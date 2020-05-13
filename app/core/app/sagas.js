@@ -1,19 +1,60 @@
-import { call, take, fork } from 'redux-saga/effects'
+import { call, takeLatest, fork, select } from 'redux-saga/effects'
 
+import { getToken } from './selectors'
 import { appActions } from './actions'
-// import history from '@core/history'
+import { postRegister, postLogin, postLogout, fetchAuth } from '@core/api'
+import { localStorageAdapter } from '@core/utils'
 
-export function * watchInitApp () {
-  while (true) {
-    const { payload } = yield take(appActions.INIT_APP)
-    console.log(payload)
-  }
+export function * init () {
+  const token = yield select(getToken)
+  if (token) yield call(fetchAuth)
 }
 
-/* export function * goBack () {
- *   yield call(history.goBack)
- * }
- *  */
+export function * register ({ payload }) {
+  yield call(postRegister, payload)
+}
+
+export function * login ({ payload }) {
+  yield call(postLogin, payload)
+}
+
+export function * logout () {
+  yield call(postLogout)
+}
+
+export function * saveToken ({ payload }) {
+  localStorageAdapter.setItem('token', payload.data.token)
+}
+
+export function * watchInitApp () {
+  yield takeLatest(appActions.INIT_APP, init)
+}
+
+export function * watchRegister () {
+  yield takeLatest(appActions.REGISTER, register)
+}
+
+export function * watchLogin () {
+  yield takeLatest(appActions.LOGIN, login)
+}
+
+export function * watchLogout () {
+  yield takeLatest(appActions.LOGOUT, logout)
+}
+
+export function * watchRegisterFulfilled () {
+  yield takeLatest(appActions.REGISTER_FULFILLED, saveToken)
+}
+
+export function * watchLoginFulfilled () {
+  yield takeLatest(appActions.LOGIN_FULFILLED, saveToken)
+}
+
 export const appSagas = [
-  fork(watchInitApp)
+  fork(watchInitApp),
+  fork(watchRegister),
+  fork(watchLogin),
+  fork(watchLogout),
+  fork(watchRegisterFulfilled),
+  fork(watchLoginFulfilled)
 ]

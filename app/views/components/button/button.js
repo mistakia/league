@@ -19,8 +19,9 @@ function Button ({ children, className, label, onClick, count, type = 'button', 
       className={classNames.join(' ')}
       onClick={onClick}
       disabled={disabled}
-      type={type}>
-      {isLoading ? <LoadingIndicator /> : children }
+      type={type}
+    >
+      {isLoading ? <LoadingIndicator /> : children}
       {haveCount && <span className='count'>{count}</span>}
     </button>
   )

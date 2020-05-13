@@ -10,6 +10,7 @@ const compression = require('compression')
 const extend = require('deep-extend')
 const debug = require('debug')
 const logger = debug('api')
+const jwt = require('express-jwt')
 
 debug.enable('api*')
 
@@ -18,14 +19,14 @@ const routes = require('./routes')
 const db = require('../db')
 const sockets = require('./sockets')
 
-const defaults = {
-  port: 8082
-}
+const defaults = { port: 8082 }
+const IS_DEV = process.env.NODE_ENV === 'development'
 
 const api = express()
 const options = extend(defaults, config)
 
 api.locals.db = db
+api.locals.config = config
 
 api.disable('x-powered-by')
 api.use(compression())
@@ -33,9 +34,10 @@ api.use(morgan('api', 'combined'))
 api.use(bodyParser.json())
 
 api.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*')
+  res.header('Access-Control-Allow-Origin', IS_DEV ? 'http://localhost:1212' : '*')
+  res.header('Access-Control-Allow-Credentials', 'true')
   res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS')
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
+  res.header('Access-Control-Allow-Headers', 'Authorization, Origin, X-Requested-With, Content-Type, Accept')
   next()
 })
 
@@ -49,13 +51,20 @@ if (options.ssl) {
   })
 }
 
-// TODO - middleware to validate leagueId
-
-api.use('/:leagueId/teams', routes.teams)
-api.use('/:leagueId/transactions', routes.transactions)
-api.use('/:leagueId/players', routes.players)
-api.use('/:leagueId/games', routes.games)
-api.use('/:leagueId/settings', routes.settings)
+api.use('/api/auth', routes.auth)
+api.use(jwt(config.jwt))
+api.use((err, req, res, next) => {
+  if (err.name === 'UnauthorizedError') {
+    return res.status(401).send({ error: 'invalid token' })
+  }
+  next()
+})
+api.use('/api/me', routes.me)
+api.use('/api/:leagueId/teams', routes.teams)
+api.use('/api/:leagueId/transactions', routes.transactions)
+api.use('/api/:leagueId/players', routes.players)
+api.use('/api/:leagueId/games', routes.games)
+api.use('/api/:leagueId/settings', routes.settings)
 
 const { port } = options
 const createServer = () => {

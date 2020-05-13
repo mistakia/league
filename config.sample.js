@@ -1,4 +1,7 @@
 module.exports = {
+  jwt: {
+    secret: null,
+  },
   mysql: {
     client: 'mysql',
     connection: {
