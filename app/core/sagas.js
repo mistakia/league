@@ -4,6 +4,6 @@ import { appSagas } from './app'
 
 export default function * rootSaga () {
   yield all([
-    ...appSagas,
+    ...appSagas
   ])
 }

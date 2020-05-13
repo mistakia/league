@@ -1,6 +1,5 @@
 import React from 'react'
 
-import Button from '@components/button'
 import LoadingIndicator from '@components/loading-indicator'
 
 import './loading.styl'
