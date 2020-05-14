@@ -1,8 +1,8 @@
 import React from 'react'
 // import hotkeys from 'hotkeys-js'
 
-// import Menu from '@components/menu'
-// import Routes from '@views/routes'
+import Menu from '@components/menu'
+import Routes from '@views/routes'
 import Loading from '@components/loading'
 import { localStorageAdapter } from '@core/utils'
 import Button from '@components/button'
@@ -92,7 +92,8 @@ class App extends React.Component {
 
     return (
       <main>
-        <div>Dashboard UserId:{userId}</div>
+        <Menu />
+        <Routes />
       </main>
     )
   }

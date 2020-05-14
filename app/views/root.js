@@ -1,6 +1,6 @@
 import React from 'react'
 import { Provider } from 'react-redux'
-import { withRouter } from 'react-router'
+import { BrowserRouter as Router, withRouter } from 'react-router-dom'
 import { ConnectedRouter } from 'connected-react-router/immutable'
 
 import createStore from '@core/store'
@@ -15,7 +15,9 @@ const ConnectedApp = withRouter(App)
 const Root = () => (
   <Provider store={store}>
     <ConnectedRouter history={history}>
-      <ConnectedApp />
+      <Router>
+        <ConnectedApp />
+      </Router>
     </ConnectedRouter>
   </Provider>
 )
