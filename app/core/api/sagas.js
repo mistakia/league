@@ -10,6 +10,8 @@ import {
   getToken
 } from '@core/app'
 
+import { playerRequestActions } from '@core/players'
+
 function * fetchAPI (apiFunction, actions, opts = {}) {
   const token = yield select(getToken)
   const { abort, request } = apiRequest(apiFunction, opts, token)
@@ -38,3 +40,5 @@ export const postRegister = fetch.bind(null, api.postRegister, registerActions)
 export const postLogin = fetch.bind(null, api.postLogin, loginActions)
 export const postLogout = fetch.bind(null, api.postLogout, logoutActions)
 export const fetchAuth = fetch.bind(null, api.fetchAuth, authActions)
+
+export const fetchPlayers = fetch.bind(null, api.fetchPlayers, playerRequestActions)

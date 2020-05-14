@@ -2,5 +2,6 @@ export {
   postRegister,
   postLogin,
   postLogout,
-  fetchAuth
+  fetchAuth,
+  fetchPlayers
 } from './sagas'

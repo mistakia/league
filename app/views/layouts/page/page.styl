@@ -1,0 +1,23 @@
+.page
+  absolute left right top bottom 75px
+  height 100%
+  overflow hidden
+  display flex
+  padding-top 60px
+  max-width 850px
+  margin 0 auto
+
+.page__body
+  flex 1
+  position relative
+
+.page__menu
+  flex 0 120px
+  .menu
+    display flex
+    flex-direction column
+    padding-top 15px
+    a
+      border-left 2px solid $borderColorLight
+    a.active
+      border-color $borderColor

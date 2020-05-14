@@ -33,6 +33,10 @@ export const api = {
   fetchAuth () {
     const url = `${BASE_URL}/me`
     return { url }
+  },
+  fetchPlayers (params) {
+    const url = `${BASE_URL}/players?${queryString.stringify(params)}`
+    return { url }
   }
 }
 
