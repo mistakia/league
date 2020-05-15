@@ -2,6 +2,7 @@ import { Record } from 'immutable'
 
 export const Player = new Record({
   id: null,
+  name: null,
   pname: null,
   fname: null,
   lname: null,
@@ -55,6 +56,7 @@ export function createPlayer ({
 }) {
   return new Player({
     id: player,
+    name: `${fname} ${lname}`,
     pname,
     fname,
     lname,
