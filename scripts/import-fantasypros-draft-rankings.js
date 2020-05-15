@@ -4,7 +4,7 @@ const debug = require('debug')
 const csv = require('csv-parser')
 
 const db = require('../db')
-const { normalizePlayerName } = require('../utils')
+const { getPlayerId } = require('../utils')
 
 const log = debug('script:import-draft-rankings')
 
@@ -37,12 +37,6 @@ const readCSV = (filepath) => new Promise((resolve, reject) => {
 
 const getPlayer = async (name, pos) => {
   const pname = normalizePlayerName(name)
-  const firstName = name.split(' ').shift()
-  const lastName = name.split(' ').splice(1).join(' ')
-  return db('player').select('*').where({
-    pos1: pos,
-    ...pname
-  })
 }
 
 const run = async () => {
@@ -69,15 +63,16 @@ const run = async () => {
     }
 
     const posrank = getPositionRank(row.Pos)
-    const player = await getPlayer(name, posrank.pos)
-    if (!player[0]) {
-      log(`[WARN] could not find player for ${name}`)
-      invalid.push({ name })
-      continue
-    }
-
-    if (player.length > 1) {
-      log(`[WARN] found ${player.length} matching players for ${name}`)
+    let playerId
+    try {
+      playerId = await getPlayerId({ name, pos: rank.pos })
+      if (!playerId) {
+        log(`[WARN] could not find player for ${name}`)
+        invalid.push({ name })
+        continue
+      }
+    } catch (err) {
+      console.log(err)
       invalid.push({ name })
       continue
     }
@@ -85,7 +80,7 @@ const run = async () => {
     players.push({
       row,
       posrank,
-      player: player[0]
+      playerId: playerId
     })
   }
 
@@ -94,7 +89,7 @@ const run = async () => {
   for (const item of players) {
     try{
       const result = await db('draft_rankings').insert({
-        player: item.player.player,
+        player: item.playerId,
         rank: item.row.Rank,
         tier: item.row.Tier,
         posrank: item.posrank.rank,
@@ -105,7 +100,7 @@ const run = async () => {
         rookie: rookie ? 1 : 0,
         seas: year
       })
-      log(`imported rankings for ${item.player.pname}`)
+      log(`imported rankings for ${item.playerId}`)
     } catch (error) {
       // console.log(error)
     }

@@ -3,7 +3,9 @@ const groupBy = (xs, key) => xs.reduce((rv, x) => {
   return rv
 }, {})
 
-
-module.exports.calculatePoints = require('./calculate-points')
-module.exports.normalizePlayerName = require('./normalize-player-name')
-module.exports.groupBy = groupBy
+module.exports = {
+  calculatePoints: require('./calculate-points'),
+  getPlayerId: require('./get-player-id'),
+  constants: require('./constants'),
+  groupBy
+}
