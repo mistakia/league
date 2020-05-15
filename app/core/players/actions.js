@@ -1,5 +1,6 @@
 export const playerActions = {
   LOAD_PLAYERS: 'LOAD_PLAYERS',
+  FILTER_POSITIONS: 'FILTER_POSITIONS',
 
   FETCH_PLAYERS_FAILED: 'FETCH_PLAYERS_FAILED',
   FETCH_PLAYERS_FULFILLED: 'FETCH_PLAYERS_FULFILLED',
@@ -7,6 +8,13 @@ export const playerActions = {
 
   load: () => ({
     type: playerActions.LOAD_PLAYERS
+  }),
+
+  filterPositions: (positions) => ({
+    type: playerActions.FILTER_POSITIONS,
+    payload: {
+      positions
+    }
   }),
 
   fetchPlayersPending: (opts) => ({

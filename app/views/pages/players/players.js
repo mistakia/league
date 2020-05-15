@@ -1,36 +1,51 @@
 import React from 'react'
-import AutoSizer from 'react-virtualized-auto-sizer'
-import { FixedSizeList as List } from 'react-window'
+import { AutoSizer, Table, Column } from 'react-virtualized'
+import TableRow from '@material-ui/core/TableRow'
+import TableCell from '@material-ui/core/TableCell'
 
-import Player from '@components/player'
+import PositionFilter from '@components/position-filter'
 import PageLayout from '@layouts/page'
+
+import './players.styl'
+
+const ROW_HEIGHT = 53
 
 export default function () {
   const { players } = this.props
 
-  const Row = ({ index, style }) => {
-    const player = players.get(index)
+  const Row = ({ index, rowData: player, style, className, columns }) => {
+    console.log(className)
     return (
-      <Player style={style} player={player} key={index} />
+      <TableRow style={style} className={className} component='div' key={index}>
+        <TableCell component='div'>{player.name}</TableCell>
+      </TableRow>
     )
   }
+
+  const menu = (
+    <PositionFilter />
+  )
 
   const body = (
     <AutoSizer>
       {({ height, width }) => (
-        <List
-          height={height}
-          itemCount={players.size}
-          itemSize={35}
+        <Table
+          className='players'
           width={width}
+          height={height}
+          headerHeight={20}
+          rowHeight={ROW_HEIGHT}
+          rowCount={players.size}
+          rowRenderer={Row}
+          rowGetter={({ index }) => players.get(index)}
         >
-          {Row}
-        </List>
+          <Column label='Name' dataKey='name' width={100} />
+        </Table>
       )}
     </AutoSizer>
   )
 
   return (
-    <PageLayout body={body} />
+    <PageLayout body={body} menu={menu} />
   )
 }
