@@ -141,7 +141,7 @@ const calculateVOR = async ({ year, rookie }) => {
 
   log(`calculating VOR for ${rows.length} players`)
 
-  // TODO - calculate fantasy points
+  // calculate fantasy points
   for (const row of rows) {
     row.points = calculatePoints(row, LEAGUE_SCORING)
   }

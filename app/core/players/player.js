@@ -1,4 +1,4 @@
-import { Record } from 'immutable'
+import { Record, List } from 'immutable'
 
 export const Player = new Record({
   id: null,
@@ -25,7 +25,8 @@ export const Player = new Record({
   team: null,
   depth_position: null,
   depth_number: null,
-  jersey: null
+  jersey: null,
+  projections: new List()
 })
 
 export function createPlayer ({
@@ -52,7 +53,8 @@ export function createPlayer ({
   cteam,
   posd,
   jnum,
-  dcp
+  dcp,
+  projections
 }) {
   return new Player({
     id: player,
@@ -79,6 +81,7 @@ export function createPlayer ({
     team: cteam,
     depth_position: posd,
     jersey: jnum,
-    depth_number: dcp
+    depth_number: dcp,
+    projections: new List(projections)
   })
 }
