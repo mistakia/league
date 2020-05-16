@@ -12,8 +12,6 @@ const debug = require('debug')
 const logger = debug('api')
 const jwt = require('express-jwt')
 
-debug.enable('api*')
-
 const config = require('../config')
 const routes = require('./routes')
 const db = require('../db')
@@ -22,11 +20,18 @@ const sockets = require('./sockets')
 const defaults = { port: 8082 }
 const IS_DEV = process.env.NODE_ENV === 'development'
 
+if (IS_DEV) {
+  debug.enable('*')
+} else {
+  debug.enable('api*,knex:query')
+}
+
 const api = express()
 const options = extend(defaults, config)
 
 api.locals.db = db
 api.locals.config = config
+api.locals.logger = logger
 
 api.disable('x-powered-by')
 api.use(compression())

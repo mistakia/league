@@ -3,7 +3,7 @@ const router = express.Router()
 
 router.get('/?', async (req, res) => {
   try {
-    const { db } = req.app.locals
+    const { db, logger } = req.app.locals
 
     const defaultOptions = {
       active: true,
@@ -24,8 +24,23 @@ router.get('/?', async (req, res) => {
     }
 
     const players = await query
+    const playerIds = players.map(p => p.player)
+    players.forEach(p => { p.projections = [] })
+
+    const projections = await db('projections')
+      .groupBy('player', 'sourceid', 'timestamp')
+      .orderBy('timestamp', 'desc')
+      .whereIn('player', playerIds)
+
+    logger(`loaded ${projections.length} projections`)
+    const addProjection = (projection) => {
+      const index = players.findIndex(p => p.player === projection.player)
+      players[index].projections.push(projection)
+    }
+    projections.forEach(addProjection)
     res.send(players)
   } catch (error) {
+    logger(error)
     res.status(500).send({ error: error.toString() })
   }
 })

@@ -24,7 +24,7 @@ export function appReducer (state = initialState(), { payload, type }) {
 
     case appActions.AUTH_FULFILLED:
       return state.merge({
-        userId: payload.data.id,
+        userId: payload.data.user.id,
         isPending: false
       })
 

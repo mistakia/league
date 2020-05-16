@@ -24,6 +24,7 @@ export function * logout () {
 
 export function * saveToken ({ payload }) {
   localStorageAdapter.setItem('token', payload.data.token)
+  yield fork(init)
 }
 
 export function * watchInitApp () {
