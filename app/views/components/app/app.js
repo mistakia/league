@@ -51,7 +51,7 @@ class App extends React.Component {
       return <Loading loading={isPending} />
     }
 
-    if (!userId) {
+    if (typeof userId === 'undefined') {
       return (
         <main>
           <div className='menu'>
