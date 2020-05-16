@@ -4,7 +4,6 @@ import TableCell from '@material-ui/core/TableCell'
 
 class Player extends React.Component {
   render () {
-    console.log(this.props)
     const { player, style, className } = this.props
 
     return (

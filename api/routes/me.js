@@ -9,6 +9,7 @@ router.get('/?', async (req, res) => {
     delete user.password
 
     const teams = await db('teams')
+      .select('teams.*')
       .where({ userid: req.user.userId })
       .join('users_teams', 'users_teams.tid', 'teams.uid')
 
@@ -21,6 +22,7 @@ router.get('/?', async (req, res) => {
       leagues
     })
   } catch (err) {
+    console.log(err)
     res.status(500).send({ error: err.toString() })
   }
 })

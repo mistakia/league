@@ -4,7 +4,7 @@ import { appActions } from './actions'
 
 const initialState = new Record({
   token: null,
-  userId: null,
+  userId: undefined,
   isPending: true,
   isUpdating: false
 })

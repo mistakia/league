@@ -14,7 +14,6 @@ export default function () {
   const { players } = this.props
 
   const Row = ({ index, rowData: player, style, className, columns }) => {
-    console.log(className)
     return (
       <TableRow style={style} className={className} component='div' key={index}>
         <TableCell component='div'>{player.name}</TableCell>
