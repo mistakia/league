@@ -7,6 +7,14 @@ import { playerActions, getPlayers } from '@core/players'
 import render from './players'
 
 class PlayersPage extends React.Component {
+  constructor (props) {
+    super(props)
+    this.state = {
+      order: 'desc',
+      orderBy: 'values.starter'
+    }
+  }
+
   componentDidMount () {
     this.props.load()
   }

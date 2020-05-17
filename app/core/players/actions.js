@@ -2,12 +2,22 @@ export const playerActions = {
   LOAD_PLAYERS: 'LOAD_PLAYERS',
   FILTER_POSITIONS: 'FILTER_POSITIONS',
 
+  CALCULATE_VALUES: 'CALCULATE_VALUES',
+
   FETCH_PLAYERS_FAILED: 'FETCH_PLAYERS_FAILED',
   FETCH_PLAYERS_FULFILLED: 'FETCH_PLAYERS_FULFILLED',
   FETCH_PLAYERS_PENDING: 'FETCH_PLAYERS_PENDING',
 
   load: () => ({
     type: playerActions.LOAD_PLAYERS
+  }),
+
+  calculate: ({ players, leagues }) => ({
+    type: playerActions.CALCULATE_VALUES,
+    payload: {
+      players,
+      leagues
+    }
   }),
 
   filterPositions: (positions) => ({

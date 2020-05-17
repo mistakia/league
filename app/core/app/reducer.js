@@ -1,12 +1,15 @@
-import { Record } from 'immutable'
+import { Record, List } from 'immutable'
 
 import { appActions } from './actions'
 
 const initialState = new Record({
   token: null,
   userId: undefined,
+  teamId: undefined,
+  leagueId: undefined,
   isPending: true,
-  isUpdating: false
+  isUpdating: false,
+  weights: new List()
 })
 
 export function appReducer (state = initialState(), { payload, type }) {
@@ -24,7 +27,10 @@ export function appReducer (state = initialState(), { payload, type }) {
 
     case appActions.AUTH_FULFILLED:
       return state.merge({
+        leagueId: payload.data.leagues.length ? payload.data.leagues[0].uid : undefined,
+        teamId: payload.data.teams.length ? payload.data.teams[0].uid : undefined,
         userId: payload.data.user.id,
+        weights: new List(payload.data.weights),
         isPending: false
       })
 

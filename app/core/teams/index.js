@@ -1,5 +1,5 @@
 export {
-  getCurrentTeam
+  getTeamById
 } from './selectors'
 
 export { teamsReducer } from './reducer'
