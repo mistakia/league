@@ -5,7 +5,7 @@ const { Table } = require('console-table-printer')
 
 const db = require('../db')
 
-const { groupBy } = require('../utils')
+const { groupBy } = require('../common')
 
 const log = debug('script:calculate-vor')
 

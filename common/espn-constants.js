@@ -62,7 +62,7 @@ const teamId = {
   34: 'HOU'
 }
 
-module.exports = {
+export {
   stats,
   teamId,
   positionId

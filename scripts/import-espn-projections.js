@@ -4,7 +4,8 @@ const debug = require('debug')
 log = debug('import:projections')
 debug.enable('league:player:get,import:projections')
 
-const { getPlayerId, constants } = require('../utils')
+const { constants } = require('../common')
+const { getPlayerId } = require('../utils')
 const db = require('../db')
 
 const year = new Date().getFullYear()

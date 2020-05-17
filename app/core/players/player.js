@@ -1,12 +1,12 @@
-import { Record, List } from 'immutable'
+import { Record, List, Map } from 'immutable'
 
 export const Player = new Record({
-  id: null,
+  player: null,
   name: null,
   pname: null,
   fname: null,
   lname: null,
-  pos: null,
+  pos1: null,
   height: null,
   weight: null,
   dob: null,
@@ -26,6 +26,10 @@ export const Player = new Record({
   depth_position: null,
   depth_number: null,
   jersey: null,
+  projection: new Map(),
+  points: new Map(),
+  values: new Map(),
+  vorp: new Map(),
   projections: new List()
 })
 
@@ -54,15 +58,19 @@ export function createPlayer ({
   posd,
   jnum,
   dcp,
+  projection,
+  points,
+  values,
+  vorp,
   projections
 }) {
   return new Player({
-    id: player,
+    player,
     name: `${fname} ${lname}`,
     pname,
     fname,
     lname,
-    pos: pos1,
+    pos1,
     height,
     weight,
     dob,
@@ -82,6 +90,10 @@ export function createPlayer ({
     depth_position: posd,
     jersey: jnum,
     depth_number: dcp,
+    projection: new Map(projection),
+    points: new Map(points),
+    values: new Map(values),
+    vorp: new Map(vorp),
     projections: new List(projections)
   })
 }

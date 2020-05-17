@@ -33,6 +33,7 @@ module.exports = api => {
         require('babel-plugin-module-resolver'), {
           'root': ['./'],
           'alias': {
+            '@common': './common',
             '@views': './app/views',
             '@pages': './app/views/pages',
             '@core': './app/core',
