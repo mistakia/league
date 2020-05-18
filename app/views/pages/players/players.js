@@ -43,11 +43,9 @@ export default function () {
         <TableCell component='div'>{player.pos1}</TableCell>
         <TableCell component='div'>${player.values.starter}</TableCell>
         <TableCell component='div'>${player.values.available}</TableCell>
-        <TableCell component='div'>${player.values.average}</TableCell>
 
         <TableCell component='div'>{(player.vorp.starter || 0).toFixed(1)}</TableCell>
         <TableCell component='div'>{(player.vorp.available || 0).toFixed(1)}</TableCell>
-        <TableCell component='div'>{(player.vorp.average || 0).toFixed(1)}</TableCell>
 
         <TableCell component='div'>{(player.points.total || 0).toFixed(1)}</TableCell>
       </TableRow>
@@ -74,7 +72,6 @@ export default function () {
           <Column label='Name' dataKey='name' width={150} />
           <Column label='VORP' dataKey='values.starter' width={25} />
           <Column label='v FA' dataKey='values.available' width={25} />
-          <Column label='v Avg' dataKey='values.average' width={25} />
         </Table>
       )}
     </AutoSizer>
