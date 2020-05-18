@@ -3,13 +3,15 @@ import getRosterSize from './get-roster-size'
 const calculateValues = ({ players, baselines, ...args }) => {
   const total = {
     available: 0,
-    starter: 0,
-    average: 0
+    starter: 0
   }
 
   for (const player of players) {
     const { pos1 } = player
-    player.vorp = {}
+    player.vorp = {
+      available: -99999,
+      starter: -99999
+    }
     for (const type in baselines[pos1]) {
       player.vorp[type] = player.points.total - baselines[pos1][type].points.total
       if (player.vorp[type] > 0) {

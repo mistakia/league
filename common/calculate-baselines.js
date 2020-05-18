@@ -28,7 +28,6 @@ const getRosterSlotCounts = ({
 })
 
 const types = [
-  'average',
   'starter',
   'available'
 ]
@@ -54,9 +53,8 @@ const calculateBaselines = ({
   for (const position of positions) {
     const base = rosterCounts[`s${position.toLowerCase()}`]
     bPlayers[position] = {
-      average: grouped[position].slice(base / 2),
       starter: grouped[position].slice(base),
-      available: grouped[position].slice(base + (rosterCounts.bench / 3))
+      available: grouped[position].slice(base + (rosterCounts.bench / 4))
     }
   }
 

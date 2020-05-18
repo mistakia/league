@@ -11,7 +11,7 @@ class PlayersPage extends React.Component {
     super(props)
     this.state = {
       order: 'desc',
-      orderBy: 'values.starter'
+      orderBy: 'vorp.starter'
     }
   }
 
