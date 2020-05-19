@@ -2,7 +2,7 @@
   "scripts": {
     "start": "cross-env START_HOT=1 NODE_ENV=development webpack-dev-server --config configs/webpack.config.dev.babel.js",
     "lint": "$(npm bin)/standard 'app/**/*.js' && $(npm bin)/standard 'api/**/*.js' && $(npm bin)/standard '*.js' && $(npm bin)/standard 'configs/*.js' && $(npm bin)/standard 'scripts/*.js' && $(npm bin)/standard 'common/*.js'",
-    "start:api": "node api/index.js"
+    "start:api": "node api/start.js"
   },
   "dependencies": {
     "bcrypt": "^4.0.1",
@@ -11,12 +11,14 @@
     "connected-react-router": "^6.8.0",
     "debug": "^4.1.1",
     "deep-extend": "^0.6.0",
+    "esm": "^3.2.25",
     "express": "^4.17.1",
     "express-jwt": "^5.3.3",
     "fetch-cheerio-object": "^1.3.0",
     "hotkeys-js": "^3.7.6",
     "jsonwebtoken": "^8.5.1",
     "knex": "^0.21.1",
+    "moment": "^2.25.3",
     "morgan": "^1.10.0",
     "morgan-debug": "^2.0.0",
     "mysql": "^2.18.1",
