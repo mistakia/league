@@ -62,8 +62,10 @@ const teamId = {
   34: 'HOU'
 }
 
-export {
+const espn = {
   stats,
   teamId,
   positionId
 }
+
+export default espn

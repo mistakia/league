@@ -3,6 +3,7 @@ import calculateBaselines from './calculate-baselines'
 import calculatePoints from './calculate-points'
 import calculateValues from './calculate-values'
 import constants from './constants'
+import getEligibleSlots from './get-eligible-slots'
 
 const groupBy = (xs, key) => xs.reduce((rv, x) => {
   (rv[x[key]] = rv[x[key]] || []).push(x)
@@ -10,10 +11,11 @@ const groupBy = (xs, key) => xs.reduce((rv, x) => {
 }, {})
 
 export {
-  weightProjections,
   calculateBaselines,
   calculatePoints,
   calculateValues,
   constants,
-  groupBy
+  getEligibleSlots,
+  groupBy,
+  weightProjections
 }
