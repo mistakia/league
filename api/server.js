@@ -48,7 +48,7 @@ api.use((req, res, next) => {
 })
 
 if (options.ssl) {
-  api.use(function(req, res, next) {
+  api.use(function (req, res, next) {
     if (!req.secure) {
       res.redirect('https://' + req.host + req.url)
     } else {

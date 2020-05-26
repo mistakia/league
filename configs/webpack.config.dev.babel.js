@@ -1,9 +1,9 @@
 const path = require('path')
-const fs = require('fs')
+// const fs = require('fs')
 const webpack = require('webpack')
-const chalk = require('chalk')
+// const chalk = require('chalk')
 const merge = require('webpack-merge')
-const { spawn, execSync } = require('child_process')
+const { spawn } = require('child_process')
 
 const baseConfig = require('./webpack.config.base')
 // import CheckNodeEnv from '../internals/scripts/CheckNodeEnv'
@@ -95,7 +95,7 @@ module.exports = merge.smart(baseConfig, {
       verbose: true,
       disableDotRule: false
     },
-    before() {
+    before () {
       if (process.env.START_HOT) {
         console.log('Starting API...')
         const api = spawn('npm', ['run', 'start:api'], {

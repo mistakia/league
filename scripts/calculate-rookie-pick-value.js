@@ -6,7 +6,7 @@ const { Table } = require('console-table-printer')
 
 const calculateVOR = require('./calculate-vor')
 
-const log = debug('script:calculate-rookie-pick-value')
+// const log = debug('script:calculate-rookie-pick-value')
 const LATEST_YEAR = 2019
 
 const calculateRookiePickValue = async ({ year }) => {
@@ -19,7 +19,7 @@ const calculateRookiePickValue = async ({ year }) => {
   const seasons = {}
   const limit = (LATEST_YEAR - year) + 1
   for (let i = 1; i <= limit; i++) {
-    seasons[i] = await calculateVOR({ year: year + (i - 1), rookie: i === 1 ? true : false })
+    seasons[i] = await calculateVOR({ year: year + (i - 1), rookie: i === 1 })
   }
 
   const result = {}
@@ -69,7 +69,7 @@ if (!module.parent) {
             return 'cyan'
         }
       }
-      for (const [ index, player ] of sortedResults.entries()) {
+      for (const [index, player] of sortedResults.entries()) {
         p.addRow({
           index: index + 1,
           player: player.player,

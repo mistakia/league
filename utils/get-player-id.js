@@ -66,7 +66,7 @@ const getPlayerId = async ({ name, pos, team }) => {
 
   const query = db('player').select('player').where({
     fname,
-    lname,
+    lname
   })
 
   if (pos) {

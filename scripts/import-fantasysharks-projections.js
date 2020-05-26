@@ -1,7 +1,7 @@
 const fetch = require('node-fetch')
 const debug = require('debug')
 
-log = debug('import:projections')
+const log = debug('import:projections')
 debug.enable('league:player:get,import:projections')
 
 const { getPlayerId } = require('../utils')
@@ -28,7 +28,7 @@ const run = async () => {
     tdr: item.RushTD,
     fuml: item.Fum,
 
-    //receiving
+    // receiving
     rec: item.Rec,
     recy: item.RecYards,
     tdrec: item.RecTD
@@ -43,7 +43,7 @@ const run = async () => {
     const lname = n.shift().trim()
     const fullname = `${fname} ${lname}`
     let playerId
-    let params = { name: fullname, team: Team, pos: Pos }
+    const params = { name: fullname, team: Team, pos: Pos }
     try {
       playerId = await getPlayerId(params)
       if (!playerId) {
@@ -69,9 +69,8 @@ const run = async () => {
   log(`Could not locate ${missing.length} players`)
   missing.forEach(m => log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`))
 
-
   log(`Inserting ${inserts.length} projections into database`)
-  const res = await db('projections').insert(inserts)
+  await db('projections').insert(inserts)
 }
 
 try {

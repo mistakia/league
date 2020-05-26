@@ -35,10 +35,6 @@ const readCSV = (filepath) => new Promise((resolve, reject) => {
     .on('end', () => resolve(results))
 })
 
-const getPlayer = async (name, pos) => {
-  const pname = normalizePlayerName(name)
-}
-
 const run = async () => {
   debug.enable('script:import-draft-rankings')
   const filepath = argv.file
@@ -65,7 +61,7 @@ const run = async () => {
     const posrank = getPositionRank(row.Pos)
     let playerId
     try {
-      playerId = await getPlayerId({ name, pos: rank.pos })
+      playerId = await getPlayerId({ name, pos: posrank.pos }) // TODO check posrank variable
       if (!playerId) {
         log(`[WARN] could not find player for ${name}`)
         invalid.push({ name })
@@ -87,8 +83,8 @@ const run = async () => {
   console.table(invalid)
 
   for (const item of players) {
-    try{
-      const result = await db('draft_rankings').insert({
+    try {
+      await db('draft_rankings').insert({
         player: item.playerId,
         rank: item.row.Rank,
         tier: item.row.Tier,
@@ -106,7 +102,7 @@ const run = async () => {
     }
   }
 
-  log(`completed import`)
+  log('completed import')
 }
 
 try {

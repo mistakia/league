@@ -1,7 +1,7 @@
 import { stats } from './constants'
 
 const getScoring = ({ ...args }) => {
-  let result = {}
+  const result = {}
   for (const stat of stats) {
     result[stat] = args[stat]
   }

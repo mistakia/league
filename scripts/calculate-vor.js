@@ -80,7 +80,7 @@ const getBaselinePlayers = ({ stats, starters }) => {
   let baselineSF
 
   if (starters.RBWR) {
-    const rbwr = baselinePlayers.RB.concat(baselinPlayers.WR).sort((b, a) => b.points - a.points)
+    const rbwr = baselinePlayers.RB.concat(baselinePlayers.WR).sort((b, a) => b.points - a.points)
     baselineRBWR = rbwr.slice(starters.RBWR)
   }
 
@@ -102,11 +102,11 @@ const getBaselinePlayers = ({ stats, starters }) => {
     baselineSF = sf.slice(starters.SF)
   }
 
-  let qb_baseline = starters.SF ? baselineSF[0] : baselinePlayers.QB[0]
+  const qbBaseline = starters.SF ? baselineSF[0] : baselinePlayers.QB[0]
 
   if (starters.RBWRTE) {
     return {
-      QB: qb_baseline,
+      QB: qbBaseline,
       RB: baselineRBWRTE[0],
       WR: baselineRBWRTE[0],
       TE: baselineRBWRTE[0]
@@ -114,7 +114,7 @@ const getBaselinePlayers = ({ stats, starters }) => {
   }
 
   return {
-    QB: qb_baseline,
+    QB: qbBaseline,
     RB: baselineRBWR[0],
     WR: baselineRBWR[0],
     TE: baselineRBWR[0]
@@ -177,7 +177,7 @@ const calculateVOR = async ({ year, rookie }) => {
         player.vor = player.points - baselinePlayer.points
       }
     }
-    let weeklyPlayerStats = Object.values(weekStatsByPosition).flat()
+    const weeklyPlayerStats = Object.values(weekStatsByPosition).flat()
     stats = stats.concat(weeklyPlayerStats)
   }
 
@@ -229,7 +229,6 @@ const calculateVOR = async ({ year, rookie }) => {
 
 module.exports = calculateVOR
 
-
 if (!module.parent) {
   debug.enable('script:calculate-vor')
   const main = async () => {
@@ -251,7 +250,7 @@ if (!module.parent) {
             return 'cyan'
         }
       }
-      for (const [ index, player ] of top200.entries()) {
+      for (const [index, player] of top200.entries()) {
         p.addRow({
           index: index + 1,
           player: player.player,
@@ -265,7 +264,7 @@ if (!module.parent) {
           color: getColor(player.pos)
         })
       }
-      console.log(chalk.bold(`${year} ${rookie ? 'Rookie ': ''}Player end-of-season values`))
+      console.log(chalk.bold(`${year} ${rookie ? 'Rookie ' : ''}Player end-of-season values`))
       p.printTable()
     } catch (e) {
       log(e)

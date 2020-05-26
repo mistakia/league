@@ -25,24 +25,24 @@ module.exports = {
       }, {
         test: /\.(styl|css)$/,
         use: [{
-	      loader: 'style-loader'
+          loader: 'style-loader'
         }, {
-	      loader: 'css-loader',
+          loader: 'css-loader'
         }, {
-	      loader: 'stylus-loader',
-	      options: {
-	        use: [nib()],
-	        import: [
-	          '~nib/lib/nib/index.styl',
-	          path.resolve(__dirname, '../app/styles/variables.styl')
-	        ]
-	      }
+          loader: 'stylus-loader',
+          options: {
+            use: [nib()],
+            import: [
+              '~nib/lib/nib/index.styl',
+              path.resolve(__dirname, '../app/styles/variables.styl')
+            ]
+          }
         }]
       }, {
         test: /\.(png|jpg)$/,
         loader: 'url-loader',
         options: {
-	      limit: 8192
+          limit: 8192
         }
       }
     ]
