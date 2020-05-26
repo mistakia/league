@@ -1,9 +1,14 @@
 {
   "scripts": {
     "start": "cross-env START_HOT=1 NODE_ENV=development webpack-dev-server --config configs/webpack.config.dev.babel.js",
-    "lint": "$(npm bin)/standard 'app/**/*.js' && $(npm bin)/standard 'api/**/*.js' && $(npm bin)/standard '*.js' && $(npm bin)/standard 'configs/*.js' && $(npm bin)/standard 'scripts/*.js' && $(npm bin)/standard 'common/*.js'",
+    "lint": "$(npm bin)/standard **/*.js",
     "test": "NODE_ENV=test TEST=all mocha --exit",
     "start:api": "node server.js"
+  },
+  "standard": {
+    "ignore": [
+      "node_modules"
+    ]
   },
   "dependencies": {
     "bcrypt": "^4.0.1",
