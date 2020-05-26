@@ -1,7 +1,7 @@
 const fetchCheerioObject = require('fetch-cheerio-object')
 const debug = require('debug')
 
-log = debug('import:projections')
+const log = debug('import:projections')
 debug.enable('league:player:get,import:projections')
 
 const { getPlayerId } = require('../utils')
@@ -72,6 +72,9 @@ const run = async () => {
 
   const inserts = []
   for (const { params, data } of items) {
+    let playerId
+
+    // TODO cleanup
     try {
       playerId = await getPlayerId(params)
       if (!playerId) {
@@ -93,12 +96,11 @@ const run = async () => {
     })
   }
 
-
   log(`Could not locate ${missing.length} players`)
   missing.forEach(m => log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`))
 
   log(`Inserting ${inserts.length} projections into database`)
-  const res = await db('projections').insert(inserts)
+  await db('projections').insert(inserts)
 
   process.exit()
 }

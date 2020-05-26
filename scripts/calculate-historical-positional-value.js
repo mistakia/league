@@ -5,7 +5,6 @@ const { groupBy } = require('../utils')
 const calculateVOR = require('./calculate-vor')
 
 const LATEST_YEAR = 2019
-const POSITIONS = ['QB', 'RB', 'WR', 'TE']
 
 const calculateHistoricalPositionalValue = async () => {
   const years = 3
@@ -84,7 +83,7 @@ if (!module.parent) {
       }
     }
 
-    for (const [ index, player ] of result.entries()) {
+    for (const player of result) {
       p.addRow({
         position: `${player.pos}${player.rank}`,
         value: player.reg,

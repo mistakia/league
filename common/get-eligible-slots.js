@@ -5,7 +5,7 @@ const getEligibleSlots = ({ pos, ps, bench, ir }) => {
   let eligible = []
 
   if (pos) {
-    eligible = eligible.filter(slotKeys.filter(k => k.includes(pos)))
+    eligible = eligible.concat(slotKeys.filter(k => k.includes(pos)))
   }
 
   if (bench) {
@@ -20,7 +20,7 @@ const getEligibleSlots = ({ pos, ps, bench, ir }) => {
     eligible = eligible.concat(slotKeys.filter(k => k.includes('IR')))
   }
 
-  return slotsKeys.map(k => slots[k])
+  return eligible
 }
 
 export default getEligibleSlots

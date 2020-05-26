@@ -1,7 +1,7 @@
 const fetch = require('node-fetch')
 const debug = require('debug')
 
-log = debug('import:projections')
+const log = debug('import:projections')
 debug.enable('league:player:get,import:projections')
 
 const { constants } = require('../common')
@@ -22,6 +22,9 @@ const run = async () => {
     const team = constants.espn.teamId[player.player.proTeamId]
     const pos = constants.espn.positionId[player.player.defaultPositionId]
     const params = { name, team, pos }
+    let playerId
+
+    // TODO cleanup
     try {
       playerId = await getPlayerId(params)
       if (!playerId) {
@@ -51,7 +54,7 @@ const run = async () => {
   missing.forEach(m => log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`))
 
   log(`Inserting ${inserts.length} projections into database`)
-  const res = await db('projections').insert(inserts)
+  await db('projections').insert(inserts)
 
   process.exit()
 }

@@ -10,9 +10,9 @@ const stats = (d) => ({
   ra: d['23'],
   ry: d['24'],
   tdr: d['25'],
-  //fuml: item.Fum,
+  // fuml: item.Fum,
 
-  //receiving
+  // receiving
   trg: d['58'],
   rec: d['53'],
   recy: d['42'],
@@ -28,15 +28,15 @@ const positionId = {
 
 const teamId = {
   [-1]: 'Bye',
-  1 : 'ATL',
-  2 : 'BUF',
-  3 : 'CHI',
-  4 : 'CIN',
-  5 : 'CLE',
-  6 : 'DAL',
-  7 : 'DEN',
-  8 : 'DET',
-  9 : 'GB',
+  1: 'ATL',
+  2: 'BUF',
+  3: 'CHI',
+  4: 'CIN',
+  5: 'CLE',
+  6: 'DAL',
+  7: 'DEN',
+  8: 'DET',
+  9: 'GB',
   10: 'TEN',
   11: 'IND',
   12: 'KC',

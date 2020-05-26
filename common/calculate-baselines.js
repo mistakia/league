@@ -62,8 +62,8 @@ const calculateBaselines = ({
   if (!args.ssflex && !args.srbwr && !args.wrte && !args.srbwrte) {
     for (const pos of positions) {
       result[pos] = {}
-      for (const type in bPlayers[position]) {
-        result[pos][type] = bPlayers[position][type][0]
+      for (const type in bPlayers[pos]) {
+        result[pos][type] = bPlayers[pos][type][0]
       }
     }
 
@@ -76,52 +76,52 @@ const calculateBaselines = ({
   if (args.swrte) {
     // TODO fix calculations for types
     for (const type of types) {
-      const combined = bPlayers['WR'][type].concat(bPlayers['TE'][type])
-      const sorted = combined.sort((a,b) => b.points.total - a.points.total)
+      const combined = bPlayers.WR[type].concat(bPlayers.TE[type])
+      const sorted = combined.sort((a, b) => b.points.total - a.points.total)
       const cutlist = sorted.slice(0, rosterCounts.swrte)
-      bPlayers['WR'][type] = filter(bPlayers['WR'][type], cutlist)
-      bPlayers['TE'][type] = filter(bPlayers['TE'][type], cutlist)
+      bPlayers.WR[type] = filter(bPlayers.WR[type], cutlist)
+      bPlayers.TE[type] = filter(bPlayers.TE[type], cutlist)
     }
   }
 
   if (args.srbwr) {
     // TODO fix calculations for types
     for (const type of types) {
-      const combined = bPlayers['RB'][type].concat(bPlayers['WR'][type])
-      const sorted = combined.sort((a,b) => b.points.total - a.points.total)
+      const combined = bPlayers.RB[type].concat(bPlayers.WR[type])
+      const sorted = combined.sort((a, b) => b.points.total - a.points.total)
       const cutlist = sorted.slice(0, rosterCounts.srbwr)
-      bPlayers['RB'][type] = filter(bPlayers['RB'][type], cutlist)
-      bPlayers['WR'][type] = filter(bPlayers['WR'][type], cutlist)
+      bPlayers.RB[type] = filter(bPlayers.RB[type], cutlist)
+      bPlayers.WR[type] = filter(bPlayers.WR[type], cutlist)
     }
   }
 
   if (args.srbwrte) {
     // TODO fix calculations for types
     for (const type of types) {
-      const combined = bPlayers['RB'][type]
-        .concat(bPlayers['WR'][type])
-        .concat(bPlayers['TE'][type])
-      const sorted = combined.sort((a,b) => b.points.total - a.points.total)
+      const combined = bPlayers.RB[type]
+        .concat(bPlayers.WR[type])
+        .concat(bPlayers.TE[type])
+      const sorted = combined.sort((a, b) => b.points.total - a.points.total)
       const cutlist = sorted.slice(0, rosterCounts.srbwrte)
-      bPlayers['RB'][type] = filter(bPlayers['RB'][type], cutlist)
-      bPlayers['WR'][type] = filter(bPlayers['WR'][type], cutlist)
-      bPlayers['TE'][type] = filter(bPlayers['TE'][type], cutlist)
+      bPlayers.RB[type] = filter(bPlayers.RB[type], cutlist)
+      bPlayers.WR[type] = filter(bPlayers.WR[type], cutlist)
+      bPlayers.TE[type] = filter(bPlayers.TE[type], cutlist)
     }
   }
 
   if (args.ssflex) {
     // TODO fix calculations for types
     for (const type of types) {
-      const combined = bPlayers['QB'][type]
-        .concat(bPlayers['RB'][type])
-        .concat(bPlayers['WR'][type])
-        .concat(bPlayers['TE'][type])
-      const sorted = combined.sort((a,b) => b.points.total - a.points.total)
+      const combined = bPlayers.QB[type]
+        .concat(bPlayers.RB[type])
+        .concat(bPlayers.WR[type])
+        .concat(bPlayers.TE[type])
+      const sorted = combined.sort((a, b) => b.points.total - a.points.total)
       const cutlist = sorted.slice(0, rosterCounts.ssflex)
-      bPlayers['QB'][type] = filter(bPlayers['QB'][type], cutlist)
-      bPlayers['RB'][type] = filter(bPlayers['RB'][type], cutlist)
-      bPlayers['WR'][type] = filter(bPlayers['WR'][type], cutlist)
-      bPlayers['TE'][type] = filter(bPlayers['TE'][type], cutlist)
+      bPlayers.QB[type] = filter(bPlayers.QB[type], cutlist)
+      bPlayers.RB[type] = filter(bPlayers.RB[type], cutlist)
+      bPlayers.WR[type] = filter(bPlayers.WR[type], cutlist)
+      bPlayers.TE[type] = filter(bPlayers.TE[type], cutlist)
     }
   }
 
@@ -130,7 +130,7 @@ const calculateBaselines = ({
     for (const pos of positions) {
       combined = combined.concat(bPlayers[pos][type])
     }
-    const sorted = combined.sort((a,b) => b.points.total - a.points.total)
+    const sorted = combined.sort((a, b) => b.points.total - a.points.total)
     if (!alternate || sorted[0].points.total < alternate.points.total) {
       return sorted[0]
     } else {
@@ -138,14 +138,14 @@ const calculateBaselines = ({
     }
   }
 
-  result['QB'] = {}
+  result.QB = {}
   for (const type of types) {
-    result['QB'][type] = args.ssflex
+    result.QB[type] = args.ssflex
       ? select({ positions: ['QB', 'RB', 'WR', 'TE'], type })
       : select({ positions: ['QB'], type })
   }
 
-  result['RB'] = {}
+  result.RB = {}
   for (const type of types) {
     let selection = select({ positions: ['RB'], type })
     if (args.ssflex) {
@@ -160,10 +160,10 @@ const calculateBaselines = ({
       selection = select({ positions: ['RB', 'WR'], type })
     }
 
-    result['RB'][type] = selection
+    result.RB[type] = selection
   }
 
-  result['WR'] = {}
+  result.WR = {}
   for (const type of types) {
     let selection = select({ positions: ['WR'], type })
     if (args.ssflex) {
@@ -182,10 +182,10 @@ const calculateBaselines = ({
       selection = select({ positions: ['TE', 'WR'], type }, selection)
     }
 
-    result['WR'][type] = selection
+    result.WR[type] = selection
   }
 
-  result['TE'] = {}
+  result.TE = {}
   for (const type of types) {
     let selection = select({ positions: ['TE'], type })
     if (args.ssflex) {
@@ -200,7 +200,7 @@ const calculateBaselines = ({
       selection = select({ positions: ['TE', 'WR'], type }, selection)
     }
 
-    result['TE'][type] = selection
+    result.TE[type] = selection
   }
 
   return result
