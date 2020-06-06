@@ -82,6 +82,10 @@ const run = async () => {
 
   console.table(invalid)
 
+  if (argv.dry) {
+    return process.exit()
+  }
+
   for (const item of players) {
     try {
       await db('draft_rankings').insert({
@@ -103,6 +107,7 @@ const run = async () => {
   }
 
   log('completed import')
+  process.exit()
 }
 
 try {
