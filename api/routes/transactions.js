@@ -1,13 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { constants, getEligibleSlots } = require('../../common')
-
-const formatRoster = (roster) => {
-  let result = new Map()
-  Object.keys(roster).forEach(k => k.startsWith('s') && result.set(k, roster[k]))
-  return result
-}
-
+const { constants, getEligibleSlots, formatRoster } = require('../../common')
 
 router.get('/?', async (req, res) => {
   // TODO return list of league transactions
