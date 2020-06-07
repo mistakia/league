@@ -1,16 +1,18 @@
 import moment from 'moment'
-import espn from './espn-constants'
+// eslint-disable-next-line
+import * as espn from './espn-constants'
+export { espn }
 
-const start = moment('9/1', 'M/D')
+export const start = moment('9/1', 'M/D')
 const diff = moment().diff(start, 'weeks')
-const week = diff < 0 ? 0 : diff
+export const week = diff < 0 ? 0 : diff
 
-const year = moment().month() > 2
+export const year = moment().month() > 2
   ? moment().year()
   : moment().year() - 1
 
-const positions = ['QB', 'RB', 'WR', 'TE']
-const stats = [
+export const positions = ['QB', 'RB', 'WR', 'TE', 'K', 'DST']
+export const stats = [
   'pa',
   'pc',
   'py',
@@ -32,7 +34,7 @@ const stats = [
   'twoptc'
 ]
 
-const slots = {
+export const slots = {
   QB_ONE: 0,
   QB_TWO: 1,
   RB_ONE: 2,
@@ -44,10 +46,10 @@ const slots = {
   TE_ONE: 8,
   TE_TWO: 9,
   WRTE_ONE: 10,
-  WRRB_ONE: 11,
-  WRRB_TWO: 12,
-  WRRBTE_ONE: 13,
-  WRRBTE_TWO: 14,
+  RBWR_ONE: 11,
+  RBWR_TWO: 12,
+  RBWRTE_ONE: 13,
+  RBWRTE_TWO: 14,
   QBRBWRTE_ONE: 15,
   K_ONE: 16,
   DST_ONE: 17,
@@ -71,7 +73,7 @@ const slots = {
   BENCH_NINE: 35
 }
 
-const transactions = {
+export const transactions = {
   ROSTER_ADD: 0,
   ROSTER_DROP: 1,
 
@@ -89,15 +91,4 @@ const transactions = {
   TRANSITION_TAG: 10,
   FRANCHISE_TAG: 11,
   ROOKIE_TAG: 12
-}
-
-export {
-  start,
-  week,
-  year,
-  positions,
-  transactions,
-  slots,
-  stats,
-  espn
 }

@@ -2,13 +2,19 @@ import weightProjections from './weight-projections'
 import calculateBaselines from './calculate-baselines'
 import calculatePoints from './calculate-points'
 import calculateValues from './calculate-values'
-import constants from './constants'
+import * as constants from './constants'
 import getEligibleSlots from './get-eligible-slots'
 
 const groupBy = (xs, key) => xs.reduce((rv, x) => {
   (rv[x[key]] = rv[x[key]] || []).push(x)
   return rv
 }, {})
+
+const formatRoster = (roster) => {
+  const result = new Map()
+  Object.keys(roster).forEach(k => k.startsWith('s') && result.set(k, roster[k]))
+  return result
+}
 
 export {
   calculateBaselines,
@@ -17,5 +23,6 @@ export {
   constants,
   getEligibleSlots,
   groupBy,
+  formatRoster,
   weightProjections
 }

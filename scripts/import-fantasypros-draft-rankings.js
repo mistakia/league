@@ -8,7 +8,7 @@ const { getPlayerId } = require('../utils')
 
 const log = debug('script:import-draft-rankings')
 
-const POSITIONS = ['QB', 'RB', 'WR', 'TE']
+const POSITIONS = ['QB', 'RB', 'WR', 'TE', 'K', 'DST']
 
 const getPositionRank = (string) => {
   const pos = POSITIONS.find(pos => string.includes(pos))

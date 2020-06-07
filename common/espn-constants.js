@@ -1,4 +1,4 @@
-const stats = (d) => ({
+export const stats = (d) => ({
   // passing
   ints: d['20'],
   tdp: d['4'],
@@ -19,14 +19,14 @@ const stats = (d) => ({
   tdrec: d['43']
 })
 
-const positionId = {
+export const positionId = {
   1: 'QB',
   2: 'RB',
   3: 'WR',
   4: 'TE'
 }
 
-const teamId = {
+export const teamId = {
   [-1]: 'Bye',
   1: 'ATL',
   2: 'BUF',
@@ -61,11 +61,3 @@ const teamId = {
   33: 'BAL',
   34: 'HOU'
 }
-
-const espn = {
-  stats,
-  teamId,
-  positionId
-}
-
-export default espn
