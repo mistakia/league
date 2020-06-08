@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt')
 const nflTeams = require('../nfl-teams')
 const { constants, getEligibleSlots, formatRoster } = require('../../../common')
+const { getSchedule } = require('../../../utils')
 
 exports.seed = async function(knex, Promise) {
   // TODO (medium) - seed armchair data
@@ -73,6 +74,7 @@ exports.seed = async function(knex, Promise) {
     await knex('teams').insert({
       uid: i,
       lid: 1,
+      div: (i % 4) + 1,
       name: `Team${i}`
     })
 
@@ -151,5 +153,17 @@ exports.seed = async function(knex, Promise) {
     roster = rosters[0]
   }
 
-  // TODO seed matchups
+  await knex('matchups').del()
+  const teams = await knex('teams').where({ lid: 1 })
+  const schedule = getSchedule(teams)
+  for (const [index, value] of schedule.entries()) {
+    for (const matchup of value) {
+      await knex('matchups').insert({
+        hid: matchup.home.uid,
+        aid: matchup.away.uid,
+        week: index + 1,
+        year: constants.year
+      })
+    }
+  }
 }

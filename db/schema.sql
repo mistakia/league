@@ -1417,6 +1417,7 @@ DROP TABLE IF EXISTS `teams`;
 CREATE TABLE `teams` (
   `uid` int(6) NOT NULL,
   `lid` int(6) NOT NULL,
+  `div` tinyint(1) NOT NULL,
   `name` varchar(50) NOT NULL,
   `image` varchar(500) DEFAULT '',
   `wp` tinyint(2) NOT NULL,
