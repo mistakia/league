@@ -67,7 +67,7 @@ api.use((err, req, res, next) => {
 })
 api.use('/api/me', routes.me)
 api.use('/api/players', routes.players)
-api.use('/api/:leagueId/teams', routes.teams)
+api.use('/api/teams', routes.teams)
 api.use('/api/:leagueId/transactions', routes.transactions)
 api.use('/api/:leagueId/games', routes.games)
 api.use('/api/:leagueId/settings', routes.settings)

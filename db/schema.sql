@@ -1349,7 +1349,7 @@ CREATE TABLE `rosters` (
   `lid` int(6) NOT NULL,
   `week` tinyint(2) NOT NULL,
   `year` int(4) NOT NULL,
-  `last_updated` datetime NOT NULL,
+  `last_updated` int(11) NOT NULL,
   `s0` varchar(7) DEFAULT NULL,
   `s1` varchar(7) DEFAULT NULL,
   `s2` varchar(7) DEFAULT NULL,

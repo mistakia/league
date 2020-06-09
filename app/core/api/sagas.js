@@ -10,6 +10,7 @@ import {
   getToken
 } from '@core/app'
 
+import { getRosterActions } from '@core/rosters'
 import { playerRequestActions } from '@core/players'
 
 function * fetchAPI (apiFunction, actions, opts = {}) {
@@ -42,3 +43,4 @@ export const postLogout = fetch.bind(null, api.postLogout, logoutActions)
 export const fetchAuth = fetch.bind(null, api.fetchAuth, authActions)
 
 export const fetchPlayers = fetch.bind(null, api.fetchPlayers, playerRequestActions)
+export const getRoster = fetch.bind(null, api.getRoster, getRosterActions)

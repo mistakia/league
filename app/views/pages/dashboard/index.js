@@ -1,11 +1,32 @@
 import React from 'react'
+import { connect } from 'react-redux'
+import { createSelector } from 'reselect'
 
+import { getApp } from '@core/app'
+import { rosterActions, getCurrentTeamRoster } from '@core/rosters'
 import render from './dashboard'
 
 class DashboardPage extends React.Component {
+  componentDidMount () {
+    this.props.loadRoster(this.props.teamId)
+  }
+
   render () {
     return render.call(this)
   }
 }
 
-export default DashboardPage
+const mapStateToProps = createSelector(
+  getApp,
+  getCurrentTeamRoster,
+  (app, roster) => ({ teamId: app.teamId, roster })
+)
+
+const mapDispatchToProps = {
+  loadRoster: rosterActions.loadRoster
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(DashboardPage)

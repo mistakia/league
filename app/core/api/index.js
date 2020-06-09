@@ -3,5 +3,6 @@ export {
   postLogin,
   postLogout,
   fetchAuth,
-  fetchPlayers
+  fetchPlayers,
+  getRoster
 } from './sagas'

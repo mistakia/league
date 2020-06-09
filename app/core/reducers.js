@@ -5,6 +5,7 @@ import { appReducer } from './app'
 import { leaguesReducer } from './leagues'
 import { teamsReducer } from './teams'
 import { playersReducer } from './players'
+import { rostersReducer } from './rosters'
 
 const rootReducer = (history) => {
   return combineReducers({
@@ -12,7 +13,8 @@ const rootReducer = (history) => {
     app: appReducer,
     leagues: leaguesReducer,
     teams: teamsReducer,
-    players: playersReducer
+    players: playersReducer,
+    rosters: rostersReducer
   })
 }
 
