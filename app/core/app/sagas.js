@@ -27,6 +27,10 @@ export function * saveToken ({ payload }) {
   yield fork(init)
 }
 
+//= ====================================
+//  WATCHERS
+// -------------------------------------
+
 export function * watchInitApp () {
   yield takeLatest(appActions.INIT_APP, init)
 }
@@ -50,6 +54,10 @@ export function * watchRegisterFulfilled () {
 export function * watchLoginFulfilled () {
   yield takeLatest(appActions.LOGIN_FULFILLED, saveToken)
 }
+
+//= ====================================
+//  ROOT
+// -------------------------------------
 
 export const appSagas = [
   fork(watchInitApp),

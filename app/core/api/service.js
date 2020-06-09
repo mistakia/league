@@ -37,6 +37,10 @@ export const api = {
   fetchPlayers (params) {
     const url = `${BASE_URL}/players?${queryString.stringify(params)}`
     return { url }
+  },
+  getRoster (params) {
+    const url = `${BASE_URL}/teams/${params.teamId}/lineups`
+    return { url }
   }
 }
 
