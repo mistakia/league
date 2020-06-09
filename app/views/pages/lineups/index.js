@@ -3,10 +3,10 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { getApp } from '@core/app'
-import { rosterActions, getCurrentPlayers } from '@core/rosters'
-import render from './dashboard'
+import { rosterActions, getCurrentTeamRoster } from '@core/rosters'
+import render from './lineups'
 
-class DashboardPage extends React.Component {
+class LineupsPage extends React.Component {
   componentDidMount () {
     this.props.loadRoster(this.props.teamId)
   }
@@ -18,8 +18,8 @@ class DashboardPage extends React.Component {
 
 const mapStateToProps = createSelector(
   getApp,
-  getCurrentPlayers,
-  (app, players) => ({ teamId: app.teamId, players })
+  getCurrentTeamRoster,
+  (app, roster) => ({ teamId: app.teamId, roster })
 )
 
 const mapDispatchToProps = {
@@ -29,4 +29,4 @@ const mapDispatchToProps = {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(DashboardPage)
+)(LineupsPage)

@@ -19,6 +19,8 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'missing player param' })
     }
 
+    const leagues = await db('leagues').where({ lid })
+    const league = leagues[0]
     const transactions = await db('transactions')
       .where({ tid, player })
       .limit(2)
@@ -72,7 +74,7 @@ router.post('/?', async (req, res) => {
 
     // select a slot if none is provided
     if (!slot) {
-      const eligbleSlots = getEligbleSlots({ pos, bench: true, ir: true, ps: true })
+      const eligbleSlots = getEligbleSlots({ pos, bench: true, ir: true, ps: true, league })
       slot = eligibleSlots[0]
       if (!slot) {
         return res.status(400).send({ error: 'no eligible slots' })
@@ -100,7 +102,7 @@ router.post('/?', async (req, res) => {
     }
 
     if (type === constants.transactions.ROSTER_ACTIVATE) {
-      const psSlots = getEligibleSlots({ ps: true })
+      const psSlots = getEligibleSlots({ ps: true, league })
       const slots = Array.from(roster.keys())
       const psPlayers = slots.filter(s => psSlots.includes(s)).map(s => roster.get(s))
       if (!psPlayers.includes(player)) {
@@ -163,7 +165,7 @@ router.post('/?', async (req, res) => {
       }
 
       //TODO
-      const psSlots = getEligibleSlots({ ir: true })
+      const psSlots = getEligibleSlots({ ir: true, league })
       const onPS = await db('rosters')
         .where({ lid })
         .whereNot({ tid })

@@ -2,12 +2,12 @@ import { Map, List } from 'immutable'
 import { playerActions } from './actions'
 import { createPlayer } from './player'
 
-const {
+import {
   weightProjections,
   calculatePoints,
   calculateBaselines,
   calculateValues
-} = require('@common')
+} from '@common'
 
 const initialState = new Map({
   isPending: false,

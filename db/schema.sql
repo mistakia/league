@@ -1254,7 +1254,7 @@ CREATE TABLE `leagues` (
   `ste` tinyint(1) NOT NULL,
   `srbwr` tinyint(1) NOT NULL,
   `srbwrte` tinyint(1) NOT NULL,
-  `ssflex` tinyint(1) NOT NULL,
+  `sqbrbwrte` tinyint(1) NOT NULL,
   `swrte` tinyint(1) NOT NULL,
   `sdst` tinyint(1) NOT NULL,
   `sk` tinyint(1) NOT NULL,

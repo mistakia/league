@@ -10,7 +10,7 @@ const getRosterSlotCounts = ({
   srbwr,
   swrte,
   srbwrte,
-  ssflex,
+  sqbrbwrte,
   bench,
   nteams
 }) => ({
@@ -23,7 +23,7 @@ const getRosterSlotCounts = ({
   srbwr: nteams * srbwr,
   swrte: nteams * swrte,
   srbwrte: nteams * srbwrte,
-  ssflex: nteams * ssflex,
+  sqbrbwrte: nteams * sqbrbwrte,
   bench: nteams * bench
 })
 
@@ -59,7 +59,7 @@ const calculateBaselines = ({
   }
 
   const result = {}
-  if (!args.ssflex && !args.srbwr && !args.wrte && !args.srbwrte) {
+  if (!args.sqbrbwrte && !args.srbwr && !args.wrte && !args.srbwrte) {
     for (const pos of positions) {
       result[pos] = {}
       for (const type in bPlayers[pos]) {
@@ -109,7 +109,7 @@ const calculateBaselines = ({
     }
   }
 
-  if (args.ssflex) {
+  if (args.sqbrbwrte) {
     // TODO fix calculations for types
     for (const type of types) {
       const combined = bPlayers.QB[type]
@@ -117,7 +117,7 @@ const calculateBaselines = ({
         .concat(bPlayers.WR[type])
         .concat(bPlayers.TE[type])
       const sorted = combined.sort((a, b) => b.points.total - a.points.total)
-      const cutlist = sorted.slice(0, rosterCounts.ssflex)
+      const cutlist = sorted.slice(0, rosterCounts.sqbrbwrte)
       bPlayers.QB[type] = filter(bPlayers.QB[type], cutlist)
       bPlayers.RB[type] = filter(bPlayers.RB[type], cutlist)
       bPlayers.WR[type] = filter(bPlayers.WR[type], cutlist)
@@ -140,7 +140,7 @@ const calculateBaselines = ({
 
   result.QB = {}
   for (const type of types) {
-    result.QB[type] = args.ssflex
+    result.QB[type] = args.sqbrbwrte
       ? select({ positions: ['QB', 'RB', 'WR', 'TE'], type })
       : select({ positions: ['QB'], type })
   }
@@ -148,7 +148,7 @@ const calculateBaselines = ({
   result.RB = {}
   for (const type of types) {
     let selection = select({ positions: ['RB'], type })
-    if (args.ssflex) {
+    if (args.sqbrbwrte) {
       selection = select({ positions: ['QB', 'RB', 'WR', 'TE'], type }, selection)
     }
 
@@ -166,7 +166,7 @@ const calculateBaselines = ({
   result.WR = {}
   for (const type of types) {
     let selection = select({ positions: ['WR'], type })
-    if (args.ssflex) {
+    if (args.sqbrbwrte) {
       selection = select({ positions: ['QB', 'RB', 'WR', 'TE'], type }, selection)
     }
 
@@ -188,7 +188,7 @@ const calculateBaselines = ({
   result.TE = {}
   for (const type of types) {
     let selection = select({ positions: ['TE'], type })
-    if (args.ssflex) {
+    if (args.sqbrbwrte) {
       selection = select({ positions: ['QB', 'RB', 'WR', 'TE'], type }, selection)
     }
 
