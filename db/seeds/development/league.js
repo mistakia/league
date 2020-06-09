@@ -24,7 +24,7 @@ exports.seed = async function(knex, Promise) {
     ste: 1,
     srbwr: 0,
     srbwrte: 1,
-    ssflex: 1,
+    sqbrbwrte: 1,
     swrte: 0,
     sdst: 1,
     sk: 1,

@@ -5,6 +5,7 @@ import TableCell from '@material-ui/core/TableCell'
 
 import PositionFilter from '@components/position-filter'
 import PageLayout from '@layouts/page'
+import Position from '@components/position'
 
 import './players.styl'
 
@@ -40,7 +41,7 @@ export default function () {
     return (
       <TableRow style={style} className={className} component='div' key={index}>
         <TableCell component='div'>{player.name}</TableCell>
-        <TableCell component='div'>{player.pos1}</TableCell>
+        <TableCell component='div'><Position pos={player.pos1} /></TableCell>
         <TableCell component='div'>${player.values.starter}</TableCell>
         <TableCell component='div'>${player.values.available}</TableCell>
 

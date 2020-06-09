@@ -10,6 +10,11 @@ export function getPlayers (state) {
   return filtered.toList()
 }
 
+export function getPlayerById (state, { playerId }) {
+  const items = getAllPlayers(state)
+  return items.get(playerId)
+}
+
 export function getPlayerPositionFilter (state) {
   return state.get('players').get('positions')
 }

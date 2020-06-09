@@ -1,3 +1,19 @@
-.player
+.player__item
   position relative
   display flex
+  align-items center
+  height 45px
+  border-bottom 1px solid $borderColor
+
+.player__item-position
+  flex 0 0 50px
+  display flex
+
+.player__item-name
+  flex 0 0 250px
+  overflow hidden
+  text-overflow ellipsis
+  white-space nowrap
+
+.player__item-metric
+  flex 0 0 100px

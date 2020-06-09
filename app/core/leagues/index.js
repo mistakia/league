@@ -1,5 +1,6 @@
 export {
   getLeagueById,
+  getCurrentLeague,
   getLeagues
 } from './selectors'
 

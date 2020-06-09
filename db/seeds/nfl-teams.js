@@ -3,223 +3,223 @@ module.exports = async function (knex) {
     player: 'ARI',
     fname: 'Arizona',
     lname: 'Cardinals',
-    pname: 'ARI',
+    pname: 'Cardinals',
     pos1: 'DST',
     cteam: 'ARI'
   }, {
     player: 'ATL',
     fname: 'Atlanta',
     lname: 'Falcons',
-    pname: 'ATL',
+    pname: 'Falcons',
     pos1: 'DST',
     cteam: 'ATL'
   }, {
     player: 'BAL',
     fname: 'Baltimore',
     lname: 'Ravens',
-    pname: 'BAL',
+    pname: 'Ravens',
     pos1: 'DST',
     cteam: 'BAL'
   }, {
     player: 'BUF',
     fname: 'Buffalo',
     lname: 'Bills',
-    pname: 'BUF',
+    pname: 'Bills',
     pos1: 'DST'
   }, {
     player: 'CAR',
     fname: 'Carolina',
     lname: 'Panthers',
-    pname: 'CAR',
+    pname: 'Panthers',
     pos1: 'DST',
     cteam: 'CAR'
   }, {
     player: 'CHI',
     fname: 'Chicago',
     lname: 'Bears',
-    pname: 'CHI',
+    pname: 'Bears',
     pos1: 'DST',
     cteam: 'CHI'
   }, {
     player: 'CIN',
     fname: 'Cincinnati',
     lname: 'Bengals',
-    pname: 'CIN',
+    pname: 'Bengals',
     pos1: 'DST',
     cteam: 'CIN'
   }, {
     player: 'CLE',
     fname: 'Cleveland',
     lname: 'Browns',
-    pname: 'CLE',
+    pname: 'Browns',
     pos1: 'DST',
     cteam: 'CLE'
   }, {
     player: 'DAL',
     fname: 'Dallas',
     lname: 'Cowboys',
-    pname: 'DAL',
+    pname: 'Cowboys',
     pos1: 'DST',
     cteam: 'DAL'
   }, {
     player: 'DEN',
     fname: 'Denver',
     lname: 'Broncos',
-    pname: 'DEN',
+    pname: 'Broncos',
     pos1: 'DST',
     cteam: 'DEN'
   }, {
     player: 'DET',
     fname: 'Detroit',
     lname: 'Lions',
-    pname: 'DET',
+    pname: 'Lions',
     pos1: 'DST',
     cteam: 'DET'
   }, {
     player: 'GB',
     fname: 'Green Bay',
     lname: 'Packers',
-    pname: 'GB',
+    pname: 'Packers',
     pos1: 'DST',
     cteam: 'GB'
   }, {
     player: 'HOU',
     fname: 'Houston',
     lname: 'Texans',
-    pname: 'HOU',
+    pname: 'Texans',
     pos1: 'DST',
     cteam: 'HOU'
   }, {
     player: 'IND',
     fname: 'Indianapolis',
     lname: 'Colts',
-    pname: 'IND',
+    pname: 'Colts',
     pos1: 'DST',
     cteam: 'IND'
   }, {
     player: 'JAC',
     fname: 'Jacksonville',
     lname: 'Jaguars',
-    pname: 'JAC',
+    pname: 'Jaguars',
     pos1: 'DST',
     cteam: 'JAC'
   }, {
     player: 'KC',
     fname: 'Kansas City',
     lname: 'Chiefs',
-    pname: 'KC',
+    pname: 'Chiefs',
     pos1: 'DST',
     cteam: 'KC'
   }, {
     player: 'LA',
     fname: 'Los Angeles',
     lname: 'Rams',
-    pname: 'LA',
+    pname: 'Rams',
     pos1: 'DST',
     cteam: 'LA'
   }, {
     player: 'LAC',
     fname: 'Los Angeles',
     lname: 'Chargers',
-    pname: 'LAC',
+    pname: 'Chargers',
     pos1: 'DST',
     cteam: 'LAC'
   }, {
     player: 'LV',
     fname: 'Las Vegas',
     lname: 'Raiders',
-    pname: 'LV',
+    pname: 'Raiders',
     pos1: 'DST',
     cteam: 'LV'
   }, {
     player: 'MIA',
     fname: 'Miami',
     lname: 'Dolphins',
-    pname: 'MIA',
+    pname: 'Dolphins',
     pos1: 'DST',
     cteam: 'MIA'
   }, {
     player: 'MIN',
     fname: 'Minnesota',
     lname: 'Vikings',
-    pname: 'MINT',
+    pname: 'Vikings',
     pos1: 'DST',
     cteam: 'MIN'
   }, {
     player: 'NE',
     fname: 'New England',
     lname: 'Patriots',
-    pname: 'NE',
+    pname: 'Patriots',
     pos1: 'DST',
     cteam: 'NE'
   }, {
     player: 'NO',
     fname: 'New Orleans',
     lname: 'Saints',
-    pname: 'NO',
+    pname: 'Saints',
     pos1: 'DST',
     cteam: 'NO'
   }, {
     player: 'NYG',
     fname: 'New York',
     lname: 'Giants',
-    pname: 'NYG',
+    pname: 'Giants',
     pos1: 'DST',
     cteam: 'NYG'
   }, {
     player: 'NYJ',
     fname: 'New York',
     lname: 'Jets',
-    pname: 'NYJ',
+    pname: 'Jets',
     pos1: 'DST',
     cteam: 'NYJ'
   }, {
     player: 'PHI',
     fname: 'Philadelphia',
     lname: 'Eagles',
-    pname: 'PHI',
+    pname: 'Eagles',
     pos1: 'DST',
     cteam: 'PHI'
   }, {
     player: 'PIT',
     fname: 'Pittsburgh',
     lname: 'Steelers',
-    pname: 'PIT',
+    pname: 'Steelers',
     pos1: 'DST',
     cteam: 'PIT'
   }, {
     player: 'SEA',
     fname: 'Seattle',
     lname: 'Seahawks',
-    pname: 'SEA',
+    pname: 'Seahawks',
     pos1: 'DST',
     cteam: 'SEA'
   }, {
     player: 'SF',
     fname: 'San Francisco',
     lname: '49ers',
-    pname: 'SF',
+    pname: '49ers',
     pos1: 'DST',
     cteam: 'SF'
   }, {
     player: 'TB',
     fname: 'Tampa Bay',
     lname: 'Buccaneers',
-    pname: 'TB',
+    pname: 'Buccaneers',
     pos1: 'DST',
     cteam: 'TB'
   }, {
     player: 'TEN',
     fname: 'Tennessee',
     lname: 'Titans',
-    pname: 'TEN',
+    pname: 'Titans',
     pos1: 'DST',
     cteam: 'TEN'
   }, {
     player: 'WAS',
     fname: 'Washington',
     lname: 'Redskins',
-    pname: 'WAS',
+    pname: 'Redskins',
     pos1: 'DST',
     cteam: 'WAS',
   }])
