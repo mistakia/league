@@ -166,4 +166,29 @@ exports.seed = async function(knex, Promise) {
       })
     }
   }
+
+  await knex('draft').del()
+  for (let i = 1; i <= (3 * league.nteams); i++) {
+    const idx = i % league.nteams
+    const team = teams[idx]
+    await knex('draft').insert({
+      tid: team.uid,
+      lid: league.uid,
+      pick: i,
+      round: Math.ceil(i / league.nteams),
+      year: constants.year
+    })
+  }
+
+  for (const team of teams) {
+    for (let i = 1; i < 4; i++) {
+      await knex('draft').insert({
+        tid: team.uid,
+        lid: league.uid,
+        round: i,
+        year: (constants.year + 1)
+      })
+    }
+  }
+
 }
