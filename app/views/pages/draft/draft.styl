@@ -7,7 +7,7 @@
   background #fafafa
 
 .draft__main
-  flex 2
+  flex 4
   border-left 1px solid $borderColor
   border-right 1px solid $borderColor
   display flex
@@ -16,9 +16,19 @@
 .draft__main-board
   flex 1
   border-bottom 1px solid $borderColor
+  display flex
+  height 50%
+
+.draft__main-board-pos
+  flex 1
+  overflow hidden
+  overflow-y scroll
+  + .draft__main-board-pos
+    border-left 1px solid $borderColor
 
 .draft__main-trade
   flex 1
+  height 50%
 
 .draft__side
   flex 1
