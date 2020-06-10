@@ -1,7 +1,5 @@
 import React from 'react'
-import { AutoSizer, Table, Column } from 'react-virtualized'
-import TableRow from '@material-ui/core/TableRow'
-import TableCell from '@material-ui/core/TableCell'
+import { AutoSizer, List } from 'react-virtualized'
 
 import PositionFilter from '@components/position-filter'
 import PageLayout from '@layouts/page'
@@ -9,7 +7,7 @@ import Position from '@components/position'
 
 import './players.styl'
 
-const ROW_HEIGHT = 53
+const ROW_HEIGHT = 45
 
 function descendingComparator (a, b, orderBy) {
   const keyPath = orderBy.split('.')
@@ -36,20 +34,19 @@ export default function () {
 
   players = players.sort(getComparator(order, orderBy))
 
-  const Row = ({ index, rowData, style, className, columns }) => {
-    const player = rowData.toJS()
+  const Row = ({ index, style, key }) => {
+    const player = players.get(index).toJS()
+
     return (
-      <TableRow style={style} className={className} component='div' key={index}>
-        <TableCell component='div'>{player.name}</TableCell>
-        <TableCell component='div'><Position pos={player.pos1} /></TableCell>
-        <TableCell component='div'>${player.values.starter}</TableCell>
-        <TableCell component='div'>${player.values.available}</TableCell>
-
-        <TableCell component='div'>{(player.vorp.starter || 0).toFixed(1)}</TableCell>
-        <TableCell component='div'>{(player.vorp.available || 0).toFixed(1)}</TableCell>
-
-        <TableCell component='div'>{(player.points.total || 0).toFixed(1)}</TableCell>
-      </TableRow>
+      <div style={style} key={key}>
+        <div className='player__row'>
+          <div className='player__row-pos'><Position pos={player.pos1} /></div>
+          <div className='player__row-name'>{player.name}</div>
+          <div className='player__row-metric'>${player.values.available} (${player.values.starter})</div>
+          <div className='player__row-metric'>{Math.round(player.vorp.available || 0)}</div>
+          <div className='player__row-metric'>{(player.points.total || 0).toFixed(1)}</div>
+        </div>
+      </div>
     )
   }
 
@@ -57,28 +54,34 @@ export default function () {
     <PositionFilter />
   )
 
+  const head = (
+    <div className='players__header'>
+      <div className='player__row-pos'></div>
+      <div className='player__row-name'>Name</div>
+      <div className='player__row-metric'>v FA (v S)</div>
+      <div className='player__row-metric'>Value</div>
+      <div className='player__row-metric'>Proj</div>
+      <div className='player__row-metric'></div>
+      <div className='player__row-metric'></div>
+    </div>
+  )
+
   const body = (
     <AutoSizer>
       {({ height, width }) => (
-        <Table
+        <List
           className='players'
           width={width}
           height={height}
-          headerHeight={20}
           rowHeight={ROW_HEIGHT}
           rowCount={players.size}
           rowRenderer={Row}
-          rowGetter={({ index }) => players.get(index)}
-        >
-          <Column label='Name' dataKey='name' width={150} />
-          <Column label='VORP' dataKey='values.starter' width={25} />
-          <Column label='v FA' dataKey='values.available' width={25} />
-        </Table>
+        />
       )}
     </AutoSizer>
   )
 
   return (
-    <PageLayout body={body} menu={menu} />
+    <PageLayout {...{ body, menu, head }} />
   )
 }

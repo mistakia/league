@@ -6,6 +6,8 @@ import 'whatwg-fetch'
 
 import Root from '@views/root'
 
+import 'react-virtualized/styles.css'
+
 document.addEventListener('DOMContentLoaded', () =>
   render(
     <AppContainer>

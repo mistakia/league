@@ -1,5 +1,29 @@
 .players
-  .ReactVirtualized__Table__row
-    display flex
-    .MuiTableCell-root
-      flex 1
+  padding 0 32px
+
+.players__header
+  flex 1
+  height 40px
+  margin 0 32px
+  display flex
+  align-items center
+  font-weight 500
+  border-bottom 1px solid $borderColor
+
+.player__row
+  display flex
+  height 45px
+  border-bottom 1px solid $borderColor
+  align-items center
+
+.player__row-name
+  flex 0 0 250px
+  overflow hidden
+  text-overflow ellipsis
+  white-space nowrap
+
+.player__row-pos
+  flex 0 0 50px
+
+.player__row-metric
+  flex 0 0 100px
