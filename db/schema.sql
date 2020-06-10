@@ -1218,6 +1218,26 @@ ALTER TABLE `pbp`
 -- Table structure for table `draft_rankings`
 --
 
+DROP TABLE IF EXISTS `draft`;
+
+CREATE TABLE `draft` (
+  `player` varchar(7) DEFAULT '',
+  `round` tinyint(1) NOT NULL,
+  `pick` tinyint(2) DEFAULT NULL,
+  `tid` int(6) NOT NULL,
+  `lid` int(6) NOT NULL,
+  `year` int(4) NOT NULL,
+  UNIQUE KEY `pick` (`round`,`pick`,`lid`,`year`),
+  KEY `lid` (`lid`),
+  KEY `tid` (`tid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `draft_rankings`
+--
+
 DROP TABLE IF EXISTS `draft_rankings`;
 
 CREATE TABLE `draft_rankings` (
