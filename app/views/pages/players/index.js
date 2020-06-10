@@ -2,7 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { playerActions, getPlayers } from '@core/players'
+import { getPlayers } from '@core/players'
 
 import render from './players'
 
@@ -11,12 +11,8 @@ class PlayersPage extends React.Component {
     super(props)
     this.state = {
       order: 'desc',
-      orderBy: 'vorp.starter'
+      orderBy: 'vorp.available'
     }
-  }
-
-  componentDidMount () {
-    this.props.load()
   }
 
   render () {
@@ -29,11 +25,6 @@ const mapStateToProps = createSelector(
   (players) => ({ players })
 )
 
-const mapDispatchToProps = {
-  load: playerActions.load
-}
-
 export default connect(
-  mapStateToProps,
-  mapDispatchToProps
+  mapStateToProps
 )(PlayersPage)
