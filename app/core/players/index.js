@@ -1,5 +1,6 @@
 export { playersReducer } from './reducer'
 export {
+  getRookiePlayers,
   getPlayers,
   getPlayerById,
   getPlayerPositionFilter
