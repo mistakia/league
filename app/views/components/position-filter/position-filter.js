@@ -55,13 +55,10 @@ class PositionFilter extends React.Component {
   render () {
     const { checkboxes } = this.state
     return (
-      <div>
-        <div>Positions</div>
-        <Filter
-          checkboxes={checkboxes}
-          onChange={this.handleCheckboxgroupChange}
-        />
-      </div>
+      <Filter
+        checkboxes={checkboxes}
+        onChange={this.handleCheckboxgroupChange}
+      />
     )
   }
 }
