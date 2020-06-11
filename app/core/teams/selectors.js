@@ -1,4 +1,6 @@
-export function getTeamById (state, id) {
+import { Team } from './team'
+
+export function getTeamById (state, { tid }) {
   const teams = state.get('teams')
-  return teams.get(teams.get(id))
+  return teams.get(tid) || new Team()
 }

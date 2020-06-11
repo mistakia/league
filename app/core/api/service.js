@@ -38,8 +38,16 @@ export const api = {
     const url = `${BASE_URL}/players?${queryString.stringify(params)}`
     return { url }
   },
-  getRoster (params) {
-    const url = `${BASE_URL}/teams/${params.teamId}/lineups`
+  getRoster ({ teamId }) {
+    const url = `${BASE_URL}/teams/${teamId}/lineups`
+    return { url }
+  },
+  getDraft ({ leagueId }) {
+    const url = `${BASE_URL}/leagues/${leagueId}/draft`
+    return { url }
+  },
+  getTeams ({ leagueId }) {
+    const url = `${BASE_URL}/leagues/${leagueId}/teams`
     return { url }
   }
 }
