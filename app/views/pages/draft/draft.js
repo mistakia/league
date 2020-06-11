@@ -2,12 +2,13 @@ import React from 'react'
 
 import PageLayout from '@layouts/page'
 import DraftPlayer from '@components/draft-player'
+import DraftPick from '@components/draft-pick'
 import { constants } from '@common'
 
 import './draft.styl'
 
 export default function () {
-  const { players } = this.props
+  const { players, picks } = this.props
   const { positions } = constants
 
   const groups = {}
@@ -25,6 +26,11 @@ export default function () {
     for (const player of players) {
       items[position].push(<DraftPlayer key={player} player={player} />)
     }
+  }
+
+  const pickItems = []
+  for (const pick of picks) {
+    pickItems.push(<DraftPick key={pick.pick} pick={pick} player={pick.player} tid={pick.tid} />)
   }
 
   const body = (
@@ -54,7 +60,7 @@ export default function () {
           <h2>On The Clock</h2>
         </div>
         <div className='draft__side-main'>
-
+          {pickItems}
         </div>
       </div>
     </div>

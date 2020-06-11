@@ -1,10 +1,6 @@
 const express = require('express')
 const router = express.Router()
 
-router.get('/?', async (req, res) => {
-  // TODO return list of teams in league
-})
-
 router.get('/:teamId/lineups/?', async (req, res) => {
   const { db } = req.app.locals
   const { teamId } = req.params

@@ -10,8 +10,10 @@ import {
   getToken
 } from '@core/app'
 
+import { getDraftActions } from '@core/draft'
 import { getRosterActions } from '@core/rosters'
 import { playerRequestActions } from '@core/players'
+import { getTeamsActions } from '@core/teams'
 
 function * fetchAPI (apiFunction, actions, opts = {}) {
   const token = yield select(getToken)
@@ -44,3 +46,5 @@ export const fetchAuth = fetch.bind(null, api.fetchAuth, authActions)
 
 export const fetchPlayers = fetch.bind(null, api.fetchPlayers, playerRequestActions)
 export const getRoster = fetch.bind(null, api.getRoster, getRosterActions)
+export const getDraft = fetch.bind(null, api.getDraft, getDraftActions)
+export const getTeams = fetch.bind(null, api.getTeams, getTeamsActions)
