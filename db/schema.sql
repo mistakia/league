@@ -1302,6 +1302,8 @@ CREATE TABLE `leagues` (
   `twoptc` tinyint(1) NOT NULL,
   `tdrec` tinyint(1) NOT NULL,
   `fuml` tinyint(1) NOT NULL,
+  `draft_start` int(11) DEFAULT NULL,
+  `auction_start` int(11) DEFAULT NULL,
   UNIQUE KEY `uid` (`uid`),
   KEY `commishid` (`commishid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
