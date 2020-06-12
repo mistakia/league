@@ -1444,7 +1444,11 @@ CREATE TABLE `teams` (
   `image` varchar(500) DEFAULT '',
   `wp` tinyint(2) NOT NULL,
   `acap` int(4) NOT NULL,
+  `do` tinyint(2) DEFAULT NULL,
+  `wo` tinyint(2) DEFAULT NULL,
   UNIQUE KEY `uid` (`uid`),
+  UNIQUE KEY `do` (`lid`, `do`),
+  UNIQUE KEY `wo` (`lid`, `wo`),
   KEY `lid` (`lid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -1457,7 +1461,7 @@ CREATE TABLE `teams` (
 DROP TABLE IF EXISTS `transactions`;
 
 CREATE TABLE `transactions` (
-  `uid` int(6) NOT NULL,
+  `uid` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `userid` int(6) NOT NULL,
   `tid` int(6) NOT NULL,
   `player` varchar(7) NOT NULL,
