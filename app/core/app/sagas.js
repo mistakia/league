@@ -3,11 +3,15 @@ import { call, takeLatest, fork, select } from 'redux-saga/effects'
 import { getToken } from './selectors'
 import { appActions } from './actions'
 import { postRegister, postLogin, postLogout, fetchAuth } from '@core/api'
+import { connectWS } from '@core/ws'
 import { localStorageAdapter } from '@core/utils'
 
 export function * init () {
   const token = yield select(getToken)
-  if (token) yield call(fetchAuth)
+  if (token) {
+    yield call(fetchAuth)
+    connectWS(token)
+  }
 }
 
 export function * register ({ payload }) {

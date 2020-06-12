@@ -8,6 +8,8 @@ import rootReducer from './reducers'
 
 const sagaMiddleware = createSagaMiddleware()
 
+let store = null
+
 export default (initialState = {}, history) => {
   const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
 
@@ -29,7 +31,7 @@ export default (initialState = {}, history) => {
   // ======================================================
   // Store Instantiation and HMR Setup
   // ======================================================
-  const store = createStore(
+  store = createStore(
     rootReducer(history),
     fromJS(initialState),
     composeEnhancers(...enhancers)
@@ -50,3 +52,5 @@ export default (initialState = {}, history) => {
 
   return store
 }
+
+export { store }
