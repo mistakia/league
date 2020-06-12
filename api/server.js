@@ -1,6 +1,7 @@
 const https = require('https')
 const http = require('http')
 const fs = require('fs')
+const url = require('url')
 
 const WebSocket = require('ws')
 const express = require('express')
@@ -10,7 +11,8 @@ const compression = require('compression')
 const extend = require('deep-extend')
 const debug = require('debug')
 const logger = debug('api')
-const jwt = require('express-jwt')
+const jwt = require('jsonwebtoken')
+const expressJwt = require('express-jwt')
 
 const config = require('../config')
 const routes = require('./routes')
@@ -40,7 +42,7 @@ api.use(morgan('api', 'combined'))
 api.use(bodyParser.json())
 
 api.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', IS_DEV ? 'http://localhost:1212' : '*')
+  res.header('Access-Control-Allow-Origin', config.url)
   res.header('Access-Control-Allow-Credentials', 'true')
   res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS')
   res.header('Access-Control-Allow-Headers', 'Authorization, Origin, X-Requested-With, Content-Type, Accept')
@@ -58,7 +60,7 @@ if (options.ssl) {
 }
 
 api.use('/api/auth', routes.auth)
-api.use(jwt(config.jwt))
+api.use(expressJwt(config.jwt))
 api.use((err, req, res, next) => {
   if (err.name === 'UnauthorizedError') {
     return res.status(401).send({ error: 'invalid token' })
@@ -85,21 +87,21 @@ const createServer = () => {
 const server = createServer()
 const wss = new WebSocket.Server({ clientTracking: false, noServer: true })
 
-/* server.on('upgrade', function(request, socket, head) {
- *   sessionParser(request, {}, () => {
- *     if (!request.session.userId) {
- *       socket.destroy()
- *       return
- *     }
- *
- *     console.log('Session is parsed!')
- *
- *     wss.handleUpgrade(request, socket, head, function(ws) {
- *       wss.emit('connection', ws, request)
- *     })
- *   })
- * })
- *  */
+server.on('upgrade', async (request, socket, head) => {
+  try {
+    const parsed = new url.URL(request.url, config.url)
+    const token = parsed.searchParams.get('token')
+    const decoded = await jwt.verify(token, config.jwt.secret)
+    request.user = decoded
+  } catch (error) {
+    logger(error)
+    return socket.destroy()
+  }
+
+  wss.handleUpgrade(request, socket, head, function (ws) {
+    wss.emit('connection', ws, request)
+  })
+})
 
 sockets(wss)
 

@@ -2,7 +2,7 @@ const map = new Map()
 
 module.exports = (wss) => {
   wss.on('connection', function(ws, request) {
-    const userId = request.session.userId
+    const { userId } = request.user
 
     map.set(userId, ws)
 
