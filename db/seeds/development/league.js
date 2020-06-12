@@ -51,7 +51,9 @@ exports.seed = async function(knex, Promise) {
     recy: 0.1,
     twoptc: 0,
     tdrec: 6,
-    fuml: -1
+    fuml: -1,
+    draft_start: Math.round(Date.now() / 1000),
+    auction_start: Math.round(Date.now() / 1000)
   })
 
   await knex('users').del()
@@ -83,7 +85,7 @@ exports.seed = async function(knex, Promise) {
       lid: 1,
       week: 0,
       year: constants.year,
-      last_updated: Date.now()
+      last_updated: Math.round(Date.now() / 1000)
     })
 
     await knex('users_teams').insert({

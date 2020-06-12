@@ -85,7 +85,7 @@ const createServer = () => {
 }
 
 const server = createServer()
-const wss = new WebSocket.Server({ clientTracking: false, noServer: true })
+const wss = new WebSocket.Server({ noServer: true })
 
 server.on('upgrade', async (request, socket, head) => {
   try {
