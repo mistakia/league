@@ -2,7 +2,7 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { appActions, getAppIsPending, getUserId } from '@core/app'
+import { appActions, getApp, getUserId } from '@core/app'
 
 import App from './app'
 
@@ -11,9 +11,9 @@ App.propTypes = {
 }
 
 const mapStateToProps = createSelector(
-  getAppIsPending,
+  getApp,
   getUserId,
-  (isPending, userId) => ({ isPending, userId })
+  (app, userId) => ({ isPending: app.isPending, authError: app.authError, userId })
 )
 
 const mapDispatchToProps = {

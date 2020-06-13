@@ -21,7 +21,11 @@ router.post('/login', async (req, res) => {
     }
 
     const user = users[0]
-    const isValid = await bcrypt.compare(user.password, password)
+    const isValid = await bcrypt.compare(password, user.password)
+    if (!isValid) {
+      return res.status(400).send({ error: 'invalid params' })
+    }
+
     const token = jwt.sign({ userId: user.id }, config.jwt.secret)
     res.json({ token })
   } catch (err) {
