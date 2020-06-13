@@ -6,6 +6,7 @@ import Routes from '@views/routes'
 import Loading from '@components/loading'
 import { localStorageAdapter } from '@core/utils'
 import Button from '@components/button'
+import TextField from '@material-ui/core/TextField'
 
 import 'normalize.css'
 import '@styles/normalize.css'
@@ -46,7 +47,7 @@ class App extends React.Component {
   }
 
   render () {
-    const { isPending, userId } = this.props
+    const { isPending, userId, authError } = this.props
     if (isPending) {
       return <Loading loading={isPending} />
     }
@@ -54,38 +55,40 @@ class App extends React.Component {
     if (typeof userId === 'undefined') {
       return (
         <main>
-          <div className='menu'>
-            <Button
-              isActive={this.state.menu === 'login'}
-              onClick={() => this.setMenu('login')}
-            >
-              Login
-            </Button>
-            <Button
-              isActive={this.state.menu === 'register'}
-              onClick={() => this.setMenu('register')}
-            >
-              Register
-            </Button>
-          </div>
-          <form id='auth' onSubmit={this.handleSubmit}>
-            <label>
-              Email
-              <input
+          <div className='auth'>
+            {/* <div className='menu'>
+                <Button
+                isActive={this.state.menu === 'login'}
+                onClick={() => this.setMenu('login')}
+                >
+                Login
+                </Button>
+                <Button
+                isActive={this.state.menu === 'register'}
+                onClick={() => this.setMenu('register')}
+                >
+                Register
+                </Button>
+                </div> */}
+            <form id='auth' onSubmit={this.handleSubmit}>
+              {authError}
+              <TextField
+                id='email'
+                label='Email Address'
                 type='email'
-                name='email'
-                placeholder='email'
+                error={!!authError}
+                variant='outlined'
               />
-            </label>
-            <label>
-              Password
-              <input
+              <TextField
+                error={!!authError}
+                id='password'
+                label='Password'
                 type='password'
-                name='password'
+                variant='outlined'
               />
-            </label>
-            <Button type='submit' isLoading={this.props.isUpdating}>Submit</Button>
-          </form>
+              <Button type='submit' isLoading={isPending}>Login</Button>
+            </form>
+          </div>
         </main>
       )
     }

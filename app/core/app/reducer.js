@@ -9,6 +9,7 @@ const initialState = new Record({
   leagueId: undefined,
   isPending: true,
   isUpdating: false,
+  authError: null,
   weights: new List()
 })
 
@@ -37,7 +38,8 @@ export function appReducer (state = initialState(), { payload, type }) {
     case appActions.REGISTER_FAILED:
     case appActions.LOGIN_FAILED:
       return state.merge({
-        isUpdating: false
+        isUpdating: false,
+        authError: payload.error
       })
 
     case appActions.REGISTER_PENDING:
