@@ -1,5 +1,5 @@
 module.exports = {
   jwt: {
-    secret: null,
+    secret: null
   }
 }

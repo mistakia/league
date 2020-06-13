@@ -2,9 +2,49 @@
   display flex
   height 100%
 
-.draft__players
+.draft__selected
   flex 1
   background #fafafa
+  display flex
+  flex-direction column
+
+.draft__selected-head
+  flex 0 0 auto
+  border-bottom 1px solid $borderColor
+
+.draft__selected-action
+  display flex
+  padding 0 16px 16px
+
+.draft__selected-title
+  font-size 2em
+  font-weight 500
+  padding 16px
+
+.draft__selected-alt
+  padding 0 16px 16px
+  display flex
+  align-items center
+  div
+    display inline-block
+    + div
+      margin-left 8px
+
+.draft__selected-body
+  flex 1
+  overflow hidden
+  overflow-y scroll
+  display flex
+  flex-wrap wrap
+  div
+    flex 1
+    padding 16px
+    font-weight 900
+  label
+    font-size 10px
+    font-weight 500
+    display block
+    color lighten($textColor, 30)
 
 .draft__main
   flex 4

@@ -1,21 +1,42 @@
 import React from 'react'
+import moment from 'moment'
 
+import Button from '@components/button'
 import PageLayout from '@layouts/page'
 import DraftPlayer from '@components/draft-player'
 import DraftPick from '@components/draft-pick'
+import Position from '@components/position'
 import { constants } from '@common'
 
 import './draft.styl'
 
 export default function () {
-  const { players, picks } = this.props
+  const { players, currentPick, picks, league, selectedPlayer, isDrafting } = this.props
   const { positions } = constants
+
+  let draftInfo
+  if (league.draft_start) {
+    const draftStart = moment(league.draft_start, 'X')
+    if (moment().isBefore(draftStart)) {
+      draftInfo = (<p>Draft begins {moment().to(draftStart)}</p>)
+    } else if (currentPick) {
+      const pickNum = (currentPick.pick % league.nteams) || league.nteams
+      draftInfo = (
+        <div>
+          <strong>Pick #{currentPick.pick} ({currentPick.round}.{('0' + pickNum).slice(-2)})</strong>
+          <h4>Time Remaining</h4>
+        </div>
+      )
+    }
+  } else {
+    draftInfo = (<p>Draft not scheduled</p>)
+  }
 
   const groups = {}
   for (const position of positions) {
     if (!groups[position]) groups[position] = []
     const ps = players.filter(p => p.pos1 === position)
-    groups[position] = ps.sort((a, b) => b.values.get('available') - a.values.get('available'))
+    groups[position] = ps.sort((a, b) => b.vorp.get('available') - a.vorp.get('available'))
   }
 
   const items = {}
@@ -30,12 +51,47 @@ export default function () {
 
   const pickItems = []
   for (const pick of picks) {
-    pickItems.push(<DraftPick key={pick.pick} pick={pick} player={pick.player} tid={pick.tid} />)
+    const isActive = currentPick && pick.pick === currentPick.pick
+    pickItems.push(<DraftPick key={pick.pick} pick={pick} playerId={pick.player} tid={pick.tid} isActive={isActive} />)
   }
+
+  const p = selectedPlayer
+  const selected = (
+    <div>
+      <div className='draft__selected-head'>
+        <div className='draft__selected-title'>{p.fname} {p.lname}</div>
+        <div className='draft__selected-alt'>
+          <div><Position pos={p.pos1} /></div>
+          <div>{p.team}</div>
+          {!!p.jersey && <div>#{p.jersey}</div>}
+        </div>
+        {isDrafting && <div className='draft__selected-action'>
+          <Button>Draft</Button>
+        </div>}
+      </div>
+      <div className='draft__selected-body'>
+        <div><label>Drafted</label>{Math.ceil(p.dpos / 12)}.{('0' + (p.dpos % 32)).slice(-2)}</div>
+        <div><label>Proj.</label>{Math.round(p.points.get('total'))}</div>
+        <div><label>Age</label>{moment().diff(moment(p.dob), 'years')}</div>
+        <div><label>Height</label>{Math.floor(p.height/12)}-{p.height % 12}</div>
+        <div><label>Weight</label>{p.weight}</div>
+        <div><label>Forty</label>{p.forty || 'n/a'}</div>
+        <div><label>Bench</label>{p.bench || 'n/a'}</div>
+        <div><label>Vertical</label>{p.vertical || 'n/a'}</div>
+        <div><label>Broad</label>{p.broad || 'n/a'}</div>
+        <div><label>Shuttle</label>{p.shuttle || 'n/a'}</div>
+        <div><label>Cone</label>{p.cone || 'n/a'}</div>
+        <div><label>Arm</label>{p.arm}</div>
+        <div><label>Hand</label>{p.hand}</div>
+        <div><label>College</label>{p.college}</div>
+        <div><label>Division</label>{p.college_division}</div>
+      </div>
+    </div>
+  )
 
   const body = (
     <div className='draft'>
-      <div className='draft__players'></div>
+      <div className='draft__selected'>{p.player && selected}</div>
       <div className='draft__main'>
         <div className='draft__main-board'>
           <div className='draft__main-board-pos'>
@@ -56,8 +112,7 @@ export default function () {
       </div>
       <div className='draft__side'>
         <div className='draft__side-top'>
-          <strong>Pick #1 (1.01)</strong>
-          <h2>On The Clock</h2>
+          {draftInfo}
         </div>
         <div className='draft__side-main'>
           {pickItems}

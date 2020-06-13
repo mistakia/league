@@ -4,11 +4,15 @@ import { draftActions } from './actions'
 
 const initialState = new Record({
   isPending: false,
+  selected: null,
   picks: new List()
 })
 
 export function draftReducer (state = initialState(), { payload, type }) {
   switch (type) {
+    case draftActions.DRAFT_SELECT_PLAYER:
+      return state.merge({ selected: payload.player })
+
     case draftActions.LOAD_DRAFT:
       return state.merge({ picks: new List() })
 
@@ -19,7 +23,7 @@ export function draftReducer (state = initialState(), { payload, type }) {
       return state.merge({ isPending: false })
 
     case draftActions.GET_DRAFT_FULFILLED:
-      return state.merge({ picks: new List(payload.data.picks) })
+      return state.merge({ isPending: false, picks: new List(payload.data.picks) })
 
     default:
       return state

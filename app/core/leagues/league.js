@@ -36,7 +36,9 @@ export const League = new Record({
   recy: null,
   twoptc: null,
   tdrec: null,
-  fuml: null
+  fuml: null,
+  auction_start: null,
+  draft_start: null
 })
 
 export function createLeague ({
@@ -75,7 +77,9 @@ export function createLeague ({
   recy,
   twoptc,
   tdrec,
-  fuml
+  fuml,
+  auction_start,
+  draft_start
 }) {
   return new League ({
     uid,
@@ -113,6 +117,8 @@ export function createLeague ({
     recy,
     twoptc,
     tdrec,
-    fuml
+    fuml,
+    auction_start,
+    draft_start
   })
 }

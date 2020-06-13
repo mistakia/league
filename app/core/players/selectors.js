@@ -1,4 +1,5 @@
 import { constants } from '@common'
+import { Player } from './player'
 
 export function getAllPlayers (state) {
   return state.get('players').get('items')
@@ -20,7 +21,7 @@ export function getRookiePlayers (state) {
 
 export function getPlayerById (state, { playerId }) {
   const items = getAllPlayers(state)
-  return items.get(playerId)
+  return items.get(playerId) || new Player()
 }
 
 export function getPlayerPositionFilter (state) {
