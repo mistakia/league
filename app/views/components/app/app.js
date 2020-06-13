@@ -7,6 +7,7 @@ import Loading from '@components/loading'
 import { localStorageAdapter } from '@core/utils'
 import Button from '@components/button'
 import TextField from '@material-ui/core/TextField'
+import Logout from '@components/logout'
 
 import 'normalize.css'
 import '@styles/normalize.css'
@@ -97,6 +98,7 @@ class App extends React.Component {
       <main>
         <Menu />
         <Routes />
+        <Logout />
       </main>
     )
   }

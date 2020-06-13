@@ -26,10 +26,6 @@ export const api = {
     const url = `${BASE_URL}/auth/login`
     return { url, ...POST(data) }
   },
-  postLogout () {
-    const url = `${BASE_URL}/auth/logout`
-    return { url, ...POST() }
-  },
   fetchAuth () {
     const url = `${BASE_URL}/me`
     return { url }

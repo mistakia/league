@@ -5,7 +5,6 @@ import { LOCATION_CHANGE } from 'connected-react-router'
 import {
   authActions,
   loginActions,
-  logoutActions,
   registerActions,
   getToken
 } from '@core/app'
@@ -41,7 +40,6 @@ function * fetch (...args) {
 
 export const postRegister = fetch.bind(null, api.postRegister, registerActions)
 export const postLogin = fetch.bind(null, api.postLogin, loginActions)
-export const postLogout = fetch.bind(null, api.postLogout, logoutActions)
 export const fetchAuth = fetch.bind(null, api.fetchAuth, authActions)
 
 export const fetchPlayers = fetch.bind(null, api.fetchPlayers, playerRequestActions)

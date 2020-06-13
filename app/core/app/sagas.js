@@ -2,7 +2,7 @@ import { call, takeLatest, fork, select } from 'redux-saga/effects'
 
 import { getToken } from './selectors'
 import { appActions } from './actions'
-import { postRegister, postLogin, postLogout, fetchAuth } from '@core/api'
+import { postRegister, postLogin, fetchAuth } from '@core/api'
 import { connectWS } from '@core/ws'
 import { localStorageAdapter } from '@core/utils'
 
@@ -23,7 +23,7 @@ export function * login ({ payload }) {
 }
 
 export function * logout () {
-  yield call(postLogout)
+  localStorageAdapter.removeItem('token')
 }
 
 export function * saveToken ({ payload }) {
