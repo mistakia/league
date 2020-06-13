@@ -1,9 +1,18 @@
 export const draftActions = {
   LOAD_DRAFT: 'LOAD_DRAFT',
 
+  DRAFT_SELECT_PLAYER: 'DRAFT_SELECT_PLAYER',
+
   GET_DRAFT_FAILED: 'GET_DRAFT_FAILED',
   GET_DRAFT_PENDING: 'GET_DRAFT_PENDING',
   GET_DRAFT_FULFILLED: 'GET_DRAFT_FULFILLED',
+
+  selectPlayer: (player) => ({
+    type: draftActions.DRAFT_SELECT_PLAYER,
+    payload: {
+      player
+    }
+  }),
 
   loadDraft: () => ({
     type: draftActions.LOAD_DRAFT

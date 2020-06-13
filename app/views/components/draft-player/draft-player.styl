@@ -4,6 +4,14 @@
   align-items center
   padding 2px 8px
   line-height 12px
+  cursor pointer
+
+  &:hover
+    color lighten($accentColor, 20)
+
+  &.selected
+    background #fafafa
+    color $accentColor
 
 .player-draft__item-name
   flex 0 0 250px
