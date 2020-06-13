@@ -17,10 +17,6 @@ export const appActions = {
   LOGIN_PENDING: 'LOGIN_PENDING',
   LOGIN_FULFILLED: 'LOGIN_FULFILLED',
 
-  LOGOUT_FAILED: 'LOGOUT_FAILED',
-  LOGOUT_PENDING: 'LOGOUT_PENDING',
-  LOGOUT_FULFILLED: 'LOGOUT_FULFILLED',
-
   init: (token) => ({
     type: appActions.INIT_APP,
     payload: {
@@ -94,29 +90,6 @@ export const appActions = {
     }
   }),
 
-  logoutFailed: (opts, error) => ({
-    type: appActions.LOGOUT_FAILED,
-    payload: {
-      opts,
-      error
-    }
-  }),
-
-  logoutPending: opts => ({
-    type: appActions.LOGOUT_PENDING,
-    payload: {
-      opts
-    }
-  }),
-
-  logoutFulfilled: (opts, data) => ({
-    type: appActions.LOGOUT_FULFILLED,
-    payload: {
-      opts,
-      data
-    }
-  }),
-
   registerFailed: (opts, error) => ({
     type: appActions.REGISTER_FAILED,
     payload: {
@@ -157,10 +130,4 @@ export const loginActions = {
   failed: appActions.loginFailed,
   fulfilled: appActions.loginFulfilled,
   pending: appActions.loginPending
-}
-
-export const logoutActions = {
-  failed: appActions.logoutFailed,
-  fulfilled: appActions.logoutFulfilled,
-  pending: appActions.logoutPending
 }

@@ -21,6 +21,9 @@ export function appReducer (state = initialState(), { payload, type }) {
         isPending: !!payload.token
       })
 
+    case appActions.LOGOUT:
+      return initialState().merge({ isPending: false })
+
     case appActions.AUTH_FAILED:
       return state.merge({
         isPending: false
