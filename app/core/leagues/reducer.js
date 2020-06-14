@@ -12,7 +12,7 @@ export function leaguesReducer (state = initialState, { payload, type }) {
         payload.data.leagues.forEach(l => state.set(l.uid, createLeague(l)))
       })
 
-    case appActions.LOGOUT_FULFILLED:
+    case appActions.LOGOUT:
       return initialState
 
     default:

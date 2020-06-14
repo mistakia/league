@@ -88,8 +88,8 @@ const server = createServer()
 const wss = new WebSocket.Server({ noServer: true })
 
 server.on('upgrade', async (request, socket, head) => {
+  const parsed = new url.URL(request.url, config.url)
   try {
-    const parsed = new url.URL(request.url, config.url)
     const token = parsed.searchParams.get('token')
     const decoded = await jwt.verify(token, config.jwt.secret)
     request.user = decoded
@@ -99,10 +99,21 @@ server.on('upgrade', async (request, socket, head) => {
   }
 
   wss.handleUpgrade(request, socket, head, function (ws) {
+    ws.leagueId = parsed.searchParams.get('leagueId')
     wss.emit('connection', ws, request)
   })
 })
 
 sockets(wss)
+
+api.locals.broadcast = (leagueId, message) => {
+  wss.clients.forEach((c) => {
+    if (c.leagueId === leagueId) {
+      if (c && c.readyState === WebSocket.OPEN) {
+        c.send(JSON.stringify(message))
+      }
+    }
+  })
+}
 
 module.exports = server

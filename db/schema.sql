@@ -1468,7 +1468,7 @@ CREATE TABLE `transactions` (
   `type` tinyint(2) NOT NULL,
   `value` int(4) NOT NULL,
   `year` int(4) NOT NULL,
-  `timestamp` datetime NOT NULL,
+  `timestamp` int(11) NOT NULL,
   UNIQUE KEY `uid` (`uid`),
   KEY `player` (`player`),
   KEY `teamid` (`tid`)

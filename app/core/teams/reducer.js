@@ -13,7 +13,7 @@ export function teamsReducer (state = initialState, { payload, type }) {
         payload.data.teams.forEach(t => state.set(t.uid, createTeam(t)))
       })
 
-    case appActions.LOGOUT_FULFILLED:
+    case appActions.LOGOUT:
       return initialState
 
     case teamActions.GET_TEAMS_FULFILLED:

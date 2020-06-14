@@ -4,9 +4,8 @@ import db from '../../db'
 import { constants } from '../../common'
 
 export default class Auction {
-  constructor ({ wss, lid, room }) {
+  constructor ({ wss, lid }) {
     this._wss = wss
-    this._room = room
     this._lid = lid
     this._paused = true
     this._locked = false
@@ -56,7 +55,7 @@ export default class Auction {
 
   broadcast (message) {
     this._wss.clients.forEach((c) => {
-      if (c.upgradeReq.url === this._room) {
+      if (c.leagueId === this._lid) {
         if (c && c.readyState === WebSocket.OPEN) {
           c.send(message)
         }
