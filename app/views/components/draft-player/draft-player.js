@@ -1,6 +1,7 @@
 import React from 'react'
 
 import Position from '@components/position'
+import Team from '@components/team'
 
 import './draft-player.styl'
 
@@ -33,7 +34,7 @@ export default class DraftPlayer extends React.Component {
           ${Math.round(player.values.get('available'))}
         </div>
         <div className='player-draft__item-name'>
-          {player.pname} <small>({player.team})</small>
+          <span>{player.pname}</span><Team team={player.team} />
         </div>
       </div>
     )

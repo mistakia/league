@@ -57,18 +57,29 @@
   flex 1
   border-bottom 1px solid $borderColor
   display flex
-  height 50%
+  height 100%
 
 .draft__main-board-pos
   flex 1
-  overflow hidden
-  overflow-y scroll
+  display flex
+  flex-direction column
   + .draft__main-board-pos
     border-left 1px solid $borderColor
 
-.draft__main-trade
-  flex 1
-  height 50%
+.draft__main-board-pos-head
+  flex 0 0 auto
+  display flex
+  justify-content center
+  align-items center
+  padding 8px
+  border-bottom 1px solid $borderColor
+
+.draft__main-board-pos-body
+  flex-grow 1
+  min-height 0
+  overflow hidden
+  overflow-y scroll
+  padding-top 8px
 
 .draft__side
   flex 1
