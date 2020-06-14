@@ -33,7 +33,7 @@ export default function () {
   }
 
   const sorted = players.sort((a, b) => b.vorp.get('available') - a.vorp.get('available'))
-  const all = sorted.map(p => <DraftPlayer key={p.player} player={p} />)
+  const all = sorted.map((p, index) => <DraftPlayer key={p.player} index={index} player={p} />)
 
   const groups = {}
   for (const position of positions) {
@@ -45,8 +45,8 @@ export default function () {
   for (const position in groups) {
     if (!items[position]) items[position] = []
     const players = groups[position]
-    for (const player of players) {
-      items[position].push(<DraftPlayer key={player.player} player={player} />)
+    for (const [index, player] of players.entries()) {
+      items[position].push(<DraftPlayer key={player.player} player={player} index={index} />)
     }
   }
 
@@ -59,7 +59,7 @@ export default function () {
   const p = selectedPlayer
   const isDrafted = drafted.includes(p.player)
   const selected = (
-    <div>
+    <div className='draft__selected'>
       <div className='draft__selected-head'>
         <div className='draft__selected-title'>{p.fname} {p.lname}</div>
         <div className='draft__selected-alt'>
@@ -72,7 +72,7 @@ export default function () {
         </div>}
       </div>
       <div className='draft__selected-body'>
-        <div><label>Drafted</label>{Math.ceil(p.dpos / 12)}.{('0' + (p.dpos % 32)).slice(-2)}</div>
+        <div><label>Drafted</label>{p.dpos ? `${Math.ceil(p.dpos / 12)}.${('0' + (p.dpos % 32)).slice(-2)}` : 'undrafted'}</div>
         <div><label>Proj.</label>{Math.round(p.points.get('total'))}</div>
         <div><label>Age</label>{moment().diff(moment(p.dob), 'years')}</div>
         <div><label>Height</label>{Math.floor(p.height/12)}-{p.height % 12}</div>
@@ -93,8 +93,8 @@ export default function () {
 
   const body = (
     <div className='draft'>
-      <div className='draft__selected'>{p.player && selected}</div>
       <div className='draft__main'>
+        {p.player && selected}
         <div className='draft__main-board'>
           <div className='draft__main-board-pos'>
             <div className='draft__main-board-pos-head'>Overall</div>
