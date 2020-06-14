@@ -17,7 +17,7 @@ export default class DraftPlayer extends React.Component {
   }
 
   render () {
-    const { player, selected, isDrafted } = this.props
+    const { player, selected, isDrafted, index } = this.props
 
     const classNames = ['player-draft__item']
     if (selected === player.player) {
@@ -30,11 +30,12 @@ export default class DraftPlayer extends React.Component {
 
     return (
       <div className={classNames.join(' ')} onClick={this.onclick}>
-        <div className='player-draft__item-metric'>
-          ${Math.round(player.values.get('available'))}
-        </div>
+        <div className='player-draft__item-index'>{index + 1}.</div>
         <div className='player-draft__item-name'>
           <span>{player.pname}</span><Team team={player.team} />
+        </div>
+        <div className='player-draft__item-metric'>
+          ${Math.round(player.values.get('available'))}
         </div>
       </div>
     )
