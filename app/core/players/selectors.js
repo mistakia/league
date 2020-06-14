@@ -9,6 +9,24 @@ export function getAllPlayers (state) {
   return state.get('players').get('items')
 }
 
+function descendingComparator (a, b, orderBy) {
+  const keyPath = orderBy.split('.')
+  const aValue = a.getIn(keyPath)
+  const bValue = b.getIn(keyPath)
+  if (bValue < aValue) {
+    return -1
+  }
+  if (bValue > aValue) {
+    return 1
+  }
+  return 0
+}
+
+function getComparator (order, orderBy) {
+  return order === 'desc'
+    ? (a, b) => descendingComparator(a, b, orderBy)
+    : (a, b) => -descendingComparator(a, b, orderBy)
+}
 
 export function getFilteredPlayers (state) {
   const players = state.get('players')
@@ -43,7 +61,9 @@ export function getFilteredPlayers (state) {
     filtered = filtered.filter(player => nflTeams.includes(player.team))
   }
 
-  return filtered.toList()
+  const sorted = filtered.sort(getComparator(players.get('order'), players.get('orderBy')))
+
+  return sorted.toList()
 }
 
 export function getRookiePlayers (state) {
