@@ -2,6 +2,8 @@ import { Map, List } from 'immutable'
 import { playerActions } from './actions'
 import { createPlayer } from './player'
 
+import { DEFAULT_ORDER_BY } from '@core/constants'
+
 import {
   constants,
   weightProjections,
@@ -18,13 +20,19 @@ const initialState = new Map({
   health: new List(['ir', 'healthy']),
   teams: new List(),
   status: new List(['available', 'rostered', 'all']),
-  items: new Map()
+  items: new Map(),
+  order: 'desc',
+  orderBy: DEFAULT_ORDER_BY
 })
 
 export function playersReducer (state = initialState, { payload, type }) {
   switch (type) {
     case playerActions.FILTER_PLAYERS:
       return state.merge({ [payload.type]: new List(payload.values) })
+
+    case playerActions.SET_ORDER:
+      const { order, orderBy } = payload
+      return state.merge({ order, orderBy })
 
     case playerActions.CALCULATE_VALUES: {
       return state.withMutations(state => {

@@ -1,0 +1,18 @@
+.player__header
+  cursor pointer
+  display flex
+  align-items center
+  justify-content flex-end
+  .icon
+    opacity 0
+    width 10px
+    height 10px
+    transition opacity 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,transform 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms
+
+  &.selected
+    color $accentColor
+    .icon
+      opacity 1
+
+  &.selected.asc .icon
+    transform rotate(180deg)

@@ -2,6 +2,8 @@ export const playerActions = {
   LOAD_PLAYERS: 'LOAD_PLAYERS',
 
   FILTER_PLAYERS: 'FILTER_PLAYERS',
+  TOGGLE_ORDER: 'TOGGLE_ORDER',
+  SET_ORDER: 'SET_ORDER',
 
   CALCULATE_VALUES: 'CALCULATE_VALUES',
 
@@ -26,6 +28,21 @@ export const playerActions = {
     payload: {
       type,
       values
+    }
+  }),
+
+  toggle: (orderBy) => ({
+    type: playerActions.TOGGLE_ORDER,
+    payload: {
+      orderBy
+    }
+  }),
+
+  setOrder: ({ order, orderBy }) => ({
+    type: playerActions.SET_ORDER,
+    payload: {
+      order,
+      orderBy
     }
   }),
 
