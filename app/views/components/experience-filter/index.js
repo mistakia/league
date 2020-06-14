@@ -3,13 +3,13 @@ import { createSelector } from 'reselect'
 
 import { getPlayers } from '@core/players'
 
-import PositionFilter from './position-filter'
+import ExperienceFilter from './experience-filter'
 
 const mapStateToProps = createSelector(
   getPlayers,
-  (players) => ({ positions: players.get('positions') })
+  (players) => ({ experience: players.get('experience') })
 )
 
 export default connect(
   mapStateToProps
-)(PositionFilter)
+)(ExperienceFilter)

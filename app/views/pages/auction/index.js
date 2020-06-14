@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { auctionActions } from '@core/auction'
-import { getPlayers } from '@core/players'
+import { getAllPlayers } from '@core/players'
 
 import render from './auction'
 
@@ -18,7 +18,7 @@ class AuctionPage extends React.Component {
 }
 
 const mapStateToProps = createSelector(
-  getPlayers,
+  getAllPlayers,
   (players) => ({ players })
 )
 

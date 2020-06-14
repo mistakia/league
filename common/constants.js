@@ -92,3 +92,38 @@ export const transactions = {
   FRANCHISE_TAG: 11,
   ROOKIE_TAG: 12
 }
+
+export const nflTeams = [
+  'ARI',
+  'ATL',
+  'BAL',
+  'BUF',
+  'CAR',
+  'CHI',
+  'CIN',
+  'CLE',
+  'DAL',
+  'DEN',
+  'DET',
+  'GB',
+  'HOU',
+  'IND',
+  'JAC',
+  'KC',
+  'LA',
+  'LAC',
+  'LV',
+  'MIA',
+  'MIN',
+  'NE',
+  'NO',
+  'NYG',
+  'NYJ',
+  'PHI',
+  'PIT',
+  'SEA',
+  'SF',
+  'TB',
+  'TEN',
+  'WAS'
+]

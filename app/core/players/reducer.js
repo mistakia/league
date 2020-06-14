@@ -3,6 +3,7 @@ import { playerActions } from './actions'
 import { createPlayer } from './player'
 
 import {
+  constants,
   weightProjections,
   calculatePoints,
   calculateBaselines,
@@ -12,15 +13,18 @@ import {
 const initialState = new Map({
   isPending: false,
   positions: new List(['QB', 'RB', 'WR', 'TE', 'K', 'DST']),
+  nflTeams: new List(constants.nflTeams),
+  experience: new List([0, 1, -1]),
+  health: new List(['ir', 'healthy']),
+  teams: new List(),
+  status: new List(['available', 'rostered', 'all']),
   items: new Map()
 })
 
 export function playersReducer (state = initialState, { payload, type }) {
   switch (type) {
-    case playerActions.FILTER_POSITIONS:
-      return state.merge({
-        positions: new List(payload.positions)
-      })
+    case playerActions.FILTER_PLAYERS:
+      return state.merge({ [payload.type]: new List(payload.values) })
 
     case playerActions.CALCULATE_VALUES: {
       return state.withMutations(state => {

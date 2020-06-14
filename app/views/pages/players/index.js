@@ -2,7 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getPlayers } from '@core/players'
+import { getFilteredPlayers } from '@core/players'
 
 import render from './players'
 
@@ -21,7 +21,7 @@ class PlayersPage extends React.Component {
 }
 
 const mapStateToProps = createSelector(
-  getPlayers,
+  getFilteredPlayers,
   (players) => ({ players })
 )
 

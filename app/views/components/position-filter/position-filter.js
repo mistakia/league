@@ -3,9 +3,9 @@ import React from 'react'
 import PlayerFilter from '@components/player-filter'
 
 class PositionFilter extends React.Component {
-  constructor (props) {
-    super(props)
-    this.state = {
+  render () {
+    const state = {
+      type: 'positions',
       label: 'POSITIONS',
       values: [
         {
@@ -41,18 +41,8 @@ class PositionFilter extends React.Component {
       ]
     }
 
-    this.onChange = this.onChange.bind(this)
-  }
-
-  onChange (values) {
-    this.setState({ values })
-    const positions = values.filter(i => i.selected).map(i => i.value)
-    this.props.filter(positions)
-  }
-
-  render () {
     return (
-      <PlayerFilter {...this.state} onChange={this.onChange} />
+      <PlayerFilter {...state} />
     )
   }
 }
