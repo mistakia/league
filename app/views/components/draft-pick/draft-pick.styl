@@ -3,15 +3,37 @@
   display flex
   align-items center
   height 46px
-  padding 16px
+  padding 8px
   margin-bottom 16px
   border 1px solid $borderColor
   border-radius 3px
   &.active
     border-color $accentColor
 
+.draft__pick-player
+  padding-bottom 4px
+
+.draft__pick-player-name
+  overflow hidden
+  text-overflow ellipsis
+  white-space nowrap
+
 .draft__pick-num
-  flex 0 0 40px
+  flex 0 0 auto
+  font-size 12px
+  font-weight 800
 
 .draft__pick-main
   flex 1
+  padding 0 8px
+
+.draft__pick-team
+  font-size 12px
+  color lighten($textColor, 20)
+
+.draft__pick-active
+  font-weight 700
+  color $accentColor
+
+.draft__pick-pos
+  flex 0 0 auto

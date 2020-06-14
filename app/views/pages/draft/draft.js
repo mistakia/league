@@ -32,20 +32,21 @@ export default function () {
     draftInfo = (<p>Draft not scheduled</p>)
   }
 
+  const sorted = players.sort((a, b) => b.vorp.get('available') - a.vorp.get('available'))
+  const all = sorted.map(p => <DraftPlayer key={p.player} player={p} />)
+
   const groups = {}
   for (const position of positions) {
     if (!groups[position]) groups[position] = []
-    const ps = players.filter(p => p.pos1 === position)
-    groups[position] = ps.sort((a, b) => b.vorp.get('available') - a.vorp.get('available'))
+    groups[position] = sorted.filter(p => p.pos1 === position)
   }
 
   const items = {}
-
   for (const position in groups) {
     if (!items[position]) items[position] = []
     const players = groups[position]
     for (const player of players) {
-      items[position].push(<DraftPlayer key={player} player={player} />)
+      items[position].push(<DraftPlayer key={player.player} player={player} />)
     }
   }
 
@@ -96,19 +97,26 @@ export default function () {
       <div className='draft__main'>
         <div className='draft__main-board'>
           <div className='draft__main-board-pos'>
-            {items['QB']}
+            <div className='draft__main-board-pos-head'>Overall</div>
+            <div className='draft__main-board-pos-body'>{all}</div>
+            { /* TODO show player position */ }
           </div>
           <div className='draft__main-board-pos'>
-            {items['RB']}
+            <div className='draft__main-board-pos-head'>Quarterbacks</div>
+            <div className='draft__main-board-pos-body'>{items['QB']}</div>
           </div>
           <div className='draft__main-board-pos'>
-            {items['WR']}
+            <div className='draft__main-board-pos-head'>Running Backs</div>
+            <div className='draft__main-board-pos-body'>{items['RB']}</div>
           </div>
           <div className='draft__main-board-pos'>
-            {items['TE']}
+            <div className='draft__main-board-pos-head'>Wide Receivers</div>
+            <div className='draft__main-board-pos-body'>{items['WR']}</div>
           </div>
-        </div>
-        <div className='draft__main-trade'>
+          <div className='draft__main-board-pos'>
+            <div className='draft__main-board-pos-head'>Tight ends</div>
+            <div className='draft__main-board-pos-body'>{items['TE']}</div>
+          </div>
         </div>
       </div>
       <div className='draft__side'>
