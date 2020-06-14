@@ -1,6 +1,8 @@
 const express = require('express')
 const router = express.Router()
 
+import { constants } from '../../common'
+
 router.get('/?', async (req, res) => {
   try {
     const { db, logger } = req.app.locals
@@ -16,7 +18,7 @@ router.get('/?', async (req, res) => {
       return res.status(400).send({ error: 'params active & inactive can not both be false' })
     }
 
-    const query = db('player')
+    const query = db('player').whereIn('pos1', constants.positions)
     if (options.active && !options.inactive) {
       query.whereNot({ cteam: 'INA' })
     } else if (options.inactive) {
