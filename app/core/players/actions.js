@@ -1,6 +1,7 @@
 export const playerActions = {
   LOAD_PLAYERS: 'LOAD_PLAYERS',
-  FILTER_POSITIONS: 'FILTER_POSITIONS',
+
+  FILTER_PLAYERS: 'FILTER_PLAYERS',
 
   CALCULATE_VALUES: 'CALCULATE_VALUES',
 
@@ -20,10 +21,11 @@ export const playerActions = {
     }
   }),
 
-  filterPositions: (positions) => ({
-    type: playerActions.FILTER_POSITIONS,
+  filter: (type, values) => ({
+    type: playerActions.FILTER_PLAYERS,
     payload: {
-      positions
+      type,
+      values
     }
   }),
 

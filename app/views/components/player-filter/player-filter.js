@@ -32,11 +32,12 @@ export default class PlayerFilter extends React.Component {
     const values = this.props.values.map(
       (v, i) => (index === i ? { ...v, selected: !v.selected } : v)
     )
-    this.props.onChange(values)
+    const filteredValues = values.filter(i => i.selected).map(i => i.value)
+    this.props.filter(this.props.type, filteredValues)
   }
 
   render () {
-    const { label, values, onChange } = this.props
+    const { label, values } = this.props
     const { visible } = this.state
 
     const items = values.map((v, index) => {

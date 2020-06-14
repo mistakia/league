@@ -2,6 +2,7 @@ import React from 'react'
 import { AutoSizer, List } from 'react-virtualized'
 
 import PositionFilter from '@components/position-filter'
+import ExperienceFilter from '@components/experience-filter'
 import PageLayout from '@layouts/page'
 import Position from '@components/position'
 
@@ -108,6 +109,7 @@ export default function () {
     <div className='players__head'>
       <div className='players__filter'>
         <PositionFilter />
+        <ExperienceFilter />
       </div>
       <div className='players__header'>
         <div className='player__row-pos'></div>
