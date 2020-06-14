@@ -1,3 +1,5 @@
+$height = 30px
+
 .players
   padding 0 32px
 
@@ -12,18 +14,31 @@
 
 .player__row
   display flex
-  height 45px
-  border-bottom 1px solid $borderColor
+  height $height
   align-items center
+  &:hover
+    background lighten(#f0f0f0, 3)
 
 .player__row-name
-  flex 0 0 250px
+  flex 0 0 100px
   overflow hidden
   text-overflow ellipsis
   white-space nowrap
+  margin-right 48px
 
 .player__row-pos
   flex 0 0 50px
+  display flex
 
 .player__row-metric
-  flex 0 0 100px
+  flex 0 0 50px
+  text-align right
+
+.player__row-group
+  flex 1
+  display flex
+  justify-content center
+  border-left 1px solid $borderColor
+  align-items center
+  height 100%
+  margin-left 32px

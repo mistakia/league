@@ -5,7 +5,7 @@ export function getDraft (state) {
 }
 
 export function getCurrentPick (state) {
-  const picks = getDraftPicks(state)
+  const { picks } = getDraft(state)
 
   for (const pick of picks.values()) {
     if (!pick.player) {
