@@ -49,8 +49,23 @@ $height = 30px
 .player__row-group
   flex 1
   display flex
+  flex-direction column
   justify-content center
   border-left 1px solid $borderColor
   align-items center
   height 100%
-  margin-left 32px
+
+.player__row-group-head
+  flex 0 0 auto
+  text-transform uppercase
+  font-size 10px
+  padding 4px
+  border-bottom 1px solid $borderColor
+  width 100%
+  text-align center
+
+.player__row-group-body
+  flex 1
+  display flex
+  justify-content center
+  align-items center
