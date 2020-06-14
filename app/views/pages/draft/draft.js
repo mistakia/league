@@ -11,7 +11,7 @@ import { constants } from '@common'
 import './draft.styl'
 
 export default function () {
-  const { players, currentPick, picks, league, selectedPlayer, isDrafting } = this.props
+  const { players, currentPick, picks, league, selectedPlayer, isDrafting, draftPlayer, drafted } = this.props
   const { positions } = constants
 
   let draftInfo
@@ -56,6 +56,7 @@ export default function () {
   }
 
   const p = selectedPlayer
+  const isDrafted = drafted.includes(p.player)
   const selected = (
     <div>
       <div className='draft__selected-head'>
@@ -65,8 +66,8 @@ export default function () {
           <div>{p.team}</div>
           {!!p.jersey && <div>#{p.jersey}</div>}
         </div>
-        {isDrafting && <div className='draft__selected-action'>
-          <Button>Draft</Button>
+        {(isDrafting && !isDrafted) && <div className='draft__selected-action'>
+          <Button onClick={draftPlayer}>Draft</Button>
         </div>}
       </div>
       <div className='draft__selected-body'>

@@ -6,6 +6,7 @@ import { draftSagas } from './draft'
 import { playerSagas } from './players'
 import { rosterSagas } from './rosters'
 import { teamSagas } from './teams'
+import { wsSagas } from './ws'
 
 export default function * rootSaga () {
   yield all([
@@ -14,6 +15,7 @@ export default function * rootSaga () {
     ...draftSagas,
     ...playerSagas,
     ...rosterSagas,
-    ...teamSagas
+    ...teamSagas,
+    ...wsSagas
   ])
 }

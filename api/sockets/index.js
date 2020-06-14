@@ -42,7 +42,7 @@ module.exports = (wss) => {
         if (days > 0) {
           return
         }
-        const auction = new Auction({ wss, lid, room: request.url })
+        const auction = new Auction({ wss, lid })
         auctions.set(lid, auction)
         auction.join({ ws, tid, userId, onclose })
         auction.setup()

@@ -6,8 +6,6 @@ export default class DraftPick extends React.Component {
   render () {
     const { player, pick, team, league, isActive } = this.props
 
-    console.log(player)
-
     const round = pick.round
     const pickNum = (pick.pick % league.nteams) || league.nteams
 

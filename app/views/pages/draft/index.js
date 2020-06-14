@@ -2,7 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { draftActions, getSelectedDraftPlayer, getDraftPicks, getCurrentPick } from '@core/draft'
+import { draftActions, getSelectedDraftPlayer, getDraft, getCurrentPick } from '@core/draft'
 import { getCurrentLeague } from '@core/leagues'
 import { teamActions } from '@core/teams'
 import { getRookiePlayers } from '@core/players'
@@ -25,14 +25,15 @@ const mapStateToProps = createSelector(
   getRookiePlayers,
   getSelectedDraftPlayer,
   getCurrentPick,
-  getDraftPicks,
+  getDraft,
   getCurrentLeague,
   getApp,
-  (players, selectedPlayer, currentPick, picks, league, app) => ({
+  (players, selectedPlayer, currentPick, draft, league, app) => ({
     players,
     selectedPlayer,
     currentPick,
-    picks,
+    picks: draft.picks,
+    drafted: draft.drafted,
     league,
     isDrafting: currentPick.tid === app.teamId
   })
@@ -40,7 +41,8 @@ const mapStateToProps = createSelector(
 
 const mapDispatchToProps = {
   loadDraft: draftActions.loadDraft,
-  loadTeams: teamActions.loadTeams
+  loadTeams: teamActions.loadTeams,
+  draftPlayer: draftActions.draftPlayer
 }
 
 export default connect(

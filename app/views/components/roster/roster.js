@@ -10,7 +10,7 @@ class Roster extends React.Component {
     const { league, roster } = this.props
 
     const slots = []
-    const eligible = getEligibleSlots({ bench: true, league, ir: true, ps: true })
+    const eligible = getEligibleSlots({ pos: 'ALL', bench: true, league, ir: true, ps: true })
     for (const slot of eligible) {
       const slotId = constants.slots[slot]
       const playerId = roster[`s${slotId}`]

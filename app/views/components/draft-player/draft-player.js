@@ -16,11 +16,15 @@ export default class DraftPlayer extends React.Component {
   }
 
   render () {
-    const { player, selected } = this.props
+    const { player, selected, isDrafted } = this.props
 
     const classNames = ['player-draft__item']
     if (selected === player.player) {
       classNames.push('selected')
+    }
+
+    if (isDrafted) {
+      classNames.push('drafted')
     }
 
     return (

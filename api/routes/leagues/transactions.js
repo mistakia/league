@@ -74,6 +74,7 @@ router.post('/?', async (req, res) => {
 
     // select a slot if none is provided
     if (!slot) {
+      // TODO
       const eligbleSlots = getEligbleSlots({ pos, bench: true, ir: true, ps: true, league })
       slot = eligibleSlots[0]
       if (!slot) {

@@ -4,10 +4,6 @@ export function getDraft (state) {
   return state.get('draft')
 }
 
-export function getDraftPicks (state) {
-  return state.get('draft').get('picks')
-}
-
 export function getCurrentPick (state) {
   const picks = getDraftPicks(state)
 
@@ -23,4 +19,10 @@ export function getCurrentPick (state) {
 export function getSelectedDraftPlayer (state) {
   const draft = state.get('draft')
   return getPlayerById(state, { playerId: draft.selected })
+}
+
+export function isDrafted (state, { playerId, player }) {
+  const id = playerId || player.player
+  const { drafted } = state.get('draft')
+  return drafted.includes(id)
 }

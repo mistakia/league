@@ -4,6 +4,7 @@ import calculatePoints from './calculate-points'
 import calculateValues from './calculate-values'
 import * as constants from './constants'
 import getEligibleSlots from './get-eligible-slots'
+import Roster from './roster'
 
 const groupBy = (xs, key) => xs.reduce((rv, x) => {
   (rv[x[key]] = rv[x[key]] || []).push(x)
@@ -24,5 +25,6 @@ export {
   getEligibleSlots,
   groupBy,
   formatRoster,
-  weightProjections
+  weightProjections,
+  Roster
 }

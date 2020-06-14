@@ -24,7 +24,7 @@ router.get('/?', async (req, res) => {
       weights
     })
   } catch (err) {
-    console.log(err)
+    // TODO log
     res.status(500).send({ error: err.toString() })
   }
 })
