@@ -78,10 +78,6 @@ export default function () {
     )
   }
 
-  const menu = (
-    <PositionFilter />
-  )
-
   const hPassing = (
     <div className='player__row-group'>
       <div className='player__row-metric'>YDS</div>
@@ -109,15 +105,20 @@ export default function () {
   )
 
   const head = (
-    <div className='players__header'>
-      <div className='player__row-pos'></div>
-      <div className='player__row-name'>Name</div>
-      <div className='player__row-metric'>v FA</div>
-      <div className='player__row-metric'>Value</div>
-      <div className='player__row-metric'>Proj</div>
-      {hPassing}
-      {hRushing}
-      {hReceiving}
+    <div className='players__head'>
+      <div className='players__filter'>
+        <PositionFilter />
+      </div>
+      <div className='players__header'>
+        <div className='player__row-pos'></div>
+        <div className='player__row-name'>Name</div>
+        <div className='player__row-metric'>v FA</div>
+        <div className='player__row-metric'>Value</div>
+        <div className='player__row-metric'>Proj</div>
+        {hPassing}
+        {hRushing}
+        {hReceiving}
+      </div>
     </div>
   )
 
@@ -137,6 +138,6 @@ export default function () {
   )
 
   return (
-    <PageLayout {...{ body, menu, head }} />
+    <PageLayout {...{ body, head }} />
   )
 }
