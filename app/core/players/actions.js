@@ -11,15 +11,29 @@ export const playerActions = {
   FETCH_PLAYERS_FULFILLED: 'FETCH_PLAYERS_FULFILLED',
   FETCH_PLAYERS_PENDING: 'FETCH_PLAYERS_PENDING',
 
+  SET_PROJECTION: 'SET_PROJECTION',
+
+  setProjection: ({ playerId, value, type, week, userId }) => ({
+    type: playerActions.SET_PROJECTION,
+    payload: {
+      userId,
+      playerId,
+      value,
+      type,
+      week
+    }
+  }),
+
   load: () => ({
     type: playerActions.LOAD_PLAYERS
   }),
 
-  calculate: ({ players, leagues }) => ({
+  calculate: ({ players, leagues, userId }) => ({
     type: playerActions.CALCULATE_VALUES,
     payload: {
       players,
-      leagues
+      leagues,
+      userId
     }
   }),
 
