@@ -5,6 +5,9 @@ $height = 30px
   display flex
   flex-direction column
 
+  &.selected .player__row-main
+    background lighten($accentColor, 95%)
+
 .player__row-main
   display flex
   height $height
@@ -12,6 +15,7 @@ $height = 30px
   &:hover
     background lighten(#f0f0f0, 3)
 
+.row__name
 .player__row-name
   flex 0 0 100px
   overflow hidden
@@ -31,3 +35,23 @@ $height = 30px
   height 100%
   background #fafafa
   border 1px solid $borderColor
+
+.expanded__section
+  padding 16px
+  display flex
+  flex-direction column
+
+.expanded__section-header
+  flex 1
+  height 40px
+  display flex
+  align-items center
+  font-weight 500
+  border-bottom 1px solid $borderColor
+
+.expanded__row
+  flex 1
+  display flex
+  padding-top 2px
+  &:hover
+    background #f0f0f0

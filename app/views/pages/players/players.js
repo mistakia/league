@@ -30,15 +30,15 @@ export default class PlayersPage extends React.Component {
       setImmediate(() => {
         this.list.current.recomputeRowHeights(0)
       }, 100)
-    }
-
-    if (prevProps.selected !== this.props.selected) {
+    } else if (prevProps.selected !== this.props.selected) {
       const index = this.props.players.findIndex(p => p.player === this.props.selected)
       this.list.current.recomputeRowHeights(index)
       if (prevProps.selected) {
         const index = this.props.players.findIndex(p => p.player === prevProps.selected)
         this.list.current.recomputeRowHeights(index)
       }
+    } else {
+      this.list.current.recomputeRowHeights()
     }
   }
 
@@ -96,9 +96,18 @@ export default class PlayersPage extends React.Component {
           <div className='player__row-name'>Name</div>
           <div className='player__row-group'>
             <div className='player__row-group-body'>
-              <PlayerHeader className='player__row-metric' label='v FA' value='values.available' />
-              <PlayerHeader className='player__row-metric' label='Value' value='vorp.available' />
-              <PlayerHeader className='player__row-metric' label='Proj' value='points.total' />
+              <PlayerHeader
+                className='player__row-metric'
+                label='v FA'
+                value='values.available' />
+              <PlayerHeader
+                className='player__row-metric'
+                label='Value'
+                value='vorp.available' />
+              <PlayerHeader
+                className='player__row-metric'
+                label='Proj'
+                value='points.total' />
             </div>
           </div>
           {hPassing}

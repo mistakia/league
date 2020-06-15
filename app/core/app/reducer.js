@@ -9,8 +9,7 @@ const initialState = new Record({
   leagueId: undefined,
   isPending: true,
   isUpdating: false,
-  authError: null,
-  weights: new List()
+  authError: null
 })
 
 export function appReducer (state = initialState(), { payload, type }) {
@@ -34,7 +33,6 @@ export function appReducer (state = initialState(), { payload, type }) {
         leagueId: payload.data.leagues.length ? payload.data.leagues[0].uid : undefined,
         teamId: payload.data.teams.length ? payload.data.teams[0].uid : undefined,
         userId: payload.data.user.id,
-        weights: new List(payload.data.weights),
         isPending: false
       })
 

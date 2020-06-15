@@ -15,13 +15,17 @@ router.get('/?', async (req, res) => {
 
     const leagueIds = teams.map(t => t.lid)
     const leagues = await db('leagues').whereIn('uid', leagueIds)
-    const weights = await db('users_sources').where({ userid: req.user.userId })
+    const sources = await db('sources')
+      .leftJoin('users_sources', 'users_sources.sourceid', 'sources.uid')
+      .where(function () {
+        this.whereNull('userId').orWhere({ userid: req.user.userId })
+      })
 
     res.send({
       user,
       teams,
       leagues,
-      weights
+      sources
     })
   } catch (err) {
     // TODO log
