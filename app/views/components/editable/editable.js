@@ -43,7 +43,7 @@ export default class Editable extends React.Component {
     const int = parseInt(value, 10)
     el.innerHTML = int
 
-    if (value !== this.props.value) {
+    if (int !== this.props.value) {
       this.props.onchange(int)
     }
   }
