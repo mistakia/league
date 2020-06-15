@@ -1,5 +1,6 @@
 import { fork, takeLatest, call, select, put } from 'redux-saga/effects'
 
+import { getApp } from '@core/app'
 import { fetchPlayers } from '@core/api'
 import { playerActions } from './actions'
 import { appActions } from '@core/app'
@@ -12,10 +13,11 @@ export function * loadPlayers () {
 }
 
 export function * calculateValues () {
+  const { userId } = yield select(getApp)
   const leagues = yield select(getLeagues)
   const players = yield select(getAllPlayers)
 
-  yield put(playerActions.calculate({ players, leagues }))
+  yield put(playerActions.calculate({ players, leagues, userId }))
 }
 
 export function * toggleOrder ({ payload }) {
@@ -43,6 +45,11 @@ export function * toggleOrder ({ payload }) {
   }
 }
 
+export function * setProjection () {
+  // TODO save projection
+  yield call(calculateValues)
+}
+
 //= ====================================
 //  WATCHERS
 // -------------------------------------
@@ -63,6 +70,10 @@ export function * watchToggleOrder () {
   yield takeLatest(playerActions.TOGGLE_ORDER, toggleOrder)
 }
 
+export function * watchSetProjection () {
+  yield takeLatest(playerActions.SET_PROJECTION, setProjection)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -71,5 +82,6 @@ export const playerSagas = [
   fork(watchLoadPlayers),
   fork(watchFetchPlayersFulfilled),
   fork(watchAuthFulfilled),
-  fork(watchToggleOrder)
+  fork(watchToggleOrder),
+  fork(watchSetProjection)
 ]

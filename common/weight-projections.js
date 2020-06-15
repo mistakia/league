@@ -1,15 +1,26 @@
 import { stats } from './constants'
 
-const weightProjections = ({ projections, weights = [] }) => {
+const removeFalsy = (obj) => {
+  const newObj = {}
+  Object.keys(obj).forEach((prop) => {
+    if (obj[prop]) newObj[prop] = obj[prop]
+  })
+  return newObj
+}
+
+const weightProjections = ({ projections, weights = [], userId }) => {
   const data = {}
   for (const r of stats) {
     data[r] = []
   }
 
-  for (const projection of projections) {
+  const userProjection = projections.find(p => p.userid === userId) || {}
+  const sourceProjections = projections.filter(p => p.sourceid)
+
+  for (const projection of sourceProjections) {
     const { sourceid } = projection
     const source = weights.find(w => w.sourceid === sourceid)
-    const weight = source ? source.weight : (1 / projections.length)
+    const weight = source ? source.weight : (1 / sourceProjections.length)
 
     for (const r in data) {
       if (projection[r]) {
@@ -34,7 +45,7 @@ const weightProjections = ({ projections, weights = [] }) => {
     result[r] = values.reduce((a, b, idx) => (a + ((item[idx].weight / totalWeight) * b)), 0)
   }
 
-  return result
+  return Object.assign({}, result, removeFalsy(userProjection))
 }
 
 export default weightProjections

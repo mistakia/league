@@ -1,6 +1,7 @@
 import React from 'react'
 import { AutoSizer, List } from 'react-virtualized'
 
+import EditableProjection from '@components/editable-projection'
 import PositionFilter from '@components/position-filter'
 import ExperienceFilter from '@components/experience-filter'
 import PageLayout from '@layouts/page'
@@ -21,9 +22,9 @@ export default class PlayersPage extends React.Component {
       const passing = (
         <div className='player__row-group'>
           <div className='player__row-group-body'>
-            <div className='player__row-metric'>{Math.round(player.projection.py) || 0}</div>
-            <div className='player__row-metric'>{Math.round(player.projection.tdp)}</div>
-            <div className='player__row-metric'>{Math.round(player.projection.ints)}</div>
+            <div className='player__row-metric'><EditableProjection player={player} type='py' /></div>
+            <div className='player__row-metric'><EditableProjection player={player} type='tdp' /></div>
+            <div className='player__row-metric'><EditableProjection player={player} type='ints' /></div>
           </div>
         </div>
       )
@@ -31,10 +32,10 @@ export default class PlayersPage extends React.Component {
       const rushing = (
         <div className='player__row-group'>
           <div className='player__row-group-body'>
-            <div className='player__row-metric'>{Math.round(player.projection.ra)}</div>
-            <div className='player__row-metric'>{Math.round(player.projection.ry)}</div>
-            <div className='player__row-metric'>{Math.round(player.projection.tdr)}</div>
-            <div className='player__row-metric'>{Math.round(player.projection.fuml)}</div>
+            <div className='player__row-metric'><EditableProjection player={player} type='ra' /></div>
+            <div className='player__row-metric'><EditableProjection player={player} type='ry' /></div>
+            <div className='player__row-metric'><EditableProjection player={player} type='tdr' /></div>
+            <div className='player__row-metric'><EditableProjection player={player} type='fuml' /></div>
           </div>
         </div>
       )
@@ -42,10 +43,10 @@ export default class PlayersPage extends React.Component {
       const receiving = (
         <div className='player__row-group'>
           <div className='player__row-group-body'>
-            <div className='player__row-metric'>{Math.round(player.projection.trg)}</div>
-            <div className='player__row-metric'>{Math.round(player.projection.rec)}</div>
-            <div className='player__row-metric'>{Math.round(player.projection.recy)}</div>
-            <div className='player__row-metric'>{Math.round(player.projection.tdrec)}</div>
+            <div className='player__row-metric'><EditableProjection player={player} type='trg' /></div>
+            <div className='player__row-metric'><EditableProjection player={player} type='rec' /></div>
+            <div className='player__row-metric'><EditableProjection player={player} type='recy' /></div>
+            <div className='player__row-metric'><EditableProjection player={player} type='tdrec' /></div>
           </div>
         </div>
       )

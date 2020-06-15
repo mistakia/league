@@ -27,6 +27,16 @@ const initialState = new Map({
 
 export function playersReducer (state = initialState, { payload, type }) {
   switch (type) {
+    case playerActions.SET_PROJECTION: {
+      const { value, type, week, playerId, userId } = payload
+      const key = state.get('items').get(playerId).get('projections').findKey(p => p.userid)
+      if (key) {
+        return state.setIn(['items', playerId, 'projections', key, type], value)
+      }
+      const newProj = { [type]: value, userid: userId, week, player: playerId }
+      return state.updateIn(['items', playerId, 'projections'], arr => arr.push(newProj))
+    }
+
     case playerActions.FILTER_PLAYERS:
       return state.merge({ [payload.type]: new List(payload.values) })
 
@@ -36,6 +46,7 @@ export function playersReducer (state = initialState, { payload, type }) {
 
     case playerActions.CALCULATE_VALUES: {
       return state.withMutations(state => {
+        const { userId } = payload
         for (const league of payload.leagues) {
           const leag = league.toJS()
           const players = payload.players.valueSeq().toJS()
@@ -43,7 +54,7 @@ export function playersReducer (state = initialState, { payload, type }) {
             const { projections } = player
 
             // TODO weights
-            player.projection = weightProjections({ projections, weights: [] })
+            player.projection = weightProjections({ projections, weights: [], userId })
             const { projection } = player
 
             // calculate points for each league
