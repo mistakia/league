@@ -22,7 +22,8 @@ const initialState = new Map({
   status: new List(['available', 'rostered', 'all']),
   items: new Map(),
   order: 'desc',
-  orderBy: DEFAULT_ORDER_BY
+  orderBy: DEFAULT_ORDER_BY,
+  selected: null
 })
 
 export function playersReducer (state = initialState, { payload, type }) {
@@ -37,12 +38,15 @@ export function playersReducer (state = initialState, { payload, type }) {
       return state.updateIn(['items', playerId, 'projections'], arr => arr.push(newProj))
     }
 
+    case playerActions.PLAYERS_SELECT_PLAYER:
+      return state.merge({ selected: payload.player })
+
     case playerActions.FILTER_PLAYERS:
       return state.merge({ [payload.type]: new List(payload.values) })
 
     case playerActions.SET_ORDER:
       const { order, orderBy } = payload
-      return state.merge({ order, orderBy })
+      return state.merge({ order, orderBy, selected: null })
 
     case playerActions.CALCULATE_VALUES: {
       return state.withMutations(state => {

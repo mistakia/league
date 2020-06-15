@@ -4,6 +4,7 @@ export const playerActions = {
   FILTER_PLAYERS: 'FILTER_PLAYERS',
   TOGGLE_ORDER: 'TOGGLE_ORDER',
   SET_ORDER: 'SET_ORDER',
+  PLAYERS_SELECT_PLAYER: 'PLAYERS_SELECT_PLAYER',
 
   CALCULATE_VALUES: 'CALCULATE_VALUES',
 
@@ -12,6 +13,13 @@ export const playerActions = {
   FETCH_PLAYERS_PENDING: 'FETCH_PLAYERS_PENDING',
 
   SET_PROJECTION: 'SET_PROJECTION',
+
+  selectPlayer: (player) => ({
+    type: playerActions.PLAYERS_SELECT_PLAYER,
+    payload: {
+      player
+    }
+  }),
 
   setProjection: ({ playerId, value, type, week, userId }) => ({
     type: playerActions.SET_PROJECTION,
