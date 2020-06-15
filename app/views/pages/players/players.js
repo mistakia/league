@@ -1,74 +1,53 @@
 import React from 'react'
 import { AutoSizer, List } from 'react-virtualized'
 
-import EditableProjection from '@components/editable-projection'
 import PositionFilter from '@components/position-filter'
 import ExperienceFilter from '@components/experience-filter'
 import PageLayout from '@layouts/page'
-import Position from '@components/position'
 import PlayerHeader from '@components/player-header'
+import PlayerRow from '@components/player-row'
 
 import './players.styl'
 
 const ROW_HEIGHT = 30
+const EXPANDED_ROW_HEIGHT = 250
 
 export default class PlayersPage extends React.Component {
-  render () {
+  list = React.createRef()
+
+  rowHeight = ({ index }) => {
+    const player = this.props.players.get(index)
+    const isSelected = player ? player.player === this.props.selected : false
+    return isSelected ? EXPANDED_ROW_HEIGHT : ROW_HEIGHT
+  }
+
+  componentDidUpdate = (prevProps) => {
+    if (prevProps.order !== this.props.order || prevProps.orderBy !== this.props.orderBy) {
+      this.list.current.scrollToPosition(0)
+    }
+
+    if (!this.props.selected) {
+      setImmediate(() => {
+        this.list.current.recomputeRowHeights(0)
+      }, 100)
+    }
+
+    if (prevProps.selected !== this.props.selected) {
+      const index = this.props.players.findIndex(p => p.player === this.props.selected)
+      this.list.current.recomputeRowHeights(index)
+      if (prevProps.selected) {
+        const index = this.props.players.findIndex(p => p.player === prevProps.selected)
+        this.list.current.recomputeRowHeights(index)
+      }
+    }
+  }
+
+  render = () => {
     const { players } = this.props
 
-    const Row = ({ index, style, key }) => {
+    const Row = ({ index, ...params }) => {
       const player = players.get(index).toJS()
-
-      const passing = (
-        <div className='player__row-group'>
-          <div className='player__row-group-body'>
-            <div className='player__row-metric'><EditableProjection player={player} type='py' /></div>
-            <div className='player__row-metric'><EditableProjection player={player} type='tdp' /></div>
-            <div className='player__row-metric'><EditableProjection player={player} type='ints' /></div>
-          </div>
-        </div>
-      )
-
-      const rushing = (
-        <div className='player__row-group'>
-          <div className='player__row-group-body'>
-            <div className='player__row-metric'><EditableProjection player={player} type='ra' /></div>
-            <div className='player__row-metric'><EditableProjection player={player} type='ry' /></div>
-            <div className='player__row-metric'><EditableProjection player={player} type='tdr' /></div>
-            <div className='player__row-metric'><EditableProjection player={player} type='fuml' /></div>
-          </div>
-        </div>
-      )
-
-      const receiving = (
-        <div className='player__row-group'>
-          <div className='player__row-group-body'>
-            <div className='player__row-metric'><EditableProjection player={player} type='trg' /></div>
-            <div className='player__row-metric'><EditableProjection player={player} type='rec' /></div>
-            <div className='player__row-metric'><EditableProjection player={player} type='recy' /></div>
-            <div className='player__row-metric'><EditableProjection player={player} type='tdrec' /></div>
-          </div>
-        </div>
-      )
-
-      return (
-        <div style={style} key={key}>
-          <div className='player__row'>
-            <div className='player__row-pos'><Position pos={player.pos1} /></div>
-            <div className='player__row-name'>{player.name}</div>
-            <div className='player__row-group'>
-              <div className='player__row-group-body'>
-                <div className='player__row-metric'>${player.values.available}</div>
-                <div className='player__row-metric'>{Math.round(player.vorp.available || 0)}</div>
-                <div className='player__row-metric'>{(player.points.total || 0).toFixed(1)}</div>
-              </div>
-            </div>
-            {passing}
-            {rushing}
-            {receiving}
-          </div>
-        </div>
-      )
+      return <PlayerRow player={player} {...params} />
     }
 
     const hPassing = (
@@ -133,10 +112,11 @@ export default class PlayersPage extends React.Component {
       <AutoSizer>
         {({ height, width }) => (
           <List
+            ref={this.list}
             className='players'
             width={width}
             height={height}
-            rowHeight={ROW_HEIGHT}
+            rowHeight={this.rowHeight}
             rowCount={players.size}
             rowRenderer={Row}
           />
