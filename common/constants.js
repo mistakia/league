@@ -93,6 +93,26 @@ export const transactions = {
   ROOKIE_TAG: 12
 }
 
+export const transactionsDetail = {
+  0: 'Added',
+  1: 'Dropped',
+
+  2: 'Activated',
+  3: 'Deactivated',
+  4: 'Poach Claim',
+  5: 'Poached',
+
+  6: 'Bid',
+  7: 'Signed',
+
+  8: 'Drafted',
+
+  9: 'Extended',
+  10: 'Tran. Tagged',
+  11: 'Fran. Tagged',
+  12: 'Rookie Tagged'
+}
+
 export const nflTeams = [
   'ARI',
   'ATL',

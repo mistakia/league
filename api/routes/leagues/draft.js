@@ -98,6 +98,7 @@ router.post('/?', async (req, res) => {
       .insert({
         userid: req.user.userId,
         tid: teamId,
+        lid: leagueId,
         player: playerId,
         type: constants.transactions.DRAFT,
         year: constants.year,
@@ -109,8 +110,8 @@ router.post('/?', async (req, res) => {
       .where({ pick, year: constants.year, lid: leagueId })
       .update({ player: playerId })
 
+    await updateRosters
     await Promise.all([
-      updateRosters,
       insertTransaction,
       updateDraft
     ])

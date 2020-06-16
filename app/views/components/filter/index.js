@@ -1,8 +1,8 @@
 import React from 'react'
 
-import './player-filter.styl'
+import './filter.styl'
 
-export default class PlayerFilter extends React.Component {
+export default class Filter extends React.Component {
   constructor (props) {
     super(props)
     this.state = {

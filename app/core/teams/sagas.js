@@ -1,7 +1,6 @@
 import { call, takeLatest, fork, select } from 'redux-saga/effects'
 
-import { getApp } from '@core/app'
-import { teamActions } from './actions'
+import { getApp, appActions } from '@core/app'
 import { getTeams } from '@core/api'
 
 export function * loadTeams () {
@@ -13,15 +12,14 @@ export function * loadTeams () {
 //  WATCHERS
 // -------------------------------------
 
-export function * watchLoadTeams () {
-  yield takeLatest(teamActions.LOAD_TEAMS, loadTeams)
+export function * watchAuthFulfilled () {
+  yield takeLatest(appActions.AUTH_FULFILLED, loadTeams)
 }
-
 
 //= ====================================
 //  ROOT
 // -------------------------------------
 
 export const teamSagas = [
-  fork(watchLoadTeams)
+  fork(watchAuthFulfilled)
 ]

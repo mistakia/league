@@ -1,10 +1,11 @@
 import { connect } from 'react-redux'
-import { playerActions } from '@core/players'
+
+import { transactionsActions } from '@core/transactions'
 
 import Filter from '@components/filter'
 
 const mapDispatchToProps = {
-  filter: playerActions.filter
+  filter: transactionsActions.filter
 }
 
 export default connect(

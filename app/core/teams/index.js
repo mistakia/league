@@ -1,4 +1,5 @@
 export {
+  getTeams,
   getTeamById
 } from './selectors'
 

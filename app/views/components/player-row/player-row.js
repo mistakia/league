@@ -109,7 +109,6 @@ export default class PlayerRow extends React.Component {
 
       for (const year in stats.overall) {
         const p = stats.overall[year]
-        console.log(p)
         const item = (
           <div key={year} className='expanded__row'>
             <div className='row__name'>
