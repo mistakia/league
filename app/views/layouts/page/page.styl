@@ -3,6 +3,8 @@
   height 100%
   overflow hidden
   display flex
+
+main > .page
   padding-top 60px
 
 .page__main
@@ -26,6 +28,6 @@
     flex-direction column
     padding-top 15px
     a
-      border-left 2px solid $borderColorLight
+      border-left 2px solid $borderColor
     a.active
-      border-color $borderColor
+      border-color darken($borderColor, 50%)
