@@ -11,7 +11,7 @@ import {
 
 import { getDraftActions, postDraftActions } from '@core/draft'
 import { getRosterActions } from '@core/rosters'
-import { playerRequestActions } from '@core/players'
+import { playersRequestActions, getPlayerStatsActions } from '@core/players'
 import { getTeamsActions } from '@core/teams'
 
 function * fetchAPI (apiFunction, actions, opts = {}) {
@@ -42,7 +42,8 @@ export const postRegister = fetch.bind(null, api.postRegister, registerActions)
 export const postLogin = fetch.bind(null, api.postLogin, loginActions)
 export const fetchAuth = fetch.bind(null, api.fetchAuth, authActions)
 
-export const fetchPlayers = fetch.bind(null, api.fetchPlayers, playerRequestActions)
+export const fetchPlayers = fetch.bind(null, api.fetchPlayers, playersRequestActions)
+export const getPlayerStats = fetch.bind(null, api.getPlayerStats, getPlayerStatsActions)
 export const getRoster = fetch.bind(null, api.getRoster, getRosterActions)
 
 export const fetchDraft = fetch.bind(null, api.getDraft, getDraftActions)

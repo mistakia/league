@@ -8,7 +8,7 @@ import './menu.styl'
 
 const Menu = () => (
   <div id='menu' className='menu'>
-    <NavLink to='/dashboard'>Home</NavLink>
+    <NavLink to='/dashboard'>Roster</NavLink>
     <NavLink to='/lineups'>Lineups</NavLink>
     <NavLink to='/players'>Players</NavLink>
     <NavLink to='/league'>League</NavLink>

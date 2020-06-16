@@ -6,5 +6,6 @@ export {
   getRoster,
   fetchDraft,
   getTeams,
-  postDraft
+  postDraft,
+  getPlayerStats
 } from './sagas'

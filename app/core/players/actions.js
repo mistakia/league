@@ -12,6 +12,10 @@ export const playerActions = {
   FETCH_PLAYERS_FULFILLED: 'FETCH_PLAYERS_FULFILLED',
   FETCH_PLAYERS_PENDING: 'FETCH_PLAYERS_PENDING',
 
+  GET_PLAYER_STATS_FAILED: 'GET_PLAYER_STATS_FAILED',
+  GET_PLAYER_STATS_PENDING: 'GET_PLAYER_STATS_PENDING',
+  GET_PLAYER_STATS_FULFILLED: 'GET_PLAYER_STATS_FULFILLED',
+
   SET_PROJECTION: 'SET_PROJECTION',
 
   selectPlayer: (player) => ({
@@ -89,11 +93,40 @@ export const playerActions = {
       opts,
       error
     }
+  }),
+
+  getPlayerStatsPending: opts => ({
+    type: playerActions.GET_PLAYER_STATS_PENDING,
+    payload: {
+      opts
+    }
+  }),
+
+  getPlayerStatsFulfilled: (opts, data) => ({
+    type: playerActions.GET_PLAYER_STATS_FULFILLED,
+    payload: {
+      opts,
+      data
+    }
+  }),
+
+  getPlayerStatsFailed: (opts, error) => ({
+    type: playerActions.GET_PLAYER_STATS_FAILED,
+    payload: {
+      opts,
+      error
+    }
   })
 }
 
-export const playerRequestActions = {
+export const playersRequestActions = {
   failed: playerActions.fetchPlayersFailed,
   fulfilled: playerActions.fetchPlayersFulfilled,
   pending: playerActions.fetchPlayersPending
+}
+
+export const getPlayerStatsActions = {
+  failed: playerActions.getPlayerStatsFailed,
+  fulfilled: playerActions.getPlayerStatsFulfilled,
+  pending: playerActions.getPlayerStatsPending
 }

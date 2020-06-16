@@ -4,8 +4,9 @@ export {
   getAllPlayers,
   getFilteredPlayers,
   getRookiePlayers,
-  getPlayerById
+  getPlayerById,
+  getGamesByYearForPlayer
 } from './selectors'
 export { Player, createPlayer } from './player'
-export { playerActions, playerRequestActions } from './actions'
+export { playerActions, playersRequestActions, getPlayerStatsActions } from './actions'
 export { playerSagas } from './sagas'

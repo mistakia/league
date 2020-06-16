@@ -52,8 +52,31 @@ router.get('/?', async (req, res) => {
   }
 })
 
-router.get('/:playerId', async (req, res) => {
-  // TODO return player information
+router.get('/:playerId/stats', async (req, res) => {
+  const { db, logger } = req.app.locals
+  try {
+    const { playerId } = req.params
+
+    const games = await db('offense').where({ player: playerId })
+    res.send({ games })
+
+    // snaps per game by year
+
+    // redzone stats by year
+
+    // injury stats
+
+    // penalties and yardage by year
+
+    // advanced
+    // - charted stats
+
+    // advanced rushing
+    // - yardage by direction
+  } catch (err) {
+    logger(error)
+    res.status(500).send({ error: error.toString() })
+  }
 })
 
 module.exports = router
