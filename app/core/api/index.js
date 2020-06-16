@@ -4,6 +4,7 @@ export {
   fetchAuth,
   fetchPlayers,
   getRoster,
+  getRosters,
   fetchDraft,
   getTeams,
   postDraft,

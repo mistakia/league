@@ -3,7 +3,7 @@ import { createSelector } from 'reselect'
 
 import { getCurrentLeague } from '@core/leagues'
 
-import Roster from './roster'
+import Lineup from './lineup'
 
 const mapStateToProps = createSelector(
   getCurrentLeague,
@@ -12,4 +12,4 @@ const mapStateToProps = createSelector(
 
 export default connect(
   mapStateToProps
-)(Roster)
+)(Lineup)

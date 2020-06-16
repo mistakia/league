@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 
+const { constants } = require('../../../common')
 const transactions = require('./transactions')
 const draft = require('./draft')
 const games = require('./games')
@@ -13,6 +14,22 @@ router.get('/:leagueId/teams/?', async (req, res) => {
     const teams = await db('teams').where({ lid: leagueId })
     res.send({ teams })
   } catch (err) {
+    res.status(500).send({ error: err.toString() })
+  }
+})
+
+router.get('/:leagueId/rosters/?', async (req, res) => {
+  const { logger, db } = req.app.locals
+  try {
+    const { leagueId } = req.params
+    const rosters = await db('rosters')
+      .where({ lid: leagueId, year: constants.year })
+      .distinct('tid', 'year')
+      .orderBy('week', 'desc')
+
+    res.send(rosters)
+  } catch (err) {
+    logger(err)
     res.status(500).send({ error: err.toString() })
   }
 })
