@@ -1,4 +1,6 @@
-import { constants } from '@common'
+import { constants, calculatePoints } from '@common'
+import { getApp } from '@core/app'
+import { getLeagueById } from '@core/leagues'
 import { Player } from './player'
 
 export function getPlayers (state) {
@@ -75,4 +77,37 @@ export function getRookiePlayers (state) {
 export function getPlayerById (state, { playerId }) {
   const items = getAllPlayers(state)
   return items.get(playerId) || new Player()
+}
+
+export function getGamesByYearForPlayer (state, { player }) {
+  const p = getPlayerById(state, { playerId: player.player })
+  const games = p.get('games')
+
+  const years = {}
+  for (const game of games) {
+    if (!years[game.year]) years[game.year] = []
+    years[game.year].push(game)
+  }
+
+  // sum yearly values
+  const { leagueId } = getApp(state)
+  const league = state.get('leagues').get(leagueId)
+  const overall = {}
+  for (const year in years) {
+    const initialValue = {}
+    for (const stat of constants.stats) {
+      initialValue[stat] = 0
+    }
+
+    const sum = years[year].reduce((sums, obj) => {
+      const stats = Object.keys(obj).filter(k => constants.stats.includes(k))
+      stats.forEach(k => sums[k] += (obj[k] || 0) )
+      return sums
+    }, initialValue)
+    const points = calculatePoints({ stats: sum, ...league.toJS() })
+    sum.total = points.total
+    overall[year] = sum
+  }
+
+  return { years, overall }
 }

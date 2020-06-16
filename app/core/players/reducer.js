@@ -99,6 +99,11 @@ export function playersReducer (state = initialState, { payload, type }) {
         })
       })
 
+    case playerActions.GET_PLAYER_STATS_FULFILLED:
+      return state.withMutations(players => {
+        players.setIn(['items', payload.opts.playerId, 'games'], new List(payload.data.games))
+      })
+
     default:
       return state
   }

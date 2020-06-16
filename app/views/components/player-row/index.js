@@ -1,13 +1,14 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getPlayers, playerActions } from '@core/players'
+import { getPlayers, playerActions, getGamesByYearForPlayer } from '@core/players'
 
 import PlayerRow from './player-row'
 
 const mapStateToProps = createSelector(
   getPlayers,
-  (players) => ({ selected: players.get('selected') })
+  getGamesByYearForPlayer,
+  (players, stats) => ({ selected: players.get('selected'), stats })
 )
 
 const mapDispatchToProps = {

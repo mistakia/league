@@ -12,7 +12,7 @@ export default class PlayerRow extends React.Component {
   }
 
   render = () => {
-    const { player, style, selected } = this.props
+    const { player, style, selected, stats } = this.props
 
     const isSelected = selected === player.player
 
@@ -71,6 +71,7 @@ export default class PlayerRow extends React.Component {
     )
 
     const projections = []
+    const years = []
     if (isSelected) {
       player.projections.forEach((p, index) => {
         const item = (
@@ -105,6 +106,42 @@ export default class PlayerRow extends React.Component {
         )
         projections.push(item)
       })
+
+      for (const year in stats.overall) {
+        const p = stats.overall[year]
+        console.log(p)
+        const item = (
+          <div key={year} className='expanded__row'>
+            <div className='row__name'>
+              {year}
+            </div>
+            <div className='row__group'>
+              <div className='row__group-body'>
+                <div className='player__row-metric'>{p.py}</div>
+                <div className='player__row-metric'>{p.tdp}</div>
+                <div className='player__row-metric'>{p.ints}</div>
+              </div>
+            </div>
+            <div className='row__group'>
+              <div className='row__group-body'>
+                <div className='player__row-metric'>{p.ra}</div>
+                <div className='player__row-metric'>{p.ry}</div>
+                <div className='player__row-metric'>{p.tdr}</div>
+                <div className='player__row-metric'>{p.fuml}</div>
+              </div>
+            </div>
+            <div className='row__group'>
+              <div className='row__group-body'>
+                <div className='player__row-metric'>{p.trg}</div>
+                <div className='player__row-metric'>{p.rec}</div>
+                <div className='player__row-metric'>{p.recy}</div>
+                <div className='player__row-metric'>{p.tdrec}</div>
+              </div>
+            </div>
+          </div>
+        )
+        years.push(item)
+      }
     }
 
     const expanded = (
@@ -145,6 +182,43 @@ export default class PlayerRow extends React.Component {
             </div>
           </div>
           {projections}
+        </div>
+        <div className='expanded__section'>
+          <div className='expanded__section-header'>
+            <div className='row__group-head'>
+              Season Stats
+            </div>
+          </div>
+          <div className='expanded__section-header'>
+            <div className='row__name'>Year</div>
+            <div className='row__group'>
+              <div className='row__group-head'>Passing</div>
+              <div className='row__group-body'>
+                <div className='player__row-metric'>YDS</div>
+                <div className='player__row-metric'>TD</div>
+                <div className='player__row-metric'>INT</div>
+              </div>
+            </div>
+            <div className='row__group'>
+              <div className='row__group-head'>Rushing</div>
+              <div className='row__group-body'>
+                <div className='player__row-metric'>CAR</div>
+                <div className='player__row-metric'>YDS</div>
+                <div className='player__row-metric'>TD</div>
+                <div className='player__row-metric'>FUM</div>
+              </div>
+            </div>
+            <div className='row__group'>
+              <div className='row__group-head'>Receiving</div>
+              <div className='row__group-body'>
+                <div className='player__row-metric'>TAR</div>
+                <div className='player__row-metric'>REC</div>
+                <div className='player__row-metric'>YDS</div>
+                <div className='player__row-metric'>TD</div>
+              </div>
+            </div>
+          </div>
+          {years}
         </div>
       </div>
     )

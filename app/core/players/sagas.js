@@ -1,7 +1,7 @@
 import { fork, takeLatest, call, select, put } from 'redux-saga/effects'
 
 import { getApp } from '@core/app'
-import { fetchPlayers } from '@core/api'
+import { fetchPlayers, getPlayerStats } from '@core/api'
 import { playerActions } from './actions'
 import { appActions } from '@core/app'
 import { getAllPlayers, getPlayers } from './selectors'
@@ -50,6 +50,11 @@ export function * setProjection () {
   yield call(calculateValues)
 }
 
+export function * loadStats ({ payload }) {
+  const { player } = payload
+  yield call(getPlayerStats, { playerId: player })
+}
+
 //= ====================================
 //  WATCHERS
 // -------------------------------------
@@ -74,6 +79,10 @@ export function * watchSetProjection () {
   yield takeLatest(playerActions.SET_PROJECTION, setProjection)
 }
 
+export function * watchSelectPlayer () {
+  yield takeLatest(playerActions.PLAYERS_SELECT_PLAYER, loadStats)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -83,5 +92,6 @@ export const playerSagas = [
   fork(watchFetchPlayersFulfilled),
   fork(watchAuthFulfilled),
   fork(watchToggleOrder),
-  fork(watchSetProjection)
+  fork(watchSetProjection),
+  fork(watchSelectPlayer)
 ]
