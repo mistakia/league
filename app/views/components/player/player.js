@@ -1,6 +1,7 @@
 import React from 'react'
 
 import Position from '@components/position'
+import Team from '@components/team'
 
 import './player.styl'
 
@@ -14,13 +15,17 @@ class Player extends React.Component {
           <Position pos={player.pos1} />
         </div>
         <div className='player__item-name'>
-          {player.pname} {player.team}
+          <span>{player.pname}</span>
+          <Team team={player.team} />
         </div>
         <div className='player__item-metric'>
-          ${Math.round(player.values.get('available'))}
+          {/* contract value */}
         </div>
         <div className='player__item-metric'>
           {(player.vorp.get('available') || 0).toFixed(1)}
+        </div>
+        <div className='player__item-metric'>
+          {/* contract value */}
         </div>
         <div className='player__item-metric'>
           {/* projected starts  */}
