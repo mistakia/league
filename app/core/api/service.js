@@ -53,6 +53,10 @@ export const api = {
   getTeams ({ leagueId }) {
     const url = `${BASE_URL}/leagues/${leagueId}/teams`
     return { url }
+  },
+  getTransactions (params) {
+    const url = `${BASE_URL}/leagues/${params.leagueId}/transactions?${queryString.stringify(params)}`
+    return { url }
   }
 }
 

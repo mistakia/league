@@ -1,7 +1,8 @@
 export {
   getLeagueById,
   getCurrentLeague,
-  getLeagues
+  getLeagues,
+  getTeamsForCurrentLeague
 } from './selectors'
 
 export { leaguesReducer } from './reducer'

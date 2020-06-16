@@ -4,7 +4,6 @@ import { createSelector } from 'reselect'
 
 import { draftActions, getSelectedDraftPlayer, getDraft, getCurrentPick } from '@core/draft'
 import { getCurrentLeague } from '@core/leagues'
-import { teamActions } from '@core/teams'
 import { getRookiePlayers } from '@core/players'
 import { getApp } from '@core/app'
 
@@ -13,7 +12,6 @@ import render from './draft'
 class DraftPage extends React.Component {
   componentDidMount () {
     this.props.loadDraft()
-    this.props.loadTeams()
   }
 
   render () {
@@ -41,7 +39,6 @@ const mapStateToProps = createSelector(
 
 const mapDispatchToProps = {
   loadDraft: draftActions.loadDraft,
-  loadTeams: teamActions.loadTeams,
   draftPlayer: draftActions.draftPlayer
 }
 

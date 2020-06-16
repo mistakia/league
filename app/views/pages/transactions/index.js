@@ -1,11 +1,25 @@
-import React from 'react'
+import { connect } from 'react-redux'
+import { createSelector } from 'reselect'
 
-import render from './transactions'
+import { getTransactions, transactionsActions } from '@core/transactions'
 
-class TransactionsPage extends React.Component {
-  render () {
-    return render.call(this)
-  }
+import TransactionsPage from './transactions'
+
+const mapStateToProps = createSelector(
+  getTransactions,
+  (transactions) => ({
+    transactions: transactions.items,
+    isPending: transactions.isPending,
+    hasMore: transactions.hasMore
+  })
+)
+
+const mapDispatchToProps = {
+  load: transactionsActions.load,
+  loadNext: transactionsActions.loadNext
 }
 
-export default TransactionsPage
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(TransactionsPage)

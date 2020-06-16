@@ -1464,6 +1464,7 @@ CREATE TABLE `transactions` (
   `uid` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `userid` int(6) NOT NULL,
   `tid` int(6) NOT NULL,
+  `lid` int(6) NOT NULL,
   `player` varchar(7) NOT NULL,
   `type` tinyint(2) NOT NULL,
   `value` int(4) NOT NULL,
@@ -1471,7 +1472,8 @@ CREATE TABLE `transactions` (
   `timestamp` int(11) NOT NULL,
   UNIQUE KEY `uid` (`uid`),
   KEY `player` (`player`),
-  KEY `teamid` (`tid`)
+  KEY `teamid` (`tid`),
+  KEY `lid` (`lid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------

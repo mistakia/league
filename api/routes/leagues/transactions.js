@@ -1,15 +1,50 @@
 const express = require('express')
-const router = express.Router()
+const router = express.Router({ mergeParams: true })
 const { constants, getEligibleSlots, formatRoster } = require('../../../common')
 
 router.get('/?', async (req, res) => {
-  // TODO return list of league transactions
+  const { db, logger } = req.app.locals
+  try {
+    const { leagueId } = req.params
+
+    // TODO validate
+    const { limit = 100, offset = 0 } = req.query
+    const types = req.query.types
+      ? (Array.isArray(req.query.types) ? req.query.types : [req.query.types])
+      : []
+    const teams = req.query.teams
+      ? (Array.isArray(req.query.teams) ? req.query.teams : [req.query.teams])
+      : []
+
+    let query = db('transactions')
+      .where({ lid: leagueId })
+      .orderBy('timestamp', 'desc')
+      .limit(limit)
+      .offset(offset)
+
+    if (types.length) {
+      query = query.whereIn('type', types)
+    }
+
+    if (teams.length) {
+      query = query.whereIn('tid', teams)
+    }
+
+    const transactions = await query
+
+    res.send(transactions)
+
+  } catch (err) {
+    logger(err)
+    res.status(500).send({ error: err.toString() })
+  }
 })
 
 router.post('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    let { slot, type, tid, player, drop, pos, lid, bid } = req.app.query
+    const { leagueId } = req.params
+    let { slot, type, tid, player, drop, pos, bid } = req.app.query
 
     if (!tid) {
       return res.status(400).send({ error: 'missing tid param' })
@@ -19,7 +54,7 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'missing player param' })
     }
 
-    const leagues = await db('leagues').where({ lid })
+    const leagues = await db('leagues').where({ lid: leageuId })
     const league = leagues[0]
     const transactions = await db('transactions')
       .where({ tid, player })
@@ -161,14 +196,10 @@ router.post('/?', async (req, res) => {
     }
 
     if (type === constants.transactions.POACH_CLAIM) {
-      if (!lid) {
-        return res.status(400).send({ error: 'missing lid param' })
-      }
-
       //TODO
       const psSlots = getEligibleSlots({ ir: true, league })
       const onPS = await db('rosters')
-        .where({ lid })
+        .where({ lid: leagueId })
         .whereNot({ tid })
         .andWhere(function () {
           psSlots.forEach((k) => this.orWhere(`s${k}`, player))
