@@ -42,6 +42,10 @@ export const api = {
     const url = `${BASE_URL}/teams/${teamId}/lineups`
     return { url }
   },
+  getRosters ({ leagueId }) {
+    const url = `${BASE_URL}/leagues/${leagueId}/rosters`
+    return { url }
+  },
   getDraft ({ leagueId }) {
     const url = `${BASE_URL}/leagues/${leagueId}/draft`
     return { url }

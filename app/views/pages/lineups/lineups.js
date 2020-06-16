@@ -1,13 +1,13 @@
 import React from 'react'
 
-import Roster from '@components/roster'
+import Lineup from '@components/lineup'
 import PageLayout from '@layouts/page'
 
 export default function () {
   const { roster } = this.props
   const body = (
     <div>
-      <Roster roster={roster} />
+      <Lineup roster={roster} />
     </div>
   )
 

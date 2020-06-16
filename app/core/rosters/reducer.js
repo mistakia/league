@@ -20,6 +20,11 @@ export function rostersReducer (state = new Map(), { payload, type }) {
     case rosterActions.GET_ROSTER_FULFILLED:
       return state.set(payload.opts.teamId, createRoster(payload.data.rosters))
 
+    case rosterActions.GET_ROSTERS_FULFILLED:
+      return state.withMutations(state => {
+        payload.data.forEach(r => state.set(r.tid, createRoster(r)))
+      })
+
     default:
       return state
   }

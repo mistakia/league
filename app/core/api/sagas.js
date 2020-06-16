@@ -10,7 +10,7 @@ import {
 } from '@core/app'
 
 import { getDraftActions, postDraftActions } from '@core/draft'
-import { getRosterActions } from '@core/rosters'
+import { getRosterActions, getRostersActions } from '@core/rosters'
 import { playersRequestActions, getPlayerStatsActions } from '@core/players'
 import { getTeamsActions } from '@core/teams'
 import { getTransactionsActions } from '@core/transactions'
@@ -46,6 +46,7 @@ export const fetchAuth = fetch.bind(null, api.fetchAuth, authActions)
 export const fetchPlayers = fetch.bind(null, api.fetchPlayers, playersRequestActions)
 export const getPlayerStats = fetch.bind(null, api.getPlayerStats, getPlayerStatsActions)
 export const getRoster = fetch.bind(null, api.getRoster, getRosterActions)
+export const getRosters = fetch.bind(null, api.getRosters, getRostersActions)
 
 export const fetchDraft = fetch.bind(null, api.getDraft, getDraftActions)
 export const postDraft = fetch.bind(null, api.postDraft, postDraftActions)

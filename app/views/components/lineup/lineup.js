@@ -3,9 +3,9 @@ import React from 'react'
 import { getEligibleSlots, constants } from '@common'
 import PlayerSlot from '@components/player-slot'
 
-import './roster.styl'
+import './lineup.styl'
 
-class Roster extends React.Component {
+class Lineup extends React.Component {
   render () {
     const { league, roster } = this.props
 
@@ -56,8 +56,8 @@ class Roster extends React.Component {
     }
 
     return (
-      <div className='roster'>
-        <div className='roster__starters'>
+      <div className='lineup'>
+        <div className='lineup__starters'>
           <div className='dashboard__section'>
             <div className='dashboard__section-header'>
               <div className='dashboard__section-body-header'>
@@ -74,7 +74,7 @@ class Roster extends React.Component {
             </div>
           </div>
         </div>
-        <div className='roster__inactive'>
+        <div className='lineup__inactive'>
           <div className='dashboard__section'>
             <div className='dashboard__section-header'>
               <div className='dashboard__section-body-header'>
@@ -126,4 +126,4 @@ class Roster extends React.Component {
   }
 }
 
-export default Roster
+export default Lineup
