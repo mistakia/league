@@ -14,8 +14,8 @@ export default class RostersPage extends React.Component {
     const { rosters } = this.props
 
     const items = []
-    for (const roster of rosters.values()) {
-      items.push(<Roster roster={roster} />)
+    for (const [index, roster] of rosters.entries()) {
+      items.push(<Roster key={index} roster={roster} />)
     }
 
     const body = (

@@ -1,11 +1,20 @@
-import React from 'react'
+import { connect } from 'react-redux'
+import { createSelector } from 'reselect'
 
-import render from './schedule'
+import { matchupsActions, getFilteredMatchups } from '@core/matchups'
 
-class SchedulePage extends React.Component {
-  render () {
-    return render.call(this)
-  }
+import SchedulePage from './schedule'
+
+const mapStateToProps = createSelector(
+  getFilteredMatchups,
+  (matchups) => ({ matchups })
+)
+
+const mapDispatchToProps = {
+  load: matchupsActions.loadMatchups
 }
 
-export default SchedulePage
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(SchedulePage)

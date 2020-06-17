@@ -9,6 +9,7 @@ import { playersReducer } from './players'
 import { rostersReducer } from './rosters'
 import { sourcesReducer } from './sources'
 import { transactionsReducer } from './transactions'
+import { matchupsReducer } from './matchups'
 
 const rootReducer = (history) => {
   return combineReducers({
@@ -20,7 +21,8 @@ const rootReducer = (history) => {
     players: playersReducer,
     rosters: rostersReducer,
     sources: sourcesReducer,
-    transactions: transactionsReducer
+    transactions: transactionsReducer,
+    matchups: matchupsReducer
   })
 }
 
