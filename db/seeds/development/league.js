@@ -175,6 +175,7 @@ exports.seed = async function(knex, Promise) {
       await knex('matchups').insert({
         hid: matchup.home.uid,
         aid: matchup.away.uid,
+        lid: league.uid,
         week: index + 1,
         year: constants.year
       })

@@ -11,6 +11,7 @@ export const year = moment().month() > 2
   ? moment().year()
   : moment().year() - 1
 
+export const weeks = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
 export const positions = ['QB', 'RB', 'WR', 'TE', 'K', 'DST']
 export const stats = [
   'pa',
