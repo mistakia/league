@@ -46,12 +46,10 @@ export const Roster = new Record({
   s36: null
 })
 
-export function createRoster (rosters) {
-  if (!rosters || !rosters.length) {
+export function createRoster (roster) {
+  if (!roster) {
     return
   }
-
-  const roster = rosters[0]
 
   return new Roster({
     isPending: false,

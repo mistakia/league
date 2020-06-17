@@ -5,7 +5,7 @@ import Team from '@components/team'
 
 import './player.styl'
 
-class Player extends React.Component {
+export default class Player extends React.Component {
   render () {
     const { player } = this.props
 
@@ -40,5 +40,3 @@ class Player extends React.Component {
     )
   }
 }
-
-export default Player

@@ -1,7 +1,8 @@
-import { call, takeLatest, fork } from 'redux-saga/effects'
+import { call, takeLatest, fork, select } from 'redux-saga/effects'
 
 import { rosterActions } from './actions'
 import { getRoster, getRosters } from '@core/api'
+import { getApp } from '@core/app'
 
 export function * loadRoster ({ payload }) {
   const { teamId } = payload

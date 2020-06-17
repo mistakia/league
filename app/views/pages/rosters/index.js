@@ -1,11 +1,21 @@
-import React from 'react'
+import { connect } from 'react-redux'
+import { createSelector } from 'reselect'
 
-import render from './rosters'
+import { rosterActions } from '@core/rosters'
+import { getRostersForCurrentLeague } from '@core/leagues'
 
-class RostersPage extends React.Component {
-  render () {
-    return render.call(this)
-  }
+import RostersPage from './rosters'
+
+const mapStateToProps = createSelector(
+  getRostersForCurrentLeague,
+  (rosters) => ({ rosters })
+)
+
+const mapDispatchToProps = {
+  load: rosterActions.loadRosters
 }
 
-export default RostersPage
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(RostersPage)

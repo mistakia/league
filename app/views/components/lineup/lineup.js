@@ -5,7 +5,7 @@ import PlayerSlot from '@components/player-slot'
 
 import './lineup.styl'
 
-class Lineup extends React.Component {
+export default class Lineup extends React.Component {
   render () {
     const { league, roster } = this.props
 
@@ -125,5 +125,3 @@ class Lineup extends React.Component {
     )
   }
 }
-
-export default Lineup
