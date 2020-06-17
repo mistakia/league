@@ -1,11 +1,15 @@
-import React from 'react'
+import { connect } from 'react-redux'
+import { createSelector } from 'reselect'
 
-import render from './stats'
+import { getCurrentLeague } from '@core/leagues'
 
-class StatsPage extends React.Component {
-  render () {
-    return render.call(this)
-  }
-}
+import StatsPage from './stats'
 
-export default StatsPage
+const mapStateToProps = createSelector(
+  getCurrentLeague,
+  (league) => ({ league })
+)
+
+export default connect(
+  mapStateToProps
+)(StatsPage)
