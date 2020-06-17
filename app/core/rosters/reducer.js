@@ -18,7 +18,7 @@ export function rostersReducer (state = new Map(), { payload, type }) {
       return state.setIn([payload.opts.teamId, 'isPending'], true)
 
     case rosterActions.GET_ROSTER_FULFILLED:
-      return state.set(payload.opts.teamId, createRoster(payload.data.rosters))
+      return state.set(payload.opts.teamId, createRoster(payload.data.rosters[0]))
 
     case rosterActions.GET_ROSTERS_FULFILLED:
       return state.withMutations(state => {

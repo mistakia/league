@@ -23,6 +23,7 @@ router.get('/:leagueId/rosters/?', async (req, res) => {
   try {
     const { leagueId } = req.params
     const rosters = await db('rosters')
+      .select('*')
       .where({ lid: leagueId, year: constants.year })
       .distinct('tid', 'year')
       .orderBy('week', 'desc')
