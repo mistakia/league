@@ -1,10 +1,10 @@
 import React from 'react'
 
 import { constants } from '@common'
-import PlayerFilter from '@components/player-filter'
+import AuctionFilter from '@components/auction-filter'
 
-class PositionFilter extends React.Component {
-  render () {
+export default class AuctionPositionFilter extends React.Component {
+  render = () => {
     const state = {
       type: 'positions',
       label: 'POSITIONS',
@@ -20,9 +20,7 @@ class PositionFilter extends React.Component {
     }
 
     return (
-      <PlayerFilter {...state} />
+      <AuctionFilter {...state} />
     )
   }
 }
-
-export default PositionFilter

@@ -68,13 +68,13 @@ router.post('/?', async (req, res) => {
     const rows = await db('rosters').where({ tid: teamId, year: constants.year, week: 0 })
     const roster = new Roster(rows[0])
     const psSlots = getEligibleSlots({ league, ps: true })
-    const openPsSlots = roster.areSlotsOpen(psSlots)
+    const openPsSlots = roster.getOpenSlots(psSlots)
     let slot = null
     if (openPsSlots.length) {
       slot = openPsSlots[0]
     } else {
       const eligibleSlots = getEligibleSlots({ league, bench: true, pos: player.pos1 })
-      const openSlots = roster.areSlotsOpen(eligibleSlots)
+      const openSlots = roster.getOpenSlots(eligibleSlots)
       if (openSlots.length) {
         slot = openSlots[0]
       }

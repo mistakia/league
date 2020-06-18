@@ -1,0 +1,24 @@
+.auction__player
+  display flex
+  height 25px
+  margin 0 8px
+  border-bottom 1px solid $borderColor
+  align-items center
+
+  &.signed
+    text-decoration line-through
+    font-weight 100
+    color lighten($textColor, 40%)
+
+.auction__player-index
+  flex 0 0 40px
+
+.auction__player-position
+  flex 0 0 40px
+  display flex
+
+.auction__player-name
+  flex 1
+
+.auction__player-metric
+  flex 0 0 30px

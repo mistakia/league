@@ -2,6 +2,7 @@ import { combineReducers } from 'redux-immutable'
 import { connectRouter } from 'connected-react-router'
 
 import { appReducer } from './app'
+import { auctionReducer } from './auction'
 import { draftReducer } from './draft'
 import { leaguesReducer } from './leagues'
 import { teamsReducer } from './teams'
@@ -15,6 +16,7 @@ const rootReducer = (history) => {
   return combineReducers({
     router: connectRouter(history),
     app: appReducer,
+    auction: auctionReducer,
     draft: draftReducer,
     leagues: leaguesReducer,
     teams: teamsReducer,
