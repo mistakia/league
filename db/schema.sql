@@ -1444,7 +1444,6 @@ CREATE TABLE `teams` (
   `div` tinyint(1) NOT NULL,
   `name` varchar(50) NOT NULL,
   `image` varchar(500) DEFAULT '',
-  `wp` tinyint(2) NOT NULL,
   `acap` int(4) NOT NULL,
   `do` tinyint(2) DEFAULT NULL,
   `wo` tinyint(2) DEFAULT NULL,

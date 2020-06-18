@@ -44,8 +44,8 @@ module.exports = (wss) => {
         }
         const auction = new Auction({ wss, lid })
         auctions.set(lid, auction)
+        await auction.setup()
         auction.join({ ws, tid, userId, onclose })
-        auction.setup()
       }
     })
   })
