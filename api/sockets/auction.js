@@ -10,9 +10,14 @@ export default class Auction {
     this._paused = true
     this._locked = false
     this._tids = []
+    this._teams = []
     this._transactions = []
     this._ready = false
     this._connected = {}
+  }
+
+  get position () {
+    return this._transactions.filter(t => t.type === constants.transactions.AUCTION_PROCESSED).length
   }
 
   has (tid) {
@@ -33,10 +38,16 @@ export default class Auction {
 
     ws.on('message', (msg) => {
       const message = JSON.parse(msg)
-      if (message.type !== 'AUCTION_BID') {
-        return
+      switch (message.type) {
+        case 'AUCTION_BID':
+          return this.bid(message)
+
+        case 'AUCTION_NOMINATE':
+          return this.nominate(message)
+
+        default:
+          return console.log(`invalid message: ${message.type}`)
       }
-      this.bid(message)
     })
 
     ws.on('close', () => {
@@ -50,6 +61,13 @@ export default class Auction {
       }
 
       onclose()
+    })
+    this.broadcast({
+      type: 'AUCTION_INIT',
+      payload: {
+        transactions: this._transactions,
+        tids: this._tids
+      }
     })
   }
 
@@ -112,19 +130,30 @@ export default class Auction {
     db('transactions').insert(bid)
     this.broadcast({
       type: 'AUCTION_BID',
-      payload: bid
+      payload: {
+        bid,
+        player
+      }
     })
     this._startBidTimer()
   }
 
-  nominate (message) {
+  async nominate (message = {}) {
     this._clearNominationTimer()
 
-    if (!message) {
+    const pos = this.position
+    const tid = this.tids[pos % this.tids.length]
+    const { value = 1 } = message
+    let { player } = message
+
+    if (!player) {
       // select player for nomination
+    } else if (tid !== message.tid)
+      // TODO announce error
+      return
     }
 
-    const { userid, tid, player, value } = message
+    const { userid, value } = message
     const bid = {
       userid,
       tid,
@@ -137,13 +166,17 @@ export default class Auction {
     db('transactions').insert(bid)
     this.broadcast({
       type: 'AUCTION_BID',
-      payload: bid
+      payload: {
+        bid,
+        player
+      }
     })
     this._startBidTimer()
   }
 
   async setup () {
-    this._teams = await db('teams').where('lid', this._lid)
+    const teams = await db('teams').where('lid', this._lid)
+    this._teams = teams.sorted((a, b) => a.do - b.do)
 
     this._tids = this._teams.map(t => t.uid)
     this._transactions = await db('transactions')
@@ -155,18 +188,13 @@ export default class Auction {
   start () {
     this._paused = false
     const latest = this._transactions[0]
+    this.broadcast({
+      type: 'AUCTION_START'
+    })
 
-    if (latest.type !== constants.transactions.AUCTION_BID) {
-      this.broadcast({
-        type: 'AUCTION_BID',
-        payload: latest
-      })
+    if (latest && latest.type === constants.transactions.AUCTION_BID) {
       this._startBidTimer()
     } else {
-      this.broadcast({
-        type: 'AUCTION_PROCESSED',
-        payload: latest
-      })
       this._startNominationTimer()
     }
   }
@@ -184,6 +212,12 @@ export default class Auction {
 
   _startNominationTimer () {
     this._clearNominationTimer()
+    this.broadcast({
+      type: 'AUCTION_POSITION'
+      payload: {
+        position: this.position
+      }
+    })
     this._nominationTimer = setTimeout(() => this.nominate(), config.nominationTimeout)
   }
 

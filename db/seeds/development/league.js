@@ -76,6 +76,8 @@ exports.seed = async function(knex, Promise) {
     await knex('teams').insert({
       uid: i,
       lid: 1,
+      wo: i,
+      do: i,
       div: (i % 4) + 1,
       name: `Team${i}`
     })

@@ -5,6 +5,7 @@ import PageLayout from '@layouts/page'
 import './auction.styl'
 
 export default function () {
+  const { players } = this.props
   const body = (
     <div className='auction'>
       <div className='auction__players'></div>
