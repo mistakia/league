@@ -2,11 +2,16 @@ import { Map } from 'immutable'
 import { rosterActions } from './actions'
 import { Roster, createRoster } from './roster'
 import { appActions } from '@core/app'
+import { constants } from '@common'
 
 export function rostersReducer (state = new Map(), { payload, type }) {
   switch (type) {
     case appActions.LOGOUT:
       return new Map()
+
+    case rosterActions.ROSTER_SLOT_UPDATED:
+      const slotNum = constants.slots[payload.slot]
+      return state.setIn([payload.tid, `s${slotNum}`], payload.player)
 
     case rosterActions.LOAD_ROSTER:
       return state.set(payload.teamId, new Roster())

@@ -2,14 +2,15 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { auctionActions } from '@core/auction'
-import { getAllPlayers } from '@core/players'
+import { rosterActions } from '@core/rosters'
+import { auctionActions, getAuction, getAuctionPlayers } from '@core/auction'
 
 import render from './auction'
 
 class AuctionPage extends React.Component {
   componentDidMount () {
     this.props.join()
+    this.props.load()
   }
 
   render () {
@@ -18,11 +19,16 @@ class AuctionPage extends React.Component {
 }
 
 const mapStateToProps = createSelector(
-  getAllPlayers,
-  (players) => ({ players })
+  getAuctionPlayers,
+  getAuction,
+  (players, auction) => ({
+    players,
+    transactions: auction.transactions
+  })
 )
 
 const mapDispatchToProps = {
+  load: rosterActions.loadRosters,
   join: auctionActions.join
 }
 

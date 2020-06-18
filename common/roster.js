@@ -16,7 +16,7 @@ export default class Roster {
     return Array.from(this._slots.values())
   }
 
-  areSlotsOpen (slots) {
+  getOpenSlots (slots) {
     const open = []
     for (const slot of slots) {
       const slotNum = constants.slots[slot]

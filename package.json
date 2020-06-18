@@ -1,7 +1,7 @@
 {
   "scripts": {
     "start": "cross-env START_HOT=1 NODE_ENV=development webpack-dev-server --config configs/webpack.config.dev.babel.js",
-    "lint": "$(npm bin)/standard *.js **/*.js",
+    "lint": "$(npm bin)/standard",
     "test": "NODE_ENV=test TEST=all mocha --exit",
     "start:api": "node server.js"
   },

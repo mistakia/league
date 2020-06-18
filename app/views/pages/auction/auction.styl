@@ -4,6 +4,22 @@
 
 .auction__players
   flex 1
+  display flex
+  flex-direction column
+
+.auction__players-header
+  flex 0 0 40px
+  height 45px
+  border-bottom 1px solid $borderColor
+  margin 0 8px
+  padding 4px 0
+  display flex
+
+.auction__players-body
+  flex 1
+  height 100%
+  overflow hidden
+  overflow-y scroll
 
 .auction__main
   flex 3
@@ -12,15 +28,9 @@
   display flex
   flex-direction column
 
-.auction__main-bid
-  flex 0 0 auto
-  height 100px
-  margin 32px
-  border 1px solid $borderColor
-  background #fafafa
-
 .auction__main-board
   flex 1
 
 .auction__log
   flex 1
+  overflow-y scroll

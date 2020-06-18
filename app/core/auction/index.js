@@ -1,4 +1,4 @@
 export { auctionActions } from './actions'
 export { auctionSagas } from './sagas'
 export { auctionReducer } from './reducer'
-export { getAuction } from './selectors'
+export { getAuction, getAuctionPlayers, getNominatingTeamId } from './selectors'
