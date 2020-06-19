@@ -16,15 +16,21 @@ export default function () {
 
   let draftInfo
   if (league.ddate) {
-    const start = moment(league.ddate, 'X')
+    const start = moment(league.ddate, 'X').startOf('day')
     if (moment().isBefore(start)) {
       draftInfo = (<p>Draft begins {moment().to(start)}</p>)
     } else if (currentPick) {
       const pickNum = (currentPick.pick % league.nteams) || league.nteams
+      const end = start.add(currentPick.pick, 'd')
+      const now = moment()
+      const hours = end.diff(now, 'hours')
+      const mins = end.diff(now, 'minutes') % 60
       draftInfo = (
         <div>
-          <strong>Pick #{currentPick.pick} ({currentPick.round}.{('0' + pickNum).slice(-2)})</strong>
-          <h4>Time Remaining</h4>
+          <div className='draft__side-top-pick'>
+            Pick #{currentPick.pick} ({currentPick.round}.{('0' + pickNum).slice(-2)})
+          </div>
+          <div>Time Remaining: {hours}h {mins}m</div>
         </div>
       )
     }
