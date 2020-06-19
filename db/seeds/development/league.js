@@ -52,8 +52,8 @@ exports.seed = async function (knex, Promise) {
     twoptc: 0,
     tdrec: 6,
     fuml: -1,
-    draft_start: Math.round(Date.now() / 1000),
-    auction_start: Math.round(Date.now() / 1000)
+    ddate: Math.round(Date.now() / 1000),
+    adate: Math.round(Date.now() / 1000)
   })
 
   const leagues = await knex('leagues').where({ uid: 1 })

@@ -31,12 +31,12 @@ module.exports = (wss) => {
       } else {
         const leagues = await db('leagues').where({ uid: lid })
         const league = leagues[0]
-        if (!league.auction_start) {
+        if (!league.adate) {
           return
         }
 
         const now = moment()
-        const auctionStart = moment(league.auction_start, 'X')
+        const auctionStart = moment(league.adate, 'X')
         const days = auctionStart.diff(now, 'days')
         // TODO log
         if (days > 0) {
