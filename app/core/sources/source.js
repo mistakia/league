@@ -13,7 +13,7 @@ export function createSource ({
   url,
   weight
 }) {
-  return new Source ({
+  return new Source({
     uid,
     name,
     url,

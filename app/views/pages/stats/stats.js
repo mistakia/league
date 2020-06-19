@@ -20,7 +20,7 @@ export default class StatsPage extends React.Component {
     const positionalHeaders = []
     for (const position of constants.positions) {
       positionalHeaders.push(<div key={position} className='player__item-metric'>{position}</div>)
-      positionalHeaders.push(<div key={`${position}%`}className='player__item-metric'>%</div>)
+      positionalHeaders.push(<div key={`${position}%`} className='player__item-metric'>%</div>)
     }
 
     const body = (
@@ -29,7 +29,7 @@ export default class StatsPage extends React.Component {
           <div className='dashboard__section-header'>
             <div className='dashboard__section-header-title'>League Stats</div>
             <div className='dashboard__section-body-header'>
-              <div className='player__item-position'></div>
+              <div className='player__item-position' />
               <div className='player__item-name'>Team</div>
               <div className='player__item-metric'>PF</div>
               <div className='player__item-metric'>OPF</div>
@@ -48,32 +48,29 @@ export default class StatsPage extends React.Component {
               </div>
             </div>
           </div>
-          <div className='dashboard__section-body'>
-          </div>
+          <div className='dashboard__section-body' />
         </div>
         <div className='dashboard__section'>
           <div className='dashboard__section-header'>
             <div className='dashboard__section-header-title'>Lineup Stats</div>
             <div className='dashboard__section-body-header'>
-              <div className='player__item-position'></div>
+              <div className='player__item-position' />
               <div className='player__item-name'>Team</div>
               {lineupHeaders}
             </div>
           </div>
-          <div className='dashboard__section-body'>
-          </div>
+          <div className='dashboard__section-body' />
         </div>
         <div className='dashboard__section'>
           <div className='dashboard__section-header'>
             <div className='dashboard__section-header-title'>Positional Stats</div>
             <div className='dashboard__section-body-header'>
-              <div className='player__item-position'></div>
+              <div className='player__item-position' />
               <div className='player__item-name'>Team</div>
               {positionalHeaders}
             </div>
           </div>
-          <div className='dashboard__section-body'>
-          </div>
+          <div className='dashboard__section-body' />
         </div>
       </div>
     )

@@ -6,7 +6,7 @@ import Position from '@components/position'
 import './auction-player.styl'
 
 export default class AuctionPlayer extends React.Component {
-  select = () => {
+  handleClick = () => {
     if (!this.props.isAvailable) {
       return
     }
@@ -19,7 +19,7 @@ export default class AuctionPlayer extends React.Component {
   }
 
   render = () => {
-    const { index, player, select, isAvailable, isEligible } = this.props
+    const { index, player, isAvailable, isEligible } = this.props
 
     const classNames = ['auction__player']
     if (!isAvailable) {
@@ -31,7 +31,7 @@ export default class AuctionPlayer extends React.Component {
     }
 
     return (
-      <div className={classNames.join(' ')} onClick={this.select}>
+      <div className={classNames.join(' ')} onClick={this.handleClick}>
         <div className='auction__player-index'>{index + 1}.</div>
         <div className='auction__player-position'>
           <Position pos={player.pos1} />

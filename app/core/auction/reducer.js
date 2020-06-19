@@ -1,4 +1,4 @@
-import { Record, List, Map } from 'immutable'
+import { Record, List } from 'immutable'
 
 import { constants } from '@common'
 import { auctionActions } from './actions'
@@ -27,7 +27,7 @@ export function auctionReducer (state = initialState(), { payload, type }) {
     case auctionActions.AUCTION_SELECT_PLAYER:
       return state.merge({
         selected: payload.player,
-        bid: 1,
+        bid: 1
       })
 
     case auctionActions.AUCTION_BID:
@@ -53,13 +53,14 @@ export function auctionReducer (state = initialState(), { payload, type }) {
         isPaused: true
       })
 
-    case auctionActions.AUCTION_INIT:
+    case auctionActions.AUCTION_INIT: {
       const latest = payload.transactions[0]
       return state.merge({
         player: (latest && latest.type === constants.transactions.AUCTION_BID) ? latest.player : null,
         transactions: new List(payload.transactions),
         tids: new List(payload.tids)
       })
+    }
 
     default:
       return state

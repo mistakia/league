@@ -166,7 +166,7 @@ export default class Auction {
     const uid = await db('transactions').insert(transaction)
     this.broadcast({
       type: 'AUCTION_PROCESSED',
-      payload: {...transaction, uid }
+      payload: { ...transaction, uid }
     })
     this._transactions.unshift(transaction)
     this._startNominationTimer()
@@ -219,7 +219,7 @@ export default class Auction {
     const uid = await db('transactions').insert(bid)
     this.broadcast({
       type: 'AUCTION_BID',
-      payload: {...bid, uid }
+      payload: { ...bid, uid }
     })
     this._transactions.unshift(bid)
     this._startBidTimer()
@@ -262,7 +262,7 @@ export default class Auction {
       player = results[0].player
     } else {
       if (tid !== message.tid) {
-        this.logger(`received nomination from a team out of turn`)
+        this.logger('received nomination from a team out of turn')
         // TODO announce error
         return
       }
@@ -284,7 +284,7 @@ export default class Auction {
     const uid = await db('transactions').insert(bid)
     this.broadcast({
       type: 'AUCTION_BID',
-      payload: {...bid, uid }
+      payload: { ...bid, uid }
     })
     this._transactions.unshift(bid)
     this._locked = false

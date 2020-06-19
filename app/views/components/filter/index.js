@@ -8,25 +8,22 @@ export default class Filter extends React.Component {
     this.state = {
       visible: false
     }
-
-    this.toggle = this.toggle.bind(this)
-    this.click = this.click.bind(this)
   }
 
-  toggle (event) {
+  handleToggleClick = (event) => {
     if (this.state.visible) {
       const wasOutsideBody = this.body ? !this.body.contains(event.target) : false
       if (wasOutsideBody) {
-        document.removeEventListener('click', this.toggle)
+        document.removeEventListener('click', this.handleToggleClick)
         return this.setState({ visible: false })
       }
     } else {
-      document.addEventListener('click', this.toggle)
+      document.addEventListener('click', this.handleToggleClick)
       this.setState({ visible: true })
     }
   }
 
-  click (index, event) {
+  handleClick = (index, event) => {
     event.preventDefault()
     event.stopPropagation()
     const values = this.props.values.map(
@@ -36,7 +33,7 @@ export default class Filter extends React.Component {
     this.props.filter(this.props.type, filteredValues)
   }
 
-  render () {
+  render = () => {
     const { label, values } = this.props
     const { visible } = this.state
 
@@ -47,7 +44,8 @@ export default class Filter extends React.Component {
         <div
           key={v.value}
           className={classNames.join(' ')}
-          onClick={this.click.bind(null, index)}>
+          onClick={(e) => this.handleClick(e, index)}
+        >
           {v.label}
         </div>
       )
@@ -60,12 +58,13 @@ export default class Filter extends React.Component {
       : values.filter(v => v.selected).map(v => v.label).join(', ')
 
     return (
-      <div ref={ref => { this.root = ref }} className='player__filter' onClick={this.toggle}>
+      <div ref={ref => { this.root = ref }} className='player__filter' onClick={this.handleToggleClick}>
         <div className='player__filter-label'>{label}</div>
         <div className='player__filter-selection'>{selectedLabel}</div>
-        { visible && <div ref={ref => { this.body = ref }} className='player__filter-body'>
-          {items}
-        </div>}
+        {visible &&
+          <div ref={ref => { this.body = ref }} className='player__filter-body'>
+            {items}
+          </div>}
       </div>
     )
   }

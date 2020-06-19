@@ -32,7 +32,6 @@ export function * watchFilterTransactions () {
   yield takeLatest(transactionsActions.FILTER_TRANSACTIONS, load)
 }
 
-
 //= ====================================
 //  ROOT
 // -------------------------------------

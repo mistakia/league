@@ -44,9 +44,10 @@ export function playersReducer (state = initialState, { payload, type }) {
     case playerActions.FILTER_PLAYERS:
       return state.merge({ [payload.type]: new List(payload.values) })
 
-    case playerActions.SET_ORDER:
+    case playerActions.SET_ORDER: {
       const { order, orderBy } = payload
       return state.merge({ order, orderBy, selected: null })
+    }
 
     case playerActions.CALCULATE_VALUES: {
       return state.withMutations(state => {

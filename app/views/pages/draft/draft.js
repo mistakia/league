@@ -67,15 +67,16 @@ export default function () {
           <div>{p.team}</div>
           {!!p.jersey && <div>#{p.jersey}</div>}
         </div>
-        {(isDrafting && !isDrafted) && <div className='draft__selected-action'>
-          <Button onClick={draftPlayer}>Draft</Button>
-        </div>}
+        {(isDrafting && !isDrafted) &&
+          <div className='draft__selected-action'>
+            <Button onClick={draftPlayer}>Draft</Button>
+          </div>}
       </div>
       <div className='draft__selected-body'>
         <div><label>Drafted</label>{p.dpos ? `${Math.ceil(p.dpos / 12)}.${('0' + (p.dpos % 32)).slice(-2)}` : 'undrafted'}</div>
         <div><label>Proj.</label>{Math.round(p.points.get('total'))}</div>
         <div><label>Age</label>{moment().diff(moment(p.dob), 'years')}</div>
-        <div><label>Height</label>{Math.floor(p.height/12)}-{p.height % 12}</div>
+        <div><label>Height</label>{Math.floor(p.height / 12)}-{p.height % 12}</div>
         <div><label>Weight</label>{p.weight}</div>
         <div><label>Forty</label>{p.forty || 'n/a'}</div>
         <div><label>Bench</label>{p.bench || 'n/a'}</div>
@@ -99,23 +100,23 @@ export default function () {
           <div className='draft__main-board-pos'>
             <div className='draft__main-board-pos-head'>Overall</div>
             <div className='draft__main-board-pos-body'>{all}</div>
-            { /* TODO show player position */ }
+            {/* TODO show player position */}
           </div>
           <div className='draft__main-board-pos'>
             <div className='draft__main-board-pos-head'>Quarterbacks</div>
-            <div className='draft__main-board-pos-body'>{items['QB']}</div>
+            <div className='draft__main-board-pos-body'>{items.QB}</div>
           </div>
           <div className='draft__main-board-pos'>
             <div className='draft__main-board-pos-head'>Running Backs</div>
-            <div className='draft__main-board-pos-body'>{items['RB']}</div>
+            <div className='draft__main-board-pos-body'>{items.RB}</div>
           </div>
           <div className='draft__main-board-pos'>
             <div className='draft__main-board-pos-head'>Wide Receivers</div>
-            <div className='draft__main-board-pos-body'>{items['WR']}</div>
+            <div className='draft__main-board-pos-body'>{items.WR}</div>
           </div>
           <div className='draft__main-board-pos'>
             <div className='draft__main-board-pos-head'>Tight ends</div>
-            <div className='draft__main-board-pos-body'>{items['TE']}</div>
+            <div className='draft__main-board-pos-body'>{items.TE}</div>
           </div>
         </div>
       </div>

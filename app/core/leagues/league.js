@@ -1,4 +1,4 @@
-import { Record, teams, List } from 'immutable'
+import { Record, List } from 'immutable'
 
 export const League = new Record({
   uid: null,
@@ -84,7 +84,7 @@ export function createLeague ({
   auction_start,
   draft_start
 }) {
-  return new League ({
+  return new League({
     uid,
     name,
     nteams,

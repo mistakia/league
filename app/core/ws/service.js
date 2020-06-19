@@ -1,3 +1,5 @@
+/* global WebSocket */
+
 import queryString from 'query-string'
 
 import { WS_URL } from '@core/constants'

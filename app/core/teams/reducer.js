@@ -27,9 +27,10 @@ export function teamsReducer (state = initialState, { payload, type }) {
         payload.teams.forEach(t => state.set(t.uid, createTeam(t)))
       })
 
-    case auctionActions.AUCTION_PROCESSED:
+    case auctionActions.AUCTION_PROCESSED: {
       const newCap = state.get(payload.tid).get('acap') - payload.value
       return state.setIn([payload.tid, 'acap'], newCap)
+    }
 
     default:
       return state

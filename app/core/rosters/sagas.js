@@ -26,7 +26,6 @@ export function * watchLoadRosters () {
   yield takeLatest(rosterActions.LOAD_ROSTERS, loadRosters)
 }
 
-
 //= ====================================
 //  ROOT
 // -------------------------------------

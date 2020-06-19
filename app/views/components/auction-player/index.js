@@ -8,7 +8,7 @@ import AuctionPlayer from './auction-player'
 
 const mapStateToProps = createSelector(
   isPlayerAvailable,
-  isPlayerEligible
+  isPlayerEligible,
   (isAvailable, isEligible) => ({ isAvailable, isEligible })
 )
 

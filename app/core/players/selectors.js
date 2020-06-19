@@ -1,6 +1,5 @@
 import { constants, calculatePoints } from '@common'
 import { getApp } from '@core/app'
-import { getLeagueById } from '@core/leagues'
 import { Player } from './player'
 
 export function getPlayers (state) {
@@ -101,7 +100,7 @@ export function getGamesByYearForPlayer (state, { player }) {
 
     const sum = years[year].reduce((sums, obj) => {
       const stats = Object.keys(obj).filter(k => constants.stats.includes(k))
-      stats.forEach(k => sums[k] += (obj[k] || 0) )
+      stats.forEach(k => { sums[k] += (obj[k] || 0) })
       return sums
     }, initialValue)
     const points = calculatePoints({ stats: sum, ...league.toJS() })

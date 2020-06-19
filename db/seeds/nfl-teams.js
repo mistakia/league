@@ -221,6 +221,6 @@ module.exports = async function (knex) {
     lname: 'Redskins',
     pname: 'Redskins',
     pos1: 'DST',
-    cteam: 'WAS',
+    cteam: 'WAS'
   }])
 }

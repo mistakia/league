@@ -20,7 +20,7 @@ export function getAuctionPlayers (state) {
 export function getAuctionPosition (state) {
   const transactions = state.get('auction').get('transactions')
   const processed = transactions.filter(t => t.type === constants.transactions.AUCTION_PROCESSED)
- return processed.size
+  return processed.size
 }
 
 export function getNominatingTeamId (state) {

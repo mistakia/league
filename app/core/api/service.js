@@ -13,10 +13,6 @@ const POST = (data) => ({
   }
 })
 
-const DELETE = {
-  method: 'DELETE'
-}
-
 export const api = {
   postRegister (data) {
     const url = `${BASE_URL}/auth/register`

@@ -1,6 +1,5 @@
 import React from 'react'
 
-import { constants } from '@common'
 import ScheduleFilter from '@components/schedule-filter'
 
 export default class ScheduleTeamsFilter extends React.Component {
