@@ -2,6 +2,7 @@ import React from 'react'
 
 import PlayerRosterRow from '@components/player-roster-row'
 import { getEligibleSlots, constants } from '@common'
+import TeamName from '@components/team-name'
 
 import './roster.styl'
 
@@ -25,7 +26,12 @@ export default class Roster extends React.Component {
 
     return (
       <div className='roster'>
-        {rows}
+        <div className='roster__team'>
+          <TeamName tid={roster.tid} />
+        </div>
+        <div className='roster__slots'>
+          {rows}
+        </div>
       </div>
     )
   }

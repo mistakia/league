@@ -2,6 +2,7 @@ import React from 'react'
 
 import PageLayout from '@layouts/page'
 import Roster from '@components/roster'
+import { getEligibleSlots } from '@common'
 
 import './rosters.styl'
 
@@ -11,7 +12,14 @@ export default class RostersPage extends React.Component {
   }
 
   render = () => {
-    const { rosters } = this.props
+    const { rosters, league } = this.props
+
+    const labels = []
+    const eligible = getEligibleSlots({ pos: 'ALL', bench: true, league, ir: true, ps: true })
+    eligible.forEach((slot, index) => {
+      const slotName = slot.split('_').shift()
+      labels.push(<div key={index} className='roster__item'>{slotName}</div>)
+    })
 
     const items = []
     for (const [index, roster] of rosters.entries()) {
@@ -20,7 +28,12 @@ export default class RostersPage extends React.Component {
 
     const body = (
       <div className='rosters'>
-        {items}
+        <div className='rosters__head'>
+          {labels}
+        </div>
+        <div className='rosters__body'>
+          {items}
+        </div>
       </div>
     )
 

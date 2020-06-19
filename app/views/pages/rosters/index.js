@@ -2,13 +2,14 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { rosterActions } from '@core/rosters'
-import { getRostersForCurrentLeague } from '@core/leagues'
+import { getRostersForCurrentLeague, getCurrentLeague } from '@core/leagues'
 
 import RostersPage from './rosters'
 
 const mapStateToProps = createSelector(
   getRostersForCurrentLeague,
-  (rosters) => ({ rosters })
+  getCurrentLeague,
+  (rosters, league) => ({ rosters, league })
 )
 
 const mapDispatchToProps = {
