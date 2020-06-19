@@ -54,7 +54,24 @@ export default class Auction {
       }
 
       onclose()
+
+      this.broadcast({
+        type: 'AUCTION_CONNECTED',
+        payload: {
+          connected: Object.keys(this._connected).map(k => parseInt(k, 10))
+        }
+      })
     })
+
+    let shouldStart = false
+    if (this._connected[tid]) {
+      this._connected[tid].push(userId)
+    } else {
+      this._connected[tid] = [userId]
+      if (!this._ready && Object.keys(this._connected).length === this._tids.length) {
+        shouldStart = true
+      }
+    }
 
     this.broadcast({
       type: 'AUCTION_INIT',
@@ -62,20 +79,15 @@ export default class Auction {
         transactions: this._transactions,
         tids: this._tids,
         teams: this._teams,
+        connected: Object.keys(this._connected).map(k => parseInt(k, 10)),
         bidTimer: config.bidTimer,
         nominationTimer: config.nominationTimer
       }
     })
 
-    if (this._connected[tid]) {
-      this._connected[tid].push(userId)
-    } else {
-      this._connected[tid] = [userId]
-
-      if (!this._ready && Object.keys(this._connected).length === this._tids.length) {
-        this._ready = true
-        this.start()
-      }
+    if (shouldStart) {
+      this._ready = true
+      this.start()
     }
   }
 
@@ -104,6 +116,7 @@ export default class Auction {
     const players = await db('player').where('player', player)
     const playerInfo = players[0]
     if (!playerInfo) {
+      this._startBidTimer()
       // TODO broadcast error
       this.logger(`can not process invalid player ${player}`)
       return
@@ -117,6 +130,7 @@ export default class Auction {
     const openSlots = roster.getOpenSlots(eligibleSlots)
     const slot = openSlots[0]
     if (!slot) {
+      this._startBidTimer()
       this.logger(`no open slots available for ${player} on teamId ${tid}`)
       // TODO broadcast error
       return
@@ -131,6 +145,8 @@ export default class Auction {
         })
         .update(`s${constants.slots[slot]}`, player)
     } catch (err) {
+      this.logger(err)
+      this._startBidTimer()
       this.logger(`unable to add player ${player} to roster of teamId ${tid}`)
       // TODO broadcast error
       return
@@ -143,6 +159,7 @@ export default class Auction {
     } catch (err) {
       this.logger(err)
       this.logger('unable to update cap space')
+      this._startBidTimer()
       // TODO broadcast error
       return
     }
@@ -160,6 +177,7 @@ export default class Auction {
       userid,
       tid,
       player,
+      lid: this._lid,
       type: constants.transactions.AUCTION_PROCESSED,
       value,
       year,
@@ -213,6 +231,7 @@ export default class Auction {
       userid,
       tid,
       player,
+      lid: this._lid,
       type: constants.transactions.AUCTION_BID,
       value,
       year: constants.year,
@@ -234,7 +253,7 @@ export default class Auction {
 
     const pos = this.position
     const tid = this._tids[pos % this._tids.length]
-    const { userid, value = 1 } = message
+    const { userid, value = 0 } = message
     let { player } = message
 
     if (!player) {
@@ -280,6 +299,7 @@ export default class Auction {
       player,
       type: constants.transactions.AUCTION_BID,
       value,
+      lid: this._lid,
       year: constants.year,
       timestamp: Math.round(Date.now() / 1000)
     }

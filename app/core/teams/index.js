@@ -1,6 +1,7 @@
 export {
   getTeams,
-  getTeamById
+  getTeamById,
+  getCurrentTeam
 } from './selectors'
 
 export { teamsReducer } from './reducer'

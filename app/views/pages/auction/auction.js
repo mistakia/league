@@ -10,7 +10,7 @@ import AuctionPositionFilter from '@components/auction-position-filter'
 import './auction.styl'
 
 export default function () {
-  const { players, transactions, tids } = this.props
+  const { players, transactions, tids, playerId } = this.props
 
   const sorted = players.sort((a, b) => b.vorp.get('available') - a.vorp.get('available')).toList()
 
@@ -26,7 +26,6 @@ export default function () {
 
   const teamItems = []
   for (const [index, tid] of tids.entries()) {
-    console.log(tid)
     teamItems.push(<AuctionTeam key={index} tid={tid} />)
   }
 
@@ -44,7 +43,7 @@ export default function () {
         <div className='auction__teams'>
           {teamItems}
         </div>
-        <AuctionMainBid />
+        <AuctionMainBid playerId={playerId} />
         <div className='auction__main-board' />
       </div>
       <div className='auction__log'>

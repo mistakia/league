@@ -4,6 +4,11 @@ export function getAuction (state) {
   return state.get('auction')
 }
 
+export function isTeamConnected (state, { tid }) {
+  const { connected } = getAuction(state)
+  return connected.includes(tid)
+}
+
 export function getAuctionPlayers (state) {
   const auction = state.get('auction')
   const players = state.get('players').get('items')

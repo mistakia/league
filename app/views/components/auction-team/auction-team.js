@@ -4,12 +4,23 @@ import './auction-team.styl'
 
 export default class AuctionTeam extends React.Component {
   render = () => {
-    const { team, transactions } = this.props
+    const { team, isConnected, isWinningBid, bid, isNominating } = this.props
+
+    const classNames = ['auction__team']
+    if (!isConnected) {
+      classNames.push('offline')
+    }
+
+    if (isNominating) {
+      classNames.push('nominating')
+    }
 
     return (
-      <div className='auction__team'>
+      <div className={classNames.join(' ')}>
         <div className='auction__team-name'>{team.name}</div>
-        <div className='auction__team-cap'>{team.acap}</div>
+        <div className='auction__team-cap'>${team.acap}</div>
+        {isWinningBid &&
+          <div className='auction__winning-bid'>${bid}</div>}
       </div>
     )
   }
