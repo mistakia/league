@@ -38,8 +38,8 @@ export const League = new Record({
   twoptc: null,
   tdrec: null,
   fuml: null,
-  auction_start: null,
-  draft_start: null,
+  adate: null,
+  ddate: null,
   teams: new List()
 })
 
@@ -81,8 +81,8 @@ export function createLeague ({
   twoptc,
   tdrec,
   fuml,
-  auction_start,
-  draft_start
+  adate,
+  ddate
 }) {
   return new League({
     uid,
@@ -122,7 +122,7 @@ export function createLeague ({
     twoptc,
     tdrec,
     fuml,
-    auction_start,
-    draft_start
+    adate,
+    ddate
   })
 }

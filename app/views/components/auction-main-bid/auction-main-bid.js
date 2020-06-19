@@ -1,4 +1,5 @@
 import React from 'react'
+import moment from 'moment'
 
 import PlayerName from '@components/player-name'
 import TeamName from '@components/team-name'
@@ -90,11 +91,20 @@ export default class AuctionMainBid extends React.Component {
       selected,
       nominatingTeamId,
       timer,
-      isWinningBid
+      isWinningBid,
+      auctionStart
     } = this.props
 
+    const now = moment()
+    const start = moment(auctionStart, 'X')
+    const isStarted = start.isBefore(now)
+
     let action
-    if (isPaused) {
+    if (!auctionStart) {
+      action = (<Button disabled>TBD</Button>)
+    } else if (!isStarted) {
+      action = (<Button disabled>Scheduled</Button>)
+    } else if (isPaused) {
       action = (<Button disabled>Paused</Button>)
     } else if (isLocked) {
       action = (<Button disabled>Locked</Button>)
@@ -115,7 +125,11 @@ export default class AuctionMainBid extends React.Component {
     }
 
     let main
-    if (isPaused) {
+    if (!auctionStart) {
+      main = (<div>Auction is not scheduled.</div>)
+    } else if (!isStarted) {
+      main = (<div>Auction will begin on {start.format('dddd, MMMM Do YYYY, h:mm:ss a')}</div>)
+    } else if (isPaused) {
       main = (<div>Auction is paused.</div>)
     } else if (playerId) {
       main = (<PlayerName playerId={playerId} />)
@@ -133,17 +147,19 @@ export default class AuctionMainBid extends React.Component {
         <div className='auction__main-player'>
           {main}
         </div>
-        <div className='auction__main-input'>
-          <input type='number' value={this.state.value} onChange={this.handleChange} />
-          <div className='auction__main-input-up' onClick={this.handleUpClick}>+</div>
-          <div className='auction__main-input-down' onClick={this.handleDownClick}>—</div>
-        </div>
+        {isStarted &&
+          <div className='auction__main-input'>
+            <input type='number' value={this.state.value} onChange={this.handleChange} />
+            <div className='auction__main-input-up' onClick={this.handleUpClick}>+</div>
+            <div className='auction__main-input-down' onClick={this.handleDownClick}>—</div>
+          </div>}
         <div className='auction__main-action'>
           {action}
         </div>
-        <div className='auction__main-timer'>
-          <Timer expiration={timer} />
-        </div>
+        {isStarted &&
+          <div className='auction__main-timer'>
+            <Timer expiration={timer} />
+          </div>}
       </div>
     )
   }

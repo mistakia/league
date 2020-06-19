@@ -15,10 +15,10 @@ export default function () {
   const { positions } = constants
 
   let draftInfo
-  if (league.draft_start) {
-    const draftStart = moment(league.draft_start, 'X')
-    if (moment().isBefore(draftStart)) {
-      draftInfo = (<p>Draft begins {moment().to(draftStart)}</p>)
+  if (league.ddate) {
+    const start = moment(league.ddate, 'X')
+    if (moment().isBefore(start)) {
+      draftInfo = (<p>Draft begins {moment().to(start)}</p>)
     } else if (currentPick) {
       const pickNum = (currentPick.pick % league.nteams) || league.nteams
       draftInfo = (
