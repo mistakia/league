@@ -23,12 +23,12 @@ export function auctionReducer (state = initialState(), { payload, type }) {
       return state.merge({ [payload.type]: new List(payload.values) })
 
     case auctionActions.AUCTION_START: {
-      const latest = payload.transactions[0]
+      const latest = state.transactions.first()
       return state.merge({
         isPaused: false,
         timer: latest && latest.type === constants.transactions.AUCTION_BID
-          ? Math.round(Date.now() / 1000) + state.bidTimer
-          : Math.round(Date.now() / 1000) + state.nominationTimer
+          ? Math.round((Date.now() + state.bidTimer) / 1000)
+          : Math.round((Date.now() + state.nominationTimer) / 1000)
       })
     }
 
@@ -45,7 +45,7 @@ export function auctionReducer (state = initialState(), { payload, type }) {
         transactions: state.transactions.unshift(payload),
         bid: payload.value,
         player: payload.player,
-        timer: Math.round(Date.now() / 1000) + state.bidTimer
+        timer: Math.round((Date.now() + state.bidTimer) / 1000)
       })
 
     case auctionActions.AUCTION_PROCESSED:
@@ -55,7 +55,7 @@ export function auctionReducer (state = initialState(), { payload, type }) {
         bid: null,
         transactions: state.transactions.unshift(payload),
         player: null,
-        timer: Math.round(Date.now() / 1000) + state.nominationTimer
+        timer: Math.round((Date.now() + state.nominationTimer) / 1000)
       })
 
     case auctionActions.AUCTION_PAUSED:
@@ -67,11 +67,12 @@ export function auctionReducer (state = initialState(), { payload, type }) {
     case auctionActions.AUCTION_INIT: {
       const latest = payload.transactions[0]
       return state.merge({
+        bid: (latest && latest.type === constants.transactions.AUCTION_BID) ? latest.value : null,
         player: (latest && latest.type === constants.transactions.AUCTION_BID) ? latest.player : null,
         transactions: new List(payload.transactions),
         tids: new List(payload.tids),
-        bidTimer: null,
-        nominationTimer: null
+        bidTimer: payload.bidTimer,
+        nominationTimer: payload.nominationTimer
       })
     }
 

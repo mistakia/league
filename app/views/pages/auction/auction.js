@@ -3,13 +3,14 @@ import React from 'react'
 import PageLayout from '@layouts/page'
 import AuctionTransaction from '@components/auction-transaction'
 import AuctionPlayer from '@components/auction-player'
+import AuctionTeam from '@components/auction-team'
 import AuctionMainBid from '@components/auction-main-bid'
 import AuctionPositionFilter from '@components/auction-position-filter'
 
 import './auction.styl'
 
 export default function () {
-  const { players, transactions } = this.props
+  const { players, transactions, tids } = this.props
 
   const sorted = players.sort((a, b) => b.vorp.get('available') - a.vorp.get('available')).toList()
 
@@ -23,6 +24,12 @@ export default function () {
     playerItems.push(<AuctionPlayer key={index} player={player} index={index} />)
   }
 
+  const teamItems = []
+  for (const [index, tid] of tids.entries()) {
+    console.log(tid)
+    teamItems.push(<AuctionTeam key={index} tid={tid} />)
+  }
+
   const body = (
     <div className='auction'>
       <div className='auction__players'>
@@ -34,6 +41,9 @@ export default function () {
         </div>
       </div>
       <div className='auction__main'>
+        <div className='auction__teams'>
+          {teamItems}
+        </div>
         <AuctionMainBid />
         <div className='auction__main-board' />
       </div>
