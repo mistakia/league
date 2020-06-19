@@ -2,7 +2,7 @@ import React from 'react'
 
 export default class Timer extends React.Component {
   constructor (props) {
-    super (props)
+    super(props)
     this.interval = null
     this.state = {
       seconds: 0
@@ -16,6 +16,7 @@ export default class Timer extends React.Component {
     if (seconds < 0) {
       clearInterval(this.interval)
       this.interval = null
+      this.setState({ seconds: 0 })
     } else {
       this.setState({ seconds })
     }
@@ -37,7 +38,7 @@ export default class Timer extends React.Component {
   render = () => {
     return (
       <div className='timer'>
-        {('0' + this.state.seconds).slice (-2)}
+        {('0' + this.state.seconds).slice(-2)}
       </div>
     )
   }

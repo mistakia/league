@@ -29,17 +29,6 @@ export default class Auction {
 
   join ({ ws, tid, userId, onclose }) {
     this.logger(`userId ${userId} joined`)
-    if (this._connected[tid]) {
-      this._connected[tid].push(userId)
-    } else {
-      this._connected[tid] = [userId]
-
-      if (!this._ready && Object.keys(this._connected).length === this._tids.length) {
-        this._ready = true
-        this.start()
-      }
-    }
-
     ws.on('message', (msg) => {
       const message = JSON.parse(msg)
       switch (message.type) {
@@ -66,6 +55,7 @@ export default class Auction {
 
       onclose()
     })
+
     this.broadcast({
       type: 'AUCTION_INIT',
       payload: {
@@ -76,6 +66,17 @@ export default class Auction {
         nominationTimer: config.nominationTimer
       }
     })
+
+    if (this._connected[tid]) {
+      this._connected[tid].push(userId)
+    } else {
+      this._connected[tid] = [userId]
+
+      if (!this._ready && Object.keys(this._connected).length === this._tids.length) {
+        this._ready = true
+        this.start()
+      }
+    }
   }
 
   broadcast (message) {
@@ -138,8 +139,9 @@ export default class Auction {
     const team = this._teams.find(t => t.uid === tid)
     const newCap = team.acap - value
     try {
-      await db('teams').where({ tid }).update('acap', newCap)
+      await db('teams').where({ uid: tid }).update('acap', newCap)
     } catch (err) {
+      this.logger(err)
       this.logger('unable to update cap space')
       // TODO broadcast error
       return
@@ -338,13 +340,7 @@ export default class Auction {
 
   _startNominationTimer () {
     this._clearNominationTimer()
-    this.broadcast({
-      type: 'AUCTION_POSITION',
-      payload: {
-        position: this.position
-      }
-    })
-    this._nominationTimer = setTimeout(() => this.nominate(), config.nominationTimeout)
+    this._nominationTimer = setTimeout(() => this.nominate(), config.nominationTimer)
   }
 
   _clearNominationTimer () {

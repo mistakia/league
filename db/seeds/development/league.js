@@ -56,6 +56,9 @@ exports.seed = async function (knex, Promise) {
     auction_start: Math.round(Date.now() / 1000)
   })
 
+  const leagues = await knex('leagues').where({ uid: 1 })
+  const league = leagues[0]
+
   await knex('users').del()
   await knex.raw('ALTER TABLE users AUTO_INCREMENT = 1')
   const userCount = 12
@@ -78,6 +81,7 @@ exports.seed = async function (knex, Promise) {
       lid: 1,
       wo: i,
       do: i,
+      acap: league.cap,
       div: (i % 4) + 1,
       name: `Team${i}`
     })
@@ -95,9 +99,6 @@ exports.seed = async function (knex, Promise) {
       tid: i
     })
   }
-
-  const leagues = await knex('leagues').where({ uid: 1 })
-  const league = leagues[0]
 
   await knex('transactions').del()
 
