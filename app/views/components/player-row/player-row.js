@@ -7,7 +7,7 @@ import Position from '@components/position'
 import './player-row.styl'
 
 export default class PlayerRow extends React.Component {
-  handleCclick = () => {
+  handleClick = () => {
     this.props.select(this.props.player.player)
   }
 
