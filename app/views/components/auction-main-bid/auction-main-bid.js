@@ -3,6 +3,7 @@ import React from 'react'
 import PlayerName from '@components/player-name'
 import TeamName from '@components/team-name'
 import Button from '@components/button'
+import Timer from '@components/timer'
 
 import './auction-main-bid.styl'
 
@@ -18,7 +19,7 @@ export default class AuctionMainBid extends React.Component {
   }
 
   render = () => {
-    const { isPaused, player, bidValue, isNominating, selected, nominatingTeamId } = this.props
+    const { isPaused, player, bidValue, isNominating, selected, nominatingTeamId, timer } = this.props
 
     let action
     if (isPaused) {
@@ -50,6 +51,9 @@ export default class AuctionMainBid extends React.Component {
         </div>
         <div className='auction__main-action'>
           {action}
+        </div>
+        <div className='auction__main-timer'>
+          <Timer expiration={timer} />
         </div>
       </div>
     )

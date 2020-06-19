@@ -5,17 +5,11 @@ import Icon from '@components/icon'
 import './player-header.styl'
 
 export default class PlayerHeader extends React.Component {
-  constructor (props) {
-    super(props)
-
-    this.click = this.click.bind(this)
-  }
-
-  handleClick () {
+  handleClick = () => {
     this.props.toggle(this.props.value)
   }
 
-  render () {
+  render = () => {
     const { label, className, order, orderBy, value } = this.props
     const isSelected = orderBy === value
     const classNames = ['player__header']

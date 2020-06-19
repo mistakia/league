@@ -11,7 +11,10 @@ const initialState = new Record({
   tids: new List(),
   transactions: new List(),
   positions: new List(constants.positions),
-  search: null
+  bidTimer: null,
+  nominationTimer: null,
+  search: null,
+  timer: null
 })
 
 export function auctionReducer (state = initialState(), { payload, type }) {
@@ -19,10 +22,15 @@ export function auctionReducer (state = initialState(), { payload, type }) {
     case auctionActions.AUCTION_FILTER:
       return state.merge({ [payload.type]: new List(payload.values) })
 
-    case auctionActions.AUCTION_START:
+    case auctionActions.AUCTION_START: {
+      const latest = payload.transactions[0]
       return state.merge({
-        isPaused: false
+        isPaused: false,
+        timer: latest && latest.type === constants.transactions.AUCTION_BID
+          ? Math.round(Date.now() / 1000) + state.bidTimer
+          : Math.round(Date.now() / 1000) + state.nominationTimer
       })
+    }
 
     case auctionActions.AUCTION_SELECT_PLAYER:
       return state.merge({
@@ -36,7 +44,8 @@ export function auctionReducer (state = initialState(), { payload, type }) {
         isPaused: false,
         transactions: state.transactions.unshift(payload),
         bid: payload.value,
-        player: payload.player
+        player: payload.player,
+        timer: Math.round(Date.now() / 1000) + state.bidTimer
       })
 
     case auctionActions.AUCTION_PROCESSED:
@@ -45,12 +54,14 @@ export function auctionReducer (state = initialState(), { payload, type }) {
         isPaused: false,
         bid: null,
         transactions: state.transactions.unshift(payload),
-        player: null
+        player: null,
+        timer: Math.round(Date.now() / 1000) + state.nominationTimer
       })
 
     case auctionActions.AUCTION_PAUSED:
       return state.merge({
-        isPaused: true
+        isPaused: true,
+        timer: null
       })
 
     case auctionActions.AUCTION_INIT: {
@@ -58,7 +69,9 @@ export function auctionReducer (state = initialState(), { payload, type }) {
       return state.merge({
         player: (latest && latest.type === constants.transactions.AUCTION_BID) ? latest.player : null,
         transactions: new List(payload.transactions),
-        tids: new List(payload.tids)
+        tids: new List(payload.tids),
+        bidTimer: null,
+        nominationTimer: null
       })
     }
 

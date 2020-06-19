@@ -16,7 +16,8 @@ const mapStateToProps = createSelector(
     selected: auction.selected,
     bidValue: auction.bid,
     isNominating: nominatingTeamId === app.teamId,
-    nominatingTeamId: nominatingTeamId
+    nominatingTeamId: nominatingTeamId,
+    timer: auction.timer
   })
 )
 

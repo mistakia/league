@@ -23,7 +23,7 @@ export default class Filter extends React.Component {
     }
   }
 
-  handleClick = (index, event) => {
+  handleClick = (event, index) => {
     event.preventDefault()
     event.stopPropagation()
     const values = this.props.values.map(
