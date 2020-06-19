@@ -3,7 +3,7 @@ const nflTeams = require('../nfl-teams')
 const { constants, getEligibleSlots, formatRoster } = require('../../../common')
 const { getSchedule } = require('../../../utils')
 
-exports.seed = async function(knex, Promise) {
+exports.seed = async function (knex, Promise) {
   // TODO (medium) - seed armchair data
 
   try {
@@ -207,5 +207,4 @@ exports.seed = async function(knex, Promise) {
       })
     }
   }
-
 }

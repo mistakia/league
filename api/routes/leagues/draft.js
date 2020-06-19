@@ -122,7 +122,6 @@ router.post('/?', async (req, res) => {
       payload: { data }
     })
     res.send(data)
-
   } catch (err) {
     res.status(500).send({ error: err.toString() })
   }

@@ -5,7 +5,7 @@ export const Team = new Record({
   name: null,
   image: null,
   lid: null,
-  acap: null,
+  acap: null
 })
 
 export function createTeam ({

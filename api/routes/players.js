@@ -1,12 +1,10 @@
+import { constants } from '../../common'
 const express = require('express')
 const router = express.Router()
 
-import { constants } from '../../common'
-
 router.get('/?', async (req, res) => {
+  const { db, logger } = req.app.locals
   try {
-    const { db, logger } = req.app.locals
-
     const defaultOptions = {
       active: true,
       inactive: false
@@ -73,7 +71,7 @@ router.get('/:playerId/stats', async (req, res) => {
 
     // advanced rushing
     // - yardage by direction
-  } catch (err) {
+  } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })
   }

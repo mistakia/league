@@ -1,9 +1,8 @@
 import { fork, takeLatest, call, select, put } from 'redux-saga/effects'
 
-import { getApp } from '@core/app'
+import { getApp, appActions } from '@core/app'
 import { fetchPlayers, getPlayerStats } from '@core/api'
 import { playerActions } from './actions'
-import { appActions } from '@core/app'
 import { getAllPlayers, getPlayers } from './selectors'
 import { getLeagues } from '@core/leagues'
 import { DEFAULT_ORDER_BY } from '@core/constants'

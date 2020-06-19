@@ -30,7 +30,6 @@ export function * watchDraftPlayer () {
   yield takeLatest(draftActions.DRAFT_PLAYER, draftPlayer)
 }
 
-
 //= ====================================
 //  ROOT
 // -------------------------------------

@@ -1,9 +1,9 @@
-import { call, takeLatest, fork, select } from 'redux-saga/effects'
+import { takeLatest, fork, select } from 'redux-saga/effects'
 
 import { getApp } from '@core/app'
 import { getAuction } from './selectors'
 import { auctionActions } from './actions'
-import { send, wsActions } from '@core/ws'
+import { send } from '@core/ws'
 
 export function * joinAuction ({ type }) {
   const { leagueId, teamId } = yield select(getApp)

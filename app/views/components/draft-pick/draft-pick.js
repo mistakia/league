@@ -23,10 +23,11 @@ export default class DraftPick extends React.Component {
           {round}.{('0' + pickNum).slice(-2)}
         </div>
         <div className='draft__pick-main'>
-          {player.player && <div className='draft__pick-player'>
-            <span className='draft__pick-player-name'>{player.fname} {player.lname}</span>
-            <Team team={player.team} />
-          </div>}
+          {player.player &&
+            <div className='draft__pick-player'>
+              <span className='draft__pick-player-name'>{player.fname} {player.lname}</span>
+              <Team team={player.team} />
+            </div>}
           {isActive && <div className='draft__pick-active'>On the clock</div>}
           <div className='draft__pick-team'>{team.name}</div>
         </div>

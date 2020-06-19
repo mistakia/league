@@ -8,14 +8,14 @@ export default class Editable extends React.Component {
 
   commit = (value) => {
     if (!this.state.invalid) {
-      let newProp = {}
+      const newProp = {}
       newProp[this.props.propName] = value
       this.setState({ loading: true, newValue: value })
       this.props.change(newProp)
     }
   }
 
-  keyDown = (event) => {
+  handleKeyDown = (event) => {
     const el = this.getEl()
     if (!el) return
 
@@ -27,17 +27,19 @@ export default class Editable extends React.Component {
     }
   }
 
-  elementBlur = (event) => {
+  handleBlur = (event) => {
     const el = this.getEl()
     if (!el) return
 
     const value = el.innerHTML
     if (isNaN(value) || value < 0) {
-      return el.innerHTML = this.props.value
+      el.innerHTML = this.props.value
+      return
     }
 
     if (value % 1 !== 0) {
-      return el.innerHTML = this.props.value
+      el.innerHTML = this.props.value
+      return
     }
 
     const int = parseInt(value, 10)
@@ -55,13 +57,18 @@ export default class Editable extends React.Component {
   }
 
   render = () => {
-    return <span
-             ref={this.el}
-             className={this.makeClassString()}
-             onBlur={this.elementBlur}
-             onKeyDown={this.keyDown}
-             suppressContentEditableWarning={true}
-             contentEditable
-             {...this.props.defaultProps}>{this.props.value}</span>
+    return (
+      <span
+        ref={this.el}
+        className={this.makeClassString()}
+        onBlur={this.handleBlur}
+        onKeyDown={this.handleKeyDown}
+        suppressContentEditableWarning
+        contentEditable
+        {...this.props.defaultProps}
+      >
+        {this.props.value}
+      </span>
+    )
   }
 }

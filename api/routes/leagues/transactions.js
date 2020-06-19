@@ -1,4 +1,5 @@
 const express = require('express')
+const moment = require('moment')
 const router = express.Router({ mergeParams: true })
 const { constants, getEligibleSlots, formatRoster } = require('../../../common')
 
@@ -33,7 +34,6 @@ router.get('/?', async (req, res) => {
     const transactions = await query
 
     res.send(transactions)
-
   } catch (err) {
     logger(err)
     res.status(500).send({ error: err.toString() })
@@ -54,7 +54,7 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'missing player param' })
     }
 
-    const leagues = await db('leagues').where({ lid: leageuId })
+    const leagues = await db('leagues').where({ lid: leagueId })
     const league = leagues[0]
     const transactions = await db('transactions')
       .where({ tid, player })
@@ -66,13 +66,13 @@ router.post('/?', async (req, res) => {
 
     const insert = async () => {
       const inserts = [{
-          userid: req.user.userId,
-          tid,
-          player,
-          type,
-          value,
-          year: constants.year,
-          timestamp: new Date()
+        userid: req.user.userId,
+        tid,
+        player,
+        type,
+        value,
+        year: constants.year,
+        timestamp: new Date()
       }]
 
       if (drop) {
@@ -95,7 +95,7 @@ router.post('/?', async (req, res) => {
     if (rosters.length) {
       return res.status(500).send({ error: 'unable to locate a roster' })
     }
-    const roster = formatRoster(roster[0])
+    const roster = formatRoster(rosters[0])
     const isRostered = () => Array.from(roster.values()).includes(player)
 
     // make sure player is rostered
@@ -110,7 +110,7 @@ router.post('/?', async (req, res) => {
     // select a slot if none is provided
     if (!slot) {
       // TODO
-      const eligbleSlots = getEligbleSlots({ pos, bench: true, ir: true, ps: true, league })
+      const eligibleSlots = getEligibleSlots({ pos, bench: true, ir: true, ps: true, league })
       slot = eligibleSlots[0]
       if (!slot) {
         return res.status(400).send({ error: 'no eligible slots' })
@@ -196,7 +196,7 @@ router.post('/?', async (req, res) => {
     }
 
     if (type === constants.transactions.POACH_CLAIM) {
-      //TODO
+      // TODO
       const psSlots = getEligibleSlots({ ir: true, league })
       const onPS = await db('rosters')
         .where({ lid: leagueId })
@@ -222,7 +222,6 @@ router.post('/?', async (req, res) => {
       value = bid
       return insert()
     }
-
   } catch (err) {
     logger(err)
     res.status(500).send({ error: err.toString() })

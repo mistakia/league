@@ -56,13 +56,12 @@ export function getCurrentPlayers (state) {
     return { active: new List(), practice: new List() }
   }
 
-
   const psSlots = getEligibleSlots({ ps: true, league })
   const psSlotNums = psSlots.map(s => constants.slots[s])
   let active = new List()
   let practice = new List()
 
-  for (const [key, value] of roster.toSeq()) {
+  for (const [key] of roster.toSeq()) {
     if (key.startsWith('s')) {
       const playerId = roster.get(key)
       const player = getPlayerById(state, { playerId })

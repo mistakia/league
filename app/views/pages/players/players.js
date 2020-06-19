@@ -67,7 +67,7 @@ export default class PlayersPage extends React.Component {
         <div className='player__row-group-body'>
           <PlayerHeader className='player__row-metric' label='CAR' value='projection.ra' />
           <PlayerHeader className='player__row-metric' label='YDS' value='projection.ry' />
-          <PlayerHeader className='player__row-metric' label='TD'  value='projection.tdr' />
+          <PlayerHeader className='player__row-metric' label='TD' value='projection.tdr' />
           <PlayerHeader className='player__row-metric' label='FUM' value='projection.fuml' />
         </div>
       </div>
@@ -80,7 +80,7 @@ export default class PlayersPage extends React.Component {
           <PlayerHeader className='player__row-metric' label='TAR' value='projection.trg' />
           <PlayerHeader className='player__row-metric' label='REC' value='projection.rec' />
           <PlayerHeader className='player__row-metric' label='YDS' value='projection.recy' />
-          <PlayerHeader className='player__row-metric' label='TD'  value='projection.tdrec' />
+          <PlayerHeader className='player__row-metric' label='TD' value='projection.tdrec' />
         </div>
       </div>
     )
@@ -92,22 +92,25 @@ export default class PlayersPage extends React.Component {
           <ExperienceFilter />
         </div>
         <div className='players__header'>
-          <div className='player__row-pos'></div>
+          <div className='player__row-pos' />
           <div className='player__row-name'>Name</div>
           <div className='player__row-group'>
             <div className='player__row-group-body'>
               <PlayerHeader
                 className='player__row-metric'
                 label='v FA'
-                value='values.available' />
+                value='values.available'
+              />
               <PlayerHeader
                 className='player__row-metric'
                 label='Value'
-                value='vorp.available' />
+                value='vorp.available'
+              />
               <PlayerHeader
                 className='player__row-metric'
                 label='Proj'
-                value='points.total' />
+                value='points.total'
+              />
             </div>
           </div>
           {hPassing}

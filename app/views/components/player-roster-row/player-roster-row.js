@@ -18,8 +18,7 @@ export default class PlayerRosterRow extends React.Component {
           <span>{player.pname}</span>
           <Team team={player.team} />
         </div>
-        <div className='roster__item-metric'>
-        </div>
+        <div className='roster__item-metric' />
       </div>
     )
   }

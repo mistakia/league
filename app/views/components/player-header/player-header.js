@@ -11,7 +11,7 @@ export default class PlayerHeader extends React.Component {
     this.click = this.click.bind(this)
   }
 
-  click () {
+  handleClick () {
     this.props.toggle(this.props.value)
   }
 
@@ -26,7 +26,7 @@ export default class PlayerHeader extends React.Component {
     }
 
     return (
-      <div className={classNames.join(' ')} onClick={this.click}>
+      <div className={classNames.join(' ')} onClick={this.handleClick}>
         <Icon name='down' />
         {label}
       </div>

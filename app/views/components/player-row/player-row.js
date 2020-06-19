@@ -7,7 +7,7 @@ import Position from '@components/position'
 import './player-row.styl'
 
 export default class PlayerRow extends React.Component {
-  onclick = () => {
+  handleCclick = () => {
     this.props.select(this.props.player.player)
   }
 
@@ -228,7 +228,7 @@ export default class PlayerRow extends React.Component {
     return (
       <div style={style}>
         <div className={classNames.join(' ')}>
-          <div className='player__row-main' onClick={this.onclick}>
+          <div className='player__row-main' onClick={this.handleClick}>
             <div className='player__row-pos'>
               <Position pos={player.pos1} />
             </div>

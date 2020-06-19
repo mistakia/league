@@ -11,7 +11,7 @@ export default function () {
         <div className='dashboard__section-header'>
           <div className='dashboard__section-header-title'>Overall</div>
           <div className='dashboard__section-body-header'>
-            <div className='player__item-position'></div>
+            <div className='player__item-position' />
             <div className='player__item-name'>Team</div>
             <div className='player__item-metric'>Rec</div>
             <div className='player__item-metric'>PF</div>
@@ -26,14 +26,13 @@ export default function () {
             {/* Projected points */}
           </div>
         </div>
-        <div className='dashboard__section-body'>
-        </div>
+        <div className='dashboard__section-body' />
       </div>
       <div className='dashboard__section'>
         <div className='dashboard__section-header'>
           <div className='dashboard__section-header-title'>Division I</div>
           <div className='dashboard__section-body-header'>
-            <div className='player__item-position'></div>
+            <div className='player__item-position' />
             <div className='player__item-name'>Team</div>
             <div className='player__item-metric'>Rec</div>
             <div className='player__item-metric'>PF</div>
@@ -48,14 +47,13 @@ export default function () {
             {/* Projected points */}
           </div>
         </div>
-        <div className='dashboard__section-body'>
-        </div>
+        <div className='dashboard__section-body' />
       </div>
       <div className='dashboard__section'>
         <div className='dashboard__section-header'>
           <div className='dashboard__section-header-title'>Division II</div>
           <div className='dashboard__section-body-header'>
-            <div className='player__item-position'></div>
+            <div className='player__item-position' />
             <div className='player__item-name'>Team</div>
             <div className='player__item-metric'>Rec</div>
             <div className='player__item-metric'>PF</div>
@@ -70,14 +68,13 @@ export default function () {
             {/* Projected points */}
           </div>
         </div>
-        <div className='dashboard__section-body'>
-        </div>
+        <div className='dashboard__section-body' />
       </div>
       <div className='dashboard__section'>
         <div className='dashboard__section-header'>
           <div className='dashboard__section-header-title'>Division III</div>
           <div className='dashboard__section-body-header'>
-            <div className='player__item-position'></div>
+            <div className='player__item-position' />
             <div className='player__item-name'>Team</div>
             <div className='player__item-metric'>Rec</div>
             <div className='player__item-metric'>PF</div>
@@ -92,14 +89,13 @@ export default function () {
             {/* Projected points */}
           </div>
         </div>
-        <div className='dashboard__section-body'>
-        </div>
+        <div className='dashboard__section-body' />
       </div>
       <div className='dashboard__section'>
         <div className='dashboard__section-header'>
           <div className='dashboard__section-header-title'>Division IV</div>
           <div className='dashboard__section-body-header'>
-            <div className='player__item-position'></div>
+            <div className='player__item-position' />
             <div className='player__item-name'>Team</div>
             <div className='player__item-metric'>Rec</div>
             <div className='player__item-metric'>PF</div>
@@ -114,8 +110,7 @@ export default function () {
             {/* Projected points */}
           </div>
         </div>
-        <div className='dashboard__section-body'>
-        </div>
+        <div className='dashboard__section-body' />
       </div>
     </div>
   )

@@ -7,12 +7,12 @@ import Button from '@components/button'
 import './auction-main-bid.styl'
 
 export default class AuctionMainBid extends React.Component {
-  bid = () => {
+  handleClickBid = () => {
     const value = (this.props.bidValue || 0) + 1
     this.props.bid(value)
   }
 
-  nominate = () => {
+  handleClickNominate = () => {
     const value = this.props.bidValue
     this.props.nominate(value)
   }
@@ -24,9 +24,9 @@ export default class AuctionMainBid extends React.Component {
     if (isPaused) {
       action = (<Button disabled>Paused</Button>)
     } else if (player) {
-      action = (<Button onClick={this.bid}>Bid</Button>)
+      action = (<Button onClick={this.handleClickBid}>Bid</Button>)
     } else if (isNominating) {
-      action = (<Button disabled={!selected} onClick={this.nominate}>Nominate</Button>)
+      action = (<Button disabled={!selected} onClick={this.handleClickNominate}>Nominate</Button>)
     } else {
       action = (<Button disabled>Waiting</Button>)
     }

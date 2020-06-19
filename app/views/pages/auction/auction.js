@@ -35,7 +35,7 @@ export default function () {
       </div>
       <div className='auction__main'>
         <AuctionMainBid />
-        <div className='auction__main-board'></div>
+        <div className='auction__main-board' />
       </div>
       <div className='auction__log'>
         {transactionItems}
