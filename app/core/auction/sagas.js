@@ -1,4 +1,4 @@
-import { takeLatest, fork, select } from 'redux-saga/effects'
+import { takeLatest, fork, select, delay, put, call } from 'redux-saga/effects'
 
 import { getApp } from '@core/app'
 import { getAuction } from './selectors'
@@ -14,10 +14,16 @@ export function * joinAuction ({ type }) {
   send(message)
 }
 
+export function * releaseLock () {
+  yield delay(1500)
+  yield put(auctionActions.release())
+}
+
 export function * submitBid ({ payload }) {
   const { userId, teamId } = yield select(getApp)
   const { player, bid } = yield select(getAuction)
   if (payload.value <= bid) {
+    yield put(auctionActions.release())
     // TODO notify user
     return
   }
@@ -33,8 +39,8 @@ export function * submitBid ({ payload }) {
       value
     }
   }
-  console.log(message)
   send(message)
+  yield call(releaseLock)
 }
 
 export function * submitNomination ({ payload }) {
@@ -50,7 +56,6 @@ export function * submitNomination ({ payload }) {
       player: selected
     }
   }
-  console.log(message)
   send(message)
 }
 
@@ -70,6 +75,10 @@ export function * watchAuctionSubmitNomination () {
   yield takeLatest(auctionActions.AUCTION_SUBMIT_NOMINATION, submitNomination)
 }
 
+export function * watchAuctionBid () {
+  yield takeLatest(auctionActions.AUCTION_BID, releaseLock)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -77,5 +86,6 @@ export function * watchAuctionSubmitNomination () {
 export const auctionSagas = [
   fork(watchAuctionJoin),
   fork(watchAuctionSubmitBid),
-  fork(watchAuctionSubmitNomination)
+  fork(watchAuctionSubmitNomination),
+  fork(watchAuctionBid)
 ]

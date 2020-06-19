@@ -8,24 +8,106 @@ import Timer from '@components/timer'
 import './auction-main-bid.styl'
 
 export default class AuctionMainBid extends React.Component {
+  constructor (props) {
+    super(props)
+
+    this.state = {
+      value: 0
+    }
+  }
+
+  isValid = (value) => {
+    if (value > this.props.availableCap) {
+      return false
+    }
+
+    if (this.props.playerId && value <= this.props.bidValue) {
+      return false
+    } else if (value < 0) {
+      return false
+    }
+
+    return true
+  }
+
+  handleChange = (event) => {
+    const value = parseInt(event.target.value, 10)
+    if (!Number.isInteger(value)) {
+      return
+    }
+
+    if (!this.isValid(value)) {
+      return
+    }
+    this.setState({ value })
+  }
+
+  handleUpClick = () => {
+    const value = this.state.value + 1
+    if (!this.isValid(value)) {
+      return
+    }
+    console.log(value)
+    this.setState({ value })
+  }
+
+  handleDownClick = () => {
+    const value = this.state.value - 1
+    if (!this.isValid(value)) {
+      return
+    }
+    this.setState({ value })
+  }
+
   handleClickBid = () => {
-    const value = (this.props.bidValue || 0) + 1
-    this.props.bid(value)
+    this.props.bid(this.state.value)
   }
 
   handleClickNominate = () => {
-    const value = this.props.bidValue
-    this.props.nominate(value)
+    this.props.nominate(this.state.value)
+  }
+
+  static getDerivedStateFromProps ({ bidValue, selected, playerId }, { value }) {
+    if (!playerId && !selected) {
+      return { value: 0 }
+    }
+
+    if (playerId && bidValue >= value) {
+      return { value: bidValue + 1 }
+    }
+
+    return null
   }
 
   render = () => {
-    const { isPaused, player, bidValue, isNominating, selected, nominatingTeamId, timer } = this.props
+    const {
+      isPaused,
+      isLocked,
+      isEligible,
+      isAboveCap,
+      playerId,
+      isNominating,
+      selected,
+      nominatingTeamId,
+      timer,
+      isWinningBid
+    } = this.props
 
     let action
     if (isPaused) {
       action = (<Button disabled>Paused</Button>)
-    } else if (player) {
-      action = (<Button onClick={this.handleClickBid}>Bid</Button>)
+    } else if (isLocked) {
+      action = (<Button disabled>Locked</Button>)
+    } else if (playerId) {
+      if (isWinningBid) {
+        action = (<Button disabled>Winning Bid</Button>)
+      } else if (isAboveCap) {
+        action = (<Button disabled>Exceeded CAP</Button>)
+      } else if (!isEligible) {
+        action = (<Button disabled>Ineligible</Button>)
+      } else {
+        action = (<Button onClick={this.handleClickBid}>Bid ${this.state.value}</Button>)
+      }
     } else if (isNominating) {
       action = (<Button disabled={!selected} onClick={this.handleClickNominate}>Nominate</Button>)
     } else {
@@ -33,8 +115,10 @@ export default class AuctionMainBid extends React.Component {
     }
 
     let main
-    if (player) {
-      main = (<PlayerName playerId={player} />)
+    if (isPaused) {
+      main = (<div>Auction is paused.</div>)
+    } else if (playerId) {
+      main = (<PlayerName playerId={playerId} />)
     } else if (selected) {
       main = (<PlayerName playerId={selected} />)
     } else if (isNominating) {
@@ -48,6 +132,11 @@ export default class AuctionMainBid extends React.Component {
         <div className='auction__main-picture' />
         <div className='auction__main-player'>
           {main}
+        </div>
+        <div className='auction__main-input'>
+          <input type='number' value={this.state.value} onChange={this.handleChange} />
+          <div className='auction__main-input-up' onClick={this.handleUpClick}>+</div>
+          <div className='auction__main-input-down' onClick={this.handleDownClick}>—</div>
         </div>
         <div className='auction__main-action'>
           {action}

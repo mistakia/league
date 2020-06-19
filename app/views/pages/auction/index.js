@@ -23,6 +23,7 @@ const mapStateToProps = createSelector(
   getAuction,
   (players, auction) => ({
     players,
+    playerId: auction.player,
     transactions: auction.transactions,
     tids: auction.tids
   })

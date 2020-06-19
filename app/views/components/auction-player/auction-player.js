@@ -12,7 +12,7 @@ export default class AuctionPlayer extends React.Component {
     }
 
     if (!this.props.isEligible) {
-
+      return
     }
 
     this.props.select(this.props.player.player)

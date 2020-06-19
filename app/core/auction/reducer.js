@@ -5,9 +5,11 @@ import { auctionActions } from './actions'
 
 const initialState = new Record({
   isPaused: true,
+  isLocked: false,
   selected: null,
   player: null,
   bid: null,
+  connected: new List(),
   tids: new List(),
   transactions: new List(),
   positions: new List(constants.positions),
@@ -19,6 +21,14 @@ const initialState = new Record({
 
 export function auctionReducer (state = initialState(), { payload, type }) {
   switch (type) {
+    case auctionActions.AUCTION_CONNECTED:
+      return state.merge({
+        connected: new List(payload.connected)
+      })
+
+    case auctionActions.AUCTION_RELEASE_LOCK:
+      return state.merge({ isLocked: false })
+
     case auctionActions.AUCTION_FILTER:
       return state.merge({ [payload.type]: new List(payload.values) })
 
@@ -45,7 +55,13 @@ export function auctionReducer (state = initialState(), { payload, type }) {
         transactions: state.transactions.unshift(payload),
         bid: payload.value,
         player: payload.player,
-        timer: Math.round((Date.now() + state.bidTimer) / 1000)
+        timer: Math.round((Date.now() + state.bidTimer) / 1000),
+        isLocked: true
+      })
+
+    case auctionActions.AUCTION_SUBMIT_BID:
+      return state.merge({
+        isLocked: true
       })
 
     case auctionActions.AUCTION_PROCESSED:
@@ -72,6 +88,7 @@ export function auctionReducer (state = initialState(), { payload, type }) {
         transactions: new List(payload.transactions),
         tids: new List(payload.tids),
         bidTimer: payload.bidTimer,
+        connected: new List(payload.connected),
         nominationTimer: payload.nominationTimer
       })
     }

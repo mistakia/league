@@ -32,7 +32,14 @@ export function isPlayerAvailable (state, { player }) {
   return !rostered.includes(player.player)
 }
 
-export function isPlayerEligible (state, { player }) {
+export function isPlayerEligible (state, { player, playerId }) {
+  if (playerId) {
+    player = getPlayerById(state, { playerId })
+  }
+
+  if (!player) {
+    return false
+  }
   const roster = getCurrentTeamRoster(state)
   const league = getCurrentLeague(state)
   const eligibleSlots = getEligibleSlots({ league, bench: true, pos: player.pos1 })
