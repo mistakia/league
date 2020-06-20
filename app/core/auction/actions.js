@@ -11,6 +11,7 @@ export const auctionActions = {
   AUCTION_RELEASE_LOCK: 'AUCTION_RELEASE_LOCK',
 
   AUCTION_FILTER: 'AUCTION_FILTER',
+  AUCTION_SEARCH_PLAYERS: 'AUCTION_SEARCH_PLAYERS',
 
   AUCTION_SELECT_PLAYER: 'AUCTION_SELECT_PLAYER',
   AUCTION_SUBMIT_NOMINATION: 'AUCTION_SUBMIT_NOMINATION',
@@ -25,6 +26,13 @@ export const auctionActions = {
     payload: {
       type,
       values
+    }
+  }),
+
+  search: (value) => ({
+    type: auctionActions.AUCTION_SEARCH_PLAYERS,
+    payload: {
+      value
     }
   }),
 

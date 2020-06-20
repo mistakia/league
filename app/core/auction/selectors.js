@@ -1,4 +1,5 @@
 import { constants } from '@common'
+import { fuzzySearch } from '@core/utils'
 
 export function getAuction (state) {
   return state.get('auction')
@@ -12,11 +13,16 @@ export function isTeamConnected (state, { tid }) {
 export function getAuctionPlayers (state) {
   const auction = state.get('auction')
   const players = state.get('players').get('items')
+  const search = auction.get('search')
   const positions = auction.get('positions')
   let filtered = players
 
   if (positions.size !== constants.positions.length) {
     filtered = players.filter(player => positions.includes(player.pos1))
+  }
+
+  if (search) {
+    filtered = filtered.filter(player => fuzzySearch(search, player.name))
   }
 
   return filtered
