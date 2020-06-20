@@ -14,6 +14,7 @@ import {
 
 const initialState = new Map({
   isPending: false,
+  search: null,
   positions: new List(['QB', 'RB', 'WR', 'TE', 'K', 'DST']),
   nflTeams: new List(constants.nflTeams),
   experience: new List([0, 1, -1]),
@@ -28,6 +29,9 @@ const initialState = new Map({
 
 export function playersReducer (state = initialState, { payload, type }) {
   switch (type) {
+    case playerActions.SEARCH_PLAYERS:
+      return state.merge({ search: payload.value })
+
     case playerActions.SET_PROJECTION: {
       const { value, type, week, playerId, userId } = payload
       const key = state.get('items').get(playerId).get('projections').findKey(p => p.userid)
