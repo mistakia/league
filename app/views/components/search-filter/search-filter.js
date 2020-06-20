@@ -2,9 +2,9 @@ import React from 'react'
 
 import Icon from '@components/icon'
 
-import './players-search.styl'
+import './search-filter.styl'
 
-export default class PlayersSearch extends React.Component {
+export default class SearchFilter extends React.Component {
   constructor (props) {
     super(props)
 
@@ -27,16 +27,16 @@ export default class PlayersSearch extends React.Component {
 
   render = () => {
     return (
-      <div className='players__search'>
+      <div className='search__filter'>
         <input
-          className='players__search-input'
+          className='search__filter-input'
           type='text'
           placeholder='Filter players'
           value={this.state.value}
           onChange={this.handleChange}
         />
         {this.state.value &&
-          <div className='players__search-clear' onClick={this.handleClick}>
+          <div className='search__filter-clear' onClick={this.handleClick}>
             <Icon name='clear' />
           </div>}
       </div>

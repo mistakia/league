@@ -21,6 +21,11 @@ const initialState = new Record({
 
 export function auctionReducer (state = initialState(), { payload, type }) {
   switch (type) {
+    case auctionActions.AUCTION_SEARCH_PLAYERS:
+      return state.merge({
+        search: payload.value
+      })
+
     case auctionActions.AUCTION_CONNECTED:
       return state.merge({
         connected: new List(payload.connected)

@@ -1,6 +1,7 @@
 import React from 'react'
 
 import PageLayout from '@layouts/page'
+import SearchFilter from '@components/search-filter'
 import AuctionTransaction from '@components/auction-transaction'
 import AuctionPlayer from '@components/auction-player'
 import AuctionTeam from '@components/auction-team'
@@ -33,6 +34,7 @@ export default function () {
     <div className='auction'>
       <div className='auction__players'>
         <div className='auction__players-header'>
+          <SearchFilter search={this.props.search} value={this.props.searchValue} />
           <AuctionPositionFilter />
         </div>
         <div className='auction__players-body'>

@@ -23,6 +23,7 @@ const mapStateToProps = createSelector(
   getAuction,
   (players, auction) => ({
     players,
+    searchValue: auction.search,
     playerId: auction.player,
     transactions: auction.transactions,
     tids: auction.tids
@@ -31,7 +32,8 @@ const mapStateToProps = createSelector(
 
 const mapDispatchToProps = {
   load: rosterActions.loadRosters,
-  join: auctionActions.join
+  join: auctionActions.join,
+  search: auctionActions.search
 }
 
 export default connect(
