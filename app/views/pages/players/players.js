@@ -1,6 +1,7 @@
 import React from 'react'
 import { AutoSizer, List } from 'react-virtualized'
 
+import PlayersSearch from '@components/players-search'
 import PositionFilter from '@components/position-filter'
 import ExperienceFilter from '@components/experience-filter'
 import PageLayout from '@layouts/page'
@@ -88,6 +89,7 @@ export default class PlayersPage extends React.Component {
     const head = (
       <div className='players__head'>
         <div className='players__filter'>
+          <PlayersSearch />
           <PositionFilter />
           <ExperienceFilter />
         </div>

@@ -1,6 +1,7 @@
 export const playerActions = {
   LOAD_PLAYERS: 'LOAD_PLAYERS',
 
+  SEARCH_PLAYERS: 'SEARCH_PLAYERS',
   FILTER_PLAYERS: 'FILTER_PLAYERS',
   TOGGLE_ORDER: 'TOGGLE_ORDER',
   SET_ORDER: 'SET_ORDER',
@@ -54,6 +55,13 @@ export const playerActions = {
     payload: {
       type,
       values
+    }
+  }),
+
+  search: (value) => ({
+    type: playerActions.SEARCH_PLAYERS,
+    payload: {
+      value
     }
   }),
 
