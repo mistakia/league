@@ -1221,12 +1221,14 @@ ALTER TABLE `pbp`
 DROP TABLE IF EXISTS `draft`;
 
 CREATE TABLE `draft` (
-  `player` varchar(7) DEFAULT '',
+  `uid` int(6) unsigned NOT NULL AUTO_INCREMENT,
+  `player` varchar(7) DEFAULT NULL,
   `round` tinyint(1) NOT NULL,
   `pick` tinyint(2) DEFAULT NULL,
   `tid` int(6) NOT NULL,
   `lid` int(6) NOT NULL,
   `year` int(4) NOT NULL,
+  PRIMARY KEY (`uid`),
   UNIQUE KEY `pick` (`round`,`pick`,`lid`,`year`),
   KEY `lid` (`lid`),
   KEY `tid` (`tid`)
@@ -1451,6 +1453,92 @@ CREATE TABLE `teams` (
   UNIQUE KEY `do` (`lid`, `do`),
   UNIQUE KEY `wo` (`lid`, `wo`),
   KEY `lid` (`lid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `trades`
+--
+
+DROP TABLE IF EXISTS `trades`;
+
+CREATE TABLE `trades` (
+  `uid` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `pid` int(6) NOT NULL,
+  `tid` int(6) NOT NULL,
+  `lid` int(6) NOT NULL,
+  `userid` int(6) NOT NULL,
+  `year` int(4) NOT NULL,
+  `offered` int(11) NOT NULL,
+  `cancelled` int(11) NOT NULL,
+  `accepted` int(11) DEFAULT NULL,
+  `rejected` int(11) DEFAULT NULL,
+  `vetoed` int(11) DEFAULT NULL,
+  UNIQUE KEY `uid` (`uid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `trades_drops`
+--
+
+DROP TABLE IF EXISTS `trades_drops`;
+
+CREATE TABLE `trades_drops` (
+  `tradeid` int(6) NOT NULL,
+  `tid` int(6) NOT NULL,
+  `player` varchar(7) NOT NULL,
+  KEY (`tradeid`),
+  UNIQUE KEY `player` (`tradeid`,`player`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `trades_players`
+--
+
+DROP TABLE IF EXISTS `trades_players`;
+
+CREATE TABLE `trades_players` (
+  `tradeid` int(6) NOT NULL,
+  `tid` int(6) NOT NULL,
+  `player` varchar(7) NOT NULL,
+  KEY (`tradeid`),
+  UNIQUE KEY `player` (`tradeid`,`player`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `trades_picks`
+--
+
+DROP TABLE IF EXISTS `trades_picks`;
+
+CREATE TABLE `trades_picks` (
+  `tradeid` int(6) NOT NULL,
+  `tid` int(6) NOT NULL,
+  `pickid` int(6) NOT NULL,
+  KEY (`tradeid`),
+  UNIQUE KEY `pick` (`tradeid`,`pickid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `trades_transactions`
+--
+
+DROP TABLE IF EXISTS `trades_transactions`;
+
+CREATE TABLE `trades_transactions` (
+  `tradeid` int(6) NOT NULL,
+  `transactionid` int(6) NOT NULL,
+  UNIQUE KEY `transaction` (`tradeid`,`transactionid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------

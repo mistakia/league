@@ -6,12 +6,21 @@ const transactions = require('./transactions')
 const draft = require('./draft')
 const games = require('./games')
 const settings = require('./settings')
+const trades = require('./trades')
 
 router.get('/:leagueId/teams/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const { leagueId } = req.params
     const teams = await db('teams').where({ lid: leagueId })
+    const picks = await db('draft')
+      .where({ lid: leagueId })
+      .whereNull('player')
+
+    for (const team of teams) {
+      team.picks = picks.filter(p => p.tid === team.uid)
+    }
+
     res.send({ teams })
   } catch (err) {
     logger(err)
@@ -65,5 +74,6 @@ router.use('/:leagueId/transactions', transactions)
 router.use('/:leagueId/games', games)
 router.use('/:leagueId/draft', draft)
 router.use('/:leagueId/settings', settings)
+router.use('/:leagueId/trades', trades)
 
 module.exports = router

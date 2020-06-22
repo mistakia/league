@@ -11,6 +11,7 @@ const Menu = () => (
     <NavLink to='/lineups'>Lineup</NavLink>
     <NavLink to='/players'>Players</NavLink>
     <NavLink to='/league'>League</NavLink>
+    <NavLink to='/trade'>Trade</NavLink>
     {!week && <NavLink to='/draft'>Draft</NavLink>}
     {!week && <NavLink to='/auction'>Auction</NavLink>}
   </div>

@@ -1,0 +1,29 @@
+.trade__menu
+  flex 1
+  height 100%
+  background #fafafa
+  border 1px solid $borderColor
+  margin 16px
+
+.trade__menu-item
+  padding 8px
+  cursor pointer
+  &:hover
+    background #f0f0f0
+
+.trade__menu-head
+  padding 8px
+  font-weight 600
+  display flex
+  justify-content center
+  align-items center
+  border-bottom 1px solid $borderColor
+
+.trade__menu-body:empty:after
+  content 'empty'
+  text-transform uppercase
+  padding 16px
+  display flex
+  align-items center
+  justify-content center
+  color lighten($textColor, 50%)

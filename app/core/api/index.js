@@ -10,5 +10,9 @@ export {
   postDraft,
   getPlayerStats,
   fetchTransactions,
-  getMatchups
+  getMatchups,
+  postProposeTrade,
+  getTrades,
+  postCancelTrade,
+  postAcceptTrade
 } from './sagas'

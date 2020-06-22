@@ -9,7 +9,6 @@ export default class DraftPick extends React.Component {
   render () {
     const { player, pick, team, league, isActive } = this.props
 
-    const round = pick.round
     const pickNum = (pick.pick % league.nteams) || league.nteams
 
     const classNames = ['draft__pick']
@@ -20,7 +19,7 @@ export default class DraftPick extends React.Component {
     return (
       <div className={classNames.join(' ')}>
         <div className='draft__pick-num'>
-          {round}.{('0' + pickNum).slice(-2)}
+          {pick.round}.{('0' + pickNum).slice(-2)}
         </div>
         <div className='draft__pick-main'>
           {player.player &&

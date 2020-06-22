@@ -7,6 +7,7 @@ import AuctionPage from '@pages/auction'
 import PlayersPage from '@pages/players'
 import LineupsPage from '@pages/lineups'
 import LeaguePage from '@pages/league'
+import TradePage from '@pages/trade'
 
 const Routes = () => (
   <Switch>
@@ -15,6 +16,7 @@ const Routes = () => (
     <Route exact path='/players' component={PlayersPage} />
     <Route exact path='/auction' component={AuctionPage} />
     <Route exact path='/draft' component={DraftPage} />
+    <Route exact path='/trade' component={TradePage} />
     <Route path='/league' component={LeaguePage} />
     <Route exact path='/' component={() => <Redirect to='/dashboard' />} />
   </Switch>
