@@ -16,6 +16,23 @@ export default class Roster {
     return Array.from(this._slots.values())
   }
 
+  get slots () {
+    return Object.fromEntries(this._slots)
+  }
+
+  removePlayer (playerId) {
+    for (const [slot, player] of this._slots.entries()) {
+      if (player === playerId) {
+        this._slots.set(slot, null)
+      }
+    }
+  }
+
+  addPlayer (slot, player) {
+    const slotNum = constants.slots[slot]
+    this._slots.set(`s${slotNum}`, player)
+  }
+
   getOpenSlots (slots) {
     const open = []
     for (const slot of slots) {

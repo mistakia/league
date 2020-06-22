@@ -48,7 +48,6 @@ export default class AuctionMainBid extends React.Component {
     if (!this.isValid(value)) {
       return
     }
-    console.log(value)
     this.setState({ value })
   }
 

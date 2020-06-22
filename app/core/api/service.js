@@ -61,6 +61,22 @@ export const api = {
   getTransactions (params) {
     const url = `${BASE_URL}/leagues/${params.leagueId}/transactions?${queryString.stringify(params)}`
     return { url }
+  },
+  getTrades (params) {
+    const url = `${BASE_URL}/leagues/${params.leagueId}/trades?${queryString.stringify(params)}`
+    return { url }
+  },
+  postProposeTrade (data) {
+    const url = `${BASE_URL}/leagues/${data.leagueId}/trades`
+    return { url, ...POST(data) }
+  },
+  postCancelTrade (data) {
+    const url = `${BASE_URL}/leagues/${data.leagueId}/trades/${data.tradeId}/cancel`
+    return { url, ...POST(data) }
+  },
+  postAcceptTrade (data) {
+    const url = `${BASE_URL}/leagues/${data.leagueId}/trades/${data.tradeId}/accept`
+    return { url, ...POST(data) }
   }
 }
 

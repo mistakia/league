@@ -1,11 +1,12 @@
-import { Record } from 'immutable'
+import { Record, List } from 'immutable'
 
 export const Team = new Record({
   uid: null,
   name: null,
   image: null,
   lid: null,
-  acap: null
+  acap: null,
+  picks: new List()
 })
 
 export function createTeam ({
@@ -13,13 +14,15 @@ export function createTeam ({
   name,
   image,
   lid,
-  acap
+  acap,
+  picks = []
 }) {
   return new Team({
     uid,
     name,
     image,
     lid,
-    acap
+    acap,
+    picks: new List(picks)
   })
 }

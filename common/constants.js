@@ -80,8 +80,10 @@ export const transactions = {
 
   ROSTER_ACTIVATE: 2,
   ROSTER_DEACTIVATE: 3,
-  POACH_CLAIM: 4,
-  POACH_PROCESSED: 5,
+
+  TRADE: 4,
+
+  POACHED: 5,
 
   AUCTION_BID: 6,
   AUCTION_PROCESSED: 7,
@@ -100,7 +102,9 @@ export const transactionsDetail = {
 
   2: 'Activated',
   3: 'Deactivated',
-  4: 'Poach Claim',
+
+  4: 'Traded',
+
   5: 'Poached',
 
   6: 'Bid',

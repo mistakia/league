@@ -9,3 +9,4 @@ export {
 export { rosterSagas } from './sagas'
 export { rostersReducer } from './reducer'
 export { rosterActions, getRosterActions, getRostersActions } from './actions'
+export { Roster } from './roster'

@@ -21,7 +21,7 @@ router.post('/?', async (req, res) => {
   try {
     const { db, broadcast } = req.app.locals
     const { leagueId } = req.params
-    const { teamId, playerId, pick } = req.body
+    const { teamId, playerId, pickId } = req.body
 
     if (!teamId) {
       return res.status(400).send({ error: 'missing teamId param' })
@@ -40,9 +40,12 @@ router.post('/?', async (req, res) => {
     }
 
     // make sure team has current pick
-    const picks = await db('draft').where({ lid: leagueId, year: constants.year }).orderBy('pick', 'asc')
-    const currentPick = picks.find(p => !p.player)
-    if (currentPick.tid !== teamId) {
+    const picks = await db('draft').where({ uid: pickId }).whereNull('player')
+    const pick = picks[0]
+    if (!pick) {
+      return res.status(400).send({ error: 'invalid pickId' })
+    }
+    if (pick.tid !== teamId) {
       return res.status(400).send({ error: 'invalid teamId' })
     }
 
@@ -84,8 +87,8 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'unavailable roster spot' })
     }
 
-    const value = (league.nteams - pick + 1) > 0
-      ? (league.nteams - pick + 1)
+    const value = (league.nteams - pick.pick + 1) > 0
+      ? (league.nteams - pick.pick + 1)
       : 1
 
     const update = {}
@@ -107,7 +110,7 @@ router.post('/?', async (req, res) => {
       })
 
     const updateDraft = db('draft')
-      .where({ pick, year: constants.year, lid: leagueId })
+      .where({ uid: pickId })
       .update({ player: playerId })
 
     await updateRosters
@@ -116,7 +119,7 @@ router.post('/?', async (req, res) => {
       updateDraft
     ])
 
-    const data = { pick, player: playerId, lid: leagueId }
+    const data = { uid: pickId, player: playerId, lid: leagueId }
     broadcast(leagueId, {
       type: 'DRAFTED_PLAYER',
       payload: { data }
