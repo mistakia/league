@@ -1,4 +1,5 @@
 const path = require('path')
+const config = require('./config')
 // Update with your config settings.
 
 module.exports = {
@@ -8,7 +9,7 @@ module.exports = {
     connection: {
       host: 'localhost',
       user: 'root',
-      database: 'league'
+      database: 'league_development'
     },
     pool: {
       min: 2,
@@ -40,23 +41,5 @@ module.exports = {
     }
   },
 
-  production: {
-    client: 'mysql',
-    connection: {
-      host: 'localhost',
-      user: 'root',
-      database: 'league'
-    },
-    pool: {
-      min: 2,
-      max: 10
-    },
-    migrations: {
-      directory: path.resolve(__dirname, './db/migrations'),
-      tableName: 'league_migrations'
-    },
-    seeds: {
-      directory: path.resolve(__dirname, './db/seeds/production')
-    }
-  }
+  production: config.mysql
 }

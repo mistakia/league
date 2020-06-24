@@ -45,6 +45,7 @@ export function * toggleOrder ({ payload }) {
 }
 
 export function * setProjection () {
+  const { value, type, week, playerId, userId } = payload
   // TODO save projection
   yield call(calculateValues)
 }
