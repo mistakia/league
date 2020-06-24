@@ -2,6 +2,7 @@ const https = require('https')
 const http = require('http')
 const fs = require('fs')
 const url = require('url')
+const path = require('path')
 
 const WebSocket = require('ws')
 const express = require('express')
@@ -60,8 +61,8 @@ if (options.ssl) {
 }
 
 api.use('/api/auth', routes.auth)
-api.use(expressJwt(config.jwt))
-api.use((err, req, res, next) => {
+api.use('/api/*', expressJwt(config.jwt))
+api.use('/api/*', (err, req, res, next) => {
   if (err.name === 'UnauthorizedError') {
     return res.status(401).send({ error: 'invalid token' })
   }
@@ -71,6 +72,9 @@ api.use('/api/me', routes.me)
 api.use('/api/players', routes.players)
 api.use('/api/teams', routes.teams)
 api.use('/api/leagues', routes.leagues)
+api.use('/*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../', 'dist', 'index.html'))
+})
 
 const createServer = () => {
   if (!options.ssl) {

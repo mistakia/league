@@ -20,7 +20,7 @@ const initialState = new Map({
   experience: new List([0, 1, -1]),
   health: new List(['ir', 'healthy']),
   teams: new List(),
-  status: new List(['available', 'rostered', 'all']),
+  status: new List(['available', 'rostered']),
   items: new Map(),
   order: 'desc',
   orderBy: DEFAULT_ORDER_BY,

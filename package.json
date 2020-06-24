@@ -3,7 +3,9 @@
     "start": "cross-env START_HOT=1 NODE_ENV=development webpack-dev-server --config configs/webpack.config.dev.babel.js",
     "lint": "$(npm bin)/standard",
     "test": "NODE_ENV=test TEST=all mocha --exit",
-    "start:api": "node server.js"
+    "start:api": "node server.js",
+    "build": "cross-env NODE_ENV=production webpack --config ./configs/webpack.config.prod.babel.js --colors",
+    "deploy": "pm2 deploy production"
   },
   "standard": {
     "parser": "babel-eslint",
@@ -58,6 +60,8 @@
     "cross-env": "^7.0.2",
     "css-loader": "^3.5.3",
     "csv-parser": "^2.3.2",
+    "html-webpack-inline-source-plugin": "^1.0.0-beta.2",
+    "html-webpack-plugin": "^4.3.0",
     "immutable": "^4.0.0-rc.12",
     "mini-css-extract-plugin": "^0.9.0",
     "mocha": "^7.2.0",

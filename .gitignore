@@ -10,4 +10,6 @@ yarn-error.log
 
 # App specific
 #
-config.js
+config.production.js
+key.pem
+cert.pem

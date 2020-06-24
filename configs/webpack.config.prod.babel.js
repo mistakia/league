@@ -1,19 +1,22 @@
-import path from 'path'
-import webpack from 'webpack'
+const path = require('path')
+const webpack = require('webpack')
+
 // import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 // import OptimizeCSSAssetsPlugin from 'optimize-css-assets-webpack-plugin'
-import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
-import nib from 'nib'
-import merge from 'webpack-merge'
-import TerserPlugin from 'terser-webpack-plugin'
-import baseConfig from './webpack.config.base'
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const HtmlWebpackInlineSourcePlugin = require('html-webpack-inline-source-plugin')
+const nib = require('nib')
+const merge = require('webpack-merge')
+const TerserPlugin = require('terser-webpack-plugin')
+const baseConfig = require('./webpack.config.base')
 // import CheckNodeEnv from '../internals/scripts/CheckNodeEnv'
 // import DeleteSourceMaps from '../internals/scripts/DeleteSourceMaps'
 
 // CheckNodeEnv('production')
 // DeleteSourceMaps()
 
-export default merge.smart(baseConfig, {
+module.exports = merge.smart(baseConfig, {
   devtool: process.env.DEBUG_PROD === 'true' ? 'source-map' : 'none',
 
   mode: 'production',
@@ -88,6 +91,11 @@ export default merge.smart(baseConfig, {
      *   filename: 'style.css'
      * }),
      */
+    new HtmlWebpackPlugin({
+      template: 'app/index.prod.html',
+      inlineSource: '.(js|css)$'
+    }),
+    new HtmlWebpackInlineSourcePlugin(HtmlWebpackPlugin),
     new BundleAnalyzerPlugin({
       analyzerMode:
         process.env.OPEN_ANALYZER === 'true' ? 'server' : 'disabled',
