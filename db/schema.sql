@@ -1266,7 +1266,7 @@ CREATE TABLE `draft_rankings` (
 DROP TABLE IF EXISTS `leagues`;
 
 CREATE TABLE `leagues` (
-  `uid` int(6) NOT NULL,
+  `uid` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `commishid` int(6) NOT NULL,
   `name` varchar(50) NOT NULL,
   `nteams` tinyint(2) NOT NULL,
@@ -1441,9 +1441,9 @@ CREATE TABLE `sources` (
 DROP TABLE IF EXISTS `teams`;
 
 CREATE TABLE `teams` (
-  `uid` int(6) NOT NULL,
+  `uid` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `lid` int(6) NOT NULL,
-  `div` tinyint(1) NOT NULL,
+  `div` tinyint(1) DEFAULT NULL,
   `name` varchar(50) NOT NULL,
   `image` varchar(500) DEFAULT '',
   `acap` int(4) NOT NULL,
