@@ -10,6 +10,7 @@
   "standard": {
     "parser": "babel-eslint",
     "ignore": [
+      "dist",
       "node_modules"
     ]
   },

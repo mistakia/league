@@ -18,10 +18,12 @@ class App extends React.Component {
   constructor (props) {
     super(props)
     this.state = {
-      menu: 'login'
+      menu: 'login',
+      passwordError: false
     }
 
-    this.handleSubmit = this.handleSubmit.bind(this)
+    this.passwordRef = React.createRef()
+    this.password2Ref = React.createRef()
     // TODO add general keyboard shortcuts
   }
 
@@ -30,7 +32,7 @@ class App extends React.Component {
     this.props.init(token)
   }
 
-  handleSubmit (event) {
+  handleSubmit = (event) => {
     event.preventDefault()
     const data = {
       email: event.target.email.value,
@@ -38,13 +40,25 @@ class App extends React.Component {
     }
     if (this.state.menu === 'login') {
       this.props.login(data)
-    } else {
+    } else if (
+      this.password2Ref.current.value &&
+        this.passwordRef.current.value === this.password2Ref.current.value) {
       this.props.register(data)
     }
   }
 
-  setMenu (menu) {
-    this.setState({ menu })
+  handleClick = () => {
+    this.setState({
+      passwordError: false,
+      menu: this.state.menu === 'login' ? 'register' : 'login'
+    })
+  }
+
+  handleChange = () => {
+    if (this.state.menu === 'login') return
+    this.setState({
+      passwordError: this.passwordRef.current.value !== this.password2Ref.current.value
+    })
   }
 
   render () {
@@ -57,38 +71,46 @@ class App extends React.Component {
       return (
         <main>
           <div className='auth'>
-            {/* <div className='menu'>
-                <Button
-                isActive={this.state.menu === 'login'}
-                onClick={() => this.setMenu('login')}
-                >
-                Login
+            <div className='auth__side' />
+            <div className='auth__main'>
+              <form id='auth' onSubmit={this.handleSubmit}>
+                {authError}
+                <TextField
+                  id='email'
+                  label='Email Address'
+                  type='email'
+                  error={!!authError}
+                  variant='outlined'
+                />
+                <TextField
+                  error={!!authError || this.state.passwordError}
+                  helperText={this.state.passwordError && 'Password does not match'}
+                  id='password'
+                  label='Password'
+                  type='password'
+                  inputRef={this.passwordRef}
+                  onChange={this.handleChange}
+                  variant='outlined'
+                />
+                {this.state.menu === 'register' &&
+                  <TextField
+                    error={!!authError || this.state.passwordError}
+                    helperText={this.state.passwordError && 'Password does not match'}
+                    id='password2'
+                    label='Confirm Password'
+                    type='password'
+                    inputRef={this.password2Ref}
+                    onChange={this.handleChange}
+                    variant='outlined'
+                  />}
+                <Button type='submit' isLoading={isPending}>
+                  {this.state.menu}
                 </Button>
-                <Button
-                isActive={this.state.menu === 'register'}
-                onClick={() => this.setMenu('register')}
-                >
-                Register
-                </Button>
-                </div> */}
-            <form id='auth' onSubmit={this.handleSubmit}>
-              {authError}
-              <TextField
-                id='email'
-                label='Email Address'
-                type='email'
-                error={!!authError}
-                variant='outlined'
-              />
-              <TextField
-                error={!!authError}
-                id='password'
-                label='Password'
-                type='password'
-                variant='outlined'
-              />
-              <Button type='submit' isLoading={isPending}>Login</Button>
-            </form>
+              </form>
+              <Button className='auth__toggle button__text' onClick={this.handleClick}>
+                {this.state.menu === 'register' ? 'login' : 'register'}
+              </Button>
+            </div>
           </div>
         </main>
       )
