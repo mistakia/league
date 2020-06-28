@@ -1,4 +1,5 @@
 import React from 'react'
+import queryString from 'query-string'
 // import hotkeys from 'hotkeys-js'
 
 import Menu from '@components/menu'
@@ -17,8 +18,11 @@ import './app.styl'
 class App extends React.Component {
   constructor (props) {
     super(props)
+
+    const { leagueId } = queryString.parse(this.props.location.search)
+
     this.state = {
-      menu: 'login',
+      menu: leagueId ? 'register' : 'login',
       passwordError: false
     }
 
@@ -34,9 +38,12 @@ class App extends React.Component {
 
   handleSubmit = (event) => {
     event.preventDefault()
+    const { leagueId, teamId } = queryString.parse(this.props.location.search)
     const data = {
       email: event.target.email.value,
-      password: event.target.password.value
+      password: event.target.password.value,
+      leagueId,
+      teamId
     }
     if (this.state.menu === 'login') {
       this.props.login(data)
@@ -62,6 +69,7 @@ class App extends React.Component {
   }
 
   render () {
+    const { leagueId, teamId } = queryString.parse(this.props.location.search)
     const { isPending, userId, authError } = this.props
     if (isPending) {
       return <Loading loading={isPending} />
@@ -75,6 +83,20 @@ class App extends React.Component {
             <div className='auth__main'>
               <form id='auth' onSubmit={this.handleSubmit}>
                 {authError}
+                {leagueId &&
+                  <TextField
+                    disabled
+                    label='League Id'
+                    variant='outlined'
+                    value={leagueId}
+                  />}
+                {teamId &&
+                  <TextField
+                    disabled
+                    label='Team Id'
+                    variant='outlined'
+                    value={teamId}
+                  />}
                 <TextField
                   id='email'
                   label='Email Address'

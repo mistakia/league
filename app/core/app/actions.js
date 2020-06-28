@@ -36,11 +36,13 @@ export const appActions = {
     type: appActions.LOGOUT
   }),
 
-  register: ({ email, password }) => ({
+  register: ({ email, password, leagueId, teamId }) => ({
     type: appActions.REGISTER,
     payload: {
       email,
-      password
+      password,
+      leagueId,
+      teamId
     }
   }),
 
