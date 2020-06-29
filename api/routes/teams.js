@@ -1,6 +1,38 @@
 const express = require('express')
 const router = express.Router()
 
+router.put('/:teamId', async (req, res) => {
+  const { db, logger } = req.app.locals
+  try {
+    const { teamId } = req.params
+    const { value, field } = req.body
+
+    const fields = ['name', 'image', 'abbrv']
+
+    if (!field) {
+      return res.status(400).send({ error: 'missing field' })
+    }
+
+    if (!value) {
+      return res.status(400).send({ error: 'missing value' })
+    }
+
+    if (fields.indexOf(field) < 0) {
+      return res.status(400).send({ error: 'invalid field' })
+    }
+
+    if (field === 'image') {
+      // TODO validate url
+    }
+
+    await db('teams').update({ [field]: value }).where({ uid: teamId })
+    res.send({ value })
+  } catch (error) {
+    logger(error)
+    res.status(500).send({ error: error.toString() })
+  }
+})
+
 router.get('/:teamId/lineups/?', async (req, res) => {
   const { db } = req.app.locals
   const { teamId } = req.params

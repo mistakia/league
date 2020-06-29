@@ -4,8 +4,9 @@ import { getApp, appActions } from '@core/app'
 import { fetchPlayers, getPlayerStats } from '@core/api'
 import { playerActions } from './actions'
 import { getAllPlayers, getPlayers } from './selectors'
-import { getLeagues } from '@core/leagues'
+import { getLeagues, leagueActions } from '@core/leagues'
 import { DEFAULT_ORDER_BY } from '@core/constants'
+import { sourceActions } from '@core/sources'
 
 export function * loadPlayers () {
   yield call(fetchPlayers)
@@ -83,6 +84,14 @@ export function * watchSelectPlayer () {
   yield takeLatest(playerActions.PLAYERS_SELECT_PLAYER, loadStats)
 }
 
+export function * watchPutLeagueFulfilled () {
+  yield takeLatest(leagueActions.PUT_LEAGUE_FULFILLED, calculateValues)
+}
+
+export function * watchPutSourceFulfilled () {
+  yield takeLatest(sourceActions.PUT_SOURCE_FULFILLED, calculateValues)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -93,5 +102,7 @@ export const playerSagas = [
   fork(watchAuthFulfilled),
   fork(watchToggleOrder),
   fork(watchSetProjection),
-  fork(watchSelectPlayer)
+  fork(watchSelectPlayer),
+  fork(watchPutLeagueFulfilled),
+  fork(watchPutSourceFulfilled)
 ]

@@ -10,6 +10,8 @@ import { wsSagas } from './ws'
 import { transactionSagas } from './transactions'
 import { matchupSagas } from './matchups'
 import { tradeSagas } from './trade'
+import { leagueSagas } from './leagues'
+import { sourceSagas } from './sources'
 
 export default function * rootSaga () {
   yield all([
@@ -22,6 +24,8 @@ export default function * rootSaga () {
     ...wsSagas,
     ...transactionSagas,
     ...matchupSagas,
-    ...tradeSagas
+    ...tradeSagas,
+    ...leagueSagas,
+    ...sourceSagas
   ])
 }

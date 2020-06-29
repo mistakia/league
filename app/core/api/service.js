@@ -13,6 +13,14 @@ const POST = (data) => ({
   }
 })
 
+const PUT = (data) => ({
+  method: 'PUT',
+  body: JSON.stringify(data),
+  headers: {
+    'Content-Type': 'application/json'
+  }
+})
+
 export const api = {
   postRegister (data) {
     const url = `${BASE_URL}/auth/register`
@@ -77,6 +85,18 @@ export const api = {
   postAcceptTrade (data) {
     const url = `${BASE_URL}/leagues/${data.leagueId}/trades/${data.tradeId}/accept`
     return { url, ...POST(data) }
+  },
+  putLeague (data) {
+    const url = `${BASE_URL}/leagues/${data.leagueId}`
+    return { url, ...PUT(data) }
+  },
+  putTeam (data) {
+    const url = `${BASE_URL}/teams/${data.teamId}`
+    return { url, ...PUT(data) }
+  },
+  putSource (data) {
+    const url = `${BASE_URL}/sources/${data.sourceId}`
+    return { url, ...PUT(data) }
   }
 }
 

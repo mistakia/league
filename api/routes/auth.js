@@ -94,7 +94,8 @@ router.post('/register', async (req, res) => {
         do: null,
         acap: league.cap,
         div: null,
-        name: 'Team Name'
+        name: 'Team Name',
+        abbrv: 'TM'
       })
       teamId = teams[0]
     }

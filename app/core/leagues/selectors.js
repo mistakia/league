@@ -3,6 +3,7 @@ import { createSelector } from 'reselect'
 import { getTeams } from '@core/teams'
 import { getRosters } from '@core/rosters'
 import { getApp } from '@core/app'
+import { League } from './league'
 
 export function getLeagues (state) {
   return state.get('leagues').toList()
@@ -18,9 +19,9 @@ export function getCurrentLeagueTeamIds (state) {
   return state.get('leagues').get(leagueId).teams
 }
 
-export function getLeagueById (state, id) {
+export function getLeagueById (state, { lid }) {
   const leagues = state.get('leagues')
-  return leagues.get(leagues.get(id))
+  return leagues.get(lid) || new League()
 }
 
 export const getTeamsForCurrentLeague = createSelector(

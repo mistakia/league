@@ -6,5 +6,5 @@ export {
 
 export { teamsReducer } from './reducer'
 export { teamSagas } from './sagas'
-export { teamActions, getTeamsActions } from './actions'
+export { teamActions, getTeamsActions, putTeamActions } from './actions'
 export { Team } from './team'

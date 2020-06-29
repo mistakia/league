@@ -14,5 +14,8 @@ export {
   postProposeTrade,
   getTrades,
   postCancelTrade,
-  postAcceptTrade
+  postAcceptTrade,
+  putLeague,
+  putTeam,
+  putSource
 } from './sagas'
