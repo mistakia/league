@@ -83,7 +83,8 @@ exports.seed = async function (knex, Promise) {
       do: i,
       acap: league.cap,
       div: (i % 4) + 1,
-      name: `Team${i}`
+      name: `Team${i}`,
+      abbrv: `TM${i}`
     })
 
     await knex('rosters').insert({

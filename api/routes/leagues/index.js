@@ -8,6 +8,71 @@ const games = require('./games')
 const settings = require('./settings')
 const trades = require('./trades')
 
+router.put('/:leagueId', async (req, res) => {
+  const { db, logger } = req.app.locals
+  try {
+    const { leagueId } = req.params
+    const { field } = req.body
+    let { value } = req.body
+
+    const fields = [
+      'sqb', 'srb', 'swr', 'ste', 'sk', 'sdst', 'srbwr', 'srbwrte',
+      'sqbrbwrte', 'swrte', 'bench', 'ps', 'ir', 'mqb', 'mrb', 'mwr', 'mte',
+      'mdst', 'mk', 'faab', 'cap', 'pa', 'pc', 'py', 'ints', 'tdp', 'ra', 'ry',
+      'tdr', 'rec', 'recy', 'twoptc', 'tdrec', 'fuml', 'name', 'nteams'
+    ]
+
+    if (!field) {
+      return res.status(400).send({ error: 'missing field' })
+    }
+
+    if (!value) {
+      return res.status(400).send({ error: 'missing value' })
+    }
+
+    if (fields.indexOf(field) < 0) {
+      return res.status(400).send({ error: 'invalid field' })
+    }
+
+    const ints = [
+      'sqb', 'srb', 'swr', 'ste', 'sk', 'sdst', 'srbwr', 'srbwrte',
+      'sqbrbwrte', 'swrte', 'bench', 'ps', 'ir', 'mqb', 'mrb', 'mwr', 'mte',
+      'mdst', 'mk', 'faab', 'cap', 'pa', 'pc', 'py', 'ints', 'tdp', 'ra', 'ry',
+      'tdr', 'rec', 'recy', 'twoptc', 'tdrec', 'fuml', 'name', 'nteams'
+    ]
+    const positives = [
+      'sqb', 'srb', 'swr', 'ste', 'sk', 'sdst', 'srbwr', 'srbwrte',
+      'sqbrbwrte', 'swrte', 'bench', 'ps', 'ir', 'mqb', 'mrb', 'mwr', 'mte',
+      'mdst', 'mk', 'faab', 'cap'
+    ]
+    const floats = [
+      'pa', 'pc', 'py', 'ra', 'ry', 'rec', 'recy'
+    ]
+
+    if (ints.indexOf(value)) {
+      if (isNaN(value)) {
+        return res.status(400).send({ error: 'invalid value' })
+      }
+
+      if (floats.indexOf(field)) {
+        value = parseFloat(value)
+      } else {
+        value = parseInt(value, 10)
+      }
+
+      if (positives.indexOf(field) && value < 0) {
+        return res.status(400).send({ error: 'invalid value' })
+      }
+    }
+
+    await db('leagues').update({ [field]: value }).where({ uid: leagueId })
+    res.send({ value })
+  } catch (err) {
+    logger(err)
+    res.status(500).send({ error: err.toString() })
+  }
+})
+
 router.get('/:leagueId/teams/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {

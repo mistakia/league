@@ -1,4 +1,4 @@
-import { Record } from 'immutable'
+import { Record, List } from 'immutable'
 
 import { appActions } from './actions'
 
@@ -9,7 +9,9 @@ const initialState = new Record({
   leagueId: undefined,
   isPending: true,
   isUpdating: false,
-  authError: null
+  authError: null,
+  teamIds: new List(),
+  leagueIds: new List()
 })
 
 export function appReducer (state = initialState(), { payload, type }) {
@@ -33,6 +35,8 @@ export function appReducer (state = initialState(), { payload, type }) {
         leagueId: payload.data.leagues.length ? payload.data.leagues[0].uid : undefined,
         teamId: payload.data.teams.length ? payload.data.teams[0].uid : undefined,
         userId: payload.data.user.id,
+        teamIds: new List(payload.data.teams.map(t => t.uid)),
+        leagueIds: new List(payload.data.leagues.map(l => l.uid)),
         isPending: false
       })
 

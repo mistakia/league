@@ -1445,6 +1445,7 @@ CREATE TABLE `teams` (
   `lid` int(6) NOT NULL,
   `div` tinyint(1) DEFAULT NULL,
   `name` varchar(50) NOT NULL,
+  `abbrv` varchar(5) NOT NULL,
   `image` varchar(500) DEFAULT '',
   `acap` int(4) NOT NULL,
   `do` tinyint(2) DEFAULT NULL,
@@ -1592,8 +1593,8 @@ CREATE TABLE `users_sources` (
   `userid` int(6) NOT NULL,
   `sourceid` int(6) NOT NULL,
   `weight` decimal(2,2) NOT NULL,
-  PRIMARY KEY (`userid`),
-  UNIQUE KEY `userid` (`userid`,`sourceid`)
+  KEY (`userid`),
+  UNIQUE KEY `sourceid` (`userid`,`sourceid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------

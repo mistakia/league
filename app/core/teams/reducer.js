@@ -32,6 +32,11 @@ export function teamsReducer (state = initialState, { payload, type }) {
       return state.setIn([payload.tid, 'acap'], newCap)
     }
 
+    case teamActions.PUT_TEAM_FULFILLED:
+      return state.setIn(
+        [payload.opts.teamId, payload.opts.field], payload.data.value
+      )
+
     default:
       return state
   }

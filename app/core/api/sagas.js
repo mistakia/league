@@ -12,7 +12,7 @@ import {
 import { getDraftActions, postDraftActions } from '@core/draft'
 import { getRosterActions, getRostersActions } from '@core/rosters'
 import { playersRequestActions, getPlayerStatsActions } from '@core/players'
-import { getTeamsActions } from '@core/teams'
+import { getTeamsActions, putTeamActions } from '@core/teams'
 import { getTransactionsActions } from '@core/transactions'
 import { getMatchupsActions } from '@core/matchups'
 import {
@@ -21,6 +21,8 @@ import {
   postTradeCancelActions,
   getTradesActions
 } from '@core/trade'
+import { putLeagueActions } from '@core/leagues'
+import { putSourceActions } from '@core/sources'
 
 function * fetchAPI (apiFunction, actions, opts = {}) {
   const token = yield select(getToken)
@@ -67,3 +69,9 @@ export const getTrades = fetch.bind(null, api.getTrades, getTradesActions)
 
 export const postCancelTrade = fetch.bind(null, api.postCancelTrade, postTradeCancelActions)
 export const postAcceptTrade = fetch.bind(null, api.postAcceptTrade, postTradeAcceptActions)
+
+export const putLeague = fetch.bind(null, api.putLeague, putLeagueActions)
+
+export const putTeam = fetch.bind(null, api.putTeam, putTeamActions)
+
+export const putSource = fetch.bind(null, api.putSource, putSourceActions)

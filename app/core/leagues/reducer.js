@@ -3,6 +3,7 @@ import { Map, List } from 'immutable'
 import { appActions } from '@core/app'
 import { createLeague } from './league'
 import { teamActions } from '@core/teams'
+import { leagueActions } from './actions'
 
 const initialState = new Map()
 
@@ -17,6 +18,11 @@ export function leaguesReducer (state = initialState, { payload, type }) {
       return state.setIn(
         [payload.opts.leagueId, 'teams'],
         new List(payload.data.teams.map(t => t.uid))
+      )
+
+    case leagueActions.PUT_LEAGUE_FULFILLED:
+      return state.setIn(
+        [payload.opts.leagueId, payload.opts.field], payload.data.value
       )
 
     case appActions.LOGOUT:

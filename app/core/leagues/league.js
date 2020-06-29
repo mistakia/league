@@ -2,6 +2,7 @@ import { Record, List } from 'immutable'
 
 export const League = new Record({
   uid: null,
+  commishid: null,
   name: null,
   nteams: null,
   sqb: null,
@@ -45,6 +46,7 @@ export const League = new Record({
 
 export function createLeague ({
   uid,
+  commishid,
   name,
   nteams,
   sqb,
@@ -86,6 +88,7 @@ export function createLeague ({
 }) {
   return new League({
     uid,
+    commishid,
     name,
     nteams,
     sqb,

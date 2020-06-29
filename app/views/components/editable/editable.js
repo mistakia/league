@@ -31,22 +31,34 @@ export default class Editable extends React.Component {
     const el = this.getEl()
     if (!el) return
 
+    const { type } = this.props
+
     const value = el.innerHTML
-    if (isNaN(value) || value < 0) {
+
+    if (this.props.value && !value) {
       el.innerHTML = this.props.value
       return
     }
 
-    if (value % 1 !== 0) {
-      el.innerHTML = this.props.value
-      return
-    }
+    if (type === 'number') {
+      if (isNaN(value) || value < 0) {
+        el.innerHTML = this.props.value
+        return
+      }
 
-    const int = parseInt(value, 10)
-    el.innerHTML = int
+      if (value % 1 !== 0) {
+        el.innerHTML = this.props.value
+        return
+      }
 
-    if (int !== this.props.value) {
-      this.props.onchange(int)
+      const int = parseInt(value, 10)
+      el.innerHTML = int
+
+      if (int !== this.props.value) {
+        this.props.onchange(int)
+      }
+    } else {
+      this.props.onchange(value)
     }
   }
 
@@ -57,6 +69,10 @@ export default class Editable extends React.Component {
   }
 
   render = () => {
+    if (this.props.disabled) {
+      return <span className={this.props.className}>{this.props.value}</span>
+    }
+
     return (
       <span
         ref={this.el}
