@@ -23,6 +23,14 @@ export default class Filter extends React.Component {
     }
   }
 
+  handleAllClick = (event) => {
+    this.props.filter(this.props.type, this.props.values.map(i => i.value))
+  }
+
+  handleClearClick = (event) => {
+    this.props.filter(this.props.type, [])
+  }
+
   handleClick = (event, index) => {
     event.preventDefault()
     event.stopPropagation()
@@ -38,7 +46,7 @@ export default class Filter extends React.Component {
     const { visible } = this.state
 
     const items = values.map((v, index) => {
-      const classNames = ['player__filter-body-item']
+      const classNames = ['player__filter-dropdown-item']
       if (v.selected) classNames.push('selected')
       return (
         <div
@@ -62,8 +70,24 @@ export default class Filter extends React.Component {
         <div className='player__filter-label'>{label}</div>
         <div className='player__filter-selection'>{selectedLabel}</div>
         {visible &&
-          <div ref={ref => { this.body = ref }} className='player__filter-body'>
-            {items}
+          <div ref={ref => { this.body = ref }} className='player__filter-dropdown'>
+            <div className='player__filter-dropdown-head'>
+              <div
+                className='player__filter-dropdown-action'
+                onClick={this.handleAllClick}
+              >
+                All
+              </div>
+              <div
+                className='player__filter-dropdown-action'
+                onClick={this.handleClearClick}
+              >
+                Clear
+              </div>
+            </div>
+            <div className='player__filter-dropdown-body'>
+              {items}
+            </div>
           </div>}
       </div>
     )
