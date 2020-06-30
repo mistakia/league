@@ -1,3 +1,4 @@
+import moment from 'moment'
 import { Map, List } from 'immutable'
 import { playerActions } from './actions'
 import { createPlayer } from './player'
@@ -22,6 +23,8 @@ const initialState = new Map({
   teams: new List(),
   status: new List(['available', 'rostered']),
   week: constants.week,
+  age: new List(),
+  allAges: new List(),
   items: new Map(),
   order: 'desc',
   orderBy: DEFAULT_ORDER_BY,
@@ -110,6 +113,20 @@ export function playersReducer (state = initialState, { payload, type }) {
     case playerActions.FETCH_PLAYERS_FULFILLED:
       return state.withMutations(players => {
         players.set('isPending', false)
+
+        const now = moment()
+        const ages = []
+        payload.data.map(p => {
+          const age = parseInt(now.diff(moment(p.dob), 'years'), 10)
+          if (!isNaN(age)) ages.push(age)
+        })
+
+        const distinctAges = Array.from(new Set(ages)).sort((a, b) => a - b)
+        players.set('age', new List(distinctAges))
+        players.set('allAges', new List(distinctAges))
+
+        // TODO - get colleges
+
         payload.data.forEach(playerData => {
           players.setIn(['items', playerData.player], createPlayer(playerData))
         })

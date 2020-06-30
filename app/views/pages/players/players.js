@@ -4,6 +4,7 @@ import { AutoSizer, List } from 'react-virtualized'
 import SearchFilter from '@components/search-filter'
 import PositionFilter from '@components/position-filter'
 import ExperienceFilter from '@components/experience-filter'
+import AgeFilter from '@components/age-filter'
 import PageLayout from '@layouts/page'
 import PlayerHeader from '@components/player-header'
 import PlayerRow from '@components/player-row'
@@ -92,6 +93,7 @@ export default class PlayersPage extends React.Component {
           <SearchFilter search={this.props.search} value={this.props.searchValue} />
           <PositionFilter />
           <ExperienceFilter />
+          <AgeFilter />
         </div>
         <div className='players__header'>
           <div className='player__row-pos' />
