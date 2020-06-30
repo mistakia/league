@@ -54,6 +54,18 @@ $height = 30px
 .expanded__row
   flex 1
   display flex
-  padding-top 2px
+  height 24px
+  line-height 16px
+  align-items center
   &:hover
     background #f0f0f0
+
+.row__action
+  flex 0 0 24px
+  cursor pointer
+  &:hover
+    fill $accentColor
+
+.average__row
+  border-top 1px solid $borderColor
+  border-bottom 1px solid $borderColor

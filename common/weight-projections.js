@@ -19,7 +19,7 @@ const weightProjections = ({ projections, weights = [], userId }) => {
 
   for (const projection of sourceProjections) {
     const { sourceid } = projection
-    const source = weights.find(w => w.sourceid === sourceid)
+    const source = weights.find(w => w.uid === sourceid)
     const weight = source ? source.weight : (1 / sourceProjections.length)
 
     for (const r in data) {

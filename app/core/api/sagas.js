@@ -11,7 +11,12 @@ import {
 
 import { getDraftActions, postDraftActions } from '@core/draft'
 import { getRosterActions, getRostersActions } from '@core/rosters'
-import { playersRequestActions, getPlayerStatsActions } from '@core/players'
+import {
+  playersRequestActions,
+  getPlayerStatsActions,
+  putProjectionActions,
+  delProjectionActions
+} from '@core/players'
 import { getTeamsActions, putTeamActions } from '@core/teams'
 import { getTransactionsActions } from '@core/transactions'
 import { getMatchupsActions } from '@core/matchups'
@@ -75,3 +80,6 @@ export const putLeague = fetch.bind(null, api.putLeague, putLeagueActions)
 export const putTeam = fetch.bind(null, api.putTeam, putTeamActions)
 
 export const putSource = fetch.bind(null, api.putSource, putSourceActions)
+
+export const putProjection = fetch.bind(null, api.putProjection, putProjectionActions)
+export const delProjection = fetch.bind(null, api.delProjection, delProjectionActions)
