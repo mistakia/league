@@ -7,7 +7,7 @@ import { constants } from '@common'
 import './dashboard.styl'
 
 export default function () {
-  const { players } = this.props
+  const { players, picks, league } = this.props
   const { positions } = constants
 
   const groups = {}
@@ -28,6 +28,20 @@ export default function () {
   const practiceItems = []
   for (const player of players.practice) {
     practiceItems.push(<Player key={player} player={player} />)
+  }
+
+  const pickItems = []
+  for (const pick of picks) {
+    const pickNum = (pick.pick % league.nteams) || league.nteams
+    const pickStr = `${pick.round}.${('0' + pickNum).slice(-2)}`
+    pickItems.push(
+      <div key={pick.uid} className='player__item'>
+        <div className='player__item-name'>{pick.year}</div>
+        <div className='player__item-metric'>{pick.pick && pickStr}</div>
+        <div className='player__item-metric'>{pick.round}</div>
+        <div className='player__item-metric'>{pick.pick}</div>
+      </div>
+    )
   }
 
   const body = (
@@ -66,6 +80,20 @@ export default function () {
         </div>
         <div className='dashboard__section-body'>
           {practiceItems}
+        </div>
+      </div>
+      <div className='dashboard__section'>
+        <div className='dashboard__section-header'>
+          <div className='dashboard__section-header-title'>Draft Picks</div>
+          <div className='dashboard__section-body-header'>
+            <div className='player__item-name'>Year</div>
+            <div className='player__item-metric'>Pick</div>
+            <div className='player__item-metric'>Round</div>
+            <div className='player__item-metric'>Pick #</div>
+          </div>
+        </div>
+        <div className='dashboard__section-body'>
+          {pickItems}
         </div>
       </div>
     </div>
