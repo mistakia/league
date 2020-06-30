@@ -28,13 +28,19 @@ router.get('/?', async (req, res) => {
     players.forEach(p => { p.projections = [] })
 
     const projections = await db('projections')
-      .groupBy('player', 'sourceid', 'timestamp', 'week')
-      .groupBy('player', 'week', 'userid')
+      .select('*').select(db.raw('CONCAT(player, "_", sourceid, "_", week) AS Group1'))
+      .groupBy('Group1')
       .orderBy('timestamp', 'desc')
       .whereIn('player', playerIds)
       .where('year', constants.year)
-      .andWhere(function () {
-        this.whereNull('userid').orWhere('userid', req.user.userId)
+      .whereNull('userid')
+
+    const userProjections = await db('projections')
+      .select('*')
+      .whereIn('player', playerIds)
+      .where({
+        year: constants.year,
+        userid: req.user.userId
       })
 
     logger(`loaded ${projections.length} projections`)
@@ -42,6 +48,7 @@ router.get('/?', async (req, res) => {
       const index = players.findIndex(p => p.player === projection.player)
       players[index].projections.push(projection)
     }
+    userProjections.forEach(addProjection)
     projections.forEach(addProjection)
     res.send(players)
   } catch (error) {
