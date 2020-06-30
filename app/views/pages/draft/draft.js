@@ -58,7 +58,7 @@ export default function () {
 
   const pickItems = []
   for (const pick of picks) {
-    const isActive = currentPick && pick.pick === currentPick.pick
+    const isActive = league.ddate && currentPick && pick.pick === currentPick.pick
     pickItems.push(<DraftPick key={pick.pick} pick={pick} playerId={pick.player} tid={pick.tid} isActive={isActive} />)
   }
 
