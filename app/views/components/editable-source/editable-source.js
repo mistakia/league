@@ -36,6 +36,10 @@ export default class EditableSource extends React.Component {
     const { value } = event.target
     this.setState({ value })
 
+    if (isNaN(value)) {
+      return this.setState({ invalid: true, helper: 'should be between 0.00 and 1.00' })
+    }
+
     const int = parseFloat(value)
     if (int < 0 || int > 1) {
       this.setState({ invalid: true, helper: 'should be between 0.00 and 1.00' })
@@ -50,6 +54,8 @@ export default class EditableSource extends React.Component {
       <TextField
         label={`${source.name} Weight`}
         value={this.state.value}
+        error={this.state.invalid}
+        helperText={this.state.helper}
         onBlur={this.handleBlur}
         onChange={this.handleChange}
         size='small'
