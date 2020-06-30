@@ -1,5 +1,6 @@
 const fetchCheerioObject = require('fetch-cheerio-object')
 const debug = require('debug')
+const argv = require('yargs').argv
 
 const log = debug('import:projections')
 debug.enable('league:player:get,import:projections')
@@ -98,6 +99,10 @@ const run = async () => {
 
   log(`Could not locate ${missing.length} players`)
   missing.forEach(m => log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`))
+
+  if (argv.dry) {
+    return process.exit()
+  }
 
   log(`Inserting ${inserts.length} projections into database`)
   await db('projections').insert(inserts)
