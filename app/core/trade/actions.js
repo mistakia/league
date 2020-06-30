@@ -29,17 +29,17 @@ export const tradeActions = {
   GET_TRADES_PENDING: 'GET_TRADES_PENDING',
   GET_TRADES_FULFILLED: 'GET_TRADES_FULFILLED',
 
-  select: (player) => ({
-    type: tradeActions.TRADE_SELECT_PLAYER,
-    payload: {
-      player
-    }
-  }),
-
   selectTrade: (tradeId) => ({
     type: tradeActions.SELECT_TRADE,
     payload: {
       tradeId
+    }
+  }),
+
+  selectTeam: (teamId) => ({
+    type: tradeActions.TRADE_SELECT_TEAM,
+    payload: {
+      teamId
     }
   }),
 

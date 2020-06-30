@@ -7,6 +7,7 @@ import TradePlayer from '@components/trade-player'
 import TradePick from '@components/trade-pick'
 import Button from '@components/button'
 import TradeMenu from '@components/trade-menu'
+import TradeSelectTeam from '@components/trade-select-team'
 
 import './trade.styl'
 
@@ -132,6 +133,7 @@ export default function () {
       <div className='trade__box'>
         <div className='trade__box-head'>
           <TeamName tid={receiveRoster.tid} />
+          {!trade.uid && <TradeSelectTeam />}
         </div>
         <div className='trade__box-body'>
           {rPlayerItems}
@@ -153,7 +155,11 @@ export default function () {
   } else if (!valid) {
     action = (<Button disabled>Invalid</Button>)
   } else if (!trade.uid) {
-    action = (<Button onClick={this.handleProposeClick}>Propose</Button>)
+    if ((trade.sendPlayers.size || trade.sendPicks.size) && (trade.receivePlayers.size || trade.receivePicks.size)) {
+      action = (<Button onClick={this.handleProposeClick}>Propose</Button>)
+    } else {
+      action = (<Button disabled>Propose</Button>)
+    }
   } else {
     if (isProposer) {
       action = (<Button onClick={this.handleCancelClick}>Cancel Proposal</Button>)
