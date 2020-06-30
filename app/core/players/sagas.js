@@ -6,7 +6,7 @@ import { playerActions } from './actions'
 import { getAllPlayers, getPlayers } from './selectors'
 import { getLeagues, leagueActions } from '@core/leagues'
 import { DEFAULT_ORDER_BY } from '@core/constants'
-import { sourceActions } from '@core/sources'
+import { sourceActions, getSources } from '@core/sources'
 
 export function * loadPlayers () {
   yield call(fetchPlayers)
@@ -16,8 +16,9 @@ export function * calculateValues () {
   const { userId } = yield select(getApp)
   const leagues = yield select(getLeagues)
   const players = yield select(getAllPlayers)
+  const sources = yield select(getSources)
 
-  yield put(playerActions.calculate({ players, leagues, userId }))
+  yield put(playerActions.calculate({ players, leagues, sources: sources.toList(), userId }))
 }
 
 export function * toggleOrder ({ payload }) {
