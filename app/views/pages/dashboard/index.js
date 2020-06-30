@@ -3,7 +3,9 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { getApp } from '@core/app'
+import { getCurrentTeam } from '@core/teams'
 import { rosterActions, getCurrentPlayers } from '@core/rosters'
+import { getCurrentLeague } from '@core/leagues'
 import render from './dashboard'
 
 class DashboardPage extends React.Component {
@@ -19,7 +21,9 @@ class DashboardPage extends React.Component {
 const mapStateToProps = createSelector(
   getApp,
   getCurrentPlayers,
-  (app, players) => ({ teamId: app.teamId, players })
+  getCurrentTeam,
+  getCurrentLeague,
+  (app, players, team, league) => ({ teamId: app.teamId, players, picks: team.picks, league })
 )
 
 const mapDispatchToProps = {
