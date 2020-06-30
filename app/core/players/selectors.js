@@ -1,3 +1,4 @@
+import moment from 'moment'
 import { constants, calculatePoints } from '@common'
 import { getApp } from '@core/app'
 import { Player } from './player'
@@ -62,6 +63,16 @@ export function getFilteredPlayers (state) {
   const nflTeams = players.get('nflTeams')
   if (nflTeams.size !== constants.nflTeams.length) {
     filtered = filtered.filter(player => nflTeams.includes(player.team))
+  }
+
+  const age = players.get('age')
+  const allAges = players.get('allAges')
+  if (age.size !== allAges.size) {
+    const now = moment()
+    filtered = filtered.filter(player => {
+      const playerAge = parseInt(now.diff(moment(player.dob), 'years'), 10)
+      return age.includes(playerAge)
+    })
   }
 
   if (search) {
