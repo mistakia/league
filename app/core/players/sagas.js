@@ -1,7 +1,7 @@
 import { fork, takeLatest, call, select, put } from 'redux-saga/effects'
 
 import { getApp, appActions } from '@core/app'
-import { fetchPlayers, getPlayerStats } from '@core/api'
+import { fetchPlayers, getPlayerStats, putProjection, delProjection } from '@core/api'
 import { playerActions } from './actions'
 import { getAllPlayers, getPlayers } from './selectors'
 import { getLeagues, leagueActions } from '@core/leagues'
@@ -46,14 +46,25 @@ export function * toggleOrder ({ payload }) {
 }
 
 export function * setProjection ({ payload }) {
-  const { value, type, week, playerId, userId } = payload
-  // TODO save projection
+  const players = yield select(getPlayers)
+  const week = players.get('week')
+  const { value, type, playerId, userId } = payload
+  yield call(putProjection, { value, type, playerId, userId, week })
   yield call(calculateValues)
 }
 
 export function * loadStats ({ payload }) {
   const { player } = payload
   yield call(getPlayerStats, { playerId: player })
+}
+
+export function * deleteProjection ({ payload }) {
+  const { playerId } = payload
+  const { userId } = yield select(getApp)
+  const players = yield select(getPlayers)
+  const week = players.get('week')
+  yield call(delProjection, { playerId, userId, week })
+  yield call(calculateValues)
 }
 
 //= ====================================
@@ -92,6 +103,10 @@ export function * watchPutSourceFulfilled () {
   yield takeLatest(sourceActions.PUT_SOURCE_FULFILLED, calculateValues)
 }
 
+export function * watchDeleteProjection () {
+  yield takeLatest(playerActions.DELETE_PROJECTION, deleteProjection)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -104,5 +119,6 @@ export const playerSagas = [
   fork(watchSetProjection),
   fork(watchSelectPlayer),
   fork(watchPutLeagueFulfilled),
-  fork(watchPutSourceFulfilled)
+  fork(watchPutSourceFulfilled),
+  fork(watchDeleteProjection)
 ]

@@ -21,6 +21,14 @@ const PUT = (data) => ({
   }
 })
 
+const DELETE = (data) => ({
+  method: 'DELETE',
+  body: JSON.stringify(data),
+  headers: {
+    'Content-Type': 'application/json'
+  }
+})
+
 export const api = {
   postRegister (data) {
     const url = `${BASE_URL}/auth/register`
@@ -97,6 +105,14 @@ export const api = {
   putSource (data) {
     const url = `${BASE_URL}/sources/${data.sourceId}`
     return { url, ...PUT(data) }
+  },
+  putProjection (data) {
+    const url = `${BASE_URL}/players/${data.playerId}/projection`
+    return { url, ...PUT(data) }
+  },
+  delProjection (data) {
+    const url = `${BASE_URL}/players/${data.playerId}/projection`
+    return { url, ...DELETE(data) }
   }
 }
 

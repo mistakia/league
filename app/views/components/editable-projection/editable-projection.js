@@ -4,7 +4,6 @@ import Editable from '@components/editable'
 
 export default class EditableProjection extends React.Component {
   onchange = (value) => {
-    // TODO week
     this.props.setProjection({
       value,
       userId: this.props.userId,

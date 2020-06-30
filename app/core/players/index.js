@@ -8,5 +8,11 @@ export {
   getGamesByYearForPlayer
 } from './selectors'
 export { Player, createPlayer } from './player'
-export { playerActions, playersRequestActions, getPlayerStatsActions } from './actions'
+export {
+  playerActions,
+  playersRequestActions,
+  getPlayerStatsActions,
+  putProjectionActions,
+  delProjectionActions
+} from './actions'
 export { playerSagas } from './sagas'

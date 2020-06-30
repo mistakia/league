@@ -3,12 +3,19 @@ import React from 'react'
 import Source from '@components/source'
 import EditableProjection from '@components/editable-projection'
 import Position from '@components/position'
+import Icon from '@components/icon'
+import { weightProjections } from '@common'
+import PlayerExpandedRow from '@components/player-expanded-row'
 
 import './player-row.styl'
 
 export default class PlayerRow extends React.Component {
   handleClick = () => {
     this.props.select(this.props.player.player)
+  }
+
+  handleClearClick = () => {
+    this.props.delete(this.props.player.player)
   }
 
   render = () => {
@@ -74,73 +81,49 @@ export default class PlayerRow extends React.Component {
     const years = []
     if (isSelected) {
       player.projections.forEach((p, index) => {
-        const item = (
-          <div key={index} className='expanded__row'>
-            <div className='row__name'>
-              {p.sourceid ? <Source sourceId={p.sourceid} /> : 'User'}
-            </div>
-            <div className='row__group'>
-              <div className='row__group-body'>
-                <div className='player__row-metric'>{p.py}</div>
-                <div className='player__row-metric'>{p.tdp}</div>
-                <div className='player__row-metric'>{p.ints}</div>
-              </div>
-            </div>
-            <div className='row__group'>
-              <div className='row__group-body'>
-                <div className='player__row-metric'>{p.ra}</div>
-                <div className='player__row-metric'>{p.ry}</div>
-                <div className='player__row-metric'>{p.tdr}</div>
-                <div className='player__row-metric'>{p.fuml}</div>
-              </div>
-            </div>
-            <div className='row__group'>
-              <div className='row__group-body'>
-                <div className='player__row-metric'>{p.trg}</div>
-                <div className='player__row-metric'>{p.rec}</div>
-                <div className='player__row-metric'>{p.recy}</div>
-                <div className='player__row-metric'>{p.tdrec}</div>
-              </div>
-            </div>
+        const isUser = !!p.userid
+        const title = (isUser ? 'User' : <Source sourceId={p.sourceid} />)
+        const action = (
+          <div className='row__action'>
+            {isUser && <div onClick={this.handleClearClick}><Icon name='clear' /></div>}
           </div>
+        )
+
+        const item = (
+          <PlayerExpandedRow
+            key={index}
+            stats={p}
+            title={title}
+            action={action}
+          />
         )
         projections.push(item)
       })
 
+      const projAvg = weightProjections({
+        projections: player.projections.filter(p => !p.userid),
+        userId: 0
+      })
+
+      projections.push(
+        <PlayerExpandedRow
+          className='average__row'
+          key='average'
+          stats={projAvg}
+          title='Average'
+          action={(<div className='row__action' />)}
+        />
+      )
+
       for (const year in stats.overall) {
         const p = stats.overall[year]
         const item = (
-          <div key={year} className='expanded__row'>
-            <div className='row__name'>
-              {year}
-            </div>
-            <div className='row__group'>
-              <div className='row__group-body'>
-                <div className='player__row-metric'>{p.py}</div>
-                <div className='player__row-metric'>{p.tdp}</div>
-                <div className='player__row-metric'>{p.ints}</div>
-              </div>
-            </div>
-            <div className='row__group'>
-              <div className='row__group-body'>
-                <div className='player__row-metric'>{p.ra}</div>
-                <div className='player__row-metric'>{p.ry}</div>
-                <div className='player__row-metric'>{p.tdr}</div>
-                <div className='player__row-metric'>{p.fuml}</div>
-              </div>
-            </div>
-            <div className='row__group'>
-              <div className='row__group-body'>
-                <div className='player__row-metric'>{p.trg}</div>
-                <div className='player__row-metric'>{p.rec}</div>
-                <div className='player__row-metric'>{p.recy}</div>
-                <div className='player__row-metric'>{p.tdrec}</div>
-              </div>
-            </div>
-          </div>
+          <PlayerExpandedRow key={year} title={year} stats={p} />
         )
         years.push(item)
       }
+
+      // TODO year average
     }
 
     const expanded = (
@@ -179,6 +162,7 @@ export default class PlayerRow extends React.Component {
                 <div className='player__row-metric'>TD</div>
               </div>
             </div>
+            <div className='row__action' />
           </div>
           {projections}
         </div>

@@ -18,6 +18,15 @@ export const playerActions = {
   GET_PLAYER_STATS_FULFILLED: 'GET_PLAYER_STATS_FULFILLED',
 
   SET_PROJECTION: 'SET_PROJECTION',
+  DELETE_PROJECTION: 'DELETE_PROJECTION',
+
+  PUT_PROJECTION_FAILED: 'PUT_PROJECTION_FAILED',
+  PUT_PROJECTION_PENDING: 'PUT_PROJECTION_PENDING',
+  PUT_PROJECTION_FULFILLED: 'PUT_PROJECTION_FULFILLED',
+
+  DEL_PROJECTION_FAILED: 'DEL_PROJECTION_FAILED',
+  DEL_PROJECTION_PENDING: 'DEL_PROJECTION_PENDING',
+  DEL_PROJECTION_FULFILLED: 'DEL_PROJECTION_FULFILLED',
 
   selectPlayer: (player) => ({
     type: playerActions.PLAYERS_SELECT_PLAYER,
@@ -26,14 +35,20 @@ export const playerActions = {
     }
   }),
 
-  setProjection: ({ playerId, value, type, week, userId }) => ({
+  setProjection: ({ playerId, value, type, userId }) => ({
     type: playerActions.SET_PROJECTION,
     payload: {
       userId,
       playerId,
       value,
-      type,
-      week
+      type
+    }
+  }),
+
+  deleteProjection: (playerId) => ({
+    type: playerActions.DELETE_PROJECTION,
+    payload: {
+      playerId
     }
   }),
 
@@ -124,6 +139,52 @@ export const playerActions = {
       opts,
       error
     }
+  }),
+
+  putProjectionFailed: (opts, error) => ({
+    type: playerActions.PUT_PROJECTION_FAILED,
+    payload: {
+      opts,
+      error
+    }
+  }),
+
+  putProjectionPending: (opts) => ({
+    type: playerActions.PUT_PROJECTION_PENDING,
+    payload: {
+      opts
+    }
+  }),
+
+  putProjectionFulfilled: (opts, data) => ({
+    type: playerActions.PUT_PROJECTION_FULFILLED,
+    payload: {
+      opts,
+      data
+    }
+  }),
+
+  delProjectionPending: (opts) => ({
+    type: playerActions.DEL_PROJECTION_PENDING,
+    payload: {
+      opts
+    }
+  }),
+
+  delProjectionFailed: (opts, error) => ({
+    type: playerActions.DEL_PROJECTION_FAILED,
+    payload: {
+      opts,
+      error
+    }
+  }),
+
+  delProjectionFulfilled: (opts, data) => ({
+    type: playerActions.DEL_PROJECTION_FULFILLED,
+    payload: {
+      opts,
+      data
+    }
   })
 }
 
@@ -137,4 +198,16 @@ export const getPlayerStatsActions = {
   failed: playerActions.getPlayerStatsFailed,
   fulfilled: playerActions.getPlayerStatsFulfilled,
   pending: playerActions.getPlayerStatsPending
+}
+
+export const putProjectionActions = {
+  failed: playerActions.putProjectionFailed,
+  fulfilled: playerActions.putProjectionFulfilled,
+  pending: playerActions.putProjectionPending
+}
+
+export const delProjectionActions = {
+  failed: playerActions.delProjectionFailed,
+  fulfilled: playerActions.delProjectionFulfilled,
+  pending: playerActions.delProjectionPending
 }

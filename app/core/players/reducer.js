@@ -21,6 +21,7 @@ const initialState = new Map({
   health: new List(['ir', 'healthy']),
   teams: new List(),
   status: new List(['available', 'rostered']),
+  week: constants.week,
   items: new Map(),
   order: 'desc',
   orderBy: DEFAULT_ORDER_BY,
@@ -32,14 +33,21 @@ export function playersReducer (state = initialState, { payload, type }) {
     case playerActions.SEARCH_PLAYERS:
       return state.merge({ search: payload.value })
 
-    case playerActions.SET_PROJECTION: {
-      const { value, type, week, playerId, userId } = payload
+    case playerActions.PUT_PROJECTION_FULFILLED: {
+      const { value, type, week, playerId, userId } = payload.opts
       const key = state.get('items').get(playerId).get('projections').findKey(p => p.userid)
       if (key) {
         return state.setIn(['items', playerId, 'projections', key, type], value)
       }
       const newProj = { [type]: value, userid: userId, week, player: playerId }
       return state.updateIn(['items', playerId, 'projections'], arr => arr.push(newProj))
+    }
+
+    case playerActions.DEL_PROJECTION_FULFILLED: {
+      const { playerId } = payload.opts
+      return state.setIn(['items', playerId, 'projections'],
+        state.getIn(['items', playerId, 'projections']).filter(p => !p.userid)
+      )
     }
 
     case playerActions.PLAYERS_SELECT_PLAYER:
@@ -62,8 +70,11 @@ export function playersReducer (state = initialState, { payload, type }) {
           for (const player of players) {
             const { projections } = player
 
-            // TODO weights
-            player.projection = weightProjections({ projections, weights: [], userId })
+            player.projection = weightProjections({
+              projections,
+              weights: payload.sources,
+              userId
+            })
             const { projection } = player
 
             // calculate points for each league
