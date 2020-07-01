@@ -1,10 +1,15 @@
 import getRosterSize from './get-roster-size'
 
-const calculateValues = ({ players, baselines, ...args }) => {
+const calculateValues = ({ players, baselines, vorpw, volsw, ...args }) => {
   const total = {
     available: 0,
-    starter: 0
+    starter: 0,
+    hybrid: 0
   }
+
+  const weightAvailable = ((vorpw !== null) ? vorpw : 1) * 0.5
+  const weightStarter = ((volsw !== null) ? volsw : 1) * 0.5
+  const totalWeight = weightAvailable + weightStarter
 
   for (const player of players) {
     const { pos1 } = player
@@ -17,6 +22,10 @@ const calculateValues = ({ players, baselines, ...args }) => {
       if (player.vorp[type] > 0) {
         total[type] = total[type] + player.vorp[type]
       }
+    }
+    player.vorp.hybrid = ((player.vorp.available * weightAvailable) + (player.vorp.starter * weightStarter)) / totalWeight
+    if (player.vorp.hybrid > 0) {
+      total.hybrid = total.hybrid + player.vorp.hybrid
     }
   }
 

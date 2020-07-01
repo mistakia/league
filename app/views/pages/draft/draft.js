@@ -11,7 +11,10 @@ import { constants } from '@common'
 import './draft.styl'
 
 export default function () {
-  const { players, currentPick, picks, league, selectedPlayer, isDrafting, draftPlayer, drafted } = this.props
+  const {
+    players, currentPick, picks, league, selectedPlayer,
+    isDrafting, draftPlayer, drafted, vbaseline
+  } = this.props
   const { positions } = constants
 
   let draftInfo
@@ -38,7 +41,7 @@ export default function () {
     draftInfo = (<p>Draft not scheduled</p>)
   }
 
-  const sorted = players.sort((a, b) => b.vorp.get('available') - a.vorp.get('available'))
+  const sorted = players.sort((a, b) => b.vorp.get(vbaseline) - a.vorp.get(vbaseline))
   const all = sorted.map((p, index) => <DraftPlayer key={p.player} index={index} player={p} />)
 
   const groups = {}

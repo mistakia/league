@@ -113,6 +113,10 @@ export const api = {
   delProjection (data) {
     const url = `${BASE_URL}/players/${data.playerId}/projection`
     return { url, ...DELETE(data) }
+  },
+  putSetting (data) {
+    const url = `${BASE_URL}/me`
+    return { url, ...PUT(data) }
   }
 }
 

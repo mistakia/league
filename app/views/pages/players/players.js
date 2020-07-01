@@ -41,7 +41,7 @@ export default class PlayersPage extends React.Component {
   }
 
   render = () => {
-    const { players } = this.props
+    const { players, vbaseline } = this.props
 
     const Row = ({ index, key, parent, ...params }) => {
       const player = players.get(index).toJS()
@@ -93,6 +93,9 @@ export default class PlayersPage extends React.Component {
       </div>
     )
 
+    const valueType = `values.${vbaseline}`
+    const vorpType = `vorp.${vbaseline}`
+
     const head = (
       <div className='players__head'>
         <div className='players__filter'>
@@ -108,13 +111,13 @@ export default class PlayersPage extends React.Component {
             <div className='player__row-group-body'>
               <PlayerHeader
                 className='player__row-metric'
-                label='v FA'
-                value='values.available'
+                label='Cost'
+                value={valueType}
               />
               <PlayerHeader
                 className='player__row-metric'
                 label='Value'
-                value='vorp.available'
+                value={vorpType}
               />
               <PlayerHeader
                 className='player__row-metric'

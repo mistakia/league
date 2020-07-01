@@ -15,4 +15,4 @@ export {
   putProjectionActions,
   delProjectionActions
 } from './actions'
-export { playerSagas } from './sagas'
+export { playerSagas, calculateValues } from './sagas'

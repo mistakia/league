@@ -1,9 +1,10 @@
 import moment from 'moment'
 import { Map, List } from 'immutable'
+
+import { settingActions } from '@core/settings'
+import { appActions } from '@core/app'
 import { playerActions } from './actions'
 import { createPlayer } from './player'
-
-import { DEFAULT_ORDER_BY } from '@core/constants'
 
 import {
   constants,
@@ -27,7 +28,7 @@ const initialState = new Map({
   allAges: new List(),
   items: new Map(),
   order: 'desc',
-  orderBy: DEFAULT_ORDER_BY,
+  orderBy: 'vorp.available',
   selected: null
 })
 
@@ -69,7 +70,7 @@ export function playersReducer (state = initialState, { payload, type }) {
 
     case playerActions.CALCULATE_VALUES: {
       return state.withMutations(state => {
-        const { userId } = payload
+        const { userId, vorpw, volsw } = payload
         for (const league of payload.leagues) {
           const leag = league.toJS()
           const players = payload.players.valueSeq().toJS()
@@ -89,7 +90,7 @@ export function playersReducer (state = initialState, { payload, type }) {
 
           // calculate worst starter baseline
           const baselines = calculateBaselines({ players, ...leag })
-          const result = calculateValues({ players, baselines, ...leag })
+          const result = calculateValues({ players, baselines, vorpw, volsw, ...leag })
           // TODO - set per league
           result.forEach(playerData => {
             state.mergeIn(['items', playerData.player], {
@@ -139,6 +140,19 @@ export function playersReducer (state = initialState, { payload, type }) {
       return state.withMutations(players => {
         players.setIn(['items', payload.opts.playerId, 'games'], new List(payload.data.games))
       })
+
+    case appActions.AUTH_FULFILLED:
+      return state.merge({
+        orderBy: `vorp.${payload.data.user.vbaseline}`
+      })
+
+    case settingActions.PUT_SETTING_FULFILLED:
+      if (payload.opts.type === 'vbaseline') {
+        return state.merge({
+          orderBy: `vorp.${payload.data.value}`
+        })
+      }
+      return state
 
     default:
       return state

@@ -11,9 +11,11 @@ import AuctionPositionFilter from '@components/auction-position-filter'
 import './auction.styl'
 
 export default function () {
-  const { players, transactions, tids, playerId } = this.props
+  const { players, transactions, tids, playerId, vbaseline } = this.props
 
-  const sorted = players.sort((a, b) => b.vorp.get('available') - a.vorp.get('available')).toList()
+  const sorted = players.sort((a, b) => {
+    return b.vorp.get(vbaseline) - a.vorp.get(vbaseline)
+  }).toList()
 
   const transactionItems = []
   for (const [index, transaction] of transactions.entries()) {

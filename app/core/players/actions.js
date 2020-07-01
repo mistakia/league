@@ -61,13 +61,15 @@ export const playerActions = {
     type: playerActions.LOAD_PLAYERS
   }),
 
-  calculate: ({ players, leagues, sources, userId }) => ({
+  calculate: ({ players, leagues, sources, userId, vorpw, volsw }) => ({
     type: playerActions.CALCULATE_VALUES,
     payload: {
       players,
       leagues,
       sources,
-      userId
+      userId,
+      vorpw,
+      volsw
     }
   }),
 

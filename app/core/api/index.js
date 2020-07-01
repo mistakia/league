@@ -19,5 +19,6 @@ export {
   putTeam,
   putSource,
   putProjection,
-  delProjection
+  delProjection,
+  putSetting
 } from './sagas'

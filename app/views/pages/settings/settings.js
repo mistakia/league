@@ -4,6 +4,7 @@ import EditableLeague from '@components/editable-league'
 import EditableTeam from '@components/editable-team'
 import EditableSource from '@components/editable-source'
 import PageLayout from '@layouts/page'
+import EditableValue from '@components/editable-value'
 
 import './settings.styl'
 
@@ -40,7 +41,9 @@ export default class SettingsPage extends React.Component {
           <div className='settings__section-body'>{teamItems}</div>
         </div>
         <div className='settings__section'>
-          <div className='settings__section-head'>Projection Sources</div>
+          <div className='settings__section-head'>Value Calculations</div>
+          <EditableValue />
+          <div className='editable__league-section-title'>Projection Weights</div>
           <div className='settings__section-body'>{sourceItems}</div>
         </div>
       </div>

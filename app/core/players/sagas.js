@@ -5,7 +5,6 @@ import { fetchPlayers, getPlayerStats, putProjection, delProjection } from '@cor
 import { playerActions } from './actions'
 import { getAllPlayers, getPlayers } from './selectors'
 import { getLeagues, leagueActions } from '@core/leagues'
-import { DEFAULT_ORDER_BY } from '@core/constants'
 import { sourceActions, getSources } from '@core/sources'
 
 export function * loadPlayers () {
@@ -13,16 +12,17 @@ export function * loadPlayers () {
 }
 
 export function * calculateValues () {
-  const { userId } = yield select(getApp)
+  const { userId, vorpw, volsw } = yield select(getApp)
   const leagues = yield select(getLeagues)
   const players = yield select(getAllPlayers)
   const sources = yield select(getSources)
 
-  yield put(playerActions.calculate({ players, leagues, sources: sources.toList(), userId }))
+  yield put(playerActions.calculate({ players, leagues, sources: sources.toList(), userId, vorpw, volsw }))
 }
 
 export function * toggleOrder ({ payload }) {
   const { orderBy } = payload
+  const app = yield select(getApp)
   const players = yield select(getPlayers)
   const currentOrderBy = players.get('orderBy')
   const currentOrder = players.get('order')
@@ -30,7 +30,7 @@ export function * toggleOrder ({ payload }) {
     if (currentOrder === 'asc') {
       yield put(playerActions.setOrder({
         order: 'desc',
-        orderBy: DEFAULT_ORDER_BY
+        orderBy: `vorp.${app.vbaseline}`
       }))
     } else {
       yield put(playerActions.setOrder({
