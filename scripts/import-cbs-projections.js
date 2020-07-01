@@ -90,6 +90,7 @@ const run = async () => {
 
     inserts.push({
       player: playerId,
+      week: 0,
       year,
       sourceid: 2, // cbs sourceid
       timestamp,
