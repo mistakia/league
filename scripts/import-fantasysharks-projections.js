@@ -61,6 +61,7 @@ const run = async () => {
     inserts.push({
       player: playerId,
       year,
+      week: 0,
       sourceid: 1, // fantasy sharks sourceid
       timestamp,
       ...entry
