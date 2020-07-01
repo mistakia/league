@@ -6,6 +6,7 @@ export const playerActions = {
   TOGGLE_ORDER: 'TOGGLE_ORDER',
   SET_ORDER: 'SET_ORDER',
   PLAYERS_SELECT_PLAYER: 'PLAYERS_SELECT_PLAYER',
+  PLAYERS_DESELECT_PLAYER: 'PLAYERS_DESELECT_PLAYER',
 
   CALCULATE_VALUES: 'CALCULATE_VALUES',
 
@@ -33,6 +34,10 @@ export const playerActions = {
     payload: {
       player
     }
+  }),
+
+  deselectPlayer: () => ({
+    type: playerActions.PLAYERS_DESELECT_PLAYER
   }),
 
   setProjection: ({ playerId, value, type, userId }) => ({

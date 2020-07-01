@@ -32,7 +32,6 @@ $height = 30px
   text-align right
 
 .player__row-expanded
-  height 220px
   background #fafafa
   border 1px solid $borderColor
   overflow hidden
@@ -69,3 +68,14 @@ $height = 30px
 .average__row
   border-top 1px solid $borderColor
   border-bottom 1px solid $borderColor
+
+.expanded__action
+  flex 1
+  display flex
+  justify-content flex-end
+  padding-top 8px
+  padding-right 8px
+
+  &:hover .icon
+    fill $accentColor
+    cursor pointer

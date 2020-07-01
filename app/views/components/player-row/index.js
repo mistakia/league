@@ -13,6 +13,7 @@ const mapStateToProps = createSelector(
 
 const mapDispatchToProps = {
   select: playerActions.selectPlayer,
+  deselect: playerActions.deselectPlayer,
   delete: playerActions.deleteProjection
 }
 
