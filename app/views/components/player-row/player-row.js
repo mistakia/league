@@ -14,6 +14,10 @@ export default class PlayerRow extends React.Component {
     this.props.select(this.props.player.player)
   }
 
+  handleDeselectClick = () => {
+    this.props.deselect()
+  }
+
   handleClearClick = () => {
     this.props.delete(this.props.player.player)
   }
@@ -128,6 +132,9 @@ export default class PlayerRow extends React.Component {
 
     const expanded = (
       <div className='player__row-expanded'>
+        <div className='expanded__action' onClick={this.handleDeselectClick}>
+          <Icon name='clear' />
+        </div>
         <div className='expanded__section'>
           <div className='expanded__section-header'>
             <div className='row__group-head'>

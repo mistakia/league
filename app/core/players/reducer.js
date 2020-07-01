@@ -56,6 +56,9 @@ export function playersReducer (state = initialState, { payload, type }) {
     case playerActions.PLAYERS_SELECT_PLAYER:
       return state.merge({ selected: payload.player })
 
+    case playerActions.PLAYERS_DESELECT_PLAYER:
+      return state.merge({ selected: null })
+
     case playerActions.FILTER_PLAYERS:
       return state.merge({ [payload.type]: new List(payload.values) })
 

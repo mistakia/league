@@ -1,5 +1,5 @@
 import React from 'react'
-import { AutoSizer, List } from 'react-virtualized'
+import { CellMeasurerCache, CellMeasurer, AutoSizer, List } from 'react-virtualized'
 
 import SearchFilter from '@components/search-filter'
 import PositionFilter from '@components/position-filter'
@@ -12,44 +12,50 @@ import PlayerRow from '@components/player-row'
 import './players.styl'
 
 const ROW_HEIGHT = 30
-const EXPANDED_ROW_HEIGHT = 250
+
+const cache = new CellMeasurerCache({
+  fixedWidth: true,
+  minHeight: 25,
+  defaultHeight: ROW_HEIGHT
+})
 
 export default class PlayersPage extends React.Component {
   list = React.createRef()
-
-  rowHeight = ({ index }) => {
-    const player = this.props.players.get(index)
-    const isSelected = player ? player.player === this.props.selected : false
-    return isSelected ? EXPANDED_ROW_HEIGHT : ROW_HEIGHT
-  }
 
   componentDidUpdate = (prevProps) => {
     if (prevProps.order !== this.props.order || prevProps.orderBy !== this.props.orderBy) {
       this.list.current.scrollToPosition(0)
     }
 
-    if (!this.props.selected) {
-      setImmediate(() => {
-        this.list.current.recomputeRowHeights(0)
-      }, 100)
-    } else if (prevProps.selected !== this.props.selected) {
+    if (this.props.selected) {
       const index = this.props.players.findIndex(p => p.player === this.props.selected)
+      cache.clear(index, 0)
       this.list.current.recomputeRowHeights(index)
-      if (prevProps.selected) {
-        const index = this.props.players.findIndex(p => p.player === prevProps.selected)
-        this.list.current.recomputeRowHeights(index)
-      }
-    } else {
-      this.list.current.recomputeRowHeights()
+      this.list.current.scrollToRow(index)
+    }
+    if (prevProps.selected) {
+      const index = this.props.players.findIndex(p => p.player === prevProps.selected)
+      cache.clear(index, 0)
+      this.list.current.recomputeRowHeights(index)
     }
   }
 
   render = () => {
     const { players } = this.props
 
-    const Row = ({ index, ...params }) => {
+    const Row = ({ index, key, parent, ...params }) => {
       const player = players.get(index).toJS()
-      return <PlayerRow player={player} {...params} />
+      return (
+        <CellMeasurer
+          cache={cache}
+          columnIndex={0}
+          key={key}
+          parent={parent}
+          rowIndex={index}
+        >
+          <PlayerRow player={player} {...params} />
+        </CellMeasurer>
+      )
     }
 
     const hPassing = (
@@ -132,7 +138,7 @@ export default class PlayersPage extends React.Component {
             className='players'
             width={width}
             height={height}
-            rowHeight={this.rowHeight}
+            rowHeight={cache.rowHeight}
             rowCount={players.size}
             rowRenderer={Row}
           />
