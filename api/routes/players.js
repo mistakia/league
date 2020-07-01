@@ -100,6 +100,8 @@ router.put('/:playerId/projection', async (req, res) => {
       return res.status(400).send({ error: 'missing week param' })
     }
 
+    // TODO - validate type
+
     // TODO - validate range
 
     if (!constants.stats.includes(type)) {

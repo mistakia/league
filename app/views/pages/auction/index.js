@@ -2,6 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
+import { getApp } from '@core/app'
 import { rosterActions } from '@core/rosters'
 import { auctionActions, getAuction, getAuctionPlayers } from '@core/auction'
 
@@ -21,12 +22,14 @@ class AuctionPage extends React.Component {
 const mapStateToProps = createSelector(
   getAuctionPlayers,
   getAuction,
-  (players, auction) => ({
+  getApp,
+  (players, auction, app) => ({
     players,
     searchValue: auction.search,
     playerId: auction.player,
     transactions: auction.transactions,
-    tids: auction.tids
+    tids: auction.tids,
+    vbaseline: app.vbaseline
   })
 )
 

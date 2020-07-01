@@ -1578,6 +1578,9 @@ CREATE TABLE `users` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `email` varchar(50) NOT NULL DEFAULT '',
   `password` varchar(60) NOT NULL DEFAULT '',
+  `vorpw` decimal(2,2) DEFAULT NULL,
+  `volsw` decimal(2,2) DEFAULT NULL,
+  `vbaseline` varchar(9) NOT NULL DEFAULT 'available',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 

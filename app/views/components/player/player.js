@@ -7,7 +7,7 @@ import './player.styl'
 
 export default class Player extends React.Component {
   render () {
-    const { player } = this.props
+    const { player, vbaseline } = this.props
 
     return (
       <div className='player__item'>
@@ -22,7 +22,7 @@ export default class Player extends React.Component {
           {/* contract value */}
         </div>
         <div className='player__item-metric'>
-          {(player.vorp.get('available') || 0).toFixed(1)}
+          {(player.vorp.get(vbaseline) || 0).toFixed(1)}
         </div>
         <div className='player__item-metric'>
           {/* contract value */}

@@ -23,7 +23,7 @@ export default class PlayerRow extends React.Component {
   }
 
   render = () => {
-    const { player, style, selected, stats } = this.props
+    const { player, style, selected, stats, vbaseline } = this.props
 
     const isSelected = selected === player.player
 
@@ -227,10 +227,10 @@ export default class PlayerRow extends React.Component {
             <div className='row__group'>
               <div className='row__group-body'>
                 <div className='player__row-metric'>
-                  ${player.values.available}
+                  ${Math.round(player.values[vbaseline])}
                 </div>
                 <div className='player__row-metric'>
-                  {Math.round(player.vorp.available || 0)}
+                  {Math.round(player.vorp[vbaseline] || 0)}
                 </div>
                 <div className='player__row-metric'>
                   {(player.points.total || 0).toFixed(1)}

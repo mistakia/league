@@ -19,7 +19,7 @@ export default class AuctionPlayer extends React.Component {
   }
 
   render = () => {
-    const { index, player, isAvailable, isEligible } = this.props
+    const { index, player, isAvailable, isEligible, vbaseline } = this.props
 
     const classNames = ['auction__player']
     if (!isAvailable) {
@@ -40,7 +40,7 @@ export default class AuctionPlayer extends React.Component {
           <span>{player.pname}</span><Team team={player.team} />
         </div>
         <div className='auction__player-metric'>
-          ${Math.round(player.values.get('available'))}
+          ${Math.round(player.values.get(vbaseline))}
         </div>
       </div>
     )
