@@ -32,7 +32,7 @@ export default class PlayersPage extends React.Component {
       this.list.current.scrollToRow(index)
     }
 
-    cache.clear()
+    cache.clearAll()
     this.list.current.recomputeRowHeights()
   }
 
