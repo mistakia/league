@@ -29,15 +29,11 @@ export default class PlayersPage extends React.Component {
 
     if (this.props.selected) {
       const index = this.props.players.findIndex(p => p.player === this.props.selected)
-      cache.clear(index, 0)
-      this.list.current.recomputeRowHeights(index)
       this.list.current.scrollToRow(index)
     }
-    if (prevProps.selected) {
-      const index = this.props.players.findIndex(p => p.player === prevProps.selected)
-      cache.clear(index, 0)
-      this.list.current.recomputeRowHeights(index)
-    }
+
+    cache.clear()
+    this.list.current.recomputeRowHeights()
   }
 
   render = () => {
