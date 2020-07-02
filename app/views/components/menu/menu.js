@@ -15,6 +15,7 @@ const Menu = () => (
     {!week && <NavLink to='/draft'>Draft</NavLink>}
     {!week && <NavLink to='/auction'>Auction</NavLink>}
     <NavLink to='/settings'>Settings</NavLink>
+    <NavLink to='/resources'>Resources</NavLink>
   </div>
 )
 
