@@ -121,9 +121,10 @@ export default class PlayerRow extends React.Component {
       )
 
       for (const year in stats.overall) {
+        const games = Object.keys(stats.years[year]).length
         const p = stats.overall[year]
         const item = (
-          <PlayerExpandedRow key={year} title={year} stats={p} />
+          <PlayerExpandedRow games={games} key={year} title={year} stats={p} />
         )
         years.push(item)
       }
@@ -182,6 +183,7 @@ export default class PlayerRow extends React.Component {
           </div>
           <div className='expanded__section-header'>
             <div className='row__name'>Year</div>
+            <div className='row__games'>G</div>
             <div className='row__group'>
               <div className='row__group-head'>Passing</div>
               <div className='row__group-body'>

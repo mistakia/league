@@ -1,3 +1,4 @@
+/* global fetch */
 import React from 'react'
 import marked from 'marked'
 
@@ -7,12 +8,12 @@ import PageLayout from '@layouts/page'
 import './resources.styl'
 
 export default class ResourcesPage extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.state = { html: null }
-
   }
+
   componentDidMount = () => {
     fetch(`${DOCS_URL}/resources.md`)
       .then((response) => {
@@ -34,18 +35,19 @@ export default class ResourcesPage extends React.Component {
         const renderer = new marked.Renderer()
         const linkRenderer = renderer.link
         renderer.link = (href, title, text) => {
-          const html = linkRenderer.call(renderer, href, title, text);
+          const html = linkRenderer.call(renderer, href, title, text)
           return html.replace(/^<a /, '<a target="_blank" rel="nofollow" ')
         }
         const markdown = marked(content, { renderer })
         const html = (
-          <div className='resources' dangerouslySetInnerHTML={{__html:markdown}} />
+          <div className='resources' dangerouslySetInnerHTML={{ __html: markdown }} />
         )
         this.setState({ html })
       }).catch((error) => {
         console.log(error)
       })
   }
+
   render = () => {
     return (
       <PageLayout body={this.state.html} scroll />

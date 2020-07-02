@@ -2,7 +2,7 @@ import React from 'react'
 
 export default class PlayerExpandedRow extends React.Component {
   render = () => {
-    const { title, stats, action, className } = this.props
+    const { title, stats, action, className, games } = this.props
     const classNames = ['expanded__row']
     if (className) classNames.push(className)
     return (
@@ -10,6 +10,8 @@ export default class PlayerExpandedRow extends React.Component {
         <div className='row__name'>
           {title}
         </div>
+        {games &&
+          <div className='row__games'>{games}</div>}
         <div className='row__group'>
           <div className='row__group-body'>
             <div className='player__row-metric'>{Math.round(stats.py) || 0}</div>
