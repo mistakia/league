@@ -43,6 +43,9 @@ export default class SettingsPage extends React.Component {
         <div className='settings__section'>
           <div className='settings__section-head'>Value Calculations</div>
           <EditableValue />
+          <div className='settings__help'>
+            <p>The baseline used for value over replacement calculations. Best available will emphasize depth, whereas worst starter will emphasize the value of high-end starters. Hybrid allows for you to mix the two cacluations based on specified weights. Weights are relative and normalized, thus equal weight values are the same as each having a weight of 1.</p>
+          </div>
           <div className='editable__league-section-title'>Projection Weights</div>
           <div className='settings__section-body'>{sourceItems}</div>
         </div>
