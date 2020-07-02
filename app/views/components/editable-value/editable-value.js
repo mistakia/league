@@ -33,7 +33,7 @@ export default class EditableValue extends React.Component {
     return (
       <div className='editable__value'>
         <FormControl size='small' variant='outlined' className='editable__value-select'>
-          <InputLabel id='value-label'>VORP Baseline</InputLabel>
+          <InputLabel id='value-label'>Value Baseline</InputLabel>
           <Select
             labelId='value-label'
             value={vbaseline}

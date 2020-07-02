@@ -105,6 +105,7 @@ export default class PlayersPage extends React.Component {
           <AgeFilter />
         </div>
         <div className='players__header'>
+          <div className='player__row-action' />
           <div className='player__row-pos' />
           <div className='player__row-name'>Name</div>
           <div className='player__row-group'>

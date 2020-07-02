@@ -7,7 +7,5 @@ export {
 export { appReducer } from './reducer'
 export { appSagas } from './sagas'
 export {
-  getApp,
-  getUserId,
-  getToken
+  getApp
 } from './selectors'

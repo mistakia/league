@@ -33,7 +33,8 @@ class App extends React.Component {
 
   async componentDidMount () {
     const token = await localStorageAdapter.getItem('token')
-    this.props.init(token)
+    const key = await localStorageAdapter.getItem('key')
+    this.props.init({ token, key })
   }
 
   handleSubmit = (event) => {

@@ -1,7 +1,9 @@
 import { fork, takeLatest, call, select, put } from 'redux-saga/effects'
+import AES from 'crypto-js/aes'
+import UTF8 from 'crypto-js/enc-utf8'
 
 import { getApp, appActions } from '@core/app'
-import { fetchPlayers, getPlayerStats, putProjection, delProjection } from '@core/api'
+import { fetchPlayers, getPlayerStats, putProjection, delProjection, putSetting } from '@core/api'
 import { playerActions } from './actions'
 import { getAllPlayers, getPlayers } from './selectors'
 import { getLeagues, leagueActions } from '@core/leagues'
@@ -68,12 +70,33 @@ export function * deleteProjection ({ payload }) {
   yield call(calculateValues)
 }
 
+export function * init ({ payload }) {
+  yield fork(loadPlayers)
+  const { key } = yield select(getApp)
+  const { watchlist } = payload.data.user
+  if (watchlist) {
+    const bytes = AES.decrypt(watchlist, key)
+    const decryptedData = bytes.toString(UTF8).split(',')
+    yield put(playerActions.setWatchlist(decryptedData))
+  }
+}
+
+export function * putWatchlist ({ payload }) {
+  const { key } = yield select(getApp)
+  const players = yield select(getPlayers)
+  const watchlist = players.get('watchlist').toArray()
+  const plaintext = watchlist.toString()
+  const encrypted = AES.encrypt(plaintext, key).toString()
+  const params = { type: 'watchlist', value: encrypted }
+  yield call(putSetting, params)
+}
+
 //= ====================================
 //  WATCHERS
 // -------------------------------------
 
 export function * watchLoadPlayers () {
-  yield takeLatest(playerActions.LOAD_PLAYERS, loadPlayers)
+  yield takeLatest(playerActions.LOAD_PLAYERS, loadPlayers) // TODO - remove?
 }
 
 export function * watchFetchPlayersFulfilled () {
@@ -81,7 +104,7 @@ export function * watchFetchPlayersFulfilled () {
 }
 
 export function * watchAuthFulfilled () {
-  yield takeLatest(appActions.AUTH_FULFILLED, loadPlayers)
+  yield takeLatest(appActions.AUTH_FULFILLED, init)
 }
 
 export function * watchToggleOrder () {
@@ -108,6 +131,10 @@ export function * watchDeleteProjection () {
   yield takeLatest(playerActions.DELETE_PROJECTION, deleteProjection)
 }
 
+export function * watchToggleWatchlist () {
+  yield takeLatest(playerActions.TOGGLE_WATCHLIST, putWatchlist)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -121,5 +148,6 @@ export const playerSagas = [
   fork(watchSelectPlayer),
   fork(watchPutLeagueFulfilled),
   fork(watchPutSourceFulfilled),
-  fork(watchDeleteProjection)
+  fork(watchDeleteProjection),
+  fork(watchToggleWatchlist)
 ]

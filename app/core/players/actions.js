@@ -1,6 +1,9 @@
 export const playerActions = {
   LOAD_PLAYERS: 'LOAD_PLAYERS',
 
+  SET_WATCHLIST: 'SET_WATCHLIST',
+  TOGGLE_WATCHLIST: 'TOGGLE_WATCHLIST',
+
   SEARCH_PLAYERS: 'SEARCH_PLAYERS',
   FILTER_PLAYERS: 'FILTER_PLAYERS',
   TOGGLE_ORDER: 'TOGGLE_ORDER',
@@ -28,6 +31,20 @@ export const playerActions = {
   DEL_PROJECTION_FAILED: 'DEL_PROJECTION_FAILED',
   DEL_PROJECTION_PENDING: 'DEL_PROJECTION_PENDING',
   DEL_PROJECTION_FULFILLED: 'DEL_PROJECTION_FULFILLED',
+
+  setWatchlist: (watchlist) => ({
+    type: playerActions.SET_WATCHLIST,
+    payload: {
+      watchlist
+    }
+  }),
+
+  toggleWatchlist: (playerId) => ({
+    type: playerActions.TOGGLE_WATCHLIST,
+    payload: {
+      playerId
+    }
+  }),
 
   selectPlayer: (player) => ({
     type: playerActions.PLAYERS_SELECT_PLAYER,
