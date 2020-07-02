@@ -7,16 +7,27 @@
   cursor pointer
   font-weight 900
 
-  &:hover
-    color lighten($accentColor, 20)
+  &.watchlist
+    background lighten(yellow, 30%)
 
   &.selected
-    background #fafafa
+    background #f0f0f0
     color $accentColor
 
   &.drafted
     text-decoration line-through
     font-weight 100
+
+  .player-draft__item-action
+    .icon
+      opacity 0
+    .selected .icon
+      opacity 1
+
+  &:hover
+    color lighten($accentColor, 20)
+    .player-draft__item-action .icon
+      opacity 1
 
 .player-draft__item-name
   flex 1
@@ -36,3 +47,8 @@
   flex 0 0 20px
   color lighten($textColor, 40)
   text-align right
+
+.player-draft__item-action
+  flex 0 0 auto
+  display flex
+  justify-content center

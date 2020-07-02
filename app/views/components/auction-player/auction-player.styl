@@ -10,6 +10,19 @@
     font-weight 100
     color lighten($textColor, 40%)
 
+  &.watchlist
+    background lighten(yellow, 30%)
+
+  .auction__player-action
+    .icon
+      opacity 0
+    .selected .icon
+      opacity 1
+
+  &:hover
+    .auction__player-action .icon
+      opacity 1
+
 .auction__player-index
   flex 0 0 40px
 
