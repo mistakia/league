@@ -1581,6 +1581,7 @@ CREATE TABLE `users` (
   `vorpw` decimal(2,2) DEFAULT NULL,
   `volsw` decimal(2,2) DEFAULT NULL,
   `vbaseline` varchar(9) NOT NULL DEFAULT 'available',
+  `watchlist` mediumtext,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 

@@ -6,6 +6,7 @@ import Position from '@components/position'
 import Icon from '@components/icon'
 import { weightProjections } from '@common'
 import PlayerExpandedRow from '@components/player-expanded-row'
+import PlayerWatchlistAction from '@components/player-watchlist-action'
 
 import './player-row.styl'
 
@@ -220,6 +221,9 @@ export default class PlayerRow extends React.Component {
       <div style={style}>
         <div className={classNames.join(' ')}>
           <div className='player__row-main' onClick={this.handleClick}>
+            <div className='player__row-action'>
+              <PlayerWatchlistAction playerId={player.player} />
+            </div>
             <div className='player__row-pos'>
               <Position pos={player.pos1} />
             </div>

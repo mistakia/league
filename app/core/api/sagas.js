@@ -6,7 +6,7 @@ import {
   authActions,
   loginActions,
   registerActions,
-  getToken
+  getApp
 } from '@core/app'
 
 import { getDraftActions, postDraftActions } from '@core/draft'
@@ -31,7 +31,7 @@ import { putSourceActions } from '@core/sources'
 import { putSettingActions } from '@core/settings'
 
 function * fetchAPI (apiFunction, actions, opts = {}) {
-  const token = yield select(getToken)
+  const { token } = yield select(getApp)
   const { abort, request } = apiRequest(apiFunction, opts, token)
   try {
     yield put(actions.pending(opts))

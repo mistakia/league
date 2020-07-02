@@ -30,7 +30,7 @@ router.post('/login', async (req, res) => {
     }
 
     const token = jwt.sign({ userId: user.id }, config.jwt.secret)
-    res.json({ token })
+    res.json({ token, userId: user.id })
   } catch (err) {
     logger(err)
     res.status(500).send({ error: err.toString() })
@@ -118,7 +118,7 @@ router.post('/register', async (req, res) => {
     })
 
     const token = jwt.sign({ userId }, config.jwt.secret)
-    res.json({ token })
+    res.json({ token, userId })
   } catch (err) {
     logger(err)
     res.status(500).send({ error: err.toString() })

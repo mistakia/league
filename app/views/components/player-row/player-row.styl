@@ -8,6 +8,14 @@ $height = 30px
   &.selected .player__row-main
     background lighten($accentColor, 95%)
 
+
+  .player__watchlist-action
+    opacity 0
+    &.selected
+      opacity 1
+  &:hover .player__watchlist-action
+    opacity 1
+
 .player__row-main
   display flex
   height $height
@@ -22,6 +30,10 @@ $height = 30px
   text-overflow ellipsis
   white-space nowrap
   margin-right 48px
+
+.player__row-action
+  flex 0 0 45px
+  display flex
 
 .player__row-pos
   flex 0 0 50px

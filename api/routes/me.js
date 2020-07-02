@@ -45,7 +45,7 @@ router.put('/?', async (req, res) => {
       return res.status(400).send({ error: 'missing type param' })
     }
 
-    const validTypes = ['email', 'password', 'vbaseline', 'vorpw', 'volsw']
+    const validTypes = ['email', 'password', 'vbaseline', 'vorpw', 'volsw', 'watchlist']
     if (!validTypes.includes(type)) {
       return res.status(400).send({ error: 'invalid type param' })
     }

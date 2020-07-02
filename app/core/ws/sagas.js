@@ -1,6 +1,6 @@
 import { call, takeLatest, select, fork } from 'redux-saga/effects'
 
-import { getToken, getApp, appActions } from '@core/app'
+import { getApp, appActions } from '@core/app'
 import { openWS, closeWS } from './service'
 
 export function * disconnect () {
@@ -8,8 +8,7 @@ export function * disconnect () {
 }
 
 export function * connect () {
-  const token = yield select(getToken)
-  const { leagueId } = yield select(getApp)
+  const { leagueId, token } = yield select(getApp)
   yield call(openWS, { token, leagueId })
 }
 

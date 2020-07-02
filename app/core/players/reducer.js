@@ -1,5 +1,5 @@
 import moment from 'moment'
-import { Map, List } from 'immutable'
+import { Map, List, Set } from 'immutable'
 
 import { settingActions } from '@core/settings'
 import { appActions } from '@core/app'
@@ -29,6 +29,7 @@ const initialState = new Map({
   items: new Map(),
   order: 'desc',
   orderBy: 'vorp.available',
+  watchlist: new Set(),
   selected: null
 })
 
@@ -153,6 +154,19 @@ export function playersReducer (state = initialState, { payload, type }) {
         })
       }
       return state
+
+    case playerActions.SET_WATCHLIST:
+      return state.merge({
+        watchlist: new Set(payload.watchlist)
+      })
+
+    case playerActions.TOGGLE_WATCHLIST: {
+      const watchlist = state.get('watchlist')
+      const { playerId } = payload
+      return state.merge({
+        watchlist: watchlist.has(playerId) ? watchlist.delete(playerId) : watchlist.add(playerId)
+      })
+    }
 
     default:
       return state
