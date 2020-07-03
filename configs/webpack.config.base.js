@@ -7,7 +7,7 @@ const webpack = require('webpack')
 const nib = require('nib')
 
 module.exports = {
-  externals: [],
+  externals: ['fs', 'child_process'],
 
   target: 'web',
 

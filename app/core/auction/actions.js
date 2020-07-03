@@ -17,6 +17,25 @@ export const auctionActions = {
   AUCTION_SUBMIT_NOMINATION: 'AUCTION_SUBMIT_NOMINATION',
   AUCTION_SUBMIT_BID: 'AUCTION_SUBMIT_BID',
 
+  SET_OPTIMAL_LINEUP: 'SET_OPTIMAL_LINEUP',
+  SET_AUCTION_BUDGET: 'SET_AUCTION_BUDGET',
+
+  setOptimalLineup: ({ players, feasible, result }) => ({
+    type: auctionActions.SET_OPTIMAL_LINEUP,
+    payload: {
+      players,
+      feasible,
+      result
+    }
+  }),
+
+  setBudget: (budget) => ({
+    type: auctionActions.SET_AUCTION_BUDGET,
+    payload: {
+      budget
+    }
+  }),
+
   release: () => ({
     type: auctionActions.AUCTION_RELEASE_LOCK
   }),

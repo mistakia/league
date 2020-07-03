@@ -1,3 +1,4 @@
+import { createSelector } from 'reselect'
 import moment from 'moment'
 import { constants, calculatePoints } from '@common'
 import { getApp } from '@core/app'
@@ -127,3 +128,10 @@ export function getGamesByYearForPlayer (state, { player }) {
 
   return { years, overall }
 }
+
+export const getPlayersForWatchlist = createSelector(
+  getPlayers,
+  (players) => {
+    return players.get('watchlist').toList().map(playerId => players.get('items').get(playerId) || new Player())
+  }
+)

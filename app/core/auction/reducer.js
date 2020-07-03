@@ -2,6 +2,7 @@ import { Record, List } from 'immutable'
 
 import { constants } from '@common'
 import { auctionActions } from './actions'
+import { appActions } from '@core/app'
 
 const initialState = new Record({
   isPaused: true,
@@ -10,6 +11,10 @@ const initialState = new Record({
   player: null,
   bid: null,
   connected: new List(),
+  lineupPlayers: new List(),
+  lineupFeasible: false,
+  lineupPoints: null,
+  lineupBudget: null,
   tids: new List(),
   transactions: new List(),
   positions: new List(constants.positions),
@@ -97,6 +102,23 @@ export function auctionReducer (state = initialState(), { payload, type }) {
         nominationTimer: payload.nominationTimer
       })
     }
+
+    case auctionActions.SET_OPTIMAL_LINEUP:
+      return state.merge({
+        lineupPlayers: new List(payload.players),
+        lineupPoints: payload.result,
+        lineupFeasible: payload.feasible
+      })
+
+    case auctionActions.SET_AUCTION_BUDGET:
+      return state.merge({
+        lineupBudget: payload.budget
+      })
+
+    case appActions.AUTH_FULFILLED:
+      return state.merge({
+        lineupBudget: Math.round(payload.data.leagues[0].cap * 0.90)
+      })
 
     default:
       return state

@@ -6,6 +6,7 @@ import AuctionTransaction from '@components/auction-transaction'
 import AuctionPlayer from '@components/auction-player'
 import AuctionTeam from '@components/auction-team'
 import AuctionMainBid from '@components/auction-main-bid'
+import AuctionTargets from '@components/auction-targets'
 import AuctionPositionFilter from '@components/auction-position-filter'
 
 import './auction.styl'
@@ -48,7 +49,9 @@ export default function () {
           {teamItems}
         </div>
         <AuctionMainBid playerId={playerId} />
-        <div className='auction__main-board' />
+        <div className='auction__main-board'>
+          <AuctionTargets />
+        </div>
       </div>
       <div className='auction__log'>
         {transactionItems}
