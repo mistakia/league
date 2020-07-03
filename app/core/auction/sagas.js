@@ -46,15 +46,49 @@ export function * optimize () {
   const positionSet = getPositionSet(positions)
   for (const [pos, min] of positionSet.entries()) {
     const posMin = Math.min(min, rosterConstraints[pos].min)
-    constraints[pos] = rosterConstraints[pos]
+    constraints[pos] = Object.assign({}, rosterConstraints[pos])
     constraints[pos].min = posMin
     constraints.starter.max += posMin
+    positionSet.set(pos, Math.max((min - rosterConstraints[pos].min), 0))
   }
 
-  // TODO add flexes
+  const processFlex = (positions, flexCount) => {
+    const pos = positions.shift()
+    const posCount = positionSet.get(pos)
+    if (!posCount) {
+      if (positions.length) processFlex(positions, flexCount)
+      return
+    }
+
+    positionSet.set(pos, Math.max((posCount - flexCount), 0))
+    const min = Math.min(posCount, flexCount)
+    constraints.starter.max += min
+    if (min < flexCount && positions.length) processFlex(positions, flexCount)
+  }
+
+  if (league.srbwr) {
+    processFlex(['RB', 'WR'], league.srbwr)
+  }
+
+  if (league.swrte) {
+    processFlex(['WR', 'TE'], league.swrte)
+  }
+
+  if (league.srbwrte) {
+    processFlex(['RB', 'WR', 'TE'], league.srbwrte)
+  }
+
+  if (league.sqbrbwrte) {
+    processFlex(['QB', 'RB', 'WR', 'TE'], league.sqbrbwrte)
+  }
+
   const worker = new Worker()
-  let result = yield call(worker.optimizeLineup, { constraints, players: sortedWatchlist.valueSeq().toJS() })
-  let selectedPlayers = Object.keys(result).filter(r => r.match(/^([A-Z]{2,})-([0-9]{4,})$/ig) || r.match(/^([A-Z]{1,3})$/ig))
+  let result = yield call(worker.optimizeLineup, {
+    constraints,
+    players: sortedWatchlist.valueSeq().toJS()
+  })
+  let selectedPlayers = Object.keys(result)
+    .filter(r => r.match(/^([A-Z]{2,})-([0-9]{4,})$/ig) || r.match(/^([A-Z]{1,3})$/ig))
   if (selectedPlayers.length < 10) {
     for (const player of selectedPlayers) {
       constraints[player] = { min: 1 }
@@ -64,7 +98,8 @@ export function * optimize () {
       players: sortedPlayers.valueSeq().toJS()
     })
   }
-  selectedPlayers = Object.keys(result).filter(r => r.match(/^([A-Z]{2,})-([0-9]{4,})$/ig) || r.match(/^([A-Z]{1,3})$/ig))
+  selectedPlayers = Object.keys(result)
+    .filter(r => r.match(/^([A-Z]{2,})-([0-9]{4,})$/ig) || r.match(/^([A-Z]{1,3})$/ig))
   yield put(auctionActions.setOptimalLineup({
     players: selectedPlayers,
     ...result
