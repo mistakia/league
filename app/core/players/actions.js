@@ -11,7 +11,7 @@ export const playerActions = {
   PLAYERS_SELECT_PLAYER: 'PLAYERS_SELECT_PLAYER',
   PLAYERS_DESELECT_PLAYER: 'PLAYERS_DESELECT_PLAYER',
 
-  CALCULATE_VALUES: 'CALCULATE_VALUES',
+  SET_PLAYER_VALUES: 'SE_PLAYER_VALUES',
 
   FETCH_PLAYERS_FAILED: 'FETCH_PLAYERS_FAILED',
   FETCH_PLAYERS_FULFILLED: 'FETCH_PLAYERS_FULFILLED',
@@ -31,6 +31,13 @@ export const playerActions = {
   DEL_PROJECTION_FAILED: 'DEL_PROJECTION_FAILED',
   DEL_PROJECTION_PENDING: 'DEL_PROJECTION_PENDING',
   DEL_PROJECTION_FULFILLED: 'DEL_PROJECTION_FULFILLED',
+
+  setValues: (players) => ({
+    type: playerActions.SET_PLAYER_VALUES,
+    payload: {
+      players
+    }
+  }),
 
   setWatchlist: (watchlist) => ({
     type: playerActions.SET_WATCHLIST,
@@ -76,18 +83,6 @@ export const playerActions = {
 
   load: () => ({
     type: playerActions.LOAD_PLAYERS
-  }),
-
-  calculate: ({ players, leagues, sources, userId, vorpw, volsw }) => ({
-    type: playerActions.CALCULATE_VALUES,
-    payload: {
-      players,
-      leagues,
-      sources,
-      userId,
-      vorpw,
-      volsw
-    }
   }),
 
   filter: (type, values) => ({

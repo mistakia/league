@@ -49,7 +49,8 @@ module.exports = {
   },
 
   output: {
-    path: path.join(__dirname, '..', 'app')
+    path: path.join(__dirname, '..', 'app'),
+    globalObject: 'this'
   },
 
   /**
@@ -64,6 +65,7 @@ module.exports = {
   },
 
   plugins: [
-    new webpack.NamedModulesPlugin()
+    new webpack.NamedModulesPlugin(),
+    new webpack.IgnorePlugin(new RegExp('^(fs|child_process)$'))
   ]
 }

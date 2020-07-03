@@ -6,8 +6,9 @@ import { getApp, appActions } from '@core/app'
 import { fetchPlayers, getPlayerStats, putProjection, delProjection, putSetting } from '@core/api'
 import { playerActions } from './actions'
 import { getAllPlayers, getPlayers } from './selectors'
-import { getLeagues, leagueActions } from '@core/leagues'
+import { leagueActions, getCurrentLeague } from '@core/leagues'
 import { sourceActions, getSources } from '@core/sources'
+import Worker from 'workerize-loader?inline!./worker' // eslint-disable-line import/no-webpack-loader-syntax
 
 export function * loadPlayers () {
   yield call(fetchPlayers)
@@ -15,11 +16,20 @@ export function * loadPlayers () {
 
 export function * calculateValues () {
   const { userId, vorpw, volsw } = yield select(getApp)
-  const leagues = yield select(getLeagues)
+  const league = yield select(getCurrentLeague)
   const players = yield select(getAllPlayers)
   const sources = yield select(getSources)
 
-  yield put(playerActions.calculate({ players, leagues, sources: sources.toList(), userId, vorpw, volsw }))
+  const worker = new Worker()
+  const result = yield call(worker.calculatePlayerValues, {
+    players: players.valueSeq().toJS(),
+    league: league,
+    sources: sources.toList().toJS(),
+    userId,
+    vorpw,
+    volsw
+  })
+  yield put(playerActions.setValues(result))
 }
 
 export function * toggleOrder ({ payload }) {
