@@ -77,7 +77,8 @@ export function * init ({ payload }) {
   if (watchlist) {
     const bytes = AES.decrypt(watchlist, key)
     const decryptedData = bytes.toString(UTF8).split(',')
-    yield put(playerActions.setWatchlist(decryptedData))
+    const cleaned = decryptedData.filter(p => !!p)
+    yield put(playerActions.setWatchlist(cleaned))
   }
 }
 

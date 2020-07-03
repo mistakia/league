@@ -5,7 +5,8 @@ export {
   getFilteredPlayers,
   getRookiePlayers,
   getPlayerById,
-  getGamesByYearForPlayer
+  getGamesByYearForPlayer,
+  getPlayersForWatchlist
 } from './selectors'
 export { Player, createPlayer } from './player'
 export {

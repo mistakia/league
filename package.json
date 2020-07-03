@@ -66,6 +66,7 @@
     "html-webpack-inline-source-plugin": "^1.0.0-beta.2",
     "html-webpack-plugin": "^4.3.0",
     "immutable": "^4.0.0-rc.12",
+    "javascript-lp-solver": "^0.4.24",
     "mini-css-extract-plugin": "^0.9.0",
     "mocha": "^7.2.0",
     "nib": "^1.1.2",

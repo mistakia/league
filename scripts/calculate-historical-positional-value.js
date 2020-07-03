@@ -1,3 +1,5 @@
+// eslint-disable-next-line
+require = require('esm')(module /*, options*/)
 const regression = require('regression')
 const { Table } = require('console-table-printer')
 

@@ -1,0 +1,58 @@
+.auction__targets-head
+  display flex
+  justify-content flex-end
+  align-items center
+  padding 16px
+
+.auction__targets-body
+  display flex
+  flex-flow column wrap
+  height 1200px
+  align-content space-between
+
+  &:before
+  &:after
+    content ''
+    flex-basis 100%
+    width 0
+    order 2
+
+.auction__targets-section
+  width 31%
+  margin 0 1% 2%
+  background #fafafa
+
+.auction__targets-section:nth-child(3n+1)
+  order 1
+.auction__targets-section:nth-child(3n+2)
+  order 2
+.auction__targets-section:nth-child(3n)
+  order 3
+
+.auction__targets-player
+  display flex
+  border-bottom 1px solid $borderColor
+  border-right 4px solid transparent
+
+  &.optimal
+    border-right 4px solid $accentColor
+
+.optimal__lineup-key
+  background #fafafa
+  border-bottom 1px solid $borderColor
+  color $accentColor
+  border-right 4px solid $accentColor
+  height 35px
+  display flex
+  align-items center
+  padding 8px
+  text-transform uppercase
+
+.auction__targets-player-cost
+  padding 8px
+  background #f0f0f0
+  border-right 1px solid darken($borderColor, 10%)
+  margin-right 8px
+
+.auction__targets-player-meta
+  width 100px
