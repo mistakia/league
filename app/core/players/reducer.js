@@ -6,13 +6,7 @@ import { appActions } from '@core/app'
 import { playerActions } from './actions'
 import { createPlayer } from './player'
 
-import {
-  constants,
-  weightProjections,
-  calculatePoints,
-  calculateBaselines,
-  calculateValues
-} from '@common'
+import { constants } from '@common'
 
 const initialState = new Map({
   isPending: false,
@@ -69,41 +63,17 @@ export function playersReducer (state = initialState, { payload, type }) {
       return state.merge({ order, orderBy, selected: null })
     }
 
-    case playerActions.CALCULATE_VALUES: {
+    case playerActions.SET_PLAYER_VALUES:
       return state.withMutations(state => {
-        const { userId, vorpw, volsw } = payload
-        for (const league of payload.leagues) {
-          const leag = league.toJS()
-          const players = payload.players.valueSeq().toJS()
-          for (const player of players) {
-            const { projections } = player
-
-            player.projection = weightProjections({
-              projections,
-              weights: payload.sources,
-              userId
-            })
-            const { projection } = player
-
-            // calculate points for each league
-            player.points = calculatePoints({ stats: projection, ...leag })
-          }
-
-          // calculate worst starter baseline
-          const baselines = calculateBaselines({ players, ...leag })
-          const result = calculateValues({ players, baselines, vorpw, volsw, ...leag })
-          // TODO - set per league
-          result.forEach(playerData => {
-            state.mergeIn(['items', playerData.player], {
-              projection: new Map(playerData.projection),
-              points: new Map(playerData.points),
-              values: new Map(playerData.values),
-              vorp: new Map(playerData.vorp)
-            })
+        payload.players.forEach(playerData => {
+          state.mergeIn(['items', playerData.player], {
+            projection: new Map(playerData.projection),
+            points: new Map(playerData.points),
+            values: new Map(playerData.values),
+            vorp: new Map(playerData.vorp)
           })
-        }
+        })
       })
-    }
 
     case playerActions.FETCH_PLAYER_PENDING:
       return state.merge({

@@ -1,4 +1,3 @@
-import solver from 'javascript-lp-solver'
 import { all, take, takeLatest, fork, select, delay, put, call } from 'redux-saga/effects'
 
 import { getApp } from '@core/app'
@@ -8,42 +7,9 @@ import { send } from '@core/ws'
 import { getCurrentLeague } from '@core/leagues'
 import { getPlayersForWatchlist, getAllPlayers, playerActions } from '@core/players'
 import { constants, getEligibleSlots } from '@common'
+import Worker from 'workerize-loader?inline!./worker' // eslint-disable-line import/no-webpack-loader-syntax
 
 const getPositionSet = (players) => players.reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map())
-
-const optimizeLineup = ({ constraints, players }) => {
-  const variables = {}
-  const ints = {}
-
-  for (const player of players.values()) {
-    variables[player.player] = {
-      points: Math.round(player.points.get('total') || 0),
-      value: Math.round(player.values.get('hybrid') || 0),
-      starter: 1
-    }
-    variables[player.player][player.player] = 1
-    // variables[player.player][player.pos1] = 1
-    if (constraints[player.player]) {
-      constraints[player.player].max = 1
-    } else {
-      constraints[player.player] = { max: 1 }
-    }
-    ints[player.player] = 1
-    for (const pos of constants.positions) {
-      variables[player.player][pos] = player.pos1 === pos ? 1 : 0
-    }
-  }
-
-  const model = {
-    optimize: 'points',
-    opType: 'max',
-    constraints,
-    variables,
-    ints
-  }
-
-  return solver.Solve(model)
-}
 
 export function * optimize () {
   const auction = yield select(getAuction)
@@ -86,16 +52,16 @@ export function * optimize () {
   }
 
   // TODO add flexes
-
-  let result = optimizeLineup({ constraints, players: sortedWatchlist })
+  const worker = new Worker()
+  let result = yield call(worker.optimizeLineup, { constraints, players: sortedWatchlist.valueSeq().toJS() })
   let selectedPlayers = Object.keys(result).filter(r => r.match(/^([A-Z]{2,})-([0-9]{4,})$/ig) || r.match(/^([A-Z]{1,3})$/ig))
   if (selectedPlayers.length < 10) {
     for (const player of selectedPlayers) {
       constraints[player] = { min: 1 }
     }
-    result = optimizeLineup({
+    result = yield call(worker.optimizeLineup, {
       constraints: { ...constraints, ...rosterConstraints, starter: { max: starterLimit } },
-      players: sortedPlayers
+      players: sortedPlayers.valueSeq().toJS()
     })
   }
   selectedPlayers = Object.keys(result).filter(r => r.match(/^([A-Z]{2,})-([0-9]{4,})$/ig) || r.match(/^([A-Z]{1,3})$/ig))
@@ -183,7 +149,7 @@ export function * watchInitAuctionLineup () {
   while (true) {
     yield all([
       take(playerActions.FETCH_PLAYERS_FULFILLED),
-      take(playerActions.CALCULATE_VALUES),
+      take(playerActions.SET_PLAYER_VALUES),
       take(auctionActions.AUCTION_JOIN)
     ])
     yield call(optimize)
