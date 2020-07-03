@@ -1,14 +1,14 @@
 import solver from 'javascript-lp-solver'
 import { constants } from '@common'
 
-export function optimizeLineup ({ constraints, players }) {
+export function optimizeLineup ({ constraints, players, vbaseline }) {
   const variables = {}
   const ints = {}
 
   for (const player of players) {
     variables[player.player] = {
       points: Math.round(player.points.total || 0),
-      value: Math.round(player.values.hybrid || 0),
+      value: Math.round(player.values[vbaseline] || 0),
       starter: 1
     }
     variables[player.player][player.player] = 1

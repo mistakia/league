@@ -16,6 +16,7 @@ export function * optimize () {
   const league = yield select(getCurrentLeague)
   const watchlist = yield select(getPlayersForWatchlist)
   const players = yield select(getAllPlayers)
+  const { vbaseline } = yield select(getApp)
 
   // TODO add signed players using signed value
   // TODO adjust budget based on available cap
@@ -85,6 +86,7 @@ export function * optimize () {
   const worker = new Worker()
   let result = yield call(worker.optimizeLineup, {
     constraints,
+    vbaseline,
     players: sortedWatchlist.valueSeq().toJS()
   })
   let selectedPlayers = Object.keys(result)
@@ -95,6 +97,7 @@ export function * optimize () {
     }
     result = yield call(worker.optimizeLineup, {
       constraints: { ...constraints, ...rosterConstraints, starter: { max: starterLimit } },
+      vbaseline,
       players: sortedPlayers.valueSeq().toJS()
     })
   }
