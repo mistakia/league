@@ -53,7 +53,7 @@ export default function () {
           <AuctionTargets />
         </div>
       </div>
-      <div className='auction__log'>
+      <div className='auction__log empty'>
         {transactionItems}
       </div>
     </div>
