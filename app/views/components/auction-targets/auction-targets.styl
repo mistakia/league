@@ -8,6 +8,7 @@
   display flex
   flex-flow column wrap
   height 1200px
+  padding 0 8px
   align-content space-between
 
   &:before
@@ -36,6 +37,11 @@
 
   &.optimal
     border-right 4px solid $accentColor
+
+  .player__watchlist-action
+    opacity 0
+  &:hover .player__watchlist-action
+    opacity 1
 
 .optimal__lineup-key
   background #fafafa

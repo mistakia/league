@@ -60,7 +60,7 @@ export default function () {
             <div className='player__item-metric'>Bench+</div>
           </div>
         </div>
-        <div className='dashboard__section-body'>
+        <div className='dashboard__section-body empty'>
           {activeItems}
         </div>
       </div>

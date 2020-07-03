@@ -2,6 +2,8 @@ import React from 'react'
 
 import Icon from '@components/icon'
 
+import './player-watchlist-action.styl'
+
 export default class PlayerWatchlistAction extends React.Component {
   handleClick = (event) => {
     event.stopPropagation()
