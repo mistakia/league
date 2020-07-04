@@ -1,4 +1,5 @@
 import React from 'react'
+import { AutoSizer, List } from 'react-virtualized'
 
 import PageLayout from '@layouts/page'
 import SearchFilter from '@components/search-filter'
@@ -23,9 +24,11 @@ export default function () {
     transactionItems.push(<AuctionTransaction key={index} transaction={transaction} />)
   }
 
-  const playerItems = []
-  for (const [index, player] of sorted.entries()) {
-    playerItems.push(<AuctionPlayer key={index} player={player} index={index} />)
+  const playerRow = ({ index, key, ...params }) => {
+    const player = sorted.get(index)
+    return (
+      <AuctionPlayer key={key} player={player} {...params} index={index} />
+    )
   }
 
   const teamItems = []
@@ -41,7 +44,17 @@ export default function () {
           <AuctionPositionFilter />
         </div>
         <div className='auction__players-body'>
-          {playerItems}
+          <AutoSizer>
+            {({ height, width }) => (
+              <List
+                width={width}
+                height={height}
+                rowHeight={25}
+                rowCount={sorted.size}
+                rowRenderer={playerRow}
+              />
+            )}
+          </AutoSizer>
         </div>
       </div>
       <div className='auction__main'>

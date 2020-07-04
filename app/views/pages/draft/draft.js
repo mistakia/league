@@ -1,5 +1,6 @@
 import React from 'react'
 import moment from 'moment'
+import { AutoSizer, List } from 'react-virtualized'
 
 import Button from '@components/button'
 import PageLayout from '@layouts/page'
@@ -42,7 +43,12 @@ export default function () {
   }
 
   const sorted = players.sort((a, b) => b.vorp.get(vbaseline) - a.vorp.get(vbaseline))
-  const all = sorted.map((p, index) => <DraftPlayer key={p.player} index={index} player={p} />)
+  const allRow = ({ index, key, ...params }) => {
+    const player = sorted.get(index)
+    return (
+      <DraftPlayer key={key} index={index} player={player} {...params} />
+    )
+  }
 
   const groups = {}
   for (const position of positions) {
@@ -54,9 +60,16 @@ export default function () {
   for (const position in groups) {
     if (!items[position]) items[position] = []
     const players = groups[position]
-    for (const [index, player] of players.entries()) {
-      items[position].push(<DraftPlayer key={player.player} player={player} index={index} />)
+    for (const player of players.values()) {
+      items[position].push(player)
     }
+  }
+
+  const positionRow = ({ index, key, pos, ...params }) => {
+    const player = items[pos][index]
+    return (
+      <DraftPlayer key={key} index={index} player={player} {...params} />
+    )
   }
 
   const pickItems = []
@@ -108,24 +121,83 @@ export default function () {
         <div className='draft__main-board'>
           <div className='draft__main-board-pos'>
             <div className='draft__main-board-pos-head'>Overall</div>
-            <div className='draft__main-board-pos-body'>{all}</div>
-            {/* TODO show player position */}
+            <div className='draft__main-board-pos-body'>
+              <AutoSizer>
+                {({ height, width }) => (
+                  <List
+                    width={width}
+                    height={height}
+                    rowHeight={25}
+                    rowCount={sorted.size}
+                    rowRenderer={allRow}
+                  />
+                )}
+              </AutoSizer>
+            </div>
           </div>
           <div className='draft__main-board-pos'>
             <div className='draft__main-board-pos-head'>Quarterbacks</div>
-            <div className='draft__main-board-pos-body'>{items.QB}</div>
+            <div className='draft__main-board-pos-body'>
+              <AutoSizer>
+                {({ height, width }) => (
+                  <List
+                    width={width}
+                    height={height}
+                    rowHeight={25}
+                    rowCount={items.QB.length}
+                    rowRenderer={(args) => positionRow({ pos: 'QB', ...args })}
+                  />
+                )}
+              </AutoSizer>
+            </div>
           </div>
           <div className='draft__main-board-pos'>
             <div className='draft__main-board-pos-head'>Running Backs</div>
-            <div className='draft__main-board-pos-body'>{items.RB}</div>
+            <div className='draft__main-board-pos-body'>
+              <AutoSizer>
+                {({ height, width }) => (
+                  <List
+                    width={width}
+                    height={height}
+                    rowHeight={25}
+                    rowCount={items.RB.length}
+                    rowRenderer={(args) => positionRow({ pos: 'RB', ...args })}
+                  />
+                )}
+              </AutoSizer>
+            </div>
           </div>
           <div className='draft__main-board-pos'>
             <div className='draft__main-board-pos-head'>Wide Receivers</div>
-            <div className='draft__main-board-pos-body'>{items.WR}</div>
+            <div className='draft__main-board-pos-body'>
+              <AutoSizer>
+                {({ height, width }) => (
+                  <List
+                    width={width}
+                    height={height}
+                    rowHeight={25}
+                    rowCount={items.WR.length}
+                    rowRenderer={(args) => positionRow({ pos: 'WR', ...args })}
+                  />
+                )}
+              </AutoSizer>
+            </div>
           </div>
           <div className='draft__main-board-pos'>
             <div className='draft__main-board-pos-head'>Tight ends</div>
-            <div className='draft__main-board-pos-body'>{items.TE}</div>
+            <div className='draft__main-board-pos-body'>
+              <AutoSizer>
+                {({ height, width }) => (
+                  <List
+                    width={width}
+                    height={height}
+                    rowHeight={25}
+                    rowCount={items.TE.length}
+                    rowRenderer={(args) => positionRow({ pos: 'TE', ...args })}
+                  />
+                )}
+              </AutoSizer>
+            </div>
           </div>
         </div>
       </div>
