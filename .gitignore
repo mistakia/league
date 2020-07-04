@@ -13,4 +13,4 @@ yarn-error.log
 config.production.js
 key.pem
 cert.pem
-dist/*.worker.js
+dist/*.worker.js*

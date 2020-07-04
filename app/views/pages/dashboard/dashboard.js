@@ -78,7 +78,7 @@ export default function () {
             <div className='player__item-metric'>Bench+</div>
           </div>
         </div>
-        <div className='dashboard__section-body'>
+        <div className='dashboard__section-body empty'>
           {practiceItems}
         </div>
       </div>
@@ -92,7 +92,7 @@ export default function () {
             <div className='player__item-metric'>Pick #</div>
           </div>
         </div>
-        <div className='dashboard__section-body'>
+        <div className='dashboard__section-body empty'>
           {pickItems}
         </div>
       </div>
