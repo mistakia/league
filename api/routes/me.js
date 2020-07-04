@@ -28,6 +28,8 @@ router.get('/?', async (req, res) => {
       leagues,
       sources
     })
+
+    await db('users').where({ id: req.user.userId }).update({ lastvisit: new Date() })
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })
