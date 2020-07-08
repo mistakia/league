@@ -1,4 +1,5 @@
 import * as constants from './constants'
+import percentile from 'percentile'
 
 const round = (value, precision) => {
   var multiplier = Math.pow(10, precision || 0)
@@ -208,6 +209,21 @@ const calculateStatsFromPlays = (plays) => {
       const value = stats[stat]
       if (value < overall[stat].min) overall[stat].min = value
       if (value > overall[stat].max) overall[stat].max = value
+    }
+  }
+
+  for (const stat in constants.createFullStats()) {
+    const values = Object.values(players).map(item => item[stat]).filter(item => !!item)
+    const result = percentile([50, 75, 90, 95, 98, 99], values)
+    console.log(result)
+    overall[stat] = {
+      p50: result[0],
+      p75: result[1],
+      p90: result[2],
+      p95: result[3],
+      p98: result[4],
+      p99: result[5],
+      ...overall[stat]
     }
   }
 

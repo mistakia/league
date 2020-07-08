@@ -6785,6 +6785,11 @@ pbkdf2@^3.0.3:
     safe-buffer "^5.0.1"
     sha.js "^2.4.8"
 
+percentile@^1.4.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/percentile/-/percentile-1.4.0.tgz#84e03f1f37722ddcc1f527d5367743b7bb30f336"
+  integrity sha512-W/Q9I9nUm9Z7JvVHWQ0zRfUUdSu3NVLeiECBCrWqxdMKAOMcUBST0RhAtlvN1itLnR8HI/LSDD96clw3RenzZQ==
+
 pg-connection-string@2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/pg-connection-string/-/pg-connection-string-2.2.0.tgz#caab4d38a9de4fdc29c9317acceed752897de41c"

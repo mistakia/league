@@ -73,6 +73,7 @@
     "nib": "^1.1.2",
     "normalize.css": "^8.0.1",
     "optimize-css-assets-webpack-plugin": "^5.0.3",
+    "percentile": "^1.4.0",
     "react-hot-loader": "^4.12.21",
     "react-redux": "^7.2.0",
     "react-router": "^5.1.2",
