@@ -1,5 +1,5 @@
-## Statistics
-### General
+# Statistics
+## General
 Success Rate
 : Rate of successful plays. Applies to Rush/Pass Plays only. Generally, a play is deemed 'Successful' when the following occurs: 40% of yards-to-go are gained on 1st down; 60% of yards-to-go on 2nd down; or 100% of yards-to-go on 3rd & 4th down. The formula changes slightly in the 4th quarter of close games.
 
@@ -33,7 +33,7 @@ Expected Yards (EY)
 Dropped Yards (DYDS)
 : the total number of air yards on dropped passes
 
-### Passing
+## Passing
 
 Expected Completion Percentage (xCOMP)
 : Using a passer’s Completion Probability on every play, determine what a passer’s completion percentage is expected to be.
@@ -95,7 +95,7 @@ Average Air Yards Differential (AYD)
 Yards After Catch Per Completion (YAC/C)
 : todo
 
-### Rushing
+## Rushing
 
 Carry Share
 : a players portion of team carries
@@ -136,7 +136,7 @@ Stacked Front
 Light Front
 : six or less defenders in the box.
 
-### Receiving
+## Receiving
 
 Share of Team Air Yards
 : todo
@@ -198,7 +198,7 @@ Catch Rate
 True Catch Rate
 : reception percentage based solely on catchable targets.
 
-### Misc
+## Misc
 
 Burn Rate
 : Percentage of targets allowed in which the defensive back’s assigned receiver gained more than 5 yards of downfield separation.
@@ -221,7 +221,7 @@ Fantasy Points Per Target
 Fantasy Points Per Attempt
 : measures quarterback fantasy points in the context of passing opportunities by dividing total fantasy points by passing attempts.
 
-## Play Stats & Filters
+# Play Stats & Filters
 
 Season
 : the season the game is played in
@@ -480,10 +480,10 @@ Play Clock Time (PCLOCK)
 : Seconds left on the play clock when the ball was snapped.
 
 RB#
-: # of Running Backs on the field.
+: number of Running Backs on the field.
 
 TE#
-: # of Tight Ends on the field.
+: number of Tight Ends on the field.
 
 QB
 : QB Player Code. Note: not always the same as PSR (passer).
