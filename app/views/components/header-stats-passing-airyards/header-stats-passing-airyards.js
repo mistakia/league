@@ -6,8 +6,8 @@ const HeaderStatsPassingAiryards = () => (
     <div className='player__row-group-head'>Air Yards</div>
     <div className='player__row-group-body'>
       <PlayerHeader className='player__row-metric' label='AY' value='stats.ptay' />
-      <PlayerHeader className='player__row-metric' label='AY/PA' value='stats._aypa' />
-      <PlayerHeader className='player__row-metric' label='CAY/PC' value='stats.pcay_pc' />
+      <PlayerHeader className='player__row-metric' label='AYPA' value='stats._aypa' />
+      <PlayerHeader className='player__row-metric' label='CAY/C' value='stats.pcay_pc' />
       <PlayerHeader className='player__row-metric' label='PACR' value='stats._pacr' />
     </div>
   </div>

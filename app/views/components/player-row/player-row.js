@@ -7,6 +7,7 @@ import Icon from '@components/icon'
 import { weightProjections } from '@common'
 import PlayerExpandedRow from '@components/player-expanded-row'
 import PlayerWatchlistAction from '@components/player-watchlist-action'
+import PlayerRowMetric from '@components/player-row-metric'
 
 import './player-row.styl'
 
@@ -105,10 +106,10 @@ export default class PlayerRow extends React.Component {
     const passingBasic = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <div className='player__row-metric'>{player.stats.py}</div>
-          <div className='player__row-metric'>{player.stats.tdp}</div>
-          <div className='player__row-metric'>{player.stats.ints}</div>
-          <div className='player__row-metric'>{player.stats.drppy}</div>
+          <PlayerRowMetric value={player.stats.py} type='py' />
+          <PlayerRowMetric value={player.stats.tdp} type='tdp' />
+          <PlayerRowMetric value={player.stats.ints} type='ints' />
+          <PlayerRowMetric value={player.stats.drppy} type='drppy' />
         </div>
       </div>
     )
@@ -116,10 +117,10 @@ export default class PlayerRow extends React.Component {
     const passingEfficiency = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <div className='player__row-metric'>{player.stats.pc_pct}</div>
-          <div className='player__row-metric'>{player.stats.tdp_pct}</div>
-          <div className='player__row-metric'>{player.stats.ints_pct}</div>
-          <div className='player__row-metric'>{player.stats.intw_pct}</div>
+          <PlayerRowMetric value={player.stats.pc_pct} type='pc_pct' />
+          <PlayerRowMetric value={player.stats.tdp_pct} type='tdp_pct' />
+          <PlayerRowMetric value={player.stats.ints_pct} type='ints_pct' />
+          <PlayerRowMetric value={player.stats.intw_pct} type='intw_pct' />
         </div>
       </div>
     )
@@ -127,10 +128,10 @@ export default class PlayerRow extends React.Component {
     const passingAdvanced = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <div className='player__row-metric'>{player.stats.pyac}</div>
-          <div className='player__row-metric'>{player.stats.pyac_pc}</div>
-          <div className='player__row-metric'>{player.stats._ypa}</div>
-          <div className='player__row-metric'>{player.stats.pdot_pa}</div>
+          <PlayerRowMetric value={player.stats.pyac} type='pyac' />
+          <PlayerRowMetric value={player.stats.pyac_pc} type='pyac_pc' />
+          <PlayerRowMetric value={player.stats._ypa} type='_ypa' />
+          <PlayerRowMetric value={player.stats.pdot_pa} type='pdot_pa' />
         </div>
       </div>
     )
@@ -138,10 +139,10 @@ export default class PlayerRow extends React.Component {
     const passingAiryards = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <div className='player__row-metric'>{player.stats.ptay}</div>
-          <div className='player__row-metric'>{player.stats.pcay_pc}</div>
-          <div className='player__row-metric'>{player.stats._aypa}</div>
-          <div className='player__row-metric'>{player.stats._pacr}</div>
+          <PlayerRowMetric value={player.stats.ptay} type='ptay' />
+          <PlayerRowMetric value={player.stats.pcay_pc} type='pcay_pc' />
+          <PlayerRowMetric value={player.stats._aypa} type='_aypa' />
+          <PlayerRowMetric value={player.stats._pacr} type='_pacr' />
         </div>
       </div>
     )
@@ -149,13 +150,13 @@ export default class PlayerRow extends React.Component {
     const passingPressure = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <div className='player__row-metric'>{player.stats.sk}</div>
-          <div className='player__row-metric'>{player.stats.sky}</div>
-          <div className='player__row-metric'>{player.stats.sk_pct}</div>
-          <div className='player__row-metric'>{player.stats.qbhi_pct}</div>
-          <div className='player__row-metric'>{player.stats.qbp_pct}</div>
-          <div className='player__row-metric'>{player.stats.qbhu_pct}</div>
-          <div className='player__row-metric'>{player.stats.sk_pct}</div>
+          <PlayerRowMetric value={player.stats.sk} type='sk' />
+          <PlayerRowMetric value={player.stats.sky} type='sky' />
+          <PlayerRowMetric value={player.stats.sk_pct} type='sk_pct' />
+          <PlayerRowMetric value={player.stats.qbhi_pct} type='qbhi_pct' />
+          <PlayerRowMetric value={player.stats.qbp_pct} type='qbp_pct' />
+          <PlayerRowMetric value={player.stats.qbhu_pct} type='qbhu_pct' />
+          <PlayerRowMetric value={player.stats.sk_pct} type='sk_pct' />
         </div>
       </div>
     )
@@ -163,9 +164,9 @@ export default class PlayerRow extends React.Component {
     const rushingBasic = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <div className='player__row-metric'>{player.stats.ry}</div>
-          <div className='player__row-metric'>{player.stats.tdr}</div>
-          <div className='player__row-metric'>{player.stats.ry_pra}</div>
+          <PlayerRowMetric value={player.stats.ry} type='ry' />
+          <PlayerRowMetric value={player.stats.tdr} type='tdr' />
+          <PlayerRowMetric value={player.stats.ry_pra} type='ry_pra' />
         </div>
       </div>
     )
@@ -173,9 +174,9 @@ export default class PlayerRow extends React.Component {
     const rushingProductivity = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <div className='player__row-metric'>{player.stats.ra}</div>
-          <div className='player__row-metric'>{player.stats.rfd}</div>
-          <div className='player__row-metric'>{player.stats.posra}</div>
+          <PlayerRowMetric value={player.stats.ra} type='ra' />
+          <PlayerRowMetric value={player.stats.rfd} type='rfd' />
+          <PlayerRowMetric value={player.stats.posra} type='posra' />
         </div>
       </div>
     )
@@ -183,8 +184,8 @@ export default class PlayerRow extends React.Component {
     const rushingAfterContact = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <div className='player__row-metric'>{player.stats.ryaco}</div>
-          <div className='player__row-metric'>{player.stats.ryaco_pra}</div>
+          <PlayerRowMetric value={player.stats.ryaco} type='ryaco' />
+          <PlayerRowMetric value={player.stats.ryaco_pra} type='ryaco_pra' />
         </div>
       </div>
     )
@@ -192,8 +193,8 @@ export default class PlayerRow extends React.Component {
     const rushingShare = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <div className='player__row-metric'>{player.stats._stra}</div>
-          <div className='player__row-metric'>{player.stats._stry}</div>
+          <PlayerRowMetric value={player.stats._stra} type='_stra' />
+          <PlayerRowMetric value={player.stats._stry} type='_stry' />
         </div>
       </div>
     )
@@ -201,9 +202,9 @@ export default class PlayerRow extends React.Component {
     const rushingAdvanced = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <div className='player__row-metric'>{player.stats._fumlpra}</div>
-          <div className='player__row-metric'>{player.stats.posra_pra}</div>
-          <div className='player__row-metric'>{player.stats.rasucc_pra}</div>
+          <PlayerRowMetric value={player.stats._fumlpra} type='_fumlpra' />
+          <PlayerRowMetric value={player.stats.posra_pra} type='posra_pra' />
+          <PlayerRowMetric value={player.stats.rasucc_pra} type='rasucc_pra' />
         </div>
       </div>
     )
@@ -211,8 +212,8 @@ export default class PlayerRow extends React.Component {
     const rushingBrokenTackles = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <div className='player__row-metric'>{player.stats.mbt}</div>
-          <div className='player__row-metric'>{player.stats.mbt_pt}</div>
+          <PlayerRowMetric value={player.stats.mbt} type='mbt' />
+          <PlayerRowMetric value={player.stats.mbt_pt} type='mbt_pt' />
         </div>
       </div>
     )
@@ -220,11 +221,11 @@ export default class PlayerRow extends React.Component {
     const receivingBasic = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <div className='player__row-metric'>{player.stats.rec}</div>
-          <div className='player__row-metric'>{player.stats.recy}</div>
-          <div className='player__row-metric'>{player.stats.tdrec}</div>
-          <div className='player__row-metric'>{player.stats.drp}</div>
-          <div className='player__row-metric'>{player.stats.drprecy}</div>
+          <PlayerRowMetric value={player.stats.rec} type='rec' />
+          <PlayerRowMetric value={player.stats.recy} type='recy' />
+          <PlayerRowMetric value={player.stats.tdrec} type='tdrec' />
+          <PlayerRowMetric value={player.stats.drp} type='drp' />
+          <PlayerRowMetric value={player.stats.drprecy} type='drprecy' />
         </div>
       </div>
     )
@@ -232,12 +233,12 @@ export default class PlayerRow extends React.Component {
     const receivingOppurtunity = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <div className='player__row-metric'>{player.stats.trg}</div>
-          <div className='player__row-metric'>{player.stats.dptrg_pct}</div>
-          <div className='player__row-metric'>{player.stats.rdot_ptrg}</div>
-          <div className='player__row-metric'>{player.stats._strtay}</div>
-          <div className='player__row-metric'>{player.stats._sttrg}</div>
-          <div className='player__row-metric'>{player.stats._wopr}</div>
+          <PlayerRowMetric value={player.stats.trg} type='trg' />
+          <PlayerRowMetric value={player.stats.dptrg_pct} type='dptrg_pct' />
+          <PlayerRowMetric value={player.stats.rdot_ptrg} type='rdot_ptrg' />
+          <PlayerRowMetric value={player.stats._strtay} type='_strtay' />
+          <PlayerRowMetric value={player.stats._sttrg} type='_sttrg' />
+          <PlayerRowMetric value={player.stats._wopr} type='_wopr' />
         </div>
       </div>
     )
@@ -245,11 +246,11 @@ export default class PlayerRow extends React.Component {
     const receivingAdvanced = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <div className='player__row-metric'>{player.stats._ayptrg}</div>
-          <div className='player__row-metric'>{player.stats._recypay}</div>
-          <div className='player__row-metric'>{player.stats._recyprec}</div>
-          <div className='player__row-metric'>{player.stats._recyptrg}</div>
-          <div className='player__row-metric'>{player.stats._ryacprec}</div>
+          <PlayerRowMetric value={player.stats._ayptrg} type='_ayptrg' />
+          <PlayerRowMetric value={player.stats._recypay} type='_recypay' />
+          <PlayerRowMetric value={player.stats._recyprec} type='_recyprec' />
+          <PlayerRowMetric value={player.stats._recyptrg} type='_recyptrg' />
+          <PlayerRowMetric value={player.stats._ryacprec} type='_ryacprec' />
         </div>
       </div>
     )
