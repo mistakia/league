@@ -70,6 +70,7 @@ export function playersReducer (state = initialState, { payload, type }) {
 
     case playerActions.SET_PLAYER_VALUES:
       return state.withMutations(state => {
+        state.set('isPending', false)
         payload.players.forEach(playerData => {
           state.mergeIn(['items', playerData.player], {
             projection: new Map(playerData.projection),
@@ -82,13 +83,16 @@ export function playersReducer (state = initialState, { payload, type }) {
 
     case statActions.FILTER_STATS:
       return state.withMutations(state => {
+        state.set('isPending', true)
+        const stats = constants.createFullStats()
         for (const player of state.get('items').keys()) {
-          state.setIn(['items', player, 'stats'], new Map())
+          state.setIn(['items', player, 'stats'], new Map(stats))
         }
       })
 
     case playerActions.SET_PLAYER_STATS:
       return state.withMutations(state => {
+        state.set('isPending', false)
         for (const player in payload.players) {
           if (state.get('items').get(player)) {
             const stats = payload.players[player]
@@ -97,20 +101,20 @@ export function playersReducer (state = initialState, { payload, type }) {
         }
       })
 
-    case playerActions.FETCH_PLAYER_PENDING:
+    case statActions.GET_PLAYS_PENDING:
+    case playerActions.FETCH_PLAYERS_PENDING:
       return state.merge({
         isPending: true
       })
 
-    case playerActions.FETCH_PLAYER_FAILED:
+    case statActions.GET_PLAYS_FAILED:
+    case playerActions.FETCH_PLAYERS_FAILED:
       return state.merge({
         isPending: false
       })
 
     case playerActions.FETCH_PLAYERS_FULFILLED:
       return state.withMutations(players => {
-        players.set('isPending', false)
-
         const now = moment()
         const ages = []
         payload.data.map(p => {
