@@ -35,10 +35,11 @@ export const playerActions = {
 
   SET_PLAYERS_VIEW: 'SET_PLAYERS_VIEW',
 
-  setStats: (players) => ({
+  setStats: ({ players, overall }) => ({
     type: playerActions.SET_PLAYER_STATS,
     payload: {
-      players
+      players,
+      overall
     }
   }),
 

@@ -11,6 +11,13 @@ const calculateStatsFromPlays = (plays) => {
   const players = {}
   const teams = {}
   const playerToTeam = {}
+  const overall = {}
+  for (const stat of constants.fullStats) {
+    overall[stat] = {
+      min: Infinity,
+      max: 0
+    }
+  }
 
   const addTeamStat = (team, stat, value) => {
     value = parseInt(value, 10)
@@ -197,9 +204,14 @@ const calculateStatsFromPlays = (plays) => {
 
     // stats.fd_pct
     // stats.succ_psnp
+    for (const stat in stats) {
+      const value = stats[stat]
+      if (value < overall[stat].min) overall[stat].min = value
+      if (value > overall[stat].max) overall[stat].max = value
+    }
   }
 
-  return players
+  return { players, overall }
 }
 
 export default calculateStatsFromPlays
