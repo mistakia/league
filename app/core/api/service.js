@@ -119,7 +119,6 @@ export const api = {
     return { url, ...PUT(data) }
   },
   getPlays (params) {
-    console.log(params)
     const url = `${BASE_URL}/plays?${queryString.stringify(params)}`
     return { url }
   }
