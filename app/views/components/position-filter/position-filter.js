@@ -3,7 +3,7 @@ import React from 'react'
 import { constants } from '@common'
 import PlayerFilter from '@components/player-filter'
 
-class PositionFilter extends React.Component {
+export default class PositionFilter extends React.Component {
   render () {
     const state = {
       type: 'positions',
@@ -24,5 +24,3 @@ class PositionFilter extends React.Component {
     )
   }
 }
-
-export default PositionFilter

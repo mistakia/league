@@ -20,5 +20,6 @@ export {
   putSource,
   putProjection,
   delProjection,
-  putSetting
+  putSetting,
+  getPlays
 } from './sagas'

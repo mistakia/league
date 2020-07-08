@@ -8,6 +8,28 @@ import AgeFilter from '@components/age-filter'
 import PageLayout from '@layouts/page'
 import PlayerHeader from '@components/player-header'
 import PlayerRow from '@components/player-row'
+import PlayersViewMenu from '@components/players-view-menu'
+import StatMenu from '@components/stat-menu'
+import StatPassingMenu from '@components/stat-passing-menu'
+import StatYearsFilter from '@components/stat-years-filter'
+import StatWeeksFilter from '@components/stat-weeks-filter'
+import StatDaysFilter from '@components/stat-days-filter'
+import StatQuartersFilter from '@components/stat-quarters-filter'
+import StatDownsFilter from '@components/stat-downs-filter'
+import HeaderStatsPassingBasic from '@components/header-stats-passing-basic'
+import HeaderStatsPassingEfficiency from '@components/header-stats-passing-efficiency'
+import HeaderStatsPassingAdvanced from '@components/header-stats-passing-advanced'
+import HeaderStatsPassingAiryards from '@components/header-stats-passing-airyards'
+import HeaderStatsPassingPressure from '@components/header-stats-passing-pressure'
+import HeaderStatsRushingBasic from '@components/header-stats-rushing-basic'
+import HeaderStatsRushingProductivity from '@components/header-stats-rushing-productivity'
+import HeaderStatsRushingAfterContact from '@components/header-stats-rushing-after-contact'
+import HeaderStatsRushingShare from '@components/header-stats-rushing-share'
+import HeaderStatsRushingAdvanced from '@components/header-stats-rushing-advanced'
+import HeaderStatsRushingBrokenTackles from '@components/header-stats-rushing-broken-tackles'
+import HeaderStatsReceivingBasic from '@components/header-stats-receiving-basic'
+import HeaderStatsReceivingOppurtunity from '@components/header-stats-receiving-oppurtunity'
+import HeaderStatsReceivingAdvanced from '@components/header-stats-receiving-advanced'
 
 import './players.styl'
 
@@ -37,7 +59,11 @@ export default class PlayersPage extends React.Component {
   }
 
   render = () => {
-    const { players, vbaseline } = this.props
+    const {
+      players, vbaseline, isSeasonProjectionView, isStatsView, isStatsPassingView,
+      isStatsRushingView, isStatsReceivingView, isStatsPassingAdvancedView,
+      isStatsPassingPressureView
+    } = this.props
 
     const Row = ({ index, key, parent, ...params }) => {
       const player = players.get(index).toJS()
@@ -54,7 +80,7 @@ export default class PlayersPage extends React.Component {
       )
     }
 
-    const hPassing = (
+    const headerSeasonPassing = (
       <div className='player__row-group'>
         <div className='player__row-group-head'>Passing</div>
         <div className='player__row-group-body'>
@@ -65,7 +91,7 @@ export default class PlayersPage extends React.Component {
       </div>
     )
 
-    const hRushing = (
+    const headerSeasonRushing = (
       <div className='player__row-group'>
         <div className='player__row-group-head'>Rushing</div>
         <div className='player__row-group-body'>
@@ -77,7 +103,7 @@ export default class PlayersPage extends React.Component {
       </div>
     )
 
-    const hReceiving = (
+    const headerSeasonReceiving = (
       <div className='player__row-group'>
         <div className='player__row-group-head'>Receiving</div>
         <div className='player__row-group-body'>
@@ -91,6 +117,27 @@ export default class PlayersPage extends React.Component {
 
     const valueType = `values.${vbaseline}`
     const vorpType = `vorp.${vbaseline}`
+    const headerSeasonSummary = (
+      <div className='player__row-group'>
+        <div className='player__row-group-body'>
+          <PlayerHeader
+            className='player__row-metric'
+            label='Cost'
+            value={valueType}
+          />
+          <PlayerHeader
+            className='player__row-metric'
+            label='Value'
+            value={vorpType}
+          />
+          <PlayerHeader
+            className='player__row-metric'
+            label='Proj'
+            value='points.total'
+          />
+        </div>
+      </div>
+    )
 
     const head = (
       <div className='players__head'>
@@ -99,33 +146,37 @@ export default class PlayersPage extends React.Component {
           <PositionFilter />
           <ExperienceFilter />
           <AgeFilter />
+          <PlayersViewMenu />
+          {isStatsView && <StatMenu />}
+          {isStatsPassingView && <StatPassingMenu />}
+          {isStatsView && <StatYearsFilter />}
+          {isStatsView && <StatWeeksFilter />}
+          {isStatsView && <StatDaysFilter />}
+          {isStatsView && <StatQuartersFilter />}
+          {isStatsView && <StatDownsFilter />}
         </div>
         <div className='players__header'>
           <div className='player__row-action' />
           <div className='player__row-pos' />
           <div className='player__row-name'>Name</div>
-          <div className='player__row-group'>
-            <div className='player__row-group-body'>
-              <PlayerHeader
-                className='player__row-metric'
-                label='Cost'
-                value={valueType}
-              />
-              <PlayerHeader
-                className='player__row-metric'
-                label='Value'
-                value={vorpType}
-              />
-              <PlayerHeader
-                className='player__row-metric'
-                label='Proj'
-                value='points.total'
-              />
-            </div>
-          </div>
-          {hPassing}
-          {hRushing}
-          {hReceiving}
+          {isSeasonProjectionView && headerSeasonSummary}
+          {isSeasonProjectionView && headerSeasonPassing}
+          {isSeasonProjectionView && headerSeasonRushing}
+          {isSeasonProjectionView && headerSeasonReceiving}
+          {isStatsPassingAdvancedView && <HeaderStatsPassingBasic />}
+          {isStatsPassingAdvancedView && <HeaderStatsPassingEfficiency />}
+          {isStatsPassingAdvancedView && <HeaderStatsPassingAdvanced />}
+          {isStatsPassingAdvancedView && <HeaderStatsPassingAiryards />}
+          {isStatsPassingPressureView && <HeaderStatsPassingPressure />}
+          {isStatsRushingView && <HeaderStatsRushingBasic />}
+          {isStatsRushingView && <HeaderStatsRushingProductivity />}
+          {isStatsRushingView && <HeaderStatsRushingAfterContact />}
+          {isStatsRushingView && <HeaderStatsRushingShare />}
+          {isStatsRushingView && <HeaderStatsRushingAdvanced />}
+          {isStatsRushingView && <HeaderStatsRushingBrokenTackles />}
+          {isStatsReceivingView && <HeaderStatsReceivingBasic />}
+          {isStatsReceivingView && <HeaderStatsReceivingOppurtunity />}
+          {isStatsReceivingView && <HeaderStatsReceivingAdvanced />}
         </div>
       </div>
     )

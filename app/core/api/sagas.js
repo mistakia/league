@@ -17,6 +17,7 @@ import {
   putProjectionActions,
   delProjectionActions
 } from '@core/players'
+import { getPlaysActions } from '@core/stats'
 import { getTeamsActions, putTeamActions } from '@core/teams'
 import { getTransactionsActions } from '@core/transactions'
 import { getMatchupsActions } from '@core/matchups'
@@ -60,6 +61,8 @@ export const fetchAuth = fetch.bind(null, api.fetchAuth, authActions)
 
 export const fetchPlayers = fetch.bind(null, api.fetchPlayers, playersRequestActions)
 export const getPlayerStats = fetch.bind(null, api.getPlayerStats, getPlayerStatsActions)
+export const getPlays = fetch.bind(null, api.getPlays, getPlaysActions)
+
 export const getRoster = fetch.bind(null, api.getRoster, getRosterActions)
 export const getRosters = fetch.bind(null, api.getRosters, getRostersActions)
 

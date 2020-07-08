@@ -11,7 +11,19 @@ export const year = moment().month() > 2
   ? moment().year()
   : moment().year() - 1
 
+const getAvailableYears = () => {
+  const arr = []
+  for (let i = year; i >= 2000; i--) {
+    arr.push(i)
+  }
+  return arr
+}
+export const years = getAvailableYears()
 export const weeks = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+export const nflWeeks = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+export const days = ['WED', 'THU', 'TN', 'FRI', 'SAT', 'SUN', 'MN', 'SN']
+export const quarters = [1, 2, 3, 4, 5]
+export const downs = ['1', '2', '3', '4']
 export const positions = ['QB', 'RB', 'WR', 'TE', 'K', 'DST']
 export const stats = [
   'pa',
@@ -34,6 +46,120 @@ export const stats = [
 
   'twoptc'
 ]
+
+export const fullStats = [
+  // ////// PASSING ////////
+  // basic
+  'pc_pct',
+  'py_pg',
+
+  'tdp_pct',
+  'ints_pct',
+
+  // productivity
+  'psucc',
+
+  // accuracy
+  'intw',
+  'intw_pct',
+  'drppy', // dropped passing yards
+  'drptdp', // dropped passing touchdowns
+  'high', // highlight pass
+  'drpp', // dropped pass
+
+  // advanced
+  'ptay', // total air yards
+  'pcay', // completed air yards
+  'pyac', // yards after catch
+  'pcay_pc', // completed air yards per completion
+  'pyac_pc',
+  '_ypa',
+  '_aypa', // air yards per attempt
+  '_adjypa',
+  '_ypc',
+  '_ypg',
+  '_pacr',
+  '_apacr',
+  'pdot', // depth of target
+  'pdot_pa', // average depth of taget
+  'padot', // adj. depth of target**
+
+  // pressure
+  'sk',
+  'sky', // sack yards
+  'sk_pct',
+  'qbp', // pressure
+  'qbp_pct',
+  'qbhi', // hit
+  'qbhi_pct',
+  'qbhu', // hurry
+  'qbhu_pct',
+  '_nygpa', // net yards gained per attempt: (py - sky) / (pa + sk)
+
+  // ////// RECEIVING ////////
+  // basic
+  'recy_prec',
+  'recy_pg',
+  'ryac', // yards after catch
+  'drprecy', // dropped receiving yards
+
+  // reliability
+  'drp',
+  'cnb',
+
+  // share
+  '_strtay', // share of team total air yards
+  '_sttrg', // share of team targets
+
+  // usage
+  'dptrg', // deep target
+  'dptrg_pct', // deep pass percentage
+  'rdot', // depth of target
+  'rdot_ptrg', // average depth of target
+
+  // advanced
+  'rtay', // total air yards
+  'rcay', // completed air yards
+  '_ayps', // air yards per snap
+  '_ayprec', // air yards per reception
+  '_ayptrg', // air yards per target
+  '_recypay', // receiving yards per air yard
+  '_recypsnp', // receiving yards per snap
+  '_recyprec', // receiving yards per reception
+  '_recyptrg', // receiving yards per target
+  '_wopr', // (1.5 x _sttrg + 0.7 x _sttay)
+  '_ryacprec', // yac per rec
+
+  // ////// RUSHING ////////
+  // basic
+  'ryaco', // rushing yards after contact
+  'ryaco_pra', // rushing yards after contact per attempt
+  'ry_pg',
+  'ry_pra',
+  'posra', // positive rush
+  'rasucc', // successful rush
+  'rfd', // rushing first down
+
+  // advanced
+  'mbt',
+  'mbt_pt', // broken tackles per touch
+  '_fumlpra', // fumbles per rushing attempt
+  'rasucc_pra', // successful rush per attempt
+  'posra_pra', // possitive rush per attempt
+
+  // usage
+  '_stra', // share of team rushing attempts
+  '_stry', // share of team rushing yards
+
+  // general
+  '_tch',
+  'fd', // first down
+  'succ',
+  'fd_pct', // first down pct*
+  ...stats
+]
+
+export const createFullStats = () => fullStats.reduce((o, key) => ({ ...o, [key]: 0 }), {})
 
 export const slots = {
   QB_ONE: 0,

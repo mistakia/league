@@ -2,6 +2,7 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { getApp } from '@core/app'
+import { getStats } from '@core/stats'
 import { getFilteredPlayers, getPlayers, playerActions } from '@core/players'
 
 import PlayersPage from './players'
@@ -10,13 +11,25 @@ const mapStateToProps = createSelector(
   getFilteredPlayers,
   getPlayers,
   getApp,
-  (players, pState, app) => ({
+  getStats,
+  (players, pState, app, stats) => ({
     players,
     vbaseline: app.vbaseline,
     searchValue: pState.get('search'),
     selected: pState.get('selected'),
     order: pState.get('order'),
-    orderBy: pState.get('orderBy')
+    orderBy: pState.get('orderBy'),
+    isSeasonProjectionView: pState.get('view') === 'seasproj',
+    isStatsView: pState.get('view') === 'stats',
+    isStatsPassingView: pState.get('view') === 'stats' && stats.view === 'passing',
+    isStatsRushingView: pState.get('view') === 'stats' && stats.view === 'rushing',
+    isStatsReceivingView: pState.get('view') === 'stats' && stats.view === 'receiving',
+    isStatsPassingAdvancedView: pState.get('view') === 'stats' &&
+      stats.view === 'passing' &&
+      stats.passing === 'advanced',
+    isStatsPassingPressureView: pState.get('view') === 'stats' &&
+      stats.view === 'passing' &&
+      stats.passing === 'pressure'
   })
 )
 

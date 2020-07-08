@@ -24,11 +24,31 @@ export default class PlayerRow extends React.Component {
   }
 
   render = () => {
-    const { player, style, selected, stats, vbaseline } = this.props
+    const {
+      player, style, selected, stats, vbaseline, isSeasonProjectionView,
+      isStatsPassingAdvancedView, isStatsPassingPressureView, isStatsRushingView,
+      isStatsReceivingView
+    } = this.props
 
     const isSelected = selected === player.player
 
-    const passing = (
+    const seasonProjectionSummary = (
+      <div className='row__group'>
+        <div className='row__group-body'>
+          <div className='player__row-metric'>
+            ${Math.round(player.values[vbaseline])}
+          </div>
+          <div className='player__row-metric'>
+            {Math.round(player.vorp[vbaseline] || 0)}
+          </div>
+          <div className='player__row-metric'>
+            {(player.points.total || 0).toFixed(1)}
+          </div>
+        </div>
+      </div>
+    )
+
+    const passingProjection = (
       <div className='row__group'>
         <div className='row__group-body'>
           <div className='player__row-metric'>
@@ -44,7 +64,7 @@ export default class PlayerRow extends React.Component {
       </div>
     )
 
-    const rushing = (
+    const rushingProjection = (
       <div className='row__group'>
         <div className='row__group-body'>
           <div className='player__row-metric'>
@@ -63,7 +83,7 @@ export default class PlayerRow extends React.Component {
       </div>
     )
 
-    const receiving = (
+    const receivingProjection = (
       <div className='row__group'>
         <div className='row__group-body'>
           <div className='player__row-metric'>
@@ -78,6 +98,158 @@ export default class PlayerRow extends React.Component {
           <div className='player__row-metric'>
             <EditableProjection player={player} type='tdrec' />
           </div>
+        </div>
+      </div>
+    )
+
+    const passingBasic = (
+      <div className='row__group'>
+        <div className='row__group-body'>
+          <div className='player__row-metric'>{player.stats.py}</div>
+          <div className='player__row-metric'>{player.stats.tdp}</div>
+          <div className='player__row-metric'>{player.stats.ints}</div>
+          <div className='player__row-metric'>{player.stats.drppy}</div>
+        </div>
+      </div>
+    )
+
+    const passingEfficiency = (
+      <div className='row__group'>
+        <div className='row__group-body'>
+          <div className='player__row-metric'>{player.stats.pc_pct}</div>
+          <div className='player__row-metric'>{player.stats.tdp_pct}</div>
+          <div className='player__row-metric'>{player.stats.ints_pct}</div>
+          <div className='player__row-metric'>{player.stats.intw_pct}</div>
+        </div>
+      </div>
+    )
+
+    const passingAdvanced = (
+      <div className='row__group'>
+        <div className='row__group-body'>
+          <div className='player__row-metric'>{player.stats.pyac}</div>
+          <div className='player__row-metric'>{player.stats.pyac_pc}</div>
+          <div className='player__row-metric'>{player.stats._ypa}</div>
+          <div className='player__row-metric'>{player.stats.pdot_pa}</div>
+        </div>
+      </div>
+    )
+
+    const passingAiryards = (
+      <div className='row__group'>
+        <div className='row__group-body'>
+          <div className='player__row-metric'>{player.stats.ptay}</div>
+          <div className='player__row-metric'>{player.stats.pcay_pc}</div>
+          <div className='player__row-metric'>{player.stats._aypa}</div>
+          <div className='player__row-metric'>{player.stats._pacr}</div>
+        </div>
+      </div>
+    )
+
+    const passingPressure = (
+      <div className='row__group'>
+        <div className='row__group-body'>
+          <div className='player__row-metric'>{player.stats.sk}</div>
+          <div className='player__row-metric'>{player.stats.sky}</div>
+          <div className='player__row-metric'>{player.stats.sk_pct}</div>
+          <div className='player__row-metric'>{player.stats.qbhi_pct}</div>
+          <div className='player__row-metric'>{player.stats.qbp_pct}</div>
+          <div className='player__row-metric'>{player.stats.qbhu_pct}</div>
+          <div className='player__row-metric'>{player.stats.sk_pct}</div>
+        </div>
+      </div>
+    )
+
+    const rushingBasic = (
+      <div className='row__group'>
+        <div className='row__group-body'>
+          <div className='player__row-metric'>{player.stats.ry}</div>
+          <div className='player__row-metric'>{player.stats.tdr}</div>
+          <div className='player__row-metric'>{player.stats.ry_pra}</div>
+        </div>
+      </div>
+    )
+
+    const rushingProductivity = (
+      <div className='row__group'>
+        <div className='row__group-body'>
+          <div className='player__row-metric'>{player.stats.ra}</div>
+          <div className='player__row-metric'>{player.stats.rfd}</div>
+          <div className='player__row-metric'>{player.stats.posra}</div>
+        </div>
+      </div>
+    )
+
+    const rushingAfterContact = (
+      <div className='row__group'>
+        <div className='row__group-body'>
+          <div className='player__row-metric'>{player.stats.ryaco}</div>
+          <div className='player__row-metric'>{player.stats.ryaco_pra}</div>
+        </div>
+      </div>
+    )
+
+    const rushingShare = (
+      <div className='row__group'>
+        <div className='row__group-body'>
+          <div className='player__row-metric'>{player.stats._stra}</div>
+          <div className='player__row-metric'>{player.stats._stry}</div>
+        </div>
+      </div>
+    )
+
+    const rushingAdvanced = (
+      <div className='row__group'>
+        <div className='row__group-body'>
+          <div className='player__row-metric'>{player.stats._fumlpra}</div>
+          <div className='player__row-metric'>{player.stats.posra_pra}</div>
+          <div className='player__row-metric'>{player.stats.rasucc_pra}</div>
+        </div>
+      </div>
+    )
+
+    const rushingBrokenTackles = (
+      <div className='row__group'>
+        <div className='row__group-body'>
+          <div className='player__row-metric'>{player.stats.mbt}</div>
+          <div className='player__row-metric'>{player.stats.mbt_pt}</div>
+        </div>
+      </div>
+    )
+
+    const receivingBasic = (
+      <div className='row__group'>
+        <div className='row__group-body'>
+          <div className='player__row-metric'>{player.stats.rec}</div>
+          <div className='player__row-metric'>{player.stats.recy}</div>
+          <div className='player__row-metric'>{player.stats.tdrec}</div>
+          <div className='player__row-metric'>{player.stats.drp}</div>
+          <div className='player__row-metric'>{player.stats.drprecy}</div>
+        </div>
+      </div>
+    )
+
+    const receivingOppurtunity = (
+      <div className='row__group'>
+        <div className='row__group-body'>
+          <div className='player__row-metric'>{player.stats.trg}</div>
+          <div className='player__row-metric'>{player.stats.dptrg_pct}</div>
+          <div className='player__row-metric'>{player.stats.rdot_ptrg}</div>
+          <div className='player__row-metric'>{player.stats._strtay}</div>
+          <div className='player__row-metric'>{player.stats._sttrg}</div>
+          <div className='player__row-metric'>{player.stats._wopr}</div>
+        </div>
+      </div>
+    )
+
+    const receivingAdvanced = (
+      <div className='row__group'>
+        <div className='row__group-body'>
+          <div className='player__row-metric'>{player.stats._ayptrg}</div>
+          <div className='player__row-metric'>{player.stats._recypay}</div>
+          <div className='player__row-metric'>{player.stats._recyprec}</div>
+          <div className='player__row-metric'>{player.stats._recyptrg}</div>
+          <div className='player__row-metric'>{player.stats._ryacprec}</div>
         </div>
       </div>
     )
@@ -230,22 +402,24 @@ export default class PlayerRow extends React.Component {
               <Position pos={player.pos1} />
             </div>
             <div className='player__row-name'>{player.name}</div>
-            <div className='row__group'>
-              <div className='row__group-body'>
-                <div className='player__row-metric'>
-                  ${Math.round(player.values[vbaseline])}
-                </div>
-                <div className='player__row-metric'>
-                  {Math.round(player.vorp[vbaseline] || 0)}
-                </div>
-                <div className='player__row-metric'>
-                  {(player.points.total || 0).toFixed(1)}
-                </div>
-              </div>
-            </div>
-            {passing}
-            {rushing}
-            {receiving}
+            {isSeasonProjectionView && seasonProjectionSummary}
+            {isSeasonProjectionView && passingProjection}
+            {isSeasonProjectionView && rushingProjection}
+            {isSeasonProjectionView && receivingProjection}
+            {isStatsPassingAdvancedView && passingBasic}
+            {isStatsPassingAdvancedView && passingEfficiency}
+            {isStatsPassingAdvancedView && passingAdvanced}
+            {isStatsPassingAdvancedView && passingAiryards}
+            {isStatsPassingPressureView && passingPressure}
+            {isStatsRushingView && rushingBasic}
+            {isStatsRushingView && rushingProductivity}
+            {isStatsRushingView && rushingAfterContact}
+            {isStatsRushingView && rushingShare}
+            {isStatsRushingView && rushingAdvanced}
+            {isStatsRushingView && rushingBrokenTackles}
+            {isStatsReceivingView && receivingBasic}
+            {isStatsReceivingView && receivingOppurtunity}
+            {isStatsReceivingView && receivingAdvanced}
           </div>
           {isSelected && expanded}
         </div>

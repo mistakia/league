@@ -27,6 +27,7 @@ export const Player = new Record({
   depth_number: null,
   jersey: null,
   projection: new Map(),
+  stats: new Map(),
   points: new Map(),
   values: new Map(),
   vorp: new Map(),
