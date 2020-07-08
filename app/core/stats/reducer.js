@@ -1,6 +1,7 @@
 import { Record, List } from 'immutable'
 
 import { statActions } from './actions'
+import { playerActions } from '@core/players'
 import { constants } from '@common'
 
 const initialState = new Record({
@@ -11,11 +12,15 @@ const initialState = new Record({
   weeks: new List(constants.nflWeeks),
   days: new List(constants.days),
   quarters: new List(constants.quarters),
-  downs: new List(constants.downs)
+  downs: new List(constants.downs),
+  overall: null
 })
 
 export function statsReducer (state = initialState(), { payload, type }) {
   switch (type) {
+    case playerActions.SET_PLAYER_STATS:
+      return state.merge({ overall: payload.overall })
+
     case statActions.FILTER_STATS:
       return state.merge({ [payload.type]: new List(payload.value) })
 
