@@ -70,6 +70,7 @@ api.use('/api/*', (err, req, res, next) => {
 })
 api.use('/api/me', routes.me)
 api.use('/api/players', routes.players)
+api.use('/api/plays', routes.plays)
 api.use('/api/teams', routes.teams)
 api.use('/api/leagues', routes.leagues)
 api.use('/api/sources', routes.sources)

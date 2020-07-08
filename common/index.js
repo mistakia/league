@@ -5,6 +5,7 @@ import calculateValues from './calculate-values'
 import * as constants from './constants'
 import getEligibleSlots from './get-eligible-slots'
 import Roster from './roster'
+import calculateStatsFromPlays from './calculate-stats-from-plays'
 
 const groupBy = (xs, key) => xs.reduce((rv, x) => {
   (rv[x[key]] = rv[x[key]] || []).push(x)
@@ -26,5 +27,6 @@ export {
   groupBy,
   formatRoster,
   weightProjections,
-  Roster
+  Roster,
+  calculateStatsFromPlays
 }

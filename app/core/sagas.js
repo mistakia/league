@@ -13,6 +13,7 @@ import { tradeSagas } from './trade'
 import { leagueSagas } from './leagues'
 import { sourceSagas } from './sources'
 import { settingSagas } from './settings'
+import { statSagas } from './stats'
 
 export default function * rootSaga () {
   yield all([
@@ -28,6 +29,7 @@ export default function * rootSaga () {
     ...tradeSagas,
     ...leagueSagas,
     ...sourceSagas,
-    ...settingSagas
+    ...settingSagas,
+    ...statSagas
   ])
 }

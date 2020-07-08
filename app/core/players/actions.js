@@ -11,7 +11,8 @@ export const playerActions = {
   PLAYERS_SELECT_PLAYER: 'PLAYERS_SELECT_PLAYER',
   PLAYERS_DESELECT_PLAYER: 'PLAYERS_DESELECT_PLAYER',
 
-  SET_PLAYER_VALUES: 'SE_PLAYER_VALUES',
+  SET_PLAYER_VALUES: 'SET_PLAYER_VALUES',
+  SET_PLAYER_STATS: 'SET_PLAYER_STATS',
 
   FETCH_PLAYERS_FAILED: 'FETCH_PLAYERS_FAILED',
   FETCH_PLAYERS_FULFILLED: 'FETCH_PLAYERS_FULFILLED',
@@ -31,6 +32,22 @@ export const playerActions = {
   DEL_PROJECTION_FAILED: 'DEL_PROJECTION_FAILED',
   DEL_PROJECTION_PENDING: 'DEL_PROJECTION_PENDING',
   DEL_PROJECTION_FULFILLED: 'DEL_PROJECTION_FULFILLED',
+
+  SET_PLAYERS_VIEW: 'SET_PLAYERS_VIEW',
+
+  setStats: (players) => ({
+    type: playerActions.SET_PLAYER_STATS,
+    payload: {
+      players
+    }
+  }),
+
+  setView: (view) => ({
+    type: playerActions.SET_PLAYERS_VIEW,
+    payload: {
+      view
+    }
+  }),
 
   setValues: (players) => ({
     type: playerActions.SET_PLAYER_VALUES,

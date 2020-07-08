@@ -5,6 +5,7 @@ import { settingActions } from '@core/settings'
 import { appActions } from '@core/app'
 import { playerActions } from './actions'
 import { createPlayer } from './player'
+import { statActions } from '@core/stats'
 
 import { constants } from '@common'
 
@@ -22,6 +23,7 @@ const initialState = new Map({
   allAges: new List(),
   items: new Map(),
   order: 'desc',
+  view: 'seasproj',
   orderBy: 'vorp.available',
   watchlist: new Set(),
   selected: null
@@ -29,6 +31,9 @@ const initialState = new Map({
 
 export function playersReducer (state = initialState, { payload, type }) {
   switch (type) {
+    case playerActions.SET_PLAYERS_VIEW:
+      return state.merge({ view: payload.view })
+
     case playerActions.SEARCH_PLAYERS:
       return state.merge({ search: payload.value })
 
@@ -73,6 +78,23 @@ export function playersReducer (state = initialState, { payload, type }) {
             vorp: new Map(playerData.vorp)
           })
         })
+      })
+
+    case statActions.FILTER_STATS:
+      return state.withMutations(state => {
+        for (const player of state.get('items').keys()) {
+          state.setIn(['items', player, 'stats'], new Map())
+        }
+      })
+
+    case playerActions.SET_PLAYER_STATS:
+      return state.withMutations(state => {
+        for (const player in payload.players) {
+          if (state.get('items').get(player)) {
+            const stats = payload.players[player]
+            state.mergeIn(['items', player, 'stats'], new Map(stats))
+          }
+        }
       })
 
     case playerActions.FETCH_PLAYER_PENDING:
