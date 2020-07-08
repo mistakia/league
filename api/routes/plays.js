@@ -1,5 +1,6 @@
 const express = require('express')
 const router = express.Router()
+const JSONStream = require('JSONStream')
 
 const { constants } = require('../../common')
 
@@ -89,8 +90,10 @@ router.get('/?', async (req, res) => {
       pbpQuery = pbpQuery.whereIn('pbp.dwn', downs)
     }
 
-    const pbpData = await pbpQuery
-    res.send(pbpData)
+    const stream = pbpQuery.stream()
+    res.set('Content-Type', 'application/json')
+    stream.pipe(JSONStream.stringify()).pipe(res)
+    req.on('close', stream.end.bind(stream))
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })
