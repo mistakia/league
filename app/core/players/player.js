@@ -1,5 +1,7 @@
 import { Record, List, Map } from 'immutable'
 
+import { constants } from '@common'
+
 export const Player = new Record({
   player: null,
   name: null,
@@ -27,7 +29,7 @@ export const Player = new Record({
   depth_number: null,
   jersey: null,
   projection: new Map(),
-  stats: new Map(),
+  stats: new Map(constants.createFullStats()),
   points: new Map(),
   values: new Map(),
   vorp: new Map(),

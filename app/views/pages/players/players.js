@@ -30,6 +30,7 @@ import HeaderStatsRushingBrokenTackles from '@components/header-stats-rushing-br
 import HeaderStatsReceivingBasic from '@components/header-stats-receiving-basic'
 import HeaderStatsReceivingOppurtunity from '@components/header-stats-receiving-oppurtunity'
 import HeaderStatsReceivingAdvanced from '@components/header-stats-receiving-advanced'
+import Loading from '@components/loading'
 
 import './players.styl'
 
@@ -45,6 +46,8 @@ export default class PlayersPage extends React.Component {
   list = React.createRef()
 
   componentDidUpdate = (prevProps) => {
+    if (!this.list.current) return
+
     if (prevProps.order !== this.props.order || prevProps.orderBy !== this.props.orderBy) {
       this.list.current.scrollToPosition(0)
     }
@@ -62,7 +65,7 @@ export default class PlayersPage extends React.Component {
     const {
       players, vbaseline, isSeasonProjectionView, isStatsView, isStatsPassingView,
       isStatsRushingView, isStatsReceivingView, isStatsPassingAdvancedView,
-      isStatsPassingPressureView
+      isStatsPassingPressureView, isPending
     } = this.props
 
     const Row = ({ index, key, parent, ...params }) => {
@@ -181,7 +184,9 @@ export default class PlayersPage extends React.Component {
       </div>
     )
 
-    const body = (
+    const body = isPending ? (
+      <Loading loading />
+    ) : (
       <AutoSizer>
         {({ height, width }) => (
           <List
