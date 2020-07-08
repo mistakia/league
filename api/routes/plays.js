@@ -44,7 +44,14 @@ router.get('/?', async (req, res) => {
     const playerIds = await db('player').select('player').whereNot({ cteam: 'INA' })
 
     let pbpQuery = db('pbp')
-      .select('pbp.*', 'chart.dot', 'chart.tay', 'chart.qbp', 'chart.qbhi', 'chart.qbhu', 'chart.high', 'chart.intw', 'chart.drp', 'chart.cnb', 'chart.mbt', 'chart.yac', 'chart.yaco', 'game.wk', 'game.day')
+      .select(
+        'pbp.fuml', 'pbp.fum', 'pbp.off', 'pbp.type', 'pbp.bc', 'pbp.yds', 'pbp.fd',
+        'pbp.succ', 'pbp.psr', 'pbp.trg', 'pbp.ints', 'pbp.comp', 'pbp.pts', 'pbp.sk1',
+        'pbp.dwn', 'pbp.qtr',
+        'chart.dot', 'chart.tay', 'chart.qbp', 'chart.qbhi', 'chart.qbhu', 'chart.high',
+        'chart.intw', 'chart.drp', 'chart.cnb', 'chart.mbt', 'chart.yac', 'chart.yaco', 'game.wk',
+        'game.day'
+      )
       .join('game', 'pbp.gid', 'game.gid')
       .leftJoin('chart', 'pbp.pid', 'chart.pid')
       .whereNot('pbp.type', 'NOPL')
