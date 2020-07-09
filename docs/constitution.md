@@ -278,7 +278,7 @@ ii. Punt Return TD (6)
 
 iii. Fumble Recovered for TD (6)
 
-iv. Total Fumbles Lost (-1)
+iv. Fumbles Lost (-1)
 
 v. Fumble Return TD (6)
 
@@ -364,7 +364,7 @@ xiv. 10-13 points allowed (2)
 
 11. Payouts shall be made as follows:
 
-(a) Highest regular season weekly score: $36
+(a) Highest regular season weekly score: 2% of total yearly buy-in.
 
 **Divisions.**
 
@@ -407,11 +407,11 @@ xiv. 10-13 points allowed (2)
 
 **Rookie Tag.**
 
-3. Each year one (1) rookie can be extended for $0.
+3. Each year one (1) rookie can be extended for $0. This will not count toward a players extension count.
 
 **Salary Cap Enforcement.**
 
-4. The $200 Salary Cap will be enforced at the following times:
+4. The $200 Salary Cap will be enforced during the offseason, at the following times:
 
 (a) Player Retention & Designation deadline;
 
@@ -462,24 +462,13 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 
 **Draft Order.**
 
-2. Non-playoff team draft order will be determined by a three (3) round Draft Order Tournament based on the place that the team finishes the tournament.
+2. Non-playoff team draft order will be determined by a Draft Order Index (DOI). The DOI will be calculated by normalizing and combining a team’s Potential Points (PP) and All-Play Losses (APL). A team’s Potential Points are how many points it would have scored had it submitted its best possible lineup using the players available on the team’s active roster for each week of the Regular Season. A team’s All-Play Losses are how many losses it would have if it were to play every team each week of the Regular Season. Draft picks will be awarded in ascending order of a team’s Draft Order Index, with the 1st pick being awarded to the team with the lowest Draft Order Index.
 
-(a) The tournament shall begin on Week 14 of the NFL regular season.
-
-(b) The two (2) Teams with the lowest win percentage will be granted a bye in the first round of the Draft Order tournament.
-
-(c\) First Round: The Teams with the 7th and 8th lowest win percentage will play, along with the 9th and 10th. The losers of the first round will play each other over two (2) weeks for the 7th pick
-with the loser receiving the 8th pick.
-
-(d) Second Round: the Team with the lowest win percentage will play the lowest seed player that won in the first round with the Team with the second lowest win percentage playing the other winner of the first round. The losers of the second round will play each other for the 9th pick with the loser receiving the 10th pick.
-
-(e) Third Round: the winners of the second round will play each other for the 1st pick.
-
-(f) In the event that any Teams should be tied in score, the tie breaker shall be the Team with the lower Total Points For (PF) during the LEAGUE regular season.
+**Interpretive Note:** _A team’s Potential Points and All-Play Losses make up 90% and 10% of their DOI, respectively. A lower value yields a higher draft pick._
 
 3. Playoff team draft order will be based on the following results:
 
-(a) The losers of the Week 14 Wildcard round will play each other over two (2) weeks for the 7th Pick, with the loser receiving the 8th pick.
+(a) The losers of the Week 14 Wildcard round will receive the 7th and 8th pick, with the lowest scoring team receiving the 7th pick
 
 (b) The winner of the LEAGUE CHAMPIONSHIP will receive the 12th pick, while the 2nd, 3rd and 4th place Teams will receive the 11th, 10th, and 9th picks respectively.
 
@@ -562,7 +551,7 @@ with the loser receiving the 8th pick.
 ## Article XIV
 > PRACTICE SQUAD
 
-1. The practice squad (PS) will consist of a maximum of five (4) players.
+1. The practice squad (PS) will consist of a maximum of four (4) players.
 
 2. Only rookies can be placed onto the PS.
 
@@ -656,9 +645,9 @@ with the loser receiving the 8th pick.
 
 7. Payouts shall be made as follows:
 
-(a) LEAGUE Championship Champion: $1152
+(a) LEAGUE Championship Champion: 64% of total yearly buy-in
 
-(b) LEAGUE Championship Runner-Up: $180
+(b) LEAGUE Championship Runner-Up: 10% of total yearly buy-in
 
 ## Article XVIII
 > ORPHANS
