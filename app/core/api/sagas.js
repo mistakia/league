@@ -20,7 +20,7 @@ import {
 import { getPlaysActions } from '@core/stats'
 import { getTeamsActions, putTeamActions } from '@core/teams'
 import { getTransactionsActions } from '@core/transactions'
-import { getMatchupsActions } from '@core/matchups'
+import { getMatchupsActions, postMatchupsActions } from '@core/matchups'
 import {
   postTradeProposeActions,
   postTradeAcceptActions,
@@ -73,6 +73,8 @@ export const getTeams = fetch.bind(null, api.getTeams, getTeamsActions)
 export const fetchTransactions = fetch.bind(null, api.getTransactions, getTransactionsActions)
 
 export const getMatchups = fetch.bind(null, api.getMatchups, getMatchupsActions)
+export const postMatchups = fetch.bind(null, api.postMatchups, postMatchupsActions)
+
 export const postProposeTrade = fetch.bind(null, api.postProposeTrade, postTradeProposeActions)
 export const getTrades = fetch.bind(null, api.getTrades, getTradesActions)
 
