@@ -2,6 +2,7 @@ import React from 'react'
 
 import Icon from '@components/icon'
 import EditableLeagueField from '@components/editable-league-field'
+import GenerateSchedule from '@components/generate-schedule'
 
 import './editable-league.styl'
 
@@ -44,17 +45,20 @@ export default class EditableLeague extends React.Component {
         {this.state.visible &&
           <div className='editable__league-body'>
             <div className='editable__league-section'>
+              <GenerateSchedule leagueId={league.uid} />
+            </div>
+            <div className='editable__league-section'>
               <EditableLeagueField
                 field='name'
                 label='Name'
                 {...props}
               />
-              <EditableLeagueField
-                label='Number of Teams'
-                field='nteams'
-                type='int'
-                {...props}
-              />
+              {/* <EditableLeagueField
+                  label='Number of Teams'
+                  field='nteams'
+                  type='int'
+                  {...props}
+                  /> */}
               <EditableLeagueField
                 label='FAAB Budget'
                 field='faab'

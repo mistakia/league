@@ -4,6 +4,7 @@ import PageLayout from '@layouts/page'
 import Matchup from '@components/matchup'
 import ScheduleWeeksFilter from '@components/schedule-weeks-filter'
 import ScheduleTeamsFilter from '@components/schedule-teams-filter'
+import { groupBy } from '@common'
 
 import './schedule.styl'
 
@@ -15,9 +16,20 @@ export default class SchedulePage extends React.Component {
   render = () => {
     const { matchups } = this.props
 
-    const items = []
-    for (const [index, matchup] of matchups.entries()) {
-      items.push(<Matchup key={index} matchup={matchup} />)
+    const sections = []
+    const groups = groupBy(matchups, 'week')
+    for (const group in groups) {
+      const items = []
+      const groupItems = groups[group]
+      for (const [index, matchup] of groupItems.entries()) {
+        items.push(<Matchup key={index} matchup={matchup} />)
+      }
+      const section = (
+        <div key={group} className='schedule__section'>
+          {items}
+        </div>
+      )
+      sections.push(section)
     }
 
     const body = (
@@ -27,7 +39,7 @@ export default class SchedulePage extends React.Component {
           <ScheduleTeamsFilter />
         </div>
         <div className='schedule__body'>
-          {items}
+          {sections}
         </div>
       </div>
     )

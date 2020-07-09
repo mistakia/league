@@ -21,5 +21,6 @@ export {
   putProjection,
   delProjection,
   putSetting,
-  getPlays
+  getPlays,
+  postMatchups
 } from './sagas'
