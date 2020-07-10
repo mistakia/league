@@ -19,11 +19,14 @@ export default function () {
   } = this.props
   const { positions } = constants
 
+  const draftActive = league.ddate &&
+      moment().isAfter(moment(league.ddate, 'X').startOf('day'))
+
   let draftInfo
   if (league.ddate) {
     const start = moment(league.ddate, 'X').startOf('day')
     if (moment().isBefore(start)) {
-      draftInfo = (<p>Draft begins {moment().to(start)}</p>)
+      draftInfo = (<div className='draft__side-top-pick'>Draft begins {moment().to(start)}</div>)
     } else if (currentPick) {
       const pickNum = (currentPick.pick % league.nteams) || league.nteams
       const end = start.add(currentPick.pick, 'd')
@@ -75,7 +78,7 @@ export default function () {
 
   const pickItems = []
   for (const pick of picks) {
-    const isActive = league.ddate && currentPick && pick.pick === currentPick.pick
+    const isActive = draftActive && currentPick && pick.pick === currentPick.pick
     pickItems.push(<DraftPick key={pick.pick} pick={pick} playerId={pick.player} tid={pick.tid} isActive={isActive} />)
   }
 
@@ -90,7 +93,7 @@ export default function () {
           <div>{p.team}</div>
           {!!p.jersey && <div>#{p.jersey}</div>}
         </div>
-        {(isDrafting && !isDrafted) &&
+        {(draftActive && isDrafting && !isDrafted) &&
           <div className='draft__selected-action'>
             <Button onClick={draftPlayer}>Draft</Button>
           </div>}
