@@ -403,7 +403,7 @@ xiv. 10-13 points allowed (2)
 
 (d) 4th+ extension: +$35
 
-2. Extension counts are reset when a player changes Teams.
+2. Extension counts are reset when a player changes Teams through free agency.
 
 **Rookie Tag.**
 
@@ -411,15 +411,7 @@ xiv. 10-13 points allowed (2)
 
 **Salary Cap Enforcement.**
 
-4. The $200 Salary Cap will be enforced during the offseason, at the following times:
-
-(a) Player Retention & Designation deadline;
-
-(b) Blind Transition Auction;
-
-(c\) FA Auction;
-
-(d) Opening Day;
+4. The $200 Salary Cap will be enforced on all transactions during the offseason and on Opening Day.
 
 ## Article IX
 > BLIND TRANSITION AUCTION
