@@ -1,7 +1,15 @@
 import { getPlayerById } from '@core/players'
+import { getApp } from '@core/app'
 
 export function getDraft (state) {
   return state.get('draft')
+}
+
+export function getPicks (state) {
+  const { picks } = getDraft(state)
+  const { teamId } = getApp(state)
+
+  return picks.filter(p => p.tid === teamId)
 }
 
 export function getCurrentPick (state) {
