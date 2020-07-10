@@ -44,9 +44,10 @@ export default class EditableLeague extends React.Component {
         </div>
         {this.state.visible &&
           <div className='editable__league-body'>
-            <div className='editable__league-section'>
-              <GenerateSchedule leagueId={league.uid} />
-            </div>
+            {isCommish &&
+              <div className='editable__league-section'>
+                <GenerateSchedule leagueId={league.uid} />
+              </div>}
             <div className='editable__league-section'>
               <EditableLeagueField
                 field='name'
