@@ -6,6 +6,7 @@ import Button from '@components/button'
 import PageLayout from '@layouts/page'
 import DraftPlayer from '@components/draft-player'
 import DraftPick from '@components/draft-pick'
+import DraftSchedule from '@components/draft-schedule'
 import Position from '@components/position'
 import { constants } from '@common'
 
@@ -30,8 +31,8 @@ export default function () {
       const hours = end.diff(now, 'hours')
       const mins = end.diff(now, 'minutes') % 60
       draftInfo = (
-        <div>
-          <div className='draft__side-top-pick'>
+        <div className='draft__side-top-pick'>
+          <div className='draft__side-top-pick-title'>
             Pick #{currentPick.pick} ({currentPick.round}.{('0' + pickNum).slice(-2)})
           </div>
           <div>Time Remaining: {hours}h {mins}m</div>
@@ -203,6 +204,7 @@ export default function () {
       </div>
       <div className='draft__side'>
         <div className='draft__side-top'>
+          {league.ddate && <DraftSchedule />}
           {draftInfo}
         </div>
         <div className='draft__side-main'>

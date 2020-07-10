@@ -1,5 +1,6 @@
 export {
   getDraft,
+  getPicks,
   getCurrentPick,
   getSelectedDraftPlayer,
   isDrafted
