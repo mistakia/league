@@ -40,7 +40,7 @@ export default function () {
       )
     }
   } else {
-    draftInfo = (<p>Draft not scheduled</p>)
+    draftInfo = (<div className='draft__side-top-pick'>Draft not scheduled</div>)
   }
 
   const sorted = players.sort((a, b) => b.vorp.get(vbaseline) - a.vorp.get(vbaseline))
