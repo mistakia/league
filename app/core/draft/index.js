@@ -1,7 +1,7 @@
 export {
   getDraft,
   getPicks,
-  getCurrentPick,
+  getNextPick,
   getSelectedDraftPlayer,
   isDrafted
 } from './selectors'

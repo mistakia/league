@@ -14,33 +14,39 @@ import './draft.styl'
 
 export default function () {
   const {
-    players, currentPick, picks, league, selectedPlayer,
-    isDrafting, draftPlayer, drafted, vbaseline
+    players, nextPick, picks, league, selectedPlayer,
+    draftPlayer, drafted, vbaseline
   } = this.props
   const { positions } = constants
 
   const draftActive = league.ddate &&
-      moment().isAfter(moment(league.ddate, 'X').startOf('day'))
+    moment().isAfter(moment(league.ddate, 'X').startOf('day'))
+  const onTheClock = league.ddate && nextPick && moment().isAfter(moment(league.ddate, 'X').add((nextPick.pick - 1), 'days'))
 
   let draftInfo
   if (league.ddate) {
     const start = moment(league.ddate, 'X').startOf('day')
     if (moment().isBefore(start)) {
       draftInfo = (<div className='draft__side-top-pick'>Draft begins {moment().to(start)}</div>)
-    } else if (currentPick) {
-      const pickNum = (currentPick.pick % league.nteams) || league.nteams
-      const end = start.add(currentPick.pick, 'd')
-      const now = moment()
-      const hours = end.diff(now, 'hours')
-      const mins = end.diff(now, 'minutes') % 60
-      draftInfo = (
-        <div className='draft__side-top-pick'>
-          <div className='draft__side-top-pick-title'>
-            Pick #{currentPick.pick} ({currentPick.round}.{('0' + pickNum).slice(-2)})
+    } else if (nextPick) {
+      const pickStart = moment(league.ddate, 'X').add((nextPick.pick - 1), 'days')
+      if (moment().isBefore(pickStart)) {
+        draftInfo = (<div className='draft__side-top-pick'>Next pick in {moment().to(pickStart)}</div>)
+      } else {
+        const pickNum = (nextPick.pick % league.nteams) || league.nteams
+        const end = pickStart.add(1, 'd')
+        const now = moment()
+        const hours = end.diff(now, 'hours')
+        const mins = end.diff(now, 'minutes') % 60
+        draftInfo = (
+          <div className='draft__side-top-pick'>
+            <div className='draft__side-top-pick-title'>
+              Pick #{nextPick.pick} ({nextPick.round}.{('0' + pickNum).slice(-2)})
+            </div>
+            <div>Time Remaining: {hours}h {mins}m</div>
           </div>
-          <div>Time Remaining: {hours}h {mins}m</div>
-        </div>
-      )
+        )
+      }
     }
   } else {
     draftInfo = (<div className='draft__side-top-pick'>Draft not scheduled</div>)
@@ -78,7 +84,7 @@ export default function () {
 
   const pickItems = []
   for (const pick of picks) {
-    const isActive = draftActive && currentPick && pick.pick === currentPick.pick
+    const isActive = draftActive && !pick.player && moment().isAfter(moment(league.ddate, 'X').add((pick.pick - 1), 'days'))
     pickItems.push(<DraftPick key={pick.pick} pick={pick} playerId={pick.player} tid={pick.tid} isActive={isActive} />)
   }
 
@@ -93,7 +99,7 @@ export default function () {
           <div>{p.team}</div>
           {!!p.jersey && <div>#{p.jersey}</div>}
         </div>
-        {(draftActive && isDrafting && !isDrafted) &&
+        {(draftActive && onTheClock && !isDrafted) &&
           <div className='draft__selected-action'>
             <Button onClick={draftPlayer}>Draft</Button>
           </div>}

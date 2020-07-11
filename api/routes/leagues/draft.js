@@ -5,22 +5,23 @@ const router = express.Router({ mergeParams: true })
 const { constants, Roster, getEligibleSlots } = require('../../../common')
 
 router.get('/?', async (req, res) => {
+  const { db, logger } = req.app.locals
   try {
-    const { db } = req.app.locals
     const { leagueId } = req.params
     const year = req.query.year || constants.year
 
     const picks = await db('draft').where({ lid: leagueId, year })
     res.send({ picks })
   } catch (err) {
+    logger(err)
     res.status(500).send({ error: err.toString() })
   }
 })
 
 router.post('/?', async (req, res) => {
+  const { db, logger, broadcast } = req.app.locals
   try {
-    const { db, broadcast } = req.app.locals
-    const { leagueId } = req.params
+    const leagueId = parseInt(req.params.leagueId, 10)
     const { teamId, playerId, pickId } = req.body
 
     if (!teamId) {
@@ -34,12 +35,12 @@ router.post('/?', async (req, res) => {
     // make sure draft has started
     const leagues = await db('leagues').where({ uid: leagueId })
     const league = leagues[0]
-    const draftStart = moment(league.draft_start, 'X')
+    const draftStart = moment(league.ddate, 'X')
     if (moment().isBefore(draftStart)) {
       return res.status(400).send({ error: 'draft has not started' })
     }
 
-    // make sure team has current pick
+    // make sure team's clock has started
     const picks = await db('draft').where({ uid: pickId }).whereNull('player')
     const pick = picks[0]
     if (!pick) {
@@ -47,6 +48,10 @@ router.post('/?', async (req, res) => {
     }
     if (pick.tid !== teamId) {
       return res.status(400).send({ error: 'invalid teamId' })
+    }
+    const clockStart = moment(draftStart).add((pick.pick - 1), 'days')
+    if (moment().isBefore(clockStart)) {
+      return res.status(400).send({ error: 'pick clock has not started' })
     }
 
     // make sure player is a rookie
@@ -126,6 +131,7 @@ router.post('/?', async (req, res) => {
     })
     res.send(data)
   } catch (err) {
+    logger(err)
     res.status(500).send({ error: err.toString() })
   }
 })
