@@ -2,7 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { draftActions, getSelectedDraftPlayer, getDraft, getCurrentPick } from '@core/draft'
+import { draftActions, getSelectedDraftPlayer, getDraft, getNextPick } from '@core/draft'
 import { getCurrentLeague } from '@core/leagues'
 import { getRookiePlayers } from '@core/players'
 import { getApp } from '@core/app'
@@ -22,19 +22,18 @@ class DraftPage extends React.Component {
 const mapStateToProps = createSelector(
   getRookiePlayers,
   getSelectedDraftPlayer,
-  getCurrentPick,
+  getNextPick,
   getDraft,
   getCurrentLeague,
   getApp,
-  (players, selectedPlayer, currentPick, draft, league, app) => ({
+  (players, selectedPlayer, nextPick, draft, league, app) => ({
     players,
+    nextPick,
     selectedPlayer,
-    currentPick,
     vbaseline: app.vbaseline,
     picks: draft.picks,
     drafted: draft.drafted,
-    league,
-    isDrafting: currentPick.tid === app.teamId
+    league
   })
 )
 

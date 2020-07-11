@@ -39,7 +39,7 @@ export function draftReducer (state = initialState(), { payload, type }) {
       const { data } = payload
       return state.merge({
         picks: state.picks.setIn(
-          [state.picks.findIndex(i => i.pick === data.pick), 'player'], data.player),
+          [state.picks.findIndex(i => i.uid === data.uid), 'player'], data.player),
         drafted: state.drafted.push(data.player)
       })
     }

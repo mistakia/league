@@ -12,16 +12,9 @@ export function getPicks (state) {
   return picks.filter(p => p.tid === teamId)
 }
 
-export function getCurrentPick (state) {
-  const { picks } = getDraft(state)
-
-  for (const pick of picks.values()) {
-    if (!pick.player) {
-      return pick
-    }
-  }
-
-  return {}
+export function getNextPick (state) {
+  const picks = getPicks(state)
+  return picks.find(p => !p.player)
 }
 
 export function getSelectedDraftPlayer (state) {

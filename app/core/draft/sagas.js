@@ -3,7 +3,7 @@ import { call, takeLatest, fork, select } from 'redux-saga/effects'
 import { getApp } from '@core/app'
 import { draftActions } from './actions'
 import { fetchDraft, postDraft } from '@core/api'
-import { getDraft, getCurrentPick } from './selectors'
+import { getDraft, getNextPick } from './selectors'
 
 export function * loadDraft () {
   const { leagueId } = yield select(getApp)
@@ -13,8 +13,8 @@ export function * loadDraft () {
 export function * draftPlayer () {
   const { selected } = yield select(getDraft)
   const { teamId, leagueId } = yield select(getApp)
-  const { pick } = yield select(getCurrentPick)
-  const params = { leagueId, playerId: selected, teamId, pick }
+  const { uid } = yield select(getNextPick)
+  const params = { leagueId, playerId: selected, teamId, pickId: uid }
   yield call(postDraft, params)
 }
 
