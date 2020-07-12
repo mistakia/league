@@ -1,6 +1,8 @@
 export const leagueActions = {
   UPDATE_LEAGUE: 'UPDATE_LEAGUE',
 
+  SET_LEAGUE: 'SET_LEAGUE',
+
   PUT_LEAGUE_FAILED: 'PUT_LEAGUE_FAILED',
   PUT_LEAGUE_PENDING: 'PUT_LEAGUE_PENDING',
   PUT_LEAGUE_FULFILLED: 'PUT_LEAGUE_FULFILLED',
@@ -11,6 +13,13 @@ export const leagueActions = {
       leagueId,
       value,
       field
+    }
+  }),
+
+  set: (opts) => ({
+    type: leagueActions.SET_LEAGUE,
+    payload: {
+      opts
     }
   }),
 

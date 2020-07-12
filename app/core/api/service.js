@@ -106,16 +106,20 @@ export const api = {
     const url = `${BASE_URL}/teams/${data.teamId}`
     return { url, ...PUT(data) }
   },
+  getSources () {
+    const url = `${BASE_URL}/sources`
+    return { url }
+  },
   putSource (data) {
     const url = `${BASE_URL}/sources/${data.sourceId}`
     return { url, ...PUT(data) }
   },
   putProjection (data) {
-    const url = `${BASE_URL}/players/${data.playerId}/projection`
+    const url = `${BASE_URL}/projections/${data.playerId}`
     return { url, ...PUT(data) }
   },
   delProjection (data) {
-    const url = `${BASE_URL}/players/${data.playerId}/projection`
+    const url = `${BASE_URL}/projections/${data.playerId}`
     return { url, ...DELETE(data) }
   },
   putSetting (data) {

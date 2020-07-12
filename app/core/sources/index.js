@@ -4,5 +4,5 @@ export {
   getSources
 } from './selectors'
 
-export { sourceActions, putSourceActions } from './actions'
+export { sourceActions, putSourceActions, getSourcesActions } from './actions'
 export { sourceSagas } from './sagas'

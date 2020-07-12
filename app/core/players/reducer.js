@@ -37,9 +37,10 @@ export function playersReducer (state = initialState, { payload, type }) {
     case playerActions.SEARCH_PLAYERS:
       return state.merge({ search: payload.value })
 
+    case playerActions.SET_PROJECTION:
     case playerActions.PUT_PROJECTION_FULFILLED: {
       const { value, type, week, playerId, userId } = payload.opts
-      const key = state.get('items').get(playerId).get('projections').findKey(p => p.userid)
+      const key = state.get('items').get(playerId).get('projections').findKey(p => !p.sourceid)
       if (key) {
         return state.setIn(['items', playerId, 'projections', key, type], value)
       }
@@ -47,10 +48,11 @@ export function playersReducer (state = initialState, { payload, type }) {
       return state.updateIn(['items', playerId, 'projections'], arr => arr.push(newProj))
     }
 
+    case playerActions.REMOVE_PROJECTION:
     case playerActions.DEL_PROJECTION_FULFILLED: {
       const { playerId } = payload.opts
       return state.setIn(['items', playerId, 'projections'],
-        state.getIn(['items', playerId, 'projections']).filter(p => !p.userid)
+        state.getIn(['items', playerId, 'projections']).filter(p => p.sourceid)
       )
     }
 
@@ -143,10 +145,12 @@ export function playersReducer (state = initialState, { payload, type }) {
         orderBy: `vorp.${payload.data.user.vbaseline}`
       })
 
+    case settingActions.SET_SETTING:
     case settingActions.PUT_SETTING_FULFILLED:
       if (payload.opts.type === 'vbaseline') {
+        const value = payload.data ? payload.data.value : payload.opts.value
         return state.merge({
-          orderBy: `vorp.${payload.data.value}`
+          orderBy: `vorp.${value}`
         })
       }
       return state

@@ -4,7 +4,7 @@ import Editable from '@components/editable'
 
 export default class EditableProjection extends React.Component {
   onchange = (value) => {
-    this.props.setProjection({
+    this.props.save({
       value,
       userId: this.props.userId,
       type: this.props.type,

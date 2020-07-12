@@ -3,6 +3,7 @@ import React from 'react'
 import Icon from '@components/icon'
 import EditableLeagueField from '@components/editable-league-field'
 import GenerateSchedule from '@components/generate-schedule'
+import { DEFAULT_LEAGUE_ID } from '@core/constants'
 
 import './editable-league.styl'
 
@@ -20,7 +21,7 @@ export default class EditableLeague extends React.Component {
   }
 
   onchange = (value) => {
-    const leagueId = this.props.league.uid
+    const leagueId = this.props.league.uid || DEFAULT_LEAGUE_ID
     this.props.update({ leagueId, ...value })
   }
 
@@ -28,13 +29,14 @@ export default class EditableLeague extends React.Component {
     const { league, userId } = this.props
 
     const isCommish = league.commishid === userId
+    const isDefault = !league.commishid
 
     const classNames = ['editable__league']
     if (this.state.visible) {
       classNames.push('expanded')
     }
 
-    const props = { league, isCommish, onchange: this.onchange }
+    const props = { league, isCommish, isDefault, onchange: this.onchange }
 
     return (
       <div className={classNames.join(' ')}>

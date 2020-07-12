@@ -51,10 +51,10 @@ export default class EditableLeagueField extends React.Component {
   }
 
   render = () => {
-    const { isCommish, label } = this.props
+    const { isCommish, isDefault, label } = this.props
     return (
       <TextField
-        disabled={!isCommish}
+        disabled={!isCommish && !isDefault}
         label={label}
         value={this.state.value}
         onBlur={this.handleBlur}

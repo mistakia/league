@@ -22,5 +22,6 @@ export {
   delProjection,
   putSetting,
   getPlays,
-  postMatchups
+  postMatchups,
+  getSources
 } from './sagas'

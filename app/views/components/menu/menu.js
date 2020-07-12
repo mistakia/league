@@ -5,17 +5,18 @@ import { constants } from '@common'
 import './menu.styl'
 
 const { week } = constants
-const Menu = () => (
+const Menu = ({ app }) => (
   <div id='menu' className='menu'>
-    <NavLink to='/dashboard'>Roster</NavLink>
-    <NavLink to='/lineups'>Lineup</NavLink>
+    {app.userId && <NavLink to='/dashboard'>Roster</NavLink>}
+    {app.userId && <NavLink to='/lineups'>Lineup</NavLink>}
     <NavLink to='/players'>Players</NavLink>
-    <NavLink to='/league'>League</NavLink>
-    <NavLink to='/trade'>Trade</NavLink>
-    {!week && <NavLink to='/draft'>Draft</NavLink>}
-    {!week && <NavLink to='/auction'>Auction</NavLink>}
+    {app.userId && <NavLink to='/league'>League</NavLink>}
+    {app.userId && <NavLink to='/trade'>Trade</NavLink>}
+    {(app.userId && !week) && <NavLink to='/draft'>Draft</NavLink>}
+    {(app.userId && !week) && <NavLink to='/auction'>Auction</NavLink>}
     <NavLink to='/settings'>Settings</NavLink>
     <NavLink to='/resources'>Resources</NavLink>
+    {!app.userId && <NavLink to='/login'>Login/Register</NavLink>}
   </div>
 )
 
