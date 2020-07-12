@@ -103,13 +103,11 @@ export function playersReducer (state = initialState, { payload, type }) {
         }
       })
 
-    case statActions.GET_PLAYS_PENDING:
     case playerActions.FETCH_PLAYERS_PENDING:
       return state.merge({
         isPending: true
       })
 
-    case statActions.GET_PLAYS_FAILED:
     case playerActions.FETCH_PLAYERS_FAILED:
       return state.merge({
         isPending: false

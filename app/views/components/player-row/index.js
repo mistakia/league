@@ -3,19 +3,18 @@ import { createSelector } from 'reselect'
 
 import { getApp } from '@core/app'
 import { getStats } from '@core/stats'
-import { getPlayers, playerActions, getGamesByYearForPlayer } from '@core/players'
+import { getPlayers, playerActions } from '@core/players'
 
 import PlayerRow from './player-row'
 
 const mapStateToProps = createSelector(
   getPlayers,
   getApp,
-  getGamesByYearForPlayer,
   getStats,
-  (players, app, stats, statsState) => ({
+  (players, app, statsState) => ({
     selected: players.get('selected'),
-    stats,
     vbaseline: app.vbaseline,
+    overall: statsState.overallPlays,
     isSeasonProjectionView: players.get('view') === 'seasproj',
     isStatsRushingView: players.get('view') === 'stats' && statsState.view === 'rushing',
     isStatsReceivingView: players.get('view') === 'stats' && statsState.view === 'receiving',
@@ -31,7 +30,6 @@ const mapStateToProps = createSelector(
 
 const mapDispatchToProps = {
   select: playerActions.selectPlayer,
-  deselect: playerActions.deselectPlayer,
   delete: playerActions.deleteProjection
 }
 

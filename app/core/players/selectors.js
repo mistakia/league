@@ -9,6 +9,12 @@ export function getPlayers (state) {
   return state.get('players')
 }
 
+export function getSelectedPlayer (state) {
+  const playerId = getPlayers(state).get('selected')
+  const player = getPlayerById(state, { playerId })
+  return player.toJS()
+}
+
 export function getAllPlayers (state) {
   return state.get('players').get('items')
 }
@@ -96,8 +102,9 @@ export function getPlayerById (state, { playerId }) {
   return items.get(playerId) || new Player()
 }
 
-export function getGamesByYearForPlayer (state, { player }) {
-  const p = getPlayerById(state, { playerId: player.player })
+export function getGamesByYearForSelectedPlayer (state) {
+  const playerId = state.get('players').get('selected')
+  const p = getPlayerById(state, { playerId })
   const games = p.get('games')
 
   const years = {}

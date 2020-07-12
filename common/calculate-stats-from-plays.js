@@ -216,7 +216,6 @@ const calculateStatsFromPlays = (plays) => {
   for (const stat in constants.createFullStats()) {
     const values = Object.values(players).map(item => item[stat]).filter(item => !!item)
     const result = percentile([50, 75, 90, 95, 98, 99], values)
-    console.log(result)
     overall[stat] = {
       p50: result[0],
       p75: result[1],

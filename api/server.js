@@ -60,6 +60,7 @@ if (options.ssl) {
   })
 }
 
+api.use('/api/stats', routes.stats)
 api.use('/api/players', routes.players)
 api.use('/api/plays', routes.plays)
 api.use('/api/sources', routes.sources)

@@ -1,5 +1,5 @@
 import React from 'react'
-import { CellMeasurerCache, CellMeasurer, AutoSizer, List } from 'react-virtualized'
+import { AutoSizer, List } from 'react-virtualized'
 
 import SearchFilter from '@components/search-filter'
 import PositionFilter from '@components/position-filter'
@@ -30,17 +30,12 @@ import HeaderStatsRushingBrokenTackles from '@components/header-stats-rushing-br
 import HeaderStatsReceivingBasic from '@components/header-stats-receiving-basic'
 import HeaderStatsReceivingOppurtunity from '@components/header-stats-receiving-oppurtunity'
 import HeaderStatsReceivingAdvanced from '@components/header-stats-receiving-advanced'
+import SelectedPlayer from '@components/selected-player'
 import Loading from '@components/loading'
 
 import './players.styl'
 
 const ROW_HEIGHT = 30
-
-const cache = new CellMeasurerCache({
-  fixedWidth: true,
-  minHeight: 25,
-  defaultHeight: ROW_HEIGHT
-})
 
 export default class PlayersPage extends React.Component {
   list = React.createRef()
@@ -56,9 +51,6 @@ export default class PlayersPage extends React.Component {
       const index = this.props.players.findIndex(p => p.player === this.props.selected)
       this.list.current.scrollToRow(index)
     }
-
-    cache.clearAll()
-    this.list.current.recomputeRowHeights()
   }
 
   render = () => {
@@ -71,15 +63,7 @@ export default class PlayersPage extends React.Component {
     const Row = ({ index, key, parent, ...params }) => {
       const player = players.get(index).toJS()
       return (
-        <CellMeasurer
-          cache={cache}
-          columnIndex={0}
-          key={key}
-          parent={parent}
-          rowIndex={index}
-        >
-          <PlayerRow player={player} {...params} />
-        </CellMeasurer>
+        <PlayerRow key={key} player={player} {...params} />
       )
     }
 
@@ -194,7 +178,7 @@ export default class PlayersPage extends React.Component {
             className='players'
             width={width}
             height={height}
-            rowHeight={cache.rowHeight}
+            rowHeight={ROW_HEIGHT}
             rowCount={players.size}
             rowRenderer={Row}
           />
@@ -202,8 +186,10 @@ export default class PlayersPage extends React.Component {
       </AutoSizer>
     )
 
+    const overlay = <SelectedPlayer />
+
     return (
-      <PageLayout {...{ body, head }} />
+      <PageLayout {...{ body, head, overlay }} />
     )
   }
 }

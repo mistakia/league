@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const JSONStream = require('JSONStream')
 
+const { getPlayByPlayQuery } = require('../../utils')
 const { constants } = require('../../common')
 
 router.get('/?', async (req, res) => {
@@ -9,7 +10,7 @@ router.get('/?', async (req, res) => {
   try {
     const years = req.query.years
       ? (Array.isArray(req.query.years) ? req.query.years : [req.query.years])
-      : [constants.year]
+      : [constants.week ? constants.year : (constants.year - 1)]
 
     const weeks = req.query.weeks
       ? (Array.isArray(req.query.weeks) ? req.query.weeks : [req.query.weeks])
@@ -27,6 +28,8 @@ router.get('/?', async (req, res) => {
       ? (Array.isArray(req.query.downs) ? req.query.downs : [req.query.downs])
       : []
 
+    const { playerId } = req.query
+
     // TODO filter by yfog range
     // TODO filter by ytg range
     // TODO filter by first drive
@@ -42,32 +45,12 @@ router.get('/?', async (req, res) => {
       return res.status(400).send({ error: 'too many years listed' })
     }
 
-    const playerIds = await db('player').select('player').whereNot({ cteam: 'INA' })
+    let pbpQuery = getPlayByPlayQuery(db)
 
-    let pbpQuery = db('pbp')
-      .select(
-        'pbp.fuml', 'pbp.fum', 'pbp.off', 'pbp.type', 'pbp.bc', 'pbp.yds', 'pbp.fd',
-        'pbp.succ', 'pbp.psr', 'pbp.trg', 'pbp.ints', 'pbp.comp', 'pbp.pts', 'pbp.sk1',
-        'pbp.dwn', 'pbp.qtr',
-        'chart.dot', 'chart.tay', 'chart.qbp', 'chart.qbhi', 'chart.qbhu', 'chart.high',
-        'chart.intw', 'chart.drp', 'chart.cnb', 'chart.mbt', 'chart.yac', 'chart.yaco', 'game.wk',
-        'game.day'
-      )
-      .join('game', 'pbp.gid', 'game.gid')
-      .leftJoin('chart', 'pbp.pid', 'chart.pid')
-      .whereNot('pbp.type', 'NOPL')
-      .where(function () {
-        this.whereNot({ 'pbp.act1': 'A' })
-        this.orWhereNot({ 'pbp.act2': 'A' })
-        this.orWhereNot({ 'pbp.act3': 'A' })
-      })
-
-    if (req.query.basic) {
-      pbpQuery = pbpQuery.where(function () {
-        this.whereIn('pbp.bc', playerIds)
-          .orWhereIn('pbp.psr', playerIds)
-          .orWhereIn('pbp.trg', playerIds)
-      })
+    if (playerId) {
+      const players = await db('player').where('player', playerId).limit(1)
+      const player = players[0]
+      pbpQuery = pbpQuery.where('pbp.off', player.cteam)
     }
 
     if (years.length) {

@@ -2,7 +2,7 @@ import { call, takeLatest, fork, select, put } from 'redux-saga/effects'
 
 import { getPlayers, playerActions } from '@core/players'
 import { statActions } from './actions'
-import { getPlays } from '@core/api'
+import { getPlays, getTeamStats } from '@core/api'
 import { getStats } from './selectors'
 import Worker from 'workerize-loader?inline!./worker' // eslint-disable-line import/no-webpack-loader-syntax
 
@@ -38,6 +38,21 @@ export function * calculateStats () {
   yield put(playerActions.setStats(result))
 }
 
+export function * calculateTeamStats () {
+  const { teamStats } = yield select(getStats)
+  const worker = new Worker()
+  const result = yield call(worker.calculateTeam, teamStats.toJS())
+  yield put(statActions.setTeamStats(result))
+}
+
+export function * loadStats () {
+  const { teamStats, plays } = yield select(getStats)
+  if (!plays.size) yield fork(getPlays)
+  if (!teamStats.size) {
+    yield call(getTeamStats)
+  }
+}
+
 //= ====================================
 //  WATCHERS
 // -------------------------------------
@@ -54,6 +69,14 @@ export function * watchFilterStats () {
   yield takeLatest(statActions.FILTER_STATS, filterPlays)
 }
 
+export function * watchPlayersSelectPlayer () {
+  yield takeLatest(playerActions.PLAYERS_SELECT_PLAYER, loadStats)
+}
+
+export function * watchGetTeamStatsFulfilled () {
+  yield takeLatest(statActions.GET_TEAM_STATS_FULFILLED, calculateTeamStats)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -61,5 +84,7 @@ export function * watchFilterStats () {
 export const statSagas = [
   fork(watchSetPlayersView),
   fork(watchGetPlaysFulfilled),
-  fork(watchFilterStats)
+  fork(watchFilterStats),
+  fork(watchPlayersSelectPlayer),
+  fork(watchGetTeamStatsFulfilled)
 ]
