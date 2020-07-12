@@ -1,6 +1,7 @@
 import { Record, List } from 'immutable'
 import SHA256 from 'crypto-js/sha256'
 
+import { DEFAULT_LEAGUE_ID } from '@core/constants'
 import { appActions } from './actions'
 import { settingActions } from '@core/settings'
 
@@ -9,7 +10,7 @@ const initialState = new Record({
   key: null,
   userId: undefined,
   teamId: undefined,
-  leagueId: undefined,
+  leagueId: DEFAULT_LEAGUE_ID,
   isPending: true,
   isUpdating: false,
   authError: null,
@@ -18,7 +19,7 @@ const initialState = new Record({
   email: null,
   vbaseline: 'available',
   teamIds: new List(),
-  leagueIds: new List()
+  leagueIds: new List([DEFAULT_LEAGUE_ID])
 })
 
 export function appReducer (state = initialState(), { payload, type }) {
@@ -71,8 +72,9 @@ export function appReducer (state = initialState(), { payload, type }) {
         token: payload.data.token
       })
 
+    case settingActions.SET_SETTING:
     case settingActions.PUT_SETTING_FULFILLED:
-      return state.merge({ [payload.opts.type]: payload.data.value })
+      return state.merge({ [payload.opts.type]: payload.data ? payload.data.value : payload.opts.value })
 
     default:
       return state

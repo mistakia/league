@@ -1,6 +1,8 @@
 export const settingActions = {
   UPDATE_SETTING: 'UPDATE_SETTING',
 
+  SET_SETTING: 'SET_SETTING',
+
   PUT_SETTING_FAILED: 'PUT_SETTING_FAILED',
   PUT_SETTING_PENDING: 'PUT_SETTING_PENDING',
   PUT_SETTING_FULFILLED: 'PUT_SETTING_FULFILLED',
@@ -10,6 +12,13 @@ export const settingActions = {
     payload: {
       type,
       value
+    }
+  }),
+
+  set: (opts) => ({
+    type: settingActions.SET_SETTING,
+    payload: {
+      opts
     }
   }),
 

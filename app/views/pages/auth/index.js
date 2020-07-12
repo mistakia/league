@@ -1,21 +1,21 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getApp } from '@core/app'
-import { playerActions } from '@core/players'
+import { getApp, appActions } from '@core/app'
 
-import EditableProjection from './editable-projection'
+import AuthPage from './auth'
 
 const mapStateToProps = createSelector(
   getApp,
-  (app) => ({ userId: app.userId })
+  (app) => ({ isPending: app.isPending, authError: app.authError })
 )
 
 const mapDispatchToProps = {
-  save: playerActions.saveProjection
+  login: appActions.login,
+  register: appActions.register
 }
 
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(EditableProjection)
+)(AuthPage)

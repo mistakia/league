@@ -1,13 +1,15 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
+import { getApp } from '@core/app'
 import { getPlayers, playerActions } from '@core/players'
 
 import PlayerWatchlistAction from './player-watchlist-action'
 
 const mapStateToProps = createSelector(
   getPlayers,
-  (players) => ({ watchlist: players.get('watchlist') })
+  getApp,
+  (players, app) => ({ watchlist: players.get('watchlist'), userId: app.userId })
 )
 
 const mapDispatchToProps = {

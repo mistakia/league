@@ -3,8 +3,7 @@ const router = express.Router()
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 
-const { constants } = require('../../common')
-const { createDefaultLeague } = require('../../utils')
+const { constants, createDefaultLeague } = require('../../common')
 
 router.post('/login', async (req, res) => {
   const { db, config, logger } = req.app.locals

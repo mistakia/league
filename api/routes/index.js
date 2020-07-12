@@ -5,6 +5,8 @@ const players = require('./players')
 const leagues = require('./leagues')
 const sources = require('./sources')
 const plays = require('./plays')
+const projections = require('./projections')
+const settings = require('./settings')
 
 module.exports = {
   auth,
@@ -13,5 +15,7 @@ module.exports = {
   players,
   me,
   sources,
-  plays
+  settings,
+  plays,
+  projections
 }

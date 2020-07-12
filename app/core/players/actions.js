@@ -22,8 +22,10 @@ export const playerActions = {
   GET_PLAYER_STATS_PENDING: 'GET_PLAYER_STATS_PENDING',
   GET_PLAYER_STATS_FULFILLED: 'GET_PLAYER_STATS_FULFILLED',
 
-  SET_PROJECTION: 'SET_PROJECTION',
+  SAVE_PROJECTION: 'SAVE_PROJECTION',
   DELETE_PROJECTION: 'DELETE_PROJECTION',
+  SET_PROJECTION: 'SET_PROJECTION',
+  REMOVE_PROJECTION: 'REMOVE_PROJECTION',
 
   PUT_PROJECTION_FAILED: 'PUT_PROJECTION_FAILED',
   PUT_PROJECTION_PENDING: 'PUT_PROJECTION_PENDING',
@@ -82,8 +84,8 @@ export const playerActions = {
     type: playerActions.PLAYERS_DESELECT_PLAYER
   }),
 
-  setProjection: ({ playerId, value, type, userId }) => ({
-    type: playerActions.SET_PROJECTION,
+  saveProjection: ({ playerId, value, type, userId }) => ({
+    type: playerActions.SAVE_PROJECTION,
     payload: {
       userId,
       playerId,
@@ -99,8 +101,18 @@ export const playerActions = {
     }
   }),
 
-  load: () => ({
-    type: playerActions.LOAD_PLAYERS
+  setProjection: (opts) => ({
+    type: playerActions.SET_PROJECTION,
+    payload: {
+      opts
+    }
+  }),
+
+  removeProjection: (opts) => ({
+    type: playerActions.REMOVE_PROJECTION,
+    payload: {
+      opts
+    }
   }),
 
   filter: (type, values) => ({

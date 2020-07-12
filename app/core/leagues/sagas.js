@@ -1,10 +1,13 @@
-import { call, takeLatest, fork } from 'redux-saga/effects'
+import { call, takeLatest, fork, select, put } from 'redux-saga/effects'
 
 import { leagueActions } from './actions'
 import { putLeague } from '@core/api'
+import { getApp } from '@core/app'
 
 export function * updateLeague ({ payload }) {
-  yield call(putLeague, payload)
+  const { token } = yield select(getApp)
+  if (token) yield call(putLeague, payload)
+  else yield put(leagueActions.set(payload))
 }
 
 //= ====================================

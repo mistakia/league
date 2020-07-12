@@ -11,7 +11,10 @@ export default class PlayerWatchlistAction extends React.Component {
   }
 
   render = () => {
-    const { watchlist, playerId } = this.props
+    const { watchlist, playerId, userId } = this.props
+    if (!userId) {
+      return null
+    }
     const selected = watchlist.has(playerId)
     const classNames = ['player__watchlist-action']
     if (selected) classNames.push('selected')

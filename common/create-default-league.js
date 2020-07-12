@@ -1,6 +1,6 @@
 const createDefaultLeague = ({ userId }) => ({
   commishid: userId,
-  name: 'TEFLON SUPERFLEX DYNASTY LEAGUE',
+  name: 'SUPERFLEX DYNASTY LEAGUE',
   nteams: 12,
   sqb: 1,
   srb: 2,
@@ -40,4 +40,4 @@ const createDefaultLeague = ({ userId }) => ({
   adate: null
 })
 
-module.exports = createDefaultLeague
+export default createDefaultLeague

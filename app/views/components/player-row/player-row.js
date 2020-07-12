@@ -259,7 +259,7 @@ export default class PlayerRow extends React.Component {
     const years = []
     if (isSelected) {
       player.projections.forEach((p, index) => {
-        const isUser = !!p.userid
+        const isUser = !p.sourceid
         const title = (isUser ? 'User' : <Source sourceId={p.sourceid} />)
         const action = (
           <div className='row__action'>

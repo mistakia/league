@@ -58,11 +58,13 @@ export function * toggleOrder ({ payload }) {
   }
 }
 
-export function * setProjection ({ payload }) {
+export function * saveProjection ({ payload }) {
+  const { token } = yield select(getApp)
   const players = yield select(getPlayers)
   const week = players.get('week')
   const { value, type, playerId, userId } = payload
-  yield call(putProjection, { value, type, playerId, userId, week })
+  if (token) yield call(putProjection, { value, type, playerId, userId, week })
+  else yield put(playerActions.setProjection({ value, type, playerId, userId, week }))
   yield call(calculateValues)
 }
 
@@ -73,10 +75,11 @@ export function * loadStats ({ payload }) {
 
 export function * deleteProjection ({ payload }) {
   const { playerId } = payload
-  const { userId } = yield select(getApp)
+  const { userId, token } = yield select(getApp)
   const players = yield select(getPlayers)
   const week = players.get('week')
-  yield call(delProjection, { playerId, userId, week })
+  if (token) yield call(delProjection, { playerId, userId, week })
+  else yield put(playerActions.removeProjection({ playerId }))
   yield call(calculateValues)
 }
 
@@ -106,10 +109,6 @@ export function * putWatchlist ({ payload }) {
 //  WATCHERS
 // -------------------------------------
 
-export function * watchLoadPlayers () {
-  yield takeLatest(playerActions.LOAD_PLAYERS, loadPlayers) // TODO - remove?
-}
-
 export function * watchFetchPlayersFulfilled () {
   yield takeLatest(playerActions.FETCH_PLAYERS_FULFILLED, calculateValues)
 }
@@ -122,16 +121,24 @@ export function * watchToggleOrder () {
   yield takeLatest(playerActions.TOGGLE_ORDER, toggleOrder)
 }
 
-export function * watchSetProjection () {
-  yield takeLatest(playerActions.SET_PROJECTION, setProjection)
+export function * watchSaveProjection () {
+  yield takeLatest(playerActions.SAVE_PROJECTION, saveProjection)
 }
 
 export function * watchSelectPlayer () {
   yield takeLatest(playerActions.PLAYERS_SELECT_PLAYER, loadStats)
 }
 
+export function * watchSetLeague () {
+  yield takeLatest(leagueActions.SET_LEAGUE, calculateValues)
+}
+
 export function * watchPutLeagueFulfilled () {
   yield takeLatest(leagueActions.PUT_LEAGUE_FULFILLED, calculateValues)
+}
+
+export function * watchSetSource () {
+  yield takeLatest(sourceActions.SET_SOURCE, calculateValues)
 }
 
 export function * watchPutSourceFulfilled () {
@@ -146,18 +153,24 @@ export function * watchToggleWatchlist () {
   yield takeLatest(playerActions.TOGGLE_WATCHLIST, putWatchlist)
 }
 
+export function * watchInitApp () {
+  yield takeLatest(appActions.INIT_APP, loadPlayers)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
 
 export const playerSagas = [
-  fork(watchLoadPlayers),
+  fork(watchInitApp),
   fork(watchFetchPlayersFulfilled),
   fork(watchAuthFulfilled),
+  fork(watchSetLeague),
   fork(watchToggleOrder),
-  fork(watchSetProjection),
+  fork(watchSaveProjection),
   fork(watchSelectPlayer),
   fork(watchPutLeagueFulfilled),
+  fork(watchSetSource),
   fork(watchPutSourceFulfilled),
   fork(watchDeleteProjection),
   fork(watchToggleWatchlist)

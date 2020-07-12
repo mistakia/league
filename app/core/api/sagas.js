@@ -28,7 +28,7 @@ import {
   getTradesActions
 } from '@core/trade'
 import { putLeagueActions } from '@core/leagues'
-import { putSourceActions } from '@core/sources'
+import { getSourcesActions, putSourceActions } from '@core/sources'
 import { putSettingActions } from '@core/settings'
 
 function * fetchAPI (apiFunction, actions, opts = {}) {
@@ -85,6 +85,7 @@ export const putLeague = fetch.bind(null, api.putLeague, putLeagueActions)
 
 export const putTeam = fetch.bind(null, api.putTeam, putTeamActions)
 
+export const getSources = fetch.bind(null, api.getSources, getSourcesActions)
 export const putSource = fetch.bind(null, api.putSource, putSourceActions)
 
 export const putProjection = fetch.bind(null, api.putProjection, putProjectionActions)

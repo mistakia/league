@@ -36,10 +36,11 @@ export default class SettingsPage extends React.Component {
     const body = (
       <div className='settings'>
         {leagueItems}
-        <div className='settings__section'>
-          <div className='settings__section-head'>Teams</div>
-          <div className='settings__section-body'>{teamItems}</div>
-        </div>
+        {!!teamItems.length &&
+          <div className='settings__section'>
+            <div className='settings__section-head'>Teams</div>
+            <div className='settings__section-body'>{teamItems}</div>
+          </div>}
         <div className='settings__section'>
           <div className='settings__section-head'>Value Calculations</div>
           <EditableValue />

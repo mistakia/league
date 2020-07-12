@@ -60,6 +60,9 @@ if (options.ssl) {
   })
 }
 
+api.use('/api/players', routes.players)
+api.use('/api/plays', routes.plays)
+api.use('/api/sources', routes.sources)
 api.use('/api/auth', routes.auth)
 api.use('/api/*', expressJwt(config.jwt))
 api.use('/api/*', (err, req, res, next) => {
@@ -69,11 +72,10 @@ api.use('/api/*', (err, req, res, next) => {
   next()
 })
 api.use('/api/me', routes.me)
-api.use('/api/players', routes.players)
-api.use('/api/plays', routes.plays)
+api.use('/api/projections', routes.projections)
 api.use('/api/teams', routes.teams)
 api.use('/api/leagues', routes.leagues)
-api.use('/api/sources', routes.sources)
+api.use('/api/settings', routes.settings)
 api.use('/*', (req, res) => {
   res.sendFile(path.join(__dirname, '../', 'dist', 'index.html'))
 })
