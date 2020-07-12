@@ -31,7 +31,7 @@ export default function () {
     } else if (nextPick) {
       const pickStart = moment(league.ddate, 'X').add((nextPick.pick - 1), 'days')
       if (moment().isBefore(pickStart)) {
-        draftInfo = (<div className='draft__side-top-pick'>Next pick in {moment().to(pickStart)}</div>)
+        draftInfo = (<div className='draft__side-top-pick'>Your next pick is in {moment().to(pickStart)}</div>)
       } else {
         const pickNum = (nextPick.pick % league.nteams) || league.nteams
         const end = pickStart.add(1, 'd')
@@ -47,6 +47,8 @@ export default function () {
           </div>
         )
       }
+    } else {
+      draftInfo = (<div className='draft__side-top-pick'>You have no picks left.</div>)
     }
   } else {
     draftInfo = (<div className='draft__side-top-pick'>Draft not scheduled</div>)

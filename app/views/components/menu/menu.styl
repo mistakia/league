@@ -1,10 +1,15 @@
 #menu
   fixed left top right
-  height 60px
+  height $menuHeight
   display flex
   z-index 1
   justify-content center
   align-items center
-  border-bottom 4px solid $borderColor
+  border-bottom 1px solid $borderColor
   user-select none
-  background white
+  background $backgroundColor
+
+.menu__time
+  absolute left 16px
+  font-size 11px
+  font-weight 700
