@@ -129,6 +129,10 @@ export const api = {
   getPlays (params) {
     const url = `${BASE_URL}/plays?${queryString.stringify(params)}`
     return { url }
+  },
+  getTeamStats () {
+    const url = `${BASE_URL}/stats/teams`
+    return { url }
   }
 }
 

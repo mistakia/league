@@ -161,6 +161,93 @@ export const fullStats = [
 
 export const createFullStats = () => fullStats.reduce((o, key) => ({ ...o, [key]: 0 }), {})
 
+export const teamStats = [
+  'q1p', // quarter 1 points
+  'q2p', // quarter 2 points
+  'q3p', // quarter 3 points
+  'q4p', // quarter 4 points
+  'rfd', // rushing first downs
+  'pfd', // passing first downs
+  'ry', // rushing yards
+  'ra', // rushing attempts
+  'py', // passing attempts
+  'pa', // passing yards
+  'tdr', // rushing touchdowns
+  'tdp', // passing touchdowns
+  'bpy', // big play passing yards
+  'srp', // successful rush plays
+  'spp', // successful pass plays
+  'qba', // qb rushing attempts
+  'qby', // qb rushing yards
+  'ley', // LE rushing yards
+  'lty', // LT rushing yards
+  'lgy', // LG rushign yards
+  'mdy', // middle rushing yards
+  'rgy', // RG rushing yards
+  'rty', // RT rushing yards
+  'rey', // RE rushing yards
+  'sla', // short left passing attempts
+  'sly', // short left passing yards
+  'sma', // short middle passing attempts
+  'smy', // short middle passing yards
+  'sra', // short right passing attempts
+  'sry', // short right passing yards
+  'dla', // deep left passing attempts
+  'dly', // deep left passing yards
+  'dma', // deep middle passing attempts
+  'dmy', // deep middle passing yards
+  'dra', // deep right passing attempts
+  'dry', // deep right passing yards
+  'wr1a', // wr1/2 passing attempts
+  'wr1y', // wr1/2 passing yards
+  'wr3a', // wr3+ passing attempts
+  'wr3y', // wr3+ passing yards
+  'tea', // te passing attempts
+  'tey', // te passing yards
+  'rba', // rb passing attempts
+  'rby', // rb passing yards
+  'sga', // shotgun attempts
+  'sgy', // shotgun yards
+  'spc', // short comp
+  'mpc', // medium comp
+  'lpc', // long comp
+  'q1ra', // quarter 1 rushing attempts
+  'q1ry', // quarter 1 rushing yards
+  'q1pa', // quarter 1 passing attempts
+  'q1py', // quarter 1 passing yards
+  'lcra', // late/close rushing attempt
+  'lcry', // late/close rushing yards
+  'lcpa', // late/close passing attempt
+  'lcpy', // late/close passing yards
+  'rzra', // redzone rushing attempts
+  'rzry', // redzone rushing yards
+  'rzpa', // redzone passing attempts
+  'rzpy', // redzone passing yards
+  'drv', // drives on offense
+  's3a', // 3rd/short attempts
+  's3c', // 3rd/short completions
+  'l3a', // 3rd/long attempts
+  'l3c', // 3rd/long completions
+  'stf', // stuffed runs
+  'fsp', // false starts
+  'ohp', // offensive holding penalty
+  'pbep', // play book execution penalty
+  'snpo', // snaps on offense
+  'pap', // play action pass attempts
+  'papy', // play action pass yards
+  'npr', // no pressure pass attempts
+  'npry', // no pressure pass yards
+  'qbp', // qb pressure
+  'qbpy', // qb pressure yards
+  'qbhi', // qb hit
+  'qbhiy', // qb hit yards
+  'qbhu', // qb hurry
+  'qbhuy', // qb hurry yards
+  'scrm', // scrambles
+  'scrmy', // scramble yards
+  'drp' // drops
+]
+
 export const slots = {
   QB_ONE: 0,
   QB_TWO: 1,

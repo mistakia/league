@@ -1,0 +1,53 @@
+.selected__player
+  absolute left bottom right
+  height 50%
+  background #fafafa
+  border-top 4px solid $borderColor
+
+.selected__player-body
+  padding-top 16px
+  width 100%
+  height 100%
+  overflow hidden
+  overflow-y scroll
+
+.selected__section
+  padding 16px
+  display flex
+  flex-direction column
+  max-width 1100px
+  margin 0 auto
+  border 1px solid $borderColor
+  background white
+  margin-bottom 16px
+
+.selected__section-header
+  flex 1
+  height 40px
+  display flex
+  align-items center
+  font-weight 500
+  border-bottom 1px solid $borderColor
+  font-size 12px
+
+.player__selected-row
+  flex 1
+  display flex
+  height 24px
+  line-height 16px
+  align-items center
+  &:hover
+    background #f0f0f0
+
+.selected__player-action
+  absolute top 16px right 16px
+  width 45px
+  height 45px
+  display flex
+  justify-content flex-end
+  padding-top 8px
+  padding-right 8px
+
+  &:hover .icon
+    fill $accentColor
+    cursor pointer

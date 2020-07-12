@@ -1,11 +1,12 @@
 export { playersReducer } from './reducer'
 export {
   getPlayers,
+  getSelectedPlayer,
   getAllPlayers,
   getFilteredPlayers,
   getRookiePlayers,
   getPlayerById,
-  getGamesByYearForPlayer,
+  getGamesByYearForSelectedPlayer,
   getPlayersForWatchlist
 } from './selectors'
 export { Player, createPlayer } from './player'

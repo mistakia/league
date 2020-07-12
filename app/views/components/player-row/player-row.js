@@ -1,11 +1,7 @@
 import React from 'react'
 
-import Source from '@components/source'
 import EditableProjection from '@components/editable-projection'
 import Position from '@components/position'
-import Icon from '@components/icon'
-import { weightProjections } from '@common'
-import PlayerExpandedRow from '@components/player-expanded-row'
 import PlayerWatchlistAction from '@components/player-watchlist-action'
 import PlayerRowMetric from '@components/player-row-metric'
 
@@ -16,19 +12,11 @@ export default class PlayerRow extends React.Component {
     this.props.select(this.props.player.player)
   }
 
-  handleDeselectClick = () => {
-    this.props.deselect()
-  }
-
-  handleClearClick = () => {
-    this.props.delete(this.props.player.player)
-  }
-
   render = () => {
     const {
-      player, style, selected, stats, vbaseline, isSeasonProjectionView,
+      player, style, selected, vbaseline, isSeasonProjectionView,
       isStatsPassingAdvancedView, isStatsPassingPressureView, isStatsRushingView,
-      isStatsReceivingView
+      isStatsReceivingView, overall
     } = this.props
 
     const isSelected = selected === player.player
@@ -102,14 +90,14 @@ export default class PlayerRow extends React.Component {
         </div>
       </div>
     )
-
+    const { stats } = player
     const passingBasic = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <PlayerRowMetric value={player.stats.py} type='py' />
-          <PlayerRowMetric value={player.stats.tdp} type='tdp' />
-          <PlayerRowMetric value={player.stats.ints} type='ints' />
-          <PlayerRowMetric value={player.stats.drppy} type='drppy' />
+          <PlayerRowMetric stats={stats} overall={overall} type='py' />
+          <PlayerRowMetric stats={stats} overall={overall} type='tdp' />
+          <PlayerRowMetric stats={stats} overall={overall} type='ints' />
+          <PlayerRowMetric stats={stats} overall={overall} type='drppy' />
         </div>
       </div>
     )
@@ -117,10 +105,10 @@ export default class PlayerRow extends React.Component {
     const passingEfficiency = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <PlayerRowMetric value={player.stats.pc_pct} type='pc_pct' />
-          <PlayerRowMetric value={player.stats.tdp_pct} type='tdp_pct' />
-          <PlayerRowMetric value={player.stats.ints_pct} type='ints_pct' />
-          <PlayerRowMetric value={player.stats.intw_pct} type='intw_pct' />
+          <PlayerRowMetric stats={stats} overall={overall} type='pc_pct' />
+          <PlayerRowMetric stats={stats} overall={overall} type='tdp_pct' />
+          <PlayerRowMetric stats={stats} overall={overall} type='ints_pct' />
+          <PlayerRowMetric stats={stats} overall={overall} type='intw_pct' />
         </div>
       </div>
     )
@@ -128,10 +116,10 @@ export default class PlayerRow extends React.Component {
     const passingAdvanced = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <PlayerRowMetric value={player.stats.pyac} type='pyac' />
-          <PlayerRowMetric value={player.stats.pyac_pc} type='pyac_pc' />
-          <PlayerRowMetric value={player.stats._ypa} type='_ypa' />
-          <PlayerRowMetric value={player.stats.pdot_pa} type='pdot_pa' />
+          <PlayerRowMetric stats={stats} overall={overall} type='pyac' />
+          <PlayerRowMetric stats={stats} overall={overall} type='pyac_pc' />
+          <PlayerRowMetric stats={stats} overall={overall} type='_ypa' />
+          <PlayerRowMetric stats={stats} overall={overall} type='pdot_pa' />
         </div>
       </div>
     )
@@ -139,10 +127,10 @@ export default class PlayerRow extends React.Component {
     const passingAiryards = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <PlayerRowMetric value={player.stats.ptay} type='ptay' />
-          <PlayerRowMetric value={player.stats.pcay_pc} type='pcay_pc' />
-          <PlayerRowMetric value={player.stats._aypa} type='_aypa' />
-          <PlayerRowMetric value={player.stats._pacr} type='_pacr' />
+          <PlayerRowMetric stats={stats} overall={overall} type='ptay' />
+          <PlayerRowMetric stats={stats} overall={overall} type='pcay_pc' />
+          <PlayerRowMetric stats={stats} overall={overall} type='_aypa' />
+          <PlayerRowMetric stats={stats} overall={overall} type='_pacr' />
         </div>
       </div>
     )
@@ -150,13 +138,13 @@ export default class PlayerRow extends React.Component {
     const passingPressure = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <PlayerRowMetric value={player.stats.sk} type='sk' />
-          <PlayerRowMetric value={player.stats.sky} type='sky' />
-          <PlayerRowMetric value={player.stats.sk_pct} type='sk_pct' />
-          <PlayerRowMetric value={player.stats.qbhi_pct} type='qbhi_pct' />
-          <PlayerRowMetric value={player.stats.qbp_pct} type='qbp_pct' />
-          <PlayerRowMetric value={player.stats.qbhu_pct} type='qbhu_pct' />
-          <PlayerRowMetric value={player.stats.sk_pct} type='sk_pct' />
+          <PlayerRowMetric stats={stats} overall={overall} type='sk' />
+          <PlayerRowMetric stats={stats} overall={overall} type='sky' />
+          <PlayerRowMetric stats={stats} overall={overall} type='sk_pct' />
+          <PlayerRowMetric stats={stats} overall={overall} type='qbhi_pct' />
+          <PlayerRowMetric stats={stats} overall={overall} type='qbp_pct' />
+          <PlayerRowMetric stats={stats} overall={overall} type='qbhu_pct' />
+          <PlayerRowMetric stats={stats} overall={overall} type='sk_pct' />
         </div>
       </div>
     )
@@ -164,9 +152,9 @@ export default class PlayerRow extends React.Component {
     const rushingBasic = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <PlayerRowMetric value={player.stats.ry} type='ry' />
-          <PlayerRowMetric value={player.stats.tdr} type='tdr' />
-          <PlayerRowMetric value={player.stats.ry_pra} type='ry_pra' />
+          <PlayerRowMetric stats={stats} overall={overall} type='ry' />
+          <PlayerRowMetric stats={stats} overall={overall} type='tdr' />
+          <PlayerRowMetric stats={stats} overall={overall} type='ry_pra' />
         </div>
       </div>
     )
@@ -174,9 +162,9 @@ export default class PlayerRow extends React.Component {
     const rushingProductivity = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <PlayerRowMetric value={player.stats.ra} type='ra' />
-          <PlayerRowMetric value={player.stats.rfd} type='rfd' />
-          <PlayerRowMetric value={player.stats.posra} type='posra' />
+          <PlayerRowMetric stats={stats} overall={overall} type='ra' />
+          <PlayerRowMetric stats={stats} overall={overall} type='rfd' />
+          <PlayerRowMetric stats={stats} overall={overall} type='posra' />
         </div>
       </div>
     )
@@ -184,8 +172,8 @@ export default class PlayerRow extends React.Component {
     const rushingAfterContact = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <PlayerRowMetric value={player.stats.ryaco} type='ryaco' />
-          <PlayerRowMetric value={player.stats.ryaco_pra} type='ryaco_pra' />
+          <PlayerRowMetric stats={stats} overall={overall} type='ryaco' />
+          <PlayerRowMetric stats={stats} overall={overall} type='ryaco_pra' />
         </div>
       </div>
     )
@@ -193,8 +181,8 @@ export default class PlayerRow extends React.Component {
     const rushingShare = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <PlayerRowMetric value={player.stats._stra} type='_stra' />
-          <PlayerRowMetric value={player.stats._stry} type='_stry' />
+          <PlayerRowMetric stats={stats} overall={overall} type='_stra' />
+          <PlayerRowMetric stats={stats} overall={overall} type='_stry' />
         </div>
       </div>
     )
@@ -202,9 +190,9 @@ export default class PlayerRow extends React.Component {
     const rushingAdvanced = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <PlayerRowMetric value={player.stats._fumlpra} type='_fumlpra' />
-          <PlayerRowMetric value={player.stats.posra_pra} type='posra_pra' />
-          <PlayerRowMetric value={player.stats.rasucc_pra} type='rasucc_pra' />
+          <PlayerRowMetric stats={stats} overall={overall} type='_fumlpra' />
+          <PlayerRowMetric stats={stats} overall={overall} type='posra_pra' />
+          <PlayerRowMetric stats={stats} overall={overall} type='rasucc_pra' />
         </div>
       </div>
     )
@@ -212,8 +200,8 @@ export default class PlayerRow extends React.Component {
     const rushingBrokenTackles = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <PlayerRowMetric value={player.stats.mbt} type='mbt' />
-          <PlayerRowMetric value={player.stats.mbt_pt} type='mbt_pt' />
+          <PlayerRowMetric stats={stats} overall={overall} type='mbt' />
+          <PlayerRowMetric stats={stats} overall={overall} type='mbt_pt' />
         </div>
       </div>
     )
@@ -221,11 +209,11 @@ export default class PlayerRow extends React.Component {
     const receivingBasic = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <PlayerRowMetric value={player.stats.rec} type='rec' />
-          <PlayerRowMetric value={player.stats.recy} type='recy' />
-          <PlayerRowMetric value={player.stats.tdrec} type='tdrec' />
-          <PlayerRowMetric value={player.stats.drp} type='drp' />
-          <PlayerRowMetric value={player.stats.drprecy} type='drprecy' />
+          <PlayerRowMetric stats={stats} overall={overall} type='rec' />
+          <PlayerRowMetric stats={stats} overall={overall} type='recy' />
+          <PlayerRowMetric stats={stats} overall={overall} type='tdrec' />
+          <PlayerRowMetric stats={stats} overall={overall} type='drp' />
+          <PlayerRowMetric stats={stats} overall={overall} type='drprecy' />
         </div>
       </div>
     )
@@ -233,12 +221,12 @@ export default class PlayerRow extends React.Component {
     const receivingOppurtunity = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <PlayerRowMetric value={player.stats.trg} type='trg' />
-          <PlayerRowMetric value={player.stats.dptrg_pct} type='dptrg_pct' />
-          <PlayerRowMetric value={player.stats.rdot_ptrg} type='rdot_ptrg' />
-          <PlayerRowMetric value={player.stats._strtay} type='_strtay' />
-          <PlayerRowMetric value={player.stats._sttrg} type='_sttrg' />
-          <PlayerRowMetric value={player.stats._wopr} type='_wopr' />
+          <PlayerRowMetric stats={stats} overall={overall} type='trg' />
+          <PlayerRowMetric stats={stats} overall={overall} type='dptrg_pct' />
+          <PlayerRowMetric stats={stats} overall={overall} type='rdot_ptrg' />
+          <PlayerRowMetric stats={stats} overall={overall} type='_strtay' />
+          <PlayerRowMetric stats={stats} overall={overall} type='_sttrg' />
+          <PlayerRowMetric stats={stats} overall={overall} type='_wopr' />
         </div>
       </div>
     )
@@ -246,145 +234,11 @@ export default class PlayerRow extends React.Component {
     const receivingAdvanced = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <PlayerRowMetric value={player.stats._ayptrg} type='_ayptrg' />
-          <PlayerRowMetric value={player.stats._recypay} type='_recypay' />
-          <PlayerRowMetric value={player.stats._recyprec} type='_recyprec' />
-          <PlayerRowMetric value={player.stats._recyptrg} type='_recyptrg' />
-          <PlayerRowMetric value={player.stats._ryacprec} type='_ryacprec' />
-        </div>
-      </div>
-    )
-
-    const projections = []
-    const years = []
-    if (isSelected) {
-      player.projections.forEach((p, index) => {
-        const isUser = !p.sourceid
-        const title = (isUser ? 'User' : <Source sourceId={p.sourceid} />)
-        const action = (
-          <div className='row__action'>
-            {isUser && <div onClick={this.handleClearClick}><Icon name='clear' /></div>}
-          </div>
-        )
-
-        const item = (
-          <PlayerExpandedRow
-            key={index}
-            stats={p}
-            title={title}
-            action={action}
-          />
-        )
-        projections.push(item)
-      })
-
-      const projAvg = weightProjections({
-        projections: player.projections.filter(p => !p.userid),
-        userId: 0
-      })
-
-      projections.push(
-        <PlayerExpandedRow
-          className='average__row'
-          key='average'
-          stats={projAvg}
-          title='Average'
-          action={(<div className='row__action' />)}
-        />
-      )
-
-      for (const year in stats.overall) {
-        const games = Object.keys(stats.years[year]).length
-        const p = stats.overall[year]
-        const item = (
-          <PlayerExpandedRow games={games} key={year} title={year} stats={p} />
-        )
-        years.push(item)
-      }
-
-      // TODO year average
-    }
-
-    const expanded = (
-      <div className='player__row-expanded'>
-        <div className='expanded__action' onClick={this.handleDeselectClick}>
-          <Icon name='clear' />
-        </div>
-        <div className='expanded__section'>
-          <div className='expanded__section-header'>
-            <div className='row__group-head'>
-              Season Projections
-            </div>
-          </div>
-          <div className='expanded__section-header'>
-            <div className='row__name'>Source</div>
-            <div className='row__group'>
-              <div className='row__group-head'>Passing</div>
-              <div className='row__group-body'>
-                <div className='player__row-metric'>YDS</div>
-                <div className='player__row-metric'>TD</div>
-                <div className='player__row-metric'>INT</div>
-              </div>
-            </div>
-            <div className='row__group'>
-              <div className='row__group-head'>Rushing</div>
-              <div className='row__group-body'>
-                <div className='player__row-metric'>CAR</div>
-                <div className='player__row-metric'>YDS</div>
-                <div className='player__row-metric'>TD</div>
-                <div className='player__row-metric'>FUM</div>
-              </div>
-            </div>
-            <div className='row__group'>
-              <div className='row__group-head'>Receiving</div>
-              <div className='row__group-body'>
-                <div className='player__row-metric'>TAR</div>
-                <div className='player__row-metric'>REC</div>
-                <div className='player__row-metric'>YDS</div>
-                <div className='player__row-metric'>TD</div>
-              </div>
-            </div>
-            <div className='row__action' />
-          </div>
-          {projections}
-        </div>
-        <div className='expanded__section'>
-          <div className='expanded__section-header'>
-            <div className='row__group-head'>
-              Season Stats
-            </div>
-          </div>
-          <div className='expanded__section-header'>
-            <div className='row__name'>Year</div>
-            <div className='row__games'>G</div>
-            <div className='row__group'>
-              <div className='row__group-head'>Passing</div>
-              <div className='row__group-body'>
-                <div className='player__row-metric'>YDS</div>
-                <div className='player__row-metric'>TD</div>
-                <div className='player__row-metric'>INT</div>
-              </div>
-            </div>
-            <div className='row__group'>
-              <div className='row__group-head'>Rushing</div>
-              <div className='row__group-body'>
-                <div className='player__row-metric'>CAR</div>
-                <div className='player__row-metric'>YDS</div>
-                <div className='player__row-metric'>TD</div>
-                <div className='player__row-metric'>FUM</div>
-              </div>
-            </div>
-            <div className='row__group'>
-              <div className='row__group-head'>Receiving</div>
-              <div className='row__group-body'>
-                <div className='player__row-metric'>TAR</div>
-                <div className='player__row-metric'>REC</div>
-                <div className='player__row-metric'>YDS</div>
-                <div className='player__row-metric'>TD</div>
-              </div>
-            </div>
-          </div>
-          {years}
+          <PlayerRowMetric stats={stats} overall={overall} type='_ayptrg' />
+          <PlayerRowMetric stats={stats} overall={overall} type='_recypay' />
+          <PlayerRowMetric stats={stats} overall={overall} type='_recyprec' />
+          <PlayerRowMetric stats={stats} overall={overall} type='_recyptrg' />
+          <PlayerRowMetric stats={stats} overall={overall} type='_ryacprec' />
         </div>
       </div>
     )
@@ -422,7 +276,6 @@ export default class PlayerRow extends React.Component {
             {isStatsReceivingView && receivingOppurtunity}
             {isStatsReceivingView && receivingAdvanced}
           </div>
-          {isSelected && expanded}
         </div>
       </div>
     )
