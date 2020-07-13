@@ -48,3 +48,5 @@
 - [https://mrcaseb.github.io/nflfastR/](https://mrcaseb.github.io/nflfastR/)
 - [https://pypi.org/project/nflgame-redux/](https://pypi.org/project/nflgame-redux/)
 - [https://github.com/maksimhorowitz/nflscrapR](https://github.com/maksimhorowitz/nflscrapR)
+
+<a href="https://armchairanalysis.com"><img src="https://armchairanalysis.com/img/poweredbyaa_tp.png" width="160" height="80" alt="NFL Stats provided by ArmchairAnalysis.com"></a>
