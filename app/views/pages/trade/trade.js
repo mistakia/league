@@ -44,6 +44,7 @@ export default function () {
       }
     }
     for (const pick of sendTeam.picks) {
+      if (pick.player) continue
       sPickItems.push(
         <TradePick
           key={pick.uid}
@@ -68,6 +69,7 @@ export default function () {
       }
     }
     for (const pick of receiveTeam.picks) {
+      if (pick.player) continue
       rPickItems.push(
         <TradePick
           key={pick.uid}
