@@ -2,7 +2,6 @@ import React from 'react'
 
 import Icon from '@components/icon'
 import EditableLeagueField from '@components/editable-league-field'
-import GenerateSchedule from '@components/generate-schedule'
 import { DEFAULT_LEAGUE_ID } from '@core/constants'
 
 import './editable-league.styl'
@@ -46,10 +45,6 @@ export default class EditableLeague extends React.Component {
         </div>
         {this.state.visible &&
           <div className='editable__league-body'>
-            {isCommish &&
-              <div className='editable__league-section'>
-                <GenerateSchedule leagueId={league.uid} />
-              </div>}
             <div className='editable__league-section'>
               <EditableLeagueField
                 field='name'
