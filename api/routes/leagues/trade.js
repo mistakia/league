@@ -1,3 +1,4 @@
+const API = require('groupme').Stateless
 const express = require('express')
 const router = express.Router({ mergeParams: true })
 const { constants, Roster, getEligibleSlots } = require('../../../common')
@@ -79,8 +80,8 @@ router.post('/accept', async (req, res, next) => {
       : []
 
     const playerRows = await db('trades_players').where({ tradeid: tradeId })
-    const receivePlayers = []
-    const sendPlayers = []
+    const receivePlayers = [] // from proposed team going to accepting team
+    const sendPlayers = [] // from accepting team going to proposed team
     for (const row of playerRows) {
       if (row.tid === trade.pid) {
         receivePlayers.push(row.player)
@@ -207,6 +208,40 @@ router.post('/accept', async (req, res, next) => {
       await db('draft')
         .update({ tid: pick.tid })
         .where({ uid: pick.pickid })
+    }
+
+    if (league.groupme_token && league.groupme_id) {
+      const teams = await db('teams').whereIn('uid', [trade.pid, trade.tid])
+      const proposingTeam = teams.find(t => t.uid === trade.pid)
+      const acceptingTeam = teams.find(t => t.uid === trade.tid)
+      const traded = []
+      const received = []
+      for (const playerId of receivePlayers) {
+        const player = players.find(p => p.player === playerId)
+        traded.push(`${player.fname} ${player.lname} (${player.pos1})`)
+      }
+      for (const playerId of sendPlayers) {
+        const player = players.find(p => p.player === playerId)
+        received.push(`${player.fname} ${player.lname} (${player.pos1})`)
+      }
+
+      const picks = await db('draft').whereIn('uid', pickRows.map(p => p.pickid))
+      for (const pick of picks) {
+        const pickNum = (pick.pick % league.nteams) || league.nteams
+        const pickStr = `${pick.year} ${pick.round}.${('0' + pickNum).slice(-2)}`
+        const pickTradeInfo = pickRows.find(p => p.pickid === pick.uid)
+        if (pickTradeInfo.tid === trade.pid) {
+          received.push(pickStr)
+        } else {
+          traded.push(pickStr)
+        }
+      }
+      const tradeStr = traded.slice(0, -1).join(', ') + ', and ' + traded.slice(-1)
+      const receiveStr = received.slice(0, -1).join(', ') + ', and ' + received.slice(-1)
+      const message = `${proposingTeam.name} has traded ${tradeStr} to ${acceptingTeam.name} in exchange for ${receiveStr}`
+      API.Bots.post(league.groupme_token, league.groupme_id, message, {}, (err) => logger(err))
+
+      // TODO drop message
     }
 
     next()
