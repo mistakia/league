@@ -1306,6 +1306,8 @@ CREATE TABLE `leagues` (
   `fuml` tinyint(1) NOT NULL,
   `ddate` int(11) DEFAULT NULL,
   `adate` int(11) DEFAULT NULL,
+  `groupme_token` varchar(45) DEFAULT NULL,
+  `groupme_id` varchar(26) DEFAULT NULL,
   UNIQUE KEY `uid` (`uid`),
   KEY `commishid` (`commishid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -1583,8 +1585,6 @@ CREATE TABLE `users` (
   `vbaseline` varchar(9) NOT NULL DEFAULT 'available',
   `watchlist` mediumtext,
   `lastvisit` datetime DEFAULT NULL,
-  `groupme_token` varchar(45) DEFAULT NULL,
-  `groupme_id` varchar(26) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
