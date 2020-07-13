@@ -27,7 +27,7 @@ router.put('/:leagueId', async (req, res) => {
       return res.status(400).send({ error: 'missing field' })
     }
 
-    if (!value) {
+    if (typeof value === 'undefined') {
       return res.status(400).send({ error: 'missing value' })
     }
 
