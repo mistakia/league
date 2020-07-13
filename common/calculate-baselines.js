@@ -54,7 +54,7 @@ const calculateBaselines = ({
     const base = rosterCounts[`s${position.toLowerCase()}`]
     bPlayers[position] = {
       starter: grouped[position].slice(base),
-      available: grouped[position].slice(base + (rosterCounts.bench / 4))
+      available: grouped[position].slice(base + (base * 0.6)) // TODO make editable
     }
   }
 
