@@ -57,11 +57,11 @@ export default class EditableLeague extends React.Component {
                 {...props}
               />
               <EditableLeagueField
-                  label='Number of Teams'
-                  field='nteams'
-                  type='int'
-                  {...props}
-                  />
+                label='Number of Teams'
+                field='nteams'
+                type='int'
+                {...props}
+              />
               <EditableLeagueField
                 label='FAAB Budget'
                 field='faab'
