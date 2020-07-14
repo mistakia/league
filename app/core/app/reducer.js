@@ -17,7 +17,7 @@ const initialState = new Record({
   vorpw: null,
   volsw: null,
   email: null,
-  vbaseline: 'available',
+  vbaseline: 'hybrid',
   teamIds: new List(),
   leagueIds: new List([DEFAULT_LEAGUE_ID])
 })
