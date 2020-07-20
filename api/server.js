@@ -60,12 +60,12 @@ if (options.ssl) {
   })
 }
 
+api.use('/api/*', expressJwt(config.jwt))
 api.use('/api/stats', routes.stats)
 api.use('/api/players', routes.players)
 api.use('/api/plays', routes.plays)
 api.use('/api/sources', routes.sources)
 api.use('/api/auth', routes.auth)
-api.use('/api/*', expressJwt(config.jwt))
 api.use('/api/*', (err, req, res, next) => {
   if (err.name === 'UnauthorizedError') {
     return res.status(401).send({ error: 'invalid token' })
