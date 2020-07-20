@@ -128,8 +128,8 @@ export default class PlayerRow extends React.Component {
       <div className='row__group'>
         <div className='row__group-body'>
           <PlayerRowMetric stats={stats} overall={overall} type='ptay' />
-          <PlayerRowMetric stats={stats} overall={overall} type='pcay_pc' />
           <PlayerRowMetric stats={stats} overall={overall} type='_aypa' />
+          <PlayerRowMetric stats={stats} overall={overall} type='pcay_pc' />
           <PlayerRowMetric stats={stats} overall={overall} type='_pacr' />
         </div>
       </div>
