@@ -33,7 +33,7 @@ const createDefaultLeague = ({ userId }) => ({
   tdr: 6,
   rec: 0.5,
   recy: 0.1,
-  twoptc: 0,
+  twoptc: 2,
   tdrec: 6,
   fuml: -1,
   ddate: null,
