@@ -13,6 +13,7 @@ const aliases = {
   'Dwayne Haskins Jr.': 'DH-1912',
   'Gardner Minshew II': 'GM-1350',
   'Henry Ruggs': 'HR-0200',
+  'Irv Smith': 'IS-0275',
   'KJ Hamler': 'KH-0250',
   'Marvin Jones Jr.': 'MJ-2250',
   'Michael Pittman Jr.': 'MP-1350',
