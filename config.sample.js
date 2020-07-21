@@ -8,6 +8,7 @@ module.exports = {
   url: 'https://example.com',
   nominationTimer: 30000,
   bidTimer: 15000,
+  pff: '', // cookies for pff
   jwt: {
     secret: 'xxxxx'
   },
