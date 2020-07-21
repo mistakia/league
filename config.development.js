@@ -7,6 +7,7 @@ module.exports = {
   url: 'http://localhost:1212',
   nominationTimer: 30000,
   bidTimer: 15000,
+  pff: '', // cookies for pff
   jwt: {
     secret: 'WajgVhpr4iCFjGq7rW'
   },
