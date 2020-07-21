@@ -29,7 +29,8 @@ const getRosterSlotCounts = ({
 
 const types = [
   'starter',
-  'available'
+  'available',
+  'average'
 ]
 
 const calculateBaselines = ({
@@ -54,6 +55,7 @@ const calculateBaselines = ({
     const base = rosterCounts[`s${position.toLowerCase()}`]
     bPlayers[position] = {
       starter: grouped[position].slice(base),
+      average: grouped[position].slice(base / 2),
       available: grouped[position].slice(base + (base * 0.6)) // TODO make editable
     }
   }

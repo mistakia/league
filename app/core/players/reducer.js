@@ -26,6 +26,7 @@ const initialState = new Map({
   view: 'seasproj',
   orderBy: 'vorp.hybrid',
   watchlist: new Set(),
+  baselines: new Map(),
   selected: null
 })
 
@@ -73,12 +74,17 @@ export function playersReducer (state = initialState, { payload, type }) {
     case playerActions.SET_PLAYER_VALUES:
       return state.withMutations(state => {
         state.set('isPending', false)
-        payload.players.forEach(playerData => {
-          state.mergeIn(['items', playerData.player], {
-            projection: new Map(playerData.projection),
-            points: new Map(playerData.points),
-            values: new Map(playerData.values),
-            vorp: new Map(playerData.vorp)
+        for (const b in payload.baselines) {
+          for (const type in payload.baselines[b]) {
+            state.setIn(['baselines', b, type], payload.baselines[b][type].player)
+          }
+        }
+        payload.values.forEach(p => {
+          state.mergeIn(['items', p.player], {
+            projection: new Map(p.projection),
+            points: new Map(p.points),
+            values: new Map(p.values),
+            vorp: new Map(p.vorp)
           })
         })
       })
@@ -139,8 +145,34 @@ export function playersReducer (state = initialState, { payload, type }) {
       })
 
     case appActions.AUTH_FULFILLED:
-      return state.merge({
-        orderBy: `vorp.${payload.data.user.vbaseline}`
+      return state.withMutations(players => {
+        players.merge({
+          orderBy: `vorp.${payload.data.user.vbaseline}`
+        })
+
+        if (payload.data.user.qbb) {
+          players.setIn(['baselines', 'QB', 'manual'], payload.data.user.qbb)
+        }
+
+        if (payload.data.user.rbb) {
+          players.setIn(['baselines', 'RB', 'manual'], payload.data.user.rbb)
+        }
+
+        if (payload.data.user.wrb) {
+          players.setIn(['baselines', 'WR', 'manual'], payload.data.user.wrb)
+        }
+
+        if (payload.data.user.teb) {
+          players.setIn(['baselines', 'TE', 'manual'], payload.data.user.teb)
+        }
+      })
+
+    case settingActions.SET_BASELINES:
+    case settingActions.PUT_BASELINES_FULFILLED:
+      return state.withMutations(players => {
+        for (const pos in payload.data) {
+          players.setIn(['baselines', pos, 'manual'], payload.data[pos])
+        }
       })
 
     case settingActions.SET_SETTING:

@@ -3,6 +3,7 @@ import React from 'react'
 import EditableLeague from '@components/editable-league'
 import EditableTeam from '@components/editable-team'
 import EditableSource from '@components/editable-source'
+import EditableBaseline from '@components/editable-baseline'
 import PageLayout from '@layouts/page'
 import EditableValue from '@components/editable-value'
 
@@ -10,7 +11,7 @@ import './settings.styl'
 
 export default class SettingsPage extends React.Component {
   render = () => {
-    const { leagueIds, teamIds, sourceIds } = this.props
+    const { leagueIds, teamIds, sourceIds, baselines, vbaseline } = this.props
 
     const leagueItems = []
     for (const leagueId of leagueIds) {
@@ -33,6 +34,11 @@ export default class SettingsPage extends React.Component {
       )
     }
 
+    const editableBaselines = []
+    for (const baseline in baselines) {
+      editableBaselines.push(<EditableBaseline key={baseline} position={baseline} />)
+    }
+
     const body = (
       <div className='settings'>
         {leagueItems}
@@ -45,8 +51,9 @@ export default class SettingsPage extends React.Component {
           <div className='settings__section-head'>Value Calculations</div>
           <EditableValue />
           <div className='settings__help'>
-            <p>The baseline used for value over replacement calculations. Best available will emphasize depth, whereas worst starter will emphasize the value of high-end starters. Hybrid allows for you to mix the two cacluations based on specified weights. Weights are relative and normalized, thus equal weight values are the same as each having a weight of 1.</p>
+            <p>The baseline used for value over replacement calculations. <strong>Best Available</strong> will emphasize depth, whereas <strong>Worst Starter</strong> will emphasize the value of high-end starters and even more so for <strong>Average Starter</strong>. <strong>Hybrid</strong> allows for you to mix <strong>Best Available</strong> and <strong>Worst Starter</strong> based on specified weights. There is no right answer but hybrid is the recommended approach. Weights are relative and normalized, thus equal weight values are the same as each having a weight of 1. <strong>Manual</strong> allows you to set the baseline for each position. Baselines are estimated when rosters are not full based on league settings, but will update live with each roster change.</p>
           </div>
+          {vbaseline !== 'hybrid' && editableBaselines}
           <div className='editable__league-section-title'>Projection Weights</div>
           <div className='settings__section-body'>{sourceItems}</div>
         </div>

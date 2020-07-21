@@ -98,6 +98,13 @@ export function getFilteredPlayers (state) {
   return sorted.toList()
 }
 
+export function getPlayersByPosition (state, { position }) {
+  const players = state.get('players')
+  const items = players.get('items')
+  const filtered = items.filter(p => p.pos1 === position)
+  return filtered.sort((a, b) => b.getIn(['points', 'total']) - a.getIn(['points', 'total'])).toList()
+}
+
 export function getRookiePlayers (state) {
   const players = state.get('players')
   const items = players.get('items')
