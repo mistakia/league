@@ -32,6 +32,6 @@ describe('API /me', function () {
     res.body.user.email.should.equal('test@email.com')
     res.body.teams.should.be.an('array')
     res.body.leagues.should.be.an('array')
-    res.body.weights.should.be.an('array')
+    res.body.sources.should.be.an('array')
   })
 })
