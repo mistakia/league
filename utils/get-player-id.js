@@ -6,16 +6,20 @@ const aliases = {
   'AJ Dillon': 'AD-1184',
   'Allen Robinson II': 'AR-1250',
   'Antonio Brown': 'AB-3500',
+  'Antonio Gibson': 'AG-0725',
   'Darrell Henderson Jr.': 'DH-2325',
   'DJ Chark Jr.': 'DC-1418',
-  'DK Metcalf': 'DM-2275',
+  'D.J. Chark Jr.': 'DC-1418',
   'DJ Moore': 'DM-2850',
+  'DK Metcalf': 'DM-2275',
+  'Duke Johnson Jr.': 'DJ-1850',
   'Dwayne Haskins Jr.': 'DH-1912',
   'Gardner Minshew II': 'GM-1350',
   'Henry Ruggs': 'HR-0200',
   'Irv Smith': 'IS-0275',
   'KJ Hamler': 'KH-0250',
   'Marvin Jones Jr.': 'MJ-2250',
+  'Melvin Gordon III': 'MG-1150',
   'Michael Pittman Jr.': 'MP-1350',
   'Mark Ingram II': 'MI-0100',
   'Odell Beckham': 'OB-0075',
@@ -24,6 +28,7 @@ const aliases = {
   'Steven Sims': 'SS-1537',
   'Todd Gurley II': 'TG-1950',
   'Will Fuller V': 'WF-0300',
+  'Willie Snead IV': 'WS-0925',
 
   'Arizona (ARI)': 'ARI',
   'Atlanta (ATL)': 'ATL',
@@ -59,37 +64,69 @@ const aliases = {
   'Washington (WAS)': 'WAS',
 
   '49ers D/ST': 'SF',
+  '49ers DST': 'SF',
   'Bears D/ST': 'CHI',
+  'Bears DST': 'CHI',
   'Bengals D/ST': 'CIN',
+  'Bengals DST': 'CIN',
   'Bills D/ST': 'BUF',
+  'Bills DST': 'BUF',
   'Broncos D/ST': 'DEN',
+  'Broncos DST': 'DEN',
   'Browns D/ST': 'CLE',
+  'Browns DST': 'CLE',
   'Buccaneers D/ST': 'TB',
+  'Buccaneers DST': 'TB',
   'Cardinals D/ST': 'ARI',
+  'Cardinals DST': 'ARI',
   'Chargers D/ST': 'LAC',
+  'Chargers DST': 'LAC',
   'Chiefs D/ST': 'KC',
+  'Chiefs DST': 'KC',
   'Colts D/ST': 'IND',
+  'Colts DST': 'IND',
   'Cowboys D/ST': 'DAL',
+  'Cowboys DST': 'DAL',
   'Dolphins D/ST': 'MIA',
+  'Dolphins DST': 'MIA',
   'Eagles D/ST': 'PHI',
+  'Eagles DST': 'PHI',
   'Falcons D/ST': 'ATL',
+  'Falcons DST': 'ATL',
   'Giants D/ST': 'NYG',
+  'Giants DST': 'NYG',
   'Jaguars D/ST': 'JAC',
+  'Jaguars DST': 'JAC',
   'Jets D/ST': 'NYJ',
+  'Jets DST': 'NYJ',
   'Lions D/ST': 'DET',
+  'Lions DST': 'DET',
   'Packers D/ST': 'GB',
+  'Packers DST': 'GB',
   'Panthers D/ST': 'CAR',
+  'Panthers DST': 'CAR',
   'Patriots D/ST': 'NE',
+  'Patriots DST': 'NE',
   'Raiders D/ST': 'LV',
+  'Raiders DST': 'LV',
   'Rams D/ST': 'LAR',
+  'Rams DST': 'LAR',
   'Ravens D/ST': 'BAL',
+  'Ravens DST': 'BAL',
   'Redskins D/ST': 'WAS',
+  'Redskins DST': 'WAS',
   'Saints D/ST': 'NO',
+  'Saints DST': 'NO',
   'Seahawks D/ST': 'SEA',
+  'Seahawks DST': 'SEA',
   'Steelers D/ST': 'PIT',
+  'Steelers DST': 'PIT',
   'Texans D/ST': 'HOU',
+  'Texans DST': 'HOU',
   'Titans D/ST': 'TEN',
-  'Vikings D/ST': 'MIN'
+  'Titans DST': 'TEN',
+  'Vikings D/ST': 'MIN',
+  'Vikings DST': 'MIN'
 
 }
 
@@ -99,6 +136,15 @@ const fixTeam = (team) => {
   switch (team) {
     case 'ARZ':
       return 'ARI'
+
+    case 'BLT':
+      return 'BAL'
+
+    case 'CLV':
+      return 'CLE'
+
+    case 'HST':
+      return 'HOU'
 
     case 'KCC':
       return 'KC'
