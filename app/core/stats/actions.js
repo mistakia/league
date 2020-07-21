@@ -16,10 +16,20 @@ export const statActions = {
 
   FILTER_STATS: 'FILTER_STATS',
 
+  UPDATE_QUALIFIER: 'UPDATE_QUALIFIER',
+
   setTeamStats: ({ overall }) => ({
     type: statActions.SET_TEAM_STATS,
     payload: {
       overall
+    }
+  }),
+
+  updateQualifier: ({ qualifier, value }) => ({
+    type: statActions.UPDATE_QUALIFIER,
+    payload: {
+      qualifier,
+      value
     }
   }),
 
