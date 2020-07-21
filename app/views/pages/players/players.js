@@ -16,6 +16,7 @@ import StatWeeksFilter from '@components/stat-weeks-filter'
 import StatDaysFilter from '@components/stat-days-filter'
 import StatQuartersFilter from '@components/stat-quarters-filter'
 import StatDownsFilter from '@components/stat-downs-filter'
+import StatQualifierFilter from '@components/stat-qualifier-filter'
 import HeaderStatsPassingBasic from '@components/header-stats-passing-basic'
 import HeaderStatsPassingEfficiency from '@components/header-stats-passing-efficiency'
 import HeaderStatsPassingAdvanced from '@components/header-stats-passing-advanced'
@@ -57,7 +58,7 @@ export default class PlayersPage extends React.Component {
     const {
       players, vbaseline, isSeasonProjectionView, isStatsView, isStatsPassingView,
       isStatsRushingView, isStatsReceivingView, isStatsPassingAdvancedView,
-      isStatsPassingPressureView, isPending
+      isStatsPassingPressureView, isPending, showQualifier
     } = this.props
 
     const Row = ({ index, key, parent, ...params }) => {
@@ -141,6 +142,7 @@ export default class PlayersPage extends React.Component {
           {isStatsView && <StatDaysFilter />}
           {isStatsView && <StatQuartersFilter />}
           {isStatsView && <StatDownsFilter />}
+          {(isStatsView && showQualifier) && <StatQualifierFilter />}
         </div>
         <div className='players__header'>
           <div className='player__row-action' />

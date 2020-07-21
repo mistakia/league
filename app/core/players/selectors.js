@@ -2,6 +2,7 @@ import { createSelector } from 'reselect'
 import moment from 'moment'
 import { constants, calculatePoints } from '@common'
 import { getApp } from '@core/app'
+import { getStats } from '@core/stats'
 import { Player } from './player'
 import { fuzzySearch } from '@core/utils'
 
@@ -39,6 +40,7 @@ function getComparator (order, orderBy) {
 }
 
 export function getFilteredPlayers (state) {
+  const { qualifiers } = getStats(state)
   const players = state.get('players')
   const items = players.get('items')
   const search = players.get('search')
@@ -86,6 +88,11 @@ export function getFilteredPlayers (state) {
     filtered = filtered.filter(player => fuzzySearch(search, player.name))
   }
 
+  const stat = players.get('orderBy').split('.').pop()
+  const qualifier = qualifiers.get(stat)
+  if (qualifier) {
+    filtered = filtered.filter(player => player.getIn(['stats', qualifier.type]) >= qualifier.value)
+  }
   const sorted = filtered.sort(getComparator(players.get('order'), players.get('orderBy')))
 
   return sorted.toList()

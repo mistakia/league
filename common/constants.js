@@ -159,6 +159,58 @@ export const fullStats = [
   ...stats
 ]
 
+const passingQualifier = {
+  type: 'pa',
+  value: 14
+}
+
+const rushingQualifier = {
+  type: 'ra',
+  value: 8
+}
+
+const receivingQualifier = {
+  type: 'trg',
+  value: 8
+}
+
+export const qualifiers = {
+  pc_pct: passingQualifier,
+  tdp_pct: passingQualifier,
+  ints_pct: passingQualifier,
+  psucc: passingQualifier,
+  intw_pct: passingQualifier,
+  pcay_pc: passingQualifier,
+  pyac_pc: passingQualifier,
+  _ypa: passingQualifier,
+  _aypa: passingQualifier,
+  _adjypa: passingQualifier,
+  _ypc: passingQualifier,
+  _pacr: passingQualifier,
+  _apacr: passingQualifier,
+  pdot_pa: passingQualifier,
+
+  recy_prec: receivingQualifier,
+  dptrg_pct: receivingQualifier,
+  rdot_ptrg: receivingQualifier,
+  _ayps: receivingQualifier,
+  _ayprec: receivingQualifier,
+  _ayptrg: receivingQualifier,
+  _recypay: receivingQualifier,
+  _recypsnp: receivingQualifier,
+  _recyprec: receivingQualifier,
+  _recyptrg: receivingQualifier,
+  _ryacprec: receivingQualifier,
+
+  ryaco_pra: rushingQualifier,
+  ry_pra: rushingQualifier,
+  rasucc: rushingQualifier,
+  mbt_pt: rushingQualifier,
+  _fumlpra: rushingQualifier,
+  rasucc_pra: rushingQualifier,
+  posra_pra: rushingQualifier
+}
+
 export const createFullStats = () => fullStats.reduce((o, key) => ({ ...o, [key]: 0 }), {})
 
 export const teamStats = [

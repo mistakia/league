@@ -8,7 +8,7 @@ const round = (value, precision) => {
 
 const toPct = (value) => value * 100
 
-const calculateStatsFromPlays = (plays) => {
+const calculateStatsFromPlays = ({ plays, qualifiers }) => {
   const players = {}
   const teams = {}
   const playerToTeam = {}
@@ -207,14 +207,24 @@ const calculateStatsFromPlays = (plays) => {
     // stats.fd_pct
     // stats.succ_psnp
     for (const stat in stats) {
+      const qualifier = qualifiers[stat]
       const value = stats[stat]
+      if (qualifier && stats[qualifier.type] < qualifier.value) continue
       if (value < overall[stat].min) overall[stat].min = value
       if (value > overall[stat].max) overall[stat].max = value
     }
   }
 
   for (const stat in constants.createFullStats()) {
-    const values = Object.values(players).map(item => item[stat]).filter(item => !!item)
+    const qualifier = qualifiers[stat]
+    const values = Object.values(players).map(item => {
+      if (qualifier) {
+        return item[qualifier.type] >= qualifier.value ? item[stat] : 0
+      } else {
+        return item[stat]
+      }
+    }).filter(item => !!item)
+
     const result = percentile([50, 75, 90, 95, 98, 99], values)
     overall[stat] = {
       p50: result[0],
