@@ -31,7 +31,6 @@ const run = async () => {
 
       const params = { name, team, pos }
       const data = {}
-      items.push({ params, data })
 
       // passing
       data.py = Math.round($(el).find('td').eq(3).text().trim()) || 0
@@ -50,6 +49,7 @@ const run = async () => {
 
       data.twoptc = Math.round($(el).find('td').eq(13).text().trim()) || 0
 
+      items.push({ params, data })
       lastProjection = parseFloat($(el).find('td').eq(15).text().trim())
     })
   }
