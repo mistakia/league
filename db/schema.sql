@@ -1585,6 +1585,10 @@ CREATE TABLE `users` (
   `vbaseline` varchar(9) NOT NULL DEFAULT 'available',
   `watchlist` mediumtext,
   `lastvisit` datetime DEFAULT NULL,
+  `qbb` varchar(7) DEFAULT NULL,
+  `rbb` varchar(7) DEFAULT NULL,
+  `wrb` varchar(7) DEFAULT NULL,
+  `teb` varchar(7) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 

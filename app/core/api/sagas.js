@@ -29,7 +29,7 @@ import {
 } from '@core/trade'
 import { putLeagueActions } from '@core/leagues'
 import { getSourcesActions, putSourceActions } from '@core/sources'
-import { putSettingActions } from '@core/settings'
+import { putSettingActions, putBaselinesActions } from '@core/settings'
 
 function * fetchAPI (apiFunction, actions, opts = {}) {
   const { token } = yield select(getApp)
@@ -92,5 +92,6 @@ export const putProjection = fetch.bind(null, api.putProjection, putProjectionAc
 export const delProjection = fetch.bind(null, api.delProjection, delProjectionActions)
 
 export const putSetting = fetch.bind(null, api.putSetting, putSettingActions)
+export const putBaselines = fetch.bind(null, api.putBaselines, putBaselinesActions)
 
 export const getTeamStats = fetch.bind(null, api.getTeamStats, getTeamStatActions)

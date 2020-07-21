@@ -12,8 +12,12 @@ export default class EditableValue extends React.Component {
     super(props)
 
     const { vbaseline, vorpw, volsw } = this.props.app
-
     this.state = { vbaseline, vorpw, volsw }
+  }
+
+  static getDerivedStateFromProps (props, state) {
+    const { vbaseline, vorpw, volsw } = props.app
+    return { vbaseline, vorpw, volsw }
   }
 
   handleChange = (event) => {
@@ -42,7 +46,9 @@ export default class EditableValue extends React.Component {
           >
             <MenuItem value='available'>Best Available</MenuItem>
             <MenuItem value='starter'>Worst Starter</MenuItem>
+            <MenuItem value='average'>Average Starter</MenuItem>
             <MenuItem value='hybrid'>Hybrid</MenuItem>
+            <MenuItem value='manual'>Manual</MenuItem>
           </Select>
         </FormControl>
         {vbaseline === 'hybrid' && weights}
