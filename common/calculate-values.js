@@ -23,7 +23,7 @@ const calculateValues = ({ players, baselines, vorpw, volsw, ...args }) => {
       manual: -99999
     }
     for (const type in baselines[pos1]) {
-      player.vorp[type] = player.points.total - baselines[pos1][type].points.total
+      player.vorp[type] = player.points.total - (baselines[pos1][type] ? baselines[pos1][type].points.total : 0)
       if (player.vorp[type] > 0) {
         total[type] = total[type] + player.vorp[type]
       }

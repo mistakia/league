@@ -76,7 +76,7 @@ export function playersReducer (state = initialState, { payload, type }) {
         state.set('isPending', false)
         for (const b in payload.baselines) {
           for (const type in payload.baselines[b]) {
-            state.setIn(['baselines', b, type], payload.baselines[b][type].player)
+            state.setIn(['baselines', b, type], payload.baselines[b][type] ? payload.baselines[b][type].player : null)
           }
         }
         payload.values.forEach(p => {
