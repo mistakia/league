@@ -26,7 +26,7 @@ export function calculatePlayerValues (payload) {
   // calculate worst starter baseline
   const baselines = calculateBaselines({ players, ...league })
   for (const pos in baselines) {
-    baselines[pos].manual = players.find(p => p.player === customBaselines[pos].manual)
+    if (customBaselines[pos]) baselines[pos].manual = players.find(p => p.player === customBaselines[pos].manual)
   }
   const values = calculateValues({ players, baselines, vorpw, volsw, ...league })
   return { baselines, values }
