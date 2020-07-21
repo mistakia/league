@@ -25,7 +25,7 @@ export function * filterPlays ({ payload }) {
 }
 
 export function * calculateStats () {
-  const { plays, weeks, days, quarters, downs } = yield select(getStats)
+  const { plays, weeks, days, quarters, downs, qualifiers } = yield select(getStats)
   const filtered = plays.filter(play => {
     if (!weeks.includes(play.wk)) return false
     if (!days.includes(play.day)) return false
@@ -34,7 +34,10 @@ export function * calculateStats () {
     return true
   })
   const worker = new Worker()
-  const result = yield call(worker.calculate, filtered.toJS())
+  const result = yield call(worker.calculate, {
+    plays: filtered.toJS(),
+    qualifiers: qualifiers.toJS()
+  })
   yield put(playerActions.setStats(result))
 }
 
@@ -65,6 +68,10 @@ export function * watchGetPlaysFulfilled () {
   yield takeLatest(statActions.GET_PLAYS_FULFILLED, calculateStats)
 }
 
+export function * watchUpdateQualifier () {
+  yield takeLatest(statActions.UPDATE_QUALIFIER, calculateStats)
+}
+
 export function * watchFilterStats () {
   yield takeLatest(statActions.FILTER_STATS, filterPlays)
 }
@@ -86,5 +93,6 @@ export const statSagas = [
   fork(watchGetPlaysFulfilled),
   fork(watchFilterStats),
   fork(watchPlayersSelectPlayer),
-  fork(watchGetTeamStatsFulfilled)
+  fork(watchGetTeamStatsFulfilled),
+  fork(watchUpdateQualifier)
 ]

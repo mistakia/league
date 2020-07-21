@@ -20,6 +20,7 @@ const mapStateToProps = createSelector(
     selected: pState.get('selected'),
     order: pState.get('order'),
     orderBy: pState.get('orderBy'),
+    showQualifier: !!stats.qualifiers.get(pState.get('orderBy').split('.').pop()),
     isSeasonProjectionView: pState.get('view') === 'seasproj',
     isStatsView: pState.get('view') === 'stats',
     isStatsPassingView: pState.get('view') === 'stats' && stats.view === 'passing',

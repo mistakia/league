@@ -1,4 +1,4 @@
-import { Record, List } from 'immutable'
+import { Record, List, Map } from 'immutable'
 
 import { statActions } from './actions'
 import { playerActions } from '@core/players'
@@ -8,6 +8,7 @@ const initialState = new Record({
   isPending: false,
   plays: new List(),
   teamStats: new List(),
+  qualifiers: new Map(constants.qualifiers),
   view: 'passing',
   passing: 'advanced',
   years: new List([constants.week ? constants.year : (constants.year - 1)]),
@@ -21,6 +22,9 @@ const initialState = new Record({
 
 export function statsReducer (state = initialState(), { payload, type }) {
   switch (type) {
+    case statActions.UPDATE_QUALIFIER:
+      return state.setIn(['qualifiers', payload.qualifier, 'value'], payload.value)
+
     case statActions.GET_PLAYS_PENDING:
       return state.merge({ isPending: true })
 

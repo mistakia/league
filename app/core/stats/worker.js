@@ -1,8 +1,8 @@
 import percentile from 'percentile'
 import { calculateStatsFromPlays, groupBy, constants } from '@common'
 
-export function calculate (plays) {
-  return calculateStatsFromPlays(plays)
+export function calculate (params) {
+  return calculateStatsFromPlays(params)
 }
 
 export function calculateTeam (teams) {
