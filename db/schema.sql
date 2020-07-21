@@ -1355,6 +1355,7 @@ CREATE TABLE `projections` (
   `recy` int(4) DEFAULT NULL,
   `tdrec` tinyint(2) DEFAULT NULL,
   `fuml` tinyint(2) DEFAULT NULL,
+  `twoptc` tinyint(2) DEFAULT NULL,
   `snp` int(4) DEFAULT NULL,
   `week` int(2) NOT NULL,
   `year` int(4) NOT NULL,
