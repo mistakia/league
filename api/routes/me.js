@@ -36,6 +36,34 @@ router.get('/?', async (req, res) => {
   }
 })
 
+router.put('/baselines', async (req, res) => {
+  const { db, logger } = req.app.locals
+  try {
+    const { userId } = req.user
+    const baselines = {
+      qbb: req.body.QB,
+      rbb: req.body.RB,
+      wrb: req.body.WR,
+      teb: req.body.TE
+    }
+
+    for (const b in baselines) {
+      if (!baselines[b]) {
+        return res.status(400).send({ error: `missing ${b} baseline param` })
+      }
+    }
+
+    await db('users')
+      .update(baselines)
+      .where({ id: userId })
+
+    res.send(req.body)
+  } catch (error) {
+    logger(error)
+    res.status(500).send({ error: error.toString() })
+  }
+})
+
 router.put('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {

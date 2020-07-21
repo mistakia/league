@@ -24,5 +24,6 @@ export {
   getPlays,
   postMatchups,
   getSources,
-  getTeamStats
+  getTeamStats,
+  putBaselines
 } from './sagas'

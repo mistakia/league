@@ -14,6 +14,8 @@ export const playerActions = {
   SET_PLAYER_VALUES: 'SET_PLAYER_VALUES',
   SET_PLAYER_STATS: 'SET_PLAYER_STATS',
 
+  UPDATE_PLAYER_BASELINE: 'UPDATE_PLAYER_BASELINE',
+
   FETCH_PLAYERS_FAILED: 'FETCH_PLAYERS_FAILED',
   FETCH_PLAYERS_FULFILLED: 'FETCH_PLAYERS_FULFILLED',
   FETCH_PLAYERS_PENDING: 'FETCH_PLAYERS_PENDING',
@@ -52,10 +54,11 @@ export const playerActions = {
     }
   }),
 
-  setValues: (players) => ({
+  setValues: ({ values, baselines }) => ({
     type: playerActions.SET_PLAYER_VALUES,
     payload: {
-      players
+      values,
+      baselines
     }
   }),
 
@@ -63,6 +66,14 @@ export const playerActions = {
     type: playerActions.SET_WATCHLIST,
     payload: {
       watchlist
+    }
+  }),
+
+  updateBaseline: ({ position, value }) => ({
+    type: playerActions.UPDATE_PLAYER_BASELINE,
+    payload: {
+      position,
+      value
     }
   }),
 

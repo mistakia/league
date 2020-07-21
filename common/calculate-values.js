@@ -4,7 +4,9 @@ const calculateValues = ({ players, baselines, vorpw, volsw, ...args }) => {
   const total = {
     available: 0,
     starter: 0,
-    hybrid: 0
+    average: 0,
+    hybrid: 0,
+    manual: 0
   }
 
   const weightAvailable = ((vorpw !== null) ? vorpw : 1) * 0.5
@@ -15,7 +17,10 @@ const calculateValues = ({ players, baselines, vorpw, volsw, ...args }) => {
     const { pos1 } = player
     player.vorp = {
       available: -99999,
-      starter: -99999
+      starter: -99999,
+      average: -99999,
+      hybrid: -99999,
+      manual: -99999
     }
     for (const type in baselines[pos1]) {
       player.vorp[type] = player.points.total - baselines[pos1][type].points.total

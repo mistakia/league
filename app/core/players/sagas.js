@@ -1,4 +1,4 @@
-import { fork, takeLatest, call, select, put } from 'redux-saga/effects'
+import { fork, takeLatest, call, select, put, putResolve } from 'redux-saga/effects'
 import AES from 'crypto-js/aes'
 import UTF8 from 'crypto-js/enc-utf8'
 
@@ -8,6 +8,7 @@ import { playerActions } from './actions'
 import { getAllPlayers, getPlayers } from './selectors'
 import { leagueActions, getCurrentLeague } from '@core/leagues'
 import { sourceActions, getSources } from '@core/sources'
+import { settingActions } from '@core/settings'
 import Worker from 'workerize-loader?inline!./worker' // eslint-disable-line import/no-webpack-loader-syntax
 
 export function * loadPlayers () {
@@ -19,12 +20,14 @@ export function * calculateValues () {
   const league = yield select(getCurrentLeague)
   const players = yield select(getAllPlayers)
   const sources = yield select(getSources)
+  const baselines = (yield select(getPlayers)).get('baselines').toJS()
 
   const worker = new Worker()
   const result = yield call(worker.calculatePlayerValues, {
     players: players.valueSeq().toJS(),
     league: league,
     sources: sources.toList().toJS(),
+    baselines,
     userId,
     vorpw,
     volsw
@@ -105,6 +108,19 @@ export function * putWatchlist ({ payload }) {
   yield call(putSetting, params)
 }
 
+export function * updateBaseline ({ payload }) {
+  const baselines = (yield select(getPlayers)).get('baselines').toJS()
+  const { vbaseline } = yield select(getApp)
+  const baseline = {}
+  for (const b in baselines) {
+    baseline[b] = baselines[b][vbaseline]
+  }
+
+  baseline[payload.position] = payload.value
+  yield putResolve(settingActions.updateBaselines(baseline))
+  yield put(settingActions.update({ type: 'vbaseline', value: 'manual' }))
+}
+
 //= ====================================
 //  WATCHERS
 // -------------------------------------
@@ -157,6 +173,10 @@ export function * watchInitApp () {
   yield takeLatest(appActions.INIT_APP, loadPlayers)
 }
 
+export function * watchUpdateBaseline () {
+  yield takeLatest(playerActions.UPDATE_PLAYER_BASELINE, updateBaseline)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -173,5 +193,6 @@ export const playerSagas = [
   fork(watchSetSource),
   fork(watchPutSourceFulfilled),
   fork(watchDeleteProjection),
-  fork(watchToggleWatchlist)
+  fork(watchToggleWatchlist),
+  fork(watchUpdateBaseline)
 ]
