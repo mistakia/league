@@ -18,11 +18,9 @@ export function * optimize () {
   const players = yield select(getAllPlayers)
   const { vbaseline } = yield select(getApp)
 
-  // TODO add signed players using signed value
-  // TODO adjust budget based on available cap
-  // TODO exclude unavailable players
+  // TODO add signed players and adjust constraints
 
-  const sortedPlayers = players.sort((a, b) => b.points.total - a.points.total)
+  const sortedPlayers = players.sort((a, b) => b.points.total - a.points.total) // TODO exclude unavailable players
   const sortedWatchlist = watchlist.sort((a, b) => b.points.total - a.points.total)
 
   const rosterConstraints = {}
@@ -39,7 +37,7 @@ export function * optimize () {
     .reduce((a, b) => a + b)
 
   const constraints = {
-    value: { max: auction.lineupBudget },
+    value: { max: auction.lineupBudget }, // TODO adjust budget based on available cap
     starter: { max: 0 }
   }
 

@@ -36,7 +36,7 @@ const calculateValues = ({ players, baselines, vorpw, volsw, ...args }) => {
 
   const { nteams, cap } = args
   const rosterSize = getRosterSize(args)
-  const leagueCap = (nteams * cap) - (nteams * rosterSize)
+  const leagueCap = (nteams * cap) - (nteams * rosterSize) // TODO use league live cap
   const rate = {}
   for (const type in total) {
     rate[type] = leagueCap / total[type]

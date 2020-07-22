@@ -14,6 +14,8 @@ const initialState = new Map({
   search: null,
   positions: new List(['QB', 'RB', 'WR', 'TE', 'K', 'DST']),
   nflTeams: new List(constants.nflTeams),
+  colleges: new List(constants.colleges),
+  collegeDivisions: new List(constants.collegeDivisions),
   experience: new List([0, 1, -1]),
   health: new List(['ir', 'healthy']),
   teams: new List(),
@@ -131,8 +133,6 @@ export function playersReducer (state = initialState, { payload, type }) {
         const distinctAges = Array.from(new Set(ages)).sort((a, b) => a - b)
         players.set('age', new List(distinctAges))
         players.set('allAges', new List(distinctAges))
-
-        // TODO - get colleges
 
         payload.data.forEach(playerData => {
           players.setIn(['items', playerData.player], createPlayer(playerData))
