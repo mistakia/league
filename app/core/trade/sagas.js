@@ -7,6 +7,7 @@ import {
   postProposeTrade,
   postAcceptTrade,
   postCancelTrade,
+  postRejectTrade,
   getTrades
 } from '@core/api'
 
@@ -39,6 +40,12 @@ export function * cancel () {
   yield call(postCancelTrade, { leagueId, tradeId: selectedTradeId })
 }
 
+export function * reject () {
+  const { selectedTradeId } = yield select(getTrade)
+  const { leagueId } = yield select(getApp)
+  yield call(postRejectTrade, { leagueId, tradeId: selectedTradeId })
+}
+
 export function * accept () {
   const { teamId, leagueId } = yield select(getApp)
   const { selectedTradeId } = yield select(getTrade)
@@ -67,6 +74,10 @@ export function * watchAcceptTrade () {
   yield takeLatest(tradeActions.ACCEPT_TRADE, accept)
 }
 
+export function * watchRejectTrade () {
+  yield takeLatest(tradeActions.REJECT_TRADE, reject)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -75,5 +86,6 @@ export const tradeSagas = [
   fork(watchProposeTrade),
   fork(watchLoadTrades),
   fork(watchCancelTrade),
-  fork(watchAcceptTrade)
+  fork(watchAcceptTrade),
+  fork(watchRejectTrade)
 ]

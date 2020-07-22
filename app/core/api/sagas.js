@@ -25,6 +25,7 @@ import {
   postTradeProposeActions,
   postTradeAcceptActions,
   postTradeCancelActions,
+  postTradeRejectActions,
   getTradesActions
 } from '@core/trade'
 import { putLeagueActions } from '@core/leagues'
@@ -80,6 +81,7 @@ export const getTrades = fetch.bind(null, api.getTrades, getTradesActions)
 
 export const postCancelTrade = fetch.bind(null, api.postCancelTrade, postTradeCancelActions)
 export const postAcceptTrade = fetch.bind(null, api.postAcceptTrade, postTradeAcceptActions)
+export const postRejectTrade = fetch.bind(null, api.postRejectTrade, postTradeRejectActions)
 
 export const putLeague = fetch.bind(null, api.putLeague, putLeagueActions)
 

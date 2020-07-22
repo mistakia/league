@@ -10,6 +10,7 @@ export const tradeActions = {
   PROPOSE_TRADE: 'PROPOSE_TRADE',
   ACCEPT_TRADE: 'ACCEPT_TRADE',
   CANCEL_TRADE: 'CANCEL_TRADE',
+  REJECT_TRADE: 'REJECT_TRADE',
 
   POST_TRADE_PROPOSE_FAILED: 'POST_TRADE_PROPOSE_FAILED',
   POST_TRADE_PROPOSE_PENDING: 'POST_TRADE_PROPOSE_PENDING',
@@ -22,6 +23,10 @@ export const tradeActions = {
   POST_TRADE_ACCEPT_FAILED: 'POST_TRADE_ACCEPT_FAILED',
   POST_TRADE_ACCEPT_PENDING: 'POST_TRADE_ACCEPT_PENDING',
   POST_TRADE_ACCEPT_FULFILLED: 'POST_TRADE_ACCEPT_FULFILLED',
+
+  POST_TRADE_REJECT_FAILED: 'POST_TRADE_REJECT_FAILED',
+  POST_TRADE_REJECT_PENDING: 'POST_TRADE_REJECT_PENDING',
+  POST_TRADE_REJECT_FULFILLED: 'POST_TRADE_REJECT_FULFILLED',
 
   LOAD_TRADES: 'LOAD_TRADES',
 
@@ -53,6 +58,10 @@ export const tradeActions = {
 
   cancel: () => ({
     type: tradeActions.CANCEL_TRADE
+  }),
+
+  reject: () => ({
+    type: tradeActions.REJECT_TRADE
   }),
 
   toggleDropPlayer: (player) => ({
@@ -184,6 +193,29 @@ export const tradeActions = {
       opts,
       data
     }
+  }),
+
+  postTradeRejectFailed: (opts, error) => ({
+    type: tradeActions.POST_TRADE_REJECT_FAILED,
+    payload: {
+      opts,
+      error
+    }
+  }),
+
+  postTradeRejectPending: (opts) => ({
+    type: tradeActions.POST_TRADE_REJECT_PENDING,
+    payload: {
+      opts
+    }
+  }),
+
+  postTradeRejectFulfilled: (opts, data) => ({
+    type: tradeActions.POST_TRADE_ACCEPT_FULFILLED,
+    payload: {
+      opts,
+      data
+    }
   })
 }
 
@@ -209,4 +241,10 @@ export const postTradeCancelActions = {
   failed: tradeActions.postTradeCancelFailed,
   pending: tradeActions.postTradeCancelPending,
   fulfilled: tradeActions.postTradeCancelFulfilled
+}
+
+export const postTradeRejectActions = {
+  failed: tradeActions.postTradeRejectFailed,
+  pending: tradeActions.postTradeRejectPending,
+  fulfilled: tradeActions.postTradeRejectFulfilled
 }

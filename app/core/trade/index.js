@@ -4,7 +4,8 @@ export {
   postTradeProposeActions,
   getTradesActions,
   postTradeAcceptActions,
-  postTradeCancelActions
+  postTradeCancelActions,
+  postTradeRejectActions
 } from './actions'
 export {
   getTradeSelectedTeamRoster,
