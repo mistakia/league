@@ -9,7 +9,8 @@ module.exports = {
   bidTimer: 15000,
   pff: '', // cookies for pff
   jwt: {
-    secret: 'WajgVhpr4iCFjGq7rW'
+    secret: 'WajgVhpr4iCFjGq7rW',
+    credentialsRequired: false
   },
   mysql: {
     client: 'mysql',
