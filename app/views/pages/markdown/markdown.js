@@ -5,23 +5,23 @@ import marked from 'marked'
 import { DOCS_URL } from '@core/constants'
 import PageLayout from '@layouts/page'
 
-import './resources.styl'
+import './markdown.styl'
 
-export default class ResourcesPage extends React.Component {
+export default class MarkdownPage extends React.Component {
   constructor (props) {
     super(props)
 
     this.state = { html: null }
   }
 
-  componentDidMount = () => {
-    fetch(`${DOCS_URL}/resources.md`)
+  _load () {
+    fetch(`${DOCS_URL}${this.props.path}`)
       .then((response) => {
         if (response.status >= 200 && response.status < 300) {
           return response
         } else {
           const html = (
-            <div className='resources'>Failed to Load</div>
+            <div className='markdown'>Failed to Load</div>
           )
           this.setState({ html })
           const error = new Error(response.statusText)
@@ -40,12 +40,22 @@ export default class ResourcesPage extends React.Component {
         }
         const markdown = marked(content, { renderer })
         const html = (
-          <div className='resources' dangerouslySetInnerHTML={{ __html: markdown }} />
+          <div className='markdown' dangerouslySetInnerHTML={{ __html: markdown }} />
         )
         this.setState({ html })
       }).catch((error) => {
         console.log(error)
       })
+  }
+
+  componentDidUpdate = (prevProps) => {
+    if (prevProps.path === this.props.path) return
+
+    this._load()
+  }
+
+  componentDidMount = () => {
+    this._load()
   }
 
   render = () => {

@@ -189,6 +189,11 @@ export const qualifiers = {
   _pacr: passingQualifier,
   _apacr: passingQualifier,
   pdot_pa: passingQualifier,
+  sk_pct: passingQualifier,
+  qbhi_pct: passingQualifier,
+  qbp_pct: passingQualifier,
+  qbhu_pct: passingQualifier,
+  _nygpa: passingQualifier,
 
   recy_prec: receivingQualifier,
   dptrg_pct: receivingQualifier,

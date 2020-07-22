@@ -144,7 +144,7 @@ export default class PlayerRow extends React.Component {
           <PlayerRowMetric stats={stats} overall={overall} type='qbhi_pct' />
           <PlayerRowMetric stats={stats} overall={overall} type='qbp_pct' />
           <PlayerRowMetric stats={stats} overall={overall} type='qbhu_pct' />
-          <PlayerRowMetric stats={stats} overall={overall} type='sk_pct' />
+          <PlayerRowMetric stats={stats} overall={overall} type='_nygpa' />
         </div>
       </div>
     )
