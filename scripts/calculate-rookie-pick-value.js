@@ -90,6 +90,8 @@ if (!module.parent) {
     } catch (e) {
       console.log(e)
     }
+
+    process.exit()
   }
 
   main()

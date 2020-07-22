@@ -1,3 +1,6 @@
+// eslint-disable-next-line
+require = require('esm')(module /*, options*/)
+
 const debug = require('debug')
 const chalk = require('chalk')
 const argv = require('yargs').argv
