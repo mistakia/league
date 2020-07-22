@@ -18,6 +18,7 @@ const Menu = ({ app }) => (
     {(app.userId && !week) && <NavLink to='/auction'>Auction</NavLink>}
     <NavLink to='/settings'>Settings</NavLink>
     <NavLink to='/resources'>Resources</NavLink>
+    <NavLink to='/glossary'>Glossary</NavLink>
     {!app.userId && <NavLink to='/login'>Login/Register</NavLink>}
   </div>
 )

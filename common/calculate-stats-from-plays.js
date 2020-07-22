@@ -130,7 +130,7 @@ const calculateStatsFromPlays = ({ plays, qualifiers }) => {
           }
         } else if (play.sk1) {
           addStat(play.psr, 'sk', 1)
-          addStat(play.psr, 'sky', play.yds)
+          addStat(play.psr, 'sky', Math.abs(play.yds))
         } else {
           addStat(play.psr, 'pa', 1)
         }
@@ -196,7 +196,7 @@ const calculateStatsFromPlays = ({ plays, qualifiers }) => {
     stats.ry_pra = round(stats.ry / stats.ra, 1) || 0
     stats.ryaco_pra = round(stats.ryaco / stats.ra, 1) || 0
 
-    stats.mbt_pt = round(toPct(stats.mbt / (stats.ra + stats.rec)), 1) || 0
+    stats.mbt_pt = round(stats.mbt / stats._tch, 1) || 0
     stats._fumlpra = round(toPct(stats.fuml / stats.ra), 1) || 0
     stats.rasucc_pra = round(toPct(stats.rasucc / stats.ra), 1) || 0
     stats.posra_pra = round(toPct(stats.posra / stats.ra), 1) || 0

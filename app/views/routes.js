@@ -14,7 +14,7 @@ import LineupsPage from '@pages/lineups'
 import LeaguePage from '@pages/league'
 import TradePage from '@pages/trade'
 import SettingsPage from '@pages/settings'
-import ResourcesPage from '@pages/resources'
+import MarkdownPage from '@pages/markdown'
 
 const mapStateToProps = createSelector(
   getApp,
@@ -46,7 +46,18 @@ const Routes = ({ app, location }) => {
       {!app.userId && <Route exact path='/login' component={AuthPage} />}
       {app.userId && <Route path='/league' component={LeaguePage} />}
       <Route path='/settings' component={SettingsPage} />
-      <Route path='/resources' component={ResourcesPage} />
+      <Route
+        path='/resources'
+        render={(props) => (
+          <MarkdownPage {...props} path='/resources.md' />
+        )}
+      />
+      <Route
+        path='/glossary'
+        render={(props) => (
+          <MarkdownPage {...props} path='/glossary.md' />
+        )}
+      />
       <Route path='*' component={redirect} />
     </Switch>
   )

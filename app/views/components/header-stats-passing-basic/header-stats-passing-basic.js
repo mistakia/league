@@ -8,7 +8,7 @@ const HeaderStatsPassingBasic = () => (
       <PlayerHeader className='player__row-metric' label='YDS' value='stats.py' />
       <PlayerHeader className='player__row-metric' label='TD' value='stats.tdp' />
       <PlayerHeader className='player__row-metric' label='INT' value='stats.ints' />
-      <PlayerHeader className='player__row-metric' label='DYDS' value='stats.drppy' />
+      <PlayerHeader className='player__row-metric' label='DAY' value='stats.drppy' />
     </div>
   </div>
 )
