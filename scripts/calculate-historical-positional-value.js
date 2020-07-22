@@ -3,7 +3,7 @@ require = require('esm')(module /*, options*/)
 const regression = require('regression')
 const { Table } = require('console-table-printer')
 
-const { groupBy } = require('../utils')
+const { groupBy } = require('../common')
 const calculateVOR = require('./calculate-vor')
 
 const LATEST_YEAR = 2019
@@ -96,6 +96,7 @@ if (!module.parent) {
     }
 
     p.printTable()
+    process.exit()
   }
 
   main()
