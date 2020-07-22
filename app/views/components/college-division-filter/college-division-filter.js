@@ -1,0 +1,26 @@
+import React from 'react'
+
+import { constants } from '@common'
+import PlayerFilter from '@components/player-filter'
+
+export default class CollegeDivisionFilter extends React.Component {
+  render () {
+    const state = {
+      type: 'collegeDivisions',
+      label: 'COLLEGE DIVS',
+      values: []
+    }
+
+    for (const division of constants.collegeDivisions) {
+      state.values.push({
+        label: division,
+        value: division,
+        selected: this.props.collegeDivisions.includes(division)
+      })
+    }
+
+    return (
+      <PlayerFilter {...state} />
+    )
+  }
+}
