@@ -23,11 +23,11 @@ export default class TradeMenu extends React.Component {
 
     return (
       <div className='trade__menu'>
-        <div className='trade__menu-head'>Proposals</div>
+        <div className='trade__menu-head'>Offers</div>
         <div className='trade__menu-body empty'>
           {selectedTradeId &&
             <div onClick={() => select()} className='trade__menu-item'>
-              New Trade Proposal
+              New Trade Offer
             </div>}
           {menuItems}
         </div>

@@ -164,9 +164,14 @@ export default function () {
     }
   } else {
     if (isProposer) {
-      action = (<Button onClick={this.handleCancelClick}>Cancel Proposal</Button>)
+      action = (<Button onClick={this.handleCancelClick}>Cancel Offer</Button>)
     } else {
-      action = (<Button onClick={this.handleAcceptClick}>Accept Proposal</Button>)
+      action = (
+        <div>
+          <Button onClick={this.handleAcceptClick}>Accept Offer</Button>
+          <Button onClick={this.handleRejectClick}>Reject Offer</Button>
+        </div>
+      )
     }
   }
 
