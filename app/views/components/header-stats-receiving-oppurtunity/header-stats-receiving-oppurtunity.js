@@ -7,7 +7,7 @@ const HeaderStatsReceivingOppurtunity = () => (
     <div className='player__row-group-body'>
       <PlayerHeader className='player__row-metric' label='TAR' value='stats.trg' />
       <PlayerHeader className='player__row-metric' label='DEEP%' value='stats.dptrg_pct' />
-      <PlayerHeader className='player__row-metric' label='ADOT' value='stats.rdot_ptrg' />
+      <PlayerHeader className='player__row-metric' label='DOT' value='stats.rdot_ptrg' />
       <PlayerHeader className='player__row-metric' label='AY%' value='stats._strtay' />
       <PlayerHeader className='player__row-metric' label='TAR%' value='stats._sttrg' />
       <PlayerHeader className='player__row-metric' label='WOPR' value='stats._wopr' />
