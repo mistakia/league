@@ -17,6 +17,9 @@ import StatDaysFilter from '@components/stat-days-filter'
 import StatQuartersFilter from '@components/stat-quarters-filter'
 import StatDownsFilter from '@components/stat-downs-filter'
 import StatQualifierFilter from '@components/stat-qualifier-filter'
+import CollegeFilter from '@components/college-filter'
+import CollegeDivisionFilter from '@components/college-division-filter'
+import NFLTeamsFilter from '@components/nfl-teams-filter'
 import HeaderStatsPassingBasic from '@components/header-stats-passing-basic'
 import HeaderStatsPassingEfficiency from '@components/header-stats-passing-efficiency'
 import HeaderStatsPassingAdvanced from '@components/header-stats-passing-advanced'
@@ -33,6 +36,7 @@ import HeaderStatsReceivingOppurtunity from '@components/header-stats-receiving-
 import HeaderStatsReceivingAdvanced from '@components/header-stats-receiving-advanced'
 import SelectedPlayer from '@components/selected-player'
 import Loading from '@components/loading'
+import Icon from '@components/icon'
 
 import './players.styl'
 
@@ -40,6 +44,16 @@ const ROW_HEIGHT = 30
 
 export default class PlayersPage extends React.Component {
   list = React.createRef()
+
+  constructor (props) {
+    super(props)
+
+    this.state = { expanded: false }
+  }
+
+  handleClick = (event) => {
+    this.setState({ expanded: !this.state.expanded })
+  }
 
   componentDidUpdate = (prevProps) => {
     if (!this.list.current) return
@@ -127,9 +141,12 @@ export default class PlayersPage extends React.Component {
       </div>
     )
 
+    const classNames = ['players__filter']
+    if (this.state.expanded) classNames.push('expanded')
+
     const head = (
       <div className='players__head'>
-        <div className='players__filter'>
+        <div className={classNames.join(' ')}>
           <SearchFilter search={this.props.search} value={this.props.searchValue} />
           <PositionFilter />
           <ExperienceFilter />
@@ -143,7 +160,16 @@ export default class PlayersPage extends React.Component {
           {isStatsView && <StatQuartersFilter />}
           {isStatsView && <StatDownsFilter />}
           {(isStatsView && showQualifier) && <StatQualifierFilter />}
+          <div className='players__head-expand' onClick={this.handleClick}>
+            <Icon className='players__head-icon' name='arrow-down' />
+          </div>
         </div>
+        {this.state.expanded &&
+          <div className='players__filter'>
+            <NFLTeamsFilter />
+            <CollegeFilter />
+            <CollegeDivisionFilter />
+          </div>}
         <div className='players__header'>
           <div className='player__row-action' />
           <div className='player__row-pos' />

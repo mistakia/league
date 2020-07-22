@@ -74,6 +74,16 @@ export function getFilteredPlayers (state) {
     filtered = filtered.filter(player => nflTeams.includes(player.team))
   }
 
+  const colleges = players.get('colleges')
+  if (colleges.size !== constants.colleges.length) {
+    filtered = filtered.filter(player => colleges.includes(player.college))
+  }
+
+  const collegeDivisions = players.get('collegeDivisions')
+  if (collegeDivisions.size !== constants.collegeDivisions.length) {
+    filtered = filtered.filter(player => collegeDivisions.includes(player.college_division))
+  }
+
   const age = players.get('age')
   const allAges = players.get('allAges')
   if (age.size !== allAges.size) {

@@ -5,6 +5,8 @@ import {
   calculateValues
 } from '@common'
 
+// TODO calculate based on weekly projections
+
 export function calculatePlayerValues (payload) {
   const { userId, vorpw, volsw, league, players } = payload
   const customBaselines = payload.baselines
@@ -23,7 +25,7 @@ export function calculatePlayerValues (payload) {
     player.points = calculatePoints({ stats: projection, ...league })
   }
 
-  // calculate worst starter baseline
+  // calculate baseline by position
   const baselines = calculateBaselines({ players, ...league })
   for (const pos in baselines) {
     if (customBaselines[pos]) baselines[pos].manual = players.find(p => p.player === customBaselines[pos].manual)

@@ -47,6 +47,9 @@ const calculateBaselines = ({
     grouped[position] = data.filter(p => p.pos1 === position)
   }
 
+  // TODO split players up into two pools: available / rostered
+  // fill rostered pool if needed, put remaining in available
+
   const rosterCounts = getRosterSlotCounts(args)
 
   // baseline players
