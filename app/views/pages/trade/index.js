@@ -29,6 +29,7 @@ class TradePage extends React.Component {
   handleReceivePickClick = (pick) => this.props.toggleReceivePick(pick)
   handleProposeClick = () => this.props.propose()
   handleAcceptClick = () => this.props.accept()
+  handleRejectClick = () => this.props.reject()
   handleCancelClick = () => this.props.cancel()
 
   render = () => {
@@ -62,6 +63,7 @@ const mapDispatchToProps = {
   loadRosters: rosterActions.loadRosters,
   load: tradeActions.load,
   accept: tradeActions.accept,
+  reject: tradeActions.reject,
   cancel: tradeActions.cancel,
   toggleDropPlayer: tradeActions.toggleDropPlayer,
   toggleSendPlayer: tradeActions.toggleSendPlayer,
