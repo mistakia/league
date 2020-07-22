@@ -12,7 +12,7 @@
 | ETD | Expected Touchdowns | The  total number of touchdowns the average NFL player would expect to score based on the field position and game situation of every pass attempt, touch, and target | Planned | 2000
 | ETDD | Expected Touchdown Differential | The difference between expected and actual touchdowns scored. Positive values indicate a player touchdown exceeded expectations due to efficiency and good fortune. Negative values indicate a player underperformed touchdown expectations due to inefficient play and bad luck. | Planned | 2000
 | EY | Expected Yards | todo | Planned | 2000
-| FLR | Floor Projection | Projected downside, calcualted as the 10th percentile of a players's projected points across analysts. | Planned | 2020
+| FLR | Floor Projection | Projected downside, calcualted as the 10th percentile of a playerss projected points across analysts. | Planned | 2020
 | GM | Games Missed | Number of games missed due to injury | Planned | 2015
 | HEAL | Days Healthy | days since last injury designation | Planned | 2020
 | HEAL% | Healthy Rate | todo | Planned | 2020
@@ -48,7 +48,7 @@
 | DB | Dropbacks | the number of times the QB dropped back to pass | Planned | 2000
 | DBP% | Dropback Pressure Rate | Percentage of dropbacks when under pressure | Planned | 2019
 | DTD | Dropped Touchdowns | Passing attempts that would have resulted in a touchdown but were dropped by the receiver | Planned | 2019
-| DOT | Depth of Target | Average depth of each of the quarterback's pass attempts | Available | 2019
+| DOT | Depth of Target | Average depth of each of the quarterbacks pass attempts | Available | 2019
 | DEEP% | Deep Rate | Percentage of passing attempts that travel 20 yards or farther down the line of scrimmage | Planned | 2019
 | aDCOMP% | Adjusted Deep Completion Rate | Percentage of deep passing attempts completed | Planned | 2000
 | FP/A | Fantasy Points Per Attempt | Fantasy points generated per passing attempt | Planned | 2000
@@ -65,7 +65,7 @@
 | PCOMP% | Pressured Completion Rate | Completion percentage on pressured passing attempts | Planned | 2019
 | PPE | Pass Points Earned | todo | Planned | 2000
 | RIGHT% | Right Rate | Percentage of throws to the right of the hashmarks | Planned | 2006
-| RQBR | Receiver QB Rating | The quarterback's traditional Passer Rating on throws when targeting the receiver. | Planned | 2000
+| RQBR | Receiver QB Rating | The quarterbacks traditional Passer Rating on throws when targeting the receiver. | Planned | 2000
 | SHT% | Short Rate | Percentage of throws where the depth of target is under 10 yards | Planned | 2020
 | SKY | Sack Yards | Total yards lost on sacks | Available | 2000
 | SUCC% | Success Rate | Percentage of passing plays deemed 'Successful': 40% of yards-to-go are gained on 1st down; 60% of yards-to-go on 2nd down; or 100% of yards-to-go on 3rd & 4th down. The formula changes slightly in the 4th quarter of close games. | Planned | 2000
@@ -167,7 +167,7 @@
 ## Defense
 | Abbrev | Name | Description | Status | Since
 | --- | --- | --- | --- | --- |
-| BR | Burn Rate | Percentage of targets allowed in which the defensive back’s assigned receiver gained more than 5 yards of downfield separation | Planned | 2020
+| BR | Burn Rate | Percentage of targets allowed in which the defensive backs assigned receiver gained more than 5 yards of downfield separation | Planned | 2020
 | COVR | Coverage Rating | Cornerback efficiency metric incorporating target rate, pass break-ups, catch rate allowed, and fantasy points allowed per snap. | Planned | 2020
 | SEP | Seperation | Average Distance in yards to the receiver at the time the ball reaches the pass target. | Planned | 2020
 
