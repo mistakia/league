@@ -1,4 +1,3 @@
-# Statistics
 ## General
 | Abbrev | Name | Description | Status | Since
 | --- | --- | --- | --- | --- |
@@ -107,12 +106,24 @@
 | YACO | Yards After Contact | Yards gained by running back after contact and beyond what was blocked. Yards are accrued after the running back's first evaded tackle. | Available | 2019
 | YACO/A | Yards After Contact per Attempt | Yards after contact per rushing attempt | Available | 2019
 
+
 **Base Front**: seven defenders in the box. The width of the box is the distance between the outer shoulder of right and the outer shoulder of the left tackle. The depth of the box is six yards from the line of scrimmage.
+
+
 **Stacked Front**: eight or more defenders in the box.
+
+
 **Light Front**: six or less defenders in the box.
+
+
 **Inside**: Runs where the intended direction was between the center and guard (excluding kneeldowns).
+
+
 **Off Tackle**: Runs where the intended direction was between the guard and the tackle.
+
+
 **Outside**: Runs where the intended direction was outside the tackles.
+
 
 ## Receiving
 | Abbrev | Name | Description | Status | Since
@@ -158,60 +169,103 @@
 | --- | --- | --- | --- | --- |
 | BR | Burn Rate | Percentage of targets allowed in which the defensive back’s assigned receiver gained more than 5 yards of downfield separation | Planned | 2020
 | COVR | Coverage Rating | Cornerback efficiency metric incorporating target rate, pass break-ups, catch rate allowed, and fantasy points allowed per snap. | Planned | 2020
-| SEP | Seperation | Average Distance in yards to the receiver at the time the ball reaches the pass target.
+| SEP | Seperation | Average Distance in yards to the receiver at the time the ball reaches the pass target. | Planned | 2020
 
 # Stat Filters
 
 **Season**: the season the game is played in
+
 **Week**: the week the game is played in
+
 **Day of week**: the day of the week the game is played in, differentiated by primetime games (i.e SUN vs SN)
+
 **Stadium**: the stadium the game is played in
+
 **Temperature**: the temperature at the start of the game
+
 **Humidity**: the humidity at the start of the game
+
 **Wind Speed**: the wind speed at the start of the game
+
 **Conditions**: 18 Possible Choices: Closed Roof; Dome; Flurries; Light Snow; Snow; Chance Rain; Light Rain; Rain; Mostly Cloudy; Partly Cloudy; Cloudy; Mostly Sunny; Partly Sunny; Sunny; Hazy; Foggy; Clear; Fair.
+
 **Surface**: 11 Possible Choices: Grass; AstroTurf; AstroPlay; FieldTurf; SportGrass; NeXTurf; MomentumTurf; DD GrassMaster; Sportex; A Turf Titan; UBU Speed Series S5M
+
 **Over/Under**: the o/u at the start of the game
+
 **Point Spread**: the point spread at the start of the game
+
 **Quarter**: the quarter the play is in
+
 **Down**: the down of the play
+
 **Yards to go**: the distance to go for a first down
+
 **Line of scrimmage**: the line of scrimmage for the play, in other words, the location on the field
+
 **Shutgun**: if play is in shotgun formation
+
 **No Huddle**: if there is or isnt a huddle before the play
+
 **Number of players in the backfield**: RB + TE + FB + WR
+
 **Extra Men on the Line**: Number of players lined up on either side of the Offensive Tackles - usually a Tight End.
+
 **Bunched/Stacked Formations (BSF)**: Can be 'B', 'S1', 'S2' or 'BS'. Bunched formations involve 3 receivers within a box not taller than 3 yards and spaced less than 2 standard arm lengths away from their neighbour.
 
 Stacked Formations are where 2 receivers are in-line vertically with at least 1.5 yards distance between them. S1 is one pair while S2 denotes 2 pairs. When both bunched/stacked are present we mark (BS).
 
 **Hash Mark Location**: Where the ball is placed when the center has it in his hand. Values can be (L)eft hash, (R)ight hash or in-between (M for Middle).
+
 **Motion**: There are 2 types of motion: Pre-snap (P) which starts and stops before the snap and the more aggressive type of motion that is occurring during the snap (S). When both occur we mark 'PS'.
+
 **Number of Defensive Linemen on the field**
+
 **Number of Linebackers on the field**
+
 **Number of Defenders in the box**
+
 **Number of DB's in the box**
+
 **Play Action Pass**: Does not consider whether a defense was fooled or not, just that a QB motioned to the RB with the ball and some effort to sell the run occurred.
+
 **Option Play**: Values can be RPO (run/pass), RUN (run/qbrun) or blank when there is not an option.
+
 **Trick Look**: Usually it's a wildcat formation or when the QB lines up in a uncommon position. Fake punts and fake field goals are not trick looks since they look like regular punts or FG's
+
 **Trick Play**: Fake punts, double passes, flea flickers, wildcats etc
+
 **QB Pressure**: Plays where the pocket is breached and the QB is near the breach.
+
 **QB Hit**: Quarterback was brought to the ground or otherwise significantly man-handled.
+
 **QB Hurry**: The Defense forces the QB to leave the pocket or forces the QB to throw the ball before he's fully ready.
+
 **Hindered Throwing Motion**: QB's throwing motion was hindered in some way by a defender.
+
 **Pass Rush**: Total number of players rushing the passer.
+
 **Blitz**: Total number of LB's and DB's blitzing.
+
 **DB Blitz**: Number of DB's blitzing. This is included in the Blitz total.
+
 **Stun Pass Rushers**: These are the number blitzing LB's who replace a DL dropping back into coverage. Included in the PRU total
+
 **Out of Pocket Pass (OOP)**: Quarterback attempts the pass out of the pocket whether pressured or not. See 'OOPD' for more details.
+
 **Out Of Pocket Pass Details (OOPD)**: This field helps to expand on why an OOP occurred. When OOP is '1', this field will have a value of 'DE' (by Design); 'DR' (Designed Rollout); 'P' (due to Pressure) or 'C' (QB decided on his own to leave a Clean pocket).
+
 **Play Clock Running**: whether or not play clock was running
+
 **Play Clock Time**: Seconds left on the play clock when the ball was snapped.
+
 **# of Running Backs on the field**
+
 **# of Tight Ends on the field**
+
 **Quarterback Position**: QB (under center), QB-5, QB-6 etc
 
-# Available But Unused Statistics
+## Available But Unused Statistics
 
 **QB Run (QBRU)**: A designed running play for the QB. These are only marked on runs by a natural QB where he lined up as a QB. Also, sneaks and kneel-downs are not counted
 
