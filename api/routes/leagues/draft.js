@@ -125,7 +125,7 @@ router.post('/?', async (req, res) => {
       updateDraft
     ])
 
-    const data = { uid: pickId, player: playerId, lid: leagueId }
+    const data = { uid: pickId, player: playerId, lid: leagueId, tid: teamId }
     broadcast(leagueId, {
       type: 'DRAFTED_PLAYER',
       payload: { data }
