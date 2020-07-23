@@ -39,7 +39,7 @@ router.put('/:leagueId', async (req, res) => {
       'sqb', 'srb', 'swr', 'ste', 'sk', 'sdst', 'srbwr', 'srbwrte',
       'sqbrbwrte', 'swrte', 'bench', 'ps', 'ir', 'mqb', 'mrb', 'mwr', 'mte',
       'mdst', 'mk', 'faab', 'cap', 'pa', 'pc', 'py', 'ints', 'tdp', 'ra', 'ry',
-      'tdr', 'rec', 'recy', 'twoptc', 'tdrec', 'fuml', 'name', 'nteams'
+      'tdr', 'rec', 'recy', 'twoptc', 'tdrec', 'fuml', 'nteams'
     ]
     const positives = [
       'sqb', 'srb', 'swr', 'ste', 'sk', 'sdst', 'srbwr', 'srbwrte',
@@ -50,18 +50,18 @@ router.put('/:leagueId', async (req, res) => {
       'pa', 'pc', 'py', 'ra', 'ry', 'rec', 'recy'
     ]
 
-    if (ints.indexOf(value)) {
+    if (ints.indexOf(field) > 0) {
       if (isNaN(value)) {
         return res.status(400).send({ error: 'invalid value' })
       }
 
-      if (floats.indexOf(field)) {
+      if (floats.indexOf(field) > 0) {
         value = parseFloat(value)
       } else {
         value = parseInt(value, 10)
       }
 
-      if (positives.indexOf(field) && value < 0) {
+      if (positives.indexOf(field) > 0 && value < 0) {
         return res.status(400).send({ error: 'invalid value' })
       }
     }

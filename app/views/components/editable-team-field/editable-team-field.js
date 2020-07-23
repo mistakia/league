@@ -22,25 +22,21 @@ export default class EditableTeamField extends React.Component {
       return
     }
 
-    if (field === 'abbrv' && value.length > 5) {
-      return
-    }
-
-    if (value !== defaultValue) {
+    if (value !== defaultValue && !this.state.invalid) {
       this.props.onchange({ field, value })
     }
   }
 
   handleChange = (event) => {
-    const { field } = this.props
+    const { limit } = this.props
     const { value } = event.target
     this.setState({ value })
 
-    if (field === 'abbrv' && value.length > 5) {
-      this.setState({ invalid: true, helper: 'too long' })
-    } else {
-      this.setState({ invalid: false, helper: '' })
+    if (limit && value.length > limit) {
+      return this.setState({ invalid: true, helper: `limit: ${limit}` })
     }
+
+    this.setState({ invalid: false, helper: '' })
   }
 
   render = () => {

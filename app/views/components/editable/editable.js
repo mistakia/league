@@ -31,7 +31,7 @@ export default class Editable extends React.Component {
     const el = this.getEl()
     if (!el) return
 
-    const { type } = this.props
+    const { type, max } = this.props
 
     const value = el.innerHTML
 
@@ -52,6 +52,11 @@ export default class Editable extends React.Component {
       }
 
       const int = parseInt(value, 10)
+      if (max && int > max) {
+        el.innerHTML = this.props.value
+        return
+      }
+
       el.innerHTML = int
 
       if (int !== this.props.value) {
