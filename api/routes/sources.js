@@ -15,7 +15,7 @@ router.get('/?', async (req, res) => {
 router.put('/:sourceid', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    const { weight } = req.body
+    const weight = parseFloat(req.body.weight)
     const { sourceid } = req.params
 
     if (!req.user || !req.user.userId) {
@@ -30,11 +30,15 @@ router.put('/:sourceid', async (req, res) => {
       return res.status(400).send({ error: 'missing sourceid param' })
     }
 
-    const rows = await db('users_sources').where({ userid: req.user.userId, sourceid })
-    if (rows.length) {
-      await db('users_sources').update({ weight }).where({ userid: req.user.userId, sourceid })
+    if (weight === 1) {
+      await db('users_sources').del().where({ userid: req.user.userId, sourceid })
     } else {
-      await db('users_sources').insert({ userid: req.user.userId, sourceid, weight })
+      const rows = await db('users_sources').where({ userid: req.user.userId, sourceid })
+      if (rows.length) {
+        await db('users_sources').update({ weight }).where({ userid: req.user.userId, sourceid })
+      } else {
+        await db('users_sources').insert({ userid: req.user.userId, sourceid, weight })
+      }
     }
 
     res.send({ weight, sourceid })
