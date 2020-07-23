@@ -24,7 +24,7 @@
 - [Dynasty Nerds](https://www.dynastynerds.com/)
 - [Dynasty League Football](https://dynastyleaguefootball.com/)
 - [r/dynastyff](https://www.reddit.com/r/dynastyff)
-- [DynastyOrocess.com](https://dynastyprocess.com/)
+- [DynastyProcess.com](https://dynastyprocess.com/)
 - [Pro Football Network](https://www.profootballnetwork.com/dynasty-fantasy-football/)
 - [FantasyPros](https://www.fantasypros.com/nfl/rankings/dynasty-overall.php)
 
