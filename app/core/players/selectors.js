@@ -152,7 +152,7 @@ export function getGamesByYearForSelectedPlayer (state) {
       stats.forEach(k => { sums[k] += (obj[k] || 0) })
       return sums
     }, initialValue)
-    const points = calculatePoints({ stats: sum, ...league.toJS() })
+    const points = calculatePoints({ stats: sum, position: p.pos1, ...league.toJS() })
     sum.total = points.total
     overall[year] = sum
   }

@@ -318,7 +318,31 @@ export default class EditableLeague extends React.Component {
             <div className='editable__league-section-title'>Pts receiving</div>
             <div className='editable__league-section'>
               <EditableLeagueField
-                label='Receptions'
+                label='Rec. (RB)'
+                field='rbrec'
+                type='float'
+                max={2}
+                min={0}
+                {...props}
+              />
+              <EditableLeagueField
+                label='Rec. (WR)'
+                field='wrrec'
+                type='float'
+                max={2}
+                min={0}
+                {...props}
+              />
+              <EditableLeagueField
+                label='Rec. (TE)'
+                field='terec'
+                type='float'
+                max={2}
+                min={0}
+                {...props}
+              />
+              <EditableLeagueField
+                label='Rec. (Other)'
                 field='rec'
                 type='float'
                 max={2}
