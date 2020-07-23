@@ -49,24 +49,31 @@ export default class EditableLeague extends React.Component {
               <EditableLeagueField
                 field='name'
                 label='Name'
+                length={80}
                 {...props}
               />
               <EditableLeagueField
                 label='Number of Teams'
                 field='nteams'
                 type='int'
+                max={14}
+                min={4}
                 {...props}
               />
               <EditableLeagueField
                 label='FAAB Budget'
                 field='faab'
                 type='int'
+                max={1000000}
+                min={0}
                 {...props}
               />
               <EditableLeagueField
                 label='CAP Limit'
                 field='cap'
                 type='int'
+                max={1000000}
+                min={0}
                 {...props}
               />
             </div>
@@ -76,30 +83,40 @@ export default class EditableLeague extends React.Component {
                 field='sqb'
                 label='QB'
                 type='int'
+                max={3}
+                min={0}
                 {...props}
               />
               <EditableLeagueField
                 label='RB'
                 field='srb'
                 type='int'
+                max={4}
+                min={0}
                 {...props}
               />
               <EditableLeagueField
                 label='WR'
                 field='swr'
                 type='int'
+                max={4}
+                min={0}
                 {...props}
               />
               <EditableLeagueField
                 label='TE'
                 field='ste'
                 type='int'
+                max={3}
+                min={0}
                 {...props}
               />
               <EditableLeagueField
                 label='K'
                 field='sk'
                 type='int'
+                max={2}
+                min={0}
                 {...props}
               />
             </div>
@@ -108,30 +125,40 @@ export default class EditableLeague extends React.Component {
                 label='DST'
                 field='sdst'
                 type='int'
+                max={2}
+                min={0}
                 {...props}
               />
               <EditableLeagueField
                 label='RB/WR'
                 field='srbwr'
                 type='int'
+                max={4}
+                min={0}
                 {...props}
               />
               <EditableLeagueField
                 label='RB/WR/TE'
                 field='srbwrte'
                 type='int'
+                max={4}
+                min={0}
                 {...props}
               />
               <EditableLeagueField
                 label='QB/RB/WR/TE'
                 field='sqbrbwrte'
                 type='int'
+                max={2}
+                min={0}
                 {...props}
               />
               <EditableLeagueField
                 label='WR/TE'
                 field='swrte'
                 type='int'
+                max={4}
+                min={0}
                 {...props}
               />
             </div>
@@ -141,54 +168,72 @@ export default class EditableLeague extends React.Component {
                 label='QB'
                 field='mqb'
                 type='int'
+                max={7}
+                min={0}
                 {...props}
               />
               <EditableLeagueField
                 label='RB'
                 field='mrb'
                 type='int'
+                max={20}
+                min={0}
                 {...props}
               />
               <EditableLeagueField
                 label='WR'
                 field='mwr'
                 type='int'
+                max={20}
+                min={0}
                 {...props}
               />
               <EditableLeagueField
                 label='TE'
                 field='mte'
                 type='int'
+                max={10}
+                min={0}
                 {...props}
               />
               <EditableLeagueField
                 label='K'
                 field='mk'
                 type='int'
+                max={5}
+                min={0}
                 {...props}
               />
               <EditableLeagueField
                 label='DST'
                 field='mdst'
                 type='int'
+                max={4}
+                min={0}
                 {...props}
               />
               <EditableLeagueField
                 label='Bench'
                 field='bench'
                 type='int'
+                max={30}
+                min={0}
                 {...props}
               />
               <EditableLeagueField
                 label='PS'
                 field='ps'
                 type='int'
+                max={15}
+                min={0}
                 {...props}
               />
               <EditableLeagueField
                 label='IR'
                 field='ir'
                 type='int'
+                max={10}
+                min={0}
                 {...props}
               />
             </div>
@@ -198,30 +243,40 @@ export default class EditableLeague extends React.Component {
                 label='Attempts'
                 field='pa'
                 type='float'
+                max={2}
+                min={0}
                 {...props}
               />
               <EditableLeagueField
                 label='Completions'
                 field='pc'
                 type='float'
+                max={2}
+                min={0}
                 {...props}
               />
               <EditableLeagueField
                 label='Yards'
                 field='py'
                 type='float'
+                max={1}
+                min={0}
                 {...props}
               />
               <EditableLeagueField
                 label='Ints'
                 field='ints'
                 type='int'
+                max={0}
+                min={-3}
                 {...props}
               />
               <EditableLeagueField
                 label='Tds'
                 field='tdp'
                 type='int'
+                max={12}
+                min={0}
                 {...props}
               />
             </div>
@@ -231,24 +286,32 @@ export default class EditableLeague extends React.Component {
                 label='Attempts'
                 field='ra'
                 type='float'
+                max={1}
+                min={0}
                 {...props}
               />
               <EditableLeagueField
                 label='Yards'
                 field='ry'
                 type='float'
+                max={2}
+                min={0}
                 {...props}
               />
               <EditableLeagueField
                 label='Fumbles'
                 field='fuml'
                 type='int'
+                max={0}
+                min={-3}
                 {...props}
               />
               <EditableLeagueField
                 label='Tds'
                 field='tdr'
                 type='int'
+                max={12}
+                min={0}
                 {...props}
               />
             </div>
@@ -258,18 +321,24 @@ export default class EditableLeague extends React.Component {
                 label='Receptions'
                 field='rec'
                 type='float'
+                max={2}
+                min={0}
                 {...props}
               />
               <EditableLeagueField
                 label='Yards'
                 field='recy'
                 type='float'
+                max={2}
+                min={0}
                 {...props}
               />
               <EditableLeagueField
                 label='Tds'
                 field='tdrec'
                 type='int'
+                max={12}
+                min={0}
                 {...props}
               />
             </div>
@@ -279,6 +348,8 @@ export default class EditableLeague extends React.Component {
                 label='Two PT Conv.'
                 field='twoptc'
                 type='int'
+                max={4}
+                min={0}
                 {...props}
               />
             </div>
