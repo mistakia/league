@@ -208,6 +208,16 @@ const calculateBaselines = ({
     result.TE[type] = selection
   }
 
+  /* for (const pos in result) {
+   *   for (const type of types) {
+   *     console.log(result[pos][type])
+   *     console.log(grouped[pos][grouped[pos].length - 1])
+   *     if (!result[pos][type]) {
+   *       result[pos][type] = grouped[pos][grouped[pos].length - 1]
+   *     }
+   *   }
+   * }
+   */
   return result
 }
 
