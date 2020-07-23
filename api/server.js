@@ -14,6 +14,7 @@ const debug = require('debug')
 const logger = debug('api')
 const jwt = require('jsonwebtoken')
 const expressJwt = require('express-jwt')
+const slowDown = require('express-slow-down')
 
 const config = require('../config')
 const routes = require('./routes')
@@ -60,13 +61,20 @@ if (options.ssl) {
   })
 }
 
+const speedLimiter = slowDown({
+  windowMs: 5 * 60 * 1000,
+  delayAfter: 5,
+  delayMs: 500,
+  maxDelayMs: 2500
+})
+
 api.use('/api/*', expressJwt(config.jwt), (err, req, res, next) => {
   if (err.code === 'invalid_token') return next()
   return next(err)
 })
-api.use('/api/stats', routes.stats)
-api.use('/api/players', routes.players)
-api.use('/api/plays', routes.plays)
+api.use('/api/stats', speedLimiter, routes.stats)
+api.use('/api/players', speedLimiter, routes.players)
+api.use('/api/plays', speedLimiter, routes.plays)
 api.use('/api/sources', routes.sources)
 api.use('/api/auth', routes.auth)
 api.use('/api/*', (err, req, res, next) => {
