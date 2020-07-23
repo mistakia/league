@@ -22,7 +22,7 @@ export function calculatePlayerValues (payload) {
     const { projection } = player
 
     // calculate points for each league
-    player.points = calculatePoints({ stats: projection, ...league })
+    player.points = calculatePoints({ stats: projection, position: player.pos1, ...league })
   }
 
   // calculate baseline by position
