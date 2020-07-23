@@ -18,7 +18,7 @@ export default class EditableProjection extends React.Component {
     const value = Math.round(player.projection[type]) || 0
 
     return (
-      <Editable type='number' value={value} onchange={this.onchange} />
+      <Editable type='number' value={value} onchange={this.onchange} max={10000} />
     )
   }
 }

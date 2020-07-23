@@ -44,7 +44,7 @@ export function playersReducer (state = initialState, { payload, type }) {
     case playerActions.PUT_PROJECTION_FULFILLED: {
       const { value, type, week, playerId, userId } = payload.opts
       const key = state.get('items').get(playerId).get('projections').findKey(p => !p.sourceid)
-      if (key) {
+      if (typeof key !== 'undefined') {
         return state.setIn(['items', playerId, 'projections', key, type], value)
       }
       const newProj = { [type]: value, userid: userId, week, player: playerId }
@@ -78,7 +78,7 @@ export function playersReducer (state = initialState, { payload, type }) {
         state.set('isPending', false)
         for (const b in payload.baselines) {
           for (const type in payload.baselines[b]) {
-            state.setIn(['baselines', b, type], payload.baselines[b][type] ? payload.baselines[b][type].player : null)
+            state.setIn(['baselines', b, type], payload.baselines[b][type].player)
           }
         }
         payload.values.forEach(p => {
@@ -176,14 +176,13 @@ export function playersReducer (state = initialState, { payload, type }) {
       })
 
     case settingActions.SET_SETTING:
-    case settingActions.PUT_SETTING_FULFILLED:
-      if (payload.opts.type === 'vbaseline') {
-        const value = payload.data ? payload.data.value : payload.opts.value
-        return state.merge({
-          orderBy: `vorp.${value}`
-        })
+    case settingActions.PUT_SETTING_FULFILLED: {
+      if (payload.opts.type !== 'vbaseline') {
+        return state
       }
-      return state
+      const value = payload.data ? payload.data.value : payload.opts.value
+      return state.merge({ orderBy: `vorp.${value}` })
+    }
 
     case playerActions.SET_WATCHLIST:
       return state.merge({

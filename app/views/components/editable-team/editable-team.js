@@ -21,11 +21,13 @@ export default class EditableTeam extends React.Component {
         <EditableTeamField
           label='Team Name'
           field='name'
+          limit={100}
           {...props}
         />
         <EditableTeamField
           label='Abbreviation'
           field='abbrv'
+          limit={5}
           {...props}
         />
         <EditableTeamField

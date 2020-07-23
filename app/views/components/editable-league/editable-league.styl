@@ -3,17 +3,17 @@
   border 1px solid $borderColor
   border-radius 3px
   user-select none
+  background white
 
   &.expanded
-    background white
     .editable__league-icon
       transform rotate(180deg)
 
     .editable__league-head
       border-bottom 1px solid $borderColor
 
-  &:hover
-    background white
+  &:hover .editable__league-head
+    color $accentColor
 
 .editable__league-head
   text-transform uppercase
