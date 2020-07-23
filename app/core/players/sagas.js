@@ -33,6 +33,8 @@ export function * calculateValues () {
     volsw
   })
   yield put(playerActions.setValues(result))
+
+  // TODO calculate bid up to values
 }
 
 export function * toggleOrder ({ payload }) {

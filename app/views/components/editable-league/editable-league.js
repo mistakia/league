@@ -83,7 +83,7 @@ export default class EditableLeague extends React.Component {
                 field='sqb'
                 label='QB'
                 type='int'
-                max={3}
+                max={2}
                 min={0}
                 {...props}
               />
@@ -133,7 +133,7 @@ export default class EditableLeague extends React.Component {
                 label='RB/WR'
                 field='srbwr'
                 type='int'
-                max={4}
+                max={3}
                 min={0}
                 {...props}
               />
@@ -141,7 +141,7 @@ export default class EditableLeague extends React.Component {
                 label='RB/WR/TE'
                 field='srbwrte'
                 type='int'
-                max={4}
+                max={3}
                 min={0}
                 {...props}
               />
@@ -149,7 +149,7 @@ export default class EditableLeague extends React.Component {
                 label='QB/RB/WR/TE'
                 field='sqbrbwrte'
                 type='int'
-                max={2}
+                max={1}
                 min={0}
                 {...props}
               />
@@ -157,7 +157,7 @@ export default class EditableLeague extends React.Component {
                 label='WR/TE'
                 field='swrte'
                 type='int'
-                max={4}
+                max={3}
                 min={0}
                 {...props}
               />
