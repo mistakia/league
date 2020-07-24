@@ -119,6 +119,21 @@ router.post('/?', async (req, res) => {
       .where({ uid: pickId })
       .update({ player: playerId })
 
+    const trades = await db('trades')
+      .innerJoin('trades_picks', 'trades.uid', 'trades_picks.tradeid')
+      .where('trades_picks.pickid', pickId)
+      .whereNull('trades.accepted')
+      .whereNull('trades.cancelled')
+      .whereNull('trades.rejected')
+      .whereNull('trades.vetoed')
+
+    if (trades.length) {
+      const tradeids = trades.map(t => t.uid)
+      await db('trades')
+        .whereIn('uid', tradeids)
+        .update({ cancelled: Math.round(Date.now() / 1000) })
+    }
+
     await updateRosters
     await Promise.all([
       insertTransaction,
