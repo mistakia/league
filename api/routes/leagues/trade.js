@@ -210,6 +210,21 @@ router.post('/accept', async (req, res, next) => {
         .where({ uid: pick.pickid })
     }
 
+    const tradeRows = await db('trades')
+      .innerJoin('trades_picks', 'trades.uid', 'trades_picks.tradeid')
+      .whereIn('trades_picks.pickid', pickRows.map(p => p.pickid))
+      .whereNull('trades.accepted')
+      .whereNull('trades.cancelled')
+      .whereNull('trades.rejected')
+      .whereNull('trades.vetoed')
+
+    if (tradeRows.length) {
+      const tradeids = tradeRows.map(t => t.uid)
+      await db('trades')
+        .whereIn('uid', tradeids)
+        .update({ cancelled: Math.round(Date.now() / 1000) })
+    }
+
     if (league.groupme_token && league.groupme_id) {
       const teams = await db('teams').whereIn('uid', [trade.pid, trade.tid])
       const proposingTeam = teams.find(t => t.uid === trade.pid)
