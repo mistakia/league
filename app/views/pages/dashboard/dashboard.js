@@ -1,6 +1,6 @@
 import React from 'react'
 
-import Player from '@components/player'
+import PlayerRoster from '@components/player-roster'
 import PageLayout from '@layouts/page'
 import { constants } from '@common'
 
@@ -21,13 +21,13 @@ export default function () {
   for (const position in groups) {
     const players = groups[position]
     for (const player of players) {
-      activeItems.push(<Player key={player} player={player} />)
+      activeItems.push(<PlayerRoster key={player} player={player} />)
     }
   }
 
   const practiceItems = []
   for (const player of players.practice) {
-    practiceItems.push(<Player key={player} player={player} />)
+    practiceItems.push(<PlayerRoster key={player} player={player} />)
   }
 
   const pickItems = []
