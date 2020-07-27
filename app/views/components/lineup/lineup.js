@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { getEligibleSlots, constants } from '@common'
+import { Roster } from '@common'
 import PlayerSlot from '@components/player-slot'
 
 import './lineup.styl'
@@ -9,49 +9,33 @@ export default class Lineup extends React.Component {
   render () {
     const { league, roster } = this.props
 
-    const slots = []
-    const eligible = getEligibleSlots({ pos: 'ALL', bench: true, league, ir: true, ps: true })
-    for (const slot of eligible) {
-      const slotId = constants.slots[slot]
-      const playerId = roster[`s${slotId}`]
-      slots.push(
-        <PlayerSlot key={slot} {...{ slotId, playerId, slot, roster }} />
-      )
-    }
+    const r = new Roster({ roster: roster.toJS(), league })
 
     const starters = []
-    for (const slot of getEligibleSlots({ pos: 'ALL', league })) {
-      const slotId = constants.slots[slot]
-      const playerId = roster[`s${slotId}`]
+    for (const { slot, player } of r.starters) {
       starters.push(
-        <PlayerSlot key={slot} {...{ slotId, playerId, slot, roster }} />
+        <PlayerSlot key={player} {...{ playerId: player, slot, roster }} />
       )
     }
 
     const ps = []
-    for (const slot of getEligibleSlots({ ps: true, league })) {
-      const slotId = constants.slots[slot]
-      const playerId = roster[`s${slotId}`]
+    for (const { slot, player } of r.practice) {
       ps.push(
-        <PlayerSlot key={slot} {...{ slotId, playerId, slot, roster }} />
+        <PlayerSlot key={player} {...{ playerId: player, slot, roster }} />
       )
     }
 
     const bench = []
-    for (const slot of getEligibleSlots({ bench: true, league })) {
-      const slotId = constants.slots[slot]
-      const playerId = roster[`s${slotId}`]
+    for (const { slot, player } of r.bench) {
       bench.push(
-        <PlayerSlot key={slot} {...{ slotId, playerId, slot, roster }} />
+        <PlayerSlot key={player} {...{ playerId: player, slot, roster }} />
       )
     }
 
     const ir = []
-    for (const slot of getEligibleSlots({ ir: true, league })) {
-      const slotId = constants.slots[slot]
-      const playerId = roster[`s${slotId}`]
+    for (const { slot, player } of r.ir) {
       ir.push(
-        <PlayerSlot key={slot} {...{ slotId, playerId, slot, roster }} />
+        <PlayerSlot key={player} {...{ playerId: player, slot, roster }} />
       )
     }
 

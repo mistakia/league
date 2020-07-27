@@ -2,6 +2,7 @@ import React from 'react'
 
 import Position from '@components/position'
 import Team from '@components/team'
+import { constants } from '@common'
 
 import './player-slot.styl'
 
@@ -9,7 +10,7 @@ export default class PlayerSlot extends React.Component {
   render () {
     const { player, slot } = this.props
 
-    const slotName = slot.split('_').shift()
+    const slotName = Object.keys(constants.slots).find(key => constants.slots[key] === slot)
 
     return (
       <div className='player__slot'>

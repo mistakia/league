@@ -4,6 +4,7 @@ import { createSelector } from 'reselect'
 
 import { rosterActions, getCurrentTeamRoster } from '@core/rosters'
 import { getApp } from '@core/app'
+import { getCurrentLeague } from '@core/leagues'
 import {
   getTrade,
   getTradeSelectedTeamRoster,
@@ -23,10 +24,10 @@ class TradePage extends React.Component {
   }
 
   handleDropPlayerClick = (player) => this.props.toggleDropPlayer(player)
-  handleSendPlayerClick = (player) => this.props.toggleSendPlayer(player)
-  handleReceivePlayerClick = (player) => this.props.toggleReceivePlayer(player)
-  handleSendPickClick = (pick) => this.props.toggleSendPick(pick)
-  handleReceivePickClick = (pick) => this.props.toggleReceivePick(pick)
+  handleProposingTeamPlayerClick = (player) => this.props.toggleProposingTeamPlayer(player)
+  handleAcceptingTeamPlayerClick = (player) => this.props.toggleAcceptingTeamPlayer(player)
+  handleProposingTeamPickClick = (pick) => this.props.toggleProposingTeamPick(pick)
+  handleAcceptingTeamPickClick = (pick) => this.props.toggleAcceptingTeamPick(pick)
   handleProposeClick = () => this.props.propose()
   handleAcceptClick = () => this.props.accept()
   handleRejectClick = () => this.props.reject()
@@ -46,15 +47,17 @@ const mapStateToProps = createSelector(
   getTradeSelectedTeamRoster,
   getTradeSelectedTeam,
   getTradeIsValid,
-  (tradeState, app, trade, sendRoster, sendTeam, receiveRoster, receiveTeam, valid) => ({
+  getCurrentLeague,
+  (tradeState, app, trade, proposingTeamRoster, proposingTeam, acceptingTeamRoster, acceptingTeam, valid, league) => ({
     valid,
     isProposer: trade.pid === app.teamId,
     trade,
     dropPlayers: tradeState.dropPlayers,
-    sendRoster,
-    receiveRoster,
-    sendTeam,
-    receiveTeam
+    proposingTeamRoster,
+    acceptingTeamRoster,
+    proposingTeam,
+    acceptingTeam,
+    league
   })
 )
 
@@ -66,10 +69,10 @@ const mapDispatchToProps = {
   reject: tradeActions.reject,
   cancel: tradeActions.cancel,
   toggleDropPlayer: tradeActions.toggleDropPlayer,
-  toggleSendPlayer: tradeActions.toggleSendPlayer,
-  toggleReceivePlayer: tradeActions.toggleReceivePlayer,
-  toggleSendPick: tradeActions.toggleSendPick,
-  toggleReceivePick: tradeActions.toggleReceivePick
+  toggleProposingTeamPlayer: tradeActions.toggleProposingTeamPlayer,
+  toggleAcceptingTeamPlayer: tradeActions.toggleAcceptingTeamPlayer,
+  toggleProposingTeamPick: tradeActions.toggleProposingTeamPick,
+  toggleAcceptingTeamPick: tradeActions.toggleAcceptingTeamPick
 }
 
 export default connect(

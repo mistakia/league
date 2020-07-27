@@ -1,9 +1,9 @@
 export const tradeActions = {
   TRADE_SELECT_TEAM: 'TRADE_SELECT_TEAM',
-  TRADE_TOGGLE_RECEIVE_PLAYER: 'TRADE_TOGGLE_RECEIVE_PLAYER',
-  TRADE_TOGGLE_SEND_PLAYER: 'TRADE_TOGGLE_SEND_PLAYER',
-  TRADE_TOGGLE_RECEIVE_PICK: 'TRADE_TOGGLE_RECEIVE_PICK',
-  TRADE_TOGGLE_SEND_PICK: 'TRADE_TOGGLE_SEND_PICK',
+  TRADE_TOGGLE_PROPOSING_TEAM_PLAYER: 'TRADE_TOGGLE_PROPOSING_TEAM_PLAYER',
+  TRADE_TOGGLE_ACCEPTING_TEAM_PLAYER: 'TRADE_TOGGLE_ACCEPTING_TEAM_PLAYER',
+  TRADE_TOGGLE_PROPOSING_TEAM_PICK: 'TRADE_TOGGLE_PROPOSING_TEAM_PICK',
+  TRADE_TOGGLE_ACCEPTING_TEAM_PICK: 'TRADE_TOGGLE_ACCEPTING_TEAM_PICK',
   TRADE_TOGGLE_DROP_PLAYER: 'TRADE_TOGGLE_DROP_PLAYER',
 
   SELECT_TRADE: 'SELECT_TRADE',
@@ -71,29 +71,29 @@ export const tradeActions = {
     }
   }),
 
-  toggleSendPlayer: (player) => ({
-    type: tradeActions.TRADE_TOGGLE_SEND_PLAYER,
+  toggleProposingTeamPlayer: (player) => ({
+    type: tradeActions.TRADE_TOGGLE_PROPOSING_TEAM_PLAYER,
     payload: {
       player
     }
   }),
 
-  toggleReceivePlayer: (player) => ({
-    type: tradeActions.TRADE_TOGGLE_RECEIVE_PLAYER,
+  toggleAcceptingTeamPlayer: (player) => ({
+    type: tradeActions.TRADE_TOGGLE_ACCEPTING_TEAM_PLAYER,
     payload: {
       player
     }
   }),
 
-  toggleSendPick: (pick) => ({
-    type: tradeActions.TRADE_TOGGLE_SEND_PICK,
+  toggleProposingTeamPick: (pick) => ({
+    type: tradeActions.TRADE_TOGGLE_PROPOSING_TEAM_PICK,
     payload: {
       pick
     }
   }),
 
-  toggleReceivePick: (pick) => ({
-    type: tradeActions.TRADE_TOGGLE_RECEIVE_PICK,
+  toggleAcceptingTeamPick: (pick) => ({
+    type: tradeActions.TRADE_TOGGLE_ACCEPTING_TEAM_PICK,
     payload: {
       pick
     }

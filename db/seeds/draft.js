@@ -1,56 +1,38 @@
-const { constants, getEligibleSlots, formatRoster } = require('../../common')
+const { constants, Roster } = require('../../common')
+const { getRoster } = require('../../utils')
 
 module.exports = async function (knex) {
   const leagues = await knex('leagues').where({ uid: 1 })
   const league = leagues[0]
 
   const players = await knex('player')
-    .innerJoin('draft_rankings', 'player.player', 'draft_rankings.player')
+    .leftJoin('draft_rankings', 'player.player', 'draft_rankings.player')
     .orderBy('rank', 'asc')
     .where('seas', constants.year)
 
-  const eligibleSlots = getEligibleSlots({ bench: true, league })
-  const eligibleSlotNumbers = eligibleSlots.map(k => constants.slots[k])
-
-  const hasOpenSlot = (roster) => {
-    const formatted = formatRoster(roster)
-    for (const slot of eligibleSlotNumbers) {
-      if (!formatted.get(`s${slot}`)) {
-        return `s${slot}`
-      }
-    }
-
-    return null
-  }
+  await knex('rosters_players').del()
 
   let i = 1
-  const rosters = await knex('rosters').where({ tid: i })
-  let roster = rosters[0]
-  while (hasOpenSlot(roster)) {
-    const formatted = formatRoster(roster)
-
+  let roster = await getRoster({ db: knex, tid: i, week: constants.week, year: constants.year })
+  let r = new Roster({ roster, league })
+  while (!r.isFull) {
     let player
-    let openSlot
     for (let p = 0; p < players.length; p++) {
       player = players[p]
-      const { pos1: pos } = player
-      const playerSlots = getEligibleSlots({ bench: true, league, pos })
-      const playerSlotNumbers = playerSlots.map(k => constants.slots[k])
-      for (const slot of playerSlotNumbers) {
-        if (!formatted.get(`s${slot}`)) {
-          openSlot = `s${slot}`
-          break
-        }
-      }
+      const hasOpenSlot = r.hasOpenBenchSlot(player.pos1)
 
-      if (openSlot) {
+      if (hasOpenSlot) {
         players.splice(p, 1)
         break
       }
     }
 
-    roster[openSlot] = player.player
-    await knex('rosters').update({ ...roster }).where({ week: roster.week, tid: roster.tid })
+    await knex('rosters_players').insert({
+      slot: constants.slots.BENCH,
+      player: player.player,
+      pos: player.pos1,
+      rid: roster.uid
+    })
     await knex('transactions').insert({
       userid: roster.tid,
       tid: roster.tid,
@@ -67,7 +49,7 @@ module.exports = async function (knex) {
     } else {
       i += 1
     }
-    const rosters = await knex('rosters').where({ tid: i })
-    roster = rosters[0]
+    roster = await getRoster({ db: knex, tid: i, week: constants.week, year: constants.year })
+    r = new Roster({ roster, league })
   }
 }

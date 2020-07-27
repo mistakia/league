@@ -1,1 +1,4 @@
-module.exports = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTU5MDI4MzUwNX0.DCZCXm51Nxe_7DTwRu7evz-LSd6OS2ml47S0zPgPFQI'
+module.exports = {
+  user1: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTU5NTQ3Njg3N30.WiPWkryeciJqKFz0rYA5rBmnKc3SOOIyjwQjrSJswGc',
+  user2: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTU5MzgyMDg0Mn0.0kqYxXAS7p04P732XBVpP0qdkHnv_GYIlyHqF9CqADk'
+}

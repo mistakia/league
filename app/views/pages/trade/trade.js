@@ -15,12 +15,13 @@ export default function () {
   const {
     valid,
     trade,
-    sendRoster,
-    receiveRoster,
-    sendTeam,
-    receiveTeam,
+    proposingTeamRoster,
+    acceptingTeamRoster,
+    proposingTeam,
+    acceptingTeam,
     isProposer,
-    dropPlayers
+    dropPlayers,
+    league
   } = this.props
 
   const sPlayerItems = []
@@ -30,51 +31,49 @@ export default function () {
   const isOpen = !trade.cancelled && !trade.rejected && !trade.accepted && !trade.vetoed
 
   if (!trade.uid) {
-    const sRoster = new Roster(sendRoster.toJS())
-    for (const [index, player] of sRoster.players.entries()) {
-      if (player) {
-        sPlayerItems.push(
-          <TradePlayer
-            key={`player${index}`}
-            handleClick={() => this.handleSendPlayerClick(player)}
-            isSelected={trade.sendPlayers.includes(player)}
-            playerId={player}
-          />
-        )
-      }
+    const sRoster = new Roster({ roster: proposingTeamRoster.toJS(), league })
+    for (const [index, item] of sRoster.players.entries()) {
+      const { player } = item
+      sPlayerItems.push(
+        <TradePlayer
+          key={`player${index}`}
+          handleClick={() => this.handleProposingTeamPlayerClick(player)}
+          isSelected={trade.proposingTeamPlayers.includes(player)}
+          playerId={player}
+        />
+      )
     }
-    for (const pick of sendTeam.picks) {
+    for (const pick of proposingTeam.picks) {
       if (pick.player) continue
       sPickItems.push(
         <TradePick
           key={pick.uid}
-          handleClick={() => this.handleSendPickClick(pick)}
-          isSelected={trade.sendPicks.has(pick.uid)}
+          handleClick={() => this.handleProposingTeamPickClick(pick)}
+          isSelected={trade.proposingTeamPicks.has(pick.uid)}
           pick={pick}
         />
       )
     }
 
-    const rRoster = new Roster(receiveRoster.toJS())
-    for (const [index, player] of rRoster.players.entries()) {
-      if (player) {
-        rPlayerItems.push(
-          <TradePlayer
-            key={`player${index}`}
-            handleClick={() => this.handleReceivePlayerClick(player)}
-            isSelected={trade.receivePlayers.includes(player)}
-            playerId={player}
-          />
-        )
-      }
+    const rRoster = new Roster({ roster: acceptingTeamRoster.toJS(), league })
+    for (const [index, item] of rRoster.players.entries()) {
+      const { player } = item
+      rPlayerItems.push(
+        <TradePlayer
+          key={`player${index}`}
+          handleClick={() => this.handleAcceptingTeamPlayerClick(player)}
+          isSelected={trade.acceptingTeamPlayers.includes(player)}
+          playerId={player}
+        />
+      )
     }
-    for (const pick of receiveTeam.picks) {
+    for (const pick of acceptingTeam.picks) {
       if (pick.player) continue
       rPickItems.push(
         <TradePick
           key={pick.uid}
-          handleClick={() => this.handleReceivePickClick(pick)}
-          isSelected={trade.receivePicks.has(pick.uid)}
+          handleClick={() => this.handleAcceptingTeamPickClick(pick)}
+          isSelected={trade.acceptingTeamPicks.has(pick.uid)}
           pick={pick}
         />
       )
@@ -82,40 +81,40 @@ export default function () {
   }
 
   const sItems = []
-  for (const [index, player] of trade.sendPlayers.entries()) {
+  for (const [index, player] of trade.proposingTeamPlayers.entries()) {
     sItems.push(
       <TradePlayer
         key={index}
-        handleClick={() => !trade.uid && this.handleSendPlayerClick(player)}
+        handleClick={() => !trade.uid && this.handleProposingTeamPlayerClick(player)}
         playerId={player}
       />
     )
   }
-  for (const [key, pick] of trade.sendPicks.entries()) {
+  for (const [key, pick] of trade.proposingTeamPicks.entries()) {
     sItems.push(
       <TradePick
         key={key}
-        handleClick={() => !trade.uid && this.handleSendPickClick(pick)}
+        handleClick={() => !trade.uid && this.handleProposingTeamPickClick(pick)}
         pick={pick}
       />
     )
   }
 
   const rItems = []
-  for (const [index, player] of trade.receivePlayers.entries()) {
+  for (const [index, player] of trade.acceptingTeamPlayers.entries()) {
     rItems.push(
       <TradePlayer
         key={index}
-        handleClick={() => !trade.uid && this.handleReceivePlayerClick(player)}
+        handleClick={() => !trade.uid && this.handleAcceptingTeamPlayerClick(player)}
         playerId={player}
       />
     )
   }
-  for (const [key, pick] of trade.receivePicks.entries()) {
+  for (const [key, pick] of trade.acceptingTeamPicks.entries()) {
     rItems.push(
       <TradePick
         key={key}
-        handleClick={() => !trade.uid && this.handleReceivePickClick(pick)}
+        handleClick={() => !trade.uid && this.handleAcceptingTeamPickClick(pick)}
         pick={pick}
       />
     )
@@ -125,7 +124,7 @@ export default function () {
     <div className='trade__head'>
       <div className='trade__box'>
         <div className='trade__box-head'>
-          <TeamName tid={sendRoster.tid} />
+          <TeamName tid={proposingTeamRoster.tid} />
         </div>
         <div className='trade__box-body'>
           {sPlayerItems}
@@ -134,7 +133,7 @@ export default function () {
       </div>
       <div className='trade__box'>
         <div className='trade__box-head'>
-          <TeamName tid={receiveRoster.tid} />
+          <TeamName tid={acceptingTeamRoster.tid} />
           {!trade.uid && <TradeSelectTeam />}
         </div>
         <div className='trade__box-body'>
@@ -157,7 +156,7 @@ export default function () {
   } else if (!valid) {
     action = (<Button disabled>Invalid</Button>)
   } else if (!trade.uid) {
-    if ((trade.sendPlayers.size || trade.sendPicks.size) && (trade.receivePlayers.size || trade.receivePicks.size)) {
+    if ((trade.proposingTeamPlayers.size || trade.proposingTeamPicks.size) && (trade.acceptingTeamPlayers.size || trade.acceptingTeamPicks.size)) {
       action = (<Button onClick={this.handleProposeClick}>Propose</Button>)
     } else {
       action = (<Button disabled>Propose</Button>)
@@ -183,9 +182,11 @@ export default function () {
 
   const dropItems = []
   if (isOpen && (!valid || dropPlayers.size)) {
-    const sRoster = new Roster(sendRoster.toJS())
-    for (const [index, player] of sRoster.players.entries()) {
-      const sPlayers = isProposer ? trade.sendPlayers : trade.receivePlayers
+    const sRoster = new Roster({ roster: proposingTeamRoster.toJS(), league })
+    for (const [index, item] of sRoster.players.entries()) {
+      const { player } = item
+      const sPlayers = isProposer ? trade.proposingTeamPlayers : trade.acceptingTeamPlayers
+      console.log(sPlayers)
       if (player && !sPlayers.includes(player)) {
         dropItems.push(
           <TradePlayer
@@ -218,7 +219,7 @@ export default function () {
             <div className='trade__box'>
               {!!sItems.length &&
                 <div className='trade__box-head'>
-                  <TeamName tid={trade.pid || sendRoster.tid} />
+                  <TeamName tid={trade.pid || proposingTeamRoster.tid} />
                   <div className='trade__offer'>Sends</div>
                 </div>}
               {sItems}
@@ -226,7 +227,7 @@ export default function () {
             <div className='trade__box'>
               {!!rItems.length &&
                 <div className='trade__box-head'>
-                  <TeamName tid={trade.tid || receiveRoster.tid} />
+                  <TeamName tid={trade.tid || acceptingTeamRoster.tid} />
                   <div className='trade__offer'>Sends</div>
                 </div>}
               {rItems}
@@ -236,7 +237,7 @@ export default function () {
             <div className='trade__drop'>
               <div className='trade__box'>
                 <div className='trade__box-head'>
-                  <TeamName tid={sendRoster.tid} />
+                  <TeamName tid={proposingTeamRoster.tid} />
                   <div className='trade__offer'>Drop</div>
                 </div>
                 <div className='traade__box-body'>

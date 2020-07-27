@@ -216,7 +216,7 @@ export default class EditableLeague extends React.Component {
                 label='Bench'
                 field='bench'
                 type='int'
-                max={30}
+                max={20}
                 min={0}
                 {...props}
               />
@@ -224,7 +224,7 @@ export default class EditableLeague extends React.Component {
                 label='PS'
                 field='ps'
                 type='int'
-                max={15}
+                max={10}
                 min={0}
                 {...props}
               />
@@ -232,7 +232,7 @@ export default class EditableLeague extends React.Component {
                 label='IR'
                 field='ir'
                 type='int'
-                max={10}
+                max={5}
                 min={0}
                 {...props}
               />
