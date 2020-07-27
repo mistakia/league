@@ -21,13 +21,15 @@ export default function () {
   for (const position in groups) {
     const players = groups[position]
     for (const player of players) {
-      activeItems.push(<PlayerRoster key={player} player={player} />)
+      if (!player.player) continue
+      activeItems.push(<PlayerRoster key={player.player} player={player} />)
     }
   }
 
   const practiceItems = []
   for (const player of players.practice) {
-    practiceItems.push(<PlayerRoster key={player} player={player} />)
+    if (!player.player) continue
+    practiceItems.push(<PlayerRoster key={player.player} player={player} />)
   }
 
   const pickItems = []
