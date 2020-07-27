@@ -3,7 +3,8 @@ const moment = require('moment')
 const router = express.Router({ mergeParams: true })
 const API = require('groupme').Stateless
 
-const { constants, Roster, getEligibleSlots } = require('../../../common')
+const { constants, Roster } = require('../../../common')
+const { getRoster } = require('../../../utils')
 
 router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
@@ -63,31 +64,19 @@ router.post('/?', async (req, res) => {
     }
 
     // make sure player is available/undrafted
-    const slotNumbers = Object.values(constants.slots)
-    const rosters = await db('rosters')
-      .where({ lid: leagueId, year: constants.year, week: 0 })
-      .andWhere(function () {
-        slotNumbers.forEach(s => this.orWhere(`s${s}`, playerId))
-      })
-    if (rosters.length) {
+    const rosterPlayers = await db('rosters_players')
+      .join('rosters', 'rosters_players.rid', 'rosters.uid')
+      .where({ lid: leagueId, year: constants.year, week: 0, player: playerId })
+    if (rosterPlayers.length) {
       return res.status(400).send({ error: 'unavailable player' })
     }
 
     // make sure team has an open slot
-    const rows = await db('rosters').where({ tid: teamId, year: constants.year, week: 0 })
-    const roster = new Roster(rows[0])
-    const psSlots = getEligibleSlots({ league, ps: true })
-    const openPsSlots = roster.getOpenSlots(psSlots)
-    let slot = null
-    if (openPsSlots.length) {
-      slot = openPsSlots[0]
-    } else {
-      const eligibleSlots = getEligibleSlots({ league, bench: true, pos: player.pos1 })
-      const openSlots = roster.getOpenSlots(eligibleSlots)
-      if (openSlots.length) {
-        slot = openSlots[0]
-      }
-    }
+    const rosterRow = await getRoster({ db, tid: teamId, year: constants.year, week: 0 })
+    const roster = new Roster({ roster: rosterRow, league })
+    const slot = roster.hasOpenPracticeSquadSlot()
+      ? constants.slots.PS
+      : (roster.hasOpenBenchSlot(player.pos1) && constants.slots.BENCH)
 
     if (!slot) {
       return res.status(400).send({ error: 'unavailable roster spot' })
@@ -97,11 +86,12 @@ router.post('/?', async (req, res) => {
       ? (league.nteams - pick.pick + 1)
       : 1
 
-    const update = {}
-    update[`s${constants.slots[slot]}`] = playerId
-    const updateRosters = db('rosters')
-      .where({ tid: teamId, year: constants.year, week: 0 })
-      .update(update)
+    const insertRoster = db('rosters_players').insert({
+      rid: roster.uid,
+      player: playerId,
+      pos: player.pos1,
+      slot
+    })
 
     const insertTransaction = db('transactions')
       .insert({
@@ -128,14 +118,16 @@ router.post('/?', async (req, res) => {
       .whereNull('trades.vetoed')
 
     if (trades.length) {
+      // TODO - broadcast on WS
+      // TODO - broadcast notifications
       const tradeids = trades.map(t => t.uid)
       await db('trades')
         .whereIn('uid', tradeids)
         .update({ cancelled: Math.round(Date.now() / 1000) })
     }
 
-    await updateRosters
     await Promise.all([
+      insertRoster,
       insertTransaction,
       updateDraft
     ])

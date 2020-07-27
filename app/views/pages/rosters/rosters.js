@@ -17,8 +17,7 @@ export default class RostersPage extends React.Component {
     const labels = []
     const eligible = getEligibleSlots({ pos: 'ALL', bench: true, league, ir: true, ps: true })
     eligible.forEach((slot, index) => {
-      const slotName = slot.split('_').shift()
-      labels.push(<div key={index} className='roster__item'>{slotName}</div>)
+      labels.push(<div key={index} className='roster__item'>{slot}</div>)
     })
 
     const items = []

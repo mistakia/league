@@ -1,4 +1,4 @@
-import { Record } from 'immutable'
+import { Record, List } from 'immutable'
 
 export const Roster = new Record({
   isPending: false,
@@ -7,43 +7,7 @@ export const Roster = new Record({
   week: null,
   year: null,
   last_updated: null,
-  s0: null,
-  s1: null,
-  s2: null,
-  s3: null,
-  s4: null,
-  s5: null,
-  s6: null,
-  s7: null,
-  s8: null,
-  s9: null,
-  s10: null,
-  s11: null,
-  s12: null,
-  s13: null,
-  s14: null,
-  s15: null,
-  s16: null,
-  s17: null,
-  s18: null,
-  s19: null,
-  s20: null,
-  s21: null,
-  s22: null,
-  s23: null,
-  s24: null,
-  s25: null,
-  s26: null,
-  s27: null,
-  s28: null,
-  s29: null,
-  s30: null,
-  s31: null,
-  s32: null,
-  s33: null,
-  s34: null,
-  s35: null,
-  s36: null
+  players: new List()
 })
 
 export function createRoster (roster) {
@@ -51,8 +15,15 @@ export function createRoster (roster) {
     return
   }
 
+  const { tid, lid, week, year, last_updated, players } = roster
+
   return new Roster({
     isPending: false,
-    ...roster
+    players: new List(players),
+    tid,
+    lid,
+    week,
+    year,
+    last_updated
   })
 }

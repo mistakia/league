@@ -104,6 +104,11 @@ router.get('/:leagueId/rosters/?', async (req, res) => {
       .distinct('tid', 'year')
       .orderBy('week', 'desc')
 
+    const players = await db('rosters_players')
+      .whereIn('rid', rosters.map(r => r.uid))
+
+    rosters.forEach(r => { r.players = players.filter(p => p.rid === r.uid) })
+
     res.send(rosters)
   } catch (err) {
     logger(err)

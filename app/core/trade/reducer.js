@@ -8,10 +8,10 @@ const initialState = new Record({
   selectedTradeId: null,
   items: new Map(),
   dropPlayers: new List(),
-  receivePlayers: new List(),
-  sendPlayers: new List(),
-  receivePicks: new Map(),
-  sendPicks: new Map()
+  acceptingTeamPlayers: new List(),
+  proposingTeamPlayers: new List(),
+  acceptingTeamPicks: new Map(),
+  proposingTeamPicks: new Map()
 })
 
 export function tradeReducer (state = initialState(), { payload, type }) {
@@ -19,8 +19,8 @@ export function tradeReducer (state = initialState(), { payload, type }) {
     case tradeActions.TRADE_SELECT_TEAM:
       return state.merge({
         teamId: payload.teamId,
-        receivePlayers: new List(),
-        receivePicks: new Map()
+        acceptingTeamPlayers: new List(),
+        acceptingTeamPicks: new Map()
       })
 
     case tradeActions.TRADE_TOGGLE_DROP_PLAYER: {
@@ -31,37 +31,37 @@ export function tradeReducer (state = initialState(), { payload, type }) {
       })
     }
 
-    case tradeActions.TRADE_TOGGLE_RECEIVE_PLAYER: {
+    case tradeActions.TRADE_TOGGLE_ACCEPTING_TEAM_PLAYER: {
       const { player } = payload
-      const index = state.receivePlayers.indexOf(player)
+      const index = state.acceptingTeamPlayers.indexOf(player)
       return state.merge({
-        receivePlayers: index === -1 ? state.receivePlayers.push(player) : state.receivePlayers.delete(index)
+        acceptingTeamPlayers: index === -1 ? state.acceptingTeamPlayers.push(player) : state.acceptingTeamPlayers.delete(index)
       })
     }
 
-    case tradeActions.TRADE_TOGGLE_SEND_PLAYER: {
+    case tradeActions.TRADE_TOGGLE_PROPOSING_TEAM_PLAYER: {
       const { player } = payload
-      const index = state.sendPlayers.indexOf(player)
+      const index = state.proposingTeamPlayers.indexOf(player)
       return state.merge({
-        sendPlayers: index === -1 ? state.sendPlayers.push(player) : state.sendPlayers.delete(index)
+        proposingTeamPlayers: index === -1 ? state.proposingTeamPlayers.push(player) : state.proposingTeamPlayers.delete(index)
       })
     }
 
-    case tradeActions.TRADE_TOGGLE_SEND_PICK: {
+    case tradeActions.TRADE_TOGGLE_PROPOSING_TEAM_PICK: {
       const { uid } = payload.pick
       return state.merge({
-        sendPicks: state.sendPicks.has(uid)
-          ? state.sendPicks.delete(uid)
-          : state.sendPicks.set(uid, payload.pick)
+        proposingTeamPicks: state.proposingTeamPicks.has(uid)
+          ? state.proposingTeamPicks.delete(uid)
+          : state.proposingTeamPicks.set(uid, payload.pick)
       })
     }
 
-    case tradeActions.TRADE_TOGGLE_RECEIVE_PICK: {
+    case tradeActions.TRADE_TOGGLE_ACCEPTING_TEAM_PICK: {
       const { uid } = payload.pick
       return state.merge({
-        receivePicks: state.receivePicks.has(uid)
-          ? state.receivePicks.delete(uid)
-          : state.receivePicks.set(uid, payload.pick)
+        acceptingTeamPicks: state.acceptingTeamPicks.has(uid)
+          ? state.acceptingTeamPicks.delete(uid)
+          : state.acceptingTeamPicks.set(uid, payload.pick)
       })
     }
 
@@ -81,10 +81,10 @@ export function tradeReducer (state = initialState(), { payload, type }) {
       return state.merge({
         selectedTradeId: payload.tradeId,
         dropPlayers: new List(),
-        receivePlayers: new List(),
-        sendPlayers: new List(),
-        receivePicks: new Map(),
-        sendPicks: new Map()
+        acceptingTeamPlayers: new List(),
+        proposingTeamPlayers: new List(),
+        acceptingTeamPicks: new Map(),
+        proposingTeamPicks: new Map()
       })
 
     default:

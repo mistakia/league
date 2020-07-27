@@ -1,6 +1,9 @@
 const express = require('express')
 const router = express.Router()
 
+const { getRoster } = require('../../utils')
+const { constants } = require('../../common')
+
 router.put('/:teamId', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
@@ -36,7 +39,8 @@ router.put('/:teamId', async (req, res) => {
 router.get('/:teamId/lineups/?', async (req, res) => {
   const { db } = req.app.locals
   const { teamId } = req.params
-  const { week, year } = req.query
+  const week = req.query.week || constants.week
+  const year = req.query.year || constants.year
 
   const tid = parseInt(teamId, 10)
 
@@ -47,17 +51,8 @@ router.get('/:teamId/lineups/?', async (req, res) => {
     return res.status(401).send({ error: 'you do not have access to this teamId' })
   }
 
-  let query = db('rosters').where({ tid }).orderBy('last_updated', 'desc')
-  if (typeof week !== 'undefined') {
-    query = query.where({ week })
-  }
-
-  if (typeof seas !== 'undefined') {
-    query = query.where({ year })
-  }
-
-  const rosters = await query
-  res.send({ rosters })
+  const roster = await getRoster({ db, tid, week, year })
+  res.send(roster)
 })
 
 router.put('/:teamId/lineups/?', async (req, res) => {
