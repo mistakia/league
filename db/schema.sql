@@ -496,6 +496,23 @@ CREATE TABLE `player` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `poaches`
+--
+
+DROP TABLE IF EXISTS `poaches`;
+
+CREATE TABLE `poaches` (
+  `player` varchar(7) NOT NULL,
+  `drop` varchar(7) NOT NULL,
+  `tid` int(5) NOT NULL,
+  `submitted` int(11) NOT NULL,
+  `expired` int(11) NOT NULL,
+  `processed` int(11) NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `punt`
 --
 
@@ -1226,6 +1243,7 @@ CREATE TABLE `draft` (
   `round` tinyint(1) NOT NULL,
   `pick` tinyint(2) DEFAULT NULL,
   `tid` int(6) NOT NULL,
+  `otid` int(6) NOT NULL,
   `lid` int(6) NOT NULL,
   `year` int(4) NOT NULL,
   PRIMARY KEY (`uid`),
@@ -1377,50 +1395,32 @@ CREATE TABLE `projections` (
 DROP TABLE IF EXISTS `rosters`;
 
 CREATE TABLE `rosters` (
+  `uid` int(11) NOT NULL AUTO_INCREMENT,
   `tid` int(6) NOT NULL,
   `lid` int(6) NOT NULL,
   `week` tinyint(2) NOT NULL,
   `year` int(4) NOT NULL,
   `last_updated` int(11) NOT NULL,
-  `s0` varchar(7) DEFAULT NULL,
-  `s1` varchar(7) DEFAULT NULL,
-  `s2` varchar(7) DEFAULT NULL,
-  `s3` varchar(7) DEFAULT NULL,
-  `s4` varchar(7) DEFAULT NULL,
-  `s5` varchar(7) DEFAULT NULL,
-  `s6` varchar(7) DEFAULT NULL,
-  `s7` varchar(7) DEFAULT NULL,
-  `s8` varchar(7) DEFAULT NULL,
-  `s9` varchar(7) DEFAULT NULL,
-  `s10` varchar(7) DEFAULT NULL,
-  `s11` varchar(7) DEFAULT NULL,
-  `s12` varchar(7) DEFAULT NULL,
-  `s13` varchar(7) DEFAULT NULL,
-  `s14` varchar(7) DEFAULT NULL,
-  `s15` varchar(7) DEFAULT NULL,
-  `s16` varchar(7) DEFAULT NULL,
-  `s17` varchar(7) DEFAULT NULL,
-  `s18` varchar(7) DEFAULT NULL,
-  `s19` varchar(7) DEFAULT NULL,
-  `s20` varchar(7) DEFAULT NULL,
-  `s21` varchar(7) DEFAULT NULL,
-  `s22` varchar(7) DEFAULT NULL,
-  `s23` varchar(7) DEFAULT NULL,
-  `s24` varchar(7) DEFAULT NULL,
-  `s25` varchar(7) DEFAULT NULL,
-  `s26` varchar(7) DEFAULT NULL,
-  `s27` varchar(7) DEFAULT NULL,
-  `s28` varchar(7) DEFAULT NULL,
-  `s29` varchar(7) DEFAULT NULL,
-  `s30` varchar(7) DEFAULT NULL,
-  `s31` varchar(7) DEFAULT NULL,
-  `s32` varchar(7) DEFAULT NULL,
-  `s33` varchar(7) DEFAULT NULL,
-  `s34` varchar(7) DEFAULT NULL,
-  `s35` varchar(7) DEFAULT NULL,
-  `s36` varchar(7) DEFAULT NULL,
+  PRIMARY KEY `uid` (`uid`),
   UNIQUE KEY `teamid` (`tid`,`week`),
   KEY `tid` (`tid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rosters`
+--
+
+DROP TABLE IF EXISTS `rosters_players`;
+
+CREATE TABLE `rosters_players` (
+  `rid` int(11) NOT NULL,
+  `slot` int(11) NOT NULL,
+  `player` varchar(7) NOT NULL,
+  `pos` varchar(3) NOT NULL,
+  UNIQUE KEY `player` (`rid`,`player`),
+  KEY `rid` (`rid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -1478,7 +1478,7 @@ CREATE TABLE `trades` (
   `userid` int(6) NOT NULL,
   `year` int(4) NOT NULL,
   `offered` int(11) NOT NULL,
-  `cancelled` int(11) NOT NULL,
+  `cancelled` int(11) DEFAULT NULL,
   `accepted` int(11) DEFAULT NULL,
   `rejected` int(11) DEFAULT NULL,
   `vetoed` int(11) DEFAULT NULL,

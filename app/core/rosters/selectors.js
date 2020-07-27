@@ -1,6 +1,6 @@
 import { List } from 'immutable'
 
-import { getEligibleSlots, constants, Roster } from '@common'
+import { Roster } from '@common'
 import { getApp } from '@core/app'
 import { getPlayerById } from '@core/players'
 import { getCurrentLeague } from '@core/leagues'
@@ -42,9 +42,8 @@ export function isPlayerEligible (state, { player, playerId }) {
   }
   const roster = getCurrentTeamRoster(state)
   const league = getCurrentLeague(state)
-  const eligibleSlots = getEligibleSlots({ league, bench: true, pos: player.pos1 })
-  const ros = new Roster(roster.toJS())
-  return !!ros.getOpenSlots(eligibleSlots).length
+  const ros = new Roster({ roster: roster.toJS(), league })
+  return ros.hasOpenBenchSlot(player.pos1)
 }
 
 export function getCurrentTeamRoster (state) {
@@ -63,25 +62,11 @@ export function getCurrentPlayers (state) {
     return { active: new List(), practice: new List() }
   }
 
-  const psSlots = getEligibleSlots({ ps: true, league })
-  const psSlotNums = psSlots.map(s => constants.slots[s])
-  let active = new List()
-  let practice = new List()
-
-  for (const [key] of roster.toSeq()) {
-    if (key.startsWith('s')) {
-      const playerId = roster.get(key)
-      const player = getPlayerById(state, { playerId })
-      if (player.player) {
-        const slot = parseInt(key.substring(1), 10)
-        if (psSlotNums.includes(slot)) {
-          practice = practice.push(player)
-        } else {
-          active = active.push(player)
-        }
-      }
-    }
-  }
+  const r = new Roster({ roster: roster.toJS(), league })
+  const activePlayerIds = r.active.map(p => p.player)
+  const active = new List(activePlayerIds.map(playerId => getPlayerById(state, { playerId })))
+  const practicePlayerIds = r.practice.map(p => p.player)
+  const practice = new List(practicePlayerIds.map(playerId => getPlayerById(state, { playerId })))
 
   return { active, practice }
 }

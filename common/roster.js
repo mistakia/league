@@ -1,47 +1,76 @@
 import * as constants from './constants'
 
 export default class Roster {
-  constructor (data) {
-    this._roster = data
-    this._slots = new Map()
+  constructor ({ roster, league }) {
+    this.uid = roster.uid
+    this._league = league
+    this._players = new Map()
 
-    for (const key in this._roster) {
-      if (key.startsWith('s')) {
-        this._slots.set(key, this._roster[key])
-      }
+    this._activeRosterLimit = league.sqb + league.srb + league.swr + league.ste + league.srbwr + league.srbwrte + league.sqbrbwrte + league.swrte + league.sdst + league.sk + league.bench
+
+    for (const { slot, player, pos } of roster.players) {
+      this._players.set(player, { slot, player, pos, rid: roster.uid })
     }
+  }
+
+  get isFull () {
+    return this.active.length >= this._activeRosterLimit
   }
 
   get players () {
-    return Array.from(this._slots.values())
+    return Array.from(this._players.values())
   }
 
-  get slots () {
-    return Object.fromEntries(this._slots)
+  get starters () {
+    const exclude = [constants.slots.IR, constants.slots.PS, constants.slots.BENCH]
+    return this.players.filter(p => !exclude.includes(p.slot))
   }
 
-  removePlayer (playerId) {
-    for (const [slot, player] of this._slots.entries()) {
-      if (player === playerId) {
-        this._slots.set(slot, null)
-      }
+  get active () {
+    const exclude = [constants.slots.IR, constants.slots.PS]
+    return this.players.filter(p => !exclude.includes(p.slot))
+  }
+
+  get practice () {
+    return this.players.filter(p => p.slot === constants.slots.PS)
+  }
+
+  get bench () {
+    return this.players.filter(p => p.slot === constants.slots.BENCH)
+  }
+
+  get ir () {
+    return this.players.filter(p => p.slot === constants.slots.IR)
+  }
+
+  has (player) {
+    return this._players.has(player)
+  }
+
+  getBySlot (slot) {
+    return this.players.filter(p => p.slot === constants.slots[slot])
+  }
+
+  removePlayer (player) {
+    this._players.delete(player)
+  }
+
+  addPlayer ({ slot, player, pos }) {
+    // TODO - handle invalid roster states
+    this._players.set(player, { slot, player, pos, rid: this.uid })
+  }
+
+  hasOpenPracticeSquadSlot () {
+    return this.practice.length < this._league.ps
+  }
+
+  hasOpenBenchSlot (pos) {
+    if (this.isFull) {
+      return false
     }
-  }
 
-  addPlayer (slot, player) {
-    const slotNum = constants.slots[slot]
-    this._slots.set(`s${slotNum}`, player)
-  }
-
-  getOpenSlots (slots) {
-    const open = []
-    for (const slot of slots) {
-      const slotNum = constants.slots[slot]
-      if (!this._slots.get(`s${slotNum}`)) {
-        open.push(slot)
-      }
-    }
-
-    return open
+    const count = this.players.filter(p => p.pos === pos).length
+    const limit = this._league[`m${pos.toLowerCase()}`]
+    return !limit || count < limit
   }
 }

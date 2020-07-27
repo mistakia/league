@@ -11,10 +11,10 @@ export const Trade = new Record({
   cancelled: null,
   rejected: null,
   vetoed: null,
-  sendPlayers: new List(),
-  receivePlayers: new List(),
-  sendPicks: new Map(),
-  receivePicks: new Map(),
+  proposingTeamPlayers: new List(),
+  acceptingTeamPlayers: new List(),
+  proposingTeamPicks: new Map(),
+  acceptingTeamPicks: new Map(),
   dropPlayers: new List()
 })
 
@@ -29,10 +29,10 @@ export function createTrade ({
   cancelled,
   rejected,
   vetoed,
-  sendPlayers,
-  receivePlayers,
-  sendPicks,
-  receivePicks,
+  proposingTeamPlayers,
+  acceptingTeamPlayers,
+  proposingTeamPicks,
+  acceptingTeamPicks,
   dropPlayers
 }) {
   return new Trade({
@@ -46,10 +46,10 @@ export function createTrade ({
     cancelled,
     rejected,
     vetoed,
-    sendPlayers: new List(sendPlayers),
-    receivePlayers: new List(receivePlayers),
-    sendPicks: new Map(sendPicks.reduce((m, p) => m.set(p.uid, p), new Map())),
-    receivePicks: new Map(receivePicks.reduce((m, p) => m.set(p.uid, p), new Map())),
+    proposingTeamPlayers: new List(proposingTeamPlayers),
+    acceptingTeamPlayers: new List(acceptingTeamPlayers),
+    proposingTeamPicks: new Map(proposingTeamPicks.reduce((m, p) => m.set(p.uid, p), new Map())),
+    acceptingTeamPicks: new Map(acceptingTeamPicks.reduce((m, p) => m.set(p.uid, p), new Map())),
     dropPlayers: new List(dropPlayers)
   })
 }

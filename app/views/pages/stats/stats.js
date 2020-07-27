@@ -12,8 +12,7 @@ export default class StatsPage extends React.Component {
     const lineupHeaders = []
     const eligibleStarterSlots = getEligibleSlots({ pos: 'ALL', league })
     for (const slot of eligibleStarterSlots) {
-      const slotName = slot.split('_').shift()
-      lineupHeaders.push(<div key={slot} className='player__item-metric'>{slotName}</div>)
+      lineupHeaders.push(<div key={slot} className='player__item-metric'>{slot}</div>)
       lineupHeaders.push(<div key={`${slot}%`} className='player__item-metric'>%</div>)
     }
 

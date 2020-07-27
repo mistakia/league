@@ -15,8 +15,17 @@ const getPlayByPlayQuery = (db) => db('pbp')
     this.orWhereNot({ 'pbp.act3': 'A' })
   })
 
+const getRoster = async ({ db, tid, week, year }) => {
+  const rows = await db('rosters').where({ tid, year, week })
+  const rosterRow = rows[0]
+  rosterRow.players = await db('rosters_players').where('rid', rosterRow.uid)
+
+  return rosterRow
+}
+
 module.exports = {
   getPlayerId: require('./get-player-id'),
   getSchedule: require('./get-schedule'),
-  getPlayByPlayQuery
+  getPlayByPlayQuery,
+  getRoster
 }

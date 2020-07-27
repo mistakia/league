@@ -1,74 +1,45 @@
-import { slots } from './constants'
-
 const getEligibleSlots = ({ pos, ps, bench, ir, league }) => {
-  const slotKeys = Object.keys(slots)
   let eligible = []
 
   if (pos) {
-    if (league.sqb === 1) {
-      eligible.push('QB_ONE')
-    } else if (league.sqb === 2) {
-      eligible.push('QB_ONE')
-      eligible.push('QB_TWO')
+    for (let i = 0; i < league.sqb; i++) {
+      eligible.push('QB')
     }
 
-    if (league.srb === 1) {
-      eligible.push('RB_ONE')
-    } else if (league.srb === 2) {
-      eligible.push('RB_ONE')
-      eligible.push('RB_TWO')
-    } else if (league.srb === 3) {
-      eligible.push('RB_ONE')
-      eligible.push('RB_TWO')
-      eligible.push('RB_THREE')
+    for (let i = 0; i < league.srb; i++) {
+      eligible.push('RB')
     }
 
-    if (league.swr === 1) {
-      eligible.push('WR_ONE')
-    } else if (league.swr === 2) {
-      eligible.push('WR_ONE')
-      eligible.push('WR_TWO')
-    } else if (league.swr === 3) {
-      eligible.push('WR_ONE')
-      eligible.push('WR_TWO')
-      eligible.push('WR_THREE')
+    for (let i = 0; i < league.swr; i++) {
+      eligible.push('WR')
     }
 
-    if (league.ste === 1) {
-      eligible.push('TE_ONE')
-    } else if (league.ste === 2) {
-      eligible.push('TE_ONE')
-      eligible.push('TE_TWO')
+    for (let i = 0; i < league.ste; i++) {
+      eligible.push('TE')
     }
 
-    if (league.swrte === 1) {
-      eligible.push('WRTE_ONE')
+    for (let i = 0; i < league.swrte; i++) {
+      eligible.push('WRTE')
     }
 
-    if (league.srbwr === 1) {
-      eligible.push('RBWR_ONE')
-    } else if (league.srbwr === 2) {
-      eligible.push('RBWR_ONE')
-      eligible.push('RBWR_TWO')
+    for (let i = 0; i < league.srbwr; i++) {
+      eligible.push('RBWR')
     }
 
-    if (league.srbwrte === 1) {
-      eligible.push('RBWRTE_ONE')
-    } else if (league.srbwrte === 2) {
-      eligible.push('RBWRTE_ONE')
-      eligible.push('RBWRTE_TWO')
+    for (let i = 0; i < league.srbwrte; i++) {
+      eligible.push('RBWRTE')
     }
 
-    if (league.sqbrbwrte === 1) {
-      eligible.push('QBRBWRTE_ONE')
+    for (let i = 0; i < league.sqbrbwrte; i++) {
+      eligible.push('QBRBWRTE')
     }
 
-    if (league.sk === 1) {
-      eligible.push('K_ONE')
+    for (let i = 0; i < league.sk; i++) {
+      eligible.push('K')
     }
 
-    if (league.sdst === 1) {
-      eligible.push('DST_ONE')
+    for (let i = 0; i < league.sdst; i++) {
+      eligible.push('DST')
     }
 
     if (pos !== 'ALL') {
@@ -76,19 +47,22 @@ const getEligibleSlots = ({ pos, ps, bench, ir, league }) => {
     }
   }
 
-  if (bench) {
-    const benchSlots = slotKeys.filter(k => k.includes('BENCH'))
-    eligible.push(...benchSlots.slice(0, league.bench))
-  }
-
   if (ps) {
-    const psSlots = slotKeys.filter(k => k.includes('PS'))
-    eligible.push(...psSlots.slice(0, league.ps))
+    for (let i = 0; i < league.ps; i++) {
+      eligible.push('PS')
+    }
   }
 
   if (ir) {
-    const irSlots = slotKeys.filter(k => k.includes('IR'))
-    eligible.push(...irSlots.slice(0, league.ir))
+    for (let i = 0; i < league.ir; i++) {
+      eligible.push('IR')
+    }
+  }
+
+  if (bench) {
+    for (let i = 0; i < league.bench; i++) {
+      eligible.push('BENCH')
+    }
   }
 
   return eligible

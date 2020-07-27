@@ -17,10 +17,10 @@ export function * propose () {
   const trade = yield select(getTrade)
 
   const params = {
-    sendPlayers: trade.sendPlayers.toJS(),
-    receivePlayers: trade.receivePlayers.toJS(),
-    sendPicks: trade.sendPicks.toIndexedSeq().toJS().map(p => p.uid),
-    receivePicks: trade.receivePicks.toIndexedSeq().toJS().map(p => p.uid),
+    proposingTeamPlayers: trade.proposingTeamPlayers.toJS(),
+    acceptingTeamPlayers: trade.acceptingTeamPlayers.toJS(),
+    proposingTeamPicks: trade.proposingTeamPicks.toIndexedSeq().toJS().map(p => p.uid),
+    acceptingTeamPicks: trade.acceptingTeamPicks.toIndexedSeq().toJS().map(p => p.uid),
     dropPlayers: trade.dropPlayers.toJS(),
     pid: teamId,
     tid,

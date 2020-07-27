@@ -1,7 +1,8 @@
 import WebSocket from 'ws'
 import config from '../../config'
 import db from '../../db'
-import { constants, Roster, getEligibleSlots } from '../../common'
+import { constants, Roster } from '../../common'
+import { getRoster } from '../../utils'
 import debug from 'debug'
 
 export default class Auction {
@@ -108,11 +109,14 @@ export default class Auction {
 
     this.logger(`processing ${player} bid`)
 
-    const rosters = await db('rosters')
-      .where({ tid, year: constants.year })
-      .orderBy('week', 'desc')
+    const roster = await getRoster({
+      db,
+      tid,
+      week: constants.week,
+      year: constants.year
+    })
 
-    const roster = new Roster(rosters[0])
+    const r = new Roster({ roster, league: this._league })
     const players = await db('player').where('player', player)
     const playerInfo = players[0]
     if (!playerInfo) {
@@ -122,14 +126,8 @@ export default class Auction {
       return
     }
 
-    const eligibleSlots = getEligibleSlots({
-      pos: playerInfo.pos1,
-      league: this._league,
-      bench: true
-    })
-    const openSlots = roster.getOpenSlots(eligibleSlots)
-    const slot = openSlots[0]
-    if (!slot) {
+    const hasSlot = r.hasOpenBenchSlot(playerInfo.pos1)
+    if (!hasSlot) {
       this._startBidTimer()
       this.logger(`no open slots available for ${player} on teamId ${tid}`)
       // TODO broadcast error
@@ -137,13 +135,12 @@ export default class Auction {
     }
 
     try {
-      await db('rosters')
-        .where({
-          tid,
-          week: rosters[0].week,
-          year: constants.year
+      await db('rosters_players')
+        .insert({
+          rid: r.uid,
+          slot: constants.slots.BENCH,
+          player
         })
-        .update(`s${constants.slots[slot]}`, player)
     } catch (err) {
       this.logger(err)
       this._startBidTimer()
@@ -169,7 +166,7 @@ export default class Auction {
       payload: {
         tid,
         player,
-        slot
+        slot: constants.slots.BENCH
       }
     })
 
@@ -259,13 +256,15 @@ export default class Auction {
     if (!player) {
       // select player for nomination
       const rows = await db('rosters')
-        .select('*')
-        .where({ lid: this._lid, year: constants.year })
-        .distinct('tid', 'year')
-        .orderBy('week', 'desc')
+        .where({ lid: this._lid, year: constants.year, week: constants.week })
 
-      const rosters = rows.map(r => new Roster(r))
-      const players = rosters.map(r => r.players).flat()
+      const rids = rows.map(r => r.uid)
+      const rosterPlayers = await db('rosters_players')
+        .whereIn('rid', rids)
+        .whereNot('slot', constants.slots.IR)
+        .whereNot('slot', constants.slots.PS)
+
+      const players = rosterPlayers.map(p => p.player)
 
       const results = await db('player')
         .innerJoin('draft_rankings', 'player.player', 'draft_rankings.player')

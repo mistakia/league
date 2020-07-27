@@ -1,7 +1,7 @@
 import React from 'react'
 
 import PlayerRosterRow from '@components/player-roster-row'
-import { getEligibleSlots, constants } from '@common'
+import { Roster as RosterBuilder } from '@common'
 import TeamName from '@components/team-name'
 
 import './roster.styl'
@@ -14,13 +14,16 @@ export default class Roster extends React.Component {
       return null
     }
 
+    const r = new RosterBuilder({ roster: roster.toJS(), league })
+    console.log(r)
+    console.log(r.players)
+    console.log(r.players.entries())
+
     const rows = []
-    const eligible = getEligibleSlots({ pos: 'ALL', bench: true, league, ir: true, ps: true })
-    for (const slot of eligible) {
-      const slotId = constants.slots[slot]
-      const playerId = roster[`s${slotId}`]
+    for (const [index, value] of r.players.entries()) {
+      const { slot, player } = value
       rows.push(
-        <PlayerRosterRow key={slot} {...{ slotId, playerId, slot, roster }} />
+        <PlayerRosterRow key={index} {...{ playerId: player, slot, roster }} />
       )
     }
 

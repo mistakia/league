@@ -1,12 +1,15 @@
 const API = require('groupme').Stateless
 const express = require('express')
 const router = express.Router({ mergeParams: true })
-const { constants, Roster, getEligibleSlots } = require('../../../common')
+const { constants, Roster } = require('../../../common')
+const { getRoster } = require('../../../utils')
 
 const getTrade = async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const { tradeId } = req.params
+
+    // validate trade exists
     const trades = await db('trades').where({ uid: tradeId })
     const trade = trades[0]
     if (!trade) {
@@ -21,10 +24,10 @@ const getTrade = async (req, res) => {
       .join('draft', 'trades_picks.pickid', 'draft.uid')
 
     trade.dropPlayers = []
-    trade.sendPlayers = []
-    trade.receivePlayers = []
-    trade.sendPicks = []
-    trade.receivePicks = []
+    trade.proposingTeamPlayers = []
+    trade.acceptingTeamPlayers = []
+    trade.proposingTeamPicks = []
+    trade.acceptingTeamPicks = []
 
     for (const player of drops) {
       trade.dropPlayers.push(player.player)
@@ -32,17 +35,17 @@ const getTrade = async (req, res) => {
 
     for (const pick of picks) {
       if (pick.tid === trade.pid) {
-        trade.receivePicks.push(pick)
+        trade.proposingTeamPicks.push(pick)
       } else {
-        trade.sendPicks.push(pick)
+        trade.acceptingTeamPicks.push(pick)
       }
     }
 
     for (const player of players) {
       if (player.tid === trade.pid) {
-        trade.receivePlayers.push(player.player)
+        trade.proposingTeamPlayers.push(player.player)
       } else {
-        trade.sendPlayers.push(player.player)
+        trade.acceptingTeamPlayers.push(player.player)
       }
     }
 
@@ -66,58 +69,79 @@ router.post('/accept', async (req, res, next) => {
       .whereNull('cancelled')
       .whereNull('vetoed')
 
+    // verify trade exists
     const trade = trades[0]
     if (!trade) {
       res.status(400).send({ error: `no valid trade with tradeid: ${tradeId}` })
     }
 
-    // TODO - get send drop players
-
-    const dropPlayers = req.body.dropPlayers
+    const acceptingTeamDropPlayers = req.body.dropPlayers
       ? (Array.isArray(req.body.dropPlayers)
         ? req.body.dropPlayers
         : [req.body.dropPlayers])
       : []
 
+    // gather traded players
     const playerRows = await db('trades_players').where({ tradeid: tradeId })
-    const receivePlayers = [] // from proposed team going to accepting team
-    const sendPlayers = [] // from accepting team going to proposed team
+    const proposingTeamPlayers = [] // players on proposing team
+    const acceptingTeamPlayers = [] // players on accepting team
     for (const row of playerRows) {
       if (row.tid === trade.pid) {
-        receivePlayers.push(row.player)
+        proposingTeamPlayers.push(row.player)
       } else {
-        sendPlayers.push(row.player)
+        acceptingTeamPlayers.push(row.player)
       }
     }
-    const rosters = await db('rosters')
-      .where({ lid: leagueId, year: constants.year })
-      .whereIn('tid', [trade.tid, trade.pid])
-      .orderBy('week', 'desc')
-      .limit(2)
-
-    const tradedPlayers = sendPlayers.concat(receivePlayers)
+    const tradedPlayers = proposingTeamPlayers.concat(acceptingTeamPlayers)
     const leagues = await db('leagues').where({ uid: leagueId })
     const players = await db('player').whereIn('player', tradedPlayers)
     const league = leagues[0]
 
-    // validate receiving roster
-    const rRosterRow = rosters.find(r => r.tid === trade.tid)
-    const rRoster = new Roster(rRosterRow)
-    dropPlayers.forEach(p => rRoster.removePlayer(p))
-    receivePlayers.forEach(p => rRoster.removePlayer(p))
-    for (const playerId of sendPlayers) {
+    // validate accepting team roster
+    const acceptingTeamRosterRow = await getRoster({
+      db,
+      tid: trade.tid,
+      week: constants.week,
+      year: constants.year
+    })
+    const acceptingTeamRoster = new Roster({ roster: acceptingTeamRosterRow, league })
+    acceptingTeamDropPlayers.forEach(p => acceptingTeamRoster.removePlayer(p))
+    acceptingTeamPlayers.forEach(p => acceptingTeamRoster.removePlayer(p))
+    for (const playerId of proposingTeamPlayers) {
       const player = players.find(p => p.player === playerId)
-      const eligibleSlots = getEligibleSlots({ bench: true, pos: player.pos1, league })
-      const openSlots = rRoster.getOpenSlots(eligibleSlots)
-      if (!openSlots.length) {
-        return res.status(400).send({ error: 'no slots available on receiving roster' })
+      const hasSlot = acceptingTeamRoster.hasOpenBenchSlot(player.pos1)
+      if (!hasSlot) {
+        return res.status(400).send({ error: 'no slots available on accepting team roster' })
       }
-      rRoster.addPlayer(openSlots[0], playerId)
+      acceptingTeamRoster.addPlayer({ slot: constants.slots.BENCH, player: playerId, pos: player.pos1 })
+    }
+
+    // validate proposing team roster
+    const proposingTeamDropPlayerRows = await db('trades_drops')
+      .where({ tradeid: tradeId })
+    const proposingTeamDropPlayers = proposingTeamDropPlayerRows.map(p => p.player)
+
+    const proposingTeamRosterRow = await getRoster({
+      db,
+      tid: trade.pid,
+      week: constants.week,
+      year: constants.year
+    })
+    const proposingTeamRoster = new Roster({ roster: proposingTeamRosterRow, league })
+    proposingTeamDropPlayers.forEach(p => proposingTeamRoster.removePlayer(p))
+    proposingTeamPlayers.forEach(p => proposingTeamRoster.removePlayer(p))
+    for (const playerId of acceptingTeamPlayers) {
+      const player = players.find(p => p.player === playerId)
+      const hasSlot = proposingTeamRoster.hasOpenBenchSlot(player.pos1)
+      if (!hasSlot) {
+        return res.status(400).send({ error: 'no slots available on proposing team roster' })
+      }
+      proposingTeamRoster.addPlayer({ slot: constants.slots.BENCH, player: playerId, pos: player.pos1 })
     }
 
     // insert receiving team drops
     const insertDrops = []
-    for (const player of dropPlayers) {
+    for (const player of acceptingTeamDropPlayers) {
       insertDrops.push({
         tradeid: tradeId,
         player,
@@ -142,7 +166,7 @@ router.post('/accept', async (req, res, next) => {
 
     // insert transactions
     const insertTransactions = []
-    for (const player of sendPlayers) {
+    for (const player of acceptingTeamPlayers) {
       insertTransactions.push({
         userid: trade.userid,
         tid: trade.pid,
@@ -154,7 +178,7 @@ router.post('/accept', async (req, res, next) => {
         timestamp: Math.round(Date.now() / 1000)
       })
     }
-    for (const player of receivePlayers) {
+    for (const player of proposingTeamPlayers) {
       insertTransactions.push({
         userid: req.user.userId,
         tid: trade.tid,
@@ -175,38 +199,22 @@ router.post('/accept', async (req, res, next) => {
     }
 
     // update receiving roster
-    if (sendPlayers.length || receivePlayers.length) {
-      await db('rosters')
-        .where({ tid: trade.tid, week: constants.week })
-        .update(rRoster.slots)
+    if (acceptingTeamPlayers.length || proposingTeamPlayers.length) {
+      await db('rosters_players').del().where({ rid: acceptingTeamRoster.uid })
+      await db('rosters_players').insert(acceptingTeamRoster.players)
     }
 
-    // process sending roster
-    const sRosterRow = rosters.find(r => r.tid === trade.pid)
-    const sRoster = new Roster(sRosterRow)
-    // dropPlayers.forEach(p => sRoster.removePlayer(p)) - TODO get send drop players
-    sendPlayers.forEach(p => sRoster.removePlayer(p))
-    for (const playerId of receivePlayers) {
-      const player = players.find(p => p.player === playerId)
-      const eligibleSlots = getEligibleSlots({ bench: true, pos: player.pos1, league })
-      const openSlots = sRoster.getOpenSlots(eligibleSlots)
-      if (!openSlots.length) {
-        return res.status(400).send({ error: 'no slots available on sending roster' })
-      }
-      sRoster.addPlayer(openSlots[0], playerId)
+    // update proposing team roster
+    if (acceptingTeamPlayers.length || proposingTeamPlayers.length) {
+      await db('rosters_players').del().where({ rid: proposingTeamRoster.uid })
+      await db('rosters_players').insert(proposingTeamRoster.players)
     }
 
-    // update sending roster
-    if (sendPlayers.length || receivePlayers.length) {
-      await db('rosters')
-        .where({ tid: trade.pid, week: constants.week })
-        .update(sRoster.slots)
-    }
-
+    // update traded picks
     const pickRows = await db('trades_picks').where({ tradeid: tradeId })
     for (const pick of pickRows) {
       await db('draft')
-        .update({ tid: pick.tid })
+        .update({ tid: pick.tid === trade.pid ? trade.tid : trade.pid })
         .where({ uid: pick.pickid })
     }
 
@@ -219,6 +227,8 @@ router.post('/accept', async (req, res, next) => {
       .whereNull('trades.vetoed')
 
     if (tradeRows.length) {
+      // TODO - broadcast on WS
+      // TODO - broadcast notifications
       const tradeids = tradeRows.map(t => t.uid)
       await db('trades')
         .whereIn('uid', tradeids)
@@ -229,31 +239,39 @@ router.post('/accept', async (req, res, next) => {
       const teams = await db('teams').whereIn('uid', [trade.pid, trade.tid])
       const proposingTeam = teams.find(t => t.uid === trade.pid)
       const acceptingTeam = teams.find(t => t.uid === trade.tid)
-      const traded = []
-      const received = []
-      for (const playerId of receivePlayers) {
+      const proposingTeamItems = []
+      const acceptingTeamItems = []
+      for (const playerId of proposingTeamPlayers) {
         const player = players.find(p => p.player === playerId)
-        traded.push(`${player.fname} ${player.lname} (${player.pos1})`)
+        proposingTeamItems.push(`${player.fname} ${player.lname} (${player.pos1})`)
       }
-      for (const playerId of sendPlayers) {
+      for (const playerId of acceptingTeamPlayers) {
         const player = players.find(p => p.player === playerId)
-        received.push(`${player.fname} ${player.lname} (${player.pos1})`)
+        acceptingTeamItems.push(`${player.fname} ${player.lname} (${player.pos1})`)
       }
 
       const picks = await db('draft').whereIn('uid', pickRows.map(p => p.pickid))
       for (const pick of picks) {
         const pickNum = (pick.pick % league.nteams) || league.nteams
-        const pickStr = `${pick.year} ${pick.round}.${('0' + pickNum).slice(-2)}`
+        const pickStr = pick.year === constants.year
+          ? `${pick.year} ${pick.round}.${('0' + pickNum).slice(-2)}`
+          : `${pick.year} ${pick.round}`
         const pickTradeInfo = pickRows.find(p => p.pickid === pick.uid)
+
+        // reversed because pick has already been traded
         if (pickTradeInfo.tid === trade.pid) {
-          received.push(pickStr)
+          acceptingTeamItems.push(pickStr)
         } else {
-          traded.push(pickStr)
+          proposingTeamItems.push(pickStr)
         }
       }
-      const tradeStr = traded.slice(0, -1).join(', ') + ', and ' + traded.slice(-1)
-      const receiveStr = received.slice(0, -1).join(', ') + ', and ' + received.slice(-1)
-      const message = `${proposingTeam.name} has traded ${tradeStr} to ${acceptingTeam.name} in exchange for ${receiveStr}`
+      const proposingTeamStr = proposingTeamItems.length > 1
+        ? proposingTeamItems.slice(0, -1).join(', ') + ', and ' + proposingTeamItems.slice(-1)
+        : proposingTeamItems.toString()
+      const acceptingTeamStr = acceptingTeamItems.length > 1
+        ? acceptingTeamItems.slice(0, -1).join(', ') + ', and ' + acceptingTeamItems.slice(-1)
+        : acceptingTeamItems.toString()
+      const message = `${proposingTeam.name} has traded ${proposingTeamStr} to ${acceptingTeam.name} in exchange for ${acceptingTeamStr}`
       API.Bots.post(league.groupme_token, league.groupme_id, message, {}, (err) => logger(err))
 
       // TODO drop message
