@@ -4,7 +4,7 @@ const router = express.Router({ mergeParams: true })
 const API = require('groupme').Stateless
 
 const { constants, Roster } = require('../../../common')
-const { getRoster } = require('../../../utils')
+const { getRoster, sendNotifications } = require('../../../utils')
 
 router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
@@ -142,17 +142,22 @@ router.post('/?', async (req, res) => {
     const teams = await db('teams').where({ uid: teamId })
     const team = teams[0]
 
-    // send out notifications
-    if (league.groupme_token && league.groupme_id) {
-      let message = `${team.name} has selected ${player.fname} ${player.lname} (${player.pos1}) with `
-      if (pick.pick === 1) {
-        message += 'the first overall pick '
-      } else {
-        const pickNum = (pick.pick % league.nteams) || league.nteams
-        message += `pick #${pick.pick} (${pick.round}.${('0' + pickNum).slice(-2)}) `
-      }
-      message += `in the ${constants.year} draft`
+    let message = `${team.name} has selected ${player.fname} ${player.lname} (${player.pos1}) with `
+    if (pick.pick === 1) {
+      message += 'the first overall pick '
+    } else {
+      const pickNum = (pick.pick % league.nteams) || league.nteams
+      message += `pick #${pick.pick} (${pick.round}.${('0' + pickNum).slice(-2)}) `
+    }
+    message += `in the ${constants.year} draft`
 
+    sendNotifications({
+      leagueId: league.uid,
+      league: true,
+      message
+    })
+
+    if (league.groupme_token && league.groupme_id) {
       API.Bots.post(league.groupme_token, league.groupme_id, message, {}, (err) => logger(err))
     }
   } catch (err) {

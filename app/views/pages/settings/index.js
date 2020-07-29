@@ -13,6 +13,7 @@ const mapStateToProps = createSelector(
   getPlayers,
   (app, sources, players) => ({
     teamIds: app.teamIds,
+    userId: app.userId,
     vbaseline: app.vbaseline,
     leagueIds: app.leagueIds,
     sourceIds: sources.toList().map(s => s.uid),

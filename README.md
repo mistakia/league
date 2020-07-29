@@ -8,7 +8,7 @@ Setup a mysql database using [`schema.sql`](https://github.com/mistakia/league/b
 
 **Development**
 
-Make sure your local mysql server matches the parameters in [`config.development.js`](https://github.com/mistakia/league/blob/master/config.development.js).
+Create a file called `config.development.js` similar to [`config.sample.js`](https://github.com/mistakia/league/blob/master/config.sample.js).
 ```
 yarn install
 yarn start

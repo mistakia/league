@@ -83,8 +83,24 @@ router.get('/:leagueId/teams/?', async (req, res) => {
       .where({ lid: leagueId })
       .whereNull('player')
 
+    const teamIds = teams.map(t => t.uid)
+
+    const usersTeams = await db('users_teams')
+      .where({ userid: req.user.userId })
+      .whereIn('tid', teamIds)
+
     for (const team of teams) {
       team.picks = picks.filter(p => p.tid === team.uid)
+    }
+
+    for (const usersTeam of usersTeams) {
+      const { tid, teamtext, teamvoice, leaguetext } = usersTeam
+      for (const [index, team] of teams.entries()) {
+        if (team.uid === tid) {
+          teams[index] = { teamtext, teamvoice, leaguetext, ...team }
+          break
+        }
+      }
     }
 
     res.send({ teams })

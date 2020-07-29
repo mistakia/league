@@ -186,7 +186,6 @@ export default function () {
     for (const [index, item] of sRoster.players.entries()) {
       const { player } = item
       const sPlayers = isProposer ? trade.proposingTeamPlayers : trade.acceptingTeamPlayers
-      console.log(sPlayers)
       if (player && !sPlayers.includes(player)) {
         dropItems.push(
           <TradePlayer
