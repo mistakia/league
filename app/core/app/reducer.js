@@ -18,6 +18,8 @@ const initialState = new Record({
   volsw: null,
   email: null,
   vbaseline: 'hybrid',
+  text: 0,
+  voice: 0,
   teamIds: new List(),
   leagueIds: new List([DEFAULT_LEAGUE_ID])
 })
@@ -48,6 +50,8 @@ export function appReducer (state = initialState(), { payload, type }) {
         volsw: payload.data.user.volsw,
         vbaseline: payload.data.user.vbaseline,
         email: payload.data.user.eamil,
+        text: payload.data.user.text,
+        voice: payload.data.user.voice,
         teamIds: new List(payload.data.teams.map(t => t.uid)),
         leagueIds: new List(payload.data.leagues.map(l => l.uid)),
         isPending: false

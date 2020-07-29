@@ -24,6 +24,7 @@ const getRoster = async ({ db, tid, week, year }) => {
 }
 
 module.exports = {
+  sendNotifications: require('./send-notifications'),
   getPlayerId: require('./get-player-id'),
   getSchedule: require('./get-schedule'),
   getPlayByPlayQuery,

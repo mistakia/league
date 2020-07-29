@@ -1593,6 +1593,9 @@ CREATE TABLE `users` (
   `rbb` varchar(7) DEFAULT NULL,
   `wrb` varchar(7) DEFAULT NULL,
   `teb` varchar(7) DEFAULT NULL,
+  `phone` varchar(12) DEFAULT NULL,
+  `text` tinyint(1) NOT NULL DEFAULT 1,
+  `voice` tinyint(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
@@ -1623,6 +1626,9 @@ DROP TABLE IF EXISTS `users_teams`;
 CREATE TABLE `users_teams` (
   `userid` int(6) NOT NULL,
   `tid` int(6) NOT NULL,
+  `teamtext` tinyint(1) NOT NULL DEFAULT 1,
+  `teamvoice` tinyint(1) NOT NULL DEFAULT 1,
+  `leaguetext` tinyint(1) NOT NULL DEFAULT 1,
   UNIQUE KEY `userid` (`userid`,`tid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 

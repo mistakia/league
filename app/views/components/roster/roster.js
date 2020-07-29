@@ -15,9 +15,6 @@ export default class Roster extends React.Component {
     }
 
     const r = new RosterBuilder({ roster: roster.toJS(), league })
-    console.log(r)
-    console.log(r.players)
-    console.log(r.players.entries())
 
     const rows = []
     for (const [index, value] of r.players.entries()) {
