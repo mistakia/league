@@ -137,7 +137,7 @@ router.post('/?', async (req, res, next) => {
         return res.status(400).send({ error: 'pick is not valid' })
       }
 
-      if (p.tid === pid) {
+      if (p.tid !== pid) {
         return res.status(400).send({ error: 'pick is not owned by proposing team' })
       }
     }
@@ -163,7 +163,7 @@ router.post('/?', async (req, res, next) => {
         return res.status(400).send({ error: 'pick is not valid' })
       }
 
-      if (p.tid === tid) {
+      if (p.tid !== tid) {
         return res.status(400).send({ error: 'pick is not owned by accepting team' })
       }
     }
