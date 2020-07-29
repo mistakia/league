@@ -69,6 +69,7 @@ export function tradeReducer (state = initialState(), { payload, type }) {
     case tradeActions.POST_TRADE_CANCEL_FULFILLED:
     case tradeActions.POST_TRADE_PROPOSE_FULFILLED:
       return state.merge({
+        selectedTradeId: payload.data.uid,
         items: state.items.set(payload.data.uid, createTrade(payload.data))
       })
 
