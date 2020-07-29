@@ -34,8 +34,7 @@ const run = async () => {
       await sendNotifications({
         leagueId: league.uid,
         teamIds: [pick.tid],
-        message,
-        league: true
+        message
       })
 
       if (league.groupme_token && league.groupme_id) {
