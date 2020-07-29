@@ -4,6 +4,10 @@
   align-items center
   border-bottom 1px solid $borderColor
 
+  &:hover .player__slot-action
+  &.selected .player__slot-action
+    opacity 1
+
 .player__slot-slotName
   opacity 50%
   flex 0 0 70px
@@ -22,3 +26,9 @@
   text-overflow ellipsis
   white-space nowrap
   line-height 20px
+
+.player__slot-action
+  flex 1
+  display flex
+  justify-content flex-end
+  opacity 0

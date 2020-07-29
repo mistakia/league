@@ -1,8 +1,9 @@
 const express = require('express')
+const moment = require('moment')
 const router = express.Router()
 
 const { getRoster } = require('../../utils')
-const { constants } = require('../../common')
+const { constants, Roster } = require('../../common')
 
 router.put('/:teamId', async (req, res) => {
   const { db, logger } = req.app.locals
@@ -44,34 +45,100 @@ router.put('/:teamId', async (req, res) => {
 })
 
 router.get('/:teamId/lineups/?', async (req, res) => {
-  const { db } = req.app.locals
-  const { teamId } = req.params
-  const week = req.query.week || constants.week
-  const year = req.query.year || constants.year
+  const { db, logger } = req.app.locals
+  try {
+    const { teamId } = req.params
+    const week = req.query.week || constants.week
+    const year = req.query.year || constants.year
 
-  const tid = parseInt(teamId, 10)
+    const tid = parseInt(teamId, 10)
 
-  const teams = await db('users_teams').where({ userid: req.user.userId })
-  const teamIds = teams.map(r => r.tid)
+    const teams = await db('users_teams').where({ userid: req.user.userId })
+    const teamIds = teams.map(r => r.tid)
 
-  if (!teamIds.includes(tid)) {
-    return res.status(401).send({ error: 'you do not have access to this teamId' })
+    if (!teamIds.includes(tid)) {
+      return res.status(401).send({ error: 'you do not have access to this teamId' })
+    }
+
+    const roster = await getRoster({ db, tid, week, year })
+    res.send(roster)
+  } catch (error) {
+    logger(error)
+    res.status(500).send({ error: error.toString() })
   }
-
-  const roster = await getRoster({ db, tid, week, year })
-  res.send(roster)
 })
 
 router.put('/:teamId/lineups/?', async (req, res) => {
-  // TODO set team game lineup
-})
+  const { db, logger } = req.app.locals
+  try {
+    const { teamId } = req.params
+    const week = req.body.week || constants.week
+    const year = req.body.year || constants.year
+    const { slot, player, leagueId } = req.body
 
-router.get('/:teamId/settings', async (req, res) => {
-  // TODO get team settings
-})
+    if (typeof slot === 'undefined' || slot === null) {
+      return res.status(400).send({ error: 'missing slot param' })
+    }
 
-router.put('/:teamId/settings', async (req, res) => {
-  // TODO set team settings
+    if (!player) {
+      return res.status(400).send({ error: 'missing player param' })
+    }
+
+    if (week < constants.week || year < constants.year) {
+      return res.status(400).send({ error: 'can not edit previous lineups' })
+    }
+
+    let playerQuery = db('player')
+      .where({ player })
+
+    if (week > 0) {
+      playerQuery = playerQuery
+        .joinRaw('left join schedule on player.cteam = schedule.v or player.cteam = schedule.h')
+        .where('schedule.wk', week)
+        .where('schedule.seas', year)
+    }
+
+    const players = await playerQuery
+
+    if (!players.length) {
+      return res.status(400).send({ error: 'invalid player' })
+    }
+
+    const playerRow = players[0]
+
+    const leagues = await db('leagues').where({ uid: leagueId })
+    if (!leagues.length) {
+      return res.status(400).send({ error: 'invalid leagueId' })
+    }
+    const league = leagues[0]
+    const tid = parseInt(teamId, 10)
+
+    const rosterRow = await getRoster({ db, tid, week, year })
+    const roster = new Roster({ roster: rosterRow, league })
+    const isEligible = roster.isEligibleForSlot({ slot, player, pos: playerRow.pos1 })
+    if (!isEligible) {
+      return res.status(400).send({ error: 'player is not eligible for slot' })
+    }
+
+    const gameStart = moment(playerRow.date, 'M/D/YYYY H:m')
+    if (moment().isAfter(gameStart)) {
+      return res.status(400).send({ error: 'player is locked, game has started' })
+    }
+
+    const updateid = await db('rosters_players')
+      .join('rosters', 'rosters_players.rid', 'rosters.uid')
+      .update({ slot })
+      .where({ week, year, tid, player })
+
+    if (!updateid) {
+      return res.status(400).send({ error: 'lineup update unsuccessful' })
+    }
+
+    res.send({ slot, player, week, year, tid })
+  } catch (error) {
+    logger(error)
+    res.status(500).send({ error: error.toString() })
+  }
 })
 
 module.exports = router

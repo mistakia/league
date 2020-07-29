@@ -54,6 +54,10 @@ export const api = {
     const url = `${BASE_URL}/teams/${teamId}/lineups`
     return { url }
   },
+  putRoster (data) {
+    const url = `${BASE_URL}/teams/${data.teamId}/lineups`
+    return { url, ...PUT(data) }
+  },
   getRosters ({ leagueId }) {
     const url = `${BASE_URL}/leagues/${leagueId}/rosters`
     return { url }
