@@ -306,19 +306,19 @@ export const teamStats = [
 ]
 
 export const slots = {
-  QB: 0,
-  RB: 1,
-  WR: 2,
-  TE: 3,
-  WRTE: 4,
-  RBWR: 5,
-  RBWRTE: 6,
-  QBRBWRTE: 7,
-  K: 8,
-  DST: 9,
-  BENCH: 10,
-  IR: 11,
-  PS: 12
+  QB: 1,
+  RB: 2,
+  WR: 3,
+  TE: 4,
+  WRTE: 5,
+  RBWR: 6,
+  RBWRTE: 7,
+  QBRBWRTE: 8,
+  K: 9,
+  DST: 10,
+  BENCH: 11,
+  PS: 12,
+  IR: 13
 }
 
 export const transactions = {

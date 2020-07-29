@@ -47,7 +47,7 @@ export default class Roster {
     return this._players.has(player)
   }
 
-  getBySlot (slot) {
+  _getBySlot (slot) {
     return this.players.filter(p => p.slot === constants.slots[slot])
   }
 
@@ -56,8 +56,31 @@ export default class Roster {
   }
 
   addPlayer ({ slot, player, pos }) {
-    // TODO - handle invalid roster states
+    const isEligible = this.isEligibleForSlot({ slot, player, pos })
+    if (!isEligible) throw new Error('Player is not eligible')
     this._players.set(player, { slot, player, pos, rid: this.uid })
+  }
+
+  isEligibleForSlot ({ slot, player, pos }) {
+    if (slot === constants.slots.IR) {
+      return this.hasOpenIrSlot()
+    } else if (slot === constants.slots.BENCH) {
+      return this.hasOpenBenchSlot(pos)
+    } else if (slot === constants.slots.PS) {
+      return this.hasOpenPracticeSquadSlot()
+    } else {
+      const slotName = Object.keys(constants.slots).find(key => constants.slots[key] === slot)
+      if (!slotName.includes(pos)) {
+        return false
+      }
+
+      const count = this._getBySlot(slot)
+      return count < this._league[`s${slotName.toLowerCase()}`]
+    }
+  }
+
+  hasOpenIrSlot () {
+    return this.ir.length < this._league.ir
   }
 
   hasOpenPracticeSquadSlot () {

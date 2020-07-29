@@ -23,7 +23,6 @@ exports.seed = async function (knex, Promise) {
    *   console.log(error)
    * }
    */
-
   try {
     await matchups(knex)
   } catch (error) {
