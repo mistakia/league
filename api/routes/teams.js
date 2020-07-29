@@ -10,13 +10,14 @@ router.put('/:teamId', async (req, res) => {
     const { teamId } = req.params
     const { value, field } = req.body
 
-    const fields = ['name', 'image', 'abbrv']
+    const userTeamFields = ['teamtext', 'teamvoice', 'leaguetext']
+    const fields = ['name', 'image', 'abbrv', ...userTeamFields]
 
     if (!field) {
       return res.status(400).send({ error: 'missing field' })
     }
 
-    if (!value) {
+    if (typeof value === 'undefined' || value === null) {
       return res.status(400).send({ error: 'missing value' })
     }
 
@@ -28,7 +29,13 @@ router.put('/:teamId', async (req, res) => {
       // TODO validate url
     }
 
-    await db('teams').update({ [field]: value }).where({ uid: teamId })
+    if (userTeamFields.indexOf(field) < 0) {
+      await db('teams').update({ [field]: value }).where({ uid: teamId })
+    } else {
+      await db('users_teams')
+        .update({ [field]: value })
+        .where({ tid: teamId, userid: req.user.userId })
+    }
     res.send({ value })
   } catch (error) {
     logger(error)

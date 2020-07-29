@@ -11,6 +11,7 @@ router.get('/?', async (req, res) => {
 
     const teams = await db('teams')
       .select('teams.*')
+      .select('users_teams.teamtext', 'users_teams.teamvoice', 'users_teams.leaguetext')
       .where({ userid: req.user.userId })
       .join('users_teams', 'users_teams.tid', 'teams.uid')
 
@@ -75,7 +76,7 @@ router.put('/?', async (req, res) => {
       return res.status(400).send({ error: 'missing type param' })
     }
 
-    const validTypes = ['email', 'password', 'vbaseline', 'vorpw', 'volsw', 'watchlist']
+    const validTypes = ['email', 'password', 'vbaseline', 'vorpw', 'volsw', 'watchlist', 'text', 'voice']
     if (!validTypes.includes(type)) {
       return res.status(400).send({ error: 'invalid type param' })
     }

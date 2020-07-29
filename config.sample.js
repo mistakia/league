@@ -9,6 +9,10 @@ module.exports = {
   nominationTimer: 30000,
   bidTimer: 15000,
   pff: '', // cookies for pff
+  clickSend: {
+    auth: '',
+    number: ''
+  },
   jwt: {
     secret: 'xxxxx',
     credentialsRequired: false

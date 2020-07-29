@@ -6,12 +6,13 @@ import EditableSource from '@components/editable-source'
 import EditableBaseline from '@components/editable-baseline'
 import PageLayout from '@layouts/page'
 import EditableValue from '@components/editable-value'
+import SettingsSwitch from '@components/settings-switch'
 
 import './settings.styl'
 
 export default class SettingsPage extends React.Component {
   render = () => {
-    const { leagueIds, teamIds, sourceIds, baselines, vbaseline } = this.props
+    const { userId, leagueIds, teamIds, sourceIds, baselines, vbaseline } = this.props
 
     const leagueItems = []
     for (const leagueId of leagueIds) {
@@ -57,6 +58,22 @@ export default class SettingsPage extends React.Component {
           <div className='editable__league-section-title'>Projection Weights</div>
           <div className='settings__section-body'>{sourceItems}</div>
         </div>
+        {userId &&
+          <div className='settings__section settings__notifications'>
+            <div className='settings__section-head'>Notifications</div>
+            <div className='settings__section-body'>
+              <SettingsSwitch
+                field='text'
+                label='Text Notifications'
+                description='Enable/disable all text notifications.'
+              />
+              <SettingsSwitch
+                field='voice'
+                label='Voice Notifications'
+                description='Enable/disable all voice notifications.'
+              />
+            </div>
+          </div>}
       </div>
     )
     return (

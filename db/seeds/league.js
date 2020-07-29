@@ -41,7 +41,7 @@ module.exports = async function (knex) {
     terec: 0.5,
     rec: 0.5,
     recy: 0.1,
-    twoptc: 0,
+    twoptc: 2,
     tdrec: 6,
     fuml: -1,
     ddate: Math.round(Date.now() / 1000),

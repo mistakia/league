@@ -7,6 +7,9 @@ export const Team = new Record({
   abbrv: null,
   lid: null,
   acap: null,
+  teamtext: 0,
+  teamvoice: 0,
+  leaguetext: 0,
   picks: new List()
 })
 
@@ -17,6 +20,9 @@ export function createTeam ({
   abbrv,
   lid,
   acap,
+  teamtext,
+  teamvoice,
+  leaguetext,
   picks = []
 }) {
   return new Team({
@@ -26,6 +32,9 @@ export function createTeam ({
     abbrv,
     lid,
     acap,
+    teamtext,
+    teamvoice,
+    leaguetext,
     picks: new List(picks)
   })
 }
