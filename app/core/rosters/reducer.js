@@ -2,17 +2,11 @@ import { Map } from 'immutable'
 import { rosterActions } from './actions'
 import { Roster, createRoster } from './roster'
 import { appActions } from '@core/app'
-import { constants } from '@common'
 
 export function rostersReducer (state = new Map(), { payload, type }) {
   switch (type) {
     case appActions.LOGOUT:
       return new Map()
-
-    case rosterActions.ROSTER_SLOT_UPDATED: {
-      const slotNum = constants.slots[payload.slot]
-      return state.setIn([payload.tid, `s${slotNum}`], payload.player)
-    }
 
     case rosterActions.LOAD_ROSTER:
       return state.set(payload.teamId, new Roster())
@@ -30,6 +24,12 @@ export function rostersReducer (state = new Map(), { payload, type }) {
       return state.withMutations(state => {
         payload.data.forEach(r => state.set(r.tid, createRoster(r)))
       })
+
+    case rosterActions.PUT_ROSTER_FULFILLED: {
+      const players = state.getIn([payload.opts.teamId, 'players'])
+      const index = players.findIndex(p => p.player === payload.data.player)
+      return state.setIn([payload.opts.teamId, 'players', index, 'slot'], payload.data.slot)
+    }
 
     default:
       return state

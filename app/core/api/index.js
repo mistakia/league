@@ -26,5 +26,6 @@ export {
   getSources,
   getTeamStats,
   putBaselines,
-  postRejectTrade
+  postRejectTrade,
+  putRoster
 } from './sagas'

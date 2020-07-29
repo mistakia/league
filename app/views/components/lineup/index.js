@@ -1,6 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
+import { rosterActions } from '@core/rosters'
 import { getCurrentLeague } from '@core/leagues'
 
 import Lineup from './lineup'
@@ -10,6 +11,11 @@ const mapStateToProps = createSelector(
   (league) => ({ league })
 )
 
+const mapDispatchToProps = {
+  update: rosterActions.update
+}
+
 export default connect(
-  mapStateToProps
+  mapStateToProps,
+  mapDispatchToProps
 )(Lineup)
