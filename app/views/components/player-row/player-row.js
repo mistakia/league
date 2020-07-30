@@ -4,6 +4,7 @@ import EditableProjection from '@components/editable-projection'
 import Position from '@components/position'
 import PlayerWatchlistAction from '@components/player-watchlist-action'
 import PlayerRowMetric from '@components/player-row-metric'
+import Team from '@components/team'
 
 import './player-row.styl'
 
@@ -256,7 +257,10 @@ export default class PlayerRow extends React.Component {
             <div className='player__row-pos'>
               <Position pos={player.pos1} />
             </div>
-            <div className='player__row-name'>{player.name}</div>
+            <div className='player__row-name'>
+              <span>{player.name}</span>
+              <Team team={player.team} />
+            </div>
             {isSeasonProjectionView && seasonProjectionSummary}
             {isSeasonProjectionView && passingProjection}
             {isSeasonProjectionView && rushingProjection}
