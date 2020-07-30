@@ -10,7 +10,13 @@ import {
 } from '@core/app'
 
 import { getDraftActions, postDraftActions } from '@core/draft'
-import { getRosterActions, getRostersActions, putRosterActions } from '@core/rosters'
+import {
+  getRosterActions,
+  getRostersActions,
+  putRosterActions,
+  postActivateActions,
+  postDeactivateActions
+} from '@core/rosters'
 import {
   playersRequestActions,
   getPlayerStatsActions,
@@ -67,6 +73,8 @@ export const getPlays = fetch.bind(null, api.getPlays, getPlaysActions)
 export const getRoster = fetch.bind(null, api.getRoster, getRosterActions)
 export const getRosters = fetch.bind(null, api.getRosters, getRostersActions)
 export const putRoster = fetch.bind(null, api.putRoster, putRosterActions)
+export const postActivate = fetch.bind(null, api.postActivate, postActivateActions)
+export const postDeactivate = fetch.bind(null, api.postDeactivate, postDeactivateActions)
 
 export const fetchDraft = fetch.bind(null, api.getDraft, getDraftActions)
 export const postDraft = fetch.bind(null, api.postDraft, postDraftActions)

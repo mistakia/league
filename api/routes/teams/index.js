@@ -2,8 +2,11 @@ const express = require('express')
 const moment = require('moment')
 const router = express.Router()
 
-const { getRoster } = require('../../utils')
-const { constants, Roster } = require('../../common')
+const activate = require('./activate')
+const deactivate = require('./deactivate')
+
+const { getRoster } = require('../../../utils')
+const { constants, Roster } = require('../../../common')
 
 router.put('/:teamId', async (req, res) => {
   const { db, logger } = req.app.locals
@@ -140,5 +143,8 @@ router.put('/:teamId/lineups/?', async (req, res) => {
     res.status(500).send({ error: error.toString() })
   }
 })
+
+router.use('/:teamId/activate', activate)
+router.use('/:teamId/deactivate', deactivate)
 
 module.exports = router

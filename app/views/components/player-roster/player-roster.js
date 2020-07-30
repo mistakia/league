@@ -2,14 +2,19 @@ import React from 'react'
 
 import Position from '@components/position'
 import Team from '@components/team'
-import Player from '@components/player'
+import { Player, connect } from '@components/player'
+import IconButton from '@components/icon-button'
 
-export default class PlayerRoster extends Player {
+class PlayerRoster extends Player {
   render () {
-    const { player, vbaseline } = this.props
+    const { player, vbaseline, selected } = this.props
+    const { handleContextClick } = this
+
+    const classNames = ['player__item']
+    if (selected === player.player) classNames.push('selected')
 
     return (
-      <div className='player__item'>
+      <div className={classNames.join(' ')}>
         <div className='player__item-position'>
           <Position pos={player.pos1} />
         </div>
@@ -35,7 +40,12 @@ export default class PlayerRoster extends Player {
         <div className='player__item-metric'>
           {/* projected bench points  */}
         </div>
+        <div className='player__item-action'>
+          <IconButton small text onClick={handleContextClick} icon='more' />
+        </div>
       </div>
     )
   }
 }
+
+export default connect(PlayerRoster)

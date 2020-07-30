@@ -62,6 +62,14 @@ export const api = {
     const url = `${BASE_URL}/leagues/${leagueId}/rosters`
     return { url }
   },
+  postActivate (data) {
+    const url = `${BASE_URL}/teams/${data.teamId}/activate`
+    return { url, ...POST(data) }
+  },
+  postDeactivate (data) {
+    const url = `${BASE_URL}/teams/${data.teamId}/deactivate`
+    return { url, ...POST(data) }
+  },
   getDraft ({ leagueId }) {
     const url = `${BASE_URL}/leagues/${leagueId}/draft`
     return { url }

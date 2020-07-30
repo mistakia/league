@@ -4,7 +4,9 @@ export {
   getCurrentPlayers,
   getRosteredPlayersForCurrentLeague,
   isPlayerAvailable,
-  isPlayerEligible
+  isPlayerEligible,
+  isPracticeSquadEligible,
+  isActiveRosterEligible
 } from './selectors'
 export { rosterSagas } from './sagas'
 export { rostersReducer } from './reducer'
@@ -12,6 +14,8 @@ export {
   rosterActions,
   getRosterActions,
   getRostersActions,
-  putRosterActions
+  putRosterActions,
+  postActivateActions,
+  postDeactivateActions
 } from './actions'
 export { Roster } from './roster'

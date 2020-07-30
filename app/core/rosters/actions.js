@@ -4,6 +4,9 @@ export const rosterActions = {
 
   UPDATE_ROSTER: 'UPDATE_ROSTER',
 
+  ACTIVATE_PLAYER: 'ACTIVATE_PLAYER',
+  DEACTIVATE_PLAYER: 'DEACTIVATE_PLAYER',
+
   GET_ROSTER_FAILED: 'GET_ROSTER_FAILED',
   GET_ROSTER_PENDING: 'GET_ROSTER_PENDING',
   GET_ROSTER_FULFILLED: 'GET_ROSTER_FULFILLED',
@@ -15,6 +18,28 @@ export const rosterActions = {
   PUT_ROSTER_FAILED: 'PUT_ROSTER_FAILED',
   PUT_ROSTER_PENDING: 'PUT_ROSTER_PENDING',
   PUT_ROSTER_FULFILLED: 'PUT_ROSTER_FULFILLED',
+
+  POST_ACTIVATE_FAILED: 'POST_ACTIVATE_FAILED',
+  POST_ACTIVATE_PENDING: 'POST_ACTIVATE_PENDING',
+  POST_ACTIVATE_FULFILLED: 'POST_ACTIVATE_FULFILLED',
+
+  POST_DEACTIVATE_FAILED: 'POST_DEACTIVATE_FAILED',
+  POST_DEACTIVATE_PENDING: 'POST_DEACTIVATE_PENDING',
+  POST_DEACTIVATE_FULFILLED: 'POST_DEACTIVATE_FULFILLED',
+
+  activate: (player) => ({
+    type: rosterActions.ACTIVATE_PLAYER,
+    payload: {
+      player
+    }
+  }),
+
+  deactivate: (player) => ({
+    type: rosterActions.DEACTIVATE_PLAYER,
+    payload: {
+      player
+    }
+  }),
 
   update: ({ slot, player }) => ({
     type: rosterActions.UPDATE_ROSTER,
@@ -102,6 +127,52 @@ export const rosterActions = {
       opts,
       error
     }
+  }),
+
+  postActivatePending: (opts) => ({
+    type: rosterActions.POST_ACTIVATE_PENDING,
+    payload: {
+      opts
+    }
+  }),
+
+  postActivateFailed: (opts, error) => ({
+    type: rosterActions.POST_ACTIVATE_FAILED,
+    payload: {
+      opts,
+      error
+    }
+  }),
+
+  postActivateFulfilled: (opts, data) => ({
+    type: rosterActions.POST_ACTIVATE_FULFILLED,
+    payload: {
+      opts,
+      data
+    }
+  }),
+
+  postDeactivatePending: (opts) => ({
+    type: rosterActions.POST_DEACTIVATE_PENDING,
+    payload: {
+      opts
+    }
+  }),
+
+  postDeactivateFulfilled: (opts, data) => ({
+    type: rosterActions.POST_DEACTIVATE_FULFILLED,
+    payload: {
+      opts,
+      data
+    }
+  }),
+
+  postDeactivateFailed: (opts, error) => ({
+    type: rosterActions.POST_DEACTIVATE_FAILED,
+    payload: {
+      opts,
+      error
+    }
   })
 }
 
@@ -121,4 +192,16 @@ export const putRosterActions = {
   failed: rosterActions.putRosterFailed,
   pending: rosterActions.putRosterPending,
   fulfilled: rosterActions.putRosterFulfilled
+}
+
+export const postActivateActions = {
+  failed: rosterActions.postActivateFailed,
+  pending: rosterActions.postActivatePending,
+  fulfilled: rosterActions.postActivateFulfilled
+}
+
+export const postDeactivateActions = {
+  failed: rosterActions.postDeactivateFailed,
+  pending: rosterActions.postDeactivatePending,
+  fulfilled: rosterActions.postDeactivateFulfilled
 }
