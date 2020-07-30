@@ -7,6 +7,7 @@ import Loading from '@components/loading'
 import ContextMenu from '@components/context-menu'
 import { localStorageAdapter } from '@core/utils'
 import Logout from '@components/logout'
+import Confirmation from '@components/confirmation'
 
 import 'normalize.css'
 import '@styles/normalize.css'
@@ -32,6 +33,7 @@ class App extends React.Component {
         <Routes />
         {userId && <Logout />}
         <ContextMenu />
+        <Confirmation />
       </main>
     )
   }
