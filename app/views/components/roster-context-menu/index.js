@@ -12,6 +12,7 @@ import {
   isActiveRosterEligible,
   rosterActions
 } from '@core/rosters'
+import { confirmationActions } from '@core/confirmations'
 
 const mapStateToProps = createSelector(
   getContextMenuInfo,
@@ -30,7 +31,8 @@ const mapDispatchToProps = {
   showContext: contextMenuActions.show,
   hide: contextMenuActions.hide,
   activate: rosterActions.activate,
-  deactivate: rosterActions.deactivate
+  deactivate: rosterActions.deactivate,
+  showConfirmation: confirmationActions.show
 }
 
 export default connect(
