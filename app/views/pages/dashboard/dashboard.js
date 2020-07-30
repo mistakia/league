@@ -60,6 +60,7 @@ export default function () {
             <div className='player__item-metric'>Starts</div>
             <div className='player__item-metric'>Pts+</div>
             <div className='player__item-metric'>Bench+</div>
+            <div className='player__item-action' />
           </div>
         </div>
         <div className='dashboard__section-body empty'>

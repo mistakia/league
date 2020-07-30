@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 
-const { constants } = require('../../../common')
+const { constants, uniqBy } = require('../../../common')
 const transactions = require('./transactions')
 const draft = require('./draft')
 const games = require('./games')
@@ -121,9 +121,14 @@ router.get('/:leagueId/rosters/?', async (req, res) => {
       .orderBy('week', 'desc')
 
     const players = await db('rosters_players')
+      .leftJoin('transactions', 'rosters_players.player', 'transactions.player')
       .whereIn('rid', rosters.map(r => r.uid))
+      .whereIn('transactions.tid', rosters.map(r => r.tid))
+      .orderBy('transactions.timestamp', 'desc')
 
-    rosters.forEach(r => { r.players = players.filter(p => p.rid === r.uid) })
+    const unique = uniqBy(players, 'player')
+
+    rosters.forEach(r => { r.players = unique.filter(p => p.rid === r.uid) })
 
     res.send(rosters)
   } catch (err) {

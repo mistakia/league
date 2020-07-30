@@ -1,3 +1,5 @@
+const { uniqBy } = require('../common')
+
 const getPlayByPlayQuery = (db) => db('pbp')
   .select(
     'pbp.fuml', 'pbp.fum', 'pbp.off', 'pbp.type', 'pbp.bc', 'pbp.yds', 'pbp.fd',
@@ -18,7 +20,13 @@ const getPlayByPlayQuery = (db) => db('pbp')
 const getRoster = async ({ db, tid, week, year }) => {
   const rows = await db('rosters').where({ tid, year, week })
   const rosterRow = rows[0]
-  rosterRow.players = await db('rosters_players').where('rid', rosterRow.uid)
+  const players = await db('rosters_players')
+    .leftJoin('transactions', 'rosters_players.player', 'transactions.player')
+    .where('rid', rosterRow.uid)
+    .where('transactions.tid', tid)
+    .orderBy('transactions.timestamp', 'desc')
+
+  rosterRow.players = uniqBy(players, 'player')
 
   return rosterRow
 }

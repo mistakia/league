@@ -1,11 +1,13 @@
 import React from 'react'
 
 import Position from '@components/position'
+import { Player, connect } from '@components/player'
 import Team from '@components/team'
+import IconButton from '@components/icon-button'
 
 import './player-roster-row.styl'
 
-export default class PlayerRosterRow extends React.Component {
+class PlayerRosterRow extends Player {
   render = () => {
     const { player } = this.props
 
@@ -18,8 +20,12 @@ export default class PlayerRosterRow extends React.Component {
           <span>{player.pname}</span>
           <Team team={player.team} />
         </div>
-        <div className='roster__item-metric' />
+        {/* <div className='roster__item-action'>
+            <IconButton small text icon='more' />
+            </div> */}
       </div>
     )
   }
 }
+
+export default connect(PlayerRosterRow)

@@ -13,12 +13,14 @@ import { transactionsReducer } from './transactions'
 import { matchupsReducer } from './matchups'
 import { tradeReducer } from './trade'
 import { statsReducer } from './stats'
+import { contextMenuReducer } from './context-menu'
 
 const rootReducer = (history) => {
   return combineReducers({
     router: connectRouter(history),
     app: appReducer,
     auction: auctionReducer,
+    contextMenu: contextMenuReducer,
     draft: draftReducer,
     leagues: leaguesReducer,
     teams: teamsReducer,

@@ -10,7 +10,7 @@ export default class Logout extends React.Component {
 
     return (
       <div id='logout'>
-        <Button className='button__text' onClick={logout}>Logout</Button>
+        <Button text onClick={logout}>Logout</Button>
       </div>
     )
   }

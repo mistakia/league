@@ -25,10 +25,18 @@ export function rostersReducer (state = new Map(), { payload, type }) {
         payload.data.forEach(r => state.set(r.tid, createRoster(r)))
       })
 
+    case rosterActions.POST_ACTIVATE_FULFILLED:
+    case rosterActions.POST_DEACTIVATE_FULFILLED:
     case rosterActions.PUT_ROSTER_FULFILLED: {
-      const players = state.getIn([payload.opts.teamId, 'players'])
-      const index = players.findIndex(p => p.player === payload.data.player)
-      return state.setIn([payload.opts.teamId, 'players', index, 'slot'], payload.data.slot)
+      return state.withMutations(state => {
+        const players = state.getIn([payload.opts.teamId, 'players'])
+        const index = players.findIndex(p => p.player === payload.data.player)
+        state.setIn([payload.opts.teamId, 'players', index, 'slot'], payload.data.slot)
+        if (payload.data.transaction) {
+          state.setIn([payload.opts.teamId, 'players', index, 'type'], payload.data.transaction.type)
+          state.setIn([payload.opts.teamId, 'players', index, 'timestamp'], payload.data.transaction.timestamp)
+        }
+      })
     }
 
     default:
