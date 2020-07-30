@@ -5,6 +5,12 @@
   height 45px
   border-bottom 1px solid $borderColor
 
+  &:hover .player__item-action
+    opacity 1
+
+  &.selected
+    background #fafafa
+
 .player__item-position
   flex 0 0 50px
   display flex
@@ -16,4 +22,8 @@
   white-space nowrap
 
 .player__item-metric
+  flex 1
+
+.player__item-action
+  opacity 0
   flex 1

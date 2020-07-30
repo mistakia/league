@@ -13,6 +13,14 @@ const groupBy = (xs, key) => xs.reduce((rv, x) => {
   return rv
 }, {})
 
+const uniqBy = (a, key) => {
+  const seen = new Set()
+  return a.filter(item => {
+    const k = item[key]
+    return seen.has(k) ? false : seen.add(k)
+  })
+}
+
 const formatRoster = (roster) => {
   const result = new Map()
   Object.keys(roster).forEach(k => k.startsWith('s') && result.set(k, roster[k]))
@@ -26,6 +34,7 @@ export {
   constants,
   getEligibleSlots,
   groupBy,
+  uniqBy,
   formatRoster,
   weightProjections,
   Roster,

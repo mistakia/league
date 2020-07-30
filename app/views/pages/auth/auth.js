@@ -114,7 +114,7 @@ export default class AuthPage extends React.Component {
               {this.state.menu}
             </Button>
           </form>
-          <Button className='auth__toggle button__text' onClick={this.handleClick}>
+          <Button className='auth__toggle' text onClick={this.handleClick}>
             {this.state.menu === 'register' ? 'login' : 'register'}
           </Button>
         </div>

@@ -4,6 +4,7 @@ import React from 'react'
 import Menu from '@components/menu'
 import Routes from '@views/routes'
 import Loading from '@components/loading'
+import ContextMenu from '@components/context-menu'
 import { localStorageAdapter } from '@core/utils'
 import Logout from '@components/logout'
 
@@ -30,6 +31,7 @@ class App extends React.Component {
         <Menu />
         <Routes />
         {userId && <Logout />}
+        <ContextMenu />
       </main>
     )
   }

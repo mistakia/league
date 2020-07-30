@@ -27,5 +27,7 @@ export {
   getTeamStats,
   putBaselines,
   postRejectTrade,
-  putRoster
+  putRoster,
+  postActivate,
+  postDeactivate
 } from './sagas'
