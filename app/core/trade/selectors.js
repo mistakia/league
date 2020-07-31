@@ -1,7 +1,7 @@
 import { createSelector } from 'reselect'
 
 import { getApp } from '@core/app'
-import { getRosters, getCurrentTeamRoster, Roster as RosterRecord } from '@core/rosters'
+import { getCurrentTeamRoster, Roster as RosterRecord } from '@core/rosters'
 import { getCurrentLeague, getCurrentLeagueTeamIds } from '@core/leagues'
 import { getTeams, Team } from '@core/teams'
 import { createTrade } from './trade'
@@ -90,6 +90,6 @@ export const getTradeSelectedTeam = createSelector(
 
 export const getTradeSelectedTeamRoster = createSelector(
   getTradeSelectedTeamId,
-  getRosters,
+  (state) => state.get('rosters'),
   (teamId, rosters) => (rosters.get(teamId) || new RosterRecord())
 )

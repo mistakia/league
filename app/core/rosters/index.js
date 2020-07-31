@@ -1,9 +1,13 @@
 export {
   getRosters,
+  getRostersForCurrentLeague,
   getCurrentTeamRoster,
   getCurrentPlayers,
-  getRosteredPlayersForCurrentLeague,
-  isPlayerAvailable,
+  getRosteredPlayerIdsForCurrentLeague,
+  getActiveRosterPlayerIdsForCurrentLeague,
+  getPracticeSquadPlayerIdsForCurrentLeague,
+  getInjuredReservePlayerIdsForCurrentLeague,
+  isPlayerFreeAgent,
   isPlayerEligible,
   isPracticeSquadEligible,
   isActiveRosterEligible

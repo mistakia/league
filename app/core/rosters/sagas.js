@@ -2,7 +2,7 @@ import { call, takeLatest, fork, select } from 'redux-saga/effects'
 
 import { rosterActions } from './actions'
 import { getRoster, getRosters, putRoster, postActivate, postDeactivate } from '@core/api'
-import { getApp } from '@core/app'
+import { getApp, appActions } from '@core/app'
 
 export function * loadRoster ({ payload }) {
   const { teamId } = payload
@@ -53,6 +53,10 @@ export function * watchDeactivatePlayer () {
   yield takeLatest(rosterActions.DEACTIVATE_PLAYER, deactivate)
 }
 
+export function * watchAuthFulfilled () {
+  yield takeLatest(appActions.AUTH_FULFILLED, loadRosters)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -62,5 +66,6 @@ export const rosterSagas = [
   fork(watchLoadRosters),
   fork(watchUpdateRoster),
   fork(watchActivatePlayer),
-  fork(watchDeactivatePlayer)
+  fork(watchDeactivatePlayer),
+  fork(watchAuthFulfilled)
 ]

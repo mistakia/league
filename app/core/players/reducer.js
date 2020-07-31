@@ -19,7 +19,7 @@ const initialState = new Map({
   experience: new List([0, 1, -1]),
   health: new List(['ir', 'healthy']),
   teams: new List(),
-  status: new List(['available', 'rostered']),
+  availability: new List(constants.availability),
   week: constants.week,
   age: new List(),
   allAges: new List(),

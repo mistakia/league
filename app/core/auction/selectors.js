@@ -1,7 +1,6 @@
 import { createSelector } from 'reselect'
 
 import { constants } from '@common'
-import { getPlayers } from '@core/players'
 import { fuzzySearch } from '@core/utils'
 
 export function getAuction (state) {
@@ -44,7 +43,7 @@ export function getNominatingTeamId (state) {
 }
 
 export const getPlayersForOptimalLineup = createSelector(
-  getPlayers,
+  (state) => state.get('players'),
   getAuction,
   (players, auction) => {
     return auction.lineupPlayers.map(playerId => players.get('items').get(playerId))
