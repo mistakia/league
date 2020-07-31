@@ -8,6 +8,7 @@ const games = require('./games')
 const settings = require('./settings')
 const trades = require('./trades')
 const schedule = require('./schedule')
+const waivers = require('./waivers')
 
 router.put('/:leagueId', async (req, res) => {
   const { db, logger } = req.app.locals
@@ -143,5 +144,6 @@ router.use('/:leagueId/draft', draft)
 router.use('/:leagueId/settings', settings)
 router.use('/:leagueId/trades', trades)
 router.use('/:leagueId/schedule', schedule)
+router.use('/:leagueId/waivers', waivers)
 
 module.exports = router

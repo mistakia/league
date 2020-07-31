@@ -37,6 +37,8 @@ import {
 import { putLeagueActions } from '@core/leagues'
 import { getSourcesActions, putSourceActions } from '@core/sources'
 import { putSettingActions, putBaselinesActions } from '@core/settings'
+import { postPoachActions } from '@core/poaches'
+import { postWaiverActions } from '@core/waivers'
 
 function * fetchAPI (apiFunction, actions, opts = {}) {
   const { token } = yield select(getApp)
@@ -106,3 +108,6 @@ export const putSetting = fetch.bind(null, api.putSetting, putSettingActions)
 export const putBaselines = fetch.bind(null, api.putBaselines, putBaselinesActions)
 
 export const getTeamStats = fetch.bind(null, api.getTeamStats, getTeamStatActions)
+
+export const postWaiver = fetch.bind(null, api.postWaiver, postWaiverActions)
+export const postPoach = fetch.bind(null, api.postPoach, postPoachActions)

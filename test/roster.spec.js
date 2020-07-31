@@ -1,11 +1,9 @@
 /* global describe it */
-
-// eslint-disable-next-line
-require = require('esm')(module /*, options*/)
+process.env.NODE_ENV = 'test'
 
 const chai = require('chai')
 
-const { Roster } = require('../common')
+const { constants, Roster } = require('../common')
 
 chai.should()
 
@@ -84,7 +82,7 @@ describe('COMMON Roster', function () {
 
     for (let i = 0; i < 18; i++) {
       roster.players.push({
-        slot: 'BENCH',
+        slot: constants.slots.BENCH,
         player: `player${i}`,
         pos: 'RB'
       })
@@ -131,7 +129,7 @@ describe('COMMON Roster', function () {
 
     for (let i = 0; i < 2; i++) {
       roster.players.push({
-        slot: 'BENCH',
+        slot: constants.slots.BENCH,
         player: `player-wr-${i}`,
         pos: 'WR'
       })
@@ -139,7 +137,7 @@ describe('COMMON Roster', function () {
 
     for (let i = 0; i < 2; i++) {
       roster.players.push({
-        slot: 'BENCH',
+        slot: constants.slots.BENCH,
         player: `player-rb-${i}`,
         pos: 'RB'
       })
@@ -186,7 +184,7 @@ describe('COMMON Roster', function () {
 
     for (let i = 0; i < 2; i++) {
       roster.players.push({
-        slot: 'BENCH',
+        slot: constants.slots.BENCH,
         player: `player-wr-${i}`,
         pos: 'WR'
       })
@@ -194,7 +192,7 @@ describe('COMMON Roster', function () {
 
     for (let i = 0; i < 2; i++) {
       roster.players.push({
-        slot: 'BENCH',
+        slot: constants.slots.BENCH,
         player: `player-rb-${i}`,
         pos: 'RB'
       })
@@ -209,7 +207,7 @@ describe('COMMON Roster', function () {
     const hasSlot = r.hasOpenBenchSlot('RB')
     hasSlot.should.equal(true)
 
-    r.addPlayer({ slot: 'BENCH', player: 'player-rb-add', pos: 'RB' })
+    r.addPlayer({ slot: constants.slots.BENCH, player: 'player-rb-add', pos: 'RB' })
     r.removePlayer('player-rb-0')
 
     r.players.length.should.equal(4)

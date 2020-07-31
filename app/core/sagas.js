@@ -14,6 +14,8 @@ import { leagueSagas } from './leagues'
 import { sourceSagas } from './sources'
 import { settingSagas } from './settings'
 import { statSagas } from './stats'
+import { waiverSagas } from './waivers'
+import { poachSagas } from './poaches'
 
 export default function * rootSaga () {
   yield all([
@@ -30,6 +32,8 @@ export default function * rootSaga () {
     ...leagueSagas,
     ...sourceSagas,
     ...settingSagas,
-    ...statSagas
+    ...statSagas,
+    ...waiverSagas,
+    ...poachSagas
   ])
 }
