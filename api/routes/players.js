@@ -27,13 +27,25 @@ router.get('/?', async (req, res) => {
     const playerIds = players.map(p => p.player)
     players.forEach(p => { p.projections = [] })
 
-    const projections = await db('projections')
-      .select('*').select(db.raw('CONCAT(player, "_", sourceid, "_", week) AS Group1'))
+    const sub = db('projections')
+      .select(db.raw('max(timestamp) AS maxtime, CONCAT(player, "_", sourceid, "_", week) AS Group1'))
       .groupBy('Group1')
-      .orderBy('timestamp', 'desc')
       .whereIn('player', playerIds)
       .where('year', constants.year)
       .whereNull('userid')
+
+    const projections = await db
+      .select('*')
+      .from(db.raw('(' + sub.toString() + ') AS X'))
+      .join(
+        'projections',
+        function () {
+          this.on(function() {
+            this.on(db.raw('CONCAT(player, "_", sourceid, "_", week) = X.Group1'))
+            this.andOn('timestamp', '=', 'maxtime')
+          })
+        }
+      )
 
     let userProjections = []
     if (req.user) {
