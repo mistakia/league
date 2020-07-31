@@ -27,9 +27,9 @@ const run = async () => {
       const name = $(el, 'td').eq(0).find('a').text().trim()
       const meta = $(el, 'td').eq(0).find('em').text().split('-')
       const pos = meta.shift().trim()
-      const team = meta.pop().trim()
+      const team = meta.pop()
 
-      const params = { name, team, pos }
+      const params = { name, team: team && team.trim(), pos }
       const data = {}
 
       // passing
