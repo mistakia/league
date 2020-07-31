@@ -756,3 +756,5 @@ export const collegeDivisions = [
   'Sun Belt',
   'Western Athletic'
 ]
+
+export const availability = ['ROSTERED', 'FREE AGENT', 'PRACTICE SQUAD', 'INJURED RESERVE']

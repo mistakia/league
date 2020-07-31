@@ -13,24 +13,63 @@ export function getRosters (state) {
   return state.get('rosters')
 }
 
-export function getRosteredPlayersForCurrentLeague (state) {
+export function getRostersForCurrentLeague (state) {
   const rosters = getRosters(state)
   const { leagueId } = getApp(state)
-  const leagueRosters = rosters.filter(r => r.lid === leagueId)
+  return rosters.filter(r => r.lid === leagueId)
+}
 
+export function getRosteredPlayerIdsForCurrentLeague (state) {
+  const rosters = getRostersForCurrentLeague(state)
   const players = []
-  for (const roster of leagueRosters.values()) {
-    for (const [key, value] of roster.entries()) {
-      if (key.startsWith('s')) {
-        players.push(value)
-      }
-    }
+  for (const roster of rosters.values()) {
+    roster.players.forEach(p => players.push(p.player))
   }
   return new List(players)
 }
 
-export function isPlayerAvailable (state, { player }) {
-  const rostered = getRosteredPlayersForCurrentLeague(state)
+export function getActiveRosterPlayerIdsForCurrentLeague (state) {
+  const rosters = getRostersForCurrentLeague(state)
+  const players = []
+  for (const roster of rosters.values()) {
+    roster.players.forEach(p => {
+      if (p.slot !== constants.slots.IR ||
+        p.slot !== constants.slots.PS) {
+        players.push(p.player)
+      }
+    })
+  }
+  return new List(players)
+}
+
+export function getPracticeSquadPlayerIdsForCurrentLeague (state) {
+  const rosters = getRostersForCurrentLeague(state)
+  const players = []
+  for (const roster of rosters.values()) {
+    roster.players.forEach(p => {
+      if (p.slot === constants.slots.PS) {
+        players.push(p.player)
+      }
+    })
+  }
+  return new List(players)
+}
+
+export function getInjuredReservePlayerIdsForCurrentLeague (state) {
+  const rosters = getRostersForCurrentLeague(state)
+  const players = []
+  for (const roster of rosters.values()) {
+    roster.players.forEach(p => {
+      if (p.slot === constants.slots.IR) {
+        players.push(p.player)
+      }
+    })
+  }
+  return new List(players)
+}
+
+export function isPlayerFreeAgent (state, { player }) {
+  const rostered = getRosteredPlayerIdsForCurrentLeague(state)
   return !rostered.includes(player.player)
 }
 

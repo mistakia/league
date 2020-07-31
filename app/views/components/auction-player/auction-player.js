@@ -8,7 +8,7 @@ import './auction-player.styl'
 
 export default class AuctionPlayer extends React.Component {
   handleClick = () => {
-    if (!this.props.isAvailable) {
+    if (!this.props.isFreeAgent) {
       return
     }
 
@@ -20,10 +20,10 @@ export default class AuctionPlayer extends React.Component {
   }
 
   render = () => {
-    const { index, player, isAvailable, isEligible, vbaseline, watchlist, style } = this.props
+    const { index, player, isFreeAgent, isEligible, vbaseline, watchlist, style } = this.props
 
     const classNames = ['auction__player']
-    if (!isAvailable) {
+    if (!isFreeAgent) {
       classNames.push('signed')
     } else if (watchlist.has(player.player)) {
       classNames.push('watchlist')
