@@ -5,10 +5,12 @@ import Position from '@components/position'
 import PlayerWatchlistAction from '@components/player-watchlist-action'
 import PlayerRowMetric from '@components/player-row-metric'
 import Team from '@components/team'
+import { Player, connect } from '@components/player'
+import IconButton from '@components/icon-button'
 
 import './player-row.styl'
 
-export default class PlayerRow extends React.Component {
+class PlayerRow extends Player {
   handleClick = () => {
     this.props.select(this.props.player.player)
   }
@@ -17,7 +19,7 @@ export default class PlayerRow extends React.Component {
     const {
       player, style, selected, vbaseline, isSeasonProjectionView,
       isStatsPassingAdvancedView, isStatsPassingPressureView, isStatsRushingView,
-      isStatsReceivingView, overall
+      isStatsReceivingView, overall, isLoggedIn
     } = this.props
 
     const isSelected = selected === player.player
@@ -261,6 +263,10 @@ export default class PlayerRow extends React.Component {
               <span>{player.name}</span>
               <Team team={player.team} />
             </div>
+            {isLoggedIn &&
+              <div className='player__row-action'>
+                <IconButton small text onClick={this.handleContextClick} icon='more' />
+              </div>}
             {isSeasonProjectionView && seasonProjectionSummary}
             {isSeasonProjectionView && passingProjection}
             {isSeasonProjectionView && rushingProjection}
@@ -285,3 +291,5 @@ export default class PlayerRow extends React.Component {
     )
   }
 }
+
+export default connect(PlayerRow)

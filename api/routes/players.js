@@ -40,7 +40,7 @@ router.get('/?', async (req, res) => {
       .join(
         'projections',
         function () {
-          this.on(function() {
+          this.on(function () {
             this.on(db.raw('CONCAT(player, "_", sourceid, "_", week) = X.Group1'))
             this.andOn('timestamp', '=', 'maxtime')
           })

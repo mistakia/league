@@ -9,8 +9,9 @@ import './player.styl'
 
 export class Player extends React.Component {
   handleContextClick = (event) => {
+    event.stopPropagation()
     this.props.showContext({
-      id: 'roster',
+      id: 'player',
       data: { playerId: this.props.player.player },
       clickX: event.clientX,
       clickY: event.clientY

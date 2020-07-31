@@ -9,10 +9,12 @@ $height = 30px
     background lighten($accentColor, 85%)
 
 
+  .player__row-action button
   .player__watchlist-action
     opacity 0
-    &.selected
-      opacity 1
+
+  .player__watchlist-action.selected
+  &:hover .player__row-action button
   &:hover .player__watchlist-action
     opacity 1
 
