@@ -4,14 +4,13 @@ import { createSelector } from 'reselect'
 import {
   getContextMenuInfo,
   contextMenuActions,
-  getContextMenuPlayer
-} from '@core/context-menu'
-import RosterContextMenu from './roster-context-menu'
-import {
+  getContextMenuPlayer,
   isPracticeSquadEligible,
   isActiveRosterEligible,
-  rosterActions
-} from '@core/rosters'
+  isPlayerOnCurrentRoster
+} from '@core/context-menu'
+import PlayerContextMenu from './player-context-menu'
+import { rosterActions } from '@core/rosters'
 import { confirmationActions } from '@core/confirmations'
 
 const mapStateToProps = createSelector(
@@ -19,10 +18,12 @@ const mapStateToProps = createSelector(
   getContextMenuPlayer,
   isPracticeSquadEligible,
   isActiveRosterEligible,
-  (contextMenuInfo, player, isPracticeSquadEligible, isActiveRosterEligible) => ({
+  isPlayerOnCurrentRoster,
+  (contextMenuInfo, player, isPracticeSquadEligible, isActiveRosterEligible, isOnCurrentRoster) => ({
     contextMenuInfo,
     player,
     isPracticeSquadEligible,
+    isOnCurrentRoster,
     isActiveRosterEligible
   })
 )
@@ -38,4 +39,4 @@ const mapDispatchToProps = {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(RosterContextMenu)
+)(PlayerContextMenu)

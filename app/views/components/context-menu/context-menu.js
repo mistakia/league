@@ -1,14 +1,10 @@
 import React from 'react'
 
-import RosterContextMenu from '@components/roster-context-menu'
+import PlayerContextMenu from '@components/player-context-menu'
 
 import './context-menu.styl'
 
 export default class ContextMenu extends React.Component {
-  handleScroll = () => {
-    this.props.hide()
-  }
-
   handleClick = (event) => {
     const { visible } = this.props.contextMenuInfo
     if (!visible) {
@@ -23,12 +19,10 @@ export default class ContextMenu extends React.Component {
 
   removeListeners = () => {
     document.removeEventListener('click', this.handleClick)
-    document.removeEventListener('scroll', this.handleScroll, true)
   }
 
   addListeners = () => {
     document.addEventListener('click', this.handleClick)
-    document.addEventListener('scroll', this.handleScroll, true)
   }
 
   componentWillUnmount = () => {
@@ -80,15 +74,18 @@ export default class ContextMenu extends React.Component {
 
     const getContextMenuComponent = (id) => {
       switch (id) {
-        case 'roster': return RosterContextMenu
+        case 'player': return PlayerContextMenu
       }
     }
 
     const ContextMenuComponent = getContextMenuComponent(id)
 
     return (
-      <div ref={ref => { this.root = ref }} className='context__menu'>
-        <ContextMenuComponent data={data} />
+      <div>
+        <div ref={ref => { this.root = ref }} className='context__menu'>
+          <ContextMenuComponent data={data} />
+        </div>
+        <div className='context__menu-backdrop' />
       </div>
     )
   }
