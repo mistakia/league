@@ -505,9 +505,11 @@ CREATE TABLE `poaches` (
   `player` varchar(7) NOT NULL,
   `drop` varchar(7) NOT NULL,
   `tid` int(5) NOT NULL,
+  `lid` int(6) NOT NULL,
   `submitted` int(11) NOT NULL,
   `expired` int(11) NOT NULL,
-  `processed` int(11) NOT NULL
+  `processed` int(11) NOT NULL,
+  KEY `lid` (`lid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -1630,6 +1632,28 @@ CREATE TABLE `users_teams` (
   `teamvoice` tinyint(1) NOT NULL DEFAULT 1,
   `leaguetext` tinyint(1) NOT NULL DEFAULT 1,
   UNIQUE KEY `userid` (`userid`,`tid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `waivers`
+--
+
+DROP TABLE IF EXISTS `waivers`;
+
+CREATE TABLE `waivers` (
+  `uid` int(11) NOT NULL AUTO_INCREMENT,
+  `player` varchar(7) NOT NULL,
+  `drop` varchar(7) NOT NULL,
+  `tid` int(5) NOT NULL,
+  `lid` int(6) NOT NULL,
+  `submitted` int(11) NOT NULL,
+  `bid` int(4) DEFAULT NULL,
+  `type` tinyint(1) NOT NULL,
+  `processed` int(11) NOT NULL,
+  PRIMARY KEY (`uid`),
+  KEY `lid` (`lid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

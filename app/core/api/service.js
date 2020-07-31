@@ -153,6 +153,14 @@ export const api = {
   getTeamStats () {
     const url = `${BASE_URL}/stats/teams`
     return { url }
+  },
+  postWaiver (data) {
+    const url = `${BASE_URL}/leagues/${data.leagueId}/waivers`
+    return { url, ...POST(data) }
+  },
+  postPoach (data) {
+    const url = `${BASE_URL}/leagues/${data.leagueId}/poaches`
+    return { url, ...POST(data) }
   }
 }
 

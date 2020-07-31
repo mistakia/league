@@ -73,7 +73,7 @@ api.use('/api/*', expressJwt(config.jwt), (err, req, res, next) => {
   return next(err)
 })
 api.use('/api/stats', speedLimiter, routes.stats)
-api.use('/api/players', speedLimiter, routes.players)
+api.use('/api/players', routes.players)
 api.use('/api/plays', speedLimiter, routes.plays)
 api.use('/api/sources', routes.sources)
 api.use('/api/auth', routes.auth)

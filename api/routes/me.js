@@ -16,6 +16,7 @@ router.get('/?', async (req, res) => {
       .join('users_teams', 'users_teams.tid', 'teams.uid')
 
     const leagueIds = teams.map(t => t.lid)
+    const teamIds = teams.map(t => t.uid)
     const leagues = await db('leagues').whereIn('uid', leagueIds)
     const sources = await db('sources')
       .leftJoin('users_sources', 'users_sources.sourceid', 'sources.uid')
@@ -23,10 +24,21 @@ router.get('/?', async (req, res) => {
         this.whereNull('userId').orWhere({ userid: req.user.userId })
       })
 
+    const poaches = await db('poaches')
+      .whereIn('lid', leagueIds)
+      .whereNull('expired')
+      .whereNull('processed')
+
+    const waivers = await db('waivers')
+      .whereIn('tid', teamIds)
+      .whereNull('processed')
+
     res.send({
       user,
       teams,
       leagues,
+      poaches,
+      waivers,
       sources
     })
 

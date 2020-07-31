@@ -15,6 +15,8 @@ import { tradeReducer } from './trade'
 import { statsReducer } from './stats'
 import { contextMenuReducer } from './context-menu'
 import { confirmationReducer } from './confirmations'
+import { poachesReducer } from './poaches'
+import { waiversReducer } from './waivers'
 
 const rootReducer = (history) => {
   return combineReducers({
@@ -32,7 +34,9 @@ const rootReducer = (history) => {
     transactions: transactionsReducer,
     matchups: matchupsReducer,
     trade: tradeReducer,
-    stats: statsReducer
+    stats: statsReducer,
+    poaches: poachesReducer,
+    waivers: waiversReducer
   })
 }
 
