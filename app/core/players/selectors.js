@@ -5,6 +5,12 @@ import { getApp } from '@core/app'
 import { getStats } from '@core/stats'
 import { Player } from './player'
 import { fuzzySearch } from '@core/utils'
+import {
+  getActiveRosterPlayerIdsForCurrentLeague,
+  getRosteredPlayerIdsForCurrentLeague,
+  getPracticeSquadPlayerIdsForCurrentLeague,
+  getInjuredReservePlayerIdsForCurrentLeague
+} from '@core/rosters'
 
 export function getPlayers (state) {
   return state.get('players')
@@ -103,8 +109,35 @@ export function getFilteredPlayers (state) {
   if (qualifier) {
     filtered = filtered.filter(player => player.getIn(['stats', qualifier.type]) >= qualifier.value)
   }
-  const sorted = filtered.sort(getComparator(players.get('order'), players.get('orderBy')))
 
+  const availability = players.get('availability')
+  if (availability.size !== constants.availability.length) {
+    const activeRosterPlayerIds = getActiveRosterPlayerIdsForCurrentLeague(state)
+    const rosteredPlayerIds = getRosteredPlayerIdsForCurrentLeague(state)
+    const practiceSquadPlayerIds = getPracticeSquadPlayerIdsForCurrentLeague(state)
+    const injuredReservePlayerIds = getInjuredReservePlayerIdsForCurrentLeague(state)
+    filtered = filtered.filter(player => {
+      if (availability.includes('ROSTERED') && activeRosterPlayerIds.includes(player.player)) {
+        return true
+      }
+
+      if (availability.includes('FREE AGENT') && !rosteredPlayerIds.includes(player.player)) {
+        return true
+      }
+
+      if (availability.includes('PRACTICE SQUAD') && practiceSquadPlayerIds.includes(player.player)) {
+        return true
+      }
+
+      if (availability.includes('INJURED RESERVE') && injuredReservePlayerIds.includes(player.player)) {
+        return true
+      }
+
+      return false
+    })
+  }
+
+  const sorted = filtered.sort(getComparator(players.get('order'), players.get('orderBy')))
   return sorted.toList()
 }
 

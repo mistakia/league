@@ -1,7 +1,6 @@
 import { createSelector } from 'reselect'
 
 import { getTeams } from '@core/teams'
-import { getRosters } from '@core/rosters'
 import { getApp } from '@core/app'
 import { League } from './league'
 
@@ -29,13 +28,5 @@ export const getTeamsForCurrentLeague = createSelector(
   getTeams,
   (teamIds, teams) => {
     return teamIds.map(tid => teams.get(tid))
-  }
-)
-
-export const getRostersForCurrentLeague = createSelector(
-  getCurrentLeagueTeamIds,
-  getRosters,
-  (teamIds, rosters) => {
-    return teamIds.map(tid => rosters.get(tid))
   }
 )

@@ -2,19 +2,19 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { getApp } from '@core/app'
-import { isPlayerAvailable, isPlayerEligible } from '@core/rosters'
+import { isPlayerFreeAgent, isPlayerEligible } from '@core/rosters'
 import { auctionActions } from '@core/auction'
 import { getPlayers } from '@core/players'
 
 import AuctionPlayer from './auction-player'
 
 const mapStateToProps = createSelector(
-  isPlayerAvailable,
+  isPlayerFreeAgent,
   isPlayerEligible,
   getApp,
   getPlayers,
-  (isAvailable, isEligible, app, players) => ({
-    isAvailable,
+  (isFreeAgent, isEligible, app, players) => ({
+    isFreeAgent,
     isEligible,
     vbaseline: app.vbaseline,
     watchlist: players.get('watchlist')

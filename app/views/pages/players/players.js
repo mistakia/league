@@ -11,6 +11,7 @@ import PlayerRow from '@components/player-row'
 import PlayersViewMenu from '@components/players-view-menu'
 import StatMenu from '@components/stat-menu'
 import StatPassingMenu from '@components/stat-passing-menu'
+import AvailabilityFilter from '@components/availability-filter'
 import StatYearsFilter from '@components/stat-years-filter'
 import StatWeeksFilter from '@components/stat-weeks-filter'
 import StatDaysFilter from '@components/stat-days-filter'
@@ -149,8 +150,7 @@ export default class PlayersPage extends React.Component {
         <div className={classNames.join(' ')}>
           <SearchFilter search={this.props.search} value={this.props.searchValue} />
           <PositionFilter />
-          <ExperienceFilter />
-          <AgeFilter />
+          <AvailabilityFilter />
           <PlayersViewMenu />
           {isStatsView && <StatMenu />}
           {isStatsPassingView && <StatPassingMenu />}
@@ -166,6 +166,8 @@ export default class PlayersPage extends React.Component {
         </div>
         {this.state.expanded &&
           <div className='players__filter'>
+            <ExperienceFilter />
+            <AgeFilter />
             <NFLTeamsFilter />
             <CollegeFilter />
             <CollegeDivisionFilter />
