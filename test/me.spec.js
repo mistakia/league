@@ -32,5 +32,7 @@ describe('API /me', function () {
     res.body.teams.should.be.an('array')
     res.body.leagues.should.be.an('array')
     res.body.sources.should.be.an('array')
+    res.body.poaches.should.be.an('array')
+    res.body.waivers.should.be.an('array')
   })
 })

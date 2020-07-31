@@ -3,9 +3,12 @@ import moment from 'moment'
 import * as espn from './espn-constants'
 export { espn }
 
-export const start = moment('9/1', 'M/D')
+export const start = moment('9/1 -0400', 'M/D Z')
 const diff = moment().diff(start, 'weeks')
 export const week = diff < 0 ? 0 : diff
+export const regularSeason = week > 0 && week < 17
+export const waiverWindow = regularSeason && moment().utcOffset(-4).day() === 2
+export const poachWaiverWindow = moment().isBefore(moment('8/5 -0400', 'M/D Z'))
 
 export const year = moment().month() > 2
   ? moment().year()
@@ -321,6 +324,11 @@ export const slots = {
   IR: 13
 }
 
+export const waivers = {
+  ADD: 1,
+  POACH: 2
+}
+
 export const transactions = {
   ROSTER_ADD: 0,
   ROSTER_DROP: 1,
@@ -340,7 +348,9 @@ export const transactions = {
   EXTENSION: 9,
   TRANSITION_TAG: 10,
   FRANCHISE_TAG: 11,
-  ROOKIE_TAG: 12
+  ROOKIE_TAG: 12,
+
+  PRACTICE_ADD: 13
 }
 
 export const transactionsDetail = {
@@ -362,7 +372,8 @@ export const transactionsDetail = {
   9: 'Extended',
   10: 'Tran. Tagged',
   11: 'Fran. Tagged',
-  12: 'Rookie Tagged'
+  12: 'Rookie Tagged',
+  13: 'Added (Practice Squad)'
 }
 
 export const nflTeams = [

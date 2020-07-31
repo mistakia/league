@@ -53,6 +53,7 @@ router.get('/?', async (req, res) => {
     }
     userProjections.forEach(addProjection)
     projections.forEach(addProjection)
+
     res.send(players)
   } catch (error) {
     logger(error)
