@@ -1,6 +1,6 @@
 import React from 'react'
 
-export default class RosterContextMenu extends React.Component {
+export default class PlayerContextMenu extends React.Component {
   handleDeactivate = () => {
     const { player, deactivate } = this.props
     this.props.showConfirmation({
@@ -22,7 +22,11 @@ export default class RosterContextMenu extends React.Component {
   }
 
   render = () => {
-    const { isPracticeSquadEligible, isActiveRosterEligible } = this.props
+    const {
+      isPracticeSquadEligible,
+      isActiveRosterEligible,
+      isOnCurrentRoster
+    } = this.props
     let deactivateAction
     if (isPracticeSquadEligible) {
       deactivateAction = (
@@ -53,14 +57,33 @@ export default class RosterContextMenu extends React.Component {
       )
     }
 
-    return (
-      <div>
-        {activateAction}
-        {deactivateAction}
-        <div className='context__menu-option disabled'>
-          Drop
+    if (isOnCurrentRoster) {
+      return (
+        <div>
+          {activateAction}
+          {deactivateAction}
+          <div className='context__menu-option disabled'>
+            Drop
+          </div>
         </div>
-      </div>
-    )
+      )
+    } else {
+      return (
+        <div>
+          <div className='context__menu-option disabled'>
+            Submit Waiver Claim
+          </div>
+          <div className='context__menu-option disabled'>
+            Submit Poaching Claim
+          </div>
+          <div className='context__menu-option disabled'>
+            Add To Roster
+          </div>
+          <div className='context__menu-option disabled'>
+            Add To Practice Squad
+          </div>
+        </div>
+      )
+    }
   }
 }

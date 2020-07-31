@@ -14,6 +14,7 @@ const mapStateToProps = createSelector(
   getStats,
   (players, pState, app, stats) => ({
     players,
+    isLoggedIn: !!app.userId,
     isPending: pState.get('isPending') || (pState.get('view') === 'stats' && stats.isPending),
     vbaseline: app.vbaseline,
     searchValue: pState.get('search'),

@@ -73,7 +73,7 @@ export default class PlayersPage extends React.Component {
     const {
       players, vbaseline, isSeasonProjectionView, isStatsView, isStatsPassingView,
       isStatsRushingView, isStatsReceivingView, isStatsPassingAdvancedView,
-      isStatsPassingPressureView, isPending, showQualifier
+      isStatsPassingPressureView, isPending, showQualifier, isLoggedIn
     } = this.props
 
     const Row = ({ index, key, parent, ...params }) => {
@@ -176,6 +176,7 @@ export default class PlayersPage extends React.Component {
           <div className='player__row-action' />
           <div className='player__row-pos' />
           <div className='player__row-name'>Name</div>
+          {isLoggedIn && <div className='player__row-action' />}
           {isSeasonProjectionView && headerSeasonSummary}
           {isSeasonProjectionView && headerSeasonPassing}
           {isSeasonProjectionView && headerSeasonRushing}

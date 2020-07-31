@@ -8,9 +8,7 @@ export {
   getPracticeSquadPlayerIdsForCurrentLeague,
   getInjuredReservePlayerIdsForCurrentLeague,
   isPlayerFreeAgent,
-  isPlayerEligible,
-  isPracticeSquadEligible,
-  isActiveRosterEligible
+  isPlayerEligible
 } from './selectors'
 export { rosterSagas } from './sagas'
 export { rostersReducer } from './reducer'
