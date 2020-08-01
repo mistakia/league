@@ -35,6 +35,7 @@ module.exports = {
   sendNotifications: require('./send-notifications'),
   getPlayerId: require('./get-player-id'),
   getSchedule: require('./get-schedule'),
+  fixTeam: require('./fix-team'),
   getPlayByPlayQuery,
   getRoster
 }
