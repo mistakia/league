@@ -16,11 +16,10 @@ const config = require('../config')
 const { constants } = require('../common')
 const { year } = constants
 
-const URL = 'https://www.pff.com/api/prankster/projections?scoring=preset_std&weeks=0'
-
-const run = async () => {
+const runOne = async (week) => {
   const missing = []
 
+  const URL = `https://www.pff.com/api/prankster/projections?scoring=preset_std&weeks=${week}`
   const result = await fetch(URL, {
     headers: {
       cookie: config.pff
@@ -66,7 +65,7 @@ const run = async () => {
 
     inserts.push({
       player: playerId,
-      week: 0,
+      week,
       year,
       sourceid: 6, // pff sourceid,
       timestamp,
@@ -83,7 +82,12 @@ const run = async () => {
 
   log(`Inserting ${inserts.length} projections into database`)
   await db('projections').insert(inserts)
+}
 
+const run = async () => {
+  for (let week = constants.week; week < 17; week++) {
+    await runOne(week)
+  }
   process.exit()
 }
 
