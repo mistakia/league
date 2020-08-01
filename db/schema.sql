@@ -501,7 +501,7 @@ CREATE TABLE `player` (
 DROP TABLE IF EXISTS `players`;
 
 CREATE TABLE `players` (
-  `player` varchar(7) NOT NULL,
+  `player` varchar(7) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `team` varchar(5) NOT NULL,
   `pos` varchar(5) NOT NULL,
@@ -531,7 +531,7 @@ CREATE TABLE `players` (
   `exp_return` varchar(255) DEFAULT NULL,
   `injury_body_part` varchar(255) DEFAULT NULL,
   `injury_start_date` varchar(255) DEFAULT NULL,
-  `injury_status` varchar(11) DEFAULT NULL,
+  `injury_status` varchar(255) DEFAULT NULL,
   `injury_notes` varchar(255) DEFAULT NULL,
   `practice_participation` varchar(255) DEFAULT NULL, -- TODO refine
   `practice_description` varchar(255) DEFAULT NULL, -- TODO refine
@@ -550,7 +550,7 @@ CREATE TABLE `players` (
 DROP TABLE IF EXISTS `players_status`;
 
 CREATE TABLE `players_status` (
-  `player` varchar(7) NOT NULL,
+  `player` varchar(7) DEFAULT NULL,
   `mfl_id` varchar(11) DEFAULT NULL,
   `sleeper_id` varchar(11) DEFAULT NULL,
   `active` tinyint(1) DEFAULT NULL,
@@ -560,7 +560,7 @@ CREATE TABLE `players_status` (
   `exp_return` varchar(255) DEFAULT NULL,
   `injury_body_part` varchar(255) DEFAULT NULL,
   `injury_start_date` varchar(255) DEFAULT NULL,
-  `injury_status` varchar(11) DEFAULT NULL,
+  `injury_status` varchar(255) DEFAULT NULL,
   `injury_notes` varchar(255) DEFAULT NULL,
   `practice_participation` varchar(255) DEFAULT NULL, -- TODO refine
   `practice_description` varchar(255) DEFAULT NULL, -- TODO refine
