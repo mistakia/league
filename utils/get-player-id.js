@@ -1,6 +1,7 @@
 const db = require('../db')
 const debug = require('debug')
 const log = debug('league:player:get')
+const fixTeam = require('./fix-team')
 
 const aliases = {
   'AJ Dillon': 'AD-1184',
@@ -128,63 +129,6 @@ const aliases = {
   'Vikings D/ST': 'MIN',
   'Vikings DST': 'MIN'
 
-}
-
-const fixTeam = (team) => {
-  team = team.toUpperCase()
-
-  switch (team) {
-    case 'ARZ':
-      return 'ARI'
-
-    case 'BLT':
-      return 'BAL'
-
-    case 'CLV':
-      return 'CLE'
-
-    case 'HST':
-      return 'HOU'
-
-    case 'KCC':
-      return 'KC'
-
-    case 'LVR':
-      return 'LV'
-
-    case 'SFO':
-      return 'SF'
-
-    case 'TBB':
-      return 'TB'
-
-    case 'FA':
-      return 'INA'
-
-    case 'NOS':
-      return 'NO'
-
-    case 'OAK':
-      return 'LV'
-
-    case 'GBP':
-      return 'GB'
-
-    case 'NEP':
-      return 'NE'
-
-    case 'LAR':
-      return 'LA'
-
-    case 'WSH':
-      return 'WAS'
-
-    case 'JAX':
-      return 'JAC'
-
-    default:
-      return team
-  }
 }
 
 const getPlayerId = async ({ name, pos, team }) => {
