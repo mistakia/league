@@ -1,4 +1,4 @@
-import { stats } from './constants'
+import { stats, week } from './constants'
 
 const removeFalsy = (obj) => {
   const newObj = {}
@@ -23,6 +23,8 @@ const weightProjections = ({ projections, weights = [], userId }) => {
     const full = 1 / sourceProjections.length
     const factor = (source && source.weight !== null) ? source.weight : 1
     const weight = factor * full
+
+    if (projection.week !== week) continue // TODO
 
     for (const r in data) {
       if (projection[r]) {
