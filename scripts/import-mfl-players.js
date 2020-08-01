@@ -1,3 +1,4 @@
+/* eslint camelcase: 'off' */
 // eslint-disable-next-line
 require = require('esm')(module /*, options*/)
 const fetch = require('node-fetch')
@@ -72,7 +73,7 @@ const run = async () => {
       rotowire_id,
       stats_id,
       stats_global_id,
-      sportsdata_id,
+      sportradar_id: sportsdata_id,
       twitter_username
     }
 
@@ -97,7 +98,11 @@ const run = async () => {
   for (const insert of inserts) {
     const rows = await db('players').where('mfl_id', insert.mfl_id)
     if (rows.length) {
-      await db('players').update(insert).where('mfl_id', insert.mfl_id)
+      const {
+        twitter_username
+      } = insert
+      if (!twitter_username) continue
+      await db('players').update({ twitter_username }).where('mfl_id', insert.mfl_id)
     } else {
       await db('players').insert(insert)
     }

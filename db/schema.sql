@@ -509,7 +509,7 @@ CREATE TABLE `players` (
   `birth_city` varchar(255) DEFAULT NULL,
   `cbs_id` varchar(11) DEFAULT NULL,
   `espn_id` varchar(11) DEFAULT NULL,
-  `fantasydata_id` varchar(11) DEFAULT NULL,
+  `fantasy_data_id` varchar(11) DEFAULT NULL,
   `fleaflicker_id` varchar(11) DEFAULT NULL,
   `gsis_id` varchar(13) DEFAULT NULL,
   `high_school` varchar(255) DEFAULT NULL,
@@ -520,9 +520,24 @@ CREATE TABLE `players` (
   `sleeper_id` varchar(11) DEFAULT NULL,
   `stats_id` varchar(11) DEFAULT NULL,
   `stats_global_id` varchar(11) DEFAULT NULL,
-  `sportsdata_id` varchar(36) DEFAULT NULL,
+  `sportradar_id` varchar(36) DEFAULT NULL,
   `twitter_username` varchar(255) DEFAULT NULL,
   `yahoo_id` varchar(11) DEFAULT NULL,
+
+  `active` tinyint(1) DEFAULT NULL,
+  `depth_chart_order` varchar(255) DEFAULT NULL, -- TODO refine
+  `depth_chart_position` varchar(255) DEFAULT NULL, -- TODO refine
+  `details` varchar(255) DEFAULT NULL,
+  `exp_return` varchar(255) DEFAULT NULL,
+  `injury_body_part` varchar(255) DEFAULT NULL,
+  `injury_start_date` varchar(255) DEFAULT NULL,
+  `injury_status` varchar(11) DEFAULT NULL,
+  `injury_notes` varchar(255) DEFAULT NULL,
+  `practice_participation` varchar(255) DEFAULT NULL, -- TODO refine
+  `practice_description` varchar(255) DEFAULT NULL, -- TODO refine
+  `status` varchar(255) DEFAULT NULL,
+  `search_rank` int(7) DEFAULT NULL,
+
   KEY `player` (`player`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -536,10 +551,14 @@ DROP TABLE IF EXISTS `players_status`;
 
 CREATE TABLE `players_status` (
   `player` varchar(7) NOT NULL,
+  `mfl_id` varchar(11) DEFAULT NULL,
+  `sleeper_id` varchar(11) DEFAULT NULL,
   `active` tinyint(1) DEFAULT NULL,
   `depth_chart_order` varchar(255) DEFAULT NULL, -- TODO refine
   `depth_chart_position` varchar(255) DEFAULT NULL, -- TODO refine
-  `injury_body_part` varchar(255) DEFAULT NULL
+  `details` varchar(255) DEFAULT NULL,
+  `exp_return` varchar(255) DEFAULT NULL,
+  `injury_body_part` varchar(255) DEFAULT NULL,
   `injury_start_date` varchar(255) DEFAULT NULL,
   `injury_status` varchar(11) DEFAULT NULL,
   `injury_notes` varchar(255) DEFAULT NULL,
