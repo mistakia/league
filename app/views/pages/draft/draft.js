@@ -15,7 +15,7 @@ import './draft.styl'
 export default function () {
   const {
     players, nextPick, picks, league, selectedPlayer,
-    draftPlayer, drafted, vbaseline
+    drafted, vbaseline
   } = this.props
   const { positions } = constants
 
@@ -103,7 +103,7 @@ export default function () {
         </div>
         {(draftActive && onTheClock && !isDrafted) &&
           <div className='draft__selected-action'>
-            <Button onClick={draftPlayer}>Draft</Button>
+            <Button onClick={this.handleDraft}>Draft</Button>
           </div>}
       </div>
       <div className='draft__selected-body'>
