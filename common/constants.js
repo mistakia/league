@@ -71,7 +71,6 @@ export const fullStats = [
   'drpp', // dropped pass
 
   // advanced
-  'ptay', // total air yards
   'pcay', // completed air yards
   'pyac', // yards after catch
   'pcay_pc', // completed air yards per completion
@@ -111,7 +110,7 @@ export const fullStats = [
   'cnb',
 
   // share
-  '_strtay', // share of team total air yards
+  '_stray', // share of team total air yards
   '_sttrg', // share of team targets
 
   // usage
@@ -121,7 +120,6 @@ export const fullStats = [
   'rdot_ptrg', // average depth of target
 
   // advanced
-  'rtay', // total air yards
   'rcay', // completed air yards
   '_ayps', // air yards per snap
   '_ayprec', // air yards per reception
@@ -130,7 +128,7 @@ export const fullStats = [
   '_recypsnp', // receiving yards per snap
   '_recyprec', // receiving yards per reception
   '_recyptrg', // receiving yards per target
-  '_wopr', // (1.5 x _sttrg + 0.7 x _sttay)
+  '_wopr', // (1.5 x _sttrg + 0.7 x _stray)
   '_ryacprec', // yac per rec
 
   // ////// RUSHING ////////

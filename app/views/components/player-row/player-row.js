@@ -130,7 +130,7 @@ class PlayerRow extends Player {
     const passingAiryards = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <PlayerRowMetric stats={stats} overall={overall} type='ptay' />
+          <PlayerRowMetric stats={stats} overall={overall} type='pdot' />
           <PlayerRowMetric stats={stats} overall={overall} type='_aypa' />
           <PlayerRowMetric stats={stats} overall={overall} type='pcay_pc' />
           <PlayerRowMetric stats={stats} overall={overall} type='_pacr' />
@@ -227,7 +227,7 @@ class PlayerRow extends Player {
           <PlayerRowMetric stats={stats} overall={overall} type='trg' />
           <PlayerRowMetric stats={stats} overall={overall} type='dptrg_pct' />
           <PlayerRowMetric stats={stats} overall={overall} type='rdot_ptrg' />
-          <PlayerRowMetric stats={stats} overall={overall} type='_strtay' />
+          <PlayerRowMetric stats={stats} overall={overall} type='_stray' />
           <PlayerRowMetric stats={stats} overall={overall} type='_sttrg' />
           <PlayerRowMetric stats={stats} overall={overall} type='_wopr' />
         </div>
