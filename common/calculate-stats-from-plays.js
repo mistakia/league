@@ -71,10 +71,9 @@ const calculateStatsFromPlays = ({ plays, qualifiers }) => {
           addStat(play.psr, 'psucc', 1)
           addStat(play.psr, 'succ', 1)
         }
-        if (play.dot) addStat(play.psr, 'pdot', play.dot)
-        if (play.tay) {
-          addStat(play.psr, 'ptay', play.tay)
-          addTeamStat(play.off, 'rtay', play.tay)
+        if (play.dot) {
+          addStat(play.psr, 'pdot', play.dot)
+          addTeamStat(play.off, 'rdot', play.dot)
         }
         if (play.qbp) addStat(play.psr, 'qbp', 1)
         if (play.qbhi) addStat(play.psr, 'qbhi', 1)
@@ -83,7 +82,7 @@ const calculateStatsFromPlays = ({ plays, qualifiers }) => {
         if (play.intw) addStat(play.psr, 'intw', 1)
         if (play.drp) {
           addStat(play.psr, 'drpp', 1)
-          addStat(play.psr, 'drppy', play.tay)
+          addStat(play.psr, 'drppy', play.dot)
         }
 
         // receiver
@@ -92,12 +91,11 @@ const calculateStatsFromPlays = ({ plays, qualifiers }) => {
           addTeamStat(play.off, 'trg', 1)
           addStat(play.trg, 'trg', 1)
           addStat(play.trg, 'rdot', play.dot)
-          addStat(play.trg, 'rtay', play.tay)
-          if (play.tay >= 20) addStat(play.trg, 'dptrg', 1)
+          if (play.dot >= 20) addStat(play.trg, 'dptrg', 1)
           if (play.cnb) addStat(play.trg, 'cnb', 1)
           if (play.drp) {
             addStat(play.trg, 'drp', 1)
-            addStat(play.trg, 'drprecy', play.tay)
+            addStat(play.trg, 'drprecy', play.dot)
           }
         }
 
@@ -108,14 +106,14 @@ const calculateStatsFromPlays = ({ plays, qualifiers }) => {
           addStat(play.trg, 'rec', 1)
           addStat(play.trg, 'recy', play.yds)
           addStat(play.trg, 'ryac', play.yac)
-          addStat(play.trg, 'rcay', play.tay)
+          addStat(play.trg, 'rcay', play.dot)
           if (play.mbt) addStat(play.trg, 'mbt', play.mbt)
 
           // passer
           addStat(play.psr, 'pa', 1)
           addStat(play.psr, 'py', play.yds)
           addStat(play.psr, 'pc', 1)
-          addStat(play.psr, 'pcay', play.tay)
+          addStat(play.psr, 'pcay', play.dot)
           if (play.yac) addStat(play.psr, 'pyac', play.yac)
 
           if (play.succ) addStat(play.trg, 'succ', 1)
@@ -157,11 +155,11 @@ const calculateStatsFromPlays = ({ plays, qualifiers }) => {
     stats.pcay_pc = round(stats.pcay / stats.pc, 1) || 0
     stats._ypa = round(stats.py / stats.pa, 1) || 0
     stats.pyac_pc = round(stats.pyac / stats.pc, 1) || 0
-    stats._aypa = round(stats.ptay / stats.pa, 1) || 0
+    stats._aypa = round(stats.pdot / stats.pa, 1) || 0
     // stats._adjypa
     stats._ypc = round(stats.py / stats.pc, 1) || 0
     // stats._ypg
-    stats._pacr = round(stats.py / stats.ptay, 2) || 0
+    stats._pacr = round(stats.py / stats.pdot, 2) || 0
     stats.pdot_pa = round(stats.pdot / stats.pa, 1) || 0
     // stats._apacr
 
@@ -174,22 +172,22 @@ const calculateStatsFromPlays = ({ plays, qualifiers }) => {
     stats.recy_prec = round(stats.recy / stats.rec, 1) || 0
     // stats.recy_pg
 
-    const strtay = stats.rtay / teamStats.rtay
-    const sttrg = stats.trg / teamStats.trg
-    stats._strtay = round(toPct(strtay), 1) || 0
+    const stray = stats.rdot / teamStats.rdot // share of teams air yards
+    const sttrg = stats.trg / teamStats.trg // share of teams targets
+    stats._stray = round(toPct(stray), 1) || 0
     stats._sttrg = round(toPct(sttrg), 1) || 0
 
     stats.dptrg_pct = round(toPct(stats.dptrg / stats.trg), 1) || 0
     stats.rdot_ptrg = round(stats.rdot / stats.trg, 1) || 0
 
     // stats._ayps
-    stats._ayprec = round(stats.rtay / stats.rec, 1) || 0
-    stats._ayptrg = round(stats.rtay / stats.trg, 1) || 0
-    stats._recypay = round(stats.recy / stats.rtay, 1) || 0
+    stats._ayprec = round(stats.rdot / stats.rec, 1) || 0
+    stats._ayptrg = round(stats.rdot / stats.trg, 1) || 0
+    stats._recypay = round(stats.recy / stats.rdot, 1) || 0
     // stats._recypsnp
     stats._recyprec = round(stats.recy / stats.rec, 1) || 0
     stats._recyptrg = round(stats.recy / stats.trg, 1) || 0
-    stats._wopr = round((1.5 * sttrg) + (0.7 * strtay), 1) || 0
+    stats._wopr = round((1.5 * sttrg) + (0.7 * stray), 1) || 0
     stats._ryacprec = round(stats.ryac / stats.rec, 1) || 0
 
     // stats.ry_pg
