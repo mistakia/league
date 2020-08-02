@@ -9,6 +9,7 @@ const settings = require('./settings')
 const trades = require('./trades')
 const schedule = require('./schedule')
 const waivers = require('./waivers')
+const poaches = require('./poaches')
 
 router.put('/:leagueId', async (req, res) => {
   const { db, logger } = req.app.locals
@@ -51,18 +52,18 @@ router.put('/:leagueId', async (req, res) => {
       'pa', 'pc', 'py', 'ra', 'ry', 'rbrec', 'wrrec', 'terec', 'rec', 'recy'
     ]
 
-    if (ints.indexOf(field) > 0) {
+    if (ints.indexOf(field) >= 0) {
       if (isNaN(value)) {
         return res.status(400).send({ error: 'invalid value' })
       }
 
-      if (floats.indexOf(field) > 0) {
+      if (floats.indexOf(field) >= 0) {
         value = parseFloat(value)
       } else {
         value = parseInt(value, 10)
       }
 
-      if (positives.indexOf(field) > 0 && value < 0) {
+      if (positives.indexOf(field) >= 0 && value < 0) {
         return res.status(400).send({ error: 'invalid value' })
       }
     }
@@ -145,5 +146,6 @@ router.use('/:leagueId/settings', settings)
 router.use('/:leagueId/trades', trades)
 router.use('/:leagueId/schedule', schedule)
 router.use('/:leagueId/waivers', waivers)
+router.use('/:leagueId/poaches', poaches)
 
 module.exports = router

@@ -104,7 +104,6 @@ router.post('/?', async (req, res, next) => {
     const league = leagues[0]
 
     const proposingTeamRosterRow = await getRoster({
-      db,
       year: constants.year,
       week: constants.week,
       tid: pid
@@ -144,7 +143,6 @@ router.post('/?', async (req, res, next) => {
 
     // validate receiving players
     const acceptingTeamRosterRow = await getRoster({
-      db,
       year: constants.year,
       week: constants.week,
       tid

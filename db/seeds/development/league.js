@@ -7,6 +7,13 @@ const nflTeams = require('../nfl-teams')
 
 exports.seed = async function (knex, Promise) {
   try {
+    await knex('waivers').del()
+    await knex('poaches').del()
+  } catch (error) {
+    console.log(error)
+  }
+
+  try {
     await nflTeams(knex)
   } catch (error) {
     console.log(error)

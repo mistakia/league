@@ -26,6 +26,23 @@ export function getRosteredPlayerIdsForCurrentLeague (state) {
   return new List(players)
 }
 
+export function getRosterInfoForPlayerId (state, { playerId, player }) {
+  const pid = playerId || player.player
+  if (!pid) {
+    return {}
+  }
+
+  const rosters = getRostersForCurrentLeague(state)
+  for (const roster of rosters.values()) {
+    for (const rosterPlayer of roster.players) {
+      if (rosterPlayer.player === pid) {
+        return rosterPlayer
+      }
+    }
+  }
+  return {}
+}
+
 export function getActiveRosterPlayerIdsForCurrentLeague (state) {
   const rosters = getRostersForCurrentLeague(state)
   const players = []
@@ -69,6 +86,11 @@ export function getInjuredReservePlayerIdsForCurrentLeague (state) {
 export function isPlayerFreeAgent (state, { player }) {
   const rostered = getRosteredPlayerIdsForCurrentLeague(state)
   return !rostered.includes(player.player)
+}
+
+export function isPlayerOnPracticeSquad (state, { player }) {
+  const practiceSquads = getPracticeSquadPlayerIdsForCurrentLeague(state)
+  return practiceSquads.includes(player.player)
 }
 
 export function isPlayerEligible (state, { player, playerId }) {

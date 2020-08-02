@@ -21,12 +21,57 @@ export default class PlayerContextMenu extends React.Component {
     this.props.hide()
   }
 
+  handleWaiver = () => {
+    const { player } = this.props
+    this.props.showConfirmation({
+      id: 'waiver',
+      player
+    })
+    this.props.hide()
+  }
+
+  handleCancelWaiver = () => {
+    const { player, data, cancelClaim } = this.props
+    this.props.showConfirmation({
+      title: 'Cancel claim',
+      description: `Your claim for ${player.fname} ${player.lname} (${player.pos1}) will no longer be processed.`,
+      onConfirm: () => cancelClaim(data.waiverId)
+    })
+  }
+
+  handlePoach = () => {
+    const { player } = this.props
+    this.props.showConfirmation({
+      id: 'poach',
+      player
+    })
+    this.props.hide()
+  }
+
   render = () => {
     const {
       isPracticeSquadEligible,
       isActiveRosterEligible,
-      isOnCurrentRoster
+      isOnCurrentRoster,
+      isPlayerRostered,
+      isPlayerOnPracticeSquad,
+      data,
+      status
     } = this.props
+
+    const { waiverId } = data
+
+    // context menu for waiver claims
+    if (waiverId) {
+      return (
+        <div>
+          <div className='context__menu-option' onClick={this.handleCancelWaiver}>
+            Cancel Claim
+          </div>
+        </div>
+      )
+    }
+
     let deactivateAction
     if (isPracticeSquadEligible) {
       deactivateAction = (
@@ -67,15 +112,53 @@ export default class PlayerContextMenu extends React.Component {
           </div>
         </div>
       )
-    } else {
-      return (
-        <div>
+    } else if (isPlayerRostered) {
+      if (isPlayerOnPracticeSquad) {
+        if (status.waiver.poach) {
+          return (
+            <div>
+              <div className='context__menu-option' onClick={this.handlePoach}>
+                Submit Poaching Waiver Claim
+              </div>
+            </div>
+          )
+        } else {
+          return (
+            <div>
+              <div className='context__menu-option' onClick={this.handlePoach}>
+                Submit Poaching Claim
+              </div>
+            </div>
+          )
+        }
+      } else {
+        return (
+          <div>
+            <div className='context__menu-option disabled'>
+              Submit Poaching Claim
+            </div>
+          </div>
+        )
+      }
+    } else { // player is a free agent
+      let claimAction
+      if (status.waiver.add) {
+        claimAction = (
+          <div className='context__menu-option' onClick={this.handleWaiver}>
+            Submit Waiver Claim
+          </div>
+        )
+      } else {
+        claimAction = (
           <div className='context__menu-option disabled'>
             Submit Waiver Claim
           </div>
-          <div className='context__menu-option disabled'>
-            Submit Poaching Claim
-          </div>
+        )
+      }
+
+      return (
+        <div>
+          {claimAction}
           <div className='context__menu-option disabled'>
             Add To Roster
           </div>

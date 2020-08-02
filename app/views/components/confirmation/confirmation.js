@@ -4,12 +4,14 @@ import DialogActions from '@material-ui/core/DialogActions'
 import DialogContent from '@material-ui/core/DialogContent'
 import DialogContentText from '@material-ui/core/DialogContentText'
 import DialogTitle from '@material-ui/core/DialogTitle'
+import WaiverConfirmation from '@components/waiver-confirmation'
+import PoachConfirmation from '@components/poach-confirmation'
 
 import Button from '@components/button'
 
 export default class Confirmation extends React.Component {
-  handleClick = () => {
-    this.props.info.onConfirm()
+  handleClick = (args) => {
+    this.props.info.onConfirm(args)
     this.props.cancel()
   }
 
@@ -18,16 +20,29 @@ export default class Confirmation extends React.Component {
   }
 
   render = () => {
+    if (this.props.info.id) {
+      const getComponent = (id) => {
+        switch (id) {
+          case 'waiver': return WaiverConfirmation
+          case 'poach': return PoachConfirmation
+        }
+      }
+      const ConfirmationComponent = getComponent(this.props.info.id)
+      const { player } = this.props.info
+      return (
+        <ConfirmationComponent
+          onClose={this.handleClose}
+          onSubmit={this.handleClick}
+          player={player}
+        />
+      )
+    }
+
     return (
-      <Dialog
-        open={!!this.props.info.title}
-        onClose={this.handleClose}
-        aria-labelledby='alert-dialog-title'
-        aria-describedby='alert-dialog-description'
-      >
-        <DialogTitle id='alert-dialog-title'>{this.props.info.title}</DialogTitle>
+      <Dialog open={!!this.props.info.title} onClose={this.handleClose}>
+        <DialogTitle>{this.props.info.title}</DialogTitle>
         <DialogContent>
-          <DialogContentText id='alert-dialog-description'>
+          <DialogContentText>
             {this.props.info.description}
           </DialogContentText>
         </DialogContent>

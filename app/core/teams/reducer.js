@@ -25,8 +25,8 @@ export function teamsReducer (state = initialState, { payload, type }) {
       })
 
     case auctionActions.AUCTION_PROCESSED: {
-      const newCap = state.get(payload.tid).get('acap') - payload.value
-      return state.setIn([payload.tid, 'acap'], newCap)
+      const newCap = state.get(payload.tid).get('cap') - payload.value
+      return state.setIn([payload.tid, 'cap'], newCap)
     }
 
     case teamActions.PUT_TEAM_FULFILLED:
