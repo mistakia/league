@@ -15,6 +15,7 @@ export default class SelectedPlayerSeasonProjections extends React.Component {
 
     const projections = []
     player.projections.forEach((p, index) => {
+      if (p.week !== 0) return
       const isUser = !p.sourceid
       const title = (isUser ? 'User' : <Source sourceId={p.sourceid} />)
       const action = (
