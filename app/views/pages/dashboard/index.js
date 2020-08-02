@@ -6,6 +6,8 @@ import { getApp } from '@core/app'
 import { getCurrentTeam } from '@core/teams'
 import { rosterActions, getCurrentPlayers } from '@core/rosters'
 import { getCurrentLeague } from '@core/leagues'
+import { getWaiverPlayersForCurrentTeam } from '@core/waivers'
+
 import render from './dashboard'
 
 class DashboardPage extends React.Component {
@@ -23,7 +25,14 @@ const mapStateToProps = createSelector(
   getCurrentPlayers,
   getCurrentTeam,
   getCurrentLeague,
-  (app, players, team, league) => ({ teamId: app.teamId, players, picks: team.picks, league })
+  getWaiverPlayersForCurrentTeam,
+  (app, players, team, league, waivers) => ({
+    teamId: app.teamId,
+    players,
+    picks: team.picks,
+    league,
+    waivers
+  })
 )
 
 const mapDispatchToProps = {

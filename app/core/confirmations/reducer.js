@@ -3,8 +3,11 @@ import { Record } from 'immutable'
 import { confirmationActions } from './actions'
 
 const ConfirmationState = new Record({
+  id: null,
   title: null,
+  player: null,
   description: null,
+  component: null,
   onConfirm: null
 })
 

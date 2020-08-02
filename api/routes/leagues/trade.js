@@ -108,7 +108,6 @@ router.post('/accept', async (req, res, next) => {
 
     // validate accepting team roster
     const acceptingTeamRosterRow = await getRoster({
-      db,
       tid: trade.tid,
       week: constants.week,
       year: constants.year
@@ -132,7 +131,6 @@ router.post('/accept', async (req, res, next) => {
 
     // validate proposing team roster
     const proposingTeamRosterRow = await getRoster({
-      db,
       tid: trade.pid,
       week: constants.week,
       year: constants.year
@@ -295,7 +293,7 @@ router.post('/accept', async (req, res, next) => {
       message = `${message} ${dropItemsStr} have been dropped.`
     }
 
-    sendNotifications({
+    await sendNotifications({
       leagueId,
       league: true,
       message
@@ -337,7 +335,7 @@ router.post('/reject', async (req, res, next) => {
       .where({ uid: tradeId })
       .update({ rejected: Math.round(Date.now() / 1000) })
 
-    sendNotifications({
+    await sendNotifications({
       leagueId,
       teamIds: [trade.pid],
       message: `${trade.name} (${trade.abbrv}) has rejected your trade offer.`
@@ -375,7 +373,7 @@ router.post('/cancel', async (req, res, next) => {
       .where({ uid: tradeId })
       .update({ cancelled: Math.round(Date.now() / 1000) })
 
-    sendNotifications({
+    await sendNotifications({
       leagueId,
       teamIds: [trade.tid],
       message: `${trade.name} (${trade.abbrv}) has cancelled their trade offer.`
@@ -412,7 +410,7 @@ router.post('/veto', async (req, res, next) => {
 
     const message = `The commissioner has vetoed trade #${tradeId}.`
 
-    sendNotifications({
+    await sendNotifications({
       leagueId,
       league: true,
       teamIds: [trade.tid, trade.pid],

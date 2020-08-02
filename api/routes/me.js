@@ -26,12 +26,12 @@ router.get('/?', async (req, res) => {
 
     const poaches = await db('poaches')
       .whereIn('lid', leagueIds)
-      .whereNull('expired')
       .whereNull('processed')
 
     const waivers = await db('waivers')
       .whereIn('tid', teamIds)
       .whereNull('processed')
+      .whereNull('cancelled')
 
     res.send({
       user,

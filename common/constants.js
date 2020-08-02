@@ -8,7 +8,7 @@ const diff = moment().diff(start, 'weeks')
 export const week = diff < 0 ? 0 : diff
 export const regularSeason = week > 0 && week < 17
 export const waiverWindow = regularSeason && moment().utcOffset(-4).day() === 2
-export const poachWaiverWindow = moment().isBefore(moment('8/5 -0400', 'M/D Z'))
+export const poachWaiverWindow = moment().isBefore(moment('8/6 -0400', 'M/D Z'))
 
 export const year = moment().month() > 2
   ? moment().year()
@@ -325,6 +325,11 @@ export const slots = {
 export const waivers = {
   ADD: 1,
   POACH: 2
+}
+
+export const waiversDetails = {
+  1: 'Add',
+  2: 'Poach'
 }
 
 export const transactions = {
@@ -756,3 +761,15 @@ export const collegeDivisions = [
 ]
 
 export const availability = ['ROSTERED', 'FREE AGENT', 'PRACTICE SQUAD', 'INJURED RESERVE']
+
+export const errors = {
+  INVALID_PARAMS: 1,
+
+  OVER_CAP_SPACE: 2,
+  OVER_ROSTER_SPACE: 3,
+
+  INELIGIBLE_PLAYER_NOT_ON_ROSTER: 3,
+  INELIGIBLE_PLAYER_NOT_ON_PRACTICE_SQUAD: 4,
+  INELIGIBLE_PLAYER_EXISTING_POACHING_CLAIM: 5,
+  INELIGIBLE_DROP_PLAYER: 6
+}

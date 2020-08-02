@@ -5,26 +5,46 @@ import {
   getContextMenuInfo,
   contextMenuActions,
   getContextMenuPlayer,
-  isPracticeSquadEligible,
   isActiveRosterEligible,
-  isPlayerOnCurrentRoster
+  isPlayerOnCurrentRoster,
+  isPlayerRostered,
+  isPlayerPracticeSquadEligibleCM,
+  getPlayerStatusCM,
+  isPlayerOnPracticeSquadCM
 } from '@core/context-menu'
-import PlayerContextMenu from './player-context-menu'
 import { rosterActions } from '@core/rosters'
 import { confirmationActions } from '@core/confirmations'
+import { waiverActions } from '@core/waivers'
+
+import PlayerContextMenu from './player-context-menu'
 
 const mapStateToProps = createSelector(
   getContextMenuInfo,
   getContextMenuPlayer,
-  isPracticeSquadEligible,
+  isPlayerPracticeSquadEligibleCM,
   isActiveRosterEligible,
   isPlayerOnCurrentRoster,
-  (contextMenuInfo, player, isPracticeSquadEligible, isActiveRosterEligible, isOnCurrentRoster) => ({
+  isPlayerRostered,
+  getPlayerStatusCM,
+  isPlayerOnPracticeSquadCM,
+  (
+    contextMenuInfo,
+    player,
+    isPracticeSquadEligible,
+    isActiveRosterEligible,
+    isOnCurrentRoster,
+    isPlayerRostered,
+    status,
+    isPlayerOnPracticeSquad
+  ) => ({
     contextMenuInfo,
     player,
     isPracticeSquadEligible,
     isOnCurrentRoster,
-    isActiveRosterEligible
+    isActiveRosterEligible,
+    isPlayerRostered,
+    status,
+    isPlayerOnPracticeSquad
   })
 )
 
@@ -33,7 +53,8 @@ const mapDispatchToProps = {
   hide: contextMenuActions.hide,
   activate: rosterActions.activate,
   deactivate: rosterActions.deactivate,
-  showConfirmation: confirmationActions.show
+  showConfirmation: confirmationActions.show,
+  cancelClaim: waiverActions.cancel
 }
 
 export default connect(

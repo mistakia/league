@@ -72,7 +72,7 @@ router.post('/?', async (req, res) => {
     }
 
     // make sure team has an open slot
-    const rosterRow = await getRoster({ db, tid: teamId, year: constants.year, week: 0 })
+    const rosterRow = await getRoster({ tid: teamId, year: constants.year, week: 0 })
     const roster = new Roster({ roster: rosterRow, league })
     const slot = roster.hasOpenPracticeSquadSlot()
       ? constants.slots.PS
@@ -151,7 +151,7 @@ router.post('/?', async (req, res) => {
     }
     message += `in the ${constants.year} draft`
 
-    sendNotifications({
+    await sendNotifications({
       leagueId: league.uid,
       league: true,
       message

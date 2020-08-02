@@ -8,11 +8,11 @@ import { getApp } from '@core/app'
 import './player.styl'
 
 export class Player extends React.Component {
-  handleContextClick = (event) => {
+  handleContextClick = (event, waiverId) => {
     event.stopPropagation()
     this.props.showContext({
       id: 'player',
-      data: { playerId: this.props.player.player },
+      data: { playerId: this.props.player.player, waiverId },
       clickX: event.clientX,
       clickY: event.clientY
     })

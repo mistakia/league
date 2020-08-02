@@ -93,7 +93,8 @@ router.post('/register', async (req, res) => {
         lid: leagueId,
         wo: null,
         do: null,
-        acap: league.cap,
+        cap: league.cap,
+        faab: league.faab,
         div: null,
         name: 'Team Name',
         abbrv: 'TM'

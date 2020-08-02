@@ -63,7 +63,7 @@ router.get('/:teamId/lineups/?', async (req, res) => {
       return res.status(401).send({ error: 'you do not have access to this teamId' })
     }
 
-    const roster = await getRoster({ db, tid, week, year })
+    const roster = await getRoster({ tid, week, year })
     res.send(roster)
   } catch (error) {
     logger(error)
@@ -116,7 +116,7 @@ router.put('/:teamId/lineups/?', async (req, res) => {
     const league = leagues[0]
     const tid = parseInt(teamId, 10)
 
-    const rosterRow = await getRoster({ db, tid, week, year })
+    const rosterRow = await getRoster({ tid, week, year })
     const roster = new Roster({ roster: rosterRow, league })
     const isEligible = roster.isEligibleForSlot({ slot, player, pos: playerRow.pos1 })
     if (!isEligible) {
