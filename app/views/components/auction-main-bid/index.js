@@ -27,8 +27,8 @@ const mapStateToProps = createSelector(
     isNominating: nominatingTeamId === app.teamId,
     nominatingTeamId: nominatingTeamId,
     timer: auction.timer,
-    availableCap: team.acap,
-    isAboveCap: auction.bid >= team.acap,
+    availableCap: team.cap,
+    isAboveCap: auction.bid >= team.cap,
     isEligible,
     auctionStart: league.adate
   })

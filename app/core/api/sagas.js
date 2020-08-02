@@ -38,7 +38,10 @@ import { putLeagueActions } from '@core/leagues'
 import { getSourcesActions, putSourceActions } from '@core/sources'
 import { putSettingActions, putBaselinesActions } from '@core/settings'
 import { postPoachActions } from '@core/poaches'
-import { postWaiverActions } from '@core/waivers'
+import {
+  postWaiverActions,
+  postCancelWaiverActions
+} from '@core/waivers'
 import { notificationActions } from '@core/notifications'
 
 function * fetchAPI (apiFunction, actions, opts = {}) {
@@ -111,4 +114,5 @@ export const putBaselines = fetch.bind(null, api.putBaselines, putBaselinesActio
 export const getTeamStats = fetch.bind(null, api.getTeamStats, getTeamStatActions)
 
 export const postWaiver = fetch.bind(null, api.postWaiver, postWaiverActions)
+export const postCancelWaiver = fetch.bind(null, api.postCancelWaiver, postCancelWaiverActions)
 export const postPoach = fetch.bind(null, api.postPoach, postPoachActions)

@@ -110,7 +110,6 @@ export default class Auction {
     this.logger(`processing ${player} bid`)
 
     const roster = await getRoster({
-      db,
       tid,
       week: constants.week,
       year: constants.year
@@ -150,9 +149,9 @@ export default class Auction {
     }
 
     const team = this._teams.find(t => t.uid === tid)
-    const newCap = team.acap - value
+    const newCap = team.cap - value
     try {
-      await db('teams').where({ uid: tid }).update('acap', newCap)
+      await db('teams').where({ uid: tid }).update('cap', newCap)
     } catch (err) {
       this.logger(err)
       this.logger('unable to update cap space')
@@ -197,11 +196,11 @@ export default class Auction {
     const current = this._transactions[0]
 
     const team = this._teams.find(t => t.uid === tid)
-    const newCap = team.acap - value
+    const newCap = team.cap - value
     if (newCap < 0) {
       // TODO broadcast error
       this._startBidTimer()
-      this.logger(`team ${tid} does not have enough available cap ${team.acap} for a bid of ${value}`)
+      this.logger(`team ${tid} does not have enough available cap ${team.cap} for a bid of ${value}`)
       this._locked = false
       return
     }

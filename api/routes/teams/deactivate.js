@@ -19,7 +19,7 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
     const league = leagues[0]
-    const rosterRow = await getRoster({ db, tid, week: constants.week, year: constants.year })
+    const rosterRow = await getRoster({ tid, week: constants.week, year: constants.year })
     const roster = new Roster({ roster: rosterRow, league })
 
     // make sure player is on team
@@ -58,6 +58,11 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'player can not be deactivated once activated' })
     }
 
+    // make sure player has not been poached
+    if (playerRow.type === constants.transactions.POACHED) {
+      return res.status(400).send({ error: 'player can not be deactivated once poached' })
+    }
+
     // make sure team has space on practice squad
     if (!roster.hasOpenPracticeSquadSlot()) {
       return res.status(400).send({ error: 'no available space on practice squad' })
@@ -89,7 +94,7 @@ router.post('/?', async (req, res) => {
 
     const message = `${team.name} (${team.abbrv}) has placed ${playerRow.fname} ${playerRow.lname} (${playerRow.pos1}) on the practice squad.`
 
-    sendNotifications({
+    await sendNotifications({
       leagueId: league.uid,
       league: true,
       message

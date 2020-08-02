@@ -1,15 +1,19 @@
 import { createSelector } from 'reselect'
 import moment from 'moment'
-import { constants, calculatePoints } from '@common'
+import { constants, calculatePoints, Roster } from '@common'
 import { getApp } from '@core/app'
 import { getStats } from '@core/stats'
 import { Player } from './player'
 import { fuzzySearch } from '@core/utils'
 import {
+  getCurrentTeamRoster,
   getActiveRosterPlayerIdsForCurrentLeague,
   getRosteredPlayerIdsForCurrentLeague,
   getPracticeSquadPlayerIdsForCurrentLeague,
-  getInjuredReservePlayerIdsForCurrentLeague
+  getInjuredReservePlayerIdsForCurrentLeague,
+  isPlayerFreeAgent,
+  isPlayerOnPracticeSquad,
+  getRosterInfoForPlayerId
 } from '@core/rosters'
 
 export function getPlayers (state) {
@@ -191,6 +195,94 @@ export function getGamesByYearForSelectedPlayer (state) {
   }
 
   return { years, overall }
+}
+
+export function getPlayerStatus (state, { player }) {
+  const status = {
+    lock: false,
+    fa: false,
+    waiver: {
+      add: false,
+      poach: false
+    }
+  }
+
+  const isFreeAgent = isPlayerFreeAgent(state, { player })
+  status.fa = isFreeAgent
+  if (constants.waiverWindow && isFreeAgent) {
+    status.waiver.add = true
+  } else if (isFreeAgent) {
+    // TODO - dropped in the last 24 hours - except for cycling
+  }
+
+  const isOnPracticeSquad = isPlayerOnPracticeSquad(state, { player })
+  if (isOnPracticeSquad) {
+    const rosterInfo = getRosterInfoForPlayerId(state, { playerId: player.player })
+    const cutoff = moment(rosterInfo.timestamp, 'X').add('24', 'hours')
+    // TODO - deprecate
+    if (constants.poachWaiverWindow) {
+      status.waiver.poach = true
+    } else if (rosterInfo.type === constants.transactions.ROSTER_DEACTIVATE &&
+      moment().isBefore(cutoff)) {
+      status.waiver.poach = true
+    }
+  }
+
+  return status
+}
+
+export function isPlayerPracticeSquadEligible (state, { player }) {
+  if (!player || !player.player) {
+    return false
+  }
+
+  // is a rookie
+  if (player.draft_year !== constants.year) {
+    return false
+  }
+
+  const rosterInfo = getRosterInfoForPlayerId(state, { playerId: player.player })
+  const { leagueId, teamId } = getApp(state)
+
+  // not eligible if already on another team
+  if (rosterInfo && rosterInfo.tid !== teamId) {
+    return false
+  }
+
+  // not eligible if already on pracice squad
+  const onPracticeSquad = isPlayerOnPracticeSquad(state, { player })
+  if (onPracticeSquad) {
+    return false
+  }
+
+  const league = state.get('leagues').get(leagueId)
+  const rosterRec = getCurrentTeamRoster(state)
+  const roster = new Roster({ roster: rosterRec.toJS(), league })
+  const rosterPlayers = rosterRec.get('players')
+  const rosterPlayer = rosterPlayers.find(p => p.player === player.player)
+
+  // not eligible if player has not been on active roster for more than 48 hours
+  const cutoff = moment(rosterPlayer.timestamp, 'X').add('48', 'hours')
+  if (moment().isAfter(cutoff)) {
+    return false
+  }
+
+  // not eligible if activated previously
+  if (rosterPlayer.type === constants.transactions.ROSTER_ACTIVATE) {
+    return false
+  }
+
+  // not eligible if player has been poached
+  if (rosterPlayer.type === constants.transactions.POACHED) {
+    return false
+  }
+
+  // not eligible if no available space on practice squad
+  if (!roster.hasOpenPracticeSquadSlot()) {
+    return false
+  }
+
+  return true
 }
 
 export const getPlayersForWatchlist = createSelector(

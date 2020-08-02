@@ -4,6 +4,9 @@ export {
   getContextMenuInfo,
   getContextMenuPlayer,
   isPlayerOnCurrentRoster,
-  isPracticeSquadEligible,
-  isActiveRosterEligible
+  isPlayerPracticeSquadEligibleCM,
+  isActiveRosterEligible,
+  isPlayerRostered,
+  isPlayerOnPracticeSquadCM,
+  getPlayerStatusCM
 } from './selectors'

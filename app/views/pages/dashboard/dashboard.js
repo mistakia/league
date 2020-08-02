@@ -7,7 +7,7 @@ import { constants } from '@common'
 import './dashboard.styl'
 
 export default function () {
-  const { players, picks, league } = this.props
+  const { players, picks, league, waivers } = this.props
   const { positions } = constants
 
   const groups = {}
@@ -46,8 +46,46 @@ export default function () {
     )
   }
 
+  const waiverItems = []
+  for (const [index, waiver] of waivers.entries()) {
+    if (!waiver.player) continue
+    waiverItems.push(
+      <PlayerRoster
+        key={index}
+        player={waiver.player}
+        waiverId={waiver.uid}
+        type={waiver.type}
+        bid={waiver.bid}
+      />
+    )
+  }
+
+  const waiverSection = (
+    <div className='dashboard__section'>
+      <div className='dashboard__section-header'>
+        <div className='dashboard__section-header-title'>Waiver Claims</div>
+        <div className='dashboard__section-body-header'>
+          <div className='player__item-position' />
+          <div className='player__item-name'>Name</div>
+          <div className='player__item-metric'>Type</div>
+          <div className='player__item-metric'>Bid</div>
+          <div className='player__item-metric'>Bye</div>
+          <div className='player__item-metric'>Value</div>
+          <div className='player__item-metric'>Starts</div>
+          <div className='player__item-metric'>Pts+</div>
+          <div className='player__item-metric'>Bench+</div>
+          <div className='player__item-action' />
+        </div>
+      </div>
+      <div className='dashboard__section-body empty'>
+        {waiverItems}
+      </div>
+    </div>
+  )
+
   const body = (
     <div className='dashboard'>
+      {waiverItems.length ? waiverSection : null}
       <div className='dashboard__section'>
         <div className='dashboard__section-header'>
           <div className='dashboard__section-header-title'>Active Roster</div>

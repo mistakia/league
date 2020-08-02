@@ -8,8 +8,8 @@ export default class Roster {
 
     this._activeRosterLimit = league.sqb + league.srb + league.swr + league.ste + league.srbwr + league.srbwrte + league.sqbrbwrte + league.swrte + league.sdst + league.sk + league.bench
 
-    for (const { slot, player, pos } of roster.players) {
-      this._players.set(player, { slot, player, pos, rid: roster.uid })
+    for (const { slot, player, pos, value } of roster.players) {
+      this._players.set(player, { slot, player, pos, rid: roster.uid, value })
     }
   }
 
@@ -17,8 +17,17 @@ export default class Roster {
     return this.active.length >= this._activeRosterLimit
   }
 
+  get availableCap () {
+    const used = this.active.reduce((a, b) => a + b.value, 0)
+    return this._league.cap - used
+  }
+
   get players () {
-    return Array.from(this._players.values())
+    const arr = []
+    for (const { slot, player, pos, rid } of this._players.values()) {
+      arr.push({ slot, player, pos, rid })
+    }
+    return arr
   }
 
   get starters () {

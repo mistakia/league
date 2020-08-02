@@ -8,7 +8,9 @@ export {
   getRookiePlayers,
   getPlayerById,
   getGamesByYearForSelectedPlayer,
-  getPlayersForWatchlist
+  getPlayersForWatchlist,
+  getPlayerStatus,
+  isPlayerPracticeSquadEligible
 } from './selectors'
 export { Player, createPlayer } from './player'
 export {

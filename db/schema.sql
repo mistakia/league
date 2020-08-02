@@ -580,11 +580,12 @@ DROP TABLE IF EXISTS `poaches`;
 
 CREATE TABLE `poaches` (
   `player` varchar(7) NOT NULL,
+  `userid` int(6) NOT NULL,
   `drop` varchar(7) NOT NULL,
   `tid` int(5) NOT NULL,
   `lid` int(6) NOT NULL,
   `submitted` int(11) NOT NULL,
-  `expired` int(11) NOT NULL,
+  `reason` varchar(255) DEFAULT NULL,
   `processed` int(11) NOT NULL,
   KEY `lid` (`lid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -1532,7 +1533,8 @@ CREATE TABLE `teams` (
   `name` varchar(50) NOT NULL,
   `abbrv` varchar(5) NOT NULL,
   `image` varchar(500) DEFAULT '',
-  `acap` int(4) NOT NULL,
+  `cap` int(4) NOT NULL,
+  `faab` int(4) NOT NULL,
   `do` tinyint(2) DEFAULT NULL,
   `wo` tinyint(2) DEFAULT NULL,
   UNIQUE KEY `uid` (`uid`),
@@ -1721,14 +1723,19 @@ DROP TABLE IF EXISTS `waivers`;
 
 CREATE TABLE `waivers` (
   `uid` int(11) NOT NULL AUTO_INCREMENT,
+  `userid` int(6) NOT NULL,
   `player` varchar(7) NOT NULL,
   `drop` varchar(7) NOT NULL,
   `tid` int(5) NOT NULL,
   `lid` int(6) NOT NULL,
   `submitted` int(11) NOT NULL,
   `bid` int(4) DEFAULT NULL,
+  `po` int(4) DEFAULT 0, -- priority order
   `type` tinyint(1) NOT NULL,
-  `processed` int(11) NOT NULL,
+  `succ` tinyint(1) DEFAULT NULL,
+  `reason` varchar(255) DEFAULT NULL,
+  `processed` int(11) DEFAULT NULL,
+  `cancelled` int(11) DEFAULT NULL,
   PRIMARY KEY (`uid`),
   KEY `lid` (`lid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;

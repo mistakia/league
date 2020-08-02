@@ -1,5 +1,3 @@
-const { uniqBy } = require('../common')
-
 const getPlayByPlayQuery = (db) => db('pbp')
   .select(
     'pbp.fuml', 'pbp.fum', 'pbp.off', 'pbp.type', 'pbp.bc', 'pbp.yds', 'pbp.fd',
@@ -17,25 +15,14 @@ const getPlayByPlayQuery = (db) => db('pbp')
     this.orWhereNot({ 'pbp.act3': 'A' })
   })
 
-const getRoster = async ({ db, tid, week, year }) => {
-  const rows = await db('rosters').where({ tid, year, week })
-  const rosterRow = rows[0]
-  const players = await db('rosters_players')
-    .leftJoin('transactions', 'rosters_players.player', 'transactions.player')
-    .where('rid', rosterRow.uid)
-    .where('transactions.tid', tid)
-    .orderBy('transactions.timestamp', 'desc')
-
-  rosterRow.players = uniqBy(players, 'player')
-
-  return rosterRow
-}
-
 module.exports = {
   sendNotifications: require('./send-notifications'),
   getPlayerId: require('./get-player-id'),
   getSchedule: require('./get-schedule'),
   fixTeam: require('./fix-team'),
-  getPlayByPlayQuery,
-  getRoster
+  submitPoach: require('./submit-poach'),
+  processPoach: require('./process-poach'),
+  getRoster: require('./get-roster'),
+  resetWaiverOrder: require('./reset-waiver-order'),
+  getPlayByPlayQuery
 }

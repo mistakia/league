@@ -158,6 +158,10 @@ export const api = {
     const url = `${BASE_URL}/leagues/${data.leagueId}/waivers`
     return { url, ...POST(data) }
   },
+  postCancelWaiver (data) {
+    const url = `${BASE_URL}/leagues/${data.leagueId}/waivers/${data.waiverId}/cancel`
+    return { url, ...POST(data) }
+  },
   postPoach (data) {
     const url = `${BASE_URL}/leagues/${data.leagueId}/poaches`
     return { url, ...POST(data) }

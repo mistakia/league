@@ -61,7 +61,8 @@ module.exports = async function (knex) {
       lid: 1,
       wo: i,
       do: i,
-      acap: league.cap,
+      cap: league.cap,
+      faab: league.faab,
       div: (i % 4) + 1,
       name: `Team${i}`,
       abbrv: `TM${i}`
