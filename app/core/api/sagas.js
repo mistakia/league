@@ -39,6 +39,7 @@ import { getSourcesActions, putSourceActions } from '@core/sources'
 import { putSettingActions, putBaselinesActions } from '@core/settings'
 import { postPoachActions } from '@core/poaches'
 import { postWaiverActions } from '@core/waivers'
+import { notificationActions } from '@core/notifications'
 
 function * fetchAPI (apiFunction, actions, opts = {}) {
   const { token } = yield select(getApp)
@@ -48,7 +49,7 @@ function * fetchAPI (apiFunction, actions, opts = {}) {
     const data = yield call(request)
     yield put(actions.fulfilled(opts, data))
   } catch (err) {
-    console.log(err)
+    yield put(notificationActions.show({ severity: 'error', message: err.message }))
     yield put(actions.failed(opts, err.toString()))
   } finally {
     if (yield cancelled()) {

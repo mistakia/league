@@ -8,6 +8,7 @@ import ContextMenu from '@components/context-menu'
 import { localStorageAdapter } from '@core/utils'
 import Logout from '@components/logout'
 import Confirmation from '@components/confirmation'
+import Notification from '@components/notification'
 
 import 'normalize.css'
 import '@styles/normalize.css'
@@ -34,6 +35,7 @@ class App extends React.Component {
         {userId && <Logout />}
         <ContextMenu />
         <Confirmation />
+        <Notification />
       </main>
     )
   }
