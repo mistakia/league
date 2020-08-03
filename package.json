@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@babel/plugin-proposal-class-properties": "^7.10.1",
+    "@material-ui/lab": "^4.0.0-alpha.56",
     "JSONStream": "^1.3.5",
     "bcrypt": "^4.0.1",
     "body-parser": "^1.19.0",
