@@ -107,7 +107,7 @@ export default function () {
           </div>}
       </div>
       <div className='draft__selected-body'>
-        <div><label>Drafted</label>{p.dpos ? `${Math.ceil(p.dpos / 12)}.${('0' + (p.dpos % 32)).slice(-2)}` : 'undrafted'}</div>
+        <div><label>Drafted</label>{p.dpos ? `#${p.dpos}` : 'undrafted'}</div>
         <div><label>Proj.</label>{Math.round(p.points.get('total'))}</div>
         <div><label>Age</label>{moment().diff(moment(p.dob), 'years')}</div>
         <div><label>Height</label>{Math.floor(p.height / 12)}-{p.height % 12}</div>
