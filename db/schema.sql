@@ -581,7 +581,7 @@ DROP TABLE IF EXISTS `poaches`;
 CREATE TABLE `poaches` (
   `player` varchar(7) NOT NULL,
   `userid` int(6) NOT NULL,
-  `drop` varchar(7) NOT NULL,
+  `drop` varchar(7) DEFAULT NULL,
   `tid` int(5) NOT NULL,
   `lid` int(6) NOT NULL,
   `submitted` int(11) NOT NULL,
@@ -1725,7 +1725,7 @@ CREATE TABLE `waivers` (
   `uid` int(11) NOT NULL AUTO_INCREMENT,
   `userid` int(6) NOT NULL,
   `player` varchar(7) NOT NULL,
-  `drop` varchar(7) NOT NULL,
+  `drop` varchar(7) DEFAULT NULL,
   `tid` int(5) NOT NULL,
   `lid` int(6) NOT NULL,
   `submitted` int(11) NOT NULL,
