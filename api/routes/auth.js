@@ -91,11 +91,6 @@ router.post('/register', async (req, res) => {
 
       const teams = await db('teams').insert({
         lid: leagueId,
-        wo: null,
-        do: null,
-        cap: league.cap,
-        faab: league.faab,
-        div: null,
         name: 'Team Name',
         abbrv: 'TM'
       })
