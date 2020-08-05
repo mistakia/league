@@ -4,7 +4,7 @@ const moment = require('moment')
 const debug = require('debug')
 
 const db = require('../db')
-const { processPoach } = require('../utils')
+const { processPoach, sendNotifications } = require('../utils')
 
 const log = debug('process:claims')
 debug.enable('process:claims')
@@ -35,7 +35,7 @@ const run = async () => {
         teamIds: [claim.tid],
         voice: false,
         league: false,
-        message: `Your poaching claim was unsuccessful.` // TODO - update add player info
+        message: 'Your poaching claim was unsuccessful.' // TODO - update add player info
       })
     }
 

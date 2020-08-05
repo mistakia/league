@@ -47,10 +47,10 @@ export default class PoachConfirmation extends React.Component {
   }
 
   render = () => {
-    const { isEligible, rosterInfo, player, status } = this.props
+    const { isPlayerEligible, rosterInfo, player, status } = this.props
 
     const menuItems = []
-    if (!isEligible) {
+    if (!isPlayerEligible) {
       for (const rPlayer of this._drops) {
         menuItems.push(
           <MenuItem
@@ -78,11 +78,11 @@ export default class PoachConfirmation extends React.Component {
               ? 'This is a waiver claim and can be cancelled anytime before it\'s processed.'
               : 'This is a poaching claim and can not be cancelled once submitted.'}
           </DialogContentText>
-          {!isEligible &&
+          {!isPlayerEligible &&
             <DialogContentText>
               There is not enough space on your active roster. Please select a player to drop. They will only be dropped if your claim is successful.
             </DialogContentText>}
-          {!isEligible &&
+          {!isPlayerEligible &&
             <FormControl size='small' variant='outlined'>
               <InputLabel id='drop-label'>Drop</InputLabel>
               <Select
