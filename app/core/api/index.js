@@ -32,5 +32,6 @@ export {
   postDeactivate,
   postWaiver,
   postPoach,
-  postCancelWaiver
+  postCancelWaiver,
+  postWaiverOrder
 } from './sagas'

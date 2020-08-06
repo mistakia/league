@@ -1,4 +1,5 @@
 import React from 'react'
+import { SortableContainer, SortableElement } from 'react-sortable-hoc'
 
 import PlayerRoster from '@components/player-roster'
 import PageLayout from '@layouts/page'
@@ -7,7 +8,7 @@ import { constants } from '@common'
 import './dashboard.styl'
 
 export default function () {
-  const { players, picks, league, waivers } = this.props
+  const { players, picks, league, waivers, reorderPoach } = this.props
   const { positions } = constants
 
   const groups = {}
@@ -46,19 +47,27 @@ export default function () {
     )
   }
 
-  const waiverItems = []
-  for (const [index, waiver] of waivers.entries()) {
-    if (!waiver.player) continue
-    waiverItems.push(
+  const SortableItem = SortableElement(({ waiver }) => {
+    return (
       <PlayerRoster
-        key={index}
         player={waiver.player}
         waiverId={waiver.uid}
         type={waiver.type}
         bid={waiver.bid}
+        reorder
       />
     )
-  }
+  })
+
+  const SortableList = SortableContainer(({ items }) => {
+    return (
+      <div>
+        {items.map((waiver, index) => (
+          <SortableItem key={index} index={index} waiver={waiver} />
+        ))}
+      </div>
+    )
+  })
 
   const waiverSection = (
     <div className='dashboard__section'>
@@ -75,17 +84,25 @@ export default function () {
           <div className='player__item-metric'>Pts+</div>
           <div className='player__item-metric'>Bench+</div>
           <div className='player__item-action' />
+          <div className='player__item-action' />
         </div>
       </div>
       <div className='dashboard__section-body empty'>
-        {waiverItems}
+        <SortableList
+          items={waivers.poach}
+          lockAxis='y'
+          helperClass='reordering'
+          onSortEnd={reorderPoach}
+          lockToContainerEdges
+          useDragHandle
+        />
       </div>
     </div>
   )
 
   const body = (
     <div className='dashboard'>
-      {waiverItems.length ? waiverSection : null}
+      {waivers.poach.size ? waiverSection : null}
       <div className='dashboard__section'>
         <div className='dashboard__section-header'>
           <div className='dashboard__section-header-title'>Active Roster</div>

@@ -24,5 +24,6 @@ module.exports = {
   processPoach: require('./process-poach'),
   getRoster: require('./get-roster'),
   resetWaiverOrder: require('./reset-waiver-order'),
+  getTopPoachingWaiver: require('./get-top-poaching-waiver'),
   getPlayByPlayQuery
 }

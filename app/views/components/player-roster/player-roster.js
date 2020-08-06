@@ -4,7 +4,15 @@ import Position from '@components/position'
 import Team from '@components/team'
 import { Player, connect } from '@components/player'
 import IconButton from '@components/icon-button'
+import Icon from '@components/icon'
 import { constants } from '@common'
+import { sortableHandle } from 'react-sortable-hoc'
+
+const DragHandle = sortableHandle(() =>
+  <div className='player__item-action reorder'>
+    <Icon name='reorder' />
+  </div>
+)
 
 class PlayerRoster extends Player {
   handleClick = (event) => {
@@ -13,7 +21,7 @@ class PlayerRoster extends Player {
   }
 
   render () {
-    const { player, vbaseline, selected, waiverId, type, bid } = this.props
+    const { player, vbaseline, selected, waiverId, type, bid, reorder } = this.props
 
     const isWaiver = !!waiverId
 
@@ -59,6 +67,7 @@ class PlayerRoster extends Player {
         <div className='player__item-action'>
           <IconButton small text onClick={this.handleClick} icon='more' />
         </div>
+        {reorder && <DragHandle />}
       </div>
     )
   }

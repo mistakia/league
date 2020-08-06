@@ -1,6 +1,8 @@
-import { Map } from 'immutable'
+import { Map, List } from 'immutable'
+
 import { getApp } from '@core/app'
 import { getPlayerById } from '@core/players'
+import { constants } from '@common'
 
 export function getWaiversForCurrentTeam (state) {
   const { teamId } = getApp(state)
@@ -15,5 +17,17 @@ export function getWaiverPlayersForCurrentTeam (state) {
     teamWaivers = teamWaivers.setIn([waiver.uid, 'player'], player)
   }
 
-  return teamWaivers.valueSeq().toList()
+  const waivers = teamWaivers.valueSeq().toList()
+  const sorted = waivers.sort((a, b) => a.po - b.po)
+  let poach = new List()
+  let add = new List()
+  for (const w of sorted) {
+    if (w.type === constants.waivers.ADD) {
+      add = add.push(w)
+    } else {
+      poach = poach.push(w)
+    }
+  }
+
+  return { poach, add }
 }
