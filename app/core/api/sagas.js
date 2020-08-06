@@ -40,7 +40,8 @@ import { putSettingActions, putBaselinesActions } from '@core/settings'
 import { postPoachActions } from '@core/poaches'
 import {
   postWaiverActions,
-  postCancelWaiverActions
+  postCancelWaiverActions,
+  postWaiverOrderActions
 } from '@core/waivers'
 import { notificationActions } from '@core/notifications'
 
@@ -114,5 +115,6 @@ export const putBaselines = fetch.bind(null, api.putBaselines, putBaselinesActio
 export const getTeamStats = fetch.bind(null, api.getTeamStats, getTeamStatActions)
 
 export const postWaiver = fetch.bind(null, api.postWaiver, postWaiverActions)
+export const postWaiverOrder = fetch.bind(null, api.postWaiverOrder, postWaiverOrderActions)
 export const postCancelWaiver = fetch.bind(null, api.postCancelWaiver, postCancelWaiverActions)
 export const postPoach = fetch.bind(null, api.postPoach, postPoachActions)

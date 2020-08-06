@@ -31,12 +31,12 @@ exports.seed = async function (knex, Promise) {
     console.log(error)
   }
 
-  /* try {
-   *   await draft(knex)
-   * } catch (error) {
-   *   console.log(error)
-   * }
-   */
+  try {
+    await draft(knex)
+  } catch (error) {
+    console.log(error)
+  }
+
   try {
     await matchups(knex)
   } catch (error) {

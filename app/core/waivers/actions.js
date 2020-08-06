@@ -3,6 +3,8 @@ export const waiverActions = {
 
   CANCEL_CLAIM: 'CANCEL_CLAIM',
 
+  REORDER_POACH: 'REORDER_POACH',
+
   POST_WAIVER_FAILED: 'POST_WAIVER_FAILED',
   POST_WAIVER_FULFILLED: 'POST_WAIVER_FULFILLED',
   POST_WAIVER_PENDING: 'POST_WAIVER_PENDING',
@@ -10,6 +12,18 @@ export const waiverActions = {
   POST_CANCEL_WAIVER_FAILED: 'POST_CANCEL_WAIVER_FAILED',
   POST_CANCEL_WAIVER_FULFILLED: 'POST_CANCEL_WAIVER_FULFILLED',
   POST_CANCEL_WAIVER_PENDING: 'POST_CANCEL_WAIVER_PENDING',
+
+  POST_WAIVER_ORDER_FAILED: 'POST_WAIVER_ORDER_FAILED',
+  POST_WAIVER_ORDER_PENDING: 'POST_WAIVER_ORDER_PENDING',
+  POST_WAIVER_ORDER_FULFILLED: 'POST_WAIVER_ORDER_FULFILLED',
+
+  reorderPoach: ({ oldIndex, newIndex }) => ({
+    type: waiverActions.REORDER_POACH,
+    payload: {
+      oldIndex,
+      newIndex
+    }
+  }),
 
   claim: ({ player, bid, drop, type }) => ({
     type: waiverActions.WAIVER_CLAIM,
@@ -72,6 +86,29 @@ export const waiverActions = {
       opts,
       error
     }
+  }),
+
+  postWaiverOrderPending: opts => ({
+    type: waiverActions.POST_WAIVER_ORDER_PENDING,
+    payload: {
+      opts
+    }
+  }),
+
+  postWaiverOrderFailed: (opts, error) => ({
+    type: waiverActions.POST_WAIVER_ORDER_FAILED,
+    payload: {
+      opts,
+      error
+    }
+  }),
+
+  postWaiverOrderFulfilled: (opts, data) => ({
+    type: waiverActions.POST_WAIVER_ORDER_FULFILLED,
+    payload: {
+      opts,
+      data
+    }
   })
 }
 
@@ -85,4 +122,10 @@ export const postCancelWaiverActions = {
   failed: waiverActions.postCancelWaiverFailed,
   pending: waiverActions.postCancelWaiverPending,
   fulfilled: waiverActions.postCancelWaiverFulfilled
+}
+
+export const postWaiverOrderActions = {
+  failed: waiverActions.postWaiverOrderFailed,
+  pending: waiverActions.postWaiverOrderPending,
+  fulfilled: waiverActions.postWaiverOrderFulfilled
 }
