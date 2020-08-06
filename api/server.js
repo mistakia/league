@@ -72,6 +72,7 @@ api.use('/api/*', expressJwt(config.jwt), (err, req, res, next) => {
   if (err.code === 'invalid_token') return next()
   return next(err)
 })
+api.use('/api/errors', routes.errors)
 api.use('/api/stats', speedLimiter, routes.stats)
 api.use('/api/players', routes.players)
 api.use('/api/plays', speedLimiter, routes.plays)

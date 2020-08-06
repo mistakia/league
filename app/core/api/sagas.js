@@ -44,6 +44,7 @@ import {
   postWaiverOrderActions
 } from '@core/waivers'
 import { notificationActions } from '@core/notifications'
+import { postErrorActions, errorActions } from '@core/errors'
 
 function * fetchAPI (apiFunction, actions, opts = {}) {
   const { token } = yield select(getApp)
@@ -53,7 +54,10 @@ function * fetchAPI (apiFunction, actions, opts = {}) {
     const data = yield call(request)
     yield put(actions.fulfilled(opts, data))
   } catch (err) {
-    yield put(notificationActions.show({ severity: 'error', message: err.message }))
+    if (!opts.ignoreError) {
+      yield put(notificationActions.show({ severity: 'error', message: err.message }))
+      yield put(errorActions.report(err)) // TODO include context like api url and options
+    }
     yield put(actions.failed(opts, err.toString()))
   } finally {
     if (yield cancelled()) {
@@ -118,3 +122,5 @@ export const postWaiver = fetch.bind(null, api.postWaiver, postWaiverActions)
 export const postWaiverOrder = fetch.bind(null, api.postWaiverOrder, postWaiverOrderActions)
 export const postCancelWaiver = fetch.bind(null, api.postCancelWaiver, postCancelWaiverActions)
 export const postPoach = fetch.bind(null, api.postPoach, postPoachActions)
+
+export const postError = fetch.bind(null, api.postError, postErrorActions)

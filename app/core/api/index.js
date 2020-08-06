@@ -33,5 +33,6 @@ export {
   postWaiver,
   postPoach,
   postCancelWaiver,
-  postWaiverOrder
+  postWaiverOrder,
+  postError
 } from './sagas'

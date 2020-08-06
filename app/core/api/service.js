@@ -169,6 +169,10 @@ export const api = {
   postPoach (data) {
     const url = `${BASE_URL}/leagues/${data.leagueId}/poaches`
     return { url, ...POST(data) }
+  },
+  postError (data) {
+    const url = `${BASE_URL}/errors`
+    return { url, ...POST(data) }
   }
 }
 
