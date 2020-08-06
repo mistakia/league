@@ -8,9 +8,11 @@ const plays = require('./plays')
 const projections = require('./projections')
 const settings = require('./settings')
 const stats = require('./stats')
+const errors = require('./errors')
 
 module.exports = {
   auth,
+  errors,
   teams,
   leagues,
   players,
