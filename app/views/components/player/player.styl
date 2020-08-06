@@ -4,7 +4,9 @@
   align-items center
   height 45px
   border-bottom 1px solid $borderColor
+  background white
 
+  &.reordering .player__item-action
   &:hover .player__item-action
     opacity 1
 
@@ -26,4 +28,6 @@
 
 .player__item-action
   opacity 0
-  flex 1
+  flex 0 0 45px
+  &.reorder
+    cursor row-resize

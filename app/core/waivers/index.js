@@ -1,7 +1,8 @@
 export {
   waiverActions,
   postWaiverActions,
-  postCancelWaiverActions
+  postCancelWaiverActions,
+  postWaiverOrderActions
 } from './actions'
 export { waiversReducer } from './reducer'
 export { waiverSagas } from './sagas'

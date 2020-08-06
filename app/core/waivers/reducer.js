@@ -7,6 +7,7 @@ const Waiver = new Record({
   uid: null,
   tid: null,
   player: null,
+  po: 0,
   drop: null,
   bid: null,
   type: null
@@ -30,9 +31,22 @@ export function waiversReducer (state = new Map(), { payload, type }) {
         })
       })
 
-    case waiverActions.POST_CANCEL_WAIVER_FULFILLED: {
+    case waiverActions.POST_WAIVER_ORDER_PENDING:
+      return state.withMutations(state => {
+        for (const [index, wid] of payload.opts.waivers.entries()) {
+          state.setIn([payload.opts.teamId, wid, 'po'], index)
+        }
+      })
+
+    case waiverActions.POST_WAIVER_ORDER_FAILED:
+      return state.withMutations(state => {
+        for (const w of payload.opts.reset) {
+          state.setIn([payload.opts.teamId, w.uid, 'po'], w.po)
+        }
+      })
+
+    case waiverActions.POST_CANCEL_WAIVER_FULFILLED:
       return state.deleteIn([payload.data.tid, payload.data.uid])
-    }
 
     default:
       return state

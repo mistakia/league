@@ -6,7 +6,7 @@ import { getApp } from '@core/app'
 import { getCurrentTeam } from '@core/teams'
 import { rosterActions, getCurrentPlayers } from '@core/rosters'
 import { getCurrentLeague } from '@core/leagues'
-import { getWaiverPlayersForCurrentTeam } from '@core/waivers'
+import { getWaiverPlayersForCurrentTeam, waiverActions } from '@core/waivers'
 
 import render from './dashboard'
 
@@ -36,7 +36,8 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  loadRoster: rosterActions.loadRoster
+  loadRoster: rosterActions.loadRoster,
+  reorderPoach: waiverActions.reorderPoach
 }
 
 export default connect(

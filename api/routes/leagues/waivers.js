@@ -142,6 +142,7 @@ router.post('/?', async (req, res) => {
       lid: leagueId,
       player,
       drop,
+      po: 9999,
       submitted: Math.round(Date.now() / 1000),
       bid,
       type
@@ -155,6 +156,55 @@ router.post('/?', async (req, res) => {
   }
 })
 
+router.put('/order', async (req, res) => {
+  const { db, logger } = req.app.locals
+  try {
+    const { waivers, teamId, leagueId } = req.body
+
+    if (!teamId) {
+      return res.status(400).send({ error: 'missing teamId param' })
+    }
+
+    if (!leagueId) {
+      return res.status(400).send({ error: 'missing leagueId param' })
+    }
+
+    if (!waivers || !Array.isArray(waivers)) {
+      return res.status(400).send({ error: 'missing waivers array' })
+    }
+
+    // verify teamId, leagueId belongs to user
+    const tid = parseInt(teamId, 10)
+    const userTeams = await db('users_teams')
+      .join('teams', 'users_teams.tid', 'teams.uid')
+      .where('userid', req.user.userId)
+    const team = userTeams.find(p => p.tid === tid)
+    if (!team) {
+      return res.status(400).send({ error: 'invalid teamId' })
+    }
+
+    if (team.lid !== leagueId) {
+      return res.status(400).send({ error: 'invalid leagueId' })
+    }
+
+    const result = []
+    for (const [index, waiverId] of waivers.entries()) {
+      const res = await db('waivers')
+        .update('po', index)
+        .where({
+          uid: waiverId,
+          tid,
+          lid: leagueId
+        })
+      result.push(res[0])
+    }
+    res.send(result)
+  } catch (error) {
+    logger(error)
+    res.status(500).send({ error: error.toString() })
+  }
+})
+
 router.put('/:waiverId', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
@@ -162,8 +212,16 @@ router.put('/:waiverId', async (req, res) => {
     const { field, teamId, leagueId } = req.body
     let { value } = req.body
 
-    const fields = ['bid', 'po', 'drop']
-    const ints = ['bid', 'po']
+    if (!teamId) {
+      return res.status(400).send({ error: 'missing teamId param' })
+    }
+
+    if (!leagueId) {
+      return res.status(400).send({ error: 'missing leagueId param' })
+    }
+
+    const fields = ['bid', 'drop']
+    const ints = ['bid']
     if (!field) {
       return res.status(400).send({ error: 'missing field' })
     }
