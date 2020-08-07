@@ -31,6 +31,7 @@ export default class Roster {
   }
 
   get starters () {
+    // TODO - exclude covid
     const exclude = [constants.slots.IR, constants.slots.PS, constants.slots.BENCH]
     return this.players.filter(p => !exclude.includes(p.slot))
   }
@@ -56,8 +57,8 @@ export default class Roster {
     return this._players.has(player)
   }
 
-  _getBySlot (slot) {
-    return this.players.filter(p => p.slot === constants.slots[slot])
+  getCountBySlot (slot) {
+    return this.players.filter(p => p.slot === constants.slots[slot]).length
   }
 
   removePlayer (player) {
@@ -65,6 +66,10 @@ export default class Roster {
   }
 
   addPlayer ({ slot, player, pos }) {
+    if (this.isFull) {
+      throw new Error('Roster is full')
+    }
+
     const isEligible = this.isEligibleForSlot({ slot, player, pos })
     if (!isEligible) throw new Error('Player is not eligible')
     this._players.set(player, { slot, player, pos, rid: this.uid })
@@ -83,7 +88,7 @@ export default class Roster {
         return false
       }
 
-      const count = this._getBySlot(slot)
+      const count = this.getCountBySlot(slot)
       return count < this._league[`s${slotName.toLowerCase()}`]
     }
   }

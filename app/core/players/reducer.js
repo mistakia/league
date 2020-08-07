@@ -26,7 +26,7 @@ const initialState = new Map({
   items: new Map(),
   order: 'desc',
   view: 'seasproj',
-  orderBy: 'vorp.hybrid',
+  orderBy: 'vorp.starter',
   watchlist: new Set(),
   baselines: new Map(),
   selected: null

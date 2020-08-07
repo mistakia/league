@@ -1,223 +1,169 @@
-import { positions } from './constants'
+import Roster from './roster'
+import { positions, slots } from './constants'
+import getEligibleSlots from './get-eligible-slots'
 
-const getRosterSlotCounts = ({
-  sqb,
-  srb,
-  swr,
-  ste,
-  sk,
-  sdst,
-  srbwr,
-  swrte,
-  srbwrte,
-  sqbrbwrte,
-  bench,
-  nteams
-}) => ({
-  sqb: nteams * sqb,
-  srb: nteams * srb,
-  swr: nteams * swr,
-  ste: nteams * ste,
-  sk: nteams * sk,
-  sdst: nteams * sdst,
-  srbwr: nteams * srbwr,
-  swrte: nteams * swrte,
-  srbwrte: nteams * srbwrte,
-  sqbrbwrte: nteams * sqbrbwrte,
-  bench: nteams * bench
-})
+const countOccurrences = (arr, val) => arr.reduce((a, v) => (v === val ? a + 1 : a), 0)
+const getBestAvailableForSlot = ({ slot, players }) => {
+  const eligiblePositions = []
+  const grouped = {}
+  for (const position of positions) {
+    if (slot.includes(position)) eligiblePositions.push(position)
+    grouped[position] = players.filter(p => p.pos1 === position)
+  }
 
-const types = [
-  'starter',
-  'available',
-  'average'
-]
+  let combined = []
+  for (const pos of eligiblePositions) {
+    combined = combined.concat(grouped[pos])
+  }
+
+  const sorted = combined.sort((a, b) => b.points.total - a.points.total)
+  return sorted[0]
+}
 
 const calculateBaselines = ({
   players,
-  ...args
+  rosterRows,
+  league
 }) => {
-  let data = JSON.parse(JSON.stringify(players))
-  // sort players by points
-  data = data.sort((a, b) => b.points.total - a.points.total)
+  const data = JSON.parse(JSON.stringify(players))
 
-  // group players by position
-  const grouped = {}
-  for (const position of positions) {
-    grouped[position] = data.filter(p => p.pos1 === position)
+  const rows = []
+  for (let i = 0; i < league.nteams; i++) {
+    rows.push(rosterRows[i] || { players: [] })
   }
 
-  // TODO split players up into two pools: available / rostered
-  // fill rostered pool if needed, put remaining in available
+  const rosteredPlayerIds = []
+  const rosters = []
+  for (const rosterRow of rows) {
+    const roster = new Roster({ roster: rosterRow, league })
+    roster.players.forEach(p => rosteredPlayerIds.push(p.player))
+    rosters.push(roster)
+  }
 
-  const rosterCounts = getRosterSlotCounts(args)
+  // remove rostered players & sort
+  let availablePlayerPool = data
+    .filter(p => !rosteredPlayerIds.includes(p.player) || !positions.includes(p.pos1))
+    .sort((a, b) => b.points.total - a.points.total)
 
-  // baseline players
-  const bPlayers = {}
-  for (const position of positions) {
-    const base = rosterCounts[`s${position.toLowerCase()}`]
-    bPlayers[position] = {
-      starter: grouped[position].slice(base),
-      average: grouped[position].slice(base / 2),
-      available: grouped[position].slice(base + (base * 0.6)) // TODO make editable
+  // fill starters using rostered players and suppliment with available players
+  const eligibleSlots = getEligibleSlots({ pos: 'ALL', league })
+  for (const [index, slot] of eligibleSlots.entries()) {
+    for (const roster of rosters) {
+      const limit = countOccurrences(eligibleSlots.slice(0, index + 1), slot)
+      const count = roster.getCountBySlot(slot)
+      if (count >= limit) continue
+
+      // get best available from bench
+      const benchIds = roster.bench.map(p => p.player)
+      let player = getBestAvailableForSlot({
+        slot,
+        players: data.filter(d => benchIds.includes(d.player))
+      })
+
+      if (player) {
+        // remove player from bench
+        roster.removePlayer(player.player)
+      } else {
+        // if no players available from bench, get best available from pool
+        player = getBestAvailableForSlot({ slot, players: availablePlayerPool })
+        if (player) {
+          // remove player from available player pool
+          availablePlayerPool = availablePlayerPool.filter(p => p.player !== player.player)
+        }
+      }
+
+      const rosterRow = {
+        slot: slots[slot],
+        player: player.player,
+        pos: player.pos1
+      }
+      const isEligible = roster.isEligibleForSlot(rosterRow)
+      if (player && isEligible && !roster.isFull) {
+        roster.addPlayer(rosterRow)
+      }
     }
+  }
+
+  // get starters
+  const starters = []
+  for (const roster of rosters) {
+    roster.starters.forEach(p => {
+      const player = data.find(d => d.player === p.player)
+      starters.push(player)
+    })
+  }
+
+  // group by position
+  const groupedStarters = {}
+  for (const position of positions) {
+    groupedStarters[position] = starters
+      .filter(s => s.pos1 === position)
+      .sort((a, b) => b.points.total - a.points.total)
   }
 
   const result = {}
-  if (!args.sqbrbwrte && !args.srbwr && !args.wrte && !args.srbwrte) {
-    for (const pos of positions) {
-      result[pos] = {}
-      for (const type in bPlayers[pos]) {
-        result[pos][type] = bPlayers[pos][type][0]
+  for (const position of positions) {
+    const players = groupedStarters[position]
+    result[position] = {}
+    result[position].starter = players[players.length - 1]
+    result[position].average = players[Math.floor(players.length / 2)]
+  }
+
+  // sort by starter vor
+  const vorAvailablePlayers = availablePlayerPool.map(p => ({
+    _value: ['K', 'DST'].includes(p.pos1)
+      ? 99999
+      : Math.round(Math.abs(result[p.pos1].starter.points.total - p.points.total) / result[p.pos1].starter.points.total) ,
+    ...p
+  }))
+  const sortedAvailablePlayers = vorAvailablePlayers.sort((a, b) => a._value - b._value)
+
+  const fullRosters = []
+  let i = 0
+  while (fullRosters.length < league.nteams) {
+    const roster = rosters[i]
+
+    if (roster.isFull) {
+      fullRosters.push(i)
+      continue
+    }
+
+    // find an eligible player
+    let player
+    for (let p = 0; p < sortedAvailablePlayers.length; p++) {
+      player = sortedAvailablePlayers[p]
+      const isEligible = roster.hasOpenBenchSlot(player.pos1)
+      if (isEligible) {
+        sortedAvailablePlayers.splice(p, 1)
+        break
       }
     }
 
-    return result
-  }
+    roster.addPlayer({
+      slot: slots.BENCH,
+      player: player.player,
+      pos: player.pos1
+    })
 
-  const filter = (array, cutlist) =>
-    array.filter(p => !cutlist.find(c => c.player === p.player))
-
-  if (args.swrte) {
-    // TODO fix calculations for types
-    for (const type of types) {
-      const combined = bPlayers.WR[type].concat(bPlayers.TE[type])
-      const sorted = combined.sort((a, b) => b.points.total - a.points.total)
-      const cutlist = sorted.slice(0, rosterCounts.swrte)
-      bPlayers.WR[type] = filter(bPlayers.WR[type], cutlist)
-      bPlayers.TE[type] = filter(bPlayers.TE[type], cutlist)
-    }
-  }
-
-  if (args.srbwr) {
-    // TODO fix calculations for types
-    for (const type of types) {
-      const combined = bPlayers.RB[type].concat(bPlayers.WR[type])
-      const sorted = combined.sort((a, b) => b.points.total - a.points.total)
-      const cutlist = sorted.slice(0, rosterCounts.srbwr)
-      bPlayers.RB[type] = filter(bPlayers.RB[type], cutlist)
-      bPlayers.WR[type] = filter(bPlayers.WR[type], cutlist)
-    }
-  }
-
-  if (args.srbwrte) {
-    // TODO fix calculations for types
-    for (const type of types) {
-      const combined = bPlayers.RB[type]
-        .concat(bPlayers.WR[type])
-        .concat(bPlayers.TE[type])
-      const sorted = combined.sort((a, b) => b.points.total - a.points.total)
-      const cutlist = sorted.slice(0, rosterCounts.srbwrte)
-      bPlayers.RB[type] = filter(bPlayers.RB[type], cutlist)
-      bPlayers.WR[type] = filter(bPlayers.WR[type], cutlist)
-      bPlayers.TE[type] = filter(bPlayers.TE[type], cutlist)
-    }
-  }
-
-  if (args.sqbrbwrte) {
-    // TODO fix calculations for types
-    for (const type of types) {
-      const combined = bPlayers.QB[type]
-        .concat(bPlayers.RB[type])
-        .concat(bPlayers.WR[type])
-        .concat(bPlayers.TE[type])
-      const sorted = combined.sort((a, b) => b.points.total - a.points.total)
-      const cutlist = sorted.slice(0, rosterCounts.sqbrbwrte)
-      bPlayers.QB[type] = filter(bPlayers.QB[type], cutlist)
-      bPlayers.RB[type] = filter(bPlayers.RB[type], cutlist)
-      bPlayers.WR[type] = filter(bPlayers.WR[type], cutlist)
-      bPlayers.TE[type] = filter(bPlayers.TE[type], cutlist)
-    }
-  }
-
-  const select = ({ positions, type }, alternate) => {
-    let combined = []
-    for (const pos of positions) {
-      combined = combined.concat(bPlayers[pos][type])
-    }
-    const sorted = combined.sort((a, b) => b.points.total - a.points.total)
-    if (!alternate || sorted[0].points.total < alternate.points.total) {
-      return sorted[0]
+    if (i === (league.nteams - 1)) {
+      i = 0
     } else {
-      return alternate
+      i += 1
     }
   }
 
-  result.QB = {}
-  for (const type of types) {
-    result.QB[type] = args.sqbrbwrte
-      ? select({ positions: ['QB', 'RB', 'WR', 'TE'], type })
-      : select({ positions: ['QB'], type })
+  // group availabe players by position
+  const groupedAvailablePlayers = {}
+  for (const position of positions) {
+    const players = sortedAvailablePlayers.filter(s => s.pos1 === position)
+    groupedAvailablePlayers[position] = players.sort((a, b) => b.points.total - a.points.total)
   }
 
-  result.RB = {}
-  for (const type of types) {
-    let selection = select({ positions: ['RB'], type })
-    if (args.sqbrbwrte) {
-      selection = select({ positions: ['QB', 'RB', 'WR', 'TE'], type }, selection)
-    }
-
-    if (args.srbwrte) {
-      selection = select({ positions: ['QB', 'RB', 'WR', 'TE'], type }, selection)
-    }
-
-    if (args.rbwr) {
-      selection = select({ positions: ['RB', 'WR'], type })
-    }
-
-    result.RB[type] = selection
+  // get best available baselines
+  for (const position of positions) {
+    result[position].available = groupedAvailablePlayers[position][0]
   }
 
-  result.WR = {}
-  for (const type of types) {
-    let selection = select({ positions: ['WR'], type })
-    if (args.sqbrbwrte) {
-      selection = select({ positions: ['QB', 'RB', 'WR', 'TE'], type }, selection)
-    }
-
-    if (args.srbwrte) {
-      selection = select({ positions: ['RB', 'WR', 'TE'], type }, selection)
-    }
-
-    if (args.swrte) {
-      selection = select({ positions: ['TE', 'WR'], type }, selection)
-    }
-
-    if (args.srbwr) {
-      selection = select({ positions: ['TE', 'WR'], type }, selection)
-    }
-
-    result.WR[type] = selection
-  }
-
-  result.TE = {}
-  for (const type of types) {
-    let selection = select({ positions: ['TE'], type })
-    if (args.sqbrbwrte) {
-      selection = select({ positions: ['QB', 'RB', 'WR', 'TE'], type }, selection)
-    }
-
-    if (args.srgbwrte) {
-      selection = select({ positions: ['RB', 'WR', 'TE'], type }, selection)
-    }
-
-    if (args.swrte) {
-      selection = select({ positions: ['TE', 'WR'], type }, selection)
-    }
-
-    result.TE[type] = selection
-  }
-
-  /* for (const pos in result) {
-   *   for (const type of types) {
-   *     console.log(result[pos][type])
-   *     console.log(grouped[pos][grouped[pos].length - 1])
-   *     if (!result[pos][type]) {
-   *       result[pos][type] = grouped[pos][grouped[pos].length - 1]
-   *     }
-   *   }
-   * }
-   */
   return result
 }
 
