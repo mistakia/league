@@ -17,7 +17,7 @@ const initialState = new Record({
   vorpw: null,
   volsw: null,
   email: null,
-  vbaseline: 'hybrid',
+  vbaseline: 'starter',
   text: 0,
   voice: 0,
   teamIds: new List(),

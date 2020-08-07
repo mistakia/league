@@ -9,6 +9,7 @@ import { getAllPlayers, getPlayers } from './selectors'
 import { leagueActions, getCurrentLeague } from '@core/leagues'
 import { sourceActions, getSources } from '@core/sources'
 import { settingActions } from '@core/settings'
+import { getRostersForCurrentLeague } from '@core/rosters'
 import Worker from 'workerize-loader?inline!./worker' // eslint-disable-line import/no-webpack-loader-syntax
 
 export function * loadPlayers () {
@@ -21,12 +22,14 @@ export function * calculateValues () {
   const players = yield select(getAllPlayers)
   const sources = yield select(getSources)
   const baselines = (yield select(getPlayers)).get('baselines').toJS()
+  const rosterRows = (yield select(getRostersForCurrentLeague)).toList().toJS()
 
   const worker = new Worker()
   const result = yield call(worker.calculatePlayerValues, {
     players: players.valueSeq().toJS(),
     league: league,
     sources: sources.toList().toJS(),
+    rosterRows,
     baselines,
     userId,
     vorpw,
