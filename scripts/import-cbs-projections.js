@@ -1,3 +1,5 @@
+// eslint-disable-next-line
+require = require('esm')(module /*, options*/)
 const fetchCheerioObject = require('fetch-cheerio-object')
 const debug = require('debug')
 const argv = require('yargs').argv
