@@ -70,7 +70,7 @@ module.exports = async function ({ leagueId, drop, player, teamId, team, userId 
     .limit(1)
   const tran = transactions[0]
   const playerPoachValue = tran.value + 2
-  if (!constants.regularSeason && (playerPoachValue + roster.availableCap) > league.cap) {
+  if (!constants.regularSeason && (roster.availableCap - playerPoachValue) < 0) {
     throw new Error('not enough available cap')
   }
 
