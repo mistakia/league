@@ -13,7 +13,7 @@ export default class AuctionTargets extends React.Component {
   render = () => {
     const { players, vbaseline, lineupPlayerIds, lineupPlayers, lineupPoints } = this.props
     const all = Set(players).union(Set(lineupPlayers))
-    const sorted = all.sort((a, b) => b.vorp.get(vbaseline) - a.vorp.get(vbaseline))
+    const sorted = all.sort((a, b) => b.vorp.getIn(['ros', vbaseline]) - a.vorp.getIn(['ros', vbaseline]))
     const groups = {}
     for (const position of constants.positions) {
       if (!groups[position]) groups[position] = {}
@@ -30,7 +30,7 @@ export default class AuctionTargets extends React.Component {
         const item = (
           <div className={classNames.join(' ')} key={index}>
             <div className='auction__targets-player-cost'>
-              ${player.values.get(vbaseline)}
+              ${player.values.getIn(['ros', vbaseline])}
             </div>
             <PlayerName playerId={player.player} />
             <PlayerWatchlistAction playerId={player.player} />

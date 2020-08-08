@@ -17,8 +17,12 @@ export default class Roster {
     return this.active.length >= this._activeRosterLimit
   }
 
+  get availableSpace () {
+    return this._activeRosterLimit - this.active.length
+  }
+
   get availableCap () {
-    const used = this.active.reduce((a, b) => a + b.value, 0)
+    const used = this.active.reduce((a, b) => a + b.value, 0) || 0
     return this._league.cap - used
   }
 
@@ -33,12 +37,12 @@ export default class Roster {
   get starters () {
     // TODO - exclude covid
     const exclude = [constants.slots.IR, constants.slots.PS, constants.slots.BENCH]
-    return this.players.filter(p => !exclude.includes(p.slot))
+    return Array.from(this._players.values()).filter(p => !exclude.includes(p.slot))
   }
 
   get active () {
     const exclude = [constants.slots.IR, constants.slots.PS]
-    return this.players.filter(p => !exclude.includes(p.slot))
+    return Array.from(this._players.values()).filter(p => !exclude.includes(p.slot))
   }
 
   get practice () {

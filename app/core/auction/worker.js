@@ -7,8 +7,8 @@ export function optimizeLineup ({ constraints, players, vbaseline }) {
 
   for (const player of players) {
     variables[player.player] = {
-      points: Math.round(player.points.total || 0),
-      value: Math.round(player.values[vbaseline] || 0),
+      points: Math.round(player.points.ros.total || 0),
+      value: Math.round(player.values.ros[vbaseline] || 0),
       starter: 1
     }
     variables[player.player][player.player] = 1

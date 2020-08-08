@@ -145,11 +145,13 @@ export function getFilteredPlayers (state) {
   return sorted.toList()
 }
 
+// used by editable baseline component
 export function getPlayersByPosition (state, { position }) {
   const players = state.get('players')
   const items = players.get('items')
   const filtered = items.filter(p => p.pos1 === position)
-  return filtered.sort((a, b) => b.getIn(['points', 'total']) - a.getIn(['points', 'total'])).toList()
+  const period = !constants.week ? '0' : 'ros'
+  return filtered.sort((a, b) => b.getIn(['points', period, 'total']) - a.getIn(['points', period, 'total'])).toList()
 }
 
 export function getRookiePlayers (state) {
@@ -189,7 +191,7 @@ export function getGamesByYearForSelectedPlayer (state) {
       stats.forEach(k => { sums[k] += (obj[k] || 0) })
       return sums
     }, initialValue)
-    const points = calculatePoints({ stats: sum, position: p.pos1, ...league.toJS() })
+    const points = calculatePoints({ stats: sum, position: p.pos1, league: league.toJS() })
     sum.total = points.total
     overall[year] = sum
   }
