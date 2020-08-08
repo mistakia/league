@@ -47,7 +47,7 @@ export default class AuctionPlayer extends React.Component {
             <span>{player.pname}</span><Team team={player.team} />
           </div>
           <div className='auction__player-metric'>
-            ${Math.round(player.values.get(vbaseline))}
+            ${Math.round(player.values.getIn(['ros', vbaseline])) || '--'}
           </div>
         </div>
       </div>

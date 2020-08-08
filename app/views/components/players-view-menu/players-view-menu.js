@@ -22,6 +22,7 @@ export default class PlayersViewMenu extends React.Component {
         >
           <MenuItem value='seasproj'>Season Projection</MenuItem>
           <MenuItem value='stats'>Historical Stats</MenuItem>
+          <MenuItem value='ros'>Rest Of Season</MenuItem>
         </Select>
       </FormControl>
     )

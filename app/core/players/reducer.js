@@ -25,8 +25,8 @@ const initialState = new Map({
   allAges: new List(),
   items: new Map(),
   order: 'desc',
-  view: 'seasproj',
-  orderBy: 'vorp.starter',
+  view: 'ros',
+  orderBy: 'vorp.ros.starter',
   watchlist: new Set(),
   baselines: new Map(),
   selected: null
@@ -35,6 +35,7 @@ const initialState = new Map({
 export function playersReducer (state = initialState, { payload, type }) {
   switch (type) {
     case playerActions.SET_PLAYERS_VIEW:
+      // TODO - reset orderBy
       return state.merge({ view: payload.view })
 
     case playerActions.SEARCH_PLAYERS:
@@ -81,7 +82,7 @@ export function playersReducer (state = initialState, { payload, type }) {
             state.setIn(['baselines', b, type], payload.baselines[b][type].player)
           }
         }
-        payload.values.forEach(p => {
+        payload.players.forEach(p => {
           state.mergeIn(['items', p.player], {
             projection: new Map(p.projection),
             points: new Map(p.points),
@@ -147,7 +148,7 @@ export function playersReducer (state = initialState, { payload, type }) {
     case appActions.AUTH_FULFILLED:
       return state.withMutations(players => {
         players.merge({
-          orderBy: `vorp.${payload.data.user.vbaseline}`
+          orderBy: `vorp.ros.${payload.data.user.vbaseline}`
         })
 
         if (payload.data.user.qbb) {
@@ -181,7 +182,7 @@ export function playersReducer (state = initialState, { payload, type }) {
         return state
       }
       const value = payload.data ? payload.data.value : payload.opts.value
-      return state.merge({ orderBy: `vorp.${value}` })
+      return state.merge({ orderBy: `vorp.ros.${value}` }) // TODO switch between 0 and ros
     }
 
     case playerActions.SET_WATCHLIST:

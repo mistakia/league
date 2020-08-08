@@ -19,81 +19,97 @@ class PlayerRow extends Player {
     const {
       player, style, selected, vbaseline, isSeasonProjectionView,
       isStatsPassingAdvancedView, isStatsPassingPressureView, isStatsRushingView,
-      isStatsReceivingView, overall, isLoggedIn
+      isStatsReceivingView, overall, isLoggedIn, isRestOfSeasonView
     } = this.props
 
-    const isSelected = selected === player.player
+    const isSelected = selected === player.player // TODO - not working
 
-    const seasonProjectionSummary = (
+    const seasonSummary = (week) => {
+      let inflation = null
+      const value = player.values.getIn([week, vbaseline])
+      if (isRestOfSeasonView) {
+        const diff = player.values.getIn(['inflation', vbaseline]) - value
+        const classNames = ['value__inflation']
+        const isPos = diff > 0
+        if (isPos) classNames.push('positive')
+        else classNames.push('negative')
+        inflation = (
+          <span className={classNames.join(' ')}>{isPos && '+'}{diff || ''}</span>
+        )
+      }
+
+      return (
+        <div className='row__group'>
+          <div className='row__group-body'>
+            <div className='player__row-metric'>
+              ${Math.round(value) || '--'}
+              {inflation}
+            </div>
+            <div className='player__row-metric'>
+              {Math.round(player.vorp.getIn([week, vbaseline]) || 0)}
+            </div>
+            <div className='player__row-metric'>
+              {(player.points.getIn([week, 'total']) || 0).toFixed(1)}
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    const seasonPassing = (week) => (
       <div className='row__group'>
         <div className='row__group-body'>
           <div className='player__row-metric'>
-            ${Math.round(player.values[vbaseline])}
+            <EditableProjection player={player} type='py' week={week} />
           </div>
           <div className='player__row-metric'>
-            {Math.round(player.vorp[vbaseline] || 0)}
+            <EditableProjection player={player} type='tdp' week={week} />
           </div>
           <div className='player__row-metric'>
-            {(player.points.total || 0).toFixed(1)}
+            <EditableProjection player={player} type='ints' week={week} />
           </div>
         </div>
       </div>
     )
 
-    const passingProjection = (
+    const seasonRushing = (week) => (
       <div className='row__group'>
         <div className='row__group-body'>
           <div className='player__row-metric'>
-            <EditableProjection player={player} type='py' />
+            <EditableProjection player={player} type='ra' week={week} />
           </div>
           <div className='player__row-metric'>
-            <EditableProjection player={player} type='tdp' />
+            <EditableProjection player={player} type='ry' week={week} />
           </div>
           <div className='player__row-metric'>
-            <EditableProjection player={player} type='ints' />
+            <EditableProjection player={player} type='tdr' week={week} />
+          </div>
+          <div className='player__row-metric'>
+            <EditableProjection player={player} type='fuml' week={week} />
           </div>
         </div>
       </div>
     )
 
-    const rushingProjection = (
+    const seasonReceiving = (week) => (
       <div className='row__group'>
         <div className='row__group-body'>
           <div className='player__row-metric'>
-            <EditableProjection player={player} type='ra' />
+            <EditableProjection player={player} type='trg' week={week} />
           </div>
           <div className='player__row-metric'>
-            <EditableProjection player={player} type='ry' />
+            <EditableProjection player={player} type='rec' week={week} />
           </div>
           <div className='player__row-metric'>
-            <EditableProjection player={player} type='tdr' />
+            <EditableProjection player={player} type='recy' week={week} />
           </div>
           <div className='player__row-metric'>
-            <EditableProjection player={player} type='fuml' />
+            <EditableProjection player={player} type='tdrec' week={week} />
           </div>
         </div>
       </div>
     )
-
-    const receivingProjection = (
-      <div className='row__group'>
-        <div className='row__group-body'>
-          <div className='player__row-metric'>
-            <EditableProjection player={player} type='trg' />
-          </div>
-          <div className='player__row-metric'>
-            <EditableProjection player={player} type='rec' />
-          </div>
-          <div className='player__row-metric'>
-            <EditableProjection player={player} type='recy' />
-          </div>
-          <div className='player__row-metric'>
-            <EditableProjection player={player} type='tdrec' />
-          </div>
-        </div>
-      </div>
-    )
-    const { stats } = player
+    const stats = player.stats.toJS()
     const passingBasic = (
       <div className='row__group'>
         <div className='row__group-body'>
@@ -267,10 +283,14 @@ class PlayerRow extends Player {
               <div className='player__row-action'>
                 <IconButton small text onClick={this.handleContextClick} icon='more' />
               </div>}
-            {isSeasonProjectionView && seasonProjectionSummary}
-            {isSeasonProjectionView && passingProjection}
-            {isSeasonProjectionView && rushingProjection}
-            {isSeasonProjectionView && receivingProjection}
+            {isSeasonProjectionView && seasonSummary('0')}
+            {isSeasonProjectionView && seasonPassing('0')}
+            {isSeasonProjectionView && seasonRushing('0')}
+            {isSeasonProjectionView && seasonReceiving('0')}
+            {isRestOfSeasonView && seasonSummary('ros')}
+            {isRestOfSeasonView && seasonPassing('ros')}
+            {isRestOfSeasonView && seasonRushing('ros')}
+            {isRestOfSeasonView && seasonReceiving('ros')}
             {isStatsPassingAdvancedView && passingBasic}
             {isStatsPassingAdvancedView && passingEfficiency}
             {isStatsPassingAdvancedView && passingAdvanced}

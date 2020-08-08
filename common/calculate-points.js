@@ -1,20 +1,20 @@
 import { stats } from './constants'
 
-const getScoring = ({ ...args }) => {
+const getScoring = ({ league }) => {
   const result = {}
   for (const stat of stats) {
-    result[stat] = args[stat]
+    result[stat] = league[stat]
   }
   return result
 }
 
-const calculatePoints = ({ stats, position, ...args }) => {
-  const scoring = getScoring({ ...args })
+const calculatePoints = ({ stats, position, league }) => {
+  const scoring = getScoring({ league })
 
   const result = { total: 0 }
   for (const stat in scoring) {
     const factor = stat === 'rec'
-      ? (args[`${position.toLowerCase()}rec`] || scoring[stat])
+      ? (league[`${position.toLowerCase()}rec`] || scoring[stat])
       : scoring[stat]
 
     const score = (factor * stats[stat]) || 0

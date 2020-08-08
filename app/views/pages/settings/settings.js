@@ -40,6 +40,33 @@ export default class SettingsPage extends React.Component {
       editableBaselines.push(<EditableBaseline key={baseline} position={baseline} />)
     }
 
+    let baselineDescription
+    switch (vbaseline) {
+      case 'available':
+        baselineDescription = (<p><strong>Best Available: </strong> The best available player at each position that can be added. This is estimated when rosters are not full but dynamically updates with each roster transaction.</p>)
+        break
+
+      case 'bench':
+        baselineDescription = (<p><strong>Average Bench: </strong> The average player at each position on a teams bench</p>)
+        break
+
+      case 'starter':
+        baselineDescription = (<p><strong>Worst Starter: </strong> The worst player at each position on a starting lineup</p>)
+        break
+
+      case 'average':
+        baselineDescription = (<p><strong>Average Starter: </strong> The average player at each position on a starting lineup</p>)
+        break
+
+      case 'hybrid':
+        baselineDescription = (<p><strong>Hybrid</strong> allows for you to mix <strong>Best Available</strong> and <strong>Worst Starter</strong> based on specified weights. Weights are relative and normalized, thus equal weight values are the same as each having a weight of 1.</p>)
+        break
+
+      case 'manual':
+        baselineDescription = (<p><strong>Manual</strong> allows you to set the baseline for each position. Not recommended during the season.</p>)
+        break
+    }
+
     const body = (
       <div className='settings'>
         {leagueItems}
@@ -52,7 +79,8 @@ export default class SettingsPage extends React.Component {
           <div className='settings__section-head'>Value Calculations</div>
           <EditableValue />
           <div className='settings__help'>
-            <p>The baseline used for value over replacement calculations. <strong>Best Available</strong> will emphasize depth, whereas <strong>Worst Starter</strong> will emphasize the value of high-end starters and even more so for <strong>Average Starter</strong>. <strong>Hybrid</strong> allows for you to mix <strong>Best Available</strong> and <strong>Worst Starter</strong> based on specified weights. There is no right answer but only starters can score points, thus the recommended apporach is hybrid weighted toward the worst starter. Weights are relative and normalized, thus equal weight values are the same as each having a weight of 1. <strong>Manual</strong> allows you to set the baseline for each position. Baselines are estimated when rosters are not full based on league settings, but will update live with each roster change.</p>
+            {baselineDescription}
+            <p>The baseline (aka replacement player) used for value over replacement calculations. Since only points from starters count, the <strong>worst starter</strong> baseline is the best baseline to use when determining historical value. When forecasting value, there is no right answer, it depends on strategy. <strong>Best Available</strong> will emphasize depth, whereas <strong>Worst Starter</strong> will emphasize the value of high-end starters and even more so for <strong>Average Starter</strong>.</p>
           </div>
           {vbaseline !== 'hybrid' && editableBaselines}
           <div className='editable__league-section-title'>Projection Weights</div>
@@ -76,6 +104,7 @@ export default class SettingsPage extends React.Component {
           </div>}
       </div>
     )
+
     return (
       <PageLayout body={body} scroll />
     )

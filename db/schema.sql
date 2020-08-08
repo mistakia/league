@@ -1409,6 +1409,7 @@ CREATE TABLE `leagues` (
   `adate` int(11) DEFAULT NULL,
   `groupme_token` varchar(45) DEFAULT NULL,
   `groupme_id` varchar(26) DEFAULT NULL,
+  `minBid` tinyint(1) DEFAULT 0,
   UNIQUE KEY `uid` (`uid`),
   KEY `commishid` (`commishid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;

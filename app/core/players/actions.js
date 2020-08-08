@@ -54,10 +54,10 @@ export const playerActions = {
     }
   }),
 
-  setValues: ({ values, baselines }) => ({
+  setValues: ({ players, baselines }) => ({
     type: playerActions.SET_PLAYER_VALUES,
     payload: {
-      values,
+      players,
       baselines
     }
   }),
@@ -95,13 +95,14 @@ export const playerActions = {
     type: playerActions.PLAYERS_DESELECT_PLAYER
   }),
 
-  saveProjection: ({ playerId, value, type, userId }) => ({
+  saveProjection: ({ playerId, value, type, userId, week }) => ({
     type: playerActions.SAVE_PROJECTION,
     payload: {
       userId,
       playerId,
       value,
-      type
+      type,
+      week
     }
   }),
 

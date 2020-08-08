@@ -16,6 +16,7 @@ const mapStateToProps = createSelector(
     selected: players.get('selected'),
     vbaseline: app.vbaseline,
     overall: statsState.overallPlays,
+    isRestOfSeasonView: players.get('view') === 'ros',
     isSeasonProjectionView: players.get('view') === 'seasproj',
     isStatsRushingView: players.get('view') === 'stats' && statsState.view === 'rushing',
     isStatsReceivingView: players.get('view') === 'stats' && statsState.view === 'receiving',

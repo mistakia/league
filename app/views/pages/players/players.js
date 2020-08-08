@@ -73,70 +73,68 @@ export default class PlayersPage extends React.Component {
     const {
       players, vbaseline, isSeasonProjectionView, isStatsView, isStatsPassingView,
       isStatsRushingView, isStatsReceivingView, isStatsPassingAdvancedView,
-      isStatsPassingPressureView, isPending, showQualifier, isLoggedIn
+      isStatsPassingPressureView, isPending, showQualifier, isLoggedIn, isRestOfSeasonView
     } = this.props
 
     const Row = ({ index, key, parent, ...params }) => {
-      const player = players.get(index).toJS()
+      const player = players.get(index)
       return (
         <PlayerRow key={key} player={player} {...params} />
       )
     }
 
-    const headerSeasonPassing = (
+    const headerSeasonPassing = (week) => (
       <div className='player__row-group'>
         <div className='player__row-group-head'>Passing</div>
         <div className='player__row-group-body'>
-          <PlayerHeader className='player__row-metric' label='YDS' value='projection.py' />
-          <PlayerHeader className='player__row-metric' label='TD' value='projection.tdp' />
-          <PlayerHeader className='player__row-metric' label='INT' value='projection.ints' />
+          <PlayerHeader className='player__row-metric' label='YDS' value={`projection.${week}.py`} />
+          <PlayerHeader className='player__row-metric' label='TD' value={`projection.${week}.tdp`} />
+          <PlayerHeader className='player__row-metric' label='INT' value={`projection.${week}.ints`} />
         </div>
       </div>
     )
 
-    const headerSeasonRushing = (
+    const headerSeasonRushing = (week) => (
       <div className='player__row-group'>
         <div className='player__row-group-head'>Rushing</div>
         <div className='player__row-group-body'>
-          <PlayerHeader className='player__row-metric' label='CAR' value='projection.ra' />
-          <PlayerHeader className='player__row-metric' label='YDS' value='projection.ry' />
-          <PlayerHeader className='player__row-metric' label='TD' value='projection.tdr' />
-          <PlayerHeader className='player__row-metric' label='FUM' value='projection.fuml' />
+          <PlayerHeader className='player__row-metric' label='CAR' value={`projection.${week}.ra`} />
+          <PlayerHeader className='player__row-metric' label='YDS' value={`projection.${week}.ry`} />
+          <PlayerHeader className='player__row-metric' label='TD' value={`projection.${week}.tdr`} />
+          <PlayerHeader className='player__row-metric' label='FUM' value={`projection.${week}.fuml`} />
         </div>
       </div>
     )
 
-    const headerSeasonReceiving = (
+    const headerSeasonReceiving = (week) => (
       <div className='player__row-group'>
         <div className='player__row-group-head'>Receiving</div>
         <div className='player__row-group-body'>
-          <PlayerHeader className='player__row-metric' label='TAR' value='projection.trg' />
-          <PlayerHeader className='player__row-metric' label='REC' value='projection.rec' />
-          <PlayerHeader className='player__row-metric' label='YDS' value='projection.recy' />
-          <PlayerHeader className='player__row-metric' label='TD' value='projection.tdrec' />
+          <PlayerHeader className='player__row-metric' label='TAR' value={`projection.${week}.trg`} />
+          <PlayerHeader className='player__row-metric' label='REC' value={`projection.${week}.rec`} />
+          <PlayerHeader className='player__row-metric' label='YDS' value={`projection.${week}.recy`} />
+          <PlayerHeader className='player__row-metric' label='TD' value={`projection.${week}.tdrec`} />
         </div>
       </div>
     )
 
-    const valueType = `values.${vbaseline}`
-    const vorpType = `vorp.${vbaseline}`
-    const headerSeasonSummary = (
+    const headerSeasonSummary = (week) => (
       <div className='player__row-group'>
         <div className='player__row-group-body'>
           <PlayerHeader
             className='player__row-metric'
             label='Cost'
-            value={valueType}
+            value={`values.${week}.${vbaseline}`}
           />
           <PlayerHeader
             className='player__row-metric'
             label='Value'
-            value={vorpType}
+            value={`vorp.${week}.${vbaseline}`}
           />
           <PlayerHeader
             className='player__row-metric'
             label='Proj'
-            value='points.total'
+            value={`points.${week}.total`}
           />
         </div>
       </div>
@@ -177,10 +175,14 @@ export default class PlayersPage extends React.Component {
           <div className='player__row-pos' />
           <div className='player__row-name'>Name</div>
           {isLoggedIn && <div className='player__row-action' />}
-          {isSeasonProjectionView && headerSeasonSummary}
-          {isSeasonProjectionView && headerSeasonPassing}
-          {isSeasonProjectionView && headerSeasonRushing}
-          {isSeasonProjectionView && headerSeasonReceiving}
+          {isSeasonProjectionView && headerSeasonSummary('0')}
+          {isSeasonProjectionView && headerSeasonPassing('0')}
+          {isSeasonProjectionView && headerSeasonRushing('0')}
+          {isSeasonProjectionView && headerSeasonReceiving('0')}
+          {isRestOfSeasonView && headerSeasonSummary('ros')}
+          {isRestOfSeasonView && headerSeasonPassing('ros')}
+          {isRestOfSeasonView && headerSeasonRushing('ros')}
+          {isRestOfSeasonView && headerSeasonReceiving('ros')}
           {isStatsPassingAdvancedView && <HeaderStatsPassingBasic />}
           {isStatsPassingAdvancedView && <HeaderStatsPassingEfficiency />}
           {isStatsPassingAdvancedView && <HeaderStatsPassingAdvanced />}

@@ -1,4 +1,4 @@
-import { stats, week } from './constants'
+import { stats } from './constants'
 
 const removeFalsy = (obj) => {
   const newObj = {}
@@ -8,14 +8,14 @@ const removeFalsy = (obj) => {
   return newObj
 }
 
-const weightProjections = ({ projections, weights = [], userId }) => {
+const weightProjections = ({ projections, weights = [], userId, week }) => {
   const data = {}
   for (const r of stats) {
     data[r] = []
   }
 
-  const userProjection = projections.find(p => p.userid === userId) || {}
-  const sourceProjections = projections.filter(p => p.sourceid)
+  const userProjection = projections.find(p => (p.userid === userId && p.week === week)) || {}
+  const sourceProjections = projections.filter(p => (p.sourceid && p.week === week))
 
   for (const projection of sourceProjections) {
     const { sourceid } = projection
@@ -23,8 +23,6 @@ const weightProjections = ({ projections, weights = [], userId }) => {
     const full = 1 / sourceProjections.length
     const factor = (source && source.weight !== null) ? source.weight : 1
     const weight = factor * full
-
-    if (projection.week !== week) continue // TODO
 
     for (const r in data) {
       if (projection[r]) {

@@ -49,7 +49,7 @@ class PlayerRoster extends Player {
           {/* contract value */}
         </div>
         <div className='player__item-metric'>
-          {(player.vorp.get(vbaseline) || 0).toFixed(1)}
+          {(player.vorp.getIn(['ros', vbaseline]) || 0).toFixed(1)}
         </div>
         {!isWaiver &&
           <div className='player__item-metric'>

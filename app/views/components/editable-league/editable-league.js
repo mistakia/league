@@ -76,6 +76,14 @@ export default class EditableLeague extends React.Component {
                 min={0}
                 {...props}
               />
+              <EditableLeagueField
+                label='Min Bid'
+                field='minBid'
+                type='int'
+                max={1}
+                min={0}
+                {...props}
+              />
             </div>
             <div className='editable__league-section-title'>Starting Lineup</div>
             <div className='editable__league-section'>
