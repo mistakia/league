@@ -40,7 +40,8 @@ const createDefaultLeague = ({ userId }) => ({
   tdrec: 6,
   fuml: -1,
   ddate: null,
-  adate: null
+  adate: null,
+  minBid: 0
 })
 
 export default createDefaultLeague

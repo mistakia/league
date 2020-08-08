@@ -54,7 +54,7 @@ export default function () {
     draftInfo = (<div className='draft__side-top-pick'>Draft not scheduled</div>)
   }
 
-  const sorted = players.sort((a, b) => b.vorp.get(vbaseline) - a.vorp.get(vbaseline))
+  const sorted = players.sort((a, b) => b.vorp.getIn(['ros', vbaseline]) - a.vorp.getIn(['ros', vbaseline]))
   const allRow = ({ index, key, ...params }) => {
     const player = sorted.get(index)
     return (

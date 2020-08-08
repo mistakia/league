@@ -50,7 +50,7 @@ export function * toggleOrder ({ payload }) {
     if (currentOrder === 'asc') {
       yield put(playerActions.setOrder({
         order: 'desc',
-        orderBy: `vorp.${app.vbaseline}`
+        orderBy: `vorp.ros.${app.vbaseline}` // TODO set based on view
       }))
     } else {
       yield put(playerActions.setOrder({
@@ -68,9 +68,7 @@ export function * toggleOrder ({ payload }) {
 
 export function * saveProjection ({ payload }) {
   const { token } = yield select(getApp)
-  const players = yield select(getPlayers)
-  const week = players.get('week')
-  const { value, type, playerId, userId } = payload
+  const { value, type, playerId, userId, week } = payload
   if (token) yield call(putProjection, { value, type, playerId, userId, week })
   else yield put(playerActions.setProjection({ value, type, playerId, userId, week }))
   yield call(calculateValues)

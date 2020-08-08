@@ -44,7 +44,8 @@ export const League = new Record({
   fuml: null,
   adate: null,
   ddate: null,
-  teams: new List()
+  teams: new List(),
+  minBid: 0
 })
 
 export function createLeague ({
@@ -90,7 +91,8 @@ export function createLeague ({
   tdrec,
   fuml,
   adate,
-  ddate
+  ddate,
+  minBid
 }) {
   return new League({
     uid,
@@ -135,6 +137,7 @@ export function createLeague ({
     tdrec,
     fuml,
     adate,
-    ddate
+    ddate,
+    minBid
   })
 }

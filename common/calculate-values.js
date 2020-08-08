@@ -1,11 +1,10 @@
-import getRosterSize from './get-roster-size'
-
-const calculateValues = ({ players, baselines, vorpw, volsw, ...args }) => {
+const calculateValues = ({ players, baselines, vorpw, volsw, week }) => {
   const total = {
     available: 0,
     starter: 0,
     average: 0,
     hybrid: 0,
+    bench: 0,
     manual: 0
   }
 
@@ -15,42 +14,27 @@ const calculateValues = ({ players, baselines, vorpw, volsw, ...args }) => {
 
   for (const player of players) {
     const { pos1 } = player
-    player.vorp = {
+    player.vorp[week] = {
       available: -99999,
       starter: -99999,
+      bench: -99999,
       average: -99999,
       hybrid: -99999,
       manual: -99999
     }
     for (const type in baselines[pos1]) {
-      player.vorp[type] = player.points.total - (baselines[pos1][type] ? baselines[pos1][type].points.total : 0)
-      if (player.vorp[type] > 0) {
-        total[type] = total[type] + player.vorp[type]
+      player.vorp[week][type] = player.points[week].total - baselines[pos1][type].points[week].total
+      if (player.vorp[week][type] > 0) {
+        total[type] = total[type] + player.vorp[week][type]
       }
     }
-    player.vorp.hybrid = ((player.vorp.available * weightAvailable) + (player.vorp.starter * weightStarter)) / totalWeight
-    if (player.vorp.hybrid > 0) {
-      total.hybrid = total.hybrid + player.vorp.hybrid
+    player.vorp[week].hybrid = ((player.vorp[week].available * weightAvailable) + (player.vorp[week].starter * weightStarter)) / totalWeight
+    if (player.vorp[week].hybrid > 0) {
+      total.hybrid = total.hybrid + player.vorp[week].hybrid
     }
   }
 
-  const { nteams, cap } = args
-  const rosterSize = getRosterSize(args)
-  const leagueCap = (nteams * cap) - (nteams * rosterSize) // TODO use league live cap
-  const rate = {}
-  for (const type in total) {
-    rate[type] = leagueCap / total[type]
-  }
-
-  for (const player of players) {
-    player.values = {}
-    for (const type in rate) {
-      const value = Math.round(rate[type] * player.vorp[type])
-      player.values[type] = value > 0 ? value : 0
-    }
-  }
-
-  return players
+  return total
 }
 
 export default calculateValues

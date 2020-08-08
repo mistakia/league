@@ -38,7 +38,7 @@ export default class EditableBaseline extends React.Component {
           key={player.player}
           value={player.player}
         >
-          {index + 1}. {player.fname} {player.lname} ({Math.round(player.getIn(['points', 'total']))} pts)
+          {index + 1}. {player.fname} {player.lname} ({Math.round(player.getIn(['points', '0', 'total']))} pts)
         </MenuItem>
       )
     }

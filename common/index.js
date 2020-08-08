@@ -6,6 +6,8 @@ import * as constants from './constants'
 import getEligibleSlots from './get-eligible-slots'
 import Roster from './roster'
 import calculateStatsFromPlays from './calculate-stats-from-plays'
+import calculatePrices from './calculate-prices'
+import getRosterSize from './get-roster-size'
 import createDefaultLeague from './create-default-league'
 
 const groupBy = (xs, key) => xs.reduce((rv, x) => {
@@ -33,11 +35,13 @@ export {
   calculateValues,
   constants,
   getEligibleSlots,
+  getRosterSize,
   groupBy,
   uniqBy,
   formatRoster,
   weightProjections,
   Roster,
+  calculatePrices,
   calculateStatsFromPlays,
   createDefaultLeague
 }
