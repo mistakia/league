@@ -17,7 +17,7 @@ export default class EditableTeam extends React.Component {
 
     const props = { team, onchange: this.onchange }
 
-    let teamNotificationsSection
+    let teamNotificationSection
     if (isHosted) {
       teamNotificationSection = (
         <div>
@@ -71,6 +71,7 @@ export default class EditableTeam extends React.Component {
           />
           <TeamImage tid={team.uid} />
         </div>
+        {teamNotificationSection}
       </div>
     )
   }
