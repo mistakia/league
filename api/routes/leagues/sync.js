@@ -4,7 +4,7 @@ const router = express.Router()
 router.post('/?', async (req, res) => {
   const { logger } = req.app.locals
   try {
-    const { type, username, password } = req.body
+    // const { type, username, password } = req.body
     // verify credentials and return list of leagues
     res.send({ success: null })
   } catch (err) {

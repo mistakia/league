@@ -27,7 +27,7 @@ export default class PoachConfirmation extends React.Component {
     }
 
     this._drops = drops
-    this.state = { drop: drops.length ? drops[0].player : undefined }
+    this.state = { drop: undefined, error: false }
   }
 
   handleDrop = (event) => {
@@ -36,8 +36,17 @@ export default class PoachConfirmation extends React.Component {
   }
 
   handleSubmit = () => {
+    const { isPlayerEligible } = this.props
+
     const player = this.props.player.player
     const { drop } = this.state
+
+    if (!isPlayerEligible && !drop) {
+      return this.setState({ error: true })
+    } else {
+      this.setState({ error: false })
+    }
+
     if (this.props.status.waiver.poach) {
       this.props.claim({ drop, player, type: constants.waivers.POACH })
     } else {
@@ -88,6 +97,7 @@ export default class PoachConfirmation extends React.Component {
               <Select
                 labelId='drop-label'
                 value={this.state.drop}
+                error={this.state.error}
                 onChange={this.handleDrop}
                 label='Drop'
               >
