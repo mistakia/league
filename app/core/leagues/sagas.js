@@ -11,7 +11,7 @@ export function * updateLeague ({ payload }) {
   else yield put(leagueActions.set(payload))
 }
 
-export function * notification ({ payload }) {
+export function * saveNotification () {
   yield put(notificationActions.show({
     message: 'League setting saved',
     severity: 'success'
@@ -27,7 +27,7 @@ export function * watchUpdateLeague () {
 }
 
 export function * watchPutLeagueFulfilled () {
-  yield takeLatest(leagueActions.PUT_LEAGUE_FULFILLED, notification)
+  yield takeLatest(leagueActions.PUT_LEAGUE_FULFILLED, saveNotification)
 }
 
 //= ====================================
