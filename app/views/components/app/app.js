@@ -21,8 +21,8 @@ class App extends React.Component {
     const key = await localStorageAdapter.getItem('key')
     this.props.init({ token, key })
 
-    window.addEventListener('error', (error) => this.props.report(error), true)
-    window.addEventListener('unhandledrejection', (error) => this.props.report(error), true)
+    window.addEventListener('error', (error) => this.props.report({ message: error.message, stack: error.stack }), true)
+    window.addEventListener('unhandledrejection', (error) => this.props.report({ message: error.message, stack: error.stack }), true)
   }
 
   render () {
