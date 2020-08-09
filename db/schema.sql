@@ -1670,7 +1670,7 @@ CREATE TABLE `users` (
   `password` varchar(60) NOT NULL DEFAULT '',
   `vorpw` decimal(2,2) DEFAULT NULL,
   `volsw` decimal(2,2) DEFAULT NULL,
-  `vbaseline` varchar(9) NOT NULL DEFAULT 'available',
+  `vbaseline` varchar(9) NOT NULL DEFAULT 'starter',
   `watchlist` mediumtext,
   `lastvisit` datetime DEFAULT NULL,
   `qbb` varchar(7) DEFAULT NULL,
