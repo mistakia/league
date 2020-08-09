@@ -12,12 +12,13 @@ export default class Auction {
     this._league = null
     this._paused = true
     this._locked = false
+    this._nominationTimerExpired = false
     this._tids = []
     this._teams = []
     this._transactions = []
     this._ready = false
     this._connected = {}
-    this.logger = debug(`league:${lid}:auction`)
+    this.logger = debug(`auction:league:${lid}`)
   }
 
   get position () {
@@ -33,11 +34,21 @@ export default class Auction {
     ws.on('message', (msg) => {
       const message = JSON.parse(msg)
       switch (message.type) {
+        case 'AUCTION_PAUSE': {
+          if (userId !== this._league.commishid) return
+          return this.pause()
+        }
+
+        case 'AUCTION_RESUME': {
+          if (userId !== this._league.commishid) return
+          return this.start()
+        }
+
         case 'AUCTION_BID':
           return this.bid(message.payload)
 
         case 'AUCTION_SUBMIT_NOMINATION':
-          return this.nominate(message.payload)
+          return this.nominate(message.payload, { userId, tid })
 
         default:
           return console.log(`invalid message: ${message.type}`)
@@ -78,6 +89,8 @@ export default class Auction {
       type: 'AUCTION_INIT',
       payload: {
         transactions: this._transactions,
+        paused: this._paused,
+        ready: this._ready,
         tids: this._tids,
         teams: this._teams,
         connected: Object.keys(this._connected).map(k => parseInt(k, 10)),
@@ -243,57 +256,38 @@ export default class Auction {
     this._locked = false
   }
 
-  async nominate (message = {}) {
-    console.log(message)
-    this._clearNominationTimer()
-
+  async nominate (message = {}, { userId, tid }) {
     const pos = this.position
-    const tid = this._tids[pos % this._tids.length]
+    const nominatingTeamId = this._tids[pos % this._tids.length]
     const { userid, value = 0 } = message
-    let { player } = message
+    const { player } = message
 
     if (!player) {
-      // select player for nomination
-      const rows = await db('rosters')
-        .where({ lid: this._lid, year: constants.year, week: constants.week })
-
-      const rids = rows.map(r => r.uid)
-      const rosterPlayers = await db('rosters_players')
-        .whereIn('rid', rids)
-        .whereNot('slot', constants.slots.IR)
-        .whereNot('slot', constants.slots.PS)
-
-      const players = rosterPlayers.map(p => p.player)
-
-      const results = await db('player')
-        .innerJoin('draft_rankings', 'player.player', 'draft_rankings.player')
-        .where('seas', constants.year)
-        .orderBy('rank', 'asc')
-        .whereNotIn('player.player', players)
-        .limit(1)
-
-      if (!results.length) {
-        this.logger('no players available to nominate')
-        // TODO announce error
-        return
-      }
-
-      player = results[0].player
-    } else {
-      if (tid !== message.tid) {
-        this.logger('received nomination from a team out of turn')
-        // TODO announce error
-        return
-      }
-
-      // TODO validate player eligibility
+      this.logger('no player to nominate')
+      return
     }
+
+    if (!this._nominationTimerExpired && nominatingTeamId !== tid) {
+      this.logger('received nomination from a team out of turn')
+      // TODO announce error
+      return
+    }
+
+    this._clearNominationTimer()
+
+    if (this._nominationTimerExpired && userId !== this._league.commishid) {
+      this.logger('nomination timer expired')
+      // TODO announce error
+      return
+    }
+
+    // TODO validate player eligibility
 
     this.logger(`nominating ${player}`)
 
     const bid = {
       userid,
-      tid,
+      tid: nominatingTeamId,
       player,
       type: constants.transactions.AUCTION_BID,
       value,
@@ -330,6 +324,7 @@ export default class Auction {
   }
 
   start () {
+    if (!this._paused) return
     this.logger('starting auction')
     this._paused = false
     const latest = this._transactions[0]
@@ -345,6 +340,7 @@ export default class Auction {
   }
 
   pause () {
+    if (this._paused) return
     this.logger('pausing auction')
     this._clearTimers()
     this._paused = true
@@ -357,8 +353,12 @@ export default class Auction {
   }
 
   _startNominationTimer () {
+    this._nominationTimerExpired = false
     this._clearNominationTimer()
-    this._nominationTimer = setTimeout(() => this.nominate(), config.nominationTimer)
+    const self = this
+    this._nominationTimer = setTimeout(() => {
+      self._nominationTimerExpired = true
+    }, config.nominationTimer)
   }
 
   _clearNominationTimer () {

@@ -161,6 +161,14 @@ export function * submitNomination ({ payload }) {
   send(message)
 }
 
+export function * resume () {
+  send({ type: auctionActions.AUCTION_RESUME })
+}
+
+export function * pause () {
+  send({ type: auctionActions.AUCTION_PAUSE })
+}
+
 //= ====================================
 //  WATCHERS
 // -------------------------------------
@@ -200,6 +208,14 @@ export function * watchSetAuctionBudget () {
   yield takeLatest(auctionActions.SET_AUCTION_BUDGET, optimize)
 }
 
+export function * watchAuctionPause () {
+  yield takeLatest(auctionActions.AUCTION_PAUSE, pause)
+}
+
+export function * watchAuctionResume () {
+  yield takeLatest(auctionActions.AUCTION_RESUME, resume)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -211,5 +227,7 @@ export const auctionSagas = [
   fork(watchAuctionBid),
   fork(watchInitAuctionLineup),
   fork(watchToggleWatchlist),
-  fork(watchSetAuctionBudget)
+  fork(watchSetAuctionBudget),
+  fork(watchAuctionPause),
+  fork(watchAuctionResume)
 ]

@@ -8,6 +8,9 @@ export const auctionActions = {
   AUCTION_PAUSED: 'AUCTION_PAUSED',
   AUCTION_CONNECTED: 'AUCTION_CONNECTED',
 
+  AUCTION_PAUSE: 'AUCTION_PAUSE',
+  AUCTION_RESUME: 'AUCTION_RESUME',
+
   AUCTION_RELEASE_LOCK: 'AUCTION_RELEASE_LOCK',
 
   AUCTION_FILTER: 'AUCTION_FILTER',
@@ -78,5 +81,13 @@ export const auctionActions = {
 
   join: () => ({
     type: auctionActions.AUCTION_JOIN
+  }),
+
+  pause: () => ({
+    type: auctionActions.AUCTION_PAUSE
+  }),
+
+  resume: () => ({
+    type: auctionActions.AUCTION_RESUME
   })
 }
