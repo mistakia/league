@@ -9,6 +9,7 @@ module.exports = {
   nominationTimer: 30000,
   bidTimer: 15000,
   pff: '', // cookies for pff
+  mflUserAgent: '',
   email: {
     api: '', // sendgrid api
     admin: '',

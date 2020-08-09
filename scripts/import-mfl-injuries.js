@@ -9,6 +9,7 @@ const argv = require('yargs').argv
 const log = debug('import:players:mfl')
 debug.enable('league:player:get,import:players:mfl')
 
+const config = require('../config')
 const db = require('../db')
 
 const { constants } = require('../common')
@@ -18,7 +19,11 @@ const run = async () => {
   const missing = []
 
   const URL = `https://api.myfantasyleague.com/${constants.year}/export?TYPE=injuries&JSON=1`
-  const result = await fetch(URL).then(res => res.json())
+  const result = await fetch(URL, {
+    headers: {
+      'User-Agent': config.mflUserAgent
+    }
+  }).then(res => res.json())
 
   const fields = {}
   const inserts = []
