@@ -9,7 +9,6 @@ export const week = diff < 0 ? 0 : diff
 export const finalWeek = 16
 export const regularSeason = week > 0 && week <= finalWeek
 export const waiverWindow = regularSeason && moment().utcOffset(-4).day() === 2
-export const poachWaiverWindow = moment().isBefore(moment('8/7 -0400', 'M/D Z'))
 
 export const year = moment().month() > 2
   ? moment().year()
