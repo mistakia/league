@@ -56,7 +56,7 @@ function * fetchAPI (apiFunction, actions, opts = {}) {
   } catch (err) {
     if (!opts.ignoreError) {
       yield put(notificationActions.show({ severity: 'error', message: err.message }))
-      yield put(errorActions.report(err)) // TODO include context like api url and options
+      yield put(errorActions.report({ message: `api: ${err.message}`, stack: err.stack })) // TODO include context like api url and options
     }
     yield put(actions.failed(opts, err.toString()))
   } finally {
