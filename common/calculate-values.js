@@ -22,6 +22,9 @@ const calculateValues = ({ players, baselines, vorpw, volsw, week }) => {
       hybrid: -99999,
       manual: -99999
     }
+
+    if (pos1 === 'K' || pos1 === 'DST') continue // TODO - ignore kickers and defenses for now
+
     for (const type in baselines[pos1]) {
       player.vorp[week][type] = player.points[week].total - baselines[pos1][type].points[week].total
       if (player.vorp[week][type] > 0) {
