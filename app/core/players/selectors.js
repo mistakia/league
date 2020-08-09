@@ -209,6 +209,10 @@ export function getPlayerStatus (state, { player }) {
     }
   }
 
+  if (!player.player) {
+    return status
+  }
+
   const isFreeAgent = isPlayerFreeAgent(state, { player })
   status.fa = isFreeAgent
   if (constants.waiverWindow && isFreeAgent) {
