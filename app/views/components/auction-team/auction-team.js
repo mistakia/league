@@ -17,7 +17,7 @@ export default class AuctionTeam extends React.Component {
 
     return (
       <div className={classNames.join(' ')}>
-        <div className='auction__team-name'>{team.name}</div>
+        <div className='auction__team-name'>{team.abbrv}</div>
         <div className='auction__team-cap'>${team.cap}</div>
         {isWinningBid &&
           <div className='auction__winning-bid'>${bid}</div>}
