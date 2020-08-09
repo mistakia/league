@@ -5,10 +5,11 @@ export const errorActions = {
   POST_ERROR_FAILED: 'POST_ERROR_FAILED',
   POST_ERROR_FULFILLED: 'POST_ERROR_FULFILLED',
 
-  report: (error) => ({
+  report: ({ message, stack }) => ({
     type: errorActions.REPORT_ERROR,
     payload: {
-      error
+      message,
+      stack
     }
   }),
 
