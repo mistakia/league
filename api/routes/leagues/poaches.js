@@ -32,11 +32,6 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid teamId' })
     }
 
-    // TODO DEPRECATE
-    if (constants.poachWaiverWindow) {
-      return res.status(400).send({ error: 'player is on waivers' })
-    }
-
     // verify player is not on waivers
     const transactions = await db('transactions')
       .where({
