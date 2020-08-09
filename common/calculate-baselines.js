@@ -2,6 +2,13 @@ import Roster from './roster'
 import { positions, slots } from './constants'
 import getEligibleSlots from './get-eligible-slots'
 
+const types = [
+  'available',
+  'starter',
+  'bench',
+  'average'
+]
+
 const countOccurrences = (arr, val) => arr.reduce((a, v) => (v === val ? a + 1 : a), 0)
 const getBestAvailableForSlot = ({ slot, players, week }) => {
   const eligiblePositions = []
@@ -27,6 +34,7 @@ const calculateBaselines = ({
   week
 }) => {
   const data = JSON.parse(JSON.stringify(players))
+    .sort((a, b) => b.points[week].total - a.points[week].totat)
 
   const rows = []
   for (let i = 0; i < league.nteams; i++) {
@@ -115,7 +123,7 @@ const calculateBaselines = ({
   const vorAvailablePlayers = availablePlayerPool.map(p => ({
     _value: ['K', 'DST'].includes(p.pos1)
       ? 99999
-      : Math.round(Math.abs(result[p.pos1].starter.points[week].total - p.points[week].total) / result[p.pos1].starter.points[week].total),
+      : result[p.pos1].starter && Math.round(Math.abs(result[p.pos1].starter.points[week].total - p.points[week].total) / result[p.pos1].starter.points[week].total), // TODO - fix
     ...p
   }))
   const sortedAvailablePlayers = vorAvailablePlayers.sort((a, b) => a._value - b._value)
@@ -187,6 +195,13 @@ const calculateBaselines = ({
     const players = groupedBench[position]
     const player = players[Math.floor(players.length / 2)]
     result[position].bench = player || result[position].available
+
+    // if any baselines are empty - set it to top player at position
+    for (const type of types) {
+      if (!result[position][type]) {
+        result[position][type] = data.find(p => p.pos1 === position)
+      }
+    }
   }
 
   return result

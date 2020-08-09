@@ -7,18 +7,18 @@ import { postError } from '@core/api'
 export function * report ({ payload }) {
   const { leagueId, teamId, userId } = yield select(getApp)
   const { error } = payload
-  const { message, stack } = error.error
-  yield call(postError, {
-    ignoreError: true,
-    leagueId,
-    teamId,
-    userId,
-    error: {
-      message,
-      stack,
-      url: document.location.href
-    }
-  })
+  /* const { message, stack } = error.error
+   * yield call(postError, {
+   *   ignoreError: true,
+   *   leagueId,
+   *   teamId,
+   *   userId,
+   *   error: {
+   *     message,
+   *     stack,
+   *     url: document.location.href
+   *   }
+   * }) */
 }
 
 //= ====================================
