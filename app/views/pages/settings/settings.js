@@ -12,21 +12,7 @@ import './settings.styl'
 
 export default class SettingsPage extends React.Component {
   render = () => {
-    const { userId, leagueIds, teamIds, sourceIds, baselines, vbaseline } = this.props
-
-    const leagueItems = []
-    for (const leagueId of leagueIds) {
-      leagueItems.push(
-        <EditableLeague key={leagueId} lid={leagueId} />
-      )
-    }
-
-    const teamItems = []
-    for (const teamId of teamIds) {
-      teamItems.push(
-        <EditableTeam key={teamId} tid={teamId} />
-      )
-    }
+    const { userId, leagueId, teamId, sourceIds, baselines, vbaseline, isHosted } = this.props
 
     const sourceItems = []
     for (const sourceId of sourceIds) {
@@ -67,13 +53,34 @@ export default class SettingsPage extends React.Component {
         break
     }
 
+    let notificationSection
+    if (userId && isHosted) {
+      notificationSection = (
+        <div className='settings__section settings__notifications'>
+          <div className='settings__section-head'>Notifications</div>
+          <div className='settings__section-body'>
+            <SettingsSwitch
+              field='text'
+              label='Text Notifications'
+              description='Enable/disable all text notifications.'
+            />
+            <SettingsSwitch
+              field='voice'
+              label='Voice Notifications'
+              description='Enable/disable all voice notifications.'
+            />
+          </div>
+        </div>
+      )
+    }
+
     const body = (
       <div className='settings'>
-        {leagueItems}
-        {!!teamItems.length &&
+        <EditableLeague lid={leagueId} />
+        {teamId &&
           <div className='settings__section'>
-            <div className='settings__section-head'>Teams</div>
-            <div className='settings__section-body'>{teamItems}</div>
+            <div className='settings__section-head'>Team Settings</div>
+            <div className='settings__section-body'><EditableTeam tid={teamId} /></div>
           </div>}
         <div className='settings__section'>
           <div className='settings__section-head'>Value Calculations</div>
@@ -82,26 +89,13 @@ export default class SettingsPage extends React.Component {
             {baselineDescription}
             <p>The baseline (aka replacement player) used for value over replacement calculations. Since only points from starters count, the <strong>worst starter</strong> baseline is the best baseline to use when determining historical value. When forecasting value, there is no right answer, it depends on strategy. <strong>Best Available</strong> will emphasize depth, whereas <strong>Worst Starter</strong> will emphasize the value of high-end starters and even more so for <strong>Average Starter</strong>.</p>
           </div>
-          {vbaseline !== 'hybrid' && editableBaselines}
-          <div className='editable__league-section-title'>Projection Weights</div>
+          {vbaseline === 'manual' && editableBaselines}
+        </div>
+        {notificationSection}
+        <div className='settings__section'>
+          <div className='settings__section-head'>Projection Weights</div>
           <div className='settings__section-body'>{sourceItems}</div>
         </div>
-        {userId &&
-          <div className='settings__section settings__notifications'>
-            <div className='settings__section-head'>Notifications</div>
-            <div className='settings__section-body'>
-              <SettingsSwitch
-                field='text'
-                label='Text Notifications'
-                description='Enable/disable all text notifications.'
-              />
-              <SettingsSwitch
-                field='voice'
-                label='Voice Notifications'
-                description='Enable/disable all voice notifications.'
-              />
-            </div>
-          </div>}
       </div>
     )
 

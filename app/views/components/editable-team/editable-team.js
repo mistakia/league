@@ -13,9 +13,41 @@ export default class EditableTeam extends React.Component {
   }
 
   render = () => {
-    const { team } = this.props
+    const { team, isHosted } = this.props
 
     const props = { team, onchange: this.onchange }
+
+    let teamNotificationsSection
+    if (isHosted) {
+      teamNotificationSection = (
+        <div>
+          <div className='editable__team-section'>
+            <EditableTeamSwitch
+              label='Team Text Notifications'
+              description='Poaching claims and trades'
+              field='teamtext'
+              {...props}
+            />
+          </div>
+          <div className='editable__team-section'>
+            <EditableTeamSwitch
+              label='Team Voice Notifications'
+              description='Poaching claims'
+              field='teamvoice'
+              {...props}
+            />
+          </div>
+          <div className='editable__team-section'>
+            <EditableTeamSwitch
+              label='League Text Notifications'
+              description='Poaching claims, trades, draft selections, dropped players and added players'
+              field='leaguetext'
+              {...props}
+            />
+          </div>
+        </div>
+      )
+    }
 
     return (
       <div className='editable__team'>
@@ -38,30 +70,6 @@ export default class EditableTeam extends React.Component {
             {...props}
           />
           <TeamImage tid={team.uid} />
-        </div>
-        <div className='editable__team-section'>
-          <EditableTeamSwitch
-            label='Team Text Notifications'
-            description='Poaching claims and trades'
-            field='teamtext'
-            {...props}
-          />
-        </div>
-        <div className='editable__team-section'>
-          <EditableTeamSwitch
-            label='Team Voice Notifications'
-            description='Poaching claims'
-            field='teamvoice'
-            {...props}
-          />
-        </div>
-        <div className='editable__team-section'>
-          <EditableTeamSwitch
-            label='League Text Notifications'
-            description='Poaching claims, trades, draft selections, dropped players and added players'
-            field='leaguetext'
-            {...props}
-          />
         </div>
       </div>
     )

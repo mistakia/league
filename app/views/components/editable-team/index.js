@@ -2,12 +2,14 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { getTeamById, teamActions } from '@core/teams'
+import { getCurrentLeague } from '@core/leagues'
 
 import EditableTeam from './editable-team'
 
 const mapStateToProps = createSelector(
   getTeamById,
-  (team) => ({ team })
+  getCurrentLeague,
+  (team, league) => ({ team, isHosted: !!league.hosted })
 )
 
 const mapDispatchToProps = {

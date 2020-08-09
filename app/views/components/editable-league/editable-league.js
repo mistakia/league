@@ -40,7 +40,7 @@ export default class EditableLeague extends React.Component {
     return (
       <div className={classNames.join(' ')}>
         <div className='editable__league-head' onClick={this.handleClick}>
-          <div className='editable__league-title'>League: {league.name}</div>
+          <div className='editable__league-title'>League Settings — {league.name}</div>
           <Icon className='editable__league-icon' name='arrow-down' />
         </div>
         {this.state.visible &&
