@@ -9,11 +9,12 @@ import AuctionTeam from '@components/auction-team'
 import AuctionMainBid from '@components/auction-main-bid'
 import AuctionTargets from '@components/auction-targets'
 import AuctionPositionFilter from '@components/auction-position-filter'
+import AuctionCommissionerControls from '@components/auction-commissioner-controls'
 
 import './auction.styl'
 
 export default function () {
-  const { players, transactions, tids, playerId, vbaseline } = this.props
+  const { players, transactions, tids, playerId, vbaseline, isCommish } = this.props
 
   const sorted = players.sort((a, b) => {
     return b.vorp.getIn(['ros', vbaseline]) - a.vorp.getIn(['ros', vbaseline])
@@ -69,6 +70,7 @@ export default function () {
       <div className='auction__log empty'>
         {transactionItems}
       </div>
+      {isCommish && <AuctionCommissionerControls />}
     </div>
   )
 

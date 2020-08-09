@@ -18,6 +18,7 @@ const mapStateToProps = createSelector(
   getCurrentLeague,
   (auction, nominatingTeamId, app, team, isEligible, league) => ({
     isPaused: auction.isPaused,
+    isCommish: app.userId === league.commishid,
     isLocked: auction.isLocked,
     isWinningBid: auction.transactions.first()
       ? auction.transactions.first().tid === app.teamId

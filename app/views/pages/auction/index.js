@@ -5,6 +5,7 @@ import { createSelector } from 'reselect'
 import { getApp } from '@core/app'
 import { rosterActions } from '@core/rosters'
 import { auctionActions, getAuction, getAuctionPlayers } from '@core/auction'
+import { getCurrentLeague } from '@core/leagues'
 
 import render from './auction'
 
@@ -23,13 +24,15 @@ const mapStateToProps = createSelector(
   getAuctionPlayers,
   getAuction,
   getApp,
-  (players, auction, app) => ({
+  getCurrentLeague,
+  (players, auction, app, league) => ({
     players,
     searchValue: auction.search,
     playerId: auction.player,
     transactions: auction.transactions,
     tids: auction.tids,
-    vbaseline: app.vbaseline
+    vbaseline: app.vbaseline,
+    isCommish: app.userId === league.commishid
   })
 )
 
