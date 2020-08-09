@@ -37,7 +37,7 @@ export default class EditableTeam extends React.Component {
             field='image'
             {...props}
           />
-          <TeamImage url={team.image} />
+          <TeamImage tid={team.uid} />
         </div>
         <div className='editable__team-section'>
           <EditableTeamSwitch

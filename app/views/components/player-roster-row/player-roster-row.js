@@ -21,7 +21,7 @@ class PlayerRosterRow extends Player {
           <Team team={player.team} />
         </div>
         <div className='roster__item-action'>
-          <IconButton small text icon='more' onClick={this.handleContextClick} />
+          {player.player && <IconButton small text icon='more' onClick={this.handleContextClick} />}
         </div>
       </div>
     )

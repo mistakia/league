@@ -22,10 +22,6 @@ export function getContextMenuPlayer (state) {
 
 export function getPlayerStatusCM (state) {
   const player = getContextMenuPlayer(state)
-  if (!player.player) {
-    return {}
-  }
-
   return getPlayerStatus(state, { player })
 }
 
