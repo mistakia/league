@@ -225,11 +225,11 @@ export function getPlayerStatus (state, { player }) {
   if (isOnPracticeSquad) {
     const rosterInfo = getRosterInfoForPlayerId(state, { playerId: player.player })
     const cutoff = moment(rosterInfo.timestamp, 'X').add('24', 'hours')
-    // TODO - deprecate
-    if (constants.poachWaiverWindow) {
-      status.waiver.poach = true
-    } else if (rosterInfo.type === constants.transactions.ROSTER_DEACTIVATE &&
-      moment().isBefore(cutoff)) {
+
+    if ((rosterInfo.type === constants.transactions.ROSTER_DEACTIVATE ||
+      rosterInfo.type === constants.transactions.DRAFT ||
+      rosterInfo.type === constants.transactions.PRACTICE_ADD
+    ) && moment().isBefore(cutoff)) {
       status.waiver.poach = true
     }
   }

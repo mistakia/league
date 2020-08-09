@@ -57,7 +57,7 @@ router.post('/?', async (req, res) => {
       .where({ lid: leagueId })
       .orderBy('timestamp', 'desc')
 
-    if (!constants.waiverWindow && !constants.poachWaiverWindow && !transactions.length) {
+    if (!constants.waiverWindow && !transactions.length) {
       return res.status(400).send({ error: 'player is not on waivers' })
     }
 
@@ -78,7 +78,7 @@ router.post('/?', async (req, res) => {
       }
       // TODO detect cycled players - they are not on waivers
     } else if (type === constants.waivers.POACH) {
-      if (!constants.poachWaiverWindow && transactions.length) { // TODO DEPRECATE
+      if (transactions.length) {
         // player has been deactivated
         if (transactions[0].type !== constants.transactions.ROSTER_DEACTIVATE &&
           transactions[0].type !== constants.transactions.PRACTICE_ADD &&
@@ -104,7 +104,7 @@ router.post('/?', async (req, res) => {
         if (!slots.length) {
           return res.status(400).send({ error: 'player is not on practice squad' })
         }
-      } else if (!constants.poachWaiverWindow && !transactions.length) {
+      } else {
         return res.status(400).send({ error: 'player is not on waivers' })
       }
 
