@@ -88,6 +88,7 @@ export default class AuctionMainBid extends React.Component {
       playerId,
       isNominating,
       selected,
+      isCommish,
       nominatingTeamId,
       timer,
       isWinningBid,
@@ -117,7 +118,7 @@ export default class AuctionMainBid extends React.Component {
       } else {
         action = (<Button onClick={this.handleClickBid}>Bid ${this.state.value}</Button>)
       }
-    } else if (isNominating) {
+    } else if (isNominating || isCommish) {
       action = (<Button disabled={!selected} onClick={this.handleClickNominate}>Nominate</Button>)
     } else {
       action = (<Button disabled>Waiting</Button>)
@@ -136,6 +137,8 @@ export default class AuctionMainBid extends React.Component {
       main = (<PlayerName playerId={selected} />)
     } else if (isNominating) {
       main = (<div>Your turn to nominate a player</div>)
+    } else if (isCommish) {
+      main = (<div>Nomination timer expired, make a nomination</div>)
     } else {
       main = (<div>Waiting for a player to be nominated by <TeamName tid={nominatingTeamId} /></div>)
     }

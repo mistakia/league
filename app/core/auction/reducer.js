@@ -97,6 +97,7 @@ export function auctionReducer (state = initialState(), { payload, type }) {
         player: (latest && latest.type === constants.transactions.AUCTION_BID) ? latest.player : null,
         transactions: new List(payload.transactions),
         tids: new List(payload.tids),
+        isPaused: payload.paused,
         bidTimer: payload.bidTimer,
         connected: new List(payload.connected),
         nominationTimer: payload.nominationTimer
