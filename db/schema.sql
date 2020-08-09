@@ -1410,6 +1410,8 @@ CREATE TABLE `leagues` (
   `groupme_token` varchar(45) DEFAULT NULL,
   `groupme_id` varchar(26) DEFAULT NULL,
   `minBid` tinyint(1) DEFAULT 0,
+  `hosted` tinyint(1) DEFAULT 0,
+  `host` tinyint(1) DEFAULT NULL,
   UNIQUE KEY `uid` (`uid`),
   KEY `commishid` (`commishid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
