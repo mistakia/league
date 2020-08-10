@@ -21,10 +21,14 @@ module.exports = {
   getPlayerId: require('./get-player-id'),
   getSchedule: require('./get-schedule'),
   fixTeam: require('./fix-team'),
+  isPlayerOnWaivers: require('./is-player-on-waivers'),
+  isPlayerLocked: require('./is-player-locked'),
   submitPoach: require('./submit-poach'),
   processPoach: require('./process-poach'),
   getRoster: require('./get-roster'),
   resetWaiverOrder: require('./reset-waiver-order'),
   getTopPoachingWaiver: require('./get-top-poaching-waiver'),
+  getTopFreeAgencyWaiver: require('./get-top-free-agency-waiver'),
+  submitAcquisition: require('./submit-acquisition'),
   getPlayByPlayQuery
 }

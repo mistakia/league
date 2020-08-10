@@ -3,12 +3,16 @@ import moment from 'moment'
 import * as espn from './espn-constants'
 export { espn }
 
+export const now = moment().utcOffset(-4)
 export const start = moment('9/1 -0400', 'M/D Z')
 const diff = moment().diff(start, 'weeks')
 export const week = diff < 0 ? 0 : diff
 export const finalWeek = 16
 export const regularSeason = week > 0 && week <= finalWeek
-export const waiverWindow = regularSeason && moment().utcOffset(-4).day() === 2
+export const waiverWindow = !regularSeason || // is Preseason
+  (now.day() === 2 || // is Tuesday
+    (now.day() === 3 && now.hour() < 14) // is Wednesday before 3PM
+  )
 
 export const year = moment().month() > 2
   ? moment().year()
