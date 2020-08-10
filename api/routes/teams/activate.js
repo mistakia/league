@@ -6,7 +6,7 @@ const { constants, Roster } = require('../../../common')
 const { getRoster, sendNotifications } = require('../../../utils')
 
 router.post('/?', async (req, res) => {
-  const { db, logger } = req.app.locals
+  const { db, logger, broadcast } = req.app.locals
   try {
     const { teamId } = req.params
     const { player, leagueId } = req.body
@@ -66,6 +66,13 @@ router.post('/?', async (req, res) => {
     await db('transactions').insert(transaction)
 
     res.send({ player, slot: constants.slots.BENCH, transaction })
+    broadcast(leagueId, {
+      type: 'ROSTER_ACTIVATION',
+      payload: {
+        ...transaction,
+        slot: constants.slots.BENCH
+      }
+    })
 
     const teams = await db('teams').where({ uid: tid })
     const team = teams[0]
