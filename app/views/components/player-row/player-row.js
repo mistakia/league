@@ -17,12 +17,12 @@ class PlayerRow extends Player {
 
   render = () => {
     const {
-      player, style, selected, vbaseline, isSeasonProjectionView,
+      player, style, selectedPlayer, vbaseline, isSeasonProjectionView,
       isStatsPassingAdvancedView, isStatsPassingPressureView, isStatsRushingView,
       isStatsReceivingView, overall, isLoggedIn, isRestOfSeasonView
     } = this.props
 
-    const isSelected = selected === player.player // TODO - not working
+    const isSelected = selectedPlayer === player.player
 
     const seasonSummary = (week) => {
       let inflation = null
