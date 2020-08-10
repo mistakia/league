@@ -5,7 +5,8 @@
     "test": "NODE_ENV=test TEST=all mocha -r esm --exit",
     "start:api": "node server.js",
     "build": "cross-env NODE_ENV=production webpack --config ./configs/webpack.config.prod.babel.js --colors",
-    "deploy": "pm2 deploy production"
+    "deploy": "pm2 deploy production",
+    "count:lines": "git ls-files | xargs wc -l"
   },
   "standard": {
     "parser": "babel-eslint",
