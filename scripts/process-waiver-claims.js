@@ -12,7 +12,7 @@ const {
 const log = debug('process:waivers:freeagency')
 debug.enable('process:waivers:freeagency,knex:query,knex:bindings')
 
-const timestamp = Math.round(Date.now() / 1000)
+// const timestamp = Math.round(Date.now() / 1000)
 
 const run = async () => {
   // get leagueIds with pending faab waivers
@@ -36,7 +36,7 @@ const run = async () => {
     }
 
     while (waiver) {
-      let error
+      // let error
       try {
         await submitAcquisition({
           leagueId: lid,
@@ -53,7 +53,7 @@ const run = async () => {
 
         // reset waiver order if necessary
       } catch (err) {
-        error = err
+        // error = err
       }
 
       // save waiver result
