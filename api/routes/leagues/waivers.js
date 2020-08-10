@@ -3,7 +3,7 @@ const moment = require('moment')
 const router = express.Router({ mergeParams: true })
 
 const { constants, Roster } = require('../../../common')
-const { getRoster } = require('../../../utils')
+const { getRoster, isPlayerOnWaivers } = require('../../../utils')
 
 router.post('/?', async (req, res) => {
   const { db, logger } = req.app.locals
@@ -45,7 +45,6 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
 
-    // TODO - get last two transactions
     const players = await db('player').where('player', player)
     if (!players.length) {
       return res.status(400).send({ error: 'invalid player' })
@@ -61,53 +60,58 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'player is not on waivers' })
     }
 
-    // make sure player is on waviers
+    // make sure player is on waivers & it's not a duplicate waiver
     if (type === constants.waivers.ADD) {
-      if (!constants.waiverWindow && transactions.length) {
-        // player has been dropped
-        if (transactions[0].type === constants.transactions.ROSTER_DROP) {
+      // if its outside the waiver period - check if he's been dropped recently (excluding cycling)
+      if (!constants.waiverWindow) {
+        const isOnWaivers = await isPlayerOnWaivers({ player, leagueId })
+        if (!isOnWaivers) {
           return res.status(400).send({ error: 'player is not on waivers' })
         }
-
-        // transaction should have been within the last 24 hours
-        if (moment().isAfter(moment(transactions[0].timestamp, 'X').add('24', 'hours'))) {
-          return res.status(400).send({ error: 'player is no longer on waivers' })
-        }
-      } else if (!constants.waiverWindow && !transactions.length) {
-        return res.status(400).send({ error: 'player is not on waivers' })
       }
-      // TODO detect cycled players - they are not on waivers
+
+      // check for duplicate claims
+      const claims = await db('waivers')
+        .where({ player, lid: leagueId, tid, drop, bid })
+        .whereNull('processed')
+        .whereNull('cancelled')
+
+      if (claims.length) {
+        return res.status(400).send({ error: 'duplicate waiver claim' })
+      }
     } else if (type === constants.waivers.POACH) {
-      if (transactions.length) {
-        // player has been deactivated
-        if (transactions[0].type !== constants.transactions.ROSTER_DEACTIVATE &&
-          transactions[0].type !== constants.transactions.PRACTICE_ADD &&
-          transactions[0].type !== constants.transactions.DRAFT) {
-          return res.status(400).send({ error: 'player is not on waivers' })
-        }
-
-        // transaction should have been within the last 24 hours
-        if (moment().isAfter(moment(transactions[0].timestamp, 'X').add('24', 'hours'))) {
-          return res.status(400).send({ error: 'player is no longer on waivers' })
-        }
-
-        // verify player is on practice squad
-        const slots = await db('rosters_players')
-          .join('rosters', 'rosters_players.rid', 'rosters.uid')
-          .where({
-            lid: leagueId,
-            week: constants.week,
-            year: constants.year,
-            player,
-            slot: constants.slots.PS
-          })
-        if (!slots.length) {
-          return res.status(400).send({ error: 'player is not on practice squad' })
-        }
-      } else {
+      // player can not be on waivers if he has no transactions
+      if (!transactions.length) {
         return res.status(400).send({ error: 'player is not on waivers' })
       }
 
+      // player has been deactivated
+      if (transactions[0].type !== constants.transactions.ROSTER_DEACTIVATE &&
+        transactions[0].type !== constants.transactions.PRACTICE_ADD &&
+        transactions[0].type !== constants.transactions.DRAFT) {
+        return res.status(400).send({ error: 'player is not on waivers' })
+      }
+
+      // transaction should have been within the last 24 hours
+      if (moment().isAfter(moment(transactions[0].timestamp, 'X').add('24', 'hours'))) {
+        return res.status(400).send({ error: 'player is no longer on waivers' })
+      }
+
+      // verify player is on practice squad
+      const slots = await db('rosters_players')
+        .join('rosters', 'rosters_players.rid', 'rosters.uid')
+        .where({
+          lid: leagueId,
+          week: constants.week,
+          year: constants.year,
+          player,
+          slot: constants.slots.PS
+        })
+      if (!slots.length) {
+        return res.status(400).send({ error: 'player is not on practice squad' })
+      }
+
+      // check for duplicate waiver
       const claims = await db('waivers')
         .where({ player, lid: leagueId, tid })
         .whereNull('processed')
