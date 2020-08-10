@@ -45,6 +45,22 @@ export function rostersReducer (state = new Map(), { payload, type }) {
       }))
     }
 
+    case rosterActions.ROSTER_ACTIVATION:
+    case rosterActions.ROSTER_DEACTIVATION: {
+      const { type, player, tid, value, timestamp, userid, slot } = payload
+      const players = state.getIn([tid, 'players'])
+      if (!players) return state
+
+      const key = players.findKey(p => p.player === player)
+      return state.mergeIn([tid, 'players', key], {
+        type,
+        value,
+        timestamp,
+        userid,
+        slot
+      })
+    }
+
     case rosterActions.POST_ACTIVATE_FULFILLED:
     case rosterActions.POST_DEACTIVATE_FULFILLED:
     case rosterActions.PUT_ROSTER_FULFILLED: {
