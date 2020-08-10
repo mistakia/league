@@ -1,10 +1,17 @@
 import React from 'react'
 
+import { Roster } from '@common'
+
 import './auction-team.styl'
 
 export default class AuctionTeam extends React.Component {
   render = () => {
-    const { team, isConnected, isWinningBid, bid, isNominating } = this.props
+    const {
+      team, isConnected, isWinningBid, bid,
+      isNominating, rosterRow, league
+    } = this.props
+
+    const r = new Roster({ roster: rosterRow, league })
 
     const classNames = ['auction__team']
     if (!isConnected) {
@@ -18,7 +25,7 @@ export default class AuctionTeam extends React.Component {
     return (
       <div className={classNames.join(' ')}>
         <div className='auction__team-name'>{team.abbrv}</div>
-        <div className='auction__team-cap'>${team.cap}</div>
+        <div className='auction__team-cap'>${r.availableCap}</div>
         {isWinningBid &&
           <div className='auction__winning-bid'>${bid}</div>}
       </div>

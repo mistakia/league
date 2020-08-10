@@ -22,6 +22,7 @@
   width 31%
   margin 0 1% 2%
   background white
+  border 1px solid $borderColor
 
 .auction__targets-section:nth-child(3n+1)
   order 1
@@ -32,7 +33,6 @@
 
 .auction__targets-player
   display flex
-  border-bottom 1px solid $borderColor
   border-right 4px solid transparent
 
   &.optimal
@@ -45,7 +45,7 @@
 
 .optimal__lineup-key
   background white
-  border-bottom 1px solid $borderColor
+  border 1px solid $borderColor
   color $accentColor
   border-right 4px solid $accentColor
   height 35px
@@ -56,8 +56,8 @@
 
 .auction__targets-player-cost
   padding 8px
-  background #e0e0e0
-  border-right 1px solid darken($borderColor, 10%)
+  background #fafafa
+  border-right 1px solid $borderColor
   margin-right 8px
   flex 0 0 45px
 

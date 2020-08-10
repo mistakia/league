@@ -59,10 +59,10 @@ export default function () {
         </div>
       </div>
       <div className='auction__main'>
+        <AuctionMainBid playerId={playerId} />
         <div className='auction__teams'>
           {teamItems}
         </div>
-        <AuctionMainBid playerId={playerId} />
         <div className='auction__main-board'>
           <AuctionTargets />
         </div>
