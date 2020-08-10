@@ -1,3 +1,4 @@
+const moment = require('moment')
 const API = require('groupme').Stateless
 
 const db = require('../db')
@@ -84,7 +85,7 @@ module.exports = async function ({ leagueId, drop, player, teamId, team, userId 
   }
   await db('poaches').insert(data)
 
-  const message = `${team.name} has submitted a poaching claim for ${poachPlayer.fname} ${poachPlayer.lname} (${poachPlayer.pos1})`
+  const message = `${team.name} has submitted a poaching claim for ${poachPlayer.fname} ${poachPlayer.lname} (${poachPlayer.pos1}). This claim will be processed around ${moment().utcOffset(-4).add('48', 'hours').format('dddd, MMMM Do h:mm a')} EST.`
   await sendNotifications({
     leagueId: league.uid,
     teamIds: [],
