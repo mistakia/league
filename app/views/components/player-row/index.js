@@ -13,7 +13,7 @@ const mapStateToProps = createSelector(
   getStats,
   (players, app, statsState) => ({
     isLoggedIn: !!app.userId,
-    selected: players.get('selected'),
+    selectedPlayer: players.get('selected'),
     vbaseline: app.vbaseline,
     overall: statsState.overallPlays,
     isRestOfSeasonView: players.get('view') === 'ros',
@@ -26,7 +26,6 @@ const mapStateToProps = createSelector(
     isStatsPassingPressureView: players.get('view') === 'stats' &&
       statsState.view === 'passing' &&
       statsState.passing === 'pressure'
-
   })
 )
 

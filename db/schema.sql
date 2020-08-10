@@ -1680,7 +1680,8 @@ CREATE TABLE `users` (
   `phone` varchar(12) DEFAULT NULL,
   `text` tinyint(1) NOT NULL DEFAULT 1,
   `voice` tinyint(1) NOT NULL DEFAULT 1,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
