@@ -3,6 +3,8 @@ import { createSelector } from 'reselect'
 
 import { getAuction, isTeamConnected, getNominatingTeamId } from '@core/auction'
 import { getTeamById } from '@core/teams'
+import { getRosterByTeamId } from '@core/rosters'
+import { getCurrentLeague } from '@core/leagues'
 
 import AuctionTeam from './auction-team'
 
@@ -11,7 +13,9 @@ const mapStateToProps = createSelector(
   getTeamById,
   isTeamConnected,
   getNominatingTeamId,
-  (auction, team, isConnected, nominatingTeamId) => ({
+  getRosterByTeamId,
+  getCurrentLeague,
+  (auction, team, isConnected, nominatingTeamId, rosterRow, league) => ({
     team,
     isConnected,
     isNominating: nominatingTeamId === team.uid,
@@ -20,7 +24,9 @@ const mapStateToProps = createSelector(
       : false,
     bid: auction.transactions.first()
       ? auction.transactions.first().value
-      : null
+      : null,
+    rosterRow,
+    league
   })
 )
 

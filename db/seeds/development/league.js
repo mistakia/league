@@ -9,6 +9,7 @@ exports.seed = async function (knex, Promise) {
   try {
     await knex('waivers').del()
     await knex('poaches').del()
+    await knex('rosters_players').del()
   } catch (error) {
     console.log(error)
   }
