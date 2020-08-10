@@ -117,7 +117,7 @@ export default class AuctionMainBid extends React.Component {
         action = (<Button onClick={this.handleClickBid}>Bid ${this.state.value}</Button>)
       }
     } else if (isNominating || isCommish) {
-      action = (<Button disabled={!selected} onClick={this.handleClickNominate}>Nominate</Button>)
+      action = (<Button disabled={!selected} onClick={this.handleClickNominate}>Nominate ${this.state.value}</Button>)
     } else {
       action = (<Button disabled>Waiting</Button>)
     }
