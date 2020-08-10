@@ -122,13 +122,6 @@ export default class Auction {
 
     this.logger(`processing ${player} bid`)
 
-    const roster = await getRoster({
-      tid,
-      week: constants.week,
-      year: constants.year
-    })
-
-    const r = new Roster({ roster, league: this._league })
     const players = await db('player').where('player', player)
     const playerInfo = players[0]
     if (!playerInfo) {
@@ -138,10 +131,24 @@ export default class Auction {
       return
     }
 
+    const roster = await getRoster({
+      tid,
+      week: constants.week,
+      year: constants.year
+    })
+
+    const r = new Roster({ roster, league: this._league })
     const hasSlot = r.hasOpenBenchSlot(playerInfo.pos1)
     if (!hasSlot) {
       this._startBidTimer()
       this.logger(`no open slots available for ${player} on teamId ${tid}`)
+      // TODO broadcast error
+      return
+    }
+
+    if ((r.availableCap - value) < 0) {
+      this._startBidTimer()
+      this.logger('no available cap space')
       // TODO broadcast error
       return
     }
@@ -151,6 +158,7 @@ export default class Auction {
         .insert({
           rid: r.uid,
           slot: constants.slots.BENCH,
+          pos: playerInfo.pos1,
           player
         })
     } catch (err) {
@@ -162,7 +170,7 @@ export default class Auction {
     }
 
     const team = this._teams.find(t => t.uid === tid)
-    const newCap = team.cap - value
+    const newCap = team.cap = r.availableCap - value
     try {
       await db('teams').where({ uid: tid }).update('cap', newCap)
     } catch (err) {
@@ -172,15 +180,6 @@ export default class Auction {
       // TODO broadcast error
       return
     }
-
-    this.broadcast({
-      type: 'ROSTER_SLOT_UPDATED',
-      payload: {
-        tid,
-        player,
-        slot: constants.slots.BENCH
-      }
-    })
 
     const transaction = {
       userid,
@@ -195,7 +194,12 @@ export default class Auction {
     const uid = await db('transactions').insert(transaction)
     this.broadcast({
       type: 'AUCTION_PROCESSED',
-      payload: { ...transaction, uid }
+      payload: {
+        rid: r.uid,
+        pos: playerInfo.pos1,
+        uid,
+        ...transaction
+      }
     })
     this._transactions.unshift(transaction)
     this._startNominationTimer()
@@ -217,6 +221,8 @@ export default class Auction {
       this._locked = false
       return
     }
+
+    // TODO - verify team has roster space
 
     this.logger(`received bid of ${value} for ${player} from teamId ${tid}`)
 

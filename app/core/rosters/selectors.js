@@ -11,6 +11,11 @@ export function getRosters (state) {
   return state.get('rosters')
 }
 
+export function getRosterByTeamId (state, { tid }) {
+  const rosters = getRosters(state)
+  return rosters.get(tid)
+}
+
 export function getRostersForCurrentLeague (state) {
   const rosters = getRosters(state)
   const { leagueId } = getApp(state)
