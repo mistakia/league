@@ -49,6 +49,8 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'player is on waivers' })
     }
 
+    // TODO - verify player does not have outstanding unprocessed waiver claim
+
     let transactions = []
     try {
       transactions = await submitAcquisition({

@@ -222,10 +222,11 @@ router.post('/accept', async (req, res, next) => {
     const pickRows = await db('trades_picks').where({ tradeid: tradeId })
     for (const pick of pickRows) {
       await db('draft')
-        .update({ tid: pick.tid === trade.pid ? trade.tid : trade.pid })
+        .update({ tid: pick.tid === trade.pid ? trade.tid : trade.pid }) // swap team ids
         .where({ uid: pick.pickid })
     }
 
+    // cancel other trades that include any picks in this trade
     const tradeRows = await db('trades')
       .innerJoin('trades_picks', 'trades.uid', 'trades_picks.tradeid')
       .whereIn('trades_picks.pickid', pickRows.map(p => p.pickid))
@@ -263,13 +264,13 @@ router.post('/accept', async (req, res, next) => {
       const pickStr = pick.year === constants.year
         ? `${pick.year} ${pick.round}.${('0' + pickNum).slice(-2)}`
         : `${pick.year} ${pick.round}`
-      const pickTradeInfo = pickRows.find(p => p.pickid === pick.uid)
 
-      // reversed because pick has already been traded
+      // pick.tid is the team the pick belongs to
+      const pickTradeInfo = pickRows.find(p => p.pickid === pick.uid)
       if (pickTradeInfo.tid === trade.pid) {
-        acceptingTeamItems.push(pickStr)
-      } else {
         proposingTeamItems.push(pickStr)
+      } else {
+        acceptingTeamItems.push(pickStr)
       }
     }
     const proposingTeamStr = proposingTeamItems.length > 1
