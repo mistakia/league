@@ -19,10 +19,11 @@ router.get('/?', async (req, res) => {
     const teamIds = teams.map(t => t.uid)
     const leagues = await db('leagues').whereIn('uid', leagueIds)
     const sources = await db('sources')
-      .leftJoin('users_sources', 'users_sources.sourceid', 'sources.uid')
-      .where(function () {
-        this.whereNull('userId').orWhere({ userid: req.user.userId })
-      })
+    const userSources = await db('users_sources').where('userid', req.user.userId)
+    for (const source of sources) {
+      const userSource = userSources.find(s => s.sourceid === source.uid)
+      source.weight = userSource ? userSource.weight : 1
+    }
 
     const poaches = await db('poaches')
       .whereIn('lid', leagueIds)
