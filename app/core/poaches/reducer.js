@@ -6,6 +6,7 @@ import { poachActions } from './actions'
 const Poach = new Record({
   tid: null,
   player: null,
+  processed: null,
   drop: null,
   submitted: null
 })
@@ -15,17 +16,17 @@ export function poachesReducer (state = new Map(), { payload, type }) {
     case poachActions.POACH_SUBMITTED:
     case poachActions.POST_POACH_FULFILLED:
       return state.withMutations(state => {
-        const league = state.get(payload.data.lid) || new Map()
-        league.set(payload.data.player, new Poach(payload.data))
-        state.set(payload.data.lid, league)
+        let leaguePoaches = state.get(payload.data.lid) || new Map()
+        leaguePoaches = leaguePoaches.set(payload.data.player, new Poach(payload.data))
+        state.set(payload.data.lid, leaguePoaches)
       })
 
     case appActions.AUTH_FULFILLED:
       return state.withMutations(state => {
         payload.data.poaches.forEach(poach => {
-          const league = state.get(poach.lid) || new Map()
-          league.set(poach.player, new Poach(poach))
-          state.set(poach.lid, league)
+          let leaguePoaches = state.get(poach.lid) || new Map()
+          leaguePoaches = leaguePoaches.set(poach.player, new Poach(poach))
+          state.set(poach.lid, leaguePoaches)
         })
       })
 

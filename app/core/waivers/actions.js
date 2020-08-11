@@ -4,6 +4,7 @@ export const waiverActions = {
   CANCEL_CLAIM: 'CANCEL_CLAIM',
 
   REORDER_POACH: 'REORDER_POACH',
+  REORDER_FREEAGENCY: 'REORDER_FREEAGENCY',
 
   POST_WAIVER_FAILED: 'POST_WAIVER_FAILED',
   POST_WAIVER_FULFILLED: 'POST_WAIVER_FULFILLED',
@@ -21,7 +22,17 @@ export const waiverActions = {
     type: waiverActions.REORDER_POACH,
     payload: {
       oldIndex,
-      newIndex
+      newIndex,
+      type: 'poach'
+    }
+  }),
+
+  reorderFreeAgency: ({ oldIndex, newIndex }) => ({
+    type: waiverActions.REORDER_FREEAGENCY,
+    payload: {
+      oldIndex,
+      newIndex,
+      type: 'freeAgency'
     }
   }),
 

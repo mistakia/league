@@ -13,7 +13,7 @@ export function getRosters (state) {
 
 export function getRosterByTeamId (state, { tid }) {
   const rosters = getRosters(state)
-  return rosters.get(tid)
+  return rosters.get(tid) || new RosterRecord()
 }
 
 export function getRostersForCurrentLeague (state) {

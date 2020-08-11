@@ -17,12 +17,13 @@ export function * cancel ({ payload }) {
 
 export function * reorder ({ payload }) {
   const { leagueId, teamId } = yield select(getApp)
-  const { poach } = yield select(getWaiverPlayersForCurrentTeam)
-  const { oldIndex, newIndex } = payload
-  const waiver = poach.get(oldIndex)
-  const newPoach = poach.delete(oldIndex).insert(newIndex, waiver)
-  const waivers = newPoach.map((w, index) => w.uid).toJS()
-  const reset = poach.map(({ uid, po }) => ({ uid, po }))
+  const teamWaivers = yield select(getWaiverPlayersForCurrentTeam)
+  const { oldIndex, newIndex, type } = payload
+  const items = teamWaivers[type]
+  const waiver = items.get(oldIndex)
+  const newWaiver = items.delete(oldIndex).insert(newIndex, waiver)
+  const waivers = newWaiver.map((w, index) => w.uid).toJS()
+  const reset = items.map(({ uid, po }) => ({ uid, po }))
   yield call(postWaiverOrder, { leagueId, teamId, waivers, reset })
 }
 
@@ -42,6 +43,10 @@ export function * watchReorderPoach () {
   yield takeLatest(waiverActions.REORDER_POACH, reorder)
 }
 
+export function * watchReorderFreeAgency () {
+  yield takeLatest(waiverActions.REORDER_FREEAGENCY, reorder)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -49,5 +54,6 @@ export function * watchReorderPoach () {
 export const waiverSagas = [
   fork(watchClaim),
   fork(watchCancelClaim),
-  fork(watchReorderPoach)
+  fork(watchReorderPoach),
+  fork(watchReorderFreeAgency)
 ]

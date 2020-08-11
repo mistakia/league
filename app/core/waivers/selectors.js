@@ -15,19 +15,24 @@ export function getWaiverPlayersForCurrentTeam (state) {
     const playerId = waiver.player
     const player = getPlayerById(state, { playerId })
     teamWaivers = teamWaivers.setIn([waiver.uid, 'player'], player)
+    if (waiver.drop) {
+      const playerId = waiver.drop
+      const player = getPlayerById(state, { playerId })
+      teamWaivers = teamWaivers.setIn([playerId, 'drop'], player)
+    }
   }
 
   const waivers = teamWaivers.valueSeq().toList()
   const sorted = waivers.sort((a, b) => a.po - b.po)
   let poach = new List()
-  let add = new List()
+  let freeAgency = new List()
   for (const w of sorted) {
-    if (w.type === constants.waivers.ADD) {
-      add = add.push(w)
+    if (w.type === constants.waivers.FREE_AGENCY) {
+      freeAgency = freeAgency.push(w)
     } else {
       poach = poach.push(w)
     }
   }
 
-  return { poach, add }
+  return { poach, freeAgency }
 }

@@ -5,7 +5,6 @@ import Team from '@components/team'
 import { Player, connect } from '@components/player'
 import IconButton from '@components/icon-button'
 import Icon from '@components/icon'
-import { constants } from '@common'
 import { sortableHandle } from 'react-sortable-hoc'
 
 const DragHandle = sortableHandle(() =>
@@ -21,9 +20,9 @@ class PlayerRoster extends Player {
   }
 
   render () {
-    const { player, vbaseline, selected, waiverId, type, bid, reorder } = this.props
+    const { player, vbaseline, selected, claim, reorder } = this.props
 
-    const isWaiver = !!waiverId
+    const isClaim = !!claim
 
     const classNames = ['player__item']
     if (selected === player.player) classNames.push('selected')
@@ -37,13 +36,14 @@ class PlayerRoster extends Player {
           <span>{player.pname}</span>
           <Team team={player.team} />
         </div>
-        {isWaiver &&
-          <div className='player__item-metric'>
-            {constants.waiversDetails[type]}
+        {isClaim &&
+          <div className='player__item-name'>
+            {claim.drop && <span>{claim.drop.pname}</span>}
+            {claim.drop && <Team team={claim.drop.team} />}
           </div>}
-        {isWaiver &&
+        {isClaim &&
           <div className='player__item-metric'>
-            {bid && `$${bid}`}
+            {claim.bid && `$${claim.bid}`}
           </div>}
         <div className='player__item-metric'>
           {/* contract value */}
@@ -51,7 +51,7 @@ class PlayerRoster extends Player {
         <div className='player__item-metric'>
           {(player.vorp.getIn(['ros', vbaseline]) || 0).toFixed(1)}
         </div>
-        {!isWaiver &&
+        {!isClaim &&
           <div className='player__item-metric'>
             {/* contract value */}
           </div>}

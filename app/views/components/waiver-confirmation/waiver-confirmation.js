@@ -57,7 +57,7 @@ export default class WaiverConfirmation extends React.Component {
     const { bid, drop, error } = this.state
     const player = this.props.player.player
     if (!error) {
-      this.props.claim({ bid, drop, player, type: constants.waivers.ADD })
+      this.props.claim({ bid, drop, player, type: constants.waivers.FREE_AGENCY })
       this.props.onClose()
     }
   }

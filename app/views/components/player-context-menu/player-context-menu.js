@@ -1,5 +1,7 @@
 import React from 'react'
 
+import { constants } from '@common'
+
 export default class PlayerContextMenu extends React.Component {
   handleDeactivate = () => {
     const { player, deactivate } = this.props
@@ -55,6 +57,7 @@ export default class PlayerContextMenu extends React.Component {
       isOnCurrentRoster,
       isPlayerRostered,
       isPlayerOnPracticeSquad,
+      hasExistingPoachingClaim,
       data,
       status
     } = this.props
@@ -122,6 +125,14 @@ export default class PlayerContextMenu extends React.Component {
               </div>
             </div>
           )
+        } else if (hasExistingPoachingClaim) {
+          return (
+            <div>
+              <div className='context__menu-option disabled'>
+                Submit Poaching Claim
+              </div>
+            </div>
+          )
         } else {
           return (
             <div>
@@ -142,7 +153,7 @@ export default class PlayerContextMenu extends React.Component {
       }
     } else { // player is a free agent
       let claimAction
-      if (status.waiver.add) {
+      if (constants.regularSeason && status.waiver.add) {
         claimAction = (
           <div className='context__menu-option' onClick={this.handleWaiver}>
             Submit Waiver Claim
