@@ -8,5 +8,6 @@ export {
   isActiveRosterEligible,
   isPlayerRostered,
   isPlayerOnPracticeSquadCM,
-  getPlayerStatusCM
+  getPlayerStatusCM,
+  hasExistingPoachingClaim
 } from './selectors'

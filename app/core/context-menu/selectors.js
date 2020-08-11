@@ -10,6 +10,9 @@ import {
   getRosteredPlayerIdsForCurrentLeague,
   isPlayerOnPracticeSquad
 } from '@core/rosters'
+import {
+  getPoachesForCurrentLeague
+} from '@core/poaches'
 
 export function getContextMenuInfo (state) {
   return state.get('contextMenu').toJS()
@@ -32,6 +35,16 @@ export function isPlayerPracticeSquadEligibleCM (state) {
   }
 
   return isPlayerPracticeSquadEligible(state, { player })
+}
+
+export function hasExistingPoachingClaim (state) {
+  const player = getContextMenuPlayer(state)
+  if (!player.player) {
+    return false
+  }
+
+  const leaguePoaches = getPoachesForCurrentLeague(state)
+  return leaguePoaches.has(player.player)
 }
 
 export function isPlayerOnPracticeSquadCM (state) {

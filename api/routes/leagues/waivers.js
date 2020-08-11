@@ -61,7 +61,7 @@ router.post('/?', async (req, res) => {
     }
 
     // make sure player is on waivers & it's not a duplicate waiver
-    if (type === constants.waivers.ADD) {
+    if (type === constants.waivers.FREE_AGENCY) {
       // if its outside the waiver period - check if he's been dropped recently (excluding cycling)
       if (!constants.waiverWindow) {
         const isOnWaivers = await isPlayerOnWaivers({ player, leagueId })
@@ -71,10 +71,17 @@ router.post('/?', async (req, res) => {
       }
 
       // check for duplicate claims
-      const claims = await db('waivers')
-        .where({ player, lid: leagueId, tid, drop, bid })
+      const claimsQuery = db('waivers')
+        .where({ player, lid: leagueId, tid, bid })
         .whereNull('processed')
         .whereNull('cancelled')
+
+      if (drop) {
+        claimsQuery.where('drop', drop)
+      } else {
+        claimsQuery.whereNull('drop')
+      }
+      const claims = await claimsQuery
 
       if (claims.length) {
         return res.status(400).send({ error: 'duplicate waiver claim' })

@@ -19,7 +19,7 @@ const run = async () => {
   const results = await db('waivers')
     .whereNull('processed')
     .whereNull('cancelled')
-    .where('type', constants.waivers.ADD)
+    .where('type', constants.waivers.FREE_AGENCY)
     .groupBy('lid')
 
   const leagueIds = results.map(w => w.lid)

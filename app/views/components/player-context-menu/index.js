@@ -10,7 +10,8 @@ import {
   isPlayerRostered,
   isPlayerPracticeSquadEligibleCM,
   getPlayerStatusCM,
-  isPlayerOnPracticeSquadCM
+  isPlayerOnPracticeSquadCM,
+  hasExistingPoachingClaim
 } from '@core/context-menu'
 import { rosterActions } from '@core/rosters'
 import { confirmationActions } from '@core/confirmations'
@@ -27,6 +28,7 @@ const mapStateToProps = createSelector(
   isPlayerRostered,
   getPlayerStatusCM,
   isPlayerOnPracticeSquadCM,
+  hasExistingPoachingClaim,
   (
     contextMenuInfo,
     player,
@@ -35,7 +37,8 @@ const mapStateToProps = createSelector(
     isOnCurrentRoster,
     isPlayerRostered,
     status,
-    isPlayerOnPracticeSquad
+    isPlayerOnPracticeSquad,
+    hasExistingPoachingClaim
   ) => ({
     contextMenuInfo,
     player,
@@ -44,7 +47,8 @@ const mapStateToProps = createSelector(
     isActiveRosterEligible,
     isPlayerRostered,
     status,
-    isPlayerOnPracticeSquad
+    isPlayerOnPracticeSquad,
+    hasExistingPoachingClaim
   })
 )
 
