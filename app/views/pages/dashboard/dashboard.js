@@ -1,4 +1,6 @@
 import React from 'react'
+import moment from 'moment'
+import Alert from '@material-ui/lab/Alert'
 import { SortableContainer, SortableElement } from 'react-sortable-hoc'
 
 import PlayerRoster from '@components/player-roster'
@@ -8,8 +10,13 @@ import { constants } from '@common'
 import './dashboard.styl'
 
 export default function () {
-  const { players, picks, league, waivers, reorderPoach } = this.props
+  const {
+    players, picks, league, waivers, reorderPoach, reorderFreeAgency,
+    poaches, teamId
+  } = this.props
   const { positions } = constants
+
+  const warnings = []
 
   const groups = {}
   for (const position of positions) {
@@ -18,7 +25,6 @@ export default function () {
   }
 
   const activeItems = []
-
   for (const position in groups) {
     const players = groups[position]
     for (const player of players) {
@@ -31,6 +37,14 @@ export default function () {
   for (const player of players.practice) {
     if (!player.player) continue
     practiceItems.push(<PlayerRoster key={player.player} player={player} />)
+
+    const poach = poaches.find(p => p.player.player === player.player)
+    if (poach) {
+      const processingTime = moment(poach.submitted, 'X').add('48', 'hours')
+      warnings.push(
+        <Alert key={player.player} severity='warning'>{player.name} has a poaching claim that will be processed {processingTime.fromNow()} on {processingTime.format('dddd, h:mm a')}.</Alert>
+      )
+    }
   }
 
   const pickItems = []
@@ -47,13 +61,24 @@ export default function () {
     )
   }
 
+  const poachItems = []
+  for (const poach of poaches) {
+    if (poach.tid !== teamId) continue
+    poachItems.push(
+      <PlayerRoster
+        key={poach.player.player}
+        claim={poach}
+        player={poach.player}
+      />
+    )
+  }
+
   const SortableItem = SortableElement(({ waiver }) => {
     return (
       <PlayerRoster
         player={waiver.player}
         waiverId={waiver.uid}
-        type={waiver.type}
-        bid={waiver.bid}
+        claim={waiver}
         reorder
       />
     )
@@ -69,14 +94,14 @@ export default function () {
     )
   })
 
-  const waiverSection = (
+  const poachWaiverSection = (
     <div className='dashboard__section'>
       <div className='dashboard__section-header'>
-        <div className='dashboard__section-header-title'>Waiver Claims</div>
+        <div className='dashboard__section-header-title'>Poaching Waiver Claims</div>
         <div className='dashboard__section-body-header'>
           <div className='player__item-position' />
           <div className='player__item-name'>Name</div>
-          <div className='player__item-metric'>Type</div>
+          <div className='player__item-name'>Drop</div>
           <div className='player__item-metric'>Bid</div>
           <div className='player__item-metric'>Bye</div>
           <div className='player__item-metric'>Value</div>
@@ -100,9 +125,66 @@ export default function () {
     </div>
   )
 
+  const freeAgencyWaiverSection = (
+    <div className='dashboard__section'>
+      <div className='dashboard__section-header'>
+        <div className='dashboard__section-header-title'>Free Agency Waiver Claims</div>
+        <div className='dashboard__section-body-header'>
+          <div className='player__item-position' />
+          <div className='player__item-name'>Name</div>
+          <div className='player__item-name'>Drop</div>
+          <div className='player__item-metric'>Bid</div>
+          <div className='player__item-metric'>Bye</div>
+          <div className='player__item-metric'>Value</div>
+          <div className='player__item-metric'>Starts</div>
+          <div className='player__item-metric'>Pts+</div>
+          <div className='player__item-metric'>Bench+</div>
+          <div className='player__item-action' />
+          <div className='player__item-action' />
+        </div>
+      </div>
+      <div className='dashboard__section-body empty'>
+        <SortableList
+          items={waivers.freeAgency}
+          lockAxis='y'
+          helperClass='reordering'
+          onSortEnd={reorderFreeAgency}
+          lockToContainerEdges
+          useDragHandle
+        />
+      </div>
+    </div>
+  )
+
+  const teamPoachSection = (
+    <div className='dashboard__section'>
+      <div className='dashboard__section-header'>
+        <div className='dashboard__section-header-title'>Poaching Claims</div>
+        <div className='dashboard__section-body-header'>
+          <div className='player__item-position' />
+          <div className='player__item-name'>Name</div>
+          <div className='player__item-name'>Drop</div>
+          <div className='player__item-metric'>Bid</div>
+          <div className='player__item-metric'>Bye</div>
+          <div className='player__item-metric'>Value</div>
+          <div className='player__item-metric'>Starts</div>
+          <div className='player__item-metric'>Pts+</div>
+          <div className='player__item-metric'>Bench+</div>
+          <div className='player__item-action' />
+        </div>
+      </div>
+      <div className='dashboard__section-body empty'>
+        {poachItems}
+      </div>
+    </div>
+  )
+
   const body = (
     <div className='dashboard'>
-      {waivers.poach.size ? waiverSection : null}
+      {warnings.length ? warnings : null}
+      {waivers.poach.size ? poachWaiverSection : null}
+      {waivers.freeAgency.size ? freeAgencyWaiverSection : null}
+      {poachItems.length ? teamPoachSection : null}
       <div className='dashboard__section'>
         <div className='dashboard__section-header'>
           <div className='dashboard__section-header-title'>Active Roster</div>
