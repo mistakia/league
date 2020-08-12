@@ -18,7 +18,7 @@ const { constants } = require('../common')
 const run = async () => {
   const missing = []
 
-  const URL = `https://api.myfantasyleague.com/${constants.year}/export?TYPE=players&DETAILS=1&JSON=1`
+  const URL = `https://api.myfantasyleague.com/${constants.season.year}/export?TYPE=players&DETAILS=1&JSON=1`
   const result = await fetch(URL, {
     headers: {
       'User-Agent': config.mflUserAgent

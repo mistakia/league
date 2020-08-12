@@ -1,26 +1,13 @@
-import moment from 'moment'
+import Season from './season'
 // eslint-disable-next-line
 import * as espn from './espn-constants'
 export { espn }
 
-export const now = moment().utcOffset(-4)
-export const start = moment('9/1 -0400', 'M/D Z')
-const diff = moment().diff(start, 'weeks')
-export const week = diff < 0 ? 0 : diff
-export const finalWeek = 16
-export const regularSeason = week > 0 && week <= finalWeek
-export const waiverWindow = !regularSeason || // is Preseason
-  (now.day() === 2 || // is Tuesday
-    (now.day() === 3 && now.hour() < 14) // is Wednesday before 3PM
-  )
-
-export const year = moment().month() > 2
-  ? moment().year()
-  : moment().year() - 1
+export const season = new Season()
 
 const getAvailableYears = () => {
   const arr = []
-  for (let i = year; i >= 2000; i--) {
+  for (let i = season.year; i >= 2000; i--) {
     arr.push(i)
   }
   return arr

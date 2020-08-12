@@ -29,8 +29,8 @@ module.exports = async function ({ leagueId, drop, player, teamId, team, userId 
     .join('rosters', 'rosters_players.rid', 'rosters.uid')
     .where({
       lid: leagueId,
-      week: constants.week,
-      year: constants.year,
+      week: constants.season.week,
+      year: constants.season.year,
       player,
       slot: constants.slots.PS
     })
@@ -49,8 +49,8 @@ module.exports = async function ({ leagueId, drop, player, teamId, team, userId 
   // verify poaching team roster has bench space
   const rosterRow = await getRoster({
     tid: teamId,
-    week: constants.week,
-    year: constants.year
+    week: constants.season.week,
+    year: constants.season.year
   })
   const roster = new Roster({ roster: rosterRow, league })
   if (drop) {
@@ -71,7 +71,7 @@ module.exports = async function ({ leagueId, drop, player, teamId, team, userId 
     .limit(1)
   const tran = transactions[0]
   const playerPoachValue = tran.value + 2
-  if (!constants.regularSeason && (roster.availableCap - playerPoachValue) < 0) {
+  if (!constants.isRegularSeason && (roster.availableCap - playerPoachValue) < 0) {
     throw new Error('not enough available cap')
   }
 

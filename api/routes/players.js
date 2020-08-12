@@ -31,7 +31,7 @@ router.get('/?', async (req, res) => {
       .select(db.raw('max(timestamp) AS maxtime, CONCAT(player, "_", sourceid, "_", week) AS Group1'))
       .groupBy('Group1')
       .whereIn('player', playerIds)
-      .where('year', constants.year)
+      .where('year', constants.season.year)
       .whereNull('userid')
 
     const projections = await db
@@ -53,7 +53,7 @@ router.get('/?', async (req, res) => {
         .select('*')
         .whereIn('player', playerIds)
         .where({
-          year: constants.year,
+          year: constants.season.year,
           userid: req.user.userId
         })
     }

@@ -13,7 +13,7 @@ const db = require('../db')
 
 const timestamp = new Date()
 const { constants } = require('../common')
-const { year } = constants
+const year = constants.season.year
 const getURL = (offset) => `https://fantasy.nfl.com/research/projections?position=O&sort=projectedPts&statCategory=projectedStats&statSeason=${year}&statType=seasonProjectedStats&offset=${offset + 1}`
 
 const run = async () => {

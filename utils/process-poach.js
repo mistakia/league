@@ -9,7 +9,7 @@ module.exports = async function (claim) {
   const rosterSlots = await db('rosters')
     .join('rosters_players', 'rosters.uid', 'rosters_players.rid')
     .where('rosters_players.player', claim.player)
-    .where({ week: constants.week, year: constants.year })
+    .where({ week: constants.season.week, year: constants.season.year })
 
   // verify player is on a team
   if (!rosterSlots.length) {
@@ -32,8 +32,8 @@ module.exports = async function (claim) {
   const league = leagues[0]
   const rosterRow = await getRoster({
     tid: claim.tid,
-    week: constants.week,
-    year: constants.year
+    week: constants.season.week,
+    year: constants.season.year
   })
   const roster = new Roster({ roster: rosterRow, league })
   if (claim.drop) {
@@ -52,7 +52,7 @@ module.exports = async function (claim) {
       player: claim.player,
       type: constants.transactions.ROSTER_DROP,
       value: 0,
-      year: constants.year,
+      year: constants.season.year,
       timestamp: Math.round(Date.now() / 1000)
     }
     await db('transactions').insert(dropTransaction)
@@ -72,7 +72,7 @@ module.exports = async function (claim) {
 
     // remove drop player from rosters
     const poachingTeamRosters = await db('rosters')
-      .where('week', '>=', constants.week)
+      .where('week', '>=', constants.season.week)
       .where('tid', claim.tid)
     const poachingTeamRosterIds = poachingTeamRosters.map(r => r.uid)
     await db('rosters_players')
@@ -91,7 +91,7 @@ module.exports = async function (claim) {
     .limit(1)
   const tran = transactions[0]
   const playerPoachValue = tran.value + 2
-  if (!constants.regularSeason && (roster.availableCap - playerPoachValue) < 0) {
+  if (!constants.isRegularSeason && (roster.availableCap - playerPoachValue) < 0) {
     throw new Error('not enough available cap')
   }
 
@@ -102,14 +102,14 @@ module.exports = async function (claim) {
     player: claim.player,
     type: constants.transactions.POACHED,
     value: playerPoachValue,
-    year: constants.year,
+    year: constants.season.year,
     timestamp: Math.round(Date.now() / 1000)
   }
   await db('transactions').insert(transaction)
 
   // remove player from poached team rosters
   const poachedTeamRosters = await db('rosters')
-    .where('week', '>=', constants.week)
+    .where('week', '>=', constants.season.week)
     .where('tid', rosterSlot.tid)
   const poachedTeamRosterIds = poachedTeamRosters.map(r => r.uid)
   await db('rosters_players')

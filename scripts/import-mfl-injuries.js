@@ -18,7 +18,7 @@ const timestamp = Math.round(Date.now() / 1000)
 const run = async () => {
   const missing = []
 
-  const URL = `https://api.myfantasyleague.com/${constants.year}/export?TYPE=injuries&JSON=1`
+  const URL = `https://api.myfantasyleague.com/${constants.season.year}/export?TYPE=injuries&JSON=1`
   const result = await fetch(URL, {
     headers: {
       'User-Agent': config.mflUserAgent

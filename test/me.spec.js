@@ -15,7 +15,9 @@ const { user1 } = require('./fixtures/token')
 chai.use(chaiHTTP)
 
 describe('API /me', function () {
-  before(async () => {
+  before(async function () {
+    this.timeout(60 * 1000)
+    await knex.migrate.rollback()
     await knex.migrate.latest()
     await knex.seed.run()
 

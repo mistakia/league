@@ -56,14 +56,14 @@ router.post('/?', async (req, res) => {
       .where({ lid: leagueId })
       .orderBy('timestamp', 'desc')
 
-    if (!constants.waiverWindow && !transactions.length) {
+    if (!constants.season.isWaiverPeriod && !transactions.length) {
       return res.status(400).send({ error: 'player is not on waivers' })
     }
 
     // make sure player is on waivers & it's not a duplicate waiver
     if (type === constants.waivers.FREE_AGENCY) {
       // if its outside the waiver period - check if he's been dropped recently (excluding cycling)
-      if (!constants.waiverWindow) {
+      if (!constants.season.isWaiverPeriod) {
         const isOnWaivers = await isPlayerOnWaivers({ player, leagueId })
         if (!isOnWaivers) {
           return res.status(400).send({ error: 'player is not on waivers' })
@@ -109,8 +109,8 @@ router.post('/?', async (req, res) => {
         .join('rosters', 'rosters_players.rid', 'rosters.uid')
         .where({
           lid: leagueId,
-          week: constants.week,
-          year: constants.year,
+          week: constants.season.week,
+          year: constants.season.year,
           player,
           slot: constants.slots.PS
         })
@@ -137,8 +137,8 @@ router.post('/?', async (req, res) => {
     const league = leagues[0]
     const rosterRow = await getRoster({
       tid,
-      week: constants.week,
-      year: constants.year
+      week: constants.season.week,
+      year: constants.season.year
     })
     const roster = new Roster({ roster: rosterRow, league })
     if (drop) roster.removePlayer(drop)
@@ -300,8 +300,8 @@ router.put('/:waiverId', async (req, res) => {
       const league = leagues[0]
       const rosterRow = await getRoster({
         tid,
-        week: constants.week,
-        year: constants.year
+        week: constants.season.week,
+        year: constants.season.year
       })
       const roster = new Roster({ roster: rosterRow, league })
       roster.removePlayer(value)

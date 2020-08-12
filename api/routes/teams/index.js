@@ -58,8 +58,8 @@ router.get('/:teamId/lineups/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const { teamId } = req.params
-    const week = req.query.week || constants.week
-    const year = req.query.year || constants.year
+    const week = req.query.week || constants.season.week
+    const year = req.query.year || constants.season.year
 
     const tid = parseInt(teamId, 10)
 
@@ -82,8 +82,8 @@ router.put('/:teamId/lineups/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const { teamId } = req.params
-    const week = req.body.week || constants.week
-    const year = req.body.year || constants.year
+    const week = req.body.week || constants.season.week
+    const year = req.body.year || constants.season.year
     const { slot, player, leagueId } = req.body
 
     // verify teamId
@@ -101,7 +101,7 @@ router.put('/:teamId/lineups/?', async (req, res) => {
       return res.status(400).send({ error: 'missing player param' })
     }
 
-    if (week < constants.week || year < constants.year) {
+    if (week < constants.season.week || year < constants.season.year) {
       return res.status(400).send({ error: 'can not edit previous lineups' })
     }
 

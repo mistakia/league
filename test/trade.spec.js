@@ -17,7 +17,9 @@ const { user1, user2 } = require('./fixtures/token')
 chai.use(chaiHTTP)
 
 describe('API /trades', function () {
-  before(async () => {
+  before(async function () {
+    this.timeout(60 * 1000)
+    await knex.migrate.rollback()
     await knex.migrate.latest()
     await knex.seed.run()
 
@@ -55,7 +57,7 @@ describe('API /trades', function () {
     proposeRes.body.pid.should.be.equal(1)
     proposeRes.body.tid.should.be.equal(2)
     proposeRes.body.userid.should.be.equal(1)
-    proposeRes.body.year.should.be.equal(constants.year)
+    proposeRes.body.year.should.be.equal(constants.season.year)
     should.exist(proposeRes.body.offered)
     should.not.exist(proposeRes.body.cancelled)
     should.not.exist(proposeRes.body.accepted)
@@ -76,7 +78,7 @@ describe('API /trades', function () {
     acceptRes.body.pid.should.be.equal(1)
     acceptRes.body.tid.should.be.equal(2)
     acceptRes.body.userid.should.be.equal(1)
-    acceptRes.body.year.should.be.equal(constants.year)
+    acceptRes.body.year.should.be.equal(constants.season.year)
     should.exist(acceptRes.body.offered)
     should.not.exist(acceptRes.body.cancelled)
     should.exist(acceptRes.body.accepted)

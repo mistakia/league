@@ -20,7 +20,7 @@ const initialState = new Map({
   health: new List(['ir', 'healthy']),
   teams: new List(),
   availability: new List(constants.availability),
-  week: constants.week,
+  week: constants.season.week,
   age: new List(),
   allAges: new List(),
   items: new Map(),
