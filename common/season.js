@@ -1,14 +1,14 @@
-import moment from 'moment'
+import moment from 'moment-timezone'
 
 export default class Season {
   constructor () {
-    this.start = moment('9/1/20 -0400', 'M/D/YY Z') // Two Tuesdays before first game
-    this.end = moment('2/7/21 -0400', 'M/D/YY Z') // super bowl
+    this.start = moment.tz('2020-09-01', 'America/New_York') // Two Tuesdays before first game
+    this.end = moment.tz('2021-02-07', 'America/New_York') // super bowl
     this.finalWeek = 16
   }
 
   get now () {
-    return moment().utcOffset(-4)
+    return moment.tz('America/New_York')
   }
 
   get isRegularSeason () {

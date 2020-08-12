@@ -1,22 +1,21 @@
 const express = require('express')
 const router = express.Router({ mergeParams: true })
 
-const { constants } = require('../../../common')
-const { verifyUserTeam, isPlayerLocked } = require('../../../utils')
+const { constants, Roster } = require('../../../common')
+const { verifyUserTeam, isPlayerLocked, getRoster } = require('../../../utils')
 
 router.post('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    const { player, teamId } = req.body
+    const { player, teamId, leagueId } = req.body
 
     if (!player) {
       return res.status(400).send({ error: 'missing player param' })
     }
 
     // verify teamId
-    let team
     try {
-      team = await verifyUserTeam({ userId: req.user.userId, teamId })
+      await verifyUserTeam({ userId: req.user.userId, teamId })
     } catch (error) {
       return res.status(400).send({ error: error.message })
     }
@@ -27,7 +26,7 @@ router.post('/?', async (req, res) => {
     if (playerRows.length) {
       return res.status(400).send({ error: 'invalid player id' })
     }
-    const playerRow = playerRows[0]
+    // const playerRow = playerRows[0]
 
     // verify player is on current roster
     const leagues = await db('leagues').where({ uid: leagueId }).limit(1)
