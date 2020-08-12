@@ -5,7 +5,7 @@ const router = express.Router()
 const activate = require('./activate')
 const deactivate = require('./deactivate')
 
-const { getRoster } = require('../../../utils')
+const { getRoster, verifyUserTeam } = require('../../../utils')
 const { constants, Roster } = require('../../../common')
 
 router.put('/:teamId', async (req, res) => {
@@ -13,6 +13,13 @@ router.put('/:teamId', async (req, res) => {
   try {
     const { teamId } = req.params
     const { value, field } = req.body
+
+    // verify teamId
+    try {
+      await verifyUserTeam({ userId: req.user.userId, teamId })
+    } catch (error) {
+      return res.status(400).send({ error: error.message })
+    }
 
     const userTeamFields = ['teamtext', 'teamvoice', 'leaguetext']
     const fields = ['name', 'image', 'abbrv', ...userTeamFields]
@@ -78,6 +85,13 @@ router.put('/:teamId/lineups/?', async (req, res) => {
     const week = req.body.week || constants.week
     const year = req.body.year || constants.year
     const { slot, player, leagueId } = req.body
+
+    // verify teamId
+    try {
+      await verifyUserTeam({ userId: req.user.userId, teamId })
+    } catch (error) {
+      return res.status(400).send({ error: error.message })
+    }
 
     if (typeof slot === 'undefined' || slot === null) {
       return res.status(400).send({ error: 'missing slot param' })
