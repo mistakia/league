@@ -30,5 +30,7 @@ module.exports = {
   getTopPoachingWaiver: require('./get-top-poaching-waiver'),
   getTopFreeAgencyWaiver: require('./get-top-free-agency-waiver'),
   submitAcquisition: require('./submit-acquisition'),
-  getPlayByPlayQuery
+  getPlayByPlayQuery,
+
+  verifyUserTeam: require('./verify-user-team')
 }
