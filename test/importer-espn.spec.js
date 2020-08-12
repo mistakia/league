@@ -7,6 +7,8 @@ const expect = chai.expect
 const { getApiKey, getCookies, getLeagues } = require('../league-import/espn')
 
 describe('IMPORTER ESPN', function () {
+  this.timeout(60 * 1000)
+
   it('get api key', async () => {
     const apiKey = await getApiKey()
     should.exist(apiKey)

@@ -1,8 +1,5 @@
 /* global describe, it, after */
 
-// eslint-disable-next-line
-require = require('esm')(module /*, options*/)
-
 const chai = require('chai')
 const MockDate = require('mockdate')
 const expect = chai.expect
@@ -142,7 +139,7 @@ describe('COMMON Season', function () {
     expect(constants.season.year).to.equal(2020)
 
     // after super bowl
-    MockDate.set(end.clone().toDate())
+    MockDate.set(end.clone().add('1', 'minute').toDate())
     expect(constants.season.year).to.equal(2021)
   })
 })
