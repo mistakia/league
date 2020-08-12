@@ -6,8 +6,6 @@ const server = require('./api')
 const config = require('./config')
 
 const main = async () => {
-  // await db.migrate.latest()
-  await db.seed.run()
   const port = config.port || 8082
   server.listen(port, () => logger(`API listening on port ${port}`))
 }

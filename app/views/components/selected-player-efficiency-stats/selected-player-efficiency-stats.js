@@ -83,7 +83,7 @@ export default class SelectedPlayerEfficiencyStats extends React.Component {
         </div>
         <div className='player__selected-row'>
           <div className='row__name'>
-            {constants.week ? constants.year : (constants.year - 1)}
+            {constants.season.week ? constants.season.year : (constants.season.year - 1)}
           </div>
           {player.pos1 === 'QB' &&
             <div className='row__group'>

@@ -37,7 +37,7 @@ export function calculatePlayerValues (payload) {
     const { projections } = player
 
     player.projection = {}
-    for (let week = 0; week <= constants.finalWeek; week++) {
+    for (let week = 0; week <= constants.season.finalWeek; week++) {
       const projection = weightProjections({
         projections,
         weights: payload.sources,
@@ -56,7 +56,7 @@ export function calculatePlayerValues (payload) {
     // calculate ros projection
     const ros = {}
     for (const [week, projection] of Object.entries(player.projection)) {
-      if (week && week !== '0' && week >= constants.week) {
+      if (week && week !== '0' && week >= constants.season.week) {
         for (const [key, value] of Object.entries(projection)) {
           if (ros[key]) {
             ros[key] += value
@@ -72,7 +72,7 @@ export function calculatePlayerValues (payload) {
   }
 
   const baselines = {}
-  for (let week = 0; week <= constants.finalWeek; week++) {
+  for (let week = 0; week <= constants.season.finalWeek; week++) {
     // calculate baseline
     const b = calculateBaselines({ players, league, rosterRows, week })
 
@@ -114,7 +114,7 @@ export function calculatePlayerValues (payload) {
   for (const player of players) {
     const ros = {}
     for (const [week, vorp] of Object.entries(player.vorp)) {
-      if (week && week >= constants.week) {
+      if (week && week >= constants.season.week) {
         for (const [key, value] of Object.entries(vorp)) {
           if (value < 0) {
             if (!ros[key]) ros[key] = 0

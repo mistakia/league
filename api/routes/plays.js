@@ -10,7 +10,7 @@ router.get('/?', async (req, res) => {
   try {
     const years = req.query.years
       ? (Array.isArray(req.query.years) ? req.query.years : [req.query.years])
-      : [constants.week ? constants.year : (constants.year - 1)]
+      : [constants.season.week ? constants.season.year : (constants.season.year - 1)]
 
     const weeks = req.query.weeks
       ? (Array.isArray(req.query.weeks) ? req.query.weeks : [req.query.weeks])

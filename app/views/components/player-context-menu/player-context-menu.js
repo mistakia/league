@@ -153,7 +153,7 @@ export default class PlayerContextMenu extends React.Component {
       }
     } else { // player is a free agent
       let claimAction
-      if (constants.regularSeason && status.waiver.add) {
+      if (constants.season.isRegularSeason && status.waiver.add) {
         claimAction = (
           <div className='context__menu-option' onClick={this.handleWaiver}>
             Submit Waiver Claim

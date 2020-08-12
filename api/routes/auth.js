@@ -101,8 +101,8 @@ router.post('/register', async (req, res) => {
       await db('rosters').insert({
         tid: teamId,
         lid: leagueId,
-        week: constants.week,
-        year: constants.year,
+        week: constants.season.week,
+        year: constants.season.year,
         last_updated: Math.round(Date.now() / 1000)
       })
     }

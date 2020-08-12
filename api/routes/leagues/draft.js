@@ -10,7 +10,7 @@ router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const { leagueId } = req.params
-    const year = req.query.year || constants.year
+    const year = req.query.year || constants.season.year
 
     const picks = await db('draft').where({ lid: leagueId, year })
     res.send({ picks })
@@ -59,20 +59,20 @@ router.post('/?', async (req, res) => {
     // make sure player is a rookie
     const players = await db('player').where({ player: playerId })
     const player = players[0]
-    if (!player || player.start !== constants.year) {
+    if (!player || player.start !== constants.season.year) {
       return res.status(400).send({ error: 'invalid player' })
     }
 
     // make sure player is available/undrafted
     const rosterPlayers = await db('rosters_players')
       .join('rosters', 'rosters_players.rid', 'rosters.uid')
-      .where({ lid: leagueId, year: constants.year, week: 0, player: playerId })
+      .where({ lid: leagueId, year: constants.season.year, week: 0, player: playerId })
     if (rosterPlayers.length) {
       return res.status(400).send({ error: 'unavailable player' })
     }
 
     // make sure team has an open slot
-    const rosterRow = await getRoster({ tid: teamId, year: constants.year, week: 0 })
+    const rosterRow = await getRoster({ tid: teamId, year: constants.season.year, week: 0 })
     const roster = new Roster({ roster: rosterRow, league })
     const slot = roster.hasOpenPracticeSquadSlot()
       ? constants.slots.PS
@@ -100,7 +100,7 @@ router.post('/?', async (req, res) => {
         lid: leagueId,
         player: playerId,
         type: constants.transactions.DRAFT,
-        year: constants.year,
+        year: constants.season.year,
         timestamp: Math.round(Date.now() / 1000),
         value
       })
@@ -149,7 +149,7 @@ router.post('/?', async (req, res) => {
       const pickNum = (pick.pick % league.nteams) || league.nteams
       message += `pick #${pick.pick} (${pick.round}.${('0' + pickNum).slice(-2)}) `
     }
-    message += `in the ${constants.year} draft`
+    message += `in the ${constants.season.year} draft`
 
     await sendNotifications({
       leagueId: league.uid,
