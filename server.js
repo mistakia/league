@@ -1,7 +1,6 @@
 const debug = require('debug')
 const logger = debug('server')
 
-const db = require('./db')
 const server = require('./api')
 const config = require('./config')
 
