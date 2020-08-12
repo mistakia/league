@@ -7,7 +7,7 @@ router.get('/teams', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const years = []
-    let startYear = constants.year
+    let startYear = constants.season.year
     while (years.length < 6) {
       years.push(startYear)
       startYear--

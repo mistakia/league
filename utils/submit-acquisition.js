@@ -32,8 +32,8 @@ module.exports = async function ({ leagueId, drop, player, teamId, bid = 0, user
     .join('rosters', 'rosters_players.rid', 'rosters.uid')
     .where({
       lid: leagueId,
-      week: constants.week,
-      year: constants.year,
+      week: constants.season.week,
+      year: constants.season.year,
       player
     })
   if (slots.length) {
@@ -49,8 +49,8 @@ module.exports = async function ({ leagueId, drop, player, teamId, bid = 0, user
   // verify team has bench space & passes roster constraints
   const rosterRow = await getRoster({
     tid: teamId,
-    week: constants.week,
-    year: constants.year
+    week: constants.season.week,
+    year: constants.season.year
   })
   const roster = new Roster({ roster: rosterRow, league })
   if (drop) {
@@ -85,7 +85,7 @@ module.exports = async function ({ leagueId, drop, player, teamId, bid = 0, user
       player: drop,
       type: constants.transactions.ROSTER_DROP,
       value: 0,
-      year: constants.year,
+      year: constants.season.year,
       timestamp: Math.round(Date.now() / 1000)
     })
     await db('rosters_players')
@@ -104,7 +104,7 @@ module.exports = async function ({ leagueId, drop, player, teamId, bid = 0, user
     player,
     type: constants.transactions.ROSTER_ADD,
     value: bid,
-    year: constants.year,
+    year: constants.season.year,
     timestamp: Math.round(Date.now() / 1000)
   })
   await db('transactions').insert(transactions)

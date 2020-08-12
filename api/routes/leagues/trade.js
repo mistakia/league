@@ -109,8 +109,8 @@ router.post('/accept', async (req, res, next) => {
     // validate accepting team roster
     const acceptingTeamRosterRow = await getRoster({
       tid: trade.tid,
-      week: constants.week,
-      year: constants.year
+      week: constants.season.week,
+      year: constants.season.year
     })
     const acceptingTeamRoster = new Roster({ roster: acceptingTeamRosterRow, league })
     for (const player of acceptingTeamDropPlayers) {
@@ -132,8 +132,8 @@ router.post('/accept', async (req, res, next) => {
     // validate proposing team roster
     const proposingTeamRosterRow = await getRoster({
       tid: trade.pid,
-      week: constants.week,
-      year: constants.year
+      week: constants.season.week,
+      year: constants.season.year
     })
     const proposingTeamRoster = new Roster({ roster: proposingTeamRosterRow, league })
     proposingTeamDropPlayerIds.forEach(p => proposingTeamRoster.removePlayer(p))
@@ -182,7 +182,7 @@ router.post('/accept', async (req, res, next) => {
         player,
         type: constants.transactions.TRADE,
         value: transactionHistory.find(t => t.player === player).value,
-        year: constants.year,
+        year: constants.season.year,
         timestamp: Math.round(Date.now() / 1000)
       })
     }
@@ -194,7 +194,7 @@ router.post('/accept', async (req, res, next) => {
         player,
         type: constants.transactions.TRADE,
         value: transactionHistory.find(t => t.player === player).value,
-        year: constants.year,
+        year: constants.season.year,
         timestamp: Math.round(Date.now() / 1000)
       })
     }
@@ -261,7 +261,7 @@ router.post('/accept', async (req, res, next) => {
     const picks = await db('draft').whereIn('uid', pickRows.map(p => p.pickid))
     for (const pick of picks) {
       const pickNum = (pick.pick % league.nteams) || league.nteams
-      const pickStr = pick.year === constants.year
+      const pickStr = pick.year === constants.season.year
         ? `${pick.year} ${pick.round}.${('0' + pickNum).slice(-2)}`
         : `${pick.year} ${pick.round}`
 

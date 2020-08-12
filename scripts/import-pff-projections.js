@@ -14,7 +14,7 @@ const db = require('../db')
 const timestamp = new Date()
 const config = require('../config')
 const { constants } = require('../common')
-const { year } = constants
+const year = constants.season.year
 
 const runOne = async (week) => {
   const missing = []
@@ -85,7 +85,7 @@ const runOne = async (week) => {
 }
 
 const run = async () => {
-  for (let week = constants.week; week < 17; week++) {
+  for (let week = constants.season.week; week < 17; week++) {
     await runOne(week)
   }
   process.exit()

@@ -14,7 +14,7 @@ module.exports = async function (knex) {
       lid: league.uid,
       pick: i,
       round: Math.ceil(i / league.nteams),
-      year: constants.year
+      year: constants.season.year
     })
   }
 
@@ -25,7 +25,7 @@ module.exports = async function (knex) {
         otid: team.uid,
         lid: league.uid,
         round: i,
-        year: (constants.year + 1)
+        year: (constants.season.year + 1)
       })
     }
   }

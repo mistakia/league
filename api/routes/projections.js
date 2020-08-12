@@ -38,7 +38,7 @@ router.put('/:playerId/?', async (req, res) => {
       userid: userId,
       player: playerId,
       week,
-      year: constants.year
+      year: constants.season.year
     })
 
     if (rows.length) {
@@ -51,7 +51,7 @@ router.put('/:playerId/?', async (req, res) => {
           userid: userId,
           player: playerId,
           week,
-          year: constants.year
+          year: constants.season.year
         })
     } else {
       await db('projections')
@@ -61,7 +61,7 @@ router.put('/:playerId/?', async (req, res) => {
           userid: userId,
           player: playerId,
           week,
-          year: constants.year
+          year: constants.season.year
         })
     }
 
@@ -83,7 +83,7 @@ router.delete('/:playerId/?', async (req, res) => {
       userid: userId,
       player: playerId,
       week,
-      year: constants.year
+      year: constants.season.year
     })
 
     res.send({ success: true })

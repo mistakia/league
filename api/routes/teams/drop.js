@@ -1,11 +1,11 @@
 const express = require('express')
 const router = express.Router({ mergeParams: true })
 
-// const { constants } = require('../../../common')
-const { verifyUserTeam } = require('../../../utils')
+const { constants } = require('../../../common')
+const { verifyUserTeam, isPlayerLocked } = require('../../../utils')
 
 router.post('/?', async (req, res) => {
-  const { db, logger, broadcast } = req.app.locals
+  const { db, logger } = req.app.locals
   try {
     const { player, teamId } = req.body
 
@@ -37,8 +37,8 @@ router.post('/?', async (req, res) => {
     const league = leagues[0]
     const rosterRow = await getRoster({
       tid,
-      week: constants.week,
-      year: constants.year
+      week: constants.season.week,
+      year: constants.season.year
     })
     const roster = new Roster({ roster: rosterRow, league })
     if (!roster.has(player)) {
@@ -57,7 +57,6 @@ router.post('/?', async (req, res) => {
     // create transaction
 
     // send notifications
-
   } catch (error) {
     logger(error)
     return res.status(400).send({ error: error.toString() })

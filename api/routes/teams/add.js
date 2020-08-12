@@ -9,7 +9,7 @@ router.post('/?', async (req, res) => {
   try {
     const { player, drop, leagueId, teamId } = req.body
 
-    if (!constants.regularSeason) {
+    if (!constants.isRegularSeason) {
       return res.stauts(400).send({ error: 'free agency has not started' })
     }
 
@@ -34,12 +34,11 @@ router.post('/?', async (req, res) => {
     }
 
     // verify not in waiver period
-    if (constants.waiverWindow) {
+    if (constants.season.isWaiverPeriod) {
       return res.status(400).send({ error: 'player is on waivers' })
     }
 
     // TODO - verify player does not have outstanding unprocessed waiver claim
-
 
     // verify drop player
 

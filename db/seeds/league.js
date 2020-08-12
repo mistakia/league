@@ -72,7 +72,7 @@ module.exports = async function (knex) {
       tid: i,
       lid: 1,
       week: 0,
-      year: constants.year,
+      year: constants.season.year,
       last_updated: Math.round(Date.now() / 1000)
     })
 

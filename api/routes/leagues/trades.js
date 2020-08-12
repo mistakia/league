@@ -10,7 +10,7 @@ router.get('/?', async (req, res) => {
   try {
     const { teamId } = req.query
     const trades = await db('trades')
-      .where('year', constants.year)
+      .where('year', constants.season.year)
       .where(function () {
         this.where('pid', teamId).orWhere('tid', teamId)
       })
@@ -104,8 +104,8 @@ router.post('/?', async (req, res, next) => {
     const league = leagues[0]
 
     const proposingTeamRosterRow = await getRoster({
-      year: constants.year,
-      week: constants.week,
+      year: constants.season.year,
+      week: constants.season.week,
       tid: pid
     })
     const proposingTeamRoster = new Roster({ roster: proposingTeamRosterRow, league })
@@ -143,8 +143,8 @@ router.post('/?', async (req, res, next) => {
 
     // validate receiving players
     const acceptingTeamRosterRow = await getRoster({
-      year: constants.year,
-      week: constants.week,
+      year: constants.season.year,
+      week: constants.season.week,
       tid
     })
     const acceptingTeamRoster = new Roster({ roster: acceptingTeamRosterRow, league })
@@ -184,7 +184,7 @@ router.post('/?', async (req, res, next) => {
       pid,
       tid,
       userid: req.user.userId,
-      year: constants.year,
+      year: constants.season.year,
       lid: leagueId,
       offered: Math.round(Date.now() / 1000)
     })

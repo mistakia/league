@@ -19,7 +19,7 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
     const league = leagues[0]
-    const rosterRow = await getRoster({ tid, week: constants.week, year: constants.year })
+    const rosterRow = await getRoster({ tid, week: constants.season.week, year: constants.season.year })
     const roster = new Roster({ roster: rosterRow, league })
 
     // make sure player is on team
@@ -43,7 +43,7 @@ router.post('/?', async (req, res) => {
     const playerRow = players[0]
 
     // make sure player is a rookie
-    if (playerRow.start !== constants.year) {
+    if (playerRow.start !== constants.season.year) {
       return res.status(400).send({ error: 'player is not a rookie' })
     }
 
@@ -82,7 +82,7 @@ router.post('/?', async (req, res) => {
       player,
       type: constants.transactions.ROSTER_DEACTIVATE,
       value: playerRow.value,
-      year: constants.year,
+      year: constants.season.year,
       timestamp: Math.round(Date.now() / 1000)
     }
     await db('transactions').insert(transaction)

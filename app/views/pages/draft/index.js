@@ -21,7 +21,7 @@ class DraftPage extends React.Component {
     const { nextPick, draftPlayer } = this.props
     this.props.showConfirmation({
       title: 'Draft Selection',
-      description: `Select ${player.fname} ${player.lname} (${player.pos1}) with the #${nextPick.pick} pick in the ${constants.year} draft.`,
+      description: `Select ${player.fname} ${player.lname} (${player.pos1}) with the #${nextPick.pick} pick in the ${constants.season.year} draft.`,
       onConfirm: draftPlayer
     })
   }

@@ -10,7 +10,7 @@ const run = async () => {
 
   for (const league of leagues) {
     // get current week rosters for league
-    const rosters = await db('rosters').where({ lid: league.uid, week: constants.week })
+    const rosters = await db('rosters').where({ lid: league.uid, week: constants.season.week })
     for (const roster of rosters) {
       // get current roster players
       const { tid, lid, uid } = roster
@@ -18,8 +18,8 @@ const run = async () => {
       const newRoster = await db('rosters').insert({
         tid,
         lid,
-        week: constants.week + 1,
-        year: constants.year
+        week: constants.season.week + 1,
+        year: constants.season.year
       })
       const newId = newRoster[0]
 

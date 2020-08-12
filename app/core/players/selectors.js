@@ -70,7 +70,7 @@ export function getFilteredPlayers (state) {
         return false
       }
 
-      const exp = constants.year - player.draft_year
+      const exp = constants.season.year - player.draft_year
       if (veterans && exp > 1) {
         return true
       }
@@ -150,14 +150,14 @@ export function getPlayersByPosition (state, { position }) {
   const players = state.get('players')
   const items = players.get('items')
   const filtered = items.filter(p => p.pos1 === position)
-  const period = !constants.week ? '0' : 'ros'
+  const period = !constants.season.week ? '0' : 'ros'
   return filtered.sort((a, b) => b.getIn(['points', period, 'total']) - a.getIn(['points', period, 'total'])).toList()
 }
 
 export function getRookiePlayers (state) {
   const players = state.get('players')
   const items = players.get('items')
-  return items.filter(p => p.draft_year === constants.year).toList()
+  return items.filter(p => p.draft_year === constants.season.year).toList()
 }
 
 export function getPlayerById (state, { playerId }) {
@@ -215,7 +215,7 @@ export function getPlayerStatus (state, { player }) {
 
   const isFreeAgent = isPlayerFreeAgent(state, { player })
   status.fa = isFreeAgent
-  if (constants.waiverWindow && isFreeAgent) {
+  if (constants.season.isWaiverPeriod && isFreeAgent) {
     status.waiver.add = true
   } else if (isFreeAgent) {
     // TODO - dropped in the last 24 hours - except for cycling
@@ -243,7 +243,7 @@ export function isPlayerPracticeSquadEligible (state, { player }) {
   }
 
   // is a rookie
-  if (player.draft_year !== constants.year) {
+  if (player.draft_year !== constants.season.year) {
     return false
   }
 

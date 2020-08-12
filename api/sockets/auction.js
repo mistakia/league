@@ -133,8 +133,8 @@ export default class Auction {
 
     const roster = await getRoster({
       tid,
-      week: constants.week,
-      year: constants.year
+      week: constants.season.week,
+      year: constants.season.year
     })
 
     const r = new Roster({ roster, league: this._league })
@@ -249,7 +249,7 @@ export default class Auction {
       lid: this._lid,
       type: constants.transactions.AUCTION_BID,
       value,
-      year: constants.year,
+      year: constants.season.year,
       timestamp: Math.round(Date.now() / 1000)
     }
     const uid = await db('transactions').insert(bid)
@@ -298,7 +298,7 @@ export default class Auction {
       type: constants.transactions.AUCTION_BID,
       value,
       lid: this._lid,
-      year: constants.year,
+      year: constants.season.year,
       timestamp: Math.round(Date.now() / 1000)
     }
     const uid = await db('transactions').insert(bid)
@@ -318,7 +318,7 @@ export default class Auction {
     this._tids = this._teams.map(t => t.uid)
     this._transactions = await db('transactions')
       .whereIn('tid', this._tids)
-      .where('year', constants.year)
+      .where('year', constants.season.year)
       .whereIn('type', [
         constants.transactions.AUCTION_BID,
         constants.transactions.AUCTION_PROCESSED

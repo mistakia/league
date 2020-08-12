@@ -12,7 +12,7 @@ module.exports = async function (knex) {
         aid: matchup.away.uid,
         lid: 1,
         week: index + 1,
-        year: constants.year
+        year: constants.season.year
       })
     }
   }

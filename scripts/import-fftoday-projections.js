@@ -13,7 +13,7 @@ const db = require('../db')
 
 const timestamp = new Date()
 const { constants } = require('../common')
-const { year } = constants
+const year = constants.season.year
 const getURL = ({ position, page }) => `https://www.fftoday.com/rankings/playerproj.php?Season=${year}&PosID=${position}&LeagueID=&order_by=FFPts&sort_order=DESC&cur_page=${page}`
 
 const positions = {
