@@ -11,23 +11,27 @@ router.post('/?', async (req, res) => {
     const { player, drop, leagueId, bid, type, teamId } = req.body
 
     if (!player) {
-      return res.status(400).send({ error: 'missing player param' })
+      return res.status(400).send({ error: 'missing player' })
     }
 
     if (!teamId) {
-      return res.status(400).send({ error: 'missing teamId param' })
+      return res.status(400).send({ error: 'missing teamId' })
     }
 
     if (!leagueId) {
-      return res.status(400).send({ error: 'missing leagueId param' })
+      return res.status(400).send({ error: 'missing leagueId' })
     }
 
     if (typeof type === 'undefined' || type === null) {
-      return res.status(400).send({ error: 'missing type param' })
+      return res.status(400).send({ error: 'missing type' })
     }
 
     if (!Object.values(constants.waivers).includes(type)) {
-      return res.status(400).send({ error: 'invalid type param' })
+      return res.status(400).send({ error: 'invalid type' })
+    }
+
+    if (typeof bid !== 'undefined' && (isNaN(bid) || bid < 0 || bid % 1 !== 0)) {
+      return res.status(400).send({ error: 'invalid bid' })
     }
 
     const tid = parseInt(teamId, 10)
@@ -45,8 +49,10 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
 
-    const players = await db('player').where('player', player)
-    if (!players.length) {
+    const playerIds = [player]
+    if (drop) playerIds.push(drop)
+    const players = await db('player').whereIn('player', playerIds)
+    if (players.length !== playerIds.length) {
       return res.status(400).send({ error: 'invalid player' })
     }
     const playerRow = players[0]
@@ -101,7 +107,7 @@ router.post('/?', async (req, res) => {
 
       // transaction should have been within the last 24 hours
       if (moment().isAfter(moment(transactions[0].timestamp, 'X').add('24', 'hours'))) {
-        return res.status(400).send({ error: 'player is no longer on waivers' })
+        return res.status(400).send({ error: 'player is not on waivers' })
       }
 
       // verify player is on practice squad
@@ -141,7 +147,12 @@ router.post('/?', async (req, res) => {
       year: constants.season.year
     })
     const roster = new Roster({ roster: rosterRow, league })
-    if (drop) roster.removePlayer(drop)
+    if (drop) {
+      if (!roster.has(drop)) {
+        return res.status(400).send({ error: 'invalid drop' })
+      }
+      roster.removePlayer(drop)
+    }
     const hasSlot = roster.hasOpenBenchSlot(playerRow.pos1)
     if (!hasSlot) {
       return res.status(400).send({ error: 'can not add player to roster, invalid roster' })
@@ -224,11 +235,11 @@ router.put('/:waiverId', async (req, res) => {
     let { value } = req.body
 
     if (!teamId) {
-      return res.status(400).send({ error: 'missing teamId param' })
+      return res.status(400).send({ error: 'missing teamId' })
     }
 
     if (!leagueId) {
-      return res.status(400).send({ error: 'missing leagueId param' })
+      return res.status(400).send({ error: 'missing leagueId' })
     }
 
     const fields = ['bid', 'drop']
@@ -330,11 +341,11 @@ router.post('/:waiverId/cancel', async (req, res) => {
     const { teamId, leagueId } = req.body
 
     if (!teamId) {
-      return res.status(400).send({ error: 'missing teamId param' })
+      return res.status(400).send({ error: 'missing teamId' })
     }
 
     if (!leagueId) {
-      return res.status(400).send({ error: 'missing leagueId param' })
+      return res.status(400).send({ error: 'missing leagueId' })
     }
 
     // verify teamId, leagueId belongs to user
