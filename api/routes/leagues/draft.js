@@ -4,7 +4,12 @@ const router = express.Router({ mergeParams: true })
 const API = require('groupme').Stateless
 
 const { constants, Roster } = require('../../../common')
-const { getRoster, sendNotifications } = require('../../../utils')
+const {
+  getRoster,
+  sendNotifications,
+  verifyUserTeam,
+  getLeague
+} = require('../../../utils')
 
 router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
@@ -23,20 +28,39 @@ router.get('/?', async (req, res) => {
 router.post('/?', async (req, res) => {
   const { db, logger, broadcast } = req.app.locals
   try {
-    const leagueId = parseInt(req.params.leagueId, 10)
+    const { leagueId } = req.params
     const { teamId, playerId, pickId } = req.body
 
     if (!teamId) {
-      return res.status(400).send({ error: 'missing teamId param' })
+      return res.status(400).send({ error: 'missing teamId' })
     }
 
     if (!playerId) {
-      return res.status(400).send({ error: 'missing playerId param' })
+      return res.status(400).send({ error: 'missing playerId' })
     }
 
+    if (!pickId) {
+      return res.status(400).send({ error: 'missing pickId' })
+    }
+
+    try {
+      await verifyUserTeam({
+        userId: req.user.userId,
+        leagueId,
+        teamId,
+        requireLeague: true
+      })
+    } catch (error) {
+      return res.status(400).send({ error: error.message })
+    }
+    const lid = parseInt(leagueId, 10)
+
     // make sure draft has started
-    const leagues = await db('leagues').where({ uid: leagueId })
-    const league = leagues[0]
+    const league = await getLeague(lid)
+    if (!league) {
+      return res.status(400).send({ error: 'invalid leagueId' })
+    }
+
     const draftStart = moment(league.ddate, 'X')
     if (moment().isBefore(draftStart)) {
       return res.status(400).send({ error: 'draft has not started' })
@@ -49,26 +73,26 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid pickId' })
     }
     if (pick.tid !== teamId) {
-      return res.status(400).send({ error: 'invalid teamId' })
+      return res.status(400).send({ error: 'invalid pickId' })
     }
     const clockStart = moment(draftStart).add((pick.pick - 1), 'days')
     if (moment().isBefore(clockStart)) {
-      return res.status(400).send({ error: 'pick clock has not started' })
+      return res.status(400).send({ error: 'draft pick not on the clock' })
     }
 
     // make sure player is a rookie
     const players = await db('player').where({ player: playerId })
     const player = players[0]
     if (!player || player.start !== constants.season.year) {
-      return res.status(400).send({ error: 'invalid player' })
+      return res.status(400).send({ error: 'invalid playerId' })
     }
 
     // make sure player is available/undrafted
     const rosterPlayers = await db('rosters_players')
       .join('rosters', 'rosters_players.rid', 'rosters.uid')
-      .where({ lid: leagueId, year: constants.season.year, week: 0, player: playerId })
+      .where({ lid, year: constants.season.year, week: 0, player: playerId })
     if (rosterPlayers.length) {
-      return res.status(400).send({ error: 'unavailable player' })
+      return res.status(400).send({ error: 'player rostered' })
     }
 
     // make sure team has an open slot
@@ -97,7 +121,7 @@ router.post('/?', async (req, res) => {
       .insert({
         userid: req.user.userId,
         tid: teamId,
-        lid: leagueId,
+        lid,
         player: playerId,
         type: constants.transactions.DRAFT,
         year: constants.season.year,
@@ -132,8 +156,8 @@ router.post('/?', async (req, res) => {
       updateDraft
     ])
 
-    const data = { uid: pickId, player: playerId, lid: leagueId, tid: teamId }
-    broadcast(leagueId, {
+    const data = { uid: pickId, player: playerId, lid, tid: teamId }
+    broadcast(lid, {
       type: 'DRAFTED_PLAYER',
       payload: { data }
     })

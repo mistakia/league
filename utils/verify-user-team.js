@@ -2,13 +2,15 @@ const db = require('../db')
 
 module.exports = async ({ userId, leagueId, teamId, requireLeague }) => {
   if (!teamId) {
-    throw new Error('missing teamId param')
+    throw new Error('missing teamId')
   }
   const tid = parseInt(teamId, 10)
 
   if (requireLeague && !leagueId) {
-    throw new Error('missing leagueId param')
+    throw new Error('missing leagueId')
   }
+
+  const lid = parseInt(leagueId, 10)
 
   // verify team belongs to user
   const userTeams = await db('users_teams')
@@ -19,7 +21,7 @@ module.exports = async ({ userId, leagueId, teamId, requireLeague }) => {
     throw new Error('invalid teamId')
   }
 
-  if (requireLeague && team.lid !== leagueId) {
+  if (requireLeague && team.lid !== lid) {
     throw new Error('invalid leagueId')
   }
 

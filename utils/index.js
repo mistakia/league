@@ -26,6 +26,7 @@ module.exports = {
   submitPoach: require('./submit-poach'),
   processPoach: require('./process-poach'),
   getRoster: require('./get-roster'),
+  getLeague: require('./get-league'),
   resetWaiverOrder: require('./reset-waiver-order'),
   getTopPoachingWaiver: require('./get-top-poaching-waiver'),
   getTopFreeAgencyWaiver: require('./get-top-free-agency-waiver'),
