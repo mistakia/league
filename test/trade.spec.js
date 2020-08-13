@@ -112,15 +112,35 @@ describe('API /trades', function () {
 
   // three for one with no drop (has room)
 
+  // cancel trade
+  // reject trade
+
   // errors
 
-  // - missing pid param
-  // - missing tid param
+  // - not logged in
+  // - invalid userId
+  // - invalid leagueId
+  // - invalid teamId
+  // - invalid player
+  // - invalid drop
+  // - teamId doesn't belong to userId
   // - drop player not on team
   // - player not on team
+  // - some players not on team
+  // - some drop players not on team
   // - pick not owned by proposing team
-  // - pick already used
-  // - pick is not owned by proposing team
+  // - some picks not owned by proposing team
   // - pick is not owned by accepting team
-  // - no bench space available on proposing team
+  // - some picks are not owned by accepting team
+  // - pick already used/drafted
+  // - exceeds bench space on proposing team
+  // - exceeds available cap on proposing team
+  // - exceeds bench space on accepting team
+  // - exceeds available cap on accepting team
+  // - trade player with existing poaching claim
+
+  // - accept cancelled trade
+  // - accept rejected trade
+  // - reject rejected trade
+  // - reject cancelled trade
 })
