@@ -1,7 +1,7 @@
-const { uniqBy } = require('../common')
+const { uniqBy, constants } = require('../common')
 const db = require('../db')
 
-module.exports = async ({ tid, week, year }) => {
+module.exports = async ({ tid, week = constants.season.week, year = constants.season.year }) => {
   const rows = await db('rosters').where({ tid, year, week })
   const rosterRow = rows[0]
   const players = await db('rosters_players')
