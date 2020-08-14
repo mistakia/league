@@ -95,7 +95,7 @@ describe('API /waivers - poach', function () {
     expect(waiver.tid).to.equal(teamId)
     expect(waiver.lid).to.equal(leagueId)
     expect(waiver.submitted).to.equal(submitted)
-    expect(waiver.bid).to.equal(null)
+    expect(waiver.bid).to.equal(0)
     expect(waiver.po).to.equal(9999)
     expect(waiver.type).to.equal(constants.waivers.POACH)
     expect(waiver.succ).to.equal(null)
@@ -322,11 +322,11 @@ describe('API /waivers - poach', function () {
     })
 
     it('claim exceeds roster limits', async () => {
-
+      // TODO
     })
 
     it('claim exceeds available cap', async () => {
-
+      // TODO
     })
   })
 })

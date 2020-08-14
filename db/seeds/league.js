@@ -68,13 +68,15 @@ module.exports = async function (knex) {
       abbrv: `TM${i}`
     })
 
-    await knex('rosters').insert({
-      tid: i,
-      lid: 1,
-      week: 0,
-      year: constants.season.year,
-      last_updated: Math.round(Date.now() / 1000)
-    })
+    for (let week = 0; week <= constants.season.finalWeek; week++) {
+      await knex('rosters').insert({
+        tid: i,
+        lid: 1,
+        week,
+        year: constants.season.year,
+        last_updated: Math.round(Date.now() / 1000)
+      })
+    }
 
     await knex('users_teams').insert({
       userid: i,
@@ -88,4 +90,5 @@ module.exports = async function (knex) {
   await knex('trades_transactions').del()
   await knex('trades_drops').del()
   await knex('transactions').del()
+  await knex('waivers').del()
 }
