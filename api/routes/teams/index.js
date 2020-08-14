@@ -1,11 +1,11 @@
 const express = require('express')
-const moment = require('moment')
 const router = express.Router()
 
 const activate = require('./activate')
 const deactivate = require('./deactivate')
+const drop = require('./drop')
 
-const { getRoster, verifyUserTeam } = require('../../../utils')
+const { getRoster, verifyUserTeam, isPlayerLocked } = require('../../../utils')
 const { constants, Roster } = require('../../../common')
 
 router.put('/:teamId', async (req, res) => {
@@ -105,17 +105,8 @@ router.put('/:teamId/lineups/?', async (req, res) => {
       return res.status(400).send({ error: 'can not edit previous lineups' })
     }
 
-    let playerQuery = db('player')
+    const players = await db('player')
       .where({ player })
-
-    if (week > 0) {
-      playerQuery = playerQuery
-        .joinRaw('left join schedule on player.cteam = schedule.v or player.cteam = schedule.h')
-        .where('schedule.wk', week)
-        .where('schedule.seas', year)
-    }
-
-    const players = await playerQuery
 
     if (!players.length) {
       return res.status(400).send({ error: 'invalid player' })
@@ -137,8 +128,8 @@ router.put('/:teamId/lineups/?', async (req, res) => {
       return res.status(400).send({ error: 'player is not eligible for slot' })
     }
 
-    const gameStart = moment(playerRow.date, 'M/D/YYYY H:m')
-    if (moment().isAfter(gameStart)) {
+    const isLocked = await isPlayerLocked(player)
+    if (isLocked) {
       return res.status(400).send({ error: 'player is locked, game has started' })
     }
 
@@ -160,5 +151,6 @@ router.put('/:teamId/lineups/?', async (req, res) => {
 
 router.use('/:teamId/activate', activate)
 router.use('/:teamId/deactivate', deactivate)
+router.use('/:teamId/drop', drop)
 
 module.exports = router

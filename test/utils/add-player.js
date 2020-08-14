@@ -1,7 +1,7 @@
 const db = require('../../db')
 const { constants } = require('../../common')
 
-module.exports = async ({ leagueId, player, teamId, userId }) => {
+module.exports = async ({ leagueId, player, teamId, userId, slot = constants.slots.BENCH }) => {
   const rosters = await db('rosters').where({
     week: constants.season.week,
     year: constants.season.year,
@@ -23,7 +23,7 @@ module.exports = async ({ leagueId, player, teamId, userId }) => {
   await db('rosters_players').insert({
     rid: rosterId,
     player: player.player,
-    slot: constants.slots.BENCH,
+    slot,
     pos: player.pos1
   })
 }
