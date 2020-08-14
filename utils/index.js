@@ -22,6 +22,7 @@ module.exports = {
   getSchedule: require('./get-schedule'),
   fixTeam: require('./fix-team'),
   isPlayerOnWaivers: require('./is-player-on-waivers'),
+  isPlayerRostered: require('./is-player-rostered'),
   isPlayerLocked: require('./is-player-locked'),
   submitPoach: require('./submit-poach'),
   processPoach: require('./process-poach'),

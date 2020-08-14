@@ -5,6 +5,7 @@ const router = express.Router({ mergeParams: true })
 const { constants, Roster } = require('../../../common')
 const {
   getRoster,
+  isPlayerRostered,
   isPlayerOnWaivers,
   verifyUserTeam
 } = require('../../../utils')
@@ -72,7 +73,11 @@ router.post('/?', async (req, res) => {
 
     // make sure player is on waivers & it's not a duplicate waiver
     if (type === constants.waivers.FREE_AGENCY) {
-      // if its outside the waiver period - check if he's been dropped recently (excluding cycling)
+      const isRostered = await isPlayerRostered({ player, leagueId })
+      if (isRostered) {
+        return res.status(400).send({ error: 'player rostered' })
+      }
+
       if (!constants.season.isWaiverPeriod) {
         const isOnWaivers = await isPlayerOnWaivers({ player, leagueId })
         if (!isOnWaivers) {

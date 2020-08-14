@@ -312,12 +312,12 @@ describe('API /waivers - update', function () {
     })
 
     it('not logged in', async () => {
-      const request = await chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
+      const request = chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
       await notLoggedIn(request)
     })
 
     it('missing teamId', async () => {
-      const request = await chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
+      const request = chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
@@ -329,7 +329,7 @@ describe('API /waivers - update', function () {
     })
 
     it('missing leagueId', async () => {
-      const request = await chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
+      const request = chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1,
@@ -341,7 +341,7 @@ describe('API /waivers - update', function () {
     })
 
     it('missing field', async () => {
-      const request = await chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
+      const request = chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1,
@@ -353,7 +353,7 @@ describe('API /waivers - update', function () {
     })
 
     it('missing value', async () => {
-      const request = await chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
+      const request = chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1,
@@ -365,7 +365,7 @@ describe('API /waivers - update', function () {
     })
 
     it('invalid teamId', async () => {
-      const request = await chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
+      const request = chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 'x',
@@ -378,7 +378,7 @@ describe('API /waivers - update', function () {
     })
 
     it('invalid leagueId', async () => {
-      const request = await chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
+      const request = chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1,
@@ -391,7 +391,7 @@ describe('API /waivers - update', function () {
     })
 
     it('invalid field', async () => {
-      const request = await chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
+      const request = chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1,
@@ -404,7 +404,7 @@ describe('API /waivers - update', function () {
     })
 
     it('invalid bid - negative', async () => {
-      const request = await chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
+      const request = chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1,
@@ -417,7 +417,7 @@ describe('API /waivers - update', function () {
     })
 
     it('invalid bid - exceed cap', async () => {
-      const request = await chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
+      const request = chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1,
@@ -430,7 +430,7 @@ describe('API /waivers - update', function () {
     })
 
     it('invalid bid - float', async () => {
-      const request = await chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
+      const request = chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1,
@@ -443,7 +443,7 @@ describe('API /waivers - update', function () {
     })
 
     it('invalid drop', async () => {
-      const request = await chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
+      const request = chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1,
@@ -456,7 +456,7 @@ describe('API /waivers - update', function () {
     })
 
     it('teamId does not belong to userId', async () => {
-      const request = await chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
+      const request = chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
         .set('Authorization', `Bearer ${user2}`)
         .send({
           teamId: 1,
@@ -469,7 +469,7 @@ describe('API /waivers - update', function () {
     })
 
     it('waiverId does not belong to teamId', async () => {
-      const request = await chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
+      const request = chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
         .set('Authorization', `Bearer ${user2}`)
         .send({
           teamId: 2,
@@ -491,7 +491,7 @@ describe('API /waivers - update', function () {
           leagueId: 1
         })
 
-      const request = await chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
+      const request = chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1,
@@ -528,7 +528,7 @@ describe('API /waivers - update', function () {
 
       waiverId = submitRes.body.uid
 
-      const request = await chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
+      const request = chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1,
