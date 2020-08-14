@@ -584,6 +584,7 @@ CREATE TABLE `poaches` (
   `drop` varchar(7) DEFAULT NULL,
   `tid` int(5) NOT NULL,
   `lid` int(6) NOT NULL,
+  `succ` tinyint(1) DEFAULT NULL,
   `submitted` int(11) NOT NULL,
   `reason` varchar(255) DEFAULT NULL,
   `processed` int(11) NOT NULL,
