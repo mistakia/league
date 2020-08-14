@@ -5,5 +5,6 @@ module.exports = {
   missing: require('./missing'),
   invalid: require('./invalid'),
   error: require('./error'),
-  addPlayer: require('./add-player')
+  addPlayer: require('./add-player'),
+  dropPlayer: require('./drop-player')
 }

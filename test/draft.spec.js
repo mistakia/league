@@ -127,13 +127,17 @@ describe('API /draft', function () {
       await invalid(request, 'teamId')
     })
 
-    it('invalid playerId', async () => {
+    it('invalid playerId - does not exist', async () => {
       MockDate.set(start.clone().subtract('1', 'month').add('1', 'day').toDate())
       const request = chai.request(server).post('/api/leagues/1/draft')
         .set('Authorization', `Bearer ${user2}`)
         .send({ playerId: 'xx', pickId: 2, teamId: 2 })
 
       await invalid(request, 'playerId')
+    })
+
+    it('invalid playerId - position', async () => {
+      // TODO
     })
 
     it('invalid leagueId', async () => {
@@ -144,15 +148,7 @@ describe('API /draft', function () {
       await invalid(request, 'leagueId')
     })
 
-    it('teamId does not belong to userId', async () => {
-      const request = chai.request(server).post('/api/leagues/1/draft')
-        .set('Authorization', `Bearer ${user1}`)
-        .send({ playerId: 'xx', pickId: 2, teamId: 2 })
-
-      await invalid(request, 'teamId')
-    })
-
-    it('player not a rookie', async () => {
+    it('invalid playerId - not a rookie', async () => {
       const players = await knex('player').where('start', constants.season.year - 1).limit(1)
       const player = players[0]
       const request = chai.request(server)
@@ -165,6 +161,14 @@ describe('API /draft', function () {
         })
 
       await invalid(request, 'playerId')
+    })
+
+    it('teamId does not belong to userId', async () => {
+      const request = chai.request(server).post('/api/leagues/1/draft')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({ playerId: 'xx', pickId: 2, teamId: 2 })
+
+      await invalid(request, 'teamId')
     })
 
     it('draft hasnt started', async () => {
