@@ -3,12 +3,17 @@ const moment = require('moment')
 const router = express.Router({ mergeParams: true })
 
 const { constants, Roster } = require('../../../common')
-const { getRoster, isPlayerOnWaivers } = require('../../../utils')
+const {
+  getRoster,
+  isPlayerOnWaivers,
+  verifyUserTeam
+} = require('../../../utils')
 
 router.post('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    const { player, drop, leagueId, bid, type, teamId } = req.body
+    const { player, drop, leagueId, type, teamId } = req.body
+    const bid = req.body.bid || 0
 
     if (!player) {
       return res.status(400).send({ error: 'missing player' })
@@ -37,16 +42,15 @@ router.post('/?', async (req, res) => {
     const tid = parseInt(teamId, 10)
 
     // verify teamId, leagueId belongs to user
-    const userTeams = await db('users_teams')
-      .join('teams', 'users_teams.tid', 'teams.uid')
-      .where('userid', req.user.userId)
-    const team = userTeams.find(p => p.tid === tid)
-    if (!team) {
-      return res.status(400).send({ error: 'invalid teamId' })
-    }
-
-    if (team.lid !== leagueId) {
-      return res.status(400).send({ error: 'invalid leagueId' })
+    try {
+      await verifyUserTeam({
+        userId: req.user.userId,
+        leagueId,
+        teamId,
+        requireLeague: true
+      })
+    } catch (error) {
+      return res.status(400).send({ error: error.message })
     }
 
     const playerIds = [player]
@@ -78,9 +82,13 @@ router.post('/?', async (req, res) => {
 
       // check for duplicate claims
       const claimsQuery = db('waivers')
-        .where({ player, lid: leagueId, tid, bid })
+        .where({ player, lid: leagueId, tid })
         .whereNull('processed')
         .whereNull('cancelled')
+
+      if (bid) {
+        claimsQuery.where('bid', bid)
+      }
 
       if (drop) {
         claimsQuery.where('drop', drop)
@@ -196,29 +204,29 @@ router.put('/order', async (req, res) => {
     }
 
     // verify teamId, leagueId belongs to user
-    const tid = parseInt(teamId, 10)
-    const userTeams = await db('users_teams')
-      .join('teams', 'users_teams.tid', 'teams.uid')
-      .where('userid', req.user.userId)
-    const team = userTeams.find(p => p.tid === tid)
-    if (!team) {
-      return res.status(400).send({ error: 'invalid teamId' })
+    try {
+      await verifyUserTeam({
+        userId: req.user.userId,
+        leagueId,
+        teamId,
+        requireLeague: true
+      })
+    } catch (error) {
+      return res.status(400).send({ error: error.message })
     }
 
-    if (team.lid !== leagueId) {
-      return res.status(400).send({ error: 'invalid leagueId' })
-    }
+    const tid = parseInt(teamId, 10)
 
     const result = []
     for (const [index, waiverId] of waivers.entries()) {
-      const res = await db('waivers')
+      await db('waivers')
         .update('po', index)
         .where({
           uid: waiverId,
           tid,
           lid: leagueId
         })
-      result.push(res[0])
+      result.push(waiverId)
     }
     res.send(result)
   } catch (error) {
@@ -265,25 +273,26 @@ router.put('/:waiverId', async (req, res) => {
     }
 
     // verify teamId, leagueId belongs to user
-    const tid = parseInt(teamId, 10)
-    const userTeams = await db('users_teams')
-      .join('teams', 'users_teams.tid', 'teams.uid')
-      .where('userid', req.user.userId)
-    const team = userTeams.find(p => p.tid === tid)
-    if (!team) {
-      return res.status(400).send({ error: 'invalid teamId' })
+    let team
+    try {
+      team = await verifyUserTeam({
+        userId: req.user.userId,
+        leagueId,
+        teamId,
+        requireLeague: true
+      })
+    } catch (error) {
+      return res.status(400).send({ error: error.message })
     }
 
-    if (team.lid !== leagueId) {
-      return res.status(400).send({ error: 'invalid leagueId' })
-    }
+    const tid = parseInt(teamId, 10)
 
     // verify waiverId belongs to teamId
     const waivers = await db('waivers').where({
       uid: waiverId,
       tid,
       lid: leagueId
-    })
+    }).whereNull('processed').whereNull('cancelled')
 
     if (!waivers.length) {
       return res.status(400).send({ error: 'invalid waiverId' })
@@ -292,7 +301,7 @@ router.put('/:waiverId', async (req, res) => {
 
     // if bid - make sure it is below available faab
     if (field === 'bid' && value > team.faab) {
-      return res.status(400).send({ error: 'bid exceeds avaialble faab' })
+      return res.status(400).send({ error: 'bid exceeds available faab' })
     }
 
     // if drop - make sure it is a suitable drop player
@@ -315,7 +324,12 @@ router.put('/:waiverId', async (req, res) => {
         year: constants.season.year
       })
       const roster = new Roster({ roster: rosterRow, league })
+      // verify drop player on roster
+      if (!roster.has(value)) {
+        return res.status(400).send({ error: 'invalid value' })
+      }
       roster.removePlayer(value)
+      // verify team has roster space
       const hasSlot = roster.hasOpenBenchSlot(playerRow.pos1)
       if (!hasSlot) {
         return res.status(400).send({ error: 'can not add player to roster, invalid roster' })
@@ -349,18 +363,18 @@ router.post('/:waiverId/cancel', async (req, res) => {
     }
 
     // verify teamId, leagueId belongs to user
-    const tid = parseInt(teamId, 10)
-    const userTeams = await db('users_teams')
-      .join('teams', 'users_teams.tid', 'teams.uid')
-      .where('userid', req.user.userId)
-    const team = userTeams.find(p => p.tid === tid)
-    if (!team) {
-      return res.status(400).send({ error: 'invalid teamId' })
+    try {
+      await verifyUserTeam({
+        userId: req.user.userId,
+        leagueId,
+        teamId,
+        requireLeague: true
+      })
+    } catch (error) {
+      return res.status(400).send({ error: error.message })
     }
 
-    if (team.lid !== leagueId) {
-      return res.status(400).send({ error: 'invalid leagueId' })
-    }
+    const tid = parseInt(teamId, 10)
 
     // verify waiverId belongs to teamId
     const waivers = await db('waivers')

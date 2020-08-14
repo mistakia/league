@@ -4,5 +4,6 @@ module.exports = {
   notLoggedIn: require('./not-logged-in'),
   missing: require('./missing'),
   invalid: require('./invalid'),
-  error: require('./error')
+  error: require('./error'),
+  addPlayer: require('./add-player')
 }
