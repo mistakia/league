@@ -39,7 +39,7 @@ export function getTeamEvents (state) {
   if (nextPick) {
     const date = moment(league.ddate, 'X').add((nextPick.pick - 1), 'days')
     events.push({
-      detail: 'Next Pick',
+      detail: 'Draft Pick',
       date
     })
   }
