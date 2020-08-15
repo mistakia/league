@@ -1,4 +1,9 @@
+import moment from 'moment'
+
 import { getApp } from '@core/app'
+import { getNextPick } from '@core/draft'
+import { getActivePoachesAgainstMyPlayers } from '@core/poaches'
+import { getCurrentLeague } from '@core/leagues'
 
 import { Team } from './team'
 
@@ -14,4 +19,30 @@ export function getTeamById (state, { tid }) {
 export function getCurrentTeam (state) {
   const { teamId } = getApp(state)
   return getTeams(state).get(teamId)
+}
+
+export function getTeamEvents (state) {
+  const league = getCurrentLeague(state)
+  const nextPick = getNextPick(state)
+  const activePoaches = getActivePoachesAgainstMyPlayers(state)
+
+  const events = []
+
+  for (const poach of activePoaches.valueSeq()) {
+    const date = moment(poach.submitted, 'X').add('48', 'hours')
+    events.push({
+      detail: 'Claim Expires',
+      date
+    })
+  }
+
+  if (nextPick) {
+    const date = moment(league.ddate, 'X').add((nextPick.pick - 1), 'days')
+    events.push({
+      detail: 'Next Pick',
+      date
+    })
+  }
+
+  return events.sort((a, b) => a.date.unix() - b.date.unix())
 }

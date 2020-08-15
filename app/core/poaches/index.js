@@ -3,5 +3,6 @@ export { poachesReducer } from './reducer'
 export { poachSagas } from './sagas'
 export {
   getPoachesForCurrentLeague,
-  getPoachPlayersForCurrentLeague
+  getPoachPlayersForCurrentLeague,
+  getActivePoachesAgainstMyPlayers
 } from './selectors'
