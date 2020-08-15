@@ -11,9 +11,17 @@ router.post('/?', async (req, res) => {
     const { teamId } = req.params
     const { player, leagueId } = req.body
 
+    if (!player) {
+      return res.status(400).send({ error: 'missing player' })
+    }
+
+    if (!leagueId) {
+      return res.status(400).send({ error: 'missing leagueId' })
+    }
+
     // verify teamId
     try {
-      await verifyUserTeam({ userId: req.user.userId, teamId })
+      await verifyUserTeam({ userId: req.user.userId, teamId, leagueId, requireLeague: true })
     } catch (error) {
       return res.status(400).send({ error: error.message })
     }

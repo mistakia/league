@@ -19,6 +19,19 @@ router.put('/:leagueId', async (req, res) => {
     const { field } = req.body
     let { value } = req.body
 
+    // verify leagueId
+    const lid = parseInt(leagueId, 10)
+    const leagues = await db('leagues').where({ uid: lid }).limit(1)
+    if (!leagues.length) {
+      return res.status(400).send({ error: 'invalid leagueId' })
+    }
+
+    // verify user is commish
+    const league = leagues[0]
+    if (league.commishid !== req.user.userId) {
+      return res.status(400).send({ error: 'invalid leagueId' })
+    }
+
     const fields = [
       'sqb', 'srb', 'swr', 'ste', 'sk', 'sdst', 'srbwr', 'srbwrte',
       'sqbrbwrte', 'swrte', 'bench', 'ps', 'ir', 'mqb', 'mrb', 'mwr', 'mte',
@@ -71,7 +84,7 @@ router.put('/:leagueId', async (req, res) => {
       }
     }
 
-    await db('leagues').update({ [field]: value }).where({ uid: leagueId })
+    await db('leagues').update({ [field]: value }).where({ uid: lid })
     res.send({ value })
   } catch (err) {
     logger(err)
