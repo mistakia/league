@@ -1,20 +1,29 @@
-/* global describe, before */
+/* global describe before it beforeEach */
 process.env.NODE_ENV = 'test'
 
 const chai = require('chai')
 const chaiHTTP = require('chai-http')
-// const server = require('../api')
+const MockDate = require('mockdate')
+
+const server = require('../api')
 const knex = require('../db')
 
-// const league = require('../db/seeds/league')
-// const draft = require('../db/seeds/draft')
-// const { constants } = require('../common')
+const league = require('../db/seeds/league')
+const { constants } = require('../common')
+const { start } = constants.season
+const { user1 } = require('./fixtures/token')
+const {
+  selectPlayer,
+  addPlayer,
+  invalid,
+  missing,
+  error,
+  notLoggedIn
+} = require('./utils')
 
-// const should = chai.should()
-
-// const { user1, user2 } = require('./fixtures/token')
-
+chai.should()
 chai.use(chaiHTTP)
+const expect = chai.expect
 
 describe('API /teams - lineups', function () {
   before(async function () {
@@ -23,24 +32,228 @@ describe('API /teams - lineups', function () {
     await knex.migrate.rollback()
     await knex.migrate.latest()
     await knex.seed.run()
+
+    await league(knex)
   })
 
-  // - change current week lineup
-  // - change future week lineup
+  describe('put', function () {
+    it('current week', async () => {
+      const leagueId = 1
+      const teamId = 1
+      const userId = 1
+      const player = await selectPlayer({ pos: 'RB' })
+      await addPlayer({
+        leagueId,
+        player,
+        teamId,
+        userId
+      })
 
-  // errors
+      const res = await chai.request(server)
+        .put('/api/teams/1/lineups')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          player: player.player,
+          leagueId,
+          slot: constants.slots.RB
+        })
 
-  // - not logged in
-  // - invalid userId
-  // - invalid leagueId
-  // - invalid teamId
-  // - invalid player
-  // - teamId doesn't belong to userId
+      res.should.have.status(200)
+      // eslint-disable-next-line
+      res.should.be.json
 
-  // - move player to invalid slot
+      res.body.slot.should.equal(constants.slots.RB)
+      res.body.player.should.equal(player.player)
+      res.body.week.should.equal(constants.season.week)
+      res.body.year.should.equal(constants.season.year)
+      res.body.tid.should.equal(teamId)
 
-  // - use player not on active roster
-  // - use player on another team
-  // - change a prior week lineup
-  // - change a locked starter
+      const rosterRows = await knex('rosters_players')
+        .join('rosters', 'rosters_players.rid', 'rosters.uid')
+        .where({
+          player: player.player,
+          tid: teamId,
+          week: constants.season.week,
+          year: constants.season.year
+        })
+
+      expect(rosterRows[0].slot).to.equal(constants.slots.RB)
+      expect(rosterRows[0].player).to.equal(player.player)
+      expect(rosterRows[0].pos).to.equal(player.pos1)
+      expect(rosterRows[0].tid).to.equal(teamId)
+      expect(rosterRows[0].lid).to.equal(leagueId)
+      expect(rosterRows[0].week).to.equal(constants.season.week)
+      expect(rosterRows[0].year).to.equal(constants.season.year)
+    })
+
+    it('future week', function () {
+      // TODO
+    })
+  })
+
+  describe('errors', function () {
+    beforeEach(async function () {
+      this.timeout(60 * 1000)
+      await league(knex)
+    })
+
+    it('not logged in', async () => {
+      const request = chai.request(server).put('/api/teams/1/lineups')
+      await notLoggedIn(request)
+    })
+
+    it('missing slot', async () => {
+      const request = chai.request(server)
+        .put('/api/teams/1/lineups')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          player: 'x',
+          leagueId: 1
+        })
+
+      await missing(request, 'slot')
+    })
+
+    it('missing player', async () => {
+      const request = chai.request(server)
+        .put('/api/teams/1/lineups')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          leagueId: 1,
+          slot: constants.slots.RB
+        })
+
+      await missing(request, 'player')
+    })
+
+    it('missing leagueId', async () => {
+      const request = chai.request(server)
+        .put('/api/teams/1/lineups')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          player: 'x',
+          slot: constants.slots.RB
+        })
+
+      await missing(request, 'leagueId')
+    })
+
+    it('invalid player - does not exist', async () => {
+      const request = chai.request(server)
+        .put('/api/teams/1/lineups')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          player: 'x',
+          leagueId: 1,
+          slot: constants.slots.RB
+        })
+
+      await invalid(request, 'player')
+    })
+
+    it('teamId does not belong to userId', async () => {
+      const request = chai.request(server)
+        .put('/api/teams/2/lineups')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          player: 'x',
+          leagueId: 1,
+          slot: constants.slots.RB
+        })
+
+      await invalid(request, 'teamId')
+    })
+
+    it('player not eligible for slot', async () => {
+      MockDate.set(start.clone().add('1', 'month').toDate())
+      const player = await selectPlayer({ pos: 'WR' })
+      await addPlayer({
+        leagueId: 1,
+        teamId: 1,
+        player,
+        userId: 1
+      })
+      const request = chai.request(server)
+        .put('/api/teams/1/lineups')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          player: player.player,
+          leagueId: 1,
+          slot: constants.slots.RB
+        })
+
+      await invalid(request, 'slot')
+    })
+
+    it('player not on active roster', async () => {
+      MockDate.set(start.clone().add('1', 'month').toDate())
+      const player = await selectPlayer({ pos: 'WR', rookie: true })
+      await addPlayer({
+        leagueId: 1,
+        teamId: 1,
+        player,
+        userId: 1,
+        slot: constants.slots.PS
+      })
+      const request = chai.request(server)
+        .put('/api/teams/1/lineups')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          player: player.player,
+          leagueId: 1,
+          slot: constants.slots.RB
+        })
+
+      await invalid(request, 'player')
+    })
+
+    it('player not on team', async () => {
+      const player = await selectPlayer()
+      const request = chai.request(server)
+        .put('/api/teams/1/lineups')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          player: player.player,
+          leagueId: 1,
+          slot: constants.slots.RB
+        })
+
+      await invalid(request, 'player')
+    })
+
+    it('previous lineup', async () => {
+      MockDate.set(start.clone().add('1', 'week').toDate())
+      const player = await selectPlayer({ pos: 'WR' })
+      await addPlayer({
+        leagueId: 1,
+        teamId: 1,
+        player,
+        userId: 1
+      })
+
+      MockDate.set(start.clone().add('2', 'week').toDate())
+      await addPlayer({
+        leagueId: 1,
+        teamId: 1,
+        player,
+        userId: 1
+      })
+
+      const request = chai.request(server)
+        .put('/api/teams/1/lineups')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          player: player.player,
+          leagueId: 1,
+          slot: constants.slots.WR,
+          week: 1
+        })
+
+      await error(request, 'lineup locked')
+    })
+
+    it('locked starter', async () => {
+      // TODO
+    })
+  })
 })

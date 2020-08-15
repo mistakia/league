@@ -10,6 +10,8 @@ module.exports = async ({ pos = 'RB', rookie = false } = {}) => {
 
   if (rookie) {
     query.where('start', constants.season.year)
+  } else {
+    query.whereNot('start', constants.season.year)
   }
 
   const players = await query

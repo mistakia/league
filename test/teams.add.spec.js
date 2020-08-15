@@ -1,20 +1,30 @@
-/* global describe, before */
+/* global describe before it beforeEach */
 process.env.NODE_ENV = 'test'
 
 const chai = require('chai')
 const chaiHTTP = require('chai-http')
-// const server = require('../api')
+const MockDate = require('mockdate')
+
+const server = require('../api')
 const knex = require('../db')
 
-// const league = require('../db/seeds/league')
-// const draft = require('../db/seeds/draft')
-// const { constants } = require('../common')
+const league = require('../db/seeds/league')
+const { constants } = require('../common')
+const { start } = constants.season
+const { user1, user2 } = require('./fixtures/token')
+const {
+  addPlayer,
+  selectPlayer,
+  checkLastTransaction,
+  missing,
+  invalid,
+  error,
+  notLoggedIn
+} = require('./utils')
 
-// const should = chai.should()
-
-// const { user1, user2 } = require('./fixtures/token')
-
+chai.should()
 chai.use(chaiHTTP)
+const expect = chai.expect
 
 describe('API /teams - add', function () {
   before(async function () {
@@ -25,25 +35,314 @@ describe('API /teams - add', function () {
     await knex.seed.run()
   })
 
-  // - add dropped free agent
-  // - add free agent
+  describe('post', async function () {
+    beforeEach(async function () {
+      MockDate.set(start.clone().subtract('2', 'month').toDate())
+      await league(knex)
+    })
 
-  // errors
+    it('free agent - active roster - season', async () => {
+      MockDate.set(start.clone().add('2', 'week').day(4).toDate())
+      const player = await selectPlayer()
 
-  // - not logged in
-  // - invalid userId
-  // - invalid leagueId
-  // - invalid teamId
-  // - invalid player
-  // - invalid drop
-  // - teamId doesn't belong to userId
-  // - drop player not on team
+      const teamId = 1
+      const leagueId = 1
+      const userId = 1
+      const res = await chai.request(server)
+        .post('/api/teams/1/add')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          teamId,
+          player: player.player,
+          leagueId,
+          slot: constants.slots.BENCH
+        })
 
-  // - add player outside regular season
-  // - add player on a roster
-  // - add player whose locked
-  // - add player who has a pending waiver claim
-  // - exceed roster space
-  // - add a player whose on waivers - dropped within 24 hrs
-  // - add a player whose on waivers - games to tuesday
+      res.should.have.status(200)
+      // eslint-disable-next-line
+      res.should.be.json
+
+      res.body.length.should.equal(1)
+      res.body[0].player.should.equal(player.player)
+      res.body[0].slot.should.equal(constants.slots.BENCH)
+      // eslint-disable-next-line
+      res.body[0].rid.should.exist
+      res.body[0].pos.should.equal(player.pos1)
+      res.body[0].transaction.userid.should.equal(userId)
+      res.body[0].transaction.tid.should.equal(teamId)
+      res.body[0].transaction.lid.should.equal(leagueId)
+      res.body[0].transaction.player.should.equal(player.player)
+      res.body[0].transaction.type.should.equal(constants.transactions.ROSTER_ADD)
+      res.body[0].transaction.value.should.equal(0)
+      res.body[0].transaction.year.should.equal(constants.season.year)
+
+      const rosters = await knex('rosters_players')
+        .join('rosters', 'rosters_players.rid', 'rosters.uid')
+        .where({
+          player: player.player,
+          tid: teamId,
+          week: constants.season.week,
+          year: constants.season.year
+        })
+
+      expect(rosters.length).to.equal(1)
+      expect(rosters[0].slot).to.equal(constants.slots.BENCH)
+      expect(rosters[0].player).to.equal(player.player)
+      expect(rosters[0].pos).to.equal(player.pos1)
+      expect(rosters[0].tid).to.equal(teamId)
+      expect(rosters[0].lid).to.equal(leagueId)
+      expect(rosters[0].week).to.equal(constants.season.week)
+      expect(rosters[0].year).to.equal(constants.season.year)
+
+      await checkLastTransaction({
+        leagueId,
+        type: constants.transactions.ROSTER_ADD,
+        value: 0,
+        year: constants.season.year,
+        player: player.player,
+        teamId,
+        userId
+      })
+    })
+
+    it('rookie free agent - practice squad - offseason', async () => {
+      MockDate.set(start.clone().subtract('1', 'week').toDate())
+      const player = await selectPlayer({ rookie: true })
+
+      const teamId = 1
+      const leagueId = 1
+      const userId = 1
+      const res = await chai.request(server)
+        .post('/api/teams/1/add')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          teamId,
+          player: player.player,
+          leagueId,
+          slot: constants.slots.PS
+        })
+
+      res.should.have.status(200)
+      // eslint-disable-next-line
+      res.should.be.json
+
+      res.body.length.should.equal(1)
+      res.body[0].player.should.equal(player.player)
+      res.body[0].slot.should.equal(constants.slots.PS)
+      // eslint-disable-next-line
+      res.body[0].rid.should.exist
+      res.body[0].pos.should.equal(player.pos1)
+      res.body[0].transaction.userid.should.equal(userId)
+      res.body[0].transaction.tid.should.equal(teamId)
+      res.body[0].transaction.lid.should.equal(leagueId)
+      res.body[0].transaction.player.should.equal(player.player)
+      res.body[0].transaction.type.should.equal(constants.transactions.PRACTICE_ADD)
+      res.body[0].transaction.value.should.equal(0)
+      res.body[0].transaction.year.should.equal(constants.season.year)
+
+      const rosters = await knex('rosters_players')
+        .join('rosters', 'rosters_players.rid', 'rosters.uid')
+        .where({
+          player: player.player,
+          tid: teamId,
+          week: constants.season.week,
+          year: constants.season.year
+        })
+
+      expect(rosters.length).to.equal(1)
+      expect(rosters[0].slot).to.equal(constants.slots.PS)
+      expect(rosters[0].player).to.equal(player.player)
+      expect(rosters[0].pos).to.equal(player.pos1)
+      expect(rosters[0].tid).to.equal(teamId)
+      expect(rosters[0].lid).to.equal(leagueId)
+      expect(rosters[0].week).to.equal(constants.season.week)
+      expect(rosters[0].year).to.equal(constants.season.year)
+
+      await checkLastTransaction({
+        leagueId,
+        type: constants.transactions.PRACTICE_ADD,
+        value: 0,
+        year: constants.season.year,
+        player: player.player,
+        teamId,
+        userId
+      })
+    })
+  })
+
+  describe('error', function () {
+    beforeEach(async function () {
+      MockDate.set(start.clone().subtract('2', 'month').toDate())
+      await league(knex)
+    })
+
+    it('not logged in', async () => {
+      const request = chai.request(server).post('/api/teams/1/add')
+      await notLoggedIn(request)
+    })
+
+    it('missing player', async () => {
+      const request = chai.request(server).post('/api/teams/1/add')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          teamId: 1,
+          leagueId: 1,
+          slot: constants.slots.PS
+        })
+
+      await missing(request, 'player')
+    })
+
+    it('missing leagueId', async () => {
+      const request = chai.request(server).post('/api/teams/1/add')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          teamId: 1,
+          player: 'x',
+          slot: constants.slots.PS
+        })
+
+      await missing(request, 'leagueId')
+    })
+
+    it('missing slot', async () => {
+      const request = chai.request(server).post('/api/teams/1/add')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          teamId: 1,
+          leagueId: 1,
+          player: 'x'
+        })
+
+      await missing(request, 'slot')
+    })
+
+    it('missing teamId', async () => {
+      const request = chai.request(server).post('/api/teams/1/add')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          player: 'x',
+          leagueId: 1,
+          slot: constants.slots.PS
+        })
+
+      await missing(request, 'teamId')
+    })
+
+    it('invalid slot', async () => {
+      const request = chai.request(server).post('/api/teams/1/add')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          teamId: 1,
+          leagueId: 1,
+          player: 'x',
+          slot: 'x'
+        })
+
+      await invalid(request, 'slot')
+    })
+
+    it('teamId does not belong to userId', async () => {
+      const request = chai.request(server).post('/api/teams/1/add')
+        .set('Authorization', `Bearer ${user2}`)
+        .send({
+          teamId: 1,
+          player: 'x',
+          leagueId: 1,
+          slot: constants.slots.PS
+        })
+
+      await invalid(request, 'teamId')
+    })
+
+    it('drop player not on team', async () => {
+      MockDate.set(start.clone().add('2', 'week').day(4).toDate())
+      const player = await selectPlayer()
+      const drop = await selectPlayer()
+      const request = chai.request(server).post('/api/teams/1/add')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          teamId: 1,
+          player: player.player,
+          drop: drop.player,
+          leagueId: 1,
+          slot: constants.slots.BENCH
+        })
+
+      await invalid(request, 'drop')
+    })
+
+    it('player is not free agent', async () => {
+      const player = await selectPlayer()
+      await addPlayer({ leagueId: 1, player, teamId: 2, userId: 2 })
+
+      const request = chai.request(server).post('/api/teams/1/add')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          teamId: 1,
+          player: player.player,
+          leagueId: 1,
+          slot: constants.slots.BENCH
+        })
+
+      await error(request, 'player is not a free agent')
+    })
+
+    it('add veteran free agent to active roster - offseason', async () => {
+      MockDate.set(start.clone().subtract('1', 'week').toDate())
+      const player = await selectPlayer({ rookie: false })
+      const request = chai.request(server).post('/api/teams/1/add')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          teamId: 1,
+          player: player.player,
+          leagueId: 1,
+          slot: constants.slots.BENCH
+        })
+
+      await error(request, 'player is locked')
+    })
+
+    it('free agent locked', async () => {
+      // TODO
+    })
+
+    it('free agent has unprocessed waiver claim', async () => {
+      MockDate.set(start.clone().add('2', 'week').day(3).hour(14).toDate())
+      const player = await selectPlayer({ rookie: false })
+
+      await knex('waivers').insert({
+        userid: 2,
+        player: player.player,
+        tid: 2,
+        lid: 1,
+        submitted: Math.round(Date.now() / 1000),
+        po: 9999,
+        type: constants.waivers.FREE_AGENCY
+      })
+
+      const request = chai.request(server).post('/api/teams/1/add')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          teamId: 1,
+          player: player.player,
+          leagueId: 1,
+          slot: constants.slots.BENCH
+        })
+
+      await error(request, 'player has pending waiver claim')
+    })
+
+    it('exceeded roster limit', async () => {
+      // TODO
+    })
+
+    it('free agent on waivers - dropped within 24 hrs', async () => {
+      // TODO
+    })
+
+    it('free agent on waivers - waiver period', async () => {
+      // TODO
+    })
+  })
 })

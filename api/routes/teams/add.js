@@ -7,10 +7,31 @@ const { submitAcquisition, verifyUserTeam } = require('../../../utils')
 router.post('/?', async (req, res) => {
   const { db, logger, broadcast } = req.app.locals
   try {
-    const { player, drop, leagueId, teamId } = req.body
+    const { player, drop, leagueId, teamId, slot } = req.body
 
-    if (!constants.isRegularSeason) {
-      return res.stauts(400).send({ error: 'free agency has not started' })
+    if (!player) {
+      return res.status(400).send({ error: 'missing player' })
+    }
+
+    if (!leagueId) {
+      return res.status(400).send({ error: 'missing leagueId' })
+    }
+
+    if (!slot) {
+      return res.status(400).send({ error: 'missing slot' })
+    }
+
+    if (!teamId) {
+      return res.status(400).send({ error: 'missing teamId' })
+    }
+
+    const validSlots = [
+      constants.slots.BENCH,
+      constants.slots.PS
+    ]
+
+    if (!validSlots.includes(slot)) {
+      return res.status(400).send({ error: 'invalid slot' })
     }
 
     // verify teamId
@@ -21,30 +42,22 @@ router.post('/?', async (req, res) => {
     }
     const tid = parseInt(teamId, 10)
 
-    if (!player) {
-      return res.status(400).send({ error: 'missing player param' })
+    // verify player does not have outstanding unprocessed waiver claim
+    if (constants.season.isRegularSeason) {
+      // verify not in waiver period
+      if (constants.season.isWaiverPeriod) {
+        return res.status(400).send({ error: 'player is on waivers' })
+      }
+
+      const waivers = await db('waivers')
+        .where({ player, lid: leagueId })
+        .whereNull('cancelled')
+        .whereNull('processed')
+
+      if (waivers.length) {
+        return res.status(400).send({ error: 'player has pending waiver claim' })
+      }
     }
-
-    // verify player drop ids
-    const playerIds = [player]
-    if (drop) playerIds.push(drop)
-    const playerRows = await db('player').whereIn('player', playerIds)
-    if (playerRows.length !== playerIds.length) {
-      return res.status(400).send({ error: 'invalid player/drop ids' })
-    }
-
-    // verify not in waiver period
-    if (constants.season.isWaiverPeriod) {
-      return res.status(400).send({ error: 'player is on waivers' })
-    }
-
-    // TODO - verify player does not have outstanding unprocessed waiver claim
-
-    // verify drop player
-
-    // verify roster space
-
-    // update roster
 
     let transactions = []
     try {
@@ -53,7 +66,8 @@ router.post('/?', async (req, res) => {
         drop,
         player,
         teamId: tid,
-        userId: req.user.userId
+        userId: req.user.userId,
+        slot
       })
     } catch (error) {
       return res.status(400).send({ error: error.message })
