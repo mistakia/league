@@ -56,6 +56,7 @@ module.exports = async function (knex) {
   await knex('users_teams').del()
   await knex('teams').del()
   await knex('rosters').del()
+  await knex('rosters_players').del()
   for (let i = 1; i <= 12; i++) {
     await knex('teams').insert({
       uid: i,

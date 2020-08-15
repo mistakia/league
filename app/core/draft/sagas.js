@@ -1,9 +1,11 @@
+import moment from 'moment'
 import { call, takeLatest, fork, select } from 'redux-saga/effects'
 
-import { getApp } from '@core/app'
+import { getApp, appActions } from '@core/app'
 import { draftActions } from './actions'
 import { fetchDraft, postDraft } from '@core/api'
 import { getDraft, getNextPick } from './selectors'
+import { getCurrentLeague } from '@core/leagues'
 
 export function * loadDraft () {
   const { leagueId } = yield select(getApp)
@@ -18,6 +20,18 @@ export function * draftPlayer () {
   yield call(postDraft, params)
 }
 
+export function * init () {
+  const league = yield select(getCurrentLeague)
+  if (league.ddate) {
+    const start = moment(league.ddate, 'X')
+    const totalPicks = league.nteams * 3
+    const end = start.clone().add(totalPicks, 'day')
+    if (moment().isBetween(start, end)) {
+      yield call(fetchDraft, { leagueId: league.uid })
+    }
+  }
+}
+
 //= ====================================
 //  WATCHERS
 // -------------------------------------
@@ -30,11 +44,16 @@ export function * watchDraftPlayer () {
   yield takeLatest(draftActions.DRAFT_PLAYER, draftPlayer)
 }
 
+export function * watchAuthFulfilled () {
+  yield takeLatest(appActions.AUTH_FULFILLED, init)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
 
 export const draftSagas = [
   fork(watchLoadDraft),
-  fork(watchDraftPlayer)
+  fork(watchDraftPlayer),
+  fork(watchAuthFulfilled)
 ]
