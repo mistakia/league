@@ -37,6 +37,9 @@ module.exports = async function (claim) {
   })
   const roster = new Roster({ roster: rosterRow, league })
   if (claim.drop) {
+    if (!roster.has(claim.drop)) {
+      throw new Error('drop player not on poaching team roster')
+    }
     roster.removePlayer(claim.drop)
   }
   const hasSlot = roster.hasOpenBenchSlot(poachPlayer.pos1)
