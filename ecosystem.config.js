@@ -16,6 +16,7 @@ module.exports = {
       ref: 'origin/master',
       repo: 'https://github.com/mistakia/league.git',
       path: '/root/league',
+      'pre-deploy': 'git pull',
       'pre-deploy-local': '',
       'post-deploy': 'source /root/.bash_profile && /root/.yarn/bin/yarn install && pm2 reload ecosystem.config.js --env production',
       'pre-setup': ''
