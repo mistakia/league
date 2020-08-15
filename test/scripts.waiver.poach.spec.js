@@ -40,6 +40,36 @@ describe('SCRIPTS /waivers - poach', function () {
     it('no waivers to process - offseason', async () => {
       MockDate.set(start.clone().subtract('1', 'month').toDate())
 
+      let error
+      try {
+        await run()
+      } catch (err) {
+        error = err
+      }
+
+      // eslint-disable-next-line
+      expect(error).to.exist
+      expect(error.message).to.equal('no waivers to process')
+    })
+
+    it('no waivers to process - season', async () => {
+      MockDate.set(start.clone().add('1', 'month').toDate())
+
+      let error
+      try {
+        await run()
+      } catch (err) {
+        error = err
+      }
+
+      // eslint-disable-next-line
+      expect(error).to.exist
+      expect(error.message).to.equal('no waivers to process')
+    })
+
+    it('no waivers ready to process - offseason', async () => {
+      MockDate.set(start.clone().subtract('1', 'month').toDate())
+
       const player = await selectPlayer({ rookie: true })
       await addPlayer({
         leagueId: 1,
@@ -81,7 +111,7 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(waivers[0].cancelled).to.equal(null)
     })
 
-    it('no waivers to process - season', async () => {
+    it('no waivers ready to process - season', async () => {
       MockDate.set(start.clone().add('1', 'month').day(5).toDate())
 
       const player = await selectPlayer({ rookie: true })

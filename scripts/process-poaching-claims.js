@@ -7,24 +7,28 @@ const db = require('../db')
 const { processPoach, sendNotifications } = require('../utils')
 
 const log = debug('process:claims')
-debug.enable('process:claims')
-
-const timestamp = Math.round(Date.now() / 1000)
+if (process.env.NODE_ENV !== 'test') {
+  debug.enable('process:claims')
+}
 
 const run = async () => {
+  const timestamp = Math.round(Date.now() / 1000)
+
   const cutoff = moment().subtract('48', 'hours').format('X')
   const claims = await db('poaches')
     .where('submitted', '<', cutoff)
     .whereNull('processed')
 
   if (!claims.length) {
-    log('no claims to process')
-    process.exit()
+    throw new Error('no claims to process')
   }
 
   for (const claim of claims) {
     let error
+    let player
     try {
+      const players = await db('player').where({ player: claim.player }).limit(1)
+      player = players[0]
       await processPoach(claim)
       log(`poaching claim awarded to teamId: (${claim.tid}) for ${claim.player}`)
     } catch (err) {
@@ -35,25 +39,36 @@ const run = async () => {
         teamIds: [claim.tid],
         voice: false,
         league: false,
-        message: 'Your poaching claim was unsuccessful.' // TODO - update add player info
+        message: player
+          ? `Your poaching claim for ${player.fname} ${player.lname} (${player.pos1}) was unsuccessful`
+          : 'Your poaching claim was unsuccessful.'
       })
     }
 
     await db('poaches')
       .update('processed', timestamp)
       .update('reason', error ? error.message : null) // TODO - add error codes
+      .update('succ', error ? 0 : 1)
       .where({
         player: claim.player,
         tid: claim.tid,
         lid: claim.lid
       })
   }
+}
+
+module.exports = run
+
+const main = async () => {
+  try {
+    await run()
+  } catch (error) {
+    console.log(error)
+  }
 
   process.exit()
 }
 
-try {
-  run()
-} catch (error) {
-  console.log(error)
+if (!module.parent) {
+  main()
 }

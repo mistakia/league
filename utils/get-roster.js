@@ -9,6 +9,7 @@ module.exports = async ({ tid, week = constants.season.week, year = constants.se
     .where('rid', rosterRow.uid)
     .where('transactions.tid', tid)
     .orderBy('transactions.timestamp', 'desc')
+    .orderBy('transactions.uid', 'desc')
 
   rosterRow.players = uniqBy(players, 'player')
 
