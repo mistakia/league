@@ -40,7 +40,7 @@ export function getLeagueEvents (state) {
     }
   }
 
-  const firstDayOfWaivers = constants.season.start.add('1', 'week')
+  const firstDayOfWaivers = constants.season.start.clone().add('1', 'week')
   if (now.isBefore(firstDayOfWaivers)) {
     events.push({
       detail: 'Sign Veteran FAs',
@@ -51,7 +51,7 @@ export function getLeagueEvents (state) {
   if (now.isBefore(constants.season.openingDay)) {
     events.push({
       detail: 'Opening day',
-      date: constants.season.openingDay
+      date: constants.season.openingDay.clone()
     })
   }
 
@@ -78,7 +78,7 @@ export function getLeagueEvents (state) {
   if (now.isBefore(constants.season.end)) {
     events.push({
       detail: 'Offseason',
-      date: constants.season.end
+      date: constants.season.end.clone()
     })
   }
 
