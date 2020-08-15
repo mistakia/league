@@ -114,7 +114,7 @@ router.post('/?', async (req, res) => {
     })
 
     // send notification
-    const message = `${team.name} (${team.abbrev}) has released ${playerRow.fname} ${playerRow.lname} (${playerRow.pos1}).`
+    const message = `${team.name} (${team.abbrv}) has released ${playerRow.fname} ${playerRow.lname} (${playerRow.pos1}).`
 
     await sendNotifications({
       leagueId: league.uid,

@@ -1,4 +1,5 @@
 const API = require('groupme').Stateless
+const moment = require('moment')
 
 const db = require('../db')
 
@@ -6,16 +7,35 @@ const { constants, Roster } = require('../common')
 const sendNotifications = require('./send-notifications')
 const getRoster = require('./get-roster')
 const isPlayerOnWaivers = require('./is-player-on-waivers')
+const isPlayerLocked = require('./is-player-locked')
 
-module.exports = async function ({ leagueId, drop, player, teamId, bid = 0, userId }) {
+module.exports = async function ({
+  leagueId,
+  drop,
+  player,
+  teamId,
+  bid = 0,
+  userId,
+  slot = constants.slots.BENCH
+}) {
+  const type = slot === constants.slots.BENCH ? constants.transactions.ROSTER_ADD
+    : constants.transactions.PRACTICE_ADD
+
   // verify player and drop ids
   const playerIds = [player]
   if (drop) playerIds.push(drop)
   const playerRows = await db('player').whereIn('player', playerIds)
-  if (playerRows.length !== playerIds.length) {
-    throw new Error('could not find playerIds')
+  const playerRow = playerRows.find(p => p.player === player)
+  if (!playerRow) {
+    throw new Error('invalid player')
   }
-  const acquisitionPlayer = playerRows.find(p => p.player === player)
+  let dropPlayerRow
+  if (drop) {
+    dropPlayerRow = playerRows.find(p => p.player === drop)
+    if (!dropPlayerRow) {
+      throw new Error('invalid drop')
+    }
+  }
 
   // verify leagueId
   const leagues = await db('leagues').where({ uid: leagueId }).limit(1)
@@ -28,20 +48,33 @@ module.exports = async function ({ leagueId, drop, player, teamId, bid = 0, user
 
   // verify player is a free agent
   const league = leagues[0]
-  const slots = await db('rosters_players')
+  const rosters = await db('rosters_players')
     .join('rosters', 'rosters_players.rid', 'rosters.uid')
     .where({
       lid: leagueId,
       week: constants.season.week,
       year: constants.season.year,
       player
-    })
-  if (slots.length) {
+    }).limit(1)
+  if (rosters.length) {
     throw new Error('player is not a free agent')
   }
 
+  // verify no veterans are signed in the offseason & the rookie draft is complete
+  if (!constants.season.isRegularSeason) {
+    if (playerRow.start !== constants.season.year) {
+      throw new Error('player is locked')
+    }
+
+    // verify rookie draft is complete
+    const totalPicks = league.nteams * 3
+    if (!league.ddate || moment().isBefore(moment(league.ddate, 'X').add(totalPicks, 'day'))) {
+      throw new Error('player is locked - draft not complete')
+    }
+  }
+
   // verify player is not on waivers - dropped in the last 24 hours excluding cycling
-  const isOnWaivers = isPlayerOnWaivers({ player, leagueId })
+  const isOnWaivers = await isPlayerOnWaivers({ player, leagueId })
   if (isOnWaivers) {
     throw new Error('player is on waivers')
   }
@@ -55,30 +88,38 @@ module.exports = async function ({ leagueId, drop, player, teamId, bid = 0, user
   const roster = new Roster({ roster: rosterRow, league })
   if (drop) {
     if (!roster.has(drop)) {
-      throw new Error('invalid drop player, not on roster')
+      throw new Error('invalid drop')
     }
 
-    // TODO check if drop player is in active roster and locked
+    const isActive = roster.starters.find(p => p.player === drop)
+    if (isActive) {
+      const isLocked = await isPlayerLocked(player)
+      if (isLocked) {
+        throw new Error('drop player is a locked starter')
+      }
+    }
 
     roster.removePlayer(drop)
   }
-  const hasSlot = roster.hasOpenBenchSlot(acquisitionPlayer.pos1)
+
+  const hasSlot = roster.isEligibleForSlot({ slot, player, pos: playerRow.pos1 })
   if (!hasSlot) {
-    throw new Error('acquisition unsuccessful, no available roster space')
+    throw new Error('exceeds roster limits')
   }
 
   // add player to roster
   await db('rosters_players').insert({
     rid: roster.uid,
     player,
-    pos: acquisitionPlayer.pos1,
-    slot: constants.slots.BENCH
+    pos: playerRow.pos1,
+    slot
   })
 
   // remove drop player if necessary
-  const transactions = []
+  const inserts = []
+  const result = []
   if (drop) {
-    transactions.push({
+    const transaction = {
       userid: userId,
       tid: teamId,
       lid: leagueId,
@@ -87,6 +128,14 @@ module.exports = async function ({ leagueId, drop, player, teamId, bid = 0, user
       value: 0,
       year: constants.season.year,
       timestamp: Math.round(Date.now() / 1000)
+    }
+    inserts.push(transaction)
+    result.push({
+      player: drop,
+      rid: roster.uid,
+      pos: dropPlayerRow.pos1,
+      slot: null,
+      transaction
     })
     await db('rosters_players')
       .where({
@@ -96,30 +145,31 @@ module.exports = async function ({ leagueId, drop, player, teamId, bid = 0, user
       .del()
   }
 
-  // create transaction
-  transactions.push({
+  const addTransaction = {
     userid: userId,
     tid: teamId,
     lid: leagueId,
     player,
-    type: constants.transactions.ROSTER_ADD,
+    type,
     value: bid,
     year: constants.season.year,
     timestamp: Math.round(Date.now() / 1000)
-  })
-  await db('transactions').insert(transactions)
-
-  for (const tran of transactions) {
-    const p = playerRows.find(p => p.player === tran.player)
-    tran.pos = p.pos1
-    tran.rid = roster.uid
   }
+  inserts.push(addTransaction)
+  await db('transactions').insert(inserts)
+
+  result.push({
+    player: player,
+    slot,
+    rid: roster.uid,
+    pos: playerRow.pos1,
+    transaction: addTransaction
+  })
 
   // send notification
-  let message = `${team.name} (${team.abbrev}) has signed free agent ${acquisitionPlayer.fname} ${acquisitionPlayer.lname} (${acquisitionPlayer.pos1}) for ${bid}.`
+  let message = `${team.name} (${team.abbrv}) has signed free agent ${playerRow.fname} ${playerRow.lname} (${playerRow.pos1}) for ${bid}.`
   if (drop) {
-    const dropPlayer = playerRows.find(p => p.player === drop)
-    message += ` ${dropPlayer.fname} ${dropPlayer.lname} (${dropPlayer.pos1}) has been released.`
+    message += ` ${dropPlayerRow.fname} ${dropPlayerRow.lname} (${dropPlayerRow.pos1}) has been released.`
   }
   await sendNotifications({
     leagueId: league.uid,
@@ -133,5 +183,5 @@ module.exports = async function ({ leagueId, drop, player, teamId, bid = 0, user
     await API.Bots.post.Q(league.groupme_token, league.groupme_id, message, {})
   }
 
-  return transactions
+  return result
 }

@@ -4,13 +4,28 @@ const API = require('groupme').Stateless
 const router = express.Router({ mergeParams: true })
 
 const { constants, Roster } = require('../../../common')
-const { getRoster, sendNotifications } = require('../../../utils')
+const { getRoster, sendNotifications, verifyUserTeam } = require('../../../utils')
 
 router.post('/?', async (req, res) => {
   const { db, logger, broadcast } = req.app.locals
   try {
     const { teamId } = req.params
     const { player, leagueId } = req.body
+
+    if (!player) {
+      return res.status(400).send({ error: 'missing player' })
+    }
+
+    if (!leagueId) {
+      return res.status(400).send({ error: 'missing leagueId' })
+    }
+
+    // verify teamId
+    try {
+      await verifyUserTeam({ userId: req.user.userId, teamId, leagueId, requireLeague: true })
+    } catch (error) {
+      return res.status(400).send({ error: error.message })
+    }
 
     const tid = parseInt(teamId, 10)
 
