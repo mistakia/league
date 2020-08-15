@@ -2,10 +2,18 @@ import { Map } from 'immutable'
 
 import { getApp } from '@core/app'
 import { getPlayerById } from '@core/players'
+import { getCurrentPlayers } from '@core/rosters'
 
 export function getPoachesForCurrentLeague (state) {
   const { leagueId } = getApp(state)
   return state.get('poaches').get(leagueId) || new Map()
+}
+
+export function getActivePoachesAgainstMyPlayers (state) {
+  const poaches = getPoachesForCurrentLeague(state)
+  const players = getCurrentPlayers(state)
+  const playerIds = players.practice.map(p => p.player)
+  return poaches.filter(p => playerIds.includes(p.player))
 }
 
 export function getPoachPlayersForCurrentLeague (state) {

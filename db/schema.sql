@@ -1413,6 +1413,7 @@ CREATE TABLE `leagues` (
   `minBid` tinyint(1) DEFAULT 0,
   `hosted` tinyint(1) DEFAULT 0,
   `host` tinyint(1) DEFAULT NULL,
+  `tddate` int(11) DEFAULT NULL,
   UNIQUE KEY `uid` (`uid`),
   KEY `commishid` (`commishid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
