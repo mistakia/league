@@ -12,11 +12,13 @@ const {
 const db = require('../db')
 
 const log = debug('process:waivers:poach')
-debug.enable('process:waivers:poach,knex:query,knex:bindings')
-
-const timestamp = Math.round(Date.now() / 1000)
+if (process.env.NODE_ENV !== 'test') {
+  debug.enable('process:waivers:poach')
+}
 
 const run = async () => {
+  const timestamp = Math.round(Date.now() / 1000)
+
   // get leagueIds with pending waivers
   const results = await db('waivers')
     .whereNull('processed')
@@ -27,8 +29,7 @@ const run = async () => {
   const leagueIds = results.map(w => w.lid)
 
   if (!leagueIds.length) {
-    log('no waivers to process')
-    process.exit()
+    throw new Error('no waivers to process')
   }
 
   for (const lid of leagueIds) {
@@ -79,12 +80,20 @@ const run = async () => {
       waiver = await getTopPoachingWaiver(lid)
     }
   }
+}
+
+module.exports = run
+
+const main = async () => {
+  try {
+    await run()
+  } catch (error) {
+    console.log(error)
+  }
 
   process.exit()
 }
 
-try {
-  run()
-} catch (error) {
-  console.log(error)
+if (!module.parent) {
+  main()
 }

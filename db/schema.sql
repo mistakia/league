@@ -587,7 +587,7 @@ CREATE TABLE `poaches` (
   `succ` tinyint(1) DEFAULT NULL,
   `submitted` int(11) NOT NULL,
   `reason` varchar(255) DEFAULT NULL,
-  `processed` int(11) NOT NULL,
+  `processed` int(11) DEFAULT NULL,
   KEY `lid` (`lid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -1542,8 +1542,6 @@ CREATE TABLE `teams` (
   `do` tinyint(2) DEFAULT NULL,
   `wo` tinyint(2) DEFAULT NULL,
   UNIQUE KEY `uid` (`uid`),
-  UNIQUE KEY `do` (`lid`, `do`),
-  UNIQUE KEY `wo` (`lid`, `wo`),
   KEY `lid` (`lid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
