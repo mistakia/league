@@ -9,7 +9,7 @@ import { getAllPlayers, getPlayers } from './selectors'
 import { leagueActions, getCurrentLeague } from '@core/leagues'
 import { sourceActions, getSources } from '@core/sources'
 import { settingActions } from '@core/settings'
-import { getRostersForCurrentLeague } from '@core/rosters'
+import { getRostersForCurrentLeague, rosterActions } from '@core/rosters'
 import Worker from 'workerize-loader?inline!./worker' // eslint-disable-line import/no-webpack-loader-syntax
 
 export function * loadPlayers () {
@@ -36,7 +36,7 @@ export function * calculateValues () {
     volsw
   })
   yield put(playerActions.setValues(result))
-
+  yield put(rosterActions.projectLineups())
   // TODO calculate bid up to values
 }
 

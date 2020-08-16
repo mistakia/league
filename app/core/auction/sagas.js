@@ -6,10 +6,12 @@ import { auctionActions } from './actions'
 import { send } from '@core/ws'
 import { getCurrentLeague } from '@core/leagues'
 import { getPlayersForWatchlist, getAllPlayers, playerActions } from '@core/players'
-import { constants, getEligibleSlots } from '@common'
+import {
+  constants,
+  getEligibleSlots,
+  getOptimizerPositionConstraints
+} from '@common'
 import Worker from 'workerize-loader?inline!./worker' // eslint-disable-line import/no-webpack-loader-syntax
-
-const getPositionSet = (players) => players.reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map())
 
 export function * optimize () {
   const auction = yield select(getAuction)
@@ -19,8 +21,8 @@ export function * optimize () {
   const { vbaseline } = yield select(getApp)
 
   // TODO add signed players and adjust constraints
-
-  const sortedPlayers = players.sort((a, b) => b.points.total - a.points.total) // TODO exclude unavailable players
+  // TODO exclude unavailable players
+  const sortedPlayers = players.sort((a, b) => b.points.total - a.points.total)
   const sortedWatchlist = watchlist.sort((a, b) => b.points.total - a.points.total)
 
   const rosterConstraints = {}
@@ -36,49 +38,11 @@ export function * optimize () {
     .map(k => league[k])
     .reduce((a, b) => a + b)
 
+  const positions = watchlist.map(p => p.pos1)
+  const positionConstraints = getOptimizerPositionConstraints({ positions, league })
   const constraints = {
     value: { max: auction.lineupBudget }, // TODO adjust budget based on available cap
-    starter: { max: 0 }
-  }
-
-  const positions = watchlist.map(p => p.pos1)
-  const positionSet = getPositionSet(positions)
-  for (const [pos, min] of positionSet.entries()) {
-    const posMin = Math.min(min, rosterConstraints[pos].min)
-    constraints[pos] = Object.assign({}, rosterConstraints[pos])
-    constraints[pos].min = posMin
-    constraints.starter.max += posMin
-    positionSet.set(pos, Math.max((min - rosterConstraints[pos].min), 0))
-  }
-
-  const processFlex = (positions, flexCount) => {
-    const pos = positions.shift()
-    const posCount = positionSet.get(pos)
-    if (!posCount) {
-      if (positions.length) processFlex(positions, flexCount)
-      return
-    }
-
-    positionSet.set(pos, Math.max((posCount - flexCount), 0))
-    const min = Math.min(posCount, flexCount)
-    constraints.starter.max += min
-    if (min < flexCount && positions.length) processFlex(positions, flexCount)
-  }
-
-  if (league.srbwr) {
-    processFlex(['RB', 'WR'], league.srbwr)
-  }
-
-  if (league.swrte) {
-    processFlex(['WR', 'TE'], league.swrte)
-  }
-
-  if (league.srbwrte) {
-    processFlex(['RB', 'WR', 'TE'], league.srbwrte)
-  }
-
-  if (league.sqbrbwrte) {
-    processFlex(['QB', 'RB', 'WR', 'TE'], league.sqbrbwrte)
+    ...positionConstraints
   }
 
   const worker = new Worker()

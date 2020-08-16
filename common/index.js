@@ -9,6 +9,7 @@ import calculateStatsFromPlays from './calculate-stats-from-plays'
 import calculatePrices from './calculate-prices'
 import getRosterSize from './get-roster-size'
 import createDefaultLeague from './create-default-league'
+import getOptimizerPositionConstraints from './get-optimizer-position-constraints'
 
 const groupBy = (xs, key) => xs.reduce((rv, x) => {
   (rv[x[key]] = rv[x[key]] || []).push(x)
@@ -43,5 +44,6 @@ export {
   Roster,
   calculatePrices,
   calculateStatsFromPlays,
-  createDefaultLeague
+  createDefaultLeague,
+  getOptimizerPositionConstraints
 }
