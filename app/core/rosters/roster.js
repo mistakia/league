@@ -1,5 +1,5 @@
 /* eslint camelcase: 'off' */
-import { Record, List } from 'immutable'
+import { Record, List, Map } from 'immutable'
 
 export const Roster = new Record({
   isPending: false,
@@ -8,7 +8,8 @@ export const Roster = new Record({
   week: null,
   year: null,
   last_updated: null,
-  players: new List()
+  players: new List(),
+  lineups: new Map()
 })
 
 export function createRoster (roster) {

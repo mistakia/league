@@ -103,6 +103,17 @@ export function rostersReducer (state = new Map(), { payload, type }) {
       })
     }
 
+    case rosterActions.SET_LINEUPS:
+      return state.withMutations(state => {
+        for (const teamId in payload.lineups) {
+          const lineups = payload.lineups[teamId]
+          for (const week in lineups) {
+            const tid = parseInt(teamId, 10)
+            state.setIn([tid, 'lineups', week], lineups[week])
+          }
+        }
+      })
+
     default:
       return state
   }

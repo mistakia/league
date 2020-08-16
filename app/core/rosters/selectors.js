@@ -1,4 +1,4 @@
-import { List } from 'immutable'
+import { List, Map } from 'immutable'
 
 import { Roster, constants } from '@common'
 import { getApp } from '@core/app'
@@ -20,6 +20,21 @@ export function getRostersForCurrentLeague (state) {
   const rosters = getRosters(state)
   const { leagueId } = getApp(state)
   return rosters.filter(r => r.lid === leagueId)
+}
+
+export function getActivePlayersByRosterForCurrentLeague (state) {
+  const rosters = getRostersForCurrentLeague(state)
+  const league = getCurrentLeague(state)
+  let result = new Map()
+  for (const ros of rosters.valueSeq()) {
+    if (!ros) continue
+    const r = new Roster({ roster: ros.toJS(), league })
+    const activePlayerIds = r.active.map(p => p.player)
+    const active = activePlayerIds.map(playerId => getPlayerById(state, { playerId }))
+    result = result.set(ros.get('tid'), new List(active))
+  }
+
+  return result
 }
 
 export function getRosteredPlayerIdsForCurrentLeague (state) {

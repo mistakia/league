@@ -2,6 +2,9 @@ export const rosterActions = {
   LOAD_ROSTER: 'LOAD_ROSTER',
   LOAD_ROSTERS: 'LOAD_ROSTERS',
 
+  PROJECT_LINEUPS: 'PROJECT_LINEUPS',
+  SET_LINEUPS: 'SET_LINEUPS',
+
   ROSTER_DEACTIVATION: 'ROSTER_DEACTIVATION',
   ROSTER_ACTIVATION: 'ROSTER_ACTIVATION',
 
@@ -31,6 +34,17 @@ export const rosterActions = {
   POST_DEACTIVATE_FAILED: 'POST_DEACTIVATE_FAILED',
   POST_DEACTIVATE_PENDING: 'POST_DEACTIVATE_PENDING',
   POST_DEACTIVATE_FULFILLED: 'POST_DEACTIVATE_FULFILLED',
+
+  projectLineups: () => ({
+    type: rosterActions.PROJECT_LINEUPS
+  }),
+
+  setLineupProjections: (lineups) => ({
+    type: rosterActions.SET_LINEUPS,
+    payload: {
+      lineups
+    }
+  }),
 
   activate: (player) => ({
     type: rosterActions.ACTIVATE_PLAYER,
