@@ -140,7 +140,7 @@ export function getCurrentPlayers (state) {
   const league = state.get('leagues').get(leagueId)
   const roster = rosters.get(teamId)
   if (!roster) {
-    return { active: new List(), practice: new List() }
+    return { active: new List(), practice: new List(), players: new List() }
   }
 
   const r = new Roster({ roster: roster.toJS(), league })
