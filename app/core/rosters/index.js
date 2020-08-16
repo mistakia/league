@@ -11,7 +11,8 @@ export {
   isPlayerFreeAgent,
   isPlayerEligible,
   isPlayerOnPracticeSquad,
-  getRosterInfoForPlayerId
+  getRosterInfoForPlayerId,
+  getActivePlayersByRosterForCurrentLeague
 } from './selectors'
 export { rosterSagas } from './sagas'
 export { rostersReducer } from './reducer'

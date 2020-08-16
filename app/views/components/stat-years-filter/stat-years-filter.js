@@ -12,7 +12,7 @@ export default class StatYearsFilter extends React.Component {
       values: []
     }
 
-    for (const year of constants.season.years) {
+    for (const year of constants.years) {
       state.values.push({
         label: year,
         value: year,
