@@ -156,5 +156,5 @@ export function calculatePlayerValues (payload) {
     }
   }
 
-  return { baselines: baselines[0], players }
+  return { baselines: baselines, players }
 }

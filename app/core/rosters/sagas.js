@@ -3,12 +3,13 @@ import { call, takeLatest, fork, select, put } from 'redux-saga/effects'
 import { rosterActions } from './actions'
 import { getRoster, getRosters, putRoster, postActivate, postDeactivate } from '@core/api'
 import { getApp, appActions } from '@core/app'
-import { getActivePlayersByRosterForCurrentLeague } from './selectors'
-import { getCurrentLeague } from '@core/leagues'
+import { getPlayers, getAllPlayers, playerActions } from '@core/players'
 import {
-  constants,
-  getOptimizerPositionConstraints
-} from '@common'
+  getActivePlayersByRosterForCurrentLeague,
+  getCurrentTeamRoster,
+  getCurrentPlayers
+} from './selectors'
+import { getCurrentLeague } from '@core/leagues'
 import Worker from 'workerize-loader?inline!./worker' // eslint-disable-line import/no-webpack-loader-syntax
 
 export function * loadRoster ({ payload }) {
@@ -45,28 +46,81 @@ export function * projectLineups () {
   for (const [teamId, players] of rosters.entrySeq()) {
     lineups[teamId] = {}
 
-    const positions = players.map(p => p.pos1)
-    const constraints = getOptimizerPositionConstraints({ positions, league })
-
     const worker = new Worker()
-    for (let week = 1; week <= constants.season.finalWeek; week++) {
-      if (constants.season.week > week) continue
-      const result = yield call(worker.optimizeLineup, {
-        constraints,
-        players: players.toJS(),
-        week
-      })
-      const starters = Object.keys(result)
-        .filter(r => r.match(/^([A-Z]{2,})-([0-9]{4,})$/ig) || r.match(/^([A-Z]{1,3})$/ig))
-
-      lineups[teamId][week] = {
-        total: result.result,
-        starters
-      }
-    }
+    lineups[teamId] = yield call(worker.optimizeLineup, {
+      players: players.toJS(),
+      league
+    })
   }
 
   yield put(rosterActions.setLineupProjections(lineups))
+  const currentRoster = yield select(getCurrentTeamRoster)
+  const currentRosterPlayers = yield select(getCurrentPlayers)
+  const baselines = (yield select(getPlayers)).get('baselines')
+  const playerItems = yield select(getAllPlayers)
+
+  const currentProjectedLineups = currentRoster.lineups
+  const projectedContribution = {}
+  for (const player of currentRosterPlayers.players) {
+    const playerData = {
+      starts: 0,
+      sp: 0,
+      bp: 0,
+      weeks: {}
+    }
+
+    // run lineup optimizer without player
+    const isActive = currentRosterPlayers.active.find(p => p.player === player.player)
+    const playerPool = isActive
+      ? currentRosterPlayers.active.filter(p => p.player !== player.player)
+      : currentRosterPlayers.active.push(player)
+    const worker = new Worker()
+    const result = yield call(worker.optimizeLineup, {
+      players: playerPool.toJS(),
+      league
+    })
+
+    for (const week in result) {
+      const weekData = {
+        start: 0,
+        sp: 0,
+        bp: 0
+      }
+      const currentProjectedWeek = currentProjectedLineups.get(week)
+      const isStarter = isActive
+        ? currentProjectedWeek.starters.includes(player.player)
+        : result[week].starters.includes(player.player)
+
+      if (isStarter) {
+        playerData.starts += 1
+        weekData.start = 1
+        // starter+ is difference between current lineup and lineup without player
+        const diff = isActive
+          ? currentProjectedWeek.total - result[week].total
+          : result[week].total - currentProjectedWeek.total
+        playerData.sp += diff
+        weekData.sp = diff
+      } else {
+        const baselinePlayerId = baselines.getIn([week, player.pos1, 'available'])
+        const baselinePlayer = playerItems.get(baselinePlayerId)
+        // bench+ is difference between player output and best available
+        const diff = player.getIn(['points', week, 'total']) - baselinePlayer.getIn(['points', week, 'total'])
+        if (diff > 0) {
+          playerData.bp += diff
+          weekData.bp = diff
+        }
+      }
+      playerData.weeks[week] = weekData
+    }
+    projectedContribution[player.player] = playerData
+  }
+
+  yield put(playerActions.setProjectedContribution(projectedContribution))
+
+  // non-rostered player projected contribution
+  // run lineup optimzer with player - difference is starterPointsPlus
+  // starts equal weeks in starters array returned from optimizer
+  // bench points plus, equal weeks not in starters array and points more than best available baseline
 }
 
 //= ====================================

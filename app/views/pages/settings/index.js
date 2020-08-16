@@ -1,3 +1,4 @@
+import { Map } from 'immutable'
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
@@ -19,7 +20,7 @@ const mapStateToProps = createSelector(
     userId: app.userId,
     vbaseline: app.vbaseline,
     sourceIds: sources.toList().map(s => s.uid),
-    baselines: players.get('baselines').toJS(),
+    baselines: players.getIn(['baselines', '0'], new Map()).toJS(),
     isHosted: !!league.hosted
   })
 )

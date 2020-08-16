@@ -3,11 +3,40 @@ import moment from 'moment'
 import Alert from '@material-ui/lab/Alert'
 import { SortableContainer, SortableElement } from 'react-sortable-hoc'
 
+import PlayerRosterHeader from '@components/player-roster-header'
 import PlayerRoster from '@components/player-roster'
 import PageLayout from '@layouts/page'
 import { constants } from '@common'
 
 import './dashboard.styl'
+
+const ValueHeader = () => (
+  <PlayerRosterHeader
+    tooltip='Projected points over baseline player'
+    title='Value'
+  />
+)
+
+const StartsHeader = () => (
+  <PlayerRosterHeader
+    tooltip='Projected games started'
+    title='Starts'
+  />
+)
+
+const PointsPlusHeader = () => (
+  <PlayerRosterHeader
+    tooltip='Projected starter points you would lose without player'
+    title='Pts+'
+  />
+)
+
+const BenchPlusHeader = () => (
+  <PlayerRosterHeader
+    tooltip='Projected bench points you would lose without player'
+    title='Bench+'
+  />
+)
 
 export default function () {
   const {
@@ -103,11 +132,10 @@ export default function () {
           <div className='player__item-name'>Name</div>
           <div className='player__item-name'>Drop</div>
           <div className='player__item-metric'>Bid</div>
-          <div className='player__item-metric'>Bye</div>
-          <div className='player__item-metric'>Value</div>
-          <div className='player__item-metric'>Starts</div>
-          <div className='player__item-metric'>Pts+</div>
-          <div className='player__item-metric'>Bench+</div>
+          <ValueHeader />
+          <StartsHeader />
+          <PointsPlusHeader />
+          <BenchPlusHeader />
           <div className='player__item-action' />
           <div className='player__item-action' />
         </div>
@@ -134,11 +162,10 @@ export default function () {
           <div className='player__item-name'>Name</div>
           <div className='player__item-name'>Drop</div>
           <div className='player__item-metric'>Bid</div>
-          <div className='player__item-metric'>Bye</div>
-          <div className='player__item-metric'>Value</div>
-          <div className='player__item-metric'>Starts</div>
-          <div className='player__item-metric'>Pts+</div>
-          <div className='player__item-metric'>Bench+</div>
+          <ValueHeader />
+          <StartsHeader />
+          <PointsPlusHeader />
+          <BenchPlusHeader />
           <div className='player__item-action' />
           <div className='player__item-action' />
         </div>
@@ -165,11 +192,10 @@ export default function () {
           <div className='player__item-name'>Name</div>
           <div className='player__item-name'>Drop</div>
           <div className='player__item-metric'>Bid</div>
-          <div className='player__item-metric'>Bye</div>
-          <div className='player__item-metric'>Value</div>
-          <div className='player__item-metric'>Starts</div>
-          <div className='player__item-metric'>Pts+</div>
-          <div className='player__item-metric'>Bench+</div>
+          <ValueHeader />
+          <StartsHeader />
+          <PointsPlusHeader />
+          <BenchPlusHeader />
           <div className='player__item-action' />
         </div>
       </div>
@@ -191,12 +217,10 @@ export default function () {
           <div className='dashboard__section-body-header'>
             <div className='player__item-position' />
             <div className='player__item-name'>Name</div>
-            <div className='player__item-metric'>Bye</div>
-            <div className='player__item-metric'>Value</div>
-            <div className='player__item-metric'>Contract</div>
-            <div className='player__item-metric'>Starts</div>
-            <div className='player__item-metric'>Pts+</div>
-            <div className='player__item-metric'>Bench+</div>
+            <ValueHeader />
+            <StartsHeader />
+            <PointsPlusHeader />
+            <BenchPlusHeader />
             <div className='player__item-action' />
           </div>
         </div>
@@ -210,12 +234,10 @@ export default function () {
           <div className='dashboard__section-body-header'>
             <div className='player__item-position' />
             <div className='player__item-name'>Name</div>
-            <div className='player__item-metric'>Bye</div>
-            <div className='player__item-metric'>Value</div>
-            <div className='player__item-metric'>Contract</div>
-            <div className='player__item-metric'>Starts</div>
-            <div className='player__item-metric'>Pts+</div>
-            <div className='player__item-metric'>Bench+</div>
+            <ValueHeader />
+            <StartsHeader />
+            <PointsPlusHeader />
+            <BenchPlusHeader />
             <div className='player__item-action' />
           </div>
         </div>
