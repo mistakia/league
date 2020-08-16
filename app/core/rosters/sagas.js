@@ -117,6 +117,8 @@ export function * projectLineups () {
 
   yield put(playerActions.setProjectedContribution(projectedContribution))
 
+  // TODO - calculate for poaches & waivers
+
   // non-rostered player projected contribution
   // run lineup optimzer with player - difference is starterPointsPlus
   // starts equal weeks in starters array returned from optimizer
@@ -155,6 +157,22 @@ export function * watchProjectLineups () {
   yield takeLatest(rosterActions.PROJECT_LINEUPS, projectLineups)
 }
 
+export function * watchRosterActivation () {
+  yield takeLatest(rosterActions.ROSTER_ACTIVATION, projectLineups)
+}
+
+export function * watchRosterDeactivation () {
+  yield takeLatest(rosterActions.ROSTER_DEACTIVATION, projectLineups)
+}
+
+export function * watchPostActivateFulfilled () {
+  yield takeLatest(rosterActions.POST_ACTIVATE_FULFILLED, projectLineups)
+}
+
+export function * watchPostDeactivateFulfilled () {
+  yield takeLatest(rosterActions.POST_DEACTIVATE_FULFILLED, projectLineups)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -166,5 +184,10 @@ export const rosterSagas = [
   fork(watchActivatePlayer),
   fork(watchDeactivatePlayer),
   fork(watchAuthFulfilled),
-  fork(watchProjectLineups)
+
+  fork(watchProjectLineups),
+  fork(watchRosterActivation),
+  fork(watchRosterDeactivation),
+  fork(watchPostActivateFulfilled),
+  fork(watchPostDeactivateFulfilled)
 ]
