@@ -11,9 +11,17 @@ import './auction-targets.styl'
 
 export default class AuctionTargets extends React.Component {
   render = () => {
-    const { players, vbaseline, lineupPlayerIds, lineupPlayers, lineupPoints } = this.props
-    const all = Set(players).union(Set(lineupPlayers))
-    const sorted = all.sort((a, b) => b.vorp.getIn(['ros', vbaseline]) - a.vorp.getIn(['ros', vbaseline]))
+    const {
+      players,
+      vbaseline,
+      lineupPlayerIds,
+      lineupPlayers,
+      lineupPoints,
+      lineupFeasible,
+      team
+    } = this.props
+    const all = Set(players).union([Set(lineupPlayers), Set(team.active)])
+    const sorted = all.sort((a, b) => b.getIn(['vorp', 'ros', vbaseline]) - a.getIn(['vorp', 'ros', vbaseline]))
     const groups = {}
     for (const position of constants.positions) {
       if (!groups[position]) groups[position] = {}
@@ -43,17 +51,6 @@ export default class AuctionTargets extends React.Component {
     return (
       <div className='auction__targets'>
         <div className='auction__targets-head'>
-          <EditableAuctionBudget />
-          {lineupPoints &&
-            <TextField
-              className='auction__targets-player-meta'
-              label='Projected Points'
-              value={lineupPoints}
-              disabled
-              margin='dense'
-              size='small'
-              variant='outlined'
-            />}
           <div className='optimal__lineup-key'>Optimal Lineup</div>
         </div>
         <div className='auction__targets-body'>

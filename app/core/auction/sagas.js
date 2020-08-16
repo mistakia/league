@@ -5,25 +5,49 @@ import { getAuction } from './selectors'
 import { auctionActions } from './actions'
 import { send } from '@core/ws'
 import { getCurrentLeague } from '@core/leagues'
+import { getRosteredPlayerIdsForCurrentLeague, getCurrentPlayers } from '@core/rosters'
 import { getPlayersForWatchlist, getAllPlayers, playerActions } from '@core/players'
 import {
   constants,
-  getEligibleSlots,
-  getOptimizerPositionConstraints
+  getEligibleSlots
 } from '@common'
 import Worker from 'workerize-loader?inline!./worker' // eslint-disable-line import/no-webpack-loader-syntax
 
 export function * optimize () {
-  const auction = yield select(getAuction)
   const league = yield select(getCurrentLeague)
   const watchlist = yield select(getPlayersForWatchlist)
   const players = yield select(getAllPlayers)
   const { vbaseline } = yield select(getApp)
 
-  // TODO add signed players and adjust constraints
-  // TODO exclude unavailable players
-  const sortedPlayers = players.sort((a, b) => b.points.total - a.points.total)
-  const sortedWatchlist = watchlist.sort((a, b) => b.points.total - a.points.total)
+  const rosteredPlayerIds = yield select(getRosteredPlayerIdsForCurrentLeague)
+  const availablePlayers = players.filter(p => !rosteredPlayerIds.includes(p.player))
+  const sortedPlayers = availablePlayers.sort((a, b) => b.points.total - a.points.total)
+  const sortedWatchlist = watchlist
+    .filter(p => !rosteredPlayerIds.includes(p.player))
+    .sort((a, b) => b.points.total - a.points.total)
+  const currentPlayers = yield select(getCurrentPlayers)
+
+  const defaultLimit = {
+    fa: {
+      max: currentPlayers.roster.availableSpace
+    },
+    value: {
+      // TODO - adjust based on bench depth
+      max: Math.min(currentPlayers.roster.availableCap, league.cap * 0.8)
+    }
+  }
+
+  // optimze lineup using current players and watchlist
+  const worker = new Worker()
+  let result = yield call(worker.optimizeLineup, {
+    limits: defaultLimit,
+    vbaseline,
+    players: sortedWatchlist.valueSeq().toJS(),
+    active: currentPlayers.active.toJS(),
+    league
+  })
+  let starterPlayerIds = Object.keys(result)
+    .filter(r => r.match(/^([A-Z]{2,})-([0-9]{4,})$/ig) || r.match(/^([A-Z]{1,3})$/ig))
 
   const rosterConstraints = {}
   for (const pos of constants.positions) {
@@ -38,35 +62,27 @@ export function * optimize () {
     .map(k => league[k])
     .reduce((a, b) => a + b)
 
-  const positions = watchlist.map(p => p.pos1)
-  const positionConstraints = getOptimizerPositionConstraints({ positions, league })
-  const constraints = {
-    value: { max: auction.lineupBudget }, // TODO adjust budget based on available cap
-    ...positionConstraints
-  }
-
-  const worker = new Worker()
-  let result = yield call(worker.optimizeLineup, {
-    constraints,
-    vbaseline,
-    players: sortedWatchlist.valueSeq().toJS()
-  })
-  let selectedPlayers = Object.keys(result)
-    .filter(r => r.match(/^([A-Z]{2,})-([0-9]{4,})$/ig) || r.match(/^([A-Z]{1,3})$/ig))
-  if (selectedPlayers.length < 10) {
-    for (const player of selectedPlayers) {
-      constraints[player] = { min: 1 }
+  // if lineup incomplete, optimize with available players
+  if (starterPlayerIds.length < starterLimit) {
+    const limits = {
+      ...defaultLimit
     }
+    for (const player of starterPlayerIds) {
+      limits[player] = { min: 1 }
+    }
+
     result = yield call(worker.optimizeLineup, {
-      constraints: { ...constraints, ...rosterConstraints, starter: { max: starterLimit } },
+      limits,
       vbaseline,
-      players: sortedPlayers.valueSeq().toJS()
+      players: sortedPlayers.valueSeq().toJS(),
+      active: currentPlayers.active.toJS(),
+      league
     })
   }
-  selectedPlayers = Object.keys(result)
+  starterPlayerIds = Object.keys(result)
     .filter(r => r.match(/^([A-Z]{2,})-([0-9]{4,})$/ig) || r.match(/^([A-Z]{1,3})$/ig))
   yield put(auctionActions.setOptimalLineup({
-    players: selectedPlayers,
+    players: starterPlayerIds,
     ...result
   }))
 }
