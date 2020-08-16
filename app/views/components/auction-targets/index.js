@@ -4,6 +4,7 @@ import { createSelector } from 'reselect'
 import { getAuction, getPlayersForOptimalLineup } from '@core/auction'
 import { getPlayersForWatchlist } from '@core/players'
 import { getApp } from '@core/app'
+import { getCurrentPlayers } from '@core/rosters'
 
 import AuctionTargets from './auction-targets'
 
@@ -12,14 +13,16 @@ const mapStateToProps = createSelector(
   getAuction,
   getApp,
   getPlayersForOptimalLineup,
-  (players, auction, app, lineupPlayers) => ({
+  getCurrentPlayers,
+  (players, auction, app, lineupPlayers, team) => ({
     players,
     lineupPlayerIds: auction.lineupPlayers,
     lineupFeasible: auction.lineupFeasible,
     lineupPoints: auction.lineupPoints,
     lineupBudget: auction.lineupBudget,
     lineupPlayers,
-    vbaseline: app.vbaseline
+    vbaseline: app.vbaseline,
+    team
   })
 )
 

@@ -140,7 +140,12 @@ export function getCurrentPlayers (state) {
   const league = state.get('leagues').get(leagueId)
   const roster = rosters.get(teamId)
   if (!roster) {
-    return { active: new List(), practice: new List(), players: new List() }
+    return {
+      active: new List(),
+      practice: new List(),
+      players: new List(),
+      roster: new Roster({ roster: new RosterRecord().toJS(), league })
+    }
   }
 
   const r = new Roster({ roster: roster.toJS(), league })
@@ -151,7 +156,7 @@ export function getCurrentPlayers (state) {
 
   const players = active.concat(practice)
 
-  return { active, practice, players }
+  return { active, practice, players, roster: r }
 }
 
 export function getPlayerProjectedContribution (state, { player }) {

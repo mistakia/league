@@ -13,7 +13,7 @@ module.exports = async function (knex) {
   await knex('rosters_players').del()
 
   let i = 1
-  let roster = await getRoster({ db: knex, tid: i, week: constants.season.week, year: constants.season.year })
+  let roster = await getRoster({ tid: i, week: constants.season.week, year: constants.season.year })
   let r = new Roster({ roster, league })
   while (!r.isFull) {
     let player
@@ -39,7 +39,7 @@ module.exports = async function (knex) {
       lid: league.uid,
       player: player.player,
       type: 7,
-      value: Math.floor(Math.random() * 50) + 1,
+      value: Math.floor(Math.random() * Math.min(r.availableCap, 60)),
       year: constants.season.year,
       timestamp: Math.round(Date.now() / 1000)
     })
@@ -49,7 +49,7 @@ module.exports = async function (knex) {
     } else {
       i += 1
     }
-    roster = await getRoster({ db: knex, tid: i, week: constants.season.week, year: constants.season.year })
+    roster = await getRoster({ tid: i, week: constants.season.week, year: constants.season.year })
     r = new Roster({ roster, league })
   }
 }
