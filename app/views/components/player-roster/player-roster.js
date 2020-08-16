@@ -46,23 +46,16 @@ class PlayerRoster extends Player {
             {claim.bid && `$${claim.bid}`}
           </div>}
         <div className='player__item-metric'>
-          {/* contract value */}
-        </div>
-        <div className='player__item-metric'>
           {(player.vorp.getIn(['ros', vbaseline]) || 0).toFixed(1)}
         </div>
-        {!isClaim &&
-          <div className='player__item-metric'>
-            {/* contract value */}
-          </div>}
         <div className='player__item-metric'>
-          {/* projected starts  */}
+          {player.lineups.starts}
         </div>
         <div className='player__item-metric'>
-          {/* projected points over best bench  */}
+          {(player.lineups.sp || 0).toFixed(1) || '--'}
         </div>
         <div className='player__item-metric'>
-          {/* projected bench points  */}
+          {(player.lineups.bp || 0).toFixed(1) || '--'}
         </div>
         <div className='player__item-action'>
           <IconButton small text onClick={this.handleClick} icon='more' />

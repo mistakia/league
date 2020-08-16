@@ -12,7 +12,8 @@ export {
   isPlayerEligible,
   isPlayerOnPracticeSquad,
   getRosterInfoForPlayerId,
-  getActivePlayersByRosterForCurrentLeague
+  getActivePlayersByRosterForCurrentLeague,
+  getPlayerProjectedContribution
 } from './selectors'
 export { rosterSagas } from './sagas'
 export { rostersReducer } from './reducer'

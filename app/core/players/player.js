@@ -34,7 +34,8 @@ export const Player = new Record({
   values: new Map(),
   vorp: new Map(),
   games: new List(),
-  projections: new List()
+  projections: new List(),
+  lineups: new Map()
 })
 
 export function createPlayer ({

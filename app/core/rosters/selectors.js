@@ -149,5 +149,10 @@ export function getCurrentPlayers (state) {
   const practicePlayerIds = r.practice.map(p => p.player)
   const practice = new List(practicePlayerIds.map(playerId => getPlayerById(state, { playerId })))
 
-  return { active, practice }
+  const players = active.concat(practice)
+
+  return { active, practice, players }
+}
+
+export function getPlayerProjectedContribution (state, { player }) {
 }
