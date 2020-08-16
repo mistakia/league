@@ -77,9 +77,11 @@ export function playersReducer (state = initialState, { payload, type }) {
     case playerActions.SET_PLAYER_VALUES:
       return state.withMutations(state => {
         state.set('isPending', false)
-        for (const b in payload.baselines) {
-          for (const type in payload.baselines[b]) {
-            state.setIn(['baselines', b, type], payload.baselines[b][type].player)
+        for (const week in payload.baselines) {
+          for (const b in payload.baselines[week]) {
+            for (const type in payload.baselines[week][b]) {
+              state.setIn(['baselines', week, b, type], payload.baselines[week][b][type].player)
+            }
           }
         }
         payload.players.forEach(p => {
@@ -197,6 +199,13 @@ export function playersReducer (state = initialState, { payload, type }) {
         watchlist: watchlist.has(playerId) ? watchlist.delete(playerId) : watchlist.add(playerId)
       })
     }
+
+    case playerActions.SET_PROJECTED_CONTRIBUTION:
+      return state.withMutations(state => {
+        for (const playerId in payload.players) {
+          state.setIn(['items', playerId, 'lineups'], payload.players[playerId])
+        }
+      })
 
     default:
       return state

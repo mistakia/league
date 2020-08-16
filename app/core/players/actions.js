@@ -13,6 +13,7 @@ export const playerActions = {
 
   SET_PLAYER_VALUES: 'SET_PLAYER_VALUES',
   SET_PLAYER_STATS: 'SET_PLAYER_STATS',
+  SET_PROJECTED_CONTRIBUTION: 'SET_PROJECTED_CONTRIBUTION',
 
   UPDATE_PLAYER_BASELINE: 'UPDATE_PLAYER_BASELINE',
 
@@ -66,6 +67,13 @@ export const playerActions = {
     type: playerActions.SET_WATCHLIST,
     payload: {
       watchlist
+    }
+  }),
+
+  setProjectedContribution: (players) => ({
+    type: playerActions.SET_PROJECTED_CONTRIBUTION,
+    payload: {
+      players
     }
   }),
 

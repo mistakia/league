@@ -458,8 +458,8 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(waiver1.cancelled).to.equal(null)
 
       expect(waiver2.player).to.equal(player2.player)
-      expect(waiver2.succ).to.equal(1)
       expect(waiver2.reason).to.equal(null)
+      expect(waiver2.succ).to.equal(1)
       expect(waiver2.processed).to.equal(Math.round(Date.now() / 1000))
       expect(waiver2.cancelled).to.equal(null)
 

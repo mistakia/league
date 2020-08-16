@@ -1,3 +1,4 @@
+import { Map } from 'immutable'
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
@@ -11,7 +12,7 @@ const mapStateToProps = createSelector(
   getPlayersByPosition, // TODO - get multiple positions if league has flex positions
   getApp,
   (pState, players, app) => ({
-    baselines: pState.get('baselines').toJS(),
+    baselines: pState.getIn(['baselines', '0'], new Map()).toJS(),
     vbaseline: app.vbaseline,
     players
   })
