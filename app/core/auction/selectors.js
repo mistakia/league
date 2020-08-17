@@ -1,5 +1,9 @@
+import { Set } from 'immutable'
 import { createSelector } from 'reselect'
 
+import { getApp } from '@core/app'
+import { getPlayersForWatchlist } from '@core/players'
+import { getRosteredPlayerIdsForCurrentLeague, getCurrentPlayers } from '@core/rosters'
 import { constants } from '@common'
 import { fuzzySearch } from '@core/utils'
 
@@ -10,6 +14,26 @@ export function getAuction (state) {
 export function isTeamConnected (state, { tid }) {
   const { connected } = getAuction(state)
   return connected.includes(tid)
+}
+
+export function getTeamBid (state, { tid }) {
+  const auction = getAuction(state)
+  const player = auction.transactions.first().player
+  const bid = auction.transactions.find(t => t.player === player && t.tid === tid)
+  return bid ? bid.value : null
+}
+
+export function getAuctionTargetPlayers (state) {
+  const watchlistPlayers = getPlayersForWatchlist(state)
+  const optimalPlayers = getPlayersForOptimalLineup(state)
+  const rosteredPlayerIds = getRosteredPlayerIdsForCurrentLeague(state)
+  const currentPlayers = getCurrentPlayers(state)
+  const { vbaseline } = getApp(state)
+
+  const combined = Set(watchlistPlayers).union(Set(optimalPlayers))
+  const filtered = combined.filter(p => !rosteredPlayerIds.includes(p.player))
+  const players = filtered.union(Set(currentPlayers.active))
+  return players.sort((a, b) => b.getIn(['vorp', '0', vbaseline]) - a.getIn(['vorp', '0', vbaseline]))
 }
 
 export function getAuctionPlayers (state) {

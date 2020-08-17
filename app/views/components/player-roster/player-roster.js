@@ -46,7 +46,7 @@ class PlayerRoster extends Player {
             {claim.bid && `$${claim.bid}`}
           </div>}
         <div className='player__item-metric'>
-          {(player.vorp.getIn(['ros', vbaseline]) || 0).toFixed(1)}
+          {(player.vorp.getIn(['0', vbaseline]) || 0).toFixed(1)}
         </div>
         <div className='player__item-metric'>
           {player.lineups.starts}

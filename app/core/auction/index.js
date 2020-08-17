@@ -6,5 +6,7 @@ export {
   getAuctionPlayers,
   getNominatingTeamId,
   isTeamConnected,
-  getPlayersForOptimalLineup
+  getPlayersForOptimalLineup,
+  getAuctionTargetPlayers,
+  getTeamBid
 } from './selectors'

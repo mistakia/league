@@ -24,14 +24,17 @@
       padding-top 4px
       color lighten($textColor, 60%)
 
-.auction__winning-bid
-  absolute left top right
-  background $accentColor
-  color white
+  &.winning .auction__team-bid
+    background $accentColor
+    color white
+
+.auction__team-bid
+  absolute left bottom -22px right
+  background lighten($accentColor, 90%)
   padding 4px
   display flex
   justify-content center
-  font-size 10px
+  font-size 11px
 
 .auction__team-name
   overflow hidden

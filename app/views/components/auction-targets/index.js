@@ -1,26 +1,23 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getAuction, getPlayersForOptimalLineup } from '@core/auction'
-import { getPlayersForWatchlist } from '@core/players'
+import { getAuction, getAuctionTargetPlayers } from '@core/auction'
 import { getApp } from '@core/app'
 import { getCurrentPlayers } from '@core/rosters'
 
 import AuctionTargets from './auction-targets'
 
 const mapStateToProps = createSelector(
-  getPlayersForWatchlist,
   getAuction,
   getApp,
-  getPlayersForOptimalLineup,
+  getAuctionTargetPlayers,
   getCurrentPlayers,
-  (players, auction, app, lineupPlayers, team) => ({
+  (auction, app, players, team) => ({
     players,
     lineupPlayerIds: auction.lineupPlayers,
     lineupFeasible: auction.lineupFeasible,
     lineupPoints: auction.lineupPoints,
     lineupBudget: auction.lineupBudget,
-    lineupPlayers,
     vbaseline: app.vbaseline,
     team
   })
