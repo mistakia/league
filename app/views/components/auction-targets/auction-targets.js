@@ -1,8 +1,7 @@
-import { Set } from 'immutable'
 import React from 'react'
-import TextField from '@material-ui/core/TextField'
+// import TextField from '@material-ui/core/TextField'
 
-import EditableAuctionBudget from '@components/editable-auction-budget'
+// import EditableAuctionBudget from '@components/editable-auction-budget'
 import PlayerWatchlistAction from '@components/player-watchlist-action'
 import PlayerName from '@components/player-name'
 import { constants } from '@common'
@@ -15,17 +14,15 @@ export default class AuctionTargets extends React.Component {
       players,
       vbaseline,
       lineupPlayerIds,
-      lineupPlayers,
-      lineupPoints,
-      lineupFeasible,
+      // lineupBudget,
+      // lineupPoints,
+      // lineupFeasible,
       team
     } = this.props
-    const all = Set(players).union([Set(lineupPlayers), Set(team.active)])
-    const sorted = all.sort((a, b) => b.getIn(['vorp', 'ros', vbaseline]) - a.getIn(['vorp', 'ros', vbaseline]))
     const groups = {}
     for (const position of constants.positions) {
       if (!groups[position]) groups[position] = {}
-      groups[position] = sorted.filter(p => p.pos1 === position)
+      groups[position] = players.filter(p => p.pos1 === position)
     }
 
     const items = {}
@@ -34,11 +31,15 @@ export default class AuctionTargets extends React.Component {
       const players = groups[position]
       for (const [index, player] of players.entries()) {
         const classNames = ['auction__targets-player']
+        const rosterSlot = team.roster.get(player.player)
+        if (rosterSlot) classNames.push('rostered')
         if (lineupPlayerIds.includes(player.player)) classNames.push('optimal')
+        const cost = rosterSlot ? rosterSlot.value : player.getIn(['values', '0', vbaseline])
+
         const item = (
           <div className={classNames.join(' ')} key={index}>
             <div className='auction__targets-player-cost'>
-              ${player.values.getIn(['ros', vbaseline])}
+              ${cost}
             </div>
             <PlayerName playerId={player.player} />
             <PlayerWatchlistAction playerId={player.player} />
@@ -54,22 +55,22 @@ export default class AuctionTargets extends React.Component {
           <div className='optimal__lineup-key'>Optimal Lineup</div>
         </div>
         <div className='auction__targets-body'>
-          <div className='auction__targets-section'>
+          <div className='auction__targets-section empty'>
             {items.QB}
           </div>
-          <div className='auction__targets-section'>
+          <div className='auction__targets-section empty'>
             {items.RB}
           </div>
-          <div className='auction__targets-section'>
+          <div className='auction__targets-section empty'>
             {items.WR}
           </div>
-          <div className='auction__targets-section'>
+          <div className='auction__targets-section empty'>
             {items.TE}
           </div>
-          <div className='auction__targets-section'>
+          <div className='auction__targets-section empty'>
             {items.K}
           </div>
-          <div className='auction__targets-section'>
+          <div className='auction__targets-section empty'>
             {items.DST}
           </div>
         </div>

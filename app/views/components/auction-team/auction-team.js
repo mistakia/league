@@ -22,12 +22,17 @@ export default class AuctionTeam extends React.Component {
       classNames.push('nominating')
     }
 
+    if (isWinningBid) {
+      classNames.push('winning')
+    }
+
+    const hasBid = bid !== null
+
     return (
       <div className={classNames.join(' ')}>
         <div className='auction__team-name'>{team.abbrv}</div>
         <div className='auction__team-cap'>${r.availableCap}</div>
-        {isWinningBid &&
-          <div className='auction__winning-bid'>${bid}</div>}
+        {hasBid && <div className='auction__team-bid'>$ {bid}</div>}
       </div>
     )
   }

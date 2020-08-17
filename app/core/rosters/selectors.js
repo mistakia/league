@@ -121,6 +121,11 @@ export function isPlayerEligible (state, { player, playerId }) {
   if (!player) {
     return false
   }
+
+  if (!player.pos1) {
+    return false
+  }
+
   const roster = getCurrentTeamRoster(state)
   const league = getCurrentLeague(state)
   const ros = new Roster({ roster: roster.toJS(), league })
