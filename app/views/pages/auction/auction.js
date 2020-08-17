@@ -17,7 +17,7 @@ export default function () {
   const { players, transactions, tids, playerId, vbaseline, isCommish } = this.props
 
   const sorted = players.sort((a, b) => {
-    return b.vorp.getIn(['ros', vbaseline]) - a.vorp.getIn(['ros', vbaseline])
+    return b.getIn(['vorp', '0', vbaseline]) - a.getIn(['vorp', '0', vbaseline])
   }).toList()
 
   const transactionItems = []

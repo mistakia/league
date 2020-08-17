@@ -35,7 +35,7 @@ export default class DraftPlayer extends React.Component {
             <span>{player.pname}</span><Team team={player.team} />
           </div>
           <div className='player-draft__item-metric'>
-            ${Math.round(player.values.getIn(['ros', vbaseline])) || '--'}
+            ${Math.round(player.getIn(['values', '0', vbaseline])) || '--'}
           </div>
         </div>
       </div>

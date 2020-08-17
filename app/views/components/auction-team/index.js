@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getAuction, isTeamConnected, getNominatingTeamId } from '@core/auction'
+import { getAuction, isTeamConnected, getNominatingTeamId, getTeamBid } from '@core/auction'
 import { getTeamById } from '@core/teams'
 import { getRosterByTeamId } from '@core/rosters'
 import { getCurrentLeague } from '@core/leagues'
@@ -15,16 +15,15 @@ const mapStateToProps = createSelector(
   getNominatingTeamId,
   getRosterByTeamId,
   getCurrentLeague,
-  (auction, team, isConnected, nominatingTeamId, rosterRow, league) => ({
+  getTeamBid,
+  (auction, team, isConnected, nominatingTeamId, rosterRow, league, bid) => ({
     team,
     isConnected,
     isNominating: nominatingTeamId === team.uid,
     isWinningBid: auction.transactions.first()
       ? auction.transactions.first().tid === team.uid
       : false,
-    bid: auction.transactions.first()
-      ? auction.transactions.first().value
-      : null,
+    bid,
     rosterRow,
     league
   })

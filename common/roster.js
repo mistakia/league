@@ -57,6 +57,10 @@ export default class Roster {
     return this.players.filter(p => p.slot === constants.slots.IR)
   }
 
+  get (player) {
+    return this._players.get(player)
+  }
+
   has (player) {
     return this._players.has(player)
   }
