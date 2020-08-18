@@ -8,6 +8,7 @@ import AuctionPlayer from '@components/auction-player'
 import AuctionTeam from '@components/auction-team'
 import AuctionMainBid from '@components/auction-main-bid'
 import AuctionTargets from '@components/auction-targets'
+import AuctionTeamRosters from '@components/auction-team-rosters'
 import AuctionPositionFilter from '@components/auction-position-filter'
 import AuctionCommissionerControls from '@components/auction-commissioner-controls'
 
@@ -67,8 +68,11 @@ export default function () {
           <AuctionTargets />
         </div>
       </div>
-      <div className='auction__log empty'>
-        {transactionItems}
+      <div className='auction__side'>
+        <AuctionTeamRosters />
+        <div className='auction__log empty'>
+          {transactionItems}
+        </div>
       </div>
       {isCommish && <AuctionCommissionerControls />}
     </div>
