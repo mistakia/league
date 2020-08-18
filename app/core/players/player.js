@@ -35,7 +35,11 @@ export const Player = new Record({
   vorp: new Map(),
   games: new List(),
   projections: new List(),
-  lineups: new Map()
+  lineups: new Map(),
+  value: null,
+  slot: null,
+  type: null,
+  tid: null
 })
 
 export function createPlayer ({
@@ -68,7 +72,11 @@ export function createPlayer ({
   values,
   vorp,
   projections,
-  games
+  games,
+  value,
+  slot,
+  type,
+  tid
 }) {
   return new Player({
     player,
@@ -101,6 +109,10 @@ export function createPlayer ({
     values: new Map(values),
     vorp: new Map(vorp),
     games: new List(games),
-    projections: new List(projections)
+    projections: new List(projections),
+    value,
+    slot,
+    type,
+    tid
   })
 }

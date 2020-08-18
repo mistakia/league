@@ -2,8 +2,15 @@ import { Set } from 'immutable'
 import { createSelector } from 'reselect'
 
 import { getApp } from '@core/app'
-import { getPlayersForWatchlist } from '@core/players'
-import { getRosteredPlayerIdsForCurrentLeague, getCurrentPlayers } from '@core/rosters'
+import {
+  getPlayersForWatchlist,
+  getAllPlayers
+} from '@core/players'
+import {
+  getRosteredPlayerIdsForCurrentLeague,
+  getCurrentPlayers,
+  getActiveRosterPlayerIdsForCurrentLeague
+} from '@core/rosters'
 import { constants } from '@common'
 import { fuzzySearch } from '@core/utils'
 
@@ -18,7 +25,12 @@ export function isTeamConnected (state, { tid }) {
 
 export function getTeamBid (state, { tid }) {
   const auction = getAuction(state)
-  const player = auction.transactions.first().player
+  const last = auction.transactions.first()
+  if (!last) {
+    return null
+  }
+
+  const player = last.player
   const bid = auction.transactions.find(t => t.player === player && t.tid === tid)
   return bid ? bid.value : null
 }
@@ -64,6 +76,33 @@ export function getNominatingTeamId (state) {
   const position = getAuctionPosition(state)
   const tids = state.get('auction').get('tids')
   return tids.get(position % tids.size)
+}
+
+export function getAuctionInfoForPosition (state, { pos }) {
+  const { vbaseline } = getApp(state)
+  const all = getAllPlayers(state)
+  const players = all.filter(p => p.pos1 === pos)
+  const activePlayerIds = getActiveRosterPlayerIdsForCurrentLeague(state)
+  const rostered = players.filter(p => activePlayerIds.includes(p.player))
+
+  const totalVorp = players.reduce((a, b) => a + (Math.max(b.getIn(['vorp', '0', vbaseline]) || 0, 0)), 0)
+  const rosteredVorp = rostered.reduce((a, b) => a + (Math.max(b.getIn(['vorp', '0', vbaseline]) || 0, 0)), 0)
+  const retail = rostered.reduce((a, b) => a + (b.getIn(['values', '0', vbaseline]) || 0), 0)
+  const actual = rostered.reduce((a, b) => a + (b.value || 0), 0)
+  return {
+    count: {
+      total: players.size,
+      rostered: rostered.size
+    },
+    vorp: {
+      total: totalVorp,
+      rostered: rosteredVorp
+    },
+    value: {
+      retail,
+      actual
+    }
+  }
 }
 
 export const getPlayersForOptimalLineup = createSelector(
