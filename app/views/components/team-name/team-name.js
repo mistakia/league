@@ -4,11 +4,11 @@ import './team-name.styl'
 
 export default class TeamName extends React.Component {
   render = () => {
-    const { team } = this.props
+    const { team, abbrv } = this.props
 
     return (
       <div className='team__name'>
-        {team.name}
+        {abbrv ? team.abbrv : team.name}
       </div>
     )
   }

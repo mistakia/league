@@ -2,7 +2,8 @@ export {
   getTeams,
   getTeamById,
   getCurrentTeam,
-  getTeamEvents
+  getTeamEvents,
+  getTeamsForCurrentLeague
 } from './selectors'
 
 export { teamsReducer } from './reducer'
