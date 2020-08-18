@@ -6,6 +6,7 @@ import { getApp } from '@core/app'
 import { isPlayerEligible } from '@core/rosters'
 import { getCurrentTeam } from '@core/teams'
 import { getCurrentLeague } from '@core/leagues'
+import { notificationActions } from '@core/notifications'
 
 import AuctionMainBid from './auction-main-bid'
 
@@ -37,7 +38,8 @@ const mapStateToProps = createSelector(
 
 const mapDispatchToProps = {
   nominate: auctionActions.nominate,
-  bid: auctionActions.bid
+  bid: auctionActions.bid,
+  showNotification: notificationActions.show
 }
 
 export default connect(
