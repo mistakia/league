@@ -16,6 +16,12 @@ export function getTeamById (state, { tid }) {
   return teams.get(tid) || new Team()
 }
 
+export function getTeamsForCurrentLeague (state) {
+  const { leagueId } = getApp(state)
+  const teams = getTeams(state)
+  return teams.filter(t => t.lid === leagueId)
+}
+
 export function getCurrentTeam (state) {
   const { teamId } = getApp(state)
   return getTeams(state).get(teamId)
