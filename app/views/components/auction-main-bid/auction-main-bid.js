@@ -18,6 +18,14 @@ export default class AuctionMainBid extends React.Component {
   }
 
   isValid = (value) => {
+    if (value !== 0 && !value) {
+      return false
+    }
+
+    if (!Number.isInteger(value)) {
+      return false
+    }
+
     if (value > this.props.availableCap) {
       return false
     }
@@ -32,14 +40,15 @@ export default class AuctionMainBid extends React.Component {
   }
 
   handleChange = (event) => {
-    const value = parseInt(event.target.value, 10)
-    if (!Number.isInteger(value)) {
+    const value = event.target.value ? parseInt(event.target.value, 10) : ''
+    if (value && !Number.isInteger(value)) {
       return
     }
 
-    if (!this.isValid(value)) {
+    if (value && value > this.props.availableCap) {
       return
     }
+
     this.setState({ value })
   }
 
@@ -60,23 +69,37 @@ export default class AuctionMainBid extends React.Component {
   }
 
   handleClickBid = () => {
+    if (!this.isValid(this.state.value)) {
+      this.props.showNotification({
+        message: 'missing or invalid bid amount',
+        severity: 'warning'
+      })
+      return
+    }
+
     this.props.bid(this.state.value)
   }
 
   handleClickNominate = () => {
+    if (!this.isValid(this.state.value)) {
+      this.props.showNotification({
+        message: 'missing or invalid bid amount',
+        severity: 'warning'
+      })
+      return
+    }
+
     this.props.nominate(this.state.value)
   }
 
-  static getDerivedStateFromProps ({ bidValue, selected, playerId }, { value }) {
-    if (!playerId && !selected) {
-      return { value: 0 }
+  componentDidUpdate = ({ bidValue, selected, playerId }, { value }) => {
+    if (!playerId && this.props.playerId) { // new player nominated
+      this.setState({ value: this.props.bidValue + 1 })
+    } else if (!this.props.playerId && playerId) { // waiting on nomination
+      this.setState({ value: 0 })
+    } else if (this.props.bidValue > bidValue) { // received new bid
+      this.setState({ value: this.props.bidValue + 1 })
     }
-
-    if (playerId && bidValue >= value) {
-      return { value: bidValue + 1 }
-    }
-
-    return null
   }
 
   render = () => {
@@ -158,6 +181,7 @@ export default class AuctionMainBid extends React.Component {
           <div className='auction__main-input'>
             <div className='auction__main-input-up' onClick={this.handleUpClick}>+</div>
             <div className='auction__main-input-down' onClick={this.handleDownClick}>—</div>
+            <input type='number' value={this.state.value} onChange={this.handleChange} />
           </div>}
       </div>
     )

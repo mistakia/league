@@ -55,7 +55,7 @@ export function auctionReducer (state = initialState(), { payload, type }) {
     case auctionActions.AUCTION_SELECT_PLAYER:
       return state.merge({
         selected: payload.player,
-        bid: 1
+        bid: 0
       })
 
     case auctionActions.AUCTION_BID:
