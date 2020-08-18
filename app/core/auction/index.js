@@ -8,5 +8,6 @@ export {
   isTeamConnected,
   getPlayersForOptimalLineup,
   getAuctionTargetPlayers,
-  getTeamBid
+  getTeamBid,
+  getAuctionInfoForPosition
 } from './selectors'

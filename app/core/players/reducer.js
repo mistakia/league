@@ -6,6 +6,8 @@ import { appActions } from '@core/app'
 import { playerActions } from './actions'
 import { createPlayer } from './player'
 import { statActions } from '@core/stats'
+import { rosterActions } from '@core/rosters'
+import { auctionActions } from '@core/auction'
 
 import { constants } from '@common'
 
@@ -138,7 +140,15 @@ export function playersReducer (state = initialState, { payload, type }) {
         players.set('allAges', new List(distinctAges))
 
         payload.data.forEach(playerData => {
-          players.setIn(['items', playerData.player], createPlayer(playerData))
+          if (players.hasIn(['items', playerData.player])) {
+            const data = players.getIn(['items', playerData.player])
+            players.setIn(['items', playerData.player], createPlayer({
+              ...data.toJS(),
+              ...playerData
+            }))
+          } else {
+            players.setIn(['items', playerData.player], createPlayer(playerData))
+          }
         })
       })
 
@@ -206,6 +216,89 @@ export function playersReducer (state = initialState, { payload, type }) {
           state.setIn(['items', playerId, 'lineups'], payload.players[playerId])
         }
       })
+
+    case rosterActions.GET_ROSTER_FULFILLED:
+      return state.withMutations(state => {
+        payload.data.players.forEach(roster => {
+          const { player, value, type, tid, slot } = roster
+          state.mergeIn(['items', player], {
+            value,
+            type,
+            tid,
+            slot
+          })
+        })
+      })
+
+    case rosterActions.GET_ROSTERS_FULFILLED:
+      return state.withMutations(state => {
+        payload.data.forEach(roster => {
+          roster.players.forEach(rosterSlot => {
+            const { player, value, type, tid, slot } = rosterSlot
+            state.mergeIn(['items', player], {
+              value,
+              type,
+              tid,
+              slot
+            })
+          })
+        })
+      })
+
+    case auctionActions.AUCTION_PROCESSED: {
+      const { tid, player, value, type } = payload
+      return state.mergeIn(['items', player], {
+        value,
+        type,
+        tid,
+        slot: constants.slots.BENCH
+      })
+    }
+
+    case rosterActions.ROSTER_TRANSACTIONS:
+      return state.withMutations(state => {
+        payload.data.transactions.forEach(t => {
+          if (t.type === constants.transactions.ROSTER_DROP) {
+            state.mergeIn(['items', t.player], {
+              value: null,
+              type: null,
+              tid: null,
+              slot: null
+            })
+          } else if (t.type === constants.transactions.ROSTER_ADD) {
+            state.mergeIn(['items', t.player], {
+              value: t.value,
+              type: t.type,
+              tid: t.tid,
+              slot: constants.slots.BENCH
+            })
+          }
+        })
+      })
+
+    case rosterActions.ROSTER_ACTIVATION:
+    case rosterActions.ROSTER_DEACTIVATION: {
+      const { type, player, tid, value, slot } = payload
+      return state.mergeIn(['items', player], {
+        type,
+        tid,
+        value,
+        slot
+      })
+    }
+
+    case rosterActions.POST_ACTIVATE_FULFILLED:
+    case rosterActions.POST_DEACTIVATE_FULFILLED:
+    case rosterActions.PUT_ROSTER_FULFILLED: {
+      const { player, slot, transaction } = payload.data
+      const { value, type, tid } = transaction
+      return state.mergeIn(['items', player], {
+        value,
+        type,
+        slot,
+        tid
+      })
+    }
 
     default:
       return state
