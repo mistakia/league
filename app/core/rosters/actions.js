@@ -9,6 +9,9 @@ export const rosterActions = {
   ROSTER_ACTIVATION: 'ROSTER_ACTIVATION',
 
   UPDATE_ROSTER: 'UPDATE_ROSTER',
+  ADD_PLAYER_ROSTER: 'ADD_PLAYER_ROSTER',
+  REMOVE_PLAYER_ROSTER: 'REMOVE_PLAYER_ROSTER',
+  UPDATE_PLAYER_ROSTER: 'UPDATE_PLAYER_ROSTER',
 
   ROSTER_TRANSACTIONS: 'ROSTER_TRANSACTIONS',
 
@@ -34,6 +37,18 @@ export const rosterActions = {
   POST_DEACTIVATE_FAILED: 'POST_DEACTIVATE_FAILED',
   POST_DEACTIVATE_PENDING: 'POST_DEACTIVATE_PENDING',
   POST_DEACTIVATE_FULFILLED: 'POST_DEACTIVATE_FULFILLED',
+
+  POST_ROSTERS_FAILED: 'POST_ROSTERS_FAILED',
+  POST_ROSTERS_PENDING: 'POST_ROSTERS_PENDING',
+  POST_ROSTERS_FULFILLED: 'POST_ROSTERS_FULFILLED',
+
+  DELETE_ROSTERS_FAILED: 'DELETE_ROSTERS_FAILED',
+  DELETE_ROSTERS_PENDING: 'DELETE_ROSTERS_PENDING',
+  DELETE_ROSTERS_FULFILLED: 'DELETE_ROSTERS_FULFILLED',
+
+  PUT_ROSTERS_FAILED: 'PUT_ROSTERS_FAILED',
+  PUT_ROSTERS_PENDING: 'PUT_ROSTERS_PENDING',
+  PUT_ROSTERS_FULFILLED: 'PUT_ROSTERS_FULFILLED',
 
   projectLineups: () => ({
     type: rosterActions.PROJECT_LINEUPS
@@ -65,6 +80,31 @@ export const rosterActions = {
     payload: {
       slot,
       player
+    }
+  }),
+
+  add: ({ player, value, teamId }) => ({
+    type: rosterActions.ADD_PLAYER_ROSTER,
+    payload: {
+      player,
+      value,
+      teamId
+    }
+  }),
+
+  remove: ({ player, teamId }) => ({
+    type: rosterActions.REMOVE_PLAYER_ROSTER,
+    payload: {
+      player,
+      teamId
+    }
+  }),
+
+  updateValue: ({ player, value, teamId }) => ({
+    type: rosterActions.UPDATE_PLAYER_ROSTER,
+    payload: {
+      player,
+      teamId
     }
   }),
 
@@ -192,6 +232,75 @@ export const rosterActions = {
       opts,
       error
     }
+  }),
+
+  putRostersPending: opts => ({
+    type: rosterActions.PUT_ROSTERS_PENDING,
+    payload: {
+      opts
+    }
+  }),
+
+  putRostersFailed: (opts, error) => ({
+    type: rosterActions.PUT_ROSTERS_FAILED,
+    payload: {
+      opts,
+      error
+    }
+  }),
+
+  putRostersFulfilled: (opts, data) => ({
+    type: rosterActions.PUT_ROSTERS_FULFILLED,
+    payload: {
+      opts,
+      data
+    }
+  }),
+
+  postRostersPending: opts => ({
+    type: rosterActions.POST_ROSTERS_PENDING,
+    payload: {
+      opts
+    }
+  }),
+
+  postRostersFulfilled: (opts, data) => ({
+    type: rosterActions.POST_ROSTERS_FULFILLED,
+    payload: {
+      opts,
+      data
+    }
+  }),
+
+  postRostersFailed: (opts, error) => ({
+    type: rosterActions.POST_ROSTERS_FAILED,
+    payload: {
+      opts,
+      error
+    }
+  }),
+
+  deleteRostersPending: opts => ({
+    type: rosterActions.DELETE_ROSTERS_PENDING,
+    payload: {
+      opts
+    }
+  }),
+
+  deleteRostersFailed: (opts, error) => ({
+    type: rosterActions.DELETE_ROSTERS_FAILED,
+    payload: {
+      opts,
+      error
+    }
+  }),
+
+  deleteRostersFulfilled: (opts, data) => ({
+    type: rosterActions.DELETE_ROSTERS_FULFILLED,
+    payload: {
+      opts,
+      data
+    }
   })
 }
 
@@ -223,4 +332,22 @@ export const postDeactivateActions = {
   failed: rosterActions.postDeactivateFailed,
   pending: rosterActions.postDeactivatePending,
   fulfilled: rosterActions.postDeactivateFulfilled
+}
+
+export const putRostersActions = {
+  failed: rosterActions.putRostersFailed,
+  pending: rosterActions.putRostersPending,
+  fulfilled: rosterActions.putRostersFulfilled
+}
+
+export const postRostersActions = {
+  failed: rosterActions.postRostersFailed,
+  pending: rosterActions.postRostersPending,
+  fulfilled: rosterActions.postRostersFulfilled
+}
+
+export const deleteRostersActions = {
+  failed: rosterActions.deleteRostersFailed,
+  pending: rosterActions.deleteRostersPending,
+  fulfilled: rosterActions.deleteRostersFulfilled
 }

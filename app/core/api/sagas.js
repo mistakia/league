@@ -15,7 +15,10 @@ import {
   getRostersActions,
   putRosterActions,
   postActivateActions,
-  postDeactivateActions
+  postDeactivateActions,
+  postRostersActions,
+  putRostersActions,
+  deleteRostersActions
 } from '@core/rosters'
 import {
   playersRequestActions,
@@ -24,7 +27,12 @@ import {
   delProjectionActions
 } from '@core/players'
 import { getPlaysActions, getTeamStatActions } from '@core/stats'
-import { getTeamsActions, putTeamActions } from '@core/teams'
+import {
+  getTeamsActions,
+  putTeamActions,
+  postTeamsActions,
+  deleteTeamsActions
+} from '@core/teams'
 import { getTransactionsActions } from '@core/transactions'
 import { getMatchupsActions, postMatchupsActions } from '@core/matchups'
 import {
@@ -84,6 +92,11 @@ export const getPlays = fetch.bind(null, api.getPlays, getPlaysActions)
 export const getRoster = fetch.bind(null, api.getRoster, getRosterActions)
 export const getRosters = fetch.bind(null, api.getRosters, getRostersActions)
 export const putRoster = fetch.bind(null, api.putRoster, putRosterActions)
+
+export const postRosters = fetch.bind(null, api.postRosters, postRostersActions)
+export const putRosters = fetch.bind(null, api.putRosters, putRostersActions)
+export const deleteRosters = fetch.bind(null, api.deleteRosters, deleteRostersActions)
+
 export const postActivate = fetch.bind(null, api.postActivate, postActivateActions)
 export const postDeactivate = fetch.bind(null, api.postDeactivate, postDeactivateActions)
 
@@ -106,6 +119,8 @@ export const postRejectTrade = fetch.bind(null, api.postRejectTrade, postTradeRe
 export const putLeague = fetch.bind(null, api.putLeague, putLeagueActions)
 
 export const putTeam = fetch.bind(null, api.putTeam, putTeamActions)
+export const postTeams = fetch.bind(null, api.postTeams, postTeamsActions)
+export const deleteTeams = fetch.bind(null, api.deleteTeams, deleteTeamsActions)
 
 export const getSources = fetch.bind(null, api.getSources, getSourcesActions)
 export const putSource = fetch.bind(null, api.putSource, putSourceActions)
