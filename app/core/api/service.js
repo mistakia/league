@@ -62,6 +62,18 @@ export const api = {
     const url = `${BASE_URL}/leagues/${leagueId}/rosters`
     return { url }
   },
+  postRosters (data) {
+    const url = `${BASE_URL}/leagues/${data.leagueId}/rosters`
+    return { url, ...POST(data) }
+  },
+  deleteRosters (data) {
+    const url = `${BASE_URL}/leagues/${data.leagueId}/rosters`
+    return { url, ...DELETE(data) }
+  },
+  putRosters (data) {
+    const url = `${BASE_URL}/leagues/${data.leagueId}/rosters`
+    return { url, ...PUT(data) }
+  },
   postActivate (data) {
     const url = `${BASE_URL}/teams/${data.teamId}/activate`
     return { url, ...POST(data) }
@@ -121,6 +133,14 @@ export const api = {
   putTeam (data) {
     const url = `${BASE_URL}/teams/${data.teamId}`
     return { url, ...PUT(data) }
+  },
+  postTeams (data) {
+    const url = `${BASE_URL}/leagues/${data.leagueId}/teams`
+    return { url, ...POST(data) }
+  },
+  deleteTeams (data) {
+    const url = `${BASE_URL}/leagues/${data.leagueId}/teams`
+    return { url, ...DELETE(data) }
   },
   getSources () {
     const url = `${BASE_URL}/sources`

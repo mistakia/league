@@ -23,6 +23,9 @@ export {
   getRostersActions,
   putRosterActions,
   postActivateActions,
-  postDeactivateActions
+  postDeactivateActions,
+  postRostersActions,
+  putRostersActions,
+  deleteRostersActions
 } from './actions'
 export { Roster } from './roster'

@@ -2,7 +2,7 @@ import { call, takeLatest, fork, select, put } from 'redux-saga/effects'
 
 import { teamActions } from './actions'
 import { getApp, appActions } from '@core/app'
-import { getTeams, putTeam } from '@core/api'
+import { getTeams, putTeam, postTeams, deleteTeams } from '@core/api'
 import { notificationActions } from '@core/notifications'
 
 export function * loadTeams () {
@@ -21,6 +21,17 @@ export function * saveNotification () {
   }))
 }
 
+export function * addTeam () {
+  const { leagueId } = yield select(getApp)
+  yield call(postTeams, { leagueId })
+}
+
+export function * deleteTeam ({ payload }) {
+  const { leagueId } = yield select(getApp)
+  const { teamId } = payload
+  yield call(deleteTeams, { leagueId, teamId })
+}
+
 //= ====================================
 //  WATCHERS
 // -------------------------------------
@@ -37,6 +48,14 @@ export function * watchPutTeamFulfilled () {
   yield takeLatest(teamActions.PUT_TEAM_FULFILLED, saveNotification)
 }
 
+export function * watchDeleteTeam () {
+  yield takeLatest(teamActions.DELETE_TEAM, deleteTeam)
+}
+
+export function * watchAddTeam () {
+  yield takeLatest(teamActions.ADD_TEAM, addTeam)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -44,5 +63,7 @@ export function * watchPutTeamFulfilled () {
 export const teamSagas = [
   fork(watchAuthFulfilled),
   fork(watchUpdateTeam),
-  fork(watchPutTeamFulfilled)
+  fork(watchPutTeamFulfilled),
+  fork(watchDeleteTeam),
+  fork(watchAddTeam)
 ]
