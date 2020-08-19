@@ -1,7 +1,16 @@
 import { call, takeLatest, fork, select, put } from 'redux-saga/effects'
 
 import { rosterActions } from './actions'
-import { getRoster, getRosters, putRoster, postActivate, postDeactivate } from '@core/api'
+import {
+  getRoster,
+  getRosters,
+  putRoster,
+  postActivate,
+  postDeactivate,
+  postRosters,
+  deleteRosters,
+  putRosters
+} from '@core/api'
 import { getApp, appActions } from '@core/app'
 import { getPlayers, getAllPlayers, playerActions } from '@core/players'
 import {
@@ -125,6 +134,21 @@ export function * projectLineups () {
   // bench points plus, equal weeks not in starters array and points more than best available baseline
 }
 
+export function * addPlayer ({ payload }) {
+  const { leagueId } = yield select(getApp)
+  yield call(postRosters, { leagueId, ...payload })
+}
+
+export function * removePlayer ({ payload }) {
+  const { leagueId } = yield select(getApp)
+  yield call(deleteRosters, { leagueId, ...payload })
+}
+
+export function * updatePlayer ({ payload }) {
+  const { leagueId } = yield select(getApp)
+  yield call(putRosters, { leagueId, ...payload })
+}
+
 //= ====================================
 //  WATCHERS
 // -------------------------------------
@@ -173,6 +197,18 @@ export function * watchPostDeactivateFulfilled () {
   yield takeLatest(rosterActions.POST_DEACTIVATE_FULFILLED, projectLineups)
 }
 
+export function * watchAddPlayerRoster () {
+  yield takeLatest(rosterActions.ADD_PLAYER_ROSTER, addPlayer)
+}
+
+export function * watchUpdatePlayerRoster () {
+  yield takeLatest(rosterActions.UPDATE_PLAYER_ROSTER, updatePlayer)
+}
+
+export function * watchRemovePlayerRoster () {
+  yield takeLatest(rosterActions.REMOVE_PLAYER_ROSTER, removePlayer)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -189,5 +225,9 @@ export const rosterSagas = [
   fork(watchRosterActivation),
   fork(watchRosterDeactivation),
   fork(watchPostActivateFulfilled),
-  fork(watchPostDeactivateFulfilled)
+  fork(watchPostDeactivateFulfilled),
+
+  fork(watchAddPlayerRoster),
+  fork(watchRemovePlayerRoster),
+  fork(watchUpdatePlayerRoster)
 ]
