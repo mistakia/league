@@ -37,12 +37,12 @@ export default class AuctionTargets extends React.Component {
         const rosterSlot = team.roster.get(player.player)
         if (rosterSlot) classNames.push('rostered')
         if (lineupPlayerIds.includes(player.player)) classNames.push('optimal')
-        const cost = rosterSlot ? rosterSlot.value : player.getIn(['values', valueType, vbaseline])
+        const salary = rosterSlot ? rosterSlot.value : player.getIn(['values', valueType, vbaseline])
 
         const item = (
           <div className={classNames.join(' ')} key={index}>
-            <div className='auction__targets-player-cost'>
-              ${cost}
+            <div className='auction__targets-player-salary'>
+              ${salary}
             </div>
             <PlayerName playerId={player.player} />
             <PlayerWatchlistAction playerId={player.player} />
