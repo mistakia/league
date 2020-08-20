@@ -27,8 +27,9 @@ class PlayerRow extends Player {
     const seasonSummary = (week) => {
       let inflation = null
       const value = player.values.getIn([week, vbaseline])
-      if (isRestOfSeasonView) {
-        const diff = player.values.getIn(['inflation', vbaseline]) - value
+      if (isRestOfSeasonView || isSeasonProjectionView) {
+        const type = isRestOfSeasonView ? 'inflation' : 'inflationSeason'
+        const diff = player.values.getIn([type, vbaseline]) - value
         const classNames = ['value__inflation']
         const isPos = diff > 0
         if (isPos) classNames.push('positive')
