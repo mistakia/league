@@ -39,7 +39,9 @@ export const Player = new Record({
   value: null,
   slot: null,
   type: null,
-  tid: null
+  tid: null,
+  inflation: null,
+  inflationSeason: null
 })
 
 export function createPlayer ({
