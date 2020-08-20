@@ -102,7 +102,16 @@ export function calculatePlayerValues (payload) {
     manual: 0
   }
 
-  const availableTotals = {
+  const availableTotalsRestOfSeason = {
+    available: 0,
+    starter: 0,
+    average: 0,
+    hybrid: 0,
+    bench: 0,
+    manual: 0
+  }
+
+  const availableTotalsSeason = {
     available: 0,
     starter: 0,
     average: 0,
@@ -113,6 +122,7 @@ export function calculatePlayerValues (payload) {
 
   for (const player of players) {
     const ros = {}
+    const isAvailable = !rosteredPlayerIds.includes(player.player)
     for (const [week, vorp] of Object.entries(player.vorp)) {
       if (week && week >= constants.season.week) {
         for (const [key, value] of Object.entries(vorp)) {
@@ -130,9 +140,16 @@ export function calculatePlayerValues (payload) {
           total[key] += value
 
           // if player is availble add to inflation
-          if (!rosteredPlayerIds.includes(player.player)) {
-            availableTotals[key] += value
+          if (isAvailable) {
+            availableTotalsRestOfSeason[key] += value
           }
+        }
+      }
+    }
+    if (isAvailable) {
+      for (const [type, value] of Object.entries(player.vorp['0'])) {
+        if (value > 0) {
+          availableTotalsSeason[type] += value
         }
       }
     }
@@ -144,8 +161,13 @@ export function calculatePlayerValues (payload) {
 
   // calculate ros inflation prices
   const rate = {}
-  for (const type in availableTotals) {
-    rate[type] = leagueAvailableCap / availableTotals[type]
+  for (const type in availableTotalsRestOfSeason) {
+    rate[type] = leagueAvailableCap / availableTotalsRestOfSeason[type]
+  }
+
+  const seasonRate = {}
+  for (const type in availableTotalsSeason) {
+    seasonRate[type] = leagueAvailableCap / availableTotalsSeason[type]
   }
 
   for (const player of players) {
@@ -153,6 +175,12 @@ export function calculatePlayerValues (payload) {
     for (const type in rate) {
       const value = Math.round(rate[type] * player.vorp.ros[type])
       player.values.inflation[type] = value > 0 ? value : 0
+    }
+
+    player.values.inflationSeason = {}
+    for (const type in seasonRate) {
+      const value = Math.round(seasonRate[type] * player.vorp['0'][type])
+      player.values.inflationSeason[type] = value > 0 ? value : 0
     }
   }
 
