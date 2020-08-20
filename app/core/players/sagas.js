@@ -180,6 +180,18 @@ export function * watchUpdateBaseline () {
   yield takeLatest(playerActions.UPDATE_PLAYER_BASELINE, updateBaseline)
 }
 
+export function * watchPutRostersFulfilled () {
+  yield takeLatest(rosterActions.PUT_ROSTERS_FULFILLED, calculateValues)
+}
+
+export function * watchPostRostersFulfilled () {
+  yield takeLatest(rosterActions.POST_ROSTERS_FULFILLED, calculateValues)
+}
+
+export function * watchDeleteRostersFulfilled () {
+  yield takeLatest(rosterActions.DELETE_ROSTERS_FULFILLED, calculateValues)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -197,5 +209,9 @@ export const playerSagas = [
   fork(watchPutSourceFulfilled),
   fork(watchDeleteProjection),
   fork(watchToggleWatchlist),
-  fork(watchUpdateBaseline)
+  fork(watchUpdateBaseline),
+
+  fork(watchPutRostersFulfilled),
+  fork(watchPostRostersFulfilled),
+  fork(watchDeleteRostersFulfilled)
 ]
