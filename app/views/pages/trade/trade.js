@@ -145,7 +145,9 @@ export default function () {
   )
 
   let action
-  if (trade.cancelled) {
+  if (!league.hosted) {
+    action = null
+  } else if (trade.cancelled) {
     action = (<Button disabled>Cancelled</Button>)
   } else if (trade.rejected) {
     action = (<Button disabled>Rejected</Button>)

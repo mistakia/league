@@ -15,7 +15,7 @@ import AuctionCommissionerControls from '@components/auction-commissioner-contro
 import './auction.styl'
 
 export default function () {
-  const { players, transactions, tids, playerId, vbaseline, isCommish } = this.props
+  const { players, transactions, tids, playerId, vbaseline, isCommish, isHosted } = this.props
 
   const sorted = players.sort((a, b) => {
     return b.getIn(['vorp', '0', vbaseline]) - a.getIn(['vorp', '0', vbaseline])
@@ -61,9 +61,7 @@ export default function () {
       </div>
       <div className='auction__main'>
         <AuctionMainBid playerId={playerId} />
-        <div className='auction__teams'>
-          {teamItems}
-        </div>
+        <div className='auction__teams'>{teamItems}</div>
         <div className='auction__main-board'>
           <AuctionTargets />
         </div>
@@ -74,7 +72,7 @@ export default function () {
           {transactionItems}
         </div>
       </div>
-      {isCommish && <AuctionCommissionerControls />}
+      {(isCommish && isHosted) ? <AuctionCommissionerControls /> : null}
     </div>
   )
 
