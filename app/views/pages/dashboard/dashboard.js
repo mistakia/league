@@ -50,7 +50,9 @@ export default function () {
   const groups = {}
   for (const position of positions) {
     if (!groups[position]) groups[position] = []
-    groups[position] = players.active.filter(p => p.pos1 === position)
+    groups[position] = players.active
+      .filter(p => p.pos1 === position)
+      .sort((a, b) => b.getIn(['lineups', 'starts'], 0) - a.getIn(['lineups', 'starts'], 0))
   }
 
   const activeItems = []
