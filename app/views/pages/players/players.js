@@ -123,7 +123,7 @@ export default class PlayersPage extends React.Component {
         <div className='player__row-group-body'>
           <PlayerHeader
             className='player__row-metric'
-            label='Cost'
+            label='Salary'
             value={`values.${week}.${vbaseline}`}
           />
           <PlayerHeader
