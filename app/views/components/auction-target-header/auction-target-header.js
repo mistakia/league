@@ -16,7 +16,7 @@ export default class AuctionTargetHeader extends React.Component {
     return (
       <div className='auction__target-header'>
         <div className='auction__target-header-inflation'>
-          <Tooltip title='Positional Cost Inflation' placement='bottom'>
+          <Tooltip title='Positional Salary Inflation' placement='bottom'>
             <span>
               {positive ? '+' : null}
               {(inflation).toFixed(1)}%
