@@ -20,7 +20,7 @@ export default class AuctionPlayer extends React.Component {
   }
 
   render = () => {
-    const { index, player, isFreeAgent, isEligible, vbaseline, watchlist, style } = this.props
+    const { index, player, isFreeAgent, isEligible, vbaseline, watchlist, style, valueType } = this.props
 
     const classNames = ['auction__player']
     if (!isFreeAgent) {
@@ -47,7 +47,7 @@ export default class AuctionPlayer extends React.Component {
             <span>{player.pname}</span><Team team={player.team} />
           </div>
           <div className='auction__player-metric'>
-            ${Math.round(player.getIn(['values', '0', vbaseline])) || '--'}
+            ${Math.round(player.getIn(['values', valueType, vbaseline])) || '--'}
           </div>
         </div>
       </div>

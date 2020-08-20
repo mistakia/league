@@ -6,7 +6,8 @@ export function optimizeLineup ({
   players,
   vbaseline,
   league,
-  active = []
+  active = [],
+  valueType = '0'
 }) {
   const variables = {}
   const ints = {}
@@ -22,7 +23,7 @@ export function optimizeLineup ({
 
   const addPlayer = ({ player, freeAgent }) => {
     variables[player.player] = {
-      points: Math.round(player.points.ros.total || 0),
+      points: Math.round(player.points[valueType].total || 0),
       starter: 1
     }
     variables[player.player][player.player] = 1
@@ -39,7 +40,7 @@ export function optimizeLineup ({
 
     if (freeAgent) {
       variables[player.player].fa = 1
-      variables[player.player].value = Math.round(player.values.ros[vbaseline] || 0)
+      variables[player.player].value = Math.round(player.values[valueType][vbaseline] || 0)
     }
   }
 

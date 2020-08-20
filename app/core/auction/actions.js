@@ -22,6 +22,7 @@ export const auctionActions = {
 
   SET_OPTIMAL_LINEUP: 'SET_OPTIMAL_LINEUP',
   SET_AUCTION_BUDGET: 'SET_AUCTION_BUDGET',
+  SET_VALUE_TYPE: 'SET_VALUE_TYPE',
 
   setOptimalLineup: ({ players, feasible, result }) => ({
     type: auctionActions.SET_OPTIMAL_LINEUP,
@@ -29,6 +30,13 @@ export const auctionActions = {
       players,
       feasible,
       result
+    }
+  }),
+
+  setValueType: (type) => ({
+    type: auctionActions.SET_VALUE_TYPE,
+    payload: {
+      type
     }
   }),
 
