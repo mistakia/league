@@ -2,6 +2,7 @@ import React from 'react'
 // import TextField from '@material-ui/core/TextField'
 
 // import EditableAuctionBudget from '@components/editable-auction-budget'
+import AuctionValueTypeToggle from '@components/auction-value-type-toggle'
 import PlayerWatchlistAction from '@components/player-watchlist-action'
 import AuctionTargetHeader from '@components/auction-target-header'
 import PlayerName from '@components/player-name'
@@ -18,6 +19,7 @@ export default class AuctionTargets extends React.Component {
       // lineupBudget,
       lineupPoints,
       lineupFeasible,
+      valueType,
       team
     } = this.props
     const groups = {}
@@ -35,7 +37,7 @@ export default class AuctionTargets extends React.Component {
         const rosterSlot = team.roster.get(player.player)
         if (rosterSlot) classNames.push('rostered')
         if (lineupPlayerIds.includes(player.player)) classNames.push('optimal')
-        const cost = rosterSlot ? rosterSlot.value : player.getIn(['values', '0', vbaseline])
+        const cost = rosterSlot ? rosterSlot.value : player.getIn(['values', valueType, vbaseline])
 
         const item = (
           <div className={classNames.join(' ')} key={index}>
@@ -57,6 +59,7 @@ export default class AuctionTargets extends React.Component {
     return (
       <div className='auction__targets'>
         <div className='auction__targets-head'>
+          <AuctionValueTypeToggle />
           <div className='optimal__lineup-key'>{lineupText}</div>
         </div>
         <div className='auction__targets-body'>

@@ -6,7 +6,7 @@ import { auctionActions } from './actions'
 import { send } from '@core/ws'
 import { getCurrentLeague } from '@core/leagues'
 import { getRosteredPlayerIdsForCurrentLeague, getCurrentPlayers } from '@core/rosters'
-import { getPlayersForWatchlist, getAllPlayers, playerActions } from '@core/players'
+import { getPlayersForWatchlist, getAllPlayers, playerActions, getPlayers } from '@core/players'
 import {
   constants,
   getEligibleSlots
@@ -18,6 +18,13 @@ export function * optimize () {
   const watchlist = yield select(getPlayersForWatchlist)
   const players = yield select(getAllPlayers)
   const { vbaseline } = yield select(getApp)
+
+  // make sure player values have been calculated
+  const pState = yield select(getPlayers)
+  const baselines = pState.get('baselines')
+  if (!baselines.size) {
+    return
+  }
 
   const rosteredPlayerIds = yield select(getRosteredPlayerIdsForCurrentLeague)
   const availablePlayers = players.filter(p => !rosteredPlayerIds.includes(p.player))
@@ -196,6 +203,10 @@ export function * watchAuctionResume () {
   yield takeLatest(auctionActions.AUCTION_RESUME, resume)
 }
 
+export function * watchSetValueType () {
+  yield takeLatest(auctionActions.SET_VALUE_TYPE, optimize)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -209,5 +220,6 @@ export const auctionSagas = [
   fork(watchToggleWatchlist),
   fork(watchSetAuctionBudget),
   fork(watchAuctionPause),
-  fork(watchAuctionResume)
+  fork(watchAuctionResume),
+  fork(watchSetValueType)
 ]
