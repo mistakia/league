@@ -21,11 +21,17 @@ const initialState = new Record({
   bidTimer: null,
   nominationTimer: null,
   search: null,
-  timer: null
+  timer: null,
+  valueType: '0'
 })
 
 export function auctionReducer (state = initialState(), { payload, type }) {
   switch (type) {
+    case auctionActions.SET_VALUE_TYPE:
+      return state.merge({
+        valueType: payload.type
+      })
+
     case auctionActions.AUCTION_SEARCH_PLAYERS:
       return state.merge({
         search: payload.value

@@ -13,6 +13,7 @@ const mapStateToProps = createSelector(
   getAuctionTargetPlayers,
   getCurrentPlayers,
   (auction, app, players, team) => ({
+    valueType: auction.valueType,
     players,
     lineupPlayerIds: auction.lineupPlayers,
     lineupFeasible: auction.lineupFeasible,
