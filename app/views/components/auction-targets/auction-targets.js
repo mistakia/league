@@ -16,8 +16,8 @@ export default class AuctionTargets extends React.Component {
       vbaseline,
       lineupPlayerIds,
       // lineupBudget,
-      // lineupPoints,
-      // lineupFeasible,
+      lineupPoints,
+      lineupFeasible,
       team
     } = this.props
     const groups = {}
@@ -50,10 +50,14 @@ export default class AuctionTargets extends React.Component {
       }
     }
 
+    const lineupText = lineupFeasible
+      ? `Optimal Lineup ${lineupPoints || 0} Pts`
+      : 'Not Feasible'
+
     return (
       <div className='auction__targets'>
         <div className='auction__targets-head'>
-          <div className='optimal__lineup-key'>Optimal Lineup</div>
+          <div className='optimal__lineup-key'>{lineupText}</div>
         </div>
         <div className='auction__targets-body'>
           <div className='auction__targets-section'>

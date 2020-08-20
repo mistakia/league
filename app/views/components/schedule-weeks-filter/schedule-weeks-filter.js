@@ -11,7 +11,7 @@ export default class ScheduleWeeksFilter extends React.Component {
       values: []
     }
 
-    for (const week of constants.season.weeks) {
+    for (const week of constants.weeks) {
       state.values.push({
         value: week,
         label: week,
