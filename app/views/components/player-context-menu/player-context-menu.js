@@ -27,7 +27,7 @@ export default class PlayerContextMenu extends React.Component {
     const { player } = this.props
     this.props.showConfirmation({
       id: 'waiver',
-      player
+      data: player
     })
     this.props.hide()
   }
@@ -45,7 +45,7 @@ export default class PlayerContextMenu extends React.Component {
     const { player } = this.props
     this.props.showConfirmation({
       id: 'poach',
-      player
+      data: player
     })
     this.props.hide()
   }

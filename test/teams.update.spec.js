@@ -99,6 +99,28 @@ describe('API /teams - update', function () {
       expect(team.name).to.equal(value)
     })
 
+    it('name - commish', async () => {
+      const value = 'TEST TEAM 2'
+      const res = await chai.request(server)
+        .put('/api/teams/2')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          field: 'name',
+          value
+        })
+
+      res.should.have.status(200)
+      // eslint-disable-next-line
+      res.should.be.json
+
+      // verify database change
+      res.body.value.should.equal(value)
+      const teams = await knex('teams').where({ uid: 2 }).limit(1)
+      const team = teams[0]
+
+      expect(team.name).to.equal(value)
+    })
+
     it('image', async () => {
       const value = 'https://example.com/image.png'
       const res = await chai.request(server)

@@ -7,6 +7,9 @@ router.get('/?', async (req, res) => {
   try {
     const users = await db('users').where({ id: req.user.userId })
     const user = users[0]
+    if (!user) {
+      return res.status(400).send({ error: 'user does not exist' })
+    }
     delete user.password
 
     const teams = await db('teams')

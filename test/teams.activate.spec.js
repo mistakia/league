@@ -11,7 +11,7 @@ const knex = require('../db')
 const league = require('../db/seeds/league')
 const { constants } = require('../common')
 const { start } = constants.season
-const { user1 } = require('./fixtures/token')
+const { user1, user2 } = require('./fixtures/token')
 const {
   addPlayer,
   selectPlayer,
@@ -161,8 +161,8 @@ describe('API /teams - activate', function () {
     })
 
     it('teamId does not belong to userId', async () => {
-      const request = chai.request(server).post('/api/teams/2/activate')
-        .set('Authorization', `Bearer ${user1}`)
+      const request = chai.request(server).post('/api/teams/1/activate')
+        .set('Authorization', `Bearer ${user2}`)
         .send({
           player: 'x',
           leagueId: 1

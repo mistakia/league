@@ -1,6 +1,9 @@
 import React from 'react'
+import Accordion from '@material-ui/core/Accordion'
+import AccordionDetails from '@material-ui/core/AccordionDetails'
+import AccordionSummary from '@material-ui/core/AccordionSummary'
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 
-import Icon from '@components/icon'
 import EditableLeagueField from '@components/editable-league-field'
 import { DEFAULT_LEAGUE_ID } from '@core/constants'
 
@@ -11,12 +14,12 @@ export default class EditableLeague extends React.Component {
     super(props)
 
     this.state = {
-      visible: false
+      open: false
     }
   }
 
-  handleClick = (event) => {
-    this.setState({ visible: !this.state.visible })
+  handleChange = () => {
+    this.setState({ open: !this.state.open })
   }
 
   onchange = (value) => {
@@ -38,13 +41,24 @@ export default class EditableLeague extends React.Component {
     const props = { league, isCommish, isDefault, onchange: this.onchange }
 
     return (
-      <div className={classNames.join(' ')}>
-        <div className='editable__league-head' onClick={this.handleClick}>
-          <div className='editable__league-title'>League Settings — {league.name}</div>
-          <Icon className='editable__league-icon' name='arrow-down' />
-        </div>
-        {this.state.visible &&
+      <Accordion expanded={this.state.open} onChange={this.handleChange}>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+        >
+          <div className='settings__section-title'>League</div>
+          <div className='settings__section-description'>Edit Scoring / Starting Lineup / Roster Limits</div>
+        </AccordionSummary>
+        <AccordionDetails>
           <div className='editable__league-body'>
+            <div className='editable__league-section'>
+              <EditableLeagueField
+                field='name'
+                label='Name'
+                length={80}
+                {...props}
+              />
+            </div>
+            <div className='editable__league-section-title'>General</div>
             <div className='editable__league-section'>
               <EditableLeagueField
                 field='name'
@@ -385,8 +399,9 @@ export default class EditableLeague extends React.Component {
                 {...props}
               />
             </div>
-          </div>}
-      </div>
+          </div>
+        </AccordionDetails>
+      </Accordion>
     )
   }
 }
