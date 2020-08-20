@@ -15,7 +15,7 @@ export function optimizeLineup ({
   const positions = pool.map(p => p.pos1)
   const positionConstraints = getOptimizerPositionConstraints({ positions, league })
   const constraints = {
-    value: { max: Math.round(league.cap * 0.8) },
+    value: { max: Math.round(league.cap * 0.9) },
     ...positionConstraints,
     ...limits
   }
