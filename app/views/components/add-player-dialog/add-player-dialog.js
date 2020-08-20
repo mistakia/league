@@ -67,7 +67,7 @@ export default class AddPlayerDialog extends React.Component {
   render = () => {
     const { players } = this.props
 
-    const sorted = players.sort((a, b) => b.name - a.name)
+    const sorted = players.sortBy(player => player.name)
     const menuItems = [<option key='default' value='' />]
     for (const [index, player] of sorted.entries()) {
       menuItems.push(
