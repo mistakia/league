@@ -2,7 +2,7 @@ import { List, Map } from 'immutable'
 
 import { Roster, constants } from '@common'
 import { getApp } from '@core/app'
-import { getPlayerById } from '@core/players'
+import { getPlayerById, getAllPlayers } from '@core/players'
 import { getCurrentLeague } from '@core/leagues'
 
 import { Roster as RosterRecord } from './roster'
@@ -20,6 +20,12 @@ export function getRostersForCurrentLeague (state) {
   const rosters = getRosters(state)
   const { leagueId } = getApp(state)
   return rosters.filter(r => r.lid === leagueId)
+}
+
+export function getAvailablePlayersForCurrentLeague (state) {
+  const rosteredPlayerIds = getRosteredPlayerIdsForCurrentLeague(state)
+  const all = getAllPlayers(state)
+  return all.filter(p => !rosteredPlayerIds.includes(p.player))
 }
 
 export function getActivePlayersByRosterForCurrentLeague (state) {

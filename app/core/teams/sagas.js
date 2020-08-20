@@ -32,6 +32,20 @@ export function * deleteTeam ({ payload }) {
   yield call(deleteTeams, { leagueId, teamId })
 }
 
+export function * addNotification () {
+  yield put(notificationActions.show({
+    message: 'Team Added',
+    severity: 'success'
+  }))
+}
+
+export function * deleteNotification () {
+  yield put(notificationActions.show({
+    message: 'Team Deleted',
+    severity: 'success'
+  }))
+}
+
 //= ====================================
 //  WATCHERS
 // -------------------------------------
@@ -56,6 +70,14 @@ export function * watchAddTeam () {
   yield takeLatest(teamActions.ADD_TEAM, addTeam)
 }
 
+export function * watchPostTeamsFulfilled () {
+  yield takeLatest(teamActions.POST_TEAMS_FULFILLED, addNotification)
+}
+
+export function * watchDeleteTeamsFulfilled () {
+  yield takeLatest(teamActions.DELETE_TEAMS_FULFILLED, deleteNotification)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -65,5 +87,8 @@ export const teamSagas = [
   fork(watchUpdateTeam),
   fork(watchPutTeamFulfilled),
   fork(watchDeleteTeam),
-  fork(watchAddTeam)
+  fork(watchAddTeam),
+
+  fork(watchPostTeamsFulfilled),
+  fork(watchDeleteTeamsFulfilled)
 ]

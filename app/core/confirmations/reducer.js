@@ -5,7 +5,7 @@ import { confirmationActions } from './actions'
 const ConfirmationState = new Record({
   id: null,
   title: null,
-  player: null,
+  data: null,
   description: null,
   component: null,
   onConfirm: null

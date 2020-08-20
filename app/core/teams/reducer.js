@@ -84,6 +84,12 @@ export function teamsReducer (state = initialState, { payload, type }) {
         }
       })
 
+    case teamActions.POST_TEAMS_FULFILLED:
+      return state.set(payload.data.team.uid, createTeam(payload.data.team))
+
+    case teamActions.DELETE_TEAMS_FULFILLED:
+      return state.delete(payload.opts.teamId)
+
     default:
       return state
   }

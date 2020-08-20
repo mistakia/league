@@ -1,101 +1,29 @@
 import React from 'react'
 
 import EditableLeague from '@components/editable-league'
-import EditableTeam from '@components/editable-team'
-import EditableSource from '@components/editable-source'
-import EditableBaseline from '@components/editable-baseline'
+import SettingsTeam from '@components/settings-team'
 import PageLayout from '@layouts/page'
-import EditableValue from '@components/editable-value'
-import SettingsSwitch from '@components/settings-switch'
+import EditableTeams from '@components/editable-teams'
+import SettingsProjections from '@components/settings-projections'
+import SettingsValue from '@components/settings-value'
+import SettingsNotifications from '@components/settings-notifications'
 
 import './settings.styl'
 
 export default class SettingsPage extends React.Component {
   render = () => {
-    const { userId, leagueId, teamId, sourceIds, baselines, vbaseline, isHosted } = this.props
-
-    const sourceItems = []
-    for (const sourceId of sourceIds) {
-      sourceItems.push(
-        <EditableSource key={sourceId} sourceId={sourceId} />
-      )
-    }
-
-    const editableBaselines = []
-    for (const baseline in baselines) {
-      editableBaselines.push(<EditableBaseline key={baseline} position={baseline} />)
-    }
-
-    let baselineDescription
-    switch (vbaseline) {
-      case 'available':
-        baselineDescription = (<p><strong>Best Available: </strong> The best available player at each position that can be added. This is estimated when rosters are not full but dynamically updates with each roster transaction.</p>)
-        break
-
-      case 'bench':
-        baselineDescription = (<p><strong>Average Bench: </strong> The average player at each position on a teams bench</p>)
-        break
-
-      case 'starter':
-        baselineDescription = (<p><strong>Worst Starter: </strong> The worst player at each position on a starting lineup</p>)
-        break
-
-      case 'average':
-        baselineDescription = (<p><strong>Average Starter: </strong> The average player at each position on a starting lineup</p>)
-        break
-
-      case 'hybrid':
-        baselineDescription = (<p><strong>Hybrid</strong> allows for you to mix <strong>Best Available</strong> and <strong>Worst Starter</strong> based on specified weights. Weights are relative and normalized, thus equal weight values are the same as each having a weight of 1.</p>)
-        break
-
-      case 'manual':
-        baselineDescription = (<p><strong>Manual</strong> allows you to set the baseline for each position. Not recommended during the season.</p>)
-        break
-    }
-
-    let notificationSection
-    if (userId && isHosted) {
-      notificationSection = (
-        <div className='settings__section settings__notifications'>
-          <div className='settings__section-head'>Notifications</div>
-          <div className='settings__section-body'>
-            <SettingsSwitch
-              field='text'
-              label='Text Notifications'
-              description='Enable/disable all text notifications.'
-            />
-            <SettingsSwitch
-              field='voice'
-              label='Voice Notifications'
-              description='Enable/disable all voice notifications.'
-            />
-          </div>
-        </div>
-      )
-    }
+    const { userId, leagueId, teamId, isHosted } = this.props
 
     const body = (
       <div className='settings'>
-        <EditableLeague lid={leagueId} />
-        {teamId &&
-          <div className='settings__section'>
-            <div className='settings__section-head'>Team Settings</div>
-            <div className='settings__section-body'><EditableTeam tid={teamId} /></div>
-          </div>}
-        <div className='settings__section'>
-          <div className='settings__section-head'>Value Calculations</div>
-          <EditableValue />
-          <div className='settings__help'>
-            {baselineDescription}
-            <p>The baseline (aka replacement player) used for value over replacement calculations. Since only points from starters count, the <strong>worst starter</strong> baseline is the best baseline to use when determining historical value. When forecasting value, there is no right answer, it depends on strategy. <strong>Best Available</strong> will emphasize depth, whereas <strong>Worst Starter</strong> will emphasize the value of high-end starters and even more so for <strong>Average Starter</strong>.</p>
-          </div>
-          {vbaseline === 'manual' && editableBaselines}
+        <div>
+          <EditableLeague lid={leagueId} />
+          {teamId && <SettingsTeam tid={teamId} />}
+          <SettingsValue />
+          <SettingsProjections />
+          {(userId && isHosted) && <SettingsNotifications />}
         </div>
-        {notificationSection}
-        <div className='settings__section'>
-          <div className='settings__section-head'>Projection Weights</div>
-          <div className='settings__section-body'>{sourceItems}</div>
-        </div>
+        <EditableTeams />
       </div>
     )
 

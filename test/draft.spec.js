@@ -22,7 +22,7 @@ const {
   invalid,
   error
 } = require('./utils')
-const { user1, user2 } = require('./fixtures/token')
+const { user1, user2, user3 } = require('./fixtures/token')
 
 chai.use(chaiHTTP)
 
@@ -165,7 +165,7 @@ describe('API /draft', function () {
 
     it('teamId does not belong to userId', async () => {
       const request = chai.request(server).post('/api/leagues/1/draft')
-        .set('Authorization', `Bearer ${user1}`)
+        .set('Authorization', `Bearer ${user3}`)
         .send({ playerId: 'xx', pickId: 2, teamId: 2 })
 
       await invalid(request, 'teamId')
