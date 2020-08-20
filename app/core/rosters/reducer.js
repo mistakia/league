@@ -5,6 +5,7 @@ import { Roster, createRoster } from './roster'
 import { appActions } from '@core/app'
 import { constants } from '@common'
 import { auctionActions } from '@core/auction'
+import { teamActions } from '@core/teams'
 
 export function rostersReducer (state = new Map(), { payload, type }) {
   switch (type) {
@@ -113,6 +114,36 @@ export function rostersReducer (state = new Map(), { payload, type }) {
           }
         }
       })
+
+    case teamActions.POST_TEAMS_FULFILLED:
+      return state.set(payload.data.team.uid, createRoster(payload.data.roster))
+
+    case teamActions.DELETE_TEAMS_FULFILLED:
+      return state.delete(payload.opts.teamId)
+
+    case rosterActions.POST_ROSTERS_FULFILLED: {
+      const { rid, slot, pos, player } = payload.data
+      const { userid, tid, lid, type, value, year, timestamp } = payload.data.transaction
+      return state.updateIn([payload.opts.teamId, 'players'], arr => arr.push({
+        rid,
+        slot,
+        player,
+        pos,
+        userid,
+        tid,
+        lid,
+        type,
+        value,
+        year,
+        timestamp
+      }))
+    }
+
+    case rosterActions.PUT_ROSTERS_FULFILLED:
+      return state // TODO
+
+    case rosterActions.DELETE_ROSTERS_FULFILLED:
+      return state.updateIn([payload.opts.teamId, 'players'], arr => arr.filter(p => p.player !== payload.opts.player))
 
     default:
       return state

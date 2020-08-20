@@ -245,9 +245,9 @@ describe('API /waivers - poach', function () {
 
     it('teamId does not belong to userId', async () => {
       const request = chai.request(server).post('/api/leagues/1/waivers')
-        .set('Authorization', `Bearer ${user1}`)
+        .set('Authorization', `Bearer ${user2}`)
         .send({
-          teamId: 2,
+          teamId: 1,
           type: constants.waivers.POACH,
           player: playerId,
           leagueId: 1

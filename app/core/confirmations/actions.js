@@ -2,11 +2,11 @@ export const confirmationActions = {
   SHOW_CONFIRMATION: 'SHOW_CONFIRMATION',
   CANCEL_CONFIRMATION: 'CANCEL_CONFIRMATION',
 
-  show: ({ title, description, id, onConfirm, player }) => ({
+  show: ({ title, description, id, onConfirm, data }) => ({
     type: confirmationActions.SHOW_CONFIRMATION,
     payload: {
       title,
-      player,
+      data,
       description,
       id,
       onConfirm

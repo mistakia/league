@@ -158,7 +158,7 @@ export const postTeamsActions = {
 }
 
 export const deleteTeamsActions = {
-  failed: teamActions.postTeamsFailed,
-  pending: teamActions.postTeamsPending,
-  fulfilled: teamActions.postTeamsFulfilled
+  failed: teamActions.deleteTeamsFailed,
+  pending: teamActions.deleteTeamsPending,
+  fulfilled: teamActions.deleteTeamsFulfilled
 }
