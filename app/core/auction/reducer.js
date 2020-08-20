@@ -12,7 +12,7 @@ const initialState = new Record({
   bid: null,
   connected: new List(),
   lineupPlayers: new List(),
-  lineupFeasible: false,
+  lineupFeasible: true,
   lineupPoints: null,
   lineupBudget: null,
   tids: new List(),

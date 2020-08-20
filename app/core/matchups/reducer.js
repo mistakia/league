@@ -8,7 +8,7 @@ const initialState = new Map({
   isPending: false,
   items: new List(),
   teams: new List(),
-  weeks: new List(constants.season.weeks)
+  weeks: new List(constants.weeks)
 })
 
 export function matchupsReducer (state = initialState, { payload, type }) {
