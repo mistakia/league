@@ -37,6 +37,7 @@ export default class SelectedPlayerSeasonProjections extends React.Component {
 
     const projAvg = weightProjections({
       projections: player.projections.filter(p => p.sourceid),
+      week: 0,
       userId: 0
     })
 
