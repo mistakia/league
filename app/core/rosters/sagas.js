@@ -9,13 +9,14 @@ import {
   postDeactivate,
   postRosters,
   deleteRosters,
-  putRosters
+  putRosters,
+  postAddFreeAgent
 } from '@core/api'
 import { getApp, appActions } from '@core/app'
 import { getPlayers, getAllPlayers, playerActions } from '@core/players'
 import {
   getActivePlayersByRosterForCurrentLeague,
-  getCurrentTeamRoster,
+  getCurrentTeamRosterRecord,
   getCurrentPlayers
 } from './selectors'
 import { getCurrentLeague } from '@core/leagues'
@@ -63,7 +64,7 @@ export function * projectLineups () {
   }
 
   yield put(rosterActions.setLineupProjections(lineups))
-  const currentRoster = yield select(getCurrentTeamRoster)
+  const currentRoster = yield select(getCurrentTeamRosterRecord)
   const currentRosterPlayers = yield select(getCurrentPlayers)
   const baselines = (yield select(getPlayers)).get('baselines')
   const playerItems = yield select(getAllPlayers)
@@ -149,6 +150,11 @@ export function * updatePlayer ({ payload }) {
   yield call(putRosters, { leagueId, ...payload })
 }
 
+export function * addFreeAgent ({ payload }) {
+  const { leagueId, teamId } = yield select(getApp)
+  yield call(postAddFreeAgent, { leagueId, teamId, ...payload })
+}
+
 //= ====================================
 //  WATCHERS
 // -------------------------------------
@@ -209,6 +215,10 @@ export function * watchRemovePlayerRoster () {
   yield takeLatest(rosterActions.REMOVE_PLAYER_ROSTER, removePlayer)
 }
 
+export function * watchAddFreeAgent () {
+  yield takeLatest(rosterActions.ADD_FREE_AGENT, addFreeAgent)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -226,6 +236,8 @@ export const rosterSagas = [
   fork(watchRosterDeactivation),
   fork(watchPostActivateFulfilled),
   fork(watchPostDeactivateFulfilled),
+
+  fork(watchAddFreeAgent),
 
   fork(watchAddPlayerRoster),
   fork(watchRemovePlayerRoster),

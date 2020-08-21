@@ -2,7 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { rosterActions, getCurrentTeamRoster } from '@core/rosters'
+import { rosterActions, getCurrentTeamRosterRecord } from '@core/rosters'
 import { getApp } from '@core/app'
 import { getCurrentLeague } from '@core/leagues'
 import {
@@ -42,7 +42,7 @@ const mapStateToProps = createSelector(
   getTrade,
   getApp,
   getCurrentTrade,
-  getCurrentTeamRoster,
+  getCurrentTeamRosterRecord,
   getCurrentTeam,
   getTradeSelectedTeamRoster,
   getTradeSelectedTeam,

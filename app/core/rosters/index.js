@@ -3,6 +3,7 @@ export {
   getRosterByTeamId,
   getRostersForCurrentLeague,
   getCurrentTeamRoster,
+  getCurrentTeamRosterRecord,
   getCurrentPlayers,
   getRosteredPlayerIdsForCurrentLeague,
   getActiveRosterPlayerIdsForCurrentLeague,
@@ -27,6 +28,7 @@ export {
   postDeactivateActions,
   postRostersActions,
   putRostersActions,
-  deleteRostersActions
+  deleteRostersActions,
+  postAddFreeAgentActions
 } from './actions'
 export { Roster } from './roster'

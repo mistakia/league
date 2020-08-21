@@ -1,3 +1,4 @@
+import moment from 'moment-timezone'
 import { Set } from 'immutable'
 import { createSelector } from 'reselect'
 
@@ -11,6 +12,7 @@ import {
   getCurrentPlayers,
   getActiveRosterPlayerIdsForCurrentLeague
 } from '@core/rosters'
+import { getCurrentLeague } from '@core/leagues'
 import { constants } from '@common'
 import { fuzzySearch } from '@core/utils'
 
@@ -103,6 +105,22 @@ export function getAuctionInfoForPosition (state, { pos }) {
       actual
     }
   }
+}
+
+export function hasAuctionCompleted (state) {
+  const league = getCurrentLeague(state)
+
+  if (!league.adate) {
+    return false
+  }
+
+  // day after auction starts
+  const cutoff = moment.tz(league.adate, 'X', 'America/New_York').add('1', 'day').startOf('day')
+  if (moment().isBefore(cutoff)) {
+    return false
+  }
+
+  return true
 }
 
 export const getPlayersForOptimalLineup = createSelector(

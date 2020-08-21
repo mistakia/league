@@ -4,7 +4,7 @@ import { createSelector } from 'reselect'
 import {
   isPlayerEligible,
   getCurrentPlayers,
-  getCurrentTeamRoster,
+  getCurrentTeamRosterRecord,
   getRosterInfoForPlayerId
 } from '@core/rosters'
 import { getCurrentLeague } from '@core/leagues'
@@ -17,7 +17,7 @@ import PoachConfirmation from './poach-confirmation'
 const mapStateToProps = createSelector(
   isPlayerEligible,
   getCurrentPlayers,
-  getCurrentTeamRoster,
+  getCurrentTeamRosterRecord,
   getCurrentLeague,
   getPlayerStatus,
   getRosterInfoForPlayerId,

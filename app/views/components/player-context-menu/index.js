@@ -13,9 +13,11 @@ import {
   isPlayerOnPracticeSquadCM,
   hasExistingPoachingClaim
 } from '@core/context-menu'
-import { rosterActions } from '@core/rosters'
+import { rosterActions, getCurrentTeamRoster } from '@core/rosters'
 import { confirmationActions } from '@core/confirmations'
 import { waiverActions } from '@core/waivers'
+import { hasDraftClockExpired } from '@core/draft'
+import { hasAuctionCompleted } from '@core/auction'
 
 import PlayerContextMenu from './player-context-menu'
 
@@ -29,6 +31,9 @@ const mapStateToProps = createSelector(
   getPlayerStatusCM,
   isPlayerOnPracticeSquadCM,
   hasExistingPoachingClaim,
+  hasDraftClockExpired,
+  hasAuctionCompleted,
+  getCurrentTeamRoster,
   (
     contextMenuInfo,
     player,
@@ -38,7 +43,10 @@ const mapStateToProps = createSelector(
     isPlayerRostered,
     status,
     isPlayerOnPracticeSquad,
-    hasExistingPoachingClaim
+    hasExistingPoachingClaim,
+    hasDraftClockExpired,
+    hasAuctionCompleted,
+    roster
   ) => ({
     contextMenuInfo,
     player,
@@ -48,7 +56,10 @@ const mapStateToProps = createSelector(
     isPlayerRostered,
     status,
     isPlayerOnPracticeSquad,
-    hasExistingPoachingClaim
+    hasExistingPoachingClaim,
+    hasDraftClockExpired,
+    hasAuctionCompleted,
+    isPlayerEligibleToDeactivate: isPracticeSquadEligible && roster.hasOpenPracticeSquadSlot()
   })
 )
 

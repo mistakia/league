@@ -1,6 +1,8 @@
 import React from 'react'
-
-import { constants } from '@common'
+import Grow from '@material-ui/core/Grow'
+import Paper from '@material-ui/core/Paper'
+import MenuItem from '@material-ui/core/MenuItem'
+import MenuList from '@material-ui/core/MenuList'
 
 export default class PlayerContextMenu extends React.Component {
   handleDeactivate = () => {
@@ -26,8 +28,10 @@ export default class PlayerContextMenu extends React.Component {
   handleWaiver = () => {
     const { player } = this.props
     this.props.showConfirmation({
-      id: 'waiver',
-      data: player
+      id: 'WAIVER',
+      data: {
+        player
+      }
     })
     this.props.hide()
   }
@@ -44,8 +48,22 @@ export default class PlayerContextMenu extends React.Component {
   handlePoach = () => {
     const { player } = this.props
     this.props.showConfirmation({
-      id: 'poach',
-      data: player
+      id: 'POACH',
+      data: {
+        player
+      }
+    })
+    this.props.hide()
+  }
+
+  handleAdd = ({ practice = false } = {}) => {
+    const { player } = this.props
+    this.props.showConfirmation({
+      id: 'ADD_FREE_AGENT',
+      data: {
+        player,
+        practice
+      }
     })
     this.props.hide()
   }
@@ -58,126 +76,109 @@ export default class PlayerContextMenu extends React.Component {
       isPlayerRostered,
       isPlayerOnPracticeSquad,
       hasExistingPoachingClaim,
-      data,
-      status
+      hasAuctionCompleted,
+      waiverId,
+      status,
+      hasDraftClockExpired,
+      isPlayerEligibleToDeactivate
     } = this.props
 
-    const { waiverId } = data
+    const menuItems = []
 
     // context menu for waiver claims
     if (waiverId) {
-      return (
-        <div>
-          <div className='context__menu-option' onClick={this.handleCancelWaiver}>
-            Cancel Claim
-          </div>
-        </div>
+      menuItems.push(
+        <MenuItem
+          dense
+          onClick={this.handleCancelWaiver}
+        >
+          Cancel Claim
+        </MenuItem>
       )
-    }
-
-    let deactivateAction
-    if (isPracticeSquadEligible) {
-      deactivateAction = (
-        <div className='context__menu-option' onClick={this.handleDeactivate}>
-          Deactivate
-        </div>
-      )
-    } else {
-      deactivateAction = (
-        <div className='context__menu-option disabled'>
-          Deactivate
-        </div>
-      )
-    }
-
-    let activateAction
-    if (isActiveRosterEligible) {
-      activateAction = (
-        <div className='context__menu-option' onClick={this.handleActivate}>
+    } else if (isOnCurrentRoster) {
+      menuItems.push(
+        <MenuItem
+          dense
+          disabled={!isActiveRosterEligible}
+          onClick={this.handleActivate}
+        >
           Activate
-        </div>
+        </MenuItem>
       )
-    } else {
-      activateAction = (
-        <div className='context__menu-option disabled'>
-          Activate
-        </div>
-      )
-    }
 
-    if (isOnCurrentRoster) {
-      return (
-        <div>
-          {activateAction}
-          {deactivateAction}
-          <div className='context__menu-option disabled'>
-            Drop
-          </div>
-        </div>
+      menuItems.push(
+        <MenuItem
+          dense
+          disabled={!isPlayerEligibleToDeactivate}
+          onClick={this.handleDeactivate}
+        >
+          Deactivate
+        </MenuItem>
+      )
+
+      menuItems.push(
+        <MenuItem
+          dense
+          disabled
+        >
+          Release
+        </MenuItem>
       )
     } else if (isPlayerRostered) {
-      if (isPlayerOnPracticeSquad) {
-        if (status.waiver.poach) {
-          return (
-            <div>
-              <div className='context__menu-option' onClick={this.handlePoach}>
-                Submit Poaching Waiver Claim
-              </div>
-            </div>
-          )
-        } else if (hasExistingPoachingClaim) {
-          return (
-            <div>
-              <div className='context__menu-option disabled'>
-                Submit Poaching Claim
-              </div>
-            </div>
-          )
-        } else {
-          return (
-            <div>
-              <div className='context__menu-option' onClick={this.handlePoach}>
-                Submit Poaching Claim
-              </div>
-            </div>
-          )
-        }
-      } else {
-        return (
-          <div>
-            <div className='context__menu-option disabled'>
-              Submit Poaching Claim
-            </div>
-          </div>
-        )
-      }
-    } else { // player is a free agent
-      let claimAction
-      if (constants.season.isRegularSeason && status.waiver.add) {
-        claimAction = (
-          <div className='context__menu-option' onClick={this.handleWaiver}>
-            Submit Waiver Claim
-          </div>
-        )
-      } else {
-        claimAction = (
-          <div className='context__menu-option disabled'>
-            Submit Waiver Claim
-          </div>
-        )
-      }
+      const text = status.waiver.poach
+        ? 'Submit Poaching Waiver Claim'
+        : 'Submit Poaching Claim'
 
-      return (
-        <div>
-          {claimAction}
-          <div className='context__menu-option disabled'>
-            Add To Roster
-          </div>
-          <div className='context__menu-option disabled'>
-            Add To Practice Squad
-          </div>
-        </div>
+      menuItems.push(
+        <MenuItem
+          dense
+          disabled={hasExistingPoachingClaim || !isPlayerOnPracticeSquad}
+          onClick={this.handlePoach}
+        >
+          {text}
+        </MenuItem>
+      )
+    } else {
+      // player is a free agent
+
+      menuItems.push(
+        <MenuItem
+          dense
+          disabled={!status.waiver.add || !hasAuctionCompleted}
+          onClick={this.handleWaiver}
+        >
+          Submit Waiver Claim
+        </MenuItem>
+      )
+
+      menuItems.push(
+        <MenuItem
+          dense
+          disabled={status.waiver.add}
+          onClick={() => this.handleAdd()}
+        >
+          Add to Active Roster
+        </MenuItem>
+      )
+      menuItems.push(
+        <MenuItem
+          dense
+          disabled={!isPracticeSquadEligible || !hasDraftClockExpired}
+          onClick={() => this.handleAdd({ practice: true })}
+        >
+          Add to Practice Squad
+        </MenuItem>
       )
     }
+
+    return (
+      <Grow in>
+        <Paper>
+          <MenuList>
+            {menuItems}
+          </MenuList>
+        </Paper>
+      </Grow>
+    )
   }
 }

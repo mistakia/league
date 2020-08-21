@@ -1,12 +1,12 @@
 import { createSelector } from 'reselect'
 import moment from 'moment'
-import { constants, calculatePoints, Roster } from '@common'
+import { constants, calculatePoints } from '@common'
 import { getApp } from '@core/app'
 import { getStats } from '@core/stats'
 import { Player } from './player'
 import { fuzzySearch } from '@core/utils'
 import {
-  getCurrentTeamRoster,
+  getCurrentTeamRosterRecord,
   getActiveRosterPlayerIdsForCurrentLeague,
   getRosteredPlayerIdsForCurrentLeague,
   getPracticeSquadPlayerIdsForCurrentLeague,
@@ -248,10 +248,10 @@ export function isPlayerPracticeSquadEligible (state, { player }) {
   }
 
   const rosterInfo = getRosterInfoForPlayerId(state, { playerId: player.player })
-  const { leagueId, teamId } = getApp(state)
+  const { teamId } = getApp(state)
 
   // not eligible if already on another team
-  if (rosterInfo && rosterInfo.tid !== teamId) {
+  if (rosterInfo.tid && rosterInfo.tid !== teamId) {
     return false
   }
 
@@ -261,13 +261,15 @@ export function isPlayerPracticeSquadEligible (state, { player }) {
     return false
   }
 
-  const league = state.get('leagues').get(leagueId)
-  const rosterRec = getCurrentTeamRoster(state)
-  const roster = new Roster({ roster: rosterRec.toJS(), league })
+  const rosterRec = getCurrentTeamRosterRecord(state)
   const rosterPlayers = rosterRec.get('players')
   const rosterPlayer = rosterPlayers.find(p => p.player === player.player)
 
-  // not eligible if player has not been on active roster for more than 48 hours
+  if (!rosterPlayer) {
+    return true
+  }
+
+  // not eligible if player has been on active roster for more than 48 hours
   const cutoff = moment(rosterPlayer.timestamp, 'X').add('48', 'hours')
   if (moment().isAfter(cutoff)) {
     return false
@@ -280,11 +282,6 @@ export function isPlayerPracticeSquadEligible (state, { player }) {
 
   // not eligible if player has been poached
   if (rosterPlayer.type === constants.transactions.POACHED) {
-    return false
-  }
-
-  // not eligible if no available space on practice squad
-  if (!roster.hasOpenPracticeSquadSlot()) {
     return false
   }
 

@@ -1,9 +1,10 @@
 const db = require('../../db')
 const { constants } = require('../../common')
 
-module.exports = async ({ pos = 'RB', rookie = false } = {}) => {
+module.exports = async ({ pos = 'RB', rookie = false, exclude = [] } = {}) => {
   const query = db('player')
     .whereNot('cteam', 'INA')
+    .whereNotIn('player', exclude)
     .where('pos1', pos)
     .orderByRaw('RAND()')
     .limit(1)

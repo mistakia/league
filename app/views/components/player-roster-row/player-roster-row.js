@@ -9,10 +9,14 @@ import './player-roster-row.styl'
 
 class PlayerRosterRow extends Player {
   render = () => {
-    const { player } = this.props
+    const { player, selected, isHosted } = this.props
+
+    const isSelected = selected === player.player
+    const classNames = ['roster__item']
+    if (isSelected) classNames.push('selected')
 
     return (
-      <div className='roster__item'>
+      <div className={classNames.join(' ')}>
         <div className='roster__item-position'>
           <Position pos={player.pos1} />
         </div>
@@ -21,7 +25,7 @@ class PlayerRosterRow extends Player {
           <Team team={player.team} />
         </div>
         <div className='roster__item-action'>
-          {player.player && <IconButton small text icon='more' onClick={this.handleContextClick} />}
+          {!!(player.player && isHosted) && <IconButton small text icon='more' onClick={this.handleContextClick} />}
         </div>
       </div>
     )

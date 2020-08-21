@@ -20,7 +20,7 @@ class PlayerRoster extends Player {
   }
 
   render () {
-    const { player, vbaseline, selected, claim, reorder } = this.props
+    const { player, vbaseline, selected, claim, reorder, isHosted } = this.props
 
     const isClaim = !!claim
 
@@ -58,7 +58,7 @@ class PlayerRoster extends Player {
           {(player.lineups.bp || 0).toFixed(1) || '--'}
         </div>
         <div className='player__item-action'>
-          <IconButton small text onClick={this.handleClick} icon='more' />
+          {!!isHosted && <IconButton small text onClick={this.handleClick} icon='more' />}
         </div>
         {reorder && <DragHandle />}
       </div>

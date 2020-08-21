@@ -315,7 +315,8 @@ export const slots = {
 
 export const waivers = {
   FREE_AGENCY: 1,
-  POACH: 2
+  POACH: 2,
+  FREE_AGENCY_PRACTICE: 3
 }
 
 export const transactions = {

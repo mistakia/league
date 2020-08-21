@@ -7,5 +7,6 @@ module.exports = {
   error: require('./error'),
   addPlayer: require('./add-player'),
   dropPlayer: require('./drop-player'),
-  selectPlayer: require('./select-player')
+  selectPlayer: require('./select-player'),
+  fillRoster: require('./fill-roster')
 }
