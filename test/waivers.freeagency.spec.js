@@ -1,4 +1,4 @@
-/* global describe before it */
+/* global describe before it beforeEach */
 process.env.NODE_ENV = 'test'
 
 const chai = require('chai')
@@ -16,6 +16,8 @@ const { user1 } = require('./fixtures/token')
 const {
   addPlayer,
   dropPlayer,
+  selectPlayer,
+  fillRoster,
   error
 } = require('./utils')
 
@@ -23,27 +25,25 @@ chai.should()
 chai.use(chaiHTTP)
 
 describe('API /waivers - free agency', function () {
-  let playerId
   before(async function () {
     this.timeout(60 * 1000)
     await knex.migrate.forceFreeMigrationsLock()
     await knex.migrate.rollback()
     await knex.migrate.latest()
     await knex.seed.run()
-
-    MockDate.set(start.clone().subtract('1', 'month').toDate())
-    await league(knex)
   })
 
   describe('put', function () {
+    beforeEach(async function () {
+      this.timeout(60 * 1000)
+      MockDate.set(start.clone().subtract('1', 'month').toDate())
+      await league(knex)
+    })
+
     it('submit waiver for player', async () => {
       MockDate.set(start.clone().add('1', 'week').toDate())
 
-      const players = await knex('player')
-        .whereNot('cteam', 'INA')
-        .where('pos1', 'WR')
-        .limit(1)
-      playerId = players[0].player
+      const player = await selectPlayer()
 
       // submit waiver claim
       const teamId = 1
@@ -53,7 +53,7 @@ describe('API /waivers - free agency', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: playerId,
+          player: player.player,
           type: constants.waivers.FREE_AGENCY,
           leagueId
         })
@@ -65,12 +65,69 @@ describe('API /waivers - free agency', function () {
       res.body.tid.should.equal(teamId)
       res.body.userid.should.equal(1)
       res.body.lid.should.equal(leagueId)
-      res.body.player.should.equal(playerId)
+      res.body.player.should.equal(player.player)
       res.body.po.should.equal(9999)
       res.body.submitted.should.equal(Math.round(Date.now() / 1000))
       res.body.bid.should.equal(0)
       res.body.type.should.equal(constants.waivers.FREE_AGENCY)
-      res.body.uid.should.equal(1)
+      // eslint-disable-next-line
+      res.body.uid.should.exist
+    })
+
+    it('submit waiver for released rookie - offseason', async () => {
+      MockDate.set(start.clone().subtract('1', 'month').toDate())
+      const leagueId = 1
+      const player = await selectPlayer({ rookie: true })
+      await addPlayer({
+        leagueId,
+        player,
+        teamId: 2,
+        userId: 2,
+        slot: constants.slots.PS,
+        transaction: constants.transactions.DRAFT,
+        value: 3
+      })
+
+      MockDate.set(start.clone().subtract('3', 'week').toDate())
+      await dropPlayer({
+        leagueId,
+        player,
+        teamId: 2,
+        userId: 2
+      })
+
+      MockDate.set(start.clone().subtract('3', 'week').add('4', 'hour').toDate())
+
+      // submit waiver claim
+      const teamId = 1
+      const res = await chai.request(server)
+        .post('/api/leagues/1/waivers')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          teamId,
+          player: player.player,
+          type: constants.waivers.FREE_AGENCY_PRACTICE,
+          leagueId
+        })
+
+      res.should.have.status(200)
+      // eslint-disable-next-line
+      res.should.be.json
+
+      res.body.tid.should.equal(teamId)
+      res.body.userid.should.equal(1)
+      res.body.lid.should.equal(leagueId)
+      res.body.player.should.equal(player.player)
+      res.body.po.should.equal(9999)
+      res.body.submitted.should.equal(Math.round(Date.now() / 1000))
+      res.body.bid.should.equal(0)
+      res.body.type.should.equal(constants.waivers.FREE_AGENCY_PRACTICE)
+      // eslint-disable-next-line
+      res.body.uid.should.exist
+    })
+
+    it('free agent rookie waiver w/ full active roster', async () => {
+
     })
   })
 
@@ -78,12 +135,23 @@ describe('API /waivers - free agency', function () {
     it('duplicate waiver claim', async () => {
       const teamId = 1
       const leagueId = 1
+      const player = await selectPlayer()
+      await chai.request(server)
+        .post('/api/leagues/1/waivers')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          teamId,
+          player: player.player,
+          type: constants.waivers.FREE_AGENCY,
+          leagueId
+        })
+
       const request = chai.request(server)
         .post('/api/leagues/1/waivers')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: playerId,
+          player: player.player,
           type: constants.waivers.FREE_AGENCY,
           leagueId
         })
@@ -154,14 +222,100 @@ describe('API /waivers - free agency', function () {
       await error(request, 'player is not on waivers')
     })
 
-    it('player is no longer on waivers - outside waiver period', async () => {
-      // set time to thursday
+    it('practice waiver for non rookie', async () => {
+      MockDate.set(start.clone().subtract('1', 'month').toDate())
+      const leagueId = 1
+      const player = await selectPlayer({ rookie: false })
 
-      // submit waiver
+      // submit waiver claim
+      const teamId = 1
+      const request = chai.request(server)
+        .post('/api/leagues/1/waivers')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          teamId,
+          player: player.player,
+          type: constants.waivers.FREE_AGENCY_PRACTICE,
+          leagueId
+        })
+
+      await error(request, 'player is not practice squad eligible')
+    })
+
+    it('player is no longer on waivers - outside waiver period', async () => {
+      MockDate.set(start.clone().add('1', 'month').day(5).toDate())
+      const leagueId = 1
+      const player = await selectPlayer()
+      const teamId = 1
+      const request = chai.request(server)
+        .post('/api/leagues/1/waivers')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          teamId,
+          player: player.player,
+          type: constants.waivers.FREE_AGENCY,
+          leagueId
+        })
+
+      await error(request, 'player is not on waivers')
+    })
+
+    it('player is no longer on waivers - outside waiver period - practice', async () => {
+      MockDate.set(start.clone().subtract('1', 'month').toDate())
+      const leagueId = 1
+      const player = await selectPlayer({ rookie: true })
+      await addPlayer({
+        leagueId,
+        player,
+        teamId: 2,
+        userId: 2,
+        slot: constants.slots.PS,
+        transaction: constants.transactions.DRAFT,
+        value: 3
+      })
+
+      MockDate.set(start.clone().subtract('3', 'week').toDate())
+      await dropPlayer({
+        leagueId,
+        player,
+        teamId: 2,
+        userId: 2
+      })
+
+      MockDate.set(start.clone().subtract('3', 'week').add('25', 'hour').toDate())
+
+      // submit waiver claim
+      const teamId = 1
+      const request = chai.request(server)
+        .post('/api/leagues/1/waivers')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          teamId,
+          player: player.player,
+          type: constants.waivers.FREE_AGENCY_PRACTICE,
+          leagueId
+        })
+
+      await error(request, 'player is not on waivers')
     })
 
     it('team exceeds roster limits', async () => {
-      // TODO
+      MockDate.set(start.clone().add('1', 'month').day(2).toDate())
+      const leagueId = 1
+      const teamId = 1
+      await fillRoster({ leagueId, teamId })
+      const player = await selectPlayer()
+      const request = chai.request(server)
+        .post('/api/leagues/1/waivers')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          teamId,
+          player: player.player,
+          type: constants.waivers.FREE_AGENCY,
+          leagueId
+        })
+
+      await error(request, 'exceeds roster limits')
     })
 
     it('team exceeds available cap', async () => {
@@ -169,6 +323,10 @@ describe('API /waivers - free agency', function () {
     })
 
     it('invalid player - position', async () => {
+      // TODO
+    })
+
+    it('rookie free agent waiver w/ full practice squad', async () => {
       // TODO
     })
   })

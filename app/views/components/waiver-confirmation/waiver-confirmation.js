@@ -31,7 +31,7 @@ export default class WaiverConfirmation extends React.Component {
     }
 
     this._drops = drops
-    this.state = { drop: drops.length ? drops[0].player : undefined, bid: 0, error: false }
+    this.state = { drop: '', bid: 0, error: false }
   }
 
   handleDrop = (event) => {

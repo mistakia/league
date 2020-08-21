@@ -40,8 +40,7 @@ const mapStateToProps = createSelector(
 
 const mapDispatchToProps = {
   loadRoster: rosterActions.loadRoster,
-  reorderPoach: waiverActions.reorderPoach,
-  reorderFreeAgency: waiverActions.reorderFreeAgency
+  reorderWaivers: waiverActions.reorderWaivers
 }
 
 export default connect(

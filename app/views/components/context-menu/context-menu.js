@@ -62,6 +62,7 @@ export default class ContextMenu extends React.Component {
 
     if (bottom) {
       this.root.style.top = `${clickY - rootH - 5}px`
+      this.root.classList.add('bottom')
     }
   }
 
@@ -83,7 +84,7 @@ export default class ContextMenu extends React.Component {
     return (
       <div>
         <div ref={ref => { this.root = ref }} className='context__menu'>
-          <ContextMenuComponent data={data} />
+          <ContextMenuComponent {...data} />
         </div>
         <div className='context__menu-backdrop' />
       </div>

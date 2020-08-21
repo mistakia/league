@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { getApp } from '@core/app'
-import { rosterActions, getCurrentTeamRoster } from '@core/rosters'
+import { rosterActions, getCurrentTeamRosterRecord } from '@core/rosters'
 import render from './lineups'
 
 class LineupsPage extends React.Component {
@@ -18,7 +18,7 @@ class LineupsPage extends React.Component {
 
 const mapStateToProps = createSelector(
   getApp,
-  getCurrentTeamRoster,
+  getCurrentTeamRosterRecord,
   (app, roster) => ({ teamId: app.teamId, roster })
 )
 

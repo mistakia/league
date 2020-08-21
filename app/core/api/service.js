@@ -74,6 +74,10 @@ export const api = {
     const url = `${BASE_URL}/leagues/${data.leagueId}/rosters`
     return { url, ...PUT(data) }
   },
+  postAddFreeAgent (data) {
+    const url = `${BASE_URL}/teams/${data.teamId}/add`
+    return { url, ...POST(data) }
+  },
   postActivate (data) {
     const url = `${BASE_URL}/teams/${data.teamId}/activate`
     return { url, ...POST(data) }

@@ -132,17 +132,23 @@ export function isPlayerEligible (state, { player, playerId }) {
     return false
   }
 
-  const roster = getCurrentTeamRoster(state)
+  const roster = getCurrentTeamRosterRecord(state)
   const league = getCurrentLeague(state)
   const ros = new Roster({ roster: roster.toJS(), league })
   return ros.hasOpenBenchSlot(player.pos1)
 }
 
-export function getCurrentTeamRoster (state) {
+export function getCurrentTeamRosterRecord (state) {
   const rosters = getRosters(state)
   const { teamId } = getApp(state)
   const roster = rosters.get(teamId)
   return roster || new RosterRecord()
+}
+
+export function getCurrentTeamRoster (state) {
+  const league = getCurrentLeague(state)
+  const rec = getCurrentTeamRosterRecord(state)
+  return new Roster({ roster: rec, league })
 }
 
 export function getCurrentPlayers (state) {

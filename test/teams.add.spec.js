@@ -337,6 +337,14 @@ describe('API /teams - add', function () {
       // TODO
     })
 
+    it('rookie free agent - before rookie draft has concluded', async () => {
+      // TODO
+    })
+
+    it('exceeds roster limit - practice squad - preseason', async () => {
+      // TODO
+    })
+
     it('free agent on waivers - dropped within 24 hrs', async () => {
       // TODO
     })

@@ -1,7 +1,7 @@
 import { createSelector } from 'reselect'
 
 import { getApp } from '@core/app'
-import { getCurrentTeamRoster, Roster as RosterRecord } from '@core/rosters'
+import { getCurrentTeamRosterRecord, Roster as RosterRecord } from '@core/rosters'
 import { getCurrentLeague, getCurrentLeagueTeamIds } from '@core/leagues'
 import { getTeams, Team } from '@core/teams'
 import { createTrade } from './trade'
@@ -16,7 +16,7 @@ export function getTradeIsValid (state) {
   const { teamId } = getApp(state)
   const league = getCurrentLeague(state)
   const players = getAllPlayers(state)
-  const rosterRecord = getCurrentTeamRoster(state)
+  const rosterRecord = getCurrentTeamRosterRecord(state)
   const trade = getCurrentTrade(state)
   const isProposer = trade.uid ? trade.pid === teamId : true
   const dropPlayersTrade = trade.dropPlayers.toJS()

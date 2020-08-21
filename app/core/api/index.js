@@ -39,5 +39,6 @@ export {
   deleteTeams,
   postRosters,
   putRosters,
-  deleteRosters
+  deleteRosters,
+  postAddFreeAgent
 } from './sagas'

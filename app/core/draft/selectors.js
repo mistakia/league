@@ -1,3 +1,6 @@
+import moment from 'moment'
+
+import { getCurrentLeague } from '@core/leagues'
 import { getPlayerById } from '@core/players'
 import { getApp } from '@core/app'
 
@@ -26,4 +29,10 @@ export function isDrafted (state, { playerId, player }) {
   const id = playerId || player.player
   const { drafted } = state.get('draft')
   return drafted.includes(id)
+}
+
+export function hasDraftClockExpired (state) {
+  const league = getCurrentLeague(state)
+  const totalPicks = league.nteams * 3
+  return league.ddate && moment().isAfter(moment(league.ddate, 'X').add(totalPicks, 'day'))
 }

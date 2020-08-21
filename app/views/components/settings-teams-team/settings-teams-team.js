@@ -23,9 +23,12 @@ export default class SettingsTeamsTeam extends React.Component {
   }
 
   handleAdd = () => {
+    const { team } = this.props
     this.props.showConfirmation({
-      id: 'add',
-      data: this.props.team
+      id: 'EDIT_TEAM_ADD_PLAYER',
+      data: {
+        team
+      }
     })
   }
 
