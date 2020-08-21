@@ -1,0 +1,16 @@
+.timer__time
+  position relative
+  z-index 2
+
+.timer__flash
+  absolute left top right bottom
+  display none
+  animation blinker 1s linear infinite
+  background lighten($accentColor, 70%)
+
+.timer.warning .timer__flash
+  display block
+
+@keyframes blinker
+  50%
+    opacity 0

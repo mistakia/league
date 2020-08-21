@@ -1,0 +1,1 @@
+export { beep } from './beep'

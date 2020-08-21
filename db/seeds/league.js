@@ -46,7 +46,8 @@ module.exports = async function (knex) {
     fuml: -1,
     ddate: Math.round(Date.now() / 1000),
     adate: Math.round(Date.now() / 1000),
-    tddate: 1606626000
+    tddate: 1606626000,
+    hosted: true
   })
 
   const leagues = await knex('leagues').where({ uid: 1 })
