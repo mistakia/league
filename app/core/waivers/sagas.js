@@ -39,12 +39,8 @@ export function * watchCancelClaim () {
   yield takeLatest(waiverActions.CANCEL_CLAIM, cancel)
 }
 
-export function * watchReorderPoach () {
-  yield takeLatest(waiverActions.REORDER_POACH, reorder)
-}
-
-export function * watchReorderFreeAgency () {
-  yield takeLatest(waiverActions.REORDER_FREEAGENCY, reorder)
+export function * watchReorderWaivers () {
+  yield takeLatest(waiverActions.REORDER_WAIVERS, reorder)
 }
 
 //= ====================================
@@ -54,6 +50,5 @@ export function * watchReorderFreeAgency () {
 export const waiverSagas = [
   fork(watchClaim),
   fork(watchCancelClaim),
-  fork(watchReorderPoach),
-  fork(watchReorderFreeAgency)
+  fork(watchReorderWaivers)
 ]

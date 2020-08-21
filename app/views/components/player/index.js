@@ -3,6 +3,7 @@ import { connect as connectRedux } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { contextMenuActions, getContextMenuInfo } from '@core/context-menu'
+import { getCurrentLeague } from '@core/leagues'
 import { getApp } from '@core/app'
 
 import './player.styl'
@@ -22,7 +23,12 @@ export class Player extends React.Component {
 const mapStateToProps = createSelector(
   getApp,
   getContextMenuInfo,
-  (app, contextMenu) => ({ vbaseline: app.vbaseline, selected: contextMenu.data.playerId })
+  getCurrentLeague,
+  (app, contextMenu, league) => ({
+    vbaseline: app.vbaseline,
+    selected: contextMenu.data.playerId,
+    isHosted: league.hosted
+  })
 )
 
 const mapDispatchToProps = {

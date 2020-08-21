@@ -1485,7 +1485,7 @@ CREATE TABLE `rosters` (
   `lid` int(6) NOT NULL,
   `week` tinyint(2) NOT NULL,
   `year` int(4) NOT NULL,
-  `last_updated` int(11) NOT NULL,
+  `last_updated` int(11) DEFAULT NULL,
   PRIMARY KEY `uid` (`uid`),
   UNIQUE KEY `teamid` (`tid`,`week`),
   KEY `tid` (`tid`)

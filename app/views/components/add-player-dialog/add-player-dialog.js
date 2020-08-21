@@ -26,8 +26,7 @@ export default class AddPlayerDialog extends React.Component {
   }
 
   getAvailableCap = () => {
-    const { rosters, league } = this.props
-    const team = this.props.data
+    const { rosters, league, team } = this.props
     const rosterData = rosters.find(r => r.tid === team.uid)
     const roster = new Roster({ roster: rosterData.toJS(), league })
     return roster.availableCap
@@ -54,11 +53,12 @@ export default class AddPlayerDialog extends React.Component {
 
   handleSubmit = () => {
     const { value, player, error } = this.state
+    const { team } = this.props
     if (!error && player) {
       this.props.add({
         player,
         value,
-        teamId: this.props.data.uid
+        teamId: team.uid
       })
     }
     this.props.onClose()

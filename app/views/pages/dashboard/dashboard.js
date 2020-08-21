@@ -40,8 +40,7 @@ const BenchPlusHeader = () => (
 
 export default function () {
   const {
-    players, picks, league, waivers, reorderPoach, reorderFreeAgency,
-    poaches, teamId
+    players, picks, league, waivers, reorderWaivers, poaches, teamId
   } = this.props
   const { positions } = constants
 
@@ -147,7 +146,7 @@ export default function () {
           items={waivers.poach}
           lockAxis='y'
           helperClass='reordering'
-          onSortEnd={reorderPoach}
+          onSortEnd={({ oldIndex, newIndex }) => reorderWaivers({ oldIndex, newIndex, type: 'poach' })}
           lockToContainerEdges
           useDragHandle
         />
@@ -155,10 +154,10 @@ export default function () {
     </div>
   )
 
-  const freeAgencyWaiverSection = (
+  const freeAgencyActiveWaiverSection = (
     <div className='dashboard__section'>
       <div className='dashboard__section-header'>
-        <div className='dashboard__section-header-title'>Free Agency Waiver Claims</div>
+        <div className='dashboard__section-header-title'>Free Agency Waiver Claims - Active Roster</div>
         <div className='dashboard__section-body-header'>
           <div className='player__item-position' />
           <div className='player__item-name'>Name</div>
@@ -174,10 +173,40 @@ export default function () {
       </div>
       <div className='dashboard__section-body empty'>
         <SortableList
-          items={waivers.freeAgency}
+          items={waivers.active}
           lockAxis='y'
           helperClass='reordering'
-          onSortEnd={reorderFreeAgency}
+          onSortEnd={({ oldIndex, newIndex }) => reorderWaivers({ oldIndex, newIndex, type: 'active' })}
+          lockToContainerEdges
+          useDragHandle
+        />
+      </div>
+    </div>
+  )
+
+  const freeAgencyPracticeWaiverSection = (
+    <div className='dashboard__section'>
+      <div className='dashboard__section-header'>
+        <div className='dashboard__section-header-title'>Free Agency Waiver Claims - Practice Squad</div>
+        <div className='dashboard__section-body-header'>
+          <div className='player__item-position' />
+          <div className='player__item-name'>Name</div>
+          <div className='player__item-name'>Drop</div>
+          <div className='player__item-metric'>Bid</div>
+          <ValueHeader />
+          <StartsHeader />
+          <PointsPlusHeader />
+          <BenchPlusHeader />
+          <div className='player__item-action' />
+          <div className='player__item-action' />
+        </div>
+      </div>
+      <div className='dashboard__section-body empty'>
+        <SortableList
+          items={waivers.practice}
+          lockAxis='y'
+          helperClass='reordering'
+          onSortEnd={({ oldIndex, newIndex }) => reorderWaivers({ oldIndex, newIndex, type: 'practice' })}
           lockToContainerEdges
           useDragHandle
         />
@@ -211,7 +240,8 @@ export default function () {
     <div className='dashboard'>
       {warnings.length ? warnings : null}
       {waivers.poach.size ? poachWaiverSection : null}
-      {waivers.freeAgency.size ? freeAgencyWaiverSection : null}
+      {waivers.active.size ? freeAgencyActiveWaiverSection : null}
+      {waivers.practice.size ? freeAgencyPracticeWaiverSection : null}
       {poachItems.length ? teamPoachSection : null}
       <div className='dashboard__section'>
         <div className='dashboard__section-header'>

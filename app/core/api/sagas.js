@@ -18,7 +18,8 @@ import {
   postDeactivateActions,
   postRostersActions,
   putRostersActions,
-  deleteRostersActions
+  deleteRostersActions,
+  postAddFreeAgentActions
 } from '@core/rosters'
 import {
   playersRequestActions,
@@ -96,6 +97,8 @@ export const putRoster = fetch.bind(null, api.putRoster, putRosterActions)
 export const postRosters = fetch.bind(null, api.postRosters, postRostersActions)
 export const putRosters = fetch.bind(null, api.putRosters, putRostersActions)
 export const deleteRosters = fetch.bind(null, api.deleteRosters, deleteRostersActions)
+
+export const postAddFreeAgent = fetch.bind(null, api.postAddFreeAgent, postAddFreeAgentActions)
 
 export const postActivate = fetch.bind(null, api.postActivate, postActivateActions)
 export const postDeactivate = fetch.bind(null, api.postDeactivate, postDeactivateActions)

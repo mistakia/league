@@ -3,8 +3,7 @@ export const waiverActions = {
 
   CANCEL_CLAIM: 'CANCEL_CLAIM',
 
-  REORDER_POACH: 'REORDER_POACH',
-  REORDER_FREEAGENCY: 'REORDER_FREEAGENCY',
+  REORDER_WAIVERS: 'REORDER_WAIVERS',
 
   POST_WAIVER_FAILED: 'POST_WAIVER_FAILED',
   POST_WAIVER_FULFILLED: 'POST_WAIVER_FULFILLED',
@@ -18,21 +17,12 @@ export const waiverActions = {
   POST_WAIVER_ORDER_PENDING: 'POST_WAIVER_ORDER_PENDING',
   POST_WAIVER_ORDER_FULFILLED: 'POST_WAIVER_ORDER_FULFILLED',
 
-  reorderPoach: ({ oldIndex, newIndex }) => ({
-    type: waiverActions.REORDER_POACH,
+  reorderWaivers: ({ oldIndex, newIndex, type }) => ({
+    type: waiverActions.REORDER_WAIVERS,
     payload: {
       oldIndex,
       newIndex,
-      type: 'poach'
-    }
-  }),
-
-  reorderFreeAgency: ({ oldIndex, newIndex }) => ({
-    type: waiverActions.REORDER_FREEAGENCY,
-    payload: {
-      oldIndex,
-      newIndex,
-      type: 'freeAgency'
+      type
     }
   }),
 

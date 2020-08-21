@@ -7,6 +7,7 @@ import DialogTitle from '@material-ui/core/DialogTitle'
 import WaiverConfirmation from '@components/waiver-confirmation'
 import PoachConfirmation from '@components/poach-confirmation'
 import AddPlayerDialog from '@components/add-player-dialog'
+import AddFreeAgentDialog from '@components/add-free-agent-dialog'
 
 import Button from '@components/button'
 
@@ -24,9 +25,10 @@ export default class Confirmation extends React.Component {
     if (this.props.info.id) {
       const getComponent = (id) => {
         switch (id) {
-          case 'waiver': return WaiverConfirmation
-          case 'poach': return PoachConfirmation
-          case 'add': return AddPlayerDialog
+          case 'WAIVER': return WaiverConfirmation
+          case 'POACH': return PoachConfirmation
+          case 'EDIT_TEAM_ADD_PLAYER': return AddPlayerDialog
+          case 'ADD_FREE_AGENT': return AddFreeAgentDialog
         }
       }
       const ConfirmationComponent = getComponent(this.props.info.id)
@@ -35,7 +37,7 @@ export default class Confirmation extends React.Component {
         <ConfirmationComponent
           onClose={this.handleClose}
           onSubmit={this.handleClick}
-          data={data}
+          {...data}
         />
       )
     }

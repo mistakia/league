@@ -62,6 +62,11 @@ router.post('/?', async (req, res) => {
     }
     const playerRow = players[0]
 
+    // verify player is practice squad eligible if type is practice waiver
+    if (type === constants.waivers.FREE_AGENCY_PRACTICE && playerRow.start !== constants.season.year) {
+      return res.status(400).send({ error: 'player is not practice squad eligible' })
+    }
+
     const transactions = await db('transactions')
       .where('player', player)
       .where({ lid: leagueId })
@@ -72,13 +77,13 @@ router.post('/?', async (req, res) => {
     }
 
     // make sure player is on waivers & it's not a duplicate waiver
-    if (type === constants.waivers.FREE_AGENCY) {
+    if (type === constants.waivers.FREE_AGENCY || type === constants.waivers.FREE_AGENCY_PRACTICE) {
       const isRostered = await isPlayerRostered({ player, leagueId })
       if (isRostered) {
         return res.status(400).send({ error: 'player rostered' })
       }
 
-      if (!constants.season.isWaiverPeriod) {
+      if (!constants.season.isWaiverPeriod || type === constants.waivers.FREE_AGENCY_PRACTICE) {
         const isOnWaivers = await isPlayerOnWaivers({ player, leagueId })
         if (!isOnWaivers) {
           return res.status(400).send({ error: 'player is not on waivers' })
@@ -87,7 +92,7 @@ router.post('/?', async (req, res) => {
 
       // check for duplicate claims
       const claimsQuery = db('waivers')
-        .where({ player, lid: leagueId, tid })
+        .where({ player, lid: leagueId, tid, type })
         .whereNull('processed')
         .whereNull('cancelled')
 
@@ -166,9 +171,11 @@ router.post('/?', async (req, res) => {
       }
       roster.removePlayer(drop)
     }
-    const hasSlot = roster.hasOpenBenchSlot(playerRow.pos1)
+    const hasSlot = type === constants.waivers.FREE_AGENCY_PRACTICE
+      ? roster.hasOpenPracticeSquadSlot()
+      : roster.hasOpenBenchSlot(playerRow.pos1)
     if (!hasSlot) {
-      return res.status(400).send({ error: 'can not add player to roster, invalid roster' })
+      return res.status(400).send({ error: 'exceeds roster limits' })
     }
 
     const data = {

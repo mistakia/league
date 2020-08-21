@@ -17,12 +17,12 @@ class PlayerRow extends Player {
 
   render = () => {
     const {
-      player, style, selectedPlayer, vbaseline, isSeasonProjectionView,
+      player, style, selectedPlayer, vbaseline, isSeasonProjectionView, isHosted,
       isStatsPassingAdvancedView, isStatsPassingPressureView, isStatsRushingView,
-      isStatsReceivingView, overall, isLoggedIn, isRestOfSeasonView
+      isStatsReceivingView, overall, isLoggedIn, isRestOfSeasonView, selected
     } = this.props
 
-    const isSelected = selectedPlayer === player.player
+    const isSelected = selectedPlayer === player.player || selected === player.player
 
     const seasonSummary = (week) => {
       let inflation = null
@@ -282,7 +282,7 @@ class PlayerRow extends Player {
             </div>
             {isLoggedIn &&
               <div className='player__row-action'>
-                <IconButton small text onClick={this.handleContextClick} icon='more' />
+                {!!isHosted && <IconButton small text onClick={this.handleContextClick} icon='more' />}
               </div>}
             {isSeasonProjectionView && seasonSummary('0')}
             {isSeasonProjectionView && seasonPassing('0')}

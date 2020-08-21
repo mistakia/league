@@ -4,7 +4,6 @@ import { createSelector } from 'reselect'
 import { getApp } from '@core/app'
 import { getCurrentLeague } from '@core/leagues'
 import { getTeamsForCurrentLeague, teamActions } from '@core/teams'
-import { confirmationActions } from '@core/confirmations'
 
 import EditableTeams from './editable-teams'
 
@@ -21,8 +20,7 @@ const mapStateToProps = createSelector(
 
 const mapDispatchToProps = {
   add: teamActions.add,
-  delete: teamActions.delete,
-  showConfirmation: confirmationActions.show
+  delete: teamActions.delete
 }
 
 export default connect(

@@ -27,7 +27,7 @@ export default class PoachConfirmation extends React.Component {
     }
 
     this._drops = drops
-    this.state = { drop: undefined, error: false }
+    this.state = { drop: '', error: false }
   }
 
   handleDrop = (event) => {
@@ -37,7 +37,6 @@ export default class PoachConfirmation extends React.Component {
 
   handleSubmit = () => {
     const { isPlayerEligible } = this.props
-
     const player = this.props.player.player
     const { drop } = this.state
 
@@ -56,7 +55,7 @@ export default class PoachConfirmation extends React.Component {
   }
 
   render = () => {
-    const { isPlayerEligible, rosterInfo, player, status } = this.props
+    const { isPlayerEligible, rosterInfo, status, player } = this.props
 
     const menuItems = []
     if (!isPlayerEligible) {

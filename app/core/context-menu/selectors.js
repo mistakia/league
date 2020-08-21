@@ -6,7 +6,7 @@ import {
 import { Roster } from '@common'
 import { getApp } from '@core/app'
 import {
-  getCurrentTeamRoster,
+  getCurrentTeamRosterRecord,
   getRosteredPlayerIdsForCurrentLeague,
   isPlayerOnPracticeSquad
 } from '@core/rosters'
@@ -64,7 +64,7 @@ export function isActiveRosterEligible (state) {
 
   const { leagueId } = getApp(state)
   const league = state.get('leagues').get(leagueId)
-  const rosterRec = getCurrentTeamRoster(state)
+  const rosterRec = getCurrentTeamRosterRecord(state)
   const roster = new Roster({ roster: rosterRec.toJS(), league })
 
   // on practice squad
@@ -86,7 +86,7 @@ export function isPlayerOnCurrentRoster (state) {
     return false
   }
 
-  const roster = getCurrentTeamRoster(state)
+  const roster = getCurrentTeamRosterRecord(state)
   return !!roster.players.find(p => p.player === player.player)
 }
 

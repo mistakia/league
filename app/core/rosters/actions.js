@@ -9,6 +9,11 @@ export const rosterActions = {
   ROSTER_ACTIVATION: 'ROSTER_ACTIVATION',
 
   UPDATE_ROSTER: 'UPDATE_ROSTER',
+
+  // USER
+  ADD_FREE_AGENT: 'ADD_FREE_AGENT',
+
+  // COMMISH / ADMIN
   ADD_PLAYER_ROSTER: 'ADD_PLAYER_ROSTER',
   REMOVE_PLAYER_ROSTER: 'REMOVE_PLAYER_ROSTER',
   UPDATE_PLAYER_ROSTER: 'UPDATE_PLAYER_ROSTER',
@@ -49,6 +54,19 @@ export const rosterActions = {
   PUT_ROSTERS_FAILED: 'PUT_ROSTERS_FAILED',
   PUT_ROSTERS_PENDING: 'PUT_ROSTERS_PENDING',
   PUT_ROSTERS_FULFILLED: 'PUT_ROSTERS_FULFILLED',
+
+  POST_ADD_FREE_AGENT_FAILED: 'POST_ADD_FREE_AGENT_FAILED',
+  POST_ADD_FREE_AGENT_PENDING: 'POST_ADD_FREE_AGENT_PENDING',
+  POST_ADD_FREE_AGENT_FULFILLED: 'POST_ADD_FREE_AGENT_FULFILLED',
+
+  addFreeAgent: ({ player, drop, slot }) => ({
+    type: rosterActions.ADD_FREE_AGENT,
+    payload: {
+      player,
+      drop,
+      slot
+    }
+  }),
 
   projectLineups: () => ({
     type: rosterActions.PROJECT_LINEUPS
@@ -301,6 +319,29 @@ export const rosterActions = {
       opts,
       data
     }
+  }),
+
+  postAddFreeAgentPending: opts => ({
+    type: rosterActions.POST_ADD_FREE_AGENT_PENDING,
+    payload: {
+      opts
+    }
+  }),
+
+  postAddFreeAgentFailed: (opts, error) => ({
+    type: rosterActions.POST_ADD_FREE_AGENT_FAILED,
+    payload: {
+      opts,
+      error
+    }
+  }),
+
+  postAddFreeAgentFulfilled: (opts, data) => ({
+    type: rosterActions.POST_ADD_FREE_AGENT_FULFILLED,
+    payload: {
+      opts,
+      data
+    }
   })
 }
 
@@ -350,4 +391,10 @@ export const deleteRostersActions = {
   failed: rosterActions.deleteRostersFailed,
   pending: rosterActions.deleteRostersPending,
   fulfilled: rosterActions.deleteRostersFulfilled
+}
+
+export const postAddFreeAgentActions = {
+  failed: rosterActions.postAddFreeAgentFailed,
+  pending: rosterActions.postAddFreeAgentPending,
+  fulfilled: rosterActions.postAddFreeAgentFulfilled
 }
