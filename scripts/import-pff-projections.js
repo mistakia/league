@@ -47,20 +47,20 @@ const runOne = async (week) => {
     }
 
     const data = {
-      fuml: Math.round(player.fumbles_lost) || 0,
-      pa: Math.round(player.pass_att) || 0,
-      pc: Math.round(player.pass_comp) || 0,
-      ints: Math.round(player.pass_int) || 0,
-      tdp: Math.round(player.pass_td) || 0,
-      py: Math.round(player.pass_yds) || 0,
-      ra: Math.round(player.rush_att) || 0,
-      tdr: Math.round(player.rush_td) || 0,
-      ry: Math.round(player.rush_yds) || 0,
-      twoptc: Math.round(player.two_pt) || 0,
-      rec: Math.round(player.recv_receptions) || 0,
-      trg: Math.round(player.recv_targets) || 0,
-      tdrec: Math.round(player.recv_td) || 0,
-      recy: Math.round(player.recv_yds) || 0
+      fuml: player.fumbles_lost || 0,
+      pa: player.pass_att || 0,
+      pc: player.pass_comp || 0,
+      ints: player.pass_int || 0,
+      tdp: player.pass_td || 0,
+      py: player.pass_yds || 0,
+      ra: player.rush_att || 0,
+      tdr: player.rush_td || 0,
+      ry: player.rush_yds || 0,
+      twoptc: player.two_pt || 0,
+      rec: player.recv_receptions || 0,
+      trg: player.recv_targets || 0,
+      tdrec: player.recv_td || 0,
+      recy: player.recv_yds || 0
     }
 
     inserts.push({
