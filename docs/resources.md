@@ -9,6 +9,8 @@
 | [Rotowire](https://www.rotowire.com/football/) | |
 | [Fantasy Football Calculator](https://fantasyfootballcalculator.com/) | |
 | [Fantasy Sharks](https://www.fantasysharks.com/) | |
+| [The Fantasy Footballers](https://www.thefantasyfootballers.com/) | |
+| [Fantasypoints.com](https://www.fantasypoints.com/) | |
 
 ## Stats
 | Name | Description |
@@ -20,6 +22,7 @@
 | [Pro Football Reference](https://www.pro-football-reference.com/) | |
 | [SIS Datahub](https://sisdatahub.com/) | |
 | [Next Gen Stats](https://nextgenstats.nfl.com/) | |
+| [Numberfire](https://www.numberfire.com/) | |
 
 ## Projections
 | Name | Description |
@@ -38,11 +41,16 @@
 | [Pro Football Network](https://www.profootballnetwork.com/dynasty-fantasy-football/) | |
 | [FantasyPros](https://www.fantasypros.com/nfl/rankings/dynasty-overall.php) | |
 
-## Superflex ADP & Rankings
+## ADP
+| Name | Description |
+| --- | --- |
+| [Dynasty League Football ADP](https://dynastyleaguefootball.com/adp-over-time/) | |
+
+## Superflex
 | Name | Description |
 | --- | --- |
 | [Cant Cut List / Undroppables](https://cantcutlist.com/resources/adp/dynasty-superflex/) | |
-| [Dynasty League Football ADP](https://dynastyleaguefootball.com/adp/superflex-adp.php) | |
+| [Dynasty League Football ADP - Superflex](https://dynastyleaguefootball.com/adp/superflex-adp.php) | |
 | [Dynasty League Football Rankings](https://dynastyleaguefootball.com/dynasty-superflex-rankings/) | |
 | [fantasydata](https://fantasydata.com/nfl/fantasy-football-2qb-adp-rankings) | |
 | [Master Drafter Football](http://masterdrafterfootball.com/rankings/dynasty/overall-superflex-dynasty-rankings/) | |
@@ -59,6 +67,12 @@
 | Name | Description |
 | --- | --- |
 | [Dynasty League Football Tools](https://dynastyleaguefootball.com/tools) | |
+
+## Analytics / Research
+| Name | Description |
+| --- | --- |
+| [Harvard Sports Analysis Collective](http://harvardsportsanalysis.org/) | |
+| [Fantasy Football Analytics](https://fantasyfootballanalytics.net/) | |
 
 ## Data
 | Name | Description |
