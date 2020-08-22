@@ -63,40 +63,46 @@ export default class AuctionTargets extends React.Component {
           <div className='optimal__lineup-key'>{lineupText}</div>
         </div>
         <div className='auction__targets-body'>
-          <div className='auction__targets-section'>
-            <AuctionTargetHeader pos='QB' />
-            <div className='empty'>
-              {items.QB}
+          <div className='auction__targets-column'>
+            <div className='auction__targets-section'>
+              <AuctionTargetHeader pos='QB' />
+              <div className='empty'>
+                {items.QB}
+              </div>
+            </div>
+            <div className='auction__targets-section'>
+              <AuctionTargetHeader pos='TE' />
+              <div className='empty'>
+                {items.TE}
+              </div>
             </div>
           </div>
-          <div className='auction__targets-section'>
-            <AuctionTargetHeader pos='RB' />
-            <div className='empty'>
-              {items.RB}
+          <div className='auction__targets-column'>
+            <div className='auction__targets-section'>
+              <AuctionTargetHeader pos='RB' />
+              <div className='empty'>
+                {items.RB}
+              </div>
+            </div>
+            <div className='auction__targets-section'>
+              <AuctionTargetHeader pos='K' />
+              <div className='empty'>
+                {items.K}
+              </div>
             </div>
           </div>
-          <div className='auction__targets-section'>
-            <AuctionTargetHeader pos='WR' />
-            <div className='empty'>
-              {items.WR}
+          <div className='auction__targets-column'>
+            <div className='auction__targets-section'>
+              <AuctionTargetHeader pos='WR' />
+              <div className='empty'>
+                {items.WR}
+              </div>
             </div>
-          </div>
-          <div className='auction__targets-section'>
-            <AuctionTargetHeader pos='TE' />
-            <div className='empty'>
-              {items.TE}
-            </div>
-          </div>
-          <div className='auction__targets-section'>
-            <AuctionTargetHeader pos='K' />
-            <div className='empty'>
-              {items.K}
-            </div>
-          </div>
-          <div className='auction__targets-section'>
-            <AuctionTargetHeader pos='DST' />
-            <div className='empty'>
-              {items.DST}
+            <div className='auction__targets-section'>
+              <AuctionTargetHeader pos='DST' />
+              <div className='empty'>
+                {items.DST}
+              </div>
             </div>
           </div>
         </div>
