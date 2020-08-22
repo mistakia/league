@@ -1,10 +1,10 @@
 import React from 'react'
 import moment from 'moment'
 
-import PlayerName from '@components/player-name'
 import TeamName from '@components/team-name'
 import Button from '@components/button'
 import Timer from '@components/timer'
+import AuctionNominatedPlayer from '@components/auction-nominated-player'
 
 import './auction-main-bid.styl'
 
@@ -156,9 +156,9 @@ export default class AuctionMainBid extends React.Component {
     } else if (isPaused) {
       main = (<div>Auction is paused.</div>)
     } else if (playerId) {
-      main = (<PlayerName playerId={playerId} />)
+      main = (<AuctionNominatedPlayer playerId={playerId} />)
     } else if (selected) {
-      main = (<PlayerName playerId={selected} />)
+      main = (<AuctionNominatedPlayer playerId={selected} />)
     } else if (isNominating) {
       main = (<div>Your turn to nominate a player</div>)
     } else if (isCommish) {
@@ -173,8 +173,7 @@ export default class AuctionMainBid extends React.Component {
           <div className='auction__main-timer'>
             <Timer expiration={timer} />
           </div>}
-        <div className='auction__main-picture' />
-        <div className='auction__main-player'>
+        <div className='auction__main-body'>
           {main}
         </div>
         <div className='auction__main-action'>
