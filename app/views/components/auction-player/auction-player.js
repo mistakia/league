@@ -16,17 +16,28 @@ export default class AuctionPlayer extends React.Component {
       return
     }
 
+    if (this.props.nominatedPlayer) {
+      return
+    }
+
     this.props.select(this.props.player.player)
   }
 
   render = () => {
-    const { index, player, isFreeAgent, isEligible, vbaseline, watchlist, style, valueType } = this.props
+    const {
+      index, player, isFreeAgent, isEligible, vbaseline, watchlist,
+      style, valueType, selected, nominatedPlayer
+    } = this.props
 
     const classNames = ['auction__player']
     if (!isFreeAgent) {
       classNames.push('signed')
     } else if (watchlist.has(player.player)) {
       classNames.push('watchlist')
+    }
+
+    if (selected === player.player || nominatedPlayer === player.player) {
+      classNames.push('selected')
     }
 
     if (!isEligible) {
