@@ -1,5 +1,7 @@
 import React from 'react'
 import { AutoSizer, List } from 'react-virtualized'
+import GetAppIcon from '@material-ui/icons/GetApp'
+import IconButton from '@material-ui/core/IconButton'
 
 import SearchFilter from '@components/search-filter'
 import PositionFilter from '@components/position-filter'
@@ -38,6 +40,8 @@ import HeaderStatsReceivingAdvanced from '@components/header-stats-receiving-adv
 import SelectedPlayer from '@components/selected-player'
 import Loading from '@components/loading'
 import Icon from '@components/icon'
+import { csv } from '@core/export'
+import { constants } from '@common'
 
 import './players.styl'
 
@@ -54,6 +58,41 @@ export default class PlayersPage extends React.Component {
 
   handleClick = (event) => {
     this.setState({ expanded: !this.state.expanded })
+  }
+
+  handleExport = () => {
+    const { players, vbaseline, isSeasonProjectionView } = this.props
+    const type = isSeasonProjectionView ? '0' : 'ros'
+    const data = players.map(p => {
+      const item = {
+        name: p.name,
+        team: p.team,
+        pos: p.pos1,
+        salary: p.getIn(['values', type, vbaseline], 0).toFixed(1),
+        inflation: p.getIn(['values', isSeasonProjectionView ? 'inflationSeason' : 'inflation', vbaseline]).toFixed(1),
+        vorp: p.getIn(['vorp', type, vbaseline], 0).toFixed(1)
+      }
+
+      for (const stat of constants.stats) {
+        item[stat] = p.getIn(['projection', type, stat], 0).toFixed(1)
+      }
+
+      return item
+    })
+
+    csv({
+      headers: {
+        name: 'Player Name',
+        team: 'Team',
+        pos: 'Position',
+        salary: 'Salary',
+        inflation: 'Inflation',
+        vorp: 'VORP',
+        ...constants.statHeaders
+      },
+      data: data.toJS(),
+      fileName: 'TeflonLeague-' + (isSeasonProjectionView ? 'SeasonProjections' : 'RestOfSeasonProjections')
+    })
   }
 
   componentDidUpdate = (prevProps) => {
@@ -160,6 +199,12 @@ export default class PlayersPage extends React.Component {
           {(isStatsView && showQualifier) && <StatQualifierFilter />}
           <div className='players__head-expand' onClick={this.handleClick}>
             <Icon className='players__head-icon' name='arrow-down' />
+          </div>
+          <div className='players__head-actions'>
+            {!!(isSeasonProjectionView || isRestOfSeasonView) &&
+              <IconButton onClick={this.handleExport} disabled={isPending}>
+                <GetAppIcon />
+              </IconButton>}
           </div>
         </div>
         {this.state.expanded &&

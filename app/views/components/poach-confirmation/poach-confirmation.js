@@ -79,7 +79,7 @@ export default class PoachConfirmation extends React.Component {
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {`Poach ${player.name} (${player.pos1}). His keeper value will become $${rosterInfo.value + 2}. If your claim is successful, he will be added to your active roster and will not be eligible for the practice squad.`}
+            {`Poach ${player.name} (${player.pos1}). If your claim is successful, he will be added to your active roster with a salary of $${rosterInfo.value + 2} and will not be eligible for the practice squad.`}
           </DialogContentText>
           <DialogContentText>
             {status.waiver.poach
