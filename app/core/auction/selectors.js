@@ -38,6 +38,7 @@ export function getTeamBid (state, { tid }) {
 }
 
 export function getAuctionTargetPlayers (state) {
+  const { valueType } = getAuction(state)
   const watchlistPlayers = getPlayersForWatchlist(state)
   const optimalPlayers = getPlayersForOptimalLineup(state)
   const rosteredPlayerIds = getRosteredPlayerIdsForCurrentLeague(state)
@@ -47,7 +48,7 @@ export function getAuctionTargetPlayers (state) {
   const combined = Set(watchlistPlayers).union(Set(optimalPlayers))
   const filtered = combined.filter(p => !rosteredPlayerIds.includes(p.player))
   const players = filtered.union(Set(currentPlayers.active))
-  return players.sort((a, b) => b.getIn(['vorp', '0', vbaseline]) - a.getIn(['vorp', '0', vbaseline]))
+  return players.sort((a, b) => b.getIn(['vorp', valueType, vbaseline]) - a.getIn(['vorp', valueType, vbaseline]))
 }
 
 export function getAuctionPlayers (state) {

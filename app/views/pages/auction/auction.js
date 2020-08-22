@@ -15,10 +15,19 @@ import AuctionCommissionerControls from '@components/auction-commissioner-contro
 import './auction.styl'
 
 export default function () {
-  const { players, transactions, tids, playerId, vbaseline, isCommish, isHosted } = this.props
+  const {
+    players,
+    transactions,
+    tids,
+    playerId,
+    vbaseline,
+    isCommish,
+    isHosted,
+    valueType
+  } = this.props
 
   const sorted = players.sort((a, b) => {
-    return b.getIn(['vorp', '0', vbaseline]) - a.getIn(['vorp', '0', vbaseline])
+    return b.getIn(['vorp', valueType, vbaseline]) - a.getIn(['vorp', valueType, vbaseline])
   }).toList()
 
   const transactionItems = []
