@@ -1,5 +1,8 @@
 import React from 'react'
 import { AutoSizer, List } from 'react-virtualized'
+import Switch from '@material-ui/core/Switch'
+import FormGroup from '@material-ui/core/FormGroup'
+import FormControlLabel from '@material-ui/core/FormControlLabel'
 
 import PageLayout from '@layouts/page'
 import SearchFilter from '@components/search-filter'
@@ -66,6 +69,15 @@ export default function () {
               />
             )}
           </AutoSizer>
+        </div>
+        <div className='auction__players-footer'>
+          <FormGroup>
+            <FormControlLabel
+              control={<Switch size='small' checked={this.props.hideRostered} onChange={this.handleToggle} />}
+              labelPlacement='start'
+              label='Hide Rostered'
+            />
+          </FormGroup>
         </div>
       </div>
       <div className='auction__main'>

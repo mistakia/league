@@ -15,6 +15,10 @@ class AuctionPage extends React.Component {
     this.props.load()
   }
 
+  handleToggle = () => {
+    this.props.toggleHideRostered()
+  }
+
   render () {
     return render.call(this)
   }
@@ -31,6 +35,7 @@ const mapStateToProps = createSelector(
     searchValue: auction.search,
     playerId: auction.player,
     transactions: auction.transactions,
+    hideRostered: auction.hideRostered,
     tids: auction.tids,
     vbaseline: app.vbaseline,
     isHosted: league.hosted,
@@ -41,7 +46,8 @@ const mapStateToProps = createSelector(
 const mapDispatchToProps = {
   load: rosterActions.loadRosters,
   join: auctionActions.join,
-  search: auctionActions.search
+  search: auctionActions.search,
+  toggleHideRostered: auctionActions.toggleHideRostered
 }
 
 export default connect(
