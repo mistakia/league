@@ -12,6 +12,7 @@ module.exports = async ({ player, leagueId }) => {
     })
     .where('timestamp', '>', cutoff)
     .orderBy('timestamp', 'desc')
+    .orderBy('uid', 'desc')
     .limit(2)
 
   // not on waivers without any transactions

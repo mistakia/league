@@ -18,6 +18,7 @@ router.get('/?', async (req, res) => {
     let query = db('transactions')
       .where({ lid: leagueId })
       .orderBy('timestamp', 'desc')
+      .orderBy('uid', 'desc')
       .limit(limit)
       .offset(offset)
 

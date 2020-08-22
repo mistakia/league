@@ -91,6 +91,7 @@ module.exports = async function (claim) {
       lid: claim.lid
     })
     .orderBy('timestamp', 'desc')
+    .orderBy('uid', 'desc')
     .limit(1)
   const tran = transactions[0]
   const playerPoachValue = tran.value + 2
