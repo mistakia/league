@@ -27,6 +27,7 @@ const mapStateToProps = createSelector(
   getCurrentLeague,
   (players, auction, app, league) => ({
     players,
+    valueType: auction.valueType,
     searchValue: auction.search,
     playerId: auction.player,
     transactions: auction.transactions,
