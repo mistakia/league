@@ -4,6 +4,7 @@
   margin 0 16px
   border-bottom 1px solid $borderColor
   align-items center
+  cursor pointer
 
   &.signed
     text-decoration line-through
@@ -19,7 +20,11 @@
     .selected .icon
       opacity 1
 
+  &.selected
+    background lighten($accentColor, 85%)
+
   &:hover
+    background #fafafa
     .auction__player-action .icon
       opacity 1
 

@@ -19,7 +19,9 @@ const mapStateToProps = createSelector(
     isEligible,
     vbaseline: app.vbaseline,
     watchlist: players.get('watchlist'),
-    valueType: auction.valueType
+    valueType: auction.valueType,
+    selected: auction.selected,
+    nominatedPlayer: auction.player
   })
 )
 
