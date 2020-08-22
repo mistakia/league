@@ -58,8 +58,13 @@ export function getAuctionPlayers (state) {
   const positions = auction.get('positions')
   let filtered = players
 
+  if (auction.hideRostered) {
+    const rostered = getRosteredPlayerIdsForCurrentLeague(state)
+    filtered = filtered.filter(player => !rostered.includes(player.player))
+  }
+
   if (positions.size !== constants.positions.length) {
-    filtered = players.filter(player => positions.includes(player.pos1))
+    filtered = filtered.filter(player => positions.includes(player.pos1))
   }
 
   if (search) {

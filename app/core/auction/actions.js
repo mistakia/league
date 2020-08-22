@@ -10,6 +10,8 @@ export const auctionActions = {
   AUCTION_NOMINATION_INFO: 'AUCTION_NOMINATION_INFO',
   AUCTION_COMPLETE: 'AUCTION_COMPLETE',
 
+  AUCTION_TOGGLE_HIDE_ROSTERED: 'AUCTION_TOGGLE_HIDE_ROSTERED',
+
   AUCTION_PAUSE: 'AUCTION_PAUSE',
   AUCTION_RESUME: 'AUCTION_RESUME',
 
@@ -25,6 +27,10 @@ export const auctionActions = {
   SET_OPTIMAL_LINEUP: 'SET_OPTIMAL_LINEUP',
   SET_AUCTION_BUDGET: 'SET_AUCTION_BUDGET',
   SET_VALUE_TYPE: 'SET_VALUE_TYPE',
+
+  toggleHideRostered: () => ({
+    type: auctionActions.AUCTION_TOGGLE_HIDE_ROSTERED
+  }),
 
   setOptimalLineup: ({ players, feasible, result }) => ({
     type: auctionActions.SET_OPTIMAL_LINEUP,
