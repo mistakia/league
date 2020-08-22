@@ -41,6 +41,24 @@ export const stats = [
   'twoptc'
 ]
 
+export const statHeaders = {
+  pa: 'Passing Attempts',
+  pc: 'Passing Completions',
+  py: 'Passing Yards',
+  ints: 'Interceptions',
+  tdp: 'Passing TDs',
+  ra: 'Rushing Attempts',
+  ry: 'Rushing Yards',
+  tdr: 'Rushing TDs',
+  fuml: 'Fumbles',
+  trg: 'Targets',
+  rec: 'Receptions',
+  recy: 'Receiving Yards',
+  tdrec: 'Receiving TDs',
+  snp: 'Snaps',
+  twoptc: 'Two Point Conversions'
+}
+
 export const fullStats = [
   // ////// PASSING ////////
   // basic

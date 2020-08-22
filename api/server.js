@@ -27,9 +27,9 @@ const IS_DEV = process.env.NODE_ENV === 'development'
 const IS_PROD = process.env.NODE_ENV === 'production'
 
 if (IS_DEV) {
-  debug.enable('api,knex:query,knex:bindings,notifications*,auction*')
+  debug.enable('api,notifications*,auction*')
 } else if (IS_PROD) {
-  debug.enable('api*,knex:query,knex:bindings,notifications*,auction*')
+  debug.enable('api*,notifications*,auction*')
 }
 
 const api = express()
