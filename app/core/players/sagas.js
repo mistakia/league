@@ -115,8 +115,8 @@ export function * updateBaseline ({ payload }) {
   const baselines = (yield select(getPlayers)).get('baselines').toJS()
   const { vbaseline } = yield select(getApp)
   const baseline = {}
-  for (const b in baselines) {
-    baseline[b] = baselines[b][vbaseline]
+  for (const b in baselines['0']) {
+    baseline[b] = baselines['0'][b][vbaseline]
   }
 
   baseline[payload.position] = payload.value

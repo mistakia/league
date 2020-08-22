@@ -29,6 +29,10 @@ export default class Auction {
     return this._tids.includes(tid)
   }
 
+  get nominatingTeamId () {
+    const last = this._transactions.first()
+  }
+
   join ({ ws, tid, userId, onclose }) {
     this.logger(`userId ${userId} joined`)
     ws.on('message', (msg) => {
