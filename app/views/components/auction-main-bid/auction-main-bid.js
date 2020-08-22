@@ -105,6 +105,7 @@ export default class AuctionMainBid extends React.Component {
   render = () => {
     const {
       isPaused,
+      isComplete,
       isLocked,
       isEligible,
       isAboveCap,
@@ -123,7 +124,7 @@ export default class AuctionMainBid extends React.Component {
     const isStarted = start.isBefore(now)
 
     let action
-    if (!auctionStart || !isStarted) {
+    if (!auctionStart || !isStarted || isComplete) {
       action = null
     } else if (isPaused) {
       action = (<Button disabled>Paused</Button>)
@@ -148,6 +149,8 @@ export default class AuctionMainBid extends React.Component {
     let main
     if (!auctionStart) {
       main = (<div>Auction is not scheduled.</div>)
+    } else if (isComplete) {
+      main = (<div>Auction is complete.</div>)
     } else if (!isStarted) {
       main = (<div>Auction will begin on {start.format('dddd, MMMM Do YYYY, h:mm:ss a')}</div>)
     } else if (isPaused) {
@@ -166,7 +169,7 @@ export default class AuctionMainBid extends React.Component {
 
     return (
       <div className='auction__main-bid'>
-        {isStarted &&
+        {(isStarted && !isComplete) &&
           <div className='auction__main-timer'>
             <Timer expiration={timer} />
           </div>}
@@ -177,7 +180,7 @@ export default class AuctionMainBid extends React.Component {
         <div className='auction__main-action'>
           {action}
         </div>
-        {isStarted &&
+        {(isStarted && !isComplete) &&
           <div className='auction__main-input'>
             <div className='auction__main-input-up' onClick={this.handleUpClick}>+</div>
             <div className='auction__main-input-down' onClick={this.handleDownClick}>—</div>

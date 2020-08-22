@@ -71,6 +71,7 @@ router.post('/?', async (req, res) => {
       .where('player', player)
       .where({ lid: leagueId })
       .orderBy('timestamp', 'desc')
+      .orderBy('uid', 'desc')
 
     if (!constants.season.isWaiverPeriod && !transactions.length) {
       return res.status(400).send({ error: 'player is not on waivers' })

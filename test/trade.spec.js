@@ -39,6 +39,8 @@ describe('API /trades', function () {
       .where('rosters.tid', 2)
       .limit(1)
 
+    // TODO - get trading player values
+
     const proposingTeamPlayers = proposingTeamPlayerRows.map(p => p.player)
     const acceptingTeamPlayers = acceptingTeamPlayerRows.map(p => p.player)
     const proposeRes = await chai.request(server)
@@ -97,6 +99,8 @@ describe('API /trades', function () {
     const acceptingRow = rows.find(p => p.tid === 2)
     proposingRow.player.should.equal(acceptingTeamPlayers[0])
     acceptingRow.player.should.equal(proposingTeamPlayers[0])
+
+    // TODO - check player values pre/post trade
   })
   // one for one trade
 

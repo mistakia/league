@@ -68,6 +68,7 @@ module.exports = async function ({ leagueId, drop, player, teamId, team, userId 
   const transactions = await db('transactions')
     .where({ player, lid: leagueId })
     .orderBy('timestamp', 'desc')
+    .orderBy('uid', 'desc')
     .limit(1)
   const tran = transactions[0]
   const playerPoachValue = tran.value + 2

@@ -21,16 +21,44 @@ export default class Auction {
     this.logger = debug(`auction:league:${lid}`)
   }
 
-  get position () {
-    return this._transactions.filter(t => t.type === constants.transactions.AUCTION_PROCESSED).length
-  }
-
   has (tid) {
     return this._tids.includes(tid)
   }
 
+  _nextTeam (idx) {
+    const tid = this._tids[idx + 1] || this._tids[0]
+    return this._teams.find(t => t.uid === tid)
+  }
+
   get nominatingTeamId () {
-    const last = this._transactions.first()
+    const lastTran = this._transactions[0]
+    if (!lastTran) {
+      return this._tids[0]
+    }
+
+    const lastNomination = this._transactions.find((tran, index) => {
+      const prev = this._transactions[index + 1]
+      return tran.type === constants.transactions.AUCTION_BID &&
+        (!prev || prev.type === constants.transactions.AUCTION_PROCESSED)
+    })
+
+    this.logger(`last nominating teamId: ${lastNomination.tid}`)
+
+    if (lastTran.type === constants.transactions.AUCTION_BID) {
+      return lastNomination.tid
+    } else {
+      // starting with the tid of the last nomination
+      let idx = this._tids.indexOf(lastNomination.tid)
+
+      // find next team with available space before going through all teams
+      let next = this._nextTeam(idx)
+      while (!next.availableSpace && next.uid !== lastNomination.tid) {
+        idx += 1
+        next = this._nextTeam(idx)
+      }
+
+      return next.availableSpace ? next.uid : null
+    }
   }
 
   join ({ ws, tid, userId, onclose }) {
@@ -99,7 +127,9 @@ export default class Auction {
         teams: this._teams,
         connected: Object.keys(this._connected).map(k => parseInt(k, 10)),
         bidTimer: config.bidTimer,
-        nominationTimer: config.nominationTimer
+        nominationTimer: config.nominationTimer,
+        nominatingTeamId: this.nominatingTeamId,
+        complete: !this.nominatingTeamId
       }
     })
 
@@ -174,6 +204,7 @@ export default class Auction {
     }
 
     const team = this._teams.find(t => t.uid === tid)
+    team.availableSpace = team.availableSpace - 1
     const newCap = team.cap = r.availableCap - value
     try {
       await db('teams').where({ uid: tid }).update('cap', newCap)
@@ -226,7 +257,13 @@ export default class Auction {
       return
     }
 
-    // TODO - verify team has roster space
+    if (!team.availableSpace) {
+      // TODO broadcast error
+      this._startBidTimer()
+      this.logger(`team ${tid} does not have enough available space ${team.availableSpace}`)
+      this._locked = false
+      return
+    }
 
     this.logger(`received bid of ${value} for ${player} from teamId ${tid}`)
 
@@ -267,9 +304,8 @@ export default class Auction {
   }
 
   async nominate (message = {}, { userId, tid }) {
-    const pos = this.position
-    const nominatingTeamId = this._tids[pos % this._tids.length]
-    const { userid, value = 0 } = message
+    const nominatingTeamId = this.nominatingTeamId
+    let { userid, value = 0 } = message
     const { player } = message
 
     if (!player) {
@@ -283,6 +319,29 @@ export default class Auction {
       return
     }
 
+    // TODO validate player eligibility
+    const players = await db('player').where('player', player)
+    const playerInfo = players[0]
+    if (!playerInfo) {
+      // TODO broadcast error
+      this.logger(`can not nominate invalid player ${player}`)
+      return
+    }
+
+    const roster = await getRoster({
+      tid: nominatingTeamId,
+      week: constants.season.week,
+      year: constants.season.year
+    })
+
+    const r = new Roster({ roster, league: this._league })
+    const hasSlot = r.hasOpenBenchSlot(playerInfo.pos1)
+    if (!hasSlot) {
+      this.logger(`no open slots available for ${player} on teamId ${nominatingTeamId}`)
+      // TODO broadcast error
+      return
+    }
+
     this._clearNominationTimer()
 
     if (this._nominationTimerExpired && userId !== this._league.commishid) {
@@ -291,7 +350,9 @@ export default class Auction {
       return
     }
 
-    // TODO validate player eligibility
+    if (this._nominationTimerExpired) {
+      value = 0
+    }
 
     this.logger(`nominating ${player}`)
 
@@ -328,9 +389,21 @@ export default class Auction {
         constants.transactions.AUCTION_PROCESSED
       ])
       .orderBy('timestamp', 'desc')
+      .orderBy('uid', 'desc')
 
     const leagues = await db('leagues').where('uid', this._lid)
     this._league = leagues[0]
+
+    for (const team of this._teams) {
+      const roster = await getRoster({
+        tid: team.uid,
+        week: constants.season.week,
+        year: constants.season.year
+      })
+      const r = new Roster({ roster, league: this._league })
+      team.availableSpace = r.availableSpace
+      team.cap = r.availableCap
+    }
   }
 
   start () {
@@ -366,6 +439,17 @@ export default class Auction {
     this._nominationTimerExpired = false
     this._clearNominationTimer()
     const self = this
+    const nominatingTeamId = this.nominatingTeamId
+    if (!nominatingTeamId) {
+      return this.broadcast({ type: 'AUCTION_COMPLETE' })
+    }
+
+    this.broadcast({
+      type: 'AUCTION_NOMINATION_INFO',
+      payload: {
+        nominatingTeamId
+      }
+    })
     this._nominationTimer = setTimeout(() => {
       self._nominationTimerExpired = true
     }, config.nominationTimer)
