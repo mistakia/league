@@ -7,6 +7,7 @@ import { appActions } from '@core/app'
 const initialState = new Record({
   isPaused: true,
   isLocked: false,
+  isComplete: false,
   selected: null,
   player: null,
   bid: null,
@@ -20,6 +21,7 @@ const initialState = new Record({
   positions: new List(constants.positions),
   bidTimer: null,
   nominationTimer: null,
+  nominatingTeamId: null,
   search: null,
   timer: null,
   valueType: '0'
@@ -96,6 +98,11 @@ export function auctionReducer (state = initialState(), { payload, type }) {
         timer: null
       })
 
+    case auctionActions.AUCTION_NOMINATION_INFO: {
+      const { nominatingTeamId } = payload
+      return state.merge({ nominatingTeamId })
+    }
+
     case auctionActions.AUCTION_INIT: {
       const latest = payload.transactions[0]
       return state.merge({
@@ -106,9 +113,14 @@ export function auctionReducer (state = initialState(), { payload, type }) {
         isPaused: payload.paused,
         bidTimer: payload.bidTimer,
         connected: new List(payload.connected),
-        nominationTimer: payload.nominationTimer
+        nominationTimer: payload.nominationTimer,
+        nominatingTeamId: payload.nominatingTeamId,
+        isComplete: payload.complete
       })
     }
+
+    case auctionActions.AUCTION_COMPLETE:
+      return state.merge({ isComplete: true })
 
     case auctionActions.SET_OPTIMAL_LINEUP:
       return state.merge({

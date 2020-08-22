@@ -33,16 +33,26 @@ module.exports = async function (knex) {
       pos: player.pos1,
       rid: roster.uid
     })
-    await knex('transactions').insert({
+    const value = Math.floor(Math.random() * Math.min(r.availableCap, 60))
+    await knex('transactions').insert([{
       userid: roster.tid,
       tid: roster.tid,
       lid: league.uid,
       player: player.player,
-      type: 7,
-      value: Math.floor(Math.random() * Math.min(r.availableCap, 60)),
+      type: constants.transactions.AUCTION_BID,
+      value,
       year: constants.season.year,
       timestamp: Math.round(Date.now() / 1000)
-    })
+    }, {
+      userid: roster.tid,
+      tid: roster.tid,
+      lid: league.uid,
+      player: player.player,
+      type: constants.transactions.AUCTION_PROCESSED,
+      value,
+      year: constants.season.year,
+      timestamp: Math.round(Date.now() / 1000)
+    }])
 
     if (i === 12) {
       i = 1

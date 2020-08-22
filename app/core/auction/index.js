@@ -4,7 +4,6 @@ export { auctionReducer } from './reducer'
 export {
   getAuction,
   getAuctionPlayers,
-  getNominatingTeamId,
   isTeamConnected,
   getPlayersForOptimalLineup,
   getAuctionTargetPlayers,

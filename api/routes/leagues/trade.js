@@ -164,13 +164,24 @@ router.post('/accept', async (req, res, next) => {
       .where({ uid: tradeId })
       .update({ accepted: Math.round(Date.now() / 1000) })
 
-    const transactionHistory = await db('transactions')
-      .select('*')
-      .distinct('player')
+    const subQuery = db('transactions')
+      .select(db.raw('max(uid) AS maxuid, CONCAT(player, "_", lid) AS Group1'))
+      .groupBy('Group1')
       .whereIn('player', tradedPlayers)
       .where({ lid: leagueId })
-      .orderBy('timestamp', 'desc')
-      .limit(tradedPlayers.length)
+
+    const transactionHistory = await db
+      .select('*')
+      .from(db.raw('(' + subQuery.toString() + ') AS X'))
+      .join(
+        'transactions',
+        function () {
+          this.on(function () {
+            this.on(db.raw('CONCAT(player, "_", lid) = X.Group1'))
+            this.andOn('uid', '=', 'maxuid')
+          })
+        }
+      )
 
     // insert transactions
     const insertTransactions = []

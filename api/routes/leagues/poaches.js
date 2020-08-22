@@ -39,6 +39,7 @@ router.post('/?', async (req, res) => {
         lid: leagueId
       })
       .orderBy('timestamp', 'desc')
+      .orderBy('uid', 'desc')
       .limit(1)
     const tran = transactions[0]
     if ((tran.type === constants.transactions.ROSTER_DEACTIVATE ||

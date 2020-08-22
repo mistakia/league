@@ -75,12 +75,6 @@ export function getAuctionPosition (state) {
   return processed.size
 }
 
-export function getNominatingTeamId (state) {
-  const position = getAuctionPosition(state)
-  const tids = state.get('auction').get('tids')
-  return tids.get(position % tids.size)
-}
-
 export function getAuctionInfoForPosition (state, { pos }) {
   const { vbaseline } = getApp(state)
   const all = getAllPlayers(state)
