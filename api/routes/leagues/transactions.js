@@ -1,5 +1,8 @@
 const express = require('express')
+const moment = require('moment')
 const router = express.Router({ mergeParams: true })
+
+const { constants } = require('../../../common')
 
 router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
@@ -36,6 +39,32 @@ router.get('/?', async (req, res) => {
   } catch (err) {
     logger(err)
     res.status(500).send({ error: err.toString() })
+  }
+})
+
+router.get('/release', async (req, res) => {
+  const { db, logger } = req.app.locals
+  try {
+    const { leagueId } = req.params
+    const cutoff = moment().subtract('48', 'hours').format('X')
+    const types = [
+      constants.transactions.ROSTER_ADD,
+      constants.transactions.ROSTER_DROP,
+      constants.transactions.PRACTICE_ADD
+    ]
+    const transactions = await db('transactions')
+      .where({
+        lid: leagueId
+      })
+      .whereIn('type', types)
+      .where('timestamp', '>', cutoff)
+      .orderBy('timestamp', 'desc')
+      .orderBy('uid', 'desc')
+
+    res.send(transactions)
+  } catch (error) {
+    logger(error)
+    res.status(500).send({ error: error.toString() })
   }
 })
 

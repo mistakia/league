@@ -300,7 +300,7 @@ describe('API /teams - add', function () {
           slot: constants.slots.BENCH
         })
 
-      await error(request, 'player is locked')
+      await error(request, 'veteran free agency not open')
     })
 
     it('free agent locked', async () => {

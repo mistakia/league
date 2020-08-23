@@ -31,7 +31,7 @@ export function isDrafted (state, { playerId, player }) {
   return drafted.includes(id)
 }
 
-export function hasDraftClockExpired (state) {
+export function isAfterDraft (state) {
   const league = getCurrentLeague(state)
   const totalPicks = league.nteams * 3
   return league.ddate && moment().isAfter(moment(league.ddate, 'X').add(totalPicks, 'day'))

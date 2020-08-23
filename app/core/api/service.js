@@ -110,6 +110,10 @@ export const api = {
     const url = `${BASE_URL}/leagues/${params.leagueId}/transactions?${queryString.stringify(params)}`
     return { url }
   },
+  getReleaseTransactions (params) {
+    const url = `${BASE_URL}/leagues/${params.leagueId}/transactions/release`
+    return { url }
+  },
   getTrades (params) {
     const url = `${BASE_URL}/leagues/${params.leagueId}/trades?${queryString.stringify(params)}`
     return { url }

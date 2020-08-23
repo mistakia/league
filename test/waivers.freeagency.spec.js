@@ -36,7 +36,7 @@ describe('API /waivers - free agency', function () {
   describe('put', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.clone().subtract('1', 'month').toDate())
+      MockDate.set(start.clone().subtract('2', 'month').toDate())
       await league(knex)
     })
 
@@ -132,10 +132,36 @@ describe('API /waivers - free agency', function () {
   })
 
   describe('errors', function () {
+    beforeEach(async function () {
+      this.timeout(60 * 1000)
+      MockDate.set(start.clone().subtract('2', 'month').toDate())
+      await league(knex)
+    })
+
     it('duplicate waiver claim', async () => {
-      const teamId = 1
+      MockDate.set(start.clone().subtract('1', 'month').toDate())
       const leagueId = 1
-      const player = await selectPlayer()
+      const player = await selectPlayer({ rookie: true })
+      await addPlayer({
+        leagueId,
+        player,
+        teamId: 2,
+        userId: 2,
+        slot: constants.slots.PS,
+        transaction: constants.transactions.DRAFT,
+        value: 3
+      })
+
+      MockDate.set(start.clone().subtract('3', 'week').toDate())
+      await dropPlayer({
+        leagueId,
+        player,
+        teamId: 2,
+        userId: 2
+      })
+
+      MockDate.set(start.clone().subtract('3', 'week').add('4', 'hour').toDate())
+      const teamId = 1
       await chai.request(server)
         .post('/api/leagues/1/waivers')
         .set('Authorization', `Bearer ${user1}`)

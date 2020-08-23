@@ -37,11 +37,11 @@ export default class PlayerContextMenu extends React.Component {
   }
 
   handleCancelWaiver = () => {
-    const { player, data, cancelClaim } = this.props
+    const { player, waiverId, cancelClaim } = this.props
     this.props.showConfirmation({
       title: 'Cancel claim',
       description: `Your claim for ${player.fname} ${player.lname} (${player.pos1}) will no longer be processed.`,
-      onConfirm: () => cancelClaim(data.waiverId)
+      onConfirm: () => cancelClaim(waiverId)
     })
   }
 
@@ -70,16 +70,13 @@ export default class PlayerContextMenu extends React.Component {
 
   render = () => {
     const {
-      isPracticeSquadEligible,
       isActiveRosterEligible,
       isOnCurrentRoster,
       isPlayerRostered,
       isPlayerOnPracticeSquad,
       hasExistingPoachingClaim,
-      hasAuctionCompleted,
       waiverId,
       status,
-      hasDraftClockExpired,
       isPlayerEligibleToDeactivate
     } = this.props
 
@@ -144,7 +141,7 @@ export default class PlayerContextMenu extends React.Component {
       menuItems.push(
         <MenuItem
           dense
-          disabled={!status.waiver.add || !hasAuctionCompleted}
+          disabled={!status.waiver.active && !status.waiver.practice}
           onClick={this.handleWaiver}
         >
           Submit Waiver Claim
@@ -154,19 +151,20 @@ export default class PlayerContextMenu extends React.Component {
       menuItems.push(
         <MenuItem
           dense
-          disabled={status.waiver.add}
+          disabled={!status.sign.active}
           onClick={() => this.handleAdd()}
         >
-          Add to Active Roster
+          Sign to Active Roster
         </MenuItem>
       )
+
       menuItems.push(
         <MenuItem
           dense
-          disabled={!isPracticeSquadEligible || !hasDraftClockExpired}
+          disabled={!status.sign.practice}
           onClick={() => this.handleAdd({ practice: true })}
         >
-          Add to Practice Squad
+          Sign to Practice Squad
         </MenuItem>
       )
     }

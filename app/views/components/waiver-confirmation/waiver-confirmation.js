@@ -20,23 +20,52 @@ export default class WaiverConfirmation extends React.Component {
   constructor (props) {
     super(props)
 
-    const drops = []
-    const { league, player } = props
-    for (const rPlayer of props.rosterPlayers.active) {
-      const r = new Roster({ roster: props.roster.toJS(), league })
-      r.removePlayer(rPlayer.player)
-      if (r.hasOpenBenchSlot(player.pos1)) {
-        drops.push(rPlayer)
-      }
+    this._isEligible = false
+    this._drops = []
+    this.state = {
+      drop: '',
+      type: '',
+      bid: 0,
+      error: false,
+      missingType: false,
+      missingDrop: false
     }
-
-    this._drops = drops
-    this.state = { drop: '', bid: 0, error: false }
   }
 
   handleDrop = (event) => {
     const { value } = event.target
-    this.setState({ drop: value })
+    this.setState({ drop: value, missingDrop: false })
+  }
+
+  handleType = (event) => {
+    const { value } = event.target
+    this.setState({ type: value, drop: '', missingType: false })
+
+    const { type } = this.state
+    const isActiveRoster = type === constants.waivers.FREE_AGENCY
+    const { league, player, roster, rosterPlayers } = this.props
+
+    const ros = new Roster({ roster: roster.toJS(), league })
+    this._isEligible = isActiveRoster
+      ? ros.hasOpenBenchSlot(player.pos1)
+      : ros.hasOpenPracticeSquadSlot()
+
+    const drops = []
+    const players = isActiveRoster
+      ? rosterPlayers.active
+      : rosterPlayers.practice
+
+    for (const rPlayer of players) {
+      const r = new Roster({ roster: roster.toJS(), league })
+      r.removePlayer(rPlayer.player)
+      if (isActiveRoster) {
+        if (r.hasOpenBenchSlot(player.pos1)) drops.push(rPlayer)
+      } else {
+        if (r.hasOpenPracticeSquadSlot()) drops.push(rPlayer)
+      }
+    }
+
+    this._drops = drops
   }
 
   handleBid = (event) => {
@@ -54,19 +83,32 @@ export default class WaiverConfirmation extends React.Component {
   }
 
   handleSubmit = () => {
-    const { bid, drop, error } = this.state
+    const { bid, drop, error, type } = this.state
     const player = this.props.player.player
+
+    if (!type) {
+      return this.setState({ missingType: true })
+    } else {
+      this.setState({ missingType: false })
+    }
+
+    if (!this._isEligible && !drop) {
+      return this.setState({ missingDrop: true })
+    } else {
+      this.setState({ missingDrop: false })
+    }
+
     if (!error) {
-      this.props.claim({ bid, drop, player, type: constants.waivers.FREE_AGENCY })
+      this.props.claim({ bid, drop, type, player })
       this.props.onClose()
     }
   }
 
   render = () => {
-    const { isEligible, team, player } = this.props
+    const { team, player, status } = this.props
 
     const menuItems = []
-    if (!isEligible) {
+    if (!this._isEligible) {
       for (const rPlayer of this._drops) {
         menuItems.push(
           <MenuItem
@@ -77,6 +119,29 @@ export default class WaiverConfirmation extends React.Component {
           </MenuItem>
         )
       }
+    }
+
+    const typeItems = []
+    if (status.waiver.practice) {
+      typeItems.push(
+        <MenuItem
+          key='practice'
+          value={constants.waivers.FREE_AGENCY_PRACTICE}
+        >
+          Practice Squad
+        </MenuItem>
+      )
+    }
+
+    if (status.waiver.active) {
+      typeItems.push(
+        <MenuItem
+          key='active'
+          value={constants.waivers.FREE_AGENCY}
+        >
+          Active Roster
+        </MenuItem>
+      )
     }
 
     return (
@@ -99,11 +164,24 @@ export default class WaiverConfirmation extends React.Component {
               size='small'
               variant='outlined'
             />
-            {!isEligible &&
+            <FormControl size='small' variant='outlined'>
+              <InputLabel id='type-label'>Type</InputLabel>
+              <Select
+                labelId='type-label'
+                error={this.state.missingType}
+                value={this.state.type}
+                onChange={this.handleType}
+                label='Type'
+              >
+                {typeItems}
+              </Select>
+            </FormControl>
+            {(this.state.type && !this._isEligible) &&
               <FormControl size='small' variant='outlined'>
                 <InputLabel id='drop-label'>Drop</InputLabel>
                 <Select
                   labelId='drop-label'
+                  error={this.state.missingDrop}
                   value={this.state.drop}
                   onChange={this.handleDrop}
                   label='Drop'

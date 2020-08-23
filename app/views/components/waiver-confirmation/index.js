@@ -5,6 +5,7 @@ import { isPlayerEligible, getCurrentPlayers, getCurrentTeamRosterRecord } from 
 import { getCurrentLeague } from '@core/leagues'
 import { getCurrentTeam } from '@core/teams'
 import { waiverActions } from '@core/waivers'
+import { getPlayerStatus } from '@core/players'
 
 import WaiverConfirmation from './waiver-confirmation'
 
@@ -13,12 +14,14 @@ const mapStateToProps = createSelector(
   getCurrentPlayers,
   getCurrentTeamRosterRecord,
   getCurrentLeague,
+  getPlayerStatus,
   getCurrentTeam,
-  (isEligible, rosterPlayers, roster, league, team) => ({
+  (isEligible, rosterPlayers, roster, league, status, team) => ({
     isEligible,
     rosterPlayers,
     roster,
     league,
+    status,
     team
   })
 )

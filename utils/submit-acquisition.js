@@ -63,13 +63,13 @@ module.exports = async function ({
   // verify no veterans are signed in the offseason & the rookie draft is complete
   if (!constants.season.isRegularSeason) {
     if (playerRow.start !== constants.season.year) {
-      throw new Error('player is locked')
+      throw new Error('veteran free agency not open')
     }
 
     // verify rookie draft is complete
     const totalPicks = league.nteams * 3
     if (!league.ddate || moment().isBefore(moment(league.ddate, 'X').add(totalPicks, 'day'))) {
-      throw new Error('player is locked - draft not complete')
+      throw new Error('rookie free agency not open')
     }
   }
 
