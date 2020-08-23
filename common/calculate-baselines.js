@@ -33,8 +33,7 @@ const calculateBaselines = ({
   league,
   week
 }) => {
-  const data = JSON.parse(JSON.stringify(players))
-    .sort((a, b) => b.points[week].total - a.points[week].totat)
+  const data = players.sort((a, b) => b.points[week].total - a.points[week].total)
 
   const rows = []
   for (let i = 0; i < league.nteams; i++) {
@@ -52,7 +51,6 @@ const calculateBaselines = ({
   // remove rostered players & sort
   let availablePlayerPool = data
     .filter(p => !rosteredPlayerIds.includes(p.player) || !positions.includes(p.pos1))
-    .sort((a, b) => b.points[week].total - a.points[week].total)
 
   // fill starters using rostered players and suppliment with available players
   const eligibleSlots = getEligibleSlots({ pos: 'ALL', league })
@@ -140,7 +138,6 @@ const calculateBaselines = ({
       : Math.round(Math.abs(result[p.pos1].starter.points[week].total - p.points[week].total) / result[p.pos1].starter.points[week].total),
     ...p
   }))
-  const sortedAvailablePlayers = vorAvailablePlayers.sort((a, b) => a._value - b._value)
 
   const fullRosters = []
   let i = 0
@@ -154,11 +151,11 @@ const calculateBaselines = ({
 
     // find an eligible player
     let player
-    for (let p = 0; p < sortedAvailablePlayers.length; p++) {
-      player = sortedAvailablePlayers[p]
+    for (let p = 0; p < vorAvailablePlayers.length; p++) {
+      player = vorAvailablePlayers[p]
       const isEligible = roster.hasOpenBenchSlot(player.pos1)
       if (isEligible) {
-        sortedAvailablePlayers.splice(p, 1)
+        vorAvailablePlayers.splice(p, 1)
         break
       }
     }
@@ -179,8 +176,7 @@ const calculateBaselines = ({
   // group availabe players by position
   const groupedAvailablePlayers = {}
   for (const position of positions) {
-    const players = sortedAvailablePlayers.filter(s => s.pos1 === position)
-    groupedAvailablePlayers[position] = players.sort((a, b) => b.points[week].total - a.points[week].total)
+    groupedAvailablePlayers[position] = vorAvailablePlayers.filter(s => s.pos1 === position)
   }
 
   // get best available baselines

@@ -3,6 +3,7 @@ import AES from 'crypto-js/aes'
 import UTF8 from 'crypto-js/enc-utf8'
 
 import { getApp, appActions } from '@core/app'
+import { notificationActions } from '@core/notifications'
 import { fetchPlayers, getPlayerStats, putProjection, delProjection, putSetting } from '@core/api'
 import { playerActions } from './actions'
 import { auctionActions } from '@core/auction'
@@ -18,6 +19,9 @@ export function * loadPlayers () {
 }
 
 export function * calculateValues () {
+  yield put(notificationActions.show({
+    message: 'Calculating values'
+  }))
   const { userId, vorpw, volsw } = yield select(getApp)
   const league = yield select(getCurrentLeague)
   const players = yield select(getAllPlayers)
@@ -137,6 +141,10 @@ export function * watchAuthFulfilled () {
   yield takeLatest(appActions.AUTH_FULFILLED, init)
 }
 
+export function * watchAuthFailed () {
+  yield takeLatest(appActions.AUTH_FAILED, loadPlayers)
+}
+
 export function * watchToggleOrder () {
   yield takeLatest(playerActions.TOGGLE_ORDER, toggleOrder)
 }
@@ -173,10 +181,6 @@ export function * watchToggleWatchlist () {
   yield takeLatest(playerActions.TOGGLE_WATCHLIST, putWatchlist)
 }
 
-export function * watchInitApp () {
-  yield takeLatest(appActions.INIT_APP, loadPlayers)
-}
-
 export function * watchUpdateBaseline () {
   yield takeLatest(playerActions.UPDATE_PLAYER_BASELINE, updateBaseline)
 }
@@ -202,9 +206,9 @@ export function * watchAuctionProcessed () {
 // -------------------------------------
 
 export const playerSagas = [
-  fork(watchInitApp),
   fork(watchFetchPlayersFulfilled),
   fork(watchAuthFulfilled),
+  fork(watchAuthFailed),
   fork(watchSetLeague),
   fork(watchToggleOrder),
   fork(watchSaveProjection),
