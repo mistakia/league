@@ -10,6 +10,7 @@ import calculatePrices from './calculate-prices'
 import getRosterSize from './get-roster-size'
 import createDefaultLeague from './create-default-league'
 import getOptimizerPositionConstraints from './get-optimizer-position-constraints'
+import isOnReleaseWaivers from './is-on-release-waivers'
 
 const groupBy = (xs, key) => xs.reduce((rv, x) => {
   (rv[x[key]] = rv[x[key]] || []).push(x)
@@ -45,5 +46,6 @@ export {
   calculatePrices,
   calculateStatsFromPlays,
   createDefaultLeague,
-  getOptimizerPositionConstraints
+  getOptimizerPositionConstraints,
+  isOnReleaseWaivers
 }

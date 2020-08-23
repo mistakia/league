@@ -108,7 +108,7 @@ export function getAuctionInfoForPosition (state, { pos }) {
   }
 }
 
-export function hasAuctionCompleted (state) {
+export function isAfterAuction (state) {
   const league = getCurrentLeague(state)
 
   if (!league.adate) {

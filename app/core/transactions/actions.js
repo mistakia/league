@@ -8,6 +8,10 @@ export const transactionsActions = {
   GET_TRANSACTIONS_FULFILLED: 'GET_TRANSACTIONS_FULFILLED',
   GET_TRANSACTIONS_FAILED: 'GET_TRANSACTIONS_FAILED',
 
+  GET_RELEASE_TRANSACTIONS_PENDING: 'GET_RELEASE_TRANSACTIONS_PENDING',
+  GET_RELEASE_TRANSACTIONS_FULFILLED: 'GET_RELEASE_TRANSACTIONS_FULFILLED',
+  GET_RELEASE_TRANSACTIONS_FAILED: 'GET_RELEASE_TRANSACTIONS_FAILED',
+
   filter: (type, values) => ({
     type: transactionsActions.FILTER_TRANSACTIONS,
     payload: {
@@ -45,6 +49,29 @@ export const transactionsActions = {
       opts,
       error
     }
+  }),
+
+  getReleaseTransactionsPending: opts => ({
+    type: transactionsActions.GET_RELEASE_TRANSACTIONS_PENDING,
+    payload: {
+      opts
+    }
+  }),
+
+  getReleaseTransactionsFailed: (opts, error) => ({
+    type: transactionsActions.GET_RELEASE_TRANSACTIONS_FAILED,
+    payload: {
+      opts,
+      error
+    }
+  }),
+
+  getReleaseTransactionsFulfilled: (opts, data) => ({
+    type: transactionsActions.GET_RELEASE_TRANSACTIONS_FULFILLED,
+    payload: {
+      opts,
+      data
+    }
   })
 }
 
@@ -52,4 +79,10 @@ export const getTransactionsActions = {
   failed: transactionsActions.getTransactionsFailed,
   pending: transactionsActions.getTransactionsPending,
   fulfilled: transactionsActions.getTransactionsFulfilled
+}
+
+export const getReleaseTransactionsActions = {
+  failed: transactionsActions.getReleaseTransactionsFailed,
+  pending: transactionsActions.getReleaseTransactionsPending,
+  fulfilled: transactionsActions.getReleaseTransactionsFulfilled
 }

@@ -1,10 +1,13 @@
 import { createSelector } from 'reselect'
 import moment from 'moment'
-import { constants, calculatePoints } from '@common'
+import { constants, calculatePoints, isOnReleaseWaivers } from '@common'
 import { getApp } from '@core/app'
 import { getStats } from '@core/stats'
 import { Player } from './player'
 import { fuzzySearch } from '@core/utils'
+import { isAfterDraft } from '@core/draft'
+import { isAfterAuction } from '@core/auction'
+import { getReleaseTransactions } from '@core/transactions'
 import {
   getCurrentTeamRosterRecord,
   getActiveRosterPlayerIdsForCurrentLeague,
@@ -199,13 +202,25 @@ export function getGamesByYearForSelectedPlayer (state) {
   return { years, overall }
 }
 
+export function isPlayerOnReleaseWaivers (state, { player }) {
+  const transactions = getReleaseTransactions(state)
+  const playerTransactions = transactions.filter(t => t.player === player.player)
+
+  return isOnReleaseWaivers({ transactions: playerTransactions.toJS() })
+}
+
 export function getPlayerStatus (state, { player }) {
   const status = {
-    lock: false,
+    locked: false,
     fa: false,
     waiver: {
-      add: false,
+      active: false,
+      practice: false,
       poach: false
+    },
+    sign: {
+      active: false,
+      practice: false
     }
   }
 
@@ -215,14 +230,24 @@ export function getPlayerStatus (state, { player }) {
 
   const isFreeAgent = isPlayerFreeAgent(state, { player })
   status.fa = isFreeAgent
-  if (constants.season.isWaiverPeriod && isFreeAgent) {
-    status.waiver.add = true
-  } else if (isFreeAgent) {
-    // TODO - dropped in the last 24 hours - except for cycling
-  }
-
-  const isOnPracticeSquad = isPlayerOnPracticeSquad(state, { player })
-  if (isOnPracticeSquad) {
+  if (isFreeAgent) {
+    if (constants.season.isRegularSeason && constants.season.isWaiverPeriod) {
+      status.waiver.active = true
+      status.waiver.practice = true
+    } else {
+      const onReleaseWaivers = isPlayerOnReleaseWaivers(state, { player })
+      const afterAuction = isAfterAuction(state)
+      const afterDraft = isAfterDraft(state)
+      const isPracticeSquadEligible = isPlayerPracticeSquadEligible(state, { player })
+      if (!onReleaseWaivers) {
+        if (afterAuction) status.sign.active = true
+        if (afterDraft && isPracticeSquadEligible) status.sign.practice = true
+      } else {
+        if (afterAuction) status.waiver.active = true
+        if (afterDraft && isPracticeSquadEligible) status.waiver.practice = true
+      }
+    }
+  } else if (isPlayerOnPracticeSquad(state, { player })) {
     const rosterInfo = getRosterInfoForPlayerId(state, { playerId: player.player })
     const cutoff = moment(rosterInfo.timestamp, 'X').add('24', 'hours')
 

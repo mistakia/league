@@ -102,7 +102,12 @@ router.delete('/?', async (req, res) => {
       lid: leagueId
     }).del()
 
-    res.send({ rosters, teams })
+    const transactions = await db('transactions').where({
+      tid: teamId,
+      lid: leagueId
+    }).del()
+
+    res.send({ rosters, teams, transactions })
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })

@@ -1,5 +1,5 @@
+const moment = require('moment-timezone')
 const express = require('express')
-const moment = require('moment')
 const router = express.Router({ mergeParams: true })
 
 const { constants, Roster } = require('../../../common')
@@ -63,7 +63,8 @@ router.post('/?', async (req, res) => {
     const playerRow = players[0]
 
     // verify player is practice squad eligible if type is practice waiver
-    if (type === constants.waivers.FREE_AGENCY_PRACTICE && playerRow.start !== constants.season.year) {
+    if (type === constants.waivers.FREE_AGENCY_PRACTICE &&
+      playerRow.start !== constants.season.year) {
       return res.status(400).send({ error: 'player is not practice squad eligible' })
     }
 
@@ -77,17 +78,45 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'player is not on waivers' })
     }
 
-    // make sure player is on waivers & it's not a duplicate waiver
+    const leagues = await db('leagues').where({ uid: leagueId })
+    if (!leagues.length) {
+      return res.status(400).send({ error: 'invalid leagueId' })
+    }
+    const league = leagues[0]
+
+    // check free agency waivers
     if (type === constants.waivers.FREE_AGENCY || type === constants.waivers.FREE_AGENCY_PRACTICE) {
+      // make sure player is not rostered
       const isRostered = await isPlayerRostered({ player, leagueId })
       if (isRostered) {
         return res.status(400).send({ error: 'player rostered' })
       }
 
-      if (!constants.season.isWaiverPeriod || type === constants.waivers.FREE_AGENCY_PRACTICE) {
+      // if outside of a waiver period in the regular season, make sure player is on waivers
+      if (!(constants.season.isRegularSeason && constants.season.isWaiverPeriod)) {
         const isOnWaivers = await isPlayerOnWaivers({ player, leagueId })
         if (!isOnWaivers) {
           return res.status(400).send({ error: 'player is not on waivers' })
+        }
+      }
+
+      // reject active roster waivers before day after auction
+      const acutoff = moment.tz(league.adate, 'X', 'America/New_York')
+        .add('1', 'day')
+        .startOf('day')
+      if (type === constants.waivers.FREE_AGENCY && (!league.adate || moment().isBefore(acutoff))) {
+        return res.status(400).send({ error: 'active roster waivers not open' })
+      }
+
+      // reject practice waivers before day after draft
+      if (type === constants.waivers.FREE_AGENCY_PRACTICE) {
+        const totalPicks = league.nteams * 3
+        const dcutoff = moment.tz(league.ddate, 'X', 'America/New_York')
+          .add(totalPicks, 'day')
+          .startOf('day')
+
+        if (!league.ddate || moment().isBefore(dcutoff)) {
+          return res.status(400).send({ error: 'practice squad waivers are not open' })
         }
       }
 
@@ -155,11 +184,6 @@ router.post('/?', async (req, res) => {
     }
 
     // verify team has space for player on active roster
-    const leagues = await db('leagues').where({ uid: leagueId })
-    if (!leagues.length) {
-      return res.status(400).send({ error: 'invalid leagueId' })
-    }
-    const league = leagues[0]
     const rosterRow = await getRoster({
       tid,
       week: constants.season.week,
