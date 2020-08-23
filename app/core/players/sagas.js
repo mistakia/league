@@ -5,6 +5,7 @@ import UTF8 from 'crypto-js/enc-utf8'
 import { getApp, appActions } from '@core/app'
 import { fetchPlayers, getPlayerStats, putProjection, delProjection, putSetting } from '@core/api'
 import { playerActions } from './actions'
+import { auctionActions } from '@core/auction'
 import { getAllPlayers, getPlayers } from './selectors'
 import { leagueActions, getCurrentLeague } from '@core/leagues'
 import { sourceActions, getSources } from '@core/sources'
@@ -192,6 +193,10 @@ export function * watchDeleteRostersFulfilled () {
   yield takeLatest(rosterActions.DELETE_ROSTERS_FULFILLED, calculateValues)
 }
 
+export function * watchAuctionProcessed () {
+  yield takeLatest(auctionActions.AUCTION_PROCESSED, calculateValues)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -210,6 +215,7 @@ export const playerSagas = [
   fork(watchDeleteProjection),
   fork(watchToggleWatchlist),
   fork(watchUpdateBaseline),
+  fork(watchAuctionProcessed),
 
   fork(watchPutRostersFulfilled),
   fork(watchPostRostersFulfilled),
