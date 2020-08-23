@@ -81,15 +81,16 @@ export function getAuctionPosition (state) {
 }
 
 export function getAuctionInfoForPosition (state, { pos }) {
+  const { valueType } = getAuction(state)
   const { vbaseline } = getApp(state)
   const all = getAllPlayers(state)
   const players = all.filter(p => p.pos1 === pos)
   const activePlayerIds = getActiveRosterPlayerIdsForCurrentLeague(state)
   const rostered = players.filter(p => activePlayerIds.includes(p.player))
 
-  const totalVorp = players.reduce((a, b) => a + (Math.max(b.getIn(['vorp', '0', vbaseline]) || 0, 0)), 0)
-  const rosteredVorp = rostered.reduce((a, b) => a + (Math.max(b.getIn(['vorp', '0', vbaseline]) || 0, 0)), 0)
-  const retail = rostered.reduce((a, b) => a + (b.getIn(['values', '0', vbaseline]) || 0), 0)
+  const totalVorp = players.reduce((a, b) => a + (Math.max(b.getIn(['vorp', valueType, vbaseline]) || 0, 0)), 0)
+  const rosteredVorp = rostered.reduce((a, b) => a + (Math.max(b.getIn(['vorp', valueType, vbaseline]) || 0, 0)), 0)
+  const retail = rostered.reduce((a, b) => a + (b.getIn(['values', valueType, vbaseline]) || 0), 0)
   const actual = rostered.reduce((a, b) => a + (b.value || 0), 0)
   return {
     count: {
