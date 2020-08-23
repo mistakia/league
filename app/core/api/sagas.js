@@ -34,7 +34,7 @@ import {
   postTeamsActions,
   deleteTeamsActions
 } from '@core/teams'
-import { getTransactionsActions } from '@core/transactions'
+import { getTransactionsActions, getReleaseTransactionsActions } from '@core/transactions'
 import { getMatchupsActions, postMatchupsActions } from '@core/matchups'
 import {
   postTradeProposeActions,
@@ -108,6 +108,7 @@ export const postDraft = fetch.bind(null, api.postDraft, postDraftActions)
 
 export const getTeams = fetch.bind(null, api.getTeams, getTeamsActions)
 export const fetchTransactions = fetch.bind(null, api.getTransactions, getTransactionsActions)
+export const getReleaseTransactions = fetch.bind(null, api.getReleaseTransactions, getReleaseTransactionsActions)
 
 export const getMatchups = fetch.bind(null, api.getMatchups, getMatchupsActions)
 export const postMatchups = fetch.bind(null, api.postMatchups, postMatchupsActions)

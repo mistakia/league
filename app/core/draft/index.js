@@ -4,7 +4,7 @@ export {
   getNextPick,
   getSelectedDraftPlayer,
   isDrafted,
-  hasDraftClockExpired
+  isAfterDraft
 } from './selectors'
 export { draftSagas } from './sagas'
 export { draftReducer } from './reducer'

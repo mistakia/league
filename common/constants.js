@@ -362,8 +362,8 @@ export const transactions = {
 }
 
 export const transactionsDetail = {
-  14: 'Added',
-  1: 'Dropped',
+  14: 'Signed',
+  1: 'Released',
 
   2: 'Activated',
   3: 'Deactivated',
@@ -381,7 +381,7 @@ export const transactionsDetail = {
   10: 'Tran. Tagged',
   11: 'Fran. Tagged',
   12: 'Rookie Tagged',
-  13: 'Added (Practice Squad)'
+  13: 'Signed (PS)'
 }
 
 export const nflTeams = [

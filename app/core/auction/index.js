@@ -9,5 +9,5 @@ export {
   getAuctionTargetPlayers,
   getTeamBid,
   getAuctionInfoForPosition,
-  hasAuctionCompleted
+  isAfterAuction
 } from './selectors'
