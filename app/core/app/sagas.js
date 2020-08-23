@@ -4,11 +4,14 @@ import { getApp } from './selectors'
 import { appActions } from './actions'
 import { postRegister, postLogin, fetchAuth } from '@core/api'
 import { localStorageAdapter } from '@core/utils'
+import { loadPlayers } from '@core/players'
 
 export function * init () {
   const { token, key } = yield select(getApp)
   if (token && key) {
     yield call(fetchAuth)
+  } else {
+    yield call(loadPlayers)
   }
 }
 
