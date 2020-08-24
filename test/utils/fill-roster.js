@@ -35,7 +35,7 @@ module.exports = async ({
     roster = new Roster({ roster: rosterRow, league })
   }
 
-  while (!roster.hasOpenPracticeSquadSlot()) {
+  while (roster.hasOpenPracticeSquadSlot()) {
     const players = await db('rosters_players')
       .join('rosters', 'rosters_players.rid', 'rosters.uid')
       .where({
@@ -56,5 +56,24 @@ module.exports = async ({
     roster = new Roster({ roster: rosterRow, league })
   }
 
-  // TODO fill IR slot
+  while (roster.hasOpenInjuredReserveSlot()) {
+    const players = await db('rosters_players')
+      .join('rosters', 'rosters_players.rid', 'rosters.uid')
+      .where({
+        lid: leagueId,
+        week: constants.season.week,
+        year: constants.season.year
+      })
+    const excludePlayerIds = players.map(p => p.player)
+    const player = await selectPlayer({ exclude: excludePlayerIds })
+    await addPlayer({
+      leagueId,
+      teamId,
+      player,
+      slot: constants.slots.IR
+    })
+
+    const rosterRow = await getRoster({ tid: teamId })
+    roster = new Roster({ roster: rosterRow, league })
+  }
 }

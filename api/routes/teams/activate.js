@@ -40,9 +40,9 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid player' })
     }
 
-    // make sure player is on practice squad
-    if (!roster.practice.find(p => p.player === player)) {
-      return res.status(400).send({ error: 'player is not on practice squad' })
+    // make sure player is not on active roster
+    if (roster.active.find(p => p.player === player)) {
+      return res.status(400).send({ error: 'player is on active roster' })
     }
 
     const players = await db('player')

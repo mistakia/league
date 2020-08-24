@@ -371,7 +371,10 @@ export const transactions = {
   FRANCHISE_TAG: 11,
   ROOKIE_TAG: 12,
 
-  PRACTICE_ADD: 13
+  PRACTICE_ADD: 13,
+
+  RESERVE_IR: 15,
+  RESERVE_COV: 16
 }
 
 export const transactionsDetail = {
@@ -394,7 +397,9 @@ export const transactionsDetail = {
   10: 'Tran. Tagged',
   11: 'Fran. Tagged',
   12: 'Rookie Tagged',
-  13: 'Signed (PS)'
+  13: 'Signed (PS)',
+  15: 'Reserve (IR)',
+  16: 'Reserve (COV)'
 }
 
 export const nflTeams = [
