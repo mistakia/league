@@ -46,6 +46,10 @@ module.exports = async function ({
   const teams = await db('teams').where({ uid: teamId }).limit(1)
   const team = teams[0]
 
+  if (team.faab - bid < 0) {
+    throw new Error('exceeds available free agent auction budget')
+  }
+
   // verify player is a free agent
   const league = leagues[0]
   const rosters = await db('rosters_players')
