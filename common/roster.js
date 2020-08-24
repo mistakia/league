@@ -35,13 +35,17 @@ export default class Roster {
   }
 
   get starters () {
-    // TODO - exclude covid
-    const exclude = [constants.slots.IR, constants.slots.PS, constants.slots.BENCH]
+    const exclude = [
+      constants.slots.IR,
+      constants.slots.PS,
+      constants.slots.BENCH,
+      constants.slots.COV
+    ]
     return Array.from(this._players.values()).filter(p => !exclude.includes(p.slot))
   }
 
   get active () {
-    const exclude = [constants.slots.IR, constants.slots.PS]
+    const exclude = [constants.slots.IR, constants.slots.PS, constants.slots.COV]
     return Array.from(this._players.values()).filter(p => !exclude.includes(p.slot))
   }
 
@@ -55,6 +59,10 @@ export default class Roster {
 
   get ir () {
     return this.players.filter(p => p.slot === constants.slots.IR)
+  }
+
+  get cov () {
+    return this.players.filter(p => p.slot === constants.slots.COV)
   }
 
   get (player) {

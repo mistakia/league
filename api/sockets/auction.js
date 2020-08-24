@@ -25,11 +25,6 @@ export default class Auction {
     return this._tids.includes(tid)
   }
 
-  _nextTeam (idx) {
-    const tid = this._tids[idx + 1] || this._tids[0]
-    return this._teams.find(t => t.uid === tid)
-  }
-
   get nominatingTeamId () {
     const lastTran = this._transactions[0]
     if (!lastTran) {
@@ -49,16 +44,16 @@ export default class Auction {
     } else {
       // starting with the tid of the last nomination
       let idx = this._tids.indexOf(lastNomination.tid)
-
-      // find next team with available space before going through all teams
-      let next = this._nextTeam(idx)
-      while (!next.availableSpace && next.uid !== lastNomination.tid) {
-        idx += 1
-        next = this._nextTeam(idx)
+      const list = this._tids.slice(idx + 1).concat(this._tids.slice(0, idx))
+      for (const tid of list) {
+        const team = this._teams.find(t => t.uid === tid)
+        if (team.availableSpace) {
+          return team.uid
+        }
       }
-
-      return next.availableSpace ? next.uid : null
     }
+
+    return null
   }
 
   join ({ ws, tid, userId, onclose }) {
@@ -117,6 +112,8 @@ export default class Auction {
       }
     }
 
+    const nominatingTeamId = this.nominatingTeamId
+
     this.broadcast({
       type: 'AUCTION_INIT',
       payload: {
@@ -128,8 +125,8 @@ export default class Auction {
         connected: Object.keys(this._connected).map(k => parseInt(k, 10)),
         bidTimer: config.bidTimer,
         nominationTimer: config.nominationTimer,
-        nominatingTeamId: this.nominatingTeamId,
-        complete: !this.nominatingTeamId
+        nominatingTeamId,
+        complete: !nominatingTeamId
       }
     })
 

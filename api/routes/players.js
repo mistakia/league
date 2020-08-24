@@ -16,7 +16,11 @@ router.get('/?', async (req, res) => {
       return res.status(400).send({ error: 'params active & inactive can not both be false' })
     }
 
-    const query = db('player').whereIn('pos1', constants.positions)
+    const query = db('player')
+      .select(db.raw('player.*, min(players.status) as status, min(players.injury_status) as injury_status, min(players.injury_body_part) as injury_body_part'))
+      .leftJoin('players', 'player.player', 'players.player')
+      .whereIn('pos1', constants.positions)
+      .groupBy('player.player')
     if (options.active && !options.inactive) {
       query.whereNot({ cteam: 'INA' })
     } else if (options.inactive) {
