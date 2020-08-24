@@ -347,6 +347,33 @@ describe('API /waivers - free agency', function () {
       await error(request, 'exceeds roster limits')
     })
 
+    it('reserve player violation', async () => {
+      MockDate.set(start.clone().add('1', 'week').toDate())
+      const reservePlayer = await selectPlayer()
+      const teamId = 1
+      const leagueId = 1
+      await addPlayer({
+        leagueId,
+        player: reservePlayer,
+        teamId,
+        slot: constants.slots.IR,
+        userId: 1
+      })
+
+      const player = await selectPlayer()
+      const request = chai.request(server)
+        .post('/api/leagues/1/waivers')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          teamId,
+          player: player.player,
+          type: constants.waivers.FREE_AGENCY,
+          leagueId
+        })
+
+      await error(request, 'Reserve player violation')
+    })
+
     it('team exceeds available cap', async () => {
       // TODO
     })

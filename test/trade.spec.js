@@ -119,6 +119,9 @@ describe('API /trades', function () {
   // cancel trade
   // reject trade
 
+  describe('errors', function () {
+
+  })
   // errors
 
   // - not logged in

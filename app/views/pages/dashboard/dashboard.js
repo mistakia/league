@@ -1,6 +1,7 @@
 import React from 'react'
 import moment from 'moment'
 import Alert from '@material-ui/lab/Alert'
+import AlertTitle from '@material-ui/lab/AlertTitle'
 import { SortableContainer, SortableElement } from 'react-sortable-hoc'
 
 import PlayerRosterHeader from '@components/player-roster-header'
@@ -68,12 +69,30 @@ export default function () {
   for (const player of players.ir) {
     if (!player.player) continue
     reserveIRItems.push(<PlayerRoster key={player.player} player={player} />)
+
+    if (!player.status || player.status === 'Active') {
+      warnings.push(
+        <Alert key={player.player} severity='error'>
+          <AlertTitle>{player.name} not eligible for Reserve/IR</AlertTitle>
+          You will need to activate or release him before you can make any acquisitions or claims.
+        </Alert>
+      )
+    }
   }
 
   const reserveCOVItems = []
   for (const player of players.cov) {
     if (!player.player) continue
     reserveCOVItems.push(<PlayerRoster key={player.player} player={player} />)
+
+    if (player.status !== 'Reserve/COVID-19') {
+      warnings.push(
+        <Alert key={player.player} severity='error'>
+          <AlertTitle>{player.name} not eligible for Reserve/COVID-19</AlertTitle>
+          You will need to activate or release him before you can make any acquisitions or claims.
+        </Alert>
+      )
+    }
   }
 
   const practiceItems = []
