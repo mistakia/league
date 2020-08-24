@@ -37,11 +37,6 @@ router.post('/?', async (req, res) => {
     const rosterRow = await getRoster({ tid, week: constants.season.week, year: constants.season.year })
     const roster = new Roster({ roster: rosterRow, league })
 
-    // make sure player is on team
-    if (!roster.has(player)) {
-      return res.status(400).send({ error: 'invalid player' })
-    }
-
     // make sure player is on active roster
     if (!roster.active.find(p => p.player === player)) {
       return res.status(400).send({ error: 'player is not on active roster' })

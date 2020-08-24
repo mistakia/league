@@ -93,7 +93,7 @@ export default class Roster {
 
   isEligibleForSlot ({ slot, player, pos }) {
     if (slot === constants.slots.IR) {
-      return this.hasOpenIrSlot()
+      return this.hasOpenInjuredReserveSlot()
     } else if (slot === constants.slots.BENCH) {
       return this.hasOpenBenchSlot(pos)
     } else if (slot === constants.slots.PS) {
@@ -109,7 +109,7 @@ export default class Roster {
     }
   }
 
-  hasOpenIrSlot () {
+  hasOpenInjuredReserveSlot () {
     return this.ir.length < this._league.ir
   }
 

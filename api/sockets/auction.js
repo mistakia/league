@@ -43,7 +43,7 @@ export default class Auction {
       return lastNomination.tid
     } else {
       // starting with the tid of the last nomination
-      let idx = this._tids.indexOf(lastNomination.tid)
+      const idx = this._tids.indexOf(lastNomination.tid)
       const list = this._tids.slice(idx + 1).concat(this._tids.slice(0, idx))
       for (const tid of list) {
         const team = this._teams.find(t => t.uid === tid)
