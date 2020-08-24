@@ -13,6 +13,7 @@ const league = require('../db/seeds/league')
 const { constants } = require('../common')
 const { start } = constants.season
 const { user1 } = require('./fixtures/token')
+const { getRoster } = require('../utils')
 const {
   addPlayer,
   dropPlayer,
@@ -330,7 +331,9 @@ describe('API /waivers - free agency', function () {
       const leagueId = 1
       const teamId = 1
       await fillRoster({ leagueId, teamId })
-      const player = await selectPlayer()
+      const roster = await getRoster({ tid: teamId })
+      const playerIds = roster.players.map(p => p.player)
+      const player = await selectPlayer({ exclude: playerIds })
       const request = chai.request(server)
         .post('/api/leagues/1/waivers')
         .set('Authorization', `Bearer ${user1}`)

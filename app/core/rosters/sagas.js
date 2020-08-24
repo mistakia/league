@@ -10,7 +10,8 @@ import {
   postRosters,
   deleteRosters,
   putRosters,
-  postAddFreeAgent
+  postAddFreeAgent,
+  postReserve
 } from '@core/api'
 import { getApp, appActions } from '@core/app'
 import { getPlayers, getAllPlayers, playerActions } from '@core/players'
@@ -155,6 +156,11 @@ export function * addFreeAgent ({ payload }) {
   yield call(postAddFreeAgent, { leagueId, teamId, ...payload })
 }
 
+export function * reserve ({ payload }) {
+  const { leagueId, teamId } = yield select(getApp)
+  yield call(postReserve, { leagueId, teamId, ...payload })
+}
+
 //= ====================================
 //  WATCHERS
 // -------------------------------------
@@ -219,6 +225,10 @@ export function * watchAddFreeAgent () {
   yield takeLatest(rosterActions.ADD_FREE_AGENT, addFreeAgent)
 }
 
+export function * watchSetRosterReserve () {
+  yield takeLatest(rosterActions.SET_ROSTER_RESERVE, reserve)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -234,6 +244,7 @@ export const rosterSagas = [
   fork(watchProjectLineups),
   fork(watchRosterActivation),
   fork(watchRosterDeactivation),
+  fork(watchSetRosterReserve),
   fork(watchPostActivateFulfilled),
   fork(watchPostDeactivateFulfilled),
 

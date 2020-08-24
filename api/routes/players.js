@@ -17,7 +17,7 @@ router.get('/?', async (req, res) => {
     }
 
     const query = db('player')
-      .select(db.raw('player.*, min(players.status) as status, min(players.injury_status) as injury_status, min(players.injury_body_part) as injury_body_part'))
+      .select(db.raw('player.*, min(players.status) as status, min(players.injury_status) as injuryStatus, min(players.injury_body_part) as injuryBodyPart'))
       .leftJoin('players', 'player.player', 'players.player')
       .whereIn('pos1', constants.positions)
       .groupBy('player.player')

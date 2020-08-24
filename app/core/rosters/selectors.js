@@ -160,6 +160,8 @@ export function getCurrentPlayers (state) {
     return {
       active: new List(),
       practice: new List(),
+      ir: new List(),
+      cov: new List(),
       players: new List(),
       roster: new Roster({ roster: new RosterRecord().toJS(), league })
     }
@@ -171,9 +173,14 @@ export function getCurrentPlayers (state) {
   const practicePlayerIds = r.practice.map(p => p.player)
   const practice = new List(practicePlayerIds.map(playerId => getPlayerById(state, { playerId })))
 
-  const players = active.concat(practice)
+  const reserveIRPlayerIds = r.ir.map(p => p.player)
+  const ir = new List(reserveIRPlayerIds.map(playerId => getPlayerById(state, { playerId })))
+  const reserveCOVPlayerIds = r.cov.map(p => p.player)
+  const cov = new List(reserveCOVPlayerIds.map(playerId => getPlayerById(state, { playerId })))
 
-  return { active, practice, players, roster: r }
+  const players = active.concat(practice).concat(ir).concat(cov)
+
+  return { active, practice, players, ir, cov, roster: r }
 }
 
 export function getPlayerProjectedContribution (state, { player }) {

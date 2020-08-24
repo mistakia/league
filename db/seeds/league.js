@@ -95,5 +95,4 @@ module.exports = async function (knex) {
   await knex('transactions').del()
   await knex('waivers').del()
   await knex('poaches').del()
-  await knex('players').del()
 }

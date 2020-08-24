@@ -193,7 +193,7 @@ describe('API /teams - activate', function () {
           leagueId: 1
         })
 
-      await error(request, 'player is not on practice squad')
+      await error(request, 'player is on active roster')
     })
 
     it('exceed roster limit', async () => {

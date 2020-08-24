@@ -7,6 +7,9 @@ export const rosterActions = {
 
   ROSTER_DEACTIVATION: 'ROSTER_DEACTIVATION',
   ROSTER_ACTIVATION: 'ROSTER_ACTIVATION',
+  SET_ROSTER_RESERVE: 'SET_ROSTER_RESERVE',
+
+  ROSTER_UPDATE: 'ROSTER_UPDATE',
 
   UPDATE_ROSTER: 'UPDATE_ROSTER',
 
@@ -59,11 +62,23 @@ export const rosterActions = {
   POST_ADD_FREE_AGENT_PENDING: 'POST_ADD_FREE_AGENT_PENDING',
   POST_ADD_FREE_AGENT_FULFILLED: 'POST_ADD_FREE_AGENT_FULFILLED',
 
+  POST_RESERVE_PENDING: 'POST_RESERVE_PENDING',
+  POST_RESERVE_FAILED: 'POST_RESERVE_FAILED',
+  POST_RESERVE_FULFILLED: 'POST_RESERVE_FULFILLED',
+
   addFreeAgent: ({ player, drop, slot }) => ({
     type: rosterActions.ADD_FREE_AGENT,
     payload: {
       player,
       drop,
+      slot
+    }
+  }),
+
+  reserve: ({ player, slot }) => ({
+    type: rosterActions.SET_ROSTER_RESERVE,
+    payload: {
+      player,
       slot
     }
   }),
@@ -342,6 +357,29 @@ export const rosterActions = {
       opts,
       data
     }
+  }),
+
+  postReservePending: opts => ({
+    type: rosterActions.POST_RESERVE_PENDING,
+    payload: {
+      opts
+    }
+  }),
+
+  postReserveFailed: (opts, error) => ({
+    type: rosterActions.POST_RESERVE_FAILED,
+    payload: {
+      opts,
+      error
+    }
+  }),
+
+  postReserveFulfilled: (opts, data) => ({
+    type: rosterActions.POST_RESERVE_FULFILLED,
+    payload: {
+      opts,
+      data
+    }
   })
 }
 
@@ -397,4 +435,10 @@ export const postAddFreeAgentActions = {
   failed: rosterActions.postAddFreeAgentFailed,
   pending: rosterActions.postAddFreeAgentPending,
   fulfilled: rosterActions.postAddFreeAgentFulfilled
+}
+
+export const postReserveActions = {
+  pending: rosterActions.postReservePending,
+  failed: rosterActions.postReserveFailed,
+  fulfilled: rosterActions.postReserveFulfilled
 }

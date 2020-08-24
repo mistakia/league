@@ -41,7 +41,10 @@ export const Player = new Record({
   type: null,
   tid: null,
   inflation: null,
-  inflationSeason: null
+  inflationSeason: null,
+  status: null,
+  injuryStatus: null,
+  injuyrBodyPart: null
 })
 
 export function createPlayer ({
@@ -78,7 +81,10 @@ export function createPlayer ({
   value,
   slot,
   type,
-  tid
+  tid,
+  status,
+  injuryStatus,
+  injuryBodyPart
 }) {
   return new Player({
     player,
@@ -115,6 +121,9 @@ export function createPlayer ({
     value,
     slot,
     type,
-    tid
+    tid,
+    status,
+    injuryStatus,
+    injuryBodyPart
   })
 }
