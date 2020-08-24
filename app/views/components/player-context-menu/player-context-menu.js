@@ -157,7 +157,7 @@ export default class PlayerContextMenu extends React.Component {
           Release
         </MenuItem>
       )
-    } else if (status.rostered) {
+    } else if (!status.fa) {
       const text = status.waiver.poach
         ? 'Submit Poaching Waiver Claim'
         : 'Submit Poaching Claim'

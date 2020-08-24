@@ -2,7 +2,11 @@ const express = require('express')
 const router = express.Router({ mergeParams: true })
 
 const { constants } = require('../../../common')
-const { submitAcquisition, verifyUserTeam } = require('../../../utils')
+const {
+  submitAcquisition,
+  verifyUserTeam,
+  verifyReserveStatus
+} = require('../../../utils')
 
 router.post('/?', async (req, res) => {
   const { db, logger, broadcast } = req.app.locals
@@ -57,6 +61,12 @@ router.post('/?', async (req, res) => {
       if (waivers.length) {
         return res.status(400).send({ error: 'player has pending waiver claim' })
       }
+    }
+
+    try {
+      await verifyReserveStatus({ teamId, leagueId })
+    } catch (error) {
+      return res.status(400).send({ error: error.message })
     }
 
     let transactions = []

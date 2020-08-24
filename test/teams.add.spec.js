@@ -337,6 +337,31 @@ describe('API /teams - add', function () {
       // TODO
     })
 
+    it('reserve player violation', async () => {
+      const reservePlayer = await selectPlayer()
+      const teamId = 1
+      const leagueId = 1
+      await addPlayer({
+        leagueId,
+        player: reservePlayer,
+        teamId,
+        slot: constants.slots.IR,
+        userId: 1
+      })
+
+      const player = await selectPlayer()
+      const request = chai.request(server).post('/api/teams/1/add')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          teamId: 1,
+          player: player.player,
+          leagueId: 1,
+          slot: constants.slots.BENCH
+        })
+
+      await error(request, 'Reserve player violation')
+    })
+
     it('rookie free agent - before rookie draft has concluded', async () => {
       // TODO
     })
