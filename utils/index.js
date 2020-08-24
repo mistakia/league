@@ -33,6 +33,7 @@ module.exports = {
   getTopFreeAgencyWaiver: require('./get-top-free-agency-waiver'),
   submitAcquisition: require('./submit-acquisition'),
   getPlayByPlayQuery,
+  getTransactionsSinceAcquisition: require('./get-transactions-since-acquisition'),
 
   verifyUserTeam: require('./verify-user-team')
 }

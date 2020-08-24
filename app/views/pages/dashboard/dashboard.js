@@ -42,6 +42,7 @@ export default function () {
   const {
     players, picks, league, waivers, reorderWaivers, poaches, teamId
   } = this.props
+
   const { positions } = constants
 
   const warnings = []
@@ -61,6 +62,18 @@ export default function () {
       if (!player.player) continue
       activeItems.push(<PlayerRoster key={player.player} player={player} />)
     }
+  }
+
+  const reserveIRItems = []
+  for (const player of players.ir) {
+    if (!player.player) continue
+    reserveIRItems.push(<PlayerRoster key={player.player} player={player} />)
+  }
+
+  const reserveCOVItems = []
+  for (const player of players.cov) {
+    if (!player.player) continue
+    reserveCOVItems.push(<PlayerRoster key={player.player} player={player} />)
   }
 
   const practiceItems = []
@@ -275,6 +288,40 @@ export default function () {
         </div>
         <div className='dashboard__section-body empty'>
           {practiceItems}
+        </div>
+      </div>
+      <div className='dashboard__section'>
+        <div className='dashboard__section-header'>
+          <div className='dashboard__section-header-title'>Reserve/IR</div>
+          <div className='dashboard__section-body-header'>
+            <div className='player__item-position' />
+            <div className='player__item-name'>Name</div>
+            <ValueHeader />
+            <StartsHeader />
+            <PointsPlusHeader />
+            <BenchPlusHeader />
+            <div className='player__item-action' />
+          </div>
+        </div>
+        <div className='dashboard__section-body empty'>
+          {reserveIRItems}
+        </div>
+      </div>
+      <div className='dashboard__section'>
+        <div className='dashboard__section-header'>
+          <div className='dashboard__section-header-title'>Reserve/COVID-19</div>
+          <div className='dashboard__section-body-header'>
+            <div className='player__item-position' />
+            <div className='player__item-name'>Name</div>
+            <ValueHeader />
+            <StartsHeader />
+            <PointsPlusHeader />
+            <BenchPlusHeader />
+            <div className='player__item-action' />
+          </div>
+        </div>
+        <div className='dashboard__section-body empty'>
+          {reserveCOVItems}
         </div>
       </div>
       <div className='dashboard__section'>

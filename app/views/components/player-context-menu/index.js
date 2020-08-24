@@ -2,56 +2,22 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import {
-  getContextMenuInfo,
   contextMenuActions,
-  getContextMenuPlayer,
-  isActiveRosterEligible,
-  isPlayerOnCurrentRoster,
-  isPlayerRostered,
-  isPlayerPracticeSquadEligibleCM,
-  getPlayerStatusCM,
-  isPlayerOnPracticeSquadCM,
-  hasExistingPoachingClaim
+  getContextMenuPlayer
 } from '@core/context-menu'
-import { rosterActions, getCurrentTeamRoster } from '@core/rosters'
+import { rosterActions } from '@core/rosters'
 import { confirmationActions } from '@core/confirmations'
 import { waiverActions } from '@core/waivers'
+import { getPlayerStatus } from '@core/players'
 
 import PlayerContextMenu from './player-context-menu'
 
 const mapStateToProps = createSelector(
-  getContextMenuInfo,
   getContextMenuPlayer,
-  isPlayerPracticeSquadEligibleCM,
-  isActiveRosterEligible,
-  isPlayerOnCurrentRoster,
-  isPlayerRostered,
-  getPlayerStatusCM,
-  isPlayerOnPracticeSquadCM,
-  hasExistingPoachingClaim,
-  getCurrentTeamRoster,
-  (
-    contextMenuInfo,
+  getPlayerStatus,
+  (player, status) => ({
     player,
-    isPracticeSquadEligible,
-    isActiveRosterEligible,
-    isOnCurrentRoster,
-    isPlayerRostered,
-    status,
-    isPlayerOnPracticeSquad,
-    hasExistingPoachingClaim,
-    roster
-  ) => ({
-    contextMenuInfo,
-    player,
-    isPracticeSquadEligible,
-    isOnCurrentRoster,
-    isActiveRosterEligible,
-    isPlayerRostered,
-    status,
-    isPlayerOnPracticeSquad,
-    hasExistingPoachingClaim,
-    isPlayerEligibleToDeactivate: isPracticeSquadEligible && roster.hasOpenPracticeSquadSlot()
+    status
   })
 )
 
@@ -61,7 +27,8 @@ const mapDispatchToProps = {
   activate: rosterActions.activate,
   deactivate: rosterActions.deactivate,
   showConfirmation: confirmationActions.show,
-  cancelClaim: waiverActions.cancel
+  cancelClaim: waiverActions.cancel,
+  reserve: rosterActions.reserve
 }
 
 export default connect(

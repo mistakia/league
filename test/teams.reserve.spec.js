@@ -179,12 +179,17 @@ describe('API /teams - reserve', function () {
         userId
       })
     })
+
+    it('move player from reserve/ir to reserve/cov', async () => {
+      // TODO
+    })
   })
 
   describe('errors', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
       await league(knex)
+      await knex('players').del()
     })
 
     it('not logged in', async () => {
@@ -273,6 +278,58 @@ describe('API /teams - reserve', function () {
         })
 
       await invalid(request, 'teamId')
+    })
+
+    it('player already on reserve/ir', async () => {
+      const player = await selectPlayer()
+      const teamId = 1
+      const leagueId = 1
+      const userId = 1
+      const value = 2
+      await addPlayer({
+        teamId,
+        leagueId,
+        userId,
+        player,
+        slot: constants.slots.IR,
+        transaction: constants.transactions.DRAFT,
+        value
+      })
+      const request = chai.request(server).post('/api/teams/1/reserve')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          leagueId: 1,
+          player: player.player,
+          slot: constants.slots.IR
+        })
+
+      await error(request, 'player already on reserve')
+    })
+
+    it('player already on reserve/cov', async () => {
+      const player = await selectPlayer()
+      const teamId = 1
+      const leagueId = 1
+      const userId = 1
+      const value = 2
+      await addPlayer({
+        teamId,
+        leagueId,
+        userId,
+        player,
+        slot: constants.slots.COV,
+        transaction: constants.transactions.DRAFT,
+        value
+      })
+      const request = chai.request(server).post('/api/teams/1/reserve')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          leagueId: 1,
+          player: player.player,
+          slot: constants.slots.COV
+        })
+
+      await error(request, 'player already on reserve')
     })
 
     it('player not on reserve/ir', async () => {

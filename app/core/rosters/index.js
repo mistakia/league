@@ -29,6 +29,7 @@ export {
   postRostersActions,
   putRostersActions,
   deleteRostersActions,
-  postAddFreeAgentActions
+  postAddFreeAgentActions,
+  postReserveActions
 } from './actions'
 export { Roster } from './roster'

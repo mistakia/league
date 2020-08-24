@@ -18,7 +18,6 @@ export function * updateSetting ({ payload }) {
 export function * updateBaselines ({ payload }) {
   const { token } = yield select(getApp)
   const { baselines } = payload
-  console.log(baselines)
   if (token) yield call(putBaselines, baselines)
   else yield put(settingActions.setBaselines(baselines))
 }

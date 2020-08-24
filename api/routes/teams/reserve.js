@@ -44,13 +44,18 @@ router.post('/?', async (req, res) => {
     }
     const league = leagues[0]
     const rosterRow = await getRoster({
-      tid: teamId,
+      tid,
       week: constants.season.week,
       year: constants.season.year
     })
     const roster = new Roster({ roster: rosterRow, league })
-    if (!roster.active.find(p => p.player === player)) {
+    const rosterPlayer = roster.get(player)
+    if (!rosterPlayer) {
       return res.status(400).send({ error: 'invalid player' })
+    }
+
+    if (rosterPlayer.slot === slot) {
+      return res.status(400).send({ error: 'player already on reserve' })
     }
 
     // make sure player is reserve eligible
@@ -83,7 +88,7 @@ router.post('/?', async (req, res) => {
 
     // make sure player was on previous week roster
     const prevRosterRow = await getRoster({
-      tid: teamId,
+      tid,
       week: Math.max(constants.season.week - 1, 0),
       year: constants.season.year
     })
@@ -119,12 +124,13 @@ router.post('/?', async (req, res) => {
       slot,
       player,
       rid: roster.uid,
+      tid,
       pos: playerRow.pos1
     }
     res.send(data)
     broadcast(leagueId, {
-      type: 'ROSTER_RESERVE',
-      payload: data
+      type: 'ROSTER_UPDATE',
+      payload: { data }
     })
 
     const teams = await db('teams').where({ uid: tid })

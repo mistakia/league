@@ -4,6 +4,8 @@ import Paper from '@material-ui/core/Paper'
 import MenuItem from '@material-ui/core/MenuItem'
 import MenuList from '@material-ui/core/MenuList'
 
+import { constants } from '@common'
+
 export default class PlayerContextMenu extends React.Component {
   handleDeactivate = () => {
     const { player, deactivate } = this.props
@@ -68,16 +70,30 @@ export default class PlayerContextMenu extends React.Component {
     this.props.hide()
   }
 
+  handleReserveIR = () => {
+    const { player, reserve } = this.props
+    this.props.showConfirmation({
+      title: 'Roster Reserve',
+      description: `${player.fname} ${player.lname} (${player.pos1}) will be placed on Reserves/IR. He will not be available to use in lineups until he's activated.`,
+      onConfirm: () => reserve({ player: player.player, slot: constants.slots.IR })
+    })
+    this.props.hide()
+  }
+
+  handleReserveCOV = () => {
+    const { player, reserve } = this.props
+    this.props.showConfirmation({
+      title: 'Roster Reserve',
+      description: `${player.fname} ${player.lname} (${player.pos1}) will be placed on Reserves/COV. He will not be available to use in lineups until he's activated.`,
+      onConfirm: () => reserve({ player: player.player, slot: constants.slots.COV })
+    })
+    this.props.hide()
+  }
+
   render = () => {
     const {
-      isActiveRosterEligible,
-      isOnCurrentRoster,
-      isPlayerRostered,
-      isPlayerOnPracticeSquad,
-      hasExistingPoachingClaim,
       waiverId,
-      status,
-      isPlayerEligibleToDeactivate
+      status
     } = this.props
 
     const menuItems = []
@@ -92,11 +108,11 @@ export default class PlayerContextMenu extends React.Component {
           Cancel Claim
         </MenuItem>
       )
-    } else if (isOnCurrentRoster) {
+    } else if (status.rostered) {
       menuItems.push(
         <MenuItem
           dense
-          disabled={!isActiveRosterEligible}
+          disabled={!status.eligible.activate}
           onClick={this.handleActivate}
         >
           Activate
@@ -106,10 +122,30 @@ export default class PlayerContextMenu extends React.Component {
       menuItems.push(
         <MenuItem
           dense
-          disabled={!isPlayerEligibleToDeactivate}
+          disabled={!status.eligible.ps}
           onClick={this.handleDeactivate}
         >
-          Deactivate
+          Move to Practice Squad
+        </MenuItem>
+      )
+
+      menuItems.push(
+        <MenuItem
+          dense
+          disabled={!status.reserve.ir}
+          onClick={this.handleReserveIR}
+        >
+          Move to Reserve/IR
+        </MenuItem>
+      )
+
+      menuItems.push(
+        <MenuItem
+          dense
+          disabled={!status.reserve.cov}
+          onClick={this.handleReserveCOV}
+        >
+          Move to Reserve/COV
         </MenuItem>
       )
 
@@ -121,7 +157,7 @@ export default class PlayerContextMenu extends React.Component {
           Release
         </MenuItem>
       )
-    } else if (isPlayerRostered) {
+    } else if (status.rostered) {
       const text = status.waiver.poach
         ? 'Submit Poaching Waiver Claim'
         : 'Submit Poaching Claim'
@@ -129,7 +165,7 @@ export default class PlayerContextMenu extends React.Component {
       menuItems.push(
         <MenuItem
           dense
-          disabled={hasExistingPoachingClaim || !isPlayerOnPracticeSquad}
+          disabled={!status.eligible.poach}
           onClick={this.handlePoach}
         >
           {text}

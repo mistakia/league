@@ -4,7 +4,12 @@ const API = require('groupme').Stateless
 const router = express.Router({ mergeParams: true })
 
 const { constants, Roster } = require('../../../common')
-const { getRoster, sendNotifications, verifyUserTeam } = require('../../../utils')
+const {
+  getRoster,
+  sendNotifications,
+  verifyUserTeam,
+  getTransactionsSinceAcquisition
+} = require('../../../utils')
 
 router.post('/?', async (req, res) => {
   const { db, logger, broadcast } = req.app.locals
@@ -37,9 +42,14 @@ router.post('/?', async (req, res) => {
     const rosterRow = await getRoster({ tid, week: constants.season.week, year: constants.season.year })
     const roster = new Roster({ roster: rosterRow, league })
 
-    // make sure player is on active roster
-    if (!roster.active.find(p => p.player === player)) {
-      return res.status(400).send({ error: 'player is not on active roster' })
+    // make sure player is on roster
+    if (!roster.has(player)) {
+      return res.status(400).send({ error: 'invalid player' })
+    }
+
+    // make sure player is not on practice squad
+    if (roster.practice.find(p => p.player === player)) {
+      return res.status(400).send({ error: 'player is already on practice squad' })
     }
 
     const players = await db('player')
@@ -50,7 +60,14 @@ router.post('/?', async (req, res) => {
         tid
       })
       .orderBy('transactions.timestamp', 'desc')
+      .orderBy('transactions.uid', 'desc')
     const playerRow = players[0]
+
+    const transactions = await getTransactionsSinceAcquisition({
+      lid: leagueId,
+      tid,
+      player
+    })
 
     // make sure player is a rookie
     if (playerRow.start !== constants.season.year) {
@@ -63,13 +80,13 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'player has exceeded 48 hours on active roster' })
     }
 
-    // make sure player has not been activated recently
-    if (playerRow.type === constants.transactions.ROSTER_ACTIVATE) {
+    // make sure player he has not been previously deactivated
+    if (transactions.find(t => t.type === constants.transactions.ROSTER_DEACTIVATE || t.type === constants.transactions.PRACTICE_ADD)) {
       return res.status(400).send({ error: 'player can not be deactivated once activated' })
     }
 
     // make sure player has not been poached
-    if (playerRow.type === constants.transactions.POACHED) {
+    if (transactions.find(t => t.type === constants.transactions.POACHED)) {
       return res.status(400).send({ error: 'player can not be deactivated once poached' })
     }
 
