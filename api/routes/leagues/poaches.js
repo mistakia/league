@@ -2,7 +2,7 @@ const moment = require('moment')
 const express = require('express')
 const router = express.Router()
 
-const { submitPoach } = require('../../../utils')
+const { submitPoach, verifyReserveStatus } = require('../../../utils')
 const { constants } = require('../../../common')
 
 router.post('/?', async (req, res) => {
@@ -48,6 +48,13 @@ router.post('/?', async (req, res) => {
       moment().isBefore(moment(tran.timestamp, 'X').add('24', 'hours'))
     ) {
       return res.status(400).send({ error: 'player is on waivers' })
+    }
+
+    // check team reserve status
+    try {
+      await verifyReserveStatus({ teamId, leagueId })
+    } catch (error) {
+      return res.status(400).send({ error: error.message })
     }
 
     let data

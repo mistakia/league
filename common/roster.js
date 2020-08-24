@@ -65,6 +65,11 @@ export default class Roster {
     return this.players.filter(p => p.slot === constants.slots.COV)
   }
 
+  get reserve () {
+    const slots = [constants.slots.IR, constants.slots.COV]
+    return Array.from(this._players.values()).filter(p => slots.includes(p.slot))
+  }
+
   get (player) {
     return this._players.get(player)
   }

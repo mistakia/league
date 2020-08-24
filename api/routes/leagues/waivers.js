@@ -7,7 +7,8 @@ const {
   getRoster,
   isPlayerRostered,
   isPlayerOnWaivers,
-  verifyUserTeam
+  verifyUserTeam,
+  verifyReserveStatus
 } = require('../../../utils')
 
 router.post('/?', async (req, res) => {
@@ -201,6 +202,13 @@ router.post('/?', async (req, res) => {
       : roster.hasOpenBenchSlot(playerRow.pos1)
     if (!hasSlot) {
       return res.status(400).send({ error: 'exceeds roster limits' })
+    }
+
+    // check team reserve status
+    try {
+      await verifyReserveStatus({ teamId, leagueId })
+    } catch (error) {
+      return res.status(400).send({ error: error.message })
     }
 
     const data = {
