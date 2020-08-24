@@ -6,6 +6,7 @@ const deactivate = require('./deactivate')
 const drop = require('./drop')
 const add = require('./add')
 const lineups = require('./lineups')
+const reserve = require('./reserve')
 
 const { verifyUserTeam } = require('../../../utils')
 
@@ -60,5 +61,6 @@ router.use('/:teamId/deactivate', deactivate)
 router.use('/:teamId/drop', drop)
 router.use('/:teamId/add', add)
 router.use('/:teamId/lineups', lineups)
+router.use('/:teamId/reserve', reserve)
 
 module.exports = router
