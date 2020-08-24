@@ -4,7 +4,7 @@ const db = require('../../db')
 
 const expect = chai.expect
 
-module.exports = async ({ leagueId, type, value, year, player, teamId, userId }) => {
+module.exports = async ({ leagueId, type, value, player, teamId, userId }) => {
   const transactions = await db('transactions')
     .orderBy('timestamp', 'desc')
     .orderBy('uid', 'desc')

@@ -15,7 +15,7 @@ router.post('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const { player, drop, leagueId, type, teamId } = req.body
-    const bid = req.body.bid || 0
+    const bid = parseInt(req.body.bid || 0, 10)
 
     if (!player) {
       return res.status(400).send({ error: 'missing player' })
