@@ -7,8 +7,10 @@ import { Player } from './player'
 import { fuzzySearch } from '@core/utils'
 import { isAfterDraft } from '@core/draft'
 import { isAfterAuction } from '@core/auction'
+import { getPoachesForCurrentLeague } from '@core/poaches'
 import { getReleaseTransactions } from '@core/transactions'
 import {
+  getCurrentTeamRoster,
   getCurrentTeamRosterRecord,
   getActiveRosterPlayerIdsForCurrentLeague,
   getRosteredPlayerIdsForCurrentLeague,
@@ -209,10 +211,32 @@ export function isPlayerOnReleaseWaivers (state, { player }) {
   return isOnReleaseWaivers({ transactions: playerTransactions.toJS() })
 }
 
-export function getPlayerStatus (state, { player }) {
+export function isPlayerReserveEligible (state, { player }) {
+  const reserve = {
+    ir: false,
+    cov: false
+  }
+
+  if (player.status && player.status !== 'Active') {
+    reserve.ir = true
+  }
+
+  if (player.status === 'Reserve/COVID-19') {
+    reserve.cov = true
+  }
+
+  return reserve
+}
+
+export function getPlayerStatus (state, { player, playerId }) {
+  if (playerId) {
+    player = getPlayerById(state, { playerId })
+  }
+
   const status = {
     locked: false,
     fa: false,
+    rostered: false,
     waiver: {
       active: false,
       practice: false,
@@ -221,10 +245,19 @@ export function getPlayerStatus (state, { player }) {
     sign: {
       active: false,
       practice: false
+    },
+    eligible: {
+      activate: false,
+      ps: false,
+      poach: false
+    },
+    reserve: {
+      ir: false,
+      covid: false
     }
   }
 
-  if (!player.player) {
+  if (!player || !player.player) {
     return status
   }
 
@@ -247,15 +280,46 @@ export function getPlayerStatus (state, { player }) {
         if (afterDraft && isPracticeSquadEligible) status.waiver.practice = true
       }
     }
-  } else if (isPlayerOnPracticeSquad(state, { player })) {
-    const rosterInfo = getRosterInfoForPlayerId(state, { playerId: player.player })
-    const cutoff = moment(rosterInfo.timestamp, 'X').add('24', 'hours')
+  } else {
+    const roster = getCurrentTeamRoster(state)
+    if (roster.has(player.player)) {
+      status.rostered = true
 
-    if ((rosterInfo.type === constants.transactions.ROSTER_DEACTIVATE ||
-      rosterInfo.type === constants.transactions.DRAFT ||
-      rosterInfo.type === constants.transactions.PRACTICE_ADD
-    ) && moment().isBefore(cutoff)) {
-      status.waiver.poach = true
+      const isActive = !!roster.active.find(p => p.player === player.player)
+      if (!isActive && roster.hasOpenBenchSlot(player.pos1)) {
+        status.eligible.activate = true
+      }
+
+      if (isPlayerPracticeSquadEligible(state, { player }) &&
+        roster.hasOpenPracticeSquadSlot()) {
+        status.eligible.ps = true
+      }
+
+      const reserve = isPlayerReserveEligible(state, { player })
+      if (reserve.ir && roster.hasOpenInjuredReserveSlot() &&
+        player.slot !== constants.slots.IR) {
+        status.reserve.ir = true
+      }
+
+      if (reserve.cov && player.slot !== constants.slots.COV) {
+        status.reserve.cov = true
+      }
+    } else if (isPlayerOnPracticeSquad(state, { player })) {
+      // check if player has existing poaching claim
+      const leaguePoaches = getPoachesForCurrentLeague(state)
+      if (!leaguePoaches.has(player.player)) {
+        status.eligible.poach = true
+      }
+
+      const rosterInfo = getRosterInfoForPlayerId(state, { playerId: player.player })
+      const cutoff = moment(rosterInfo.timestamp, 'X').add('24', 'hours')
+
+      if ((rosterInfo.type === constants.transactions.ROSTER_DEACTIVATE ||
+        rosterInfo.type === constants.transactions.DRAFT ||
+        rosterInfo.type === constants.transactions.PRACTICE_ADD
+      ) && moment().isBefore(cutoff)) {
+        status.waiver.poach = true
+      }
     }
   }
 
@@ -300,11 +364,13 @@ export function isPlayerPracticeSquadEligible (state, { player }) {
     return false
   }
 
+  // TODO - check transaction history for deactivation or practice_add
   // not eligible if activated previously
   if (rosterPlayer.type === constants.transactions.ROSTER_ACTIVATE) {
     return false
   }
 
+  // TODO - check entire transaction history for a poach
   // not eligible if player has been poached
   if (rosterPlayer.type === constants.transactions.POACHED) {
     return false

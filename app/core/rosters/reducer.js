@@ -46,6 +46,18 @@ export function rostersReducer (state = new Map(), { payload, type }) {
       }))
     }
 
+    case rosterActions.ROSTER_UPDATE: {
+      return state.withMutations(state => {
+        const players = state.getIn([payload.data.tid, 'players'])
+        const index = players.findIndex(p => p.player === payload.data.player)
+        state.setIn([payload.data.tid, 'players', index, 'slot'], payload.data.slot)
+        if (payload.data.transaction) {
+          state.setIn([payload.data.tid, 'players', index, 'type'], payload.data.transaction.type)
+          state.setIn([payload.data.tid, 'players', index, 'timestamp'], payload.data.transaction.timestamp)
+        }
+      })
+    }
+
     case rosterActions.ROSTER_TRANSACTIONS: {
       return state.withMutations(state => {
         payload.data.forEach(p => {
@@ -93,6 +105,7 @@ export function rostersReducer (state = new Map(), { payload, type }) {
 
     case rosterActions.POST_ACTIVATE_FULFILLED:
     case rosterActions.POST_DEACTIVATE_FULFILLED:
+    case rosterActions.POST_RESERVE_FULFILLED:
     case rosterActions.PUT_ROSTER_FULFILLED: {
       return state.withMutations(state => {
         const players = state.getIn([payload.opts.teamId, 'players'])
