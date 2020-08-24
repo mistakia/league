@@ -427,6 +427,7 @@ describe('API /teams - reserve', function () {
           week: constants.season.week,
           year: constants.season.year
         })
+        .whereNot('slot', constants.slots.IR)
         .limit(1)
 
       const player = players[0].player
