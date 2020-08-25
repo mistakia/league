@@ -5,6 +5,7 @@ import Position from '@components/position'
 import PlayerWatchlistAction from '@components/player-watchlist-action'
 import PlayerRowMetric from '@components/player-row-metric'
 import Team from '@components/team'
+import TeamName from '@components/team-name'
 import { Player, connect } from '@components/player'
 import IconButton from '@components/icon-button'
 import { constants } from '@common'
@@ -20,7 +21,7 @@ class PlayerRow extends Player {
     const {
       player, style, selectedPlayer, vbaseline, isSeasonProjectionView, isHosted,
       isStatsPassingAdvancedView, isStatsPassingPressureView, isStatsRushingView,
-      isStatsReceivingView, overall, isLoggedIn, isRestOfSeasonView, selected
+      isStatsReceivingView, overall, isLoggedIn, isRestOfSeasonView, selected, status
     } = this.props
 
     const isSelected = selectedPlayer === player.player || selected === player.player
@@ -288,6 +289,13 @@ class PlayerRow extends Player {
             {isLoggedIn &&
               <div className='player__row-action'>
                 {!!isHosted && <IconButton small text onClick={this.handleContextClick} icon='more' />}
+              </div>}
+            {isLoggedIn &&
+              <div className='player__row-availability'>
+                {player.tid
+                  ? <TeamName abbrv tid={player.tid} />
+                  : ((status.waiver.active || status.waiver.poach || status.waiver.practice)
+                    ? 'W' : 'FA')}
               </div>}
             {isSeasonProjectionView && seasonSummary('0')}
             {isSeasonProjectionView && seasonPassing('0')}
