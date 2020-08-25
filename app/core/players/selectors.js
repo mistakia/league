@@ -151,6 +151,11 @@ export function getFilteredPlayers (state) {
     filtered = filtered.filter(player => status.includes(player.status))
   }
 
+  const teamIds = players.get('teamIds')
+  if (teamIds.size) {
+    filtered = filtered.filter(player => teamIds.includes(player.tid))
+  }
+
   const sorted = filtered.sort(getComparator(players.get('order'), players.get('orderBy')))
   return sorted.toList()
 }

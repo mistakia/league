@@ -5,6 +5,7 @@ import IconButton from '@material-ui/core/IconButton'
 
 import SearchFilter from '@components/search-filter'
 import StatusFilter from '@components/status-filter'
+import TeamFilter from '@components/team-filter'
 import PositionFilter from '@components/position-filter'
 import ExperienceFilter from '@components/experience-filter'
 import AgeFilter from '@components/age-filter'
@@ -188,7 +189,7 @@ export default class PlayersPage extends React.Component {
         <div className={classNames.join(' ')}>
           <SearchFilter search={this.props.search} value={this.props.searchValue} />
           <PositionFilter />
-          <AvailabilityFilter />
+          {isLoggedIn && <AvailabilityFilter />}
           <PlayersViewMenu />
           {isStatsView && <StatMenu />}
           {isStatsPassingView && <StatPassingMenu />}
@@ -216,6 +217,7 @@ export default class PlayersPage extends React.Component {
             <CollegeFilter />
             <CollegeDivisionFilter />
             <StatusFilter />
+            {isLoggedIn && <TeamFilter />}
           </div>}
         <div className='players__header'>
           <div className='player__row-action' />
