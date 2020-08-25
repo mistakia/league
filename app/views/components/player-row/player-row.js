@@ -7,6 +7,7 @@ import PlayerRowMetric from '@components/player-row-metric'
 import Team from '@components/team'
 import { Player, connect } from '@components/player'
 import IconButton from '@components/icon-button'
+import { constants } from '@common'
 
 import './player-row.styl'
 
@@ -278,6 +279,10 @@ class PlayerRow extends Player {
             </div>
             <div className='player__row-name'>
               <span>{player.name}</span>
+              {(constants.season.year === player.draft_year) &&
+                <sup className='player__label-rookie'>
+                  R
+                </sup>}
               <Team team={player.team} />
             </div>
             {isLoggedIn &&

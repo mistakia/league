@@ -1,7 +1,6 @@
 import React from 'react'
 
-import Position from '@components/position'
-import Team from '@components/team'
+import PlayerNameExpanded from '@components/player-name-expanded'
 import { Player, connect } from '@components/player'
 import IconButton from '@components/icon-button'
 import Icon from '@components/icon'
@@ -29,17 +28,12 @@ class PlayerRoster extends Player {
 
     return (
       <div className={classNames.join(' ')}>
-        <div className='player__item-position'>
-          <Position pos={player.pos1} />
-        </div>
         <div className='player__item-name'>
-          <span>{player.pname}</span>
-          <Team team={player.team} />
+          <PlayerNameExpanded playerId={player.player} />
         </div>
         {isClaim &&
           <div className='player__item-name'>
-            {claim.drop && <span>{claim.drop.pname}</span>}
-            {claim.drop && <Team team={claim.drop.team} />}
+            {claim.drop && <PlayerNameExpanded playerId={claim.drop} />}
           </div>}
         {isClaim &&
           <div className='player__item-metric'>

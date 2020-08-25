@@ -1,7 +1,6 @@
 import React from 'react'
 
-import Position from '@components/position'
-import Team from '@components/team'
+import PlayerName from '@components/player-name'
 
 import './trade-player.styl'
 
@@ -12,9 +11,7 @@ export default class TradePlayer extends React.Component {
     if (isSelected) classNames.push('selected')
     return (
       <div className={classNames.join(' ')} onClick={handleClick}>
-        <Position pos={player.pos1} />
-        <div className='trade__player-name'>{player.name}</div>
-        <Team team={player.team} />
+        <PlayerName playerId={player.player} />
       </div>
     )
   }
