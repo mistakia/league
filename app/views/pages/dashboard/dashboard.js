@@ -161,7 +161,6 @@ export default function () {
       <div className='dashboard__section-header'>
         <div className='dashboard__section-header-title'>Poaching Waiver Claims</div>
         <div className='dashboard__section-body-header'>
-          <div className='player__item-position' />
           <div className='player__item-name'>Name</div>
           <div className='player__item-name'>Drop</div>
           <div className='player__item-metric'>Bid</div>
@@ -191,7 +190,6 @@ export default function () {
       <div className='dashboard__section-header'>
         <div className='dashboard__section-header-title'>Free Agency Waiver Claims - Active Roster</div>
         <div className='dashboard__section-body-header'>
-          <div className='player__item-position' />
           <div className='player__item-name'>Name</div>
           <div className='player__item-name'>Drop</div>
           <div className='player__item-metric'>Bid</div>
@@ -221,7 +219,6 @@ export default function () {
       <div className='dashboard__section-header'>
         <div className='dashboard__section-header-title'>Free Agency Waiver Claims - Practice Squad</div>
         <div className='dashboard__section-body-header'>
-          <div className='player__item-position' />
           <div className='player__item-name'>Name</div>
           <div className='player__item-name'>Drop</div>
           <div className='player__item-metric'>Bid</div>
@@ -251,7 +248,6 @@ export default function () {
       <div className='dashboard__section-header'>
         <div className='dashboard__section-header-title'>Poaching Claims</div>
         <div className='dashboard__section-body-header'>
-          <div className='player__item-position' />
           <div className='player__item-name'>Name</div>
           <div className='player__item-name'>Drop</div>
           <div className='player__item-metric'>Bid</div>
@@ -279,7 +275,6 @@ export default function () {
         <div className='dashboard__section-header'>
           <div className='dashboard__section-header-title'>Active Roster</div>
           <div className='dashboard__section-body-header'>
-            <div className='player__item-position' />
             <div className='player__item-name'>Name</div>
             <ValueHeader />
             <StartsHeader />
@@ -296,7 +291,6 @@ export default function () {
         <div className='dashboard__section-header'>
           <div className='dashboard__section-header-title'>Practice Squad</div>
           <div className='dashboard__section-body-header'>
-            <div className='player__item-position' />
             <div className='player__item-name'>Name</div>
             <ValueHeader />
             <StartsHeader />
@@ -313,7 +307,6 @@ export default function () {
         <div className='dashboard__section-header'>
           <div className='dashboard__section-header-title'>Reserve/IR</div>
           <div className='dashboard__section-body-header'>
-            <div className='player__item-position' />
             <div className='player__item-name'>Name</div>
             <ValueHeader />
             <StartsHeader />
@@ -330,7 +323,6 @@ export default function () {
         <div className='dashboard__section-header'>
           <div className='dashboard__section-header-title'>Reserve/COVID-19</div>
           <div className='dashboard__section-body-header'>
-            <div className='player__item-position' />
             <div className='player__item-name'>Name</div>
             <ValueHeader />
             <StartsHeader />
