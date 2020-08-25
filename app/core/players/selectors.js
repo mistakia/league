@@ -146,6 +146,11 @@ export function getFilteredPlayers (state) {
     })
   }
 
+  const status = players.get('status')
+  if (status.size !== Object.keys(constants.status).length) {
+    filtered = filtered.filter(player => status.includes(player.status))
+  }
+
   const sorted = filtered.sort(getComparator(players.get('order'), players.get('orderBy')))
   return sorted.toList()
 }
