@@ -222,6 +222,7 @@ export default class PlayersPage extends React.Component {
           <div className='player__row-pos' />
           <div className='player__row-name'>Name</div>
           {isLoggedIn && <div className='player__row-action' />}
+          {isLoggedIn && <div className='player__row-availability' />}
           {isSeasonProjectionView && headerSeasonSummary('0')}
           {isSeasonProjectionView && headerSeasonPassing('0')}
           {isSeasonProjectionView && headerSeasonRushing('0')}
