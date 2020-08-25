@@ -1,7 +1,6 @@
 import React from 'react'
 
-import Team from '@components/team'
-import Position from '@components/position'
+import PlayerName from '@components/player-name'
 import PlayerWatchlistAction from '@components/player-watchlist-action'
 
 import './auction-player.styl'
@@ -51,11 +50,8 @@ export default class AuctionPlayer extends React.Component {
             <PlayerWatchlistAction playerId={player.player} />
           </div>
           <div className='auction__player-index'>{index + 1}.</div>
-          <div className='auction__player-position'>
-            <Position pos={player.pos1} />
-          </div>
           <div className='auction__player-name'>
-            <span>{player.pname}</span><Team team={player.team} />
+            <PlayerName playerId={player.player} />
           </div>
           <div className='auction__player-metric'>
             ${Math.round(player.getIn(['values', valueType, vbaseline])) || '--'}
