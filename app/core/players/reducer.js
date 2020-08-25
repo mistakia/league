@@ -19,7 +19,7 @@ const initialState = new Map({
   colleges: new List(constants.colleges),
   collegeDivisions: new List(constants.collegeDivisions),
   experience: new List([0, 1, -1]),
-  health: new List(['ir', 'healthy']),
+  status: new List(Object.keys(constants.status)),
   teams: new List(),
   availability: new List(constants.availability),
   week: constants.season.week,

@@ -4,6 +4,7 @@ import GetAppIcon from '@material-ui/icons/GetApp'
 import IconButton from '@material-ui/core/IconButton'
 
 import SearchFilter from '@components/search-filter'
+import StatusFilter from '@components/status-filter'
 import PositionFilter from '@components/position-filter'
 import ExperienceFilter from '@components/experience-filter'
 import AgeFilter from '@components/age-filter'
@@ -214,6 +215,7 @@ export default class PlayersPage extends React.Component {
             <NFLTeamsFilter />
             <CollegeFilter />
             <CollegeDivisionFilter />
+            <StatusFilter />
           </div>}
         <div className='players__header'>
           <div className='player__row-action' />
