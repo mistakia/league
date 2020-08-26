@@ -39,7 +39,6 @@ import HeaderStatsRushingBrokenTackles from '@components/header-stats-rushing-br
 import HeaderStatsReceivingBasic from '@components/header-stats-receiving-basic'
 import HeaderStatsReceivingOppurtunity from '@components/header-stats-receiving-oppurtunity'
 import HeaderStatsReceivingAdvanced from '@components/header-stats-receiving-advanced'
-import SelectedPlayer from '@components/selected-player'
 import Loading from '@components/loading'
 import Icon from '@components/icon'
 import { csv } from '@core/export'
@@ -269,10 +268,8 @@ export default class PlayersPage extends React.Component {
       </AutoSizer>
     )
 
-    const overlay = <SelectedPlayer />
-
     return (
-      <PageLayout {...{ body, head, overlay }} />
+      <PageLayout {...{ body, head }} />
     )
   }
 }

@@ -5,6 +5,7 @@ import { AutoSizer, List } from 'react-virtualized'
 import Button from '@components/button'
 import PageLayout from '@layouts/page'
 import DraftPlayer from '@components/draft-player'
+import PlayerAge from '@components/player-age'
 import DraftPick from '@components/draft-pick'
 import DraftSchedule from '@components/draft-schedule'
 import Position from '@components/position'
@@ -109,7 +110,7 @@ export default function () {
       <div className='draft__selected-body'>
         <div><label>Drafted</label>{p.dpos ? `#${p.dpos}` : 'undrafted'}</div>
         <div><label>Proj.</label>{Math.round(p.points.get('total'))}</div>
-        <div><label>Age</label>{moment().diff(moment(p.dob), 'years')}</div>
+        <div><label>Age</label><PlayerAge date={p.dob} /></div>
         <div><label>Height</label>{Math.floor(p.height / 12)}-{p.height % 12}</div>
         <div><label>Weight</label>{p.weight}</div>
         <div><label>Forty</label>{p.forty || 'n/a'}</div>

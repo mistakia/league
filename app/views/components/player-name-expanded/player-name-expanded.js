@@ -8,11 +8,18 @@ import { constants } from '@common'
 import './player-name-expanded.styl'
 
 export default class PlayerNameExpanded extends React.Component {
+  handleClick = () => {
+    this.props.select(this.props.player.player)
+  }
+
   render = () => {
     const { player } = this.props
     return (
       <div className='player__name-expanded'>
-        <div className='player__name-expanded-row'>
+        <div
+          className='player__name-expanded-row player__name-expanded-name cursor'
+          onClick={this.handleClick}
+        >
           <span>{player.fname} {player.lname}</span>
           {(constants.season.year === player.draft_year) &&
             <sup className='player__label-rookie'>

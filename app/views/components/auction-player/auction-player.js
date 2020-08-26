@@ -1,4 +1,7 @@
 import React from 'react'
+import IconButton from '@material-ui/core/IconButton'
+import PersonAddIcon from '@material-ui/icons/PersonAdd'
+import Tooltip from '@material-ui/core/Tooltip'
 
 import PlayerName from '@components/player-name'
 import PlayerWatchlistAction from '@components/player-watchlist-action'
@@ -55,6 +58,13 @@ export default class AuctionPlayer extends React.Component {
           </div>
           <div className='auction__player-metric'>
             ${Math.round(player.getIn(['values', valueType, vbaseline])) || '--'}
+          </div>
+          <div className='auction__player-nominate'>
+            <Tooltip title='Nominate'>
+              <IconButton size='small' onClick={this.handleClick}>
+                <PersonAddIcon fontSize='small' />
+              </IconButton>
+            </Tooltip>
           </div>
         </div>
       </div>

@@ -75,7 +75,7 @@ router.post('/?', async (req, res) => {
       .orderBy('timestamp', 'desc')
       .orderBy('uid', 'desc')
 
-    if (!constants.season.isWaiverPeriod && !transactions.length) {
+    if (constants.season.isRegularSeason && !constants.season.isWaiverPeriod && !transactions.length) {
       return res.status(400).send({ error: 'player is not on waivers' })
     }
 
@@ -93,8 +93,8 @@ router.post('/?', async (req, res) => {
         return res.status(400).send({ error: 'player rostered' })
       }
 
-      // if outside of a waiver period in the regular season, make sure player is on waivers
-      if (!(constants.season.isRegularSeason && constants.season.isWaiverPeriod)) {
+      // if regular season and not during waiver period, check if player is on release waivers
+      if (constants.season.isRegularSeason && !constants.season.isWaiverPeriod) {
         const isOnWaivers = await isPlayerOnWaivers({ player, leagueId })
         if (!isOnWaivers) {
           return res.status(400).send({ error: 'player is not on waivers' })
@@ -118,6 +118,13 @@ router.post('/?', async (req, res) => {
 
         if (!league.ddate || moment().isBefore(dcutoff)) {
           return res.status(400).send({ error: 'practice squad waivers are not open' })
+        } if (league.ddate && moment().isAfter(dcutoff)) {
+
+          // if after rookie draft, check if player is on release waivers
+          const isOnWaivers = await isPlayerOnWaivers({ player, leagueId })
+          if (!isOnWaivers) {
+            return res.status(400).send({ error: 'player is not on waivers' })
+          }
         }
       }
 
