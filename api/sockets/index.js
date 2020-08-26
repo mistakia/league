@@ -1,6 +1,4 @@
-import db from '../../db'
 import Auction from './auction'
-import moment from 'moment'
 
 const auctions = new Map()
 
@@ -29,19 +27,6 @@ module.exports = (wss) => {
       if (auction) {
         auction.join({ ws, tid, userId, onclose })
       } else {
-        const leagues = await db('leagues').where({ uid: lid })
-        const league = leagues[0]
-        if (!league.adate) {
-          return
-        }
-
-        const now = moment()
-        const auctionStart = moment(league.adate, 'X')
-        const days = auctionStart.diff(now, 'days')
-        // TODO log
-        if (days > 0) {
-          return
-        }
         const auction = new Auction({ wss, lid })
         auctions.set(lid, auction)
         await auction.setup()
