@@ -1,18 +1,51 @@
 .auction__team-rosters
   flex 2
   border 1px solid $borderColor
+  border-radius 3px
   background white
-  padding 16px 8px
   max-height 60%
   overflow hidden
+  display flex
+  flex-direction column
   .MuiFormControl-root
     width 100%
-    margin-bottom 8px
 
 .auction__team-rosters-player
   border-bottom 1px solid $borderColor
   padding 8px 4px
+  display flex
+  align-items center
 
+.auction__team-rosters-player-slot
+  flex 0 0 44px
+  opacity 0.5
+  font-size 10px
+
+.auction__team-rosters-header
+  flex 0 0 auto
+  padding 8px 16px
+  background #f0f0f0
+  border-bottom 1px solid $borderColor
 
 .auction__team-rosters-body
-  height 100%
+  flex 1
+
+.auction__team-rosters-footer
+  flex 0 0 auto
+  display flex
+  border-top 1px solid $borderColor
+  background #f0f0f0
+
+.auction__team-rosters-footer-item
+  flex 1
+  display flex
+  flex-direction column
+  align-items center
+  font-weight 600
+  padding 4px
+  + .auction__team-rosters-footer-item
+    border-left 1px solid $borderColor
+
+  label
+    font-size 11px
+    font-weight 200

@@ -119,7 +119,6 @@ router.post('/?', async (req, res) => {
         if (!league.ddate || moment().isBefore(dcutoff)) {
           return res.status(400).send({ error: 'practice squad waivers are not open' })
         } if (league.ddate && moment().isAfter(dcutoff)) {
-
           // if after rookie draft, check if player is on release waivers
           const isOnWaivers = await isPlayerOnWaivers({ player, leagueId })
           if (!isOnWaivers) {
