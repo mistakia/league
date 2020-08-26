@@ -283,7 +283,10 @@ export function getPlayerStatus (state, { player, playerId }) {
       const afterDraft = isAfterDraft(state)
       const isPracticeSquadEligible = isPlayerPracticeSquadEligible(state, { player })
       if (!onReleaseWaivers) {
-        if (afterAuction) status.sign.active = true
+        if (afterAuction) {
+          if (constants.season.isRegularSeason) status.sign.active = true
+          else status.waiver.active = true
+        }
         if (afterDraft && isPracticeSquadEligible) status.sign.practice = true
       } else {
         if (afterAuction) status.waiver.active = true

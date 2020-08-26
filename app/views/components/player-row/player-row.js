@@ -13,10 +13,6 @@ import { constants } from '@common'
 import './player-row.styl'
 
 class PlayerRow extends Player {
-  handleClick = () => {
-    this.props.select(this.props.player.player)
-  }
-
   render = () => {
     const {
       player, style, selectedPlayer, vbaseline, isSeasonProjectionView, isHosted,
@@ -271,14 +267,14 @@ class PlayerRow extends Player {
     return (
       <div style={style}>
         <div className={classNames.join(' ')}>
-          <div className='player__row-main' onClick={this.handleClick}>
+          <div className='player__row-main'>
             <div className='player__row-action'>
               <PlayerWatchlistAction playerId={player.player} />
             </div>
             <div className='player__row-pos'>
               <Position pos={player.pos1} />
             </div>
-            <div className='player__row-name'>
+            <div className='player__row-name cursor' onClick={this.handleClick}>
               <span>{player.name}</span>
               {(constants.season.year === player.draft_year) &&
                 <sup className='player__label-rookie'>

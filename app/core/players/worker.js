@@ -55,8 +55,10 @@ export function calculatePlayerValues (payload) {
 
     // calculate ros projection
     const ros = {}
+    let projWks = 0
     for (const [week, projection] of Object.entries(player.projection)) {
       if (week && week !== '0' && week >= constants.season.week) {
+        projWks += 1
         for (const [key, value] of Object.entries(projection)) {
           if (ros[key]) {
             ros[key] += value
@@ -67,6 +69,7 @@ export function calculatePlayerValues (payload) {
       }
     }
 
+    player.projWks = projWks
     player.projection.ros = ros
     player.points.ros = calculatePoints({ stats: ros, position: player.pos1, league })
   }

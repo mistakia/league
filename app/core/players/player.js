@@ -44,7 +44,8 @@ export const Player = new Record({
   inflationSeason: null,
   status: null,
   injuryStatus: null,
-  injuyrBodyPart: null
+  injuyrBodyPart: null,
+  projWks: null
 })
 
 export function createPlayer ({

@@ -92,7 +92,8 @@ export function playersReducer (state = initialState, { payload, type }) {
             projection: new Map(p.projection),
             points: new Map(p.points),
             values: new Map(p.values),
-            vorp: new Map(p.vorp)
+            vorp: new Map(p.vorp),
+            projWks: p.projWks
           })
         })
       })

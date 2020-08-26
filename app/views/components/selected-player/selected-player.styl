@@ -1,15 +1,66 @@
-.selected__player
-  absolute left bottom right
-  height 50%
-  background $backgroundColor
-  border-top 3px solid #000
+.selected__player-paper.MuiDialog-paper
+  width 90%
+  height calc(100% - 64px)
+
+.selected__player-header
+  display flex
+  background #f0f0f0
+  border-bottom 1px solid $borderColor
+  height 80px
+  label
+    font-size 11px
+    font-family "Roboto", "Helvetica", "Arial", sans-serif;
+    font-weight 300
+    letter-spacing 0.2em
+    text-transform uppercase
+    display block
+
+.selected__player-header-lead
+  flex 0 0 auto
+  display flex
+  flex-direction column
+  padding 0 16px
+  justify-content center
+
+.selected__player-first-name
+  font-weight 100
+  text-transform uppercase
+
+.selected__player-last-name
+  font-weight 600
+  font-size 2em
+  text-transform uppercase
+
+.selected__player-header-section
+  flex 1
+  display flex
+  border-right 1px solid $borderColor
+  + .selected__player-header-section
+    background white
+
+.selected__player-header-item
+  flex 1
+  font-weight 600px
+  font-size 20px
+  display flex
+  flex-direction column
+  justify-content center
+  align-items center
+
+.selected__player-main
+  display flex
+  overflow hidden
+  height 100%
+
+.selected__player-menu
+  border-right 1px solid $borderColor
 
 .selected__player-body
-  padding-top 16px
-  width 100%
-  height 100%
-  overflow hidden
-  overflow-y scroll
+  flex 1
+  padding 24px
+  background #f0f0f0
+  overflow-y auto
+  -webkit-overflow-scrolling touch
 
 .selected__section
   padding 16px
