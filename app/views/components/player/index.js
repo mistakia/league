@@ -5,18 +5,24 @@ import { createSelector } from 'reselect'
 import { contextMenuActions, getContextMenuInfo } from '@core/context-menu'
 import { getCurrentLeague } from '@core/leagues'
 import { getApp } from '@core/app'
+import { playerActions } from '@core/players'
 
 import './player.styl'
 
 export class Player extends React.Component {
-  handleContextClick = (event, waiverId) => {
+  handleContextClick = (event) => {
+    const { waiverId, player } = this.props
     event.stopPropagation()
     this.props.showContext({
       id: 'player',
-      data: { playerId: this.props.player.player, waiverId },
+      data: { playerId: player.player, waiverId },
       clickX: event.clientX,
       clickY: event.clientY
     })
+  }
+
+  handleClick = () => {
+    this.props.select(this.props.player.player)
   }
 }
 
@@ -32,7 +38,8 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  showContext: contextMenuActions.show
+  showContext: contextMenuActions.show,
+  select: playerActions.selectPlayer
 }
 
 export function connect (Component) {

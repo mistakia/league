@@ -13,11 +13,6 @@ const DragHandle = sortableHandle(() =>
 )
 
 class PlayerRoster extends Player {
-  handleClick = (event) => {
-    const { waiverId } = this.props
-    this.handleContextClick(event, waiverId)
-  }
-
   render () {
     const { player, vbaseline, selected, claim, reorder, isHosted } = this.props
 
@@ -52,7 +47,7 @@ class PlayerRoster extends Player {
           {(player.lineups.bp || 0).toFixed(1) || '--'}
         </div>
         <div className='player__item-action'>
-          {!!isHosted && <IconButton small text onClick={this.handleClick} icon='more' />}
+          {!!isHosted && <IconButton small text onClick={this.handleContextClick} icon='more' />}
         </div>
         {reorder && <DragHandle />}
       </div>

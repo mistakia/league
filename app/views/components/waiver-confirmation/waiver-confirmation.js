@@ -41,8 +41,7 @@ export default class WaiverConfirmation extends React.Component {
     const { value } = event.target
     this.setState({ type: value, drop: '', missingType: false })
 
-    const { type } = this.state
-    const isActiveRoster = type === constants.waivers.FREE_AGENCY
+    const isActiveRoster = value === constants.waivers.FREE_AGENCY
     const { league, player, roster, rosterPlayers } = this.props
 
     const ros = new Roster({ roster: roster.toJS(), league })

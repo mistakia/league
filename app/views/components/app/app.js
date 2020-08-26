@@ -9,6 +9,7 @@ import { localStorageAdapter } from '@core/utils'
 import Logout from '@components/logout'
 import Confirmation from '@components/confirmation'
 import Notification from '@components/notification'
+import SelectedPlayer from '@components/selected-player'
 
 import 'normalize.css'
 import '@styles/normalize.css'
@@ -39,6 +40,7 @@ class App extends React.Component {
         <ContextMenu />
         <Confirmation />
         <Notification />
+        <SelectedPlayer />
       </main>
     )
   }

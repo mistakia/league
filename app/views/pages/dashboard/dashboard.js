@@ -161,7 +161,7 @@ export default function () {
       <div className='dashboard__section-header'>
         <div className='dashboard__section-header-title'>Poaching Waiver Claims</div>
         <div className='dashboard__section-body-header'>
-          <div className='player__item-name'>Name</div>
+          <div className='player__item-name'>Poach</div>
           <div className='player__item-name'>Drop</div>
           <div className='player__item-metric'>Bid</div>
           <ValueHeader />
@@ -190,7 +190,7 @@ export default function () {
       <div className='dashboard__section-header'>
         <div className='dashboard__section-header-title'>Free Agency Waiver Claims - Active Roster</div>
         <div className='dashboard__section-body-header'>
-          <div className='player__item-name'>Name</div>
+          <div className='player__item-name'>Add</div>
           <div className='player__item-name'>Drop</div>
           <div className='player__item-metric'>Bid</div>
           <ValueHeader />
@@ -219,7 +219,7 @@ export default function () {
       <div className='dashboard__section-header'>
         <div className='dashboard__section-header-title'>Free Agency Waiver Claims - Practice Squad</div>
         <div className='dashboard__section-body-header'>
-          <div className='player__item-name'>Name</div>
+          <div className='player__item-name'>Add</div>
           <div className='player__item-name'>Drop</div>
           <div className='player__item-metric'>Bid</div>
           <ValueHeader />

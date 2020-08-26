@@ -7,11 +7,15 @@ import { constants } from '@common'
 import './player-name.styl'
 
 export default class PlayerName extends React.Component {
+  handleClick = () => {
+    this.props.select(this.props.player.player)
+  }
+
   render = () => {
     const { player } = this.props
 
     return (
-      <div className='player__name'>
+      <div className='player__name cursor' onClick={this.handleClick}>
         <div className='player__name-position'>
           <Position pos={player.pos1} />
         </div>
