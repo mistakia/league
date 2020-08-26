@@ -43,12 +43,6 @@ export default class AuctonTeamRosters extends React.Component {
 
     const counts = {}
     const roster = this.props.rosters.find(r => r.tid === this.state.tid)
-    if (roster) {
-      for (const position of constants.positions) {
-        counts[position] = roster.players.filter(p => p.pos === position).size
-      }
-    }
-
     const rows = []
     const excludeSlots = [
       constants.slots.PS,
@@ -60,6 +54,10 @@ export default class AuctonTeamRosters extends React.Component {
         .filter(p => !excludeSlots.includes(p.slot))
         .sort((a, b) => b.value - a.value).toJS()
       : []
+
+    for (const position of constants.positions) {
+      counts[position] = players.filter(p => p.pos === position).length
+    }
 
     if (league.sqb) {
       for (let i = 0; i < league.sqb; i++) {
