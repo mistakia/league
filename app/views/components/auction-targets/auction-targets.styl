@@ -2,7 +2,12 @@
   display flex
   justify-content flex-end
   align-items center
-  padding 16px
+  padding 16px 0
+  .MuiFormControlLabel-label
+    font-size 11px
+    font-weight 200
+  .MuiFormGroup-root
+    margin-right 16px
 
 .auction__targets-body
   display flex
@@ -33,9 +38,13 @@
   &:hover .player__watchlist-action
     opacity 1
 
-  &.rostered
+  &.signed
     background lighten(green, 93%)
     font-weight bold
+
+  &.rostered
+    text-decoration line-through
+    color #8f8f8f
 
 .optimal__lineup-key
   background white
