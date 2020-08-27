@@ -1,4 +1,7 @@
 import React from 'react'
+import Switch from '@material-ui/core/Switch'
+import FormGroup from '@material-ui/core/FormGroup'
+import FormControlLabel from '@material-ui/core/FormControlLabel'
 // import TextField from '@material-ui/core/TextField'
 
 // import EditableAuctionBudget from '@components/editable-auction-budget'
@@ -11,6 +14,10 @@ import { constants } from '@common'
 import './auction-targets.styl'
 
 export default class AuctionTargets extends React.Component {
+  handleToggle = () => {
+    this.props.toggleHideRostered()
+  }
+
   render = () => {
     const {
       players,
@@ -20,6 +27,7 @@ export default class AuctionTargets extends React.Component {
       lineupPoints,
       lineupFeasible,
       valueType,
+      rosteredPlayerIds,
       team
     } = this.props
     const groups = {}
@@ -35,7 +43,8 @@ export default class AuctionTargets extends React.Component {
       for (const [index, player] of players.entries()) {
         const classNames = ['auction__targets-player']
         const rosterSlot = team.roster.get(player.player)
-        if (rosterSlot) classNames.push('rostered')
+        if (rosterSlot) classNames.push('signed')
+        else if (rosteredPlayerIds.includes(player.player)) classNames.push('rostered')
         if (lineupPlayerIds.includes(player.player)) classNames.push('optimal')
         const salary = rosterSlot ? rosterSlot.value : player.getIn(['values', valueType, vbaseline])
 
@@ -59,6 +68,13 @@ export default class AuctionTargets extends React.Component {
     return (
       <div className='auction__targets'>
         <div className='auction__targets-head'>
+          <FormGroup>
+            <FormControlLabel
+              control={<Switch size='small' checked={this.props.hideRostered} onChange={this.handleToggle} />}
+              labelPlacement='top'
+              label='Hide Rostered'
+            />
+          </FormGroup>
           <AuctionValueTypeToggle />
           <div className='optimal__lineup-key'>{lineupText}</div>
         </div>
