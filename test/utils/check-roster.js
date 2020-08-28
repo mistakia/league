@@ -10,5 +10,8 @@ module.exports = async ({ teamId, player, leagueId }) => {
   const rosterRow = await getRoster({ tid: teamId })
   const roster = new Roster({ roster: rosterRow, league })
 
-  expect(roster.has(player)).to.equal(true)
+  const p = roster.get(player)
+  expect(p.player).to.equal(player)
+
+  // TODO - check slot
 }

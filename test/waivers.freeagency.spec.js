@@ -382,8 +382,30 @@ describe('API /waivers - free agency', function () {
       // TODO
     })
 
-    it('rookie free agent waiver w/ full practice squad', async () => {
+    it('practice squad waiver for previously activated player', async () => {
       // TODO
+    })
+
+    it('rookie free agent waiver w/ full practice squad and no drop', async () => {
+      const picks = 12 * 3
+      MockDate.set(start.clone().subtract('2', 'month').add(picks, 'day').toDate())
+      const leagueId = 1
+      const teamId = 1
+      await fillRoster({ leagueId, teamId })
+      const roster = await getRoster({ tid: teamId })
+      const playerIds = roster.players.map(p => p.player)
+      const player = await selectPlayer({ exclude: playerIds, rookie: true })
+      const request = chai.request(server)
+        .post('/api/leagues/1/waivers')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          teamId,
+          player: player.player,
+          type: constants.waivers.FREE_AGENCY_PRACTICE,
+          leagueId
+        })
+
+      await error(request, 'exceeds roster limits')
     })
   })
 })
