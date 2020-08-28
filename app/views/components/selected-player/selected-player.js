@@ -17,6 +17,7 @@ import SelectedPlayerTeamStats from '@components/selected-player-team-stats'
 import SelectedPlayerTeamSituationSplits from '@components/selected-player-team-situation-splits'
 import SelectedPlayerTeamPositionSplits from '@components/selected-player-team-position-splits'
 import SelectedPlayerEfficiencyStats from '@components/selected-player-efficiency-stats'
+import SelectedPlayerLineupImpact from '@components/selected-player-lineup-impact'
 
 import './selected-player.styl'
 
@@ -95,29 +96,29 @@ export default class SelectedPlayer extends React.Component {
           <div className='selected__player-header-section'>
             <div className='selected__player-header-item'>
               <label>Starts</label>
-              {player.lineups.starts || '-'}
+              {player.getIn(['lineups', 'starts']) || '-'}
             </div>
             <div className='selected__player-header-item'>
               <label>Points+</label>
-              {(player.lineups.sp || 0).toFixed(1) || '-'}
+              {(player.getIn(['lineups', 'sp'], 0)).toFixed(1) || '-'}
             </div>
             <div className='selected__player-header-item'>
               <label>Bench+</label>
-              {(player.lineups.bp || 0).toFixed(1) || '-'}
+              {(player.getIn(['lineups', 'bp'], 0)).toFixed(1) || '-'}
             </div>
           </div>
           <div className='selected__player-header-section'>
             <div className='selected__player-header-item'>
               <label>Proj/G</label>
-              {(player.points.ros.total / player.projWks).toFixed(1) || '-'}
+              {(player.getIn(['points', 'ros', 'total']) / player.projWks).toFixed(1) || '-'}
             </div>
             <div className='selected__player-header-item'>
               <label>VOBA</label>
-              {player.values.ros.available}
+              {player.getIn(['values', 'ros', 'available'])}
             </div>
             <div className='selected__player-header-item'>
               <label>VOWS</label>
-              {player.values.ros.starter}
+              {player.getIn(['values', 'ros', 'starter'])}
             </div>
           </div>
           <div className='selected__player-header-section'>
@@ -157,7 +158,7 @@ export default class SelectedPlayer extends React.Component {
             <Tab label='News' />
           </Tabs>
           <TabPanel value={value} index={0}>
-            Coming soon
+            <SelectedPlayerLineupImpact />
           </TabPanel>
           <TabPanel value={value} index={1}>
             Coming soon
