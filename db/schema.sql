@@ -1487,7 +1487,7 @@ CREATE TABLE `rosters` (
   `year` int(4) NOT NULL,
   `last_updated` int(11) DEFAULT NULL,
   PRIMARY KEY `uid` (`uid`),
-  UNIQUE KEY `teamid` (`tid`,`week`),
+  UNIQUE KEY `teamid` (`tid`,`week`,`year`),
   KEY `tid` (`tid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
