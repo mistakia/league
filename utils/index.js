@@ -26,6 +26,7 @@ module.exports = {
   isPlayerLocked: require('./is-player-locked'),
   submitPoach: require('./submit-poach'),
   processPoach: require('./process-poach'),
+  processRelease: require('./process-release'),
   getRoster: require('./get-roster'),
   getLeague: require('./get-league'),
   resetWaiverOrder: require('./reset-waiver-order'),

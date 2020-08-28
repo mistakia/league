@@ -42,5 +42,6 @@ export {
   deleteRosters,
   postAddFreeAgent,
   getReleaseTransactions,
-  postReserve
+  postReserve,
+  postRelease
 } from './sagas'

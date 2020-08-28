@@ -243,7 +243,7 @@ export function getPlayerStatus (state, { player, playerId }) {
   }
 
   const status = {
-    locked: false,
+    locked: false, // TODO
     fa: false,
     rostered: false,
     waiver: {

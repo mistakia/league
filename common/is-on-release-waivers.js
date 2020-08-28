@@ -12,7 +12,7 @@ export default function isOnReleaseWaivers ({ transactions = [] } = {}) {
   // not on waivers if not dropped within the last 24 hours
   const last = sorted[0]
 
-  if (last.type !== constantsTransactions.ROSTER_DROP) {
+  if (last.type !== constantsTransactions.ROSTER_RELEASE) {
     return false
   }
 

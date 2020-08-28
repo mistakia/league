@@ -299,7 +299,7 @@ describe('SCRIPTS /waivers - free agency', function () {
         tid: 2,
         lid: leagueId,
         player: player.player,
-        type: constants.transactions.ROSTER_DROP,
+        type: constants.transactions.ROSTER_RELEASE,
         value: 0,
         year: constants.season.year,
         timestamp: Math.round(Date.now() / 1000)

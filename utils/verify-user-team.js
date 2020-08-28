@@ -18,6 +18,7 @@ module.exports = async ({ userId, leagueId, teamId, requireLeague }) => {
 
   // verify team belongs to user
   const userTeams = await db('teams')
+    .select('teams.*', 'users_teams.*', 'leagues.commishid')
     .leftJoin('users_teams', 'teams.uid', 'users_teams.tid')
     .join('leagues', 'teams.lid', 'leagues.uid')
     .where('teams.uid', tid)

@@ -7,7 +7,7 @@ module.exports = async (leagueId) => {
   // get relevant transactions from last 24 hours
   const cutoff = moment().subtract('24', 'hours').format('X')
   const transactions = await db('transactions')
-    .where('type', constants.transactions.ROSTER_DROP)
+    .where('type', constants.transactions.ROSTER_RELEASE)
     .where('timestamp', '>=', cutoff)
     .where('lid', leagueId)
 

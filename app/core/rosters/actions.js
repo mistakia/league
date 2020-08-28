@@ -15,6 +15,7 @@ export const rosterActions = {
 
   // USER
   ADD_FREE_AGENT: 'ADD_FREE_AGENT',
+  RELEASE_PLAYER: 'RELEASE_PLAYER',
 
   // COMMISH / ADMIN
   ADD_PLAYER_ROSTER: 'ADD_PLAYER_ROSTER',
@@ -22,6 +23,7 @@ export const rosterActions = {
   UPDATE_PLAYER_ROSTER: 'UPDATE_PLAYER_ROSTER',
 
   ROSTER_TRANSACTIONS: 'ROSTER_TRANSACTIONS',
+  ROSTER_PLAYER_RELEASED: 'ROSTER_PLAYER_RELEASED',
 
   ACTIVATE_PLAYER: 'ACTIVATE_PLAYER',
   DEACTIVATE_PLAYER: 'DEACTIVATE_PLAYER',
@@ -66,12 +68,23 @@ export const rosterActions = {
   POST_RESERVE_FAILED: 'POST_RESERVE_FAILED',
   POST_RESERVE_FULFILLED: 'POST_RESERVE_FULFILLED',
 
+  POST_RELEASE_PENDING: 'POST_RELEASE_PENDING',
+  POST_RELEASE_FAILED: 'POST_RELEASE_FAILED',
+  POST_RELEASE_FULFILLED: 'POST_RELEASE_FULFILLED',
+
   addFreeAgent: ({ player, drop, slot }) => ({
     type: rosterActions.ADD_FREE_AGENT,
     payload: {
       player,
       drop,
       slot
+    }
+  }),
+
+  release: (player) => ({
+    type: rosterActions.RELEASE_PLAYER,
+    payload: {
+      player
     }
   }),
 
@@ -380,6 +393,29 @@ export const rosterActions = {
       opts,
       data
     }
+  }),
+
+  postReleasePending: opts => ({
+    type: rosterActions.POST_RELEASE_PENDING,
+    payload: {
+      opts
+    }
+  }),
+
+  postReleaseFailed: (opts, error) => ({
+    type: rosterActions.POST_RELEASE_FAILED,
+    payload: {
+      opts,
+      error
+    }
+  }),
+
+  postReleaseFulfilled: (opts, data) => ({
+    type: rosterActions.POST_RELEASE_FULFILLED,
+    payload: {
+      opts,
+      data
+    }
   })
 }
 
@@ -441,4 +477,10 @@ export const postReserveActions = {
   pending: rosterActions.postReservePending,
   failed: rosterActions.postReserveFailed,
   fulfilled: rosterActions.postReserveFulfilled
+}
+
+export const postReleaseActions = {
+  pending: rosterActions.postReleasePending,
+  failed: rosterActions.postReleaseFailed,
+  fulfilled: rosterActions.postReleaseFulfilled
 }
