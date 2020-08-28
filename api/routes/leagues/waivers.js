@@ -15,7 +15,7 @@ router.post('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const { player, drop, leagueId, type, teamId } = req.body
-    const bid = parseInt(req.body.bid || 0, 10)
+    let bid = parseInt(req.body.bid || 0, 10)
 
     if (!player) {
       return res.status(400).send({ error: 'missing player' })
@@ -64,9 +64,14 @@ router.post('/?', async (req, res) => {
     const playerRow = players[0]
 
     // verify player is practice squad eligible if type is practice waiver
-    if (type === constants.waivers.FREE_AGENCY_PRACTICE &&
-      playerRow.start !== constants.season.year) {
-      return res.status(400).send({ error: 'player is not practice squad eligible' })
+    // TODO - verify player was not previously on team practice squad
+    if (type === constants.waivers.FREE_AGENCY_PRACTICE) {
+      if (playerRow.start !== constants.season.year) {
+        return res.status(400).send({ error: 'player is not practice squad eligible' })
+      }
+
+      // set bid to zero for practice squad waivers
+      bid = 0
     }
 
     const transactions = await db('transactions')
@@ -118,8 +123,8 @@ router.post('/?', async (req, res) => {
 
         if (!league.ddate || moment().isBefore(dcutoff)) {
           return res.status(400).send({ error: 'practice squad waivers are not open' })
-        } if (league.ddate && moment().isAfter(dcutoff)) {
-          // if after rookie draft, check if player is on release waivers
+        } if (league.ddate && moment().isAfter(dcutoff.add('1', 'day'))) {
+          // if after rookie draft waivers cleared, check if player is on release waivers
           const isOnWaivers = await isPlayerOnWaivers({ player, leagueId })
           if (!isOnWaivers) {
             return res.status(400).send({ error: 'player is not on waivers' })

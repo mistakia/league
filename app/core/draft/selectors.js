@@ -34,5 +34,10 @@ export function isDrafted (state, { playerId, player }) {
 export function isAfterDraft (state) {
   const league = getCurrentLeague(state)
   const totalPicks = league.nteams * 3
-  return league.ddate && moment().isAfter(moment(league.ddate, 'X').add(totalPicks, 'day'))
+  const afterDraft = league.ddate && moment().isAfter(moment(league.ddate, 'X').add(totalPicks, 'day'))
+  const afterWaivers = league.ddate && moment().isAfter(moment(league.ddate, 'X').add(totalPicks + 1, 'day'))
+  return {
+    afterDraft,
+    afterWaivers
+  }
 }

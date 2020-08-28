@@ -32,6 +32,7 @@ module.exports = {
   resetWaiverOrder: require('./reset-waiver-order'),
   getTopPoachingWaiver: require('./get-top-poaching-waiver'),
   getTopFreeAgencyWaiver: require('./get-top-free-agency-waiver'),
+  getTopPracticeSquadWaiver: require('./get-top-practice-squad-waiver'),
   submitAcquisition: require('./submit-acquisition'),
   getPlayByPlayQuery,
   getTransactionsSinceAcquisition: require('./get-transactions-since-acquisition'),
