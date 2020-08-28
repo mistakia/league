@@ -19,7 +19,7 @@ const year = constants.season.year
 const runOne = async (week) => {
   const missing = []
 
-  const URL = `https://www.pff.com/api/prankster/projections?scoring=preset_std&weeks=${week}`
+  const URL = `https://www.pff.com/api/fantasy/projections?scoring=preset_ppr&weeks=${week}`
   const result = await fetch(URL, {
     headers: {
       cookie: config.pff
