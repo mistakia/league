@@ -30,6 +30,7 @@ const formatRoster = (roster) => {
   Object.keys(roster).forEach(k => k.startsWith('s') && result.set(k, roster[k]))
   return result
 }
+const nth = (n) => ['st', 'nd', 'rd'][((n + 90) % 100 - 10) % 10 - 1] || 'th'
 
 export {
   calculateBaselines,
@@ -47,5 +48,6 @@ export {
   calculateStatsFromPlays,
   createDefaultLeague,
   getOptimizerPositionConstraints,
-  isOnReleaseWaivers
+  isOnReleaseWaivers,
+  nth
 }

@@ -2,6 +2,7 @@ import { Record, List } from 'immutable'
 
 export const Team = new Record({
   uid: null,
+  div: null,
   name: null,
   image: null,
   abbrv: null,
@@ -16,6 +17,7 @@ export const Team = new Record({
 
 export function createTeam ({
   uid,
+  div,
   name,
   image,
   abbrv,
@@ -29,6 +31,7 @@ export function createTeam ({
 }) {
   return new Team({
     uid,
+    div,
     name,
     image,
     abbrv,

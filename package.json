@@ -72,6 +72,8 @@
     "cross-env": "^7.0.2",
     "css-loader": "^3.5.3",
     "csv-parser": "^2.3.2",
+    "highcharts": "^8.2.0",
+    "highcharts-react-official": "^3.0.0",
     "html-webpack-inline-source-plugin": "^1.0.0-beta.2",
     "html-webpack-plugin": "^4.3.0",
     "immutable": "^4.0.0-rc.12",
