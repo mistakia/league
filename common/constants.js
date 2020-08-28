@@ -1,9 +1,12 @@
 import Season from './season'
+// import MockDate from 'mockdate'
 // eslint-disable-next-line
 import * as espn from './espn-constants'
 export { espn }
 
 export const season = new Season()
+
+// MockDate.set(season.start.clone().add('1', 'month').day(2).toDate())
 
 const getAvailableYears = () => {
   const arr = []
