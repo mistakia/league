@@ -49,7 +49,7 @@ router.get('/release', async (req, res) => {
     const cutoff = moment().subtract('48', 'hours').format('X')
     const types = [
       constants.transactions.ROSTER_ADD,
-      constants.transactions.ROSTER_DROP,
+      constants.transactions.ROSTER_RELEASE,
       constants.transactions.PRACTICE_ADD
     ]
     const transactions = await db('transactions')

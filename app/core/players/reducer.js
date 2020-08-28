@@ -257,11 +257,20 @@ export function playersReducer (state = initialState, { payload, type }) {
       })
     }
 
+    case rosterActions.ROSTER_PLAYER_RELEASED:
+    case rosterActions.POST_RELEASE_FULFILLED:
+      return state.mergeIn(['items', payload.data.player], {
+        value: null,
+        type: null,
+        tid: null,
+        slot: null
+      })
+
     case rosterActions.ROSTER_TRANSACTIONS:
       return state.withMutations(state => {
         payload.data.forEach(p => {
           const t = p.transaction
-          if (t.type === constants.transactions.ROSTER_DROP) {
+          if (t.type === constants.transactions.ROSTER_RELEASE) {
             state.mergeIn(['items', t.player], {
               value: null,
               type: null,

@@ -1,6 +1,7 @@
 import { take, call, takeLatest, fork, select, put } from 'redux-saga/effects'
 
 import { rosterActions } from './actions'
+import { notificationActions } from '@core/notifications'
 import {
   getRoster,
   getRosters,
@@ -11,7 +12,8 @@ import {
   deleteRosters,
   putRosters,
   postAddFreeAgent,
-  postReserve
+  postReserve,
+  postRelease
 } from '@core/api'
 import { getApp, appActions } from '@core/app'
 import { constants } from '@common'
@@ -178,6 +180,18 @@ export function * reserve ({ payload }) {
   yield call(postReserve, { leagueId, teamId, ...payload })
 }
 
+export function * release ({ payload }) {
+  const { leagueId, teamId } = yield select(getApp)
+  yield call(postRelease, { leagueId, teamId, ...payload })
+}
+
+export function * releaseNotification () {
+  yield put(notificationActions.show({
+    message: 'Player released',
+    severity: 'success'
+  }))
+}
+
 //= ====================================
 //  WATCHERS
 // -------------------------------------
@@ -250,6 +264,14 @@ export function * watchPlayersSelectPlayer () {
   yield takeLatest(playerActions.PLAYERS_SELECT_PLAYER, setPlayerLineupContribution)
 }
 
+export function * watchReleasePlayer () {
+  yield takeLatest(rosterActions.RELEASE_PLAYER, release)
+}
+
+export function * watchPostReleaseFulfilled () {
+  yield takeLatest(rosterActions.POST_RELEASE_FULFILLED, releaseNotification)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -272,6 +294,9 @@ export const rosterSagas = [
   fork(watchPostDeactivateFulfilled),
 
   fork(watchAddFreeAgent),
+  fork(watchReleasePlayer),
+
+  fork(watchPostReleaseFulfilled),
 
   fork(watchAddPlayerRoster),
   fork(watchRemovePlayerRoster),

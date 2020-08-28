@@ -78,6 +78,10 @@ export const api = {
     const url = `${BASE_URL}/teams/${data.teamId}/add`
     return { url, ...POST(data) }
   },
+  postRelease (data) {
+    const url = `${BASE_URL}/teams/${data.teamId}/release`
+    return { url, ...POST(data) }
+  },
   postActivate (data) {
     const url = `${BASE_URL}/teams/${data.teamId}/activate`
     return { url, ...POST(data) }

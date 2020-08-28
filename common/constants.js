@@ -353,7 +353,7 @@ export const waivers = {
 
 export const transactions = {
   ROSTER_ADD: 14,
-  ROSTER_DROP: 1,
+  ROSTER_RELEASE: 1,
 
   ROSTER_ACTIVATE: 2,
   ROSTER_DEACTIVATE: 3,

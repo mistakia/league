@@ -3,7 +3,7 @@ const router = express.Router()
 
 const activate = require('./activate')
 const deactivate = require('./deactivate')
-const drop = require('./drop')
+const release = require('./release')
 const add = require('./add')
 const lineups = require('./lineups')
 const reserve = require('./reserve')
@@ -58,7 +58,7 @@ router.put('/:teamId', async (req, res) => {
 
 router.use('/:teamId/activate', activate)
 router.use('/:teamId/deactivate', deactivate)
-router.use('/:teamId/drop', drop)
+router.use('/:teamId/release', release)
 router.use('/:teamId/add', add)
 router.use('/:teamId/lineups', lineups)
 router.use('/:teamId/reserve', reserve)

@@ -7,7 +7,7 @@ const { constants, Roster } = require('../common')
 const sendNotifications = require('./send-notifications')
 const getRoster = require('./get-roster')
 const isPlayerOnWaivers = require('./is-player-on-waivers')
-const isPlayerLocked = require('./is-player-locked')
+const processRelease = require('./process-release')
 
 module.exports = async function ({
   leagueId,
@@ -95,20 +95,25 @@ module.exports = async function ({
       throw new Error('invalid drop')
     }
 
-    const isActive = roster.starters.find(p => p.player === drop)
-    if (isActive) {
-      const isLocked = await isPlayerLocked(player)
-      if (isLocked) {
-        throw new Error('drop player is a locked starter')
-      }
-    }
-
     roster.removePlayer(drop)
   }
 
   const hasSlot = roster.isEligibleForSlot({ slot, player, pos: playerRow.pos1 })
   if (!hasSlot) {
     throw new Error('exceeds roster limits')
+  }
+
+  const result = []
+
+  // process release
+  if (drop) {
+    const releaseData = await processRelease({
+      player: drop,
+      tid: teamId,
+      lid: leagueId,
+      useris: userId
+    })
+    result.push(releaseData)
   }
 
   // add player to roster
@@ -119,36 +124,7 @@ module.exports = async function ({
     slot
   })
 
-  // remove drop player if necessary
-  const inserts = []
-  const result = []
-  if (drop) {
-    const transaction = {
-      userid: userId,
-      tid: teamId,
-      lid: leagueId,
-      player: drop,
-      type: constants.transactions.ROSTER_DROP,
-      value: 0,
-      year: constants.season.year,
-      timestamp: Math.round(Date.now() / 1000)
-    }
-    inserts.push(transaction)
-    result.push({
-      player: drop,
-      rid: roster.uid,
-      pos: dropPlayerRow.pos1,
-      slot: null,
-      transaction
-    })
-    await db('rosters_players')
-      .where({
-        rid: roster.uid,
-        player: drop
-      })
-      .del()
-  }
-
+  // add player transaction
   const addTransaction = {
     userid: userId,
     tid: teamId,
@@ -159,8 +135,7 @@ module.exports = async function ({
     year: constants.season.year,
     timestamp: Math.round(Date.now() / 1000)
   }
-  inserts.push(addTransaction)
-  await db('transactions').insert(inserts)
+  await db('transactions').insert(addTransaction)
 
   result.push({
     player: player,
