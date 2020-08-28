@@ -4,6 +4,7 @@ import { Roster, constants } from '@common'
 import { getApp } from '@core/app'
 import { getPlayerById, getAllPlayers } from '@core/players'
 import { getCurrentLeague } from '@core/leagues'
+import { getTeamsForCurrentLeague, getCurrentTeam } from '@core/teams'
 
 import { Roster as RosterRecord } from './roster'
 
@@ -148,7 +149,48 @@ export function getCurrentTeamRosterRecord (state) {
 export function getCurrentTeamRoster (state) {
   const league = getCurrentLeague(state)
   const rec = getCurrentTeamRosterRecord(state)
-  return new Roster({ roster: rec, league })
+  return new Roster({ roster: rec.toJS(), league })
+}
+
+export function getCurrentTeamRosterPositionalValue (state) {
+  const rosterRecords = getRostersForCurrentLeague(state)
+  const league = getCurrentLeague(state)
+  const teams = getTeamsForCurrentLeague(state)
+  const team = getCurrentTeam(state)
+  const divTeamIds = teams.filter(t => t.div === team.div).map(t => t.uid)
+
+  const rosters = []
+  for (const rec of rosterRecords.valueSeq()) {
+    const roster = new Roster({ roster: rec.toJS(), league })
+    rosters.push(roster)
+  }
+
+  const values = {
+    league_avg: {},
+    league: {},
+    div_avg: {},
+    div: {},
+    team: {}
+  }
+  for (const position of constants.positions) {
+    const league = []
+    const div = []
+    for (const roster of rosters) {
+      const rosterPlayers = roster.active.filter(p => p.pos === position)
+      const players = rosterPlayers.map(p => getPlayerById(state, { playerId: p.player }))
+      const vorps = players.map(p => p.getIn(['vorp', 'ros', 'starter'], 0))
+      const sum = vorps.reduce((s, i) => s + i, 0)
+      league.push(sum)
+      if (divTeamIds.includes(roster.tid)) div.push(sum)
+      if (roster.tid === team.uid) values.team[position] = sum
+    }
+    values.league_avg[position] = league.reduce((s, i) => s + i, 0) / league.length
+    values.league[position] = league
+    values.div_avg[position] = div.reduce((s, i) => s + i, 0) / div.length
+    values.div[position] = div
+  }
+
+  return values
 }
 
 export function getCurrentPlayers (state) {

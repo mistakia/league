@@ -3,6 +3,7 @@ import * as constants from './constants'
 export default class Roster {
   constructor ({ roster, league }) {
     this.uid = roster.uid
+    this.tid = roster.tid
     this._league = league
     this._players = new Map()
 
