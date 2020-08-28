@@ -151,7 +151,7 @@ export default class WaiverConfirmation extends React.Component {
             {`Add ${player.name} (${player.pos1})`}
           </DialogContentText>
           <div className='waiver__claim-inputs'>
-            {this.state.type === 'practice' &&
+            {this.state.type === constants.waivers.FREE_AGENCY &&
               <TextField
                 label='Bid'
                 helperText={`Max Bid: ${team.faab}`}
