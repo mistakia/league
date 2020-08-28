@@ -15,7 +15,8 @@ export {
   getRosterInfoForPlayerId,
   getActivePlayersByRosterForCurrentLeague,
   getPlayerProjectedContribution,
-  getAvailablePlayersForCurrentLeague
+  getAvailablePlayersForCurrentLeague,
+  getCurrentTeamRosterPositionalValue
 } from './selectors'
 export { rosterSagas } from './sagas'
 export { rostersReducer } from './reducer'
