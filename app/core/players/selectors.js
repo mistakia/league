@@ -27,8 +27,7 @@ export function getPlayers (state) {
 
 export function getSelectedPlayer (state) {
   const playerId = getPlayers(state).get('selected')
-  const player = getPlayerById(state, { playerId })
-  return player.toJS()
+  return getPlayerById(state, { playerId })
 }
 
 export function getAllPlayers (state) {
