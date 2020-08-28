@@ -18,6 +18,7 @@ import SelectedPlayerTeamSituationSplits from '@components/selected-player-team-
 import SelectedPlayerTeamPositionSplits from '@components/selected-player-team-position-splits'
 import SelectedPlayerEfficiencyStats from '@components/selected-player-efficiency-stats'
 import SelectedPlayerLineupImpact from '@components/selected-player-lineup-impact'
+import SelectedPlayerValue from '@components/selected-player-value'
 
 import './selected-player.styl'
 
@@ -161,7 +162,7 @@ export default class SelectedPlayer extends React.Component {
             <SelectedPlayerLineupImpact />
           </TabPanel>
           <TabPanel value={value} index={1}>
-            Coming soon
+            <SelectedPlayerValue />
           </TabPanel>
           <TabPanel value={value} index={2}>
             Coming soon
