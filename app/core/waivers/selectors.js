@@ -23,7 +23,7 @@ export function getWaiverPlayersForCurrentTeam (state) {
   }
 
   const waivers = teamWaivers.valueSeq().toList()
-  const sorted = waivers.sort((a, b) => a.po - b.po)
+  const sorted = waivers.sort((a, b) => b.bid - a.bid || a.po - b.po || a.uid - b.uid)
   let poach = new List()
   let active = new List()
   let practice = new List()

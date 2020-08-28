@@ -21,7 +21,11 @@ export function * reorder ({ payload }) {
   const { oldIndex, newIndex, type } = payload
   const items = teamWaivers[type]
   const waiver = items.get(oldIndex)
-  const newWaiver = items.delete(oldIndex).insert(newIndex, waiver)
+  let newWaiver = items.delete(oldIndex).insert(newIndex, waiver)
+  if (type === 'active') {
+    newWaiver = newWaiver.sort((a, b) => b.bid - a.bid ||
+      newWaiver.findIndex(i => i.uid === a.uid) - newWaiver.findIndex(i => i.uid === b.uid))
+  }
   const waivers = newWaiver.map((w, index) => w.uid).toJS()
   const reset = items.map(({ uid, po }) => ({ uid, po }))
   yield call(postWaiverOrder, { leagueId, teamId, waivers, reset })
