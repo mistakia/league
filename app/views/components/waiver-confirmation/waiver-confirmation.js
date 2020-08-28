@@ -151,18 +151,19 @@ export default class WaiverConfirmation extends React.Component {
             {`Add ${player.name} (${player.pos1})`}
           </DialogContentText>
           <div className='waiver__claim-inputs'>
-            <TextField
-              label='Bid'
-              helperText={`Max Bid: ${team.faab}`}
-              error={this.state.error}
-              value={this.state.bid}
-              onChange={this.handleBid}
-              InputProps={{
-                startAdornment: <InputAdornment position='start'>$</InputAdornment>
-              }}
-              size='small'
-              variant='outlined'
-            />
+            {this.state.type === 'practice' &&
+              <TextField
+                label='Bid'
+                helperText={`Max Bid: ${team.faab}`}
+                error={this.state.error}
+                value={this.state.bid}
+                onChange={this.handleBid}
+                InputProps={{
+                  startAdornment: <InputAdornment position='start'>$</InputAdornment>
+                }}
+                size='small'
+                variant='outlined'
+              />}
             <FormControl size='small' variant='outlined'>
               <InputLabel id='type-label'>Type</InputLabel>
               <Select

@@ -71,8 +71,8 @@ module.exports = async function ({
     }
 
     // verify rookie draft is complete
-    const totalPicks = league.nteams * 3
-    if (!league.ddate || moment().isBefore(moment(league.ddate, 'X').add(totalPicks, 'day'))) {
+    const days = (league.nteams * 3) + 1 // total picks + waiver day
+    if (!league.ddate || moment().isBefore(moment(league.ddate, 'X').add(days, 'day'))) {
       throw new Error('rookie free agency not open')
     }
   }

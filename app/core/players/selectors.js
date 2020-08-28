@@ -279,17 +279,20 @@ export function getPlayerStatus (state, { player, playerId }) {
     } else {
       const onReleaseWaivers = isPlayerOnReleaseWaivers(state, { player })
       const afterAuction = isAfterAuction(state)
-      const afterDraft = isAfterDraft(state)
+      const draft = isAfterDraft(state)
       const isPracticeSquadEligible = isPlayerPracticeSquadEligible(state, { player })
-      if (!onReleaseWaivers) {
+      if (onReleaseWaivers) {
+        if (afterAuction) status.waiver.active = true
+        if (draft.afterDraft && isPracticeSquadEligible) status.waiver.practice = true
+      } else {
         if (afterAuction) {
           if (constants.season.isRegularSeason) status.sign.active = true
           else status.waiver.active = true
         }
-        if (afterDraft && isPracticeSquadEligible) status.sign.practice = true
-      } else {
-        if (afterAuction) status.waiver.active = true
-        if (afterDraft && isPracticeSquadEligible) status.waiver.practice = true
+        if (isPracticeSquadEligible) {
+          if (draft.afterWaivers) status.sign.practice = true
+          else if (draft.afterDraft) status.waiver.practice = true
+        }
       }
     }
   } else {
