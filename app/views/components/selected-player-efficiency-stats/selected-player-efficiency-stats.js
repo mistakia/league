@@ -6,7 +6,7 @@ import { constants } from '@common'
 export default class SelectedPlayerEfficiencyStats extends React.Component {
   render = () => {
     const { player, overall } = this.props
-    const { stats } = player
+    const stats = player.stats.toJS()
 
     return (
       <div className='selected__section'>
