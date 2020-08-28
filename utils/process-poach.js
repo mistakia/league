@@ -4,6 +4,7 @@ const db = require('../db')
 const { constants, Roster } = require('../common')
 const sendNotifications = require('./send-notifications')
 const getRoster = require('./get-roster')
+const processRelease = require('./process-release')
 
 module.exports = async function (claim) {
   const rosterSlots = await db('rosters')
@@ -47,43 +48,6 @@ module.exports = async function (claim) {
     throw new Error('poaching claim unsuccessful, no available roster space')
   }
 
-  if (claim.drop) {
-    // drop transaction
-    const dropTransaction = {
-      userid: claim.userid,
-      tid: claim.tid,
-      player: claim.player,
-      type: constants.transactions.ROSTER_DROP,
-      value: 0,
-      year: constants.season.year,
-      timestamp: Math.round(Date.now() / 1000)
-    }
-    await db('transactions').insert(dropTransaction)
-
-    // send drop notification
-    const dropPlayer = playerRows.find(p => p.player === claim.drop)
-    const dropMessage = `${dropPlayer.fname} ${dropPlayer.lname} (${dropPlayer.pos1}) has been released.`
-    await sendNotifications({
-      leagueId: claim.lid,
-      league: true,
-      message: dropMessage
-    })
-
-    if (league.groupme_token && league.groupme_id) {
-      await API.Bots.post.Q(league.groupme_token, league.groupme_id, dropMessage, {})
-    }
-
-    // remove drop player from rosters
-    const poachingTeamRosters = await db('rosters')
-      .where('week', '>=', constants.season.week)
-      .where('tid', claim.tid)
-    const poachingTeamRosterIds = poachingTeamRosters.map(r => r.uid)
-    await db('rosters_players')
-      .whereIn('rid', poachingTeamRosterIds)
-      .where('player', claim.drop)
-      .del()
-  }
-
   // verify team has enough cap if during the offseason
   const transactions = await db('transactions')
     .where({
@@ -99,6 +63,23 @@ module.exports = async function (claim) {
     throw new Error('not enough available cap')
   }
 
+  // process release
+  if (claim.drop) {
+    const { drop, tid, lid, userid } = claim
+    await processRelease({ player: drop, tid, lid, userid })
+  }
+
+  // remove player from poached team rosters
+  const poachedTeamRosters = await db('rosters')
+    .where('week', '>=', constants.season.week)
+    .where('tid', rosterSlot.tid)
+    .where('year', constants.season.year)
+  const poachedTeamRosterIds = poachedTeamRosters.map(r => r.uid)
+  await db('rosters_players')
+    .whereIn('rid', poachedTeamRosterIds)
+    .where('player', claim.player)
+    .del()
+
   const transaction = {
     userid: claim.userid,
     tid: claim.tid,
@@ -111,16 +92,6 @@ module.exports = async function (claim) {
   }
   await db('transactions').insert(transaction)
 
-  // remove player from poached team rosters
-  const poachedTeamRosters = await db('rosters')
-    .where('week', '>=', constants.season.week)
-    .where('tid', rosterSlot.tid)
-  const poachedTeamRosterIds = poachedTeamRosters.map(r => r.uid)
-  await db('rosters_players')
-    .whereIn('rid', poachedTeamRosterIds)
-    .where('player', claim.player)
-    .del()
-
   // add player to poaching team roster
   await db('rosters_players')
     .insert({
@@ -131,7 +102,12 @@ module.exports = async function (claim) {
     })
 
   // send notification
-  const message = `Poaching claim for ${poachPlayer.fname} ${poachPlayer.lname} (${poachPlayer.pos1}) successfully processed.`
+  let message = `Poaching claim for ${poachPlayer.fname} ${poachPlayer.lname} (${poachPlayer.pos1}) successfully processed.`
+  if (claim.drop) {
+    const dropPlayer = playerRows.find(p => p.player === claim.drop)
+    message += ` ${dropPlayer.fname} ${dropPlayer.lname} (${dropPlayer.pos1}) has been released.`
+  }
+
   await sendNotifications({
     leagueId: claim.lid,
     league: true,

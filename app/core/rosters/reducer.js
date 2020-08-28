@@ -58,6 +58,14 @@ export function rostersReducer (state = new Map(), { payload, type }) {
       })
     }
 
+    case rosterActions.POST_RELEASE_FULFILLED:
+    case rosterActions.ROSTER_PLAYER_RELEASED: {
+      const players = state.getIn([payload.data.transaction.tid, 'players'])
+      if (!players) return state
+      const key = players.findKey(p => p.player === payload.data.player)
+      return state.deleteIn([payload.data.transaction.tid, 'players', key])
+    }
+
     case rosterActions.ROSTER_TRANSACTIONS: {
       return state.withMutations(state => {
         payload.data.forEach(p => {
@@ -66,7 +74,7 @@ export function rostersReducer (state = new Map(), { payload, type }) {
           if (!players) return state
 
           const key = players.findKey(p => p.player === t.player)
-          if (t.type === constants.transactions.ROSTER_DROP) {
+          if (t.type === constants.transactions.ROSTER_RELEASE) {
             return state.deleteIn([t.tid, 'players', key])
           } else {
             return state.updateIn([t.tid, 'players'], arr => arr.push({

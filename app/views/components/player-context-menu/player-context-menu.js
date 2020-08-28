@@ -90,6 +90,16 @@ export default class PlayerContextMenu extends React.Component {
     this.props.hide()
   }
 
+  handleRelease = () => {
+    const { player, release } = this.props
+    this.props.showConfirmation({
+      title: 'Release Player',
+      description: `${player.fname} ${player.lname} (${player.pos1}) will be released and placed on waivers for 24 hours before becoming a free agent.`,
+      onConfirm: () => release(player.player)
+    })
+    this.props.hide()
+  }
+
   render = () => {
     const {
       waiverId,
@@ -152,7 +162,8 @@ export default class PlayerContextMenu extends React.Component {
       menuItems.push(
         <MenuItem
           dense
-          disabled
+          disabled={status.locked}
+          onClick={this.handleRelease}
         >
           Release
         </MenuItem>

@@ -28,7 +28,8 @@ const mapDispatchToProps = {
   deactivate: rosterActions.deactivate,
   showConfirmation: confirmationActions.show,
   cancelClaim: waiverActions.cancel,
-  reserve: rosterActions.reserve
+  reserve: rosterActions.reserve,
+  release: rosterActions.release
 }
 
 export default connect(
