@@ -1,7 +1,25 @@
 import React from 'react'
 
+import { nth } from '@common'
+
 export default class DashboardTeamSummary extends React.Component {
   render = () => {
+    const { team, faabRank, capRank, cap, league } = this.props
+
+    const tQuarter = Math.ceil(league.nteams / 4)
+    const bQuarter = league.nteams - tQuarter
+    const faabClassNames = []
+    if (faabRank <= tQuarter) faabClassNames.push('text-green')
+    else if (faabRank >= bQuarter) faabClassNames.push('text-red')
+
+    const capClassNames = []
+    if (capRank <= tQuarter) capClassNames.push('text-green')
+    else if (capRank >= bQuarter) capClassNames.push('text-red')
+
+    const woClassNames = []
+    if (team.wo <= tQuarter) woClassNames.push('text-green')
+    else if (team.wo >= bQuarter) woClassNames.push('text-red')
+
     return (
       <div className='dashboard__section-side'>
         <div className='dashboard__section-side-title'>Summary</div>
@@ -17,6 +35,23 @@ export default class DashboardTeamSummary extends React.Component {
                 <td>Points</td>
                 <td>-</td>
                 <td>-</td>
+              </tr>
+              <tr>
+                <td>Free Agent Auction Budget</td>
+                <td>${team.faab}</td>
+                <td className={faabClassNames.join(' ')}>{faabRank}{nth(faabRank)}</td>
+              </tr>
+              <tr>
+                <td>Salary Space Available</td>
+                <td>{cap ? `$${cap}` : '-'}</td>
+                <td className={capClassNames.join(' ')}>
+                  {capRank ? `${capRank}${nth(capRank)}` : '-'}
+                </td>
+              </tr>
+              <tr>
+                <td>Waiver Order</td>
+                <td />
+                <td className={woClassNames.join(' ')}>{team.wo}{nth(team.wo)}</td>
               </tr>
               <tr>
                 <td>Proj. Record</td>
