@@ -17,6 +17,10 @@ object-assign
  * @license  MIT
  */
 
+/*! NanoPop 1.3.0 MIT | https://github.com/Simonwep/nanopop */
+
+/*! Pickr 1.7.2 MIT | https://github.com/Simonwep/pickr */
+
 /**
  * A better abstraction over CSS.
  *

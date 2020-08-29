@@ -1542,6 +1542,8 @@ CREATE TABLE `teams` (
   `faab` int(4) NOT NULL,
   `do` tinyint(2) DEFAULT NULL,
   `wo` tinyint(2) DEFAULT NULL,
+  `pc` varchar(6) DEFAULT NULL,
+  `ac` varchar(6) DEFAULT NULL,
   UNIQUE KEY `uid` (`uid`),
   KEY `lid` (`lid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;

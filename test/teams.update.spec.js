@@ -164,6 +164,14 @@ describe('API /teams - update', function () {
 
       expect(team.abbrv).to.equal(value)
     })
+
+    it('pc', async () => {
+      // TODO
+    })
+
+    it('ac', async () => {
+      // TODO
+    })
   })
 
   describe('errors', function () {
@@ -208,6 +216,14 @@ describe('API /teams - update', function () {
           value: 'test'
         })
       await invalid(request, 'teamId')
+    })
+
+    it('invalid pc - length', async () => {
+      // TODO
+    })
+
+    it('invalid ac - length', async () => {
+      // TODO
     })
 
     it('image is not a url', async () => {
