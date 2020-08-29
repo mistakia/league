@@ -170,8 +170,10 @@ export function getCurrentTeamRosterPositionalValue (state) {
     league: {},
     div_avg: {},
     div: {},
-    team: {}
+    team: {},
+    total: {}
   }
+
   for (const position of constants.positions) {
     const league = []
     const div = []
@@ -183,12 +185,15 @@ export function getCurrentTeamRosterPositionalValue (state) {
       league.push(sum)
       if (divTeamIds.includes(roster.tid)) div.push(sum)
       if (roster.tid === team.uid) values.team[position] = sum
+      values.total[roster.tid] = (values.total[roster.tid] ?? 0) + sum
     }
     values.league_avg[position] = league.reduce((s, i) => s + i, 0) / league.length
     values.league[position] = league
     values.div_avg[position] = div.reduce((s, i) => s + i, 0) / div.length
     values.div[position] = div
   }
+
+  values.team_total = values.total[team.uid]
 
   return values
 }
