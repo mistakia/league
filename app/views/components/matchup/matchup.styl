@@ -1,4 +1,4 @@
-$height = 50px
+$height = 55px
 
 .matchup
   display flex
@@ -15,27 +15,41 @@ $height = 50px
 .matchup__body
   flex 1
   display flex
+  background white
 
 .matchup__home
 .matchup__away
+  position relative
   height $height
   flex 1
   width 48%
-  background white
-  border 1px solid $borderColor
+  border-top 1px solid $borderColor
   padding 8px 32px
   display flex
   align-items center
+  justify-content space-between
 
 .matchup__away
-  justify-content flex-end
   border-right 0
-  border-radius 3px 0 0 3px
+  .matchup__banner
+    left 0
+    &:after
+      right -11%
+      transform skewX(20deg)
+
+  .team__image
+    margin-left 15%
 
 .matchup__home
-  justify-content flex-start
   border-left 0
-  border-radius 0 3px 3px 0
+  .matchup__banner
+    right 0
+    &:after
+      left -11%
+      transform skewX(-20deg)
+
+  .team__image
+    margin-right 15%
 
 .matchup__divider
   flex 0 0 0
@@ -51,3 +65,24 @@ $height = 50px
   align-items center
   font-family Roboto, sans-serif
   font-size 20px
+
+.matchup__banner
+  position absolute
+  background-color $borderColor
+  width 25%
+  height $height - 1px
+  &:after
+    position absolute
+    content ""
+    top 0
+    background-color inherit
+    height 100%
+    width 100%
+
+.matchup__line
+  position absolute
+  bottom 0
+  height 3px
+  background-color $borderColor
+  left 0
+  right 0

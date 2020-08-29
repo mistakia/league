@@ -7,7 +7,10 @@ import './matchup.styl'
 
 export default class Matchup extends React.Component {
   render = () => {
-    const { matchup } = this.props
+    const { matchup, teams } = this.props
+
+    const home = teams.find(t => t.uid === matchup.hid)
+    const away = teams.find(t => t.uid === matchup.aid)
 
     return (
       <div className='matchup'>
@@ -16,8 +19,20 @@ export default class Matchup extends React.Component {
         </div>
         <div className='matchup__body'>
           <div className='matchup__away'>
-            <TeamName tid={matchup.aid} />
+            <div
+              className='matchup__banner'
+              style={{
+                backgroundColor: `#${away.pc}`
+              }}
+            />
+            <div
+              className='matchup__line'
+              style={{
+                backgroundColor: `#${away.ac}`
+              }}
+            />
             <TeamImage tid={matchup.aid} />
+            <TeamName tid={matchup.aid} />
           </div>
           <div className='matchup__divider'>
             <div className='matchup__versus'>
@@ -25,8 +40,20 @@ export default class Matchup extends React.Component {
             </div>
           </div>
           <div className='matchup__home'>
-            <TeamImage tid={matchup.hid} />
+            <div
+              className='matchup__banner'
+              style={{
+                backgroundColor: `#${home.pc}`
+              }}
+            />
+            <div
+              className='matchup__line'
+              style={{
+                backgroundColor: `#${home.ac}`
+              }}
+            />
             <TeamName tid={matchup.hid} />
+            <TeamImage tid={matchup.hid} />
           </div>
         </div>
       </div>

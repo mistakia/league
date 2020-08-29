@@ -12,6 +12,7 @@ import Notification from '@components/notification'
 import SelectedPlayer from '@components/selected-player'
 
 import 'normalize.css'
+import '@simonwep/pickr/dist/themes/nano.min.css'
 import '@styles/normalize.css'
 import '@styles/index.styl'
 import './app.styl'
