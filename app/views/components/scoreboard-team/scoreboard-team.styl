@@ -1,0 +1,73 @@
+$height = 50px
+
+.scoreboard__team
+  padding 16px
+
+.scoreboard__team-banner
+  position relative
+  height $height
+
+.scoreboard__team-score
+  font-size 2em
+
+.scoreboard__team-banner
+  position absolute
+  background-color $borderColor
+  width 25%
+  height $height - 1px
+  &:after
+    position absolute
+    content ""
+    top 0
+    background-color inherit
+    height 100%
+    width 100%
+
+.away
+  .team__image
+    margin-left 15%
+    order 1
+
+  .team__name
+    order 2
+
+  .scoreboard__team-score
+    order 3
+
+  .scoreboard__team-banner
+    left 0
+    &:after
+      right -11%
+      transform skewX(20deg)
+
+.home
+  .scoreboard__team-score
+    order 1
+
+  .team__name
+    order 2
+
+  .team__image
+    margin-right 15%
+    order 3
+
+  .scoreboard__team-banner
+    right 0
+    &:after
+      left -11%
+      transform skewX(-20deg)
+
+.scoreboard__team-line
+  position absolute
+  bottom 0
+  height 3px
+  background-color $borderColor
+  left 0
+  right 0
+
+.scoreboard__team-head
+  position relative
+  height $height
+  display flex
+  align-items center
+  justify-content space-between

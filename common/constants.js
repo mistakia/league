@@ -348,6 +348,23 @@ export const slots = {
   COV: 14
 }
 
+export const slotName = {
+  [slots.QB]: 'QB',
+  [slots.RB]: 'RB',
+  [slots.WR]: 'WR',
+  [slots.TE]: 'TE',
+  [slots.WRTE]: 'WR/TE',
+  [slots.RBWR]: 'RB/WR',
+  [slots.RBWRTE]: 'FLEX',
+  [slots.QBRBWRTE]: 'SFLEX',
+  [slots.K]: 'K',
+  [slots.DST]: 'DST',
+  [slots.BENCH]: 'BE',
+  [slots.PS]: 'PS',
+  [slots.IR]: 'IR',
+  [slots.COV]: 'COV'
+}
+
 export const waivers = {
   FREE_AGENCY: 1,
   POACH: 2,

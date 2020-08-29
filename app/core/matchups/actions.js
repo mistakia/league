@@ -1,5 +1,4 @@
 export const matchupsActions = {
-  LOAD_MATCHUPS: 'LOAD_MATCHUPS',
   GENERATE_MATCHUPS: 'GENERATE_MATCHUPS',
 
   FILTER_MATCHUPS: 'FILTER_MATCHUPS',
@@ -25,10 +24,6 @@ export const matchupsActions = {
     payload: {
       leagueId
     }
-  }),
-
-  loadMatchups: () => ({
-    type: matchupsActions.LOAD_MATCHUPS
   }),
 
   getMatchupsFailed: (opts, error) => ({

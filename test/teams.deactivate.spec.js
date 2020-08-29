@@ -70,6 +70,7 @@ describe('API /teams - deactivate', function () {
       // eslint-disable-next-line
       res.should.be.json
 
+      res.body.tid.should.equal(teamId)
       res.body.player.should.equal(player.player)
       res.body.slot.should.equal(constants.slots.PS)
       res.body.transaction.userid.should.equal(userId)

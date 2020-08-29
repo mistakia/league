@@ -129,7 +129,7 @@ router.post('/?', async (req, res) => {
     }
     res.send(data)
     broadcast(leagueId, {
-      type: 'ROSTER_UPDATE',
+      type: 'ROSTER_TRANSACTION',
       payload: { data }
     })
 

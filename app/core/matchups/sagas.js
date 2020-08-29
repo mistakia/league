@@ -1,6 +1,6 @@
 import { call, takeLatest, fork, select } from 'redux-saga/effects'
 
-import { getApp } from '@core/app'
+import { getApp, appActions } from '@core/app'
 import { getMatchups, postMatchups } from '@core/api'
 import { matchupsActions } from './actions'
 
@@ -17,12 +17,12 @@ export function * generate ({ payload }) {
 //  WATCHERS
 // -------------------------------------
 
-export function * watchLoadMatchups () {
-  yield takeLatest(matchupsActions.LOAD_MATCHUPS, loadMatchups)
-}
-
 export function * watchGenerateMatchups () {
   yield takeLatest(matchupsActions.GENERATE_MATCHUPS, generate)
+}
+
+export function * watchAuthFulfilled () {
+  yield takeLatest(appActions.AUTH_FULFILLED, loadMatchups)
 }
 
 //= ====================================
@@ -30,6 +30,6 @@ export function * watchGenerateMatchups () {
 // -------------------------------------
 
 export const matchupSagas = [
-  fork(watchLoadMatchups),
+  fork(watchAuthFulfilled),
   fork(watchGenerateMatchups)
 ]

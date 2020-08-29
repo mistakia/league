@@ -14,7 +14,9 @@ export function getRosters (state) {
 
 export function getRosterByTeamId (state, { tid }) {
   const rosters = getRosters(state)
-  return rosters.get(tid) || new RosterRecord()
+  const rec = rosters.get(tid) || new RosterRecord()
+  const league = getCurrentLeague(state)
+  return new Roster({ roster: rec.toJS(), league })
 }
 
 export function getRostersForCurrentLeague (state) {

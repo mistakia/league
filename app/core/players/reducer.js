@@ -257,7 +257,6 @@ export function playersReducer (state = initialState, { payload, type }) {
       })
     }
 
-    case rosterActions.ROSTER_PLAYER_RELEASED:
     case rosterActions.POST_RELEASE_FULFILLED:
       return state.mergeIn(['items', payload.data.player], {
         value: null,
@@ -288,22 +287,15 @@ export function playersReducer (state = initialState, { payload, type }) {
         })
       })
 
-    case rosterActions.ROSTER_ACTIVATION:
-    case rosterActions.ROSTER_DEACTIVATION: {
-      const { type, player, tid, value, slot } = payload
-      return state.mergeIn(['items', player], {
-        type,
-        tid,
-        value,
-        slot
-      })
+    case rosterActions.PUT_ROSTER_FULFILLED: {
+      const { player, slot } = payload.data
+      return state.mergeIn(['items', player], { slot })
     }
 
     case rosterActions.POST_ACTIVATE_FULFILLED:
     case rosterActions.POST_DEACTIVATE_FULFILLED:
     case rosterActions.POST_RESERVE_FULFILLED:
-    case rosterActions.ROSTER_UPDATE:
-    case rosterActions.PUT_ROSTER_FULFILLED: {
+    case rosterActions.ROSTER_TRANSACTION: {
       const { player, slot, transaction } = payload.data
       const { value, type, tid } = transaction
       return state.mergeIn(['items', player], {

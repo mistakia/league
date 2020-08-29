@@ -16,7 +16,7 @@ const run = require('../scripts/generate-rosters')
 chai.should()
 const expect = chai.expect
 
-describe('SCRIPTS /waivers - free agency - active roster', function () {
+describe('SCRIPTS /rosters - generate weekly rosters', function () {
   before(async function () {
     this.timeout(60 * 1000)
     await knex.migrate.forceFreeMigrationsLock()

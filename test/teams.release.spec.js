@@ -65,6 +65,7 @@ describe('API /teams - release', function () {
       // eslint-disable-next-line
       res.should.be.json
 
+      res.body.tid.should.equal(teamId)
       res.body.player.should.equal(player.player)
       expect(res.body.slot).to.equal(null)
       res.body.pos.should.equal(player.pos1)
@@ -111,6 +112,7 @@ describe('API /teams - release', function () {
       // eslint-disable-next-line
       res.should.be.json
 
+      res.body.tid.should.equal(teamId)
       res.body.player.should.equal(player.player)
       expect(res.body.slot).to.equal(null)
       res.body.pos.should.equal(player.pos1)
@@ -157,6 +159,7 @@ describe('API /teams - release', function () {
       // eslint-disable-next-line
       res.should.be.json
 
+      res.body.tid.should.equal(teamId)
       res.body.player.should.equal(player.player)
       expect(res.body.slot).to.equal(null)
       res.body.pos.should.equal(player.pos1)
@@ -203,6 +206,7 @@ describe('API /teams - release', function () {
       // eslint-disable-next-line
       res.should.be.json
 
+      res.body.tid.should.equal(teamId)
       res.body.player.should.equal(player.player)
       expect(res.body.slot).to.equal(null)
       res.body.pos.should.equal(player.pos1)
@@ -249,6 +253,7 @@ describe('API /teams - release', function () {
       // eslint-disable-next-line
       res.should.be.json
 
+      res.body.tid.should.equal(teamId)
       res.body.player.should.equal(player.player)
       expect(res.body.slot).to.equal(null)
       res.body.pos.should.equal(player.pos1)
@@ -295,6 +300,7 @@ describe('API /teams - release', function () {
       // eslint-disable-next-line
       res.should.be.json
 
+      res.body.tid.should.equal(teamId)
       res.body.player.should.equal(player.player)
       expect(res.body.slot).to.equal(null)
       res.body.pos.should.equal(player.pos1)
