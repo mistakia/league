@@ -54,7 +54,7 @@ router.post('/?', async (req, res) => {
 
     res.send(data)
     broadcast(lid, {
-      type: 'ROSTER_PLAYER_RELEASED',
+      type: 'ROSTER_TRANSACTION',
       payload: { data }
     })
 

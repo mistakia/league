@@ -3,17 +3,11 @@ export const rosterActions = {
   LOAD_ROSTERS: 'LOAD_ROSTERS',
 
   PROJECT_LINEUPS: 'PROJECT_LINEUPS',
-  SET_LINEUPS: 'SET_LINEUPS',
-
-  ROSTER_DEACTIVATION: 'ROSTER_DEACTIVATION',
-  ROSTER_ACTIVATION: 'ROSTER_ACTIVATION',
-  SET_ROSTER_RESERVE: 'SET_ROSTER_RESERVE',
-
-  ROSTER_UPDATE: 'ROSTER_UPDATE',
-
-  UPDATE_ROSTER: 'UPDATE_ROSTER',
 
   // USER
+  SET_LINEUPS: 'SET_LINEUPS',
+  SET_ROSTER_RESERVE: 'SET_ROSTER_RESERVE',
+  UPDATE_ROSTER_PLAYER_SLOT: 'UPDATE_ROSTER_PLAYER_SLOT',
   ADD_FREE_AGENT: 'ADD_FREE_AGENT',
   RELEASE_PLAYER: 'RELEASE_PLAYER',
 
@@ -22,8 +16,9 @@ export const rosterActions = {
   REMOVE_PLAYER_ROSTER: 'REMOVE_PLAYER_ROSTER',
   UPDATE_PLAYER_ROSTER: 'UPDATE_PLAYER_ROSTER',
 
+  // Websocket Events
+  ROSTER_TRANSACTION: 'ROSTER_TRANSACTION',
   ROSTER_TRANSACTIONS: 'ROSTER_TRANSACTIONS',
-  ROSTER_PLAYER_RELEASED: 'ROSTER_PLAYER_RELEASED',
 
   ACTIVATE_PLAYER: 'ACTIVATE_PLAYER',
   DEACTIVATE_PLAYER: 'DEACTIVATE_PLAYER',
@@ -122,7 +117,7 @@ export const rosterActions = {
   }),
 
   update: ({ slot, player }) => ({
-    type: rosterActions.UPDATE_ROSTER,
+    type: rosterActions.UPDATE_ROSTER_PLAYER_SLOT,
     payload: {
       slot,
       player
@@ -146,6 +141,7 @@ export const rosterActions = {
     }
   }),
 
+  // commish
   updateValue: ({ player, value, teamId }) => ({
     type: rosterActions.UPDATE_PLAYER_ROSTER,
     payload: {

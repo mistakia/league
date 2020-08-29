@@ -27,6 +27,10 @@ export default class Roster {
     return this._league.cap - used
   }
 
+  get all () {
+    return Array.from(this._players.values())
+  }
+
   get players () {
     const arr = []
     for (const { slot, player, pos, rid } of this._players.values()) {
