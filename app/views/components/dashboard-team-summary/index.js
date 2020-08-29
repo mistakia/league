@@ -22,7 +22,7 @@ const mapStateToProps = createSelector(
     const rs = rosters.valueSeq().toJS().map(r => new Roster({ roster: r, league }))
     const roster = rs.find(r => r.tid === app.teamId) || {}
     const caps = rs.map(r => r.availableCap).sort((a, b) => b - a)
-    const capRank = caps.indexOf(roster.availableCap)
+    const capRank = caps.indexOf(roster.availableCap) + 1
 
     return {
       team,
