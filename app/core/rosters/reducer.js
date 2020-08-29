@@ -46,20 +46,7 @@ export function rostersReducer (state = new Map(), { payload, type }) {
       }))
     }
 
-    case rosterActions.ROSTER_UPDATE: {
-      return state.withMutations(state => {
-        const players = state.getIn([payload.data.tid, 'players'])
-        const index = players.findIndex(p => p.player === payload.data.player)
-        state.setIn([payload.data.tid, 'players', index, 'slot'], payload.data.slot)
-        if (payload.data.transaction) {
-          state.setIn([payload.data.tid, 'players', index, 'type'], payload.data.transaction.type)
-          state.setIn([payload.data.tid, 'players', index, 'timestamp'], payload.data.transaction.timestamp)
-        }
-      })
-    }
-
-    case rosterActions.POST_RELEASE_FULFILLED:
-    case rosterActions.ROSTER_PLAYER_RELEASED: {
+    case rosterActions.POST_RELEASE_FULFILLED: {
       const players = state.getIn([payload.data.transaction.tid, 'players'])
       if (!players) return state
       const key = players.findKey(p => p.player === payload.data.player)
@@ -95,33 +82,24 @@ export function rostersReducer (state = new Map(), { payload, type }) {
       })
     }
 
-    case rosterActions.ROSTER_ACTIVATION:
-    case rosterActions.ROSTER_DEACTIVATION: {
-      const { type, player, tid, value, timestamp, userid, slot } = payload
-      const players = state.getIn([tid, 'players'])
-      if (!players) return state
-
-      const key = players.findKey(p => p.player === player)
-      return state.mergeIn([tid, 'players', key], {
-        type,
-        value,
-        timestamp,
-        userid,
-        slot
-      })
-    }
-
+    case rosterActions.ROSTER_TRANSACTION:
     case rosterActions.POST_ACTIVATE_FULFILLED:
     case rosterActions.POST_DEACTIVATE_FULFILLED:
     case rosterActions.POST_RESERVE_FULFILLED:
     case rosterActions.PUT_ROSTER_FULFILLED: {
       return state.withMutations(state => {
-        const players = state.getIn([payload.opts.teamId, 'players'])
+        const players = state.getIn([payload.data.tid, 'players'])
+        if (!players) return state
+
         const index = players.findIndex(p => p.player === payload.data.player)
-        state.setIn([payload.opts.teamId, 'players', index, 'slot'], payload.data.slot)
+        state.setIn([payload.data.tid, 'players', index, 'slot'], payload.data.slot)
         if (payload.data.transaction) {
-          state.setIn([payload.opts.teamId, 'players', index, 'type'], payload.data.transaction.type)
-          state.setIn([payload.opts.teamId, 'players', index, 'timestamp'], payload.data.transaction.timestamp)
+          const { type, value, timestamp } = payload.data.transaction
+          state.mergIn([payload.data.tid, 'players', index], {
+            type,
+            value,
+            timestamp
+          })
         }
       })
     }

@@ -36,7 +36,7 @@ export function * loadRosters () {
   yield call(getRosters, { leagueId })
 }
 
-export function * updateRoster ({ payload }) {
+export function * updateRosterPlayerSlot ({ payload }) {
   const { teamId, leagueId } = yield select(getApp)
   yield call(putRoster, { teamId, leagueId, ...payload })
 }
@@ -204,8 +204,8 @@ export function * watchLoadRosters () {
   yield takeLatest(rosterActions.LOAD_ROSTERS, loadRosters)
 }
 
-export function * watchUpdateRoster () {
-  yield takeLatest(rosterActions.UPDATE_ROSTER, updateRoster)
+export function * watchUpdateRosterPlayerSlot () {
+  yield takeLatest(rosterActions.UPDATE_ROSTER_PLAYER_SLOT, updateRosterPlayerSlot)
 }
 
 export function * watchActivatePlayer () {
@@ -224,20 +224,12 @@ export function * watchProjectLineups () {
   yield takeLatest(rosterActions.PROJECT_LINEUPS, projectLineups)
 }
 
-export function * watchRosterActivation () {
-  yield takeLatest(rosterActions.ROSTER_ACTIVATION, projectLineups)
+export function * watchRosterTransaction () {
+  yield takeLatest(rosterActions.ROSTER_TRANSACTION, projectLineups)
 }
 
-export function * watchRosterDeactivation () {
-  yield takeLatest(rosterActions.ROSTER_DEACTIVATION, projectLineups)
-}
-
-export function * watchPostActivateFulfilled () {
-  yield takeLatest(rosterActions.POST_ACTIVATE_FULFILLED, projectLineups)
-}
-
-export function * watchPostDeactivateFulfilled () {
-  yield takeLatest(rosterActions.POST_DEACTIVATE_FULFILLED, projectLineups)
+export function * watchRosterTransactions () {
+  yield takeLatest(rosterActions.ROSTER_TRANSACTIONS, projectLineups)
 }
 
 export function * watchAddPlayerRoster () {
@@ -279,7 +271,7 @@ export function * watchPostReleaseFulfilled () {
 export const rosterSagas = [
   fork(watchLoadRoster),
   fork(watchLoadRosters),
-  fork(watchUpdateRoster),
+  fork(watchUpdateRosterPlayerSlot),
   fork(watchActivatePlayer),
   fork(watchDeactivatePlayer),
   fork(watchAuthFulfilled),
@@ -287,11 +279,9 @@ export const rosterSagas = [
   fork(watchPlayersSelectPlayer),
 
   fork(watchProjectLineups),
-  fork(watchRosterActivation),
-  fork(watchRosterDeactivation),
+  fork(watchRosterTransaction),
+  fork(watchRosterTransactions),
   fork(watchSetRosterReserve),
-  fork(watchPostActivateFulfilled),
-  fork(watchPostDeactivateFulfilled),
 
   fork(watchAddFreeAgent),
   fork(watchReleasePlayer),

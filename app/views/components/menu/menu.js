@@ -12,6 +12,7 @@ const Menu = ({ app }) => (
     {app.userId && <NavLink to='/dashboard'>Roster</NavLink>}
     {app.userId && <NavLink to='/lineups'>Lineup</NavLink>}
     <NavLink to='/players'>Players</NavLink>
+    {app.userId && <NavLink to='/scoreboard'>Scoreboard</NavLink>}
     {app.userId && <NavLink to='/league'>League</NavLink>}
     {app.userId && <NavLink to='/trade'>Trade</NavLink>}
     {(app.userId && !week) && <NavLink to='/draft'>Draft</NavLink>}

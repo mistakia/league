@@ -15,6 +15,7 @@ import LeaguePage from '@pages/league'
 import TradePage from '@pages/trade'
 import SettingsPage from '@pages/settings'
 import MarkdownPage from '@pages/markdown'
+import ScoreboardPage from '@pages/scoreboard'
 
 const mapStateToProps = createSelector(
   getApp,
@@ -40,6 +41,7 @@ const Routes = ({ app, location }) => {
       {app.userId && <Route exact path='/dashboard' component={DashboardPage} />}
       {app.userId && <Route exact path='/lineups' component={LineupsPage} />}
       <Route exact path='/players' component={PlayersPage} />
+      {app.userId && <Route exact path='/scoreboard' component={ScoreboardPage} />}
       {app.userId && <Route exact path='/auction' component={AuctionPage} />}
       {app.userId && <Route exact path='/draft' component={DraftPage} />}
       {app.userId && <Route exact path='/trade' component={TradePage} />}

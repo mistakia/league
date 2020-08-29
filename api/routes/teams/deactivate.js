@@ -114,13 +114,18 @@ router.post('/?', async (req, res) => {
     }
     await db('transactions').insert(transaction)
 
-    res.send({ player, slot: constants.slots.PS, transaction })
+    const data = {
+      player,
+      tid,
+      slot: constants.slots.PS,
+      rid: roster.uid,
+      pos: playerRow.pos1,
+      transaction
+    }
+    res.send(data)
     broadcast(leagueId, {
-      type: 'ROSTER_DEACTIVATION',
-      payload: {
-        ...transaction,
-        slot: constants.slots.PS
-      }
+      type: 'ROSTER_TRANSACTION',
+      payload: { data }
     })
 
     const teams = await db('teams').where({ uid: tid })

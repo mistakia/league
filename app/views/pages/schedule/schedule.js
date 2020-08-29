@@ -9,10 +9,6 @@ import { groupBy } from '@common'
 import './schedule.styl'
 
 export default class SchedulePage extends React.Component {
-  componentDidMount = () => {
-    this.props.load()
-  }
-
   render = () => {
     const { matchups } = this.props
 

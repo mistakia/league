@@ -77,6 +77,7 @@ describe('API /teams - reserve', function () {
       // eslint-disable-next-line
       res.should.be.json
 
+      res.body.tid.should.equal(teamId)
       res.body.player.should.equal(player.player)
       res.body.slot.should.equal(constants.slots.IR)
       res.body.transaction.userid.should.equal(userId)
