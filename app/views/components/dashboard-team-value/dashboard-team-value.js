@@ -10,13 +10,27 @@ HighchartsMore(Highcharts)
 export default class DashboardTeamValue extends React.Component {
   render = () => {
     const { summary, league } = this.props
+    const quarterOfLeague = Math.ceil(league.nteams / 4)
+
+    const allValues = Object.values(summary.total).sort((a, b) => b - a)
+    const allRank = allValues.indexOf(summary.team_total) + 1
+    const allClassNames = []
+    if (allRank <= quarterOfLeague) allClassNames.push('text-green')
+    if (allRank >= (league.nteams - quarterOfLeague)) allClassNames.push('text-red')
+
     const rows = []
+    rows.push(
+      <tr key='overall'>
+        <td>All</td>
+        <td>{(summary.team_total || 0).toFixed(1)}</td>
+        <td className={allClassNames.join(' ')}>{`${allRank}${nth(allRank)}`}</td>
+      </tr>
+    )
     for (const [index, position] of constants.positions.entries()) {
       const values = summary.league[position].sort((a, b) => b - a)
       const value = summary.team[position] || 0
       const rank = values.indexOf(value) + 1
       const classNames = []
-      const quarterOfLeague = Math.ceil(league.nteams / 4)
       if (rank <= quarterOfLeague) classNames.push('text-green')
       if (rank >= (league.nteams - quarterOfLeague)) classNames.push('text-red')
       rows.push(
