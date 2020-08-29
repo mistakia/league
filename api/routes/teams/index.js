@@ -24,7 +24,7 @@ router.put('/:teamId', async (req, res) => {
     }
 
     const userTeamFields = ['teamtext', 'teamvoice', 'leaguetext']
-    const fields = ['name', 'image', 'abbrv', ...userTeamFields]
+    const fields = ['name', 'image', 'abbrv', 'pc', 'ac', ...userTeamFields]
 
     if (!field) {
       return res.status(400).send({ error: 'missing field' })
@@ -40,6 +40,12 @@ router.put('/:teamId', async (req, res) => {
 
     if (field === 'image') {
       // TODO validate url
+    }
+
+    if (['pc', 'ac'].includes(field)) {
+      if (typeof value !== 'string' || value.length !== 6) {
+        return res.status(400).send({ error: 'invalid value' })
+      }
     }
 
     if (userTeamFields.indexOf(field) < 0) {
