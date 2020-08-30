@@ -35,16 +35,16 @@ class PlayerRoster extends Player {
             {claim.bid && `$${claim.bid}`}
           </div>}
         <div className='player__item-metric'>
-          {(player.vorp.getIn(['0', vbaseline]) || 0).toFixed(1)}
+          {(player.getIn(['vorp', '0', vbaseline]) || 0).toFixed(1)}
         </div>
         <div className='player__item-metric'>
-          {player.lineups.starts}
+          {player.getIn(['lineups', 'starts'])}
         </div>
         <div className='player__item-metric'>
-          {(player.lineups.sp || 0).toFixed(1) || '--'}
+          {player.getIn(['lineups', 'sp'], 0).toFixed(1) || '--'}
         </div>
         <div className='player__item-metric'>
-          {(player.lineups.bp || 0).toFixed(1) || '--'}
+          {player.get(['lineups', 'bp'], 0).toFixed(1) || '--'}
         </div>
         <div className='player__item-action'>
           {!!isHosted && <IconButton small text onClick={this.handleContextClick} icon='more' />}
