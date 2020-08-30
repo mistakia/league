@@ -146,7 +146,7 @@ module.exports = async function ({
   })
 
   // send notification
-  let message = `${team.name} (${team.abbrv}) has signed free agent ${playerRow.fname} ${playerRow.lname} (${playerRow.pos1}) for ${bid}.`
+  let message = `${team.name} (${team.abbrv}) has signed free agent ${playerRow.fname} ${playerRow.lname} (${playerRow.pos1}) for $${bid}.`
   if (drop) {
     message += ` ${dropPlayerRow.fname} ${dropPlayerRow.lname} (${dropPlayerRow.pos1}) has been released.`
   }
