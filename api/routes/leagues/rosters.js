@@ -44,11 +44,7 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid value' })
     }
 
-    const rosterRow = await getRoster({
-      tid: teamId,
-      week: constants.season.week,
-      year: constants.season.year
-    })
+    const rosterRow = await getRoster({ tid: teamId })
     const roster = new Roster({ roster: rosterRow, league })
     if (!roster.availableSpace) {
       return res.status(400).send({ error: 'exceeds roster limits' })
@@ -136,11 +132,7 @@ router.put('/?', async (req, res) => {
     }
 
     // verify team cap
-    const rosterRow = await getRoster({
-      tid: teamId,
-      week: constants.season.week,
-      year: constants.season.year
-    })
+    const rosterRow = await getRoster({ tid: teamId })
     const roster = new Roster({ roster: rosterRow, league })
     roster.removePlayer(player)
     const val = parseInt(value, 10)

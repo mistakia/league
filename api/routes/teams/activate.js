@@ -32,7 +32,7 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
     const league = leagues[0]
-    const rosterRow = await getRoster({ tid, week: constants.season.week, year: constants.season.year })
+    const rosterRow = await getRoster({ tid })
     const roster = new Roster({ roster: rosterRow, league })
 
     // make sure player is on team

@@ -162,11 +162,7 @@ export default class Auction {
       return
     }
 
-    const roster = await getRoster({
-      tid,
-      week: constants.season.week,
-      year: constants.season.year
-    })
+    const roster = await getRoster({ tid })
 
     const r = new Roster({ roster, league: this._league })
     const hasSlot = r.hasOpenBenchSlot(playerInfo.pos1)
@@ -325,11 +321,7 @@ export default class Auction {
       return
     }
 
-    const roster = await getRoster({
-      tid: nominatingTeamId,
-      week: constants.season.week,
-      year: constants.season.year
-    })
+    const roster = await getRoster({ tid: nominatingTeamId })
 
     const r = new Roster({ roster, league: this._league })
     const hasSlot = r.hasOpenBenchSlot(playerInfo.pos1)
@@ -392,11 +384,7 @@ export default class Auction {
     this._league = leagues[0]
 
     for (const team of this._teams) {
-      const roster = await getRoster({
-        tid: team.uid,
-        week: constants.season.week,
-        year: constants.season.year
-      })
+      const roster = await getRoster({ tid: team.uid })
       const r = new Roster({ roster, league: this._league })
       team.availableSpace = r.availableSpace
       team.cap = r.availableCap
