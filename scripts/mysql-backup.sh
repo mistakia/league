@@ -6,7 +6,7 @@ DUMP_DIR="/root/backups"
 DB_NAME="league_production"
 DB_FILE="/root/.mysql/mysqldump.cnf"
 DB_TABLES="draft leagues matchups poaches rosters rosters_players teams trades trades_drops trades_picks trades_players trades_transactions transactions users users_sources users_teams waivers"
-DATE_FORMAT="%Y-%m-%d_%H"
+DATE_FORMAT="%Y-%m-%d_%H-%M"
 
 file_name="$(date +$DATE_FORMAT)"
 sql_file="$file_name.sql"
