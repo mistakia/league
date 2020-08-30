@@ -24,11 +24,7 @@ module.exports = async function ({
     throw new Error('invalid leagueId')
   }
   const league = leagues[0]
-  const rosterRow = await getRoster({
-    tid,
-    week: constants.season.week,
-    year: constants.season.year
-  })
+  const rosterRow = await getRoster({ tid })
   const roster = new Roster({ roster: rosterRow, league })
   if (!roster.has(player)) {
     throw new Error('player not on roster')
@@ -67,17 +63,6 @@ module.exports = async function ({
     }
   }
 
-  // remove drop player from rosters
-  const teamRosters = await db('rosters')
-    .where('week', '>=', constants.season.week)
-    .where('year', constants.season.year)
-    .where('tid', tid)
-  const rosterIds = teamRosters.map(r => r.uid)
-  await db('rosters_players')
-    .whereIn('rid', rosterIds)
-    .where('player', player)
-    .del()
-
   // create transaction
   const transaction = {
     userid,
@@ -91,8 +76,19 @@ module.exports = async function ({
   }
   await db('transactions').insert(transaction)
 
+  // remove drop player from rosters
+  const teamRosters = await db('rosters')
+    .where('week', '>=', constants.season.week)
+    .where('year', constants.season.year)
+    .where('tid', tid)
+  const rosterIds = teamRosters.map(r => r.uid)
+  await db('rosters_players')
+    .whereIn('rid', rosterIds)
+    .where('player', player)
+    .del()
+
   return {
-    player: player,
+    player,
     slot: null,
     tid,
     rid: roster.uid,
