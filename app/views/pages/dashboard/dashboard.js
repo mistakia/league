@@ -128,11 +128,11 @@ export default function () {
   }
 
   const poachItems = []
-  for (const poach of poaches) {
+  for (const [index, poach] of poaches.entries()) {
     if (poach.tid !== teamId) continue
     poachItems.push(
       <PlayerRoster
-        key={poach.player.player}
+        key={index}
         claim={poach}
         player={poach.player}
       />
