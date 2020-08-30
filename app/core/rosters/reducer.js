@@ -95,7 +95,7 @@ export function rostersReducer (state = new Map(), { payload, type }) {
         state.setIn([payload.data.tid, 'players', index, 'slot'], payload.data.slot)
         if (payload.data.transaction) {
           const { type, value, timestamp } = payload.data.transaction
-          state.mergIn([payload.data.tid, 'players', index], {
+          state.mergeIn([payload.data.tid, 'players', index], {
             type,
             value,
             timestamp
