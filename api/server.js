@@ -38,16 +38,18 @@ api.locals.db = db
 api.locals.config = config
 api.locals.logger = logger
 
+api.enable('etag')
 api.disable('x-powered-by')
 api.use(compression())
 api.use(morgan('api', 'combined'))
 api.use(bodyParser.json())
 
 api.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', config.url)
-  res.header('Access-Control-Allow-Credentials', 'true')
-  res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS, PUT')
-  res.header('Access-Control-Allow-Headers', 'Authorization, Origin, X-Requested-With, Content-Type, Accept')
+  res.set('Access-Control-Allow-Origin', config.url)
+  res.set('Access-Control-Allow-Credentials', 'true')
+  res.set('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS, PUT')
+  res.set('Access-Control-Allow-Headers', 'Authorization, Origin, X-Requested-With, Content-Type, Accept')
+  res.set('Cache-Control', 'no-cache, must-revalidate, proxy-revalidate')
   next()
 })
 
@@ -69,6 +71,9 @@ const speedLimiter = slowDown({
 })
 
 api.use('/api/*', expressJwt(config.jwt), (err, req, res, next) => {
+  res.set('Expires', '0')
+  res.set('Pragma', 'no-cache')
+  res.set('Surrogate-Control', 'no-store')
   if (err.code === 'invalid_token') return next()
   return next(err)
 })
@@ -90,7 +95,7 @@ api.use('/api/teams', routes.teams)
 api.use('/api/leagues', routes.leagues)
 api.use('/api/settings', routes.settings)
 api.use('/*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../', 'dist', 'index.html'))
+  res.sendFile(path.join(__dirname, '../', 'dist', 'index.html'), { cacheControl: false })
 })
 
 const createServer = () => {
