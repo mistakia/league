@@ -107,11 +107,7 @@ router.post('/accept', async (req, res, next) => {
     const league = leagues[0]
 
     // validate accepting team roster
-    const acceptingTeamRosterRow = await getRoster({
-      tid: trade.tid,
-      week: constants.season.week,
-      year: constants.season.year
-    })
+    const acceptingTeamRosterRow = await getRoster({ tid: trade.tid })
     const acceptingTeamRoster = new Roster({ roster: acceptingTeamRosterRow, league })
     for (const player of acceptingTeamDropPlayers) {
       if (!acceptingTeamRoster.has(player)) {
@@ -130,11 +126,7 @@ router.post('/accept', async (req, res, next) => {
     }
 
     // validate proposing team roster
-    const proposingTeamRosterRow = await getRoster({
-      tid: trade.pid,
-      week: constants.season.week,
-      year: constants.season.year
-    })
+    const proposingTeamRosterRow = await getRoster({ tid: trade.pid })
     const proposingTeamRoster = new Roster({ roster: proposingTeamRosterRow, league })
     proposingTeamDropPlayerIds.forEach(p => proposingTeamRoster.removePlayer(p))
     proposingTeamPlayers.forEach(p => proposingTeamRoster.removePlayer(p))

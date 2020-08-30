@@ -84,11 +84,7 @@ module.exports = async function ({
   }
 
   // verify team has bench space & passes roster constraints
-  const rosterRow = await getRoster({
-    tid: teamId,
-    week: constants.season.week,
-    year: constants.season.year
-  })
+  const rosterRow = await getRoster({ tid: teamId })
   const roster = new Roster({ roster: rosterRow, league })
   if (drop) {
     if (!roster.has(drop)) {

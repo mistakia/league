@@ -103,11 +103,7 @@ router.post('/?', async (req, res, next) => {
     const leagues = await db('leagues').where({ uid: leagueId })
     const league = leagues[0]
 
-    const proposingTeamRosterRow = await getRoster({
-      year: constants.season.year,
-      week: constants.season.week,
-      tid: pid
-    })
+    const proposingTeamRosterRow = await getRoster({ tid: pid })
     const proposingTeamRoster = new Roster({ roster: proposingTeamRosterRow, league })
 
     // valdiate drop players
@@ -142,11 +138,7 @@ router.post('/?', async (req, res, next) => {
     }
 
     // validate receiving players
-    const acceptingTeamRosterRow = await getRoster({
-      year: constants.season.year,
-      week: constants.season.week,
-      tid
-    })
+    const acceptingTeamRosterRow = await getRoster({ tid })
     const acceptingTeamRoster = new Roster({ roster: acceptingTeamRosterRow, league })
     for (const player of acceptingTeamPlayers) {
       if (!acceptingTeamRoster.has(player)) {
