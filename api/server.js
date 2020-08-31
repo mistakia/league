@@ -45,7 +45,7 @@ api.use(morgan('api', 'combined'))
 api.use(bodyParser.json())
 
 api.use((req, res, next) => {
-  res.set('Access-Control-Allow-Origin', config.url)
+  res.set('Access-Control-Allow-Origin', req.headers.origin || config.url)
   res.set('Access-Control-Allow-Credentials', 'true')
   res.set('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS, PUT')
   res.set('Access-Control-Allow-Headers', 'Authorization, Origin, X-Requested-With, Content-Type, Accept')
