@@ -282,6 +282,7 @@ export default function () {
               <div className='dashboard__section-header-title'>Active Roster</div>
               <div className='dashboard__section-body-header'>
                 <div className='player__item-name'>Name</div>
+                <div className='player__item-metric'>Salary</div>
                 <ValueHeader />
                 <StartsHeader />
                 <PointsPlusHeader />
@@ -298,6 +299,7 @@ export default function () {
               <div className='dashboard__section-header-title'>Practice Squad</div>
               <div className='dashboard__section-body-header'>
                 <div className='player__item-name'>Name</div>
+                <div className='player__item-metric'>Salary</div>
                 <ValueHeader />
                 <StartsHeader />
                 <PointsPlusHeader />
@@ -314,6 +316,7 @@ export default function () {
               <div className='dashboard__section-header-title'>Reserve/IR</div>
               <div className='dashboard__section-body-header'>
                 <div className='player__item-name'>Name</div>
+                <div className='player__item-metric'>Salary</div>
                 <ValueHeader />
                 <StartsHeader />
                 <PointsPlusHeader />
@@ -330,6 +333,7 @@ export default function () {
               <div className='dashboard__section-header-title'>Reserve/COVID-19</div>
               <div className='dashboard__section-body-header'>
                 <div className='player__item-name'>Name</div>
+                <div className='player__item-metric'>Salary</div>
                 <ValueHeader />
                 <StartsHeader />
                 <PointsPlusHeader />
