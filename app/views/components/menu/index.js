@@ -8,7 +8,7 @@ import Menu from './menu'
 
 const mapStateToProps = createSelector(
   getApp,
-  (app) => ({ app })
+  (app) => ({ isLoggedIn: !!app.userId })
 )
 
 export default withRouter(connect(
