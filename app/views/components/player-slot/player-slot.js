@@ -10,7 +10,7 @@ export default class PlayerSlot extends React.Component {
   render () {
     const { player, slot, handleSelect, selected, handleUpdate } = this.props
 
-    const slotName = Object.keys(constants.slots).find(key => constants.slots[key] === slot)
+    const slotName = constants.slotName[slot]
 
     let action
     if (!selected && player.player) {

@@ -1,4 +1,5 @@
 import React from 'react'
+import Grid from '@material-ui/core/Grid'
 
 import { Roster, constants } from '@common'
 import PlayerSlot from '@components/player-slot'
@@ -152,92 +153,57 @@ export default class Lineup extends React.Component {
       )
     }
 
-    const ir = []
-    for (const { slot, player } of r.ir) {
-      ir.push(
-        <PlayerSlot key={player} {...{ playerId: player, slot, roster }} />
-      )
-    }
+    /* const ir = []
+     * for (const { slot, player } of r.ir) {
+     *   ir.push(
+     *     <PlayerSlot key={player} {...{ playerId: player, slot, roster }} />
+     *   )
+     * }
 
-    const ps = []
-    for (const { slot, player } of r.practice) {
-      ps.push(
-        <PlayerSlot key={player} {...{ playerId: player, slot, roster }} />
-      )
-    }
-
+     * const ps = []
+     * for (const { slot, player } of r.practice) {
+     *   ps.push(
+     *     <PlayerSlot key={player} {...{ playerId: player, slot, roster }} />
+     *   )
+     * }
+     */
     return (
-      <div className='lineup'>
-        <div className='lineup__header'>
-          {/* TODO */}
-        </div>
-        <div className='lineup__body'>
-          <div className='lineup__starters'>
-            <div className='dashboard__section'>
-              <div className='dashboard__section-header'>
-                <div className='dashboard__section-body-header'>
-                  <div className='player__slot-slotName'>Slot</div>
-                  <div className='player__item-name'>Name</div>
-                  {/* <div className='player__item-metric'>Opp</div>
-                      <div className='player__item-metric'>Avg</div>
-                      <div className='player__item-metric'>Proj</div>
-                      <div className='player__item-metric'>Sos</div> */}
-                </div>
-              </div>
-              <div className='dashboard__section-body'>
-                {starters}
-              </div>
-            </div>
-          </div>
-          <div className='lineup__inactive'>
-            <div className='dashboard__section'>
-              <div className='dashboard__section-header'>
-                <div className='dashboard__section-body-header'>
-                  <div className='player__slot-slotName'>Slot</div>
-                  <div className='player__item-name'>Name</div>
-                  {/* <div className='player__item-metric'>Opp</div>
-                      <div className='player__item-metric'>Avg</div>
-                      <div className='player__item-metric'>Proj</div>
-                      <div className='player__item-metric'>Sos</div> */}
-                </div>
-              </div>
-              <div className='dashboard__section-body empty'>
-                {bench}
-              </div>
-            </div>
-            {/* <div className='dashboard__section'>
-                <div className='dashboard__section-header'>
-                <div className='dashboard__section-body-header'>
+      <Grid container spacing={1} classes={{ root: 'lineup' }}>
+        <Grid item xs={12} md={6}>
+          <div className='dashboard__section'>
+            <div className='dashboard__section-header'>
+              <div className='dashboard__section-body-header'>
                 <div className='player__slot-slotName'>Slot</div>
                 <div className='player__item-name'>Name</div>
-                {<div className='player__item-metric'>Opp</div>
-                <div className='player__item-metric'>Avg</div>
-                <div className='player__item-metric'>Proj</div>
-                <div className='player__item-metric'>Sos</div>}
-                </div>
-                </div>
-                <div className='dashboard__section-body'>
-                {ir}
-                </div>
-                </div>
-                <div className='dashboard__section'>
-                <div className='dashboard__section-header'>
-                <div className='dashboard__section-body-header'>
+                {/* <div className='player__item-metric'>Opp</div>
+                    <div className='player__item-metric'>Avg</div>
+                    <div className='player__item-metric'>Proj</div>
+                    <div className='player__item-metric'>Sos</div> */}
+              </div>
+            </div>
+            <div className='dashboard__section-body'>
+              {starters}
+            </div>
+          </div>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <div className='dashboard__section'>
+            <div className='dashboard__section-header'>
+              <div className='dashboard__section-body-header'>
                 <div className='player__slot-slotName'>Slot</div>
                 <div className='player__item-name'>Name</div>
-                {<div className='player__item-metric'>Opp</div>
-                <div className='player__item-metric'>Avg</div>
-                <div className='player__item-metric'>Proj</div>
-                <div className='player__item-metric'>Sos</div>}
-                </div>
-                </div>
-                <div className='dashboard__section-body'>
-                {ps}
-                </div>
-                </div> */}
+                {/* <div className='player__item-metric'>Opp</div>
+                    <div className='player__item-metric'>Avg</div>
+                    <div className='player__item-metric'>Proj</div>
+                    <div className='player__item-metric'>Sos</div> */}
+              </div>
+            </div>
+            <div className='dashboard__section-body empty'>
+              {bench}
+            </div>
           </div>
-        </div>
-      </div>
+        </Grid>
+      </Grid>
     )
   }
 }
