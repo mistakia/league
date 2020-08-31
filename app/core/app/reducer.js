@@ -1,5 +1,6 @@
 import { Record, List } from 'immutable'
 import SHA256 from 'crypto-js/sha256'
+import Bugsnag from '@bugsnag/js'
 
 import { DEFAULT_LEAGUE_ID } from '@core/constants'
 import { appActions } from './actions'
@@ -42,6 +43,7 @@ export function appReducer (state = initialState(), { payload, type }) {
       })
 
     case appActions.AUTH_FULFILLED:
+      Bugsnag.setUser(payload.data.user.id, payload.data.user.email)
       return state.merge({
         leagueId: payload.data.leagues.length ? payload.data.leagues[0].uid : undefined,
         teamId: payload.data.teams.length ? payload.data.teams[0].uid : undefined,
