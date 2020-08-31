@@ -10,7 +10,7 @@ module.exports = async ({ teamId, leagueId }) => {
   const reservePlayerIds = roster.reserve.map(p => p.player)
 
   const players = await db('players')
-    .select(db.raw('min(players.status) as status, min(players.injury_status) as injuryStatus, min(players.injury_body_part) as injuryBodyPart'))
+    .select(db.raw('players.player, min(players.status) as status, min(players.injury_status) as injuryStatus, min(players.injury_body_part) as injuryBodyPart'))
     .whereIn('player', reservePlayerIds)
     .groupBy('player')
 
