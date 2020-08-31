@@ -805,7 +805,7 @@ export const collegeDivisions = [
   'Western Athletic'
 ]
 
-export const availability = ['ROSTERED', 'FREE AGENT', 'PRACTICE SQUAD', 'INJURED RESERVE']
+export const availability = ['ACTIVE ROSTER', 'FREE AGENT', 'PRACTICE SQUAD', 'INJURED RESERVE']
 
 export const errors = {
   INVALID_PARAMS: 1,
