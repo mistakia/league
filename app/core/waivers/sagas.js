@@ -1,9 +1,10 @@
-import { call, takeLatest, fork, select } from 'redux-saga/effects'
+import { call, takeLatest, fork, select, put } from 'redux-saga/effects'
 
 import { getApp } from '@core/app'
 import { waiverActions } from './actions'
 import { postWaiver, postCancelWaiver, postWaiverOrder } from '@core/api'
 import { getWaiverPlayersForCurrentTeam } from './selectors'
+import { notificationActions } from '@core/notifications'
 
 export function * claim ({ payload }) {
   const { leagueId, teamId } = yield select(getApp)
@@ -31,6 +32,27 @@ export function * reorder ({ payload }) {
   yield call(postWaiverOrder, { leagueId, teamId, waivers, reset })
 }
 
+export function * waiverNotification () {
+  yield put(notificationActions.show({
+    message: 'Waiver Submitted',
+    severity: 'success'
+  }))
+}
+
+export function * waiverOrderNotification () {
+  yield put(notificationActions.show({
+    message: 'Waiver Order Updated',
+    severity: 'success'
+  }))
+}
+
+export function * cancelWaiverNotification () {
+  yield put(notificationActions.show({
+    message: 'Waiver Cancelled',
+    severity: 'success'
+  }))
+}
+
 //= ====================================
 //  WATCHERS
 // -------------------------------------
@@ -47,6 +69,18 @@ export function * watchReorderWaivers () {
   yield takeLatest(waiverActions.REORDER_WAIVERS, reorder)
 }
 
+export function * watchPostWaiverFulfilled () {
+  yield takeLatest(waiverActions.POST_WAIVER_FULFILLED, waiverNotification)
+}
+
+export function * watchPostWaiverOrderFulfilled () {
+  yield takeLatest(waiverActions.POST_WAIVER_ORDER_FULFILLED, waiverOrderNotification)
+}
+
+export function * watchPostCancelWaiverFulfilled () {
+  yield takeLatest(waiverActions.POST_CANCEL_WAIVER_FULFILLED, cancelWaiverNotification)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -54,5 +88,8 @@ export function * watchReorderWaivers () {
 export const waiverSagas = [
   fork(watchClaim),
   fork(watchCancelClaim),
-  fork(watchReorderWaivers)
+  fork(watchReorderWaivers),
+  fork(watchPostWaiverOrderFulfilled),
+  fork(watchPostWaiverFulfilled),
+  fork(watchPostCancelWaiverFulfilled)
 ]
