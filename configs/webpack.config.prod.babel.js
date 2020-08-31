@@ -4,7 +4,7 @@ const webpack = require('webpack')
 // import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 // import OptimizeCSSAssetsPlugin from 'optimize-css-assets-webpack-plugin'
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
-const { BugsnagSourceMapUploaderPlugin } = require('webpack-bugsnag-plugins')
+// const { BugsnagSourceMapUploaderPlugin } = require('webpack-bugsnag-plugins')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const HtmlWebpackInlineSourcePlugin = require('html-webpack-inline-source-plugin')
 const nib = require('nib')
@@ -104,10 +104,10 @@ module.exports = merge.smart(baseConfig, {
       analyzerMode:
         process.env.OPEN_ANALYZER === 'true' ? 'server' : 'disabled',
       openAnalyzer: process.env.OPEN_ANALYZER === 'true'
-    }),
-    new BugsnagSourceMapUploaderPlugin({
-      apiKey: '183fca706d9f94c00a661167bf8cfc5d',
-      appVersion: VERSION
     })
+    /* new BugsnagSourceMapUploaderPlugin({
+     *   apiKey: '183fca706d9f94c00a661167bf8cfc5d',
+     *   appVersion: VERSION
+     * }) */
   ]
 })

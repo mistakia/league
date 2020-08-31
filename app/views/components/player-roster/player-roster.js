@@ -26,6 +26,10 @@ class PlayerRoster extends Player {
         <div className='player__item-name'>
           <PlayerNameExpanded playerId={player.player} />
         </div>
+        {!isClaim &&
+          <div className='player__item-metric'>
+            ${player.value}
+          </div>}
         {isClaim &&
           <div className='player__item-name'>
             {claim.drop && <PlayerNameExpanded playerId={claim.drop} />}
