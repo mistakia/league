@@ -3,7 +3,6 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { getApp, appActions } from '@core/app'
-import { errorActions } from '@core/errors'
 
 import App from './app'
 
@@ -17,8 +16,7 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  init: appActions.init,
-  report: errorActions.report
+  init: appActions.init
 }
 
 export default connect(

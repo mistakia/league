@@ -4,6 +4,7 @@ const webpack = require('webpack')
 // import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 // import OptimizeCSSAssetsPlugin from 'optimize-css-assets-webpack-plugin'
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
+const { BugsnagSourceMapUploaderPlugin } = require('webpack-bugsnag-plugins')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const HtmlWebpackInlineSourcePlugin = require('html-webpack-inline-source-plugin')
 const nib = require('nib')
@@ -16,8 +17,10 @@ const baseConfig = require('./webpack.config.base')
 // CheckNodeEnv('production')
 // DeleteSourceMaps()
 
+const VERSION = '0.0.1'
+
 module.exports = merge.smart(baseConfig, {
-  devtool: process.env.DEBUG_PROD === 'true' ? 'source-map' : 'none',
+  devtool: 'source-map',
 
   mode: 'production',
 
@@ -84,7 +87,8 @@ module.exports = merge.smart(baseConfig, {
      * development checks
      */
     new webpack.DefinePlugin({
-      IS_DEV: false
+      IS_DEV: false,
+      APP_VERSION: JSON.stringify(VERSION)
     }),
 
     /* new MiniCssExtractPlugin({
@@ -100,6 +104,10 @@ module.exports = merge.smart(baseConfig, {
       analyzerMode:
         process.env.OPEN_ANALYZER === 'true' ? 'server' : 'disabled',
       openAnalyzer: process.env.OPEN_ANALYZER === 'true'
+    }),
+    new BugsnagSourceMapUploaderPlugin({
+      apiKey: '183fca706d9f94c00a661167bf8cfc5d',
+      appVersion: VERSION
     })
   ]
 })

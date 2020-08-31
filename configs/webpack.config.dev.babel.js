@@ -61,7 +61,8 @@ module.exports = merge.smart(baseConfig, {
      * 'staging', for example, by changing the ENV variables in the npm scripts
      */
     new webpack.DefinePlugin({
-      IS_DEV: true
+      IS_DEV: true,
+      APP_VERSION: JSON.stringify('0.0.x')
     }),
 
     new webpack.LoaderOptionsPlugin({
