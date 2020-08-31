@@ -1,10 +1,27 @@
-#menu
-  fixed left top right
-  height $menuHeight
-  display flex
-  z-index 1
-  justify-content center
-  align-items center
-  border-bottom 1px solid $borderColor
-  user-select none
-  background $backgroundColor
+.main__menu
+  .MuiAppBar-root
+    border-bottom 1px solid $borderColor
+  .MuiToolbar-root a
+    padding 0 12px
+    height 36px
+    display flex
+    align-items center
+    border-radius 3px
+    &:hover
+      background-color rgba(0,0,0,0.08)
+
+    &.active
+      font-weight 600
+
+.MuiDrawer-paper
+  width 250px
+
+@media (min-width 1051px)
+  .main__menu .MuiToolbar-root
+    justify-content center
+    .main__menu-button
+      display none
+
+@media screen and (max-width 1050px)
+  .main__menu .MuiToolbar-root a
+    display none
