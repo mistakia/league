@@ -94,6 +94,9 @@ api.use('/api/projections', routes.projections)
 api.use('/api/teams', routes.teams)
 api.use('/api/leagues', routes.leagues)
 api.use('/api/settings', routes.settings)
+api.use('/index.js.map', (req, res) => {
+  res.sendFile(path.join(__dirname, '../', 'dist', 'index.js.map'), { cacheControl: false })
+})
 api.use('/*', (req, res) => {
   res.sendFile(path.join(__dirname, '../', 'dist', 'index.html'), { cacheControl: false })
 })
