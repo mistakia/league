@@ -45,6 +45,7 @@ export default class PlayerContextMenu extends React.Component {
       description: `Your claim for ${player.fname} ${player.lname} (${player.pos1}) will no longer be processed.`,
       onConfirm: () => cancelClaim(waiverId)
     })
+    this.props.hide()
   }
 
   handlePoach = () => {
