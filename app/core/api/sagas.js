@@ -1,7 +1,8 @@
 import { race, call, put, take, cancelled, select } from 'redux-saga/effects'
-import { api, apiRequest } from '@core/api/service'
+import Bugsnag from '@bugsnag/js'
 import { LOCATION_CHANGE } from 'connected-react-router'
 
+import { api, apiRequest } from '@core/api/service'
 import {
   authActions,
   loginActions,
@@ -55,7 +56,7 @@ import {
   postWaiverOrderActions
 } from '@core/waivers'
 import { notificationActions } from '@core/notifications'
-import { postErrorActions, errorActions } from '@core/errors'
+import { postErrorActions } from '@core/errors'
 
 function * fetchAPI (apiFunction, actions, opts = {}) {
   const { token } = yield select(getApp)
@@ -67,7 +68,9 @@ function * fetchAPI (apiFunction, actions, opts = {}) {
   } catch (err) {
     if (!opts.ignoreError) {
       yield put(notificationActions.show({ severity: 'error', message: err.message }))
-      yield put(errorActions.report({ message: `api: ${err.message}`, stack: err.stack })) // TODO include context like api url and options
+      Bugsnag.notify(err, (event) => {
+        event.addMetadata('options', opts)
+      })
     }
     yield put(actions.failed(opts, err.toString()))
   } finally {
