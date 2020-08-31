@@ -15,6 +15,7 @@ const logger = debug('api')
 const jwt = require('jsonwebtoken')
 const expressJwt = require('express-jwt')
 const slowDown = require('express-slow-down')
+const favicon = require('serve-favicon')
 
 const config = require('../config')
 const routes = require('./routes')
@@ -44,6 +45,7 @@ api.use(compression())
 api.use(morgan('api', 'combined'))
 api.use(bodyParser.json())
 
+api.use(favicon(path.join(__dirname, '../', 'dist', 'favicon.ico'), { maxAge: '604800' }))
 api.use((req, res, next) => {
   res.set('Access-Control-Allow-Origin', req.headers.origin || config.url)
   res.set('Access-Control-Allow-Credentials', 'true')
