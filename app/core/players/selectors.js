@@ -125,7 +125,7 @@ export function getFilteredPlayers (state) {
     const practiceSquadPlayerIds = getPracticeSquadPlayerIdsForCurrentLeague(state)
     const injuredReservePlayerIds = getInjuredReservePlayerIdsForCurrentLeague(state)
     filtered = filtered.filter(player => {
-      if (availability.includes('ROSTERED') && activeRosterPlayerIds.includes(player.player)) {
+      if (availability.includes('ACTIVE ROSTER') && activeRosterPlayerIds.includes(player.player)) {
         return true
       }
 
