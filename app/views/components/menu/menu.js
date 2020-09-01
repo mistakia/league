@@ -46,20 +46,20 @@ export default class Menu extends React.Component {
     let header
     if (isLoggedIn) {
       header = (
-        <ListItem button onClick={this.handleClick('/login')}>
-          <ListItemAvatar>
-            <Avatar alt='' />
-          </ListItemAvatar>
-          <ListItemText primary='Login/Register' />
-        </ListItem>
-      )
-    } else {
-      header = (
         <ListItem alignItems='flex-start'>
           <ListItemAvatar>
             <Avatar alt={team.logo} />
           </ListItemAvatar>
           <ListItemText primary={team.name} secondary='0-0' />
+        </ListItem>
+      )
+    } else {
+      header = (
+        <ListItem button onClick={this.handleClick('/login')}>
+          <ListItemAvatar>
+            <Avatar alt='' />
+          </ListItemAvatar>
+          <ListItemText primary='Login/Register' />
         </ListItem>
       )
     }
