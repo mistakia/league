@@ -1,4 +1,4 @@
-/* global describe before it beforeEach*/
+/* global describe before it beforeEach */
 process.env.NODE_ENV = 'test'
 
 const chai = require('chai')
@@ -14,9 +14,6 @@ const {
   addPlayer,
   selectPlayer,
   checkLastTransaction,
-  notLoggedIn,
-  missing,
-  invalid,
   error
 } = require('./utils')
 
@@ -276,7 +273,6 @@ describe('API /trades', function () {
       const teamId = 1
       const leagueId = 1
       const userId = 1
-      const value = 3
       await addPlayer({
         teamId,
         leagueId,
@@ -317,7 +313,6 @@ describe('API /trades', function () {
           tid: 2,
           leagueId: 1
         })
-
 
       await error(request, 'player has poaching claim')
     })
