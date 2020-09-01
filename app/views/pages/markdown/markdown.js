@@ -1,6 +1,7 @@
 /* global fetch */
 import React from 'react'
 import marked from 'marked'
+import Container from '@material-ui/core/Container'
 
 import { DOCS_URL } from '@core/constants'
 import PageLayout from '@layouts/page'
@@ -40,7 +41,9 @@ export default class MarkdownPage extends React.Component {
         }
         const markdown = marked(content, { renderer })
         const html = (
-          <div className='markdown' dangerouslySetInnerHTML={{ __html: markdown }} />
+          <Container maxWidth='md'>
+            <div className='markdown' dangerouslySetInnerHTML={{ __html: markdown }} />
+          </Container>
         )
         this.setState({ html })
       }).catch((error) => {

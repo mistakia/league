@@ -1,4 +1,5 @@
 import React from 'react'
+import Container from '@material-ui/core/Container'
 
 import PageLayout from '@layouts/page'
 
@@ -6,7 +7,7 @@ import './standings.styl'
 
 export default function () {
   const body = (
-    <div className='standings'>
+    <Container maxWidth='md' classes={{ root: 'standings' }}>
       <div className='dashboard__section'>
         <div className='dashboard__section-header'>
           <div className='dashboard__section-header-title'>Overall</div>
@@ -112,7 +113,7 @@ export default function () {
         </div>
         <div className='dashboard__section-body' />
       </div>
-    </div>
+    </Container>
   )
 
   return (
