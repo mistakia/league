@@ -161,20 +161,18 @@ export default function () {
   })
 
   const poachWaiverSection = (
-    <div className='dashboard__section'>
-      <div className='dashboard__section-header'>
-        <div className='dashboard__section-header-title'>Poaching Waiver Claims</div>
-        <div className='dashboard__section-body-header'>
-          <div className='player__item-name'>Poach</div>
-          <div className='player__item-name'>Release</div>
-          <div className='player__item-metric'>Bid</div>
-          <ValueHeader />
-          <StartsHeader />
-          <PointsPlusHeader />
-          <BenchPlusHeader />
-          <div className='player__item-action' />
-          <div className='player__item-action' />
-        </div>
+    <div className='section'>
+      <div className='dashboard__section-header-title'>Poaching Waiver Claims</div>
+      <div className='dashboard__section-body-header'>
+        <div className='player__item-name'>Poach</div>
+        <div className='player__item-name'>Release</div>
+        <div className='player__item-metric'>Bid</div>
+        <ValueHeader />
+        <StartsHeader />
+        <PointsPlusHeader />
+        <BenchPlusHeader />
+        <div className='player__item-action' />
+        <div className='player__item-action' />
       </div>
       <div className='dashboard__section-body empty'>
         <SortableList
@@ -190,20 +188,18 @@ export default function () {
   )
 
   const freeAgencyActiveWaiverSection = (
-    <div className='dashboard__section'>
-      <div className='dashboard__section-header'>
-        <div className='dashboard__section-header-title'>Free Agency Waiver Claims - Active Roster</div>
-        <div className='dashboard__section-body-header'>
-          <div className='player__item-name'>Sign</div>
-          <div className='player__item-name'>Release</div>
-          <div className='player__item-metric'>Bid</div>
-          <ValueHeader />
-          <StartsHeader />
-          <PointsPlusHeader />
-          <BenchPlusHeader />
-          <div className='player__item-action' />
-          <div className='player__item-action' />
-        </div>
+    <div className='section'>
+      <div className='dashboard__section-header-title'>Free Agency Waiver Claims - Active Roster</div>
+      <div className='dashboard__section-body-header'>
+        <div className='player__item-name'>Sign</div>
+        <div className='player__item-name'>Release</div>
+        <div className='player__item-metric'>Bid</div>
+        <ValueHeader />
+        <StartsHeader />
+        <PointsPlusHeader />
+        <BenchPlusHeader />
+        <div className='player__item-action' />
+        <div className='player__item-action' />
       </div>
       <div className='dashboard__section-body empty'>
         <SortableList
@@ -219,20 +215,18 @@ export default function () {
   )
 
   const freeAgencyPracticeWaiverSection = (
-    <div className='dashboard__section'>
-      <div className='dashboard__section-header'>
-        <div className='dashboard__section-header-title'>Free Agency Waiver Claims - Practice Squad</div>
-        <div className='dashboard__section-body-header'>
-          <div className='player__item-name'>Sign</div>
-          <div className='player__item-name'>Release</div>
-          <div className='player__item-metric'>Bid</div>
-          <ValueHeader />
-          <StartsHeader />
-          <PointsPlusHeader />
-          <BenchPlusHeader />
-          <div className='player__item-action' />
-          <div className='player__item-action' />
-        </div>
+    <div className='section'>
+      <div className='dashboard__section-header-title'>Free Agency Waiver Claims - Practice Squad</div>
+      <div className='dashboard__section-body-header'>
+        <div className='player__item-name'>Sign</div>
+        <div className='player__item-name'>Release</div>
+        <div className='player__item-metric'>Bid</div>
+        <ValueHeader />
+        <StartsHeader />
+        <PointsPlusHeader />
+        <BenchPlusHeader />
+        <div className='player__item-action' />
+        <div className='player__item-action' />
       </div>
       <div className='dashboard__section-body empty'>
         <SortableList
@@ -248,19 +242,17 @@ export default function () {
   )
 
   const teamPoachSection = (
-    <div className='dashboard__section'>
-      <div className='dashboard__section-header'>
-        <div className='dashboard__section-header-title'>Poaching Claims</div>
-        <div className='dashboard__section-body-header'>
-          <div className='player__item-name'>Name</div>
-          <div className='player__item-name'>Release</div>
-          <div className='player__item-metric'>Bid</div>
-          <ValueHeader />
-          <StartsHeader />
-          <PointsPlusHeader />
-          <BenchPlusHeader />
-          <div className='player__item-action' />
-        </div>
+    <div className='section'>
+      <div className='dashboard__section-header-title'>Poaching Claims</div>
+      <div className='dashboard__section-body-header'>
+        <div className='player__item-name'>Name</div>
+        <div className='player__item-name'>Release</div>
+        <div className='player__item-metric'>Bid</div>
+        <ValueHeader />
+        <StartsHeader />
+        <PointsPlusHeader />
+        <BenchPlusHeader />
+        <div className='player__item-action' />
       </div>
       <div className='dashboard__section-body empty'>
         {poachItems}
@@ -277,83 +269,73 @@ export default function () {
           {waivers.active.size ? freeAgencyActiveWaiverSection : null}
           {waivers.practice.size ? freeAgencyPracticeWaiverSection : null}
           {poachItems.length ? teamPoachSection : null}
-          <div className='dashboard__section'>
-            <div className='dashboard__section-header'>
-              <div className='dashboard__section-header-title'>Active Roster</div>
-              <div className='dashboard__section-body-header'>
-                <div className='player__item-name'>Name</div>
-                <div className='player__item-metric'>Salary</div>
-                <ValueHeader />
-                <StartsHeader />
-                <PointsPlusHeader />
-                <BenchPlusHeader />
-                <div className='player__item-action' />
-              </div>
+          <div className='section'>
+            <div className='dashboard__section-header-title'>Active Roster</div>
+            <div className='dashboard__section-body-header'>
+              <div className='player__item-name'>Name</div>
+              <div className='player__item-metric'>Salary</div>
+              <ValueHeader />
+              <StartsHeader />
+              <PointsPlusHeader />
+              <BenchPlusHeader />
+              <div className='player__item-action' />
             </div>
             <div className='dashboard__section-body empty'>
               {activeItems}
             </div>
           </div>
-          <div className='dashboard__section'>
-            <div className='dashboard__section-header'>
-              <div className='dashboard__section-header-title'>Practice Squad</div>
-              <div className='dashboard__section-body-header'>
-                <div className='player__item-name'>Name</div>
-                <div className='player__item-metric'>Salary</div>
-                <ValueHeader />
-                <StartsHeader />
-                <PointsPlusHeader />
-                <BenchPlusHeader />
-                <div className='player__item-action' />
-              </div>
+          <div className='section'>
+            <div className='dashboard__section-header-title'>Practice Squad</div>
+            <div className='dashboard__section-body-header'>
+              <div className='player__item-name'>Name</div>
+              <div className='player__item-metric'>Salary</div>
+              <ValueHeader />
+              <StartsHeader />
+              <PointsPlusHeader />
+              <BenchPlusHeader />
+              <div className='player__item-action' />
             </div>
             <div className='dashboard__section-body empty'>
               {practiceItems}
             </div>
           </div>
-          <div className='dashboard__section'>
-            <div className='dashboard__section-header'>
-              <div className='dashboard__section-header-title'>Reserve/IR</div>
-              <div className='dashboard__section-body-header'>
-                <div className='player__item-name'>Name</div>
-                <div className='player__item-metric'>Salary</div>
-                <ValueHeader />
-                <StartsHeader />
-                <PointsPlusHeader />
-                <BenchPlusHeader />
-                <div className='player__item-action' />
-              </div>
+          <div className='section'>
+            <div className='dashboard__section-header-title'>Reserve/IR</div>
+            <div className='dashboard__section-body-header'>
+              <div className='player__item-name'>Name</div>
+              <div className='player__item-metric'>Salary</div>
+              <ValueHeader />
+              <StartsHeader />
+              <PointsPlusHeader />
+              <BenchPlusHeader />
+              <div className='player__item-action' />
             </div>
             <div className='dashboard__section-body empty'>
               {reserveIRItems}
             </div>
           </div>
-          <div className='dashboard__section'>
-            <div className='dashboard__section-header'>
-              <div className='dashboard__section-header-title'>Reserve/COVID-19</div>
-              <div className='dashboard__section-body-header'>
-                <div className='player__item-name'>Name</div>
-                <div className='player__item-metric'>Salary</div>
-                <ValueHeader />
-                <StartsHeader />
-                <PointsPlusHeader />
-                <BenchPlusHeader />
-                <div className='player__item-action' />
-              </div>
+          <div className='section'>
+            <div className='dashboard__section-header-title'>Reserve/COVID-19</div>
+            <div className='dashboard__section-body-header'>
+              <div className='player__item-name'>Name</div>
+              <div className='player__item-metric'>Salary</div>
+              <ValueHeader />
+              <StartsHeader />
+              <PointsPlusHeader />
+              <BenchPlusHeader />
+              <div className='player__item-action' />
             </div>
             <div className='dashboard__section-body empty'>
               {reserveCOVItems}
             </div>
           </div>
-          <div className='dashboard__section'>
-            <div className='dashboard__section-header'>
-              <div className='dashboard__section-header-title'>Draft Picks</div>
-              <div className='dashboard__section-body-header'>
-                <div className='player__item-name'>Year</div>
-                <div className='player__item-metric'>Pick</div>
-                <div className='player__item-metric'>Round</div>
-                <div className='player__item-metric'>Pick #</div>
-              </div>
+          <div className='section'>
+            <div className='dashboard__section-header-title'>Draft Picks</div>
+            <div className='dashboard__section-body-header'>
+              <div className='player__item-name'>Year</div>
+              <div className='player__item-metric'>Pick</div>
+              <div className='player__item-metric'>Round</div>
+              <div className='player__item-metric'>Pick #</div>
             </div>
             <div className='dashboard__section-body empty'>
               {pickItems}

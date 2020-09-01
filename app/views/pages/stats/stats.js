@@ -24,50 +24,44 @@ export default class StatsPage extends React.Component {
 
     const body = (
       <div className='stats'>
-        <div className='dashboard__section'>
-          <div className='dashboard__section-header'>
-            <div className='dashboard__section-header-title'>League Stats</div>
-            <div className='dashboard__section-body-header'>
-              <div className='player__item-position' />
-              <div className='player__item-name'>Team</div>
-              <div className='player__item-metric'>PF</div>
-              <div className='player__item-metric'>OPF</div>
-              <div className='player__item-metric'>EFF</div>
-              <div className='player__item-metric'>MAX</div>
-              <div className='player__item-metric'>MIN</div>
-              <div className='player__item-metric'>STDEV</div>
-              <div className='player__row-group'>
-                <div className='player__row-group-head'>All Play Record</div>
-                <div className='player__row-group-body'>
-                  <div className='player__item-metric'>W</div>
-                  <div className='player__item-metric'>L</div>
-                  <div className='player__item-metric'>T</div>
-                  <div className='player__item-metric'>PCT</div>
-                </div>
+        <div className='section'>
+          <div className='dashboard__section-header-title'>League Stats</div>
+          <div className='dashboard__section-body-header'>
+            <div className='player__item-position' />
+            <div className='player__item-name'>Team</div>
+            <div className='player__item-metric'>PF</div>
+            <div className='player__item-metric'>OPF</div>
+            <div className='player__item-metric'>EFF</div>
+            <div className='player__item-metric'>MAX</div>
+            <div className='player__item-metric'>MIN</div>
+            <div className='player__item-metric'>STDEV</div>
+            <div className='player__row-group'>
+              <div className='player__row-group-head'>All Play Record</div>
+              <div className='player__row-group-body'>
+                <div className='player__item-metric'>W</div>
+                <div className='player__item-metric'>L</div>
+                <div className='player__item-metric'>T</div>
+                <div className='player__item-metric'>PCT</div>
               </div>
             </div>
           </div>
           <div className='dashboard__section-body' />
         </div>
-        <div className='dashboard__section'>
-          <div className='dashboard__section-header'>
-            <div className='dashboard__section-header-title'>Lineup Stats</div>
-            <div className='dashboard__section-body-header'>
-              <div className='player__item-position' />
-              <div className='player__item-name'>Team</div>
-              {lineupHeaders}
-            </div>
+        <div className='section'>
+          <div className='dashboard__section-header-title'>Lineup Stats</div>
+          <div className='dashboard__section-body-header'>
+            <div className='player__item-position' />
+            <div className='player__item-name'>Team</div>
+            {lineupHeaders}
           </div>
           <div className='dashboard__section-body' />
         </div>
-        <div className='dashboard__section'>
-          <div className='dashboard__section-header'>
-            <div className='dashboard__section-header-title'>Positional Stats</div>
-            <div className='dashboard__section-body-header'>
-              <div className='player__item-position' />
-              <div className='player__item-name'>Team</div>
-              {positionalHeaders}
-            </div>
+        <div className='section'>
+          <div className='dashboard__section-header-title'>Positional Stats</div>
+          <div className='dashboard__section-body-header'>
+            <div className='player__item-position' />
+            <div className='player__item-name'>Team</div>
+            {positionalHeaders}
           </div>
           <div className='dashboard__section-body' />
         </div>
