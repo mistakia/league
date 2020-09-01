@@ -100,6 +100,24 @@ router.post('/?', async (req, res, next) => {
       return res.status(400).send({ error: 'missing param tid' })
     }
 
+    // make sure no player is on the practice squad with an existing poaching claim
+    const allPlayers = proposingTeamPlayers.concat(acceptingTeamPlayers, dropPlayers)
+    const psPlayers = await db('rosters_players')
+      .join('rosters', 'rosters_players.rid', 'rosters.uid')
+      .join('poaches', 'rosters_players.player', 'poaches.player')
+      .where({
+        year: constants.season.year,
+        week: constants.season.week,
+        slot: constants.slots.PS
+      })
+      .whereNull('poaches.processed')
+      .where('poaches.lid', leagueId)
+      .whereIn('rosters_players.player', allPlayers)
+
+    if (psPlayers.length) {
+      return res.status(400).send({ error: 'player has poaching claim' })
+    }
+
     const leagues = await db('leagues').where({ uid: leagueId })
     const league = leagues[0]
 
