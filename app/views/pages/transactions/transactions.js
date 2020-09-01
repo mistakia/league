@@ -1,5 +1,6 @@
 import React from 'react'
 import { AutoSizer, List, InfiniteLoader } from 'react-virtualized'
+import Container from '@material-ui/core/Container'
 
 import PageLayout from '@layouts/page'
 import TransactionRow from '@components/transaction-row'
@@ -28,7 +29,7 @@ export default class TransactionsPage extends React.Component {
     const rowCount = hasMore ? transactions.size + 1 : transactions.size
 
     const body = (
-      <div className='transactions'>
+      <Container maxWidth='md' classes={{ root: 'transactions' }}>
         <div className='transactions__filter'>
           <TransactionTypeFilter />
           <TransactionTeamFilter />
@@ -56,7 +57,7 @@ export default class TransactionsPage extends React.Component {
             )}
           </InfiniteLoader>
         </div>
-      </div>
+      </Container>
     )
 
     return (

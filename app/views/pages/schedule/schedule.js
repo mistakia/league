@@ -1,4 +1,5 @@
 import React from 'react'
+import Container from '@material-ui/core/Container'
 
 import PageLayout from '@layouts/page'
 import Matchup from '@components/matchup'
@@ -29,7 +30,7 @@ export default class SchedulePage extends React.Component {
     }
 
     const body = (
-      <div className='schedule'>
+      <Container maxWidth='md'>
         <div className='schedule__filter'>
           <ScheduleWeeksFilter />
           <ScheduleTeamsFilter />
@@ -37,7 +38,7 @@ export default class SchedulePage extends React.Component {
         <div className='schedule__body'>
           {sections}
         </div>
-      </div>
+      </Container>
     )
 
     return (
