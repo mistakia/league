@@ -1,4 +1,5 @@
 import React from 'react'
+import Container from '@material-ui/core/Container'
 
 import EditableLeague from '@components/editable-league'
 import SettingsTeam from '@components/settings-team'
@@ -15,7 +16,7 @@ export default class SettingsPage extends React.Component {
     const { userId, leagueId, teamId, isHosted } = this.props
 
     const body = (
-      <div className='settings'>
+      <Container maxWidth='lg' classes={{ root: 'settings' }}>
         <div>
           <EditableLeague lid={leagueId} />
           {teamId && <SettingsTeam tid={teamId} />}
@@ -24,7 +25,7 @@ export default class SettingsPage extends React.Component {
           {(userId && isHosted) && <SettingsNotifications />}
         </div>
         <EditableTeams />
-      </div>
+      </Container>
     )
 
     return (

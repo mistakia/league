@@ -41,13 +41,13 @@ export default class RostersPage extends React.Component {
 
     if (league.srbwrte) {
       for (let i = 0; i < league.srbwrte; i++) {
-        labels.push(<div key={`${i}RBWRTE`} className='roster__item'>RB/WR/TE</div>)
+        labels.push(<div key={`${i}RBWRTE`} className='roster__item'>FLEX</div>)
       }
     }
 
     if (league.sqbrbwrte) {
       for (let i = 0; i < league.sqbrbwrte; i++) {
-        labels.push(<div key={`${i}QBRBWRTE`} className='roster__item'>QB/RB/WR/TE</div>)
+        labels.push(<div key={`${i}QBRBWRTE`} className='roster__item'>SFLEX</div>)
       }
     }
 
@@ -97,7 +97,7 @@ export default class RostersPage extends React.Component {
 
     if (benchMax) {
       for (let i = 0; i < benchMax; i++) {
-        labels.push(<div key={`${i}BENCH`} className='roster__item'>BENCH</div>)
+        labels.push(<div key={`${i}BENCH`} className='roster__item'>BE</div>)
       }
     }
 
