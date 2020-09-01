@@ -170,16 +170,14 @@ export default class Lineup extends React.Component {
     return (
       <Grid container spacing={1} classes={{ root: 'lineup' }}>
         <Grid item xs={12} md={6}>
-          <div className='dashboard__section'>
-            <div className='dashboard__section-header'>
-              <div className='dashboard__section-body-header'>
-                <div className='player__slot-slotName'>Slot</div>
-                <div className='player__item-name'>Name</div>
-                {/* <div className='player__item-metric'>Opp</div>
-                    <div className='player__item-metric'>Avg</div>
-                    <div className='player__item-metric'>Proj</div>
-                    <div className='player__item-metric'>Sos</div> */}
-              </div>
+          <div className='section'>
+            <div className='dashboard__section-body-header'>
+              <div className='player__slot-slotName'>Slot</div>
+              <div className='player__item-name'>Name</div>
+              {/* <div className='player__item-metric'>Opp</div>
+                  <div className='player__item-metric'>Avg</div>
+                  <div className='player__item-metric'>Proj</div>
+                  <div className='player__item-metric'>Sos</div> */}
             </div>
             <div className='dashboard__section-body'>
               {starters}
@@ -187,16 +185,14 @@ export default class Lineup extends React.Component {
           </div>
         </Grid>
         <Grid item xs={12} md={6}>
-          <div className='dashboard__section'>
-            <div className='dashboard__section-header'>
-              <div className='dashboard__section-body-header'>
-                <div className='player__slot-slotName'>Slot</div>
-                <div className='player__item-name'>Name</div>
-                {/* <div className='player__item-metric'>Opp</div>
-                    <div className='player__item-metric'>Avg</div>
-                    <div className='player__item-metric'>Proj</div>
-                    <div className='player__item-metric'>Sos</div> */}
-              </div>
+          <div className='section'>
+            <div className='dashboard__section-body-header'>
+              <div className='player__slot-slotName'>Slot</div>
+              <div className='player__item-name'>Name</div>
+              {/* <div className='player__item-metric'>Opp</div>
+                  <div className='player__item-metric'>Avg</div>
+                  <div className='player__item-metric'>Proj</div>
+                  <div className='player__item-metric'>Sos</div> */}
             </div>
             <div className='dashboard__section-body empty'>
               {bench}
