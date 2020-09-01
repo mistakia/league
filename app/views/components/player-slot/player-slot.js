@@ -10,6 +10,7 @@ export default class PlayerSlot extends React.Component {
   render () {
     const { player, slot, handleSelect, selected, handleUpdate } = this.props
 
+    const slotPositions = Object.keys(constants.slots).find(key => constants.slots[key] === slot)
     const slotName = constants.slotName[slot]
 
     let action
@@ -22,7 +23,7 @@ export default class PlayerSlot extends React.Component {
           Move
         </Button>
       )
-    } else if (selected && !player.player && (slotName.includes(selected.pos) || slot === constants.slots.BENCH)) {
+    } else if (selected && !player.player && (slotPositions.includes(selected.pos) || slot === constants.slots.BENCH)) {
       action = (
         <Button
           onClick={() => handleUpdate({ slot })}
