@@ -9,6 +9,8 @@ import List from '@material-ui/core/List'
 import Divider from '@material-ui/core/Divider'
 import ListItem from '@material-ui/core/ListItem'
 import ListItemText from '@material-ui/core/ListItemText'
+import ListItemAvatar from '@material-ui/core/ListItemAvatar'
+import Avatar from '@material-ui/core/Avatar'
 
 import LeagueSchedule from '@components/league-schedule'
 import { constants } from '@common'
@@ -40,7 +42,28 @@ export default class Menu extends React.Component {
   }
 
   render = () => {
-    const { isLoggedIn } = this.props
+    const { isLoggedIn, team } = this.props
+    let header
+    if (isLoggedIn) {
+      header = (
+        <ListItem button onClick={this.handleClick('/login')}>
+          <ListItemAvatar>
+            <Avatar alt='' />
+          </ListItemAvatar>
+          <ListItemText primary='Login/Register' />
+        </ListItem>
+      )
+    } else {
+      header = (
+        <ListItem alignItems='flex-start'>
+          <ListItemAvatar>
+            <Avatar alt={team.logo} />
+          </ListItemAvatar>
+          <ListItemText primary={team.name} secondary='0-0' />
+        </ListItem>
+      )
+    }
+
     return (
       <div className='main__menu'>
         <AppBar color='transparent' elevation={0}>
@@ -75,11 +98,9 @@ export default class Menu extends React.Component {
           onOpen={this.handleOpen}
           onClose={this.handleClose}
         >
+          {header}
+          <Divider />
           <List>
-            {!isLoggedIn &&
-              <ListItem button onClick={this.handleClick('/login')}>
-                <ListItemText primary='Login/Register' />
-              </ListItem>}
             {isLoggedIn &&
               <ListItem button onClick={this.handleClick('/dashboard')}>
                 <ListItemText primary='Roster' />

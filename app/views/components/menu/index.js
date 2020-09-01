@@ -3,12 +3,14 @@ import { createSelector } from 'reselect'
 import { withRouter } from 'react-router-dom'
 
 import { getApp } from '@core/app'
+import { getCurrentTeam } from '@core/teams'
 
 import Menu from './menu'
 
 const mapStateToProps = createSelector(
   getApp,
-  (app) => ({ isLoggedIn: !!app.userId })
+  getCurrentTeam,
+  (app, team) => ({ isLoggedIn: !!app.userId, team })
 )
 
 export default withRouter(connect(
