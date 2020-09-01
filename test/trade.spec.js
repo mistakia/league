@@ -128,6 +128,31 @@ describe('API /trades', function () {
         transaction: constants.transactions.DRAFT
       })
 
+      await knex('poaches').insert({
+        userid: 3,
+        tid: 3,
+        lid: 1,
+        player: player1.player,
+        drop: null,
+        submitted: Math.round(Date.now() / 1000)
+      })
+
+      // active player
+      await knex('rosters_players')
+        .update('slot', constants.slots.BENCH)
+        .where('player', player1.player)
+      await knex('transactions')
+        .insert({
+          userid: userId,
+          tid: teamId,
+          lid: leagueId,
+          player: player1.player,
+          type: constants.transactions.ROSTER_ACTIVATE,
+          value: 0,
+          year: constants.season.year,
+          timestamp: Math.round(Date.now() / 1000)
+        })
+
       const player2 = await selectPlayer({ rookie: true })
       await addPlayer({
         teamId: 2,
@@ -221,6 +246,13 @@ describe('API /trades', function () {
       res.body.transaction.value.should.equal(value)
       res.body.transaction.year.should.equal(constants.season.year)
       res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
+
+      // verify poach is cancelled
+      const poaches = await knex('poaches')
+      expect(poaches.length).to.equal(1)
+      expect(poaches[0].processed).to.exist
+      expect(poaches[0].succ).to.equal(0)
+      expect(poaches[0].reason).to.equal('Player traded')
 
       const rosterRows = await knex('rosters_players')
         .join('rosters', 'rosters_players.rid', 'rosters.uid')
