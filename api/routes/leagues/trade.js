@@ -106,6 +106,21 @@ router.post('/accept', async (req, res, next) => {
     const players = await db('player').whereIn('player', allPlayers)
     const league = leagues[0]
 
+    // clear any existing poaching claims
+    const activePoaches = await db('poaches')
+      .where('lid', leagueId)
+      .whereNull('processed')
+      .whereIn('player', allPlayers)
+
+    if (activePoaches.length) {
+      await db('poaches')
+        .update('processed', Math.round(Date.now() / 1000))
+        .update('reason', 'Player traded')
+        .update('succ', 0)
+        .where('lid', leagueId)
+        .whereIn('player', activePoaches.map(p => p.player))
+    }
+
     // validate accepting team roster
     const acceptingTeamRosterRow = await getRoster({ tid: trade.tid })
     const acceptingTeamRoster = new Roster({ roster: acceptingTeamRosterRow, league })
@@ -295,6 +310,19 @@ router.post('/accept', async (req, res, next) => {
         ? dropItems.slice(0, -1).join(', ') + ', and ' + dropItems.slice(-1)
         : dropItems.toString()
       message = `${message} ${dropItemsStr} have been dropped.`
+    }
+
+    if (activePoaches.length) {
+      const poachItems = []
+      for (const poach of activePoaches) {
+        const player = players.find(p => p.player === poach.player)
+        poachItems.push(`${player.fname} ${player.lname} (${player.pos1})`)
+      }
+      const poachItemsStr = poachItems.length > 1
+        ? poachItems.slice(0, -1).join(', ') + ', and ' + poachItems.slice(-1)
+        : poachItems.toString()
+
+      message = `${message} Poaching claim(s) for ${poachItemsStr} have been cancelled.`
     }
 
     await sendNotifications({
