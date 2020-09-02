@@ -1,15 +1,4 @@
 .player__item
-  position relative
-  display flex
-  align-items center
-  height 55px
-  border-bottom 1px solid $borderColor
-  background white
-
-  &.reordering .player__item-action
-  &:hover .player__item-action
-    opacity 1
-
   &.selected
     background #fafafa
 
@@ -22,6 +11,8 @@
   overflow hidden
   text-overflow ellipsis
   white-space nowrap
+  &.table__cell
+    flex 0 0 232px
 
 .player__item-metric
   flex 1
@@ -29,7 +20,6 @@
   font-weight 600
 
 .player__item-action
-  opacity 0
   flex 0 0 45px
   &.reorder
     cursor row-resize

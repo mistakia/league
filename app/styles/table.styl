@@ -1,0 +1,38 @@
+.table__container
+  width 100%
+  overflow-x auto
+
+.table__row
+  position relative
+  display flex
+  align-items center
+  height 55px
+  background white
+  z-index 1
+
+.table__head
+  align-items center
+  height 25px
+  border-bottom 1px solid $borderColor
+  font-size 11px
+  text-transform uppercase
+  font-weight 500
+
+.table__cell
+  flex 1
+  min-width 50px
+  display flex
+  align-items center
+  height 55px
+  border-bottom 1px solid $borderColor
+  padding 0 16px
+
+.table__head .table__cell
+  height 25px
+
+.table__row:last-child .table__cell
+  border-bottom none
+
+.sticky__column
+  position sticky
+  left 0
