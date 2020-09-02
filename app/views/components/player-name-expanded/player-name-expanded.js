@@ -36,7 +36,7 @@ class PlayerNameExpanded extends Player {
               </Tooltip>}
           </div>
         </div>
-        {isHosted &&
+        {!!(isHosted && player.player) &&
           <div className='player__name-expanded-action'>
             <IconButton small text onClick={this.handleContextClick} icon='more' />
           </div>}

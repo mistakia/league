@@ -1,4 +1,5 @@
 import React from 'react'
+import Hidden from '@material-ui/core/Hidden'
 
 import EditableProjection from '@components/editable-projection'
 import Position from '@components/position'
@@ -293,28 +294,30 @@ class PlayerRow extends Player {
                   : ((status.waiver.active || status.waiver.poach || status.waiver.practice)
                     ? 'W' : 'FA')}
               </div>}
-            {isSeasonProjectionView && seasonSummary('0')}
-            {isSeasonProjectionView && seasonPassing('0')}
-            {isSeasonProjectionView && seasonRushing('0')}
-            {isSeasonProjectionView && seasonReceiving('0')}
-            {isRestOfSeasonView && seasonSummary('ros')}
-            {isRestOfSeasonView && seasonPassing('ros')}
-            {isRestOfSeasonView && seasonRushing('ros')}
-            {isRestOfSeasonView && seasonReceiving('ros')}
-            {isStatsPassingAdvancedView && passingBasic}
-            {isStatsPassingAdvancedView && passingEfficiency}
-            {isStatsPassingAdvancedView && passingAdvanced}
-            {isStatsPassingAdvancedView && passingAiryards}
-            {isStatsPassingPressureView && passingPressure}
-            {isStatsRushingView && rushingBasic}
-            {isStatsRushingView && rushingProductivity}
-            {isStatsRushingView && rushingAfterContact}
-            {isStatsRushingView && rushingShare}
-            {isStatsRushingView && rushingAdvanced}
-            {isStatsRushingView && rushingBrokenTackles}
-            {isStatsReceivingView && receivingBasic}
-            {isStatsReceivingView && receivingOppurtunity}
-            {isStatsReceivingView && receivingAdvanced}
+            <Hidden xsDown>
+              {isSeasonProjectionView && seasonSummary('0')}
+              {isSeasonProjectionView && seasonPassing('0')}
+              {isSeasonProjectionView && seasonRushing('0')}
+              {isSeasonProjectionView && seasonReceiving('0')}
+              {isRestOfSeasonView && seasonSummary('ros')}
+              {isRestOfSeasonView && seasonPassing('ros')}
+              {isRestOfSeasonView && seasonRushing('ros')}
+              {isRestOfSeasonView && seasonReceiving('ros')}
+              {isStatsPassingAdvancedView && passingBasic}
+              {isStatsPassingAdvancedView && passingEfficiency}
+              {isStatsPassingAdvancedView && passingAdvanced}
+              {isStatsPassingAdvancedView && passingAiryards}
+              {isStatsPassingPressureView && passingPressure}
+              {isStatsRushingView && rushingBasic}
+              {isStatsRushingView && rushingProductivity}
+              {isStatsRushingView && rushingAfterContact}
+              {isStatsRushingView && rushingShare}
+              {isStatsRushingView && rushingAdvanced}
+              {isStatsRushingView && rushingBrokenTackles}
+              {isStatsReceivingView && receivingBasic}
+              {isStatsReceivingView && receivingOppurtunity}
+              {isStatsReceivingView && receivingAdvanced}
+            </Hidden>
           </div>
         </div>
       </div>

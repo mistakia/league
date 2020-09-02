@@ -98,7 +98,9 @@ export default class Menu extends React.Component {
           onOpen={this.handleOpen}
           onClose={this.handleClose}
         >
-          {header}
+          <List>
+            {header}
+          </List>
           <Divider />
           <List>
             {isLoggedIn &&
