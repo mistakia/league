@@ -1,7 +1,12 @@
 .player__name-expanded
+  display flex
+  width 200px
+
+.player__name-expanded-main
   align-items center
   display flex
   flex-direction column
+  flex 0 0 150px
 
 .player__name-expanded-name:hover
   color $accentColor
@@ -13,3 +18,8 @@
   text-overflow ellipsis
   white-space nowrap
   line-height 20px
+
+.player__name-expanded-action
+  flex 0 0 50px
+  display flex
+  align-items center

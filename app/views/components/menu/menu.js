@@ -48,7 +48,7 @@ export default class Menu extends React.Component {
       header = (
         <ListItem alignItems='flex-start'>
           <ListItemAvatar>
-            <Avatar alt={team.logo} />
+            <Avatar alt={team.image} />
           </ListItemAvatar>
           <ListItemText primary={team.name} secondary='0-0' />
         </ListItem>

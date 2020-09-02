@@ -1,5 +1,4 @@
 import React from 'react'
-import Grow from '@material-ui/core/Grow'
 import Paper from '@material-ui/core/Paper'
 import MenuItem from '@material-ui/core/MenuItem'
 import MenuList from '@material-ui/core/MenuList'
@@ -228,13 +227,11 @@ export default class PlayerContextMenu extends React.Component {
     }
 
     return (
-      <Grow in>
-        <Paper>
-          <MenuList>
-            {menuItems}
-          </MenuList>
-        </Paper>
-      </Grow>
+      <Paper>
+        <MenuList>
+          {menuItems}
+        </MenuList>
+      </Paper>
     )
   }
 }

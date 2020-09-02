@@ -43,6 +43,14 @@ export default class ContextMenu extends React.Component {
     const screenW = window.innerWidth
     const screenH = window.innerHeight
 
+    if (screenW <= 600) {
+      this.root.style.left = '0px'
+      this.root.style.right = '0px'
+      this.root.style.bottom = '0px'
+      this.root.style.top = 'auto'
+      return
+    }
+
     const right = (screenW - clickX) > rootW
     const left = !right
     const top = (screenH - clickY) > rootH
