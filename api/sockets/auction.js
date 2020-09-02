@@ -16,7 +16,6 @@ export default class Auction {
     this._tids = []
     this._teams = []
     this._transactions = []
-    this._ready = false
     this._connected = {}
     this.logger = debug(`auction:league:${lid}`)
   }
@@ -88,7 +87,6 @@ export default class Auction {
 
       if (!this._connected[tid].length) {
         delete this._connected[tid]
-        this._ready = false
         this.pause()
       }
 
@@ -102,14 +100,10 @@ export default class Auction {
       })
     })
 
-    let shouldStart = false
     if (this._connected[tid]) {
       this._connected[tid].push(userId)
     } else {
       this._connected[tid] = [userId]
-      if (!this._ready && Object.keys(this._connected).length === this._tids.length) {
-        shouldStart = true
-      }
     }
 
     const nominatingTeamId = this.nominatingTeamId
@@ -119,7 +113,6 @@ export default class Auction {
       payload: {
         transactions: this._transactions,
         paused: this._paused,
-        ready: this._ready,
         tids: this._tids,
         teams: this._teams,
         connected: Object.keys(this._connected).map(k => parseInt(k, 10)),
@@ -129,11 +122,21 @@ export default class Auction {
         complete: !nominatingTeamId
       }
     })
+  }
 
-    if (shouldStart) {
-      this._ready = true
-      this.start()
+  reply (userId, message) {
+    const event = {
+      type: 'AUCTION_ERROR',
+      payload: { error: message }
     }
+
+    this._wss.clients.forEach((c) => {
+      if (c.userId === userId) {
+        if (c && c.readyState === WebSocket.OPEN) {
+          c.send(JSON.stringify(event))
+        }
+      }
+    })
   }
 
   broadcast (message) {
@@ -157,7 +160,7 @@ export default class Auction {
     const playerInfo = players[0]
     if (!playerInfo) {
       this._startBidTimer()
-      // TODO broadcast error
+      this.reply(userid, 'invalid player')
       this.logger(`can not process invalid player ${player}`)
       return
     }
@@ -169,14 +172,14 @@ export default class Auction {
     if (!hasSlot) {
       this._startBidTimer()
       this.logger(`no open slots available for ${player} on teamId ${tid}`)
-      // TODO broadcast error
+      this.reply(userid, 'exceeds roster limits')
       return
     }
 
     if ((r.availableCap - value) < 0) {
       this._startBidTimer()
       this.logger('no available cap space')
-      // TODO broadcast error
+      this.reply(userid, 'exceeds salary limit')
       return
     }
 
@@ -192,7 +195,7 @@ export default class Auction {
       this.logger(err)
       this._startBidTimer()
       this.logger(`unable to add player ${player} to roster of teamId ${tid}`)
-      // TODO broadcast error
+      this.reply(userid, err.message)
       return
     }
 
@@ -205,7 +208,7 @@ export default class Auction {
       this.logger(err)
       this.logger('unable to update cap space')
       this._startBidTimer()
-      // TODO broadcast error
+      this.reply(userid, err.message)
       return
     }
 
@@ -243,7 +246,7 @@ export default class Auction {
     const team = this._teams.find(t => t.uid === tid)
     const newCap = team.cap - value
     if (newCap < 0) {
-      // TODO broadcast error
+      this.reply(userid, 'exceeds salary limit')
       this._startBidTimer()
       this.logger(`team ${tid} does not have enough available cap ${team.cap} for a bid of ${value}`)
       this._locked = false
@@ -251,7 +254,7 @@ export default class Auction {
     }
 
     if (!team.availableSpace) {
-      // TODO broadcast error
+      this.reply(userid, 'exceeds roster limits')
       this._startBidTimer()
       this.logger(`team ${tid} does not have enough available space ${team.availableSpace}`)
       this._locked = false
@@ -262,7 +265,7 @@ export default class Auction {
 
     if (current.player !== player) {
       this.logger(`received bid for player ${player} is not the current player of ${current.player}`)
-      // TODO announce error
+      this.reply(userid, 'invalid bid')
       this._startBidTimer()
       this._locked = false
       return
@@ -270,7 +273,7 @@ export default class Auction {
 
     if (value <= current.value) {
       this.logger(`received bid of ${value} is not greater than current value of ${current.value}`)
-      // TODO announce error
+      this.reply(userid, 'invalid bid')
       this._startBidTimer()
       this._locked = false
       return
@@ -308,15 +311,26 @@ export default class Auction {
 
     if (!this._nominationTimerExpired && nominatingTeamId !== tid) {
       this.logger('received nomination from a team out of turn')
-      // TODO announce error
+      this.reply(userid, 'invalid nomination')
       return
     }
 
-    // TODO validate player eligibility
     const players = await db('player').where('player', player)
     const playerInfo = players[0]
     if (!playerInfo) {
-      // TODO broadcast error
+      this.reply(userid, 'invalid nomination')
+      this.logger(`can not nominate invalid player ${player}`)
+      return
+    }
+
+    // make sure player is not rostered
+    const rosterRows = await db('rosters_players')
+      .join('rosters', 'rosters_players.rid', 'rosters.uid')
+      .where('lid', this._lid)
+      .where('year', constants.season.year)
+      .where('player', player)
+    if (rosterRows.length) {
+      this.reply(userid, 'invalid nomination')
       this.logger(`can not nominate invalid player ${player}`)
       return
     }
@@ -327,7 +341,13 @@ export default class Auction {
     const hasSlot = r.hasOpenBenchSlot(playerInfo.pos1)
     if (!hasSlot) {
       this.logger(`no open slots available for ${player} on teamId ${nominatingTeamId}`)
-      // TODO broadcast error
+      this.reply(userid, 'exceeds roster limits')
+      return
+    }
+
+    // make sure bid is within budget
+    if (value > r.availableCap) {
+      this.reply(userid, 'exceeds salary limit')
       return
     }
 
@@ -335,7 +355,7 @@ export default class Auction {
 
     if (this._nominationTimerExpired && userId !== this._league.commishid) {
       this.logger('nomination timer expired')
-      // TODO announce error
+      this.reply(userid, 'nomination timer has expired')
       return
     }
 

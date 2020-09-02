@@ -38,6 +38,7 @@ export function * calculateStats () {
     plays: filtered.toJS(),
     qualifiers: qualifiers.toJS()
   })
+  worker.terminate()
   yield put(playerActions.setStats(result))
 }
 
@@ -45,6 +46,7 @@ export function * calculateTeamStats () {
   const { teamStats } = yield select(getStats)
   const worker = new Worker()
   const result = yield call(worker.calculateTeam, teamStats.toJS())
+  worker.terminate()
   yield put(statActions.setTeamStats(result))
 }
 

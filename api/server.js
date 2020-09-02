@@ -131,6 +131,7 @@ server.on('upgrade', async (request, socket, head) => {
 
   wss.handleUpgrade(request, socket, head, function (ws) {
     ws.leagueId = parseInt(parsed.searchParams.get('leagueId'), 10)
+    ws.userId = request.user.userId
     wss.emit('connection', ws, request)
   })
 })
