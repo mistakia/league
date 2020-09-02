@@ -88,6 +88,7 @@ export function * calculatePlayerLineupContribution ({ player }) {
     players: playerPool.toJS(),
     league
   })
+  worker.terminate()
 
   for (const week in result) {
     const weekData = {
@@ -139,6 +140,7 @@ export function * projectLineups () {
       players: players.toJS(),
       league
     })
+    worker.terminate()
   }
 
   yield put(rosterActions.setLineupProjections(lineups))

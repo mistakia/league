@@ -86,6 +86,7 @@ export function * optimize () {
       league
     })
   }
+  worker.terminate()
   starterPlayerIds = Object.keys(result)
     .filter(r => r.match(/^([A-Z]{2,})-([0-9]{4,})$/ig) || r.match(/^([A-Z]{1,3})$/ig))
   yield put(auctionActions.setOptimalLineup({

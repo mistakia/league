@@ -250,6 +250,7 @@ describe('API /trades', function () {
       // verify poach is cancelled
       const poaches = await knex('poaches')
       expect(poaches.length).to.equal(1)
+      // eslint-disable-next-line
       expect(poaches[0].processed).to.exist
       expect(poaches[0].succ).to.equal(0)
       expect(poaches[0].reason).to.equal('Player traded')
