@@ -2,6 +2,7 @@ import React from 'react'
 import { AutoSizer, List } from 'react-virtualized'
 import GetAppIcon from '@material-ui/icons/GetApp'
 import IconButton from '@material-ui/core/IconButton'
+import Hidden from '@material-ui/core/Hidden'
 
 import SearchFilter from '@components/search-filter'
 import StatusFilter from '@components/status-filter'
@@ -180,72 +181,76 @@ export default class PlayersPage extends React.Component {
       </div>
     )
 
-    const classNames = ['players__filter']
+    const classNames = ['players__filters']
     if (this.state.expanded) classNames.push('expanded')
 
     const head = (
       <div className='players__head'>
         <div className={classNames.join(' ')}>
-          <SearchFilter search={this.props.search} value={this.props.searchValue} />
-          <PositionFilter />
-          {isLoggedIn && <AvailabilityFilter />}
-          <PlayersViewMenu />
-          {isStatsView && <StatMenu />}
-          {isStatsPassingView && <StatPassingMenu />}
-          {isStatsView && <StatYearsFilter />}
-          {isStatsView && <StatWeeksFilter />}
-          {isStatsView && <StatDaysFilter />}
-          {isStatsView && <StatQuartersFilter />}
-          {isStatsView && <StatDownsFilter />}
-          {(isStatsView && showQualifier) && <StatQualifierFilter />}
-          <div className='players__head-expand' onClick={this.handleClick}>
-            <Icon className='players__head-icon' name='arrow-down' />
+          <div className='players__filters-row'>
+            <SearchFilter search={this.props.search} value={this.props.searchValue} />
+            <PositionFilter />
+            {isLoggedIn && <AvailabilityFilter />}
+            <PlayersViewMenu />
+            {isStatsView && <StatMenu />}
+            {isStatsPassingView && <StatPassingMenu />}
+            {isStatsView && <StatYearsFilter />}
+            {isStatsView && <StatWeeksFilter />}
+            {isStatsView && <StatDaysFilter />}
+            {isStatsView && <StatQuartersFilter />}
+            {isStatsView && <StatDownsFilter />}
+            {(isStatsView && showQualifier) && <StatQualifierFilter />}
+            <div className='players__head-expand' onClick={this.handleClick}>
+              <Icon className='players__head-icon' name='arrow-down' />
+            </div>
+            <div className='players__head-actions'>
+              {!!(isSeasonProjectionView || isRestOfSeasonView) &&
+                <IconButton onClick={this.handleExport} disabled={isPending}>
+                  <GetAppIcon />
+                </IconButton>}
+            </div>
           </div>
-          <div className='players__head-actions'>
-            {!!(isSeasonProjectionView || isRestOfSeasonView) &&
-              <IconButton onClick={this.handleExport} disabled={isPending}>
-                <GetAppIcon />
-              </IconButton>}
-          </div>
+          {this.state.expanded &&
+            <div className='players__filters-row'>
+              <ExperienceFilter />
+              <AgeFilter />
+              <NFLTeamsFilter />
+              <CollegeFilter />
+              <CollegeDivisionFilter />
+              <StatusFilter />
+              {isLoggedIn && <TeamFilter />}
+            </div>}
         </div>
-        {this.state.expanded &&
-          <div className='players__filter'>
-            <ExperienceFilter />
-            <AgeFilter />
-            <NFLTeamsFilter />
-            <CollegeFilter />
-            <CollegeDivisionFilter />
-            <StatusFilter />
-            {isLoggedIn && <TeamFilter />}
-          </div>}
         <div className='players__header'>
           <div className='player__row-action' />
           <div className='player__row-pos' />
           <div className='player__row-name'>Name</div>
           {isLoggedIn && <div className='player__row-action' />}
           {isLoggedIn && <div className='player__row-availability' />}
-          {isSeasonProjectionView && headerSeasonSummary('0')}
-          {isSeasonProjectionView && headerSeasonPassing('0')}
-          {isSeasonProjectionView && headerSeasonRushing('0')}
-          {isSeasonProjectionView && headerSeasonReceiving('0')}
-          {isRestOfSeasonView && headerSeasonSummary('ros')}
-          {isRestOfSeasonView && headerSeasonPassing('ros')}
-          {isRestOfSeasonView && headerSeasonRushing('ros')}
-          {isRestOfSeasonView && headerSeasonReceiving('ros')}
-          {isStatsPassingAdvancedView && <HeaderStatsPassingBasic />}
-          {isStatsPassingAdvancedView && <HeaderStatsPassingEfficiency />}
-          {isStatsPassingAdvancedView && <HeaderStatsPassingAdvanced />}
-          {isStatsPassingAdvancedView && <HeaderStatsPassingAiryards />}
-          {isStatsPassingPressureView && <HeaderStatsPassingPressure />}
-          {isStatsRushingView && <HeaderStatsRushingBasic />}
-          {isStatsRushingView && <HeaderStatsRushingProductivity />}
-          {isStatsRushingView && <HeaderStatsRushingAfterContact />}
-          {isStatsRushingView && <HeaderStatsRushingShare />}
-          {isStatsRushingView && <HeaderStatsRushingAdvanced />}
-          {isStatsRushingView && <HeaderStatsRushingBrokenTackles />}
-          {isStatsReceivingView && <HeaderStatsReceivingBasic />}
-          {isStatsReceivingView && <HeaderStatsReceivingOppurtunity />}
-          {isStatsReceivingView && <HeaderStatsReceivingAdvanced />}
+          <Hidden xsDown>
+            {isSeasonProjectionView && headerSeasonSummary('0')}
+            {isSeasonProjectionView && headerSeasonPassing('0')}
+            {isSeasonProjectionView && headerSeasonRushing('0')}
+            {isSeasonProjectionView && headerSeasonReceiving('0')}
+            {isRestOfSeasonView && headerSeasonSummary('ros')}
+            {isRestOfSeasonView && headerSeasonPassing('ros')}
+            {isRestOfSeasonView && headerSeasonRushing('ros')}
+            {isRestOfSeasonView && headerSeasonReceiving('ros')}
+            {isStatsPassingAdvancedView && <HeaderStatsPassingBasic />}
+            {isStatsPassingAdvancedView && <HeaderStatsPassingEfficiency />}
+            {isStatsPassingAdvancedView && <HeaderStatsPassingAdvanced />}
+            {isStatsPassingAdvancedView && <HeaderStatsPassingAiryards />}
+            {isStatsPassingPressureView && <HeaderStatsPassingPressure />}
+            {isStatsRushingView && <HeaderStatsRushingBasic />}
+            {isStatsRushingView && <HeaderStatsRushingProductivity />}
+            {isStatsRushingView && <HeaderStatsRushingAfterContact />}
+            {isStatsRushingView && <HeaderStatsRushingShare />}
+            {isStatsRushingView && <HeaderStatsRushingAdvanced />}
+            {isStatsRushingView && <HeaderStatsRushingBrokenTackles />}
+            {isStatsReceivingView && <HeaderStatsReceivingBasic />}
+            {isStatsReceivingView && <HeaderStatsReceivingOppurtunity />}
+            {isStatsReceivingView && <HeaderStatsReceivingAdvanced />}
+          </Hidden>
         </div>
       </div>
     )
@@ -260,8 +265,10 @@ export default class PlayersPage extends React.Component {
             className='players'
             width={width}
             height={height}
+            columnWidth={60}
             rowHeight={ROW_HEIGHT}
             rowCount={players.size}
+            columnCount={50}
             rowRenderer={Row}
           />
         )}
