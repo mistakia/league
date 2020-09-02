@@ -2,6 +2,7 @@
   flex 1
   display flex
   flex-direction column
+  width 100%
 
 .players__head-expand
   flex 0 0 auto
@@ -19,15 +20,23 @@
   display flex
   justify-content flex-end
 
-.players__filter
+.players__filters
+  flex 0 0 auto
+  display flex
+  flex-direction column
+  width 100%
+
+  &.expanded .players__head-expand .icon
+    transform rotate(180deg)
+
+.players__filters-row
   flex 0 0 auto
   border-bottom 1px solid $borderColor
   padding 8px 32px
   display flex
   align-items center
-
-  &.expanded .players__head-expand .icon
-    transform rotate(180deg)
+  overflow-y visible
+  overflow-x scroll
 
 .players__header
   flex 1
