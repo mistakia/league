@@ -165,23 +165,31 @@ export function calculatePlayerValues (payload) {
   // calculate ros inflation prices
   const rate = {}
   for (const type in availableTotalsRestOfSeason) {
-    rate[type] = leagueAvailableCap / availableTotalsRestOfSeason[type]
+    rate[type] = availableTotalsRestOfSeason[type] ? leagueAvailableCap / availableTotalsRestOfSeason[type] : 0
   }
 
   const seasonRate = {}
   for (const type in availableTotalsSeason) {
-    seasonRate[type] = leagueAvailableCap / availableTotalsSeason[type]
+    seasonRate[type] = availableTotalsSeason[type] ? leagueAvailableCap / availableTotalsSeason[type] : 0
   }
 
   for (const player of players) {
     player.values.inflation = {}
     for (const type in rate) {
+      if (!rate[type]) {
+        player.values.inflation[type] = player.values.ros[type]
+        continue
+      }
       const value = Math.round(rate[type] * player.vorp.ros[type])
       player.values.inflation[type] = value > 0 ? value : 0
     }
 
     player.values.inflationSeason = {}
     for (const type in seasonRate) {
+      if (!seasonRate[type]) {
+        player.values.inflationSeason[type] = player.values[0][type]
+        continue
+      }
       const value = Math.round(seasonRate[type] * player.vorp['0'][type])
       player.values.inflationSeason[type] = value > 0 ? value : 0
     }
