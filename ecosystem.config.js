@@ -6,7 +6,7 @@ module.exports = {
     env_production: {
       NODE_ENV: 'production'
     },
-    max_memory_restart: '1G'
+    max_memory_restart: '2G'
   }],
 
   deploy: {

@@ -40,6 +40,7 @@ export function * calculateValues () {
     vorpw,
     volsw
   })
+  worker.terminate()
   yield put(playerActions.setValues(result))
   yield put(rosterActions.projectLineups())
   // TODO calculate bid up to values
