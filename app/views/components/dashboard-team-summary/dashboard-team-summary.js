@@ -42,7 +42,7 @@ export default class DashboardTeamSummary extends React.Component {
                 <td className={faabClassNames.join(' ')}>{faabRank}{nth(faabRank)}</td>
               </tr>
               <tr>
-                <td>Salary Space Available</td>
+                <td>Salary Space</td>
                 <td>{cap ? `$${cap}` : '-'}</td>
                 <td className={capClassNames.join(' ')}>
                   {capRank ? `${capRank}${nth(capRank)}` : '-'}
