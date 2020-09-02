@@ -2,10 +2,10 @@ import React from 'react'
 import moment from 'moment'
 import Alert from '@material-ui/lab/Alert'
 import AlertTitle from '@material-ui/lab/AlertTitle'
-import { SortableContainer, SortableElement } from 'react-sortable-hoc'
 import Container from '@material-ui/core/Container'
 import Grid from '@material-ui/core/Grid'
 
+import DashboardPlayersTable from '@components/dashboard-players-table'
 import DashboardTeamSummary from '@components/dashboard-team-summary'
 import DashboardTeamValue from '@components/dashboard-team-value'
 import PlayerRosterHeader from '@components/player-roster-header'
@@ -45,7 +45,7 @@ const BenchPlusHeader = () => (
 
 export default function () {
   const {
-    players, picks, league, waivers, reorderWaivers, poaches, teamId
+    players, picks, league, waivers, poaches, teamId
   } = this.props
 
   const { positions } = constants
@@ -118,11 +118,11 @@ export default function () {
     const pickNum = (pick.pick % league.nteams) || league.nteams
     const pickStr = `${pick.round}.${('0' + pickNum).slice(-2)}`
     pickItems.push(
-      <div key={pick.uid} className='player__item'>
-        <div className='player__item-name'>{pick.year}</div>
-        <div className='player__item-metric'>{pick.pick && pickStr}</div>
-        <div className='player__item-metric'>{pick.round}</div>
-        <div className='player__item-metric'>{pick.pick}</div>
+      <div key={pick.uid} className='player__item table__row'>
+        <div className='table__cell'>{pick.year}</div>
+        <div className='metric table__cell'>{pick.pick && pickStr}</div>
+        <div className='metric table__cell'>{pick.round}</div>
+        <div className='metric table__cell'>{pick.pick}</div>
       </div>
     )
   }
@@ -139,106 +139,37 @@ export default function () {
     )
   }
 
-  const SortableItem = SortableElement(({ waiver }) => {
-    return (
-      <PlayerRoster
-        player={waiver.player}
-        waiverId={waiver.uid}
-        claim={waiver}
-        reorder
-      />
-    )
-  })
-
-  const SortableList = SortableContainer(({ items }) => {
-    return (
-      <div>
-        {items.map((waiver, index) => (
-          <SortableItem key={index} index={index} waiver={waiver} />
-        ))}
-      </div>
-    )
-  })
-
   const poachWaiverSection = (
-    <div className='section'>
-      <div className='dashboard__section-header-title'>Poaching Waiver Claims</div>
-      <div className='dashboard__section-body-header'>
-        <div className='player__item-name'>Poach</div>
-        <div className='player__item-name'>Release</div>
-        <div className='player__item-metric'>Bid</div>
-        <ValueHeader />
-        <StartsHeader />
-        <PointsPlusHeader />
-        <BenchPlusHeader />
-        <div className='player__item-action' />
-        <div className='player__item-action' />
-      </div>
-      <div className='dashboard__section-body empty'>
-        <SortableList
-          items={waivers.poach}
-          lockAxis='y'
-          helperClass='reordering'
-          onSortEnd={({ oldIndex, newIndex }) => reorderWaivers({ oldIndex, newIndex, type: 'poach' })}
-          lockToContainerEdges
-          useDragHandle
-        />
-      </div>
-    </div>
+    <Grid item xs={12}>
+      <DashboardPlayersTable
+        claim
+        title='Poaching Waiver Claims'
+        claims={waivers.poach}
+        reorderType='poach'
+      />
+    </Grid>
   )
 
   const freeAgencyActiveWaiverSection = (
-    <div className='section'>
-      <div className='dashboard__section-header-title'>Free Agency Waiver Claims - Active Roster</div>
-      <div className='dashboard__section-body-header'>
-        <div className='player__item-name'>Sign</div>
-        <div className='player__item-name'>Release</div>
-        <div className='player__item-metric'>Bid</div>
-        <ValueHeader />
-        <StartsHeader />
-        <PointsPlusHeader />
-        <BenchPlusHeader />
-        <div className='player__item-action' />
-        <div className='player__item-action' />
-      </div>
-      <div className='dashboard__section-body empty'>
-        <SortableList
-          items={waivers.active}
-          lockAxis='y'
-          helperClass='reordering'
-          onSortEnd={({ oldIndex, newIndex }) => reorderWaivers({ oldIndex, newIndex, type: 'active' })}
-          lockToContainerEdges
-          useDragHandle
-        />
-      </div>
-    </div>
+    <Grid item xs={12}>
+      <DashboardPlayersTable
+        claim
+        title='Active Roster Waiver Claims'
+        claims={waivers.active}
+        reorderType='active'
+      />
+    </Grid>
   )
 
   const freeAgencyPracticeWaiverSection = (
-    <div className='section'>
-      <div className='dashboard__section-header-title'>Free Agency Waiver Claims - Practice Squad</div>
-      <div className='dashboard__section-body-header'>
-        <div className='player__item-name'>Sign</div>
-        <div className='player__item-name'>Release</div>
-        <div className='player__item-metric'>Bid</div>
-        <ValueHeader />
-        <StartsHeader />
-        <PointsPlusHeader />
-        <BenchPlusHeader />
-        <div className='player__item-action' />
-        <div className='player__item-action' />
-      </div>
-      <div className='dashboard__section-body empty'>
-        <SortableList
-          items={waivers.practice}
-          lockAxis='y'
-          helperClass='reordering'
-          onSortEnd={({ oldIndex, newIndex }) => reorderWaivers({ oldIndex, newIndex, type: 'practice' })}
-          lockToContainerEdges
-          useDragHandle
-        />
-      </div>
-    </div>
+    <Grid item xs={12}>
+      <DashboardPlayersTable
+        claim
+        title='Practice Squad Waiver Claims'
+        claims={waivers.practice}
+        reorderType='practice'
+      />
+    </Grid>
   )
 
   const teamPoachSection = (
@@ -247,7 +178,7 @@ export default function () {
       <div className='dashboard__section-body-header'>
         <div className='player__item-name'>Name</div>
         <div className='player__item-name'>Release</div>
-        <div className='player__item-metric'>Bid</div>
+        <div className='metric'>Bid</div>
         <ValueHeader />
         <StartsHeader />
         <PointsPlusHeader />
@@ -263,84 +194,38 @@ export default function () {
   const body = (
     <Container maxWidth='lg' classes={{ root: 'dashboard' }}>
       <Grid container spacing={2}>
-        <Grid item xs={12} md={8}>
+        <Grid container item xs={12} md={8}>
           {warnings.length ? warnings : null}
           {waivers.poach.size ? poachWaiverSection : null}
           {waivers.active.size ? freeAgencyActiveWaiverSection : null}
           {waivers.practice.size ? freeAgencyPracticeWaiverSection : null}
           {poachItems.length ? teamPoachSection : null}
-          <div className='section'>
-            <div className='dashboard__section-header-title'>Active Roster</div>
-            <div className='dashboard__section-body-header'>
-              <div className='player__item-name'>Name</div>
-              <div className='player__item-metric'>Salary</div>
-              <ValueHeader />
-              <StartsHeader />
-              <PointsPlusHeader />
-              <BenchPlusHeader />
-              <div className='player__item-action' />
+          <Grid item xs={12}>
+            <DashboardPlayersTable items={activeItems} title='Active Roster' />
+          </Grid>
+          <Grid item xs={12}>
+            <DashboardPlayersTable items={practiceItems} title='Practice Squad' />
+          </Grid>
+          <Grid item xs={12}>
+            <DashboardPlayersTable items={reserveIRItems} title='Reserve/IR' />
+          </Grid>
+          <Grid item xs={12}>
+            <DashboardPlayersTable items={reserveCOVItems} title='Reserve/COVID-19' />
+          </Grid>
+          <Grid item xs={12}>
+            <div className='section table__container'>
+              <div className='dashboard__section-header-title'>Draft Picks</div>
+              <div className='table__row table__head'>
+                <div className='table__cell'>Year</div>
+                <div className='metric table__cell'>Pick</div>
+                <div className='metric table__cell'>Round</div>
+                <div className='metric table__cell'>Pick #</div>
+              </div>
+              <div className='empty'>
+                {pickItems}
+              </div>
             </div>
-            <div className='dashboard__section-body empty'>
-              {activeItems}
-            </div>
-          </div>
-          <div className='section'>
-            <div className='dashboard__section-header-title'>Practice Squad</div>
-            <div className='dashboard__section-body-header'>
-              <div className='player__item-name'>Name</div>
-              <div className='player__item-metric'>Salary</div>
-              <ValueHeader />
-              <StartsHeader />
-              <PointsPlusHeader />
-              <BenchPlusHeader />
-              <div className='player__item-action' />
-            </div>
-            <div className='dashboard__section-body empty'>
-              {practiceItems}
-            </div>
-          </div>
-          <div className='section'>
-            <div className='dashboard__section-header-title'>Reserve/IR</div>
-            <div className='dashboard__section-body-header'>
-              <div className='player__item-name'>Name</div>
-              <div className='player__item-metric'>Salary</div>
-              <ValueHeader />
-              <StartsHeader />
-              <PointsPlusHeader />
-              <BenchPlusHeader />
-              <div className='player__item-action' />
-            </div>
-            <div className='dashboard__section-body empty'>
-              {reserveIRItems}
-            </div>
-          </div>
-          <div className='section'>
-            <div className='dashboard__section-header-title'>Reserve/COVID-19</div>
-            <div className='dashboard__section-body-header'>
-              <div className='player__item-name'>Name</div>
-              <div className='player__item-metric'>Salary</div>
-              <ValueHeader />
-              <StartsHeader />
-              <PointsPlusHeader />
-              <BenchPlusHeader />
-              <div className='player__item-action' />
-            </div>
-            <div className='dashboard__section-body empty'>
-              {reserveCOVItems}
-            </div>
-          </div>
-          <div className='section'>
-            <div className='dashboard__section-header-title'>Draft Picks</div>
-            <div className='dashboard__section-body-header'>
-              <div className='player__item-name'>Year</div>
-              <div className='player__item-metric'>Pick</div>
-              <div className='player__item-metric'>Round</div>
-              <div className='player__item-metric'>Pick #</div>
-            </div>
-            <div className='dashboard__section-body empty'>
-              {pickItems}
-            </div>
-          </div>
+          </Grid>
         </Grid>
         <Grid item xs={12} md={4}>
           <DashboardTeamSummary />

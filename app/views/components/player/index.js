@@ -33,7 +33,7 @@ const mapStateToProps = createSelector(
   (app, contextMenu, league) => ({
     vbaseline: app.vbaseline,
     selected: contextMenu.data.playerId,
-    isHosted: league.hosted
+    isHosted: !!league.hosted
   })
 )
 
