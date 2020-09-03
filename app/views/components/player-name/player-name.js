@@ -2,6 +2,7 @@ import React from 'react'
 
 import Position from '@components/position'
 import Team from '@components/team'
+import NFLTeamBye from '@components/nfl-team-bye'
 import { constants } from '@common'
 
 import './player-name.styl'
@@ -12,7 +13,7 @@ export default class PlayerName extends React.Component {
   }
 
   render = () => {
-    const { player } = this.props
+    const { player, bye } = this.props
 
     return (
       <div className='player__name cursor' onClick={this.handleClick}>
@@ -26,6 +27,7 @@ export default class PlayerName extends React.Component {
               R
             </sup>}
           <Team team={player.team} />
+          {bye && <NFLTeamBye team={player.team} />}
         </div>
       </div>
     )

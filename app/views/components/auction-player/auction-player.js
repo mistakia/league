@@ -54,7 +54,7 @@ export default class AuctionPlayer extends React.Component {
           </div>
           <div className='auction__player-index'>{index + 1}.</div>
           <div className='auction__player-name'>
-            <PlayerName playerId={player.player} />
+            <PlayerName playerId={player.player} bye />
           </div>
           <div className='auction__player-metric'>
             ${Math.round(player.getIn(['values', valueType, vbaseline])) || '--'}
