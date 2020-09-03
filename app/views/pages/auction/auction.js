@@ -17,6 +17,8 @@ import AuctionCommissionerControls from '@components/auction-commissioner-contro
 
 import './auction.styl'
 
+const ROW_HEIGHT = 30
+
 export default function () {
   const {
     players,
@@ -33,9 +35,9 @@ export default function () {
     return b.getIn(['vorp', valueType, vbaseline]) - a.getIn(['vorp', valueType, vbaseline])
   }).toList()
 
-  const transactionItems = []
-  for (const [index, transaction] of transactions.entries()) {
-    transactionItems.push(<AuctionTransaction key={index} transaction={transaction} />)
+  const TransactionRow = ({ index, key, ...params }) => {
+    const transaction = transactions.get(index)
+    return <AuctionTransaction key={key} transaction={transaction} {...params} />
   }
 
   const playerRow = ({ index, key, ...params }) => {
@@ -89,8 +91,18 @@ export default function () {
       </div>
       <div className='auction__side'>
         <AuctionTeamRosters />
-        <div className='auction__log empty'>
-          {transactionItems}
+        <div className='auction__log'>
+          <AutoSizer>
+            {({ height, width }) => (
+              <List
+                width={width}
+                height={height}
+                rowHeight={ROW_HEIGHT}
+                rowCount={transactions.size}
+                rowRenderer={TransactionRow}
+              />
+            )}
+          </AutoSizer>
         </div>
       </div>
       {(isCommish && isHosted) ? <AuctionCommissionerControls /> : null}
