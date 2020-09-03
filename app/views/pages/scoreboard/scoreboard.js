@@ -7,6 +7,7 @@ import ScoreboardScores from '@components/scoreboard-scores'
 import ScoreboardTeam from '@components/scoreboard-team'
 import ScoreboardOverTime from '@components/scoreboard-over-time'
 import ScoreboardPlayByPlay from '@components/scoreboard-play-by-play'
+import ScoreboardSlots from '@components/scoreboard-slots'
 
 import './scoreboard.styl'
 
@@ -20,18 +21,15 @@ export default class ScoreboardPage extends React.Component {
 
     const body = (
       <Container maxWidth='lg'>
-        <Grid container spacing={1}>
+        <Grid container spacing={0}>
           <Grid item xs={12}>
             <ScoreboardScores />
           </Grid>
-          <Grid container item xs={12} spacing={1}>
-            <Grid container item xs={12} md={9} spacing={0} classes={{ container: 'scoreboard__main' }}>
-              <Grid item xs={6}>
-                <ScoreboardTeam tid={matchup.aid} type='away' />
-              </Grid>
-              <Grid item xs={6}>
-                <ScoreboardTeam tid={matchup.hid} type='home' />
-              </Grid>
+          <Grid container item xs={12} spacing={0}>
+            <Grid item xs={12} md={9} classes={{ root: 'scoreboard__main' }}>
+              <ScoreboardTeam tid={matchup.aid} type='away' />
+              <ScoreboardSlots />
+              <ScoreboardTeam tid={matchup.hid} type='home' />
             </Grid>
             <Grid item xs={12} md={3}>
               <div>

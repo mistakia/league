@@ -4,7 +4,7 @@ import { createSelector } from 'reselect'
 
 import { getApp } from '@core/app'
 import { getCurrentTeam } from '@core/teams'
-import { rosterActions, getCurrentPlayers } from '@core/rosters'
+import { getCurrentPlayers } from '@core/rosters'
 import { getCurrentLeague } from '@core/leagues'
 import { getWaiverPlayersForCurrentTeam } from '@core/waivers'
 import { getPoachPlayersForCurrentLeague } from '@core/poaches'
@@ -12,10 +12,6 @@ import { getPoachPlayersForCurrentLeague } from '@core/poaches'
 import render from './dashboard'
 
 class DashboardPage extends React.Component {
-  componentDidMount () {
-    this.props.loadRoster(this.props.teamId)
-  }
-
   render () {
     return render.call(this)
   }
@@ -38,11 +34,6 @@ const mapStateToProps = createSelector(
   })
 )
 
-const mapDispatchToProps = {
-  loadRoster: rosterActions.loadRoster
-}
-
 export default connect(
-  mapStateToProps,
-  mapDispatchToProps
+  mapStateToProps
 )(DashboardPage)

@@ -18,7 +18,7 @@ export default class ScoreboardTeam extends React.Component {
       for (let i = 0; i < league.sqb; i++) {
         const { player } = players[i] || {}
         rows.push(
-          <ScoreboardPlayer key={`${slot}${i}`} {...{ playerId: player, slot, roster }} />
+          <ScoreboardPlayer key={`${slot}${i}`} {...{ playerId: player, roster }} />
         )
       }
     }
@@ -29,7 +29,7 @@ export default class ScoreboardTeam extends React.Component {
       for (let i = 0; i < league.srb; i++) {
         const { player } = players[i] || {}
         rows.push(
-          <ScoreboardPlayer key={`${slot}${i}`} {...{ playerId: player, slot, roster }} />
+          <ScoreboardPlayer key={`${slot}${i}`} {...{ playerId: player, roster }} />
         )
       }
     }
@@ -40,7 +40,7 @@ export default class ScoreboardTeam extends React.Component {
       for (let i = 0; i < league.swr; i++) {
         const { player } = players[i] || {}
         rows.push(
-          <ScoreboardPlayer key={`${slot}${i}`} {...{ playerId: player, slot, roster }} />
+          <ScoreboardPlayer key={`${slot}${i}`} {...{ playerId: player, roster }} />
         )
       }
     }
@@ -51,7 +51,7 @@ export default class ScoreboardTeam extends React.Component {
       for (let i = 0; i < league.srbwr; i++) {
         const { player } = players[i] || {}
         rows.push(
-          <ScoreboardPlayer key={`${slot}${i}`} {...{ playerId: player, slot, roster }} />
+          <ScoreboardPlayer key={`${slot}${i}`} {...{ playerId: player, roster }} />
         )
       }
     }
@@ -62,7 +62,7 @@ export default class ScoreboardTeam extends React.Component {
       for (let i = 0; i < league.srbwrte; i++) {
         const { player } = players[i] || {}
         rows.push(
-          <ScoreboardPlayer key={`${slot}${i}`} {...{ playerId: player, slot, roster }} />
+          <ScoreboardPlayer key={`${slot}${i}`} {...{ playerId: player, roster }} />
         )
       }
     }
@@ -73,7 +73,7 @@ export default class ScoreboardTeam extends React.Component {
       for (let i = 0; i < league.sqbrbwrte; i++) {
         const { player } = players[i] || {}
         rows.push(
-          <ScoreboardPlayer key={`${slot}${i}`} {...{ playerId: player, slot, roster }} />
+          <ScoreboardPlayer key={`${slot}${i}`} {...{ playerId: player, roster }} />
         )
       }
     }
@@ -84,7 +84,7 @@ export default class ScoreboardTeam extends React.Component {
       for (let i = 0; i < league.swrte; i++) {
         const { player } = players[i] || {}
         rows.push(
-          <ScoreboardPlayer key={`${slot}${i}`} {...{ playerId: player, slot, roster }} />
+          <ScoreboardPlayer key={`${slot}${i}`} {...{ playerId: player, roster }} />
         )
       }
     }
@@ -95,7 +95,7 @@ export default class ScoreboardTeam extends React.Component {
       for (let i = 0; i < league.ste; i++) {
         const { player } = players[i] || {}
         rows.push(
-          <ScoreboardPlayer key={`${slot}${i}`} {...{ playerId: player, slot, roster }} />
+          <ScoreboardPlayer key={`${slot}${i}`} {...{ playerId: player, roster }} />
         )
       }
     }
@@ -106,7 +106,7 @@ export default class ScoreboardTeam extends React.Component {
       for (let i = 0; i < league.sk; i++) {
         const { player } = players[i] || {}
         rows.push(
-          <ScoreboardPlayer key={`${slot}${i}`} {...{ playerId: player, slot, roster }} />
+          <ScoreboardPlayer key={`${slot}${i}`} {...{ playerId: player, roster }} />
         )
       }
     }
@@ -117,7 +117,7 @@ export default class ScoreboardTeam extends React.Component {
       for (let i = 0; i < league.sdst; i++) {
         const { player } = players[i] || {}
         rows.push(
-          <ScoreboardPlayer key={`${slot}${i}`} {...{ playerId: player, slot, roster }} />
+          <ScoreboardPlayer key={`${slot}${i}`} {...{ playerId: player, roster }} />
         )
       }
     }

@@ -11,10 +11,10 @@ import './player-name-expanded.styl'
 
 class PlayerNameExpanded extends Player {
   render = () => {
-    const { player, isHosted } = this.props
+    const { player, isHosted, hideActions } = this.props
     return (
       <div className='player__name-expanded'>
-        {!!(isHosted && player.player) &&
+        {!!(isHosted && player.player && !hideActions) &&
           <div className='player__name-expanded-action'>
             <IconButton small text onClick={this.handleContextClick} icon='more' />
           </div>}
@@ -23,7 +23,7 @@ class PlayerNameExpanded extends Player {
             className='player__name-expanded-row player__name-expanded-name cursor'
             onClick={this.handleClick}
           >
-            <span>{player.fname} {player.lname}</span>
+            <div className='player__name-expanded-full-name'>{player.fname} {player.lname}</div>
             {(constants.season.year === player.draft_year) &&
               <sup className='player__label-rookie'>
                 R
