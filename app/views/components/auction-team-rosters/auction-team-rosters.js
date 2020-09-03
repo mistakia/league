@@ -4,7 +4,7 @@ import Select from '@material-ui/core/Select'
 import InputLabel from '@material-ui/core/InputLabel'
 import FormControl from '@material-ui/core/FormControl'
 
-import { constants } from '@common'
+import { constants, Roster } from '@common'
 import PlayerName from '@components/player-name'
 
 import './auction-team-rosters.styl'
@@ -162,6 +162,13 @@ export default class AuctonTeamRosters extends React.Component {
     }
 
     const countItems = []
+    const r = roster ? new Roster({ roster, league }) : null
+    countItems.push(
+      <div key='avail' className='auction__team-rosters-footer-item'>
+        <label>AVAIL</label>
+        {r ? r.availableSpace : '-'}
+      </div>
+    )
     for (const position of constants.positions) {
       countItems.push(
         <div key={position} className='auction__team-rosters-footer-item'>
