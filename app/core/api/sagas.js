@@ -10,6 +10,7 @@ import {
   getApp
 } from '@core/app'
 
+import { getScheduleActions } from '@core/schedule'
 import { getDraftActions, postDraftActions } from '@core/draft'
 import {
   getRosterActions,
@@ -148,5 +149,7 @@ export const postWaiver = fetch.bind(null, api.postWaiver, postWaiverActions)
 export const postWaiverOrder = fetch.bind(null, api.postWaiverOrder, postWaiverOrderActions)
 export const postCancelWaiver = fetch.bind(null, api.postCancelWaiver, postCancelWaiverActions)
 export const postPoach = fetch.bind(null, api.postPoach, postPoachActions)
+
+export const getSchedule = fetch.bind(null, api.getSchedule, getScheduleActions)
 
 export const postError = fetch.bind(null, api.postError, postErrorActions)

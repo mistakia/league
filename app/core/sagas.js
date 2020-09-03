@@ -16,6 +16,7 @@ import { settingSagas } from './settings'
 import { statSagas } from './stats'
 import { waiverSagas } from './waivers'
 import { poachSagas } from './poaches'
+import { scheduleSagas } from './schedule'
 import { errorSagas } from './errors'
 
 export default function * rootSaga () {
@@ -36,6 +37,7 @@ export default function * rootSaga () {
     ...statSagas,
     ...waiverSagas,
     ...poachSagas,
+    ...scheduleSagas,
     ...errorSagas
   ])
 }
