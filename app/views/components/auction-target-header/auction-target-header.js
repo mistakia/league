@@ -15,14 +15,6 @@ export default class AuctionTargetHeader extends React.Component {
 
     return (
       <div className='auction__target-header'>
-        <div className='auction__target-header-inflation'>
-          <Tooltip title='Positional Salary Inflation' placement='bottom'>
-            <span>
-              {positive ? '+' : null}
-              {(inflation).toFixed(1)}%
-            </span>
-          </Tooltip>
-        </div>
         <div className='auction__target-header-scarcity'>
           <Tooltip title='Positional Value Remaining' placement='bottom'>
             <span>
@@ -34,6 +26,19 @@ export default class AuctionTargetHeader extends React.Component {
           <Tooltip title='Positional Rostered Count' placement='bottom'>
             <span>
               {info.count.rostered}/{info.count.total}
+            </span>
+          </Tooltip>
+        </div>
+        <div className='auction__target-header-bye'>
+          <Tooltip title='Bye Week' placement='bottom'>
+            <span>BW</span>
+          </Tooltip>
+        </div>
+        <div className='auction__target-header-inflation'>
+          <Tooltip title='Positional Salary Inflation' placement='bottom'>
+            <span>
+              {positive ? '+' : null}
+              {(inflation).toFixed(1)}%
             </span>
           </Tooltip>
         </div>

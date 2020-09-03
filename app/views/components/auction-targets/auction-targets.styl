@@ -28,10 +28,10 @@
 
 .auction__targets-player
   display flex
-  border-right 4px solid transparent
+  border-left 4px solid transparent
 
   &.optimal
-    border-right 4px solid $accentColor
+    border-left 4px solid $accentColor
 
   .player__watchlist-action
     opacity 0
@@ -45,6 +45,9 @@
   &.rostered
     text-decoration line-through
     color #8f8f8f
+
+  .player__name
+    padding 0 4px
 
 .optimal__lineup-key
   background white
@@ -61,9 +64,20 @@
 .auction__targets-player-salary
   padding 8px
   background #fafafa
-  border-right 1px solid $borderColor
-  margin-right 8px
+  border-left 1px solid $borderColor
   flex 0 0 45px
+  display flex
+  justify-content flex-end
+
+.auction__targets-player-bye
+  flex 0 0 20px
+  font-size 10px
+  display flex
+  align-items center
+  background white
+  border-left 1px solid $borderColor
+  justify-content center
+  color lighten(black, 50%)
 
 .auction__targets-player-meta
   width 100px
