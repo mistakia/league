@@ -1,6 +1,7 @@
 import React from 'react'
 
 import PlayerName from '@components/player-name'
+import NFLTeamBye from '@components/nfl-team-bye'
 
 import './auction-nominated-player.styl'
 
@@ -19,6 +20,9 @@ export default class AuctionNominatedPlayer extends React.Component {
           </div>
           <div className='nominated__player-detail'>
             Inflation: ${player.getIn(['values', inflationType, vbaseline], 0)}
+          </div>
+          <div className='nominated__player-detail'>
+            Bye: <NFLTeamBye team={player.team} />
           </div>
         </div>
       </div>
