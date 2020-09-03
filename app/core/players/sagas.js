@@ -41,7 +41,7 @@ export function * calculateValues () {
     volsw
   })
   worker.terminate()
-  yield put(playerActions.setValues(result))
+  yield putResolve(playerActions.setValues(result))
   yield put(rosterActions.projectLineups())
   // TODO calculate bid up to values
 }
@@ -76,7 +76,7 @@ export function * saveProjection ({ payload }) {
   const { token } = yield select(getApp)
   const { value, type, playerId, userId, week } = payload
   if (token) yield call(putProjection, { value, type, playerId, userId, week })
-  else yield put(playerActions.setProjection({ value, type, playerId, userId, week }))
+  else yield putResolve(playerActions.setProjection({ value, type, playerId, userId, week }))
   yield call(calculateValues)
 }
 
@@ -91,7 +91,7 @@ export function * deleteProjection ({ payload }) {
   const players = yield select(getPlayers)
   const week = players.get('week')
   if (token) yield call(delProjection, { playerId, userId, week })
-  else yield put(playerActions.removeProjection({ playerId }))
+  else yield putResolve(playerActions.removeProjection({ playerId }))
   yield call(calculateValues)
 }
 

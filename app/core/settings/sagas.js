@@ -1,4 +1,4 @@
-import { call, takeLatest, fork, put, select } from 'redux-saga/effects'
+import { call, takeLatest, fork, put, select, putResolve } from 'redux-saga/effects'
 
 import { getApp } from '@core/app'
 import { settingActions } from './actions'
@@ -8,7 +8,7 @@ import { calculateValues } from '@core/players'
 export function * updateSetting ({ payload }) {
   const { token } = yield select(getApp)
   if (token) yield call(putSetting, payload)
-  else yield put(settingActions.set(payload))
+  else yield putResolve(settingActions.set(payload))
 
   if (['vbaseline', 'vorpw', 'volsw'].includes(payload.type)) {
     yield call(calculateValues)

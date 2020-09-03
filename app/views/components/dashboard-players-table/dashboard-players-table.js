@@ -42,7 +42,7 @@ export default class DashboardPlayersTable extends React.Component {
   }
 
   render = () => {
-    const { items, title, claim, claims, reorderType, reorderWaivers, leadColumn = 'Name' } = this.props
+    const { items, title, claim, claims, reorderType, reorderWaivers, leadColumn = '' } = this.props
 
     const SortableItem = SortableElement(({ waiver }) => {
       return (

@@ -10,7 +10,8 @@ export {
   getGamesByYearForSelectedPlayer,
   getPlayersForWatchlist,
   getPlayerStatus,
-  isPlayerPracticeSquadEligible
+  isPlayerPracticeSquadEligible,
+  isPlayerLocked
 } from './selectors'
 export { Player, createPlayer } from './player'
 export {

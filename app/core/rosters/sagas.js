@@ -1,4 +1,4 @@
-import { take, call, takeLatest, fork, select, put } from 'redux-saga/effects'
+import { take, call, takeLatest, fork, select, put, putResolve } from 'redux-saga/effects'
 
 import { rosterActions } from './actions'
 import { notificationActions } from '@core/notifications'
@@ -143,7 +143,7 @@ export function * projectLineups () {
     worker.terminate()
   }
 
-  yield put(rosterActions.setLineupProjections(lineups))
+  yield putResolve(rosterActions.setLineupProjections(lineups))
   const currentRosterPlayers = yield select(getCurrentPlayers)
 
   const projectedContribution = {}

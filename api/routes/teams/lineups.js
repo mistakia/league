@@ -85,9 +85,11 @@ router.put('/?', async (req, res) => {
     }
 
     // verify player is eligible for slot
-    const isEligible = roster.isEligibleForSlot({ slot, player, pos: playerRow.pos1 })
-    if (!isEligible) {
-      return res.status(400).send({ error: 'invalid slot' })
+    if (slot !== constants.slots.BENCH) {
+      const isEligible = roster.isEligibleForSlot({ slot, player, pos: playerRow.pos1 })
+      if (!isEligible) {
+        return res.status(400).send({ error: 'invalid slot' })
+      }
     }
 
     // verify player is not locked
