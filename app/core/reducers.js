@@ -17,6 +17,7 @@ import { contextMenuReducer } from './context-menu'
 import { confirmationReducer } from './confirmations'
 import { poachesReducer } from './poaches'
 import { waiversReducer } from './waivers'
+import { scheduleReducer } from './schedule'
 import { notificationReducer } from './notifications'
 
 const rootReducer = (history) => {
@@ -38,7 +39,8 @@ const rootReducer = (history) => {
     trade: tradeReducer,
     stats: statsReducer,
     poaches: poachesReducer,
-    waivers: waiversReducer
+    waivers: waiversReducer,
+    schedule: scheduleReducer
   })
 }
 

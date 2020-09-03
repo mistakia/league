@@ -83,6 +83,7 @@ api.use('/api/errors', routes.errors)
 api.use('/api/stats', speedLimiter, routes.stats)
 api.use('/api/players', routes.players)
 api.use('/api/plays', speedLimiter, routes.plays)
+api.use('/api/schedule', routes.schedule)
 api.use('/api/sources', routes.sources)
 api.use('/api/auth', routes.auth)
 api.use('/api/*', (err, req, res, next) => {

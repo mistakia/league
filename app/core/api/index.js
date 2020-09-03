@@ -43,5 +43,6 @@ export {
   postAddFreeAgent,
   getReleaseTransactions,
   postReserve,
-  postRelease
+  postRelease,
+  getSchedule
 } from './sagas'
