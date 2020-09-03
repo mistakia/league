@@ -172,8 +172,8 @@ export default class Lineup extends React.Component {
         <Grid item xs={12} md={6}>
           <div className='section'>
             <div className='dashboard__section-body-header'>
-              <div className='player__slot-slotName'>Slot</div>
-              <div className='player__item-name'>Name</div>
+              <div className='player__slot-slotName' />
+              <div className='player__item-name' />
               {/* <div className='player__item-metric'>Opp</div>
                   <div className='player__item-metric'>Avg</div>
                   <div className='player__item-metric'>Proj</div>
@@ -187,8 +187,8 @@ export default class Lineup extends React.Component {
         <Grid item xs={12} md={6}>
           <div className='section'>
             <div className='dashboard__section-body-header'>
-              <div className='player__slot-slotName'>Slot</div>
-              <div className='player__item-name'>Name</div>
+              <div className='player__slot-slotName' />
+              <div className='player__item-name' />
               {/* <div className='player__item-metric'>Opp</div>
                   <div className='player__item-metric'>Avg</div>
                   <div className='player__item-metric'>Proj</div>

@@ -8,7 +8,7 @@ import './player-slot.styl'
 
 export default class PlayerSlot extends React.Component {
   render () {
-    const { player, slot, handleSelect, selected, handleUpdate } = this.props
+    const { player, slot, handleSelect, selected, handleUpdate, isLocked } = this.props
 
     const slotPositions = Object.keys(constants.slots).find(key => constants.slots[key] === slot)
     const slotName = constants.slotName[slot]
@@ -17,10 +17,11 @@ export default class PlayerSlot extends React.Component {
     if (!selected && player.player) {
       action = (
         <Button
+          disabled={isLocked}
           onClick={() => handleSelect({ slot, player: player.player, pos: player.pos1 })}
           small
         >
-          Move
+          {isLocked ? 'Locked' : 'Move'}
         </Button>
       )
     } else if (selected && !player.player && (slotPositions.includes(selected.pos) || slot === constants.slots.BENCH)) {
@@ -52,7 +53,7 @@ export default class PlayerSlot extends React.Component {
       <div className={classNames.join(' ')}>
         <div className='player__slot-slotName'>{slotName}</div>
         <div className='player__slot-player'>
-          <PlayerNameExpanded playerId={player.player} />
+          <PlayerNameExpanded playerId={player.player} hideActions />
           {/* projected output */}
           {/* expert consensus ranking */}
         </div>

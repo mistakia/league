@@ -1,25 +1,29 @@
 .player__name-expanded
   display flex
-  width 200px
 
 .player__name-expanded-main
   align-items center
   display flex
   flex-direction column
-  flex 0 0 150px
+  flex 1
+  align-items flex-start
+  width 100%
 
 .player__name-expanded-name:hover
   color $accentColor
 
 .player__name-expanded-row
   flex 1
-  width 150px
-  overflow hidden
-  text-overflow ellipsis
   white-space nowrap
   line-height 20px
+  display flex
 
 .player__name-expanded-action
   flex 0 0 50px
   display flex
   align-items center
+
+.player__name-expanded-full-name
+  flex 0 0 auto
+  overflow hidden
+  text-overflow ellipsis

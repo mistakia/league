@@ -12,19 +12,19 @@
   display flex
 
 .scoreboard__player-score
-  font-size 1.25em
+  font-size 1em
 
 .scoreboard__player-body
   flex 1
   display flex
   flex-direction column
+  width 100%
+  overflow hidden
 
 .away
   .scoreboard__player
     justify-content flex-end
     margin-right 8px
-  .scoreboard__player-slot
-    order 1
   .scoreboard__player-body
     order 2
   .scoreboard__player-score
@@ -38,6 +38,17 @@
     order 1
   .scoreboard__player-body
     order 2
-  .scoreboard__player-slot
-    order 3
-    justify-content flex-end
+
+  .player__name-expanded-main
+    align-items flex-end
+    .position
+      order 3
+    .team
+      order 2
+    .player__label-status
+      order 1
+
+  .player__label-rookie
+    order 1
+  .player__name-expanded-full-name
+    order 2

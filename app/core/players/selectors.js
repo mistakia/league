@@ -1,5 +1,5 @@
 import { createSelector } from 'reselect'
-import moment from 'moment'
+import moment from 'moment-timezone'
 import { constants, calculatePoints, isOnReleaseWaivers } from '@common'
 import { getApp } from '@core/app'
 import { getStats } from '@core/stats'
@@ -20,6 +20,7 @@ import {
   isPlayerOnPracticeSquad,
   getRosterInfoForPlayerId
 } from '@core/rosters'
+import { getGameForWeekByTeam } from '@core/schedule'
 
 export function getPlayers (state) {
   return state.get('players')
@@ -237,6 +238,28 @@ export function isPlayerReserveEligible (state, { player }) {
   return reserve
 }
 
+export function isPlayerLocked (state, { player, playerId }) {
+  if (playerId) {
+    player = getPlayerById(state, { playerId })
+  }
+
+  if (!player) {
+    return false
+  }
+
+  const game = getGameForWeekByTeam(state, { team: player.team })
+  if (!game) {
+    return false
+  }
+
+  const gameStart = moment.tz(game.date, 'M/D/YYYY H:m', 'America/New_York')
+  if (moment().isAfter(gameStart)) {
+    return true
+  }
+
+  return false
+}
+
 export function getPlayerStatus (state, { player, playerId }) {
   if (playerId) {
     player = getPlayerById(state, { playerId })
@@ -269,6 +292,8 @@ export function getPlayerStatus (state, { player, playerId }) {
   if (!player || !player.player) {
     return status
   }
+
+  status.locked = isPlayerLocked(state, { player })
 
   const isFreeAgent = isPlayerFreeAgent(state, { player })
   status.fa = isFreeAgent
