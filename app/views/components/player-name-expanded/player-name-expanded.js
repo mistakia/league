@@ -14,6 +14,10 @@ class PlayerNameExpanded extends Player {
     const { player, isHosted } = this.props
     return (
       <div className='player__name-expanded'>
+        {!!(isHosted && player.player) &&
+          <div className='player__name-expanded-action'>
+            <IconButton small text onClick={this.handleContextClick} icon='more' />
+          </div>}
         <div className='player__name-expanded-main'>
           <div
             className='player__name-expanded-row player__name-expanded-name cursor'
@@ -36,10 +40,6 @@ class PlayerNameExpanded extends Player {
               </Tooltip>}
           </div>
         </div>
-        {!!(isHosted && player.player) &&
-          <div className='player__name-expanded-action'>
-            <IconButton small text onClick={this.handleContextClick} icon='more' />
-          </div>}
       </div>
     )
   }
