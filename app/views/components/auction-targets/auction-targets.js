@@ -5,6 +5,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel'
 // import TextField from '@material-ui/core/TextField'
 
 // import EditableAuctionBudget from '@components/editable-auction-budget'
+import NFLTeamBye from '@components/nfl-team-bye'
 import AuctionValueTypeToggle from '@components/auction-value-type-toggle'
 import PlayerWatchlistAction from '@components/player-watchlist-action'
 import AuctionTargetHeader from '@components/auction-target-header'
@@ -50,11 +51,12 @@ export default class AuctionTargets extends React.Component {
 
         const item = (
           <div className={classNames.join(' ')} key={index}>
+            <PlayerName playerId={player.player} />
+            <PlayerWatchlistAction playerId={player.player} />
+            <div className='auction__targets-player-bye'><NFLTeamBye team={player.team} /></div>
             <div className='auction__targets-player-salary'>
               ${salary}
             </div>
-            <PlayerName playerId={player.player} bye />
-            <PlayerWatchlistAction playerId={player.player} />
           </div>
         )
         items[position].push(item)
