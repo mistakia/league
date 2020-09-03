@@ -6,7 +6,7 @@ export default class AuctionTeam extends React.Component {
   render = () => {
     const {
       team, isConnected, isWinningBid, bid,
-      isNominating, roster
+      isNominating, roster, isOwner
     } = this.props
 
     const classNames = ['auction__team']
@@ -20,6 +20,10 @@ export default class AuctionTeam extends React.Component {
 
     if (isWinningBid) {
       classNames.push('winning')
+    }
+
+    if (isOwner) {
+      classNames.push('owner')
     }
 
     const hasBid = bid !== null

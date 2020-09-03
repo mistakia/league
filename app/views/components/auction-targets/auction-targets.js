@@ -53,7 +53,7 @@ export default class AuctionTargets extends React.Component {
             <div className='auction__targets-player-salary'>
               ${salary}
             </div>
-            <PlayerName playerId={player.player} />
+            <PlayerName playerId={player.player} bye />
             <PlayerWatchlistAction playerId={player.player} />
           </div>
         )
