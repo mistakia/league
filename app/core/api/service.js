@@ -209,6 +209,10 @@ export const api = {
   postError (data) {
     const url = `${BASE_URL}/errors`
     return { url, ...POST(data) }
+  },
+  getSchedule () {
+    const url = `${BASE_URL}/schedule`
+    return { url }
   }
 }
 
