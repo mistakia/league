@@ -1,6 +1,5 @@
 import React from 'react'
 import { SortableContainer, SortableElement } from 'react-sortable-hoc'
-import Paper from '@material-ui/core/Paper'
 import Toolbar from '@material-ui/core/Toolbar'
 
 import PlayerRoster from '@components/player-roster'
@@ -89,11 +88,11 @@ export default class DashboardPlayersTable extends React.Component {
       )
     }
 
-    const classNames = ['dashboard__players-table']
+    const classNames = ['section']
     if (claim) classNames.push('waiver')
 
     return (
-      <Paper classes={{ root: classNames.join(' ') }}>
+      <div className={classNames.join(' ')}>
         <Toolbar>
           <div className='dashboard__section-header-title'>{title}</div>
         </Toolbar>
@@ -109,14 +108,14 @@ export default class DashboardPlayersTable extends React.Component {
               <div className='metric table__cell'>Bid</div>}
             {!claim &&
               <div className='metric table__cell'>Salary</div>}
-            <div className='table__cell'><ValueHeader /></div>
-            <div className='table__cell'><StartsHeader /></div>
-            <div className='table__cell'><PointsPlusHeader /></div>
-            <div className='table__cell'><BenchPlusHeader /></div>
+            <div className='table__cell metric'><ValueHeader /></div>
+            <div className='table__cell metric'><StartsHeader /></div>
+            <div className='table__cell metric'><PointsPlusHeader /></div>
+            <div className='table__cell metric'><BenchPlusHeader /></div>
           </div>
           {body}
         </div>
-      </Paper>
+      </div>
     )
   }
 }
