@@ -25,12 +25,11 @@ const mapStateToProps = createSelector(
 const Routes = ({ app, location }) => {
   const redirect = () => {
     const { leagueId, teamId } = queryString.parse(location.search)
-    if (leagueId || teamId) {
-      return <Redirect to={`/login${location.search}`} />
-    }
 
     if (app.userId) {
       return <Redirect to='/dashboard' />
+    } else if (leagueId || teamId) {
+      return <Redirect to={`/login${location.search}`} />
     } else {
       return <Redirect to='/players' />
     }
