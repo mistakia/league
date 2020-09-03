@@ -8,7 +8,6 @@
   align-items center
   height 55px
   background white
-  z-index 1
 
 .table__head
   align-items center
@@ -20,12 +19,14 @@
 
 .table__cell
   flex 1
-  min-width 50px
+  min-width 60px
   display flex
   align-items center
   height 55px
   border-bottom 1px solid $borderColor
-  padding 0 16px
+  padding 0 8px
+  &.metric
+    justify-content flex-end
 
 .table__head .table__cell
   height 25px
