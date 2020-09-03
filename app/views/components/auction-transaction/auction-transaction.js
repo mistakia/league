@@ -9,13 +9,17 @@ import './auction-transaction.styl'
 
 export default class AuctionTransaction extends React.Component {
   render = () => {
-    const { transaction } = this.props
-    const icon = transaction.type === 6
-      ? <AttachMoneyIcon fontSize='small' />
-      : <AddCircleOutlineIcon fontSize='small' />
+    const { transaction, style } = this.props
+    const isSigned = transaction.type === 7
+    const icon = isSigned
+      ? (<AddCircleOutlineIcon fontSize='small' />)
+      : (<AttachMoneyIcon fontSize='small' />)
+
+    const classNames = ['auction__transaction']
+    if (isSigned) classNames.push('signed')
 
     return (
-      <div className='auction__transaction'>
+      <div className={classNames.join(' ')} style={style}>
         <div className='auction__transaction-type'>
           {icon}
         </div>
