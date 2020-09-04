@@ -10,6 +10,7 @@ import {
   getApp
 } from '@core/app'
 
+import { getStatusActions } from '@core/status'
 import { getScheduleActions } from '@core/schedule'
 import { getDraftActions, postDraftActions } from '@core/draft'
 import {
@@ -153,3 +154,4 @@ export const postPoach = fetch.bind(null, api.postPoach, postPoachActions)
 export const getSchedule = fetch.bind(null, api.getSchedule, getScheduleActions)
 
 export const postError = fetch.bind(null, api.postError, postErrorActions)
+export const getStatus = fetch.bind(null, api.getStatus, getStatusActions)
