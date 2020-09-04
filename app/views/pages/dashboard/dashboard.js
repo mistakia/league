@@ -5,6 +5,7 @@ import AlertTitle from '@material-ui/lab/AlertTitle'
 import Container from '@material-ui/core/Container'
 import Grid from '@material-ui/core/Grid'
 
+import DashboardLeaguePositionalValue from '@components/dashboard-league-positional-value'
 import DashboardPlayersTable from '@components/dashboard-players-table'
 import DashboardTeamSummary from '@components/dashboard-team-summary'
 import DashboardTeamValue from '@components/dashboard-team-value'
@@ -230,6 +231,7 @@ export default function () {
         <Grid item xs={12} md={4}>
           <DashboardTeamSummary />
           <DashboardTeamValue />
+          <DashboardLeaguePositionalValue />
         </Grid>
       </Grid>
     </Container>

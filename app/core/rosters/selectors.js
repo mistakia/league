@@ -161,19 +161,21 @@ export function getCurrentTeamRosterPositionalValue (state) {
   const team = getCurrentTeam(state)
   const divTeamIds = teams.filter(t => t.div === team.div).map(t => t.uid)
 
-  const rosters = []
-  for (const rec of rosterRecords.valueSeq()) {
-    const roster = new Roster({ roster: rec.toJS(), league })
-    rosters.push(roster)
-  }
-
   const values = {
     league_avg: {},
     league: {},
     div_avg: {},
     div: {},
     team: {},
-    total: {}
+    total: {},
+    rosters: {}
+  }
+
+  const rosters = []
+  for (const rec of rosterRecords.valueSeq()) {
+    const roster = new Roster({ roster: rec.toJS(), league })
+    rosters.push(roster)
+    values.rosters[roster.tid] = {}
   }
 
   for (const position of constants.positions) {
@@ -185,6 +187,7 @@ export function getCurrentTeamRosterPositionalValue (state) {
       const vorps = players.map(p => p.getIn(['vorp', 'ros', 'starter'], 0))
       const sum = vorps.reduce((s, i) => s + i, 0)
       league.push(sum)
+      values.rosters[roster.tid][position] = sum
       if (divTeamIds.includes(roster.tid)) div.push(sum)
       if (roster.tid === team.uid) values.team[position] = sum
       values.total[roster.tid] = (values.total[roster.tid] ?? 0) + sum
