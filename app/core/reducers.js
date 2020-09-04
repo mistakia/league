@@ -19,6 +19,7 @@ import { poachesReducer } from './poaches'
 import { waiversReducer } from './waivers'
 import { scheduleReducer } from './schedule'
 import { notificationReducer } from './notifications'
+import { statusReducer } from './status'
 
 const rootReducer = (history) => {
   return combineReducers({
@@ -40,7 +41,8 @@ const rootReducer = (history) => {
     stats: statsReducer,
     poaches: poachesReducer,
     waivers: waiversReducer,
-    schedule: scheduleReducer
+    schedule: scheduleReducer,
+    status: statusReducer
   })
 }
 

@@ -44,5 +44,6 @@ export {
   getReleaseTransactions,
   postReserve,
   postRelease,
-  getSchedule
+  getSchedule,
+  getStatus
 } from './sagas'

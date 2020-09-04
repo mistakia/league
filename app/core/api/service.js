@@ -213,6 +213,10 @@ export const api = {
   getSchedule () {
     const url = `${BASE_URL}/schedule`
     return { url }
+  },
+  getStatus () {
+    const url = `${BASE_URL}/status`
+    return { url }
   }
 }
 
