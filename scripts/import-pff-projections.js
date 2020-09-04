@@ -77,7 +77,7 @@ const runOne = async (week) => {
   missing.forEach(m => log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`))
 
   if (argv.dry) {
-    return process.exit()
+    return
   }
 
   log(`Inserting ${inserts.length} projections into database`)
@@ -88,11 +88,29 @@ const run = async () => {
   for (let week = constants.season.week; week < 17; week++) {
     await runOne(week)
   }
+}
+
+module.exports = run
+
+const main = async () => {
+  let error
+  try {
+    await run()
+  } catch (err) {
+    error = err
+    console.log(error)
+  }
+
+  await db('jobs').insert({
+    type: constants.jobs.PROJECTIONS_PFF,
+    succ: error ? 0 : 1,
+    reason: error ? error.message : null,
+    timestamp: Math.round(Date.now() / 1000)
+  })
+
   process.exit()
 }
 
-try {
-  run()
-} catch (error) {
-  console.log(error)
+if (!module.parent) {
+  main()
 }

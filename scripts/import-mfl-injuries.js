@@ -68,17 +68,34 @@ const run = async () => {
   log(`Retrieved ${inserts.length} status updates`)
 
   if (argv.dry) {
-    return process.exit()
+    return
   }
 
   log(`Inserting ${inserts.length} status updates into database`)
   await db('players_status').insert(inserts)
+}
+
+module.exports = run
+
+const main = async () => {
+  let error
+  try {
+    await run()
+  } catch (err) {
+    error = err
+    console.log(error)
+  }
+
+  await db('jobs').insert({
+    type: constants.jobs.PLAYERS_MFL_INJURIES,
+    succ: error ? 0 : 1,
+    reason: error ? error.message : null,
+    timestamp: Math.round(Date.now() / 1000)
+  })
 
   process.exit()
 }
 
-try {
-  run()
-} catch (error) {
-  console.log(error)
+if (!module.parent) {
+  main()
 }
