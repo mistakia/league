@@ -10,6 +10,7 @@ const log = debug('import:players:sleeper')
 debug.enable('league:player:get,import:players:sleeper')
 
 const { getPlayerId, fixTeam } = require('../utils')
+const { constants } = require('../common')
 const db = require('../db')
 const timestamp = Math.round(Date.now() / 1000)
 
@@ -99,7 +100,7 @@ const run = async () => {
   missing.forEach(m => log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`))
 
   if (argv.dry) {
-    return process.exit()
+    return
   }
 
   log(`Inserting ${inserts.length} players into database`)
@@ -178,12 +179,29 @@ const run = async () => {
   }
 
   await db('players_status').insert(statuses)
+}
+
+module.exports = run
+
+const main = async () => {
+  let error
+  try {
+    await run()
+  } catch (err) {
+    error = err
+    console.log(error)
+  }
+
+  await db('jobs').insert({
+    type: constants.jobs.PLAYERS_SLEEPER,
+    succ: error ? 0 : 1,
+    reason: error ? error.message : null,
+    timestamp: Math.round(Date.now() / 1000)
+  })
 
   process.exit()
 }
 
-try {
-  run()
-} catch (error) {
-  console.log(error)
+if (!module.parent) {
+  main()
 }

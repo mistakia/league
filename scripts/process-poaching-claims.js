@@ -4,6 +4,7 @@ const moment = require('moment')
 const debug = require('debug')
 
 const db = require('../db')
+const { constants } = require('../common')
 const { processPoach, sendNotifications } = require('../utils')
 
 const log = debug('process:claims')
@@ -60,11 +61,20 @@ const run = async () => {
 module.exports = run
 
 const main = async () => {
+  let error
   try {
     await run()
-  } catch (error) {
+  } catch (err) {
+    error = err
     console.log(error)
   }
+
+  await db('jobs').insert({
+    type: constants.jobs.CLAIMS_POACH,
+    succ: error ? 0 : 1,
+    reason: error ? error.message : null,
+    timestamp: Math.round(Date.now() / 1000)
+  })
 
   process.exit()
 }
