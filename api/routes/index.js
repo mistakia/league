@@ -9,11 +9,13 @@ const projections = require('./projections')
 const settings = require('./settings')
 const stats = require('./stats')
 const schedule = require('./schedule')
+const status = require('./status')
 const errors = require('./errors')
 
 module.exports = {
   auth,
   schedule,
+  status,
   errors,
   teams,
   leagues,
