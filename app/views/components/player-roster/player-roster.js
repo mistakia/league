@@ -13,7 +13,7 @@ const DragHandle = sortableHandle(() =>
 
 class PlayerRoster extends Player {
   render () {
-    const { player, vbaseline, selected, claim, reorder, waiverId } = this.props
+    const { player, selected, claim, reorder, waiverId } = this.props
 
     const isClaim = !!claim
 
@@ -39,7 +39,7 @@ class PlayerRoster extends Player {
             {claim.bid && `$${claim.bid}`}
           </div>}
         <div className='metric table__cell'>
-          {(player.getIn(['vorp', '0', vbaseline]) || 0).toFixed(1)}
+          {(player.getIn(['vorp', 'ros', 'starter']) || 0).toFixed(1)}
         </div>
         <div className='metric table__cell'>
           {player.getIn(['lineups', 'starts'])}
