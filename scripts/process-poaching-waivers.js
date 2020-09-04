@@ -71,7 +71,7 @@ const run = async () => {
 
       await db('waivers')
         .update({
-          succ: !error,
+          succ: error ? 0 : 1,
           reason: error ? error.message : null, // TODO - add error codes
           processed: timestamp
         })
@@ -85,11 +85,20 @@ const run = async () => {
 module.exports = run
 
 const main = async () => {
+  let error
   try {
     await run()
-  } catch (error) {
+  } catch (err) {
+    error = err
     console.log(error)
   }
+
+  await db('jobs').insert({
+    type: constants.jobs.CLAIMS_WAIVERS_POACH,
+    succ: error ? 0 : 1,
+    reason: error ? error.message : null,
+    timestamp: Math.round(Date.now() / 1000)
+  })
 
   process.exit()
 }
