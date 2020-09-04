@@ -841,3 +841,21 @@ export const jobs = {
   NOTIFICATIONS_DRAFT: 14,
   NOTIFICATIONS_POACH: 15
 }
+
+export const jobDetails = {
+  1: 'Active Roster Free Agency Waivers',
+  2: 'Practice Squad Free Agency Waivers',
+  3: 'Poaching Waivers',
+  4: 'Poaching Claims',
+  5: 'Player Status (MFL)',
+  6: 'Player Status (Sleeper)',
+  7: 'Player Status (MFL Injuries)',
+  8: 'Projections (PFF)',
+  9: 'Projections (FFToday)',
+  10: 'Projections (CBS)',
+  11: 'Projections (ESPN)',
+  12: 'Projections (FantasySharks)',
+  13: 'Projections (NFL)',
+  14: 'Notifications (Draft)',
+  15: 'Notifications (Poach)'
+}

@@ -18,6 +18,7 @@ import { waiverSagas } from './waivers'
 import { poachSagas } from './poaches'
 import { scheduleSagas } from './schedule'
 import { errorSagas } from './errors'
+import { statusSagas } from './status'
 
 export default function * rootSaga () {
   yield all([
@@ -38,6 +39,7 @@ export default function * rootSaga () {
     ...waiverSagas,
     ...poachSagas,
     ...scheduleSagas,
-    ...errorSagas
+    ...errorSagas,
+    ...statusSagas
   ])
 }
