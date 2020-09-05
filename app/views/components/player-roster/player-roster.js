@@ -1,5 +1,6 @@
 import React from 'react'
 
+import { constants } from '@common'
 import PlayerNameExpanded from '@components/player-name-expanded'
 import { Player, connect } from '@components/player'
 import Icon from '@components/icon'
@@ -16,6 +17,8 @@ class PlayerRoster extends Player {
     const { player, selected, claim, reorder, waiverId } = this.props
 
     const isClaim = !!claim
+
+    const week = Math.max(constants.season.week, 1)
 
     const classNames = ['player__item', 'table__row']
     if (selected === player.player) classNames.push('selected')
@@ -39,7 +42,13 @@ class PlayerRoster extends Player {
             {claim.bid && `$${claim.bid}`}
           </div>}
         <div className='metric table__cell'>
-          {(player.getIn(['vorp', 'ros', 'starter']) || 0).toFixed(1)}
+          {player.getIn(['vorp', 'ros', 'starter'], 0).toFixed(1)}
+        </div>
+        <div className='metric table__cell'>
+          {player.getIn(['points', 'ros', 'total'], 0).toFixed(1)}
+        </div>
+        <div className='metric table__cell'>
+          {player.getIn(['points', `${week}`, 'total'], 0).toFixed(1)}
         </div>
         <div className='metric table__cell'>
           {player.getIn(['lineups', 'starts'])}

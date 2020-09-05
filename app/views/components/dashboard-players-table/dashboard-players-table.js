@@ -2,6 +2,7 @@ import React from 'react'
 import { SortableContainer, SortableElement } from 'react-sortable-hoc'
 import Toolbar from '@material-ui/core/Toolbar'
 
+import { constants } from '@common'
 import PlayerRoster from '@components/player-roster'
 import PlayerRosterHeader from '@components/player-roster-header'
 
@@ -32,6 +33,13 @@ const BenchPlusHeader = () => (
   <PlayerRosterHeader
     tooltip='Projected bench points you would lose without player'
     title='Bench+'
+  />
+)
+
+const ROSHeader = () => (
+  <PlayerRosterHeader
+    tooltip='Projected points for the remainder of the season'
+    title='ROS'
   />
 )
 
@@ -91,6 +99,8 @@ export default class DashboardPlayersTable extends React.Component {
     const classNames = ['section']
     if (claim) classNames.push('waiver')
 
+    const week = Math.max(constants.season.week, 1)
+
     return (
       <div className={classNames.join(' ')}>
         <Toolbar>
@@ -109,6 +119,8 @@ export default class DashboardPlayersTable extends React.Component {
             {!claim &&
               <div className='metric table__cell'>Salary</div>}
             <div className='table__cell metric'><ValueHeader /></div>
+            <div className='table__cell metric'><ROSHeader /></div>
+            <div className='table__cell metric'>Week {week}</div>
             <div className='table__cell metric'><StartsHeader /></div>
             <div className='table__cell metric'><PointsPlusHeader /></div>
             <div className='table__cell metric'><BenchPlusHeader /></div>
