@@ -14,10 +14,6 @@ export default class AuctionPlayer extends React.Component {
       return
     }
 
-    if (!this.props.isEligible) {
-      return
-    }
-
     if (this.props.nominatedPlayer) {
       return
     }
