@@ -159,6 +159,7 @@ export default class Roster extends React.Component {
       <div className='roster'>
         <div className='roster__team'>
           <TeamName tid={roster.tid} />
+          <div className='roster__salary metric'>{`$${r.availableCap}`}</div>
         </div>
         <div className='roster__slots'>
           {rows}
