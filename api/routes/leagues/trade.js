@@ -2,7 +2,7 @@ const API = require('groupme').Stateless
 const express = require('express')
 const router = express.Router({ mergeParams: true })
 const { constants, Roster, toStringArray } = require('../../../common')
-const { getRoster, sendNotifications } = require('../../../utils')
+const { getRoster, sendNotifications, verifyReserveStatus } = require('../../../utils')
 
 const getTrade = async (req, res) => {
   const { db, logger } = req.app.locals
@@ -77,6 +77,13 @@ router.post('/accept', async (req, res, next) => {
       res.status(400).send({ error: `no valid trade with tradeid: ${tradeId}` })
     }
 
+    // verify accepting team reserve status
+    try {
+      await verifyReserveStatus({ teamId: trade.tid, leagueId })
+    } catch (error) {
+      return res.status(400).send({ error: error.message })
+    }
+
     const acceptingTeamDropPlayers = req.body.dropPlayers
       ? (Array.isArray(req.body.dropPlayers)
         ? req.body.dropPlayers
@@ -140,6 +147,10 @@ router.post('/accept', async (req, res, next) => {
       acceptingTeamRoster.addPlayer({ slot: constants.slots.BENCH, player: playerId, pos: player.pos1 })
     }
 
+    if (!constants.season.isRegularSeason && acceptingTeamRoster.availableCap < 0) {
+      return res.status(400).send({ error: 'exceeds salary limit' })
+    }
+
     // validate proposing team roster
     const proposingTeamRosterRow = await getRoster({ tid: trade.pid })
     const proposingTeamRoster = new Roster({ roster: proposingTeamRosterRow, league })
@@ -152,6 +163,10 @@ router.post('/accept', async (req, res, next) => {
         return res.status(400).send({ error: 'no slots available on proposing team roster' })
       }
       proposingTeamRoster.addPlayer({ slot: constants.slots.BENCH, player: playerId, pos: player.pos1 })
+    }
+
+    if (!constants.season.isRegularSeason && proposingTeamRoster.availableCap < 0) {
+      return res.status(400).send({ error: 'exceeds proposing teams salary limit' })
     }
 
     // insert receiving team drops

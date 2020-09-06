@@ -373,6 +373,10 @@ describe('API /trades', function () {
   // - exceeds bench space on accepting team
   // - exceeds available cap on accepting team
   // - trade player with existing poaching claim
+  // - trade proposal with reserve violation
+  // - trade acceptance with reserve violation
+  // - trade proposal exceeds salary space (offseason)
+  // - trade acceptance exceeds salary space (offseason)
 
   // - accept cancelled trade
   // - accept rejected trade
