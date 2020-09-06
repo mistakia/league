@@ -89,6 +89,12 @@ export default class SelectedPlayer extends React.Component {
               <label>Manager</label>
               {player.tid ? <TeamName abbrv tid={player.tid} /> : '-'}
             </div>
+            {player.value &&
+              <div className='selected__player-header-item'>
+                <label>Salary</label>
+                {`$${player.value}`}
+              </div>}
+
             <div className='selected__player-header-item'>
               <label>Status</label>
               {player.status || 'Active'}
