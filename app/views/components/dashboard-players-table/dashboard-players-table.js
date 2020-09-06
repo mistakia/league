@@ -50,7 +50,11 @@ export default class DashboardPlayersTable extends React.Component {
   }
 
   render = () => {
-    const { items, title, claim, claims, reorderType, reorderWaivers, leadColumn = '' } = this.props
+    const { items = [], title, poaches, claims, waiverType, reorderWaivers, leadColumn = '' } = this.props
+
+    const isWaiver = !!waiverType
+    const isPoach = !!poaches
+    const isClaim = isWaiver || isPoach
 
     const SortableItem = SortableElement(({ waiver }) => {
       return (
@@ -73,15 +77,28 @@ export default class DashboardPlayersTable extends React.Component {
       )
     })
 
+    if (isPoach) {
+      poaches.forEach((poach, index) => {
+        items.push(
+          <PlayerRoster
+            key={index}
+            claim={poach}
+            poach
+            player={poach.player}
+          />
+        )
+      })
+    }
+
     let body
-    if (reorderType) {
+    if (isWaiver) {
       body = (
         <div ref={this.ref}>
           <SortableList
             items={claims}
             lockAxis='y'
             helperClass='reordering'
-            onSortEnd={({ oldIndex, newIndex }) => reorderWaivers({ oldIndex, newIndex, type: reorderType })}
+            onSortEnd={({ oldIndex, newIndex }) => reorderWaivers({ oldIndex, newIndex, type: waiverType })}
             helperContainer={this.ref.current}
             lockToContainerEdges
             useDragHandle
@@ -97,7 +114,7 @@ export default class DashboardPlayersTable extends React.Component {
     }
 
     const classNames = ['section']
-    if (claim) classNames.push('waiver')
+    if (isClaim) classNames.push('waiver')
 
     const week = Math.max(constants.season.week, 1)
 
@@ -108,15 +125,15 @@ export default class DashboardPlayersTable extends React.Component {
         </Toolbar>
         <div className='table__container'>
           <div className='table__row table__head'>
-            {claim && <div className='player__item-action table__cell' />}
+            {isWaiver && <div className='player__item-action table__cell' />}
             <div className='player__item-name table__cell sticky__column'>
               {leadColumn}
             </div>
-            {claim &&
+            {isClaim &&
               <div className='player__item-name table__cell'>Release</div>}
-            {claim &&
+            {isWaiver &&
               <div className='metric table__cell'>Bid</div>}
-            {!claim &&
+            {!isWaiver &&
               <div className='metric table__cell'>Salary</div>}
             <div className='table__cell metric'><ValueHeader /></div>
             <div className='table__cell metric'><ROSHeader /></div>

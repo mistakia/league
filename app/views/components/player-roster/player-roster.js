@@ -14,9 +14,11 @@ const DragHandle = sortableHandle(() =>
 
 class PlayerRoster extends Player {
   render () {
-    const { player, selected, claim, reorder, waiverId } = this.props
+    const { player, selected, claim, reorder, waiverId, poach } = this.props
 
-    const isClaim = !!claim
+    const isWaiver = !!waiverId
+    const isPoach = !!poach
+    const isClaim = isWaiver || isPoach
 
     const week = Math.max(constants.season.week, 1)
 
@@ -27,19 +29,19 @@ class PlayerRoster extends Player {
       <div className={classNames.join(' ')}>
         {reorder && <DragHandle />}
         <div className='player__item-name table__cell sticky__column'>
-          <PlayerNameExpanded playerId={player.player} waiverId={waiverId} />
+          <PlayerNameExpanded playerId={player.player} waiverId={waiverId} hideActions={isPoach} />
         </div>
-        {!isClaim &&
-          <div className='metric table__cell'>
-            ${player.value}
-          </div>}
         {isClaim &&
           <div className='player__item-name table__cell'>
-            {claim.drop && <PlayerNameExpanded playerId={claim.drop} />}
+            {claim.drop && <PlayerNameExpanded playerId={claim.drop} hideActions={isPoach} />}
           </div>}
-        {isClaim &&
+        {isWaiver &&
           <div className='metric table__cell'>
             {claim.bid && `$${claim.bid}`}
+          </div>}
+        {!isWaiver &&
+          <div className='metric table__cell'>
+            ${isPoach ? ((player.value + 2) || '-') : player.value}
           </div>}
         <div className='metric table__cell'>
           {player.getIn(['vorp', 'ros', 'starter'], 0).toFixed(1)}
