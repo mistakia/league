@@ -32,6 +32,12 @@ const formatRoster = (roster) => {
 }
 const nth = (n) => ['st', 'nd', 'rd'][((n + 90) % 100 - 10) % 10 - 1] || 'th'
 
+const toStringArray = (arr) => {
+  return arr.length > 1
+    ? arr.slice(0, -1).join(', ') + ', and ' + arr.slice(-1)
+    : arr.toString()
+}
+
 export {
   calculateBaselines,
   calculatePoints,
@@ -49,5 +55,6 @@ export {
   createDefaultLeague,
   getOptimizerPositionConstraints,
   isOnReleaseWaivers,
-  nth
+  nth,
+  toStringArray
 }
