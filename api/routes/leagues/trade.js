@@ -1,7 +1,7 @@
 const API = require('groupme').Stateless
 const express = require('express')
 const router = express.Router({ mergeParams: true })
-const { constants, Roster } = require('../../../common')
+const { constants, Roster, toStringArray } = require('../../../common')
 const { getRoster, sendNotifications } = require('../../../utils')
 
 const getTrade = async (req, res) => {
@@ -291,12 +291,8 @@ router.post('/accept', async (req, res, next) => {
         acceptingTeamItems.push(pickStr)
       }
     }
-    const proposingTeamStr = proposingTeamItems.length > 1
-      ? proposingTeamItems.slice(0, -1).join(', ') + ', and ' + proposingTeamItems.slice(-1)
-      : proposingTeamItems.toString()
-    const acceptingTeamStr = acceptingTeamItems.length > 1
-      ? acceptingTeamItems.slice(0, -1).join(', ') + ', and ' + acceptingTeamItems.slice(-1)
-      : acceptingTeamItems.toString()
+    const proposingTeamStr = toStringArray(proposingTeamItems)
+    const acceptingTeamStr = toStringArray(acceptingTeamItems)
 
     let message = `${proposingTeam.name} has traded ${proposingTeamStr} to ${acceptingTeam.name} in exchange for ${acceptingTeamStr}.`
 
@@ -306,9 +302,7 @@ router.post('/accept', async (req, res, next) => {
         const player = players.find(p => p.player === playerId)
         dropItems.push(`${player.fname} ${player.lname} (${player.pos1})`)
       }
-      const dropItemsStr = dropItems.length > 1
-        ? dropItems.slice(0, -1).join(', ') + ', and ' + dropItems.slice(-1)
-        : dropItems.toString()
+      const dropItemsStr = toStringArray(dropItems)
       message = `${message} ${dropItemsStr} have been dropped.`
     }
 
@@ -318,9 +312,7 @@ router.post('/accept', async (req, res, next) => {
         const player = players.find(p => p.player === poach.player)
         poachItems.push(`${player.fname} ${player.lname} (${player.pos1})`)
       }
-      const poachItemsStr = poachItems.length > 1
-        ? poachItems.slice(0, -1).join(', ') + ', and ' + poachItems.slice(-1)
-        : poachItems.toString()
+      const poachItemsStr = toStringArray(poachItems)
 
       message = `${message} Poaching claim(s) for ${poachItemsStr} have been cancelled.`
     }
