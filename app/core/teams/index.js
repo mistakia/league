@@ -2,6 +2,7 @@ export {
   getTeams,
   getTeamById,
   getCurrentTeam,
+  getDraftPickById,
   getTeamEvents,
   getTeamsForCurrentLeague
 } from './selectors'

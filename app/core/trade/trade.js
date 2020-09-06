@@ -1,4 +1,4 @@
-import { Record, List, Map } from 'immutable'
+import { Record, List } from 'immutable'
 
 export const Trade = new Record({
   uid: null,
@@ -13,9 +13,10 @@ export const Trade = new Record({
   vetoed: null,
   proposingTeamPlayers: new List(),
   acceptingTeamPlayers: new List(),
-  proposingTeamPicks: new Map(),
-  acceptingTeamPicks: new Map(),
-  dropPlayers: new List()
+  proposingTeamPicks: new List(),
+  acceptingTeamPicks: new List(),
+  proposingTeamDropPlayers: new List(),
+  acceptingTeamDropPlayers: new List()
 })
 
 export function createTrade ({
@@ -33,7 +34,8 @@ export function createTrade ({
   acceptingTeamPlayers,
   proposingTeamPicks,
   acceptingTeamPicks,
-  dropPlayers
+  proposingTeamDropPlayers,
+  acceptingTeamDropPlayers
 }) {
   return new Trade({
     uid,
@@ -48,8 +50,9 @@ export function createTrade ({
     vetoed,
     proposingTeamPlayers: new List(proposingTeamPlayers),
     acceptingTeamPlayers: new List(acceptingTeamPlayers),
-    proposingTeamPicks: new Map(proposingTeamPicks.reduce((m, p) => m.set(p.uid, p), new Map())),
-    acceptingTeamPicks: new Map(acceptingTeamPicks.reduce((m, p) => m.set(p.uid, p), new Map())),
-    dropPlayers: new List(dropPlayers)
+    proposingTeamPicks: new List(proposingTeamPicks),
+    acceptingTeamPicks: new List(acceptingTeamPicks),
+    proposingTeamDropPlayers: new List(proposingTeamDropPlayers),
+    acceptingTeamDropPlayers: new List(acceptingTeamDropPlayers)
   })
 }

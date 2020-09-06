@@ -49,10 +49,16 @@ describe('API /trades', function () {
         .where('rosters.tid', 2)
         .limit(1)
 
-      // TODO - get trading player values
-
       const proposingTeamPlayers = proposingTeamPlayerRows.map(p => p.player)
       const acceptingTeamPlayers = acceptingTeamPlayerRows.map(p => p.player)
+
+      // set values to zero
+      await knex('transactions')
+        .whereIn('player', proposingTeamPlayers.concat(acceptingTeamPlayers))
+        .update('value', 0)
+
+      // TODO - get trading player values
+
       const proposeRes = await chai.request(server)
         .post('/api/leagues/1/trades')
         .set('Authorization', `Bearer ${user1}`)

@@ -23,14 +23,19 @@ const getTrade = async (req, res) => {
       .where({ tradeid: tradeId })
       .join('draft', 'trades_picks.pickid', 'draft.uid')
 
-    trade.dropPlayers = []
+    trade.proposingTeamDropPlayers = []
+    trade.acceptingTeamDropPlayers = []
     trade.proposingTeamPlayers = []
     trade.acceptingTeamPlayers = []
     trade.proposingTeamPicks = []
     trade.acceptingTeamPicks = []
 
     for (const player of drops) {
-      trade.dropPlayers.push(player.player)
+      if (player.tid === trade.pid) {
+        trade.proposingTeamDropPlayers.push(player.player)
+      } else {
+        trade.acceptingTeamDropPlayers.push(player.player)
+      }
     }
 
     for (const pick of picks) {
@@ -110,7 +115,19 @@ router.post('/accept', async (req, res, next) => {
     const dropPlayers = acceptingTeamDropPlayers.concat(proposingTeamDropPlayerIds)
     const allPlayers = tradedPlayers.concat(dropPlayers)
     const leagues = await db('leagues').where({ uid: leagueId })
-    const players = await db('player').whereIn('player', allPlayers)
+    const sub = db('transactions')
+      .select(db.raw('max(uid) as uid'))
+      .whereIn('player', allPlayers)
+      .where('lid', leagueId)
+      .groupBy('player')
+
+    const players = await db
+      .select('player.*', 'transactions.value')
+      .from(db.raw('(' + sub.toString() + ') AS X'))
+      .join('transactions', 'X.uid', 'transactions.uid')
+      .join('player', 'transactions.player', 'player.player')
+      .whereIn('player.player', allPlayers)
+
     const league = leagues[0]
 
     // clear any existing poaching claims
@@ -144,7 +161,12 @@ router.post('/accept', async (req, res, next) => {
       if (!hasSlot) {
         return res.status(400).send({ error: 'no slots available on accepting team roster' })
       }
-      acceptingTeamRoster.addPlayer({ slot: constants.slots.BENCH, player: playerId, pos: player.pos1 })
+      acceptingTeamRoster.addPlayer({
+        slot: constants.slots.BENCH,
+        player: playerId,
+        pos: player.pos1,
+        value: player.value
+      })
     }
 
     if (!constants.season.isRegularSeason && acceptingTeamRoster.availableCap < 0) {
@@ -162,7 +184,12 @@ router.post('/accept', async (req, res, next) => {
       if (!hasSlot) {
         return res.status(400).send({ error: 'no slots available on proposing team roster' })
       }
-      proposingTeamRoster.addPlayer({ slot: constants.slots.BENCH, player: playerId, pos: player.pos1 })
+      proposingTeamRoster.addPlayer({
+        slot: constants.slots.BENCH,
+        player: playerId,
+        pos: player.pos1,
+        value: player.value
+      })
     }
 
     if (!constants.season.isRegularSeason && proposingTeamRoster.availableCap < 0) {

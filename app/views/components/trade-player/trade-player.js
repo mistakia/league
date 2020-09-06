@@ -1,28 +1,28 @@
 import React from 'react'
 
-import Position from '@components/position'
-import Team from '@components/team'
-import { constants } from '@common'
+import PlayerNameExpanded from '@components/player-name-expanded'
 
 import './trade-player.styl'
 
 export default class TradePlayer extends React.Component {
   render = () => {
-    const { player, handleClick, isSelected } = this.props
-    const classNames = ['trade__player']
-    if (isSelected) classNames.push('selected')
+    const { player } = this.props
     return (
-      <div className={classNames.join(' ')} onClick={handleClick}>
-        <div className='player__name-position'>
-          <Position pos={player.pos1} />
+      <div className='trade__player'>
+        <div className='trade__player-name'>
+          <PlayerNameExpanded playerId={player.player} hideActions />
         </div>
-        <div className='player__name-main'>
-          <span>{player.pname}</span>
-          {(constants.season.year === player.draft_year) &&
-            <sup className='player__label-rookie'>
-              R
-            </sup>}
-          <Team team={player.team} />
+        <div className='trade__player-metric metric'>
+          <label>Val</label>
+          {player.getIn(['vorp', 'ros', 'starter'], 0).toFixed(1)}
+        </div>
+        <div className='trade__player-metric metric'>
+          <label>Pts+</label>
+          {player.getIn(['lineups', 'sp'], 0).toFixed(1)}
+        </div>
+        <div className='trade__player-metric metric'>
+          <label>Be+</label>
+          {player.getIn(['lineups', 'bp'], 0).toFixed(1)}
         </div>
       </div>
     )

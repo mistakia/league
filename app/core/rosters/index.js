@@ -1,10 +1,13 @@
 export {
   getRosters,
   getRosterByTeamId,
+  getRosterRecordByTeamId,
   getRostersForCurrentLeague,
+  getPlayersByTeamId,
   getCurrentTeamRoster,
   getCurrentTeamRosterRecord,
   getCurrentPlayers,
+  getActivePlayersByTeamId,
   getRosteredPlayerIdsForCurrentLeague,
   getActiveRosterPlayerIdsForCurrentLeague,
   getPracticeSquadPlayerIdsForCurrentLeague,
@@ -14,7 +17,6 @@ export {
   isPlayerOnPracticeSquad,
   getRosterInfoForPlayerId,
   getActivePlayersByRosterForCurrentLeague,
-  getPlayerProjectedContribution,
   getAvailablePlayersForCurrentLeague,
   getCurrentTeamRosterPositionalValue
 } from './selectors'

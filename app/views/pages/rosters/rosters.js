@@ -7,10 +7,6 @@ import { constants } from '@common'
 import './rosters.styl'
 
 export default class RostersPage extends React.Component {
-  componentDidMount = () => {
-    this.props.load()
-  }
-
   render = () => {
     const { rosters, league } = this.props
 

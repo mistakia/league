@@ -3,7 +3,6 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { getApp } from '@core/app'
-import { rosterActions } from '@core/rosters'
 import { auctionActions, getAuction, getAuctionPlayers } from '@core/auction'
 import { getCurrentLeague } from '@core/leagues'
 
@@ -12,7 +11,6 @@ import render from './auction'
 class AuctionPage extends React.Component {
   componentDidMount () {
     this.props.join()
-    this.props.load()
   }
 
   handleToggle = () => {
@@ -44,7 +42,6 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  load: rosterActions.loadRosters,
   join: auctionActions.join,
   search: auctionActions.search,
   toggleHideRostered: auctionActions.toggleHideRostered
