@@ -1,8 +1,12 @@
 .player__slot
-  height 55px
+  min-height 55px
+  padding 8px 0
   display flex
   align-items center
   border-bottom 1px solid $borderColor
+
+  .player__name-expanded
+    margin-bottom 8px
 
 .player__slot-slotName
   color rgba(0,0,0,0.4)
@@ -10,13 +14,22 @@
   font-size 12px
 
 .player__slot-player
-  flex 0 0 150px
+  flex 1
+
+.player__slot-projected-points
+  flex 0 0 40px
+  color rgba(0,0,0,0.4)
+
+.player__slot-projected-stats
+  color rgba(0,0,0,0.5)
+  font-weight 400
+  padding 4px 0
 
 .player__slot-action
-  flex 1
+  flex 0 0 100px
   display flex
   justify-content flex-end
 
 @media (max-width 600px)
   .player__slot
-    padding 0 8px
+    padding 4px 8px
