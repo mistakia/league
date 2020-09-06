@@ -9,40 +9,11 @@ import DashboardLeaguePositionalValue from '@components/dashboard-league-positio
 import DashboardPlayersTable from '@components/dashboard-players-table'
 import DashboardTeamSummary from '@components/dashboard-team-summary'
 import DashboardTeamValue from '@components/dashboard-team-value'
-import PlayerRosterHeader from '@components/player-roster-header'
 import PlayerRoster from '@components/player-roster'
 import PageLayout from '@layouts/page'
 import { constants } from '@common'
 
 import './dashboard.styl'
-
-const ValueHeader = () => (
-  <PlayerRosterHeader
-    tooltip='Projected points over baseline player'
-    title='Value'
-  />
-)
-
-const StartsHeader = () => (
-  <PlayerRosterHeader
-    tooltip='Projected games started'
-    title='Starts'
-  />
-)
-
-const PointsPlusHeader = () => (
-  <PlayerRosterHeader
-    tooltip='Projected starter points you would lose without player'
-    title='Pts+'
-  />
-)
-
-const BenchPlusHeader = () => (
-  <PlayerRosterHeader
-    tooltip='Projected bench points you would lose without player'
-    title='Bench+'
-  />
-)
 
 export default function () {
   const {
@@ -105,7 +76,7 @@ export default function () {
     if (!player.player) continue
     practiceItems.push(<PlayerRoster key={player.player} player={player} />)
 
-    const poach = poaches.find(p => p.player.player === player.player)
+    const poach = poaches.find(p => p.player === player.player)
     if (poach) {
       const processingTime = moment(poach.submitted, 'X').add('48', 'hours')
       warnings.push(
@@ -128,25 +99,12 @@ export default function () {
     )
   }
 
-  const poachItems = []
-  for (const [index, poach] of poaches.entries()) {
-    if (poach.tid !== teamId) continue
-    poachItems.push(
-      <PlayerRoster
-        key={index}
-        claim={poach}
-        player={poach.player}
-      />
-    )
-  }
-
   const poachWaiverSection = (
     <Grid item xs={12}>
       <DashboardPlayersTable
-        claim
         title='Poaching Waiver Claims'
         claims={waivers.poach}
-        reorderType='poach'
+        waiverType='poach'
       />
     </Grid>
   )
@@ -154,10 +112,9 @@ export default function () {
   const freeAgencyActiveWaiverSection = (
     <Grid item xs={12}>
       <DashboardPlayersTable
-        claim
         title='Active Roster Waiver Claims'
         claims={waivers.active}
-        reorderType='active'
+        waiverType='active'
       />
     </Grid>
   )
@@ -165,31 +122,21 @@ export default function () {
   const freeAgencyPracticeWaiverSection = (
     <Grid item xs={12}>
       <DashboardPlayersTable
-        claim
         title='Practice Squad Waiver Claims'
         claims={waivers.practice}
-        reorderType='practice'
+        waiverType='practice'
       />
     </Grid>
   )
 
+  const teamPoaches = poaches.filter(p => p.tid === teamId)
   const teamPoachSection = (
-    <div className='section'>
-      <div className='dashboard__section-header-title'>Poaching Claims</div>
-      <div className='dashboard__section-body-header'>
-        <div className='player__item-name'>Name</div>
-        <div className='player__item-name'>Release</div>
-        <div className='metric'>Bid</div>
-        <ValueHeader />
-        <StartsHeader />
-        <PointsPlusHeader />
-        <BenchPlusHeader />
-        <div className='player__item-action' />
-      </div>
-      <div className='dashboard__section-body empty'>
-        {poachItems}
-      </div>
-    </div>
+    <Grid item xs={12}>
+      <DashboardPlayersTable
+        title='Poaching Claims'
+        poaches={teamPoaches}
+      />
+    </Grid>
   )
 
   const body = (
@@ -200,7 +147,7 @@ export default function () {
           {waivers.poach.size ? poachWaiverSection : null}
           {waivers.active.size ? freeAgencyActiveWaiverSection : null}
           {waivers.practice.size ? freeAgencyPracticeWaiverSection : null}
-          {poachItems.length ? teamPoachSection : null}
+          {teamPoaches.size ? teamPoachSection : null}
           <Grid item xs={12}>
             <DashboardPlayersTable items={activeItems} title='Active Roster' />
           </Grid>
