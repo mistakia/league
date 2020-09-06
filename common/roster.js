@@ -91,14 +91,14 @@ export default class Roster {
     this._players.delete(player)
   }
 
-  addPlayer ({ slot, player, pos }) {
+  addPlayer ({ slot, player, pos, value = 0 }) {
     if (this.isFull) {
       throw new Error('Roster is full')
     }
 
     const isEligible = this.isEligibleForSlot({ slot, player, pos })
     if (!isEligible) throw new Error('Player is not eligible')
-    this._players.set(player, { slot, player, pos, rid: this.uid })
+    this._players.set(player, { slot, player, pos, rid: this.uid, value })
   }
 
   isEligibleForSlot ({ slot, player, pos }) {

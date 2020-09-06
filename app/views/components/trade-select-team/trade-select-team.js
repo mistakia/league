@@ -1,6 +1,10 @@
 import React from 'react'
+import List from '@material-ui/core/List'
+import ListItem from '@material-ui/core/ListItem'
+import MenuItem from '@material-ui/core/MenuItem'
+import Menu from '@material-ui/core/Menu'
 
-import Icon from '@components/icon'
+import TeamName from '@components/team-name'
 
 import './trade-select-team.styl'
 
@@ -8,59 +12,55 @@ export default class TradeSelectTeam extends React.Component {
   constructor (props) {
     super(props)
     this.state = {
-      visible: false
+      anchorEl: null
     }
   }
 
-  handleToggleClick = (event) => {
-    if (this.state.visible) {
-      const wasOutsideBody = this.body ? !this.body.contains(event.target) : false
-      if (wasOutsideBody) {
-        document.removeEventListener('click', this.handleToggleClick)
-        return this.setState({ visible: false })
-      }
-    } else {
-      document.addEventListener('click', this.handleToggleClick)
-      this.setState({ visible: true })
-    }
+  handleOpen = (event) => {
+    this.setState({ anchorEl: event.currentTarget })
   }
 
-  handleSelectClick = (event, teamId) => {
-    event.preventDefault()
-    event.stopPropagation()
+  handleClose = () => {
+    this.setState({ anchorEl: null })
+  }
 
-    this.props.select(teamId)
-    this.setState({ visible: false })
-    document.removeEventListener('click', this.handleToggleClick)
+  handleSelect = (value) => {
+    this.props.select(value)
+    this.setState({ anchorEl: null })
   }
 
   render = () => {
-    const { teams, team } = this.props
-    const { visible } = this.state
+    const { teams, teamId, trade } = this.props
+    const { anchorEl } = this.state
 
-    const items = teams.filter(t => t.uid !== team.uid).map((t, index) => {
-      return (
-        <div
-          className='trade__select-team-body-item'
-          key={index}
-          onClick={(e) => this.handleSelectClick(e, t.uid)}
-        >
-          {t.name}
-        </div>
-      )
-    })
+    const menuItems = teams.filter(t => t.uid !== teamId).map((team, index) => (
+      <MenuItem
+        key={team.uid}
+        selected={team.uid === trade.tid}
+        onClick={() => this.handleSelect(team.uid)}
+      >
+        {team.name}
+      </MenuItem>
+    ))
 
     return (
-      <div
-        ref={ref => { this.root = ref }}
-        className='trade__select-team'
-        onClick={this.handleToggleClick}
-      >
-        <Icon name='arrow-down' />
-        {visible &&
-          <div ref={ref => { this.body = ref }} className='trade__select-team-body'>
-            {items}
-          </div>}
+      <div>
+        <List component='nav'>
+          <ListItem
+            button
+            disabled={Boolean(trade.uid)}
+            onClick={this.handleOpen}
+          >
+            <TeamName tid={trade.tid} />
+          </ListItem>
+        </List>
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={this.handleClose}
+        >
+          {menuItems}
+        </Menu>
       </div>
     )
   }

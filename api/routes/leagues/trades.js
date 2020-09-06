@@ -24,7 +24,8 @@ router.get('/?', async (req, res) => {
       .join('draft', 'trades_picks.pickid', 'draft.uid')
 
     for (const trade of trades) {
-      trade.dropPlayers = []
+      trade.proposingTeamDropPlayers = []
+      trade.acceptingTeamDropPlayers = []
       trade.proposingTeamPlayers = []
       trade.acceptingTeamPlayers = []
       trade.proposingTeamPicks = []
@@ -32,7 +33,11 @@ router.get('/?', async (req, res) => {
 
       for (const player of drops) {
         if (player.tradeid !== trade.uid) continue
-        trade.dropPlayers.push(player.player)
+        if (player.tid === trade.pid) {
+          trade.proposingTeamDropPlayers.push(player.player)
+        } else {
+          trade.acceptingTeamDropPlayers.push(player.player)
+        }
       }
 
       for (const pick of picks) {
@@ -184,7 +189,19 @@ router.post('/?', async (req, res, next) => {
     }
 
     // validate proposing team roster
-    const players = await db('player').whereIn('player', acceptingTeamPlayers)
+    const sub = db('transactions')
+      .select(db.raw('max(uid) as uid'))
+      .whereIn('player', acceptingTeamPlayers)
+      .where('lid', leagueId)
+      .groupBy('player')
+
+    const players = await db
+      .select('player.*', 'transactions.value')
+      .from(db.raw('(' + sub.toString() + ') AS X'))
+      .join('transactions', 'X.uid', 'transactions.uid')
+      .join('player', 'transactions.player', 'player.player')
+      .whereIn('player.player', acceptingTeamPlayers)
+
     dropPlayers.forEach(p => proposingTeamRoster.removePlayer(p))
     proposingTeamPlayers.forEach(p => proposingTeamRoster.removePlayer(p))
     for (const playerId of acceptingTeamPlayers) {
@@ -193,7 +210,12 @@ router.post('/?', async (req, res, next) => {
       if (!hasSlot) {
         return res.status(400).send({ error: 'no slots available' })
       }
-      proposingTeamRoster.addPlayer({ slot: constants.slots.BENCH, player: playerId, pos: player.pos1 })
+      proposingTeamRoster.addPlayer({
+        slot: constants.slots.BENCH,
+        player: playerId,
+        pos: player.pos1,
+        value: player.value
+      })
     }
 
     if (!constants.season.isRegularSeason && proposingTeamRoster.availableCap < 0) {

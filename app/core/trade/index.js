@@ -8,10 +8,18 @@ export {
   postTradeRejectActions
 } from './actions'
 export {
-  getTradeSelectedTeamRoster,
   getTrade,
   getCurrentTrade,
-  getTradeSelectedTeam,
-  getTradeIsValid
+  getCurrentTradePlayers,
+  getTradeIsValid,
+  getCurrentTradeAnalysis,
+  getProposingTeam,
+  getAcceptingTeam,
+  getProposingTeamPlayers,
+  getAcceptingTeamPlayers,
+  getProposingTeamTradedRosterPlayers,
+  getAcceptingTeamTradedRosterPlayers,
+  getAcceptingTeamRoster,
+  getProposingTeamRoster
 } from './selectors'
 export { tradeSagas } from './sagas'
