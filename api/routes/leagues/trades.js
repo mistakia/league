@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router({ mergeParams: true })
 const { constants, Roster } = require('../../../common')
-const { getRoster } = require('../../../utils')
+const { getRoster, verifyReserveStatus } = require('../../../utils')
 
 const trade = require('./trade')
 
@@ -100,6 +100,13 @@ router.post('/?', async (req, res, next) => {
       return res.status(400).send({ error: 'missing param tid' })
     }
 
+    // validate proposing team reserve status
+    try {
+      await verifyReserveStatus({ teamId: pid, leagueId })
+    } catch (error) {
+      return res.status(400).send({ error: error.message })
+    }
+
     // make sure no player is on the practice squad with an existing poaching claim
     const allPlayers = proposingTeamPlayers.concat(acceptingTeamPlayers, dropPlayers)
     const psPlayers = await db('rosters_players')
@@ -187,6 +194,10 @@ router.post('/?', async (req, res, next) => {
         return res.status(400).send({ error: 'no slots available' })
       }
       proposingTeamRoster.addPlayer({ slot: constants.slots.BENCH, player: playerId, pos: player.pos1 })
+    }
+
+    if (!constants.season.isRegularSeason && proposingTeamRoster.availableCap < 0) {
+      return res.status(400).send({ error: 'exceeds salary limit' })
     }
 
     // insert trade

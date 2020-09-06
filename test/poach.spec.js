@@ -89,6 +89,7 @@ describe('API /poaches', function () {
   // - invalid drop
   // - teamId doesn't belong to userId
   // - drop player not on team
+  // - poaching claim with reserve violation
 
   // errors
   // - player on waivers - within 24 hours
