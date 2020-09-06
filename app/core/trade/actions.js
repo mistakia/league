@@ -1,16 +1,18 @@
 export const tradeActions = {
   TRADE_SELECT_TEAM: 'TRADE_SELECT_TEAM',
-  TRADE_TOGGLE_PROPOSING_TEAM_PLAYER: 'TRADE_TOGGLE_PROPOSING_TEAM_PLAYER',
-  TRADE_TOGGLE_ACCEPTING_TEAM_PLAYER: 'TRADE_TOGGLE_ACCEPTING_TEAM_PLAYER',
-  TRADE_TOGGLE_PROPOSING_TEAM_PICK: 'TRADE_TOGGLE_PROPOSING_TEAM_PICK',
-  TRADE_TOGGLE_ACCEPTING_TEAM_PICK: 'TRADE_TOGGLE_ACCEPTING_TEAM_PICK',
-  TRADE_TOGGLE_DROP_PLAYER: 'TRADE_TOGGLE_DROP_PLAYER',
+  TRADE_SET_PROPOSING_TEAM_PLAYERS: 'TRADE_SET_PROPOSING_TEAM_PLAYERS',
+  TRADE_SET_ACCEPTING_TEAM_PLAYERS: 'TRADE_SET_ACCEPTING_TEAM_PLAYERS',
+  TRADE_SET_PROPOSING_TEAM_PICKS: 'TRADE_SET_PROPOSING_TEAM_PICKS',
+  TRADE_SET_ACCEPTING_TEAM_PICKS: 'TRADE_SET_ACCEPTING_TEAM_PICKS',
+  TRADE_SET_DROP_PLAYERS: 'TRADE_SET_DROP_PLAYERS',
 
   SELECT_TRADE: 'SELECT_TRADE',
   PROPOSE_TRADE: 'PROPOSE_TRADE',
   ACCEPT_TRADE: 'ACCEPT_TRADE',
   CANCEL_TRADE: 'CANCEL_TRADE',
   REJECT_TRADE: 'REJECT_TRADE',
+
+  TRADE_SET_PROJECTED_LINEUPS: 'TRADE_SET_PROJECTED_LINEUPS',
 
   POST_TRADE_PROPOSE_FAILED: 'POST_TRADE_PROPOSE_FAILED',
   POST_TRADE_PROPOSE_PENDING: 'POST_TRADE_PROPOSE_PENDING',
@@ -48,6 +50,14 @@ export const tradeActions = {
     }
   }),
 
+  setProjectedLineups: ({ proposingTeamLineups, acceptingTeamLineups }) => ({
+    type: tradeActions.TRADE_SET_PROJECTED_LINEUPS,
+    payload: {
+      proposingTeamLineups,
+      acceptingTeamLineups
+    }
+  }),
+
   load: () => ({
     type: tradeActions.LOAD_TRADES
   }),
@@ -64,38 +74,38 @@ export const tradeActions = {
     type: tradeActions.REJECT_TRADE
   }),
 
-  toggleDropPlayer: (player) => ({
-    type: tradeActions.TRADE_TOGGLE_DROP_PLAYER,
+  setDropPlayers: (players) => ({
+    type: tradeActions.TRADE_SET_DROP_PLAYERS,
     payload: {
-      player
+      players
     }
   }),
 
-  toggleProposingTeamPlayer: (player) => ({
-    type: tradeActions.TRADE_TOGGLE_PROPOSING_TEAM_PLAYER,
+  setProposingTeamPlayers: (players) => ({
+    type: tradeActions.TRADE_SET_PROPOSING_TEAM_PLAYERS,
     payload: {
-      player
+      players
     }
   }),
 
-  toggleAcceptingTeamPlayer: (player) => ({
-    type: tradeActions.TRADE_TOGGLE_ACCEPTING_TEAM_PLAYER,
+  setAcceptingTeamPlayers: (players) => ({
+    type: tradeActions.TRADE_SET_ACCEPTING_TEAM_PLAYERS,
     payload: {
-      player
+      players
     }
   }),
 
-  toggleProposingTeamPick: (pick) => ({
-    type: tradeActions.TRADE_TOGGLE_PROPOSING_TEAM_PICK,
+  setProposingTeamPicks: (picks) => ({
+    type: tradeActions.TRADE_SET_PROPOSING_TEAM_PICKS,
     payload: {
-      pick
+      picks
     }
   }),
 
-  toggleAcceptingTeamPick: (pick) => ({
-    type: tradeActions.TRADE_TOGGLE_ACCEPTING_TEAM_PICK,
+  setAcceptingTeamPicks: (picks) => ({
+    type: tradeActions.TRADE_SET_ACCEPTING_TEAM_PICKS,
     payload: {
-      pick
+      picks
     }
   }),
 

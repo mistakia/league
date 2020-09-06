@@ -12,11 +12,27 @@ export function getRosters (state) {
   return state.get('rosters')
 }
 
-export function getRosterByTeamId (state, { tid }) {
+export function getRosterRecordByTeamId (state, { tid }) {
   const rosters = getRosters(state)
-  const rec = rosters.get(tid) || new RosterRecord()
+  return rosters.get(tid) || new RosterRecord()
+}
+
+export function getRosterByTeamId (state, { tid }) {
+  const rec = getRosterRecordByTeamId(state, { tid })
   const league = getCurrentLeague(state)
   return new Roster({ roster: rec.toJS(), league })
+}
+
+export function getPlayersByTeamId (state, { tid }) {
+  const roster = getRosterByTeamId(state, { tid })
+  const playerIds = roster.all.map(p => p.player)
+  return playerIds.map(playerId => getPlayerById(state, { playerId }))
+}
+
+export function getActivePlayersByTeamId (state, { tid }) {
+  const roster = getRosterByTeamId(state, { tid })
+  const activePlayerIds = roster.active.map(p => p.player)
+  return activePlayerIds.map(playerId => getPlayerById(state, { playerId }))
 }
 
 export function getRostersForCurrentLeague (state) {
@@ -233,7 +249,4 @@ export function getCurrentPlayers (state) {
   const players = active.concat(practice).concat(ir).concat(cov)
 
   return { active, practice, players, ir, cov, roster: r }
-}
-
-export function getPlayerProjectedContribution (state, { player }) {
 }

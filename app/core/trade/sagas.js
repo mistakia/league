@@ -19,8 +19,8 @@ export function * propose () {
   const params = {
     proposingTeamPlayers: trade.proposingTeamPlayers.toJS(),
     acceptingTeamPlayers: trade.acceptingTeamPlayers.toJS(),
-    proposingTeamPicks: trade.proposingTeamPicks.toIndexedSeq().toJS().map(p => p.uid),
-    acceptingTeamPicks: trade.acceptingTeamPicks.toIndexedSeq().toJS().map(p => p.uid),
+    proposingTeamPicks: trade.proposingTeamPicks.toJS(),
+    acceptingTeamPicks: trade.acceptingTeamPicks.toJS(),
     dropPlayers: trade.dropPlayers.toJS(),
     pid: teamId,
     tid,

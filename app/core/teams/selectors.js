@@ -1,4 +1,5 @@
 import moment from 'moment'
+import { Map } from 'immutable'
 
 import { getApp } from '@core/app'
 import { getNextPick } from '@core/draft'
@@ -14,6 +15,19 @@ export function getTeams (state) {
 export function getTeamById (state, { tid }) {
   const teams = state.get('teams')
   return teams.get(tid) || new Team()
+}
+
+export function getDraftPickById (state, { pickId }) {
+  const teams = state.get('teams')
+  for (const team of teams.valueSeq()) {
+    const picks = team.get('picks')
+    const pick = picks.find(p => p.uid === pickId)
+    if (pick) {
+      return pick
+    }
+  }
+
+  return new Map()
 }
 
 export function getTeamsForCurrentLeague (state) {

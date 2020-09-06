@@ -19,6 +19,11 @@ import { getApp, appActions } from '@core/app'
 import { constants } from '@common'
 import { getPlayers, getAllPlayers, playerActions } from '@core/players'
 import {
+  tradeActions,
+  getProposingTeamTradedRosterPlayers,
+  getAcceptingTeamTradedRosterPlayers
+} from '@core/trade'
+import {
   getActivePlayersByRosterForCurrentLeague,
   getCurrentTeamRosterRecord,
   getCurrentPlayers
@@ -132,16 +137,15 @@ export function * projectLineups () {
   const rosters = yield select(getActivePlayersByRosterForCurrentLeague)
   const lineups = {}
 
+  const worker = new Worker()
   for (const [teamId, players] of rosters.entrySeq()) {
     lineups[teamId] = {}
-
-    const worker = new Worker()
     lineups[teamId] = yield call(worker.optimizeLineup, {
       players: players.toJS(),
       league
     })
-    worker.terminate()
   }
+  worker.terminate()
 
   yield putResolve(rosterActions.setLineupProjections(lineups))
   const currentRosterPlayers = yield select(getCurrentPlayers)
@@ -155,6 +159,29 @@ export function * projectLineups () {
   yield put(playerActions.setProjectedContribution(projectedContribution))
 
   // TODO - calculate for poaches & waivers
+}
+
+export function * projectTrade () {
+  // TODO - make sure player values and projections have been calculated
+  const league = yield select(getCurrentLeague)
+  const worker = new Worker()
+  const proposingTeamTradedPlayers = yield select(getProposingTeamTradedRosterPlayers)
+  const proposingTeamLineups = yield call(worker.optimizeLineup, {
+    players: proposingTeamTradedPlayers.map(p => p.toJS()),
+    league
+  })
+
+  const acceptingTeamTradedPlayers = yield select(getAcceptingTeamTradedRosterPlayers)
+  const acceptingTeamLineups = yield call(worker.optimizeLineup, {
+    players: acceptingTeamTradedPlayers.map(p => p.toJS()),
+    league
+  })
+
+  worker.terminate()
+  yield put(tradeActions.setProjectedLineups({
+    proposingTeamLineups,
+    acceptingTeamLineups
+  }))
 }
 
 export function * addPlayer ({ payload }) {
@@ -266,6 +293,14 @@ export function * watchPostReleaseFulfilled () {
   yield takeLatest(rosterActions.POST_RELEASE_FULFILLED, releaseNotification)
 }
 
+export function * watchTradeSetProposingTeamPlayers () {
+  yield takeLatest(tradeActions.TRADE_SET_PROPOSING_TEAM_PLAYERS, projectTrade)
+}
+
+export function * watchTradeSetAcceptingTeamPlayers () {
+  yield takeLatest(tradeActions.TRADE_SET_ACCEPTING_TEAM_PLAYERS, projectTrade)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -292,5 +327,8 @@ export const rosterSagas = [
 
   fork(watchAddPlayerRoster),
   fork(watchRemovePlayerRoster),
-  fork(watchUpdatePlayerRoster)
+  fork(watchUpdatePlayerRoster),
+
+  fork(watchTradeSetProposingTeamPlayers),
+  fork(watchTradeSetAcceptingTeamPlayers)
 ]

@@ -2,36 +2,63 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { rosterActions, getCurrentTeamRosterRecord } from '@core/rosters'
 import { getApp } from '@core/app'
-import { getCurrentLeague } from '@core/leagues'
 import {
-  getTrade,
-  getTradeSelectedTeamRoster,
-  getTradeSelectedTeam,
   tradeActions,
   getCurrentTrade,
-  getTradeIsValid
+  getCurrentTradePlayers,
+  getTradeIsValid,
+  getCurrentTradeAnalysis,
+  getProposingTeamPlayers,
+  getAcceptingTeamPlayers,
+  getAcceptingTeam,
+  getProposingTeam,
+  getProposingTeamRoster
 } from '@core/trade'
-import { getCurrentTeam } from '@core/teams'
 
 import render from './trade'
 
 class TradePage extends React.Component {
-  componentDidMount = () => {
-    this.props.load()
-    this.props.loadRosters()
+  constructor (props) {
+    super(props)
+
+    this.state = {
+      receivePlayers: []
+    }
   }
 
-  handleDropPlayerClick = (player) => this.props.toggleDropPlayer(player)
-  handleProposingTeamPlayerClick = (player) => this.props.toggleProposingTeamPlayer(player)
-  handleAcceptingTeamPlayerClick = (player) => this.props.toggleAcceptingTeamPlayer(player)
-  handleProposingTeamPickClick = (pick) => this.props.toggleProposingTeamPick(pick)
-  handleAcceptingTeamPickClick = (pick) => this.props.toggleAcceptingTeamPick(pick)
-  handleProposeClick = () => this.props.propose()
-  handleAcceptClick = () => this.props.accept()
-  handleRejectClick = () => this.props.reject()
-  handleCancelClick = () => this.props.cancel()
+  handleDropChange = (event, value) => {
+    const playerIds = value.map(p => p.id)
+    this.props.setDropPlayers(playerIds)
+  }
+
+  handleProposeChange = (event, value) => {
+    const players = value.filter(p => p.type === 'player')
+    const picks = value.filter(p => p.type === 'pick')
+    const playerIds = players.map(p => p.id)
+    const pickIds = picks.map(p => p.id)
+    this.props.setProposingTeamPlayers(playerIds)
+    this.props.setProposingTeamPicks(pickIds)
+  }
+
+  handleAcceptChange = (event, value) => {
+    const players = value.filter(p => p.type === 'player')
+    const picks = value.filter(p => p.type === 'pick')
+    const playerIds = players.map(p => p.id)
+    const pickIds = picks.map(p => p.id)
+    this.props.setAcceptingTeamPlayers(playerIds)
+    this.props.setAcceptingTeamPicks(pickIds)
+  }
+
+  componentDidMount = () => {
+    this.props.load()
+  }
+
+  handleDropPlayerClick = (player) => this.props.setDropPlayers(player)
+  handleProposingTeamPlayerClick = (player) => this.props.setProposingTeamPlayers(player)
+  handleAcceptingTeamPlayerClick = (player) => this.props.setAcceptingTeamPlayers(player)
+  handleProposingTeamPickClick = (pick) => this.props.setProposingTeamPicks(pick)
+  handleAcceptingTeamPickClick = (pick) => this.props.setAcceptingTeamPicks(pick)
 
   render = () => {
     return render.call(this)
@@ -39,40 +66,59 @@ class TradePage extends React.Component {
 }
 
 const mapStateToProps = createSelector(
-  getTrade,
   getApp,
+
   getCurrentTrade,
-  getCurrentTeamRosterRecord,
-  getCurrentTeam,
-  getTradeSelectedTeamRoster,
-  getTradeSelectedTeam,
+  getCurrentTradePlayers,
   getTradeIsValid,
-  getCurrentLeague,
-  (tradeState, app, trade, proposingTeamRoster, proposingTeam, acceptingTeamRoster, acceptingTeam, valid, league) => ({
-    valid,
+
+  getProposingTeam,
+  getProposingTeamPlayers,
+  getProposingTeamRoster,
+
+  getAcceptingTeam,
+  getAcceptingTeamPlayers,
+
+  getCurrentTradeAnalysis,
+  (
+    app,
+
+    trade,
+    tradePlayers,
+    isValid,
+
+    proposingTeam,
+    proposingTeamPlayers,
+    proposingTeamRoster,
+
+    acceptingTeam,
+    acceptingTeamPlayers,
+
+    analysis
+  ) => ({
+    isValid,
     isProposer: trade.pid === app.teamId,
     trade,
-    dropPlayers: tradeState.dropPlayers,
-    proposingTeamRoster,
-    acceptingTeamRoster,
+    tradePlayers,
+
     proposingTeam,
+    proposingTeamRoster,
+    proposingTeamPlayers,
+
     acceptingTeam,
-    league
+    acceptingTeamPlayers,
+
+    analysis
   })
 )
 
 const mapDispatchToProps = {
-  propose: tradeActions.propose,
-  loadRosters: rosterActions.loadRosters,
   load: tradeActions.load,
-  accept: tradeActions.accept,
-  reject: tradeActions.reject,
-  cancel: tradeActions.cancel,
-  toggleDropPlayer: tradeActions.toggleDropPlayer,
-  toggleProposingTeamPlayer: tradeActions.toggleProposingTeamPlayer,
-  toggleAcceptingTeamPlayer: tradeActions.toggleAcceptingTeamPlayer,
-  toggleProposingTeamPick: tradeActions.toggleProposingTeamPick,
-  toggleAcceptingTeamPick: tradeActions.toggleAcceptingTeamPick
+  setDropPlayers: tradeActions.setDropPlayers,
+  setProposingTeamPlayers: tradeActions.setProposingTeamPlayers,
+  setAcceptingTeamPlayers: tradeActions.setAcceptingTeamPlayers,
+  setProposingTeamPicks: tradeActions.setProposingTeamPicks,
+  setAcceptingTeamPicks: tradeActions.setAcceptingTeamPicks
 }
 
 export default connect(
