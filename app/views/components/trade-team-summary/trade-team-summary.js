@@ -7,14 +7,19 @@ import TableContainer from '@material-ui/core/TableContainer'
 import TableRow from '@material-ui/core/TableRow'
 import Paper from '@material-ui/core/Paper'
 
+function getPct (type, analysis) {
+  const delta = analysis.after[type] - analysis.before[type]
+  return (((delta / analysis.before[type]) * 100) || 0).toFixed(1)
+}
+
 export default class TradeTeamSummary extends React.Component {
   render = () => {
     const { analysis } = this.props
-    const deltaPoints = analysis.after.points - analysis.before.points
-    const pctPoints = (((deltaPoints / analysis.before.points) * 100) || 0).toFixed(1)
 
-    const deltaValue = analysis.after.value - analysis.before.value
-    const pctValue = (((deltaValue / analysis.before.value) * 100) || 0).toFixed(1)
+    const pctPoints = getPct('points', analysis)
+    const pctValue = getPct('value', analysis)
+    const pctSalary = getPct('salary', analysis)
+
     return (
       <TableContainer component={Paper}>
         <Table size='small'>
@@ -62,7 +67,9 @@ export default class TradeTeamSummary extends React.Component {
               <TableCell component='th' scope='row'>
                 Team Salary
               </TableCell>
-              <TableCell />
+              <TableCell>
+                {analysis.after.salary} ({pctSalary}%)
+              </TableCell>
               <TableCell />
             </TableRow>
             <TableRow>

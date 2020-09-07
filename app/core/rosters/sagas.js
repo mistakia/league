@@ -301,6 +301,14 @@ export function * watchTradeSetAcceptingTeamPlayers () {
   yield takeLatest(tradeActions.TRADE_SET_ACCEPTING_TEAM_PLAYERS, projectTrade)
 }
 
+export function * watchTradeSelectTeam () {
+  yield takeLatest(tradeActions.TRADE_SELECT_TEAM, projectTrade)
+}
+
+export function * watchSelectTrade () {
+  yield takeLatest(tradeActions.SELECT_TRADE, projectTrade)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -330,5 +338,7 @@ export const rosterSagas = [
   fork(watchUpdatePlayerRoster),
 
   fork(watchTradeSetProposingTeamPlayers),
-  fork(watchTradeSetAcceptingTeamPlayers)
+  fork(watchTradeSetAcceptingTeamPlayers),
+  fork(watchTradeSelectTeam),
+  fork(watchSelectTrade)
 ]
