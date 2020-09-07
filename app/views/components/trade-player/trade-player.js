@@ -13,6 +13,10 @@ export default class TradePlayer extends React.Component {
           <PlayerNameExpanded playerId={player.player} hideActions />
         </div>
         <div className='trade__player-metric metric'>
+          <label>Sal</label>
+          ${player.getIn(['value'], 0)}
+        </div>
+        <div className='trade__player-metric metric'>
           <label>Val</label>
           {player.getIn(['vorp', 'ros', 'starter'], 0).toFixed(1)}
         </div>

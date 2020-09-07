@@ -172,7 +172,8 @@ export function getAcceptingTeamTradedRosterPlayers (state) {
 function getTeamTradeSummary (lineups, players) {
   const values = {
     points: lineups.reduce((sum, l) => sum + l.total, 0),
-    value: players.reduce((sum, p) => sum + p.getIn(['values', 'ros', 'starter']), 0)
+    value: players.reduce((sum, p) => sum + p.getIn(['values', 'ros', 'starter']), 0),
+    salary: players.reduce((sum, p) => sum + p.value, 0)
   }
 
   return values
