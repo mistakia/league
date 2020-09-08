@@ -56,6 +56,7 @@ const calculateBaselines = ({
   const eligibleSlots = getEligibleSlots({ pos: 'ALL', league })
   for (const [index, slot] of eligibleSlots.entries()) {
     for (const roster of rosters) {
+      if (roster.isFull) continue
       const limit = countOccurrences(eligibleSlots.slice(0, index + 1), slot)
       const count = roster.getCountBySlot(slot)
       if (count >= limit) continue
@@ -85,7 +86,7 @@ const calculateBaselines = ({
       }
 
       const isEligible = roster.isEligibleForSlot(rosterRow)
-      if (player && isEligible && !roster.isFull) {
+      if (player && isEligible) {
         roster.addPlayer(rosterRow)
         if (!isBenchBetter) {
           // remove player from available player pool
@@ -98,6 +99,35 @@ const calculateBaselines = ({
   // get starters
   const starters = []
   for (const roster of rosters) {
+    // optimize starting lineup
+    const playerIds = roster.all.map(p => p.player)
+    let players = data.filter(d => playerIds.includes(d.player))
+    for (const slot of eligibleSlots) {
+      const slotStarters = roster.getPlayersBySlot(slot)
+
+      // move current starters to bench
+      for (const p of slotStarters) {
+        const player = data.find(ps => ps.player === p.player)
+        roster.removePlayer(p.player)
+        roster.addPlayer({ slot: slots.BENCH, player: p.player, pos: player.pos1 })
+      }
+
+      // set slots with best available
+      const count = countOccurrences(eligibleSlots, slot)
+      for (let i = 0; i < count; i++) {
+        const best = getBestAvailableForSlot({ slot, players, week })
+        if (best) {
+          roster.removePlayer(best.player)
+          roster.addPlayer({
+            slot: slots[slot],
+            player: best.player,
+            pos: best.pos1
+          })
+          players = players.filter(p => p.player !== best.player)
+        }
+      }
+    }
+
     roster.starters.forEach(p => {
       const player = data.find(d => d.player === p.player)
       starters.push(player)

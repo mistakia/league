@@ -84,7 +84,11 @@ export default class Roster {
   }
 
   getCountBySlot (slot) {
-    return this.players.filter(p => p.slot === constants.slots[slot]).length
+    return this.getPlayersBySlot(slot).length
+  }
+
+  getPlayersBySlot (slot) {
+    return this.players.filter(p => p.slot === constants.slots[slot])
   }
 
   removePlayer (player) {
