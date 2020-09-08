@@ -1,5 +1,6 @@
 // eslint-disable-next-line
 require = require('esm')(module /*, options*/)
+const moment = require('moment-timezone')
 const debug = require('debug')
 
 const db = require('../db')
@@ -17,6 +18,19 @@ if (process.env.NODE_ENV !== 'test') {
 
 const run = async () => {
   const timestamp = Math.round(Date.now() / 1000)
+
+  const now = moment.tz('America/New_York')
+  if (constants.season.isRegularSeason) {
+    // do not run on tuesdays
+    if (now.day() === 2) {
+      return
+    }
+
+    // do not run before 3:05pm on wednesday
+    if (now.day() === 3 && now.hour() < 14 && now.minute() < 5) {
+      return
+    }
+  }
 
   // get leagueIds with pending practice squad waivers
   const results = await db('waivers')

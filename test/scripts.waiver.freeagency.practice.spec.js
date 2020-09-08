@@ -197,6 +197,10 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
       expect(error.message).to.equal('no waivers to process')
     })
 
+    it('no waivers ready to be processed - regular season waiver period', async () => {
+      // TODO
+    })
+
     it('drop player not on team', async () => {
       // TODO
     })
