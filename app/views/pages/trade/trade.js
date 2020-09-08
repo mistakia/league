@@ -34,6 +34,7 @@ export default function () {
     analysis
   } = this.props
 
+  const isProposed = Boolean(trade.uid)
   const isOpen = !trade.cancelled && !trade.rejected && !trade.accepted && !trade.vetoed
 
   const sItems = []
@@ -97,13 +98,13 @@ export default function () {
   const proposingTeamDropSection = (
     <div className='trade__box'>
       <div className='trade__box-body'>
-        <TradeSelectItems
-          title='Select players to drop'
-          disabled={Boolean(trade.uid)}
-          onChange={this.handleDropChange}
-          selectedPlayers={tradePlayers.proposingTeamDropPlayers.toJS()}
-          players={teamDropPlayers}
-        />
+        {!isProposed &&
+          <TradeSelectItems
+            title='Select players to drop'
+            onChange={this.handleDropChange}
+            selectedPlayers={tradePlayers.proposingTeamDropPlayers.toJS()}
+            players={teamDropPlayers}
+          />}
         {proposingTeamDropPlayers}
       </div>
     </div>
@@ -114,13 +115,13 @@ export default function () {
   const acceptingTeamDropSection = (
     <div className='trade__box'>
       <div className='trade__box-body'>
-        <TradeSelectItems
-          title='Select players to drop'
-          disabled={!isOpen}
-          onChange={this.handleDropChange}
-          selectedPlayers={tradePlayers.acceptingTeamDropPlayers.toJS()}
-          players={teamDropPlayers}
-        />
+        {isOpen &&
+          <TradeSelectItems
+            title='Select players to drop'
+            onChange={this.handleDropChange}
+            selectedPlayers={tradePlayers.acceptingTeamDropPlayers.toJS()}
+            players={teamDropPlayers}
+          />}
         {acceptingTeamDropPlayers}
       </div>
     </div>
@@ -149,14 +150,14 @@ export default function () {
                 </List>
               </div>
               <div className='trade__box-body'>
-                <TradeSelectItems
-                  disabled={Boolean(trade.uid)}
-                  onChange={this.handleProposeChange}
-                  selectedPlayers={tradePlayers.proposingTeamPlayers.toJS()}
-                  selectedPicks={trade.proposingTeamPicks.toJS()}
-                  picks={proposingTeam.picks}
-                  players={proposingTeamPlayers}
-                />
+                {!isProposed &&
+                  <TradeSelectItems
+                    onChange={this.handleProposeChange}
+                    selectedPlayers={tradePlayers.proposingTeamPlayers.toJS()}
+                    selectedPicks={trade.proposingTeamPicks.toJS()}
+                    picks={proposingTeam.picks}
+                    players={proposingTeamPlayers}
+                  />}
                 {sItems}
               </div>
             </div>
@@ -168,14 +169,14 @@ export default function () {
                 <TradeSelectTeam />
               </div>
               <div className='trade__box-body'>
-                <TradeSelectItems
-                  disabled={Boolean(trade.uid)}
-                  onChange={this.handleAcceptChange}
-                  selectedPlayers={tradePlayers.acceptingTeamPlayers.toJS()}
-                  selectedPicks={trade.acceptingTeamPicks.toJS()}
-                  players={acceptingTeamPlayers}
-                  picks={acceptingTeam.picks}
-                />
+                {!isProposed &&
+                  <TradeSelectItems
+                    onChange={this.handleAcceptChange}
+                    selectedPlayers={tradePlayers.acceptingTeamPlayers.toJS()}
+                    selectedPicks={trade.acceptingTeamPicks.toJS()}
+                    players={acceptingTeamPlayers}
+                    picks={acceptingTeam.picks}
+                  />}
                 {rItems}
               </div>
             </div>
