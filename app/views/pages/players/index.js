@@ -14,6 +14,7 @@ const mapStateToProps = createSelector(
   getStats,
   (players, pState, app, stats) => ({
     players,
+    week: pState.get('view') === 'ros' ? 'ros' : pState.get('week').get(0),
     isLoggedIn: !!app.userId,
     isPending: pState.get('isPending') || (pState.get('view') === 'stats' && stats.isPending),
     vbaseline: app.vbaseline,
@@ -22,8 +23,9 @@ const mapStateToProps = createSelector(
     order: pState.get('order'),
     orderBy: pState.get('orderBy'),
     showQualifier: !!stats.qualifiers.get(pState.get('orderBy').split('.').pop()),
-    isSeasonProjectionView: pState.get('view') === 'seasproj',
+    isSeasonView: pState.get('view') === 'season',
     isRestOfSeasonView: pState.get('view') === 'ros',
+    isWeekView: pState.get('view') === 'week',
     isStatsView: pState.get('view') === 'stats',
     isStatsPassingView: pState.get('view') === 'stats' && stats.view === 'passing',
     isStatsRushingView: pState.get('view') === 'stats' && stats.view === 'rushing',

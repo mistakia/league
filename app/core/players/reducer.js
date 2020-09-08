@@ -24,7 +24,7 @@ const initialState = new Map({
   status: new List(Object.keys(constants.status)),
   teams: new List(),
   availability: new List(constants.availability),
-  week: constants.season.week,
+  week: new List([constants.season.week]),
   age: new List(),
   allAges: new List(),
   items: new Map(),
@@ -38,9 +38,11 @@ const initialState = new Map({
 
 export function playersReducer (state = initialState, { payload, type }) {
   switch (type) {
-    case playerActions.SET_PLAYERS_VIEW:
+    case playerActions.SET_PLAYERS_VIEW: {
       // TODO - reset orderBy
-      return state.merge({ view: payload.view })
+      const week = payload.view === 'season' ? new List([0]) : new List([Math.max(constants.season.week, 1)])
+      return state.merge({ view: payload.view, week })
+    }
 
     case playerActions.SEARCH_PLAYERS:
       return state.merge({ search: payload.value })
