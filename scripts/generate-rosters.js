@@ -6,7 +6,7 @@ const { constants } = require('../common')
 
 const run = async () => {
   // get list of hosted leagues
-  const leagues = await db('leagues').where('hosted', 1)
+  const leagues = await db('leagues')
 
   const isCurrentYear = constants.season.week < constants.season.finalWeek
   const week = isCurrentYear ? (constants.season.week + 1) : 0
@@ -44,6 +44,7 @@ const run = async () => {
       // insert any missing players & remove excess players
       const existingPlayers = await db('rosters_players').where({ rid })
       const existingPlayerIds = existingPlayers.map(p => p.player)
+      const matching = players.filter(p => existingPlayerIds.includes(p.player))
       const missing = players.filter(p => !existingPlayerIds.includes(p.player))
       const excessive = existingPlayers.filter(p => !currentPlayerIds.includes(p.player))
       const inserts = missing.map(p => ({
@@ -53,11 +54,26 @@ const run = async () => {
         pos: p.pos
       }))
 
+      const updates = matching.filter(p => {
+        const item = existingPlayers.find(i => i.player === p.player)
+        return item.slot !== p.slot
+      })
+
       await db('rosters_players').insert(inserts)
       if (excessive.length) {
         await db('rosters_players')
           .where('rid', rid)
           .whereIn('player', excessive.map(p => p.player))
+      }
+
+      if (updates.length) {
+        console.log(updates)
+        for (const { player, slot } of updates) {
+          console.log(rid)
+          await db('rosters_players')
+            .where({ rid, player })
+            .update({ slot })
+        }
       }
     }
   }
@@ -66,11 +82,20 @@ const run = async () => {
 module.exports = run
 
 const main = async () => {
+  let error
   try {
     await run()
-  } catch (error) {
+  } catch (err) {
+    error = err
     console.log(error)
   }
+
+  await db('jobs').insert({
+    type: constants.jobs.GENERATE_ROSTERS,
+    succ: error ? 0 : 1,
+    reason: error ? error.message : null,
+    timestamp: Math.round(Date.now() / 1000)
+  })
 
   process.exit()
 }

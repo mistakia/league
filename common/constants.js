@@ -840,7 +840,9 @@ export const jobs = {
 
   NOTIFICATIONS_DRAFT: 14,
   NOTIFICATIONS_POACH_8HR: 15,
-  NOTIFICATIONS_POACH_1HR: 16
+  NOTIFICATIONS_POACH_1HR: 16,
+
+  GENERATE_ROSTERS: 17
 }
 
 export const jobDetails = {
@@ -859,5 +861,6 @@ export const jobDetails = {
   13: 'Projections (NFL)',
   14: 'Notifications (Draft)',
   15: 'Notifications (Poach) 8HR',
-  16: 'Notifications (Poach) 1HR'
+  16: 'Notifications (Poach) 1HR',
+  17: 'Generate Rosters'
 }
