@@ -1,4 +1,4 @@
-const moment = require('moment')
+const moment = require('moment-timezone')
 
 const db = require('../db')
 const { constants } = require('../common')
@@ -13,8 +13,12 @@ module.exports = async (leagueId) => {
 
   const playerIds = transactions.map(t => t.player)
   const query = db('waivers')
-    .select('teams.*', 'waivers.uid as wid', 'waivers.bid', 'waivers.player', 'waivers.drop', 'waivers.tid', 'waivers.userid')
+    .select('teams.*', 'waivers.uid as wid', 'waivers.bid', 'waivers.player', 'waivers.drop', 'waivers.tid', 'waivers.userid', 'schedule.date')
     .join('teams', 'waivers.tid', 'teams.uid')
+    .join('player', 'waivers.player', 'player.player')
+    .joinRaw('left join schedule on player.cteam = schedule.v or player.cteam = schedule.h')
+    .where('schedule.wk', constants.season.week)
+    .where('schedule.seas', constants.season.year)
     .whereNull('processed')
     .whereNull('cancelled')
     .where('type', constants.waivers.FREE_AGENCY)
@@ -38,5 +42,11 @@ module.exports = async (leagueId) => {
 
   const waivers = await query
 
-  return waivers.length ? waivers[0] : undefined
+  const now = moment()
+  const filtered = waivers.filter(player => {
+    const gameStart = moment.tz(player.date, 'M/D/YYYY H:m', 'America/New_York')
+    return now.isBefore(gameStart)
+  })
+
+  return filtered.length ? filtered[0] : undefined
 }
