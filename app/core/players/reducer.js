@@ -12,6 +12,7 @@ import { auctionActions } from '@core/auction'
 import { constants } from '@common'
 
 const initialState = new Map({
+  isInitializing: true,
   isPending: false,
   search: null,
   positions: new List(['QB', 'RB', 'WR', 'TE', 'K', 'DST']),
@@ -80,6 +81,7 @@ export function playersReducer (state = initialState, { payload, type }) {
     case playerActions.SET_PLAYER_VALUES:
       return state.withMutations(state => {
         state.set('isPending', false)
+        state.set('isInitializing', false)
         for (const week in payload.baselines) {
           for (const b in payload.baselines[week]) {
             for (const type in payload.baselines[week][b]) {

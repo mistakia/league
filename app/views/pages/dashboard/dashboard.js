@@ -22,7 +22,7 @@ export default function () {
 
   const { positions } = constants
 
-  const warnings = []
+  const notices = []
 
   const groups = {}
   for (const position of positions) {
@@ -47,7 +47,7 @@ export default function () {
     reserveIRItems.push(<PlayerRoster key={player.player} player={player} />)
 
     if (!player.status || player.status === 'Active') {
-      warnings.push(
+      notices.push(
         <Alert key={player.player} severity='error'>
           <AlertTitle>{player.name} not eligible for Reserve/IR</AlertTitle>
           You will need to activate or release him before you can make any acquisitions or claims.
@@ -62,7 +62,7 @@ export default function () {
     reserveCOVItems.push(<PlayerRoster key={player.player} player={player} />)
 
     if (player.status !== 'Reserve/COVID-19') {
-      warnings.push(
+      notices.push(
         <Alert key={player.player} severity='error'>
           <AlertTitle>{player.name} not eligible for Reserve/COVID-19</AlertTitle>
           You will need to activate or release him before you can make any acquisitions or claims.
@@ -79,7 +79,7 @@ export default function () {
     const poach = poaches.find(p => p.getIn(['player', 'player']) === player.player)
     if (poach) {
       const processingTime = moment(poach.submitted, 'X').add('48', 'hours')
-      warnings.push(
+      notices.push(
         <Alert key={player.player} severity='warning'>{player.name} has a poaching claim that will be processed {processingTime.fromNow()} on {processingTime.format('dddd, h:mm a')}.</Alert>
       )
     }
@@ -143,7 +143,7 @@ export default function () {
     <Container maxWidth='lg' classes={{ root: 'dashboard' }}>
       <Grid container spacing={2}>
         <Grid container item xs={12} md={8}>
-          {warnings.length ? <Grid item xs={12}>{warnings}</Grid> : null}
+          {notices.length ? <Grid item xs={12}>{notices}</Grid> : null}
           {waivers.poach.size ? poachWaiverSection : null}
           {waivers.active.size ? freeAgencyActiveWaiverSection : null}
           {waivers.practice.size ? freeAgencyPracticeWaiverSection : null}
