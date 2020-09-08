@@ -25,7 +25,7 @@ export default class SelectedPlayerValue extends React.Component {
         text: ''
       },
       xAxis: {
-        categories: constants.fantasyWeeks.filter(w => w > constants.season.week),
+        categories: constants.fantasyWeeks.filter(w => w >= constants.season.week),
         title: {
           text: 'Week'
         },
