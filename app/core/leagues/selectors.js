@@ -40,17 +40,35 @@ export function getLeagueEvents (state) {
     }
   }
 
-  const firstDayOfWaivers = constants.season.start.clone().add('1', 'week')
-  if (now.isBefore(firstDayOfWaivers)) {
+  const firstDayOfRegularSeason = constants.season.start.clone().add('1', 'week')
+  if (now.isBefore(firstDayOfRegularSeason)) {
     events.push({
-      detail: 'Sign Veteran FAs',
-      date: firstDayOfWaivers
+      detail: 'Start of Regular Season',
+      date: firstDayOfRegularSeason
+    })
+  }
+
+  const firstWaiverDate = constants.season.start.clone().add('1', 'week').day(3).hour(14)
+  if (now.isBefore(firstWaiverDate)) {
+    events.push({
+      detail: 'Waivers Processed',
+      date: firstWaiverDate
+    })
+  } else if (constants.season.isRegularSeason) {
+    const waiverDate = moment.tz('America/New_York').day(3).hour(14)
+    const nextWaiverDate = now.isBefore(waiverDate)
+      ? waiverDate
+      : waiverDate.add('1', 'week')
+
+    events.push({
+      detail: 'Waivers Processed',
+      date: nextWaiverDate
     })
   }
 
   if (now.isBefore(constants.season.openingDay)) {
     events.push({
-      detail: 'Opening day',
+      detail: 'NFL Opening Day',
       date: constants.season.openingDay.clone()
     })
   }
