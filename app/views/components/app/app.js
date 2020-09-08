@@ -1,4 +1,6 @@
 import React from 'react'
+import Backdrop from '@material-ui/core/Backdrop'
+import CircularProgress from '@material-ui/core/CircularProgress'
 // import hotkeys from 'hotkeys-js'
 
 import Menu from '@components/menu'
@@ -25,13 +27,16 @@ class App extends React.Component {
   }
 
   render () {
-    const { isPending, userId } = this.props
+    const { isPending, userId, isInitializing } = this.props
     if (isPending) {
       return <Loading loading={isPending} />
     }
 
     return (
       <main>
+        <Backdrop classes={{ root: 'initializing__backdrop' }} open={isInitializing}>
+          <CircularProgress color='inherit' />
+        </Backdrop>
         <Menu />
         <Routes />
         {userId && <Logout />}
