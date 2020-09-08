@@ -9,6 +9,7 @@ import StatusFilter from '@components/status-filter'
 import TeamFilter from '@components/team-filter'
 import PositionFilter from '@components/position-filter'
 import ExperienceFilter from '@components/experience-filter'
+import WeekFilter from '@components/week-filter'
 import AgeFilter from '@components/age-filter'
 import PageLayout from '@layouts/page'
 import PlayerHeader from '@components/player-header'
@@ -63,20 +64,19 @@ export default class PlayersPage extends React.Component {
   }
 
   handleExport = () => {
-    const { players, vbaseline, isSeasonProjectionView } = this.props
-    const type = isSeasonProjectionView ? '0' : 'ros'
+    const { players, vbaseline, isSeasonView, week } = this.props
     const data = players.map(p => {
       const item = {
         name: p.name,
         team: p.team,
         pos: p.pos1,
-        salary: p.getIn(['values', type, vbaseline], 0).toFixed(1),
-        inflation: p.getIn(['values', isSeasonProjectionView ? 'inflationSeason' : 'inflation', vbaseline]).toFixed(1),
-        vorp: p.getIn(['vorp', type, vbaseline], 0).toFixed(1)
+        salary: p.getIn(['values', `${week}`, vbaseline], 0).toFixed(1),
+        inflation: p.getIn(['values', isSeasonView ? 'inflationSeason' : 'inflation', vbaseline]).toFixed(1),
+        vorp: p.getIn(['vorp', `${week}`, vbaseline], 0).toFixed(1)
       }
 
       for (const stat of constants.stats) {
-        item[stat] = p.getIn(['projection', type, stat], 0).toFixed(1)
+        item[stat] = p.getIn(['projection', `${week}`, stat], 0).toFixed(1)
       }
 
       return item
@@ -93,7 +93,7 @@ export default class PlayersPage extends React.Component {
         ...constants.statHeaders
       },
       data: data.toJS(),
-      fileName: 'TeflonLeague-' + (isSeasonProjectionView ? 'SeasonProjections' : 'RestOfSeasonProjections')
+      fileName: 'TeflonLeague-' + (isSeasonView ? 'SeasonProjections' : 'RestOfSeasonProjections')
     })
   }
 
@@ -112,8 +112,8 @@ export default class PlayersPage extends React.Component {
 
   render = () => {
     const {
-      players, vbaseline, isSeasonProjectionView, isStatsView, isStatsPassingView,
-      isStatsRushingView, isStatsReceivingView, isStatsPassingAdvancedView,
+      players, vbaseline, isSeasonView, isStatsView, isStatsPassingView, isWeekView,
+      isStatsRushingView, isStatsReceivingView, isStatsPassingAdvancedView, week,
       isStatsPassingPressureView, isPending, showQualifier, isLoggedIn, isRestOfSeasonView
     } = this.props
 
@@ -124,7 +124,7 @@ export default class PlayersPage extends React.Component {
       )
     }
 
-    const headerSeasonPassing = (week) => (
+    const headerSeasonPassing = (
       <div className='player__row-group'>
         <div className='player__row-group-head'>Passing</div>
         <div className='player__row-group-body'>
@@ -135,7 +135,7 @@ export default class PlayersPage extends React.Component {
       </div>
     )
 
-    const headerSeasonRushing = (week) => (
+    const headerSeasonRushing = (
       <div className='player__row-group'>
         <div className='player__row-group-head'>Rushing</div>
         <div className='player__row-group-body'>
@@ -147,7 +147,7 @@ export default class PlayersPage extends React.Component {
       </div>
     )
 
-    const headerSeasonReceiving = (week) => (
+    const headerSeasonReceiving = (
       <div className='player__row-group'>
         <div className='player__row-group-head'>Receiving</div>
         <div className='player__row-group-body'>
@@ -159,7 +159,7 @@ export default class PlayersPage extends React.Component {
       </div>
     )
 
-    const headerSeasonSummary = (week) => (
+    const headerSeasonSummary = (
       <div className='player__row-group'>
         <div className='player__row-group-body'>
           <PlayerHeader
@@ -184,6 +184,8 @@ export default class PlayersPage extends React.Component {
     const classNames = ['players__filters']
     if (this.state.expanded) classNames.push('expanded')
 
+    const projectionView = isRestOfSeasonView || isSeasonView || isWeekView
+
     const head = (
       <div className='players__head'>
         <div className={classNames.join(' ')}>
@@ -192,6 +194,7 @@ export default class PlayersPage extends React.Component {
             <PositionFilter />
             {isLoggedIn && <AvailabilityFilter />}
             <PlayersViewMenu />
+            {isWeekView && <WeekFilter />}
             {isStatsView && <StatMenu />}
             {isStatsPassingView && <StatPassingMenu />}
             {isStatsView && <StatYearsFilter />}
@@ -204,7 +207,7 @@ export default class PlayersPage extends React.Component {
               <Icon className='players__head-icon' name='arrow-down' />
             </div>
             <div className='players__head-actions'>
-              {!!(isSeasonProjectionView || isRestOfSeasonView) &&
+              {!!(isSeasonView || isRestOfSeasonView) &&
                 <IconButton onClick={this.handleExport} disabled={isPending}>
                   <GetAppIcon />
                 </IconButton>}
@@ -228,14 +231,10 @@ export default class PlayersPage extends React.Component {
           {isLoggedIn && <div className='player__row-action' />}
           {isLoggedIn && <div className='player__row-availability' />}
           <Hidden xsDown>
-            {isSeasonProjectionView && headerSeasonSummary('0')}
-            {isSeasonProjectionView && headerSeasonPassing('0')}
-            {isSeasonProjectionView && headerSeasonRushing('0')}
-            {isSeasonProjectionView && headerSeasonReceiving('0')}
-            {isRestOfSeasonView && headerSeasonSummary('ros')}
-            {isRestOfSeasonView && headerSeasonPassing('ros')}
-            {isRestOfSeasonView && headerSeasonRushing('ros')}
-            {isRestOfSeasonView && headerSeasonReceiving('ros')}
+            {projectionView && headerSeasonSummary}
+            {projectionView && headerSeasonPassing}
+            {projectionView && headerSeasonRushing}
+            {projectionView && headerSeasonReceiving}
             {isStatsPassingAdvancedView && <HeaderStatsPassingBasic />}
             {isStatsPassingAdvancedView && <HeaderStatsPassingEfficiency />}
             {isStatsPassingAdvancedView && <HeaderStatsPassingAdvanced />}

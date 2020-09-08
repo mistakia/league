@@ -20,9 +20,10 @@ export default class PlayersViewMenu extends React.Component {
           onChange={this.handleChange}
           label='View'
         >
-          <MenuItem value='seasproj'>Season Projection</MenuItem>
+          <MenuItem value='season'>Season Projection</MenuItem>
           <MenuItem value='stats'>Stats</MenuItem>
           <MenuItem value='ros'>Rest Of Season</MenuItem>
+          <MenuItem value='week'>Weekly Projection</MenuItem>
         </Select>
       </FormControl>
     )

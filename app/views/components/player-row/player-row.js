@@ -16,17 +16,18 @@ import './player-row.styl'
 class PlayerRow extends Player {
   render = () => {
     const {
-      player, style, selectedPlayer, vbaseline, isSeasonProjectionView, isHosted,
-      isStatsPassingAdvancedView, isStatsPassingPressureView, isStatsRushingView,
-      isStatsReceivingView, overall, isLoggedIn, isRestOfSeasonView, selected, status
+      player, style, selectedPlayer, vbaseline, isSeasonView, isHosted, isWeekView,
+      isStatsPassingAdvancedView, isStatsPassingPressureView, isStatsRushingView, week,
+      isStatsReceivingView, overall, isLoggedIn, isRestOfSeasonView, selected, status,
+      baselines
     } = this.props
 
     const isSelected = selectedPlayer === player.player || selected === player.player
 
-    const seasonSummary = (week) => {
+    const seasonSummary = () => {
       let inflation = null
-      const value = player.values.getIn([week, vbaseline])
-      if (isRestOfSeasonView || isSeasonProjectionView) {
+      const value = player.values.getIn([`${week}`, vbaseline])
+      if (isRestOfSeasonView || isSeasonView) {
         const type = isRestOfSeasonView ? 'inflation' : 'inflationSeason'
         const diff = player.values.getIn([type, vbaseline]) - value
         const classNames = ['value__inflation']
@@ -46,17 +47,17 @@ class PlayerRow extends Player {
               {inflation}
             </div>
             <div className='player__row-metric'>
-              {Math.round(player.vorp.getIn([week, vbaseline]) || 0)}
+              {Math.round(player.vorp.getIn([`${week}`, vbaseline]) || 0)}
             </div>
             <div className='player__row-metric'>
-              {(player.points.getIn([week, 'total']) || 0).toFixed(1)}
+              {(player.points.getIn([`${week}`, 'total']) || 0).toFixed(1)}
             </div>
           </div>
         </div>
       )
     }
 
-    const seasonPassing = (week) => (
+    const seasonPassing = (
       <div className='row__group'>
         <div className='row__group-body'>
           <div className='player__row-metric'>
@@ -72,7 +73,7 @@ class PlayerRow extends Player {
       </div>
     )
 
-    const seasonRushing = (week) => (
+    const seasonRushing = (
       <div className='row__group'>
         <div className='row__group-body'>
           <div className='player__row-metric'>
@@ -91,7 +92,7 @@ class PlayerRow extends Player {
       </div>
     )
 
-    const seasonReceiving = (week) => (
+    const seasonReceiving = (
       <div className='row__group'>
         <div className='row__group-body'>
           <div className='player__row-metric'>
@@ -265,6 +266,15 @@ class PlayerRow extends Player {
     const classNames = ['player__row']
     if (isSelected) classNames.push('selected')
 
+    const projectionView = isRestOfSeasonView || isSeasonView || isWeekView
+
+    if (isWeekView || isSeasonView) {
+      const starterBaselinePlayerId = baselines.getIn([`${week}`, player.pos1, 'starter'])
+      const bestAvailablePlayerId = baselines.getIn([`${week}`, player.pos1, 'available'])
+      if (player.player === starterBaselinePlayerId) classNames.push('starter__baseline')
+      else if (player.player === bestAvailablePlayerId) classNames.push('available__baseline')
+    }
+
     return (
       <div style={style}>
         <div className={classNames.join(' ')}>
@@ -295,14 +305,10 @@ class PlayerRow extends Player {
                     ? 'W' : 'FA')}
               </div>}
             <Hidden xsDown>
-              {isSeasonProjectionView && seasonSummary('0')}
-              {isSeasonProjectionView && seasonPassing('0')}
-              {isSeasonProjectionView && seasonRushing('0')}
-              {isSeasonProjectionView && seasonReceiving('0')}
-              {isRestOfSeasonView && seasonSummary('ros')}
-              {isRestOfSeasonView && seasonPassing('ros')}
-              {isRestOfSeasonView && seasonRushing('ros')}
-              {isRestOfSeasonView && seasonReceiving('ros')}
+              {projectionView && seasonSummary()}
+              {projectionView && seasonPassing}
+              {projectionView && seasonRushing}
+              {projectionView && seasonReceiving}
               {isStatsPassingAdvancedView && passingBasic}
               {isStatsPassingAdvancedView && passingEfficiency}
               {isStatsPassingAdvancedView && passingAdvanced}

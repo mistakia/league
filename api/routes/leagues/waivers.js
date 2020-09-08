@@ -98,36 +98,40 @@ router.post('/?', async (req, res) => {
         return res.status(400).send({ error: 'player rostered' })
       }
 
-      // if regular season and not during waiver period, check if player is on release waivers
-      if (constants.season.isRegularSeason && !constants.season.isWaiverPeriod) {
-        const isOnWaivers = await isPlayerOnWaivers({ player, leagueId })
-        if (!isOnWaivers) {
-          return res.status(400).send({ error: 'player is not on waivers' })
-        }
-      }
-
-      // reject active roster waivers before day after auction
-      const acutoff = moment.tz(league.adate, 'X', 'America/New_York')
-        .add('1', 'day')
-        .startOf('day')
-      if (type === constants.waivers.FREE_AGENCY && (!league.adate || moment().isBefore(acutoff))) {
-        return res.status(400).send({ error: 'active roster waivers not open' })
-      }
-
-      // reject practice waivers before day after draft
-      if (type === constants.waivers.FREE_AGENCY_PRACTICE) {
-        const totalPicks = league.nteams * 3
-        const dcutoff = moment.tz(league.ddate, 'X', 'America/New_York')
-          .add(totalPicks, 'day')
-          .startOf('day')
-
-        if (!league.ddate || moment().isBefore(dcutoff)) {
-          return res.status(400).send({ error: 'practice squad waivers are not open' })
-        } if (league.ddate && moment().isAfter(dcutoff.add('1', 'day'))) {
-          // if after rookie draft waivers cleared, check if player is on release waivers
+      if (constants.season.isRegularSeason) {
+        // if regular season and not during waiver period, check if player is on release waivers
+        if (!constants.season.isWaiverPeriod) {
           const isOnWaivers = await isPlayerOnWaivers({ player, leagueId })
           if (!isOnWaivers) {
             return res.status(400).send({ error: 'player is not on waivers' })
+          }
+        }
+
+        // otherwise, it's a waiver period and all players are on waivers
+      } else {
+        // reject active roster waivers before day after auction
+        const acutoff = moment.tz(league.adate, 'X', 'America/New_York')
+          .add('1', 'day')
+          .startOf('day')
+        if (type === constants.waivers.FREE_AGENCY && (!league.adate || moment().isBefore(acutoff))) {
+          return res.status(400).send({ error: 'active roster waivers not open' })
+        }
+
+        // reject practice waivers before day after draft
+        if (type === constants.waivers.FREE_AGENCY_PRACTICE) {
+          const totalPicks = league.nteams * 3
+          const dcutoff = moment.tz(league.ddate, 'X', 'America/New_York')
+            .add(totalPicks, 'day')
+            .startOf('day')
+
+          if (!league.ddate || moment().isBefore(dcutoff)) {
+            return res.status(400).send({ error: 'practice squad waivers are not open' })
+          } if (league.ddate && moment().isAfter(dcutoff.add('1', 'day'))) {
+            // if after rookie draft waivers cleared, check if player is on release waivers
+            const isOnWaivers = await isPlayerOnWaivers({ player, leagueId })
+            if (!isOnWaivers) {
+              return res.status(400).send({ error: 'player is not on waivers' })
+            }
           }
         }
       }
