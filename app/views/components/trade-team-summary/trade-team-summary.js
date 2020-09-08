@@ -3,7 +3,7 @@ import Table from '@material-ui/core/Table'
 import TableBody from '@material-ui/core/TableBody'
 import TableCell from '@material-ui/core/TableCell'
 import TableContainer from '@material-ui/core/TableContainer'
-// import TableHead from '@material-ui/core/TableHead'
+import TableHead from '@material-ui/core/TableHead'
 import TableRow from '@material-ui/core/TableRow'
 import Paper from '@material-ui/core/Paper'
 
@@ -23,61 +23,61 @@ export default class TradeTeamSummary extends React.Component {
     return (
       <TableContainer component={Paper}>
         <Table size='small'>
+          <TableHead>
+            <TableRow>
+              <TableCell align='center' colSpan={2}>
+                Team Summary
+              </TableCell>
+            </TableRow>
+          </TableHead>
           <TableBody>
             <TableRow>
               <TableCell component='th' scope='row'>
                 Points
               </TableCell>
-              <TableCell>
+              <TableCell align='right'>
                 {analysis.after.points} ({pctPoints}%)
               </TableCell>
-              <TableCell />
             </TableRow>
             <TableRow>
               <TableCell component='th' scope='row'>
                 Value
               </TableCell>
-              <TableCell>
+              <TableCell align='right'>
                 {analysis.after.value} ({pctValue}%)
               </TableCell>
-              <TableCell />
             </TableRow>
             <TableRow>
               <TableCell component='th' scope='row'>
                 Record
               </TableCell>
               <TableCell />
-              <TableCell />
             </TableRow>
             <TableRow>
               <TableCell component='th' scope='row'>
                 Playoff Odds
               </TableCell>
-              <TableCell />
-              <TableCell />
+              <TableCell align='right' />
             </TableRow>
             <TableRow>
               <TableCell component='th' scope='row'>
                 Championship Odds
               </TableCell>
-              <TableCell />
-              <TableCell />
+              <TableCell align='right' />
             </TableRow>
             <TableRow>
               <TableCell component='th' scope='row'>
                 Team Salary
               </TableCell>
-              <TableCell>
+              <TableCell align='right'>
                 {analysis.after.salary} ({pctSalary}%)
               </TableCell>
-              <TableCell />
             </TableRow>
             <TableRow>
               <TableCell component='th' scope='row'>
                 Roster Space
               </TableCell>
-              <TableCell />
-              <TableCell />
+              <TableCell align='right' />
             </TableRow>
           </TableBody>
         </Table>
