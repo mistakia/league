@@ -76,7 +76,7 @@ export default function () {
     if (!player.player) continue
     practiceItems.push(<PlayerRoster key={player.player} player={player} />)
 
-    const poach = poaches.find(p => p.player === player.player)
+    const poach = poaches.find(p => p.getIn(['player', 'player']) === player.player)
     if (poach) {
       const processingTime = moment(poach.submitted, 'X').add('48', 'hours')
       warnings.push(
@@ -143,7 +143,7 @@ export default function () {
     <Container maxWidth='lg' classes={{ root: 'dashboard' }}>
       <Grid container spacing={2}>
         <Grid container item xs={12} md={8}>
-          {warnings.length ? warnings : null}
+          {warnings.length ? <Grid item xs={12}>{warnings}</Grid> : null}
           {waivers.poach.size ? poachWaiverSection : null}
           {waivers.active.size ? freeAgencyActiveWaiverSection : null}
           {waivers.practice.size ? freeAgencyPracticeWaiverSection : null}
