@@ -100,7 +100,7 @@ const calculateBaselines = ({
   const starters = []
   for (const roster of rosters) {
     // optimize starting lineup
-    const playerIds = roster.all.map(p => p.player)
+    const playerIds = roster.active.map(p => p.player)
     let players = data.filter(d => playerIds.includes(d.player))
     for (const slot of eligibleSlots) {
       const slotStarters = roster.getPlayersBySlot(slot)
