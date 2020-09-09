@@ -55,7 +55,7 @@ export function getLeagueEvents (state) {
       date: firstWaiverDate
     })
   } else if (constants.season.isRegularSeason) {
-    const waiverDate = moment.tz('America/New_York').day(3).hour(14)
+    const waiverDate = moment.tz('America/New_York').day(3).hour(15)
     const nextWaiverDate = now.isBefore(waiverDate)
       ? waiverDate
       : waiverDate.add('1', 'week')
