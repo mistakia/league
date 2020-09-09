@@ -27,7 +27,7 @@ const run = async () => {
     }
 
     // do not run before 3:05pm on wednesday
-    if (now.day() === 3 && now.hour() < 14 && now.minute() < 5) {
+    if (now.day() === 3 && now.hour() < 15 && now.minute() < 5) {
       return
     }
   }
