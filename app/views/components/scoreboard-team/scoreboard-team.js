@@ -9,7 +9,7 @@ import './scoreboard-team.styl'
 
 export default class ScoreboardTeam extends React.Component {
   render = () => {
-    const { team, roster, league, type } = this.props
+    const { team, roster, league, type, projectedScore } = this.props
 
     const rows = []
     if (league.sqb) {
@@ -142,7 +142,7 @@ export default class ScoreboardTeam extends React.Component {
           />
           <TeamImage tid={team.uid} />
           <TeamName tid={team.uid} />
-          <div className='scoreboard__team-score metric'>0.0</div>
+          <div className='scoreboard__team-score metric projected'>{projectedScore.toFixed(2)}</div>
         </div>
         <div className='scoreboard__team-roster'>
           {rows}

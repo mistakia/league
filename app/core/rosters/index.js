@@ -3,6 +3,7 @@ export {
   getRosterByTeamId,
   getRosterRecordByTeamId,
   getRostersForCurrentLeague,
+  getStartersByTeamId,
   getPlayersByTeamId,
   getCurrentTeamRoster,
   getCurrentTeamRosterRecord,
