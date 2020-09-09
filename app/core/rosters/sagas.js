@@ -20,6 +20,7 @@ import { constants } from '@common'
 import { getPlayers, getAllPlayers, playerActions } from '@core/players'
 import {
   tradeActions,
+  getCurrentTradePlayers,
   getProposingTeamTradedRosterPlayers,
   getAcceptingTeamTradedRosterPlayers
 } from '@core/trade'
@@ -176,12 +177,23 @@ export function * projectTrade () {
     players: acceptingTeamTradedPlayers.map(p => p.toJS()),
     league
   })
-
   worker.terminate()
   yield put(tradeActions.setProjectedLineups({
     proposingTeamLineups,
     acceptingTeamLineups
   }))
+
+  const projectedContribution = {}
+  const tradePlayers = yield select(getCurrentTradePlayers)
+  const allPlayers = tradePlayers.acceptingTeamPlayers
+    .concat(tradePlayers.proposingTeamPlayers)
+    .concat(tradePlayers.acceptingTeamDropPlayers)
+    .concat(tradePlayers.proposingTeamDropPlayers)
+  for (const player of allPlayers) {
+    const playerData = yield call(calculatePlayerLineupContribution, { player })
+    projectedContribution[player.player] = playerData
+  }
+  yield put(playerActions.setProjectedContribution(projectedContribution))
 }
 
 export function * addPlayer ({ payload }) {
