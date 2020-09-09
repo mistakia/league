@@ -586,7 +586,7 @@ CREATE TABLE `poaches` (
   `lid` int(6) NOT NULL,
   `succ` tinyint(1) DEFAULT NULL,
   `submitted` int(11) NOT NULL,
-  `reason` varchar(255) DEFAULT NULL,
+  `reason` text DEFAULT NULL,
   `processed` int(11) DEFAULT NULL,
   KEY `lid` (`lid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -1739,7 +1739,7 @@ CREATE TABLE `waivers` (
   `po` int(4) DEFAULT 0, -- priority order
   `type` tinyint(1) NOT NULL,
   `succ` tinyint(1) DEFAULT NULL,
-  `reason` varchar(255) DEFAULT NULL,
+  `reason` text DEFAULT NULL,
   `processed` int(11) DEFAULT NULL,
   `cancelled` int(11) DEFAULT NULL,
   PRIMARY KEY (`uid`),
@@ -1758,7 +1758,7 @@ CREATE TABLE `jobs` (
   `uid` int(11) NOT NULL AUTO_INCREMENT,
   `type` tinyint(1) NOT NULL,
   `succ` tinyint(1) NOT NULL,
-  `reason` varchar(255) DEFAULT NULL,
+  `reason` text DEFAULT NULL,
   `timestamp` int(11) NOT NULL,
   PRIMARY KEY (`uid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
