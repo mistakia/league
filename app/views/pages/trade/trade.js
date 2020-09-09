@@ -42,7 +42,7 @@ export default function () {
     <TradePlayer key={p} playerId={p} />
   ))
   trade.proposingTeamPicks.forEach(p => sItems.push(
-    <TradePick key={p} pick={p} />
+    <TradePick key={p.uid} pick={p} />
   ))
 
   const rItems = []
@@ -50,7 +50,7 @@ export default function () {
     <TradePlayer key={p} playerId={p} />
   ))
   trade.acceptingTeamPicks.forEach(p => rItems.push(
-    <TradePick key={p} pick={p} />
+    <TradePick key={p.uid} pick={p} />
   ))
 
   const invalidNotice = (
