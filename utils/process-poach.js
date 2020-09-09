@@ -37,10 +37,7 @@ module.exports = async function (claim) {
     year: constants.season.year
   })
   const roster = new Roster({ roster: rosterRow, league })
-  if (claim.drop) {
-    if (!roster.has(claim.drop)) {
-      throw new Error('drop player not on poaching team roster')
-    }
+  if (claim.drop && roster.has(claim.drop)) {
     roster.removePlayer(claim.drop)
   }
   const hasSlot = roster.hasOpenBenchSlot(poachPlayer.pos1)
@@ -64,7 +61,7 @@ module.exports = async function (claim) {
   }
 
   // process release
-  if (claim.drop) {
+  if (claim.drop && roster.has(claim.drop)) {
     const { drop, tid, lid, userid } = claim
     await processRelease({ player: drop, tid, lid, userid })
   }
@@ -103,7 +100,7 @@ module.exports = async function (claim) {
 
   // send notification
   let message = `Poaching claim for ${poachPlayer.fname} ${poachPlayer.lname} (${poachPlayer.pos1}) successfully processed.`
-  if (claim.drop) {
+  if (claim.drop && roster.has(claim.drop)) {
     const dropPlayer = playerRows.find(p => p.player === claim.drop)
     message += ` ${dropPlayer.fname} ${dropPlayer.lname} (${dropPlayer.pos1}) has been released.`
   }
