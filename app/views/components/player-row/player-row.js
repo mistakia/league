@@ -42,10 +42,11 @@ class PlayerRow extends Player {
       return (
         <div className='row__group'>
           <div className='row__group-body'>
-            <div className='player__row-metric'>
-              ${Math.round(value) || '--'}
-              {inflation}
-            </div>
+            {!constants.season.isRegularSeason &&
+              <div className='player__row-metric'>
+                ${Math.round(value) || '--'}
+                {inflation}
+              </div>}
             <div className='player__row-metric'>
               {Math.round(player.vorp.getIn([`${week}`, vbaseline]) || 0)}
             </div>
