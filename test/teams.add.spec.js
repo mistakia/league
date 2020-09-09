@@ -308,7 +308,7 @@ describe('API /teams - add', function () {
     })
 
     it('free agent has unprocessed waiver claim', async () => {
-      MockDate.set(start.clone().add('2', 'week').day(3).hour(14).toDate())
+      MockDate.set(start.clone().add('2', 'week').day(3).hour(15).toDate())
       const player = await selectPlayer({ rookie: false })
 
       await knex('waivers').insert({
