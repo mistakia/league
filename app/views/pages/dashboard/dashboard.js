@@ -17,7 +17,7 @@ import './dashboard.styl'
 
 export default function () {
   const {
-    players, picks, league, waivers, poaches, teamId
+    players, picks, league, waivers, poaches, teamId, roster
   } = this.props
 
   const { positions } = constants
@@ -149,16 +149,31 @@ export default function () {
           {waivers.practice.size ? freeAgencyPracticeWaiverSection : null}
           {teamPoaches.size ? teamPoachSection : null}
           <Grid item xs={12}>
-            <DashboardPlayersTable items={activeItems} title='Active Roster' />
+            <DashboardPlayersTable
+              items={activeItems}
+              title='Active Roster'
+              limit={roster.activeRosterLimit}
+            />
           </Grid>
           <Grid item xs={12}>
-            <DashboardPlayersTable items={practiceItems} title='Practice Squad' />
+            <DashboardPlayersTable
+              items={practiceItems}
+              title='Practice Squad'
+              limit={league.ps}
+            />
           </Grid>
           <Grid item xs={12}>
-            <DashboardPlayersTable items={reserveIRItems} title='Reserve/IR' />
+            <DashboardPlayersTable
+              items={reserveIRItems}
+              title='Reserve/IR'
+              limit={league.ir}
+            />
           </Grid>
           <Grid item xs={12}>
-            <DashboardPlayersTable items={reserveCOVItems} title='Reserve/COVID-19' />
+            <DashboardPlayersTable
+              items={reserveCOVItems}
+              title='Reserve/COVID-19'
+            />
           </Grid>
           <Grid item xs={12}>
             <div className='section table__container'>
