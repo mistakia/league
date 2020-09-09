@@ -107,7 +107,7 @@ module.exports = async function ({
       player: drop,
       tid: teamId,
       lid: leagueId,
-      useris: userId
+      userid: userId
     })
     result.push(releaseData)
   }
