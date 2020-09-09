@@ -6,6 +6,28 @@
   + .section
     margin-top 16px
 
+.section__footer
+  color rgba(0, 0, 0, 0.54)
+  text-transform uppercase
+  padding 16px 0 16px
+  font-size 0.675rem
+  text-align left
+  font-family "Roboto", "Helvetica", "Arial", sans-serif
+  font-weight 400
+  line-height 1.43
+  caption-side bottom
+  letter-spacing 0.01071em
+  display flex
+  justify-content flex-end
+
+.section__footer-item
+  flex 0 0 auto
+  + .section__footer-item
+    padding 0 16px
+
 @media (min-width 601px)
   .section
     padding 16px
+
+  .section__footer
+    padding 16px 0 0

@@ -4,7 +4,7 @@ import { createSelector } from 'reselect'
 
 import { getApp } from '@core/app'
 import { getCurrentTeam } from '@core/teams'
-import { getCurrentPlayers } from '@core/rosters'
+import { getCurrentPlayers, getCurrentTeamRoster } from '@core/rosters'
 import { getCurrentLeague } from '@core/leagues'
 import { getWaiverPlayersForCurrentTeam } from '@core/waivers'
 import { getPoachPlayersForCurrentLeague } from '@core/poaches'
@@ -22,13 +22,15 @@ const mapStateToProps = createSelector(
   getCurrentPlayers,
   getCurrentTeam,
   getCurrentLeague,
+  getCurrentTeamRoster,
   getWaiverPlayersForCurrentTeam,
   getPoachPlayersForCurrentLeague,
-  (app, players, team, league, waivers, poaches) => ({
+  (app, players, team, league, roster, waivers, poaches) => ({
     teamId: app.teamId,
     players,
     picks: team.picks,
     league,
+    roster,
     waivers,
     poaches
   })

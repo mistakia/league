@@ -7,7 +7,7 @@ export default class Roster {
     this._league = league
     this._players = new Map()
 
-    this._activeRosterLimit = league.sqb + league.srb + league.swr + league.ste + league.srbwr + league.srbwrte + league.sqbrbwrte + league.swrte + league.sdst + league.sk + league.bench
+    this.activeRosterLimit = league.sqb + league.srb + league.swr + league.ste + league.srbwr + league.srbwrte + league.sqbrbwrte + league.swrte + league.sdst + league.sk + league.bench
 
     for (const { slot, player, pos, value } of roster.players) {
       this._players.set(player, { slot, player, pos, rid: roster.uid, value })
@@ -15,11 +15,11 @@ export default class Roster {
   }
 
   get isFull () {
-    return this.active.length >= this._activeRosterLimit
+    return this.active.length >= this.activeRosterLimit
   }
 
   get availableSpace () {
-    return this._activeRosterLimit - this.active.length
+    return this.activeRosterLimit - this.active.length
   }
 
   get availableCap () {
