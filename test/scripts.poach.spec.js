@@ -297,6 +297,77 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(poaches[0].reason).to.equal(null)
       expect(poaches[0].player).to.equal(player.player)
     })
+
+    it('drop player not on roster - have roster space', async () => {
+      MockDate.set(start.clone().subtract('1', 'month').toDate())
+      const dropPlayer = await selectPlayer({ pos: 'RB' })
+      const player = await selectPlayer({ rookie: true })
+      await addPlayer({
+        leagueId: 1,
+        player,
+        teamId: 1,
+        userId: 1,
+        slot: constants.slots.PS,
+        transaction: constants.transactions.DRAFT,
+        value: 1
+      })
+
+      await knex('waivers').insert({
+        tid: 2,
+        userid: 2,
+        lid: 1,
+        player: player.player,
+        po: 9999,
+        submitted: Math.round(Date.now() / 1000),
+        drop: dropPlayer.player,
+        bid: 0,
+        succ: 1,
+        processed: Math.round(Date.now() / 1000),
+        type: constants.waivers.POACH
+      })
+
+      await knex('poaches').insert({
+        userid: 2,
+        tid: 2,
+        lid: 1,
+        player: player.player,
+        drop: dropPlayer.player,
+        submitted: Math.round(Date.now() / 1000)
+      })
+
+      MockDate.set(start.clone().subtract('1', 'month').add('2', 'day').add('1', 'minute').toDate())
+
+      let error
+      try {
+        await run()
+      } catch (err) {
+        error = err
+      }
+
+      expect(error).to.equal(undefined)
+
+      // check rosters
+      const rosterRow1 = await getRoster({ tid: 1 })
+      const rosterRow2 = await getRoster({ tid: 2 })
+
+      expect(rosterRow1.tid).to.equal(1)
+      expect(rosterRow1.players.length).to.equal(0)
+
+      expect(rosterRow2.tid).to.equal(2)
+      expect(rosterRow2.players.length).to.equal(1)
+      expect(rosterRow2.players[0].player).to.equal(player.player)
+      expect(rosterRow2.players[0].slot).to.equal(constants.slots.BENCH)
+      expect(rosterRow2.players[0].type).to.equal(constants.transactions.POACHED)
+      expect(rosterRow2.players[0].value).to.equal(3)
+
+      // check poaching claim
+      const poaches = await knex('poaches')
+      expect(poaches.length).to.equal(1)
+      expect(poaches[0].succ).to.equal(1)
+      expect(poaches[0].processed).to.equal(Math.round(Date.now() / 1000))
+      expect(poaches[0].reason).to.equal(null)
+      expect(poaches[0].player).to.equal(player.player)
+    })
   })
 
   describe('errors', function () {
@@ -398,75 +469,8 @@ describe('SCRIPTS /waivers - poach', function () {
       // TODO
     })
 
-    it('drop player not on roster', async () => {
-      MockDate.set(start.clone().subtract('1', 'month').toDate())
-      const dropPlayer = await selectPlayer({ pos: 'RB' })
-      const player = await selectPlayer({ rookie: true })
-      await addPlayer({
-        leagueId: 1,
-        player,
-        teamId: 1,
-        userId: 1,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.DRAFT,
-        value: 1
-      })
-
-      await knex('waivers').insert({
-        tid: 2,
-        userid: 2,
-        lid: 1,
-        player: player.player,
-        po: 9999,
-        submitted: Math.round(Date.now() / 1000),
-        drop: dropPlayer.player,
-        bid: 0,
-        succ: 1,
-        processed: Math.round(Date.now() / 1000),
-        type: constants.waivers.POACH
-      })
-
-      await knex('poaches').insert({
-        userid: 2,
-        tid: 2,
-        lid: 1,
-        player: player.player,
-        drop: dropPlayer.player,
-        submitted: Math.round(Date.now() / 1000)
-      })
-
-      MockDate.set(start.clone().subtract('1', 'month').add('2', 'day').add('1', 'minute').toDate())
-
-      let error
-      try {
-        await run()
-      } catch (err) {
-        error = err
-      }
-
-      expect(error).to.equal(undefined)
-
-      // check rosters
-      const rosterRow1 = await getRoster({ tid: 1 })
-      const rosterRow2 = await getRoster({ tid: 2 })
-
-      expect(rosterRow1.tid).to.equal(1)
-      expect(rosterRow1.players.length).to.equal(1)
-      expect(rosterRow1.players[0].player).to.equal(player.player)
-      expect(rosterRow1.players[0].slot).to.equal(constants.slots.PS)
-      expect(rosterRow1.players[0].type).to.equal(constants.transactions.DRAFT)
-      expect(rosterRow1.players[0].value).to.equal(1)
-
-      expect(rosterRow2.tid).to.equal(2)
-      expect(rosterRow2.players.length).to.equal(0)
-
-      // check poaching claim
-      const poaches = await knex('poaches')
-      expect(poaches.length).to.equal(1)
-      expect(poaches[0].succ).to.equal(0)
-      expect(poaches[0].processed).to.equal(Math.round(Date.now() / 1000))
-      expect(poaches[0].reason).to.equal('drop player not on poaching team roster')
-      expect(poaches[0].player).to.equal(player.player)
+    it('drop player not on roster & exceeds roster limits', async () => {
+      // TODO
     })
   })
 })
