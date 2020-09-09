@@ -162,11 +162,12 @@ export default class PlayersPage extends React.Component {
     const headerSeasonSummary = (
       <div className='player__row-group'>
         <div className='player__row-group-body'>
-          <PlayerHeader
-            className='player__row-metric'
-            label='Salary'
-            value={`values.${week}.${vbaseline}`}
-          />
+          {!constants.season.isRegularSeason &&
+            <PlayerHeader
+              className='player__row-metric'
+              label='Salary'
+              value={`values.${week}.${vbaseline}`}
+            />}
           <PlayerHeader
             className='player__row-metric'
             label='Value'
