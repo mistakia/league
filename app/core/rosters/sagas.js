@@ -59,7 +59,8 @@ export function * deactivate ({ payload }) {
 
 export function * setPlayerLineupContribution ({ payload }) {
   const currentRoster = yield select(getCurrentTeamRosterRecord)
-  if (!currentRoster.lineups.get(constants.season.week)) {
+  const week = Math.max(constants.season.week, 1)
+  if (!currentRoster.getIn(['lineups', `${week}`])) {
     yield take(rosterActions.SET_LINEUPS)
   }
   const projectedContribution = {}
