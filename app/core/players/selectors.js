@@ -300,7 +300,8 @@ export function getPlayerStatus (state, { player, playerId }) {
   if (isFreeAgent) {
     if (constants.season.isRegularSeason && constants.season.isWaiverPeriod) {
       status.waiver.active = true
-      status.waiver.practice = true
+      const isPracticeSquadEligible = isPlayerPracticeSquadEligible(state, { player })
+      if (isPracticeSquadEligible) status.waiver.practice = true
     } else {
       const onReleaseWaivers = isPlayerOnReleaseWaivers(state, { player })
       const afterAuction = isAfterAuction(state)

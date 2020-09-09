@@ -107,17 +107,15 @@ export default class WaiverConfirmation extends React.Component {
     const { team, player, status } = this.props
 
     const menuItems = []
-    if (!this._isEligible) {
-      for (const rPlayer of this._drops) {
-        menuItems.push(
-          <MenuItem
-            key={rPlayer.player}
-            value={rPlayer.player}
-          >
-            {rPlayer.name} ({rPlayer.pos1})
-          </MenuItem>
-        )
-      }
+    for (const rPlayer of this._drops) {
+      menuItems.push(
+        <MenuItem
+          key={rPlayer.player}
+          value={rPlayer.player}
+        >
+          {rPlayer.name} ({rPlayer.pos1})
+        </MenuItem>
+      )
     }
 
     const typeItems = []
@@ -176,7 +174,7 @@ export default class WaiverConfirmation extends React.Component {
                 {typeItems}
               </Select>
             </FormControl>
-            {(this.state.type && !this._isEligible) &&
+            {(this.state.type) &&
               <FormControl size='small' variant='outlined'>
                 <InputLabel id='drop-label'>Drop</InputLabel>
                 <Select
