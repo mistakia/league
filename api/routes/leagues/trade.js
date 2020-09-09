@@ -1,7 +1,7 @@
 const API = require('groupme').Stateless
 const express = require('express')
 const router = express.Router({ mergeParams: true })
-const { constants, Roster, toStringArray } = require('../../../common')
+const { constants, Roster, toStringArray, nth } = require('../../../common')
 const { getRoster, sendNotifications, verifyReserveStatus } = require('../../../utils')
 
 const getTrade = async (req, res) => {
@@ -321,9 +321,9 @@ router.post('/accept', async (req, res, next) => {
     const picks = await db('draft').whereIn('uid', pickRows.map(p => p.pickid))
     for (const pick of picks) {
       const pickNum = (pick.pick % league.nteams) || league.nteams
-      const pickStr = pick.year === constants.season.year
+      const pickStr = pick.pick
         ? `${pick.year} ${pick.round}.${('0' + pickNum).slice(-2)}`
-        : `${pick.year} ${pick.round}`
+        : `${pick.year} ${pick.round}${nth(pick.round)}`
 
       // pick.tid is the team the pick belongs to
       const pickTradeInfo = pickRows.find(p => p.pickid === pick.uid)
