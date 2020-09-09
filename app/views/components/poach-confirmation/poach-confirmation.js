@@ -58,17 +58,15 @@ export default class PoachConfirmation extends React.Component {
     const { isPlayerEligible, rosterInfo, status, player } = this.props
 
     const menuItems = []
-    if (!isPlayerEligible) {
-      for (const rPlayer of this._drops) {
-        menuItems.push(
-          <MenuItem
-            key={rPlayer.player}
-            value={rPlayer.player}
-          >
-            {rPlayer.name} ({rPlayer.pos1})
-          </MenuItem>
-        )
-      }
+    for (const rPlayer of this._drops) {
+      menuItems.push(
+        <MenuItem
+          key={rPlayer.player}
+          value={rPlayer.player}
+        >
+          {rPlayer.name} ({rPlayer.pos1})
+        </MenuItem>
+      )
     }
 
     return (
@@ -88,21 +86,20 @@ export default class PoachConfirmation extends React.Component {
           </DialogContentText>
           {!isPlayerEligible &&
             <DialogContentText>
-              There is not enough space on your active roster. Please select a player to drop. They will only be dropped if your claim is successful.
+              There is not enough roster or salary space on your active roster. Please select a player to drop. They will only be dropped if your claim is successful.
             </DialogContentText>}
-          {!isPlayerEligible &&
-            <FormControl size='small' variant='outlined'>
-              <InputLabel id='drop-label'>Drop</InputLabel>
-              <Select
-                labelId='drop-label'
-                value={this.state.drop}
-                error={this.state.error}
-                onChange={this.handleDrop}
-                label='Drop'
-              >
-                {menuItems}
-              </Select>
-            </FormControl>}
+          <FormControl size='small' variant='outlined'>
+            <InputLabel id='drop-label'>Drop</InputLabel>
+            <Select
+              labelId='drop-label'
+              value={this.state.drop}
+              error={this.state.error}
+              onChange={this.handleDrop}
+              label='Drop'
+            >
+              {menuItems}
+            </Select>
+          </FormControl>
         </DialogContent>
         <DialogActions>
           <Button onClick={this.props.onClose} text>
