@@ -51,7 +51,7 @@ describe('COMMON Season', function () {
     expect(constants.season.isWaiverPeriod).to.equal(true)
 
     // wednesday of week 1 - 3pm
-    MockDate.set(start.clone().add('7', 'day').day(3).hour(14).toDate())
+    MockDate.set(start.clone().add('7', 'day').day(3).hour(15).toDate())
     expect(constants.season.isWaiverPeriod).to.equal(false)
 
     // tuesday of week 2
@@ -63,7 +63,7 @@ describe('COMMON Season', function () {
     expect(constants.season.isWaiverPeriod).to.equal(true)
 
     // wednesday of week 16 - 3pm
-    MockDate.set(start.clone().add('112', 'day').day(3).hour(14).toDate())
+    MockDate.set(start.clone().add('112', 'day').day(3).hour(15).toDate())
     expect(constants.season.isWaiverPeriod).to.equal(false)
 
     // tuesday of week 16
@@ -75,7 +75,7 @@ describe('COMMON Season', function () {
     expect(constants.season.isWaiverPeriod).to.equal(true)
 
     // wednesday of week 16 - 3pm
-    MockDate.set(start.clone().add('112', 'day').day(3).hour(14).toDate())
+    MockDate.set(start.clone().add('112', 'day').day(3).hour(15).toDate())
     expect(constants.season.isWaiverPeriod).to.equal(false)
 
     // tuesday of week 17
