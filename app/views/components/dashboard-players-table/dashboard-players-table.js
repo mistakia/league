@@ -50,7 +50,7 @@ export default class DashboardPlayersTable extends React.Component {
   }
 
   render = () => {
-    const { items = [], title, poaches, claims, waiverType, reorderWaivers, leadColumn = '' } = this.props
+    const { items = [], title, poaches, claims, waiverType, reorderWaivers, leadColumn = '', limit } = this.props
 
     const isWaiver = !!waiverType
     const isPoach = !!poaches
@@ -113,10 +113,21 @@ export default class DashboardPlayersTable extends React.Component {
       )
     }
 
-    const classNames = ['section']
+    const classNames = ['section', 'dashboard__players-table']
     if (isClaim) classNames.push('waiver')
 
     const week = Math.max(constants.season.week, 1)
+
+    let caption
+    if (limit) {
+      const space = limit - items.length
+      caption = (
+        <div className='section__footer'>
+          <div className='section__footer-item'>Rostered: {items.length}</div>
+          <div className='section__footer-item'>Space: {space}</div>
+        </div>
+      )
+    }
 
     return (
       <div className={classNames.join(' ')}>
@@ -144,6 +155,7 @@ export default class DashboardPlayersTable extends React.Component {
           </div>
           {body}
         </div>
+        {!!caption && caption}
       </div>
     )
   }
