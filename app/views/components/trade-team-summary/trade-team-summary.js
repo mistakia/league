@@ -44,7 +44,7 @@ export default class TradeTeamSummary extends React.Component {
                 Value
               </TableCell>
               <TableCell align='right'>
-                {analysis.after.value} ({pctValue}%)
+                {(analysis.after.value || 0).toFixed(1)} ({pctValue}%)
               </TableCell>
             </TableRow>
             <TableRow>
@@ -70,7 +70,7 @@ export default class TradeTeamSummary extends React.Component {
                 Team Salary
               </TableCell>
               <TableCell align='right'>
-                {analysis.after.salary} ({pctSalary}%)
+                {(analysis.after.salary || 0)} ({pctSalary}%)
               </TableCell>
             </TableRow>
             <TableRow>
