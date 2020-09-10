@@ -16,7 +16,7 @@ class PlayerNameExpanded extends Player {
     const hasGame = !!game
 
     const gameTime = hasGame
-      ? moment(game.date, 'M/D/YYYY H:m', 'America/New_York').local().format('ddd, h:mmA')
+      ? moment.tz(game.date, 'M/D/YYYY H:m', 'America/New_York').local().format('ddd, h:mmA')
       : null
 
     const opponent = hasGame
