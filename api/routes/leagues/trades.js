@@ -19,7 +19,7 @@ router.get('/?', async (req, res) => {
     const drops = await db('trades_drops').whereIn('tradeid', tradeids)
     const players = await db('trades_players').whereIn('tradeid', tradeids)
     const picks = await db('trades_picks')
-      .select('trades_picks.*', 'draft.uid', 'draft.pick', 'draft.round', 'draft.year', 'draft.lid')
+      .select('trades_picks.*', 'draft.uid', 'draft.pick', 'draft.round', 'draft.year', 'draft.lid', 'draft.otid')
       .whereIn('tradeid', tradeids)
       .join('draft', 'trades_picks.pickid', 'draft.uid')
 
