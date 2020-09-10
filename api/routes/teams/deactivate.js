@@ -80,8 +80,9 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'player has exceeded 48 hours on active roster' })
     }
 
-    // make sure player he has not been previously deactivated
-    if (transactions.find(t => t.type === constants.transactions.ROSTER_DEACTIVATE || t.type === constants.transactions.PRACTICE_ADD)) {
+    // if on active roster, make sure player he has not been previously deactivated
+    const isActive = !!roster.active.find(p => p.player === player)
+    if (isActive && transactions.find(t => t.type === constants.transactions.ROSTER_DEACTIVATE || t.type === constants.transactions.PRACTICE_ADD)) {
       return res.status(400).send({ error: 'player can not be deactivated once activated' })
     }
 
