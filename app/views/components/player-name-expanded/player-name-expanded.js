@@ -1,4 +1,5 @@
 import React from 'react'
+import moment from 'moment-timezone'
 
 import { Player, connect } from '@components/player'
 import Position from '@components/position'
@@ -11,7 +12,17 @@ import './player-name-expanded.styl'
 
 class PlayerNameExpanded extends Player {
   render = () => {
-    const { player, isHosted, hideActions } = this.props
+    const { player, isHosted, hideActions, game } = this.props
+    const hasGame = !!game
+
+    const gameTime = hasGame
+      ? moment(game.date, 'M/D/YYYY H:m', 'America/New_York').local().format('ddd, h:mmA')
+      : null
+
+    const opponent = hasGame
+      ? (player.team === game.h ? `v${game.v}` : `@${game.h}`)
+      : null
+
     return (
       <div className='player__name-expanded'>
         {!!(isHosted && player.player && !hideActions) &&
@@ -32,6 +43,10 @@ class PlayerNameExpanded extends Player {
           <div className='player__name-expanded-row'>
             <Position pos={player.pos1} />
             <Team team={player.team} />
+            {hasGame &&
+              <div className='player__name-expanded-game'>
+                {gameTime} {opponent}
+              </div>}
             {!!player.status &&
               <Tooltip title={player.status} placement='bottom'>
                 <span className='player__label-status'>
