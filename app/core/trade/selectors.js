@@ -8,7 +8,7 @@ import {
   getActivePlayersByTeamId
 } from '@core/rosters'
 import { getCurrentLeague, getCurrentLeagueTeamIds } from '@core/leagues'
-import { getTeamById } from '@core/teams'
+import { getTeamById, getDraftPickById } from '@core/teams'
 import { createTrade } from './trade'
 import { Roster, constants } from '@common'
 import { getAllPlayers, getPlayerById } from '@core/players'
@@ -101,8 +101,8 @@ export function getCurrentTrade (state) {
       proposingTeamDropPlayers: dropPlayers,
       acceptingTeamPlayers,
       proposingTeamPlayers,
-      acceptingTeamPicks,
-      proposingTeamPicks
+      acceptingTeamPicks: acceptingTeamPicks.map(pickId => getDraftPickById(state, { pickId })),
+      proposingTeamPicks: proposingTeamPicks.map(pickId => getDraftPickById(state, { pickId }))
     })
   }
 }
