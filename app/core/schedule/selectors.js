@@ -1,7 +1,13 @@
 import { constants } from '@common'
+import { getPlayerById } from '@core/players'
 
 export function getSchedule (state) {
   return state.get('schedule')
+}
+
+export function getGameForWeekByPlayerId (state, { playerId }) {
+  const player = getPlayerById(state, { playerId })
+  return getGameForWeekByTeam(state, { team: player.team })
 }
 
 export function getByeByTeam (state, { team }) {
