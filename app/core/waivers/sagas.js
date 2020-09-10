@@ -2,8 +2,14 @@ import { call, takeLatest, fork, select, put } from 'redux-saga/effects'
 
 import { getApp } from '@core/app'
 import { waiverActions } from './actions'
-import { postWaiver, postCancelWaiver, postWaiverOrder } from '@core/api'
-import { getWaiverPlayersForCurrentTeam } from './selectors'
+import {
+  postWaiver,
+  postCancelWaiver,
+  postWaiverOrder,
+  fetchWaivers,
+  getWaiverReport
+} from '@core/api'
+import { getWaivers, getWaiverPlayersForCurrentTeam } from './selectors'
 import { notificationActions } from '@core/notifications'
 
 export function * claim ({ payload }) {
@@ -53,6 +59,30 @@ export function * cancelWaiverNotification () {
   }))
 }
 
+export function * loadWaivers () {
+  const { leagueId, teamId } = yield select(getApp)
+  const state = yield select(getWaivers)
+  const type = state.get('type').get(0)
+  yield call(fetchWaivers, { leagueId, teamId, type })
+}
+
+export function * loadWaiverReport () {
+  const { leagueId, teamId } = yield select(getApp)
+  const state = yield select(getWaivers)
+  const type = state.get('type').get(0)
+  const processed = state.get('processed').get(0)
+  if (!processed) return
+  yield call(getWaiverReport, { leagueId, teamId, type, processed })
+}
+
+export function * filterWaivers ({ payload }) {
+  if (payload.type === 'processed') {
+    yield call(loadWaiverReport)
+  } else {
+    yield call(loadWaivers)
+  }
+}
+
 //= ====================================
 //  WATCHERS
 // -------------------------------------
@@ -81,6 +111,18 @@ export function * watchPostCancelWaiverFulfilled () {
   yield takeLatest(waiverActions.POST_CANCEL_WAIVER_FULFILLED, cancelWaiverNotification)
 }
 
+export function * watchGetWaiversFulfilled () {
+  yield takeLatest(waiverActions.GET_WAIVERS_FULFILLED, loadWaiverReport)
+}
+
+export function * watchLoadWaivers () {
+  yield takeLatest(waiverActions.LOAD_WAIVERS, loadWaivers)
+}
+
+export function * watchFilterWaivers () {
+  yield takeLatest(waiverActions.FILTER_WAIVERS, filterWaivers)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -91,5 +133,10 @@ export const waiverSagas = [
   fork(watchReorderWaivers),
   fork(watchPostWaiverOrderFulfilled),
   fork(watchPostWaiverFulfilled),
-  fork(watchPostCancelWaiverFulfilled)
+  fork(watchPostCancelWaiverFulfilled),
+
+  fork(watchGetWaiversFulfilled),
+  fork(watchFilterWaivers),
+
+  fork(watchLoadWaivers)
 ]

@@ -7,11 +7,13 @@ import StatsPage from '@pages/stats'
 import SchedulePage from '@pages/schedule'
 import RostersPage from '@pages/rosters'
 import PageLayout from '@layouts/page'
+import WaiversPage from '@pages/waivers'
 
 export default function () {
   const menu = (
     <div className='menu'>
       <NavLink to='/league/transactions'>Transactions</NavLink>
+      <NavLink to='/league/waivers'>Waivers</NavLink>
       <NavLink to='/league/rosters'>Rosters</NavLink>
       <NavLink to='/league/standings'>Standings</NavLink>
       <NavLink to='/league/stats'>Stats</NavLink>
@@ -26,6 +28,7 @@ export default function () {
       <Route exact path='/league/stats' component={StatsPage} />
       <Route exact path='/league/schedule' component={SchedulePage} />
       <Route exact path='/league/rosters' component={RostersPage} />
+      <Route exact path='/league/waivers' component={WaiversPage} />
       <Route exact path='/league' component={() => <Redirect to='/league/transactions' />} />
     </Switch>
   )
