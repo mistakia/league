@@ -137,6 +137,9 @@ export default class Menu extends React.Component {
               <ListItem button onClick={this.handleClick('/league/transactions')}>
                 <ListItemText primary='Transactions' />
               </ListItem>
+              <ListItem button onClick={this.handleClick('/league/waivers')}>
+                <ListItemText primary='Waivers' />
+              </ListItem>
               <ListItem button onClick={this.handleClick('/league/rosters')}>
                 <ListItemText primary='Rosters' />
               </ListItem>

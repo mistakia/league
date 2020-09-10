@@ -373,6 +373,12 @@ export const waivers = {
   FREE_AGENCY_PRACTICE: 3
 }
 
+export const waiversDetail = {
+  1: 'Active Roster',
+  2: 'Poach',
+  3: 'Practice Squad'
+}
+
 export const transactions = {
   ROSTER_ADD: 14,
   ROSTER_RELEASE: 1,
