@@ -19,7 +19,7 @@ const getTrade = async (req, res) => {
     const drops = await db('trades_drops').where({ tradeid: tradeId })
     const players = await db('trades_players').where({ tradeid: tradeId })
     const picks = await db('trades_picks')
-      .select('trades_picks.*', 'draft.uid', 'draft.pick', 'draft.round', 'draft.year', 'draft.lid')
+      .select('trades_picks.*', 'draft.uid', 'draft.pick', 'draft.round', 'draft.year', 'draft.lid', 'draft.otid')
       .where({ tradeid: tradeId })
       .join('draft', 'trades_picks.pickid', 'draft.uid')
 
