@@ -301,6 +301,10 @@ describe('API /trades', function () {
   // cancel trade
   // reject trade
 
+  // cancel trades with involved players when trade accepted
+
+  // cancel trades with involved picks when trade accepted
+
   describe('errors', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
