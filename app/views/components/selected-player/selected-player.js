@@ -121,11 +121,11 @@ export default class SelectedPlayer extends React.Component {
             </div>
             <div className='selected__player-header-item'>
               <label>VOBA</label>
-              {player.getIn(['values', 'ros', 'available'])}
+              {player.getIn(['vorp', 'ros', 'available'])}
             </div>
             <div className='selected__player-header-item'>
               <label>VOWS</label>
-              {player.getIn(['values', 'ros', 'starter'])}
+              {player.getIn(['vorp', 'ros', 'starter'])}
             </div>
           </div>
           <div className='selected__player-header-section'>
