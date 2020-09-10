@@ -8,17 +8,22 @@ import TradeSelectPick from '@components/trade-select-pick'
 
 import './trade-select-items.styl'
 
-const getPickLabel = (pick) => {
+const getPickLabel = (pick, teams) => {
   let str = `${pick.year} Draft Pick ${pick.round}`
   if (pick.pick) {
     str += ` #${pick.pick}`
   }
+
+  const team = teams.get(pick.otid)
+  str += ` (${team.abbrv})`
+
   return str
 }
 
 export default class TradeSelectItems extends React.Component {
   render = () => {
     const {
+      teams,
       onChange,
       disabled,
       selectedPlayers = [],
@@ -33,16 +38,15 @@ export default class TradeSelectItems extends React.Component {
       options.push({ id: player.player, label: player.name, type: 'player' })
     })
     picks.forEach(pick => {
-      options.push({ id: pick.uid, label: getPickLabel(pick), type: 'pick' })
+      options.push({ id: pick.uid, label: getPickLabel(pick, teams), type: 'pick' })
     })
 
     const value = []
     selectedPlayers.forEach(player => {
       value.push({ id: player.player, label: player.name, type: 'player' })
     })
-    selectedPicks.forEach(pickId => {
-      const pick = picks.find(p => p.uid === pickId)
-      value.push({ id: pickId, label: getPickLabel(pick), type: 'pick' })
+    selectedPicks.forEach(pick => {
+      value.push({ id: pick.uid, label: getPickLabel(pick, teams), type: 'pick' })
     })
 
     const renderOption = (option, state) => {
