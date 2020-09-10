@@ -11,6 +11,7 @@
 | [Fantasy Sharks](https://www.fantasysharks.com/) | |
 | [The Fantasy Footballers](https://www.thefantasyfootballers.com/) | |
 | [Fantasypoints.com](https://www.fantasypoints.com/) | |
+| [KeepTradeCut](https://keeptradecut.com/) | Up-to-date crowdsourced dynasty rankings |
 
 ## Stats
 | Name | Description |
@@ -62,6 +63,7 @@
 | [FantasyCalc Trade Database](https://www.fantasycalc.com/#/tradedatabase) | |
 | [DynastyProcess.com Trade Calculator](https://apps.dynastyprocess.com/calculator/) | |
 | [Dynasty Trade Calculator](https://dynastytradecalculator.com/) | |
+| [KeepTradeCut Trade Calculator](https://keeptradecut.com/trade-calculator) | |
 
 ## Misc Tools
 | Name | Description |
