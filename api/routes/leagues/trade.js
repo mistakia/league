@@ -266,6 +266,37 @@ router.post('/accept', async (req, res, next) => {
         .insert(tranIds.map(t => ({ transactionid: t, tradeid: trade.uid })))
     }
 
+    if (dropPlayers.length) {
+      const dropTransactions = []
+      for (const player of proposingTeamDropPlayerIds) {
+        dropTransactions.push({
+          userid: trade.userid,
+          tid: trade.pid,
+          lid: leagueId,
+          player,
+          type: constants.transactions.ROSTER_RELEASE,
+          value: 0,
+          year: constants.season.year,
+          timestamp: Math.round(Date.now() / 1000)
+        })
+      }
+
+      for (const player of acceptingTeamDropPlayers) {
+        dropTransactions.push({
+          userid: req.user.userId,
+          tid: trade.tid,
+          lid: leagueId,
+          player,
+          type: constants.transactions.ROSTER_RELEASE,
+          value: 0,
+          year: constants.season.year,
+          timestamp: Math.round(Date.now() / 1000)
+        })
+      }
+
+      await db('transactions').insert(dropTransactions)
+    }
+
     // update receiving roster
     if (acceptingTeamPlayers.length || proposingTeamPlayers.length) {
       await db('rosters_players').del().where({ rid: acceptingTeamRoster.uid })

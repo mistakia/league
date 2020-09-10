@@ -284,6 +284,9 @@ describe('API /trades', function () {
       })
     })
   })
+
+  // trade with drop players, make sure transactions are created
+
   // one for one trade
 
   // two for one trade with drop
