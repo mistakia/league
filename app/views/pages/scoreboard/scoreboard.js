@@ -12,10 +12,6 @@ import ScoreboardSlots from '@components/scoreboard-slots'
 import './scoreboard.styl'
 
 export default class ScoreboardPage extends React.Component {
-  componentDidMount = () => {
-
-  }
-
   render = () => {
     const { matchup } = this.props
 

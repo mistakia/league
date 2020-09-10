@@ -202,6 +202,14 @@ export const api = {
     const url = `${BASE_URL}/leagues/${data.leagueId}/waivers/${data.waiverId}/cancel`
     return { url, ...POST(data) }
   },
+  getWaivers (params) {
+    const url = `${BASE_URL}/leagues/${params.leagueId}/waivers?${queryString.stringify(params)}`
+    return { url }
+  },
+  getWaiverReport (params) {
+    const url = `${BASE_URL}/leagues/${params.leagueId}/waivers/report?${queryString.stringify(params)}`
+    return { url }
+  },
   postPoach (data) {
     const url = `${BASE_URL}/leagues/${data.leagueId}/poaches`
     return { url, ...POST(data) }

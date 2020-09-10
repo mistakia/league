@@ -1,5 +1,7 @@
 export const waiverActions = {
+  LOAD_WAIVERS: 'LOAD_WAIVERS',
   WAIVER_CLAIM: 'WAIVER_CLAIM',
+  FILTER_WAIVERS: 'FILTER_WAIVERS',
 
   CANCEL_CLAIM: 'CANCEL_CLAIM',
 
@@ -16,6 +18,26 @@ export const waiverActions = {
   POST_WAIVER_ORDER_FAILED: 'POST_WAIVER_ORDER_FAILED',
   POST_WAIVER_ORDER_PENDING: 'POST_WAIVER_ORDER_PENDING',
   POST_WAIVER_ORDER_FULFILLED: 'POST_WAIVER_ORDER_FULFILLED',
+
+  GET_WAIVERS_PENDING: 'GET_WAIVERS_PENDING',
+  GET_WAIVERS_FAILED: 'GET_WAIVERS_FAILED',
+  GET_WAIVERS_FULFILLED: 'GET_WAIVERS_FULFILLED',
+
+  GET_WAIVER_REPORT_PENDING: 'GET_WAIVER_REPORT_PENDING',
+  GET_WAIVER_REPORT_FAILED: 'GET_WAIVER_REPORT_FAILED',
+  GET_WAIVER_REPORT_FULFILLED: 'GET_WAIVER_REPORT_FULFILLED',
+
+  filter: (type, values) => ({
+    type: waiverActions.FILTER_WAIVERS,
+    payload: {
+      type,
+      values
+    }
+  }),
+
+  loadWaivers: () => ({
+    type: waiverActions.LOAD_WAIVERS
+  }),
 
   reorderWaivers: ({ oldIndex, newIndex, type }) => ({
     type: waiverActions.REORDER_WAIVERS,
@@ -110,6 +132,52 @@ export const waiverActions = {
       opts,
       data
     }
+  }),
+
+  getWaiversPending: (opts) => ({
+    type: waiverActions.GET_WAIVERS_PENDING,
+    payload: {
+      opts
+    }
+  }),
+
+  getWaiversFailed: (opts, error) => ({
+    type: waiverActions.GET_WAIVERS_FAILED,
+    payload: {
+      opts,
+      error
+    }
+  }),
+
+  getWaiversFulfilled: (opts, data) => ({
+    type: waiverActions.GET_WAIVERS_FULFILLED,
+    payload: {
+      opts,
+      data
+    }
+  }),
+
+  getWaiverReportPending: (opts) => ({
+    type: waiverActions.GET_WAIVER_REPORT_PENDING,
+    payload: {
+      opts
+    }
+  }),
+
+  getWaiverReportFailed: (opts, error) => ({
+    type: waiverActions.GET_WAIVER_REPORT_FAILED,
+    payload: {
+      opts,
+      error
+    }
+  }),
+
+  getWaiverReportFulfilled: (opts, data) => ({
+    type: waiverActions.GET_WAIVER_REPORT_FULFILLED,
+    payload: {
+      opts,
+      data
+    }
   })
 }
 
@@ -129,4 +197,16 @@ export const postWaiverOrderActions = {
   failed: waiverActions.postWaiverOrderFailed,
   pending: waiverActions.postWaiverOrderPending,
   fulfilled: waiverActions.postWaiverOrderFulfilled
+}
+
+export const getWaiversActions = {
+  pending: waiverActions.getWaiversPending,
+  failed: waiverActions.getWaiversFailed,
+  fulfilled: waiverActions.getWaiversFulfilled
+}
+
+export const getWaiverReportActions = {
+  pending: waiverActions.getWaiverReportPending,
+  failed: waiverActions.getWaiverReportFailed,
+  fulfilled: waiverActions.getWaiverReportFulfilled
 }

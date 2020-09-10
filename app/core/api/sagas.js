@@ -55,7 +55,9 @@ import { postPoachActions } from '@core/poaches'
 import {
   postWaiverActions,
   postCancelWaiverActions,
-  postWaiverOrderActions
+  postWaiverOrderActions,
+  getWaiversActions,
+  getWaiverReportActions
 } from '@core/waivers'
 import { notificationActions } from '@core/notifications'
 import { postErrorActions } from '@core/errors'
@@ -150,6 +152,8 @@ export const postWaiver = fetch.bind(null, api.postWaiver, postWaiverActions)
 export const postWaiverOrder = fetch.bind(null, api.postWaiverOrder, postWaiverOrderActions)
 export const postCancelWaiver = fetch.bind(null, api.postCancelWaiver, postCancelWaiverActions)
 export const postPoach = fetch.bind(null, api.postPoach, postPoachActions)
+export const fetchWaivers = fetch.bind(null, api.getWaivers, getWaiversActions)
+export const getWaiverReport = fetch.bind(null, api.getWaiverReport, getWaiverReportActions)
 
 export const getSchedule = fetch.bind(null, api.getSchedule, getScheduleActions)
 
