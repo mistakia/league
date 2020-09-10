@@ -59,7 +59,7 @@ class PlayerRoster extends Player {
           {player.getIn(['lineups', 'sp'], 0).toFixed(1) || '--'}
         </div>
         <div className='metric table__cell'>
-          {player.get(['lineups', 'bp'], 0).toFixed(1) || '--'}
+          {player.getIn(['lineups', 'bp'], 0).toFixed(1) || '--'}
         </div>
       </div>
     )
