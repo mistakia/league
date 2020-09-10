@@ -287,7 +287,7 @@ router.post('/accept', async (req, res, next) => {
     }
 
     // cancel other trades that include any picks in this trade
-    const tradeRows = await db('trades')
+    const pickTradeRows = await db('trades')
       .innerJoin('trades_picks', 'trades.uid', 'trades_picks.tradeid')
       .whereIn('trades_picks.pickid', pickRows.map(p => p.pickid))
       .whereNull('trades.accepted')
@@ -295,10 +295,29 @@ router.post('/accept', async (req, res, next) => {
       .whereNull('trades.rejected')
       .whereNull('trades.vetoed')
 
-    if (tradeRows.length) {
+    if (pickTradeRows.length) {
       // TODO - broadcast on WS
       // TODO - broadcast notifications
-      const tradeids = tradeRows.map(t => t.uid)
+      const tradeids = pickTradeRows.map(t => t.uid)
+      await db('trades')
+        .whereIn('uid', tradeids)
+        .update({ cancelled: Math.round(Date.now() / 1000) })
+    }
+
+    // cancel other trades that include any players in this trade
+    const playerTradeRows = await db('trades')
+      .innerJoin('trades_players', 'trades.uid', 'trades_players.tradeid')
+      .whereIn('trades_players.player', allPlayers)
+      .where('trades.lid', leagueId)
+      .whereNull('trades.accepted')
+      .whereNull('trades.cancelled')
+      .whereNull('trades.rejected')
+      .whereNull('trades.vetoed')
+
+    if (playerTradeRows.length) {
+      // TODO - broadcast on WS
+      // TODO - broadcast notifications
+      const tradeids = playerTradeRows.map(t => t.uid)
       await db('trades')
         .whereIn('uid', tradeids)
         .update({ cancelled: Math.round(Date.now() / 1000) })
