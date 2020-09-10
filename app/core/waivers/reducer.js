@@ -32,7 +32,7 @@ export function waiversReducer (state = initialState, { payload, type }) {
         const teams = state.get('teams')
         let team = teams.get(payload.data.tid) || new Map()
         team = team.set(payload.data.uid, new Waiver(payload.data))
-        state.set(payload.data.tid, team)
+        state.setIn(['teams', payload.data.tid], team)
       })
 
     case appActions.AUTH_FULFILLED:
@@ -41,7 +41,7 @@ export function waiversReducer (state = initialState, { payload, type }) {
         payload.data.waivers.forEach(waiver => {
           let team = teams.get(waiver.tid) || new Map()
           team = team.set(waiver.uid, new Waiver(waiver))
-          state.set(waiver.tid, team)
+          state.setIn(['teams', waiver.tid], team)
         })
       })
 
