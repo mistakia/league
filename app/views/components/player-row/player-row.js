@@ -302,7 +302,7 @@ class PlayerRow extends Player {
               <div className='player__row-availability'>
                 {player.tid
                   ? <TeamName abbrv tid={player.tid} />
-                  : ((status.waiver.active || status.waiver.poach || status.waiver.practice)
+                  : ((status.waiver.active || status.waiver.poach || status.waiver.practice || status.locked)
                     ? 'W' : 'FA')}
               </div>}
             <Hidden xsDown>
