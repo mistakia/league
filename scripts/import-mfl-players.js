@@ -9,11 +9,11 @@ const argv = require('yargs').argv
 const log = debug('import:players:mfl')
 debug.enable('league:player:get,import:players:mfl')
 
-const { getPlayerId, fixTeam } = require('../utils')
+const { getPlayerId } = require('../utils')
 const db = require('../db')
 const config = require('../config')
 
-const { constants } = require('../common')
+const { constants, fixTeam } = require('../common')
 
 const run = async () => {
   const missing = []

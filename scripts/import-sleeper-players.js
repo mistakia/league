@@ -9,8 +9,8 @@ const argv = require('yargs').argv
 const log = debug('import:players:sleeper')
 debug.enable('league:player:get,import:players:sleeper')
 
-const { getPlayerId, fixTeam } = require('../utils')
-const { constants } = require('../common')
+const { getPlayerId } = require('../utils')
+const { constants, fixTeam } = require('../common')
 const db = require('../db')
 const timestamp = Math.round(Date.now() / 1000)
 
