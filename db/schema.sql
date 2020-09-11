@@ -1782,6 +1782,38 @@ CREATE TABLE `changelog` (
   PRIMARY KEY (`uid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `changelog`
+--
+
+DROP TABLE IF EXISTS `nflSchedule`;
+
+CREATE TABLE `nflSchedule` (
+  `gid` int(5) NOT NULL,
+  `gameId` int(10) NOT NULL,
+  `gameKey` int(5) NOT NULL,
+  `season` int(4) NOT NULL,
+  `seasonType` varchar(10) NOT NULL,
+  `week` int(2) NOT NULL,
+  `gameSmartId` varchar(36) NOT NULL,
+  `homeTeamId` varchar(36) NOT NULL,
+  `homeTeamAbbr` varchar(36) NOT NULL,
+  `homeScore` int(5) DEFAULT 0,
+  `awayTeamId` varchar(36) NOT NULL,
+  `awayTeamAbbr` varchar(36) NOT NULL,
+  `awayScore` int(5) DEFAULT 0,
+  `gameClock` varchar(10) DEFAULT NULL,
+  `gameStatus` varchar(10) DEFAULT NULL,
+  `possessionTeamId` varchar(36) DEFAULT NULL,
+  `possessionTeamAbbr` varchar(36) DEFAULT NULL,
+  `gameDate` varchar(10) NOT NULL,
+  `gameTimeEastern` varchar(8) NOT NULL,
+  UNIQUE KEY `gid` (`gid`),
+  UNIQUE KEY `gameId` (`gameId`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

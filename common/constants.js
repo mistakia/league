@@ -851,7 +851,9 @@ export const jobs = {
   GENERATE_ROSTERS: 17,
   GENERATE_DRAFT_PICKS: 18,
 
-  PLAYERS_ARMCHAIR: 19
+  PLAYERS_ARMCHAIR: 19,
+
+  NFL_GAMES: 20
 }
 
 export const jobDetails = {
@@ -873,7 +875,8 @@ export const jobDetails = {
   16: 'Notifications (Poach) 1HR',
   17: 'Generate Rosters',
   18: 'Generate Draft Picks',
-  19: 'Players (Armchair)'
+  19: 'Players (Armchair)',
+  20: 'NFL Games (NFL)'
 }
 
 export const changes = {
