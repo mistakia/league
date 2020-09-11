@@ -1,7 +1,7 @@
 const db = require('../db')
 const debug = require('debug')
 const log = debug('league:player:get')
-const fixTeam = require('./fix-team')
+const { fixTeam } = require('../common')
 
 const aliases = {
   'AJ Dillon': 'AD-1184',

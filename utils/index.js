@@ -21,7 +21,6 @@ module.exports = {
   sendEmail: require('./send-email'),
   getPlayerId: require('./get-player-id'),
   getSchedule: require('./get-schedule'),
-  fixTeam: require('./fix-team'),
   isPlayerOnWaivers: require('./is-player-on-waivers'),
   isPlayerRostered: require('./is-player-rostered'),
   isPlayerLocked: require('./is-player-locked'),
