@@ -1,10 +1,8 @@
-const fs = require('fs')
 const argv = require('yargs').argv
 const debug = require('debug')
-const csv = require('csv-parser')
 
 const db = require('../db')
-const { getPlayerId } = require('../utils')
+const { getPlayerId, readCSV } = require('../utils')
 
 const log = debug('script:import-draft-rankings')
 
@@ -25,15 +23,6 @@ const getPositionRank = (string) => {
     rank
   }
 }
-
-const readCSV = (filepath) => new Promise((resolve, reject) => {
-  const results = []
-  fs.createReadStream(filepath)
-    .pipe(csv())
-    .on('data', (data) => results.push(data))
-    .on('error', error => resolve(error))
-    .on('end', () => resolve(results))
-})
 
 const run = async () => {
   debug.enable('script:import-draft-rankings')
