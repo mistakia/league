@@ -311,12 +311,12 @@ export function getPlayerStatus (state, { player, playerId }) {
         if (afterAuction) status.waiver.active = true
         if (draft.afterDraft && isPracticeSquadEligible) status.waiver.practice = true
       } else {
-        if (afterAuction) {
-          if (constants.season.isRegularSeason && !status.locked) status.sign.active = true
+        if (afterAuction && !status.locked) {
+          if (constants.season.isRegularSeason) status.sign.active = true
           else status.waiver.active = true
         }
-        if (isPracticeSquadEligible) {
-          if (draft.afterWaivers && !status.locked) status.sign.practice = true
+        if (isPracticeSquadEligible && !status.locked) {
+          if (draft.afterWaivers) status.sign.practice = true
           else if (draft.afterDraft) status.waiver.practice = true
         }
       }
