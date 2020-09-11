@@ -16,6 +16,7 @@ const getPlayByPlayQuery = (db) => db('pbp')
   })
 
 module.exports = {
+  readCSV: require('./read-csv'),
   sendNotifications: require('./send-notifications'),
   sendEmail: require('./send-email'),
   getPlayerId: require('./get-player-id'),
