@@ -16,6 +16,25 @@ router.get('/?', async (req, res) => {
       return res.status(400).send({ error: 'params active & inactive can not both be false' })
     }
 
+    let includePlayerIds = []
+    if (req.user) {
+      const leagues = await db('leagues')
+        .select('leagues.uid')
+        .join('teams', 'leagues.uid', 'teams.lid')
+        .join('users_teams', 'teams.uid', 'users_teams.tid')
+        .where('users_teams.userid', req.user.userId)
+
+      const leagueIds = leagues.map(l => l.uid)
+
+      const playerSlots = await db('rosters_players')
+        .join('rosters', 'rosters_players.rid', 'rosters.uid')
+        .whereIn('rosters.lid', leagueIds)
+        .where('rosters.week', constants.season.week)
+        .where('rosters.year', constants.season.year)
+
+      includePlayerIds = playerSlots.map(s => s.player)
+    }
+
     const query = db('player')
       .select(db.raw('player.*, min(players.status) as status, min(players.injury_status) as injuryStatus, min(players.injury_body_part) as injuryBodyPart'))
       .leftJoin('players', 'player.player', 'players.player')
@@ -25,6 +44,10 @@ router.get('/?', async (req, res) => {
       query.whereNot({ cteam: 'INA' })
     } else if (options.inactive) {
       query.where({ cteam: 'INA' })
+    }
+
+    if (includePlayerIds.length) {
+      query.orWhereIn('player.player', includePlayerIds)
     }
 
     const players = await query

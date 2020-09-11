@@ -1763,6 +1763,25 @@ CREATE TABLE `jobs` (
   PRIMARY KEY (`uid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `changelog`
+--
+
+DROP TABLE IF EXISTS `changelog`;
+
+CREATE TABLE `changelog` (
+  `uid` int(11) NOT NULL AUTO_INCREMENT,
+  `id` text NOT NULL,
+  `type` tinyint(2) NOT NULL,
+  `prop` text DEFAULT NULL,
+  `prev` text DEFAULT NULL,
+  `new` text DEFAULT NULL,
+  `timestamp` int(11) NOT NULL,
+  PRIMARY KEY (`uid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

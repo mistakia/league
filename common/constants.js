@@ -872,3 +872,8 @@ export const jobDetails = {
   17: 'Generate Rosters',
   18: 'Generate Draft Picks'
 }
+
+export const changes = {
+  PLAYER_EDIT: 1,
+  PLAYER_NEW: 2
+}
