@@ -8,6 +8,7 @@ const sendNotifications = require('./send-notifications')
 const getRoster = require('./get-roster')
 const isPlayerOnWaivers = require('./is-player-on-waivers')
 const processRelease = require('./process-release')
+const isPlayerLocked = require('./is-player-locked')
 
 module.exports = async function ({
   leagueId,
@@ -62,6 +63,12 @@ module.exports = async function ({
     }).limit(1)
   if (rosters.length) {
     throw new Error('player is not a free agent')
+  }
+
+  // verify player is not locked
+  const isLocked = await isPlayerLocked(player)
+  if (isLocked) {
+    throw new Error('player is locked, game has started')
   }
 
   // verify no veterans are signed in the offseason & the rookie draft is complete
