@@ -490,7 +490,9 @@ CREATE TABLE `player` (
   `posd` varchar(8) NOT NULL,
   `jnum` tinyint(2) NOT NULL,
   `dcp` tinyint(1) NOT NULL,
-  `nflid` int(10) NOT NULL
+  `nflid` int(10) NOT NULL,
+  `esbid` varchar(10) DEFAULT NULL,
+  `gsisid` varchar(15) DEDFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
