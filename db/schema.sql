@@ -1428,11 +1428,13 @@ CREATE TABLE `leagues` (
 DROP TABLE IF EXISTS `matchups`;
 
 CREATE TABLE `matchups` (
+  `uid` int(11) NOT NULL AUTO_INCREMENT,
   `aid` int(6) NOT NULL,
   `hid` int(6) NOT NULL,
   `lid` int(6) NOT NULL,
   `year` int(4) NOT NULL,
   `week` tinyint(2) NOT NULL,
+  PRIMARY KEY `uid` (`uid`),
   UNIQUE KEY `aid` (`aid`,`hid`,`year`,`week`),
   KEY `lid` (`lid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;

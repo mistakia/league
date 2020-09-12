@@ -27,6 +27,15 @@ export function getCurrentMatchup (state) {
   return matchup
 }
 
+export function getSelectedMatchup (state) {
+  const matchups = state.get('matchups')
+  const matchupId = matchups.get('selected')
+  if (!matchupId) return null
+
+  const items = matchups.get('items')
+  return items.find(m => m.uid === matchupId)
+}
+
 export function getMatchupsForCurrentWeek (state) {
   const matchups = state.getIn(['matchups', 'items'])
   const week = constants.season.week || 1
