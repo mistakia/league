@@ -212,6 +212,7 @@ export function * watchSetValueType () {
 //  ROOT
 // -------------------------------------
 
+// TODO - auto rejoin auction on websocket reconnection
 export const auctionSagas = [
   fork(watchAuctionJoin),
   fork(watchAuctionSubmitBid),
