@@ -1,7 +1,8 @@
-import { call, takeLatest, select, fork } from 'redux-saga/effects'
+import { call, takeLatest, select, fork, delay } from 'redux-saga/effects'
 
+import { wsActions } from './actions'
 import { getApp, appActions } from '@core/app'
-import { openWS, closeWS } from './service'
+import { openWS, closeWS, isOpen } from './service'
 
 export function * disconnect () {
   yield call(closeWS)
@@ -10,6 +11,16 @@ export function * disconnect () {
 export function * connect () {
   const { leagueId, token } = yield select(getApp)
   yield call(openWS, { token, leagueId })
+}
+
+export function * reconnect () {
+  const { userId } = yield select(getApp)
+  if (userId) {
+    while (!isOpen()) {
+      yield call(connect)
+      yield delay(2000) // TODO - increase delay each run
+    }
+  }
 }
 
 //= ====================================
@@ -24,11 +35,16 @@ export function * watchAuthFulfilled () {
   yield takeLatest(appActions.AUTH_FULFILLED, connect)
 }
 
+export function * watchWebSocketClose () {
+  yield takeLatest(wsActions.WEBSOCKET_CLOSE, reconnect)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
 
 export const wsSagas = [
   fork(watchAuthFulfilled),
-  fork(watchLogout)
+  fork(watchLogout),
+  fork(watchWebSocketClose)
 ]
