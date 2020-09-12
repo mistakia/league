@@ -225,6 +225,10 @@ export const api = {
   getStatus () {
     const url = `${BASE_URL}/status`
     return { url }
+  },
+  getScoreboard (params) {
+    const url = `${BASE_URL}/scoreboard?${queryString.stringify(params)}`
+    return { url }
   }
 }
 

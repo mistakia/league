@@ -25,7 +25,8 @@ module.exports = async function (knex) {
     fname: 'Buffalo',
     lname: 'Bills',
     pname: 'Bills',
-    pos1: 'DST'
+    pos1: 'DST',
+    cteam: 'BUF'
   }, {
     player: 'CAR',
     fname: 'Carolina',

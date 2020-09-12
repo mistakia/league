@@ -45,7 +45,8 @@ export const Player = new Record({
   status: null,
   injuryStatus: null,
   injuyrBodyPart: null,
-  projWks: null
+  projWks: null,
+  nflid: null
 })
 
 export function createPlayer ({
@@ -85,7 +86,8 @@ export function createPlayer ({
   tid,
   status,
   injuryStatus,
-  injuryBodyPart
+  injuryBodyPart,
+  nflid
 }) {
   return new Player({
     player,
@@ -125,6 +127,7 @@ export function createPlayer ({
     tid,
     status,
     injuryStatus,
-    injuryBodyPart
+    injuryBodyPart,
+    nflid
   })
 }
