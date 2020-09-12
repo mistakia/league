@@ -60,6 +60,7 @@ import {
   getWaiverReportActions
 } from '@core/waivers'
 import { notificationActions } from '@core/notifications'
+import { getScoreboardActions } from '@core/scoreboard'
 import { postErrorActions } from '@core/errors'
 
 function * fetchAPI (apiFunction, actions, opts = {}) {
@@ -156,6 +157,8 @@ export const fetchWaivers = fetch.bind(null, api.getWaivers, getWaiversActions)
 export const getWaiverReport = fetch.bind(null, api.getWaiverReport, getWaiverReportActions)
 
 export const getSchedule = fetch.bind(null, api.getSchedule, getScheduleActions)
+
+export const fetchScoreboard = fetch.bind(null, api.getScoreboard, getScoreboardActions)
 
 export const postError = fetch.bind(null, api.postError, postErrorActions)
 export const getStatus = fetch.bind(null, api.getStatus, getStatusActions)

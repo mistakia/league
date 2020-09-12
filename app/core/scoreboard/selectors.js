@@ -1,6 +1,10 @@
 import { getStartersByTeamId } from '@core/rosters'
 import { constants } from '@common'
 
+export function getScoreboard (state) {
+  return state.get('scoreboard')
+}
+
 export function getProjectedScoreByTeamId (state, { tid }) {
   const starters = getStartersByTeamId(state, { tid })
   return starters.reduce((sum, s) => {

@@ -489,7 +489,8 @@ CREATE TABLE `player` (
   `cteam` varchar(3) NOT NULL,
   `posd` varchar(8) NOT NULL,
   `jnum` tinyint(2) NOT NULL,
-  `dcp` tinyint(1) NOT NULL
+  `dcp` tinyint(1) NOT NULL,
+  `nflid` int(10) NOT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -1901,7 +1902,7 @@ CREATE TABLE `nflPlayStat` (
 
 DROP TABLE IF EXISTS `nflSnap`;
 
-CREATE TABLE `nflSnap` (
+CRETE TABLE `nflSnap` (
   `esbid` int(10) NOT NULL,
   `playId` int(10) NOT NULL,
   `nflId` int(10) NOT NULL,

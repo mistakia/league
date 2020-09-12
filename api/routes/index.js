@@ -10,6 +10,7 @@ const settings = require('./settings')
 const stats = require('./stats')
 const schedule = require('./schedule')
 const status = require('./status')
+const scoreboard = require('./scoreboard')
 const errors = require('./errors')
 
 module.exports = {
@@ -25,5 +26,6 @@ module.exports = {
   settings,
   plays,
   projections,
+  scoreboard,
   stats
 }

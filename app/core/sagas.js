@@ -19,6 +19,7 @@ import { poachSagas } from './poaches'
 import { scheduleSagas } from './schedule'
 import { errorSagas } from './errors'
 import { statusSagas } from './status'
+import { scoreboardSagas } from './scoreboard'
 
 export default function * rootSaga () {
   yield all([
@@ -40,6 +41,7 @@ export default function * rootSaga () {
     ...poachSagas,
     ...scheduleSagas,
     ...errorSagas,
-    ...statusSagas
+    ...statusSagas,
+    ...scoreboardSagas
   ])
 }
