@@ -3,14 +3,15 @@ import { createSelector } from 'reselect'
 
 import { getApp } from '@core/app'
 import { scoreboardActions } from '@core/scoreboard'
-import { getCurrentMatchup } from '@core/matchups'
+import { getCurrentMatchup, getSelectedMatchup } from '@core/matchups'
 
 import ScoreboardPage from './scoreboard'
 
 const mapStateToProps = createSelector(
   getApp,
   getCurrentMatchup,
-  (app, matchup) => ({ app, matchup })
+  getSelectedMatchup,
+  (app, matchup, selected) => ({ app, matchup, selected })
 )
 
 const mapDispatchToProps = {
