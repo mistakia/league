@@ -853,7 +853,10 @@ export const jobs = {
 
   PLAYERS_ARMCHAIR: 19,
 
-  NFL_GAMES: 20
+  NFL_GAMES_NGS: 20,
+  NFL_PLAYS_NGS: 21,
+  NFL_PLAYS_NFL: 22,
+  NFL_GAMES_NFL: 23
 }
 
 export const jobDetails = {
@@ -876,7 +879,10 @@ export const jobDetails = {
   17: 'Generate Rosters',
   18: 'Generate Draft Picks',
   19: 'Players (Armchair)',
-  20: 'NFL Games (NFL)'
+  20: 'NFL Games (NGS)',
+  21: 'NFL Plays (NGS)',
+  22: 'NFL Plays (NFL)',
+  23: 'NFL GAMES (NFL)'
 }
 
 export const changes = {
