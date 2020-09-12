@@ -17,7 +17,7 @@ export default class ScoreboardPage extends React.Component {
   }
 
   render = () => {
-    const { matchup } = this.props
+    const { matchup, selected } = this.props
 
     const body = (
       <Container maxWidth='lg'>
@@ -27,9 +27,9 @@ export default class ScoreboardPage extends React.Component {
           </Grid>
           <Grid container item xs={12} spacing={0}>
             <Grid item xs={12} md={9} classes={{ root: 'scoreboard__main' }}>
-              <ScoreboardTeam tid={matchup.aid} type='away' />
+              <ScoreboardTeam tid={selected ? selected.aid : matchup.aid} type='away' />
               <ScoreboardSlots />
-              <ScoreboardTeam tid={matchup.hid} type='home' />
+              <ScoreboardTeam tid={selected ? selected.hid : matchup.hid} type='home' />
             </Grid>
             <Grid item xs={12} md={3}>
               <div>

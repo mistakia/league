@@ -6,6 +6,7 @@ import { constants } from '@common'
 
 const initialState = new Map({
   isPending: false,
+  selected: null,
   items: new List(),
   teams: new List(),
   weeks: new List(constants.weeks)
@@ -13,6 +14,9 @@ const initialState = new Map({
 
 export function matchupsReducer (state = initialState, { payload, type }) {
   switch (type) {
+    case matchupsActions.SELECT_MATCHUP:
+      return state.merge({ selected: payload.matchupId })
+
     case matchupsActions.GET_MATCHUPS_FAILED:
       return state.merge({ isPending: false })
 
