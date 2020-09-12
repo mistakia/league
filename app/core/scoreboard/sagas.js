@@ -6,8 +6,11 @@ import { fetchScoreboard } from '@core/api'
 
 export function * loadScoreboard () {
   const state = yield select(getScoreboard)
-  const week = state.get('week')
-  yield call(fetchScoreboard, { week })
+  const isLoaded = state.get('isLoaded')
+  if (!isLoaded) {
+    const week = state.get('week')
+    yield call(fetchScoreboard, { week })
+  }
 }
 
 //= ====================================
