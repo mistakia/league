@@ -882,7 +882,7 @@ export const jobDetails = {
   20: 'NFL Games (NGS)',
   21: 'NFL Plays (NGS)',
   22: 'NFL Plays (NFL)',
-  23: 'NFL GAMES (NFL)'
+  23: 'NFL Games (NFL)'
 }
 
 export const changes = {
