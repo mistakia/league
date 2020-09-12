@@ -1792,12 +1792,13 @@ DROP TABLE IF EXISTS `nflSchedule`;
 
 CREATE TABLE `nflSchedule` (
   `gid` int(5) NOT NULL,
-  `gameId` int(10) NOT NULL,
-  `gameKey` int(5) NOT NULL,
+  `esbid` int(10) NOT NULL,
+  `gsisid` int(5) NOT NULL,
   `season` int(4) NOT NULL,
   `seasonType` varchar(10) NOT NULL,
   `week` int(2) NOT NULL,
-  `gameSmartId` varchar(36) NOT NULL,
+  `gameShieldId` varchar(36) NOT NULL,
+  `gameDetailId` varchar(36) DEFAULT NULL,
   `homeTeamId` varchar(36) NOT NULL,
   `homeTeamAbbr` varchar(36) NOT NULL,
   `homeScore` int(5) DEFAULT 0,
@@ -1811,7 +1812,82 @@ CREATE TABLE `nflSchedule` (
   `gameDate` varchar(10) NOT NULL,
   `gameTimeEastern` varchar(8) NOT NULL,
   UNIQUE KEY `gid` (`gid`),
-  UNIQUE KEY `gameId` (`gameId`)
+  UNIQUE KEY `esbid` (`esbid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `nflPlay`
+--
+
+DROP TABLE IF EXISTS `nflPlay`;
+
+CREATE TABLE `nflPlay` (
+  `esbid` int(10) NOT NULL,
+  `playId` int(10) DEFAULT NULL,
+  `sequence` int(10) DEFAULT NULL,
+  `playState` varchar(36) DEFAULT NULL,
+  `down` int(1) DEFAULT NULL,
+  `homeScore` int(5) DEFAULT NULL,
+  `isBigPlay` tinyint(1) DEFAULT NULL,
+  `isSTPlay` tinyint(1) DEFAULT NULL,
+  `isScoring` tinyint(1) DEFAULT NULL,
+  `playDescription` text DEFAULT NULL,
+  `playType` text DEFAULT NULL,
+  `possessionTeam` varchar(10) DEFAULT NULL,
+  `possessionTeamId` varchar(36) DEFAULT NULL,
+  `quarter` int(1) DEFAULT NULL,
+  `season` int(4) DEFAULT NULL,
+  `seasonType` varchar(36) DEFAULT NULL,
+  `visitorScore` int(4) DEFAULT NULL,
+  `week` int(2) DEFAULT NULL,
+  `yardlineNumber` int(4) DEFAULT NULL,
+  `yardlineSide` varchar(10) DEFAULT NULL,
+  `yardsToGo` int(3) DEFAULT NULL,
+  `isRedzonePlay` tinyint(1) DEFAULT NULL,
+  `offenseFormation` varchar(36) DEFAULT NULL,
+  `offensePersonnel` varchar(36) DEFAULT NULL,
+  `defendersInTheBox` int(3) DEFAULT NULL,
+  `defensePersonnel` varchar(36) DEFAULT NULL,
+  `updated` int(11) NOT NULL,
+  KEY `esbid` (`esbid`),
+  KEY `playId` (`playId`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `nflPlayStat`
+--
+
+DROP TABLE IF EXISTS `nflPlayStat`;
+
+CREATE TABLE `nflPlayStat` (
+  `esbid` int(10) NOT NULL,
+  `playId` int(10) NOT NULL,
+  `clubCode` varchar(10) DEFAULT NULL,
+  `playerName` varchar(36) DEFAULT NULL,
+  `statId` int(10) NOT NULL,
+  `yards` int(3) DEFAULT NULL,
+  `gsisId` varchar(36) DEFAULT NULL,
+  KEY `playId` (`playId`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `nflSnap`
+--
+
+DROP TABLE IF EXISTS `nflSnap`;
+
+CREATE TABLE `nflSnap` (
+  `esbid` int(10) NOT NULL,
+  `playId` int(10) NOT NULL,
+  `nflId` int(10) NOT NULL,
+  KEY `playId` (`playId`),
+  UNIQUE KEY `snap` (`playId`,`nflId`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
