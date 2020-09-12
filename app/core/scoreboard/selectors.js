@@ -12,3 +12,10 @@ export function getProjectedScoreByTeamId (state, { tid }) {
     return pts + sum
   }, 0)
 }
+
+export function getScoreboardUpdated (state) {
+  const scoreboard = getScoreboard(state)
+  const plays = scoreboard.get('plays')
+  const play = plays.minBy(x => x.updated)
+  return play ? play.updated : 0
+}

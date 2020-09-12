@@ -11,6 +11,7 @@ const initialState = new Map({
 
 export function scoreboardReducer (state = initialState, { payload, type }) {
   switch (type) {
+    case scoreboardActions.UPDATE_SCOREBOARD_PLAYS:
     case scoreboardActions.GET_SCOREBOARD_FULFILLED:
       return state.withMutations(state => {
         state.set('isLoaded', true)
