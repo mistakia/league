@@ -1,14 +1,20 @@
 import Auction from './auction'
+import Scoreboard from './scoreboard'
 
 const auctions = new Map()
 
 module.exports = (wss) => {
+  const scoreboard = new Scoreboard(wss)
+
   wss.on('connection', function (ws, request) {
     const { userId } = request.user
     ws.on('message', async (msg) => {
       const message = JSON.parse(msg)
 
-      // TODO log
+      if (message.type === 'SCOREBOARD_REGISTER') {
+        const { updated } = message.payload
+        return scoreboard.register({ ws, userId, updated })
+      }
 
       if (message.type !== 'AUCTION_JOIN') {
         return
