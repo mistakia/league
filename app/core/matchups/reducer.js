@@ -29,7 +29,10 @@ export function matchupsReducer (state = initialState, { payload, type }) {
       })
 
     case matchupsActions.GET_MATCHUPS_FULFILLED:
-      return state.merge({ items: new List(payload.data), isPending: false })
+      return state.merge({
+        items: new List(payload.data),
+        isPending: false
+      })
 
     case matchupsActions.FILTER_MATCHUPS:
       return state.merge({
