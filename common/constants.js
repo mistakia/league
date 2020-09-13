@@ -59,6 +59,8 @@ export const stats = [
   'twoptc'
 ]
 
+export const createStats = () => stats.reduce((o, key) => ({ ...o, [key]: 0 }), {})
+
 export const statHeaders = {
   pa: 'Passing Attempts',
   pc: 'Passing Completions',

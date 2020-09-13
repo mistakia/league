@@ -2,6 +2,7 @@ export { scoreboardActions, getScoreboardActions } from './actions'
 export { scoreboardSagas } from './sagas'
 export {
   getScoreboard,
-  getProjectedScoreByTeamId
+  getStatsByPlayerId,
+  getScoreboardByTeamId
 } from './selectors'
 export { scoreboardReducer } from './reducer'
