@@ -10,10 +10,15 @@ $height = 50px
   height $height
 
 .scoreboard__team-score
-  font-size 1.3em
-  &.projected
-    font-weight 300
+  display flex
+  flex-direction column
+  .score
+    font-size 1.5em
+  .projected
+    font-size 13px
+    font-weight 400
     color rgba(0,0,0,0.5)
+    padding-top 4px
 
 .scoreboard__team-banner
   position absolute
@@ -38,6 +43,7 @@ $height = 50px
 
   .scoreboard__team-score
     order 3
+    align-items flex-end
 
   .scoreboard__team-banner
     left 0

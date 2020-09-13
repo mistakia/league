@@ -8,18 +8,25 @@ import './scoreboard-player.styl'
 
 class ScoreboardPlayer extends Player {
   render = () => {
-    const { player } = this.props
+    const { player, scoreboard } = this.props
+
+    const classNames = ['scoreboard__player']
+    if (!scoreboard) classNames.push('projection')
+
+    const points = scoreboard
+      ? (scoreboard.points.total || 0).toFixed(1)
+      : player.getIn(['points', `${constants.season.week}`, 'total'], 0).toFixed(1)
 
     return (
-      <div className='scoreboard__player'>
+      <div className={classNames.join(' ')}>
         <div className='scoreboard__player-body'>
           <PlayerNameExpanded playerId={player.player} hideActions />
           <div className='scoreboard__player-game-info' />
           <div className='scoreboard__player-game-stats' />
           <div className='scoreboard__player-drive-info' />
         </div>
-        <div className='scoreboard__player-score metric projection'>
-          {player.getIn(['points', `${constants.season.week}`, 'total'], 0).toFixed(1)}
+        <div className='scoreboard__player-score metric'>
+          {points}
         </div>
       </div>
     )
