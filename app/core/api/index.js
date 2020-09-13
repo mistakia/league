@@ -10,7 +10,7 @@ export {
   postDraft,
   getPlayerStats,
   fetchTransactions,
-  getMatchups,
+  fetchMatchups,
   postProposeTrade,
   getTrades,
   postCancelTrade,

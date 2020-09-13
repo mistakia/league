@@ -22,6 +22,7 @@ export default class Scoreboard {
   }
 
   async poll () {
+    // TODO - only poll while games are pending
     this._log('polling for scoreboard updates')
     this._isPolling = true
     const updateTimestamps = Array.from(this._users.values()).sort((a, b) => a - b)
