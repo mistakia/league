@@ -122,7 +122,7 @@ export const getTeams = fetch.bind(null, api.getTeams, getTeamsActions)
 export const fetchTransactions = fetch.bind(null, api.getTransactions, getTransactionsActions)
 export const getReleaseTransactions = fetch.bind(null, api.getReleaseTransactions, getReleaseTransactionsActions)
 
-export const getMatchups = fetch.bind(null, api.getMatchups, getMatchupsActions)
+export const fetchMatchups = fetch.bind(null, api.getMatchups, getMatchupsActions)
 export const postMatchups = fetch.bind(null, api.postMatchups, postMatchupsActions)
 
 export const postProposeTrade = fetch.bind(null, api.postProposeTrade, postTradeProposeActions)

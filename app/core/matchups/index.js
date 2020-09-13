@@ -1,7 +1,6 @@
 export {
   getMatchups,
   getFilteredMatchups,
-  getCurrentMatchup,
   getSelectedMatchup,
   getMatchupsForCurrentWeek
 } from './selectors'
