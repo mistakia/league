@@ -1,4 +1,4 @@
-import { call, takeLatest, select, fork, delay } from 'redux-saga/effects'
+import { call, takeLatest, select, fork, delay, put } from 'redux-saga/effects'
 
 import { wsActions } from './actions'
 import { getApp, appActions } from '@core/app'
@@ -20,6 +20,8 @@ export function * reconnect () {
       yield call(connect)
       yield delay(2000) // TODO - increase delay each run
     }
+
+    yield put(wsActions.reconnected())
   }
 }
 
