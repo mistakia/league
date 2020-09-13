@@ -3,7 +3,7 @@ import { call, takeLatest, fork, select } from 'redux-saga/effects'
 import { getScoreboard, getScoreboardUpdated } from './selectors'
 import { scoreboardActions } from './actions'
 import { fetchScoreboard } from '@core/api'
-import { send } from '@core/ws'
+import { send, wsActions } from '@core/ws'
 
 export function * loadScoreboard () {
   const state = yield select(getScoreboard)
@@ -23,6 +23,14 @@ export function * register () {
   })
 }
 
+export function * reregister () {
+  const state = yield select(getScoreboard)
+  const isLoaded = state.get('isLoaded')
+  if (isLoaded) {
+    yield call(register)
+  }
+}
+
 //= ====================================
 //  WATCHERS
 // -------------------------------------
@@ -39,6 +47,10 @@ export function * watchUpdateScoreboardPlays () {
   yield takeLatest(scoreboardActions.UPDATE_SCOREBOARD_PLAYS, register)
 }
 
+export function * watchWebSocketReconnected () {
+  yield takeLatest(wsActions.WEBSOCKET_RECONNECTED, reregister)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -46,5 +58,6 @@ export function * watchUpdateScoreboardPlays () {
 export const scoreboardSagas = [
   fork(watchLoadScoreboard),
   fork(watchGetScoreboardFulfilled),
-  fork(watchUpdateScoreboardPlays)
+  fork(watchUpdateScoreboardPlays),
+  fork(watchWebSocketReconnected)
 ]
