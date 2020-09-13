@@ -1906,7 +1906,7 @@ CREATE TABLE `nflPlayStat` (
 
 DROP TABLE IF EXISTS `nflSnap`;
 
-CRETE TABLE `nflSnap` (
+CREATE TABLE `nflSnap` (
   `esbid` int(10) NOT NULL,
   `playId` int(10) NOT NULL,
   `nflId` int(10) NOT NULL,

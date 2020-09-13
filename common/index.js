@@ -5,6 +5,7 @@ import calculateValues from './calculate-values'
 import * as constants from './constants'
 import getEligibleSlots from './get-eligible-slots'
 import Roster from './roster'
+import calculateStatsFromPlayStats from './calculate-stats-from-play-stats'
 import calculateStatsFromPlays from './calculate-stats-from-plays'
 import calculatePrices from './calculate-prices'
 import getRosterSize from './get-roster-size'
@@ -52,6 +53,7 @@ export {
   weightProjections,
   Roster,
   calculatePrices,
+  calculateStatsFromPlayStats,
   calculateStatsFromPlays,
   createDefaultLeague,
   getOptimizerPositionConstraints,
