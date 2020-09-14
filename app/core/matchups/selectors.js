@@ -6,6 +6,12 @@ export function getMatchups (state) {
   return state.get('matchups')
 }
 
+export function getMatchupById (state, { mid }) {
+  const matchups = state.get('matchups')
+  const items = matchups.get('items')
+  return items.find(m => m.uid === mid)
+}
+
 export function getFilteredMatchups (state) {
   const matchups = state.get('matchups')
   const items = matchups.get('items')

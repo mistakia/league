@@ -48,7 +48,8 @@ export const Player = new Record({
   projWks: null,
   nflid: null,
   gsisid: null,
-  esbid: null
+  esbid: null,
+  gsispid: null
 })
 
 export function createPlayer ({
@@ -91,7 +92,8 @@ export function createPlayer ({
   injuryBodyPart,
   nflid,
   gsisid,
-  esbid
+  esbid,
+  gsispid
 }) {
   return new Player({
     player,
@@ -134,6 +136,7 @@ export function createPlayer ({
     injuryBodyPart,
     nflid,
     gsisid,
-    esbid
+    esbid,
+    gsispid
   })
 }

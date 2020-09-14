@@ -17,13 +17,13 @@ router.get('/?', async (req, res) => {
     }
 
     const plays = await db('nflPlay').where({ week: constants.season.week })
-    const playIds = plays.map(p => p.playId)
-    const playStats = await db('nflPlayStat').whereIn('playId', playIds)
-    const playSnaps = await db('nflSnap').whereIn('playId', playIds)
+    const esbids = plays.map(p => p.esbid)
+    const playStats = await db('nflPlayStat').whereIn('esbid', esbids)
+    const playSnaps = await db('nflSnap').whereIn('esbid', esbids)
 
     for (const play of plays) {
-      play.playStats = playStats.filter(p => p.playId === play.playId)
-      play.playSnaps = playSnaps.filter(p => p.playId === play.playId)
+      play.playStats = playStats.filter(p => p.playId === play.playId && p.esbid === play.esbid)
+      play.playSnaps = playSnaps.filter(p => p.playId === play.playId && p.esbid === play.esbid)
     }
 
     res.send(plays)

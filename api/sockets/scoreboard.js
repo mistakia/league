@@ -16,8 +16,8 @@ export default class Scoreboard {
 
   register ({ ws, userId, updated }) {
     this._log(`registering userId(${userId}) for scoreboard updates`)
+    if (!this._users.has(userId)) ws.on('close', () => this._users.delete(userId))
     this._users.set(userId, updated)
-    ws.on('close', () => this._users.delete(userId))
     if (!this._isPolling) this.poll()
   }
 
@@ -36,13 +36,13 @@ export default class Scoreboard {
 
     this._log(`${plays.length} updated plays found`)
 
-    const playIds = plays.map(p => p.playId)
-    const playStats = await db('nflPlayStat').whereIn('playId', playIds)
-    const playSnaps = await db('nflSnap').whereIn('playId', playIds)
+    const esbids = plays.map(p => p.esbid)
+    const playStats = await db('nflPlayStat').whereIn('esbid', esbids)
+    const playSnaps = await db('nflSnap').whereIn('esbid', esbids)
 
     for (const play of plays) {
-      play.playStats = playStats.filter(p => p.playId === play.playId)
-      play.playSnaps = playSnaps.filter(p => p.playId === play.playId)
+      play.playStats = playStats.filter(p => p.playId === play.playId && p.esbid === play.esbid)
+      play.playSnaps = playSnaps.filter(p => p.playId === play.playId && p.esbid === play.esbid)
     }
 
     // loop through users and broadcast diff
