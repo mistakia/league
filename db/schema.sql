@@ -1858,8 +1858,12 @@ CREATE TABLE `nflPlay` (
   `numberOfPassRushers` int(3) DEFAULT NULL,
   `defensePersonnel` varchar(36) DEFAULT NULL,
 
+  `driveNetYards` int(3) DEFAULT NULL,
+  `drivePlayCount` int(3) DEFAULT NULL,
   `clockTime` varchar(10) DEFAULT NULL,
   `driveSequenceNumber` int(4) DEFAULT NULL,
+  `startYardLine` varchar(10) DEFAULT NULl,
+  `endYardLine` varchar(10) DEFAULT NULl,
   `firstDown` tinyint(1) DEFAULT NULL,
   `goalToGo` tinyint(1) DEFAULT NULL,
   `nextPlayType` varchar(36) DEFAULT NULL,
@@ -1896,6 +1900,8 @@ CREATE TABLE `nflPlayStat` (
   `statId` int(10) NOT NULL,
   `yards` int(3) DEFAULT NULL,
   `gsisId` varchar(36) DEFAULT NULL,
+  `gsispid` varchar(47) DEFAULT NULL,
+  `teamid` varchar(36) DEFAULT NULL
   KEY `playId` (`playId`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 

@@ -16,7 +16,7 @@ export function scoreboardReducer (state = initialState, { payload, type }) {
       return state.withMutations(state => {
         state.set('isLoaded', true)
         payload.data.forEach(play => {
-          state.setIn(['plays', play.playId], play)
+          state.setIn(['plays', `${play.esbid}:${play.playId}`], play)
         })
       })
 

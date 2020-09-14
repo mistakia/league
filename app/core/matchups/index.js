@@ -2,7 +2,8 @@ export {
   getMatchups,
   getFilteredMatchups,
   getSelectedMatchup,
-  getMatchupsForCurrentWeek
+  getMatchupsForCurrentWeek,
+  getMatchupById
 } from './selectors'
 export { matchupsReducer } from './reducer'
 export { matchupSagas } from './sagas'
