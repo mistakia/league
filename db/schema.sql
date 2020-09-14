@@ -492,7 +492,8 @@ CREATE TABLE `player` (
   `dcp` tinyint(1) NOT NULL,
   `nflid` int(10) NOT NULL,
   `esbid` varchar(10) DEFAULT NULL,
-  `gsisid` varchar(15) DEDFAULT NULL
+  `gsisid` varchar(15) DEFAULT NULL,
+  `gsispid` varchar(36) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------

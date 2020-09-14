@@ -859,7 +859,8 @@ export const jobs = {
   NFL_PLAYS_NGS: 21,
   NFL_PLAYS_NFL: 22,
   NFL_GAMES_NFL: 23,
-  NFL_PLAYERS: 24
+  NFL_PLAYERS: 24,
+  NFL_PLAYER_IDS: 25
 }
 
 export const jobDetails = {
@@ -886,7 +887,8 @@ export const jobDetails = {
   21: 'NFL Plays (NGS)',
   22: 'NFL Plays (NFL)',
   23: 'NFL Games (NFL)',
-  24: 'NFL Players (NFL)'
+  24: 'NFL Players (NFL)',
+  25: 'NFL Player Ids (NFL)'
 }
 
 export const changes = {
