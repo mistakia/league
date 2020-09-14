@@ -3,6 +3,7 @@ export { scoreboardSagas } from './sagas'
 export {
   getScoreboard,
   getStatsByPlayerId,
-  getScoreboardByTeamId
+  getScoreboardByTeamId,
+  getPlaysByMatchupId
 } from './selectors'
 export { scoreboardReducer } from './reducer'
