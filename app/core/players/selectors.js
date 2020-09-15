@@ -20,7 +20,7 @@ import {
   isPlayerOnPracticeSquad,
   getRosterInfoForPlayerId
 } from '@core/rosters'
-import { getGameForWeekByTeam } from '@core/schedule'
+import { getGameByTeam } from '@core/schedule'
 
 export function getPlayers (state) {
   return state.get('players')
@@ -247,7 +247,7 @@ export function isPlayerLocked (state, { player, playerId }) {
     return false
   }
 
-  const game = getGameForWeekByTeam(state, { team: player.team })
+  const game = getGameByTeam(state, { team: player.team })
   if (!game) {
     return false
   }
