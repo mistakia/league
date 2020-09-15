@@ -6,7 +6,7 @@ import {
   fixTeam,
   calculateStatsFromPlayStats,
   calculatePoints,
-  calculateDstStatsFromPlayStats,
+  calculateDstStatsFromPlays,
   calculateDstPoints
 } from '@common'
 import { getPlayerById } from '@core/players'
@@ -25,21 +25,20 @@ export function getScoreboardRosterByTeamId (state, { tid }) {
 function getStatsForPlayer (state, { player }) {
   const plays = state.getIn(['scoreboard', 'plays'])
   const week = state.getIn(['scoreboard', 'week'])
+  // TODO - filter deleted plays
   const currentWeekPlays = plays.filter(p => p.week === week)
 
   if (player.pos1 === 'DST') {
     const game = getGameByPlayerId(state, { playerId: player.player, week })
     const opponent = game.h === player.team ? game.v : game.h
 
-    const playStats = currentWeekPlays.valueSeq().toList().flatMap(p => {
-      if (!p.possessionTeam) return []
+    const opponentPlays = currentWeekPlays
+      .valueSeq()
+      .toList()
+      .filter(p => p.possessionTeam && fixTeam(p.possessionTeam) === opponent)
 
-      if (fixTeam(p.possessionTeam) !== opponent) return []
-
-      return p.playStats
-    })
-
-    const stats = calculateDstStatsFromPlayStats(playStats.toJS())
+    const playStats = opponentPlays.flatMap(p => p.playStats)
+    const stats = calculateDstStatsFromPlays(opponentPlays.toJS())
     const points = calculateDstPoints(stats)
     return { playStats: playStats.toJS(), points, stats }
   }
