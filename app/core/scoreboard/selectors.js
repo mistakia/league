@@ -2,14 +2,38 @@ import { List } from 'immutable'
 
 import { getStartersByTeamId } from '@core/rosters'
 import { getCurrentLeague } from '@core/leagues'
-import { constants, fixTeam, calculateStatsFromPlayStats, calculatePoints } from '@common'
+import {
+  constants,
+  fixTeam,
+  calculateStatsFromPlayStats,
+  calculatePoints,
+  calculateDstStatsFromPlayStats,
+  calculateDstPoints
+} from '@common'
 import { getPlayerById } from '@core/players'
 import { getMatchupById } from '@core/matchups'
+import { getGameForWeekByPlayerId } from '@core/schedule'
 
 function getStatsForPlayer (state, { player }) {
   const plays = state.getIn(['scoreboard', 'plays'])
 
-  // TODO - dst
+  if (player.pos1 === 'DST') {
+    const game = getGameForWeekByPlayerId(state, { playerId: player.player })
+    const opponent = game.h === player.team ? game.v : game.h
+
+    const playStats = plays.valueSeq().toList().flatMap(p => {
+      if (!p.possessionTeam) return []
+
+      if (fixTeam(p.possessionTeam) !== opponent) return []
+
+      return p.playStats
+    })
+
+    const stats = calculateDstStatsFromPlayStats(playStats.toJS())
+    const points = calculateDstPoints(stats)
+    return { playStats: playStats.toJS(), points, stats }
+  }
+
   const playStats = plays.valueSeq().toList().flatMap(p => {
     if (!p.possessionTeam) return []
 

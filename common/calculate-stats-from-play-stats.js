@@ -90,7 +90,7 @@ const calculateStatsFromPlayStats = (playStats) => {
         break
 
       case 20:
-        // sack
+        // sack (team)
         stats.pa += 1
         break
 
@@ -347,11 +347,11 @@ const calculateStatsFromPlayStats = (playStats) => {
         break
 
       case 83:
-        // sack
+        // sack (individual palyer)
         break
 
       case 84:
-        // assisted sack
+        // assisted sack (individual player)
         break
 
       case 85:
