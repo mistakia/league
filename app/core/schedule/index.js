@@ -1,8 +1,8 @@
 export {
   getSchedule,
   getByeByTeam,
-  getGameForWeekByTeam,
-  getGameForWeekByPlayerId
+  getGameByTeam,
+  getGameByPlayerId
 } from './selectors'
 export { scheduleSagas } from './sagas'
 export { scheduleReducer } from './reducer'

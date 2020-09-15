@@ -11,7 +11,7 @@ import {
 } from '@common'
 import { getPlayerById } from '@core/players'
 import { getMatchupById } from '@core/matchups'
-import { getGameForWeekByPlayerId } from '@core/schedule'
+import { getGameByPlayerId } from '@core/schedule'
 
 export function getScoreboard (state) {
   return state.get('scoreboard')
@@ -28,7 +28,7 @@ function getStatsForPlayer (state, { player }) {
   const currentWeekPlays = plays.filter(p => p.week === week)
 
   if (player.pos1 === 'DST') {
-    const game = getGameForWeekByPlayerId(state, { playerId: player.player })
+    const game = getGameByPlayerId(state, { playerId: player.player, week })
     const opponent = game.h === player.team ? game.v : game.h
 
     const playStats = currentWeekPlays.valueSeq().toList().flatMap(p => {

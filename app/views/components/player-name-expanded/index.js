@@ -2,13 +2,13 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { getPlayerById, playerActions } from '@core/players'
-import { getGameForWeekByPlayerId } from '@core/schedule'
+import { getGameByPlayerId } from '@core/schedule'
 
 import PlayerNameExpanded from './player-name-expanded'
 
 const mapStateToProps = createSelector(
   getPlayerById,
-  getGameForWeekByPlayerId,
+  getGameByPlayerId,
   (player, game) => ({ player, game })
 )
 
