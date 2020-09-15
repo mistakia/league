@@ -55,14 +55,18 @@ const calculateDstStatsFromPlays = (plays) => {
         break
 
       case 19:
-        // interception
-        dstStats.int += 1
+        // interception (passer)
         break
 
       case 20:
         // sack (team)
         dstStats.ya += playStat.yards
         dstStats.sk += 1
+        break
+
+      case 25:
+        // interception
+        dstStats.int += 1
         break
 
       case 26:
@@ -72,8 +76,7 @@ const calculateDstStatsFromPlays = (plays) => {
         break
 
       case 28:
-        // interception return touchdown (lateral)
-        dstStats.int += 1
+        // interception return touchdown (lateral), no interception credited
         dstStats.td += 1
         break
 
@@ -83,14 +86,12 @@ const calculateDstStatsFromPlays = (plays) => {
         break
 
       case 55:
-        // fumble recovery
-        dstStats.rf += 1
+        // fumble recovery (offensive player recovery)
         break
 
       case 56:
-        // fumble return touchdown
-        // TODO - check if fumble recovery stat is needed
-        dstStats.td += 1
+        // fumble recovery touchdown (offensive player)
+        dstStats.pa += 6
         break
 
       case 57:
@@ -98,25 +99,27 @@ const calculateDstStatsFromPlays = (plays) => {
         break
 
       case 58:
-        // fumble return touchdown (lateral)
-        dstStats.td += 1
+        // fumble recovery touchdown (lateral) (offensive player)
+        dstStats.pa += 6
         break
 
       case 59:
-        // fumble recovery and return
+        // fumble recovery and return (defense)
+        dstStats.rf += 1
         break
 
       case 60:
-        // fumble return for touchdown
+        // fumble return for touchdown (defense)
+        dstStats.rf += 1
         dstStats.td += 1
         break
 
       case 61:
-        // fumble recovery (lateral)
+        // fumble recovery (lateral) (no recovery) (defense)
         break
 
       case 62:
-        // fumble recovery touchdown (lateral)
+        // fumble recovery touchdown (lateral) (no recovery) (defense)
         dstStats.td += 1
         break
 
@@ -157,7 +160,7 @@ const calculateDstStatsFromPlays = (plays) => {
         break
 
       case 86:
-        // punt block player (individual)
+        // punt block player (individual) (defense)
         break
 
       case 87:
