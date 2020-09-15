@@ -1410,6 +1410,8 @@ CREATE TABLE `leagues` (
   `twoptc` tinyint(1) NOT NULL,
   `tdrec` tinyint(1) NOT NULL,
   `fuml` tinyint(1) NOT NULL,
+  `prtd` tinyint(1) NOT NULL,
+  `krtd` tinyint(1) NOT NULL,
   `ddate` int(11) DEFAULT NULL,
   `adate` int(11) DEFAULT NULL,
   `groupme_token` varchar(45) DEFAULT NULL,
