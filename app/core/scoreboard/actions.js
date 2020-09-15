@@ -1,6 +1,8 @@
 export const scoreboardActions = {
   LOAD_SCOREBOARD: 'LOAD_SCOREBOARD',
 
+  SCOREBOARD_SELECT_WEEK: 'SCOREBOARD_SELECT_WEEK',
+
   // websocket events
   SCOREBOARD_REGISTER: 'SCOREBOARD_REGISTER',
   UPDATE_SCOREBOARD_PLAYS: 'UPDATE_SCOREBOARD_PLAYS',
@@ -11,6 +13,13 @@ export const scoreboardActions = {
 
   load: () => ({
     type: scoreboardActions.LOAD_SCOREBOARD
+  }),
+
+  select: (week) => ({
+    type: scoreboardActions.SCOREBOARD_SELECT_WEEK,
+    payload: {
+      week
+    }
   }),
 
   getScoreboardPending: opts => ({
