@@ -4,6 +4,7 @@ export {
   getScoreboard,
   getStatsByPlayerId,
   getScoreboardByTeamId,
-  getPlaysByMatchupId
+  getPlaysByMatchupId,
+  getScoreboardRosterByTeamId
 } from './selectors'
 export { scoreboardReducer } from './reducer'

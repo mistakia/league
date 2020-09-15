@@ -16,7 +16,7 @@ router.get('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid week' })
     }
 
-    const plays = await db('nflPlay').where({ week: constants.season.week })
+    const plays = await db('nflPlay').where({ week })
     const esbids = plays.map(p => p.esbid)
     const playStats = await db('nflPlayStat').whereIn('esbid', esbids)
     const playSnaps = await db('nflSnap').whereIn('esbid', esbids)

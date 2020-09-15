@@ -236,7 +236,11 @@ export function playersReducer (state = initialState, { payload, type }) {
         })
       })
 
-    case rosterActions.GET_ROSTERS_FULFILLED:
+    case rosterActions.GET_ROSTERS_FULFILLED: {
+      if (payload.opts.week !== constants.season.week) {
+        return state
+      }
+
       return state.withMutations(state => {
         payload.data.forEach(roster => {
           roster.players.forEach(rosterSlot => {
@@ -250,6 +254,7 @@ export function playersReducer (state = initialState, { payload, type }) {
           })
         })
       })
+    }
 
     case auctionActions.AUCTION_PROCESSED: {
       const { tid, player, value, type } = payload
