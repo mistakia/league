@@ -61,6 +61,23 @@ export const stats = [
 
 export const createStats = () => stats.reduce((o, key) => ({ ...o, [key]: 0 }), {})
 
+export const dstStats = [
+  'sk',
+  'int',
+  'ff', // forced fumble
+  'rf', // recovered fumble
+  'tno', // three and out
+  'fds', // fourth down stop
+  'pa', // points against
+  'ya', // yards against
+  'blk', // blocked kicks
+  'sfty', // safety
+  'tpr', // two point return
+  'td'
+]
+
+export const createDstStats = () => dstStats.reduce((o, key) => ({ ...o, [key]: 0 }), {})
+
 export const statHeaders = {
   pa: 'Passing Attempts',
   pc: 'Passing Completions',
