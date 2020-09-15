@@ -39,7 +39,7 @@ router.put('/:leagueId', async (req, res) => {
       'sqbrbwrte', 'swrte', 'bench', 'ps', 'ir', 'mqb', 'mrb', 'mwr', 'mte',
       'mdst', 'mk', 'faab', 'cap', 'pa', 'pc', 'py', 'ints', 'tdp', 'ra', 'ry',
       'tdr', 'rbrec', 'wrrec', 'terec', 'rec', 'recy', 'twoptc', 'tdrec', 'fuml', 'name',
-      'nteams', 'minBid'
+      'nteams', 'minBid', 'prtd', 'krtd'
     ]
 
     if (!field) {
@@ -59,12 +59,12 @@ router.put('/:leagueId', async (req, res) => {
       'sqbrbwrte', 'swrte', 'bench', 'ps', 'ir', 'mqb', 'mrb', 'mwr', 'mte',
       'mdst', 'mk', 'faab', 'cap', 'pa', 'pc', 'py', 'ints', 'tdp', 'ra', 'ry',
       'tdr', 'rbrec', 'wrrec', 'terec', 'rec', 'recy', 'twoptc', 'tdrec', 'fuml',
-      'nteams', 'minBid'
+      'nteams', 'minBid', 'prtd', 'krtd'
     ]
     const positives = [
       'sqb', 'srb', 'swr', 'ste', 'sk', 'sdst', 'srbwr', 'srbwrte',
       'sqbrbwrte', 'swrte', 'bench', 'ps', 'ir', 'mqb', 'mrb', 'mwr', 'mte',
-      'mdst', 'mk', 'faab', 'cap', 'minBid'
+      'mdst', 'mk', 'faab', 'cap', 'minBid', 'prtd', 'krtd'
     ]
     const floats = [
       'pa', 'pc', 'py', 'ra', 'ry', 'rbrec', 'wrrec', 'terec', 'rec', 'recy'
