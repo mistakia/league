@@ -1,15 +1,21 @@
 import { call, takeLatest, fork, select } from 'redux-saga/effects'
 
+import { getApp } from '@core/app'
 import { getScoreboard, getScoreboardUpdated } from './selectors'
 import { scoreboardActions } from './actions'
-import { fetchScoreboard } from '@core/api'
+import { fetchScoreboard, getRosters } from '@core/api'
 import { send, wsActions } from '@core/ws'
+import { constants } from '@common'
 
 export function * loadScoreboard () {
   const state = yield select(getScoreboard)
   const isLoaded = state.get('isLoaded')
   if (!isLoaded) {
+    const { leagueId } = yield select(getApp)
     const week = state.get('week')
+    if (week !== constants.season.week) {
+      yield fork(getRosters, { leagueId, week })
+    }
     yield call(fetchScoreboard, { week })
   }
 }
@@ -34,6 +40,10 @@ export function * reregister () {
 export function * loadWeek () {
   const scoreboard = yield select(getScoreboard)
   const week = scoreboard.get('week')
+  if (week !== constants.season.week) {
+    const { leagueId } = yield select(getApp)
+    yield fork(getRosters, { leagueId, week })
+  }
   yield call(fetchScoreboard, { week })
 }
 

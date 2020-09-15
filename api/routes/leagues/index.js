@@ -134,9 +134,19 @@ router.get('/:leagueId/rosters/?', async (req, res) => {
   const { logger, db } = req.app.locals
   try {
     const { leagueId } = req.params
+    const week = typeof req.query.week !== 'undefined' ? parseInt(req.query.week, 10) : constants.season.week
+
+    if (isNaN(week)) {
+      return res.status(400).send({ error: 'invalid week' })
+    }
+
+    if (week !== 0 && !constants.fantasyWeeks.includes(week)) {
+      return res.status(400).send({ error: 'invalid week' })
+    }
+
     const rosters = await db('rosters')
       .select('*')
-      .where({ lid: leagueId, year: constants.season.year, week: constants.season.week })
+      .where({ lid: leagueId, year: constants.season.year, week })
       .distinct('tid', 'year')
       .orderBy('week', 'desc')
 

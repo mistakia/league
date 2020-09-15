@@ -39,7 +39,7 @@ export function * loadRoster ({ payload }) {
 
 export function * loadRosters () {
   const { leagueId } = yield select(getApp)
-  yield call(getRosters, { leagueId })
+  yield call(getRosters, { leagueId, week: constants.season.week })
 }
 
 export function * updateRosterPlayerSlot ({ payload }) {
