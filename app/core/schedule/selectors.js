@@ -5,20 +5,20 @@ export function getSchedule (state) {
   return state.get('schedule')
 }
 
-export function getGameForWeekByPlayerId (state, { playerId }) {
+export function getGameByPlayerId (state, { playerId, week }) {
   const player = getPlayerById(state, { playerId })
-  return getGameForWeekByTeam(state, { team: player.team })
+  return getGameByTeam(state, { team: player.team, week })
 }
 
 export function getByeByTeam (state, { team }) {
   return state.getIn(['schedule', 'teams', team, 'bye'])
 }
 
-export function getGameForWeekByTeam (state, { team }) {
+export function getGameByTeam (state, { team, week = constants.season.week }) {
   const nflTeam = state.getIn(['schedule', 'teams', team])
   if (!nflTeam) {
     return null
   }
 
-  return nflTeam.games.find(g => g.wk === constants.season.week)
+  return nflTeam.games.find(g => g.wk === week)
 }
