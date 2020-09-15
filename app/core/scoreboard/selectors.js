@@ -14,14 +14,19 @@ import { getPlayerById } from '@core/players'
 import { getMatchupById } from '@core/matchups'
 import { getGameForWeekByPlayerId } from '@core/schedule'
 
+export function getScoreboard (state) {
+  return state.get('scoreboard')
+}
+
 function getStatsForPlayer (state, { player }) {
   const plays = state.getIn(['scoreboard', 'plays'])
+  const currentWeekPlays = plays.filter(p => p.week === constants.season.week)
 
   if (player.pos1 === 'DST') {
     const game = getGameForWeekByPlayerId(state, { playerId: player.player })
     const opponent = game.h === player.team ? game.v : game.h
 
-    const playStats = plays.valueSeq().toList().flatMap(p => {
+    const playStats = currentWeekPlays.valueSeq().toList().flatMap(p => {
       if (!p.possessionTeam) return []
 
       if (fixTeam(p.possessionTeam) !== opponent) return []
@@ -34,7 +39,7 @@ function getStatsForPlayer (state, { player }) {
     return { playStats: playStats.toJS(), points, stats }
   }
 
-  const playStats = plays.valueSeq().toList().flatMap(p => {
+  const playStats = currentWeekPlays.valueSeq().toList().flatMap(p => {
     if (!p.possessionTeam) return []
 
     // ignore plays by other teams
@@ -86,10 +91,6 @@ function getStatsForPlayer (state, { player }) {
   return { playStats: playStats.toJS(), points, stats }
 }
 
-export function getScoreboard (state) {
-  return state.get('scoreboard')
-}
-
 export function getScoreboardByTeamId (state, { tid }) {
   const starters = getStartersByTeamId(state, { tid })
   let points = 0
@@ -108,7 +109,8 @@ export function getScoreboardByTeamId (state, { tid }) {
 export function getScoreboardUpdated (state) {
   const scoreboard = getScoreboard(state)
   const plays = scoreboard.get('plays')
-  const play = plays.maxBy(x => x.updated)
+  const currentWeekPlays = plays.filter(p => p.week === constants.season.week)
+  const play = currentWeekPlays.maxBy(x => x.updated)
   return play ? play.updated : 0
 }
 
@@ -134,6 +136,8 @@ export function getPlaysByMatchupId (state, { mid }) {
 
   const plays = state.getIn(['scoreboard', 'plays'])
   const filteredPlays = plays.valueSeq().toList().filter(p => {
+    if (p.week !== constants.season.week) return false
+
     const matchSingleGsis = p.playStats.find(p => gsisids.includes(p.gsisId))
     if (matchSingleGsis) return true
 

@@ -7,7 +7,7 @@ export { espn }
 
 export const season = new Season()
 
-// MockDate.set(moment('1600016460', 'X').toDate())
+// MockDate.set(moment('1600056000', 'X').toDate())
 
 const getAvailableYears = () => {
   const arr = []

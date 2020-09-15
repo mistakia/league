@@ -1,13 +1,13 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getMatchups, getMatchupsForCurrentWeek, matchupsActions } from '@core/matchups'
+import { getMatchups, getMatchupsForSelectedWeek, matchupsActions } from '@core/matchups'
 
 import ScoreboardScores from './scoreboard-scores'
 
 const mapStateToProps = createSelector(
   getMatchups,
-  getMatchupsForCurrentWeek,
+  getMatchupsForSelectedWeek,
   (state, matchups) => ({ selected: state.get('selected'), matchups })
 )
 

@@ -2,7 +2,7 @@ export {
   getMatchups,
   getFilteredMatchups,
   getSelectedMatchup,
-  getMatchupsForCurrentWeek,
+  getMatchupsForSelectedWeek,
   getMatchupById
 } from './selectors'
 export { matchupsReducer } from './reducer'
