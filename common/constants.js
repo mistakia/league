@@ -59,7 +59,7 @@ export const stats = [
   'twoptc',
 
   'prtd', // punt return touchdown
-  'krtd', // kickoff return touchdown
+  'krtd' // kickoff return touchdown
 ]
 
 export const createStats = () => stats.reduce((o, key) => ({ ...o, [key]: 0 }), {})

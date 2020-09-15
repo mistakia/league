@@ -5,7 +5,7 @@ import calculateValues from './calculate-values'
 import * as constants from './constants'
 import getEligibleSlots from './get-eligible-slots'
 import Roster from './roster'
-import calculateDstStatsFromPlayStats from './calculate-dst-stats-from-play-stats'
+import calculateDstStatsFromPlays from './calculate-dst-stats-from-plays'
 import calculateDstPoints from './calculate-dst-points'
 import calculateStatsFromPlayStats from './calculate-stats-from-play-stats'
 import calculateStatsFromPlays from './calculate-stats-from-plays'
@@ -59,7 +59,7 @@ export {
   calculateStatsFromPlays,
   createDefaultLeague,
   getOptimizerPositionConstraints,
-  calculateDstStatsFromPlayStats,
+  calculateDstStatsFromPlays,
   calculateDstPoints,
   isOnReleaseWaivers,
   nth,

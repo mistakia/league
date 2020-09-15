@@ -1,7 +1,9 @@
 import * as constants from './constants'
 
-const calculateDstStatsFromPlayStats = (playStats) => {
+const calculateDstStatsFromPlays = (plays) => {
   const dstStats = constants.createDstStats()
+  dstStats.tno = plays.filter(p => p.drivePlayCount === 3 && p.playTypeNFL === 'PUNT').length
+  const playStats = plays.map(p => p.playStats).flat()
 
   for (const playStat of playStats) {
     switch (playStat.statId) {
@@ -197,4 +199,4 @@ const calculateDstStatsFromPlayStats = (playStats) => {
   return dstStats
 }
 
-export default calculateDstStatsFromPlayStats
+export default calculateDstStatsFromPlays
