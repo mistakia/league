@@ -162,6 +162,7 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 34:
         // punt return touchdown
+        stats.prtd += 1
         break
 
       case 35:
@@ -170,6 +171,7 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 36:
         // punt return touchdown (lateral)
+        stats.prtd += 1
         break
 
       case 37:
@@ -210,6 +212,7 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 46:
         // kickoff return touchdown
+        stats.krtd += 1
         break
 
       case 47:
@@ -218,6 +221,7 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 48:
         // kickoff return touchdown (lateral)
+        stats.krtd += 1
         break
 
       case 49:
@@ -434,8 +438,6 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 111:
         // completed air yard passing
-        stats.pa += 1
-        stats.pc += 1
         break
 
       case 112:
