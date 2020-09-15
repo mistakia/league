@@ -1,9 +1,8 @@
 import { List } from 'immutable'
 
-import { getStartersByTeamId } from '@core/rosters'
+import { getStartersByTeamId, getRosterByTeamId } from '@core/rosters'
 import { getCurrentLeague } from '@core/leagues'
 import {
-  constants,
   fixTeam,
   calculateStatsFromPlayStats,
   calculatePoints,
@@ -18,9 +17,15 @@ export function getScoreboard (state) {
   return state.get('scoreboard')
 }
 
+export function getScoreboardRosterByTeamId (state, { tid }) {
+  const week = state.getIn(['scoreboard', 'week'])
+  return getRosterByTeamId(state, { tid, week })
+}
+
 function getStatsForPlayer (state, { player }) {
   const plays = state.getIn(['scoreboard', 'plays'])
-  const currentWeekPlays = plays.filter(p => p.week === constants.season.week)
+  const week = state.getIn(['scoreboard', 'week'])
+  const currentWeekPlays = plays.filter(p => p.week === week)
 
   if (player.pos1 === 'DST') {
     const game = getGameForWeekByPlayerId(state, { playerId: player.player })
@@ -94,12 +99,13 @@ function getStatsForPlayer (state, { player }) {
 export function getScoreboardByTeamId (state, { tid }) {
   const starters = getStartersByTeamId(state, { tid })
   let points = 0
+  const week = state.getIn(['scoreboard', 'week'])
   const projected = starters.reduce((sum, player) => {
     const playerScoreboard = getStatsForPlayer(state, { player })
     if (playerScoreboard) points += playerScoreboard.points.total
     const add = playerScoreboard
       ? playerScoreboard.points.total
-      : player.getIn(['points', `${constants.season.week}`, 'total'], 0)
+      : player.getIn(['points', `${week}`, 'total'], 0)
     return add + sum
   }, 0)
 
@@ -109,7 +115,8 @@ export function getScoreboardByTeamId (state, { tid }) {
 export function getScoreboardUpdated (state) {
   const scoreboard = getScoreboard(state)
   const plays = scoreboard.get('plays')
-  const currentWeekPlays = plays.filter(p => p.week === constants.season.week)
+  const week = scoreboard.get('week')
+  const currentWeekPlays = plays.filter(p => p.week === week)
   const play = currentWeekPlays.maxBy(x => x.updated)
   return play ? play.updated : 0
 }
@@ -135,8 +142,9 @@ export function getPlaysByMatchupId (state, { mid }) {
   const gsispids = players.map(p => p.gsispid).filter(Boolean)
 
   const plays = state.getIn(['scoreboard', 'plays'])
+  const week = state.getIn(['scoreboard', 'week'])
   const filteredPlays = plays.valueSeq().toList().filter(p => {
-    if (p.week !== constants.season.week) return false
+    if (p.week !== week) return false
 
     const matchSingleGsis = p.playStats.find(p => gsisids.includes(p.gsisId))
     if (matchSingleGsis) return true

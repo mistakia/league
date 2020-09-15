@@ -12,13 +12,13 @@ export function getRosters (state) {
   return state.get('rosters')
 }
 
-export function getRosterRecordByTeamId (state, { tid }) {
+export function getRosterRecordByTeamId (state, { tid, week = constants.season.week }) {
   const rosters = getRosters(state)
-  return rosters.get(tid) || new RosterRecord()
+  return rosters.getIn([tid, week]) || new RosterRecord()
 }
 
-export function getRosterByTeamId (state, { tid }) {
-  const rec = getRosterRecordByTeamId(state, { tid })
+export function getRosterByTeamId (state, { tid, week }) {
+  const rec = getRosterRecordByTeamId(state, { tid, week })
   const league = getCurrentLeague(state)
   return new Roster({ roster: rec.toJS(), league })
 }
@@ -44,7 +44,13 @@ export function getActivePlayersByTeamId (state, { tid }) {
 export function getRostersForCurrentLeague (state) {
   const rosters = getRosters(state)
   const { leagueId } = getApp(state)
-  return rosters.filter(r => r.lid === leagueId)
+  const filtered = rosters.filter(w => {
+    const r = w.get(constants.season.week)
+    if (!r) return false
+    return r.lid === leagueId
+  })
+
+  return filtered.map(r => r.get(constants.season.week))
 }
 
 export function getAvailablePlayersForCurrentLeague (state) {
@@ -166,8 +172,7 @@ export function isPlayerEligible (state, { player, playerId }) {
 export function getCurrentTeamRosterRecord (state) {
   const rosters = getRosters(state)
   const { teamId } = getApp(state)
-  const roster = rosters.get(teamId)
-  return roster || new RosterRecord()
+  return rosters.getIn([teamId, constants.season.week], new RosterRecord())
 }
 
 export function getCurrentTeamRoster (state) {
@@ -229,7 +234,7 @@ export function getCurrentPlayers (state) {
   const rosters = getRosters(state)
   const { teamId, leagueId } = getApp(state)
   const league = state.get('leagues').get(leagueId)
-  const roster = rosters.get(teamId)
+  const roster = rosters.getIn([teamId, constants.season.week])
   if (!roster) {
     return {
       active: new List(),
