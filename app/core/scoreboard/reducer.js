@@ -1,4 +1,5 @@
 import { Map } from 'immutable'
+import moment from 'moment'
 
 import { scoreboardActions } from './actions'
 import { constants } from '@common'
@@ -6,7 +7,7 @@ import { constants } from '@common'
 const initialState = new Map({
   plays: new Map(),
   isLoaded: false,
-  week: constants.season.week
+  week: Math.max(moment().day() === 2 ? (constants.season.week - 1) : constants.season.week, 1)
 })
 
 export function scoreboardReducer (state = initialState, { payload, type }) {
@@ -18,6 +19,11 @@ export function scoreboardReducer (state = initialState, { payload, type }) {
         payload.data.forEach(play => {
           state.setIn(['plays', `${play.esbid}:${play.playId}`], play)
         })
+      })
+
+    case scoreboardActions.SCOREBOARD_SELECT_WEEK:
+      return state.merge({
+        week: payload.week
       })
 
     default:

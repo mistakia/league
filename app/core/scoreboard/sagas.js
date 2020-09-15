@@ -31,6 +31,12 @@ export function * reregister () {
   }
 }
 
+export function * loadWeek () {
+  const scoreboard = yield select(getScoreboard)
+  const week = scoreboard.get('week')
+  yield call(fetchScoreboard, { week })
+}
+
 //= ====================================
 //  WATCHERS
 // -------------------------------------
@@ -51,6 +57,10 @@ export function * watchWebSocketReconnected () {
   yield takeLatest(wsActions.WEBSOCKET_RECONNECTED, reregister)
 }
 
+export function * watchScoreboardSelectWeek () {
+  yield takeLatest(scoreboardActions.SCOREBOARD_SELECT_WEEK, loadWeek)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -59,5 +69,6 @@ export const scoreboardSagas = [
   fork(watchLoadScoreboard),
   fork(watchGetScoreboardFulfilled),
   fork(watchUpdateScoreboardPlays),
-  fork(watchWebSocketReconnected)
+  fork(watchWebSocketReconnected),
+  fork(watchScoreboardSelectWeek)
 ]

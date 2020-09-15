@@ -1,7 +1,5 @@
 import { Map } from 'immutable'
 
-import { constants } from '@common'
-
 export function getMatchups (state) {
   return state.get('matchups')
 }
@@ -30,8 +28,8 @@ export function getSelectedMatchup (state) {
   return items.find(m => m.uid === matchupId)
 }
 
-export function getMatchupsForCurrentWeek (state) {
+export function getMatchupsForSelectedWeek (state) {
   const matchups = state.getIn(['matchups', 'items'])
-  const week = constants.season.week || 1
+  const week = state.getIn(['scoreboard', 'week'])
   return matchups.filter(m => m.week === week)
 }

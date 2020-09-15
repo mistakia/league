@@ -4,7 +4,7 @@ import { getApp, appActions } from '@core/app'
 import { fetchMatchups, postMatchups } from '@core/api'
 import { matchupsActions } from './actions'
 import { getMatchups } from './selectors'
-import { constants } from '@common'
+import { getScoreboard } from '@core/scoreboard'
 
 export function * loadMatchups () {
   const { leagueId } = yield select(getApp)
@@ -19,7 +19,8 @@ export function * selectMatchup () {
   const state = yield select(getMatchups)
   const matchups = state.get('items')
   const { teamId } = yield select(getApp)
-  const week = constants.season.week || 1
+  const scoreboard = yield select(getScoreboard)
+  const week = scoreboard.get('week')
   const matchup = matchups.find(m => (m.aid === teamId || m.hid === teamId) && m.week === week)
   if (matchup) {
     yield put(matchupsActions.select(matchup.uid))
