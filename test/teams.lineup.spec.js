@@ -53,20 +53,23 @@ describe('API /teams - lineups', function () {
         .put('/api/teams/1/lineups')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player.player,
-          leagueId,
-          slot: constants.slots.RB
+          players: [{
+            player: player.player,
+            slot: constants.slots.RB
+          }],
+          leagueId
         })
 
       res.should.have.status(200)
       // eslint-disable-next-line
       res.should.be.json
 
-      res.body.slot.should.equal(constants.slots.RB)
-      res.body.player.should.equal(player.player)
-      res.body.week.should.equal(constants.season.week)
-      res.body.year.should.equal(constants.season.year)
-      res.body.tid.should.equal(teamId)
+      expect(res.body.length).to.equal(1)
+      res.body[0].slot.should.equal(constants.slots.RB)
+      res.body[0].player.should.equal(player.player)
+      res.body[0].week.should.equal(constants.season.week)
+      res.body[0].year.should.equal(constants.season.year)
+      res.body[0].tid.should.equal(teamId)
 
       const rosterRows = await knex('rosters_players')
         .join('rosters', 'rosters_players.rid', 'rosters.uid')
@@ -102,12 +105,25 @@ describe('API /teams - lineups', function () {
       await notLoggedIn(request)
     })
 
+    it('missing players', async () => {
+      const request = chai.request(server)
+        .put('/api/teams/1/lineups')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          leagueId: 1
+        })
+
+      await missing(request, 'players')
+    })
+
     it('missing slot', async () => {
       const request = chai.request(server)
         .put('/api/teams/1/lineups')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: 'x',
+          players: [{
+            player: 'x'
+          }],
           leagueId: 1
         })
 
@@ -120,7 +136,9 @@ describe('API /teams - lineups', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          slot: constants.slots.RB
+          players: [{
+            slot: constants.slots.RB
+          }]
         })
 
       await missing(request, 'player')
@@ -131,8 +149,10 @@ describe('API /teams - lineups', function () {
         .put('/api/teams/1/lineups')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: 'x',
-          slot: constants.slots.RB
+          players: [{
+            player: 'x',
+            slot: constants.slots.RB
+          }]
         })
 
       await missing(request, 'leagueId')
@@ -143,9 +163,11 @@ describe('API /teams - lineups', function () {
         .put('/api/teams/1/lineups')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: 'x',
           leagueId: 1,
-          slot: constants.slots.RB
+          players: [{
+            player: 'x',
+            slot: constants.slots.RB
+          }]
         })
 
       await invalid(request, 'player')
@@ -156,9 +178,11 @@ describe('API /teams - lineups', function () {
         .put('/api/teams/1/lineups')
         .set('Authorization', `Bearer ${user2}`)
         .send({
-          player: 'x',
           leagueId: 1,
-          slot: constants.slots.RB
+          players: [{
+            player: 'x',
+            slot: constants.slots.RB
+          }]
         })
 
       await invalid(request, 'teamId')
@@ -177,9 +201,11 @@ describe('API /teams - lineups', function () {
         .put('/api/teams/1/lineups')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player.player,
           leagueId: 1,
-          slot: constants.slots.RB
+          players: [{
+            player: player.player,
+            slot: constants.slots.RB
+          }]
         })
 
       await invalid(request, 'slot')
@@ -199,9 +225,11 @@ describe('API /teams - lineups', function () {
         .put('/api/teams/1/lineups')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player.player,
           leagueId: 1,
-          slot: constants.slots.RB
+          players: [{
+            slot: constants.slots.RB,
+            player: player.player
+          }]
         })
 
       await invalid(request, 'player')
@@ -213,9 +241,11 @@ describe('API /teams - lineups', function () {
         .put('/api/teams/1/lineups')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player.player,
           leagueId: 1,
-          slot: constants.slots.RB
+          players: [{
+            player: player.player,
+            slot: constants.slots.RB
+          }]
         })
 
       await invalid(request, 'player')
@@ -243,9 +273,11 @@ describe('API /teams - lineups', function () {
         .put('/api/teams/1/lineups')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player.player,
           leagueId: 1,
-          slot: constants.slots.WR,
+          players: [{
+            player: player.player,
+            slot: constants.slots.WR
+          }],
           week: 1
         })
 

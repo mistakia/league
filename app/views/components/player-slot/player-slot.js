@@ -24,26 +24,37 @@ export default class PlayerSlot extends React.Component {
           {isLocked ? 'Locked' : 'Move'}
         </Button>
       )
-    } else if (selected && !player.player && (slotPositions.includes(selected.pos) || slot === constants.slots.BENCH)) {
-      action = (
-        <Button
-          onClick={() => handleUpdate({ slot })}
-          small
-        >
-          Here
-        </Button>
-      )
-    } else if (selected && player.player && selected.player === player.player) {
-      action = (
-        <Button
-          onClick={() => handleSelect(null)}
-          small
-        >
-          Cancel
-        </Button>
-      )
-    } else if (slot === constants.slots.BENCH || selected) {
-      return null
+    } else if (selected) {
+      if (player.player && selected.player === player.player) {
+        action = (
+          <Button
+            onClick={() => handleSelect(null)}
+            small
+          >
+            Cancel
+          </Button>
+        )
+      } else if (slotPositions.includes(selected.pos)) {
+        action = (
+          <Button
+            onClick={() => handleUpdate({ slot, player })}
+            small
+          >
+            Here
+          </Button>
+        )
+      } else if (!player.player && slot === constants.slots.BENCH) {
+        action = (
+          <Button
+            onClick={() => handleUpdate({ slot })}
+            small
+          >
+            Here
+          </Button>
+        )
+      } else {
+        return null
+      }
     }
 
     const classNames = ['player__slot']

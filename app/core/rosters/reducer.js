@@ -82,11 +82,23 @@ export function rostersReducer (state = new Map(), { payload, type }) {
       })
     }
 
+    case rosterActions.PUT_ROSTER_FULFILLED: {
+      return state.withMutations(state => {
+        const tid = payload.data[0].tid
+        const players = state.getIn([tid, constants.season.week, 'players'])
+        if (!players) return state
+
+        payload.data.forEach(({ player, slot }) => {
+          const index = players.findIndex(p => p.player === player)
+          state.setIn([tid, constants.season.week, 'players', index, 'slot'], slot)
+        })
+      })
+    }
+
     case rosterActions.ROSTER_TRANSACTION:
     case rosterActions.POST_ACTIVATE_FULFILLED:
     case rosterActions.POST_DEACTIVATE_FULFILLED:
-    case rosterActions.POST_RESERVE_FULFILLED:
-    case rosterActions.PUT_ROSTER_FULFILLED: {
+    case rosterActions.POST_RESERVE_FULFILLED: {
       return state.withMutations(state => {
         const players = state.getIn([payload.data.tid, constants.season.week, 'players'])
         if (!players) return state

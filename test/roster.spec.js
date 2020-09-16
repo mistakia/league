@@ -216,4 +216,16 @@ describe('COMMON Roster', function () {
     const hasSlot2 = r.hasOpenBenchSlot('RB')
     hasSlot2.should.equal(true)
   })
+
+  it('getCountBySlot', () => {
+    // TODO
+  })
+
+  it('getPlayersBySlot', () => {
+    // TODO
+  })
+
+  it('isEligibleForSlot', () => {
+    // TODO
+  })
 })
