@@ -19,7 +19,7 @@ class PlayerRow extends Player {
       player, style, selectedPlayer, vbaseline, isSeasonView, isHosted, isWeekView,
       isStatsPassingAdvancedView, isStatsPassingPressureView, isStatsRushingView, week,
       isStatsReceivingView, overall, isLoggedIn, isRestOfSeasonView, selected, status,
-      baselines
+      baselines, teamId
     } = this.props
 
     const isSelected = selectedPlayer === player.player || selected === player.player
@@ -266,14 +266,14 @@ class PlayerRow extends Player {
 
     const classNames = ['player__row']
     if (isSelected) classNames.push('selected')
+    if (!player.tid) classNames.push('fa')
+    else if (player.tid === teamId) classNames.push('rostered')
 
     const projectionView = isRestOfSeasonView || isSeasonView || isWeekView
 
     if (isWeekView || isSeasonView) {
       const starterBaselinePlayerId = baselines.getIn([`${week}`, player.pos1, 'starter'])
-      const bestAvailablePlayerId = baselines.getIn([`${week}`, player.pos1, 'available'])
       if (player.player === starterBaselinePlayerId) classNames.push('starter__baseline')
-      else if (player.player === bestAvailablePlayerId) classNames.push('available__baseline')
     }
 
     return (
