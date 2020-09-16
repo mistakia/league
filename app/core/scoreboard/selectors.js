@@ -1,4 +1,5 @@
 import { List } from 'immutable'
+import moment from 'moment-timezone'
 
 import { getStartersByTeamId, getRosterByTeamId } from '@core/rosters'
 import { getCurrentLeague } from '@core/leagues'
@@ -11,7 +12,7 @@ import {
 } from '@common'
 import { getPlayerById } from '@core/players'
 import { getMatchupById } from '@core/matchups'
-import { getGameByPlayerId } from '@core/schedule'
+import { getGameByPlayerId, getGameByTeam } from '@core/schedule'
 
 export function getScoreboard (state) {
   return state.get('scoreboard')
@@ -152,10 +153,44 @@ export function getPlaysByMatchupId (state, { mid }) {
     return !!matchSingleGsisPid
   })
 
-  const sortedPlays = filteredPlays.sort((a, b) => b.timeOfDay - a.timeOfDay)
+  const league = getCurrentLeague(state)
+  let result = new List()
+  for (const play of filteredPlays) {
+    const game = getGameByTeam(state, { team: fixTeam(play.possessionTeam), week })
+    const playStats = play.playStats.filter(p => p.gsispid)
+    const grouped = {}
+    for (const playStat of playStats) {
+      const player = players.find(p => {
+        if (p.gsispid && p.gsispid === playStat.gsispid) return true
+        if (p.gsisid && p.gsisid === playStat.gsisId) return true
+        return false
+      })
+      if (!player) continue
+      if (!grouped[player.player]) grouped[player.player] = []
+      grouped[player.player].push(playStat)
+    }
+    const points = {}
+    const stats = {}
+    for (const playerId in grouped) {
+      const player = players.find(p => p.player === playerId)
+      const playStats = grouped[playerId]
+      stats[playerId] = calculateStatsFromPlayStats(playStats)
+      points[playerId] = calculatePoints({
+        stats: stats[playerId],
+        position: player.pos1,
+        league
+      })
+    }
+    const date = moment.tz(game.date, 'M/D/YYYY HH:mm', 'America/New_York')
+    const time = moment.utc(`${date.utc().format('YYYY-MM-DD')} ${play.timeOfDay}`, 'YYYY-MM-DD HH:mm:ss')
+    result = result.push({
+      time: time.unix(),
+      play,
+      game,
+      stats,
+      points
+    })
+  }
 
-  // TODO
-  // calculate points for each play
-
-  return sortedPlays
+  return result.sort((a, b) => b.time - a.time)
 }
