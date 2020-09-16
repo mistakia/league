@@ -29,19 +29,13 @@ export function waiversReducer (state = initialState, { payload, type }) {
   switch (type) {
     case waiverActions.POST_WAIVER_FULFILLED:
       return state.withMutations(state => {
-        const teams = state.get('teams')
-        let team = teams.get(payload.data.tid) || new Map()
-        team = team.set(payload.data.uid, new Waiver(payload.data))
-        state.setIn(['teams', payload.data.tid], team)
+        state.setIn(['teams', payload.data.tid, payload.data.uid], new Waiver(payload.data))
       })
 
     case appActions.AUTH_FULFILLED:
       return state.withMutations(state => {
-        const teams = state.get('teams')
         payload.data.waivers.forEach(waiver => {
-          let team = teams.get(waiver.tid) || new Map()
-          team = team.set(waiver.uid, new Waiver(waiver))
-          state.setIn(['teams', waiver.tid], team)
+          state.setIn(['teams', waiver.tid, waiver.uid], new Waiver(waiver))
         })
       })
 
