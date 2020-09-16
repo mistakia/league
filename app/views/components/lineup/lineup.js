@@ -17,8 +17,21 @@ export default class Lineup extends React.Component {
     this.setState({ selected })
   }
 
-  handleUpdate = ({ slot }) => {
-    this.props.update({ slot, player: this.state.selected.player })
+  handleUpdate = ({ slot, player }) => {
+    const players = [{ slot, player: this.state.selected.player }]
+    if (player.player) {
+      const { league, roster } = this.props
+      const r = new Roster({ roster: roster.toJS(), league })
+      const selectedSlot = this.state.selected.slot
+      const slot = r.isEligibleForSlot({ slot: selectedSlot, pos: player.pos1 })
+        ? selectedSlot
+        : constants.slots.BENCH
+      players.push({
+        player: player.player,
+        slot
+      })
+    }
+    this.props.update(players)
     this.setState({ selected: null })
   }
 

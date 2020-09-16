@@ -116,11 +116,10 @@ export const rosterActions = {
     }
   }),
 
-  update: ({ slot, player }) => ({
+  update: (players) => ({
     type: rosterActions.UPDATE_ROSTER_PLAYER_SLOT,
     payload: {
-      slot,
-      player
+      players
     }
   }),
 

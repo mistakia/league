@@ -297,8 +297,9 @@ export function playersReducer (state = initialState, { payload, type }) {
       })
 
     case rosterActions.PUT_ROSTER_FULFILLED: {
-      const { player, slot } = payload.data
-      return state.mergeIn(['items', player], { slot })
+      return state.withMutations(state => {
+        payload.data.forEach(({ player, slot }) => state.mergeIn(['items', player], { slot }))
+      })
     }
 
     case rosterActions.POST_ACTIVATE_FULFILLED:
