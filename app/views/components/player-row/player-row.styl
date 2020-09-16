@@ -8,16 +8,20 @@ $height = 30px
   &.selected .player__row-main
     background lighten($accentColor, 85%)
 
-  &.starter__baseline .player__row-main
-    background rgba(124, 181, 236, 0.4)
+  &.fa .player__row-main
+    background lighten(orange, 80%)
 
-  &.available__baseline .player__row-main
-    background rgba(0,0,0,0.12)
+  &.rostered .player__row-main
+    background lighten(yellow, 80%)
+
+  &.starter__baseline .player__row-main
+    border-left 4px solid red
 
 .player__row-main
   display flex
   height $height
   align-items center
+  border-left 4px solid transparent
   &:hover
     background white
 
