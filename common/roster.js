@@ -88,7 +88,7 @@ export default class Roster {
   }
 
   getPlayersBySlot (slot) {
-    return this.players.filter(p => p.slot === constants.slots[slot])
+    return this.players.filter(p => p.slot === slot)
   }
 
   removePlayer (player) {

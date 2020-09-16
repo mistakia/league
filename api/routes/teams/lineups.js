@@ -34,21 +34,13 @@ router.put('/?', async (req, res) => {
     const { teamId } = req.params
     const week = req.body.week || constants.season.week
     const year = req.body.year || constants.season.year
-    const { slot, player, leagueId } = req.body
+    const { players, leagueId } = req.body
 
     // verify teamId
     try {
       await verifyUserTeam({ userId: req.user.userId, teamId })
     } catch (error) {
       return res.status(400).send({ error: error.message })
-    }
-
-    if (typeof slot === 'undefined' || slot === null) {
-      return res.status(400).send({ error: 'missing slot' })
-    }
-
-    if (!player) {
-      return res.status(400).send({ error: 'missing player' })
     }
 
     if (!leagueId) {
@@ -59,14 +51,27 @@ router.put('/?', async (req, res) => {
       return res.status(400).send({ error: 'lineup locked' })
     }
 
-    const players = await db('player')
-      .where({ player })
-
-    if (!players.length) {
-      return res.status(400).send({ error: 'invalid player' })
+    if (!players || !Array.isArray(players)) {
+      return res.status(400).send({ error: 'missing players' })
     }
 
-    const playerRow = players[0]
+    for (const item of players) {
+      if (typeof item.slot === 'undefined' || item.slot === null) {
+        return res.status(400).send({ error: 'missing slot' })
+      }
+
+      if (!item.player) {
+        return res.status(400).send({ error: 'missing player' })
+      }
+    }
+
+    const playerIds = players.map(p => p.player)
+    const playerRows = await db('player')
+      .whereIn('player', playerIds)
+
+    if (playerRows.length !== playerIds.length) {
+      return res.status(400).send({ error: 'invalid player' })
+    }
 
     const leagues = await db('leagues').where({ uid: leagueId })
     if (!leagues.length) {
@@ -78,36 +83,56 @@ router.put('/?', async (req, res) => {
     const rosterRow = await getRoster({ tid, week, year })
     const roster = new Roster({ roster: rosterRow, league })
 
-    // verify player is on roster
-    const isActive = !!roster.active.find(p => p.player === player)
-    if (!isActive) {
-      return res.status(400).send({ error: 'invalid player' })
+    for (const item of players) {
+      // verify player is on roster
+      const isActive = !!roster.active.find(p => p.player === item.player)
+      if (!isActive) {
+        return res.status(400).send({ error: 'invalid player' })
+      }
+
+      roster.removePlayer(item.player)
     }
 
-    // verify player is eligible for slot
-    if (slot !== constants.slots.BENCH) {
-      const isEligible = roster.isEligibleForSlot({ slot, player, pos: playerRow.pos1 })
-      if (!isEligible) {
-        return res.status(400).send({ error: 'invalid slot' })
+    for (const item of players) {
+      const playerRow = playerRows.find(p => p.player === item.player)
+      // verify player is eligible for slot
+      if (item.slot !== constants.slots.BENCH) {
+        const isEligible = roster.isEligibleForSlot({ slot: item.slot, player: item.player, pos: playerRow.pos1 })
+        if (!isEligible) {
+          return res.status(400).send({ error: 'invalid slot' })
+        }
+      }
+
+      // verify player is not locked
+      const isLocked = await isPlayerLocked(item.player)
+      if (isLocked) {
+        return res.status(400).send({ error: 'player is locked, game has started' })
+      }
+
+      roster.addPlayer({ slot: item.slot, player: item.player, pos: playerRow.pos1 })
+    }
+
+    const data = []
+    for (const item of players) {
+      const updateid = await db('rosters_players')
+        .join('rosters', 'rosters_players.rid', 'rosters.uid')
+        .update({ slot: item.slot })
+        .where({ week, year, tid, player: item.player })
+
+      data.push({
+        slot: item.slot,
+        player: item.player,
+        week,
+        year,
+        tid
+      })
+
+      if (!updateid) {
+        return res.status(400).send({ error: 'lineup update unsuccessful' })
       }
     }
 
-    // verify player is not locked
-    const isLocked = await isPlayerLocked(player)
-    if (isLocked) {
-      return res.status(400).send({ error: 'player is locked, game has started' })
-    }
-
-    const updateid = await db('rosters_players')
-      .join('rosters', 'rosters_players.rid', 'rosters.uid')
-      .update({ slot })
-      .where({ week, year, tid, player })
-
-    if (!updateid) {
-      return res.status(400).send({ error: 'lineup update unsuccessful' })
-    }
-
-    res.send({ slot, player, week, year, tid })
+    res.send(data)
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })
