@@ -1,14 +1,41 @@
 .scoreboard__play
-  padding 5px
+
+  &.big
+    background lighten(yellow, 90%)
+
+  &.td
+    background lighten(yellow, 60%)
 
 .scoreboard__play-info
   display flex
-  justify-content center
   background $borderColor
   padding 2px 8px
   font-size 11px
+
+.scoreboard__play-info-time
+  flex 0 0 60px
+
+.scoreboard__play-info-play
+  flex 1
+  display flex
+  justify-content flex-end
 
 .scoreboard__play-description
   padding 4px
   font-size 12px
   line-height 1.2em
+
+.scoreboard__play-players
+  display flex
+  flex-direction column
+  width 100%
+
+.scoreboard__play-player
+  display flex
+  padding 4px 8px
+
+.scoreboard__play-player-name
+  flex 1
+
+.scoreboard__play-player-points
+  flex 0 0 50px

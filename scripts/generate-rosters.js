@@ -67,9 +67,7 @@ const run = async () => {
       }
 
       if (updates.length) {
-        console.log(updates)
         for (const { player, slot } of updates) {
-          console.log(rid)
           await db('rosters_players')
             .where({ rid, player })
             .update({ slot })
