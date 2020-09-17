@@ -17,12 +17,16 @@ export default class ScoreboardPlayByPlay extends React.Component {
     if (!is(this.props.plays.size, prevProps.plays.size)) {
       this._resizeAll()
     }
+
+    if (this.props.mid !== prevProps.mid && this._ref.current) {
+      this._ref.current.scrollToRow(0)
+    }
   }
 
   _resizeAll = () => {
     this._cache.clearAll()
-    if (this._list) {
-      this._list.recomputeRowHeights()
+    if (this._ref.current) {
+      this._ref.current.recomputeRowHeights()
     }
   }
 

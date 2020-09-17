@@ -142,9 +142,8 @@ export function getPlaysByMatchupId (state, { mid }) {
   const gsispids = players.map(p => p.gsispid).filter(Boolean)
 
   const plays = state.getIn(['scoreboard', 'plays'])
-  const week = state.getIn(['scoreboard', 'week'])
   const filteredPlays = plays.valueSeq().toList().filter(p => {
-    if (p.week !== week) return false
+    if (p.week !== matchup.week) return false
 
     const matchSingleGsis = p.playStats.find(p => gsisids.includes(p.gsisId))
     if (matchSingleGsis) return true
@@ -156,7 +155,7 @@ export function getPlaysByMatchupId (state, { mid }) {
   const league = getCurrentLeague(state)
   let result = new List()
   for (const play of filteredPlays) {
-    const game = getGameByTeam(state, { team: fixTeam(play.possessionTeam), week })
+    const game = getGameByTeam(state, { team: fixTeam(play.possessionTeam), week: matchup.week })
     const playStats = play.playStats.filter(p => p.gsispid)
     const grouped = {}
     for (const playStat of playStats) {
