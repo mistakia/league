@@ -4,7 +4,7 @@ import { getApp, appActions } from '@core/app'
 import { fetchMatchups, postMatchups } from '@core/api'
 import { matchupsActions } from './actions'
 import { getMatchups } from './selectors'
-import { getScoreboard } from '@core/scoreboard'
+import { getScoreboard, scoreboardActions } from '@core/scoreboard'
 
 export function * loadMatchups () {
   const { leagueId } = yield select(getApp)
@@ -43,6 +43,10 @@ export function * watchGetMatchupsFulfilled () {
   yield takeLatest(matchupsActions.GET_MATCHUPS_FULFILLED, selectMatchup)
 }
 
+export function * watchScoreboardSelectWeek () {
+  yield takeLatest(scoreboardActions.SCOREBOARD_SELECT_WEEK, selectMatchup)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -50,5 +54,6 @@ export function * watchGetMatchupsFulfilled () {
 export const matchupSagas = [
   fork(watchAuthFulfilled),
   fork(watchGetMatchupsFulfilled),
-  fork(watchGenerateMatchups)
+  fork(watchGenerateMatchups),
+  fork(watchScoreboardSelectWeek)
 ]
