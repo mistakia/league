@@ -1,19 +1,24 @@
 import React from 'react'
-import Highcharts from 'highcharts'
+import Highcharts from 'highcharts/highstock'
 import HighchartsReact from 'highcharts-react-official'
+
+import './scoreboard-over-time.styl'
 
 export default class ScoreboardOverTime extends React.Component {
   render = () => {
     const options = {
       chart: {
         zoomType: 'x',
+        type: 'spline',
         backgroundColor: 'transparent'
       },
       title: {
         text: ''
       },
       xAxis: {
-        type: 'datetime'
+        type: 'datetime',
+        ordinal: false,
+        breaks: this.props.breaks
       },
       yAxis: {
         title: {
@@ -27,13 +32,11 @@ export default class ScoreboardOverTime extends React.Component {
         enabled: false
       },
       series: [{
-        type: 'line',
         name: 'Home',
-        data: []
+        data: this.props.homeData
       }, {
-        type: 'line',
         name: 'Away',
-        data: []
+        data: this.props.awayData
       }]
     }
 
