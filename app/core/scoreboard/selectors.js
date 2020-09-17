@@ -180,6 +180,7 @@ export function getPlaysByMatchupId (state, { mid }) {
         position: player.pos1,
         league
       })
+      points[playerId].isHomePlayer = !!homeStarters.find(p => p.player === playerId)
     }
     const date = moment.tz(game.date, 'M/D/YYYY HH:mm', 'America/New_York')
     const time = moment.utc(`${date.utc().format('YYYY-MM-DD')} ${play.timeOfDay}`, 'YYYY-MM-DD HH:mm:ss')

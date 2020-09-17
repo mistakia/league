@@ -32,18 +32,18 @@ export default class ScoreboardPage extends React.Component {
             <ScoreboardScores />
           </Grid>
           <Grid container item xs={12} spacing={0}>
-            <Grid item xs={12} md={9}>
-              <div className='scoreboard__main'>
-                <ScoreboardTeam tid={matchup.aid} type='away' />
-                <ScoreboardSlots />
-                <ScoreboardTeam tid={matchup.hid} type='home' />
-              </div>
+            <Grid item xs={12} md={9} classes={{ root: 'scoreboard__main' }}>
+              <ScoreboardTeam tid={matchup.aid} type='away' />
+              <ScoreboardSlots />
+              <ScoreboardTeam tid={matchup.hid} type='home' />
             </Grid>
             <Grid item xs={12} md={3}>
-              <div>
-                <ScoreboardOverTime />
-                <ScoreboardPlayByPlay mid={matchup.uid} />
-              </div>
+              <ScoreboardPlayByPlay mid={matchup.uid} />
+            </Grid>
+          </Grid>
+          <Grid container item xs={12} spacing={0}>
+            <Grid item xs={12}>
+              <ScoreboardOverTime mid={matchup.uid} />
             </Grid>
           </Grid>
         </Grid>
