@@ -2,6 +2,14 @@ import React from 'react'
 import Highcharts from 'highcharts/highstock'
 import HighchartsReact from 'highcharts-react-official'
 
+const timezone = new Date().getTimezoneOffset()
+
+Highcharts.setOptions({
+  global: {
+    timezoneOffset: timezone
+  }
+})
+
 import './scoreboard-over-time.styl'
 
 export default class ScoreboardOverTime extends React.Component {
@@ -34,10 +42,22 @@ export default class ScoreboardOverTime extends React.Component {
       },
       series: [{
         name: home.name,
-        data: this.props.homeData
+        data: this.props.homeData,
+        color: 'red'
       }, {
         name: away.name,
-        data: this.props.awayData
+        data: this.props.awayData,
+        color: 'black'
+      }, {
+        name: `${home.name} Projection`,
+        data: this.props.homeProjection,
+        dashStyle: 'DashDot',
+        color: 'red'
+      }, {
+        name: `${away.name} Projection`,
+        data: this.props.awayProjection,
+        dashStyle: 'DashDot',
+        color: 'black'
       }]
     }
 

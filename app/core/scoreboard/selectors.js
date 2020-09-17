@@ -121,6 +121,32 @@ export function getScoreboardUpdated (state) {
   return play ? play.updated : 0
 }
 
+export function getStartersByMatchupId (state, { mid }) {
+  const matchup = getMatchupById(state, { mid })
+  if (!matchup) {
+    return {
+      matchup: {},
+      games: {},
+      home: [],
+      away: []
+    }
+  }
+
+  const home = getStartersByTeamId(state, { tid: matchup.hid })
+  const away = getStartersByTeamId(state, { tid: matchup.aid })
+  const players = home.concat(away)
+
+  const games = {}
+  for (const player of players) {
+    if (!player.player) continue
+    const game = getGameByTeam(state, { team: fixTeam(player.team), week: matchup.week })
+    if (!games[game.date]) games[game.date] = []
+    games[game.date].push(player)
+  }
+
+  return { matchup, games, home, away }
+}
+
 export function getStatsByPlayerId (state, { playerId }) {
   const player = getPlayerById(state, { playerId })
 
