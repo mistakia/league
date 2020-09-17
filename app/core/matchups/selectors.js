@@ -1,5 +1,7 @@
 import { Map } from 'immutable'
 
+import { getTeamById } from '@core/teams'
+
 export function getMatchups (state) {
   return state.get('matchups')
 }
@@ -26,6 +28,16 @@ export function getSelectedMatchup (state) {
 
   const items = matchups.get('items')
   return items.find(m => m.uid === matchupId)
+}
+
+export function getSelectedMatchupHomeTeam (state) {
+  const matchup = getSelectedMatchup(state)
+  return getTeamById(state, { tid: matchup.hid })
+}
+
+export function getSelectedMatchupAwayTeam (state) {
+  const matchup = getSelectedMatchup(state)
+  return getTeamById(state, { tid: matchup.aid })
 }
 
 export function getMatchupsForSelectedWeek (state) {

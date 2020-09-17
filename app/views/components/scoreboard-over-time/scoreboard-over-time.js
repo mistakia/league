@@ -6,6 +6,7 @@ import './scoreboard-over-time.styl'
 
 export default class ScoreboardOverTime extends React.Component {
   render = () => {
+    const { home, away } = this.props
     const options = {
       chart: {
         zoomType: 'x',
@@ -32,10 +33,10 @@ export default class ScoreboardOverTime extends React.Component {
         enabled: false
       },
       series: [{
-        name: 'Home',
+        name: home.name,
         data: this.props.homeData
       }, {
-        name: 'Away',
+        name: away.name,
         data: this.props.awayData
       }]
     }
