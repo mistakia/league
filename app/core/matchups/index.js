@@ -3,7 +3,9 @@ export {
   getFilteredMatchups,
   getSelectedMatchup,
   getMatchupsForSelectedWeek,
-  getMatchupById
+  getMatchupById,
+  getSelectedMatchupHomeTeam,
+  getSelectedMatchupAwayTeam
 } from './selectors'
 export { matchupsReducer } from './reducer'
 export { matchupSagas } from './sagas'
