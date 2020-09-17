@@ -2,12 +2,18 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { getPlaysByMatchupId } from '@core/scoreboard'
+import {
+  getSelectedMatchupHomeTeam,
+  getSelectedMatchupAwayTeam
+} from '@core/matchups'
 
 import ScoreboardOverTime from './scoreboard-over-time'
 
 const mapStateToProps = createSelector(
   getPlaysByMatchupId,
-  (plays) => {
+  getSelectedMatchupHomeTeam,
+  getSelectedMatchupAwayTeam,
+  (plays, home, away) => {
     const homeData = []
     const awayData = []
     let homePoints = 0
@@ -52,7 +58,7 @@ const mapStateToProps = createSelector(
       lastPlayTime = play.time
     }
 
-    return { homeData, awayData, breaks }
+    return { homeData, awayData, breaks, home, away }
   }
 )
 
