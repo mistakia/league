@@ -8,11 +8,13 @@ const log = debug('import:projections')
 debug.enable('league:player:get,import:projections')
 
 const { getPlayerId } = require('../utils')
+const { constants } = require('../common')
 const db = require('../db')
 
+const type = argv.season ? 'season' : constants.season.week
 const year = new Date().getFullYear()
 const timestamp = new Date()
-const getUrl = (pos) => `https://www.cbssports.com/fantasy/football/stats/${pos}/${year}/season/projections/ppr/`
+const getUrl = (pos) => `https://www.cbssports.com/fantasy/football/stats/${pos}/${year}/${type}/projections/ppr/`
 
 const positions = ['QB', 'RB', 'WR', 'TE']
 
