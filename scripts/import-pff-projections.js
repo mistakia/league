@@ -6,7 +6,7 @@ const debug = require('debug')
 const argv = require('yargs').argv
 
 const log = debug('import:projections')
-debug.enable('league:player:get,import:projections')
+debug.enable('import:projections')
 
 const { getPlayerId } = require('../utils')
 const db = require('../db')
@@ -77,6 +77,8 @@ const runOne = async (week) => {
   missing.forEach(m => log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`))
 
   if (argv.dry) {
+    log(`${inserts.length} projections`)
+    log(inserts[0])
     return
   }
 
@@ -85,6 +87,11 @@ const runOne = async (week) => {
 }
 
 const run = async () => {
+  // do not pull in any projections after the season has ended
+  if (constants.season.week > constants.season.finalWeek) {
+    return
+  }
+
   for (let week = constants.season.week; week < 17; week++) {
     await runOne(week)
   }

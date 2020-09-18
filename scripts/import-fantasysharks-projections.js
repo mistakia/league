@@ -5,16 +5,26 @@ const debug = require('debug')
 const argv = require('yargs').argv
 
 const log = debug('import:projections')
-debug.enable('league:player:get,import:projections')
+debug.enable('import:projections')
 
+const { constants } = require('../common')
 const { getPlayerId } = require('../utils')
 const db = require('../db')
 
-const URL = 'https://www.fantasysharks.com/apps/Projections/SeasonProjections.php?pos=ALL&format=json&l=2'
+const URL = argv.season
+  ? 'https://www.fantasysharks.com/apps/Projections/SeasonProjections.php?pos=ALL&format=json&l=2'
+  : 'https://www.fantasysharks.com/apps/Projections/WeeklyProjections.php?pos=ALL&format=json'
+const week = argv.season ? 0 : constants.season.week
 const year = new Date().getFullYear()
 const timestamp = new Date()
 
 const run = async () => {
+  // do not pull in any projections after the season has ended
+  if (constants.season.week > constants.season.finalWeek) {
+    return
+  }
+
+  log(URL)
   const data = await fetch(URL).then(res => res.json())
   const missing = []
 
@@ -63,7 +73,7 @@ const run = async () => {
     inserts.push({
       player: playerId,
       year,
-      week: 0,
+      week,
       sourceid: 1, // fantasy sharks sourceid
       timestamp,
       ...entry
@@ -74,17 +84,35 @@ const run = async () => {
   missing.forEach(m => log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`))
 
   if (argv.dry) {
-    return process.exit()
+    log(inserts[0])
+    return
   }
 
   log(`Inserting ${inserts.length} projections into database`)
   await db('projections').insert(inserts)
+}
+
+module.exports = run
+
+const main = async () => {
+  let error
+  try {
+    await run()
+  } catch (err) {
+    error = err
+    console.log(error)
+  }
+
+  await db('jobs').insert({
+    type: constants.jobs.PROJECTIONS_FANTASYSHARKS,
+    succ: error ? 0 : 1,
+    reason: error ? error.message : null,
+    timestamp: Math.round(Date.now() / 1000)
+  })
 
   process.exit()
 }
 
-try {
-  run()
-} catch (error) {
-  console.log(error)
+if (!module.parent) {
+  main()
 }
