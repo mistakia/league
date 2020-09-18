@@ -2,15 +2,14 @@ import React from 'react'
 import Highcharts from 'highcharts/highstock'
 import HighchartsReact from 'highcharts-react-official'
 
-const timezone = new Date().getTimezoneOffset()
+import './scoreboard-over-time.styl'
 
+const timezone = new Date().getTimezoneOffset()
 Highcharts.setOptions({
   global: {
     timezoneOffset: timezone
   }
 })
-
-import './scoreboard-over-time.styl'
 
 export default class ScoreboardOverTime extends React.Component {
   render = () => {

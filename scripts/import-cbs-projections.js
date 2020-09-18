@@ -5,13 +5,14 @@ const debug = require('debug')
 const argv = require('yargs').argv
 
 const log = debug('import:projections')
-debug.enable('league:player:get,import:projections')
+debug.enable('import:projections')
 
 const { getPlayerId } = require('../utils')
 const { constants } = require('../common')
 const db = require('../db')
 
 const type = argv.season ? 'season' : constants.season.week
+const week = argv.season ? 0 : constants.season.week
 const year = new Date().getFullYear()
 const timestamp = new Date()
 const getUrl = (pos) => `https://www.cbssports.com/fantasy/football/stats/${pos}/${year}/${type}/projections/ppr/`
@@ -19,10 +20,16 @@ const getUrl = (pos) => `https://www.cbssports.com/fantasy/football/stats/${pos}
 const positions = ['QB', 'RB', 'WR', 'TE']
 
 const run = async () => {
+  // do not pull in any projections after the season has ended
+  if (constants.season.week > constants.season.finalWeek) {
+    return
+  }
+
   const missing = []
   const items = []
   for (const position of positions) {
     const url = getUrl(position)
+    log(url)
     const $ = await fetchCheerioObject(url)
     $('main table tbody tr').map((i, el) => {
       const name = $(el, 'td').eq(0).find('.CellPlayerName--long a').text().trim()
@@ -94,7 +101,7 @@ const run = async () => {
 
     inserts.push({
       player: playerId,
-      week: 0,
+      week,
       year,
       sourceid: 2, // cbs sourceid
       timestamp,
@@ -106,17 +113,35 @@ const run = async () => {
   missing.forEach(m => log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`))
 
   if (argv.dry) {
-    return process.exit()
+    log(inserts[0])
+    return
   }
 
   log(`Inserting ${inserts.length} projections into database`)
   await db('projections').insert(inserts)
+}
+
+module.exports = run
+
+const main = async () => {
+  let error
+  try {
+    await run()
+  } catch (err) {
+    error = err
+    console.log(error)
+  }
+
+  await db('jobs').insert({
+    type: constants.jobs.PROJECTIONS_CBS,
+    succ: error ? 0 : 1,
+    reason: error ? error.message : null,
+    timestamp: Math.round(Date.now() / 1000)
+  })
 
   process.exit()
 }
 
-try {
-  run()
-} catch (err) {
-  console.log(err)
+if (!module.parent) {
+  main()
 }
