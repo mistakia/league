@@ -86,13 +86,10 @@ export function * loadStats ({ payload }) {
 }
 
 export function * deleteProjection ({ payload }) {
-  const { playerId } = payload
+  const { playerId, week } = payload
   const { userId, token } = yield select(getApp)
-  // const players = yield select(getPlayers)
-  // TODO
-  const week = 0 // players.get('week')
-  if (token) yield call(delProjection, { playerId, userId, week })
-  else yield putResolve(playerActions.removeProjection({ playerId }))
+  if (token) yield call(delProjection, { userId, week, playerId })
+  else yield putResolve(playerActions.removeProjection({ playerId, week }))
   yield call(calculateValues)
 }
 

@@ -114,10 +114,11 @@ export const playerActions = {
     }
   }),
 
-  deleteProjection: (playerId) => ({
+  deleteProjection: ({ playerId, week }) => ({
     type: playerActions.DELETE_PROJECTION,
     payload: {
-      playerId
+      playerId,
+      week
     }
   }),
 
