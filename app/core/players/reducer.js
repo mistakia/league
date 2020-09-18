@@ -60,9 +60,9 @@ export function playersReducer (state = initialState, { payload, type }) {
 
     case playerActions.REMOVE_PROJECTION:
     case playerActions.DEL_PROJECTION_FULFILLED: {
-      const { playerId } = payload.opts
+      const { playerId, week } = payload.opts
       return state.setIn(['items', playerId, 'projections'],
-        state.getIn(['items', playerId, 'projections']).filter(p => p.sourceid)
+        state.getIn(['items', playerId, 'projections']).filter(p => p.sourceid || p.week !== week)
       )
     }
 

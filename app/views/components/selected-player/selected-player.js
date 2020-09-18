@@ -12,7 +12,7 @@ import TeamName from '@components/team-name'
 import Position from '@components/position'
 import PlayerAge from '@components/player-age'
 import SelectedPlayerSeasonStats from '@components/selected-player-season-stats'
-import SelectedPlayerSeasonProjections from '@components/selected-player-season-projections'
+import SelectedPlayerProjections from '@components/selected-player-projections'
 import SelectedPlayerTeamStats from '@components/selected-player-team-stats'
 import SelectedPlayerTeamSituationSplits from '@components/selected-player-team-situation-splits'
 import SelectedPlayerTeamPositionSplits from '@components/selected-player-team-position-splits'
@@ -159,6 +159,7 @@ export default class SelectedPlayer extends React.Component {
             <Tab label='Matchup' />
             <Tab label='Projections' />
             <Tab label='Game Log' />
+            <Tab label='Stats' />
             <Tab label='Team Splits' />
             <Tab label='Oppurtunity' />
             <Tab label='Efficiency' />
@@ -174,24 +175,26 @@ export default class SelectedPlayer extends React.Component {
             Coming soon
           </TabPanel>
           <TabPanel value={value} index={3}>
-            <SelectedPlayerSeasonProjections />
-            <SelectedPlayerSeasonStats />
+            <SelectedPlayerProjections />
           </TabPanel>
           <TabPanel value={value} index={4}>
             Coming soon
           </TabPanel>
           <TabPanel value={value} index={5}>
+            <SelectedPlayerSeasonStats />
+          </TabPanel>
+          <TabPanel value={value} index={6}>
             <SelectedPlayerTeamStats />
             <SelectedPlayerTeamSituationSplits />
             <SelectedPlayerTeamPositionSplits />
           </TabPanel>
-          <TabPanel value={value} index={6}>
+          <TabPanel value={value} index={7}>
             Coming Soon
           </TabPanel>
-          <TabPanel value={value} index={7}>
+          <TabPanel value={value} index={8}>
             <SelectedPlayerEfficiencyStats />
           </TabPanel>
-          <TabPanel value={value} index={8}>
+          <TabPanel value={value} index={9}>
             Coming soon
           </TabPanel>
         </div>

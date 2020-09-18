@@ -14,25 +14,25 @@ export default class PlayerSelectedRow extends React.Component {
           <div className='row__single-metric'>{games}</div>}
         <div className='row__group'>
           <div className='row__group-body'>
-            <div className='player__row-metric'>{Math.round(stats.py) || 0}</div>
-            <div className='player__row-metric'>{Math.round(stats.tdp) || 0}</div>
-            <div className='player__row-metric'>{Math.round(stats.ints) || 0}</div>
+            <div className='player__row-metric'>{(stats.py || 0).toFixed(1)}</div>
+            <div className='player__row-metric'>{(stats.tdp || 0).toFixed(1)}</div>
+            <div className='player__row-metric'>{(stats.ints || 0).toFixed(1)}</div>
           </div>
         </div>
         <div className='row__group'>
           <div className='row__group-body'>
-            <div className='player__row-metric'>{Math.round(stats.ra) || 0}</div>
-            <div className='player__row-metric'>{Math.round(stats.ry) || 0}</div>
-            <div className='player__row-metric'>{Math.round(stats.tdr) || 0}</div>
-            <div className='player__row-metric'>{Math.round(stats.fuml) || 0}</div>
+            <div className='player__row-metric'>{(stats.ra || 0).toFixed(1)}</div>
+            <div className='player__row-metric'>{(stats.ry || 0).toFixed(1)}</div>
+            <div className='player__row-metric'>{(stats.tdr || 0).toFixed(1)}</div>
+            <div className='player__row-metric'>{(stats.fuml || 0).toFixed(1)}</div>
           </div>
         </div>
         <div className='row__group'>
           <div className='row__group-body'>
-            <div className='player__row-metric'>{Math.round(stats.trg) || 0}</div>
-            <div className='player__row-metric'>{Math.round(stats.rec) || 0}</div>
-            <div className='player__row-metric'>{Math.round(stats.recy) || 0}</div>
-            <div className='player__row-metric'>{Math.round(stats.tdrec) || 0}</div>
+            <div className='player__row-metric'>{(stats.trg || 0).toFixed(1)}</div>
+            <div className='player__row-metric'>{(stats.rec || 0).toFixed(1)}</div>
+            <div className='player__row-metric'>{(stats.recy || 0).toFixed(1)}</div>
+            <div className='player__row-metric'>{(stats.tdrec || 0).toFixed(1)}</div>
           </div>
         </div>
         {action}
