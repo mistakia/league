@@ -86,7 +86,7 @@ router.delete('/:playerId/?', async (req, res) => {
       year: constants.season.year
     })
 
-    res.send({ success: true })
+    res.send({ success: true, week, playerId })
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })
