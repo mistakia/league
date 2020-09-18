@@ -38,41 +38,41 @@ const runOne = async (week) => {
 
       if (argv.season) {
         // passing
-        data.py = $(el).find('td').eq(3).text().trim() || 0
-        data.tdp = $(el).find('td').eq(4).text().trim() || 0
-        data.ints = $(el).find('td').eq(5).text().trim() || 0
+        data.py = parseFloat($(el).find('td').eq(3).text().trim()) || 0
+        data.tdp = parseFloat($(el).find('td').eq(4).text().trim()) || 0
+        data.ints = parseFloat($(el).find('td').eq(5).text().trim()) || 0
 
         // rushing
-        data.ry = $(el).find('td').eq(6).text().trim() || 0
-        data.tdr = $(el).find('td').eq(7).text().trim() || 0
-        data.fuml = $(el).find('td').eq(14).text().trim() || 0
+        data.ry = parseFloat($(el).find('td').eq(6).text().trim()) || 0
+        data.tdr = parseFloat($(el).find('td').eq(7).text().trim()) || 0
+        data.fuml = parseFloat($(el).find('td').eq(14).text().trim()) || 0
 
         // receiving
-        data.rec = $(el).find('td').eq(8).text().trim() || 0
-        data.recy = $(el).find('td').eq(9).text().trim() || 0
-        data.tdrec = $(el).find('td').eq(10).text().trim() || 0
+        data.rec = parseFloat($(el).find('td').eq(8).text().trim()) || 0
+        data.recy = parseFloat($(el).find('td').eq(9).text().trim()) || 0
+        data.tdrec = parseFloat($(el).find('td').eq(10).text().trim()) || 0
 
-        data.twoptc = $(el).find('td').eq(13).text().trim() || 0
+        data.twoptc = parseFloat($(el).find('td').eq(13).text().trim()) || 0
 
         items.push({ params, data })
         lastProjection = parseFloat($(el).find('td').eq(15).text().trim())
       } else {
         // passing
-        data.py = $(el).find('td').eq(2).text().trim() || 0
-        data.tdp = $(el).find('td').eq(3).text().trim() || 0
-        data.ints = $(el).find('td').eq(4).text().trim() || 0
+        data.py = parseFloat($(el).find('td').eq(2).text().trim()) || 0
+        data.tdp = parseFloat($(el).find('td').eq(3).text().trim()) || 0
+        data.ints = parseFloat($(el).find('td').eq(4).text().trim()) || 0
 
         // rushing
-        data.ry = $(el).find('td').eq(5).text().trim() || 0
-        data.tdr = $(el).find('td').eq(6).text().trim() || 0
-        data.fuml = $(el).find('td').eq(13).text().trim() || 0
+        data.ry = parseFloat($(el).find('td').eq(5).text().trim()) || 0
+        data.tdr = parseFloat($(el).find('td').eq(6).text().trim()) || 0
+        data.fuml = parseFloat($(el).find('td').eq(13).text().trim()) || 0
 
         // receiving
-        data.rec = $(el).find('td').eq(7).text().trim() || 0
-        data.recy = $(el).find('td').eq(8).text().trim() || 0
-        data.tdrec = $(el).find('td').eq(9).text().trim() || 0
+        data.rec = parseFloat($(el).find('td').eq(7).text().trim()) || 0
+        data.recy = parseFloat($(el).find('td').eq(8).text().trim()) || 0
+        data.tdrec = parseFloat($(el).find('td').eq(9).text().trim()) || 0
 
-        data.twoptc = $(el).find('td').eq(12).text().trim() || 0
+        data.twoptc = parseFloat($(el).find('td').eq(12).text().trim()) || 0
 
         items.push({ params, data })
         lastProjection = parseFloat($(el).find('td').eq(14).text().trim())
