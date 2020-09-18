@@ -6,7 +6,7 @@ const debug = require('debug')
 const argv = require('yargs').argv
 
 const log = debug('import:projections')
-debug.enable('league:player:get,import:projections')
+debug.enable('import:projections')
 
 const { getPlayerId } = require('../utils')
 const db = require('../db')
@@ -14,7 +14,11 @@ const db = require('../db')
 const timestamp = new Date()
 const { constants } = require('../common')
 const year = constants.season.year
-const getURL = ({ position, page }) => `https://www.fftoday.com/rankings/playerproj.php?Season=${year}&PosID=${position}&LeagueID=&order_by=FFPts&sort_order=DESC&cur_page=${page}`
+
+const week = argv.season ? 0 : constants.season.week
+const getURL = ({ position, page }) => argv.season
+  ? `https://www.fftoday.com/rankings/playerproj.php?Season=${year}&PosID=${position}&LeagueID=&order_by=FFPts&sort_order=DESC&cur_page=${page}`
+  : `https://www.fftoday.com/rankings/playerwkproj.php?Season=${year}&GameWeek=${week}&PosID=${position}&LeagueID=&order_by=FFPts&sort_order=DESC&cur_page=${page}`
 
 const positions = {
   10: 'QB',
@@ -24,6 +28,11 @@ const positions = {
 }
 
 const run = async () => {
+  // do not pull in any projections after the season has ended
+  if (constants.season.week > constants.season.finalWeek) {
+    return
+  }
+
   const missing = []
   const items = []
   for (const position of Object.keys(positions)) {
@@ -31,6 +40,7 @@ const run = async () => {
     let page = 0
     while (count === 50) {
       const url = getURL({ position, page })
+      log(url)
       const $ = await fetchCheerioObject(url)
       count = $('table tr table tr tr:not(.tablehdr):not(.tableclmhdr)').length
       $('table tr table tr tr:not(.tablehdr):not(.tableclmhdr)').map((i, el) => {
@@ -97,7 +107,7 @@ const run = async () => {
 
     inserts.push({
       player: playerId,
-      week: 0,
+      week,
       year,
       sourceid: 5, // fftoday sourceid,
       timestamp,
@@ -109,17 +119,35 @@ const run = async () => {
   missing.forEach(m => log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`))
 
   if (argv.dry) {
-    return process.exit()
+    log(inserts[0])
+    return
   }
 
   log(`Inserting ${inserts.length} projections into database`)
   await db('projections').insert(inserts)
+}
+
+module.exports = run
+
+const main = async () => {
+  let error
+  try {
+    await run()
+  } catch (err) {
+    error = err
+    console.log(error)
+  }
+
+  await db('jobs').insert({
+    type: constants.jobs.PROJECTIONS_FFTODAY,
+    succ: error ? 0 : 1,
+    reason: error ? error.message : null,
+    timestamp: Math.round(Date.now() / 1000)
+  })
 
   process.exit()
 }
 
-try {
-  run()
-} catch (error) {
-  console.log(error)
+if (!module.parent) {
+  main()
 }

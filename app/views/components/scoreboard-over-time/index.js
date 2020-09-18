@@ -40,7 +40,7 @@ const mapStateToProps = createSelector(
         }
       }
       const start = moment.tz(date, 'M/D/YYYY HH:mm', 'America/New_York')
-      const end = start.clone().add(3, 'hours')//.add('25', 'minutes')
+      const end = start.clone().add(3, 'hours')
 
       const isLast = sorted[sorted.length - 1] === date
       if (hPoints || isLast) {

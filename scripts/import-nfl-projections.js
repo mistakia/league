@@ -6,7 +6,7 @@ const debug = require('debug')
 const argv = require('yargs').argv
 
 const log = debug('import:projections')
-debug.enable('league:player:get,import:projections')
+debug.enable('import:projections')
 
 const { getPlayerId } = require('../utils')
 const db = require('../db')
@@ -14,15 +14,19 @@ const db = require('../db')
 const timestamp = new Date()
 const { constants } = require('../common')
 const year = constants.season.year
-const getURL = (offset) => `https://fantasy.nfl.com/research/projections?position=O&sort=projectedPts&statCategory=projectedStats&statSeason=${year}&statType=seasonProjectedStats&offset=${offset + 1}`
+const getURL = (week, offset) => argv.season
+  ? `https://fantasy.nfl.com/research/projections?position=O&sort=projectedPts&statCategory=projectedStats&statSeason=${year}&statType=seasonProjectedStats&offset=${offset + 1}`
+  : `https://fantasy.nfl.com/research/projections?position=O&sort=projectedPts&statCategory=projectedStats&statSeason=${year}&statType=weekProjectedStats&statWeek=${week}&offset=${offset + 1}`
 
-const run = async () => {
+const runOne = async (week) => {
   const missing = []
   const items = []
 
   let lastProjection = 1
   while (lastProjection > 0) {
-    const $ = await fetchCheerioObject(getURL(items.length))
+    const url = getURL(week, items.length)
+    log(url)
+    const $ = await fetchCheerioObject(url)
     $('table.tableType-player tbody tr').map((i, el) => {
       const name = $(el, 'td').eq(0).find('a').text().trim()
       const meta = $(el, 'td').eq(0).find('em').text().split('-')
@@ -32,25 +36,47 @@ const run = async () => {
       const params = { name, team: team && team.trim(), pos }
       const data = {}
 
-      // passing
-      data.py = Math.round($(el).find('td').eq(3).text().trim()) || 0
-      data.tdp = Math.round($(el).find('td').eq(4).text().trim()) || 0
-      data.ints = Math.round($(el).find('td').eq(5).text().trim()) || 0
+      if (argv.season) {
+        // passing
+        data.py = $(el).find('td').eq(3).text().trim() || 0
+        data.tdp = $(el).find('td').eq(4).text().trim() || 0
+        data.ints = $(el).find('td').eq(5).text().trim() || 0
 
-      // rushing
-      data.ry = Math.round($(el).find('td').eq(6).text().trim()) || 0
-      data.tdr = Math.round($(el).find('td').eq(7).text().trim()) || 0
-      data.fuml = Math.round($(el).find('td').eq(14).text().trim()) || 0
+        // rushing
+        data.ry = $(el).find('td').eq(6).text().trim() || 0
+        data.tdr = $(el).find('td').eq(7).text().trim() || 0
+        data.fuml = $(el).find('td').eq(14).text().trim() || 0
 
-      // receiving
-      data.rec = Math.round($(el).find('td').eq(8).text().trim()) || 0
-      data.recy = Math.round($(el).find('td').eq(9).text().trim()) || 0
-      data.tdrec = Math.round($(el).find('td').eq(10).text().trim()) || 0
+        // receiving
+        data.rec = $(el).find('td').eq(8).text().trim() || 0
+        data.recy = $(el).find('td').eq(9).text().trim() || 0
+        data.tdrec = $(el).find('td').eq(10).text().trim() || 0
 
-      data.twoptc = Math.round($(el).find('td').eq(13).text().trim()) || 0
+        data.twoptc = $(el).find('td').eq(13).text().trim() || 0
 
-      items.push({ params, data })
-      lastProjection = parseFloat($(el).find('td').eq(15).text().trim())
+        items.push({ params, data })
+        lastProjection = parseFloat($(el).find('td').eq(15).text().trim())
+      } else {
+        // passing
+        data.py = $(el).find('td').eq(2).text().trim() || 0
+        data.tdp = $(el).find('td').eq(3).text().trim() || 0
+        data.ints = $(el).find('td').eq(4).text().trim() || 0
+
+        // rushing
+        data.ry = $(el).find('td').eq(5).text().trim() || 0
+        data.tdr = $(el).find('td').eq(6).text().trim() || 0
+        data.fuml = $(el).find('td').eq(13).text().trim() || 0
+
+        // receiving
+        data.rec = $(el).find('td').eq(7).text().trim() || 0
+        data.recy = $(el).find('td').eq(8).text().trim() || 0
+        data.tdrec = $(el).find('td').eq(9).text().trim() || 0
+
+        data.twoptc = $(el).find('td').eq(12).text().trim() || 0
+
+        items.push({ params, data })
+        lastProjection = parseFloat($(el).find('td').eq(14).text().trim())
+      }
     })
   }
 
@@ -72,7 +98,7 @@ const run = async () => {
 
     inserts.push({
       player: playerId,
-      week: 0,
+      week,
       year,
       sourceid: 4, // nfl sourceid,
       timestamp,
@@ -84,17 +110,51 @@ const run = async () => {
   missing.forEach(m => log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`))
 
   if (argv.dry) {
-    return process.exit()
+    log(`${inserts.length} projections`)
+    log(inserts[0])
+    return
   }
 
   log(`Inserting ${inserts.length} projections into database`)
   await db('projections').insert(inserts)
+}
+
+const run = async () => {
+  // do not pull in any projections after the season has ended
+  if (constants.season.week > constants.season.finalWeek) {
+    return
+  }
+
+  if (argv.season) {
+    await runOne()
+  } else {
+    for (let week = constants.season.week; week < 17; week++) {
+      await runOne(week)
+    }
+  }
+}
+
+module.exports = run
+
+const main = async () => {
+  let error
+  try {
+    await run()
+  } catch (err) {
+    error = err
+    console.log(error)
+  }
+
+  await db('jobs').insert({
+    type: constants.jobs.PROJECTIONS_NFL,
+    succ: error ? 0 : 1,
+    reason: error ? error.message : null,
+    timestamp: Math.round(Date.now() / 1000)
+  })
 
   process.exit()
 }
 
-try {
-  run()
-} catch (error) {
-  console.log(error)
+if (!module.parent) {
+  main()
 }

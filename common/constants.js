@@ -882,7 +882,7 @@ export const jobs = {
   NFL_PLAYERS: 24,
   NFL_PLAYER_IDS: 25,
 
-  WEEK_PROJECTIONS_FBG: 26
+  PROJECTIONS_FBG: 26
 }
 
 export const jobDetails = {
