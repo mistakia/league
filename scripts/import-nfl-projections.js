@@ -28,7 +28,7 @@ const runOne = async (week) => {
     log(url)
     const $ = await fetchCheerioObject(url)
     $('table.tableType-player tbody tr').map((i, el) => {
-      const name = $(el, 'td').eq(0).find('a').text().trim()
+      const name = $(el, 'td').eq(0).find('a').text().trim().replace('View News', '')
       const meta = $(el, 'td').eq(0).find('em').text().split('-')
       const pos = meta.shift().trim()
       const team = meta.pop()
