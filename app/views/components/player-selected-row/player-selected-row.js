@@ -14,25 +14,25 @@ export default class PlayerSelectedRow extends React.Component {
           <div className='row__single-metric'>{games}</div>}
         <div className='row__group'>
           <div className='row__group-body'>
-            <div className='player__row-metric'>{(stats.py || 0).toFixed(1)}</div>
-            <div className='player__row-metric'>{(stats.tdp || 0).toFixed(1)}</div>
-            <div className='player__row-metric'>{(stats.ints || 0).toFixed(1)}</div>
+            <div className='player__row-metric'>{stats.py ? (stats.py || 0).toFixed(1) : '-'}</div>
+            <div className='player__row-metric'>{stats.tdp ? (stats.tdp || 0).toFixed(1) : '-'}</div>
+            <div className='player__row-metric'>{stats.ints ? (stats.ints || 0).toFixed(1) : '-'}</div>
           </div>
         </div>
         <div className='row__group'>
           <div className='row__group-body'>
-            <div className='player__row-metric'>{(stats.ra || 0).toFixed(1)}</div>
-            <div className='player__row-metric'>{(stats.ry || 0).toFixed(1)}</div>
-            <div className='player__row-metric'>{(stats.tdr || 0).toFixed(1)}</div>
-            <div className='player__row-metric'>{(stats.fuml || 0).toFixed(1)}</div>
+            <div className='player__row-metric'>{stats.ra ? (stats.ra || 0).toFixed(1) : '-'}</div>
+            <div className='player__row-metric'>{stats.ry ? (stats.ry || 0).toFixed(1) : '-'}</div>
+            <div className='player__row-metric'>{stats.tdr ? (stats.tdr || 0).toFixed(1) : '-'}</div>
+            <div className='player__row-metric'>{stats.fuml ? (stats.fuml || 0).toFixed(1) : '-'}</div>
           </div>
         </div>
         <div className='row__group'>
           <div className='row__group-body'>
-            <div className='player__row-metric'>{(stats.trg || 0).toFixed(1)}</div>
-            <div className='player__row-metric'>{(stats.rec || 0).toFixed(1)}</div>
-            <div className='player__row-metric'>{(stats.recy || 0).toFixed(1)}</div>
-            <div className='player__row-metric'>{(stats.tdrec || 0).toFixed(1)}</div>
+            <div className='player__row-metric'>{stats.trg ? (stats.trg || 0).toFixed(1) : '-'}</div>
+            <div className='player__row-metric'>{stats.rec ? (stats.rec || 0).toFixed(1) : '-'}</div>
+            <div className='player__row-metric'>{stats.recy ? (stats.recy || 0).toFixed(1) : '-'}</div>
+            <div className='player__row-metric'>{stats.tdrec ? (stats.tdrec || 0).toFixed(1) : '-'}</div>
           </div>
         </div>
         {action}

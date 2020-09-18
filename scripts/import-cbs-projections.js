@@ -113,6 +113,7 @@ const run = async () => {
   missing.forEach(m => log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`))
 
   if (argv.dry) {
+    log(`${inserts.length} projections`)
     log(inserts[0])
     return
   }
