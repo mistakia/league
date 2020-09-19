@@ -38,10 +38,10 @@ router.get('/?', async (req, res) => {
     const query = db('player')
       .select(db.raw('player.*, min(players.status) as status, min(players.injury_status) as injuryStatus, min(players.injury_body_part) as injuryBodyPart, practice.status as gamestatus'))
       .leftJoin('players', 'player.player', 'players.player')
-      .leftJoin('practice', 'player.player', 'practice.player')
+      .leftJoin('practice', function () {
+        this.on('player.player', '=', 'practice.player').andOn('practice.week', '=', constants.season.week).andOn('practice.year', '=', constants.season.year)
+      })
       .whereIn('pos1', constants.positions)
-      .where('practice.week', constants.season.week)
-      .where('practice.year', constants.season.year)
       .groupBy('player.player')
     if (options.active && !options.inactive) {
       query.whereNot({ cteam: 'INA' })
