@@ -4,6 +4,7 @@ import { getApp } from '@core/app'
 import { waiverActions } from './actions'
 import {
   postWaiver,
+  putWaiver,
   postCancelWaiver,
   postWaiverOrder,
   fetchWaivers,
@@ -15,6 +16,11 @@ import { notificationActions } from '@core/notifications'
 export function * claim ({ payload }) {
   const { leagueId, teamId } = yield select(getApp)
   yield call(postWaiver, { leagueId, teamId, ...payload })
+}
+
+export function * update ({ payload }) {
+  const { leagueId, teamId } = yield select(getApp)
+  yield call(putWaiver, { leagueId, teamId, ...payload })
 }
 
 export function * cancel ({ payload }) {
@@ -55,6 +61,13 @@ export function * waiverOrderNotification () {
 export function * cancelWaiverNotification () {
   yield put(notificationActions.show({
     message: 'Waiver Cancelled',
+    severity: 'success'
+  }))
+}
+
+export function * updateNotification () {
+  yield put(notificationActions.show({
+    message: 'Waiver Updated',
     severity: 'success'
   }))
 }
@@ -123,17 +136,27 @@ export function * watchFilterWaivers () {
   yield takeLatest(waiverActions.FILTER_WAIVERS, filterWaivers)
 }
 
+export function * watchUpdateClaim () {
+  yield takeLatest(waiverActions.UPDATE_WAIVER_CLAIM, update)
+}
+
+export function * watchPutWaiverFulfilled () {
+  yield takeLatest(waiverActions.PUT_WAIVER_FULFILLED, updateNotification)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
 
 export const waiverSagas = [
   fork(watchClaim),
+  fork(watchUpdateClaim),
   fork(watchCancelClaim),
   fork(watchReorderWaivers),
   fork(watchPostWaiverOrderFulfilled),
   fork(watchPostWaiverFulfilled),
   fork(watchPostCancelWaiverFulfilled),
+  fork(watchPutWaiverFulfilled),
 
   fork(watchGetWaiversFulfilled),
   fork(watchFilterWaivers),

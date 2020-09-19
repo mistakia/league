@@ -8,6 +8,11 @@ export function getWaivers (state) {
   return state.get('waivers')
 }
 
+export function getWaiverById (state, { waiverId }) {
+  const waivers = getWaiversForCurrentTeam(state)
+  return waivers.get(waiverId)
+}
+
 export function getWaiverReportItems (state) {
   const items = state.getIn(['waivers', 'report']).toJS()
   const grouped = groupBy(items, 'player')
@@ -25,7 +30,7 @@ export function getWaiverReportItems (state) {
 
 export function getWaiversForCurrentTeam (state) {
   const { teamId } = getApp(state)
-  return state.getIn(['waivers', 'teams', teamId])
+  return state.getIn(['waivers', 'teams', teamId], new Map())
 }
 
 export function getWaiverPlayersForCurrentTeam (state) {

@@ -47,6 +47,18 @@ export default class PlayerContextMenu extends React.Component {
     this.props.hide()
   }
 
+  handleUpdateWaiver = () => {
+    const { player, waiverId } = this.props
+    this.props.showConfirmation({
+      id: 'WAIVER',
+      data: {
+        waiverId,
+        player
+      }
+    })
+    this.props.hide()
+  }
+
   handlePoach = () => {
     const { player } = this.props
     this.props.showConfirmation({
@@ -110,6 +122,16 @@ export default class PlayerContextMenu extends React.Component {
 
     // context menu for waiver claims
     if (waiverId) {
+      menuItems.push(
+        <MenuItem
+          key='update-waiver'
+          dense
+          onClick={this.handleUpdateWaiver}
+        >
+          Update Claim
+        </MenuItem>
+      )
+
       menuItems.push(
         <MenuItem
           key='cancel-waiver'

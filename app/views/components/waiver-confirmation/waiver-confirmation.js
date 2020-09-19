@@ -20,28 +20,23 @@ export default class WaiverConfirmation extends React.Component {
   constructor (props) {
     super(props)
 
+    const { waiver } = props
     this._isEligible = false
     this._drops = []
     this.state = {
-      drop: '',
-      type: '',
-      bid: 0,
+      drop: waiver ? waiver.drop : '',
+      type: waiver ? waiver.type : '',
+      bid: waiver ? waiver.bid : 0,
       error: false,
       missingType: false,
       missingDrop: false
     }
+
+    if (waiver) this._setType(waiver.type)
   }
 
-  handleDrop = (event) => {
-    const { value } = event.target
-    this.setState({ drop: value, missingDrop: false })
-  }
-
-  handleType = (event) => {
-    const { value } = event.target
-    this.setState({ type: value, drop: '', missingType: false })
-
-    const isActiveRoster = value === constants.waivers.FREE_AGENCY
+  _setType = (type) => {
+    const isActiveRoster = type === constants.waivers.FREE_AGENCY
     const { league, player, roster, rosterPlayers } = this.props
 
     const ros = new Roster({ roster: roster.toJS(), league })
@@ -65,6 +60,17 @@ export default class WaiverConfirmation extends React.Component {
     }
 
     this._drops = drops
+  }
+
+  handleDrop = (event) => {
+    const { value } = event.target
+    this.setState({ drop: value, missingDrop: false })
+  }
+
+  handleType = (event) => {
+    const { value } = event.target
+    this.setState({ type: value, drop: '', missingType: false })
+    this._setType(value)
   }
 
   handleBid = (event) => {
@@ -98,13 +104,17 @@ export default class WaiverConfirmation extends React.Component {
     }
 
     if (!error) {
-      this.props.claim({ bid, drop, type, player })
+      if (this.props.waiver) {
+        this.props.update({ waiverId: this.props.waiver.uid, drop, bid })
+      } else {
+        this.props.claim({ bid, drop, type, player })
+      }
       this.props.onClose()
     }
   }
 
   render = () => {
-    const { team, player, status } = this.props
+    const { team, player, status, waiver } = this.props
 
     const menuItems = []
     for (const rPlayer of this._drops) {
@@ -119,7 +129,7 @@ export default class WaiverConfirmation extends React.Component {
     }
 
     const typeItems = []
-    if (status.waiver.practice) {
+    if ((waiver && waiver.type === constants.waivers.FREE_AGENCY_PRACTICE) || status.waiver.practice) {
       typeItems.push(
         <MenuItem
           key='practice'
@@ -130,7 +140,7 @@ export default class WaiverConfirmation extends React.Component {
       )
     }
 
-    if (status.waiver.active) {
+    if ((waiver && waiver.type === constants.waivers.FREE_AGENCY) || status.waiver.active) {
       typeItems.push(
         <MenuItem
           key='active'
@@ -168,6 +178,7 @@ export default class WaiverConfirmation extends React.Component {
                 labelId='type-label'
                 error={this.state.missingType}
                 value={this.state.type}
+                disabled={Boolean(waiver)}
                 onChange={this.handleType}
                 label='Type'
               >

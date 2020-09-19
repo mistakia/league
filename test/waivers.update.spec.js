@@ -224,20 +224,24 @@ describe('API /waivers - update', function () {
       const waiverId = submitRes.body.uid
 
       // update bid
+      const bid = 10
       const res = await chai.request(server)
         .put(`/api/leagues/1/waivers/${waiverId}`)
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
           leagueId,
-          field: 'bid',
-          value: 10
+          bid
         })
 
       res.should.have.status(200)
       // eslint-disable-next-line
       res.should.be.json
-      res.body.value.should.equal(10)
+      res.body.bid.should.equal(bid)
+
+      const waivers = await knex('waivers').where({ uid: res.body.uid }).limit(1)
+      expect(waivers.length).to.equal(1)
+      expect(waivers[0].bid).to.equal(bid)
     })
 
     it('update drop', async () => {
@@ -272,14 +276,17 @@ describe('API /waivers - update', function () {
         .send({
           teamId,
           leagueId,
-          field: 'drop',
-          value: dropPlayer.player
+          drop: dropPlayer.player
         })
 
       res.should.have.status(200)
       // eslint-disable-next-line
       res.should.be.json
-      res.body.value.should.equal(dropPlayer.player)
+      res.body.drop.should.equal(dropPlayer.player)
+
+      const waivers = await knex('waivers').where({ uid: res.body.uid }).limit(1)
+      expect(waivers.length).to.equal(1)
+      expect(waivers[0].drop).to.equal(dropPlayer.player)
     })
   })
 
@@ -321,8 +328,7 @@ describe('API /waivers - update', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          field: 'bid',
-          value: 10
+          bid: 10
         })
 
       await missing(request, 'teamId')
@@ -333,35 +339,34 @@ describe('API /waivers - update', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1,
-          field: 'bid',
-          value: 10
+          bid: 10
         })
 
       await missing(request, 'leagueId')
     })
 
-    it('missing field', async () => {
+    it('invalid drop', async () => {
       const request = chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1,
           leagueId: 1,
-          value: 10
+          drop: 'x'
         })
 
-      await missing(request, 'field')
+      await invalid(request, 'drop')
     })
 
-    it('missing value', async () => {
+    it('invalid bid', async () => {
       const request = chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1,
           leagueId: 1,
-          field: 'bid'
+          bid: 'x'
         })
 
-      await missing(request, 'value')
+      await invalid(request, 'bid')
     })
 
     it('invalid teamId', async () => {
@@ -390,30 +395,16 @@ describe('API /waivers - update', function () {
       await invalid(request, 'leagueId')
     })
 
-    it('invalid field', async () => {
-      const request = chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
-        .set('Authorization', `Bearer ${user1}`)
-        .send({
-          teamId: 1,
-          leagueId: 1,
-          field: 'bids',
-          value: 10
-        })
-
-      await invalid(request, 'field')
-    })
-
     it('invalid bid - negative', async () => {
       const request = chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1,
           leagueId: 1,
-          field: 'bid',
-          value: -1
+          bid: -1
         })
 
-      await invalid(request, 'value')
+      await invalid(request, 'bid')
     })
 
     it('invalid bid - exceed cap', async () => {
@@ -422,37 +413,10 @@ describe('API /waivers - update', function () {
         .send({
           teamId: 1,
           leagueId: 1,
-          field: 'bid',
-          value: 201
+          bid: 201
         })
 
       await error(request, 'bid exceeds available faab')
-    })
-
-    it('invalid bid - float', async () => {
-      const request = chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
-        .set('Authorization', `Bearer ${user1}`)
-        .send({
-          teamId: 1,
-          leagueId: 1,
-          field: 'bid',
-          value: 1.2
-        })
-
-      await invalid(request, 'value')
-    })
-
-    it('invalid drop', async () => {
-      const request = chai.request(server).put(`/api/leagues/1/waivers/${waiverId}`)
-        .set('Authorization', `Bearer ${user1}`)
-        .send({
-          teamId: 1,
-          leagueId: 1,
-          field: 'drop',
-          value: 'x'
-        })
-
-      await invalid(request, 'value')
     })
 
     it('teamId does not belong to userId', async () => {
@@ -461,8 +425,7 @@ describe('API /waivers - update', function () {
         .send({
           teamId: 1,
           leagueId: 1,
-          field: 'bid',
-          value: 1
+          bid: 1
         })
 
       await invalid(request, 'teamId')
@@ -474,8 +437,7 @@ describe('API /waivers - update', function () {
         .send({
           teamId: 2,
           leagueId: 1,
-          field: 'bid',
-          value: 5
+          bid: 5
         })
 
       await invalid(request, 'waiverId')
@@ -496,8 +458,7 @@ describe('API /waivers - update', function () {
         .send({
           teamId: 1,
           leagueId: 1,
-          field: 'bid',
-          value: 1
+          bid: 1
         })
 
       await invalid(request, 'waiverId')
@@ -533,11 +494,10 @@ describe('API /waivers - update', function () {
         .send({
           teamId: 1,
           leagueId: 1,
-          field: 'drop',
-          value: dropPlayerId
+          drop: dropPlayerId
         })
 
-      await invalid(request, 'value')
+      await invalid(request, 'drop')
     })
 
     it('bid exceeds available cap', async () => {
@@ -545,10 +505,6 @@ describe('API /waivers - update', function () {
     })
 
     it('drop player exceeds roster limits', async () => {
-      // TODO
-    })
-
-    it('bid is less than zero', async () => {
       // TODO
     })
   })

@@ -4,12 +4,17 @@ export const waiverActions = {
   FILTER_WAIVERS: 'FILTER_WAIVERS',
 
   CANCEL_CLAIM: 'CANCEL_CLAIM',
+  UPDATE_WAIVER_CLAIM: 'UPDATE_WAIVER_CLAIM',
 
   REORDER_WAIVERS: 'REORDER_WAIVERS',
 
   POST_WAIVER_FAILED: 'POST_WAIVER_FAILED',
   POST_WAIVER_FULFILLED: 'POST_WAIVER_FULFILLED',
   POST_WAIVER_PENDING: 'POST_WAIVER_PENDING',
+
+  PUT_WAIVER_FAILED: 'PUT_WAIVER_FAILED',
+  PUT_WAIVER_PENDING: 'PUT_WAIVER_PENDING',
+  PUT_WAIVER_FULFILLED: 'PUT_WAIVER_FULFILLED',
 
   POST_CANCEL_WAIVER_FAILED: 'POST_CANCEL_WAIVER_FAILED',
   POST_CANCEL_WAIVER_FULFILLED: 'POST_CANCEL_WAIVER_FULFILLED',
@@ -58,6 +63,15 @@ export const waiverActions = {
     }
   }),
 
+  update: ({ waiverId, drop, bid }) => ({
+    type: waiverActions.UPDATE_WAIVER_CLAIM,
+    payload: {
+      waiverId,
+      drop,
+      bid
+    }
+  }),
+
   cancel: (waiverId) => ({
     type: waiverActions.CANCEL_CLAIM,
     payload: {
@@ -85,6 +99,29 @@ export const waiverActions = {
     payload: {
       opts,
       error
+    }
+  }),
+
+  putWaiverPending: opts => ({
+    type: waiverActions.PUT_WAIVER_PENDING,
+    payload: {
+      opts
+    }
+  }),
+
+  putWaiverFailed: (opts, error) => ({
+    type: waiverActions.PUT_WAIVER_FAILED,
+    payload: {
+      opts,
+      error
+    }
+  }),
+
+  putWaiverFulfilled: (opts, data) => ({
+    type: waiverActions.PUT_WAIVER_FULFILLED,
+    payload: {
+      opts,
+      data
     }
   }),
 
@@ -185,6 +222,12 @@ export const postWaiverActions = {
   failed: waiverActions.postWaiverFailed,
   pending: waiverActions.postWaiverPending,
   fulfilled: waiverActions.postWaiverFulfilled
+}
+
+export const putWaiverActions = {
+  pending: waiverActions.putWaiverPending,
+  failed: waiverActions.putWaiverFailed,
+  fulfilled: waiverActions.putWaiverFulfilled
 }
 
 export const postCancelWaiverActions = {
