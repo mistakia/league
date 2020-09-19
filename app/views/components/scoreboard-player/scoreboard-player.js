@@ -3,6 +3,7 @@ import React from 'react'
 import { constants } from '@common'
 import { Player, connect } from '@components/player'
 import PlayerNameExpanded from '@components/player-name-expanded'
+import ScoreboardPlayerGameStatus from '@components/scoreboard-player-game-status'
 
 import './scoreboard-player.styl'
 
@@ -21,9 +22,7 @@ class ScoreboardPlayer extends Player {
       <div className={classNames.join(' ')}>
         <div className='scoreboard__player-body'>
           <PlayerNameExpanded playerId={player.player} hideActions />
-          <div className='scoreboard__player-game-info' />
-          <div className='scoreboard__player-game-stats' />
-          <div className='scoreboard__player-drive-info' />
+          <ScoreboardPlayerGameStatus playerId={player.player} />
         </div>
         <div className='scoreboard__player-score metric'>
           {points}
