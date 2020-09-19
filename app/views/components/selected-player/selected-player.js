@@ -97,7 +97,7 @@ export default class SelectedPlayer extends React.Component {
 
             <div className='selected__player-header-item'>
               <label>Status</label>
-              {player.status || 'Active'}
+              {constants.status[player.status] ? player.status : (player.gamestatus || 'Active')}
             </div>
           </div>
           <div className='selected__player-header-section'>

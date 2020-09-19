@@ -26,7 +26,12 @@ export const status = {
   'Non-Football Illness': 'NFI-Ill',
   'Did Not Report': 'DNR',
   'Reserve/COVID-19': 'COV',
-  'Practice Squad': 'NFL-PS'
+  'Practice Squad': 'NFL-PS',
+  Questionable: 'Q',
+  Inactive: 'INA',
+  Out: 'O',
+  Doubtful: 'D',
+  IR: 'IR'
 }
 export const years = getAvailableYears()
 export const byeWeeks = [5, 6, 7, 8, 9, 10, 11, 13]
