@@ -33,7 +33,7 @@ class PlayerRoster extends Player {
         </div>
         {isClaim &&
           <div className='player__item-name table__cell'>
-            {claim.drop && <PlayerNameExpanded playerId={claim.drop} hideActions={isPoach} />}
+            {claim.drop && <PlayerNameExpanded playerId={claim.drop} hideActions={isClaim} />}
           </div>}
         {isWaiver &&
           <div className='metric table__cell'>

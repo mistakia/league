@@ -327,8 +327,8 @@ router.put('/:waiverId', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const { waiverId } = req.params
-    const { field, teamId, leagueId } = req.body
-    let { value } = req.body
+    const { teamId, leagueId, drop } = req.body
+    const bid = parseInt(req.body.bid || 0, 10)
 
     if (!teamId) {
       return res.status(400).send({ error: 'missing teamId' })
@@ -338,26 +338,8 @@ router.put('/:waiverId', async (req, res) => {
       return res.status(400).send({ error: 'missing leagueId' })
     }
 
-    const fields = ['bid', 'drop']
-    const ints = ['bid']
-    if (!field) {
-      return res.status(400).send({ error: 'missing field' })
-    }
-
-    if (typeof value === 'undefined') {
-      return res.status(400).send({ error: 'missing value' })
-    }
-
-    if (fields.indexOf(field) < 0) {
-      return res.status(400).send({ error: 'invalid field' })
-    }
-
-    if (ints.indexOf(field) >= 0) {
-      if (isNaN(value) || value < 0 || value % 1 !== 0) {
-        return res.status(400).send({ error: 'invalid value' })
-      }
-
-      value = parseInt(value, 10)
+    if (typeof bid !== 'undefined' && (isNaN(bid) || bid < 0 || bid % 1 !== 0)) {
+      return res.status(400).send({ error: 'invalid bid' })
     }
 
     // verify teamId, leagueId belongs to user
@@ -388,40 +370,39 @@ router.put('/:waiverId', async (req, res) => {
     const waiver = waivers[0]
 
     // if bid - make sure it is below available faab
-    if (field === 'bid' && value > team.faab) {
+    if (bid > team.faab) {
       return res.status(400).send({ error: 'bid exceeds available faab' })
     }
 
-    // if drop - make sure it is a suitable drop player
-    if (field === 'drop') {
-      const players = await db('player').where('player', waiver.player)
-      if (!players.length) {
-        return res.status(400).send({ error: 'invalid player' })
-      }
-      const playerRow = players[0]
+    const leagues = await db('leagues').where({ uid: leagueId })
+    if (!leagues.length) {
+      return res.status(400).send({ error: 'invalid leagueId' })
+    }
+    const league = leagues[0]
+    const players = await db('player').where('player', waiver.player).limit(1)
+    if (!players.length) {
+      return res.status(400).send({ error: 'invalid player' })
+    }
+    const playerRow = players[0]
 
-      // verify team has space for player on active roster
-      const leagues = await db('leagues').where({ uid: leagueId })
-      if (!leagues.length) {
-        return res.status(400).send({ error: 'invalid leagueId' })
+    // verify team has space for player on active roster
+    const rosterRow = await getRoster({ tid })
+    const roster = new Roster({ roster: rosterRow, league })
+    if (drop) {
+      if (!roster.has(drop)) {
+        return res.status(400).send({ error: 'invalid drop' })
       }
-      const league = leagues[0]
-      const rosterRow = await getRoster({ tid })
-      const roster = new Roster({ roster: rosterRow, league })
-      // verify drop player on roster
-      if (!roster.has(value)) {
-        return res.status(400).send({ error: 'invalid value' })
-      }
-      roster.removePlayer(value)
-      // verify team has roster space
-      const hasSlot = roster.hasOpenBenchSlot(playerRow.pos1)
-      if (!hasSlot) {
-        return res.status(400).send({ error: 'can not add player to roster, invalid roster' })
-      }
+      roster.removePlayer(drop)
+    }
+    const hasSlot = waiver.type === constants.waivers.FREE_AGENCY_PRACTICE
+      ? roster.hasOpenPracticeSquadSlot()
+      : roster.hasOpenBenchSlot(playerRow.pos1)
+    if (!hasSlot) {
+      return res.status(400).send({ error: 'exceeds roster limits' })
     }
 
-    await db('waivers').update({ [field]: value }).where({ uid: waiverId })
-    res.send({ value })
+    await db('waivers').update({ bid, drop }).where({ uid: waiverId })
+    res.send({ bid, drop, uid: waiverId })
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })

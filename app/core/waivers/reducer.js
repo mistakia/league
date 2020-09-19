@@ -32,6 +32,14 @@ export function waiversReducer (state = initialState, { payload, type }) {
         state.setIn(['teams', payload.data.tid, payload.data.uid], new Waiver(payload.data))
       })
 
+    case waiverActions.PUT_WAIVER_FULFILLED: {
+      const uid = parseInt(payload.data.uid, 10)
+      return state.mergeIn(['teams', payload.opts.teamId, uid], {
+        bid: payload.data.bid,
+        drop: payload.data.drop
+      })
+    }
+
     case appActions.AUTH_FULFILLED:
       return state.withMutations(state => {
         payload.data.waivers.forEach(waiver => {
