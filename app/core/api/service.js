@@ -198,6 +198,10 @@ export const api = {
     const url = `${BASE_URL}/leagues/${data.leagueId}/waivers/order`
     return { url, ...PUT(data) }
   },
+  putWaiver (data) {
+    const url = `${BASE_URL}/leagues/${data.leagueId}/waivers/${data.waiverId}`
+    return { url, ...PUT(data) }
+  },
   postCancelWaiver (data) {
     const url = `${BASE_URL}/leagues/${data.leagueId}/waivers/${data.waiverId}/cancel`
     return { url, ...POST(data) }

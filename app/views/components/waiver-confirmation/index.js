@@ -4,7 +4,7 @@ import { createSelector } from 'reselect'
 import { isPlayerEligible, getCurrentPlayers, getCurrentTeamRosterRecord } from '@core/rosters'
 import { getCurrentLeague } from '@core/leagues'
 import { getCurrentTeam } from '@core/teams'
-import { waiverActions } from '@core/waivers'
+import { waiverActions, getWaiverById } from '@core/waivers'
 import { getPlayerStatus } from '@core/players'
 
 import WaiverConfirmation from './waiver-confirmation'
@@ -16,18 +16,21 @@ const mapStateToProps = createSelector(
   getCurrentLeague,
   getPlayerStatus,
   getCurrentTeam,
-  (isEligible, rosterPlayers, roster, league, status, team) => ({
+  getWaiverById,
+  (isEligible, rosterPlayers, roster, league, status, team, waiver) => ({
     isEligible,
     rosterPlayers,
     roster,
     league,
     status,
-    team
+    team,
+    waiver
   })
 )
 
 const mapDispatchToProps = {
-  claim: waiverActions.claim
+  claim: waiverActions.claim,
+  update: waiverActions.update
 }
 
 export default connect(

@@ -31,6 +31,7 @@ export {
   postActivate,
   postDeactivate,
   postWaiver,
+  putWaiver,
   postPoach,
   postCancelWaiver,
   postWaiverOrder,
