@@ -1923,6 +1923,30 @@ CREATE TABLE `nflSnap` (
   UNIQUE KEY `snap` (`playId`,`nflId`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `practice`
+--
+
+DROP TABLE IF EXISTS `practice`;
+
+CREATE TABLE `practice` (
+  `player` varchar(7) NOT NULL,
+  `week` tinyint(2) NOT NULL,
+  `year` int(4) NOT NULL,
+  `status` varchar(100) DEFAULT NULL,
+  `inj` varchar(100) DEFAULT NULL,
+  `m` varchar(20) DEFAULT NULL,
+  `tu` varchar(20) DEFAULT NULL,
+  `w` varchar(20) DEFAULT NULL,
+  `th` varchar(20) DEFAULT NULL,
+  `f` varchar(20) DEFAULT NULL,
+  `s` varchar(20) DEFAULT NULL,
+  `su` varchar(20) DEFAULT NULL,
+  UNIQUE KEY `player` (`player`, `week`, `year`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
