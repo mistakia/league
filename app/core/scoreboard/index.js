@@ -6,6 +6,7 @@ export {
   getScoreboardByTeamId,
   getPlaysByMatchupId,
   getScoreboardRosterByTeamId,
-  getStartersByMatchupId
+  getStartersByMatchupId,
+  getGameStatusByPlayerId
 } from './selectors'
 export { scoreboardReducer } from './reducer'
