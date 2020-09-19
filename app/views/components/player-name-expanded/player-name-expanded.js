@@ -47,7 +47,7 @@ class PlayerNameExpanded extends Player {
               <div className='player__name-expanded-game'>
                 {gameTime} {opponent}
               </div>}
-            {!!(player.status || player.gamestatus) &&
+            {!!(constants.status[player.status] || player.gamestatus) &&
               <Tooltip title={constants.status[player.status] ? player.status : player.gamestatus} placement='bottom'>
                 <span className='player__label-status'>
                   {constants.status[player.status] || constants.status[player.gamestatus]}
