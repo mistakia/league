@@ -49,7 +49,8 @@ export const Player = new Record({
   nflid: null,
   gsisid: null,
   esbid: null,
-  gsispid: null
+  gsispid: null,
+  gamestatus: null
 })
 
 export function createPlayer ({
@@ -93,7 +94,8 @@ export function createPlayer ({
   nflid,
   gsisid,
   esbid,
-  gsispid
+  gsispid,
+  gamestatus
 }) {
   return new Player({
     player,
@@ -137,6 +139,7 @@ export function createPlayer ({
     nflid,
     gsisid,
     esbid,
-    gsispid
+    gsispid,
+    gamestatus
   })
 }
