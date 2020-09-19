@@ -21,6 +21,7 @@ const aliases = {
   'CJ Beathard': 'CB-1145',
   'Darrell Henderson Jr.': 'DH-2325',
   'DAndre Swift': 'DS-5175',
+  'Dante Fowler': 'DF-1481',
   'DJ Chark Jr.': 'DC-1418',
   'D.J. Chark Jr.': 'DC-1418',
   'DJ Moore': 'DM-2850',
@@ -32,6 +33,8 @@ const aliases = {
   'Henry Ruggs': 'HR-0200',
   'Irv Smith': 'IS-0275',
   'Irv Smith Jr': 'IS-0275',
+  'JC Tretter': 'JT-3350',
+  'Jedrick Wills': 'JW-4918',
   'JJ Arcega-Whiteside': 'JA-1975',
   'JK Dobbins': 'JD-2225',
   'JD McKissic': 'JM-3475',
@@ -158,6 +161,34 @@ const aliases = {
 
 }
 
+const fixPosition = (pos) => {
+  switch (pos) {
+    case 'C':
+      return 'OL'
+
+    case 'CB':
+      return 'DB'
+
+    case 'DE':
+      return 'DL'
+
+    case 'DT':
+      return 'DL'
+
+    case 'OG':
+      return 'OL'
+
+    case 'OT':
+      return 'OL'
+
+    case 'S':
+      return 'DB'
+
+    default:
+      return pos
+  }
+}
+
 const getPlayerId = async ({ name, pos, team }) => {
   if (aliases[name]) {
     return aliases[name]
@@ -172,7 +203,10 @@ const getPlayerId = async ({ name, pos, team }) => {
   })
 
   if (pos) {
-    query.where({ pos1: pos })
+    const p = fixPosition(pos)
+    query.where(function () {
+      this.where({ pos1: p }).orWhere({ pos2: p })
+    })
   }
 
   if (team) {
