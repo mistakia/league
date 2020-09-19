@@ -1,0 +1,23 @@
+.scoreboard__player-game-status
+  padding 4px 0
+
+  &.possession
+    .scoreboard__player-game-status-yardline
+      background rgba(0, 51, 0, 0.6)
+
+    &.redzone .scoreboard__player-game-status-yardline
+      background red
+
+.scoreboard__player-game-status-yardline-container
+  width 100%
+  height 3px
+  background #f0f0f0
+  display flex
+
+.scoreboard__player-game-status-yardline
+  flex 0 0 auto
+  height 100%
+  background $borderColor
+
+.home .possession .scoreboard__player-game-status-yardline-container
+  justify-content flex-end
