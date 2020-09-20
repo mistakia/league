@@ -67,24 +67,38 @@ export const stats = [
   'krtd' // kickoff return touchdown
 ]
 
-export const createStats = () => stats.reduce((o, key) => ({ ...o, [key]: 0 }), {})
-
-export const dstStats = [
-  'sk',
-  'int',
-  'ff', // forced fumble
-  'rf', // recovered fumble
-  'tno', // three and out
-  'fds', // fourth down stop
-  'pa', // points against
-  'ya', // yards against
-  'blk', // blocked kicks
-  'sfty', // safety
-  'tpr', // two point return
-  'td'
+export const kStats = [
+  'fgm', // field goal made
+  'fg19', // field goal <19
+  'fg29', // field goal 29
+  'fg39', // field goal 39
+  'fg49', // field goal 49
+  'fg50', // field goal 50
+  'xpm' // extra point made
 ]
 
-export const createDstStats = () => dstStats.reduce((o, key) => ({ ...o, [key]: 0 }), {})
+export const dstStats = [
+  'dsk', // sack
+  'dint', // int
+  'dff', // forced fumble
+  'drf', // recovered fumble
+  'dtno', // three and out
+  'dfds', // fourth down stop
+  'dpa', // points against
+  'dya', // yards against
+  'dblk', // blocked kicks
+  'dsfty', // safety
+  'dtpr', // two point return
+  'dtd' // touchdown
+]
+
+export const fantasyStats = [
+  ...stats,
+  ...kStats,
+  ...dstStats
+]
+
+export const createStats = () => fantasyStats.reduce((o, key) => ({ ...o, [key]: 0 }), {})
 
 export const statHeaders = {
   pa: 'Passing Attempts',
@@ -211,7 +225,7 @@ export const fullStats = [
   'fd', // first down
   'succ',
   'fd_pct', // first down pct*
-  ...stats
+  ...fantasyStats
 ]
 
 const passingQualifier = {

@@ -3,6 +3,9 @@ import * as constants from './constants'
 const calculateStatsFromPlayStats = (playStats) => {
   const stats = constants.createStats()
 
+  stats._fga = []
+  stats._fgm = []
+
   for (const playStat of playStats) {
     switch (playStat.statId) {
       case 2:
@@ -294,10 +297,15 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 69:
         // missed field goal
+        stats.fga += 1
+        stats._fga.push(playStat.yards)
         break
 
       case 70:
         // made field goal
+        stats.fgm += 1
+        stats.fga += 1
+        stats._fgm.push(playStat.yards)
         break
 
       case 71:
@@ -306,10 +314,13 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 72:
         // made extra point
+        stats.xpa += 1
+        stats.xpm += 1
         break
 
       case 73:
         // missed extra point
+        stats.xpa += 1
         break
 
       case 74:
