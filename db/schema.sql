@@ -1490,6 +1490,8 @@ CREATE TABLE `projections` (
   `dsf` decimal(4,1) DEFAULT NULL,
   `dtpr` decimal(4,1) DEFAULT NULL,
   `dtd` decimal(4,1) DEFAULT NULL,
+  `krtd` decimal(4,1) DEFAULT NULL,
+  `prtd` decimal(4,1) DEFAULT NULL,
   `week` int(2) NOT NULL,
   `year` int(4) NOT NULL,
   `timestamp` datetime NOT NULL,
