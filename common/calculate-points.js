@@ -47,7 +47,7 @@ const calculatePoints = ({ stats, position, league }) => {
     dpa: Math.max(stats.dpa - 20, 0) * -0.4, // points against
     dya: Math.max(stats.dya - 300, 0) * -0.02, // yards against
     dblk: stats.dblk * 3, // blocked kicks
-    dsfty: stats.dsfty * 2, // safety
+    dsf: stats.dsf * 2, // safety
     dtpr: stats.dtpr * 2, // two point return
     dtd: stats.dtd * 6
   }

@@ -173,7 +173,7 @@ const calculateDstStatsFromPlays = (plays) => {
 
       case 89:
         // safety
-        dstStats.dsfty += 1
+        dstStats.dsf += 1
         break
 
       case 91:
