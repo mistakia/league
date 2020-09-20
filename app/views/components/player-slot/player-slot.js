@@ -34,7 +34,7 @@ export default class PlayerSlot extends React.Component {
             Cancel
           </Button>
         )
-      } else if (slotPositions.includes(selected.pos)) {
+      } else if (!isLocked && slotPositions.includes(selected.pos)) {
         action = (
           <Button
             onClick={() => handleUpdate({ slot, player })}
