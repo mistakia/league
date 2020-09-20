@@ -1,6 +1,7 @@
 import { List } from 'immutable'
 import moment from 'moment-timezone'
 
+import { constants } from '@common'
 import { getStartersByTeamId, getRosterByTeamId } from '@core/rosters'
 import { getCurrentLeague } from '@core/leagues'
 import {
@@ -63,9 +64,9 @@ function getStatsForPlayer (state, { player }) {
 }
 
 export function getScoreboardByTeamId (state, { tid }) {
-  const starters = getStartersByTeamId(state, { tid })
-  let points = 0
   const week = state.getIn(['scoreboard', 'week'])
+  const starters = getStartersByTeamId(state, { tid, week })
+  let points = 0
   const projected = starters.reduce((sum, player) => {
     const playerScoreboard = getStatsForPlayer(state, { player })
     if (playerScoreboard) points += playerScoreboard.points.total
@@ -81,8 +82,7 @@ export function getScoreboardByTeamId (state, { tid }) {
 export function getScoreboardUpdated (state) {
   const scoreboard = getScoreboard(state)
   const plays = scoreboard.get('plays')
-  const week = scoreboard.get('week')
-  const currentWeekPlays = plays.filter(p => p.week === week)
+  const currentWeekPlays = plays.filter(p => p.week === constants.season.week)
   const play = currentWeekPlays.maxBy(x => x.updated)
   return play ? play.updated : 0
 }
@@ -98,8 +98,8 @@ export function getStartersByMatchupId (state, { mid }) {
     }
   }
 
-  const home = getStartersByTeamId(state, { tid: matchup.hid })
-  const away = getStartersByTeamId(state, { tid: matchup.aid })
+  const home = getStartersByTeamId(state, { tid: matchup.hid, week: matchup.week })
+  const away = getStartersByTeamId(state, { tid: matchup.aid, week: matchup.week })
   const players = home.concat(away)
 
   const games = {}
@@ -126,8 +126,8 @@ export function getPlaysByMatchupId (state, { mid }) {
   const matchup = getMatchupById(state, { mid })
   if (!matchup) return new List()
 
-  const homeStarters = getStartersByTeamId(state, { tid: matchup.hid })
-  const awayStarters = getStartersByTeamId(state, { tid: matchup.aid })
+  const homeStarters = getStartersByTeamId(state, { tid: matchup.hid, week: matchup.week })
+  const awayStarters = getStartersByTeamId(state, { tid: matchup.aid, week: matchup.week })
   const players = homeStarters.concat(awayStarters)
   const gsisids = players.map(p => p.gsisid).filter(Boolean)
   if (!gsisids.length) return new List()
