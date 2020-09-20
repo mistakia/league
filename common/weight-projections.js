@@ -1,4 +1,4 @@
-import { stats } from './constants'
+import { fantasyStats } from './constants'
 
 const removeFalsy = (obj) => {
   const newObj = {}
@@ -10,7 +10,7 @@ const removeFalsy = (obj) => {
 
 const weightProjections = ({ projections, weights = [], userId, week }) => {
   const data = {}
-  for (const r of stats) {
+  for (const r of fantasyStats) {
     data[r] = []
   }
 
