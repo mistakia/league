@@ -29,8 +29,8 @@ export function getPlayersByTeamId (state, { tid }) {
   return playerIds.map(playerId => getPlayerById(state, { playerId }))
 }
 
-export function getStartersByTeamId (state, { tid }) {
-  const roster = getRosterByTeamId(state, { tid })
+export function getStartersByTeamId (state, { tid, week }) {
+  const roster = getRosterByTeamId(state, { tid, week })
   const starterPlayerIds = roster.starters.map(p => p.player)
   return starterPlayerIds.map(playerId => getPlayerById(state, { playerId }))
 }
