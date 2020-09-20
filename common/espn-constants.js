@@ -10,20 +10,40 @@ export const stats = (d) => ({
   ra: d['23'],
   ry: d['24'],
   tdr: d['25'],
-  // fuml: item.Fum,
+  fuml: d['72'],
 
   // receiving
   trg: d['58'],
   rec: d['53'],
   recy: d['42'],
-  tdrec: d['43']
+  tdrec: d['43'],
+
+  // kicker
+  fg39: d['80'],
+  fg49: d['77'],
+  fg50: d['74'],
+  xpm: d['86'],
+
+  // return
+  prtd: d['102'],
+  krtd: d['101'],
+
+  // defense
+  dint: d['95'],
+  drf: d['96'],
+  dblk: d['97'],
+  dsf: d['98'],
+  dsk: d['99'],
+  dtd: (d['103'] || 0) + (d['104'] || 0) + (d['93'] || 0)
 })
 
 export const positionId = {
   1: 'QB',
   2: 'RB',
   3: 'WR',
-  4: 'TE'
+  4: 'TE',
+  5: 'K',
+  16: 'DST'
 }
 
 export const teamId = {
