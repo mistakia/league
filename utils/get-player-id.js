@@ -159,8 +159,9 @@ const aliases = {
   'Titans D/ST': 'TEN',
   'Titans DST': 'TEN',
   'Vikings D/ST': 'MIN',
-  'Vikings DST': 'MIN'
+  'Vikings DST': 'MIN',
 
+  'Football Team DST': 'WAS'
 }
 
 const fixPosition = (pos) => {
