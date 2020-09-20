@@ -87,7 +87,7 @@ export const dstStats = [
   'dpa', // points against
   'dya', // yards against
   'dblk', // blocked kicks
-  'dsfty', // safety
+  'dsf', // safety
   'dtpr', // two point return
   'dtd' // touchdown
 ]
