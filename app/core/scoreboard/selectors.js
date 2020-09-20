@@ -7,8 +7,7 @@ import {
   fixTeam,
   calculateStatsFromPlayStats,
   calculatePoints,
-  calculateDstStatsFromPlays,
-  calculateDstPoints
+  calculateDstStatsFromPlays
 } from '@common'
 import { getPlayerById } from '@core/players'
 import { getMatchupById } from '@core/matchups'
@@ -26,6 +25,7 @@ export function getScoreboardRosterByTeamId (state, { tid }) {
 function getStatsForPlayer (state, { player }) {
   const plays = state.getIn(['scoreboard', 'plays'])
   const week = state.getIn(['scoreboard', 'week'])
+  const league = getCurrentLeague(state)
   // TODO - filter deleted plays
   const currentWeekPlays = plays.filter(p => p.week === week)
 
@@ -39,8 +39,9 @@ function getStatsForPlayer (state, { player }) {
       .filter(p => p.possessionTeam && fixTeam(p.possessionTeam) === opponent)
 
     const playStats = opponentPlays.flatMap(p => p.playStats)
+    if (!playStats.size) return
     const stats = calculateDstStatsFromPlays(opponentPlays.toJS())
-    const points = calculateDstPoints(stats)
+    const points = calculatePoints({ stats, position: player.pos1, league })
     return { playStats: playStats.toJS(), points, stats }
   }
 
@@ -54,44 +55,9 @@ function getStatsForPlayer (state, { player }) {
   })
 
   if (!playStats.size) return
-  const league = getCurrentLeague(state)
 
   const stats = calculateStatsFromPlayStats(playStats.toJS())
   const points = calculatePoints({ stats, position: player.pos1, league })
-
-  if (player.pos1 === 'K') {
-    stats.fgs = []
-    stats.fga = 0
-    stats.fgm = 0
-    stats.xpa = 0
-    stats.xpm = 0
-    for (const playStat of playStats) {
-      switch (playStat.statId) {
-        case 69:
-          stats.fga += 1
-          break
-
-        case 70:
-          stats.fga += 1
-          stats.fgm += 1
-          stats.fgs.push(playStat.yards)
-          break
-
-        case 72:
-          stats.xpa += 1
-          stats.xpm += 1
-          break
-
-        case 73:
-          stats.xpa += 1
-          break
-      }
-    }
-
-    points.xp = (stats.xpm * 1)
-    points.fg = stats.fgs.reduce((sum, fg) => sum + Math.max(fg / 10, 3), 0)
-    points.total = points.total + points.xp + points.fg
-  }
 
   return { playStats: playStats.toJS(), points, stats }
 }
@@ -139,7 +105,8 @@ export function getStartersByMatchupId (state, { mid }) {
   const games = {}
   for (const player of players) {
     if (!player.player) continue
-    const game = getGameByTeam(state, { team: fixTeam(player.team), week: matchup.week })
+    const game = getGameByTeam(state, { team: player.team, week: matchup.week })
+    if (!game) continue
     if (!games[game.date]) games[game.date] = []
     games[game.date].push(player)
   }
@@ -168,6 +135,7 @@ export function getPlaysByMatchupId (state, { mid }) {
   const gsispids = players.map(p => p.gsispid).filter(Boolean)
 
   const plays = state.getIn(['scoreboard', 'plays'])
+  // TODO - match/filter dst plays
   const filteredPlays = plays.valueSeq().toList().filter(p => {
     if (p.week !== matchup.week) return false
 
@@ -182,6 +150,7 @@ export function getPlaysByMatchupId (state, { mid }) {
   let result = new List()
   for (const play of filteredPlays) {
     const game = getGameByTeam(state, { team: fixTeam(play.possessionTeam), week: matchup.week })
+    // TODO - calculate dst stats and points
     const playStats = play.playStats.filter(p => p.gsispid)
     const grouped = {}
     for (const playStat of playStats) {
