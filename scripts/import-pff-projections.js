@@ -60,7 +60,20 @@ const runOne = async (week) => {
       rec: player.recv_receptions || 0,
       trg: player.recv_targets || 0,
       tdrec: player.recv_td || 0,
-      recy: player.recv_yds || 0
+      recy: player.recv_yds || 0,
+
+      fg29: player.fg_made_20_29 || 0,
+      fg39: player.fg_made_30_39 || 0,
+      fg49: player.fg_made_40_49 || 0,
+      fg50: player.fg_made_50plus || 0,
+      xpm: player.pat_made || 0,
+
+      dff: player.dst_fumbles_forced || 0,
+      drf: player.dst_fumbles_recovered || 0,
+      dint: player.dst_int || 0,
+      dsk: player.dst_sacks || 0,
+      dsf: player.dst_safeties || 0,
+      dtd: player.dst_td || 0
     }
 
     inserts.push({

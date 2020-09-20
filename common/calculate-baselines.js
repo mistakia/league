@@ -163,9 +163,7 @@ const calculateBaselines = ({
 
   // sort by starter vor
   const vorAvailablePlayers = availablePlayerPool.map(p => ({
-    _value: ['K', 'DST'].includes(p.pos1)
-      ? 99999
-      : Math.round(Math.abs(result[p.pos1].starter.points[week].total - p.points[week].total) / result[p.pos1].starter.points[week].total),
+    _value: Math.round(Math.abs(result[p.pos1].starter.points[week].total - p.points[week].total) / result[p.pos1].starter.points[week].total),
     ...p
   }))
 
