@@ -161,7 +161,19 @@ const aliases = {
   'Vikings D/ST': 'MIN',
   'Vikings DST': 'MIN',
 
-  'Football Team DST': 'WAS'
+  'Football Team DST': 'WAS',
+  'Green Bay Packers': 'GB',
+  'Kansas City Chiefs': 'KC',
+  'Las Vegas Raiders': 'LV',
+  'Los Angeles Chargers': 'LAC',
+  'Los Angeles Rams': 'LAR',
+  'New England Patriots': 'NE',
+  'New Orleans Saints': 'NO',
+  'New York Giants': 'NYG',
+  'New York Jets': 'NYJ',
+  'San Francisco 49ers': 'SF',
+  'Tampa Bay Buccaneers': 'TB',
+  'Washington Football Team': 'WAS'
 }
 
 const fixPosition = (pos) => {
