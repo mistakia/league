@@ -37,12 +37,17 @@ router.get('/?', async (req, res) => {
       .whereNull('processed')
       .whereNull('cancelled')
 
+    const extensions = await db('extensions')
+      .whereIn('tid', teamIds)
+      .where('year', constants.season.year)
+
     res.send({
       user,
       teams,
       leagues,
       poaches,
       waivers,
+      extensions,
       sources
     })
 

@@ -1968,6 +1968,22 @@ CREATE TABLE `practice` (
   UNIQUE KEY `player` (`player`, `week`, `year`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `extensions`
+--
+
+DROP TABLE IF EXISTS `extensions`;
+
+CREATE TABLE `extensions` (
+  `player` varchar(7) NOT NULL,
+  `year` int(4) NOT NULL,
+  `type` tinyint(4) NOT NULL,
+  `tid` int(5) NOT NULL,
+  UNIQUE KEY `player` (`player`, `tid`, `year`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

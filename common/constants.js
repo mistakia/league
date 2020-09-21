@@ -472,6 +472,13 @@ export const transactionsDetail = {
   16: 'Reserve (COV)'
 }
 
+export const extensions = {
+  FRANCHISE: 1,
+  TRANSITION: 2,
+  ROOKIE: 3,
+  STANDARD: 4
+}
+
 export const nflTeams = [
   'ARI',
   'ATL',
