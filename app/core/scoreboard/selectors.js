@@ -1,10 +1,10 @@
 import { List } from 'immutable'
 import moment from 'moment-timezone'
 
-import { constants } from '@common'
 import { getStartersByTeamId, getRosterByTeamId } from '@core/rosters'
 import { getCurrentLeague } from '@core/leagues'
 import {
+  constants,
   fixTeam,
   calculateStatsFromPlayStats,
   calculatePoints,

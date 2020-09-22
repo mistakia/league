@@ -10,6 +10,7 @@ import calculateStatsFromPlayStats from './calculate-stats-from-play-stats'
 import calculateStatsFromPlays from './calculate-stats-from-plays'
 import calculatePrices from './calculate-prices'
 import getRosterSize from './get-roster-size'
+import getProjectedSnapsRemaining from './get-projected-snaps-remaining'
 import createDefaultLeague from './create-default-league'
 import getOptimizerPositionConstraints from './get-optimizer-position-constraints'
 import isOnReleaseWaivers from './is-on-release-waivers'
@@ -57,6 +58,7 @@ export {
   calculateStatsFromPlayStats,
   calculateStatsFromPlays,
   createDefaultLeague,
+  getProjectedSnapsRemaining,
   getOptimizerPositionConstraints,
   calculateDstStatsFromPlays,
   isOnReleaseWaivers,
