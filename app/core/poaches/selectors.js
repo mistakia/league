@@ -16,6 +16,20 @@ export function getActivePoachesAgainstMyPlayers (state) {
   return poaches.filter(p => playerIds.includes(p.player))
 }
 
+export function getPoachPlayersForCurrentTeam (state) {
+  let poaches = getPoachesForCurrentLeague(state)
+  const { teamId } = getApp(state)
+
+  for (const poach of poaches.values()) {
+    if (poach.tid !== teamId) continue
+    const playerId = poach.player
+    const player = getPlayerById(state, { playerId })
+    poaches = poaches.setIn([playerId, 'player'], player)
+  }
+
+  return poaches.valueSeq().toList()
+}
+
 export function getPoachPlayersForCurrentLeague (state) {
   let poaches = getPoachesForCurrentLeague(state)
 

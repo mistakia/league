@@ -29,6 +29,8 @@ import {
   getCurrentTeamRosterRecord,
   getCurrentPlayers
 } from './selectors'
+import { poachActions, getPoachPlayersForCurrentTeam } from '@core/poaches'
+import { waiverActions, getWaiverPlayersForCurrentTeam } from '@core/waivers'
 import { getCurrentLeague } from '@core/leagues'
 import Worker from 'workerize-loader?inline!./worker' // eslint-disable-line import/no-webpack-loader-syntax
 
@@ -57,7 +59,19 @@ export function * deactivate ({ payload }) {
   yield call(postDeactivate, { teamId, leagueId, ...payload })
 }
 
-export function * setPlayerLineupContribution ({ payload }) {
+export function * setWaiverPlayerLineupContribution ({ payload }) {
+  yield call(setPlayerLineupContribution, { playerId: payload.data.player })
+}
+
+export function * setPoachPlayerLineupContribution ({ payload }) {
+  yield call(setPlayerLineupContribution, { playerId: payload.data.player })
+}
+
+export function * setSelectedPlayerLineupContribution ({ payload }) {
+  yield call(setPlayerLineupContribution, { playerId: payload.player })
+}
+
+export function * setPlayerLineupContribution ({ playerId }) {
   const currentRoster = yield select(getCurrentTeamRosterRecord)
   const week = Math.max(constants.season.week, 1)
   if (!currentRoster.getIn(['lineups', `${week}`])) {
@@ -65,7 +79,7 @@ export function * setPlayerLineupContribution ({ payload }) {
   }
   const projectedContribution = {}
   const playerItems = yield select(getAllPlayers)
-  const player = playerItems.get(payload.player)
+  const player = playerItems.get(playerId)
   const playerData = yield call(calculatePlayerLineupContribution, { player })
   projectedContribution[player.player] = playerData
   yield put(playerActions.setProjectedContribution(projectedContribution))
@@ -158,9 +172,22 @@ export function * projectLineups () {
     projectedContribution[player.player] = playerData
   }
 
-  yield put(playerActions.setProjectedContribution(projectedContribution))
+  const poaches = yield select(getPoachPlayersForCurrentTeam)
+  for (const poach of poaches.values()) {
+    const playerData = yield call(calculatePlayerLineupContribution, { player: poach.player })
+    projectedContribution[poach.player.player] = playerData
+  }
 
-  // TODO - calculate for poaches & waivers
+  const claims = yield select(getWaiverPlayersForCurrentTeam)
+  const claimTypes = ['active', 'poach', 'practice']
+  for (const type of claimTypes) {
+    for (const claim of claims[type].values()) {
+      const playerData = yield call(calculatePlayerLineupContribution, { player: claim.player })
+      projectedContribution[claim.player.player] = playerData
+    }
+  }
+
+  yield put(playerActions.setProjectedContribution(projectedContribution))
 }
 
 export function * projectTrade () {
@@ -295,7 +322,15 @@ export function * watchSetRosterReserve () {
 }
 
 export function * watchPlayersSelectPlayer () {
-  yield takeLatest(playerActions.PLAYERS_SELECT_PLAYER, setPlayerLineupContribution)
+  yield takeLatest(playerActions.PLAYERS_SELECT_PLAYER, setSelectedPlayerLineupContribution)
+}
+
+export function * watchPostWaiverFulfilled () {
+  yield takeLatest(waiverActions.POST_WAIVER_FULFILLED, setWaiverPlayerLineupContribution)
+}
+
+export function * watchPostPoachFulfilled () {
+  yield takeLatest(poachActions.POST_POACH_FULFILLED, setPoachPlayerLineupContribution)
 }
 
 export function * watchReleasePlayer () {
@@ -334,6 +369,8 @@ export const rosterSagas = [
   fork(watchDeactivatePlayer),
   fork(watchAuthFulfilled),
 
+  fork(watchPostWaiverFulfilled),
+  fork(watchPostPoachFulfilled),
   fork(watchPlayersSelectPlayer),
 
   fork(watchProjectLineups),
