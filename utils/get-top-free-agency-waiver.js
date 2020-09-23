@@ -17,8 +17,12 @@ module.exports = async (leagueId) => {
     .join('teams', 'waivers.tid', 'teams.uid')
     .join('player', 'waivers.player', 'player.player')
     .joinRaw('left join schedule on player.cteam = schedule.v or player.cteam = schedule.h')
-    .where('schedule.wk', constants.season.week)
-    .where('schedule.seas', constants.season.year)
+    .where(function () {
+      this.where('schedule.wk', constants.season.week).orWhere('schedule.wk', null)
+    })
+    .where(function () {
+      this.where('schedule.seas', constants.season.year).orWhere('schedule.seas', null)
+    })
     .whereNull('processed')
     .whereNull('cancelled')
     .where('type', constants.waivers.FREE_AGENCY)
@@ -44,6 +48,7 @@ module.exports = async (leagueId) => {
 
   const now = moment()
   const filtered = waivers.filter(player => {
+    if (!player.date) return true
     const gameStart = moment.tz(player.date, 'M/D/YYYY H:m', 'America/New_York')
     return now.isBefore(gameStart)
   })

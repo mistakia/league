@@ -130,6 +130,10 @@ describe('API /waivers - free agency', function () {
     it('free agent rookie waiver w/ full active roster', async () => {
 
     })
+
+    it('free agent waiver for player not on nfl active roster', async () => {
+
+    })
   })
 
   describe('errors', function () {
