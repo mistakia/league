@@ -172,10 +172,13 @@ export function * projectLineups () {
     projectedContribution[player.player] = playerData
   }
 
+  yield put(playerActions.setProjectedContribution(projectedContribution))
+
+  const claimContribution = {}
   const poaches = yield select(getPoachPlayersForCurrentTeam)
   for (const poach of poaches.values()) {
     const playerData = yield call(calculatePlayerLineupContribution, { player: poach.player })
-    projectedContribution[poach.player.player] = playerData
+    claimContribution[poach.player.player] = playerData
   }
 
   const claims = yield select(getWaiverPlayersForCurrentTeam)
@@ -183,11 +186,11 @@ export function * projectLineups () {
   for (const type of claimTypes) {
     for (const claim of claims[type].values()) {
       const playerData = yield call(calculatePlayerLineupContribution, { player: claim.player })
-      projectedContribution[claim.player.player] = playerData
+      claimContribution[claim.player.player] = playerData
     }
   }
 
-  yield put(playerActions.setProjectedContribution(projectedContribution))
+  yield put(playerActions.setProjectedContribution(claimContribution))
 }
 
 export function * projectTrade () {
