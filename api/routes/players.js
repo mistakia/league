@@ -16,7 +16,7 @@ router.get('/?', async (req, res) => {
       return res.status(400).send({ error: 'params active & inactive can not both be false' })
     }
 
-    let includePlayerIds = []
+    const includePlayerIds = ['DF-1875', 'AB-3500']
     if (req.user) {
       const leagues = await db('leagues')
         .select('leagues.uid')
@@ -32,7 +32,7 @@ router.get('/?', async (req, res) => {
         .where('rosters.week', constants.season.week)
         .where('rosters.year', constants.season.year)
 
-      includePlayerIds = playerSlots.map(s => s.player)
+      playerSlots.forEach(s => includePlayerIds.push(s.player))
     }
 
     const query = db('player')
