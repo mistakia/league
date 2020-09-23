@@ -1,4 +1,4 @@
-import { Map } from 'immutable'
+import { Map, List } from 'immutable'
 
 import { getApp } from '@core/app'
 import { getPlayerById } from '@core/players'
@@ -20,14 +20,15 @@ export function getPoachPlayersForCurrentTeam (state) {
   let poaches = getPoachesForCurrentLeague(state)
   const { teamId } = getApp(state)
 
-  for (const poach of poaches.values()) {
+  let poachPlayers = new List()
+  for (const poach of poaches.valueSeq()) {
     if (poach.tid !== teamId) continue
     const playerId = poach.player
     const player = getPlayerById(state, { playerId })
-    poaches = poaches.setIn([playerId, 'player'], player)
+    poachPlayers = poachPlayers.push(poach.set('player', player))
   }
 
-  return poaches.valueSeq().toList()
+  return poachPlayers
 }
 
 export function getPoachPlayersForCurrentLeague (state) {
