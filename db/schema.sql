@@ -482,18 +482,40 @@ CREATE TABLE `player` (
   `cone` decimal(3,2) NOT NULL,
   `arm` decimal(5,3) NOT NULL,
   `hand` decimal(5,3) NOT NULL,
-  `dpos` int(3) NOT NULL,
+  `dpos` int(3) NOT NULL, -- draft pick/position
   `col` varchar(35) NOT NULL,
   `dv` varchar(35) DEFAULT NULL,
   `start` int(4) NOT NULL,
   `cteam` varchar(3) NOT NULL,
-  `posd` varchar(8) NOT NULL,
+  `posd` varchar(8) NOT NULL, -- depth chart position
   `jnum` tinyint(2) NOT NULL,
-  `dcp` tinyint(1) NOT NULL,
+  `dcp` tinyint(1) NOT NULL, -- depth chart order
   `nflid` int(10) NOT NULL,
   `esbid` varchar(10) DEFAULT NULL,
   `gsisid` varchar(15) DEFAULT NULL,
-  `gsispid` varchar(36) DEFAULT NULL
+  `gsispid` varchar(36) DEFAULT NULL,
+
+  `bcountry` varchar(255) DEFAULT NULL, -- birth country
+  `bstate` varchar(255) DEFAULT NULL, -- birth state
+  `bcity` varchar(255) DEFAULT NULL, -- birth city
+  `hs` varchar(255) DEFAULT NULL,  -- high school
+
+  `cbsid` varchar(11) DEFAULT NULL,
+  `espnid` int(11) DEFAULT NULL,
+  `fantasydataid` int(11) DEFAULT NULL,
+  `fleaflickerid` varchar(11) DEFAULT NULL,
+  `nflidf` varchar(255) DEFAULT NULL,
+  `mflid` varchar(11) DEFAULT NULL,
+  `rotoworldid` int(11) DEFAULT NULL,
+  `rotowireid` int(11) DEFAULT NULL,
+  `sleeperid` varchar(11) DEFAULT NULL,
+  `statsid` varchar(11) DEFAULT NULL,
+  `statsglobalid` int(11) DEFAULT NULL,
+  `sportradarid` varchar(36) DEFAULT NULL,
+  `twitter` varchar(255) DEFAULT NULL,
+  `yahooid` int(11) DEFAULT NULL,
+
+  `status` varchar(255) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
