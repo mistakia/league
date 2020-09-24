@@ -19,7 +19,7 @@ export default class Lineup extends React.Component {
 
   handleUpdate = ({ slot, player }) => {
     const players = [{ slot, player: this.state.selected.player }]
-    if (player.player) {
+    if (player && player.player) {
       const { league, roster } = this.props
       const r = new Roster({ roster: roster.toJS(), league })
       const selectedSlot = this.state.selected.slot
