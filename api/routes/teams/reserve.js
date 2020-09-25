@@ -56,17 +56,10 @@ router.post('/?', async (req, res) => {
 
     // make sure player is reserve eligible
     const players = await db('player')
-      .select(db.raw('player.*, min(players.status) as status, min(players.injury_status) as injury_status, min(players.injury_body_part) as injury_body_part, transactions.value'))
+      .select(db.raw('player.*, min(players.status) as status, min(players.injury_status) as injury_status, min(players.injury_body_part) as injury_body_part'))
       .leftJoin('players', 'player.player', 'players.player')
-      .join('transactions', 'player.player', 'transactions.player')
-      .orderBy('transactions.timestamp', 'desc')
-      .orderBy('transactions.uid', 'desc')
       .groupBy('player.player')
       .where('player.player', player)
-      .where({
-        lid: leagueId,
-        tid
-      })
 
     const playerRow = players[0]
 
@@ -103,13 +96,24 @@ router.post('/?', async (req, res) => {
         player
       })
 
+    const transactions = await db('transactions')
+      .orderBy('transactions.timestamp', 'desc')
+      .orderBy('transactions.uid', 'desc')
+      .where({
+        player,
+        lid: leagueId,
+        tid
+      })
+      .limit(1)
+    const { value } = transactions[0]
+
     const transaction = {
       userid: req.user.userId,
       tid,
       lid: leagueId,
       player,
       type,
-      value: playerRow.value,
+      value,
       year: constants.season.year,
       timestamp: Math.round(Date.now() / 1000)
     }
