@@ -17,7 +17,7 @@ export function getActivePoachesAgainstMyPlayers (state) {
 }
 
 export function getPoachPlayersForCurrentTeam (state) {
-  let poaches = getPoachesForCurrentLeague(state)
+  const poaches = getPoachesForCurrentLeague(state)
   const { teamId } = getApp(state)
 
   let poachPlayers = new List()
