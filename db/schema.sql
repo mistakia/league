@@ -1968,6 +1968,69 @@ CREATE TABLE `practice` (
   UNIQUE KEY `player` (`player`, `week`, `year`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `gamelogs`
+--
+
+DROP TABLE IF EXISTS `gamelogs`;
+
+CREATE TABLE `gamelogs` (
+  `player` varchar(7) NOT NULL,
+  `opp` varchar(3) NOT NULL,
+  `pos` varchar(3) NOT NULL,
+  `week` tinyint(2) NOT NULL,
+  `year` int(4) NOT NULL,
+
+  `pa` tinyint(2) DEFAULT NULL,
+  `pc` tinyint(2) DEFAULT NULL,
+  `py` int(3) DEFAULT NULL,
+  `ints` tinyint(1) DEFAULT NULL,
+  `tdp` tinyint(1) DEFAULT NULL,
+
+  `ra` tinyint(2) DEFAULT NULL,
+  `ry` int(3) DEFAULT NULL,
+  `tdr` tinyint(1) DEFAULT NULL,
+  `fuml` tinyint(1) DEFAULT NULL,
+
+  `trg` tinyint(2) DEFAULT NULL,
+  `rec` tinyint(2) DEFAULT NULL,
+  `recy` int(3) DEFAULT NULL,
+  `tdrec` tinyint(1) DEFAULT NULL,
+
+  `twoptc` tinyint(1) DEFAULT NULL,
+
+  `prtd` tinyint(1) DEFAULT NULL,
+  `krtd` tinyint(1) DEFAULT NULL,
+
+  `snp` tinyint(3) DEFAULT NULL,
+
+  `fgm` tinyint(1) DEFAULT NULL,
+  `fg19` tinyint(1) DEFAULT NULL,
+  `fg29` tinyint(1) DEFAULT NULL,
+  `fg39` tinyint(1) DEFAULT NULL,
+  `fg49` tinyint(1) DEFAULT NULL,
+  `fg50` tinyint(1) DEFAULT NULL,
+  `xpm` tinyint(1) DEFAULT NULL,
+
+  `dsk` tinyint(2) DEFAULT NULL,
+  `dint` tinyint(2) DEFAULT NULL,
+  `dff` tinyint(2) DEFAULT NULL,
+  `drf` tinyint(2) DEFAULT NULL,
+  `dtno` tinyint(2) DEFAULT NULL,
+  `dfds` tinyint(2) DEFAULT NULL,
+  `dpa` tinyint(2) DEFAULT NULL,
+  `dya` int(4) DEFAULT NULL,
+  `dblk` tinyint(2) DEFAULT NULL,
+  `dsf` tinyint(2) DEFAULT NULL,
+  `dtpr` tinyint(2) DEFAULT NULL,
+  `dtd` tinyint(2) DEFAULT NULL,
+
+  UNIQUE KEY `player` (`player`, `week`, `year`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

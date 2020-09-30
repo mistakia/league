@@ -306,6 +306,17 @@ const calculateStatsFromPlayStats = (playStats) => {
         stats.fgm += 1
         stats.fga += 1
         stats._fgm.push(playStat.yards)
+        if (playStat.yards < 20) {
+          stats.fg19 += 1
+        } else if (playStat.yards < 30) {
+          stats.fg29 += 1
+        } else if (playStat.yards < 40) {
+          stats.fg39 += 1
+        } else if (playStat.yards < 50) {
+          stats.fg49 += 1
+        } else {
+          stats.fg50 += 1
+        }
         break
 
       case 71:
