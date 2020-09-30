@@ -7,6 +7,7 @@ export {
   getFilteredPlayers,
   getRookiePlayers,
   getPlayerById,
+  getGamesForSelectedPlayer,
   getGamesByYearForSelectedPlayer,
   getPlayersForWatchlist,
   getPlayerStatus,

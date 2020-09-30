@@ -4,6 +4,7 @@ import Icon from '@components/icon'
 import { weightProjections } from '@common'
 import Source from '@components/source'
 import PlayerSelectedRow from '@components/player-selected-row'
+import PlayerSelectedRowHeader from '@components/player-selected-row-header'
 
 export default class SelectedPlayerProjection extends React.Component {
   handleClearClick = () => {
@@ -12,7 +13,7 @@ export default class SelectedPlayerProjection extends React.Component {
   }
 
   render = () => {
-    const { week, projections, projection } = this.props
+    const { week, projections, projection, pos } = this.props
 
     const rows = []
     projections.forEach((p, index) => {
@@ -30,6 +31,7 @@ export default class SelectedPlayerProjection extends React.Component {
           stats={p}
           title={title}
           action={action}
+          pos={pos}
         />
       )
       rows.push(item)
@@ -47,6 +49,7 @@ export default class SelectedPlayerProjection extends React.Component {
         key='average'
         stats={projAvg}
         title='Average'
+        pos={pos}
         action={(<div className='row__action' />)}
       />
     )
@@ -57,6 +60,7 @@ export default class SelectedPlayerProjection extends React.Component {
         key='weighted'
         stats={projection}
         title='Weighted'
+        pos={pos}
         action={(<div className='row__action' />)}
       />
     )
@@ -70,32 +74,7 @@ export default class SelectedPlayerProjection extends React.Component {
         </div>
         <div className='selected__section-header'>
           <div className='row__name'>Source</div>
-          <div className='row__group'>
-            <div className='row__group-head'>Passing</div>
-            <div className='row__group-body'>
-              <div className='player__row-metric'>YDS</div>
-              <div className='player__row-metric'>TD</div>
-              <div className='player__row-metric'>INT</div>
-            </div>
-          </div>
-          <div className='row__group'>
-            <div className='row__group-head'>Rushing</div>
-            <div className='row__group-body'>
-              <div className='player__row-metric'>CAR</div>
-              <div className='player__row-metric'>YDS</div>
-              <div className='player__row-metric'>TD</div>
-              <div className='player__row-metric'>FUM</div>
-            </div>
-          </div>
-          <div className='row__group'>
-            <div className='row__group-head'>Receiving</div>
-            <div className='row__group-body'>
-              <div className='player__row-metric'>TAR</div>
-              <div className='player__row-metric'>REC</div>
-              <div className='player__row-metric'>YDS</div>
-              <div className='player__row-metric'>TD</div>
-            </div>
-          </div>
+          <PlayerSelectedRowHeader pos={pos} />
           <div className='row__action' />
         </div>
         {rows}
