@@ -108,7 +108,7 @@ router.get('/:playerId/stats', async (req, res) => {
   try {
     const { playerId } = req.params
 
-    const games = await db('offense').where({ player: playerId })
+    const games = await db('gamelogs').where({ player: playerId })
 
     // snaps per game by year
 
