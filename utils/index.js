@@ -15,6 +15,36 @@ const getChartedPlayByPlayQuery = (db) => db('pbp')
     this.orWhereNot({ 'pbp.act3': 'A' })
   })
 
+const fields = [
+  'nflPlay.esbid',
+  'nflPlay.playId',
+  'nflPlay.down',
+  'nflPlay.playDescription',
+  'nflPlay.possessionTeam',
+  'nflPlay.season',
+  'nflPlay.week',
+  'nflPlay.yardsToGo',
+  'nflPlay.clockTime',
+  'nflPlay.driveSequenceNumber',
+  'nflPlay.endYardLine',
+  'nflPlay.startYardLine',
+  'nflPlay.firstDown',
+  'nflPlay.goalToGo',
+  'nflPlay.drivePlayCount',
+  'nflPlay.playClock',
+  'nflPlay.scoringPlay',
+  'nflPlay.timeOfDay',
+  'nflPlay.playTypeNFL',
+  'nflPlay.updated',
+
+  'nflSchedule.homeTeamAbbr',
+  'nflSchedule.awayTeamAbbr'
+]
+
+const getPlayByPlayQuery = (db) => db('nflPlay')
+  .select(fields)
+  .join('nflSchedule', 'nflPlay.esbid', '=', 'nflSchedule.esbid')
+
 module.exports = {
   readCSV: require('./read-csv'),
   sendNotifications: require('./send-notifications'),
@@ -35,6 +65,7 @@ module.exports = {
   getTopPracticeSquadWaiver: require('./get-top-practice-squad-waiver'),
   submitAcquisition: require('./submit-acquisition'),
   getChartedPlayByPlayQuery,
+  getPlayByPlayQuery,
   getTransactionsSinceAcquisition: require('./get-transactions-since-acquisition'),
 
   verifyUserTeam: require('./verify-user-team'),

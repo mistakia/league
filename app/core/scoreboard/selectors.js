@@ -13,7 +13,7 @@ import {
 import { getPlayerById } from '@core/players'
 import { getMatchupById } from '@core/matchups'
 import { getGameByPlayerId, getGameByTeam } from '@core/schedule'
-import { getPlays } from '@core/plays'
+import { getPlaysForPlayer, getPlays } from '@core/plays'
 
 export function getScoreboard (state) {
   return state.get('scoreboard')
@@ -25,42 +25,18 @@ export function getScoreboardRosterByTeamId (state, { tid }) {
 }
 
 function getStatsForPlayer (state, { player }) {
-  const plays = getPlays(state)
   const week = state.getIn(['scoreboard', 'week'])
+  const plays = getPlaysForPlayer(state, { player, week })
   const league = getCurrentLeague(state)
-  // TODO - filter deleted plays
-  const currentWeekPlays = plays.filter(p => p.week === week)
 
-  if (player.pos1 === 'DST') {
-    const game = getGameByPlayerId(state, { playerId: player.player, week })
-    const opponent = game.h === player.team ? game.v : game.h
-
-    const opponentPlays = currentWeekPlays
-      .valueSeq()
-      .toList()
-      .filter(p => p.possessionTeam && fixTeam(p.possessionTeam) === opponent)
-
-    const playStats = opponentPlays.flatMap(p => p.playStats)
-    if (!playStats.size) return
-    const stats = calculateDstStatsFromPlays(opponentPlays.toJS())
-    const points = calculatePoints({ stats, position: player.pos1, league })
-    return { playStats: playStats.toJS(), points, stats }
-  }
-
-  const playStats = currentWeekPlays.valueSeq().toList().flatMap(p => {
-    if (!p.possessionTeam) return []
-
-    // ignore plays by other teams
-    if (fixTeam(p.possessionTeam) !== player.team) return []
-
-    return p.playStats.filter(ps => (ps.gsisId && ps.gsisId === player.gsisid) || (ps.gsispid && ps.gsispid === player.gsispid))
-  })
-
+  const playStats = plays.flatMap(p => p.playStats)
   if (!playStats.size) return
 
-  const stats = calculateStatsFromPlayStats(playStats.toJS())
-  const points = calculatePoints({ stats, position: player.pos1, league })
+  const stats = player.pos1 === 'DST'
+    ? calculateDstStatsFromPlays(plays.toJS(), player.team)
+    : calculateStatsFromPlayStats(playStats.toJS())
 
+  const points = calculatePoints({ stats, position: player.pos1, league })
   return { playStats: playStats.toJS(), points, stats }
 }
 
