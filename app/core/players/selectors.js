@@ -180,20 +180,6 @@ export function getPlayerById (state, { playerId }) {
   return items.get(playerId) || new Player()
 }
 
-export function getGamesForSelectedPlayer (state) {
-  const { leagueId } = getApp(state)
-  const playerId = state.get('players').get('selected')
-  const league = state.get('leagues').get(leagueId)
-  const p = getPlayerById(state, { playerId })
-  let games = p.get('games')
-  for (const [index, game] of games.entrySeq()) {
-    const points = calculatePoints({ stats: game, position: p.pos1, league: league.toJS() })
-    games = games.setIn([index, 'total'], points.total)
-  }
-
-  return games
-}
-
 export function getGamesByYearForSelectedPlayer (state) {
   const playerId = state.get('players').get('selected')
   const p = getPlayerById(state, { playerId })

@@ -1,8 +1,15 @@
 import { List } from 'immutable'
 import { fixTeam } from '@common'
 
+import { getSelectedPlayer } from '@core/players'
+
 export function getPlays (state) {
   return state.get('plays')
+}
+
+export function getPlaysForSelectedPlayer (state) {
+  const player = getSelectedPlayer(state)
+  return getPlaysForPlayer(state, { player })
 }
 
 export function getPlaysForPlayer (state, { player, week }) {
