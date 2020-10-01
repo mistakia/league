@@ -3,6 +3,7 @@ const debug = require('debug')
 
 const db = require('../../db')
 const { constants } = require('../../common')
+const { getPlayByPlayQuery } = require('../../utils')
 
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms))
 
@@ -30,8 +31,9 @@ export default class Scoreboard {
 
     this._log(`searching for plays newer than ${updated}`)
 
-    const plays = await db('nflPlay')
-      .where({ week: constants.season.week })
+    const query = getPlayByPlayQuery(db)
+    const plays = await query
+      .where('nflPlay.week', constants.season.week)
       .where('updated', '>', updated)
 
     this._log(`${plays.length} updated plays found`)
