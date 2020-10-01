@@ -2,7 +2,7 @@ const WebSocket = require('ws')
 const debug = require('debug')
 
 const db = require('../../db')
-const { constants } = require('../../common')
+const { constants, uniqBy } = require('../../common')
 const { getPlayByPlayQuery } = require('../../utils')
 
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms))
@@ -38,7 +38,7 @@ export default class Scoreboard {
 
     this._log(`${plays.length} updated plays found`)
 
-    const esbids = plays.map(p => p.esbid)
+    const esbids = Array.from(uniqBy(plays, 'esbid')).map(p => p.esbid)
     const playStats = await db('nflPlayStat').whereIn('esbid', esbids)
     const playSnaps = await db('nflSnap').whereIn('esbid', esbids)
 

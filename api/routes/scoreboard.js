@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 
-const { constants } = require('../../common')
+const { constants, uniqBy } = require('../../common')
 const { getPlayByPlayQuery } = require('../../utils')
 
 router.get('/?', async (req, res) => {
@@ -19,7 +19,7 @@ router.get('/?', async (req, res) => {
 
     const query = getPlayByPlayQuery(db)
     const plays = await query.where('nflPlay.week', week)
-    const esbids = plays.map(p => p.esbid)
+    const esbids = Array.from(uniqBy(plays, 'esbid')).map(p => p.esbid)
     const playStats = await db('nflPlayStat').whereIn('esbid', esbids)
     const playSnaps = await db('nflSnap').whereIn('esbid', esbids)
 
