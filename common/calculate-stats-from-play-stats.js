@@ -55,13 +55,13 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 12:
         // lateral rush
-        stats.ra += 1
+        // stats.ra += 1
         stats.ry += playStat.yards
         break
 
       case 13:
         // lateral rushing touchdown
-        stats.ra += 1
+        // stats.ra += 1
         stats.ry += playStat.yards
         stats.tdr += 1
         break
@@ -114,15 +114,11 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 23:
         // lateral receiving yards
-        stats.trg += 1
-        stats.rec += 1
         stats.recy += playStat.yards
         break
 
       case 24:
         // lateral receving touchdown
-        stats.trg += 1
-        stats.rec += 1
         stats.recy += playStat.yards
         stats.tdrec += 1
         break
@@ -260,7 +256,7 @@ const calculateStatsFromPlayStats = (playStats) => {
         break
 
       case 57:
-        // fumble lateral
+        // fumble return lateral
         break
 
       case 58:
@@ -472,6 +468,7 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 115:
         // target player
+        stats.trg += 1
         break
 
       case 120:
