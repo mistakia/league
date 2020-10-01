@@ -30,12 +30,15 @@ export function getPlaysForPlayer (state, { player, week }) {
     const pos = play.possessionTeam
     if (!pos || fixTeam(pos) !== player.team) continue
 
-    play.playStats = play.playStats.filter(ps => (ps.gsisId && ps.gsisId === player.gsisid) ||
+    const playStats = play.playStats.filter(ps => (ps.gsisId && ps.gsisId === player.gsisid) ||
       (ps.gsispid && ps.gsispid === player.gsispid))
 
-    if (!play.playStats.length) continue
+    if (!playStats.length) continue
 
-    filtered = filtered.push(play)
+    filtered = filtered.push({
+      ...play,
+      playStats
+    })
   }
   return filtered
 }
