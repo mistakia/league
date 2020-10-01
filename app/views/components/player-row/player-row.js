@@ -1,6 +1,7 @@
 import React from 'react'
 import Hidden from '@material-ui/core/Hidden'
 
+import PlayerRowOpponent from '@components/player-row-opponent'
 import EditableProjection from '@components/editable-projection'
 import Position from '@components/position'
 import PlayerWatchlistAction from '@components/player-watchlist-action'
@@ -298,6 +299,7 @@ class PlayerRow extends Player {
               <div className='player__row-action'>
                 {!!isHosted && <IconButton small text onClick={this.handleContextClick} icon='more' />}
               </div>}
+            <PlayerRowOpponent team={player.team} pos={player.pos1} />
             {isLoggedIn &&
               <div className='player__row-availability'>
                 {player.tid
