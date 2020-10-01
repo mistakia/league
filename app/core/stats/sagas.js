@@ -2,23 +2,23 @@ import { call, takeLatest, fork, select, put } from 'redux-saga/effects'
 
 import { getPlayers, playerActions } from '@core/players'
 import { statActions } from './actions'
-import { getPlays, getTeamStats } from '@core/api'
+import { getChartedPlays, getTeamStats } from '@core/api'
 import { getStats } from './selectors'
 import Worker from 'workerize-loader?inline!./worker' // eslint-disable-line import/no-webpack-loader-syntax
 
-export function * loadPlays () {
+export function * loadChartedPlays () {
   const players = yield select(getPlayers)
   const view = players.get('view')
   if (view === 'stats') {
     const stats = yield select(getStats)
     const { years } = stats.toJS()
-    yield call(getPlays, { years })
+    yield call(getChartedPlays, { years })
   }
 }
 
 export function * filterPlays ({ payload }) {
   if (payload.type === 'years') {
-    yield call(loadPlays)
+    yield call(loadChartedPlays)
   } else {
     yield call(calculateStats)
   }
@@ -52,7 +52,7 @@ export function * calculateTeamStats () {
 
 export function * loadStats () {
   const { teamStats, plays } = yield select(getStats)
-  if (!plays.size) yield fork(getPlays)
+  if (!plays.size) yield fork(getChartedPlays)
   if (!teamStats.size) {
     yield call(getTeamStats)
   }
@@ -63,11 +63,11 @@ export function * loadStats () {
 // -------------------------------------
 
 export function * watchSetPlayersView () {
-  yield takeLatest(playerActions.SET_PLAYERS_VIEW, loadPlays)
+  yield takeLatest(playerActions.SET_PLAYERS_VIEW, loadChartedPlays)
 }
 
-export function * watchGetPlaysFulfilled () {
-  yield takeLatest(statActions.GET_PLAYS_FULFILLED, calculateStats)
+export function * watchGetChartedPlaysFulfilled () {
+  yield takeLatest(statActions.GET_CHARTED_PLAYS_FULFILLED, calculateStats)
 }
 
 export function * watchUpdateQualifier () {
@@ -92,7 +92,7 @@ export function * watchGetTeamStatsFulfilled () {
 
 export const statSagas = [
   fork(watchSetPlayersView),
-  fork(watchGetPlaysFulfilled),
+  fork(watchGetChartedPlaysFulfilled),
   fork(watchFilterStats),
   fork(watchPlayersSelectPlayer),
   fork(watchGetTeamStatsFulfilled),
