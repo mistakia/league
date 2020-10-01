@@ -1,7 +1,7 @@
 export const statActions = {
-  GET_PLAYS_FAILED: 'GET_PLAYS_FAILED',
-  GET_PLAYS_PENDING: 'GET_PLAYS_PENDING',
-  GET_PLAYS_FULFILLED: 'GET_PLAYS_FULFILLED',
+  GET_CHARTED_PLAYS_FAILED: 'GET_CHARTED_PLAYS_FAILED',
+  GET_CHARTED_PLAYS_PENDING: 'GET_CHARTED_PLAYS_PENDING',
+  GET_CHARTED_PLAYS_FULFILLED: 'GET_CHARTED_PLAYS_FULFILLED',
 
   SET_STAT_VIEW: 'SET_STAT_VIEW',
   SET_STAT_PASSING_VIEW: 'SET_STAT_PASSING_VIEW',
@@ -55,23 +55,23 @@ export const statActions = {
     }
   }),
 
-  getPlaysPending: (opts) => ({
-    type: statActions.GET_PLAYS_PENDING,
+  getChartedPlaysPending: (opts) => ({
+    type: statActions.GET_CHARTED_PLAYS_PENDING,
     payload: {
       opts
     }
   }),
 
-  getPlaysFulfilled: (opts, data) => ({
-    type: statActions.GET_PLAYS_FULFILLED,
+  getChartedPlaysFulfilled: (opts, data) => ({
+    type: statActions.GET_CHARTED_PLAYS_FULFILLED,
     payload: {
       opts,
       data
     }
   }),
 
-  getPlaysFailed: (opts, error) => ({
-    type: statActions.GET_PLAYS_FAILED,
+  getChartedPlaysFailed: (opts, error) => ({
+    type: statActions.GET_CHARTED_PLAYS_FAILED,
     payload: {
       opts,
       error
@@ -102,10 +102,10 @@ export const statActions = {
   })
 }
 
-export const getPlaysActions = {
-  failed: statActions.getPlaysFailed,
-  fulfilled: statActions.getPlaysFulfilled,
-  pending: statActions.getPlaysPending
+export const getChartedPlaysActions = {
+  failed: statActions.getChartedPlaysFailed,
+  fulfilled: statActions.getChartedPlaysFulfilled,
+  pending: statActions.getChartedPlaysPending
 }
 
 export const getTeamStatActions = {

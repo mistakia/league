@@ -2,10 +2,58 @@ const express = require('express')
 const router = express.Router()
 const JSONStream = require('JSONStream')
 
-const { getPlayByPlayQuery } = require('../../utils')
-const { constants } = require('../../common')
+const { getChartedPlayByPlayQuery } = require('../../utils')
+const { constants, uniqBy } = require('../../common')
 
 router.get('/?', async (req, res) => {
+  const { db, logger } = req.app.locals
+  try {
+    const years = req.query.years
+      ? (Array.isArray(req.query.years) ? req.query.years : [req.query.years])
+      : [constants.season.week ? constants.season.year : (constants.season.year - 1)]
+    // TODO - enable multiple years
+    if (years.length > 1) {
+      return res.status(400).send({ error: 'too many years listed' })
+    }
+
+    const fields = [
+      'esbid',
+      'playId',
+      'down',
+      'playDescription',
+      'possessionTeam',
+      'season',
+      'week',
+      'yardsToGo',
+      'clockTime',
+      'driveSequenceNumber',
+      'endYardLine',
+      'startYardLine',
+      'firstDown',
+      'goalToGo',
+      'drivePlayCount',
+      'playClock',
+      'scoringPlay',
+      'timeOfDay',
+      'playTypeNFL'
+    ]
+
+    const plays = await db('nflPlay').select(fields).whereIn('season', years)
+    const esbids = Array.from(uniqBy(plays, 'esbid')).map(p => p.esbid)
+    const playStats = await db('nflPlayStat').whereIn('esbid', esbids)
+
+    for (const play of plays) {
+      play.playStats = playStats.filter(p => p.playId === play.playId && p.esbid === play.esbid)
+    }
+
+    res.send(plays)
+  } catch (error) {
+    logger(error)
+    res.status(500).send({ error: error.toString() })
+  }
+})
+
+router.get('/charted', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const years = req.query.years
@@ -45,7 +93,7 @@ router.get('/?', async (req, res) => {
       return res.status(400).send({ error: 'too many years listed' })
     }
 
-    let pbpQuery = getPlayByPlayQuery(db)
+    let pbpQuery = getChartedPlayByPlayQuery(db)
 
     if (playerId) {
       const players = await db('player').where('player', playerId).limit(1)

@@ -13,6 +13,7 @@ import {
 import { getPlayerById } from '@core/players'
 import { getMatchupById } from '@core/matchups'
 import { getGameByPlayerId, getGameByTeam } from '@core/schedule'
+import { getPlays } from '@core/plays'
 
 export function getScoreboard (state) {
   return state.get('scoreboard')
@@ -24,7 +25,7 @@ export function getScoreboardRosterByTeamId (state, { tid }) {
 }
 
 function getStatsForPlayer (state, { player }) {
-  const plays = state.getIn(['scoreboard', 'plays'])
+  const plays = getPlays(state)
   const week = state.getIn(['scoreboard', 'week'])
   const league = getCurrentLeague(state)
   // TODO - filter deleted plays
@@ -80,8 +81,7 @@ export function getScoreboardByTeamId (state, { tid }) {
 }
 
 export function getScoreboardUpdated (state) {
-  const scoreboard = getScoreboard(state)
-  const plays = scoreboard.get('plays')
+  const plays = getPlays(state)
   const currentWeekPlays = plays.filter(p => p.week === constants.season.week)
   const play = currentWeekPlays.maxBy(x => x.updated)
   return play ? play.updated : 0
@@ -134,7 +134,7 @@ export function getPlaysByMatchupId (state, { mid }) {
 
   const gsispids = players.map(p => p.gsispid).filter(Boolean)
 
-  const plays = state.getIn(['scoreboard', 'plays'])
+  const plays = getPlays(state)
   // TODO - match/filter dst plays
   const filteredPlays = plays.valueSeq().toList().filter(p => {
     if (p.week !== matchup.week) return false
@@ -212,7 +212,7 @@ export function getGameStatusByPlayerId (state, { playerId }) {
     return null
   }
 
-  const plays = state.getIn(['scoreboard', 'plays'])
+  const plays = getPlays(state)
   const player = getPlayerById(state, { playerId })
   const play = plays.valueSeq().toList().find(p => {
     if (!p.possessionTeam) return false

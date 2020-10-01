@@ -25,10 +25,10 @@ export function statsReducer (state = initialState(), { payload, type }) {
     case statActions.UPDATE_QUALIFIER:
       return state.setIn(['qualifiers', payload.qualifier, 'value'], payload.value)
 
-    case statActions.GET_PLAYS_PENDING:
+    case statActions.GET_CHARTED_PLAYS_PENDING:
       return state.merge({ isPending: true })
 
-    case statActions.GET_PLAYS_FAILED:
+    case statActions.GET_CHARTED_PLAYS_FAILED:
       return state.merge({ isPending: false })
 
     case playerActions.SET_PLAYER_STATS:
@@ -50,7 +50,7 @@ export function statsReducer (state = initialState(), { payload, type }) {
         passing: payload.view
       })
 
-    case statActions.GET_PLAYS_FULFILLED:
+    case statActions.GET_CHARTED_PLAYS_FULFILLED:
       return state.merge({
         plays: new List(payload.data)
       })

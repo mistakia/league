@@ -1,4 +1,4 @@
-const getPlayByPlayQuery = (db) => db('pbp')
+const getChartedPlayByPlayQuery = (db) => db('pbp')
   .select(
     'pbp.fuml', 'pbp.fum', 'pbp.off', 'pbp.type', 'pbp.bc', 'pbp.yds', 'pbp.fd',
     'pbp.succ', 'pbp.psr', 'pbp.trg', 'pbp.ints', 'pbp.comp', 'pbp.pts', 'pbp.sk1',
@@ -34,7 +34,7 @@ module.exports = {
   getTopFreeAgencyWaiver: require('./get-top-free-agency-waiver'),
   getTopPracticeSquadWaiver: require('./get-top-practice-squad-waiver'),
   submitAcquisition: require('./submit-acquisition'),
-  getPlayByPlayQuery,
+  getChartedPlayByPlayQuery,
   getTransactionsSinceAcquisition: require('./get-transactions-since-acquisition'),
 
   verifyUserTeam: require('./verify-user-team'),

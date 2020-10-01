@@ -32,7 +32,8 @@ import {
   putProjectionActions,
   delProjectionActions
 } from '@core/players'
-import { getPlaysActions, getTeamStatActions } from '@core/stats'
+import { getChartedPlaysActions, getTeamStatActions } from '@core/stats'
+import { getPlaysActions } from '@core/plays'
 import {
   getTeamsActions,
   putTeamActions,
@@ -99,6 +100,8 @@ export const fetchAuth = fetch.bind(null, api.fetchAuth, authActions)
 
 export const fetchPlayers = fetch.bind(null, api.fetchPlayers, playersRequestActions)
 export const getPlayerStats = fetch.bind(null, api.getPlayerStats, getPlayerStatsActions)
+
+export const getChartedPlays = fetch.bind(null, api.getChartedPlays, getChartedPlaysActions)
 export const getPlays = fetch.bind(null, api.getPlays, getPlaysActions)
 
 export const getRoster = fetch.bind(null, api.getRoster, getRosterActions)
