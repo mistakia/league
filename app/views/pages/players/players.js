@@ -230,6 +230,7 @@ export default class PlayersPage extends React.Component {
           <div className='player__row-pos' />
           <div className='player__row-name'>Name</div>
           {isLoggedIn && <div className='player__row-action' />}
+          <div className='player__row-opponent'>Opp</div>
           {isLoggedIn && <div className='player__row-availability' />}
           <Hidden xsDown>
             {projectionView && headerSeasonSummary}
