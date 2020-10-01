@@ -2,7 +2,10 @@ const express = require('express')
 const router = express.Router()
 const JSONStream = require('JSONStream')
 
-const { getChartedPlayByPlayQuery } = require('../../utils')
+const {
+  getChartedPlayByPlayQuery,
+  getPlayByPlayQuery
+} = require('../../utils')
 const { constants, uniqBy } = require('../../common')
 
 router.get('/?', async (req, res) => {
@@ -16,29 +19,8 @@ router.get('/?', async (req, res) => {
       return res.status(400).send({ error: 'too many years listed' })
     }
 
-    const fields = [
-      'esbid',
-      'playId',
-      'down',
-      'playDescription',
-      'possessionTeam',
-      'season',
-      'week',
-      'yardsToGo',
-      'clockTime',
-      'driveSequenceNumber',
-      'endYardLine',
-      'startYardLine',
-      'firstDown',
-      'goalToGo',
-      'drivePlayCount',
-      'playClock',
-      'scoringPlay',
-      'timeOfDay',
-      'playTypeNFL'
-    ]
-
-    const plays = await db('nflPlay').select(fields).whereIn('season', years)
+    const query = getPlayByPlayQuery(db)
+    const plays = await query.whereIn('nflPlay.season', years)
     const esbids = Array.from(uniqBy(plays, 'esbid')).map(p => p.esbid)
     const playStats = await db('nflPlayStat').whereIn('esbid', esbids)
 

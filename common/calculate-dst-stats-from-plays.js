@@ -1,11 +1,36 @@
 import * as constants from './constants'
+import fixTeam from './fix-team'
 
-const calculateDstStatsFromPlays = (plays) => {
+const calculateDstStatsFromPlays = (plays, team) => {
   const dstStats = constants.createStats()
   dstStats.dtno = plays.filter(p => p.drivePlayCount === 3 && p.playTypeNFL === 'PUNT').length
-  const playStats = plays.map(p => p.playStats).flat()
+  const playStats = plays.map(p => p.playStats.map(ps => ({
+    possessionTeam: p.possessionTeam,
+    ...ps
+  }))).flat()
 
   for (const playStat of playStats) {
+    if (fixTeam(playStat.possessionTeam) === team) {
+      switch (playStat.statId) {
+        case 34:
+          dstStats.prtd += 1
+          break
+
+        case 36:
+          dstStats.prtd += 1
+          break
+
+        case 45:
+          dstStats.krtd += 1
+          break
+
+        case 48:
+          dstStats.krtd += 1
+          break
+      }
+      continue
+    }
+
     switch (playStat.statId) {
       case 2:
         // punt block
