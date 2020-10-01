@@ -99,14 +99,12 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 21:
         // receiving yards
-        stats.trg += 1
         stats.rec += 1
         stats.recy += playStat.yards
         break
 
       case 22:
         // receiving touchdown
-        stats.trg += 1
         stats.rec += 1
         stats.tdrec += 1
         stats.recy += playStat.yards
