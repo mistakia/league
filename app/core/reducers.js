@@ -21,6 +21,7 @@ import { scheduleReducer } from './schedule'
 import { notificationReducer } from './notifications'
 import { statusReducer } from './status'
 import { scoreboardReducer } from './scoreboard'
+import { playsReducer } from './plays'
 
 const rootReducer = (history) => {
   return combineReducers({
@@ -44,7 +45,8 @@ const rootReducer = (history) => {
     waivers: waiversReducer,
     schedule: scheduleReducer,
     status: statusReducer,
-    scoreboard: scoreboardReducer
+    scoreboard: scoreboardReducer,
+    plays: playsReducer
   })
 }
 
