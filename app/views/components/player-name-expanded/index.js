@@ -2,14 +2,14 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { getPlayerById, playerActions } from '@core/players'
-import { getGameByPlayerId } from '@core/schedule'
+import { getGameStatusByPlayerId } from '@core/scoreboard'
 
 import PlayerNameExpanded from './player-name-expanded'
 
 const mapStateToProps = createSelector(
   getPlayerById,
-  getGameByPlayerId,
-  (player, game) => ({ player, game })
+  getGameStatusByPlayerId,
+  (player, status) => ({ player, status })
 )
 
 const mapDispatchToProps = {

@@ -23,6 +23,7 @@ const fields = [
   'nflPlay.possessionTeam',
   'nflPlay.season',
   'nflPlay.week',
+  'nflPlay.quarter',
   'nflPlay.yardsToGo',
   'nflPlay.clockTime',
   'nflPlay.driveSequenceNumber',
