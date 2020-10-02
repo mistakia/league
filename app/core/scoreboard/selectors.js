@@ -188,7 +188,7 @@ export function getGameStatusByPlayerId (state, { playerId }) {
     return null
   }
 
-  const plays = getPlays(state)
+  const plays = getPlays(state, { week })
   const player = getPlayerById(state, { playerId })
   const play = plays.valueSeq().toList().find(p => {
     if (!p.possessionTeam) return false
