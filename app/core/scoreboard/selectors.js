@@ -188,9 +188,10 @@ export function getGameStatusByPlayerId (state, { playerId }) {
     return null
   }
 
-  const plays = getPlays(state, { week })
+  const plays = getPlays(state)
+  const weekPlays = plays.valueSeq().toList().filter(p => p.week === week)
   const player = getPlayerById(state, { playerId })
-  const play = plays.valueSeq().toList().find(p => {
+  const play = weekPlays.find(p => {
     if (!p.possessionTeam) return false
 
     const team = fixTeam(p.possessionTeam)
@@ -198,13 +199,13 @@ export function getGameStatusByPlayerId (state, { playerId }) {
   })
 
   if (!play) {
-    return null
+    return { game }
   }
 
-  const filteredPlays = plays.valueSeq().toList().filter(p => p.esbid === play.esbid)
+  const filteredPlays = weekPlays.filter(p => p.esbid === play.esbid)
   const lastPlay = filteredPlays.maxBy(p => p.playId)
   if (!lastPlay.possessionTeam) {
-    return null
+    return { game, lastPlay }
   }
 
   const hasPossession = fixTeam(lastPlay.possessionTeam) === player.team
@@ -212,6 +213,7 @@ export function getGameStatusByPlayerId (state, { playerId }) {
   const isRedzone = yardline >= 80
 
   return {
+    game,
     lastPlay,
     yardline,
     isRedzone,
