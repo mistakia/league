@@ -27,26 +27,24 @@ export default class SelectedPlayerGamelogs extends React.Component {
     }
 
     return (
-      <div>
-        <div className='selected__section'>
-          <div className='selected__section-header'>
-            <div className='row__group-head'>
-              Gamelogs
-            </div>
+      <div className='selected__section'>
+        <div className='selected__section-header'>
+          <div className='row__group-head'>
+            Gamelogs
           </div>
-          <div className='selected__section-header'>
-            <div className='row__group'>
-              <div className='row__group-body'>
-                <div className='player__row-metric'>Wk</div>
-                <div className='player__row-metric'>Opp</div>
-                <div className='player__row-metric'>Prj</div>
-                <div className='player__row-metric'>Pts</div>
-              </div>
-            </div>
-            <PlayerSelectedRowHeader pos={player.pos1} />
-          </div>
-          {rows}
         </div>
+        <div className='selected__section-header'>
+          <div className='row__group'>
+            <div className='row__group-body'>
+              <div className='player__row-metric'>Wk</div>
+              <div className='player__row-metric'>Opp</div>
+              <div className='player__row-metric'>Prj</div>
+              <div className='player__row-metric'>Pts</div>
+            </div>
+          </div>
+          <PlayerSelectedRowHeader pos={player.pos1} />
+        </div>
+        {rows}
       </div>
     )
   }
