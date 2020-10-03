@@ -46,8 +46,8 @@ export const api = {
     const url = `${BASE_URL}/players?${queryString.stringify(params)}`
     return { url }
   },
-  getPlayerStats ({ playerId }) {
-    const url = `${BASE_URL}/players/${playerId}/stats`
+  getPlayer ({ playerId }) {
+    const url = `${BASE_URL}/players/${playerId}`
     return { url }
   },
   getRoster ({ teamId }) {

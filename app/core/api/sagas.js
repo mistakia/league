@@ -28,7 +28,7 @@ import {
 } from '@core/rosters'
 import {
   playersRequestActions,
-  getPlayerStatsActions,
+  getPlayerActions,
   putProjectionActions,
   delProjectionActions
 } from '@core/players'
@@ -99,7 +99,7 @@ export const postLogin = fetch.bind(null, api.postLogin, loginActions)
 export const fetchAuth = fetch.bind(null, api.fetchAuth, authActions)
 
 export const fetchPlayers = fetch.bind(null, api.fetchPlayers, playersRequestActions)
-export const getPlayerStats = fetch.bind(null, api.getPlayerStats, getPlayerStatsActions)
+export const getPlayer = fetch.bind(null, api.getPlayer, getPlayerActions)
 
 export const getChartedPlays = fetch.bind(null, api.getChartedPlays, getChartedPlaysActions)
 export const getPlays = fetch.bind(null, api.getPlays, getPlaysActions)

@@ -4,7 +4,7 @@ import UTF8 from 'crypto-js/enc-utf8'
 
 import { getApp, appActions } from '@core/app'
 import { notificationActions } from '@core/notifications'
-import { fetchPlayers, getPlayerStats, putProjection, delProjection, putSetting } from '@core/api'
+import { fetchPlayers, getPlayer, putProjection, delProjection, putSetting } from '@core/api'
 import { playerActions } from './actions'
 import { auctionActions } from '@core/auction'
 import { getAllPlayers, getPlayers } from './selectors'
@@ -80,9 +80,9 @@ export function * saveProjection ({ payload }) {
   yield call(calculateValues)
 }
 
-export function * loadStats ({ payload }) {
+export function * loadPlayer ({ payload }) {
   const { player } = payload
-  yield call(getPlayerStats, { playerId: player })
+  yield call(getPlayer, { playerId: player })
 }
 
 export function * deleteProjection ({ payload }) {
@@ -153,7 +153,7 @@ export function * watchSaveProjection () {
 }
 
 export function * watchSelectPlayer () {
-  yield takeLatest(playerActions.PLAYERS_SELECT_PLAYER, loadStats)
+  yield takeLatest(playerActions.PLAYERS_SELECT_PLAYER, loadPlayer)
 }
 
 export function * watchSetLeague () {

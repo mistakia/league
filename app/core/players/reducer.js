@@ -158,9 +158,10 @@ export function playersReducer (state = initialState, { payload, type }) {
         })
       })
 
-    case playerActions.GET_PLAYER_STATS_FULFILLED:
+    case playerActions.GET_PLAYER_FULFILLED:
       return state.withMutations(players => {
         players.setIn(['items', payload.opts.playerId, 'games'], new List(payload.data.games))
+        players.setIn(['items', payload.opts.playerId, 'practice'], new List(payload.data.practice))
       })
 
     case appActions.AUTH_FULFILLED:
