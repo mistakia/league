@@ -8,7 +8,7 @@ export {
   fetchDraft,
   getTeams,
   postDraft,
-  getPlayerStats,
+  getPlayer,
   fetchTransactions,
   fetchMatchups,
   postProposeTrade,

@@ -21,9 +21,9 @@ export const playerActions = {
   FETCH_PLAYERS_FULFILLED: 'FETCH_PLAYERS_FULFILLED',
   FETCH_PLAYERS_PENDING: 'FETCH_PLAYERS_PENDING',
 
-  GET_PLAYER_STATS_FAILED: 'GET_PLAYER_STATS_FAILED',
-  GET_PLAYER_STATS_PENDING: 'GET_PLAYER_STATS_PENDING',
-  GET_PLAYER_STATS_FULFILLED: 'GET_PLAYER_STATS_FULFILLED',
+  GET_PLAYER_FAILED: 'GET_PLAYER_FAILED',
+  GET_PLAYER_PENDING: 'GET_PLAYER_PENDING',
+  GET_PLAYER_FULFILLED: 'GET_PLAYER_FULFILLED',
 
   SAVE_PROJECTION: 'SAVE_PROJECTION',
   DELETE_PROJECTION: 'DELETE_PROJECTION',
@@ -189,23 +189,23 @@ export const playerActions = {
     }
   }),
 
-  getPlayerStatsPending: opts => ({
-    type: playerActions.GET_PLAYER_STATS_PENDING,
+  getPlayerPending: opts => ({
+    type: playerActions.GET_PLAYER_PENDING,
     payload: {
       opts
     }
   }),
 
-  getPlayerStatsFulfilled: (opts, data) => ({
-    type: playerActions.GET_PLAYER_STATS_FULFILLED,
+  getPlayerFulfilled: (opts, data) => ({
+    type: playerActions.GET_PLAYER_FULFILLED,
     payload: {
       opts,
       data
     }
   }),
 
-  getPlayerStatsFailed: (opts, error) => ({
-    type: playerActions.GET_PLAYER_STATS_FAILED,
+  getPlayerFailed: (opts, error) => ({
+    type: playerActions.GET_PLAYER_FAILED,
     payload: {
       opts,
       error
@@ -265,10 +265,10 @@ export const playersRequestActions = {
   pending: playerActions.fetchPlayersPending
 }
 
-export const getPlayerStatsActions = {
-  failed: playerActions.getPlayerStatsFailed,
-  fulfilled: playerActions.getPlayerStatsFulfilled,
-  pending: playerActions.getPlayerStatsPending
+export const getPlayerActions = {
+  failed: playerActions.getPlayerFailed,
+  fulfilled: playerActions.getPlayerFulfilled,
+  pending: playerActions.getPlayerPending
 }
 
 export const putProjectionActions = {
