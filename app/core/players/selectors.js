@@ -267,6 +267,7 @@ export function getPlayerStatus (state, { player, playerId }) {
 
   const status = {
     locked: false, // TODO
+    starter: false,
     fa: false,
     rostered: false,
     waiver: {
@@ -293,6 +294,7 @@ export function getPlayerStatus (state, { player, playerId }) {
     return status
   }
 
+  status.starter = constants.starterSlots.includes(player.slot)
   status.locked = isPlayerLocked(state, { player })
 
   const isFreeAgent = isPlayerFreeAgent(state, { player })
