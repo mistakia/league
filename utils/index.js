@@ -69,6 +69,8 @@ module.exports = {
   getPlayByPlayQuery,
   getTransactionsSinceAcquisition: require('./get-transactions-since-acquisition'),
 
+  upsert: require('./upsert'),
+
   verifyUserTeam: require('./verify-user-team'),
   verifyReserveStatus: require('./verify-reserve-status')
 }
