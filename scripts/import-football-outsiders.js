@@ -203,7 +203,7 @@ const runOne = async ({ type, url }) => {
       for (const [index, header] of headers.entries()) {
         const data = $(el).find('td').eq(index).text().trim()
         const value = parseFloat(data)
-        item[header] = isNaN(value) ? data : value
+        item[header] = isNaN(value) ? (data || null) : value
       }
       update(type, item)
     })
@@ -217,12 +217,13 @@ const run = async () => {
   }
 
   for (const [team, data] of Object.entries(teams.toJS())) {
+    if (team === 'NFL') continue
     await upsert('footballoutsiders', {
       team: fixTeam(team),
       week: constants.season.week,
       year: constants.season.year,
       ...data
-    })
+    }).catch((err) => console.log(err))
   }
 }
 
@@ -238,7 +239,7 @@ const main = async () => {
   }
 
   await db('jobs').insert({
-    type: constants.jobs.EXAMPLE,
+    type: constants.jobs.DATA_FOOTBALL_OUTSIDERS,
     succ: error ? 0 : 1,
     reason: error ? error.message : null,
     timestamp: Math.round(Date.now() / 1000)

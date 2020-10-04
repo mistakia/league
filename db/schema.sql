@@ -2140,8 +2140,8 @@ CREATE TABLE `footballoutsiders` (
   `dptsprz` decimal(3,2) DEFAULT NULL,
   `otdprz` decimal(4,3) DEFAULT NULL,
   `dtdprz` decimal(4,3) DEFAULT NULL,
-  `oavgld` decimal(3,2) DEFAULT NULL,
-  `davgld` decimal(3,2) DEFAULT NULL,
+  `oavgld` decimal(4,2) DEFAULT NULL,
+  `davgld` decimal(4,2) DEFAULT NULL,
   UNIQUE KEY `team` (`team`, `week`, `year`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
