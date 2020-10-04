@@ -391,6 +391,19 @@ export const slots = {
   COV: 14
 }
 
+export const starterSlots = [
+  slots.QB,
+  slots.RB,
+  slots.WR,
+  slots.TE,
+  slots.WRTE,
+  slots.RBWR,
+  slots.RBWRTE,
+  slots.QBRBWRTE,
+  slots.K,
+  slots.DST
+]
+
 export const slotName = {
   [slots.QB]: 'QB',
   [slots.RB]: 'RB',

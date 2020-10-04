@@ -190,7 +190,7 @@ export default class PlayerContextMenu extends React.Component {
         <MenuItem
           key='release'
           dense
-          disabled={status.locked}
+          disabled={status.locked && status.starter}
           onClick={this.handleRelease}
         >
           Release
