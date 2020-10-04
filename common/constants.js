@@ -908,7 +908,8 @@ export const jobs = {
   PROJECTIONS_NUMBERFIRE: 29,
 
   PROCESS_PLAY_STATS: 30,
-  DATA_ARMCHAIR: 31
+  DATA_ARMCHAIR: 31,
+  DATA_FOOTBALL_OUTSIDERS: 32
 }
 
 export const jobDetails = {
@@ -942,7 +943,8 @@ export const jobDetails = {
   28: 'Practice Report',
   29: 'Projections (Numberfire)',
   30: 'Process Play Stats',
-  31: 'Armchair (Data)'
+  31: 'Armchair (Data)',
+  32: 'Football Outsiders (Data)'
 }
 
 export const changes = {
