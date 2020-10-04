@@ -2043,6 +2043,108 @@ CREATE TABLE `gamelogs` (
   UNIQUE KEY `player` (`player`, `week`, `year`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `footballoutsiders`
+--
+
+DROP TABLE IF EXISTS `footballoutsiders`;
+
+CREATE TABLE `footballoutsiders` (
+  `week` tinyint(2) NOT NULL,
+  `year` int(4) NOT NULL,
+  `team` varchar(3) NOT NULL,
+
+  `ork` tinyint(2) DEFAULT NULL,
+  `drk` tinyint(2) DEFAULT NULL,
+  `odvoa` decimal(3,1) DEFAULT NULL,
+  `ddvoa` decimal(3,1) DEFAULT NULL,
+  `olw` tinyint(2) DEFAULT NULL,
+  `dlw` tinyint(2) DEFAULT NULL,
+  `odave` decimal(3,1) DEFAULT NULL,
+  `ddave` decimal(3,1) DEFAULT NULL,
+  `opass` decimal(3,1) DEFAULT NULL,
+  `dpass` decimal(3,1) DEFAULT NULL,
+  `orun` decimal(3,1) DEFAULT NULL,
+  `drun` decimal(3,1) DEFAULT NULL,
+
+  `olrunaly` decimal(4,2) DEFAULT NULL,
+  `dlrunaly` decimal(4,2) DEFAULT NULL,
+  `olrby` decimal(4,2) DEFAULT NULL,
+  `dlrby` decimal(4,2) DEFAULT NULL,
+  `olpwr` int(3) DEFAULT NULL,
+  `dlpwr` int(3) DEFAULT NULL,
+  `olstf` int(3) DEFAULT NULL,
+  `dlstf` int(3) DEFAULT NULL,
+  `olrun2y` decimal(4,2) DEFAULT NULL,
+  `dlrun2y` decimal(4,2) DEFAULT NULL,
+  `olrunofy` decimal(4,2) DEFAULT NULL,
+  `dlrunofy` decimal(4,2) DEFAULT NULL,
+  `olpassrk` tinyint(2) DEFAULT NULL,
+  `dlpassrk` tinyint(2) DEFAULT NULL,
+  `olskrk` tinyint(2) DEFAULT NULL,
+  `dlskrk` tinyint(2) DEFAULT NULL,
+  `olskrt` decimal(3,1) DEFAULT NULL,
+  `dlskrt` decimal(3,1) DEFAULT NULL,
+
+  `olrunley` decimal(4,2) DEFAULT NULL,
+  `dlrunley` decimal(4,2) DEFAULT NULL,
+
+  `olrunlty` decimal(4,2) DEFAULT NULL,
+  `dlrunlty` decimal(4,2) DEFAULT NULL,
+
+  `olrunmgy` decimal(4,2) DEFAULT NULL,
+  `dlrunmgy` decimal(4,2) DEFAULT NULL,
+
+  `olrunrty` decimal(4,2) DEFAULT NULL,
+  `dlrunrty` decimal(4,2) DEFAULT NULL,
+
+  `olrunrey` decimal(4,2) DEFAULT NULL,
+  `dlrunrey` decimal(4,2) DEFAULT NULL,
+
+  `odrv` int(3) DEFAULT NULL,
+  `ddrv` int(3) DEFAULT NULL,
+  `oypdrv` decimal(4,2) DEFAULT NULL,
+  `dypdrv` decimal(4,2) DEFAULT NULL,
+  `optspdrv` decimal(3,2) DEFAULT NULL,
+  `dptspdrv` decimal(3,2) DEFAULT NULL,
+  `otopdrv` decimal(4,3) DEFAULT NULL,
+  `dtopdrv` decimal(4,3) DEFAULT NULL,
+  `ointpdrv` decimal(4,3) DEFAULT NULL,
+  `dintpdrv` decimal(4,3) DEFAULT NULL,
+  `ofumpdrv` decimal(4,3) DEFAULT NULL,
+  `dfumpdrv` decimal(4,3) DEFAULT NULL,
+  `olospdrv` decimal(4,2) DEFAULT NULL,
+  `dlospdrv` decimal(4,2) DEFAULT NULL,
+  `oplypdrv` decimal(4,2) DEFAULT NULL,
+  `dplypdrv` decimal(4,2) DEFAULT NULL,
+  `otoppdrv` varchar(10) DEFAULT NULL,
+  `dtoppdrv` varchar(10) DEFAULT NULL,
+  `odrvsucc` decimal(4,3) DEFAULT NULL,
+  `ddrvsucc` decimal(4,3) DEFAULT NULL,
+
+  `otdpdrv` decimal(4,3) DEFAULT NULL,
+  `dtdpdrv` decimal(4,3) DEFAULT NULL,
+  `ofgpdrv` decimal(4,3) DEFAULT NULL,
+  `dfgpdrv` decimal(4,3) DEFAULT NULL,
+  `opntpdrv` decimal(4,3) DEFAULT NULL,
+  `dpntpdrv` decimal(4,3) DEFAULT NULL,
+  `o3opdrv` decimal(4,3) DEFAULT NULL,
+  `d3opdrv` decimal(4,3) DEFAULT NULL,
+  `olosko` decimal(4,2) DEFAULT NULL,
+  `dlosko` decimal(4,2) DEFAULT NULL,
+  `otdfg` decimal(5,2) DEFAULT NULL,
+  `dtdfg` decimal(5,2) DEFAULT NULL,
+  `optsprz` decimal(3,2) DEFAULT NULL,
+  `dptsprz` decimal(3,2) DEFAULT NULL,
+  `otdprz` decimal(4,3) DEFAULT NULL,
+  `dtdprz` decimal(4,3) DEFAULT NULL,
+  `oavgld` decimal(3,2) DEFAULT NULL,
+  `davgld` decimal(3,2) DEFAULT NULL,
+  UNIQUE KEY `team` (`team`, `week`, `year`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
