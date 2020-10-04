@@ -202,7 +202,8 @@ const runOne = async ({ type, url }) => {
       const item = {}
       for (const [index, header] of headers.entries()) {
         const data = $(el).find('td').eq(index).text().trim()
-        item[header] = parseFloat(data) || data
+        const value = parseFloat(data)
+        item[header] = isNaN(value) ? data : value
       }
       update(type, item)
     })
