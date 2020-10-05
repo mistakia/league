@@ -466,7 +466,7 @@ CREATE TABLE `play` (
   `saf` tinyint(1) NOT NULL,
   `blk` tinyint(1) NOT NULL,
   `eps` decimal(3,2) NOT NULL,
-  `epa` decimal(3,2) NOT NULL
+  `epa` decimal(4,2) NOT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -1114,7 +1114,7 @@ CREATE TABLE `pbp` (
   `kr` varchar(7) DEFAULT NULL,
   `kry` varchar(3) DEFAULT NULL,
   `eps` decimal(3,2) NOT NULL,
-  `epa` decimal(3,2) NOT NULL
+  `epa` decimal(4,2) NOT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --

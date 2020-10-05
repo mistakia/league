@@ -7,8 +7,8 @@ const { constants } = require('../../common')
 router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    res.set('Expires', moment().add('1', 'week').toDate().toUTCString())
-    res.set('Cache-Control', 'public, max-age=604800') // one-week
+    res.set('Expires', moment().add('1', 'day').toDate().toUTCString())
+    res.set('Cache-Control', 'public, max-age=86400') // one-day
     res.set('Pragma', null)
     res.set('Surrogate-Control', null)
 
