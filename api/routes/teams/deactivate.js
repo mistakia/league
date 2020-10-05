@@ -52,15 +52,7 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'player is already on practice squad' })
     }
 
-    const players = await db('player')
-      .join('transactions', 'player.player', 'transactions.player')
-      .where('player.player', player)
-      .where({
-        lid: leagueId,
-        tid
-      })
-      .orderBy('transactions.timestamp', 'desc')
-      .orderBy('transactions.uid', 'desc')
+    const players = await db('player').where('player', player).limit(1)
     const playerRow = players[0]
 
     const transactions = await getTransactionsSinceAcquisition({
@@ -68,6 +60,7 @@ router.post('/?', async (req, res) => {
       tid,
       player
     })
+    const lastTransaction = transactions.reduce((a, b) => a.timestamp > b.timestamp ? a : b)
 
     // make sure player is a rookie
     if (playerRow.start !== constants.season.year) {
@@ -75,7 +68,7 @@ router.post('/?', async (req, res) => {
     }
 
     // make sure player has not been on the active roster for more than 48 hours
-    const cutoff = moment(playerRow.timestamp, 'X').add('48', 'hours')
+    const cutoff = moment(lastTransaction.timestamp, 'X').add('48', 'hours')
     if (moment().isAfter(cutoff)) {
       return res.status(400).send({ error: 'player has exceeded 48 hours on active roster' })
     }
@@ -109,7 +102,7 @@ router.post('/?', async (req, res) => {
       lid: leagueId,
       player,
       type: constants.transactions.ROSTER_DEACTIVATE,
-      value: playerRow.value,
+      value: lastTransaction.value,
       year: constants.season.year,
       timestamp: Math.round(Date.now() / 1000)
     }
