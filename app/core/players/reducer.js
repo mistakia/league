@@ -224,26 +224,10 @@ export function playersReducer (state = initialState, { payload, type }) {
         }
       })
 
-    case rosterActions.GET_ROSTER_FULFILLED:
-      return state.withMutations(state => {
-        payload.data.players.forEach(roster => {
-          const { player, value, type, tid, slot } = roster
-          state.mergeIn(['items', player], {
-            value,
-            type,
-            tid,
-            slot
-          })
-        })
-      })
-
     case rosterActions.GET_ROSTERS_FULFILLED: {
-      if (payload.opts.week !== constants.season.week) {
-        return state
-      }
-
+      const rosters = payload.data.filter(r => r.week === constants.season.week)
       return state.withMutations(state => {
-        payload.data.forEach(roster => {
+        rosters.forEach(roster => {
           roster.players.forEach(rosterSlot => {
             const { player, value, type, tid, slot } = rosterSlot
             state.mergeIn(['items', player], {
