@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 
-const { constants, uniqBy } = require('../../../common')
+const { constants } = require('../../../common')
 const transactions = require('./transactions')
 const draft = require('./draft')
 const games = require('./games')
@@ -134,31 +134,21 @@ router.get('/:leagueId/rosters/?', async (req, res) => {
   const { logger, db } = req.app.locals
   try {
     const { leagueId } = req.params
-    const week = typeof req.query.week !== 'undefined' ? parseInt(req.query.week, 10) : constants.season.week
-
-    if (isNaN(week)) {
-      return res.status(400).send({ error: 'invalid week' })
-    }
-
-    if (week !== 0 && !constants.fantasyWeeks.includes(week)) {
-      return res.status(400).send({ error: 'invalid week' })
-    }
 
     const rosters = await db('rosters')
       .select('*')
-      .where({ lid: leagueId, year: constants.season.year, week })
-      .distinct('tid', 'year')
+      .where({ lid: leagueId, year: constants.season.year })
       .orderBy('week', 'desc')
 
     const players = await db('rosters_players')
-      .leftJoin('transactions', 'rosters_players.player', 'transactions.player')
+      .select('rosters_players.*', 'transactions.*')
+      .join('rosters', 'rosters_players.rid', '=', 'rosters.uid')
+      .leftJoin('transactions', function () {
+        this.on('transactions.uid', '=', db.raw('(select max(uid) from transactions where transactions.tid = rosters.tid and transactions.player = rosters_players.player)'))
+      })
       .whereIn('rid', rosters.map(r => r.uid))
-      .whereIn('transactions.tid', rosters.map(r => r.tid))
-      .orderBy('transactions.timestamp', 'desc')
 
-    const unique = uniqBy(players, 'player')
-
-    rosters.forEach(r => { r.players = unique.filter(p => p.rid === r.uid) })
+    rosters.forEach(r => { r.players = players.filter(p => p.rid === r.uid) })
 
     res.send(rosters)
   } catch (err) {
