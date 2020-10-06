@@ -3,7 +3,6 @@ import { take, call, takeLatest, fork, select, put, putResolve } from 'redux-sag
 import { rosterActions } from './actions'
 import { notificationActions } from '@core/notifications'
 import {
-  getRoster,
   getRosters,
   putRoster,
   postActivate,
@@ -34,14 +33,9 @@ import { waiverActions, getWaiverPlayersForCurrentTeam } from '@core/waivers'
 import { getCurrentLeague } from '@core/leagues'
 import Worker from 'workerize-loader?inline!./worker' // eslint-disable-line import/no-webpack-loader-syntax
 
-export function * loadRoster ({ payload }) {
-  const { teamId } = payload
-  yield call(getRoster, { teamId })
-}
-
 export function * loadRosters () {
   const { leagueId } = yield select(getApp)
-  yield call(getRosters, { leagueId, week: constants.season.week })
+  yield call(getRosters, { leagueId })
 }
 
 export function * updateRosterPlayerSlot ({ payload }) {
@@ -268,14 +262,6 @@ export function * releaseNotification () {
 //  WATCHERS
 // -------------------------------------
 
-export function * watchLoadRoster () {
-  yield takeLatest(rosterActions.LOAD_ROSTER, loadRoster)
-}
-
-export function * watchLoadRosters () {
-  yield takeLatest(rosterActions.LOAD_ROSTERS, loadRosters)
-}
-
 export function * watchUpdateRosterPlayerSlot () {
   yield takeLatest(rosterActions.UPDATE_ROSTER_PLAYER_SLOT, updateRosterPlayerSlot)
 }
@@ -365,8 +351,6 @@ export function * watchSelectTrade () {
 // -------------------------------------
 
 export const rosterSagas = [
-  fork(watchLoadRoster),
-  fork(watchLoadRosters),
   fork(watchUpdateRosterPlayerSlot),
   fork(watchActivatePlayer),
   fork(watchDeactivatePlayer),

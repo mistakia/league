@@ -14,7 +14,6 @@ import { getStatusActions } from '@core/status'
 import { getScheduleActions } from '@core/schedule'
 import { getDraftActions, postDraftActions } from '@core/draft'
 import {
-  getRosterActions,
   getRostersActions,
   putRosterActions,
   postActivateActions,
@@ -104,7 +103,6 @@ export const getPlayer = fetch.bind(null, api.getPlayer, getPlayerActions)
 export const getChartedPlays = fetch.bind(null, api.getChartedPlays, getChartedPlaysActions)
 export const getPlays = fetch.bind(null, api.getPlays, getPlaysActions)
 
-export const getRoster = fetch.bind(null, api.getRoster, getRosterActions)
 export const getRosters = fetch.bind(null, api.getRosters, getRostersActions)
 export const putRoster = fetch.bind(null, api.putRoster, putRosterActions)
 
