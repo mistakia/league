@@ -1,6 +1,4 @@
 export const scoreboardActions = {
-  LOAD_SCOREBOARD: 'LOAD_SCOREBOARD',
-
   SCOREBOARD_SELECT_WEEK: 'SCOREBOARD_SELECT_WEEK',
 
   // websocket events
@@ -10,10 +8,6 @@ export const scoreboardActions = {
   GET_SCOREBOARD_PENDING: 'GET_SCOREBOARD_PENDING',
   GET_SCOREBOARD_FAILED: 'GET_SCOREBOARD_FAILED',
   GET_SCOREBOARD_FULFILLED: 'GET_SCOREBOARD_FULFILLED',
-
-  load: () => ({
-    type: scoreboardActions.LOAD_SCOREBOARD
-  }),
 
   select: (week) => ({
     type: scoreboardActions.SCOREBOARD_SELECT_WEEK,

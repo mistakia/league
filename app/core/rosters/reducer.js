@@ -1,7 +1,7 @@
 import { Map } from 'immutable'
 
 import { rosterActions } from './actions'
-import { Roster, createRoster } from './roster'
+import { createRoster } from './roster'
 import { appActions } from '@core/app'
 import { constants } from '@common'
 import { auctionActions } from '@core/auction'
@@ -12,21 +12,9 @@ export function rostersReducer (state = new Map(), { payload, type }) {
     case appActions.LOGOUT:
       return new Map()
 
-    case rosterActions.LOAD_ROSTER:
-      return state.setIn([payload.teamId, constants.season.week], new Roster())
-
-    case rosterActions.GET_ROSTER_PENDING:
-      return state.setIn([payload.opts.teamId, constants.season.week, 'isPending'], true)
-
-    case rosterActions.GET_ROSTER_FAILED:
-      return state.setIn([payload.opts.teamId, constants.season.week, 'isPending'], true)
-
-    case rosterActions.GET_ROSTER_FULFILLED:
-      return state.setIn([payload.opts.teamId, constants.season.week], createRoster(payload.data))
-
     case rosterActions.GET_ROSTERS_FULFILLED:
       return state.withMutations(state => {
-        payload.data.forEach(r => state.setIn([r.tid, payload.opts.week], createRoster(r)))
+        payload.data.forEach(r => state.setIn([r.tid, r.week], createRoster(r)))
       })
 
     case auctionActions.AUCTION_PROCESSED: {

@@ -50,10 +50,7 @@ export const api = {
     const url = `${BASE_URL}/players/${playerId}`
     return { url }
   },
-  getRoster ({ teamId }) {
-    const url = `${BASE_URL}/teams/${teamId}/lineups`
-    return { url }
-  },
+  // TODO - unused / deprecate
   putRoster (data) {
     const url = `${BASE_URL}/teams/${data.teamId}/lineups`
     return { url, ...PUT(data) }

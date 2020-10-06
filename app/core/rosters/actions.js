@@ -1,7 +1,4 @@
 export const rosterActions = {
-  LOAD_ROSTER: 'LOAD_ROSTER',
-  LOAD_ROSTERS: 'LOAD_ROSTERS',
-
   PROJECT_LINEUPS: 'PROJECT_LINEUPS',
 
   // USER
@@ -22,10 +19,6 @@ export const rosterActions = {
 
   ACTIVATE_PLAYER: 'ACTIVATE_PLAYER',
   DEACTIVATE_PLAYER: 'DEACTIVATE_PLAYER',
-
-  GET_ROSTER_FAILED: 'GET_ROSTER_FAILED',
-  GET_ROSTER_PENDING: 'GET_ROSTER_PENDING',
-  GET_ROSTER_FULFILLED: 'GET_ROSTER_FULFILLED',
 
   GET_ROSTERS_FAILED: 'GET_ROSTERS_FAILED',
   GET_ROSTERS_PENDING: 'GET_ROSTERS_PENDING',
@@ -146,40 +139,6 @@ export const rosterActions = {
     payload: {
       player,
       teamId
-    }
-  }),
-
-  loadRoster: (teamId) => ({
-    type: rosterActions.LOAD_ROSTER,
-    payload: {
-      teamId
-    }
-  }),
-
-  loadRosters: () => ({
-    type: rosterActions.LOAD_ROSTERS
-  }),
-
-  getRosterFailed: (opts, error) => ({
-    type: rosterActions.GET_ROSTER_FAILED,
-    payload: {
-      opts,
-      error
-    }
-  }),
-
-  getRosterFulfilled: (opts, data) => ({
-    type: rosterActions.GET_ROSTER_FULFILLED,
-    payload: {
-      opts,
-      data
-    }
-  }),
-
-  getRosterPending: opts => ({
-    type: rosterActions.GET_ROSTER_PENDING,
-    payload: {
-      opts
     }
   }),
 
@@ -412,12 +371,6 @@ export const rosterActions = {
       data
     }
   })
-}
-
-export const getRosterActions = {
-  failed: rosterActions.getRosterFailed,
-  pending: rosterActions.getRosterPending,
-  fulfilled: rosterActions.getRosterFulfilled
 }
 
 export const getRostersActions = {
