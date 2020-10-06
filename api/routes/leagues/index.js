@@ -141,7 +141,7 @@ router.get('/:leagueId/rosters/?', async (req, res) => {
       .orderBy('week', 'desc')
 
     const players = await db('rosters_players')
-      .select('rosters_players.*', 'transactions.*')
+      .select('rosters_players.*', 'transactions.type', 'transactions.value', 'transactions.timestamp', 'transactions.year')
       .join('rosters', 'rosters_players.rid', '=', 'rosters.uid')
       .leftJoin('transactions', function () {
         this.on('transactions.uid', '=', db.raw('(select max(uid) from transactions where transactions.tid = rosters.tid and transactions.player = rosters_players.player)'))
