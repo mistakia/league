@@ -146,7 +146,7 @@ const run = async () => {
     await upsert({
       player: team,
       pos: 'DST',
-      opp: fixTeam(opp.possessionTeam),
+      opp: fixTeam(opp),
       stats
     })
   }
