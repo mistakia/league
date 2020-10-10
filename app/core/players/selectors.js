@@ -183,7 +183,7 @@ export function getPlayerById (state, { playerId }) {
 export function getGamesByYearForSelectedPlayer (state) {
   const playerId = state.get('players').get('selected')
   const p = getPlayerById(state, { playerId })
-  const games = p.get('games')
+  const games = p.get('gamelogs')
 
   const years = {}
   for (const game of games) {
