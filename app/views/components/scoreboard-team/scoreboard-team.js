@@ -9,7 +9,7 @@ import './scoreboard-team.styl'
 
 export default class ScoreboardTeam extends React.Component {
   render = () => {
-    const { team, roster, league, type, scoreboard } = this.props
+    const { team, roster, league, type, scoreboard, showBench } = this.props
 
     const rows = []
     if (league.sqb) {
@@ -122,6 +122,16 @@ export default class ScoreboardTeam extends React.Component {
       }
     }
 
+    const bench = []
+    if (showBench) {
+      for (const [index, rosterSlot] of roster.bench.entries()) {
+        const { player } = rosterSlot
+        bench.push(
+          <ScoreboardPlayer key={index} {...{ playerId: player, roster }} />
+        )
+      }
+    }
+
     const classNames = ['scoreboard__team']
     classNames.push(type)
 
@@ -154,6 +164,10 @@ export default class ScoreboardTeam extends React.Component {
         <div className='scoreboard__team-roster'>
           {rows}
         </div>
+        {showBench &&
+          <div className='scoreboard__team-bench'>
+            {bench}
+          </div>}
       </div>
     )
   }

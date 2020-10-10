@@ -74,6 +74,7 @@ const run = async () => {
     const playStat = groups[gsispid].find(p => p.possessionTeam && p.playerName)
     if (!playStat) continue
 
+    // TODO - use teamId to get cteam
     const params = {
       pname: playStat.playerName,
       cteam: fixTeam(playStat.possessionTeam)
