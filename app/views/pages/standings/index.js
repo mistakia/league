@@ -1,11 +1,15 @@
-import React from 'react'
+import { connect } from 'react-redux'
+import { createSelector } from 'reselect'
 
-import render from './standings'
+import { getStandings } from '@core/standings'
 
-class StandingsPage extends React.Component {
-  render () {
-    return render.call(this)
-  }
-}
+import StandingsPage from './standings'
 
-export default StandingsPage
+const mapStateToProps = createSelector(
+  getStandings,
+  (standings) => ({ standings })
+)
+
+export default connect(
+  mapStateToProps
+)(StandingsPage)
