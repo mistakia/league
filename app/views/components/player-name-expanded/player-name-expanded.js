@@ -10,6 +10,25 @@ import IconButton from '@components/icon-button'
 
 import './player-name-expanded.styl'
 
+function getClock ({ playDescription, clockTime, quarter }) {
+  switch (playDescription) {
+    case 'END QUARTER 1':
+      return 'End of 1st'
+
+    case 'END QUARTER 2':
+      return 'Half'
+
+    case 'END QUARTER 3':
+      return 'End of 3rd'
+
+    case 'END GAME':
+      return 'Final'
+
+    default:
+      return quarter ? `${clockTime} ${quarter}${nth(quarter)}` : '-'
+  }
+}
+
 function GameStatus ({ status, player }) {
   if (!status || !status.game) {
     return null
@@ -29,11 +48,7 @@ function GameStatus ({ status, player }) {
     )
   }
 
-  const p = status.lastPlay
-  const isFinal = p.playDescription === 'END GAME'
-  const clock = isFinal
-    ? 'Final'
-    : `${p.clockTime} ${p.quarter}${nth(p.quarter)}`
+  const clock = getClock(status.lastPlay)
 
   return (
     <div className='player__name-expanded-game'>
