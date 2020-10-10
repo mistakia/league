@@ -130,16 +130,18 @@ const run = async () => {
         return false
       }
 
-      return fixTeam(p.possessionTeam) !== team
+      return Boolean(p.possessionTeam)
     })
     if (!opponentPlays.length) continue
-    const opp = opponentPlays.find(p => p.possessionTeam)
+    const play = opponentPlays[0]
+    const opp = fixTeam(play.homeTeamAbbr) === team ? play.awayTeamAbbr : play.homeTeamAbbr
     const formattedPlayStats = opponentPlays.map(p => ({
+      possessionTeam: p.possessionTeam,
       drivePlayCount: p.drivePlayCount,
       playTypeNFL: p.playTypeNFL,
       playStats: [{ ...p }]
     }))
-    const stats = calculateDstStatsFromPlays(formattedPlayStats)
+    const stats = calculateDstStatsFromPlays(formattedPlayStats, team)
     if (argv.dry) continue
     await upsert({
       player: team,
