@@ -1,7 +1,6 @@
 .scoreboard__player
   display flex
   height 60px
-  border-bottom 1px solid $borderColor
   align-items center
 
   &.projection .scoreboard__player-score
@@ -28,6 +27,7 @@
 .away
   .scoreboard__player
     justify-content flex-end
+    margin-left 16px
     margin-right 8px
   .scoreboard__player-body
     order 2
@@ -38,6 +38,7 @@
   .scoreboard__player
     justify-content flex-start
     margin-left 8px
+    margin-right 16px
   .scoreboard__player-score
     order 1
   .scoreboard__player-body
