@@ -1,0 +1,1 @@
+export { getStandings } from './selectors'

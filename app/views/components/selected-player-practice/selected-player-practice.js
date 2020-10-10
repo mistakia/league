@@ -19,7 +19,6 @@ const Row = ({ data }) => (
 
 export default class SelectedPlayerPractice extends React.Component {
   render = () => {
-    console.log(this.props.player.toJS())
     const rows = []
     for (const [index, p] of this.props.player.practice.entries()) {
       rows.push(<Row key={index} data={p} />)
