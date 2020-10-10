@@ -27,8 +27,8 @@ export function getPlaysForPlayer (state, { player, week }) {
           fixTeam(p.awayTeamAbbr) !== player.team) {
           return false
         }
-        const pos = p.possessionTeam
-        return pos && fixTeam(pos) !== player.team
+
+        return Boolean(p.possessionTeam)
       })
   }
 
