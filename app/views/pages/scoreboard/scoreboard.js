@@ -13,6 +13,18 @@ import ScoreboardSlots from '@components/scoreboard-slots'
 import './scoreboard.styl'
 
 export default class ScoreboardPage extends React.Component {
+  constructor (props) {
+    super(props)
+
+    this.state = {
+      show: false
+    }
+  }
+
+  handleClick = () => {
+    this.setState({ show: !this.state.show })
+  }
+
   render = () => {
     const { matchup } = this.props
 
@@ -28,10 +40,15 @@ export default class ScoreboardPage extends React.Component {
             <ScoreboardScores />
           </Grid>
           <Grid container item xs={12} spacing={0}>
-            <Grid item xs={12} md={9} classes={{ root: 'scoreboard__main' }}>
-              <ScoreboardTeam tid={matchup.aid} type='away' />
-              <ScoreboardSlots />
-              <ScoreboardTeam tid={matchup.hid} type='home' />
+            <Grid item xs={12} md={9}>
+              <div className='scoreboard__main'>
+                <ScoreboardTeam tid={matchup.aid} type='away' showBench={this.state.show} />
+                <ScoreboardSlots />
+                <ScoreboardTeam tid={matchup.hid} type='home' showBench={this.state.show} />
+              </div>
+              <div className='scoreboard__bench cursor' onClick={this.handleClick}>
+                Show Bench
+              </div>
             </Grid>
             <Grid item xs={12} md={3}>
               <ScoreboardPlayByPlay mid={matchup.uid} />

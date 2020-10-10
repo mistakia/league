@@ -1,7 +1,6 @@
 $height = 50px
 
 .scoreboard__team
-  padding 16px
   flex 1
   overflow hidden
 
@@ -24,7 +23,7 @@ $height = 50px
   position absolute
   background-color $borderColor
   width 25%
-  height $height - 1px
+  height $height
   &:after
     position absolute
     content ""
@@ -82,7 +81,3 @@ $height = 50px
   display flex
   align-items center
   justify-content space-between
-
-@media (max-width 600px)
-  .scoreboard__team
-    padding 16px 2px
