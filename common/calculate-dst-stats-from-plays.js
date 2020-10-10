@@ -3,7 +3,7 @@ import fixTeam from './fix-team'
 
 const calculateDstStatsFromPlays = (plays, team) => {
   const dstStats = constants.createStats()
-  dstStats.dtno = plays.filter(p => p.drivePlayCount === 3 && p.playTypeNFL === 'PUNT').length
+  dstStats.dtno = plays.filter(p => (p.possessionTeam && fixTeam(p.possessionTeam) !== team) && p.drivePlayCount === 3 && p.playTypeNFL === 'PUNT').length
   const playStats = plays.map(p => p.playStats.map(ps => ({
     possessionTeam: p.possessionTeam,
     ...ps
@@ -20,7 +20,7 @@ const calculateDstStatsFromPlays = (plays, team) => {
           dstStats.prtd += 1
           break
 
-        case 45:
+        case 46:
           dstStats.krtd += 1
           break
 
