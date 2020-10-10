@@ -229,11 +229,11 @@ export function playersReducer (state = initialState, { payload, type }) {
       return state.withMutations(state => {
         rosters.forEach(roster => {
           roster.players.forEach(rosterSlot => {
-            const { player, value, type, tid, slot } = rosterSlot
+            const { player, value, type, slot } = rosterSlot
             state.mergeIn(['items', player], {
               value,
               type,
-              tid,
+              tid: roster.tid,
               slot
             })
           })
