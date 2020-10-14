@@ -230,6 +230,11 @@ const run = async () => {
 module.exports = run
 
 const main = async () => {
+  // do not pull in any data after the season has ended
+  if (constants.season.week > constants.season.finalWeek) {
+    return
+  }
+
   let error
   try {
     await run()
