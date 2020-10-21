@@ -90,6 +90,7 @@ const run = async () => {
           })
           .whereNot('uid', waiver.wid)
           .whereNot('tid', waiver.tid)
+          .whereNull('processed')
           .whereNull('cancelled')
 
         if (tiedWaivers.length) {
