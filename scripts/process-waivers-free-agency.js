@@ -82,11 +82,15 @@ const run = async () => {
         }
 
         // reset waiver order if necessary
-        const tiedWaivers = await db('waivers').where({
-          bid: waiver.bid,
-          player: waiver.player,
-          lid: waiver.lid
-        }).whereNot('uid', waiver.wid)
+        const tiedWaivers = await db('waivers')
+          .where({
+            bid: waiver.bid,
+            player: waiver.player,
+            lid: waiver.lid
+          })
+          .whereNot('uid', waiver.wid)
+          .whereNot('tid', waiver.tid)
+          .whereNull('cancelled')
 
         if (tiedWaivers.length) {
           await resetWaiverOrder({ leagueId: waiver.lid, teamId: waiver.tid })
