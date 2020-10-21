@@ -134,6 +134,14 @@ describe('API /waivers - free agency', function () {
     it('free agent waiver for player not on nfl active roster', async () => {
 
     })
+
+    it('multiple same bids for same player, one team', async () => {
+
+    })
+
+    it('multiple same bids for same player, multiple teams', async () => {
+
+    })
   })
 
   describe('errors', function () {
