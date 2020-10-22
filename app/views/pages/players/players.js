@@ -39,7 +39,7 @@ import HeaderStatsRushingShare from '@components/header-stats-rushing-share'
 import HeaderStatsRushingAdvanced from '@components/header-stats-rushing-advanced'
 import HeaderStatsRushingBrokenTackles from '@components/header-stats-rushing-broken-tackles'
 import HeaderStatsReceivingBasic from '@components/header-stats-receiving-basic'
-import HeaderStatsReceivingOppurtunity from '@components/header-stats-receiving-oppurtunity'
+import HeaderStatsReceivingOpportunity from '@components/header-stats-receiving-opportunity'
 import HeaderStatsReceivingAdvanced from '@components/header-stats-receiving-advanced'
 import Loading from '@components/loading'
 import Icon from '@components/icon'
@@ -249,7 +249,7 @@ export default class PlayersPage extends React.Component {
             {isStatsRushingView && <HeaderStatsRushingAdvanced />}
             {isStatsRushingView && <HeaderStatsRushingBrokenTackles />}
             {isStatsReceivingView && <HeaderStatsReceivingBasic />}
-            {isStatsReceivingView && <HeaderStatsReceivingOppurtunity />}
+            {isStatsReceivingView && <HeaderStatsReceivingOpportunity />}
             {isStatsReceivingView && <HeaderStatsReceivingAdvanced />}
           </Hidden>
         </div>

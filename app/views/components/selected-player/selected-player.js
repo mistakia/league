@@ -163,7 +163,7 @@ export default class SelectedPlayer extends React.Component {
             <Tab label='Game Log' />
             <Tab label='Stats' />
             <Tab label='Team Splits' />
-            <Tab label='Oppurtunity' />
+            <Tab label='Opportunity' />
             <Tab label='Efficiency' />
             <Tab label='Practice' />
             <Tab label='News' />
