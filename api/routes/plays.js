@@ -6,7 +6,7 @@ const {
   getChartedPlayByPlayQuery,
   getPlayByPlayQuery
 } = require('../../utils')
-const { constants, uniqBy } = require('../../common')
+const { constants } = require('../../common')
 
 router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
@@ -20,15 +20,33 @@ router.get('/?', async (req, res) => {
     }
 
     const query = getPlayByPlayQuery(db)
-    const plays = await query.whereIn('nflPlay.season', years)
-    const esbids = Array.from(uniqBy(plays, 'esbid')).map(p => p.esbid)
-    const playStats = await db('nflPlayStat').whereIn('esbid', esbids)
+    const stream = query.whereIn('nflPlay.season', years).stream()
+    res.set('Content-Type', 'application/json')
+    stream.pipe(JSONStream.stringify()).pipe(res)
+    req.on('close', stream.end.bind(stream))
+  } catch (error) {
+    logger(error)
+    res.status(500).send({ error: error.toString() })
+  }
+})
 
-    for (const play of plays) {
-      play.playStats = playStats.filter(p => p.playId === play.playId && p.esbid === play.esbid)
+router.get('/stats', async (req, res) => {
+  const { db, logger } = req.app.locals
+  try {
+    const years = req.query.years
+      ? (Array.isArray(req.query.years) ? req.query.years : [req.query.years])
+      : [constants.season.week ? constants.season.year : (constants.season.year - 1)]
+    // TODO - enable multiple years
+    if (years.length > 1) {
+      return res.status(400).send({ error: 'too many years listed' })
     }
 
-    res.send(plays)
+    const plays = await db('nflPlay').select('esbid').whereIn('season', years).groupBy('esbid')
+    const esbids = plays.map(p => p.esbid)
+    const stream = db('nflPlayStat').whereIn('esbid', esbids).stream()
+    res.set('Content-Type', 'application/json')
+    stream.pipe(JSONStream.stringify()).pipe(res)
+    req.on('close', stream.end.bind(stream))
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })

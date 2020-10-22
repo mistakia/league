@@ -1,10 +1,11 @@
 import { fork, takeLatest, call } from 'redux-saga/effects'
 
 import { playerActions } from '@core/players'
-import { getPlays } from '@core/api'
+import { getPlays, getPlayStats } from '@core/api'
 
 export function * loadPlays () {
   yield call(getPlays)
+  yield call(getPlayStats)
 }
 
 //= ====================================
