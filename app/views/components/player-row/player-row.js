@@ -240,7 +240,7 @@ class PlayerRow extends Player {
       </div>
     )
 
-    const receivingOppurtunity = (
+    const receivingOpportunity = (
       <div className='row__group'>
         <div className='row__group-body'>
           <PlayerRowMetric stats={stats} overall={overall} type='trg' />
@@ -324,7 +324,7 @@ class PlayerRow extends Player {
               {isStatsRushingView && rushingAdvanced}
               {isStatsRushingView && rushingBrokenTackles}
               {isStatsReceivingView && receivingBasic}
-              {isStatsReceivingView && receivingOppurtunity}
+              {isStatsReceivingView && receivingOpportunity}
               {isStatsReceivingView && receivingAdvanced}
             </Hidden>
           </div>

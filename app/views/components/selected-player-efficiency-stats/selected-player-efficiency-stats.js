@@ -71,7 +71,7 @@ export default class SelectedPlayerEfficiencyStats extends React.Component {
             </div>}
           {['RB', 'WR', 'TE'].includes(player.pos1) &&
             <div className='row__group'>
-              <div className='row__group-head'>Receiving Oppurtunity</div>
+              <div className='row__group-head'>Receiving Opportunity</div>
               <div className='row__group-body'>
                 <div className='player__row-metric'>AY%</div>
                 <div className='player__row-metric'>TAR%</div>

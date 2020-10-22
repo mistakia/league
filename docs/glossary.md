@@ -92,9 +92,9 @@
 | ELU | Elusive Rating | PFF Elusive rating: (Missed Tackles Forced) / (Designed Run Attempts + Receptions) * (Yards After Contact Per Attempt * 100) | Planned | 2000
 | FD | First Downs | Rushing attempts resulting in a first down | Available | 2000
 | FD% | First Down Rate | Percentage of rushing attempts resuling in first downs | Planned | 2000
-| FP/O | Fantasy Points Per Opportunity | Fantasy points generated per oppurtunity (rushing attempts and passing targets) | Planned | 2000
+| FP/O | Fantasy Points Per Opportunity | Fantasy points generated per opportunity (rushing attempts and passing targets) | Planned | 2000
 | FUM% | Fumble Rate | Percentage of rushing attempts resulting in fumbles | Available | 2000
-| OPR | Oppurtunity Rating | The percentage of total team touches | Planned | 2000
+| OPR | Opportunity Rating | The percentage of total team touches | Planned | 2000
 | POS% | Postive Rush Rate | Percentage of rushing attempts resulting in gained yards | Available | 2000
 | RPA | Rush Points Earned | todo | Planned | 2000
 | STF% | Stuff Rate | Percentage of rushing attempts resulting in zero or negative yards | Planned | 2000
@@ -156,7 +156,7 @@
 | RZT% | Red Zone Target Share | Percentage of all passing targets from a line of scrimmage at or inside the 20-yard line | Planned | 2000
 | TAR% | Target Share | percentage of total team targets | Available | 2000
 | TAR/S | Targets Per Snap | todo | Planned | 2012
-| WOPR | Weighted Oppurtunity Rating | Created by [Josh Hermsmeyer](https://twitter.com/friscojosh). WOPR is a weighted combination of the share of team targets a player receives and the share of team air yards. | Available | 2019
+| WOPR | Weighted Opportunity Rating | Created by [Josh Hermsmeyer](https://twitter.com/friscojosh). WOPR is a weighted combination of the share of team targets a player receives and the share of team air yards. | Available | 2019
 | YAC | Yards After Catch | yards gained by receiver after reception | Planned | 2019
 | YAC/R | Yards After Catch Per Reception | average yards gained after reception | Available | 2019
 | Y/R | Receiving Yards Per Reception | todo | Available | 2000
