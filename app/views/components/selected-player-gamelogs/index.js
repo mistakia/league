@@ -31,7 +31,7 @@ const mapStateToProps = createSelector(
         : calculateStatsFromPlayStats(playStats)
 
       const play = weekPlays.find(p => p.possessionTeam)
-      const opp = fixTeam(play.possessionTeam) === fixTeam(play.homeTeamAbbr)
+      const opp = fixTeam(player.team) === fixTeam(play.homeTeamAbbr)
         ? fixTeam(play.awayTeamAbbr)
         : fixTeam(play.homeTeamAbbr)
       const points = calculatePoints({ stats, position: player.pos1, league })
