@@ -187,6 +187,10 @@ export const api = {
     const url = `${BASE_URL}/plays?${queryString.stringify(params)}`
     return { url }
   },
+  getPlayStats (params) {
+    const url = `${BASE_URL}/plays/stats?${queryString.stringify(params)}`
+    return { url }
+  },
   getTeamStats () {
     const url = `${BASE_URL}/stats/teams`
     return { url }

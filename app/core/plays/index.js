@@ -1,4 +1,4 @@
-export { playActions, getPlaysActions } from './actions'
+export { playActions, getPlaysActions, getPlayStatsActions } from './actions'
 export { playSagas } from './sagas'
 export {
   getPlays,

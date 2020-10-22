@@ -10,7 +10,14 @@ export function playsReducer (state = new Map(), { payload, type }) {
     case playActions.GET_PLAYS_FULFILLED:
       return state.withMutations(state => {
         payload.data.forEach(play => {
-          state.set(`${play.esbid}:${play.playId}`, play)
+          state.set(`${play.esbid}:${play.playId}`, { playStats: [], ...play })
+        })
+      })
+
+    case playActions.GET_PLAYSTATS_FULFILLED:
+      return state.withMutations(state => {
+        payload.data.forEach(playStat => {
+          state.mergeIn([`${playStat.esbid}:${playStat.playId}`, 'playStats'], [playStat])
         })
       })
 
