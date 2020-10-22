@@ -16,7 +16,7 @@ router.get('/?', async (req, res) => {
       return res.status(400).send({ error: 'params active & inactive can not both be false' })
     }
 
-    const includePlayerIds = ['DF-1875', 'AB-3500']
+    const includePlayerIds = ['DB-5300', 'AB-3500']
     if (req.user) {
       const leagues = await db('leagues')
         .select('leagues.uid')

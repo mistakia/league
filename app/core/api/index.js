@@ -21,6 +21,7 @@ export {
   delProjection,
   putSetting,
   getPlays,
+  getPlayStats,
   getChartedPlays,
   postMatchups,
   getSources,
