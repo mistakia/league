@@ -101,7 +101,7 @@ const calculateStatsFromPlays = ({ plays, qualifiers }) => {
 
         if (play.ints) {
           addStat(play.psr, 'ints', 1)
-        } else if (play.comp === 'Y') {
+        } else if (play.comp === 'Y' && play.trg) { // TODO deprecate - temp fix for missing trg
           // receiver
           addStat(play.trg, 'rec', 1)
           addStat(play.trg, 'recy', play.yds)
