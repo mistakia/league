@@ -15,11 +15,13 @@ export const openWS = (params) => {
   ws = new WebSocket(`${WS_URL}?${queryString.stringify(params)}`)
 
   ws.onopen = () => {
+    console.log('connected to websocket')
     store.dispatch(wsActions.open())
     messages.forEach((msg) => ws.send(JSON.stringify(msg)))
     messages = []
 
     ws.onclose = () => {
+      console.log('disconnected from websocket')
       store.dispatch(wsActions.close())
     }
   }
