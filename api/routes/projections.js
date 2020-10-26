@@ -2,7 +2,59 @@ import { constants } from '../../common'
 const express = require('express')
 const router = express.Router()
 
-router.put('/:playerId/?', async (req, res) => {
+router.get('/?', async (req, res) => {
+  const { db, logger } = req.app.locals
+  try {
+    const players = await db('player')
+      .whereIn('pos1', constants.positions)
+      .whereNot({ cteam: 'INA' })
+    const playerIds = players.map(p => p.player)
+
+    const sub = db('projections')
+      .select(db.raw('max(timestamp) AS maxtime, CONCAT(player, "_", sourceid, "_", week) AS Group1'))
+      .groupBy('Group1')
+      .whereIn('player', playerIds)
+      .where('year', constants.season.year)
+      .where('week', '>=', constants.season.week)
+      .whereNull('userid')
+
+    const projections = await db
+      .select('*')
+      .from(db.raw('(' + sub.toString() + ') AS X'))
+      .join(
+        'projections',
+        function () {
+          this.on(function () {
+            this.on(db.raw('CONCAT(player, "_", sourceid, "_", week) = X.Group1'))
+            this.andOn('timestamp', '=', 'maxtime')
+          })
+        }
+      )
+
+    let userProjections = []
+    if (req.user) {
+      userProjections = await db('projections')
+        .select('*')
+        .whereIn('player', playerIds)
+        .where({
+          year: constants.season.year,
+          userid: req.user.userId
+        })
+    }
+
+    res.send(projections.concat(userProjections))
+  } catch (error) {
+    logger(error)
+    res.status(500).send({ error: error.toString() })
+  }
+})
+
+router.put('/:playerId/?', (err, req, res, next) => {
+  if (err.name === 'UnauthorizedError') {
+    return res.status(401).send({ error: 'invalid token' })
+  }
+  next()
+}, async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     let { value } = req.body
@@ -72,7 +124,12 @@ router.put('/:playerId/?', async (req, res) => {
   }
 })
 
-router.delete('/:playerId/?', async (req, res) => {
+router.delete('/:playerId/?', (err, req, res, next) => {
+  if (err.name === 'UnauthorizedError') {
+    return res.status(401).send({ error: 'invalid token' })
+  }
+  next()
+}, async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const { userId } = req.user

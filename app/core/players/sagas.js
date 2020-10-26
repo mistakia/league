@@ -4,7 +4,7 @@ import UTF8 from 'crypto-js/enc-utf8'
 
 import { getApp, appActions } from '@core/app'
 import { notificationActions } from '@core/notifications'
-import { fetchPlayers, getPlayer, putProjection, delProjection, putSetting } from '@core/api'
+import { fetchPlayers, getPlayer, getProjections, putProjection, delProjection, putSetting } from '@core/api'
 import { playerActions } from './actions'
 import { auctionActions } from '@core/auction'
 import { getAllPlayers, getPlayers } from './selectors'
@@ -16,6 +16,13 @@ import Worker from 'workerize-loader?inline!./worker' // eslint-disable-line imp
 
 export function * loadPlayers () {
   yield call(fetchPlayers)
+}
+
+export function * loadProjections () {
+  yield put(notificationActions.show({
+    message: 'Loading Projections'
+  }))
+  yield call(getProjections)
 }
 
 export function * calculateValues () {
@@ -42,6 +49,9 @@ export function * calculateValues () {
   })
   worker.terminate()
   yield putResolve(playerActions.setValues(result))
+  yield put(notificationActions.show({
+    message: 'Projecting Lineups'
+  }))
   yield put(rosterActions.projectLineups())
   // TODO calculate bid up to values
 }
@@ -132,8 +142,12 @@ export function * updateBaseline ({ payload }) {
 //  WATCHERS
 // -------------------------------------
 
+export function * watchGetProjectionsFulfilled () {
+  yield takeLatest(playerActions.GET_PROJECTIONS_FULFILLED, calculateValues)
+}
+
 export function * watchFetchPlayersFulfilled () {
-  yield takeLatest(playerActions.FETCH_PLAYERS_FULFILLED, calculateValues)
+  yield takeLatest(playerActions.FETCH_PLAYERS_FULFILLED, loadProjections)
 }
 
 export function * watchAuthFulfilled () {
@@ -205,6 +219,7 @@ export function * watchAuctionProcessed () {
 // -------------------------------------
 
 export const playerSagas = [
+  fork(watchGetProjectionsFulfilled),
   fork(watchFetchPlayersFulfilled),
   fork(watchAuthFulfilled),
   fork(watchAuthFailed),
