@@ -28,6 +28,7 @@ import {
 import {
   playersRequestActions,
   getPlayerActions,
+  getProjectionsActions,
   putProjectionActions,
   delProjectionActions
 } from '@core/players'
@@ -144,6 +145,7 @@ export const deleteTeams = fetch.bind(null, api.deleteTeams, deleteTeamsActions)
 export const getSources = fetch.bind(null, api.getSources, getSourcesActions)
 export const putSource = fetch.bind(null, api.putSource, putSourceActions)
 
+export const getProjections = fetch.bind(null, api.getProjections, getProjectionsActions)
 export const putProjection = fetch.bind(null, api.putProjection, putProjectionActions)
 export const delProjection = fetch.bind(null, api.delProjection, delProjectionActions)
 

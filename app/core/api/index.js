@@ -17,6 +17,7 @@ export {
   putLeague,
   putTeam,
   putSource,
+  getProjections,
   putProjection,
   delProjection,
   putSetting,

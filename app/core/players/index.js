@@ -18,6 +18,7 @@ export {
   playerActions,
   playersRequestActions,
   getPlayerActions,
+  getProjectionsActions,
   putProjectionActions,
   delProjectionActions
 } from './actions'
