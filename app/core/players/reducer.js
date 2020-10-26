@@ -83,7 +83,6 @@ export function playersReducer (state = initialState, { payload, type }) {
     case playerActions.SET_PLAYER_VALUES:
       return state.withMutations(state => {
         state.set('isPending', false)
-        state.set('isInitializing', false)
         for (const week in payload.baselines) {
           for (const b in payload.baselines[week]) {
             for (const type in payload.baselines[week][b]) {
@@ -132,8 +131,17 @@ export function playersReducer (state = initialState, { payload, type }) {
         isPending: false
       })
 
+    case playerActions.GET_PROJECTIONS_FULFILLED:
+      return state.withMutations(players => {
+        payload.data.forEach(p => {
+          players.updateIn(['items', p.player, 'projections'], arr => arr.push(p))
+        })
+      })
+
     case playerActions.FETCH_PLAYERS_FULFILLED:
       return state.withMutations(players => {
+        players.set('isInitializing', false)
+
         const now = moment()
         const ages = []
         payload.data.map(p => {
@@ -160,8 +168,10 @@ export function playersReducer (state = initialState, { payload, type }) {
 
     case playerActions.GET_PLAYER_FULFILLED:
       return state.withMutations(players => {
-        players.setIn(['items', payload.opts.playerId, 'gamelogs'], new List(payload.data.gamelogs))
-        players.setIn(['items', payload.opts.playerId, 'practice'], new List(payload.data.practice))
+        const { gamelogs, practice, ...player } = payload.data
+        players.mergeIn(['items', payload.opts.playerId], player)
+        players.setIn(['items', payload.opts.playerId, 'gamelogs'], new List(gamelogs))
+        players.setIn(['items', payload.opts.playerId, 'practice'], new List(practice))
       })
 
     case appActions.AUTH_FULFILLED:
