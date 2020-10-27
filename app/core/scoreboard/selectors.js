@@ -182,7 +182,6 @@ function getYardline (str, possessionTeam) {
 }
 
 export function getGameStatusByPlayerId (state, { playerId, week = constants.season.week }) {
-  console.log(week)
   const game = getGameByPlayerId(state, { playerId, week })
   if (!game) {
     return null
