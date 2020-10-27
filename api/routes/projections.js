@@ -1,10 +1,17 @@
 import { constants } from '../../common'
 const express = require('express')
+const moment = require('moment')
 const router = express.Router()
 
 router.get('/?', async (req, res) => {
-  const { db, logger } = req.app.locals
+  const { db, logger, cache } = req.app.locals
   try {
+    // 12 hours
+    res.set('Expires', moment().add('12', 'hour').toDate().toUTCString())
+    res.set('Cache-Control', 'public, max-age=43200')
+    res.set('Pragma', null)
+    res.set('Surrogate-Control', null)
+
     const players = await db('player')
       .whereIn('pos1', constants.positions)
       .whereNot({ cteam: 'INA' })
@@ -18,18 +25,23 @@ router.get('/?', async (req, res) => {
       .where('week', '>=', constants.season.week)
       .whereNull('userid')
 
-    const projections = await db
-      .select('*')
-      .from(db.raw('(' + sub.toString() + ') AS X'))
-      .join(
-        'projections',
-        function () {
-          this.on(function () {
-            this.on(db.raw('CONCAT(player, "_", sourceid, "_", week) = X.Group1'))
-            this.andOn('timestamp', '=', 'maxtime')
-          })
-        }
-      )
+    let projections = cache.get('projections')
+    if (!projections) {
+      projections = await db
+        .select('*')
+        .from(db.raw('(' + sub.toString() + ') AS X'))
+        .join(
+          'projections',
+          function () {
+            this.on(function () {
+              this.on(db.raw('CONCAT(player, "_", sourceid, "_", week) = X.Group1'))
+              this.andOn('timestamp', '=', 'maxtime')
+            })
+          }
+        )
+
+      cache.set('projections', projections, 14400) // 4 hours
+    }
 
     let userProjections = []
     if (req.user) {
