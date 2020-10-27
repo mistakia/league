@@ -168,7 +168,7 @@ export default class PlayerContextMenu extends React.Component {
         <MenuItem
           key='ir'
           dense
-          disabled={!status.reserve.ir}
+          disabled={!status.reserve.ir || (status.locked && status.starter)}
           onClick={this.handleReserveIR}
         >
           Move to Reserve/IR
@@ -179,7 +179,7 @@ export default class PlayerContextMenu extends React.Component {
         <MenuItem
           key='cov'
           dense
-          disabled={!status.reserve.cov}
+          disabled={!status.reserve.cov || (status.locked && status.starter)}
           onClick={this.handleReserveCOV}
         >
           Move to Reserve/COV

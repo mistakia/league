@@ -448,6 +448,10 @@ describe('API /teams - reserve', function () {
       await error(request, 'exceeds roster limits')
     })
 
+    it('player is a locked starter', async () => {
+      // TODO
+    })
+
     it('player not rostered on previous week roster', async () => {
       MockDate.set(start.clone().add('2', 'week').toDate())
       const player = await selectPlayer()
