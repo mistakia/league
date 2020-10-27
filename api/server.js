@@ -16,6 +16,7 @@ const jwt = require('jsonwebtoken')
 const expressJwt = require('express-jwt')
 const slowDown = require('express-slow-down')
 const favicon = require('serve-favicon')
+const NodeCache = require('node-cache')
 
 const config = require('../config')
 const routes = require('./routes')
@@ -38,6 +39,7 @@ const api = express()
 api.locals.db = db
 api.locals.config = config
 api.locals.logger = logger
+api.locals.cache = new NodeCache()
 
 api.enable('etag')
 api.disable('x-powered-by')
