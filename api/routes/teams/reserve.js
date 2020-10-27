@@ -3,7 +3,12 @@ const router = express.Router({ mergeParams: true })
 const API = require('groupme').Stateless
 
 const { constants, Roster } = require('../../../common')
-const { getRoster, sendNotifications, verifyUserTeam } = require('../../../utils')
+const {
+  getRoster,
+  sendNotifications,
+  verifyUserTeam,
+  isPlayerLocked
+} = require('../../../utils')
 
 router.post('/?', async (req, res) => {
   const { db, logger, broadcast } = req.app.locals
@@ -84,6 +89,13 @@ router.post('/?', async (req, res) => {
     const prevRoster = new Roster({ roster: prevRosterRow, league })
     if (!prevRoster.has(player)) {
       return res.status(400).send({ error: 'not eligible, not rostered long enough' })
+    }
+
+    // verify player is not locked and is a starter
+    const isLocked = await isPlayerLocked(player)
+    const isStarter = !!roster.starters.find(p => p.player === player)
+    if (isLocked && isStarter) {
+      return res.status(400).send({ error: 'not eligible, locked starter' })
     }
 
     const type = slot === constants.slots.IR
