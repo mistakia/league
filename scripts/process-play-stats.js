@@ -71,13 +71,12 @@ const run = async () => {
   const missingGsispids = gsispids.filter(p => !playerGsispids.includes(p))
   const missing = []
   for (const gsispid of missingGsispids) {
-    const playStat = groups[gsispid].find(p => p.possessionTeam && p.playerName)
+    const playStat = groups[gsispid].find(p => p.teamid && p.playerName)
     if (!playStat) continue
 
-    // TODO - use teamId to get cteam
     const params = {
       pname: playStat.playerName,
-      cteam: fixTeam(playStat.possessionTeam)
+      cteam: constants.nflTeamIds[playStat.teamid]
     }
 
     const results = await db('player').where(params)
