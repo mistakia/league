@@ -9,20 +9,20 @@ import './scoreboard-player.styl'
 
 class ScoreboardPlayer extends Player {
   render = () => {
-    const { player, scoreboard } = this.props
+    const { player, stats, week } = this.props
 
     const classNames = ['scoreboard__player']
-    if (!scoreboard) classNames.push('projection')
+    if (!stats) classNames.push('projection')
 
-    const points = scoreboard
-      ? (scoreboard.points.total || 0).toFixed(1)
+    const points = stats
+      ? (stats.points.total || 0).toFixed(1)
       : player.getIn(['points', `${constants.season.week}`, 'total'], 0).toFixed(1)
 
     return (
       <div className={classNames.join(' ')}>
         <div className='scoreboard__player-body'>
-          <PlayerNameExpanded playerId={player.player} hideActions />
-          <ScoreboardPlayerGameStatus playerId={player.player} />
+          <PlayerNameExpanded playerId={player.player} week={week} hideActions />
+          <ScoreboardPlayerGameStatus playerId={player.player} week={week} />
         </div>
         <div className='scoreboard__player-score metric'>
           {points}
