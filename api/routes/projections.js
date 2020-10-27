@@ -17,28 +17,29 @@ router.get('/?', async (req, res) => {
       .whereNot({ cteam: 'INA' })
     const playerIds = players.map(p => p.player)
 
-    const sub = db('projections')
-      .select(db.raw('max(timestamp) AS maxtime, CONCAT(player, "_", sourceid, "_", week) AS Group1'))
-      .groupBy('Group1')
-      .whereIn('player', playerIds)
-      .where('year', constants.season.year)
-      .where('week', '>=', constants.season.week)
-      .whereNull('userid')
-
     let projections = cache.get('projections')
     if (!projections) {
+      const sub = db('projections')
+        .select(db.raw('max(timestamp) AS maxtime, sourceid AS sid'))
+        .groupBy('sid')
+        .where('year', constants.season.year)
+        .whereNull('userid')
+
       projections = await db
         .select('*')
         .from(db.raw('(' + sub.toString() + ') AS X'))
-        .join(
+        .innerJoin(
           'projections',
           function () {
             this.on(function () {
-              this.on(db.raw('CONCAT(player, "_", sourceid, "_", week) = X.Group1'))
+              this.on('sourceid', '=', 'sid')
               this.andOn('timestamp', '=', 'maxtime')
             })
           }
         )
+        .whereIn('player', playerIds)
+        .where('week', '>=', constants.season.week)
+        .whereNull('userid')
 
       cache.set('projections', projections, 14400) // 4 hours
     }
