@@ -135,37 +135,13 @@ const calculateBaselines = ({
   }
 
   // group by position
+  const result = {}
   const groupedStarters = {}
   for (const position of positions) {
     groupedStarters[position] = starters
       .filter(s => s.pos1 === position)
       .sort((a, b) => b.points[week].total - a.points[week].total)
   }
-
-  const result = {}
-  for (const position of positions) {
-    const players = groupedStarters[position]
-    result[position] = {}
-    result[position].starter = players[players.length - 1]
-    result[position].average = players[Math.floor(players.length / 2)]
-  }
-
-  // if any starter baselines are empty - set to best available
-  for (const position of positions) {
-    if (!result[position].starter) {
-      result[position].starter = availablePlayerPool.find(p => p.pos1 === position)
-    }
-
-    if (!result[position].average) {
-      result[position].average = availablePlayerPool.find(p => p.pos1 === position)
-    }
-  }
-
-  // sort by starter vor
-  const vorAvailablePlayers = availablePlayerPool.map(p => ({
-    _value: Math.round(Math.abs(result[p.pos1].starter.points[week].total - p.points[week].total) / result[p.pos1].starter.points[week].total),
-    ...p
-  }))
 
   const fullRosters = []
   let i = 0
@@ -179,11 +155,11 @@ const calculateBaselines = ({
 
     // find an eligible player
     let player
-    for (let p = 0; p < vorAvailablePlayers.length; p++) {
-      player = vorAvailablePlayers[p]
+    for (let p = 0; p < availablePlayerPool.length; p++) {
+      player = availablePlayerPool[p]
       const isEligible = roster.hasOpenBenchSlot(player.pos1)
       if (isEligible) {
-        vorAvailablePlayers.splice(p, 1)
+        availablePlayerPool.splice(p, 1)
         break
       }
     }
@@ -204,11 +180,12 @@ const calculateBaselines = ({
   // group availabe players by position
   const groupedAvailablePlayers = {}
   for (const position of positions) {
-    groupedAvailablePlayers[position] = vorAvailablePlayers.filter(s => s.pos1 === position)
+    groupedAvailablePlayers[position] = availablePlayerPool.filter(s => s.pos1 === position)
   }
 
   // get best available baselines
   for (const position of positions) {
+    result[position] = {}
     result[position].available = groupedAvailablePlayers[position][0]
   }
 
@@ -240,6 +217,16 @@ const calculateBaselines = ({
         result[position][type] = data.find(p => p.pos1 === position)
       }
     }
+  }
+
+  // set starter baselines
+  for (const position of positions) {
+    const players = groupedStarters[position]
+    const ba = result[position].available
+    const ws = players[players.length - 1]
+    const avg = players[Math.floor(players.length / 2)]
+    result[position].starter = (ws && ws.points[week].total > ba.points[week].total) ? ws : ba
+    result[position].average = (avg && avg.points[week].total > ba.points[week].total) ? avg : ba
   }
 
   return result
