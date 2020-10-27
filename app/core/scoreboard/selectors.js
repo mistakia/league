@@ -181,8 +181,8 @@ function getYardline (str, possessionTeam) {
     : (100 - yardlineNumber)
 }
 
-export function getGameStatusByPlayerId (state, { playerId }) {
-  const week = state.getIn(['scoreboard', 'week'])
+export function getGameStatusByPlayerId (state, { playerId, week = constants.season.week }) {
+  console.log(week)
   const game = getGameByPlayerId(state, { playerId, week })
   if (!game) {
     return null
