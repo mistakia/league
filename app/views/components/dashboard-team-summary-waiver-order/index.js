@@ -12,7 +12,7 @@ const mapStateToProps = createSelector(
   (app, teams) => {
     const list = teams.toList()
     const team = list.find(t => t.uid === app.teamId)
-    const sorted = list.sort((a, b) => b.wo - a.wo)
+    const sorted = list.sort((a, b) => a.wo - b.wo)
     return { teams: sorted, team }
   }
 )
