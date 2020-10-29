@@ -4,7 +4,15 @@ import UTF8 from 'crypto-js/enc-utf8'
 
 import { getApp, appActions } from '@core/app'
 import { notificationActions } from '@core/notifications'
-import { fetchPlayers, getPlayer, getProjections, putProjection, delProjection, putSetting } from '@core/api'
+import {
+  fetchPlayers,
+  getPlayer,
+  getProjections,
+  putProjection,
+  delProjection,
+  putSetting,
+  getGamelogs
+} from '@core/api'
 import { playerActions } from './actions'
 import { auctionActions } from '@core/auction'
 import { getAllPlayers, getPlayers } from './selectors'
@@ -18,11 +26,12 @@ export function * loadPlayers () {
   yield call(fetchPlayers)
 }
 
-export function * loadProjections () {
+export function * loadProjectionsAndGamelogs () {
   yield put(notificationActions.show({
     message: 'Loading Projections'
   }))
-  yield call(getProjections)
+  yield fork(getProjections)
+  yield fork(getGamelogs)
 }
 
 export function * calculateValues () {
@@ -147,7 +156,7 @@ export function * watchGetProjectionsFulfilled () {
 }
 
 export function * watchFetchPlayersFulfilled () {
-  yield takeLatest(playerActions.FETCH_PLAYERS_FULFILLED, loadProjections)
+  yield takeLatest(playerActions.FETCH_PLAYERS_FULFILLED, loadProjectionsAndGamelogs)
 }
 
 export function * watchAuthFulfilled () {

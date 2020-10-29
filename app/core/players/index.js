@@ -18,6 +18,7 @@ export {
   playerActions,
   playersRequestActions,
   getPlayerActions,
+  getGamelogsActions,
   getProjectionsActions,
   putProjectionActions,
   delProjectionActions
