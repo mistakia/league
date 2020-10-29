@@ -131,6 +131,14 @@ export function playersReducer (state = initialState, { payload, type }) {
         isPending: false
       })
 
+    case playerActions.GET_GAMELOGS_FULFILLED:
+      return state.withMutations(players => {
+        payload.data.forEach(p => {
+          if (!players.hasIn(['items', p.player])) return
+          players.updateIn(['items', p.player, 'gamelogs'], arr => arr.push(p))
+        })
+      })
+
     case playerActions.GET_PROJECTIONS_FULFILLED:
       return state.withMutations(players => {
         payload.data.forEach(p => {
