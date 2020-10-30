@@ -8,7 +8,7 @@ const calculateVOR = require('./calculate-vor')
 
 const LATEST_YEAR = 2019
 
-const calculateHistoricalPositionalValue = async () => {
+const calculateHistoricalPositionalRankingValue = async () => {
   const years = 3
   let year = LATEST_YEAR - years
 
@@ -35,16 +35,15 @@ const calculateHistoricalPositionalValue = async () => {
     const sums = {}
     for (const year in byPosition) {
       const players = byPosition[year]
-      const sorted = players.sort((a, b) => b.vor - a.vor)
-      for (const [index, player] of sorted.entries()) {
-        if (sums[index]) {
-          sums[index].vor += player.vor
-          sums[index].value += player.value
-          sums[index].points += player.points
+      for (const player of players) {
+        if (sums[player.posrank]) {
+          sums[player.posrank].vor += player.vor
+          sums[player.posrank].value += player.value
+          sums[player.posrank].points += player.points
         } else {
-          sums[index] = {
+          sums[player.posrank] = {
             pos,
-            rank: index + 1,
+            rank: player.posrank,
             vor: player.vor,
             value: player.value,
             points: player.points
@@ -56,8 +55,6 @@ const calculateHistoricalPositionalValue = async () => {
     for (const posrank in sums) {
       const item = sums[posrank]
       item.value = item.value / years
-      item.vor = item.vor / years
-      item.points = item.points / years
     }
 
     /* const vorValues = Object.values(sums).map(v => [v.rank, v.vor || 0.01])
@@ -71,12 +68,12 @@ const calculateHistoricalPositionalValue = async () => {
     output = output.concat(values)
   }
 
-  return output.sort((a, b) => b.vor - a.vor)
+  return output.sort((a, b) => b.reg - a.reg)
 }
 
 if (!module.parent) {
   const main = async () => {
-    const result = await calculateHistoricalPositionalValue()
+    const result = await calculateHistoricalPositionalRankingValue()
 
     const p = new Table()
     const getColor = (pos) => {
@@ -95,10 +92,9 @@ if (!module.parent) {
     for (const player of result) {
       p.addRow({
         position: `${player.pos}${player.rank}`,
-        value: player.vor.toFixed(1),
-        regression: player.reg,
-        salary: player.value.toFixed(2),
-        points: player.points.toFixed(1)
+        vor: player.vor.toFixed(1),
+        value: player.reg,
+        actual: player.value.toFixed(2)
       }, {
         color: getColor(player.pos)
       })
