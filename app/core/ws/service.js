@@ -28,6 +28,7 @@ export const openWS = (params) => {
 
   ws.onmessage = (event) => {
     const message = JSON.parse(event.data)
+    console.log(`websocket message: ${message.type}`)
     store.dispatch(message)
   }
 }
