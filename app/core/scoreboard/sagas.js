@@ -2,11 +2,12 @@ import { call, takeLatest, fork, select } from 'redux-saga/effects'
 
 import { getScoreboard, getScoreboardUpdated } from './selectors'
 import { scoreboardActions } from './actions'
+import { playActions } from '@core/plays'
 import { send, wsActions } from '@core/ws'
 
 export function * register () {
   const updated = yield select(getScoreboardUpdated)
-
+  console.log(`register scoreboard ${updated}`)
   send({
     type: scoreboardActions.SCOREBOARD_REGISTER,
     payload: { updated }
@@ -26,7 +27,7 @@ export function * reregister () {
 // -------------------------------------
 
 export function * watchGetScoreboardFulfilled () {
-  yield takeLatest(scoreboardActions.GET_SCOREBOARD_FULFILLED, register)
+  yield takeLatest(playActions.GET_PLAYSTATS_FULFILLED, register)
 }
 
 export function * watchUpdateScoreboardPlays () {
