@@ -26,9 +26,11 @@ import {
   postReleaseActions
 } from '@core/rosters'
 import {
+  getGamelogsActions
+} from '@core/gamelogs'
+import {
   playersRequestActions,
   getPlayerActions,
-  getGamelogsActions,
   getProjectionsActions,
   putProjectionActions,
   delProjectionActions
