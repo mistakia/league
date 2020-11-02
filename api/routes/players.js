@@ -75,7 +75,6 @@ router.get('/:playerId', async (req, res) => {
 
     const players = await db('player').where({ player: playerId }).limit(1)
     const player = players[0]
-    const gamelogs = await db('gamelogs').where({ player: playerId })
     const practice = await db('practice').where({ player: playerId, year: constants.season.year })
 
     // snaps per game by year
@@ -91,7 +90,7 @@ router.get('/:playerId', async (req, res) => {
 
     // advanced rushing
     // - yardage by direction
-    res.send({ ...player, gamelogs, practice })
+    res.send({ ...player, practice })
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })

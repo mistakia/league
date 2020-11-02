@@ -21,6 +21,7 @@ import {
   getRosterInfoForPlayerId
 } from '@core/rosters'
 import { getGameByTeam } from '@core/schedule'
+import { getGamelogs } from '@core/gamelogs'
 
 export function getPlayers (state) {
   return state.get('players')
@@ -29,6 +30,11 @@ export function getPlayers (state) {
 export function getSelectedPlayer (state) {
   const playerId = getPlayers(state).get('selected')
   return getPlayerById(state, { playerId })
+}
+
+export function getSelectedPlayerGame (state) {
+  const player = getSelectedPlayer(state)
+  return getGameByTeam(state, { team: player.team })
 }
 
 export function getAllPlayers (state) {
@@ -183,7 +189,8 @@ export function getPlayerById (state, { playerId }) {
 export function getGamesByYearForSelectedPlayer (state) {
   const playerId = state.get('players').get('selected')
   const p = getPlayerById(state, { playerId })
-  const games = p.get('gamelogs')
+  const gamelogs = getGamelogs(state)
+  const games = gamelogs.filter(p => p.player === playerId)
 
   const years = {}
   for (const game of games) {

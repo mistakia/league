@@ -13,12 +13,7 @@ export function getStats (state) {
 }
 
 export function getGamelogForPlayer (state, { player, week }) {
-  // TODO
-  /* const gamelog = player.get('gamelogs')
-   *   .filter(g => g.year === constants.season.year && g.week === week)
-   * if (gamelog) {
-   *   return gamelog
-   * } */
+  // TODO - check gamelogs store
 
   if (!player || !player.player) return null
 

@@ -3,6 +3,7 @@ export {
   getPlayers,
   getPlayersByPosition,
   getSelectedPlayer,
+  getSelectedPlayerGame,
   getAllPlayers,
   getFilteredPlayers,
   getRookiePlayers,
@@ -18,7 +19,6 @@ export {
   playerActions,
   playersRequestActions,
   getPlayerActions,
-  getGamelogsActions,
   getProjectionsActions,
   putProjectionActions,
   delProjectionActions
