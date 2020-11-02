@@ -10,8 +10,7 @@ import {
   getProjections,
   putProjection,
   delProjection,
-  putSetting,
-  getGamelogs
+  putSetting
 } from '@core/api'
 import { playerActions } from './actions'
 import { auctionActions } from '@core/auction'
@@ -26,12 +25,11 @@ export function * loadPlayers () {
   yield call(fetchPlayers)
 }
 
-export function * loadProjectionsAndGamelogs () {
+export function * loadProjections () {
   yield put(notificationActions.show({
     message: 'Loading Projections'
   }))
   yield fork(getProjections)
-  yield fork(getGamelogs)
 }
 
 export function * calculateValues () {
@@ -156,7 +154,7 @@ export function * watchGetProjectionsFulfilled () {
 }
 
 export function * watchFetchPlayersFulfilled () {
-  yield takeLatest(playerActions.FETCH_PLAYERS_FULFILLED, loadProjectionsAndGamelogs)
+  yield takeLatest(playerActions.FETCH_PLAYERS_FULFILLED, loadProjections)
 }
 
 export function * watchAuthFulfilled () {

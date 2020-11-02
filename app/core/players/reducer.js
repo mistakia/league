@@ -131,14 +131,6 @@ export function playersReducer (state = initialState, { payload, type }) {
         isPending: false
       })
 
-    case playerActions.GET_GAMELOGS_FULFILLED:
-      return state.withMutations(players => {
-        payload.data.forEach(p => {
-          if (!players.hasIn(['items', p.player])) return
-          players.updateIn(['items', p.player, 'gamelogs'], arr => arr.push(p))
-        })
-      })
-
     case playerActions.GET_PROJECTIONS_FULFILLED:
       return state.withMutations(players => {
         payload.data.forEach(p => {
@@ -176,9 +168,8 @@ export function playersReducer (state = initialState, { payload, type }) {
 
     case playerActions.GET_PLAYER_FULFILLED:
       return state.withMutations(players => {
-        const { gamelogs, practice, ...player } = payload.data
+        const { practice, ...player } = payload.data
         players.mergeIn(['items', payload.opts.playerId], player)
-        players.setIn(['items', payload.opts.playerId, 'gamelogs'], new List(gamelogs))
         players.setIn(['items', payload.opts.playerId, 'practice'], new List(practice))
       })
 

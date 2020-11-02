@@ -21,6 +21,7 @@ import SelectedPlayerLineupImpact from '@components/selected-player-lineup-impac
 import SelectedPlayerValue from '@components/selected-player-value'
 import SelectedPlayerGamelogs from '@components/selected-player-gamelogs'
 import SelectedPlayerPractice from '@components/selected-player-practice'
+import SelectedPlayerMatchup from '@components/selected-player-matchup'
 
 import './selected-player.styl'
 
@@ -175,7 +176,7 @@ export default class SelectedPlayer extends React.Component {
             <SelectedPlayerValue />
           </TabPanel>
           <TabPanel value={value} index={2}>
-            Coming soon
+            <SelectedPlayerMatchup />
           </TabPanel>
           <TabPanel value={value} index={3}>
             <SelectedPlayerProjections />
