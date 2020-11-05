@@ -32,11 +32,11 @@ function getStatsForPlayer (state, { player }) {
   const playStats = plays.flatMap(p => p.playStats)
   if (!playStats.size) return
 
-  const stats = player.pos1 === 'DST'
+  const stats = player.pos === 'DST'
     ? calculateDstStatsFromPlays(plays.toJS(), player.team)
     : calculateStatsFromPlayStats(playStats.toJS())
 
-  const points = calculatePoints({ stats, position: player.pos1, league })
+  const points = calculatePoints({ stats, position: player.pos, league })
   return { playStats: playStats.toJS(), points, stats }
 }
 
@@ -147,7 +147,7 @@ export function getPlaysByMatchupId (state, { mid }) {
       stats[playerId] = calculateStatsFromPlayStats(playStats)
       points[playerId] = calculatePoints({
         stats: stats[playerId],
-        position: player.pos1,
+        position: player.pos,
         league
       })
       points[playerId].isHomePlayer = !!homeStarters.find(p => p.player === playerId)

@@ -66,7 +66,7 @@ export default function () {
   const groups = {}
   for (const position of positions) {
     if (!groups[position]) groups[position] = []
-    groups[position] = sorted.filter(p => p.pos1 === position)
+    groups[position] = sorted.filter(p => p.pos === position)
   }
 
   const items = {}
@@ -98,7 +98,7 @@ export default function () {
       <div className='draft__selected-head'>
         <div className='draft__selected-title'>{p.fname} {p.lname}</div>
         <div className='draft__selected-alt'>
-          <div><Position pos={p.pos1} /></div>
+          <div><Position pos={p.pos} /></div>
           <div>{p.team}</div>
           {!!p.jersey && <div>#{p.jersey}</div>}
         </div>

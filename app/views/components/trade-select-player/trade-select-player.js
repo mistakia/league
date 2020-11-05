@@ -14,7 +14,7 @@ export default class TradeSelectPlayer extends React.Component {
     return (
       <div className={classNames.join(' ')}>
         <div className='player__name-position'>
-          <Position pos={player.pos1} />
+          <Position pos={player.pos} />
         </div>
         <div className='player__name-main'>
           <span>{player.pname}</span>

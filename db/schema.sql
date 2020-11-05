@@ -482,6 +482,7 @@ CREATE TABLE `player` (
   `fname` varchar(20) NOT NULL,
   `lname` varchar(25) NOT NULL,
   `pname` varchar(25) NOT NULL,
+  `pos` varchar(3) NOT NULL,
   `pos1` varchar(3) NOT NULL,
   `pos2` varchar(2) DEFAULT NULL,
   `height` tinyint(2) NOT NULL,

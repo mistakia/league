@@ -17,7 +17,7 @@ export default class SelectedPlayerSeasonProjections extends React.Component {
           week={week}
           projections={weeks[wk]}
           playerId={player.player}
-          pos={player.pos1}
+          pos={player.pos}
           projection={player.getIn(['projection', wk])}
         />
       )

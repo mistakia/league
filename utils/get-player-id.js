@@ -220,7 +220,7 @@ const getPlayerId = async ({ name, pos, team }) => {
   if (pos) {
     const p = fixPosition(pos)
     query.where(function () {
-      this.where({ pos1: p }).orWhere({ pos2: p })
+      this.where({ pos: p }).orWhere({ pos1: p }).orWhere({ pos2: p })
     })
   }
 

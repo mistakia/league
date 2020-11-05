@@ -69,7 +69,7 @@ export function getFilteredPlayers (state) {
 
   const positions = players.get('positions')
   if (positions.size !== constants.positions.length) {
-    filtered = items.filter(player => positions.includes(player.pos1))
+    filtered = items.filter(player => positions.includes(player.pos))
   }
 
   const experience = players.get('experience')
@@ -170,7 +170,7 @@ export function getFilteredPlayers (state) {
 export function getPlayersByPosition (state, { position }) {
   const players = state.get('players')
   const items = players.get('items')
-  const filtered = items.filter(p => p.pos1 === position)
+  const filtered = items.filter(p => p.pos === position)
   const period = !constants.season.week ? '0' : 'ros'
   return filtered.sort((a, b) => b.getIn(['points', period, 'total']) - a.getIn(['points', period, 'total'])).toList()
 }
@@ -213,7 +213,7 @@ export function getGamesByYearForSelectedPlayer (state) {
       stats.forEach(k => { sums[k] += (obj[k] || 0) })
       return sums
     }, initialValue)
-    const points = calculatePoints({ stats: sum, position: p.pos1, league: league.toJS() })
+    const points = calculatePoints({ stats: sum, position: p.pos, league: league.toJS() })
     sum.total = points.total
     overall[year] = sum
   }
@@ -336,7 +336,7 @@ export function getPlayerStatus (state, { player, playerId }) {
       status.rostered = true
 
       const isActive = !!roster.active.find(p => p.player === player.player)
-      if (!isActive && roster.hasOpenBenchSlot(player.pos1)) {
+      if (!isActive && roster.hasOpenBenchSlot(player.pos)) {
         status.eligible.activate = true
       }
 

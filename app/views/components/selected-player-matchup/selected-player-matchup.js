@@ -24,14 +24,14 @@ export default class SelectedPlayerMatchup extends React.Component {
         </div>
       )
       rows.push(
-        <PlayerSelectedRow key={index} stats={gamelog} lead={lead} pos={player.pos1} />
+        <PlayerSelectedRow key={index} stats={gamelog} lead={lead} pos={player.pos} />
       )
     }
     return (
       <div className='selected__section'>
         <div className='selected__section-header'>
           <div className='row__group-head'>
-            {player.pos1} vs {opp} Gamelogs
+            {player.pos} vs {opp} Gamelogs
           </div>
         </div>
         <div className='selected__section-header'>
@@ -42,7 +42,7 @@ export default class SelectedPlayerMatchup extends React.Component {
               <div className='player__row-metric'>Pts</div>
             </div>
           </div>
-          <PlayerSelectedRowHeader pos={player.pos1} />
+          <PlayerSelectedRowHeader pos={player.pos} />
         </div>
         {rows}
       </div>

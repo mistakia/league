@@ -23,13 +23,13 @@ function ByeWeekPopover ({ players, bye }) {
 
     labels.push(
       <div key={index} className='dashboard__bye-week-pop-player'>
-        {player.name} ({player.pos1} - {player.team})
+        {player.name} ({player.pos} - {player.team})
       </div>
     )
 
     items.push(
       <div key={index} className={classNames.join(' ')}>
-        <Position pos={player.pos1} />
+        <Position pos={player.pos} />
       </div>
     )
   }

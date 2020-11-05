@@ -17,7 +17,7 @@ export default class SelectedPlayerEfficiencyStats extends React.Component {
         </div>
         <div className='selected__section-header'>
           <div className='row__name'>Year</div>
-          {player.pos1 === 'QB' &&
+          {player.pos === 'QB' &&
             <div className='row__group'>
               <div className='row__group-head'>Passing Efficiency</div>
               <div className='row__group-body'>
@@ -27,7 +27,7 @@ export default class SelectedPlayerEfficiencyStats extends React.Component {
                 <div className='player__row-metric'>INTW%</div>
               </div>
             </div>}
-          {player.pos1 === 'QB' &&
+          {player.pos === 'QB' &&
             <div className='row__group'>
               <div className='row__group-head'>Passing Efficiency</div>
               <div className='row__group-body'>
@@ -37,7 +37,7 @@ export default class SelectedPlayerEfficiencyStats extends React.Component {
                 <div className='player__row-metric'>DOT</div>
               </div>
             </div>}
-          {player.pos1 === 'QB' &&
+          {player.pos === 'QB' &&
             <div className='row__group'>
               <div className='row__group-head'>Passing Air Yards</div>
               <div className='row__group-body'>
@@ -47,7 +47,7 @@ export default class SelectedPlayerEfficiencyStats extends React.Component {
                 <div className='player__row-metric'>PACR</div>
               </div>
             </div>}
-          {['QB', 'RB'].includes(player.pos1) &&
+          {['QB', 'RB'].includes(player.pos) &&
             <div className='row__group'>
               <div className='row__group-head'>Rushing Efficiency</div>
               <div className='row__group-body'>
@@ -58,7 +58,7 @@ export default class SelectedPlayerEfficiencyStats extends React.Component {
                 <div className='player__row-metric'>BT%</div>
               </div>
             </div>}
-          {['RB', 'WR', 'TE'].includes(player.pos1) &&
+          {['RB', 'WR', 'TE'].includes(player.pos) &&
             <div className='row__group'>
               <div className='row__group-head'>Receiving Efficiency</div>
               <div className='row__group-body'>
@@ -69,7 +69,7 @@ export default class SelectedPlayerEfficiencyStats extends React.Component {
                 <div className='player__row-metric'>YAC/REC</div>
               </div>
             </div>}
-          {['RB', 'WR', 'TE'].includes(player.pos1) &&
+          {['RB', 'WR', 'TE'].includes(player.pos) &&
             <div className='row__group'>
               <div className='row__group-head'>Receiving Opportunity</div>
               <div className='row__group-body'>
@@ -85,7 +85,7 @@ export default class SelectedPlayerEfficiencyStats extends React.Component {
           <div className='row__name'>
             {constants.season.week ? constants.season.year : (constants.season.year - 1)}
           </div>
-          {player.pos1 === 'QB' &&
+          {player.pos === 'QB' &&
             <div className='row__group'>
               <div className='row__group-body'>
                 <PlayerRowMetric stats={stats} overall={overall} type='pc_pct' />
@@ -94,7 +94,7 @@ export default class SelectedPlayerEfficiencyStats extends React.Component {
                 <PlayerRowMetric stats={stats} overall={overall} type='intw_pct' />
               </div>
             </div>}
-          {player.pos1 === 'QB' &&
+          {player.pos === 'QB' &&
             <div className='row__group'>
               <div className='row__group-body'>
                 <PlayerRowMetric stats={stats} overall={overall} type='pyac' />
@@ -103,7 +103,7 @@ export default class SelectedPlayerEfficiencyStats extends React.Component {
                 <PlayerRowMetric stats={stats} overall={overall} type='pdot_pa' />
               </div>
             </div>}
-          {player.pos1 === 'QB' &&
+          {player.pos === 'QB' &&
             <div className='row__group'>
               <div className='row__group-body'>
                 <PlayerRowMetric stats={stats} overall={overall} type='pdot' />
@@ -112,7 +112,7 @@ export default class SelectedPlayerEfficiencyStats extends React.Component {
                 <PlayerRowMetric stats={stats} overall={overall} type='_pacr' />
               </div>
             </div>}
-          {['QB', 'RB'].includes(player.pos1) &&
+          {['QB', 'RB'].includes(player.pos) &&
             <div className='row__group'>
               <div className='row__group-body'>
                 <PlayerRowMetric stats={stats} overall={overall} type='ry_pra' />
@@ -122,7 +122,7 @@ export default class SelectedPlayerEfficiencyStats extends React.Component {
                 <PlayerRowMetric stats={stats} overall={overall} type='mbt_pt' />
               </div>
             </div>}
-          {['RB', 'WR', 'TE'].includes(player.pos1) &&
+          {['RB', 'WR', 'TE'].includes(player.pos) &&
             <div className='row__group'>
               <div className='row__group-body'>
                 <PlayerRowMetric stats={stats} overall={overall} type='_ayptrg' />
@@ -132,7 +132,7 @@ export default class SelectedPlayerEfficiencyStats extends React.Component {
                 <PlayerRowMetric stats={stats} overall={overall} type='_ryacprec' />
               </div>
             </div>}
-          {['RB', 'WR', 'TE'].includes(player.pos1) &&
+          {['RB', 'WR', 'TE'].includes(player.pos) &&
             <div className='row__group'>
               <div className='row__group-body'>
                 <PlayerRowMetric stats={stats} overall={overall} type='_stray' />

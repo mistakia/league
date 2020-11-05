@@ -13,7 +13,7 @@ const calculateValues = ({ players, baselines, vorpw, volsw, week }) => {
   const totalWeight = weightAvailable + weightStarter
 
   for (const player of players) {
-    const { pos1 } = player
+    const { pos } = player
     player.vorp[week] = {
       available: -99999,
       starter: -99999,
@@ -23,8 +23,8 @@ const calculateValues = ({ players, baselines, vorpw, volsw, week }) => {
       manual: -99999
     }
 
-    for (const type in baselines[pos1]) {
-      player.vorp[week][type] = player.points[week].total - baselines[pos1][type].points[week].total
+    for (const type in baselines[pos]) {
+      player.vorp[week][type] = player.points[week].total - baselines[pos][type].points[week].total
       if (player.vorp[week][type] > 0) {
         total[type] = total[type] + player.vorp[week][type]
       }
