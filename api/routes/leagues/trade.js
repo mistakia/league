@@ -2,7 +2,7 @@ const API = require('groupme').Stateless
 const express = require('express')
 const router = express.Router({ mergeParams: true })
 const { constants, Roster, toStringArray, nth } = require('../../../common')
-const { getRoster, sendNotifications, verifyReserveStatus } = require('../../../utils')
+const { getRoster, sendNotifications } = require('../../../utils')
 
 const getTrade = async (req, res) => {
   const { db, logger } = req.app.locals
@@ -80,13 +80,6 @@ router.post('/accept', async (req, res, next) => {
     const trade = trades[0]
     if (!trade) {
       res.status(400).send({ error: `no valid trade with tradeid: ${tradeId}` })
-    }
-
-    // verify accepting team reserve status
-    try {
-      await verifyReserveStatus({ teamId: trade.tid, leagueId })
-    } catch (error) {
-      return res.status(400).send({ error: error.message })
     }
 
     const acceptingTeamDropPlayers = req.body.dropPlayers
