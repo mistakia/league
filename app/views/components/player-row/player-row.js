@@ -273,7 +273,7 @@ class PlayerRow extends Player {
     const projectionView = isRestOfSeasonView || isSeasonView || isWeekView
 
     if (isWeekView || isSeasonView) {
-      const starterBaselinePlayerId = baselines.getIn([`${week}`, player.pos1, 'starter'])
+      const starterBaselinePlayerId = baselines.getIn([`${week}`, player.pos, 'starter'])
       if (player.player === starterBaselinePlayerId) classNames.push('starter__baseline')
     }
 
@@ -285,7 +285,7 @@ class PlayerRow extends Player {
               <PlayerWatchlistAction playerId={player.player} />
             </div>
             <div className='player__row-pos'>
-              <Position pos={player.pos1} />
+              <Position pos={player.pos} />
             </div>
             <div className='player__row-name cursor' onClick={this.handleClick}>
               <span>{player.name}</span>
@@ -299,7 +299,7 @@ class PlayerRow extends Player {
               <div className='player__row-action'>
                 {!!isHosted && <IconButton small text onClick={this.handleContextClick} icon='more' />}
               </div>}
-            <PlayerRowOpponent team={player.team} pos={player.pos1} />
+            <PlayerRowOpponent team={player.team} pos={player.pos} />
             {isLoggedIn &&
               <div className='player__row-availability'>
                 {player.tid

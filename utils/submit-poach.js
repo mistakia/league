@@ -59,7 +59,7 @@ module.exports = async function ({ leagueId, drop, player, teamId, team, userId 
     }
     roster.removePlayer(drop)
   }
-  const hasSlot = roster.hasOpenBenchSlot(poachPlayer.pos1)
+  const hasSlot = roster.hasOpenBenchSlot(poachPlayer.pos)
   if (!hasSlot) {
     throw new Error('poaching claim unsuccessful, no available roster space')
   }
@@ -86,7 +86,7 @@ module.exports = async function ({ leagueId, drop, player, teamId, team, userId 
   }
   await db('poaches').insert(data)
 
-  const message = `${team.name} has submitted a poaching claim for ${poachPlayer.fname} ${poachPlayer.lname} (${poachPlayer.pos1}). This claim will be processed around ${moment().utcOffset(-4).add('48', 'hours').format('dddd, MMMM Do h:mm a')} EST.`
+  const message = `${team.name} has submitted a poaching claim for ${poachPlayer.fname} ${poachPlayer.lname} (${poachPlayer.pos}). This claim will be processed around ${moment().utcOffset(-4).add('48', 'hours').format('dddd, MMMM Do h:mm a')} EST.`
   await sendNotifications({
     leagueId: league.uid,
     teamIds: [],

@@ -206,14 +206,14 @@ router.post('/?', async (req, res, next) => {
     proposingTeamPlayers.forEach(p => proposingTeamRoster.removePlayer(p))
     for (const playerId of acceptingTeamPlayers) {
       const player = players.find(p => p.player === playerId)
-      const hasSlot = proposingTeamRoster.hasOpenBenchSlot(player.pos1)
+      const hasSlot = proposingTeamRoster.hasOpenBenchSlot(player.pos)
       if (!hasSlot) {
         return res.status(400).send({ error: 'no slots available' })
       }
       proposingTeamRoster.addPlayer({
         slot: constants.slots.BENCH,
         player: playerId,
-        pos: player.pos1,
+        pos: player.pos,
         value: player.value
       })
     }

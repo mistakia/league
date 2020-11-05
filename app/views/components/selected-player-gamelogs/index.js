@@ -21,7 +21,7 @@ const mapStateToProps = createSelector(
   getCurrentLeague,
   (plays, player, league) => {
     const group = groupBy(plays.toJS(), 'week')
-    const pos = player.pos1
+    const pos = player.pos
     const gamelogs = []
     for (const week in group) {
       const weekPlays = group[week]
@@ -34,7 +34,7 @@ const mapStateToProps = createSelector(
       const opp = fixTeam(player.team) === fixTeam(play.homeTeamAbbr)
         ? fixTeam(play.awayTeamAbbr)
         : fixTeam(play.homeTeamAbbr)
-      const points = calculatePoints({ stats, position: player.pos1, league })
+      const points = calculatePoints({ stats, position: player.pos, league })
       gamelogs.push({
         player: player.player,
         week,

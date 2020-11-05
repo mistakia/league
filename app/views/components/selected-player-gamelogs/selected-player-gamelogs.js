@@ -22,7 +22,7 @@ export default class SelectedPlayerGamelogs extends React.Component {
         </div>
       )
       rows.push(
-        <PlayerSelectedRow key={index} stats={game} lead={lead} pos={player.pos1} />
+        <PlayerSelectedRow key={index} stats={game} lead={lead} pos={player.pos} />
       )
     }
 
@@ -42,7 +42,7 @@ export default class SelectedPlayerGamelogs extends React.Component {
               <div className='player__row-metric'>Pts</div>
             </div>
           </div>
-          <PlayerSelectedRowHeader pos={player.pos1} />
+          <PlayerSelectedRowHeader pos={player.pos} />
         </div>
         {rows}
       </div>

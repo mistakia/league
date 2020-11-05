@@ -20,11 +20,11 @@ const mapStateToProps = createSelector(
 
     const opp = player.team === game.h ? game.v : game.h
     const gamelogs = logs
-      .filter(g => g.opp === opp && g.pos === player.pos1)
+      .filter(g => g.opp === opp && g.pos === player.pos)
       .sort((a, b) => a.week - b.week)
       .withMutations(g => {
         for (const [index, gamelog] of g.entrySeq()) {
-          const points = calculatePoints({ stats: gamelog, position: player.pos1, league })
+          const points = calculatePoints({ stats: gamelog, position: player.pos, league })
           g.setIn([index, 'pts'], points.total)
         }
       })

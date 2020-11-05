@@ -32,7 +32,7 @@ export default class AddFreeAgentDialog extends React.Component {
       props.rosterPlayers.active.forEach(p => {
         const r = new Roster({ roster: props.roster.toJS(), league })
         r.removePlayer(p.player)
-        if (r.hasOpenBenchSlot(player.pos1)) {
+        if (r.hasOpenBenchSlot(player.pos)) {
           drops.push(p)
         }
       })
@@ -40,7 +40,7 @@ export default class AddFreeAgentDialog extends React.Component {
 
     this._isPlayerEligible = practice
       ? r.hasOpenPracticeSquadSlot()
-      : r.hasOpenBenchSlot(player.pos1)
+      : r.hasOpenBenchSlot(player.pos)
     this._drops = drops
     this.state = { drop: '', error: false }
   }
@@ -77,13 +77,13 @@ export default class AddFreeAgentDialog extends React.Component {
             key={rPlayer.player}
             value={rPlayer.player}
           >
-            {rPlayer.name} ({rPlayer.pos1})
+            {rPlayer.name} ({rPlayer.pos})
           </MenuItem>
         )
       }
     }
 
-    let text = `Sign ${player.name} (${player.pos1}) to a salary of $0 and add them to the `
+    let text = `Sign ${player.name} (${player.pos}) to a salary of $0 and add them to the `
     if (practice) text += 'practice squad.'
     else text += 'active roster.'
 

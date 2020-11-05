@@ -47,7 +47,7 @@ export function calculatePlayerValues (payload) {
       player.projection[week] = projection
 
       // calculate points based on projection
-      const points = calculatePoints({ stats: projection, position: player.pos1, league })
+      const points = calculatePoints({ stats: projection, position: player.pos, league })
       player.points[week] = points
       player.vorp[week] = {}
       player.values[week] = {}
@@ -71,7 +71,7 @@ export function calculatePlayerValues (payload) {
 
     player.projWks = projWks
     player.projection.ros = ros
-    player.points.ros = calculatePoints({ stats: ros, position: player.pos1, league })
+    player.points.ros = calculatePoints({ stats: ros, position: player.pos, league })
   }
 
   const baselines = {}

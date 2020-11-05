@@ -10,7 +10,7 @@ export default class PlayerContextMenu extends React.Component {
     const { player, deactivate } = this.props
     this.props.showConfirmation({
       title: 'Roster Deactivation',
-      description: `${player.fname} ${player.lname} (${player.pos1}) will be placed on the practice squad. He will not be available to use in lineups until he's reactivated.`,
+      description: `${player.fname} ${player.lname} (${player.pos}) will be placed on the practice squad. He will not be available to use in lineups until he's reactivated.`,
       onConfirm: () => deactivate(player.player)
     })
     this.props.hide()
@@ -20,7 +20,7 @@ export default class PlayerContextMenu extends React.Component {
     const { player, activate } = this.props
     this.props.showConfirmation({
       title: 'Roster Activation',
-      description: `${player.fname} ${player.lname} (${player.pos1}) will be placed on the active roster. He will no longer be eligble for the practice squad.`,
+      description: `${player.fname} ${player.lname} (${player.pos}) will be placed on the active roster. He will no longer be eligble for the practice squad.`,
       onConfirm: () => activate(player.player)
     })
     this.props.hide()
@@ -41,7 +41,7 @@ export default class PlayerContextMenu extends React.Component {
     const { player, waiverId, cancelClaim } = this.props
     this.props.showConfirmation({
       title: 'Cancel claim',
-      description: `Your claim for ${player.fname} ${player.lname} (${player.pos1}) will no longer be processed.`,
+      description: `Your claim for ${player.fname} ${player.lname} (${player.pos}) will no longer be processed.`,
       onConfirm: () => cancelClaim(waiverId)
     })
     this.props.hide()
@@ -86,7 +86,7 @@ export default class PlayerContextMenu extends React.Component {
     const { player, reserve } = this.props
     this.props.showConfirmation({
       title: 'Roster Reserve',
-      description: `${player.fname} ${player.lname} (${player.pos1}) will be placed on Reserves/IR. He will not be available to use in lineups until he's activated.`,
+      description: `${player.fname} ${player.lname} (${player.pos}) will be placed on Reserves/IR. He will not be available to use in lineups until he's activated.`,
       onConfirm: () => reserve({ player: player.player, slot: constants.slots.IR })
     })
     this.props.hide()
@@ -96,7 +96,7 @@ export default class PlayerContextMenu extends React.Component {
     const { player, reserve } = this.props
     this.props.showConfirmation({
       title: 'Roster Reserve',
-      description: `${player.fname} ${player.lname} (${player.pos1}) will be placed on Reserves/COV. He will not be available to use in lineups until he's activated.`,
+      description: `${player.fname} ${player.lname} (${player.pos}) will be placed on Reserves/COV. He will not be available to use in lineups until he's activated.`,
       onConfirm: () => reserve({ player: player.player, slot: constants.slots.COV })
     })
     this.props.hide()
@@ -106,7 +106,7 @@ export default class PlayerContextMenu extends React.Component {
     const { player, release } = this.props
     this.props.showConfirmation({
       title: 'Release Player',
-      description: `${player.fname} ${player.lname} (${player.pos1}) will be released and placed on waivers for 24 hours before becoming a free agent.`,
+      description: `${player.fname} ${player.lname} (${player.pos}) will be released and placed on waivers for 24 hours before becoming a free agent.`,
       onConfirm: () => release(player.player)
     })
     this.props.hide()

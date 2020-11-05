@@ -17,7 +17,7 @@ export default class PlayerName extends React.Component {
     return (
       <div className='player__name cursor' onClick={this.handleClick}>
         <div className='player__name-position'>
-          <Position pos={player.pos1} />
+          <Position pos={player.pos} />
         </div>
         <div className='player__name-main'>
           <span>{player.pname}</span>

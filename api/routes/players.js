@@ -33,7 +33,7 @@ router.get('/?', async (req, res) => {
       'player.start',
       'player.col',
       'player.dv',
-      'player.pos1',
+      'player.pos',
       'player.cteam',
       'player.gsisid',
       'player.gsispid',
@@ -50,7 +50,7 @@ router.get('/?', async (req, res) => {
       .leftJoin('practice', function () {
         this.on('player.player', '=', 'practice.player').andOn('practice.week', '=', constants.season.week).andOn('practice.year', '=', constants.season.year)
       })
-      .whereIn('pos1', constants.positions)
+      .whereIn('player.pos', constants.positions)
       .groupBy('player.player')
       .whereNot({ cteam: 'INA' })
 

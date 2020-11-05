@@ -97,7 +97,7 @@ router.put('/?', async (req, res) => {
       const playerRow = playerRows.find(p => p.player === item.player)
       // verify player is eligible for slot
       if (item.slot !== constants.slots.BENCH) {
-        const isEligible = roster.isEligibleForSlot({ slot: item.slot, player: item.player, pos: playerRow.pos1 })
+        const isEligible = roster.isEligibleForSlot({ slot: item.slot, player: item.player, pos: playerRow.pos })
         if (!isEligible) {
           return res.status(400).send({ error: 'invalid slot' })
         }
@@ -109,7 +109,7 @@ router.put('/?', async (req, res) => {
         return res.status(400).send({ error: 'player is locked, game has started' })
       }
 
-      roster.addPlayer({ slot: item.slot, player: item.player, pos: playerRow.pos1 })
+      roster.addPlayer({ slot: item.slot, player: item.player, pos: playerRow.pos })
     }
 
     const data = []

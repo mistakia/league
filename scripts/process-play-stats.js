@@ -107,7 +107,7 @@ const run = async () => {
   for (const gsispid of Object.keys(groups)) {
     const player = players.find(p => p.gsispid === gsispid)
     if (!player) continue
-    if (!constants.positions.includes(player.pos1)) continue
+    if (!constants.positions.includes(player.pos)) continue
 
     const playStat = groups[gsispid].find(p => p.possessionTeam)
     const opp = fixTeam(playStat.possessionTeam) === fixTeam(playStat.homeTeamAbbr)
@@ -118,7 +118,7 @@ const run = async () => {
 
     await upsert({
       player: player.player,
-      pos: player.pos1,
+      pos: player.pos,
       opp,
       stats
     })

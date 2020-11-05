@@ -72,7 +72,7 @@ router.post('/?', async (req, res) => {
     const rosterInsert = {
       rid: roster.uid,
       player,
-      pos: playerRow.pos1,
+      pos: playerRow.pos,
       slot: constants.slots.BENCH
     }
     await db('rosters_players').insert(rosterInsert)

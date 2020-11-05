@@ -34,7 +34,7 @@ export default class AuctionTargets extends React.Component {
     const groups = {}
     for (const position of constants.positions) {
       if (!groups[position]) groups[position] = {}
-      groups[position] = players.filter(p => p.pos1 === position)
+      groups[position] = players.filter(p => p.pos === position)
     }
 
     const items = {}

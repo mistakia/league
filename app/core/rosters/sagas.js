@@ -126,7 +126,7 @@ export function * calculatePlayerLineupContribution ({ player }) {
       playerData.sp += diff
       weekData.sp = diff
     } else {
-      const baselinePlayerId = baselines.getIn([week, player.pos1, 'available'])
+      const baselinePlayerId = baselines.getIn([week, player.pos, 'available'])
       const baselinePlayer = playerItems.get(baselinePlayerId)
       // bench+ is difference between player output and best available
       const diff = player.getIn(['points', week, 'total']) - baselinePlayer.getIn(['points', week, 'total'])

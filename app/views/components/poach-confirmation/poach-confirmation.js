@@ -21,7 +21,7 @@ export default class PoachConfirmation extends React.Component {
     for (const rPlayer of props.rosterPlayers.active) {
       const r = new Roster({ roster: props.roster.toJS(), league })
       r.removePlayer(rPlayer.player)
-      if (r.hasOpenBenchSlot(player.pos1)) {
+      if (r.hasOpenBenchSlot(player.pos)) {
         drops.push(rPlayer)
       }
     }
@@ -64,7 +64,7 @@ export default class PoachConfirmation extends React.Component {
           key={rPlayer.player}
           value={rPlayer.player}
         >
-          {rPlayer.name} ({rPlayer.pos1})
+          {rPlayer.name} ({rPlayer.pos})
         </MenuItem>
       )
     }
@@ -77,7 +77,7 @@ export default class PoachConfirmation extends React.Component {
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {`Poach ${player.name} (${player.pos1}). If your claim is successful, he will be added to your active roster with a salary of $${rosterInfo.value + 2} and will not be eligible for the practice squad.`}
+            {`Poach ${player.name} (${player.pos}). If your claim is successful, he will be added to your active roster with a salary of $${rosterInfo.value + 2} and will not be eligible for the practice squad.`}
           </DialogContentText>
           <DialogContentText>
             {status.waiver.poach

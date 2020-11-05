@@ -20,7 +20,7 @@ export function getPlaysForPlayer (state, { player, week }) {
     formatted = formatted.filter(p => p.week === week)
   }
 
-  if (player.pos1 === 'DST') {
+  if (player.pos === 'DST') {
     return formatted
       .filter(p => {
         if (fixTeam(p.homeTeamAbbr) !== player.team &&

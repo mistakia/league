@@ -31,7 +31,7 @@ export default class DraftPick extends React.Component {
           <div className='draft__pick-team'>{team.name}</div>
         </div>
         <div className='draf__pick-pos'>
-          <Position pos={player.pos1} />
+          <Position pos={player.pos} />
         </div>
       </div>
     )

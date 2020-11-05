@@ -92,7 +92,7 @@ module.exports = async function ({
     slot: null,
     tid,
     rid: roster.uid,
-    pos: playerRow.pos1,
+    pos: playerRow.pos,
     transaction
   }
 }
