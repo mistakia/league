@@ -133,7 +133,7 @@ const calculateVOR = async ({ year, rookie }) => {
 
   // get player stats for year
   const rows = await db('offense')
-    .select('offense.*', 'player.pname', 'player.pos1', 'game.wk', 'offense.player', 'offense.seas', 'draft_rankings.rank', 'draft_rankings.posrank', 'draft_rankings.avg')
+    .select('offense.*', 'player.pname', 'player.pos', 'game.wk', 'offense.player', 'offense.seas', 'draft_rankings.rank', 'draft_rankings.posrank', 'draft_rankings.avg')
     .where('offense.year', year)
     .andWhere('game.wk', '<=', LAST_WEEK_OF_SEASON)
     .andWhere('draft_rankings.seas', year)
@@ -152,7 +152,7 @@ const calculateVOR = async ({ year, rookie }) => {
   // group by position
   const statsByPosition = {}
   for (const position of POSITIONS) {
-    statsByPosition[position] = rows.filter(p => p.pos1 === position).sort((a, b) => b.points - a.points)
+    statsByPosition[position] = rows.filter(p => p.pos === position).sort((a, b) => b.points - a.points)
   }
 
   // calculate VOR by week
@@ -200,7 +200,7 @@ const calculateVOR = async ({ year, rookie }) => {
     output[player] = {
       player: games[0].pname,
       rookie: games[0].seas === 1,
-      pos: games[0].pos1,
+      pos: games[0].pos,
       seas: games[0].seas,
       posrank: games[0].posrank,
       vor,

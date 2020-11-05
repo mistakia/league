@@ -242,7 +242,7 @@ router.post('/?', async (req, res) => {
     }
     const hasSlot = type === constants.waivers.FREE_AGENCY_PRACTICE
       ? roster.hasOpenPracticeSquadSlot()
-      : roster.hasOpenBenchSlot(playerRow.pos1)
+      : roster.hasOpenBenchSlot(playerRow.pos)
     if (!hasSlot) {
       return res.status(400).send({ error: 'exceeds roster limits' })
     }
@@ -396,7 +396,7 @@ router.put('/:waiverId', async (req, res) => {
     }
     const hasSlot = waiver.type === constants.waivers.FREE_AGENCY_PRACTICE
       ? roster.hasOpenPracticeSquadSlot()
-      : roster.hasOpenBenchSlot(playerRow.pos1)
+      : roster.hasOpenBenchSlot(playerRow.pos)
     if (!hasSlot) {
       return res.status(400).send({ error: 'exceeds roster limits' })
     }

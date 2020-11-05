@@ -72,7 +72,7 @@ export default class AddPlayerDialog extends React.Component {
     for (const [index, player] of sorted.entries()) {
       menuItems.push(
         <option key={index} value={player.player}>
-          {player.name} ({player.pos1})
+          {player.name} ({player.pos})
         </option>
       )
     }

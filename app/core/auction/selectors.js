@@ -66,7 +66,7 @@ export function getAuctionPlayers (state) {
   }
 
   if (positions.size !== constants.positions.length) {
-    filtered = filtered.filter(player => positions.includes(player.pos1))
+    filtered = filtered.filter(player => positions.includes(player.pos))
   }
 
   if (search) {
@@ -86,7 +86,7 @@ export function getAuctionInfoForPosition (state, { pos }) {
   const { valueType } = getAuction(state)
   const { vbaseline } = getApp(state)
   const all = getAllPlayers(state)
-  const players = all.filter(p => p.pos1 === pos)
+  const players = all.filter(p => p.pos === pos)
   const activePlayerIds = getActiveRosterPlayerIdsForCurrentLeague(state)
   const rostered = players.filter(p => activePlayerIds.includes(p.player))
 

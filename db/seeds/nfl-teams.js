@@ -4,6 +4,7 @@ module.exports = async function (knex) {
     fname: 'Arizona',
     lname: 'Cardinals',
     pname: 'Cardinals',
+    pos: 'DST',
     pos1: 'DST',
     cteam: 'ARI'
   }, {
@@ -11,6 +12,7 @@ module.exports = async function (knex) {
     fname: 'Atlanta',
     lname: 'Falcons',
     pname: 'Falcons',
+    pos: 'DST',
     pos1: 'DST',
     cteam: 'ATL'
   }, {
@@ -18,6 +20,7 @@ module.exports = async function (knex) {
     fname: 'Baltimore',
     lname: 'Ravens',
     pname: 'Ravens',
+    pos: 'DST',
     pos1: 'DST',
     cteam: 'BAL'
   }, {
@@ -25,6 +28,7 @@ module.exports = async function (knex) {
     fname: 'Buffalo',
     lname: 'Bills',
     pname: 'Bills',
+    pos: 'DST',
     pos1: 'DST',
     cteam: 'BUF'
   }, {
@@ -32,6 +36,7 @@ module.exports = async function (knex) {
     fname: 'Carolina',
     lname: 'Panthers',
     pname: 'Panthers',
+    pos: 'DST',
     pos1: 'DST',
     cteam: 'CAR'
   }, {
@@ -39,6 +44,7 @@ module.exports = async function (knex) {
     fname: 'Chicago',
     lname: 'Bears',
     pname: 'Bears',
+    pos: 'DST',
     pos1: 'DST',
     cteam: 'CHI'
   }, {
@@ -46,6 +52,7 @@ module.exports = async function (knex) {
     fname: 'Cincinnati',
     lname: 'Bengals',
     pname: 'Bengals',
+    pos: 'DST',
     pos1: 'DST',
     cteam: 'CIN'
   }, {
@@ -53,6 +60,7 @@ module.exports = async function (knex) {
     fname: 'Cleveland',
     lname: 'Browns',
     pname: 'Browns',
+    pos: 'DST',
     pos1: 'DST',
     cteam: 'CLE'
   }, {
@@ -60,6 +68,7 @@ module.exports = async function (knex) {
     fname: 'Dallas',
     lname: 'Cowboys',
     pname: 'Cowboys',
+    pos: 'DST',
     pos1: 'DST',
     cteam: 'DAL'
   }, {
@@ -67,6 +76,7 @@ module.exports = async function (knex) {
     fname: 'Denver',
     lname: 'Broncos',
     pname: 'Broncos',
+    pos: 'DST',
     pos1: 'DST',
     cteam: 'DEN'
   }, {
@@ -74,6 +84,7 @@ module.exports = async function (knex) {
     fname: 'Detroit',
     lname: 'Lions',
     pname: 'Lions',
+    pos: 'DST',
     pos1: 'DST',
     cteam: 'DET'
   }, {
@@ -81,6 +92,7 @@ module.exports = async function (knex) {
     fname: 'Green Bay',
     lname: 'Packers',
     pname: 'Packers',
+    pos: 'DST',
     pos1: 'DST',
     cteam: 'GB'
   }, {
@@ -88,6 +100,7 @@ module.exports = async function (knex) {
     fname: 'Houston',
     lname: 'Texans',
     pname: 'Texans',
+    pos: 'DST',
     pos1: 'DST',
     cteam: 'HOU'
   }, {
@@ -95,6 +108,7 @@ module.exports = async function (knex) {
     fname: 'Indianapolis',
     lname: 'Colts',
     pname: 'Colts',
+    pos: 'DST',
     pos1: 'DST',
     cteam: 'IND'
   }, {
@@ -102,6 +116,7 @@ module.exports = async function (knex) {
     fname: 'Jacksonville',
     lname: 'Jaguars',
     pname: 'Jaguars',
+    pos: 'DST',
     pos1: 'DST',
     cteam: 'JAC'
   }, {
@@ -109,6 +124,7 @@ module.exports = async function (knex) {
     fname: 'Kansas City',
     lname: 'Chiefs',
     pname: 'Chiefs',
+    pos: 'DST',
     pos1: 'DST',
     cteam: 'KC'
   }, {
@@ -116,6 +132,7 @@ module.exports = async function (knex) {
     fname: 'Los Angeles',
     lname: 'Rams',
     pname: 'Rams',
+    pos: 'DST',
     pos1: 'DST',
     cteam: 'LA'
   }, {
@@ -123,6 +140,7 @@ module.exports = async function (knex) {
     fname: 'Los Angeles',
     lname: 'Chargers',
     pname: 'Chargers',
+    pos: 'DST',
     pos1: 'DST',
     cteam: 'LAC'
   }, {
@@ -130,6 +148,7 @@ module.exports = async function (knex) {
     fname: 'Las Vegas',
     lname: 'Raiders',
     pname: 'Raiders',
+    pos: 'DST',
     pos1: 'DST',
     cteam: 'LV'
   }, {
@@ -137,6 +156,7 @@ module.exports = async function (knex) {
     fname: 'Miami',
     lname: 'Dolphins',
     pname: 'Dolphins',
+    pos: 'DST',
     pos1: 'DST',
     cteam: 'MIA'
   }, {
@@ -144,6 +164,7 @@ module.exports = async function (knex) {
     fname: 'Minnesota',
     lname: 'Vikings',
     pname: 'Vikings',
+    pos: 'DST',
     pos1: 'DST',
     cteam: 'MIN'
   }, {
@@ -151,6 +172,7 @@ module.exports = async function (knex) {
     fname: 'New England',
     lname: 'Patriots',
     pname: 'Patriots',
+    pos: 'DST',
     pos1: 'DST',
     cteam: 'NE'
   }, {
@@ -158,6 +180,7 @@ module.exports = async function (knex) {
     fname: 'New Orleans',
     lname: 'Saints',
     pname: 'Saints',
+    pos: 'DST',
     pos1: 'DST',
     cteam: 'NO'
   }, {
@@ -165,6 +188,7 @@ module.exports = async function (knex) {
     fname: 'New York',
     lname: 'Giants',
     pname: 'Giants',
+    pos: 'DST',
     pos1: 'DST',
     cteam: 'NYG'
   }, {
@@ -172,6 +196,7 @@ module.exports = async function (knex) {
     fname: 'New York',
     lname: 'Jets',
     pname: 'Jets',
+    pos: 'DST',
     pos1: 'DST',
     cteam: 'NYJ'
   }, {
@@ -179,6 +204,7 @@ module.exports = async function (knex) {
     fname: 'Philadelphia',
     lname: 'Eagles',
     pname: 'Eagles',
+    pos: 'DST',
     pos1: 'DST',
     cteam: 'PHI'
   }, {
@@ -186,6 +212,7 @@ module.exports = async function (knex) {
     fname: 'Pittsburgh',
     lname: 'Steelers',
     pname: 'Steelers',
+    pos: 'DST',
     pos1: 'DST',
     cteam: 'PIT'
   }, {
@@ -193,6 +220,7 @@ module.exports = async function (knex) {
     fname: 'Seattle',
     lname: 'Seahawks',
     pname: 'Seahawks',
+    pos: 'DST',
     pos1: 'DST',
     cteam: 'SEA'
   }, {
@@ -200,6 +228,7 @@ module.exports = async function (knex) {
     fname: 'San Francisco',
     lname: '49ers',
     pname: '49ers',
+    pos: 'DST',
     pos1: 'DST',
     cteam: 'SF'
   }, {
@@ -207,6 +236,7 @@ module.exports = async function (knex) {
     fname: 'Tampa Bay',
     lname: 'Buccaneers',
     pname: 'Buccaneers',
+    pos: 'DST',
     pos1: 'DST',
     cteam: 'TB'
   }, {
@@ -214,6 +244,7 @@ module.exports = async function (knex) {
     fname: 'Tennessee',
     lname: 'Titans',
     pname: 'Titans',
+    pos: 'DST',
     pos1: 'DST',
     cteam: 'TEN'
   }, {
@@ -221,6 +252,7 @@ module.exports = async function (knex) {
     fname: 'Washington',
     lname: 'Redskins',
     pname: 'Redskins',
+    pos: 'DST',
     pos1: 'DST',
     cteam: 'WAS'
   }])

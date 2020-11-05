@@ -113,7 +113,7 @@ router.post('/?', async (req, res) => {
       tid,
       slot: constants.slots.PS,
       rid: roster.uid,
-      pos: playerRow.pos1,
+      pos: playerRow.pos,
       transaction
     }
     res.send(data)
@@ -125,7 +125,7 @@ router.post('/?', async (req, res) => {
     const teams = await db('teams').where({ uid: tid })
     const team = teams[0]
 
-    const message = `${team.name} (${team.abbrv}) has placed ${playerRow.fname} ${playerRow.lname} (${playerRow.pos1}) on the practice squad.`
+    const message = `${team.name} (${team.abbrv}) has placed ${playerRow.fname} ${playerRow.lname} (${playerRow.pos}) on the practice squad.`
 
     await sendNotifications({
       leagueId: league.uid,

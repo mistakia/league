@@ -41,7 +41,7 @@ export default class WaiverConfirmation extends React.Component {
 
     const ros = new Roster({ roster: roster.toJS(), league })
     this._isEligible = isActiveRoster
-      ? ros.hasOpenBenchSlot(player.pos1)
+      ? ros.hasOpenBenchSlot(player.pos)
       : ros.hasOpenPracticeSquadSlot()
 
     const drops = []
@@ -53,7 +53,7 @@ export default class WaiverConfirmation extends React.Component {
       const r = new Roster({ roster: roster.toJS(), league })
       r.removePlayer(rPlayer.player)
       if (isActiveRoster) {
-        if (r.hasOpenBenchSlot(player.pos1)) drops.push(rPlayer)
+        if (r.hasOpenBenchSlot(player.pos)) drops.push(rPlayer)
       } else {
         if (r.hasOpenPracticeSquadSlot()) drops.push(rPlayer)
       }
@@ -123,7 +123,7 @@ export default class WaiverConfirmation extends React.Component {
           key={rPlayer.player}
           value={rPlayer.player}
         >
-          {rPlayer.name} ({rPlayer.pos1})
+          {rPlayer.name} ({rPlayer.pos})
         </MenuItem>
       )
     }
@@ -156,7 +156,7 @@ export default class WaiverConfirmation extends React.Component {
         <DialogTitle>Waiver Claim</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {`Add ${player.name} (${player.pos1})`}
+            {`Add ${player.name} (${player.pos})`}
           </DialogContentText>
           <div className='waiver__claim-inputs'>
             {this.state.type === constants.waivers.FREE_AGENCY &&

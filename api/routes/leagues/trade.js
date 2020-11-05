@@ -157,14 +157,14 @@ router.post('/accept', async (req, res, next) => {
     acceptingTeamPlayers.forEach(p => acceptingTeamRoster.removePlayer(p))
     for (const playerId of proposingTeamPlayers) {
       const player = players.find(p => p.player === playerId)
-      const hasSlot = acceptingTeamRoster.hasOpenBenchSlot(player.pos1)
+      const hasSlot = acceptingTeamRoster.hasOpenBenchSlot(player.pos)
       if (!hasSlot) {
         return res.status(400).send({ error: 'no slots available on accepting team roster' })
       }
       acceptingTeamRoster.addPlayer({
         slot: constants.slots.BENCH,
         player: playerId,
-        pos: player.pos1,
+        pos: player.pos,
         value: player.value
       })
     }
@@ -180,14 +180,14 @@ router.post('/accept', async (req, res, next) => {
     proposingTeamPlayers.forEach(p => proposingTeamRoster.removePlayer(p))
     for (const playerId of acceptingTeamPlayers) {
       const player = players.find(p => p.player === playerId)
-      const hasSlot = proposingTeamRoster.hasOpenBenchSlot(player.pos1)
+      const hasSlot = proposingTeamRoster.hasOpenBenchSlot(player.pos)
       if (!hasSlot) {
         return res.status(400).send({ error: 'no slots available on proposing team roster' })
       }
       proposingTeamRoster.addPlayer({
         slot: constants.slots.BENCH,
         player: playerId,
-        pos: player.pos1,
+        pos: player.pos,
         value: player.value
       })
     }
@@ -361,11 +361,11 @@ router.post('/accept', async (req, res, next) => {
     const acceptingTeamItems = []
     for (const playerId of proposingTeamPlayers) {
       const player = players.find(p => p.player === playerId)
-      proposingTeamItems.push(`${player.fname} ${player.lname} (${player.pos1})`)
+      proposingTeamItems.push(`${player.fname} ${player.lname} (${player.pos})`)
     }
     for (const playerId of acceptingTeamPlayers) {
       const player = players.find(p => p.player === playerId)
-      acceptingTeamItems.push(`${player.fname} ${player.lname} (${player.pos1})`)
+      acceptingTeamItems.push(`${player.fname} ${player.lname} (${player.pos})`)
     }
 
     const picks = await db('draft').whereIn('uid', pickRows.map(p => p.pickid))
@@ -392,7 +392,7 @@ router.post('/accept', async (req, res, next) => {
       const dropItems = []
       for (const playerId of dropPlayers) {
         const player = players.find(p => p.player === playerId)
-        dropItems.push(`${player.fname} ${player.lname} (${player.pos1})`)
+        dropItems.push(`${player.fname} ${player.lname} (${player.pos})`)
       }
       const dropItemsStr = toStringArray(dropItems)
       message = `${message} ${dropItemsStr} have been dropped.`
@@ -402,7 +402,7 @@ router.post('/accept', async (req, res, next) => {
       const poachItems = []
       for (const poach of activePoaches) {
         const player = players.find(p => p.player === poach.player)
-        poachItems.push(`${player.fname} ${player.lname} (${player.pos1})`)
+        poachItems.push(`${player.fname} ${player.lname} (${player.pos})`)
       }
       const poachItemsStr = toStringArray(poachItems)
 

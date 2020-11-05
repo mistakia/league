@@ -56,7 +56,7 @@ router.post('/?', async (req, res) => {
     const playerRow = players[0]
 
     // make sure team has space on active roster
-    if (!roster.hasOpenBenchSlot(playerRow.pos1)) {
+    if (!roster.hasOpenBenchSlot(playerRow.pos)) {
       return res.status(400).send({ error: 'no available space on active roster' })
     }
 
@@ -89,7 +89,7 @@ router.post('/?', async (req, res) => {
       tid,
       slot: constants.slots.BENCH,
       rid: roster.uid,
-      pos: playerRow.pos1,
+      pos: playerRow.pos,
       transaction
     }
     res.send(data)
@@ -101,7 +101,7 @@ router.post('/?', async (req, res) => {
     const teams = await db('teams').where({ uid: tid })
     const team = teams[0]
 
-    const message = `${team.name} (${team.abbrv}) has activated ${playerRow.fname} ${playerRow.lname} (${playerRow.pos1}).`
+    const message = `${team.name} (${team.abbrv}) has activated ${playerRow.fname} ${playerRow.lname} (${playerRow.pos}).`
 
     await sendNotifications({
       leagueId: league.uid,

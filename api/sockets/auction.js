@@ -168,7 +168,7 @@ export default class Auction {
     const roster = await getRoster({ tid })
 
     const r = new Roster({ roster, league: this._league })
-    const hasSlot = r.hasOpenBenchSlot(playerInfo.pos1)
+    const hasSlot = r.hasOpenBenchSlot(playerInfo.pos)
     if (!hasSlot) {
       this._startBidTimer()
       this.logger(`no open slots available for ${player} on teamId ${tid}`)
@@ -188,7 +188,7 @@ export default class Auction {
         .insert({
           rid: r.uid,
           slot: constants.slots.BENCH,
-          pos: playerInfo.pos1,
+          pos: playerInfo.pos,
           player
         })
     } catch (err) {
@@ -227,7 +227,7 @@ export default class Auction {
       type: 'AUCTION_PROCESSED',
       payload: {
         rid: r.uid,
-        pos: playerInfo.pos1,
+        pos: playerInfo.pos,
         uid,
         ...transaction
       }
@@ -338,7 +338,7 @@ export default class Auction {
     const roster = await getRoster({ tid: nominatingTeamId })
 
     const r = new Roster({ roster, league: this._league })
-    const hasSlot = r.hasOpenBenchSlot(playerInfo.pos1)
+    const hasSlot = r.hasOpenBenchSlot(playerInfo.pos)
     if (!hasSlot) {
       this.logger(`no open slots available for ${player} on teamId ${nominatingTeamId}`)
       this.reply(userid, 'exceeds roster limits')

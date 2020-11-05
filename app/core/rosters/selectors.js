@@ -159,14 +159,14 @@ export function isPlayerEligible (state, { player, playerId }) {
     return false
   }
 
-  if (!player.pos1) {
+  if (!player.pos) {
     return false
   }
 
   const roster = getCurrentTeamRosterRecord(state)
   const league = getCurrentLeague(state)
   const ros = new Roster({ roster: roster.toJS(), league })
-  return ros.hasOpenBenchSlot(player.pos1)
+  return ros.hasOpenBenchSlot(player.pos)
 }
 
 export function getCurrentTeamRosterRecord (state) {

@@ -82,7 +82,7 @@ export default class SelectedPlayer extends React.Component {
             <div className='selected__player-first-name'>{player.fname}</div>
             <div className='selected__player-last-name'>{player.lname}</div>
             <div className='selected__player-meta'>
-              <Position pos={player.pos1} />
+              <Position pos={player.pos} />
               <Team team={player.team} />
               <span>#{player.jersey}</span>
             </div>
@@ -185,7 +185,7 @@ export default class SelectedPlayer extends React.Component {
             <SelectedPlayerGamelogs />
           </TabPanel>
           <TabPanel value={value} index={5}>
-            <SelectedPlayerSeasonStats pos={player.pos1} />
+            <SelectedPlayerSeasonStats pos={player.pos} />
           </TabPanel>
           <TabPanel value={value} index={6}>
             <SelectedPlayerTeamStats />

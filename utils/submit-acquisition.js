@@ -101,7 +101,7 @@ module.exports = async function ({
     roster.removePlayer(drop)
   }
 
-  const hasSlot = roster.isEligibleForSlot({ slot, player, pos: playerRow.pos1 })
+  const hasSlot = roster.isEligibleForSlot({ slot, player, pos: playerRow.pos })
   if (!hasSlot) {
     throw new Error('exceeds roster limits')
   }
@@ -123,7 +123,7 @@ module.exports = async function ({
   await db('rosters_players').insert({
     rid: roster.uid,
     player,
-    pos: playerRow.pos1,
+    pos: playerRow.pos,
     slot
   })
 
@@ -144,14 +144,14 @@ module.exports = async function ({
     player: player,
     slot,
     rid: roster.uid,
-    pos: playerRow.pos1,
+    pos: playerRow.pos,
     transaction: addTransaction
   })
 
   // send notification
-  let message = `${team.name} (${team.abbrv}) has signed free agent ${playerRow.fname} ${playerRow.lname} (${playerRow.pos1}) for $${bid}.`
+  let message = `${team.name} (${team.abbrv}) has signed free agent ${playerRow.fname} ${playerRow.lname} (${playerRow.pos}) for $${bid}.`
   if (drop) {
-    message += ` ${dropPlayerRow.fname} ${dropPlayerRow.lname} (${dropPlayerRow.pos1}) has been released.`
+    message += ` ${dropPlayerRow.fname} ${dropPlayerRow.lname} (${dropPlayerRow.pos}) has been released.`
   }
   await sendNotifications({
     leagueId: league.uid,

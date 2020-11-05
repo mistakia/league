@@ -18,7 +18,7 @@ export default class PlayerSlot extends React.Component {
       action = (
         <Button
           disabled={isLocked}
-          onClick={() => handleSelect({ slot, player: player.player, pos: player.pos1 })}
+          onClick={() => handleSelect({ slot, player: player.player, pos: player.pos })}
           small
         >
           {isLocked ? 'Locked' : 'Move'}

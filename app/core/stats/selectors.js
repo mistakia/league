@@ -19,7 +19,7 @@ export function getGamelogForPlayer (state, { player, week }) {
 
   const league = getCurrentLeague(state)
   const plays = getPlaysForPlayer(state, { player, week }).toJS()
-  const pos = player.pos1
+  const { pos } = player
   const stats = pos === 'DST'
     ? calculateDstStatsFromPlays(plays, player.team)
     : calculateStatsFromPlayStats(plays.flatMap(p => p.playStats))

@@ -13,7 +13,7 @@ router.get('/?', async (req, res) => {
     res.set('Surrogate-Control', null)
 
     const players = await db('player')
-      .whereIn('pos1', constants.positions)
+      .whereIn('pos', constants.positions)
       .whereNot({ cteam: 'INA' })
     const playerIds = players.map(p => p.player)
 

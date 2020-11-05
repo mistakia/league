@@ -40,7 +40,7 @@ module.exports = async function (claim) {
   if (claim.drop && roster.has(claim.drop)) {
     roster.removePlayer(claim.drop)
   }
-  const hasSlot = roster.hasOpenBenchSlot(poachPlayer.pos1)
+  const hasSlot = roster.hasOpenBenchSlot(poachPlayer.pos)
   if (!hasSlot) {
     throw new Error('poaching claim unsuccessful, no available roster space')
   }
@@ -95,14 +95,14 @@ module.exports = async function (claim) {
       rid: rosterRow.uid,
       slot: constants.slots.BENCH,
       player: claim.player,
-      pos: poachPlayer.pos1
+      pos: poachPlayer.pos
     })
 
   // send notification
-  let message = `Poaching claim for ${poachPlayer.fname} ${poachPlayer.lname} (${poachPlayer.pos1}) successfully processed.`
+  let message = `Poaching claim for ${poachPlayer.fname} ${poachPlayer.lname} (${poachPlayer.pos}) successfully processed.`
   if (claim.drop && roster.has(claim.drop)) {
     const dropPlayer = playerRows.find(p => p.player === claim.drop)
-    message += ` ${dropPlayer.fname} ${dropPlayer.lname} (${dropPlayer.pos1}) has been released.`
+    message += ` ${dropPlayer.fname} ${dropPlayer.lname} (${dropPlayer.pos}) has been released.`
   }
 
   await sendNotifications({
