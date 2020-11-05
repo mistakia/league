@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router({ mergeParams: true })
 const { constants, Roster } = require('../../../common')
-const { getRoster, verifyReserveStatus } = require('../../../utils')
+const { getRoster } = require('../../../utils')
 
 const trade = require('./trade')
 
@@ -103,13 +103,6 @@ router.post('/?', async (req, res, next) => {
 
     if (!tid) {
       return res.status(400).send({ error: 'missing param tid' })
-    }
-
-    // validate proposing team reserve status
-    try {
-      await verifyReserveStatus({ teamId: pid, leagueId })
-    } catch (error) {
-      return res.status(400).send({ error: error.message })
     }
 
     // make sure no player is on the practice squad with an existing poaching claim
