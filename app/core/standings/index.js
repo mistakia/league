@@ -1,1 +1,2 @@
-export { getStandings } from './selectors'
+export { standingsSagas } from './sagas'
+export { standingsActions } from './actions'

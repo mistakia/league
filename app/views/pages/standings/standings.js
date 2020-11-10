@@ -1,36 +1,36 @@
 import React from 'react'
 import Container from '@material-ui/core/Container'
 
+import { constants, toPercent } from '@common'
 import PageLayout from '@layouts/page'
 
 import './standings.styl'
 
-function StandingsTeam ({ item }) {
+const gs = constants.season.week - 1
+
+function StandingsTeam ({ team }) {
   return (
     <div className='table__row'>
-      <div className='table__cell player__item-name'>{item.team.name}</div>
-      <div className='table__cell metric'>{item.wins}-{item.losses}-{item.ties}</div>
-      <div className='table__cell metric'>{(item.pointsFor || 0).toFixed(1)}</div>
+      <div className='table__cell player__item-name'>{team.name}</div>
+      <div className='table__cell metric'>{team.wins}-{team.losses}-{team.ties}</div>
+      <div className='table__cell metric'>{(team.pointsFor || 0).toFixed(1)}</div>
+      <div className='table__cell metric'>{(team.pointsAgainst || 0).toFixed(1)}</div>
+      <div className='table__cell metric'>{((team.pointsFor / gs) || 0).toFixed(1)}</div>
+      <div className='table__cell metric'>{((team.pointsAgainst / gs) || 0).toFixed(1)}</div>
       <div className='table__cell metric'>-</div>
       <div className='table__cell metric'>-</div>
-      <div className='table__cell metric'>-</div>
-      <div className='table__cell metric'>-</div>
-      <div className='table__cell metric'>-</div>
-      <div className='table__cell metric'>-</div>
-      <div className='table__cell metric'>-</div>
+      <div className='table__cell metric'>{toPercent(team.playoffOdds)}</div>
     </div>
   )
 }
 
-function Standings ({ items, title }) {
-  const sorted = items.sort((a, b) => {
-    return b.wins - a.wins || b.pointsFor - a.pointsFor
-  })
+function Standings ({ teams, title }) {
+  const sorted = teams.sort((a, b) => b.wins - a.wins || b.pointsFor - a.pointsFor)
 
   const overallRows = []
-  for (const [index, item] of sorted.entries()) {
+  for (const [index, team] of sorted.entries()) {
     overallRows.push(
-      <StandingsTeam key={index} item={item} />
+      <StandingsTeam key={index} team={team} />
     )
   }
 
@@ -45,7 +45,6 @@ function Standings ({ items, title }) {
           <div className='table__cell metric'>PA</div>
           <div className='table__cell metric'>PF/G</div>
           <div className='table__cell metric'>PA/G</div>
-          <div className='table__cell metric'>Wa</div>
           <div className='table__cell metric'>PP</div>
           <div className='table__cell metric'>PP%</div>
           <div className='table__cell metric'>P Odds</div>
@@ -58,26 +57,25 @@ function Standings ({ items, title }) {
 
 export default class StandingsPage extends React.Component {
   render = () => {
-    const { standings } = this.props
+    const { teams } = this.props
 
-    const items = Object.values(standings)
     const divs = {}
-    for (const item of items) {
-      const { div } = item.team
+    for (const team of teams.valueSeq()) {
+      const div = team.get('div')
       if (!divs[div]) divs[div] = []
-      divs[div].push(item)
+      divs[div].push(team)
     }
 
     const divisions = []
     for (const div in divs) {
       divisions.push(
-        <Standings key={div} title={`Division ${div}`} items={divs[div]} />
+        <Standings key={div} title={`Division ${div}`} teams={divs[div]} />
       )
     }
 
     const body = (
       <Container maxWidth='md' classes={{ root: 'standings' }}>
-        <Standings title='Overall' items={items} />
+        <Standings title='Overall' teams={teams} />
         {divisions}
       </Container>
     )

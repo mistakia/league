@@ -29,6 +29,8 @@ const uniqBy = (a, key) => {
   })
 }
 
+const toPercent = num => `${((num || 0) * 100).toFixed(1)}%`
+
 const formatRoster = (roster) => {
   const result = new Map()
   Object.keys(roster).forEach(k => k.startsWith('s') && result.set(k, roster[k]))
@@ -64,5 +66,6 @@ export {
   isOnReleaseWaivers,
   nth,
   toStringArray,
-  fixTeam
+  fixTeam,
+  toPercent
 }
