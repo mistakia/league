@@ -4562,6 +4562,10 @@ gauge@~2.7.3:
     strip-ansi "^3.0.1"
     wide-align "^1.1.0"
 
+gaussian@errcw/gaussian#3b3e49c:
+  version "1.1.0"
+  resolved "https://codeload.github.com/errcw/gaussian/tar.gz/3b3e49cd35f278429af80e310aed85de94d1eb99"
+
 generate-object-property@^1.0.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/generate-object-property/-/generate-object-property-1.2.0.tgz#9c0e1c40308ce804f4783618b937fa88f99d50d0"
