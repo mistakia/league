@@ -135,13 +135,19 @@ const run = async () => {
     if (!opponentPlays.length) continue
     const play = opponentPlays[0]
     const opp = fixTeam(play.homeTeamAbbr) === team ? play.awayTeamAbbr : play.homeTeamAbbr
-    const formattedPlayStats = opponentPlays.map(p => ({
-      possessionTeam: p.possessionTeam,
-      drivePlayCount: p.drivePlayCount,
-      playTypeNFL: p.playTypeNFL,
-      playStats: [{ ...p }]
-    }))
-    const stats = calculateDstStatsFromPlays(formattedPlayStats, team)
+    const groupedPlays = groupBy(opponentPlays, 'playId')
+    const formattedPlays = []
+    for (const playId in groupedPlays) {
+      const playStats = groupedPlays[playId]
+      const p = playStats[0]
+      formattedPlays.push({
+        possessionTeam: p.possessionTeam,
+        drivePlayCount: p.drivePlayCount,
+        playTypeNFL: p.playTypeNFL,
+        playStats
+      })
+    }
+    const stats = calculateDstStatsFromPlays(formattedPlays, team)
     if (argv.dry) continue
     await upsert({
       player: team,

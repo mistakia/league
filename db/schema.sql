@@ -1917,6 +1917,7 @@ CREATE TABLE `nflPlay` (
   `playTypeNFL` varchar(36) DEFAULT NULL,
 
   `updated` int(11) NOT NULL,
+  UNIQUE KEY `gamePlay` (`esbid`,`playId`),
   KEY `esbid` (`esbid`),
   KEY `playId` (`playId`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -2021,6 +2022,7 @@ CREATE TABLE `gamelogs` (
   `snp` tinyint(3) DEFAULT NULL,
 
   `fgm` tinyint(1) DEFAULT NULL,
+  `fgy` int(3) DEFAULT NULL,
   `fg19` tinyint(1) DEFAULT NULL,
   `fg29` tinyint(1) DEFAULT NULL,
   `fg39` tinyint(1) DEFAULT NULL,

@@ -15,7 +15,23 @@ export const Team = new Record({
   teamtext: 0,
   teamvoice: 0,
   leaguetext: 0,
-  picks: new List()
+  picks: new List(),
+
+  wins: null,
+  losses: null,
+  ties: null,
+
+  pointsFor: null,
+  pointsAgainst: null,
+  potentialPointsFor: null,
+
+  allPlayWins: null,
+  allPlayLosses: null,
+  allPlayTies: null,
+
+  playoffOdds: null,
+  divisionOdds: null,
+  byeOdds: null
 })
 
 export function createTeam ({

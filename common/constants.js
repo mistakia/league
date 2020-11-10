@@ -69,6 +69,7 @@ export const stats = [
 
 export const kStats = [
   'fgm', // field goal made
+  'fgy', // field goal yards (min of 30)
   'fg19', // field goal <19
   'fg29', // field goal 29
   'fg39', // field goal 39

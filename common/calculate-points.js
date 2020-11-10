@@ -24,18 +24,8 @@ const calculatePoints = ({ stats, position, league }) => {
 
   result.xpm = stats.xpm * 1
   result.total = result.total + result.xpm
-  if (stats._fgm) {
-    result.fgm = stats._fgm.reduce((sum, fg) => sum + Math.max(fg / 10, 3), 0)
-    result.total = result.total + result.fgm
-  } else {
-    result.fgm = stats.fgm * 3
-    result.fg19 = stats.fg19 * 3
-    result.fg29 = stats.fg29 * 3
-    result.fg39 = stats.fg39 * 3
-    result.fg49 = stats.fg49 * 4
-    result.fg50 = stats.fg50 * 5
-    result.total = result.total + result.fgm + result.fg19 + result.fg29 + result.fg39 + result.fg49 + result.fg50
-  }
+  result.fgm = stats.fgy / 10
+  result.total = result.total + result.fgm
 
   const dst = {
     dsk: stats.dsk * 1,

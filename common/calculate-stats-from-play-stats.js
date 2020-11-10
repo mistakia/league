@@ -299,6 +299,7 @@ const calculateStatsFromPlayStats = (playStats) => {
         // made field goal
         stats.fgm += 1
         stats.fga += 1
+        stats.fgy += Math.max(playStat.yards, 30)
         stats._fgm.push(playStat.yards)
         if (playStat.yards < 20) {
           stats.fg19 += 1

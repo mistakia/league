@@ -22,6 +22,8 @@ import { statusSagas } from './status'
 import { scoreboardSagas } from './scoreboard'
 import { playSagas } from './plays'
 import { gamelogSagas } from './gamelogs'
+import { forecastSagas } from './forecast'
+import { standingsSagas } from './standings'
 
 export default function * rootSaga () {
   yield all([
@@ -46,6 +48,8 @@ export default function * rootSaga () {
     ...statusSagas,
     ...scoreboardSagas,
     ...playSagas,
-    ...gamelogSagas
+    ...gamelogSagas,
+    ...forecastSagas,
+    ...standingsSagas
   ])
 }
