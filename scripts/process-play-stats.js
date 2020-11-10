@@ -16,7 +16,10 @@ const log = debug('process:play-stats')
 debug.enable('process:play-stats')
 
 const timestamp = Math.round(Date.now() / 1000)
-const week = argv.week || constants.season.week
+const week = argv.week || (Math.max(moment().day() === 2
+  ? (constants.season.week - 1)
+  : constants.season.week, 1))
+
 const year = constants.season.year
 
 const upsert = async ({ player, stats, opp, pos }) => {
