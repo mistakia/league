@@ -15,6 +15,14 @@ module.exports = async (leagueId) => {
     return undefined
   }
 
+  const activeWaivers = await db('waivers')
+    .whereNull('processed')
+    .whereNull('cancelled')
+    .where('lid', leagueId)
+    .where('type', constants.waivers.FREE_AGENCY)
+    .groupBy('player')
+  const activeWaiverPlayerIds = activeWaivers.map(w => w.player)
+
   // get relevant transactions from last 24 hours
   const cutoff = moment().subtract('24', 'hours').format('X')
   const transactions = await db('transactions')
@@ -28,6 +36,7 @@ module.exports = async (leagueId) => {
     .join('teams', 'waivers.tid', 'teams.uid')
     .whereNull('processed')
     .whereNull('cancelled')
+    .where('waivers.lid', leagueId)
     .where('type', constants.waivers.FREE_AGENCY_PRACTICE)
     .orderBy([{
       column: 'teams.wo',
@@ -51,6 +60,10 @@ module.exports = async (leagueId) => {
 
   if (playerIds.length) {
     query.whereNotIn('waivers.player', playerIds)
+  }
+
+  if (activeWaiverPlayerIds.length) {
+    query.whereNotIn('waivers.player', activeWaiverPlayerIds)
   }
 
   const waivers = await query
