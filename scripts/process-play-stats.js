@@ -66,6 +66,7 @@ const run = async () => {
     })
     .where('nflPlay.season', year)
     .where('nflPlay.week', week)
+    .where('nflPlayStat.valid', 1)
 
   const groups = groupBy(playStats, 'gsispid')
   const gsispids = Object.keys(groups)
