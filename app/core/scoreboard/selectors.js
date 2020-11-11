@@ -7,13 +7,13 @@ import {
   constants,
   fixTeam,
   calculateStatsFromPlayStats,
-  calculatePoints,
-  calculateDstStatsFromPlays
+  calculatePoints
 } from '@common'
+import { getGamelogForPlayer } from '@core/stats'
 import { getPlayerById } from '@core/players'
 import { getMatchupById } from '@core/matchups'
 import { getGameByPlayerId, getGameByTeam } from '@core/schedule'
-import { getPlaysForPlayer, getPlays } from '@core/plays'
+import { getPlays } from '@core/plays'
 
 export function getScoreboard (state) {
   return state.get('scoreboard')
@@ -24,31 +24,15 @@ export function getScoreboardRosterByTeamId (state, { tid }) {
   return getRosterByTeamId(state, { tid, week })
 }
 
-function getStatsForPlayer (state, { player }) {
-  const week = state.getIn(['scoreboard', 'week'])
-  const plays = getPlaysForPlayer(state, { player, week })
-  const league = getCurrentLeague(state)
-
-  const playStats = plays.flatMap(p => p.playStats)
-  if (!playStats.size) return
-
-  const stats = player.pos === 'DST'
-    ? calculateDstStatsFromPlays(plays.toJS(), player.team)
-    : calculateStatsFromPlayStats(playStats.toJS())
-
-  const points = calculatePoints({ stats, position: player.pos, league })
-  return { playStats: playStats.toJS(), points, stats }
-}
-
 export function getScoreboardByTeamId (state, { tid }) {
   const week = state.getIn(['scoreboard', 'week'])
   const starters = getStartersByTeamId(state, { tid, week })
   let points = 0
   const projected = starters.reduce((sum, player) => {
-    const playerScoreboard = getStatsForPlayer(state, { player })
-    if (playerScoreboard) points += playerScoreboard.points.total
-    const add = playerScoreboard
-      ? playerScoreboard.points.total
+    const gamelog = getGamelogForPlayer(state, { player, week })
+    if (gamelog) points += gamelog.total
+    const add = gamelog
+      ? gamelog.total
       : player.getIn(['points', `${week}`, 'total'], 0)
     return add + sum
   }, 0)
@@ -90,12 +74,13 @@ export function getStartersByMatchupId (state, { mid }) {
   return { matchup, games, home, away }
 }
 
-export function getStatsByPlayerId (state, { playerId }) {
+export function getScoreboardGamelogByPlayerId (state, { playerId }) {
   const player = getPlayerById(state, { playerId })
 
   if (!player.player) return
 
-  return getStatsForPlayer(state, { player })
+  const week = state.getIn(['scoreboard', 'week'])
+  return getGamelogForPlayer(state, { player, week })
 }
 
 export function getPlaysByMatchupId (state, { mid }) {
