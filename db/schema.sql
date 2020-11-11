@@ -1940,6 +1940,7 @@ CREATE TABLE `nflPlayStat` (
   `gsisId` varchar(36) DEFAULT NULL,
   `gsispid` varchar(47) DEFAULT NULL,
   `teamid` varchar(36) DEFAULT NULL,
+  `valid` tinyint(1) DEFAULT NULL,
   KEY `playId` (`playId`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
