@@ -23,6 +23,7 @@ module.exports = async (leagueId) => {
     .where(function () {
       this.where('schedule.seas', constants.season.year).orWhere('schedule.seas', null)
     })
+    .where('waivers.lid', leagueId)
     .whereNull('processed')
     .whereNull('cancelled')
     .where('type', constants.waivers.FREE_AGENCY)

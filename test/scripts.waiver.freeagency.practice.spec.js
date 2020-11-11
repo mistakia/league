@@ -208,5 +208,9 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
     it('exceeds roster limits', async () => {
       // TODO
     })
+
+    it('active roster waiver exists for player', async () => {
+      // TODO
+    })
   })
 })
