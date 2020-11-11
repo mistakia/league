@@ -39,7 +39,7 @@ export default class Scoreboard {
     this._log(`${plays.length} updated plays found`)
 
     const esbids = Array.from(uniqBy(plays, 'esbid')).map(p => p.esbid)
-    const playStats = await db('nflPlayStat').whereIn('esbid', esbids)
+    const playStats = await db('nflPlayStat').whereIn('esbid', esbids).where('valid', 1)
     const playSnaps = await db('nflSnap').whereIn('esbid', esbids)
 
     for (const play of plays) {

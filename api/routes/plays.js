@@ -43,7 +43,7 @@ router.get('/stats', async (req, res) => {
 
     const plays = await db('nflPlay').select('esbid').whereIn('season', years).groupBy('esbid')
     const esbids = plays.map(p => p.esbid)
-    const stream = db('nflPlayStat').whereIn('esbid', esbids).stream()
+    const stream = db('nflPlayStat').whereIn('esbid', esbids).where('valid', 1).stream()
     res.set('Content-Type', 'application/json')
     stream.pipe(JSONStream.stringify()).pipe(res)
     req.on('close', stream.end.bind(stream))
