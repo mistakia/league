@@ -34,6 +34,8 @@ export function getGamelogForPlayer (state, { player, week }) {
   if (gamelog) return process(gamelog)
 
   const plays = getPlaysForPlayer(state, { player, week }).toJS()
+  if (!plays.length) return null
+
   const { pos } = player
   const stats = pos === 'DST'
     ? calculateDstStatsFromPlays(plays, player.team)
