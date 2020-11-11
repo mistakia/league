@@ -9,13 +9,13 @@ import './scoreboard-player.styl'
 
 class ScoreboardPlayer extends Player {
   render = () => {
-    const { player, stats, week } = this.props
+    const { player, gamelog, week } = this.props
 
     const classNames = ['scoreboard__player']
-    if (!stats) classNames.push('projection')
+    if (!gamelog) classNames.push('projection')
 
-    const points = stats
-      ? (stats.points.total || 0).toFixed(1)
+    const points = gamelog
+      ? (gamelog.total || 0).toFixed(1)
       : player.getIn(['points', `${constants.season.week}`, 'total'], 0).toFixed(1)
 
     return (
