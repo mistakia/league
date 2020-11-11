@@ -2,7 +2,7 @@ export { scoreboardActions, getScoreboardActions } from './actions'
 export { scoreboardSagas } from './sagas'
 export {
   getScoreboard,
-  getStatsByPlayerId,
+  getScoreboardGamelogByPlayerId,
   getScoreboardByTeamId,
   getPlaysByMatchupId,
   getScoreboardRosterByTeamId,

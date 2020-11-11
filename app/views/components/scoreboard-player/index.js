@@ -2,15 +2,15 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { getPlayerById } from '@core/players'
-import { getStatsByPlayerId, getScoreboard } from '@core/scoreboard'
+import { getScoreboardGamelogByPlayerId, getScoreboard } from '@core/scoreboard'
 
 import ScoreboardPlayer from './scoreboard-player'
 
 const mapStateToProps = createSelector(
   getPlayerById,
-  getStatsByPlayerId,
+  getScoreboardGamelogByPlayerId,
   getScoreboard,
-  (player, stats, scoreboard) => ({ player, stats, week: scoreboard.get('week') })
+  (player, gamelog, scoreboard) => ({ player, gamelog, week: scoreboard.get('week') })
 )
 
 export default connect(
