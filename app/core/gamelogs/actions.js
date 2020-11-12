@@ -1,25 +1,25 @@
 export const gamelogsActions = {
-  GET_GAMELOGS_FAILED: 'GET_GAMELOGS_FAILED',
-  GET_GAMELOGS_PENDING: 'GET_GAMELOGS_PENDING',
-  GET_GAMELOGS_FULFILLED: 'GET_GAMELOGS_FULFILLED',
+  GET_PLAYER_GAMELOGS_FAILED: 'GET_PLAYER_GAMELOGS_FAILED',
+  GET_PLAYER_GAMELOGS_PENDING: 'GET_PLAYER_GAMELOGS_PENDING',
+  GET_PLAYER_GAMELOGS_FULFILLED: 'GET_PLAYER_GAMELOGS_FULFILLED',
 
-  getGamelogsFailed: (opts, error) => ({
-    type: gamelogsActions.GET_GAMELOGS_FAILED,
+  getPlayerGamelogsFailed: (opts, error) => ({
+    type: gamelogsActions.GET_PLAYER_GAMELOGS_FAILED,
     payload: {
       opts,
       error
     }
   }),
 
-  getGamelogsPending: opts => ({
-    type: gamelogsActions.GET_GAMELOGS_PENDING,
+  getPlayerGamelogsPending: opts => ({
+    type: gamelogsActions.GET_PLAYER_GAMELOGS_PENDING,
     payload: {
       opts
     }
   }),
 
-  getGamelogsFulfilled: (opts, data) => ({
-    type: gamelogsActions.GET_GAMELOGS_FULFILLED,
+  getPlayerGamelogsFulfilled: (opts, data) => ({
+    type: gamelogsActions.GET_PLAYER_GAMELOGS_FULFILLED,
     payload: {
       opts,
       data
@@ -27,8 +27,8 @@ export const gamelogsActions = {
   })
 }
 
-export const getGamelogsActions = {
-  failed: gamelogsActions.getGamelogsFailed,
-  pending: gamelogsActions.getGamelogsPending,
-  fulfilled: gamelogsActions.getGamelogsFulfilled
+export const getPlayerGamelogsActions = {
+  failed: gamelogsActions.getPlayerGamelogsFailed,
+  pending: gamelogsActions.getPlayerGamelogsPending,
+  fulfilled: gamelogsActions.getPlayerGamelogsFulfilled
 }

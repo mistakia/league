@@ -163,7 +163,7 @@ export const api = {
     const url = `${BASE_URL}/sources/${data.sourceId}`
     return { url, ...PUT(data) }
   },
-  getGamelogs () {
+  getPlayerGamelogs () {
     const url = `${BASE_URL}/stats/gamelogs`
     return { url }
   },

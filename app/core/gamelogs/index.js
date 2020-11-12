@@ -1,7 +1,7 @@
-export { gamelogsActions, getGamelogsActions } from './actions'
+export { gamelogsActions, getPlayerGamelogsActions } from './actions'
 export { gamelogSagas } from './sagas'
 export { gamelogsReducer } from './reducer'
 export {
-  getGamelogs,
+  getPlayerGamelogs,
   getGamelogByPlayerId
 } from './selectors'
