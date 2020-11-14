@@ -45,9 +45,9 @@ export function * calculateStats () {
 export function * calculateTeamStats () {
   const { teamStats } = yield select(getStats)
   const worker = new Worker()
-  const result = yield call(worker.calculateTeam, teamStats.toJS())
+  const result = yield call(worker.calculateTeamPercentiles, teamStats.toJS())
   worker.terminate()
-  yield put(statActions.setTeamStats(result))
+  yield put(statActions.setTeamStatsPercentiles(result))
 }
 
 export function * loadStats () {

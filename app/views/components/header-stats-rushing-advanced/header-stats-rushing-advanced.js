@@ -5,9 +5,9 @@ const HeaderStatsRushingAdvanced = () => (
   <div className='player__row-group'>
     <div className='player__row-group-head'>Advanced</div>
     <div className='player__row-group-body'>
-      <PlayerHeader className='player__row-metric' label='FUM%' value='stats._fumlpra' />
-      <PlayerHeader className='player__row-metric' label='POS%' value='stats.posra_pra' />
-      <PlayerHeader className='player__row-metric' label='SUCC%' value='stats.rasucc_pra' />
+      <PlayerHeader className='table__cell metric' label='FUM%' value='stats._fumlpra' />
+      <PlayerHeader className='table__cell metric' label='POS%' value='stats.posra_pra' />
+      <PlayerHeader className='table__cell metric' label='SUCC%' value='stats.rasucc_pra' />
     </div>
   </div>
 )

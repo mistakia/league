@@ -16,8 +16,8 @@ const initialState = new Record({
   days: new List(constants.days),
   quarters: new List(constants.quarters),
   downs: new List(constants.downs),
-  overallPlays: new Record(),
-  overallTeams: new Record()
+  playsPercentiles: new Record(),
+  teamStatsPercentiles: new Record()
 })
 
 export function statsReducer (state = initialState(), { payload, type }) {
@@ -32,10 +32,10 @@ export function statsReducer (state = initialState(), { payload, type }) {
       return state.merge({ isPending: false })
 
     case playerActions.SET_PLAYER_STATS:
-      return state.merge({ isPending: false, overallPlays: payload.overall })
+      return state.merge({ isPending: false, playsPercentiles: payload.percentiles })
 
-    case statActions.SET_TEAM_STATS:
-      return state.merge({ overallTeams: payload.overall })
+    case statActions.SET_TEAM_STATS_PERCENTILES:
+      return state.merge({ teamStatsPercentiles: payload.percentiles })
 
     case statActions.FILTER_STATS:
       return state.merge({ [payload.type]: new List(payload.value) })

@@ -15,6 +15,7 @@ import createDefaultLeague from './create-default-league'
 import getOptimizerPositionConstraints from './get-optimizer-position-constraints'
 import isOnReleaseWaivers from './is-on-release-waivers'
 import fixTeam from './fix-team'
+import calculatePercentiles from './calculate-percentiles'
 
 const groupBy = (xs, key) => xs.reduce((rv, x) => {
   (rv[x[key]] = rv[x[key]] || []).push(x)
@@ -67,5 +68,6 @@ export {
   nth,
   toStringArray,
   fixTeam,
-  toPercent
+  toPercent,
+  calculatePercentiles
 }

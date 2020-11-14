@@ -52,5 +52,6 @@ export {
   fetchWaivers,
   getWaiverReport,
   fetchScoreboard,
-  getPlayerGamelogs
+  fetchPlayerGamelogs,
+  fetchTeamGamelogs
 } from './sagas'

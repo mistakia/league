@@ -44,11 +44,11 @@ export const playerActions = {
 
   SET_PLAYERS_VIEW: 'SET_PLAYERS_VIEW',
 
-  setStats: ({ players, overall }) => ({
+  setStats: ({ players, percentiles }) => ({
     type: playerActions.SET_PLAYER_STATS,
     payload: {
       players,
-      overall
+      percentiles
     }
   }),
 
