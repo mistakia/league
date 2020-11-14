@@ -23,7 +23,7 @@ const week = argv.week || (Math.max(moment().day() === 2
 
 const year = constants.season.year
 
-const upsert = async ({ player, stats, opp, pos }) => {
+const upsert = async ({ player, stats, opp, pos, tm }) => {
   const exists = await db('gamelogs').where({
     player,
     week,
@@ -39,6 +39,7 @@ const upsert = async ({ player, stats, opp, pos }) => {
 
   if (exists.length) {
     await db('gamelogs').update({
+      tm,
       ...cleanedStats
     }).where({
       player,
@@ -47,6 +48,7 @@ const upsert = async ({ player, stats, opp, pos }) => {
     })
   } else {
     await db('gamelogs').insert({
+      tm,
       player,
       pos,
       opp,
@@ -124,6 +126,7 @@ const run = async () => {
     await upsert({
       player: player.player,
       pos: player.pos,
+      tm: constants.nflTeamIds[playStat.teamid],
       opp,
       stats
     })
@@ -157,6 +160,7 @@ const run = async () => {
     await upsert({
       player: team,
       pos: 'DST',
+      tm: team,
       opp: fixTeam(opp),
       stats
     })

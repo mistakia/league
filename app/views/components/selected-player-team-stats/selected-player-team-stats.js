@@ -1,6 +1,6 @@
 import React from 'react'
 
-import PlayerRowMetric from '@components/player-row-metric'
+import PercentileMetric from '@components/percentile-metric'
 
 export default class SelectedPlayerTeamStats extends React.Component {
   render = () => {
@@ -10,34 +10,34 @@ export default class SelectedPlayerTeamStats extends React.Component {
     const sorted = teamStats.sort((a, b) => b.seas - a.seas)
     const items = []
     for (const [index, year] of sorted.entries()) {
-      const overall = stats.overallTeams[year.seas] || {}
+      const percentiles = stats.teamStatsPercentiles[year.seas] || {}
       items.push(
         <div key={index} className='player__selected-row'>
           <div className='row__name'>
             {year.seas}
           </div>
-          <PlayerRowMetric className='row__single-metric' stats={year} overall={overall} type='drv' />
-          <PlayerRowMetric className='row__single-metric' stats={year} overall={overall} type='snpo' />
+          <PercentileMetric className='row__single-metric' stats={year} percentiles={percentiles} type='drv' />
+          <PercentileMetric className='row__single-metric' stats={year} percentiles={percentiles} type='snpo' />
           <div className='row__group'>
             <div className='row__group-body'>
-              <PlayerRowMetric stats={year} overall={overall} type='pa' />
-              <PlayerRowMetric stats={year} overall={overall} type='py' />
-              <PlayerRowMetric stats={year} overall={overall} type='tdp' />
-              <PlayerRowMetric stats={year} overall={overall} type='pfd' />
-              <PlayerRowMetric stats={year} overall={overall} type='spp' />
-              <PlayerRowMetric stats={year} overall={overall} type='rzpa' />
-              <PlayerRowMetric stats={year} overall={overall} type='rzpy' />
+              <PercentileMetric stats={year} percentiles={percentiles} type='pa' />
+              <PercentileMetric stats={year} percentiles={percentiles} type='py' />
+              <PercentileMetric stats={year} percentiles={percentiles} type='tdp' />
+              <PercentileMetric stats={year} percentiles={percentiles} type='pfd' />
+              <PercentileMetric stats={year} percentiles={percentiles} type='spp' />
+              <PercentileMetric stats={year} percentiles={percentiles} type='rzpa' />
+              <PercentileMetric stats={year} percentiles={percentiles} type='rzpy' />
             </div>
           </div>
           <div className='row__group'>
             <div className='row__group-body'>
-              <PlayerRowMetric stats={year} overall={overall} type='ra' />
-              <PlayerRowMetric stats={year} overall={overall} type='ry' />
-              <PlayerRowMetric stats={year} overall={overall} type='tdr' />
-              <PlayerRowMetric stats={year} overall={overall} type='rfd' />
-              <PlayerRowMetric stats={year} overall={overall} type='srp' />
-              <PlayerRowMetric stats={year} overall={overall} type='rzra' />
-              <PlayerRowMetric stats={year} overall={overall} type='rzry' />
+              <PercentileMetric stats={year} percentiles={percentiles} type='ra' />
+              <PercentileMetric stats={year} percentiles={percentiles} type='ry' />
+              <PercentileMetric stats={year} percentiles={percentiles} type='tdr' />
+              <PercentileMetric stats={year} percentiles={percentiles} type='rfd' />
+              <PercentileMetric stats={year} percentiles={percentiles} type='srp' />
+              <PercentileMetric stats={year} percentiles={percentiles} type='rzra' />
+              <PercentileMetric stats={year} percentiles={percentiles} type='rzry' />
             </div>
           </div>
         </div>
@@ -58,25 +58,25 @@ export default class SelectedPlayerTeamStats extends React.Component {
           <div className='row__group'>
             <div className='row__group-head'>Passing Volume</div>
             <div className='row__group-body'>
-              <div className='player__row-metric'>ATT</div>
-              <div className='player__row-metric'>YDS</div>
-              <div className='player__row-metric'>TD</div>
-              <div className='player__row-metric'>FD</div>
-              <div className='player__row-metric'>SUCC</div>
-              <div className='player__row-metric'>RZATT</div>
-              <div className='player__row-metric'>RZYDS</div>
+              <div className='table__cell metric'>ATT</div>
+              <div className='table__cell metric'>YDS</div>
+              <div className='table__cell metric'>TD</div>
+              <div className='table__cell metric'>FD</div>
+              <div className='table__cell metric'>SUCC</div>
+              <div className='table__cell metric'>RZATT</div>
+              <div className='table__cell metric'>RZYDS</div>
             </div>
           </div>
           <div className='row__group'>
             <div className='row__group-head'>Rushing Volume</div>
             <div className='row__group-body'>
-              <div className='player__row-metric'>ATT</div>
-              <div className='player__row-metric'>YDS</div>
-              <div className='player__row-metric'>TD</div>
-              <div className='player__row-metric'>FD</div>
-              <div className='player__row-metric'>SUCC</div>
-              <div className='player__row-metric'>RZATT</div>
-              <div className='player__row-metric'>RZYDS</div>
+              <div className='table__cell metric'>ATT</div>
+              <div className='table__cell metric'>YDS</div>
+              <div className='table__cell metric'>TD</div>
+              <div className='table__cell metric'>FD</div>
+              <div className='table__cell metric'>SUCC</div>
+              <div className='table__cell metric'>RZATT</div>
+              <div className='table__cell metric'>RZYDS</div>
             </div>
           </div>
         </div>

@@ -5,8 +5,8 @@ const HeaderStatsRushingShare = () => (
   <div className='player__row-group'>
     <div className='player__row-group-head'>Team Share</div>
     <div className='player__row-group-body'>
-      <PlayerHeader className='player__row-metric' label='ATT%' value='stats._stra' />
-      <PlayerHeader className='player__row-metric' label='YDS%' value='stats._stry' />
+      <PlayerHeader className='table__cell metric' label='ATT%' value='stats._stra' />
+      <PlayerHeader className='table__cell metric' label='YDS%' value='stats._stry' />
     </div>
   </div>
 )

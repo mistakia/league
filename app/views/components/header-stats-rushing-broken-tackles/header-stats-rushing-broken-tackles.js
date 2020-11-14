@@ -5,8 +5,8 @@ const HeaderStatsRushingBrokenTackles = () => (
   <div className='player__row-group'>
     <div className='player__row-group-head'>Broken Tackles</div>
     <div className='player__row-group-body'>
-      <PlayerHeader className='player__row-metric' label='BT' value='stats.mbt' />
-      <PlayerHeader className='player__row-metric' label='BT/T' value='stats.mbt_pt' />
+      <PlayerHeader className='table__cell metric' label='BT' value='stats.mbt' />
+      <PlayerHeader className='table__cell metric' label='BT/T' value='stats.mbt_pt' />
     </div>
   </div>
 )

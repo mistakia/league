@@ -5,10 +5,10 @@ const HeaderStatsPassingBasic = () => (
   <div className='player__row-group'>
     <div className='player__row-group-head'>Passing</div>
     <div className='player__row-group-body'>
-      <PlayerHeader className='player__row-metric' label='YDS' value='stats.py' />
-      <PlayerHeader className='player__row-metric' label='TD' value='stats.tdp' />
-      <PlayerHeader className='player__row-metric' label='INT' value='stats.ints' />
-      <PlayerHeader className='player__row-metric' label='DAY' value='stats.drppy' />
+      <PlayerHeader className='table__cell metric' label='YDS' value='stats.py' />
+      <PlayerHeader className='table__cell metric' label='TD' value='stats.tdp' />
+      <PlayerHeader className='table__cell metric' label='INT' value='stats.ints' />
+      <PlayerHeader className='table__cell metric' label='DAY' value='stats.drppy' />
     </div>
   </div>
 )

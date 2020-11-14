@@ -2,7 +2,7 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { calculatePoints } from '@common'
-import { getPlayerGamelogs } from '@core/gamelogs'
+import { getPlayerGamelogs, getGamelogs } from '@core/gamelogs'
 import { getSelectedPlayer, getSelectedPlayerGame } from '@core/players'
 import { getCurrentLeague } from '@core/leagues'
 
@@ -13,7 +13,8 @@ const mapStateToProps = createSelector(
   getSelectedPlayerGame,
   getPlayerGamelogs,
   getCurrentLeague,
-  (player, game, logs, league) => {
+  getGamelogs,
+  (player, game, logs, league, gamelogState) => {
     if (!game) {
       return {}
     }
@@ -29,9 +30,32 @@ const mapStateToProps = createSelector(
         }
       })
 
+    const defense = gamelogState.getIn(['playersAnalysis', 'defense'], {})
+    const dPos = defense[player.pos]
+
+    const defenseStats = []
+    if (dPos) {
+      const types = { total: 'Total', adj: 'Adjusted', avg: 'Average' }
+      for (const [type, title] of Object.entries(types)) {
+        const stats = dPos.stats[type].find(d => d.opp === opp)
+        const points = calculatePoints({ stats, position: player.pos, league })
+        defenseStats.push({
+          type,
+          stats,
+          points: points.total,
+          title
+        })
+      }
+    }
+
+    const individual = gamelogState.getIn(['playersAnalysis', 'individual'], {})
+
     return {
       player,
       gamelogs,
+      defenseStats,
+      playerPercentiles: individual ? individual[player.pos] : {},
+      defensePercentiles: dPos ? dPos.percentiles : {},
       opp
     }
   }

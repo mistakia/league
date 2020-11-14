@@ -1,5 +1,5 @@
 import * as constants from './constants'
-import percentile from 'percentile'
+import calculatePercentiles from './calculate-percentiles'
 
 const round = (value, precision) => {
   var multiplier = Math.pow(10, precision || 0)
@@ -12,13 +12,6 @@ const calculateStatsFromPlays = ({ plays, qualifiers }) => {
   const players = {}
   const teams = {}
   const playerToTeam = {}
-  const overall = {}
-  for (const stat of constants.fullStats) {
-    overall[stat] = {
-      min: Infinity,
-      max: 0
-    }
-  }
 
   const addTeamStat = (team, stat, value) => {
     value = parseInt(value, 10)
@@ -204,38 +197,15 @@ const calculateStatsFromPlays = ({ plays, qualifiers }) => {
 
     // stats.fd_pct
     // stats.succ_psnp
-    for (const stat in stats) {
-      const qualifier = qualifiers[stat]
-      const value = stats[stat]
-      if (qualifier && stats[qualifier.type] < qualifier.value) continue
-      if (value < overall[stat].min) overall[stat].min = value
-      if (value > overall[stat].max) overall[stat].max = value
-    }
   }
 
-  for (const stat in constants.createFullStats()) {
-    const qualifier = qualifiers[stat]
-    const values = Object.values(players).map(item => {
-      if (qualifier) {
-        return item[qualifier.type] >= qualifier.value ? item[stat] : 0
-      } else {
-        return item[stat]
-      }
-    }).filter(item => !!item)
+  const percentiles = calculatePercentiles({
+    items: Object.values(players),
+    stats: constants.fullStats,
+    qualifiers
+  })
 
-    const result = percentile([50, 75, 90, 95, 98, 99], values)
-    overall[stat] = {
-      p50: result[0],
-      p75: result[1],
-      p90: result[2],
-      p95: result[3],
-      p98: result[4],
-      p99: result[5],
-      ...overall[stat]
-    }
-  }
-
-  return { players, overall }
+  return { players, percentiles }
 }
 
 export default calculateStatsFromPlays

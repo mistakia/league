@@ -1,6 +1,6 @@
 import React from 'react'
 
-import PlayerRowMetric from '@components/player-row-metric'
+import PercentileMetric from '@components/percentile-metric'
 
 export default class SelectedPlayerTeamPositionSplits extends React.Component {
   render = () => {
@@ -10,7 +10,7 @@ export default class SelectedPlayerTeamPositionSplits extends React.Component {
     const sorted = teamStats.sort((a, b) => b.seas - a.seas)
     const items = []
     for (const [index, year] of sorted.entries()) {
-      const overall = stats.overallTeams[year.seas] || {}
+      const percentiles = stats.teamStatsPercentiles[year.seas] || {}
       items.push(
         <div key={index} className='player__selected-row'>
           <div className='row__name'>
@@ -18,32 +18,32 @@ export default class SelectedPlayerTeamPositionSplits extends React.Component {
           </div>
           <div className='row__group'>
             <div className='row__group-body'>
-              <PlayerRowMetric stats={year} overall={overall} type='rba' />
-              <PlayerRowMetric stats={year} overall={overall} type='rby' />
+              <PercentileMetric stats={year} percentiles={percentiles} type='rba' />
+              <PercentileMetric stats={year} percentiles={percentiles} type='rby' />
             </div>
           </div>
           <div className='row__group'>
             <div className='row__group-body'>
-              <PlayerRowMetric stats={year} overall={overall} type='wr1a' />
-              <PlayerRowMetric stats={year} overall={overall} type='wr1y' />
+              <PercentileMetric stats={year} percentiles={percentiles} type='wr1a' />
+              <PercentileMetric stats={year} percentiles={percentiles} type='wr1y' />
             </div>
           </div>
           <div className='row__group'>
             <div className='row__group-body'>
-              <PlayerRowMetric stats={year} overall={overall} type='wr3a' />
-              <PlayerRowMetric stats={year} overall={overall} type='wr3y' />
+              <PercentileMetric stats={year} percentiles={percentiles} type='wr3a' />
+              <PercentileMetric stats={year} percentiles={percentiles} type='wr3y' />
             </div>
           </div>
           <div className='row__group'>
             <div className='row__group-body'>
-              <PlayerRowMetric stats={year} overall={overall} type='tea' />
-              <PlayerRowMetric stats={year} overall={overall} type='tey' />
+              <PercentileMetric stats={year} percentiles={percentiles} type='tea' />
+              <PercentileMetric stats={year} percentiles={percentiles} type='tey' />
             </div>
           </div>
           <div className='row__group'>
             <div className='row__group-body'>
-              <PlayerRowMetric stats={year} overall={overall} type='qba' />
-              <PlayerRowMetric stats={year} overall={overall} type='qby' />
+              <PercentileMetric stats={year} percentiles={percentiles} type='qba' />
+              <PercentileMetric stats={year} percentiles={percentiles} type='qby' />
             </div>
           </div>
         </div>
@@ -62,36 +62,36 @@ export default class SelectedPlayerTeamPositionSplits extends React.Component {
           <div className='row__group'>
             <div className='row__group-head'>RB Receiving</div>
             <div className='row__group-body'>
-              <div className='player__row-metric'>TRG</div>
-              <div className='player__row-metric'>YDS</div>
+              <div className='table__cell metric'>TRG</div>
+              <div className='table__cell metric'>YDS</div>
             </div>
           </div>
           <div className='row__group'>
             <div className='row__group-head'>WR1/2 Receiving</div>
             <div className='row__group-body'>
-              <div className='player__row-metric'>TRG</div>
-              <div className='player__row-metric'>YDS</div>
+              <div className='table__cell metric'>TRG</div>
+              <div className='table__cell metric'>YDS</div>
             </div>
           </div>
           <div className='row__group'>
             <div className='row__group-head'>WR3+ Receiving</div>
             <div className='row__group-body'>
-              <div className='player__row-metric'>TRG</div>
-              <div className='player__row-metric'>YDS</div>
+              <div className='table__cell metric'>TRG</div>
+              <div className='table__cell metric'>YDS</div>
             </div>
           </div>
           <div className='row__group'>
             <div className='row__group-head'>TE Receiving</div>
             <div className='row__group-body'>
-              <div className='player__row-metric'>TRG</div>
-              <div className='player__row-metric'>YDS</div>
+              <div className='table__cell metric'>TRG</div>
+              <div className='table__cell metric'>YDS</div>
             </div>
           </div>
           <div className='row__group'>
             <div className='row__group-head'>QB Rushing</div>
             <div className='row__group-body'>
-              <div className='player__row-metric'>ATT</div>
-              <div className='player__row-metric'>YDS</div>
+              <div className='table__cell metric'>ATT</div>
+              <div className='table__cell metric'>YDS</div>
             </div>
           </div>
         </div>

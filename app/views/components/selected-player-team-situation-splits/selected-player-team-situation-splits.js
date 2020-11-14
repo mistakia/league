@@ -1,6 +1,6 @@
 import React from 'react'
 
-import PlayerRowMetric from '@components/player-row-metric'
+import PercentileMetric from '@components/percentile-metric'
 
 export default class SelectedPlayerTeamSituationSplits extends React.Component {
   render = () => {
@@ -10,42 +10,42 @@ export default class SelectedPlayerTeamSituationSplits extends React.Component {
     const sorted = teamStats.sort((a, b) => b.seas - a.seas)
     const items = []
     for (const [index, year] of sorted.entries()) {
-      const overall = stats.overallTeams[year.seas] || {}
+      const percentiles = stats.teamStatsPercentiles[year.seas] || {}
       items.push(
         <div key={index} className='player__selected-row'>
           <div className='row__name'>
             {year.seas}
           </div>
-          <PlayerRowMetric className='row__single-metric' stats={year} overall={overall} type='q1p' />
-          <PlayerRowMetric className='row__single-metric' stats={year} overall={overall} type='q2p' />
-          <PlayerRowMetric className='row__single-metric' stats={year} overall={overall} type='q3p' />
-          <PlayerRowMetric className='row__single-metric' stats={year} overall={overall} type='q4p' />
+          <PercentileMetric className='row__single-metric' stats={year} percentiles={percentiles} type='q1p' />
+          <PercentileMetric className='row__single-metric' stats={year} percentiles={percentiles} type='q2p' />
+          <PercentileMetric className='row__single-metric' stats={year} percentiles={percentiles} type='q3p' />
+          <PercentileMetric className='row__single-metric' stats={year} percentiles={percentiles} type='q4p' />
           <div className='row__group'>
             <div className='row__group-body'>
-              <PlayerRowMetric stats={year} overall={overall} type='q1ra' />
-              <PlayerRowMetric stats={year} overall={overall} type='q1pa' />
-              <PlayerRowMetric stats={year} overall={overall} type='q1ry' />
-              <PlayerRowMetric stats={year} overall={overall} type='q1py' />
+              <PercentileMetric stats={year} percentiles={percentiles} type='q1ra' />
+              <PercentileMetric stats={year} percentiles={percentiles} type='q1pa' />
+              <PercentileMetric stats={year} percentiles={percentiles} type='q1ry' />
+              <PercentileMetric stats={year} percentiles={percentiles} type='q1py' />
             </div>
           </div>
           <div className='row__group'>
             <div className='row__group-body'>
-              <PlayerRowMetric stats={year} overall={overall} type='lcra' />
-              <PlayerRowMetric stats={year} overall={overall} type='lcpa' />
-              <PlayerRowMetric stats={year} overall={overall} type='lcry' />
-              <PlayerRowMetric stats={year} overall={overall} type='lcpy' />
+              <PercentileMetric stats={year} percentiles={percentiles} type='lcra' />
+              <PercentileMetric stats={year} percentiles={percentiles} type='lcpa' />
+              <PercentileMetric stats={year} percentiles={percentiles} type='lcry' />
+              <PercentileMetric stats={year} percentiles={percentiles} type='lcpy' />
             </div>
           </div>
           <div className='row__group'>
             <div className='row__group-body'>
-              <PlayerRowMetric stats={year} overall={overall} type='pap' />
-              <PlayerRowMetric stats={year} overall={overall} type='papy' />
+              <PercentileMetric stats={year} percentiles={percentiles} type='pap' />
+              <PercentileMetric stats={year} percentiles={percentiles} type='papy' />
             </div>
           </div>
           <div className='row__group'>
             <div className='row__group-body'>
-              <PlayerRowMetric stats={year} overall={overall} type='sga' />
-              <PlayerRowMetric stats={year} overall={overall} type='sgy' />
+              <PercentileMetric stats={year} percentiles={percentiles} type='sga' />
+              <PercentileMetric stats={year} percentiles={percentiles} type='sgy' />
             </div>
           </div>
         </div>
@@ -68,33 +68,33 @@ export default class SelectedPlayerTeamSituationSplits extends React.Component {
           <div className='row__group'>
             <div className='row__group-head'>Quarter 1 Splits</div>
             <div className='row__group-body'>
-              <div className='player__row-metric'>RA</div>
-              <div className='player__row-metric'>PA</div>
-              <div className='player__row-metric'>RY</div>
-              <div className='player__row-metric'>PY</div>
+              <div className='table__cell metric'>RA</div>
+              <div className='table__cell metric'>PA</div>
+              <div className='table__cell metric'>RY</div>
+              <div className='table__cell metric'>PY</div>
             </div>
           </div>
           <div className='row__group'>
             <div className='row__group-head'>Late/Close Splits</div>
             <div className='row__group-body'>
-              <div className='player__row-metric'>RA</div>
-              <div className='player__row-metric'>PA</div>
-              <div className='player__row-metric'>RY</div>
-              <div className='player__row-metric'>PY</div>
+              <div className='table__cell metric'>RA</div>
+              <div className='table__cell metric'>PA</div>
+              <div className='table__cell metric'>RY</div>
+              <div className='table__cell metric'>PY</div>
             </div>
           </div>
           <div className='row__group'>
             <div className='row__group-head'>Play Action</div>
             <div className='row__group-body'>
-              <div className='player__row-metric'>ATT</div>
-              <div className='player__row-metric'>YDS</div>
+              <div className='table__cell metric'>ATT</div>
+              <div className='table__cell metric'>YDS</div>
             </div>
           </div>
           <div className='row__group'>
             <div className='row__group-head'>Shotgun</div>
             <div className='row__group-body'>
-              <div className='player__row-metric'>ATT</div>
-              <div className='player__row-metric'>YDS</div>
+              <div className='table__cell metric'>ATT</div>
+              <div className='table__cell metric'>YDS</div>
             </div>
           </div>
         </div>

@@ -128,9 +128,9 @@ export default class PlayersPage extends React.Component {
       <div className='player__row-group'>
         <div className='player__row-group-head'>Passing</div>
         <div className='player__row-group-body'>
-          <PlayerHeader className='player__row-metric' label='YDS' value={`projection.${week}.py`} />
-          <PlayerHeader className='player__row-metric' label='TD' value={`projection.${week}.tdp`} />
-          <PlayerHeader className='player__row-metric' label='INT' value={`projection.${week}.ints`} />
+          <PlayerHeader className='table__cell metric' label='YDS' value={`projection.${week}.py`} />
+          <PlayerHeader className='table__cell metric' label='TD' value={`projection.${week}.tdp`} />
+          <PlayerHeader className='table__cell metric' label='INT' value={`projection.${week}.ints`} />
         </div>
       </div>
     )
@@ -139,10 +139,10 @@ export default class PlayersPage extends React.Component {
       <div className='player__row-group'>
         <div className='player__row-group-head'>Rushing</div>
         <div className='player__row-group-body'>
-          <PlayerHeader className='player__row-metric' label='CAR' value={`projection.${week}.ra`} />
-          <PlayerHeader className='player__row-metric' label='YDS' value={`projection.${week}.ry`} />
-          <PlayerHeader className='player__row-metric' label='TD' value={`projection.${week}.tdr`} />
-          <PlayerHeader className='player__row-metric' label='FUM' value={`projection.${week}.fuml`} />
+          <PlayerHeader className='table__cell metric' label='CAR' value={`projection.${week}.ra`} />
+          <PlayerHeader className='table__cell metric' label='YDS' value={`projection.${week}.ry`} />
+          <PlayerHeader className='table__cell metric' label='TD' value={`projection.${week}.tdr`} />
+          <PlayerHeader className='table__cell metric' label='FUM' value={`projection.${week}.fuml`} />
         </div>
       </div>
     )
@@ -151,10 +151,10 @@ export default class PlayersPage extends React.Component {
       <div className='player__row-group'>
         <div className='player__row-group-head'>Receiving</div>
         <div className='player__row-group-body'>
-          <PlayerHeader className='player__row-metric' label='TAR' value={`projection.${week}.trg`} />
-          <PlayerHeader className='player__row-metric' label='REC' value={`projection.${week}.rec`} />
-          <PlayerHeader className='player__row-metric' label='YDS' value={`projection.${week}.recy`} />
-          <PlayerHeader className='player__row-metric' label='TD' value={`projection.${week}.tdrec`} />
+          <PlayerHeader className='table__cell metric' label='TAR' value={`projection.${week}.trg`} />
+          <PlayerHeader className='table__cell metric' label='REC' value={`projection.${week}.rec`} />
+          <PlayerHeader className='table__cell metric' label='YDS' value={`projection.${week}.recy`} />
+          <PlayerHeader className='table__cell metric' label='TD' value={`projection.${week}.tdrec`} />
         </div>
       </div>
     )
@@ -164,17 +164,17 @@ export default class PlayersPage extends React.Component {
         <div className='player__row-group-body'>
           {!constants.season.isRegularSeason &&
             <PlayerHeader
-              className='player__row-metric'
+              className='table__cell metric'
               label='Salary'
               value={`values.${week}.${vbaseline}`}
             />}
           <PlayerHeader
-            className='player__row-metric'
+            className='table__cell metric'
             label='Value'
             value={`vorp.${week}.${vbaseline}`}
           />
           <PlayerHeader
-            className='player__row-metric'
+            className='table__cell metric'
             label='Proj'
             value={`points.${week}.total`}
           />
