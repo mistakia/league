@@ -164,7 +164,11 @@ export const api = {
     return { url, ...PUT(data) }
   },
   getPlayerGamelogs () {
-    const url = `${BASE_URL}/stats/gamelogs`
+    const url = `${BASE_URL}/stats/gamelogs/players`
+    return { url }
+  },
+  getTeamGamelogs () {
+    const url = `${BASE_URL}/stats/gamelogs/teams`
     return { url }
   },
   getProjections () {

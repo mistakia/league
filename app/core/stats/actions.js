@@ -10,18 +10,16 @@ export const statActions = {
   GET_TEAM_STATS_PENDING: 'GET_TEAM_STATS_PENDING',
   GET_TEAM_STATS_FULFILLED: 'GET_TEAM_STATS_FULFILLED',
 
-  SET_TEAM_STATS: 'SET_TEAM_STATS',
-
-  GET_TEAM_STATS: 'GET_TEAM_STATS',
+  SET_TEAM_STATS_PERCENTILES: 'SET_TEAM_STATS_PERCENTILES',
 
   FILTER_STATS: 'FILTER_STATS',
 
   UPDATE_QUALIFIER: 'UPDATE_QUALIFIER',
 
-  setTeamStats: ({ overall }) => ({
-    type: statActions.SET_TEAM_STATS,
+  setTeamStatsPercentiles: (percentiles) => ({
+    type: statActions.SET_TEAM_STATS_PERCENTILES,
     payload: {
-      overall
+      percentiles
     }
   }),
 

@@ -1994,6 +1994,7 @@ DROP TABLE IF EXISTS `gamelogs`;
 
 CREATE TABLE `gamelogs` (
   `player` varchar(7) NOT NULL,
+  `tm` varchar(3) NOT NULL,
   `opp` varchar(3) NOT NULL,
   `pos` varchar(3) NOT NULL,
   `week` tinyint(2) NOT NULL,

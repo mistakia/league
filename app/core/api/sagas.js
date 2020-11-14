@@ -26,7 +26,8 @@ import {
   postReleaseActions
 } from '@core/rosters'
 import {
-  getPlayerGamelogsActions
+  getPlayerGamelogsActions,
+  getTeamGamelogsActions
 } from '@core/gamelogs'
 import {
   playersRequestActions,
@@ -148,7 +149,8 @@ export const deleteTeams = fetch.bind(null, api.deleteTeams, deleteTeamsActions)
 export const getSources = fetch.bind(null, api.getSources, getSourcesActions)
 export const putSource = fetch.bind(null, api.putSource, putSourceActions)
 
-export const getPlayerGamelogs = fetch.bind(null, api.getPlayerGamelogs, getPlayerGamelogsActions)
+export const fetchPlayerGamelogs = fetch.bind(null, api.getPlayerGamelogs, getPlayerGamelogsActions)
+export const fetchTeamGamelogs = fetch.bind(null, api.getTeamGamelogs, getTeamGamelogsActions)
 
 export const getProjections = fetch.bind(null, api.getProjections, getProjectionsActions)
 export const putProjection = fetch.bind(null, api.putProjection, putProjectionActions)

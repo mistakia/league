@@ -1,87 +1,89 @@
 import React from 'react'
 
-const defenseStats = (stats) => (
+import PercentileMetric from '@components/percentile-metric'
+
+const defenseStats = (stats, percentiles = {}) => (
   <div className='row__group'>
     <div className='row__group-body'>
-      <div className='player__row-metric'>{stats.dpa ? (stats.dpa || 0).toFixed(1) : '-'}</div>
-      <div className='player__row-metric'>{stats.dya ? (stats.dya || 0).toFixed(1) : '-'}</div>
-      <div className='player__row-metric'>{stats.dsk ? (stats.dsk || 0).toFixed(1) : '-'}</div>
-      <div className='player__row-metric'>{stats.dint ? (stats.dint || 0).toFixed(1) : '-'}</div>
-      <div className='player__row-metric'>{stats.dff ? (stats.dff || 0).toFixed(1) : '-'}</div>
-      <div className='player__row-metric'>{stats.drf ? (stats.drf || 0).toFixed(1) : '-'}</div>
-      <div className='player__row-metric'>{stats.dtno ? (stats.dtno || 0).toFixed(1) : '-'}</div>
-      <div className='player__row-metric'>{stats.dfds ? (stats.dfds || 0).toFixed(1) : '-'}</div>
-      <div className='player__row-metric'>{stats.dblk ? (stats.dblk || 0).toFixed(1) : '-'}</div>
-      <div className='player__row-metric'>{stats.dsf ? (stats.dsf || 0).toFixed(1) : '-'}</div>
-      <div className='player__row-metric'>{stats.dtpr ? (stats.dtpr || 0).toFixed(1) : '-'}</div>
-      <div className='player__row-metric'>{stats.dtd ? (stats.dtd || 0).toFixed(1) : '-'}</div>
-      <div className='player__row-metric'>{stats.prtd ? (stats.prtd || 0).toFixed(1) : '-'}</div>
-      <div className='player__row-metric'>{stats.krtd ? (stats.krtd || 0).toFixed(1) : '-'}</div>
+      <PercentileMetric stats={stats} percentiles={percentiles} type='dpa' />
+      <PercentileMetric stats={stats} percentiles={percentiles} type='dya' />
+      <PercentileMetric stats={stats} percentiles={percentiles} type='dsk' />
+      <PercentileMetric stats={stats} percentiles={percentiles} type='dint' />
+      <PercentileMetric stats={stats} percentiles={percentiles} type='dff' />
+      <PercentileMetric stats={stats} percentiles={percentiles} type='drf' />
+      <PercentileMetric stats={stats} percentiles={percentiles} type='dtno' />
+      <PercentileMetric stats={stats} percentiles={percentiles} type='dfds' />
+      <PercentileMetric stats={stats} percentiles={percentiles} type='dblk' />
+      <PercentileMetric stats={stats} percentiles={percentiles} type='dsf' />
+      <PercentileMetric stats={stats} percentiles={percentiles} type='dtpr' />
+      <PercentileMetric stats={stats} percentiles={percentiles} type='dtd' />
+      <PercentileMetric stats={stats} percentiles={percentiles} type='prtd' />
+      <PercentileMetric stats={stats} percentiles={percentiles} type='krtd' />
     </div>
   </div>
 )
 
-const kickerStats = (stats) => (
+const kickerStats = (stats, percentiles = {}) => (
   <div className='row__group'>
     <div className='row__group-body'>
-      <div className='player__row-metric'>{stats.xpm ? (stats.xpm || 0).toFixed(1) : '-'}</div>
-      <div className='player__row-metric'>{stats.fgm ? (stats.fgm || 0).toFixed(1) : '-'}</div>
-      <div className='player__row-metric'>{stats.fg19 ? (stats.fg19 || 0).toFixed(1) : '-'}</div>
-      <div className='player__row-metric'>{stats.fg29 ? (stats.fg29 || 0).toFixed(1) : '-'}</div>
-      <div className='player__row-metric'>{stats.fg39 ? (stats.fg39 || 0).toFixed(1) : '-'}</div>
-      <div className='player__row-metric'>{stats.fg49 ? (stats.fg49 || 0).toFixed(1) : '-'}</div>
-      <div className='player__row-metric'>{stats.fg50 ? (stats.fg50 || 0).toFixed(1) : '-'}</div>
+      <PercentileMetric stats={stats} percentiles={percentiles} type='xpm' />
+      <PercentileMetric stats={stats} percentiles={percentiles} type='fgm' />
+      <PercentileMetric stats={stats} percentiles={percentiles} type='fg19' />
+      <PercentileMetric stats={stats} percentiles={percentiles} type='fg29' />
+      <PercentileMetric stats={stats} percentiles={percentiles} type='fg39' />
+      <PercentileMetric stats={stats} percentiles={percentiles} type='fg49' />
+      <PercentileMetric stats={stats} percentiles={percentiles} type='fg50' />
     </div>
   </div>
 )
 
-const playerStats = (stats) => ([
+const playerStats = (stats, percentiles = {}) => ([
   (
     <div className='row__group' key={0}>
       <div className='row__group-body'>
-        <div className='player__row-metric'>{stats.py ? (stats.py || 0).toFixed(1) : '-'}</div>
-        <div className='player__row-metric'>{stats.tdp ? (stats.tdp || 0).toFixed(1) : '-'}</div>
-        <div className='player__row-metric'>{stats.ints ? (stats.ints || 0).toFixed(1) : '-'}</div>
+        <PercentileMetric stats={stats} percentiles={percentiles} type='py' />
+        <PercentileMetric stats={stats} percentiles={percentiles} type='tdp' />
+        <PercentileMetric stats={stats} percentiles={percentiles} type='ints' />
       </div>
     </div>
   ), (
     <div className='row__group' key={1}>
       <div className='row__group-body'>
-        <div className='player__row-metric'>{stats.ra ? (stats.ra || 0).toFixed(1) : '-'}</div>
-        <div className='player__row-metric'>{stats.ry ? (stats.ry || 0).toFixed(1) : '-'}</div>
-        <div className='player__row-metric'>{stats.tdr ? (stats.tdr || 0).toFixed(1) : '-'}</div>
-        <div className='player__row-metric'>{stats.fuml ? (stats.fuml || 0).toFixed(1) : '-'}</div>
+        <PercentileMetric stats={stats} percentiles={percentiles} type='ra' />
+        <PercentileMetric stats={stats} percentiles={percentiles} type='ry' />
+        <PercentileMetric stats={stats} percentiles={percentiles} type='tdr' />
+        <PercentileMetric stats={stats} percentiles={percentiles} type='fuml' />
       </div>
     </div>
   ), (
     <div className='row__group' key={2}>
       <div className='row__group-body'>
-        <div className='player__row-metric'>{stats.trg ? (stats.trg || 0).toFixed(1) : '-'}</div>
-        <div className='player__row-metric'>{stats.rec ? (stats.rec || 0).toFixed(1) : '-'}</div>
-        <div className='player__row-metric'>{stats.recy ? (stats.recy || 0).toFixed(1) : '-'}</div>
-        <div className='player__row-metric'>{stats.tdrec ? (stats.tdrec || 0).toFixed(1) : '-'}</div>
+        <PercentileMetric stats={stats} percentiles={percentiles} type='trg' />
+        <PercentileMetric stats={stats} percentiles={percentiles} type='rec' />
+        <PercentileMetric stats={stats} percentiles={percentiles} type='recy' />
+        <PercentileMetric stats={stats} percentiles={percentiles} type='tdrec' />
       </div>
     </div>
   )
 ])
 
-const getStatRows = (pos, stats) => {
+const getStatRows = (pos, stats, percentiles) => {
   switch (pos) {
     case 'DST':
-      return defenseStats(stats)
+      return defenseStats(stats, percentiles)
     case 'K':
-      return kickerStats(stats)
+      return kickerStats(stats, percentiles)
     default:
-      return playerStats(stats)
+      return playerStats(stats, percentiles)
   }
 }
 
 export default class PlayerSelectedRow extends React.Component {
   render = () => {
-    const { title, stats, action, className, games, lead, pos } = this.props
+    const { title, stats, action, className, games, lead, pos, percentiles } = this.props
     const classNames = ['player__selected-row']
     if (className) classNames.push(className)
-    const rows = getStatRows(pos, stats)
+    const rows = getStatRows(pos, stats, percentiles)
     return (
       <div className={classNames.join(' ')}>
         {lead || <div className='row__name'>{title}</div>}

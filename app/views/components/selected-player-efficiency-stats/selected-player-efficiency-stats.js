@@ -1,11 +1,11 @@
 import React from 'react'
 
-import PlayerRowMetric from '@components/player-row-metric'
+import PercentileMetric from '@components/percentile-metric'
 import { constants } from '@common'
 
 export default class SelectedPlayerEfficiencyStats extends React.Component {
   render = () => {
-    const { player, overall } = this.props
+    const { player, percentiles } = this.props
     const stats = player.stats.toJS()
 
     return (
@@ -21,63 +21,63 @@ export default class SelectedPlayerEfficiencyStats extends React.Component {
             <div className='row__group'>
               <div className='row__group-head'>Passing Efficiency</div>
               <div className='row__group-body'>
-                <div className='player__row-metric'>COMP%</div>
-                <div className='player__row-metric'>TD%</div>
-                <div className='player__row-metric'>INT%</div>
-                <div className='player__row-metric'>INTW%</div>
+                <div className='table__cell metric'>COMP%</div>
+                <div className='table__cell metric'>TD%</div>
+                <div className='table__cell metric'>INT%</div>
+                <div className='table__cell metric'>INTW%</div>
               </div>
             </div>}
           {player.pos === 'QB' &&
             <div className='row__group'>
               <div className='row__group-head'>Passing Efficiency</div>
               <div className='row__group-body'>
-                <div className='player__row-metric'>YAC</div>
-                <div className='player__row-metric'>YAC/C</div>
-                <div className='player__row-metric'>YPA</div>
-                <div className='player__row-metric'>DOT</div>
+                <div className='table__cell metric'>YAC</div>
+                <div className='table__cell metric'>YAC/C</div>
+                <div className='table__cell metric'>YPA</div>
+                <div className='table__cell metric'>DOT</div>
               </div>
             </div>}
           {player.pos === 'QB' &&
             <div className='row__group'>
               <div className='row__group-head'>Passing Air Yards</div>
               <div className='row__group-body'>
-                <div className='player__row-metric'>AY</div>
-                <div className='player__row-metric'>AYPA</div>
-                <div className='player__row-metric'>CAY/C</div>
-                <div className='player__row-metric'>PACR</div>
+                <div className='table__cell metric'>AY</div>
+                <div className='table__cell metric'>AYPA</div>
+                <div className='table__cell metric'>CAY/C</div>
+                <div className='table__cell metric'>PACR</div>
               </div>
             </div>}
           {['QB', 'RB'].includes(player.pos) &&
             <div className='row__group'>
               <div className='row__group-head'>Rushing Efficiency</div>
               <div className='row__group-body'>
-                <div className='player__row-metric'>YPC</div>
-                <div className='player__row-metric'>ATT%</div>
-                <div className='player__row-metric'>YDS%</div>
-                <div className='player__row-metric'>BT</div>
-                <div className='player__row-metric'>BT%</div>
+                <div className='table__cell metric'>YPC</div>
+                <div className='table__cell metric'>ATT%</div>
+                <div className='table__cell metric'>YDS%</div>
+                <div className='table__cell metric'>BT</div>
+                <div className='table__cell metric'>BT%</div>
               </div>
             </div>}
           {['RB', 'WR', 'TE'].includes(player.pos) &&
             <div className='row__group'>
               <div className='row__group-head'>Receiving Efficiency</div>
               <div className='row__group-body'>
-                <div className='player__row-metric'>AY/TAR</div>
-                <div className='player__row-metric'>YDS/AY</div>
-                <div className='player__row-metric'>YDS/REC</div>
-                <div className='player__row-metric'>YDS/TAR</div>
-                <div className='player__row-metric'>YAC/REC</div>
+                <div className='table__cell metric'>AY/TAR</div>
+                <div className='table__cell metric'>YDS/AY</div>
+                <div className='table__cell metric'>YDS/REC</div>
+                <div className='table__cell metric'>YDS/TAR</div>
+                <div className='table__cell metric'>YAC/REC</div>
               </div>
             </div>}
           {['RB', 'WR', 'TE'].includes(player.pos) &&
             <div className='row__group'>
               <div className='row__group-head'>Receiving Opportunity</div>
               <div className='row__group-body'>
-                <div className='player__row-metric'>AY%</div>
-                <div className='player__row-metric'>TAR%</div>
-                <div className='player__row-metric'>WOPR</div>
-                <div className='player__row-metric'>ADOT</div>
-                <div className='player__row-metric'>DEEP%</div>
+                <div className='table__cell metric'>AY%</div>
+                <div className='table__cell metric'>TAR%</div>
+                <div className='table__cell metric'>WOPR</div>
+                <div className='table__cell metric'>ADOT</div>
+                <div className='table__cell metric'>DEEP%</div>
               </div>
             </div>}
         </div>
@@ -88,58 +88,58 @@ export default class SelectedPlayerEfficiencyStats extends React.Component {
           {player.pos === 'QB' &&
             <div className='row__group'>
               <div className='row__group-body'>
-                <PlayerRowMetric stats={stats} overall={overall} type='pc_pct' />
-                <PlayerRowMetric stats={stats} overall={overall} type='tdp_pct' />
-                <PlayerRowMetric stats={stats} overall={overall} type='ints_pct' />
-                <PlayerRowMetric stats={stats} overall={overall} type='intw_pct' />
+                <PercentileMetric stats={stats} percentiles={percentiles} type='pc_pct' />
+                <PercentileMetric stats={stats} percentiles={percentiles} type='tdp_pct' />
+                <PercentileMetric stats={stats} percentiles={percentiles} type='ints_pct' />
+                <PercentileMetric stats={stats} percentiles={percentiles} type='intw_pct' />
               </div>
             </div>}
           {player.pos === 'QB' &&
             <div className='row__group'>
               <div className='row__group-body'>
-                <PlayerRowMetric stats={stats} overall={overall} type='pyac' />
-                <PlayerRowMetric stats={stats} overall={overall} type='pyac_pc' />
-                <PlayerRowMetric stats={stats} overall={overall} type='_ypa' />
-                <PlayerRowMetric stats={stats} overall={overall} type='pdot_pa' />
+                <PercentileMetric stats={stats} percentiles={percentiles} type='pyac' />
+                <PercentileMetric stats={stats} percentiles={percentiles} type='pyac_pc' />
+                <PercentileMetric stats={stats} percentiles={percentiles} type='_ypa' />
+                <PercentileMetric stats={stats} percentiles={percentiles} type='pdot_pa' />
               </div>
             </div>}
           {player.pos === 'QB' &&
             <div className='row__group'>
               <div className='row__group-body'>
-                <PlayerRowMetric stats={stats} overall={overall} type='pdot' />
-                <PlayerRowMetric stats={stats} overall={overall} type='pcay_pc' />
-                <PlayerRowMetric stats={stats} overall={overall} type='_aypa' />
-                <PlayerRowMetric stats={stats} overall={overall} type='_pacr' />
+                <PercentileMetric stats={stats} percentiles={percentiles} type='pdot' />
+                <PercentileMetric stats={stats} percentiles={percentiles} type='pcay_pc' />
+                <PercentileMetric stats={stats} percentiles={percentiles} type='_aypa' />
+                <PercentileMetric stats={stats} percentiles={percentiles} type='_pacr' />
               </div>
             </div>}
           {['QB', 'RB'].includes(player.pos) &&
             <div className='row__group'>
               <div className='row__group-body'>
-                <PlayerRowMetric stats={stats} overall={overall} type='ry_pra' />
-                <PlayerRowMetric stats={stats} overall={overall} type='_stra' />
-                <PlayerRowMetric stats={stats} overall={overall} type='_stry' />
-                <PlayerRowMetric stats={stats} overall={overall} type='mbt' />
-                <PlayerRowMetric stats={stats} overall={overall} type='mbt_pt' />
+                <PercentileMetric stats={stats} percentiles={percentiles} type='ry_pra' />
+                <PercentileMetric stats={stats} percentiles={percentiles} type='_stra' />
+                <PercentileMetric stats={stats} percentiles={percentiles} type='_stry' />
+                <PercentileMetric stats={stats} percentiles={percentiles} type='mbt' />
+                <PercentileMetric stats={stats} percentiles={percentiles} type='mbt_pt' />
               </div>
             </div>}
           {['RB', 'WR', 'TE'].includes(player.pos) &&
             <div className='row__group'>
               <div className='row__group-body'>
-                <PlayerRowMetric stats={stats} overall={overall} type='_ayptrg' />
-                <PlayerRowMetric stats={stats} overall={overall} type='_recypay' />
-                <PlayerRowMetric stats={stats} overall={overall} type='_recyprec' />
-                <PlayerRowMetric stats={stats} overall={overall} type='_recyptrg' />
-                <PlayerRowMetric stats={stats} overall={overall} type='_ryacprec' />
+                <PercentileMetric stats={stats} percentiles={percentiles} type='_ayptrg' />
+                <PercentileMetric stats={stats} percentiles={percentiles} type='_recypay' />
+                <PercentileMetric stats={stats} percentiles={percentiles} type='_recyprec' />
+                <PercentileMetric stats={stats} percentiles={percentiles} type='_recyptrg' />
+                <PercentileMetric stats={stats} percentiles={percentiles} type='_ryacprec' />
               </div>
             </div>}
           {['RB', 'WR', 'TE'].includes(player.pos) &&
             <div className='row__group'>
               <div className='row__group-body'>
-                <PlayerRowMetric stats={stats} overall={overall} type='_stray' />
-                <PlayerRowMetric stats={stats} overall={overall} type='_sttrg' />
-                <PlayerRowMetric stats={stats} overall={overall} type='_wopr' />
-                <PlayerRowMetric stats={stats} overall={overall} type='rdot_ptrg' />
-                <PlayerRowMetric stats={stats} overall={overall} type='dptrg_pct' />
+                <PercentileMetric stats={stats} percentiles={percentiles} type='_stray' />
+                <PercentileMetric stats={stats} percentiles={percentiles} type='_sttrg' />
+                <PercentileMetric stats={stats} percentiles={percentiles} type='_wopr' />
+                <PercentileMetric stats={stats} percentiles={percentiles} type='rdot_ptrg' />
+                <PercentileMetric stats={stats} percentiles={percentiles} type='dptrg_pct' />
               </div>
             </div>}
         </div>

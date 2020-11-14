@@ -4,9 +4,9 @@ import PlayerHeader from '@components/player-header'
 const HeaderStatsRushingBasic = () => (
   <div className='player__row-group'>
     <div className='player__row-group-body'>
-      <PlayerHeader className='player__row-metric' label='YDS' value='stats.ry' />
-      <PlayerHeader className='player__row-metric' label='TD' value='stats.tdr' />
-      <PlayerHeader className='player__row-metric' label='Y/A' value='stats.ry_pra' />
+      <PlayerHeader className='table__cell metric' label='YDS' value='stats.ry' />
+      <PlayerHeader className='table__cell metric' label='TD' value='stats.tdr' />
+      <PlayerHeader className='table__cell metric' label='Y/A' value='stats.ry_pra' />
     </div>
   </div>
 )
