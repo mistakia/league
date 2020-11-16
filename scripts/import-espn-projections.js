@@ -53,6 +53,7 @@ const run = async () => {
 
     const projections = player.player.stats
       .find(s => s.scoringPeriodId === week && s.seasonId === year)
+    if (!projections) continue
     const data = constants.espn.stats(projections.stats)
 
     inserts.push({

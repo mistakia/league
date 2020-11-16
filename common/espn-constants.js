@@ -25,8 +25,8 @@ export const stats = (d) => ({
   xpm: d['86'],
 
   // return
-  prtd: d['102'],
-  krtd: d['101'],
+  // prtd: d['102'],
+  // krtd: d['101'],
 
   // defense
   dint: d['95'],
