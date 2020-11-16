@@ -41,9 +41,8 @@ export function getScoreboardByTeamId (state, { tid }) {
 }
 
 export function getScoreboardUpdated (state) {
-  const plays = getPlays(state)
-  const currentWeekPlays = plays.filter(p => p.week === constants.season.week)
-  const play = currentWeekPlays.maxBy(x => x.updated)
+  const plays = getPlays(state, { week: constants.season.week })
+  const play = plays.maxBy(x => x.updated)
   return play ? play.updated : 0
 }
 
@@ -95,11 +94,9 @@ export function getPlaysByMatchupId (state, { mid }) {
 
   const gsispids = players.map(p => p.gsispid).filter(Boolean)
 
-  const plays = getPlays(state)
+  const plays = getPlays(state, { week: matchup.week })
   // TODO - match/filter dst plays
   const filteredPlays = plays.valueSeq().toList().filter(p => {
-    if (p.week !== matchup.week) return false
-
     const matchSingleGsis = p.playStats.find(p => gsisids.includes(p.gsisId))
     if (matchSingleGsis) return true
 
@@ -172,10 +169,9 @@ export function getGameStatusByPlayerId (state, { playerId, week = constants.sea
     return null
   }
 
-  const plays = getPlays(state)
-  const weekPlays = plays.valueSeq().toList().filter(p => p.week === week)
+  const plays = getPlays(state, { week })
   const player = getPlayerById(state, { playerId })
-  const play = weekPlays.find(p => {
+  const play = plays.find(p => {
     if (!p.possessionTeam) return false
 
     const team = fixTeam(p.possessionTeam)
@@ -186,7 +182,7 @@ export function getGameStatusByPlayerId (state, { playerId, week = constants.sea
     return { game }
   }
 
-  const filteredPlays = weekPlays.filter(p => p.esbid === play.esbid)
+  const filteredPlays = plays.filter(p => p.esbid === play.esbid)
   const lastPlay = filteredPlays.maxBy(p => p.playId)
   if (!lastPlay.possessionTeam) {
     return { game, lastPlay }
