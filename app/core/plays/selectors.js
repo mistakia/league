@@ -28,7 +28,7 @@ export function getPlaysForPlayer (state, { player, week }) {
           return false
         }
 
-        return Boolean(p.possessionTeam)
+        return Boolean(p.possessionTeam) && fixTeam(p.possessionTeam) !== player.player
       })
   }
 
