@@ -1,5 +1,4 @@
 import * as constants from './constants'
-import fixTeam from './fix-team'
 
 const calculateDstStatsFromPlays = (plays, team) => {
   const dstStats = constants.createStats()

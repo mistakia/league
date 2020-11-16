@@ -1,24 +1,13 @@
-import { List } from 'immutable'
+import { List, Map } from 'immutable'
 import { fixTeam } from '@common'
 
-import { getSelectedPlayer } from '@core/players'
-
-export function getPlays (state) {
-  return state.get('plays')
-}
-
-export function getPlaysForSelectedPlayer (state) {
-  const player = getSelectedPlayer(state)
-  return getPlaysForPlayer(state, { player })
+export function getPlays (state, { week }) {
+  return state.getIn(['plays', week], new Map())
 }
 
 export function getPlaysForPlayer (state, { player, week }) {
-  const plays = getPlays(state)
-  let formatted = plays.valueSeq().toList()
-
-  if (week) {
-    formatted = formatted.filter(p => p.week === week)
-  }
+  const plays = getPlays(state, { week })
+  const formatted = plays.valueSeq().toList()
 
   if (player.pos === 'DST') {
     return formatted

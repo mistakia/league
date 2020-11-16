@@ -11,16 +11,8 @@ const { constants } = require('../../common')
 router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    const years = req.query.years
-      ? (Array.isArray(req.query.years) ? req.query.years : [req.query.years])
-      : [constants.season.week ? constants.season.year : (constants.season.year - 1)]
-    // TODO - enable multiple years
-    if (years.length > 1) {
-      return res.status(400).send({ error: 'too many years listed' })
-    }
-
     const query = getPlayByPlayQuery(db)
-    const stream = query.whereIn('nflPlay.season', years).stream()
+    const stream = query.where('nflPlay.season', constants.season.year).stream()
     res.set('Content-Type', 'application/json')
     stream.pipe(JSONStream.stringify()).pipe(res)
     req.on('close', stream.end.bind(stream))
@@ -33,17 +25,20 @@ router.get('/?', async (req, res) => {
 router.get('/stats', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    const years = req.query.years
-      ? (Array.isArray(req.query.years) ? req.query.years : [req.query.years])
-      : [constants.season.week ? constants.season.year : (constants.season.year - 1)]
-    // TODO - enable multiple years
-    if (years.length > 1) {
-      return res.status(400).send({ error: 'too many years listed' })
-    }
-
-    const plays = await db('nflPlay').select('esbid').whereIn('season', years).groupBy('esbid')
+    const plays = await db('nflPlay')
+      .select('esbid')
+      .where('season', constants.season.year)
+      .groupBy('esbid')
     const esbids = plays.map(p => p.esbid)
-    const stream = db('nflPlayStat').whereIn('esbid', esbids).where('valid', 1).stream()
+    const stream = db('nflPlayStat')
+      .select('nflPlayStat.*', 'nflPlay.week')
+      .leftJoin('nflPlay', function () {
+        this.on('nflPlayStat.esbid', '=', 'nflPlay.esbid')
+          .andOn('nflPlayStat.playId', '=', 'nflPlay.playId')
+      })
+      .whereIn('nflPlayStat.esbid', esbids)
+      .where('nflPlayStat.valid', 1)
+      .stream()
     res.set('Content-Type', 'application/json')
     stream.pipe(JSONStream.stringify()).pipe(res)
     req.on('close', stream.end.bind(stream))

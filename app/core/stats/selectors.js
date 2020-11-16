@@ -8,14 +8,23 @@ import {
 import { getCurrentLeague } from '@core/leagues'
 import { getPlaysForPlayer } from '@core/plays'
 import { getGamelogByPlayerId } from '@core/gamelogs'
+import { getSelectedPlayer } from '@core/players'
 
 export function getStats (state) {
   return state.get('stats')
 }
 
-export function getGamelogForPlayer (state, { player, week }) {
-  // TODO - check gamelogs store
+export function getGamelogsForSelectedPlayer (state) {
+  const player = getSelectedPlayer(state)
+  const gamelogs = []
+  for (let week = 1; week <= constants.season.week; week++) {
+    const gamelog = getGamelogForPlayer(state, { player, week })
+    if (gamelog) gamelogs.push(gamelog)
+  }
+  return gamelogs
+}
 
+export function getGamelogForPlayer (state, { player, week }) {
   if (!player || !player.player) return null
 
   const league = getCurrentLeague(state)
