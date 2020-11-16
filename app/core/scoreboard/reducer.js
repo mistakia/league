@@ -1,6 +1,7 @@
 import { Map } from 'immutable'
 import moment from 'moment'
 
+import { playActions } from '@core/plays'
 import { scoreboardActions } from './actions'
 import { constants } from '@common'
 
@@ -13,6 +14,7 @@ export function scoreboardReducer (state = initialState, { payload, type }) {
   switch (type) {
     case scoreboardActions.UPDATE_SCOREBOARD_PLAYS:
     case scoreboardActions.GET_SCOREBOARD_FULFILLED:
+    case playActions.GET_PLAYSTATS_FULFILLED:
       return state.set('isLoaded', true)
 
     case scoreboardActions.SCOREBOARD_SELECT_WEEK:

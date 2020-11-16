@@ -39,7 +39,7 @@ export const closeWS = () => {
 }
 
 export const send = (message) => {
-  if (ws.readyState !== 1) messages.push(message)
+  if (!ws || ws.readyState !== 1) messages.push(message)
   else ws.send(JSON.stringify(message))
 }
 
