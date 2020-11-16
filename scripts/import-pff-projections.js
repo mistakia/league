@@ -26,6 +26,10 @@ const runOne = async (week) => {
     }
   }).then(res => res.json())
 
+  if (!result.player_projections || !result.player_projections.length) {
+    throw new Error('missing projections')
+  }
+
   const inserts = []
   for (const player of result.player_projections) {
     const name = player.player_name
