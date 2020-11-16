@@ -138,7 +138,7 @@ const run = async () => {
         return false
       }
 
-      return Boolean(p.possessionTeam)
+      return Boolean(p.possessionTeam) && fixTeam(p.possessionTeam) !== team
     })
     if (!opponentPlays.length) continue
     const play = opponentPlays[0]

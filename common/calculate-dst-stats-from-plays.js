@@ -3,34 +3,10 @@ import fixTeam from './fix-team'
 
 const calculateDstStatsFromPlays = (plays, team) => {
   const dstStats = constants.createStats()
-  dstStats.dtno = plays.filter(p => (p.possessionTeam && fixTeam(p.possessionTeam) !== team) && p.drivePlayCount === 3 && p.playTypeNFL === 'PUNT').length
-  const playStats = plays.map(p => p.playStats.map(ps => ({
-    possessionTeam: p.possessionTeam,
-    ...ps
-  }))).flat()
+  dstStats.dtno = plays.filter(p => p.drivePlayCount === 3 && p.playTypeNFL === 'PUNT').length
+  const playStats = plays.map(p => p.playStats).flat()
 
   for (const playStat of playStats) {
-    if (fixTeam(playStat.possessionTeam) === team) {
-      switch (playStat.statId) {
-        case 34:
-          dstStats.prtd += 1
-          break
-
-        case 36:
-          dstStats.prtd += 1
-          break
-
-        case 46:
-          dstStats.krtd += 1
-          break
-
-        case 48:
-          dstStats.krtd += 1
-          break
-      }
-      continue
-    }
-
     switch (playStat.statId) {
       case 2:
         // punt block
@@ -103,6 +79,26 @@ const calculateDstStatsFromPlays = (plays, team) => {
       case 28:
         // interception return touchdown (lateral), no interception credited
         dstStats.dtd += 1
+        break
+
+      case 34:
+        // punt return touchdown
+        dstStats.prtd += 1
+        break
+
+      case 36:
+        // punt return touchdown (lateral)
+        dstStats.prtd += 1
+        break
+
+      case 46:
+        // kickoff return touchdown
+        dstStats.krtd += 1
+        break
+
+      case 48:
+        // kickoff return touchdown (lateral)
+        dstStats.krtd += 1
         break
 
       case 52:
