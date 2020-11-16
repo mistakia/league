@@ -5,6 +5,8 @@ import DashboardTeamSummarySalary from '@components/dashboard-team-summary-salar
 import DashboardTeamSummaryWaiverOrder from '@components/dashboard-team-summary-waiver-order'
 import DashboardTeamSummaryRecord from '@components/dashboard-team-summary-record'
 import DashboardTeamSummaryPlayoffOdds from '@components/dashboard-team-summary-playoff-odds'
+import DashboardTeamSummaryByeOdds from '@components/dashboard-team-summary-bye-odds'
+import DashboardTeamSummaryDivisionOdds from '@components/dashboard-team-summary-division-odds'
 
 const DashboardTeamSummary = () => (
   <div className='dashboard__section-side'>
@@ -12,6 +14,8 @@ const DashboardTeamSummary = () => (
     <div className='dashboard__section-side-body'>
       <DashboardTeamSummaryRecord />
       <DashboardTeamSummaryPlayoffOdds />
+      <DashboardTeamSummaryDivisionOdds />
+      <DashboardTeamSummaryByeOdds />
       <DashboardTeamSummaryFAAB />
       <DashboardTeamSummarySalary />
       <DashboardTeamSummaryWaiverOrder />
