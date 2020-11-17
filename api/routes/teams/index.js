@@ -7,6 +7,7 @@ const release = require('./release')
 const add = require('./add')
 const lineups = require('./lineups')
 const reserve = require('./reserve')
+const protect = require('./protect')
 
 const { verifyUserTeam } = require('../../../utils')
 
@@ -68,5 +69,6 @@ router.use('/:teamId/release', release)
 router.use('/:teamId/add', add)
 router.use('/:teamId/lineups', lineups)
 router.use('/:teamId/reserve', reserve)
+router.use('/:teamId/protect', protect)
 
 module.exports = router

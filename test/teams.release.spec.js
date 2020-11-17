@@ -439,6 +439,20 @@ describe('API /teams - release', function () {
       await error(request, 'player has a poaching claim')
     })
 
+    it('player is protected', async () => {
+      const player = await selectPlayer()
+      await addPlayer({ leagueId: 1, player, teamId: 1, userId: 1, slot: constants.slots.PSP })
+      const request = chai.request(server).post('/api/teams/1/release')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          player: player.player,
+          teamId: 1,
+          leagueId: 1
+        })
+
+      await error(request, 'player is protected')
+    })
+
     it('release locked starter', async () => {
       // TODO
     })

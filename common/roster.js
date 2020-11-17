@@ -43,6 +43,7 @@ export default class Roster {
     const exclude = [
       constants.slots.IR,
       constants.slots.PS,
+      constants.slots.PSP,
       constants.slots.BENCH,
       constants.slots.COV
     ]
@@ -50,12 +51,17 @@ export default class Roster {
   }
 
   get active () {
-    const exclude = [constants.slots.IR, constants.slots.PS, constants.slots.COV]
+    const exclude = [
+      constants.slots.IR,
+      constants.slots.PS,
+      constants.slots.PSP,
+      constants.slots.COV
+    ]
     return Array.from(this._players.values()).filter(p => !exclude.includes(p.slot))
   }
 
   get practice () {
-    return this.players.filter(p => p.slot === constants.slots.PS)
+    return this.players.filter(p => p.slot === constants.slots.PS || p.slot === constants.slots.PSP)
   }
 
   get bench () {
@@ -110,7 +116,7 @@ export default class Roster {
       return this.hasOpenInjuredReserveSlot()
     } else if (slot === constants.slots.BENCH) {
       return this.hasOpenBenchSlot(pos)
-    } else if (slot === constants.slots.PS) {
+    } else if (slot === constants.slots.PS || slot === constants.slots.PSP) {
       return this.hasOpenPracticeSquadSlot()
     } else {
       const slotName = Object.keys(constants.slots).find(key => constants.slots[key] === slot)

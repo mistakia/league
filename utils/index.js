@@ -68,6 +68,7 @@ module.exports = {
   getChartedPlayByPlayQuery,
   getPlayByPlayQuery,
   getTransactionsSinceAcquisition: require('./get-transactions-since-acquisition'),
+  getTransactionsSinceFreeAgent: require('./get-transactions-since-free-agent'),
 
   upsert: require('./upsert'),
 

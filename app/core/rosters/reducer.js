@@ -86,6 +86,7 @@ export function rostersReducer (state = new Map(), { payload, type }) {
     case rosterActions.ROSTER_TRANSACTION:
     case rosterActions.POST_ACTIVATE_FULFILLED:
     case rosterActions.POST_DEACTIVATE_FULFILLED:
+    case rosterActions.POST_PROTECT_FULFILLED:
     case rosterActions.POST_RESERVE_FULFILLED: {
       return state.withMutations(state => {
         const players = state.getIn([payload.data.tid, constants.season.week, 'players'])

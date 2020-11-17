@@ -45,6 +45,11 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'player is on active roster' })
     }
 
+    // make sure player is not protected
+    if (roster.players.find(p => p.player === player && p.slot === constants.slots.PSP)) {
+      return res.status(400).send({ error: 'player is protected' })
+    }
+
     const players = await db('player')
       .join('transactions', 'player.player', 'transactions.player')
       .where('player.player', player)

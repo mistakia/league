@@ -389,7 +389,8 @@ export const slots = {
   BENCH: 11,
   PS: 12,
   IR: 13,
-  COV: 14
+  COV: 14,
+  PSP: 15
 }
 
 export const starterSlots = [
@@ -419,7 +420,8 @@ export const slotName = {
   [slots.BENCH]: 'BE',
   [slots.PS]: 'PS',
   [slots.IR]: 'IR',
-  [slots.COV]: 'COV'
+  [slots.COV]: 'COV',
+  [slots.PSP]: 'PS (P)'
 }
 
 export const waivers = {
@@ -458,7 +460,8 @@ export const transactions = {
   PRACTICE_ADD: 13,
 
   RESERVE_IR: 15,
-  RESERVE_COV: 16
+  RESERVE_COV: 16,
+  PRACTICE_PROTECTED: 17
 }
 
 export const transactionsDetail = {
@@ -483,7 +486,8 @@ export const transactionsDetail = {
   12: 'Rookie Tagged',
   13: 'Signed (PS)',
   15: 'Reserve (IR)',
-  16: 'Reserve (COV)'
+  16: 'Reserve (COV)',
+  17: 'Protected (PS)'
 }
 
 export const nflTeams = [

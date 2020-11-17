@@ -19,6 +19,7 @@ export const rosterActions = {
 
   ACTIVATE_PLAYER: 'ACTIVATE_PLAYER',
   DEACTIVATE_PLAYER: 'DEACTIVATE_PLAYER',
+  PROTECT_PLAYER: 'PROTECT_PLAYER',
 
   GET_ROSTERS_FAILED: 'GET_ROSTERS_FAILED',
   GET_ROSTERS_PENDING: 'GET_ROSTERS_PENDING',
@@ -35,6 +36,10 @@ export const rosterActions = {
   POST_DEACTIVATE_FAILED: 'POST_DEACTIVATE_FAILED',
   POST_DEACTIVATE_PENDING: 'POST_DEACTIVATE_PENDING',
   POST_DEACTIVATE_FULFILLED: 'POST_DEACTIVATE_FULFILLED',
+
+  POST_PROTECT_FAILED: 'POST_PROTECT_FAILED',
+  POST_PROTECT_PENDING: 'POST_PROTECT_PENDING',
+  POST_PROTECT_FULFILLED: 'POST_PROTECT_FULFILLED',
 
   POST_ROSTERS_FAILED: 'POST_ROSTERS_FAILED',
   POST_ROSTERS_PENDING: 'POST_ROSTERS_PENDING',
@@ -104,6 +109,13 @@ export const rosterActions = {
 
   deactivate: (player) => ({
     type: rosterActions.DEACTIVATE_PLAYER,
+    payload: {
+      player
+    }
+  }),
+
+  protect: (player) => ({
+    type: rosterActions.PROTECT_PLAYER,
     payload: {
       player
     }
@@ -208,6 +220,29 @@ export const rosterActions = {
     payload: {
       opts,
       data
+    }
+  }),
+
+  postProtectPending: opts => ({
+    type: rosterActions.POST_PROTECT_PENDING,
+    payload: {
+      opts
+    }
+  }),
+
+  postProtectFulfilled: (opts, data) => ({
+    type: rosterActions.POST_PROTECT_FULFILLED,
+    payload: {
+      opts,
+      data
+    }
+  }),
+
+  postProtectFailed: (opts, error) => ({
+    type: rosterActions.POST_PROTECT_FAILED,
+    payload: {
+      opts,
+      error
     }
   }),
 
@@ -395,6 +430,12 @@ export const postDeactivateActions = {
   failed: rosterActions.postDeactivateFailed,
   pending: rosterActions.postDeactivatePending,
   fulfilled: rosterActions.postDeactivateFulfilled
+}
+
+export const postProtectActions = {
+  failed: rosterActions.postProtectFailed,
+  pending: rosterActions.postProtectPending,
+  fulfilled: rosterActions.postProtectFulfilled
 }
 
 export const putRostersActions = {

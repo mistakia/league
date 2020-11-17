@@ -18,6 +18,7 @@ import {
   putRosterActions,
   postActivateActions,
   postDeactivateActions,
+  postProtectActions,
   postRostersActions,
   putRostersActions,
   deleteRostersActions,
@@ -121,6 +122,7 @@ export const postRelease = fetch.bind(null, api.postRelease, postReleaseActions)
 
 export const postActivate = fetch.bind(null, api.postActivate, postActivateActions)
 export const postDeactivate = fetch.bind(null, api.postDeactivate, postDeactivateActions)
+export const postProtect = fetch.bind(null, api.postProtect, postProtectActions)
 export const postReserve = fetch.bind(null, api.postReserve, postReserveActions)
 
 export const fetchDraft = fetch.bind(null, api.getDraft, getDraftActions)

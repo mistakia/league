@@ -8,7 +8,8 @@ const {
   getRoster,
   sendNotifications,
   verifyUserTeam,
-  getTransactionsSinceAcquisition
+  getTransactionsSinceAcquisition,
+  getTransactionsSinceFreeAgent
 } = require('../../../utils')
 
 router.post('/?', async (req, res) => {
@@ -62,9 +63,9 @@ router.post('/?', async (req, res) => {
     })
     const lastTransaction = transactions.reduce((a, b) => a.timestamp > b.timestamp ? a : b)
 
-    // make sure player is a rookie
-    if (playerRow.start !== constants.season.year) {
-      return res.status(400).send({ error: 'player is not a rookie' })
+    // make sure player is a rookie OR not on a team OR on a teams practice squad
+    if (playerRow.start !== constants.season.year && playerRow.posd !== 'PS' && playerRow.cteam !== 'INA') {
+      return res.status(400).send({ error: 'player is not practice squad eligible' })
     }
 
     // make sure player has not been on the active roster for more than 48 hours
@@ -79,8 +80,12 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'player can not be deactivated once activated' })
     }
 
-    // make sure player has not been poached
-    if (transactions.find(t => t.type === constants.transactions.POACHED)) {
+    // make sure player has not been poached since the last time they were a free agent
+    const transactionsSinceFA = await getTransactionsSinceFreeAgent({
+      lid: leagueId,
+      player
+    })
+    if (transactionsSinceFA.find(t => t.type === constants.transactions.POACHED)) {
       return res.status(400).send({ error: 'player can not be deactivated once poached' })
     }
 

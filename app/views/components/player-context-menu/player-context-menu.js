@@ -16,6 +16,16 @@ export default class PlayerContextMenu extends React.Component {
     this.props.hide()
   }
 
+  handleProtect = () => {
+    const { player, protect } = this.props
+    this.props.showConfirmation({
+      title: 'Designate Protected',
+      description: `${player.fname} ${player.lname} (${player.pos}) will be designated as protected. This will protect the player from poaches but you will not be able to activate or release this player until the off-season.`,
+      onConfirm: () => protect(player.player)
+    })
+    this.props.hide()
+  }
+
   handleActivate = () => {
     const { player, activate } = this.props
     this.props.showConfirmation({
@@ -146,7 +156,7 @@ export default class PlayerContextMenu extends React.Component {
         <MenuItem
           key='activate'
           dense
-          disabled={!status.eligible.activate}
+          disabled={(status.protected || !status.eligible.activate)}
           onClick={this.handleActivate}
         >
           Activate
@@ -161,6 +171,17 @@ export default class PlayerContextMenu extends React.Component {
           onClick={this.handleDeactivate}
         >
           Move to Practice Squad
+        </MenuItem>
+      )
+
+      menuItems.push(
+        <MenuItem
+          key='protect'
+          dense
+          disabled={!status.eligible.protect}
+          onClick={this.handleProtect}
+        >
+          Designate Protected
         </MenuItem>
       )
 
@@ -190,7 +211,7 @@ export default class PlayerContextMenu extends React.Component {
         <MenuItem
           key='release'
           dense
-          disabled={status.locked && status.starter}
+          disabled={status.protected || (status.locked && status.starter)}
           onClick={this.handleRelease}
         >
           Release

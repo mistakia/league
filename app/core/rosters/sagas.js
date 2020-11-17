@@ -7,6 +7,7 @@ import {
   putRoster,
   postActivate,
   postDeactivate,
+  postProtect,
   postRosters,
   deleteRosters,
   putRosters,
@@ -51,6 +52,11 @@ export function * activate ({ payload }) {
 export function * deactivate ({ payload }) {
   const { teamId, leagueId } = yield select(getApp)
   yield call(postDeactivate, { teamId, leagueId, ...payload })
+}
+
+export function * protect ({ payload }) {
+  const { teamId, leagueId } = yield select(getApp)
+  yield call(postProtect, { teamId, leagueId, ...payload })
 }
 
 export function * setWaiverPlayerLineupContribution ({ payload }) {
@@ -258,6 +264,13 @@ export function * releaseNotification () {
   }))
 }
 
+export function * protectNotification () {
+  yield put(notificationActions.show({
+    message: 'Player designated',
+    severity: 'success'
+  }))
+}
+
 //= ====================================
 //  WATCHERS
 // -------------------------------------
@@ -272,6 +285,10 @@ export function * watchActivatePlayer () {
 
 export function * watchDeactivatePlayer () {
   yield takeLatest(rosterActions.DEACTIVATE_PLAYER, deactivate)
+}
+
+export function * watchProtectPlayer () {
+  yield takeLatest(rosterActions.PROTECT_PLAYER, protect)
 }
 
 export function * watchAuthFulfilled () {
@@ -330,6 +347,10 @@ export function * watchPostReleaseFulfilled () {
   yield takeLatest(rosterActions.POST_RELEASE_FULFILLED, releaseNotification)
 }
 
+export function * watchPostProtectFulfilled () {
+  yield takeLatest(rosterActions.POST_PROTECT_FULFILLED, protectNotification)
+}
+
 export function * watchTradeSetProposingTeamPlayers () {
   yield takeLatest(tradeActions.TRADE_SET_PROPOSING_TEAM_PLAYERS, projectTrade)
 }
@@ -354,6 +375,7 @@ export const rosterSagas = [
   fork(watchUpdateRosterPlayerSlot),
   fork(watchActivatePlayer),
   fork(watchDeactivatePlayer),
+  fork(watchProtectPlayer),
   fork(watchAuthFulfilled),
 
   fork(watchPostWaiverFulfilled),
@@ -369,6 +391,7 @@ export const rosterSagas = [
   fork(watchReleasePlayer),
 
   fork(watchPostReleaseFulfilled),
+  fork(watchPostProtectFulfilled),
 
   fork(watchAddPlayerRoster),
   fork(watchRemovePlayerRoster),

@@ -32,6 +32,7 @@ export {
   putRoster,
   postActivate,
   postDeactivate,
+  postProtect,
   postWaiver,
   putWaiver,
   postPoach,
