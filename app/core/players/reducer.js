@@ -298,6 +298,7 @@ export function playersReducer (state = initialState, { payload, type }) {
 
     case rosterActions.POST_ACTIVATE_FULFILLED:
     case rosterActions.POST_DEACTIVATE_FULFILLED:
+    case rosterActions.POST_PROTECT_FULFILLED:
     case rosterActions.POST_RESERVE_FULFILLED:
     case rosterActions.ROSTER_TRANSACTION: {
       const { player, slot, transaction } = payload.data

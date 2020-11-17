@@ -26,6 +26,10 @@ export default class PlayerName extends React.Component {
               R
             </sup>}
           <Team team={player.team} />
+          {(player.slot === constants.slots.PSP) &&
+            <div className='player__label'>
+              P
+            </div>}
         </div>
       </div>
     )

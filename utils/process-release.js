@@ -30,6 +30,11 @@ module.exports = async function ({
     throw new Error('player not on roster')
   }
 
+  // verify player is not protected
+  if (roster.players.find(p => p.player === player && p.slot === constants.slots.PSP)) {
+    throw new Error('player is protected')
+  }
+
   // verify player is not locked and is a starter
   const isLocked = await isPlayerLocked(player)
   const isStarter = !!roster.starters.find(p => p.player === player)

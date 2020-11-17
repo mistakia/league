@@ -217,7 +217,7 @@ router.post('/?', async (req, res) => {
           slot: constants.slots.PS
         })
       if (!slots.length) {
-        return res.status(400).send({ error: 'player is not on practice squad' })
+        return res.status(400).send({ error: 'player is not in an unprotected practice squad slot' })
       }
 
       // check for duplicate waiver

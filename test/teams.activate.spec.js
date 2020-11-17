@@ -197,6 +197,19 @@ describe('API /teams - activate', function () {
       await error(request, 'player is on active roster')
     })
 
+    it('player is protected', async () => {
+      const player = await selectPlayer()
+      await addPlayer({ leagueId: 1, player, teamId: 1, userId: 1, slot: constants.slots.PSP })
+      const request = chai.request(server).post('/api/teams/1/activate')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          player: player.player,
+          leagueId: 1
+        })
+
+      await error(request, 'player is protected')
+    })
+
     it('exceed roster limit', async () => {
       // TODO
     })
