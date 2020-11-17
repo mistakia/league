@@ -103,6 +103,7 @@ export function teamsReducer (state = initialState, { payload, type }) {
             pointsFor: t.pointsFor,
             pointsAgainst: t.pointsAgainst,
             potentialPointsFor: t.potentialPointsFor,
+            draftOrderIndex: t.draftOrderIndex,
             allPlayWins: t.allPlayWins,
             allPlayLosses: t.allPlayLosses,
             allPlayTies: t.allPlayTies
