@@ -3,7 +3,7 @@ import { fork, all, take, call, select, put } from 'redux-saga/effects'
 import { constants } from '@common'
 import { getCurrentLeague } from '@core/leagues'
 import { teamActions, getTeamsForCurrentLeague } from '@core/teams'
-import { rosterActions, getStartersByTeamId } from '@core/rosters'
+import { rosterActions, getStartersByTeamId, getActivePlayersByTeamId } from '@core/rosters'
 import { matchupsActions, getMatchups } from '@core/matchups'
 import { gamelogsActions, getPlayerGamelogs } from '@core/gamelogs'
 import { standingsActions } from './actions'
@@ -13,11 +13,16 @@ export function * calculate () {
   const league = yield select(getCurrentLeague)
   const teams = yield select(getTeamsForCurrentLeague)
   const starters = {}
+  const active = {}
   for (let week = 1; week < constants.season.week; week++) {
     starters[week] = {}
+    active[week] = {}
     for (const team of teams.valueSeq()) {
-      const players = yield select(getStartersByTeamId, { tid: team.uid, week })
-      starters[week][team.uid] = players.map(p => ({ player: p.player, pos: p.pos }))
+      const startingPlayers = yield select(getStartersByTeamId, { tid: team.uid, week })
+      starters[week][team.uid] = startingPlayers.map(p => ({ player: p.player, pos: p.pos }))
+
+      const activePlayers = yield select(getActivePlayersByTeamId, { tid: team.uid, week })
+      active[week][team.uid] = activePlayers.map(p => ({ player: p.player, pos: p.pos }))
     }
   }
   const gamelogs = yield select(getPlayerGamelogs)
@@ -28,9 +33,10 @@ export function * calculate () {
     matchups: matchups.get('items').toJS(),
     tids: teams.toList().map(t => t.uid).toJS(),
     starters,
+    active,
     gamelogs: gamelogs.toJS()
   })
-  worker.terminate()
+  // worker.terminate()
 
   yield put(standingsActions.setStandings(result))
 }

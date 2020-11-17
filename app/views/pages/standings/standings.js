@@ -17,9 +17,10 @@ function StandingsTeam ({ team }) {
       <div className='table__cell metric'>{(team.pointsAgainst || 0).toFixed(1)}</div>
       <div className='table__cell metric'>{((team.pointsFor / gs) || 0).toFixed(1)}</div>
       <div className='table__cell metric'>{((team.pointsAgainst / gs) || 0).toFixed(1)}</div>
-      <div className='table__cell metric'>-</div>
-      <div className='table__cell metric'>-</div>
       <div className='table__cell metric'>{toPercent(team.playoffOdds)}</div>
+      <div className='table__cell metric'>{(team.potentialPointsFor || 0).toFixed(1)}</div>
+      <div className='table__cell metric'>{toPercent(team.pointsFor / team.potentialPointsFor)}</div>
+      <div className='table__cell metric'>{(team.draftOrderIndex || 0).toFixed(2)}</div>
     </div>
   )
 }
@@ -45,9 +46,10 @@ function Standings ({ teams, title }) {
           <div className='table__cell metric'>PA</div>
           <div className='table__cell metric'>PF/G</div>
           <div className='table__cell metric'>PA/G</div>
+          <div className='table__cell metric'>P Odds</div>
           <div className='table__cell metric'>PP</div>
           <div className='table__cell metric'>PP%</div>
-          <div className='table__cell metric'>P Odds</div>
+          <div className='table__cell metric'>DOI</div>
         </div>
       </div>
       {overallRows}

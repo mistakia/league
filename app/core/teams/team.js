@@ -25,6 +25,8 @@ export const Team = new Record({
   pointsAgainst: null,
   potentialPointsFor: null,
 
+  draftOrderIndex: null,
+
   allPlayWins: null,
   allPlayLosses: null,
   allPlayTies: null,
