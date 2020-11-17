@@ -35,7 +35,7 @@ module.exports = async function ({ leagueId, drop, player, teamId, team, userId 
       slot: constants.slots.PS
     })
   if (!slots.length) {
-    throw new Error('player is not on a practice squad')
+    throw new Error('player is not in an unprotected practice squad slot')
   }
 
   // verify no existing poaches exist

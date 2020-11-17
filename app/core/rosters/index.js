@@ -29,6 +29,7 @@ export {
   putRosterActions,
   postActivateActions,
   postDeactivateActions,
+  postProtectActions,
   postRostersActions,
   putRostersActions,
   deleteRostersActions,

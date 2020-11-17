@@ -699,7 +699,7 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(waivers.length).to.equal(1)
       expect(waivers[0].player).to.equal(player.player)
       expect(waivers[0].succ).to.equal(0)
-      expect(waivers[0].reason).to.equal('player is not on a practice squad')
+      expect(waivers[0].reason).to.equal('player is not in an unprotected practice squad slot')
       expect(waivers[0].processed).to.equal(Math.round(Date.now() / 1000))
       expect(waivers[0].cancelled).to.equal(null)
 

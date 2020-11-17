@@ -208,7 +208,7 @@ describe('API /teams - deactivate', function () {
           leagueId: 1
         })
 
-      await error(request, 'player is not a rookie')
+      await error(request, 'player is not practice squad eligible')
     })
 
     it('exceed roster limits', async () => {

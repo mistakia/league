@@ -87,6 +87,10 @@ export const api = {
     const url = `${BASE_URL}/teams/${data.teamId}/deactivate`
     return { url, ...POST(data) }
   },
+  postProtect (data) {
+    const url = `${BASE_URL}/teams/${data.teamId}/protect`
+    return { url, ...POST(data) }
+  },
   postReserve (data) {
     const url = `${BASE_URL}/teams/${data.teamId}/reserve`
     return { url, ...POST(data) }

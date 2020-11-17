@@ -90,6 +90,13 @@ module.exports = async function ({
     throw new Error('player is on waivers')
   }
 
+  // verify player is practice squad eligible (rookie, not on a team, or on a PS)
+  if (type === constants.transactions.PRACTICE_ADD) {
+    if (playerRow.start !== constants.season.year && playerRow.posd !== 'PS' && playerRow.cteam !== 'INA') {
+      throw new Error('player is not practice squad eligible')
+    }
+  }
+
   // verify team has bench space & passes roster constraints
   const rosterRow = await getRoster({ tid: teamId })
   const roster = new Roster({ roster: rosterRow, league })

@@ -77,6 +77,10 @@ class PlayerNameExpanded extends Player {
               <sup className='player__label-rookie'>
                 R
               </sup>}
+            {(player.slot === constants.slots.PSP) &&
+              <div className='player__label'>
+                P
+              </div>}
           </div>
           <div className='player__name-expanded-row'>
             <Position pos={player.pos} />

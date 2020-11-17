@@ -106,7 +106,7 @@ export function getActiveRosterPlayerIdsForCurrentLeague (state) {
   for (const roster of rosters.values()) {
     roster.players.forEach(p => {
       if (p.slot !== constants.slots.IR ||
-        p.slot !== constants.slots.PS) {
+        p.slot !== constants.slots.PS || p.slot !== constants.slots.PSP) {
         players.push(p.player)
       }
     })
@@ -119,7 +119,7 @@ export function getPracticeSquadPlayerIdsForCurrentLeague (state) {
   const players = []
   for (const roster of rosters.values()) {
     roster.players.forEach(p => {
-      if (p.slot === constants.slots.PS) {
+      if (p.slot === constants.slots.PS || p.slot === constants.slots.PSP) {
         players.push(p.player)
       }
     })

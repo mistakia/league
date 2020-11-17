@@ -29,7 +29,8 @@ const mapDispatchToProps = {
   showConfirmation: confirmationActions.show,
   cancelClaim: waiverActions.cancel,
   reserve: rosterActions.reserve,
-  release: rosterActions.release
+  release: rosterActions.release,
+  protect: rosterActions.protect
 }
 
 export default connect(

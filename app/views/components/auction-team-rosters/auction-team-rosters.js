@@ -46,6 +46,7 @@ export default class AuctonTeamRosters extends React.Component {
     const rows = []
     const excludeSlots = [
       constants.slots.PS,
+      constants.slots.PSP,
       constants.slots.IR,
       constants.slots.COV
     ]

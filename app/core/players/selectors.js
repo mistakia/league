@@ -277,6 +277,7 @@ export function getPlayerStatus (state, { player, playerId }) {
     starter: false,
     fa: false,
     rostered: false,
+    protected: false,
     waiver: {
       active: false,
       practice: false,
@@ -287,6 +288,7 @@ export function getPlayerStatus (state, { player, playerId }) {
       practice: false
     },
     eligible: {
+      protect: false,
       activate: false,
       ps: false,
       poach: false
@@ -301,6 +303,7 @@ export function getPlayerStatus (state, { player, playerId }) {
     return status
   }
 
+  status.protected = player.slot === constants.slots.PSP
   status.starter = constants.starterSlots.includes(player.slot)
   status.locked = isPlayerLocked(state, { player })
 
@@ -336,8 +339,16 @@ export function getPlayerStatus (state, { player, playerId }) {
       status.rostered = true
 
       const isActive = !!roster.active.find(p => p.player === player.player)
-      if (!isActive && roster.hasOpenBenchSlot(player.pos)) {
-        status.eligible.activate = true
+      if (!isActive) {
+        if (roster.hasOpenBenchSlot(player.pos)) {
+          status.eligible.activate = true
+        }
+
+        // is on practice squad && has no poaching claims
+        const leaguePoaches = getPoachesForCurrentLeague(state)
+        if (player.slot === constants.slots.PS && !leaguePoaches.has(player.player)) {
+          status.eligible.protect = true
+        }
       }
 
       if (isPlayerPracticeSquadEligible(state, { player }) &&
@@ -355,20 +366,23 @@ export function getPlayerStatus (state, { player, playerId }) {
         status.reserve.cov = true
       }
     } else if (isPlayerOnPracticeSquad(state, { player })) {
-      // check if player has existing poaching claim
-      const leaguePoaches = getPoachesForCurrentLeague(state)
-      if (!leaguePoaches.has(player.player)) {
-        status.eligible.poach = true
-      }
+      // make sure player is unprotected
+      if (player.slot === constants.slots.PS) {
+        // check if player has existing poaching claim
+        const leaguePoaches = getPoachesForCurrentLeague(state)
+        if (!leaguePoaches.has(player.player)) {
+          status.eligible.poach = true
+        }
 
-      const rosterInfo = getRosterInfoForPlayerId(state, { playerId: player.player })
-      const cutoff = moment(rosterInfo.timestamp, 'X').add('24', 'hours')
+        const rosterInfo = getRosterInfoForPlayerId(state, { playerId: player.player })
+        const cutoff = moment(rosterInfo.timestamp, 'X').add('24', 'hours')
 
-      if ((rosterInfo.type === constants.transactions.ROSTER_DEACTIVATE ||
-        rosterInfo.type === constants.transactions.DRAFT ||
-        rosterInfo.type === constants.transactions.PRACTICE_ADD
-      ) && moment().isBefore(cutoff)) {
-        status.waiver.poach = true
+        if ((rosterInfo.type === constants.transactions.ROSTER_DEACTIVATE ||
+          rosterInfo.type === constants.transactions.DRAFT ||
+          rosterInfo.type === constants.transactions.PRACTICE_ADD
+        ) && moment().isBefore(cutoff)) {
+          status.waiver.poach = true
+        }
       }
     }
   }
@@ -381,8 +395,8 @@ export function isPlayerPracticeSquadEligible (state, { player }) {
     return false
   }
 
-  // is a rookie
-  if (player.draft_year !== constants.season.year) {
+  // is a rookie OR is not on a team OR is on a teams practice squad
+  if (player.draft_year !== constants.season.year && player.posd !== 'PS' && player.team !== 'INA') {
     return false
   }
 
