@@ -1,4 +1,4 @@
-import { fork, takeLatest, call, select, put, putResolve } from 'redux-saga/effects'
+import { fork, takeLatest, call, select, put, putResolve, debounce } from 'redux-saga/effects'
 import AES from 'crypto-js/aes'
 import UTF8 from 'crypto-js/enc-utf8'
 
@@ -6,6 +6,7 @@ import { getApp, appActions } from '@core/app'
 import { notificationActions } from '@core/notifications'
 import {
   fetchPlayers,
+  searchPlayers,
   getPlayer,
   getProjections,
   putProjection,
@@ -23,6 +24,12 @@ import Worker from 'workerize-loader?inline!./worker' // eslint-disable-line imp
 
 export function * loadPlayers () {
   yield call(fetchPlayers)
+}
+
+export function * search () {
+  const players = yield select(getPlayers)
+  const q = players.get('search')
+  yield call(searchPlayers, { q })
 }
 
 export function * loadProjections () {
@@ -221,6 +228,10 @@ export function * watchAuctionProcessed () {
   yield takeLatest(auctionActions.AUCTION_PROCESSED, calculateValues)
 }
 
+export function * watchSearchPlayers () {
+  yield debounce(1000, playerActions.SEARCH_PLAYERS, search)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -241,6 +252,8 @@ export const playerSagas = [
   fork(watchToggleWatchlist),
   fork(watchUpdateBaseline),
   fork(watchAuctionProcessed),
+
+  fork(watchSearchPlayers),
 
   fork(watchPutRostersFulfilled),
   fork(watchPostRostersFulfilled),

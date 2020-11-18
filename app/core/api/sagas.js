@@ -32,6 +32,7 @@ import {
 } from '@core/gamelogs'
 import {
   playersRequestActions,
+  playersSearchActions,
   getPlayerActions,
   getProjectionsActions,
   putProjectionActions,
@@ -104,6 +105,7 @@ export const postLogin = fetch.bind(null, api.postLogin, loginActions)
 export const fetchAuth = fetch.bind(null, api.fetchAuth, authActions)
 
 export const fetchPlayers = fetch.bind(null, api.fetchPlayers, playersRequestActions)
+export const searchPlayers = fetch.bind(null, api.fetchPlayers, playersSearchActions)
 export const getPlayer = fetch.bind(null, api.getPlayer, getPlayerActions)
 
 export const getChartedPlays = fetch.bind(null, api.getChartedPlays, getChartedPlaysActions)

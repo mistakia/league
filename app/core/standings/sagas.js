@@ -36,7 +36,7 @@ export function * calculate () {
     active,
     gamelogs: gamelogs.toJS()
   })
-  // worker.terminate()
+  worker.terminate()
 
   yield put(standingsActions.setStandings(result))
 }

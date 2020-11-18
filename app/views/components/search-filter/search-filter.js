@@ -1,6 +1,7 @@
 import React from 'react'
 
 import Icon from '@components/icon'
+import { debounce } from '@common'
 
 import './search-filter.styl'
 
@@ -11,6 +12,10 @@ export default class SearchFilter extends React.Component {
     this.state = {
       value: this.props.value || ''
     }
+
+    this.search = debounce((value) => {
+      this.props.search(value)
+    }, 500)
   }
 
   handleClick = () => {
@@ -22,7 +27,7 @@ export default class SearchFilter extends React.Component {
   handleChange = (event) => {
     const { value } = event.target
     this.setState({ value })
-    this.props.search(value)
+    this.search(value)
   }
 
   render = () => {
