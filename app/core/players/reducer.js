@@ -138,6 +138,21 @@ export function playersReducer (state = initialState, { payload, type }) {
         })
       })
 
+    case playerActions.SEARCH_PLAYERS_FULFILLED:
+      return state.withMutations(players => {
+        payload.data.forEach(playerData => {
+          if (players.hasIn(['items', playerData.player])) {
+            const data = players.getIn(['items', playerData.player])
+            players.setIn(['items', playerData.player], createPlayer({
+              ...data.toJS(),
+              ...playerData
+            }))
+          } else {
+            players.setIn(['items', playerData.player], createPlayer(playerData))
+          }
+        })
+      })
+
     case playerActions.FETCH_PLAYERS_FULFILLED:
       return state.withMutations(players => {
         players.set('isInitializing', false)

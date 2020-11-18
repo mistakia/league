@@ -507,7 +507,8 @@ CREATE TABLE `player` (
   `nflid` int(10) NOT NULL,
   `esbid` varchar(10) DEFAULT NULL,
   `gsisid` varchar(15) DEFAULT NULL,
-  `gsispid` varchar(36) DEFAULT NULL
+  `gsispid` varchar(36) DEFAULT NULL,
+  FULLTEXT KEY `name` (`fname`,`lname`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------

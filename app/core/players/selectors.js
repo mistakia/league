@@ -396,7 +396,7 @@ export function isPlayerPracticeSquadEligible (state, { player }) {
   }
 
   // is a rookie OR is not on a team OR is on a teams practice squad
-  if (player.draft_year !== constants.season.year && player.posd !== 'PS' && player.team !== 'INA') {
+  if (player.draft_year !== constants.season.year && player.depth_position !== 'PS' && player.team !== 'INA') {
     return false
   }
 

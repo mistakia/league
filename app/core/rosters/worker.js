@@ -15,7 +15,7 @@ export function optimizeLineup ({ players, league }) {
 
     for (const player of players) {
       variables[player.player] = {
-        points: Math.round(player.points[week].total || 0),
+        points: Math.round((player.points[week] && player.points[week].total) || 0),
         starter: 1
       }
       variables[player.player][player.player] = 1

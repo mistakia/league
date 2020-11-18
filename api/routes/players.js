@@ -6,6 +6,8 @@ const JSONStream = require('JSONStream')
 router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
+    const search = req.query.q
+
     const includePlayerIds = []
     if (req.user) {
       const leagues = await db('leagues')
@@ -52,13 +54,16 @@ router.get('/?', async (req, res) => {
         this.on('player.player', '=', 'practice.player').andOn('practice.week', '=', constants.season.week).andOn('practice.year', '=', constants.season.year)
       })
       .whereIn('player.pos', constants.positions)
-      .andWhere(function () {
-        this.where('player.posd', 'PS').orWhereNot('cteam', 'INA')
-      })
       .groupBy('player.player')
 
-    if (includePlayerIds.length) {
-      query.orWhereIn('player.player', includePlayerIds)
+    if (search) {
+      query.whereRaw('MATCH(fname, lname) AGAINST(? IN BOOLEAN MODE)', search)
+    } else {
+      query.whereNot('cteam', 'INA')
+
+      if (includePlayerIds.length) {
+        query.orWhereIn('player.player', includePlayerIds)
+      }
     }
 
     const stream = query.stream()

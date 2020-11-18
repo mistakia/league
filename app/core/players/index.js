@@ -18,6 +18,7 @@ export { Player, createPlayer } from './player'
 export {
   playerActions,
   playersRequestActions,
+  playersSearchActions,
   getPlayerActions,
   getProjectionsActions,
   putProjectionActions,
