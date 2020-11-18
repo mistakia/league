@@ -356,14 +356,16 @@ export function getPlayerStatus (state, { player, playerId }) {
         status.eligible.ps = true
       }
 
-      const reserve = isPlayerReserveEligible(state, { player })
-      if (reserve.ir && roster.hasOpenInjuredReserveSlot() &&
-        player.slot !== constants.slots.IR) {
-        status.reserve.ir = true
-      }
+      if (!status.protected) {
+        const reserve = isPlayerReserveEligible(state, { player })
+        if (reserve.ir && roster.hasOpenInjuredReserveSlot() &&
+          player.slot !== constants.slots.IR) {
+          status.reserve.ir = true
+        }
 
-      if (reserve.cov && player.slot !== constants.slots.COV) {
-        status.reserve.cov = true
+        if (reserve.cov && player.slot !== constants.slots.COV) {
+          status.reserve.cov = true
+        }
       }
     } else if (isPlayerOnPracticeSquad(state, { player })) {
       // make sure player is unprotected
