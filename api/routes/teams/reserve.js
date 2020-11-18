@@ -59,6 +59,11 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'player already on reserve' })
     }
 
+    // make sure player is not protected
+    if (rosterPlayer.slot === constants.slots.PSP) {
+      return res.status(400).send({ error: 'protected players are not reserve eligible' })
+    }
+
     // make sure player is reserve eligible
     const players = await db('player')
       .select(db.raw('player.*, min(players.status) as status, min(players.injury_status) as injury_status, min(players.injury_body_part) as injury_body_part'))

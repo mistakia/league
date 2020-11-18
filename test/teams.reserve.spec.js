@@ -452,6 +452,24 @@ describe('API /teams - reserve', function () {
       // TODO
     })
 
+    it('player is protected', async () => {
+      const player = await selectPlayer()
+      await addPlayer({ leagueId: 1, player, teamId: 1, userId: 1, slot: constants.slots.PSP })
+      await knex('players').insert({
+        player: player.player,
+        status: 'Injured Reserve'
+      })
+      const request = chai.request(server).post('/api/teams/1/reserve')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          player: player.player,
+          slot: constants.slots.IR,
+          leagueId: 1
+        })
+
+      await error(request, 'protected players are not reserve eligible')
+    })
+
     it('player not rostered on previous week roster', async () => {
       MockDate.set(start.clone().add('2', 'week').toDate())
       const player = await selectPlayer()
