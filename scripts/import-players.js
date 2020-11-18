@@ -90,7 +90,10 @@ const run = async () => {
       timestamp
     })
 
-    await db('player').insert(formatted)
+    await db('player').insert({
+      pos: row.pos1,
+      ...formatted
+    })
   }
 }
 
