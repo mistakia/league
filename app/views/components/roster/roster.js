@@ -128,15 +128,13 @@ export default class Roster extends React.Component {
     }
 
     if (league.ps) {
-      const slots = [constants.slots.PS, constants.slots.PSP]
-      for (const slot of slots) {
-        const players = r.practice
-        for (let i = 0; i < league.ps; i++) {
-          const { player } = players[i] || {}
-          rows.push(
-            <PlayerRosterRow key={`${slot}${i}`} {...{ playerId: player, slot, roster }} />
-          )
-        }
+      const slot = constants.slots.PS
+      const players = r.practice
+      for (let i = 0; i < league.ps; i++) {
+        const { player } = players[i] || {}
+        rows.push(
+          <PlayerRosterRow key={`${slot}${i}`} {...{ playerId: player, slot, roster }} />
+        )
       }
     }
 
