@@ -21,6 +21,10 @@ export const playerActions = {
   FETCH_PLAYERS_FULFILLED: 'FETCH_PLAYERS_FULFILLED',
   FETCH_PLAYERS_PENDING: 'FETCH_PLAYERS_PENDING',
 
+  SEARCH_PLAYERS_FAILED: 'SEARCH_PLAYERS_FAILED',
+  SEARCH_PLAYERS_PENDING: 'SEARCH_PLAYERS_PENDING',
+  SEARCH_PLAYERS_FULFILLED: 'SEARCH_PLAYERS_FULFILLED',
+
   GET_PLAYER_FAILED: 'GET_PLAYER_FAILED',
   GET_PLAYER_PENDING: 'GET_PLAYER_PENDING',
   GET_PLAYER_FULFILLED: 'GET_PLAYER_FULFILLED',
@@ -193,6 +197,29 @@ export const playerActions = {
     }
   }),
 
+  searchPlayersPending: opts => ({
+    type: playerActions.SEARCH_PLAYERS_PENDING,
+    payload: {
+      opts
+    }
+  }),
+
+  searchPlayersFulfilled: (opts, data) => ({
+    type: playerActions.SEARCH_PLAYERS_FULFILLED,
+    payload: {
+      opts,
+      data
+    }
+  }),
+
+  searchPlayersFailed: (opts, error) => ({
+    type: playerActions.SEARCH_PLAYERS_FAILED,
+    payload: {
+      opts,
+      error
+    }
+  }),
+
   getPlayerPending: opts => ({
     type: playerActions.GET_PLAYER_PENDING,
     payload: {
@@ -284,6 +311,12 @@ export const playerActions = {
       data
     }
   })
+}
+
+export const playersSearchActions = {
+  failed: playerActions.searchPlayersFailed,
+  fulfilled: playerActions.searchPlayersFulfilled,
+  pending: playerActions.searchPlayersPending
 }
 
 export const playersRequestActions = {
