@@ -51,6 +51,7 @@ export default class WaiverConfirmation extends React.Component {
 
     for (const rPlayer of players) {
       const r = new Roster({ roster: roster.toJS(), league })
+      if (rPlayer.slot === constants.slots.PSP) continue
       r.removePlayer(rPlayer.player)
       if (isActiveRoster) {
         if (r.hasOpenBenchSlot(player.pos)) drops.push(rPlayer)
