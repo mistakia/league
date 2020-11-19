@@ -362,6 +362,10 @@ describe('API /teams - add', function () {
       await error(request, 'Reserve player violation')
     })
 
+    it('drop protected practice squad player', async () => {
+      // TODO
+    })
+
     it('rookie free agent - before rookie draft has concluded', async () => {
       // TODO
     })
