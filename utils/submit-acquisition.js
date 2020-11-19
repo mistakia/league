@@ -100,8 +100,9 @@ module.exports = async function ({
   // verify team has bench space & passes roster constraints
   const rosterRow = await getRoster({ tid: teamId })
   const roster = new Roster({ roster: rosterRow, league })
-  const dropPlayer = roster.get(player)
+  let dropPlayer
   if (drop) {
+    dropPlayer = roster.get(drop)
     if (!dropPlayer) {
       throw new Error('invalid drop')
     }
