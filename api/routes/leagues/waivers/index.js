@@ -238,6 +238,11 @@ router.post('/?', async (req, res) => {
       if (!roster.has(drop)) {
         return res.status(400).send({ error: 'invalid drop' })
       }
+
+      const dropPlayer = roster.get(drop)
+      if (dropPlayer.slot === constants.slots.PSP) {
+        return res.status(400).send({ error: 'invalid drop' })
+      }
       roster.removePlayer(drop)
     }
     const hasSlot = type === constants.waivers.FREE_AGENCY_PRACTICE

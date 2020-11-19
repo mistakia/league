@@ -398,6 +398,10 @@ describe('API /waivers - free agency', function () {
       // TODO
     })
 
+    it('drop protected practice squad player', async () => {
+      // TODO
+    })
+
     it('rookie free agent waiver w/ full practice squad and no drop', async () => {
       const picks = 12 * 3
       MockDate.set(start.clone().subtract('2', 'month').add(picks, 'day').toDate())

@@ -22,6 +22,7 @@ export default class AddFreeAgentDialog extends React.Component {
 
     if (practice) {
       props.rosterPlayers.practice.forEach(p => {
+        if (p.slot === constants.slots.PSP) return
         const r = new Roster({ roster: props.roster.toJS(), league })
         r.removePlayer(p.player)
         if (r.hasOpenPracticeSquadSlot()) {

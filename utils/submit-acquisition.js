@@ -100,12 +100,15 @@ module.exports = async function ({
   // verify team has bench space & passes roster constraints
   const rosterRow = await getRoster({ tid: teamId })
   const roster = new Roster({ roster: rosterRow, league })
+  const dropPlayer = roster.get(player)
   if (drop) {
-    if (!roster.has(drop)) {
+    if (!dropPlayer) {
       throw new Error('invalid drop')
     }
 
-    roster.removePlayer(drop)
+    if (dropPlayer.slot !== constants.slots.PSP) {
+      roster.removePlayer(drop)
+    }
   }
 
   const hasSlot = roster.isEligibleForSlot({ slot, player, pos: playerRow.pos })
@@ -116,7 +119,7 @@ module.exports = async function ({
   const result = []
 
   // process release
-  if (drop) {
+  if (dropPlayer && dropPlayer.slot !== constants.slots.PSP) {
     const releaseData = await processRelease({
       player: drop,
       tid: teamId,
