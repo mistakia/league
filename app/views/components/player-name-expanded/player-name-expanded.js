@@ -30,8 +30,16 @@ function getClock ({ playDescription, clockTime, quarter }) {
 }
 
 function GameStatus ({ status, player }) {
-  if (!status || !status.game) {
+  if (!player || !player.player) {
     return null
+  }
+
+  if (!status || !status.game) {
+    return (
+      <div className='player__name-expanded-game bye'>
+        BYE
+      </div>
+    )
   }
 
   const opponent = player.team === status.game.h ? `v${status.game.v}` : `@${status.game.h}`
