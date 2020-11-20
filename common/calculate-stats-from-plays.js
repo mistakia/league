@@ -148,7 +148,6 @@ const calculateStatsFromPlays = ({ plays, qualifiers }) => {
     stats.pcay_pc = round(stats.pcay / stats.pc, 1) || 0
     stats._ypa = round(stats.py / stats.pa, 1) || 0
     stats.pyac_pc = round(stats.pyac / stats.pc, 1) || 0
-    stats._aypa = round(stats.pdot / stats.pa, 1) || 0
     // stats._adjypa
     stats._ypc = round(stats.py / stats.pc, 1) || 0
     // stats._ypg

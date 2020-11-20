@@ -6,7 +6,6 @@ const HeaderStatsPassingAiryards = () => (
     <div className='player__row-group-head'>Air Yards</div>
     <div className='player__row-group-body'>
       <PlayerHeader className='table__cell metric' label='AY' value='stats.pdot' />
-      <PlayerHeader className='table__cell metric' label='AY/A' value='stats._aypa' />
       <PlayerHeader className='table__cell metric' label='CAY/C' value='stats.pcay_pc' />
       <PlayerHeader className='table__cell metric' label='PACR' value='stats._pacr' />
     </div>

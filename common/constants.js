@@ -145,7 +145,6 @@ export const fullStats = [
   'pcay_pc', // completed air yards per completion
   'pyac_pc',
   '_ypa',
-  '_aypa', // air yards per attempt
   '_adjypa',
   '_ypc',
   '_ypg',
@@ -213,9 +212,9 @@ export const fullStats = [
   // advanced
   'mbt',
   'mbt_pt', // broken tackles per touch
-  '_fumlpra', // fumbles per rushing attempt
-  'rasucc_pra', // successful rush per attempt
-  'posra_pra', // possitive rush per attempt
+  '_fumlpra', // fumble rate
+  'rasucc_pra', // successful rush rate
+  'posra_pra', // possitive rush rate
 
   // usage
   '_stra', // share of team rushing attempts
@@ -253,7 +252,6 @@ export const qualifiers = {
   pcay_pc: passingQualifier,
   pyac_pc: passingQualifier,
   _ypa: passingQualifier,
-  _aypa: passingQualifier,
   _adjypa: passingQualifier,
   _ypc: passingQualifier,
   _pacr: passingQualifier,
