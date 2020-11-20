@@ -17,8 +17,17 @@ export default class Scoreboard {
 
   register ({ ws, userId, updated }) {
     this._log(`registering userId(${userId}) for scoreboard updates`)
-    if (!this._users.has(userId)) ws.on('close', () => this._users.delete(userId))
+    if (!this._users.has(userId)) ws.on('close', () => {
+      this._log(`removing userId(${userId}) from scoreboard`)
+      this._users.delete(userId)
+    })
     this._users.set(userId, updated)
+
+    const event = {
+      type: 'SCOREBOARD_REGISTER'
+    }
+
+    ws.send(JSON.stringify(event))
     if (!this._isPolling) this.poll()
   }
 
