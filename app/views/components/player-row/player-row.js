@@ -150,7 +150,6 @@ class PlayerRow extends Player {
       <div className='row__group'>
         <div className='row__group-body'>
           <PercentileMetric stats={stats} percentiles={percentiles} type='pdot' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='_aypa' />
           <PercentileMetric stats={stats} percentiles={percentiles} type='pcay_pc' />
           <PercentileMetric stats={stats} percentiles={percentiles} type='_pacr' />
         </div>
