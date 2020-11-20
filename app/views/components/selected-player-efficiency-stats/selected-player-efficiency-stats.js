@@ -146,12 +146,6 @@ const receiving = ({ stats, percentiles }) => (
       percentiles={percentiles}
       type='_ryacprec'
     />
-    <PercentileChart
-      title='Deep Target %'
-      stats={stats}
-      percentiles={percentiles}
-      type='dptrg_pct'
-    />
   </div>
 )
 
