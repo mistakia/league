@@ -31,7 +31,7 @@ const IS_PROD = process.env.NODE_ENV === 'production'
 if (IS_DEV) {
   debug.enable('api,notifications*,auction*,scoreboard*')
 } else if (IS_PROD) {
-  debug.enable('api*,notifications*,auction*')
+  debug.enable('api*,notifications*,auction*,scoreboard*')
 }
 
 const api = express()
