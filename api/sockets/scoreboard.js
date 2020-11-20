@@ -17,7 +17,7 @@ export default class Scoreboard {
 
   register ({ ws, userId, updated }) {
     this._log(`registering userId(${userId}) for scoreboard updates`)
-    if (!this._users.has(userId)) ws.on('close', () => {
+    ws.on('close', () => {
       this._log(`removing userId(${userId}) from scoreboard`)
       this._users.delete(userId)
     })
