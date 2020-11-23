@@ -1,4 +1,5 @@
 const express = require('express')
+const moment = require('moment')
 const router = express.Router({ mergeParams: true })
 const { constants, Roster } = require('../../../common')
 const { getRoster } = require('../../../utils')
@@ -125,6 +126,12 @@ router.post('/?', async (req, res, next) => {
 
     const leagues = await db('leagues').where({ uid: leagueId })
     const league = leagues[0]
+
+    // make sure trade deadline has not passed
+    const deadline = moment(league.tddate, 'X')
+    if (moment().isAfter(deadline)) {
+      return res.status(400).send({ error: 'deadline has passed' })
+    }
 
     const proposingTeamRosterRow = await getRoster({ tid: pid })
     const proposingTeamRoster = new Roster({ roster: proposingTeamRosterRow, league })

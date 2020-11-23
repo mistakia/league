@@ -3,6 +3,8 @@ process.env.NODE_ENV = 'test'
 
 const chai = require('chai')
 const chaiHTTP = require('chai-http')
+const MockDate = require('mockdate')
+const moment = require('moment')
 const server = require('../api')
 const knex = require('../db')
 
@@ -361,6 +363,22 @@ describe('API /trades', function () {
         })
 
       await error(request, 'player has poaching claim')
+    })
+
+    it('deadline has passed', async function () {
+      MockDate.set(moment('1606626001', 'X').toDate())
+      const request = chai.request(server)
+        .post('/api/leagues/1/trades')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          proposingTeamPlayers: [],
+          acceptingTeamPlayers: [],
+          pid: 1,
+          tid: 2,
+          leagueId: 1
+        })
+
+      await error(request, 'deadline has passed')
     })
   })
   // errors
