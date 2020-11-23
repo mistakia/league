@@ -1,4 +1,5 @@
 const API = require('groupme').Stateless
+const moment = require('moment')
 const express = require('express')
 const router = express.Router({ mergeParams: true })
 const { constants, Roster, toStringArray, nth } = require('../../../common')
@@ -108,6 +109,14 @@ router.post('/accept', async (req, res, next) => {
     const dropPlayers = acceptingTeamDropPlayers.concat(proposingTeamDropPlayerIds)
     const allPlayers = tradedPlayers.concat(dropPlayers)
     const leagues = await db('leagues').where({ uid: leagueId })
+    const league = leagues[0]
+
+    // make sure trade deadline has not passed
+    const deadline = moment(league.tddate, 'X')
+    if (moment().isAfter(deadline)) {
+      return res.status(400).send({ error: 'deadline has passed' })
+    }
+
     const sub = db('transactions')
       .select(db.raw('max(uid) as uid'))
       .whereIn('player', allPlayers)
@@ -120,8 +129,6 @@ router.post('/accept', async (req, res, next) => {
       .join('transactions', 'X.uid', 'transactions.uid')
       .join('player', 'transactions.player', 'player.player')
       .whereIn('player.player', allPlayers)
-
-    const league = leagues[0]
 
     // clear any existing poaching claims
     const activePoaches = await db('poaches')
