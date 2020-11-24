@@ -17,13 +17,23 @@ export function * generate ({ payload }) {
 
 export function * selectMatchup () {
   const state = yield select(getMatchups)
-  const matchups = state.get('items')
   const { teamId } = yield select(getApp)
   const scoreboard = yield select(getScoreboard)
   const week = scoreboard.get('week')
-  const matchup = matchups.find(m => (m.aid === teamId || m.hid === teamId) && m.week === week)
-  if (matchup) {
-    yield put(matchupsActions.select(matchup.uid))
+  if (week < 14) {
+    const matchups = state.get('items')
+    const matchup = matchups.find(m => m.tids.includes(teamId) && m.week === week)
+    if (matchup) {
+      yield put(matchupsActions.select(matchup.uid))
+    }
+  } else {
+    const playoffs = state.get('playoffs')
+    const filtered = playoffs.filter(m => m.week === week)
+    const matchup = filtered.find(m => m.tids.includes(teamId))
+    const first = filtered.first()
+    if (matchup || first) {
+      yield put(matchupsActions.select(matchup.uid || first.uid))
+    }
   }
 }
 

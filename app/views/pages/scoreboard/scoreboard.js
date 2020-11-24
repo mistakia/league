@@ -9,6 +9,8 @@ import ScoreboardTeam from '@components/scoreboard-team'
 import ScoreboardOverTime from '@components/scoreboard-over-time'
 import ScoreboardPlayByPlay from '@components/scoreboard-play-by-play'
 import ScoreboardSlots from '@components/scoreboard-slots'
+import ScoreboardTeams from '@components/scoreboard-teams'
+import { constants } from '@common'
 
 import './scoreboard.styl'
 
@@ -17,11 +19,22 @@ export default class ScoreboardPage extends React.Component {
     super(props)
 
     this.state = {
+      tid: props.matchup.tids[0] || props.matchup.hid,
       show: false
     }
   }
 
-  handleClick = () => {
+  componentWillReceiveProps = (nextProps) => {
+    if (nextProps.matchup.uid !== this.props.matchup.uid) {
+      this.setState({ tid: nextProps.matchup.tids[0] || nextProps.matchup.hid })
+    }
+  }
+
+  handleSelect = (tid) => {
+    this.setState({ tid })
+  }
+
+  handleBenchToggle = () => {
     this.setState({ show: !this.state.show })
   }
 
@@ -37,16 +50,18 @@ export default class ScoreboardPage extends React.Component {
             </div>
           </Grid>
           <Grid item xs={12}>
-            <ScoreboardScores />
+            {matchup.type === constants.matchups.H2H && <ScoreboardScores />}
+            {matchup.type === constants.matchups.TOURNAMENT && <ScoreboardTeams onClick={this.handleSelect} selected={this.state.tid} />}
           </Grid>
           <Grid container item xs={12} spacing={0}>
             <Grid item xs={12} md={9}>
               <div className='scoreboard__main'>
-                <ScoreboardTeam tid={matchup.aid} type='away' showBench={this.state.show} />
+                {matchup.type === constants.matchups.H2H &&
+                  <ScoreboardTeam tid={matchup.aid} type='away' showBench={this.state.show} />}
                 <ScoreboardSlots />
-                <ScoreboardTeam tid={matchup.hid} type='home' showBench={this.state.show} />
+                <ScoreboardTeam tid={this.state.tid} type='home' showBench={this.state.show} />
               </div>
-              <div className='scoreboard__bench cursor' onClick={this.handleClick}>
+              <div className='scoreboard__bench cursor' onClick={this.handleBenchToggle}>
                 Show Bench
               </div>
             </Grid>

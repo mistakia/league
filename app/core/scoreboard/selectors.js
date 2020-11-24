@@ -11,7 +11,7 @@ import {
 } from '@common'
 import { getGamelogForPlayer } from '@core/stats'
 import { getPlayerById } from '@core/players'
-import { getMatchupById } from '@core/matchups'
+import { getSelectedMatchup } from '@core/matchups'
 import { getGameByPlayerId, getGameByTeam } from '@core/schedule'
 import { getPlays } from '@core/plays'
 
@@ -47,19 +47,20 @@ export function getScoreboardUpdated (state) {
 }
 
 export function getStartersByMatchupId (state, { mid }) {
-  const matchup = getMatchupById(state, { mid })
+  const matchup = getSelectedMatchup(state)
   if (!matchup) {
     return {
       matchup: {},
       games: {},
-      home: [],
-      away: []
+      teams: []
     }
   }
 
-  const home = getStartersByTeamId(state, { tid: matchup.hid, week: matchup.week })
-  const away = getStartersByTeamId(state, { tid: matchup.aid, week: matchup.week })
-  const players = home.concat(away)
+  const teams = {}
+  matchup.tids.forEach(tid => {
+    teams[tid] = getStartersByTeamId(state, { tid, week: matchup.week })
+  })
+  const players = Object.values(teams).flat()
 
   const games = {}
   for (const player of players) {
@@ -70,7 +71,7 @@ export function getStartersByMatchupId (state, { mid }) {
     games[game.date].push(player)
   }
 
-  return { matchup, games, home, away }
+  return { matchup, games, teams }
 }
 
 export function getScoreboardGamelogByPlayerId (state, { playerId }) {
@@ -83,12 +84,13 @@ export function getScoreboardGamelogByPlayerId (state, { playerId }) {
 }
 
 export function getPlaysByMatchupId (state, { mid }) {
-  const matchup = getMatchupById(state, { mid })
+  const matchup = getSelectedMatchup(state)
   if (!matchup) return new List()
 
-  const homeStarters = getStartersByTeamId(state, { tid: matchup.hid, week: matchup.week })
-  const awayStarters = getStartersByTeamId(state, { tid: matchup.aid, week: matchup.week })
-  const players = homeStarters.concat(awayStarters)
+  const players = matchup.tids.reduce((arr, tid) => {
+    const starters = getStartersByTeamId(state, { tid, week: matchup.week })
+    return arr.concat(starters)
+  }, [])
   const gsisids = players.map(p => p.gsisid).filter(Boolean)
   if (!gsisids.length) return new List()
 
@@ -134,7 +136,6 @@ export function getPlaysByMatchupId (state, { mid }) {
         position: player.pos,
         league
       })
-      points[playerId].isHomePlayer = !!homeStarters.find(p => p.player === playerId)
     }
     const date = moment.tz(game.date, 'M/D/YYYY HH:mm', 'America/New_York')
     const time = moment.utc(`${date.utc().format('YYYY-MM-DD')} ${play.timeOfDay}`, 'YYYY-MM-DD HH:mm:ss')
