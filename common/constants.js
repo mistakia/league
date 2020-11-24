@@ -422,6 +422,11 @@ export const slotName = {
   [slots.PSP]: 'PS (P)'
 }
 
+export const matchups = {
+  H2H: 1,
+  TOURNAMENT: 2
+}
+
 export const fantasyTeamStats = [
   'wins',
   'losses',

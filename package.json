@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "cross-env START_HOT=1 NODE_ENV=development webpack-dev-server --config configs/webpack.config.dev.babel.js",
+    "start": "cross-env START_HOT=1 NODE_ENV=development webpack-dev-server --max_old_space_size=4096 --config configs/webpack.config.dev.babel.js",
     "lint": "$(npm bin)/standard",
     "test": "NODE_ENV=test TEST=all mocha -r esm --exit --exclude test/importer-espn.spec.js",
     "start:api": "node server.js",

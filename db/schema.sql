@@ -1462,6 +1462,24 @@ CREATE TABLE `matchups` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `playoffs`
+--
+
+DROP TABLE IF EXISTS `playoffs`;
+
+CREATE TABLE `playoffs` (
+  `uid` int(6) NOT NULL,
+  `tid` int(6) NOT NULL,
+  `lid` int(6) NOT NULL,
+  `year` int(4) NOT NULL,
+  `week` tinyint(2) NOT NULL,
+  UNIQUE KEY `tid` (`tid`,`uid`,`year`),
+  KEY `lid` (`lid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `projections`
 --
 

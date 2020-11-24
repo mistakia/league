@@ -1,6 +1,5 @@
-import { Map } from 'immutable'
-
 import { getTeamById } from '@core/teams'
+import { createMatchup } from './matchup'
 
 export function getMatchups (state) {
   return state.get('matchups')
@@ -24,20 +23,21 @@ export function getFilteredMatchups (state) {
 export function getSelectedMatchup (state) {
   const matchups = state.get('matchups')
   const matchupId = matchups.get('selected')
-  if (!matchupId) return new Map()
+  if (!matchupId) return createMatchup()
 
-  const items = matchups.get('items')
-  return items.find(m => m.uid === matchupId)
+  const week = state.getIn(['scoreboard', 'week'])
+  if (week < 14) {
+    const items = matchups.get('items')
+    return items.find(m => m.uid === matchupId)
+  } else {
+    const items = matchups.get('playoffs')
+    return items.find(m => m.uid === matchupId)
+  }
 }
 
-export function getSelectedMatchupHomeTeam (state) {
+export function getSelectedMatchupTeams (state) {
   const matchup = getSelectedMatchup(state)
-  return getTeamById(state, { tid: matchup.hid })
-}
-
-export function getSelectedMatchupAwayTeam (state) {
-  const matchup = getSelectedMatchup(state)
-  return getTeamById(state, { tid: matchup.aid })
+  return matchup.tids.map(tid => getTeamById(state, { tid }))
 }
 
 export function getMatchupsForSelectedWeek (state) {
