@@ -41,21 +41,15 @@ router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const { leagueId } = req.params
-    const { year = constants.season.year, teamId } = req.query
+    const { year = constants.season.year } = req.query
 
-    let query = db('matchups')
+    const matchups = await db('matchups')
       .where({ lid: leagueId, year })
       .orderBy('week', 'asc')
 
-    if (teamId) {
-      query = query.where(function () {
-        this.where('aid', teamId).orWhere('hid', teamId)
-      })
-    }
+    const playoffs = await db('playoffs').where({ lid: leagueId, year })
 
-    const matchups = await query
-
-    res.send(matchups)
+    res.send({ matchups, playoffs })
   } catch (err) {
     logger(err)
     res.status(500).send({ error: err.toString() })

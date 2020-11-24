@@ -13,7 +13,24 @@ Highcharts.setOptions({
 
 export default class ScoreboardOverTime extends React.Component {
   render = () => {
-    const { home, away } = this.props
+    const { data } = this.props
+    const series = []
+    const colors = ['red', 'black', 'green', 'yellow']
+    data.forEach((team, index) => {
+      series.push({
+        name: team.team.name,
+        data: team.data,
+        color: colors[index]
+      })
+
+      series.push({
+        name: `${team.team.name} Projection`,
+        data: team.projection,
+        dashStyle: 'DashDot',
+        color: colors[index]
+      })
+    })
+
     const options = {
       chart: {
         zoomType: 'x',
@@ -39,25 +56,7 @@ export default class ScoreboardOverTime extends React.Component {
       credits: {
         enabled: false
       },
-      series: [{
-        name: home.name,
-        data: this.props.homeData,
-        color: 'red'
-      }, {
-        name: away.name,
-        data: this.props.awayData,
-        color: 'black'
-      }, {
-        name: `${home.name} Projection`,
-        data: this.props.homeProjection,
-        dashStyle: 'DashDot',
-        color: 'red'
-      }, {
-        name: `${away.name} Projection`,
-        data: this.props.awayProjection,
-        dashStyle: 'DashDot',
-        color: 'black'
-      }]
+      series
     }
 
     return (
