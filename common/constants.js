@@ -962,7 +962,9 @@ export const jobs = {
   DATA_ARMCHAIR: 31,
   DATA_FOOTBALL_OUTSIDERS: 32,
 
-  DRAFTKINGS_ODDS: 33
+  DRAFTKINGS_ODDS: 33,
+  BETONLINE_ODDS: 34,
+  PROJECTIONS_4FOR4: 35
 }
 
 export const jobDetails = {
@@ -1036,5 +1038,6 @@ export const sources = {
   FANTASY_FOOTBALL_NERD: 12,
   NUMBERFIRE: 13,
   DRAFT_KINGS: 14,
-  BETONLINE: 15
+  BETONLINE: 15,
+  '4FOR4': 16
 }
