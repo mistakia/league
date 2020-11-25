@@ -37,7 +37,6 @@
     "gaussian": "errcw/gaussian#3b3e49c",
     "groupme": "^0.5.8",
     "hotkeys-js": "^3.7.6",
-    "jsonfile": "^6.1.0",
     "jsonwebtoken": "^8.5.1",
     "knex": "^0.21.1",
     "marked": "^1.1.0",
