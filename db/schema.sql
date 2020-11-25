@@ -2151,6 +2151,56 @@ CREATE TABLE `footballoutsiders` (
   UNIQUE KEY `team` (`team`, `week`, `year`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rankings`
+--
+
+DROP TABLE IF EXISTS `rankings`;
+
+CREATE TABLE `rankings` (
+  `player` varchar(7) NOT NULL,
+  `pos` varchar(3) NOT NULL,
+  `wk` tinyint(2) NOT NULL,
+  `year` int(4) NOT NULL,
+  `min` int(4) DEFAULT NULL,
+  `max` int(4) DEFAULT NULL,
+  `avg` int(4) DEFAULT NULL,
+  `ornk` int(4) DEFAULT NULL,
+  `prnk` int(4) DEFAULT NULL,
+  `pct` int(4) DEFAULT NULL,
+  `type` int(2) DEFAULT NULL, -- ADP or Ranking
+  `ppr` int(2) DEFAULT NULL,
+  `sf` tinyint(1) DEFAULT NULL,
+  `dynasty` tinyint(1) DEFAULT NULL,
+  `rookie` tinyint(2) DEFAULT NULL,
+  `sourceid` int(6) NOT NULL,
+  `timestamp` int(11) DEFAULT NULL,
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `props`
+--
+
+DROP TABLE IF EXISTS `props`;
+
+CREATE TABLE `props` (
+  `player` varchar(7) NOT NULL,
+  `wk` tinyint(2) NOT NULL,
+  `year` int(4) NOT NULL,
+  `type` tinyint(3) NOT NULL,
+  `id` varchar(100) DEFAULT NULL,
+  `ln` decimal(4,1) NOT NULL,
+  `o` decimal(5,2) NOT NULL,
+  `u` decimal(5,2) NOT NULL,
+  `sourceid` int(6) NOT NULL,
+  `timestamp` int(11) NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
