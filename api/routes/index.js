@@ -12,6 +12,7 @@ const schedule = require('./schedule')
 const status = require('./status')
 const scoreboard = require('./scoreboard')
 const errors = require('./errors')
+const odds = require('./odds')
 
 module.exports = {
   auth,
@@ -27,5 +28,6 @@ module.exports = {
   plays,
   projections,
   scoreboard,
-  stats
+  stats,
+  odds
 }

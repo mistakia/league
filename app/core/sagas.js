@@ -24,6 +24,7 @@ import { playSagas } from './plays'
 import { gamelogSagas } from './gamelogs'
 import { forecastSagas } from './forecast'
 import { standingsSagas } from './standings'
+import { propSagas } from './props'
 
 export default function * rootSaga () {
   yield all([
@@ -50,6 +51,7 @@ export default function * rootSaga () {
     ...playSagas,
     ...gamelogSagas,
     ...forecastSagas,
-    ...standingsSagas
+    ...standingsSagas,
+    ...propSagas
   ])
 }
