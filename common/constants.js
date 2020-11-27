@@ -1023,6 +1023,22 @@ export const oddTypes = {
   GAME_TOUCHDOWNDS: 12
 }
 
+export const oddTypeDesc = {
+  1: 'Pass (seas)',
+  2: 'Rush (seas)',
+  3: 'Recv (seas)',
+
+  4: 'Pass',
+  5: 'Recv',
+  6: 'Rush',
+  7: 'Comp',
+  8: 'Pass TDs',
+  9: 'Rec',
+  10: 'Int',
+  11: 'Carry',
+  12: 'TDs'
+}
+
 export const sources = {
   FANTASY_SHARKS: 1,
   CBS: 2,
@@ -1040,4 +1056,23 @@ export const sources = {
   DRAFT_KINGS: 14,
   BETONLINE: 15,
   '4FOR4': 16
+}
+
+export const sourcesTitle = {
+  1: 'Fantasy Sharks',
+  2: 'CBS',
+  3: 'ESPN',
+  4: 'NFL',
+  5: 'FFToday',
+  6: 'PFF',
+  7: 'David Dodds (FBG)',
+  8: 'Bob Henry (FBG)',
+  9: 'Jason Wood (FBG)',
+  10: 'Maurile Tremblay (FBG)',
+  11: 'Sigmund Bloom (FBG)',
+  12: 'Fantasy Football Nerd',
+  13: 'Numberfire',
+  14: 'Draft Kings',
+  15: 'BetOnline',
+  16: '4For4'
 }

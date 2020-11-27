@@ -254,6 +254,10 @@ export const api = {
   getScoreboard (params) {
     const url = `${BASE_URL}/scoreboard?${queryString.stringify(params)}`
     return { url }
+  },
+  getProps () {
+    const url = `${BASE_URL}/odds/props`
+    return { url }
   }
 }
 
