@@ -70,6 +70,7 @@ import {
 import { notificationActions } from '@core/notifications'
 import { getScoreboardActions } from '@core/scoreboard'
 import { postErrorActions } from '@core/errors'
+import { getPropsActions } from '@core/props'
 
 function * fetchAPI (apiFunction, actions, opts = {}) {
   const { token } = yield select(getApp)
@@ -179,3 +180,5 @@ export const fetchScoreboard = fetch.bind(null, api.getScoreboard, getScoreboard
 
 export const postError = fetch.bind(null, api.postError, postErrorActions)
 export const getStatus = fetch.bind(null, api.getStatus, getStatusActions)
+
+export const fetchProps = fetch.bind(null, api.getProps, getPropsActions)

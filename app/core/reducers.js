@@ -23,6 +23,7 @@ import { statusReducer } from './status'
 import { scoreboardReducer } from './scoreboard'
 import { playsReducer } from './plays'
 import { gamelogsReducer } from './gamelogs'
+import { propsReducer } from './props'
 
 const rootReducer = (history) => {
   return combineReducers({
@@ -48,7 +49,8 @@ const rootReducer = (history) => {
     status: statusReducer,
     scoreboard: scoreboardReducer,
     plays: playsReducer,
-    gamelogs: gamelogsReducer
+    gamelogs: gamelogsReducer,
+    props: propsReducer
   })
 }
 

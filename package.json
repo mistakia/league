@@ -47,6 +47,7 @@
     "mysql": "^2.18.1",
     "node-cache": "^5.1.2",
     "node-fetch": "^2.6.0",
+    "oddslib": "^1.0.3",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-sortable-hoc": "^1.11.0",

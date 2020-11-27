@@ -1,0 +1,39 @@
+.list__head
+  flex 1
+  display flex
+  flex-direction column
+  width 100%
+
+.list__filters
+  flex 0 0 auto
+  display flex
+  flex-direction column
+  width 100%
+
+.list__headers
+  flex 1
+  height 40px
+  display flex
+  align-items center
+  font-weight 500
+  border-bottom 1px solid $borderColor
+  border-left 4px solid transparent
+
+.item
+  height 30px
+  display flex
+
+.item__col-group
+  flex 1
+  display flex
+
+.item__col
+  flex 1
+  min-width 60px
+  max-width 350px
+  display flex
+  align-items center
+  height 100%
+  &.lead
+    min-width 150px
+    padding-left 16px

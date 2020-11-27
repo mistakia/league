@@ -96,6 +96,7 @@ api.use('/api/*', (err, req, res, next) => {
   }
   next()
 })
+api.use('/api/odds', routes.odds)
 api.use('/api/scoreboard', routes.scoreboard)
 api.use('/api/me', routes.me)
 api.use('/api/teams', routes.teams)
