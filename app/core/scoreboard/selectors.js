@@ -97,6 +97,8 @@ export function getPlaysByMatchupId (state, { mid }) {
   const plays = getPlays(state, { week: matchup.week })
   // TODO - match/filter dst plays
   const filteredPlays = plays.valueSeq().toList().filter(p => {
+    if (!p.playStats) return false
+
     const matchSingleGsis = p.playStats.find(p => gsisids.includes(p.gsisId))
     if (matchSingleGsis) return true
 

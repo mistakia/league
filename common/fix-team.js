@@ -1,4 +1,6 @@
 export default function (team) {
+  if (!team) return
+
   team = team.toUpperCase()
 
   switch (team) {
