@@ -134,8 +134,11 @@ export function calculate ({
     }
 
     // calculate all play record
-    const scores = Object.values(result).map(p => p.points.weeks[week])
+
     for (const tid of tids) {
+      const scores = Object.values(result)
+        .filter(p => p.tid !== tid)
+        .map(p => p.points.weeks[week])
       const score = result[tid].points.weeks[week]
       result[tid].stats.apWins += scores.filter(p => p < score).length
       result[tid].stats.apLosses += scores.filter(p => p > score).length
