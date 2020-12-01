@@ -21,17 +21,8 @@ const run = async () => {
 
   if (!constants.season.isRegularSeason) {
     throw new Error('outside regular season')
-  } else {
-    const now = moment.tz('America/New_York')
-    // do not run on tuesdays
-    if (now.day() === 2) {
-      return
-    }
-
-    // do not run before 2:59pm on wednesday
-    if (now.day() === 3 && now.hour() < 14 && now.minute() < 59) {
-      return
-    }
+  } else if (constants.season.isWaiverPeriod) {
+    return
   }
 
   // get leagueIds with pending faab waivers
