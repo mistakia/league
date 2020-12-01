@@ -20,16 +20,8 @@ const run = async () => {
   const timestamp = Math.round(Date.now() / 1000)
 
   const now = moment.tz('America/New_York')
-  if (constants.season.isRegularSeason) {
-    // do not run on tuesdays
-    if (now.day() === 2) {
-      return
-    }
-
-    // do not run before 3:05pm on wednesday
-    if (now.day() === 3 && now.hour() < 15 && now.minute() < 5) {
-      return
-    }
+  if (constants.season.isRegularSeason && constants.season.isWaiverPeriod) {
+    return
   }
 
   // get leagueIds with pending practice squad waivers
