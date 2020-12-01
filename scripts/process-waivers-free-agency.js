@@ -1,6 +1,5 @@
 // eslint-disable-next-line
 require = require('esm')(module /*, options*/)
-const moment = require('moment-timezone')
 const debug = require('debug')
 
 const db = require('../db')
