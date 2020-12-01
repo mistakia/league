@@ -94,19 +94,10 @@ export function teamsReducer (state = initialState, { payload, type }) {
 
     case standingsActions.SET_STANDINGS:
       return state.withMutations(state => {
-        for (const teamId in payload.standings) {
-          const t = payload.standings[teamId]
+        for (const teamId in payload.teams) {
+          const t = payload.teams[teamId]
           state.updateIn([t.tid], team => team.merge({
-            wins: t.wins,
-            losses: t.losses,
-            ties: t.ties,
-            pointsFor: t.pointsFor,
-            pointsAgainst: t.pointsAgainst,
-            potentialPointsFor: t.potentialPointsFor,
-            draftOrderIndex: t.draftOrderIndex,
-            allPlayWins: t.allPlayWins,
-            allPlayLosses: t.allPlayLosses,
-            allPlayTies: t.allPlayTies
+            stats: new Map(t.stats)
           }))
         }
       })

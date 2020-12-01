@@ -1,32 +1,26 @@
 import React from 'react'
 import Container from '@material-ui/core/Container'
 
-import { constants, toPercent } from '@common'
+import { toPercent } from '@common'
 import PageLayout from '@layouts/page'
 
 import './standings.styl'
-
-const gs = constants.season.week - 1
 
 function StandingsTeam ({ team }) {
   return (
     <div className='table__row'>
       <div className='table__cell player__item-name'>{team.name}</div>
-      <div className='table__cell metric'>{team.wins}-{team.losses}-{team.ties}</div>
-      <div className='table__cell metric'>{(team.pointsFor || 0).toFixed(1)}</div>
-      <div className='table__cell metric'>{(team.pointsAgainst || 0).toFixed(1)}</div>
-      <div className='table__cell metric'>{((team.pointsFor / gs) || 0).toFixed(1)}</div>
-      <div className='table__cell metric'>{((team.pointsAgainst / gs) || 0).toFixed(1)}</div>
+      <div className='table__cell metric'>{team.getIn(['stats', 'wins'], 0)}-{team.getIn(['stats', 'losses'], 0)}-{team.getIn(['stats', 'ties'], 0)}</div>
+      <div className='table__cell metric'>{team.getIn(['stats', 'pf'], 0).toFixed(1)}</div>
       <div className='table__cell metric'>{toPercent(team.playoffOdds)}</div>
-      <div className='table__cell metric'>{(team.potentialPointsFor || 0).toFixed(1)}</div>
-      <div className='table__cell metric'>{toPercent(team.pointsFor / team.potentialPointsFor)}</div>
-      <div className='table__cell metric'>{(team.draftOrderIndex || 0).toFixed(2)}</div>
+      <div className='table__cell metric'>{toPercent(team.byeOdds)}</div>
+      <div className='table__cell metric'>{team.getIn(['stats', 'doi'], 0).toFixed(2)}</div>
     </div>
   )
 }
 
 function Standings ({ teams, title }) {
-  const sorted = teams.sort((a, b) => b.wins - a.wins || b.pointsFor - a.pointsFor)
+  const sorted = teams.sort((a, b) => b.getIn(['stats', 'wins'], 0) - a.getIn(['stats', 'wins'], 0) || b.getIn(['stats', 'pf'], 0) - a.getIn(['stats', 'pf'], 0))
 
   const overallRows = []
   for (const [index, team] of sorted.entries()) {
@@ -43,12 +37,8 @@ function Standings ({ teams, title }) {
           <div className='table__cell player__item-name'>Team</div>
           <div className='table__cell metric'>Rec</div>
           <div className='table__cell metric'>PF</div>
-          <div className='table__cell metric'>PA</div>
-          <div className='table__cell metric'>PF/G</div>
-          <div className='table__cell metric'>PA/G</div>
           <div className='table__cell metric'>P Odds</div>
-          <div className='table__cell metric'>PP</div>
-          <div className='table__cell metric'>PP%</div>
+          <div className='table__cell metric'>Bye Odds</div>
           <div className='table__cell metric'>DOI</div>
         </div>
       </div>
