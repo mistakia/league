@@ -1,6 +1,5 @@
 // eslint-disable-next-line
 require = require('esm')(module /*, options*/)
-const moment = require('moment-timezone')
 const debug = require('debug')
 
 const db = require('../db')
@@ -19,7 +18,6 @@ if (process.env.NODE_ENV !== 'test') {
 const run = async () => {
   const timestamp = Math.round(Date.now() / 1000)
 
-  const now = moment.tz('America/New_York')
   if (constants.season.isRegularSeason && constants.season.isWaiverPeriod) {
     return
   }
