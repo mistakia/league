@@ -76,10 +76,10 @@ export function simulate ({
     // process standings, combine with current standings
     for (const tid in rosters) {
       const team = teams[tid]
-      standings[tid].wins += team.wins
-      standings[tid].losses += team.losses
-      standings[tid].ties += team.ties
-      standings[tid].pointsFor += team.pointsFor
+      standings[tid].wins += team.stats.wins
+      standings[tid].losses += team.stats.losses
+      standings[tid].ties += team.stats.ties
+      standings[tid].pointsFor += team.stats.pf
     }
 
     // determine division winners

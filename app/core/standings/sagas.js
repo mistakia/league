@@ -19,7 +19,7 @@ export function * calculate () {
     active[week] = {}
     for (const team of teams.valueSeq()) {
       const startingPlayers = yield select(getStartersByTeamId, { tid: team.uid, week })
-      starters[week][team.uid] = startingPlayers.map(p => ({ player: p.player, pos: p.pos }))
+      starters[week][team.uid] = startingPlayers.map(p => ({ player: p.player, pos: p.pos, slot: p.slot }))
 
       const activePlayers = yield select(getActivePlayersByTeamId, { tid: team.uid, week })
       active[week][team.uid] = activePlayers.map(p => ({ player: p.player, pos: p.pos }))

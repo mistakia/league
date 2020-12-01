@@ -1,4 +1,5 @@
-import { Record, List } from 'immutable'
+import { Record, List, Map } from 'immutable'
+import { constants } from '@common'
 
 export const Team = new Record({
   uid: null,
@@ -16,20 +17,7 @@ export const Team = new Record({
   teamvoice: 0,
   leaguetext: 0,
   picks: new List(),
-
-  wins: null,
-  losses: null,
-  ties: null,
-
-  pointsFor: null,
-  pointsAgainst: null,
-  potentialPointsFor: null,
-
-  draftOrderIndex: null,
-
-  allPlayWins: null,
-  allPlayLosses: null,
-  allPlayTies: null,
+  stats: new Map(constants.createFantasyTeamStats()),
 
   playoffOdds: null,
   divisionOdds: null,

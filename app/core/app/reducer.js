@@ -5,6 +5,7 @@ import Bugsnag from '@bugsnag/js'
 import { DEFAULT_LEAGUE_ID } from '@core/constants'
 import { appActions } from './actions'
 import { settingActions } from '@core/settings'
+import { standingsActions } from '@core/standings'
 
 const initialState = new Record({
   token: null,
@@ -22,7 +23,8 @@ const initialState = new Record({
   text: 0,
   voice: 0,
   teamIds: new List(),
-  leagueIds: new List([DEFAULT_LEAGUE_ID])
+  leagueIds: new List([DEFAULT_LEAGUE_ID]),
+  teamPercentiles: {}
 })
 
 export function appReducer (state = initialState(), { payload, type }) {
@@ -41,6 +43,9 @@ export function appReducer (state = initialState(), { payload, type }) {
       return state.merge({
         isPending: false
       })
+
+    case standingsActions.SET_STANDINGS:
+      return state.merge({ teamPercentiles: payload.percentiles })
 
     case appActions.AUTH_FULFILLED:
       Bugsnag.setUser(payload.data.user.id, payload.data.user.email)

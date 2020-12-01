@@ -422,6 +422,33 @@ export const slotName = {
   [slots.PSP]: 'PS (P)'
 }
 
+export const fantasyTeamStats = [
+  'wins',
+  'losses',
+  'ties',
+
+  'apWins',
+  'apLosses',
+  'apTies',
+
+  'pf',
+  'pa',
+  'pdiff',
+  'pp',
+  'pp_pct',
+
+  'pmax',
+  'pmin',
+  'pdev',
+
+  'doi',
+
+  ...Object.values(slots).map(s => `pSlot${s}`),
+  ...positions.map(p => `pPos${p}`)
+]
+
+export const createFantasyTeamStats = () => fantasyTeamStats.reduce((o, key) => ({ ...o, [key]: 0 }), {})
+
 export const waivers = {
   FREE_AGENCY: 1,
   POACH: 2,
