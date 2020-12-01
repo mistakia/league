@@ -17,8 +17,8 @@ export default class DashboardTeamSummaryRecord extends React.Component {
       const item = (
         <tr key={t.uid}>
           <td>{t.name}</td>
-          <td>{t.wins}-{t.losses}-{t.ties}</td>
-          <td>{(t.pointsFor || 0).toFixed(1)}</td>
+          <td>{t.getIn(['stats', 'wins'], 0)}-{t.getIn(['stats', 'losses'], 0)}-{t.getIn(['stats', 'ties'], 0)}</td>
+          <td>{t.getIn(['stats', 'pf'], 0).toFixed(1)}</td>
         </tr>
       )
 
@@ -34,7 +34,7 @@ export default class DashboardTeamSummaryRecord extends React.Component {
               Record
             </Grid>
             <Grid item xs={4}>
-              {team.wins}-{team.losses}-{team.ties} (<Rank rank={rank} size={teams.size} />)
+              {team.getIn(['stats', 'wins'], 0)}-{team.getIn(['stats', 'losses'], 0)}-{team.getIn(['stats', 'ties'], 0)} (<Rank rank={rank} size={teams.size} />)
             </Grid>
           </Grid>
         </AccordionSummary>

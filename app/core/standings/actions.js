@@ -1,10 +1,11 @@
 export const standingsActions = {
   SET_STANDINGS: 'SET_STANDINGS',
 
-  setStandings: standings => ({
+  setStandings: ({ teams, percentiles }) => ({
     type: standingsActions.SET_STANDINGS,
     payload: {
-      standings
+      teams,
+      percentiles
     }
   })
 }
