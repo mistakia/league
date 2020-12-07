@@ -24,11 +24,11 @@ export default class Season {
     }
 
     const now = this.now
-    if (now.day() === 2 || now.day() === 3) { // is Tuesday
+    if (now.day() === 2) { // is Tuesday
       return true
     }
 
-    if (now.day() === 4 && now.hour() < 15) { // is Wednesday before 3PM
+    if (now.day() === 3 && now.hour() < 15) { // is Wednesday before 3PM
       return true
     }
 
