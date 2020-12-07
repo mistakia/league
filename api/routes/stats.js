@@ -23,10 +23,9 @@ router.get('/teams', async (req, res) => {
       .groupBy('Group1')
       .whereIn('game.seas', years)
       .stream()
-
+    req.on('close', stream.end.bind(stream))
     res.set('Content-Type', 'application/json')
     stream.pipe(JSONStream.stringify()).pipe(res)
-    req.on('close', stream.end.bind(stream))
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })
@@ -42,10 +41,9 @@ router.get('/gamelogs/teams', async (req, res) => {
       .select(db.raw(constants.teamStats.map(s => `team.${s}`).join(', ')))
       .where('game.seas', constants.season.year)
       .stream()
-
+    req.on('close', stream.end.bind(stream))
     res.set('Content-Type', 'application/json')
     stream.pipe(JSONStream.stringify()).pipe(res)
-    req.on('close', stream.end.bind(stream))
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })
@@ -56,9 +54,9 @@ router.get('/gamelogs/players', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const stream = db('gamelogs').where('year', constants.season.year).stream()
+    req.on('close', stream.end.bind(stream))
     res.set('Content-Type', 'application/json')
     stream.pipe(JSONStream.stringify()).pipe(res)
-    req.on('close', stream.end.bind(stream))
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })

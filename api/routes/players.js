@@ -67,9 +67,9 @@ router.get('/?', async (req, res) => {
     }
 
     const stream = query.stream()
+    req.on('close', stream.end.bind(stream))
     res.set('Content-Type', 'application/json')
     stream.pipe(JSONStream.stringify()).pipe(res)
-    req.on('close', stream.end.bind(stream))
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })
