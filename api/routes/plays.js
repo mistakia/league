@@ -13,9 +13,9 @@ router.get('/?', async (req, res) => {
   try {
     const query = getPlayByPlayQuery(db)
     const stream = query.where('nflPlay.season', constants.season.year).stream()
+    req.on('close', stream.end.bind(stream))
     res.set('Content-Type', 'application/json')
     stream.pipe(JSONStream.stringify()).pipe(res)
-    req.on('close', stream.end.bind(stream))
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })
@@ -25,23 +25,18 @@ router.get('/?', async (req, res) => {
 router.get('/stats', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    const plays = await db('nflPlay')
-      .select('esbid')
-      .where('season', constants.season.year)
-      .groupBy('esbid')
-    const esbids = plays.map(p => p.esbid)
     const stream = db('nflPlayStat')
       .select('nflPlayStat.*', 'nflPlay.week')
       .leftJoin('nflPlay', function () {
         this.on('nflPlayStat.esbid', '=', 'nflPlay.esbid')
           .andOn('nflPlayStat.playId', '=', 'nflPlay.playId')
       })
-      .whereIn('nflPlayStat.esbid', esbids)
+      .where('nflPlay.season', constants.season.year)
       .where('nflPlayStat.valid', 1)
       .stream()
+    req.on('close', stream.end.bind(stream))
     res.set('Content-Type', 'application/json')
     stream.pipe(JSONStream.stringify()).pipe(res)
-    req.on('close', stream.end.bind(stream))
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })
@@ -117,9 +112,9 @@ router.get('/charted', async (req, res) => {
     }
 
     const stream = pbpQuery.stream()
+    req.on('close', stream.end.bind(stream))
     res.set('Content-Type', 'application/json')
     stream.pipe(JSONStream.stringify()).pipe(res)
-    req.on('close', stream.end.bind(stream))
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })
