@@ -434,7 +434,10 @@ export const fantasyTeamStats = [
   'pf',
   'pa',
   'pdiff',
+
   'pp',
+  'pw',
+  'pl',
   'pp_pct',
 
   'pmax',
