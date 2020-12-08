@@ -118,15 +118,28 @@ export function calculate ({
       const homeScore = result[m.hid].points.weeks[week]
       const awayScore = result[m.aid].points.weeks[week]
 
+      const pHomeScore = result[m.hid].potentialPoints[week]
+      const pAwayScore = result[m.aid].potentialPoints[week]
+
       result[m.hid].stats.pa += awayScore
       result[m.aid].stats.pa += homeScore
 
       if (homeScore > awayScore) {
         result[m.hid].stats.wins += 1
         result[m.aid].stats.losses += 1
+
+        if (pAwayScore > homeScore) {
+          result[m.aid].stats.pw += 1
+          result[m.hid].stats.pl += 1
+        }
       } else if (homeScore < awayScore) {
         result[m.hid].stats.losses += 1
         result[m.aid].stats.wins += 1
+
+        if (pHomeScore > awayScore) {
+          result[m.hid].stats.pw += 1
+          result[m.aid].stats.pl += 1
+        }
       } else {
         result[m.hid].stats.ties += 1
         result[m.aid].stats.ties += 1
