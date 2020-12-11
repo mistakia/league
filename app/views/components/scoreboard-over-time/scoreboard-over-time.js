@@ -15,7 +15,7 @@ export default class ScoreboardOverTime extends React.Component {
   render = () => {
     const { data } = this.props
     const series = []
-    const colors = ['red', 'black', 'green', 'yellow']
+    const colors = ['red', 'black', 'green', 'blue']
     data.forEach((team, index) => {
       series.push({
         name: team.team.name,
