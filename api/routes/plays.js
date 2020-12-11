@@ -1,6 +1,5 @@
 const express = require('express')
 const router = express.Router()
-const JSONStream = require('JSONStream')
 
 const {
   getChartedPlayByPlayQuery,
@@ -12,10 +11,8 @@ router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const query = getPlayByPlayQuery(db)
-    const stream = query.where('nflPlay.season', constants.season.year).stream()
-    req.on('close', stream.end.bind(stream))
-    res.set('Content-Type', 'application/json')
-    stream.pipe(JSONStream.stringify()).pipe(res)
+    const data = await query.where('nflPlay.season', constants.season.year)
+    res.send(data)
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })
@@ -25,7 +22,7 @@ router.get('/?', async (req, res) => {
 router.get('/stats', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    const stream = db('nflPlayStat')
+    const data = await db('nflPlayStat')
       .select('nflPlayStat.*', 'nflPlay.week')
       .leftJoin('nflPlay', function () {
         this.on('nflPlayStat.esbid', '=', 'nflPlay.esbid')
@@ -33,10 +30,7 @@ router.get('/stats', async (req, res) => {
       })
       .where('nflPlay.season', constants.season.year)
       .where('nflPlayStat.valid', 1)
-      .stream()
-    req.on('close', stream.end.bind(stream))
-    res.set('Content-Type', 'application/json')
-    stream.pipe(JSONStream.stringify()).pipe(res)
+    res.send(data)
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })
@@ -111,10 +105,8 @@ router.get('/charted', async (req, res) => {
       pbpQuery = pbpQuery.whereIn('pbp.dwn', downs)
     }
 
-    const stream = pbpQuery.stream()
-    req.on('close', stream.end.bind(stream))
-    res.set('Content-Type', 'application/json')
-    stream.pipe(JSONStream.stringify()).pipe(res)
+    const data = await pbpQuery
+    res.send(data)
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })
