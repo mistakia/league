@@ -1,7 +1,6 @@
 import { constants } from '../../common'
 const express = require('express')
 const router = express.Router()
-const JSONStream = require('JSONStream')
 
 router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
@@ -66,10 +65,8 @@ router.get('/?', async (req, res) => {
       }
     }
 
-    const stream = query.stream()
-    req.on('close', stream.end.bind(stream))
-    res.set('Content-Type', 'application/json')
-    stream.pipe(JSONStream.stringify()).pipe(res)
+    const data = await query
+    res.send(data)
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })

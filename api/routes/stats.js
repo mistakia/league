@@ -1,6 +1,5 @@
 const express = require('express')
 const router = express.Router()
-const JSONStream = require('JSONStream')
 
 const { constants } = require('../../common')
 
@@ -15,17 +14,15 @@ router.get('/teams', async (req, res) => {
     }
 
     const teamSelect = constants.teamStats.map(s => `SUM(team.${s}) as ${s}`).join(', ')
-    const stream = db('team')
+    const data = await db('team')
       .leftJoin('game', 'team.gid', 'game.gid')
       .select('game.seas', 'team.tname')
       .select(db.raw('CONCAT(team.tname, "_", game.seas) AS Group1'))
       .select(db.raw(teamSelect))
       .groupBy('Group1')
       .whereIn('game.seas', years)
-      .stream()
-    req.on('close', stream.end.bind(stream))
-    res.set('Content-Type', 'application/json')
-    stream.pipe(JSONStream.stringify()).pipe(res)
+
+    res.send(data)
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })
@@ -35,15 +32,13 @@ router.get('/teams', async (req, res) => {
 router.get('/gamelogs/teams', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    const stream = db('team')
+    const data = await db('team')
       .leftJoin('game', 'team.gid', 'game.gid')
       .select('game.seas', 'game.wk', 'team.tname as tm')
       .select(db.raw(constants.teamStats.map(s => `team.${s}`).join(', ')))
       .where('game.seas', constants.season.year)
-      .stream()
-    req.on('close', stream.end.bind(stream))
-    res.set('Content-Type', 'application/json')
-    stream.pipe(JSONStream.stringify()).pipe(res)
+
+    res.send(data)
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })
@@ -53,10 +48,8 @@ router.get('/gamelogs/teams', async (req, res) => {
 router.get('/gamelogs/players', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    const stream = db('gamelogs').where('year', constants.season.year).stream()
-    req.on('close', stream.end.bind(stream))
-    res.set('Content-Type', 'application/json')
-    stream.pipe(JSONStream.stringify()).pipe(res)
+    const data = await db('gamelogs').where('year', constants.season.year)
+    res.send(data)
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })
