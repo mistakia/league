@@ -1,6 +1,5 @@
 const express = require('express')
 const router = express.Router()
-const JSONStream = require('JSONStream')
 
 const { constants } = require('../../../common')
 
@@ -12,7 +11,7 @@ router.get('/props', async (req, res) => {
       .groupBy('sid')
       .where({ wk: constants.season.week, year: constants.season.year })
 
-    const stream = db
+    const data = await db
       .select('*')
       .from(db.raw('(' + sub.toString() + ') AS X'))
       .innerJoin(
@@ -25,10 +24,7 @@ router.get('/props', async (req, res) => {
         }
       )
       .where({ wk: constants.season.week, year: constants.season.year })
-      .stream()
-    req.on('close', stream.end.bind(stream))
-    res.set('Content-Type', 'application/json')
-    stream.pipe(JSONStream.stringify()).pipe(res)
+    res.send(data)
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })
