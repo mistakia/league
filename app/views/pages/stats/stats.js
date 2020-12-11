@@ -16,6 +16,7 @@ function SummaryRow ({ team, percentiles }) {
       <PercentileMetric scaled {...{ stats, percentiles, type: 'pdiff' }} />
       <PercentileMetric scaled {...{ stats, percentiles, type: 'pp' }} />
       <PercentileMetric scaled {...{ stats, percentiles, type: 'pp_pct' }} />
+      <PercentileMetric scaled {...{ stats, percentiles, type: 'ppp' }} />
       <PercentileMetric scaled {...{ stats, percentiles, type: 'pw' }} />
       <PercentileMetric scaled {...{ stats, percentiles, type: 'pl' }} />
       <PercentileMetric scaled {...{ stats, percentiles, type: 'pmax' }} />
@@ -138,6 +139,7 @@ export default class StatsPage extends React.Component {
               <div className='table__cell metric'>DIFF</div>
               <div className='table__cell metric'>PP</div>
               <div className='table__cell metric'>PP%</div>
+              <div className='table__cell metric'>PP Pen</div>
               <div className='table__cell metric'>P WINS</div>
               <div className='table__cell metric'>P LOSSES</div>
               <div className='table__cell metric'>MAX</div>

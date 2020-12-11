@@ -64,11 +64,14 @@ export function calculate ({
         weeks: {}
       },
       stats: constants.createFantasyTeamStats(),
-      potentialPoints: {}
+      potentialPoints: {},
+      potentialPointsPenalty: {}
     }
 
     result[tid].stats.pmin = 99999
   }
+
+  const minStarters = league.sqb + league.srb + league.swr + league.ste + league.srbwr + league.srbwrte + league.sqbrbwrte + league.swrte + league.sdst + league.sk
 
   for (let week = 1; week < constants.season.week; week++) {
     for (const tid of tids) {
@@ -101,6 +104,9 @@ export function calculate ({
 
       // calculate optimal lineup
       const optimizeResult = optimizeLineup({ players: optimizePlayers, league })
+      if (optimizeResult.starters.length < minStarters) {
+        result[tid].potentialPointsPenalty[week] = true
+      }
       result[tid].potentialPoints[week] = optimizeResult.total
       result[tid].stats.pp += optimizeResult.total
 
@@ -156,18 +162,24 @@ export function calculate ({
       result[tid].stats.apWins += scores.filter(p => p < score).length
       result[tid].stats.apLosses += scores.filter(p => p > score).length
       result[tid].stats.apTies += scores.filter(p => p === score).length
+
+      if (result[tid].potentialPointsPenalty[week]) {
+        const pps = Object.values(result).map(p => p.potentialPoints[week])
+        const max = Math.max(...pps)
+        result[tid].stats.ppp += (max - result[tid].potentialPoints[week])
+      }
     }
   }
 
   // calculate draft order
-  const potentialPoints = Object.values(result).map(p => p.stats.pp)
+  const potentialPoints = Object.values(result).map(p => (p.stats.pp + p.stats.ppp))
   const allPlayLosses = Object.values(result).map(p => p.stats.apLosses)
   const minPP = Math.min(...potentialPoints)
   const maxPP = Math.max(...potentialPoints)
   const minAPL = Math.min(...allPlayLosses)
   const maxAPL = Math.max(...allPlayLosses)
   for (const tid of tids) {
-    const pp = result[tid].stats.pp
+    const pp = result[tid].stats.pp + result[tid].stats.ppp
     const apl = result[tid].stats.apLosses
     const normPP = (pp - minPP) / (maxPP - minPP)
     const normAPL = (apl - minAPL) / (maxAPL - minAPL)
