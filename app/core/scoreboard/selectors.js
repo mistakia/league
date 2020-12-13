@@ -24,20 +24,41 @@ export function getScoreboardRosterByTeamId (state, { tid }) {
   return getRosterByTeamId(state, { tid, week })
 }
 
+export function getSelectedMatchupScoreboards (state) {
+  const matchup = getSelectedMatchup(state)
+  const week = state.getIn(['scoreboard', 'week'])
+  return matchup.tids.map(tid => ({
+    tid,
+    ...getScoreboardByTeamId(state, { tid, week })
+  }))
+}
+
 export function getScoreboardByTeamId (state, { tid }) {
   const week = state.getIn(['scoreboard', 'week'])
   const starters = getStartersByTeamId(state, { tid, week })
   let points = 0
+  let minutes = 0
   const projected = starters.reduce((sum, player) => {
     const gamelog = getGamelogForPlayer(state, { player, week })
-    if (gamelog) points += gamelog.total
+    if (gamelog) {
+      points += gamelog.total
+      const gameStatus = getGameStatusByPlayerId(state, { playerId: player.player, week })
+      if (gameStatus && gameStatus.lastPlay) {
+        const lp = gameStatus.lastPlay
+        const quarterMinutes = lp.playDescription === 'END GAME' ? 0 : moment.duration(`00:${lp.clockTime}`).minutes()
+        const quartersRemaining = lp.quarter === 5 ? 0 : (4 - lp.quarter)
+        minutes += (quartersRemaining * 15) + quarterMinutes
+      }
+    } else {
+      minutes += 60
+    }
     const add = gamelog
       ? gamelog.total
       : player.getIn(['points', `${week}`, 'total'], 0)
     return add + sum
   }, 0)
 
-  return { points, projected }
+  return { points, projected, minutes }
 }
 
 export function getScoreboardUpdated (state) {
