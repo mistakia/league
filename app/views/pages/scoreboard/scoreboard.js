@@ -51,10 +51,10 @@ export default class ScoreboardPage extends React.Component {
           </Grid>
           <Grid item xs={12}>
             {matchup.type === constants.matchups.H2H && <ScoreboardScores />}
-            {matchup.type === constants.matchups.TOURNAMENT && <ScoreboardTeams onClick={this.handleSelect} selected={this.state.tid} />}
           </Grid>
           <Grid container item xs={12} spacing={0}>
             <Grid item xs={12} md={9}>
+              {matchup.type === constants.matchups.TOURNAMENT && <ScoreboardTeams onClick={this.handleSelect} selected={this.state.tid} />}
               <div className='scoreboard__main'>
                 {matchup.type === constants.matchups.H2H &&
                   <ScoreboardTeam tid={matchup.aid} type='away' showBench={this.state.show} />}

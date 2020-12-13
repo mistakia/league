@@ -1,27 +1,36 @@
 import React from 'react'
 
 import ScoreboardScoreTeam from '@components/scoreboard-score-team'
+import { constants } from '@common'
 
 import './scoreboard-teams.styl'
 
-function Team ({ team, onClick, selected }) {
+function Team ({ tid, onClick, selected, cutoff, challenger }) {
   const classNames = ['scoreboard__teams-team', 'cursor']
-  if (team.uid === selected) classNames.push('selected')
+  if (tid === selected) classNames.push('selected')
   return (
-    <div className={classNames.join(' ')} onClick={() => onClick(team.uid)}>
-      <ScoreboardScoreTeam tid={team.uid} />
+    <div className={classNames.join(' ')} onClick={() => onClick(tid)}>
+      <ScoreboardScoreTeam
+        tid={tid}
+        type={constants.matchups.TOURNAMENT}
+        {... { cutoff, challenger }}
+      />
     </div>
   )
 }
 
 export default class ScoreboardTeams extends React.Component {
   render = () => {
-    const { teams, onClick, selected } = this.props
+    const { onClick, selected, scoreboards } = this.props
 
+    const sorted = scoreboards.sort((a, b) => b.points - a.points)
+    const cutoff = sorted[1].points
+    const challenger = sorted[2].points
     const items = []
-    for (const [index, team] of teams.entries()) {
+    for (const [index, scoreboard] of sorted.entries()) {
+      const { tid } = scoreboard
       items.push(
-        <Team key={index} {...{ team, selected, onClick }} />
+        <Team key={index} {...{ tid, selected, onClick, cutoff, challenger }} />
       )
     }
 
