@@ -32,7 +32,8 @@ export function * selectMatchup () {
     const matchup = filtered.find(m => m.tids.includes(teamId))
     const first = filtered.first()
     if (matchup || first) {
-      yield put(matchupsActions.select(matchup.uid || first.uid))
+      const uid = matchup ? matchup.uid : first.uid
+      yield put(matchupsActions.select(uid))
     }
   }
 }
