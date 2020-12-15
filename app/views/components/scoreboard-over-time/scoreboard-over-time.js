@@ -51,7 +51,7 @@ export default class ScoreboardOverTime extends React.Component {
         }
       },
       legend: {
-        enabled: false
+        enabled: true
       },
       credits: {
         enabled: false
