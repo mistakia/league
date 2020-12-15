@@ -134,7 +134,9 @@ export function playersReducer (state = initialState, { payload, type }) {
     case playerActions.GET_PROJECTIONS_FULFILLED:
       return state.withMutations(players => {
         payload.data.forEach(p => {
-          players.updateIn(['items', p.player, 'projections'], arr => arr.push(p))
+          if (players.hasIn(['items', p.player])) {
+            players.updateIn(['items', p.player, 'projections'], arr => arr.push(p))
+          }
         })
       })
 
