@@ -150,6 +150,19 @@ _The Commissioner refuses to reconsider, and a vote is therefore held. More than
 
 12. The Commissioner vows to remain impartial and unbiased when making decisions involving the League and its Players.
 
+**Impeachment
+
+13. A two-thirds majority vote of Teams is needed to Impeach the Commissioner.
+
+14. The Commissioner shall be removed from Office on Impeachment for Bribery, Maladministration or other High Crimes and Misdemeanors.
+
+(a) improperly exceeding or abusing the powers of the office;
+
+(b) behavior incompatible with the function and purpose of the office; and
+
+(c) misusing the office for an improper purpose or for personal gain.
+
+
 ## Article IV
 > TEAMS AND MANAGERS
 
