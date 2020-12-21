@@ -558,13 +558,13 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 
 1. The practice squad (PS) will consist of a maximum of four (4) players.
 
-2. Only rookies can be placed onto the PS.
+2. Only rookies, unsigned, and practice squad NFL players can be placed onto the PS.
 
 3. PS players will not count towards the active roster limit or toward the player retention salary cap.
 
 4. During the Regular Season, once you move a player from the PS to the active roster you may not move him back to the PS.
 
-5. Poached PS players will be placed directly into the active roster and may not be placed onto the PS again, unless that player is traded or signed by a new team via free agency and still has PS eligibility (Article XIV subsection 2).
+5. Poached PS players will be placed directly into the active roster and will lose PS eligibility until they are released and clear waivers. (Article XIV subsection 2).
 
 6. When an offer is made to poach a player, the PS player may not be released or traded from the team unless brought up to the activated roster first.
 
@@ -572,7 +572,11 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 
 8. Any rookie that is acquired by waivers or free agency during the Regular Season must be placed onto the PS within 48 hours of the acquisition or remain on the active roster.
 
-9. Eligibility is reset when a player changes Teams. If an activated rookie is dropped from the roster and then picked up again by the same team, without spending any period of time on a new team, this does not reset his PS eligibility and the player cannot be placed back on the PS.
+9. The Manager of poached PS player will be awarded a Compensatory draft pick
+
+10. Releasing a player that was poached during the same offseason will result in a Salary Cap penalty equal to the salary of the released poached player. The Salary Cap penalty can be appealed. The appealing team must prove the poach was not frivolous and a release was warranted by establishing the players value at the time of the poach was worth an active roster spot and changed at the time of the release.
+
+11. At any time during the regular season, Manager’s may elect to designate practice squad players as protected. Protected practice squad players can not be activated, released or poached during the regular season. However, they can still be traded. Their protected status can not be reversed and will expire at the start of the offseason and thus is only in effect during the regular season.
 
 **Poaching.**
 
