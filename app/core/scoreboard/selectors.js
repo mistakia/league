@@ -45,6 +45,7 @@ export function getScoreboardByTeamId (state, { tid }) {
       points += gamelog.total
     })
   }
+  const previousWeek = points
 
   const starters = getStartersByTeamId(state, { tid, week })
   const projected = starters.reduce((sum, player) => {
@@ -67,7 +68,7 @@ export function getScoreboardByTeamId (state, { tid }) {
     return add + sum
   }, 0)
 
-  return { points, projected, minutes }
+  return { points, projected: projected + previousWeek, minutes }
 }
 
 export function getScoreboardUpdated (state) {
