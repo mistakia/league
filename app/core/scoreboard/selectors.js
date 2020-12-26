@@ -35,9 +35,18 @@ export function getSelectedMatchupScoreboards (state) {
 
 export function getScoreboardByTeamId (state, { tid }) {
   const week = state.getIn(['scoreboard', 'week'])
-  const starters = getStartersByTeamId(state, { tid, week })
   let points = 0
   let minutes = 0
+
+  if (week === 16) {
+    const starters = getStartersByTeamId(state, { tid, week: 15 })
+    starters.forEach((player) => {
+      const gamelog = getGamelogForPlayer(state, { player, week: 15 })
+      points += gamelog.total
+    })
+  }
+
+  const starters = getStartersByTeamId(state, { tid, week })
   const projected = starters.reduce((sum, player) => {
     const gamelog = getGamelogForPlayer(state, { player, week })
     if (gamelog) {
