@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router({ mergeParams: true })
 const API = require('groupme').Stateless
 
+const { constants } = require('../../../common')
 const {
   verifyUserTeam,
   sendNotifications,
@@ -13,6 +14,10 @@ router.post('/?', async (req, res) => {
   const { db, logger, broadcast } = req.app.locals
   try {
     const { player, teamId, leagueId } = req.body
+
+    if (constants.season.week > constants.season.finalWeek) {
+      return res.status(400).send({ error: 'player locked' })
+    }
 
     if (!player) {
       return res.status(400).send({ error: 'missing player' })

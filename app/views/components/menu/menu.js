@@ -79,7 +79,7 @@ export default class Menu extends React.Component {
             </IconButton>
             <LeagueSchedule />
             {isLoggedIn && <NavLink to='/dashboard'>Roster</NavLink>}
-            {isLoggedIn && <NavLink to='/lineups'>Lineup</NavLink>}
+            {(isLoggedIn && (constants.season.week < constants.season.finalWeek)) && <NavLink to='/lineups'>Lineup</NavLink>}
             <NavLink to='/players'>Players</NavLink>
             {isLoggedIn && <NavLink to='/scoreboard'>Scoreboard</NavLink>}
             {isLoggedIn && <NavLink to='/league'>League</NavLink>}

@@ -54,17 +54,13 @@ export function calculatePlayerValues (payload) {
     }
 
     // calculate ros projection
-    const ros = {}
+    const ros = constants.createStats()
     let projWks = 0
     for (const [week, projection] of Object.entries(player.projection)) {
       if (week && week !== '0' && week >= constants.season.week) {
         projWks += 1
         for (const [key, value] of Object.entries(projection)) {
-          if (ros[key]) {
-            ros[key] += value
-          } else {
-            ros[key] = value
-          }
+          ros[key] += value
         }
       }
     }

@@ -400,9 +400,7 @@ describe('API /trades', function () {
   // - some picks are not owned by accepting team
   // - pick already used/drafted
   // - exceeds bench space on proposing team
-  // - exceeds available cap on proposing team
   // - exceeds bench space on accepting team
-  // - exceeds available cap on accepting team
   // - trade player with existing poaching claim
   // - trade proposal exceeds salary space (offseason)
   // - trade acceptance exceeds salary space (offseason)

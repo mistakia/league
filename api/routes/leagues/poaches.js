@@ -11,6 +11,10 @@ router.post('/?', async (req, res) => {
     const { player, drop, leagueId } = req.body
     const teamId = parseInt(req.body.teamId, 10)
 
+    if (constants.season.week > constants.season.finalWeek) {
+      return res.status(400).send({ error: 'player is locked' })
+    }
+
     if (!player) {
       return res.status(400).send({ error: 'missing player param' })
     }

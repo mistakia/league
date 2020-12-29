@@ -251,7 +251,8 @@ export function playersReducer (state = initialState, { payload, type }) {
       })
 
     case rosterActions.GET_ROSTERS_FULFILLED: {
-      const rosters = payload.data.filter(r => r.week === constants.season.week)
+      const week = Math.min(constants.season.week, constants.season.finalWeek)
+      const rosters = payload.data.filter(r => r.week === week)
       return state.withMutations(state => {
         rosters.forEach(roster => {
           roster.players.forEach(rosterSlot => {
