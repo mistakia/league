@@ -143,6 +143,9 @@ export function getPlaysByMatchupId (state, { mid }) {
   let result = new List()
   for (const play of filteredPlays) {
     const game = getGameByTeam(state, { team: fixTeam(play.possessionTeam), week: matchup.week })
+
+    if (!game) continue
+
     // TODO - calculate dst stats and points
     const playStats = play.playStats.filter(p => p.gsispid)
     const grouped = {}
