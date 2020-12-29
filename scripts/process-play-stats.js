@@ -60,6 +60,10 @@ const upsert = async ({ player, stats, opp, pos, tm }) => {
 }
 
 const run = async () => {
+  if (week > constants.season.nflFinalWeek) {
+    return
+  }
+
   const playStats = await db('nflPlayStat')
     .select('nflPlayStat.*', 'nflPlay.drivePlayCount', 'nflPlay.playTypeNFL', 'nflSchedule.homeTeamAbbr', 'nflSchedule.awayTeamAbbr', 'nflPlay.possessionTeam')
     .join('nflSchedule', 'nflPlayStat.esbid', '=', 'nflSchedule.esbid')
