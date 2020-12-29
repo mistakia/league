@@ -192,7 +192,7 @@ export default class Lineup extends React.Component {
                   <div className='player__item-metric'>Proj</div>
                   <div className='player__item-metric'>Sos</div> */}
             </div>
-            <div className='dashboard__section-body'>
+            <div className='dashboard__section-body empty'>
               {starters}
             </div>
           </div>

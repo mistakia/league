@@ -54,10 +54,6 @@ export function getTradeIsValid (state) {
     })
   }
 
-  if (!constants.season.isRegularSeason && roster.availableCap < 0) {
-    return false
-  }
-
   return true
 }
 

@@ -5,6 +5,7 @@ import List from '@material-ui/core/List'
 import ListItem from '@material-ui/core/ListItem'
 import Grid from '@material-ui/core/Grid'
 
+import { constants } from '@common'
 import TeamName from '@components/team-name'
 import PageLayout from '@layouts/page'
 import TradePlayer from '@components/trade-player'
@@ -63,7 +64,7 @@ export default function () {
   const action = (
     <Grid item xs={12}>
       <div className='trade__action'>
-        {isValid && <TradeAction />}
+        {(isValid && constants.season.week < constants.season.finalWeek) && <TradeAction />}
         {(isOpen && !isValid) && invalidNotice}
       </div>
     </Grid>

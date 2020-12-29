@@ -51,6 +51,10 @@ router.put('/?', async (req, res) => {
       return res.status(400).send({ error: 'lineup locked' })
     }
 
+    if (week > constants.season.finalWeek) {
+      return res.status(400).send({ error: 'lineup locked' })
+    }
+
     if (!players || !Array.isArray(players)) {
       return res.status(400).send({ error: 'missing players' })
     }

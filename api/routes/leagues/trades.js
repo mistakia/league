@@ -218,10 +218,6 @@ router.post('/?', async (req, res, next) => {
       })
     }
 
-    if (!constants.season.isRegularSeason && proposingTeamRoster.availableCap < 0) {
-      return res.status(400).send({ error: 'exceeds salary limit' })
-    }
-
     // insert trade
     const result = await db('trades').insert({
       pid,
