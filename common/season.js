@@ -7,6 +7,7 @@ export default class Season {
     this.end = moment.tz('2021-02-07', 'America/New_York') // super bowl
     this.openingDay = moment.tz('2020-09-10', 'America/New_York') // first game
     this.finalWeek = 16
+    this.nflFinalWeek = 17
   }
 
   get now () {
