@@ -21,7 +21,11 @@ const positions = ['QB', 'RB', 'WR', 'TE']
 
 const run = async () => {
   // do not pull in any projections after the season has ended
-  if (constants.season.week > constants.season.finalWeek) {
+  if (type !== 'season' && constants.season.week > constants.season.finalWeek) {
+    return
+  }
+
+  if (type === 'season' && constants.season.week > 0) {
     return
   }
 

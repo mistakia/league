@@ -211,6 +211,11 @@ const runOne = async ({ type, url }) => {
 }
 
 const run = async () => {
+  // do not fetch outside of the NFL regular season
+  if (constants.season.week > constants.season.nflFinalWeek) {
+    return
+  }
+
   for (const item of urls) {
     await runOne(item)
     await wait(2000)
