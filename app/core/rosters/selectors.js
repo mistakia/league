@@ -12,7 +12,7 @@ export function getRosters (state) {
   return state.get('rosters')
 }
 
-export function getRosterRecordByTeamId (state, { tid, week = constants.season.week }) {
+export function getRosterRecordByTeamId (state, { tid, week = Math.min(constants.season.week, constants.season.finalWeek) }) {
   const rosters = getRosters(state)
   return rosters.getIn([tid, week]) || new RosterRecord()
 }
@@ -37,7 +37,7 @@ export function getStartersByTeamId (state, { tid, week }) {
   })
 }
 
-export function getActivePlayersByTeamId (state, { tid, week = constants.season.week }) {
+export function getActivePlayersByTeamId (state, { tid, week = Math.min(constants.season.week, constants.season.finalWeek) }) {
   const roster = getRosterByTeamId(state, { tid, week })
   const activePlayerIds = roster.active.map(p => p.player)
   return activePlayerIds.map(playerId => getPlayerById(state, { playerId }))
@@ -46,13 +46,14 @@ export function getActivePlayersByTeamId (state, { tid, week = constants.season.
 export function getRostersForCurrentLeague (state) {
   const rosters = getRosters(state)
   const { leagueId } = getApp(state)
+  const week = Math.min(constants.season.week, constants.season.finalWeek)
   const filtered = rosters.filter(w => {
-    const r = w.get(constants.season.week)
+    const r = w.get(week)
     if (!r) return false
     return r.lid === leagueId
   })
 
-  return filtered.map(r => r.get(constants.season.week))
+  return filtered.map(r => r.get(week))
 }
 
 export function getAvailablePlayersForCurrentLeague (state) {
@@ -174,7 +175,8 @@ export function isPlayerEligible (state, { player, playerId }) {
 export function getCurrentTeamRosterRecord (state) {
   const rosters = getRosters(state)
   const { teamId } = getApp(state)
-  return rosters.getIn([teamId, constants.season.week], new RosterRecord())
+  const week = Math.min(constants.season.week, constants.season.finalWeek)
+  return rosters.getIn([teamId, week], new RosterRecord())
 }
 
 export function getCurrentTeamRoster (state) {
@@ -236,7 +238,8 @@ export function getCurrentPlayers (state) {
   const rosters = getRosters(state)
   const { teamId, leagueId } = getApp(state)
   const league = state.get('leagues').get(leagueId)
-  const roster = rosters.getIn([teamId, constants.season.week])
+  const week = Math.min(constants.season.week, constants.season.finalWeek)
+  const roster = rosters.getIn([teamId, week])
   if (!roster) {
     return {
       active: new List(),

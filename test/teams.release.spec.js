@@ -460,5 +460,9 @@ describe('API /teams - release', function () {
     it('release poached player - offseason', async () => {
       // TODO
     })
+
+    it('release player after final week - locked', async () => {
+      // TODO
+    })
   })
 })

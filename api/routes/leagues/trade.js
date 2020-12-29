@@ -169,10 +169,6 @@ router.post('/accept', async (req, res, next) => {
       })
     }
 
-    if (!constants.season.isRegularSeason && acceptingTeamRoster.availableCap < 0) {
-      return res.status(400).send({ error: 'exceeds salary limit' })
-    }
-
     // validate proposing team roster
     const proposingTeamRosterRow = await getRoster({ tid: trade.pid })
     const proposingTeamRoster = new Roster({ roster: proposingTeamRosterRow, league })
@@ -190,10 +186,6 @@ router.post('/accept', async (req, res, next) => {
         pos: player.pos,
         value: player.value
       })
-    }
-
-    if (!constants.season.isRegularSeason && proposingTeamRoster.availableCap < 0) {
-      return res.status(400).send({ error: 'exceeds proposing teams salary limit' })
     }
 
     // insert receiving team drops

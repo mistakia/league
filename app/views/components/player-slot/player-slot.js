@@ -14,7 +14,9 @@ export default class PlayerSlot extends React.Component {
     const slotName = constants.slotName[slot]
 
     let action
-    if (!selected && player.player) {
+    if (constants.season.week > constants.season.finalWeek) {
+      return null
+    } else if (!selected && player.player) {
       action = (
         <Button
           disabled={isLocked}

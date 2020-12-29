@@ -246,6 +246,10 @@ export function isPlayerReserveEligible (state, { player }) {
 }
 
 export function isPlayerLocked (state, { player, playerId }) {
+  if (constants.season.week > constants.season.finalWeek) {
+    return true
+  }
+
   if (playerId) {
     player = getPlayerById(state, { playerId })
   }

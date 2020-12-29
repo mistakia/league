@@ -78,6 +78,10 @@ describe('API /poaches', function () {
 
       await error(request, 'Reserve player violation')
     })
+
+    it('poach player after final week - locked', async () => {
+      // TODO
+    })
   })
   // errors
 
