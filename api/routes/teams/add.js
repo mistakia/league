@@ -46,6 +46,10 @@ router.post('/?', async (req, res) => {
     }
     const tid = parseInt(teamId, 10)
 
+    if (constants.season.week > constants.season.finalWeek) {
+      return res.status(400).send({ error: 'player is locked' })
+    }
+
     // verify player does not have outstanding unprocessed waiver claim
     if (constants.season.isRegularSeason) {
       // verify not in waiver period
