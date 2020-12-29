@@ -2194,7 +2194,7 @@ CREATE TABLE `rankings` (
   `dynasty` tinyint(1) DEFAULT NULL,
   `rookie` tinyint(2) DEFAULT NULL,
   `sourceid` int(6) NOT NULL,
-  `timestamp` int(11) DEFAULT NULL,
+  `timestamp` int(11) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 

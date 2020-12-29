@@ -16,6 +16,10 @@ if (process.env.NODE_ENV !== 'test') {
 }
 
 const run = async () => {
+  if (constants.season.week > constants.season.finalWeek) {
+    return
+  }
+
   const timestamp = Math.round(Date.now() / 1000)
 
   if (constants.season.isRegularSeason && constants.season.isWaiverPeriod) {
