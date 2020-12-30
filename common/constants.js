@@ -33,6 +33,11 @@ export const status = {
   Doubtful: 'D',
   IR: 'IR'
 }
+export const scoring = {
+  STD: 1,
+  HALF: 2,
+  PPR: 3
+}
 export const years = getAvailableYears()
 export const byeWeeks = [4, 5, 6, 7, 8, 9, 10, 11, 13]
 export const weeks = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
@@ -1000,7 +1005,9 @@ export const jobs = {
 
   DRAFTKINGS_ODDS: 33,
   BETONLINE_ODDS: 34,
-  PROJECTIONS_4FOR4: 35
+  PROJECTIONS_4FOR4: 35,
+  FANTASYPROS_DYNASTY: 36,
+  FANTASYPROS_WEEKLY: 37
 }
 
 export const jobDetails = {
@@ -1091,7 +1098,8 @@ export const sources = {
   NUMBERFIRE: 13,
   DRAFT_KINGS: 14,
   BETONLINE: 15,
-  '4FOR4': 16
+  '4FOR4': 16,
+  FANTASYPROS: 17
 }
 
 export const sourcesTitle = {
@@ -1111,4 +1119,15 @@ export const sourcesTitle = {
   14: 'Draft Kings',
   15: 'BetOnline',
   16: '4For4'
+}
+
+export const rankings = {
+  QB: 1,
+  RB: 2,
+  WR: 3,
+  TE: 4,
+  K: 5,
+  DST: 6,
+  FLX: 7,
+  OP: 8
 }

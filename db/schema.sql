@@ -1332,7 +1332,7 @@ ALTER TABLE `pbp`
 -- --------------------------------------------------------
 
 --
--- Table structure for table `draft_rankings`
+-- Table structure for table `draft`
 --
 
 DROP TABLE IF EXISTS `draft`;
@@ -1350,29 +1350,6 @@ CREATE TABLE `draft` (
   UNIQUE KEY `pick` (`round`,`pick`,`lid`,`year`),
   KEY `lid` (`lid`),
   KEY `tid` (`tid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `draft_rankings`
---
-
-DROP TABLE IF EXISTS `draft_rankings`;
-
-CREATE TABLE `draft_rankings` (
-  `player` varchar(7) NOT NULL DEFAULT '',
-  `rank` int(4) NOT NULL,
-  `tier` int(2) DEFAULT NULL,
-  `posrank` int(5) NOT NULL,
-  `best` int(11) NOT NULL,
-  `worst` int(11) NOT NULL,
-  `avg` decimal(3,1) NOT NULL,
-  `stddev` decimal(3,1) NOT NULL,
-  `rookie` int(1) NOT NULL,
-  `seas` int(4) NOT NULL,
-  UNIQUE KEY `player_2` (`player`,`seas`,`rookie`),
-  KEY `player` (`player`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -2184,12 +2161,13 @@ CREATE TABLE `rankings` (
   `year` int(4) NOT NULL,
   `min` int(4) DEFAULT NULL,
   `max` int(4) DEFAULT NULL,
-  `avg` int(4) DEFAULT NULL,
+  `avg` decimal(5,2) DEFAULT NULL,
+  `std` decimal(5,2) DEFAULT NULL,
   `ornk` int(4) DEFAULT NULL,
   `prnk` int(4) DEFAULT NULL,
-  `pct` int(4) DEFAULT NULL,
-  `type` int(2) DEFAULT NULL, -- ADP or Ranking
-  `ppr` int(2) DEFAULT NULL,
+  `type` int(1) NOT NULL,
+  `adp` tinyint(1) DEFAULT NULL,
+  `ppr` int(1) DEFAULT NULL,
   `sf` tinyint(1) DEFAULT NULL,
   `dynasty` tinyint(1) DEFAULT NULL,
   `rookie` tinyint(2) DEFAULT NULL,
