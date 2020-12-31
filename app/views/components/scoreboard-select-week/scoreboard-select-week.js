@@ -15,7 +15,8 @@ export default class ScoreboardSelectWeek extends React.Component {
     if (!constants.season.week) return null
 
     const menuItems = []
-    for (let wk = constants.season.week; wk > 0; wk--) {
+    let wk = Math.min(constants.season.week, constants.season.finalWeek)
+    for (; wk > 0; wk--) {
       menuItems.push(
         <MenuItem key={wk} value={wk}>Week {wk}</MenuItem>
       )
