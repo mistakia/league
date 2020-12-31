@@ -6,9 +6,9 @@ module.exports = async function (knex) {
   const league = leagues[0]
 
   const players = await knex('player')
-    .leftJoin('draft_rankings', 'player.player', 'draft_rankings.player')
-    .orderBy('rank', 'asc')
-    .where('seas', constants.season.year)
+    .leftJoin('rankings', 'player.player', 'rankings.player')
+    .orderBy('ornk', 'asc')
+    .where('rankings.year', constants.season.year)
 
   await knex('rosters_players').del()
 
