@@ -360,7 +360,7 @@ export function getPlayerStatus (state, { player, playerId }) {
         status.eligible.ps = true
       }
 
-      if (!status.protected) {
+      if (!status.protected && constants.season.week < constants.season.finalWeek) {
         const reserve = isPlayerReserveEligible(state, { player })
         if (reserve.ir && roster.hasOpenInjuredReserveSlot() &&
           player.slot !== constants.slots.IR) {
