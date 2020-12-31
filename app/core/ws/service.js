@@ -11,6 +11,7 @@ export let ws = null
 let messages = []
 
 export const openWS = (params) => {
+  if (ws && ws.close) ws.close()
   console.log('connecting to websocket...')
   ws = new WebSocket(`${WS_URL}?${queryString.stringify(params)}`)
 
