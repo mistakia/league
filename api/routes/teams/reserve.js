@@ -16,6 +16,10 @@ router.post('/?', async (req, res) => {
     const { teamId } = req.params
     const { player, leagueId, slot } = req.body
 
+    if (constants.season.week > constants.season.finalWeek) {
+      return res.status(400).send({ error: 'player locked' })
+    }
+
     if (!player) {
       return res.status(400).send({ error: 'missing player' })
     }
