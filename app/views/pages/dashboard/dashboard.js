@@ -87,7 +87,8 @@ export default function () {
   }
 
   const pickItems = []
-  for (const pick of picks) {
+  const sortedPicks = picks.sort((a, b) => a.year - b.year || a.pick - b.pick || a.round - b.round)
+  for (const pick of sortedPicks) {
     const pickNum = (pick.pick % league.nteams) || league.nteams
     const pickStr = `${pick.round}.${('0' + pickNum).slice(-2)}`
     pickItems.push(

@@ -15,9 +15,8 @@ router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const { leagueId } = req.params
-    const year = req.query.year || constants.season.year
 
-    const picks = await db('draft').where({ lid: leagueId, year })
+    const picks = await db('draft').where({ lid: leagueId })
     res.send({ picks })
   } catch (err) {
     logger(err)

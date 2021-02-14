@@ -123,6 +123,24 @@ CREATE TABLE `chart` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `college`
+--
+
+DROP TABLE IF EXISTS `college`;
+
+CREATE TABLE `college` (
+  `espnid` int(7) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `abbr` varchar(10) NOT NULL,
+  `displayName` varchar(255) NOT NULL,
+  `color` varchar(6) DEFAULT NULL,
+  `altColor` varchar(6) DEFAULT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `conv`
 --
 
