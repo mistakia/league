@@ -1,24 +1,33 @@
 // eslint-disable-next-line
 require = require('esm')(module /*, options*/)
 
+const argv = require('yargs').argv
+
 const db = require('../db')
 const { constants } = require('../common')
 
 const run = async () => {
+  const isNewSeason = !!argv.year
+
+  // do not run once season is over unless generating roster for next season
+  if (constants.season.week >= constants.season.finalWeek && !isNewSeason) return
+
   // get list of hosted leagues
   const leagues = await db('leagues')
 
-  const isCurrentYear = constants.season.week < constants.season.finalWeek
-  const week = isCurrentYear ? (constants.season.week + 1) : 0
-  const year = isCurrentYear ? constants.season.year : (constants.season.year + 1)
+
+  const nextWeek = isNewSeason ? 0 : (constants.season.week + 1)
+  const nextYear = isNewSeason ? argv.year : constants.season.year
+  const previousWeek = isNewSeason ? 16 : constants.season.week
+  const previousYear = isNewSeason ? (argv.year - 1) : constants.season.year
 
   for (const league of leagues) {
     // get latest rosters for league
     const rosters = await db('rosters')
       .where({
         lid: league.uid,
-        year: constants.season.year,
-        week: constants.season.week
+        year: previousYear,
+        week: previousWeek
       })
 
     for (const roster of rosters) {
@@ -31,8 +40,8 @@ const run = async () => {
       const rosterData = {
         tid,
         lid,
-        week,
-        year
+        week: nextWeek,
+        year: nextYear
       }
       const rosterRows = await db('rosters').where(rosterData)
       let rid = rosterRows.length ? rosterRows[0].uid : null
