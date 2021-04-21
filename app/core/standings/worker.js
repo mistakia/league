@@ -186,7 +186,7 @@ export function calculate ({
     result[tid].stats.doi = (9 * normPP) + normAPL
 
     const points = Object.values(result[tid].points.weeks)
-    result[tid].stats.pdev = std(points)
+    result[tid].stats.pdev = points.length ? std(points) : null
     result[tid].stats.pdiff = result[tid].stats.pf - result[tid].stats.pa
     result[tid].stats.pp_pct = (result[tid].stats.pf / result[tid].stats.pp) * 100
   }
