@@ -1,5 +1,8 @@
 const debug = require('debug')
 const logger = debug('server')
+const yargs = require('yargs/yargs')
+const { hideBin } = require('yargs/helpers')
+const argv = yargs(hideBin(process.argv)).argv
 
 const server = require('./api')
 const config = require('./config')
@@ -9,7 +12,7 @@ const main = async () => {
   const port = config.port || 8082
   server.listen(port, () => logger(`API listening on port ${port}`))
 
-  if (process.env.NODE_ENV === 'development') {
+  if (argv.clean && process.env.NODE_ENV === 'development') {
     await db.seed.run()
   }
 }

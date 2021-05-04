@@ -22,6 +22,7 @@ export function rostersReducer (state = new Map(), { payload, type }) {
       return state.updateIn([payload.tid, constants.season.week, 'players'], players => players.push({
         rid,
         slot: constants.slots.BENCH,
+        tag: 1,
         player,
         pos,
         userid,
@@ -56,6 +57,7 @@ export function rostersReducer (state = new Map(), { payload, type }) {
               rid: t.rid,
               slot: p.slot,
               player: t.player,
+              tag: t.tag,
               pos: t.pos,
               userid: t.userid,
               tid: t.tid,
@@ -127,6 +129,7 @@ export function rostersReducer (state = new Map(), { payload, type }) {
       const { userid, tid, lid, type, value, year, timestamp } = payload.data.transaction
       return state.updateIn([payload.opts.teamId, constants.season.week, 'players'], arr => arr.push({
         rid,
+        tag: 1,
         slot,
         player,
         pos,

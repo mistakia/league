@@ -1404,6 +1404,9 @@ CREATE TABLE `leagues` (
   `fuml` tinyint(1) NOT NULL,
   `prtd` tinyint(1) NOT NULL,
   `krtd` tinyint(1) NOT NULL,
+  `tag2` tinyint(1) unsigned NOT NULL DEFAULT '1',
+  `tag3` tinyint(1) unsigned NOT NULL DEFAULT '1',
+  `tag4` tinyint(1) unsigned NOT NULL DEFAULT '2',
   `ddate` int(11) DEFAULT NULL,
   `adate` int(11) DEFAULT NULL,
   `groupme_token` varchar(45) DEFAULT NULL,
@@ -1543,6 +1546,7 @@ CREATE TABLE `rosters_players` (
   `slot` int(11) NOT NULL,
   `player` varchar(7) NOT NULL,
   `pos` varchar(3) NOT NULL,
+  `tag` tinyint(1) unsigned NOT NULL DEFAULT '1',
   UNIQUE KEY `player` (`rid`,`player`),
   KEY `rid` (`rid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
