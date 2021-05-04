@@ -3,6 +3,7 @@ import React from 'react'
 import Position from '@components/position'
 import Team from '@components/team'
 import { constants } from '@common'
+import PlayerLabel from '@components/player-label'
 
 import './player-name.styl'
 
@@ -21,15 +22,9 @@ export default class PlayerName extends React.Component {
         </div>
         <div className='player__name-main'>
           <span>{player.pname}</span>
-          {(constants.season.year === player.draft_year) &&
-            <sup className='player__label-rookie'>
-              R
-            </sup>}
+          {(constants.season.year === player.draft_year) && <PlayerLabel label='R' type='rookie' description='Rookie' />}
           <Team team={player.team} />
-          {(player.slot === constants.slots.PSP) &&
-            <div className='player__label'>
-              P
-            </div>}
+          {(player.slot === constants.slots.PSP) && <PlayerLabel label='P' description='Protected Practice Squad' />}
         </div>
       </div>
     )
