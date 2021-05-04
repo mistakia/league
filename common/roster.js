@@ -9,8 +9,8 @@ export default class Roster {
 
     this.activeRosterLimit = league.sqb + league.srb + league.swr + league.ste + league.srbwr + league.srbwrte + league.sqbrbwrte + league.swrte + league.sdst + league.sk + league.bench
 
-    for (const { slot, player, pos, value } of roster.players) {
-      this._players.set(player, { slot, player, pos, rid: roster.uid, value })
+    for (const { slot, player, pos, value, tag } of roster.players) {
+      this._players.set(player, { slot, player, pos, rid: roster.uid, value, tag })
     }
   }
 
@@ -33,8 +33,8 @@ export default class Roster {
 
   get players () {
     const arr = []
-    for (const { slot, player, pos, rid } of this._players.values()) {
-      arr.push({ slot, player, pos, rid })
+    for (const { slot, player, pos, rid, tag } of this._players.values()) {
+      arr.push({ slot, player, pos, rid, tag })
     }
     return arr
   }
@@ -89,8 +89,16 @@ export default class Roster {
     return this._players.has(player)
   }
 
+  getCountByTag (tag) {
+    return this.getPlayersByTag(tag).length
+  }
+
   getCountBySlot (slot) {
     return this.getPlayersBySlot(slot).length
+  }
+
+  getPlayersByTag (tag) {
+    return this.players.filter(p => p.tag === tag)
   }
 
   getPlayersBySlot (slot) {
@@ -101,14 +109,14 @@ export default class Roster {
     this._players.delete(player)
   }
 
-  addPlayer ({ slot, player, pos, value = 0 }) {
+  addPlayer ({ slot, player, pos, value = 0, tag = 1 }) {
     if (this.isFull) {
       throw new Error('Roster is full')
     }
 
     const isEligible = this.isEligibleForSlot({ slot, player, pos })
     if (!isEligible) throw new Error('Player is not eligible')
-    this._players.set(player, { slot, player, pos, rid: this.uid, value })
+    this._players.set(player, { slot, player, pos, rid: this.uid, value, tag })
   }
 
   isEligibleForSlot ({ slot, player, pos }) {
@@ -127,6 +135,15 @@ export default class Roster {
       const count = this.getCountBySlot(slot)
       return count < this._league[`s${slotName.toLowerCase()}`]
     }
+  }
+
+  isEligibleForTag ({ tag, player }) {
+    if (tag === 1) {
+      return true
+    }
+
+    const count = this.getCountByTag(tag)
+    return count < this._league[`tag${tag}`]
   }
 
   hasOpenInjuredReserveSlot () {

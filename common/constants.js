@@ -503,6 +503,13 @@ export const transactions = {
   PRACTICE_PROTECTED: 17
 }
 
+export const tags = {
+  REGULAR: 1,
+  FRANCHISE: 2,
+  ROOKIE: 3,
+  RESTRICTED: 4
+}
+
 export const transactionsDetail = {
   14: 'Signed',
   1: 'Released',

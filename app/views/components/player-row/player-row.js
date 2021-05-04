@@ -11,6 +11,7 @@ import TeamName from '@components/team-name'
 import { Player, connect } from '@components/player'
 import IconButton from '@components/icon-button'
 import { constants } from '@common'
+import PlayerLabel from '@components/player-label'
 
 import './player-row.styl'
 
@@ -288,10 +289,7 @@ class PlayerRow extends Player {
             </div>
             <div className='player__row-name cursor' onClick={this.handleClick}>
               <span>{player.name}</span>
-              {(constants.season.year === player.draft_year) &&
-                <sup className='player__label-rookie'>
-                  R
-                </sup>}
+              {(constants.season.year === player.draft_year) && <PlayerLabel label='R' type='rookie' description='Rookie' />}
               <Team team={player.team} />
             </div>
             {isLoggedIn &&

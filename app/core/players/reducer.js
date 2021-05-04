@@ -256,9 +256,10 @@ export function playersReducer (state = initialState, { payload, type }) {
       return state.withMutations(state => {
         rosters.forEach(roster => {
           roster.players.forEach(rosterSlot => {
-            const { player, value, type, slot } = rosterSlot
+            const { player, value, type, slot, tag } = rosterSlot
             state.mergeIn(['items', player], {
               value,
+              tag,
               type,
               tid: roster.tid,
               slot
@@ -281,6 +282,7 @@ export function playersReducer (state = initialState, { payload, type }) {
     case rosterActions.POST_RELEASE_FULFILLED:
       return state.mergeIn(['items', payload.data.player], {
         value: null,
+        tag: null,
         type: null,
         tid: null,
         slot: null
@@ -293,6 +295,7 @@ export function playersReducer (state = initialState, { payload, type }) {
           if (t.type === constants.transactions.ROSTER_RELEASE) {
             state.mergeIn(['items', t.player], {
               value: null,
+              tag: null,
               type: null,
               tid: null,
               slot: null

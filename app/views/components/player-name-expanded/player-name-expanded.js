@@ -7,8 +7,20 @@ import Tooltip from '@material-ui/core/Tooltip'
 import Team from '@components/team'
 import { constants, nth } from '@common'
 import IconButton from '@components/icon-button'
+import PlayerLabel from '@components/player-label'
 
 import './player-name-expanded.styl'
+
+const getPlayerTagLabel = (tag) => {
+  switch (tag) {
+    case 2:
+      return (<PlayerLabel label='F' type='tag' description='Franchise Tag' />)
+    case 3:
+      return (<PlayerLabel label='R' type='tag' description='Rookie Tag' />)
+    case 4:
+      return (<PlayerLabel label='RFA' type='tag' description='Restricted Free Agent' />)
+  }
+}
 
 function getClock ({ playDescription, clockTime, quarter }) {
   switch (playDescription) {
@@ -30,6 +42,10 @@ function getClock ({ playDescription, clockTime, quarter }) {
 }
 
 function GameStatus ({ status, player }) {
+  if (!constants.season.isRegularSeason) {
+    return null
+  }
+
   if (!player || !player.player) {
     return null
   }
@@ -81,25 +97,16 @@ class PlayerNameExpanded extends Player {
             onClick={this.handleClick}
           >
             <div className='player__name-expanded-full-name'>{player.fname} {player.lname}</div>
-            {(constants.season.year === player.draft_year) &&
-              <sup className='player__label-rookie'>
-                R
-              </sup>}
-            {(player.slot === constants.slots.PSP) &&
-              <div className='player__label'>
-                P
-              </div>}
+            {(constants.season.year === player.draft_year) && <PlayerLabel label='R' type='rookie' description='Rookie' />}
+            {(player.slot === constants.slots.PSP) && <PlayerLabel label='P' description='Protected Practice Squad' />}
+            {(player.tag > 1) && getPlayerTagLabel(player.tag)}
           </div>
           <div className='player__name-expanded-row'>
             <Position pos={player.pos} />
             <Team team={player.team} />
             <GameStatus status={status} player={player} />
             {!!(constants.status[player.status] || player.gamestatus) &&
-              <Tooltip title={constants.status[player.status] ? player.status : player.gamestatus} placement='bottom'>
-                <span className='player__label-status'>
-                  {constants.status[player.status] || constants.status[player.gamestatus]}
-                </span>
-              </Tooltip>}
+              <PlayerLabel type='game' label={constants.status[player.status] || constants.status[player.gamestatus]} description={constants.status[player.status] ? player.status : player.gamestatus} />}
           </div>
         </div>
       </div>
