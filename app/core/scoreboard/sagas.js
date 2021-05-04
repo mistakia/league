@@ -4,8 +4,10 @@ import { getScoreboard, getScoreboardUpdated } from './selectors'
 import { scoreboardActions } from './actions'
 import { playActions } from '@core/plays'
 import { send, wsActions } from '@core/ws'
+import { constants } from '@common'
 
 export function * register () {
+  if (!constants.season.isRegularSeason) return
   const updated = yield select(getScoreboardUpdated)
   console.log(`register scoreboard ${updated}`)
   send({
