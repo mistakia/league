@@ -25,7 +25,7 @@ const run = async () => {
   log(URL)
   const data = await fetch(URL, {
     headers: {
-      'x-fantasy-filter': '{"players":{"filterStatsForSplitTypeIds":{"value":[0,1]},"filterSlotIds":{"value":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,23,24]},"filterStatsForSourceIds":{"value":[0,1]},"useFullProjectionTable":{"value":true},"sortAppliedStatTotal":{"sortAsc":false,"sortPriority":2,"value":"1120202"},"sortDraftRanks":{"sortPriority":3,"sortAsc":true,"value":"PPR"},"sortPercOwned":{"sortPriority":4,"sortAsc":false},"limit":600,"filterRanksForSlotIds":{"value":[0,2,4,6,17,16]},"filterStatsForTopScoringPeriodIds":{"value":2,"additionalValue":["002020","102020","002019","1120202","022020"]}}}'
+      'x-fantasy-filter': '{"players":{"filterStatsForExternalIds":{"value":[2020,2021]},"filterSlotIds":{"value":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,23,24]},"filterStatsForSourceIds":{"value":[1]},"useFullProjectionTable":{"value":true},"sortAppliedStatTotal":{"sortAsc":false,"sortPriority":2,"value":"102021"},"sortDraftRanks":{"sortPriority":3,"sortAsc":true,"value":"PPR"},"sortPercOwned":{"sortPriority":4,"sortAsc":false},"limit":600,"filterRanksForSlotIds":{"value":[0,2,4,6,17,16]},"filterStatsForTopScoringPeriodIds":{"value":2,"additionalValue":["002021","102021","002020","022021"]}}}'
     }
   }).then(res => res.json())
 
@@ -60,7 +60,7 @@ const run = async () => {
       player: playerId,
       year,
       week,
-      sourceid: 3, // fantasy sharks sourceid
+      sourceid: constants.sources.ESPN,
       timestamp,
       ...data
     })
