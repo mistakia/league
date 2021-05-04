@@ -117,6 +117,13 @@ export function * calculatePlayerLineupContribution ({ player }) {
       sp: 0,
       bp: 0
     }
+
+    const projectedPoints = player.getIn(['points', week, 'total'])
+    if (!projectedPoints) {
+      playerData.weeks[week] = weekData
+      continue
+    }
+
     const currentProjectedWeek = currentRoster.lineups.get(week)
     const isStarter = isActive
       ? currentProjectedWeek.starters.includes(player.player)
@@ -135,7 +142,7 @@ export function * calculatePlayerLineupContribution ({ player }) {
       const baselinePlayerId = baselines.getIn([week, player.pos, 'available'])
       const baselinePlayer = playerItems.get(baselinePlayerId)
       // bench+ is difference between player output and best available
-      const diff = player.getIn(['points', week, 'total']) - baselinePlayer.getIn(['points', week, 'total'])
+      const diff = projectedPoints - baselinePlayer.getIn(['points', week, 'total'])
       if (diff > 0) {
         playerData.bp += diff
         weekData.bp = diff
