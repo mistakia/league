@@ -86,7 +86,8 @@ export default function () {
   }
 
   const pickItems = []
-  for (const pick of picks) {
+  const picksSorted = picks.sort((a, b) => a.round - b.round || a.pick - b.pick)
+  for (const pick of picksSorted) {
     const isActive = draftActive && !pick.player && moment().isAfter(moment(league.ddate, 'X').add((pick.pick - 1), 'days'))
     pickItems.push(<DraftPick key={pick.pick} pick={pick} playerId={pick.player} tid={pick.tid} isActive={isActive} />)
   }
