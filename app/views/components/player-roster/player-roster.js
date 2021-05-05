@@ -44,7 +44,13 @@ class PlayerRoster extends Player {
             ${isPoach ? ((player.value + 2) || '-') : player.value}
           </div>}
         <div className='metric table__cell'>
+          ${player.getIn(['values', 'ros', 'starter'], 0).toFixed(0)}
+        </div>
+        <div className='metric table__cell'>
           {player.getIn(['vorp', 'ros', 'starter'], 0).toFixed(1)}
+        </div>
+        <div className='metric table__cell'>
+          {player.getIn(['vorp_adj', 'ros', 'starter'], 0).toFixed(1)}
         </div>
         <div className='metric table__cell'>
           {player.getIn(['points', 'ros', 'total'], 0).toFixed(1)}

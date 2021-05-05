@@ -18,6 +18,7 @@ export default class TradeTeamSummary extends React.Component {
 
     const pctPoints = getPct('points', analysis)
     const pctValue = getPct('value', analysis)
+    const pctValueAdj = getPct('value_adj', analysis)
     const pctSalary = getPct('salary', analysis)
 
     return (
@@ -45,6 +46,14 @@ export default class TradeTeamSummary extends React.Component {
               </TableCell>
               <TableCell align='right'>
                 {(analysis.after.value || 0).toFixed(1)} ({pctValue}%)
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell component='th' scope='row'>
+                Salary Adjusted Value
+              </TableCell>
+              <TableCell align='right'>
+                {(analysis.after.value_adj || 0).toFixed(1)} ({pctValueAdj}%)
               </TableCell>
             </TableRow>
             <TableRow>
