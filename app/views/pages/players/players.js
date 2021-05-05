@@ -175,6 +175,11 @@ export default class PlayersPage extends React.Component {
           />
           <PlayerHeader
             className='table__cell metric'
+            label='Adj Value'
+            value={`vorp_adj.${week}.${vbaseline}`}
+          />
+          <PlayerHeader
+            className='table__cell metric'
             label='Proj'
             value={`points.${week}.total`}
           />

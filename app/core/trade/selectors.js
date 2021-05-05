@@ -169,6 +169,7 @@ function getTeamTradeSummary (lineups, players) {
   const values = {
     points: lineups.reduce((sum, l) => sum + l.total, 0),
     value: players.reduce((sum, p) => sum + Math.max(p.getIn(['vorp', 'ros', 'starter']), 0), 0),
+    value_adj: players.reduce((sum, p) => sum + Math.max(p.getIn(['vorp_adj', 'ros', 'starter']), 0), 0),
     salary: players.reduce((sum, p) => sum + p.value, 0)
   }
 

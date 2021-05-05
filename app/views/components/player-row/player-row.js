@@ -53,6 +53,9 @@ class PlayerRow extends Player {
               {Math.round(player.vorp.getIn([`${week}`, vbaseline]) || 0)}
             </div>
             <div className='table__cell metric'>
+              {Math.round(player.vorp_adj.getIn([`${week}`, vbaseline]) || 0)}
+            </div>
+            <div className='table__cell metric'>
               {(player.points.getIn([`${week}`, 'total']) || 0).toFixed(1)}
             </div>
           </div>
