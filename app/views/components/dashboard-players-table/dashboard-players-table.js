@@ -8,10 +8,24 @@ import PlayerRosterHeader from '@components/player-roster-header'
 
 import './dashboard-players-table.styl'
 
+const RecommendedSalaryHeader = () => (
+  <PlayerRosterHeader
+    tooltip='Recommended Salary based on projected points over baseline player'
+    title='Rec Salary'
+  />
+)
+
 const ValueHeader = () => (
   <PlayerRosterHeader
     tooltip='Projected points over baseline player'
     title='Value'
+  />
+)
+
+const ValueAdjustedHeader = () => (
+  <PlayerRosterHeader
+    tooltip='Salary Adjusted Projected points over baseline player'
+    title='Adj Value'
   />
 )
 
@@ -146,7 +160,9 @@ export default class DashboardPlayersTable extends React.Component {
               <div className='metric table__cell'>Bid</div>}
             {!isWaiver &&
               <div className='metric table__cell'>Salary</div>}
+            <div className='table__cell metric'><RecommendedSalaryHeader /></div>
             <div className='table__cell metric'><ValueHeader /></div>
+            <div className='table__cell metric'><ValueAdjustedHeader /></div>
             <div className='table__cell metric'><ROSHeader /></div>
             <div className='table__cell metric'>Week {week}</div>
             <div className='table__cell metric'><StartsHeader /></div>
