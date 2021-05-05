@@ -12,6 +12,7 @@ import { Player, connect } from '@components/player'
 import IconButton from '@components/icon-button'
 import { constants } from '@common'
 import PlayerLabel from '@components/player-label'
+import { COLUMNS } from '@core/constants'
 
 import './player-row.styl'
 
@@ -21,7 +22,7 @@ class PlayerRow extends Player {
       player, style, selectedPlayer, vbaseline, isSeasonView, isHosted, isWeekView,
       isStatsPassingAdvancedView, isStatsPassingPressureView, isStatsRushingView, week,
       isStatsReceivingView, percentiles, isLoggedIn, isRestOfSeasonView, selected, status,
-      baselines, teamId
+      baselines, teamId, column
     } = this.props
 
     const isSelected = selectedPlayer === player.player || selected === player.player
@@ -277,53 +278,58 @@ class PlayerRow extends Player {
       if (player.player === starterBaselinePlayerId) classNames.push('starter__baseline')
     }
 
+    const playerName = (
+      <>
+        <div className='player__row-action'>
+          <PlayerWatchlistAction playerId={player.player} />
+        </div>
+        <div className='player__row-pos'>
+          <Position pos={player.pos} />
+        </div>
+        <div className='player__row-name cursor' onClick={this.handleClick}>
+          <span>{player.name}</span>
+          {(constants.season.year === player.draft_year) && <PlayerLabel label='R' type='rookie' description='Rookie' />}
+          <Team team={player.team} />
+        </div>
+        {isLoggedIn &&
+          <div className='player__row-action'>
+            {!!isHosted && <IconButton small text onClick={this.handleContextClick} icon='more' />}
+          </div>}
+        <PlayerRowOpponent team={player.team} pos={player.pos} />
+        {isLoggedIn &&
+          <div className='player__row-availability'>
+            {player.tid
+              ? <TeamName abbrv tid={player.tid} />
+              : ((status.waiver.active || status.waiver.poach || status.waiver.practice || status.locked)
+                ? 'W' : 'FA')}
+          </div>}
+      </>
+    )
+
+    const cellMain = () => {
+      switch (column) {
+        case COLUMNS.PLAYER_NAME:
+          return playerName
+
+        case COLUMNS.SEASON_SUMMARY:
+          return seasonSummary()
+
+        case COLUMNS.SEASON_PASSING:
+          return seasonPassing
+
+        case COLUMNS.SEASON_RUSHING:
+          return seasonRushing
+
+        case COLUMNS.SEASON_RECEIVING:
+          return seasonReceiving
+      }
+    }
+
     return (
       <div style={style}>
         <div className={classNames.join(' ')}>
           <div className='player__row-main'>
-            <div className='player__row-action'>
-              <PlayerWatchlistAction playerId={player.player} />
-            </div>
-            <div className='player__row-pos'>
-              <Position pos={player.pos} />
-            </div>
-            <div className='player__row-name cursor' onClick={this.handleClick}>
-              <span>{player.name}</span>
-              {(constants.season.year === player.draft_year) && <PlayerLabel label='R' type='rookie' description='Rookie' />}
-              <Team team={player.team} />
-            </div>
-            {isLoggedIn &&
-              <div className='player__row-action'>
-                {!!isHosted && <IconButton small text onClick={this.handleContextClick} icon='more' />}
-              </div>}
-            <PlayerRowOpponent team={player.team} pos={player.pos} />
-            {isLoggedIn &&
-              <div className='player__row-availability'>
-                {player.tid
-                  ? <TeamName abbrv tid={player.tid} />
-                  : ((status.waiver.active || status.waiver.poach || status.waiver.practice || status.locked)
-                    ? 'W' : 'FA')}
-              </div>}
-            <Hidden xsDown>
-              {projectionView && seasonSummary()}
-              {projectionView && seasonPassing}
-              {projectionView && seasonRushing}
-              {projectionView && seasonReceiving}
-              {isStatsPassingAdvancedView && passingBasic}
-              {isStatsPassingAdvancedView && passingEfficiency}
-              {isStatsPassingAdvancedView && passingAdvanced}
-              {isStatsPassingAdvancedView && passingAiryards}
-              {isStatsPassingPressureView && passingPressure}
-              {isStatsRushingView && rushingBasic}
-              {isStatsRushingView && rushingProductivity}
-              {isStatsRushingView && rushingAfterContact}
-              {isStatsRushingView && rushingShare}
-              {isStatsRushingView && rushingAdvanced}
-              {isStatsRushingView && rushingBrokenTackles}
-              {isStatsReceivingView && receivingBasic}
-              {isStatsReceivingView && receivingOpportunity}
-              {isStatsReceivingView && receivingAdvanced}
-            </Hidden>
+            {cellMain()}
           </div>
         </div>
       </div>

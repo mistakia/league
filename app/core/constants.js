@@ -8,3 +8,11 @@ export const DOCS_URL = 'https://api.github.com/repos/mistakia/league/contents/d
 export const DEFAULT_LEAGUE_ID = 'DEFAULT_LEAGUE_ID'
 
 export const TRANSACTIONS_PER_LOAD = 100
+
+export const COLUMNS = {
+  PLAYER_NAME: 1,
+  SEASON_SUMMARY: 2,
+  SEASON_PASSING: 3,
+  SEASON_RUSHING: 4,
+  SEASON_RECEIVING: 5
+}

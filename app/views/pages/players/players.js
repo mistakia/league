@@ -1,5 +1,5 @@
 import React from 'react'
-import { AutoSizer, List } from 'react-virtualized'
+import { AutoSizer, List, MultiGrid } from 'react-virtualized'
 import GetAppIcon from '@material-ui/icons/GetApp'
 import IconButton from '@material-ui/core/IconButton'
 import Hidden from '@material-ui/core/Hidden'
@@ -43,6 +43,7 @@ import HeaderStatsReceivingOpportunity from '@components/header-stats-receiving-
 import HeaderStatsReceivingAdvanced from '@components/header-stats-receiving-advanced'
 import Loading from '@components/loading'
 import Icon from '@components/icon'
+import { COLUMNS } from '@core/constants'
 import { csv } from '@core/export'
 import { constants } from '@common'
 
@@ -117,12 +118,22 @@ export default class PlayersPage extends React.Component {
       isStatsPassingPressureView, isPending, showQualifier, isLoggedIn, isRestOfSeasonView
     } = this.props
 
-    const Row = ({ index, key, parent, ...params }) => {
-      const player = players.get(index)
-      return (
-        <PlayerRow key={key} player={player} {...params} />
-      )
+    const projectionView = isRestOfSeasonView || isSeasonView || isWeekView
+
+    const columns = []
+    columns.push(COLUMNS.PLAYER_NAME)
+    if (projectionView) {
+      columns.push(COLUMNS.SEASON_SUMMARY)
+      columns.push(COLUMNS.SEASON_PASSING)
+      columns.push(COLUMNS.SEASON_RUSHING)
+      columns.push(COLUMNS.SEASON_RECEIVING)
     }
+
+    console.log(columns)
+
+    const headerPlayerName = (
+      <div className='player__row-name'>Name</div>
+    )
 
     const headerSeasonPassing = (
       <div className='player__row-group'>
@@ -185,8 +196,6 @@ export default class PlayersPage extends React.Component {
     const classNames = ['players__filters']
     if (this.state.expanded) classNames.push('expanded')
 
-    const projectionView = isRestOfSeasonView || isSeasonView || isWeekView
-
     const head = (
       <div className='players__head'>
         <div className={classNames.join(' ')}>
@@ -225,14 +234,14 @@ export default class PlayersPage extends React.Component {
               {isLoggedIn && <TeamFilter />}
             </div>}
         </div>
-        <div className='players__header'>
-          <div className='player__row-action' />
-          <div className='player__row-pos' />
-          <div className='player__row-name'>Name</div>
-          {isLoggedIn && <div className='player__row-action' />}
-          <div className='player__row-opponent'>Opp</div>
-          {isLoggedIn && <div className='player__row-availability' />}
-          <Hidden xsDown>
+        {/* <div className='players__header'>
+            <div className='player__row-action' />
+            <div className='player__row-pos' />
+            <div className='player__row-name'>Name</div>
+            {isLoggedIn && <div className='player__row-action' />}
+            <div className='player__row-opponent'>Opp</div>
+            {isLoggedIn && <div className='player__row-availability' />}
+            <Hidden xsDown>
             {projectionView && headerSeasonSummary}
             {projectionView && headerSeasonPassing}
             {projectionView && headerSeasonRushing}
@@ -251,26 +260,62 @@ export default class PlayersPage extends React.Component {
             {isStatsReceivingView && <HeaderStatsReceivingBasic />}
             {isStatsReceivingView && <HeaderStatsReceivingOpportunity />}
             {isStatsReceivingView && <HeaderStatsReceivingAdvanced />}
-          </Hidden>
-        </div>
+            </Hidden>
+            </div> */}
       </div>
     )
+
+    function PlayerRowHeader ({ column }) {
+      switch (column) {
+        case COLUMNS.PLAYER_NAME:
+          return headerPlayerName
+
+        case COLUMNS.SEASON_SUMMARY:
+          return headerSeasonSummary
+
+        case COLUMNS.SEASON_PASSING:
+          return headerSeasonPassing
+
+        case COLUMNS.SEASON_RUSHING:
+          return headerSeasonRushing
+
+        case COLUMNS.SEASON_RECEIVING:
+          return headerSeasonReceiving
+
+        default:
+          return null
+      }
+    }
+
+    const cellRenderer = ({ columnIndex, rowIndex, key, parent, ...params }) => {
+      const columnId = columns[columnIndex]
+      if (rowIndex === 0) {
+        return <PlayerRowHeader key={key} column={columnId} {...params} />
+      }
+
+      const player = players.get(rowIndex)
+      return (
+        <PlayerRow column={columnId} key={key} player={player} {...params} />
+      )
+    }
 
     const body = isPending ? (
       <Loading loading />
     ) : (
       <AutoSizer>
         {({ height, width }) => (
-          <List
+          <MultiGrid
             ref={this.list}
             className='players'
+            cellRenderer={cellRenderer}
             width={width}
             height={height}
-            columnWidth={60}
             rowHeight={ROW_HEIGHT}
             rowCount={players.size}
-            columnCount={50}
-            rowRenderer={Row}
+            columnCount={columns.length}
+            columnWidth={120}
+            fixedColumnCount={1}
+            fixedRowCount={1}
           />
         )}
       </AutoSizer>
