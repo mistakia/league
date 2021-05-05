@@ -1093,7 +1093,7 @@ export const oddTypeDesc = {
 export const sources = {
   FANTASY_SHARKS: 1,
   CBS: 2,
-  EPSN: 3,
+  ESPN: 3,
   NFL: 4,
   FFTODAY: 5,
   PFF: 6,
