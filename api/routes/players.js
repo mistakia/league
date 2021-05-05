@@ -8,6 +8,32 @@ router.get('/?', async (req, res) => {
     const search = req.query.q
 
     const includePlayerIds = []
+
+    const latestRanking = db('rankings')
+      .select(db.raw('max(timestamp) as maxtime'))
+      .where('year', constants.season.year)
+      .where('sf', 1)
+      .where('rookie', 0)
+      .where('ppr', constants.scoring.HALF)
+      .where('sourceid', constants.sources.FANTASYPROS)
+      .where('dynasty', 0)
+    const maxtime = latestRanking.length ? latestRanking[0].maxtime : null
+
+    if (maxtime) {
+      const topPlayers = db('rankings')
+        .where({
+          timestamp: maxtime,
+          sf: 1,
+          dynasty: 0,
+          ppr: constants.scoring.HALF,
+          rookie: 0,
+          year: constants.season.year,
+          sourceid: constants.sources.FANTASYPROS
+        })
+
+      topPlayers.forEach(p => includePlayerIds.push(p.player))
+    }
+
     if (req.user) {
       const leagues = await db('leagues')
         .select('leagues.uid')
@@ -58,14 +84,39 @@ router.get('/?', async (req, res) => {
     if (search) {
       query.whereRaw('MATCH(fname, lname) AGAINST(? IN BOOLEAN MODE)', search)
     } else {
-      query.whereNot('cteam', 'INA')
-
       if (includePlayerIds.length) {
-        query.orWhereIn('player.player', includePlayerIds)
+        query.whereIn('player.player', includePlayerIds)
       }
+
+      query.orWhere(function () {
+        this.where('player.pos', 'QB')
+          .whereNot('player.posd', 'PS')
+          .whereNot('player.cteam', 'INA')
+      }).orWhere(function () {
+        this.where('player.pos', 'RB')
+          .where('player.posd', 'RB')
+          .where('player.dcp', '<', 3)
+          .whereNot('player.cteam', 'INA')
+      }).orWhere(function () {
+        this.where('player.pos', 'WR')
+          .whereNot('player.posd', 'PS')
+          .whereNot('player.cteam', 'INA')
+          .where('player.dcp', '<', 3)
+      }).orWhere(function () {
+        this.where('player.pos', 'TE')
+          .whereNot('player.posd', 'PS')
+          .whereNot('player.cteam', 'INA')
+          .where('player.dcp', '<', 2)
+      }).orWhere(function () {
+        this.where('player.pos', 'K')
+          .whereNot('player.posd', 'PS')
+          .whereNot('player.cteam', 'INA')
+          .where('player.dcp', '<=', 1)
+      }).orWhere('player.pos', 'DST')
     }
 
     const data = await query
+    logger(`responding with ${data.length} players`)
     res.send(data)
   } catch (error) {
     logger(error)
