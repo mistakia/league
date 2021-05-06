@@ -716,6 +716,24 @@ CREATE TABLE `safety` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `seasons`
+--
+
+DROP TABLE IF EXISTS `seasons`;
+
+CREATE TABLE `seasons` (
+  `lid` int(11) NOT NULL,
+  `year` int(4) NOT NULL,
+  `fqb` int(3) DEFAULT NULL, -- qb franchise tag amount
+  `frb` int(3) DEFAULT NULL, -- rb franchise tag amount
+  `fwr` int(3) DEFAULT NULL, -- wr franchise tag amount
+  `fte` int(3) DEFAULT NULL, -- te franchise tag amount
+  UNIQUE KEY `season` (`lid`,`year`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `schedule`
 --
 
