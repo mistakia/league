@@ -1,33 +1,42 @@
 $height = 30px
 
 .player__row
-  height 100%
-  display flex
-  flex-direction column
-
-  &.selected .player__row-main
-    background lighten($accentColor, 85%)
-
-  &.fa .player__row-main
-    background lighten(orange, 80%)
-
-  &.rostered .player__row-main
-    background lighten(yellow, 80%)
-
-  &.starter__baseline .player__row-main
-    border-left 4px solid red
-
-.player__row-main
-  display flex
   height $height
   align-items center
-  border-left 4px solid transparent
+  display flex
+  white-space nowrap
+  width max-content
+  flex-wrap nowrap
+  min-width 100%
+
+  &.selected
+    background lighten($accentColor, 85%)
+
+  &.fa
+    background lighten(orange, 80%)
+
+  &.rostered
+    background lighten(yellow, 80%)
+
+  &.starter__baseline
+    border-bottom 2px solid red
+
   &:hover
     background white
+
+.player__row-lead
+  background $backgroundColor
+  display inline-flex
+  height 100%
+  align-items center
+  position sticky
+  z-index 1
+  left 0
 
 .row__name
 .player__row-name
   flex 0 0 150px
+  width 150px
   overflow hidden
   text-overflow ellipsis
   white-space nowrap
@@ -44,11 +53,13 @@ $height = 30px
 
 .player__row-availability
   flex 0 0 50px
+  width 50px
   overflow hidden
   display flex
   justify-content center
   align-items center
   border-left 1px solid $borderColor
+  border-right 1px solid $borderColor
   background white
   height 100%
 
@@ -57,11 +68,13 @@ $height = 30px
 
 .player__row-action
   flex 0 0 45px
+  width 45px
   display flex
   justify-content center
 
 .player__row-pos
   flex 0 0 50px
+  width 50px
   display flex
 
 .row__action

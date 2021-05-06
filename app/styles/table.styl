@@ -3,6 +3,7 @@
   overflow-x auto
 
 .table__row
+  width max-content
   position relative
   display flex
   align-items center
@@ -19,14 +20,14 @@
   font-weight 500
 
 .table__cell
-  flex 1
-  min-width 60px
+  flex 0 0 60px
+  width 60px
   display flex
   align-items center
   height 100%
   padding 0 8px
   &.metric
-    justify-content flex-end
+    justify-content flex-start
 
 .table__head .table__cell
   height 100%

@@ -3,7 +3,6 @@ import moment from 'moment-timezone'
 
 import { Player, connect } from '@components/player'
 import Position from '@components/position'
-import Tooltip from '@material-ui/core/Tooltip'
 import Team from '@components/team'
 import { constants, nth } from '@common'
 import IconButton from '@components/icon-button'
