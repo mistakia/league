@@ -27,7 +27,6 @@ const aliases = {
   'Dante Fowler': 'DF-1481',
   'DJ Chark Jr.': 'DC-1418',
   'D.J. Chark Jr.': 'DC-1418',
-  'DJ Moore': 'DM-2850',
   'DK Metcalf': 'DM-2275',
   'Duke Johnson Jr.': 'DJ-1850',
   'Dwayne Haskins': 'DH-1912',
@@ -189,6 +188,10 @@ const aliases = {
   'Washington Football Team': 'WAS'
 }
 
+const nameAliases = {
+  'DJ Moore': 'D.J. Moore'
+}
+
 const fixPosition = (pos) => {
   switch (pos) {
     case 'C':
@@ -222,8 +225,10 @@ const getPlayerId = async ({ name, pos, team }) => {
     return aliases[name]
   }
 
-  const fname = name.split(' ').shift()
-  const lname = name.split(' ').splice(1).join(' ')
+  const aname = nameAliases[name] || name
+  const sname = aname.replace(/jr.|jr|sr.|sr|II|III/gi, '').trim()
+  const fname = sname.split(' ').shift()
+  const lname = sname.split(' ').splice(1).join(' ')
 
   const query = db('player').select('player').where({
     fname,

@@ -59,10 +59,13 @@ describe('API /teams - reserve', function () {
         value
       })
 
-      await knex('players').insert({
-        player: player.player,
-        status: 'Injured Reserve'
-      })
+      await knex('player')
+        .update({
+          status: 'Injured Reserve'
+        })
+        .where({
+          player: player.player
+        })
 
       const res = await chai
         .request(server)
@@ -130,10 +133,13 @@ describe('API /teams - reserve', function () {
         value
       })
 
-      await knex('players').insert({
-        player: player.player,
-        status: 'Reserve/COVID-19'
-      })
+      await knex('player')
+        .update({
+          status: 'Reserve/COVID-19'
+        })
+        .where({
+          player: player.player
+        })
 
       const res = await chai
         .request(server)
@@ -424,10 +430,13 @@ describe('API /teams - reserve', function () {
         transaction: constants.transactions.DRAFT,
         value
       })
-      await knex('players').insert({
-        player: player.player,
-        status: 'Injured Reserve'
-      })
+      await knex('player')
+        .update({
+          status: 'Injured Reserve'
+        })
+        .where({
+          player: player.player
+        })
       const request = chai
         .request(server)
         .post('/api/teams/1/reserve')
@@ -459,10 +468,13 @@ describe('API /teams - reserve', function () {
 
       const player = players[0].player
 
-      await knex('players').insert({
-        player,
-        status: 'Injured Reserve'
-      })
+      await knex('player')
+        .update({
+          status: 'Injured Reserve'
+        })
+        .where({
+          player
+        })
       const request = chai
         .request(server)
         .post('/api/teams/1/reserve')
@@ -489,10 +501,13 @@ describe('API /teams - reserve', function () {
         userId: 1,
         slot: constants.slots.PSP
       })
-      await knex('players').insert({
-        player: player.player,
-        status: 'Injured Reserve'
-      })
+      await knex('player')
+        .update({
+          status: 'Injured Reserve'
+        })
+        .where({
+          player: player.player
+        })
       const request = chai
         .request(server)
         .post('/api/teams/1/reserve')
@@ -523,10 +538,13 @@ describe('API /teams - reserve', function () {
         value
       })
 
-      await knex('players').insert({
-        player: player.player,
-        status: 'Injured Reserve'
-      })
+      await knex('player')
+        .update({
+          status: 'Injured Reserve'
+        })
+        .where({
+          player: player.player
+        })
 
       const request = chai
         .request(server)
