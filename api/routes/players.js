@@ -64,16 +64,16 @@ router.get('/?', async (req, res) => {
       'player.cteam',
       'player.gsisid',
       'player.gsispid',
+      'player.status',
 
-      'min(players.status) as status',
-      'min(players.injury_status) as injuryStatus',
-      'min(players.injury_body_part) as injuryBodyPart',
+      /* 'min(players.injury_status) as injuryStatus',
+       * 'min(players.injury_body_part) as injuryBodyPart', */
       'practice.status as gamestatus'
     ]
 
     const query = db('player')
       .select(db.raw(selects.join(',')))
-      .leftJoin('players', 'player.player', 'players.player')
+      /* .leftJoin('players', 'player.player', 'players.player') */
       .leftJoin('practice', function () {
         this.on('player.player', '=', 'practice.player')
           .andOn('practice.week', '=', constants.season.week)

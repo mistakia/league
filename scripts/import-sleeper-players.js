@@ -2,6 +2,7 @@
 // eslint-disable-next-line
 require = require('esm')(module /*, options*/)
 const fetch = require('node-fetch')
+const diff = require('deep-diff')
 
 const debug = require('debug')
 const argv = require('yargs').argv
@@ -25,17 +26,22 @@ const run = async () => {
   for (const sleeper_id in result) {
     const item = result[sleeper_id]
     const name = item.full_name || ''
-    const team = fixTeam(item.team || '')
+    const team = fixTeam(item.team)
     const pos = item.position
 
-    if (!name || !team || !pos) continue
+    if (!name || !pos) continue
 
-    const params = { name, team, pos }
+    for (const field in item) {
+      fields[field] = true
+    }
+
+    const params = { name, pos }
     let playerId
     try {
       playerId = await getPlayerId(params)
       if (!playerId) {
         missing.push(params)
+        continue
       }
     } catch (err) {
       console.log(err)
@@ -43,14 +49,9 @@ const run = async () => {
       continue
     }
 
-    for (const field in item) {
-      fields[field] = true
-    }
-
     const {
       rotoworld_id,
       high_school,
-      injury_notes,
       rotowire_id,
       gsis_id,
       sportradar_id,
@@ -58,38 +59,29 @@ const run = async () => {
       espn_id,
       fantasy_data_id,
       yahoo_id,
-      injury_start_date,
       practice_participation,
-      search_rank,
-      injury_body_part,
       stats_id,
-      injury_status,
       status
     } = item
 
     const data = {
       rotoworld_id,
       high_school,
-      injury_notes,
       rotowire_id,
-      gsis_id,
+      gsisid: gsis_id,
       sportradar_id,
-      practice_description,
+      //practice_description,
       espn_id,
       fantasy_data_id,
       yahoo_id,
-      injury_start_date,
-      practice_participation,
-      search_rank,
-      injury_body_part,
-      stats_global_id: stats_id,
-      injury_status,
+      //practice_participation,
+      //stats_global_id: stats_id,
       status,
       sleeper_id,
       player: playerId,
-      name,
-      team,
-      pos
+      // name,
+      cteam: team
+      //pos
     }
 
     inserts.push(data)
@@ -97,51 +89,110 @@ const run = async () => {
 
   log(`Complete field list: ${Object.keys(fields)}`)
   log(`Could not locate ${missing.length} players`)
-  missing.forEach((m) =>
+  missing.forEach((m) => {
+    if (!constants.positions.includes(m.pos)) return
     log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`)
-  )
+  })
 
   if (argv.dry) {
+    log(inserts[0])
     return
   }
 
   log(`Inserting ${inserts.length} players into database`)
-  for (const insert of inserts) {
-    const rows = await db('players').where('sleeper_id', insert.sleeper_id)
-    if (rows.length) {
-      const {
-        active,
-        depth_chart_order,
-        depth_chart_position,
-        injury_body_part,
-        injury_start_date,
-        injury_status,
-        injury_notes,
-        practice_participation,
-        practice_description,
-        status,
-        search_rank
-      } = insert
-      await db('players')
-        .update({
-          active,
-          depth_chart_order,
-          depth_chart_position,
-          injury_body_part,
-          injury_start_date,
-          injury_status,
-          injury_notes,
-          practice_participation,
-          practice_description,
-          status,
-          search_rank
+  const playerIds = inserts.map((p) => p.player)
+  const sleeperIds = inserts.map((p) => p.sleeper_id)
+
+  const currentPlayers = await db('player')
+    .whereIn('player', playerIds)
+    .orWhereIn('sleeper_id', sleeperIds)
+  const currentPlayerIds = currentPlayers.map((p) => p.player)
+
+  for (const player of currentPlayers) {
+    const row = inserts.find(
+      (r) => r.player === player.player || r.sleeper_id === player.sleeper_id
+    )
+    const differences = diff(player, row)
+
+    const edits = differences.filter((d) => d.kind === 'E')
+    if (edits.length) {
+      for (const edit of edits) {
+        const prop = edit.path[0]
+        log(`Updating ${player.player} - ${prop} - ${edit.rhs}`)
+        await db('changelog').insert({
+          type: constants.changes.PLAYER_EDIT,
+          id: player.player,
+          prop,
+          prev: edit.lhs,
+          new: edit.rhs,
+          timestamp
         })
-        .where('sleeper_id', insert.sleeper_id)
-    } else {
-      await db('players').insert(insert)
+
+        await db('player')
+          .update({
+            [prop]: edit.rhs
+          })
+          .where({
+            player: player.player
+          })
+      }
     }
   }
 
+  const missingPlayerIds = playerIds.filter(
+    (p) => !currentPlayerIds.includes(p)
+  )
+
+  for (const missingPlayerId of missingPlayerIds) {
+    const row = inserts.find((r) => r.player === missingPlayerId)
+    /* await db('changelog').insert({
+     *   type: constants.changes.PLAYER_NEW,
+     *   id: row.player,
+     *   timestamp
+     * })
+
+     * await db('player').insert({
+     *   pos: row.pos1,
+     *   ...formatted
+     * }) */
+  }
+
+  /* for (const insert of inserts) {
+   *   const rows = await db('players').where('sleeper_id', insert.sleeper_id)
+   *   if (rows.length) {
+   *     const {
+   *       active,
+   *       depth_chart_order,
+   *       depth_chart_position,
+   *       injury_body_part,
+   *       injury_start_date,
+   *       injury_status,
+   *       injury_notes,
+   *       practice_participation,
+   *       practice_description,
+   *       status,
+   *       search_rank
+   *     } = insert
+   *     await db('players')
+   *       .update({
+   *         active,
+   *         depth_chart_order,
+   *         depth_chart_position,
+   *         injury_body_part,
+   *         injury_start_date,
+   *         injury_status,
+   *         injury_notes,
+   *         practice_participation,
+   *         practice_description,
+   *         status,
+   *         search_rank
+   *       })
+   *       .where('sleeper_id', insert.sleeper_id)
+   *   } else {
+   *     await db('players').insert(insert)
+   *   }
+   * }
+   */
   const statuses = []
   for (const insert of inserts) {
     const {

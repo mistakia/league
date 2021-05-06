@@ -76,16 +76,7 @@ router.post('/?', async (req, res) => {
     }
 
     // make sure player is reserve eligible
-    const players = await db('player')
-      .select(
-        db.raw(
-          'player.*, min(players.status) as status, min(players.injury_status) as injury_status, min(players.injury_body_part) as injury_body_part'
-        )
-      )
-      .leftJoin('players', 'player.player', 'players.player')
-      .groupBy('player.player')
-      .where('player.player', player)
-
+    const players = await db('player').where('player', player)
     const playerRow = players[0]
 
     if (!playerRow.status || playerRow.status === 'Active') {
