@@ -57,7 +57,7 @@ export default class PlayersPage extends React.Component {
   componentDidUpdate (prevProps) {
     if (!this.scroll) return
 
-    if (prevProps.order !== this.props.order || prevProps.orderBy !== this.props.orderBy) {
+    if ((prevProps.order !== this.props.order || prevProps.orderBy !== this.props.orderBy) || !prevProps.players.equals(this.props.players)) {
       this.scroll.pageLoaded = 0
       const parentElement = this.scroll.getParentElement(this.scroll.scrollComponent)
       parentElement.scrollTop = 0
