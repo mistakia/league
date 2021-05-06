@@ -20,10 +20,7 @@ module.exports = {
   },
   plugins: ['react'],
   rules: {
-    'curly': [
-      'error',
-      'multi-line'
-    ],
+    curly: ['error', 'multi-line'],
     'generator-star-spacing': [
       'error',
       {

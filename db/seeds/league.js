@@ -46,7 +46,7 @@ module.exports = async function (knex) {
     fuml: -1,
     ddate: Math.round(Date.now() / 1000),
     adate: Math.round(Date.now() / 1000),
-    tddate: 1606626000,
+    tddate: constants.season.start.clone().add('12', 'weeks').unix(),
     hosted: true
   })
 

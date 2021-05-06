@@ -508,6 +508,17 @@ CREATE TABLE `player` (
   `esbid` varchar(10) DEFAULT NULL,
   `gsisid` varchar(15) DEFAULT NULL,
   `gsispid` varchar(36) DEFAULT NULL,
+
+  `status` varchar(255) DEFAULT NULL,
+  `high_school` varchar(255) DEFAULT NULL,
+
+  `sleeper_id` varchar(11) DEFAULT NULL,
+  `rotoworld_id` int(11) DEFAULT NULL,
+  `rotowire_id` varchar(11) DEFAULT NULL,
+  `sportradar_id` varchar(36) DEFAULT NULL,
+  `espn_id` int(11) DEFAULT NULL,
+  `fantasy_data_id` int(11) DEFAULT NULL,
+  `yahoo_id` int(11) DEFAULT NULL,
   FULLTEXT KEY `name` (`fname`,`lname`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 

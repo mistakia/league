@@ -5,10 +5,7 @@ module.exports = async function (knex) {
   const leagues = await knex('leagues').where({ uid: 1 })
   const league = leagues[0]
 
-  const players = await knex('player')
-    .leftJoin('rankings', 'player.player', 'rankings.player')
-    .orderBy('ornk', 'asc')
-    .where('rankings.year', constants.season.year)
+  const players = await knex('player').orderByRaw('RAND()')
 
   await knex('rosters_players').del()
 

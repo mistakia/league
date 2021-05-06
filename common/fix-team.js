@@ -1,9 +1,11 @@
 export default function (team) {
-  if (!team) return
-
-  team = team.toUpperCase()
+  team = team ? team.toUpperCase() : null
 
   switch (team) {
+    case undefined:
+    case null:
+      return 'INA'
+
     case 'ARZ':
       return 'ARI'
 
