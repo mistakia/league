@@ -41,8 +41,47 @@ export const scoring = {
 export const years = getAvailableYears()
 export const byeWeeks = [4, 5, 6, 7, 8, 9, 10, 11, 13]
 export const weeks = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
-export const fantasyWeeks = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
-export const nflWeeks = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+export const fantasyWeeks = [
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16
+]
+export const nflWeeks = [
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+  19,
+  20,
+  21
+]
 export const days = ['WED', 'THU', 'TN', 'FRI', 'SAT', 'SUN', 'MN', 'SN']
 export const quarters = [1, 2, 3, 4, 5]
 export const downs = ['1', '2', '3', '4']
@@ -98,13 +137,10 @@ export const dstStats = [
   'dtd' // touchdown
 ]
 
-export const fantasyStats = [
-  ...stats,
-  ...kStats,
-  ...dstStats
-]
+export const fantasyStats = [...stats, ...kStats, ...dstStats]
 
-export const createStats = () => fantasyStats.reduce((o, key) => ({ ...o, [key]: 0 }), {})
+export const createStats = () =>
+  fantasyStats.reduce((o, key) => ({ ...o, [key]: 0 }), {})
 
 export const statHeaders = {
   pa: 'Passing Attempts',
@@ -289,7 +325,8 @@ export const qualifiers = {
   posra_pra: rushingQualifier
 }
 
-export const createFullStats = () => fullStats.reduce((o, key) => ({ ...o, [key]: 0 }), {})
+export const createFullStats = () =>
+  fullStats.reduce((o, key) => ({ ...o, [key]: 0 }), {})
 
 export const teamStats = [
   'q1p', // quarter 1 points
@@ -457,11 +494,12 @@ export const fantasyTeamStats = [
 
   'doi',
 
-  ...Object.values(slots).map(s => `pSlot${s}`),
-  ...positions.map(p => `pPos${p}`)
+  ...Object.values(slots).map((s) => `pSlot${s}`),
+  ...positions.map((p) => `pPos${p}`)
 ]
 
-export const createFantasyTeamStats = () => fantasyTeamStats.reduce((o, key) => ({ ...o, [key]: 0 }), {})
+export const createFantasyTeamStats = () =>
+  fantasyTeamStats.reduce((o, key) => ({ ...o, [key]: 0 }), {})
 
 export const waivers = {
   FREE_AGENCY: 1,
@@ -853,7 +891,7 @@ export const colleges = [
   'Southern Mississippi',
   'Southern Oregon',
   'Southern Utah',
-  'St. John\'s',
+  "St. John's",
   'Stanford',
   'Stephen F Austin State',
   'Stetson',
@@ -952,7 +990,12 @@ export const collegeDivisions = [
   'Western Athletic'
 ]
 
-export const availability = ['ACTIVE ROSTER', 'FREE AGENT', 'PRACTICE SQUAD', 'INJURED RESERVE']
+export const availability = [
+  'ACTIVE ROSTER',
+  'FREE AGENT',
+  'PRACTICE SQUAD',
+  'INJURED RESERVE'
+]
 
 export const errors = {
   INVALID_PARAMS: 1,

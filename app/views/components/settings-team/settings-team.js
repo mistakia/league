@@ -12,7 +12,7 @@ import TeamImage from '@components/team-image'
 import './settings-team.styl'
 
 export default class SettingsTeam extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
 
     this.primaryRef = React.createRef()
@@ -122,11 +122,11 @@ export default class SettingsTeam extends React.Component {
 
     return (
       <Accordion expanded={this.state.open} onChange={this.handleChange}>
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
-        >
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <div className='settings__section-title'>Team</div>
-          <div className='settings__section-description'>Edit Name / Abbreviation / Logo</div>
+          <div className='settings__section-description'>
+            Edit Name / Abbreviation / Logo
+          </div>
         </AccordionSummary>
         <AccordionDetails>
           <div className='settings__team-section'>
@@ -142,15 +142,17 @@ export default class SettingsTeam extends React.Component {
               limit={5}
               {...props}
             />
-            <EditableTeamField
-              label='Logo (URL)'
-              field='image'
-              {...props}
-            />
+            <EditableTeamField label='Logo (URL)' field='image' {...props} />
           </div>
           <div className='settings__team-section team__brand'>
-            <div className='team__brand-pc' style={{ backgroundColor: this.state.pc }} />
-            <div className='team__brand-ac' style={{ backgroundColor: this.state.ac }} />
+            <div
+              className='team__brand-pc'
+              style={{ backgroundColor: this.state.pc }}
+            />
+            <div
+              className='team__brand-ac'
+              style={{ backgroundColor: this.state.ac }}
+            />
             <TeamImage tid={team.uid} />
             <div className='team__brand-colors'>
               <div ref={this.primaryRef} />

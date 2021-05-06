@@ -29,11 +29,13 @@ export default function () {
       <Route exact path='/league/schedule' component={SchedulePage} />
       <Route exact path='/league/rosters' component={RostersPage} />
       <Route exact path='/league/waivers' component={WaiversPage} />
-      <Route exact path='/league' component={() => <Redirect to='/league/transactions' />} />
+      <Route
+        exact
+        path='/league'
+        component={() => <Redirect to='/league/transactions' />}
+      />
     </Switch>
   )
 
-  return (
-    <PageLayout body={body} menu={menu} />
-  )
+  return <PageLayout body={body} menu={menu} />
 }

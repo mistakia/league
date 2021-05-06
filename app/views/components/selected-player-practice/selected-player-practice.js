@@ -27,9 +27,7 @@ export default class SelectedPlayerPractice extends React.Component {
     return (
       <div className='selected__section'>
         <div className='selected__section-header'>
-          <div className='row__group-head'>
-            Practice Reports
-          </div>
+          <div className='row__group-head'>Practice Reports</div>
         </div>
         <div className='selected__section-header'>
           <div className='row__group'>
@@ -47,9 +45,7 @@ export default class SelectedPlayerPractice extends React.Component {
             </div>
           </div>
         </div>
-        <div className='empty'>
-          {rows}
-        </div>
+        <div className='empty'>{rows}</div>
       </div>
     )
   }

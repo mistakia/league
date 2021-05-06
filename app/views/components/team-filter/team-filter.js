@@ -3,7 +3,7 @@ import React from 'react'
 import PlayerFilter from '@components/player-filter'
 
 export default class TeamFilter extends React.Component {
-  render () {
+  render() {
     const state = {
       type: 'teamIds',
       label: 'TEAMS',
@@ -18,8 +18,6 @@ export default class TeamFilter extends React.Component {
       })
     }
 
-    return (
-      <PlayerFilter {...state} />
-    )
+    return <PlayerFilter {...state} />
   }
 }

@@ -14,7 +14,9 @@ router.post('/?', async (req, res) => {
       return res.status(401).send({ error: 'user is not commish' })
     }
 
-    await db('matchups').del().where({ lid: leagueId, year: constants.season.year })
+    await db('matchups')
+      .del()
+      .where({ lid: leagueId, year: constants.season.year })
     const teams = await db('teams').where({ lid: leagueId })
     const schedule = getSchedule(teams)
     const inserts = []

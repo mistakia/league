@@ -24,7 +24,4 @@ const mapDispatchToProps = {
   select: draftActions.selectPlayer
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(DraftPlayer)
+export default connect(mapStateToProps, mapDispatchToProps)(DraftPlayer)

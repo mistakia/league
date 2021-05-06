@@ -5,7 +5,19 @@ import LoadingIndicator from '@components/loading-indicator'
 
 import './button.styl'
 
-function Button ({ children, className, label, onClick, count, type = 'button', disabled = false, isLoading, isActive, small, text }) {
+function Button({
+  children,
+  className,
+  label,
+  onClick,
+  count,
+  type = 'button',
+  disabled = false,
+  isLoading,
+  isActive,
+  small,
+  text
+}) {
   const classNames = ['button', className]
   const haveCount = typeof count === 'number'
 
@@ -21,8 +33,7 @@ function Button ({ children, className, label, onClick, count, type = 'button', 
       className={classNames.join(' ')}
       onClick={onClick}
       disabled={disabled}
-      type={type}
-    >
+      type={type}>
       {isLoading ? <LoadingIndicator /> : children}
       {haveCount && <span className='count'>{count}</span>}
     </button>

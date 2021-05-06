@@ -5,11 +5,8 @@ import { getSelectedPlayer } from '@core/players'
 
 import SelectedPlayerValue from './selected-player-value'
 
-const mapStateToProps = createSelector(
-  getSelectedPlayer,
-  (player) => ({ player })
-)
+const mapStateToProps = createSelector(getSelectedPlayer, (player) => ({
+  player
+}))
 
-export default connect(
-  mapStateToProps
-)(SelectedPlayerValue)
+export default connect(mapStateToProps)(SelectedPlayerValue)

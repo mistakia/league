@@ -9,7 +9,7 @@ const initialState = new Map({
   teamsAnalysis: new List()
 })
 
-export function gamelogsReducer (state = initialState, { payload, type }) {
+export function gamelogsReducer(state = initialState, { payload, type }) {
   switch (type) {
     case gamelogsActions.GET_PLAYER_GAMELOGS_FULFILLED:
       return state.set('players', new List(payload.data))

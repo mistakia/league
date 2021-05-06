@@ -4,11 +4,10 @@ const router = express.Router()
 router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    const sub = db('jobs')
-      .select(db.raw('max(uid) as maxuid'))
-      .groupBy('type')
+    const sub = db('jobs').select(db.raw('max(uid) as maxuid')).groupBy('type')
 
-    const jobs = await db.select('*')
+    const jobs = await db
+      .select('*')
       .from(db.raw('(' + sub.toString() + ') AS X'))
       .join('jobs', 'X.maxuid', 'jobs.uid')
 

@@ -7,10 +7,19 @@ import PlayerNameExpanded from '@components/player-name-expanded'
 import './player-slot.styl'
 
 export default class PlayerSlot extends React.Component {
-  render () {
-    const { player, slot, handleSelect, selected, handleUpdate, isLocked } = this.props
+  render() {
+    const {
+      player,
+      slot,
+      handleSelect,
+      selected,
+      handleUpdate,
+      isLocked
+    } = this.props
 
-    const slotPositions = Object.keys(constants.slots).find(key => constants.slots[key] === slot)
+    const slotPositions = Object.keys(constants.slots).find(
+      (key) => constants.slots[key] === slot
+    )
     const slotName = constants.slotName[slot]
 
     let action
@@ -20,37 +29,29 @@ export default class PlayerSlot extends React.Component {
       action = (
         <Button
           disabled={isLocked}
-          onClick={() => handleSelect({ slot, player: player.player, pos: player.pos })}
-          small
-        >
+          onClick={() =>
+            handleSelect({ slot, player: player.player, pos: player.pos })
+          }
+          small>
           {isLocked ? 'Locked' : 'Move'}
         </Button>
       )
     } else if (selected) {
       if (player.player && selected.player === player.player) {
         action = (
-          <Button
-            onClick={() => handleSelect(null)}
-            small
-          >
+          <Button onClick={() => handleSelect(null)} small>
             Cancel
           </Button>
         )
       } else if (!isLocked && slotPositions.includes(selected.pos)) {
         action = (
-          <Button
-            onClick={() => handleUpdate({ slot, player })}
-            small
-          >
+          <Button onClick={() => handleUpdate({ slot, player })} small>
             Here
           </Button>
         )
       } else if (!player.player && slot === constants.slots.BENCH) {
         action = (
-          <Button
-            onClick={() => handleUpdate({ slot })}
-            small
-          >
+          <Button onClick={() => handleUpdate({ slot })} small>
             Here
           </Button>
         )
@@ -117,27 +118,28 @@ export default class PlayerSlot extends React.Component {
         <div className='player__slot-slotName'>{slotName}</div>
         <div className='player__slot-player'>
           <PlayerNameExpanded playerId={player.player} hideActions />
-          {!!passing.length &&
+          {!!passing.length && (
             <div className='player__slot-projected-stats'>
               {toStringArray(passing)}
-            </div>}
-          {!!rushing.length &&
+            </div>
+          )}
+          {!!rushing.length && (
             <div className='player__slot-projected-stats'>
               {toStringArray(rushing)}
-            </div>}
-          {!!receiving.length &&
+            </div>
+          )}
+          {!!receiving.length && (
             <div className='player__slot-projected-stats'>
               {toStringArray(receiving)}
-            </div>}
+            </div>
+          )}
           {/* projected output */}
           {/* expert consensus ranking */}
         </div>
         <div className='player__slot-projected-points metric'>
           {player.getIn(['points', `${week}`, 'total'], 0).toFixed(1)}
         </div>
-        <div className='player__slot-action'>
-          {action}
-        </div>
+        <div className='player__slot-action'>{action}</div>
       </div>
     )
   }

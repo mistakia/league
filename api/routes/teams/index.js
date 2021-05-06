@@ -50,7 +50,9 @@ router.put('/:teamId', async (req, res) => {
     }
 
     if (userTeamFields.indexOf(field) < 0) {
-      await db('teams').update({ [field]: value }).where({ uid: teamId })
+      await db('teams')
+        .update({ [field]: value })
+        .where({ uid: teamId })
     } else {
       await db('users_teams')
         .update({ [field]: value })

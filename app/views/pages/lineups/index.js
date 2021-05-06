@@ -6,7 +6,7 @@ import { getCurrentTeamRosterRecord } from '@core/rosters'
 import render from './lineups'
 
 class LineupsPage extends React.Component {
-  render () {
+  render() {
     return render.call(this)
   }
 }
@@ -16,6 +16,4 @@ const mapStateToProps = createSelector(
   (roster) => ({ roster })
 )
 
-export default connect(
-  mapStateToProps
-)(LineupsPage)
+export default connect(mapStateToProps)(LineupsPage)

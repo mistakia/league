@@ -2,7 +2,7 @@ import React from 'react'
 import TextField from '@material-ui/core/TextField'
 
 export default class StatQualifierFilter extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
 
     this.state = {
@@ -12,7 +12,7 @@ export default class StatQualifierFilter extends React.Component {
     }
   }
 
-  static getDerivedStateFromProps (props, state) {
+  static getDerivedStateFromProps(props, state) {
     return {
       value: props.qualifier.value,
       invalid: false,
@@ -25,7 +25,10 @@ export default class StatQualifierFilter extends React.Component {
     this.setState({ value })
 
     if (isNaN(value) || parseInt(value, 10) < 0) {
-      return this.setState({ invalid: true, helper: 'should be greater than 1' })
+      return this.setState({
+        invalid: true,
+        helper: 'should be greater than 1'
+      })
     } else {
       this.props.update({ qualifier: this.props.stat, value })
     }

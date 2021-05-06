@@ -10,30 +10,31 @@ const run = async () => {
   const isNewSeason = !!argv.year
 
   // do not run once season is over unless generating roster for next season
-  if (constants.season.week >= constants.season.finalWeek && !isNewSeason) return
+  if (constants.season.week >= constants.season.finalWeek && !isNewSeason) {
+    return
+  }
 
   // get list of hosted leagues
   const leagues = await db('leagues')
 
-  const nextWeek = isNewSeason ? 0 : (constants.season.week + 1)
+  const nextWeek = isNewSeason ? 0 : constants.season.week + 1
   const nextYear = isNewSeason ? argv.year : constants.season.year
   const previousWeek = isNewSeason ? 16 : constants.season.week
-  const previousYear = isNewSeason ? (argv.year - 1) : constants.season.year
+  const previousYear = isNewSeason ? argv.year - 1 : constants.season.year
 
   for (const league of leagues) {
     // get latest rosters for league
-    const rosters = await db('rosters')
-      .where({
-        lid: league.uid,
-        year: previousYear,
-        week: previousWeek
-      })
+    const rosters = await db('rosters').where({
+      lid: league.uid,
+      year: previousYear,
+      week: previousWeek
+    })
 
     for (const roster of rosters) {
       // get current roster players
       const { tid, lid, uid } = roster
       const players = await db('rosters_players').where({ rid: uid })
-      const currentPlayerIds = players.map(p => p.player)
+      const currentPlayerIds = players.map((p) => p.player)
 
       // get roster id
       const rosterData = {
@@ -51,19 +52,25 @@ const run = async () => {
 
       // insert any missing players & remove excess players
       const existingPlayers = await db('rosters_players').where({ rid })
-      const existingPlayerIds = existingPlayers.map(p => p.player)
-      const matching = players.filter(p => existingPlayerIds.includes(p.player))
-      const missing = players.filter(p => !existingPlayerIds.includes(p.player))
-      const excessive = existingPlayers.filter(p => !currentPlayerIds.includes(p.player))
-      const inserts = missing.map(p => ({
+      const existingPlayerIds = existingPlayers.map((p) => p.player)
+      const matching = players.filter((p) =>
+        existingPlayerIds.includes(p.player)
+      )
+      const missing = players.filter(
+        (p) => !existingPlayerIds.includes(p.player)
+      )
+      const excessive = existingPlayers.filter(
+        (p) => !currentPlayerIds.includes(p.player)
+      )
+      const inserts = missing.map((p) => ({
         rid,
         slot: p.slot,
         player: p.player,
         pos: p.pos
       }))
 
-      const updates = matching.filter(p => {
-        const item = existingPlayers.find(i => i.player === p.player)
+      const updates = matching.filter((p) => {
+        const item = existingPlayers.find((i) => i.player === p.player)
         return item.slot !== p.slot
       })
 
@@ -71,14 +78,15 @@ const run = async () => {
       if (excessive.length) {
         await db('rosters_players')
           .where('rid', rid)
-          .whereIn('player', excessive.map(p => p.player))
+          .whereIn(
+            'player',
+            excessive.map((p) => p.player)
+          )
       }
 
       if (updates.length) {
         for (const { player, slot } of updates) {
-          await db('rosters_players')
-            .where({ rid, player })
-            .update({ slot })
+          await db('rosters_players').where({ rid, player }).update({ slot })
         }
       }
     }

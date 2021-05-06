@@ -9,7 +9,7 @@ import TeamName from '@components/team-name'
 import './trade-select-team.styl'
 
 export default class TradeSelectTeam extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.state = {
       anchorEl: null
@@ -33,15 +33,16 @@ export default class TradeSelectTeam extends React.Component {
     const { teams, teamId, trade } = this.props
     const { anchorEl } = this.state
 
-    const menuItems = teams.filter(t => t.uid !== teamId).map((team, index) => (
-      <MenuItem
-        key={team.uid}
-        selected={team.uid === trade.tid}
-        onClick={() => this.handleSelect(team.uid)}
-      >
-        {team.name}
-      </MenuItem>
-    ))
+    const menuItems = teams
+      .filter((t) => t.uid !== teamId)
+      .map((team, index) => (
+        <MenuItem
+          key={team.uid}
+          selected={team.uid === trade.tid}
+          onClick={() => this.handleSelect(team.uid)}>
+          {team.name}
+        </MenuItem>
+      ))
 
     return (
       <div>
@@ -49,16 +50,14 @@ export default class TradeSelectTeam extends React.Component {
           <ListItem
             button
             disabled={Boolean(trade.uid)}
-            onClick={this.handleOpen}
-          >
+            onClick={this.handleOpen}>
             <TeamName tid={trade.tid} />
           </ListItem>
         </List>
         <Menu
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}
-          onClose={this.handleClose}
-        >
+          onClose={this.handleClose}>
           {menuItems}
         </Menu>
       </div>

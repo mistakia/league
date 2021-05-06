@@ -31,7 +31,7 @@ router.post('/?', async (req, res) => {
     const userTeams = await db('users_teams')
       .join('teams', 'users_teams.tid', 'teams.uid')
       .where('userid', req.user.userId)
-    const team = userTeams.find(p => p.tid === teamId)
+    const team = userTeams.find((p) => p.tid === teamId)
     if (!team) {
       return res.status(400).send({ error: 'invalid teamId' })
     }
@@ -46,9 +46,10 @@ router.post('/?', async (req, res) => {
       .orderBy('uid', 'desc')
       .limit(1)
     const tran = transactions[0]
-    if ((tran.type === constants.transactions.ROSTER_DEACTIVATE ||
-      tran.type === constants.transactions.DRAFT ||
-      tran.type === constants.transactions.PRACTICE_ADD) &&
+    if (
+      (tran.type === constants.transactions.ROSTER_DEACTIVATE ||
+        tran.type === constants.transactions.DRAFT ||
+        tran.type === constants.transactions.PRACTICE_ADD) &&
       moment().isBefore(moment(tran.timestamp, 'X').add('24', 'hours'))
     ) {
       return res.status(400).send({ error: 'player is on waivers' })
@@ -63,7 +64,14 @@ router.post('/?', async (req, res) => {
 
     let data
     try {
-      data = await submitPoach({ leagueId, drop, player, teamId, team, userId: req.user.userId })
+      data = await submitPoach({
+        leagueId,
+        drop,
+        player,
+        teamId,
+        team,
+        userId: req.user.userId
+      })
     } catch (error) {
       return res.status(400).send({ error: error.message })
     }

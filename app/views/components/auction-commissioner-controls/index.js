@@ -5,12 +5,9 @@ import { auctionActions, getAuction } from '@core/auction'
 
 import AuctionCommissionerControls from './auction-commissioner-controls'
 
-const mapStateToProps = createSelector(
-  getAuction,
-  (auction) => ({
-    isPaused: auction.isPaused
-  })
-)
+const mapStateToProps = createSelector(getAuction, (auction) => ({
+  isPaused: auction.isPaused
+}))
 
 const mapDispatchToProps = {
   pause: auctionActions.pause,

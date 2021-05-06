@@ -7,7 +7,14 @@ const { constants, Roster } = require('../common')
 const sendNotifications = require('./send-notifications')
 const getRoster = require('./get-roster')
 
-module.exports = async function ({ leagueId, drop, player, teamId, team, userId }) {
+module.exports = async function ({
+  leagueId,
+  drop,
+  player,
+  teamId,
+  team,
+  userId
+}) {
   // verify player and drop ids
   const playerIds = [player]
   if (drop) playerIds.push(drop)
@@ -15,7 +22,7 @@ module.exports = async function ({ leagueId, drop, player, teamId, team, userId 
   if (playerRows.length !== playerIds.length) {
     throw new Error('could not find playerIds')
   }
-  const poachPlayer = playerRows.find(p => p.player === player)
+  const poachPlayer = playerRows.find((p) => p.player === player)
 
   // verify leagueId
   const leagues = await db('leagues').where({ uid: leagueId })
@@ -39,9 +46,7 @@ module.exports = async function ({ leagueId, drop, player, teamId, team, userId 
   }
 
   // verify no existing poaches exist
-  const poaches = await db('poaches')
-    .where({ player })
-    .whereNull('processed')
+  const poaches = await db('poaches').where({ player }).whereNull('processed')
   if (poaches.length) {
     throw new Error('player has existing poaching claim')
   }
@@ -72,7 +77,10 @@ module.exports = async function ({ leagueId, drop, player, teamId, team, userId 
     .limit(1)
   const tran = transactions[0]
   const playerPoachValue = tran.value + 2
-  if (!constants.season.isRegularSeason && (roster.availableCap - playerPoachValue) < 0) {
+  if (
+    !constants.season.isRegularSeason &&
+    roster.availableCap - playerPoachValue < 0
+  ) {
     throw new Error('not enough available cap')
   }
 
@@ -86,7 +94,14 @@ module.exports = async function ({ leagueId, drop, player, teamId, team, userId 
   }
   await db('poaches').insert(data)
 
-  const message = `${team.name} has submitted a poaching claim for ${poachPlayer.fname} ${poachPlayer.lname} (${poachPlayer.pos}). This claim will be processed around ${moment().utcOffset(-4).add('48', 'hours').format('dddd, MMMM Do h:mm a')} EST.`
+  const message = `${team.name} has submitted a poaching claim for ${
+    poachPlayer.fname
+  } ${poachPlayer.lname} (${
+    poachPlayer.pos
+  }). This claim will be processed around ${moment()
+    .utcOffset(-4)
+    .add('48', 'hours')
+    .format('dddd, MMMM Do h:mm a')} EST.`
   await sendNotifications({
     leagueId: league.uid,
     teamIds: [],

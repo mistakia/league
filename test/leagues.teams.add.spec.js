@@ -12,12 +12,7 @@ const user = require('../db/seeds/user')
 const { constants } = require('../common')
 const { start } = constants.season
 const { user1, user2 } = require('./fixtures/token')
-const {
-  missing,
-  invalid,
-  error,
-  notLoggedIn
-} = require('./utils')
+const { missing, invalid, error, notLoggedIn } = require('./utils')
 
 chai.should()
 chai.use(chaiHTTP)
@@ -40,7 +35,8 @@ describe('API /leagues/teams - add', function () {
 
     it('add team', async () => {
       const leagueId = 1
-      const res = await chai.request(server)
+      const res = await chai
+        .request(server)
         .post('/api/leagues/1/teams')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -82,7 +78,9 @@ describe('API /leagues/teams - add', function () {
     })
 
     it('missing leagueId', async () => {
-      const request = chai.request(server).post('/api/leagues/1/teams')
+      const request = chai
+        .request(server)
+        .post('/api/leagues/1/teams')
         .set('Authorization', `Bearer ${user1}`)
         .send()
 
@@ -90,7 +88,9 @@ describe('API /leagues/teams - add', function () {
     })
 
     it('invalid leagueId', async () => {
-      const request = chai.request(server).post('/api/leagues/2/teams')
+      const request = chai
+        .request(server)
+        .post('/api/leagues/2/teams')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 2
@@ -100,7 +100,9 @@ describe('API /leagues/teams - add', function () {
     })
 
     it('user is not commish', async () => {
-      const request = chai.request(server).post('/api/leagues/1/teams')
+      const request = chai
+        .request(server)
+        .post('/api/leagues/1/teams')
         .set('Authorization', `Bearer ${user2}`)
         .send({
           leagueId: 1
@@ -122,7 +124,8 @@ describe('API /leagues/teams - add', function () {
       }
 
       const leagueId = 1
-      const request = chai.request(server)
+      const request = chai
+        .request(server)
         .post('/api/leagues/1/teams')
         .set('Authorization', `Bearer ${user1}`)
         .send({

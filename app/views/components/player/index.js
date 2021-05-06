@@ -42,10 +42,7 @@ const mapDispatchToProps = {
   select: playerActions.selectPlayer
 }
 
-export function connect (Component) {
-  return connectRedux(
-    mapStateToProps,
-    mapDispatchToProps
-  )(Component)
+export function connect(Component) {
+  return connectRedux(mapStateToProps, mapDispatchToProps)(Component)
 }
 export default connect(Player)

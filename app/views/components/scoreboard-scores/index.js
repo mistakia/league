@@ -1,7 +1,11 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getMatchups, getMatchupsForSelectedWeek, matchupsActions } from '@core/matchups'
+import {
+  getMatchups,
+  getMatchupsForSelectedWeek,
+  matchupsActions
+} from '@core/matchups'
 
 import ScoreboardScores from './scoreboard-scores'
 
@@ -15,7 +19,4 @@ const mapDispatchToProps = {
   select: matchupsActions.select
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(ScoreboardScores)
+export default connect(mapStateToProps, mapDispatchToProps)(ScoreboardScores)

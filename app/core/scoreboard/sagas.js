@@ -6,7 +6,7 @@ import { playActions } from '@core/plays'
 import { send, wsActions } from '@core/ws'
 import { constants } from '@common'
 
-export function * register () {
+export function* register() {
   if (!constants.season.isRegularSeason) return
   const updated = yield select(getScoreboardUpdated)
   console.log(`register scoreboard ${updated}`)
@@ -16,7 +16,7 @@ export function * register () {
   })
 }
 
-export function * reregister () {
+export function* reregister() {
   const state = yield select(getScoreboard)
   const isLoaded = state.get('isLoaded')
   if (isLoaded) {
@@ -28,15 +28,15 @@ export function * reregister () {
 //  WATCHERS
 // -------------------------------------
 
-export function * watchGetScoreboardFulfilled () {
+export function* watchGetScoreboardFulfilled() {
   yield takeLatest(playActions.GET_PLAYSTATS_FULFILLED, register)
 }
 
-export function * watchUpdateScoreboardPlays () {
+export function* watchUpdateScoreboardPlays() {
   yield takeLatest(scoreboardActions.UPDATE_SCOREBOARD_PLAYS, register)
 }
 
-export function * watchWebSocketReconnected () {
+export function* watchWebSocketReconnected() {
   yield takeLatest(wsActions.WEBSOCKET_RECONNECTED, reregister)
 }
 

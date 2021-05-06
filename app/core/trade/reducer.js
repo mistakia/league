@@ -16,7 +16,7 @@ const initialState = new Record({
   acceptingTeamLineups: new Map()
 })
 
-export function tradeReducer (state = initialState(), { payload, type }) {
+export function tradeReducer(state = initialState(), { payload, type }) {
   switch (type) {
     case tradeActions.TRADE_SELECT_TEAM:
       return state.merge({
@@ -65,8 +65,10 @@ export function tradeReducer (state = initialState(), { payload, type }) {
       })
 
     case tradeActions.GET_TRADES_FULFILLED:
-      return state.withMutations(state => {
-        payload.data.forEach(t => state.setIn(['items', t.uid], createTrade(t)))
+      return state.withMutations((state) => {
+        payload.data.forEach((t) =>
+          state.setIn(['items', t.uid], createTrade(t))
+        )
       })
 
     case tradeActions.SELECT_TRADE:

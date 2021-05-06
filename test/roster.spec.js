@@ -207,7 +207,11 @@ describe('COMMON Roster', function () {
     const hasSlot = r.hasOpenBenchSlot('RB')
     hasSlot.should.equal(true)
 
-    r.addPlayer({ slot: constants.slots.BENCH, player: 'player-rb-add', pos: 'RB' })
+    r.addPlayer({
+      slot: constants.slots.BENCH,
+      player: 'player-rb-add',
+      pos: 'RB'
+    })
     r.removePlayer('player-rb-0')
 
     r.players.length.should.equal(4)

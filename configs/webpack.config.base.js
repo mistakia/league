@@ -22,23 +22,29 @@ module.exports = {
             cacheDirectory: true
           }
         }
-      }, {
+      },
+      {
         test: /\.(styl|css)$/,
-        use: [{
-          loader: 'style-loader'
-        }, {
-          loader: 'css-loader'
-        }, {
-          loader: 'stylus-loader',
-          options: {
-            use: [nib()],
-            import: [
-              '~nib/lib/nib/index.styl',
-              path.resolve(__dirname, '../app/styles/variables.styl')
-            ]
+        use: [
+          {
+            loader: 'style-loader'
+          },
+          {
+            loader: 'css-loader'
+          },
+          {
+            loader: 'stylus-loader',
+            options: {
+              use: [nib()],
+              import: [
+                '~nib/lib/nib/index.styl',
+                path.resolve(__dirname, '../app/styles/variables.styl')
+              ]
+            }
           }
-        }]
-      }, {
+        ]
+      },
+      {
         test: /\.(png|jpg)$/,
         loader: 'url-loader',
         options: {
@@ -66,6 +72,6 @@ module.exports = {
 
   plugins: [
     new webpack.NamedModulesPlugin(),
-    new webpack.IgnorePlugin(new RegExp('^(fs|child_process)$'))
+    new webpack.IgnorePlugin(/^(fs|child_process)$/)
   ]
 }

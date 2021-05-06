@@ -19,8 +19,6 @@ export default class ScheduleWeeksFilter extends React.Component {
       })
     }
 
-    return (
-      <ScheduleFilter {...state} />
-    )
+    return <ScheduleFilter {...state} />
   }
 }

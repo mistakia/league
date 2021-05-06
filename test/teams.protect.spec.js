@@ -57,7 +57,9 @@ describe('API /teams - protect', function () {
     })
 
     it('missing player', async () => {
-      const request = chai.request(server).post('/api/teams/1/protect')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/protect')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1
@@ -67,7 +69,9 @@ describe('API /teams - protect', function () {
     })
 
     it('missing leagueId', async () => {
-      const request = chai.request(server).post('/api/teams/1/protect')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/protect')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           player: 'x'
@@ -77,7 +81,9 @@ describe('API /teams - protect', function () {
     })
 
     it('teamId does not belong to userId', async () => {
-      const request = chai.request(server).post('/api/teams/1/protect')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/protect')
         .set('Authorization', `Bearer ${user2}`)
         .send({
           leagueId: 1,
@@ -89,7 +95,9 @@ describe('API /teams - protect', function () {
 
     it('player not on team', async () => {
       const player = await selectPlayer()
-      const request = chai.request(server).post('/api/teams/1/protect')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/protect')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
@@ -101,8 +109,16 @@ describe('API /teams - protect', function () {
 
     it('player already protected on practice squad', async () => {
       const player = await selectPlayer({ rookie: true })
-      await addPlayer({ leagueId: 1, player, teamId: 1, userId: 1, slot: constants.slots.PSP })
-      const request = chai.request(server).post('/api/teams/1/protect')
+      await addPlayer({
+        leagueId: 1,
+        player,
+        teamId: 1,
+        userId: 1,
+        slot: constants.slots.PSP
+      })
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/protect')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           player: player.player,

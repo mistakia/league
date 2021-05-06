@@ -5,13 +5,8 @@ import { getSources } from '@core/sources'
 
 import SettingsProjections from './settings-projections'
 
-const mapStateToProps = createSelector(
-  getSources,
-  (sources) => ({
-    sourceIds: sources.toList().map(s => s.uid)
-  })
-)
+const mapStateToProps = createSelector(getSources, (sources) => ({
+  sourceIds: sources.toList().map((s) => s.uid)
+}))
 
-export default connect(
-  mapStateToProps
-)(SettingsProjections)
+export default connect(mapStateToProps)(SettingsProjections)

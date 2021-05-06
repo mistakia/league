@@ -31,9 +31,9 @@ router.get('/?', async (req, res) => {
     }
 
     for (const team of constants.nflTeams) {
-      const weeks = teams[team].games.map(m => m.wk)
+      const weeks = teams[team].games.map((m) => m.wk)
       const teamWeeks = new Set(weeks)
-      const result = constants.byeWeeks.filter(x => !teamWeeks.has(x))
+      const result = constants.byeWeeks.filter((x) => !teamWeeks.has(x))
       teams[team].bye = result[0]
     }
 

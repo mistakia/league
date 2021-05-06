@@ -34,7 +34,7 @@ export default class AuctionTargets extends React.Component {
     const groups = {}
     for (const position of constants.positions) {
       if (!groups[position]) groups[position] = {}
-      groups[position] = players.filter(p => p.pos === position)
+      groups[position] = players.filter((p) => p.pos === position)
     }
 
     const items = {}
@@ -45,18 +45,21 @@ export default class AuctionTargets extends React.Component {
         const classNames = ['auction__targets-player']
         const rosterSlot = team.roster.get(player.player)
         if (rosterSlot) classNames.push('signed')
-        else if (rosteredPlayerIds.includes(player.player)) classNames.push('rostered')
+        else if (rosteredPlayerIds.includes(player.player))
+          classNames.push('rostered')
         if (lineupPlayerIds.includes(player.player)) classNames.push('optimal')
-        const salary = rosterSlot ? rosterSlot.value : player.getIn(['values', valueType, vbaseline])
+        const salary = rosterSlot
+          ? rosterSlot.value
+          : player.getIn(['values', valueType, vbaseline])
 
         const item = (
           <div className={classNames.join(' ')} key={index}>
             <PlayerName playerId={player.player} />
             <PlayerWatchlistAction playerId={player.player} />
-            <div className='auction__targets-player-bye'><NFLTeamBye team={player.team} /></div>
-            <div className='auction__targets-player-salary'>
-              ${salary}
+            <div className='auction__targets-player-bye'>
+              <NFLTeamBye team={player.team} />
             </div>
+            <div className='auction__targets-player-salary'>${salary}</div>
           </div>
         )
         items[position].push(item)
@@ -72,7 +75,13 @@ export default class AuctionTargets extends React.Component {
         <div className='auction__targets-head'>
           <FormGroup>
             <FormControlLabel
-              control={<Switch size='small' checked={this.props.hideRostered} onChange={this.handleToggle} />}
+              control={
+                <Switch
+                  size='small'
+                  checked={this.props.hideRostered}
+                  onChange={this.handleToggle}
+                />
+              }
               labelPlacement='top'
               label='Hide Rostered'
             />
@@ -84,43 +93,31 @@ export default class AuctionTargets extends React.Component {
           <div className='auction__targets-column'>
             <div className='auction__targets-section'>
               <AuctionTargetHeader pos='QB' />
-              <div className='empty'>
-                {items.QB}
-              </div>
+              <div className='empty'>{items.QB}</div>
             </div>
             <div className='auction__targets-section'>
               <AuctionTargetHeader pos='TE' />
-              <div className='empty'>
-                {items.TE}
-              </div>
+              <div className='empty'>{items.TE}</div>
             </div>
           </div>
           <div className='auction__targets-column'>
             <div className='auction__targets-section'>
               <AuctionTargetHeader pos='RB' />
-              <div className='empty'>
-                {items.RB}
-              </div>
+              <div className='empty'>{items.RB}</div>
             </div>
             <div className='auction__targets-section'>
               <AuctionTargetHeader pos='K' />
-              <div className='empty'>
-                {items.K}
-              </div>
+              <div className='empty'>{items.K}</div>
             </div>
           </div>
           <div className='auction__targets-column'>
             <div className='auction__targets-section'>
               <AuctionTargetHeader pos='WR' />
-              <div className='empty'>
-                {items.WR}
-              </div>
+              <div className='empty'>{items.WR}</div>
             </div>
             <div className='auction__targets-section'>
               <AuctionTargetHeader pos='DST' />
-              <div className='empty'>
-                {items.DST}
-              </div>
+              <div className='empty'>{items.DST}</div>
             </div>
           </div>
         </div>

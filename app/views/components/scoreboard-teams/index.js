@@ -20,6 +20,4 @@ const mapStateToProps = createSelector(
   })
 )
 
-export default connect(
-  mapStateToProps
-)(ScoreboardTeams)
+export default connect(mapStateToProps)(ScoreboardTeams)

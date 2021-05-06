@@ -21,7 +21,7 @@ export const errorActions = {
     }
   }),
 
-  postErrorPending: opts => ({
+  postErrorPending: (opts) => ({
     type: errorActions.POST_ERROR_PENDING,
     payload: {
       opts

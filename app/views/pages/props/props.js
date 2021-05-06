@@ -24,10 +24,16 @@ export default class PropsPage extends React.Component {
           </div>
           <div className='item__col-group'>
             <div className='item__col'>{constants.oddTypeDesc[prop.type]}</div>
-            <div className='item__col'>{constants.sourcesTitle[prop.sourceid]}</div>
+            <div className='item__col'>
+              {constants.sourcesTitle[prop.sourceid]}
+            </div>
             <div className='item__col metric'>{prop.ln}</div>
-            <div className='item__col metric'>{(prop.proj || 0).toFixed(1)}</div>
-            <div className='item__col metric'>{(prop.diff || 0).toFixed(1)}</div>
+            <div className='item__col metric'>
+              {(prop.proj || 0).toFixed(1)}
+            </div>
+            <div className='item__col metric'>
+              {(prop.diff || 0).toFixed(1)}
+            </div>
             <div className='item__col metric'>{prop.odds}</div>
           </div>
           {/* <div className='item__col-group'>
@@ -78,8 +84,6 @@ export default class PropsPage extends React.Component {
       </AutoSizer>
     )
 
-    return (
-      <PageLayout {...{ body, head }} />
-    )
+    return <PageLayout {...{ body, head }} />
   }
 }

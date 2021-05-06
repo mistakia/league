@@ -3,7 +3,7 @@ import { fork, takeLatest, call } from 'redux-saga/effects'
 import { playerActions } from '@core/players'
 import { getPlays, getPlayStats } from '@core/api'
 
-export function * loadPlays () {
+export function* loadPlays() {
   yield call(getPlays)
   yield call(getPlayStats)
 }
@@ -12,7 +12,7 @@ export function * loadPlays () {
 //  WATCHERS
 // -------------------------------------
 
-export function * watchFetchPlayersFulfilled () {
+export function* watchFetchPlayersFulfilled() {
   yield takeLatest(playerActions.FETCH_PLAYERS_FULFILLED, loadPlays)
 }
 
@@ -20,6 +20,4 @@ export function * watchFetchPlayersFulfilled () {
 //  ROOT
 // -------------------------------------
 
-export const playSagas = [
-  fork(watchFetchPlayersFulfilled)
-]
+export const playSagas = [fork(watchFetchPlayersFulfilled)]

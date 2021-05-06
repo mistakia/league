@@ -25,11 +25,14 @@ const Waiver = new Record({
   type: null
 })
 
-export function waiversReducer (state = initialState, { payload, type }) {
+export function waiversReducer(state = initialState, { payload, type }) {
   switch (type) {
     case waiverActions.POST_WAIVER_FULFILLED:
-      return state.withMutations(state => {
-        state.setIn(['teams', payload.data.tid, payload.data.uid], new Waiver(payload.data))
+      return state.withMutations((state) => {
+        state.setIn(
+          ['teams', payload.data.tid, payload.data.uid],
+          new Waiver(payload.data)
+        )
       })
 
     case waiverActions.PUT_WAIVER_FULFILLED: {
@@ -41,21 +44,21 @@ export function waiversReducer (state = initialState, { payload, type }) {
     }
 
     case appActions.AUTH_FULFILLED:
-      return state.withMutations(state => {
-        payload.data.waivers.forEach(waiver => {
+      return state.withMutations((state) => {
+        payload.data.waivers.forEach((waiver) => {
           state.setIn(['teams', waiver.tid, waiver.uid], new Waiver(waiver))
         })
       })
 
     case waiverActions.POST_WAIVER_ORDER_PENDING:
-      return state.withMutations(state => {
+      return state.withMutations((state) => {
         for (const [index, wid] of payload.opts.waivers.entries()) {
           state.setIn(['teams', payload.opts.teamId, wid, 'po'], index)
         }
       })
 
     case waiverActions.POST_WAIVER_ORDER_FAILED:
-      return state.withMutations(state => {
+      return state.withMutations((state) => {
         for (const w of payload.opts.reset) {
           state.setIn(['teams', payload.opts.teamId, w.uid, 'po'], w.po)
         }
@@ -67,8 +70,10 @@ export function waiversReducer (state = initialState, { payload, type }) {
     case waiverActions.GET_WAIVERS_FULFILLED:
       return state.merge({
         isPending: false,
-        processed: payload.data.length ? new List([payload.data[0].processed]) : new List(),
-        processingTimes: new List(payload.data.map(p => p.processed))
+        processed: payload.data.length
+          ? new List([payload.data[0].processed])
+          : new List(),
+        processingTimes: new List(payload.data.map((p) => p.processed))
       })
 
     case waiverActions.GET_WAIVERS_PENDING:
@@ -85,7 +90,7 @@ export function waiversReducer (state = initialState, { payload, type }) {
 
     case waiverActions.GET_WAIVER_REPORT_FULFILLED:
       return state.merge({
-        report: new List(payload.data.map(p => new Waiver(p))),
+        report: new List(payload.data.map((p) => new Waiver(p))),
         isPending: false
       })
 

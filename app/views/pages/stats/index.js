@@ -14,6 +14,4 @@ const mapStateToProps = createSelector(
   (league, teams, app) => ({ league, teams, percentiles: app.teamPercentiles })
 )
 
-export default connect(
-  mapStateToProps
-)(StatsPage)
+export default connect(mapStateToProps)(StatsPage)

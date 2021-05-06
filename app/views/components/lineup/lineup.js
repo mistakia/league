@@ -7,7 +7,7 @@ import PlayerSlot from '@components/player-slot'
 import './lineup.styl'
 
 export default class Lineup extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
 
     this.state = { selected: null }
@@ -46,110 +46,140 @@ export default class Lineup extends React.Component {
     const starters = []
     if (league.sqb) {
       const slot = constants.slots.QB
-      const players = r.starters.filter(p => p.slot === slot)
+      const players = r.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.sqb; i++) {
         const { player } = players[i] || {}
         starters.push(
-          <PlayerSlot key={`${slot}${i}`} {...{ playerId: player, slot, ...slotProps }} />
+          <PlayerSlot
+            key={`${slot}${i}`}
+            {...{ playerId: player, slot, ...slotProps }}
+          />
         )
       }
     }
 
     if (league.srb) {
       const slot = constants.slots.RB
-      const players = r.starters.filter(p => p.slot === slot)
+      const players = r.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.srb; i++) {
         const { player } = players[i] || {}
         starters.push(
-          <PlayerSlot key={`${slot}${i}`} {...{ playerId: player, slot, ...slotProps }} />
+          <PlayerSlot
+            key={`${slot}${i}`}
+            {...{ playerId: player, slot, ...slotProps }}
+          />
         )
       }
     }
 
     if (league.swr) {
       const slot = constants.slots.WR
-      const players = r.starters.filter(p => p.slot === slot)
+      const players = r.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.swr; i++) {
         const { player } = players[i] || {}
         starters.push(
-          <PlayerSlot key={`${slot}${i}`} {...{ playerId: player, slot, ...slotProps }} />
+          <PlayerSlot
+            key={`${slot}${i}`}
+            {...{ playerId: player, slot, ...slotProps }}
+          />
         )
       }
     }
 
     if (league.srbwr) {
       const slot = constants.slots.RBWR
-      const players = r.starters.filter(p => p.slot === slot)
+      const players = r.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.srbwr; i++) {
         const { player } = players[i] || {}
         starters.push(
-          <PlayerSlot key={`${slot}${i}`} {...{ playerId: player, slot, ...slotProps }} />
+          <PlayerSlot
+            key={`${slot}${i}`}
+            {...{ playerId: player, slot, ...slotProps }}
+          />
         )
       }
     }
 
     if (league.srbwrte) {
       const slot = constants.slots.RBWRTE
-      const players = r.starters.filter(p => p.slot === slot)
+      const players = r.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.srbwrte; i++) {
         const { player } = players[i] || {}
         starters.push(
-          <PlayerSlot key={`${slot}${i}`} {...{ playerId: player, slot, ...slotProps }} />
+          <PlayerSlot
+            key={`${slot}${i}`}
+            {...{ playerId: player, slot, ...slotProps }}
+          />
         )
       }
     }
 
     if (league.sqbrbwrte) {
       const slot = constants.slots.QBRBWRTE
-      const players = r.starters.filter(p => p.slot === slot)
+      const players = r.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.sqbrbwrte; i++) {
         const { player } = players[i] || {}
         starters.push(
-          <PlayerSlot key={`${slot}${i}`} {...{ playerId: player, slot, ...slotProps }} />
+          <PlayerSlot
+            key={`${slot}${i}`}
+            {...{ playerId: player, slot, ...slotProps }}
+          />
         )
       }
     }
 
     if (league.swrte) {
       const slot = constants.slots.WRTE
-      const players = r.starters.filter(p => p.slot === slot)
+      const players = r.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.swrte; i++) {
         const { player } = players[i] || {}
         starters.push(
-          <PlayerSlot key={`${slot}${i}`} {...{ playerId: player, slot, ...slotProps }} />
+          <PlayerSlot
+            key={`${slot}${i}`}
+            {...{ playerId: player, slot, ...slotProps }}
+          />
         )
       }
     }
 
     if (league.ste) {
       const slot = constants.slots.TE
-      const players = r.starters.filter(p => p.slot === slot)
+      const players = r.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.ste; i++) {
         const { player } = players[i] || {}
         starters.push(
-          <PlayerSlot key={`${slot}${i}`} {...{ playerId: player, slot, ...slotProps }} />
+          <PlayerSlot
+            key={`${slot}${i}`}
+            {...{ playerId: player, slot, ...slotProps }}
+          />
         )
       }
     }
 
     if (league.sk) {
       const slot = constants.slots.K
-      const players = r.starters.filter(p => p.slot === slot)
+      const players = r.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.sk; i++) {
         const { player } = players[i] || {}
         starters.push(
-          <PlayerSlot key={`${slot}${i}`} {...{ playerId: player, slot, ...slotProps }} />
+          <PlayerSlot
+            key={`${slot}${i}`}
+            {...{ playerId: player, slot, ...slotProps }}
+          />
         )
       }
     }
 
     if (league.sdst) {
       const slot = constants.slots.DST
-      const players = r.starters.filter(p => p.slot === slot)
+      const players = r.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.sdst; i++) {
         const { player } = players[i] || {}
         starters.push(
-          <PlayerSlot key={`${slot}${i}`} {...{ playerId: player, slot, ...slotProps }} />
+          <PlayerSlot
+            key={`${slot}${i}`}
+            {...{ playerId: player, slot, ...slotProps }}
+          />
         )
       }
     }
@@ -157,12 +187,18 @@ export default class Lineup extends React.Component {
     const bench = []
     if (selected && selected.slot !== constants.slots.BENCH) {
       bench.push(
-        <PlayerSlot key='bench' {...{ playerId: null, slot: constants.slots.BENCH, ...slotProps }} />
+        <PlayerSlot
+          key='bench'
+          {...{ playerId: null, slot: constants.slots.BENCH, ...slotProps }}
+        />
       )
     }
     for (const { slot, player } of r.bench) {
       bench.push(
-        <PlayerSlot key={player} {...{ playerId: player, slot, ...slotProps }} />
+        <PlayerSlot
+          key={player}
+          {...{ playerId: player, slot, ...slotProps }}
+        />
       )
     }
 
@@ -192,9 +228,7 @@ export default class Lineup extends React.Component {
                   <div className='player__item-metric'>Proj</div>
                   <div className='player__item-metric'>Sos</div> */}
             </div>
-            <div className='dashboard__section-body empty'>
-              {starters}
-            </div>
+            <div className='dashboard__section-body empty'>{starters}</div>
           </div>
         </Grid>
         <Grid item xs={12} md={6}>
@@ -207,9 +241,7 @@ export default class Lineup extends React.Component {
                   <div className='player__item-metric'>Proj</div>
                   <div className='player__item-metric'>Sos</div> */}
             </div>
-            <div className='dashboard__section-body empty'>
-              {bench}
-            </div>
+            <div className='dashboard__section-body empty'>{bench}</div>
           </div>
         </Grid>
       </Grid>

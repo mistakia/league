@@ -28,7 +28,7 @@ export const transactionsActions = {
     type: transactionsActions.LOAD_NEXT_TRANSACTIONS
   }),
 
-  getTransactionsPending: opts => ({
+  getTransactionsPending: (opts) => ({
     type: transactionsActions.GET_TRANSACTIONS_PENDING,
     payload: {
       opts
@@ -51,7 +51,7 @@ export const transactionsActions = {
     }
   }),
 
-  getReleaseTransactionsPending: opts => ({
+  getReleaseTransactionsPending: (opts) => ({
     type: transactionsActions.GET_RELEASE_TRANSACTIONS_PENDING,
     payload: {
       opts

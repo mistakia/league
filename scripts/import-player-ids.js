@@ -21,7 +21,10 @@ const run = async () => {
   for (const row of rows) {
     let playerId
     try {
-      playerId = await getPlayerId({ name: row.full_player_name, pos: row.position })
+      playerId = await getPlayerId({
+        name: row.full_player_name,
+        pos: row.position
+      })
     } catch (error) {
       if (error.message === 'matched multiple players') {
         multiple.push(row)
@@ -47,9 +50,11 @@ const run = async () => {
         timestamp
       })
 
-      await db('player').update({
-        gsispid: row.player_id
-      }).where({ player: playerId })
+      await db('player')
+        .update({
+          gsispid: row.player_id
+        })
+        .where({ player: playerId })
     }
   }
 

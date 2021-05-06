@@ -40,7 +40,7 @@ const sendTextNotification = async (items) => {
 module.exports = sendTextNotification
 
 if (!module.parent) {
-  (async function () {
+  ;(async function () {
     await sendTextNotification({
       number: '+61411111111',
       message: 'Test message from script'

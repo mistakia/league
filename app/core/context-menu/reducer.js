@@ -9,7 +9,10 @@ const ContextMenuState = new Record({
   data: {}
 })
 
-export function contextMenuReducer (state = new ContextMenuState(), { payload, type }) {
+export function contextMenuReducer(
+  state = new ContextMenuState(),
+  { payload, type }
+) {
   switch (type) {
     case contextMenuActions.SHOW_CONTEXT_MENU: {
       const { id, data, clickX, clickY } = payload

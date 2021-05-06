@@ -17,7 +17,10 @@ export default class DashboardTeamSummaryWaiverOrder extends React.Component {
       items.push(
         <tr key={team.uid}>
           <td>{team.name}</td>
-          <td>{team.wo}{nth(team.wo)}</td>
+          <td>
+            {team.wo}
+            {nth(team.wo)}
+          </td>
         </tr>
       )
     }
@@ -36,9 +39,7 @@ export default class DashboardTeamSummaryWaiverOrder extends React.Component {
         </AccordionSummary>
         <AccordionDetails>
           <table>
-            <tbody>
-              {items}
-            </tbody>
+            <tbody>{items}</tbody>
           </table>
         </AccordionDetails>
       </Accordion>

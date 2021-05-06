@@ -9,29 +9,27 @@ import PageLayout from '@layouts/page'
 import './markdown.styl'
 
 export default class MarkdownPage extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
 
     this.state = { html: null }
   }
 
-  _load () {
+  _load() {
     fetch(`${DOCS_URL}${this.props.path}`)
       .then((response) => {
         if (response.status >= 200 && response.status < 300) {
           return response
         } else {
-          const html = (
-            <div className='markdown'>Failed to Load</div>
-          )
+          const html = <div className='markdown'>Failed to Load</div>
           this.setState({ html })
           const error = new Error(response.statusText)
           error.response = response
           throw error
         }
       })
-      .then(res => res.json())
-      .then(json => {
+      .then((res) => res.json())
+      .then((json) => {
         const content = window.atob(json.content)
         const renderer = new marked.Renderer()
         const linkRenderer = renderer.link
@@ -42,11 +40,15 @@ export default class MarkdownPage extends React.Component {
         const markdown = marked(content, { renderer })
         const html = (
           <Container maxWidth='md'>
-            <div className='markdown' dangerouslySetInnerHTML={{ __html: markdown }} />
+            <div
+              className='markdown'
+              dangerouslySetInnerHTML={{ __html: markdown }}
+            />
           </Container>
         )
         this.setState({ html })
-      }).catch((error) => {
+      })
+      .catch((error) => {
         console.log(error)
       })
   }
@@ -62,8 +64,6 @@ export default class MarkdownPage extends React.Component {
   }
 
   render = () => {
-    return (
-      <PageLayout body={this.state.html} scroll />
-    )
+    return <PageLayout body={this.state.html} scroll />
   }
 }

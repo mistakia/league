@@ -10,7 +10,7 @@ import { DEFAULT_LEAGUE_ID } from '@core/constants'
 import './editable-league.styl'
 
 export default class EditableLeague extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
 
     this.state = {
@@ -42,11 +42,11 @@ export default class EditableLeague extends React.Component {
 
     return (
       <Accordion expanded={this.state.open} onChange={this.handleChange}>
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
-        >
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <div className='settings__section-title'>League</div>
-          <div className='settings__section-description'>Edit Scoring / Starting Lineup / Roster Limits</div>
+          <div className='settings__section-description'>
+            Edit Scoring / Starting Lineup / Roster Limits
+          </div>
         </AccordionSummary>
         <AccordionDetails>
           <div className='editable__league-body'>
@@ -99,7 +99,9 @@ export default class EditableLeague extends React.Component {
                 {...props}
               />
             </div>
-            <div className='editable__league-section-title'>Starting Lineup</div>
+            <div className='editable__league-section-title'>
+              Starting Lineup
+            </div>
             <div className='editable__league-section'>
               <EditableLeagueField
                 field='sqb'

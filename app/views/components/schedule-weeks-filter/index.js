@@ -5,11 +5,8 @@ import { getMatchups } from '@core/matchups'
 
 import ScheduleWeeksFilter from './schedule-weeks-filter'
 
-const mapStateToProps = createSelector(
-  getMatchups,
-  (matchups) => ({ weeks: matchups.get('weeks') })
-)
+const mapStateToProps = createSelector(getMatchups, (matchups) => ({
+  weeks: matchups.get('weeks')
+}))
 
-export default connect(
-  mapStateToProps
-)(ScheduleWeeksFilter)
+export default connect(mapStateToProps)(ScheduleWeeksFilter)

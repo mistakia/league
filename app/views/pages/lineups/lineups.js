@@ -12,7 +12,5 @@ export default function () {
     </Container>
   )
 
-  return (
-    <PageLayout body={body} scroll />
-  )
+  return <PageLayout body={body} scroll />
 }

@@ -1,7 +1,7 @@
 import solver from 'javascript-lp-solver'
 import { constants, getOptimizerPositionConstraints } from '@common'
 
-export function optimizeLineup ({
+export function optimizeLineup({
   limits = {},
   players,
   vbaseline,
@@ -13,8 +13,11 @@ export function optimizeLineup ({
   const ints = {}
 
   const pool = players.concat(active)
-  const positions = pool.map(p => p.pos)
-  const positionConstraints = getOptimizerPositionConstraints({ positions, league })
+  const positions = pool.map((p) => p.pos)
+  const positionConstraints = getOptimizerPositionConstraints({
+    positions,
+    league
+  })
   const constraints = {
     value: { max: Math.round(league.cap * 0.9) },
     ...positionConstraints,
@@ -40,12 +43,14 @@ export function optimizeLineup ({
 
     if (freeAgent) {
       variables[player.player].fa = 1
-      variables[player.player].value = Math.round(player.values[valueType][vbaseline] || 0)
+      variables[player.player].value = Math.round(
+        player.values[valueType][vbaseline] || 0
+      )
     }
   }
 
-  active.forEach(player => addPlayer({ player, freeAgent: false }))
-  players.forEach(player => addPlayer({ player, freeAgent: true }))
+  active.forEach((player) => addPlayer({ player, freeAgent: false }))
+  players.forEach((player) => addPlayer({ player, freeAgent: true }))
 
   const model = {
     optimize: 'points',

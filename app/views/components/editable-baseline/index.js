@@ -22,7 +22,4 @@ const mapDispatchToProps = {
   update: playerActions.updateBaseline
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(EditableBaseline)
+export default connect(mapStateToProps, mapDispatchToProps)(EditableBaseline)

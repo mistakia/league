@@ -5,10 +5,9 @@ import { getAuction, auctionActions } from '@core/auction'
 
 import EditableAuctionBudget from './editable-auction-budget'
 
-const mapStateToProps = createSelector(
-  getAuction,
-  (auction) => ({ budget: auction.lineupBudget })
-)
+const mapStateToProps = createSelector(getAuction, (auction) => ({
+  budget: auction.lineupBudget
+}))
 
 const mapDispatchToProps = {
   set: auctionActions.setBudget

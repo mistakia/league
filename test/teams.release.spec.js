@@ -50,9 +50,16 @@ describe('API /teams - release', function () {
       const leagueId = 1
       const userId = 1
       const player = await selectPlayer()
-      await addPlayer({ player, leagueId, teamId, userId, slot: constants.slots.PS })
+      await addPlayer({
+        player,
+        leagueId,
+        teamId,
+        userId,
+        slot: constants.slots.PS
+      })
 
-      const res = await chai.request(server)
+      const res = await chai
+        .request(server)
         .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -73,7 +80,9 @@ describe('API /teams - release', function () {
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
       res.body.transaction.player.should.equal(player.player)
-      res.body.transaction.type.should.equal(constants.transactions.ROSTER_RELEASE)
+      res.body.transaction.type.should.equal(
+        constants.transactions.ROSTER_RELEASE
+      )
       res.body.transaction.value.should.equal(0)
       res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
 
@@ -97,9 +106,16 @@ describe('API /teams - release', function () {
       const leagueId = 1
       const userId = 1
       const player = await selectPlayer()
-      await addPlayer({ player, leagueId, teamId, userId, slot: constants.slots.PS })
+      await addPlayer({
+        player,
+        leagueId,
+        teamId,
+        userId,
+        slot: constants.slots.PS
+      })
 
-      const res = await chai.request(server)
+      const res = await chai
+        .request(server)
         .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -120,7 +136,9 @@ describe('API /teams - release', function () {
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
       res.body.transaction.player.should.equal(player.player)
-      res.body.transaction.type.should.equal(constants.transactions.ROSTER_RELEASE)
+      res.body.transaction.type.should.equal(
+        constants.transactions.ROSTER_RELEASE
+      )
       res.body.transaction.value.should.equal(0)
       res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
 
@@ -144,9 +162,16 @@ describe('API /teams - release', function () {
       const leagueId = 1
       const userId = 1
       const player = await selectPlayer()
-      await addPlayer({ player, leagueId, teamId, userId, slot: constants.slots.BENCH })
+      await addPlayer({
+        player,
+        leagueId,
+        teamId,
+        userId,
+        slot: constants.slots.BENCH
+      })
 
-      const res = await chai.request(server)
+      const res = await chai
+        .request(server)
         .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -167,7 +192,9 @@ describe('API /teams - release', function () {
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
       res.body.transaction.player.should.equal(player.player)
-      res.body.transaction.type.should.equal(constants.transactions.ROSTER_RELEASE)
+      res.body.transaction.type.should.equal(
+        constants.transactions.ROSTER_RELEASE
+      )
       res.body.transaction.value.should.equal(0)
       res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
 
@@ -191,9 +218,16 @@ describe('API /teams - release', function () {
       const leagueId = 1
       const userId = 1
       const player = await selectPlayer()
-      await addPlayer({ player, leagueId, teamId, userId, slot: constants.slots.BENCH })
+      await addPlayer({
+        player,
+        leagueId,
+        teamId,
+        userId,
+        slot: constants.slots.BENCH
+      })
 
-      const res = await chai.request(server)
+      const res = await chai
+        .request(server)
         .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -214,7 +248,9 @@ describe('API /teams - release', function () {
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
       res.body.transaction.player.should.equal(player.player)
-      res.body.transaction.type.should.equal(constants.transactions.ROSTER_RELEASE)
+      res.body.transaction.type.should.equal(
+        constants.transactions.ROSTER_RELEASE
+      )
       res.body.transaction.value.should.equal(0)
       res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
 
@@ -238,9 +274,16 @@ describe('API /teams - release', function () {
       const leagueId = 1
       const userId = 1
       const player = await selectPlayer()
-      await addPlayer({ player, leagueId, teamId, userId, slot: constants.slots.IR })
+      await addPlayer({
+        player,
+        leagueId,
+        teamId,
+        userId,
+        slot: constants.slots.IR
+      })
 
-      const res = await chai.request(server)
+      const res = await chai
+        .request(server)
         .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -261,7 +304,9 @@ describe('API /teams - release', function () {
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
       res.body.transaction.player.should.equal(player.player)
-      res.body.transaction.type.should.equal(constants.transactions.ROSTER_RELEASE)
+      res.body.transaction.type.should.equal(
+        constants.transactions.ROSTER_RELEASE
+      )
       res.body.transaction.value.should.equal(0)
       res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
 
@@ -285,9 +330,16 @@ describe('API /teams - release', function () {
       const leagueId = 1
       const userId = 1
       const player = await selectPlayer()
-      await addPlayer({ player, leagueId, teamId, userId, slot: constants.slots.IR })
+      await addPlayer({
+        player,
+        leagueId,
+        teamId,
+        userId,
+        slot: constants.slots.IR
+      })
 
-      const res = await chai.request(server)
+      const res = await chai
+        .request(server)
         .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -308,7 +360,9 @@ describe('API /teams - release', function () {
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
       res.body.transaction.player.should.equal(player.player)
-      res.body.transaction.type.should.equal(constants.transactions.ROSTER_RELEASE)
+      res.body.transaction.type.should.equal(
+        constants.transactions.ROSTER_RELEASE
+      )
       res.body.transaction.value.should.equal(0)
       res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
 
@@ -347,7 +401,9 @@ describe('API /teams - release', function () {
     })
 
     it('missing player', async () => {
-      const request = chai.request(server).post('/api/teams/1/release')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1,
@@ -358,7 +414,9 @@ describe('API /teams - release', function () {
     })
 
     it('missing teamId', async () => {
-      const request = chai.request(server).post('/api/teams/1/release')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           player: 'x',
@@ -369,7 +427,9 @@ describe('API /teams - release', function () {
     })
 
     it('missing leagueId', async () => {
-      const request = chai.request(server).post('/api/teams/1/release')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           player: 'x',
@@ -380,7 +440,9 @@ describe('API /teams - release', function () {
     })
 
     it('teamId does not belong to userId', async () => {
-      const request = chai.request(server).post('/api/teams/1/release')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user2}`)
         .send({
           player: 'x',
@@ -398,7 +460,8 @@ describe('API /teams - release', function () {
       const leagueId = 1
       const player = await selectPlayer()
 
-      const request = chai.request(server)
+      const request = chai
+        .request(server)
         .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -417,7 +480,13 @@ describe('API /teams - release', function () {
       const leagueId = 1
       const userId = 1
       const player = await selectPlayer()
-      await addPlayer({ player, leagueId, teamId, userId, slot: constants.slots.PS })
+      await addPlayer({
+        player,
+        leagueId,
+        teamId,
+        userId,
+        slot: constants.slots.PS
+      })
 
       await knex('poaches').insert({
         player: player.player,
@@ -427,7 +496,8 @@ describe('API /teams - release', function () {
         submitted: Math.round(Date.now() / 1000)
       })
 
-      const request = chai.request(server)
+      const request = chai
+        .request(server)
         .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -441,8 +511,16 @@ describe('API /teams - release', function () {
 
     it('player is protected', async () => {
       const player = await selectPlayer()
-      await addPlayer({ leagueId: 1, player, teamId: 1, userId: 1, slot: constants.slots.PSP })
-      const request = chai.request(server).post('/api/teams/1/release')
+      await addPlayer({
+        leagueId: 1,
+        player,
+        teamId: 1,
+        userId: 1,
+        slot: constants.slots.PSP
+      })
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           player: player.player,

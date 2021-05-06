@@ -27,7 +27,4 @@ const mapDispatchToProps = {
   cancel: tradeActions.cancel
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(TradeAction)
+export default connect(mapStateToProps, mapDispatchToProps)(TradeAction)

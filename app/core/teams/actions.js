@@ -100,7 +100,7 @@ export const teamActions = {
     }
   }),
 
-  postTeamsPending: opts => ({
+  postTeamsPending: (opts) => ({
     type: teamActions.POST_TEAMS_PENDING,
     payload: {
       opts
@@ -115,7 +115,7 @@ export const teamActions = {
     }
   }),
 
-  deleteTeamsPending: opts => ({
+  deleteTeamsPending: (opts) => ({
     type: teamActions.DELETE_TEAMS_PENDING,
     payload: {
       opts

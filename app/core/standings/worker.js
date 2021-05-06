@@ -7,8 +7,8 @@ import {
   calculatePercentiles
 } from '@common'
 
-function optimizeLineup ({ players, league }) {
-  const positions = players.map(p => p.pos)
+function optimizeLineup({ players, league }) {
+  const positions = players.map((p) => p.pos)
   const constraints = getOptimizerPositionConstraints({ positions, league })
 
   const variables = {}
@@ -36,8 +36,9 @@ function optimizeLineup ({ players, league }) {
   }
 
   const result = solver.Solve(model)
-  const starters = Object.keys(result)
-    .filter(r => r.match(/^([A-Z]{2,})-([0-9]{4,})$/ig) || r.match(/^([A-Z]{1,3})$/ig))
+  const starters = Object.keys(result).filter(
+    (r) => r.match(/^([A-Z]{2,})-([0-9]{4,})$/gi) || r.match(/^([A-Z]{1,3})$/gi)
+  )
 
   return {
     total: result.result,
@@ -46,7 +47,7 @@ function optimizeLineup ({ players, league }) {
   }
 }
 
-export function calculate ({
+export function calculate({
   league,
   tids,
   starters,
@@ -71,26 +72,42 @@ export function calculate ({
     result[tid].stats.pmin = 99999
   }
 
-  const minStarters = league.sqb + league.srb + league.swr + league.ste + league.srbwr + league.srbwrte + league.sqbrbwrte + league.swrte + league.sdst + league.sk
+  const minStarters =
+    league.sqb +
+    league.srb +
+    league.swr +
+    league.ste +
+    league.srbwr +
+    league.srbwrte +
+    league.sqbrbwrte +
+    league.swrte +
+    league.sdst +
+    league.sk
 
   for (let week = 1; week < constants.season.week; week++) {
     for (const tid of tids) {
       const startingPlayers = starters[week][tid]
-      const starterIds = startingPlayers.map(p => p.player)
+      const starterIds = startingPlayers.map((p) => p.player)
       let total = 0
       result[tid].games[week] = {}
       const optimizePlayers = []
       for (const { player, pos } of active[week][tid]) {
-        const gamelog = gamelogs.find(g => g.week === week && g.player === player)
+        const gamelog = gamelogs.find(
+          (g) => g.week === week && g.player === player
+        )
         if (!gamelog) {
           continue
         }
 
         result[tid].gamelogs.push(gamelog)
-        const points = calculatePoints({ stats: gamelog, position: pos, league })
+        const points = calculatePoints({
+          stats: gamelog,
+          position: pos,
+          league
+        })
         result[tid].games[week][player] = points.total
         if (starterIds.includes(player)) {
-          const starter = startingPlayers.find(p => p.player === player)
+          const starter = startingPlayers.find((p) => p.player === player)
           total = points.total + total
           result[tid].stats[`pPos${pos}`] += points.total
           result[tid].stats[`pSlot${starter.slot}`] += points.total
@@ -103,7 +120,10 @@ export function calculate ({
       }
 
       // calculate optimal lineup
-      const optimizeResult = optimizeLineup({ players: optimizePlayers, league })
+      const optimizeResult = optimizeLineup({
+        players: optimizePlayers,
+        league
+      })
       if (optimizeResult.starters.length < minStarters) {
         result[tid].potentialPointsPenalty[week] = true
       }
@@ -119,7 +139,7 @@ export function calculate ({
   }
 
   for (let week = 1; week < constants.season.week; week++) {
-    const weekMatchups = matchups.filter(m => m.week === week)
+    const weekMatchups = matchups.filter((m) => m.week === week)
     for (const m of weekMatchups) {
       const homeScore = result[m.hid].points.weeks[week]
       const awayScore = result[m.aid].points.weeks[week]
@@ -156,24 +176,26 @@ export function calculate ({
 
     for (const tid of tids) {
       const scores = Object.values(result)
-        .filter(p => p.tid !== tid)
-        .map(p => p.points.weeks[week])
+        .filter((p) => p.tid !== tid)
+        .map((p) => p.points.weeks[week])
       const score = result[tid].points.weeks[week]
-      result[tid].stats.apWins += scores.filter(p => p < score).length
-      result[tid].stats.apLosses += scores.filter(p => p > score).length
-      result[tid].stats.apTies += scores.filter(p => p === score).length
+      result[tid].stats.apWins += scores.filter((p) => p < score).length
+      result[tid].stats.apLosses += scores.filter((p) => p > score).length
+      result[tid].stats.apTies += scores.filter((p) => p === score).length
 
       if (result[tid].potentialPointsPenalty[week]) {
-        const pps = Object.values(result).map(p => p.potentialPoints[week])
+        const pps = Object.values(result).map((p) => p.potentialPoints[week])
         const max = Math.max(...pps)
-        result[tid].stats.ppp += (max - result[tid].potentialPoints[week])
+        result[tid].stats.ppp += max - result[tid].potentialPoints[week]
       }
     }
   }
 
   // calculate draft order
-  const potentialPoints = Object.values(result).map(p => (p.stats.pp + p.stats.ppp))
-  const allPlayLosses = Object.values(result).map(p => p.stats.apLosses)
+  const potentialPoints = Object.values(result).map(
+    (p) => p.stats.pp + p.stats.ppp
+  )
+  const allPlayLosses = Object.values(result).map((p) => p.stats.apLosses)
   const minPP = Math.min(...potentialPoints)
   const maxPP = Math.max(...potentialPoints)
   const minAPL = Math.min(...allPlayLosses)
@@ -183,16 +205,17 @@ export function calculate ({
     const apl = result[tid].stats.apLosses
     const normPP = (pp - minPP) / (maxPP - minPP)
     const normAPL = (apl - minAPL) / (maxAPL - minAPL)
-    result[tid].stats.doi = (9 * normPP) + normAPL
+    result[tid].stats.doi = 9 * normPP + normAPL
 
     const points = Object.values(result[tid].points.weeks)
     result[tid].stats.pdev = points.length ? std(points) : null
     result[tid].stats.pdiff = result[tid].stats.pf - result[tid].stats.pa
-    result[tid].stats.pp_pct = (result[tid].stats.pf / result[tid].stats.pp) * 100
+    result[tid].stats.pp_pct =
+      (result[tid].stats.pf / result[tid].stats.pp) * 100
   }
 
   const percentiles = calculatePercentiles({
-    items: Object.values(result).map(t => t.stats),
+    items: Object.values(result).map((t) => t.stats),
     stats: constants.fantasyTeamStats
   })
 

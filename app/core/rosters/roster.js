@@ -12,7 +12,7 @@ export const Roster = new Record({
   lineups: new Map()
 })
 
-export function createRoster (roster) {
+export function createRoster(roster) {
   if (!roster) {
     return
   }

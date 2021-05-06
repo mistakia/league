@@ -4,10 +4,7 @@ const { getRoster, getLeague } = require('../../utils')
 const selectPlayer = require('./select-player')
 const addPlayer = require('./add-player')
 
-module.exports = async ({
-  leagueId,
-  teamId
-}) => {
+module.exports = async ({ leagueId, teamId }) => {
   const league = await getLeague(leagueId)
   const rosterRow = await getRoster({ tid: teamId })
   let roster = new Roster({ roster: rosterRow, league })
@@ -20,7 +17,7 @@ module.exports = async ({
         week: constants.season.week,
         year: constants.season.year
       })
-    const excludePlayerIds = players.map(p => p.player)
+    const excludePlayerIds = players.map((p) => p.player)
     const player = await selectPlayer({ exclude: excludePlayerIds })
     const hasSlot = roster.hasOpenBenchSlot(player.pos1)
     if (hasSlot) {
@@ -43,8 +40,11 @@ module.exports = async ({
         week: constants.season.week,
         year: constants.season.year
       })
-    const excludePlayerIds = players.map(p => p.player)
-    const player = await selectPlayer({ exclude: excludePlayerIds, rookie: true })
+    const excludePlayerIds = players.map((p) => p.player)
+    const player = await selectPlayer({
+      exclude: excludePlayerIds,
+      rookie: true
+    })
     await addPlayer({
       leagueId,
       teamId,
@@ -64,7 +64,7 @@ module.exports = async ({
         week: constants.season.week,
         year: constants.season.year
       })
-    const excludePlayerIds = players.map(p => p.player)
+    const excludePlayerIds = players.map((p) => p.player)
     const player = await selectPlayer({ exclude: excludePlayerIds })
     await addPlayer({
       leagueId,

@@ -197,7 +197,7 @@ export const playerActions = {
     }
   }),
 
-  searchPlayersPending: opts => ({
+  searchPlayersPending: (opts) => ({
     type: playerActions.SEARCH_PLAYERS_PENDING,
     payload: {
       opts
@@ -220,7 +220,7 @@ export const playerActions = {
     }
   }),
 
-  getPlayerPending: opts => ({
+  getPlayerPending: (opts) => ({
     type: playerActions.GET_PLAYER_PENDING,
     payload: {
       opts
@@ -251,7 +251,7 @@ export const playerActions = {
     }
   }),
 
-  getProjectionsPending: opts => ({
+  getProjectionsPending: (opts) => ({
     type: playerActions.GET_PROJECTIONS_PENDING,
     payload: {
       opts

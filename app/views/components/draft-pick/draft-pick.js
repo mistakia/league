@@ -6,10 +6,10 @@ import Position from '@components/position'
 import './draft-pick.styl'
 
 export default class DraftPick extends React.Component {
-  render () {
+  render() {
     const { player, pick, team, league, isActive } = this.props
 
-    const pickNum = (pick.pick % league.nteams) || league.nteams
+    const pickNum = pick.pick % league.nteams || league.nteams
 
     const classNames = ['draft__pick']
     if (isActive) {
@@ -22,11 +22,14 @@ export default class DraftPick extends React.Component {
           {pick.round}.{('0' + pickNum).slice(-2)}
         </div>
         <div className='draft__pick-main'>
-          {player.player &&
+          {player.player && (
             <div className='draft__pick-player'>
-              <span className='draft__pick-player-name'>{player.fname} {player.lname}</span>
+              <span className='draft__pick-player-name'>
+                {player.fname} {player.lname}
+              </span>
               <Team team={player.team} />
-            </div>}
+            </div>
+          )}
           {isActive && <div className='draft__pick-active'>On the clock</div>}
           <div className='draft__pick-team'>{team.name}</div>
         </div>

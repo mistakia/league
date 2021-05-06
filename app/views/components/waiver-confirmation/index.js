@@ -1,7 +1,11 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { isPlayerEligible, getCurrentPlayers, getCurrentTeamRosterRecord } from '@core/rosters'
+import {
+  isPlayerEligible,
+  getCurrentPlayers,
+  getCurrentTeamRosterRecord
+} from '@core/rosters'
 import { getCurrentLeague } from '@core/leagues'
 import { getCurrentTeam } from '@core/teams'
 import { waiverActions, getWaiverById } from '@core/waivers'
@@ -33,7 +37,4 @@ const mapDispatchToProps = {
   update: waiverActions.update
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(WaiverConfirmation)
+export default connect(mapStateToProps, mapDispatchToProps)(WaiverConfirmation)

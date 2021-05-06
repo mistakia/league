@@ -6,14 +6,14 @@ import { Player, connect } from '@components/player'
 import Icon from '@components/icon'
 import { sortableHandle } from 'react-sortable-hoc'
 
-const DragHandle = sortableHandle(() =>
+const DragHandle = sortableHandle(() => (
   <div className='player__item-action reorder table__cell'>
     <Icon name='reorder' />
   </div>
-)
+))
 
 class PlayerRoster extends Player {
-  render () {
+  render() {
     const { player, selected, claim, reorder, waiverId, poach } = this.props
 
     const isWaiver = !!waiverId
@@ -29,20 +29,29 @@ class PlayerRoster extends Player {
       <div className={classNames.join(' ')}>
         {reorder && <DragHandle />}
         <div className='player__item-name table__cell sticky__column'>
-          <PlayerNameExpanded playerId={player.player} waiverId={waiverId} hideActions={isPoach} />
+          <PlayerNameExpanded
+            playerId={player.player}
+            waiverId={waiverId}
+            hideActions={isPoach}
+          />
         </div>
-        {isClaim &&
+        {isClaim && (
           <div className='player__item-name table__cell'>
-            {claim.drop && <PlayerNameExpanded playerId={claim.drop} hideActions={isClaim} />}
-          </div>}
-        {isWaiver &&
+            {claim.drop && (
+              <PlayerNameExpanded playerId={claim.drop} hideActions={isClaim} />
+            )}
+          </div>
+        )}
+        {isWaiver && (
           <div className='metric table__cell'>
             {claim.bid && `$${claim.bid}`}
-          </div>}
-        {!isWaiver &&
+          </div>
+        )}
+        {!isWaiver && (
           <div className='metric table__cell'>
-            ${isPoach ? ((player.value + 2) || '-') : player.value}
-          </div>}
+            ${isPoach ? player.value + 2 || '-' : player.value}
+          </div>
+        )}
         <div className='metric table__cell'>
           ${player.getIn(['values', 'ros', 'starter'], 0).toFixed(0)}
         </div>

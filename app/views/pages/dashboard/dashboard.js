@@ -18,7 +18,13 @@ import './dashboard.styl'
 
 export default function () {
   const {
-    players, picks, league, waivers, poaches, teamId, roster
+    players,
+    picks,
+    league,
+    waivers,
+    poaches,
+    teamId,
+    roster
   } = this.props
 
   const { positions } = constants
@@ -29,8 +35,11 @@ export default function () {
   for (const position of positions) {
     if (!groups[position]) groups[position] = []
     groups[position] = players.active
-      .filter(p => p.pos === position)
-      .sort((a, b) => b.getIn(['lineups', 'starts'], 0) - a.getIn(['lineups', 'starts'], 0))
+      .filter((p) => p.pos === position)
+      .sort(
+        (a, b) =>
+          b.getIn(['lineups', 'starts'], 0) - a.getIn(['lineups', 'starts'], 0)
+      )
   }
 
   const activeItems = []
@@ -51,7 +60,8 @@ export default function () {
       notices.push(
         <Alert key={player.player} severity='error'>
           <AlertTitle>{player.name} not eligible for Reserve/IR</AlertTitle>
-          You will need to activate or release him before you can make any acquisitions or claims.
+          You will need to activate or release him before you can make any
+          acquisitions or claims.
         </Alert>
       )
     }
@@ -65,8 +75,11 @@ export default function () {
     if (player.status !== 'Reserve/COVID-19') {
       notices.push(
         <Alert key={player.player} severity='error'>
-          <AlertTitle>{player.name} not eligible for Reserve/COVID-19</AlertTitle>
-          You will need to activate or release him before you can make any acquisitions or claims.
+          <AlertTitle>
+            {player.name} not eligible for Reserve/COVID-19
+          </AlertTitle>
+          You will need to activate or release him before you can make any
+          acquisitions or claims.
         </Alert>
       )
     }
@@ -77,18 +90,23 @@ export default function () {
     if (!player.player) continue
     practiceItems.push(<PlayerRoster key={player.player} player={player} />)
 
-    const poach = poaches.find(p => p.getIn(['player', 'player']) === player.player)
+    const poach = poaches.find(
+      (p) => p.getIn(['player', 'player']) === player.player
+    )
     if (poach) {
       const processingTime = moment(poach.submitted, 'X').add('48', 'hours')
       notices.push(
-        <Alert key={player.player} severity='warning'>{player.name} has a poaching claim that will be processed {processingTime.fromNow()} on {processingTime.format('dddd, h:mm a')}.</Alert>
+        <Alert key={player.player} severity='warning'>
+          {player.name} has a poaching claim that will be processed{' '}
+          {processingTime.fromNow()} on {processingTime.format('dddd, h:mm a')}.
+        </Alert>
       )
     }
   }
 
   const pickItems = []
   for (const pick of picks) {
-    const pickNum = (pick.pick % league.nteams) || league.nteams
+    const pickNum = pick.pick % league.nteams || league.nteams
     const pickStr = `${pick.round}.${('0' + pickNum).slice(-2)}`
     pickItems.push(
       <div key={pick.uid} className='player__item table__row'>
@@ -130,13 +148,10 @@ export default function () {
     </Grid>
   )
 
-  const teamPoaches = poaches.filter(p => p.tid === teamId)
+  const teamPoaches = poaches.filter((p) => p.tid === teamId)
   const teamPoachSection = (
     <Grid item xs={12}>
-      <DashboardPlayersTable
-        title='Poaching Claims'
-        poaches={teamPoaches}
-      />
+      <DashboardPlayersTable title='Poaching Claims' poaches={teamPoaches} />
     </Grid>
   )
 
@@ -144,7 +159,11 @@ export default function () {
     <Container maxWidth='lg' classes={{ root: 'dashboard' }}>
       <Grid container spacing={2}>
         <Grid container item xs={12} md={8}>
-          {notices.length ? <Grid item xs={12}>{notices}</Grid> : null}
+          {notices.length ? (
+            <Grid item xs={12}>
+              {notices}
+            </Grid>
+          ) : null}
           {waivers.poach.size ? poachWaiverSection : null}
           {waivers.active.size ? freeAgencyActiveWaiverSection : null}
           {waivers.practice.size ? freeAgencyPracticeWaiverSection : null}
@@ -185,9 +204,7 @@ export default function () {
                 <div className='metric table__cell'>Round</div>
                 <div className='metric table__cell'>Pick #</div>
               </div>
-              <div className='empty'>
-                {pickItems}
-              </div>
+              <div className='empty'>{pickItems}</div>
             </div>
           </Grid>
         </Grid>
@@ -201,7 +218,5 @@ export default function () {
     </Container>
   )
 
-  return (
-    <PageLayout body={body} scroll />
-  )
+  return <PageLayout body={body} scroll />
 }

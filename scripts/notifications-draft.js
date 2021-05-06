@@ -38,7 +38,12 @@ const run = async () => {
       })
 
       if (league.groupme_token && league.groupme_id) {
-        await API.Bots.post.Q(league.groupme_token, league.groupme_id, message, {})
+        await API.Bots.post.Q(
+          league.groupme_token,
+          league.groupme_id,
+          message,
+          {}
+        )
       }
     }
   }

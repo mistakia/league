@@ -26,7 +26,12 @@ router.post('/?', async (req, res) => {
 
     // verify teamId
     try {
-      await verifyUserTeam({ userId: req.user.userId, teamId, leagueId, requireLeague: true })
+      await verifyUserTeam({
+        userId: req.user.userId,
+        teamId,
+        leagueId,
+        requireLeague: true
+      })
     } catch (error) {
       return res.status(400).send({ error: error.message })
     }
@@ -47,21 +52,25 @@ router.post('/?', async (req, res) => {
     }
 
     // make sure player is on practice squad
-    if (!roster.practice.find(p => p.player === player)) {
+    if (!roster.practice.find((p) => p.player === player)) {
       return res.status(400).send({ error: 'player is not on practice squad' })
     }
 
     // make sure player is not already protected
-    if (roster.practice.find(p => p.player === player && p.slot === constants.slots.PSP)) {
+    if (
+      roster.practice.find(
+        (p) => p.player === player && p.slot === constants.slots.PSP
+      )
+    ) {
       return res.status(400).send({ error: 'player is already protected' })
     }
 
     // make sure player has no pending poaching claims
-    const poaches = await db('poaches')
-      .where({ player })
-      .whereNull('processed')
+    const poaches = await db('poaches').where({ player }).whereNull('processed')
     if (poaches.length) {
-      return res.status(400).send({ error: 'player has an existing poaching claim' })
+      return res
+        .status(400)
+        .send({ error: 'player has an existing poaching claim' })
     }
 
     const players = await db('player').where('player', player).limit(1)
@@ -72,14 +81,14 @@ router.post('/?', async (req, res) => {
       tid,
       player
     })
-    const lastTransaction = transactions.reduce((a, b) => a.timestamp > b.timestamp ? a : b)
+    const lastTransaction = transactions.reduce((a, b) =>
+      a.timestamp > b.timestamp ? a : b
+    )
 
-    await db('rosters_players')
-      .update({ slot: constants.slots.PSP })
-      .where({
-        rid: rosterRow.uid,
-        player
-      })
+    await db('rosters_players').update({ slot: constants.slots.PSP }).where({
+      rid: rosterRow.uid,
+      player
+    })
 
     const transaction = {
       userid: req.user.userId,
@@ -119,7 +128,13 @@ router.post('/?', async (req, res) => {
     })
 
     if (league.groupme_token && league.groupme_id) {
-      API.Bots.post(league.groupme_token, league.groupme_id, message, {}, (err) => logger(err))
+      API.Bots.post(
+        league.groupme_token,
+        league.groupme_id,
+        message,
+        {},
+        (err) => logger(err)
+      )
     }
   } catch (error) {
     logger(error)

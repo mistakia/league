@@ -6,44 +6,82 @@ export default class SelectedPlayerTeamPositionSplits extends React.Component {
   render = () => {
     const { player, stats } = this.props
 
-    const teamStats = stats.teamStats.filter(t => t.tname === player.team)
+    const teamStats = stats.teamStats.filter((t) => t.tname === player.team)
     const sorted = teamStats.sort((a, b) => b.seas - a.seas)
     const items = []
     for (const [index, year] of sorted.entries()) {
       const percentiles = stats.teamStatsPercentiles[year.seas] || {}
       items.push(
         <div key={index} className='player__selected-row'>
-          <div className='row__name'>
-            {year.seas}
-          </div>
+          <div className='row__name'>{year.seas}</div>
           <div className='row__group'>
             <div className='row__group-body'>
-              <PercentileMetric stats={year} percentiles={percentiles} type='rba' />
-              <PercentileMetric stats={year} percentiles={percentiles} type='rby' />
+              <PercentileMetric
+                stats={year}
+                percentiles={percentiles}
+                type='rba'
+              />
+              <PercentileMetric
+                stats={year}
+                percentiles={percentiles}
+                type='rby'
+              />
             </div>
           </div>
           <div className='row__group'>
             <div className='row__group-body'>
-              <PercentileMetric stats={year} percentiles={percentiles} type='wr1a' />
-              <PercentileMetric stats={year} percentiles={percentiles} type='wr1y' />
+              <PercentileMetric
+                stats={year}
+                percentiles={percentiles}
+                type='wr1a'
+              />
+              <PercentileMetric
+                stats={year}
+                percentiles={percentiles}
+                type='wr1y'
+              />
             </div>
           </div>
           <div className='row__group'>
             <div className='row__group-body'>
-              <PercentileMetric stats={year} percentiles={percentiles} type='wr3a' />
-              <PercentileMetric stats={year} percentiles={percentiles} type='wr3y' />
+              <PercentileMetric
+                stats={year}
+                percentiles={percentiles}
+                type='wr3a'
+              />
+              <PercentileMetric
+                stats={year}
+                percentiles={percentiles}
+                type='wr3y'
+              />
             </div>
           </div>
           <div className='row__group'>
             <div className='row__group-body'>
-              <PercentileMetric stats={year} percentiles={percentiles} type='tea' />
-              <PercentileMetric stats={year} percentiles={percentiles} type='tey' />
+              <PercentileMetric
+                stats={year}
+                percentiles={percentiles}
+                type='tea'
+              />
+              <PercentileMetric
+                stats={year}
+                percentiles={percentiles}
+                type='tey'
+              />
             </div>
           </div>
           <div className='row__group'>
             <div className='row__group-body'>
-              <PercentileMetric stats={year} percentiles={percentiles} type='qba' />
-              <PercentileMetric stats={year} percentiles={percentiles} type='qby' />
+              <PercentileMetric
+                stats={year}
+                percentiles={percentiles}
+                type='qba'
+              />
+              <PercentileMetric
+                stats={year}
+                percentiles={percentiles}
+                type='qby'
+              />
             </div>
           </div>
         </div>
@@ -53,9 +91,7 @@ export default class SelectedPlayerTeamPositionSplits extends React.Component {
     return (
       <div className='selected__section'>
         <div className='selected__section-header'>
-          <div className='row__group-head'>
-            Team Season Position Splits
-          </div>
+          <div className='row__group-head'>Team Season Position Splits</div>
         </div>
         <div className='selected__section-header'>
           <div className='row__name'>Year</div>

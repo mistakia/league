@@ -5,13 +5,8 @@ import { getPlayers } from '@core/players'
 
 import CollegeFilter from './college-filter'
 
-const mapStateToProps = createSelector(
-  getPlayers,
-  (players) => ({
-    colleges: players.get('colleges')
-  })
-)
+const mapStateToProps = createSelector(getPlayers, (players) => ({
+  colleges: players.get('colleges')
+}))
 
-export default connect(
-  mapStateToProps
-)(CollegeFilter)
+export default connect(mapStateToProps)(CollegeFilter)

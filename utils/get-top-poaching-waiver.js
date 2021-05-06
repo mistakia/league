@@ -15,9 +15,16 @@ module.exports = async (leagueId) => {
     .where('timestamp', '>=', cutoff)
     .where('lid', leagueId)
 
-  const excludePlayerIds = transactions.map(t => t.player)
+  const excludePlayerIds = transactions.map((t) => t.player)
   const waiversQuery = db('waivers')
-    .select('teams.*', 'waivers.uid as wid', 'waivers.player', 'waivers.drop', 'waivers.tid', 'waivers.userid')
+    .select(
+      'teams.*',
+      'waivers.uid as wid',
+      'waivers.player',
+      'waivers.drop',
+      'waivers.tid',
+      'waivers.userid'
+    )
     .join('teams', 'waivers.tid', 'teams.uid')
     .whereNull('processed')
     .whereNull('cancelled')

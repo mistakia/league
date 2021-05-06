@@ -4,7 +4,7 @@ import { constants } from '@common'
 import PlayerFilter from '@components/player-filter'
 
 export default class AvailabilityFilter extends React.Component {
-  render () {
+  render() {
     const state = {
       type: 'availability',
       label: 'AVAILABILITY',
@@ -19,8 +19,6 @@ export default class AvailabilityFilter extends React.Component {
       })
     }
 
-    return (
-      <PlayerFilter {...state} />
-    )
+    return <PlayerFilter {...state} />
   }
 }

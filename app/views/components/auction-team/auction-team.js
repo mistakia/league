@@ -5,8 +5,13 @@ import './auction-team.styl'
 export default class AuctionTeam extends React.Component {
   render = () => {
     const {
-      team, isConnected, isWinningBid, bid,
-      isNominating, roster, isOwner
+      team,
+      isConnected,
+      isWinningBid,
+      bid,
+      isNominating,
+      roster,
+      isOwner
     } = this.props
 
     const classNames = ['auction__team']

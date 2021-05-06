@@ -20,18 +20,17 @@ router.get('/?', async (req, res) => {
     const maxtime = latestRanking.length ? latestRanking[0].maxtime : null
 
     if (maxtime) {
-      const topPlayers = db('rankings')
-        .where({
-          timestamp: maxtime,
-          sf: 1,
-          dynasty: 0,
-          ppr: constants.scoring.HALF,
-          rookie: 0,
-          year: constants.season.year,
-          sourceid: constants.sources.FANTASYPROS
-        })
+      const topPlayers = db('rankings').where({
+        timestamp: maxtime,
+        sf: 1,
+        dynasty: 0,
+        ppr: constants.scoring.HALF,
+        rookie: 0,
+        year: constants.season.year,
+        sourceid: constants.sources.FANTASYPROS
+      })
 
-      topPlayers.forEach(p => includePlayerIds.push(p.player))
+      topPlayers.forEach((p) => includePlayerIds.push(p.player))
     }
 
     if (req.user) {
@@ -41,7 +40,7 @@ router.get('/?', async (req, res) => {
         .join('users_teams', 'teams.uid', 'users_teams.tid')
         .where('users_teams.userid', req.user.userId)
 
-      const leagueIds = leagues.map(l => l.uid)
+      const leagueIds = leagues.map((l) => l.uid)
 
       const playerSlots = await db('rosters_players')
         .join('rosters', 'rosters_players.rid', 'rosters.uid')
@@ -49,7 +48,7 @@ router.get('/?', async (req, res) => {
         .where('rosters.year', constants.season.year)
         .groupBy('rosters_players.player')
 
-      playerSlots.forEach(s => includePlayerIds.push(s.player))
+      playerSlots.forEach((s) => includePlayerIds.push(s.player))
     }
 
     const selects = [
@@ -76,7 +75,9 @@ router.get('/?', async (req, res) => {
       .select(db.raw(selects.join(',')))
       .leftJoin('players', 'player.player', 'players.player')
       .leftJoin('practice', function () {
-        this.on('player.player', '=', 'practice.player').andOn('practice.week', '=', constants.season.week).andOn('practice.year', '=', constants.season.year)
+        this.on('player.player', '=', 'practice.player')
+          .andOn('practice.week', '=', constants.season.week)
+          .andOn('practice.year', '=', constants.season.year)
       })
       .whereIn('player.pos', constants.positions)
       .groupBy('player.player')
@@ -88,31 +89,37 @@ router.get('/?', async (req, res) => {
         query.whereIn('player.player', includePlayerIds)
       }
 
-      query.orWhere(function () {
-        this.where('player.pos', 'QB')
-          .whereNot('player.posd', 'PS')
-          .whereNot('player.cteam', 'INA')
-      }).orWhere(function () {
-        this.where('player.pos', 'RB')
-          .where('player.posd', 'RB')
-          .where('player.dcp', '<', 3)
-          .whereNot('player.cteam', 'INA')
-      }).orWhere(function () {
-        this.where('player.pos', 'WR')
-          .whereNot('player.posd', 'PS')
-          .whereNot('player.cteam', 'INA')
-          .where('player.dcp', '<', 3)
-      }).orWhere(function () {
-        this.where('player.pos', 'TE')
-          .whereNot('player.posd', 'PS')
-          .whereNot('player.cteam', 'INA')
-          .where('player.dcp', '<', 2)
-      }).orWhere(function () {
-        this.where('player.pos', 'K')
-          .whereNot('player.posd', 'PS')
-          .whereNot('player.cteam', 'INA')
-          .where('player.dcp', '<=', 1)
-      }).orWhere('player.pos', 'DST')
+      query
+        .orWhere(function () {
+          this.where('player.pos', 'QB')
+            .whereNot('player.posd', 'PS')
+            .whereNot('player.cteam', 'INA')
+        })
+        .orWhere(function () {
+          this.where('player.pos', 'RB')
+            .where('player.posd', 'RB')
+            .where('player.dcp', '<', 3)
+            .whereNot('player.cteam', 'INA')
+        })
+        .orWhere(function () {
+          this.where('player.pos', 'WR')
+            .whereNot('player.posd', 'PS')
+            .whereNot('player.cteam', 'INA')
+            .where('player.dcp', '<', 3)
+        })
+        .orWhere(function () {
+          this.where('player.pos', 'TE')
+            .whereNot('player.posd', 'PS')
+            .whereNot('player.cteam', 'INA')
+            .where('player.dcp', '<', 2)
+        })
+        .orWhere(function () {
+          this.where('player.pos', 'K')
+            .whereNot('player.posd', 'PS')
+            .whereNot('player.cteam', 'INA')
+            .where('player.dcp', '<=', 1)
+        })
+        .orWhere('player.pos', 'DST')
     }
 
     const data = await query
@@ -131,7 +138,10 @@ router.get('/:playerId', async (req, res) => {
 
     const players = await db('player').where({ player: playerId }).limit(1)
     const player = players[0]
-    const practice = await db('practice').where({ player: playerId, year: constants.season.year })
+    const practice = await db('practice').where({
+      player: playerId,
+      year: constants.season.year
+    })
 
     // snaps per game by year
 

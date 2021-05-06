@@ -23,7 +23,10 @@ export default class TradeAction extends React.Component {
     } else if (!isValid) {
       return <Button disabled>Exceeds Limits</Button>
     } else if (!trade.uid) {
-      if ((trade.proposingTeamPlayers.size || trade.proposingTeamPicks.size) && (trade.acceptingTeamPlayers.size || trade.acceptingTeamPicks.size)) {
+      if (
+        (trade.proposingTeamPlayers.size || trade.proposingTeamPicks.size) &&
+        (trade.acceptingTeamPlayers.size || trade.acceptingTeamPicks.size)
+      ) {
         return <Button onClick={this.handleProposeClick}>Propose</Button>
       } else {
         return <Button disabled>Propose</Button>

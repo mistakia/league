@@ -31,20 +31,25 @@ export default function () {
     valueType
   } = this.props
 
-  const sorted = players.sort((a, b) => {
-    return b.getIn(['vorp', valueType, vbaseline]) - a.getIn(['vorp', valueType, vbaseline])
-  }).toList()
+  const sorted = players
+    .sort((a, b) => {
+      return (
+        b.getIn(['vorp', valueType, vbaseline]) -
+        a.getIn(['vorp', valueType, vbaseline])
+      )
+    })
+    .toList()
 
   const TransactionRow = ({ index, key, ...params }) => {
     const transaction = transactions.get(index)
-    return <AuctionTransaction key={key} transaction={transaction} {...params} />
+    return (
+      <AuctionTransaction key={key} transaction={transaction} {...params} />
+    )
   }
 
   const playerRow = ({ index, key, ...params }) => {
     const player = sorted.get(index)
-    return (
-      <AuctionPlayer key={key} player={player} {...params} index={index} />
-    )
+    return <AuctionPlayer key={key} player={player} {...params} index={index} />
   }
 
   const teamItems = []
@@ -56,7 +61,10 @@ export default function () {
     <div className='auction'>
       <div className='auction__players'>
         <div className='auction__players-header'>
-          <SearchFilter search={this.props.search} value={this.props.searchValue} />
+          <SearchFilter
+            search={this.props.search}
+            value={this.props.searchValue}
+          />
           <AuctionPositionFilter />
         </div>
         <div className='auction__players-body'>
@@ -75,7 +83,13 @@ export default function () {
         <div className='auction__players-footer'>
           <FormGroup>
             <FormControlLabel
-              control={<Switch size='small' checked={this.props.hideRostered} onChange={this.handleToggle} />}
+              control={
+                <Switch
+                  size='small'
+                  checked={this.props.hideRostered}
+                  onChange={this.handleToggle}
+                />
+              }
               labelPlacement='start'
               label='Hide Rostered'
             />
@@ -105,11 +119,9 @@ export default function () {
           </AutoSizer>
         </div>
       </div>
-      {(isCommish && isHosted) ? <AuctionCommissionerControls /> : null}
+      {isCommish && isHosted ? <AuctionCommissionerControls /> : null}
     </div>
   )
 
-  return (
-    <PageLayout body={body} />
-  )
+  return <PageLayout body={body} />
 }

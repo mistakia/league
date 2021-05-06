@@ -1,11 +1,18 @@
-import { call, takeLatest, fork, put, select, putResolve } from 'redux-saga/effects'
+import {
+  call,
+  takeLatest,
+  fork,
+  put,
+  select,
+  putResolve
+} from 'redux-saga/effects'
 
 import { getApp } from '@core/app'
 import { settingActions } from './actions'
 import { putSetting, putBaselines } from '@core/api'
 import { calculateValues } from '@core/players'
 
-export function * updateSetting ({ payload }) {
+export function* updateSetting({ payload }) {
   const { token } = yield select(getApp)
   if (token) yield call(putSetting, payload)
   else yield putResolve(settingActions.set(payload))
@@ -15,7 +22,7 @@ export function * updateSetting ({ payload }) {
   }
 }
 
-export function * updateBaselines ({ payload }) {
+export function* updateBaselines({ payload }) {
   const { token } = yield select(getApp)
   const { baselines } = payload
   if (token) yield call(putBaselines, baselines)
@@ -26,11 +33,11 @@ export function * updateBaselines ({ payload }) {
 //  WATCHERS
 // -------------------------------------
 
-export function * watchUpdateSetting () {
+export function* watchUpdateSetting() {
   yield takeLatest(settingActions.UPDATE_SETTING, updateSetting)
 }
 
-export function * watchUpdateBaselines () {
+export function* watchUpdateBaselines() {
   yield takeLatest(settingActions.UPDATE_BASELINES, updateBaselines)
 }
 

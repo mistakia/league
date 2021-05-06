@@ -79,7 +79,7 @@ export const waiverActions = {
     }
   }),
 
-  postWaiverPending: opts => ({
+  postWaiverPending: (opts) => ({
     type: waiverActions.POST_WAIVER_PENDING,
     payload: {
       opts
@@ -102,7 +102,7 @@ export const waiverActions = {
     }
   }),
 
-  putWaiverPending: opts => ({
+  putWaiverPending: (opts) => ({
     type: waiverActions.PUT_WAIVER_PENDING,
     payload: {
       opts
@@ -125,7 +125,7 @@ export const waiverActions = {
     }
   }),
 
-  postCancelWaiverPending: opts => ({
+  postCancelWaiverPending: (opts) => ({
     type: waiverActions.POST_CANCEL_WAIVER_PENDING,
     payload: {
       opts
@@ -148,7 +148,7 @@ export const waiverActions = {
     }
   }),
 
-  postWaiverOrderPending: opts => ({
+  postWaiverOrderPending: (opts) => ({
     type: waiverActions.POST_WAIVER_ORDER_PENDING,
     payload: {
       opts

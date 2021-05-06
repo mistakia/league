@@ -19,13 +19,18 @@ const run = async () => {
     const teams = await db('teams').where({ lid: league.uid })
     for (const team of teams) {
       for (let i = 1; i < 4; i++) {
-        await db.raw(db('draft').insert({
-          tid: team.uid,
-          otid: team.uid,
-          lid: league.uid,
-          round: i,
-          year
-        }).toString().replace('insert', 'INSERT IGNORE'))
+        await db.raw(
+          db('draft')
+            .insert({
+              tid: team.uid,
+              otid: team.uid,
+              lid: league.uid,
+              round: i,
+              year
+            })
+            .toString()
+            .replace('insert', 'INSERT IGNORE')
+        )
       }
     }
   }

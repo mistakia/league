@@ -8,7 +8,4 @@ const mapDispatchToProps = {
   filter: matchupsActions.filter
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(Filter)
+export default connect(null, mapDispatchToProps)(Filter)

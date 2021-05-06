@@ -19,8 +19,6 @@ export default class AuctionPositionFilter extends React.Component {
       })
     }
 
-    return (
-      <AuctionFilter {...state} />
-    )
+    return <AuctionFilter {...state} />
   }
 }

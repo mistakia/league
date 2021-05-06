@@ -24,12 +24,16 @@ const mapStateToProps = createSelector(
     isRestOfSeasonView: players.get('view') === 'ros',
     isWeekView: players.get('view') === 'week',
     isSeasonView: players.get('view') === 'season',
-    isStatsRushingView: players.get('view') === 'stats' && statsState.view === 'rushing',
-    isStatsReceivingView: players.get('view') === 'stats' && statsState.view === 'receiving',
-    isStatsPassingAdvancedView: players.get('view') === 'stats' &&
+    isStatsRushingView:
+      players.get('view') === 'stats' && statsState.view === 'rushing',
+    isStatsReceivingView:
+      players.get('view') === 'stats' && statsState.view === 'receiving',
+    isStatsPassingAdvancedView:
+      players.get('view') === 'stats' &&
       statsState.view === 'passing' &&
       statsState.passing === 'advanced',
-    isStatsPassingPressureView: players.get('view') === 'stats' &&
+    isStatsPassingPressureView:
+      players.get('view') === 'stats' &&
       statsState.view === 'passing' &&
       statsState.passing === 'pressure'
   })
@@ -40,7 +44,4 @@ const mapDispatchToProps = {
   delete: playerActions.deleteProjection
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(PlayerRow)
+export default connect(mapStateToProps, mapDispatchToProps)(PlayerRow)

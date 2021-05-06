@@ -10,11 +10,11 @@ import { getPlaysForPlayer } from '@core/plays'
 import { getGamelogByPlayerId } from '@core/gamelogs'
 import { getSelectedPlayer } from '@core/players'
 
-export function getStats (state) {
+export function getStats(state) {
   return state.get('stats')
 }
 
-export function getGamelogsForSelectedPlayer (state) {
+export function getGamelogsForSelectedPlayer(state) {
   const player = getSelectedPlayer(state)
   const gamelogs = []
   for (let week = 1; week <= constants.season.week; week++) {
@@ -24,13 +24,17 @@ export function getGamelogsForSelectedPlayer (state) {
   return gamelogs
 }
 
-export function getGamelogForPlayer (state, { player, week }) {
+export function getGamelogForPlayer(state, { player, week }) {
   if (!player || !player.player) return null
 
   const league = getCurrentLeague(state)
 
   const process = (gamelog) => {
-    const points = calculatePoints({ stats: gamelog, position: gamelog.pos, league })
+    const points = calculatePoints({
+      stats: gamelog,
+      position: gamelog.pos,
+      league
+    })
 
     return {
       points,
@@ -46,13 +50,16 @@ export function getGamelogForPlayer (state, { player, week }) {
   if (!plays.length) return null
 
   const { pos } = player
-  const stats = pos === 'DST'
-    ? calculateDstStatsFromPlays(plays, player.team)
-    : calculateStatsFromPlayStats(plays.flatMap(p => p.playStats))
-  const play = plays.find(p => p.possessionTeam)
-  const opp = play ? (fixTeam(play.possessionTeam) === fixTeam(play.homeTeamAbbr)
-    ? fixTeam(play.awayTeamAbbr)
-    : fixTeam(play.homeTeamAbbr)) : null
+  const stats =
+    pos === 'DST'
+      ? calculateDstStatsFromPlays(plays, player.team)
+      : calculateStatsFromPlayStats(plays.flatMap((p) => p.playStats))
+  const play = plays.find((p) => p.possessionTeam)
+  const opp = play
+    ? fixTeam(play.possessionTeam) === fixTeam(play.homeTeamAbbr)
+      ? fixTeam(play.awayTeamAbbr)
+      : fixTeam(play.homeTeamAbbr)
+    : null
 
   return process({
     player: player.player,

@@ -23,25 +23,25 @@ import {
 import { getGameByTeam } from '@core/schedule'
 import { getPlayerGamelogs } from '@core/gamelogs'
 
-export function getPlayers (state) {
+export function getPlayers(state) {
   return state.get('players')
 }
 
-export function getSelectedPlayer (state) {
+export function getSelectedPlayer(state) {
   const playerId = getPlayers(state).get('selected')
   return getPlayerById(state, { playerId })
 }
 
-export function getSelectedPlayerGame (state) {
+export function getSelectedPlayerGame(state) {
   const player = getSelectedPlayer(state)
   return getGameByTeam(state, { team: player.team })
 }
 
-export function getAllPlayers (state) {
+export function getAllPlayers(state) {
   return state.get('players').get('items')
 }
 
-function descendingComparator (a, b, orderBy) {
+function descendingComparator(a, b, orderBy) {
   const keyPath = orderBy.split('.')
   const aValue = a.getIn(keyPath)
   const bValue = b.getIn(keyPath)
@@ -54,13 +54,13 @@ function descendingComparator (a, b, orderBy) {
   return 0
 }
 
-function getComparator (order, orderBy) {
+function getComparator(order, orderBy) {
   return order === 'desc'
     ? (a, b) => descendingComparator(a, b, orderBy)
     : (a, b) => -descendingComparator(a, b, orderBy)
 }
 
-export function getFilteredPlayers (state) {
+export function getFilteredPlayers(state) {
   const { qualifiers } = getStats(state)
   const players = state.get('players')
   const items = players.get('items')
@@ -69,13 +69,13 @@ export function getFilteredPlayers (state) {
 
   const positions = players.get('positions')
   if (positions.size !== constants.positions.length) {
-    filtered = items.filter(player => positions.includes(player.pos))
+    filtered = items.filter((player) => positions.includes(player.pos))
   }
 
   const experience = players.get('experience')
   if (experience.size < 3) {
     const veterans = experience.includes(-1)
-    filtered = filtered.filter(player => {
+    filtered = filtered.filter((player) => {
       // exclude defenses
       if (!player.draft_year) {
         return false
@@ -92,59 +92,81 @@ export function getFilteredPlayers (state) {
 
   const nflTeams = players.get('nflTeams')
   if (nflTeams.size !== constants.nflTeams.length) {
-    filtered = filtered.filter(player => nflTeams.includes(player.team))
+    filtered = filtered.filter((player) => nflTeams.includes(player.team))
   }
 
   const colleges = players.get('colleges')
   if (colleges.size !== constants.colleges.length) {
-    filtered = filtered.filter(player => colleges.includes(player.college))
+    filtered = filtered.filter((player) => colleges.includes(player.college))
   }
 
   const collegeDivisions = players.get('collegeDivisions')
   if (collegeDivisions.size !== constants.collegeDivisions.length) {
-    filtered = filtered.filter(player => collegeDivisions.includes(player.college_division))
+    filtered = filtered.filter((player) =>
+      collegeDivisions.includes(player.college_division)
+    )
   }
 
   const age = players.get('age')
   const allAges = players.get('allAges')
   if (age.size !== allAges.size) {
     const now = moment()
-    filtered = filtered.filter(player => {
+    filtered = filtered.filter((player) => {
       const playerAge = parseInt(now.diff(moment(player.dob), 'years'), 10)
       return age.includes(playerAge)
     })
   }
 
   if (search) {
-    filtered = filtered.filter(player => fuzzySearch(search, player.name))
+    filtered = filtered.filter((player) => fuzzySearch(search, player.name))
   }
 
   const stat = players.get('orderBy').split('.').pop()
   const qualifier = qualifiers.get(stat)
   if (qualifier) {
-    filtered = filtered.filter(player => player.getIn(['stats', qualifier.type]) >= qualifier.value)
+    filtered = filtered.filter(
+      (player) => player.getIn(['stats', qualifier.type]) >= qualifier.value
+    )
   }
 
   const availability = players.get('availability')
   if (availability.size !== constants.availability.length) {
-    const activeRosterPlayerIds = getActiveRosterPlayerIdsForCurrentLeague(state)
+    const activeRosterPlayerIds = getActiveRosterPlayerIdsForCurrentLeague(
+      state
+    )
     const rosteredPlayerIds = getRosteredPlayerIdsForCurrentLeague(state)
-    const practiceSquadPlayerIds = getPracticeSquadPlayerIdsForCurrentLeague(state)
-    const injuredReservePlayerIds = getInjuredReservePlayerIdsForCurrentLeague(state)
-    filtered = filtered.filter(player => {
-      if (availability.includes('ACTIVE ROSTER') && activeRosterPlayerIds.includes(player.player)) {
+    const practiceSquadPlayerIds = getPracticeSquadPlayerIdsForCurrentLeague(
+      state
+    )
+    const injuredReservePlayerIds = getInjuredReservePlayerIdsForCurrentLeague(
+      state
+    )
+    filtered = filtered.filter((player) => {
+      if (
+        availability.includes('ACTIVE ROSTER') &&
+        activeRosterPlayerIds.includes(player.player)
+      ) {
         return true
       }
 
-      if (availability.includes('FREE AGENT') && !rosteredPlayerIds.includes(player.player)) {
+      if (
+        availability.includes('FREE AGENT') &&
+        !rosteredPlayerIds.includes(player.player)
+      ) {
         return true
       }
 
-      if (availability.includes('PRACTICE SQUAD') && practiceSquadPlayerIds.includes(player.player)) {
+      if (
+        availability.includes('PRACTICE SQUAD') &&
+        practiceSquadPlayerIds.includes(player.player)
+      ) {
         return true
       }
 
-      if (availability.includes('INJURED RESERVE') && injuredReservePlayerIds.includes(player.player)) {
+      if (
+        availability.includes('INJURED RESERVE') &&
+        injuredReservePlayerIds.includes(player.player)
+      ) {
         return true
       }
 
@@ -154,43 +176,51 @@ export function getFilteredPlayers (state) {
 
   const status = players.get('status')
   if (status.size !== Object.keys(constants.status).length) {
-    filtered = filtered.filter(player => status.includes(player.status))
+    filtered = filtered.filter((player) => status.includes(player.status))
   }
 
   const teamIds = players.get('teamIds')
   if (teamIds.size) {
-    filtered = filtered.filter(player => teamIds.includes(player.tid))
+    filtered = filtered.filter((player) => teamIds.includes(player.tid))
   }
 
-  const sorted = filtered.sort(getComparator(players.get('order'), players.get('orderBy')))
+  const sorted = filtered.sort(
+    getComparator(players.get('order'), players.get('orderBy'))
+  )
   return sorted.toList()
 }
 
 // used by editable baseline component
-export function getPlayersByPosition (state, { position }) {
+export function getPlayersByPosition(state, { position }) {
   const players = state.get('players')
   const items = players.get('items')
-  const filtered = items.filter(p => p.pos === position)
+  const filtered = items.filter((p) => p.pos === position)
   const period = !constants.season.week ? '0' : 'ros'
-  return filtered.sort((a, b) => b.getIn(['points', period, 'total']) - a.getIn(['points', period, 'total'])).toList()
+  return filtered
+    .sort(
+      (a, b) =>
+        b.getIn(['points', period, 'total']) -
+        a.getIn(['points', period, 'total'])
+    )
+    .toList()
 }
 
-export function getRookiePlayers (state) {
+export function getRookiePlayers(state) {
   const players = state.get('players')
   const items = players.get('items')
-  return items.filter(p => p.draft_year === constants.season.year).toList()
+  return items.filter((p) => p.draft_year === constants.season.year).toList()
 }
 
-export function getPlayerById (state, { playerId }) {
+export function getPlayerById(state, { playerId }) {
   const items = getAllPlayers(state)
   return items.get(playerId) || new Player()
 }
 
-export function getGamesByYearForSelectedPlayer (state) {
+export function getGamesByYearForSelectedPlayer(state) {
   const playerId = state.get('players').get('selected')
   const p = getPlayerById(state, { playerId })
   const gamelogs = getPlayerGamelogs(state)
-  const games = gamelogs.filter(p => p.player === playerId)
+  const games = gamelogs.filter((p) => p.player === playerId)
 
   const years = {}
   for (const game of games) {
@@ -209,11 +239,17 @@ export function getGamesByYearForSelectedPlayer (state) {
     }
 
     const sum = years[year].reduce((sums, obj) => {
-      const stats = Object.keys(obj).filter(k => constants.stats.includes(k))
-      stats.forEach(k => { sums[k] += (obj[k] || 0) })
+      const stats = Object.keys(obj).filter((k) => constants.stats.includes(k))
+      stats.forEach((k) => {
+        sums[k] += obj[k] || 0
+      })
       return sums
     }, initialValue)
-    const points = calculatePoints({ stats: sum, position: p.pos, league: league.toJS() })
+    const points = calculatePoints({
+      stats: sum,
+      position: p.pos,
+      league: league.toJS()
+    })
     sum.total = points.total
     overall[year] = sum
   }
@@ -221,14 +257,16 @@ export function getGamesByYearForSelectedPlayer (state) {
   return { years, overall }
 }
 
-export function isPlayerOnReleaseWaivers (state, { player }) {
+export function isPlayerOnReleaseWaivers(state, { player }) {
   const transactions = getReleaseTransactions(state)
-  const playerTransactions = transactions.filter(t => t.player === player.player)
+  const playerTransactions = transactions.filter(
+    (t) => t.player === player.player
+  )
 
   return isOnReleaseWaivers({ transactions: playerTransactions.toJS() })
 }
 
-export function isPlayerReserveEligible (state, { player }) {
+export function isPlayerReserveEligible(state, { player }) {
   const reserve = {
     ir: false,
     cov: false
@@ -245,7 +283,7 @@ export function isPlayerReserveEligible (state, { player }) {
   return reserve
 }
 
-export function isPlayerLocked (state, { player, playerId }) {
+export function isPlayerLocked(state, { player, playerId }) {
   if (constants.season.week > constants.season.finalWeek) {
     return true
   }
@@ -271,7 +309,7 @@ export function isPlayerLocked (state, { player, playerId }) {
   return false
 }
 
-export function getPlayerStatus (state, { player, playerId }) {
+export function getPlayerStatus(state, { player, playerId }) {
   if (playerId) {
     player = getPlayerById(state, { playerId })
   }
@@ -316,16 +354,21 @@ export function getPlayerStatus (state, { player, playerId }) {
   if (isFreeAgent) {
     if (constants.season.isRegularSeason && constants.season.isWaiverPeriod) {
       status.waiver.active = true
-      const isPracticeSquadEligible = isPlayerPracticeSquadEligible(state, { player })
+      const isPracticeSquadEligible = isPlayerPracticeSquadEligible(state, {
+        player
+      })
       if (isPracticeSquadEligible) status.waiver.practice = true
     } else {
       const onReleaseWaivers = isPlayerOnReleaseWaivers(state, { player })
       const afterAuction = isAfterAuction(state)
       const draft = isAfterDraft(state)
-      const isPracticeSquadEligible = isPlayerPracticeSquadEligible(state, { player })
+      const isPracticeSquadEligible = isPlayerPracticeSquadEligible(state, {
+        player
+      })
       if (onReleaseWaivers) {
         if (afterAuction) status.waiver.active = true
-        if (draft.afterDraft && isPracticeSquadEligible) status.waiver.practice = true
+        if (draft.afterDraft && isPracticeSquadEligible)
+          status.waiver.practice = true
       } else {
         if (afterAuction && !status.locked) {
           if (constants.season.isRegularSeason) status.sign.active = true
@@ -342,7 +385,7 @@ export function getPlayerStatus (state, { player, playerId }) {
     if (roster.has(player.player)) {
       status.rostered = true
 
-      const isActive = !!roster.active.find(p => p.player === player.player)
+      const isActive = !!roster.active.find((p) => p.player === player.player)
       if (!isActive) {
         if (roster.hasOpenBenchSlot(player.pos)) {
           status.eligible.activate = true
@@ -350,20 +393,31 @@ export function getPlayerStatus (state, { player, playerId }) {
 
         // is on practice squad && has no poaching claims
         const leaguePoaches = getPoachesForCurrentLeague(state)
-        if (player.slot === constants.slots.PS && !leaguePoaches.has(player.player)) {
+        if (
+          player.slot === constants.slots.PS &&
+          !leaguePoaches.has(player.player)
+        ) {
           status.eligible.protect = true
         }
       }
 
-      if (isPlayerPracticeSquadEligible(state, { player }) &&
-        roster.hasOpenPracticeSquadSlot()) {
+      if (
+        isPlayerPracticeSquadEligible(state, { player }) &&
+        roster.hasOpenPracticeSquadSlot()
+      ) {
         status.eligible.ps = true
       }
 
-      if (!status.protected && constants.season.week < constants.season.finalWeek) {
+      if (
+        !status.protected &&
+        constants.season.week < constants.season.finalWeek
+      ) {
         const reserve = isPlayerReserveEligible(state, { player })
-        if (reserve.ir && roster.hasOpenInjuredReserveSlot() &&
-          player.slot !== constants.slots.IR) {
+        if (
+          reserve.ir &&
+          roster.hasOpenInjuredReserveSlot() &&
+          player.slot !== constants.slots.IR
+        ) {
           status.reserve.ir = true
         }
 
@@ -380,13 +434,17 @@ export function getPlayerStatus (state, { player, playerId }) {
           status.eligible.poach = true
         }
 
-        const rosterInfo = getRosterInfoForPlayerId(state, { playerId: player.player })
+        const rosterInfo = getRosterInfoForPlayerId(state, {
+          playerId: player.player
+        })
         const cutoff = moment(rosterInfo.timestamp, 'X').add('24', 'hours')
 
-        if ((rosterInfo.type === constants.transactions.ROSTER_DEACTIVATE ||
-          rosterInfo.type === constants.transactions.DRAFT ||
-          rosterInfo.type === constants.transactions.PRACTICE_ADD
-        ) && moment().isBefore(cutoff)) {
+        if (
+          (rosterInfo.type === constants.transactions.ROSTER_DEACTIVATE ||
+            rosterInfo.type === constants.transactions.DRAFT ||
+            rosterInfo.type === constants.transactions.PRACTICE_ADD) &&
+          moment().isBefore(cutoff)
+        ) {
           status.waiver.poach = true
         }
       }
@@ -396,17 +454,23 @@ export function getPlayerStatus (state, { player, playerId }) {
   return status
 }
 
-export function isPlayerPracticeSquadEligible (state, { player }) {
+export function isPlayerPracticeSquadEligible(state, { player }) {
   if (!player || !player.player) {
     return false
   }
 
   // is a rookie OR is not on a team OR is on a teams practice squad
-  if (player.draft_year !== constants.season.year && player.depth_position !== 'PS' && player.team !== 'INA') {
+  if (
+    player.draft_year !== constants.season.year &&
+    player.depth_position !== 'PS' &&
+    player.team !== 'INA'
+  ) {
     return false
   }
 
-  const rosterInfo = getRosterInfoForPlayerId(state, { playerId: player.player })
+  const rosterInfo = getRosterInfoForPlayerId(state, {
+    playerId: player.player
+  })
   const { teamId } = getApp(state)
 
   // not eligible if already on another team
@@ -422,7 +486,7 @@ export function isPlayerPracticeSquadEligible (state, { player }) {
 
   const rosterRec = getCurrentTeamRosterRecord(state)
   const rosterPlayers = rosterRec.get('players')
-  const rosterPlayer = rosterPlayers.find(p => p.player === player.player)
+  const rosterPlayer = rosterPlayers.find((p) => p.player === player.player)
 
   if (!rosterPlayer) {
     return true
@@ -449,9 +513,9 @@ export function isPlayerPracticeSquadEligible (state, { player }) {
   return true
 }
 
-export const getPlayersForWatchlist = createSelector(
-  getPlayers,
-  (players) => {
-    return players.get('watchlist').toList().map(playerId => players.get('items').get(playerId) || new Player())
-  }
-)
+export const getPlayersForWatchlist = createSelector(getPlayers, (players) => {
+  return players
+    .get('watchlist')
+    .toList()
+    .map((playerId) => players.get('items').get(playerId) || new Player())
+})

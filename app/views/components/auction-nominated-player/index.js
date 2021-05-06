@@ -18,6 +18,4 @@ const mapStateToProps = createSelector(
   })
 )
 
-export default connect(
-  mapStateToProps
-)(AuctionNominatedPlayer)
+export default connect(mapStateToProps)(AuctionNominatedPlayer)

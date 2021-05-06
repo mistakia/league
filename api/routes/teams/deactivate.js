@@ -28,7 +28,12 @@ router.post('/?', async (req, res) => {
 
     // verify teamId
     try {
-      await verifyUserTeam({ userId: req.user.userId, teamId, leagueId, requireLeague: true })
+      await verifyUserTeam({
+        userId: req.user.userId,
+        teamId,
+        leagueId,
+        requireLeague: true
+      })
     } catch (error) {
       return res.status(400).send({ error: error.message })
     }
@@ -49,8 +54,10 @@ router.post('/?', async (req, res) => {
     }
 
     // make sure player is not on practice squad
-    if (roster.practice.find(p => p.player === player)) {
-      return res.status(400).send({ error: 'player is already on practice squad' })
+    if (roster.practice.find((p) => p.player === player)) {
+      return res
+        .status(400)
+        .send({ error: 'player is already on practice squad' })
     }
 
     const players = await db('player').where('player', player).limit(1)
@@ -61,23 +68,42 @@ router.post('/?', async (req, res) => {
       tid,
       player
     })
-    const lastTransaction = transactions.reduce((a, b) => a.timestamp > b.timestamp ? a : b)
+    const lastTransaction = transactions.reduce((a, b) =>
+      a.timestamp > b.timestamp ? a : b
+    )
 
     // make sure player is a rookie OR not on a team OR on a teams practice squad
-    if (playerRow.start !== constants.season.year && playerRow.posd !== 'PS' && playerRow.cteam !== 'INA') {
-      return res.status(400).send({ error: 'player is not practice squad eligible' })
+    if (
+      playerRow.start !== constants.season.year &&
+      playerRow.posd !== 'PS' &&
+      playerRow.cteam !== 'INA'
+    ) {
+      return res
+        .status(400)
+        .send({ error: 'player is not practice squad eligible' })
     }
 
     // make sure player has not been on the active roster for more than 48 hours
     const cutoff = moment(lastTransaction.timestamp, 'X').add('48', 'hours')
     if (moment().isAfter(cutoff)) {
-      return res.status(400).send({ error: 'player has exceeded 48 hours on active roster' })
+      return res
+        .status(400)
+        .send({ error: 'player has exceeded 48 hours on active roster' })
     }
 
     // if on active roster, make sure player he has not been previously deactivated
-    const isActive = !!roster.active.find(p => p.player === player)
-    if (isActive && transactions.find(t => t.type === constants.transactions.ROSTER_DEACTIVATE || t.type === constants.transactions.PRACTICE_ADD)) {
-      return res.status(400).send({ error: 'player can not be deactivated once activated' })
+    const isActive = !!roster.active.find((p) => p.player === player)
+    if (
+      isActive &&
+      transactions.find(
+        (t) =>
+          t.type === constants.transactions.ROSTER_DEACTIVATE ||
+          t.type === constants.transactions.PRACTICE_ADD
+      )
+    ) {
+      return res
+        .status(400)
+        .send({ error: 'player can not be deactivated once activated' })
     }
 
     // make sure player has not been poached since the last time they were a free agent
@@ -85,21 +111,25 @@ router.post('/?', async (req, res) => {
       lid: leagueId,
       player
     })
-    if (transactionsSinceFA.find(t => t.type === constants.transactions.POACHED)) {
-      return res.status(400).send({ error: 'player can not be deactivated once poached' })
+    if (
+      transactionsSinceFA.find((t) => t.type === constants.transactions.POACHED)
+    ) {
+      return res
+        .status(400)
+        .send({ error: 'player can not be deactivated once poached' })
     }
 
     // make sure team has space on practice squad
     if (!roster.hasOpenPracticeSquadSlot()) {
-      return res.status(400).send({ error: 'no available space on practice squad' })
+      return res
+        .status(400)
+        .send({ error: 'no available space on practice squad' })
     }
 
-    await db('rosters_players')
-      .update({ slot: constants.slots.PS })
-      .where({
-        rid: rosterRow.uid,
-        player
-      })
+    await db('rosters_players').update({ slot: constants.slots.PS }).where({
+      rid: rosterRow.uid,
+      player
+    })
 
     const transaction = {
       userid: req.user.userId,
@@ -139,7 +169,13 @@ router.post('/?', async (req, res) => {
     })
 
     if (league.groupme_token && league.groupme_id) {
-      API.Bots.post(league.groupme_token, league.groupme_id, message, {}, (err) => logger(err))
+      API.Bots.post(
+        league.groupme_token,
+        league.groupme_id,
+        message,
+        {},
+        (err) => logger(err)
+      )
     }
   } catch (error) {
     logger(error)

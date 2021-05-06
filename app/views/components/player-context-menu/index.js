@@ -1,10 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import {
-  contextMenuActions,
-  getContextMenuPlayer
-} from '@core/context-menu'
+import { contextMenuActions, getContextMenuPlayer } from '@core/context-menu'
 import { rosterActions } from '@core/rosters'
 import { confirmationActions } from '@core/confirmations'
 import { waiverActions } from '@core/waivers'
@@ -33,7 +30,4 @@ const mapDispatchToProps = {
   protect: rosterActions.protect
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(PlayerContextMenu)
+export default connect(mapStateToProps, mapDispatchToProps)(PlayerContextMenu)

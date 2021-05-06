@@ -11,21 +11,14 @@ App.propTypes = {
   children: PropTypes.element
 }
 
-const mapStateToProps = createSelector(
-  getApp,
-  getPlayers,
-  (app, players) => ({
-    isPending: app.isPending,
-    userId: app.userId,
-    isInitializing: players.get('isInitializing')
-  })
-)
+const mapStateToProps = createSelector(getApp, getPlayers, (app, players) => ({
+  isPending: app.isPending,
+  userId: app.userId,
+  isInitializing: players.get('isInitializing')
+}))
 
 const mapDispatchToProps = {
   init: appActions.init
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(App)
+export default connect(mapStateToProps, mapDispatchToProps)(App)

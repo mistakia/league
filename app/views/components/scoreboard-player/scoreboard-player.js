@@ -16,17 +16,21 @@ class ScoreboardPlayer extends Player {
 
     const points = gamelog
       ? (gamelog.total || 0).toFixed(1)
-      : player.getIn(['points', `${constants.season.week}`, 'total'], 0).toFixed(1)
+      : player
+          .getIn(['points', `${constants.season.week}`, 'total'], 0)
+          .toFixed(1)
 
     return (
       <div className={classNames.join(' ')}>
         <div className='scoreboard__player-body'>
-          <PlayerNameExpanded playerId={player.player} week={week} hideActions />
+          <PlayerNameExpanded
+            playerId={player.player}
+            week={week}
+            hideActions
+          />
           <ScoreboardPlayerGameStatus playerId={player.player} week={week} />
         </div>
-        <div className='scoreboard__player-score metric'>
-          {points}
-        </div>
+        <div className='scoreboard__player-score metric'>{points}</div>
       </div>
     )
   }

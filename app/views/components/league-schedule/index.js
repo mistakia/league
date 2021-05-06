@@ -12,6 +12,4 @@ const mapStateToProps = createSelector(
   (teamEvents, leagueEvents) => ({ teamEvents, leagueEvents })
 )
 
-export default connect(
-  mapStateToProps
-)(LeagueSchedule)
+export default connect(mapStateToProps)(LeagueSchedule)

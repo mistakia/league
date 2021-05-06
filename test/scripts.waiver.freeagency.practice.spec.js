@@ -9,11 +9,7 @@ const league = require('../db/seeds/league')
 const { constants } = require('../common')
 const { getLeague } = require('../utils')
 const { start } = constants.season
-const {
-  selectPlayer,
-  checkLastTransaction,
-  checkRoster
-} = require('./utils')
+const { selectPlayer, checkLastTransaction, checkRoster } = require('./utils')
 
 const run = require('../scripts/process-waivers-free-agency-practice')
 
@@ -39,8 +35,10 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
     it('rookie post draft single waiver - offseason', async () => {
       const leagueId = 1
       const league = await getLeague(leagueId)
-      const days = (league.nteams * 3) + 1
-      MockDate.set(start.clone().subtract('2', 'month').add(days, 'day').toDate())
+      const days = league.nteams * 3 + 1
+      MockDate.set(
+        start.clone().subtract('2', 'month').add(days, 'day').toDate()
+      )
 
       const player = await selectPlayer({ rookie: true })
       const teamId = 1
@@ -76,10 +74,10 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
 
       // check team waiver order
       const teams = await knex('teams').where({ lid: 1 })
-      const team1 = teams.find(t => t.uid === 1)
-      const team2 = teams.find(t => t.uid === 2)
-      const team3 = teams.find(t => t.uid === 3)
-      const team4 = teams.find(t => t.uid === 4)
+      const team1 = teams.find((t) => t.uid === 1)
+      const team2 = teams.find((t) => t.uid === 2)
+      const team3 = teams.find((t) => t.uid === 3)
+      const team4 = teams.find((t) => t.uid === 4)
       expect(team1.wo).to.equal(12)
       expect(team2.wo).to.equal(1)
       expect(team3.wo).to.equal(2)
@@ -128,8 +126,15 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
     it('no waivers ready to process - offseason', async () => {
       const leagueId = 1
       const league = await getLeague(leagueId)
-      const days = (league.nteams * 3)
-      MockDate.set(start.clone().subtract('2', 'month').add(days, 'day').add('1', 'hour').toDate())
+      const days = league.nteams * 3
+      MockDate.set(
+        start
+          .clone()
+          .subtract('2', 'month')
+          .add(days, 'day')
+          .add('1', 'hour')
+          .toDate()
+      )
 
       const player = await selectPlayer({ rookie: true })
       const teamId = 1
@@ -165,10 +170,10 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
 
       // check team waiver order
       const teams = await knex('teams').where({ lid: 1 })
-      const team1 = teams.find(t => t.uid === 1)
-      const team2 = teams.find(t => t.uid === 2)
-      const team3 = teams.find(t => t.uid === 3)
-      const team4 = teams.find(t => t.uid === 4)
+      const team1 = teams.find((t) => t.uid === 1)
+      const team2 = teams.find((t) => t.uid === 2)
+      const team3 = teams.find((t) => t.uid === 3)
+      const team4 = teams.find((t) => t.uid === 4)
       expect(team1.wo).to.equal(1)
       expect(team2.wo).to.equal(2)
       expect(team3.wo).to.equal(3)

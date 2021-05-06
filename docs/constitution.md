@@ -1,12 +1,15 @@
 # THE TEFLON LEAGUE CONSTITUTION
+
 > Originally adopted 2020
 
 ## Article I
+
 > FORMATION AND DURATION OF CONSTITUTION
 
 This TEFLON (LEAGUE) Constitution constitutes an agreement among the LEAGUE Football Teams, as identified herein, each of which shall be entitled to the benefits of and shall be bound by all the terms and provisions hereof, and it shall remain in effect indefinitely, except that the provisions of Article III, Section 2 shall expire at such time as the current Commissioner ceases to hold office.
 
 ## Article II
+
 > DEFINITION OF TERMS
 
 ### Terms Defined.
@@ -52,6 +55,7 @@ Where this Constitution refers to a period of time measured in days between two 
 All times of day applied herein shall be computed as being in Eastern Standard Time.
 
 ## Article III
+
 > THE COMMISSIONER
 
 **Establishment of Office.**
@@ -150,7 +154,7 @@ _The Commissioner refuses to reconsider, and a vote is therefore held. More than
 
 12. The Commissioner vows to remain impartial and unbiased when making decisions involving the League and its Players.
 
-**Impeachment
+\*\*Impeachment
 
 13. A two-thirds majority vote of Teams is needed to Impeach the Commissioner.
 
@@ -162,8 +166,8 @@ _The Commissioner refuses to reconsider, and a vote is therefore held. More than
 
 (c) misusing the office for an improper purpose or for personal gain.
 
-
 ## Article IV
+
 > TEAMS AND MANAGERS
 
 **Establishment of Teams and Managers.**
@@ -247,7 +251,8 @@ All of which shall require a simple majority vote by means of a poll on the Boar
 11. If at any time a new Manager joins the League in order to replace a Manager that left, each new Manager will take over the departing Team’s roster. If multiple teams are available, the person that was highest on the waiting list, or the first to say they want in AND hand over money if there is no current list, gets to pick which Manager-less team to choose first.
 
 ## Article V
->LEAGUE SETTINGS
+
+> LEAGUE SETTINGS
 
 **Game Service and Format.**
 
@@ -390,18 +395,23 @@ xiv. 10-13 points allowed (2)
 **Interpretive Note:** _Note that a two-week period of Inactivity, under the Offences section, is grounds for permanent suspension._
 
 ## Article VI
+
 > INAUGURAL ROOKIE DRAFT
 
 **Draft Order.**
+
 1. The inaugural draft order will be decided by a FFPC style competition taking place during the 2019 NFL Playoffs.
 
 ## Article VII
+
 > INAUGURAL NON-ROOKIE AUCTION
 
 **Budget.**
+
 1. Each Team's budget will be determined by subtracting the sum of the contract values of their rookie players on the Team’s active roster from $200.
 
 ## Article VIII
+
 > PLAYER RETENTION
 
 **Extensions.**
@@ -427,6 +437,7 @@ xiv. 10-13 points allowed (2)
 4. The $200 Salary Cap will be enforced on all transactions during the offseason and on Opening Day.
 
 ## Article IX
+
 > BLIND TRANSITION AUCTION
 
 1. Each team may nominate a maximum of two (2) players for the “fair-market” Blind Transition Auction.
@@ -446,6 +457,7 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 6. The $200 retention budget is enforced throughout the process.
 
 ## Article X
+
 > FRANCHISE TAGS
 
 1. Each team will be allowed the use of one (1) Franchise Tag each season to extend a player.
@@ -459,6 +471,7 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 3. A player can not be franchise tagged three (3) consecutive years.
 
 ## Article XI
+
 > ROOKIE DRAFT
 
 **Format.**
@@ -488,6 +501,7 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 6. Teams who have more than one (1) compensatory pick will make their second selection after all the Teams with a compensatory pick have made their first selection.
 
 ## Article XII
+
 > FREE AGENCY AUCTION
 
 **Announcement.**
@@ -503,6 +517,7 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 4. Following the rookie draft order, Teams will nominate players for bidding and set a bid themselves (minimum $1). Teams who have a full active roster will be skipped.
 
 ## Article XIII
+
 > FREE AGENCY AND ROSTER MANAGEMENT
 
 **Free Agent Acquisition.**
@@ -554,6 +569,7 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 17. Before or during the Regular Season, players may be placed on Injured Reserve (IR) if they are designated as PUP (Physically Unable to Play) or IR by the NFL. If they are not listed as such on the official injury list, they cannot be placed in IR. Once the injured player is no longer listed as PUP or IR due to injury, he must immediately be placed into a regular roster slot and a player must be dropped from the roster slot in order to fit him in (unless another IR-like injury occurs that can be moved into an empty IR slot). The Team will be unable to make any transactions until the ineligible player is removed.
 
 ## Article XIV
+
 > PRACTICE SQUAD
 
 1. The practice squad (PS) will consist of a maximum of four (4) players.
@@ -583,6 +599,7 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 10. Players on a PS may be poached by another team at any point for an extra $2 on their current contract. The Manager of the PS player has 48 hours to promote the player to the active roster or lose that player.
 
 ## Article XV
+
 > TRANSACTIONS
 
 **Authorization to Trade.**
@@ -608,6 +625,7 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 14. Trading can resume at the start of the Offseason.
 
 ## Article XVI
+
 > WILDCARD ROUND
 
 **Format.**
@@ -629,6 +647,7 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 5. In the event that any Teams should be tied in score, the tie breaker shall be the Team with the higher Total Points For (PF) during the LEAGUE regular season.
 
 ## Article XVII
+
 > CHAMPIONSHIP
 
 ** Format.**
@@ -645,8 +664,7 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 
 4. In the event that any Teams should be tied in respect of win percentage, the tie breaker shall be the Total Points For (PF) during the LEAGUE regular season.
 
-**Tiebreakers.**
-5. In the event that any Teams should be tied in score, the tie breaker shall be the Team with the higher Total Points For (PF) during the LEAGUE regular season.
+**Tiebreakers.** 5. In the event that any Teams should be tied in score, the tie breaker shall be the Team with the higher Total Points For (PF) during the LEAGUE regular season.
 
 **Awards.**
 
@@ -659,6 +677,7 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 (b) LEAGUE Championship Runner-Up: 10% of total yearly buy-in
 
 ## Article XVIII
+
 > ORPHANS
 
 **Retirement.**
@@ -684,6 +703,7 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 5. In the event the Commissioner’s team plays the orphan team during the Regular Season, another league member appointed by the Commissioner shall set the orphan team’s lineup for that game.
 
 ## Article XIX
+
 > OFFENCES
 
 **Nature of Offences.**

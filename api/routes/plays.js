@@ -1,10 +1,7 @@
 const express = require('express')
 const router = express.Router()
 
-const {
-  getChartedPlayByPlayQuery,
-  getPlayByPlayQuery
-} = require('../../utils')
+const { getChartedPlayByPlayQuery, getPlayByPlayQuery } = require('../../utils')
 const { constants } = require('../../common')
 
 router.get('/?', async (req, res) => {
@@ -25,8 +22,11 @@ router.get('/stats', async (req, res) => {
     const data = await db('nflPlayStat')
       .select('nflPlayStat.*', 'nflPlay.week')
       .leftJoin('nflPlay', function () {
-        this.on('nflPlayStat.esbid', '=', 'nflPlay.esbid')
-          .andOn('nflPlayStat.playId', '=', 'nflPlay.playId')
+        this.on('nflPlayStat.esbid', '=', 'nflPlay.esbid').andOn(
+          'nflPlayStat.playId',
+          '=',
+          'nflPlay.playId'
+        )
       })
       .where('nflPlay.season', constants.season.year)
       .where('nflPlayStat.valid', 1)
@@ -41,23 +41,37 @@ router.get('/charted', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const years = req.query.years
-      ? (Array.isArray(req.query.years) ? req.query.years : [req.query.years])
-      : [constants.season.week ? constants.season.year : (constants.season.year - 1)]
+      ? Array.isArray(req.query.years)
+        ? req.query.years
+        : [req.query.years]
+      : [
+          constants.season.week
+            ? constants.season.year
+            : constants.season.year - 1
+        ]
 
     const weeks = req.query.weeks
-      ? (Array.isArray(req.query.weeks) ? req.query.weeks : [req.query.weeks])
+      ? Array.isArray(req.query.weeks)
+        ? req.query.weeks
+        : [req.query.weeks]
       : []
 
     const days = req.query.days
-      ? (Array.isArray(req.query.days) ? req.query.days : [req.query.days])
+      ? Array.isArray(req.query.days)
+        ? req.query.days
+        : [req.query.days]
       : []
 
     const quarters = req.query.quarters
-      ? (Array.isArray(req.query.quarters) ? req.query.quarters : [req.query.quarters])
+      ? Array.isArray(req.query.quarters)
+        ? req.query.quarters
+        : [req.query.quarters]
       : []
 
     const downs = req.query.downs
-      ? (Array.isArray(req.query.downs) ? req.query.downs : [req.query.downs])
+      ? Array.isArray(req.query.downs)
+        ? req.query.downs
+        : [req.query.downs]
       : []
 
     const { playerId } = req.query

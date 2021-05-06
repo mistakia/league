@@ -13,7 +13,7 @@ import Button from '@components/button'
 import { Roster, constants } from '@common'
 
 export default class PoachConfirmation extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
 
     const drops = []
@@ -60,10 +60,7 @@ export default class PoachConfirmation extends React.Component {
     const menuItems = []
     for (const rPlayer of this._drops) {
       menuItems.push(
-        <MenuItem
-          key={rPlayer.player}
-          value={rPlayer.player}
-        >
+        <MenuItem key={rPlayer.player} value={rPlayer.player}>
           {rPlayer.name} ({rPlayer.pos})
         </MenuItem>
       )
@@ -71,23 +68,29 @@ export default class PoachConfirmation extends React.Component {
 
     return (
       <Dialog open onClose={this.props.onClose}>
-        <DialogTitle>{status.waiver.poach
-          ? 'Poaching Waiver Claim'
-          : 'Poaching Claim'}
+        <DialogTitle>
+          {status.waiver.poach ? 'Poaching Waiver Claim' : 'Poaching Claim'}
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {`Poach ${player.name} (${player.pos}). If your claim is successful, he will be added to your active roster with a salary of $${rosterInfo.value + 2} and will not be eligible for the practice squad.`}
+            {`Poach ${player.name} (${
+              player.pos
+            }). If your claim is successful, he will be added to your active roster with a salary of $${
+              rosterInfo.value + 2
+            } and will not be eligible for the practice squad.`}
           </DialogContentText>
           <DialogContentText>
             {status.waiver.poach
-              ? 'This is a waiver claim and can be cancelled anytime before it\'s processed.'
+              ? "This is a waiver claim and can be cancelled anytime before it's processed."
               : 'This is a poaching claim and can not be cancelled once submitted.'}
           </DialogContentText>
-          {!isPlayerEligible &&
+          {!isPlayerEligible && (
             <DialogContentText>
-              There is not enough roster or salary space on your active roster. Please select a player to drop. They will only be dropped if your claim is successful.
-            </DialogContentText>}
+              There is not enough roster or salary space on your active roster.
+              Please select a player to drop. They will only be dropped if your
+              claim is successful.
+            </DialogContentText>
+          )}
           <FormControl size='small' variant='outlined'>
             <InputLabel id='drop-label'>Drop</InputLabel>
             <Select
@@ -95,8 +98,7 @@ export default class PoachConfirmation extends React.Component {
               value={this.state.drop}
               error={this.state.error}
               onChange={this.handleDrop}
-              label='Drop'
-            >
+              label='Drop'>
               {menuItems}
             </Select>
           </FormControl>

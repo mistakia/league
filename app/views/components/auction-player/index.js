@@ -29,7 +29,4 @@ const mapDispatchToProps = {
   select: auctionActions.select
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(AuctionPlayer)
+export default connect(mapStateToProps, mapDispatchToProps)(AuctionPlayer)

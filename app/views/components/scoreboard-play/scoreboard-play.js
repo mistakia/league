@@ -36,15 +36,15 @@ export default class ScoreboardPlay extends React.Component {
             {moment(play.time, 'X').format('ddd h:mm')}
           </div>
           <div className='scoreboard__play-info-play'>
-            {play.play.down}{nth(play.play.down)} & {play.play.yardsToGo} - {play.play.startYardLine}
+            {play.play.down}
+            {nth(play.play.down)} & {play.play.yardsToGo} -{' '}
+            {play.play.startYardLine}
           </div>
         </div>
         <div className='scoreboard__play-description'>
           {play.play.playDescription}
         </div>
-        <div className='scoreboard__play-players'>
-          {players}
-        </div>
+        <div className='scoreboard__play-players'>{players}</div>
       </div>
     )
   }

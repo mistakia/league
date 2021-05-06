@@ -16,7 +16,4 @@ const mapDispatchToProps = {
   select: playerActions.selectPlayer
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(PlayerNameExpanded)
+export default connect(mapStateToProps, mapDispatchToProps)(PlayerNameExpanded)

@@ -7,10 +7,13 @@ import { constants } from '@common'
 
 const initialState = new Map({
   isLoaded: false,
-  week: Math.max(moment().day() === 2 ? (constants.season.week - 1) : constants.season.week, 1)
+  week: Math.max(
+    moment().day() === 2 ? constants.season.week - 1 : constants.season.week,
+    1
+  )
 })
 
-export function scoreboardReducer (state = initialState, { payload, type }) {
+export function scoreboardReducer(state = initialState, { payload, type }) {
   switch (type) {
     case scoreboardActions.UPDATE_SCOREBOARD_PLAYS:
     case scoreboardActions.GET_SCOREBOARD_FULFILLED:

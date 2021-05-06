@@ -12,6 +12,4 @@ const mapStateToProps = createSelector(
   (league, picks) => ({ league, picks })
 )
 
-export default connect(
-  mapStateToProps
-)(DraftSchedule)
+export default connect(mapStateToProps)(DraftSchedule)

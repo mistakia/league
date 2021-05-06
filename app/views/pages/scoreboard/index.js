@@ -12,6 +12,4 @@ const mapStateToProps = createSelector(
   (app, matchup) => ({ app, matchup })
 )
 
-export default connect(
-  mapStateToProps
-)(ScoreboardPage)
+export default connect(mapStateToProps)(ScoreboardPage)

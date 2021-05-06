@@ -2,7 +2,7 @@ import * as constants from './constants'
 import calculatePercentiles from './calculate-percentiles'
 
 const round = (value, precision) => {
-  var multiplier = Math.pow(10, precision || 0)
+  const multiplier = Math.pow(10, precision || 0)
   return Math.round(value * multiplier) / multiplier
 }
 
@@ -94,7 +94,8 @@ const calculateStatsFromPlays = ({ plays, qualifiers }) => {
 
         if (play.ints) {
           addStat(play.psr, 'ints', 1)
-        } else if (play.comp === 'Y' && play.trg) { // TODO deprecate - temp fix for missing trg
+        } else if (play.comp === 'Y' && play.trg) {
+          // TODO deprecate - temp fix for missing trg
           // receiver
           addStat(play.trg, 'rec', 1)
           addStat(play.trg, 'recy', play.yds)
@@ -179,7 +180,7 @@ const calculateStatsFromPlays = ({ plays, qualifiers }) => {
     // stats._recypsnp
     stats._recyprec = round(stats.recy / stats.rec, 1) || 0
     stats._recyptrg = round(stats.recy / stats.trg, 1) || 0
-    stats._wopr = round((1.5 * sttrg) + (0.7 * stray), 1) || 0
+    stats._wopr = round(1.5 * sttrg + 0.7 * stray, 1) || 0
     stats._ryacprec = round(stats.ryac / stats.rec, 1) || 0
 
     // stats.ry_pg

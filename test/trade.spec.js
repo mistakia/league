@@ -51,8 +51,8 @@ describe('API /trades', function () {
         .where('rosters.tid', 2)
         .limit(1)
 
-      const proposingTeamPlayers = proposingTeamPlayerRows.map(p => p.player)
-      const acceptingTeamPlayers = acceptingTeamPlayerRows.map(p => p.player)
+      const proposingTeamPlayers = proposingTeamPlayerRows.map((p) => p.player)
+      const acceptingTeamPlayers = acceptingTeamPlayerRows.map((p) => p.player)
 
       // set values to zero
       await knex('transactions')
@@ -61,7 +61,8 @@ describe('API /trades', function () {
 
       // TODO - get trading player values
 
-      const proposeRes = await chai.request(server)
+      const proposeRes = await chai
+        .request(server)
         .post('/api/leagues/1/trades')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -89,7 +90,8 @@ describe('API /trades', function () {
 
       const tradeid = proposeRes.body.uid
 
-      const acceptRes = await chai.request(server)
+      const acceptRes = await chai
+        .request(server)
         .post(`/api/leagues/1/trades/${tradeid}/accept`)
         .set('Authorization', `Bearer ${user2}`)
 
@@ -110,11 +112,14 @@ describe('API /trades', function () {
 
       const rows = await knex('rosters_players')
         .leftJoin('rosters', 'rosters_players.rid', 'rosters.uid')
-        .whereIn('rosters_players.player', proposingTeamPlayers.concat(acceptingTeamPlayers))
+        .whereIn(
+          'rosters_players.player',
+          proposingTeamPlayers.concat(acceptingTeamPlayers)
+        )
 
       rows.length.should.equal(2)
-      const proposingRow = rows.find(p => p.tid === 1)
-      const acceptingRow = rows.find(p => p.tid === 2)
+      const proposingRow = rows.find((p) => p.tid === 1)
+      const acceptingRow = rows.find((p) => p.tid === 2)
       proposingRow.player.should.equal(acceptingTeamPlayers[0])
       acceptingRow.player.should.equal(proposingTeamPlayers[0])
 
@@ -149,17 +154,16 @@ describe('API /trades', function () {
       await knex('rosters_players')
         .update('slot', constants.slots.BENCH)
         .where('player', player1.player)
-      await knex('transactions')
-        .insert({
-          userid: userId,
-          tid: teamId,
-          lid: leagueId,
-          player: player1.player,
-          type: constants.transactions.ROSTER_ACTIVATE,
-          value: 0,
-          year: constants.season.year,
-          timestamp: Math.round(Date.now() / 1000)
-        })
+      await knex('transactions').insert({
+        userid: userId,
+        tid: teamId,
+        lid: leagueId,
+        player: player1.player,
+        type: constants.transactions.ROSTER_ACTIVATE,
+        value: 0,
+        year: constants.season.year,
+        timestamp: Math.round(Date.now() / 1000)
+      })
 
       const player2 = await selectPlayer({ rookie: true })
       await addPlayer({
@@ -174,7 +178,8 @@ describe('API /trades', function () {
 
       const proposingTeamPlayers = [player1.player]
       const acceptingTeamPlayers = [player2.player]
-      const proposeRes = await chai.request(server)
+      const proposeRes = await chai
+        .request(server)
         .post('/api/leagues/1/trades')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -202,7 +207,8 @@ describe('API /trades', function () {
 
       const tradeid = proposeRes.body.uid
 
-      const acceptRes = await chai.request(server)
+      const acceptRes = await chai
+        .request(server)
         .post(`/api/leagues/1/trades/${tradeid}/accept`)
         .set('Authorization', `Bearer ${user2}`)
 
@@ -223,15 +229,19 @@ describe('API /trades', function () {
 
       const rows = await knex('rosters_players')
         .leftJoin('rosters', 'rosters_players.rid', 'rosters.uid')
-        .whereIn('rosters_players.player', proposingTeamPlayers.concat(acceptingTeamPlayers))
+        .whereIn(
+          'rosters_players.player',
+          proposingTeamPlayers.concat(acceptingTeamPlayers)
+        )
 
       rows.length.should.equal(2)
-      const proposingRow = rows.find(p => p.tid === 1)
-      const acceptingRow = rows.find(p => p.tid === 2)
+      const proposingRow = rows.find((p) => p.tid === 1)
+      const acceptingRow = rows.find((p) => p.tid === 2)
       proposingRow.player.should.equal(acceptingTeamPlayers[0])
       acceptingRow.player.should.equal(proposingTeamPlayers[0])
 
-      const res = await chai.request(server)
+      const res = await chai
+        .request(server)
         .post('/api/teams/1/deactivate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -250,7 +260,9 @@ describe('API /trades', function () {
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
       res.body.transaction.player.should.equal(player2.player)
-      res.body.transaction.type.should.equal(constants.transactions.ROSTER_DEACTIVATE)
+      res.body.transaction.type.should.equal(
+        constants.transactions.ROSTER_DEACTIVATE
+      )
       res.body.transaction.value.should.equal(value)
       res.body.transaction.year.should.equal(constants.season.year)
       res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
@@ -351,7 +363,8 @@ describe('API /trades', function () {
 
       const proposingTeamPlayers = [player1.player]
       const acceptingTeamPlayers = [player2.player]
-      const request = chai.request(server)
+      const request = chai
+        .request(server)
         .post('/api/leagues/1/trades')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -367,7 +380,8 @@ describe('API /trades', function () {
 
     it('deadline has passed', async function () {
       MockDate.set(moment('1606626001', 'X').toDate())
-      const request = chai.request(server)
+      const request = chai
+        .request(server)
         .post('/api/leagues/1/trades')
         .set('Authorization', `Bearer ${user1}`)
         .send({

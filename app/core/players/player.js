@@ -56,7 +56,7 @@ export const Player = new Record({
   practice: new List()
 })
 
-export function createPlayer ({
+export function createPlayer({
   player,
   fname,
   lname,

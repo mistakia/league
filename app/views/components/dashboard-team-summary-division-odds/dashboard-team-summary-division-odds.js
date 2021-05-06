@@ -30,15 +30,14 @@ export default class DashboardTeamSummaryDivisionOdds extends React.Component {
               Division Odds
             </Grid>
             <Grid item xs={4}>
-              {toPercent(team.divisionOdds)} (<Rank rank={rank} size={teams.size} />)
+              {toPercent(team.divisionOdds)} (
+              <Rank rank={rank} size={teams.size} />)
             </Grid>
           </Grid>
         </AccordionSummary>
         <AccordionDetails>
           <table>
-            <tbody>
-              {items}
-            </tbody>
+            <tbody>{items}</tbody>
           </table>
         </AccordionDetails>
       </Accordion>

@@ -12,8 +12,12 @@ export default class SelectedPlayerValue extends React.Component {
     const wsData = []
     for (const week of constants.fantasyWeeks) {
       if (week < constants.season.week) continue
-      baData.push(parseFloat(player.getIn(['vorp', `${week}`, 'available'], 0).toFixed(1)))
-      wsData.push(parseFloat(player.getIn(['vorp', `${week}`, 'starter'], 0).toFixed(1)))
+      baData.push(
+        parseFloat(player.getIn(['vorp', `${week}`, 'available'], 0).toFixed(1))
+      )
+      wsData.push(
+        parseFloat(player.getIn(['vorp', `${week}`, 'starter'], 0).toFixed(1))
+      )
     }
 
     const options = {
@@ -25,7 +29,9 @@ export default class SelectedPlayerValue extends React.Component {
         text: ''
       },
       xAxis: {
-        categories: constants.fantasyWeeks.filter(w => w >= constants.season.week),
+        categories: constants.fantasyWeeks.filter(
+          (w) => w >= constants.season.week
+        ),
         title: {
           text: 'Week'
         },
@@ -52,22 +58,20 @@ export default class SelectedPlayerValue extends React.Component {
       credits: {
         enabled: false
       },
-      series: [{
-        name: 'Worst Starter',
-        data: wsData,
-        pointPadding: 0.2
-      }, {
-        name: 'Best Available',
-        data: baData,
-        pointPadding: 0.4
-      }]
+      series: [
+        {
+          name: 'Worst Starter',
+          data: wsData,
+          pointPadding: 0.2
+        },
+        {
+          name: 'Best Available',
+          data: baData,
+          pointPadding: 0.4
+        }
+      ]
     }
 
-    return (
-      <HighchartsReact
-        highcharts={Highcharts}
-        options={options}
-      />
-    )
+    return <HighchartsReact highcharts={Highcharts} options={options} />
   }
 }

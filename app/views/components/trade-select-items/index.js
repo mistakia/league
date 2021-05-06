@@ -5,11 +5,8 @@ import { getTeamsForCurrentLeague } from '@core/teams'
 
 import TradeSelectItems from './trade-select-items'
 
-const mapStateToProps = createSelector(
-  getTeamsForCurrentLeague,
-  (teams) => ({ teams })
-)
+const mapStateToProps = createSelector(getTeamsForCurrentLeague, (teams) => ({
+  teams
+}))
 
-export default connect(
-  mapStateToProps
-)(TradeSelectItems)
+export default connect(mapStateToProps)(TradeSelectItems)

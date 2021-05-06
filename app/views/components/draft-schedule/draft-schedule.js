@@ -18,22 +18,27 @@ export default class DraftSchedule extends React.Component {
       const daysInPreviousMonth = moment(m).subtract(1, 'month').daysInMonth()
       const picksInPreviousMonth = daysInPreviousMonth - startDate + 1
 
-      tbl.push(<div key={`${month}`} className='draft__schedule-title'>{m.format('MMMM')}</div>)
+      tbl.push(
+        <div key={`${month}`} className='draft__schedule-title'>
+          {m.format('MMMM')}
+        </div>
+      )
 
       let date = 1
       for (let i = 0; i < 6; i++) {
         const cells = []
         for (let j = 0; j < 7; j++) {
           if (i === 0 && j < firstDay) {
-            const cell = (<div key={j} className='draft__schedule-cell' />)
+            const cell = <div key={j} className='draft__schedule-cell' />
             cells.push(cell)
           } else if (date > daysInMonth) {
             if (i === 5 && j === 0) break
-            const cell = (<div key={j} className='draft__schedule-cell' />)
+            const cell = <div key={j} className='draft__schedule-cell' />
             cells.push(cell)
           } else {
             const classNames = ['draft__schedule-cell']
-            if (date === moment().date() && month === moment().month()) classNames.push('today')
+            if (date === moment().date() && month === moment().month())
+              classNames.push('today')
             if (month === draftMonth) {
               if (date === startDate) classNames.push('start')
               for (const pick of picks) {
@@ -46,7 +51,11 @@ export default class DraftSchedule extends React.Component {
                 if (pickDate === date) classNames.push('pick')
               }
             }
-            const cell = (<div key={j} className={classNames.join(' ')}>{date}</div>)
+            const cell = (
+              <div key={j} className={classNames.join(' ')}>
+                {date}
+              </div>
+            )
             cells.push(cell)
             date++
           }

@@ -14,15 +14,12 @@ router.get('/props', async (req, res) => {
     const data = await db
       .select('*')
       .from(db.raw('(' + sub.toString() + ') AS X'))
-      .innerJoin(
-        'props',
-        function () {
-          this.on(function () {
-            this.on('sourceid', '=', 'sid')
-            this.andOn('timestamp', '=', 'maxtime')
-          })
-        }
-      )
+      .innerJoin('props', function () {
+        this.on(function () {
+          this.on('sourceid', '=', 'sid')
+          this.andOn('timestamp', '=', 'maxtime')
+        })
+      })
       .where({ wk: constants.season.week, year: constants.season.year })
     res.send(data)
   } catch (error) {

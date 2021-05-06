@@ -17,27 +17,31 @@ import isOnReleaseWaivers from './is-on-release-waivers'
 import fixTeam from './fix-team'
 import calculatePercentiles from './calculate-percentiles'
 
-const groupBy = (xs, key) => xs.reduce((rv, x) => {
-  (rv[x[key]] = rv[x[key]] || []).push(x)
-  return rv
-}, {})
+const groupBy = (xs, key) =>
+  xs.reduce((rv, x) => {
+    ;(rv[x[key]] = rv[x[key]] || []).push(x)
+    return rv
+  }, {})
 
 const uniqBy = (a, key) => {
   const seen = new Set()
-  return a.filter(item => {
+  return a.filter((item) => {
     const k = item[key]
     return seen.has(k) ? false : seen.add(k)
   })
 }
 
-const toPercent = num => `${((num || 0) * 100).toFixed(1)}%`
+const toPercent = (num) => `${((num || 0) * 100).toFixed(1)}%`
 
 const formatRoster = (roster) => {
   const result = new Map()
-  Object.keys(roster).forEach(k => k.startsWith('s') && result.set(k, roster[k]))
+  Object.keys(roster).forEach(
+    (k) => k.startsWith('s') && result.set(k, roster[k])
+  )
   return result
 }
-const nth = (n) => ['st', 'nd', 'rd'][((n + 90) % 100 - 10) % 10 - 1] || 'th'
+const nth = (n) =>
+  ['st', 'nd', 'rd'][((((n + 90) % 100) - 10) % 10) - 1] || 'th'
 
 const toStringArray = (arr) => {
   return arr.length > 1

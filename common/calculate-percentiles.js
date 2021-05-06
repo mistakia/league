@@ -6,9 +6,9 @@ const calculatePercentiles = ({ items, stats, qualifiers = {} }) => {
   for (const stat of stats) {
     const qualifier = qualifiers[stat]
     const filtered = qualifier
-      ? items.filter(i => i[qualifier.type] >= qualifier.value)
+      ? items.filter((i) => i[qualifier.type] >= qualifier.value)
       : items
-    const values = filtered.map(t => t[stat])
+    const values = filtered.map((t) => t[stat])
     const result = percentile([25, 50, 75, 90, 95, 98, 99, 0, 100], values)
     percentiles[stat] = {
       p25: result[0],

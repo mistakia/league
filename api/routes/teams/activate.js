@@ -3,7 +3,11 @@ const API = require('groupme').Stateless
 const router = express.Router({ mergeParams: true })
 
 const { constants, Roster } = require('../../../common')
-const { getRoster, sendNotifications, verifyUserTeam } = require('../../../utils')
+const {
+  getRoster,
+  sendNotifications,
+  verifyUserTeam
+} = require('../../../utils')
 
 router.post('/?', async (req, res) => {
   const { db, logger, broadcast } = req.app.locals
@@ -25,7 +29,12 @@ router.post('/?', async (req, res) => {
 
     // verify teamId
     try {
-      await verifyUserTeam({ userId: req.user.userId, teamId, leagueId, requireLeague: true })
+      await verifyUserTeam({
+        userId: req.user.userId,
+        teamId,
+        leagueId,
+        requireLeague: true
+      })
     } catch (error) {
       return res.status(400).send({ error: error.message })
     }
@@ -45,12 +54,16 @@ router.post('/?', async (req, res) => {
     }
 
     // make sure player is not on active roster
-    if (roster.active.find(p => p.player === player)) {
+    if (roster.active.find((p) => p.player === player)) {
       return res.status(400).send({ error: 'player is on active roster' })
     }
 
     // make sure player is not protected
-    if (roster.players.find(p => p.player === player && p.slot === constants.slots.PSP)) {
+    if (
+      roster.players.find(
+        (p) => p.player === player && p.slot === constants.slots.PSP
+      )
+    ) {
       return res.status(400).send({ error: 'player is protected' })
     }
 
@@ -66,20 +79,23 @@ router.post('/?', async (req, res) => {
 
     // make sure team has space on active roster
     if (!roster.hasOpenBenchSlot(playerRow.pos)) {
-      return res.status(400).send({ error: 'no available space on active roster' })
+      return res
+        .status(400)
+        .send({ error: 'no available space on active roster' })
     }
 
     // if during the offseason make sure team has enough cap space
-    if (!constants.season.isRegularSeason && (roster.availableCap - playerRow.value) < 0) {
+    if (
+      !constants.season.isRegularSeason &&
+      roster.availableCap - playerRow.value < 0
+    ) {
       return res.status(400).send({ error: 'exceeds salary limit' })
     }
 
-    await db('rosters_players')
-      .update({ slot: constants.slots.BENCH })
-      .where({
-        rid: rosterRow.uid,
-        player
-      })
+    await db('rosters_players').update({ slot: constants.slots.BENCH }).where({
+      rid: rosterRow.uid,
+      player
+    })
 
     const transaction = {
       userid: req.user.userId,
@@ -119,7 +135,13 @@ router.post('/?', async (req, res) => {
     })
 
     if (league.groupme_token && league.groupme_id) {
-      API.Bots.post(league.groupme_token, league.groupme_id, message, {}, (err) => logger(err))
+      API.Bots.post(
+        league.groupme_token,
+        league.groupme_id,
+        message,
+        {},
+        (err) => logger(err)
+      )
     }
   } catch (error) {
     logger(error)

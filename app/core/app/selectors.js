@@ -1,3 +1,3 @@
-export function getApp (state) {
+export function getApp(state) {
   return state.get('app')
 }

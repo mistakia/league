@@ -6,7 +6,7 @@ const initialState = new Record({
   teams: new Map()
 })
 
-export function scheduleReducer (state = initialState(), { payload, type }) {
+export function scheduleReducer(state = initialState(), { payload, type }) {
   switch (type) {
     case scheduleActions.GET_SCHEDULE_FULFILLED:
       return state.merge({

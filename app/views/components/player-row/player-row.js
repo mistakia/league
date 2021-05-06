@@ -17,13 +17,28 @@ import './player-row.styl'
 class PlayerRow extends Player {
   render = () => {
     const {
-      player, selectedPlayer, vbaseline, isSeasonView, isHosted, isWeekView,
-      isStatsPassingAdvancedView, isStatsPassingPressureView, isStatsRushingView, week,
-      isStatsReceivingView, percentiles, isLoggedIn, isRestOfSeasonView, selected, status,
-      baselines, teamId
+      player,
+      selectedPlayer,
+      vbaseline,
+      isSeasonView,
+      isHosted,
+      isWeekView,
+      isStatsPassingAdvancedView,
+      isStatsPassingPressureView,
+      isStatsRushingView,
+      week,
+      isStatsReceivingView,
+      percentiles,
+      isLoggedIn,
+      isRestOfSeasonView,
+      selected,
+      status,
+      baselines,
+      teamId
     } = this.props
 
-    const isSelected = selectedPlayer === player.player || selected === player.player
+    const isSelected =
+      selectedPlayer === player.player || selected === player.player
 
     const seasonSummary = () => {
       let inflation = null
@@ -43,11 +58,12 @@ class PlayerRow extends Player {
       return (
         <div className='row__group'>
           <div className='row__group-body'>
-            {!constants.season.isRegularSeason &&
+            {!constants.season.isRegularSeason && (
               <div className='table__cell metric'>
                 ${Math.round(value) || '--'}
                 {/* {inflation} */}
-              </div>}
+              </div>
+            )}
             <div className='table__cell metric'>
               {Math.round(player.vorp.getIn([`${week}`, vbaseline]) || 0)}
             </div>
@@ -120,9 +136,21 @@ class PlayerRow extends Player {
       <div className='row__group'>
         <div className='row__group-body'>
           <PercentileMetric stats={stats} percentiles={percentiles} type='py' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='tdp' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='ints' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='drppy' />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='tdp'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='ints'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='drppy'
+          />
         </div>
       </div>
     )
@@ -130,10 +158,26 @@ class PlayerRow extends Player {
     const passingEfficiency = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <PercentileMetric stats={stats} percentiles={percentiles} type='pc_pct' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='tdp_pct' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='ints_pct' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='intw_pct' />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='pc_pct'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='tdp_pct'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='ints_pct'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='intw_pct'
+          />
         </div>
       </div>
     )
@@ -141,10 +185,26 @@ class PlayerRow extends Player {
     const passingAdvanced = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <PercentileMetric stats={stats} percentiles={percentiles} type='pyac' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='pyac_pc' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='_ypa' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='pdot_pa' />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='pyac'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='pyac_pc'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='_ypa'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='pdot_pa'
+          />
         </div>
       </div>
     )
@@ -152,9 +212,21 @@ class PlayerRow extends Player {
     const passingAiryards = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <PercentileMetric stats={stats} percentiles={percentiles} type='pdot' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='pcay_pc' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='_pacr' />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='pdot'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='pcay_pc'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='_pacr'
+          />
         </div>
       </div>
     )
@@ -163,12 +235,36 @@ class PlayerRow extends Player {
       <div className='row__group'>
         <div className='row__group-body'>
           <PercentileMetric stats={stats} percentiles={percentiles} type='sk' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='sky' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='sk_pct' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='qbhi_pct' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='qbp_pct' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='qbhu_pct' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='_nygpa' />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='sky'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='sk_pct'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='qbhi_pct'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='qbp_pct'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='qbhu_pct'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='_nygpa'
+          />
         </div>
       </div>
     )
@@ -177,8 +273,16 @@ class PlayerRow extends Player {
       <div className='row__group'>
         <div className='row__group-body'>
           <PercentileMetric stats={stats} percentiles={percentiles} type='ry' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='tdr' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='ry_pra' />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='tdr'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='ry_pra'
+          />
         </div>
       </div>
     )
@@ -187,8 +291,16 @@ class PlayerRow extends Player {
       <div className='row__group'>
         <div className='row__group-body'>
           <PercentileMetric stats={stats} percentiles={percentiles} type='ra' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='rfd' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='posra' />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='rfd'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='posra'
+          />
         </div>
       </div>
     )
@@ -196,8 +308,16 @@ class PlayerRow extends Player {
     const rushingAfterContact = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <PercentileMetric stats={stats} percentiles={percentiles} type='ryaco' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='ryaco_pra' />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='ryaco'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='ryaco_pra'
+          />
         </div>
       </div>
     )
@@ -205,8 +325,16 @@ class PlayerRow extends Player {
     const rushingShare = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <PercentileMetric stats={stats} percentiles={percentiles} type='_stra' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='_stry' />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='_stra'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='_stry'
+          />
         </div>
       </div>
     )
@@ -214,9 +342,21 @@ class PlayerRow extends Player {
     const rushingAdvanced = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <PercentileMetric stats={stats} percentiles={percentiles} type='_fumlpra' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='posra_pra' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='rasucc_pra' />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='_fumlpra'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='posra_pra'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='rasucc_pra'
+          />
         </div>
       </div>
     )
@@ -224,8 +364,16 @@ class PlayerRow extends Player {
     const rushingBrokenTackles = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <PercentileMetric stats={stats} percentiles={percentiles} type='mbt' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='mbt_pt' />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='mbt'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='mbt_pt'
+          />
         </div>
       </div>
     )
@@ -233,11 +381,31 @@ class PlayerRow extends Player {
     const receivingBasic = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <PercentileMetric stats={stats} percentiles={percentiles} type='rec' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='recy' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='tdrec' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='drp' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='drprecy' />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='rec'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='recy'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='tdrec'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='drp'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='drprecy'
+          />
         </div>
       </div>
     )
@@ -245,12 +413,36 @@ class PlayerRow extends Player {
     const receivingOpportunity = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <PercentileMetric stats={stats} percentiles={percentiles} type='trg' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='dptrg_pct' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='rdot_ptrg' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='_stray' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='_sttrg' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='_wopr' />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='trg'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='dptrg_pct'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='rdot_ptrg'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='_stray'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='_sttrg'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='_wopr'
+          />
         </div>
       </div>
     )
@@ -258,11 +450,31 @@ class PlayerRow extends Player {
     const receivingAdvanced = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <PercentileMetric stats={stats} percentiles={percentiles} type='_ayptrg' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='_recypay' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='_recyprec' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='_recyptrg' />
-          <PercentileMetric stats={stats} percentiles={percentiles} type='_ryacprec' />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='_ayptrg'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='_recypay'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='_recyprec'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='_recyptrg'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='_ryacprec'
+          />
         </div>
       </div>
     )
@@ -275,8 +487,13 @@ class PlayerRow extends Player {
     const projectionView = isRestOfSeasonView || isSeasonView || isWeekView
 
     if (isWeekView || isSeasonView) {
-      const starterBaselinePlayerId = baselines.getIn([`${week}`, player.pos, 'starter'])
-      if (player.player === starterBaselinePlayerId) classNames.push('starter__baseline')
+      const starterBaselinePlayerId = baselines.getIn([
+        `${week}`,
+        player.pos,
+        'starter'
+      ])
+      if (player.player === starterBaselinePlayerId)
+        classNames.push('starter__baseline')
     }
 
     return (
@@ -290,21 +507,40 @@ class PlayerRow extends Player {
           </div>
           <div className='player__row-name cursor' onClick={this.handleClick}>
             <span>{player.name}</span>
-            {(constants.season.year === player.draft_year) && <PlayerLabel label='R' type='rookie' description='Rookie' />}
+            {constants.season.year === player.draft_year && (
+              <PlayerLabel label='R' type='rookie' description='Rookie' />
+            )}
             <Team team={player.team} />
           </div>
-          {isLoggedIn &&
+          {isLoggedIn && (
             <div className='player__row-action'>
-              {!!isHosted && <IconButton small text onClick={this.handleContextClick} icon='more' />}
-            </div>}
-          {constants.season.week > 0 && <PlayerRowOpponent team={player.team} pos={player.pos} />}
-          {isLoggedIn &&
+              {!!isHosted && (
+                <IconButton
+                  small
+                  text
+                  onClick={this.handleContextClick}
+                  icon='more'
+                />
+              )}
+            </div>
+          )}
+          {constants.season.week > 0 && (
+            <PlayerRowOpponent team={player.team} pos={player.pos} />
+          )}
+          {isLoggedIn && (
             <div className='player__row-availability'>
-              {player.tid
-                ? <TeamName abbrv tid={player.tid} />
-                : ((status.waiver.active || status.waiver.poach || status.waiver.practice || status.locked)
-                  ? 'W' : 'FA')}
-            </div>}
+              {player.tid ? (
+                <TeamName abbrv tid={player.tid} />
+              ) : status.waiver.active ||
+                status.waiver.poach ||
+                status.waiver.practice ||
+                status.locked ? (
+                'W'
+              ) : (
+                'FA'
+              )}
+            </div>
+          )}
         </div>
         {projectionView && seasonSummary()}
         {projectionView && seasonPassing}

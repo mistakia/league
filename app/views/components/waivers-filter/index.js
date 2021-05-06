@@ -8,7 +8,4 @@ const mapDispatchToProps = {
   filter: waiverActions.filter
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(Filter)
+export default connect(null, mapDispatchToProps)(Filter)

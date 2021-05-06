@@ -9,7 +9,7 @@ import PageLayout from '@layouts/page'
 import './auth.styl'
 
 export default class AuthPage extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
 
     const { leagueId } = queryString.parse(this.props.location.search)
@@ -36,7 +36,8 @@ export default class AuthPage extends React.Component {
       this.props.login(data)
     } else if (
       this.password2Ref.current.value &&
-        this.passwordRef.current.value === this.password2Ref.current.value) {
+      this.passwordRef.current.value === this.password2Ref.current.value
+    ) {
       this.props.register(data)
     }
   }
@@ -51,11 +52,12 @@ export default class AuthPage extends React.Component {
   handleChange = () => {
     if (this.state.menu === 'login') return
     this.setState({
-      passwordError: this.passwordRef.current.value !== this.password2Ref.current.value
+      passwordError:
+        this.passwordRef.current.value !== this.password2Ref.current.value
     })
   }
 
-  render () {
+  render() {
     const { leagueId, teamId } = queryString.parse(this.props.location.search)
     const { isPending, authError } = this.props
     if (isPending) {
@@ -68,20 +70,22 @@ export default class AuthPage extends React.Component {
         <div className='auth__main'>
           <form id='auth' onSubmit={this.handleSubmit}>
             {authError}
-            {leagueId &&
+            {leagueId && (
               <TextField
                 disabled
                 label='League Id'
                 variant='outlined'
                 value={leagueId}
-              />}
-            {teamId &&
+              />
+            )}
+            {teamId && (
               <TextField
                 disabled
                 label='Team Id'
                 variant='outlined'
                 value={teamId}
-              />}
+              />
+            )}
             <TextField
               id='email'
               label='Email Address'
@@ -99,17 +103,20 @@ export default class AuthPage extends React.Component {
               onChange={this.handleChange}
               variant='outlined'
             />
-            {this.state.menu === 'register' &&
+            {this.state.menu === 'register' && (
               <TextField
                 error={!!authError || this.state.passwordError}
-                helperText={this.state.passwordError && 'Password does not match'}
+                helperText={
+                  this.state.passwordError && 'Password does not match'
+                }
                 id='password2'
                 label='Confirm Password'
                 type='password'
                 inputRef={this.password2Ref}
                 onChange={this.handleChange}
                 variant='outlined'
-              />}
+              />
+            )}
             <Button type='submit' isLoading={isPending}>
               {this.state.menu}
             </Button>
@@ -121,8 +128,6 @@ export default class AuthPage extends React.Component {
       </div>
     )
 
-    return (
-      <PageLayout body={body} />
-    )
+    return <PageLayout body={body} />
   }
 }

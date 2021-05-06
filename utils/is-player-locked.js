@@ -9,7 +9,9 @@ module.exports = async (player) => {
 
   const players = await db('player')
     .where({ player })
-    .joinRaw('left join schedule on player.cteam = schedule.v or player.cteam = schedule.h')
+    .joinRaw(
+      'left join schedule on player.cteam = schedule.v or player.cteam = schedule.h'
+    )
     .where('schedule.wk', constants.season.week)
     .where('schedule.seas', constants.season.year)
     .limit(1)

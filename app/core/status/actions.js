@@ -9,7 +9,7 @@ export const statusActions = {
     type: statusActions.LOAD_STATUS
   }),
 
-  getStatusPending: opts => ({
+  getStatusPending: (opts) => ({
     type: statusActions.GET_STATUS_PENDING,
     payload: {
       opts

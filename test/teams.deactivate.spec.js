@@ -58,7 +58,8 @@ describe('API /teams - deactivate', function () {
         value
       })
 
-      const res = await chai.request(server)
+      const res = await chai
+        .request(server)
         .post('/api/teams/1/deactivate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -77,7 +78,9 @@ describe('API /teams - deactivate', function () {
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
       res.body.transaction.player.should.equal(player.player)
-      res.body.transaction.type.should.equal(constants.transactions.ROSTER_DEACTIVATE)
+      res.body.transaction.type.should.equal(
+        constants.transactions.ROSTER_DEACTIVATE
+      )
       res.body.transaction.value.should.equal(value)
       res.body.transaction.year.should.equal(constants.season.year)
       res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
@@ -137,7 +140,9 @@ describe('API /teams - deactivate', function () {
     })
 
     it('missing player', async () => {
-      const request = chai.request(server).post('/api/teams/1/deactivate')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/deactivate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1
@@ -147,7 +152,9 @@ describe('API /teams - deactivate', function () {
     })
 
     it('missing leagueId', async () => {
-      const request = chai.request(server).post('/api/teams/1/deactivate')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/deactivate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           player: 'x'
@@ -157,7 +164,9 @@ describe('API /teams - deactivate', function () {
     })
 
     it('teamId does not belong to userId', async () => {
-      const request = chai.request(server).post('/api/teams/1/deactivate')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/deactivate')
         .set('Authorization', `Bearer ${user2}`)
         .send({
           leagueId: 1,
@@ -169,7 +178,9 @@ describe('API /teams - deactivate', function () {
 
     it('player not on team', async () => {
       const player = await selectPlayer()
-      const request = chai.request(server).post('/api/teams/1/deactivate')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/deactivate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
@@ -181,8 +192,16 @@ describe('API /teams - deactivate', function () {
 
     it('player already on practice squad', async () => {
       const player = await selectPlayer({ rookie: true })
-      await addPlayer({ leagueId: 1, player, teamId: 1, userId: 1, slot: constants.slots.PS })
-      const request = chai.request(server).post('/api/teams/1/deactivate')
+      await addPlayer({
+        leagueId: 1,
+        player,
+        teamId: 1,
+        userId: 1,
+        slot: constants.slots.PS
+      })
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/deactivate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           player: player.player,
@@ -201,7 +220,9 @@ describe('API /teams - deactivate', function () {
         userId: 1,
         slot: constants.slots.BENCH
       })
-      const request = chai.request(server).post('/api/teams/1/deactivate')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/deactivate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           player: player.player,

@@ -9,7 +9,7 @@ import {
   Roster
 } from '@common'
 
-export function calculatePlayerValues (payload) {
+export function calculatePlayerValues(payload) {
   const { userId, vorpw, volsw, league, players, rosterRows } = payload
   const customBaselines = payload.baselines
 
@@ -22,15 +22,15 @@ export function calculatePlayerValues (payload) {
   const rosters = []
   for (const rosterRow of rows) {
     const roster = new Roster({ roster: rosterRow, league })
-    roster.players.forEach(p => rosteredPlayerIds.push(p.player))
+    roster.players.forEach((p) => rosteredPlayerIds.push(p.player))
     rosters.push(roster)
   }
 
   const { nteams, cap, minBid } = league
   const rosterSize = getRosterSize(league)
-  const leagueTotalCap = (nteams * cap) - (nteams * rosterSize * minBid)
+  const leagueTotalCap = nteams * cap - nteams * rosterSize * minBid
   const leagueAvailableCap = rosters.reduce((s, r) => {
-    return s + (r.availableCap - (minBid * r.availableSpace))
+    return s + (r.availableCap - minBid * r.availableSpace)
   }, 0)
 
   for (const player of players) {
@@ -47,7 +47,11 @@ export function calculatePlayerValues (payload) {
       player.projection[week] = projection
 
       // calculate points based on projection
-      const points = calculatePoints({ stats: projection, position: player.pos, league })
+      const points = calculatePoints({
+        stats: projection,
+        position: player.pos,
+        league
+      })
       player.points[week] = points
       player.vorp[week] = {}
       player.values[week] = {}
@@ -67,7 +71,11 @@ export function calculatePlayerValues (payload) {
 
     player.projWks = projWks
     player.projection.ros = ros
-    player.points.ros = calculatePoints({ stats: ros, position: player.pos, league })
+    player.points.ros = calculatePoints({
+      stats: ros,
+      position: player.pos,
+      league
+    })
   }
 
   const baselines = {}
@@ -78,7 +86,9 @@ export function calculatePlayerValues (payload) {
     // set manual baselines if they exist, use starter baseline by default
     for (const pos in b) {
       if (customBaselines[pos] && customBaselines[pos].manual) {
-        b[pos].manual = players.find(p => p.player === customBaselines[pos].manual)
+        b[pos].manual = players.find(
+          (p) => p.player === customBaselines[pos].manual
+        )
       } else {
         b[pos].manual = b[pos].starter
       }
@@ -161,12 +171,16 @@ export function calculatePlayerValues (payload) {
   // calculate ros inflation prices
   const rate = {}
   for (const type in availableTotalsRestOfSeason) {
-    rate[type] = availableTotalsRestOfSeason[type] ? leagueAvailableCap / availableTotalsRestOfSeason[type] : 0
+    rate[type] = availableTotalsRestOfSeason[type]
+      ? leagueAvailableCap / availableTotalsRestOfSeason[type]
+      : 0
   }
 
   const seasonRate = {}
   for (const type in availableTotalsSeason) {
-    seasonRate[type] = availableTotalsSeason[type] ? leagueAvailableCap / availableTotalsSeason[type] : 0
+    seasonRate[type] = availableTotalsSeason[type]
+      ? leagueAvailableCap / availableTotalsSeason[type]
+      : 0
   }
 
   for (const player of players) {

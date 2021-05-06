@@ -8,8 +8,8 @@ const calculateValues = ({ players, baselines, vorpw, volsw, week }) => {
     manual: 0
   }
 
-  const weightAvailable = ((vorpw !== null) ? vorpw : 1) * 0.5
-  const weightStarter = ((volsw !== null) ? volsw : 1) * 0.5
+  const weightAvailable = (vorpw !== null ? vorpw : 1) * 0.5
+  const weightStarter = (volsw !== null ? volsw : 1) * 0.5
   const totalWeight = weightAvailable + weightStarter
 
   for (const player of players) {
@@ -24,12 +24,16 @@ const calculateValues = ({ players, baselines, vorpw, volsw, week }) => {
     }
 
     for (const type in baselines[pos]) {
-      player.vorp[week][type] = player.points[week].total - baselines[pos][type].points[week].total
+      player.vorp[week][type] =
+        player.points[week].total - baselines[pos][type].points[week].total
       if (player.vorp[week][type] > 0) {
         total[type] = total[type] + player.vorp[week][type]
       }
     }
-    player.vorp[week].hybrid = ((player.vorp[week].available * weightAvailable) + (player.vorp[week].starter * weightStarter)) / totalWeight
+    player.vorp[week].hybrid =
+      (player.vorp[week].available * weightAvailable +
+        player.vorp[week].starter * weightStarter) /
+      totalWeight
     if (player.vorp[week].hybrid > 0) {
       total.hybrid = total.hybrid + player.vorp[week].hybrid
     }

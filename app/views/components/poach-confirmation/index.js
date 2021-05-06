@@ -36,7 +36,4 @@ const mapDispatchToProps = {
   poach: poachActions.poach
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(PoachConfirmation)
+export default connect(mapStateToProps, mapDispatchToProps)(PoachConfirmation)

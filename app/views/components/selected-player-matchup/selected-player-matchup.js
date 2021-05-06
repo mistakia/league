@@ -28,7 +28,9 @@ export default class SelectedPlayerMatchup extends React.Component {
           <div className='row__group-body'>
             <div className='row__text'>{item.title}</div>
             <div className='table__cell metric' />
-            <div className='table__cell metric'>{(item.points || 0).toFixed(1)}</div>
+            <div className='table__cell metric'>
+              {(item.points || 0).toFixed(1)}
+            </div>
           </div>
         </div>
       )
@@ -47,9 +49,13 @@ export default class SelectedPlayerMatchup extends React.Component {
       const lead = (
         <div className='row__group'>
           <div className='row__group-body'>
-            <div className='row__text'><PlayerNameText playerId={gamelog.player} /></div>
+            <div className='row__text'>
+              <PlayerNameText playerId={gamelog.player} />
+            </div>
             <div className='table__cell metric'>{gamelog.week}</div>
-            <div className='table__cell metric'>{(gamelog.pts || 0).toFixed(1)}</div>
+            <div className='table__cell metric'>
+              {(gamelog.pts || 0).toFixed(1)}
+            </div>
           </div>
         </div>
       )

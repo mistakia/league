@@ -13,7 +13,9 @@ const db = require('../db')
 
 const week = argv.season ? 0 : constants.season.week
 const year = new Date().getFullYear()
-const URL = `https://fantasy.espn.com/apis/v3/games/ffl/seasons/${year}/segments/0/leaguedefaults/3?view=kona_player_info` + (argv.season ? '&seasonTotals=true' : '')
+const URL =
+  `https://fantasy.espn.com/apis/v3/games/ffl/seasons/${year}/segments/0/leaguedefaults/3?view=kona_player_info` +
+  (argv.season ? '&seasonTotals=true' : '')
 const timestamp = new Date()
 
 const run = async () => {
@@ -25,9 +27,10 @@ const run = async () => {
   log(URL)
   const data = await fetch(URL, {
     headers: {
-      'x-fantasy-filter': '{"players":{"filterStatsForExternalIds":{"value":[2020,2021]},"filterSlotIds":{"value":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,23,24]},"filterStatsForSourceIds":{"value":[1]},"useFullProjectionTable":{"value":true},"sortAppliedStatTotal":{"sortAsc":false,"sortPriority":2,"value":"102021"},"sortDraftRanks":{"sortPriority":3,"sortAsc":true,"value":"PPR"},"sortPercOwned":{"sortPriority":4,"sortAsc":false},"limit":600,"filterRanksForSlotIds":{"value":[0,2,4,6,17,16]},"filterStatsForTopScoringPeriodIds":{"value":2,"additionalValue":["002021","102021","002020","022021"]}}}'
+      'x-fantasy-filter':
+        '{"players":{"filterStatsForExternalIds":{"value":[2020,2021]},"filterSlotIds":{"value":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,23,24]},"filterStatsForSourceIds":{"value":[1]},"useFullProjectionTable":{"value":true},"sortAppliedStatTotal":{"sortAsc":false,"sortPriority":2,"value":"102021"},"sortDraftRanks":{"sortPriority":3,"sortAsc":true,"value":"PPR"},"sortPercOwned":{"sortPriority":4,"sortAsc":false},"limit":600,"filterRanksForSlotIds":{"value":[0,2,4,6,17,16]},"filterStatsForTopScoringPeriodIds":{"value":2,"additionalValue":["002021","102021","002020","022021"]}}}'
     }
-  }).then(res => res.json())
+  }).then((res) => res.json())
 
   const inserts = []
   const missing = []
@@ -51,8 +54,9 @@ const run = async () => {
       continue
     }
 
-    const projections = player.player.stats
-      .find(s => s.scoringPeriodId === week && s.seasonId === year)
+    const projections = player.player.stats.find(
+      (s) => s.scoringPeriodId === week && s.seasonId === year
+    )
     if (!projections) continue
     const data = constants.espn.stats(projections.stats)
 
@@ -67,7 +71,9 @@ const run = async () => {
   }
 
   log(`Could not locate ${missing.length} players`)
-  missing.forEach(m => log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`))
+  missing.forEach((m) =>
+    log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`)
+  )
 
   if (argv.dry) {
     log(inserts[0])

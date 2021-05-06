@@ -16,18 +16,18 @@ const styles = {
 }
 
 class CheckboxItem extends Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.state = {}
 
     this.handleCheckboxChange = this.handleCheckboxChange.bind(this)
   }
 
-  handleCheckboxChange (event) {
+  handleCheckboxChange(event) {
     this.props.onChange(event.target.checked)
   }
 
-  render () {
+  render() {
     const { classes, checkboxValue, checkboxLabel, checked } = this.props
     return (
       <FormControlLabel

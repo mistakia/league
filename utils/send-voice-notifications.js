@@ -40,10 +40,12 @@ const sendVoiceNotification = async (items) => {
 module.exports = sendVoiceNotification
 
 if (!module.parent) {
-  (async function () {
-    await sendVoiceNotification([{
-      number: '+61411111111',
-      message: 'Hi Erin, please do not forget about the coffee. Thanks'
-    }])
+  ;(async function () {
+    await sendVoiceNotification([
+      {
+        number: '+61411111111',
+        message: 'Hi Erin, please do not forget about the coffee. Thanks'
+      }
+    ])
   })()
 }

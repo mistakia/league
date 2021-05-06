@@ -4,7 +4,7 @@ import { errorActions } from './actions'
 import { auctionActions } from '@core/auction'
 import { notificationActions } from '@core/notifications'
 
-export function * report ({ payload }) {
+export function* report({ payload }) {
   // const { leagueId, teamId, userId } = yield select(getApp)
   // const { message, stack } = payload
   /* yield call(postError, {
@@ -20,22 +20,24 @@ export function * report ({ payload }) {
    * }) */
 }
 
-export function * reportAuction ({ payload }) {
-  yield put(notificationActions.show({
-    message: payload.error,
-    severity: 'error'
-  }))
+export function* reportAuction({ payload }) {
+  yield put(
+    notificationActions.show({
+      message: payload.error,
+      severity: 'error'
+    })
+  )
 }
 
 //= ====================================
 //  WATCHERS
 // -------------------------------------
 
-export function * watchReport () {
+export function* watchReport() {
   yield takeLatest(errorActions.REPORT_ERROR, report)
 }
 
-export function * watchAuctionError () {
+export function* watchAuctionError() {
   yield takeLatest(auctionActions.AUCTION_ERROR, reportAuction)
 }
 
@@ -43,7 +45,4 @@ export function * watchAuctionError () {
 //  ROOT
 // -------------------------------------
 
-export const errorSagas = [
-  fork(watchAuctionError),
-  fork(watchReport)
-]
+export const errorSagas = [fork(watchAuctionError), fork(watchReport)]

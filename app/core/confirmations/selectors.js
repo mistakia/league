@@ -1,3 +1,3 @@
-export function getConfirmationInfo (state) {
+export function getConfirmationInfo(state) {
   return state.get('confirmation')
 }

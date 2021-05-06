@@ -64,9 +64,15 @@ const calculateHistoricalPositionalValue = async () => {
      * const vorReg = pos === 'QB' ? regression.linear(vorValues) : regression.exponential(vorValues)
      * const values = Object.values(sums).map(v => ({ reg: vorReg.predict(v.rank)[1], ...v }))
      */
-    const regValues = Object.values(sums).map(v => [v.rank, v.value || 0.01])
-    const reg = pos === 'QB' ? regression.linear(regValues) : regression.exponential(regValues)
-    const values = Object.values(sums).map(v => ({ reg: reg.predict(v.rank)[1], ...v }))
+    const regValues = Object.values(sums).map((v) => [v.rank, v.value || 0.01])
+    const reg =
+      pos === 'QB'
+        ? regression.linear(regValues)
+        : regression.exponential(regValues)
+    const values = Object.values(sums).map((v) => ({
+      reg: reg.predict(v.rank)[1],
+      ...v
+    }))
 
     output = output.concat(values)
   }
@@ -93,15 +99,18 @@ if (!module.parent) {
     }
 
     for (const player of result) {
-      p.addRow({
-        position: `${player.pos}${player.rank}`,
-        value: player.vor.toFixed(1),
-        regression: player.reg,
-        salary: player.value.toFixed(2),
-        points: player.points.toFixed(1)
-      }, {
-        color: getColor(player.pos)
-      })
+      p.addRow(
+        {
+          position: `${player.pos}${player.rank}`,
+          value: player.vor.toFixed(1),
+          regression: player.reg,
+          salary: player.value.toFixed(2),
+          points: player.points.toFixed(1)
+        },
+        {
+          color: getColor(player.pos)
+        }
+      )
     }
 
     p.printTable()

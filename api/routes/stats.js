@@ -13,7 +13,9 @@ router.get('/teams', async (req, res) => {
       startYear--
     }
 
-    const teamSelect = constants.teamStats.map(s => `SUM(team.${s}) as ${s}`).join(', ')
+    const teamSelect = constants.teamStats
+      .map((s) => `SUM(team.${s}) as ${s}`)
+      .join(', ')
     const data = await db('team')
       .leftJoin('game', 'team.gid', 'game.gid')
       .select('game.seas', 'team.tname')
@@ -35,7 +37,7 @@ router.get('/gamelogs/teams', async (req, res) => {
     const data = await db('team')
       .leftJoin('game', 'team.gid', 'game.gid')
       .select('game.seas', 'game.wk', 'team.tname as tm')
-      .select(db.raw(constants.teamStats.map(s => `team.${s}`).join(', ')))
+      .select(db.raw(constants.teamStats.map((s) => `team.${s}`).join(', ')))
       .where('game.seas', constants.season.year)
 
     res.send(data)

@@ -13,7 +13,4 @@ const mapDispatchToProps = {
   hide: contextMenuActions.hide
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(ContextMenu)
+export default connect(mapStateToProps, mapDispatchToProps)(ContextMenu)

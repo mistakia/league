@@ -21,7 +21,4 @@ const mapDispatchToProps = {
   update: teamActions.update
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(SettingsTeamsTeam)
+export default connect(mapStateToProps, mapDispatchToProps)(SettingsTeamsTeam)

@@ -6,7 +6,7 @@ import { getChartedPlays, getTeamStats } from '@core/api'
 import { getStats } from './selectors'
 import Worker from 'workerize-loader?inline!./worker' // eslint-disable-line import/no-webpack-loader-syntax
 
-export function * loadChartedPlays () {
+export function* loadChartedPlays() {
   const players = yield select(getPlayers)
   const view = players.get('view')
   if (view === 'stats') {
@@ -16,7 +16,7 @@ export function * loadChartedPlays () {
   }
 }
 
-export function * filterPlays ({ payload }) {
+export function* filterPlays({ payload }) {
   if (payload.type === 'years') {
     yield call(loadChartedPlays)
   } else {
@@ -24,9 +24,11 @@ export function * filterPlays ({ payload }) {
   }
 }
 
-export function * calculateStats () {
-  const { plays, weeks, days, quarters, downs, qualifiers } = yield select(getStats)
-  const filtered = plays.filter(play => {
+export function* calculateStats() {
+  const { plays, weeks, days, quarters, downs, qualifiers } = yield select(
+    getStats
+  )
+  const filtered = plays.filter((play) => {
     if (!weeks.includes(play.wk)) return false
     if (!days.includes(play.day)) return false
     if (!quarters.includes(play.qtr)) return false
@@ -42,7 +44,7 @@ export function * calculateStats () {
   yield put(playerActions.setStats(result))
 }
 
-export function * calculateTeamStats () {
+export function* calculateTeamStats() {
   const { teamStats } = yield select(getStats)
   const worker = new Worker()
   const result = yield call(worker.calculateTeamPercentiles, teamStats.toJS())
@@ -50,7 +52,7 @@ export function * calculateTeamStats () {
   yield put(statActions.setTeamStatsPercentiles(result))
 }
 
-export function * loadStats () {
+export function* loadStats() {
   const { teamStats, plays } = yield select(getStats)
   if (!plays.size) yield fork(getChartedPlays)
   if (!teamStats.size) {
@@ -62,27 +64,27 @@ export function * loadStats () {
 //  WATCHERS
 // -------------------------------------
 
-export function * watchSetPlayersView () {
+export function* watchSetPlayersView() {
   yield takeLatest(playerActions.SET_PLAYERS_VIEW, loadChartedPlays)
 }
 
-export function * watchGetChartedPlaysFulfilled () {
+export function* watchGetChartedPlaysFulfilled() {
   yield takeLatest(statActions.GET_CHARTED_PLAYS_FULFILLED, calculateStats)
 }
 
-export function * watchUpdateQualifier () {
+export function* watchUpdateQualifier() {
   yield takeLatest(statActions.UPDATE_QUALIFIER, calculateStats)
 }
 
-export function * watchFilterStats () {
+export function* watchFilterStats() {
   yield takeLatest(statActions.FILTER_STATS, filterPlays)
 }
 
-export function * watchPlayersSelectPlayer () {
+export function* watchPlayersSelectPlayer() {
   yield takeLatest(playerActions.PLAYERS_SELECT_PLAYER, loadStats)
 }
 
-export function * watchGetTeamStatsFulfilled () {
+export function* watchGetTeamStatsFulfilled() {
   yield takeLatest(statActions.GET_TEAM_STATS_FULFILLED, calculateTeamStats)
 }
 

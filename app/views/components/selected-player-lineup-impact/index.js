@@ -12,6 +12,4 @@ const mapStateToProps = createSelector(
   (player, app) => ({ player, isLoggedIn: !!app.userId })
 )
 
-export default connect(
-  mapStateToProps
-)(SelectedPlayerLineupImpact)
+export default connect(mapStateToProps)(SelectedPlayerLineupImpact)

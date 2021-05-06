@@ -20,7 +20,7 @@ import './menu.styl'
 const week = constants.season.week
 
 export default class Menu extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
 
     this.state = {
@@ -73,20 +73,22 @@ export default class Menu extends React.Component {
               className='main__menu-button'
               color='inherit'
               aria-label='menu'
-              onClick={this.handleOpen}
-            >
+              onClick={this.handleOpen}>
               <MenuIcon />
             </IconButton>
             <LeagueSchedule />
             {isLoggedIn && <NavLink to='/dashboard'>Roster</NavLink>}
-            {(isLoggedIn && (constants.season.week < constants.season.finalWeek)) && <NavLink to='/lineups'>Lineup</NavLink>}
+            {isLoggedIn &&
+              constants.season.week < constants.season.finalWeek && (
+                <NavLink to='/lineups'>Lineup</NavLink>
+              )}
             <NavLink to='/players'>Players</NavLink>
             {isLoggedIn && <NavLink to='/scoreboard'>Scoreboard</NavLink>}
             {isLoggedIn && <NavLink to='/league'>League</NavLink>}
             {isLoggedIn && <NavLink to='/trade'>Trade</NavLink>}
             {isLoggedIn && <NavLink to='/props'>Props</NavLink>}
-            {(isLoggedIn && !week) && <NavLink to='/draft'>Draft</NavLink>}
-            {(isLoggedIn && !week) && <NavLink to='/auction'>Auction</NavLink>}
+            {isLoggedIn && !week && <NavLink to='/draft'>Draft</NavLink>}
+            {isLoggedIn && !week && <NavLink to='/auction'>Auction</NavLink>}
             <NavLink to='/settings'>Settings</NavLink>
             <NavLink to='/resources'>Resources</NavLink>
             <NavLink to='/glossary'>Glossary</NavLink>
@@ -97,45 +99,50 @@ export default class Menu extends React.Component {
           anchor='left'
           open={this.state.open}
           onOpen={this.handleOpen}
-          onClose={this.handleClose}
-        >
-          <List>
-            {header}
-          </List>
+          onClose={this.handleClose}>
+          <List>{header}</List>
           <Divider />
           <List>
-            {isLoggedIn &&
+            {isLoggedIn && (
               <ListItem button onClick={this.handleClick('/dashboard')}>
                 <ListItemText primary='Roster' />
-              </ListItem>}
-            {isLoggedIn &&
+              </ListItem>
+            )}
+            {isLoggedIn && (
               <ListItem button onClick={this.handleClick('/lineups')}>
                 <ListItemText primary='Lineups' />
-              </ListItem>}
+              </ListItem>
+            )}
             <ListItem button onClick={this.handleClick('/players')}>
               <ListItemText primary='Players' />
             </ListItem>
-            {isLoggedIn &&
+            {isLoggedIn && (
               <ListItem button onClick={this.handleClick('/scoreboard')}>
                 <ListItemText primary='Scoreboard' />
-              </ListItem>}
-            {isLoggedIn &&
+              </ListItem>
+            )}
+            {isLoggedIn && (
               <ListItem button onClick={this.handleClick('/trade')}>
                 <ListItemText primary='Trade' />
-              </ListItem>}
-            {(isLoggedIn && !week) &&
+              </ListItem>
+            )}
+            {isLoggedIn && !week && (
               <ListItem button onClick={this.handleClick('/auction')}>
                 <ListItemText primary='Auction' />
-              </ListItem>}
-            {(isLoggedIn && !week) &&
+              </ListItem>
+            )}
+            {isLoggedIn && !week && (
               <ListItem button onClick={this.handleClick('/draft')}>
                 <ListItemText primary='Draft' />
-              </ListItem>}
+              </ListItem>
+            )}
           </List>
           {isLoggedIn && <Divider />}
-          {isLoggedIn &&
+          {isLoggedIn && (
             <List>
-              <ListItem button onClick={this.handleClick('/league/transactions')}>
+              <ListItem
+                button
+                onClick={this.handleClick('/league/transactions')}>
                 <ListItemText primary='Transactions' />
               </ListItem>
               <ListItem button onClick={this.handleClick('/league/waivers')}>
@@ -153,7 +160,8 @@ export default class Menu extends React.Component {
               <ListItem button onClick={this.handleClick('/league/schedule')}>
                 <ListItemText primary='Schedule' />
               </ListItem>
-            </List>}
+            </List>
+          )}
           <Divider />
           <List>
             <ListItem button onClick={this.handleClick('/settings')}>

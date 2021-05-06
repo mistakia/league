@@ -16,19 +16,19 @@ const mapStateToProps = createSelector(
   getCurrentLeague,
   (app, records, teams, league) => {
     const rosterRecords = records.toList().toJS()
-    const rosters = rosterRecords.map(roster => new Roster({ roster, league }))
+    const rosters = rosterRecords.map(
+      (roster) => new Roster({ roster, league })
+    )
 
-    const list = rosters.map(r => {
-      const team = teams.find(t => t.uid === r.tid, null, {})
+    const list = rosters.map((r) => {
+      const team = teams.find((t) => t.uid === r.tid, null, {})
       return { uid: r.tid, cap: r.availableCap, name: team.name }
     })
-    const team = list.find(t => t.uid === app.teamId) || {}
+    const team = list.find((t) => t.uid === app.teamId) || {}
     const sorted = list.sort((a, b) => b.cap - a.cap)
-    const rank = sorted.findIndex(t => t.uid === app.teamId) + 1
+    const rank = sorted.findIndex((t) => t.uid === app.teamId) + 1
     return { teams: sorted, team, rank }
   }
 )
 
-export default connect(
-  mapStateToProps
-)(DashboardTeamSummarySalary)
+export default connect(mapStateToProps)(DashboardTeamSummarySalary)

@@ -4,7 +4,7 @@ import { constants } from '@common'
 import PlayerFilter from '@components/player-filter'
 
 export default class CollegeDivisionFilter extends React.Component {
-  render () {
+  render() {
     const state = {
       type: 'collegeDivisions',
       label: 'COLLEGE DIVS',
@@ -19,8 +19,6 @@ export default class CollegeDivisionFilter extends React.Component {
       })
     }
 
-    return (
-      <PlayerFilter {...state} />
-    )
+    return <PlayerFilter {...state} />
   }
 }

@@ -449,7 +449,7 @@ const calculateStatsFromPlayStats = (playStats) => {
         // own kickoff recovery touchdown
         break
 
-        // qb hit player
+      // qb hit player
       case 110:
         break
 

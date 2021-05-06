@@ -61,10 +61,7 @@ export default class ScoreboardOverTime extends React.Component {
 
     return (
       <div className='scoreboard__over-time'>
-        <HighchartsReact
-          highcharts={Highcharts}
-          options={options}
-        />
+        <HighchartsReact highcharts={Highcharts} options={options} />
       </div>
     )
   }

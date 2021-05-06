@@ -23,7 +23,4 @@ const mapDispatchToProps = {
   delete: teamActions.delete
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(EditableTeams)
+export default connect(mapStateToProps, mapDispatchToProps)(EditableTeams)

@@ -9,7 +9,7 @@ import AuctionNominatedPlayer from '@components/auction-nominated-player'
 import './auction-main-bid.styl'
 
 export default class AuctionMainBid extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
 
     this.state = {
@@ -93,11 +93,14 @@ export default class AuctionMainBid extends React.Component {
   }
 
   componentDidUpdate = ({ bidValue, selected, playerId }, { value }) => {
-    if (!playerId && this.props.playerId) { // new player nominated
+    if (!playerId && this.props.playerId) {
+      // new player nominated
       this.setState({ value: this.props.bidValue + 1 })
-    } else if (!this.props.playerId && playerId) { // waiting on nomination
+    } else if (!this.props.playerId && playerId) {
+      // waiting on nomination
       this.setState({ value: 0 })
-    } else if (this.props.bidValue > bidValue) { // received new bid
+    } else if (this.props.bidValue > bidValue) {
+      // received new bid
       this.setState({ value: this.props.bidValue + 1 })
     }
   }
@@ -127,65 +130,90 @@ export default class AuctionMainBid extends React.Component {
     if (!auctionStart || !isStarted || isComplete) {
       action = null
     } else if (isPaused) {
-      action = (<Button disabled>Paused</Button>)
+      action = <Button disabled>Paused</Button>
     } else if (isLocked) {
-      action = (<Button disabled>Locked</Button>)
+      action = <Button disabled>Locked</Button>
     } else if (playerId) {
       if (isWinningBid) {
-        action = (<Button disabled>Winning Bid</Button>)
+        action = <Button disabled>Winning Bid</Button>
       } else if (isAboveCap) {
-        action = (<Button disabled>Exceeded CAP</Button>)
+        action = <Button disabled>Exceeded CAP</Button>
       } else if (!isEligible) {
-        action = (<Button disabled>Ineligible</Button>)
+        action = <Button disabled>Ineligible</Button>
       } else {
-        action = (<Button onClick={this.handleClickBid}>Bid ${this.state.value}</Button>)
+        action = (
+          <Button onClick={this.handleClickBid}>Bid ${this.state.value}</Button>
+        )
       }
     } else if (isNominating || isCommish) {
-      action = (<Button disabled={!selected} onClick={this.handleClickNominate}>Nominate ${this.state.value}</Button>)
+      action = (
+        <Button disabled={!selected} onClick={this.handleClickNominate}>
+          Nominate ${this.state.value}
+        </Button>
+      )
     } else {
-      action = (<Button disabled>Waiting</Button>)
+      action = <Button disabled>Waiting</Button>
     }
 
     let main
     if (!auctionStart) {
-      main = (<div>Auction is not scheduled.</div>)
+      main = <div>Auction is not scheduled.</div>
     } else if (isComplete) {
-      main = (<div>Auction is complete.</div>)
+      main = <div>Auction is complete.</div>
     } else if (!isStarted) {
-      main = (<div>Auction will begin on {start.format('dddd, MMMM Do YYYY, h:mm:ss a')}</div>)
+      main = (
+        <div>
+          Auction will begin on {start.format('dddd, MMMM Do YYYY, h:mm:ss a')}
+        </div>
+      )
     } else if (isPaused) {
-      main = (<div>Auction is paused.</div>)
+      main = <div>Auction is paused.</div>
     } else if (playerId) {
-      main = (<AuctionNominatedPlayer playerId={playerId} />)
+      main = <AuctionNominatedPlayer playerId={playerId} />
     } else if (selected) {
-      main = (<AuctionNominatedPlayer playerId={selected} />)
+      main = <AuctionNominatedPlayer playerId={selected} />
     } else if (isNominating) {
-      main = (<div>Your turn to nominate a player</div>)
+      main = <div>Your turn to nominate a player</div>
     } else if (isCommish) {
-      main = (<div>Nomination timer expired, make a nomination</div>)
+      main = <div>Nomination timer expired, make a nomination</div>
     } else {
-      main = (<div>Waiting for a player to be nominated by <TeamName tid={nominatingTeamId} /></div>)
+      main = (
+        <div>
+          Waiting for a player to be nominated by{' '}
+          <TeamName tid={nominatingTeamId} />
+        </div>
+      )
     }
 
     return (
       <div className='auction__main-bid'>
-        {(isStarted && !isComplete) &&
+        {isStarted && !isComplete && (
           <div className='auction__main-timer'>
             <Timer expiration={timer} />
-          </div>}
-        <div className='auction__main-body'>
-          {main}
-        </div>
-        <div className='auction__main-action'>
-          {action}
-        </div>
-        {(isStarted && !isComplete) &&
+          </div>
+        )}
+        <div className='auction__main-body'>{main}</div>
+        <div className='auction__main-action'>{action}</div>
+        {isStarted && !isComplete && (
           <div className='auction__main-input'>
-            <div className='auction__main-input-up' onClick={this.handleUpClick}>+</div>
-            <div className='auction__main-input-down' onClick={this.handleDownClick}>—</div>
+            <div
+              className='auction__main-input-up'
+              onClick={this.handleUpClick}>
+              +
+            </div>
+            <div
+              className='auction__main-input-down'
+              onClick={this.handleDownClick}>
+              —
+            </div>
             <label>Enter Bid</label>
-            <input type='number' value={this.state.value} onChange={this.handleChange} />
-          </div>}
+            <input
+              type='number'
+              value={this.state.value}
+              onChange={this.handleChange}
+            />
+          </div>
+        )}
       </div>
     )
   }

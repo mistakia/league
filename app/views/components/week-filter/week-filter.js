@@ -4,7 +4,7 @@ import { constants } from '@common'
 import PlayerFilter from '@components/player-filter'
 
 export default class WeekFilter extends React.Component {
-  render () {
+  render() {
     const state = {
       single: true,
       type: 'week',
@@ -12,7 +12,11 @@ export default class WeekFilter extends React.Component {
       values: []
     }
 
-    for (let week = Math.max(constants.season.week, 1); week <= constants.season.finalWeek; week++) {
+    for (
+      let week = Math.max(constants.season.week, 1);
+      week <= constants.season.finalWeek;
+      week++
+    ) {
       state.values.push({
         label: week,
         value: week,
@@ -20,8 +24,6 @@ export default class WeekFilter extends React.Component {
       })
     }
 
-    return (
-      <PlayerFilter {...state} />
-    )
+    return <PlayerFilter {...state} />
   }
 }

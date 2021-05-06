@@ -8,16 +8,18 @@ import './dashboard-bye-weeks.styl'
 
 const weeksRemaining = constants.season.finalWeek - constants.season.week
 
-function ByeWeekPopover ({ players, bye }) {
+function ByeWeekPopover({ players, bye }) {
   const [anchorEl, setAnchorEl] = React.useState(null)
 
   const items = []
   const labels = []
-  const sorted = players.sort((a, b) => b.getIn(['lineups', 'starts']) - a.getIn(['lineups', 'starts']))
+  const sorted = players.sort(
+    (a, b) => b.getIn(['lineups', 'starts']) - a.getIn(['lineups', 'starts'])
+  )
   for (const [index, player] of sorted.entries()) {
     const starts = player.getIn(['lineups', 'starts'], 0)
     // TODO - use global variable tied to settings
-    const isStarter = (starts / weeksRemaining) > 0.4
+    const isStarter = starts / weeksRemaining > 0.4
     const classNames = ['dashboard__bye-week-row-item']
     if (isStarter) classNames.push('starter')
 
@@ -43,8 +45,7 @@ function ByeWeekPopover ({ players, bye }) {
       <div
         className='dashboard__bye-week-row-body'
         onMouseEnter={handlePopoverOpen}
-        onMouseLeave={handlePopoverClose}
-      >
+        onMouseLeave={handlePopoverClose}>
         {items}
       </div>
       <Popover
@@ -60,8 +61,7 @@ function ByeWeekPopover ({ players, bye }) {
           horizontal: 'left'
         }}
         onClose={handlePopoverClose}
-        disableRestoreFocus
-      >
+        disableRestoreFocus>
         <div className='dashboard__bye-week-pop-label'>Week {bye} Byes</div>
         {labels}
       </Popover>

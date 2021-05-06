@@ -43,7 +43,7 @@ const getEligibleSlots = ({ pos, ps, bench, ir, league }) => {
     }
 
     if (pos !== 'ALL') {
-      eligible = eligible.filter(k => k.includes(pos))
+      eligible = eligible.filter((k) => k.includes(pos))
     }
   }
 
