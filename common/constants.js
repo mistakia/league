@@ -1058,7 +1058,9 @@ export const jobs = {
   PROJECTIONS_4FOR4: 35,
   FANTASYPROS_DYNASTY: 36,
   FANTASYPROS_WEEKLY: 37,
-  FANTASYPROS_DRAFT: 38
+  FANTASYPROS_DRAFT: 38,
+
+  CALCULATE_FRANCHISE_TAGS: 39
 }
 
 export const jobDetails = {
@@ -1093,7 +1095,9 @@ export const jobDetails = {
   29: 'Projections (Numberfire)',
   30: 'Process Play Stats',
   31: 'Armchair (Data)',
-  32: 'Football Outsiders (Data)'
+  32: 'Football Outsiders (Data)',
+
+  39: 'Calculate Franchise Tags'
 }
 
 export const changes = {
