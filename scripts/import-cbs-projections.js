@@ -15,7 +15,8 @@ const type = argv.season ? 'season' : constants.season.week
 const week = argv.season ? 0 : constants.season.week
 const year = new Date().getFullYear()
 const timestamp = new Date()
-const getUrl = (pos) => `https://www.cbssports.com/fantasy/football/stats/${pos}/${year}/${type}/projections/ppr/`
+const getUrl = (pos) =>
+  `https://www.cbssports.com/fantasy/football/stats/${pos}/${year}/${type}/projections/ppr/`
 
 const positions = ['QB', 'RB', 'WR', 'TE']
 
@@ -35,10 +36,22 @@ const run = async () => {
     const url = getUrl(position)
     log(url)
     const $ = await fetchCheerioObject(url)
-    $('main table tbody tr').map((i, el) => {
-      const name = $(el, 'td').eq(0).find('.CellPlayerName--long a').text().trim()
-      const team = $(el, 'td').eq(0).find('.CellPlayerName--long .CellPlayerName-team').text().trim()
-      const pos = $(el, 'td').eq(0).find('.CellPlayerName--long .CellPlayerName-position').text().trim()
+    $('main table tbody tr').each((i, el) => {
+      const name = $(el, 'td')
+        .eq(0)
+        .find('.CellPlayerName--long a')
+        .text()
+        .trim()
+      const team = $(el, 'td')
+        .eq(0)
+        .find('.CellPlayerName--long .CellPlayerName-team')
+        .text()
+        .trim()
+      const pos = $(el, 'td')
+        .eq(0)
+        .find('.CellPlayerName--long .CellPlayerName-position')
+        .text()
+        .trim()
 
       const params = { name, team, pos }
       const data = {}
@@ -114,7 +127,9 @@ const run = async () => {
   }
 
   log(`Could not locate ${missing.length} players`)
-  missing.forEach(m => log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`))
+  missing.forEach((m) =>
+    log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`)
+  )
 
   if (argv.dry) {
     log(`${inserts.length} projections`)

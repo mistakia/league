@@ -14,9 +14,14 @@ const db = require('../db')
 const timestamp = new Date()
 const { constants } = require('../common')
 const year = constants.season.year
-const getURL = (week, offset) => argv.season
-  ? `https://fantasy.nfl.com/research/projections?position=O&sort=projectedPts&statCategory=projectedStats&statSeason=${year}&statType=seasonProjectedStats&offset=${offset + 1}`
-  : `https://fantasy.nfl.com/research/projections?position=O&sort=projectedPts&statCategory=projectedStats&statSeason=${year}&statType=weekProjectedStats&statWeek=${week}&offset=${offset + 1}`
+const getURL = (week, offset) =>
+  argv.season
+    ? `https://fantasy.nfl.com/research/projections?position=O&sort=projectedPts&statCategory=projectedStats&statSeason=${year}&statType=seasonProjectedStats&offset=${
+        offset + 1
+      }`
+    : `https://fantasy.nfl.com/research/projections?position=O&sort=projectedPts&statCategory=projectedStats&statSeason=${year}&statType=weekProjectedStats&statWeek=${week}&offset=${
+        offset + 1
+      }`
 
 const runOne = async (week) => {
   const missing = []
@@ -27,8 +32,13 @@ const runOne = async (week) => {
     const url = getURL(week, items.length)
     log(url)
     const $ = await fetchCheerioObject(url)
-    $('table.tableType-player tbody tr').map((i, el) => {
-      const name = $(el, 'td').eq(0).find('a').text().trim().replace('View News', '')
+    $('table.tableType-player tbody tr').each((i, el) => {
+      const name = $(el, 'td')
+        .eq(0)
+        .find('a')
+        .text()
+        .trim()
+        .replace('View News', '')
       const meta = $(el, 'td').eq(0).find('em').text().split('-')
       const pos = meta.shift().trim()
       const team = meta.pop()
@@ -107,7 +117,9 @@ const runOne = async (week) => {
   }
 
   log(`Could not locate ${missing.length} players`)
-  missing.forEach(m => log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`))
+  missing.forEach((m) =>
+    log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`)
+  )
 
   if (argv.dry) {
     log(`${inserts.length} projections`)

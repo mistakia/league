@@ -11,7 +11,19 @@ const getRosterSize = ({
   sk = 0,
   bench = 0
 }) => {
-  return sqb + srb + swr + ste + srbwr + srbwrte + sqbrbwrte + swrte + sdst + sk + bench
+  return (
+    sqb +
+    srb +
+    swr +
+    ste +
+    srbwr +
+    srbwrte +
+    sqbrbwrte +
+    swrte +
+    sdst +
+    sk +
+    bench
+  )
 }
 
 export default getRosterSize

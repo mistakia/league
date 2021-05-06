@@ -8,8 +8,6 @@ export default class GenerateSchedule extends React.Component {
   }
 
   render = () => {
-    return (
-      <Button onClick={this.handleClick}>Generate Schedule</Button>
-    )
+    return <Button onClick={this.handleClick}>Generate Schedule</Button>
   }
 }

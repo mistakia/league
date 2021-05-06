@@ -19,7 +19,9 @@ export default class TradeSelectPlayer extends React.Component {
         </div>
         <div className='player__name-main'>
           <span>{player.pname}</span>
-          {(constants.season.year === player.draft_year) && <PlayerLabel label='R' type='rookie' description='Rookie' />}
+          {constants.season.year === player.draft_year && (
+            <PlayerLabel label='R' type='rookie' description='Rookie' />
+          )}
           <Team team={player.team} />
         </div>
       </div>

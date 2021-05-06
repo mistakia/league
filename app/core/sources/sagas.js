@@ -4,14 +4,14 @@ import { appActions, getApp } from '@core/app'
 import { sourceActions } from './actions'
 import { putSource, getSources } from '@core/api'
 
-export function * init () {
+export function* init() {
   const { token } = yield select(getApp)
   if (!token) {
     yield call(getSources)
   }
 }
 
-export function * updateSource ({ payload }) {
+export function* updateSource({ payload }) {
   const { token } = yield select(getApp)
   if (token) yield call(putSource, payload)
   else yield put(sourceActions.set(payload))
@@ -21,11 +21,11 @@ export function * updateSource ({ payload }) {
 //  WATCHERS
 // -------------------------------------
 
-export function * watchUpdateSource () {
+export function* watchUpdateSource() {
   yield takeLatest(sourceActions.UPDATE_SOURCE, updateSource)
 }
 
-export function * watchInitApp () {
+export function* watchInitApp() {
   yield takeLatest(appActions.INIT_APP, init)
 }
 
@@ -33,7 +33,4 @@ export function * watchInitApp () {
 //  ROOT
 // -------------------------------------
 
-export const sourceSagas = [
-  fork(watchUpdateSource),
-  fork(watchInitApp)
-]
+export const sourceSagas = [fork(watchUpdateSource), fork(watchInitApp)]

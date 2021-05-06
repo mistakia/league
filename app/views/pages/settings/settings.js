@@ -22,14 +22,12 @@ export default class SettingsPage extends React.Component {
           {teamId && <SettingsTeam tid={teamId} />}
           <SettingsValue />
           <SettingsProjections />
-          {(userId && isHosted) && <SettingsNotifications />}
+          {userId && isHosted && <SettingsNotifications />}
         </div>
         <EditableTeams />
       </Container>
     )
 
-    return (
-      <PageLayout body={body} scroll />
-    )
+    return <PageLayout body={body} scroll />
   }
 }

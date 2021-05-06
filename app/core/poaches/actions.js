@@ -13,7 +13,7 @@ export const poachActions = {
     }
   }),
 
-  postPoachPending: opts => ({
+  postPoachPending: (opts) => ({
     type: poachActions.POST_POACH_PENDING,
     payload: {
       opts

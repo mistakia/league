@@ -21,11 +21,15 @@ const mapStateToProps = createSelector(
 
     const opp = player.team === game.h ? game.v : game.h
     const gamelogs = logs
-      .filter(g => g.opp === opp && g.pos === player.pos)
+      .filter((g) => g.opp === opp && g.pos === player.pos)
       .sort((a, b) => a.week - b.week)
-      .withMutations(g => {
+      .withMutations((g) => {
         for (const [index, gamelog] of g.entrySeq()) {
-          const points = calculatePoints({ stats: gamelog, position: player.pos, league })
+          const points = calculatePoints({
+            stats: gamelog,
+            position: player.pos,
+            league
+          })
           g.setIn([index, 'pts'], points.total)
         }
       })
@@ -37,7 +41,7 @@ const mapStateToProps = createSelector(
     if (dPos) {
       const types = { total: 'Total', adj: 'Adjusted', avg: 'Average' }
       for (const [type, title] of Object.entries(types)) {
-        const stats = dPos.stats[type].find(d => d.opp === opp)
+        const stats = dPos.stats[type].find((d) => d.opp === opp)
         const points = calculatePoints({ stats, position: player.pos, league })
         defenseStats.push({
           type,
@@ -61,6 +65,4 @@ const mapStateToProps = createSelector(
   }
 )
 
-export default connect(
-  mapStateToProps
-)(SelectedPlayerMatchup)
+export default connect(mapStateToProps)(SelectedPlayerMatchup)

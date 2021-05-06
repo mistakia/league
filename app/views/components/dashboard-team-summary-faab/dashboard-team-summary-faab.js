@@ -35,9 +35,7 @@ export default class DashboardTeamSummaryFAAB extends React.Component {
         </AccordionSummary>
         <AccordionDetails>
           <table>
-            <tbody>
-              {items}
-            </tbody>
+            <tbody>{items}</tbody>
           </table>
         </AccordionDetails>
       </Accordion>

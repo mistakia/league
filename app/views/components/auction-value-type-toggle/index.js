@@ -5,12 +5,9 @@ import { getAuction, auctionActions } from '@core/auction'
 
 import AuctionValueTypeToggle from './auction-value-type-toggle'
 
-const mapStateToProps = createSelector(
-  getAuction,
-  (auction) => ({
-    valueType: auction.valueType
-  })
-)
+const mapStateToProps = createSelector(getAuction, (auction) => ({
+  valueType: auction.valueType
+}))
 
 const mapDispatchToProps = {
   setValueType: auctionActions.setValueType

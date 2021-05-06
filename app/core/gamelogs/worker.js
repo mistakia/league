@@ -1,9 +1,4 @@
-import {
-  calculatePercentiles,
-  constants,
-  groupBy,
-  uniqBy
-} from '@common'
+import { calculatePercentiles, constants, groupBy, uniqBy } from '@common'
 
 const copy = ({ opp, tm }) => ({ opp, tm })
 
@@ -31,7 +26,7 @@ const adj = (actual, average, props) => {
   return obj
 }
 
-function rollup (group) {
+function rollup(group) {
   const stats = {
     total: [],
     avg: []
@@ -58,7 +53,7 @@ function rollup (group) {
   }
 }
 
-export function processPlayerGamelogs (gamelogs) {
+export function processPlayerGamelogs(gamelogs) {
   const positions = groupBy(gamelogs, 'pos')
 
   const defense = {}
@@ -85,7 +80,9 @@ export function processPlayerGamelogs (gamelogs) {
         // sum week
         const gamelog = sum(logs, constants.fantasyStats)
         // get offense (opponent) average
-        const offenseAverage = offense[position].stats.avg.find(g => g.tm === gamelog.tm)
+        const offenseAverage = offense[position].stats.avg.find(
+          (g) => g.tm === gamelog.tm
+        )
         // calculate difference (adjusted)
         const adjusted = adj(gamelog, offenseAverage, constants.fantasyStats)
         weeks.push(adjusted)
@@ -113,7 +110,7 @@ export function processPlayerGamelogs (gamelogs) {
   }
 }
 
-export function processTeamGamelogs (gamelogs) {
+export function processTeamGamelogs(gamelogs) {
   return calculatePercentiles({
     items: gamelogs,
     stats: constants.teamStats

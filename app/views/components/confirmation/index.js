@@ -5,16 +5,12 @@ import { confirmationActions, getConfirmationInfo } from '@core/confirmations'
 
 import Confirmation from './confirmation'
 
-const mapStateToProps = createSelector(
-  getConfirmationInfo,
-  (info) => ({ info })
-)
+const mapStateToProps = createSelector(getConfirmationInfo, (info) => ({
+  info
+}))
 
 const mapDispatchToProps = {
   cancel: confirmationActions.cancel
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Confirmation)
+export default connect(mapStateToProps, mapDispatchToProps)(Confirmation)

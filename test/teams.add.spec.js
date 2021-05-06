@@ -48,7 +48,8 @@ describe('API /teams - add', function () {
       const teamId = 1
       const leagueId = 1
       const userId = 1
-      const res = await chai.request(server)
+      const res = await chai
+        .request(server)
         .post('/api/teams/1/add')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -72,7 +73,9 @@ describe('API /teams - add', function () {
       res.body[0].transaction.tid.should.equal(teamId)
       res.body[0].transaction.lid.should.equal(leagueId)
       res.body[0].transaction.player.should.equal(player.player)
-      res.body[0].transaction.type.should.equal(constants.transactions.ROSTER_ADD)
+      res.body[0].transaction.type.should.equal(
+        constants.transactions.ROSTER_ADD
+      )
       res.body[0].transaction.value.should.equal(0)
       res.body[0].transaction.year.should.equal(constants.season.year)
 
@@ -112,7 +115,8 @@ describe('API /teams - add', function () {
       const teamId = 1
       const leagueId = 1
       const userId = 1
-      const res = await chai.request(server)
+      const res = await chai
+        .request(server)
         .post('/api/teams/1/add')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -136,7 +140,9 @@ describe('API /teams - add', function () {
       res.body[0].transaction.tid.should.equal(teamId)
       res.body[0].transaction.lid.should.equal(leagueId)
       res.body[0].transaction.player.should.equal(player.player)
-      res.body[0].transaction.type.should.equal(constants.transactions.PRACTICE_ADD)
+      res.body[0].transaction.type.should.equal(
+        constants.transactions.PRACTICE_ADD
+      )
       res.body[0].transaction.value.should.equal(0)
       res.body[0].transaction.year.should.equal(constants.season.year)
 
@@ -182,7 +188,9 @@ describe('API /teams - add', function () {
     })
 
     it('missing player', async () => {
-      const request = chai.request(server).post('/api/teams/1/add')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/add')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1,
@@ -194,7 +202,9 @@ describe('API /teams - add', function () {
     })
 
     it('missing leagueId', async () => {
-      const request = chai.request(server).post('/api/teams/1/add')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/add')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1,
@@ -206,7 +216,9 @@ describe('API /teams - add', function () {
     })
 
     it('missing slot', async () => {
-      const request = chai.request(server).post('/api/teams/1/add')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/add')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1,
@@ -218,7 +230,9 @@ describe('API /teams - add', function () {
     })
 
     it('missing teamId', async () => {
-      const request = chai.request(server).post('/api/teams/1/add')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/add')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           player: 'x',
@@ -230,7 +244,9 @@ describe('API /teams - add', function () {
     })
 
     it('invalid slot', async () => {
-      const request = chai.request(server).post('/api/teams/1/add')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/add')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1,
@@ -243,7 +259,9 @@ describe('API /teams - add', function () {
     })
 
     it('teamId does not belong to userId', async () => {
-      const request = chai.request(server).post('/api/teams/1/add')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/add')
         .set('Authorization', `Bearer ${user2}`)
         .send({
           teamId: 1,
@@ -259,7 +277,9 @@ describe('API /teams - add', function () {
       MockDate.set(start.clone().add('2', 'week').day(4).toDate())
       const player = await selectPlayer()
       const drop = await selectPlayer()
-      const request = chai.request(server).post('/api/teams/1/add')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/add')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1,
@@ -276,7 +296,9 @@ describe('API /teams - add', function () {
       const player = await selectPlayer()
       await addPlayer({ leagueId: 1, player, teamId: 2, userId: 2 })
 
-      const request = chai.request(server).post('/api/teams/1/add')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/add')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1,
@@ -291,7 +313,9 @@ describe('API /teams - add', function () {
     it('add veteran free agent to active roster - offseason', async () => {
       MockDate.set(start.clone().subtract('1', 'week').toDate())
       const player = await selectPlayer({ rookie: false })
-      const request = chai.request(server).post('/api/teams/1/add')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/add')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1,
@@ -321,7 +345,9 @@ describe('API /teams - add', function () {
         type: constants.waivers.FREE_AGENCY
       })
 
-      const request = chai.request(server).post('/api/teams/1/add')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/add')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1,
@@ -350,7 +376,9 @@ describe('API /teams - add', function () {
       })
 
       const player = await selectPlayer()
-      const request = chai.request(server).post('/api/teams/1/add')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/add')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1,

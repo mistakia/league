@@ -5,12 +5,7 @@ const { constants, Roster } = require('../common')
 const isPlayerLocked = require('./is-player-locked')
 const getRoster = require('./get-roster')
 
-module.exports = async function ({
-  lid,
-  tid,
-  player,
-  userid
-}) {
+module.exports = async function ({ lid, tid, player, userid }) {
   // verify player id
   const playerRows = await db('player').where('player', player).limit(1)
   if (!playerRows.length) {
@@ -31,19 +26,23 @@ module.exports = async function ({
   }
 
   // verify player is not protected
-  if (roster.players.find(p => p.player === player && p.slot === constants.slots.PSP)) {
+  if (
+    roster.players.find(
+      (p) => p.player === player && p.slot === constants.slots.PSP
+    )
+  ) {
     throw new Error('player is protected')
   }
 
   // verify player is not locked and is a starter
   const isLocked = await isPlayerLocked(player)
-  const isStarter = !!roster.starters.find(p => p.player === player)
+  const isStarter = !!roster.starters.find((p) => p.player === player)
   if (isLocked && isStarter) {
     throw new Error('starter is locked')
   }
 
   // verify player does not have a poaching claim
-  const isOnPracticeSquad = !!roster.practice.find(p => p.player === player)
+  const isOnPracticeSquad = !!roster.practice.find((p) => p.player === player)
   if (isOnPracticeSquad) {
     const poaches = await db('poaches')
       .where({ player, lid })
@@ -86,7 +85,7 @@ module.exports = async function ({
     .where('week', '>=', constants.season.week)
     .where('year', constants.season.year)
     .where('tid', tid)
-  const rosterIds = teamRosters.map(r => r.uid)
+  const rosterIds = teamRosters.map((r) => r.uid)
   await db('rosters_players')
     .whereIn('rid', rosterIds)
     .where('player', player)

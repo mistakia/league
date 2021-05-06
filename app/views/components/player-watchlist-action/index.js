@@ -6,11 +6,10 @@ import { getPlayers, playerActions } from '@core/players'
 
 import PlayerWatchlistAction from './player-watchlist-action'
 
-const mapStateToProps = createSelector(
-  getPlayers,
-  getApp,
-  (players, app) => ({ watchlist: players.get('watchlist'), userId: app.userId })
-)
+const mapStateToProps = createSelector(getPlayers, getApp, (players, app) => ({
+  watchlist: players.get('watchlist'),
+  userId: app.userId
+}))
 
 const mapDispatchToProps = {
   toggle: playerActions.toggleWatchlist

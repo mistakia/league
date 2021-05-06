@@ -3,7 +3,7 @@ import { call, takeLatest, fork } from 'redux-saga/effects'
 import { appActions } from '@core/app'
 import { getSchedule } from '@core/api'
 
-export function * loadSchedule () {
+export function* loadSchedule() {
   yield call(getSchedule)
 }
 
@@ -11,7 +11,7 @@ export function * loadSchedule () {
 //  WATCHERS
 // -------------------------------------
 
-export function * watchInitApp () {
+export function* watchInitApp() {
   yield takeLatest(appActions.INIT_APP, loadSchedule)
 }
 
@@ -19,6 +19,4 @@ export function * watchInitApp () {
 //  ROOT
 // -------------------------------------
 
-export const scheduleSagas = [
-  fork(watchInitApp)
-]
+export const scheduleSagas = [fork(watchInitApp)]

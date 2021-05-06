@@ -35,38 +35,34 @@ const kicker = () => (
   </div>
 )
 
-const player = () => ([
-  (
-    <div className='row__group' key={0}>
-      <div className='row__group-head'>Passing</div>
-      <div className='row__group-body'>
-        <div className='table__cell metric'>YDS</div>
-        <div className='table__cell metric'>TD</div>
-        <div className='table__cell metric'>INT</div>
-      </div>
+const player = () => [
+  <div className='row__group' key={0}>
+    <div className='row__group-head'>Passing</div>
+    <div className='row__group-body'>
+      <div className='table__cell metric'>YDS</div>
+      <div className='table__cell metric'>TD</div>
+      <div className='table__cell metric'>INT</div>
     </div>
-  ), (
-    <div className='row__group' key={1}>
-      <div className='row__group-head'>Rushing</div>
-      <div className='row__group-body'>
-        <div className='table__cell metric'>CAR</div>
-        <div className='table__cell metric'>YDS</div>
-        <div className='table__cell metric'>TD</div>
-        <div className='table__cell metric'>FUM</div>
-      </div>
+  </div>,
+  <div className='row__group' key={1}>
+    <div className='row__group-head'>Rushing</div>
+    <div className='row__group-body'>
+      <div className='table__cell metric'>CAR</div>
+      <div className='table__cell metric'>YDS</div>
+      <div className='table__cell metric'>TD</div>
+      <div className='table__cell metric'>FUM</div>
     </div>
-  ), (
-    <div className='row__group' key={2}>
-      <div className='row__group-head'>Receiving</div>
-      <div className='row__group-body'>
-        <div className='table__cell metric'>TAR</div>
-        <div className='table__cell metric'>REC</div>
-        <div className='table__cell metric'>YDS</div>
-        <div className='table__cell metric'>TD</div>
-      </div>
+  </div>,
+  <div className='row__group' key={2}>
+    <div className='row__group-head'>Receiving</div>
+    <div className='row__group-body'>
+      <div className='table__cell metric'>TAR</div>
+      <div className='table__cell metric'>REC</div>
+      <div className='table__cell metric'>YDS</div>
+      <div className='table__cell metric'>TD</div>
     </div>
-  )
-])
+  </div>
+]
 
 export default class PlayerSelectedRowHeader extends React.Component {
   render = () => {

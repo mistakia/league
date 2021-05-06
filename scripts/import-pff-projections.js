@@ -24,7 +24,7 @@ const runOne = async (week) => {
     headers: {
       cookie: config.pff
     }
-  }).then(res => res.json())
+  }).then((res) => res.json())
 
   if (!result.player_projections || !result.player_projections.length) {
     throw new Error('missing projections')
@@ -91,7 +91,9 @@ const runOne = async (week) => {
   }
 
   log(`Could not locate ${missing.length} players`)
-  missing.forEach(m => log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`))
+  missing.forEach((m) =>
+    log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`)
+  )
 
   if (argv.dry) {
     log(`${inserts.length} projections`)

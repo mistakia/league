@@ -36,7 +36,7 @@ const calculatePoints = (stats, scoring) => {
   for (const stat in scoring) {
     const modifier = scoring[stat]
     const value = stats[stat]
-    points = points + (modifier * value)
+    points = points + modifier * value
   }
   return points
 }
@@ -83,24 +83,38 @@ const getBaselinePlayers = ({ stats, starters }) => {
   let baselineSF
 
   if (starters.RBWR) {
-    const rbwr = baselinePlayers.RB.concat(baselinePlayers.WR).sort((b, a) => b.points - a.points)
+    const rbwr = baselinePlayers.RB.concat(baselinePlayers.WR).sort(
+      (b, a) => b.points - a.points
+    )
     baselineRBWR = rbwr.slice(starters.RBWR)
   }
 
   if (starters.RBWRTE) {
     const rbwrte = baselineRBWR
-      ? baselineRBWR.concat(baselinePlayers.TE).sort((a, b) => b.points - a.points)
-      : baselinePlayers.RB.concat(baselinePlayers.WR, baselinePlayers.TE).sort((a, b) => b.points - a.points)
+      ? baselineRBWR
+          .concat(baselinePlayers.TE)
+          .sort((a, b) => b.points - a.points)
+      : baselinePlayers.RB.concat(baselinePlayers.WR, baselinePlayers.TE).sort(
+          (a, b) => b.points - a.points
+        )
 
     baselineRBWRTE = rbwrte.slice(starters.RBWRTE)
   }
 
   if (starters.SF) {
     const sf = baselineRBWR
-      ? baselineRBWRTE.concat(baselinePlayers.QB).sort((a, b) => b.points - a.points)
-      : (baselineRBWR
-        ? baselineRBWR.concat(baselinePlayers.QB).sort((a, b) => b.points - a.points)
-        : baselinePlayers.RB.concat(baselinePlayers.WR, baselinePlayers.TE, baselinePlayers.QB).sort((a, b) => b.points - a.points))
+      ? baselineRBWRTE
+          .concat(baselinePlayers.QB)
+          .sort((a, b) => b.points - a.points)
+      : baselineRBWR
+      ? baselineRBWR
+          .concat(baselinePlayers.QB)
+          .sort((a, b) => b.points - a.points)
+      : baselinePlayers.RB.concat(
+          baselinePlayers.WR,
+          baselinePlayers.TE,
+          baselinePlayers.QB
+        ).sort((a, b) => b.points - a.points)
 
     baselineSF = sf.slice(starters.SF)
   }
@@ -133,7 +147,17 @@ const calculateVOR = async ({ year, rookie }) => {
 
   // get player stats for year
   const rows = await db('offense')
-    .select('offense.*', 'player.pname', 'player.pos', 'game.wk', 'offense.player', 'offense.seas', 'draft_rankings.rank', 'draft_rankings.posrank', 'draft_rankings.avg')
+    .select(
+      'offense.*',
+      'player.pname',
+      'player.pos',
+      'game.wk',
+      'offense.player',
+      'offense.seas',
+      'draft_rankings.rank',
+      'draft_rankings.posrank',
+      'draft_rankings.avg'
+    )
     .where('offense.year', year)
     .andWhere('game.wk', '<=', LAST_WEEK_OF_SEASON)
     .andWhere('draft_rankings.seas', year)
@@ -152,7 +176,9 @@ const calculateVOR = async ({ year, rookie }) => {
   // group by position
   const statsByPosition = {}
   for (const position of POSITIONS) {
-    statsByPosition[position] = rows.filter(p => p.pos === position).sort((a, b) => b.points - a.points)
+    statsByPosition[position] = rows
+      .filter((p) => p.pos === position)
+      .sort((a, b) => b.points - a.points)
   }
 
   // calculate VOR by week
@@ -160,17 +186,26 @@ const calculateVOR = async ({ year, rookie }) => {
   for (let week = 1; week <= LAST_WEEK_OF_SEASON; week++) {
     const weekStatsByPosition = {}
     for (const position of POSITIONS) {
-      weekStatsByPosition[position] = statsByPosition[position].filter(p => p.wk === week)
-      log(`Top ${position} of week ${week} is ${weekStatsByPosition[position][0].pname} with ${weekStatsByPosition[position][0].points}pts`)
+      weekStatsByPosition[position] = statsByPosition[position].filter(
+        (p) => p.wk === week
+      )
+      log(
+        `Top ${position} of week ${week} is ${weekStatsByPosition[position][0].pname} with ${weekStatsByPosition[position][0].points}pts`
+      )
     }
 
     // get player VOR baselines
     const starters = getStartersByPosition()
-    const baselinePlayers = getBaselinePlayers({ stats: weekStatsByPosition, starters })
+    const baselinePlayers = getBaselinePlayers({
+      stats: weekStatsByPosition,
+      starters
+    })
 
     for (const position of POSITIONS) {
       const p = baselinePlayers[position]
-      log(`Baseline ${position} of week ${week} is ${p.pname} with ${p.points}pts`)
+      log(
+        `Baseline ${position} of week ${week} is ${p.pname} with ${p.points}pts`
+      )
     }
 
     // calculate individual VOR
@@ -210,7 +245,7 @@ const calculateVOR = async ({ year, rookie }) => {
   }
 
   // set player contract value
-  const leagueCAP = (TEAMS * TEAM_CAP) - (TEAMS * ROSTER_SIZE)
+  const leagueCAP = TEAMS * TEAM_CAP - TEAMS * ROSTER_SIZE
   const pricePerVOR = leagueCAP / totalVOR
   for (const player in players) {
     const vor = output[player].vor
@@ -239,7 +274,9 @@ if (!module.parent) {
       const year = argv.year
       const rookie = argv.rookie
       const results = await calculateVOR({ year, rookie })
-      const top200 = Object.values(results).sort((a, b) => b.vor - a.vor).slice(0, 200)
+      const top200 = Object.values(results)
+        .sort((a, b) => b.vor - a.vor)
+        .slice(0, 200)
       const p = new Table()
       const getColor = (pos) => {
         switch (pos) {
@@ -254,20 +291,27 @@ if (!module.parent) {
         }
       }
       for (const [index, player] of top200.entries()) {
-        p.addRow({
-          index: index + 1,
-          player: player.player,
-          vor: player.vor.toFixed(2),
-          points: player.points.toFixed(2),
-          rank: player.posrank,
-          value: `$${player.value}`,
-          pos: player.pos,
-          rookie: player.rookie ? 'rookie' : ''
-        }, {
-          color: getColor(player.pos)
-        })
+        p.addRow(
+          {
+            index: index + 1,
+            player: player.player,
+            vor: player.vor.toFixed(2),
+            points: player.points.toFixed(2),
+            rank: player.posrank,
+            value: `$${player.value}`,
+            pos: player.pos,
+            rookie: player.rookie ? 'rookie' : ''
+          },
+          {
+            color: getColor(player.pos)
+          }
+        )
       }
-      console.log(chalk.bold(`${year} ${rookie ? 'Rookie ' : ''}Player end-of-season values`))
+      console.log(
+        chalk.bold(
+          `${year} ${rookie ? 'Rookie ' : ''}Player end-of-season values`
+        )
+      )
       p.printTable()
     } catch (e) {
       log(e)

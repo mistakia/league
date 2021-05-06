@@ -53,7 +53,7 @@ export const League = new Record({
   tddate: null
 })
 
-export function createLeague ({
+export function createLeague({
   uid,
   commishid,
   name,

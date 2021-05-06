@@ -10,11 +10,7 @@ const knex = require('../db')
 
 const league = require('../db/seeds/league')
 const { user1, user2 } = require('./fixtures/token')
-const {
-  notLoggedIn,
-  missing,
-  invalid
-} = require('./utils')
+const { notLoggedIn, missing, invalid } = require('./utils')
 
 const expect = chai.expect
 chai.should()
@@ -34,7 +30,8 @@ describe('API /leagues - update', function () {
   describe('put', function () {
     it('update name', async () => {
       const value = 'TEST LEAGUE'
-      const res = await chai.request(server)
+      const res = await chai
+        .request(server)
         .put('/api/leagues/1')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -56,7 +53,8 @@ describe('API /leagues - update', function () {
 
     it('update sqb', async () => {
       const value = 2
-      const res = await chai.request(server)
+      const res = await chai
+        .request(server)
         .put('/api/leagues/1')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -78,7 +76,8 @@ describe('API /leagues - update', function () {
 
     it('update rec', async () => {
       const value = 1.0
-      const res = await chai.request(server)
+      const res = await chai
+        .request(server)
         .put('/api/leagues/1')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -106,7 +105,9 @@ describe('API /leagues - update', function () {
     })
 
     it('missing field', async () => {
-      const request = chai.request(server).put('/api/leagues/1')
+      const request = chai
+        .request(server)
+        .put('/api/leagues/1')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           value: 'test'
@@ -115,7 +116,9 @@ describe('API /leagues - update', function () {
     })
 
     it('missing value', async () => {
-      const request = chai.request(server).put('/api/leagues/1')
+      const request = chai
+        .request(server)
+        .put('/api/leagues/1')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           field: 'name'
@@ -124,7 +127,9 @@ describe('API /leagues - update', function () {
     })
 
     it('invalid field - does not exist', async () => {
-      const request = chai.request(server).put('/api/leagues/1')
+      const request = chai
+        .request(server)
+        .put('/api/leagues/1')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           field: 'name2',
@@ -134,7 +139,9 @@ describe('API /leagues - update', function () {
     })
 
     it('userId is not commishId', async () => {
-      const request = chai.request(server).put('/api/leagues/1')
+      const request = chai
+        .request(server)
+        .put('/api/leagues/1')
         .set('Authorization', `Bearer ${user2}`)
         .send({
           field: 'name',
@@ -144,7 +151,8 @@ describe('API /leagues - update', function () {
     })
 
     it('not an integer value', async () => {
-      const request = chai.request(server)
+      const request = chai
+        .request(server)
         .put('/api/leagues/1')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -156,7 +164,8 @@ describe('API /leagues - update', function () {
     })
 
     it('not a positive value', async () => {
-      const request = chai.request(server)
+      const request = chai
+        .request(server)
         .put('/api/leagues/1')
         .set('Authorization', `Bearer ${user1}`)
         .send({

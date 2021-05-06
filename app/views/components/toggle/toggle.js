@@ -18,8 +18,7 @@ export default class Toggle extends React.Component {
         value={selected}
         exclusive
         onChange={onChange}
-        size='small'
-      >
+        size='small'>
         {items}
       </ToggleButtonGroup>
     )

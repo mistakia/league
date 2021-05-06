@@ -47,17 +47,17 @@ const run = async () => {
   const timestamp = Math.round(Date.now() / 1000)
   const rows = await readCSV(filepath)
 
-  const playerIds = rows.map(p => p.player)
+  const playerIds = rows.map((p) => p.player)
 
   const currentPlayers = await db('player').whereIn('player', playerIds)
-  const currentPlayerIds = currentPlayers.map(p => p.player)
+  const currentPlayerIds = currentPlayers.map((p) => p.player)
 
   for (const player of currentPlayers) {
-    const row = rows.find(r => r.player === player.player)
+    const row = rows.find((r) => r.player === player.player)
     const formatted = formatCSV(row)
     const differences = diff(player, formatted)
 
-    const edits = differences.filter(d => d.kind === 'E')
+    const edits = differences.filter((d) => d.kind === 'E')
     if (edits.length) {
       for (const edit of edits) {
         const prop = edit.path[0]
@@ -70,19 +70,23 @@ const run = async () => {
           timestamp
         })
 
-        await db('player').update({
-          [prop]: edit.rhs
-        }).where({
-          player: player.player
-        })
+        await db('player')
+          .update({
+            [prop]: edit.rhs
+          })
+          .where({
+            player: player.player
+          })
       }
     }
   }
 
-  const missingPlayerIds = playerIds.filter(p => !currentPlayerIds.includes(p))
+  const missingPlayerIds = playerIds.filter(
+    (p) => !currentPlayerIds.includes(p)
+  )
 
   for (const missingPlayerId of missingPlayerIds) {
-    const row = rows.find(r => r.player === missingPlayerId)
+    const row = rows.find((r) => r.player === missingPlayerId)
     const formatted = formatCSV(row)
     await db('changelog').insert({
       type: constants.changes.PLAYER_NEW,

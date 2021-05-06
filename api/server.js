@@ -47,12 +47,19 @@ api.use(compression())
 api.use(morgan('api', 'combined'))
 api.use(bodyParser.json())
 
-api.use(favicon(path.join(__dirname, '../', 'dist', 'favicon.ico'), { maxAge: '604800' }))
+api.use(
+  favicon(path.join(__dirname, '../', 'dist', 'favicon.ico'), {
+    maxAge: '604800'
+  })
+)
 api.use((req, res, next) => {
   res.set('Access-Control-Allow-Origin', req.headers.origin || config.url)
   res.set('Access-Control-Allow-Credentials', 'true')
   res.set('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS, PUT')
-  res.set('Access-Control-Allow-Headers', 'Authorization, Origin, X-Requested-With, Content-Type, Accept')
+  res.set(
+    'Access-Control-Allow-Headers',
+    'Authorization, Origin, X-Requested-With, Content-Type, Accept'
+  )
   res.set('Cache-Control', 'no-cache, must-revalidate, proxy-revalidate')
   next()
 })
@@ -103,10 +110,14 @@ api.use('/api/teams', routes.teams)
 api.use('/api/leagues', routes.leagues)
 api.use('/api/settings', routes.settings)
 api.use('/index.js.map', (req, res) => {
-  res.sendFile(path.join(__dirname, '../', 'dist', 'index.js.map'), { cacheControl: false })
+  res.sendFile(path.join(__dirname, '../', 'dist', 'index.js.map'), {
+    cacheControl: false
+  })
 })
 api.use('/*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../', 'dist', 'index.html'), { cacheControl: false })
+  res.sendFile(path.join(__dirname, '../', 'dist', 'index.html'), {
+    cacheControl: false
+  })
 })
 
 const createServer = () => {

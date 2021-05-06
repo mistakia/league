@@ -12,12 +12,7 @@ const user = require('../db/seeds/user')
 const { constants } = require('../common')
 const { start } = constants.season
 const { user1, user2 } = require('./fixtures/token')
-const {
-  missing,
-  invalid,
-  error,
-  notLoggedIn
-} = require('./utils')
+const { missing, invalid, error, notLoggedIn } = require('./utils')
 
 chai.should()
 chai.use(chaiHTTP)
@@ -57,7 +52,8 @@ describe('API /leagues/teams - delete', function () {
 
       await knex('rosters').insert(roster)
 
-      const res = await chai.request(server)
+      const res = await chai
+        .request(server)
         .delete('/api/leagues/1/teams')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -91,7 +87,9 @@ describe('API /leagues/teams - delete', function () {
     })
 
     it('missing leagueId', async () => {
-      const request = chai.request(server).delete('/api/leagues/1/teams')
+      const request = chai
+        .request(server)
+        .delete('/api/leagues/1/teams')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1
@@ -101,7 +99,9 @@ describe('API /leagues/teams - delete', function () {
     })
 
     it('missing teamId', async () => {
-      const request = chai.request(server).delete('/api/leagues/1/teams')
+      const request = chai
+        .request(server)
+        .delete('/api/leagues/1/teams')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1
@@ -111,7 +111,9 @@ describe('API /leagues/teams - delete', function () {
     })
 
     it('invalid leagueId', async () => {
-      const request = chai.request(server).delete('/api/leagues/2/teams')
+      const request = chai
+        .request(server)
+        .delete('/api/leagues/2/teams')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1,
@@ -122,7 +124,9 @@ describe('API /leagues/teams - delete', function () {
     })
 
     it('user is not commish', async () => {
-      const request = chai.request(server).delete('/api/leagues/1/teams')
+      const request = chai
+        .request(server)
+        .delete('/api/leagues/1/teams')
         .set('Authorization', `Bearer ${user2}`)
         .send({
           teamId: 1,
@@ -146,7 +150,9 @@ describe('API /leagues/teams - delete', function () {
         tid: rows[0]
       })
 
-      const request = chai.request(server).delete('/api/leagues/1/teams')
+      const request = chai
+        .request(server)
+        .delete('/api/leagues/1/teams')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 2,

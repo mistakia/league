@@ -5,11 +5,8 @@ import { getFilteredMatchups } from '@core/matchups'
 
 import SchedulePage from './schedule'
 
-const mapStateToProps = createSelector(
-  getFilteredMatchups,
-  (matchups) => ({ matchups })
-)
+const mapStateToProps = createSelector(getFilteredMatchups, (matchups) => ({
+  matchups
+}))
 
-export default connect(
-  mapStateToProps
-)(SchedulePage)
+export default connect(mapStateToProps)(SchedulePage)

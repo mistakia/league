@@ -1,5 +1,3 @@
 import React from 'react'
 
-export default ({ source }) => (
-  <span className='source'>{source.name}</span>
-)
+export default ({ source }) => <span className='source'>{source.name}</span>

@@ -33,47 +33,55 @@ module.exports = merge.smart(baseConfig, {
   },
 
   module: {
-    rules: [{
-      test: /\.m?js$/,
-      exclude: /(node_modules|bower_components)/,
-      use: {
-        loader: 'babel-loader',
-        options: {
-          presets: ['@babel/preset-env']
+    rules: [
+      {
+        test: /\.m?js$/,
+        exclude: /(node_modules|bower_components)/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env']
+          }
         }
+      },
+      {
+        test: /\.(styl|css)$/,
+        use: [
+          {
+            loader: 'style-loader'
+          },
+          {
+            loader: 'css-loader'
+          },
+          {
+            loader: 'stylus-loader',
+            options: {
+              use: [nib()],
+              import: [
+                '~nib/lib/nib/index.styl',
+                path.resolve(__dirname, '../app/styles/variables.styl')
+              ]
+            }
+          }
+        ]
+      },
+      {
+        test: /\.(png|jpg)$/,
+        loader: 'url-loader?limit=8192'
       }
-    }, {
-      test: /\.(styl|css)$/,
-      use: [{
-        loader: 'style-loader'
-      }, {
-        loader: 'css-loader'
-      }, {
-        loader: 'stylus-loader',
-        options: {
-          use: [nib()],
-          import: [
-            '~nib/lib/nib/index.styl',
-            path.resolve(__dirname, '../app/styles/variables.styl')
-          ]
-        }
-      }]
-    }, {
-      test: /\.(png|jpg)$/,
-      loader: 'url-loader?limit=8192'
-    }]
+    ]
   },
 
   optimization: {
     minimizer: process.env.E2E_BUILD
       ? []
       : [
-        new TerserPlugin({
-          parallel: true,
-          sourceMap: true,
-          cache: false
-        })
-      ]
+          new TerserPlugin({
+            parallel: true,
+            sourceMap: true,
+            cache: false
+          })
+        ]
   },
 
   plugins: [

@@ -8,11 +8,7 @@ const knex = require('../db')
 const league = require('../db/seeds/league')
 const { constants } = require('../common')
 const { start } = constants.season
-const {
-  selectPlayer,
-  checkLastTransaction,
-  checkRoster
-} = require('./utils')
+const { selectPlayer, checkLastTransaction, checkRoster } = require('./utils')
 
 const run = require('../scripts/process-waivers-free-agency')
 
@@ -72,10 +68,10 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
 
       // check team waiver order
       const teams = await knex('teams').where({ lid: 1 })
-      const team1 = teams.find(t => t.uid === 1)
-      const team2 = teams.find(t => t.uid === 2)
-      const team3 = teams.find(t => t.uid === 3)
-      const team4 = teams.find(t => t.uid === 4)
+      const team1 = teams.find((t) => t.uid === 1)
+      const team2 = teams.find((t) => t.uid === 2)
+      const team3 = teams.find((t) => t.uid === 3)
+      const team4 = teams.find((t) => t.uid === 4)
       expect(team1.wo).to.equal(1)
       expect(team2.wo).to.equal(2)
       expect(team3.wo).to.equal(3)
@@ -215,7 +211,9 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
       expect(waivers[2].player).to.equal(player2.player)
 
       expect(waivers[3].succ).to.equal(0)
-      expect(waivers[3].reason).to.equal('exceeds available free agent auction budget')
+      expect(waivers[3].reason).to.equal(
+        'exceeds available free agent auction budget'
+      )
       expect(waivers[3].player).to.equal(player3.player)
 
       expect(waivers[4].succ).to.equal(1)
@@ -232,10 +230,10 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
 
       // check team waiver order
       const teams = await knex('teams').where({ lid: 1 })
-      const team1 = teams.find(t => t.uid === 1)
-      const team2 = teams.find(t => t.uid === 2)
-      const team3 = teams.find(t => t.uid === 3)
-      const team4 = teams.find(t => t.uid === 4)
+      const team1 = teams.find((t) => t.uid === 1)
+      const team2 = teams.find((t) => t.uid === 2)
+      const team3 = teams.find((t) => t.uid === 3)
+      const team4 = teams.find((t) => t.uid === 4)
       expect(team1.wo).to.equal(12)
       expect(team2.wo).to.equal(1)
       expect(team3.wo).to.equal(2)
@@ -267,7 +265,9 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
       })
 
       // verify transactions
-      const transactions = await knex('transactions').where('lid', leagueId).orderBy('uid')
+      const transactions = await knex('transactions')
+        .where('lid', leagueId)
+        .orderBy('uid')
       expect(transactions.length).to.equal(4)
       expect(transactions[0].player).to.equal(player1.player)
       expect(transactions[0].tid).to.equal(1)

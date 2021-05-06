@@ -35,8 +35,6 @@ export default class WaiversPage extends React.Component {
       </Container>
     )
 
-    return (
-      <PageLayout body={body} scroll />
-    )
+    return <PageLayout body={body} scroll />
   }
 }

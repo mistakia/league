@@ -15,7 +15,7 @@ import { constants } from '@common'
 import './scoreboard.styl'
 
 export default class ScoreboardPage extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
 
     this.state = {
@@ -54,18 +54,30 @@ export default class ScoreboardPage extends React.Component {
           </Grid>
           <Grid container item xs={12} spacing={0}>
             <Grid item xs={12} md={9}>
-              {matchup.type === constants.matchups.TOURNAMENT &&
+              {matchup.type === constants.matchups.TOURNAMENT && (
                 <ScoreboardTeams
                   onClick={this.handleSelect}
                   selected={this.state.tid}
-                />}
+                />
+              )}
               <div className='scoreboard__main'>
-                {matchup.type === constants.matchups.H2H &&
-                  <ScoreboardTeam tid={matchup.aid} type='away' showBench={this.state.show} />}
+                {matchup.type === constants.matchups.H2H && (
+                  <ScoreboardTeam
+                    tid={matchup.aid}
+                    type='away'
+                    showBench={this.state.show}
+                  />
+                )}
                 <ScoreboardSlots />
-                <ScoreboardTeam tid={this.state.tid} type='home' showBench={this.state.show} />
+                <ScoreboardTeam
+                  tid={this.state.tid}
+                  type='home'
+                  showBench={this.state.show}
+                />
               </div>
-              <div className='scoreboard__bench cursor' onClick={this.handleBenchToggle}>
+              <div
+                className='scoreboard__bench cursor'
+                onClick={this.handleBenchToggle}>
                 Show Bench
               </div>
             </Grid>
@@ -82,8 +94,6 @@ export default class ScoreboardPage extends React.Component {
       </Container>
     )
 
-    return (
-      <PageLayout body={body} scroll />
-    )
+    return <PageLayout body={body} scroll />
   }
 }

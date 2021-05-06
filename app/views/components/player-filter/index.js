@@ -7,7 +7,4 @@ const mapDispatchToProps = {
   filter: playerActions.filter
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(Filter)
+export default connect(null, mapDispatchToProps)(Filter)

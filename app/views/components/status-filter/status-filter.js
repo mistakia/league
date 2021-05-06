@@ -19,8 +19,6 @@ export default class StatusFilter extends React.Component {
       })
     }
 
-    return (
-      <PlayerFilter {...state} />
-    )
+    return <PlayerFilter {...state} />
   }
 }

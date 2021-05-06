@@ -19,8 +19,6 @@ export default class StatDownsFilter extends React.Component {
       })
     }
 
-    return (
-      <StatFilter {...state} />
-    )
+    return <StatFilter {...state} />
   }
 }

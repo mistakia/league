@@ -16,7 +16,7 @@ export const scoreboardActions = {
     }
   }),
 
-  getScoreboardPending: opts => ({
+  getScoreboardPending: (opts) => ({
     type: scoreboardActions.GET_SCOREBOARD_PENDING,
     payload: {
       opts

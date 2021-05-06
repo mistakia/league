@@ -9,14 +9,12 @@ export default class Matchup extends React.Component {
   render = () => {
     const { matchup, teams } = this.props
 
-    const home = teams.find(t => t.uid === matchup.hid)
-    const away = teams.find(t => t.uid === matchup.aid)
+    const home = teams.find((t) => t.uid === matchup.hid)
+    const away = teams.find((t) => t.uid === matchup.aid)
 
     return (
       <div className='matchup'>
-        <div className='matchup__week'>
-          Week {matchup.week}
-        </div>
+        <div className='matchup__week'>Week {matchup.week}</div>
         <div className='matchup__body'>
           <div className='matchup__away'>
             <div
@@ -35,9 +33,7 @@ export default class Matchup extends React.Component {
             <TeamName tid={matchup.aid} />
           </div>
           <div className='matchup__divider'>
-            <div className='matchup__versus'>
-              @
-            </div>
+            <div className='matchup__versus'>@</div>
           </div>
           <div className='matchup__home'>
             <div

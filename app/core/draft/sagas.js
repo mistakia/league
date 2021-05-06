@@ -7,12 +7,12 @@ import { fetchDraft, postDraft } from '@core/api'
 import { getDraft, getNextPick } from './selectors'
 import { getCurrentLeague } from '@core/leagues'
 
-export function * loadDraft () {
+export function* loadDraft() {
   const { leagueId } = yield select(getApp)
   yield call(fetchDraft, { leagueId })
 }
 
-export function * draftPlayer () {
+export function* draftPlayer() {
   const { selected } = yield select(getDraft)
   const { teamId, leagueId } = yield select(getApp)
   const { uid } = yield select(getNextPick)
@@ -20,7 +20,7 @@ export function * draftPlayer () {
   yield call(postDraft, params)
 }
 
-export function * init () {
+export function* init() {
   const league = yield select(getCurrentLeague)
   if (league.ddate) {
     const start = moment(league.ddate, 'X')
@@ -36,15 +36,15 @@ export function * init () {
 //  WATCHERS
 // -------------------------------------
 
-export function * watchLoadDraft () {
+export function* watchLoadDraft() {
   yield takeLatest(draftActions.LOAD_DRAFT, loadDraft)
 }
 
-export function * watchDraftPlayer () {
+export function* watchDraftPlayer() {
   yield takeLatest(draftActions.DRAFT_PLAYER, draftPlayer)
 }
 
-export function * watchAuthFulfilled () {
+export function* watchAuthFulfilled() {
   yield takeLatest(appActions.AUTH_FULFILLED, init)
 }
 

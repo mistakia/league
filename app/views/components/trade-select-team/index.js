@@ -22,7 +22,4 @@ const mapDispatchToProps = {
   select: tradeActions.selectTeam
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(TradeSelectTeam)
+export default connect(mapStateToProps, mapDispatchToProps)(TradeSelectTeam)

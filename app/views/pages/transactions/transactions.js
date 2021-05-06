@@ -25,7 +25,11 @@ export default class TransactionsPage extends React.Component {
     }
 
     const isRowLoaded = ({ index }) => !hasMore || index < transactions.size
-    const loadMoreRows = isPending ? () => {} : () => { loadNext() }
+    const loadMoreRows = isPending
+      ? () => {}
+      : () => {
+          loadNext()
+        }
     const rowCount = hasMore ? transactions.size + 1 : transactions.size
 
     const body = (
@@ -38,8 +42,7 @@ export default class TransactionsPage extends React.Component {
           <InfiniteLoader
             isRowLoaded={isRowLoaded}
             loadMoreRows={loadMoreRows}
-            rowCount={rowCount}
-          >
+            rowCount={rowCount}>
             {({ onRowsRendered, registerChild }) => (
               <AutoSizer>
                 {({ height, width }) => (
@@ -60,8 +63,6 @@ export default class TransactionsPage extends React.Component {
       </Container>
     )
 
-    return (
-      <PageLayout body={body} />
-    )
+    return <PageLayout body={body} />
   }
 }

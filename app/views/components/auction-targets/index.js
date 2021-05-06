@@ -1,9 +1,16 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getAuction, getAuctionTargetPlayers, auctionActions } from '@core/auction'
+import {
+  getAuction,
+  getAuctionTargetPlayers,
+  auctionActions
+} from '@core/auction'
 import { getApp } from '@core/app'
-import { getCurrentPlayers, getRosteredPlayerIdsForCurrentLeague } from '@core/rosters'
+import {
+  getCurrentPlayers,
+  getRosteredPlayerIdsForCurrentLeague
+} from '@core/rosters'
 
 import AuctionTargets from './auction-targets'
 
@@ -31,7 +38,4 @@ const mapDispatchToProps = {
   toggleHideRostered: auctionActions.toggleHideRostered
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(AuctionTargets)
+export default connect(mapStateToProps, mapDispatchToProps)(AuctionTargets)

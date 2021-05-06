@@ -5,7 +5,7 @@ import TeamName from '@components/team-name'
 
 import './waiver-report-item.styl'
 
-function AlternateClaims ({ waivers }) {
+function AlternateClaims({ waivers }) {
   if (!waivers.length) {
     return null
   }
@@ -18,9 +18,7 @@ function AlternateClaims ({ waivers }) {
         <div className='table__cell'>
           <TeamName tid={item.tid} />
         </div>
-        <div className='table__cell reason'>
-          {item.reason}
-        </div>
+        <div className='table__cell reason'>{item.reason}</div>
       </div>
     )
   }
@@ -45,7 +43,9 @@ export default class WaiverReportItem extends React.Component {
       <div className='waiver__report-item'>
         <div className='waiver__report-item-head'>
           <TeamName tid={waiver.tid} />
-          <div className='waiver__report-item-winning-bid metric'>${waiver.bid}</div>
+          <div className='waiver__report-item-winning-bid metric'>
+            ${waiver.bid}
+          </div>
         </div>
         <PlayerName playerId={waiver.player} hideActions />
         <AlternateClaims waivers={waiver.waivers} />

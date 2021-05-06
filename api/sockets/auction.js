@@ -6,7 +6,7 @@ import { getRoster } from '../../utils'
 import debug from 'debug'
 
 export default class Auction {
-  constructor ({ wss, lid }) {
+  constructor({ wss, lid }) {
     this._wss = wss
     this._lid = lid
     this._league = null
@@ -20,11 +20,11 @@ export default class Auction {
     this.logger = debug(`auction:league:${lid}`)
   }
 
-  has (tid) {
+  has(tid) {
     return this._tids.includes(tid)
   }
 
-  get nominatingTeamId () {
+  get nominatingTeamId() {
     const lastTran = this._transactions[0]
     if (!lastTran) {
       return this._tids[0]
@@ -32,8 +32,10 @@ export default class Auction {
 
     const lastNomination = this._transactions.find((tran, index) => {
       const prev = this._transactions[index + 1]
-      return tran.type === constants.transactions.AUCTION_BID &&
+      return (
+        tran.type === constants.transactions.AUCTION_BID &&
         (!prev || prev.type === constants.transactions.AUCTION_PROCESSED)
+      )
     })
 
     this.logger(`last nominating teamId: ${lastNomination.tid}`)
@@ -45,7 +47,7 @@ export default class Auction {
       const idx = this._tids.indexOf(lastNomination.tid)
       const list = this._tids.slice(idx + 1).concat(this._tids.slice(0, idx))
       for (const tid of list) {
-        const team = this._teams.find(t => t.uid === tid)
+        const team = this._teams.find((t) => t.uid === tid)
         if (team.availableSpace) {
           return team.uid
         }
@@ -55,7 +57,7 @@ export default class Auction {
     return null
   }
 
-  join ({ ws, tid, userId, onclose }) {
+  join({ ws, tid, userId, onclose }) {
     this.logger(`userId ${userId} joined`)
     ws.on('message', (msg) => {
       const message = JSON.parse(msg)
@@ -95,7 +97,7 @@ export default class Auction {
       this.broadcast({
         type: 'AUCTION_CONNECTED',
         payload: {
-          connected: Object.keys(this._connected).map(k => parseInt(k, 10))
+          connected: Object.keys(this._connected).map((k) => parseInt(k, 10))
         }
       })
     })
@@ -115,7 +117,7 @@ export default class Auction {
         paused: this._paused,
         tids: this._tids,
         teams: this._teams,
-        connected: Object.keys(this._connected).map(k => parseInt(k, 10)),
+        connected: Object.keys(this._connected).map((k) => parseInt(k, 10)),
         bidTimer: config.bidTimer,
         nominationTimer: config.nominationTimer,
         nominatingTeamId,
@@ -124,7 +126,7 @@ export default class Auction {
     })
   }
 
-  reply (userId, message) {
+  reply(userId, message) {
     const event = {
       type: 'AUCTION_ERROR',
       payload: { error: message }
@@ -139,7 +141,7 @@ export default class Auction {
     })
   }
 
-  broadcast (message) {
+  broadcast(message) {
     this._wss.clients.forEach((c) => {
       if (c.leagueId === this._lid) {
         if (c && c.readyState === WebSocket.OPEN) {
@@ -149,7 +151,7 @@ export default class Auction {
     })
   }
 
-  async sold () {
+  async sold() {
     this._locked = true
     const bid = this._transactions[0]
     const { userid, tid, player, value, year } = bid
@@ -176,7 +178,7 @@ export default class Auction {
       return
     }
 
-    if ((r.availableCap - value) < 0) {
+    if (r.availableCap - value < 0) {
       this._startBidTimer()
       this.logger('no available cap space')
       this.reply(userid, 'exceeds salary limit')
@@ -184,13 +186,12 @@ export default class Auction {
     }
 
     try {
-      await db('rosters_players')
-        .insert({
-          rid: r.uid,
-          slot: constants.slots.BENCH,
-          pos: playerInfo.pos,
-          player
-        })
+      await db('rosters_players').insert({
+        rid: r.uid,
+        slot: constants.slots.BENCH,
+        pos: playerInfo.pos,
+        player
+      })
     } catch (err) {
       this.logger(err)
       this._startBidTimer()
@@ -199,9 +200,9 @@ export default class Auction {
       return
     }
 
-    const team = this._teams.find(t => t.uid === tid)
+    const team = this._teams.find((t) => t.uid === tid)
     team.availableSpace = team.availableSpace - 1
-    const newCap = team.cap = r.availableCap - value
+    const newCap = (team.cap = r.availableCap - value)
     try {
       await db('teams').where({ uid: tid }).update('cap', newCap)
     } catch (err) {
@@ -236,19 +237,21 @@ export default class Auction {
     this._startNominationTimer()
   }
 
-  async bid (message) {
+  async bid(message) {
     if (this._locked) return
     this._locked = true
 
     const { userid, tid, player, value } = message
     const current = this._transactions[0]
 
-    const team = this._teams.find(t => t.uid === tid)
+    const team = this._teams.find((t) => t.uid === tid)
     const newCap = team.cap - value
     if (newCap < 0) {
       this.reply(userid, 'exceeds salary limit')
       this._startBidTimer()
-      this.logger(`team ${tid} does not have enough available cap ${team.cap} for a bid of ${value}`)
+      this.logger(
+        `team ${tid} does not have enough available cap ${team.cap} for a bid of ${value}`
+      )
       this._locked = false
       return
     }
@@ -256,7 +259,9 @@ export default class Auction {
     if (!team.availableSpace) {
       this.reply(userid, 'exceeds roster limits')
       this._startBidTimer()
-      this.logger(`team ${tid} does not have enough available space ${team.availableSpace}`)
+      this.logger(
+        `team ${tid} does not have enough available space ${team.availableSpace}`
+      )
       this._locked = false
       return
     }
@@ -264,7 +269,9 @@ export default class Auction {
     this.logger(`received bid of ${value} for ${player} from teamId ${tid}`)
 
     if (current.player !== player) {
-      this.logger(`received bid for player ${player} is not the current player of ${current.player}`)
+      this.logger(
+        `received bid for player ${player} is not the current player of ${current.player}`
+      )
       this.reply(userid, 'invalid bid')
       this._startBidTimer()
       this._locked = false
@@ -272,7 +279,9 @@ export default class Auction {
     }
 
     if (value <= current.value) {
-      this.logger(`received bid of ${value} is not greater than current value of ${current.value}`)
+      this.logger(
+        `received bid of ${value} is not greater than current value of ${current.value}`
+      )
       this.reply(userid, 'invalid bid')
       this._startBidTimer()
       this._locked = false
@@ -299,7 +308,7 @@ export default class Auction {
     this._locked = false
   }
 
-  async nominate (message = {}, { userId, tid }) {
+  async nominate(message = {}, { userId, tid }) {
     const nominatingTeamId = this.nominatingTeamId
     let { userid, value = 0 } = message
     const { player } = message
@@ -340,7 +349,9 @@ export default class Auction {
     const r = new Roster({ roster, league: this._league })
     const hasSlot = r.hasOpenBenchSlot(playerInfo.pos)
     if (!hasSlot) {
-      this.logger(`no open slots available for ${player} on teamId ${nominatingTeamId}`)
+      this.logger(
+        `no open slots available for ${player} on teamId ${nominatingTeamId}`
+      )
       this.reply(userid, 'exceeds roster limits')
       return
     }
@@ -385,11 +396,11 @@ export default class Auction {
     this._startBidTimer()
   }
 
-  async setup () {
+  async setup() {
     const teams = await db('teams').where('lid', this._lid)
     this._teams = teams.sort((a, b) => a.do - b.do)
 
-    this._tids = this._teams.map(t => t.uid)
+    this._tids = this._teams.map((t) => t.uid)
     this._transactions = await db('transactions')
       .whereIn('tid', this._tids)
       .where('year', constants.season.year)
@@ -411,7 +422,7 @@ export default class Auction {
     }
   }
 
-  start () {
+  start() {
     if (!this._paused) return
     this.logger('starting auction')
     this._paused = false
@@ -427,7 +438,7 @@ export default class Auction {
     }
   }
 
-  pause () {
+  pause() {
     if (this._paused) return
     this.logger('pausing auction')
     this._clearTimers()
@@ -435,12 +446,12 @@ export default class Auction {
     this.broadcast({ type: 'AUCTION_PAUSED' })
   }
 
-  _clearTimers () {
+  _clearTimers() {
     this._clearNominationTimer()
     this._clearBidTimer()
   }
 
-  _startNominationTimer () {
+  _startNominationTimer() {
     this._nominationTimerExpired = false
     this._clearNominationTimer()
     const self = this
@@ -460,16 +471,16 @@ export default class Auction {
     }, config.nominationTimer)
   }
 
-  _clearNominationTimer () {
+  _clearNominationTimer() {
     if (this._nominationTimer) clearTimeout(this._nominationTimer)
   }
 
-  _startBidTimer () {
+  _startBidTimer() {
     this._clearBidTimer()
     this._bidTimer = setTimeout(() => this.sold(), config.bidTimer)
   }
 
-  _clearBidTimer () {
+  _clearBidTimer() {
     if (this._bidTimer) clearTimeout(this._bidTimer)
   }
 }

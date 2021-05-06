@@ -36,7 +36,14 @@ export default class DashboardLeaguePositionalValue extends React.Component {
       xAxis: {
         categories: teamNames
       },
-      colors: ['#ff3f3f', '#3f9f3f', '#ffbb3f', '#3f3fff', '#9f9f9f', '#3f3f3f'],
+      colors: [
+        '#ff3f3f',
+        '#3f9f3f',
+        '#ffbb3f',
+        '#3f3fff',
+        '#9f9f9f',
+        '#3f3f3f'
+      ],
       yAxis: {
         min: 0,
         title: {
@@ -60,10 +67,7 @@ export default class DashboardLeaguePositionalValue extends React.Component {
     return (
       <div className='dashboard__section-side'>
         <div className='dashboard__section-side-body'>
-          <HighchartsReact
-            highcharts={Highcharts}
-            options={options}
-          />
+          <HighchartsReact highcharts={Highcharts} options={options} />
         </div>
       </div>
     )

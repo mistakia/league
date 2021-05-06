@@ -6,7 +6,7 @@ import Button from '@components/button'
 import './editable-teams.styl'
 
 export default class EditableTeams extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
 
     this.state = { open: false }
@@ -31,24 +31,22 @@ export default class EditableTeams extends React.Component {
 
     const teamItems = []
     for (const [index, team] of sorted.entries()) {
-      teamItems.push(
-        <SettingsTeamsTeam key={index} tid={team.uid} />
-      )
+      teamItems.push(<SettingsTeamsTeam key={index} tid={team.uid} />)
     }
 
     let addTeam
     if (teams.size < league.nteams) {
       addTeam = (
-        <Button onClick={this.handleAdd} text>Add Team</Button>
+        <Button onClick={this.handleAdd} text>
+          Add Team
+        </Button>
       )
     }
 
     return (
       <div className='settings__section'>
         <div className='settings__section-header'>Teams</div>
-        <div>
-          {teamItems}
-        </div>
+        <div>{teamItems}</div>
         <div className='settings__section-row editable__teams-action'>
           {addTeam}
         </div>

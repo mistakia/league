@@ -15,7 +15,7 @@ import Button from '@components/button'
 import './add-player-dialog.styl'
 
 export default class AddPlayerDialog extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
 
     this.state = {
@@ -27,7 +27,7 @@ export default class AddPlayerDialog extends React.Component {
 
   getAvailableCap = () => {
     const { rosters, league, team } = this.props
-    const rosterData = rosters.find(r => r.tid === team.uid)
+    const rosterData = rosters.find((r) => r.tid === team.uid)
     const roster = new Roster({ roster: rosterData.toJS(), league })
     return roster.availableCap
   }
@@ -67,7 +67,7 @@ export default class AddPlayerDialog extends React.Component {
   render = () => {
     const { players } = this.props
 
-    const sorted = players.sortBy(player => player.name)
+    const sorted = players.sortBy((player) => player.name)
     const menuItems = [<option key='default' value='' />]
     for (const [index, player] of sorted.entries()) {
       menuItems.push(
@@ -88,8 +88,7 @@ export default class AddPlayerDialog extends React.Component {
                 native
                 value={this.state.player}
                 onChange={this.handleChangePlayer}
-                label='Player'
-              >
+                label='Player'>
                 {menuItems}
               </Select>
             </FormControl>
@@ -100,7 +99,9 @@ export default class AddPlayerDialog extends React.Component {
               value={this.state.value}
               onChange={this.handleChangeValue}
               InputProps={{
-                startAdornment: <InputAdornment position='start'>$</InputAdornment>
+                startAdornment: (
+                  <InputAdornment position='start'>$</InputAdornment>
+                )
               }}
               size='small'
               variant='outlined'

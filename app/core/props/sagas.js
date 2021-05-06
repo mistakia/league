@@ -3,7 +3,7 @@ import { call, takeLatest, fork } from 'redux-saga/effects'
 import { fetchProps } from '@core/api'
 import { propActions } from './actions'
 
-export function * load () {
+export function* load() {
   yield call(fetchProps)
 }
 
@@ -11,7 +11,7 @@ export function * load () {
 //  WATCHERS
 // -------------------------------------
 
-export function * watchLoadProps () {
+export function* watchLoadProps() {
   yield takeLatest(propActions.LOAD_PROPS, load)
 }
 
@@ -19,6 +19,4 @@ export function * watchLoadProps () {
 //  ROOT
 // -------------------------------------
 
-export const propSagas = [
-  fork(watchLoadProps)
-]
+export const propSagas = [fork(watchLoadProps)]

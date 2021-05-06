@@ -25,10 +25,14 @@ export default class Confirmation extends React.Component {
     if (this.props.info.id) {
       const getComponent = (id) => {
         switch (id) {
-          case 'WAIVER': return WaiverConfirmation
-          case 'POACH': return PoachConfirmation
-          case 'EDIT_TEAM_ADD_PLAYER': return AddPlayerDialog
-          case 'ADD_FREE_AGENT': return AddFreeAgentDialog
+          case 'WAIVER':
+            return WaiverConfirmation
+          case 'POACH':
+            return PoachConfirmation
+          case 'EDIT_TEAM_ADD_PLAYER':
+            return AddPlayerDialog
+          case 'ADD_FREE_AGENT':
+            return AddFreeAgentDialog
         }
       }
       const ConfirmationComponent = getComponent(this.props.info.id)
@@ -46,9 +50,7 @@ export default class Confirmation extends React.Component {
       <Dialog open={!!this.props.info.title} onClose={this.handleClose}>
         <DialogTitle>{this.props.info.title}</DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            {this.props.info.description}
-          </DialogContentText>
+          <DialogContentText>{this.props.info.description}</DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={this.handleClose} text>

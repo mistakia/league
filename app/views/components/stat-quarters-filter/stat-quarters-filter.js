@@ -19,8 +19,6 @@ export default class StatQuartersFilter extends React.Component {
       })
     }
 
-    return (
-      <StatFilter {...state} />
-    )
+    return <StatFilter {...state} />
   }
 }

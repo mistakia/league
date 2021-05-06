@@ -2,12 +2,12 @@ import React from 'react'
 import Snackbar from '@material-ui/core/Snackbar'
 import MuiAlert from '@material-ui/lab/Alert'
 
-function Alert (props) {
+function Alert(props) {
   return <MuiAlert elevation={6} variant='filled' {...props} />
 }
 
 export default class Notification extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
 
     const { key } = props.info
@@ -18,7 +18,7 @@ export default class Notification extends React.Component {
     }
   }
 
-  componentDidUpdate (prevProps) {
+  componentDidUpdate(prevProps) {
     if (prevProps.info.key !== this.props.info.key) {
       this.setState({ list: [...this.state.list, this.props.info.toJS()] })
     }
@@ -56,12 +56,12 @@ export default class Notification extends React.Component {
         autoHideDuration={6000}
         onClose={this.handleClose}
         onExited={this.handleExited}
-        message={(info && !info.severity) ? info.message : undefined}
-      >
-        {(info && info.severity) &&
+        message={info && !info.severity ? info.message : undefined}>
+        {info && info.severity && (
           <Alert severity={info ? info.severity : undefined}>
             {info ? info.message : undefined}
-          </Alert>}
+          </Alert>
+        )}
       </Snackbar>
     )
   }

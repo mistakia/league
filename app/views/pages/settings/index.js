@@ -17,6 +17,4 @@ const mapStateToProps = createSelector(
   })
 )
 
-export default connect(
-  mapStateToProps
-)(SettingsPage)
+export default connect(mapStateToProps)(SettingsPage)

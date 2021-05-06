@@ -41,7 +41,6 @@ module.exports = merge.smart(baseConfig, {
   },
 
   plugins: [
-
     new webpack.HotModuleReplacementPlugin({
       multiStep: true
     }),
@@ -96,7 +95,7 @@ module.exports = merge.smart(baseConfig, {
       verbose: true,
       disableDotRule: false
     },
-    before () {
+    before() {
       if (process.env.START_HOT) {
         console.log('Starting API...')
         const api = spawn('npm', ['run', 'start:api'], {
@@ -104,8 +103,8 @@ module.exports = merge.smart(baseConfig, {
           env: process.env,
           stdio: 'inherit'
         })
-          .on('close', code => process.exit(code))
-          .on('error', spawnError => console.error(spawnError))
+          .on('close', (code) => process.exit(code))
+          .on('error', (spawnError) => console.error(spawnError))
 
         process.on('exit', () => api.kill())
       }

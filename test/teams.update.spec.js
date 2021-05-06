@@ -11,11 +11,7 @@ const knex = require('../db')
 const league = require('../db/seeds/league')
 // const { constants } = require('../common')
 const { user1, user2 } = require('./fixtures/token')
-const {
-  notLoggedIn,
-  missing,
-  invalid
-} = require('./utils')
+const { notLoggedIn, missing, invalid } = require('./utils')
 
 chai.should()
 chai.use(chaiHTTP)
@@ -35,7 +31,8 @@ describe('API /teams - update', function () {
   describe('put', function () {
     it('teamtext', async () => {
       const value = 0
-      const res = await chai.request(server)
+      const res = await chai
+        .request(server)
         .put('/api/teams/1')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -49,7 +46,9 @@ describe('API /teams - update', function () {
 
       // verify database change
       res.body.value.should.equal(value)
-      const teams = await knex('users_teams').where({ tid: 1, userid: 1 }).limit(1)
+      const teams = await knex('users_teams')
+        .where({ tid: 1, userid: 1 })
+        .limit(1)
       const team = teams[0]
 
       expect(team.teamtext).to.equal(value)
@@ -57,7 +56,8 @@ describe('API /teams - update', function () {
 
     it('teamvoice', async () => {
       const value = 0
-      const res = await chai.request(server)
+      const res = await chai
+        .request(server)
         .put('/api/teams/1')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -71,7 +71,9 @@ describe('API /teams - update', function () {
 
       // verify database change
       res.body.value.should.equal(value)
-      const teams = await knex('users_teams').where({ tid: 1, userid: 1 }).limit(1)
+      const teams = await knex('users_teams')
+        .where({ tid: 1, userid: 1 })
+        .limit(1)
       const team = teams[0]
 
       expect(team.teamvoice).to.equal(value)
@@ -79,7 +81,8 @@ describe('API /teams - update', function () {
 
     it('name', async () => {
       const value = 'TEST TEAM'
-      const res = await chai.request(server)
+      const res = await chai
+        .request(server)
         .put('/api/teams/1')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -101,7 +104,8 @@ describe('API /teams - update', function () {
 
     it('name - commish', async () => {
       const value = 'TEST TEAM 2'
-      const res = await chai.request(server)
+      const res = await chai
+        .request(server)
         .put('/api/teams/2')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -123,7 +127,8 @@ describe('API /teams - update', function () {
 
     it('image', async () => {
       const value = 'https://example.com/image.png'
-      const res = await chai.request(server)
+      const res = await chai
+        .request(server)
         .put('/api/teams/1')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -145,7 +150,8 @@ describe('API /teams - update', function () {
 
     it('abbrv', async () => {
       const value = 'TT'
-      const res = await chai.request(server)
+      const res = await chai
+        .request(server)
         .put('/api/teams/1')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -181,7 +187,9 @@ describe('API /teams - update', function () {
     })
 
     it('missing value', async () => {
-      const request = chai.request(server).put('/api/teams/1')
+      const request = chai
+        .request(server)
+        .put('/api/teams/1')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           field: 'name'
@@ -190,7 +198,9 @@ describe('API /teams - update', function () {
     })
 
     it('missing field', async () => {
-      const request = chai.request(server).put('/api/teams/1')
+      const request = chai
+        .request(server)
+        .put('/api/teams/1')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           value: 'test'
@@ -199,7 +209,9 @@ describe('API /teams - update', function () {
     })
 
     it('invalid field - does not exist', async () => {
-      const request = chai.request(server).put('/api/teams/1')
+      const request = chai
+        .request(server)
+        .put('/api/teams/1')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           field: 'name1',
@@ -209,7 +221,9 @@ describe('API /teams - update', function () {
     })
 
     it('teamId does not belong to userId', async () => {
-      const request = chai.request(server).put('/api/teams/1')
+      const request = chai
+        .request(server)
+        .put('/api/teams/1')
         .set('Authorization', `Bearer ${user2}`)
         .send({
           field: 'name',

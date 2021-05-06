@@ -7,9 +7,9 @@ import TableHead from '@material-ui/core/TableHead'
 import TableRow from '@material-ui/core/TableRow'
 import Paper from '@material-ui/core/Paper'
 
-function getPct (type, analysis) {
+function getPct(type, analysis) {
   const delta = analysis.after[type] - analysis.before[type]
-  return (((delta / analysis.before[type]) * 100) || 0).toFixed(1)
+  return ((delta / analysis.before[type]) * 100 || 0).toFixed(1)
 }
 
 export default class TradeTeamSummary extends React.Component {
@@ -79,7 +79,7 @@ export default class TradeTeamSummary extends React.Component {
                 Team Salary
               </TableCell>
               <TableCell align='right'>
-                {(analysis.after.salary || 0)} ({pctSalary}%)
+                {analysis.after.salary || 0} ({pctSalary}%)
               </TableCell>
             </TableRow>
             <TableRow>

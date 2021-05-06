@@ -10,11 +10,13 @@ export default class SettingsTeamsTeamPlayer extends React.Component {
   handleRemove = () => {
     this.props.showConfirmation({
       title: 'Remove player',
-      description: 'Player will be removed from roster and any related transactions',
-      onConfirm: () => this.props.remove({
-        player: this.props.playerId,
-        teamId: this.props.teamId
-      })
+      description:
+        'Player will be removed from roster and any related transactions',
+      onConfirm: () =>
+        this.props.remove({
+          player: this.props.playerId,
+          teamId: this.props.teamId
+        })
     })
   }
 
@@ -22,7 +24,9 @@ export default class SettingsTeamsTeamPlayer extends React.Component {
     // TODO edit value
     return (
       <div className='settings__teams-team-player'>
-        <div className='settings__teams-team-player-value'>${this.props.value}</div>
+        <div className='settings__teams-team-player-value'>
+          ${this.props.value}
+        </div>
         <PlayerName playerId={this.props.playerId} />
         <div>
           <IconButton onClick={this.handleRemove}>

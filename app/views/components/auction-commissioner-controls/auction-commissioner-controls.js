@@ -8,7 +8,7 @@ import Icon from '@components/icon'
 import './auction-commissioner-controls.styl'
 
 export default class AuctionCommissionerControls extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
 
     this.state = { open: false }
@@ -30,9 +30,7 @@ export default class AuctionCommissionerControls extends React.Component {
     this.props.resume()
   }
 
-  handleRewind = () => {
-
-  }
+  handleRewind = () => {}
 
   render = () => {
     const { open } = this.state
@@ -65,8 +63,7 @@ export default class AuctionCommissionerControls extends React.Component {
           icon={<SpeedDialIcon />}
           onClose={this.handleClose}
           onOpen={this.handleOpen}
-          open={open}
-        >
+          open={open}>
           {action}
           <SpeedDialAction
             icon={<Icon name='previous' />}

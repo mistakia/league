@@ -10,6 +10,4 @@ const mapStateToProps = createSelector(
   (stats) => ({ stats })
 )
 
-export default connect(
-  mapStateToProps
-)(SelectedPlayerSeasonStats)
+export default connect(mapStateToProps)(SelectedPlayerSeasonStats)

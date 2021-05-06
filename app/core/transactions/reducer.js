@@ -15,7 +15,7 @@ const initialState = new Record({
   teams: new List()
 })
 
-export function transactionsReducer (state = initialState(), { payload, type }) {
+export function transactionsReducer(state = initialState(), { payload, type }) {
   switch (type) {
     case transactionsActions.LOAD_TRANSACTIONS:
       return state.merge({ items: new List(), hasMore: true })
@@ -50,20 +50,31 @@ export function transactionsReducer (state = initialState(), { payload, type }) 
 
     case teamActions.GET_TEAMS_FULFILLED:
       return state.merge({
-        teams: new List(payload.data.teams.map(t => t.uid))
+        teams: new List(payload.data.teams.map((t) => t.uid))
       })
 
     case teamActions.DELETE_TEAMS_FULFILLED:
-      return state.updateIn(['release'], list => list.filter(t => t.tid !== payload.opts.teamId))
+      return state.updateIn(['release'], (list) =>
+        list.filter((t) => t.tid !== payload.opts.teamId)
+      )
 
     case teamActions.POST_ROSTERS_FULFILLED:
-      return state.updateIn(['release'], list => list.push(payload.data.transaction))
+      return state.updateIn(['release'], (list) =>
+        list.push(payload.data.transaction)
+      )
 
     case teamActions.DELETE_ROSTERS_FULFILLED:
-      return state.updateIn(['release'], list => list.filter(t => t.tid !== payload.opts.teamId && t.player !== payload.opts.player))
+      return state.updateIn(['release'], (list) =>
+        list.filter(
+          (t) =>
+            t.tid !== payload.opts.teamId && t.player !== payload.opts.player
+        )
+      )
 
     case rosterActions.ROSTER_TRANSACTIONS:
-      return state.updateIn(['release'], list => list.push(...payload.data.map(p => p.transaction)))
+      return state.updateIn(['release'], (list) =>
+        list.push(...payload.data.map((p) => p.transaction))
+      )
 
     default:
       return state

@@ -5,11 +5,6 @@ import { getGameByTeam } from '@core/schedule'
 
 import PlayerRowOpponent from './player-row-opponent'
 
-const mapStateToProps = createSelector(
-  getGameByTeam,
-  (game) => ({ game })
-)
+const mapStateToProps = createSelector(getGameByTeam, (game) => ({ game }))
 
-export default connect(
-  mapStateToProps
-)(PlayerRowOpponent)
+export default connect(mapStateToProps)(PlayerRowOpponent)

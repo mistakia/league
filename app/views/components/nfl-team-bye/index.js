@@ -5,11 +5,6 @@ import { getByeByTeam } from '@core/schedule'
 
 import NFLTeamBye from './nfl-team-bye'
 
-const mapStateToProps = createSelector(
-  getByeByTeam,
-  (bye) => ({ bye })
-)
+const mapStateToProps = createSelector(getByeByTeam, (bye) => ({ bye }))
 
-export default connect(
-  mapStateToProps
-)(NFLTeamBye)
+export default connect(mapStateToProps)(NFLTeamBye)

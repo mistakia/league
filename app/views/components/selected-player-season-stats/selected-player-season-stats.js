@@ -11,7 +11,13 @@ export default class SelectedPlayerSeasonStats extends React.Component {
       const games = Object.keys(stats.years[year]).length
       const p = stats.overall[year]
       const item = (
-        <PlayerSelectedRow games={games} key={year} title={year} stats={p} pos={pos} />
+        <PlayerSelectedRow
+          games={games}
+          key={year}
+          title={year}
+          stats={p}
+          pos={pos}
+        />
       )
       years.push(item)
       // TODO year average
@@ -20,9 +26,7 @@ export default class SelectedPlayerSeasonStats extends React.Component {
     return (
       <div className='selected__section'>
         <div className='selected__section-header'>
-          <div className='row__group-head'>
-            Player Season Stats
-          </div>
+          <div className='row__group-head'>Player Season Stats</div>
         </div>
         <div className='selected__section-header'>
           <div className='row__name'>Year</div>

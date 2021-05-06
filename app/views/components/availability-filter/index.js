@@ -5,11 +5,8 @@ import { getPlayers } from '@core/players'
 
 import AvailabilityFilter from './availability-filter'
 
-const mapStateToProps = createSelector(
-  getPlayers,
-  (players) => ({ availability: players.get('availability') })
-)
+const mapStateToProps = createSelector(getPlayers, (players) => ({
+  availability: players.get('availability')
+}))
 
-export default connect(
-  mapStateToProps
-)(AvailabilityFilter)
+export default connect(mapStateToProps)(AvailabilityFilter)

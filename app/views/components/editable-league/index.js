@@ -16,7 +16,4 @@ const mapDispatchToProps = {
   update: leagueActions.update
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(EditableLeague)
+export default connect(mapStateToProps, mapDispatchToProps)(EditableLeague)

@@ -22,9 +22,13 @@ export default class PlayerName extends React.Component {
         </div>
         <div className='player__name-main'>
           <span>{player.pname}</span>
-          {(constants.season.year === player.draft_year) && <PlayerLabel label='R' type='rookie' description='Rookie' />}
+          {constants.season.year === player.draft_year && (
+            <PlayerLabel label='R' type='rookie' description='Rookie' />
+          )}
           <Team team={player.team} />
-          {(player.slot === constants.slots.PSP) && <PlayerLabel label='P' description='Protected Practice Squad' />}
+          {player.slot === constants.slots.PSP && (
+            <PlayerLabel label='P' description='Protected Practice Squad' />
+          )}
         </div>
       </div>
     )

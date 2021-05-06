@@ -5,11 +5,8 @@ import { getCurrentLeague } from '@core/leagues'
 
 import Roster from './roster'
 
-const mapStateToProps = createSelector(
-  getCurrentLeague,
-  (league) => ({ league })
-)
+const mapStateToProps = createSelector(getCurrentLeague, (league) => ({
+  league
+}))
 
-export default connect(
-  mapStateToProps
-)(Roster)
+export default connect(mapStateToProps)(Roster)

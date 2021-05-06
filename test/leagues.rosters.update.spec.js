@@ -54,7 +54,8 @@ describe('API /leagues/rosters - update', function () {
       })
 
       const value = 10
-      const res = await chai.request(server)
+      const res = await chai
+        .request(server)
         .put('/api/leagues/1/rosters')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -80,7 +81,9 @@ describe('API /leagues/rosters - update', function () {
       expect(rosterRow.players[0].userid).to.equal(1)
       expect(rosterRow.players[0].tid).to.equal(teamId)
       expect(rosterRow.players[0].lid).to.equal(leagueId)
-      expect(rosterRow.players[0].type).to.equal(constants.transactions.ROSTER_ADD)
+      expect(rosterRow.players[0].type).to.equal(
+        constants.transactions.ROSTER_ADD
+      )
       expect(rosterRow.players[0].value).to.equal(value)
       expect(rosterRow.players[0].year).to.equal(constants.season.year)
     })
@@ -98,7 +101,9 @@ describe('API /leagues/rosters - update', function () {
     })
 
     it('missing player', async () => {
-      const request = chai.request(server).put('/api/leagues/1/rosters')
+      const request = chai
+        .request(server)
+        .put('/api/leagues/1/rosters')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
@@ -110,7 +115,9 @@ describe('API /leagues/rosters - update', function () {
     })
 
     it('missing teamId', async () => {
-      const request = chai.request(server).put('/api/leagues/1/rosters')
+      const request = chai
+        .request(server)
+        .put('/api/leagues/1/rosters')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           player: 'x',
@@ -122,7 +129,9 @@ describe('API /leagues/rosters - update', function () {
     })
 
     it('missing leagueId', async () => {
-      const request = chai.request(server).put('/api/leagues/1/rosters')
+      const request = chai
+        .request(server)
+        .put('/api/leagues/1/rosters')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           player: 'x',
@@ -134,7 +143,9 @@ describe('API /leagues/rosters - update', function () {
     })
 
     it('missing value', async () => {
-      const request = chai.request(server).put('/api/leagues/1/rosters')
+      const request = chai
+        .request(server)
+        .put('/api/leagues/1/rosters')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           player: 'x',
@@ -146,7 +157,9 @@ describe('API /leagues/rosters - update', function () {
 
     it('invalid leagueId', async () => {
       const player = await selectPlayer()
-      const request = chai.request(server).put('/api/leagues/2/rosters')
+      const request = chai
+        .request(server)
+        .put('/api/leagues/2/rosters')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1,
@@ -159,7 +172,9 @@ describe('API /leagues/rosters - update', function () {
     })
 
     it('invalid player - does not exist', async () => {
-      const request = chai.request(server).put('/api/leagues/2/rosters')
+      const request = chai
+        .request(server)
+        .put('/api/leagues/2/rosters')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           player: 'x',
@@ -173,7 +188,9 @@ describe('API /leagues/rosters - update', function () {
 
     it('user is not commish', async () => {
       const player = await selectPlayer()
-      const request = chai.request(server).put('/api/leagues/1/rosters')
+      const request = chai
+        .request(server)
+        .put('/api/leagues/1/rosters')
         .set('Authorization', `Bearer ${user2}`)
         .send({
           player: player.player,
@@ -202,7 +219,8 @@ describe('API /leagues/rosters - update', function () {
       })
 
       const value = 201
-      const request = chai.request(server)
+      const request = chai
+        .request(server)
         .put('/api/leagues/1/rosters')
         .set('Authorization', `Bearer ${user1}`)
         .send({

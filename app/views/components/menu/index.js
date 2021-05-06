@@ -7,12 +7,9 @@ import { getCurrentTeam } from '@core/teams'
 
 import Menu from './menu'
 
-const mapStateToProps = createSelector(
-  getApp,
-  getCurrentTeam,
-  (app, team) => ({ isLoggedIn: !!app.userId, team })
-)
+const mapStateToProps = createSelector(getApp, getCurrentTeam, (app, team) => ({
+  isLoggedIn: !!app.userId,
+  team
+}))
 
-export default withRouter(connect(
-  mapStateToProps
-)(Menu))
+export default withRouter(connect(mapStateToProps)(Menu))

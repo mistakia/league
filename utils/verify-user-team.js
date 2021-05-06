@@ -22,7 +22,9 @@ module.exports = async ({ userId, leagueId, teamId, requireLeague }) => {
     .leftJoin('users_teams', 'teams.uid', 'users_teams.tid')
     .join('leagues', 'teams.lid', 'leagues.uid')
     .where('teams.uid', tid)
-  const team = userTeams.find(p => p.userid === userId || p.commishid === userId)
+  const team = userTeams.find(
+    (p) => p.userid === userId || p.commishid === userId
+  )
   if (!team) {
     throw new Error('invalid teamId')
   }

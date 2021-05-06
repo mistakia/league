@@ -11,7 +11,9 @@ const initialState = new Record({
   qualifiers: new Map(constants.qualifiers),
   view: 'passing',
   passing: 'advanced',
-  years: new List([constants.season.week ? constants.season.year : (constants.season.year - 1)]),
+  years: new List([
+    constants.season.week ? constants.season.year : constants.season.year - 1
+  ]),
   weeks: new List(constants.nflWeeks),
   days: new List(constants.days),
   quarters: new List(constants.quarters),
@@ -20,10 +22,13 @@ const initialState = new Record({
   teamStatsPercentiles: new Record()
 })
 
-export function statsReducer (state = initialState(), { payload, type }) {
+export function statsReducer(state = initialState(), { payload, type }) {
   switch (type) {
     case statActions.UPDATE_QUALIFIER:
-      return state.setIn(['qualifiers', payload.qualifier, 'value'], payload.value)
+      return state.setIn(
+        ['qualifiers', payload.qualifier, 'value'],
+        payload.value
+      )
 
     case statActions.GET_CHARTED_PLAYS_PENDING:
       return state.merge({ isPending: true })
@@ -32,7 +37,10 @@ export function statsReducer (state = initialState(), { payload, type }) {
       return state.merge({ isPending: false })
 
     case playerActions.SET_PLAYER_STATS:
-      return state.merge({ isPending: false, playsPercentiles: payload.percentiles })
+      return state.merge({
+        isPending: false,
+        playsPercentiles: payload.percentiles
+      })
 
     case statActions.SET_TEAM_STATS_PERCENTILES:
       return state.merge({ teamStatsPercentiles: payload.percentiles })

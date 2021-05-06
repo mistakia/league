@@ -5,11 +5,8 @@ import { getStats } from '@core/stats'
 
 import StatDownsFilter from './stat-downs-filter'
 
-const mapStateToProps = createSelector(
-  getStats,
-  (stats) => ({ downs: stats.downs })
-)
+const mapStateToProps = createSelector(getStats, (stats) => ({
+  downs: stats.downs
+}))
 
-export default connect(
-  mapStateToProps
-)(StatDownsFilter)
+export default connect(mapStateToProps)(StatDownsFilter)

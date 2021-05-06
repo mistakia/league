@@ -25,26 +25,28 @@ import SelectedPlayerMatchup from '@components/selected-player-matchup'
 
 import './selected-player.styl'
 
-function PaperComponent (props) {
+function PaperComponent(props) {
   return (
-    <Draggable handle='#draggable-dialog-title' cancel={'[class*="MuiDialogContent-root"]'}>
+    <Draggable
+      handle='#draggable-dialog-title'
+      cancel={'[class*="MuiDialogContent-root"]'}>
       <Paper {...props} />
     </Draggable>
   )
 }
 
-function TabPanel (props) {
+function TabPanel(props) {
   const { children, value, index, ...other } = props
 
   return (
     <div className='selected__player-body' hidden={value !== index} {...other}>
-      {(value === index) && children}
+      {value === index && children}
     </div>
   )
 }
 
 export default class SelectedPlayer extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
 
     this.state = {
@@ -75,8 +77,7 @@ export default class SelectedPlayer extends React.Component {
           paper: 'selected__player-paper'
         }}
         PaperComponent={PaperComponent}
-        aria-labelledby='draggable-dialog-title'
-      >
+        aria-labelledby='draggable-dialog-title'>
         <div className='selected__player-header' id='draggable-dialog-title'>
           <div className='selected__player-header-lead'>
             <div className='selected__player-first-name'>{player.fname}</div>
@@ -92,15 +93,18 @@ export default class SelectedPlayer extends React.Component {
               <label>Manager</label>
               {player.tid ? <TeamName abbrv tid={player.tid} /> : '-'}
             </div>
-            {(player.value !== null) &&
+            {player.value !== null && (
               <div className='selected__player-header-item'>
                 <label>Salary</label>
                 {`$${player.value}`}
-              </div>}
+              </div>
+            )}
 
             <div className='selected__player-header-item'>
               <label>Status</label>
-              {constants.status[player.status] ? player.status : (player.gamestatus || 'Active')}
+              {constants.status[player.status]
+                ? player.status
+                : player.gamestatus || 'Active'}
             </div>
           </div>
           <div className='selected__player-header-section'>
@@ -110,17 +114,19 @@ export default class SelectedPlayer extends React.Component {
             </div>
             <div className='selected__player-header-item'>
               <label>Points+</label>
-              {(player.getIn(['lineups', 'sp'], 0)).toFixed(1) || '-'}
+              {player.getIn(['lineups', 'sp'], 0).toFixed(1) || '-'}
             </div>
             <div className='selected__player-header-item'>
               <label>Bench+</label>
-              {(player.getIn(['lineups', 'bp'], 0)).toFixed(1) || '-'}
+              {player.getIn(['lineups', 'bp'], 0).toFixed(1) || '-'}
             </div>
           </div>
           <div className='selected__player-header-section'>
             <div className='selected__player-header-item'>
               <label>Proj/G</label>
-              {(player.getIn(['points', 'ros', 'total']) / player.projWks).toFixed(1) || '-'}
+              {(
+                player.getIn(['points', 'ros', 'total']) / player.projWks
+              ).toFixed(1) || '-'}
             </div>
             <div className='selected__player-header-item'>
               <label>VOBA</label>
@@ -142,12 +148,10 @@ export default class SelectedPlayer extends React.Component {
             </div>
             <div className='selected__player-header-item'>
               <label>Exp.</label>
-              {(constants.season.year - player.draft_year) || 'Rookie'}
+              {constants.season.year - player.draft_year || 'Rookie'}
             </div>
           </div>
-          <Button onClick={this.handleClose}>
-            Close
-          </Button>
+          <Button onClick={this.handleClose}>Close</Button>
         </div>
         <div className='selected__player-main'>
           <Tabs
@@ -155,8 +159,7 @@ export default class SelectedPlayer extends React.Component {
             variant='scrollable'
             value={value}
             className='selected__player-menu'
-            onChange={this.handleChange}
-          >
+            onChange={this.handleChange}>
             <Tab label='Impact' />
             <Tab label='Value' />
             <Tab label='Matchup' />

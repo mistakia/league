@@ -24,9 +24,14 @@ router.put('/:sourceId', async (req, res) => {
     weight = parseFloat(weight)
 
     if (weight === 1) {
-      await db('users_sources').del().where({ userid: userId, sourceid: sourceId })
+      await db('users_sources')
+        .del()
+        .where({ userid: userId, sourceid: sourceId })
     } else {
-      const rows = await db('users_sources').where({ userid: userId, sourceid: sourceId })
+      const rows = await db('users_sources').where({
+        userid: userId,
+        sourceid: sourceId
+      })
       if (!rows.length) {
         await db('users_sources').insert({
           userid: userId,
@@ -34,9 +39,11 @@ router.put('/:sourceId', async (req, res) => {
           weight
         })
       } else {
-        await db('users_sources').update({
-          weight
-        }).where({ userid: userId, sourceid: sourceId })
+        await db('users_sources')
+          .update({
+            weight
+          })
+          .where({ userid: userId, sourceid: sourceId })
       }
     }
 

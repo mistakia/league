@@ -8,7 +8,9 @@ const { constants } = require('../common')
 const { start, end } = constants.season
 
 describe('COMMON Season', function () {
-  after(() => { MockDate.reset() })
+  after(() => {
+    MockDate.reset()
+  })
 
   it('isRegularSeason', function () {
     // 5 weeks before start of week 1
@@ -93,7 +95,9 @@ describe('COMMON Season', function () {
     expect(constants.season.week).to.equal(0)
 
     // end of week 0
-    MockDate.set(start.clone().add('7', 'days').subtract('1', 'minute').toDate())
+    MockDate.set(
+      start.clone().add('7', 'days').subtract('1', 'minute').toDate()
+    )
     expect(constants.season.week).to.equal(0)
 
     // start of week 1
@@ -101,7 +105,9 @@ describe('COMMON Season', function () {
     expect(constants.season.week).to.equal(1)
 
     // end of week 1
-    MockDate.set(start.clone().add('14', 'days').subtract('1', 'minute').toDate())
+    MockDate.set(
+      start.clone().add('14', 'days').subtract('1', 'minute').toDate()
+    )
     expect(constants.season.week).to.equal(1)
 
     // start of week 16
@@ -109,7 +115,9 @@ describe('COMMON Season', function () {
     expect(constants.season.week).to.equal(16)
 
     // end of week 16 - day light savings
-    MockDate.set(start.clone().add('119', 'days').subtract('61', 'minute').toDate())
+    MockDate.set(
+      start.clone().add('119', 'days').subtract('61', 'minute').toDate()
+    )
     expect(constants.season.week).to.equal(16)
 
     // start of week 17

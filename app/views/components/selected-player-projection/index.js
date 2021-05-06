@@ -8,7 +8,4 @@ const mapDispatchToProps = {
   delete: playerActions.deleteProjection
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(SelectedPlayerProjection)
+export default connect(null, mapDispatchToProps)(SelectedPlayerProjection)

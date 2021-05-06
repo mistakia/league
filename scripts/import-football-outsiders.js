@@ -12,26 +12,33 @@ const { upsert } = require('../utils')
 const log = debug('import:footballoutsiders')
 debug.enable('import:footballoutsiders')
 
-const wait = ms => new Promise(resolve => setTimeout(resolve, ms))
-const urls = [{
-  type: 'TEAMOFF',
-  url: `https://www.footballoutsiders.com/stats/nfl/team-offense/${constants.season.year}`
-}, {
-  type: 'TEAMDEF',
-  url: `https://www.footballoutsiders.com/stats/nfl/team-defense/${constants.season.year}`
-}, {
-  type: 'OL',
-  url: `https://www.footballoutsiders.com/stats/nfl/offensive-line/${constants.season.year}`
-}, {
-  type: 'DL',
-  url: `https://www.footballoutsiders.com/stats/nfl/defensive-line/${constants.season.year}`
-}, {
-  type: 'DRVOFF',
-  url: `https://www.footballoutsiders.com/stats/nfl/overall-drive-statsoff/${constants.season.year}`
-}, {
-  type: 'DRVDEF',
-  url: `https://www.footballoutsiders.com/stats/nfl/overall-drive-statsdef/${constants.season.year}`
-}]
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+const urls = [
+  {
+    type: 'TEAMOFF',
+    url: `https://www.footballoutsiders.com/stats/nfl/team-offense/${constants.season.year}`
+  },
+  {
+    type: 'TEAMDEF',
+    url: `https://www.footballoutsiders.com/stats/nfl/team-defense/${constants.season.year}`
+  },
+  {
+    type: 'OL',
+    url: `https://www.footballoutsiders.com/stats/nfl/offensive-line/${constants.season.year}`
+  },
+  {
+    type: 'DL',
+    url: `https://www.footballoutsiders.com/stats/nfl/defensive-line/${constants.season.year}`
+  },
+  {
+    type: 'DRVOFF',
+    url: `https://www.footballoutsiders.com/stats/nfl/overall-drive-statsoff/${constants.season.year}`
+  },
+  {
+    type: 'DRVDEF',
+    url: `https://www.footballoutsiders.com/stats/nfl/overall-drive-statsdef/${constants.season.year}`
+  }
+]
 
 const cleanStr = (str) => str.replace(/\n/g, '').replace(/\t/g, '')
 let teams = new Map()
@@ -194,16 +201,16 @@ const runOne = async ({ type, url }) => {
 
   $('table.sticky-headers.sortable').each(function (i, el) {
     const headers = []
-    $('thead tr:last-child th', el).map((i, el) => {
+    $('thead tr:last-child th', el).each((i, el) => {
       const value = cleanStr($(el).text().trim())
       headers.push(`${value}_${i}`)
     })
-    $('tbody tr', el).map((i, el) => {
+    $('tbody tr', el).each((i, el) => {
       const item = {}
       for (const [index, header] of headers.entries()) {
         const data = $(el).find('td').eq(index).text().trim()
         const value = parseFloat(data)
-        item[header] = isNaN(value) ? (data || null) : value
+        item[header] = isNaN(value) ? data || null : value
       }
       update(type, item)
     })

@@ -92,20 +92,26 @@ router.delete('/?', async (req, res) => {
       return res.status(400).send({ error: 'can not remove user team' })
     }
 
-    const rosters = await db('rosters').where({
-      tid: teamId,
-      lid: leagueId
-    }).del()
+    const rosters = await db('rosters')
+      .where({
+        tid: teamId,
+        lid: leagueId
+      })
+      .del()
 
-    const teams = await db('teams').where({
-      uid: teamId,
-      lid: leagueId
-    }).del()
+    const teams = await db('teams')
+      .where({
+        uid: teamId,
+        lid: leagueId
+      })
+      .del()
 
-    const transactions = await db('transactions').where({
-      tid: teamId,
-      lid: leagueId
-    }).del()
+    const transactions = await db('transactions')
+      .where({
+        tid: teamId,
+        lid: leagueId
+      })
+      .del()
 
     res.send({ rosters, teams, transactions })
   } catch (error) {

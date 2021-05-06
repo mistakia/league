@@ -21,8 +21,6 @@ export default class TransactionTypeFilter extends React.Component {
       })
     }
 
-    return (
-      <TransactionsFilter {...state} />
-    )
+    return <TransactionsFilter {...state} />
   }
 }

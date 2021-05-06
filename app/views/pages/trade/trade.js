@@ -36,23 +36,24 @@ export default function () {
   } = this.props
 
   const isProposed = Boolean(trade.uid)
-  const isOpen = !trade.cancelled && !trade.rejected && !trade.accepted && !trade.vetoed
+  const isOpen =
+    !trade.cancelled && !trade.rejected && !trade.accepted && !trade.vetoed
 
   const sItems = []
-  trade.proposingTeamPlayers.forEach(p => sItems.push(
-    <TradePlayer key={p} playerId={p} />
-  ))
-  trade.proposingTeamPicks.forEach(p => sItems.push(
-    <TradePick key={p.uid} pick={p} />
-  ))
+  trade.proposingTeamPlayers.forEach((p) =>
+    sItems.push(<TradePlayer key={p} playerId={p} />)
+  )
+  trade.proposingTeamPicks.forEach((p) =>
+    sItems.push(<TradePick key={p.uid} pick={p} />)
+  )
 
   const rItems = []
-  trade.acceptingTeamPlayers.forEach(p => rItems.push(
-    <TradePlayer key={p} playerId={p} />
-  ))
-  trade.acceptingTeamPicks.forEach(p => rItems.push(
-    <TradePick key={p.uid} pick={p} />
-  ))
+  trade.acceptingTeamPlayers.forEach((p) =>
+    rItems.push(<TradePlayer key={p} playerId={p} />)
+  )
+  trade.acceptingTeamPicks.forEach((p) =>
+    rItems.push(<TradePick key={p.uid} pick={p} />)
+  )
 
   const invalidNotice = (
     <Alert severity='warning'>
@@ -64,65 +65,65 @@ export default function () {
   const action = (
     <Grid item xs={12}>
       <div className='trade__action'>
-        {(isValid && constants.season.week < constants.season.finalWeek) && <TradeAction />}
-        {(isOpen && !isValid) && invalidNotice}
+        {isValid && constants.season.week < constants.season.finalWeek && (
+          <TradeAction />
+        )}
+        {isOpen && !isValid && invalidNotice}
       </div>
     </Grid>
   )
 
   const proposingTeamDropPlayers = []
   for (const [index, player] of trade.proposingTeamDropPlayers.entries()) {
-    proposingTeamDropPlayers.push(
-      <TradePlayer
-        key={index}
-        playerId={player}
-      />
-    )
+    proposingTeamDropPlayers.push(<TradePlayer key={index} playerId={player} />)
   }
 
   const acceptingTeamDropPlayers = []
   for (const [index, player] of trade.acceptingTeamDropPlayers.entries()) {
-    acceptingTeamDropPlayers.push(
-      <TradePlayer
-        key={index}
-        playerId={player}
-      />
-    )
+    acceptingTeamDropPlayers.push(<TradePlayer key={index} playerId={player} />)
   }
 
   const teamDropPlayers = isProposer
-    ? proposingTeamPlayers.filter(p => !trade.proposingTeamPlayers.includes(p.player))
-    : acceptingTeamPlayers.filter(p => !trade.acceptingTeamPlayers.includes(p.player))
+    ? proposingTeamPlayers.filter(
+        (p) => !trade.proposingTeamPlayers.includes(p.player)
+      )
+    : acceptingTeamPlayers.filter(
+        (p) => !trade.acceptingTeamPlayers.includes(p.player)
+      )
 
-  const showProposingTeamDropSection = Boolean((isProposer && !isValid) ||
-    trade.proposingTeamDropPlayers.size)
+  const showProposingTeamDropSection = Boolean(
+    (isProposer && !isValid) || trade.proposingTeamDropPlayers.size
+  )
   const proposingTeamDropSection = (
     <div className='trade__box'>
       <div className='trade__box-body'>
-        {!isProposed &&
+        {!isProposed && (
           <TradeSelectItems
             title='Select players to drop'
             onChange={this.handleDropChange}
             selectedPlayers={tradePlayers.proposingTeamDropPlayers.toJS()}
             players={teamDropPlayers}
-          />}
+          />
+        )}
         {proposingTeamDropPlayers}
       </div>
     </div>
   )
 
-  const showAcceptingTeamDropSection = Boolean((!isProposer && !isValid) ||
-    trade.acceptingTeamDropPlayers.size)
+  const showAcceptingTeamDropSection = Boolean(
+    (!isProposer && !isValid) || trade.acceptingTeamDropPlayers.size
+  )
   const acceptingTeamDropSection = (
     <div className='trade__box'>
       <div className='trade__box-body'>
-        {isOpen &&
+        {isOpen && (
           <TradeSelectItems
             title='Select players to drop'
             onChange={this.handleDropChange}
             selectedPlayers={tradePlayers.acceptingTeamDropPlayers.toJS()}
             players={teamDropPlayers}
-          />}
+          />
+        )}
         {acceptingTeamDropPlayers}
       </div>
     </div>
@@ -151,14 +152,15 @@ export default function () {
                 </List>
               </div>
               <div className='trade__box-body'>
-                {!isProposed &&
+                {!isProposed && (
                   <TradeSelectItems
                     onChange={this.handleProposeChange}
                     selectedPlayers={tradePlayers.proposingTeamPlayers.toJS()}
                     selectedPicks={trade.proposingTeamPicks.toJS()}
                     picks={proposingTeam.picks}
                     players={proposingTeamPlayers}
-                  />}
+                  />
+                )}
                 {sItems}
               </div>
             </div>
@@ -170,14 +172,15 @@ export default function () {
                 <TradeSelectTeam />
               </div>
               <div className='trade__box-body'>
-                {!isProposed &&
+                {!isProposed && (
                   <TradeSelectItems
                     onChange={this.handleAcceptChange}
                     selectedPlayers={tradePlayers.acceptingTeamPlayers.toJS()}
                     selectedPicks={trade.acceptingTeamPicks.toJS()}
                     players={acceptingTeamPlayers}
                     picks={acceptingTeam.picks}
-                  />}
+                  />
+                )}
                 {rItems}
               </div>
             </div>
@@ -190,7 +193,5 @@ export default function () {
     </div>
   )
 
-  return (
-    <PageLayout body={body} scroll />
-  )
+  return <PageLayout body={body} scroll />
 }

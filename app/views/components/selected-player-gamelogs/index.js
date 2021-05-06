@@ -12,6 +12,4 @@ const mapStateToProps = createSelector(
   (player, gamelogs) => ({ player, gamelogs })
 )
 
-export default connect(
-  mapStateToProps
-)(SelectedPlayerGamelogs)
+export default connect(mapStateToProps)(SelectedPlayerGamelogs)

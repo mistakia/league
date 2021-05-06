@@ -14,8 +14,7 @@ export default class TradeMenu extends React.Component {
         <div
           key={index}
           className={classNames.join(' ')}
-          onClick={() => select(trade.uid)}
-        >
+          onClick={() => select(trade.uid)}>
           Trade #{trade.uid}
         </div>
       )
@@ -25,10 +24,11 @@ export default class TradeMenu extends React.Component {
       <div className='trade__menu'>
         <div className='trade__menu-head'>Offers</div>
         <div className='trade__menu-body empty'>
-          {selectedTradeId &&
+          {selectedTradeId && (
             <div onClick={() => select()} className='trade__menu-item'>
               New Trade Offer
-            </div>}
+            </div>
+          )}
           {menuItems}
         </div>
       </div>

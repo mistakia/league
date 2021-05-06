@@ -2,8 +2,10 @@ import * as constants from './constants'
 
 const calculateDstStatsFromPlays = (plays, team) => {
   const dstStats = constants.createStats()
-  dstStats.dtno = plays.filter(p => p.drivePlayCount === 3 && p.playTypeNFL === 'PUNT').length
-  const playStats = plays.map(p => p.playStats).flat()
+  dstStats.dtno = plays.filter(
+    (p) => p.drivePlayCount === 3 && p.playTypeNFL === 'PUNT'
+  ).length
+  const playStats = plays.map((p) => p.playStats).flat()
 
   for (const playStat of playStats) {
     switch (playStat.statId) {

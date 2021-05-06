@@ -26,7 +26,10 @@ describe('API /me', function () {
   })
 
   it('/api/me', async () => {
-    const res = await chai.request(server).get('/api/me').set('Authorization', `Bearer ${user1}`)
+    const res = await chai
+      .request(server)
+      .get('/api/me')
+      .set('Authorization', `Bearer ${user1}`)
     res.should.have.status(200)
     // eslint-disable-next-line
     res.should.be.json

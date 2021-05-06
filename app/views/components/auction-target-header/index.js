@@ -5,11 +5,8 @@ import { getAuctionInfoForPosition } from '@core/auction'
 
 import AuctionTargetHeader from './auction-target-header'
 
-const mapStateToProps = createSelector(
-  getAuctionInfoForPosition,
-  (info) => ({ info })
-)
+const mapStateToProps = createSelector(getAuctionInfoForPosition, (info) => ({
+  info
+}))
 
-export default connect(
-  mapStateToProps
-)(AuctionTargetHeader)
+export default connect(mapStateToProps)(AuctionTargetHeader)

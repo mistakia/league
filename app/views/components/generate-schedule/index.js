@@ -8,7 +8,4 @@ const mapDispatchToProps = {
   generate: matchupsActions.generate
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(GenerateSchedule)
+export default connect(null, mapDispatchToProps)(GenerateSchedule)

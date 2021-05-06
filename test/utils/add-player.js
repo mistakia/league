@@ -10,11 +10,13 @@ module.exports = async ({
   transaction = constants.transactions.ROSTER_ADD,
   value = 0
 }) => {
-  const rosters = await db('rosters').where({
-    week: constants.season.week,
-    year: constants.season.year,
-    tid: teamId
-  }).limit(1)
+  const rosters = await db('rosters')
+    .where({
+      week: constants.season.week,
+      year: constants.season.year,
+      tid: teamId
+    })
+    .limit(1)
   const rosterId = rosters[0].uid
 
   await db('transactions').insert({

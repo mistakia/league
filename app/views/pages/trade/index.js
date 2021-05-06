@@ -19,7 +19,7 @@ import {
 import render from './trade'
 
 class TradePage extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
 
     this.state = {
@@ -28,24 +28,24 @@ class TradePage extends React.Component {
   }
 
   handleDropChange = (event, value) => {
-    const playerIds = value.map(p => p.id)
+    const playerIds = value.map((p) => p.id)
     this.props.setDropPlayers(playerIds)
   }
 
   handleProposeChange = (event, value) => {
-    const players = value.filter(p => p.type === 'player')
-    const picks = value.filter(p => p.type === 'pick')
-    const playerIds = players.map(p => p.id)
-    const pickIds = picks.map(p => p.id)
+    const players = value.filter((p) => p.type === 'player')
+    const picks = value.filter((p) => p.type === 'pick')
+    const playerIds = players.map((p) => p.id)
+    const pickIds = picks.map((p) => p.id)
     this.props.setProposingTeamPlayers(playerIds)
     this.props.setProposingTeamPicks(pickIds)
   }
 
   handleAcceptChange = (event, value) => {
-    const players = value.filter(p => p.type === 'player')
-    const picks = value.filter(p => p.type === 'pick')
-    const playerIds = players.map(p => p.id)
-    const pickIds = picks.map(p => p.id)
+    const players = value.filter((p) => p.type === 'player')
+    const picks = value.filter((p) => p.type === 'pick')
+    const playerIds = players.map((p) => p.id)
+    const pickIds = picks.map((p) => p.id)
     this.props.setAcceptingTeamPlayers(playerIds)
     this.props.setAcceptingTeamPicks(pickIds)
   }
@@ -55,10 +55,14 @@ class TradePage extends React.Component {
   }
 
   handleDropPlayerClick = (player) => this.props.setDropPlayers(player)
-  handleProposingTeamPlayerClick = (player) => this.props.setProposingTeamPlayers(player)
-  handleAcceptingTeamPlayerClick = (player) => this.props.setAcceptingTeamPlayers(player)
-  handleProposingTeamPickClick = (pick) => this.props.setProposingTeamPicks(pick)
-  handleAcceptingTeamPickClick = (pick) => this.props.setAcceptingTeamPicks(pick)
+  handleProposingTeamPlayerClick = (player) =>
+    this.props.setProposingTeamPlayers(player)
+  handleAcceptingTeamPlayerClick = (player) =>
+    this.props.setAcceptingTeamPlayers(player)
+  handleProposingTeamPickClick = (pick) =>
+    this.props.setProposingTeamPicks(pick)
+  handleAcceptingTeamPickClick = (pick) =>
+    this.props.setAcceptingTeamPicks(pick)
 
   render = () => {
     return render.call(this)
@@ -121,7 +125,4 @@ const mapDispatchToProps = {
   setAcceptingTeamPicks: tradeActions.setAcceptingTeamPicks
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(TradePage)
+export default connect(mapStateToProps, mapDispatchToProps)(TradePage)

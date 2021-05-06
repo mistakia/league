@@ -26,15 +26,18 @@ export default class StatusPage extends React.Component {
     for (const [index, statusItem] of status.entries()) {
       const isOperational = !!statusItem.succ
 
-      const icon = isOperational
-        ? (<CheckCircleOutlineIcon style={{ color: green[500] }} />)
-        : (<ErrorIcon style={{ color: red[500] }} />)
+      const icon = isOperational ? (
+        <CheckCircleOutlineIcon style={{ color: green[500] }} />
+      ) : (
+        <ErrorIcon style={{ color: red[500] }} />
+      )
 
       const classNames = []
       if (isOperational) classNames.push('operational')
 
       const time = moment(statusItem.timestamp, 'X')
-      const secondary = `${time.fromNow()} - ` + (statusItem.reason || 'Operational')
+      const secondary =
+        `${time.fromNow()} - ` + (statusItem.reason || 'Operational')
 
       items.push(
         <ListItem key={index}>
@@ -42,9 +45,7 @@ export default class StatusPage extends React.Component {
             primary={constants.jobDetails[statusItem.type]}
             secondary={secondary}
           />
-          <ListItemSecondaryAction>
-            {icon}
-          </ListItemSecondaryAction>
+          <ListItemSecondaryAction>{icon}</ListItemSecondaryAction>
         </ListItem>
       )
     }
@@ -52,15 +53,11 @@ export default class StatusPage extends React.Component {
     const body = (
       <Container maxWidth='sm'>
         <Paper style={{ marginTop: '36px' }}>
-          <List>
-            {items}
-          </List>
+          <List>{items}</List>
         </Paper>
       </Container>
     )
 
-    return (
-      <PageLayout body={body} scroll />
-    )
+    return <PageLayout body={body} scroll />
   }
 }

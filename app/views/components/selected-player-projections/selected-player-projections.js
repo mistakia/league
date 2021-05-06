@@ -23,10 +23,6 @@ export default class SelectedPlayerSeasonProjections extends React.Component {
       )
     }
 
-    return (
-      <div className='selected__player-projections'>
-        {tables}
-      </div>
-    )
+    return <div className='selected__player-projections'>{tables}</div>
   }
 }

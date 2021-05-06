@@ -12,14 +12,16 @@ export default class StatPassingMenu extends React.Component {
 
   render = () => {
     return (
-      <FormControl size='small' variant='outlined' className='stat__passing-view-menu player__filter'>
+      <FormControl
+        size='small'
+        variant='outlined'
+        className='stat__passing-view-menu player__filter'>
         <InputLabel id='stat__passing-view-menu-label'>Passing</InputLabel>
         <Select
           labelId='stat__passing-view-menu-label'
           value={this.props.passing}
           onChange={this.handleChange}
-          label='Passing'
-        >
+          label='Passing'>
           <MenuItem value='advanced'>Advanced</MenuItem>
           <MenuItem value='pressure'>Pressure</MenuItem>
         </Select>

@@ -20,13 +20,13 @@ import '@styles/index.styl'
 import './app.styl'
 
 class App extends React.Component {
-  async componentDidMount () {
+  async componentDidMount() {
     const token = await localStorageAdapter.getItem('token')
     const key = await localStorageAdapter.getItem('key')
     this.props.init({ token, key })
   }
 
-  render () {
+  render() {
     const { isPending, userId, isInitializing } = this.props
     if (isPending) {
       return <Loading loading={isPending} />
@@ -34,7 +34,9 @@ class App extends React.Component {
 
     return (
       <main>
-        <Backdrop classes={{ root: 'initializing__backdrop' }} open={isInitializing}>
+        <Backdrop
+          classes={{ root: 'initializing__backdrop' }}
+          open={isInitializing}>
           <CircularProgress color='inherit' />
         </Backdrop>
         <Menu />

@@ -3,13 +3,17 @@ import { fork, all, take, call, select, put } from 'redux-saga/effects'
 import { constants } from '@common'
 import { getCurrentLeague } from '@core/leagues'
 import { teamActions, getTeamsForCurrentLeague } from '@core/teams'
-import { rosterActions, getStartersByTeamId, getActivePlayersByTeamId } from '@core/rosters'
+import {
+  rosterActions,
+  getStartersByTeamId,
+  getActivePlayersByTeamId
+} from '@core/rosters'
 import { matchupsActions, getMatchups } from '@core/matchups'
 import { gamelogsActions, getPlayerGamelogs } from '@core/gamelogs'
 import { standingsActions } from './actions'
 import Worker from 'workerize-loader?inline!./worker' // eslint-disable-line import/no-webpack-loader-syntax
 
-export function * calculate () {
+export function* calculate() {
   const league = yield select(getCurrentLeague)
   const teams = yield select(getTeamsForCurrentLeague)
   const starters = {}
@@ -18,11 +22,24 @@ export function * calculate () {
     starters[week] = {}
     active[week] = {}
     for (const team of teams.valueSeq()) {
-      const startingPlayers = yield select(getStartersByTeamId, { tid: team.uid, week })
-      starters[week][team.uid] = startingPlayers.map(p => ({ player: p.player, pos: p.pos, slot: p.slot }))
+      const startingPlayers = yield select(getStartersByTeamId, {
+        tid: team.uid,
+        week
+      })
+      starters[week][team.uid] = startingPlayers.map((p) => ({
+        player: p.player,
+        pos: p.pos,
+        slot: p.slot
+      }))
 
-      const activePlayers = yield select(getActivePlayersByTeamId, { tid: team.uid, week })
-      active[week][team.uid] = activePlayers.map(p => ({ player: p.player, pos: p.pos }))
+      const activePlayers = yield select(getActivePlayersByTeamId, {
+        tid: team.uid,
+        week
+      })
+      active[week][team.uid] = activePlayers.map((p) => ({
+        player: p.player,
+        pos: p.pos
+      }))
     }
   }
   const gamelogs = yield select(getPlayerGamelogs)
@@ -31,7 +48,10 @@ export function * calculate () {
   const result = yield call(worker.calculate, {
     league,
     matchups: matchups.get('items').toJS(),
-    tids: teams.toList().map(t => t.uid).toJS(),
+    tids: teams
+      .toList()
+      .map((t) => t.uid)
+      .toJS(),
     starters,
     active,
     gamelogs: gamelogs.toJS()
@@ -45,7 +65,7 @@ export function * calculate () {
 //  WATCHERS
 // -------------------------------------
 
-export function * watchAll () {
+export function* watchAll() {
   while (true) {
     yield all([
       take(teamActions.GET_TEAMS_FULFILLED),
@@ -62,6 +82,4 @@ export function * watchAll () {
 //  ROOT
 // -------------------------------------
 
-export const standingsSagas = [
-  fork(watchAll)
-]
+export const standingsSagas = [fork(watchAll)]

@@ -15,26 +15,42 @@ import './draft.styl'
 
 export default function () {
   const {
-    players, nextPick, picks, league, selectedPlayer,
-    drafted, vbaseline
+    players,
+    nextPick,
+    picks,
+    league,
+    selectedPlayer,
+    drafted,
+    vbaseline
   } = this.props
   const { positions } = constants
 
-  const draftActive = league.ddate &&
-    moment().isAfter(moment(league.ddate, 'X').startOf('day'))
-  const onTheClock = league.ddate && nextPick && moment().isAfter(moment(league.ddate, 'X').add((nextPick.pick - 1), 'days'))
+  const draftActive =
+    league.ddate && moment().isAfter(moment(league.ddate, 'X').startOf('day'))
+  const onTheClock =
+    league.ddate &&
+    nextPick &&
+    moment().isAfter(moment(league.ddate, 'X').add(nextPick.pick - 1, 'days'))
 
   let draftInfo
   if (league.ddate) {
     const start = moment(league.ddate, 'X').startOf('day')
     if (moment().isBefore(start)) {
-      draftInfo = (<div className='draft__side-top-pick'>Draft begins {moment().to(start)}</div>)
+      draftInfo = (
+        <div className='draft__side-top-pick'>
+          Draft begins {moment().to(start)}
+        </div>
+      )
     } else if (nextPick) {
-      const pickStart = moment(league.ddate, 'X').add((nextPick.pick - 1), 'days')
+      const pickStart = moment(league.ddate, 'X').add(nextPick.pick - 1, 'days')
       if (moment().isBefore(pickStart)) {
-        draftInfo = (<div className='draft__side-top-pick'>Your next pick is {moment().to(pickStart)}</div>)
+        draftInfo = (
+          <div className='draft__side-top-pick'>
+            Your next pick is {moment().to(pickStart)}
+          </div>
+        )
       } else {
-        const pickNum = (nextPick.pick % league.nteams) || league.nteams
+        const pickNum = nextPick.pick % league.nteams || league.nteams
         const end = pickStart.add(1, 'd')
         const now = moment()
         const hours = end.diff(now, 'hours')
@@ -42,31 +58,36 @@ export default function () {
         draftInfo = (
           <div className='draft__side-top-pick'>
             <div className='draft__side-top-pick-title'>
-              Pick #{nextPick.pick} ({nextPick.round}.{('0' + pickNum).slice(-2)})
+              Pick #{nextPick.pick} ({nextPick.round}.
+              {('0' + pickNum).slice(-2)})
             </div>
-            <div>Time Remaining: {hours}h {mins}m</div>
+            <div>
+              Time Remaining: {hours}h {mins}m
+            </div>
           </div>
         )
       }
     } else {
-      draftInfo = (<div className='draft__side-top-pick'>You have no picks left.</div>)
+      draftInfo = (
+        <div className='draft__side-top-pick'>You have no picks left.</div>
+      )
     }
   } else {
-    draftInfo = (<div className='draft__side-top-pick'>Draft not scheduled</div>)
+    draftInfo = <div className='draft__side-top-pick'>Draft not scheduled</div>
   }
 
-  const sorted = players.sort((a, b) => b.vorp.getIn(['0', vbaseline]) - a.vorp.getIn(['0', vbaseline]))
+  const sorted = players.sort(
+    (a, b) => b.vorp.getIn(['0', vbaseline]) - a.vorp.getIn(['0', vbaseline])
+  )
   const allRow = ({ index, key, ...params }) => {
     const player = sorted.get(index)
-    return (
-      <DraftPlayer key={key} index={index} player={player} {...params} />
-    )
+    return <DraftPlayer key={key} index={index} player={player} {...params} />
   }
 
   const groups = {}
   for (const position of positions) {
     if (!groups[position]) groups[position] = []
-    groups[position] = sorted.filter(p => p.pos === position)
+    groups[position] = sorted.filter((p) => p.pos === position)
   }
 
   const items = {}
@@ -80,16 +101,25 @@ export default function () {
 
   const positionRow = ({ index, key, pos, ...params }) => {
     const player = items[pos][index]
-    return (
-      <DraftPlayer key={key} index={index} player={player} {...params} />
-    )
+    return <DraftPlayer key={key} index={index} player={player} {...params} />
   }
 
   const pickItems = []
   const picksSorted = picks.sort((a, b) => a.round - b.round || a.pick - b.pick)
   for (const pick of picksSorted) {
-    const isActive = draftActive && !pick.player && moment().isAfter(moment(league.ddate, 'X').add((pick.pick - 1), 'days'))
-    pickItems.push(<DraftPick key={pick.pick} pick={pick} playerId={pick.player} tid={pick.tid} isActive={isActive} />)
+    const isActive =
+      draftActive &&
+      !pick.player &&
+      moment().isAfter(moment(league.ddate, 'X').add(pick.pick - 1, 'days'))
+    pickItems.push(
+      <DraftPick
+        key={pick.pick}
+        pick={pick}
+        playerId={pick.player}
+        tid={pick.tid}
+        isActive={isActive}
+      />
+    )
   }
 
   const p = selectedPlayer
@@ -97,33 +127,83 @@ export default function () {
   const selected = (
     <div className='draft__selected'>
       <div className='draft__selected-head'>
-        <div className='draft__selected-title'>{p.fname} {p.lname}</div>
+        <div className='draft__selected-title'>
+          {p.fname} {p.lname}
+        </div>
         <div className='draft__selected-alt'>
-          <div><Position pos={p.pos} /></div>
+          <div>
+            <Position pos={p.pos} />
+          </div>
           <div>{p.team}</div>
           {!!p.jersey && <div>#{p.jersey}</div>}
         </div>
-        {(draftActive && onTheClock && !isDrafted) &&
+        {draftActive && onTheClock && !isDrafted && (
           <div className='draft__selected-action'>
             <Button onClick={this.handleDraft}>Draft</Button>
-          </div>}
+          </div>
+        )}
       </div>
       <div className='draft__selected-body'>
-        <div><label>Drafted</label>{p.dpos ? `#${p.dpos}` : 'undrafted'}</div>
-        <div><label>Proj.</label>{Math.round(p.points.get('total'))}</div>
-        <div><label>Age</label><PlayerAge date={p.dob} /></div>
-        <div><label>Height</label>{Math.floor(p.height / 12)}-{p.height % 12}</div>
-        <div><label>Weight</label>{p.weight}</div>
-        <div><label>Forty</label>{p.forty || 'n/a'}</div>
-        <div><label>Bench</label>{p.bench || 'n/a'}</div>
-        <div><label>Vertical</label>{p.vertical || 'n/a'}</div>
-        <div><label>Broad</label>{p.broad || 'n/a'}</div>
-        <div><label>Shuttle</label>{p.shuttle || 'n/a'}</div>
-        <div><label>Cone</label>{p.cone || 'n/a'}</div>
-        <div><label>Arm</label>{p.arm}</div>
-        <div><label>Hand</label>{p.hand}</div>
-        <div><label>College</label>{p.college}</div>
-        <div><label>Division</label>{p.college_division}</div>
+        <div>
+          <label>Drafted</label>
+          {p.dpos ? `#${p.dpos}` : 'undrafted'}
+        </div>
+        <div>
+          <label>Proj.</label>
+          {Math.round(p.points.get('total'))}
+        </div>
+        <div>
+          <label>Age</label>
+          <PlayerAge date={p.dob} />
+        </div>
+        <div>
+          <label>Height</label>
+          {Math.floor(p.height / 12)}-{p.height % 12}
+        </div>
+        <div>
+          <label>Weight</label>
+          {p.weight}
+        </div>
+        <div>
+          <label>Forty</label>
+          {p.forty || 'n/a'}
+        </div>
+        <div>
+          <label>Bench</label>
+          {p.bench || 'n/a'}
+        </div>
+        <div>
+          <label>Vertical</label>
+          {p.vertical || 'n/a'}
+        </div>
+        <div>
+          <label>Broad</label>
+          {p.broad || 'n/a'}
+        </div>
+        <div>
+          <label>Shuttle</label>
+          {p.shuttle || 'n/a'}
+        </div>
+        <div>
+          <label>Cone</label>
+          {p.cone || 'n/a'}
+        </div>
+        <div>
+          <label>Arm</label>
+          {p.arm}
+        </div>
+        <div>
+          <label>Hand</label>
+          {p.hand}
+        </div>
+        <div>
+          <label>College</label>
+          {p.college}
+        </div>
+        <div>
+          <label>Division</label>
+          {p.college_division}
+        </div>
       </div>
     </div>
   )
@@ -220,14 +300,10 @@ export default function () {
           {league.ddate && <DraftSchedule />}
           {draftInfo}
         </div>
-        <div className='draft__side-main'>
-          {pickItems}
-        </div>
+        <div className='draft__side-main'>{pickItems}</div>
       </div>
     </div>
   )
 
-  return (
-    <PageLayout body={body} />
-  )
+  return <PageLayout body={body} />
 }

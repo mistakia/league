@@ -12,7 +12,7 @@ import { getPoachPlayersForCurrentLeague } from '@core/poaches'
 import render from './dashboard'
 
 class DashboardPage extends React.Component {
-  render () {
+  render() {
     return render.call(this)
   }
 }
@@ -36,6 +36,4 @@ const mapStateToProps = createSelector(
   })
 )
 
-export default connect(
-  mapStateToProps
-)(DashboardPage)
+export default connect(mapStateToProps)(DashboardPage)

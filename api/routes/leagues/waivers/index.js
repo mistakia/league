@@ -73,7 +73,10 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid type' })
     }
 
-    if (typeof bid !== 'undefined' && (isNaN(bid) || bid < 0 || bid % 1 !== 0)) {
+    if (
+      typeof bid !== 'undefined' &&
+      (isNaN(bid) || bid < 0 || bid % 1 !== 0)
+    ) {
       return res.status(400).send({ error: 'invalid bid' })
     }
 
@@ -103,7 +106,9 @@ router.post('/?', async (req, res) => {
     // TODO - verify player was not previously on team practice squad
     if (type === constants.waivers.FREE_AGENCY_PRACTICE) {
       if (playerRow.start !== constants.season.year) {
-        return res.status(400).send({ error: 'player is not practice squad eligible' })
+        return res
+          .status(400)
+          .send({ error: 'player is not practice squad eligible' })
       }
 
       // set bid to zero for practice squad waivers
@@ -116,7 +121,11 @@ router.post('/?', async (req, res) => {
       .orderBy('timestamp', 'desc')
       .orderBy('uid', 'desc')
 
-    if (constants.season.isRegularSeason && !constants.season.isWaiverPeriod && !transactions.length) {
+    if (
+      constants.season.isRegularSeason &&
+      !constants.season.isWaiverPeriod &&
+      !transactions.length
+    ) {
       return res.status(400).send({ error: 'player is not on waivers' })
     }
 
@@ -127,7 +136,10 @@ router.post('/?', async (req, res) => {
     const league = leagues[0]
 
     // check free agency waivers
-    if (type === constants.waivers.FREE_AGENCY || type === constants.waivers.FREE_AGENCY_PRACTICE) {
+    if (
+      type === constants.waivers.FREE_AGENCY ||
+      type === constants.waivers.FREE_AGENCY_PRACTICE
+    ) {
       // make sure player is not rostered
       const isRostered = await isPlayerRostered({ player, leagueId })
       if (isRostered) {
@@ -146,23 +158,33 @@ router.post('/?', async (req, res) => {
         // otherwise, it's a waiver period and all players are on waivers
       } else {
         // reject active roster waivers before day after auction
-        const acutoff = moment.tz(league.adate, 'X', 'America/New_York')
+        const acutoff = moment
+          .tz(league.adate, 'X', 'America/New_York')
           .add('1', 'day')
           .startOf('day')
-        if (type === constants.waivers.FREE_AGENCY && (!league.adate || moment().isBefore(acutoff))) {
-          return res.status(400).send({ error: 'active roster waivers not open' })
+        if (
+          type === constants.waivers.FREE_AGENCY &&
+          (!league.adate || moment().isBefore(acutoff))
+        ) {
+          return res
+            .status(400)
+            .send({ error: 'active roster waivers not open' })
         }
 
         // reject practice waivers before day after draft
         if (type === constants.waivers.FREE_AGENCY_PRACTICE) {
           const totalPicks = league.nteams * 3
-          const dcutoff = moment.tz(league.ddate, 'X', 'America/New_York')
+          const dcutoff = moment
+            .tz(league.ddate, 'X', 'America/New_York')
             .add(totalPicks, 'day')
             .startOf('day')
 
           if (!league.ddate || moment().isBefore(dcutoff)) {
-            return res.status(400).send({ error: 'practice squad waivers are not open' })
-          } if (league.ddate && moment().isAfter(dcutoff.add('1', 'day'))) {
+            return res
+              .status(400)
+              .send({ error: 'practice squad waivers are not open' })
+          }
+          if (league.ddate && moment().isAfter(dcutoff.add('1', 'day'))) {
             // if after rookie draft waivers cleared, check if player is on release waivers
             const isOnWaivers = await isPlayerOnWaivers({ player, leagueId })
             if (!isOnWaivers) {
@@ -199,14 +221,20 @@ router.post('/?', async (req, res) => {
       }
 
       // player has been deactivated
-      if (transactions[0].type !== constants.transactions.ROSTER_DEACTIVATE &&
+      if (
+        transactions[0].type !== constants.transactions.ROSTER_DEACTIVATE &&
         transactions[0].type !== constants.transactions.PRACTICE_ADD &&
-        transactions[0].type !== constants.transactions.DRAFT) {
+        transactions[0].type !== constants.transactions.DRAFT
+      ) {
         return res.status(400).send({ error: 'player is not on waivers' })
       }
 
       // transaction should have been within the last 24 hours
-      if (moment().isAfter(moment(transactions[0].timestamp, 'X').add('24', 'hours'))) {
+      if (
+        moment().isAfter(
+          moment(transactions[0].timestamp, 'X').add('24', 'hours')
+        )
+      ) {
         return res.status(400).send({ error: 'player is not on waivers' })
       }
 
@@ -221,7 +249,9 @@ router.post('/?', async (req, res) => {
           slot: constants.slots.PS
         })
       if (!slots.length) {
-        return res.status(400).send({ error: 'player is not in an unprotected practice squad slot' })
+        return res.status(400).send({
+          error: 'player is not in an unprotected practice squad slot'
+        })
       }
 
       // check for duplicate waiver
@@ -249,9 +279,10 @@ router.post('/?', async (req, res) => {
       }
       roster.removePlayer(drop)
     }
-    const hasSlot = type === constants.waivers.FREE_AGENCY_PRACTICE
-      ? roster.hasOpenPracticeSquadSlot()
-      : roster.hasOpenBenchSlot(playerRow.pos)
+    const hasSlot =
+      type === constants.waivers.FREE_AGENCY_PRACTICE
+        ? roster.hasOpenPracticeSquadSlot()
+        : roster.hasOpenBenchSlot(playerRow.pos)
     if (!hasSlot) {
       return res.status(400).send({ error: 'exceeds roster limits' })
     }
@@ -316,13 +347,11 @@ router.put('/order', async (req, res) => {
 
     const result = []
     for (const [index, waiverId] of waivers.entries()) {
-      await db('waivers')
-        .update('po', index)
-        .where({
-          uid: waiverId,
-          tid,
-          lid: leagueId
-        })
+      await db('waivers').update('po', index).where({
+        uid: waiverId,
+        tid,
+        lid: leagueId
+      })
       result.push(waiverId)
     }
     res.send(result)
@@ -347,7 +376,10 @@ router.put('/:waiverId', async (req, res) => {
       return res.status(400).send({ error: 'missing leagueId' })
     }
 
-    if (typeof bid !== 'undefined' && (isNaN(bid) || bid < 0 || bid % 1 !== 0)) {
+    if (
+      typeof bid !== 'undefined' &&
+      (isNaN(bid) || bid < 0 || bid % 1 !== 0)
+    ) {
       return res.status(400).send({ error: 'invalid bid' })
     }
 
@@ -367,11 +399,14 @@ router.put('/:waiverId', async (req, res) => {
     const tid = parseInt(teamId, 10)
 
     // verify waiverId belongs to teamId
-    const waivers = await db('waivers').where({
-      uid: waiverId,
-      tid,
-      lid: leagueId
-    }).whereNull('processed').whereNull('cancelled')
+    const waivers = await db('waivers')
+      .where({
+        uid: waiverId,
+        tid,
+        lid: leagueId
+      })
+      .whereNull('processed')
+      .whereNull('cancelled')
 
     if (!waivers.length) {
       return res.status(400).send({ error: 'invalid waiverId' })
@@ -403,9 +438,10 @@ router.put('/:waiverId', async (req, res) => {
       }
       roster.removePlayer(drop)
     }
-    const hasSlot = waiver.type === constants.waivers.FREE_AGENCY_PRACTICE
-      ? roster.hasOpenPracticeSquadSlot()
-      : roster.hasOpenBenchSlot(playerRow.pos)
+    const hasSlot =
+      waiver.type === constants.waivers.FREE_AGENCY_PRACTICE
+        ? roster.hasOpenPracticeSquadSlot()
+        : roster.hasOpenBenchSlot(playerRow.pos)
     if (!hasSlot) {
       return res.status(400).send({ error: 'exceeds roster limits' })
     }
@@ -465,9 +501,7 @@ router.post('/:waiverId/cancel', async (req, res) => {
     }
 
     const cancelled = Math.round(Date.now() / 1000)
-    await db('waivers')
-      .update('cancelled', cancelled)
-      .where('uid', waiverId)
+    await db('waivers').update('cancelled', cancelled).where('uid', waiverId)
 
     res.send({
       uid: waiverId,

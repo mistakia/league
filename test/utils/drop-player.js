@@ -2,11 +2,13 @@ const db = require('../../db')
 const { constants } = require('../../common')
 
 module.exports = async ({ leagueId, player, teamId, userId }) => {
-  const rids = await db('rosters').where({
-    tid: teamId,
-    week: constants.season.week,
-    year: constants.season.year
-  }).limit(1)
+  const rids = await db('rosters')
+    .where({
+      tid: teamId,
+      week: constants.season.week,
+      year: constants.season.year
+    })
+    .limit(1)
 
   const rid = rids[0].uid
 

@@ -14,7 +14,7 @@ import Button from '@components/button'
 import './settings-teams-team.styl'
 
 export default class SettingsTeamsTeam extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
 
     this.state = {
@@ -44,7 +44,8 @@ export default class SettingsTeamsTeam extends React.Component {
   handleConfirmation = () => {
     this.props.showConfirmation({
       title: 'Delete Team',
-      description: 'Remove team from league and permanently delete team & roster data',
+      description:
+        'Remove team from league and permanently delete team & roster data',
       onConfirm: () => this.props.delete(this.props.team.uid)
     })
   }
@@ -65,15 +66,14 @@ export default class SettingsTeamsTeam extends React.Component {
     }
     return (
       <Accordion expanded={this.state.open} onChange={this.handleChange}>
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
-        >
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <div className='settings__section-title'>{team.name}</div>
           <div className='settings__section-action'>
-            {team.uid !== teamId &&
+            {team.uid !== teamId && (
               <Button text onClick={() => this.handleConfirmation(team.uid)}>
                 delete
-              </Button>}
+              </Button>
+            )}
           </div>
         </AccordionSummary>
         <AccordionDetails>
@@ -90,9 +90,7 @@ export default class SettingsTeamsTeam extends React.Component {
               <AddCircleOutlineIcon />
             </IconButton>
           </div>
-          <div className='settings__teams-team-roster empty'>
-            {rosterItems}
-          </div>
+          <div className='settings__teams-team-roster empty'>{rosterItems}</div>
         </AccordionDetails>
       </Accordion>
     )

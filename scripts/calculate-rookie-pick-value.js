@@ -20,7 +20,7 @@ const calculateRookiePickValue = async ({ year }) => {
   // TODO get rookie position rank
   // get up to 4 seasons of data
   const seasons = {}
-  const limit = (LATEST_YEAR - year) + 1
+  const limit = LATEST_YEAR - year + 1
   for (let i = 1; i <= limit; i++) {
     seasons[i] = await calculateVOR({ year: year + (i - 1), rookie: i === 1 })
   }
@@ -58,7 +58,9 @@ if (!module.parent) {
     try {
       const year = argv.year
       const results = await calculateRookiePickValue({ year })
-      const sortedResults = Object.values(results).sort((a, b) => b.value - a.value)
+      const sortedResults = Object.values(results).sort(
+        (a, b) => b.value - a.value
+      )
       const p = new Table()
       const getColor = (pos) => {
         switch (pos) {
@@ -73,17 +75,20 @@ if (!module.parent) {
         }
       }
       for (const [index, player] of sortedResults.entries()) {
-        p.addRow({
-          index: index + 1,
-          player: player.player,
-          vor: player.vor.toFixed(2),
-          points: player.points.toFixed(2),
-          posrank: player.posrank,
-          value: player.value,
-          pos: player.pos
-        }, {
-          color: getColor(player.pos)
-        })
+        p.addRow(
+          {
+            index: index + 1,
+            player: player.player,
+            vor: player.vor.toFixed(2),
+            points: player.points.toFixed(2),
+            posrank: player.posrank,
+            value: player.value,
+            pos: player.pos
+          },
+          {
+            color: getColor(player.pos)
+          }
+        )
       }
       console.log(chalk.bold(`Year-over-year Rookie Value starting in ${year}`))
       p.printTable()

@@ -7,12 +7,7 @@ export const Source = new Record({
   weight: null
 })
 
-export function createSource ({
-  uid,
-  name,
-  url,
-  weight
-}) {
+export function createSource({ uid, name, url, weight }) {
   return new Source({
     uid,
     name,

@@ -7,7 +7,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import SettingsSwitch from '@components/settings-switch'
 
 export default class SettingsNotifications extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
 
     this.state = {
@@ -22,9 +22,7 @@ export default class SettingsNotifications extends React.Component {
   render = () => {
     return (
       <Accordion expanded={this.state.open} onChange={this.handleChange}>
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
-        >
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <div className='settings__section-title'>Notifications</div>
         </AccordionSummary>
         <AccordionDetails>

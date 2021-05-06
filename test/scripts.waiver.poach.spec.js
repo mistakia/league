@@ -10,10 +10,7 @@ const knex = require('../db')
 const league = require('../db/seeds/league')
 const { constants } = require('../common')
 const { start } = constants.season
-const {
-  selectPlayer,
-  addPlayer
-} = require('./utils')
+const { selectPlayer, addPlayer } = require('./utils')
 
 const run = require('../scripts/process-poaching-waivers')
 
@@ -180,7 +177,9 @@ describe('SCRIPTS /waivers - poach', function () {
         type: constants.waivers.POACH
       })
 
-      MockDate.set(start.clone().subtract('1', 'month').day(6).add('1', 'minute').toDate())
+      MockDate.set(
+        start.clone().subtract('1', 'month').day(6).add('1', 'minute').toDate()
+      )
 
       let error
       try {
@@ -202,10 +201,10 @@ describe('SCRIPTS /waivers - poach', function () {
 
       // check team waiver order
       const teams = await knex('teams').where({ lid: 1 })
-      const team1 = teams.find(t => t.uid === 1)
-      const team2 = teams.find(t => t.uid === 2)
-      const team3 = teams.find(t => t.uid === 3)
-      const team4 = teams.find(t => t.uid === 4)
+      const team1 = teams.find((t) => t.uid === 1)
+      const team2 = teams.find((t) => t.uid === 2)
+      const team3 = teams.find((t) => t.uid === 3)
+      const team4 = teams.find((t) => t.uid === 4)
       expect(team1.wo).to.equal(1)
       expect(team2.wo).to.equal(12)
       expect(team3.wo).to.equal(2)
@@ -250,7 +249,9 @@ describe('SCRIPTS /waivers - poach', function () {
         type: constants.waivers.POACH
       })
 
-      MockDate.set(start.clone().add('1', 'month').day(6).add('1', 'minute').toDate())
+      MockDate.set(
+        start.clone().add('1', 'month').day(6).add('1', 'minute').toDate()
+      )
 
       let error
       try {
@@ -272,10 +273,10 @@ describe('SCRIPTS /waivers - poach', function () {
 
       // check team waiver order
       const teams = await knex('teams').where({ lid: 1 })
-      const team1 = teams.find(t => t.uid === 1)
-      const team2 = teams.find(t => t.uid === 2)
-      const team3 = teams.find(t => t.uid === 3)
-      const team4 = teams.find(t => t.uid === 4)
+      const team1 = teams.find((t) => t.uid === 1)
+      const team2 = teams.find((t) => t.uid === 2)
+      const team3 = teams.find((t) => t.uid === 3)
+      const team4 = teams.find((t) => t.uid === 4)
       expect(team1.wo).to.equal(1)
       expect(team2.wo).to.equal(12)
       expect(team3.wo).to.equal(2)
@@ -333,7 +334,9 @@ describe('SCRIPTS /waivers - poach', function () {
         type: constants.waivers.POACH
       })
 
-      MockDate.set(start.clone().add('1', 'month').day(6).add('1', 'minute').toDate())
+      MockDate.set(
+        start.clone().add('1', 'month').day(6).add('1', 'minute').toDate()
+      )
 
       let error
       try {
@@ -346,8 +349,8 @@ describe('SCRIPTS /waivers - poach', function () {
 
       // check waivers
       const waivers = await knex('waivers')
-      const waiver1 = waivers.find(w => w.tid === 2)
-      const waiver2 = waivers.find(w => w.tid === 4)
+      const waiver1 = waivers.find((w) => w.tid === 2)
+      const waiver2 = waivers.find((w) => w.tid === 4)
       expect(waivers.length).to.equal(2)
       expect(waiver1.player).to.equal(player.player)
       expect(waiver1.succ).to.equal(1)
@@ -363,10 +366,10 @@ describe('SCRIPTS /waivers - poach', function () {
 
       // check team waiver order
       const teams = await knex('teams').where({ lid: 1 })
-      const team1 = teams.find(t => t.uid === 1)
-      const team2 = teams.find(t => t.uid === 2)
-      const team3 = teams.find(t => t.uid === 3)
-      const team4 = teams.find(t => t.uid === 4)
+      const team1 = teams.find((t) => t.uid === 1)
+      const team2 = teams.find((t) => t.uid === 2)
+      const team3 = teams.find((t) => t.uid === 3)
+      const team4 = teams.find((t) => t.uid === 4)
       expect(team1.wo).to.equal(1)
       expect(team2.wo).to.equal(12)
       expect(team3.wo).to.equal(2)
@@ -435,7 +438,9 @@ describe('SCRIPTS /waivers - poach', function () {
         type: constants.waivers.POACH
       })
 
-      MockDate.set(start.clone().add('1', 'month').day(6).add('1', 'minute').toDate())
+      MockDate.set(
+        start.clone().add('1', 'month').day(6).add('1', 'minute').toDate()
+      )
 
       let error
       try {
@@ -448,8 +453,8 @@ describe('SCRIPTS /waivers - poach', function () {
 
       // check waivers
       const waivers = await knex('waivers')
-      const waiver1 = waivers.find(w => w.tid === 2)
-      const waiver2 = waivers.find(w => w.tid === 4)
+      const waiver1 = waivers.find((w) => w.tid === 2)
+      const waiver2 = waivers.find((w) => w.tid === 4)
       expect(waivers.length).to.equal(2)
       expect(waiver1.player).to.equal(player1.player)
       expect(waiver1.succ).to.equal(1)
@@ -465,10 +470,10 @@ describe('SCRIPTS /waivers - poach', function () {
 
       // check team waiver order
       const teams = await knex('teams').where({ lid: 1 })
-      const team1 = teams.find(t => t.uid === 1)
-      const team2 = teams.find(t => t.uid === 2)
-      const team3 = teams.find(t => t.uid === 3)
-      const team4 = teams.find(t => t.uid === 4)
+      const team1 = teams.find((t) => t.uid === 1)
+      const team2 = teams.find((t) => t.uid === 2)
+      const team3 = teams.find((t) => t.uid === 3)
+      const team4 = teams.find((t) => t.uid === 4)
       expect(team1.wo).to.equal(1)
       expect(team2.wo).to.equal(11)
       expect(team3.wo).to.equal(2)
@@ -476,8 +481,8 @@ describe('SCRIPTS /waivers - poach', function () {
 
       // verify poaching claims
       const poaches = await knex('poaches').where({ lid: 1 })
-      const poach1 = poaches.find(p => p.tid === 2)
-      const poach2 = poaches.find(p => p.tid === 4)
+      const poach1 = poaches.find((p) => p.tid === 2)
+      const poach2 = poaches.find((p) => p.tid === 4)
       expect(poaches.length).to.equal(2)
       expect(poach1.player).to.equal(player1.player)
       expect(poach1.userid).to.equal(2)
@@ -561,7 +566,9 @@ describe('SCRIPTS /waivers - poach', function () {
         type: constants.waivers.POACH
       })
 
-      MockDate.set(start.clone().add('1', 'month').day(6).add('1', 'minute').toDate())
+      MockDate.set(
+        start.clone().add('1', 'month').day(6).add('1', 'minute').toDate()
+      )
 
       let error
       try {
@@ -574,9 +581,9 @@ describe('SCRIPTS /waivers - poach', function () {
 
       // check waivers
       const waivers = await knex('waivers')
-      const waiver1 = waivers.find(w => w.tid === 2)
-      const waiver2 = waivers.find(w => w.tid === 4)
-      const waiver3 = waivers.find(w => w.tid === 6)
+      const waiver1 = waivers.find((w) => w.tid === 2)
+      const waiver2 = waivers.find((w) => w.tid === 4)
+      const waiver3 = waivers.find((w) => w.tid === 6)
       expect(waivers.length).to.equal(3)
       expect(waiver1.player).to.equal(player1.player)
       expect(waiver1.succ).to.equal(1)
@@ -598,11 +605,11 @@ describe('SCRIPTS /waivers - poach', function () {
 
       // check team waiver order
       const teams = await knex('teams').where({ lid: 1 })
-      const team1 = teams.find(t => t.uid === 1)
-      const team2 = teams.find(t => t.uid === 2)
-      const team3 = teams.find(t => t.uid === 3)
-      const team4 = teams.find(t => t.uid === 4)
-      const team6 = teams.find(t => t.uid === 6)
+      const team1 = teams.find((t) => t.uid === 1)
+      const team2 = teams.find((t) => t.uid === 2)
+      const team3 = teams.find((t) => t.uid === 3)
+      const team4 = teams.find((t) => t.uid === 4)
+      const team6 = teams.find((t) => t.uid === 6)
       expect(team1.wo).to.equal(1)
       expect(team2.wo).to.equal(11)
       expect(team3.wo).to.equal(2)
@@ -611,8 +618,8 @@ describe('SCRIPTS /waivers - poach', function () {
 
       // verify poaching claims
       const poaches = await knex('poaches').where({ lid: 1 })
-      const poach1 = poaches.find(p => p.tid === 2)
-      const poach2 = poaches.find(p => p.tid === 4)
+      const poach1 = poaches.find((p) => p.tid === 2)
+      const poach2 = poaches.find((p) => p.tid === 4)
       expect(poaches.length).to.equal(2)
       expect(poach1.player).to.equal(player1.player)
       expect(poach1.userid).to.equal(2)
@@ -683,7 +690,9 @@ describe('SCRIPTS /waivers - poach', function () {
         timestamp: Math.round(Date.now() / 1000)
       })
 
-      MockDate.set(start.clone().add('1', 'month').day(6).add('1', 'minute').toDate())
+      MockDate.set(
+        start.clone().add('1', 'month').day(6).add('1', 'minute').toDate()
+      )
 
       let error
       try {
@@ -699,16 +708,18 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(waivers.length).to.equal(1)
       expect(waivers[0].player).to.equal(player.player)
       expect(waivers[0].succ).to.equal(0)
-      expect(waivers[0].reason).to.equal('player is not in an unprotected practice squad slot')
+      expect(waivers[0].reason).to.equal(
+        'player is not in an unprotected practice squad slot'
+      )
       expect(waivers[0].processed).to.equal(Math.round(Date.now() / 1000))
       expect(waivers[0].cancelled).to.equal(null)
 
       // check team waiver order
       const teams = await knex('teams').where({ lid: 1 })
-      const team1 = teams.find(t => t.uid === 1)
-      const team2 = teams.find(t => t.uid === 2)
-      const team3 = teams.find(t => t.uid === 3)
-      const team4 = teams.find(t => t.uid === 4)
+      const team1 = teams.find((t) => t.uid === 1)
+      const team2 = teams.find((t) => t.uid === 2)
+      const team3 = teams.find((t) => t.uid === 3)
+      const team4 = teams.find((t) => t.uid === 4)
       expect(team1.wo).to.equal(1)
       expect(team2.wo).to.equal(2)
       expect(team3.wo).to.equal(3)

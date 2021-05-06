@@ -10,6 +10,4 @@ const mapDispatchToProps = createSelector(
   (teams) => ({ teams })
 )
 
-export default connect(
-  mapDispatchToProps
-)(Matchup)
+export default connect(mapDispatchToProps)(Matchup)

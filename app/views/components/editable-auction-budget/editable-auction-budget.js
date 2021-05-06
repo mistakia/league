@@ -3,7 +3,7 @@ import React from 'react'
 import TextField from '@material-ui/core/TextField'
 
 export default class EditableAuctionBudget extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
 
     this.state = { value: this.props.budget, invalid: false, helper: '' }

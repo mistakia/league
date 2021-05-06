@@ -3,7 +3,7 @@ import React from 'react'
 import PlayerFilter from '@components/player-filter'
 
 export default class ExperienceFilter extends React.Component {
-  render () {
+  render() {
     const state = {
       type: 'experience',
       label: 'EXPERIENCE',
@@ -26,8 +26,6 @@ export default class ExperienceFilter extends React.Component {
       ]
     }
 
-    return (
-      <PlayerFilter {...state} />
-    )
+    return <PlayerFilter {...state} />
   }
 }

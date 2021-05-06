@@ -9,15 +9,23 @@ export default class SelectedPlayerLineupImpact extends React.Component {
     const { isLoggedIn, player } = this.props
 
     if (!isLoggedIn) {
-      return (<div>Must be logged in.</div>)
+      return <div>Must be logged in.</div>
     }
 
     const spData = []
     const bpData = []
     for (const week in player.getIn(['lineups', 'weeks'], {})) {
       if (week >= constants.season.week) {
-        spData.push(parseFloat(player.getIn(['lineups', 'weeks', week, 'sp'], 0).toFixed(1)))
-        bpData.push(parseFloat(player.getIn(['lineups', 'weeks', week, 'bp'], 0).toFixed(1)))
+        spData.push(
+          parseFloat(
+            player.getIn(['lineups', 'weeks', week, 'sp'], 0).toFixed(1)
+          )
+        )
+        bpData.push(
+          parseFloat(
+            player.getIn(['lineups', 'weeks', week, 'bp'], 0).toFixed(1)
+          )
+        )
       }
     }
 
@@ -30,7 +38,9 @@ export default class SelectedPlayerLineupImpact extends React.Component {
         text: ''
       },
       xAxis: {
-        categories: constants.fantasyWeeks.filter(w => w >= constants.season.week),
+        categories: constants.fantasyWeeks.filter(
+          (w) => w >= constants.season.week
+        ),
         title: {
           text: 'Week'
         },
@@ -57,20 +67,18 @@ export default class SelectedPlayerLineupImpact extends React.Component {
       credits: {
         enabled: false
       },
-      series: [{
-        name: 'Starter Points Added',
-        data: spData
-      }, {
-        name: 'Bench Points Added',
-        data: bpData
-      }]
+      series: [
+        {
+          name: 'Starter Points Added',
+          data: spData
+        },
+        {
+          name: 'Bench Points Added',
+          data: bpData
+        }
+      ]
     }
 
-    return (
-      <HighchartsReact
-        highcharts={Highcharts}
-        options={options}
-      />
-    )
+    return <HighchartsReact highcharts={Highcharts} options={options} />
   }
 }

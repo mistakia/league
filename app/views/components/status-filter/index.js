@@ -5,11 +5,8 @@ import { getPlayers } from '@core/players'
 
 import StatusFilter from './status-filter'
 
-const mapStateToProps = createSelector(
-  getPlayers,
-  (players) => ({ status: players.get('status') })
-)
+const mapStateToProps = createSelector(getPlayers, (players) => ({
+  status: players.get('status')
+}))
 
-export default connect(
-  mapStateToProps
-)(StatusFilter)
+export default connect(mapStateToProps)(StatusFilter)

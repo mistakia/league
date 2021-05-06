@@ -33,7 +33,7 @@ const run = async () => {
     .where('type', constants.waivers.FREE_AGENCY_PRACTICE)
     .groupBy('lid')
 
-  const leagueIds = results.map(w => w.lid)
+  const leagueIds = results.map((w) => w.lid)
   if (!leagueIds.length) {
     throw new Error('no waivers to process')
   }
@@ -50,12 +50,11 @@ const run = async () => {
       try {
         let value = 0
         if (!constants.season.isRegularSeason) {
-          const transactions = await db('transactions')
-            .where({
-              lid,
-              type: constants.transactions.DRAFT,
-              player: waiver.player
-            })
+          const transactions = await db('transactions').where({
+            lid,
+            type: constants.transactions.DRAFT,
+            player: waiver.player
+          })
 
           if (transactions.length) {
             value = transactions[0].value

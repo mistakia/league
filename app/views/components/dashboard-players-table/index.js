@@ -8,7 +8,4 @@ const mapDispatchToProps = {
   reorderWaivers: waiverActions.reorderWaivers
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(DashboardPlayersTable)
+export default connect(null, mapDispatchToProps)(DashboardPlayersTable)

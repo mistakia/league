@@ -10,11 +10,7 @@ const MockDate = require('mockdate')
 const league = require('../db/seeds/league')
 const { constants } = require('../common')
 const { start } = constants.season
-const {
-  addPlayer,
-  selectPlayer,
-  error
-} = require('./utils')
+const { addPlayer, selectPlayer, error } = require('./utils')
 
 // const should = chai.should()
 
@@ -67,7 +63,8 @@ describe('API /poaches', function () {
 
       MockDate.set(start.clone().add('1', 'week').add('3', 'day').toDate())
 
-      const request = chai.request(server)
+      const request = chai
+        .request(server)
         .post('/api/leagues/1/poaches')
         .set('Authorization', `Bearer ${user1}`)
         .send({

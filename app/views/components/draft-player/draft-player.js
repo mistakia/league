@@ -11,7 +11,15 @@ export default class DraftPlayer extends React.Component {
   }
 
   render = () => {
-    const { player, selected, isDrafted, index, vbaseline, watchlist, style } = this.props
+    const {
+      player,
+      selected,
+      isDrafted,
+      index,
+      vbaseline,
+      watchlist,
+      style
+    } = this.props
 
     const classNames = ['player-draft__item']
     if (selected === player.player) {
@@ -32,7 +40,8 @@ export default class DraftPlayer extends React.Component {
           </div>
           <div className='player-draft__item-index'>{index + 1}.</div>
           <div className='player-draft__item-name'>
-            <span>{player.pname}</span><Team team={player.team} />
+            <span>{player.pname}</span>
+            <Team team={player.team} />
           </div>
           <div className='player-draft__item-metric'>
             ${Math.round(player.getIn(['values', '0', vbaseline])) || '--'}

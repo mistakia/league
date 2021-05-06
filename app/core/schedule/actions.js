@@ -3,7 +3,7 @@ export const scheduleActions = {
   GET_SCHEDULE_FAILED: 'GET_SCHEDULE_FAILED',
   GET_SCHEDULE_FULFILLED: 'GET_SCHEDULE_FULFILLED',
 
-  getSchedulePending: opts => ({
+  getSchedulePending: (opts) => ({
     type: scheduleActions.GET_SCHEDULE_PENDING,
     payload: {
       opts

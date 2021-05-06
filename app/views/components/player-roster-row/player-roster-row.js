@@ -19,12 +19,18 @@ class PlayerRosterRow extends Player {
         <div className='roster__item-name'>
           <PlayerName playerId={player.player} />
         </div>
-        {!!player.player &&
-          <div className='roster__item-salary metric'>
-            {`$${player.value}`}
-          </div>}
+        {!!player.player && (
+          <div className='roster__item-salary metric'>{`$${player.value}`}</div>
+        )}
         <div className='roster__item-action'>
-          {!!(player.player && isHosted) && <IconButton small text icon='more' onClick={this.handleContextClick} />}
+          {!!(player.player && isHosted) && (
+            <IconButton
+              small
+              text
+              icon='more'
+              onClick={this.handleContextClick}
+            />
+          )}
         </div>
       </div>
     )

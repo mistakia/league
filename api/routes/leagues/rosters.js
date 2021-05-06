@@ -40,7 +40,10 @@ router.post('/?', async (req, res) => {
     }
 
     // verify value
-    if (typeof value !== 'undefined' && (isNaN(value) || value < 0 || value % 1 !== 0)) {
+    if (
+      typeof value !== 'undefined' &&
+      (isNaN(value) || value < 0 || value % 1 !== 0)
+    ) {
       return res.status(400).send({ error: 'invalid value' })
     }
 
@@ -127,7 +130,10 @@ router.put('/?', async (req, res) => {
     }
 
     // verify value
-    if (typeof value !== 'undefined' && (isNaN(value) || value < 0 || value % 1 !== 0)) {
+    if (
+      typeof value !== 'undefined' &&
+      (isNaN(value) || value < 0 || value % 1 !== 0)
+    ) {
       return res.status(400).send({ error: 'invalid value' })
     }
 
@@ -141,13 +147,15 @@ router.put('/?', async (req, res) => {
     }
 
     // update player value
-    await db('transactions').where({
-      player,
-      tid: teamId,
-      lid: leagueId
-    }).update({
-      value: val
-    })
+    await db('transactions')
+      .where({
+        player,
+        tid: teamId,
+        lid: leagueId
+      })
+      .update({
+        value: val
+      })
 
     res.send({ value: val })
   } catch (error) {
@@ -202,16 +210,20 @@ router.delete('/?', async (req, res) => {
       return res.status(400).send({ error: 'player not on roster' })
     }
 
-    const transaction = await db('transactions').where({
-      player,
-      tid: teamId,
-      lid: leagueId
-    }).del()
+    const transaction = await db('transactions')
+      .where({
+        player,
+        tid: teamId,
+        lid: leagueId
+      })
+      .del()
 
-    const rosterRes = await db('rosters_players').where({
-      rid: roster.uid,
-      player
-    }).del()
+    const rosterRes = await db('rosters_players')
+      .where({
+        rid: roster.uid,
+        player
+      })
+      .del()
 
     res.send({ roster: rosterRes, transaction })
   } catch (error) {

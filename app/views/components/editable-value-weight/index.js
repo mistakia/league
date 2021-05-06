@@ -8,7 +8,4 @@ const mapDispatchToProps = {
   update: settingActions.update
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(EditableValueWeight)
+export default connect(null, mapDispatchToProps)(EditableValueWeight)

@@ -21,8 +21,7 @@ const initialState = window.__INITIAL_STATE__
 const store = createStore(initialState, history)
 
 const ConnectedApp = withRouter(App)
-const ErrorBoundary = Bugsnag.getPlugin('react')
-  .createErrorBoundary(React)
+const ErrorBoundary = Bugsnag.getPlugin('react').createErrorBoundary(React)
 
 const Root = () => (
   <ErrorBoundary>

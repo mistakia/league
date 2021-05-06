@@ -19,7 +19,4 @@ const mapDispatchToProps = {
   update: statActions.updateQualifier
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(StatQualifierFilter)
+export default connect(mapStateToProps, mapDispatchToProps)(StatQualifierFilter)

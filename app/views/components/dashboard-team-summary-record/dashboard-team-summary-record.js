@@ -17,7 +17,10 @@ export default class DashboardTeamSummaryRecord extends React.Component {
       const item = (
         <tr key={t.uid}>
           <td>{t.name}</td>
-          <td>{t.getIn(['stats', 'wins'], 0)}-{t.getIn(['stats', 'losses'], 0)}-{t.getIn(['stats', 'ties'], 0)}</td>
+          <td>
+            {t.getIn(['stats', 'wins'], 0)}-{t.getIn(['stats', 'losses'], 0)}-
+            {t.getIn(['stats', 'ties'], 0)}
+          </td>
           <td>{t.getIn(['stats', 'pf'], 0).toFixed(1)}</td>
         </tr>
       )
@@ -34,7 +37,10 @@ export default class DashboardTeamSummaryRecord extends React.Component {
               Record
             </Grid>
             <Grid item xs={4}>
-              {team.getIn(['stats', 'wins'], 0)}-{team.getIn(['stats', 'losses'], 0)}-{team.getIn(['stats', 'ties'], 0)} (<Rank rank={rank} size={teams.size} />)
+              {team.getIn(['stats', 'wins'], 0)}-
+              {team.getIn(['stats', 'losses'], 0)}-
+              {team.getIn(['stats', 'ties'], 0)} (
+              <Rank rank={rank} size={teams.size} />)
             </Grid>
           </Grid>
         </AccordionSummary>
@@ -47,9 +53,7 @@ export default class DashboardTeamSummaryRecord extends React.Component {
                 <td>PF</td>
               </tr>
             </thead>
-            <tbody>
-              {divStandings}
-            </tbody>
+            <tbody>{divStandings}</tbody>
           </table>
           <table>
             <thead>
@@ -59,9 +63,7 @@ export default class DashboardTeamSummaryRecord extends React.Component {
                 <td>PF</td>
               </tr>
             </thead>
-            <tbody>
-              {leagueStandings}
-            </tbody>
+            <tbody>{leagueStandings}</tbody>
           </table>
         </AccordionDetails>
       </Accordion>

@@ -31,13 +31,24 @@ router.put('/:sourceid', async (req, res) => {
     }
 
     if (weight === 1) {
-      await db('users_sources').del().where({ userid: req.user.userId, sourceid })
+      await db('users_sources')
+        .del()
+        .where({ userid: req.user.userId, sourceid })
     } else {
-      const rows = await db('users_sources').where({ userid: req.user.userId, sourceid })
+      const rows = await db('users_sources').where({
+        userid: req.user.userId,
+        sourceid
+      })
       if (rows.length) {
-        await db('users_sources').update({ weight }).where({ userid: req.user.userId, sourceid })
+        await db('users_sources')
+          .update({ weight })
+          .where({ userid: req.user.userId, sourceid })
       } else {
-        await db('users_sources').insert({ userid: req.user.userId, sourceid, weight })
+        await db('users_sources').insert({
+          userid: req.user.userId,
+          sourceid,
+          weight
+        })
       }
     }
 

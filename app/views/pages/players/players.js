@@ -48,18 +48,24 @@ import { constants } from '@common'
 import './players.styl'
 
 export default class PlayersPage extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
 
     this.state = { expanded: false, page: 0, hasMore: true }
   }
 
-  componentDidUpdate (prevProps) {
+  componentDidUpdate(prevProps) {
     if (!this.scroll) return
 
-    if ((prevProps.order !== this.props.order || prevProps.orderBy !== this.props.orderBy) || !prevProps.players.equals(this.props.players)) {
+    if (
+      prevProps.order !== this.props.order ||
+      prevProps.orderBy !== this.props.orderBy ||
+      !prevProps.players.equals(this.props.players)
+    ) {
       this.scroll.pageLoaded = 0
-      const parentElement = this.scroll.getParentElement(this.scroll.scrollComponent)
+      const parentElement = this.scroll.getParentElement(
+        this.scroll.scrollComponent
+      )
       parentElement.scrollTop = 0
       this.setState({ page: 0, hasMore: true })
     }
@@ -71,7 +77,7 @@ export default class PlayersPage extends React.Component {
     }
   }
 
-  loadMore (page) {
+  loadMore(page) {
     const index = page * 25
     const hasMore = this.props.players.size > index
     this.setState({ page, hasMore })
@@ -83,13 +89,19 @@ export default class PlayersPage extends React.Component {
 
   handleExport = () => {
     const { players, vbaseline, isSeasonView, week } = this.props
-    const data = players.map(p => {
+    const data = players.map((p) => {
       const item = {
         name: p.name,
         team: p.team,
         pos: p.pos,
         salary: p.getIn(['values', `${week}`, vbaseline], 0).toFixed(1),
-        inflation: p.getIn(['values', isSeasonView ? 'inflationSeason' : 'inflation', vbaseline]).toFixed(1),
+        inflation: p
+          .getIn([
+            'values',
+            isSeasonView ? 'inflationSeason' : 'inflation',
+            vbaseline
+          ])
+          .toFixed(1),
         vorp: p.getIn(['vorp', `${week}`, vbaseline], 0).toFixed(1)
       }
 
@@ -111,28 +123,56 @@ export default class PlayersPage extends React.Component {
         ...constants.statHeaders
       },
       data: data.toJS(),
-      fileName: 'TeflonLeague-' + (isSeasonView ? 'SeasonProjections' : 'RestOfSeasonProjections')
+      fileName:
+        'TeflonLeague-' +
+        (isSeasonView ? 'SeasonProjections' : 'RestOfSeasonProjections')
     })
   }
 
   render = () => {
     const {
-      players, vbaseline, isSeasonView, isStatsView, isStatsPassingView, isWeekView,
-      isStatsRushingView, isStatsReceivingView, isStatsPassingAdvancedView, week,
-      isStatsPassingPressureView, isPending, showQualifier, isLoggedIn, isRestOfSeasonView
+      players,
+      vbaseline,
+      isSeasonView,
+      isStatsView,
+      isStatsPassingView,
+      isWeekView,
+      isStatsRushingView,
+      isStatsReceivingView,
+      isStatsPassingAdvancedView,
+      week,
+      isStatsPassingPressureView,
+      isPending,
+      showQualifier,
+      isLoggedIn,
+      isRestOfSeasonView
     } = this.props
 
     const rowItems = []
     const index = this.state.page * 25
-    players.slice(0, index).forEach((p, idx) => rowItems.push(<PlayerRow key={idx} player={p} />))
+    players
+      .slice(0, index)
+      .forEach((p, idx) => rowItems.push(<PlayerRow key={idx} player={p} />))
 
     const headerSeasonPassing = (
       <div className='player__row-group'>
         <div className='player__row-group-head'>Passing</div>
         <div className='player__row-group-body'>
-          <PlayerHeader className='table__cell metric' label='YDS' value={`projection.${week}.py`} />
-          <PlayerHeader className='table__cell metric' label='TD' value={`projection.${week}.tdp`} />
-          <PlayerHeader className='table__cell metric' label='INT' value={`projection.${week}.ints`} />
+          <PlayerHeader
+            className='table__cell metric'
+            label='YDS'
+            value={`projection.${week}.py`}
+          />
+          <PlayerHeader
+            className='table__cell metric'
+            label='TD'
+            value={`projection.${week}.tdp`}
+          />
+          <PlayerHeader
+            className='table__cell metric'
+            label='INT'
+            value={`projection.${week}.ints`}
+          />
         </div>
       </div>
     )
@@ -141,10 +181,26 @@ export default class PlayersPage extends React.Component {
       <div className='player__row-group'>
         <div className='player__row-group-head'>Rushing</div>
         <div className='player__row-group-body'>
-          <PlayerHeader className='table__cell metric' label='CAR' value={`projection.${week}.ra`} />
-          <PlayerHeader className='table__cell metric' label='YDS' value={`projection.${week}.ry`} />
-          <PlayerHeader className='table__cell metric' label='TD' value={`projection.${week}.tdr`} />
-          <PlayerHeader className='table__cell metric' label='FUM' value={`projection.${week}.fuml`} />
+          <PlayerHeader
+            className='table__cell metric'
+            label='CAR'
+            value={`projection.${week}.ra`}
+          />
+          <PlayerHeader
+            className='table__cell metric'
+            label='YDS'
+            value={`projection.${week}.ry`}
+          />
+          <PlayerHeader
+            className='table__cell metric'
+            label='TD'
+            value={`projection.${week}.tdr`}
+          />
+          <PlayerHeader
+            className='table__cell metric'
+            label='FUM'
+            value={`projection.${week}.fuml`}
+          />
         </div>
       </div>
     )
@@ -153,10 +209,26 @@ export default class PlayersPage extends React.Component {
       <div className='player__row-group'>
         <div className='player__row-group-head'>Receiving</div>
         <div className='player__row-group-body'>
-          <PlayerHeader className='table__cell metric' label='TAR' value={`projection.${week}.trg`} />
-          <PlayerHeader className='table__cell metric' label='REC' value={`projection.${week}.rec`} />
-          <PlayerHeader className='table__cell metric' label='YDS' value={`projection.${week}.recy`} />
-          <PlayerHeader className='table__cell metric' label='TD' value={`projection.${week}.tdrec`} />
+          <PlayerHeader
+            className='table__cell metric'
+            label='TAR'
+            value={`projection.${week}.trg`}
+          />
+          <PlayerHeader
+            className='table__cell metric'
+            label='REC'
+            value={`projection.${week}.rec`}
+          />
+          <PlayerHeader
+            className='table__cell metric'
+            label='YDS'
+            value={`projection.${week}.recy`}
+          />
+          <PlayerHeader
+            className='table__cell metric'
+            label='TD'
+            value={`projection.${week}.tdrec`}
+          />
         </div>
       </div>
     )
@@ -164,12 +236,13 @@ export default class PlayersPage extends React.Component {
     const headerSeasonSummary = (
       <div className='player__row-group'>
         <div className='player__row-group-body'>
-          {!constants.season.isRegularSeason &&
+          {!constants.season.isRegularSeason && (
             <PlayerHeader
               className='table__cell metric'
               label='Salary'
               value={`values.${week}.${vbaseline}`}
-            />}
+            />
+          )}
           <PlayerHeader
             className='table__cell metric'
             label='Value'
@@ -198,7 +271,10 @@ export default class PlayersPage extends React.Component {
       <div className='players__head'>
         <div className={classNames.join(' ')}>
           <div className='players__filters-row'>
-            <SearchFilter search={this.props.search} value={this.props.searchValue} />
+            <SearchFilter
+              search={this.props.search}
+              value={this.props.searchValue}
+            />
             <PositionFilter />
             {isLoggedIn && <AvailabilityFilter />}
             <PlayersViewMenu />
@@ -210,18 +286,19 @@ export default class PlayersPage extends React.Component {
             {isStatsView && <StatDaysFilter />}
             {isStatsView && <StatQuartersFilter />}
             {isStatsView && <StatDownsFilter />}
-            {(isStatsView && showQualifier) && <StatQualifierFilter />}
+            {isStatsView && showQualifier && <StatQualifierFilter />}
             <div className='players__head-expand' onClick={this.handleClick}>
               <Icon className='players__head-icon' name='arrow-down' />
             </div>
             <div className='players__head-actions'>
-              {!!(isSeasonView || isRestOfSeasonView) &&
+              {!!(isSeasonView || isRestOfSeasonView) && (
                 <IconButton onClick={this.handleExport} disabled={isPending}>
                   <GetAppIcon />
-                </IconButton>}
+                </IconButton>
+              )}
             </div>
           </div>
-          {this.state.expanded &&
+          {this.state.expanded && (
             <div className='players__filters-row'>
               <ExperienceFilter />
               <AgeFilter />
@@ -230,7 +307,8 @@ export default class PlayersPage extends React.Component {
               <CollegeDivisionFilter />
               <StatusFilter />
               {isLoggedIn && <TeamFilter />}
-            </div>}
+            </div>
+          )}
         </div>
       </div>
     )
@@ -245,7 +323,9 @@ export default class PlayersPage extends React.Component {
             <div className='player__row-pos' />
             <div className='player__row-name'>Name</div>
             {isLoggedIn && <div className='player__row-action' />}
-            {constants.season.week > 0 && <div className='player__row-opponent'>Opp</div>}
+            {constants.season.week > 0 && (
+              <div className='player__row-opponent'>Opp</div>
+            )}
             {isLoggedIn && <div className='player__row-availability' />}
           </div>
           {projectionView && headerSeasonSummary}
@@ -268,20 +348,19 @@ export default class PlayersPage extends React.Component {
           {isStatsReceivingView && <HeaderStatsReceivingAdvanced />}
         </div>
         <InfiniteScroll
-          ref={(scroll) => { this.scroll = scroll }}
+          ref={(scroll) => {
+            this.scroll = scroll
+          }}
           pageStart={0}
           loadMore={this.loadMore.bind(this)}
           hasMore={this.state.hasMore}
           loader={<Loading loading key={0} />}
-          useWindow={false}
-        >
+          useWindow={false}>
           {rowItems}
         </InfiniteScroll>
       </div>
     )
 
-    return (
-      <PageLayout {...{ body, head }} />
-    )
+    return <PageLayout {...{ body, head }} />
   }
 }

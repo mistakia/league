@@ -19,20 +19,22 @@ module.exports = async function ({
   userId,
   slot = constants.slots.BENCH
 }) {
-  const type = slot === constants.slots.BENCH ? constants.transactions.ROSTER_ADD
-    : constants.transactions.PRACTICE_ADD
+  const type =
+    slot === constants.slots.BENCH
+      ? constants.transactions.ROSTER_ADD
+      : constants.transactions.PRACTICE_ADD
 
   // verify player and drop ids
   const playerIds = [player]
   if (drop) playerIds.push(drop)
   const playerRows = await db('player').whereIn('player', playerIds)
-  const playerRow = playerRows.find(p => p.player === player)
+  const playerRow = playerRows.find((p) => p.player === player)
   if (!playerRow) {
     throw new Error('invalid player')
   }
   let dropPlayerRow
   if (drop) {
-    dropPlayerRow = playerRows.find(p => p.player === drop)
+    dropPlayerRow = playerRows.find((p) => p.player === drop)
     if (!dropPlayerRow) {
       throw new Error('invalid drop')
     }
@@ -60,7 +62,8 @@ module.exports = async function ({
       week: constants.season.week,
       year: constants.season.year,
       player
-    }).limit(1)
+    })
+    .limit(1)
   if (rosters.length) {
     throw new Error('player is not a free agent')
   }
@@ -78,8 +81,11 @@ module.exports = async function ({
     }
 
     // verify rookie draft is complete
-    const days = (league.nteams * 3) + 1 // total picks + waiver day
-    if (!league.ddate || moment().isBefore(moment(league.ddate, 'X').add(days, 'day'))) {
+    const days = league.nteams * 3 + 1 // total picks + waiver day
+    if (
+      !league.ddate ||
+      moment().isBefore(moment(league.ddate, 'X').add(days, 'day'))
+    ) {
       throw new Error('rookie free agency not open')
     }
   }
@@ -92,7 +98,11 @@ module.exports = async function ({
 
   // verify player is practice squad eligible (rookie, not on a team, or on a PS)
   if (type === constants.transactions.PRACTICE_ADD) {
-    if (playerRow.start !== constants.season.year && playerRow.posd !== 'PS' && playerRow.cteam !== 'INA') {
+    if (
+      playerRow.start !== constants.season.year &&
+      playerRow.posd !== 'PS' &&
+      playerRow.cteam !== 'INA'
+    ) {
       throw new Error('player is not practice squad eligible')
     }
   }

@@ -10,9 +10,11 @@ const mapStateToProps = createSelector(
   getPlayerById,
   getScoreboardGamelogByPlayerId,
   getScoreboard,
-  (player, gamelog, scoreboard) => ({ player, gamelog, week: scoreboard.get('week') })
+  (player, gamelog, scoreboard) => ({
+    player,
+    gamelog,
+    week: scoreboard.get('week')
+  })
 )
 
-export default connect(
-  mapStateToProps
-)(ScoreboardPlayer)
+export default connect(mapStateToProps)(ScoreboardPlayer)

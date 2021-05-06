@@ -28,13 +28,19 @@ const run = async () => {
     let error
     let player
     try {
-      const players = await db('player').where({ player: claim.player }).limit(1)
+      const players = await db('player')
+        .where({ player: claim.player })
+        .limit(1)
       player = players[0]
       await processPoach(claim)
-      log(`poaching claim awarded to teamId: (${claim.tid}) for ${claim.player}`)
+      log(
+        `poaching claim awarded to teamId: (${claim.tid}) for ${claim.player}`
+      )
     } catch (err) {
       error = err
-      log(`poaching claim unsuccessful by teamId: (${claim.tid}) because ${error.message}`)
+      log(
+        `poaching claim unsuccessful by teamId: (${claim.tid}) because ${error.message}`
+      )
       await sendNotifications({
         leagueId: claim.lid,
         teamIds: [claim.tid],

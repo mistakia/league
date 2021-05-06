@@ -5,11 +5,8 @@ import { getPlayers } from '@core/players'
 
 import PositionFilter from './position-filter'
 
-const mapStateToProps = createSelector(
-  getPlayers,
-  (players) => ({ positions: players.get('positions') })
-)
+const mapStateToProps = createSelector(getPlayers, (players) => ({
+  positions: players.get('positions')
+}))
 
-export default connect(
-  mapStateToProps
-)(PositionFilter)
+export default connect(mapStateToProps)(PositionFilter)
