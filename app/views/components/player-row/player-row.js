@@ -1,5 +1,4 @@
 import React from 'react'
-import Hidden from '@material-ui/core/Hidden'
 
 import PlayerRowOpponent from '@components/player-row-opponent'
 import EditableProjection from '@components/editable-projection'
@@ -18,7 +17,7 @@ import './player-row.styl'
 class PlayerRow extends Player {
   render = () => {
     const {
-      player, style, selectedPlayer, vbaseline, isSeasonView, isHosted, isWeekView,
+      player, selectedPlayer, vbaseline, isSeasonView, isHosted, isWeekView,
       isStatsPassingAdvancedView, isStatsPassingPressureView, isStatsRushingView, week,
       isStatsReceivingView, percentiles, isLoggedIn, isRestOfSeasonView, selected, status,
       baselines, teamId
@@ -281,54 +280,50 @@ class PlayerRow extends Player {
     }
 
     return (
-      <div style={style}>
-        <div className={classNames.join(' ')}>
-          <div className='player__row-main'>
-            <div className='player__row-action'>
-              <PlayerWatchlistAction playerId={player.player} />
-            </div>
-            <div className='player__row-pos'>
-              <Position pos={player.pos} />
-            </div>
-            <div className='player__row-name cursor' onClick={this.handleClick}>
-              <span>{player.name}</span>
-              {(constants.season.year === player.draft_year) && <PlayerLabel label='R' type='rookie' description='Rookie' />}
-              <Team team={player.team} />
-            </div>
-            {isLoggedIn &&
-              <div className='player__row-action'>
-                {!!isHosted && <IconButton small text onClick={this.handleContextClick} icon='more' />}
-              </div>}
-            <PlayerRowOpponent team={player.team} pos={player.pos} />
-            {isLoggedIn &&
-              <div className='player__row-availability'>
-                {player.tid
-                  ? <TeamName abbrv tid={player.tid} />
-                  : ((status.waiver.active || status.waiver.poach || status.waiver.practice || status.locked)
-                    ? 'W' : 'FA')}
-              </div>}
-            <Hidden xsDown>
-              {projectionView && seasonSummary()}
-              {projectionView && seasonPassing}
-              {projectionView && seasonRushing}
-              {projectionView && seasonReceiving}
-              {isStatsPassingAdvancedView && passingBasic}
-              {isStatsPassingAdvancedView && passingEfficiency}
-              {isStatsPassingAdvancedView && passingAdvanced}
-              {isStatsPassingAdvancedView && passingAiryards}
-              {isStatsPassingPressureView && passingPressure}
-              {isStatsRushingView && rushingBasic}
-              {isStatsRushingView && rushingProductivity}
-              {isStatsRushingView && rushingAfterContact}
-              {isStatsRushingView && rushingShare}
-              {isStatsRushingView && rushingAdvanced}
-              {isStatsRushingView && rushingBrokenTackles}
-              {isStatsReceivingView && receivingBasic}
-              {isStatsReceivingView && receivingOpportunity}
-              {isStatsReceivingView && receivingAdvanced}
-            </Hidden>
+      <div className={classNames.join(' ')}>
+        <div className='player__row-lead'>
+          <div className='player__row-action'>
+            <PlayerWatchlistAction playerId={player.player} />
           </div>
+          <div className='player__row-pos'>
+            <Position pos={player.pos} />
+          </div>
+          <div className='player__row-name cursor' onClick={this.handleClick}>
+            <span>{player.name}</span>
+            {(constants.season.year === player.draft_year) && <PlayerLabel label='R' type='rookie' description='Rookie' />}
+            <Team team={player.team} />
+          </div>
+          {isLoggedIn &&
+            <div className='player__row-action'>
+              {!!isHosted && <IconButton small text onClick={this.handleContextClick} icon='more' />}
+            </div>}
+          {constants.season.week > 0 && <PlayerRowOpponent team={player.team} pos={player.pos} />}
+          {isLoggedIn &&
+            <div className='player__row-availability'>
+              {player.tid
+                ? <TeamName abbrv tid={player.tid} />
+                : ((status.waiver.active || status.waiver.poach || status.waiver.practice || status.locked)
+                  ? 'W' : 'FA')}
+            </div>}
         </div>
+        {projectionView && seasonSummary()}
+        {projectionView && seasonPassing}
+        {projectionView && seasonRushing}
+        {projectionView && seasonReceiving}
+        {isStatsPassingAdvancedView && passingBasic}
+        {isStatsPassingAdvancedView && passingEfficiency}
+        {isStatsPassingAdvancedView && passingAdvanced}
+        {isStatsPassingAdvancedView && passingAiryards}
+        {isStatsPassingPressureView && passingPressure}
+        {isStatsRushingView && rushingBasic}
+        {isStatsRushingView && rushingProductivity}
+        {isStatsRushingView && rushingAfterContact}
+        {isStatsRushingView && rushingShare}
+        {isStatsRushingView && rushingAdvanced}
+        {isStatsRushingView && rushingBrokenTackles}
+        {isStatsReceivingView && receivingBasic}
+        {isStatsReceivingView && receivingOpportunity}
+        {isStatsReceivingView && receivingAdvanced}
       </div>
     )
   }

@@ -1,8 +1,7 @@
 import React from 'react'
-import { AutoSizer, List } from 'react-virtualized'
 import GetAppIcon from '@material-ui/icons/GetApp'
 import IconButton from '@material-ui/core/IconButton'
-import Hidden from '@material-ui/core/Hidden'
+import InfiniteScroll from 'react-infinite-scroller'
 
 import SearchFilter from '@components/search-filter'
 import StatusFilter from '@components/status-filter'
@@ -48,15 +47,34 @@ import { constants } from '@common'
 
 import './players.styl'
 
-const ROW_HEIGHT = 30
-
 export default class PlayersPage extends React.Component {
-  list = React.createRef()
-
   constructor (props) {
     super(props)
 
-    this.state = { expanded: false }
+    this.state = { expanded: false, page: 0, hasMore: true }
+  }
+
+  componentDidUpdate (prevProps) {
+    if (!this.scroll) return
+
+    if (prevProps.order !== this.props.order || prevProps.orderBy !== this.props.orderBy) {
+      this.scroll.pageLoaded = 0
+      const parentElement = this.scroll.getParentElement(this.scroll.scrollComponent)
+      parentElement.scrollTop = 0
+      this.setState({ page: 0, hasMore: true })
+    }
+
+    if (this.props.selected) {
+      // TODO
+      // const index = this.props.players.findIndex(p => p.player === this.props.selected)
+      // this.list.current.scrollToRow(index)
+    }
+  }
+
+  loadMore (page) {
+    const index = page * 25
+    const hasMore = this.props.players.size > index
+    this.setState({ page, hasMore })
   }
 
   handleClick = (event) => {
@@ -97,19 +115,6 @@ export default class PlayersPage extends React.Component {
     })
   }
 
-  componentDidUpdate = (prevProps) => {
-    if (!this.list.current) return
-
-    if (prevProps.order !== this.props.order || prevProps.orderBy !== this.props.orderBy) {
-      this.list.current.scrollToPosition(0)
-    }
-
-    if (this.props.selected) {
-      const index = this.props.players.findIndex(p => p.player === this.props.selected)
-      this.list.current.scrollToRow(index)
-    }
-  }
-
   render = () => {
     const {
       players, vbaseline, isSeasonView, isStatsView, isStatsPassingView, isWeekView,
@@ -117,12 +122,9 @@ export default class PlayersPage extends React.Component {
       isStatsPassingPressureView, isPending, showQualifier, isLoggedIn, isRestOfSeasonView
     } = this.props
 
-    const Row = ({ index, key, parent, ...params }) => {
-      const player = players.get(index)
-      return (
-        <PlayerRow key={key} player={player} {...params} />
-      )
-    }
+    const rowItems = []
+    const index = this.state.page * 25
+    players.slice(0, index).forEach((p, idx) => rowItems.push(<PlayerRow key={idx} player={p} />))
 
     const headerSeasonPassing = (
       <div className='player__row-group'>
@@ -230,55 +232,52 @@ export default class PlayersPage extends React.Component {
               {isLoggedIn && <TeamFilter />}
             </div>}
         </div>
-        <div className='players__header'>
-          <div className='player__row-action' />
-          <div className='player__row-pos' />
-          <div className='player__row-name'>Name</div>
-          {isLoggedIn && <div className='player__row-action' />}
-          <div className='player__row-opponent'>Opp</div>
-          {isLoggedIn && <div className='player__row-availability' />}
-          <Hidden xsDown>
-            {projectionView && headerSeasonSummary}
-            {projectionView && headerSeasonPassing}
-            {projectionView && headerSeasonRushing}
-            {projectionView && headerSeasonReceiving}
-            {isStatsPassingAdvancedView && <HeaderStatsPassingBasic />}
-            {isStatsPassingAdvancedView && <HeaderStatsPassingEfficiency />}
-            {isStatsPassingAdvancedView && <HeaderStatsPassingAdvanced />}
-            {isStatsPassingAdvancedView && <HeaderStatsPassingAiryards />}
-            {isStatsPassingPressureView && <HeaderStatsPassingPressure />}
-            {isStatsRushingView && <HeaderStatsRushingBasic />}
-            {isStatsRushingView && <HeaderStatsRushingProductivity />}
-            {isStatsRushingView && <HeaderStatsRushingAfterContact />}
-            {isStatsRushingView && <HeaderStatsRushingShare />}
-            {isStatsRushingView && <HeaderStatsRushingAdvanced />}
-            {isStatsRushingView && <HeaderStatsRushingBrokenTackles />}
-            {isStatsReceivingView && <HeaderStatsReceivingBasic />}
-            {isStatsReceivingView && <HeaderStatsReceivingOpportunity />}
-            {isStatsReceivingView && <HeaderStatsReceivingAdvanced />}
-          </Hidden>
-        </div>
       </div>
     )
 
     const body = isPending ? (
       <Loading loading />
     ) : (
-      <AutoSizer>
-        {({ height, width }) => (
-          <List
-            ref={this.list}
-            className='players'
-            width={width}
-            height={height}
-            columnWidth={60}
-            rowHeight={ROW_HEIGHT}
-            rowCount={players.size}
-            columnCount={50}
-            rowRenderer={Row}
-          />
-        )}
-      </AutoSizer>
+      <div className='players__table'>
+        <div className='players__header'>
+          <div className='player__row-lead'>
+            <div className='player__row-action' />
+            <div className='player__row-pos' />
+            <div className='player__row-name'>Name</div>
+            {isLoggedIn && <div className='player__row-action' />}
+            {constants.season.week > 0 && <div className='player__row-opponent'>Opp</div>}
+            {isLoggedIn && <div className='player__row-availability' />}
+          </div>
+          {projectionView && headerSeasonSummary}
+          {projectionView && headerSeasonPassing}
+          {projectionView && headerSeasonRushing}
+          {projectionView && headerSeasonReceiving}
+          {isStatsPassingAdvancedView && <HeaderStatsPassingBasic />}
+          {isStatsPassingAdvancedView && <HeaderStatsPassingEfficiency />}
+          {isStatsPassingAdvancedView && <HeaderStatsPassingAdvanced />}
+          {isStatsPassingAdvancedView && <HeaderStatsPassingAiryards />}
+          {isStatsPassingPressureView && <HeaderStatsPassingPressure />}
+          {isStatsRushingView && <HeaderStatsRushingBasic />}
+          {isStatsRushingView && <HeaderStatsRushingProductivity />}
+          {isStatsRushingView && <HeaderStatsRushingAfterContact />}
+          {isStatsRushingView && <HeaderStatsRushingShare />}
+          {isStatsRushingView && <HeaderStatsRushingAdvanced />}
+          {isStatsRushingView && <HeaderStatsRushingBrokenTackles />}
+          {isStatsReceivingView && <HeaderStatsReceivingBasic />}
+          {isStatsReceivingView && <HeaderStatsReceivingOpportunity />}
+          {isStatsReceivingView && <HeaderStatsReceivingAdvanced />}
+        </div>
+        <InfiniteScroll
+          ref={(scroll) => { this.scroll = scroll }}
+          pageStart={0}
+          loadMore={this.loadMore.bind(this)}
+          hasMore={this.state.hasMore}
+          loader={<Loading loading key={0} />}
+          useWindow={false}
+        >
+          {rowItems}
+        </InfiniteScroll>
+      </div>
     )
 
     return (

@@ -17,7 +17,6 @@ const calculatePrices = ({ total, cap, players, week }) => {
       const value_adj = Math.round(rate[type] * player.vorp_adj[week][type])
       player.values[week][type] = value > 0 ? value : 0
       player.values_adj[week][type] = value_adj > 0 ? value_adj : 0
-      console.log(`${player.fname} ${player.lname} salary: ${player.value}, value: ${value}, adjusted: ${value_adj}`)
     }
   }
 

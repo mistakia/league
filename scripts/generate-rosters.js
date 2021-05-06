@@ -15,7 +15,6 @@ const run = async () => {
   // get list of hosted leagues
   const leagues = await db('leagues')
 
-
   const nextWeek = isNewSeason ? 0 : (constants.season.week + 1)
   const nextYear = isNewSeason ? argv.year : constants.season.year
   const previousWeek = isNewSeason ? 16 : constants.season.week
