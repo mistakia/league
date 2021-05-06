@@ -35,11 +35,48 @@ router.put('/:leagueId', async (req, res) => {
     }
 
     const fields = [
-      'sqb', 'srb', 'swr', 'ste', 'sk', 'sdst', 'srbwr', 'srbwrte',
-      'sqbrbwrte', 'swrte', 'bench', 'ps', 'ir', 'mqb', 'mrb', 'mwr', 'mte',
-      'mdst', 'mk', 'faab', 'cap', 'pa', 'pc', 'py', 'ints', 'tdp', 'ra', 'ry',
-      'tdr', 'rbrec', 'wrrec', 'terec', 'rec', 'recy', 'twoptc', 'tdrec', 'fuml', 'name',
-      'nteams', 'minBid', 'prtd', 'krtd'
+      'sqb',
+      'srb',
+      'swr',
+      'ste',
+      'sk',
+      'sdst',
+      'srbwr',
+      'srbwrte',
+      'sqbrbwrte',
+      'swrte',
+      'bench',
+      'ps',
+      'ir',
+      'mqb',
+      'mrb',
+      'mwr',
+      'mte',
+      'mdst',
+      'mk',
+      'faab',
+      'cap',
+      'pa',
+      'pc',
+      'py',
+      'ints',
+      'tdp',
+      'ra',
+      'ry',
+      'tdr',
+      'rbrec',
+      'wrrec',
+      'terec',
+      'rec',
+      'recy',
+      'twoptc',
+      'tdrec',
+      'fuml',
+      'name',
+      'nteams',
+      'minBid',
+      'prtd',
+      'krtd'
     ]
 
     if (!field) {
@@ -55,19 +92,85 @@ router.put('/:leagueId', async (req, res) => {
     }
 
     const ints = [
-      'sqb', 'srb', 'swr', 'ste', 'sk', 'sdst', 'srbwr', 'srbwrte',
-      'sqbrbwrte', 'swrte', 'bench', 'ps', 'ir', 'mqb', 'mrb', 'mwr', 'mte',
-      'mdst', 'mk', 'faab', 'cap', 'pa', 'pc', 'py', 'ints', 'tdp', 'ra', 'ry',
-      'tdr', 'rbrec', 'wrrec', 'terec', 'rec', 'recy', 'twoptc', 'tdrec', 'fuml',
-      'nteams', 'minBid', 'prtd', 'krtd'
+      'sqb',
+      'srb',
+      'swr',
+      'ste',
+      'sk',
+      'sdst',
+      'srbwr',
+      'srbwrte',
+      'sqbrbwrte',
+      'swrte',
+      'bench',
+      'ps',
+      'ir',
+      'mqb',
+      'mrb',
+      'mwr',
+      'mte',
+      'mdst',
+      'mk',
+      'faab',
+      'cap',
+      'pa',
+      'pc',
+      'py',
+      'ints',
+      'tdp',
+      'ra',
+      'ry',
+      'tdr',
+      'rbrec',
+      'wrrec',
+      'terec',
+      'rec',
+      'recy',
+      'twoptc',
+      'tdrec',
+      'fuml',
+      'nteams',
+      'minBid',
+      'prtd',
+      'krtd'
     ]
     const positives = [
-      'sqb', 'srb', 'swr', 'ste', 'sk', 'sdst', 'srbwr', 'srbwrte',
-      'sqbrbwrte', 'swrte', 'bench', 'ps', 'ir', 'mqb', 'mrb', 'mwr', 'mte',
-      'mdst', 'mk', 'faab', 'cap', 'minBid', 'prtd', 'krtd'
+      'sqb',
+      'srb',
+      'swr',
+      'ste',
+      'sk',
+      'sdst',
+      'srbwr',
+      'srbwrte',
+      'sqbrbwrte',
+      'swrte',
+      'bench',
+      'ps',
+      'ir',
+      'mqb',
+      'mrb',
+      'mwr',
+      'mte',
+      'mdst',
+      'mk',
+      'faab',
+      'cap',
+      'minBid',
+      'prtd',
+      'krtd'
     ]
     const floats = [
-      'pa', 'pc', 'py', 'ra', 'ry', 'rbrec', 'wrrec', 'terec', 'rec', 'recy'
+      'pa',
+      'pc',
+      'py',
+      'ra',
+      'ry',
+      'rbrec',
+      'wrrec',
+      'terec',
+      'rec',
+      'recy'
     ]
 
     if (ints.indexOf(field) >= 0) {
@@ -86,7 +189,9 @@ router.put('/:leagueId', async (req, res) => {
       }
     }
 
-    await db('leagues').update({ [field]: value }).where({ uid: lid })
+    await db('leagues')
+      .update({ [field]: value })
+      .where({ uid: lid })
     res.send({ value })
   } catch (err) {
     logger(err)
@@ -99,18 +204,16 @@ router.get('/:leagueId/teams/?', async (req, res) => {
   try {
     const { leagueId } = req.params
     const teams = await db('teams').where({ lid: leagueId })
-    const picks = await db('draft')
-      .where({ lid: leagueId })
-      .whereNull('player')
+    const picks = await db('draft').where({ lid: leagueId }).whereNull('player')
 
-    const teamIds = teams.map(t => t.uid)
+    const teamIds = teams.map((t) => t.uid)
 
     const usersTeams = await db('users_teams')
       .where({ userid: req.user.userId })
       .whereIn('tid', teamIds)
 
     for (const team of teams) {
-      team.picks = picks.filter(p => p.tid === team.uid)
+      team.picks = picks.filter((p) => p.tid === team.uid)
     }
 
     for (const usersTeam of usersTeams) {
@@ -141,14 +244,31 @@ router.get('/:leagueId/rosters/?', async (req, res) => {
       .orderBy('week', 'desc')
 
     const players = await db('rosters_players')
-      .select('rosters_players.*', 'transactions.type', 'transactions.value', 'transactions.timestamp', 'transactions.year')
+      .select(
+        'rosters_players.*',
+        'transactions.type',
+        'transactions.value',
+        'transactions.timestamp',
+        'transactions.year'
+      )
       .join('rosters', 'rosters_players.rid', '=', 'rosters.uid')
       .leftJoin('transactions', function () {
-        this.on('transactions.uid', '=', db.raw('(select max(uid) from transactions where transactions.tid = rosters.tid and transactions.player = rosters_players.player)'))
+        this.on(
+          'transactions.uid',
+          '=',
+          db.raw(
+            '(select max(uid) from transactions where transactions.tid = rosters.tid and transactions.player = rosters_players.player)'
+          )
+        )
       })
-      .whereIn('rid', rosters.map(r => r.uid))
+      .whereIn(
+        'rid',
+        rosters.map((r) => r.uid)
+      )
 
-    rosters.forEach(r => { r.players = players.filter(p => p.rid === r.uid) })
+    rosters.forEach((r) => {
+      r.players = players.filter((p) => p.rid === r.uid)
+    })
 
     res.send(rosters)
   } catch (err) {

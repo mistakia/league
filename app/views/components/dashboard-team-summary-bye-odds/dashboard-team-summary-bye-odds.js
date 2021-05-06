@@ -36,9 +36,7 @@ export default class DashboardTeamSummaryByeOdds extends React.Component {
         </AccordionSummary>
         <AccordionDetails>
           <table>
-            <tbody>
-              {items}
-            </tbody>
+            <tbody>{items}</tbody>
           </table>
         </AccordionDetails>
       </Accordion>

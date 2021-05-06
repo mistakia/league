@@ -1,7 +1,8 @@
 import getEligibleSlots from './get-eligible-slots'
 import * as constants from './constants'
 
-const getPositionCount = (players) => players.reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map())
+const getPositionCount = (players) =>
+  players.reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map())
 
 export default function ({ positions, league }) {
   const rosterConstraints = {}
@@ -23,7 +24,7 @@ export default function ({ positions, league }) {
     constraints[pos].min = posMin
     constraints.starter.max += posMin
     constraints.starter.min += posMin
-    positionCount.set(pos, Math.max((min - rosterConstraints[pos].min), 0))
+    positionCount.set(pos, Math.max(min - rosterConstraints[pos].min, 0))
   }
 
   const processFlex = (positions, flexCount) => {
@@ -34,7 +35,7 @@ export default function ({ positions, league }) {
       return
     }
 
-    positionCount.set(pos, Math.max((posCount - flexCount), 0))
+    positionCount.set(pos, Math.max(posCount - flexCount, 0))
     const min = Math.min(posCount, flexCount)
     constraints.starter.max += min
     constraints.starter.min += min

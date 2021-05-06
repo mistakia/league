@@ -18,19 +18,23 @@ export default class ScoreboardSelectWeek extends React.Component {
     let wk = Math.min(constants.season.week, constants.season.finalWeek)
     for (; wk > 0; wk--) {
       menuItems.push(
-        <MenuItem key={wk} value={wk}>Week {wk}</MenuItem>
+        <MenuItem key={wk} value={wk}>
+          Week {wk}
+        </MenuItem>
       )
     }
 
     return (
-      <FormControl size='small' variant='outlined' className='scoreboard__select-week'>
+      <FormControl
+        size='small'
+        variant='outlined'
+        className='scoreboard__select-week'>
         <InputLabel id='players__view-menu-label'>Week</InputLabel>
         <Select
           labelId='players__view-menu-label'
           value={this.props.week}
           onChange={this.handleChange}
-          label='Week'
-        >
+          label='Week'>
           {menuItems}
         </Select>
       </FormControl>

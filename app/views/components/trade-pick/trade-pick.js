@@ -9,7 +9,7 @@ export default class TradePick extends React.Component {
     const { pick, league, isSelected, teams } = this.props
     let text = `${pick.year} - ${ordinalSuffixOf(pick.round)}`
     if (pick.pick) {
-      const pickNum = (pick.pick % league.nteams) || league.nteams
+      const pickNum = pick.pick % league.nteams || league.nteams
       const pickStr = `${pick.round}.${('0' + pickNum).slice(-2)}`
       text = `${text} #${pick.pick} (${pickStr})`
     }
@@ -20,10 +20,6 @@ export default class TradePick extends React.Component {
     const classNames = ['trade__pick']
     if (isSelected) classNames.push('selected')
 
-    return (
-      <div className={classNames.join(' ')}>
-        {text}
-      </div>
-    )
+    return <div className={classNames.join(' ')}>{text}</div>
   }
 }

@@ -14,10 +14,12 @@ router.get('/?', async (req, res) => {
     const tid = parseInt(teamId, 10)
 
     const teams = await db('users_teams').where({ userid: req.user.userId })
-    const teamIds = teams.map(r => r.tid)
+    const teamIds = teams.map((r) => r.tid)
 
     if (!teamIds.includes(tid)) {
-      return res.status(401).send({ error: 'you do not have access to this teamId' })
+      return res
+        .status(401)
+        .send({ error: 'you do not have access to this teamId' })
     }
 
     const roster = await getRoster({ tid, week, year })
@@ -69,9 +71,8 @@ router.put('/?', async (req, res) => {
       }
     }
 
-    const playerIds = players.map(p => p.player)
-    const playerRows = await db('player')
-      .whereIn('player', playerIds)
+    const playerIds = players.map((p) => p.player)
+    const playerRows = await db('player').whereIn('player', playerIds)
 
     if (playerRows.length !== playerIds.length) {
       return res.status(400).send({ error: 'invalid player' })
@@ -89,7 +90,7 @@ router.put('/?', async (req, res) => {
 
     for (const item of players) {
       // verify player is on roster
-      const isActive = !!roster.active.find(p => p.player === item.player)
+      const isActive = !!roster.active.find((p) => p.player === item.player)
       if (!isActive) {
         return res.status(400).send({ error: 'invalid player' })
       }
@@ -98,10 +99,14 @@ router.put('/?', async (req, res) => {
     }
 
     for (const item of players) {
-      const playerRow = playerRows.find(p => p.player === item.player)
+      const playerRow = playerRows.find((p) => p.player === item.player)
       // verify player is eligible for slot
       if (item.slot !== constants.slots.BENCH) {
-        const isEligible = roster.isEligibleForSlot({ slot: item.slot, player: item.player, pos: playerRow.pos })
+        const isEligible = roster.isEligibleForSlot({
+          slot: item.slot,
+          player: item.player,
+          pos: playerRow.pos
+        })
         if (!isEligible) {
           return res.status(400).send({ error: 'invalid slot' })
         }
@@ -110,10 +115,16 @@ router.put('/?', async (req, res) => {
       // verify player is not locked
       const isLocked = await isPlayerLocked(item.player)
       if (isLocked) {
-        return res.status(400).send({ error: 'player is locked, game has started' })
+        return res
+          .status(400)
+          .send({ error: 'player is locked, game has started' })
       }
 
-      roster.addPlayer({ slot: item.slot, player: item.player, pos: playerRow.pos })
+      roster.addPlayer({
+        slot: item.slot,
+        player: item.player,
+        pos: playerRow.pos
+      })
     }
 
     const data = []

@@ -28,7 +28,7 @@ module.exports = async function (claim) {
   const claimPlayerIds = [claim.player]
   if (claim.drop) claimPlayerIds.push(claim.drop)
   const playerRows = await db('player').whereIn('player', claimPlayerIds)
-  const poachPlayer = playerRows.find(p => p.player === claim.player)
+  const poachPlayer = playerRows.find((p) => p.player === claim.player)
   const leagues = await db('leagues').where({ uid: claim.lid })
   const league = leagues[0]
   const rosterRow = await getRoster({
@@ -56,7 +56,10 @@ module.exports = async function (claim) {
     .limit(1)
   const tran = transactions[0]
   const playerPoachValue = tran.value + 2
-  if (!constants.season.isRegularSeason && (roster.availableCap - playerPoachValue) < 0) {
+  if (
+    !constants.season.isRegularSeason &&
+    roster.availableCap - playerPoachValue < 0
+  ) {
     throw new Error('not enough available cap')
   }
 
@@ -71,7 +74,7 @@ module.exports = async function (claim) {
     .where('week', '>=', constants.season.week)
     .where('tid', rosterSlot.tid)
     .where('year', constants.season.year)
-  const poachedTeamRosterIds = poachedTeamRosters.map(r => r.uid)
+  const poachedTeamRosterIds = poachedTeamRosters.map((r) => r.uid)
   await db('rosters_players')
     .whereIn('rid', poachedTeamRosterIds)
     .where('player', claim.player)
@@ -90,18 +93,17 @@ module.exports = async function (claim) {
   await db('transactions').insert(transaction)
 
   // add player to poaching team roster
-  await db('rosters_players')
-    .insert({
-      rid: rosterRow.uid,
-      slot: constants.slots.BENCH,
-      player: claim.player,
-      pos: poachPlayer.pos
-    })
+  await db('rosters_players').insert({
+    rid: rosterRow.uid,
+    slot: constants.slots.BENCH,
+    player: claim.player,
+    pos: poachPlayer.pos
+  })
 
   // send notification
   let message = `Poaching claim for ${poachPlayer.fname} ${poachPlayer.lname} (${poachPlayer.pos}) successfully processed.`
   if (claim.drop && roster.has(claim.drop)) {
-    const dropPlayer = playerRows.find(p => p.player === claim.drop)
+    const dropPlayer = playerRows.find((p) => p.player === claim.drop)
     message += ` ${dropPlayer.fname} ${dropPlayer.lname} (${dropPlayer.pos}) has been released.`
   }
 

@@ -23,11 +23,23 @@ const run = async () => {
     headers: {
       'User-Agent': config.mflUserAgent
     }
-  }).then(res => res.json())
+  }).then((res) => res.json())
 
   const fields = {}
   const inserts = []
-  const ignorePositions = ['TMQB', 'TMPK', 'TMPN', 'TMWR', 'TMRB', 'TMDL', 'TMLB', 'TMDB', 'TMTE', 'ST', 'Off']
+  const ignorePositions = [
+    'TMQB',
+    'TMPK',
+    'TMPN',
+    'TMWR',
+    'TMRB',
+    'TMDL',
+    'TMLB',
+    'TMDB',
+    'TMTE',
+    'ST',
+    'Off'
+  ]
   for (const item of result.players.player) {
     const name = item.name.split(', ').reverse().join(' ')
     const team = fixTeam(item.team)
@@ -93,7 +105,9 @@ const run = async () => {
 
   log(`Complete field list: ${Object.keys(fields)}`)
   log(`Could not locate ${missing.length} players`)
-  missing.forEach(m => log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`))
+  missing.forEach((m) =>
+    log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`)
+  )
 
   if (argv.dry) {
     return
@@ -103,11 +117,11 @@ const run = async () => {
   for (const insert of inserts) {
     const rows = await db('players').where('mfl_id', insert.mfl_id)
     if (rows.length) {
-      const {
-        twitter_username
-      } = insert
+      const { twitter_username } = insert
       if (!twitter_username) continue
-      await db('players').update({ twitter_username }).where('mfl_id', insert.mfl_id)
+      await db('players')
+        .update({ twitter_username })
+        .where('mfl_id', insert.mfl_id)
     } else {
       await db('players').insert(insert)
     }

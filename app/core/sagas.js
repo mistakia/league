@@ -26,7 +26,7 @@ import { forecastSagas } from './forecast'
 import { standingsSagas } from './standings'
 import { propSagas } from './props'
 
-export default function * rootSaga () {
+export default function* rootSaga() {
   yield all([
     ...appSagas,
     ...auctionSagas,

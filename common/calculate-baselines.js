@@ -2,20 +2,16 @@ import Roster from './roster'
 import { positions, slots } from './constants'
 import getEligibleSlots from './get-eligible-slots'
 
-const types = [
-  'available',
-  'starter',
-  'bench',
-  'average'
-]
+const types = ['available', 'starter', 'bench', 'average']
 
-const countOccurrences = (arr, val) => arr.reduce((a, v) => (v === val ? a + 1 : a), 0)
+const countOccurrences = (arr, val) =>
+  arr.reduce((a, v) => (v === val ? a + 1 : a), 0)
 const getBestAvailableForSlot = ({ slot, players, week }) => {
   const eligiblePositions = []
   const grouped = {}
   for (const position of positions) {
     if (slot.includes(position)) eligiblePositions.push(position)
-    grouped[position] = players.filter(p => p.pos === position)
+    grouped[position] = players.filter((p) => p.pos === position)
   }
 
   let combined = []
@@ -23,17 +19,16 @@ const getBestAvailableForSlot = ({ slot, players, week }) => {
     combined = combined.concat(grouped[pos])
   }
 
-  const sorted = combined.sort((a, b) => b.points[week].total - a.points[week].total)
+  const sorted = combined.sort(
+    (a, b) => b.points[week].total - a.points[week].total
+  )
   return sorted[0]
 }
 
-const calculateBaselines = ({
-  players,
-  rosterRows,
-  league,
-  week
-}) => {
-  const data = players.sort((a, b) => b.points[week].total - a.points[week].total)
+const calculateBaselines = ({ players, rosterRows, league, week }) => {
+  const data = players.sort(
+    (a, b) => b.points[week].total - a.points[week].total
+  )
 
   const rows = []
   for (let i = 0; i < league.nteams; i++) {
@@ -44,13 +39,14 @@ const calculateBaselines = ({
   const rosters = []
   for (const rosterRow of rows) {
     const roster = new Roster({ roster: rosterRow, league })
-    roster.players.forEach(p => rosteredPlayerIds.push(p.player))
+    roster.players.forEach((p) => rosteredPlayerIds.push(p.player))
     rosters.push(roster)
   }
 
   // remove rostered players & sort
-  let availablePlayerPool = data
-    .filter(p => !rosteredPlayerIds.includes(p.player) || !positions.includes(p.pos))
+  let availablePlayerPool = data.filter(
+    (p) => !rosteredPlayerIds.includes(p.player) || !positions.includes(p.pos)
+  )
 
   // fill starters using rostered players and suppliment with available players
   const eligibleSlots = getEligibleSlots({ pos: 'ALL', league })
@@ -64,15 +60,21 @@ const calculateBaselines = ({
       // check bench for player in the top x (occurrences
 
       // get best available from bench
-      const benchIds = roster.bench.map(p => p.player)
+      const benchIds = roster.bench.map((p) => p.player)
       const benchPlayer = getBestAvailableForSlot({
         slot,
-        players: data.filter(d => benchIds.includes(d.player)),
+        players: data.filter((d) => benchIds.includes(d.player)),
         week
       })
 
-      const availablePlayer = getBestAvailableForSlot({ slot, players: availablePlayerPool, week })
-      const isBenchBetter = benchPlayer && benchPlayer.points[week].total > availablePlayer.points[week].total
+      const availablePlayer = getBestAvailableForSlot({
+        slot,
+        players: availablePlayerPool,
+        week
+      })
+      const isBenchBetter =
+        benchPlayer &&
+        benchPlayer.points[week].total > availablePlayer.points[week].total
       const player = isBenchBetter ? benchPlayer : availablePlayer
       const rosterRow = {
         slot: slots[slot],
@@ -90,7 +92,9 @@ const calculateBaselines = ({
         roster.addPlayer(rosterRow)
         if (!isBenchBetter) {
           // remove player from available player pool
-          availablePlayerPool = availablePlayerPool.filter(p => p.player !== player.player)
+          availablePlayerPool = availablePlayerPool.filter(
+            (p) => p.player !== player.player
+          )
         }
       }
     }
@@ -100,16 +104,20 @@ const calculateBaselines = ({
   const starters = []
   for (const roster of rosters) {
     // optimize starting lineup
-    const playerIds = roster.active.map(p => p.player)
-    let players = data.filter(d => playerIds.includes(d.player))
+    const playerIds = roster.active.map((p) => p.player)
+    let players = data.filter((d) => playerIds.includes(d.player))
     for (const slot of Array.from(new Set(eligibleSlots))) {
       const slotStarters = roster.getPlayersBySlot(slots[slot])
 
       // move current starters to bench
       for (const p of slotStarters) {
-        const player = data.find(ps => ps.player === p.player)
+        const player = data.find((ps) => ps.player === p.player)
         roster.removePlayer(p.player)
-        roster.addPlayer({ slot: slots.BENCH, player: p.player, pos: player.pos })
+        roster.addPlayer({
+          slot: slots.BENCH,
+          player: p.player,
+          pos: player.pos
+        })
       }
 
       // set slots with best available
@@ -123,13 +131,13 @@ const calculateBaselines = ({
             player: best.player,
             pos: best.pos
           })
-          players = players.filter(p => p.player !== best.player)
+          players = players.filter((p) => p.player !== best.player)
         }
       }
     }
 
-    roster.starters.forEach(p => {
-      const player = data.find(d => d.player === p.player)
+    roster.starters.forEach((p) => {
+      const player = data.find((d) => d.player === p.player)
       starters.push(player)
     })
   }
@@ -139,7 +147,7 @@ const calculateBaselines = ({
   const groupedStarters = {}
   for (const position of positions) {
     groupedStarters[position] = starters
-      .filter(s => s.pos === position)
+      .filter((s) => s.pos === position)
       .sort((a, b) => b.points[week].total - a.points[week].total)
   }
 
@@ -170,7 +178,7 @@ const calculateBaselines = ({
       pos: player.pos
     })
 
-    if (i === (league.nteams - 1)) {
+    if (i === league.nteams - 1) {
       i = 0
     } else {
       i += 1
@@ -180,7 +188,9 @@ const calculateBaselines = ({
   // group availabe players by position
   const groupedAvailablePlayers = {}
   for (const position of positions) {
-    groupedAvailablePlayers[position] = availablePlayerPool.filter(s => s.pos === position)
+    groupedAvailablePlayers[position] = availablePlayerPool.filter(
+      (s) => s.pos === position
+    )
   }
 
   // get best available baselines
@@ -192,8 +202,8 @@ const calculateBaselines = ({
   // get bench players
   const benchPlayers = []
   for (const roster of rosters) {
-    roster.bench.forEach(p => {
-      const player = data.find(d => d.player === p.player)
+    roster.bench.forEach((p) => {
+      const player = data.find((d) => d.player === p.player)
       benchPlayers.push(player)
     })
   }
@@ -202,7 +212,7 @@ const calculateBaselines = ({
   const groupedBench = {}
   for (const position of positions) {
     groupedBench[position] = benchPlayers
-      .filter(s => s.pos === position)
+      .filter((s) => s.pos === position)
       .sort((a, b) => b.points[week].total - a.points[week].total)
   }
 
@@ -214,7 +224,7 @@ const calculateBaselines = ({
     // if any baselines are empty - set it to top player at position
     for (const type of types) {
       if (!result[position][type]) {
-        result[position][type] = data.find(p => p.pos === position)
+        result[position][type] = data.find((p) => p.pos === position)
       }
     }
   }
@@ -225,8 +235,10 @@ const calculateBaselines = ({
     const ba = result[position].available
     const ws = players[players.length - 1]
     const avg = players[Math.floor(players.length / 2)]
-    result[position].starter = (ws && ws.points[week].total > ba.points[week].total) ? ws : ba
-    result[position].average = (avg && avg.points[week].total > ba.points[week].total) ? avg : ba
+    result[position].starter =
+      ws && ws.points[week].total > ba.points[week].total ? ws : ba
+    result[position].average =
+      avg && avg.points[week].total > ba.points[week].total ? avg : ba
   }
 
   return result

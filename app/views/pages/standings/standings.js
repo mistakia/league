@@ -6,27 +6,36 @@ import PageLayout from '@layouts/page'
 
 import './standings.styl'
 
-function StandingsTeam ({ team }) {
+function StandingsTeam({ team }) {
   return (
     <div className='table__row'>
       <div className='table__cell player__item-name'>{team.name}</div>
-      <div className='table__cell metric'>{team.getIn(['stats', 'wins'], 0)}-{team.getIn(['stats', 'losses'], 0)}-{team.getIn(['stats', 'ties'], 0)}</div>
-      <div className='table__cell metric'>{team.getIn(['stats', 'pf'], 0).toFixed(1)}</div>
+      <div className='table__cell metric'>
+        {team.getIn(['stats', 'wins'], 0)}-{team.getIn(['stats', 'losses'], 0)}-
+        {team.getIn(['stats', 'ties'], 0)}
+      </div>
+      <div className='table__cell metric'>
+        {team.getIn(['stats', 'pf'], 0).toFixed(1)}
+      </div>
       <div className='table__cell metric'>{toPercent(team.playoffOdds)}</div>
       <div className='table__cell metric'>{toPercent(team.byeOdds)}</div>
-      <div className='table__cell metric'>{team.getIn(['stats', 'doi'], 0).toFixed(2)}</div>
+      <div className='table__cell metric'>
+        {team.getIn(['stats', 'doi'], 0).toFixed(2)}
+      </div>
     </div>
   )
 }
 
-function Standings ({ teams, title }) {
-  const sorted = teams.sort((a, b) => b.getIn(['stats', 'wins'], 0) - a.getIn(['stats', 'wins'], 0) || b.getIn(['stats', 'pf'], 0) - a.getIn(['stats', 'pf'], 0))
+function Standings({ teams, title }) {
+  const sorted = teams.sort(
+    (a, b) =>
+      b.getIn(['stats', 'wins'], 0) - a.getIn(['stats', 'wins'], 0) ||
+      b.getIn(['stats', 'pf'], 0) - a.getIn(['stats', 'pf'], 0)
+  )
 
   const overallRows = []
   for (const [index, team] of sorted.entries()) {
-    overallRows.push(
-      <StandingsTeam key={index} team={team} />
-    )
+    overallRows.push(<StandingsTeam key={index} team={team} />)
   }
 
   return (
@@ -72,8 +81,6 @@ export default class StandingsPage extends React.Component {
       </Container>
     )
 
-    return (
-      <PageLayout body={body} scroll />
-    )
+    return <PageLayout body={body} scroll />
   }
 }

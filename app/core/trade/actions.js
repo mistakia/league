@@ -167,7 +167,7 @@ export const tradeActions = {
     }
   }),
 
-  postTradeCancelPending: opts => ({
+  postTradeCancelPending: (opts) => ({
     type: tradeActions.POST_TRADE_CANCEL_PENDING,
     payload: {
       opts
@@ -190,7 +190,7 @@ export const tradeActions = {
     }
   }),
 
-  postTradeAcceptPending: opts => ({
+  postTradeAcceptPending: (opts) => ({
     type: tradeActions.POST_TRADE_ACCEPT_PENDING,
     payload: {
       opts

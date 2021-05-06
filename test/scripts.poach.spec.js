@@ -11,10 +11,7 @@ const league = require('../db/seeds/league')
 const { constants } = require('../common')
 const { getRoster } = require('../utils')
 const { start } = constants.season
-const {
-  addPlayer,
-  selectPlayer
-} = require('./utils')
+const { addPlayer, selectPlayer } = require('./utils')
 
 const run = require('../scripts/process-poaching-claims')
 
@@ -73,7 +70,14 @@ describe('SCRIPTS /waivers - poach', function () {
         submitted: Math.round(Date.now() / 1000)
       })
 
-      MockDate.set(start.clone().subtract('1', 'month').add('2', 'day').add('1', 'minute').toDate())
+      MockDate.set(
+        start
+          .clone()
+          .subtract('1', 'month')
+          .add('2', 'day')
+          .add('1', 'minute')
+          .toDate()
+      )
 
       let error
       try {
@@ -95,7 +99,9 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(rosterRow2.players.length).to.equal(1)
       expect(rosterRow2.players[0].player).to.equal(player.player)
       expect(rosterRow2.players[0].slot).to.equal(constants.slots.BENCH)
-      expect(rosterRow2.players[0].type).to.equal(constants.transactions.POACHED)
+      expect(rosterRow2.players[0].type).to.equal(
+        constants.transactions.POACHED
+      )
       expect(rosterRow2.players[0].value).to.equal(3)
 
       // check poaching claim
@@ -142,7 +148,9 @@ describe('SCRIPTS /waivers - poach', function () {
         submitted: Math.round(Date.now() / 1000)
       })
 
-      MockDate.set(start.clone().subtract('1', 'month').add('2', 'hour').toDate())
+      MockDate.set(
+        start.clone().subtract('1', 'month').add('2', 'hour').toDate()
+      )
       const player2 = await selectPlayer({ rookie: true })
       await addPlayer({
         leagueId: 1,
@@ -176,7 +184,14 @@ describe('SCRIPTS /waivers - poach', function () {
         submitted: Math.round(Date.now() / 1000)
       })
 
-      MockDate.set(start.clone().subtract('1', 'month').add('2', 'day').add('1', 'minute').toDate())
+      MockDate.set(
+        start
+          .clone()
+          .subtract('1', 'month')
+          .add('2', 'day')
+          .add('1', 'minute')
+          .toDate()
+      )
 
       let error
       try {
@@ -200,7 +215,9 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(rosterRow2.players.length).to.equal(1)
       expect(rosterRow2.players[0].player).to.equal(player1.player)
       expect(rosterRow2.players[0].slot).to.equal(constants.slots.BENCH)
-      expect(rosterRow2.players[0].type).to.equal(constants.transactions.POACHED)
+      expect(rosterRow2.players[0].type).to.equal(
+        constants.transactions.POACHED
+      )
       expect(rosterRow2.players[0].value).to.equal(3)
 
       expect(rosterRow3.tid).to.equal(3)
@@ -215,8 +232,8 @@ describe('SCRIPTS /waivers - poach', function () {
 
       // check poaching claim
       const poaches = await knex('poaches')
-      const poach1 = poaches.find(p => p.tid === 2)
-      const poach2 = poaches.find(p => p.tid === 4)
+      const poach1 = poaches.find((p) => p.tid === 2)
+      const poach2 = poaches.find((p) => p.tid === 4)
       expect(poaches.length).to.equal(2)
       expect(poach1.succ).to.equal(1)
       expect(poach1.processed).to.equal(Math.round(Date.now() / 1000))
@@ -335,7 +352,14 @@ describe('SCRIPTS /waivers - poach', function () {
         submitted: Math.round(Date.now() / 1000)
       })
 
-      MockDate.set(start.clone().subtract('1', 'month').add('2', 'day').add('1', 'minute').toDate())
+      MockDate.set(
+        start
+          .clone()
+          .subtract('1', 'month')
+          .add('2', 'day')
+          .add('1', 'minute')
+          .toDate()
+      )
 
       let error
       try {
@@ -357,7 +381,9 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(rosterRow2.players.length).to.equal(1)
       expect(rosterRow2.players[0].player).to.equal(player.player)
       expect(rosterRow2.players[0].slot).to.equal(constants.slots.BENCH)
-      expect(rosterRow2.players[0].type).to.equal(constants.transactions.POACHED)
+      expect(rosterRow2.players[0].type).to.equal(
+        constants.transactions.POACHED
+      )
       expect(rosterRow2.players[0].value).to.equal(3)
 
       // check poaching claim
@@ -427,7 +453,14 @@ describe('SCRIPTS /waivers - poach', function () {
         timestamp: Math.round(Date.now() / 1000)
       })
 
-      MockDate.set(start.clone().subtract('1', 'month').add('2', 'day').add('1', 'minute').toDate())
+      MockDate.set(
+        start
+          .clone()
+          .subtract('1', 'month')
+          .add('2', 'day')
+          .add('1', 'minute')
+          .toDate()
+      )
 
       let error
       try {
@@ -446,7 +479,9 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(rosterRow1.players.length).to.equal(1)
       expect(rosterRow1.players[0].player).to.equal(player.player)
       expect(rosterRow1.players[0].slot).to.equal(constants.slots.BENCH)
-      expect(rosterRow1.players[0].type).to.equal(constants.transactions.ROSTER_ACTIVATE)
+      expect(rosterRow1.players[0].type).to.equal(
+        constants.transactions.ROSTER_ACTIVATE
+      )
       expect(rosterRow1.players[0].value).to.equal(1)
 
       expect(rosterRow2.tid).to.equal(2)

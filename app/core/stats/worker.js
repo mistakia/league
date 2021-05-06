@@ -5,11 +5,11 @@ import {
   calculatePercentiles
 } from '@common'
 
-export function calculate (params) {
+export function calculate(params) {
   return calculateStatsFromPlays(params)
 }
 
-export function calculateTeamPercentiles (teams) {
+export function calculateTeamPercentiles(teams) {
   const grouped = groupBy(teams, 'seas')
   const percentiles = {}
 

@@ -21,6 +21,4 @@ const mapStateToProps = createSelector(
   }
 )
 
-export default connect(
-  mapStateToProps
-)(DashboardByeWeeks)
+export default connect(mapStateToProps)(DashboardByeWeeks)

@@ -49,14 +49,17 @@ describe('API /teams - lineups', function () {
         userId
       })
 
-      const res = await chai.request(server)
+      const res = await chai
+        .request(server)
         .put('/api/teams/1/lineups')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          players: [{
-            player: player.player,
-            slot: constants.slots.RB
-          }],
+          players: [
+            {
+              player: player.player,
+              slot: constants.slots.RB
+            }
+          ],
           leagueId
         })
 
@@ -106,7 +109,8 @@ describe('API /teams - lineups', function () {
     })
 
     it('missing players', async () => {
-      const request = chai.request(server)
+      const request = chai
+        .request(server)
         .put('/api/teams/1/lineups')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -117,13 +121,16 @@ describe('API /teams - lineups', function () {
     })
 
     it('missing slot', async () => {
-      const request = chai.request(server)
+      const request = chai
+        .request(server)
         .put('/api/teams/1/lineups')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          players: [{
-            player: 'x'
-          }],
+          players: [
+            {
+              player: 'x'
+            }
+          ],
           leagueId: 1
         })
 
@@ -131,58 +138,70 @@ describe('API /teams - lineups', function () {
     })
 
     it('missing player', async () => {
-      const request = chai.request(server)
+      const request = chai
+        .request(server)
         .put('/api/teams/1/lineups')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          players: [{
-            slot: constants.slots.RB
-          }]
+          players: [
+            {
+              slot: constants.slots.RB
+            }
+          ]
         })
 
       await missing(request, 'player')
     })
 
     it('missing leagueId', async () => {
-      const request = chai.request(server)
+      const request = chai
+        .request(server)
         .put('/api/teams/1/lineups')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          players: [{
-            player: 'x',
-            slot: constants.slots.RB
-          }]
+          players: [
+            {
+              player: 'x',
+              slot: constants.slots.RB
+            }
+          ]
         })
 
       await missing(request, 'leagueId')
     })
 
     it('invalid player - does not exist', async () => {
-      const request = chai.request(server)
+      const request = chai
+        .request(server)
         .put('/api/teams/1/lineups')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          players: [{
-            player: 'x',
-            slot: constants.slots.RB
-          }]
+          players: [
+            {
+              player: 'x',
+              slot: constants.slots.RB
+            }
+          ]
         })
 
       await invalid(request, 'player')
     })
 
     it('teamId does not belong to userId', async () => {
-      const request = chai.request(server)
+      const request = chai
+        .request(server)
         .put('/api/teams/1/lineups')
         .set('Authorization', `Bearer ${user2}`)
         .send({
           leagueId: 1,
-          players: [{
-            player: 'x',
-            slot: constants.slots.RB
-          }]
+          players: [
+            {
+              player: 'x',
+              slot: constants.slots.RB
+            }
+          ]
         })
 
       await invalid(request, 'teamId')
@@ -197,15 +216,18 @@ describe('API /teams - lineups', function () {
         player,
         userId: 1
       })
-      const request = chai.request(server)
+      const request = chai
+        .request(server)
         .put('/api/teams/1/lineups')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          players: [{
-            player: player.player,
-            slot: constants.slots.RB
-          }]
+          players: [
+            {
+              player: player.player,
+              slot: constants.slots.RB
+            }
+          ]
         })
 
       await invalid(request, 'slot')
@@ -221,15 +243,18 @@ describe('API /teams - lineups', function () {
         userId: 1,
         slot: constants.slots.PS
       })
-      const request = chai.request(server)
+      const request = chai
+        .request(server)
         .put('/api/teams/1/lineups')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          players: [{
-            slot: constants.slots.RB,
-            player: player.player
-          }]
+          players: [
+            {
+              slot: constants.slots.RB,
+              player: player.player
+            }
+          ]
         })
 
       await invalid(request, 'player')
@@ -237,15 +262,18 @@ describe('API /teams - lineups', function () {
 
     it('player not on team', async () => {
       const player = await selectPlayer()
-      const request = chai.request(server)
+      const request = chai
+        .request(server)
         .put('/api/teams/1/lineups')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          players: [{
-            player: player.player,
-            slot: constants.slots.RB
-          }]
+          players: [
+            {
+              player: player.player,
+              slot: constants.slots.RB
+            }
+          ]
         })
 
       await invalid(request, 'player')
@@ -269,15 +297,18 @@ describe('API /teams - lineups', function () {
         userId: 1
       })
 
-      const request = chai.request(server)
+      const request = chai
+        .request(server)
         .put('/api/teams/1/lineups')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          players: [{
-            player: player.player,
-            slot: constants.slots.WR
-          }],
+          players: [
+            {
+              player: player.player,
+              slot: constants.slots.WR
+            }
+          ],
           week: 1
         })
 

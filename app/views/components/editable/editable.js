@@ -19,9 +19,11 @@ export default class Editable extends React.Component {
     const el = this.getEl()
     if (!el) return
 
-    if (event.keyCode === 13) { // enter
+    if (event.keyCode === 13) {
+      // enter
       el.blur()
-    } else if (event.keyCode === 27) { // escape
+    } else if (event.keyCode === 27) {
+      // escape
       el.innerHTML = this.props.value
       el.blur()
     }
@@ -86,8 +88,7 @@ export default class Editable extends React.Component {
         onKeyDown={this.handleKeyDown}
         suppressContentEditableWarning
         contentEditable
-        {...this.props.defaultProps}
-      >
+        {...this.props.defaultProps}>
         {this.props.value}
       </span>
     )

@@ -3,7 +3,10 @@ import { createSelector } from 'reselect'
 
 import { getTeamById } from '@core/teams'
 import { getCurrentLeague } from '@core/leagues'
-import { getScoreboardByTeamId, getScoreboardRosterByTeamId } from '@core/scoreboard'
+import {
+  getScoreboardByTeamId,
+  getScoreboardRosterByTeamId
+} from '@core/scoreboard'
 
 import ScoreboardTeam from './scoreboard-team'
 
@@ -15,6 +18,4 @@ const mapStateToProps = createSelector(
   (team, roster, league, scoreboard) => ({ team, roster, league, scoreboard })
 )
 
-export default connect(
-  mapStateToProps
-)(ScoreboardTeam)
+export default connect(mapStateToProps)(ScoreboardTeam)

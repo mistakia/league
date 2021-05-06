@@ -46,7 +46,7 @@ const aliases = {
   'JD McKissic': 'JM-3475',
   'Keelan Cole Sr.': 'KC-1550',
   'KJ Hamler': 'KH-0250',
-  'La\'Mical Perine': 'LP-0437',
+  "La'Mical Perine": 'LP-0437',
   'Laviska Shenault': 'LS-0650',
   'Laviska Shenault Jr': 'LS-0650',
   'Lynn Bowden Jr.': 'LB-0775',

@@ -4,7 +4,7 @@ import { beep } from '@core/audio'
 import './timer.styl'
 
 export default class Timer extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.interval = null
     this.state = {

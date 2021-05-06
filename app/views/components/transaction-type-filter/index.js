@@ -5,11 +5,8 @@ import { getTransactions } from '@core/transactions'
 
 import TransactionTypeFilter from './transaction-type-filter'
 
-const mapStateToProps = createSelector(
-  getTransactions,
-  (transactions) => ({ types: transactions.types })
-)
+const mapStateToProps = createSelector(getTransactions, (transactions) => ({
+  types: transactions.types
+}))
 
-export default connect(
-  mapStateToProps
-)(TransactionTypeFilter)
+export default connect(mapStateToProps)(TransactionTypeFilter)

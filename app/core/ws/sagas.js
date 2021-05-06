@@ -4,16 +4,16 @@ import { wsActions } from './actions'
 import { getApp, appActions } from '@core/app'
 import { openWS, closeWS, isOpen } from './service'
 
-export function * disconnect () {
+export function* disconnect() {
   yield call(closeWS)
 }
 
-export function * connect () {
+export function* connect() {
   const { leagueId, token } = yield select(getApp)
   yield call(openWS, { token, leagueId })
 }
 
-export function * reconnect () {
+export function* reconnect() {
   const { userId } = yield select(getApp)
   if (userId) {
     while (!isOpen()) {
@@ -29,15 +29,15 @@ export function * reconnect () {
 //  WATCHERS
 // -------------------------------------
 
-export function * watchLogout () {
+export function* watchLogout() {
   yield takeLatest(appActions.LOGOUT, disconnect)
 }
 
-export function * watchAuthFulfilled () {
+export function* watchAuthFulfilled() {
   yield takeLatest(appActions.AUTH_FULFILLED, connect)
 }
 
-export function * watchWebSocketClose () {
+export function* watchWebSocketClose() {
   yield takeLatest(wsActions.WEBSOCKET_CLOSE, reconnect)
 }
 

@@ -19,10 +19,7 @@ import ScoreboardPage from '@pages/scoreboard'
 import StatusPage from '@pages/status'
 import PropsPage from '@pages/props'
 
-const mapStateToProps = createSelector(
-  getApp,
-  (app) => ({ app })
-)
+const mapStateToProps = createSelector(getApp, (app) => ({ app }))
 
 const Routes = ({ app, location }) => {
   const redirect = () => {
@@ -39,10 +36,14 @@ const Routes = ({ app, location }) => {
 
   return (
     <Switch>
-      {app.userId && <Route exact path='/dashboard' component={DashboardPage} />}
+      {app.userId && (
+        <Route exact path='/dashboard' component={DashboardPage} />
+      )}
       {app.userId && <Route exact path='/lineups' component={LineupsPage} />}
       <Route exact path='/players' component={PlayersPage} />
-      {app.userId && <Route exact path='/scoreboard' component={ScoreboardPage} />}
+      {app.userId && (
+        <Route exact path='/scoreboard' component={ScoreboardPage} />
+      )}
       {app.userId && <Route exact path='/auction' component={AuctionPage} />}
       {app.userId && <Route exact path='/draft' component={DraftPage} />}
       {app.userId && <Route exact path='/trade' component={TradePage} />}
@@ -53,21 +54,15 @@ const Routes = ({ app, location }) => {
       <Route path='/settings' component={SettingsPage} />
       <Route
         path='/resources'
-        render={(props) => (
-          <MarkdownPage {...props} path='/resources.md' />
-        )}
+        render={(props) => <MarkdownPage {...props} path='/resources.md' />}
       />
       <Route
         path='/glossary'
-        render={(props) => (
-          <MarkdownPage {...props} path='/glossary.md' />
-        )}
+        render={(props) => <MarkdownPage {...props} path='/glossary.md' />}
       />
       <Route path='*' component={redirect} />
     </Switch>
   )
 }
 
-export default withRouter(connect(
-  mapStateToProps
-)(Routes))
+export default withRouter(connect(mapStateToProps)(Routes))

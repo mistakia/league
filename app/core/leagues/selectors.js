@@ -6,26 +6,26 @@ import { getTeams } from '@core/teams'
 import { getApp } from '@core/app'
 import { League } from './league'
 
-export function getLeagues (state) {
+export function getLeagues(state) {
   return state.get('leagues').toList()
 }
 
-export function getCurrentLeague (state) {
+export function getCurrentLeague(state) {
   const { leagueId } = getApp(state)
   return state.get('leagues').get(leagueId).toJS()
 }
 
-export function getCurrentLeagueTeamIds (state) {
+export function getCurrentLeagueTeamIds(state) {
   const { leagueId } = getApp(state)
   return state.get('leagues').get(leagueId).teams
 }
 
-export function getLeagueById (state, { lid }) {
+export function getLeagueById(state, { lid }) {
   const leagues = state.get('leagues')
   return leagues.get(lid) || new League()
 }
 
-export function getLeagueEvents (state) {
+export function getLeagueEvents(state) {
   const league = getCurrentLeague(state)
   const events = []
   const now = moment()
@@ -40,7 +40,9 @@ export function getLeagueEvents (state) {
     }
   }
 
-  const firstDayOfRegularSeason = constants.season.start.clone().add('1', 'week')
+  const firstDayOfRegularSeason = constants.season.start
+    .clone()
+    .add('1', 'week')
   if (now.isBefore(firstDayOfRegularSeason)) {
     events.push({
       detail: 'Start of Regular Season',
@@ -48,7 +50,11 @@ export function getLeagueEvents (state) {
     })
   }
 
-  const firstWaiverDate = constants.season.start.clone().add('1', 'week').day(3).hour(14)
+  const firstWaiverDate = constants.season.start
+    .clone()
+    .add('1', 'week')
+    .day(3)
+    .hour(14)
   if (now.isBefore(firstWaiverDate)) {
     events.push({
       detail: 'Waivers Processed',
@@ -107,6 +113,6 @@ export const getTeamsForCurrentLeague = createSelector(
   getCurrentLeagueTeamIds,
   getTeams,
   (teamIds, teams) => {
-    return teamIds.map(tid => teams.get(tid))
+    return teamIds.map((tid) => teams.get(tid))
   }
 )

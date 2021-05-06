@@ -34,19 +34,27 @@ export default class TradeSelectItems extends React.Component {
     } = this.props
 
     const options = []
-    players.forEach(player => {
+    players.forEach((player) => {
       options.push({ id: player.player, label: player.name, type: 'player' })
     })
-    picks.forEach(pick => {
-      options.push({ id: pick.uid, label: getPickLabel(pick, teams), type: 'pick' })
+    picks.forEach((pick) => {
+      options.push({
+        id: pick.uid,
+        label: getPickLabel(pick, teams),
+        type: 'pick'
+      })
     })
 
     const value = []
-    selectedPlayers.forEach(player => {
+    selectedPlayers.forEach((player) => {
       value.push({ id: player.player, label: player.name, type: 'player' })
     })
-    selectedPicks.forEach(pick => {
-      value.push({ id: pick.uid, label: getPickLabel(pick, teams), type: 'pick' })
+    selectedPicks.forEach((pick) => {
+      value.push({
+        id: pick.uid,
+        label: getPickLabel(pick, teams),
+        type: 'pick'
+      })
     })
 
     const renderOption = (option, state) => {
@@ -59,10 +67,11 @@ export default class TradeSelectItems extends React.Component {
 
     const getOptionSelected = (option, value) => option.id === value.id
 
-    const renderTags = (value, getTagProps) => value.map((option, index) => (
-      // eslint-disable-next-line
-      <Chip label={option.label} {...getTagProps({ index })} />
-    ))
+    const renderTags = (value, getTagProps) =>
+      value.map((option, index) => (
+        // eslint-disable-next-line
+        <Chip label={option.label} {...getTagProps({ index })} />
+      ))
 
     const renderInput = (params) => (
       <TextField

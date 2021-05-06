@@ -8,7 +8,7 @@ const initialState = new Map({
   items: new List()
 })
 
-export function propsReducer (state = initialState, { payload, type }) {
+export function propsReducer(state = initialState, { payload, type }) {
   switch (type) {
     case propActions.GET_PROPS_FULFILLED:
       return state.set('items', new List(payload.data))

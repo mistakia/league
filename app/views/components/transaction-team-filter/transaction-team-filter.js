@@ -18,8 +18,6 @@ export default class TransactionTeamFilter extends React.Component {
       })
     }
 
-    return (
-      <TransactionsFilter {...state} />
-    )
+    return <TransactionsFilter {...state} />
   }
 }

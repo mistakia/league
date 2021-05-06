@@ -15,25 +15,25 @@ import { getSelectedMatchup } from '@core/matchups'
 import { getGameByPlayerId, getGameByTeam } from '@core/schedule'
 import { getPlays } from '@core/plays'
 
-export function getScoreboard (state) {
+export function getScoreboard(state) {
   return state.get('scoreboard')
 }
 
-export function getScoreboardRosterByTeamId (state, { tid }) {
+export function getScoreboardRosterByTeamId(state, { tid }) {
   const week = state.getIn(['scoreboard', 'week'])
   return getRosterByTeamId(state, { tid, week })
 }
 
-export function getSelectedMatchupScoreboards (state) {
+export function getSelectedMatchupScoreboards(state) {
   const matchup = getSelectedMatchup(state)
   const week = state.getIn(['scoreboard', 'week'])
-  return matchup.tids.map(tid => ({
+  return matchup.tids.map((tid) => ({
     tid,
     ...getScoreboardByTeamId(state, { tid, week })
   }))
 }
 
-export function getScoreboardByTeamId (state, { tid }) {
+export function getScoreboardByTeamId(state, { tid }) {
   const week = state.getIn(['scoreboard', 'week'])
   let points = 0
   let minutes = 0
@@ -52,12 +52,18 @@ export function getScoreboardByTeamId (state, { tid }) {
     const gamelog = getGamelogForPlayer(state, { player, week })
     if (gamelog) {
       points += gamelog.total
-      const gameStatus = getGameStatusByPlayerId(state, { playerId: player.player, week })
+      const gameStatus = getGameStatusByPlayerId(state, {
+        playerId: player.player,
+        week
+      })
       if (gameStatus && gameStatus.lastPlay) {
         const lp = gameStatus.lastPlay
-        const quarterMinutes = lp.playDescription === 'END GAME' ? 0 : moment.duration(`00:${lp.clockTime}`).minutes()
-        const quartersRemaining = lp.quarter === 5 ? 0 : (4 - lp.quarter)
-        minutes += (quartersRemaining * 15) + quarterMinutes
+        const quarterMinutes =
+          lp.playDescription === 'END GAME'
+            ? 0
+            : moment.duration(`00:${lp.clockTime}`).minutes()
+        const quartersRemaining = lp.quarter === 5 ? 0 : 4 - lp.quarter
+        minutes += quartersRemaining * 15 + quarterMinutes
       }
     } else {
       minutes += 60
@@ -71,13 +77,13 @@ export function getScoreboardByTeamId (state, { tid }) {
   return { points, projected: projected + previousWeek, minutes }
 }
 
-export function getScoreboardUpdated (state) {
+export function getScoreboardUpdated(state) {
   const plays = getPlays(state, { week: constants.season.week })
-  const play = plays.maxBy(x => x.updated)
+  const play = plays.maxBy((x) => x.updated)
   return play ? play.updated : 0
 }
 
-export function getStartersByMatchupId (state, { mid }) {
+export function getStartersByMatchupId(state, { mid }) {
   const matchup = getSelectedMatchup(state)
   if (!matchup) {
     return {
@@ -88,7 +94,7 @@ export function getStartersByMatchupId (state, { mid }) {
   }
 
   const teams = {}
-  matchup.tids.forEach(tid => {
+  matchup.tids.forEach((tid) => {
     teams[tid] = getStartersByTeamId(state, { tid, week: matchup.week })
   })
   const players = Object.values(teams).flat()
@@ -105,7 +111,7 @@ export function getStartersByMatchupId (state, { mid }) {
   return { matchup, games, teams }
 }
 
-export function getScoreboardGamelogByPlayerId (state, { playerId }) {
+export function getScoreboardGamelogByPlayerId(state, { playerId }) {
   const player = getPlayerById(state, { playerId })
 
   if (!player.player) return
@@ -114,7 +120,7 @@ export function getScoreboardGamelogByPlayerId (state, { playerId }) {
   return getGamelogForPlayer(state, { player, week })
 }
 
-export function getPlaysByMatchupId (state, { mid }) {
+export function getPlaysByMatchupId(state, { mid }) {
   const matchup = getSelectedMatchup(state)
   if (!matchup) return new List()
 
@@ -122,35 +128,45 @@ export function getPlaysByMatchupId (state, { mid }) {
     const starters = getStartersByTeamId(state, { tid, week: matchup.week })
     return arr.concat(starters)
   }, [])
-  const gsisids = players.map(p => p.gsisid).filter(Boolean)
+  const gsisids = players.map((p) => p.gsisid).filter(Boolean)
   if (!gsisids.length) return new List()
 
-  const gsispids = players.map(p => p.gsispid).filter(Boolean)
+  const gsispids = players.map((p) => p.gsispid).filter(Boolean)
 
   const plays = getPlays(state, { week: matchup.week })
   // TODO - match/filter dst plays
-  const filteredPlays = plays.valueSeq().toList().filter(p => {
-    if (!p.playStats) return false
+  const filteredPlays = plays
+    .valueSeq()
+    .toList()
+    .filter((p) => {
+      if (!p.playStats) return false
 
-    const matchSingleGsis = p.playStats.find(p => gsisids.includes(p.gsisId))
-    if (matchSingleGsis) return true
+      const matchSingleGsis = p.playStats.find((p) =>
+        gsisids.includes(p.gsisId)
+      )
+      if (matchSingleGsis) return true
 
-    const matchSingleGsisPid = p.playStats.find(p => gsispids.includes(p.gsispid))
-    return !!matchSingleGsisPid
-  })
+      const matchSingleGsisPid = p.playStats.find((p) =>
+        gsispids.includes(p.gsispid)
+      )
+      return !!matchSingleGsisPid
+    })
 
   const league = getCurrentLeague(state)
   let result = new List()
   for (const play of filteredPlays) {
-    const game = getGameByTeam(state, { team: fixTeam(play.possessionTeam), week: matchup.week })
+    const game = getGameByTeam(state, {
+      team: fixTeam(play.possessionTeam),
+      week: matchup.week
+    })
 
     if (!game) continue
 
     // TODO - calculate dst stats and points
-    const playStats = play.playStats.filter(p => p.gsispid)
+    const playStats = play.playStats.filter((p) => p.gsispid)
     const grouped = {}
     for (const playStat of playStats) {
-      const player = players.find(p => {
+      const player = players.find((p) => {
         if (p.gsispid && p.gsispid === playStat.gsispid) return true
         if (p.gsisid && p.gsisid === playStat.gsisId) return true
         return false
@@ -162,7 +178,7 @@ export function getPlaysByMatchupId (state, { mid }) {
     const points = {}
     const stats = {}
     for (const playerId in grouped) {
-      const player = players.find(p => p.player === playerId)
+      const player = players.find((p) => p.player === playerId)
       const playStats = grouped[playerId]
       stats[playerId] = calculateStatsFromPlayStats(playStats)
       points[playerId] = calculatePoints({
@@ -172,7 +188,10 @@ export function getPlaysByMatchupId (state, { mid }) {
       })
     }
     const date = moment.tz(game.date, 'M/D/YYYY HH:mm', 'America/New_York')
-    const time = moment.utc(`${date.utc().format('YYYY-MM-DD')} ${play.timeOfDay}`, 'YYYY-MM-DD HH:mm:ss')
+    const time = moment.utc(
+      `${date.utc().format('YYYY-MM-DD')} ${play.timeOfDay}`,
+      'YYYY-MM-DD HH:mm:ss'
+    )
     result = result.push({
       time: time.unix(),
       play,
@@ -185,7 +204,7 @@ export function getPlaysByMatchupId (state, { mid }) {
   return result.sort((a, b) => b.time - a.time)
 }
 
-function getYardline (str, possessionTeam) {
+function getYardline(str, possessionTeam) {
   if (str === '50') {
     return 50
   }
@@ -195,12 +214,13 @@ function getYardline (str, possessionTeam) {
   const yardlineSide = results[1]
   const yardlineNumber = parseInt(results[2], 10)
 
-  return yardlineSide === possessionTeam
-    ? yardlineNumber
-    : (100 - yardlineNumber)
+  return yardlineSide === possessionTeam ? yardlineNumber : 100 - yardlineNumber
 }
 
-export function getGameStatusByPlayerId (state, { playerId, week = constants.season.week }) {
+export function getGameStatusByPlayerId(
+  state,
+  { playerId, week = constants.season.week }
+) {
   const game = getGameByPlayerId(state, { playerId, week })
   if (!game) {
     return null
@@ -208,7 +228,7 @@ export function getGameStatusByPlayerId (state, { playerId, week = constants.sea
 
   const plays = getPlays(state, { week })
   const player = getPlayerById(state, { playerId })
-  const play = plays.find(p => {
+  const play = plays.find((p) => {
     if (!p.possessionTeam) return false
 
     const team = fixTeam(p.possessionTeam)
@@ -219,14 +239,17 @@ export function getGameStatusByPlayerId (state, { playerId, week = constants.sea
     return { game }
   }
 
-  const filteredPlays = plays.filter(p => p.esbid === play.esbid)
-  const lastPlay = filteredPlays.maxBy(p => p.playId)
+  const filteredPlays = plays.filter((p) => p.esbid === play.esbid)
+  const lastPlay = filteredPlays.maxBy((p) => p.playId)
   if (!lastPlay.possessionTeam) {
     return { game, lastPlay }
   }
 
   const hasPossession = fixTeam(lastPlay.possessionTeam) === player.team
-  const yardline = getYardline(lastPlay.endYardLine || lastPlay.startYardLine, lastPlay.possessionTeam)
+  const yardline = getYardline(
+    lastPlay.endYardLine || lastPlay.startYardLine,
+    lastPlay.possessionTeam
+  )
   const isRedzone = yardline >= 80
 
   return {

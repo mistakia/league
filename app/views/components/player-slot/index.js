@@ -11,6 +11,4 @@ const mapStateToProps = createSelector(
   (player, isLocked) => ({ player, isLocked })
 )
 
-export default connect(
-  mapStateToProps
-)(PlayerSlot)
+export default connect(mapStateToProps)(PlayerSlot)

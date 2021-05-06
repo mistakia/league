@@ -3,7 +3,7 @@ import React from 'react'
 import PlayerFilter from '@components/player-filter'
 
 export default class AgeFilter extends React.Component {
-  render () {
+  render() {
     const state = {
       type: 'age',
       label: 'AGE',
@@ -18,8 +18,6 @@ export default class AgeFilter extends React.Component {
       })
     }
 
-    return (
-      <PlayerFilter {...state} />
-    )
+    return <PlayerFilter {...state} />
   }
 }

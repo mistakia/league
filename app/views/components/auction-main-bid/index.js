@@ -41,7 +41,4 @@ const mapDispatchToProps = {
   showNotification: notificationActions.show
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(AuctionMainBid)
+export default connect(mapStateToProps, mapDispatchToProps)(AuctionMainBid)

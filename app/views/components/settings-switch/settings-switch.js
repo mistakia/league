@@ -4,7 +4,7 @@ import Switch from '@material-ui/core/Switch'
 import './settings-switch.styl'
 
 export default class SettingsSwitch extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
 
     const { app, field } = props
@@ -23,9 +23,7 @@ export default class SettingsSwitch extends React.Component {
     return (
       <div className='settings__switch'>
         <div className='settings__switch-body'>
-          <div className='settings__switch-body-label'>
-            {this.props.label}
-          </div>
+          <div className='settings__switch-body-label'>{this.props.label}</div>
           <div className='settings__switch-body-description'>
             {this.props.description}
           </div>

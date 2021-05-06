@@ -7,7 +7,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import EditableSource from '@components/editable-source'
 
 export default class SettingsProjections extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
 
     this.state = { open: false }
@@ -22,23 +22,17 @@ export default class SettingsProjections extends React.Component {
 
     const sourceItems = []
     for (const sourceId of sourceIds) {
-      sourceItems.push(
-        <EditableSource key={sourceId} sourceId={sourceId} />
-      )
+      sourceItems.push(<EditableSource key={sourceId} sourceId={sourceId} />)
     }
 
     return (
       <Accordion expanded={this.state.open} onChange={this.handleChange}>
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
-        >
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <div className='settings__section-title'>Projections</div>
           <div className='settings__section-description'>Edit weights</div>
         </AccordionSummary>
         <AccordionDetails>
-          <div className='settings__section-row'>
-            {sourceItems}
-          </div>
+          <div className='settings__section-row'>{sourceItems}</div>
         </AccordionDetails>
       </Accordion>
     )

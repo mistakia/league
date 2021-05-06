@@ -14,110 +14,140 @@ export default class ScoreboardTeam extends React.Component {
     const rows = []
     if (league.sqb) {
       const slot = constants.slots.QB
-      const players = roster.starters.filter(p => p.slot === slot)
+      const players = roster.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.sqb; i++) {
         const { player } = players[i] || {}
         rows.push(
-          <ScoreboardPlayer key={`${slot}${i}`} {...{ playerId: player, roster }} />
+          <ScoreboardPlayer
+            key={`${slot}${i}`}
+            {...{ playerId: player, roster }}
+          />
         )
       }
     }
 
     if (league.srb) {
       const slot = constants.slots.RB
-      const players = roster.starters.filter(p => p.slot === slot)
+      const players = roster.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.srb; i++) {
         const { player } = players[i] || {}
         rows.push(
-          <ScoreboardPlayer key={`${slot}${i}`} {...{ playerId: player, roster }} />
+          <ScoreboardPlayer
+            key={`${slot}${i}`}
+            {...{ playerId: player, roster }}
+          />
         )
       }
     }
 
     if (league.swr) {
       const slot = constants.slots.WR
-      const players = roster.starters.filter(p => p.slot === slot)
+      const players = roster.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.swr; i++) {
         const { player } = players[i] || {}
         rows.push(
-          <ScoreboardPlayer key={`${slot}${i}`} {...{ playerId: player, roster }} />
+          <ScoreboardPlayer
+            key={`${slot}${i}`}
+            {...{ playerId: player, roster }}
+          />
         )
       }
     }
 
     if (league.srbwr) {
       const slot = constants.slots.RBWR
-      const players = roster.starters.filter(p => p.slot === slot)
+      const players = roster.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.srbwr; i++) {
         const { player } = players[i] || {}
         rows.push(
-          <ScoreboardPlayer key={`${slot}${i}`} {...{ playerId: player, roster }} />
+          <ScoreboardPlayer
+            key={`${slot}${i}`}
+            {...{ playerId: player, roster }}
+          />
         )
       }
     }
 
     if (league.srbwrte) {
       const slot = constants.slots.RBWRTE
-      const players = roster.starters.filter(p => p.slot === slot)
+      const players = roster.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.srbwrte; i++) {
         const { player } = players[i] || {}
         rows.push(
-          <ScoreboardPlayer key={`${slot}${i}`} {...{ playerId: player, roster }} />
+          <ScoreboardPlayer
+            key={`${slot}${i}`}
+            {...{ playerId: player, roster }}
+          />
         )
       }
     }
 
     if (league.sqbrbwrte) {
       const slot = constants.slots.QBRBWRTE
-      const players = roster.starters.filter(p => p.slot === slot)
+      const players = roster.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.sqbrbwrte; i++) {
         const { player } = players[i] || {}
         rows.push(
-          <ScoreboardPlayer key={`${slot}${i}`} {...{ playerId: player, roster }} />
+          <ScoreboardPlayer
+            key={`${slot}${i}`}
+            {...{ playerId: player, roster }}
+          />
         )
       }
     }
 
     if (league.swrte) {
       const slot = constants.slots.WRTE
-      const players = roster.starters.filter(p => p.slot === slot)
+      const players = roster.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.swrte; i++) {
         const { player } = players[i] || {}
         rows.push(
-          <ScoreboardPlayer key={`${slot}${i}`} {...{ playerId: player, roster }} />
+          <ScoreboardPlayer
+            key={`${slot}${i}`}
+            {...{ playerId: player, roster }}
+          />
         )
       }
     }
 
     if (league.ste) {
       const slot = constants.slots.TE
-      const players = roster.starters.filter(p => p.slot === slot)
+      const players = roster.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.ste; i++) {
         const { player } = players[i] || {}
         rows.push(
-          <ScoreboardPlayer key={`${slot}${i}`} {...{ playerId: player, roster }} />
+          <ScoreboardPlayer
+            key={`${slot}${i}`}
+            {...{ playerId: player, roster }}
+          />
         )
       }
     }
 
     if (league.sk) {
       const slot = constants.slots.K
-      const players = roster.starters.filter(p => p.slot === slot)
+      const players = roster.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.sk; i++) {
         const { player } = players[i] || {}
         rows.push(
-          <ScoreboardPlayer key={`${slot}${i}`} {...{ playerId: player, roster }} />
+          <ScoreboardPlayer
+            key={`${slot}${i}`}
+            {...{ playerId: player, roster }}
+          />
         )
       }
     }
 
     if (league.sdst) {
       const slot = constants.slots.DST
-      const players = roster.starters.filter(p => p.slot === slot)
+      const players = roster.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.sdst; i++) {
         const { player } = players[i] || {}
         rows.push(
-          <ScoreboardPlayer key={`${slot}${i}`} {...{ playerId: player, roster }} />
+          <ScoreboardPlayer
+            key={`${slot}${i}`}
+            {...{ playerId: player, roster }}
+          />
         )
       }
     }
@@ -153,21 +183,14 @@ export default class ScoreboardTeam extends React.Component {
           <TeamImage tid={team.uid} />
           <TeamName tid={team.uid} />
           <div className='scoreboard__team-score'>
-            <div className='score'>
-              {(scoreboard.points || 0).toFixed(2)}
-            </div>
+            <div className='score'>{(scoreboard.points || 0).toFixed(2)}</div>
             <div className='projected'>
               {(scoreboard.projected || 0).toFixed(2)}
             </div>
           </div>
         </div>
-        <div className='scoreboard__team-roster'>
-          {rows}
-        </div>
-        {showBench &&
-          <div className='scoreboard__team-bench'>
-            {bench}
-          </div>}
+        <div className='scoreboard__team-roster'>{rows}</div>
+        {showBench && <div className='scoreboard__team-bench'>{bench}</div>}
       </div>
     )
   }

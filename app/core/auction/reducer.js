@@ -28,7 +28,7 @@ const initialState = new Record({
   hideRostered: false
 })
 
-export function auctionReducer (state = initialState(), { payload, type }) {
+export function auctionReducer(state = initialState(), { payload, type }) {
   switch (type) {
     case auctionActions.SET_VALUE_TYPE:
       return state.merge({
@@ -58,9 +58,10 @@ export function auctionReducer (state = initialState(), { payload, type }) {
       const latest = state.transactions.first()
       return state.merge({
         isPaused: false,
-        timer: latest && latest.type === constants.transactions.AUCTION_BID
-          ? Math.round((Date.now() + state.bidTimer) / 1000)
-          : Math.round((Date.now() + state.nominationTimer) / 1000)
+        timer:
+          latest && latest.type === constants.transactions.AUCTION_BID
+            ? Math.round((Date.now() + state.bidTimer) / 1000)
+            : Math.round((Date.now() + state.nominationTimer) / 1000)
       })
     }
 
@@ -110,8 +111,14 @@ export function auctionReducer (state = initialState(), { payload, type }) {
     case auctionActions.AUCTION_INIT: {
       const latest = payload.transactions[0]
       return state.merge({
-        bid: (latest && latest.type === constants.transactions.AUCTION_BID) ? latest.value : null,
-        player: (latest && latest.type === constants.transactions.AUCTION_BID) ? latest.player : null,
+        bid:
+          latest && latest.type === constants.transactions.AUCTION_BID
+            ? latest.value
+            : null,
+        player:
+          latest && latest.type === constants.transactions.AUCTION_BID
+            ? latest.player
+            : null,
         transactions: new List(payload.transactions),
         tids: new List(payload.tids),
         isPaused: payload.paused,
@@ -140,7 +147,7 @@ export function auctionReducer (state = initialState(), { payload, type }) {
 
     case appActions.AUTH_FULFILLED:
       return state.merge({
-        lineupBudget: Math.round(payload.data.leagues[0].cap * 0.90)
+        lineupBudget: Math.round(payload.data.leagues[0].cap * 0.9)
       })
 
     default:

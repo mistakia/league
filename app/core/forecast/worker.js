@@ -3,11 +3,7 @@ import { groupBy } from '@common'
 
 const SIMULATIONS = 10000
 
-export function simulate ({
-  teams,
-  matchups,
-  rosters
-}) {
+export function simulate({ teams, matchups, rosters }) {
   const result = {}
 
   for (const tid in rosters) {
@@ -86,31 +82,45 @@ export function simulate ({
     const divisions = groupBy(Object.values(standings), 'div')
     const divisionWinners = []
     for (const teams of Object.values(divisions)) {
-      const sorted = teams.sort((a, b) => b.wins - a.wins || b.pointsFor - a.pointsFor)
+      const sorted = teams.sort(
+        (a, b) => b.wins - a.wins || b.pointsFor - a.pointsFor
+      )
       divisionWinners.push(sorted[0])
     }
-    const sortedDivisionWinners = divisionWinners
-      .sort((a, b) => b.wins - a.wins || b.pointsFor - a.pointsFor)
+    const sortedDivisionWinners = divisionWinners.sort(
+      (a, b) => b.wins - a.wins || b.pointsFor - a.pointsFor
+    )
     const byeTeams = sortedDivisionWinners.slice(0, 2)
-    const divisionWinnerIds = divisionWinners.map(t => t.tid)
+    const divisionWinnerIds = divisionWinners.map((t) => t.tid)
 
     // determine wildcard winners
     const wildcardRanks = Object.values(standings)
-      .filter(t => !divisionWinnerIds.includes(t.tid))
+      .filter((t) => !divisionWinnerIds.includes(t.tid))
       .sort((a, b) => b.pointsFor - a.pointsFor)
     const wildcardWinners = wildcardRanks.slice(0, 2)
 
     // determine playoff teams
-    const wildcardTeams = wildcardWinners
-      .concat(sortedDivisionWinners.slice(2, 4))
+    const wildcardTeams = wildcardWinners.concat(
+      sortedDivisionWinners.slice(2, 4)
+    )
     const playoffTeams = byeTeams.concat(wildcardTeams)
 
     // record results
-    divisionWinners.forEach(t => { result[t.tid].divisionWins += 1 })
-    wildcardWinners.forEach(t => { result[t.tid].wildcards += 1 })
-    playoffTeams.forEach(t => { result[t.tid].playoffAppearances += 1 })
-    wildcardTeams.forEach(t => { result[t.tid].wildcardAppearances += 1 })
-    byeTeams.forEach(t => { result[t.tid].byes += 1 })
+    divisionWinners.forEach((t) => {
+      result[t.tid].divisionWins += 1
+    })
+    wildcardWinners.forEach((t) => {
+      result[t.tid].wildcards += 1
+    })
+    playoffTeams.forEach((t) => {
+      result[t.tid].playoffAppearances += 1
+    })
+    wildcardTeams.forEach((t) => {
+      result[t.tid].wildcardAppearances += 1
+    })
+    byeTeams.forEach((t) => {
+      result[t.tid].byes += 1
+    })
 
     // TODO simulate playoffs
 

@@ -1,24 +1,27 @@
 import { List, Map } from 'immutable'
 import { fixTeam } from '@common'
 
-export function getPlays (state, { week }) {
+export function getPlays(state, { week }) {
   return state.getIn(['plays', week], new Map())
 }
 
-export function getPlaysForPlayer (state, { player, week }) {
+export function getPlaysForPlayer(state, { player, week }) {
   const plays = getPlays(state, { week })
   const formatted = plays.valueSeq().toList()
 
   if (player.pos === 'DST') {
-    return formatted
-      .filter(p => {
-        if (fixTeam(p.homeTeamAbbr) !== player.team &&
-          fixTeam(p.awayTeamAbbr) !== player.team) {
-          return false
-        }
+    return formatted.filter((p) => {
+      if (
+        fixTeam(p.homeTeamAbbr) !== player.team &&
+        fixTeam(p.awayTeamAbbr) !== player.team
+      ) {
+        return false
+      }
 
-        return Boolean(p.possessionTeam) && fixTeam(p.possessionTeam) !== player.player
-      })
+      return (
+        Boolean(p.possessionTeam) && fixTeam(p.possessionTeam) !== player.player
+      )
+    })
   }
 
   let filtered = new List()
@@ -26,8 +29,11 @@ export function getPlaysForPlayer (state, { player, week }) {
     const pos = play.possessionTeam
     if (!pos || fixTeam(pos) !== player.team) continue
 
-    const playStats = play.playStats.filter(ps => (ps.gsisId && ps.gsisId === player.gsisid) ||
-      (ps.gsispid && ps.gsispid === player.gsispid))
+    const playStats = play.playStats.filter(
+      (ps) =>
+        (ps.gsisId && ps.gsisId === player.gsisid) ||
+        (ps.gsispid && ps.gsispid === player.gsispid)
+    )
 
     if (!playStats.length) continue
 

@@ -18,7 +18,7 @@ const run = async () => {
   const missing = []
 
   const URL = 'https://api.sleeper.app/v1/players/nfl'
-  const result = await fetch(URL).then(res => res.json())
+  const result = await fetch(URL).then((res) => res.json())
 
   const fields = {}
   const inserts = []
@@ -97,7 +97,9 @@ const run = async () => {
 
   log(`Complete field list: ${Object.keys(fields)}`)
   log(`Could not locate ${missing.length} players`)
-  missing.forEach(m => log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`))
+  missing.forEach((m) =>
+    log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`)
+  )
 
   if (argv.dry) {
     return
@@ -120,19 +122,21 @@ const run = async () => {
         status,
         search_rank
       } = insert
-      await db('players').update({
-        active,
-        depth_chart_order,
-        depth_chart_position,
-        injury_body_part,
-        injury_start_date,
-        injury_status,
-        injury_notes,
-        practice_participation,
-        practice_description,
-        status,
-        search_rank
-      }).where('sleeper_id', insert.sleeper_id)
+      await db('players')
+        .update({
+          active,
+          depth_chart_order,
+          depth_chart_position,
+          injury_body_part,
+          injury_start_date,
+          injury_status,
+          injury_notes,
+          practice_participation,
+          practice_description,
+          status,
+          search_rank
+        })
+        .where('sleeper_id', insert.sleeper_id)
     } else {
       await db('players').insert(insert)
     }

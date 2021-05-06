@@ -25,7 +25,4 @@ const mapDispatchToProps = {
   addFreeAgent: rosterActions.addFreeAgent
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(AddFreeAgentDialog)
+export default connect(mapStateToProps, mapDispatchToProps)(AddFreeAgentDialog)

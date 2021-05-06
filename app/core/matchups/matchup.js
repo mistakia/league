@@ -11,7 +11,7 @@ export const Matchup = new Record({
   lid: null
 })
 
-export function createMatchup ({
+export function createMatchup({
   uid,
   tids,
   hid,

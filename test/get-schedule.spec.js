@@ -26,13 +26,14 @@ describe('UTILS getSchedule', function () {
       }
     }
 
-    const countMatchups = (arr) => arr.reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map())
+    const countMatchups = (arr) =>
+      arr.reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map())
 
     for (const teamid in schedulePerTeam) {
-      const team = teams.find(t => t.uid === parseInt(teamid, 10))
+      const team = teams.find((t) => t.uid === parseInt(teamid, 10))
       const count = countMatchups(schedulePerTeam[teamid])
       for (const [opponent, occurences] of count.entries()) {
-        const oppoTeam = teams.find(t => t.uid === opponent)
+        const oppoTeam = teams.find((t) => t.uid === opponent)
         if (team.div === oppoTeam.div) {
           occurences.should.equal(2)
         } else {

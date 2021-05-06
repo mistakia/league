@@ -9,9 +9,7 @@ const { constants } = require('../common')
 // const log = debug('example')
 // debug.enable('example')
 
-const run = async () => {
-
-}
+const run = async () => {}
 
 module.exports = run
 

@@ -154,7 +154,7 @@ export const rosterActions = {
     }
   }),
 
-  getRostersPending: opts => ({
+  getRostersPending: (opts) => ({
     type: rosterActions.GET_ROSTERS_PENDING,
     payload: {
       opts
@@ -177,7 +177,7 @@ export const rosterActions = {
     }
   }),
 
-  putRosterPending: opts => ({
+  putRosterPending: (opts) => ({
     type: rosterActions.PUT_ROSTER_PENDING,
     payload: {
       opts
@@ -223,7 +223,7 @@ export const rosterActions = {
     }
   }),
 
-  postProtectPending: opts => ({
+  postProtectPending: (opts) => ({
     type: rosterActions.POST_PROTECT_PENDING,
     payload: {
       opts
@@ -269,7 +269,7 @@ export const rosterActions = {
     }
   }),
 
-  putRostersPending: opts => ({
+  putRostersPending: (opts) => ({
     type: rosterActions.PUT_ROSTERS_PENDING,
     payload: {
       opts
@@ -292,7 +292,7 @@ export const rosterActions = {
     }
   }),
 
-  postRostersPending: opts => ({
+  postRostersPending: (opts) => ({
     type: rosterActions.POST_ROSTERS_PENDING,
     payload: {
       opts
@@ -315,7 +315,7 @@ export const rosterActions = {
     }
   }),
 
-  deleteRostersPending: opts => ({
+  deleteRostersPending: (opts) => ({
     type: rosterActions.DELETE_ROSTERS_PENDING,
     payload: {
       opts
@@ -338,7 +338,7 @@ export const rosterActions = {
     }
   }),
 
-  postAddFreeAgentPending: opts => ({
+  postAddFreeAgentPending: (opts) => ({
     type: rosterActions.POST_ADD_FREE_AGENT_PENDING,
     payload: {
       opts
@@ -361,7 +361,7 @@ export const rosterActions = {
     }
   }),
 
-  postReservePending: opts => ({
+  postReservePending: (opts) => ({
     type: rosterActions.POST_RESERVE_PENDING,
     payload: {
       opts
@@ -384,7 +384,7 @@ export const rosterActions = {
     }
   }),
 
-  postReleasePending: opts => ({
+  postReleasePending: (opts) => ({
     type: rosterActions.POST_RELEASE_PENDING,
     payload: {
       opts

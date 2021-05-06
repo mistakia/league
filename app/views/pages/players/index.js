@@ -16,24 +16,33 @@ const mapStateToProps = createSelector(
     players,
     week: pState.get('view') === 'ros' ? 'ros' : pState.get('week').get(0),
     isLoggedIn: !!app.userId,
-    isPending: pState.get('isPending') || (pState.get('view') === 'stats' && stats.isPending),
+    isPending:
+      pState.get('isPending') ||
+      (pState.get('view') === 'stats' && stats.isPending),
     vbaseline: app.vbaseline,
     searchValue: pState.get('search'),
     selected: pState.get('selected'),
     order: pState.get('order'),
     orderBy: pState.get('orderBy'),
-    showQualifier: !!stats.qualifiers.get(pState.get('orderBy').split('.').pop()),
+    showQualifier: !!stats.qualifiers.get(
+      pState.get('orderBy').split('.').pop()
+    ),
     isSeasonView: pState.get('view') === 'season',
     isRestOfSeasonView: pState.get('view') === 'ros',
     isWeekView: pState.get('view') === 'week',
     isStatsView: pState.get('view') === 'stats',
-    isStatsPassingView: pState.get('view') === 'stats' && stats.view === 'passing',
-    isStatsRushingView: pState.get('view') === 'stats' && stats.view === 'rushing',
-    isStatsReceivingView: pState.get('view') === 'stats' && stats.view === 'receiving',
-    isStatsPassingAdvancedView: pState.get('view') === 'stats' &&
+    isStatsPassingView:
+      pState.get('view') === 'stats' && stats.view === 'passing',
+    isStatsRushingView:
+      pState.get('view') === 'stats' && stats.view === 'rushing',
+    isStatsReceivingView:
+      pState.get('view') === 'stats' && stats.view === 'receiving',
+    isStatsPassingAdvancedView:
+      pState.get('view') === 'stats' &&
       stats.view === 'passing' &&
       stats.passing === 'advanced',
-    isStatsPassingPressureView: pState.get('view') === 'stats' &&
+    isStatsPassingPressureView:
+      pState.get('view') === 'stats' &&
       stats.view === 'passing' &&
       stats.passing === 'pressure'
   })
@@ -43,7 +52,4 @@ const mapDispatchToProps = {
   search: playerActions.search
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(PlayersPage)
+export default connect(mapStateToProps, mapDispatchToProps)(PlayersPage)

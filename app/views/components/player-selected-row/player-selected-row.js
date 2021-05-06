@@ -37,35 +37,31 @@ const kickerStats = (stats, percentiles = {}) => (
   </div>
 )
 
-const playerStats = (stats, percentiles = {}) => ([
-  (
-    <div className='row__group' key={0}>
-      <div className='row__group-body'>
-        <PercentileMetric stats={stats} percentiles={percentiles} type='py' />
-        <PercentileMetric stats={stats} percentiles={percentiles} type='tdp' />
-        <PercentileMetric stats={stats} percentiles={percentiles} type='ints' />
-      </div>
+const playerStats = (stats, percentiles = {}) => [
+  <div className='row__group' key={0}>
+    <div className='row__group-body'>
+      <PercentileMetric stats={stats} percentiles={percentiles} type='py' />
+      <PercentileMetric stats={stats} percentiles={percentiles} type='tdp' />
+      <PercentileMetric stats={stats} percentiles={percentiles} type='ints' />
     </div>
-  ), (
-    <div className='row__group' key={1}>
-      <div className='row__group-body'>
-        <PercentileMetric stats={stats} percentiles={percentiles} type='ra' />
-        <PercentileMetric stats={stats} percentiles={percentiles} type='ry' />
-        <PercentileMetric stats={stats} percentiles={percentiles} type='tdr' />
-        <PercentileMetric stats={stats} percentiles={percentiles} type='fuml' />
-      </div>
+  </div>,
+  <div className='row__group' key={1}>
+    <div className='row__group-body'>
+      <PercentileMetric stats={stats} percentiles={percentiles} type='ra' />
+      <PercentileMetric stats={stats} percentiles={percentiles} type='ry' />
+      <PercentileMetric stats={stats} percentiles={percentiles} type='tdr' />
+      <PercentileMetric stats={stats} percentiles={percentiles} type='fuml' />
     </div>
-  ), (
-    <div className='row__group' key={2}>
-      <div className='row__group-body'>
-        <PercentileMetric stats={stats} percentiles={percentiles} type='trg' />
-        <PercentileMetric stats={stats} percentiles={percentiles} type='rec' />
-        <PercentileMetric stats={stats} percentiles={percentiles} type='recy' />
-        <PercentileMetric stats={stats} percentiles={percentiles} type='tdrec' />
-      </div>
+  </div>,
+  <div className='row__group' key={2}>
+    <div className='row__group-body'>
+      <PercentileMetric stats={stats} percentiles={percentiles} type='trg' />
+      <PercentileMetric stats={stats} percentiles={percentiles} type='rec' />
+      <PercentileMetric stats={stats} percentiles={percentiles} type='recy' />
+      <PercentileMetric stats={stats} percentiles={percentiles} type='tdrec' />
     </div>
-  )
-])
+  </div>
+]
 
 const getStatRows = (pos, stats, percentiles) => {
   switch (pos) {
@@ -80,15 +76,23 @@ const getStatRows = (pos, stats, percentiles) => {
 
 export default class PlayerSelectedRow extends React.Component {
   render = () => {
-    const { title, stats, action, className, games, lead, pos, percentiles } = this.props
+    const {
+      title,
+      stats,
+      action,
+      className,
+      games,
+      lead,
+      pos,
+      percentiles
+    } = this.props
     const classNames = ['player__selected-row']
     if (className) classNames.push(className)
     const rows = getStatRows(pos, stats, percentiles)
     return (
       <div className={classNames.join(' ')}>
         {lead || <div className='row__name'>{title}</div>}
-        {games &&
-          <div className='row__single-metric'>{games}</div>}
+        {games && <div className='row__single-metric'>{games}</div>}
         {rows}
         {action}
       </div>

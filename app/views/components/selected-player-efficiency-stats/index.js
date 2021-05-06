@@ -12,6 +12,4 @@ const mapStateToProps = createSelector(
   (player, stats) => ({ player, percentiles: stats.playsPercentiles })
 )
 
-export default connect(
-  mapStateToProps
-)(SelectedPlayerEfficiencyStats)
+export default connect(mapStateToProps)(SelectedPlayerEfficiencyStats)

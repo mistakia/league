@@ -13,7 +13,11 @@ module.exports = async function (knex) {
   await knex('rosters_players').del()
 
   let i = 1
-  let roster = await getRoster({ tid: i, week: constants.season.week, year: constants.season.year })
+  let roster = await getRoster({
+    tid: i,
+    week: constants.season.week,
+    year: constants.season.year
+  })
   let r = new Roster({ roster, league })
   while (!r.isFull) {
     let player
@@ -34,32 +38,39 @@ module.exports = async function (knex) {
       rid: roster.uid
     })
     const value = Math.floor(Math.random() * Math.min(r.availableCap, 60))
-    await knex('transactions').insert([{
-      userid: roster.tid,
-      tid: roster.tid,
-      lid: league.uid,
-      player: player.player,
-      type: constants.transactions.AUCTION_BID,
-      value,
-      year: constants.season.year,
-      timestamp: Math.round(Date.now() / 1000)
-    }, {
-      userid: roster.tid,
-      tid: roster.tid,
-      lid: league.uid,
-      player: player.player,
-      type: constants.transactions.AUCTION_PROCESSED,
-      value,
-      year: constants.season.year,
-      timestamp: Math.round(Date.now() / 1000)
-    }])
+    await knex('transactions').insert([
+      {
+        userid: roster.tid,
+        tid: roster.tid,
+        lid: league.uid,
+        player: player.player,
+        type: constants.transactions.AUCTION_BID,
+        value,
+        year: constants.season.year,
+        timestamp: Math.round(Date.now() / 1000)
+      },
+      {
+        userid: roster.tid,
+        tid: roster.tid,
+        lid: league.uid,
+        player: player.player,
+        type: constants.transactions.AUCTION_PROCESSED,
+        value,
+        year: constants.season.year,
+        timestamp: Math.round(Date.now() / 1000)
+      }
+    ])
 
     if (i === 12) {
       i = 1
     } else {
       i += 1
     }
-    roster = await getRoster({ tid: i, week: constants.season.week, year: constants.season.year })
+    roster = await getRoster({
+      tid: i,
+      week: constants.season.week,
+      year: constants.season.year
+    })
     r = new Roster({ roster, league })
   }
 }

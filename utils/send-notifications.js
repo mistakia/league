@@ -32,7 +32,7 @@ const sendNotifications = async ({
 
   if (teamIds.length) {
     // filter based on affected teams
-    const userTeams = users.filter(u => teamIds.includes(u.tid))
+    const userTeams = users.filter((u) => teamIds.includes(u.tid))
 
     for (const user of userTeams) {
       // send team text messages

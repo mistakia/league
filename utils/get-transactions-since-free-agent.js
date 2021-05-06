@@ -15,7 +15,7 @@ module.exports = async function ({ lid, player }) {
     constants.transactions.AUCTION_PROCESSED,
     constants.transactions.PRACTICE_ADD
   ]
-  const index = transactions.findIndex(t => types.includes(t.type))
+  const index = transactions.findIndex((t) => types.includes(t.type))
   if (index === -1) return transactions
   return transactions.slice(0, index + 1)
 }

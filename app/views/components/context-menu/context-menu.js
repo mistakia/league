@@ -51,9 +51,9 @@ export default class ContextMenu extends React.Component {
       return
     }
 
-    const right = (screenW - clickX) > rootW
+    const right = screenW - clickX > rootW
     const left = !right
-    const top = (screenH - clickY) > rootH
+    const top = screenH - clickY > rootH
     const bottom = !top
 
     if (right) {
@@ -83,7 +83,8 @@ export default class ContextMenu extends React.Component {
 
     const getContextMenuComponent = (id) => {
       switch (id) {
-        case 'player': return PlayerContextMenu
+        case 'player':
+          return PlayerContextMenu
       }
     }
 
@@ -91,7 +92,11 @@ export default class ContextMenu extends React.Component {
 
     return (
       <div>
-        <div ref={ref => { this.root = ref }} className='context__menu'>
+        <div
+          ref={(ref) => {
+            this.root = ref
+          }}
+          className='context__menu'>
           <ContextMenuComponent {...data} />
         </div>
         <div className='context__menu-backdrop' />

@@ -18,10 +18,14 @@ export default class SelectedPlayerProjection extends React.Component {
     const rows = []
     projections.forEach((p, index) => {
       const isUser = !p.sourceid
-      const title = (isUser ? 'User' : <Source sourceId={p.sourceid} />)
+      const title = isUser ? 'User' : <Source sourceId={p.sourceid} />
       const action = (
         <div className='row__action'>
-          {isUser && <div onClick={this.handleClearClick}><Icon name='clear' /></div>}
+          {isUser && (
+            <div onClick={this.handleClearClick}>
+              <Icon name='clear' />
+            </div>
+          )}
         </div>
       )
 
@@ -38,7 +42,7 @@ export default class SelectedPlayerProjection extends React.Component {
     })
 
     const projAvg = weightProjections({
-      projections: projections.filter(p => p.sourceid),
+      projections: projections.filter((p) => p.sourceid),
       week,
       userId: 0
     })
@@ -50,7 +54,7 @@ export default class SelectedPlayerProjection extends React.Component {
         stats={projAvg}
         title='Average'
         pos={pos}
-        action={(<div className='row__action' />)}
+        action={<div className='row__action' />}
       />
     )
 
@@ -61,7 +65,7 @@ export default class SelectedPlayerProjection extends React.Component {
         stats={projection}
         title='Weighted'
         pos={pos}
-        action={(<div className='row__action' />)}
+        action={<div className='row__action' />}
       />
     )
 

@@ -14,9 +14,7 @@ export default class PlayerRowOpponent extends React.Component {
     const opp = isHome ? game.v : game.h
 
     return (
-      <div className='player__row-opponent'>
-        {(isHome ? 'v' : '@') + opp}
-      </div>
+      <div className='player__row-opponent'>{(isHome ? 'v' : '@') + opp}</div>
     )
   }
 }

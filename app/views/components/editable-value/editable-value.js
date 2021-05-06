@@ -8,14 +8,14 @@ import MenuItem from '@material-ui/core/MenuItem'
 import './editable-value.styl'
 
 export default class EditableValue extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
 
     const { vbaseline, vorpw, volsw } = this.props.app
     this.state = { vbaseline, vorpw, volsw }
   }
 
-  static getDerivedStateFromProps (props, state) {
+  static getDerivedStateFromProps(props, state) {
     const { vbaseline, vorpw, volsw } = props.app
     return { vbaseline, vorpw, volsw }
   }
@@ -30,20 +30,30 @@ export default class EditableValue extends React.Component {
     const { vbaseline, vorpw, volsw } = this.state
     const weights = (
       <div className='editable__value-weights'>
-        <EditableValueWeight weight={vorpw} type='vorpw' label='Best Available Weight' />
-        <EditableValueWeight weight={volsw} type='volsw' label='Worst Starter Weight' />
+        <EditableValueWeight
+          weight={vorpw}
+          type='vorpw'
+          label='Best Available Weight'
+        />
+        <EditableValueWeight
+          weight={volsw}
+          type='volsw'
+          label='Worst Starter Weight'
+        />
       </div>
     )
     return (
       <div className='editable__value'>
-        <FormControl size='small' variant='outlined' className='editable__value-select'>
+        <FormControl
+          size='small'
+          variant='outlined'
+          className='editable__value-select'>
           <InputLabel id='value-label'>Value Baseline</InputLabel>
           <Select
             labelId='value-label'
             value={vbaseline}
             onChange={this.handleChange}
-            label='VORP Baseline'
-          >
+            label='VORP Baseline'>
             <MenuItem value='available'>Best Available</MenuItem>
             <MenuItem value='bench'>Average Bench</MenuItem>
             <MenuItem value='starter'>Worst Starter</MenuItem>

@@ -18,8 +18,6 @@ export default class ScheduleTeamsFilter extends React.Component {
       })
     }
 
-    return (
-      <ScheduleFilter {...state} />
-    )
+    return <ScheduleFilter {...state} />
   }
 }

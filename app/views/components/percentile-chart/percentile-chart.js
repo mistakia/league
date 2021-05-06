@@ -10,7 +10,8 @@ export default class PercentileChart extends React.Component {
     const { percentiles, type, stats, title } = this.props
     const value = stats[type]
     const percentile = percentiles[type] || {}
-    const norm = (value) => (value - percentile.min) / (percentile.max - percentile.min)
+    const norm = (value) =>
+      (value - percentile.min) / (percentile.max - percentile.min)
     const w = norm(value)
     const color = (value) => {
       if (value <= percentile.p25) {
@@ -32,7 +33,9 @@ export default class PercentileChart extends React.Component {
     return (
       <div className='percentile__chart'>
         <div className='percentile__chart-title'>{title}</div>
-        <div className='percentile__chart-value metric'>{value ? value.toFixed(1) : '-'}</div>
+        <div className='percentile__chart-value metric'>
+          {value ? value.toFixed(1) : '-'}
+        </div>
         <div className='percentile__chart-bars'>
           <div
             className='percentile__chart-player-bar'

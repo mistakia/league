@@ -26,7 +26,7 @@ const run = async () => {
     .where('type', constants.waivers.POACH)
     .groupBy('lid')
 
-  const leagueIds = results.map(w => w.lid)
+  const leagueIds = results.map((w) => w.lid)
 
   if (!leagueIds.length) {
     throw new Error('no waivers to process')
@@ -52,13 +52,19 @@ const run = async () => {
           team: waiver
         })
 
-        log(`poaching waiver awarded to ${waiver.name} (${waiver.tid}) for ${waiver.player}`)
+        log(
+          `poaching waiver awarded to ${waiver.name} (${waiver.tid}) for ${waiver.player}`
+        )
 
         await resetWaiverOrder({ leagueId: waiver.lid, teamId: waiver.tid })
       } catch (err) {
         error = err
-        log(`poaching waiver unsuccessful for ${waiver.name} (${waiver.tid}) because ${error.message}`)
-        const players = await db('player').where('player', waiver.player).limit(1)
+        log(
+          `poaching waiver unsuccessful for ${waiver.name} (${waiver.tid}) because ${error.message}`
+        )
+        const players = await db('player')
+          .where('player', waiver.player)
+          .limit(1)
         const player = players[0]
         await sendNotifications({
           leagueId: waiver.lid,

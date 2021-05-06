@@ -5,11 +5,8 @@ import { getStats } from '@core/stats'
 
 import StatDaysFilter from './stat-days-filter'
 
-const mapStateToProps = createSelector(
-  getStats,
-  (stats) => ({ days: stats.days })
-)
+const mapStateToProps = createSelector(getStats, (stats) => ({
+  days: stats.days
+}))
 
-export default connect(
-  mapStateToProps
-)(StatDaysFilter)
+export default connect(mapStateToProps)(StatDaysFilter)

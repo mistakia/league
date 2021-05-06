@@ -2,7 +2,7 @@ import React from 'react'
 import Switch from '@material-ui/core/Switch'
 
 export default class EditableTeamSwitch extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
 
     const { team, field } = props
@@ -21,9 +21,7 @@ export default class EditableTeamSwitch extends React.Component {
     return (
       <div className='settings__switch'>
         <div className='settings__switch-body'>
-          <div className='settings__switch-body-label'>
-            {this.props.label}
-          </div>
+          <div className='settings__switch-body-label'>{this.props.label}</div>
           <div className='settings__switch-body-description'>
             {this.props.description}
           </div>

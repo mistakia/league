@@ -24,7 +24,7 @@ export const Team = new Record({
   byeOdds: null
 })
 
-export function createTeam ({
+export function createTeam({
   uid,
   div,
   name,

@@ -11,7 +11,7 @@ import {
   getTrades
 } from '@core/api'
 
-export function * propose () {
+export function* propose() {
   const { teamId, leagueId } = yield select(getApp)
   const tid = yield select(getTradeSelectedTeamId)
   const trade = yield select(getTrade)
@@ -29,52 +29,57 @@ export function * propose () {
   yield call(postProposeTrade, params)
 }
 
-export function * load () {
+export function* load() {
   const { teamId, leagueId } = yield select(getApp)
   yield call(getTrades, { leagueId, teamId })
 }
 
-export function * cancel () {
+export function* cancel() {
   const { selectedTradeId } = yield select(getTrade)
   const { leagueId } = yield select(getApp)
   yield call(postCancelTrade, { leagueId, tradeId: selectedTradeId })
 }
 
-export function * reject () {
+export function* reject() {
   const { selectedTradeId } = yield select(getTrade)
   const { leagueId } = yield select(getApp)
   yield call(postRejectTrade, { leagueId, tradeId: selectedTradeId })
 }
 
-export function * accept () {
+export function* accept() {
   const { teamId, leagueId } = yield select(getApp)
   const { selectedTradeId } = yield select(getTrade)
   const trade = yield select(getTrade)
   const dropPlayers = trade.dropPlayers.toJS()
-  yield call(postAcceptTrade, { teamId, leagueId, dropPlayers, tradeId: selectedTradeId })
+  yield call(postAcceptTrade, {
+    teamId,
+    leagueId,
+    dropPlayers,
+    tradeId: selectedTradeId
+  })
 }
 
 //= ====================================
 //  WATCHERS
 // -------------------------------------
 
-export function * watchProposeTrade () {
+export function* watchProposeTrade() {
   yield takeLatest(tradeActions.PROPOSE_TRADE, propose)
 }
 
-export function * watchLoadTrades () {
+export function* watchLoadTrades() {
   yield takeLatest(tradeActions.LOAD_TRADES, load)
 }
 
-export function * watchCancelTrade () {
+export function* watchCancelTrade() {
   yield takeLatest(tradeActions.CANCEL_TRADE, cancel)
 }
 
-export function * watchAcceptTrade () {
+export function* watchAcceptTrade() {
   yield takeLatest(tradeActions.ACCEPT_TRADE, accept)
 }
 
-export function * watchRejectTrade () {
+export function* watchRejectTrade() {
   yield takeLatest(tradeActions.REJECT_TRADE, reject)
 }
 

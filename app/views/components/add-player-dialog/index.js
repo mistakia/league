@@ -21,7 +21,4 @@ const mapDispatchToProps = {
   add: rosterActions.add
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(AddPlayerDialog)
+export default connect(mapStateToProps, mapDispatchToProps)(AddPlayerDialog)

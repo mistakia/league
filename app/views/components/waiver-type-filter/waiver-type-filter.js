@@ -23,8 +23,6 @@ export default class WaiverTypeFilter extends React.Component {
       })
     }
 
-    return (
-      <WaiversFilter {...state} />
-    )
+    return <WaiversFilter {...state} />
   }
 }

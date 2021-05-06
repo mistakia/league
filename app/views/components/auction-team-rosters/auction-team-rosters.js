@@ -9,7 +9,7 @@ import PlayerName from '@components/player-name'
 
 import './auction-team-rosters.styl'
 
-function RosterRow ({ player = {}, slot }) {
+function RosterRow({ player = {}, slot }) {
   return (
     <div key={player.player} className='auction__team-rosters-player'>
       <div className='auction__team-rosters-player-slot'>{slot}</div>
@@ -19,7 +19,7 @@ function RosterRow ({ player = {}, slot }) {
 }
 
 export default class AuctonTeamRosters extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
 
     this.state = {
@@ -37,12 +37,14 @@ export default class AuctonTeamRosters extends React.Component {
     const menuItems = []
     for (const [index, team] of this.props.teams.entries()) {
       menuItems.push(
-        <MenuItem key={index} value={team.uid}>{team.name}</MenuItem>
+        <MenuItem key={index} value={team.uid}>
+          {team.name}
+        </MenuItem>
       )
     }
 
     const counts = {}
-    const roster = this.props.rosters.find(r => r.tid === this.state.tid)
+    const roster = this.props.rosters.find((r) => r.tid === this.state.tid)
     const rows = []
     const excludeSlots = [
       constants.slots.PS,
@@ -51,18 +53,20 @@ export default class AuctonTeamRosters extends React.Component {
       constants.slots.COV
     ]
     const players = roster
-      ? roster.get('players')
-        .filter(p => !excludeSlots.includes(p.slot))
-        .sort((a, b) => b.value - a.value).toJS()
+      ? roster
+          .get('players')
+          .filter((p) => !excludeSlots.includes(p.slot))
+          .sort((a, b) => b.value - a.value)
+          .toJS()
       : []
 
     for (const position of constants.positions) {
-      counts[position] = players.filter(p => p.pos === position).length
+      counts[position] = players.filter((p) => p.pos === position).length
     }
 
     if (league.sqb) {
       for (let i = 0; i < league.sqb; i++) {
-        const idx = players.findIndex(p => p.pos === 'QB')
+        const idx = players.findIndex((p) => p.pos === 'QB')
         const items = idx >= 0 ? players.splice(idx, 1) : []
         rows.push(
           <RosterRow key={`qb${i}`} {...{ player: items[0], slot: 'QB' }} />
@@ -72,7 +76,7 @@ export default class AuctonTeamRosters extends React.Component {
 
     if (league.srb) {
       for (let i = 0; i < league.srb; i++) {
-        const idx = players.findIndex(p => p.pos === 'RB')
+        const idx = players.findIndex((p) => p.pos === 'RB')
         const items = idx >= 0 ? players.splice(idx, 1) : []
         rows.push(
           <RosterRow key={`rb${i}`} {...{ player: items[0], slot: 'RB' }} />
@@ -82,7 +86,7 @@ export default class AuctonTeamRosters extends React.Component {
 
     if (league.swr) {
       for (let i = 0; i < league.swr; i++) {
-        const idx = players.findIndex(p => p.pos === 'WR')
+        const idx = players.findIndex((p) => p.pos === 'WR')
         const items = idx >= 0 ? players.splice(idx, 1) : []
         rows.push(
           <RosterRow key={`wr${i}`} {...{ player: items[0], slot: 'WR' }} />
@@ -93,10 +97,13 @@ export default class AuctonTeamRosters extends React.Component {
     if (league.srbwr) {
       for (let i = 0; i < league.srbwr; i++) {
         const positions = ['RB', 'WR']
-        const idx = players.findIndex(p => positions.includes(p.pos))
+        const idx = players.findIndex((p) => positions.includes(p.pos))
         const items = idx >= 0 ? players.splice(idx, 1) : []
         rows.push(
-          <RosterRow key={`rbwr${i}`} {...{ player: items[0], slot: 'RB/WR' }} />
+          <RosterRow
+            key={`rbwr${i}`}
+            {...{ player: items[0], slot: 'RB/WR' }}
+          />
         )
       }
     }
@@ -104,10 +111,13 @@ export default class AuctonTeamRosters extends React.Component {
     if (league.srbwrte) {
       for (let i = 0; i < league.srbwrte; i++) {
         const positions = ['RB', 'WR', 'TE']
-        const idx = players.findIndex(p => positions.includes(p.pos))
+        const idx = players.findIndex((p) => positions.includes(p.pos))
         const items = idx >= 0 ? players.splice(idx, 1) : []
         rows.push(
-          <RosterRow key={`rbwrte${i}`} {...{ player: items[0], slot: 'FLEX' }} />
+          <RosterRow
+            key={`rbwrte${i}`}
+            {...{ player: items[0], slot: 'FLEX' }}
+          />
         )
       }
     }
@@ -115,17 +125,20 @@ export default class AuctonTeamRosters extends React.Component {
     if (league.sqbrbwrte) {
       for (let i = 0; i < league.sqb; i++) {
         const positions = ['QB', 'RB', 'WR', 'TE']
-        const idx = players.findIndex(p => positions.includes(p.pos))
+        const idx = players.findIndex((p) => positions.includes(p.pos))
         const items = idx >= 0 ? players.splice(idx, 1) : []
         rows.push(
-          <RosterRow key={`qbrbwrte${i}`} {...{ player: items[0], slot: 'SFLEX' }} />
+          <RosterRow
+            key={`qbrbwrte${i}`}
+            {...{ player: items[0], slot: 'SFLEX' }}
+          />
         )
       }
     }
 
     if (league.ste) {
       for (let i = 0; i < league.ste; i++) {
-        const idx = players.findIndex(p => p.pos === 'TE')
+        const idx = players.findIndex((p) => p.pos === 'TE')
         const items = idx >= 0 ? players.splice(idx, 1) : []
         rows.push(
           <RosterRow key={`te${i}`} {...{ player: items[0], slot: 'TE' }} />
@@ -135,7 +148,7 @@ export default class AuctonTeamRosters extends React.Component {
 
     if (league.sk) {
       for (let i = 0; i < league.sk; i++) {
-        const idx = players.findIndex(p => p.pos === 'K')
+        const idx = players.findIndex((p) => p.pos === 'K')
         const items = idx >= 0 ? players.splice(idx, 1) : []
         rows.push(
           <RosterRow key={`k${i}`} {...{ player: items[0], slot: 'K' }} />
@@ -145,7 +158,7 @@ export default class AuctonTeamRosters extends React.Component {
 
     if (league.sdst) {
       for (let i = 0; i < league.sdst; i++) {
-        const idx = players.findIndex(p => p.pos === 'DST')
+        const idx = players.findIndex((p) => p.pos === 'DST')
         const items = idx >= 0 ? players.splice(idx, 1) : []
         rows.push(
           <RosterRow key={`dst${i}`} {...{ player: items[0], slot: 'DST' }} />
@@ -187,18 +200,13 @@ export default class AuctonTeamRosters extends React.Component {
             <Select
               value={this.state.tid}
               onChange={this.handleChange}
-              label='Roster'
-            >
+              label='Roster'>
               {menuItems}
             </Select>
           </FormControl>
         </div>
-        <div className='auction__team-rosters-body empty scroll'>
-          {rows}
-        </div>
-        <div className='auction__team-rosters-footer'>
-          {countItems}
-        </div>
+        <div className='auction__team-rosters-body empty scroll'>{rows}</div>
+        <div className='auction__team-rosters-footer'>{countItems}</div>
       </div>
     )
   }

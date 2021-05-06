@@ -30,10 +30,7 @@ const ValueAdjustedHeader = () => (
 )
 
 const StartsHeader = () => (
-  <PlayerRosterHeader
-    tooltip='Projected games started'
-    title='Starts'
-  />
+  <PlayerRosterHeader tooltip='Projected games started' title='Starts' />
 )
 
 const PointsPlusHeader = () => (
@@ -58,13 +55,22 @@ const ROSHeader = () => (
 )
 
 export default class DashboardPlayersTable extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.ref = React.createRef()
   }
 
   render = () => {
-    const { items = [], title, poaches, claims, waiverType, reorderWaivers, leadColumn = '', limit } = this.props
+    const {
+      items = [],
+      title,
+      poaches,
+      claims,
+      waiverType,
+      reorderWaivers,
+      leadColumn = '',
+      limit
+    } = this.props
 
     const isWaiver = !!waiverType
     const isPoach = !!poaches
@@ -94,12 +100,7 @@ export default class DashboardPlayersTable extends React.Component {
     if (isPoach) {
       poaches.forEach((poach, index) => {
         items.push(
-          <PlayerRoster
-            key={index}
-            claim={poach}
-            poach
-            player={poach.player}
-          />
+          <PlayerRoster key={index} claim={poach} poach player={poach.player} />
         )
       })
     }
@@ -112,7 +113,9 @@ export default class DashboardPlayersTable extends React.Component {
             items={claims}
             lockAxis='y'
             helperClass='reordering'
-            onSortEnd={({ oldIndex, newIndex }) => reorderWaivers({ oldIndex, newIndex, type: waiverType })}
+            onSortEnd={({ oldIndex, newIndex }) =>
+              reorderWaivers({ oldIndex, newIndex, type: waiverType })
+            }
             helperContainer={this.ref.current}
             lockToContainerEdges
             useDragHandle
@@ -120,11 +123,7 @@ export default class DashboardPlayersTable extends React.Component {
         </div>
       )
     } else {
-      body = (
-        <div className='empty'>
-          {items}
-        </div>
-      )
+      body = <div className='empty'>{items}</div>
     }
 
     const classNames = ['section', 'dashboard__players-table']
@@ -154,20 +153,33 @@ export default class DashboardPlayersTable extends React.Component {
             <div className='player__item-name table__cell sticky__column'>
               {leadColumn}
             </div>
-            {isClaim &&
-              <div className='player__item-name table__cell'>Release</div>}
-            {isWaiver &&
-              <div className='metric table__cell'>Bid</div>}
-            {!isWaiver &&
-              <div className='metric table__cell'>Salary</div>}
-            <div className='table__cell metric'><RecommendedSalaryHeader /></div>
-            <div className='table__cell metric'><ValueHeader /></div>
-            <div className='table__cell metric'><ValueAdjustedHeader /></div>
-            <div className='table__cell metric'><ROSHeader /></div>
+            {isClaim && (
+              <div className='player__item-name table__cell'>Release</div>
+            )}
+            {isWaiver && <div className='metric table__cell'>Bid</div>}
+            {!isWaiver && <div className='metric table__cell'>Salary</div>}
+            <div className='table__cell metric'>
+              <RecommendedSalaryHeader />
+            </div>
+            <div className='table__cell metric'>
+              <ValueHeader />
+            </div>
+            <div className='table__cell metric'>
+              <ValueAdjustedHeader />
+            </div>
+            <div className='table__cell metric'>
+              <ROSHeader />
+            </div>
             <div className='table__cell metric'>Week {week}</div>
-            <div className='table__cell metric'><StartsHeader /></div>
-            <div className='table__cell metric'><PointsPlusHeader /></div>
-            <div className='table__cell metric'><BenchPlusHeader /></div>
+            <div className='table__cell metric'>
+              <StartsHeader />
+            </div>
+            <div className='table__cell metric'>
+              <PointsPlusHeader />
+            </div>
+            <div className='table__cell metric'>
+              <BenchPlusHeader />
+            </div>
           </div>
           {body}
         </div>

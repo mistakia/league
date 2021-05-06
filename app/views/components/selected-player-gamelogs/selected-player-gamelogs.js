@@ -17,21 +17,26 @@ export default class SelectedPlayerGamelogs extends React.Component {
             <div className='table__cell metric'>
               {player.getIn(['points', `${game.week}`, 'total'], 0).toFixed(1)}
             </div>
-            <div className='table__cell metric'>{(game.total || 0).toFixed(1)}</div>
+            <div className='table__cell metric'>
+              {(game.total || 0).toFixed(1)}
+            </div>
           </div>
         </div>
       )
       rows.push(
-        <PlayerSelectedRow key={index} stats={game} lead={lead} pos={player.pos} />
+        <PlayerSelectedRow
+          key={index}
+          stats={game}
+          lead={lead}
+          pos={player.pos}
+        />
       )
     }
 
     return (
       <div className='selected__section'>
         <div className='selected__section-header'>
-          <div className='row__group-head'>
-            Gamelogs
-          </div>
+          <div className='row__group-head'>Gamelogs</div>
         </div>
         <div className='selected__section-header'>
           <div className='row__group'>

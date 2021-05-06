@@ -1,8 +1,11 @@
 const fetch = require('node-fetch')
 
-const API_URL = 'https://registerdisney.go.com/jgc/v5/client/ESPN-FANTASYLM-PROD/api-key?langPref=en-US'
-const LOGIN_URL = 'https://ha.registerdisney.go.com/jgc/v5/client/ESPN-FANTASYLM-PROD/guest/login?langPref=en-US'
-const LEAGUES_URL = (swid) => `https://fan.api.espn.com/apis/v2/fans/${swid}?displayEvents=true&displayNow=true&displayRecs=true&recLimit=5&context=fantasy&source=espncom-fantasy&lang=en&section=espn&region=us`
+const API_URL =
+  'https://registerdisney.go.com/jgc/v5/client/ESPN-FANTASYLM-PROD/api-key?langPref=en-US'
+const LOGIN_URL =
+  'https://ha.registerdisney.go.com/jgc/v5/client/ESPN-FANTASYLM-PROD/guest/login?langPref=en-US'
+const LEAGUES_URL = (swid) =>
+  `https://fan.api.espn.com/apis/v2/fans/${swid}?displayEvents=true&displayNow=true&displayRecs=true&recLimit=5&context=fantasy&source=espncom-fantasy&lang=en&section=espn&region=us`
 
 const getApiKey = async () => {
   const apiKey = await fetch(API_URL, {
@@ -10,7 +13,7 @@ const getApiKey = async () => {
     headers: {
       'Content-Type': 'application/json'
     }
-  }).then(res => res.headers.get('api-key'))
+  }).then((res) => res.headers.get('api-key'))
   return apiKey
 }
 
@@ -23,7 +26,7 @@ const getCookies = async ({ username, password }) => {
       authorization: 'APIKEY ' + apiKey
     },
     body: JSON.stringify({ loginValue: username, password })
-  }).then(res => res.json())
+  }).then((res) => res.json())
 
   const { s2 } = data.data
   const { swid } = data.data.profile
@@ -34,11 +37,11 @@ const getCookies = async ({ username, password }) => {
 const getLeagues = async (credentials) => {
   const cookies = await getCookies(credentials)
 
-  const data = await fetch(LEAGUES_URL(cookies.swid)).then(res => res.json())
+  const data = await fetch(LEAGUES_URL(cookies.swid)).then((res) => res.json())
   const { preferences } = data
   const leagueIds = preferences
-    .filter(p => p.metaData.entry.abbrev === 'FFL')
-    .map(p => {
+    .filter((p) => p.metaData.entry.abbrev === 'FFL')
+    .map((p) => {
       const { entryLocation, entryNickname, groups } = p.metaData.entry
       const name = `${entryLocation} ${entryNickname}`
       const leagueId = groups[0].groupId

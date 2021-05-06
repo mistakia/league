@@ -21,6 +21,4 @@ const mapStateToProps = createSelector(
   })
 )
 
-export default connect(
-  mapStateToProps
-)(AuctionTeamRosters)
+export default connect(mapStateToProps)(AuctionTeamRosters)

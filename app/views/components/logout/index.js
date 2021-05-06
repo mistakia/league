@@ -8,7 +8,4 @@ const mapDispatchToProps = {
   logout: appActions.logout
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(Logout)
+export default connect(null, mapDispatchToProps)(Logout)

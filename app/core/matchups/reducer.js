@@ -14,7 +14,7 @@ const initialState = new Map({
   playoffs: new List()
 })
 
-export function matchupsReducer (state = initialState, { payload, type }) {
+export function matchupsReducer(state = initialState, { payload, type }) {
   switch (type) {
     case matchupsActions.SELECT_MATCHUP:
       return state.merge({ selected: payload.matchupId })
@@ -27,16 +27,18 @@ export function matchupsReducer (state = initialState, { payload, type }) {
 
     case teamActions.GET_TEAMS_FULFILLED:
       return state.merge({
-        teams: new List(payload.data.teams.map(t => t.uid))
+        teams: new List(payload.data.teams.map((t) => t.uid))
       })
 
     case matchupsActions.GET_MATCHUPS_FULFILLED: {
-      return state.withMutations(state => {
-        const matchups = payload.data.matchups.map(m => createMatchup({
-          ...m,
-          tids: [m.hid, m.aid],
-          type: constants.matchups.H2H
-        }))
+      return state.withMutations((state) => {
+        const matchups = payload.data.matchups.map((m) =>
+          createMatchup({
+            ...m,
+            tids: [m.hid, m.aid],
+            type: constants.matchups.H2H
+          })
+        )
         state.merge({
           items: new List(matchups),
           isPending: false
@@ -44,12 +46,16 @@ export function matchupsReducer (state = initialState, { payload, type }) {
 
         const playoffs = groupBy(payload.data.playoffs, 'uid')
         for (const gid in playoffs) {
-          const tids = playoffs[gid].map(p => p.tid)
-          state.updateIn(['playoffs'], arr => arr.push(createMatchup({
-            tids,
-            type: constants.matchups.TOURNAMENT,
-            ...playoffs[gid][0]
-          })))
+          const tids = playoffs[gid].map((p) => p.tid)
+          state.updateIn(['playoffs'], (arr) =>
+            arr.push(
+              createMatchup({
+                tids,
+                type: constants.matchups.TOURNAMENT,
+                ...playoffs[gid][0]
+              })
+            )
+          )
         }
       })
     }

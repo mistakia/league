@@ -8,14 +8,17 @@ import { matchupsActions, getMatchups } from '@core/matchups'
 import { forecastActions } from './actions'
 import Worker from 'workerize-loader?inline!./worker' // eslint-disable-line import/no-webpack-loader-syntax
 
-export function * simulate () {
+export function* simulate() {
   const teams = yield select(getTeamsForCurrentLeague)
   const matchups = yield select(getMatchups)
   const rosters = yield select(getRostersForCurrentLeague)
   const worker = new Worker()
   const result = yield call(worker.simulate, {
     teams: teams.toJS(),
-    matchups: matchups.get('items').filter(m => m.week >= constants.season.week).toJS(),
+    matchups: matchups
+      .get('items')
+      .filter((m) => m.week >= constants.season.week)
+      .toJS(),
     rosters: rosters.toJS()
   })
   worker.terminate()
@@ -27,7 +30,7 @@ export function * simulate () {
 //  WATCHERS
 // -------------------------------------
 
-export function * watchAll () {
+export function* watchAll() {
   while (true) {
     yield all([
       take(teamActions.GET_TEAMS_FULFILLED),
@@ -44,6 +47,4 @@ export function * watchAll () {
 //  ROOT
 // -------------------------------------
 
-export const forecastSagas = [
-  fork(watchAll)
-]
+export const forecastSagas = [fork(watchAll)]

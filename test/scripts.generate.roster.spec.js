@@ -46,9 +46,30 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
 
       const teamId = 1
       const roster1 = await getRoster({ tid: teamId })
-      const roster1Players = roster1.players.map(({ lid, player, pos, slot, tid, type }) => ({ lid, player, pos, slot, tid, type }))
-      const roster2 = await getRoster({ tid: teamId, week: constants.season.week + 1 })
-      const roster2Players = roster2.players.map(({ lid, player, pos, slot, tid, type }) => ({ lid, player, pos, slot, tid, type }))
+      const roster1Players = roster1.players.map(
+        ({ lid, player, pos, slot, tid, type }) => ({
+          lid,
+          player,
+          pos,
+          slot,
+          tid,
+          type
+        })
+      )
+      const roster2 = await getRoster({
+        tid: teamId,
+        week: constants.season.week + 1
+      })
+      const roster2Players = roster2.players.map(
+        ({ lid, player, pos, slot, tid, type }) => ({
+          lid,
+          player,
+          pos,
+          slot,
+          tid,
+          type
+        })
+      )
       expect(roster1Players).to.eql(roster2Players)
 
       try {
@@ -60,9 +81,30 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
       expect(error).to.equal(undefined)
 
       const roster3 = await getRoster({ tid: teamId })
-      const roster3Players = roster3.players.map(({ lid, player, pos, slot, tid, type }) => ({ lid, player, pos, slot, tid, type }))
-      const roster4 = await getRoster({ tid: teamId, week: constants.season.week + 1 })
-      const roster4Players = roster4.players.map(({ lid, player, pos, slot, tid, type }) => ({ lid, player, pos, slot, tid, type }))
+      const roster3Players = roster3.players.map(
+        ({ lid, player, pos, slot, tid, type }) => ({
+          lid,
+          player,
+          pos,
+          slot,
+          tid,
+          type
+        })
+      )
+      const roster4 = await getRoster({
+        tid: teamId,
+        week: constants.season.week + 1
+      })
+      const roster4Players = roster4.players.map(
+        ({ lid, player, pos, slot, tid, type }) => ({
+          lid,
+          player,
+          pos,
+          slot,
+          tid,
+          type
+        })
+      )
       expect(roster3Players).to.eql(roster4Players)
       expect(roster1Players).to.eql(roster3Players)
       expect(roster4.week).to.equal(constants.season.week + 1)
@@ -85,9 +127,31 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
 
       const teamId = 1
       const roster1 = await getRoster({ tid: teamId })
-      const roster1Players = roster1.players.map(({ lid, player, pos, slot, tid, type }) => ({ lid, player, pos, slot, tid, type }))
-      const roster2 = await getRoster({ tid: teamId, week: 0, year: constants.season.year + 1 })
-      const roster2Players = roster2.players.map(({ lid, player, pos, slot, tid, type }) => ({ lid, player, pos, slot, tid, type }))
+      const roster1Players = roster1.players.map(
+        ({ lid, player, pos, slot, tid, type }) => ({
+          lid,
+          player,
+          pos,
+          slot,
+          tid,
+          type
+        })
+      )
+      const roster2 = await getRoster({
+        tid: teamId,
+        week: 0,
+        year: constants.season.year + 1
+      })
+      const roster2Players = roster2.players.map(
+        ({ lid, player, pos, slot, tid, type }) => ({
+          lid,
+          player,
+          pos,
+          slot,
+          tid,
+          type
+        })
+      )
       expect(roster1Players).to.eql(roster2Players)
 
       try {
@@ -99,9 +163,31 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
       expect(error).to.equal(undefined)
 
       const roster3 = await getRoster({ tid: teamId })
-      const roster3Players = roster3.players.map(({ lid, player, pos, slot, tid, type }) => ({ lid, player, pos, slot, tid, type }))
-      const roster4 = await getRoster({ tid: teamId, week: 0, year: constants.season.year + 1 })
-      const roster4Players = roster4.players.map(({ lid, player, pos, slot, tid, type }) => ({ lid, player, pos, slot, tid, type }))
+      const roster3Players = roster3.players.map(
+        ({ lid, player, pos, slot, tid, type }) => ({
+          lid,
+          player,
+          pos,
+          slot,
+          tid,
+          type
+        })
+      )
+      const roster4 = await getRoster({
+        tid: teamId,
+        week: 0,
+        year: constants.season.year + 1
+      })
+      const roster4Players = roster4.players.map(
+        ({ lid, player, pos, slot, tid, type }) => ({
+          lid,
+          player,
+          pos,
+          slot,
+          tid,
+          type
+        })
+      )
       expect(roster3Players).to.eql(roster4Players)
       expect(roster1Players).to.eql(roster3Players)
       expect(roster4.week).to.equal(0)

@@ -28,7 +28,11 @@ const run = async () => {
   // for each claim, notify the team owners
   for (const claim of claims) {
     const time = moment(claim.submitted, 'X').add('48', 'hours').utcOffset(-4)
-    const message = `The poaching claim for ${claim.fname} ${claim.lname} (${claim.pos}) will be processed ${time.toNow()} around ${time.format('dddd, MMMM Do h:mm a')} EST.`
+    const message = `The poaching claim for ${claim.fname} ${claim.lname} (${
+      claim.pos
+    }) will be processed ${time.toNow()} around ${time.format(
+      'dddd, MMMM Do h:mm a'
+    )} EST.`
     await sendNotifications({
       leagueId: claim.lid,
       teamIds: [claim.tid],

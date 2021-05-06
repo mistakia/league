@@ -20,8 +20,6 @@ export default class StatYearsFilter extends React.Component {
       })
     }
 
-    return (
-      <StatFilter {...state} />
-    )
+    return <StatFilter {...state} />
   }
 }

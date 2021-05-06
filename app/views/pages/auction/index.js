@@ -9,7 +9,7 @@ import { getCurrentLeague } from '@core/leagues'
 import render from './auction'
 
 class AuctionPage extends React.Component {
-  componentDidMount () {
+  componentDidMount() {
     this.props.join()
   }
 
@@ -17,7 +17,7 @@ class AuctionPage extends React.Component {
     this.props.toggleHideRostered()
   }
 
-  render () {
+  render() {
     return render.call(this)
   }
 }
@@ -47,7 +47,4 @@ const mapDispatchToProps = {
   toggleHideRostered: auctionActions.toggleHideRostered
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(AuctionPage)
+export default connect(mapStateToProps, mapDispatchToProps)(AuctionPage)

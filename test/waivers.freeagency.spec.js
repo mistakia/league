@@ -49,7 +49,8 @@ describe('API /waivers - free agency', function () {
       // submit waiver claim
       const teamId = 1
       const leagueId = 1
-      const res = await chai.request(server)
+      const res = await chai
+        .request(server)
         .post('/api/leagues/1/waivers')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -97,11 +98,14 @@ describe('API /waivers - free agency', function () {
         userId: 2
       })
 
-      MockDate.set(start.clone().subtract('3', 'week').add('4', 'hour').toDate())
+      MockDate.set(
+        start.clone().subtract('3', 'week').add('4', 'hour').toDate()
+      )
 
       // submit waiver claim
       const teamId = 1
-      const res = await chai.request(server)
+      const res = await chai
+        .request(server)
         .post('/api/leagues/1/waivers')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -127,21 +131,13 @@ describe('API /waivers - free agency', function () {
       res.body.uid.should.exist
     })
 
-    it('free agent rookie waiver w/ full active roster', async () => {
+    it('free agent rookie waiver w/ full active roster', async () => {})
 
-    })
+    it('free agent waiver for player not on nfl active roster', async () => {})
 
-    it('free agent waiver for player not on nfl active roster', async () => {
+    it('multiple same bids for same player, one team', async () => {})
 
-    })
-
-    it('multiple same bids for same player, one team', async () => {
-
-    })
-
-    it('multiple same bids for same player, multiple teams', async () => {
-
-    })
+    it('multiple same bids for same player, multiple teams', async () => {})
   })
 
   describe('errors', function () {
@@ -173,9 +169,12 @@ describe('API /waivers - free agency', function () {
         userId: 2
       })
 
-      MockDate.set(start.clone().subtract('3', 'week').add('4', 'hour').toDate())
+      MockDate.set(
+        start.clone().subtract('3', 'week').add('4', 'hour').toDate()
+      )
       const teamId = 1
-      await chai.request(server)
+      await chai
+        .request(server)
         .post('/api/leagues/1/waivers')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -185,7 +184,8 @@ describe('API /waivers - free agency', function () {
           leagueId
         })
 
-      const request = chai.request(server)
+      const request = chai
+        .request(server)
         .post('/api/leagues/1/waivers')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -208,7 +208,8 @@ describe('API /waivers - free agency', function () {
 
       const teamId = 1
       const leagueId = 1
-      const request = chai.request(server)
+      const request = chai
+        .request(server)
         .post('/api/leagues/1/waivers')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -248,7 +249,8 @@ describe('API /waivers - free agency', function () {
       // submit waiver
       const teamId = 1
       const leagueId = 1
-      const request = chai.request(server)
+      const request = chai
+        .request(server)
         .post('/api/leagues/1/waivers')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -268,7 +270,8 @@ describe('API /waivers - free agency', function () {
 
       // submit waiver claim
       const teamId = 1
-      const request = chai.request(server)
+      const request = chai
+        .request(server)
         .post('/api/leagues/1/waivers')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -286,7 +289,8 @@ describe('API /waivers - free agency', function () {
       const leagueId = 1
       const player = await selectPlayer()
       const teamId = 1
-      const request = chai.request(server)
+      const request = chai
+        .request(server)
         .post('/api/leagues/1/waivers')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -321,11 +325,14 @@ describe('API /waivers - free agency', function () {
         userId: 2
       })
 
-      MockDate.set(start.clone().subtract('3', 'week').add('25', 'hour').toDate())
+      MockDate.set(
+        start.clone().subtract('3', 'week').add('25', 'hour').toDate()
+      )
 
       // submit waiver claim
       const teamId = 1
-      const request = chai.request(server)
+      const request = chai
+        .request(server)
         .post('/api/leagues/1/waivers')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -344,9 +351,10 @@ describe('API /waivers - free agency', function () {
       const teamId = 1
       await fillRoster({ leagueId, teamId })
       const roster = await getRoster({ tid: teamId })
-      const playerIds = roster.players.map(p => p.player)
+      const playerIds = roster.players.map((p) => p.player)
       const player = await selectPlayer({ exclude: playerIds })
-      const request = chai.request(server)
+      const request = chai
+        .request(server)
         .post('/api/leagues/1/waivers')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -373,7 +381,8 @@ describe('API /waivers - free agency', function () {
       })
 
       const player = await selectPlayer()
-      const request = chai.request(server)
+      const request = chai
+        .request(server)
         .post('/api/leagues/1/waivers')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -404,14 +413,17 @@ describe('API /waivers - free agency', function () {
 
     it('rookie free agent waiver w/ full practice squad and no drop', async () => {
       const picks = 12 * 3
-      MockDate.set(start.clone().subtract('2', 'month').add(picks, 'day').toDate())
+      MockDate.set(
+        start.clone().subtract('2', 'month').add(picks, 'day').toDate()
+      )
       const leagueId = 1
       const teamId = 1
       await fillRoster({ leagueId, teamId })
       const roster = await getRoster({ tid: teamId })
-      const playerIds = roster.players.map(p => p.player)
+      const playerIds = roster.players.map((p) => p.player)
       const player = await selectPlayer({ exclude: playerIds, rookie: true })
-      const request = chai.request(server)
+      const request = chai
+        .request(server)
         .post('/api/leagues/1/waivers')
         .set('Authorization', `Bearer ${user1}`)
         .send({

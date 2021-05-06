@@ -35,14 +35,10 @@ export default class SchedulePage extends React.Component {
           <ScheduleWeeksFilter />
           <ScheduleTeamsFilter />
         </div>
-        <div className='schedule__body'>
-          {sections}
-        </div>
+        <div className='schedule__body'>{sections}</div>
       </Container>
     )
 
-    return (
-      <PageLayout body={body} scroll />
-    )
+    return <PageLayout body={body} scroll />
   }
 }

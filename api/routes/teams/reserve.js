@@ -34,7 +34,12 @@ router.post('/?', async (req, res) => {
 
     // verify teamId
     try {
-      await verifyUserTeam({ userId: req.user.userId, teamId, leagueId, requireLeague: true })
+      await verifyUserTeam({
+        userId: req.user.userId,
+        teamId,
+        leagueId,
+        requireLeague: true
+      })
     } catch (error) {
       return res.status(400).send({ error: error.message })
     }
@@ -65,12 +70,18 @@ router.post('/?', async (req, res) => {
 
     // make sure player is not protected
     if (rosterPlayer.slot === constants.slots.PSP) {
-      return res.status(400).send({ error: 'protected players are not reserve eligible' })
+      return res
+        .status(400)
+        .send({ error: 'protected players are not reserve eligible' })
     }
 
     // make sure player is reserve eligible
     const players = await db('player')
-      .select(db.raw('player.*, min(players.status) as status, min(players.injury_status) as injury_status, min(players.injury_body_part) as injury_body_part'))
+      .select(
+        db.raw(
+          'player.*, min(players.status) as status, min(players.injury_status) as injury_status, min(players.injury_body_part) as injury_body_part'
+        )
+      )
       .leftJoin('players', 'player.player', 'players.player')
       .groupBy('player.player')
       .where('player.player', player)
@@ -83,7 +94,9 @@ router.post('/?', async (req, res) => {
 
     if (slot === constants.slots.COV) {
       if (playerRow.status !== 'Reserve/COVID-19') {
-        return res.status(400).send({ error: 'player not eligible for Reserve/COV' })
+        return res
+          .status(400)
+          .send({ error: 'player not eligible for Reserve/COV' })
       }
     } else if (!roster.hasOpenInjuredReserveSlot()) {
       return res.status(400).send({ error: 'exceeds roster limits' })
@@ -97,25 +110,26 @@ router.post('/?', async (req, res) => {
     })
     const prevRoster = new Roster({ roster: prevRosterRow, league })
     if (!prevRoster.has(player)) {
-      return res.status(400).send({ error: 'not eligible, not rostered long enough' })
+      return res
+        .status(400)
+        .send({ error: 'not eligible, not rostered long enough' })
     }
 
     // verify player is not locked and is a starter
     const isLocked = await isPlayerLocked(player)
-    const isStarter = !!roster.starters.find(p => p.player === player)
+    const isStarter = !!roster.starters.find((p) => p.player === player)
     if (isLocked && isStarter) {
       return res.status(400).send({ error: 'not eligible, locked starter' })
     }
 
-    const type = slot === constants.slots.IR
-      ? constants.transactions.RESERVE_IR
-      : constants.transactions.RESERVE_COV
-    await db('rosters_players')
-      .update({ slot })
-      .where({
-        rid: rosterRow.uid,
-        player
-      })
+    const type =
+      slot === constants.slots.IR
+        ? constants.transactions.RESERVE_IR
+        : constants.transactions.RESERVE_COV
+    await db('rosters_players').update({ slot }).where({
+      rid: rosterRow.uid,
+      player
+    })
 
     const transactions = await db('transactions')
       .orderBy('transactions.timestamp', 'desc')
@@ -166,7 +180,13 @@ router.post('/?', async (req, res) => {
     })
 
     if (league.groupme_token && league.groupme_id) {
-      API.Bots.post(league.groupme_token, league.groupme_id, message, {}, (err) => logger(err))
+      API.Bots.post(
+        league.groupme_token,
+        league.groupme_id,
+        message,
+        {},
+        (err) => logger(err)
+      )
     }
   } catch (error) {
     logger(error)

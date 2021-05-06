@@ -75,7 +75,7 @@ router.post('/?', async (req, res) => {
     if (pick.tid !== teamId) {
       return res.status(400).send({ error: 'invalid pickId' })
     }
-    const clockStart = moment(draftStart).add((pick.pick - 1), 'days')
+    const clockStart = moment(draftStart).add(pick.pick - 1, 'days')
     if (moment().isBefore(clockStart)) {
       return res.status(400).send({ error: 'draft pick not on the clock' })
     }
@@ -96,19 +96,22 @@ router.post('/?', async (req, res) => {
     }
 
     // make sure team has an open slot
-    const rosterRow = await getRoster({ tid: teamId, year: constants.season.year, week: 0 })
+    const rosterRow = await getRoster({
+      tid: teamId,
+      year: constants.season.year,
+      week: 0
+    })
     const roster = new Roster({ roster: rosterRow, league })
     const slot = roster.hasOpenPracticeSquadSlot()
       ? constants.slots.PS
-      : (roster.hasOpenBenchSlot(player.pos) && constants.slots.BENCH)
+      : roster.hasOpenBenchSlot(player.pos) && constants.slots.BENCH
 
     if (!slot) {
       return res.status(400).send({ error: 'unavailable roster spot' })
     }
 
-    const value = (league.nteams - pick.pick + 1) > 0
-      ? (league.nteams - pick.pick + 1)
-      : 1
+    const value =
+      league.nteams - pick.pick + 1 > 0 ? league.nteams - pick.pick + 1 : 1
 
     const insertRoster = db('rosters_players').insert({
       rid: roster.uid,
@@ -117,17 +120,16 @@ router.post('/?', async (req, res) => {
       slot
     })
 
-    const insertTransaction = db('transactions')
-      .insert({
-        userid: req.user.userId,
-        tid: teamId,
-        lid,
-        player: playerId,
-        type: constants.transactions.DRAFT,
-        year: constants.season.year,
-        timestamp: Math.round(Date.now() / 1000),
-        value
-      })
+    const insertTransaction = db('transactions').insert({
+      userid: req.user.userId,
+      tid: teamId,
+      lid,
+      player: playerId,
+      type: constants.transactions.DRAFT,
+      year: constants.season.year,
+      timestamp: Math.round(Date.now() / 1000),
+      value
+    })
 
     const updateDraft = db('draft')
       .where({ uid: pickId })
@@ -144,17 +146,13 @@ router.post('/?', async (req, res) => {
     if (trades.length) {
       // TODO - broadcast on WS
       // TODO - broadcast notifications
-      const tradeids = trades.map(t => t.uid)
+      const tradeids = trades.map((t) => t.uid)
       await db('trades')
         .whereIn('uid', tradeids)
         .update({ cancelled: Math.round(Date.now() / 1000) })
     }
 
-    await Promise.all([
-      insertRoster,
-      insertTransaction,
-      updateDraft
-    ])
+    await Promise.all([insertRoster, insertTransaction, updateDraft])
 
     const data = { uid: pickId, player: playerId, lid, tid: teamId }
     broadcast(lid, {
@@ -170,8 +168,10 @@ router.post('/?', async (req, res) => {
     if (pick.pick === 1) {
       message += 'the first overall pick '
     } else {
-      const pickNum = (pick.pick % league.nteams) || league.nteams
-      message += `pick #${pick.pick} (${pick.round}.${('0' + pickNum).slice(-2)}) `
+      const pickNum = pick.pick % league.nteams || league.nteams
+      message += `pick #${pick.pick} (${pick.round}.${('0' + pickNum).slice(
+        -2
+      )}) `
     }
     message += `in the ${constants.season.year} draft`
 
@@ -182,7 +182,13 @@ router.post('/?', async (req, res) => {
     })
 
     if (league.groupme_token && league.groupme_id) {
-      API.Bots.post(league.groupme_token, league.groupme_id, message, {}, (err) => logger(err))
+      API.Bots.post(
+        league.groupme_token,
+        league.groupme_id,
+        message,
+        {},
+        (err) => logger(err)
+      )
     }
   } catch (err) {
     logger(err)

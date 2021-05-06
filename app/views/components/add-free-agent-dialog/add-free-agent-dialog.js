@@ -13,7 +13,7 @@ import Button from '@components/button'
 import { Roster, constants } from '@common'
 
 export default class AddFreeAgentDialog extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
 
     const drops = []
@@ -21,7 +21,7 @@ export default class AddFreeAgentDialog extends React.Component {
     const r = new Roster({ roster: props.roster.toJS(), league })
 
     if (practice) {
-      props.rosterPlayers.practice.forEach(p => {
+      props.rosterPlayers.practice.forEach((p) => {
         if (p.slot === constants.slots.PSP) return
         const r = new Roster({ roster: props.roster.toJS(), league })
         r.removePlayer(p.player)
@@ -30,7 +30,7 @@ export default class AddFreeAgentDialog extends React.Component {
         }
       })
     } else {
-      props.rosterPlayers.active.forEach(p => {
+      props.rosterPlayers.active.forEach((p) => {
         const r = new Roster({ roster: props.roster.toJS(), league })
         r.removePlayer(p.player)
         if (r.hasOpenBenchSlot(player.pos)) {
@@ -74,10 +74,7 @@ export default class AddFreeAgentDialog extends React.Component {
     if (!this._isPlayerEligible) {
       for (const rPlayer of this._drops) {
         menuItems.push(
-          <MenuItem
-            key={rPlayer.player}
-            value={rPlayer.player}
-          >
+          <MenuItem key={rPlayer.player} value={rPlayer.player}>
             {rPlayer.name} ({rPlayer.pos})
           </MenuItem>
         )
@@ -92,11 +89,9 @@ export default class AddFreeAgentDialog extends React.Component {
       <Dialog open onClose={this.props.onClose}>
         <DialogTitle>Sign Free Agent</DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            {text}
-          </DialogContentText>
+          <DialogContentText>{text}</DialogContentText>
           <div className='waiver__claim-inputs'>
-            {!this._isPlayerEligible &&
+            {!this._isPlayerEligible && (
               <FormControl size='small' variant='outlined'>
                 <InputLabel id='drop-label'>Drop</InputLabel>
                 <Select
@@ -104,11 +99,11 @@ export default class AddFreeAgentDialog extends React.Component {
                   value={this.state.drop}
                   onChange={this.handleDrop}
                   error={this.state.error}
-                  label='Drop'
-                >
+                  label='Drop'>
                   {menuItems}
                 </Select>
-              </FormControl>}
+              </FormControl>
+            )}
           </div>
         </DialogContent>
         <DialogActions>

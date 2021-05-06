@@ -9,7 +9,7 @@ export const propActions = {
     type: propActions.LOAD_PROPS
   }),
 
-  getPropsPending: opts => ({
+  getPropsPending: (opts) => ({
     type: propActions.GET_PROPS_PENDING,
     payload: {
       opts

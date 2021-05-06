@@ -6,16 +6,12 @@ import { getCurrentLeague } from '@core/leagues'
 
 import Lineup from './lineup'
 
-const mapStateToProps = createSelector(
-  getCurrentLeague,
-  (league) => ({ league })
-)
+const mapStateToProps = createSelector(getCurrentLeague, (league) => ({
+  league
+}))
 
 const mapDispatchToProps = {
   update: rosterActions.update
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Lineup)
+export default connect(mapStateToProps, mapDispatchToProps)(Lineup)

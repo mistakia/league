@@ -5,16 +5,10 @@ import { getPlayerById, playerActions } from '@core/players'
 
 import PlayerName from './player-name'
 
-const mapStateToProps = createSelector(
-  getPlayerById,
-  (player) => ({ player })
-)
+const mapStateToProps = createSelector(getPlayerById, (player) => ({ player }))
 
 const mapDispatchToProps = {
   select: playerActions.selectPlayer
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(PlayerName)
+export default connect(mapStateToProps, mapDispatchToProps)(PlayerName)

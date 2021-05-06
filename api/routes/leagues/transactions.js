@@ -12,10 +12,14 @@ router.get('/?', async (req, res) => {
     // TODO validate
     const { limit = 100, offset = 0 } = req.query
     const types = req.query.types
-      ? (Array.isArray(req.query.types) ? req.query.types : [req.query.types])
+      ? Array.isArray(req.query.types)
+        ? req.query.types
+        : [req.query.types]
       : []
     const teams = req.query.teams
-      ? (Array.isArray(req.query.teams) ? req.query.teams : [req.query.teams])
+      ? Array.isArray(req.query.teams)
+        ? req.query.teams
+        : [req.query.teams]
       : []
 
     let query = db('transactions')

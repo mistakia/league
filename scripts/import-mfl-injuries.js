@@ -23,17 +23,13 @@ const run = async () => {
     headers: {
       'User-Agent': config.mflUserAgent
     }
-  }).then(res => res.json())
+  }).then((res) => res.json())
 
   const fields = {}
   const inserts = []
   for (const item of result.injuries.injury) {
     const mfl_id = item.id
-    const {
-      exp_return,
-      status,
-      details
-    } = item
+    const { exp_return, status, details } = item
 
     for (const field in item) {
       fields[field] = true

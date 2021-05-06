@@ -6,9 +6,7 @@ import PercentileChart from '@components/percentile-chart'
 const passing = ({ stats, percentiles }) => (
   <div className='selected__section'>
     <div className='selected__section-header'>
-      <div className='row__group-head'>
-        Passing Efficiency
-      </div>
+      <div className='row__group-head'>Passing Efficiency</div>
     </div>
     <PercentileChart
       title='Comp %'
@@ -57,9 +55,7 @@ const passing = ({ stats, percentiles }) => (
 const rushing = ({ stats, percentiles }) => (
   <div className='selected__section'>
     <div className='selected__section-header'>
-      <div className='row__group-head'>
-        Rushing Efficiency
-      </div>
+      <div className='row__group-head'>Rushing Efficiency</div>
     </div>
     <PercentileChart
       title='Yards Per Carry'
@@ -112,9 +108,7 @@ const rushing = ({ stats, percentiles }) => (
 const receiving = ({ stats, percentiles }) => (
   <div className='selected__section'>
     <div className='selected__section-header'>
-      <div className='row__group-head'>
-        Receiving Efficiency
-      </div>
+      <div className='row__group-head'>Receiving Efficiency</div>
     </div>
     <PercentileChart
       title='Yards Per Target'
@@ -152,9 +146,7 @@ const receiving = ({ stats, percentiles }) => (
 const kicker = () => (
   <div className='selected__section'>
     <div className='selected__section-header'>
-      <div className='row__group-head'>
-        Kicker Efficiency
-      </div>
+      <div className='row__group-head'>Kicker Efficiency</div>
     </div>
     <p>In Development</p>
   </div>
@@ -163,9 +155,7 @@ const kicker = () => (
 const defense = () => (
   <div className='selected__section'>
     <div className='selected__section-header'>
-      <div className='row__group-head'>
-        Defense Efficiency
-      </div>
+      <div className='row__group-head'>Defense Efficiency</div>
     </div>
     <p>In Development</p>
   </div>
@@ -180,7 +170,8 @@ export default class SelectedPlayerEfficiencyStats extends React.Component {
       <div>
         {player.pos === 'QB' && passing({ stats, percentiles })}
         {['QB', 'RB'].includes(player.pos) && rushing({ stats, percentiles })}
-        {['RB', 'WR', 'TE'].includes(player.pos) && receiving({ stats, percentiles })}
+        {['RB', 'WR', 'TE'].includes(player.pos) &&
+          receiving({ stats, percentiles })}
         {player.pos === 'K' && kicker({ stats, percentiles })}
         {player.pos === 'DST' && defense({ stats, percentiles })}
       </div>

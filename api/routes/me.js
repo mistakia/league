@@ -14,17 +14,24 @@ router.get('/?', async (req, res) => {
 
     const teams = await db('teams')
       .select('teams.*')
-      .select('users_teams.teamtext', 'users_teams.teamvoice', 'users_teams.leaguetext')
+      .select(
+        'users_teams.teamtext',
+        'users_teams.teamvoice',
+        'users_teams.leaguetext'
+      )
       .where({ userid: req.user.userId })
       .join('users_teams', 'users_teams.tid', 'teams.uid')
 
-    const leagueIds = teams.map(t => t.lid)
-    const teamIds = teams.map(t => t.uid)
+    const leagueIds = teams.map((t) => t.lid)
+    const teamIds = teams.map((t) => t.uid)
     const leagues = await db('leagues').whereIn('uid', leagueIds)
     const sources = await db('sources')
-    const userSources = await db('users_sources').where('userid', req.user.userId)
+    const userSources = await db('users_sources').where(
+      'userid',
+      req.user.userId
+    )
     for (const source of sources) {
-      const userSource = userSources.find(s => s.sourceid === source.uid)
+      const userSource = userSources.find((s) => s.sourceid === source.uid)
       source.weight = userSource ? userSource.weight : 1
     }
 
@@ -46,7 +53,9 @@ router.get('/?', async (req, res) => {
       sources
     })
 
-    await db('users').where({ id: req.user.userId }).update({ lastvisit: new Date() })
+    await db('users')
+      .where({ id: req.user.userId })
+      .update({ lastvisit: new Date() })
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })
@@ -70,9 +79,7 @@ router.put('/baselines', async (req, res) => {
       }
     }
 
-    await db('users')
-      .update(baselines)
-      .where({ id: userId })
+    await db('users').update(baselines).where({ id: userId })
 
     res.send(req.body)
   } catch (error) {
@@ -92,7 +99,16 @@ router.put('/?', async (req, res) => {
       return res.status(400).send({ error: 'missing type param' })
     }
 
-    const validTypes = ['email', 'password', 'vbaseline', 'vorpw', 'volsw', 'watchlist', 'text', 'voice']
+    const validTypes = [
+      'email',
+      'password',
+      'vbaseline',
+      'vorpw',
+      'volsw',
+      'watchlist',
+      'text',
+      'voice'
+    ]
     if (!validTypes.includes(type)) {
       return res.status(400).send({ error: 'invalid type param' })
     }

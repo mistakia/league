@@ -12,6 +12,4 @@ const mapStateToProps = createSelector(
   (transactions, leagueTeams) => ({ teams: transactions.teams, leagueTeams })
 )
 
-export default connect(
-  mapStateToProps
-)(TransactionTeamFilter)
+export default connect(mapStateToProps)(TransactionTeamFilter)

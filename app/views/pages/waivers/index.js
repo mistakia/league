@@ -18,7 +18,4 @@ const mapDispatchToProps = {
   load: waiverActions.loadWaivers
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(WaiversPage)
+export default connect(mapStateToProps, mapDispatchToProps)(WaiversPage)

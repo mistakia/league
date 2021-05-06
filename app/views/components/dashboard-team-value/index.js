@@ -12,6 +12,4 @@ const mapStateToProps = createSelector(
   (summary, league) => ({ summary, league })
 )
 
-export default connect(
-  mapStateToProps
-)(DashboardTeamValue)
+export default connect(mapStateToProps)(DashboardTeamValue)

@@ -5,11 +5,8 @@ import { getPlayers } from '@core/players'
 
 import ExperienceFilter from './experience-filter'
 
-const mapStateToProps = createSelector(
-  getPlayers,
-  (players) => ({ experience: players.get('experience') })
-)
+const mapStateToProps = createSelector(getPlayers, (players) => ({
+  experience: players.get('experience')
+}))
 
-export default connect(
-  mapStateToProps
-)(ExperienceFilter)
+export default connect(mapStateToProps)(ExperienceFilter)

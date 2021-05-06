@@ -5,11 +5,8 @@ import { getGameStatusByPlayerId } from '@core/scoreboard'
 
 import ScoreboardPlayerGameStatus from './scoreboard-player-game-status'
 
-const mapStateToProps = createSelector(
-  getGameStatusByPlayerId,
-  (status) => ({ status })
-)
+const mapStateToProps = createSelector(getGameStatusByPlayerId, (status) => ({
+  status
+}))
 
-export default connect(
-  mapStateToProps
-)(ScoreboardPlayerGameStatus)
+export default connect(mapStateToProps)(ScoreboardPlayerGameStatus)

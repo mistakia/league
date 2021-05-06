@@ -5,7 +5,7 @@ import { constants } from '@common'
 
 import './scoreboard-teams.styl'
 
-function Team ({ tid, onClick, selected, cutoff, challenger }) {
+function Team({ tid, onClick, selected, cutoff, challenger }) {
   const classNames = ['scoreboard__teams-team', 'cursor']
   if (tid === selected) classNames.push('selected')
   return (
@@ -13,7 +13,7 @@ function Team ({ tid, onClick, selected, cutoff, challenger }) {
       <ScoreboardScoreTeam
         tid={tid}
         type={constants.matchups.TOURNAMENT}
-        {... { cutoff, challenger }}
+        {...{ cutoff, challenger }}
       />
     </div>
   )
@@ -35,10 +35,6 @@ export default class ScoreboardTeams extends React.Component {
       )
     }
 
-    return (
-      <div className='scoreboard__teams'>
-        {items}
-      </div>
-    )
+    return <div className='scoreboard__teams'>{items}</div>
   }
 }

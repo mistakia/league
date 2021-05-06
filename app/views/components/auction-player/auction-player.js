@@ -23,8 +23,16 @@ export default class AuctionPlayer extends React.Component {
 
   render = () => {
     const {
-      index, player, isFreeAgent, isEligible, vbaseline, watchlist,
-      style, valueType, selected, nominatedPlayer
+      index,
+      player,
+      isFreeAgent,
+      isEligible,
+      vbaseline,
+      watchlist,
+      style,
+      valueType,
+      selected,
+      nominatedPlayer
     } = this.props
 
     const classNames = ['auction__player']
@@ -53,7 +61,8 @@ export default class AuctionPlayer extends React.Component {
             <PlayerName playerId={player.player} />
           </div>
           <div className='auction__player-metric'>
-            ${Math.round(player.getIn(['values', valueType, vbaseline])) || '--'}
+            $
+            {Math.round(player.getIn(['values', valueType, vbaseline])) || '--'}
           </div>
           <div className='auction__player-nominate'>
             <Tooltip title='Nominate'>

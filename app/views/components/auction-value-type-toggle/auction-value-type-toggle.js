@@ -10,16 +10,23 @@ export default class AuctionValueTypeToggle extends React.Component {
   render = () => {
     const { valueType } = this.props
 
-    const values = [{
-      value: '0',
-      label: 'Season'
-    }, {
-      value: 'ros',
-      label: 'ROS'
-    }]
+    const values = [
+      {
+        value: '0',
+        label: 'Season'
+      },
+      {
+        value: 'ros',
+        label: 'ROS'
+      }
+    ]
 
     return (
-      <Toggle values={values} selected={valueType} onChange={this.handleChange} />
+      <Toggle
+        values={values}
+        selected={valueType}
+        onChange={this.handleChange}
+      />
     )
   }
 }

@@ -55,7 +55,7 @@ export const appActions = {
     }
   }),
 
-  authPending: opts => ({
+  authPending: (opts) => ({
     type: appActions.AUTH_PENDING,
     payload: {
       opts
@@ -78,7 +78,7 @@ export const appActions = {
     }
   }),
 
-  loginPending: opts => ({
+  loginPending: (opts) => ({
     type: appActions.LOGIN_PENDING,
     payload: {
       opts
@@ -101,7 +101,7 @@ export const appActions = {
     }
   }),
 
-  registerPending: opts => ({
+  registerPending: (opts) => ({
     type: appActions.REGISTER_PENDING,
     payload: {
       opts

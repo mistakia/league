@@ -10,14 +10,14 @@ export const gamelogsActions = {
   SET_PLAYER_GAMELOGS_ANALYSIS: 'SET_PLAYER_GAMELOGS_ANALYSIS',
   SET_TEAM_GAMELOGS_ANALYSIS: 'SET_TEAM_GAMELOGS_ANALYSIS',
 
-  setTeamGamelogsAnalysis: data => ({
+  setTeamGamelogsAnalysis: (data) => ({
     type: gamelogsActions.SET_TEAM_GAMELOGS_ANALYSIS,
     payload: {
       data
     }
   }),
 
-  setPlayerGamelogsAnalysis: data => ({
+  setPlayerGamelogsAnalysis: (data) => ({
     type: gamelogsActions.SET_PLAYER_GAMELOGS_ANALYSIS,
     payload: {
       data
@@ -32,7 +32,7 @@ export const gamelogsActions = {
     }
   }),
 
-  getPlayerGamelogsPending: opts => ({
+  getPlayerGamelogsPending: (opts) => ({
     type: gamelogsActions.GET_PLAYER_GAMELOGS_PENDING,
     payload: {
       opts
@@ -55,7 +55,7 @@ export const gamelogsActions = {
     }
   }),
 
-  getTeamGamelogsPending: opts => ({
+  getTeamGamelogsPending: (opts) => ({
     type: gamelogsActions.GET_TEAM_GAMELOGS_PENDING,
     payload: {
       opts

@@ -48,9 +48,9 @@ router.get('/?', async (req, res) => {
         lid: leagueId,
         type,
         processed
-      }).where(function () {
-        this
-          .where('succ', 1)
+      })
+      .where(function () {
+        this.where('succ', 1)
           .orWhere({
             succ: 0,
             tid

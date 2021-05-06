@@ -8,7 +8,18 @@ export default class ScoreboardSlots extends React.Component {
   render = () => {
     const { league } = this.props
     const rows = []
-    const slots = ['qb', 'rb', 'wr', 'rbwr', 'rbwrte', 'qbrbwrte', 'wrte', 'te', 'k', 'dst']
+    const slots = [
+      'qb',
+      'rb',
+      'wr',
+      'rbwr',
+      'rbwrte',
+      'qbrbwrte',
+      'wrte',
+      'te',
+      'k',
+      'dst'
+    ]
     let index = 0
     for (const slot of slots) {
       for (let i = 0; i < league[`s${slot}`]; i++) {
@@ -22,10 +33,6 @@ export default class ScoreboardSlots extends React.Component {
       }
     }
 
-    return (
-      <div className='scoreboard__slots'>
-        {rows}
-      </div>
-    )
+    return <div className='scoreboard__slots'>{rows}</div>
   }
 }

@@ -9,6 +9,7 @@ Setup a mysql database using [`schema.sql`](https://github.com/mistakia/league/b
 **Development**
 
 Create a file called `config.development.js` similar to [`config.sample.js`](https://github.com/mistakia/league/blob/master/config.sample.js).
+
 ```
 yarn install
 yarn start
@@ -17,6 +18,7 @@ yarn start
 **Production**
 
 Install [PM2](https://pm2.keymetrics.io/) on a production server and create a file called `config.production.js` similar to [`config.sample.js`](https://github.com/mistakia/league/blob/master/config.sample.js).
+
 ```
 yarn install
 pm2 start

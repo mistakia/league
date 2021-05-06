@@ -17,7 +17,7 @@ import { Roster, constants } from '@common'
 import './waiver-confirmation.styl'
 
 export default class WaiverConfirmation extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
 
     const { waiver } = props
@@ -120,33 +120,30 @@ export default class WaiverConfirmation extends React.Component {
     const menuItems = []
     for (const rPlayer of this._drops) {
       menuItems.push(
-        <MenuItem
-          key={rPlayer.player}
-          value={rPlayer.player}
-        >
+        <MenuItem key={rPlayer.player} value={rPlayer.player}>
           {rPlayer.name} ({rPlayer.pos})
         </MenuItem>
       )
     }
 
     const typeItems = []
-    if ((waiver && waiver.type === constants.waivers.FREE_AGENCY_PRACTICE) || status.waiver.practice) {
+    if (
+      (waiver && waiver.type === constants.waivers.FREE_AGENCY_PRACTICE) ||
+      status.waiver.practice
+    ) {
       typeItems.push(
-        <MenuItem
-          key='practice'
-          value={constants.waivers.FREE_AGENCY_PRACTICE}
-        >
+        <MenuItem key='practice' value={constants.waivers.FREE_AGENCY_PRACTICE}>
           Practice Squad
         </MenuItem>
       )
     }
 
-    if ((waiver && waiver.type === constants.waivers.FREE_AGENCY) || status.waiver.active) {
+    if (
+      (waiver && waiver.type === constants.waivers.FREE_AGENCY) ||
+      status.waiver.active
+    ) {
       typeItems.push(
-        <MenuItem
-          key='active'
-          value={constants.waivers.FREE_AGENCY}
-        >
+        <MenuItem key='active' value={constants.waivers.FREE_AGENCY}>
           Active Roster
         </MenuItem>
       )
@@ -160,7 +157,7 @@ export default class WaiverConfirmation extends React.Component {
             {`Add ${player.name} (${player.pos})`}
           </DialogContentText>
           <div className='waiver__claim-inputs'>
-            {this.state.type === constants.waivers.FREE_AGENCY &&
+            {this.state.type === constants.waivers.FREE_AGENCY && (
               <TextField
                 label='Bid'
                 helperText={`Max Bid: ${team.faab}`}
@@ -168,11 +165,14 @@ export default class WaiverConfirmation extends React.Component {
                 value={this.state.bid}
                 onChange={this.handleBid}
                 InputProps={{
-                  startAdornment: <InputAdornment position='start'>$</InputAdornment>
+                  startAdornment: (
+                    <InputAdornment position='start'>$</InputAdornment>
+                  )
                 }}
                 size='small'
                 variant='outlined'
-              />}
+              />
+            )}
             <FormControl size='small' variant='outlined'>
               <InputLabel id='type-label'>Type</InputLabel>
               <Select
@@ -181,12 +181,11 @@ export default class WaiverConfirmation extends React.Component {
                 value={this.state.type}
                 disabled={Boolean(waiver)}
                 onChange={this.handleType}
-                label='Type'
-              >
+                label='Type'>
                 {typeItems}
               </Select>
             </FormControl>
-            {(this.state.type) &&
+            {this.state.type && (
               <FormControl size='small' variant='outlined'>
                 <InputLabel id='drop-label'>Drop</InputLabel>
                 <Select
@@ -194,11 +193,11 @@ export default class WaiverConfirmation extends React.Component {
                   error={this.state.missingDrop}
                   value={this.state.drop}
                   onChange={this.handleDrop}
-                  label='Drop'
-                >
+                  label='Drop'>
                   {menuItems}
                 </Select>
-              </FormControl>}
+              </FormControl>
+            )}
           </div>
         </DialogContent>
         <DialogActions>

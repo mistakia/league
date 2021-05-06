@@ -4,19 +4,19 @@ import { getApp } from '@core/app'
 import { getPlayerById } from '@core/players'
 import { getCurrentPlayers } from '@core/rosters'
 
-export function getPoachesForCurrentLeague (state) {
+export function getPoachesForCurrentLeague(state) {
   const { leagueId } = getApp(state)
   return state.get('poaches').get(leagueId) || new Map()
 }
 
-export function getActivePoachesAgainstMyPlayers (state) {
+export function getActivePoachesAgainstMyPlayers(state) {
   const poaches = getPoachesForCurrentLeague(state)
   const players = getCurrentPlayers(state)
-  const playerIds = players.practice.map(p => p.player)
-  return poaches.filter(p => playerIds.includes(p.player))
+  const playerIds = players.practice.map((p) => p.player)
+  return poaches.filter((p) => playerIds.includes(p.player))
 }
 
-export function getPoachPlayersForCurrentTeam (state) {
+export function getPoachPlayersForCurrentTeam(state) {
   const poaches = getPoachesForCurrentLeague(state)
   const { teamId } = getApp(state)
 
@@ -31,7 +31,7 @@ export function getPoachPlayersForCurrentTeam (state) {
   return poachPlayers
 }
 
-export function getPoachPlayersForCurrentLeague (state) {
+export function getPoachPlayersForCurrentLeague(state) {
   let poaches = getPoachesForCurrentLeague(state)
 
   for (const poach of poaches.values()) {

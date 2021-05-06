@@ -3,7 +3,7 @@ import React from 'react'
 import TextField from '@material-ui/core/TextField'
 
 export default class EditableTeamField extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
 
     const { team, field } = this.props

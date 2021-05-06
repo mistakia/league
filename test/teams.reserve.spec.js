@@ -64,7 +64,8 @@ describe('API /teams - reserve', function () {
         status: 'Injured Reserve'
       })
 
-      const res = await chai.request(server)
+      const res = await chai
+        .request(server)
         .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -134,7 +135,8 @@ describe('API /teams - reserve', function () {
         status: 'Reserve/COVID-19'
       })
 
-      const res = await chai.request(server)
+      const res = await chai
+        .request(server)
         .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -199,7 +201,9 @@ describe('API /teams - reserve', function () {
     })
 
     it('missing player', async () => {
-      const request = chai.request(server).post('/api/teams/1/reserve')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
@@ -210,7 +214,9 @@ describe('API /teams - reserve', function () {
     })
 
     it('missing leagueId', async () => {
-      const request = chai.request(server).post('/api/teams/1/reserve')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           player: 'x',
@@ -221,7 +227,9 @@ describe('API /teams - reserve', function () {
     })
 
     it('missing slot', async () => {
-      const request = chai.request(server).post('/api/teams/1/reserve')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
@@ -232,7 +240,9 @@ describe('API /teams - reserve', function () {
     })
 
     it('invalid slot', async () => {
-      const request = chai.request(server).post('/api/teams/1/reserve')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
@@ -244,7 +254,9 @@ describe('API /teams - reserve', function () {
     })
 
     it('invalid player - non-existant', async () => {
-      const request = chai.request(server).post('/api/teams/1/reserve')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
@@ -257,7 +269,9 @@ describe('API /teams - reserve', function () {
 
     it('invalid player - not on active roster', async () => {
       const player = await selectPlayer()
-      const request = chai.request(server).post('/api/teams/1/reserve')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
@@ -270,7 +284,9 @@ describe('API /teams - reserve', function () {
 
     it('teamId does not belong to userId', async () => {
       const player = await selectPlayer()
-      const request = chai.request(server).post('/api/teams/1/reserve')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user2}`)
         .send({
           leagueId: 1,
@@ -296,7 +312,9 @@ describe('API /teams - reserve', function () {
         transaction: constants.transactions.DRAFT,
         value
       })
-      const request = chai.request(server).post('/api/teams/1/reserve')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
@@ -322,7 +340,9 @@ describe('API /teams - reserve', function () {
         transaction: constants.transactions.DRAFT,
         value
       })
-      const request = chai.request(server).post('/api/teams/1/reserve')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
@@ -348,7 +368,9 @@ describe('API /teams - reserve', function () {
         transaction: constants.transactions.DRAFT,
         value
       })
-      const request = chai.request(server).post('/api/teams/1/reserve')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
@@ -374,7 +396,9 @@ describe('API /teams - reserve', function () {
         transaction: constants.transactions.DRAFT,
         value
       })
-      const request = chai.request(server).post('/api/teams/1/reserve')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
@@ -404,7 +428,9 @@ describe('API /teams - reserve', function () {
         player: player.player,
         status: 'Injured Reserve'
       })
-      const request = chai.request(server).post('/api/teams/1/reserve')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
@@ -437,7 +463,9 @@ describe('API /teams - reserve', function () {
         player,
         status: 'Injured Reserve'
       })
-      const request = chai.request(server).post('/api/teams/1/reserve')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
@@ -454,12 +482,20 @@ describe('API /teams - reserve', function () {
 
     it('player is protected', async () => {
       const player = await selectPlayer()
-      await addPlayer({ leagueId: 1, player, teamId: 1, userId: 1, slot: constants.slots.PSP })
+      await addPlayer({
+        leagueId: 1,
+        player,
+        teamId: 1,
+        userId: 1,
+        slot: constants.slots.PSP
+      })
       await knex('players').insert({
         player: player.player,
         status: 'Injured Reserve'
       })
-      const request = chai.request(server).post('/api/teams/1/reserve')
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           player: player.player,
@@ -492,7 +528,8 @@ describe('API /teams - reserve', function () {
         status: 'Injured Reserve'
       })
 
-      const request = chai.request(server)
+      const request = chai
+        .request(server)
         .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({

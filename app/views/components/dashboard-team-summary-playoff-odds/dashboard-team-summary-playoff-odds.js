@@ -30,15 +30,14 @@ export default class DashboardTeamSummaryPlayoffOdds extends React.Component {
               Playoff Odds
             </Grid>
             <Grid item xs={4}>
-              {toPercent(team.playoffOdds)} (<Rank rank={rank} size={teams.size} />)
+              {toPercent(team.playoffOdds)} (
+              <Rank rank={rank} size={teams.size} />)
             </Grid>
           </Grid>
         </AccordionSummary>
         <AccordionDetails>
           <table>
-            <tbody>
-              {items}
-            </tbody>
+            <tbody>{items}</tbody>
           </table>
         </AccordionDetails>
       </Accordion>

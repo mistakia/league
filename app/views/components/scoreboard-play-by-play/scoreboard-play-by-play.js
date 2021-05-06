@@ -1,19 +1,24 @@
 import { is } from 'immutable'
 import React from 'react'
-import { AutoSizer, List, CellMeasurer, CellMeasurerCache } from 'react-virtualized'
+import {
+  AutoSizer,
+  List,
+  CellMeasurer,
+  CellMeasurerCache
+} from 'react-virtualized'
 
 import ScoreboardPlay from '@components/scoreboard-play'
 
 import './scoreboard-play-by-play.styl'
 
 export default class ScoreboardPlayByPlay extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
     this._cache = new CellMeasurerCache({ defaultHeight: 85, fixedWidth: true })
     this._ref = React.createRef()
   }
 
-  componentDidUpdate (prevProps, prevState) {
+  componentDidUpdate(prevProps, prevState) {
     if (!is(this.props.plays.size, prevProps.plays.size)) {
       this._resizeAll()
     }
@@ -41,8 +46,7 @@ export default class ScoreboardPlayByPlay extends React.Component {
           columnIndex={0}
           key={key}
           parent={parent}
-          rowIndex={index}
-        >
+          rowIndex={index}>
           <ScoreboardPlay key={key} play={play} {...params} />
         </CellMeasurer>
       )

@@ -6,7 +6,7 @@ import { constants, getEligibleSlots, toPercent } from '@common'
 
 import './stats.styl'
 
-function SummaryRow ({ team, percentiles }) {
+function SummaryRow({ team, percentiles }) {
   const stats = team.get('stats').toJS()
   return (
     <div className='table__row'>
@@ -24,17 +24,33 @@ function SummaryRow ({ team, percentiles }) {
       <PercentileMetric scaled {...{ stats, percentiles, type: 'pdev' }} />
       <div className='row__group'>
         <div className='row__group-body'>
-          <PercentileMetric scaled {...{ stats, percentiles, type: 'apWins' }} />
-          <PercentileMetric scaled {...{ stats, percentiles, type: 'apLosses' }} />
-          <PercentileMetric scaled {...{ stats, percentiles, type: 'apTies' }} />
-          <div className='table__cell metric'>{toPercent(team.getIn(['stats', 'apWins'], 0) / (team.getIn(['stats', 'apWins'], 0) + team.getIn(['stats', 'apLosses'], 0) + team.getIn(['stats', 'apTies'], 0)))}</div>
+          <PercentileMetric
+            scaled
+            {...{ stats, percentiles, type: 'apWins' }}
+          />
+          <PercentileMetric
+            scaled
+            {...{ stats, percentiles, type: 'apLosses' }}
+          />
+          <PercentileMetric
+            scaled
+            {...{ stats, percentiles, type: 'apTies' }}
+          />
+          <div className='table__cell metric'>
+            {toPercent(
+              team.getIn(['stats', 'apWins'], 0) /
+                (team.getIn(['stats', 'apWins'], 0) +
+                  team.getIn(['stats', 'apLosses'], 0) +
+                  team.getIn(['stats', 'apTies'], 0))
+            )}
+          </div>
         </div>
       </div>
     </div>
   )
 }
 
-function PositionRow ({ team, percentiles }) {
+function PositionRow({ team, percentiles }) {
   const positionCells = []
   for (const [index, position] of constants.positions.entries()) {
     const type = `pPos${position}`
@@ -48,7 +64,9 @@ function PositionRow ({ team, percentiles }) {
       />
     )
     positionCells.push(
-      <div key={`${index}%`} className='table__cell metric'>{toPercent(points / team.getIn(['stats', 'pf'], 0))}</div>
+      <div key={`${index}%`} className='table__cell metric'>
+        {toPercent(points / team.getIn(['stats', 'pf'], 0))}
+      </div>
     )
   }
 
@@ -60,7 +78,7 @@ function PositionRow ({ team, percentiles }) {
   )
 }
 
-function SlotRow ({ team, slots, percentiles }) {
+function SlotRow({ team, slots, percentiles }) {
   const slotCells = []
   for (const [index, s] of slots.entries()) {
     const slot = constants.slots[s]
@@ -74,7 +92,11 @@ function SlotRow ({ team, slots, percentiles }) {
         {...{ percentiles, type }}
       />
     )
-    slotCells.push(<div key={`${index}%`} className='table__cell metric'>{toPercent(points / team.getIn(['stats', 'pf'], 0))}</div>)
+    slotCells.push(
+      <div key={`${index}%`} className='table__cell metric'>
+        {toPercent(points / team.getIn(['stats', 'pf'], 0))}
+      </div>
+    )
   }
 
   return (
@@ -93,21 +115,43 @@ export default class StatsPage extends React.Component {
     const eligibleStarterSlots = getEligibleSlots({ pos: 'ALL', league })
     const slots = [...new Set(eligibleStarterSlots)]
     for (const [index, slot] of slots.entries()) {
-      slotHeaders.push(<div key={index} className='table__cell metric'>{constants.slotName[constants.slots[slot]]}</div>)
-      slotHeaders.push(<div key={`${index}%`} className='table__cell metric'>%</div>)
+      slotHeaders.push(
+        <div key={index} className='table__cell metric'>
+          {constants.slotName[constants.slots[slot]]}
+        </div>
+      )
+      slotHeaders.push(
+        <div key={`${index}%`} className='table__cell metric'>
+          %
+        </div>
+      )
     }
 
     const positionHeaders = []
     for (const position of constants.positions) {
-      positionHeaders.push(<div key={position} className='table__cell metric'>{position}</div>)
-      positionHeaders.push(<div key={`${position}%`} className='table__cell metric'>%</div>)
+      positionHeaders.push(
+        <div key={position} className='table__cell metric'>
+          {position}
+        </div>
+      )
+      positionHeaders.push(
+        <div key={`${position}%`} className='table__cell metric'>
+          %
+        </div>
+      )
     }
 
-    const sorted = teams.sort((a, b) => b.getIn(['stats', 'apWins'], 0) - a.getIn(['stats', 'apWins'], 0) || b.getIn(['stats', 'pf'], 0) - a.getIn(['stats', 'pf'], 0))
+    const sorted = teams.sort(
+      (a, b) =>
+        b.getIn(['stats', 'apWins'], 0) - a.getIn(['stats', 'apWins'], 0) ||
+        b.getIn(['stats', 'pf'], 0) - a.getIn(['stats', 'pf'], 0)
+    )
 
     const summaryRows = []
     for (const team of sorted.valueSeq()) {
-      summaryRows.push(<SummaryRow key={team.uid} team={team} percentiles={percentiles} />)
+      summaryRows.push(
+        <SummaryRow key={team.uid} team={team} percentiles={percentiles} />
+      )
     }
 
     const slotRows = []
@@ -124,7 +168,9 @@ export default class StatsPage extends React.Component {
 
     const positionRows = []
     for (const team of sorted.valueSeq()) {
-      positionRows.push(<PositionRow key={team.uid} team={team} percentiles={percentiles} />)
+      positionRows.push(
+        <PositionRow key={team.uid} team={team} percentiles={percentiles} />
+      )
     }
 
     const body = (
@@ -169,7 +215,9 @@ export default class StatsPage extends React.Component {
           </div>
         </div>
         <div className='section'>
-          <div className='dashboard__section-header-title'>Positional Stats</div>
+          <div className='dashboard__section-header-title'>
+            Positional Stats
+          </div>
           <div className='table__container'>
             <div className='table__row table__head'>
               <div className='table__cell player__item-name'>Team</div>
@@ -181,8 +229,6 @@ export default class StatsPage extends React.Component {
       </div>
     )
 
-    return (
-      <PageLayout body={body} scroll />
-    )
+    return <PageLayout body={body} scroll />
   }
 }

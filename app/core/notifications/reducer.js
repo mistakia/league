@@ -8,7 +8,10 @@ const NotificationState = new Record({
   key: null
 })
 
-export function notificationReducer (state = new NotificationState(), { payload, type }) {
+export function notificationReducer(
+  state = new NotificationState(),
+  { payload, type }
+) {
   switch (type) {
     case notificationActions.SHOW_NOTIFICATION:
       return state.merge({ key: new Date().getTime(), ...payload })

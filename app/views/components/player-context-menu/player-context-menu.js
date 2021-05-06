@@ -97,7 +97,8 @@ export default class PlayerContextMenu extends React.Component {
     this.props.showConfirmation({
       title: 'Roster Reserve',
       description: `${player.fname} ${player.lname} (${player.pos}) will be placed on Reserves/IR. He will not be available to use in lineups until he's activated.`,
-      onConfirm: () => reserve({ player: player.player, slot: constants.slots.IR })
+      onConfirm: () =>
+        reserve({ player: player.player, slot: constants.slots.IR })
     })
     this.props.hide()
   }
@@ -107,7 +108,8 @@ export default class PlayerContextMenu extends React.Component {
     this.props.showConfirmation({
       title: 'Roster Reserve',
       description: `${player.fname} ${player.lname} (${player.pos}) will be placed on Reserves/COV. He will not be available to use in lineups until he's activated.`,
-      onConfirm: () => reserve({ player: player.player, slot: constants.slots.COV })
+      onConfirm: () =>
+        reserve({ player: player.player, slot: constants.slots.COV })
     })
     this.props.hide()
   }
@@ -123,31 +125,20 @@ export default class PlayerContextMenu extends React.Component {
   }
 
   render = () => {
-    const {
-      waiverId,
-      status
-    } = this.props
+    const { waiverId, status } = this.props
 
     const menuItems = []
 
     // context menu for waiver claims
     if (waiverId) {
       menuItems.push(
-        <MenuItem
-          key='update-waiver'
-          dense
-          onClick={this.handleUpdateWaiver}
-        >
+        <MenuItem key='update-waiver' dense onClick={this.handleUpdateWaiver}>
           Update Claim
         </MenuItem>
       )
 
       menuItems.push(
-        <MenuItem
-          key='cancel-waiver'
-          dense
-          onClick={this.handleCancelWaiver}
-        >
+        <MenuItem key='cancel-waiver' dense onClick={this.handleCancelWaiver}>
           Cancel Claim
         </MenuItem>
       )
@@ -156,9 +147,8 @@ export default class PlayerContextMenu extends React.Component {
         <MenuItem
           key='activate'
           dense
-          disabled={(status.protected || !status.eligible.activate)}
-          onClick={this.handleActivate}
-        >
+          disabled={status.protected || !status.eligible.activate}
+          onClick={this.handleActivate}>
           Activate
         </MenuItem>
       )
@@ -168,8 +158,7 @@ export default class PlayerContextMenu extends React.Component {
           key='ps'
           dense
           disabled={!status.eligible.ps}
-          onClick={this.handleDeactivate}
-        >
+          onClick={this.handleDeactivate}>
           Move to Practice Squad
         </MenuItem>
       )
@@ -179,8 +168,7 @@ export default class PlayerContextMenu extends React.Component {
           key='protect'
           dense
           disabled={!status.eligible.protect}
-          onClick={this.handleProtect}
-        >
+          onClick={this.handleProtect}>
           Designate Protected
         </MenuItem>
       )
@@ -190,8 +178,7 @@ export default class PlayerContextMenu extends React.Component {
           key='ir'
           dense
           disabled={!status.reserve.ir || (status.locked && status.starter)}
-          onClick={this.handleReserveIR}
-        >
+          onClick={this.handleReserveIR}>
           Move to Reserve/IR
         </MenuItem>
       )
@@ -201,8 +188,7 @@ export default class PlayerContextMenu extends React.Component {
           key='cov'
           dense
           disabled={!status.reserve.cov || (status.locked && status.starter)}
-          onClick={this.handleReserveCOV}
-        >
+          onClick={this.handleReserveCOV}>
           Move to Reserve/COV
         </MenuItem>
       )
@@ -212,8 +198,7 @@ export default class PlayerContextMenu extends React.Component {
           key='release'
           dense
           disabled={status.protected || (status.locked && status.starter)}
-          onClick={this.handleRelease}
-        >
+          onClick={this.handleRelease}>
           Release
         </MenuItem>
       )
@@ -227,8 +212,7 @@ export default class PlayerContextMenu extends React.Component {
           key='poach'
           dense
           disabled={status.locked || !status.eligible.poach}
-          onClick={this.handlePoach}
-        >
+          onClick={this.handlePoach}>
           {text}
         </MenuItem>
       )
@@ -240,8 +224,7 @@ export default class PlayerContextMenu extends React.Component {
           key='waiver'
           dense
           disabled={!status.waiver.active && !status.waiver.practice}
-          onClick={this.handleWaiver}
-        >
+          onClick={this.handleWaiver}>
           Submit Waiver Claim
         </MenuItem>
       )
@@ -251,8 +234,7 @@ export default class PlayerContextMenu extends React.Component {
           key='sign-active'
           dense
           disabled={!status.sign.active}
-          onClick={() => this.handleAdd()}
-        >
+          onClick={() => this.handleAdd()}>
           Sign to Active Roster
         </MenuItem>
       )
@@ -262,8 +244,7 @@ export default class PlayerContextMenu extends React.Component {
           key='sign-ps'
           dense
           disabled={!status.sign.practice}
-          onClick={() => this.handleAdd({ practice: true })}
-        >
+          onClick={() => this.handleAdd({ practice: true })}>
           Sign to Practice Squad
         </MenuItem>
       )
@@ -271,9 +252,7 @@ export default class PlayerContextMenu extends React.Component {
 
     return (
       <Paper>
-        <MenuList>
-          {menuItems}
-        </MenuList>
+        <MenuList>{menuItems}</MenuList>
       </Paper>
     )
   }

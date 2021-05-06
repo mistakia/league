@@ -11,7 +11,4 @@ const mapDispatchToProps = {
   showConfirmation: confirmationActions.show
 }
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(SettingsTeamsTeamPlayer)
+export default connect(null, mapDispatchToProps)(SettingsTeamsTeamPlayer)

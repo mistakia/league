@@ -13,11 +13,12 @@ const calculatePoints = ({ stats, position, league }) => {
 
   const result = { total: 0 }
   for (const stat in scoring) {
-    const factor = stat === 'rec'
-      ? (league[`${position.toLowerCase()}rec`] || scoring[stat])
-      : scoring[stat]
+    const factor =
+      stat === 'rec'
+        ? league[`${position.toLowerCase()}rec`] || scoring[stat]
+        : scoring[stat]
 
-    const score = (factor * stats[stat]) || 0
+    const score = factor * stats[stat] || 0
     result[stat] = score
     result.total = result.total + score
   }
@@ -34,7 +35,14 @@ const calculatePoints = ({ stats, position, league }) => {
     result.fg39 = stats.fg39 * 3
     result.fg49 = stats.fg49 * 4
     result.fg50 = stats.fg50 * 5
-    result.total = result.total + result.fgm + result.fg19 + result.fg29 + result.fg39 + result.fg49 + result.fg50
+    result.total =
+      result.total +
+      result.fgm +
+      result.fg19 +
+      result.fg29 +
+      result.fg39 +
+      result.fg49 +
+      result.fg50
   }
 
   const dst = {

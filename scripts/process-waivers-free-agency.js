@@ -31,7 +31,7 @@ const run = async () => {
     .where('type', constants.waivers.FREE_AGENCY)
     .groupBy('lid')
 
-  const leagueIds = results.map(w => w.lid)
+  const leagueIds = results.map((w) => w.lid)
   if (!leagueIds.length) {
     throw new Error('no waivers to process')
   }
@@ -88,9 +88,7 @@ const run = async () => {
         }
 
         // update team budget
-        await db('teams')
-          .decrement('faab', waiver.bid)
-          .where('uid', waiver.tid)
+        await db('teams').decrement('faab', waiver.bid).where('uid', waiver.tid)
       } catch (err) {
         error = err
       }

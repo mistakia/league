@@ -29,10 +29,7 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'missing teamId' })
     }
 
-    const validSlots = [
-      constants.slots.BENCH,
-      constants.slots.PS
-    ]
+    const validSlots = [constants.slots.BENCH, constants.slots.PS]
 
     if (!validSlots.includes(slot)) {
       return res.status(400).send({ error: 'invalid slot' })
@@ -40,7 +37,12 @@ router.post('/?', async (req, res) => {
 
     // verify teamId
     try {
-      await verifyUserTeam({ userId: req.user.userId, teamId, leagueId, requireLeague: true })
+      await verifyUserTeam({
+        userId: req.user.userId,
+        teamId,
+        leagueId,
+        requireLeague: true
+      })
     } catch (error) {
       return res.status(400).send({ error: error.message })
     }
@@ -63,7 +65,9 @@ router.post('/?', async (req, res) => {
         .whereNull('processed')
 
       if (waivers.length) {
-        return res.status(400).send({ error: 'player has pending waiver claim' })
+        return res
+          .status(400)
+          .send({ error: 'player has pending waiver claim' })
       }
     }
 

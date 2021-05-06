@@ -3,7 +3,12 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { constants } from '@common'
-import { draftActions, getSelectedDraftPlayer, getDraft, getNextPick } from '@core/draft'
+import {
+  draftActions,
+  getSelectedDraftPlayer,
+  getDraft,
+  getNextPick
+} from '@core/draft'
 import { getCurrentLeague } from '@core/leagues'
 import { getRookiePlayers } from '@core/players'
 import { getApp } from '@core/app'
@@ -12,7 +17,7 @@ import { confirmationActions } from '@core/confirmations'
 import render from './draft'
 
 class DraftPage extends React.Component {
-  componentDidMount () {
+  componentDidMount() {
     this.props.loadDraft()
   }
 
@@ -26,7 +31,7 @@ class DraftPage extends React.Component {
     })
   }
 
-  render () {
+  render() {
     return render.call(this)
   }
 }
@@ -55,7 +60,4 @@ const mapDispatchToProps = {
   showConfirmation: confirmationActions.show
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(DraftPage)
+export default connect(mapStateToProps, mapDispatchToProps)(DraftPage)

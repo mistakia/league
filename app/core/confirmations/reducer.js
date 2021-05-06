@@ -11,7 +11,10 @@ const ConfirmationState = new Record({
   onConfirm: null
 })
 
-export function confirmationReducer (state = new ConfirmationState(), { payload, type }) {
+export function confirmationReducer(
+  state = new ConfirmationState(),
+  { payload, type }
+) {
   switch (type) {
     case confirmationActions.SHOW_CONFIRMATION:
       return state.merge(payload)
