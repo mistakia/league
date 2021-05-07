@@ -167,10 +167,14 @@ export default class DashboardPlayersTable extends React.Component {
             <div className='table__cell metric'>
               <ValueAdjustedHeader />
             </div>
-            <div className='table__cell metric'>
-              <ROSHeader />
-            </div>
-            <div className='table__cell metric'>Week {week}</div>
+            {constants.season.week > 0 && (
+              <div className='table__cell metric'>
+                <ROSHeader />
+              </div>
+            )}
+            {constants.season.week > 0 && (
+              <div className='table__cell metric'>Week {week}</div>
+            )}
             <div className='table__cell metric'>
               <StartsHeader />
             </div>
