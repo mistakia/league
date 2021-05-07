@@ -61,12 +61,16 @@ class PlayerRoster extends Player {
         <div className='metric table__cell'>
           {player.getIn(['vorp_adj', 'ros', 'default'], 0).toFixed(1)}
         </div>
-        <div className='metric table__cell'>
-          {player.getIn(['points', 'ros', 'total'], 0).toFixed(1)}
-        </div>
-        <div className='metric table__cell'>
-          {player.getIn(['points', `${week}`, 'total'], 0).toFixed(1)}
-        </div>
+        {constants.season.week > 0 && (
+          <div className='metric table__cell'>
+            {player.getIn(['points', 'ros', 'total'], 0).toFixed(1)}
+          </div>
+        )}
+        {constants.season.week > 0 && (
+          <div className='metric table__cell'>
+            {player.getIn(['points', `${week}`, 'total'], 0).toFixed(1)}
+          </div>
+        )}
         <div className='metric table__cell'>
           {player.getIn(['lineups', 'starts'])}
         </div>
