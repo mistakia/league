@@ -490,7 +490,7 @@ class PlayerRow extends Player {
       const starterBaselinePlayerId = baselines.getIn([
         `${week}`,
         player.pos,
-        'starter'
+        'default'
       ])
       if (player.player === starterBaselinePlayerId)
         classNames.push('starter__baseline')

@@ -103,29 +103,29 @@ export function calculatePlayerValues(payload) {
 
   // calculate ros vorp
   const total = {
+    default: 0,
     available: 0,
     starter: 0,
     average: 0,
     hybrid: 0,
-    bench: 0,
     manual: 0
   }
 
   const availableTotalsRestOfSeason = {
+    default: 0,
     available: 0,
     starter: 0,
     average: 0,
     hybrid: 0,
-    bench: 0,
     manual: 0
   }
 
   const availableTotalsSeason = {
+    default: 0,
     available: 0,
     starter: 0,
     average: 0,
     hybrid: 0,
-    bench: 0,
     manual: 0
   }
 

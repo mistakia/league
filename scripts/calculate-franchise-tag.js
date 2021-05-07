@@ -38,10 +38,10 @@ const run = async () => {
 
     const grouped = groupBy(rosters, 'pos')
     const key = {
-      'QB': 10,
-      'RB': 10,
-      'WR': 10,
-      'TE': 5
+      QB: 10,
+      RB: 10,
+      WR: 10,
+      TE: 5
     }
 
     const update = {}
@@ -49,7 +49,7 @@ const run = async () => {
       const players = grouped[pos]
       const sorted = players.sort((a, b) => b.value - a.value)
       const top = sorted.slice(0, key[pos])
-      const values = top.map(p => p.value)
+      const values = top.map((p) => p.value)
       const avg = average(values)
       update[`f${pos.toLowerCase()}`] = Math.round(avg)
     }

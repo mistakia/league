@@ -228,7 +228,7 @@ export function getCurrentTeamRosterPositionalValue(state) {
       const players = rosterPlayers.map((p) =>
         getPlayerById(state, { playerId: p.player })
       )
-      const vorps = players.map((p) => p.getIn(['vorp', 'ros', 'starter'], 0))
+      const vorps = players.map((p) => p.getIn(['vorp', 'ros', 'default'], 0))
       const sum = vorps.reduce((s, i) => s + i, 0)
       league.push(sum)
       values.rosters[roster.tid][position] = sum

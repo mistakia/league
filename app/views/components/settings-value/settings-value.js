@@ -31,40 +31,69 @@ export default class SettingsValue extends React.Component {
 
     let baselineDescription
     switch (vbaseline) {
-      case 'available':
+      case 'default':
         baselineDescription = (
-          <p>
-            <strong>Best Available: </strong> The best available player at each
-            position that can be added. This is estimated when rosters are not
-            full but dynamically updates with each roster transaction.
-          </p>
+          <>
+            <p>
+              <strong>Default: </strong> A sensible default baseline to measure
+              a players contribution to your starting lineup.
+            </p>
+            <p>
+              It is heavily based on the worst starter baseline with minor
+              adjustments to account for the value of depth and unexpected
+              injuries. You shouldn't change the baseline (i.e. how value is
+              measured) but the assumptions that go into it (i.e. the
+              projections), as this is the most sensible way to measure value.
+            </p>
+          </>
         )
         break
 
-      case 'bench':
+      case 'available':
         baselineDescription = (
-          <p>
-            <strong>Average Bench: </strong> The average player at each position
-            on a teams bench
-          </p>
+          <>
+            <p>
+              <strong>Best Available: </strong> The best available player at
+              each position that can be added. This is estimated when rosters
+              are not full but dynamically updates with each roster transaction.
+            </p>
+            <p>
+              Somewhat useful for determining the value of depth. Provides a
+              good "floor" value for starters. Provides a good "ceiling" value
+              for depth players.
+            </p>
+          </>
         )
         break
 
       case 'starter':
         baselineDescription = (
-          <p>
-            <strong>Worst Starter: </strong> The worst player at each position
-            on a starting lineup
-          </p>
+          <>
+            <p>
+              <strong>Worst Starter: </strong> The worst player at each position
+              on a starting lineup
+            </p>
+            <p>
+              Useful for determining the true value of a players contribution to
+              your starting lineup. Provides a good "ceiling" value for
+              starters.
+            </p>
+          </>
         )
         break
 
       case 'average':
         baselineDescription = (
-          <p>
-            <strong>Average Starter: </strong> The average player at each
-            position on a starting lineup
-          </p>
+          <>
+            <p>
+              <strong>Average Starter: </strong> The average player at each
+              position on a starting lineup
+            </p>
+            <p>
+              Useful for comparing starters across positions (i.e. comparing a
+              RB to a WR or QB)
+            </p>
+          </>
         )
         break
 
@@ -105,14 +134,8 @@ export default class SettingsValue extends React.Component {
               {baselineDescription}
               <p>
                 The baseline (aka replacement player) used for value over
-                replacement calculations. Since only points from starters count,
-                the <strong>worst starter</strong> baseline is the best baseline
-                to use when determining historical value. When forecasting
-                value, there is no right answer, it depends on strategy.{' '}
-                <strong>Best Available</strong> will emphasize depth, whereas{' '}
-                <strong>Worst Starter</strong> will emphasize the value of
-                high-end starters and even more so for{' '}
-                <strong>Average Starter</strong>.
+                replacement calculations. It is advised to use the{' '}
+                <strong>default</strong> baseline.
               </p>
             </div>
           </div>

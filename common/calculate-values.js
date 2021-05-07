@@ -1,5 +1,6 @@
 const calculateValues = ({ players, baselines, vorpw, volsw, week }) => {
   const total = {
+    default: 0,
     available: 0,
     starter: 0,
     average: 0,
@@ -15,6 +16,7 @@ const calculateValues = ({ players, baselines, vorpw, volsw, week }) => {
   for (const player of players) {
     const { pos } = player
     player.vorp[week] = {
+      default: -99999,
       available: -99999,
       starter: -99999,
       bench: -99999,
@@ -36,6 +38,13 @@ const calculateValues = ({ players, baselines, vorpw, volsw, week }) => {
       totalWeight
     if (player.vorp[week].hybrid > 0) {
       total.hybrid = total.hybrid + player.vorp[week].hybrid
+    }
+
+    player.vorp[week].default =
+      (player.vorp[week].available * 0.1 + player.vorp[week].starter) /
+      totalWeight
+    if (player.vorp[week].default > 0) {
+      total.default = total.default + player.vorp[week].default
     }
   }
 
