@@ -4,6 +4,8 @@ const calculatePrices = ({ total, cap, players, week }) => {
     rate[type] = cap / total[type]
   }
 
+  rate.default = (cap * 0.98) / total.default
+
   for (const player of players) {
     player.values_adj[week] = {}
     player.vorp_adj[week] = {}

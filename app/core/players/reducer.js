@@ -30,7 +30,7 @@ const initialState = new Map({
   items: new Map(),
   order: 'desc',
   view: 'ros',
-  orderBy: 'vorp.ros.starter',
+  orderBy: 'vorp.ros.default',
   watchlist: new Set(),
   baselines: new Map(),
   selected: null

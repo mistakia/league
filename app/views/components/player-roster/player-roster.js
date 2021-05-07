@@ -53,13 +53,13 @@ class PlayerRoster extends Player {
           </div>
         )}
         <div className='metric table__cell'>
-          ${player.getIn(['values', 'ros', 'starter'], 0).toFixed(0)}
+          ${player.getIn(['values', 'ros', 'default'], 0).toFixed(0)}
         </div>
         <div className='metric table__cell'>
-          {player.getIn(['vorp', 'ros', 'starter'], 0).toFixed(1)}
+          {player.getIn(['vorp', 'ros', 'default'], 0).toFixed(1)}
         </div>
         <div className='metric table__cell'>
-          {player.getIn(['vorp_adj', 'ros', 'starter'], 0).toFixed(1)}
+          {player.getIn(['vorp_adj', 'ros', 'default'], 0).toFixed(1)}
         </div>
         <div className='metric table__cell'>
           {player.getIn(['points', 'ros', 'total'], 0).toFixed(1)}
