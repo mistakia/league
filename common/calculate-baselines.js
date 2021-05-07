@@ -2,7 +2,7 @@ import Roster from './roster'
 import { positions, slots } from './constants'
 import getEligibleSlots from './get-eligible-slots'
 
-const types = ['available', 'starter', 'bench', 'average']
+const types = ['available', 'starter', 'average']
 
 const countOccurrences = (arr, val) =>
   arr.reduce((a, v) => (v === val ? a + 1 : a), 0)
@@ -199,28 +199,7 @@ const calculateBaselines = ({ players, rosterRows, league, week }) => {
     result[position].available = groupedAvailablePlayers[position][0]
   }
 
-  // get bench players
-  const benchPlayers = []
-  for (const roster of rosters) {
-    roster.bench.forEach((p) => {
-      const player = data.find((d) => d.player === p.player)
-      benchPlayers.push(player)
-    })
-  }
-
-  // group by position
-  const groupedBench = {}
   for (const position of positions) {
-    groupedBench[position] = benchPlayers
-      .filter((s) => s.pos === position)
-      .sort((a, b) => b.points[week].total - a.points[week].total)
-  }
-
-  for (const position of positions) {
-    const players = groupedBench[position]
-    const player = players[Math.floor(players.length / 2)]
-    result[position].bench = player || result[position].available
-
     // if any baselines are empty - set it to top player at position
     for (const type of types) {
       if (!result[position][type]) {
@@ -230,6 +209,7 @@ const calculateBaselines = ({ players, rosterRows, league, week }) => {
   }
 
   // set starter baselines
+  // uses best available over worst starter when the best available is better
   for (const position of positions) {
     const players = groupedStarters[position]
     const ba = result[position].available

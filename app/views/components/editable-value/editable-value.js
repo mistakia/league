@@ -54,8 +54,8 @@ export default class EditableValue extends React.Component {
             value={vbaseline}
             onChange={this.handleChange}
             label='VORP Baseline'>
+            <MenuItem value='default'>Default</MenuItem>
             <MenuItem value='available'>Best Available</MenuItem>
-            <MenuItem value='bench'>Average Bench</MenuItem>
             <MenuItem value='starter'>Worst Starter</MenuItem>
             <MenuItem value='average'>Average Starter</MenuItem>
             <MenuItem value='hybrid'>Hybrid</MenuItem>
