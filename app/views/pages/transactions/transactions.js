@@ -1,5 +1,7 @@
 import React from 'react'
-import { AutoSizer, List, InfiniteLoader } from 'react-virtualized'
+import AutoSizer from 'react-virtualized/dist/es/AutoSizer'
+import List from 'react-virtualized/dist/es/List'
+import InfiniteLoader from 'react-virtualized/dist/es/InfiniteLoader'
 import Container from '@material-ui/core/Container'
 
 import PageLayout from '@layouts/page'

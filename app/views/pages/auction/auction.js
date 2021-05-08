@@ -1,5 +1,7 @@
 import React from 'react'
-import { AutoSizer, List } from 'react-virtualized'
+import AutoSizer from 'react-virtualized/dist/es/AutoSizer'
+import List from 'react-virtualized/dist/es/List'
+
 import Switch from '@material-ui/core/Switch'
 import FormGroup from '@material-ui/core/FormGroup'
 import FormControlLabel from '@material-ui/core/FormControlLabel'

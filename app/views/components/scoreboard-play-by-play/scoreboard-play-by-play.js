@@ -1,11 +1,9 @@
 import { is } from 'immutable'
 import React from 'react'
-import {
-  AutoSizer,
-  List,
-  CellMeasurer,
-  CellMeasurerCache
-} from 'react-virtualized'
+import CellMeasurer from 'react-virtualized/dist/es/CellMeasurer'
+import CellMeasurerCache from 'react-virtualized/dist/es/CellMeasurer/CellMeasurerCache'
+import AutoSizer from 'react-virtualized/dist/es/AutoSizer'
+import List from 'react-virtualized/dist/es/List'
 
 import ScoreboardPlay from '@components/scoreboard-play'
 
