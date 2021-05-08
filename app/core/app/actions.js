@@ -17,11 +17,10 @@ export const appActions = {
   LOGIN_PENDING: 'LOGIN_PENDING',
   LOGIN_FULFILLED: 'LOGIN_FULFILLED',
 
-  init: ({ token, key }) => ({
+  init: ({ token }) => ({
     type: appActions.INIT_APP,
     payload: {
-      token,
-      key
+      token
     }
   }),
 

@@ -11,8 +11,19 @@ module.exports = {
 
   target: 'web',
 
+  optimization: {
+    moduleIds: 'named'
+  },
+
   module: {
     rules: [
+      // TODO - webpack 5
+      /* {
+       *   test: /\.m?js/,
+       *   resolve: {
+       *     fullySpecified: false
+       *   }
+       * }, */
       {
         test: /\.m?js$/,
         exclude: /(node_modules)/,
@@ -74,8 +85,5 @@ module.exports = {
     }
   },
 
-  plugins: [
-    new webpack.NamedModulesPlugin(),
-    new webpack.IgnorePlugin(/^(fs|child_process)$/)
-  ]
+  plugins: [new webpack.IgnorePlugin(/^(fs|child_process)$/)]
 }

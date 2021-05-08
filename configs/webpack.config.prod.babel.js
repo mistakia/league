@@ -67,7 +67,10 @@ module.exports = merge.smart(baseConfig, {
       },
       {
         test: /\.(png|jpg)$/,
-        loader: 'url-loader?limit=8192'
+        loader: 'url-loader',
+        options: {
+          limit: 8192
+        }
       }
     ]
   },
