@@ -6,7 +6,7 @@ import { standingsActions } from '@core/standings'
 import { rosterActions, getRostersForCurrentLeague } from '@core/rosters'
 import { matchupsActions, getMatchups } from '@core/matchups'
 import { forecastActions } from './actions'
-import Worker from 'workerize-loader?inline!./worker' // eslint-disable-line import/no-webpack-loader-syntax
+import Worker from 'workerize-loader?inline!../worker' // eslint-disable-line import/no-webpack-loader-syntax
 
 export function* simulate() {
   const teams = yield select(getTeamsForCurrentLeague)

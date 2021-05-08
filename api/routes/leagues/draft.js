@@ -1,5 +1,5 @@
 const express = require('express')
-const moment = require('moment')
+const dayjs = require('dayjs')
 const router = express.Router({ mergeParams: true })
 const API = require('groupme').Stateless
 
@@ -61,8 +61,8 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
 
-    const draftStart = moment(league.ddate, 'X')
-    if (moment().isBefore(draftStart)) {
+    const draftStart = dayjs.unix(league.ddate)
+    if (constants.season.now.isBefore(draftStart)) {
       return res.status(400).send({ error: 'draft has not started' })
     }
 
@@ -75,8 +75,8 @@ router.post('/?', async (req, res) => {
     if (pick.tid !== teamId) {
       return res.status(400).send({ error: 'invalid pickId' })
     }
-    const clockStart = moment(draftStart).add(pick.pick - 1, 'days')
-    if (moment().isBefore(clockStart)) {
+    const clockStart = dayjs(draftStart).add(pick.pick - 1, 'days')
+    if (constants.season.now.isBefore(clockStart)) {
       return res.status(400).send({ error: 'draft pick not on the clock' })
     }
 

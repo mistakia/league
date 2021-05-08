@@ -1,5 +1,5 @@
 import React from 'react'
-import moment from 'moment'
+import dayjs from 'dayjs'
 
 import TeamName from '@components/team-name'
 import Button from '@components/button'
@@ -122,8 +122,8 @@ export default class AuctionMainBid extends React.Component {
       auctionStart
     } = this.props
 
-    const now = moment()
-    const start = moment(auctionStart, 'X')
+    const now = dayjs()
+    const start = dayjs.unix(auctionStart)
     const isStarted = start.isBefore(now)
 
     let action

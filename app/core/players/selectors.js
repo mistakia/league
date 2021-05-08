@@ -1,5 +1,5 @@
 import { createSelector } from 'reselect'
-import moment from 'moment-timezone'
+import dayjs from 'dayjs'
 import { constants, calculatePoints, isOnReleaseWaivers } from '@common'
 import { getApp } from '@core/app'
 import { getStats } from '@core/stats'
@@ -111,9 +111,9 @@ export function getFilteredPlayers(state) {
   const age = players.get('age')
   const allAges = players.get('allAges')
   if (age.size !== allAges.size) {
-    const now = moment()
+    const now = dayjs()
     filtered = filtered.filter((player) => {
-      const playerAge = parseInt(now.diff(moment(player.dob), 'years'), 10)
+      const playerAge = parseInt(now.diff(dayjs(player.dob), 'years'), 10)
       return age.includes(playerAge)
     })
   }
@@ -302,8 +302,8 @@ export function isPlayerLocked(state, { player, playerId }) {
     return false
   }
 
-  const gameStart = moment.tz(game.date, 'M/D/YYYY H:m', 'America/New_York')
-  if (moment().isAfter(gameStart)) {
+  const gameStart = dayjs.tz(game.date, 'M/D/YYYY H:m', 'America/New_York')
+  if (dayjs().isAfter(gameStart)) {
     return true
   }
 
@@ -391,10 +391,10 @@ export function getPlayerStatus(state, { player, playerId }) {
       // if before extension deadline
       //     was player a rookie last year
       //     otherwise are they a rookie now
-      const now = moment()
+      const now = dayjs()
       const league = getCurrentLeague(state)
       if (
-        now.isBefore(moment(league.ext_date, 'X')) &&
+        now.isBefore(dayjs.unix(league.ext_date)) &&
         player.draft_year === constants.season.year - 1
       ) {
         status.eligible.rookieTag = true
@@ -404,7 +404,7 @@ export function getPlayerStatus(state, { player, playerId }) {
 
       if (
         constants.season.week === 0 &&
-        now.isBefore(moment(league.tran_date, 'X'))
+        now.isBefore(dayjs.unix(league.tran_date))
       ) {
         status.eligible.transitionTag = true
       }
@@ -461,13 +461,13 @@ export function getPlayerStatus(state, { player, playerId }) {
         const rosterInfo = getRosterInfoForPlayerId(state, {
           playerId: player.player
         })
-        const cutoff = moment(rosterInfo.timestamp, 'X').add('24', 'hours')
+        const cutoff = dayjs.unix(rosterInfo.timestamp).add('24', 'hours')
 
         if (
           (rosterInfo.type === constants.transactions.ROSTER_DEACTIVATE ||
             rosterInfo.type === constants.transactions.DRAFT ||
             rosterInfo.type === constants.transactions.PRACTICE_ADD) &&
-          moment().isBefore(cutoff)
+          dayjs().isBefore(cutoff)
         ) {
           status.waiver.poach = true
         }
@@ -517,8 +517,8 @@ export function isPlayerPracticeSquadEligible(state, { player }) {
   }
 
   // not eligible if player has been on active roster for more than 48 hours
-  const cutoff = moment(rosterPlayer.timestamp, 'X').add('48', 'hours')
-  if (moment().isAfter(cutoff)) {
+  const cutoff = dayjs.unix(rosterPlayer.timestamp).add('48', 'hours')
+  if (dayjs().isAfter(cutoff)) {
     return false
   }
 

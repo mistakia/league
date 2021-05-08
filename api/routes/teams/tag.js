@@ -1,4 +1,5 @@
 const express = require('express')
+const dayjs = require('dayjs')
 const router = express.Router({ mergeParams: true })
 const API = require('groupme').Stateless
 
@@ -75,7 +76,7 @@ router.post('/?', async (req, res) => {
     if (
       constants.season.week === 0 &&
       league.ext_date &&
-      moment().isAfter(moment(league.ext_date, 'X'))
+      constants.season.now.isAfter(dayjs.unix(league.ext_date))
     ) {
       return res.status(400).send({ error: 'extension deadline has passed' })
     }

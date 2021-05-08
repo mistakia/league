@@ -1,7 +1,12 @@
 const db = require('../../db')
 const { constants } = require('../../common')
 
-module.exports = async ({ pos = 'RB', rookie = false, exclude = [] } = {}) => {
+module.exports = async ({
+  pos = 'RB',
+  rookie = false,
+  exclude = [],
+  excludePS = false
+} = {}) => {
   const query = db('player')
     .whereNot('cteam', 'INA')
     .whereNotIn('player', exclude)
@@ -13,6 +18,10 @@ module.exports = async ({ pos = 'RB', rookie = false, exclude = [] } = {}) => {
     query.where('start', constants.season.year)
   } else {
     query.whereNot('start', constants.season.year)
+  }
+
+  if (excludePS) {
+    query.whereNot('posd', 'PS')
   }
 
   const players = await query

@@ -30,12 +30,12 @@ describe('API /waivers - update', function () {
   describe('put', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.clone().subtract('1', 'month').toDate())
+      MockDate.set(start.subtract('1', 'month').toDate())
       await league(knex)
     })
 
     it('change order for single waiver', async () => {
-      MockDate.set(start.clone().add('1', 'week').toDate())
+      MockDate.set(start.add('1', 'week').toDate())
 
       const players = await knex('player').whereNot('cteam', 'INA').limit(1)
       const playerId = players[0].player
@@ -76,7 +76,7 @@ describe('API /waivers - update', function () {
     })
 
     it('change order for two waivers', async () => {
-      MockDate.set(start.clone().add('1', 'week').toDate())
+      MockDate.set(start.add('1', 'week').toDate())
 
       const players = await knex('player').whereNot('cteam', 'INA').limit(2)
       const playerId1 = players[0].player
@@ -133,7 +133,7 @@ describe('API /waivers - update', function () {
     })
 
     it('change order for three waivers', async () => {
-      MockDate.set(start.clone().add('1', 'week').toDate())
+      MockDate.set(start.add('1', 'week').toDate())
 
       const players = await knex('player').whereNot('cteam', 'INA').limit(3)
       const playerId1 = players[0].player
@@ -206,7 +206,7 @@ describe('API /waivers - update', function () {
     })
 
     it('update bid', async () => {
-      MockDate.set(start.clone().add('1', 'week').toDate())
+      MockDate.set(start.add('1', 'week').toDate())
 
       const players = await knex('player').whereNot('cteam', 'INA').limit(1)
       const playerId = players[0].player
@@ -252,7 +252,7 @@ describe('API /waivers - update', function () {
     })
 
     it('update drop', async () => {
-      MockDate.set(start.clone().add('1', 'week').toDate())
+      MockDate.set(start.add('1', 'week').toDate())
 
       const players = await knex('player')
         .whereNot('cteam', 'INA')
@@ -308,10 +308,10 @@ describe('API /waivers - update', function () {
     let waiverId
     before(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.clone().subtract('1', 'month').toDate())
+      MockDate.set(start.subtract('1', 'month').toDate())
       await league(knex)
 
-      MockDate.set(start.clone().add('1', 'week').toDate())
+      MockDate.set(start.add('1', 'week').toDate())
 
       const players = await knex('player').whereNot('cteam', 'INA').limit(1)
       const playerId = players[0].player
@@ -505,7 +505,7 @@ describe('API /waivers - update', function () {
     })
 
     it('drop player not on team', async () => {
-      MockDate.set(start.clone().add('1', 'week').toDate())
+      MockDate.set(start.add('1', 'week').toDate())
 
       const players = await knex('player')
         .whereNot('cteam', 'INA')

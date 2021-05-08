@@ -37,12 +37,12 @@ describe('API /teams - add', function () {
 
   describe('post', async function () {
     beforeEach(async function () {
-      MockDate.set(start.clone().subtract('2', 'month').toDate())
+      MockDate.set(start.subtract('2', 'month').toDate())
       await league(knex)
     })
 
     it('free agent - active roster - season', async () => {
-      MockDate.set(start.clone().add('2', 'week').day(4).toDate())
+      MockDate.set(start.add('2', 'week').day(4).toDate())
       const player = await selectPlayer()
 
       const teamId = 1
@@ -109,7 +109,7 @@ describe('API /teams - add', function () {
     })
 
     it('rookie free agent - practice squad - offseason', async () => {
-      MockDate.set(start.clone().subtract('1', 'week').toDate())
+      MockDate.set(start.subtract('1', 'week').toDate())
       const player = await selectPlayer({ rookie: true })
 
       const teamId = 1
@@ -178,7 +178,7 @@ describe('API /teams - add', function () {
 
   describe('error', function () {
     beforeEach(async function () {
-      MockDate.set(start.clone().subtract('2', 'month').toDate())
+      MockDate.set(start.subtract('2', 'month').toDate())
       await league(knex)
     })
 
@@ -274,7 +274,7 @@ describe('API /teams - add', function () {
     })
 
     it('drop player not on team', async () => {
-      MockDate.set(start.clone().add('2', 'week').day(4).toDate())
+      MockDate.set(start.add('2', 'week').day(4).toDate())
       const player = await selectPlayer()
       const drop = await selectPlayer()
       const request = chai
@@ -311,7 +311,7 @@ describe('API /teams - add', function () {
     })
 
     it('add veteran free agent to active roster - offseason', async () => {
-      MockDate.set(start.clone().subtract('1', 'week').toDate())
+      MockDate.set(start.subtract('1', 'week').toDate())
       const player = await selectPlayer({ rookie: false })
       const request = chai
         .request(server)
@@ -332,7 +332,7 @@ describe('API /teams - add', function () {
     })
 
     it('free agent has unprocessed waiver claim', async () => {
-      MockDate.set(start.clone().add('2', 'week').day(3).hour(15).toDate())
+      MockDate.set(start.add('2', 'week').day(3).hour(15).toDate())
       const player = await selectPlayer({ rookie: false })
 
       await knex('waivers').insert({

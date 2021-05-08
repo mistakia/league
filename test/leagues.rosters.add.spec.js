@@ -30,7 +30,7 @@ describe('API /leagues/rosters - add', function () {
 
   describe('post', function () {
     beforeEach(async function () {
-      MockDate.set(start.clone().subtract('2', 'month').toDate())
+      MockDate.set(start.subtract('2', 'month').toDate())
       await league(knex)
     })
 
@@ -83,7 +83,7 @@ describe('API /leagues/rosters - add', function () {
 
   describe('errors', function () {
     beforeEach(async function () {
-      MockDate.set(start.clone().subtract('2', 'month').toDate())
+      MockDate.set(start.subtract('2', 'month').toDate())
       await league(knex)
     })
 

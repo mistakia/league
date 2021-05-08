@@ -4,7 +4,7 @@ import { getPlayers, playerActions } from '@core/players'
 import { statActions } from './actions'
 import { getChartedPlays, getTeamStats } from '@core/api'
 import { getStats } from './selectors'
-import Worker from 'workerize-loader?inline!./worker' // eslint-disable-line import/no-webpack-loader-syntax
+import Worker from 'workerize-loader?inline!../worker' // eslint-disable-line import/no-webpack-loader-syntax
 
 export function* loadChartedPlays() {
   const players = yield select(getPlayers)
@@ -36,7 +36,7 @@ export function* calculateStats() {
     return true
   })
   const worker = new Worker()
-  const result = yield call(worker.calculate, {
+  const result = yield call(worker.calculateStats, {
     plays: filtered.toJS(),
     qualifiers: qualifiers.toJS()
   })

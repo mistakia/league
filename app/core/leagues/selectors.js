@@ -1,4 +1,4 @@
-import moment from 'moment-timezone'
+import dayjs from 'dayjs'
 import { createSelector } from 'reselect'
 
 import { constants } from '@common'
@@ -28,10 +28,10 @@ export function getLeagueById(state, { lid }) {
 export function getLeagueEvents(state) {
   const league = getCurrentLeague(state)
   const events = []
-  const now = moment()
+  const now = dayjs()
   if (league.ddate) {
     const totalPicks = league.nteams * 3
-    const date = moment(league.ddate, 'X').add(totalPicks, 'days')
+    const date = dayjs.unix(league.ddate).add(totalPicks, 'days')
     if (now.isBefore(date)) {
       events.push({
         detail: 'Sign Rookie FAs',
@@ -40,9 +40,7 @@ export function getLeagueEvents(state) {
     }
   }
 
-  const firstDayOfRegularSeason = constants.season.start
-    .clone()
-    .add('1', 'week')
+  const firstDayOfRegularSeason = constants.season.start.add('1', 'week')
   if (now.isBefore(firstDayOfRegularSeason)) {
     events.push({
       detail: 'Start of Regular Season',
@@ -51,7 +49,6 @@ export function getLeagueEvents(state) {
   }
 
   const firstWaiverDate = constants.season.start
-    .clone()
     .add('1', 'week')
     .day(3)
     .hour(14)
@@ -61,7 +58,7 @@ export function getLeagueEvents(state) {
       date: firstWaiverDate
     })
   } else if (constants.season.isRegularSeason) {
-    const waiverDate = moment.tz('America/New_York').day(3).hour(15)
+    const waiverDate = dayjs.tz('America/New_York').day(3).hour(15)
     const nextWaiverDate = now.isBefore(waiverDate)
       ? waiverDate
       : waiverDate.add('1', 'week')
@@ -75,12 +72,12 @@ export function getLeagueEvents(state) {
   if (now.isBefore(constants.season.openingDay)) {
     events.push({
       detail: 'NFL Opening Day',
-      date: constants.season.openingDay.clone()
+      date: constants.season.openingDay
     })
   }
 
   if (league.adate) {
-    const date = moment(league.adate, 'X')
+    const date = dayjs.unix(league.adate)
     if (now.isBefore(date)) {
       events.push({
         detail: 'Auction',
@@ -90,7 +87,7 @@ export function getLeagueEvents(state) {
   }
 
   if (league.tddate) {
-    const date = moment(league.tddate, 'X')
+    const date = dayjs.unix(league.tddate)
     if (now.isBefore(date)) {
       events.push({
         detail: 'Trade Deadline',
@@ -102,7 +99,7 @@ export function getLeagueEvents(state) {
   if (now.isBefore(constants.season.end)) {
     events.push({
       detail: 'Offseason',
-      date: constants.season.end.clone()
+      date: constants.season.end
     })
   }
 

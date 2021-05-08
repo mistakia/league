@@ -1,6 +1,6 @@
 // eslint-disable-next-line
 require = require('esm')(module /*, options*/)
-const moment = require('moment')
+const dayjs = require('dayjs')
 const API = require('groupme').Stateless
 
 const { constants } = require('../common')
@@ -9,14 +9,14 @@ const db = require('../db')
 
 const run = async () => {
   // get lists of leagues after draft start date
-  const now = moment().format('X')
+  const now = dayjs().unix()
   const leagues = await db('leagues')
     .whereNotNull('ddate')
     .where('ddate', '<', now)
 
   for (const league of leagues) {
-    const draftStart = moment(league.ddate, 'X')
-    const difference = moment().diff(draftStart, 'days')
+    const draftStart = dayjs.unix(league.ddate)
+    const difference = dayjs().diff(draftStart, 'days')
     const pick = difference + 1
 
     const picks = await db('draft')

@@ -1,4 +1,4 @@
-const moment = require('moment')
+const dayjs = require('dayjs')
 
 const db = require('../db')
 const { constants, Roster } = require('../common')
@@ -61,7 +61,7 @@ module.exports = async function ({ lid, tid, player, userid }) {
 
     if (poaches.length) {
       const poach = poaches[0]
-      if (moment(poach.processed, 'X').isAfter(constants.season.offseason)) {
+      if (dayjs.unix(poach.processed).isAfter(constants.season.offseason)) {
         throw new Error('player was poached')
       }
     }

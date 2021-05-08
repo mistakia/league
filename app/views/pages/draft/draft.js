@@ -1,5 +1,6 @@
 import React from 'react'
-import moment from 'moment'
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
 import { AutoSizer, List } from 'react-virtualized'
 
 import Button from '@components/button'
@@ -12,6 +13,8 @@ import Position from '@components/position'
 import { constants } from '@common'
 
 import './draft.styl'
+
+dayjs.extend(relativeTime)
 
 export default function () {
   const {
@@ -26,33 +29,33 @@ export default function () {
   const { positions } = constants
 
   const draftActive =
-    league.ddate && moment().isAfter(moment(league.ddate, 'X').startOf('day'))
+    league.ddate && dayjs().isAfter(dayjs.unix(league.ddate).startOf('day'))
   const onTheClock =
     league.ddate &&
     nextPick &&
-    moment().isAfter(moment(league.ddate, 'X').add(nextPick.pick - 1, 'days'))
+    dayjs().isAfter(dayjs.unix(league.ddate).add(nextPick.pick - 1, 'days'))
 
   let draftInfo
   if (league.ddate) {
-    const start = moment(league.ddate, 'X').startOf('day')
-    if (moment().isBefore(start)) {
+    const start = dayjs.unix(league.ddate).startOf('day')
+    if (dayjs().isBefore(start)) {
       draftInfo = (
         <div className='draft__side-top-pick'>
-          Draft begins {moment().to(start)}
+          Draft begins {dayjs().to(start)}
         </div>
       )
     } else if (nextPick) {
-      const pickStart = moment(league.ddate, 'X').add(nextPick.pick - 1, 'days')
-      if (moment().isBefore(pickStart)) {
+      const pickStart = dayjs.unix(league.ddate).add(nextPick.pick - 1, 'days')
+      if (dayjs().isBefore(pickStart)) {
         draftInfo = (
           <div className='draft__side-top-pick'>
-            Your next pick is {moment().to(pickStart)}
+            Your next pick is {dayjs().to(pickStart)}
           </div>
         )
       } else {
         const pickNum = nextPick.pick % league.nteams || league.nteams
         const end = pickStart.add(1, 'd')
-        const now = moment()
+        const now = dayjs()
         const hours = end.diff(now, 'hours')
         const mins = end.diff(now, 'minutes') % 60
         draftInfo = (
@@ -110,7 +113,7 @@ export default function () {
     const isActive =
       draftActive &&
       !pick.player &&
-      moment().isAfter(moment(league.ddate, 'X').add(pick.pick - 1, 'days'))
+      dayjs().isAfter(dayjs.unix(league.ddate).add(pick.pick - 1, 'days'))
     pickItems.push(
       <DraftPick
         key={pick.pick}

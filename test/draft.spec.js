@@ -34,7 +34,7 @@ describe('API /draft', function () {
     await knex.migrate.latest()
     await knex.seed.run()
 
-    MockDate.set(start.clone().subtract('1', 'month').toDate())
+    MockDate.set(start.subtract('1', 'month').toDate())
 
     await league(knex)
     await draftPicks(knex)
@@ -45,9 +45,7 @@ describe('API /draft', function () {
   })
 
   it('make selection', async () => {
-    MockDate.set(
-      start.clone().subtract('1', 'month').add('10', 'minute').toDate()
-    )
+    MockDate.set(start.subtract('1', 'month').add('10', 'minute').toDate())
 
     const leagueId = 1
     const teamId = 1
@@ -143,9 +141,7 @@ describe('API /draft', function () {
     })
 
     it('invalid playerId - does not exist', async () => {
-      MockDate.set(
-        start.clone().subtract('1', 'month').add('1', 'day').toDate()
-      )
+      MockDate.set(start.subtract('1', 'month').add('1', 'day').toDate())
       const request = chai
         .request(server)
         .post('/api/leagues/1/draft')
@@ -198,9 +194,7 @@ describe('API /draft', function () {
     })
 
     it('draft hasnt started', async () => {
-      MockDate.set(
-        start.clone().subtract('1', 'month').subtract('1', 'day').toDate()
-      )
+      MockDate.set(start.subtract('1', 'month').subtract('1', 'day').toDate())
       const request = chai
         .request(server)
         .post('/api/leagues/1/draft')
@@ -215,9 +209,7 @@ describe('API /draft', function () {
     })
 
     it('pick not on clock', async () => {
-      MockDate.set(
-        start.clone().subtract('1', 'month').add('1', 'minute').toDate()
-      )
+      MockDate.set(start.subtract('1', 'month').add('1', 'minute').toDate())
       const request = chai
         .request(server)
         .post('/api/leagues/1/draft')
@@ -232,9 +224,7 @@ describe('API /draft', function () {
     })
 
     it('pick is already selected', async () => {
-      MockDate.set(
-        start.clone().subtract('1', 'month').add('1', 'minute').toDate()
-      )
+      MockDate.set(start.subtract('1', 'month').add('1', 'minute').toDate())
       const request = chai
         .request(server)
         .post('/api/leagues/1/draft')
@@ -249,9 +239,7 @@ describe('API /draft', function () {
     })
 
     it('pickId does not belong to teamId', async () => {
-      MockDate.set(
-        start.clone().subtract('1', 'month').add('1', 'minute').toDate()
-      )
+      MockDate.set(start.subtract('1', 'month').add('1', 'minute').toDate())
       const request = chai
         .request(server)
         .post('/api/leagues/1/draft')
@@ -268,9 +256,7 @@ describe('API /draft', function () {
     it('player rostered', async () => {
       const picks = await knex('draft').where({ uid: 1 }).limit(1)
       const { player } = picks[0]
-      MockDate.set(
-        start.clone().subtract('1', 'month').add('2', 'day').toDate()
-      )
+      MockDate.set(start.subtract('1', 'month').add('2', 'day').toDate())
       const request = chai
         .request(server)
         .post('/api/leagues/1/draft')

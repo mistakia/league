@@ -1,6 +1,9 @@
 import React from 'react'
-import moment from 'moment'
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
 import Popover from '@material-ui/core/Popover'
+
+dayjs.extend(relativeTime)
 
 import './league-schedule.styl'
 
@@ -29,7 +32,7 @@ export default class LeagueSchedule extends React.Component {
       .sort((a, b) => a.date.unix() - b.date.unix())
     const items = []
     const next = events.length
-      ? `${events[0].detail} ${moment().to(events[0].date)}`
+      ? `${events[0].detail} ${dayjs().to(events[0].date)}`
       : null
     for (const [index, event] of events.entries()) {
       items.push(
@@ -38,7 +41,7 @@ export default class LeagueSchedule extends React.Component {
             {event.date.format('M/D')}
           </div>
           <div className='league__schedule-item-body'>
-            <strong>{event.detail}</strong> {moment().to(event.date)}
+            <strong>{event.detail}</strong> {dayjs().to(event.date)}
           </div>
         </div>
       )

@@ -1,4 +1,5 @@
-import moment from 'moment'
+import dayjs from 'dayjs'
+
 import { transactions as constantsTransactions } from './constants'
 
 export default function isOnReleaseWaivers({ transactions = [] } = {}) {
@@ -16,7 +17,7 @@ export default function isOnReleaseWaivers({ transactions = [] } = {}) {
     return false
   }
 
-  if (moment().isAfter(moment(last.timestamp, 'X').add('24', 'hours'))) {
+  if (dayjs().isAfter(dayjs.unix(last.timestamp).add(24, 'hour'))) {
     return false
   }
 
@@ -27,10 +28,9 @@ export default function isOnReleaseWaivers({ transactions = [] } = {}) {
   }
 
   // not on waivers if not on roster for 24 hours before being dropped
-  const diff = moment(last.timestamp, 'X').diff(
-    moment(previous.timestamp, 'X'),
-    'hours'
-  )
+  const diff = dayjs
+    .unix(last.timestamp)
+    .diff(dayjs.unix(previous.timestamp), 'hour')
   if (diff < 24) {
     return false
   }

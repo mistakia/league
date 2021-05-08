@@ -1,4 +1,4 @@
-const moment = require('moment-timezone')
+const dayjs = require('dayjs')
 const express = require('express')
 const router = express.Router({ mergeParams: true })
 
@@ -158,13 +158,14 @@ router.post('/?', async (req, res) => {
         // otherwise, it's a waiver period and all players are on waivers
       } else {
         // reject active roster waivers before day after auction
-        const acutoff = moment
-          .tz(league.adate, 'X', 'America/New_York')
+        const acutoff = dayjs
+          .unix(league.adate)
+          .tz('America/New_York')
           .add('1', 'day')
           .startOf('day')
         if (
           type === constants.waivers.FREE_AGENCY &&
-          (!league.adate || moment().isBefore(acutoff))
+          (!league.adate || dayjs().isBefore(acutoff))
         ) {
           return res
             .status(400)
@@ -174,17 +175,18 @@ router.post('/?', async (req, res) => {
         // reject practice waivers before day after draft
         if (type === constants.waivers.FREE_AGENCY_PRACTICE) {
           const totalPicks = league.nteams * 3
-          const dcutoff = moment
-            .tz(league.ddate, 'X', 'America/New_York')
+          const dcutoff = dayjs
+            .unix(league.ddate)
+            .tz('America/New_York')
             .add(totalPicks, 'day')
             .startOf('day')
 
-          if (!league.ddate || moment().isBefore(dcutoff)) {
+          if (!league.ddate || dayjs().isBefore(dcutoff)) {
             return res
               .status(400)
               .send({ error: 'practice squad waivers are not open' })
           }
-          if (league.ddate && moment().isAfter(dcutoff.add('1', 'day'))) {
+          if (league.ddate && dayjs().isAfter(dcutoff.add('1', 'day'))) {
             // if after rookie draft waivers cleared, check if player is on release waivers
             const isOnWaivers = await isPlayerOnWaivers({ player, leagueId })
             if (!isOnWaivers) {
@@ -231,8 +233,8 @@ router.post('/?', async (req, res) => {
 
       // transaction should have been within the last 24 hours
       if (
-        moment().isAfter(
-          moment(transactions[0].timestamp, 'X').add('24', 'hours')
+        dayjs().isAfter(
+          dayjs.unix(transactions[0].timestamp).add('24', 'hours')
         )
       ) {
         return res.status(400).send({ error: 'player is not on waivers' })

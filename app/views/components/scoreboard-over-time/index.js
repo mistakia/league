@@ -1,6 +1,6 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
-import moment from 'moment-timezone'
+import dayjs from 'dayjs'
 
 import { getPlaysByMatchupId, getStartersByMatchupId } from '@core/scoreboard'
 import { getSelectedMatchupTeams } from '@core/matchups'
@@ -31,8 +31,8 @@ const mapStateToProps = createSelector(
     const dates = Object.keys(starters.games)
     const sorted = dates.sort(
       (a, b) =>
-        moment.tz(a, 'M/D/YYYY HH:mm', 'America/New_York').unix() -
-        moment.tz(b, 'M/D/YYYY HH:mm', 'America/New_York').unix()
+        dayjs.tz(a, 'M/D/YYYY HH:mm', 'America/New_York').unix() -
+        dayjs.tz(b, 'M/D/YYYY HH:mm', 'America/New_York').unix()
     )
     for (const date of sorted) {
       const players = starters.games[date]
@@ -51,8 +51,8 @@ const mapStateToProps = createSelector(
             0
           )
       }
-      const start = moment.tz(date, 'M/D/YYYY HH:mm', 'America/New_York')
-      const end = start.clone().add(3, 'hours')
+      const start = dayjs.tz(date, 'M/D/YYYY HH:mm', 'America/New_York')
+      const end = start.add(3, 'hours')
 
       const isLast = sorted[sorted.length - 1] === date
 

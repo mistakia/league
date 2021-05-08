@@ -1,4 +1,4 @@
-import moment from 'moment'
+import dayjs from 'dayjs'
 import { Map } from 'immutable'
 
 import { getApp } from '@core/app'
@@ -49,7 +49,7 @@ export function getTeamEvents(state) {
   const events = []
 
   for (const poach of activePoaches.valueSeq()) {
-    const date = moment(poach.submitted, 'X').add('48', 'hours')
+    const date = dayjs.unix(poach.submitted).add('48', 'hours')
     events.push({
       detail: 'Claim Expires',
       date
@@ -57,7 +57,7 @@ export function getTeamEvents(state) {
   }
 
   if (nextPick) {
-    const date = moment(league.ddate, 'X').add(nextPick.pick - 1, 'days')
+    const date = dayjs.unix(league.ddate).add(nextPick.pick - 1, 'days')
     events.push({
       detail: 'Draft Pick',
       date

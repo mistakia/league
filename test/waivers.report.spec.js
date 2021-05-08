@@ -4,7 +4,6 @@ process.env.NODE_ENV = 'test'
 const chai = require('chai')
 const chaiHTTP = require('chai-http')
 const MockDate = require('mockdate')
-// const moment = require('moment')
 
 // const server = require('../api')
 const knex = require('../db')
@@ -28,7 +27,7 @@ describe('API /waivers -report', function () {
   describe('get', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.clone().subtract('2', 'month').toDate())
+      MockDate.set(start.subtract('2', 'month').toDate())
       await league(knex)
     })
 
@@ -50,7 +49,7 @@ describe('API /waivers -report', function () {
   describe('errors', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.clone().subtract('2', 'month').toDate())
+      MockDate.set(start.subtract('2', 'month').toDate())
       await league(knex)
     })
 

@@ -1,5 +1,5 @@
 import React from 'react'
-import moment from 'moment'
+import dayjs from 'dayjs'
 
 import Paper from '@material-ui/core/Paper'
 import Container from '@material-ui/core/Container'
@@ -35,7 +35,7 @@ export default class StatusPage extends React.Component {
       const classNames = []
       if (isOperational) classNames.push('operational')
 
-      const time = moment(statusItem.timestamp, 'X')
+      const time = dayjs.unix(statusItem.timestamp)
       const secondary =
         `${time.fromNow()} - ` + (statusItem.reason || 'Operational')
 
