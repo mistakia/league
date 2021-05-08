@@ -19,7 +19,8 @@ import {
   deleteRostersActions,
   postAddFreeAgentActions,
   postReserveActions,
-  postReleaseActions
+  postReleaseActions,
+  postTagActions
 } from '@core/rosters'
 import {
   getPlayerGamelogsActions,
@@ -78,6 +79,7 @@ function* fetchAPI(apiFunction, actions, opts = {}) {
     const data = yield call(request)
     yield put(actions.fulfilled(opts, data))
   } catch (err) {
+    console.log(err)
     if (!opts.ignoreError) {
       yield put(
         notificationActions.show({ severity: 'error', message: err.message })
@@ -156,6 +158,7 @@ export const postDeactivate = fetch.bind(
 )
 export const postProtect = fetch.bind(null, api.postProtect, postProtectActions)
 export const postReserve = fetch.bind(null, api.postReserve, postReserveActions)
+export const postTag = fetch.bind(null, api.postTag, postTagActions)
 
 export const fetchDraft = fetch.bind(null, api.getDraft, getDraftActions)
 export const postDraft = fetch.bind(null, api.postDraft, postDraftActions)

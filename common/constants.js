@@ -545,7 +545,7 @@ export const tags = {
   REGULAR: 1,
   FRANCHISE: 2,
   ROOKIE: 3,
-  RESTRICTED: 4
+  TRANSITION: 4
 }
 
 export const transactionsDetail = {

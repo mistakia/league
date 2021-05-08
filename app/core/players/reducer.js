@@ -347,6 +347,15 @@ export function playersReducer(state = initialState, { payload, type }) {
         })
       })
 
+    case rosterActions.POST_TAG_FULFILLED:
+      return state.withMutations((state) => {
+        state.mergeIn(['items', payload.opts.player], { tag: payload.opts.tag })
+        if (payload.opts.remove)
+          state.mergeIn(['items', payload.opts.remove], {
+            tag: constants.tags.REGULAR
+          })
+      })
+
     case rosterActions.PUT_ROSTER_FULFILLED: {
       return state.withMutations((state) => {
         payload.data.forEach(({ player, slot }) =>

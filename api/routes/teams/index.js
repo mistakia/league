@@ -8,6 +8,7 @@ const add = require('./add')
 const lineups = require('./lineups')
 const reserve = require('./reserve')
 const protect = require('./protect')
+const tag = require('./tag')
 
 const { verifyUserTeam } = require('../../../utils')
 
@@ -72,5 +73,6 @@ router.use('/:teamId/add', add)
 router.use('/:teamId/lineups', lineups)
 router.use('/:teamId/reserve', reserve)
 router.use('/:teamId/protect', protect)
+router.use('/:teamId/tag', tag)
 
 module.exports = router

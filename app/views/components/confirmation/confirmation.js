@@ -4,10 +4,14 @@ import DialogActions from '@material-ui/core/DialogActions'
 import DialogContent from '@material-ui/core/DialogContent'
 import DialogContentText from '@material-ui/core/DialogContentText'
 import DialogTitle from '@material-ui/core/DialogTitle'
+
 import WaiverConfirmation from '@components/waiver-confirmation'
 import PoachConfirmation from '@components/poach-confirmation'
 import AddPlayerDialog from '@components/add-player-dialog'
 import AddFreeAgentDialog from '@components/add-free-agent-dialog'
+import FranchiseConfirmation from '@components/franchise-confirmation'
+import RookieConfirmation from '@components/rookie-confirmation'
+import TransitionConfirmation from '@components/transition-confirmation'
 
 import Button from '@components/button'
 
@@ -33,6 +37,12 @@ export default class Confirmation extends React.Component {
             return AddPlayerDialog
           case 'ADD_FREE_AGENT':
             return AddFreeAgentDialog
+          case 'FRANCHISE':
+            return FranchiseConfirmation
+          case 'TRANSITION':
+            return TransitionConfirmation
+          case 'ROOKIE':
+            return RookieConfirmation
         }
       }
       const ConfirmationComponent = getComponent(this.props.info.id)

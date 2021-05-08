@@ -44,13 +44,23 @@ export const League = new Record({
   fuml: null,
   krtd: null,
   prtd: null,
+  tag2: null,
+  tag3: null,
+  tag4: null,
   adate: null,
   ddate: null,
   teams: new List(),
   minBid: 0,
   hosted: 0,
   host: null,
-  tddate: null
+  tddate: null,
+
+  fqb: null,
+  frb: null,
+  fwr: null,
+  fte: null,
+  tran_date: null,
+  ext_date: null
 })
 
 export function createLeague({
@@ -97,12 +107,21 @@ export function createLeague({
   fuml,
   prtd,
   krtd,
+  tag2,
+  tag3,
+  tag4,
   adate,
   ddate,
   minBid,
   hosted,
   host,
-  tddate
+  tddate,
+  fqb,
+  frb,
+  fwr,
+  fte,
+  tran_date,
+  ext_date
 }) {
   return new League({
     uid,
@@ -148,11 +167,20 @@ export function createLeague({
     fuml,
     prtd,
     krtd,
+    tag2,
+    tag3,
+    tag4,
     adate,
     ddate,
     minBid,
     hosted,
     host,
-    tddate
+    tddate,
+    fqb,
+    frb,
+    fwr,
+    fte,
+    tran_date,
+    ext_date
   })
 }
