@@ -15,7 +15,6 @@ import {
 } from '@common'
 import gaussian from 'gaussian'
 import solver from 'javascript-lp-solver'
-import { std } from 'mathjs'
 
 export function calculateStats(params) {
   return calculateStatsFromPlays(params)
@@ -281,6 +280,9 @@ function optimizeStandingsLineup({ players, league }) {
   }
 }
 
+const average = data => data.reduce((sum, value) => sum + value) / data.length
+const standardDeviation = values => Math.sqrt(average(values.map(value => (value - average(values)) ** 2)))
+
 export function calculateStandings({
   league,
   tids,
@@ -442,7 +444,7 @@ export function calculateStandings({
     result[tid].stats.doi = 9 * normPP + normAPL
 
     const points = Object.values(result[tid].points.weeks)
-    result[tid].stats.pdev = points.length ? std(points) : null
+    result[tid].stats.pdev = points.length ? standardDeviation(points) : null
     result[tid].stats.pdiff = result[tid].stats.pf - result[tid].stats.pa
     result[tid].stats.pp_pct =
       (result[tid].stats.pf / result[tid].stats.pp) * 100
