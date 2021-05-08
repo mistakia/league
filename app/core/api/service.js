@@ -93,6 +93,10 @@ export const api = {
     const url = `${BASE_URL}/teams/${data.teamId}/protect`
     return { url, ...POST(data) }
   },
+  postTag(data) {
+    const url = `${BASE_URL}/teams/${data.teamId}/tag`
+    return { url, ...POST(data) }
+  },
   postReserve(data) {
     const url = `${BASE_URL}/teams/${data.teamId}/reserve`
     return { url, ...POST(data) }

@@ -2,6 +2,8 @@ const express = require('express')
 const router = express.Router()
 const bcrypt = require('bcrypt')
 
+const { constants } = require('../../common')
+
 router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
@@ -24,7 +26,11 @@ router.get('/?', async (req, res) => {
 
     const leagueIds = teams.map((t) => t.lid)
     const teamIds = teams.map((t) => t.uid)
-    const leagues = await db('leagues').whereIn('uid', leagueIds)
+    const leagues = await db('leagues')
+      .leftJoin('seasons', 'seasons.lid', 'leagues.uid')
+      .whereIn('leagues.uid', leagueIds)
+      .where('seasons.year', constants.season.year)
+
     const sources = await db('sources')
     const userSources = await db('users_sources').where(
       'userid',
