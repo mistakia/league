@@ -280,8 +280,9 @@ function optimizeStandingsLineup({ players, league }) {
   }
 }
 
-const average = data => data.reduce((sum, value) => sum + value) / data.length
-const standardDeviation = values => Math.sqrt(average(values.map(value => (value - average(values)) ** 2)))
+const average = (data) => data.reduce((sum, value) => sum + value) / data.length
+const standardDeviation = (values) =>
+  Math.sqrt(average(values.map((value) => (value - average(values)) ** 2)))
 
 export function calculateStandings({
   league,

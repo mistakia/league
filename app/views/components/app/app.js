@@ -22,8 +22,7 @@ import './app.styl'
 class App extends React.Component {
   async componentDidMount() {
     const token = await localStorageAdapter.getItem('token')
-    const key = await localStorageAdapter.getItem('key')
-    this.props.init({ token, key })
+    this.props.init({ token })
   }
 
   render() {

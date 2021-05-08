@@ -7,8 +7,6 @@ import {
   putResolve,
   debounce
 } from 'redux-saga/effects'
-import AES from 'crypto-js/aes'
-import UTF8 from 'crypto-js/enc-utf8'
 
 import { getApp, appActions } from '@core/app'
 import { notificationActions } from '@core/notifications'
@@ -142,23 +140,23 @@ export function* deleteProjection({ payload }) {
 
 export function* init({ payload }) {
   yield fork(loadPlayers)
-  const { key } = yield select(getApp)
   const { watchlist } = payload.data.user
   if (watchlist) {
-    const bytes = AES.decrypt(watchlist, key)
-    const decryptedData = bytes.toString(UTF8).split(',')
-    const cleaned = decryptedData.filter((p) => !!p)
-    yield put(playerActions.setWatchlist(cleaned))
+    try {
+      const array = watchlist.split(',')
+      const filtered = array.filter((p) => p.length === 7)
+      yield put(playerActions.setWatchlist(filtered))
+    } catch (err) {
+      console.log(err)
+    }
   }
 }
 
 export function* putWatchlist({ payload }) {
-  const { key } = yield select(getApp)
   const players = yield select(getPlayers)
   const watchlist = players.get('watchlist').toArray()
   const plaintext = watchlist.toString()
-  const encrypted = AES.encrypt(plaintext, key).toString()
-  const params = { type: 'watchlist', value: encrypted }
+  const params = { type: 'watchlist', value: plaintext }
   yield call(putSetting, params)
 }
 
