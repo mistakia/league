@@ -1,5 +1,6 @@
 import React from 'react'
-import { AutoSizer, List } from 'react-virtualized'
+import AutoSizer from 'react-virtualized/dist/es/AutoSizer'
+import List from 'react-virtualized/dist/es/List'
 
 import { constants } from '@common'
 import PlayerName from '@components/player-name'
