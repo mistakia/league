@@ -1,13 +1,13 @@
 import { constants } from '../../common'
 const express = require('express')
-const moment = require('moment')
+const dayjs = require('dayjs')
 const router = express.Router()
 
 router.get('/?', async (req, res) => {
   const { db, logger, cache } = req.app.locals
   try {
     // 12 hours
-    res.set('Expires', moment().add('12', 'hour').toDate().toUTCString())
+    res.set('Expires', dayjs().add('12', 'hour').toDate().toUTCString())
     res.set('Cache-Control', 'public, max-age=43200')
     res.set('Pragma', null)
     res.set('Surrogate-Control', null)

@@ -1,5 +1,5 @@
 import { Map } from 'immutable'
-import moment from 'moment'
+import dayjs from 'dayjs'
 
 import { playActions } from '@core/plays'
 import { scoreboardActions } from './actions'
@@ -8,7 +8,7 @@ import { constants } from '@common'
 const initialState = new Map({
   isLoaded: false,
   week: Math.max(
-    moment().day() === 2 ? constants.season.week - 1 : constants.season.week,
+    dayjs().day() === 2 ? constants.season.week - 1 : constants.season.week,
     1
   )
 })

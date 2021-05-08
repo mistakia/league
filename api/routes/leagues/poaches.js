@@ -1,4 +1,4 @@
-const moment = require('moment')
+const dayjs = require('dayjs')
 const express = require('express')
 const router = express.Router()
 
@@ -50,7 +50,7 @@ router.post('/?', async (req, res) => {
       (tran.type === constants.transactions.ROSTER_DEACTIVATE ||
         tran.type === constants.transactions.DRAFT ||
         tran.type === constants.transactions.PRACTICE_ADD) &&
-      moment().isBefore(moment(tran.timestamp, 'X').add('24', 'hours'))
+      dayjs().isBefore(dayjs.unix(tran.timestamp).add('24', 'hours'))
     ) {
       return res.status(400).send({ error: 'player is on waivers' })
     }

@@ -1,5 +1,5 @@
 import React from 'react'
-import moment from 'moment'
+import dayjs from 'dayjs'
 
 import './timestamp.styl'
 
@@ -7,7 +7,7 @@ export default class Timestamp extends React.Component {
   render = () => {
     const { timestamp } = this.props
 
-    const m = moment(timestamp, 'X')
+    const m = dayjs.unix(timestamp)
 
     return (
       <div className='timestamp'>

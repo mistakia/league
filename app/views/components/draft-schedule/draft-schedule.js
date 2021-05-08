@@ -1,12 +1,12 @@
 import React from 'react'
-import moment from 'moment'
+import dayjs from 'dayjs'
 
 import './draft-schedule.styl'
 
 export default class DraftSchedule extends React.Component {
   render = () => {
     const { league, picks } = this.props
-    const m = moment(league.ddate, 'X')
+    const m = dayjs.unix(league.ddate)
     const startDate = m.date()
     const draftMonth = m.month()
 
@@ -15,7 +15,7 @@ export default class DraftSchedule extends React.Component {
       const firstDay = m.startOf('month').day()
       const month = m.month()
       const daysInMonth = m.daysInMonth()
-      const daysInPreviousMonth = moment(m).subtract(1, 'month').daysInMonth()
+      const daysInPreviousMonth = dayjs(m).subtract(1, 'month').daysInMonth()
       const picksInPreviousMonth = daysInPreviousMonth - startDate + 1
 
       tbl.push(
@@ -37,7 +37,7 @@ export default class DraftSchedule extends React.Component {
             cells.push(cell)
           } else {
             const classNames = ['draft__schedule-cell']
-            if (date === moment().date() && month === moment().month())
+            if (date === dayjs().date() && month === dayjs().month())
               classNames.push('today')
             if (month === draftMonth) {
               if (date === startDate) classNames.push('start')

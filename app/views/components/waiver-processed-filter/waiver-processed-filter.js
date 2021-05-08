@@ -1,5 +1,5 @@
 import React from 'react'
-import moment from 'moment'
+import dayjs from 'dayjs'
 
 import WaiversFilter from '@components/waivers-filter'
 
@@ -15,7 +15,7 @@ export default class WaiverTypeFilter extends React.Component {
     }
 
     for (const date of processingTimes.valueSeq()) {
-      const label = moment(date, 'X').format('ddd, MMM Do h:mm YYYY')
+      const label = dayjs.unix(date).format('ddd, MMM Do h:mm YYYY')
 
       state.values.push({
         value: date,

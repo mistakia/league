@@ -1,5 +1,5 @@
 const API = require('groupme').Stateless
-const moment = require('moment')
+const dayjs = require('dayjs')
 
 const db = require('../db')
 
@@ -84,7 +84,7 @@ module.exports = async function ({
     const days = league.nteams * 3 + 1 // total picks + waiver day
     if (
       !league.ddate ||
-      moment().isBefore(moment(league.ddate, 'X').add(days, 'day'))
+      dayjs().isBefore(dayjs.unix(league.ddate).add(days, 'day'))
     ) {
       throw new Error('rookie free agency not open')
     }

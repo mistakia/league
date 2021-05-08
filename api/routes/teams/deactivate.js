@@ -1,5 +1,5 @@
 const express = require('express')
-const moment = require('moment')
+const dayjs = require('dayjs')
 const API = require('groupme').Stateless
 const router = express.Router({ mergeParams: true })
 
@@ -84,8 +84,8 @@ router.post('/?', async (req, res) => {
     }
 
     // make sure player has not been on the active roster for more than 48 hours
-    const cutoff = moment(lastTransaction.timestamp, 'X').add('48', 'hours')
-    if (moment().isAfter(cutoff)) {
+    const cutoff = dayjs.unix(lastTransaction.timestamp).add('48', 'hours')
+    if (dayjs().isAfter(cutoff)) {
       return res
         .status(400)
         .send({ error: 'player has exceeded 48 hours on active roster' })

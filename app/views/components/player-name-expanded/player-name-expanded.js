@@ -1,5 +1,5 @@
 import React from 'react'
-import moment from 'moment-timezone'
+import dayjs from 'dayjs'
 
 import { Player, connect } from '@components/player'
 import Position from '@components/position'
@@ -63,7 +63,7 @@ function GameStatus({ status, player }) {
     player.team === status.game.h ? `v${status.game.v}` : `@${status.game.h}`
 
   if (!status.lastPlay) {
-    const gameTime = moment
+    const gameTime = dayjs
       .tz(status.game.date, 'M/D/YYYY H:m', 'America/New_York')
       .local()
       .format('ddd, h:mmA')

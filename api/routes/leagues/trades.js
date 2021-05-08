@@ -1,5 +1,5 @@
 const express = require('express')
-const moment = require('moment')
+const dayjs = require('dayjs')
 const router = express.Router({ mergeParams: true })
 const { constants, Roster } = require('../../../common')
 const { getRoster } = require('../../../utils')
@@ -141,8 +141,8 @@ router.post(
       const league = leagues[0]
 
       // make sure trade deadline has not passed
-      const deadline = moment(league.tddate, 'X')
-      if (moment().isAfter(deadline)) {
+      const deadline = dayjs.unix(league.tddate)
+      if (dayjs().isAfter(deadline)) {
         return res.status(400).send({ error: 'deadline has passed' })
       }
 

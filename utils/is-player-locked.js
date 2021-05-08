@@ -1,4 +1,4 @@
-const moment = require('moment')
+const dayjs = require('dayjs')
 const db = require('../db')
 const { constants } = require('../common')
 
@@ -22,8 +22,8 @@ module.exports = async (player) => {
     return false
   }
 
-  const gameStart = moment(playerRow.date, 'M/D/YYYY H:m')
-  if (moment().isAfter(gameStart)) {
+  const gameStart = dayjs(playerRow.date, 'M/D/YYYY H:m')
+  if (dayjs().isAfter(gameStart)) {
     return true
   }
 

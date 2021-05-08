@@ -42,7 +42,7 @@ describe('API /teams - deactivate', function () {
     })
 
     it('drafted player', async () => {
-      MockDate.set(start.clone().subtract('1', 'week').toDate())
+      MockDate.set(start.subtract('1', 'week').toDate())
       const player = await selectPlayer({ rookie: true })
       const teamId = 1
       const leagueId = 1
@@ -212,7 +212,7 @@ describe('API /teams - deactivate', function () {
     })
 
     it('player is not a rookie', async () => {
-      const player = await selectPlayer()
+      const player = await selectPlayer({ excludePS: true })
       await addPlayer({
         leagueId: 1,
         player,

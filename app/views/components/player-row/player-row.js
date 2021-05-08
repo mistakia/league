@@ -41,7 +41,7 @@ class PlayerRow extends Player {
       selectedPlayer === player.player || selected === player.player
 
     const seasonSummary = () => {
-      let inflation = null
+      // let inflation = null
       const value = player.values.getIn([`${week}`, vbaseline])
       /* if (isRestOfSeasonView || isSeasonView) {
        *   const type = isRestOfSeasonView ? 'inflation' : 'inflationSeason'

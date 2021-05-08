@@ -4,7 +4,6 @@ process.env.NODE_ENV = 'test'
 const chai = require('chai')
 const chaiHTTP = require('chai-http')
 const MockDate = require('mockdate')
-const moment = require('moment')
 const server = require('../api')
 const knex = require('../db')
 
@@ -379,7 +378,7 @@ describe('API /trades', function () {
     })
 
     it('deadline has passed', async function () {
-      MockDate.set(constants.season.start.clone().add('13', 'weeks').toDate())
+      MockDate.set(constants.season.start.add('13', 'weeks').toDate())
       const request = chai
         .request(server)
         .post('/api/leagues/1/trades')

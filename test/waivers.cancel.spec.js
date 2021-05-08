@@ -29,16 +29,14 @@ describe('API /waivers - cancel', function () {
     await knex.migrate.latest()
     await knex.seed.run()
 
-    MockDate.set(start.clone().subtract('1', 'month').toDate())
+    MockDate.set(start.subtract('1', 'month').toDate())
 
     await league(knex)
     await draftPicks(knex)
   })
 
   it('cancel poaching waiver', async () => {
-    MockDate.set(
-      start.clone().subtract('1', 'month').add('10', 'minute').toDate()
-    )
+    MockDate.set(start.subtract('1', 'month').add('10', 'minute').toDate())
 
     // make draft selection
     const leagueId = 1

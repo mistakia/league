@@ -30,12 +30,12 @@ describe('SCRIPTS /waivers - poach', function () {
   describe('process', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.clone().subtract('1', 'month').toDate())
+      MockDate.set(start.subtract('1', 'month').toDate())
       await league(knex)
     })
 
     it('no waivers to process - offseason', async () => {
-      MockDate.set(start.clone().subtract('1', 'month').toDate())
+      MockDate.set(start.subtract('1', 'month').toDate())
 
       let error
       try {
@@ -50,7 +50,7 @@ describe('SCRIPTS /waivers - poach', function () {
     })
 
     it('no waivers to process - season', async () => {
-      MockDate.set(start.clone().add('1', 'month').toDate())
+      MockDate.set(start.add('1', 'month').toDate())
 
       let error
       try {
@@ -65,7 +65,7 @@ describe('SCRIPTS /waivers - poach', function () {
     })
 
     it('no waivers ready to process - offseason', async () => {
-      MockDate.set(start.clone().subtract('1', 'month').toDate())
+      MockDate.set(start.subtract('1', 'month').toDate())
 
       const player = await selectPlayer({ rookie: true })
       await addPlayer({
@@ -109,7 +109,7 @@ describe('SCRIPTS /waivers - poach', function () {
     })
 
     it('no waivers ready to process - season', async () => {
-      MockDate.set(start.clone().add('1', 'month').day(5).toDate())
+      MockDate.set(start.add('1', 'month').day(5).toDate())
 
       const player = await selectPlayer({ rookie: true })
       await addPlayer({
@@ -153,7 +153,7 @@ describe('SCRIPTS /waivers - poach', function () {
     })
 
     it('process single ready waiver - offseason', async () => {
-      MockDate.set(start.clone().subtract('1', 'month').day(5).toDate())
+      MockDate.set(start.subtract('1', 'month').day(5).toDate())
 
       const player = await selectPlayer({ rookie: true })
       await addPlayer({
@@ -178,7 +178,7 @@ describe('SCRIPTS /waivers - poach', function () {
       })
 
       MockDate.set(
-        start.clone().subtract('1', 'month').day(6).add('1', 'minute').toDate()
+        start.subtract('1', 'month').day(6).add('1', 'minute').toDate()
       )
 
       let error
@@ -225,7 +225,7 @@ describe('SCRIPTS /waivers - poach', function () {
     })
 
     it('process single ready waiver - season', async () => {
-      MockDate.set(start.clone().add('1', 'month').day(5).toDate())
+      MockDate.set(start.add('1', 'month').day(5).toDate())
 
       const player = await selectPlayer({ rookie: true })
       await addPlayer({
@@ -249,9 +249,7 @@ describe('SCRIPTS /waivers - poach', function () {
         type: constants.waivers.POACH
       })
 
-      MockDate.set(
-        start.clone().add('1', 'month').day(6).add('1', 'minute').toDate()
-      )
+      MockDate.set(start.add('1', 'month').day(6).add('1', 'minute').toDate())
 
       let error
       try {
@@ -297,7 +295,7 @@ describe('SCRIPTS /waivers - poach', function () {
     })
 
     it('process multiple waivers for the same player', async () => {
-      MockDate.set(start.clone().add('1', 'month').day(5).toDate())
+      MockDate.set(start.add('1', 'month').day(5).toDate())
 
       const player = await selectPlayer({ rookie: true })
       await addPlayer({
@@ -334,9 +332,7 @@ describe('SCRIPTS /waivers - poach', function () {
         type: constants.waivers.POACH
       })
 
-      MockDate.set(
-        start.clone().add('1', 'month').day(6).add('1', 'minute').toDate()
-      )
+      MockDate.set(start.add('1', 'month').day(6).add('1', 'minute').toDate())
 
       let error
       try {
@@ -390,7 +386,7 @@ describe('SCRIPTS /waivers - poach', function () {
     })
 
     it('process multiple waivers for multiple players', async () => {
-      MockDate.set(start.clone().add('1', 'month').day(5).toDate())
+      MockDate.set(start.add('1', 'month').day(5).toDate())
 
       const player1 = await selectPlayer({ rookie: true })
       await addPlayer({
@@ -438,9 +434,7 @@ describe('SCRIPTS /waivers - poach', function () {
         type: constants.waivers.POACH
       })
 
-      MockDate.set(
-        start.clone().add('1', 'month').day(6).add('1', 'minute').toDate()
-      )
+      MockDate.set(start.add('1', 'month').day(6).add('1', 'minute').toDate())
 
       let error
       try {
@@ -506,7 +500,7 @@ describe('SCRIPTS /waivers - poach', function () {
     })
 
     it('process multiple waivers for the same and different players', async () => {
-      MockDate.set(start.clone().add('1', 'month').day(5).toDate())
+      MockDate.set(start.add('1', 'month').day(5).toDate())
 
       const player1 = await selectPlayer({ rookie: true })
       await addPlayer({
@@ -566,9 +560,7 @@ describe('SCRIPTS /waivers - poach', function () {
         type: constants.waivers.POACH
       })
 
-      MockDate.set(
-        start.clone().add('1', 'month').day(6).add('1', 'minute').toDate()
-      )
+      MockDate.set(start.add('1', 'month').day(6).add('1', 'minute').toDate())
 
       let error
       try {
@@ -646,12 +638,12 @@ describe('SCRIPTS /waivers - poach', function () {
   describe('errors', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.clone().subtract('1', 'month').toDate())
+      MockDate.set(start.subtract('1', 'month').toDate())
       await league(knex)
     })
 
     it('player not on practice squad', async () => {
-      MockDate.set(start.clone().add('1', 'month').day(5).toDate())
+      MockDate.set(start.add('1', 'month').day(5).toDate())
 
       const player = await selectPlayer({ rookie: true })
       await addPlayer({
@@ -690,9 +682,7 @@ describe('SCRIPTS /waivers - poach', function () {
         timestamp: Math.round(Date.now() / 1000)
       })
 
-      MockDate.set(
-        start.clone().add('1', 'month').day(6).add('1', 'minute').toDate()
-      )
+      MockDate.set(start.add('1', 'month').day(6).add('1', 'minute').toDate())
 
       let error
       try {

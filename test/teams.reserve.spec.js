@@ -43,7 +43,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('move player to reserve - ir', async () => {
-      MockDate.set(start.clone().subtract('1', 'week').toDate())
+      MockDate.set(start.subtract('1', 'week').toDate())
       const player = await selectPlayer()
       const teamId = 1
       const leagueId = 1
@@ -117,7 +117,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('move player to reserve - cov', async () => {
-      MockDate.set(start.clone().subtract('1', 'week').toDate())
+      MockDate.set(start.subtract('1', 'week').toDate())
       const player = await selectPlayer()
       const teamId = 1
       const leagueId = 1
@@ -522,7 +522,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('player not rostered on previous week roster', async () => {
-      MockDate.set(start.clone().add('2', 'week').toDate())
+      MockDate.set(start.add('2', 'week').toDate())
       const player = await selectPlayer()
       const teamId = 1
       const leagueId = 1

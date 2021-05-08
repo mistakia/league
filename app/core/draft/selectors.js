@@ -1,4 +1,4 @@
-import moment from 'moment'
+import dayjs from 'dayjs'
 
 import { getCurrentLeague } from '@core/leagues'
 import { getPlayerById } from '@core/players'
@@ -36,10 +36,10 @@ export function isAfterDraft(state) {
   const totalPicks = league.nteams * 3
   const afterDraft =
     league.ddate &&
-    moment().isAfter(moment(league.ddate, 'X').add(totalPicks, 'day'))
+    dayjs().isAfter(dayjs.unix(league.ddate).add(totalPicks, 'day'))
   const afterWaivers =
     league.ddate &&
-    moment().isAfter(moment(league.ddate, 'X').add(totalPicks + 1, 'day'))
+    dayjs().isAfter(dayjs.unix(league.ddate).add(totalPicks + 1, 'day'))
   return {
     afterDraft,
     afterWaivers

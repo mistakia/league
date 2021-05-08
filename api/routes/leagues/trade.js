@@ -1,5 +1,5 @@
 const API = require('groupme').Stateless
-const moment = require('moment')
+const dayjs = require('dayjs')
 const express = require('express')
 const router = express.Router({ mergeParams: true })
 const { constants, Roster, toStringArray, nth } = require('../../../common')
@@ -129,8 +129,8 @@ router.post(
       const league = leagues[0]
 
       // make sure trade deadline has not passed
-      const deadline = moment(league.tddate, 'X')
-      if (moment().isAfter(deadline)) {
+      const deadline = dayjs.unix(league.tddate)
+      if (dayjs().isAfter(deadline)) {
         return res.status(400).send({ error: 'deadline has passed' })
       }
 

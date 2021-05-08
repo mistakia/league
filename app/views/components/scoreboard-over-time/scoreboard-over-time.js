@@ -1,5 +1,5 @@
 import React from 'react'
-import Highcharts from 'highcharts/highstock'
+import Highcharts from 'highcharts'
 import HighchartsReact from 'highcharts-react-official'
 
 import './scoreboard-over-time.styl'

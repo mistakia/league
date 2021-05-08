@@ -1,5 +1,5 @@
 const express = require('express')
-const moment = require('moment')
+const dayjs = require('dayjs')
 const router = express.Router({ mergeParams: true })
 
 const { constants } = require('../../../common')
@@ -50,7 +50,7 @@ router.get('/release', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const { leagueId } = req.params
-    const cutoff = moment().subtract('48', 'hours').format('X')
+    const cutoff = dayjs().subtract('48', 'hours').unix()
     const types = [
       constants.transactions.ROSTER_ADD,
       constants.transactions.ROSTER_RELEASE,

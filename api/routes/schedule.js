@@ -1,5 +1,5 @@
 const express = require('express')
-const moment = require('moment')
+const dayjs = require('dayjs')
 const router = express.Router()
 
 const { constants } = require('../../common')
@@ -8,7 +8,7 @@ router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     // one day
-    res.set('Expires', moment().add('1', 'day').toDate().toUTCString())
+    res.set('Expires', dayjs().add('1', 'day').toDate().toUTCString())
     res.set('Cache-Control', 'public, max-age=86400') // one-day
     res.set('Pragma', null)
     res.set('Surrogate-Control', null)

@@ -1,6 +1,6 @@
 // eslint-disable-next-line
 require = require('esm')(module /*, options*/)
-const moment = require('moment')
+const dayjs = require('dayjs')
 const debug = require('debug')
 
 const db = require('../db')
@@ -15,7 +15,7 @@ if (process.env.NODE_ENV !== 'test') {
 const run = async () => {
   const timestamp = Math.round(Date.now() / 1000)
 
-  const cutoff = moment().subtract('48', 'hours').format('X')
+  const cutoff = dayjs().subtract('48', 'hours').unix()
   const claims = await db('poaches')
     .where('submitted', '<', cutoff)
     .whereNull('processed')

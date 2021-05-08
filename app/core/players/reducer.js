@@ -1,4 +1,4 @@
-import moment from 'moment'
+import dayjs from 'dayjs'
 import { Map, List, Set } from 'immutable'
 
 import { settingActions } from '@core/settings'
@@ -184,10 +184,10 @@ export function playersReducer(state = initialState, { payload, type }) {
       return state.withMutations((players) => {
         players.set('isInitializing', false)
 
-        const now = moment()
+        const now = dayjs()
         const ages = []
         payload.data.forEach((p) => {
-          const age = parseInt(now.diff(moment(p.dob), 'years'), 10)
+          const age = parseInt(now.diff(dayjs(p.dob), 'years'), 10)
           if (!isNaN(age)) ages.push(age)
         })
 

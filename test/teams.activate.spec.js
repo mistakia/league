@@ -41,7 +41,7 @@ describe('API /teams - activate', function () {
     })
 
     it('drafted player', async () => {
-      MockDate.set(start.clone().subtract('1', 'week').toDate())
+      MockDate.set(start.subtract('1', 'week').toDate())
       const player = await selectPlayer()
       const teamId = 1
       const leagueId = 1
