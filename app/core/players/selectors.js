@@ -9,6 +9,7 @@ import { isAfterDraft } from '@core/draft'
 import { isAfterAuction } from '@core/auction'
 import { getPoachesForCurrentLeague } from '@core/poaches'
 import { getReleaseTransactions } from '@core/transactions'
+import { getCurrentLeague } from '@core/leagues'
 import {
   getCurrentTeamRoster,
   getCurrentTeamRosterRecord,
@@ -333,7 +334,9 @@ export function getPlayerStatus(state, { player, playerId }) {
       protect: false,
       activate: false,
       ps: false,
-      poach: false
+      poach: false,
+      rookieTag: false,
+      transitionTag: false
     },
     reserve: {
       ir: false,
@@ -384,6 +387,27 @@ export function getPlayerStatus(state, { player, playerId }) {
     const roster = getCurrentTeamRoster(state)
     if (roster.has(player.player)) {
       status.rostered = true
+
+      // if before extension deadline
+      //     was player a rookie last year
+      //     otherwise are they a rookie now
+      const now = moment()
+      const league = getCurrentLeague(state)
+      if (
+        now.isBefore(moment(league.ext_date, 'X')) &&
+        player.draft_year === constants.season.year - 1
+      ) {
+        status.eligible.rookieTag = true
+      } else if (player.draft_year === constants.season.year) {
+        status.eligible.rookieTag = true
+      }
+
+      if (
+        constants.season.week === 0 &&
+        now.isBefore(moment(league.tran_date, 'X'))
+      ) {
+        status.eligible.transitionTag = true
+      }
 
       const isActive = !!roster.active.find((p) => p.player === player.player)
       if (!isActive) {

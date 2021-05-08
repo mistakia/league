@@ -20,6 +20,7 @@ export const rosterActions = {
   ACTIVATE_PLAYER: 'ACTIVATE_PLAYER',
   DEACTIVATE_PLAYER: 'DEACTIVATE_PLAYER',
   PROTECT_PLAYER: 'PROTECT_PLAYER',
+  TAG_PLAYER: 'TAG_PLAYER',
 
   GET_ROSTERS_FAILED: 'GET_ROSTERS_FAILED',
   GET_ROSTERS_PENDING: 'GET_ROSTERS_PENDING',
@@ -65,6 +66,10 @@ export const rosterActions = {
   POST_RELEASE_FAILED: 'POST_RELEASE_FAILED',
   POST_RELEASE_FULFILLED: 'POST_RELEASE_FULFILLED',
 
+  POST_TAG_PENDING: 'POST_TAG_PENDING',
+  POST_TAG_FAILED: 'POST_TAG_FAILED',
+  POST_TAG_FULFILLED: 'POST_TAG_FULFILLED',
+
   addFreeAgent: ({ player, drop, slot }) => ({
     type: rosterActions.ADD_FREE_AGENT,
     payload: {
@@ -86,6 +91,16 @@ export const rosterActions = {
     payload: {
       player,
       slot
+    }
+  }),
+
+  // rookie, franchise tag
+  tag: ({ player, tag, remove }) => ({
+    type: rosterActions.TAG_PLAYER,
+    payload: {
+      player,
+      tag,
+      remove
     }
   }),
 
@@ -405,6 +420,29 @@ export const rosterActions = {
       opts,
       data
     }
+  }),
+
+  postTagPending: (opts) => ({
+    type: rosterActions.POST_TAG_PENDING,
+    payload: {
+      opts
+    }
+  }),
+
+  postTagFailed: (opts, error) => ({
+    type: rosterActions.POST_TAG_FAILED,
+    payload: {
+      opts,
+      error
+    }
+  }),
+
+  postTagFulfilled: (opts, data) => ({
+    type: rosterActions.POST_TAG_FULFILLED,
+    payload: {
+      opts,
+      data
+    }
   })
 }
 
@@ -472,4 +510,10 @@ export const postReleaseActions = {
   pending: rosterActions.postReleasePending,
   failed: rosterActions.postReleaseFailed,
   fulfilled: rosterActions.postReleaseFulfilled
+}
+
+export const postTagActions = {
+  pending: rosterActions.postTagPending,
+  failed: rosterActions.postTagFailed,
+  fulfilled: rosterActions.postTagFulfilled
 }

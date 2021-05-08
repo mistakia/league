@@ -135,6 +135,14 @@ export default class Roster {
     this._players.delete(player)
   }
 
+  removeTag(player) {
+    const p = this.get(player)
+    this._players.set(player, {
+      ...p,
+      tag: 1
+    })
+  }
+
   addPlayer({ slot, player, pos, value = 0, tag = 1 }) {
     if (this.isFull) {
       throw new Error('Roster is full')

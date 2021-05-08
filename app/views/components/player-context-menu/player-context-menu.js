@@ -124,6 +124,39 @@ export default class PlayerContextMenu extends React.Component {
     this.props.hide()
   }
 
+  handleFranchiseTag = () => {
+    const { player } = this.props
+    this.props.showConfirmation({
+      id: 'FRANCHISE',
+      data: {
+        player
+      }
+    })
+    this.props.hide()
+  }
+
+  handleTransitionTag = () => {
+    const { player } = this.props
+    this.props.showConfirmation({
+      id: 'TRANSITION',
+      data: {
+        player
+      }
+    })
+    this.props.hide()
+  }
+
+  handleRookieTag = () => {
+    const { player } = this.props
+    this.props.showConfirmation({
+      id: 'ROOKIE',
+      data: {
+        player
+      }
+    })
+    this.props.hide()
+  }
+
   render = () => {
     const { waiverId, status } = this.props
 
@@ -170,6 +203,30 @@ export default class PlayerContextMenu extends React.Component {
           disabled={!status.eligible.protect}
           onClick={this.handleProtect}>
           Designate Protected
+        </MenuItem>
+      )
+
+      menuItems.push(
+        <MenuItem key='franchise' dense onClick={this.handleFranchiseTag}>
+          Franchise Tag
+        </MenuItem>
+      )
+
+      if (status.eligible.transitionTag) {
+        menuItems.push(
+          <MenuItem key='transition' dense onClick={this.handleTransitionTag}>
+            Transition Tag
+          </MenuItem>
+        )
+      }
+
+      menuItems.push(
+        <MenuItem
+          key='rookie'
+          dense
+          disabled={!status.eligible.rookieTag}
+          onClick={this.handleRookieTag}>
+          Rookie Tag
         </MenuItem>
       )
 

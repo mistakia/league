@@ -209,6 +209,38 @@ export function rostersReducer(state = new Map(), { payload, type }) {
       )
     }
 
+    case rosterActions.POST_TAG_FULFILLED:
+      return state.withMutations((state) => {
+        const players = state.getIn([
+          payload.opts.teamId,
+          constants.season.week,
+          'players'
+        ])
+        if (!players) return state
+
+        const index = players.findIndex((p) => p.player === payload.opts.player)
+        state.setIn(
+          [payload.opts.teamId, constants.season.week, 'players', index, 'tag'],
+          payload.opts.tag
+        )
+
+        if (payload.opts.remove) {
+          const index = players.findIndex(
+            (p) => p.player === payload.opts.remove
+          )
+          state.setIn(
+            [
+              payload.opts.teamId,
+              constants.season.week,
+              'players',
+              index,
+              'tag'
+            ],
+            constants.tags.REGULAR
+          )
+        }
+      })
+
     case rosterActions.PUT_ROSTERS_FULFILLED:
       return state // TODO
 

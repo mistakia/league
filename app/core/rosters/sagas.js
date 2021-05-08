@@ -21,7 +21,8 @@ import {
   putRosters,
   postAddFreeAgent,
   postReserve,
-  postRelease
+  postRelease,
+  postTag
 } from '@core/api'
 import { getApp, appActions } from '@core/app'
 import { constants } from '@common'
@@ -255,6 +256,11 @@ export function* projectTrade() {
   yield put(playerActions.setProjectedContribution(projectedContribution))
 }
 
+export function* tag({ payload }) {
+  const { teamId, leagueId } = yield select(getApp)
+  yield call(postTag, { teamId, leagueId, ...payload })
+}
+
 export function* addPlayer({ payload }) {
   const { leagueId } = yield select(getApp)
   yield call(postRosters, { leagueId, ...payload })
@@ -298,6 +304,15 @@ export function* protectNotification() {
   yield put(
     notificationActions.show({
       message: 'Player designated',
+      severity: 'success'
+    })
+  )
+}
+
+export function* tagNotification() {
+  yield put(
+    notificationActions.show({
+      message: 'Player tagged',
       severity: 'success'
     })
   )
@@ -395,6 +410,10 @@ export function* watchPostProtectFulfilled() {
   yield takeLatest(rosterActions.POST_PROTECT_FULFILLED, protectNotification)
 }
 
+export function* watchPostTagFulfilled() {
+  yield takeLatest(rosterActions.POST_TAG_FULFILLED, tagNotification)
+}
+
 export function* watchTradeSetProposingTeamPlayers() {
   yield takeLatest(tradeActions.TRADE_SET_PROPOSING_TEAM_PLAYERS, projectTrade)
 }
@@ -409,6 +428,10 @@ export function* watchTradeSelectTeam() {
 
 export function* watchSelectTrade() {
   yield takeLatest(tradeActions.SELECT_TRADE, projectTrade)
+}
+
+export function* watchTagPlayer() {
+  yield takeLatest(rosterActions.TAG_PLAYER, tag)
 }
 
 //= ====================================
@@ -434,8 +457,11 @@ export const rosterSagas = [
   fork(watchAddFreeAgent),
   fork(watchReleasePlayer),
 
+  fork(watchTagPlayer),
+
   fork(watchPostReleaseFulfilled),
   fork(watchPostProtectFulfilled),
+  fork(watchPostTagFulfilled),
 
   fork(watchAddPlayerRoster),
   fork(watchRemovePlayerRoster),
