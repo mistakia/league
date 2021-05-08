@@ -1,5 +1,4 @@
 import { Record, List } from 'immutable'
-import SHA256 from 'crypto-js/sha256'
 import Bugsnag from '@bugsnag/js'
 
 import { DEFAULT_LEAGUE_ID } from '@core/constants'
@@ -9,7 +8,6 @@ import { standingsActions } from '@core/standings'
 
 const initialState = new Record({
   token: null,
-  key: null,
   userId: undefined,
   teamId: undefined,
   leagueId: DEFAULT_LEAGUE_ID,
@@ -32,8 +30,7 @@ export function appReducer(state = initialState(), { payload, type }) {
     case appActions.INIT_APP:
       return state.merge({
         token: payload.token,
-        key: payload.key,
-        isPending: !!(payload.token && payload.key)
+        isPending: !!payload.token
       })
 
     case appActions.LOGOUT:
@@ -83,9 +80,6 @@ export function appReducer(state = initialState(), { payload, type }) {
     case appActions.LOGIN_FULFILLED:
       return state.merge({
         isUpdating: false,
-        key: SHA256(
-          `${payload.data.userId}${payload.opts.password}`
-        ).toString(),
         token: payload.data.token
       })
 

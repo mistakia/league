@@ -7,8 +7,8 @@ import { localStorageAdapter } from '@core/utils'
 import { loadPlayers } from '@core/players'
 
 export function* init() {
-  const { token, key } = yield select(getApp)
-  if (token && key) {
+  const { token } = yield select(getApp)
+  if (token) {
     yield call(fetchAuth)
   } else {
     yield call(loadPlayers)
@@ -28,8 +28,7 @@ export function logout() {
 }
 
 export function* saveToken({ payload }) {
-  const { token, key } = yield select(getApp)
-  localStorageAdapter.setItem('key', key)
+  const { token } = yield select(getApp)
   localStorageAdapter.setItem('token', token)
   yield fork(init)
 }
