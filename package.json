@@ -108,7 +108,7 @@
     "style-loader": "^1.2.1",
     "stylus": "^0.54.7",
     "stylus-loader": "^3.0.2",
-    "terser-webpack-plugin": "^2.3.6",
+    "terser-webpack-plugin": "4.2.3",
     "webpack": "4.46.0",
     "webpack-bugsnag-plugins": "^1.4.3",
     "webpack-bundle-analyzer": "4.4.1",

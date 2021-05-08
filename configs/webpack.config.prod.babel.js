@@ -76,13 +76,13 @@ module.exports = merge.smart(baseConfig, {
   },
 
   optimization: {
+    minimize: true,
     minimizer: process.env.E2E_BUILD
       ? []
       : [
           new TerserPlugin({
             parallel: true,
-            sourceMap: true,
-            cache: false
+            sourceMap: true
           })
         ]
   },
