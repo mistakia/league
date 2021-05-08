@@ -1,17 +1,22 @@
-import moment from 'moment-timezone'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+dayjs.extend(utc)
+dayjs.extend(timezone)
+dayjs.tz.setDefault('America/New_York')
 
 export default class Season {
   constructor() {
-    this.offseason = moment.tz('2021-02-07', 'America/New_York') // Super Bowl
-    this.start = moment.tz('2021-08-31', 'America/New_York') // Two Tuesdays before first game
-    this.end = moment.tz('2022-02-06', 'America/New_York') // super bowl
-    this.openingDay = moment.tz('2021-09-09', 'America/New_York') // first game
+    this.offseason = dayjs.tz('2021-02-07', 'America/New_York') // Super Bowl
+    this.start = dayjs.tz('2021-08-31', 'America/New_York') // Two Tuesdays before first game
+    this.end = dayjs.tz('2022-02-06', 'America/New_York') // super bowl
+    this.openingDay = dayjs.tz('2021-09-09', 'America/New_York') // first game
     this.finalWeek = 16
     this.nflFinalWeek = 17
   }
 
   get now() {
-    return moment.tz('America/New_York')
+    return dayjs()
   }
 
   get isRegularSeason() {

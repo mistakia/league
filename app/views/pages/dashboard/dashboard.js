@@ -1,5 +1,5 @@
 import React from 'react'
-import moment from 'moment'
+import dayjs from 'dayjs'
 import Alert from '@material-ui/lab/Alert'
 import AlertTitle from '@material-ui/lab/AlertTitle'
 import Container from '@material-ui/core/Container'
@@ -94,7 +94,7 @@ export default function () {
       (p) => p.getIn(['player', 'player']) === player.player
     )
     if (poach) {
-      const processingTime = moment(poach.submitted, 'X').add('48', 'hours')
+      const processingTime = dayjs.unix(poach.submitted).add('48', 'hours')
       notices.push(
         <Alert key={player.player} severity='warning'>
           {player.name} has a poaching claim that will be processed{' '}

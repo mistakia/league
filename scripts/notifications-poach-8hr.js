@@ -1,6 +1,6 @@
 // eslint-disable-next-line
 require = require('esm')(module /*, options*/)
-const moment = require('moment')
+const dayjs = require('dayjs')
 
 const { constants } = require('../common')
 const { sendNotifications } = require('../utils')
@@ -9,7 +9,7 @@ const db = require('../db')
 const run = async () => {
   // get list of poaches that were submitted more than 40 hours ago
   // player still on practice squad
-  const cutoff = moment().subtract('40', 'hours').format('X')
+  const cutoff = dayjs().subtract('40', 'hours').unix()
   const claims = await db('poaches')
     .select('rosters.tid', 'player.*', 'rosters.lid')
     .join('rosters_players', 'poaches.player', 'rosters_players.player')
@@ -27,7 +27,7 @@ const run = async () => {
 
   // for each claim, notify the team owners
   for (const claim of claims) {
-    const time = moment(claim.submitted, 'X').add('48', 'hours').utcOffset(-4)
+    const time = dayjs.unix(claim.submitted).add('48', 'hours').utcOffset(-4)
     const message = `The poaching claim for ${claim.fname} ${claim.lname} (${
       claim.pos
     }) will be processed ${time.toNow()} around ${time.format(

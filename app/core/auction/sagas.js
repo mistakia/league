@@ -25,7 +25,7 @@ import {
   getPlayers
 } from '@core/players'
 import { constants, getEligibleSlots } from '@common'
-import Worker from 'workerize-loader?inline!./worker' // eslint-disable-line import/no-webpack-loader-syntax
+import Worker from 'workerize-loader?inline!../worker' // eslint-disable-line import/no-webpack-loader-syntax
 
 export function* optimize() {
   const league = yield select(getCurrentLeague)
@@ -64,7 +64,7 @@ export function* optimize() {
 
   // optimze lineup using current players and watchlist
   const worker = new Worker()
-  let result = yield call(worker.optimizeLineup, {
+  let result = yield call(worker.optimizeAuctionLineup, {
     limits: defaultLimit,
     vbaseline,
     players: sortedWatchlist.valueSeq().toJS(),

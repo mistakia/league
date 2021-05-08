@@ -1,7 +1,7 @@
 // eslint-disable-next-line
 require = require('esm')(module /*, options*/)
 const debug = require('debug')
-const moment = require('moment')
+const dayjs = require('dayjs')
 const argv = require('yargs').argv
 
 const db = require('../db')
@@ -20,7 +20,7 @@ const timestamp = Math.round(Date.now() / 1000)
 const week =
   argv.week ||
   Math.max(
-    moment().day() === 2 ? constants.season.week - 1 : constants.season.week,
+    dayjs().day() === 2 ? constants.season.week - 1 : constants.season.week,
     1
   )
 

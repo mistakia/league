@@ -1,5 +1,5 @@
 import React from 'react'
-import moment from 'moment'
+import dayjs from 'dayjs'
 
 import { nth } from '@common'
 
@@ -33,7 +33,7 @@ export default class ScoreboardPlay extends React.Component {
       <div className={classNames.join(' ')} style={style}>
         <div className='scoreboard__play-info'>
           <div className='scoreboard__play-info-time'>
-            {moment(play.time, 'X').format('ddd h:mm')}
+            {dayjs.unix(play.time).format('ddd h:mm')}
           </div>
           <div className='scoreboard__play-info-play'>
             {play.play.down}

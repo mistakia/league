@@ -11,7 +11,7 @@ import {
 import { matchupsActions, getMatchups } from '@core/matchups'
 import { gamelogsActions, getPlayerGamelogs } from '@core/gamelogs'
 import { standingsActions } from './actions'
-import Worker from 'workerize-loader?inline!./worker' // eslint-disable-line import/no-webpack-loader-syntax
+import Worker from 'workerize-loader?inline!../worker' // eslint-disable-line import/no-webpack-loader-syntax
 
 export function* calculate() {
   const league = yield select(getCurrentLeague)
@@ -45,7 +45,7 @@ export function* calculate() {
   const gamelogs = yield select(getPlayerGamelogs)
   const matchups = yield select(getMatchups)
   const worker = new Worker()
-  const result = yield call(worker.calculate, {
+  const result = yield call(worker.calculateStandings, {
     league,
     matchups: matchups.get('items').toJS(),
     tids: teams

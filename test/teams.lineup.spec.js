@@ -208,7 +208,7 @@ describe('API /teams - lineups', function () {
     })
 
     it('player not eligible for slot', async () => {
-      MockDate.set(start.clone().add('1', 'month').toDate())
+      MockDate.set(start.add('1', 'month').toDate())
       const player = await selectPlayer({ pos: 'WR' })
       await addPlayer({
         leagueId: 1,
@@ -234,7 +234,7 @@ describe('API /teams - lineups', function () {
     })
 
     it('player not on active roster', async () => {
-      MockDate.set(start.clone().add('1', 'month').toDate())
+      MockDate.set(start.add('1', 'month').toDate())
       const player = await selectPlayer({ pos: 'WR', rookie: true })
       await addPlayer({
         leagueId: 1,
@@ -280,7 +280,7 @@ describe('API /teams - lineups', function () {
     })
 
     it('previous lineup', async () => {
-      MockDate.set(start.clone().add('1', 'week').toDate())
+      MockDate.set(start.add('1', 'week').toDate())
       const player = await selectPlayer({ pos: 'WR' })
       await addPlayer({
         leagueId: 1,
@@ -289,7 +289,7 @@ describe('API /teams - lineups', function () {
         userId: 1
       })
 
-      MockDate.set(start.clone().add('2', 'week').toDate())
+      MockDate.set(start.add('2', 'week').toDate())
       await addPlayer({
         leagueId: 1,
         teamId: 1,

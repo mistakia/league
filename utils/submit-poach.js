@@ -1,4 +1,4 @@
-const moment = require('moment')
+const dayjs = require('dayjs')
 const API = require('groupme').Stateless
 
 const db = require('../db')
@@ -98,7 +98,7 @@ module.exports = async function ({
     poachPlayer.fname
   } ${poachPlayer.lname} (${
     poachPlayer.pos
-  }). This claim will be processed around ${moment()
+  }). This claim will be processed around ${dayjs()
     .utcOffset(-4)
     .add('48', 'hours')
     .format('dddd, MMMM Do h:mm a')} EST.`

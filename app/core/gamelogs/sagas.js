@@ -4,7 +4,7 @@ import { appActions } from '@core/app'
 import { fetchPlayerGamelogs, fetchTeamGamelogs } from '@core/api'
 import { getPlayerGamelogs, getTeamGamelogs } from './selectors'
 import { gamelogsActions } from './actions'
-import Worker from 'workerize-loader?inline!./worker' // eslint-disable-line import/no-webpack-loader-syntax
+import Worker from 'workerize-loader?inline!../worker' // eslint-disable-line import/no-webpack-loader-syntax
 
 export function* load() {
   yield fork(fetchPlayerGamelogs)

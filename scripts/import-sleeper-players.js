@@ -55,12 +55,12 @@ const run = async () => {
       rotowire_id,
       gsis_id,
       sportradar_id,
-      practice_description,
+      // practice_description,
       espn_id,
       fantasy_data_id,
       yahoo_id,
-      practice_participation,
-      stats_id,
+      // practice_participation,
+      // stats_id,
       status
     } = item
 
@@ -70,18 +70,18 @@ const run = async () => {
       rotowire_id,
       gsisid: gsis_id,
       sportradar_id,
-      //practice_description,
+      // practice_description,
       espn_id,
       fantasy_data_id,
       yahoo_id,
-      //practice_participation,
-      //stats_global_id: stats_id,
+      // practice_participation,
+      // stats_global_id: stats_id,
       status,
       sleeper_id,
       player: playerId,
       // name,
       cteam: team
-      //pos
+      // pos
     }
 
     inserts.push(data)
@@ -143,20 +143,20 @@ const run = async () => {
     (p) => !currentPlayerIds.includes(p)
   )
 
-  for (const missingPlayerId of missingPlayerIds) {
-    const row = inserts.find((r) => r.player === missingPlayerId)
-    /* await db('changelog').insert({
-     *   type: constants.changes.PLAYER_NEW,
-     *   id: row.player,
-     *   timestamp
-     * })
+  /* for (const missingPlayerId of missingPlayerIds) {
+   *   const row = inserts.find((r) => r.player === missingPlayerId)
+   *   await db('changelog').insert({
+   *     type: constants.changes.PLAYER_NEW,
+   *     id: row.player,
+   *     timestamp
+   *   })
 
-     * await db('player').insert({
-     *   pos: row.pos1,
-     *   ...formatted
-     * }) */
-  }
-
+   *   await db('player').insert({
+   *     pos: row.pos1,
+   *     ...formatted
+   *   })
+   * }
+   */
   /* for (const insert of inserts) {
    *   const rows = await db('players').where('sleeper_id', insert.sleeper_id)
    *   if (rows.length) {

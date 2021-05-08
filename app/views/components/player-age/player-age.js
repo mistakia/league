@@ -1,8 +1,8 @@
 import React from 'react'
-import moment from 'moment'
+import dayjs from 'dayjs'
 
 export default function ({ date }) {
   return (
-    <span>{(moment().diff(moment(date), 'days') / 365).toFixed(1) || '-'}</span>
+    <span>{(dayjs().diff(dayjs(date), 'days') / 365).toFixed(1) || '-'}</span>
   )
 }

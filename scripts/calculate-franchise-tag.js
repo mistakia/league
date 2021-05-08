@@ -1,7 +1,6 @@
 // eslint-disable-next-line
 require = require('esm')(module /*, options*/)
 const debug = require('debug')
-const argv = require('yargs').argv
 
 const db = require('../db')
 const { constants, groupBy } = require('../common')

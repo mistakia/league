@@ -41,7 +41,7 @@ import {
 import { poachActions, getPoachPlayersForCurrentTeam } from '@core/poaches'
 import { waiverActions, getWaiverPlayersForCurrentTeam } from '@core/waivers'
 import { getCurrentLeague } from '@core/leagues'
-import Worker from 'workerize-loader?inline!./worker' // eslint-disable-line import/no-webpack-loader-syntax
+import Worker from 'workerize-loader?inline!../worker' // eslint-disable-line import/no-webpack-loader-syntax
 
 export function* loadRosters() {
   const { leagueId } = yield select(getApp)

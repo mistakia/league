@@ -1,10 +1,10 @@
-const moment = require('moment')
+const dayjs = require('dayjs')
 const db = require('../db')
 const { isOnReleaseWaivers } = require('../common')
 
 module.exports = async ({ player, leagueId }) => {
   // get last two transactions for player
-  const cutoff = moment().subtract('48', 'hours').format('X')
+  const cutoff = dayjs().subtract('48', 'hours').unix()
   const transactions = await db('transactions')
     .where({
       lid: leagueId,

@@ -28,7 +28,7 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
   describe('process', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.clone().subtract('2', 'month').toDate())
+      MockDate.set(start.subtract('2', 'month').toDate())
       await league(knex)
     })
 
@@ -36,9 +36,7 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
       const leagueId = 1
       const league = await getLeague(leagueId)
       const days = league.nteams * 3 + 1
-      MockDate.set(
-        start.clone().subtract('2', 'month').add(days, 'day').toDate()
-      )
+      MockDate.set(start.subtract('2', 'month').add(days, 'day').toDate())
 
       const player = await selectPlayer({ rookie: true })
       const teamId = 1
@@ -128,12 +126,7 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
       const league = await getLeague(leagueId)
       const days = league.nteams * 3
       MockDate.set(
-        start
-          .clone()
-          .subtract('2', 'month')
-          .add(days, 'day')
-          .add('1', 'hour')
-          .toDate()
+        start.subtract('2', 'month').add(days, 'day').add('1', 'hour').toDate()
       )
 
       const player = await selectPlayer({ rookie: true })
@@ -186,12 +179,12 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
   describe('errors', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.clone().subtract('1', 'month').toDate())
+      MockDate.set(start.subtract('1', 'month').toDate())
       await league(knex)
     })
 
     it('no waivers to process', async () => {
-      MockDate.set(start.clone().add('1', 'month').day(4).toDate())
+      MockDate.set(start.add('1', 'month').day(4).toDate())
       let error
       try {
         await run()

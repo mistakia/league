@@ -1,5 +1,5 @@
 import { List } from 'immutable'
-import moment from 'moment-timezone'
+import dayjs from 'dayjs'
 
 import { getStartersByTeamId, getRosterByTeamId } from '@core/rosters'
 import { getCurrentLeague } from '@core/leagues'
@@ -61,7 +61,7 @@ export function getScoreboardByTeamId(state, { tid }) {
         const quarterMinutes =
           lp.playDescription === 'END GAME'
             ? 0
-            : moment.duration(`00:${lp.clockTime}`).minutes()
+            : parseInt(lp.clockTime.split(':').pop(), 10) // TODO - double check
         const quartersRemaining = lp.quarter === 5 ? 0 : 4 - lp.quarter
         minutes += quartersRemaining * 15 + quarterMinutes
       }
@@ -187,8 +187,8 @@ export function getPlaysByMatchupId(state, { mid }) {
         league
       })
     }
-    const date = moment.tz(game.date, 'M/D/YYYY HH:mm', 'America/New_York')
-    const time = moment.utc(
+    const date = dayjs.tz(game.date, 'M/D/YYYY HH:mm', 'America/New_York')
+    const time = dayjs.utc(
       `${date.utc().format('YYYY-MM-DD')} ${play.timeOfDay}`,
       'YYYY-MM-DD HH:mm:ss'
     )

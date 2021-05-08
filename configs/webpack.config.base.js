@@ -27,7 +27,11 @@ module.exports = {
         test: /\.(styl|css)$/,
         use: [
           {
-            loader: 'style-loader'
+            loader: 'style-loader',
+            options: {
+              insert: 'head', // insert style tag inside of <head>
+              injectType: 'singletonStyleTag' // this is for wrap all your style in just one style tag
+            }
           },
           {
             loader: 'css-loader'

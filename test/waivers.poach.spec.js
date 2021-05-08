@@ -29,16 +29,14 @@ describe('API /waivers - poach', function () {
     await knex.migrate.latest()
     await knex.seed.run()
 
-    MockDate.set(start.clone().subtract('1', 'month').toDate())
+    MockDate.set(start.subtract('1', 'month').toDate())
 
     await league(knex)
     await draftPicks(knex)
   })
 
   it('submit poaching waiver for drafted player', async () => {
-    MockDate.set(
-      start.clone().subtract('1', 'month').add('10', 'minute').toDate()
-    )
+    MockDate.set(start.subtract('1', 'month').add('10', 'minute').toDate())
 
     // make draft selection
     const leagueId = 1
@@ -333,7 +331,6 @@ describe('API /waivers - poach', function () {
 
     it('player is not on waivers - past 24 hours', async () => {
       const time = start
-        .clone()
         .subtract('1', 'month')
         .add('1', 'day')
         .add('11', 'minute')

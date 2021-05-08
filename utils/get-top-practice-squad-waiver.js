@@ -1,4 +1,4 @@
-const moment = require('moment-timezone')
+const dayjs = require('dayjs')
 
 const db = require('../db')
 const { constants } = require('../common')
@@ -9,7 +9,7 @@ module.exports = async (leagueId) => {
   const days = league.nteams * 3 + 1 // total picks + waiver day
   if (
     !league.ddate ||
-    moment().isBefore(moment(league.ddate, 'X').add(days, 'day'))
+    dayjs().isBefore(dayjs.unix(league.ddate).add(days, 'day'))
   ) {
     return undefined
   }
@@ -27,7 +27,7 @@ module.exports = async (leagueId) => {
   const activeWaiverPlayerIds = activeWaivers.map((w) => w.player)
 
   // get relevant transactions from last 24 hours
-  const cutoff = moment().subtract('24', 'hours').format('X')
+  const cutoff = dayjs().subtract('24', 'hours').unix()
   const transactions = await db('transactions')
     .where('type', constants.transactions.ROSTER_RELEASE)
     .where('timestamp', '>=', cutoff)
@@ -86,9 +86,9 @@ module.exports = async (leagueId) => {
   const waivers = await query
 
   if (constants.season.isRegularSeason) {
-    const now = moment()
+    const now = dayjs()
     const filtered = waivers.filter((player) => {
-      const gameStart = moment.tz(
+      const gameStart = dayjs.tz(
         player.date,
         'M/D/YYYY H:m',
         'America/New_York'

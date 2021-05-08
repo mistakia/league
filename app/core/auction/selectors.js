@@ -1,4 +1,4 @@
-import moment from 'moment-timezone'
+import dayjs from 'dayjs'
 import { Set } from 'immutable'
 import { createSelector } from 'reselect'
 
@@ -132,11 +132,12 @@ export function isAfterAuction(state) {
   }
 
   // day after auction starts
-  const cutoff = moment
-    .tz(league.adate, 'X', 'America/New_York')
+  const cutoff = dayjs
+    .unix(league.adate)
+    .tz('America/New_York')
     .add('1', 'day')
     .startOf('day')
-  if (moment().isBefore(cutoff)) {
+  if (dayjs().isBefore(cutoff)) {
     return false
   }
 

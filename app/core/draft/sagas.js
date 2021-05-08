@@ -1,4 +1,4 @@
-import moment from 'moment'
+import dayjs from 'dayjs'
 import { call, takeLatest, fork, select } from 'redux-saga/effects'
 
 import { getApp, appActions } from '@core/app'
@@ -23,10 +23,10 @@ export function* draftPlayer() {
 export function* init() {
   const league = yield select(getCurrentLeague)
   if (league.ddate) {
-    const start = moment(league.ddate, 'X')
+    const start = dayjs.unix(league.ddate)
     const totalPicks = league.nteams * 3
-    const end = start.clone().add(totalPicks, 'day')
-    if (moment().isBetween(start, end)) {
+    const end = start.add(totalPicks, 'day')
+    if (dayjs().isBetween(start, end)) {
       yield call(fetchDraft, { leagueId: league.uid })
     }
   }
