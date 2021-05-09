@@ -10,7 +10,7 @@ const { Table } = require('console-table-printer')
 const calculateVOR = require('./calculate-vor')
 
 // const log = debug('script:calculate-rookie-pick-value')
-const LATEST_YEAR = 2019
+const LATEST_YEAR = 2020
 
 const calculateRookiePickValue = async ({ year }) => {
   if (year > LATEST_YEAR) {
