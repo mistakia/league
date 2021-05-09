@@ -42,6 +42,7 @@ export function processTeamGamelogs(gamelogs) {
 }
 
 export function calculatePlayerValues(payload) {
+  const currentWeek = constants.season.week
   const { userId, vorpw, volsw, league, players, rosterRows } = payload
   const customBaselines = payload.baselines
 
@@ -65,11 +66,12 @@ export function calculatePlayerValues(payload) {
     return s + (r.availableCap - minBid * r.availableSpace)
   }, 0)
 
+  const finalWeek = constants.season.finalWeek
   for (const player of players) {
     const { projections } = player
 
     player.projection = {}
-    for (let week = 0; week <= constants.season.finalWeek; week++) {
+    for (let week = 0; week <= finalWeek; week++) {
       const projection = weightProjections({
         projections,
         weights: payload.sources,
@@ -93,7 +95,7 @@ export function calculatePlayerValues(payload) {
     const ros = constants.createStats()
     let projWks = 0
     for (const [week, projection] of Object.entries(player.projection)) {
-      if (week && week !== '0' && week >= constants.season.week) {
+      if (week && week !== '0' && week >= currentWeek) {
         projWks += 1
         for (const [key, value] of Object.entries(projection)) {
           ros[key] += value
@@ -111,7 +113,7 @@ export function calculatePlayerValues(payload) {
   }
 
   const baselines = {}
-  for (let week = 0; week <= constants.season.finalWeek; week++) {
+  for (let week = 0; week <= finalWeek; week++) {
     // calculate baseline
     const b = calculateBaselines({ players, league, rosterRows, week })
 
@@ -165,7 +167,7 @@ export function calculatePlayerValues(payload) {
     const ros = {}
     const isAvailable = !rosteredPlayerIds.includes(player.player)
     for (const [week, vorp] of Object.entries(player.vorp)) {
-      if (week && week >= constants.season.week) {
+      if (week && week >= currentWeek) {
         for (const [key, value] of Object.entries(vorp)) {
           if (value < 0) {
             if (!ros[key]) ros[key] = 0
@@ -292,6 +294,7 @@ export function calculateStandings({
   gamelogs,
   matchups
 }) {
+  const currentWeek = constants.season.week
   const result = {}
   for (const tid of tids) {
     result[tid] = {
@@ -321,7 +324,7 @@ export function calculateStandings({
     league.sdst +
     league.sk
 
-  for (let week = 1; week < constants.season.week; week++) {
+  for (let week = 1; week < currentWeek; week++) {
     for (const tid of tids) {
       const startingPlayers = starters[week][tid]
       const starterIds = startingPlayers.map((p) => p.player)
@@ -375,7 +378,7 @@ export function calculateStandings({
     }
   }
 
-  for (let week = 1; week < constants.season.week; week++) {
+  for (let week = 1; week < currentWeek; week++) {
     const weekMatchups = matchups.filter((m) => m.week === week)
     for (const m of weekMatchups) {
       const homeScore = result[m.hid].points.weeks[week]
@@ -718,9 +721,10 @@ export function optimizeLineup({ players, league }) {
   const positions = players.map((p) => p.pos)
   const constraints = getOptimizerPositionConstraints({ positions, league })
 
+  const finalWeek = constants.season.finalWeek
   for (
     let week = constants.season.week;
-    week <= constants.season.finalWeek;
+    week <= finalWeek;
     week++
   ) {
     const variables = {}
