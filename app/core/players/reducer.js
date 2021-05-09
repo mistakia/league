@@ -29,7 +29,7 @@ const initialState = new Map({
   allAges: new List(),
   items: new Map(),
   order: 'desc',
-  view: 'ros',
+  view: constants.season.week === 0 ? 'season' : 'ros',
   orderBy: 'vorp.ros.default',
   watchlist: new Set(),
   baselines: new Map(),
