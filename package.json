@@ -44,7 +44,7 @@
     "react-dom": "^16.13.1",
     "react-sortable-hoc": "^1.11.0",
     "serve-favicon": "^2.5.0",
-    "ws": "^7.2.5"
+    "ws": "^7.4.6"
   },
   "devDependencies": {
     "@babel/core": "^7.14.0",
