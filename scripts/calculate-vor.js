@@ -153,18 +153,38 @@ const calculateVOR = async ({ year, rookie }) => {
       'player.pos',
       'game.wk',
       'offense.player',
-      'offense.seas',
-      'draft_rankings.rank',
-      'draft_rankings.posrank',
-      'draft_rankings.avg'
+      'offense.seas'
     )
     .where('offense.year', year)
     .andWhere('game.wk', '<=', LAST_WEEK_OF_SEASON)
-    .andWhere('draft_rankings.seas', year)
-    .andWhere('draft_rankings.rookie', 0) // TODO figure out how to only include one row
     .join('player', 'offense.player', 'player.player')
     .join('game', 'offense.gid', 'game.gid')
-    .join('draft_rankings', 'offense.player', 'draft_rankings.player')
+
+  const playerIds = rows.map(p => p.player)
+  const sub = db('rankings')
+    .select(db.raw('max(timestamp) AS maxtime, sourceid AS sid'))
+    .groupBy('sid')
+    .where('year', year)
+  const rankings = await db('rankings')
+    .select('*')
+    .from(db.raw('(' + sub.toString() + ') AS X'))
+    .innerJoin('rankings', function () {
+      this.on(function () {
+        this.on('sourceid', '=', 'sid')
+        this.andOn('timestamp', '=', 'maxtime')
+      })
+    })
+    .where('sf', 1)
+    .where('year', year)
+    .whereIn('player', playerIds)
+
+  for (let row of rows) {
+    const ranking = rankings.find(r => r.player === row.player)
+    if (ranking) {
+      const { ornk, prnk, avg, std } = ranking
+      row = { ...row, ornk, prnk, avg, std }
+    }
+  }
 
   log(`calculating VOR for ${rows.length} players`)
 
@@ -237,7 +257,7 @@ const calculateVOR = async ({ year, rookie }) => {
       rookie: games[0].seas === 1,
       pos: games[0].pos,
       seas: games[0].seas,
-      posrank: games[0].posrank,
+      prnk: games[0].prnk,
       vor,
       points,
       games
@@ -297,7 +317,7 @@ if (!module.parent) {
             player: player.player,
             vor: player.vor.toFixed(2),
             points: player.points.toFixed(2),
-            rank: player.posrank,
+            rank: player.prnk,
             value: `$${player.value}`,
             pos: player.pos,
             rookie: player.rookie ? 'rookie' : ''
