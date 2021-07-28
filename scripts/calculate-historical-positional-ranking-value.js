@@ -6,7 +6,7 @@ const { Table } = require('console-table-printer')
 const { groupBy } = require('../common')
 const calculateVOR = require('./calculate-vor')
 
-const LATEST_YEAR = 2019
+const LATEST_YEAR = 2020
 
 const calculateHistoricalPositionalRankingValue = async () => {
   const years = 3
@@ -36,14 +36,14 @@ const calculateHistoricalPositionalRankingValue = async () => {
     for (const year in byPosition) {
       const players = byPosition[year]
       for (const player of players) {
-        if (sums[player.posrank]) {
-          sums[player.posrank].vor += player.vor
-          sums[player.posrank].value += player.value
-          sums[player.posrank].points += player.points
+        if (sums[player.prnk]) {
+          sums[player.prnk].vor += player.vor
+          sums[player.prnk].value += player.value
+          sums[player.prnk].points += player.points
         } else {
-          sums[player.posrank] = {
+          sums[player.prnk] = {
             pos,
-            rank: player.posrank,
+            rank: player.prnk,
             vor: player.vor,
             value: player.value,
             points: player.points
@@ -52,8 +52,8 @@ const calculateHistoricalPositionalRankingValue = async () => {
       }
     }
 
-    for (const posrank in sums) {
-      const item = sums[posrank]
+    for (const prnk in sums) {
+      const item = sums[prnk]
       item.value = item.value / years
     }
 
