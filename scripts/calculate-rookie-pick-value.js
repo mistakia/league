@@ -81,7 +81,7 @@ if (!module.parent) {
             player: player.player,
             vor: player.vor.toFixed(2),
             points: player.points.toFixed(2),
-            posrank: player.posrank,
+            prnk: player.prnk,
             value: player.value,
             pos: player.pos
           },
