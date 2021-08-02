@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import { nth } from '@common'
 
 export default class Rank extends React.Component {
@@ -18,4 +19,9 @@ export default class Rank extends React.Component {
       </span>
     )
   }
+}
+
+Rank.propTypes = {
+  rank: PropTypes.number,
+  size: PropTypes.number
 }

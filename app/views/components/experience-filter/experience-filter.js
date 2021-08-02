@@ -1,4 +1,5 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import PlayerFilter from '@components/player-filter'
 
@@ -28,4 +29,8 @@ export default class ExperienceFilter extends React.Component {
 
     return <PlayerFilter {...state} />
   }
+}
+
+ExperienceFilter.propTypes = {
+  experience: ImmutablePropTypes.list
 }

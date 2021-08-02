@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 import { constants } from '@common'
 import PlayerName from '@components/player-name'
@@ -31,4 +32,9 @@ export default class TransactionRow extends React.Component {
       </div>
     )
   }
+}
+
+TransactionRow.propTypes = {
+  style: PropTypes.object,
+  transaction: PropTypes.object
 }

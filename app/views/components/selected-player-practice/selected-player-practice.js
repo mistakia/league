@@ -1,4 +1,6 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 
 const Row = ({ data }) => (
   <div className='player__selected-row'>
@@ -16,6 +18,10 @@ const Row = ({ data }) => (
     </div>
   </div>
 )
+
+Row.propTypes = {
+  data: PropTypes.object
+}
 
 export default class SelectedPlayerPractice extends React.Component {
   render = () => {
@@ -49,4 +55,8 @@ export default class SelectedPlayerPractice extends React.Component {
       </div>
     )
   }
+}
+
+SelectedPlayerPractice.propTypes = {
+  player: ImmutablePropTypes.record
 }

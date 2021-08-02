@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import IconButton from '@material-ui/core/IconButton'
 import DeleteIcon from '@material-ui/icons/Delete'
 
@@ -36,4 +37,13 @@ export default class SettingsTeamsTeamPlayer extends React.Component {
       </div>
     )
   }
+}
+
+SettingsTeamsTeamPlayer.propTypes = {
+  update: PropTypes.func,
+  remove: PropTypes.func,
+  showConfirmation: PropTypes.func,
+  playerId: PropTypes.string,
+  teamId: PropTypes.number,
+  value: PropTypes.number
 }

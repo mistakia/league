@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import FormControl from '@material-ui/core/FormControl'
 import Select from '@material-ui/core/Select'
 import InputLabel from '@material-ui/core/InputLabel'
@@ -40,4 +41,9 @@ export default class ScoreboardSelectWeek extends React.Component {
       </FormControl>
     )
   }
+}
+
+ScoreboardSelectWeek.propTypes = {
+  select: PropTypes.func,
+  week: PropTypes.number
 }

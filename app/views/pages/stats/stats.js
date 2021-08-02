@@ -1,4 +1,6 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import PageLayout from '@layouts/page'
 import PercentileMetric from '@components/percentile-metric'
@@ -50,6 +52,11 @@ function SummaryRow({ team, percentiles }) {
   )
 }
 
+SummaryRow.propTypes = {
+  team: ImmutablePropTypes.map,
+  percentiles: PropTypes.object
+}
+
 function PositionRow({ team, percentiles }) {
   const positionCells = []
   for (const [index, position] of constants.positions.entries()) {
@@ -76,6 +83,11 @@ function PositionRow({ team, percentiles }) {
       {positionCells}
     </div>
   )
+}
+
+PositionRow.propTypes = {
+  team: ImmutablePropTypes.map,
+  percentiles: PropTypes.object
 }
 
 function SlotRow({ team, slots, percentiles }) {
@@ -105,6 +117,12 @@ function SlotRow({ team, slots, percentiles }) {
       {slotCells}
     </div>
   )
+}
+
+SlotRow.propTypes = {
+  team: ImmutablePropTypes.map,
+  slots: PropTypes.array,
+  percentiles: PropTypes.object
 }
 
 export default class StatsPage extends React.Component {
@@ -231,4 +249,10 @@ export default class StatsPage extends React.Component {
 
     return <PageLayout body={body} scroll />
   }
+}
+
+StatsPage.propTypes = {
+  teams: ImmutablePropTypes.map,
+  league: PropTypes.object,
+  percentiles: PropTypes.object
 }

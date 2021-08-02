@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import Tooltip from '@material-ui/core/Tooltip'
 
 export default function PlayerRosterHeader(props) {
@@ -7,4 +8,9 @@ export default function PlayerRosterHeader(props) {
       <span>{props.title}</span>
     </Tooltip>
   )
+}
+
+PlayerRosterHeader.propTypes = {
+  tooltip: PropTypes.string,
+  title: PropTypes.string
 }

@@ -1,4 +1,6 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 import FormControl from '@material-ui/core/FormControl'
 import Select from '@material-ui/core/Select'
 import InputLabel from '@material-ui/core/InputLabel'
@@ -117,4 +119,14 @@ export default class AddFreeAgentDialog extends React.Component {
       </Dialog>
     )
   }
+}
+
+AddFreeAgentDialog.propTypes = {
+  league: PropTypes.object,
+  player: ImmutablePropTypes.record,
+  practice: PropTypes.bool,
+  roster: ImmutablePropTypes.record,
+  rosterPlayers: PropTypes.object,
+  addFreeAgent: PropTypes.func,
+  onClose: PropTypes.func
 }

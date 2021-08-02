@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import Backdrop from '@material-ui/core/Backdrop'
 import SpeedDial from '@material-ui/lab/SpeedDial'
 import SpeedDialIcon from '@material-ui/lab/SpeedDialIcon'
@@ -75,4 +76,10 @@ export default class AuctionCommissionerControls extends React.Component {
       </div>
     )
   }
+}
+
+AuctionCommissionerControls.propTypes = {
+  pause: PropTypes.func,
+  resume: PropTypes.func,
+  isPaused: PropTypes.bool
 }

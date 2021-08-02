@@ -1,4 +1,5 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import { constants } from '@common'
 import PlayerFilter from '@components/player-filter'
@@ -21,4 +22,8 @@ export default class CollegeFilter extends React.Component {
 
     return <PlayerFilter {...state} />
   }
+}
+
+CollegeFilter.propTypes = {
+  colleges: ImmutablePropTypes.list
 }

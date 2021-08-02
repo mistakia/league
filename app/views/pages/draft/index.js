@@ -1,4 +1,6 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
+import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
@@ -58,6 +60,14 @@ const mapDispatchToProps = {
   loadDraft: draftActions.loadDraft,
   draftPlayer: draftActions.draftPlayer,
   showConfirmation: confirmationActions.show
+}
+
+DraftPage.propTypes = {
+  loadDraft: PropTypes.func,
+  draftPlayer: PropTypes.func,
+  showConfirmation: PropTypes.func,
+  selectedPlayer: ImmutablePropTypes.record,
+  nextPick: PropTypes.object
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(DraftPage)

@@ -1,5 +1,6 @@
 import React from 'react'
 import Container from '@material-ui/core/Container'
+import PropTypes from 'prop-types'
 
 import EditableLeague from '@components/editable-league'
 import SettingsTeam from '@components/settings-team'
@@ -30,4 +31,11 @@ export default class SettingsPage extends React.Component {
 
     return <PageLayout body={body} scroll />
   }
+}
+
+SettingsPage.propTypes = {
+  userId: PropTypes.number,
+  leagueId: PropTypes.number,
+  teamId: PropTypes.number,
+  isHosted: PropTypes.bool
 }

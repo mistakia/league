@@ -1,4 +1,6 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
+import PropTypes from 'prop-types'
 import List from '@material-ui/core/List'
 import ListItem from '@material-ui/core/ListItem'
 import MenuItem from '@material-ui/core/MenuItem'
@@ -63,4 +65,11 @@ export default class TradeSelectTeam extends React.Component {
       </div>
     )
   }
+}
+
+TradeSelectTeam.propTypes = {
+  select: PropTypes.func,
+  teams: ImmutablePropTypes.list,
+  teamId: PropTypes.number,
+  trade: ImmutablePropTypes.record
 }

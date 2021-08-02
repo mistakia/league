@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 import TransactionsFilter from '@components/transactions-filter'
 
@@ -20,4 +21,9 @@ export default class TransactionTeamFilter extends React.Component {
 
     return <TransactionsFilter {...state} />
   }
+}
+
+TransactionTeamFilter.propTypes = {
+  teams: PropTypes.array,
+  leagueTeams: PropTypes.array
 }

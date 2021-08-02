@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 import PercentileMetric from '@components/percentile-metric'
 
@@ -98,4 +99,15 @@ export default class PlayerSelectedRow extends React.Component {
       </div>
     )
   }
+}
+
+PlayerSelectedRow.propTypes = {
+  title: PropTypes.string,
+  stats: PropTypes.object,
+  action: PropTypes.element,
+  className: PropTypes.string,
+  games: PropTypes.number,
+  lead: PropTypes.element,
+  pos: PropTypes.string,
+  percentiles: PropTypes.object
 }

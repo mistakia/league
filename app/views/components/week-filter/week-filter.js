@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 import { constants } from '@common'
 import PlayerFilter from '@components/player-filter'
@@ -26,4 +27,8 @@ export default class WeekFilter extends React.Component {
 
     return <PlayerFilter {...state} />
   }
+}
+
+WeekFilter.propTypes = {
+  week: PropTypes.array
 }

@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import dayjs from 'dayjs'
 
 import { nth } from '@common'
@@ -48,4 +49,9 @@ export default class ScoreboardPlay extends React.Component {
       </div>
     )
   }
+}
+
+ScoreboardPlay.propTypes = {
+  style: PropTypes.object,
+  play: PropTypes.object
 }

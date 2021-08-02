@@ -1,4 +1,6 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 import { connect as connectRedux } from 'react-redux'
 import { createSelector } from 'reselect'
 
@@ -24,6 +26,13 @@ export class Player extends React.Component {
   handleClick = () => {
     this.props.select(this.props.player.player)
   }
+}
+
+Player.propTypes = {
+  waiverId: PropTypes.number,
+  player: ImmutablePropTypes.record,
+  showContext: PropTypes.func,
+  select: PropTypes.func
 }
 
 const mapStateToProps = createSelector(

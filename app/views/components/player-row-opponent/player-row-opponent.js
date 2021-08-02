@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 import './player-row-opponent.styl'
 
@@ -17,4 +18,9 @@ export default class PlayerRowOpponent extends React.Component {
       <div className='player__row-opponent'>{(isHome ? 'v' : '@') + opp}</div>
     )
   }
+}
+
+PlayerRowOpponent.propTypes = {
+  game: PropTypes.object,
+  team: PropTypes.string
 }

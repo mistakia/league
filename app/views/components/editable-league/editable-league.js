@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import Accordion from '@material-ui/core/Accordion'
 import AccordionDetails from '@material-ui/core/AccordionDetails'
 import AccordionSummary from '@material-ui/core/AccordionSummary'
@@ -406,4 +407,10 @@ export default class EditableLeague extends React.Component {
       </Accordion>
     )
   }
+}
+
+EditableLeague.propTypes = {
+  league: PropTypes.object,
+  update: PropTypes.func,
+  userId: PropTypes.number
 }

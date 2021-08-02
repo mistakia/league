@@ -1,4 +1,5 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 import Accordion from '@material-ui/core/Accordion'
 import AccordionDetails from '@material-ui/core/AccordionDetails'
 import AccordionSummary from '@material-ui/core/AccordionSummary'
@@ -37,4 +38,8 @@ export default class SettingsProjections extends React.Component {
       </Accordion>
     )
   }
+}
+
+SettingsProjections.propTypes = {
+  sourceIds: ImmutablePropTypes.list
 }

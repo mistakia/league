@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import FormControl from '@material-ui/core/FormControl'
 import Select from '@material-ui/core/Select'
 import InputLabel from '@material-ui/core/InputLabel'
@@ -30,4 +31,9 @@ export default class PlayersViewMenu extends React.Component {
       </FormControl>
     )
   }
+}
+
+PlayersViewMenu.propTypes = {
+  update: PropTypes.func,
+  view: PropTypes.string
 }

@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import Table from '@material-ui/core/Table'
 import TableBody from '@material-ui/core/TableBody'
 import TableCell from '@material-ui/core/TableCell'
@@ -93,4 +94,8 @@ export default class TradeTeamSummary extends React.Component {
       </TableContainer>
     )
   }
+}
+
+TradeTeamSummary.propTypes = {
+  analysis: PropTypes.object
 }

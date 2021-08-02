@@ -1,4 +1,6 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import PlayerName from '@components/player-name'
 import NFLTeamBye from '@components/nfl-team-bye'
@@ -28,4 +30,10 @@ export default class AuctionNominatedPlayer extends React.Component {
       </div>
     )
   }
+}
+
+AuctionNominatedPlayer.propTypes = {
+  player: ImmutablePropTypes.record,
+  vbaseline: PropTypes.string,
+  valueType: PropTypes.string
 }

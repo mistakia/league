@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 import TextField from '@material-ui/core/TextField'
 
@@ -47,4 +48,9 @@ export default class EditableAuctionBudget extends React.Component {
       />
     )
   }
+}
+
+EditableAuctionBudget.propTypes = {
+  budget: PropTypes.number,
+  set: PropTypes.func
 }

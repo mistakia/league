@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import Tooltip from '@material-ui/core/Tooltip'
 
 import './auction-target-header.styl'
@@ -50,4 +51,8 @@ export default class AuctionTargetHeader extends React.Component {
       </div>
     )
   }
+}
+
+AuctionTargetHeader.propTypes = {
+  info: PropTypes.object
 }

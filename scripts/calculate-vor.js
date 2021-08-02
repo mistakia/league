@@ -89,6 +89,7 @@ const getBaselinePlayers = ({ stats, starters }) => {
     baselineRBWR = rbwr.slice(starters.RBWR)
   }
 
+  /* eslint-disable indent */
   if (starters.RBWRTE) {
     const rbwrte = baselineRBWR
       ? baselineRBWR
@@ -100,6 +101,7 @@ const getBaselinePlayers = ({ stats, starters }) => {
 
     baselineRBWRTE = rbwrte.slice(starters.RBWRTE)
   }
+  /* eslint-enable indent */
 
   if (starters.SF) {
     const sf = baselineRBWR
@@ -160,7 +162,7 @@ const calculateVOR = async ({ year, rookie }) => {
     .join('player', 'offense.player', 'player.player')
     .join('game', 'offense.gid', 'game.gid')
 
-  const playerIds = rows.map(p => p.player)
+  const playerIds = rows.map((p) => p.player)
   const sub = db('rankings')
     .select(db.raw('max(timestamp) AS maxtime, sourceid AS sid'))
     .groupBy('sid')
@@ -179,7 +181,7 @@ const calculateVOR = async ({ year, rookie }) => {
     .whereIn('player', playerIds)
 
   for (let row of rows) {
-    const ranking = rankings.find(r => r.player === row.player)
+    const ranking = rankings.find((r) => r.player === row.player)
     if (ranking) {
       const { ornk, prnk, avg, std } = ranking
       row = { ...row, ornk, prnk, avg, std }

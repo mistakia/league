@@ -1,4 +1,6 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
+import PropTypes from 'prop-types'
 
 import ScoreboardScoreTeam from '@components/scoreboard-score-team'
 import { constants } from '@common'
@@ -19,6 +21,14 @@ function Team({ tid, onClick, selected, cutoff, challenger }) {
   )
 }
 
+Team.propTypes = {
+  tid: PropTypes.number,
+  onClick: PropTypes.func,
+  selected: PropTypes.number,
+  cutoff: PropTypes.number,
+  challenger: PropTypes.number
+}
+
 export default class ScoreboardTeams extends React.Component {
   render = () => {
     const { onClick, selected, scoreboards, week } = this.props
@@ -37,4 +47,11 @@ export default class ScoreboardTeams extends React.Component {
 
     return <div className='scoreboard__teams'>{items}</div>
   }
+}
+
+ScoreboardTeams.propTypes = {
+  onClick: PropTypes.func,
+  selected: PropTypes.number,
+  week: PropTypes.number,
+  scoreboards: ImmutablePropTypes.list
 }

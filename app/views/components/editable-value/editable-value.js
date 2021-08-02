@@ -1,4 +1,6 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
+import PropTypes from 'prop-types'
 import EditableValueWeight from '@components/editable-value-weight'
 import FormControl from '@material-ui/core/FormControl'
 import Select from '@material-ui/core/Select'
@@ -66,4 +68,9 @@ export default class EditableValue extends React.Component {
       </div>
     )
   }
+}
+
+EditableValue.propTypes = {
+  app: ImmutablePropTypes.record,
+  update: PropTypes.func
 }

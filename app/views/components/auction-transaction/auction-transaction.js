@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import AttachMoneyIcon from '@material-ui/icons/AttachMoney'
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline'
 
@@ -33,4 +34,9 @@ export default class AuctionTransaction extends React.Component {
       </div>
     )
   }
+}
+
+AuctionTransaction.propTypes = {
+  transaction: PropTypes.object,
+  style: PropTypes.object
 }

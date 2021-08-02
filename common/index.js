@@ -17,11 +17,13 @@ import isOnReleaseWaivers from './is-on-release-waivers'
 import fixTeam from './fix-team'
 import calculatePercentiles from './calculate-percentiles'
 
+/* eslint-disable no-extra-semi */
 const groupBy = (xs, key) =>
   xs.reduce((rv, x) => {
     ;(rv[x[key]] = rv[x[key]] || []).push(x)
     return rv
   }, {})
+/* eslint-enable no-extra-semi */
 
 const uniqBy = (a, key) => {
   const seen = new Set()

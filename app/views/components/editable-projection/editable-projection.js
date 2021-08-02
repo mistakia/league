@@ -1,4 +1,6 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
+import PropTypes from 'prop-types'
 
 import Editable from '@components/editable'
 
@@ -31,4 +33,12 @@ export default class EditableProjection extends React.Component {
       />
     )
   }
+}
+
+EditableProjection.propTypes = {
+  save: PropTypes.func,
+  week: PropTypes.number,
+  userId: PropTypes.number,
+  type: PropTypes.string,
+  player: ImmutablePropTypes.record
 }

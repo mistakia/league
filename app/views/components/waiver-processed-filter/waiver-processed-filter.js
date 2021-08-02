@@ -1,4 +1,5 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 import dayjs from 'dayjs'
 
 import WaiversFilter from '@components/waivers-filter'
@@ -26,4 +27,9 @@ export default class WaiverTypeFilter extends React.Component {
 
     return <WaiversFilter {...state} />
   }
+}
+
+WaiverTypeFilter.propTypes = {
+  processingTimes: ImmutablePropTypes.list,
+  processed: ImmutablePropTypes.list
 }

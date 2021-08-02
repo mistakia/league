@@ -16,7 +16,7 @@ import { constants } from '@common'
 
 import './dashboard.styl'
 
-export default function () {
+export default function DashboardPage() {
   const {
     players,
     picks,

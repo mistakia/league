@@ -1,5 +1,7 @@
-import { is } from 'immutable'
 import React from 'react'
+import { is } from 'immutable'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 import CellMeasurer from 'react-virtualized/dist/es/CellMeasurer'
 import CellMeasurerCache from 'react-virtualized/dist/es/CellMeasurer/CellMeasurerCache'
 import AutoSizer from 'react-virtualized/dist/es/AutoSizer'
@@ -67,4 +69,9 @@ export default class ScoreboardPlayByPlay extends React.Component {
       </div>
     )
   }
+}
+
+ScoreboardPlayByPlay.propTypes = {
+  plays: ImmutablePropTypes.list,
+  mid: PropTypes.number
 }

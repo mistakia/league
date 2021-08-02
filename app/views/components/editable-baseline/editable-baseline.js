@@ -1,4 +1,6 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 import FormControl from '@material-ui/core/FormControl'
 import Select from '@material-ui/core/Select'
 import InputLabel from '@material-ui/core/InputLabel'
@@ -59,4 +61,12 @@ export default class EditableBaseline extends React.Component {
       </div>
     )
   }
+}
+
+EditableBaseline.propTypes = {
+  position: PropTypes.string,
+  baselines: PropTypes.object,
+  vbaseline: PropTypes.string,
+  update: PropTypes.func,
+  players: ImmutablePropTypes.map
 }

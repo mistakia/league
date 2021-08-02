@@ -1,4 +1,6 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
+import PropTypes from 'prop-types'
 import Highcharts from 'highcharts'
 import HighchartsReact from 'highcharts-react-official'
 
@@ -72,4 +74,9 @@ export default class DashboardLeaguePositionalValue extends React.Component {
       </div>
     )
   }
+}
+
+DashboardLeaguePositionalValue.propTypes = {
+  teams: ImmutablePropTypes.map,
+  summary: PropTypes.object
 }

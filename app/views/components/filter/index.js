@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 import './filter.styl'
 
@@ -113,4 +114,12 @@ export default class Filter extends React.Component {
       </div>
     )
   }
+}
+
+Filter.propTypes = {
+  filter: PropTypes.func,
+  type: PropTypes.string,
+  values: PropTypes.array,
+  single: PropTypes.bool,
+  label: PropTypes.string
 }

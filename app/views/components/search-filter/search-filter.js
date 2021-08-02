@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 import Icon from '@components/icon'
 import { debounce } from '@common'
@@ -48,4 +49,9 @@ export default class SearchFilter extends React.Component {
       </div>
     )
   }
+}
+
+SearchFilter.propTypes = {
+  value: PropTypes.string,
+  search: PropTypes.func
 }

@@ -1,4 +1,6 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 import FormControl from '@material-ui/core/FormControl'
 import Select from '@material-ui/core/Select'
 import InputLabel from '@material-ui/core/InputLabel'
@@ -119,4 +121,13 @@ export default class AddPlayerDialog extends React.Component {
       </Dialog>
     )
   }
+}
+
+AddPlayerDialog.propTypes = {
+  rosters: ImmutablePropTypes.map,
+  league: PropTypes.object,
+  team: ImmutablePropTypes.record,
+  add: PropTypes.func,
+  onClose: PropTypes.func,
+  players: ImmutablePropTypes.map
 }

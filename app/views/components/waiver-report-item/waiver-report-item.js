@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 import PlayerName from '@components/player-name'
 import TeamName from '@components/team-name'
@@ -35,6 +36,10 @@ function AlternateClaims({ waivers }) {
   )
 }
 
+AlternateClaims.propTypes = {
+  waivers: PropTypes.array
+}
+
 export default class WaiverReportItem extends React.Component {
   render = () => {
     const { waiver } = this.props
@@ -52,4 +57,8 @@ export default class WaiverReportItem extends React.Component {
       </div>
     )
   }
+}
+
+WaiverReportItem.propTypes = {
+  waiver: PropTypes.object
 }

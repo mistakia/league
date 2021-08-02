@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 import { beep } from '@core/audio'
 import './timer.styl'
@@ -53,4 +54,8 @@ export default class Timer extends React.Component {
       </div>
     )
   }
+}
+
+Timer.propTypes = {
+  expiration: PropTypes.number
 }

@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 import { constants } from '@common'
 import WaiversFilter from '@components/waivers-filter'
@@ -25,4 +26,8 @@ export default class WaiverTypeFilter extends React.Component {
 
     return <WaiversFilter {...state} />
   }
+}
+
+WaiverTypeFilter.propTypes = {
+  type: PropTypes.array
 }

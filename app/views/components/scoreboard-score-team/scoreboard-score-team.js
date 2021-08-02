@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 import TeamName from '@components/team-name'
 import { constants } from '@common'
@@ -33,4 +34,12 @@ export default class ScoreboardScoreTeam extends React.Component {
       </div>
     )
   }
+}
+
+ScoreboardScoreTeam.propTypes = {
+  tid: PropTypes.number,
+  scoreboard: PropTypes.object,
+  type: PropTypes.number,
+  cutoff: PropTypes.number,
+  challenger: PropTypes.number
 }

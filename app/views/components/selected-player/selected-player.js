@@ -1,4 +1,6 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
+import PropTypes from 'prop-types'
 import Button from '@material-ui/core/Button'
 import Dialog from '@material-ui/core/Dialog'
 import Paper from '@material-ui/core/Paper'
@@ -43,6 +45,12 @@ function TabPanel(props) {
       {value === index && children}
     </div>
   )
+}
+
+TabPanel.propTypes = {
+  children: PropTypes.element,
+  value: PropTypes.number,
+  index: PropTypes.number
 }
 
 export default class SelectedPlayer extends React.Component {
@@ -211,4 +219,10 @@ export default class SelectedPlayer extends React.Component {
       </Dialog>
     )
   }
+}
+
+SelectedPlayer.propTypes = {
+  children: PropTypes.element,
+  deselect: PropTypes.func,
+  player: ImmutablePropTypes.record
 }

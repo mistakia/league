@@ -1,4 +1,6 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
+import PropTypes from 'prop-types'
 import FormControl from '@material-ui/core/FormControl'
 import Select from '@material-ui/core/Select'
 import InputLabel from '@material-ui/core/InputLabel'
@@ -211,4 +213,17 @@ export default class WaiverConfirmation extends React.Component {
       </Dialog>
     )
   }
+}
+
+WaiverConfirmation.propTypes = {
+  player: ImmutablePropTypes.record,
+  rosterPlayers: PropTypes.object,
+  waiver: PropTypes.object,
+  roster: ImmutablePropTypes.record,
+  team: ImmutablePropTypes.record,
+  league: PropTypes.object,
+  status: PropTypes.object,
+  onClose: PropTypes.func,
+  claim: PropTypes.func,
+  update: PropTypes.func
 }

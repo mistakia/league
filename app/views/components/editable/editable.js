@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 import './editable.styl'
 
@@ -93,4 +94,16 @@ export default class Editable extends React.Component {
       </span>
     )
   }
+}
+
+Editable.propTypes = {
+  disabled: PropTypes.bool,
+  propName: PropTypes.string,
+  change: PropTypes.func,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  type: PropTypes.string,
+  max: PropTypes.number,
+  onchange: PropTypes.func,
+  className: PropTypes.string,
+  defaultProps: PropTypes.object
 }

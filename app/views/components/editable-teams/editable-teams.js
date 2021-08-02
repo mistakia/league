@@ -1,4 +1,6 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import SettingsTeamsTeam from '@components/settings-teams-team'
 import Button from '@components/button'
@@ -53,4 +55,11 @@ export default class EditableTeams extends React.Component {
       </div>
     )
   }
+}
+
+EditableTeams.propTypes = {
+  add: PropTypes.func,
+  isCommish: PropTypes.bool,
+  teams: ImmutablePropTypes.map,
+  league: PropTypes.object
 }

@@ -1,4 +1,5 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import PercentileMetric from '@components/percentile-metric'
 
@@ -146,4 +147,9 @@ export default class SelectedPlayerTeamStats extends React.Component {
       </div>
     )
   }
+}
+
+SelectedPlayerTeamStats.propTypes = {
+  stats: ImmutablePropTypes.record,
+  player: ImmutablePropTypes.record
 }
