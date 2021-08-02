@@ -1,4 +1,6 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
+import PropTypes from 'prop-types'
 
 import ScoreboardScoreTeam from '@components/scoreboard-score-team'
 
@@ -28,4 +30,10 @@ export default class ScoreboardScores extends React.Component {
     }
     return <div className='scoreboard__scores'>{items}</div>
   }
+}
+
+ScoreboardScores.propTypes = {
+  select: PropTypes.func,
+  matchups: ImmutablePropTypes.list,
+  selected: PropTypes.number
 }

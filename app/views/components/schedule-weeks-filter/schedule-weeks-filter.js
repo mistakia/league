@@ -1,4 +1,5 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import { constants } from '@common'
 import ScheduleFilter from '@components/schedule-filter'
@@ -21,4 +22,8 @@ export default class ScheduleWeeksFilter extends React.Component {
 
     return <ScheduleFilter {...state} />
   }
+}
+
+ScheduleWeeksFilter.propTypes = {
+  weeks: ImmutablePropTypes.list
 }

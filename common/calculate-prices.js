@@ -16,9 +16,11 @@ const calculatePrices = ({ total, cap, players, week }) => {
       const vorpDiff = diff / rate[type]
       const vorpAdj = player.vorp[week][type] + vorpDiff
       player.vorp_adj[week][type] = vorpAdj > 0 ? vorpAdj : 0
+      /* eslint-disable camelcase */
       const value_adj = Math.round(rate[type] * player.vorp_adj[week][type])
       player.values[week][type] = value > 0 ? value : 0
       player.values_adj[week][type] = value_adj > 0 ? value_adj : 0
+      /* eslint-enable camelcase */
     }
   }
 

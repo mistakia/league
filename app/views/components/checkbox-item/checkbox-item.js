@@ -51,12 +51,13 @@ class CheckboxItem extends Component {
 export default withStyles(styles)(CheckboxItem)
 
 CheckboxItem.propTypes = {
+  onChange: PropTypes.func,
   classes: PropTypes.object.isRequired,
   checkboxLabel: PropTypes.string.isRequired,
   checkboxValue: PropTypes.string.isRequired,
-  checked: PropTypes.bool.isRequired,
-  handleCheckboxChange: PropTypes.func
+  checked: PropTypes.bool.isRequired
 }
+
 CheckboxItem.defaultProps = {
   handleCheckboxChange: null
 }

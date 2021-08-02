@@ -39,6 +39,7 @@ const sendVoiceNotification = async (items) => {
 
 module.exports = sendVoiceNotification
 
+/* eslint-disable no-extra-semi */
 if (!module.parent) {
   ;(async function () {
     await sendVoiceNotification([
@@ -49,3 +50,4 @@ if (!module.parent) {
     ])
   })()
 }
+/* eslint-enable no-extra-semi */

@@ -1,4 +1,5 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import PercentileChart from '@components/percentile-chart'
 
@@ -177,4 +178,9 @@ export default class SelectedPlayerEfficiencyStats extends React.Component {
       </div>
     )
   }
+}
+
+SelectedPlayerEfficiencyStats.propTypes = {
+  player: ImmutablePropTypes.record,
+  percentiles: ImmutablePropTypes.record
 }

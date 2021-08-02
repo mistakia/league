@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import TextField from '@material-ui/core/TextField'
 
 export default class StatQualifierFilter extends React.Component {
@@ -48,4 +49,10 @@ export default class StatQualifierFilter extends React.Component {
       />
     )
   }
+}
+
+StatQualifierFilter.propTypes = {
+  qualifier: PropTypes.array,
+  stat: PropTypes.array,
+  update: PropTypes.func
 }

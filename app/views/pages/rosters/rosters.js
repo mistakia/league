@@ -1,4 +1,6 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
+import PropTypes from 'prop-types'
 
 import PageLayout from '@layouts/page'
 import Roster from '@components/roster'
@@ -160,4 +162,9 @@ export default class RostersPage extends React.Component {
 
     return <PageLayout body={body} scroll />
   }
+}
+
+RostersPage.propTypes = {
+  rosters: ImmutablePropTypes.map,
+  league: PropTypes.object
 }

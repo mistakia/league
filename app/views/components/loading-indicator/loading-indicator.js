@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 import './loading-indicator.styl'
 
@@ -17,5 +18,9 @@ const LoadingIndicator = ({ className }) => (
     </div>
   </div>
 )
+
+LoadingIndicator.propTypes = {
+  className: PropTypes.string
+}
 
 export default LoadingIndicator

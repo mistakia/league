@@ -1,4 +1,6 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 import MenuItem from '@material-ui/core/MenuItem'
 import Select from '@material-ui/core/Select'
 import InputLabel from '@material-ui/core/InputLabel'
@@ -16,6 +18,11 @@ function RosterRow({ player = {}, slot }) {
       {player.player ? <PlayerName playerId={player.player} /> : '-'}
     </div>
   )
+}
+
+RosterRow.propTypes = {
+  player: ImmutablePropTypes.record,
+  slot: PropTypes.string
 }
 
 export default class AuctonTeamRosters extends React.Component {
@@ -210,4 +217,11 @@ export default class AuctonTeamRosters extends React.Component {
       </div>
     )
   }
+}
+
+AuctonTeamRosters.propTypes = {
+  teamId: PropTypes.number,
+  league: PropTypes.object,
+  teams: ImmutablePropTypes.map,
+  rosters: ImmutablePropTypes.map
 }

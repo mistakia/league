@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 const defense = () => (
   <div className='row__group'>
@@ -77,4 +78,8 @@ export default class PlayerSelectedRowHeader extends React.Component {
         return player()
     }
   }
+}
+
+PlayerSelectedRowHeader.propTypes = {
+  pos: PropTypes.string
 }

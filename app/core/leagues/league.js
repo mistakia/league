@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { Record, List } from 'immutable'
 
 export const League = new Record({

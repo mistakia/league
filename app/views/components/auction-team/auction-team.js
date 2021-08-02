@@ -1,4 +1,6 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import './auction-team.styl'
 
@@ -41,4 +43,14 @@ export default class AuctionTeam extends React.Component {
       </div>
     )
   }
+}
+
+AuctionTeam.propTypes = {
+  team: ImmutablePropTypes.record,
+  isConnected: PropTypes.bool,
+  isWinningBid: PropTypes.bool,
+  bid: PropTypes.number,
+  isNominating: PropTypes.bool,
+  roster: ImmutablePropTypes.record,
+  isOwner: PropTypes.bool
 }

@@ -45,11 +45,13 @@ const mapStateToProps = createSelector(
         const team = data.find((t) =>
           t.starters.find((p) => p.player === player.player)
         )
-        if (team)
+
+        if (team) {
           teamPoints[team.team.uid] += player.getIn(
             ['points', `${week}`, 'total'],
             0
           )
+        }
       }
       const start = dayjs.tz(date, 'M/D/YYYY HH:mm', 'America/New_York')
       const end = start.add(3, 'hours')

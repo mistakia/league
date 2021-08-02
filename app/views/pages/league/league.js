@@ -9,7 +9,7 @@ import RostersPage from '@pages/rosters'
 import PageLayout from '@layouts/page'
 import WaiversPage from '@pages/waivers'
 
-export default function () {
+export default function LeaguePage() {
   const menu = (
     <div className='menu'>
       <NavLink to='/league/transactions'>Transactions</NavLink>

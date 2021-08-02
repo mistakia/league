@@ -1,4 +1,6 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
+import PropTypes from 'prop-types'
 import Highcharts from 'highcharts'
 import HighchartsReact from 'highcharts-react-official'
 
@@ -81,4 +83,9 @@ export default class SelectedPlayerLineupImpact extends React.Component {
 
     return <HighchartsReact highcharts={Highcharts} options={options} />
   }
+}
+
+SelectedPlayerLineupImpact.propTypes = {
+  isLoggedIn: PropTypes.bool,
+  player: ImmutablePropTypes.record
 }

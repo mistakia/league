@@ -1,4 +1,6 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 import Switch from '@material-ui/core/Switch'
 import FormGroup from '@material-ui/core/FormGroup'
 import FormControlLabel from '@material-ui/core/FormControlLabel'
@@ -44,9 +46,12 @@ export default class AuctionTargets extends React.Component {
       for (const [index, player] of players.entries()) {
         const classNames = ['auction__targets-player']
         const rosterSlot = team.roster.get(player.player)
+
         if (rosterSlot) classNames.push('signed')
-        else if (rosteredPlayerIds.includes(player.player))
+        else if (rosteredPlayerIds.includes(player.player)) {
           classNames.push('rostered')
+        }
+
         if (lineupPlayerIds.includes(player.player)) classNames.push('optimal')
         const salary = rosterSlot
           ? rosterSlot.value
@@ -124,4 +129,17 @@ export default class AuctionTargets extends React.Component {
       </div>
     )
   }
+}
+
+AuctionTargets.propTypes = {
+  toggleHideRostered: PropTypes.func,
+  players: ImmutablePropTypes.map,
+  vbaseline: PropTypes.string,
+  lineupPlayerIds: ImmutablePropTypes.list,
+  lineupPoints: PropTypes.number,
+  lineupFeasible: PropTypes.bool,
+  valueType: PropTypes.string,
+  rosteredPlayerIds: ImmutablePropTypes.list,
+  team: PropTypes.object,
+  hideRostered: PropTypes.bool
 }

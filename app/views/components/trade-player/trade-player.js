@@ -1,4 +1,5 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import PlayerNameExpanded from '@components/player-name-expanded'
 
@@ -34,4 +35,8 @@ export default class TradePlayer extends React.Component {
       </div>
     )
   }
+}
+
+TradePlayer.propTypes = {
+  player: ImmutablePropTypes.record
 }

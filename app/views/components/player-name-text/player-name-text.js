@@ -1,4 +1,5 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import { constants } from '@common'
 import PlayerLabel from '@components/player-label'
@@ -18,4 +19,8 @@ export default class PlayerNameText extends React.Component {
       </div>
     )
   }
+}
+
+PlayerNameText.propTypes = {
+  player: ImmutablePropTypes.record
 }

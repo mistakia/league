@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import { SortableContainer, SortableElement } from 'react-sortable-hoc'
 import Toolbar from '@material-ui/core/Toolbar'
 
@@ -191,4 +192,15 @@ export default class DashboardPlayersTable extends React.Component {
       </div>
     )
   }
+}
+
+DashboardPlayersTable.propTypes = {
+  items: PropTypes.array,
+  title: PropTypes.string,
+  poaches: PropTypes.array,
+  claims: PropTypes.array,
+  waiverType: PropTypes.string,
+  reorderWaivers: PropTypes.func,
+  leadColumn: PropTypes.string,
+  limit: PropTypes.number
 }

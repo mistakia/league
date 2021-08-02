@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 import Toggle from '@components/toggle'
 
@@ -29,4 +30,9 @@ export default class AuctionValueTypeToggle extends React.Component {
       />
     )
   }
+}
+
+AuctionValueTypeToggle.propTypes = {
+  setValueType: PropTypes.func,
+  valueType: PropTypes.string
 }

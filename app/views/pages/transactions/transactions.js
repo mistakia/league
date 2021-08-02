@@ -1,4 +1,6 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 import AutoSizer from 'react-virtualized/dist/es/AutoSizer'
 import List from 'react-virtualized/dist/es/List'
 import InfiniteLoader from 'react-virtualized/dist/es/InfiniteLoader'
@@ -67,4 +69,12 @@ export default class TransactionsPage extends React.Component {
 
     return <PageLayout body={body} />
   }
+}
+
+TransactionsPage.propTypes = {
+  load: PropTypes.func,
+  transactions: ImmutablePropTypes.record,
+  isPending: PropTypes.bool,
+  hasMore: PropTypes.bool,
+  loadNext: PropTypes.func
 }

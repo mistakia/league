@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 import Icon from '@components/icon'
 import { weightProjections } from '@common'
@@ -85,4 +86,13 @@ export default class SelectedPlayerProjection extends React.Component {
       </div>
     )
   }
+}
+
+SelectedPlayerProjection.propTypes = {
+  playerId: PropTypes.string,
+  delete: PropTypes.func,
+  pos: PropTypes.string,
+  week: PropTypes.number,
+  projections: PropTypes.array,
+  projection: PropTypes.object
 }

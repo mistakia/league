@@ -1,4 +1,6 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
+import PropTypes from 'prop-types'
 
 import Position from '@components/position'
 import Team from '@components/team'
@@ -27,4 +29,9 @@ export default class TradeSelectPlayer extends React.Component {
       </div>
     )
   }
+}
+
+TradeSelectPlayer.propTypes = {
+  player: ImmutablePropTypes.record,
+  isSelected: PropTypes.bool
 }

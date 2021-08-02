@@ -1,4 +1,6 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
+import PropTypes from 'prop-types'
 import Grid from '@material-ui/core/Grid'
 
 import { Roster, constants } from '@common'
@@ -247,4 +249,10 @@ export default class Lineup extends React.Component {
       </Grid>
     )
   }
+}
+
+Lineup.propTypes = {
+  league: PropTypes.object,
+  roster: ImmutablePropTypes.record,
+  update: PropTypes.func
 }

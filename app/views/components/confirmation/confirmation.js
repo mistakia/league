@@ -1,4 +1,6 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 import Dialog from '@material-ui/core/Dialog'
 import DialogActions from '@material-ui/core/DialogActions'
 import DialogContent from '@material-ui/core/DialogContent'
@@ -73,4 +75,9 @@ export default class Confirmation extends React.Component {
       </Dialog>
     )
   }
+}
+
+Confirmation.propTypes = {
+  info: ImmutablePropTypes.record,
+  cancel: PropTypes.func
 }

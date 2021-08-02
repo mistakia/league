@@ -1,4 +1,6 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
+import PropTypes from 'prop-types'
 
 import Position from '@components/position'
 import Team from '@components/team'
@@ -33,4 +35,9 @@ export default class PlayerName extends React.Component {
       </div>
     )
   }
+}
+
+PlayerName.propTypes = {
+  player: ImmutablePropTypes.record,
+  select: PropTypes.func
 }

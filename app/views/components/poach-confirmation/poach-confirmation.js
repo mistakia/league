@@ -1,4 +1,6 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 import FormControl from '@material-ui/core/FormControl'
 import Select from '@material-ui/core/Select'
 import InputLabel from '@material-ui/core/InputLabel'
@@ -114,4 +116,17 @@ export default class PoachConfirmation extends React.Component {
       </Dialog>
     )
   }
+}
+
+PoachConfirmation.propTypes = {
+  league: PropTypes.object,
+  status: PropTypes.object,
+  claim: PropTypes.func,
+  poach: PropTypes.func,
+  isPlayerEligible: PropTypes.bool,
+  player: ImmutablePropTypes.record,
+  rosterPlayers: PropTypes.object,
+  roster: ImmutablePropTypes.record,
+  onClose: PropTypes.func,
+  rosterInfo: PropTypes.object
 }

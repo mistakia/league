@@ -1,4 +1,5 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import ScheduleFilter from '@components/schedule-filter'
 
@@ -20,4 +21,9 @@ export default class ScheduleTeamsFilter extends React.Component {
 
     return <ScheduleFilter {...state} />
   }
+}
+
+ScheduleTeamsFilter.propTypes = {
+  leagueTeams: ImmutablePropTypes.list,
+  teams: ImmutablePropTypes.list
 }

@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import Highcharts from 'highcharts'
 import HighchartsReact from 'highcharts-react-official'
 import HighchartsMore from 'highcharts/highcharts-more'
@@ -16,8 +17,9 @@ export default class DashboardTeamValue extends React.Component {
     const allRank = allValues.indexOf(summary.team_total) + 1
     const allClassNames = []
     if (allRank <= quarterOfLeague) allClassNames.push('text-green')
-    if (allRank >= league.nteams - quarterOfLeague)
+    if (allRank >= league.nteams - quarterOfLeague) {
       allClassNames.push('text-red')
+    }
 
     const rows = []
     rows.push(
@@ -143,4 +145,9 @@ export default class DashboardTeamValue extends React.Component {
       </div>
     )
   }
+}
+
+DashboardTeamValue.propTypes = {
+  summary: PropTypes.object,
+  league: PropTypes.object
 }

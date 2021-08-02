@@ -1,4 +1,6 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
+import PropTypes from 'prop-types'
 import Grid from '@material-ui/core/Grid'
 import Accordion from '@material-ui/core/Accordion'
 import AccordionDetails from '@material-ui/core/AccordionDetails'
@@ -41,4 +43,10 @@ export default class DashboardTeamSummaryFAAB extends React.Component {
       </Accordion>
     )
   }
+}
+
+DashboardTeamSummaryFAAB.propTypes = {
+  team: ImmutablePropTypes.record,
+  teams: ImmutablePropTypes.map,
+  rank: PropTypes.number
 }

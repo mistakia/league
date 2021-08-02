@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import Backdrop from '@material-ui/core/Backdrop'
 import CircularProgress from '@material-ui/core/CircularProgress'
 // import hotkeys from 'hotkeys-js'
@@ -48,6 +49,13 @@ class App extends React.Component {
       </main>
     )
   }
+}
+
+App.propTypes = {
+  init: PropTypes.func,
+  isPending: PropTypes.bool,
+  userId: PropTypes.number,
+  isInitializing: PropTypes.bool
 }
 
 export default App

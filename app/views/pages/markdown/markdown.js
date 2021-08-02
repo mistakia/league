@@ -1,5 +1,6 @@
 /* global fetch */
 import React from 'react'
+import PropTypes from 'prop-types'
 import marked from 'marked'
 import Container from '@material-ui/core/Container'
 
@@ -66,4 +67,8 @@ export default class MarkdownPage extends React.Component {
   render = () => {
     return <PageLayout body={this.state.html} scroll />
   }
+}
+
+MarkdownPage.propTypes = {
+  path: PropTypes.string
 }

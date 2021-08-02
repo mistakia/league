@@ -1,4 +1,6 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import Button from '@components/button'
 
@@ -44,4 +46,15 @@ export default class TradeAction extends React.Component {
       }
     }
   }
+}
+
+TradeAction.propTypes = {
+  propose: PropTypes.func,
+  accept: PropTypes.func,
+  reject: PropTypes.func,
+  cancel: PropTypes.func,
+  isValid: PropTypes.bool,
+  isProposer: PropTypes.bool,
+  league: PropTypes.object,
+  trade: ImmutablePropTypes.record
 }

@@ -4,7 +4,7 @@ import Container from '@material-ui/core/Container'
 import Lineup from '@components/lineup'
 import PageLayout from '@layouts/page'
 
-export default function () {
+export default function LineupsPage() {
   const { roster } = this.props
   const body = (
     <Container maxWidth='lg'>

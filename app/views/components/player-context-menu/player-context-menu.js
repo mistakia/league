@@ -1,4 +1,6 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 import Paper from '@material-ui/core/Paper'
 import MenuItem from '@material-ui/core/MenuItem'
 import MenuList from '@material-ui/core/MenuList'
@@ -313,4 +315,19 @@ export default class PlayerContextMenu extends React.Component {
       </Paper>
     )
   }
+}
+
+PlayerContextMenu.propTypes = {
+  player: ImmutablePropTypes.record,
+  status: PropTypes.object,
+  showContext: PropTypes.func,
+  hide: PropTypes.func,
+  activate: PropTypes.func,
+  deactivate: PropTypes.func,
+  showConfirmation: PropTypes.func,
+  cancelClaim: PropTypes.func,
+  reserve: PropTypes.func,
+  release: PropTypes.func,
+  protect: PropTypes.func,
+  waiverId: PropTypes.string
 }

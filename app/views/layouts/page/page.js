@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 import './page.styl'
 
@@ -11,5 +12,12 @@ export const PageLayout = ({ body, menu, scroll, head }) => (
     {menu && <div className='page__menu'>{menu}</div>}
   </section>
 )
+
+PageLayout.propTypes = {
+  body: PropTypes.element,
+  menu: PropTypes.element,
+  scroll: PropTypes.bool,
+  head: PropTypes.element
+}
 
 export default PageLayout

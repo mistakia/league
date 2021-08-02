@@ -1,4 +1,6 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import PlayerContextMenu from '@components/player-context-menu'
 
@@ -103,4 +105,9 @@ export default class ContextMenu extends React.Component {
       </div>
     )
   }
+}
+
+ContextMenu.propTypes = {
+  contextMenuInfo: ImmutablePropTypes.record,
+  hide: PropTypes.func
 }

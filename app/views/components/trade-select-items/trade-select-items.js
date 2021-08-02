@@ -1,4 +1,6 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 import Autocomplete from '@material-ui/lab/Autocomplete'
 import TextField from '@material-ui/core/TextField'
 import Chip from '@material-ui/core/Chip'
@@ -98,4 +100,15 @@ export default class TradeSelectItems extends React.Component {
       />
     )
   }
+}
+
+TradeSelectItems.propTypes = {
+  teams: ImmutablePropTypes.map,
+  onChange: PropTypes.func,
+  disabled: PropTypes.bool,
+  selectedPlayers: PropTypes.array,
+  selectedPicks: PropTypes.array,
+  players: PropTypes.array,
+  picks: PropTypes.array,
+  title: PropTypes.string
 }

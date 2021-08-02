@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 import { constants } from '@common'
 
@@ -35,4 +36,8 @@ export default class ScoreboardSlots extends React.Component {
 
     return <div className='scoreboard__slots'>{rows}</div>
   }
+}
+
+ScoreboardSlots.propTypes = {
+  league: PropTypes.object
 }

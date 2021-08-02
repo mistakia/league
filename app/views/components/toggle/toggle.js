@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import ToggleButton from '@material-ui/lab/ToggleButton'
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup'
 
@@ -23,4 +24,10 @@ export default class Toggle extends React.Component {
       </ToggleButtonGroup>
     )
   }
+}
+
+Toggle.propTypes = {
+  onChange: PropTypes.func,
+  values: PropTypes.array,
+  selected: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
 }

@@ -1,4 +1,6 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
+import PropTypes from 'prop-types'
 
 import { constants } from '@common'
 import ScoreboardPlayer from '@components/scoreboard-player'
@@ -194,4 +196,13 @@ export default class ScoreboardTeam extends React.Component {
       </div>
     )
   }
+}
+
+ScoreboardTeam.propTypes = {
+  team: ImmutablePropTypes.record,
+  roster: ImmutablePropTypes.record,
+  league: PropTypes.object,
+  type: PropTypes.string,
+  showBench: PropTypes.bool,
+  scoreboard: PropTypes.object
 }

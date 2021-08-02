@@ -41,6 +41,12 @@ function Button({
 }
 
 Button.propTypes = {
+  count: PropTypes.number,
+  disabled: PropTypes.bool,
+  isLoading: PropTypes.bool,
+  isActive: PropTypes.bool,
+  small: PropTypes.bool,
+  text: PropTypes.bool,
   children: PropTypes.node,
   className: PropTypes.string,
   label: PropTypes.string,

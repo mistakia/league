@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import AutoSizer from 'react-virtualized/dist/es/AutoSizer'
 import List from 'react-virtualized/dist/es/List'
 
@@ -21,7 +22,7 @@ import './auction.styl'
 
 const ROW_HEIGHT = 30
 
-export default function () {
+export default function AuctionPageRender() {
   const {
     players,
     transactions,
@@ -47,6 +48,11 @@ export default function () {
     return (
       <AuctionTransaction key={key} transaction={transaction} {...params} />
     )
+  }
+
+  TransactionRow.propTypes = {
+    index: PropTypes.number,
+    key: PropTypes.number
   }
 
   const playerRow = ({ index, key, ...params }) => {

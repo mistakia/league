@@ -1,4 +1,6 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
+import PropTypes from 'prop-types'
 
 import Icon from '@components/icon'
 
@@ -24,4 +26,11 @@ export default class PlayerWatchlistAction extends React.Component {
       </div>
     )
   }
+}
+
+PlayerWatchlistAction.propTypes = {
+  toggle: PropTypes.func,
+  playerId: PropTypes.string,
+  watchlist: ImmutablePropTypes.set,
+  userId: PropTypes.number
 }

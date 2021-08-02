@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { Record, List, Map } from 'immutable'
 
 import { constants } from '@common'

@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import Container from '@material-ui/core/Container'
 
 import Loading from '@components/loading'
@@ -37,4 +38,10 @@ export default class WaiversPage extends React.Component {
 
     return <PageLayout body={body} scroll />
   }
+}
+
+WaiversPage.propTypes = {
+  load: PropTypes.func,
+  items: PropTypes.array,
+  isPending: PropTypes.bool
 }

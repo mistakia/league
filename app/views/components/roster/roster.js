@@ -1,4 +1,6 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
+import PropTypes from 'prop-types'
 
 import PlayerRosterRow from '@components/player-roster-row'
 import { Roster as RosterBuilder, constants } from '@common'
@@ -204,4 +206,9 @@ export default class Roster extends React.Component {
       </div>
     )
   }
+}
+
+Roster.propTypes = {
+  roster: ImmutablePropTypes.record,
+  league: PropTypes.object
 }

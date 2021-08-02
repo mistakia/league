@@ -1,4 +1,5 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 import Container from '@material-ui/core/Container'
 
 import PageLayout from '@layouts/page'
@@ -41,4 +42,8 @@ export default class SchedulePage extends React.Component {
 
     return <PageLayout body={body} scroll />
   }
+}
+
+SchedulePage.propTypes = {
+  matchups: ImmutablePropTypes.list
 }

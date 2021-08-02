@@ -1,4 +1,6 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import { ordinalSuffixOf } from '@core/utils'
 
@@ -22,4 +24,11 @@ export default class TradePick extends React.Component {
 
     return <div className={classNames.join(' ')}>{text}</div>
   }
+}
+
+TradePick.propTypes = {
+  pick: PropTypes.object,
+  league: PropTypes.object,
+  isSelected: PropTypes.bool,
+  teams: ImmutablePropTypes.map
 }

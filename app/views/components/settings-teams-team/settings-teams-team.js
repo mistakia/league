@@ -1,4 +1,6 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 import Accordion from '@material-ui/core/Accordion'
 import AccordionDetails from '@material-ui/core/AccordionDetails'
 import AccordionSummary from '@material-ui/core/AccordionSummary'
@@ -95,4 +97,13 @@ export default class SettingsTeamsTeam extends React.Component {
       </Accordion>
     )
   }
+}
+
+SettingsTeamsTeam.propTypes = {
+  teamId: PropTypes.number,
+  delete: PropTypes.func,
+  showConfirmation: PropTypes.func,
+  update: PropTypes.func,
+  team: ImmutablePropTypes.record,
+  roster: PropTypes.object
 }

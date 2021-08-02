@@ -1,4 +1,6 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
+import PropTypes from 'prop-types'
 import FormControl from '@material-ui/core/FormControl'
 import MenuItem from '@material-ui/core/MenuItem'
 import InputLabel from '@material-ui/core/InputLabel'
@@ -103,4 +105,14 @@ export default class FranchiseConfirmation extends React.Component {
       </Dialog>
     )
   }
+}
+
+FranchiseConfirmation.propTypes = {
+  onClose: PropTypes.func,
+  team: PropTypes.object,
+  league: PropTypes.object,
+  tag: PropTypes.func,
+  status: PropTypes.object,
+  player: ImmutablePropTypes.record,
+  waiver: PropTypes.object
 }
