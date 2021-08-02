@@ -14,5 +14,5 @@ export default class TeamName extends React.Component {
 
 TeamName.propTypes = {
   team: ImmutablePropTypes.record,
-  abbrv: PropTypes.string
+  abbrv: PropTypes.bool
 }

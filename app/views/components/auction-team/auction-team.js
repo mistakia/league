@@ -51,6 +51,6 @@ AuctionTeam.propTypes = {
   isWinningBid: PropTypes.bool,
   bid: PropTypes.number,
   isNominating: PropTypes.bool,
-  roster: ImmutablePropTypes.record,
+  roster: PropTypes.object,
   isOwner: PropTypes.bool
 }

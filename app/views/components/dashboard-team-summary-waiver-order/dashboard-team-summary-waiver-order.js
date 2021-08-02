@@ -50,5 +50,5 @@ export default class DashboardTeamSummaryWaiverOrder extends React.Component {
 
 DashboardTeamSummaryWaiverOrder.propTypes = {
   team: ImmutablePropTypes.record,
-  teams: ImmutablePropTypes.map
+  teams: ImmutablePropTypes.list
 }

@@ -1,5 +1,4 @@
 import React from 'react'
-import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 
 import PlayerSelectedRow from '@components/player-selected-row'
@@ -42,6 +41,6 @@ export default class SelectedPlayerSeasonStats extends React.Component {
 }
 
 SelectedPlayerSeasonStats.propTypes = {
-  stats: ImmutablePropTypes.record,
+  stats: PropTypes.object,
   pos: PropTypes.string
 }

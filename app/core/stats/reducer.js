@@ -18,7 +18,7 @@ const initialState = new Record({
   days: new List(constants.days),
   quarters: new List(constants.quarters),
   downs: new List(constants.downs),
-  playsPercentiles: new Record(),
+  playsPercentiles: {},
   teamStatsPercentiles: new Record()
 })
 

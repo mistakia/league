@@ -9,5 +9,5 @@ export default class NFLTeamBye extends React.Component {
 }
 
 NFLTeamBye.propTypes = {
-  bye: PropTypes.string
+  bye: PropTypes.number
 }

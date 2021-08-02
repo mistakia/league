@@ -133,7 +133,7 @@ export default class AuctionTargets extends React.Component {
 
 AuctionTargets.propTypes = {
   toggleHideRostered: PropTypes.func,
-  players: ImmutablePropTypes.map,
+  players: ImmutablePropTypes.set,
   vbaseline: PropTypes.string,
   lineupPlayerIds: ImmutablePropTypes.list,
   lineupPoints: PropTypes.number,
