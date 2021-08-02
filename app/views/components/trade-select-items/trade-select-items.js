@@ -109,6 +109,6 @@ TradeSelectItems.propTypes = {
   selectedPlayers: PropTypes.array,
   selectedPicks: PropTypes.array,
   players: PropTypes.array,
-  picks: PropTypes.array,
+  picks: ImmutablePropTypes.list,
   title: PropTypes.string
 }

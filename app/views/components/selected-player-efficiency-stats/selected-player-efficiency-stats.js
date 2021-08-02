@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import PercentileChart from '@components/percentile-chart'
@@ -182,5 +183,5 @@ export default class SelectedPlayerEfficiencyStats extends React.Component {
 
 SelectedPlayerEfficiencyStats.propTypes = {
   player: ImmutablePropTypes.record,
-  percentiles: ImmutablePropTypes.record
+  percentiles: PropTypes.object
 }

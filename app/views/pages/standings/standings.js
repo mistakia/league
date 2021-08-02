@@ -29,7 +29,7 @@ function StandingsTeam({ team }) {
 }
 
 StandingsTeam.propTypes = {
-  team: ImmutablePropTypes.map
+  team: ImmutablePropTypes.record
 }
 
 function Standings({ teams, title }) {
@@ -63,7 +63,7 @@ function Standings({ teams, title }) {
 }
 
 Standings.propTypes = {
-  teams: ImmutablePropTypes.map,
+  teams: PropTypes.oneOfType([ImmutablePropTypes.map, PropTypes.array]),
   title: PropTypes.string
 }
 

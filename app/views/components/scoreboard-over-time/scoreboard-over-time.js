@@ -1,4 +1,5 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 import Highcharts from 'highcharts'
 import HighchartsReact from 'highcharts-react-official'
@@ -69,6 +70,6 @@ export default class ScoreboardOverTime extends React.Component {
 }
 
 ScoreboardOverTime.propTypes = {
-  data: PropTypes.array,
+  data: ImmutablePropTypes.list,
   breaks: PropTypes.array
 }
