@@ -1,4 +1,6 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import Team from '@components/team'
 import Position from '@components/position'
@@ -39,4 +41,12 @@ export default class DraftPick extends React.Component {
       </div>
     )
   }
+}
+
+DraftPick.propTypes = {
+  player: ImmutablePropTypes.record,
+  pick: PropTypes.object,
+  team: ImmutablePropTypes.record,
+  isActive: PropTypes.bool,
+  league: PropTypes.object
 }

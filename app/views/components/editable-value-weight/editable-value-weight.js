@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 import TextField from '@material-ui/core/TextField'
 
@@ -76,4 +77,11 @@ export default class EditableValueWeight extends React.Component {
       />
     )
   }
+}
+
+EditableValueWeight.propTypes = {
+  weight: PropTypes.number,
+  update: PropTypes.func,
+  type: PropTypes.string,
+  label: PropTypes.string
 }

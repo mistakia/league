@@ -1,4 +1,6 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
+import PropTypes from 'prop-types'
 
 import './trade-menu.styl'
 
@@ -34,4 +36,10 @@ export default class TradeMenu extends React.Component {
       </div>
     )
   }
+}
+
+TradeMenu.propTypes = {
+  trades: ImmutablePropTypes.map,
+  selectedTradeId: PropTypes.number,
+  select: PropTypes.func
 }

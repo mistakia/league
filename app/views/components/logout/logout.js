@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 import Button from '@components/button'
 
@@ -16,4 +17,8 @@ export default class Logout extends React.Component {
       </div>
     )
   }
+}
+
+Logout.propTypes = {
+  logout: PropTypes.func
 }

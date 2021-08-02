@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import Accordion from '@material-ui/core/Accordion'
 import AccordionDetails from '@material-ui/core/AccordionDetails'
 import AccordionSummary from '@material-ui/core/AccordionSummary'
@@ -41,8 +42,8 @@ export default class SettingsValue extends React.Component {
             <p>
               It is heavily based on the worst starter baseline with minor
               adjustments to account for the value of depth and unexpected
-              injuries. You shouldn't change the baseline (i.e. how value is
-              measured) but the assumptions that go into it (i.e. the
+              injuries. You shouldn&apos;t change the baseline (i.e. how value
+              is measured) but the assumptions that go into it (i.e. the
               projections), as this is the most sensible way to measure value.
             </p>
           </>
@@ -59,8 +60,8 @@ export default class SettingsValue extends React.Component {
             </p>
             <p>
               Somewhat useful for determining the value of depth. Provides a
-              good "floor" value for starters. Provides a good "ceiling" value
-              for depth players.
+              good &quot;floor&quot; value for starters. Provides a good
+              &quot;ceiling&quot; value for depth players.
             </p>
           </>
         )
@@ -75,8 +76,8 @@ export default class SettingsValue extends React.Component {
             </p>
             <p>
               Useful for determining the true value of a players contribution to
-              your starting lineup. Provides a good "ceiling" value for
-              starters.
+              your starting lineup. Provides a good &quot;ceiling&quot; value
+              for starters.
             </p>
           </>
         )
@@ -143,4 +144,9 @@ export default class SettingsValue extends React.Component {
       </Accordion>
     )
   }
+}
+
+SettingsValue.propTypes = {
+  baselines: PropTypes.object,
+  vbaseline: PropTypes.string
 }

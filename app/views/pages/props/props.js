@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import AutoSizer from 'react-virtualized/dist/es/AutoSizer'
 import List from 'react-virtualized/dist/es/List'
 
@@ -87,4 +88,9 @@ export default class PropsPage extends React.Component {
 
     return <PageLayout {...{ body, head }} />
   }
+}
+
+PropsPage.propTypes = {
+  load: PropTypes.func,
+  props: PropTypes.array
 }

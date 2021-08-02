@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 import './scoreboard-player-game-status.styl'
 
@@ -21,4 +22,8 @@ export default class ScoreboardPlayerGameStatus extends React.Component {
       </div>
     )
   }
+}
+
+ScoreboardPlayerGameStatus.propTypes = {
+  status: PropTypes.object
 }

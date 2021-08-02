@@ -1,4 +1,6 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-prop-types'
 import Switch from '@material-ui/core/Switch'
 
 export default class EditableTeamSwitch extends React.Component {
@@ -34,4 +36,12 @@ export default class EditableTeamSwitch extends React.Component {
       </div>
     )
   }
+}
+
+EditableTeamSwitch.propTypes = {
+  team: ImmutablePropTypes.record,
+  field: PropTypes.string,
+  onchange: PropTypes.func,
+  label: PropTypes.string,
+  description: PropTypes.string
 }

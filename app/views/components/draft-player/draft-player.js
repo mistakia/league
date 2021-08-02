@@ -1,4 +1,6 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import Team from '@components/team'
 import PlayerWatchlistAction from '@components/player-watchlist-action'
@@ -50,4 +52,15 @@ export default class DraftPlayer extends React.Component {
       </div>
     )
   }
+}
+
+DraftPlayer.propTypes = {
+  select: PropTypes.func,
+  player: ImmutablePropTypes.record,
+  selected: PropTypes.string,
+  isDrafted: PropTypes.bool,
+  index: PropTypes.number,
+  vbaseline: PropTypes.string,
+  watchlist: ImmutablePropTypes.set,
+  style: PropTypes.object
 }

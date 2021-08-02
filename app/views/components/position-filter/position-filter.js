@@ -1,4 +1,5 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import { constants } from '@common'
 import PlayerFilter from '@components/player-filter'
@@ -21,4 +22,8 @@ export default class PositionFilter extends React.Component {
 
     return <PlayerFilter {...state} />
   }
+}
+
+PositionFilter.propTypes = {
+  positions: ImmutablePropTypes.list
 }

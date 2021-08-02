@@ -1,4 +1,6 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 import Container from '@material-ui/core/Container'
 
 import { toPercent } from '@common'
@@ -24,6 +26,10 @@ function StandingsTeam({ team }) {
       </div>
     </div>
   )
+}
+
+StandingsTeam.propTypes = {
+  team: ImmutablePropTypes.map
 }
 
 function Standings({ teams, title }) {
@@ -56,6 +62,11 @@ function Standings({ teams, title }) {
   )
 }
 
+Standings.propTypes = {
+  teams: ImmutablePropTypes.map,
+  title: PropTypes.string
+}
+
 export default class StandingsPage extends React.Component {
   render = () => {
     const { teams } = this.props
@@ -83,4 +94,8 @@ export default class StandingsPage extends React.Component {
 
     return <PageLayout body={body} scroll />
   }
+}
+
+StandingsPage.propTypes = {
+  teams: ImmutablePropTypes.map
 }

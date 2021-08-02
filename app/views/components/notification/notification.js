@@ -1,4 +1,5 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 import Snackbar from '@material-ui/core/Snackbar'
 import MuiAlert from '@material-ui/lab/Alert'
 
@@ -65,4 +66,8 @@ export default class Notification extends React.Component {
       </Snackbar>
     )
   }
+}
+
+Notification.propTypes = {
+  info: ImmutablePropTypes.record
 }

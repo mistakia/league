@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 import LoadingIndicator from '@components/loading-indicator'
 
@@ -14,6 +15,11 @@ const Loading = ({ loading, onClick }) => {
   }
 
   return null
+}
+
+Loading.propTypes = {
+  loading: PropTypes.bool,
+  onClick: PropTypes.func
 }
 
 export default Loading

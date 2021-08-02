@@ -1,4 +1,6 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 import FormControl from '@material-ui/core/FormControl'
 import MenuItem from '@material-ui/core/MenuItem'
 import InputLabel from '@material-ui/core/InputLabel'
@@ -103,4 +105,13 @@ export default class RookieConfirmation extends React.Component {
       </Dialog>
     )
   }
+}
+
+RookieConfirmation.propTypes = {
+  tag: PropTypes.func,
+  player: ImmutablePropTypes.record,
+  status: PropTypes.object,
+  onClose: PropTypes.func,
+  team: PropTypes.object,
+  waiver: PropTypes.object
 }

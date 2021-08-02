@@ -492,8 +492,10 @@ class PlayerRow extends Player {
         player.pos,
         'default'
       ])
-      if (player.player === starterBaselinePlayerId)
+
+      if (player.player === starterBaselinePlayerId) {
         classNames.push('starter__baseline')
+      }
     }
 
     return (

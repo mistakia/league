@@ -1,4 +1,5 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import TeamName from '@components/team-name'
 import TeamImage from '@components/team-image'
@@ -55,4 +56,9 @@ export default class Matchup extends React.Component {
       </div>
     )
   }
+}
+
+Matchup.propTypes = {
+  matchup: ImmutablePropTypes.record,
+  teams: ImmutablePropTypes.map
 }

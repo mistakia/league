@@ -1,4 +1,6 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 import IconButton from '@material-ui/core/IconButton'
 import PersonAddIcon from '@material-ui/icons/PersonAdd'
 import Tooltip from '@material-ui/core/Tooltip'
@@ -75,4 +77,18 @@ export default class AuctionPlayer extends React.Component {
       </div>
     )
   }
+}
+
+AuctionPlayer.propTypes = {
+  isFreeAgent: PropTypes.bool,
+  nominatedPlayer: PropTypes.string,
+  select: PropTypes.func,
+  player: ImmutablePropTypes.record,
+  index: PropTypes.number,
+  isEligible: PropTypes.bool,
+  vbaseline: PropTypes.string,
+  watchlist: ImmutablePropTypes.set,
+  style: PropTypes.object,
+  valueType: PropTypes.string,
+  selected: PropTypes.string
 }

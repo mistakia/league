@@ -18,7 +18,7 @@ import TradeTeamSummary from '@components/trade-team-summary'
 
 import './trade.styl'
 
-export default function () {
+export default function TradePage() {
   const {
     isValid,
     trade,

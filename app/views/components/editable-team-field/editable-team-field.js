@@ -1,4 +1,6 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
+import PropTypes from 'prop-types'
 
 import TextField from '@material-ui/core/TextField'
 
@@ -54,4 +56,12 @@ export default class EditableTeamField extends React.Component {
       />
     )
   }
+}
+
+EditableTeamField.propTypes = {
+  team: ImmutablePropTypes.record,
+  field: PropTypes.string,
+  onchange: PropTypes.func,
+  limit: PropTypes.number,
+  label: PropTypes.string
 }

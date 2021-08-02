@@ -1,4 +1,6 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 import dayjs from 'dayjs'
 
 import { Player, connect } from '@components/player'
@@ -84,6 +86,11 @@ function GameStatus({ status, player }) {
   )
 }
 
+GameStatus.propTypes = {
+  status: PropTypes.object,
+  player: ImmutablePropTypes.record
+}
+
 class PlayerNameExpanded extends Player {
   render = () => {
     const { player, isHosted, hideActions, status } = this.props
@@ -138,6 +145,11 @@ class PlayerNameExpanded extends Player {
       </div>
     )
   }
+}
+
+PlayerNameExpanded.propTypes = {
+  status: PropTypes.object,
+  player: ImmutablePropTypes.record
 }
 
 export default connect(PlayerNameExpanded)

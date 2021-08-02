@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 import Button from '@components/button'
 import Icon from '@components/icon'
@@ -15,4 +16,10 @@ export default class IconButton extends React.Component {
       </Button>
     )
   }
+}
+
+IconButton.propTypes = {
+  className: PropTypes.string,
+  icon: PropTypes.string,
+  type: PropTypes.string
 }

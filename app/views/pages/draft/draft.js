@@ -17,7 +17,7 @@ import './draft.styl'
 
 dayjs.extend(relativeTime)
 
-export default function () {
+export default function DraftPage() {
   const {
     players,
     nextPick,

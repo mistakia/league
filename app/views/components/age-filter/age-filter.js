@@ -1,4 +1,5 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import PlayerFilter from '@components/player-filter'
 
@@ -20,4 +21,9 @@ export default class AgeFilter extends React.Component {
 
     return <PlayerFilter {...state} />
   }
+}
+
+AgeFilter.propTypes = {
+  age: ImmutablePropTypes.list,
+  allAges: ImmutablePropTypes.allAges
 }

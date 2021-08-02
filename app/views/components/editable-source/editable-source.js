@@ -1,4 +1,6 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import TextField from '@material-ui/core/TextField'
 
@@ -71,4 +73,9 @@ export default class EditableSource extends React.Component {
       />
     )
   }
+}
+
+EditableSource.propTypes = {
+  update: PropTypes.func,
+  source: ImmutablePropTypes.record
 }

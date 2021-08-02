@@ -1,5 +1,7 @@
 import React from 'react'
 import dayjs from 'dayjs'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import Paper from '@material-ui/core/Paper'
 import Container from '@material-ui/core/Container'
@@ -60,4 +62,9 @@ export default class StatusPage extends React.Component {
 
     return <PageLayout body={body} scroll />
   }
+}
+
+StatusPage.propTypes = {
+  load: PropTypes.func,
+  status: ImmutablePropTypes.list
 }

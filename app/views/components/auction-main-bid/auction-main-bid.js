@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import dayjs from 'dayjs'
 
 import TeamName from '@components/team-name'
@@ -217,4 +218,25 @@ export default class AuctionMainBid extends React.Component {
       </div>
     )
   }
+}
+
+AuctionMainBid.propTypes = {
+  bid: PropTypes.func,
+  availableCap: PropTypes.number,
+  playerId: PropTypes.string,
+  bidValue: PropTypes.number,
+  showNotification: PropTypes.func,
+  nominate: PropTypes.func,
+  selected: PropTypes.string,
+  isPaused: PropTypes.bool,
+  isComplete: PropTypes.bool,
+  isLocked: PropTypes.bool,
+  isEligible: PropTypes.bool,
+  isAboveCap: PropTypes.bool,
+  isNominating: PropTypes.bool,
+  isCommish: PropTypes.bool,
+  nominatingTeamId: PropTypes.number,
+  timer: PropTypes.number,
+  isWinningBid: PropTypes.bool,
+  auctionStart: PropTypes.number
 }

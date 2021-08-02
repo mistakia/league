@@ -1,4 +1,5 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import { constants } from '@common'
 import StatFilter from '@components/stat-filter'
@@ -21,4 +22,8 @@ export default class StatQuartersFilter extends React.Component {
 
     return <StatFilter {...state} />
   }
+}
+
+StatQuartersFilter.propTypes = {
+  quarters: ImmutablePropTypes.list
 }

@@ -1,4 +1,6 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 import { Route, Redirect, Switch, withRouter } from 'react-router-dom'
@@ -63,6 +65,11 @@ const Routes = ({ app, location }) => {
       <Route path='*' component={redirect} />
     </Switch>
   )
+}
+
+Routes.propTypes = {
+  location: PropTypes.object,
+  app: ImmutablePropTypes.record
 }
 
 export default withRouter(connect(mapStateToProps)(Routes))

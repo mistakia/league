@@ -1,4 +1,5 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 import Highcharts from 'highcharts'
 import HighchartsReact from 'highcharts-react-official'
 
@@ -74,4 +75,8 @@ export default class SelectedPlayerValue extends React.Component {
 
     return <HighchartsReact highcharts={Highcharts} options={options} />
   }
+}
+
+SelectedPlayerValue.propTypes = {
+  player: ImmutablePropTypes.record
 }

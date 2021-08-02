@@ -1,4 +1,6 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
+import PropTypes from 'prop-types'
 import Switch from '@material-ui/core/Switch'
 
 import './settings-switch.styl'
@@ -36,4 +38,12 @@ export default class SettingsSwitch extends React.Component {
       </div>
     )
   }
+}
+
+SettingsSwitch.propTypes = {
+  app: ImmutablePropTypes.record,
+  field: PropTypes.string,
+  label: PropTypes.string,
+  description: PropTypes.string,
+  update: PropTypes.func
 }

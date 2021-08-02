@@ -1,4 +1,6 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import { constants, toStringArray } from '@common'
 import Button from '@components/button'
@@ -143,4 +145,13 @@ export default class PlayerSlot extends React.Component {
       </div>
     )
   }
+}
+
+PlayerSlot.propTypes = {
+  player: ImmutablePropTypes.record,
+  slot: PropTypes.number,
+  handleSelect: PropTypes.func,
+  selected: ImmutablePropTypes.record,
+  handleUpdate: PropTypes.func,
+  isLocked: PropTypes.bool
 }

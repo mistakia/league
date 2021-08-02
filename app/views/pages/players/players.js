@@ -1,4 +1,6 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 import GetAppIcon from '@material-ui/icons/GetApp'
 import IconButton from '@material-ui/core/IconButton'
 import InfiniteScroll from 'react-infinite-scroller'
@@ -363,4 +365,27 @@ export default class PlayersPage extends React.Component {
 
     return <PageLayout {...{ body, head }} />
   }
+}
+
+PlayersPage.propTypes = {
+  order: PropTypes.string,
+  orderBy: PropTypes.string,
+  players: ImmutablePropTypes.list,
+  selected: PropTypes.string,
+  vbaseline: PropTypes.string,
+  week: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  isSeasonView: PropTypes.bool,
+  isStatsView: PropTypes.bool,
+  isStatsPassingView: PropTypes.bool,
+  isWeekView: PropTypes.bool,
+  isStatsRushingView: PropTypes.bool,
+  isStatsReceivingView: PropTypes.bool,
+  isStatsPassingAdvancedView: PropTypes.bool,
+  isStatsPassingPressureView: PropTypes.bool,
+  isPending: PropTypes.bool,
+  showQualifier: PropTypes.bool,
+  isLoggedIn: PropTypes.bool,
+  isRestOfSeasonView: PropTypes.bool,
+  search: PropTypes.func,
+  searchValue: PropTypes.string
 }

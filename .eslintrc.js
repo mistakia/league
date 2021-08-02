@@ -20,7 +20,9 @@ module.exports = {
   },
   plugins: ['react'],
   rules: {
-    curly: ['error', 'multi-line'],
+    curly: ['off'],
+    indent: ['off'],
+    'multiline-ternary': ['off', 'always'],
     'generator-star-spacing': [
       'error',
       {

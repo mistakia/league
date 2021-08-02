@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 import Icon from '@components/icon'
 
@@ -26,4 +27,13 @@ export default class PlayerHeader extends React.Component {
       </div>
     )
   }
+}
+
+PlayerHeader.propTypes = {
+  toggle: PropTypes.func,
+  value: PropTypes.string,
+  label: PropTypes.string,
+  className: PropTypes.string,
+  order: PropTypes.string,
+  orderBy: PropTypes.string
 }

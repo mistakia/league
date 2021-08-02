@@ -1,4 +1,6 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 import dayjs from 'dayjs'
 
 import './draft-schedule.styl'
@@ -37,8 +39,11 @@ export default class DraftSchedule extends React.Component {
             cells.push(cell)
           } else {
             const classNames = ['draft__schedule-cell']
-            if (date === dayjs().date() && month === dayjs().month())
+
+            if (date === dayjs().date() && month === dayjs().month()) {
               classNames.push('today')
+            }
+
             if (month === draftMonth) {
               if (date === startDate) classNames.push('start')
               for (const pick of picks) {
@@ -51,6 +56,7 @@ export default class DraftSchedule extends React.Component {
                 if (pickDate === date) classNames.push('pick')
               }
             }
+
             const cell = (
               <div key={j} className={classNames.join(' ')}>
                 {date}
@@ -83,4 +89,9 @@ export default class DraftSchedule extends React.Component {
       </div>
     )
   }
+}
+
+DraftSchedule.propTypes = {
+  league: PropTypes.object,
+  picks: ImmutablePropTypes.list
 }

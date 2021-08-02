@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import Tooltip from '@material-ui/core/Tooltip'
 
 import './player-label.styl'
@@ -14,4 +15,10 @@ export default function PlayerLabel({ label, type, description }) {
       <div className={classNames.join(' ')}>{label}</div>
     </Tooltip>
   )
+}
+
+PlayerLabel.propTypes = {
+  label: PropTypes.string,
+  type: PropTypes.string,
+  description: PropTypes.string
 }

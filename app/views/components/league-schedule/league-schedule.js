@@ -1,11 +1,12 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import Popover from '@material-ui/core/Popover'
 
-dayjs.extend(relativeTime)
-
 import './league-schedule.styl'
+
+dayjs.extend(relativeTime)
 
 export default class LeagueSchedule extends React.Component {
   constructor(props) {
@@ -72,4 +73,9 @@ export default class LeagueSchedule extends React.Component {
       </div>
     )
   }
+}
+
+LeagueSchedule.propTypes = {
+  teamEvents: PropTypes.array,
+  leagueEvents: PropTypes.array
 }

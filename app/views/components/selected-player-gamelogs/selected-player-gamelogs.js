@@ -1,4 +1,6 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
+import PropTypes from 'prop-types'
 
 import PlayerSelectedRow from '@components/player-selected-row'
 import PlayerSelectedRowHeader from '@components/player-selected-row-header'
@@ -53,4 +55,9 @@ export default class SelectedPlayerGamelogs extends React.Component {
       </div>
     )
   }
+}
+
+SelectedPlayerGamelogs.propTypes = {
+  gamelogs: PropTypes.array,
+  player: ImmutablePropTypes.record
 }

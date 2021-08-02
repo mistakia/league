@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 import TextField from '@material-ui/core/TextField'
 
@@ -82,4 +83,17 @@ export default class EditableLeagueField extends React.Component {
       />
     )
   }
+}
+
+EditableLeagueField.propTypes = {
+  league: PropTypes.object,
+  field: PropTypes.string,
+  type: PropTypes.string,
+  onchange: PropTypes.func,
+  length: PropTypes.number,
+  max: PropTypes.number,
+  min: PropTypes.number,
+  isCommish: PropTypes.bool,
+  isDefault: PropTypes.bool,
+  label: PropTypes.string
 }

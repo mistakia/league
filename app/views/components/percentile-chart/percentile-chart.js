@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 import './percentile-chart.styl'
 
@@ -45,4 +46,11 @@ export default class PercentileChart extends React.Component {
       </div>
     )
   }
+}
+
+PercentileChart.propTypes = {
+  percentiles: PropTypes.object,
+  type: PropTypes.string,
+  stats: PropTypes.object,
+  title: PropTypes.string
 }

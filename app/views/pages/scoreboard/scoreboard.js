@@ -1,5 +1,6 @@
 import React from 'react'
 import Container from '@material-ui/core/Container'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 import Grid from '@material-ui/core/Grid'
 
 import PageLayout from '@layouts/page'
@@ -96,4 +97,8 @@ export default class ScoreboardPage extends React.Component {
 
     return <PageLayout body={body} scroll />
   }
+}
+
+ScoreboardPage.propTypes = {
+  matchup: ImmutablePropTypes.record
 }

@@ -12,9 +12,4 @@ const mapStateToProps = createSelector(
   (league, team) => ({ league, team })
 )
 
-const mapDispatchToProps = {}
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(TransitionConfirmation)
+export default connect(mapStateToProps)(TransitionConfirmation)

@@ -1,5 +1,6 @@
 import React from 'react'
 import queryString from 'query-string'
+import PropTypes from 'prop-types'
 
 import TextField from '@material-ui/core/TextField'
 import Button from '@components/button'
@@ -130,4 +131,12 @@ export default class AuthPage extends React.Component {
 
     return <PageLayout body={body} />
   }
+}
+
+AuthPage.propTypes = {
+  location: PropTypes.object,
+  login: PropTypes.func,
+  isPending: PropTypes.bool,
+  authError: PropTypes.string,
+  register: PropTypes.func
 }

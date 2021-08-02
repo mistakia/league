@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 export default class PercentileMetric extends React.Component {
   render = () => {
@@ -27,4 +28,13 @@ export default class PercentileMetric extends React.Component {
       </div>
     )
   }
+}
+
+PercentileMetric.propTypes = {
+  percentiles: PropTypes.object,
+  className: PropTypes.string,
+  type: PropTypes.string,
+  stats: PropTypes.object,
+  scaled: PropTypes.bool,
+  title: PropTypes.string
 }

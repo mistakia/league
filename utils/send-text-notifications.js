@@ -39,6 +39,7 @@ const sendTextNotification = async (items) => {
 
 module.exports = sendTextNotification
 
+/* eslint-disable no-extra-semi */
 if (!module.parent) {
   ;(async function () {
     await sendTextNotification({
@@ -47,3 +48,4 @@ if (!module.parent) {
     })
   })()
 }
+/* eslint-enable no-extra-semi */

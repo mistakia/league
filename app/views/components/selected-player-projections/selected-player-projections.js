@@ -1,4 +1,5 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import SelectedPlayerProjection from '@components/selected-player-projection'
 import { groupBy } from '@common'
@@ -25,4 +26,8 @@ export default class SelectedPlayerSeasonProjections extends React.Component {
 
     return <div className='selected__player-projections'>{tables}</div>
   }
+}
+
+SelectedPlayerSeasonProjections.propTypes = {
+  player: ImmutablePropTypes.record
 }

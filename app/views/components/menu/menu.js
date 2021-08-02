@@ -1,4 +1,6 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 import { NavLink } from 'react-router-dom'
 import AppBar from '@material-ui/core/AppBar'
 import Toolbar from '@material-ui/core/Toolbar'
@@ -180,4 +182,10 @@ export default class Menu extends React.Component {
       </div>
     )
   }
+}
+
+Menu.propTypes = {
+  history: PropTypes.array,
+  isLoggedIn: PropTypes.bool,
+  team: ImmutablePropTypes.record
 }

@@ -1,4 +1,5 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import './team-image.styl'
 
@@ -23,4 +24,8 @@ export default class TeamImage extends React.Component {
       </div>
     )
   }
+}
+
+TeamImage.propTypes = {
+  team: ImmutablePropTypes.record
 }

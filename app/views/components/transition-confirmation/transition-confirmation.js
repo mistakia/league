@@ -1,4 +1,6 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
+import PropTypes from 'prop-types'
 import FormControl from '@material-ui/core/FormControl'
 import MenuItem from '@material-ui/core/MenuItem'
 import InputLabel from '@material-ui/core/InputLabel'
@@ -209,4 +211,11 @@ export default class TransitionConfirmation extends React.Component {
       </Dialog>
     )
   }
+}
+
+TransitionConfirmation.propTypes = {
+  onClose: PropTypes.func,
+  team: PropTypes.object,
+  league: PropTypes.object,
+  player: ImmutablePropTypes.record
 }
