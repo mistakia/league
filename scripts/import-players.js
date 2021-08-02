@@ -15,25 +15,25 @@ const formatCSV = (row) => {
     pname: row.pname,
     pos1: row.pos1,
     pos2: row.pos2,
-    height: parseInt(row.height, 10),
-    weight: parseInt(row.weight, 10),
+    height: parseInt(row.height, 10) || null,
+    weight: parseInt(row.weight, 10) || null,
     dob: row.dob,
-    forty: parseFloat(row.forty),
-    bench: parseInt(row.bench, 10),
-    vertical: parseFloat(row.vertical),
-    broad: parseInt(row.broad, 10),
-    shuttle: parseFloat(row.shuttle, 10),
-    cone: parseFloat(row.cone),
-    arm: parseFloat(row.arm),
-    hand: parseFloat(row.hand),
-    dpos: parseInt(row.dpos, 10),
+    forty: parseFloat(row.forty) || null,
+    bench: parseInt(row.bench, 10) || null,
+    vertical: parseFloat(row.vertical) || null,
+    broad: parseInt(row.broad, 10) || null,
+    shuttle: parseFloat(row.shuttle, 10) || null,
+    cone: parseFloat(row.cone) || null,
+    arm: parseFloat(row.arm) || null,
+    hand: parseFloat(row.hand) || null,
+    dpos: parseInt(row.dpos, 10) || 0,
     col: row.col,
     dv: row.dv,
-    start: parseInt(row.start, 10),
+    start: parseInt(row.start, 10) || null,
     cteam: row.cteam,
     posd: row.posd,
-    jnum: parseInt(row.jnum, 10),
-    dcp: parseInt(row.dcp, 10)
+    jnum: parseInt(row.jnum, 10) || 0,
+    dcp: parseInt(row.dcp, 10) || 0
   }
 }
 
@@ -61,22 +61,26 @@ const run = async () => {
     if (edits.length) {
       for (const edit of edits) {
         const prop = edit.path[0]
-        await db('changelog').insert({
-          type: constants.changes.PLAYER_EDIT,
-          id: player.player,
-          prop,
-          prev: edit.lhs,
-          new: edit.rhs,
-          timestamp
-        })
+        try {
+          await db('player')
+            .update({
+              [prop]: edit.rhs
+            })
+            .where({
+              player: player.player
+            })
 
-        await db('player')
-          .update({
-            [prop]: edit.rhs
+          await db('changelog').insert({
+            type: constants.changes.PLAYER_EDIT,
+            id: player.player,
+            prop,
+            prev: edit.lhs,
+            new: edit.rhs,
+            timestamp
           })
-          .where({
-            player: player.player
-          })
+        } catch (err) {
+          console.log(err)
+        }
       }
     }
   }
@@ -88,16 +92,20 @@ const run = async () => {
   for (const missingPlayerId of missingPlayerIds) {
     const row = rows.find((r) => r.player === missingPlayerId)
     const formatted = formatCSV(row)
-    await db('changelog').insert({
-      type: constants.changes.PLAYER_NEW,
-      id: row.player,
-      timestamp
-    })
+    try {
+      await db('player').insert({
+        pos: row.pos1,
+        ...formatted
+      })
 
-    await db('player').insert({
-      pos: row.pos1,
-      ...formatted
-    })
+      await db('changelog').insert({
+        type: constants.changes.PLAYER_NEW,
+        id: row.player,
+        timestamp
+      })
+    } catch (err) {
+      console.log(err)
+    }
   }
 }
 
