@@ -47,6 +47,6 @@ export default class DashboardTeamSummaryFAAB extends React.Component {
 
 DashboardTeamSummaryFAAB.propTypes = {
   team: ImmutablePropTypes.record,
-  teams: ImmutablePropTypes.map,
+  teams: ImmutablePropTypes.list,
   rank: PropTypes.number
 }

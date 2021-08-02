@@ -102,7 +102,7 @@ export default class PlayerSelectedRow extends React.Component {
 }
 
 PlayerSelectedRow.propTypes = {
-  title: PropTypes.string,
+  title: PropTypes.node,
   stats: PropTypes.object,
   action: PropTypes.element,
   className: PropTypes.string,

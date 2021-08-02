@@ -1,5 +1,5 @@
 import React from 'react'
-import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import TransactionsFilter from '@components/transactions-filter'
 
@@ -24,6 +24,6 @@ export default class TransactionTeamFilter extends React.Component {
 }
 
 TransactionTeamFilter.propTypes = {
-  teams: PropTypes.array,
-  leagueTeams: PropTypes.array
+  teams: ImmutablePropTypes.list,
+  leagueTeams: ImmutablePropTypes.list
 }

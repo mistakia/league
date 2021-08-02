@@ -1,6 +1,5 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import ImmutablePropTypes from 'react-immutable-proptypes'
 import Popover from '@material-ui/core/Popover'
 
 import { constants } from '@common'
@@ -72,8 +71,8 @@ function ByeWeekPopover({ players, bye }) {
 }
 
 ByeWeekPopover.propTypes = {
-  players: ImmutablePropTypes.map,
-  bye: PropTypes.number
+  players: PropTypes.array,
+  bye: PropTypes.string
 }
 
 export default class DashboardByeWeeks extends React.Component {

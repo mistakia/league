@@ -21,7 +21,7 @@ function RosterRow({ player = {}, slot }) {
 }
 
 RosterRow.propTypes = {
-  player: ImmutablePropTypes.record,
+  player: PropTypes.object,
   slot: PropTypes.string
 }
 

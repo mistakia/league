@@ -1,5 +1,5 @@
 import React from 'react'
-import PropTypes from 'react-immutable-proptypes'
+import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
@@ -74,6 +74,15 @@ class TradePage extends React.Component {
   }
 }
 
+TradePage.propTypes = {
+  setDropPlayers: PropTypes.func,
+  setProposingTeamPlayers: PropTypes.func,
+  setProposingTeamPicks: PropTypes.func,
+  setAcceptingTeamPlayers: PropTypes.func,
+  setAcceptingTeamPicks: PropTypes.func,
+  load: PropTypes.func
+}
+
 const mapStateToProps = createSelector(
   getApp,
 
@@ -128,15 +137,6 @@ const mapDispatchToProps = {
   setAcceptingTeamPlayers: tradeActions.setAcceptingTeamPlayers,
   setProposingTeamPicks: tradeActions.setProposingTeamPicks,
   setAcceptingTeamPicks: tradeActions.setAcceptingTeamPicks
-}
-
-TradePage.propTypes = {
-  setDropPlayers: PropTypes.func,
-  setProposingTeamPlayers: PropTypes.func,
-  setProposingTeamPicks: PropTypes.func,
-  setAcceptingTeamPlayers: PropTypes.func,
-  setAcceptingTeamPicks: PropTypes.func,
-  load: PropTypes.func
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(TradePage)

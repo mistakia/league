@@ -200,7 +200,7 @@ export default class ScoreboardTeam extends React.Component {
 
 ScoreboardTeam.propTypes = {
   team: ImmutablePropTypes.record,
-  roster: ImmutablePropTypes.record,
+  roster: PropTypes.object,
   league: PropTypes.object,
   type: PropTypes.string,
   showBench: PropTypes.bool,

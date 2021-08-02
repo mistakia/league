@@ -1,5 +1,5 @@
 import React from 'react'
-import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import { constants } from '@common'
 import WaiversFilter from '@components/waivers-filter'
@@ -29,5 +29,5 @@ export default class WaiverTypeFilter extends React.Component {
 }
 
 WaiverTypeFilter.propTypes = {
-  type: PropTypes.array
+  type: ImmutablePropTypes.list
 }

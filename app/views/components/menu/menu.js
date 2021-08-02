@@ -185,7 +185,7 @@ export default class Menu extends React.Component {
 }
 
 Menu.propTypes = {
-  history: PropTypes.array,
+  history: PropTypes.object,
   isLoggedIn: PropTypes.bool,
   team: ImmutablePropTypes.record
 }

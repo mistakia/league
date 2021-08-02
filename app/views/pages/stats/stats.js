@@ -53,7 +53,7 @@ function SummaryRow({ team, percentiles }) {
 }
 
 SummaryRow.propTypes = {
-  team: ImmutablePropTypes.map,
+  team: ImmutablePropTypes.record,
   percentiles: PropTypes.object
 }
 
@@ -86,7 +86,7 @@ function PositionRow({ team, percentiles }) {
 }
 
 PositionRow.propTypes = {
-  team: ImmutablePropTypes.map,
+  team: ImmutablePropTypes.record,
   percentiles: PropTypes.object
 }
 
@@ -120,7 +120,7 @@ function SlotRow({ team, slots, percentiles }) {
 }
 
 SlotRow.propTypes = {
-  team: ImmutablePropTypes.map,
+  team: ImmutablePropTypes.record,
   slots: PropTypes.array,
   percentiles: PropTypes.object
 }

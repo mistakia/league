@@ -73,7 +73,7 @@ export default class TransactionsPage extends React.Component {
 
 TransactionsPage.propTypes = {
   load: PropTypes.func,
-  transactions: ImmutablePropTypes.record,
+  transactions: ImmutablePropTypes.list,
   isPending: PropTypes.bool,
   hasMore: PropTypes.bool,
   loadNext: PropTypes.func

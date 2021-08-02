@@ -49,6 +49,6 @@ export default class DashboardTeamSummaryPlayoffOdds extends React.Component {
 
 DashboardTeamSummaryPlayoffOdds.propTypes = {
   team: ImmutablePropTypes.record,
-  teams: ImmutablePropTypes.map,
+  teams: ImmutablePropTypes.list,
   rank: PropTypes.number
 }
