@@ -27,20 +27,8 @@ module.exports = async (leagueId) => {
     .join('teams', 'waivers.tid', 'teams.uid')
     .join('player', 'waivers.player', 'player.player')
     .joinRaw(
-      'left join schedule on player.cteam = schedule.v or player.cteam = schedule.h'
+      `left join schedule on (player.cteam = schedule.v or player.cteam = schedule.h) and (schedule.wk = ${constants.season.week} or schedule.wk is null) and (schedule.seas = ${constants.season.year} or schedule.seas is null)`
     )
-    .where(function () {
-      this.where('schedule.wk', constants.season.week).orWhere(
-        'schedule.wk',
-        null
-      )
-    })
-    .where(function () {
-      this.where('schedule.seas', constants.season.year).orWhere(
-        'schedule.seas',
-        null
-      )
-    })
     .where('waivers.lid', leagueId)
     .whereNull('processed')
     .whereNull('cancelled')
