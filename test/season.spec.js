@@ -18,23 +18,23 @@ describe('COMMON Season', function () {
     expect(constants.season.isRegularSeason).to.equal(false)
 
     // 1 minute before start of week 1
-    MockDate.set(start.add('7', 'day').subtract('1', 'minute').toDate())
+    MockDate.set(start.add('7', 'day').subtract('1', 'minute').utc())
     expect(constants.season.isRegularSeason).to.equal(false)
 
     // start of week 1
-    MockDate.set(start.add('7', 'day').toDate())
+    MockDate.set(start.add('1', 'week').toDate())
     expect(constants.season.isRegularSeason).to.equal(true)
 
     // start of week 4
-    MockDate.set(start.add('28', 'day').toDate())
+    MockDate.set(start.add('4', 'week').toDate())
     expect(constants.season.isRegularSeason).to.equal(true)
 
     // start of week 16
-    MockDate.set(start.add('60', 'day').toDate())
+    MockDate.set(start.add('16', 'week').toDate())
     expect(constants.season.isRegularSeason).to.equal(true)
 
     // start of week 17
-    MockDate.set(start.add('119', 'day').toDate())
+    MockDate.set(start.add('17', 'week').toDate())
     expect(constants.season.isRegularSeason).to.equal(false)
   })
 
