@@ -76,8 +76,8 @@ export default class TransitionConfirmation extends React.Component {
   }
 
   handleSubmit = () => {
-    const { bid, untag, error } = this.state
-    const player = this.props.player.player
+    const { untag, error } = this.state
+    // const player = this.props.player.player
 
     if (!this._isEligible && !untag) {
       return this.setState({ missingUntag: true })

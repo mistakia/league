@@ -25,9 +25,11 @@ export default class ScoreboardPage extends React.Component {
     }
   }
 
-  componentWillReceiveProps = (nextProps) => {
-    if (nextProps.matchup.uid !== this.props.matchup.uid) {
-      this.setState({ tid: nextProps.matchup.tids[0] || nextProps.matchup.hid })
+  componentDidUpdate = (prevProps) => {
+    if (prevProps.matchup.uid !== this.props.matchup.uid) {
+      this.setState({
+        tid: this.props.matchup.tids[0] || this.props.matchup.hid
+      })
     }
   }
 
