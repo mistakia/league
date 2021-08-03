@@ -106,7 +106,7 @@ const run = async () => {
   const currentPlayers = await db('player')
     .whereIn('player', playerIds)
     .orWhereIn('sleeper_id', sleeperIds)
-  const currentPlayerIds = currentPlayers.map((p) => p.player)
+  // const currentPlayerIds = currentPlayers.map((p) => p.player)
 
   for (const player of currentPlayers) {
     const row = inserts.find(
@@ -139,11 +139,12 @@ const run = async () => {
     }
   }
 
-  const missingPlayerIds = playerIds.filter(
-    (p) => !currentPlayerIds.includes(p)
-  )
+  // TODO - create new players
+  /* const missingPlayerIds = playerIds.filter(
+   *   (p) => !currentPlayerIds.includes(p)
+   * )
 
-  /* for (const missingPlayerId of missingPlayerIds) {
+   * for (const missingPlayerId of missingPlayerIds) {
    *   const row = inserts.find((r) => r.player === missingPlayerId)
    *   await db('changelog').insert({
    *     type: constants.changes.PLAYER_NEW,
@@ -156,8 +157,8 @@ const run = async () => {
    *     ...formatted
    *   })
    * }
-   */
-  /* for (const insert of inserts) {
+   *
+   * for (const insert of inserts) {
    *   const rows = await db('players').where('sleeper_id', insert.sleeper_id)
    *   if (rows.length) {
    *     const {
@@ -191,8 +192,8 @@ const run = async () => {
    *   } else {
    *     await db('players').insert(insert)
    *   }
-   * }
-   */
+   * } */
+
   const statuses = []
   for (const insert of inserts) {
     const {

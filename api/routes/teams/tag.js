@@ -1,18 +1,12 @@
 const express = require('express')
 const dayjs = require('dayjs')
 const router = express.Router({ mergeParams: true })
-const API = require('groupme').Stateless
 
 const { constants, Roster } = require('../../../common')
-const {
-  getRoster,
-  verifyUserTeam,
-  sendNotifications,
-  getTransactionsSinceAcquisition
-} = require('../../../utils')
+const { getRoster, verifyUserTeam } = require('../../../utils')
 
 router.post('/?', async (req, res) => {
-  const { db, logger, broadcast } = req.app.locals
+  const { db, logger } = req.app.locals
   try {
     const { teamId } = req.params
     let { tag } = req.body

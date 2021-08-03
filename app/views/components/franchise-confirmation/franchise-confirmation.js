@@ -60,7 +60,7 @@ export default class FranchiseConfirmation extends React.Component {
   }
 
   render = () => {
-    const { team, player, status, waiver } = this.props
+    const { player } = this.props
 
     const menuItems = []
     for (const rPlayer of this._untags) {
@@ -108,8 +108,8 @@ export default class FranchiseConfirmation extends React.Component {
 }
 
 FranchiseConfirmation.propTypes = {
-  onClose: PropTypes.func,
   team: PropTypes.object,
+  onClose: PropTypes.func,
   league: PropTypes.object,
   tag: PropTypes.func,
   status: PropTypes.object,
