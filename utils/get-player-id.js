@@ -1,7 +1,10 @@
-const db = require('../db')
 const debug = require('debug')
-const log = debug('league:player:get')
+const argv = require('yargs').argv
+
 const { fixTeam } = require('../common')
+const db = require('../db')
+
+const log = debug('league:player:get')
 
 const aliases = {
   'AJ Dillon': 'AD-1184',
@@ -37,6 +40,7 @@ const aliases = {
   'Henry Ruggs III': 'HR-0200',
   'Irv Smith': 'IS-0275',
   'Irv Smith Jr': 'IS-0275',
+  'Irv Smith Jr.': 'IS-0275',
   'JC Tretter': 'JT-3350',
   'Jedrick Wills': 'JW-4918',
   'Jeff Wilson Jr.': 'JW-4975',
@@ -48,6 +52,7 @@ const aliases = {
   "La'Mical Perine": 'LP-0437',
   'Laviska Shenault': 'LS-0650',
   'Laviska Shenault Jr': 'LS-0650',
+  'Laviska Shenault Jr.': 'LS-0650',
   'Lynn Bowden Jr.': 'LB-0775',
   'Mark Ingram II': 'MI-0100',
   'Marvin Jones Jr.': 'MJ-2250',
@@ -59,6 +64,8 @@ const aliases = {
   'Nkeal Harry': 'NH-0825',
   'NKeal Harry': 'NH-0825',
   'Odell Beckham': 'OB-0075',
+  'Odell Beckham Jr': 'OB-0075',
+  'Odell Beckham Jr.': 'OB-0075',
   'OJ Howard': 'OH-0250',
   'Patrick Mahomes II': 'PM-0025',
   'Phillip Dorsett II': 'PD-0800',
@@ -68,11 +75,14 @@ const aliases = {
   'Ronald Jones II': 'RJ-2250',
   'Scotty Miller': 'SM-2653',
   'Steven Sims': 'SS-1537',
+  'Terrace Marshall': 'TM-0135',
+  'Terrace Marshall Jr.': 'TM-0135',
   'Todd Gurley II': 'TG-1950',
   'TY Hilton': 'TH-1850',
   'TJ Hockenson': 'TH-1875',
   'Will Fuller V': 'WF-0300',
   'Will Lutz': 'WL-0300',
+  'William Fuller V': 'WF-0300',
   'Willie Snead IV': 'WS-0925',
 
   'Arizona (ARI)': 'ARI',
@@ -172,6 +182,8 @@ const aliases = {
   'Titans DST': 'TEN',
   'Vikings D/ST': 'MIN',
   'Vikings DST': 'MIN',
+  'Washington D/ST': 'WAS',
+  'Washington DST': 'WAS',
 
   'Football Team DST': 'WAS',
   'Green Bay Packers': 'GB',
@@ -258,3 +270,26 @@ const getPlayerId = async ({ name, pos, team }) => {
 }
 
 module.exports = getPlayerId
+
+const main = async () => {
+  let error
+  try {
+    const options = {
+      name: argv.name,
+      pos: argv.pos,
+      team: argv.team
+    }
+    console.log(options)
+    const playerId = await getPlayerId(options)
+    console.log(playerId)
+  } catch (err) {
+    error = err
+    console.log(error)
+  }
+
+  process.exit()
+}
+
+if (!module.parent) {
+  main()
+}
