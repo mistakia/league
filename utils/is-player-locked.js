@@ -1,6 +1,9 @@
 const dayjs = require('dayjs')
+const timezone = require('dayjs/plugin/timezone')
 const db = require('../db')
 const { constants } = require('../common')
+
+dayjs.extend(timezone)
 
 module.exports = async (player) => {
   if (constants.season.week === 0) {
@@ -22,7 +25,7 @@ module.exports = async (player) => {
     return false
   }
 
-  const gameStart = dayjs(playerRow.date, 'M/D/YYYY H:m')
+  const gameStart = dayjs.tz(playerRow.date, 'M/D/YYYY H:m', 'America/New_York')
   if (dayjs().isAfter(gameStart)) {
     return true
   }
