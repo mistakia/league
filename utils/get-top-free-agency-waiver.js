@@ -1,7 +1,10 @@
 const dayjs = require('dayjs')
+const timezone = require('dayjs/plugin/timezone')
 
 const db = require('../db')
 const { constants } = require('../common')
+
+dayjs.extend(timezone)
 
 module.exports = async (leagueId) => {
   // get relevant transactions from last 24 hours
