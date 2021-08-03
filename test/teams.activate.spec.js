@@ -238,9 +238,5 @@ describe('API /teams - activate', function () {
     it('exceed roster limit', async () => {
       // TODO
     })
-
-    it('exceed available cap', async () => {
-      // TODO
-    })
   })
 })

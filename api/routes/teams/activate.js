@@ -84,14 +84,6 @@ router.post('/?', async (req, res) => {
         .send({ error: 'no available space on active roster' })
     }
 
-    // if during the offseason make sure team has enough cap space
-    if (
-      !constants.season.isRegularSeason &&
-      roster.availableCap - playerRow.value < 0
-    ) {
-      return res.status(400).send({ error: 'exceeds salary limit' })
-    }
-
     await db('rosters_players').update({ slot: constants.slots.BENCH }).where({
       rid: rosterRow.uid,
       player
