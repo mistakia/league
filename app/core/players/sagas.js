@@ -19,6 +19,7 @@ import {
   delProjection,
   putSetting
 } from '@core/api'
+import { draftActions } from '@core/draft'
 import { playerActions } from './actions'
 import { auctionActions } from '@core/auction'
 import { getAllPlayers, getPlayers } from './selectors'
@@ -201,6 +202,10 @@ export function* watchSaveProjection() {
   yield takeLatest(playerActions.SAVE_PROJECTION, saveProjection)
 }
 
+export function* watchDraftSelectPlayer() {
+  yield takeLatest(draftActions.DRAFT_SELECT_PLAYER, loadPlayer)
+}
+
 export function* watchSelectPlayer() {
   yield takeLatest(playerActions.PLAYERS_SELECT_PLAYER, loadPlayer)
 }
@@ -265,6 +270,7 @@ export const playerSagas = [
   fork(watchSetLeague),
   fork(watchToggleOrder),
   fork(watchSaveProjection),
+  fork(watchDraftSelectPlayer),
   fork(watchSelectPlayer),
   fork(watchPutLeagueFulfilled),
   fork(watchSetSource),

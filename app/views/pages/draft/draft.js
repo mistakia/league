@@ -150,15 +150,15 @@ export default function DraftPage() {
       <div className='draft__selected-body'>
         <div>
           <label>Drafted</label>
-          {p.dpos ? `#${p.dpos}` : 'undrafted'}
+          {p.dpos ? `#${p.dpos}` : '-'}
         </div>
         <div>
           <label>Proj.</label>
-          {Math.round(p.points.get('total'))}
+          {Math.round(p.points.getIn(['0', 'total'], 0))}
         </div>
         <div>
           <label>Age</label>
-          <PlayerAge date={p.dob} />
+          {p.dob ? <PlayerAge date={p.dob} /> : '-'}
         </div>
         <div>
           <label>Height</label>
@@ -166,43 +166,43 @@ export default function DraftPage() {
         </div>
         <div>
           <label>Weight</label>
-          {p.weight}
+          {p.weight || '-'}
         </div>
         <div>
           <label>Forty</label>
-          {p.forty || 'n/a'}
+          {p.forty || '-'}
         </div>
         <div>
           <label>Bench</label>
-          {p.bench || 'n/a'}
+          {p.bench || '-'}
         </div>
         <div>
           <label>Vertical</label>
-          {p.vertical || 'n/a'}
+          {p.vertical || '-'}
         </div>
         <div>
           <label>Broad</label>
-          {p.broad || 'n/a'}
+          {p.broad || '-'}
         </div>
         <div>
           <label>Shuttle</label>
-          {p.shuttle || 'n/a'}
+          {p.shuttle || '-'}
         </div>
         <div>
           <label>Cone</label>
-          {p.cone || 'n/a'}
+          {p.cone || '-'}
         </div>
         <div>
           <label>Arm</label>
-          {p.arm}
+          {p.arm || '-'}
         </div>
         <div>
           <label>Hand</label>
-          {p.hand}
+          {p.hand || '-'}
         </div>
         <div>
           <label>College</label>
-          {p.college}
+          {p.college || '-'}
         </div>
         <div>
           <label>Division</label>
