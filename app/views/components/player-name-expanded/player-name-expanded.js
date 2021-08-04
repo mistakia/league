@@ -9,25 +9,9 @@ import Team from '@components/team'
 import { constants, nth } from '@common'
 import IconButton from '@components/icon-button'
 import PlayerLabel from '@components/player-label'
+import PlayerTag from '@components/player-tag'
 
 import './player-name-expanded.styl'
-
-const getPlayerTagLabel = (tag) => {
-  switch (tag) {
-    case 2:
-      return <PlayerLabel label='F' type='tag' description='Franchise Tag' />
-    case 3:
-      return <PlayerLabel label='R' type='tag' description='Rookie Tag' />
-    case 4:
-      return (
-        <PlayerLabel
-          label='RFA'
-          type='tag'
-          description='Restricted Free Agent'
-        />
-      )
-  }
-}
 
 function getClock({ playDescription, clockTime, quarter }) {
   switch (playDescription) {
@@ -97,7 +81,7 @@ class PlayerNameExpanded extends Player {
 
     return (
       <div className='player__name-expanded'>
-        {!!(isHosted && player.player && !hideActions) && (
+        {Boolean(isHosted && player.player && !hideActions) && (
           <div className='player__name-expanded-action'>
             <IconButton
               small
@@ -120,7 +104,7 @@ class PlayerNameExpanded extends Player {
             {player.slot === constants.slots.PSP && (
               <PlayerLabel label='P' description='Protected Practice Squad' />
             )}
-            {player.tag > 1 && getPlayerTagLabel(player.tag)}
+            <PlayerTag tag={player.tag} />
           </div>
           <div className='player__name-expanded-row'>
             <Position pos={player.pos} />

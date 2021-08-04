@@ -6,6 +6,7 @@ import Position from '@components/position'
 import Team from '@components/team'
 import { constants } from '@common'
 import PlayerLabel from '@components/player-label'
+import PlayerTag from '@components/player-tag'
 
 import './player-name.styl'
 
@@ -31,6 +32,7 @@ export default class PlayerName extends React.Component {
           {player.slot === constants.slots.PSP && (
             <PlayerLabel label='P' description='Protected Practice Squad' />
           )}
+          <PlayerTag tag={player.tag} />
         </div>
       </div>
     )

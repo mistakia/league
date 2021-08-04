@@ -30,7 +30,8 @@ import { getRostersForCurrentLeague, rosterActions } from '@core/rosters'
 import Worker from 'workerize-loader?inline!../worker' // eslint-disable-line import/no-webpack-loader-syntax
 
 export function* loadPlayers() {
-  yield call(fetchPlayers)
+  const { leagueId } = yield select(getApp)
+  yield call(fetchPlayers, { leagueId })
 }
 
 export function* search() {

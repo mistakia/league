@@ -1,7 +1,8 @@
 import React from 'react'
 
 import { constants } from '@common'
-import PlayerNameExpanded from '@components/player-name-expanded'
+import PlayerName from '@components/player-name'
+import IconButton from '@components/icon-button'
 import { Player, connect } from '@components/player'
 import Icon from '@components/icon'
 import { sortableHandle } from 'react-sortable-hoc'
@@ -12,15 +13,69 @@ const DragHandle = sortableHandle(() => (
   </div>
 ))
 
+const getFranchiseAmount = ({ pos, league }) => {
+  switch (pos) {
+    case 'QB':
+      return league.fqb || 0
+
+    case 'RB':
+      return league.frb || 0
+
+    case 'WR':
+      return league.fwr || 0
+
+    case 'TE':
+      return league.fte || 0
+  }
+}
+
+const getExtensionAmount = ({ extensions, tag, pos, league, value }) => {
+  switch (tag) {
+    case constants.tags.FRANCHISE:
+      return getFranchiseAmount({ pos, league })
+
+    case constants.tags.ROOKIE:
+      return value
+
+    case constants.tags.TRANSITION:
+      return value
+
+    case constants.tags.REGULAR:
+    default:
+      return value + (extensions + 1) * 5
+  }
+}
+
 class PlayerRoster extends Player {
   render() {
-    const { player, selected, claim, reorder, waiverId, poach } = this.props
+    const {
+      player,
+      selected,
+      claim,
+      reorder,
+      waiverId,
+      poach,
+      isHosted,
+      league
+    } = this.props
 
-    const isWaiver = !!waiverId
-    const isPoach = !!poach
+    const isWaiver = Boolean(waiverId)
+    const isPoach = Boolean(poach)
     const isClaim = isWaiver || isPoach
 
     const week = Math.max(constants.season.week, 1)
+
+    const extensions = player.get('extensions').size
+    const { pos, tag, value } = player
+    const extendedSalary = getExtensionAmount({
+      pos,
+      tag,
+      extensions,
+      league,
+      value
+    })
+    const projectedSalary = player.getIn(['values', 'ros', 'default'], 0)
+    const savings = projectedSalary - extendedSalary
 
     const classNames = ['player__item', 'table__row']
     if (selected === player.player) classNames.push('selected')
@@ -29,7 +84,17 @@ class PlayerRoster extends Player {
       <div className={classNames.join(' ')}>
         {reorder && <DragHandle />}
         <div className='player__item-name table__cell sticky__column'>
-          <PlayerNameExpanded
+          <div className='player__item-menu'>
+            {Boolean(player.player && isHosted) && (
+              <IconButton
+                small
+                text
+                icon='more'
+                onClick={this.handleContextClick}
+              />
+            )}
+          </div>
+          <PlayerName
             playerId={player.player}
             waiverId={waiverId}
             hideActions={isPoach}
@@ -38,7 +103,7 @@ class PlayerRoster extends Player {
         {isClaim && (
           <div className='player__item-name table__cell'>
             {claim.drop && (
-              <PlayerNameExpanded playerId={claim.drop} hideActions={isClaim} />
+              <PlayerName playerId={claim.drop} hideActions={isClaim} />
             )}
           </div>
         )}
@@ -52,9 +117,17 @@ class PlayerRoster extends Player {
             ${isPoach ? player.value + 2 || '-' : player.value}
           </div>
         )}
-        <div className='metric table__cell'>
-          ${player.getIn(['values', 'ros', 'default'], 0).toFixed(0)}
-        </div>
+        {!isWaiver && !isPoach && (
+          <div className='metric table__cell'>${extendedSalary}</div>
+        )}
+        {!isWaiver && !isPoach && (
+          <div className='metric table__cell'>
+            ${projectedSalary.toFixed(0)}
+          </div>
+        )}
+        {!isWaiver && (
+          <div className='metric table__cell'>${savings.toFixed(0)}</div>
+        )}
         <div className='metric table__cell'>
           {player.getIn(['vorp', 'ros', 'default'], 0).toFixed(1)}
         </div>
