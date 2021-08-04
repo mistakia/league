@@ -40,7 +40,7 @@ export const Player = new Record({
   lineups: new Map(),
   value: null,
   slot: null,
-  type: null,
+  type: null, // transaction type
   tid: null,
   tag: null,
   inflation: null,
@@ -54,7 +54,8 @@ export const Player = new Record({
   esbid: null,
   gsispid: null,
   gamestatus: null,
-  practice: new List()
+  practice: new List(),
+  extensions: new List()
 })
 
 export function createPlayer({
@@ -102,7 +103,8 @@ export function createPlayer({
   esbid,
   gsispid,
   gamestatus,
-  practice
+  practice,
+  extensions
 }) {
   return new Player({
     player,
@@ -150,6 +152,7 @@ export function createPlayer({
     esbid,
     gsispid,
     gamestatus,
-    practice: new List(practice)
+    practice: new List(practice),
+    extensions: new List(extensions)
   })
 }
