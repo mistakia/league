@@ -6,9 +6,9 @@ router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const search = req.query.q
+    const { leagueId } = req.query
 
-    const includePlayerIds = []
-
+    const topPlayerIds = []
     const latestRanking = db('rankings')
       .select(db.raw('max(timestamp) as maxtime'))
       .where('year', constants.season.year)
@@ -30,25 +30,18 @@ router.get('/?', async (req, res) => {
         sourceid: constants.sources.FANTASYPROS
       })
 
-      topPlayers.forEach((p) => includePlayerIds.push(p.player))
+      topPlayers.forEach((p) => topPlayerIds.push(p.player))
     }
 
+    const leaguePlayerIds = []
     if (req.user) {
-      const leagues = await db('leagues')
-        .select('leagues.uid')
-        .join('teams', 'leagues.uid', 'teams.lid')
-        .join('users_teams', 'teams.uid', 'users_teams.tid')
-        .where('users_teams.userid', req.user.userId)
-
-      const leagueIds = leagues.map((l) => l.uid)
-
       const playerSlots = await db('rosters_players')
         .join('rosters', 'rosters_players.rid', 'rosters.uid')
-        .whereIn('rosters.lid', leagueIds)
+        .where('rosters.lid', leagueId)
         .where('rosters.year', constants.season.year)
         .groupBy('rosters_players.player')
 
-      playerSlots.forEach((s) => includePlayerIds.push(s.player))
+      playerSlots.forEach((s) => leaguePlayerIds.push(s.player))
     }
 
     const selects = [
@@ -85,6 +78,7 @@ router.get('/?', async (req, res) => {
     if (search) {
       query.whereRaw('MATCH(fname, lname) AGAINST(? IN BOOLEAN MODE)', search)
     } else {
+      const includePlayerIds = [...topPlayerIds, ...leaguePlayerIds]
       if (includePlayerIds.length) {
         query.whereIn('player.player', includePlayerIds)
       }
@@ -123,6 +117,46 @@ router.get('/?', async (req, res) => {
     }
 
     const data = await query
+
+    if (leaguePlayerIds.length) {
+      const transactions = await db('transactions')
+        .select(
+          'transactions.type',
+          'transactions.value',
+          'transactions.timestamp',
+          'transactions.tid',
+          'transactions.lid',
+          'transactions.player'
+        )
+        .join(
+          'rosters_players',
+          'transactions.player',
+          'rosters_players.player'
+        )
+        .join('rosters', function () {
+          this.on('rosters_players.rid', '=', 'rosters.uid')
+          this.on('transactions.tid', '=', 'rosters.tid')
+        })
+        .where('rosters.week', constants.season.week)
+        .where('rosters.year', constants.season.year)
+        .where('rosters.lid', leagueId)
+        .whereIn('type', [
+          constants.transactions.EXTENSION,
+          constants.transactions.TRANSITION_TAG,
+          constants.transactions.FRANCHISE_TAG,
+          constants.transactions.ROOKIE_TAG
+        ])
+        .whereIn('transactions.player', leaguePlayerIds)
+
+      if (transactions.length) {
+        for (const player of data) {
+          player.extensions = transactions.filter(
+            (p) => p.player === player.player
+          )
+        }
+      }
+    }
+
     logger(`responding with ${data.length} players`)
     res.send(data)
   } catch (error) {
