@@ -53,6 +53,10 @@ export const League = new Record({
   host: null,
   tddate: null,
 
+  tag2: null,
+  tag3: null,
+  tag4: null,
+
   ext1: null,
   ext2: null,
   ext3: null,
@@ -117,6 +121,10 @@ export function createLeague({
   host,
   tddate,
 
+  tag2,
+  tag3,
+  tag4,
+
   ext1,
   ext2,
   ext3,
@@ -179,6 +187,10 @@ export function createLeague({
     hosted,
     host,
     tddate,
+
+    tag2,
+    tag3,
+    tag4,
 
     ext1,
     ext2,

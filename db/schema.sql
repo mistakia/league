@@ -1435,6 +1435,9 @@ CREATE TABLE `leagues` (
   `fuml` tinyint(1) NOT NULL,
   `prtd` tinyint(1) NOT NULL,
   `krtd` tinyint(1) NOT NULL,
+  `tag2` tinyint(1) unsigned NOT NULL DEFAULT '1', -- franchise tag count
+  `tag3` tinyint(1) unsigned NOT NULL DEFAULT '1', -- rookie tag count
+  `tag4` tinyint(1) unsigned NOT NULL DEFAULT '2', -- transition tag count
   `ext1` int(4) DEFAULT 5,
   `ext2` int(4) DEFAULT 10,
   `ext3` int(4) DEFAULT 20,
