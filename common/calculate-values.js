@@ -1,4 +1,10 @@
-const calculateValues = ({ players, baselines, vorpw, volsw, week }) => {
+const calculateValues = ({
+  players,
+  baselines,
+  vorpw = 1,
+  volsw = 1,
+  week
+}) => {
   const total = {
     default: 0,
     available: 0,
@@ -9,8 +15,8 @@ const calculateValues = ({ players, baselines, vorpw, volsw, week }) => {
     manual: 0
   }
 
-  const weightAvailable = (vorpw !== null ? vorpw : 1) * 0.5
-  const weightStarter = (volsw !== null ? volsw : 1) * 0.5
+  const weightAvailable = vorpw
+  const weightStarter = volsw
   const totalWeight = weightAvailable + weightStarter
 
   for (const player of players) {
@@ -32,6 +38,8 @@ const calculateValues = ({ players, baselines, vorpw, volsw, week }) => {
         total[type] = total[type] + player.vorp[week][type]
       }
     }
+
+    // weighted average based on user weights
     player.vorp[week].hybrid =
       (player.vorp[week].available * weightAvailable +
         player.vorp[week].starter * weightStarter) /
@@ -40,9 +48,9 @@ const calculateValues = ({ players, baselines, vorpw, volsw, week }) => {
       total.hybrid = total.hybrid + player.vorp[week].hybrid
     }
 
+    // weighted average
     player.vorp[week].default =
-      (player.vorp[week].available * 0.1 + player.vorp[week].starter) /
-      totalWeight
+      (player.vorp[week].available + 9 * player.vorp[week].starter) / 10
     if (player.vorp[week].default > 0) {
       total.default = total.default + player.vorp[week].default
     }
