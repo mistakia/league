@@ -35,6 +35,11 @@ const run = async () => {
       .where('rosters.week', 0)
       .where('rosters.year', year - 1)
 
+    if (!rosters.length) {
+      log(`Missing roster, skipping lid ${lid}`)
+      continue
+    }
+
     const grouped = groupBy(rosters, 'pos')
     const key = {
       QB: 10,
@@ -46,6 +51,10 @@ const run = async () => {
     const update = {}
     for (const pos in key) {
       const players = grouped[pos]
+      if (!players) {
+        continue
+      }
+
       const sorted = players.sort((a, b) => b.value - a.value)
       const top = sorted.slice(0, key[pos])
       const values = top.map((p) => p.value)
