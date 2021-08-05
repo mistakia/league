@@ -43,10 +43,12 @@ export default function DashboardPage() {
   }
 
   const activeItems = []
+  const activePlayers = []
   for (const position in groups) {
     const players = groups[position]
     for (const player of players) {
       if (!player.player) continue
+      activePlayers.push(player)
       activeItems.push(<PlayerRoster key={player.player} player={player} />)
     }
   }
@@ -173,6 +175,7 @@ export default function DashboardPage() {
               items={activeItems}
               title='Active Roster'
               limit={roster.activeRosterLimit}
+              total={activePlayers}
             />
           </Grid>
           <Grid item xs={12}>

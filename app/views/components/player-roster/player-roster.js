@@ -1,6 +1,7 @@
 import React from 'react'
 
 import { constants } from '@common'
+import { getExtensionAmount } from '@core/utils'
 import PlayerName from '@components/player-name'
 import IconButton from '@components/icon-button'
 import { Player, connect } from '@components/player'
@@ -12,39 +13,6 @@ const DragHandle = sortableHandle(() => (
     <Icon name='reorder' />
   </div>
 ))
-
-const getFranchiseAmount = ({ pos, league }) => {
-  switch (pos) {
-    case 'QB':
-      return league.fqb || 0
-
-    case 'RB':
-      return league.frb || 0
-
-    case 'WR':
-      return league.fwr || 0
-
-    case 'TE':
-      return league.fte || 0
-  }
-}
-
-const getExtensionAmount = ({ extensions, tag, pos, league, value }) => {
-  switch (tag) {
-    case constants.tags.FRANCHISE:
-      return getFranchiseAmount({ pos, league })
-
-    case constants.tags.ROOKIE:
-      return value
-
-    case constants.tags.TRANSITION:
-      return value
-
-    case constants.tags.REGULAR:
-    default:
-      return value + (extensions + 1) * 5
-  }
-}
 
 class PlayerRoster extends Player {
   render() {
