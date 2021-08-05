@@ -6,6 +6,7 @@ import Toolbar from '@material-ui/core/Toolbar'
 import { constants } from '@common'
 import PlayerRoster from '@components/player-roster'
 import PlayerRosterHeader from '@components/player-roster-header'
+import PlayerRosterTotal from '@components/player-roster-total'
 
 import './dashboard-players-table.styl'
 
@@ -74,6 +75,7 @@ export default class DashboardPlayersTable extends React.Component {
       title,
       poaches,
       claims,
+      total,
       waiverType,
       reorderWaivers,
       leadColumn = '',
@@ -202,6 +204,9 @@ export default class DashboardPlayersTable extends React.Component {
               <BenchPlusHeader />
             </div>
           </div>
+          {Boolean(total && total.length) && (
+            <PlayerRosterTotal players={total} />
+          )}
           {body}
         </div>
       </div>
@@ -217,5 +222,6 @@ DashboardPlayersTable.propTypes = {
   waiverType: PropTypes.string,
   reorderWaivers: PropTypes.func,
   leadColumn: PropTypes.string,
-  limit: PropTypes.number
+  limit: PropTypes.number,
+  total: PropTypes.array
 }
