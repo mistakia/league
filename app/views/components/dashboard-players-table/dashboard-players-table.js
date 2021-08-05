@@ -10,17 +10,17 @@ import PlayerRosterTotal from '@components/player-roster-total'
 
 import './dashboard-players-table.styl'
 
-const SuggestedSalaryHeader = () => (
+const MarketSalaryHeader = () => (
   <PlayerRosterHeader
     tooltip='Salary based on projected points over baseline player'
-    title='Suggested Salary'
+    title='Market Salary'
   />
 )
 
-const SalarySavingsHeader = () => (
+const SalaryDifferenceHeader = () => (
   <PlayerRosterHeader
-    tooltip='Salary savings based on the difference between the extended salary and the suggested salary'
-    title='Savings'
+    tooltip='Difference between a players salary and the market salary'
+    title='Diff.'
   />
 )
 
@@ -71,6 +71,7 @@ export default class DashboardPlayersTable extends React.Component {
 
   render = () => {
     const {
+      isBeforeExtensionDeadline,
       items = [],
       title,
       poaches,
@@ -152,6 +153,10 @@ export default class DashboardPlayersTable extends React.Component {
       )
     }
 
+    const baseYear = isBeforeExtensionDeadline
+      ? constants.season.year - 1
+      : constants.season.year
+
     return (
       <div className={classNames.join(' ')}>
         <Toolbar>
@@ -168,17 +173,21 @@ export default class DashboardPlayersTable extends React.Component {
               <div className='player__item-name table__cell'>Release</div>
             )}
             {isWaiver && <div className='metric table__cell'>Bid</div>}
-            {!isWaiver && <div className='metric table__cell'>Base Salary</div>}
+            {!isWaiver && (
+              <div className='metric table__cell'>{`${baseYear} Salary`}</div>
+            )}
             {!isWaiver && !isPoach && (
-              <div className='metric table__cell'>Extended Salary</div>
+              <div className='metric table__cell'>{`${
+                baseYear + 1
+              } Salary`}</div>
             )}
             {!isWaiver && !isPoach && (
               <div className='table__cell metric'>
-                <SuggestedSalaryHeader />
+                <MarketSalaryHeader />
               </div>
             )}
             <div className='table__cell metric'>
-              <SalarySavingsHeader />
+              <SalaryDifferenceHeader />
             </div>
             <div className='table__cell metric'>
               <ValueHeader />
@@ -215,6 +224,7 @@ export default class DashboardPlayersTable extends React.Component {
 }
 
 DashboardPlayersTable.propTypes = {
+  isBeforeExtensionDeadline: PropTypes.bool,
   items: PropTypes.array,
   title: PropTypes.string,
   poaches: PropTypes.array,
