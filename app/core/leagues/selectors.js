@@ -106,6 +106,12 @@ export function getLeagueEvents(state) {
   return events.sort((a, b) => a.date.unix() - b.date.unix())
 }
 
+export function isBeforeExtensionDeadline(state) {
+  const league = getCurrentLeague(state)
+  const deadline = dayjs().unix(league.ext_date)
+  return constants.season.now.isBefore(deadline)
+}
+
 export const getTeamsForCurrentLeague = createSelector(
   getCurrentLeagueTeamIds,
   getTeams,

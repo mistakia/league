@@ -86,7 +86,9 @@ const run = async ({ year = argv.year } = {}) => {
 
       if (updates.length) {
         for (const { player, slot, tag } of updates) {
-          await db('rosters_players').where({ rid, player }).update({ slot, tag })
+          await db('rosters_players')
+            .where({ rid, player })
+            .update({ slot, tag })
         }
       }
     }
