@@ -63,6 +63,7 @@ const run = async ({ year = argv.year } = {}) => {
       )
       const inserts = missing.map((p) => ({
         rid,
+        tag: p.tag,
         slot: p.slot,
         player: p.player,
         pos: p.pos
@@ -70,7 +71,7 @@ const run = async ({ year = argv.year } = {}) => {
 
       const updates = matching.filter((p) => {
         const item = existingPlayers.find((i) => i.player === p.player)
-        return item.slot !== p.slot
+        return item.slot !== p.slot || item.tag !== p.tag
       })
 
       await db('rosters_players').insert(inserts)
@@ -84,8 +85,8 @@ const run = async ({ year = argv.year } = {}) => {
       }
 
       if (updates.length) {
-        for (const { player, slot } of updates) {
-          await db('rosters_players').where({ rid, player }).update({ slot })
+        for (const { player, slot, tag } of updates) {
+          await db('rosters_players').where({ rid, player }).update({ slot, tag })
         }
       }
     }
