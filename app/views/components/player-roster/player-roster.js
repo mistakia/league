@@ -45,6 +45,16 @@ class PlayerRoster extends Player {
     const projectedSalary = player.getIn(['values', 'ros', 'default'], 0)
     const savings = projectedSalary - extendedSalary
 
+    const vorp = player.getIn(['vorp', 'ros', 'default'], 0)
+    const vorpAdj = player.getIn(['vorp_adj', 'ros', 'default'], 0)
+    const rosPoints = player.getIn(['points', 'ros', 'total'], 0)
+    const weekPoints = player.getIn(['points', `${week}`, 'total'], 0)
+    const starts = player.getIn(['lineups', 'starts'], 0)
+    const startPoints = player.getIn(['lineups', 'sp'], 0)
+    const benchPoints = player.getIn(['lineups', 'bp'], 0)
+
+    const isNegative = Math.sign(savings) === -1
+
     const classNames = ['player__item', 'table__row']
     if (selected === player.player) classNames.push('selected')
 
@@ -86,40 +96,40 @@ class PlayerRoster extends Player {
           </div>
         )}
         {!isWaiver && !isPoach && (
-          <div className='metric table__cell'>${extendedSalary}</div>
+          <div className='metric table__cell'>
+            {extendedSalary ? `$${extendedSalary}` : '-'}
+          </div>
         )}
         {!isWaiver && !isPoach && (
           <div className='metric table__cell'>
-            ${projectedSalary.toFixed(0)}
+            {projectedSalary ? `$${projectedSalary.toFixed(0)}` : '-'}
           </div>
         )}
         {!isWaiver && (
-          <div className='metric table__cell'>${savings.toFixed(0)}</div>
+          <div className={`metric table__cell ${isNegative && 'warning'}`}>
+            {savings ? `$${savings.toFixed(0)}` : '-'}
+          </div>
         )}
+        <div className='metric table__cell'>{vorp ? vorp.toFixed(1) : '-'}</div>
         <div className='metric table__cell'>
-          {player.getIn(['vorp', 'ros', 'default'], 0).toFixed(1)}
-        </div>
-        <div className='metric table__cell'>
-          {player.getIn(['vorp_adj', 'ros', 'default'], 0).toFixed(1)}
+          {vorpAdj ? vorpAdj.toFixed(1) : '-'}
         </div>
         {constants.season.week > 0 && (
           <div className='metric table__cell'>
-            {player.getIn(['points', 'ros', 'total'], 0).toFixed(1)}
+            {rosPoints ? rosPoints.toFixed(1) : '-'}
           </div>
         )}
         {constants.season.week > 0 && (
           <div className='metric table__cell'>
-            {player.getIn(['points', `${week}`, 'total'], 0).toFixed(1)}
+            {weekPoints ? weekPoints.toFixed(1) : '-'}
           </div>
         )}
+        <div className='metric table__cell'>{starts || '-'}</div>
         <div className='metric table__cell'>
-          {player.getIn(['lineups', 'starts'])}
+          {startPoints ? startPoints.toFixed(1) : '-'}
         </div>
         <div className='metric table__cell'>
-          {player.getIn(['lineups', 'sp'], 0).toFixed(1) || '--'}
-        </div>
-        <div className='metric table__cell'>
-          {player.getIn(['lineups', 'bp'], 0).toFixed(1) || '--'}
+          {benchPoints ? benchPoints.toFixed(1) : '-'}
         </div>
       </div>
     )

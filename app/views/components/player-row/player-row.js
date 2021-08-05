@@ -59,6 +59,9 @@ class PlayerRow extends Player {
         <div className='row__group'>
           <div className='row__group-body'>
             {!constants.season.isRegularSeason && (
+              <div className='table__cell metric'>${player.value || '--'}</div>
+            )}
+            {!constants.season.isRegularSeason && (
               <div className='table__cell metric'>
                 ${Math.round(value) || '--'}
                 {/* {inflation} */}
