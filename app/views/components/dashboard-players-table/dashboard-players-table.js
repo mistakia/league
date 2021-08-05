@@ -27,7 +27,7 @@ const SalaryDifferenceHeader = () => (
 const ValueHeader = () => (
   <PlayerRosterHeader
     tooltip='Projected points over baseline player'
-    title='Value'
+    title='Market Value'
   />
 )
 
@@ -45,14 +45,14 @@ const StartsHeader = () => (
 const PointsPlusHeader = () => (
   <PlayerRosterHeader
     tooltip='Projected starter points you would lose without player'
-    title='Pts+'
+    title='Start Points'
   />
 )
 
 const BenchPlusHeader = () => (
   <PlayerRosterHeader
     tooltip='Projected bench points you would lose without player'
-    title='Bench+'
+    title='Bench Points'
   />
 )
 
