@@ -53,16 +53,26 @@ class PlayerRosterTotal extends Player {
         <div className='metric table__cell'>${baseSalaryTotal.toFixed(0)}</div>
         <div className='metric table__cell'>${extendedSalaryTotal}</div>
         <div className='metric table__cell'>
-          ${projectedSalaryTotal.toFixed(0)}
+          {projectedSalaryTotal ? `$${projectedSalaryTotal.toFixed(0)}` : '-'}
         </div>
-        <div className='metric table__cell'>${savingsTotal.toFixed(0)}</div>
-        <div className='metric table__cell'>{valueTotal.toFixed(1)}</div>
-        <div className='metric table__cell'>{valueAdjTotal.toFixed(1)}</div>
+        <div className='metric table__cell'>
+          {savingsTotal ? `$${savingsTotal.toFixed(0)}` : '-'}
+        </div>
+        <div className='metric table__cell'>
+          {valueTotal ? valueTotal.toFixed(1) : '-'}
+        </div>
+        <div className='metric table__cell'>
+          {valueAdjTotal ? valueAdjTotal.toFixed(1) : '-'}
+        </div>
         {constants.season.week > 0 && (
-          <div className='metric table__cell'>{rosPointsTotal.toFixed(1)}</div>
+          <div className='metric table__cell'>
+            {rosPointsTotal ? rosPointsTotal.toFixed(1) : '-'}
+          </div>
         )}
         {constants.season.week > 0 && (
-          <div className='metric table__cell'>{weekPointsTotal.toFixed(1)}</div>
+          <div className='metric table__cell'>
+            {weekPointsTotal ? weekPointsTotal.toFixed(1) : '-'}
+          </div>
         )}
         <div className='metric table__cell'>-</div>
         <div className='metric table__cell'>-</div>
