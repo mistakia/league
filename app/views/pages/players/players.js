@@ -242,6 +242,13 @@ export default class PlayersPage extends React.Component {
             <PlayerHeader
               className='table__cell metric'
               label='Salary'
+              value='value'
+            />
+          )}
+          {!constants.season.isRegularSeason && (
+            <PlayerHeader
+              className='table__cell metric'
+              label='Market'
               value={`values.${week}.${vbaseline}`}
             />
           )}
