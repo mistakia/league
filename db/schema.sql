@@ -1827,6 +1827,22 @@ CREATE TABLE `waivers` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `waiver_drops`
+--
+
+DROP TABLE IF EXISTS `waiver_drops`;
+
+CREATE TABLE `waiver_drops` (
+  `waiverid` int(11) NOT NULL,
+  `userid` int(6) NOT NULL,
+  `player` varchar(7) NOT NULL,
+  `order` tinyint(2) NOT NULL,
+  KEY `waiverid` (`waiverid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `jobs`
 --
 
