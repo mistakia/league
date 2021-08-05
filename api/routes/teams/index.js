@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 
 const activate = require('./activate')
+const cutlist = require('./cutlist')
 const deactivate = require('./deactivate')
 const release = require('./release')
 const add = require('./add')
@@ -74,5 +75,6 @@ router.use('/:teamId/lineups', lineups)
 router.use('/:teamId/reserve', reserve)
 router.use('/:teamId/protect', protect)
 router.use('/:teamId/tag', tag)
+router.use('/:teamId/cutlist', cutlist)
 
 module.exports = router

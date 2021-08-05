@@ -1715,6 +1715,23 @@ CREATE TABLE `trades_transactions` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `cutlist`
+--
+
+DROP TABLE IF EXISTS `cutlist`;
+
+CREATE TABLE `cutlist` (
+  `player` varchar(7) NOT NULL,
+  `tid` int(6) NOT NULL,
+  `order` tinyint(2) NOT NULL,
+  KEY `player` (`player`),
+  KEY `teamid` (`tid`),
+  UNIQUE KEY `teamplayer` (`tid`, `player`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `transactions`
 --
 
@@ -1818,6 +1835,9 @@ CREATE TABLE `waivers` (
   `type` tinyint(1) NOT NULL,
   `succ` tinyint(1) DEFAULT NULL,
   `reason` text DEFAULT NULL,
+
+  `deadline` int(11) DEFAULT NULL,
+
   `processed` int(11) DEFAULT NULL,
   `cancelled` int(11) DEFAULT NULL,
   PRIMARY KEY (`uid`),
@@ -1827,16 +1847,14 @@ CREATE TABLE `waivers` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `waiver_drops`
+-- Table structure for table `waiver_release`
 --
 
-DROP TABLE IF EXISTS `waiver_drops`;
+DROP TABLE IF EXISTS `waiver_release`;
 
-CREATE TABLE `waiver_drops` (
+CREATE TABLE `waiver_release` (
   `waiverid` int(11) NOT NULL,
-  `userid` int(6) NOT NULL,
   `player` varchar(7) NOT NULL,
-  `order` tinyint(2) NOT NULL,
   KEY `waiverid` (`waiverid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
