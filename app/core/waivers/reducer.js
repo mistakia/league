@@ -18,7 +18,7 @@ const Waiver = new Record({
   tid: null,
   player: null,
   po: 0,
-  drop: null,
+  release: new List(),
   succ: null,
   reason: null,
   bid: null,
@@ -39,7 +39,7 @@ export function waiversReducer(state = initialState, { payload, type }) {
       const uid = parseInt(payload.data.uid, 10)
       return state.mergeIn(['teams', payload.opts.teamId, uid], {
         bid: payload.data.bid,
-        drop: payload.data.drop
+        release: payload.data.release
       })
     }
 

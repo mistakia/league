@@ -39,10 +39,13 @@ export function getWaiverPlayersForCurrentTeam(state) {
     const playerId = waiver.player
     const player = getPlayerById(state, { playerId })
     teamWaivers = teamWaivers.setIn([waiver.uid, 'player'], player)
-    if (waiver.drop) {
-      const playerId = waiver.drop
-      const player = getPlayerById(state, { playerId })
-      teamWaivers = teamWaivers.setIn([playerId, 'drop'], player)
+    if (waiver.release.size) {
+      const releases = []
+      for (const playerId of waiver.release) {
+        const player = getPlayerById(state, { playerId })
+        releases.push(player)
+      }
+      teamWaivers = teamWaivers.setIn([playerId, 'release'], new List(releases))
     }
   }
 

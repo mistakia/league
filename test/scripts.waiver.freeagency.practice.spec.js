@@ -199,7 +199,7 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
       // TODO
     })
 
-    it('drop player not on team', async () => {
+    it('release player not on team', async () => {
       // TODO
     })
 

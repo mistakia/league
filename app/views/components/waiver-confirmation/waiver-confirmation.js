@@ -24,14 +24,14 @@ export default class WaiverConfirmation extends React.Component {
 
     const { waiver } = props
     this._isEligible = false
-    this._drops = []
+    this._releases = []
     this.state = {
-      drop: waiver ? waiver.drop : '',
+      release: waiver ? waiver.release : [],
       type: waiver ? waiver.type : '',
       bid: waiver ? waiver.bid : 0,
       error: false,
       missingType: false,
-      missingDrop: false
+      missingRelease: false
     }
 
     if (waiver) this._setType(waiver.type)
@@ -46,7 +46,7 @@ export default class WaiverConfirmation extends React.Component {
       ? ros.hasOpenBenchSlot(player.pos)
       : ros.hasOpenPracticeSquadSlot()
 
-    const drops = []
+    const releases = []
     const players = isActiveRoster
       ? rosterPlayers.active
       : rosterPlayers.practice
@@ -56,23 +56,23 @@ export default class WaiverConfirmation extends React.Component {
       if (rPlayer.slot === constants.slots.PSP) continue
       r.removePlayer(rPlayer.player)
       if (isActiveRoster) {
-        if (r.hasOpenBenchSlot(player.pos)) drops.push(rPlayer)
+        if (r.hasOpenBenchSlot(player.pos)) releases.push(rPlayer)
       } else {
-        if (r.hasOpenPracticeSquadSlot()) drops.push(rPlayer)
+        if (r.hasOpenPracticeSquadSlot()) releases.push(rPlayer)
       }
     }
 
-    this._drops = drops
+    this._releases = releases
   }
 
-  handleDrop = (event) => {
+  handleRelease = (event) => {
     const { value } = event.target
-    this.setState({ drop: value, missingDrop: false })
+    this.setState({ release: value, missingRelease: false })
   }
 
   handleType = (event) => {
     const { value } = event.target
-    this.setState({ type: value, drop: '', missingType: false })
+    this.setState({ type: value, release: [], missingType: false })
     this._setType(value)
   }
 
@@ -91,7 +91,7 @@ export default class WaiverConfirmation extends React.Component {
   }
 
   handleSubmit = () => {
-    const { bid, drop, error, type } = this.state
+    const { bid, release, error, type } = this.state
     const player = this.props.player.player
 
     if (!type) {
@@ -100,17 +100,17 @@ export default class WaiverConfirmation extends React.Component {
       this.setState({ missingType: false })
     }
 
-    if (!this._isEligible && !drop) {
-      return this.setState({ missingDrop: true })
+    if (!this._isEligible && !release.length) {
+      return this.setState({ missingRelease: true })
     } else {
-      this.setState({ missingDrop: false })
+      this.setState({ missingRelease: false })
     }
 
     if (!error) {
       if (this.props.waiver) {
-        this.props.update({ waiverId: this.props.waiver.uid, drop, bid })
+        this.props.update({ waiverId: this.props.waiver.uid, release, bid })
       } else {
-        this.props.claim({ bid, drop, type, player })
+        this.props.claim({ bid, release, type, player })
       }
       this.props.onClose()
     }
@@ -120,7 +120,7 @@ export default class WaiverConfirmation extends React.Component {
     const { team, player, status, waiver } = this.props
 
     const menuItems = []
-    for (const rPlayer of this._drops) {
+    for (const rPlayer of this._releases) {
       menuItems.push(
         <MenuItem key={rPlayer.player} value={rPlayer.player}>
           {rPlayer.name} ({rPlayer.pos})
@@ -189,13 +189,14 @@ export default class WaiverConfirmation extends React.Component {
             </FormControl>
             {this.state.type && (
               <FormControl size='small' variant='outlined'>
-                <InputLabel id='drop-label'>Drop</InputLabel>
+                <InputLabel id='release-label'>Release</InputLabel>
                 <Select
-                  labelId='drop-label'
-                  error={this.state.missingDrop}
-                  value={this.state.drop}
-                  onChange={this.handleDrop}
-                  label='Drop'>
+                  labelId='release-label'
+                  error={this.state.missingRelease}
+                  value={this.state.release}
+                  onChange={this.handleRelease}
+                  multiple
+                  label='Release'>
                   {menuItems}
                 </Select>
               </FormControl>

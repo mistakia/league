@@ -28,9 +28,9 @@ class TradePage extends React.Component {
     }
   }
 
-  handleDropChange = (event, value) => {
+  handleReleaseChange = (event, value) => {
     const playerIds = value.map((p) => p.id)
-    this.props.setDropPlayers(playerIds)
+    this.props.setReleasePlayers(playerIds)
   }
 
   handleProposeChange = (event, value) => {
@@ -55,7 +55,7 @@ class TradePage extends React.Component {
     this.props.load()
   }
 
-  handleDropPlayerClick = (player) => this.props.setDropPlayers(player)
+  handleReleasePlayerClick = (player) => this.props.setReleasePlayers(player)
 
   handleProposingTeamPlayerClick = (player) =>
     this.props.setProposingTeamPlayers(player)
@@ -75,7 +75,7 @@ class TradePage extends React.Component {
 }
 
 TradePage.propTypes = {
-  setDropPlayers: PropTypes.func,
+  setReleasePlayers: PropTypes.func,
   setProposingTeamPlayers: PropTypes.func,
   setProposingTeamPicks: PropTypes.func,
   setAcceptingTeamPlayers: PropTypes.func,
@@ -132,7 +132,7 @@ const mapStateToProps = createSelector(
 
 const mapDispatchToProps = {
   load: tradeActions.load,
-  setDropPlayers: tradeActions.setDropPlayers,
+  setReleasePlayers: tradeActions.setReleasePlayers,
   setProposingTeamPlayers: tradeActions.setProposingTeamPlayers,
   setAcceptingTeamPlayers: tradeActions.setAcceptingTeamPlayers,
   setProposingTeamPicks: tradeActions.setProposingTeamPicks,

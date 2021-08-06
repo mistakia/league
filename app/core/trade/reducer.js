@@ -7,7 +7,7 @@ const initialState = new Record({
   teamId: null,
   selectedTradeId: null,
   items: new Map(),
-  dropPlayers: new List(),
+  releasePlayers: new List(),
   acceptingTeamPlayers: new List(),
   proposingTeamPlayers: new List(),
   acceptingTeamPicks: new List(),
@@ -31,9 +31,9 @@ export function tradeReducer(state = initialState(), { payload, type }) {
         acceptingTeamLineups: new Map(payload.acceptingTeamLineups)
       })
 
-    case tradeActions.TRADE_SET_DROP_PLAYERS:
+    case tradeActions.TRADE_SET_RELEASE_PLAYERS:
       return state.merge({
-        dropPlayers: new List(payload.players)
+        releasePlayers: new List(payload.players)
       })
 
     case tradeActions.TRADE_SET_ACCEPTING_TEAM_PLAYERS:
@@ -74,7 +74,7 @@ export function tradeReducer(state = initialState(), { payload, type }) {
     case tradeActions.SELECT_TRADE:
       return state.merge({
         selectedTradeId: payload.tradeId,
-        dropPlayers: new List(),
+        releasePlayers: new List(),
         acceptingTeamPlayers: new List(),
         proposingTeamPlayers: new List(),
         acceptingTeamPicks: new List(),

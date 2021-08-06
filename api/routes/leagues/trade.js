@@ -17,7 +17,7 @@ const getTrade = async (req, res) => {
       res.status(400).send({ error: `could not find tradeid: ${tradeId}` })
     }
 
-    const drops = await db('trades_drops').where({ tradeid: tradeId })
+    const releases = await db('trade_releases').where({ tradeid: tradeId })
     const players = await db('trades_players').where({ tradeid: tradeId })
     const picks = await db('trades_picks')
       .select(
@@ -32,18 +32,18 @@ const getTrade = async (req, res) => {
       .where({ tradeid: tradeId })
       .join('draft', 'trades_picks.pickid', 'draft.uid')
 
-    trade.proposingTeamDropPlayers = []
-    trade.acceptingTeamDropPlayers = []
+    trade.proposingTeamReleasePlayers = []
+    trade.acceptingTeamReleasePlayers = []
     trade.proposingTeamPlayers = []
     trade.acceptingTeamPlayers = []
     trade.proposingTeamPicks = []
     trade.acceptingTeamPicks = []
 
-    for (const player of drops) {
+    for (const player of releases) {
       if (player.tid === trade.pid) {
-        trade.proposingTeamDropPlayers.push(player.player)
+        trade.proposingTeamReleasePlayers.push(player.player)
       } else {
-        trade.acceptingTeamDropPlayers.push(player.player)
+        trade.acceptingTeamReleasePlayers.push(player.player)
       }
     }
 
@@ -95,16 +95,16 @@ router.post(
           .send({ error: `no valid trade with tradeid: ${tradeId}` })
       }
 
-      const acceptingTeamDropPlayers = req.body.dropPlayers
-        ? Array.isArray(req.body.dropPlayers)
-          ? req.body.dropPlayers
-          : [req.body.dropPlayers]
+      const acceptingTeamReleasePlayers = req.body.releasePlayers
+        ? Array.isArray(req.body.releasePlayers)
+          ? req.body.releasePlayers
+          : [req.body.releasePlayers]
         : []
 
-      const proposingTeamDropPlayerRows = await db('trades_drops').where({
+      const proposingTeamReleasePlayerRows = await db('trade_releases').where({
         tradeid: tradeId
       })
-      const proposingTeamDropPlayerIds = proposingTeamDropPlayerRows.map(
+      const proposingTeamReleasePlayerIds = proposingTeamReleasePlayerRows.map(
         (p) => p.player
       )
 
@@ -121,10 +121,10 @@ router.post(
       }
 
       const tradedPlayers = proposingTeamPlayers.concat(acceptingTeamPlayers)
-      const dropPlayers = acceptingTeamDropPlayers.concat(
-        proposingTeamDropPlayerIds
+      const releasePlayers = acceptingTeamReleasePlayers.concat(
+        proposingTeamReleasePlayerIds
       )
-      const allPlayers = tradedPlayers.concat(dropPlayers)
+      const allPlayers = tradedPlayers.concat(releasePlayers)
       const leagues = await db('leagues').where({ uid: leagueId })
       const league = leagues[0]
 
@@ -171,14 +171,14 @@ router.post(
         roster: acceptingTeamRosterRow,
         league
       })
-      for (const player of acceptingTeamDropPlayers) {
+      for (const player of acceptingTeamReleasePlayers) {
         if (!acceptingTeamRoster.has(player)) {
           return res
             .status(400)
-            .send({ error: 'drop player not on accepting team' })
+            .send({ error: 'release player not on accepting team' })
         }
       }
-      acceptingTeamDropPlayers.forEach((p) =>
+      acceptingTeamReleasePlayers.forEach((p) =>
         acceptingTeamRoster.removePlayer(p)
       )
       acceptingTeamPlayers.forEach((p) => acceptingTeamRoster.removePlayer(p))
@@ -204,7 +204,7 @@ router.post(
         roster: proposingTeamRosterRow,
         league
       })
-      proposingTeamDropPlayerIds.forEach((p) =>
+      proposingTeamReleasePlayerIds.forEach((p) =>
         proposingTeamRoster.removePlayer(p)
       )
       proposingTeamPlayers.forEach((p) => proposingTeamRoster.removePlayer(p))
@@ -224,17 +224,17 @@ router.post(
         })
       }
 
-      // insert receiving team drops
-      const insertDrops = []
-      for (const player of acceptingTeamDropPlayers) {
-        insertDrops.push({
+      // insert receiving team releases
+      const insertReleases = []
+      for (const player of acceptingTeamReleasePlayers) {
+        insertReleases.push({
           tradeid: tradeId,
           player,
           tid: trade.tid
         })
       }
-      if (insertDrops.length) {
-        await db('trades_drops').insert(insertDrops)
+      if (insertReleases.length) {
+        await db('trade_releases').insert(insertReleases)
       }
 
       await db('trades')
@@ -294,10 +294,10 @@ router.post(
         )
       }
 
-      if (dropPlayers.length) {
-        const dropTransactions = []
-        for (const player of proposingTeamDropPlayerIds) {
-          dropTransactions.push({
+      if (releasePlayers.length) {
+        const releaseTransactions = []
+        for (const player of proposingTeamReleasePlayerIds) {
+          releaseTransactions.push({
             userid: trade.userid,
             tid: trade.pid,
             lid: leagueId,
@@ -309,8 +309,8 @@ router.post(
           })
         }
 
-        for (const player of acceptingTeamDropPlayers) {
-          dropTransactions.push({
+        for (const player of acceptingTeamReleasePlayers) {
+          releaseTransactions.push({
             userid: req.user.userId,
             tid: trade.tid,
             lid: leagueId,
@@ -322,7 +322,7 @@ router.post(
           })
         }
 
-        await db('transactions').insert(dropTransactions)
+        await db('transactions').insert(releaseTransactions)
       }
 
       // update receiving roster
@@ -430,14 +430,14 @@ router.post(
 
       let message = `${proposingTeam.name} has traded ${proposingTeamStr} to ${acceptingTeam.name} in exchange for ${acceptingTeamStr}.`
 
-      if (dropPlayers.length) {
-        const dropItems = []
-        for (const playerId of dropPlayers) {
+      if (releasePlayers.length) {
+        const releaseItems = []
+        for (const playerId of releasePlayers) {
           const player = players.find((p) => p.player === playerId)
-          dropItems.push(`${player.fname} ${player.lname} (${player.pos})`)
+          releaseItems.push(`${player.fname} ${player.lname} (${player.pos})`)
         }
-        const dropItemsStr = toStringArray(dropItems)
-        message = `${message} ${dropItemsStr} have been dropped.`
+        const releaseItemsStr = toStringArray(releaseItems)
+        message = `${message} ${releaseItemsStr} have been released.`
       }
 
       if (activePoaches.length) {

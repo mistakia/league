@@ -32,7 +32,15 @@ const run = async () => {
         .where({ player: claim.player })
         .limit(1)
       player = players[0]
-      await processPoach(claim)
+
+      const release = await db('poach_releases')
+        .select('player')
+        .where('poachid', claim.uid)
+
+      await processPoach({
+        release,
+        ...claim
+      })
       log(
         `poaching claim awarded to teamId: (${claim.tid}) for ${claim.player}`
       )

@@ -27,11 +27,11 @@ export default class TransitionConfirmation extends React.Component {
     super(props)
 
     this.state = {
-      dropIds: [],
+      releaseIds: [],
       untag: '',
       bid: 0,
       error: false,
-      missingDrop: false,
+      missingRelease: false,
       missingUntag: false
     }
 
@@ -65,9 +65,9 @@ export default class TransitionConfirmation extends React.Component {
     this.setState({ bid: value })
   }
 
-  handleDrop = (event, value) => {
+  handleRelease = (event, value) => {
     const playerIds = value.map((p) => p.id)
-    this.setState({ dropIds: playerIds })
+    this.setState({ releaseIds: playerIds })
   }
 
   handleUntag = (event) => {
@@ -111,8 +111,8 @@ export default class TransitionConfirmation extends React.Component {
     const getOptionSelected = (option, value) => option.id === value.id
     const renderOption = (option) => {
       return (
-        <div className='drop__select-player'>
-          <div className='drop__select-player-value'>${option.value}</div>
+        <div className='release__select-player'>
+          <div className='release__select-player-value'>${option.value}</div>
           <div className='player__name-position'>
             <Position pos={option.pos} />
           </div>
@@ -128,7 +128,7 @@ export default class TransitionConfirmation extends React.Component {
         // eslint-disable-next-line
         <Chip label={option.label} {...getTagProps({ index })} />
       ))
-    const title = 'Select players to conditionally drop'
+    const title = 'Select players to conditionally release'
     const renderInput = (params) => (
       <TextField
         {...params}
@@ -137,11 +137,11 @@ export default class TransitionConfirmation extends React.Component {
         placeholder={title}
       />
     )
-    const dropPlayers = []
-    this.state.dropIds.forEach((playerId) => {
+    const releasePlayers = []
+    this.state.releaseIds.forEach((playerId) => {
       const player = this.props.team.players.find((p) => p.player === playerId)
       const { pos, team, pname, value, name } = player
-      dropPlayers.push({
+      releasePlayers.push({
         id: player.player,
         label: name,
         pos,
@@ -193,8 +193,8 @@ export default class TransitionConfirmation extends React.Component {
               getOptionSelected={getOptionSelected}
               renderOption={renderOption}
               filterSelectedOptions
-              value={dropPlayers}
-              onChange={this.handleDrop}
+              value={releasePlayers}
+              onChange={this.handleRelease}
               renderTags={renderTags}
               renderInput={renderInput}
             />

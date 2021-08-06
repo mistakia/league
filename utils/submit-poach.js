@@ -9,15 +9,17 @@ const getRoster = require('./get-roster')
 
 module.exports = async function ({
   leagueId,
-  drop,
+  release = [],
   player,
   teamId,
   team,
   userId
 }) {
-  // verify player and drop ids
+  // verify player and release ids
   const playerIds = [player]
-  if (drop) playerIds.push(drop)
+  if (release.length) {
+    release.forEach((player) => playerIds.push(player))
+  }
   const playerRows = await db('player').whereIn('player', playerIds)
   if (playerRows.length !== playerIds.length) {
     throw new Error('could not find playerIds')
@@ -58,11 +60,13 @@ module.exports = async function ({
     year: constants.season.year
   })
   const roster = new Roster({ roster: rosterRow, league })
-  if (drop) {
-    if (!roster.has(drop)) {
-      throw new Error('invalid drop player, not on roster')
+  if (release.length) {
+    for (const player of release) {
+      if (!roster.has(player)) {
+        throw new Error('invalid release player, not on roster')
+      }
+      roster.removePlayer(player)
     }
-    roster.removePlayer(drop)
   }
   const hasSlot = roster.hasOpenBenchSlot(poachPlayer.pos)
   if (!hasSlot) {
@@ -89,10 +93,11 @@ module.exports = async function ({
     tid: teamId,
     lid: leagueId,
     player,
-    drop,
     submitted: Math.round(Date.now() / 1000)
   }
-  await db('poaches').insert(data)
+  const rows = await db('poaches').insert(data)
+  const releaseInserts = release.map((player) => ({ poachid: rows[0], player }))
+  await db('poach_releases').insert(releaseInserts)
 
   const message = `${team.name} has submitted a poaching claim for ${
     poachPlayer.fname

@@ -113,7 +113,7 @@ export default class SettingsTeam extends React.Component {
           <div className='settings__team-section'>
             <EditableTeamSwitch
               label='League Text Notifications'
-              description='Poaching claims, trades, draft selections, dropped players and added players'
+              description='Poaching claims, trades, draft selections, released players and added players'
               field='leaguetext'
               {...props}
             />

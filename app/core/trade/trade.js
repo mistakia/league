@@ -15,8 +15,8 @@ export const Trade = new Record({
   acceptingTeamPlayers: new List(),
   proposingTeamPicks: new List(),
   acceptingTeamPicks: new List(),
-  proposingTeamDropPlayers: new List(),
-  acceptingTeamDropPlayers: new List()
+  proposingTeamReleasePlayers: new List(),
+  acceptingTeamReleasePlayers: new List()
 })
 
 export function createTrade({
@@ -34,8 +34,8 @@ export function createTrade({
   acceptingTeamPlayers,
   proposingTeamPicks,
   acceptingTeamPicks,
-  proposingTeamDropPlayers,
-  acceptingTeamDropPlayers
+  proposingTeamReleasePlayers,
+  acceptingTeamReleasePlayers
 }) {
   return new Trade({
     uid,
@@ -52,7 +52,7 @@ export function createTrade({
     acceptingTeamPlayers: new List(acceptingTeamPlayers),
     proposingTeamPicks: new List(proposingTeamPicks),
     acceptingTeamPicks: new List(acceptingTeamPicks),
-    proposingTeamDropPlayers: new List(proposingTeamDropPlayers),
-    acceptingTeamDropPlayers: new List(acceptingTeamDropPlayers)
+    proposingTeamReleasePlayers: new List(proposingTeamReleasePlayers),
+    acceptingTeamReleasePlayers: new List(acceptingTeamReleasePlayers)
   })
 }

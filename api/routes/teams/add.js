@@ -11,7 +11,11 @@ const {
 router.post('/?', async (req, res) => {
   const { db, logger, broadcast } = req.app.locals
   try {
-    const { player, drop, leagueId, teamId, slot } = req.body
+    const { player, leagueId, teamId, slot } = req.body
+    let { release } = req.body
+    if (!Array.isArray(release)) {
+      release = release ? [release] : []
+    }
 
     if (!player) {
       return res.status(400).send({ error: 'missing player' })
@@ -81,7 +85,7 @@ router.post('/?', async (req, res) => {
     try {
       transactions = await submitAcquisition({
         leagueId,
-        drop,
+        release,
         player,
         teamId: tid,
         userId: req.user.userId,

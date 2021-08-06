@@ -66,7 +66,6 @@ describe('SCRIPTS /waivers - poach', function () {
         tid: 2,
         lid: 1,
         player: player.player,
-        drop: null,
         submitted: Math.round(Date.now() / 1000)
       })
 
@@ -139,7 +138,6 @@ describe('SCRIPTS /waivers - poach', function () {
         tid: 2,
         lid: 1,
         player: player1.player,
-        drop: null,
         submitted: Math.round(Date.now() / 1000)
       })
 
@@ -173,7 +171,6 @@ describe('SCRIPTS /waivers - poach', function () {
         tid: 4,
         lid: 1,
         player: player2.player,
-        drop: null,
         submitted: Math.round(Date.now() / 1000)
       })
 
@@ -265,7 +262,6 @@ describe('SCRIPTS /waivers - poach', function () {
         tid: 2,
         lid: 1,
         player: player.player,
-        drop: null,
         submitted: Math.round(Date.now() / 1000)
       })
 
@@ -303,9 +299,9 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(poaches[0].player).to.equal(player.player)
     })
 
-    it('drop player not on roster - have roster space', async () => {
+    it('release player not on roster - have roster space', async () => {
       MockDate.set(start.subtract('1', 'month').toDate())
-      const dropPlayer = await selectPlayer({ pos: 'RB' })
+      const releasePlayer = await selectPlayer({ pos: 'RB' })
       const player = await selectPlayer({ rookie: true })
       await addPlayer({
         leagueId: 1,
@@ -317,27 +313,35 @@ describe('SCRIPTS /waivers - poach', function () {
         value: 1
       })
 
-      await knex('waivers').insert({
+      const query1 = await knex('waivers').insert({
         tid: 2,
         userid: 2,
         lid: 1,
         player: player.player,
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
-        drop: dropPlayer.player,
         bid: 0,
         succ: 1,
         processed: Math.round(Date.now() / 1000),
         type: constants.waivers.POACH
       })
 
-      await knex('poaches').insert({
+      await knex('waiver_releases').insert({
+        waiverid: query1[0],
+        player: releasePlayer.player
+      })
+
+      const query2 = await knex('poaches').insert({
         userid: 2,
         tid: 2,
         lid: 1,
         player: player.player,
-        drop: dropPlayer.player,
         submitted: Math.round(Date.now() / 1000)
+      })
+
+      await knex('poach_releases').insert({
+        poachid: query2[0],
+        player: releasePlayer.player
       })
 
       MockDate.set(
@@ -417,7 +421,6 @@ describe('SCRIPTS /waivers - poach', function () {
         tid: 2,
         lid: 1,
         player: player.player,
-        drop: null,
         submitted: Math.round(Date.now() / 1000)
       })
 
@@ -482,7 +485,7 @@ describe('SCRIPTS /waivers - poach', function () {
       // TODO
     })
 
-    it('drop player not on roster & exceeds roster limits', async () => {
+    it('release player not on roster & exceeds roster limits', async () => {
       // TODO
     })
   })

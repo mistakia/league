@@ -8,7 +8,7 @@ const { constants } = require('../../../common')
 router.post('/?', async (req, res) => {
   const { db, logger, broadcast } = req.app.locals
   try {
-    const { player, drop, leagueId } = req.body
+    const { player, release, leagueId } = req.body
     const teamId = parseInt(req.body.teamId, 10)
 
     if (constants.season.week > constants.season.finalWeek) {
@@ -66,7 +66,7 @@ router.post('/?', async (req, res) => {
     try {
       data = await submitPoach({
         leagueId,
-        drop,
+        release,
         player,
         teamId,
         team,

@@ -6,7 +6,7 @@ module.exports = {
   invalid: require('./invalid'),
   error: require('./error'),
   addPlayer: require('./add-player'),
-  dropPlayer: require('./drop-player'),
+  releasePlayer: require('./release-player'),
   selectPlayer: require('./select-player'),
   fillRoster: require('./fill-roster')
 }

@@ -90,7 +90,6 @@ describe('API /waivers - poach', function () {
     expect(waiver.uid).to.equal(1)
     expect(waiver.userid).to.equal(2)
     expect(waiver.player).to.equal(playerId)
-    expect(waiver.drop).to.equal(null)
     expect(waiver.tid).to.equal(teamId)
     expect(waiver.lid).to.equal(leagueId)
     expect(waiver.submitted).to.equal(submitted)
@@ -106,7 +105,7 @@ describe('API /waivers - poach', function () {
   // - poaching waiver for deactivated player
   // - poaching waiver for drafted player
   // - poaching waiver for added to practice squad player
-  // - poaching waiver with full roster and drop player
+  // - poaching waiver with full roster and release player
 
   describe('errors', function () {
     it('not logged in', async () => {
@@ -185,7 +184,7 @@ describe('API /waivers - poach', function () {
       await invalid(request, 'player')
     })
 
-    it('invalid drop', async () => {
+    it('invalid release', async () => {
       const request = chai
         .request(server)
         .post('/api/leagues/1/waivers')
@@ -194,7 +193,7 @@ describe('API /waivers - poach', function () {
           teamId: 2,
           type: constants.waivers.POACH,
           player: playerId,
-          drop: 'x',
+          release: 'x',
           leagueId: 1
         })
 
@@ -277,9 +276,9 @@ describe('API /waivers - poach', function () {
       await invalid(request, 'teamId')
     })
 
-    it('drop player not on team', async () => {
+    it('release player not on team', async () => {
       const players = await knex('player').whereNot('cteam', 'INA').limit(1)
-      const dropPlayerId = players[0].player
+      const releasePlayerId = players[0].player
 
       const request = chai
         .request(server)
@@ -287,13 +286,13 @@ describe('API /waivers - poach', function () {
         .set('Authorization', `Bearer ${user3}`)
         .send({
           teamId: 3,
-          drop: dropPlayerId,
+          release: releasePlayerId,
           type: constants.waivers.POACH,
           player: playerId,
           leagueId: 1
         })
 
-      await invalid(request, 'drop')
+      await invalid(request, 'release')
     })
 
     it('duplicate waivers', async () => {

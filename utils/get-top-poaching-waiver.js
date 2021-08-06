@@ -21,7 +21,6 @@ module.exports = async (leagueId) => {
       'teams.*',
       'waivers.uid as wid',
       'waivers.player',
-      'waivers.drop',
       'waivers.tid',
       'waivers.userid'
     )
