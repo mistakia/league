@@ -247,8 +247,8 @@ export function* projectTrade() {
   const tradePlayers = yield select(getCurrentTradePlayers)
   const allPlayers = tradePlayers.acceptingTeamPlayers
     .concat(tradePlayers.proposingTeamPlayers)
-    .concat(tradePlayers.acceptingTeamDropPlayers)
-    .concat(tradePlayers.proposingTeamDropPlayers)
+    .concat(tradePlayers.acceptingTeamReleasePlayers)
+    .concat(tradePlayers.proposingTeamReleasePlayers)
   for (const player of allPlayers) {
     const playerData = yield call(calculatePlayerLineupContribution, { player })
     projectedContribution[player.player] = playerData

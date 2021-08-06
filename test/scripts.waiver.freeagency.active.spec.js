@@ -367,7 +367,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
       expect(error.message).to.equal('no waivers to process')
     })
 
-    it('drop player not on team', async () => {
+    it('release player not on team', async () => {
       // TODO
     })
 

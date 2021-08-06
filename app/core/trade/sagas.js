@@ -21,7 +21,7 @@ export function* propose() {
     acceptingTeamPlayers: trade.acceptingTeamPlayers.toJS(),
     proposingTeamPicks: trade.proposingTeamPicks.toJS(),
     acceptingTeamPicks: trade.acceptingTeamPicks.toJS(),
-    dropPlayers: trade.dropPlayers.toJS(),
+    releasePlayers: trade.releasePlayers.toJS(),
     pid: teamId,
     tid,
     leagueId
@@ -50,11 +50,11 @@ export function* accept() {
   const { teamId, leagueId } = yield select(getApp)
   const { selectedTradeId } = yield select(getTrade)
   const trade = yield select(getTrade)
-  const dropPlayers = trade.dropPlayers.toJS()
+  const releasePlayers = trade.releasePlayers.toJS()
   yield call(postAcceptTrade, {
     teamId,
     leagueId,
-    dropPlayers,
+    releasePlayers,
     tradeId: selectedTradeId
   })
 }

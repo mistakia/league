@@ -1,4 +1,4 @@
-import { Map, Record } from 'immutable'
+import { Map, Record, List } from 'immutable'
 
 import { appActions } from '@core/app'
 import { poachActions } from './actions'
@@ -7,7 +7,7 @@ const Poach = new Record({
   tid: null,
   player: null,
   processed: null,
-  drop: null,
+  release: new List(),
   submitted: null
 })
 

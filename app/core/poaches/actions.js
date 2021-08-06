@@ -5,11 +5,11 @@ export const poachActions = {
   POST_POACH_FULFILLED: 'POST_POACH_FULFILLED',
   POST_POACH_PENDING: 'POST_POACH_PENDING',
 
-  poach: ({ player, drop }) => ({
+  poach: ({ player, release }) => ({
     type: poachActions.POACH_PLAYER,
     payload: {
       player,
-      drop
+      release
     }
   }),
 

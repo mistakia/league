@@ -38,10 +38,13 @@ export function getPoachPlayersForCurrentLeague(state) {
     const playerId = poach.player
     const player = getPlayerById(state, { playerId })
     poaches = poaches.setIn([playerId, 'player'], player)
-    if (poach.drop) {
-      const playerId = poach.drop
-      const player = getPlayerById(state, { playerId })
-      poaches = poaches.setIn([playerId, 'drop'], player)
+    if (poach.release.size) {
+      const releases = []
+      for (const playerId of poach.release) {
+        const player = getPlayerById(state, { playerId })
+        releases.push(player)
+      }
+      poaches = poaches.setIn([playerId, 'release'], new List(releases))
     }
   }
 

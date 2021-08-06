@@ -87,9 +87,9 @@ describe('API /poaches', function () {
   // - invalid leagueId
   // - invalid teamId
   // - invalid player
-  // - invalid drop
+  // - invalid release
   // - teamId doesn't belong to userId
-  // - drop player not on team
+  // - release player not on team
   // - poaching claim with reserve violation
 
   // errors

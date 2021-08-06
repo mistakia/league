@@ -80,7 +80,7 @@ module.exports = async function ({ lid, tid, player, userid }) {
   }
   await db('transactions').insert(transaction)
 
-  // remove drop player from rosters
+  // remove release player from rosters
   const teamRosters = await db('rosters')
     .where('week', '>=', constants.season.week)
     .where('year', constants.season.year)

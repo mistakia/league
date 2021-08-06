@@ -145,7 +145,6 @@ describe('API /trades', function () {
         tid: 3,
         lid: 1,
         player: player1.player,
-        drop: null,
         submitted: Math.round(Date.now() / 1000)
       })
 
@@ -298,21 +297,21 @@ describe('API /trades', function () {
     })
   })
 
-  // trade with drop players, make sure transactions are created
+  // trade with release players, make sure transactions are created
 
   // one for one trade
 
-  // two for one trade with drop
+  // two for one trade with release
 
-  // one for two trade with drop
+  // one for two trade with release
 
   // one for one pick exchange
 
   // two for one pick exchange
 
-  // two players for two picks and two drops
+  // two players for two picks and two releases
 
-  // three for one with no drop (has room)
+  // three for one with no release (has room)
 
   // cancel trade
   // reject trade
@@ -346,7 +345,6 @@ describe('API /trades', function () {
         tid: 3,
         lid: 1,
         player: player1.player,
-        drop: null,
         submitted: Math.round(Date.now() / 1000)
       })
 
@@ -401,12 +399,12 @@ describe('API /trades', function () {
   // - invalid leagueId
   // - invalid teamId
   // - invalid player
-  // - invalid drop
+  // - invalid release
   // - teamId doesn't belong to userId
-  // - drop player not on team
+  // - release player not on team
   // - player not on team
   // - some players not on team
-  // - some drop players not on team
+  // - some release players not on team
   // - pick not owned by proposing team
   // - some picks not owned by proposing team
   // - pick is not owned by accepting team

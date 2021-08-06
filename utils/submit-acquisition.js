@@ -12,7 +12,7 @@ const isPlayerLocked = require('./is-player-locked')
 
 module.exports = async function ({
   leagueId,
-  drop,
+  release = [],
   player,
   teamId,
   bid = 0,
@@ -24,19 +24,21 @@ module.exports = async function ({
       ? constants.transactions.ROSTER_ADD
       : constants.transactions.PRACTICE_ADD
 
-  // verify player and drop ids
+  // verify player and release ids
   const playerIds = [player]
-  if (drop) playerIds.push(drop)
+  if (release.length) {
+    release.forEach((player) => playerIds.push(player))
+  }
   const playerRows = await db('player').whereIn('player', playerIds)
   const playerRow = playerRows.find((p) => p.player === player)
   if (!playerRow) {
     throw new Error('invalid player')
   }
-  let dropPlayerRow
-  if (drop) {
-    dropPlayerRow = playerRows.find((p) => p.player === drop)
-    if (!dropPlayerRow) {
-      throw new Error('invalid drop')
+  if (release.length) {
+    for (const player of release) {
+      if (!playerRows.some((p) => p.player === player)) {
+        throw new Error('invalid release')
+      }
     }
   }
 
@@ -90,7 +92,7 @@ module.exports = async function ({
     }
   }
 
-  // verify player is not on waivers - dropped in the last 24 hours excluding cycling
+  // verify player is not on waivers - released in the last 24 hours excluding cycling
   const isOnWaivers = await isPlayerOnWaivers({ player, leagueId })
   if (isOnWaivers) {
     throw new Error('player is on waivers')
@@ -110,15 +112,16 @@ module.exports = async function ({
   // verify team has bench space & passes roster constraints
   const rosterRow = await getRoster({ tid: teamId })
   const roster = new Roster({ roster: rosterRow, league })
-  let dropPlayer
-  if (drop) {
-    dropPlayer = roster.get(drop)
-    if (!dropPlayer) {
-      throw new Error('invalid drop')
-    }
+  if (release.length) {
+    for (const player of release) {
+      const releasePlayer = roster.get(player)
+      if (!releasePlayer) {
+        throw new Error('invalid release')
+      }
 
-    if (dropPlayer.slot !== constants.slots.PSP) {
-      roster.removePlayer(drop)
+      if (releasePlayer.slot !== constants.slots.PSP) {
+        roster.removePlayer(player)
+      }
     }
   }
 
@@ -130,14 +133,19 @@ module.exports = async function ({
   const result = []
 
   // process release
-  if (dropPlayer && dropPlayer.slot !== constants.slots.PSP) {
-    const releaseData = await processRelease({
-      player: drop,
-      tid: teamId,
-      lid: leagueId,
-      userid: userId
-    })
-    result.push(releaseData)
+  if (release.length) {
+    for (const player of release) {
+      const releasePlayer = roster.get(player)
+      if (releasePlayer && releasePlayer.slot !== constants.slots.PSP) {
+        const releaseData = await processRelease({
+          player,
+          tid: teamId,
+          lid: leagueId,
+          userid: userId
+        })
+        result.push(releaseData)
+      }
+    }
   }
 
   // add player to roster
@@ -171,8 +179,13 @@ module.exports = async function ({
 
   // send notification
   let message = `${team.name} (${team.abbrv}) has signed free agent ${playerRow.fname} ${playerRow.lname} (${playerRow.pos}) for $${bid}.`
-  if (drop) {
-    message += ` ${dropPlayerRow.fname} ${dropPlayerRow.lname} (${dropPlayerRow.pos}) has been released.`
+  if (release.length) {
+    for (const player of release) {
+      if (roster.has(player)) {
+        const releasePlayer = playerRows.find((p) => p.player === player)
+        message += ` ${releasePlayer.fname} ${releasePlayer.lname} (${releasePlayer.pos}) has been released.`
+      }
+    }
   }
   await sendNotifications({
     leagueId: league.uid,

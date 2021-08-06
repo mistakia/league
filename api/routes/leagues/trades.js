@@ -17,7 +17,7 @@ router.get('/?', async (req, res) => {
       })
     const tradeids = trades.map((t) => t.uid)
 
-    const drops = await db('trades_drops').whereIn('tradeid', tradeids)
+    const releases = await db('trade_releases').whereIn('tradeid', tradeids)
     const players = await db('trades_players').whereIn('tradeid', tradeids)
     const picks = await db('trades_picks')
       .select(
@@ -33,19 +33,19 @@ router.get('/?', async (req, res) => {
       .join('draft', 'trades_picks.pickid', 'draft.uid')
 
     for (const trade of trades) {
-      trade.proposingTeamDropPlayers = []
-      trade.acceptingTeamDropPlayers = []
+      trade.proposingTeamReleasePlayers = []
+      trade.acceptingTeamReleasePlayers = []
       trade.proposingTeamPlayers = []
       trade.acceptingTeamPlayers = []
       trade.proposingTeamPicks = []
       trade.acceptingTeamPicks = []
 
-      for (const player of drops) {
+      for (const player of releases) {
         if (player.tradeid !== trade.uid) continue
         if (player.tid === trade.pid) {
-          trade.proposingTeamDropPlayers.push(player.player)
+          trade.proposingTeamReleasePlayers.push(player.player)
         } else {
-          trade.acceptingTeamDropPlayers.push(player.player)
+          trade.acceptingTeamReleasePlayers.push(player.player)
         }
       }
 
@@ -99,10 +99,10 @@ router.post(
           ? req.body.acceptingTeamPicks
           : [req.body.acceptingTeamPicks]
         : []
-      const dropPlayers = req.body.dropPlayers
-        ? Array.isArray(req.body.dropPlayers)
-          ? req.body.dropPlayers
-          : [req.body.dropPlayers]
+      const releasePlayers = req.body.releasePlayers
+        ? Array.isArray(req.body.releasePlayers)
+          ? req.body.releasePlayers
+          : [req.body.releasePlayers]
         : []
 
       const { leagueId } = req.params
@@ -119,7 +119,7 @@ router.post(
       // make sure no player is on the practice squad with an existing poaching claim
       const allPlayers = proposingTeamPlayers.concat(
         acceptingTeamPlayers,
-        dropPlayers
+        releasePlayers
       )
       const psPlayers = await db('rosters_players')
         .join('rosters', 'rosters_players.rid', 'rosters.uid')
@@ -152,10 +152,10 @@ router.post(
         league
       })
 
-      // valdiate drop players
-      for (const player of dropPlayers) {
+      // valdiate release players
+      for (const player of releasePlayers) {
         if (!proposingTeamRoster.has(player)) {
-          return res.status(400).send({ error: 'drop player not on team' })
+          return res.status(400).send({ error: 'release player not on team' })
         }
       }
 
@@ -229,7 +229,7 @@ router.post(
         .join('player', 'transactions.player', 'player.player')
         .whereIn('player.player', acceptingTeamPlayers)
 
-      dropPlayers.forEach((p) => proposingTeamRoster.removePlayer(p))
+      releasePlayers.forEach((p) => proposingTeamRoster.removePlayer(p))
       proposingTeamPlayers.forEach((p) => proposingTeamRoster.removePlayer(p))
       for (const playerId of acceptingTeamPlayers) {
         const player = players.find((p) => p.player === playerId)
@@ -288,9 +288,9 @@ router.post(
         })
       }
 
-      const insertDrops = []
-      for (const player of dropPlayers) {
-        insertDrops.push({
+      const insertReleases = []
+      for (const player of releasePlayers) {
+        insertReleases.push({
           tradeid,
           player,
           tid: pid
@@ -305,8 +305,8 @@ router.post(
         await db('trades_players').insert(insertPlayers)
       }
 
-      if (insertDrops.length) {
-        await db('trades_drops').insert(insertDrops)
+      if (insertReleases.length) {
+        await db('trade_releases').insert(insertReleases)
       }
 
       req.params.tradeId = tradeid

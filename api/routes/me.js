@@ -44,11 +44,27 @@ router.get('/?', async (req, res) => {
     const poaches = await db('poaches')
       .whereIn('lid', leagueIds)
       .whereNull('processed')
+    const poachIds = poaches.map((p) => p.uid)
+    const poachReleases = await db('poach_releases').whereIn(
+      'poachid',
+      poachIds
+    )
+    for (const poach of poaches) {
+      poach.release = poachReleases.filter((p) => p.poachid === poach.uid)
+    }
 
     const waivers = await db('waivers')
       .whereIn('tid', teamIds)
       .whereNull('processed')
       .whereNull('cancelled')
+    const waiverIds = waivers.map((p) => p.uid)
+    const waiverReleases = await db('waiver_releases').whereIn(
+      'waiverid',
+      waiverIds
+    )
+    for (const waiver of waivers) {
+      waiver.release = waiverReleases.filter((p) => p.waiverid === waiver.uid)
+    }
 
     res.send({
       user,

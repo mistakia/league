@@ -53,21 +53,21 @@ export const waiverActions = {
     }
   }),
 
-  claim: ({ player, bid, drop, type }) => ({
+  claim: ({ player, bid, release, type }) => ({
     type: waiverActions.WAIVER_CLAIM,
     payload: {
       player,
       bid,
-      drop,
+      release,
       type
     }
   }),
 
-  update: ({ waiverId, drop, bid }) => ({
+  update: ({ waiverId, release, bid }) => ({
     type: waiverActions.UPDATE_WAIVER_CLAIM,
     payload: {
       waiverId,
-      drop,
+      release,
       bid
     }
   }),

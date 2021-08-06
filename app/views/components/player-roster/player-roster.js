@@ -80,9 +80,14 @@ class PlayerRoster extends Player {
         </div>
         {isClaim && (
           <div className='player__item-name table__cell'>
-            {claim.drop && (
-              <PlayerName playerId={claim.drop} hideActions={isClaim} />
-            )}
+            {claim.release.size &&
+              claim.release.map((player) => (
+                <PlayerName
+                  key={player}
+                  playerId={player}
+                  hideActions={isClaim}
+                />
+              ))}
           </div>
         )}
         {isWaiver && (

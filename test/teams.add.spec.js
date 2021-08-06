@@ -273,10 +273,10 @@ describe('API /teams - add', function () {
       await invalid(request, 'teamId')
     })
 
-    it('drop player not on team', async () => {
+    it('release player not on team', async () => {
       MockDate.set(start.add('2', 'week').day(4).toDate())
       const player = await selectPlayer()
-      const drop = await selectPlayer()
+      const release = await selectPlayer()
       const request = chai
         .request(server)
         .post('/api/teams/1/add')
@@ -284,12 +284,12 @@ describe('API /teams - add', function () {
         .send({
           teamId: 1,
           player: player.player,
-          drop: drop.player,
+          release: release.player,
           leagueId: 1,
           slot: constants.slots.BENCH
         })
 
-      await invalid(request, 'drop')
+      await invalid(request, 'release')
     })
 
     it('player is not free agent', async () => {
@@ -390,7 +390,7 @@ describe('API /teams - add', function () {
       await error(request, 'Reserve player violation')
     })
 
-    it('drop protected practice squad player', async () => {
+    it('release protected practice squad player', async () => {
       // TODO
     })
 
@@ -402,7 +402,7 @@ describe('API /teams - add', function () {
       // TODO
     })
 
-    it('free agent on waivers - dropped within 24 hrs', async () => {
+    it('free agent on waivers - released within 24 hrs', async () => {
       // TODO
     })
 

@@ -46,8 +46,13 @@ router.get('/?', async (req, res) => {
 router.post('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    const { player, drop, leagueId, type, teamId } = req.body
+    const { player, leagueId, type, teamId } = req.body
+    let { release } = req.body
     let bid = parseInt(req.body.bid || 0, 10)
+
+    if (!Array.isArray(release)) {
+      release = release ? [release] : []
+    }
 
     if (constants.season.week > constants.season.finalWeek) {
       return res.status(400).send({ error: 'player is locked' })
@@ -95,7 +100,9 @@ router.post('/?', async (req, res) => {
     }
 
     const playerIds = [player]
-    if (drop) playerIds.push(drop)
+    if (release.length) {
+      release.forEach((player) => playerIds.push(player))
+    }
     const players = await db('player').whereIn('player', playerIds)
     if (players.length !== playerIds.length) {
       return res.status(400).send({ error: 'invalid player' })
@@ -206,11 +213,6 @@ router.post('/?', async (req, res) => {
         claimsQuery.where('bid', bid)
       }
 
-      if (drop) {
-        claimsQuery.where('drop', drop)
-      } else {
-        claimsQuery.whereNull('drop')
-      }
       const claims = await claimsQuery
 
       if (claims.length) {
@@ -270,16 +272,18 @@ router.post('/?', async (req, res) => {
     // verify team has space for player on active roster
     const rosterRow = await getRoster({ tid })
     const roster = new Roster({ roster: rosterRow, league })
-    if (drop) {
-      if (!roster.has(drop)) {
-        return res.status(400).send({ error: 'invalid drop' })
-      }
+    if (release.length) {
+      for (const player of release) {
+        if (!roster.has(player)) {
+          return res.status(400).send({ error: 'invalid release' })
+        }
 
-      const dropPlayer = roster.get(drop)
-      if (dropPlayer.slot === constants.slots.PSP) {
-        return res.status(400).send({ error: 'invalid drop' })
+        const releasePlayer = roster.get(player)
+        if (releasePlayer.slot === constants.slots.PSP) {
+          return res.status(400).send({ error: 'invalid release' })
+        }
+        roster.removePlayer(player)
       }
-      roster.removePlayer(drop)
     }
     const hasSlot =
       type === constants.waivers.FREE_AGENCY_PRACTICE
@@ -301,7 +305,6 @@ router.post('/?', async (req, res) => {
       userid: req.user.userId,
       lid: leagueId,
       player,
-      drop,
       po: 9999,
       submitted: Math.round(Date.now() / 1000),
       bid,
@@ -309,6 +312,14 @@ router.post('/?', async (req, res) => {
     }
     const ids = await db('waivers').insert(data)
     data.uid = ids[0]
+    if (release.length) {
+      const releaseInserts = release.map((player) => ({
+        waiverid: ids[0],
+        player
+      }))
+      await db('waiver_releases').insert(releaseInserts)
+    }
+
     res.send(data)
   } catch (error) {
     logger(error)
@@ -367,8 +378,13 @@ router.put('/:waiverId', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const { waiverId } = req.params
-    const { teamId, leagueId, drop } = req.body
+    const { teamId, leagueId } = req.body
+    let { release } = req.body
     const bid = parseInt(req.body.bid || 0, 10)
+
+    if (!Array.isArray(release)) {
+      release = release ? [release] : []
+    }
 
     if (!teamId) {
       return res.status(400).send({ error: 'missing teamId' })
@@ -434,11 +450,13 @@ router.put('/:waiverId', async (req, res) => {
     // verify team has space for player on active roster
     const rosterRow = await getRoster({ tid })
     const roster = new Roster({ roster: rosterRow, league })
-    if (drop) {
-      if (!roster.has(drop)) {
-        return res.status(400).send({ error: 'invalid drop' })
+    if (release.length) {
+      for (const player of release) {
+        if (!roster.has(player)) {
+          return res.status(400).send({ error: 'invalid release' })
+        }
+        roster.removePlayer(player)
       }
-      roster.removePlayer(drop)
     }
     const hasSlot =
       waiver.type === constants.waivers.FREE_AGENCY_PRACTICE
@@ -448,8 +466,18 @@ router.put('/:waiverId', async (req, res) => {
       return res.status(400).send({ error: 'exceeds roster limits' })
     }
 
-    await db('waivers').update({ bid, drop }).where({ uid: waiverId })
-    res.send({ bid, drop, uid: waiverId })
+    await db('waivers').update({ bid }).where({ uid: waiverId })
+    const releaseInserts = release.map((player) => ({
+      waiverid: waiverId,
+      player
+    }))
+    await db('waiver_releases').insert(releaseInserts).onConflict().merge()
+    await db('waiver_releases')
+      .del()
+      .where('waiverid', waiverId)
+      .whereNotIn('player', release)
+
+    res.send({ bid, release, uid: waiverId })
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })

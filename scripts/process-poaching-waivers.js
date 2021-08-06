@@ -43,10 +43,13 @@ const run = async () => {
       let error
 
       try {
+        const release = await db('waiver_releases')
+          .select('player')
+          .where('waiverid', waiver.uid)
         await submitPoach({
+          release,
           leagueId: waiver.lid,
           userId: waiver.userid,
-          drop: waiver.drop,
           player: waiver.player,
           teamId: waiver.tid,
           team: waiver

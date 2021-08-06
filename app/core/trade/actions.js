@@ -4,7 +4,7 @@ export const tradeActions = {
   TRADE_SET_ACCEPTING_TEAM_PLAYERS: 'TRADE_SET_ACCEPTING_TEAM_PLAYERS',
   TRADE_SET_PROPOSING_TEAM_PICKS: 'TRADE_SET_PROPOSING_TEAM_PICKS',
   TRADE_SET_ACCEPTING_TEAM_PICKS: 'TRADE_SET_ACCEPTING_TEAM_PICKS',
-  TRADE_SET_DROP_PLAYERS: 'TRADE_SET_DROP_PLAYERS',
+  TRADE_SET_RELEASE_PLAYERS: 'TRADE_SET_RELEASE_PLAYERS',
 
   SELECT_TRADE: 'SELECT_TRADE',
   PROPOSE_TRADE: 'PROPOSE_TRADE',
@@ -74,8 +74,8 @@ export const tradeActions = {
     type: tradeActions.REJECT_TRADE
   }),
 
-  setDropPlayers: (players) => ({
-    type: tradeActions.TRADE_SET_DROP_PLAYERS,
+  setReleasePlayers: (players) => ({
+    type: tradeActions.TRADE_SET_RELEASE_PLAYERS,
     payload: {
       players
     }
