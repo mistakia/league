@@ -108,7 +108,7 @@ export function getLeagueEvents(state) {
 
 export function isBeforeExtensionDeadline(state) {
   const league = getCurrentLeague(state)
-  const deadline = dayjs().unix(league.ext_date)
+  const deadline = dayjs.unix(league.ext_date)
   return constants.season.now.isBefore(deadline)
 }
 
