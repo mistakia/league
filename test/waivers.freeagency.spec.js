@@ -16,7 +16,7 @@ const { user1 } = require('./fixtures/token')
 const { getRoster } = require('../utils')
 const {
   addPlayer,
-  dropPlayer,
+  releasePlayer,
   selectPlayer,
   fillRoster,
   error
@@ -91,7 +91,7 @@ describe('API /waivers - free agency', function () {
       })
 
       MockDate.set(start.subtract('3', 'week').toDate())
-      await dropPlayer({
+      await releasePlayer({
         leagueId,
         player,
         teamId: 2,
@@ -160,7 +160,7 @@ describe('API /waivers - free agency', function () {
       })
 
       MockDate.set(start.subtract('3', 'week').toDate())
-      await dropPlayer({
+      await releasePlayer({
         leagueId,
         player,
         teamId: 2,
@@ -237,7 +237,7 @@ describe('API /waivers - free agency', function () {
       MockDate.set(dayjs().add('5', 'minute').toDate())
 
       // release player
-      await dropPlayer({ leagueId: 1, player, teamId: 2, userId: 2 })
+      await releasePlayer({ leagueId: 1, player, teamId: 2, userId: 2 })
 
       // set time to 24 hours and 1 minute later
       MockDate.set(dayjs().add('24', 'hour').add('1', 'minute').toDate())
@@ -314,7 +314,7 @@ describe('API /waivers - free agency', function () {
       })
 
       MockDate.set(start.subtract('3', 'week').toDate())
-      await dropPlayer({
+      await releasePlayer({
         leagueId,
         player,
         teamId: 2,
@@ -401,11 +401,11 @@ describe('API /waivers - free agency', function () {
       // TODO
     })
 
-    it('drop protected practice squad player', async () => {
+    it('release protected practice squad player', async () => {
       // TODO
     })
 
-    it('rookie free agent waiver w/ full practice squad and no drop', async () => {
+    it('rookie free agent waiver w/ full practice squad and no release', async () => {
       const picks = 12 * 3
       MockDate.set(start.subtract('2', 'month').add(picks, 'day').toDate())
       const leagueId = 1

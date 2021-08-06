@@ -70,11 +70,11 @@ export const rosterActions = {
   POST_TAG_FAILED: 'POST_TAG_FAILED',
   POST_TAG_FULFILLED: 'POST_TAG_FULFILLED',
 
-  addFreeAgent: ({ player, drop, slot }) => ({
+  addFreeAgent: ({ player, release, slot }) => ({
     type: rosterActions.ADD_FREE_AGENT,
     payload: {
       player,
-      drop,
+      release,
       slot
     }
   }),

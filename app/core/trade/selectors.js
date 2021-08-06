@@ -28,9 +28,9 @@ export function getTradeIsValid(state) {
   const addPlayerIds = isProposer
     ? trade.acceptingTeamPlayers
     : trade.proposingTeamPlayers
-  const dropPlayerIds = isProposer
-    ? trade.proposingTeamDropPlayers
-    : trade.acceptingTeamDropPlayers
+  const releasePlayerIds = isProposer
+    ? trade.proposingTeamReleasePlayers
+    : trade.acceptingTeamReleasePlayers
   const removePlayerIds = isProposer
     ? trade.proposingTeamPlayers
     : trade.acceptingTeamPlayers
@@ -38,7 +38,7 @@ export function getTradeIsValid(state) {
   const league = getCurrentLeague(state)
   const players = getAllPlayers(state)
   const roster = new Roster({ roster: rosterRecord.toJS(), league })
-  dropPlayerIds.forEach((p) => roster.removePlayer(p))
+  releasePlayerIds.forEach((p) => roster.removePlayer(p))
   removePlayerIds.forEach((p) => roster.removePlayer(p))
   for (const playerId of addPlayerIds) {
     const player = players.get(playerId)
@@ -78,7 +78,7 @@ export function getCurrentTrade(state) {
     acceptingTeamPlayers,
     acceptingTeamPicks,
     proposingTeamPicks,
-    dropPlayers
+    releasePlayers
   } = getTrade(state)
 
   if (selectedTradeId) {
@@ -87,7 +87,7 @@ export function getCurrentTrade(state) {
       !trade.cancelled && !trade.rejected && !trade.accepted && !trade.vetoed
     const isAcceptingTeam = trade.tid === teamId
     if (isOpen && isAcceptingTeam) {
-      return trade.merge({ acceptingTeamDropPlayers: dropPlayers })
+      return trade.merge({ acceptingTeamReleasePlayers: releasePlayers })
     } else {
       return trade
     }
@@ -97,7 +97,7 @@ export function getCurrentTrade(state) {
     return createTrade({
       tid,
       pid: teamId,
-      proposingTeamDropPlayers: dropPlayers,
+      proposingTeamReleasePlayers: releasePlayers,
       acceptingTeamPlayers,
       proposingTeamPlayers,
       acceptingTeamPicks: acceptingTeamPicks.map((pickId) =>
@@ -125,14 +125,14 @@ export function getCurrentTradePlayers(state) {
     )
   )
 
-  const acceptingTeamDropPlayers = new List(
-    trade.acceptingTeamDropPlayers.map((playerId) =>
+  const acceptingTeamReleasePlayers = new List(
+    trade.acceptingTeamReleasePlayers.map((playerId) =>
       getPlayerById(state, { playerId })
     )
   )
 
-  const proposingTeamDropPlayers = new List(
-    trade.proposingTeamDropPlayers.map((playerId) =>
+  const proposingTeamReleasePlayers = new List(
+    trade.proposingTeamReleasePlayers.map((playerId) =>
       getPlayerById(state, { playerId })
     )
   )
@@ -140,17 +140,17 @@ export function getCurrentTradePlayers(state) {
   return {
     acceptingTeamPlayers,
     proposingTeamPlayers,
-    acceptingTeamDropPlayers,
-    proposingTeamDropPlayers
+    acceptingTeamReleasePlayers,
+    proposingTeamReleasePlayers
   }
 }
 
-function calculateTradedRosterPlayers({ state, roster, add, remove, drop }) {
+function calculateTradedRosterPlayers({ state, roster, add, remove, release }) {
   const activePlayerIds = roster.active.map((p) => p.player)
 
   const removePlayers = []
   remove.forEach((playerId) => removePlayers.push(playerId))
-  drop.forEach((playerId) => removePlayers.push(playerId))
+  release.forEach((playerId) => removePlayers.push(playerId))
 
   const filteredPlayerIds = activePlayerIds.filter(
     (p) => !removePlayers.includes(p)
@@ -168,7 +168,7 @@ export function getProposingTeamTradedRosterPlayers(state) {
     state,
     roster,
     add: trade.acceptingTeamPlayers,
-    drop: trade.proposingTeamDropPlayers,
+    release: trade.proposingTeamReleasePlayers,
     remove: trade.proposingTeamPlayers
   })
 }
@@ -181,7 +181,7 @@ export function getAcceptingTeamTradedRosterPlayers(state) {
     state,
     roster,
     add: trade.proposingTeamPlayers,
-    drop: trade.acceptingTeamDropPlayers,
+    release: trade.acceptingTeamReleasePlayers,
     remove: trade.acceptingTeamPlayers
   })
 }

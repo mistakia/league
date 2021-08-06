@@ -18,7 +18,7 @@ export default class AddFreeAgentDialog extends React.Component {
   constructor(props) {
     super(props)
 
-    const drops = []
+    const releases = []
     const { league, player, practice } = props
     const r = new Roster({ roster: props.roster.toJS(), league })
 
@@ -28,7 +28,7 @@ export default class AddFreeAgentDialog extends React.Component {
         const r = new Roster({ roster: props.roster.toJS(), league })
         r.removePlayer(p.player)
         if (r.hasOpenPracticeSquadSlot()) {
-          drops.push(p)
+          releases.push(p)
         }
       })
     } else {
@@ -36,7 +36,7 @@ export default class AddFreeAgentDialog extends React.Component {
         const r = new Roster({ roster: props.roster.toJS(), league })
         r.removePlayer(p.player)
         if (r.hasOpenBenchSlot(player.pos)) {
-          drops.push(p)
+          releases.push(p)
         }
       })
     }
@@ -44,26 +44,26 @@ export default class AddFreeAgentDialog extends React.Component {
     this._isPlayerEligible = practice
       ? r.hasOpenPracticeSquadSlot()
       : r.hasOpenBenchSlot(player.pos)
-    this._drops = drops
-    this.state = { drop: '', error: false }
+    this._releases = releases
+    this.state = { release: [], error: false }
   }
 
-  handleDrop = (event) => {
+  handleRelease = (event) => {
     const { value } = event.target
-    this.setState({ drop: value, error: false })
+    this.setState({ release: value, error: false })
   }
 
   handleSubmit = () => {
     const { player, practice } = this.props
-    const { drop } = this.state
+    const { release } = this.state
 
-    if (!this._isPlayerEligible && !drop) {
+    if (!this._isPlayerEligible && !release) {
       return this.setState({ error: true })
     }
 
     this.props.addFreeAgent({
       player: player.player,
-      drop,
+      release,
       slot: practice ? constants.slots.PS : constants.slots.BENCH
     })
     this.props.onClose()
@@ -74,7 +74,7 @@ export default class AddFreeAgentDialog extends React.Component {
 
     const menuItems = []
     if (!this._isPlayerEligible) {
-      for (const rPlayer of this._drops) {
+      for (const rPlayer of this._releases) {
         menuItems.push(
           <MenuItem key={rPlayer.player} value={rPlayer.player}>
             {rPlayer.name} ({rPlayer.pos})
@@ -95,13 +95,14 @@ export default class AddFreeAgentDialog extends React.Component {
           <div className='waiver__claim-inputs'>
             {!this._isPlayerEligible && (
               <FormControl size='small' variant='outlined'>
-                <InputLabel id='drop-label'>Drop</InputLabel>
+                <InputLabel id='release-label'>Release</InputLabel>
                 <Select
-                  labelId='drop-label'
-                  value={this.state.drop}
-                  onChange={this.handleDrop}
+                  labelId='release-label'
+                  value={this.state.release}
+                  onChange={this.handleRelease}
                   error={this.state.error}
-                  label='Drop'>
+                  multiple
+                  label='Release'>
                   {menuItems}
                 </Select>
               </FormControl>

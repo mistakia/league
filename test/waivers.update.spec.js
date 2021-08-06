@@ -251,7 +251,7 @@ describe('API /waivers - update', function () {
       expect(waivers[0].bid).to.equal(bid)
     })
 
-    it('update drop', async () => {
+    it('update release', async () => {
       MockDate.set(start.add('1', 'week').toDate())
 
       const players = await knex('player')
@@ -259,7 +259,7 @@ describe('API /waivers - update', function () {
         .where('pos1', 'WR')
         .limit(2)
       const playerId = players[0].player
-      const dropPlayer = players[1]
+      const releasePlayer = players[1]
 
       // submit waiver claim
       const teamId = 1
@@ -277,10 +277,10 @@ describe('API /waivers - update', function () {
 
       const waiverId = submitRes.body.uid
 
-      // insert drop player into roster
-      await addPlayer({ leagueId, player: dropPlayer, teamId, userId: 1 })
+      // insert release player into roster
+      await addPlayer({ leagueId, player: releasePlayer, teamId, userId: 1 })
 
-      // update drop
+      // update release
       const res = await chai
         .request(server)
         .put(`/api/leagues/1/waivers/${waiverId}`)
@@ -288,19 +288,19 @@ describe('API /waivers - update', function () {
         .send({
           teamId,
           leagueId,
-          drop: dropPlayer.player
+          release: releasePlayer.player
         })
 
       res.should.have.status(200)
       // eslint-disable-next-line
       res.should.be.json
-      res.body.drop.should.equal(dropPlayer.player)
+      res.body.release.should.deep.equal([releasePlayer.player])
 
-      const waivers = await knex('waivers')
-        .where({ uid: res.body.uid })
+      const waivers = await knex('waiver_releases')
+        .where({ waiverid: res.body.uid })
         .limit(1)
       expect(waivers.length).to.equal(1)
-      expect(waivers[0].drop).to.equal(dropPlayer.player)
+      expect(waivers[0].player).to.equal(releasePlayer.player)
     })
   })
 
@@ -366,7 +366,7 @@ describe('API /waivers - update', function () {
       await missing(request, 'leagueId')
     })
 
-    it('invalid drop', async () => {
+    it('invalid release', async () => {
       const request = chai
         .request(server)
         .put(`/api/leagues/1/waivers/${waiverId}`)
@@ -374,10 +374,10 @@ describe('API /waivers - update', function () {
         .send({
           teamId: 1,
           leagueId: 1,
-          drop: 'x'
+          release: 'x'
         })
 
-      await invalid(request, 'drop')
+      await invalid(request, 'release')
     })
 
     it('invalid bid', async () => {
@@ -504,7 +504,7 @@ describe('API /waivers - update', function () {
       await invalid(request, 'waiverId')
     })
 
-    it('drop player not on team', async () => {
+    it('release player not on team', async () => {
       MockDate.set(start.add('1', 'week').toDate())
 
       const players = await knex('player')
@@ -512,7 +512,7 @@ describe('API /waivers - update', function () {
         .where('pos1', 'WR')
         .limit(2)
       const playerId = players[0].player
-      const dropPlayerId = players[1].player
+      const releasePlayerId = players[1].player
 
       // submit waiver claim
       const teamId = 1
@@ -537,17 +537,17 @@ describe('API /waivers - update', function () {
         .send({
           teamId: 1,
           leagueId: 1,
-          drop: dropPlayerId
+          release: releasePlayerId
         })
 
-      await invalid(request, 'drop')
+      await invalid(request, 'release')
     })
 
     it('bid exceeds available cap', async () => {
       // TODO
     })
 
-    it('drop player exceeds roster limits', async () => {
+    it('release player exceeds roster limits', async () => {
       // TODO
     })
   })

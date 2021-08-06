@@ -58,7 +58,7 @@ export default function TradePage() {
   const invalidNotice = (
     <Alert severity='warning'>
       <AlertTitle>Exceeds Roster Limits</AlertTitle>
-      You must select player(s) to drop
+      You must select player(s) to release
     </Alert>
   )
 
@@ -73,17 +73,21 @@ export default function TradePage() {
     </Grid>
   )
 
-  const proposingTeamDropPlayers = []
-  for (const [index, player] of trade.proposingTeamDropPlayers.entries()) {
-    proposingTeamDropPlayers.push(<TradePlayer key={index} playerId={player} />)
+  const proposingTeamReleasePlayers = []
+  for (const [index, player] of trade.proposingTeamReleasePlayers.entries()) {
+    proposingTeamReleasePlayers.push(
+      <TradePlayer key={index} playerId={player} />
+    )
   }
 
-  const acceptingTeamDropPlayers = []
-  for (const [index, player] of trade.acceptingTeamDropPlayers.entries()) {
-    acceptingTeamDropPlayers.push(<TradePlayer key={index} playerId={player} />)
+  const acceptingTeamReleasePlayers = []
+  for (const [index, player] of trade.acceptingTeamReleasePlayers.entries()) {
+    acceptingTeamReleasePlayers.push(
+      <TradePlayer key={index} playerId={player} />
+    )
   }
 
-  const teamDropPlayers = isProposer
+  const teamReleasePlayers = isProposer
     ? proposingTeamPlayers.filter(
         (p) => !trade.proposingTeamPlayers.includes(p.player)
       )
@@ -91,40 +95,40 @@ export default function TradePage() {
         (p) => !trade.acceptingTeamPlayers.includes(p.player)
       )
 
-  const showProposingTeamDropSection = Boolean(
-    (isProposer && !isValid) || trade.proposingTeamDropPlayers.size
+  const showProposingTeamReleaseSection = Boolean(
+    (isProposer && !isValid) || trade.proposingTeamReleasePlayers.size
   )
-  const proposingTeamDropSection = (
+  const proposingTeamReleaseSection = (
     <div className='trade__box'>
       <div className='trade__box-body'>
         {!isProposed && (
           <TradeSelectItems
-            title='Select players to drop'
-            onChange={this.handleDropChange}
-            selectedPlayers={tradePlayers.proposingTeamDropPlayers.toJS()}
-            players={teamDropPlayers}
+            title='Select players to release'
+            onChange={this.handleReleaseChange}
+            selectedPlayers={tradePlayers.proposingTeamReleasePlayers.toJS()}
+            players={teamReleasePlayers}
           />
         )}
-        {proposingTeamDropPlayers}
+        {proposingTeamReleasePlayers}
       </div>
     </div>
   )
 
-  const showAcceptingTeamDropSection = Boolean(
-    (!isProposer && !isValid) || trade.acceptingTeamDropPlayers.size
+  const showAcceptingTeamReleaseSection = Boolean(
+    (!isProposer && !isValid) || trade.acceptingTeamReleasePlayers.size
   )
-  const acceptingTeamDropSection = (
+  const acceptingTeamReleaseSection = (
     <div className='trade__box'>
       <div className='trade__box-body'>
         {isOpen && (
           <TradeSelectItems
-            title='Select players to drop'
-            onChange={this.handleDropChange}
-            selectedPlayers={tradePlayers.acceptingTeamDropPlayers.toJS()}
-            players={teamDropPlayers}
+            title='Select players to release'
+            onChange={this.handleReleaseChange}
+            selectedPlayers={tradePlayers.acceptingTeamReleasePlayers.toJS()}
+            players={teamReleasePlayers}
           />
         )}
-        {acceptingTeamDropPlayers}
+        {acceptingTeamReleasePlayers}
       </div>
     </div>
   )
@@ -164,7 +168,7 @@ export default function TradePage() {
                 {sItems}
               </div>
             </div>
-            {showProposingTeamDropSection && proposingTeamDropSection}
+            {showProposingTeamReleaseSection && proposingTeamReleaseSection}
           </Grid>
           <Grid item xs={12} md={6}>
             <div className='trade__box'>
@@ -184,7 +188,7 @@ export default function TradePage() {
                 {rItems}
               </div>
             </div>
-            {showAcceptingTeamDropSection && acceptingTeamDropSection}
+            {showAcceptingTeamReleaseSection && acceptingTeamReleaseSection}
           </Grid>
           {action}
         </Grid>

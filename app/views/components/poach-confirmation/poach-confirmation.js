@@ -18,40 +18,40 @@ export default class PoachConfirmation extends React.Component {
   constructor(props) {
     super(props)
 
-    const drops = []
+    const releases = []
     const { league, player } = props
     for (const rPlayer of props.rosterPlayers.active) {
       const r = new Roster({ roster: props.roster.toJS(), league })
       r.removePlayer(rPlayer.player)
       if (r.hasOpenBenchSlot(player.pos)) {
-        drops.push(rPlayer)
+        releases.push(rPlayer)
       }
     }
 
-    this._drops = drops
-    this.state = { drop: '', error: false }
+    this._releases = releases
+    this.state = { release: [], error: false }
   }
 
-  handleDrop = (event) => {
+  handleRelease = (event) => {
     const { value } = event.target
-    this.setState({ drop: value })
+    this.setState({ release: value })
   }
 
   handleSubmit = () => {
     const { isPlayerEligible } = this.props
     const player = this.props.player.player
-    const { drop } = this.state
+    const { release } = this.state
 
-    if (!isPlayerEligible && !drop) {
+    if (!isPlayerEligible && !release.length) {
       return this.setState({ error: true })
     } else {
       this.setState({ error: false })
     }
 
     if (this.props.status.waiver.poach) {
-      this.props.claim({ drop, player, type: constants.waivers.POACH })
+      this.props.claim({ release, player, type: constants.waivers.POACH })
     } else {
-      this.props.poach({ drop, player })
+      this.props.poach({ release, player })
     }
     this.props.onClose()
   }
@@ -60,7 +60,7 @@ export default class PoachConfirmation extends React.Component {
     const { isPlayerEligible, rosterInfo, status, player } = this.props
 
     const menuItems = []
-    for (const rPlayer of this._drops) {
+    for (const rPlayer of this._releases) {
       menuItems.push(
         <MenuItem key={rPlayer.player} value={rPlayer.player}>
           {rPlayer.name} ({rPlayer.pos})
@@ -89,18 +89,18 @@ export default class PoachConfirmation extends React.Component {
           {!isPlayerEligible && (
             <DialogContentText>
               There is not enough roster or salary space on your active roster.
-              Please select a player to drop. They will only be dropped if your
-              claim is successful.
+              Please select a player to release. They will only be released if
+              your claim is successful.
             </DialogContentText>
           )}
           <FormControl size='small' variant='outlined'>
-            <InputLabel id='drop-label'>Drop</InputLabel>
+            <InputLabel id='release-label'>Release</InputLabel>
             <Select
-              labelId='drop-label'
-              value={this.state.drop}
+              labelId='release-label'
+              value={this.state.release}
               error={this.state.error}
-              onChange={this.handleDrop}
-              label='Drop'>
+              onChange={this.handleRelease}
+              label='Release'>
               {menuItems}
             </Select>
           </FormControl>

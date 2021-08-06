@@ -46,29 +46,31 @@ const run = async () => {
     while (waiver) {
       let error
       try {
+        const release = await db('waiver_releases')
+          .select('player')
+          .where('waiverid', waiver.uid)
         await submitAcquisition({
+          release,
           leagueId: lid,
-          drop: waiver.drop,
           player: waiver.player,
           teamId: waiver.tid,
           bid: waiver.bid,
           userId: waiver.userid
         })
 
-        // cancel any outstanding waivers with the same drop player
-        if (waiver.drop) {
+        // cancel any outstanding waivers with the same release player
+        if (release.length) {
           await db('waivers')
             .update({
               succ: 0,
-              reason: 'invalid drop',
+              reason: 'invalid release',
               processed: timestamp
             })
+            .join('waiver_releases', 'waiver_releases.waiverid', 'waviers.uid')
             .whereNull('processed')
             .whereNull('cancelled')
-            .where({
-              drop: waiver.drop,
-              tid: waiver.tid
-            })
+            .where('tid', waiver.tid)
+            .whereIn('waiver_releases', release)
         }
 
         // reset waiver order if necessary

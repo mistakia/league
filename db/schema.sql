@@ -609,16 +609,32 @@ CREATE TABLE `players_status` (
 DROP TABLE IF EXISTS `poaches`;
 
 CREATE TABLE `poaches` (
+  `uid` int(11) NOT NULL AUTO_INCREMENT,
   `player` varchar(7) NOT NULL,
   `userid` int(6) NOT NULL,
-  `drop` varchar(7) DEFAULT NULL,
   `tid` int(5) NOT NULL,
   `lid` int(6) NOT NULL,
   `succ` tinyint(1) DEFAULT NULL,
   `submitted` int(11) NOT NULL,
   `reason` text DEFAULT NULL,
   `processed` int(11) DEFAULT NULL,
+  PRIMARY KEY (`uid`),
   KEY `lid` (`lid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `poach_releases`
+--
+
+DROP TABLE IF EXISTS `poach_releases`;
+
+CREATE TABLE `poach_releases` (
+  `poachid` int(11) NOT NULL,
+  `player` varchar(7) NOT NULL,
+  KEY `poachid` (`poachid`),
+  UNIQUE KEY `player` (`poachid`, `player`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -1652,12 +1668,12 @@ CREATE TABLE `trades` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `trades_drops`
+-- Table structure for table `trade_releases`
 --
 
-DROP TABLE IF EXISTS `trades_drops`;
+DROP TABLE IF EXISTS `trade_releases`;
 
-CREATE TABLE `trades_drops` (
+CREATE TABLE `trade_releases` (
   `tradeid` int(6) NOT NULL,
   `tid` int(6) NOT NULL,
   `player` varchar(7) NOT NULL,
@@ -1850,12 +1866,13 @@ CREATE TABLE `waivers` (
 -- Table structure for table `waiver_release`
 --
 
-DROP TABLE IF EXISTS `waiver_release`;
+DROP TABLE IF EXISTS `waiver_releases`;
 
-CREATE TABLE `waiver_release` (
+CREATE TABLE `waiver_releases` (
   `waiverid` int(11) NOT NULL,
   `player` varchar(7) NOT NULL,
-  KEY `waiverid` (`waiverid`)
+  KEY `waiverid` (`waiverid`),
+  UNIQUE KEY `player` (`waiverid`, `player`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
