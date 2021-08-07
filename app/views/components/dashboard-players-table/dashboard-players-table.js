@@ -1,4 +1,5 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 import { SortableContainer, SortableElement } from 'react-sortable-hoc'
 import Toolbar from '@material-ui/core/Toolbar'
@@ -73,12 +74,14 @@ export default class DashboardPlayersTable extends React.Component {
     const {
       isBeforeExtensionDeadline,
       items = [],
+      cutlist,
       title,
       poaches,
       claims,
       total,
       waiverType,
       reorderWaivers,
+      reorderCutlist,
       leadColumn = '',
       limit
     } = this.props
@@ -86,6 +89,7 @@ export default class DashboardPlayersTable extends React.Component {
     const isWaiver = !!waiverType
     const isPoach = !!poaches
     const isClaim = isWaiver || isPoach
+    const showReorder = isWaiver || cutlist
 
     const SortableItem = SortableElement(({ waiver }) => {
       return (
@@ -133,6 +137,34 @@ export default class DashboardPlayersTable extends React.Component {
           />
         </div>
       )
+    } else if (cutlist) {
+      const SortableItem = SortableElement(({ player }) => {
+        return <PlayerRoster player={player} reorder />
+      })
+
+      const SortableCutlist = SortableContainer(({ items }) => {
+        return (
+          <div>
+            {items.map((player, index) => (
+              <SortableItem key={index} index={index} player={player} />
+            ))}
+          </div>
+        )
+      })
+
+      body = (
+        <div ref={this.ref}>
+          <SortableCutlist
+            items={cutlist}
+            lockAxis='y'
+            helperClass='reordering'
+            onSortEnd={reorderCutlist}
+            helperContainer={this.ref.current}
+            lockToContainerEdges
+            useDragHandle
+          />
+        </div>
+      )
     } else {
       body = <div className='empty'>{items}</div>
     }
@@ -165,7 +197,7 @@ export default class DashboardPlayersTable extends React.Component {
         </Toolbar>
         <div className='table__container'>
           <div className='table__row table__head'>
-            {isWaiver && <div className='player__item-action table__cell' />}
+            {showReorder && <div className='player__item-action table__cell' />}
             <div className='player__item-name table__cell sticky__column'>
               {leadColumn}
             </div>
@@ -213,8 +245,8 @@ export default class DashboardPlayersTable extends React.Component {
               <BenchPlusHeader />
             </div>
           </div>
-          {Boolean(total && total.length) && (
-            <PlayerRosterTotal players={total} />
+          {Boolean(total && total.size) && (
+            <PlayerRosterTotal players={total} reorder={showReorder} />
           )}
           {body}
         </div>
@@ -233,5 +265,7 @@ DashboardPlayersTable.propTypes = {
   reorderWaivers: PropTypes.func,
   leadColumn: PropTypes.string,
   limit: PropTypes.number,
-  total: PropTypes.array
+  total: ImmutablePropTypes.list,
+  cutlist: ImmutablePropTypes.list,
+  reorderCutlist: PropTypes.func
 }

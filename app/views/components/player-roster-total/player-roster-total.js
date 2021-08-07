@@ -6,7 +6,7 @@ import { constants } from '@common'
 
 class PlayerRosterTotal extends Player {
   render() {
-    const { players, league } = this.props
+    const { players, league, reorder } = this.props
 
     const week = Math.max(constants.season.week, 1)
 
@@ -47,6 +47,7 @@ class PlayerRosterTotal extends Player {
 
     return (
       <div className='player__item table__row table__row-summary'>
+        {reorder && <div className='player__item-action table__cell' />}
         <div className='player__item-name table__cell sticky__column'>
           Total
         </div>

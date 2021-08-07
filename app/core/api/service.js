@@ -272,6 +272,14 @@ export const api = {
   getProps() {
     const url = `${BASE_URL}/odds/props`
     return { url }
+  },
+  getCutlist({ teamId }) {
+    const url = `${BASE_URL}/teams/${teamId}/cutlist`
+    return { url }
+  },
+  postCutlist({ teamId, ...data }) {
+    const url = `${BASE_URL}/teams/${teamId}/cutlist`
+    return { url, ...POST(data) }
   }
 }
 

@@ -57,5 +57,7 @@ export {
   fetchScoreboard,
   fetchPlayerGamelogs,
   fetchTeamGamelogs,
-  fetchProps
+  fetchProps,
+  getCutlist,
+  postCutlist
 } from './sagas'
