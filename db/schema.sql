@@ -2287,6 +2287,45 @@ CREATE TABLE `props` (
   `timestamp` int(11) NOT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `transition_bids`
+--
+
+DROP TABLE IF EXISTS `transition_bids`;
+
+CREATE TABLE `transition_bids` (
+  `uid` int(11) NOT NULL AUTO_INCREMENT,
+  `player` varchar(7) NOT NULL,
+  `userid` int(6) NOT NULL,
+  `bid` int(4) DEFAULT NULL,
+  `tid` int(5) NOT NULL,
+  `otid` int(5) NOT NULL,
+  `lid` int(6) NOT NULL,
+  `succ` tinyint(1) DEFAULT NULL,
+  `submitted` int(11) NOT NULL,
+  `reason` text DEFAULT NULL,
+  `processed` int(11) DEFAULT NULL,
+  PRIMARY KEY (`uid`),
+  KEY `lid` (`lid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `poach_releases`
+--
+
+DROP TABLE IF EXISTS `transition_releases`;
+
+CREATE TABLE `transition_releases` (
+  `transitionid` int(11) NOT NULL,
+  `player` varchar(7) NOT NULL,
+  KEY `transitionid` (`transitionid`),
+  UNIQUE KEY `player` (`transitionid`, `player`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
