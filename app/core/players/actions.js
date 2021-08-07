@@ -48,6 +48,19 @@ export const playerActions = {
 
   SET_PLAYERS_VIEW: 'SET_PLAYERS_VIEW',
 
+  GET_CUTLIST: 'GET_CUTLIST',
+
+  GET_CUTLIST_FULFILLED: 'GET_CUTLIST_FULFILLED',
+  GET_CUTLIST_PENDING: 'GET_CUTLIST_PENDING',
+  GET_CUTLIST_FAILED: 'GET_CUTLIST_FAILED',
+
+  TOGGLE_CUTLIST: 'TOGGLE_CUTLIST',
+  REORDER_CUTLIST: 'REORDER_CUTLIST',
+
+  POST_CUTLIST_FULFILLED: 'POST_CUTLIST_FULFILLED',
+  POST_CUTLIST_PENDING: 'POST_CUTLIST_PENDING',
+  POST_CUTLIST_FAILED: 'POST_CUTLIST_FAILED',
+
   setStats: ({ players, percentiles }) => ({
     type: playerActions.SET_PLAYER_STATS,
     payload: {
@@ -310,6 +323,71 @@ export const playerActions = {
       opts,
       data
     }
+  }),
+
+  getCutlist: () => ({
+    type: playerActions.GET_CUTLIST
+  }),
+
+  getCutlistFailed: (opts, error) => ({
+    type: playerActions.GET_CUTLIST_FAILED,
+    payload: {
+      opts,
+      error
+    }
+  }),
+
+  getCutlistPending: (opts) => ({
+    type: playerActions.GET_CUTLIST_PENDING,
+    payload: {
+      opts
+    }
+  }),
+
+  getCutlistFulfilled: (opts, data) => ({
+    type: playerActions.GET_CUTLIST_FULFILLED,
+    payload: {
+      opts,
+      data
+    }
+  }),
+
+  toggleCutlist: (player) => ({
+    type: playerActions.TOGGLE_CUTLIST,
+    payload: {
+      player
+    }
+  }),
+
+  reorderCutlist: ({ oldIndex, newIndex }) => ({
+    type: playerActions.REORDER_CUTLIST,
+    payload: {
+      oldIndex,
+      newIndex
+    }
+  }),
+
+  postCutlistPending: (opts) => ({
+    type: playerActions.POST_CUTLIST_PENDING,
+    payload: {
+      opts
+    }
+  }),
+
+  postCutlistFulfilled: (opts, data) => ({
+    type: playerActions.POST_CUTLIST_FULFILLED,
+    payload: {
+      opts,
+      data
+    }
+  }),
+
+  postCutlistFailed: (opts, error) => ({
+    type: playerActions.POST_CUTLIST_FAILED,
+    payload: {
+      opts,
+      error
+    }
   })
 }
 
@@ -347,4 +425,16 @@ export const delProjectionActions = {
   failed: playerActions.delProjectionFailed,
   fulfilled: playerActions.delProjectionFulfilled,
   pending: playerActions.delProjectionPending
+}
+
+export const getCutlistActions = {
+  failed: playerActions.getCutlistFailed,
+  fulfilled: playerActions.getCutlistFulfilled,
+  pending: playerActions.getCutlistPending
+}
+
+export const postCutlistActions = {
+  failed: playerActions.postCutlistFailed,
+  pending: playerActions.postCutlistPending,
+  fulfilled: playerActions.postCutlistFulfilled
 }

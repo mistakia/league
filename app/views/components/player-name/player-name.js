@@ -1,6 +1,7 @@
 import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
+import NotInterestedIcon from '@material-ui/icons/NotInterested'
 
 import Position from '@components/position'
 import Team from '@components/team'
@@ -16,7 +17,7 @@ export default class PlayerName extends React.Component {
   }
 
   render = () => {
-    const { player } = this.props
+    const { player, isOnCutlist } = this.props
 
     return (
       <div className='player__name cursor' onClick={this.handleClick}>
@@ -29,8 +30,13 @@ export default class PlayerName extends React.Component {
             <PlayerLabel label='R' type='rookie' description='Rookie' />
           )}
           <Team team={player.team} />
+        </div>
+        <div className='player__name-label'>
           {player.slot === constants.slots.PSP && (
             <PlayerLabel label='P' description='Protected Practice Squad' />
+          )}
+          {isOnCutlist && (
+            <PlayerLabel label={<NotInterestedIcon />} description='Cutlist' />
           )}
           <PlayerTag tag={player.tag} />
         </div>
@@ -41,5 +47,6 @@ export default class PlayerName extends React.Component {
 
 PlayerName.propTypes = {
   player: ImmutablePropTypes.record,
-  select: PropTypes.func
+  select: PropTypes.func,
+  isOnCutlist: PropTypes.bool
 }

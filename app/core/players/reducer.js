@@ -32,6 +32,7 @@ const initialState = new Map({
   view: constants.season.week === 0 ? 'season' : 'ros',
   orderBy: 'vorp.ros.default',
   watchlist: new Set(),
+  cutlist: new List(),
   baselines: new Map(),
   selected: null
 })
@@ -262,6 +263,28 @@ export function playersReducer(state = initialState, { payload, type }) {
       }
       const value = payload.data ? payload.data.value : payload.opts.value
       return state.merge({ orderBy: `vorp.ros.${value}` }) // TODO switch between 0 and ros
+    }
+
+    case playerActions.GET_CUTLIST_FULFILLED:
+      return state.merge({
+        cutlist: new List(payload.data)
+      })
+
+    case playerActions.TOGGLE_CUTLIST: {
+      const cutlist = state.get('cutlist')
+      const { player } = payload
+      const index = cutlist.keyOf(player)
+      return state.merge({
+        cutlist: index ? cutlist.delete(index) : cutlist.push(player)
+      })
+    }
+
+    case playerActions.REORDER_CUTLIST: {
+      const cutlist = state.get('cutlist')
+      const { oldIndex, newIndex } = payload
+      const player = cutlist.get(oldIndex)
+      const newCutlist = cutlist.delete(oldIndex).insert(newIndex, player)
+      return state.set('cutlist', newCutlist)
     }
 
     case playerActions.SET_WATCHLIST:

@@ -1,4 +1,5 @@
 import React from 'react'
+import { List } from 'immutable'
 import dayjs from 'dayjs'
 import Alert from '@material-ui/lab/Alert'
 import AlertTitle from '@material-ui/lab/AlertTitle'
@@ -19,6 +20,7 @@ import './dashboard.styl'
 export default function DashboardPage() {
   const {
     players,
+    cutlist,
     picks,
     league,
     waivers,
@@ -43,12 +45,12 @@ export default function DashboardPage() {
   }
 
   const activeItems = []
-  const activePlayers = []
+  let activePlayers = new List()
   for (const position in groups) {
     const players = groups[position]
     for (const player of players) {
       if (!player.player) continue
-      activePlayers.push(player)
+      activePlayers = activePlayers.push(player)
       activeItems.push(<PlayerRoster key={player.player} player={player} />)
     }
   }
@@ -120,56 +122,61 @@ export default function DashboardPage() {
     )
   }
 
-  const poachWaiverSection = (
-    <Grid item xs={12}>
-      <DashboardPlayersTable
-        title='Poaching Waiver Claims'
-        claims={waivers.poach}
-        waiverType='poach'
-      />
-    </Grid>
-  )
-
-  const freeAgencyActiveWaiverSection = (
-    <Grid item xs={12}>
-      <DashboardPlayersTable
-        title='Active Roster Waiver Claims'
-        claims={waivers.active}
-        waiverType='active'
-      />
-    </Grid>
-  )
-
-  const freeAgencyPracticeWaiverSection = (
-    <Grid item xs={12}>
-      <DashboardPlayersTable
-        title='Practice Squad Waiver Claims'
-        claims={waivers.practice}
-        waiverType='practice'
-      />
-    </Grid>
-  )
-
   const teamPoaches = poaches.filter((p) => p.tid === teamId)
-  const teamPoachSection = (
-    <Grid item xs={12}>
-      <DashboardPlayersTable title='Poaching Claims' poaches={teamPoaches} />
-    </Grid>
-  )
 
   const body = (
     <Container maxWidth='lg' classes={{ root: 'dashboard' }}>
-      <Grid container spacing={2}>
+      <Grid container spacing={2} alignItems='flex-start'>
         <Grid container item xs={12} md={8}>
           {notices.length ? (
             <Grid item xs={12}>
               {notices}
             </Grid>
           ) : null}
-          {waivers.poach.size ? poachWaiverSection : null}
-          {waivers.active.size ? freeAgencyActiveWaiverSection : null}
-          {waivers.practice.size ? freeAgencyPracticeWaiverSection : null}
-          {teamPoaches.size ? teamPoachSection : null}
+          {Boolean(waivers.poach.size) && (
+            <Grid item xs={12}>
+              <DashboardPlayersTable
+                title='Poaching Waiver Claims'
+                claims={waivers.poach}
+                waiverType='poach'
+              />
+            </Grid>
+          )}
+          {Boolean(waivers.active.size) && (
+            <Grid item xs={12}>
+              <DashboardPlayersTable
+                title='Active Roster Waiver Claims'
+                claims={waivers.active}
+                waiverType='active'
+              />
+            </Grid>
+          )}
+          {Boolean(waivers.practice.size) && (
+            <Grid item xs={12}>
+              <DashboardPlayersTable
+                title='Practice Squad Waiver Claims'
+                claims={waivers.practice}
+                waiverType='practice'
+              />
+            </Grid>
+          )}
+          {Boolean(teamPoaches.size) && (
+            <Grid item xs={12}>
+              <DashboardPlayersTable
+                title='Poaching Claims'
+                poaches={teamPoaches}
+              />
+            </Grid>
+          )}
+          {Boolean(cutlist.size) && (
+            <Grid item xs={12}>
+              <DashboardPlayersTable
+                title='Cutlist'
+                cutlist={cutlist}
+                total={cutlist}
+              />
+            </Grid>
+          )}
           <Grid item xs={12}>
             <DashboardPlayersTable
               items={activeItems}
