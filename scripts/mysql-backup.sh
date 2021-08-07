@@ -14,7 +14,7 @@ done
 DUMP_DIR="/root/backups"
 DB_NAME="league_production"
 DB_FILE="/root/.mysql/mysqldump.cnf"
-DB_TABLES="draft leagues matchups poaches rosters rosters_players teams trades trades_drops trades_picks trades_players trades_transactions transactions users users_sources users_teams waivers"
+DB_TABLES="draft leagues matchups poaches poach_releases rosters rosters_players teams trades trade_releases trades_picks trades_players trades_transactions transactions users users_sources users_teams waivers waiver_releases cutlist"
 DATE_FORMAT="%Y-%m-%d_%H-%M"
 
 file_name="$(date +$DATE_FORMAT)"
