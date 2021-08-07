@@ -4,6 +4,22 @@ const router = express.Router({ mergeParams: true })
 const { Roster } = require('../../../common')
 const { getRoster, verifyUserTeam } = require('../../../utils')
 
+router.get('/?', async (req, res) => {
+  const { db, logger } = req.app.locals
+  try {
+    const { teamId } = req.params
+    const cutlist = await db('cutlist')
+      .select('player')
+      .where('tid', teamId)
+      .orderBy('order', 'asc')
+
+    res.send(cutlist.map((p) => p.player))
+  } catch (error) {
+    logger(error)
+    return res.status(400).send({ error: error.toString() })
+  }
+})
+
 router.post('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {

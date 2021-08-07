@@ -66,7 +66,7 @@ const run = async () => {
           .where('waiverid', waiver.uid)
 
         await submitAcquisition({
-          release,
+          release: release.map((r) => r.player),
           leagueId: lid,
           player: waiver.player,
           teamId: waiver.tid,

@@ -159,8 +159,14 @@ export default class PlayerContextMenu extends React.Component {
     this.props.hide()
   }
 
+  handleCutlist = () => {
+    const { player } = this.props.player
+    this.props.toggleCutlist(player)
+    this.props.hide()
+  }
+
   render = () => {
-    const { waiverId, status } = this.props
+    const { waiverId, status, isOnCutlist } = this.props
 
     const menuItems = []
 
@@ -229,6 +235,12 @@ export default class PlayerContextMenu extends React.Component {
           disabled={!status.eligible.rookieTag}
           onClick={this.handleRookieTag}>
           Rookie Tag
+        </MenuItem>
+      )
+
+      menuItems.push(
+        <MenuItem key='cutlist' dense onClick={this.handleCutlist}>
+          {`${isOnCutlist ? 'Remove from' : 'Add to'} Cutlist`}
         </MenuItem>
       )
 
@@ -329,5 +341,7 @@ PlayerContextMenu.propTypes = {
   reserve: PropTypes.func,
   release: PropTypes.func,
   protect: PropTypes.func,
-  waiverId: PropTypes.string
+  waiverId: PropTypes.string,
+  toggleCutlist: PropTypes.func,
+  isOnCutlist: PropTypes.bool
 }

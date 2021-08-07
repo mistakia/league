@@ -18,7 +18,7 @@ export default function PlayerLabel({ label, type, description }) {
 }
 
 PlayerLabel.propTypes = {
-  label: PropTypes.string,
+  label: PropTypes.node,
   type: PropTypes.string,
   description: PropTypes.string
 }

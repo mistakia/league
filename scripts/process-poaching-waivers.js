@@ -47,7 +47,7 @@ const run = async () => {
           .select('player')
           .where('waiverid', waiver.uid)
         await submitPoach({
-          release,
+          release: release.map((r) => r.player),
           leagueId: waiver.lid,
           userId: waiver.userid,
           player: waiver.player,

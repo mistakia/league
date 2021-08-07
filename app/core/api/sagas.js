@@ -32,7 +32,9 @@ import {
   getPlayerActions,
   getProjectionsActions,
   putProjectionActions,
-  delProjectionActions
+  delProjectionActions,
+  getCutlistActions,
+  postCutlistActions
 } from '@core/players'
 import { getChartedPlaysActions, getTeamStatActions } from '@core/stats'
 import { getPlaysActions, getPlayStatsActions } from '@core/plays'
@@ -290,3 +292,6 @@ export const postError = fetch.bind(null, api.postError, postErrorActions)
 export const getStatus = fetch.bind(null, api.getStatus, getStatusActions)
 
 export const fetchProps = fetch.bind(null, api.getProps, getPropsActions)
+
+export const getCutlist = fetch.bind(null, api.getCutlist, getCutlistActions)
+export const postCutlist = fetch.bind(null, api.postCutlist, postCutlistActions)

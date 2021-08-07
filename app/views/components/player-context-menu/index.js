@@ -5,16 +5,18 @@ import { contextMenuActions, getContextMenuPlayer } from '@core/context-menu'
 import { rosterActions } from '@core/rosters'
 import { confirmationActions } from '@core/confirmations'
 import { waiverActions } from '@core/waivers'
-import { getPlayerStatus } from '@core/players'
+import { playerActions, getPlayerStatus, getPlayers } from '@core/players'
 
 import PlayerContextMenu from './player-context-menu'
 
 const mapStateToProps = createSelector(
   getContextMenuPlayer,
   getPlayerStatus,
-  (player, status) => ({
+  getPlayers,
+  (player, status, players) => ({
     player,
-    status
+    status,
+    isOnCutlist: players.get('cutlist').includes(player.player)
   })
 )
 
@@ -27,7 +29,8 @@ const mapDispatchToProps = {
   cancelClaim: waiverActions.cancel,
   reserve: rosterActions.reserve,
   release: rosterActions.release,
-  protect: rosterActions.protect
+  protect: rosterActions.protect,
+  toggleCutlist: playerActions.toggleCutlist
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PlayerContextMenu)

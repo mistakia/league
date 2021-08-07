@@ -38,7 +38,7 @@ const run = async () => {
         .where('poachid', claim.uid)
 
       await processPoach({
-        release,
+        release: release.map((r) => r.player),
         ...claim
       })
       log(

@@ -11,6 +11,8 @@ import {
 import { getApp, appActions } from '@core/app'
 import { notificationActions } from '@core/notifications'
 import {
+  getCutlist,
+  postCutlist,
   fetchPlayers,
   searchPlayers,
   getPlayer,
@@ -175,6 +177,27 @@ export function* updateBaseline({ payload }) {
   yield put(settingActions.update({ type: 'vbaseline', value: 'manual' }))
 }
 
+export function* fetchCutlist() {
+  const { teamId } = yield select(getApp)
+  yield call(getCutlist, { teamId })
+}
+
+export function* updateCutlist() {
+  const players = yield select(getPlayers)
+  const cutlist = players.get('cutlist').toArray()
+  const { teamId, leagueId } = yield select(getApp)
+  yield call(postCutlist, { players: cutlist, teamId, leagueId })
+}
+
+export function* cutlistNotification() {
+  yield put(
+    notificationActions.show({
+      message: 'Updated Cutlist',
+      severity: 'success'
+    })
+  )
+}
+
 //= ====================================
 //  WATCHERS
 // -------------------------------------
@@ -259,6 +282,22 @@ export function* watchSearchPlayers() {
   yield debounce(1000, playerActions.SEARCH_PLAYERS, search)
 }
 
+export function* watchGetCutlist() {
+  yield takeLatest(playerActions.GET_CUTLIST, fetchCutlist)
+}
+
+export function* watchAddCutlist() {
+  yield takeLatest(playerActions.TOGGLE_CUTLIST, updateCutlist)
+}
+
+export function* watchReorderCutlist() {
+  yield takeLatest(playerActions.REORDER_CUTLIST, updateCutlist)
+}
+
+export function* watchPostCutlistFulfilled() {
+  yield takeLatest(playerActions.POST_CUTLIST_FULFILLED, cutlistNotification)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -285,5 +324,11 @@ export const playerSagas = [
 
   fork(watchPutRostersFulfilled),
   fork(watchPostRostersFulfilled),
-  fork(watchDeleteRostersFulfilled)
+  fork(watchDeleteRostersFulfilled),
+
+  fork(watchPostCutlistFulfilled),
+
+  fork(watchGetCutlist),
+  fork(watchAddCutlist),
+  fork(watchReorderCutlist)
 ]

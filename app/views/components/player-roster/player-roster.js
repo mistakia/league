@@ -5,12 +5,12 @@ import { getExtensionAmount } from '@core/utils'
 import PlayerName from '@components/player-name'
 import IconButton from '@components/icon-button'
 import { Player, connect } from '@components/player'
-import Icon from '@components/icon'
 import { sortableHandle } from 'react-sortable-hoc'
+import DragIndicatorIcon from '@material-ui/icons/DragIndicator'
 
 const DragHandle = sortableHandle(() => (
   <div className='player__item-action reorder table__cell'>
-    <Icon name='reorder' />
+    <DragIndicatorIcon />
   </div>
 ))
 

@@ -2,6 +2,7 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { waiverActions } from '@core/waivers'
+import { playerActions } from '@core/players'
 import { isBeforeExtensionDeadline } from '@core/leagues'
 
 import DashboardPlayersTable from './dashboard-players-table'
@@ -12,7 +13,8 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  reorderWaivers: waiverActions.reorderWaivers
+  reorderWaivers: waiverActions.reorderWaivers,
+  reorderCutlist: playerActions.reorderCutlist
 }
 
 export default connect(

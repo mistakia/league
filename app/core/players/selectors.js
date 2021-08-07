@@ -28,6 +28,11 @@ export function getPlayers(state) {
   return state.get('players')
 }
 
+export function getCutlistPlayers(state) {
+  const cutlist = state.getIn(['players', 'cutlist'])
+  return cutlist.map((playerId) => getPlayerById(state, { playerId }))
+}
+
 export function getSelectedPlayer(state) {
   const playerId = getPlayers(state).get('selected')
   return getPlayerById(state, { playerId })

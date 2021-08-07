@@ -1,6 +1,7 @@
 export { playersReducer } from './reducer'
 export {
   getPlayers,
+  getCutlistPlayers,
   getPlayersByPosition,
   getSelectedPlayer,
   getSelectedPlayerGame,
@@ -22,6 +23,8 @@ export {
   getPlayerActions,
   getProjectionsActions,
   putProjectionActions,
-  delProjectionActions
+  delProjectionActions,
+  getCutlistActions,
+  postCutlistActions
 } from './actions'
 export { playerSagas, calculateValues, loadPlayers } from './sagas'
