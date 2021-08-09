@@ -4,7 +4,7 @@ const { getRoster, getLeague } = require('../../utils')
 const selectPlayer = require('./select-player')
 const addPlayer = require('./add-player')
 
-module.exports = async ({ leagueId, teamId }) => {
+module.exports = async ({ leagueId, teamId, excludeIR = false }) => {
   const league = await getLeague(leagueId)
   const rosterRow = await getRoster({ tid: teamId })
   let roster = new Roster({ roster: rosterRow, league })
@@ -54,6 +54,10 @@ module.exports = async ({ leagueId, teamId }) => {
 
     const rosterRow = await getRoster({ tid: teamId })
     roster = new Roster({ roster: rosterRow, league })
+  }
+
+  if (excludeIR) {
+    return
   }
 
   while (roster.hasOpenInjuredReserveSlot()) {

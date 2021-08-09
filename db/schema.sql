@@ -2301,12 +2301,13 @@ CREATE TABLE `transition_bids` (
   `userid` int(6) NOT NULL,
   `bid` int(4) DEFAULT NULL,
   `tid` int(5) NOT NULL,
-  `otid` int(5) NOT NULL,
+  `player_tid` int(5) NOT NULL,
   `lid` int(6) NOT NULL,
   `succ` tinyint(1) DEFAULT NULL,
-  `submitted` int(11) NOT NULL,
   `reason` text DEFAULT NULL,
+  `submitted` int(11) NOT NULL,
   `processed` int(11) DEFAULT NULL,
+  `cancelled` int(11) DEFAULT NULL,
   PRIMARY KEY (`uid`),
   KEY `lid` (`lid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
