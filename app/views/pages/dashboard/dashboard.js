@@ -5,6 +5,7 @@ import Alert from '@material-ui/lab/Alert'
 import AlertTitle from '@material-ui/lab/AlertTitle'
 import Container from '@material-ui/core/Container'
 import Grid from '@material-ui/core/Grid'
+import NotInterestedIcon from '@material-ui/icons/NotInterested'
 
 import DashboardByeWeeks from '@components/dashboard-bye-weeks'
 import DashboardLeaguePositionalValue from '@components/dashboard-league-positional-value'
@@ -171,7 +172,12 @@ export default function DashboardPage() {
           {Boolean(cutlist.size) && (
             <Grid item xs={12}>
               <DashboardPlayersTable
-                title='Cutlist'
+                title={
+                  <>
+                    Cutlist
+                    <NotInterestedIcon />
+                  </>
+                }
                 cutlist={cutlist}
                 total={cutlist}
               />

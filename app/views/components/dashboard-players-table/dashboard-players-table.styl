@@ -1,4 +1,5 @@
 $color = lighten(yellow, 92%)
+$cutlistColor = lighten(red, 92%)
 
 .section.waiver
   background $color
@@ -6,6 +7,15 @@ $color = lighten(yellow, 92%)
     background $color
   .player__item-name.table__cell
     background $color
+
+.section.cutlist
+  border 1px solid red
+  .dashboard__section-header-title
+    color red
+    display flex
+    align-items center
+  .MuiSvgIcon-root
+    margin 0 6px
 
 .player__item.reordering
   min-width auto

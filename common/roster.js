@@ -131,6 +131,11 @@ export default class Roster {
     return this.players.filter((p) => p.slot === slot)
   }
 
+  updateValue(player, value = 0) {
+    const data = this.get(player)
+    this._players.set(player, { ...data, value })
+  }
+
   removePlayer(player) {
     this._players.delete(player)
   }

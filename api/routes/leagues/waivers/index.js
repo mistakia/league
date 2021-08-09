@@ -35,6 +35,14 @@ router.get('/?', async (req, res) => {
       .whereNotNull('processed')
       .groupBy('processed')
       .orderBy('processed', 'desc')
+    const waiverIds = waivers.map((p) => p.uid)
+    const waiverReleases = await db('waiver_releases').whereIn(
+      'waiverid',
+      waiverIds
+    )
+    for (const waiver of waivers) {
+      waiver.release = waiverReleases.filter((p) => p.waiverid === waiver.uid)
+    }
 
     res.send(waivers)
   } catch (error) {
@@ -319,6 +327,8 @@ router.post('/?', async (req, res) => {
       }))
       await db('waiver_releases').insert(releaseInserts)
     }
+
+    data.release = release
 
     res.send(data)
   } catch (error) {

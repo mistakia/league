@@ -171,6 +171,7 @@ export default class DashboardPlayersTable extends React.Component {
 
     const classNames = ['section', 'dashboard__players-table']
     if (isClaim) classNames.push('waiver')
+    if (cutlist) classNames.push('cutlist')
 
     const week = Math.max(constants.season.week, 1)
 

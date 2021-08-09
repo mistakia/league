@@ -20,16 +20,18 @@ export default class PlayerName extends React.Component {
     const { player, isOnCutlist } = this.props
 
     return (
-      <div className='player__name cursor' onClick={this.handleClick}>
-        <div className='player__name-position'>
-          <Position pos={player.pos} />
-        </div>
-        <div className='player__name-main'>
-          <span>{player.pname}</span>
-          {constants.season.year === player.draft_year && (
-            <PlayerLabel label='R' type='rookie' description='Rookie' />
-          )}
-          <Team team={player.team} />
+      <>
+        <div className='player__name cursor' onClick={this.handleClick}>
+          <div className='player__name-position'>
+            <Position pos={player.pos} />
+          </div>
+          <div className='player__name-main'>
+            <span>{player.pname}</span>
+            {constants.season.year === player.draft_year && (
+              <PlayerLabel label='R' type='rookie' description='Rookie' />
+            )}
+            <Team team={player.team} />
+          </div>
         </div>
         <div className='player__name-label'>
           {player.slot === constants.slots.PSP && (
@@ -40,7 +42,7 @@ export default class PlayerName extends React.Component {
           )}
           <PlayerTag tag={player.tag} />
         </div>
-      </div>
+      </>
     )
   }
 }
