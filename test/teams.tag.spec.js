@@ -198,5 +198,9 @@ describe('API /teams - tag', function () {
     it('offseason & tag deadline passed', async () => {
       // TODO
     })
+
+    it('reserve violation', async () => {
+      // TODO
+    })
   })
 })

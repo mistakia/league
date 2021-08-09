@@ -2,8 +2,14 @@ const express = require('express')
 const dayjs = require('dayjs')
 const router = express.Router({ mergeParams: true })
 
+const transition = require('./transition')
+
 const { constants, Roster } = require('../../../common')
-const { getRoster, verifyUserTeam } = require('../../../utils')
+const {
+  getRoster,
+  verifyUserTeam,
+  verifyReserveStatus
+} = require('../../../utils')
 
 router.post('/?', async (req, res) => {
   const { db, logger } = req.app.locals
@@ -51,6 +57,13 @@ router.post('/?', async (req, res) => {
     const league = leagues[0]
     const rosterRow = await getRoster({ tid })
     const roster = new Roster({ roster: rosterRow, league })
+
+    // check for reserve violations
+    try {
+      await verifyReserveStatus({ teamId, leagueId })
+    } catch (error) {
+      return res.status(400).send({ error: error.message })
+    }
 
     // make sure player is on roster
     if (!roster.has(player)) {
@@ -101,5 +114,7 @@ router.post('/?', async (req, res) => {
     return res.status(400).send({ error: error.toString() })
   }
 })
+
+router.use('/transition', transition)
 
 module.exports = router
