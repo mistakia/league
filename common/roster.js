@@ -1,4 +1,6 @@
+import dayjs from 'dayjs'
 import * as constants from './constants'
+import getExtensionAmount from './get-extension-amount'
 
 export default class Roster {
   constructor({ roster, league }) {
@@ -20,13 +22,34 @@ export default class Roster {
       league.sk +
       league.bench
 
-    for (const { slot, player, pos, value, tag } of roster.players) {
+    const deadline = dayjs.unix(league.tran_date)
+    const calculateExtension = constants.season.now.isBefore(deadline)
+    for (const {
+      slot,
+      player,
+      pos,
+      value,
+      tag,
+      extensions = [],
+      bid
+    } of roster.players) {
+      const salary = calculateExtension
+        ? getExtensionAmount({
+            pos,
+            tag,
+            extensions: extensions.length,
+            league,
+            value,
+            bid
+          })
+        : value
+
       this._players.set(player, {
         slot,
         player,
         pos,
         rid: roster.uid,
-        value,
+        value: salary,
         tag
       })
     }

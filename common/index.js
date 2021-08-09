@@ -16,6 +16,7 @@ import getOptimizerPositionConstraints from './get-optimizer-position-constraint
 import isOnReleaseWaivers from './is-on-release-waivers'
 import fixTeam from './fix-team'
 import calculatePercentiles from './calculate-percentiles'
+import getExtensionAmount from './get-extension-amount'
 
 /* eslint-disable no-extra-semi */
 const groupBy = (xs, key) =>
@@ -86,5 +87,6 @@ export {
   toStringArray,
   fixTeam,
   toPercent,
-  calculatePercentiles
+  calculatePercentiles,
+  getExtensionAmount
 }

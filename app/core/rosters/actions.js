@@ -22,6 +22,17 @@ export const rosterActions = {
   PROTECT_PLAYER: 'PROTECT_PLAYER',
   TAG_PLAYER: 'TAG_PLAYER',
 
+  TRANSITION_TAG_PLAYER: 'TRANSITION_TAG_PLAYER',
+  UPDATE_TRANSITION_TAG_PLAYER: 'UPDATE_TRANSITION_TAG_PLAYER',
+
+  POST_TRANSITION_TAG_PENDING: 'POST_TRANSITION_TAG_PENDING',
+  POST_TRANSITION_TAG_FULFILLED: 'POST_TRANSITION_TAG_FULFILLED',
+  POST_TRANSITION_TAG_FAILED: 'POST_TRANSITION_TAG_FAILED',
+
+  PUT_TRANSITION_TAG_PENDING: 'PUT_TRANSITION_TAG_PENDING',
+  PUT_TRANSITION_TAG_FULFILLED: 'PUT_TRANSITION_TAG_FULFILLED',
+  PUT_TRANSITION_TAG_FAILED: 'PUT_TRANSITION_TAG_FAILED',
+
   GET_ROSTERS_FAILED: 'GET_ROSTERS_FAILED',
   GET_ROSTERS_PENDING: 'GET_ROSTERS_PENDING',
   GET_ROSTERS_FULFILLED: 'GET_ROSTERS_FULFILLED',
@@ -443,6 +454,75 @@ export const rosterActions = {
       opts,
       data
     }
+  }),
+
+  transitionTag: ({ player, release, playerTid, teamId, bid, remove }) => ({
+    type: rosterActions.TRANSITION_TAG_PLAYER,
+    payload: {
+      player,
+      release,
+      teamId,
+      playerTid,
+      bid,
+      remove
+    }
+  }),
+
+  updateTransitionTag: ({ player, release, playerTid, teamId, bid }) => ({
+    type: rosterActions.UPDATE_TRANSITION_TAG_PLAYER,
+    payload: {
+      player,
+      release,
+      teamId,
+      playerTid,
+      bid
+    }
+  }),
+
+  postTransitionTagFailed: (opts, error) => ({
+    type: rosterActions.POST_TRANSITION_TAG_FAILED,
+    payload: {
+      opts,
+      error
+    }
+  }),
+
+  postTransitionTagPending: (opts) => ({
+    type: rosterActions.POST_TRANSITION_TAG_PENDING,
+    payload: {
+      opts
+    }
+  }),
+
+  postTransitionTagFulfilled: (opts, data) => ({
+    type: rosterActions.POST_TRANSITION_TAG_FULFILLED,
+    payload: {
+      opts,
+      data
+    }
+  }),
+
+  putTransitionTagFailed: (opts, error) => ({
+    type: rosterActions.PUT_TRANSITION_TAG_FAILED,
+    payload: {
+      opts,
+      error
+    }
+  }),
+
+  putTransitionTagPending: (opts) => ({
+    type: rosterActions.PUT_TRANSITION_TAG_PENDING,
+    payload: {
+      opts
+    }
+  }),
+
+  putTransitionTagFulfilled: (opts, data) => ({
+    type: rosterActions.PUT_TRANSITION_TAG_FULFILLED,
+    payload: {
+      opts,
+      data
+    }
   })
 }
 
@@ -516,4 +596,16 @@ export const postTagActions = {
   pending: rosterActions.postTagPending,
   failed: rosterActions.postTagFailed,
   fulfilled: rosterActions.postTagFulfilled
+}
+
+export const postTransitionTagActions = {
+  pending: rosterActions.postTransitionTagPending,
+  failed: rosterActions.postTransitionTagFailed,
+  fulfilled: rosterActions.postTransitionTagFulfilled
+}
+
+export const putTransitionTagActions = {
+  pending: rosterActions.putTransitionTagPending,
+  failed: rosterActions.putTransitionTagFailed,
+  fulfilled: rosterActions.putTransitionTagFulfilled
 }

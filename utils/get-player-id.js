@@ -279,9 +279,7 @@ const main = async () => {
       pos: argv.pos,
       team: argv.team
     }
-    console.log(options)
     const playerId = await getPlayerId(options)
-    console.log(playerId)
   } catch (err) {
     error = err
     console.log(error)

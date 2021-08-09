@@ -20,7 +20,9 @@ import {
   postAddFreeAgentActions,
   postReserveActions,
   postReleaseActions,
-  postTagActions
+  postTagActions,
+  postTransitionTagActions,
+  putTransitionTagActions
 } from '@core/rosters'
 import {
   getPlayerGamelogsActions,
@@ -295,3 +297,14 @@ export const fetchProps = fetch.bind(null, api.getProps, getPropsActions)
 
 export const getCutlist = fetch.bind(null, api.getCutlist, getCutlistActions)
 export const postCutlist = fetch.bind(null, api.postCutlist, postCutlistActions)
+
+export const postTransitionTag = fetch.bind(
+  null,
+  api.postTransitionTag,
+  postTransitionTagActions
+)
+export const putTransitionTag = fetch.bind(
+  null,
+  api.putTransitionTag,
+  putTransitionTagActions
+)

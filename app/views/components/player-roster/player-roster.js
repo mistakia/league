@@ -1,7 +1,6 @@
 import React from 'react'
 
-import { constants } from '@common'
-import { getExtensionAmount } from '@core/utils'
+import { constants, getExtensionAmount } from '@common'
 import PlayerName from '@components/player-name'
 import IconButton from '@components/icon-button'
 import { Player, connect } from '@components/player'
@@ -34,13 +33,14 @@ class PlayerRoster extends Player {
     const week = Math.max(constants.season.week, 1)
 
     const extensions = player.get('extensions').size
-    const { pos, tag, value } = player
+    const { pos, tag, value, bid } = player
     const extendedSalary = getExtensionAmount({
       pos,
       tag,
       extensions,
       league,
-      value
+      value,
+      bid
     })
     const projectedSalary = player.getIn(['values', 'ros', 'default'], 0)
     const savings = projectedSalary - extendedSalary

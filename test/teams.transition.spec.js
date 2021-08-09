@@ -86,6 +86,7 @@ describe('API /teams - transition', function () {
       res.body.player.should.equal(player.player)
       res.body.submitted.should.equal(Math.round(Date.now() / 1000))
       res.body.bid.should.equal(bid)
+      res.body.year.should.equal(constants.season.year)
       res.body.player_tid.should.equal(teamId)
       res.body.uid.should.equal(1)
       res.body.release.length.should.equal(1)
@@ -98,6 +99,7 @@ describe('API /teams - transition', function () {
       query1[0].player.should.equal(player.player)
       query1[0].userid.should.equal(userId)
       query1[0].bid.should.equal(bid)
+      query1[0].year.should.equal(constants.season.year)
       query1[0].tid.should.equal(teamId)
       query1[0].player_tid.should.equal(teamId)
       query1[0].lid.should.equal(leagueId)
@@ -168,6 +170,7 @@ describe('API /teams - transition', function () {
       res2.body.tid.should.equal(1)
       res2.body.userid.should.equal(userId)
       res2.body.player.should.equal(player.player)
+      res2.body.year.should.equal(constants.season.year)
       res2.body.submitted.should.equal(Math.round(Date.now() / 1000))
       res2.body.bid.should.equal(bid)
       res2.body.player_tid.should.equal(playerTid)
@@ -241,12 +244,18 @@ describe('API /teams - transition', function () {
 
       res2.body.tid.should.equal(teamId)
       res2.body.userid.should.equal(userId)
+      res2.body.year.should.equal(constants.season.year)
       res2.body.player.should.equal(tagPlayer.player)
       res2.body.submitted.should.equal(Math.round(Date.now() / 1000))
       res2.body.bid.should.equal(bid)
       res2.body.player_tid.should.equal(teamId)
       res2.body.release.length.should.equal(1)
       res2.body.release[0].should.equal(releasePlayer.player)
+    })
+
+    it('remove tag', async () => {
+      // TODO
+      // TODO - check to make sure cancelled is set
     })
   })
 
@@ -673,6 +682,30 @@ describe('API /teams - transition', function () {
         })
 
       await error(request, 'Reserve player violation')
+    })
+
+    it('invalid remove - not on team', async () => {
+      // TODO
+    })
+
+    it('original bid - deadline passed', async () => {
+      // TODO
+    })
+
+    it('competing bid - deadline passed', async () => {
+      // TODO
+    })
+
+    it('exceeds tag limit', async () => {
+      // TODO
+    })
+
+    it('invalid remove - matches player', async () => {
+      // TODO
+    })
+
+    it('invalid release - includes player', async () => {
+      // TODO
     })
   })
 })

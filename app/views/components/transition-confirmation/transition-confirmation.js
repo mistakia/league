@@ -18,7 +18,7 @@ import Chip from '@material-ui/core/Chip'
 import Position from '@components/position'
 import Team from '@components/team'
 import Button from '@components/button'
-import { constants } from '@common'
+import { constants, getExtensionAmount } from '@common'
 
 import './transition-confirmation.styl'
 
@@ -36,10 +36,6 @@ export default class TransitionConfirmation extends React.Component {
     }
 
     const { team, player } = props
-    this._isEligible = team.roster.isEligibleForTag({
-      tag: constants.tags.TRANSITION,
-      player: player.player
-    })
     this._untags = []
     const taggedPlayers = team.roster.getPlayersByTag(constants.tags.TRANSITION)
     const taggedPlayerIds = taggedPlayers.map((p) => p.player)
@@ -47,12 +43,56 @@ export default class TransitionConfirmation extends React.Component {
       const player = team.players.find((p) => p.player === playerId)
       this._untags.push(player)
     }
+
+    this._isUpdate = taggedPlayerIds.includes(player.player)
+    this._isEligible =
+      this._isUpdate ||
+      team.roster.isEligibleForTag({
+        tag: constants.tags.TRANSITION,
+        player: player.player
+      })
+  }
+
+  getMaxBid = () => {
+    const available = this.props.team.roster.availableCap
+    const { pos, tag, value, bid } = this.props.player
+    const extensions = this.props.player.get('extensions').size
+    const { league, cutlistTotalSalary } = this.props
+    const playerSalary = getExtensionAmount({
+      pos,
+      tag,
+      extensions,
+      league,
+      value,
+      bid
+    })
+
+    const notInCutlist = this.state.releaseIds.filter(
+      (playerId) => !this.props.cutlist.includes(playerId)
+    )
+    const releaseSalary = notInCutlist.reduce((sum, playerId) => {
+      const player = this.props.team.players.find((p) => p.player === playerId)
+      const { pos, value, tag, bid } = player
+      const extensions = player.get('extensions').size
+      const salary = getExtensionAmount({
+        pos,
+        tag,
+        extensions,
+        league,
+        value,
+        bid
+      })
+
+      return sum + salary
+    }, 0)
+
+    return available + playerSalary + cutlistTotalSalary + releaseSalary
   }
 
   handleBid = (event) => {
     const { value } = event.target
 
-    const maxBid = this.props.team.roster.availableCap
+    const maxBid = this.getMaxBid()
 
     if (isNaN(value) || value % 1 !== 0) {
       this.setState({ error: true })
@@ -76,8 +116,9 @@ export default class TransitionConfirmation extends React.Component {
   }
 
   handleSubmit = () => {
-    const { untag, error } = this.state
-    // const player = this.props.player.player
+    const { untag, error, bid } = this.state
+    const { tid } = this.props.team.roster
+    const player = this.props.player.player
 
     if (!this._isEligible && !untag) {
       return this.setState({ missingUntag: true })
@@ -86,13 +127,27 @@ export default class TransitionConfirmation extends React.Component {
     }
 
     if (!error) {
-      // broadcast
+      const data = {
+        player,
+        release: this.state.releaseIds,
+        playerTid: tid, // TODO
+        teamId: tid,
+        bid: parseInt(bid, 10),
+        remove: untag
+      }
+
+      if (this._isUpdate) {
+        this.props.updateTransitionTag(data)
+      } else {
+        this.props.transitionTag(data)
+      }
+
       this.props.onClose()
     }
   }
 
   render = () => {
-    const { team, player } = this.props
+    const { team, player, league } = this.props
 
     const menuItems = []
     for (const rPlayer of this._untags) {
@@ -105,8 +160,28 @@ export default class TransitionConfirmation extends React.Component {
 
     const options = []
     team.players.forEach((player) => {
-      const { pos, team, pname, value, name } = player
-      options.push({ id: player.player, label: name, pos, team, pname, value })
+      if (player.player === this.props.player.player) {
+        return
+      }
+
+      const { pos, team, pname, value, name, tag, bid } = player
+      const extensions = player.get('extensions').size
+      const salary = getExtensionAmount({
+        pos,
+        tag,
+        extensions,
+        league,
+        value,
+        bid
+      })
+      options.push({
+        id: player.player,
+        label: name,
+        pos,
+        team,
+        pname,
+        value: salary
+      })
     })
     const getOptionSelected = (option, value) => option.id === value.id
     const renderOption = (option) => {
@@ -158,10 +233,10 @@ export default class TransitionConfirmation extends React.Component {
           <DialogContentText>
             {`Apply Transition Tag to ${player.name} (${player.pos})`}
           </DialogContentText>
-          <div className='waiver__claim-inputs'>
+          <div className='transition__bid-inputs'>
             <TextField
               label='Bid'
-              helperText={`Max Bid: ${team.roster.availableCap}`}
+              helperText={`Max Bid: ${this.getMaxBid()}`}
               error={this.state.error}
               value={this.state.bid}
               onChange={this.handleBid}
@@ -217,5 +292,9 @@ TransitionConfirmation.propTypes = {
   onClose: PropTypes.func,
   team: PropTypes.object,
   league: PropTypes.object,
-  player: ImmutablePropTypes.record
+  player: ImmutablePropTypes.record,
+  cutlistTotalSalary: PropTypes.number,
+  cutlist: ImmutablePropTypes.list,
+  transitionTag: PropTypes.func,
+  updateTransitionTag: PropTypes.func
 }

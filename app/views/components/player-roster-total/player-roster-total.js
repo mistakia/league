@@ -1,8 +1,7 @@
 import React from 'react'
 
 import { Player, connect } from '@components/player'
-import { getExtensionAmount } from '@core/utils'
-import { constants } from '@common'
+import { constants, getExtensionAmount } from '@common'
 
 class PlayerRosterTotal extends Player {
   render() {
@@ -21,13 +20,14 @@ class PlayerRosterTotal extends Player {
 
     players.forEach((player) => {
       const extensions = player.get('extensions').size
-      const { pos, tag, value } = player
+      const { pos, tag, value, bid } = player
       const extendedSalary = getExtensionAmount({
         pos,
         tag,
         extensions,
         league,
-        value
+        value,
+        bid
       })
       const projectedSalary = player.getIn(['values', 'ros', 'default'], 0)
       const savings = projectedSalary - extendedSalary

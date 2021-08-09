@@ -55,7 +55,8 @@ export const Player = new Record({
   gsispid: null,
   gamestatus: null,
   practice: new List(),
-  extensions: new List()
+  extensions: new List(),
+  bid: null
 })
 
 export function createPlayer({
@@ -104,7 +105,8 @@ export function createPlayer({
   gsispid,
   gamestatus,
   practice,
-  extensions
+  extensions,
+  bid
 }) {
   return new Player({
     player,
@@ -153,6 +155,7 @@ export function createPlayer({
     gsispid,
     gamestatus,
     practice: new List(practice),
-    extensions: new List(extensions)
+    extensions: new List(extensions),
+    bid
   })
 }
