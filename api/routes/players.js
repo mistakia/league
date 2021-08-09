@@ -155,6 +155,26 @@ router.get('/?', async (req, res) => {
           )
         }
       }
+
+      const query1 = await db('teams')
+        .select('teams.*')
+        .join('users_teams', 'teams.uid', 'users_teams.userid')
+        .where('users_teams.userid', req.user.userId)
+        .where('teams.lid', leagueId)
+
+      if (query1.length) {
+        const tid = query1[0].uid
+        const bids = await db('transition_bids')
+          .where('tid', tid)
+          .where('year', constants.season.year)
+
+        if (bids.length) {
+          for (const player of data) {
+            const { bid } = bids.find((b) => b.player === player.player) || {}
+            player.bid = bid
+          }
+        }
+      }
     }
 
     logger(`responding with ${data.length} players`)

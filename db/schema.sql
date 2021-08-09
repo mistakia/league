@@ -2301,6 +2301,7 @@ CREATE TABLE `transition_bids` (
   `userid` int(6) NOT NULL,
   `bid` int(4) DEFAULT NULL,
   `tid` int(5) NOT NULL,
+  `year` int(4) NOT NULL,
   `player_tid` int(5) NOT NULL,
   `lid` int(6) NOT NULL,
   `succ` tinyint(1) DEFAULT NULL,

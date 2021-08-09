@@ -22,7 +22,9 @@ import {
   postAddFreeAgent,
   postReserve,
   postRelease,
-  postTag
+  postTag,
+  postTransitionTag,
+  putTransitionTag
 } from '@core/api'
 import { getApp, appActions } from '@core/app'
 import { constants } from '@common'
@@ -318,6 +320,16 @@ export function* tagNotification() {
   )
 }
 
+export function* transitionTagPlayer({ payload }) {
+  const { leagueId, teamId } = yield select(getApp)
+  yield call(postTransitionTag, { leagueId, teamId, ...payload })
+}
+
+export function* updateTransitionTagPlayer({ payload }) {
+  const { leagueId, teamId } = yield select(getApp)
+  yield call(putTransitionTag, { leagueId, teamId, ...payload })
+}
+
 //= ====================================
 //  WATCHERS
 // -------------------------------------
@@ -434,6 +446,25 @@ export function* watchTagPlayer() {
   yield takeLatest(rosterActions.TAG_PLAYER, tag)
 }
 
+export function* watchTransitionTagPlayer() {
+  yield takeLatest(rosterActions.TRANSITION_TAG_PLAYER, transitionTagPlayer)
+}
+
+export function* watchPostTransitionTagFulfilled() {
+  yield takeLatest(rosterActions.POST_TRANSITION_TAG_FULFILLED, tagNotification)
+}
+
+export function* watchUpdateTransitionTagPlayer() {
+  yield takeLatest(
+    rosterActions.UPDATE_TRANSITION_TAG_PLAYER,
+    updateTransitionTagPlayer
+  )
+}
+
+export function* watchPutTransitionTagFulfilled() {
+  yield takeLatest(rosterActions.PUT_TRANSITION_TAG_FULFILLED, tagNotification)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -470,5 +501,11 @@ export const rosterSagas = [
   fork(watchTradeSetProposingTeamPlayers),
   fork(watchTradeSetAcceptingTeamPlayers),
   fork(watchTradeSelectTeam),
-  fork(watchSelectTrade)
+  fork(watchSelectTrade),
+
+  fork(watchTransitionTagPlayer),
+  fork(watchUpdateTransitionTagPlayer),
+
+  fork(watchPostTransitionTagFulfilled),
+  fork(watchPutTransitionTagFulfilled)
 ]

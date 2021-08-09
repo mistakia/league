@@ -2,6 +2,7 @@ export { playersReducer } from './reducer'
 export {
   getPlayers,
   getCutlistPlayers,
+  getCutlistTotalSalary,
   getPlayersByPosition,
   getSelectedPlayer,
   getSelectedPlayerGame,
