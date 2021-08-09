@@ -1,6 +1,11 @@
 import { createSelector } from 'reselect'
 import dayjs from 'dayjs'
-import { constants, calculatePoints, isOnReleaseWaivers } from '@common'
+import {
+  constants,
+  calculatePoints,
+  isOnReleaseWaivers,
+  getExtensionAmount
+} from '@common'
 import { getApp } from '@core/app'
 import { getStats } from '@core/stats'
 import { Player } from './player'
@@ -31,6 +36,26 @@ export function getPlayers(state) {
 export function getCutlistPlayers(state) {
   const cutlist = state.getIn(['players', 'cutlist'])
   return cutlist.map((playerId) => getPlayerById(state, { playerId }))
+}
+
+export function getCutlistTotalSalary(state) {
+  const cutlist = getCutlistPlayers(state)
+  const league = getCurrentLeague(state)
+
+  return cutlist.reduce((sum, player) => {
+    const { pos, value, tag, bid } = player
+    const extensions = player.get('extensions').size
+    const salary = getExtensionAmount({
+      pos,
+      tag,
+      extensions,
+      league,
+      value,
+      bid
+    })
+
+    return sum + salary
+  }, 0)
 }
 
 export function getSelectedPlayer(state) {
@@ -409,7 +434,7 @@ export function getPlayerStatus(state, { player, playerId }) {
 
       if (
         constants.season.week === 0 &&
-        now.isBefore(dayjs.unix(league.tran_date))
+        now.isBefore(dayjs.unix(league.ext_date))
       ) {
         status.eligible.transitionTag = true
       }

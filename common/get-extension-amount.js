@@ -1,4 +1,4 @@
-import { constants } from '@common'
+import * as constants from './constants'
 
 const getFranchiseAmount = ({ pos, league }) => {
   switch (pos) {
@@ -16,7 +16,7 @@ const getFranchiseAmount = ({ pos, league }) => {
   }
 }
 
-export const getExtensionAmount = ({ extensions, tag, pos, league, value }) => {
+export default function ({ extensions, tag, pos, league, value, bid }) {
   switch (tag) {
     case constants.tags.FRANCHISE:
       return getFranchiseAmount({ pos, league })
@@ -25,7 +25,7 @@ export const getExtensionAmount = ({ extensions, tag, pos, league, value }) => {
       return value
 
     case constants.tags.TRANSITION:
-      return value
+      return bid
 
     case constants.tags.REGULAR:
     default:

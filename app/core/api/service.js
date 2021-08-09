@@ -280,6 +280,14 @@ export const api = {
   postCutlist({ teamId, ...data }) {
     const url = `${BASE_URL}/teams/${teamId}/cutlist`
     return { url, ...POST(data) }
+  },
+  postTransitionTag({ teamId, ...data }) {
+    const url = `${BASE_URL}/teams/${teamId}/tag/transition`
+    return { url, ...POST(data) }
+  },
+  putTransitionTag({ teamId, ...data }) {
+    const url = `${BASE_URL}/teams/${teamId}/tag/transition`
+    return { url, ...PUT(data) }
   }
 }
 

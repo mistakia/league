@@ -270,6 +270,27 @@ router.get('/:leagueId/rosters/?', async (req, res) => {
       r.players = players.filter((p) => p.rid === r.uid)
     })
 
+    const query1 = await db('teams')
+      .select('teams.*')
+      .join('users_teams', 'teams.uid', 'users_teams.userid')
+      .where('users_teams.userid', req.user.userId)
+      .where('teams.lid', leagueId)
+
+    if (query1.length) {
+      const tid = query1[0].uid
+      const bids = await db('transition_bids')
+        .where('tid', tid)
+        .where('year', constants.season.year)
+
+      if (bids.length) {
+        const teamRoster = rosters.find((r) => r.tid === tid)
+        for (const bid of bids) {
+          const player = teamRoster.players.find((p) => p.player === bid.player)
+          player.bid = bid.bid
+        }
+      }
+    }
+
     res.send(rosters)
   } catch (err) {
     logger(err)

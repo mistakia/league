@@ -2,14 +2,30 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { getCurrentLeague } from '@core/leagues'
-import { getCurrentPlayers } from '@core/rosters'
+import { getCurrentPlayers, rosterActions } from '@core/rosters'
+import { getCutlistTotalSalary, getPlayers } from '@core/players'
 
 import TransitionConfirmation from './transition-confirmation'
 
 const mapStateToProps = createSelector(
   getCurrentLeague,
   getCurrentPlayers,
-  (league, team) => ({ league, team })
+  getCutlistTotalSalary,
+  getPlayers,
+  (league, team, cutlistTotalSalary, players) => ({
+    league,
+    team,
+    cutlistTotalSalary,
+    cutlist: players.get('cutlist')
+  })
 )
 
-export default connect(mapStateToProps)(TransitionConfirmation)
+const mapDispatchToProps = {
+  transitionTag: rosterActions.transitionTag,
+  updateTransitionTag: rosterActions.updateTransitionTag
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(TransitionConfirmation)

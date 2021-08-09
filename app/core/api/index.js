@@ -59,5 +59,7 @@ export {
   fetchTeamGamelogs,
   fetchProps,
   getCutlist,
-  postCutlist
+  postCutlist,
+  postTransitionTag,
+  putTransitionTag
 } from './sagas'
