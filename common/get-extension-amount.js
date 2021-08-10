@@ -25,7 +25,7 @@ export default function ({ extensions, tag, pos, league, value, bid }) {
       return value
 
     case constants.tags.TRANSITION:
-      return bid
+      return bid || value
 
     case constants.tags.REGULAR:
     default:

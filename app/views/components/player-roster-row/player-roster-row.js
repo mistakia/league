@@ -1,5 +1,8 @@
 import React from 'react'
+import { List } from 'immutable'
+import dayjs from 'dayjs'
 
+import { getExtensionAmount, constants } from '@common'
 import { Player, connect } from '@components/player'
 import IconButton from '@components/icon-button'
 import PlayerName from '@components/player-name'
@@ -8,11 +11,26 @@ import './player-roster-row.styl'
 
 class PlayerRosterRow extends Player {
   render = () => {
-    const { player, selected, isHosted } = this.props
+    const { player, selected, isHosted, league } = this.props
 
     const isSelected = selected === player.player
     const classNames = ['roster__item']
     if (isSelected) classNames.push('selected')
+
+    const deadline = dayjs.unix(league.tran_date)
+    const calculateExtension = constants.season.now.isBefore(deadline)
+    const { pos, tag, value, bid } = player
+    const extensions = player.get('extensions', new List()).size
+    const salary = calculateExtension
+      ? getExtensionAmount({
+          pos,
+          tag,
+          extensions,
+          league,
+          value,
+          bid
+        })
+      : value
 
     return (
       <div className={classNames.join(' ')}>
@@ -20,7 +38,7 @@ class PlayerRosterRow extends Player {
           <PlayerName playerId={player.player} />
         </div>
         {Boolean(player.player) && (
-          <div className='roster__item-salary metric'>{`$${player.value}`}</div>
+          <div className='roster__item-salary metric'>{`$${salary}`}</div>
         )}
         <div className='roster__item-action'>
           {Boolean(player.player && isHosted) && (
