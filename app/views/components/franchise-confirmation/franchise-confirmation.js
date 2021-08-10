@@ -54,7 +54,7 @@ export default class FranchiseConfirmation extends React.Component {
     }
 
     if (!error) {
-      this.props.tag({ remove: untag, tag: constants.tags.FRANCHISE, player })
+      this.props.add({ remove: untag, tag: constants.tags.FRANCHISE, player })
       this.props.onClose()
     }
   }
@@ -111,7 +111,7 @@ FranchiseConfirmation.propTypes = {
   team: PropTypes.object,
   onClose: PropTypes.func,
   league: PropTypes.object,
-  tag: PropTypes.func,
+  add: PropTypes.func,
   status: PropTypes.object,
   player: ImmutablePropTypes.record,
   waiver: PropTypes.object

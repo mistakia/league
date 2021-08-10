@@ -137,6 +137,28 @@ export default class PlayerContextMenu extends React.Component {
     this.props.hide()
   }
 
+  handleRookieTag = () => {
+    const { player } = this.props
+    this.props.showConfirmation({
+      id: 'ROOKIE',
+      data: {
+        player
+      }
+    })
+    this.props.hide()
+  }
+
+  handleRemoveTag = () => {
+    const { player } = this.props
+    this.props.showConfirmation({
+      id: 'REMOVE_TAG',
+      data: {
+        player
+      }
+    })
+    this.props.hide()
+  }
+
   handleTransitionTag = () => {
     const { player } = this.props
     this.props.showConfirmation({
@@ -148,10 +170,10 @@ export default class PlayerContextMenu extends React.Component {
     this.props.hide()
   }
 
-  handleRookieTag = () => {
+  handleRemoveTransitionTag = () => {
     const { player } = this.props
     this.props.showConfirmation({
-      id: 'ROOKIE',
+      id: 'REMOVE_TRANSITION_TAG',
       data: {
         player
       }
@@ -215,17 +237,35 @@ export default class PlayerContextMenu extends React.Component {
       )
 
       menuItems.push(
-        <MenuItem key='franchise' dense onClick={this.handleFranchiseTag}>
-          Franchise Tag
+        <MenuItem
+          key='franchise'
+          dense
+          onClick={
+            status.tagged.franchise
+              ? this.handleRemoveTag
+              : this.handleFranchiseTag
+          }>
+          {`${status.tagged.franchise ? 'Remove' : 'Apply'} Franchise Tag`}
         </MenuItem>
       )
 
       if (status.eligible.transitionTag) {
         menuItems.push(
           <MenuItem key='transition' dense onClick={this.handleTransitionTag}>
-            Transition Tag
+            {`${status.tagged.transition ? 'Update' : 'Apply'} Transition Tag`}
           </MenuItem>
         )
+
+        if (status.tagged.transition) {
+          menuItems.push(
+            <MenuItem
+              key='transition'
+              dense
+              onClick={this.handleRemoveTransitionTag}>
+              Remove Transition Tag
+            </MenuItem>
+          )
+        }
       }
 
       menuItems.push(
@@ -233,8 +273,10 @@ export default class PlayerContextMenu extends React.Component {
           key='rookie'
           dense
           disabled={!status.eligible.rookieTag}
-          onClick={this.handleRookieTag}>
-          Rookie Tag
+          onClick={
+            status.tagged.rookie ? this.handleRemoveTag : this.handleRookieTag
+          }>
+          {`${status.tagged.rookie ? 'Remove' : 'Apply'} Rookie Tag`}
         </MenuItem>
       )
 

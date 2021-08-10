@@ -14,6 +14,8 @@ import AddFreeAgentDialog from '@components/add-free-agent-dialog'
 import FranchiseConfirmation from '@components/franchise-confirmation'
 import RookieConfirmation from '@components/rookie-confirmation'
 import TransitionConfirmation from '@components/transition-confirmation'
+import RemoveTransitionTagConfirmation from '@components/remove-transition-tag-confirmation'
+import RemoveTagConfirmation from '@components/remove-tag-confirmation'
 
 import Button from '@components/button'
 
@@ -45,6 +47,10 @@ export default class Confirmation extends React.Component {
             return TransitionConfirmation
           case 'ROOKIE':
             return RookieConfirmation
+          case 'REMOVE_TAG':
+            return RemoveTagConfirmation
+          case 'REMOVE_TRANSITION_TAG':
+            return RemoveTransitionTagConfirmation
         }
       }
       const ConfirmationComponent = getComponent(this.props.info.id)

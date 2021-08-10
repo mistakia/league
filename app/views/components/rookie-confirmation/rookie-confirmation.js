@@ -45,7 +45,7 @@ export default class RookieConfirmation extends React.Component {
 
   handleSubmit = () => {
     const { untag, error } = this.state
-    const player = this.props.player.player
+    const { player } = this.props.player
 
     if (!this._isEligible && !untag) {
       return this.setState({ missingUntag: true })
@@ -54,7 +54,7 @@ export default class RookieConfirmation extends React.Component {
     }
 
     if (!error) {
-      this.props.tag({ remove: untag, tag: constants.tags.ROOKIE, player })
+      this.props.add({ remove: untag, tag: constants.tags.ROOKIE, player })
       this.props.onClose()
     }
   }
@@ -109,7 +109,7 @@ export default class RookieConfirmation extends React.Component {
 
 RookieConfirmation.propTypes = {
   team: PropTypes.object,
-  tag: PropTypes.func,
+  add: PropTypes.func,
   player: ImmutablePropTypes.record,
   status: PropTypes.object,
   onClose: PropTypes.func,

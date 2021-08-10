@@ -167,6 +167,8 @@ router.get('/?', async (req, res) => {
         const bids = await db('transition_bids')
           .where('tid', tid)
           .where('year', constants.season.year)
+          .whereNull('cancelled')
+          .whereNull('processed')
 
         if (bids.length) {
           for (const player of data) {

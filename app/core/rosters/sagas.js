@@ -23,7 +23,9 @@ import {
   postReserve,
   postRelease,
   postTag,
+  deleteTag,
   postTransitionTag,
+  deleteTransitionTag,
   putTransitionTag
 } from '@core/api'
 import { getApp, appActions } from '@core/app'
@@ -258,9 +260,14 @@ export function* projectTrade() {
   yield put(playerActions.setProjectedContribution(projectedContribution))
 }
 
-export function* tag({ payload }) {
+export function* addTag({ payload }) {
   const { teamId, leagueId } = yield select(getApp)
   yield call(postTag, { teamId, leagueId, ...payload })
+}
+
+export function* removeTag({ payload }) {
+  const { teamId, leagueId } = yield select(getApp)
+  yield call(deleteTag, { teamId, leagueId, ...payload })
 }
 
 export function* addPlayer({ payload }) {
@@ -320,12 +327,17 @@ export function* tagNotification() {
   )
 }
 
-export function* transitionTagPlayer({ payload }) {
+export function* addTransitionTag({ payload }) {
   const { leagueId, teamId } = yield select(getApp)
   yield call(postTransitionTag, { leagueId, teamId, ...payload })
 }
 
-export function* updateTransitionTagPlayer({ payload }) {
+export function* removeTransitionTag({ payload }) {
+  const { leagueId, teamId } = yield select(getApp)
+  yield call(deleteTransitionTag, { leagueId, teamId, ...payload })
+}
+
+export function* updateTransitionTag({ payload }) {
   const { leagueId, teamId } = yield select(getApp)
   yield call(putTransitionTag, { leagueId, teamId, ...payload })
 }
@@ -442,23 +454,28 @@ export function* watchSelectTrade() {
   yield takeLatest(tradeActions.SELECT_TRADE, projectTrade)
 }
 
-export function* watchTagPlayer() {
-  yield takeLatest(rosterActions.TAG_PLAYER, tag)
+export function* watchAddTag() {
+  yield takeLatest(rosterActions.ADD_TAG, addTag)
 }
 
-export function* watchTransitionTagPlayer() {
-  yield takeLatest(rosterActions.TRANSITION_TAG_PLAYER, transitionTagPlayer)
+export function* watchRemoveTag() {
+  yield takeLatest(rosterActions.REMOVE_TAG, removeTag)
+}
+
+export function* watchAddTransitionTag() {
+  yield takeLatest(rosterActions.ADD_TRANSITION_TAG, addTransitionTag)
+}
+
+export function* watchRemoveTransitionTag() {
+  yield takeLatest(rosterActions.REMOVE_TRANSITION_TAG, removeTransitionTag)
 }
 
 export function* watchPostTransitionTagFulfilled() {
   yield takeLatest(rosterActions.POST_TRANSITION_TAG_FULFILLED, tagNotification)
 }
 
-export function* watchUpdateTransitionTagPlayer() {
-  yield takeLatest(
-    rosterActions.UPDATE_TRANSITION_TAG_PLAYER,
-    updateTransitionTagPlayer
-  )
+export function* watchUpdateTransitionTag() {
+  yield takeLatest(rosterActions.UPDATE_TRANSITION_TAG, updateTransitionTag)
 }
 
 export function* watchPutTransitionTagFulfilled() {
@@ -488,7 +505,8 @@ export const rosterSagas = [
   fork(watchAddFreeAgent),
   fork(watchReleasePlayer),
 
-  fork(watchTagPlayer),
+  fork(watchAddTag),
+  fork(watchRemoveTag),
 
   fork(watchPostReleaseFulfilled),
   fork(watchPostProtectFulfilled),
@@ -503,8 +521,9 @@ export const rosterSagas = [
   fork(watchTradeSelectTeam),
   fork(watchSelectTrade),
 
-  fork(watchTransitionTagPlayer),
-  fork(watchUpdateTransitionTagPlayer),
+  fork(watchAddTransitionTag),
+  fork(watchRemoveTransitionTag),
+  fork(watchUpdateTransitionTag),
 
   fork(watchPostTransitionTagFulfilled),
   fork(watchPutTransitionTagFulfilled)
