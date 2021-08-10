@@ -1,5 +1,7 @@
 import { createSelector } from 'reselect'
+import { List } from 'immutable'
 import dayjs from 'dayjs'
+
 import {
   constants,
   calculatePoints,
@@ -44,7 +46,7 @@ export function getCutlistTotalSalary(state) {
 
   return cutlist.reduce((sum, player) => {
     const { pos, value, tag, bid } = player
-    const extensions = player.get('extensions').size
+    const extensions = player.get('extensions', new List()).size
     const salary = getExtensionAmount({
       pos,
       tag,

@@ -1,4 +1,5 @@
 import React from 'react'
+import { List } from 'immutable'
 
 import { constants, getExtensionAmount } from '@common'
 import PlayerName from '@components/player-name'
@@ -32,7 +33,9 @@ class PlayerRoster extends Player {
 
     const week = Math.max(constants.season.week, 1)
 
-    const extensions = player.get('extensions').size
+    console.log(player)
+    console.log(player.toJS())
+    const extensions = player.get('extensions', new List()).size
     const { pos, tag, value, bid } = player
     const extendedSalary = getExtensionAmount({
       pos,

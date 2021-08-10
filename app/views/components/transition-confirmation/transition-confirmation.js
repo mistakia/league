@@ -1,4 +1,5 @@
 import React from 'react'
+import { List } from 'immutable'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 import FormControl from '@material-ui/core/FormControl'
@@ -57,7 +58,7 @@ export default class TransitionConfirmation extends React.Component {
   getMaxBid = () => {
     const available = this.props.team.roster.availableCap
     const { pos, tag, value, bid } = this.props.player
-    const extensions = this.props.player.get('extensions').size
+    const extensions = this.props.player.get('extensions', new List()).size
     const { league, cutlistTotalSalary } = this.props
     const playerSalary = getExtensionAmount({
       pos,
@@ -74,7 +75,7 @@ export default class TransitionConfirmation extends React.Component {
     const releaseSalary = notInCutlist.reduce((sum, playerId) => {
       const player = this.props.team.players.find((p) => p.player === playerId)
       const { pos, value, tag, bid } = player
-      const extensions = player.get('extensions').size
+      const extensions = player.get('extensions', new List()).size
       const salary = getExtensionAmount({
         pos,
         tag,
@@ -166,7 +167,7 @@ export default class TransitionConfirmation extends React.Component {
       }
 
       const { pos, team, pname, value, name, tag, bid } = player
-      const extensions = player.get('extensions').size
+      const extensions = player.get('extensions', new List()).size
       const salary = getExtensionAmount({
         pos,
         tag,
