@@ -21,7 +21,9 @@ import {
   postReserveActions,
   postReleaseActions,
   postTagActions,
+  deleteTagActions,
   postTransitionTagActions,
+  deleteTransitionTagActions,
   putTransitionTagActions
 } from '@core/rosters'
 import {
@@ -163,6 +165,7 @@ export const postDeactivate = fetch.bind(
 export const postProtect = fetch.bind(null, api.postProtect, postProtectActions)
 export const postReserve = fetch.bind(null, api.postReserve, postReserveActions)
 export const postTag = fetch.bind(null, api.postTag, postTagActions)
+export const deleteTag = fetch.bind(null, api.deleteTag, deleteTagActions)
 
 export const fetchDraft = fetch.bind(null, api.getDraft, getDraftActions)
 export const postDraft = fetch.bind(null, api.postDraft, postDraftActions)
@@ -302,6 +305,11 @@ export const postTransitionTag = fetch.bind(
   null,
   api.postTransitionTag,
   postTransitionTagActions
+)
+export const deleteTransitionTag = fetch.bind(
+  null,
+  api.deleteTransitionTag,
+  deleteTransitionTagActions
 )
 export const putTransitionTag = fetch.bind(
   null,

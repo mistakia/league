@@ -26,16 +26,17 @@ export default class TransitionConfirmation extends React.Component {
   constructor(props) {
     super(props)
 
+    const { team, player } = props
+
     this.state = {
       releaseIds: [],
       untag: '',
-      bid: 0,
+      bid: player.bid || 0,
       error: false,
       missingRelease: false,
       missingUntag: false
     }
 
-    const { team, player } = props
     this._untags = []
     const taggedPlayers = team.roster.getPlayersByTag(constants.tags.TRANSITION)
     const taggedPlayerIds = taggedPlayers.map((p) => p.player)
@@ -139,7 +140,7 @@ export default class TransitionConfirmation extends React.Component {
       if (this._isUpdate) {
         this.props.updateTransitionTag(data)
       } else {
-        this.props.transitionTag(data)
+        this.props.addTransitionTag(data)
       }
 
       this.props.onClose()
@@ -295,6 +296,6 @@ TransitionConfirmation.propTypes = {
   player: ImmutablePropTypes.record,
   cutlistTotalSalary: PropTypes.number,
   cutlist: ImmutablePropTypes.list,
-  transitionTag: PropTypes.func,
+  addTransitionTag: PropTypes.func,
   updateTransitionTag: PropTypes.func
 }

@@ -21,7 +21,7 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  transitionTag: rosterActions.transitionTag,
+  addTransitionTag: rosterActions.addTransitionTag,
   updateTransitionTag: rosterActions.updateTransitionTag
 }
 

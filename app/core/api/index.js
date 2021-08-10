@@ -35,6 +35,7 @@ export {
   postDeactivate,
   postProtect,
   postTag,
+  deleteTag,
   postWaiver,
   putWaiver,
   postPoach,
@@ -61,5 +62,6 @@ export {
   getCutlist,
   postCutlist,
   postTransitionTag,
+  deleteTransitionTag,
   putTransitionTag
 } from './sagas'
