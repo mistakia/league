@@ -33,8 +33,6 @@ class PlayerRoster extends Player {
 
     const week = Math.max(constants.season.week, 1)
 
-    console.log(player)
-    console.log(player.toJS())
     const extensions = player.get('extensions', new List()).size
     const { pos, tag, value, bid } = player
     const extendedSalary = getExtensionAmount({
