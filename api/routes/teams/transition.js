@@ -245,6 +245,71 @@ router.post('/?', async (req, res) => {
   }
 })
 
+router.delete('/?', async (req, res) => {
+  const { db, logger } = req.app.locals
+  try {
+    const { teamId } = req.params
+    const { player, leagueId } = req.body
+
+    if (!player) {
+      return res.status(400).send({ error: 'missing player' })
+    }
+
+    if (!leagueId) {
+      return res.status(400).send({ error: 'missing leagueId' })
+    }
+
+    const tid = parseInt(teamId, 10)
+
+    // verify teamId, leagueId belongs to user
+    try {
+      await verifyUserTeam({
+        userId: req.user.userId,
+        leagueId,
+        teamId,
+        requireLeague: true
+      })
+    } catch (error) {
+      return res.status(400).send({ error: error.message })
+    }
+
+    // get roster
+    const rosterRow = await getRoster({ tid })
+
+    // TODO - make sure deadline has not passed
+
+    // verify transition id exists
+    const query1 = await db('transition_bids')
+      .where({
+        player,
+        tid,
+        year: constants.season.year
+      })
+      .whereNull('cancelled')
+
+    if (!query1.length) {
+      return res.status(400).send({ error: 'invalid player' })
+    }
+    const transitionBid = query1[0]
+
+    // cancel bid
+    await db('transition_bids')
+      .update('cancelled', Math.round(Date.now() / 1000))
+      .where('uid', transitionBid.uid)
+
+    // update tag
+    await db('rosters_players').update({ tag: constants.tags.REGULAR }).where({
+      rid: rosterRow.uid,
+      player
+    })
+
+    res.send({ success: true })
+  } catch (error) {
+    logger(error)
+    res.status(500).send({ error: error.toString() })
+  }
+})
+
 router.put('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
@@ -291,11 +356,13 @@ router.put('/?', async (req, res) => {
     }
 
     // verify transition id exists
-    const query1 = await db('transition_bids').where({
-      player,
-      tid,
-      year: constants.season.year
-    })
+    const query1 = await db('transition_bids')
+      .where({
+        player,
+        tid,
+        year: constants.season.year
+      })
+      .whereNull('cancelled')
 
     if (!query1.length) {
       return res.status(400).send({ error: 'invalid player' })

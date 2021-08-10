@@ -351,6 +351,11 @@ export function getPlayerStatus(state, { player, playerId }) {
     fa: false,
     rostered: false,
     protected: false,
+    tagged: {
+      rookie: false,
+      transition: false,
+      franchise: false
+    },
     waiver: {
       active: false,
       practice: false,
@@ -378,6 +383,9 @@ export function getPlayerStatus(state, { player, playerId }) {
     return status
   }
 
+  status.tagged.rookie = player.tag === constants.tags.ROOKIE
+  status.tagged.transition = player.tag === constants.tags.TRANSITION
+  status.tagged.franchise = player.tag === constants.tags.FRANCHISE
   status.protected = player.slot === constants.slots.PSP
   status.starter = constants.starterSlots.includes(player.slot)
   status.locked = isPlayerLocked(state, { player })

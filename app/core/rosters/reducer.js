@@ -250,8 +250,8 @@ export function rostersReducer(state = new Map(), { payload, type }) {
         (arr) => arr.filter((p) => p.player !== payload.opts.player)
       )
 
-    case rosterActions.UPDATE_TRANSITION_TAG_PLAYER:
-    case rosterActions.TRANSITION_TAG_PLAYER: {
+    case rosterActions.UPDATE_TRANSITION_TAG:
+    case rosterActions.ADD_TRANSITION_TAG: {
       return state.withMutations((state) => {
         const players = state.getIn([
           payload.teamId,
@@ -279,6 +279,25 @@ export function rostersReducer(state = new Map(), { payload, type }) {
           )
         }
       })
+    }
+
+    case rosterActions.REMOVE_TRANSITION_TAG:
+    case rosterActions.REMOVE_TAG: {
+      const players = state.getIn([
+        payload.teamId,
+        constants.season.week,
+        'players'
+      ])
+      if (!players) return state
+
+      const index = players.findIndex((p) => p.player === payload.remove)
+      return state.mergeIn(
+        [payload.teamId, constants.season.week, 'players', index],
+        {
+          tag: constants.tags.REGULAR,
+          bid: null
+        }
+      )
     }
 
     default:

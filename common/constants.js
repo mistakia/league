@@ -548,6 +548,13 @@ export const tags = {
   TRANSITION: 4
 }
 
+export const tagsDetail = {
+  1: 'Regular',
+  2: 'Franchise',
+  3: 'Rookie',
+  4: 'Transition'
+}
+
 export const transactionsDetail = {
   14: 'Signed',
   1: 'Released',

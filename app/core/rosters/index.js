@@ -37,7 +37,9 @@ export {
   postReserveActions,
   postReleaseActions,
   postTagActions,
+  deleteTagActions,
   postTransitionTagActions,
-  putTransitionTagActions
+  putTransitionTagActions,
+  deleteTransitionTagActions
 } from './actions'
 export { Roster } from './roster'

@@ -16,7 +16,7 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  tag: rosterActions.tag
+  add: rosterActions.addTag
 }
 
 export default connect(

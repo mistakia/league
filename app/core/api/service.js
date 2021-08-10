@@ -97,6 +97,10 @@ export const api = {
     const url = `${BASE_URL}/teams/${data.teamId}/tag`
     return { url, ...POST(data) }
   },
+  deleteTag(data) {
+    const url = `${BASE_URL}/teams/${data.teamId}/tag`
+    return { url, ...DELETE(data) }
+  },
   postReserve(data) {
     const url = `${BASE_URL}/teams/${data.teamId}/reserve`
     return { url, ...POST(data) }
@@ -284,6 +288,10 @@ export const api = {
   postTransitionTag({ teamId, ...data }) {
     const url = `${BASE_URL}/teams/${teamId}/tag/transition`
     return { url, ...POST(data) }
+  },
+  deleteTransitionTag({ teamId, ...data }) {
+    const url = `${BASE_URL}/teams/${teamId}/tag/transition`
+    return { url, ...DELETE(data) }
   },
   putTransitionTag({ teamId, ...data }) {
     const url = `${BASE_URL}/teams/${teamId}/tag/transition`
