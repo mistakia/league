@@ -259,7 +259,7 @@ export default class DashboardPlayersTable extends React.Component {
 DashboardPlayersTable.propTypes = {
   isBeforeExtensionDeadline: PropTypes.bool,
   items: PropTypes.array,
-  title: PropTypes.string,
+  title: PropTypes.node,
   poaches: PropTypes.array,
   claims: PropTypes.array,
   waiverType: PropTypes.string,
