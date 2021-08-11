@@ -64,6 +64,8 @@ router.post('/?', async (req, res) => {
       }
     }
 
+    // TODO - remove any duplicates
+
     // save
     const result = []
     for (const [index, player] of players.entries()) {

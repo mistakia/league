@@ -275,7 +275,7 @@ export function playersReducer(state = initialState, { payload, type }) {
       const { player } = payload
       const index = cutlist.keyOf(player)
       return state.merge({
-        cutlist: index ? cutlist.delete(index) : cutlist.push(player)
+        cutlist: index >= 0 ? cutlist.delete(index) : cutlist.push(player)
       })
     }
 
