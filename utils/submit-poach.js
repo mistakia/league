@@ -115,5 +115,8 @@ module.exports = async function ({
     await API.Bots.post.Q(league.groupme_token, league.groupme_id, message, {})
   }
 
-  return data
+  return {
+    release,
+    ...data
+  }
 }

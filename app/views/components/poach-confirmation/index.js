@@ -21,9 +21,9 @@ const mapStateToProps = createSelector(
   getCurrentLeague,
   getPlayerStatus,
   getRosterInfoForPlayerId,
-  (isPlayerEligible, rosterPlayers, roster, league, status, rosterInfo) => ({
+  (isPlayerEligible, team, roster, league, status, rosterInfo) => ({
     isPlayerEligible,
-    rosterPlayers,
+    team,
     roster,
     league,
     status,
