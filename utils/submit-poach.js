@@ -54,11 +54,7 @@ module.exports = async function ({
   }
 
   // verify poaching team roster has bench space
-  const rosterRow = await getRoster({
-    tid: teamId,
-    week: constants.season.week,
-    year: constants.season.year
-  })
+  const rosterRow = await getRoster({ tid: teamId })
   const roster = new Roster({ roster: rosterRow, league })
   if (release.length) {
     for (const player of release) {
