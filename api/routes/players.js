@@ -158,7 +158,7 @@ router.get('/?', async (req, res) => {
 
       const query1 = await db('teams')
         .select('teams.*')
-        .join('users_teams', 'teams.uid', 'users_teams.userid')
+        .join('users_teams', 'teams.uid', 'users_teams.tid')
         .where('users_teams.userid', req.user.userId)
         .where('teams.lid', leagueId)
 
