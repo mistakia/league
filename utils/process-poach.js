@@ -33,11 +33,7 @@ module.exports = async function ({ player, release = [], lid, tid, userid }) {
   const poachPlayer = playerRows.find((p) => p.player === player)
   const leagues = await db('leagues').where({ uid: lid })
   const league = leagues[0]
-  const rosterRow = await getRoster({
-    tid,
-    week: constants.season.week,
-    year: constants.season.year
-  })
+  const rosterRow = await getRoster({ tid })
   const roster = new Roster({ roster: rosterRow, league })
   if (release.length) {
     for (const player of release) {
