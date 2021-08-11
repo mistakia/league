@@ -1,18 +1,20 @@
 import React from 'react'
+import { List } from 'immutable'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
-import FormControl from '@material-ui/core/FormControl'
-import Select from '@material-ui/core/Select'
-import InputLabel from '@material-ui/core/InputLabel'
-import MenuItem from '@material-ui/core/MenuItem'
 import DialogContent from '@material-ui/core/DialogContent'
 import DialogContentText from '@material-ui/core/DialogContentText'
 import Dialog from '@material-ui/core/Dialog'
 import DialogActions from '@material-ui/core/DialogActions'
 import DialogTitle from '@material-ui/core/DialogTitle'
+import Autocomplete from '@material-ui/lab/Autocomplete'
+import TextField from '@material-ui/core/TextField'
+import Chip from '@material-ui/core/Chip'
 
+import Position from '@components/position'
+import Team from '@components/team'
 import Button from '@components/button'
-import { Roster, constants } from '@common'
+import { Roster, constants, getExtensionAmount } from '@common'
 
 export default class PoachConfirmation extends React.Component {
   constructor(props) {
@@ -20,7 +22,7 @@ export default class PoachConfirmation extends React.Component {
 
     const releases = []
     const { league, player } = props
-    for (const rPlayer of props.rosterPlayers.active) {
+    for (const rPlayer of props.team.active) {
       const r = new Roster({ roster: props.roster.toJS(), league })
       r.removePlayer(rPlayer.player)
       if (r.hasOpenBenchSlot(player.pos)) {
@@ -32,9 +34,9 @@ export default class PoachConfirmation extends React.Component {
     this.state = { release: [], error: false }
   }
 
-  handleRelease = (event) => {
-    const { value } = event.target
-    this.setState({ release: value })
+  handleRelease = (event, value) => {
+    const playerIds = value.map((p) => p.id)
+    this.setState({ release: playerIds })
   }
 
   handleSubmit = () => {
@@ -57,16 +59,78 @@ export default class PoachConfirmation extends React.Component {
   }
 
   render = () => {
-    const { isPlayerEligible, rosterInfo, status, player } = this.props
+    const {
+      isPlayerEligible,
+      rosterInfo,
+      status,
+      player,
+      team,
+      league
+    } = this.props
 
-    const menuItems = []
-    for (const rPlayer of this._releases) {
-      menuItems.push(
-        <MenuItem key={rPlayer.player} value={rPlayer.player}>
-          {rPlayer.name} ({rPlayer.pos})
-        </MenuItem>
+    const options = []
+    team.active.forEach((player) => {
+      const { pos, team, pname, value, name, tag, bid } = player
+      const extensions = player.get('extensions', new List()).size
+      const salary = getExtensionAmount({
+        pos,
+        tag,
+        extensions,
+        league,
+        value,
+        bid
+      })
+      options.push({
+        id: player.player,
+        label: name,
+        pos,
+        team,
+        pname,
+        value: salary
+      })
+    })
+    const getOptionSelected = (option, value) => option.id === value.id
+    const renderOption = (option) => {
+      return (
+        <div className='release__select-player'>
+          <div className='release__select-player-value'>${option.value}</div>
+          <div className='player__name-position'>
+            <Position pos={option.pos} />
+          </div>
+          <div className='player__name-main'>
+            <span>{option.pname}</span>
+            <Team team={option.team} />
+          </div>
+        </div>
       )
     }
+    const renderTags = (value, getTagProps) =>
+      value.map((option, index) => (
+        // eslint-disable-next-line
+        <Chip label={option.label} {...getTagProps({ index })} />
+      ))
+    const title = 'Select players to conditionally release'
+    const renderInput = (params) => (
+      <TextField
+        {...params}
+        variant='outlined'
+        label={title}
+        placeholder={title}
+      />
+    )
+    const releasePlayers = []
+    this.state.release.forEach((playerId) => {
+      const player = this.props.team.players.find((p) => p.player === playerId)
+      const { pos, team, pname, value, name } = player
+      releasePlayers.push({
+        id: player.player,
+        label: name,
+        pos,
+        team,
+        pname,
+        value
+      })
+    })
 
     return (
       <Dialog open onClose={this.props.onClose}>
@@ -93,17 +157,18 @@ export default class PoachConfirmation extends React.Component {
               your claim is successful.
             </DialogContentText>
           )}
-          <FormControl size='small' variant='outlined'>
-            <InputLabel id='release-label'>Release</InputLabel>
-            <Select
-              labelId='release-label'
-              value={this.state.release}
-              error={this.state.error}
-              onChange={this.handleRelease}
-              label='Release'>
-              {menuItems}
-            </Select>
-          </FormControl>
+          <Autocomplete
+            multiple
+            options={options}
+            getOptionLabel={(x) => x.label}
+            getOptionSelected={getOptionSelected}
+            renderOption={renderOption}
+            filterSelectedOptions
+            value={releasePlayers}
+            onChange={this.handleRelease}
+            renderTags={renderTags}
+            renderInput={renderInput}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={this.props.onClose} text>
@@ -125,7 +190,7 @@ PoachConfirmation.propTypes = {
   poach: PropTypes.func,
   isPlayerEligible: PropTypes.bool,
   player: ImmutablePropTypes.record,
-  rosterPlayers: PropTypes.object,
+  team: PropTypes.object,
   roster: ImmutablePropTypes.record,
   onClose: PropTypes.func,
   rosterInfo: PropTypes.object

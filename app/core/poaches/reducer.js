@@ -11,6 +11,15 @@ const Poach = new Record({
   submitted: null
 })
 
+const createPoach = ({ tid, player, processed, release, submitted }) =>
+  new Poach({
+    tid,
+    player,
+    processed,
+    release: new List(release),
+    submitted
+  })
+
 export function poachesReducer(state = new Map(), { payload, type }) {
   switch (type) {
     case poachActions.POACH_SUBMITTED:
@@ -19,7 +28,7 @@ export function poachesReducer(state = new Map(), { payload, type }) {
         let leaguePoaches = state.get(payload.data.lid) || new Map()
         leaguePoaches = leaguePoaches.set(
           payload.data.player,
-          new Poach(payload.data)
+          createPoach(payload.data)
         )
         state.set(payload.data.lid, leaguePoaches)
       })
@@ -28,7 +37,7 @@ export function poachesReducer(state = new Map(), { payload, type }) {
       return state.withMutations((state) => {
         payload.data.poaches.forEach((poach) => {
           let leaguePoaches = state.get(poach.lid) || new Map()
-          leaguePoaches = leaguePoaches.set(poach.player, new Poach(poach))
+          leaguePoaches = leaguePoaches.set(poach.player, createPoach(poach))
           state.set(poach.lid, leaguePoaches)
         })
       })

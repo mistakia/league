@@ -50,7 +50,9 @@ router.get('/?', async (req, res) => {
       poachIds
     )
     for (const poach of poaches) {
-      poach.release = poachReleases.filter((p) => p.poachid === poach.uid)
+      poach.release = poachReleases
+        .filter((p) => p.poachid === poach.uid)
+        .map((p) => p.player)
     }
 
     const waivers = await db('waivers')
@@ -63,7 +65,9 @@ router.get('/?', async (req, res) => {
       waiverIds
     )
     for (const waiver of waivers) {
-      waiver.release = waiverReleases.filter((p) => p.waiverid === waiver.uid)
+      waiver.release = waiverReleases
+        .filter((p) => p.waiverid === waiver.uid)
+        .map((p) => p.player)
     }
 
     res.send({
