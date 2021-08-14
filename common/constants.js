@@ -1069,7 +1069,9 @@ export const jobs = {
 
   CALCULATE_FRANCHISE_TAGS: 39,
 
-  PROCESS_MATCHUPS: 40
+  PROCESS_MATCHUPS: 40,
+  DRAW_DIVISIONS: 41,
+  GENERATE_SCHEDULE: 42
 }
 
 export const jobDetails = {
