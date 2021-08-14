@@ -29,7 +29,7 @@ router.get('/?', async (req, res) => {
     }
 
     const waivers = await db('waivers')
-      .select('processed')
+      .select('uid', 'processed')
       .where('lid', leagueId)
       .where('type', type)
       .whereNotNull('processed')
