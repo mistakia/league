@@ -74,7 +74,7 @@ const run = async ({ lid }) => {
       await db('teams').update({ div }).where({ uid: team.tid })
     }
 
-    if (argv.pring) {
+    if (argv.print) {
       console.log(`Division ${div}`)
       const p = new Table()
       for (const team of division) {
