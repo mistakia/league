@@ -1067,7 +1067,9 @@ export const jobs = {
   FANTASYPROS_WEEKLY: 37,
   FANTASYPROS_DRAFT: 38,
 
-  CALCULATE_FRANCHISE_TAGS: 39
+  CALCULATE_FRANCHISE_TAGS: 39,
+
+  PROCESS_MATCHUPS: 40
 }
 
 export const jobDetails = {
@@ -1161,7 +1163,9 @@ export const sources = {
   DRAFT_KINGS: 14,
   BETONLINE: 15,
   '4FOR4': 16,
-  FANTASYPROS: 17
+  FANTASYPROS: 17,
+
+  AVERAGE: 18
 }
 
 export const sourcesTitle = {

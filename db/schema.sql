@@ -1483,6 +1483,13 @@ CREATE TABLE `matchups` (
   `aid` int(6) NOT NULL,
   `hid` int(6) NOT NULL,
   `lid` int(6) NOT NULL,
+
+  `hp` decimal(3,2) DEFAULT 0, -- points
+  `ap` decimal(3,2) DEFAULT 0,
+
+  `hpp` decimal(3,2) DEFAULT 0, -- potential points
+  `app` decimal(3,2) DEFAULT 0,
+
   `year` int(4) NOT NULL,
   `week` tinyint(2) NOT NULL,
   PRIMARY KEY `uid` (`uid`),
@@ -1640,6 +1647,68 @@ CREATE TABLE `teams` (
   `ac` varchar(6) DEFAULT NULL,
   UNIQUE KEY `uid` (`uid`),
   KEY `lid` (`lid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `team_stats`
+--
+
+DROP TABLE IF EXISTS `team_stats`;
+
+CREATE TABLE `team_stats` (
+  `tid` int(6) NOT NULL,
+  `year` int(4) NOT NULL,
+
+  `wins` tinyint(2) DEFAULT 0,
+  `losses` tinyint(2) DEFAULT 0,
+  `ties` tinyint(2) DEFAULT 0,
+
+  `apWins` tinyint(2) DEFAULT 0,
+  `apLosses` tinyint(2) DEFAULT 0,
+  `apTies` tinyint(2) DEFAULT 0,
+
+  `pf` decimal(6,2) DEFAULT 0,
+  `pa` decimal(6,2) DEFAULT 0,
+  `pdiff` decimal(6,2) DEFAULT 0,
+
+  `pp` decimal(6,2) DEFAULT 0,
+  `ppp` decimal(6,2) DEFAULT 0,
+  `pw` tinyint(2) DEFAULT 0,
+  `pl` tinyint(2) DEFAULT 0,
+  `pp_pct` decimal(5,2) DEFAULT 0,
+
+  `pmax` decimal(5,2) DEFAULT 0,
+  `pmin` decimal(5,2) DEFAULT 0,
+  `pdev` decimal(5,2) DEFAULT 0,
+
+  `doi` decimal(4,2) DEFAULT 0,
+
+  `pSlot1` decimal(6,2) DEFAULT 0,
+  `pSlot2` decimal(6,2) DEFAULT 0,
+  `pSlot3` decimal(6,2) DEFAULT 0,
+  `pSlot4` decimal(6,2) DEFAULT 0,
+  `pSlot5` decimal(6,2) DEFAULT 0,
+  `pSlot6` decimal(6,2) DEFAULT 0,
+  `pSlot7` decimal(6,2) DEFAULT 0,
+  `pSlot8` decimal(6,2) DEFAULT 0,
+  `pSlot9` decimal(6,2) DEFAULT 0,
+  `pSlot10` decimal(6,2) DEFAULT 0,
+  `pSlot11` decimal(6,2) DEFAULT 0,
+  `pSlot12` decimal(6,2) DEFAULT 0,
+  `pSlot13` decimal(6,2) DEFAULT 0,
+  `pSlot14` decimal(6,2) DEFAULT 0,
+  `pSlot15` decimal(6,2) DEFAULT 0,
+
+  `pPosQB` decimal(6,2) DEFAULT 0,
+  `pPosRB` decimal(6,2) DEFAULT 0,
+  `pPosWR` decimal(6,2) DEFAULT 0,
+  `pPosTE` decimal(6,2) DEFAULT 0,
+  `pPosK` decimal(6,2) DEFAULT 0,
+  `pPosDST` decimal(6,2) DEFAULT 0,
+
+  UNIQUE KEY `team` (`tid`, `year`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
