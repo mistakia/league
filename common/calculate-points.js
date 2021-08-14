@@ -37,7 +37,6 @@ const calculatePoints = ({ stats, position, league }) => {
     result.fg50 = stats.fg50 * 5
     result.total =
       result.total +
-      result.fgm +
       result.fg19 +
       result.fg29 +
       result.fg39 +
