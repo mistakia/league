@@ -91,6 +91,7 @@ module.exports = {
   getTopPoachingWaiver: require('./get-top-poaching-waiver'),
   getTopFreeAgencyWaiver: require('./get-top-free-agency-waiver'),
   getTopPracticeSquadWaiver: require('./get-top-practice-squad-waiver'),
+  generateSchedule: require('./generate-schedule'),
   submitAcquisition: require('./submit-acquisition'),
   getChartedPlayByPlayQuery,
   getPlayByPlayQuery,
