@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router({ mergeParams: true })
 const { constants } = require('../../../common')
-const { getSchedule } = require('../../../utils')
+const { generateSchedule } = require('../../../utils')
 
 router.post('/?', async (req, res) => {
   const { db, logger } = req.app.locals
@@ -14,25 +14,8 @@ router.post('/?', async (req, res) => {
       return res.status(401).send({ error: 'user is not commish' })
     }
 
-    await db('matchups')
-      .del()
-      .where({ lid: leagueId, year: constants.season.year })
-    const teams = await db('teams').where({ lid: leagueId })
-    const schedule = getSchedule(teams)
-    const inserts = []
-    for (const [index, value] of schedule.entries()) {
-      for (const matchup of value) {
-        inserts.push({
-          hid: matchup.home.uid,
-          aid: matchup.away.uid,
-          lid: league.uid,
-          week: index + 1,
-          year: constants.season.year
-        })
-      }
-    }
-    await db('matchups').insert(inserts)
-    res.send(inserts)
+    const data = await generateSchedule({ leagueId })
+    res.send(data)
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })
