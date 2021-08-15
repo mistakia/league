@@ -281,5 +281,9 @@ describe('API /draft', function () {
     it('pick expired', async () => {
       // TODO
     })
+
+    it('reserve violation', async () => {
+      // TODO
+    })
   })
 })

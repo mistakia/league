@@ -8,6 +8,7 @@ const {
   getRoster,
   sendNotifications,
   verifyUserTeam,
+  verifyReserveStatus,
   getLeague
 } = require('../../../utils')
 
@@ -78,6 +79,13 @@ router.post('/?', async (req, res) => {
     const clockStart = dayjs(draftStart).add(pick.pick - 1, 'days')
     if (constants.season.now.isBefore(clockStart)) {
       return res.status(400).send({ error: 'draft pick not on the clock' })
+    }
+
+    // verify no reserve violations
+    try {
+      await verifyReserveStatus({ teamId, leagueId })
+    } catch (error) {
+      return res.status(400).send({ error: error.message })
     }
 
     // make sure player is a rookie

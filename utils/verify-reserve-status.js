@@ -1,6 +1,11 @@
 const db = require('../db')
 const getRoster = require('./get-roster')
-const { constants, Roster } = require('../common')
+const {
+  constants,
+  Roster,
+  isReserveEligible,
+  isReserveCovEligible
+} = require('../common')
 
 module.exports = async ({ teamId, leagueId }) => {
   const leagues = await db('leagues').where({ uid: leagueId })
@@ -9,7 +14,7 @@ module.exports = async ({ teamId, leagueId }) => {
   const roster = new Roster({ roster: rosterRow, league })
   const reservePlayerIds = roster.reserve.map((p) => p.player)
 
-  const players = await db('players').whereIn('player', reservePlayerIds)
+  const players = await db('player').whereIn('player', reservePlayerIds)
 
   for (const player of roster.reserve) {
     const playerItem = players.find((p) => p.player === player.player)
@@ -17,14 +22,11 @@ module.exports = async ({ teamId, leagueId }) => {
       throw new Error('Reserve player violation')
     }
 
-    if (
-      player.slot === constants.slots.IR &&
-      (!playerItem.status || playerItem.status === 'Active')
-    ) {
+    if (player.slot === constants.slots.IR && !isReserveEligible(playerItem)) {
       throw new Error('Reserve player violation')
     } else if (
       player.slot === constants.slots.COV &&
-      playerItem.status !== 'Reserve/COVID-19'
+      !isReserveCovEligible(playerItem)
     ) {
       throw new Error('Reserve player violation')
     }

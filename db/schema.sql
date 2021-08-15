@@ -510,6 +510,7 @@ CREATE TABLE `player` (
   `gsispid` varchar(36) DEFAULT NULL,
 
   `status` varchar(255) DEFAULT NULL,
+  `injury_status` varchar(255) DEFAULT NULL,
   `high_school` varchar(255) DEFAULT NULL,
 
   `sleeper_id` varchar(11) DEFAULT NULL,
