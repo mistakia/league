@@ -288,6 +288,8 @@ export default class Auction {
       return
     }
 
+    // TODO - verify reserve status for team
+
     const bid = {
       userid,
       tid,

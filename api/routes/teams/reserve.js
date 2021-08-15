@@ -2,7 +2,12 @@ const express = require('express')
 const router = express.Router({ mergeParams: true })
 const API = require('groupme').Stateless
 
-const { constants, Roster } = require('../../../common')
+const {
+  constants,
+  Roster,
+  isReserveEligible,
+  isReserveCovEligible
+} = require('../../../common')
 const {
   getRoster,
   sendNotifications,
@@ -79,18 +84,22 @@ router.post('/?', async (req, res) => {
     const players = await db('player').where('player', player)
     const playerRow = players[0]
 
-    if (!playerRow.status || playerRow.status === 'Active') {
-      return res.status(400).send({ error: 'player not eligible for Reserve' })
-    }
-
     if (slot === constants.slots.COV) {
-      if (playerRow.status !== 'Reserve/COVID-19') {
+      if (!isReserveCovEligible(playerRow)) {
         return res
           .status(400)
           .send({ error: 'player not eligible for Reserve/COV' })
       }
-    } else if (!roster.hasOpenInjuredReserveSlot()) {
-      return res.status(400).send({ error: 'exceeds roster limits' })
+    } else {
+      if (!isReserveEligible(playerRow)) {
+        return res
+          .status(400)
+          .send({ error: 'player not eligible for Reserve' })
+      }
+
+      if (!roster.hasOpenInjuredReserveSlot()) {
+        return res.status(400).send({ error: 'exceeds roster limits' })
+      }
     }
 
     // make sure player was on previous week roster

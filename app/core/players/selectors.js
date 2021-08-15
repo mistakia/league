@@ -6,7 +6,9 @@ import {
   constants,
   calculatePoints,
   isOnReleaseWaivers,
-  getExtensionAmount
+  getExtensionAmount,
+  isReserveEligible,
+  isReserveCovEligible
 } from '@common'
 import { getApp } from '@core/app'
 import { getStats } from '@core/stats'
@@ -305,11 +307,11 @@ export function isPlayerReserveEligible(state, { player }) {
     cov: false
   }
 
-  if (player.status && player.status !== 'Active') {
+  if (isReserveEligible(player)) {
     reserve.ir = true
   }
 
-  if (player.status === 'Reserve/COVID-19') {
+  if (isReserveCovEligible(player)) {
     reserve.cov = true
   }
 

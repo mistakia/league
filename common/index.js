@@ -21,6 +21,8 @@ import calculateStandings from './calculate-standings'
 import optimizeStandingsLineup from './optimize-standings-lineup'
 import getPlayerCountBySlot from './get-player-count-by-slot'
 import getActiveRosterLimit from './get-active-roster-limit'
+import isReserveEligible from './is-reserve-eligible'
+import isReserveCovEligible from './is-reserve-cov-eligible'
 
 /* eslint-disable no-extra-semi */
 const groupBy = (xs, key) =>
@@ -96,5 +98,7 @@ export {
   calculateStandings,
   optimizeStandingsLineup,
   getPlayerCountBySlot,
-  getActiveRosterLimit
+  getActiveRosterLimit,
+  isReserveEligible,
+  isReserveCovEligible
 }
