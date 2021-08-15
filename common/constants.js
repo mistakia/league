@@ -18,21 +18,40 @@ const getAvailableYears = () => {
 }
 export const status = {
   'Physically Unable to Perform': 'PUP',
-  'Voluntary Opt Out': 'DNR',
+  'Voluntary Opt Out': 'OPT',
   'Injured Reserve': 'IR',
-  Suspended: 'Sus',
+  Suspended: 'SUS',
   'Commissioner Exempt List': 'NFL-E',
-  'Non Football Injury': 'NFI-Inj',
-  'Non-Football Illness': 'NFI-Ill',
+  'Non Football Injury': 'NFI-INJ',
+  'Non-Football Illness': 'NFI-ILL',
   'Did Not Report': 'DNR',
   'Reserve/COVID-19': 'COV',
   'Practice Squad': 'NFL-PS',
+  PUP: 'PUP',
   Questionable: 'Q',
   Inactive: 'INA',
   Out: 'O',
   Doubtful: 'D',
   IR: 'IR'
 }
+
+export const statusDescriptions = {
+  PUP: 'Physically Unable to Perform',
+  OPT: 'Voluntary Opt Out',
+  IR: 'Injured Reserve',
+  SUS: 'Suspended',
+  'NFL-E': 'Commissioner Exempt List',
+  'NFI-INJ': 'Non Football Injury',
+  'NFI-ILL': 'Non-Football Illness',
+  DNR: 'Did Not Report',
+  COV: 'Reserve/COVID-19',
+  'NFL-PS': 'Practice Squad',
+  Q: 'Questionable',
+  INA: 'Inactive',
+  O: 'Out',
+  D: 'Doubtful'
+}
+
 export const scoring = {
   STD: 1,
   HALF: 2,
