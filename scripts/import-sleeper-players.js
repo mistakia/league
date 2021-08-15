@@ -61,7 +61,8 @@ const run = async () => {
       yahoo_id,
       // practice_participation,
       // stats_id,
-      status
+      status,
+      injury_status
     } = item
 
     const data = {
@@ -77,6 +78,7 @@ const run = async () => {
       // practice_participation,
       // stats_global_id: stats_id,
       status,
+      injury_status,
       sleeper_id,
       player: playerId,
       // name,

@@ -412,7 +412,7 @@ describe('API /teams - reserve', function () {
           slot: constants.slots.COV
         })
 
-      await error(request, 'player not eligible for Reserve')
+      await error(request, 'player not eligible for Reserve/COV')
     })
 
     it('player not on reserve/cov - ir', async () => {

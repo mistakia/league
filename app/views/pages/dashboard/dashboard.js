@@ -14,7 +14,7 @@ import DashboardTeamSummary from '@components/dashboard-team-summary'
 import DashboardTeamValue from '@components/dashboard-team-value'
 import PlayerRoster from '@components/player-roster'
 import PageLayout from '@layouts/page'
-import { constants } from '@common'
+import { constants, isReserveEligible, isReserveCovEligible } from '@common'
 
 import './dashboard.styl'
 
@@ -61,7 +61,7 @@ export default function DashboardPage() {
     if (!player.player) continue
     reserveIRItems.push(<PlayerRoster key={player.player} player={player} />)
 
-    if (!player.status || player.status === 'Active') {
+    if (!isReserveEligible(player)) {
       notices.push(
         <Alert key={player.player} severity='error'>
           <AlertTitle>{player.name} not eligible for Reserve/IR</AlertTitle>
@@ -77,7 +77,7 @@ export default function DashboardPage() {
     if (!player.player) continue
     reserveCOVItems.push(<PlayerRoster key={player.player} player={player} />)
 
-    if (player.status !== 'Reserve/COVID-19') {
+    if (!isReserveCovEligible(player)) {
       notices.push(
         <Alert key={player.player} severity='error'>
           <AlertTitle>
