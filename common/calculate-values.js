@@ -15,8 +15,8 @@ const calculateValues = ({
     manual: 0
   }
 
-  const weightAvailable = vorpw
-  const weightStarter = volsw
+  const weightAvailable = vorpw === null ? 1 : vorpw
+  const weightStarter = volsw === null ? 1 : volsw
   const totalWeight = weightAvailable + weightStarter
 
   for (const player of players) {
@@ -50,7 +50,8 @@ const calculateValues = ({
 
     // weighted average
     player.vorp[week].default =
-      (player.vorp[week].available + 9 * player.vorp[week].starter) / 10
+      (player.vorp[week].defaultAvailable + 3 * player.vorp[week].starter) / 4
+
     if (player.vorp[week].default > 0) {
       total.default = total.default + player.vorp[week].default
     }

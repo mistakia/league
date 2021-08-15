@@ -9,6 +9,7 @@ class PlayerRosterTotal extends Player {
     const { players, league, reorder } = this.props
 
     const week = Math.max(constants.season.week, 1)
+    const type = constants.season.isRegularSeason ? 'ros' : '0'
 
     let baseSalaryTotal = 0
     let extendedSalaryTotal = 0
@@ -30,18 +31,18 @@ class PlayerRosterTotal extends Player {
         value,
         bid
       })
-      const projectedSalary = player.getIn(['values', 'ros', 'default'], 0)
+      const projectedSalary = player.getIn(['values', type, 'default'], 0)
       const savings = projectedSalary - extendedSalary
 
       baseSalaryTotal = baseSalaryTotal + value
       extendedSalaryTotal = extendedSalaryTotal + extendedSalary
       projectedSalaryTotal = projectedSalaryTotal + projectedSalary
       savingsTotal = savingsTotal + savings
-      valueTotal = valueTotal + player.getIn(['vorp', 'ros', 'default'], 0)
+      valueTotal = valueTotal + player.getIn(['vorp', type, 'default'], 0)
       valueAdjTotal =
-        valueAdjTotal + player.getIn(['vorp_adj', 'ros', 'default'], 0)
+        valueAdjTotal + player.getIn(['vorp_adj', type, 'default'], 0)
       rosPointsTotal =
-        rosPointsTotal + player.getIn(['points', 'ros', 'total'], 0)
+        rosPointsTotal + player.getIn(['points', type, 'total'], 0)
       weekPointsTotal =
         weekPointsTotal + player.getIn(['points', `${week}`, 'total'], 0)
     })

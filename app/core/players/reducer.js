@@ -11,6 +11,8 @@ import { auctionActions } from '@core/auction'
 
 import { constants } from '@common'
 
+const isOffseason = constants.season.isOffseason
+
 const initialState = new Map({
   isInitializing: true,
   isPending: false,
@@ -29,8 +31,8 @@ const initialState = new Map({
   allAges: new List(),
   items: new Map(),
   order: 'desc',
-  view: constants.season.week === 0 ? 'season' : 'ros',
-  orderBy: 'vorp.ros.default',
+  view: isOffseason ? 'season' : 'ros',
+  orderBy: isOffseason ? 'vorp.0.default' : 'vorp.ros.default',
   watchlist: new Set(),
   cutlist: new List(),
   baselines: new Map(),
@@ -227,8 +229,9 @@ export function playersReducer(state = initialState, { payload, type }) {
 
     case appActions.AUTH_FULFILLED:
       return state.withMutations((players) => {
+        const week = isOffseason ? '0' : 'ros'
         players.merge({
-          orderBy: `vorp.ros.${payload.data.user.vbaseline}`
+          orderBy: `vorp.${week}.${payload.data.user.vbaseline}`
         })
 
         if (payload.data.user.qbb) {
@@ -262,7 +265,8 @@ export function playersReducer(state = initialState, { payload, type }) {
         return state
       }
       const value = payload.data ? payload.data.value : payload.opts.value
-      return state.merge({ orderBy: `vorp.ros.${value}` }) // TODO switch between 0 and ros
+      const week = isOffseason ? '0' : 'ros'
+      return state.merge({ orderBy: `vorp.${week}.${value}` })
     }
 
     case playerActions.GET_CUTLIST_FULFILLED:

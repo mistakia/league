@@ -1,7 +1,9 @@
-import { constants } from '../../common'
 const express = require('express')
 const dayjs = require('dayjs')
 const router = express.Router()
+
+const { constants } = require('../../common')
+const { getProjections } = require('../../utils')
 
 router.get('/?', async (req, res) => {
   const { db, logger, cache } = req.app.locals
@@ -12,40 +14,19 @@ router.get('/?', async (req, res) => {
     res.set('Pragma', null)
     res.set('Surrogate-Control', null)
 
-    const players = await db('player')
-      .whereIn('pos', constants.positions)
-      .whereNot({ cteam: 'INA' })
-    const playerIds = players.map((p) => p.player)
-
     let projections = cache.get('projections')
     if (!projections) {
-      const sub = db('projections')
-        .select(db.raw('max(timestamp) AS maxtime, sourceid AS sid'))
-        .groupBy('sid')
-        .where('year', constants.season.year)
-        .whereNull('userid')
-
-      projections = await db
-        .select('*')
-        .from(db.raw('(' + sub.toString() + ') AS X'))
-        .innerJoin('projections', function () {
-          this.on(function () {
-            this.on('sourceid', '=', 'sid')
-            this.andOn('timestamp', '=', 'maxtime')
-          })
-        })
-        .whereIn('player', playerIds)
-        .where('week', '>=', constants.season.week)
-        .whereNull('userid')
-
+      projections = await getProjections()
       cache.set('projections', projections, 14400) // 4 hours
     }
 
     let userProjections = []
     if (req.user) {
       userProjections = await db('projections')
-        .select('*')
-        .whereIn('player', playerIds)
+        .select('projections.*')
+        .join('player', 'projections.player', 'player.player')
+        .whereIn('player.pos', constants.positions)
+        .whereNot('player.cteam', 'INA')
         .where({
           year: constants.season.year,
           userid: req.user.userId
