@@ -30,8 +30,10 @@ class PlayerRoster extends Player {
     const isWaiver = Boolean(waiverId)
     const isPoach = Boolean(poach)
     const isClaim = isWaiver || isPoach
+    const isRegularSeason = constants.season.isRegularSeason
 
     const week = Math.max(constants.season.week, 1)
+    const type = isRegularSeason ? 'ros' : '0'
 
     const extensions = player.get('extensions', new List()).size
     const { pos, tag, value, bid } = player
@@ -43,13 +45,13 @@ class PlayerRoster extends Player {
       value,
       bid
     })
-    const projectedSalary = player.getIn(['values', 'ros', 'default'], 0)
+    const projectedSalary = player.getIn(['values', type, 'default'], 0)
     const savings = projectedSalary - extendedSalary
 
-    const vorp = player.getIn(['vorp', 'ros', 'default'], 0)
-    const vorpAdj = player.getIn(['vorp_adj', 'ros', 'default'], 0)
-    const rosPoints = player.getIn(['points', 'ros', 'total'], 0)
-    const weekPoints = player.getIn(['points', `${week}`, 'total'], 0)
+    const vorp = player.getIn(['vorp', type, 'default'], 0)
+    const vorpAdj = player.getIn(['vorp_adj', type, 'default'], 0)
+    const rosPoints = player.getIn(['points', type, 'total'], 0)
+    const weekPoints = player.getIn(['points', week, 'total'], 0)
     const starts = player.getIn(['lineups', 'starts'], 0)
     const startPoints = player.getIn(['lineups', 'sp'], 0)
     const benchPoints = player.getIn(['lineups', 'bp'], 0)
@@ -122,7 +124,7 @@ class PlayerRoster extends Player {
         <div className='metric table__cell'>
           {vorpAdj ? vorpAdj.toFixed(1) : '-'}
         </div>
-        {constants.season.week > 0 && (
+        {isRegularSeason && (
           <div className='metric table__cell'>
             {rosPoints ? rosPoints.toFixed(1) : '-'}
           </div>

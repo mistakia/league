@@ -8,69 +8,29 @@ const { Table } = require('console-table-printer')
 
 const db = require('../db')
 
-const { groupBy } = require('../common')
+const { getLeague } = require('../utils')
+const {
+  constants,
+  groupBy,
+  getPlayerCountBySlot,
+  getActiveRosterLimit,
+  calculatePoints
+} = require('../common')
 
-const log = debug('script:calculate-vor')
+const log = debug('calculate-vor')
+debug.enable('calculate-vor')
 
-const TEAMS = 12
-const TEAM_CAP = 200
-const ROSTER_SIZE = 17
-const LAST_WEEK_OF_SEASON = 16
 const POSITIONS = ['QB', 'RB', 'WR', 'TE']
-const LEAGUE_SCORING = {
-  ints: -0.5,
-  tdp: 4,
-  py: 0.05,
-  ry: 0.1,
-  tdr: 6,
-  rec: 0.5,
-  recy: 0.1,
-  tdrec: 6,
-  tdret: 6,
-  fuml: -1,
-  conv: 2
-}
-
-const calculatePoints = (stats, scoring) => {
-  let points = 0
-  for (const stat in scoring) {
-    const modifier = scoring[stat]
-    const value = stats[stat]
-    points = points + modifier * value
-  }
-  return points
-}
-
-const getStartersByPosition = () => {
-  const TEAMS = 12
-  const slots = {
-    QB: 1,
-    RB: 2,
-    WR: 2,
-    TE: 1,
-    SF: 1,
-    RBWRTE: 1,
-    DEF: 1,
-    K: 1
-  }
-
-  const result = {}
-  for (const slot in slots) {
-    result[slot] = slots[slot] * TEAMS
-  }
-
-  return result
-}
 
 // Stats is an object with positions as properties and player stats as values
 // i.e. { QB: [{ player1 }, { player2 }, ... ], RB: [{ player1 }, { player2 }, ... ] ... }
-const getBaselinePlayers = ({ stats, starters }) => {
+const getBaselinePlayers = ({ stats, playerCount }) => {
   const baselinePlayers = {}
   for (const position of POSITIONS) {
-    baselinePlayers[position] = stats[position].slice(starters[position])
+    baselinePlayers[position] = stats[position].slice(playerCount[position])
   }
 
-  if (!starters.RBWRTE && !starters.SF && !starters.RBWR) {
+  if (!playerCount.RBWRTE && !playerCount.QBRBWRTE && !playerCount.RBWR) {
     const result = {}
     for (const position of POSITIONS) {
       result[position] = baselinePlayers[position][0]
@@ -80,17 +40,17 @@ const getBaselinePlayers = ({ stats, starters }) => {
 
   let baselineRBWR
   let baselineRBWRTE
-  let baselineSF
+  let baselineQBRBWRTE
 
-  if (starters.RBWR) {
+  if (playerCount.RBWR) {
     const rbwr = baselinePlayers.RB.concat(baselinePlayers.WR).sort(
       (b, a) => b.points - a.points
     )
-    baselineRBWR = rbwr.slice(starters.RBWR)
+    baselineRBWR = rbwr.slice(playerCount.RBWR)
   }
 
   /* eslint-disable indent */
-  if (starters.RBWRTE) {
+  if (playerCount.RBWRTE) {
     const rbwrte = baselineRBWR
       ? baselineRBWR
           .concat(baselinePlayers.TE)
@@ -99,11 +59,11 @@ const getBaselinePlayers = ({ stats, starters }) => {
           (a, b) => b.points - a.points
         )
 
-    baselineRBWRTE = rbwrte.slice(starters.RBWRTE)
+    baselineRBWRTE = rbwrte.slice(playerCount.RBWRTE)
   }
   /* eslint-enable indent */
 
-  if (starters.SF) {
+  if (playerCount.QBRBWRTE) {
     const sf = baselineRBWR
       ? baselineRBWRTE
           .concat(baselinePlayers.QB)
@@ -118,12 +78,14 @@ const getBaselinePlayers = ({ stats, starters }) => {
           baselinePlayers.QB
         ).sort((a, b) => b.points - a.points)
 
-    baselineSF = sf.slice(starters.SF)
+    baselineQBRBWRTE = sf.slice(playerCount.QBRBWRTE)
   }
 
-  const qbBaseline = starters.SF ? baselineSF[0] : baselinePlayers.QB[0]
+  const qbBaseline = playerCount.QBRBWRTE
+    ? baselineQBRBWRTE[0]
+    : baselinePlayers.QB[0]
 
-  if (starters.RBWRTE) {
+  if (playerCount.RBWRTE) {
     return {
       QB: qbBaseline,
       RB: baselineRBWRTE[0],
@@ -140,7 +102,7 @@ const getBaselinePlayers = ({ stats, starters }) => {
   }
 }
 
-const calculateVOR = async ({ year, rookie }) => {
+const calculateVOR = async ({ year, rookie, league }) => {
   if (!Number.isInteger(year)) {
     throw new Error(`${year} invalid year`)
   }
@@ -158,7 +120,7 @@ const calculateVOR = async ({ year, rookie }) => {
       'offense.seas'
     )
     .where('offense.year', year)
-    .andWhere('game.wk', '<=', LAST_WEEK_OF_SEASON)
+    .andWhere('game.wk', '<=', constants.season.finalWeek)
     .join('player', 'offense.player', 'player.player')
     .join('game', 'offense.gid', 'game.gid')
 
@@ -192,7 +154,8 @@ const calculateVOR = async ({ year, rookie }) => {
 
   // calculate fantasy points
   for (const row of rows) {
-    row.points = calculatePoints(row, LEAGUE_SCORING)
+    const points = calculatePoints({ stats: row, position: row.pos, league })
+    row.points = points.total
   }
 
   // group by position
@@ -205,7 +168,7 @@ const calculateVOR = async ({ year, rookie }) => {
 
   // calculate VOR by week
   let stats = []
-  for (let week = 1; week <= LAST_WEEK_OF_SEASON; week++) {
+  for (let week = 1; week <= constants.season.finalWeek; week++) {
     const weekStatsByPosition = {}
     for (const position of POSITIONS) {
       weekStatsByPosition[position] = statsByPosition[position].filter(
@@ -217,10 +180,10 @@ const calculateVOR = async ({ year, rookie }) => {
     }
 
     // get player VOR baselines
-    const starters = getStartersByPosition()
+    const playerCount = getPlayerCountBySlot({ league })
     const baselinePlayers = getBaselinePlayers({
       stats: weekStatsByPosition,
-      starters
+      playerCount
     })
 
     for (const position of POSITIONS) {
@@ -267,7 +230,8 @@ const calculateVOR = async ({ year, rookie }) => {
   }
 
   // set player contract value
-  const leagueCAP = TEAMS * TEAM_CAP - TEAMS * ROSTER_SIZE
+  const rosterLimit = getActiveRosterLimit(league)
+  const leagueCAP = league.nteams * league.cap - league.nteams * rosterLimit
   const pricePerVOR = leagueCAP / totalVOR
   for (const player in players) {
     const vor = output[player].vor
@@ -289,56 +253,64 @@ const calculateVOR = async ({ year, rookie }) => {
 
 module.exports = calculateVOR
 
-if (!module.parent) {
-  debug.enable('script:calculate-vor')
-  const main = async () => {
-    try {
-      const year = argv.year
-      const rookie = argv.rookie
-      const results = await calculateVOR({ year, rookie })
-      const top200 = Object.values(results)
-        .sort((a, b) => b.vor - a.vor)
-        .slice(0, 200)
-      const p = new Table()
-      const getColor = (pos) => {
-        switch (pos) {
-          case 'QB':
-            return 'red'
-          case 'RB':
-            return 'green'
-          case 'WR':
-            return 'white'
-          case 'TE':
-            return 'cyan'
-        }
-      }
-      for (const [index, player] of top200.entries()) {
-        p.addRow(
-          {
-            index: index + 1,
-            player: player.player,
-            vor: player.vor.toFixed(2),
-            points: player.points.toFixed(2),
-            rank: player.prnk,
-            value: `$${player.value}`,
-            pos: player.pos,
-            rookie: player.rookie ? 'rookie' : ''
-          },
-          {
-            color: getColor(player.pos)
-          }
-        )
-      }
-      console.log(
-        chalk.bold(
-          `${year} ${rookie ? 'Rookie ' : ''}Player end-of-season values`
-        )
-      )
-      p.printTable()
-    } catch (e) {
-      log(e)
+const main = async () => {
+  try {
+    const year = argv.year
+    const rookie = argv.rookie
+    const lid = argv.lid
+    if (!lid) {
+      console.log('missing --lid')
+      return
     }
+    const league = await getLeague(lid)
+    const results = await calculateVOR({ year, rookie, league })
+    const top200 = Object.values(results)
+      .sort((a, b) => b.vor - a.vor)
+      .slice(0, 200)
+    const p = new Table()
+    const getColor = (pos) => {
+      switch (pos) {
+        case 'QB':
+          return 'red'
+        case 'RB':
+          return 'green'
+        case 'WR':
+          return 'white'
+        case 'TE':
+          return 'cyan'
+      }
+    }
+    for (const [index, player] of top200.entries()) {
+      p.addRow(
+        {
+          index: index + 1,
+          player: player.player,
+          vor: player.vor.toFixed(2),
+          points: player.points.toFixed(2),
+          rank: player.prnk,
+          value: `$${player.value}`,
+          pos: player.pos,
+          rookie: player.rookie ? 'rookie' : ''
+        },
+        {
+          color: getColor(player.pos)
+        }
+      )
+    }
+    console.log(
+      chalk.bold(
+        `${year} ${rookie ? 'Rookie ' : ''}Player end-of-season values`
+      )
+    )
+    p.printTable()
+  } catch (e) {
+    log(e)
   }
 
+  process.exit()
+}
+
+if (!module.parent) {
+  debug.enable('calculate-vor')
   main()
 }

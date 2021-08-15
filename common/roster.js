@@ -1,6 +1,7 @@
 import dayjs from 'dayjs'
 import * as constants from './constants'
 import getExtensionAmount from './get-extension-amount'
+import getActiveRosterLimit from './get-active-roster-limit'
 
 export default class Roster {
   constructor({ roster, league }) {
@@ -9,18 +10,7 @@ export default class Roster {
     this._league = league
     this._players = new Map()
 
-    this.activeRosterLimit =
-      league.sqb +
-      league.srb +
-      league.swr +
-      league.ste +
-      league.srbwr +
-      league.srbwrte +
-      league.sqbrbwrte +
-      league.swrte +
-      league.sdst +
-      league.sk +
-      league.bench
+    this.activeRosterLimit = getActiveRosterLimit(league)
 
     const deadline = dayjs.unix(league.tran_date)
     const calculateExtension = constants.season.now.isBefore(deadline)

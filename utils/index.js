@@ -86,6 +86,7 @@ module.exports = {
   processPoach: require('./process-poach'),
   processRelease: require('./process-release'),
   getRoster: require('./get-roster'),
+  getProjections: require('./get-projections'),
   getLeague: require('./get-league'),
   resetWaiverOrder: require('./reset-waiver-order'),
   getTopPoachingWaiver: require('./get-top-poaching-waiver'),

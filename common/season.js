@@ -18,6 +18,10 @@ export default class Season {
     return dayjs().utc()
   }
 
+  get isOffseason() {
+    return this.week === 0
+  }
+
   get isRegularSeason() {
     const week = this.week
     return week > 0 && week <= this.finalWeek

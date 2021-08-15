@@ -23,9 +23,7 @@ const weightProjections = ({ projections, weights = [], userId, week }) => {
   for (const projection of sourceProjections) {
     const { sourceid } = projection
     const source = weights.find((w) => w.uid === sourceid)
-    const full = 1 / sourceProjections.length
-    const factor = source && source.weight !== null ? source.weight : 1
-    const weight = factor * full
+    const weight = source && source.weight !== null ? source.weight : 1
 
     for (const r in data) {
       if (projection[r]) {
@@ -46,11 +44,12 @@ const weightProjections = ({ projections, weights = [], userId, week }) => {
 
     const totalWeight = item.reduce((a, b) => a + b.weight, 0)
     const values = item.map((a) => a.value)
-    // weighted mean
-    result[r] = values.reduce(
-      (a, b, idx) => a + (item[idx].weight / totalWeight) * b,
+    const appliedWeight = values.reduce(
+      (sum, val, idx) => sum + item[idx].weight * val,
       0
     )
+
+    result[r] = appliedWeight / totalWeight || 0
   }
 
   return Object.assign({}, result, removeFalsy(userProjection))
