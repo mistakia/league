@@ -19,6 +19,8 @@ import calculatePercentiles from './calculate-percentiles'
 import getExtensionAmount from './get-extension-amount'
 import calculateStandings from './calculate-standings'
 import optimizeStandingsLineup from './optimize-standings-lineup'
+import getPlayerCountBySlot from './get-player-count-by-slot'
+import getActiveRosterLimit from './get-active-roster-limit'
 
 /* eslint-disable no-extra-semi */
 const groupBy = (xs, key) =>
@@ -92,5 +94,7 @@ export {
   calculatePercentiles,
   getExtensionAmount,
   calculateStandings,
-  optimizeStandingsLineup
+  optimizeStandingsLineup,
+  getPlayerCountBySlot,
+  getActiveRosterLimit
 }

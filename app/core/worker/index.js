@@ -124,7 +124,9 @@ export function calculatePlayerValues(payload) {
         b[pos].manual = players.find(
           (p) => p.player === customBaselines[pos].manual
         )
-      } else {
+      }
+
+      if (!b[pos].manual) {
         b[pos].manual = b[pos].starter
       }
     }
