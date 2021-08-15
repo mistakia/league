@@ -8,6 +8,7 @@ import Team from '@components/team'
 import { constants } from '@common'
 import PlayerLabel from '@components/player-label'
 import PlayerTag from '@components/player-tag'
+import PlayerStatus from '@components/player-status'
 
 import './player-name.styl'
 
@@ -40,6 +41,7 @@ export default class PlayerName extends React.Component {
           {isOnCutlist && (
             <PlayerLabel label={<NotInterestedIcon />} description='Cutlist' />
           )}
+          <PlayerStatus player={player} />
           <PlayerTag tag={player.tag} />
         </div>
       </>
