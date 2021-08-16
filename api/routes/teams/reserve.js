@@ -153,6 +153,13 @@ router.post('/?', async (req, res) => {
     }
     await db('transactions').insert(transaction)
 
+    await db('cutlist')
+      .where({
+        player,
+        tid
+      })
+      .del()
+
     const data = {
       transaction,
       slot,
