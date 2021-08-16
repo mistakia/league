@@ -12,8 +12,9 @@ export default class Roster {
 
     this.activeRosterLimit = getActiveRosterLimit(league)
 
-    const deadline = dayjs.unix(league.ext_date)
-    const isBeforeExtensionDeadline = constants.season.now.isBefore(deadline)
+    const isBeforeExtensionDeadline = constants.season.now.isBefore(
+      dayjs.unix(league.ext_date)
+    )
     for (const {
       slot,
       player,
@@ -32,7 +33,7 @@ export default class Roster {
             value,
             bid
           })
-        : value
+        : bid || value
 
       this._players.set(player, {
         slot,
