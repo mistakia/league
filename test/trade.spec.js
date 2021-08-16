@@ -295,6 +295,8 @@ describe('API /trades', function () {
         userId
       })
     })
+
+    // check to make sure cutlist players are removed
   })
 
   // trade with release players, make sure transactions are created

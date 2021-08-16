@@ -2,7 +2,11 @@ const express = require('express')
 const dayjs = require('dayjs')
 const router = express.Router({ mergeParams: true })
 const { constants, Roster } = require('../../../common')
-const { getRoster } = require('../../../utils')
+const {
+  getRoster,
+  getLeague,
+  verifyRestrictedFreeAgency
+} = require('../../../utils')
 
 const trade = require('./trade')
 
@@ -137,12 +141,19 @@ router.post(
         return res.status(400).send({ error: 'player has poaching claim' })
       }
 
-      const leagues = await db('leagues').where({ uid: leagueId })
-      const league = leagues[0]
+      const league = await getLeague(leagueId)
+      const now = dayjs()
+
+      // check for restricted free agency players during RFA
+      try {
+        await verifyRestrictedFreeAgency({ league, players: allPlayers })
+      } catch (error) {
+        return res.status(400).send({ error: error.message })
+      }
 
       // make sure trade deadline has not passed
       const deadline = dayjs.unix(league.tddate)
-      if (dayjs().isAfter(deadline)) {
+      if (now.isAfter(deadline)) {
         return res.status(400).send({ error: 'deadline has passed' })
       }
 

@@ -480,7 +480,10 @@ export function* watchRemoveTransitionTag() {
 }
 
 export function* watchPostTransitionTagFulfilled() {
-  yield takeLatest(rosterActions.POST_TRANSITION_TAG_FULFILLED, transitionNotification)
+  yield takeLatest(
+    rosterActions.POST_TRANSITION_TAG_FULFILLED,
+    transitionNotification
+  )
 }
 
 export function* watchUpdateTransitionTag() {
@@ -488,7 +491,10 @@ export function* watchUpdateTransitionTag() {
 }
 
 export function* watchPutTransitionTagFulfilled() {
-  yield takeLatest(rosterActions.PUT_TRANSITION_TAG_FULFILLED, transitionNotification)
+  yield takeLatest(
+    rosterActions.PUT_TRANSITION_TAG_FULFILLED,
+    transitionNotification
+  )
 }
 
 //= ====================================
