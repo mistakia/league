@@ -1,6 +1,5 @@
 const express = require('express')
 const router = express.Router({ mergeParams: true })
-const API = require('groupme').Stateless
 
 const { constants } = require('../../../common')
 const {
@@ -66,24 +65,14 @@ router.post('/?', async (req, res) => {
     // send notification
     const message = `${team.name} (${team.abbrv}) has released ${playerRow.fname} ${playerRow.lname} (${playerRow.pos}).`
 
+    const league = await getLeague(lid)
     await sendNotifications({
-      leagueId: lid,
+      league,
       teamIds: [],
       voice: false,
-      league: true,
+      notifyLeague: true,
       message
     })
-
-    const league = await getLeague(lid)
-
-    if (league.groupme_token && league.groupme_id) {
-      await API.Bots.post.Q(
-        league.groupme_token,
-        league.groupme_id,
-        message,
-        {}
-      )
-    }
   } catch (error) {
     logger(error)
     return res.status(400).send({ error: error.toString() })

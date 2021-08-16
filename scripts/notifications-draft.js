@@ -1,7 +1,6 @@
 // eslint-disable-next-line
 require = require('esm')(module /*, options*/)
 const dayjs = require('dayjs')
-const API = require('groupme').Stateless
 
 const { constants } = require('../common')
 const { sendNotifications } = require('../utils')
@@ -32,19 +31,10 @@ const run = async () => {
       const pick = picks[0]
       const message = `${pick.name} (${pick.abbrv}) is now on the clock with the #${pick.pick} pick in the ${pick.year} draft.`
       await sendNotifications({
-        leagueId: league.uid,
+        league,
         teamIds: [pick.tid],
         message
       })
-
-      if (league.groupme_token && league.groupme_id) {
-        await API.Bots.post.Q(
-          league.groupme_token,
-          league.groupme_id,
-          message,
-          {}
-        )
-      }
     }
   }
 

@@ -5,7 +5,7 @@ const debug = require('debug')
 
 const db = require('../db')
 const { constants } = require('../common')
-const { processPoach, sendNotifications } = require('../utils')
+const { processPoach, sendNotifications, getLeague } = require('../utils')
 
 const log = debug('process:claims')
 if (process.env.NODE_ENV !== 'test') {
@@ -49,11 +49,12 @@ const run = async () => {
       log(
         `poaching claim unsuccessful by teamId: (${claim.tid}) because ${error.message}`
       )
+      const league = await getLeague(claim.lid)
       await sendNotifications({
-        leagueId: claim.lid,
+        league,
         teamIds: [claim.tid],
         voice: false,
-        league: false,
+        notifyLeague: true,
         message: player
           ? `Your poaching claim for ${player.fname} ${player.lname} (${player.pos}) was unsuccessful`
           : 'Your poaching claim was unsuccessful.'

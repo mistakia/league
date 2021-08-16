@@ -1,4 +1,3 @@
-const API = require('groupme').Stateless
 const dayjs = require('dayjs')
 
 const db = require('../db')
@@ -9,6 +8,7 @@ const getRoster = require('./get-roster')
 const isPlayerOnWaivers = require('./is-player-on-waivers')
 const processRelease = require('./process-release')
 const isPlayerLocked = require('./is-player-locked')
+const getLeague = require('./get-league')
 
 module.exports = async function ({
   leagueId,
@@ -43,8 +43,8 @@ module.exports = async function ({
   }
 
   // verify leagueId
-  const leagues = await db('leagues').where({ uid: leagueId }).limit(1)
-  if (!leagues.length) {
+  const league = await getLeague(leagueId)
+  if (!league) {
     throw new Error('invalid leagueId')
   }
 
@@ -56,7 +56,6 @@ module.exports = async function ({
   }
 
   // verify player is a free agent
-  const league = leagues[0]
   const rosters = await db('rosters_players')
     .join('rosters', 'rosters_players.rid', 'rosters.uid')
     .where({
@@ -187,17 +186,14 @@ module.exports = async function ({
       }
     }
   }
+
   await sendNotifications({
-    leagueId: league.uid,
+    league,
     teamIds: [],
     voice: false,
-    league: true,
+    notifyLeague: true,
     message
   })
-
-  if (league.groupme_token && league.groupme_id) {
-    await API.Bots.post.Q(league.groupme_token, league.groupme_id, message, {})
-  }
 
   return result
 }

@@ -1,11 +1,11 @@
 const dayjs = require('dayjs')
-const API = require('groupme').Stateless
 
 const db = require('../db')
 
 const { constants, Roster } = require('../common')
 const sendNotifications = require('./send-notifications')
 const getRoster = require('./get-roster')
+const getLeague = require('./get-league')
 
 module.exports = async function ({
   leagueId,
@@ -27,13 +27,12 @@ module.exports = async function ({
   const poachPlayer = playerRows.find((p) => p.player === player)
 
   // verify leagueId
-  const leagues = await db('leagues').where({ uid: leagueId })
-  if (!leagues.length) {
+  const league = await getLeague(leagueId)
+  if (!league) {
     throw new Error('invalid leagueId')
   }
 
   // verify player is on a practice squad
-  const league = leagues[0]
   const slots = await db('rosters_players')
     .join('rosters', 'rosters_players.rid', 'rosters.uid')
     .where({
@@ -104,16 +103,12 @@ module.exports = async function ({
     .add('48', 'hours')
     .format('dddd, MMMM Do h:mm a')} EST.`
   await sendNotifications({
-    leagueId: league.uid,
+    league,
     teamIds: [],
     voice: true,
-    league: true,
+    notifyLeague: true,
     message
   })
-
-  if (league.groupme_token && league.groupme_id) {
-    await API.Bots.post.Q(league.groupme_token, league.groupme_id, message, {})
-  }
 
   return {
     release,

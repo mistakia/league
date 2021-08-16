@@ -1,12 +1,14 @@
 const db = require('../db')
 const sendVoiceNotifications = require('./send-voice-notifications')
 const sendTextNotifications = require('./send-text-notifications')
+const sendGroupmeMessage = require('./send-groupme-message')
+const sendDiscordMessage = require('./send-discord-message')
 
 const sendNotifications = async ({
   teamIds = [],
-  leagueId, // required
+  league, // required
   message, // required
-  league,
+  notifyLeague,
   voice
 }) => {
   const textMessages = []
@@ -14,9 +16,9 @@ const sendNotifications = async ({
   const users = await db('users_teams')
     .join('teams', 'users_teams.tid', 'teams.uid')
     .join('users', 'users_teams.userid', 'users.id')
-    .where('teams.lid', leagueId)
+    .where('teams.lid', league.uid)
 
-  if (league) {
+  if (notifyLeague) {
     // send league text messages
     for (const [index, user] of users.entries()) {
       if (user.phone && user.text && user.leaguetext) {
@@ -28,6 +30,23 @@ const sendNotifications = async ({
         users.splice(index, 1)
       }
     }
+
+    // send league groupme messages
+    if (league.groupme_token && league.groupme_id) {
+      await sendGroupmeMessage({
+        token: league.groupme_token,
+        id: league.groupme_id,
+        message
+      })
+    }
+
+    // send league discord messages
+    if (league.discord_webhook_url) {
+      await sendDiscordMessage({
+        webhookUrl: league.discord_webhook_url,
+        message
+      })
+    }
   }
 
   if (teamIds.length) {
@@ -38,7 +57,7 @@ const sendNotifications = async ({
       // send team text messages
       if (voice && user.phone && user.voice && user.teamvoice) {
         voiceMessages.push({
-          id: `${leagueId}:${user.tid}:${user.userid}:${Date.now()}`,
+          id: `${league.uid}:${user.tid}:${user.userid}:${Date.now()}`,
           number: user.phone,
           message
         })

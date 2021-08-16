@@ -1,7 +1,6 @@
 const express = require('express')
 const dayjs = require('dayjs')
 const router = express.Router({ mergeParams: true })
-const API = require('groupme').Stateless
 
 const { constants, Roster } = require('../../../common')
 const {
@@ -184,20 +183,10 @@ router.post('/?', async (req, res) => {
     message += `in the ${constants.season.year} draft`
 
     await sendNotifications({
-      leagueId: league.uid,
-      league: true,
+      league,
+      notifyLeague: true,
       message
     })
-
-    if (league.groupme_token && league.groupme_id) {
-      API.Bots.post(
-        league.groupme_token,
-        league.groupme_id,
-        message,
-        {},
-        (err) => logger(err)
-      )
-    }
   } catch (err) {
     logger(err)
     res.status(500).send({ error: err.toString() })

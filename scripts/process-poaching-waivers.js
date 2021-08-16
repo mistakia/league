@@ -7,7 +7,8 @@ const {
   sendNotifications,
   submitPoach,
   resetWaiverOrder,
-  getTopPoachingWaiver
+  getTopPoachingWaiver,
+  getLeague
 } = require('../utils')
 const db = require('../db')
 
@@ -69,11 +70,12 @@ const run = async () => {
           .where('player', waiver.player)
           .limit(1)
         const player = players[0]
+        const league = await getLeague(waiver.lid)
         await sendNotifications({
-          leagueId: waiver.lid,
+          league,
           teamIds: [waiver.tid],
           voice: false,
-          league: false,
+          notifyLeague: false,
           message: `Your waiver claim to poach ${player.fname} ${player.lname} was unsuccessful.`
         })
       }

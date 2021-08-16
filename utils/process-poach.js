@@ -1,10 +1,9 @@
-const API = require('groupme').Stateless
-
 const db = require('../db')
 const { constants, Roster } = require('../common')
 const sendNotifications = require('./send-notifications')
 const getRoster = require('./get-roster')
 const processRelease = require('./process-release')
+const getLeague = require('./get-league')
 
 module.exports = async function ({ player, release = [], lid, tid, userid }) {
   const rosterSlots = await db('rosters')
@@ -31,8 +30,7 @@ module.exports = async function ({ player, release = [], lid, tid, userid }) {
   }
   const playerRows = await db('player').whereIn('player', claimPlayerIds)
   const poachPlayer = playerRows.find((p) => p.player === player)
-  const leagues = await db('leagues').where({ uid: lid })
-  const league = leagues[0]
+  const league = await getLeague(lid)
   const rosterRow = await getRoster({ tid })
   const roster = new Roster({ roster: rosterRow, league })
   if (release.length) {
@@ -117,12 +115,8 @@ module.exports = async function ({ player, release = [], lid, tid, userid }) {
   }
 
   await sendNotifications({
-    leagueId: lid,
-    league: true,
+    league,
+    notifyLeague: true,
     message
   })
-
-  if (league.groupme_token && league.groupme_id) {
-    await API.Bots.post.Q(league.groupme_token, league.groupme_id, message, {})
-  }
 }

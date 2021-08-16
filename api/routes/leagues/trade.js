@@ -1,4 +1,3 @@
-const API = require('groupme').Stateless
 const dayjs = require('dayjs')
 const express = require('express')
 const router = express.Router({ mergeParams: true })
@@ -479,20 +478,10 @@ router.post(
       }
 
       await sendNotifications({
-        leagueId,
-        league: true,
+        league,
+        notifyLeague: true,
         message
       })
-
-      if (league.groupme_token && league.groupme_id) {
-        API.Bots.post(
-          league.groupme_token,
-          league.groupme_id,
-          message,
-          {},
-          (err) => logger(err)
-        )
-      }
 
       next()
     } catch (error) {
@@ -532,8 +521,9 @@ router.post(
         .where({ uid: tradeId })
         .update({ rejected: Math.round(Date.now() / 1000) })
 
+      const league = await getLeague(leagueId)
       await sendNotifications({
-        leagueId,
+        league,
         teamIds: [trade.pid],
         message: `${trade.name} (${trade.abbrv}) has rejected your trade offer.`
       })
@@ -576,8 +566,9 @@ router.post(
         .where({ uid: tradeId })
         .update({ cancelled: Math.round(Date.now() / 1000) })
 
+      const league = await getLeague(leagueId)
       await sendNotifications({
-        leagueId,
+        league,
         teamIds: [trade.tid],
         message: `${trade.name} (${trade.abbrv}) has cancelled their trade offer.`
       })
@@ -621,21 +612,11 @@ router.post(
       const message = `The commissioner has vetoed trade #${tradeId}.`
 
       await sendNotifications({
-        leagueId,
-        league: true,
+        league,
+        notifyLeague: true,
         teamIds: [trade.tid, trade.pid],
         message
       })
-
-      if (league.groupme_token && league.groupme_id) {
-        API.Bots.post(
-          league.groupme_token,
-          league.groupme_id,
-          message,
-          {},
-          (err) => logger(err)
-        )
-      }
 
       next()
     } catch (error) {
