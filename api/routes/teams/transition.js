@@ -257,6 +257,7 @@ router.post('/?', async (req, res) => {
     }
 
     data.release = release
+    data.remove = remove
 
     res.send(data)
   } catch (error) {
@@ -336,7 +337,7 @@ router.delete('/?', async (req, res) => {
       player
     })
 
-    res.send({ success: true })
+    res.send({ success: true, player })
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })
