@@ -25,19 +25,25 @@ class PlayerRoster extends Player {
       poach,
       isHosted,
       league,
-      isBeforeExtensionDeadline
+      isBeforeExtensionDeadline,
+      isBeforeTransitionDeadline
     } = this.props
 
     const isWaiver = Boolean(waiverId)
     const isPoach = Boolean(poach)
     const isClaim = isWaiver || isPoach
     const isRegularSeason = constants.season.isRegularSeason
+    const isRestrictedFreeAgent = player.tag === constants.tags.TRANSITION
+    const isRestrictedFreeAgencyPeriod =
+      !isBeforeExtensionDeadline && isBeforeTransitionDeadline
+
+    const { pos, tag, value, bid } = player
+    const salary = isRestrictedFreeAgent ? bid : player.value
 
     const week = Math.max(constants.season.week, 1)
     const type = isRegularSeason ? 'ros' : '0'
 
     const extensions = player.get('extensions', new List()).size
-    const { pos, tag, value, bid } = player
     const extendedSalary = getExtensionAmount({
       pos,
       tag,
@@ -47,7 +53,10 @@ class PlayerRoster extends Player {
       bid
     })
     const projectedSalary = player.getIn(['values', type, 'default'], 0)
-    const savings = projectedSalary - extendedSalary
+    const savings =
+      !isRestrictedFreeAgencyPeriod || bid
+        ? projectedSalary - extendedSalary
+        : null
 
     const vorp = player.getIn(['vorp', type, 'default'], 0)
     const vorpAdj = player.getIn(['vorp_adj', type, 'default'], 0)
@@ -103,7 +112,7 @@ class PlayerRoster extends Player {
         )}
         {!isWaiver && (
           <div className='metric table__cell'>
-            ${isPoach ? player.value + 2 || '-' : bid || player.value}
+            {isPoach ? player.value + 2 || '-' : salary ? `$${salary}` : '-'}
           </div>
         )}
         {!isWaiver && !isPoach && isBeforeExtensionDeadline && (

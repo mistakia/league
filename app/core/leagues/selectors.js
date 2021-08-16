@@ -112,6 +112,12 @@ export function isBeforeExtensionDeadline(state) {
   return constants.season.now.isBefore(deadline)
 }
 
+export function isBeforeTransitionDeadline(state) {
+  const league = getCurrentLeague(state)
+  const deadline = dayjs.unix(league.tran_date)
+  return constants.season.now.isBefore(deadline)
+}
+
 export const getTeamsForCurrentLeague = createSelector(
   getCurrentLeagueTeamIds,
   getTeams,
