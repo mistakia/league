@@ -174,7 +174,7 @@ router.delete('/?', async (req, res) => {
       player
     })
 
-    res.send({ success: true })
+    res.send({ success: true, player })
   } catch (error) {
     logger(error)
     return res.status(400).send({ error: error.toString() })
