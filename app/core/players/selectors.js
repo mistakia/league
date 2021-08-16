@@ -37,6 +37,11 @@ export function getPlayers(state) {
   return state.get('players')
 }
 
+export function getTransitionPlayers(state) {
+  const players = getAllPlayers(state)
+  return players.filter((p) => p.tag === constants.tags.TRANSITION)
+}
+
 export function getCutlistPlayers(state) {
   const cutlist = state.getIn(['players', 'cutlist'])
   return cutlist.map((playerId) => getPlayerById(state, { playerId }))
@@ -355,6 +360,7 @@ export function getPlayerStatus(state, { player, playerId }) {
     fa: false,
     rostered: false,
     protected: false,
+    bid: null,
     tagged: {
       rookie: false,
       transition: false,
@@ -388,6 +394,7 @@ export function getPlayerStatus(state, { player, playerId }) {
     return status
   }
 
+  status.bid = player.bid
   status.tagged.rookie = player.tag === constants.tags.ROOKIE
   status.tagged.transition = player.tag === constants.tags.TRANSITION
   status.tagged.franchise = player.tag === constants.tags.FRANCHISE

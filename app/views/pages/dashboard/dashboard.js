@@ -21,6 +21,7 @@ import './dashboard.styl'
 export default function DashboardPage() {
   const {
     players,
+    transitionPlayers,
     cutlist,
     picks,
     league,
@@ -54,6 +55,11 @@ export default function DashboardPage() {
       activePlayers = activePlayers.push(player)
       activeItems.push(<PlayerRoster key={player.player} player={player} />)
     }
+  }
+
+  const transitionItems = []
+  for (const player of transitionPlayers.valueSeq()) {
+    transitionItems.push(<PlayerRoster key={player.player} player={player} />)
   }
 
   const reserveIRItems = []
@@ -134,6 +140,15 @@ export default function DashboardPage() {
               {notices}
             </Grid>
           ) : null}
+          {Boolean(transitionPlayers.size) && (
+            <Grid item xs={12}>
+              <DashboardPlayersTable
+                title='Restricted Free Agents'
+                items={transitionItems}
+                total={transitionPlayers}
+              />
+            </Grid>
+          )}
           {Boolean(waivers.poach.size) && (
             <Grid item xs={12}>
               <DashboardPlayersTable

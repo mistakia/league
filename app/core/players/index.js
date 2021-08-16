@@ -1,6 +1,7 @@
 export { playersReducer } from './reducer'
 export {
   getPlayers,
+  getTransitionPlayers,
   getCutlistPlayers,
   getCutlistTotalSalary,
   getPlayersByPosition,

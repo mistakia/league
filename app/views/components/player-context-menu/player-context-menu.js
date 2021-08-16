@@ -327,7 +327,7 @@ export default class PlayerContextMenu extends React.Component {
       if (status.eligible.transitionBid) {
         menuItems.push(
           <MenuItem key='transition' dense onClick={this.handleTransitionTag}>
-            Place Transition Bid
+            {`${status.bid ? 'Update' : 'Place'} Transition Bid`}
           </MenuItem>
         )
       }
