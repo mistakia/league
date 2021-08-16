@@ -327,6 +327,15 @@ export function* tagNotification() {
   )
 }
 
+export function* transitionNotification() {
+  yield put(
+    notificationActions.show({
+      message: 'Transition Bid Placed',
+      severity: 'success'
+    })
+  )
+}
+
 export function* addTransitionTag({ payload }) {
   const { leagueId, teamId } = yield select(getApp)
   yield call(postTransitionTag, { leagueId, teamId, ...payload })
@@ -471,7 +480,7 @@ export function* watchRemoveTransitionTag() {
 }
 
 export function* watchPostTransitionTagFulfilled() {
-  yield takeLatest(rosterActions.POST_TRANSITION_TAG_FULFILLED, tagNotification)
+  yield takeLatest(rosterActions.POST_TRANSITION_TAG_FULFILLED, transitionNotification)
 }
 
 export function* watchUpdateTransitionTag() {
@@ -479,7 +488,7 @@ export function* watchUpdateTransitionTag() {
 }
 
 export function* watchPutTransitionTagFulfilled() {
-  yield takeLatest(rosterActions.PUT_TRANSITION_TAG_FULFILLED, tagNotification)
+  yield takeLatest(rosterActions.PUT_TRANSITION_TAG_FULFILLED, transitionNotification)
 }
 
 //= ====================================
