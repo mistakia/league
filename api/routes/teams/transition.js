@@ -201,9 +201,11 @@ router.post('/?', async (req, res) => {
     }
 
     // make sure there is enough cap space
-    if (roster.availableCap < 0) {
-      return res.status(400).send({ error: 'exceeds salary cap' })
-    }
+    // TODO
+    /* if (roster.availableCap < 0) {
+     *   return res.status(400).send({ error: 'exceeds salary cap' })
+     * }
+     */
 
     if (playerTid === tid) {
       await db('rosters_players')
@@ -466,10 +468,11 @@ router.put('/?', async (req, res) => {
     }
 
     // make sure there is enough cap space
-    if (!roster.availableCap) {
-      return res.stauts(400).send({ error: 'exceeds cap space' })
-    }
-
+    // TODO
+    /* if (!roster.availableCap) {
+     *   return res.stauts(400).send({ error: 'exceeds cap space' })
+     * }
+     */
     if (transitionBid.player_tid === teamId) {
       await db('rosters_players')
         .update({ tag: constants.tags.TRANSITION })
