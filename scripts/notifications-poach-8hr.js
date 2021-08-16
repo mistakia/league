@@ -3,7 +3,7 @@ require = require('esm')(module /*, options*/)
 const dayjs = require('dayjs')
 
 const { constants } = require('../common')
-const { sendNotifications } = require('../utils')
+const { sendNotifications, getLeague } = require('../utils')
 const db = require('../db')
 
 const run = async () => {
@@ -33,11 +33,12 @@ const run = async () => {
     }) will be processed ${time.toNow()} around ${time.format(
       'dddd, MMMM Do h:mm a'
     )} EST.`
+    const league = await getLeague(claim.lid)
     await sendNotifications({
-      leagueId: claim.lid,
+      league,
       teamIds: [claim.tid],
       voice: false,
-      league: false,
+      notifyLeague: false,
       message
     })
   }
