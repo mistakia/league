@@ -1,5 +1,4 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
@@ -9,22 +8,14 @@ import { getCurrentPlayers, getCurrentTeamRoster } from '@core/rosters'
 import { getCurrentLeague } from '@core/leagues'
 import { getWaiverPlayersForCurrentTeam } from '@core/waivers'
 import { getPoachPlayersForCurrentLeague } from '@core/poaches'
-import { playerActions, getCutlistPlayers } from '@core/players'
+import { getCutlistPlayers } from '@core/players'
 
 import render from './dashboard'
 
 class DashboardPage extends React.Component {
-  componentDidMount() {
-    this.props.loadCutlist()
-  }
-
   render() {
     return render.call(this)
   }
-}
-
-DashboardPage.propTypes = {
-  loadCutlist: PropTypes.func
 }
 
 const mapStateToProps = createSelector(
@@ -48,8 +39,4 @@ const mapStateToProps = createSelector(
   })
 )
 
-const mapDispatchToProps = {
-  loadCutlist: playerActions.getCutlist
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(DashboardPage)
+export default connect(mapStateToProps)(DashboardPage)

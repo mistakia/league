@@ -24,7 +24,8 @@ class PlayerRoster extends Player {
       waiverId,
       poach,
       isHosted,
-      league
+      league,
+      isBeforeExtensionDeadline
     } = this.props
 
     const isWaiver = Boolean(waiverId)
@@ -102,10 +103,10 @@ class PlayerRoster extends Player {
         )}
         {!isWaiver && (
           <div className='metric table__cell'>
-            ${isPoach ? player.value + 2 || '-' : player.value}
+            ${isPoach ? player.value + 2 || '-' : bid || player.value}
           </div>
         )}
-        {!isWaiver && !isPoach && (
+        {!isWaiver && !isPoach && isBeforeExtensionDeadline && (
           <div className='metric table__cell'>
             {extendedSalary ? `$${extendedSalary}` : '-'}
           </div>

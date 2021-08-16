@@ -46,9 +46,12 @@ export default class TransitionConfirmation extends React.Component {
       this._untags.push(player)
     }
 
-    this._isUpdate = taggedPlayerIds.includes(player.player)
+    this._isUpdate = taggedPlayerIds.includes(player.player) || player.bid
+    this._isOriginalTeam = team.roster.tid === player.tid
+    // TODO - check roster size limit eligiblity
     this._isEligible =
       this._isUpdate ||
+      !this._isOriginalTeam ||
       team.roster.isEligibleForTag({
         tag: constants.tags.TRANSITION,
         player: player.player
@@ -88,17 +91,16 @@ export default class TransitionConfirmation extends React.Component {
       return sum + salary
     }, 0)
 
-    return available + playerSalary + cutlistTotalSalary + releaseSalary
+    const space = available + cutlistTotalSalary + releaseSalary
+    return space + (this._isOriginalTeam ? playerSalary : 0)
   }
 
   handleBid = (event) => {
     const { value } = event.target
 
-    const maxBid = this.getMaxBid()
-
     if (isNaN(value) || value % 1 !== 0) {
       this.setState({ error: true })
-    } else if (value < 0 || value > maxBid) {
+    } else if (value < 0) {
       this.setState({ error: true })
     } else {
       this.setState({ error: false })
@@ -121,6 +123,7 @@ export default class TransitionConfirmation extends React.Component {
     const { untag, error, bid } = this.state
     const { tid } = this.props.team.roster
     const player = this.props.player.player
+    const playerTid = this.props.player.tid
 
     if (!this._isEligible && !untag) {
       return this.setState({ missingUntag: true })
@@ -132,7 +135,7 @@ export default class TransitionConfirmation extends React.Component {
       const data = {
         player,
         release: this.state.releaseIds,
-        playerTid: tid, // TODO
+        playerTid,
         teamId: tid,
         bid: parseInt(bid, 10),
         remove: untag

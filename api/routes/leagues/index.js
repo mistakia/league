@@ -280,6 +280,7 @@ router.get('/:leagueId/rosters/?', async (req, res) => {
       const tid = query1[0].uid
       const bids = await db('transition_bids')
         .where('tid', tid)
+        .where('player_tid', tid)
         .where('year', constants.season.year)
         .whereNull('cancelled')
         .whereNull('processed')

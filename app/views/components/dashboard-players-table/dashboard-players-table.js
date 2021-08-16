@@ -209,7 +209,7 @@ export default class DashboardPlayersTable extends React.Component {
             {!isWaiver && (
               <div className='metric table__cell'>{`${baseYear} Salary`}</div>
             )}
-            {!isWaiver && !isPoach && (
+            {!isWaiver && !isPoach && isBeforeExtensionDeadline && (
               <div className='metric table__cell'>{`${
                 baseYear + 1
               } Salary`}</div>
@@ -247,7 +247,11 @@ export default class DashboardPlayersTable extends React.Component {
             </div>
           </div>
           {Boolean(total && total.size) && (
-            <PlayerRosterTotal players={total} reorder={showReorder} />
+            <PlayerRosterTotal
+              players={total}
+              reorder={showReorder}
+              isBeforeExtensionDeadline={isBeforeExtensionDeadline}
+            />
           )}
           {body}
         </div>
