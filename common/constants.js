@@ -1090,7 +1090,8 @@ export const jobs = {
 
   PROCESS_MATCHUPS: 40,
   DRAW_DIVISIONS: 41,
-  GENERATE_SCHEDULE: 42
+  GENERATE_SCHEDULE: 42,
+  PROCESS_EXTENSIONS: 43
 }
 
 export const jobDetails = {
