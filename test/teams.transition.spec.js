@@ -707,5 +707,7 @@ describe('API /teams - transition', function () {
     it('invalid release - includes player', async () => {
       // TODO
     })
+
+    // TODO - delete extension deadline passed
   })
 })

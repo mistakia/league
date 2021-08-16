@@ -7,6 +7,7 @@ const transition = require('./transition')
 const { constants, Roster } = require('../../../common')
 const {
   getRoster,
+  getLeague,
   verifyUserTeam,
   verifyReserveStatus
 } = require('../../../utils')
@@ -50,11 +51,10 @@ router.post('/?', async (req, res) => {
 
     const tid = parseInt(teamId, 10)
 
-    const leagues = await db('leagues').where({ uid: leagueId })
-    if (!leagues.length) {
+    const league = await getLeague(leagueId)
+    if (!league) {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
-    const league = leagues[0]
     const rosterRow = await getRoster({ tid })
     const roster = new Roster({ roster: rosterRow, league })
 
@@ -143,11 +143,10 @@ router.delete('/?', async (req, res) => {
 
     const tid = parseInt(teamId, 10)
 
-    const leagues = await db('leagues').where({ uid: leagueId })
-    if (!leagues.length) {
+    const league = await getLeague(leagueId)
+    if (!league) {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
-    const league = leagues[0]
     const rosterRow = await getRoster({ tid })
     const roster = new Roster({ roster: rosterRow, league })
 
