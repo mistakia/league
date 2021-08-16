@@ -60,17 +60,20 @@ export default class TransitionConfirmation extends React.Component {
 
   getMaxBid = () => {
     const available = this.props.team.roster.availableCap
+    const { isBeforeExtensionDeadline } = this.props
     const { pos, tag, value, bid } = this.props.player
     const extensions = this.props.player.get('extensions', new List()).size
     const { league, cutlistTotalSalary } = this.props
-    const playerSalary = getExtensionAmount({
-      pos,
-      tag,
-      extensions,
-      league,
-      value,
-      bid
-    })
+    const playerSalary = isBeforeExtensionDeadline
+      ? getExtensionAmount({
+          pos,
+          tag,
+          extensions,
+          league,
+          value,
+          bid
+        })
+      : bid || value
 
     const notInCutlist = this.state.releaseIds.filter(
       (playerId) => !this.props.cutlist.includes(playerId)
@@ -79,14 +82,16 @@ export default class TransitionConfirmation extends React.Component {
       const player = this.props.team.players.find((p) => p.player === playerId)
       const { pos, value, tag, bid } = player
       const extensions = player.get('extensions', new List()).size
-      const salary = getExtensionAmount({
-        pos,
-        tag,
-        extensions,
-        league,
-        value,
-        bid
-      })
+      const salary = isBeforeExtensionDeadline
+        ? getExtensionAmount({
+            pos,
+            tag,
+            extensions,
+            league,
+            value,
+            bid
+          })
+        : value
 
       return sum + salary
     }, 0)
@@ -301,5 +306,6 @@ TransitionConfirmation.propTypes = {
   cutlistTotalSalary: PropTypes.number,
   cutlist: ImmutablePropTypes.list,
   addTransitionTag: PropTypes.func,
-  updateTransitionTag: PropTypes.func
+  updateTransitionTag: PropTypes.func,
+  isBeforeExtensionDeadline: PropTypes.bool
 }
