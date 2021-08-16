@@ -375,7 +375,8 @@ export function getPlayerStatus(state, { player, playerId }) {
       ps: false,
       poach: false,
       rookieTag: false,
-      transitionTag: false
+      transitionTag: false,
+      transitionBid: false
     },
     reserve: {
       ir: false,
@@ -427,16 +428,28 @@ export function getPlayerStatus(state, { player, playerId }) {
     }
   } else {
     const roster = getCurrentTeamRoster(state)
+    const league = getCurrentLeague(state)
+    const now = dayjs()
+
+    if (
+      status.tagged.transition &&
+      now.isBefore(dayjs.unix(league.tran_date))
+    ) {
+      status.eligible.transitionBid = true
+    }
+
     if (roster.has(player.player)) {
       status.rostered = true
 
       // if before extension deadline
       //     was player a rookie last year
       //     otherwise are they a rookie now
-      const now = dayjs()
-      const league = getCurrentLeague(state)
+      const isBeforeExtensionDeadline = now.isBefore(
+        dayjs.unix(league.ext_date)
+      )
+      status.eligible.franchiseTag = isBeforeExtensionDeadline
       if (
-        now.isBefore(dayjs.unix(league.ext_date)) &&
+        isBeforeExtensionDeadline &&
         player.draft_year === constants.season.year - 1
       ) {
         status.eligible.rookieTag = true
@@ -444,10 +457,7 @@ export function getPlayerStatus(state, { player, playerId }) {
         status.eligible.rookieTag = true
       }
 
-      if (
-        constants.season.week === 0 &&
-        now.isBefore(dayjs.unix(league.ext_date))
-      ) {
+      if (constants.season.week === 0 && isBeforeExtensionDeadline) {
         status.eligible.transitionTag = true
       }
 

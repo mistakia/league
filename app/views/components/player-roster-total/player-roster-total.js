@@ -6,7 +6,7 @@ import { constants, getExtensionAmount } from '@common'
 
 class PlayerRosterTotal extends Player {
   render() {
-    const { players, league, reorder } = this.props
+    const { players, league, reorder, isBeforeExtensionDeadline } = this.props
 
     const week = Math.max(constants.season.week, 1)
     const type = constants.season.isRegularSeason ? 'ros' : '0'
@@ -34,7 +34,7 @@ class PlayerRosterTotal extends Player {
       const projectedSalary = player.getIn(['values', type, 'default'], 0)
       const savings = projectedSalary - extendedSalary
 
-      baseSalaryTotal = baseSalaryTotal + value
+      baseSalaryTotal = baseSalaryTotal + (bid || value)
       extendedSalaryTotal = extendedSalaryTotal + extendedSalary
       projectedSalaryTotal = projectedSalaryTotal + projectedSalary
       savingsTotal = savingsTotal + savings
@@ -54,7 +54,9 @@ class PlayerRosterTotal extends Player {
           Total
         </div>
         <div className='metric table__cell'>${baseSalaryTotal.toFixed(0)}</div>
-        <div className='metric table__cell'>${extendedSalaryTotal}</div>
+        {isBeforeExtensionDeadline && (
+          <div className='metric table__cell'>${extendedSalaryTotal}</div>
+        )}
         <div className='metric table__cell'>
           {projectedSalaryTotal ? `$${projectedSalaryTotal.toFixed(0)}` : '-'}
         </div>

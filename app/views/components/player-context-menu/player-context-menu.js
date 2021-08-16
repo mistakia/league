@@ -236,18 +236,20 @@ export default class PlayerContextMenu extends React.Component {
         </MenuItem>
       )
 
-      menuItems.push(
-        <MenuItem
-          key='franchise'
-          dense
-          onClick={
-            status.tagged.franchise
-              ? this.handleRemoveTag
-              : this.handleFranchiseTag
-          }>
-          {`${status.tagged.franchise ? 'Remove' : 'Apply'} Franchise Tag`}
-        </MenuItem>
-      )
+      if (status.eligible.franchiseTag) {
+        menuItems.push(
+          <MenuItem
+            key='franchise'
+            dense
+            onClick={
+              status.tagged.franchise
+                ? this.handleRemoveTag
+                : this.handleFranchiseTag
+            }>
+            {`${status.tagged.franchise ? 'Remove' : 'Apply'} Franchise Tag`}
+          </MenuItem>
+        )
+      }
 
       if (status.eligible.transitionTag) {
         menuItems.push(
@@ -266,6 +268,12 @@ export default class PlayerContextMenu extends React.Component {
             </MenuItem>
           )
         }
+      } else if (status.eligible.transitionBid) {
+        menuItems.push(
+          <MenuItem key='transition' dense onClick={this.handleTransitionTag}>
+            Update Transition Tag
+          </MenuItem>
+        )
       }
 
       menuItems.push(
@@ -316,6 +324,14 @@ export default class PlayerContextMenu extends React.Component {
         </MenuItem>
       )
     } else if (!status.fa) {
+      if (status.eligible.transitionBid) {
+        menuItems.push(
+          <MenuItem key='transition' dense onClick={this.handleTransitionTag}>
+            Place Transition Bid
+          </MenuItem>
+        )
+      }
+
       const text = status.waiver.poach
         ? 'Submit Poaching Waiver Claim'
         : 'Submit Poaching Claim'

@@ -48,8 +48,6 @@ export const playerActions = {
 
   SET_PLAYERS_VIEW: 'SET_PLAYERS_VIEW',
 
-  GET_CUTLIST: 'GET_CUTLIST',
-
   GET_CUTLIST_FULFILLED: 'GET_CUTLIST_FULFILLED',
   GET_CUTLIST_PENDING: 'GET_CUTLIST_PENDING',
   GET_CUTLIST_FAILED: 'GET_CUTLIST_FAILED',
@@ -323,10 +321,6 @@ export const playerActions = {
       opts,
       data
     }
-  }),
-
-  getCutlist: () => ({
-    type: playerActions.GET_CUTLIST
   }),
 
   getCutlistFailed: (opts, error) => ({
