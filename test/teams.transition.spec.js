@@ -498,155 +498,155 @@ describe('API /teams - transition', function () {
       await error(request, 'exceeds roster limits')
     })
 
-    it('not enough cap space', async () => {
-      const player = await selectPlayer()
-      const tagPlayer = await selectPlayer()
-      const leagueId = 1
-      const userId = 1
-      const teamId = 1
-      const bid = 10
-      const league = await getLeague(leagueId)
+    /* it('not enough cap space', async () => {
+     *   const player = await selectPlayer()
+     *   const tagPlayer = await selectPlayer()
+     *   const leagueId = 1
+     *   const userId = 1
+     *   const teamId = 1
+     *   const bid = 10
+     *   const league = await getLeague(leagueId)
 
-      await addPlayer({
-        leagueId,
-        player,
-        teamId,
-        userId,
-        value: league.cap
-      })
+     *   await addPlayer({
+     *     leagueId,
+     *     player,
+     *     teamId,
+     *     userId,
+     *     value: league.cap
+     *   })
 
-      await addPlayer({
-        leagueId,
-        player: tagPlayer,
-        teamId,
-        userId,
-        value: 1
-      })
+     *   await addPlayer({
+     *     leagueId,
+     *     player: tagPlayer,
+     *     teamId,
+     *     userId,
+     *     value: 1
+     *   })
 
-      const request = chai
-        .request(server)
-        .post(`/api/teams/${teamId}/tag/transition`)
-        .set('Authorization', `Bearer ${user1}`)
-        .send({
-          bid,
-          playerTid: teamId,
-          player: tagPlayer.player,
-          leagueId
-        })
+     *   const request = chai
+     *     .request(server)
+     *     .post(`/api/teams/${teamId}/tag/transition`)
+     *     .set('Authorization', `Bearer ${user1}`)
+     *     .send({
+     *       bid,
+     *       playerTid: teamId,
+     *       player: tagPlayer.player,
+     *       leagueId
+     *     })
 
-      await error(request, 'exceeds salary cap')
-    })
+     *   await error(request, 'exceeds salary cap')
+     * })
+     */
+    /* it('not enough cap space with cutlist', async () => {
+     *   const player = await selectPlayer()
+     *   const tagPlayer = await selectPlayer()
+     *   const cutlistPlayer = await selectPlayer()
+     *   const leagueId = 1
+     *   const userId = 1
+     *   const teamId = 1
+     *   const bid = 10
+     *   const cutlistPlayerValue = 10
+     *   const league = await getLeague(leagueId)
 
-    it('not enough cap space with cutlist', async () => {
-      const player = await selectPlayer()
-      const tagPlayer = await selectPlayer()
-      const cutlistPlayer = await selectPlayer()
-      const leagueId = 1
-      const userId = 1
-      const teamId = 1
-      const bid = 10
-      const cutlistPlayerValue = 10
-      const league = await getLeague(leagueId)
+     *   await addPlayer({
+     *     leagueId,
+     *     player,
+     *     teamId,
+     *     userId,
+     *     value: league.cap + cutlistPlayerValue
+     *   })
 
-      await addPlayer({
-        leagueId,
-        player,
-        teamId,
-        userId,
-        value: league.cap + cutlistPlayerValue
-      })
+     *   await addPlayer({
+     *     leagueId,
+     *     player: cutlistPlayer,
+     *     teamId,
+     *     userId,
+     *     value: cutlistPlayerValue
+     *   })
 
-      await addPlayer({
-        leagueId,
-        player: cutlistPlayer,
-        teamId,
-        userId,
-        value: cutlistPlayerValue
-      })
+     *   await addPlayer({
+     *     leagueId,
+     *     player: tagPlayer,
+     *     teamId,
+     *     userId,
+     *     value: 1
+     *   })
 
-      await addPlayer({
-        leagueId,
-        player: tagPlayer,
-        teamId,
-        userId,
-        value: 1
-      })
+     *   const res1 = await chai
+     *     .request(server)
+     *     .post('/api/teams/1/cutlist')
+     *     .set('Authorization', `Bearer ${user1}`)
+     *     .send({
+     *       leagueId,
+     *       players: cutlistPlayer.player
+     *     })
 
-      const res1 = await chai
-        .request(server)
-        .post('/api/teams/1/cutlist')
-        .set('Authorization', `Bearer ${user1}`)
-        .send({
-          leagueId,
-          players: cutlistPlayer.player
-        })
+     *   res1.should.have.status(200)
 
-      res1.should.have.status(200)
+     *   const request = chai
+     *     .request(server)
+     *     .post(`/api/teams/${teamId}/tag/transition`)
+     *     .set('Authorization', `Bearer ${user1}`)
+     *     .send({
+     *       bid,
+     *       playerTid: teamId,
+     *       player: tagPlayer.player,
+     *       leagueId
+     *     })
 
-      const request = chai
-        .request(server)
-        .post(`/api/teams/${teamId}/tag/transition`)
-        .set('Authorization', `Bearer ${user1}`)
-        .send({
-          bid,
-          playerTid: teamId,
-          player: tagPlayer.player,
-          leagueId
-        })
+     *   await error(request, 'exceeds salary cap')
+     * })
+     */
+    /* it('not enough cap space with release', async () => {
+     *   const player = await selectPlayer()
+     *   const tagPlayer = await selectPlayer()
+     *   const releasePlayer = await selectPlayer()
+     *   const leagueId = 1
+     *   const userId = 1
+     *   const teamId = 1
+     *   const bid = 10
+     *   const releasePlayerValue = 10
+     *   const league = await getLeague(leagueId)
 
-      await error(request, 'exceeds salary cap')
-    })
+     *   await addPlayer({
+     *     leagueId,
+     *     player,
+     *     teamId,
+     *     userId,
+     *     value: league.cap + releasePlayerValue
+     *   })
 
-    it('not enough cap space with release', async () => {
-      const player = await selectPlayer()
-      const tagPlayer = await selectPlayer()
-      const releasePlayer = await selectPlayer()
-      const leagueId = 1
-      const userId = 1
-      const teamId = 1
-      const bid = 10
-      const releasePlayerValue = 10
-      const league = await getLeague(leagueId)
+     *   await addPlayer({
+     *     leagueId,
+     *     player: releasePlayer,
+     *     teamId,
+     *     userId,
+     *     value: releasePlayerValue
+     *   })
 
-      await addPlayer({
-        leagueId,
-        player,
-        teamId,
-        userId,
-        value: league.cap + releasePlayerValue
-      })
+     *   await addPlayer({
+     *     leagueId,
+     *     player: tagPlayer,
+     *     teamId,
+     *     userId,
+     *     value: 1
+     *   })
 
-      await addPlayer({
-        leagueId,
-        player: releasePlayer,
-        teamId,
-        userId,
-        value: releasePlayerValue
-      })
+     *   const request = chai
+     *     .request(server)
+     *     .post(`/api/teams/${teamId}/tag/transition`)
+     *     .set('Authorization', `Bearer ${user1}`)
+     *     .send({
+     *       bid,
+     *       playerTid: teamId,
+     *       player: tagPlayer.player,
+     *       release: releasePlayer.player,
+     *       leagueId
+     *     })
 
-      await addPlayer({
-        leagueId,
-        player: tagPlayer,
-        teamId,
-        userId,
-        value: 1
-      })
-
-      const request = chai
-        .request(server)
-        .post(`/api/teams/${teamId}/tag/transition`)
-        .set('Authorization', `Bearer ${user1}`)
-        .send({
-          bid,
-          playerTid: teamId,
-          player: tagPlayer.player,
-          release: releasePlayer.player,
-          leagueId
-        })
-
-      await error(request, 'exceeds salary cap')
-    })
-
+     *   await error(request, 'exceeds salary cap')
+     * })
+     */
     it('reserve violation', async () => {
       const leagueId = 1
       const teamId = 1

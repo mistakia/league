@@ -8,7 +8,7 @@ import { getCurrentPlayers, getCurrentTeamRoster } from '@core/rosters'
 import { getCurrentLeague } from '@core/leagues'
 import { getWaiverPlayersForCurrentTeam } from '@core/waivers'
 import { getPoachPlayersForCurrentLeague } from '@core/poaches'
-import { getCutlistPlayers } from '@core/players'
+import { getTransitionPlayers, getCutlistPlayers } from '@core/players'
 
 import render from './dashboard'
 
@@ -20,6 +20,7 @@ class DashboardPage extends React.Component {
 
 const mapStateToProps = createSelector(
   getApp,
+  getTransitionPlayers,
   getCurrentPlayers,
   getCutlistPlayers,
   getCurrentTeam,
@@ -27,7 +28,18 @@ const mapStateToProps = createSelector(
   getCurrentTeamRoster,
   getWaiverPlayersForCurrentTeam,
   getPoachPlayersForCurrentLeague,
-  (app, players, cutlist, team, league, roster, waivers, poaches) => ({
+  (
+    app,
+    transitionPlayers,
+    players,
+    cutlist,
+    team,
+    league,
+    roster,
+    waivers,
+    poaches
+  ) => ({
+    transitionPlayers,
     teamId: app.teamId,
     players,
     cutlist,
