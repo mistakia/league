@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getCurrentLeague } from '@core/leagues'
+import { getCurrentLeague, isBeforeExtensionDeadline } from '@core/leagues'
 import { getCurrentPlayers, rosterActions } from '@core/rosters'
 import { getCutlistTotalSalary, getPlayers } from '@core/players'
 
@@ -12,11 +12,13 @@ const mapStateToProps = createSelector(
   getCurrentPlayers,
   getCutlistTotalSalary,
   getPlayers,
-  (league, team, cutlistTotalSalary, players) => ({
+  isBeforeExtensionDeadline,
+  (league, team, cutlistTotalSalary, players, isBeforeExtensionDeadline) => ({
     league,
     team,
     cutlistTotalSalary,
-    cutlist: players.get('cutlist')
+    cutlist: players.get('cutlist'),
+    isBeforeExtensionDeadline
   })
 )
 

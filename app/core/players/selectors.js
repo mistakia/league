@@ -18,7 +18,7 @@ import { isAfterDraft } from '@core/draft'
 import { isAfterAuction } from '@core/auction'
 import { getPoachesForCurrentLeague } from '@core/poaches'
 import { getReleaseTransactions } from '@core/transactions'
-import { getCurrentLeague } from '@core/leagues'
+import { getCurrentLeague, isBeforeExtensionDeadline } from '@core/leagues'
 import {
   getCurrentTeamRoster,
   getCurrentTeamRosterRecord,
@@ -50,18 +50,21 @@ export function getCutlistPlayers(state) {
 export function getCutlistTotalSalary(state) {
   const cutlist = getCutlistPlayers(state)
   const league = getCurrentLeague(state)
+  const isBeforeExtension = isBeforeExtensionDeadline(state)
 
   return cutlist.reduce((sum, player) => {
     const { pos, value, tag, bid } = player
     const extensions = player.get('extensions', new List()).size
-    const salary = getExtensionAmount({
-      pos,
-      tag,
-      extensions,
-      league,
-      value,
-      bid
-    })
+    const salary = isBeforeExtension
+      ? getExtensionAmount({
+          pos,
+          tag,
+          extensions,
+          league,
+          value,
+          bid
+        })
+      : value
 
     return sum + salary
   }, 0)
