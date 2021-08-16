@@ -3,7 +3,12 @@ const dayjs = require('dayjs')
 const express = require('express')
 const router = express.Router({ mergeParams: true })
 const { constants, Roster, toStringArray, nth } = require('../../../common')
-const { getRoster, sendNotifications } = require('../../../utils')
+const {
+  getRoster,
+  getLeague,
+  sendNotifications,
+  verifyRestrictedFreeAgency
+} = require('../../../utils')
 
 const getTrade = async (req, res) => {
   const { db, logger } = req.app.locals
@@ -125,13 +130,20 @@ router.post(
         proposingTeamReleasePlayerIds
       )
       const allPlayers = tradedPlayers.concat(releasePlayers)
-      const leagues = await db('leagues').where({ uid: leagueId })
-      const league = leagues[0]
+
+      const league = await getLeague(leagueId)
 
       // make sure trade deadline has not passed
       const deadline = dayjs.unix(league.tddate)
       if (dayjs().isAfter(deadline)) {
         return res.status(400).send({ error: 'deadline has passed' })
+      }
+
+      // check for restricted free agency players during RFA
+      try {
+        await verifyRestrictedFreeAgency({ league, players: allPlayers })
+      } catch (error) {
+        return res.status(400).send({ error: error.message })
       }
 
       const sub = db('transactions')
@@ -380,6 +392,21 @@ router.post(
         .whereNull('trades.rejected')
         .whereNull('trades.vetoed')
 
+      // remove players from cutlist
+      await db('cutlist')
+        .whereIn('player', allPlayers)
+        .whereIn('tid', [trade.pid, trade.tid])
+        .del()
+
+      // cancel any transition bids
+      await db('transition_bids')
+        .update('cancelled', Math.round(Date.now() / 1000))
+        .whereIn('player', allPlayers)
+        .whereNull('cancelled')
+        .whereNull('processed')
+        .where('lid', leagueId)
+        .where('year', constants.season.year)
+
       if (playerTradeRows.length) {
         // TODO - broadcast on WS
         // TODO - broadcast notifications
@@ -571,8 +598,7 @@ router.post(
     try {
       const { tradeId, leagueId } = req.params
 
-      const leagues = await db('leagues').where('uid', leagueId)
-      const league = leagues[0]
+      const league = await getLeague(leagueId)
       if (league.commishid !== req.user.userId) {
         return res
           .status(401)

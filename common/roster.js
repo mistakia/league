@@ -64,13 +64,7 @@ export default class Roster {
 
   get players() {
     const arr = []
-    for (const {
-      slot,
-      player,
-      pos,
-      rid,
-      tag
-    } of this._players.values()) {
+    for (const { slot, player, pos, rid, tag } of this._players.values()) {
       arr.push({ slot, player, pos, rid, tag })
     }
     return arr
@@ -112,11 +106,15 @@ export default class Roster {
   }
 
   get ir() {
-    return Array.from(this._players.values()).filter(p => p.slot === constants.slots.IR)
+    return Array.from(this._players.values()).filter(
+      (p) => p.slot === constants.slots.IR
+    )
   }
 
   get cov() {
-    return Array.from(this._players.values()).filter(p => p.slot === constants.slots.COV)
+    return Array.from(this._players.values()).filter(
+      (p) => p.slot === constants.slots.COV
+    )
   }
 
   get reserve() {
