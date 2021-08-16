@@ -54,7 +54,7 @@ class PlayerRoster extends Player {
     })
     const projectedSalary = player.getIn(['values', type, 'default'], 0)
     const savings =
-      !isRestrictedFreeAgencyPeriod || bid
+      !isRestrictedFreeAgencyPeriod || bid || !isRestrictedFreeAgent
         ? projectedSalary - extendedSalary
         : null
 

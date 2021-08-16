@@ -19,29 +19,12 @@ module.exports = async ({
 
   if (week === 0) {
     const playerIds = players.map((p) => p.player)
+
+    // TODO - get extension count for player
     const transactions = await db('transactions')
-      .select(
-        'transactions.type',
-        'transactions.value',
-        'transactions.timestamp',
-        'transactions.tid',
-        'transactions.lid',
-        'transactions.player'
-      )
-      .join('rosters_players', 'transactions.player', 'rosters_players.player')
-      .join('rosters', function () {
-        this.on('rosters_players.rid', '=', 'rosters.uid')
-        this.on('transactions.tid', '=', 'rosters.tid')
-      })
-      .where('rosters.week', constants.season.week)
-      .where('rosters.year', constants.season.year)
-      .whereIn('type', [
-        constants.transactions.EXTENSION,
-        constants.transactions.TRANSITION_TAG,
-        constants.transactions.FRANCHISE_TAG,
-        constants.transactions.ROOKIE_TAG
-      ])
-      .whereIn('transactions.player', playerIds)
+      .where('tid', tid)
+      .whereIn('player', playerIds)
+      .where('type', constants.transactions.EXTENSION)
 
     if (transactions.length) {
       for (const player of rosterRow.players) {

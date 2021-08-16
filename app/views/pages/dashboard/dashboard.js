@@ -145,7 +145,6 @@ export default function DashboardPage() {
               <DashboardPlayersTable
                 title='Restricted Free Agents'
                 items={transitionItems}
-                total={transitionPlayers}
               />
             </Grid>
           )}
