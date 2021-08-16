@@ -12,8 +12,8 @@ export default class Roster {
 
     this.activeRosterLimit = getActiveRosterLimit(league)
 
-    const deadline = dayjs.unix(league.tran_date)
-    const calculateExtension = constants.season.now.isBefore(deadline)
+    const deadline = dayjs.unix(league.ext_date)
+    const isBeforeExtensionDeadline = constants.season.now.isBefore(deadline)
     for (const {
       slot,
       player,
@@ -23,7 +23,7 @@ export default class Roster {
       extensions = [],
       bid
     } of roster.players) {
-      const salary = calculateExtension
+      const salary = isBeforeExtensionDeadline
         ? getExtensionAmount({
             pos,
             tag,
@@ -64,7 +64,13 @@ export default class Roster {
 
   get players() {
     const arr = []
-    for (const { slot, player, pos, rid, tag } of this._players.values()) {
+    for (const {
+      slot,
+      player,
+      pos,
+      rid,
+      tag
+    } of this._players.values()) {
       arr.push({ slot, player, pos, rid, tag })
     }
     return arr
@@ -106,11 +112,11 @@ export default class Roster {
   }
 
   get ir() {
-    return this.players.filter((p) => p.slot === constants.slots.IR)
+    return Array.from(this._players.values()).filter(p => p.slot === constants.slots.IR)
   }
 
   get cov() {
-    return this.players.filter((p) => p.slot === constants.slots.COV)
+    return Array.from(this._players.values()).filter(p => p.slot === constants.slots.COV)
   }
 
   get reserve() {

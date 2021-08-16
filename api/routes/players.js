@@ -116,6 +116,7 @@ router.get('/?', async (req, res) => {
     const data = await query
 
     if (leaguePlayerIds.length) {
+      // TODO - get extension count for player
       const transactions = await db('transactions')
         .select(
           'transactions.type',
@@ -137,12 +138,7 @@ router.get('/?', async (req, res) => {
         .where('rosters.week', constants.season.week)
         .where('rosters.year', constants.season.year)
         .where('rosters.lid', leagueId)
-        .whereIn('type', [
-          constants.transactions.EXTENSION,
-          constants.transactions.TRANSITION_TAG,
-          constants.transactions.FRANCHISE_TAG,
-          constants.transactions.ROOKIE_TAG
-        ])
+        .whereIn('type', [constants.transactions.EXTENSION])
         .whereIn('transactions.player', leaguePlayerIds)
 
       if (transactions.length) {
