@@ -17,7 +17,7 @@ class PlayerRosterRow extends Player {
     const classNames = ['roster__item']
     if (isSelected) classNames.push('selected')
 
-    const deadline = dayjs.unix(league.tran_date)
+    const deadline = dayjs.unix(league.ext_date)
     const calculateExtension = constants.season.now.isBefore(deadline)
     const { pos, tag, value, bid } = player
     const extensions = player.get('extensions', new List()).size
