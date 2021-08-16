@@ -383,23 +383,23 @@ export function playersReducer(state = initialState, { payload, type }) {
           })
       })
 
-    case rosterActions.UPDATE_TRANSITION_TAG:
-    case rosterActions.ADD_TRANSITION_TAG:
+    case rosterActions.POST_TRANSITION_TAG_FULFILLED:
+    case rosterActions.PUT_TRANSITION_TAG_FULFILLED:
       return state.withMutations((state) => {
-        state.mergeIn(['items', payload.player], {
+        state.mergeIn(['items', payload.data.player], {
           tag: constants.tags.TRANSITION,
-          bid: payload.bid
+          bid: payload.data.bid
         })
 
-        if (payload.remove)
-          state.mergeIn(['items', payload.remove], {
+        if (payload.data.remove)
+          state.mergeIn(['items', payload.data.remove], {
             tag: constants.tags.REGULAR
           })
       })
 
-    case rosterActions.REMOVE_TRANSITION_TAG:
-    case rosterActions.REMOVE_TAG:
-      return state.mergeIn(['items', payload.player], {
+    case rosterActions.DELETE_TRANSTION_TAG_FULFILLED:
+    case rosterActions.DELETE_TAG_FULFILLED:
+      return state.mergeIn(['items', payload.data.player], {
         bid: null,
         tag: constants.tags.REGULAR
       })
