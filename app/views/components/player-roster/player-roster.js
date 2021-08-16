@@ -44,14 +44,16 @@ class PlayerRoster extends Player {
     const type = isRegularSeason ? 'ros' : '0'
 
     const extensions = player.get('extensions', new List()).size
-    const extendedSalary = isBeforeExtensionDeadline ? getExtensionAmount({
-      pos,
-      tag,
-      extensions,
-      league,
-      value,
-      bid
-    }) : salary
+    const extendedSalary = isBeforeExtensionDeadline
+      ? getExtensionAmount({
+          pos,
+          tag,
+          extensions,
+          league,
+          value,
+          bid
+        })
+      : salary
     const projectedSalary = player.getIn(['values', type, 'default'], 0)
     const savings =
       !isRestrictedFreeAgencyPeriod || bid || !isRestrictedFreeAgent

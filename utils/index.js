@@ -102,5 +102,6 @@ module.exports = {
   upsert: require('./upsert'),
 
   verifyUserTeam: require('./verify-user-team'),
-  verifyReserveStatus: require('./verify-reserve-status')
+  verifyReserveStatus: require('./verify-reserve-status'),
+  verifyRestrictedFreeAgency: require('./verify-restricted-free-agency')
 }
