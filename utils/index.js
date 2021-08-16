@@ -77,6 +77,7 @@ module.exports = {
   readCSV: require('./read-csv'),
   sendNotifications: require('./send-notifications'),
   sendEmail: require('./send-email'),
+  sendGroupmeMessage: require('./send-groupme-message'),
   getPlayerId: require('./get-player-id'),
   getSchedule: require('./get-schedule'),
   isPlayerOnWaivers: require('./is-player-on-waivers'),

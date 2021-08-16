@@ -1461,6 +1461,7 @@ CREATE TABLE `leagues` (
   `ext4` int(4) DEFAULT 35,
   `ddate` int(11) DEFAULT NULL,
   `adate` int(11) DEFAULT NULL,
+  `discord_webhook_url` varchar(255) DEFAULT NULL,
   `groupme_token` varchar(45) DEFAULT NULL,
   `groupme_id` varchar(26) DEFAULT NULL,
   `minBid` tinyint(1) DEFAULT 0,

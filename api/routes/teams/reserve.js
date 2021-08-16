@@ -1,6 +1,5 @@
 const express = require('express')
 const router = express.Router({ mergeParams: true })
-const API = require('groupme').Stateless
 
 const {
   constants,
@@ -10,6 +9,7 @@ const {
 } = require('../../../common')
 const {
   getRoster,
+  getLeague,
   sendNotifications,
   verifyUserTeam,
   isPlayerLocked
@@ -57,11 +57,10 @@ router.post('/?', async (req, res) => {
     }
 
     // make sure player is on active roster
-    const leagues = await db('leagues').where({ uid: leagueId })
-    if (!leagues.length) {
+    const league = await getLeague(leagueId)
+    if (!league) {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
-    const league = leagues[0]
     const rosterRow = await getRoster({ tid })
     const roster = new Roster({ roster: rosterRow, league })
     const rosterPlayer = roster.get(player)
@@ -174,20 +173,10 @@ router.post('/?', async (req, res) => {
     const message = `${team.name} (${team.abbrv}) has placed ${playerRow.fname} ${playerRow.lname} (${playerRow.pos}) on ${constants.transactionsDetail[type]}.`
 
     await sendNotifications({
-      leagueId: league.uid,
-      league: true,
+      league,
+      notifyLeague: true,
       message
     })
-
-    if (league.groupme_token && league.groupme_id) {
-      API.Bots.post(
-        league.groupme_token,
-        league.groupme_id,
-        message,
-        {},
-        (err) => logger(err)
-      )
-    }
   } catch (error) {
     logger(error)
     return res.status(400).send({ error: error.toString() })
