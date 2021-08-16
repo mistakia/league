@@ -1,9 +1,11 @@
 const express = require('express')
+const dayjs = require('dayjs')
 const router = express.Router({ mergeParams: true })
 
 const { constants, Roster } = require('../../../common')
 const {
   getRoster,
+  getLeague,
   verifyUserTeam,
   verifyReserveStatus
 } = require('../../../utils')
@@ -95,11 +97,10 @@ router.post('/?', async (req, res) => {
     const playerRow = players[0]
 
     // get league info
-    const leagues = await db('leagues').where({ uid: leagueId })
-    if (!leagues.length) {
+    const league = await getLeague(leagueId)
+    if (!league) {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
-    const league = leagues[0]
 
     // get roster
     const rosterRow = await getRoster({ tid })
@@ -126,11 +127,19 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid remove player' })
     }
 
-    // TODO - make sure deadline has not passed
     // if original bid, check if on team
     if (playerTid === tid) {
       if (!roster.has(player)) {
         return res.status(400).send({ error: 'invalid player' })
+      }
+
+      // make sure extension has not passed
+      if (
+        constants.season.week === 0 &&
+        league.ext_date &&
+        constants.season.now.isAfter(dayjs.unix(league.ext_date))
+      ) {
+        return res.status(400).send({ error: 'extension deadline has passed' })
       }
 
       // update value to bid
@@ -158,6 +167,15 @@ router.post('/?', async (req, res) => {
 
       if (!transitionBids.length) {
         return res.status(400).send({ error: 'invalid player' })
+      }
+
+      // make sure transition has not passed
+      if (
+        constants.season.week === 0 &&
+        league.tran_date &&
+        constants.season.now.isAfter(dayjs.unix(league.tran_date))
+      ) {
+        return res.status(400).send({ error: 'transition deadline has passed' })
       }
     }
 
@@ -276,7 +294,20 @@ router.delete('/?', async (req, res) => {
     // get roster
     const rosterRow = await getRoster({ tid })
 
-    // TODO - make sure deadline has not passed
+    // get league info
+    const league = await getLeague(leagueId)
+    if (!league) {
+      return res.status(400).send({ error: 'invalid leagueId' })
+    }
+
+    // make sure extension has not passed
+    if (
+      constants.season.week === 0 &&
+      league.ext_date &&
+      constants.season.now.isAfter(dayjs.unix(league.ext_date))
+    ) {
+      return res.status(400).send({ error: 'extension deadline has passed' })
+    }
 
     // verify transition id exists
     const query1 = await db('transition_bids')
@@ -381,11 +412,10 @@ router.put('/?', async (req, res) => {
     const playerRow = players[0]
 
     // get league info
-    const leagues = await db('leagues').where({ uid: leagueId })
-    if (!leagues.length) {
+    const league = await getLeague(leagueId)
+    if (!league) {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
-    const league = leagues[0]
 
     // get roster
     const rosterRow = await getRoster({ tid })
@@ -408,7 +438,15 @@ router.put('/?', async (req, res) => {
       roster.removePlayer(row.player)
     }
 
-    // TODO - make sure deadline has not passed
+    // make sure extension has not passed
+    if (
+      constants.season.week === 0 &&
+      league.tran_date &&
+      constants.season.now.isAfter(dayjs.unix(league.tran_date))
+    ) {
+      return res.status(400).send({ error: 'transition deadline has passed' })
+    }
+
     // if competing bid, make sure there is roster space
     if (transitionBid.player_tid !== teamId) {
       if (!roster.hasOpenBenchSlot(playerRow.pos)) {
