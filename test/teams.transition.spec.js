@@ -709,5 +709,7 @@ describe('API /teams - transition', function () {
     })
 
     // TODO - delete extension deadline passed
+
+    // TODO - can't cancel original bid after during restricted free agency
   })
 })
