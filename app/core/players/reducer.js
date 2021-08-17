@@ -397,12 +397,17 @@ export function playersReducer(state = initialState, { payload, type }) {
           })
       })
 
-    case rosterActions.DELETE_TRANSTION_TAG_FULFILLED:
-    case rosterActions.DELETE_TAG_FULFILLED:
-      return state.mergeIn(['items', payload.data.player], {
-        bid: null,
-        tag: constants.tags.REGULAR
-      })
+    case rosterActions.DELETE_TRANSITION_TAG_FULFILLED:
+    case rosterActions.DELETE_TAG_FULFILLED: {
+      const data = { bid: null }
+      if (
+        !payload.data.player_tid ||
+        payload.data.player_tid === payload.data.tid
+      ) {
+        data.tag = constants.tags.REGULAR
+      }
+      return state.mergeIn(['items', payload.data.player], data)
+    }
 
     case rosterActions.PUT_ROSTER_FULFILLED: {
       return state.withMutations((state) => {

@@ -22,10 +22,10 @@ export default class RemoveTransitionTagConfirmation extends React.Component {
 
     return (
       <Dialog open onClose={this.props.onClose}>
-        <DialogTitle>Remove Transition Tag</DialogTitle>
+        <DialogTitle>Remove Transition Bid</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {`Remove Transition Tag from ${player.name} (${player.pos})`}
+            {`Remove Transition Bid on ${player.name} (${player.pos})`}
           </DialogContentText>
         </DialogContent>
         <DialogActions>

@@ -303,13 +303,13 @@ router.delete('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
 
-    // make sure extension has not passed
+    // make sure transition deadline has not passed
     if (
       constants.season.week === 0 &&
-      league.ext_date &&
-      constants.season.now.isAfter(dayjs.unix(league.ext_date))
+      league.tran_date &&
+      constants.season.now.isAfter(dayjs.unix(league.tran_date))
     ) {
-      return res.status(400).send({ error: 'extension deadline has passed' })
+      return res.status(400).send({ error: 'transition deadline has passed' })
     }
 
     // verify transition id exists
@@ -326,9 +326,19 @@ router.delete('/?', async (req, res) => {
     }
     const transitionBid = query1[0]
 
+    // if its after the extension deadline, only competing bids can be cancelled
+    if (
+      league.ext_date &&
+      constants.season.now.isAfter(dayjs.unix(league.ext_date)) &&
+      transitionBid.player_tid === transitionBid.tid
+    ) {
+      return res.status(400).send({ error: 'restricted free agency has begun' })
+    }
+
     // cancel bid
+    const cancelled = Math.round(Date.now() / 1000)
     await db('transition_bids')
-      .update('cancelled', Math.round(Date.now() / 1000))
+      .update('cancelled', cancelled)
       .where('uid', transitionBid.uid)
 
     // update tag
@@ -337,7 +347,7 @@ router.delete('/?', async (req, res) => {
       player
     })
 
-    res.send({ success: true, player })
+    res.send({ ...transitionBid, cancelled })
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })
