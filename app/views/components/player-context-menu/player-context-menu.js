@@ -261,7 +261,7 @@ export default class PlayerContextMenu extends React.Component {
         if (status.tagged.transition) {
           menuItems.push(
             <MenuItem
-              key='transition'
+              key='transition-remove'
               dense
               onClick={this.handleRemoveTransitionTag}>
               Remove Transition Tag
@@ -330,6 +330,17 @@ export default class PlayerContextMenu extends React.Component {
             {`${status.bid ? 'Update' : 'Place'} Transition Bid`}
           </MenuItem>
         )
+
+        if (status.bid) {
+          menuItems.push(
+            <MenuItem
+              key='transition-remove'
+              dense
+              onClick={this.handleRemoveTransitionTag}>
+              Remove Transition Bid
+            </MenuItem>
+          )
+        }
       }
 
       const text = status.waiver.poach

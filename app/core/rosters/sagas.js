@@ -327,10 +327,19 @@ export function* tagNotification() {
   )
 }
 
-export function* transitionNotification() {
+export function* transitionPlacedNotification() {
   yield put(
     notificationActions.show({
       message: 'Transition Bid Placed',
+      severity: 'success'
+    })
+  )
+}
+
+export function* transitionRemovedNotification() {
+  yield put(
+    notificationActions.show({
+      message: 'Transition Bid Cancelled',
       severity: 'success'
     })
   )
@@ -482,7 +491,14 @@ export function* watchRemoveTransitionTag() {
 export function* watchPostTransitionTagFulfilled() {
   yield takeLatest(
     rosterActions.POST_TRANSITION_TAG_FULFILLED,
-    transitionNotification
+    transitionPlacedNotification
+  )
+}
+
+export function* watchDeleteTransiionTagFulfilled() {
+  yield takeLatest(
+    rosterActions.DELETE_TRANSITION_TAG_FULFILLED,
+    transitionRemovedNotification
   )
 }
 
@@ -493,7 +509,7 @@ export function* watchUpdateTransitionTag() {
 export function* watchPutTransitionTagFulfilled() {
   yield takeLatest(
     rosterActions.PUT_TRANSITION_TAG_FULFILLED,
-    transitionNotification
+    transitionPlacedNotification
   )
 }
 
@@ -541,5 +557,6 @@ export const rosterSagas = [
   fork(watchUpdateTransitionTag),
 
   fork(watchPostTransitionTagFulfilled),
-  fork(watchPutTransitionTagFulfilled)
+  fork(watchPutTransitionTagFulfilled),
+  fork(watchDeleteTransiionTagFulfilled)
 ]

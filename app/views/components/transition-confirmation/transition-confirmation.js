@@ -241,7 +241,7 @@ export default class TransitionConfirmation extends React.Component {
         <DialogTitle>Transition Tag</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {`Apply Transition Tag to ${player.name} (${player.pos})`}
+            {`Place Transition bid on ${player.name} (${player.pos})`}
           </DialogContentText>
           <div className='transition__bid-inputs'>
             <TextField
