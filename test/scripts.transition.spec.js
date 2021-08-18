@@ -23,6 +23,8 @@ chai.should()
 const expect = chai.expect
 
 describe('SCRIPTS - transition bids - restricted free agency', function () {
+  const leagueId = 1
+
   before(async function () {
     this.timeout(60 * 1000)
     await knex.migrate.forceFreeMigrationsLock()
@@ -32,8 +34,6 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
   })
 
   describe('process', function () {
-    const leagueId = 1
-
     beforeEach(async function () {
       this.timeout(60 * 1000)
       await league(knex)
@@ -228,7 +228,52 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
     })
 
     it('no bids to process', async () => {
-      // TODO
+      const tranDate = start.subtract('1', 'week').unix()
+      await knex('seasons').insert({
+        lid: leagueId,
+        year: constants.season.year,
+        tran_date: tranDate
+      })
+
+      const player = await selectPlayer()
+      const teamId = 1
+      const value = 10
+      const userId = 1
+
+      await addPlayer({
+        leagueId,
+        player,
+        teamId,
+        userId
+      })
+
+      const timestamp = Math.round(Date.now() / 1000)
+      await knex('transition_bids').insert({
+        player: player.player,
+        userid: userId,
+        bid: value,
+        tid: teamId,
+        year: constants.season.year,
+        player_tid: teamId,
+        lid: leagueId,
+        submitted: timestamp
+      })
+
+      let error
+      try {
+        await run()
+      } catch (err) {
+        error = err
+      }
+
+      expect(error).to.equal(undefined)
+
+      // check transition bid
+      const transitionBids = await knex('transition_bids')
+      expect(transitionBids.length).to.equal(1)
+      expect(transitionBids[0].succ).to.equal(null)
+      expect(transitionBids[0].processed).to.equal(null)
+      expect(transitionBids[0].reason).to.equal(null)
     })
 
     it('exceeds roster size limit', async () => {
