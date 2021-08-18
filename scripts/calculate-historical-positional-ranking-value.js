@@ -1,21 +1,23 @@
 // eslint-disable-next-line
 require = require('esm')(module /*, options*/)
 const regression = require('regression')
+const argv = require('yargs').argv
 const { Table } = require('console-table-printer')
 
 const { groupBy } = require('../common')
+const { getLeague } = require('../utils')
 const calculateVOR = require('./calculate-vor')
 
 const LATEST_YEAR = 2020
 
-const calculateHistoricalPositionalRankingValue = async () => {
+const calculateHistoricalPositionalRankingValue = async ({ league }) => {
   const years = 3
   let year = LATEST_YEAR - years
 
   const data = {}
 
   for (; year < LATEST_YEAR; year++) {
-    const res = await calculateVOR({ year })
+    const res = await calculateVOR({ year, league })
     const values = Object.values(res)
     const byPosition = groupBy(values, 'pos')
     for (const pos in byPosition) {
@@ -79,7 +81,14 @@ const calculateHistoricalPositionalRankingValue = async () => {
 
 if (!module.parent) {
   const main = async () => {
-    const result = await calculateHistoricalPositionalRankingValue()
+    const lid = argv.lid
+    if (!lid) {
+      console.log('missing --lid')
+      return
+    }
+
+    const league = await getLeague(lid)
+    const result = await calculateHistoricalPositionalRankingValue({ league })
 
     const p = new Table()
     const getColor = (pos) => {
