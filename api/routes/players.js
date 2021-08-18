@@ -34,7 +34,7 @@ router.get('/?', async (req, res) => {
     }
 
     const leaguePlayerIds = []
-    if (req.user) {
+    if (req.user && !search && leagueId) {
       const playerSlots = await db('rosters_players')
         .join('rosters', 'rosters_players.rid', 'rosters.uid')
         .where('rosters.lid', leagueId)
