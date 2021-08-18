@@ -40,6 +40,10 @@ const uniqBy = (a, key) => {
   })
 }
 
+const arrayToSentence = (arr) =>
+  arr.length > 1
+    ? arr.slice(0, arr.length - 1).join(', ') + ', and ' + arr.slice(-1)
+    : arr[0]
 const toPercent = (num) => `${((num || 0) * 100).toFixed(1)}%`
 
 const formatRoster = (roster) => {
@@ -70,6 +74,7 @@ const debounce = (callback, wait) => {
 
 export {
   debounce,
+  arrayToSentence,
   calculateBaselines,
   calculatePoints,
   calculateValues,
