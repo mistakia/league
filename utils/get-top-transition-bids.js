@@ -1,8 +1,10 @@
 const db = require('../db')
+const { constants } = require('../common')
 
 module.exports = async (leagueId) => {
   const transitionBids = await db('transition_bids')
     .where('lid', leagueId)
+    .where('year', constants.season.year)
     .whereNull('cancelled')
     .whereNull('processed')
 

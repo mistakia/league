@@ -103,6 +103,19 @@ router.post('/?', async (req, res) => {
         player: remove
       })
     }
+
+    // cancel existing transition bids
+    const timestamp = Math.round(Date.now() / 1000)
+    await db('transition_bids')
+      .update('cancelled', timestamp)
+      .where({
+        year: constants.seaosn.year,
+        player,
+        tid
+      })
+      .whereNull('cancelled')
+      .whereNull('processed')
+
     await db('rosters_players').update({ tag }).where({
       rid: rosterRow.uid,
       player
