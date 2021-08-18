@@ -53,6 +53,10 @@ describe('API /teams - tag', function () {
     it('rookie tag', async () => {
       // TODO
     })
+
+    it('cancel existing transition bid', async () => {
+      // TODO
+    })
   })
 
   describe('errors', function () {
