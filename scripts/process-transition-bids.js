@@ -18,6 +18,7 @@ const run = async () => {
     .join('seasons', 'transition_bids.lid', 'seasons.lid')
     .whereNotNull('tran_date')
     .where('tran_date', '<=', timestamp)
+    .where('transition_bids.year', constants.season.year)
     .groupBy('transition_bids.lid')
     .whereNull('processed')
     .whereNull('cancelled')
@@ -46,7 +47,11 @@ const run = async () => {
               reason: 'player no longer a restricted free agent',
               processed: timestamp
             })
-            .where({ player, lid })
+            .where({
+              player,
+              lid,
+              year: constants.season.year
+            })
             .whereNull('cancelled')
             .whereNull('processed')
         } else {

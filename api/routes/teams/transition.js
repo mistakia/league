@@ -16,7 +16,10 @@ router.get('/?', async (req, res) => {
     const { teamId } = req.params
 
     const transitionBids = await db('transition_bids')
-      .where('tid', teamId)
+      .where({
+        tid: teamId,
+        year: constants.season.year
+      })
       .whereNull('processed')
       .whereNull('cancelled')
 
@@ -159,9 +162,12 @@ router.post('/?', async (req, res) => {
     } else {
       // check if transition bid exists
       const transitionBids = await db('transition_bids')
-        .where('player', player)
-        .where('tid', playerTid)
-        .where('lid', leagueId)
+        .where({
+          player,
+          tid: playerTid,
+          lid: leagueId,
+          year: constants.season.year
+        })
         .whereNull('processed')
         .whereNull('cancelled')
 
