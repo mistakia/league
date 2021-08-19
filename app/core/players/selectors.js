@@ -480,9 +480,10 @@ export function getPlayerStatus(state, { player, playerId }) {
           status.eligible.activate = true
         }
 
-        // is on practice squad && has no poaching claims
+        // is regular season and is on practice squad && has no poaching claims
         const leaguePoaches = getPoachesForCurrentLeague(state)
         if (
+          constants.season.isRegularSeason &&
           player.slot === constants.slots.PS &&
           !leaguePoaches.has(player.player)
         ) {

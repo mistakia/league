@@ -44,6 +44,12 @@ router.post('/?', async (req, res) => {
     const rosterRow = await getRoster({ tid })
     const roster = new Roster({ roster: rosterRow, league })
 
+    if (!constants.season.isRegularSeason) {
+      return res
+        .status(400)
+        .send({ error: 'not permitted during the offseason' })
+    }
+
     // make sure player is on roster
     if (!roster.has(player)) {
       return res.status(400).send({ error: 'invalid player' })
