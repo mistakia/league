@@ -86,7 +86,9 @@ export default class Roster {
   }
 
   get active() {
-    return Array.from(this._players.values()).filter(p => isSlotActive(p.slot))
+    return Array.from(this._players.values()).filter((p) =>
+      isSlotActive(p.slot)
+    )
   }
 
   get practice() {

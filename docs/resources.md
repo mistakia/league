@@ -94,5 +94,3 @@
 | [nflgame-redux](https://pypi.org/project/nflgame-redux/) |             |
 | [nflscrapR](https://github.com/maksimhorowitz/nflscrapR) |             |
 | [ffscrapr](https://github.com/dynastyprocess/ffscrapr/)  |             |
-
-<a href="https://armchairanalysis.com"><img src="https://armchairanalysis.com/img/poweredbyaa_tp.png" width="160" height="80" alt="NFL Stats provided by ArmchairAnalysis.com"></a>
