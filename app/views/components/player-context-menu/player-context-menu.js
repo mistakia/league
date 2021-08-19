@@ -289,11 +289,13 @@ export default class PlayerContextMenu extends React.Component {
         )
       }
 
-      menuItems.push(
-        <MenuItem key='cutlist' dense onClick={this.handleCutlist}>
-          {`${isOnCutlist ? 'Remove from' : 'Add to'} Cutlist`}
-        </MenuItem>
-      )
+      if (status.active) {
+        menuItems.push(
+          <MenuItem key='cutlist' dense onClick={this.handleCutlist}>
+            {`${isOnCutlist ? 'Remove from' : 'Add to'} Cutlist`}
+          </MenuItem>
+        )
+      }
 
       menuItems.push(
         <MenuItem

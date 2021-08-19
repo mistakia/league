@@ -130,6 +130,8 @@ router.post('/?', async (req, res) => {
       player
     })
 
+    await db('cutlist').where({ player, tid }).del()
+
     const transaction = {
       userid: req.user.userId,
       tid,
