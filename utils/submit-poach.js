@@ -45,6 +45,7 @@ module.exports = async function ({
   if (!slots.length) {
     throw new Error('player is not in an unprotected practice squad slot')
   }
+  const playerTid = slots[0].tid
 
   // verify no existing poaches exist
   const poaches = await db('poaches').where({ player }).whereNull('processed')
@@ -87,6 +88,7 @@ module.exports = async function ({
     userid: userId,
     tid: teamId,
     lid: leagueId,
+    player_tid: playerTid,
     player,
     submitted: Math.round(Date.now() / 1000)
   }
