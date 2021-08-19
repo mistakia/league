@@ -4,6 +4,7 @@ const sendNotifications = require('./send-notifications')
 const getRoster = require('./get-roster')
 const processRelease = require('./process-release')
 const getLeague = require('./get-league')
+const createConditionalPick = require('./create-conditional-pick')
 
 module.exports = async function ({ player, release = [], lid, tid, userid }) {
   const rosterSlots = await db('rosters')
@@ -101,6 +102,12 @@ module.exports = async function ({ player, release = [], lid, tid, userid }) {
     slot: constants.slots.BENCH,
     player,
     pos: poachPlayer.pos
+  })
+
+  // award conditional pick to poached team
+  await createConditionalPick({
+    tid: rosterSlot.tid,
+    league
   })
 
   // send notification
