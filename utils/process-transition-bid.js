@@ -4,6 +4,7 @@ const getRoster = require('./get-roster')
 const getLeague = require('./get-league')
 const processRelease = require('./process-release')
 const sendNotifications = require('./send-notifications')
+const createConditionalPick = require('./create-conditional-pick')
 const getTeam = require('./get-team')
 
 /* eslint-disable camelcase */
@@ -86,7 +87,10 @@ module.exports = async function ({
     })
 
     // add conditional pick to original team
-    // TODO
+    await createConditionalPick({
+      tid: player_tid,
+      league
+    })
   }
 
   // release conditional & cutlist players
