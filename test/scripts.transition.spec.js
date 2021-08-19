@@ -285,7 +285,87 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
     })
 
     it('tied bids among competing team', async () => {
-      // TODO
+      const tranDate = start.subtract('1', 'month').unix()
+      await knex('seasons').insert({
+        lid: leagueId,
+        year: constants.season.year,
+        tran_date: tranDate
+      })
+
+      const player = await selectPlayer()
+      const teamId = 1
+      const teamId2 = 2
+      const teamId3 = 3
+      const value1 = 10
+      const value2 = 13
+      const userId = 1
+      const userId2 = 2
+      const userId3 = 3
+
+      await addPlayer({
+        leagueId,
+        player,
+        teamId,
+        userId
+      })
+
+      const timestamp = Math.round(Date.now() / 1000)
+      await knex('transition_bids').insert({
+        player: player.player,
+        userid: userId,
+        bid: value1,
+        tid: teamId,
+        year: constants.season.year,
+        player_tid: teamId,
+        lid: leagueId,
+        submitted: timestamp
+      })
+
+      await knex('transition_bids').insert({
+        player: player.player,
+        userid: userId2,
+        bid: value2,
+        tid: teamId2,
+        year: constants.season.year,
+        player_tid: teamId,
+        lid: leagueId,
+        submitted: timestamp
+      })
+
+      await knex('transition_bids').insert({
+        player: player.player,
+        userid: userId3,
+        bid: value2,
+        tid: teamId3,
+        year: constants.season.year,
+        player_tid: teamId,
+        lid: leagueId,
+        submitted: timestamp
+      })
+
+      let error
+      try {
+        await run()
+      } catch (err) {
+        error = err
+      }
+
+      expect(error).to.equal(undefined)
+
+      // check transition bid
+      const transitionBids = await knex('transition_bids')
+      expect(transitionBids.length).to.equal(3)
+      expect(transitionBids[0].succ).to.equal(null)
+      expect(transitionBids[0].processed).to.equal(null)
+      expect(transitionBids[0].reason).to.equal(null)
+
+      expect(transitionBids[1].succ).to.equal(null)
+      expect(transitionBids[1].processed).to.equal(null)
+      expect(transitionBids[1].reason).to.equal(null)
+
+      expect(transitionBids[2].succ).to.equal(null)
+      expect(transitionBids[2].processed).to.equal(null)
+      expect(transitionBids[2].reason).to.equal(null)
     })
   })
 })
