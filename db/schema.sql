@@ -614,6 +614,7 @@ CREATE TABLE `poaches` (
   `player` varchar(7) NOT NULL,
   `userid` int(6) NOT NULL,
   `tid` int(5) NOT NULL,
+  `player_tid` int(5) NOT NULL,
   `lid` int(6) NOT NULL,
   `succ` tinyint(1) DEFAULT NULL,
   `submitted` int(11) NOT NULL,

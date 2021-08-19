@@ -66,6 +66,7 @@ describe('SCRIPTS /waivers - poach', function () {
         tid: 2,
         lid: 1,
         player: player.player,
+        player_tid: 1,
         submitted: Math.round(Date.now() / 1000)
       })
 
@@ -146,6 +147,7 @@ describe('SCRIPTS /waivers - poach', function () {
         tid: 2,
         lid: 1,
         player: player1.player,
+        player_tid: 1,
         submitted: Math.round(Date.now() / 1000)
       })
 
@@ -179,6 +181,7 @@ describe('SCRIPTS /waivers - poach', function () {
         tid: 4,
         lid: 1,
         player: player2.player,
+        player_tid: 3,
         submitted: Math.round(Date.now() / 1000)
       })
 
@@ -270,6 +273,7 @@ describe('SCRIPTS /waivers - poach', function () {
         tid: 2,
         lid: 1,
         player: player.player,
+        player_tid: 1,
         submitted: Math.round(Date.now() / 1000)
       })
 
@@ -357,6 +361,7 @@ describe('SCRIPTS /waivers - poach', function () {
         tid: 2,
         lid: 1,
         player: player.player,
+        player_tid: 1,
         submitted: Math.round(Date.now() / 1000)
       })
 
@@ -442,6 +447,7 @@ describe('SCRIPTS /waivers - poach', function () {
         tid: 2,
         lid: 1,
         player: player.player,
+        player_tid: 1,
         submitted: Math.round(Date.now() / 1000)
       })
 
