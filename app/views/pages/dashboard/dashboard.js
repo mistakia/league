@@ -6,6 +6,7 @@ import AlertTitle from '@material-ui/lab/AlertTitle'
 import Container from '@material-ui/core/Container'
 import Grid from '@material-ui/core/Grid'
 import NotInterestedIcon from '@material-ui/icons/NotInterested'
+import Toolbar from '@material-ui/core/Toolbar'
 
 import DashboardByeWeeks from '@components/dashboard-bye-weeks'
 import DashboardLeaguePositionalValue from '@components/dashboard-league-positional-value'
@@ -116,7 +117,10 @@ export default function DashboardPage() {
   }
 
   const pickItems = []
-  for (const pick of picks) {
+  const sortedPicks = picks.sort(
+    (a, b) => a.year - b.year || a.round - b.round || a.pick - b.pick
+  )
+  for (const pick of sortedPicks) {
     const pickNum = pick.pick % league.nteams || league.nteams
     const pickStr = `${pick.round}.${('0' + pickNum).slice(-2)}`
     pickItems.push(
@@ -226,15 +230,21 @@ export default function DashboardPage() {
             />
           </Grid>
           <Grid item xs={12}>
-            <div className='section table__container'>
-              <div className='dashboard__section-header-title'>Draft Picks</div>
-              <div className='table__row table__head'>
-                <div className='table__cell'>Year</div>
-                <div className='metric table__cell'>Pick</div>
-                <div className='metric table__cell'>Round</div>
-                <div className='metric table__cell'>Pick #</div>
+            <div className='section'>
+              <Toolbar>
+                <div className='dashboard__section-header-title'>
+                  Draft Picks
+                </div>
+              </Toolbar>
+              <div className='table__container'>
+                <div className='table__row table__head'>
+                  <div className='table__cell'>Year</div>
+                  <div className='metric table__cell'>Pick</div>
+                  <div className='metric table__cell'>Round</div>
+                  <div className='metric table__cell'>Pick #</div>
+                </div>
+                <div className='empty'>{pickItems}</div>
               </div>
-              <div className='empty'>{pickItems}</div>
             </div>
           </Grid>
         </Grid>
