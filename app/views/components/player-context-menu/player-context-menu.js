@@ -276,17 +276,18 @@ export default class PlayerContextMenu extends React.Component {
         )
       }
 
-      menuItems.push(
-        <MenuItem
-          key='rookie'
-          dense
-          disabled={!status.eligible.rookieTag}
-          onClick={
-            status.tagged.rookie ? this.handleRemoveTag : this.handleRookieTag
-          }>
-          {`${status.tagged.rookie ? 'Remove' : 'Apply'} Rookie Tag`}
-        </MenuItem>
-      )
+      if (status.eligible.rookieTag) {
+        menuItems.push(
+          <MenuItem
+            key='rookie'
+            dense
+            onClick={
+              status.tagged.rookie ? this.handleRemoveTag : this.handleRookieTag
+            }>
+            {`${status.tagged.rookie ? 'Remove' : 'Apply'} Rookie Tag`}
+          </MenuItem>
+        )
+      }
 
       menuItems.push(
         <MenuItem key='cutlist' dense onClick={this.handleCutlist}>
