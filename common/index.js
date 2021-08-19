@@ -23,6 +23,7 @@ import getPlayerCountBySlot from './get-player-count-by-slot'
 import getActiveRosterLimit from './get-active-roster-limit'
 import isReserveEligible from './is-reserve-eligible'
 import isReserveCovEligible from './is-reserve-cov-eligible'
+import isSlotActive from './is-slot-active'
 
 /* eslint-disable no-extra-semi */
 const groupBy = (xs, key) =>
@@ -105,5 +106,6 @@ export {
   getPlayerCountBySlot,
   getActiveRosterLimit,
   isReserveEligible,
-  isReserveCovEligible
+  isReserveCovEligible,
+  isSlotActive
 }

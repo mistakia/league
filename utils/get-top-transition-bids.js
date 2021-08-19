@@ -19,7 +19,8 @@ module.exports = async (leagueId) => {
     }
 
     // boost original team bids
-    const boost = Math.max(2, t.bid * 0.2)
+    const _20pct = Math.min(t.bid * 0.2)
+    const boost = Math.max(2, _20pct)
     t._bid = t.bid + boost
   })
 

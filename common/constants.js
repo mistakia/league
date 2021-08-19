@@ -591,9 +591,9 @@ export const transactionsDetail = {
   8: 'Drafted',
 
   9: 'Extended',
-  10: 'Tran. Tagged',
-  11: 'Fran. Tagged',
-  12: 'Rookie Tagged',
+  10: 'Signed',
+  11: 'Franchised',
+  12: 'Rookie Tag',
   13: 'Signed (PS)',
   15: 'Reserve (IR)',
   16: 'Reserve (COV)',
