@@ -2,6 +2,7 @@ import dayjs from 'dayjs'
 import * as constants from './constants'
 import getExtensionAmount from './get-extension-amount'
 import getActiveRosterLimit from './get-active-roster-limit'
+import isSlotActive from './is-slot-active'
 
 export default class Roster {
   constructor({ roster, league }) {
@@ -85,15 +86,7 @@ export default class Roster {
   }
 
   get active() {
-    const exclude = [
-      constants.slots.IR,
-      constants.slots.PS,
-      constants.slots.PSP,
-      constants.slots.COV
-    ]
-    return Array.from(this._players.values()).filter(
-      (p) => !exclude.includes(p.slot)
-    )
+    return Array.from(this._players.values()).filter(p => isSlotActive(p.slot))
   }
 
   get practice() {

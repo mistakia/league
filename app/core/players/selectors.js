@@ -8,7 +8,8 @@ import {
   isOnReleaseWaivers,
   getExtensionAmount,
   isReserveEligible,
-  isReserveCovEligible
+  isReserveCovEligible,
+  isSlotActive
 } from '@common'
 import { getApp } from '@core/app'
 import { getStats } from '@core/stats'
@@ -363,6 +364,7 @@ export function getPlayerStatus(state, { player, playerId }) {
     fa: false,
     rostered: false,
     protected: false,
+    active: false,
     bid: null,
     tagged: {
       rookie: false,
@@ -404,6 +406,7 @@ export function getPlayerStatus(state, { player, playerId }) {
   status.protected = player.slot === constants.slots.PSP
   status.starter = constants.starterSlots.includes(player.slot)
   status.locked = isPlayerLocked(state, { player })
+  status.active = isSlotActive(player.slot)
 
   const isFreeAgent = isPlayerFreeAgent(state, { player })
   status.fa = isFreeAgent
