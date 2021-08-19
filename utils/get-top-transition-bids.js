@@ -26,5 +26,8 @@ module.exports = async (leagueId) => {
   const bidAmounts = transitionBids.map((t) => t._bid)
   const topBid = Math.max(...bidAmounts)
   const topBids = transitionBids.filter((t) => t._bid === topBid)
-  return topBids
+  const players = topBids.map((p) => p.player)
+  const sortedPlayers = players.sort((a, b) => a - b)
+  const topPlayer = sortedPlayers[0]
+  return topBids.filter((b) => b.player === topPlayer)
 }

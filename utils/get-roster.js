@@ -37,10 +37,11 @@ module.exports = async ({
     const bids = await db('transition_bids')
       .where('tid', tid)
       .where('year', constants.season.year)
+      .whereNull('cancelled')
 
     if (bids.length) {
       for (const player of rosterRow.players) {
-        const { bid } = bids.find((b) => b.player === player) || {}
+        const { bid } = bids.find((b) => b.player === player.player) || {}
         player.bid = bid
       }
     }
