@@ -38,6 +38,7 @@ const run = async () => {
 
       try {
         if (originalTeamBid || transitionBids.length === 1) {
+          log('processing transition bid', transitionBid)
           await processTransitionBid(transitionBid)
 
           const { player } = transitionBid
@@ -57,10 +58,12 @@ const run = async () => {
         } else {
           // multiple bids tied with no original team
           log(`tied top bids for league ${lid}`)
+          log(transitionBids)
           break
         }
       } catch (err) {
         error = err
+        log(error)
       }
 
       // save transition bid outcome
@@ -80,6 +83,7 @@ const run = async () => {
 module.exports = run
 
 const main = async () => {
+  debug.enable('process-transition-bids')
   let error
   try {
     await run()
