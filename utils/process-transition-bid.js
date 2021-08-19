@@ -114,7 +114,7 @@ module.exports = async function ({
   const team = await getTeam(tid)
 
   // send notification
-  let message = `${team.name} (${team.abbrv}) has signed restricted free agent ${playerRow.fname} ${playerRow.lname} (${playerRow.pos}) for $${bid}.`
+  let message = `${team.name} (${team.abbrv}) has signed restricted free agent ${playerRow.fname} ${playerRow.lname} (${playerRow.pos}) for $${bid}. `
   if (releasePlayers.length) {
     const releaseMessages = []
     for (const player of releasePlayers) {

@@ -8,7 +8,7 @@ const { constants } = require('../common')
 const { getTopTransitionBids, processTransitionBid } = require('../utils')
 
 const log = debug('process-transition-bids')
-debug.enable('process-transition-bids')
+// debug.enable('process-transition-bids')
 
 const run = async () => {
   const timestamp = Math.round(Date.now() / 1000)
