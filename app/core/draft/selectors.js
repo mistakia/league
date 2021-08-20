@@ -13,12 +13,12 @@ export function getPicks(state) {
   const { picks } = getDraft(state)
   const { teamId } = getApp(state)
 
-  return picks.filter((p) => p.tid === teamId)
+  return picks.filter((p) => p.tid === teamId).sort((a, b) => a.pick - b.pick)
 }
 
 export function getNextPick(state) {
   const picks = getPicks(state)
-  return picks.find((p) => !p.player)
+  return picks.filter(p => p.pick).find((p) => !p.player)
 }
 
 export function getLastPick(state) {
