@@ -27,9 +27,11 @@ router.get('/?', async (req, res) => {
     const leagueIds = teams.map((t) => t.lid)
     const teamIds = teams.map((t) => t.uid)
     const leagues = await db('leagues')
-      .leftJoin('seasons', 'seasons.lid', 'leagues.uid')
+      .leftJoin('seasons', function () {
+        this.on('leagues.uid', '=', 'seasons.lid')
+        this.on(db.raw(`seasons.year = ${constants.season.year} or seasons.year is null`))
+      })
       .whereIn('leagues.uid', leagueIds)
-      .where('seasons.year', constants.season.year)
 
     const sources = await db('sources')
     const userSources = await db('users_sources').where(
