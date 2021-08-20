@@ -33,7 +33,7 @@ export default function DraftPage() {
     league.ddate && dayjs().isAfter(dayjs.unix(league.ddate).startOf('day'))
   const prevPick = picks.find((p) => p.pick === nextPick.pick - 1)
   const isPreviousSelectionMade =
-    (nextPick && nextPick.pick === 1) || (prevPick && prevPick.player)
+    Boolean(nextPick && nextPick.pick === 1) || Boolean(prevPick && prevPick.player)
   const onTheClock =
     league.ddate &&
     nextPick &&
@@ -54,7 +54,7 @@ export default function DraftPage() {
         start: league.ddate,
         pickNum: nextPick.pick
       })
-      if (dayjs().isBefore(draftWindow)) {
+      if (dayjs().isBefore(draftWindow) && !isPreviousSelectionMade) {
         draftInfo = (
           <div className='draft__side-top-pick'>
             Your next pick is {dayjs().to(draftWindow)}
