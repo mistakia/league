@@ -24,6 +24,7 @@ import getActiveRosterLimit from './get-active-roster-limit'
 import isReserveEligible from './is-reserve-eligible'
 import isReserveCovEligible from './is-reserve-cov-eligible'
 import isSlotActive from './is-slot-active'
+import getDraftWindow from './get-draft-window'
 
 /* eslint-disable no-extra-semi */
 const groupBy = (xs, key) =>
@@ -73,6 +74,9 @@ const debounce = (callback, wait) => {
   }
 }
 
+const isDraftWindowOpen = (params) =>
+  constants.season.now.isAfter(getDraftWindow(params))
+
 export {
   debounce,
   arrayToSentence,
@@ -107,5 +111,7 @@ export {
   getActiveRosterLimit,
   isReserveEligible,
   isReserveCovEligible,
-  isSlotActive
+  isSlotActive,
+  getDraftWindow,
+  isDraftWindowOpen
 }

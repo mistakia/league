@@ -1,20 +1,28 @@
 import React from 'react'
+import dayjs from 'dayjs'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import Team from '@components/team'
 import Position from '@components/position'
+import { getDraftWindow } from '@common'
 
 import './draft-pick.styl'
 
 export default class DraftPick extends React.Component {
   render() {
-    const { player, pick, team, league, isActive } = this.props
+    const { player, pick, team, league } = this.props
 
     const pickNum = pick.pick % league.nteams || league.nteams
 
+    const draftWindow = getDraftWindow({
+      start: league.ddate,
+      pickNum: pick.pick
+    })
+    const isActive = pick.pick && dayjs().isAfter(draftWindow)
+
     const classNames = ['draft__pick']
-    if (isActive) {
+    if (isActive && !pick.player) {
       classNames.push('active')
     }
 
@@ -32,8 +40,15 @@ export default class DraftPick extends React.Component {
               <Team team={player.team} />
             </div>
           )}
-          {isActive && <div className='draft__pick-active'>On the clock</div>}
           <div className='draft__pick-team'>{team.name}</div>
+          {isActive && !pick.player && (
+            <div className='draft__pick-window active'>On the clock</div>
+          )}
+          {!isActive && Boolean(pick.pick) && (
+            <div className='draft__pick-window'>
+              On the clock {dayjs().to(draftWindow)}
+            </div>
+          )}
         </div>
         <div className='draf__pick-pos'>
           <Position pos={player.pos} />
