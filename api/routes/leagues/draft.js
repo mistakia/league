@@ -134,6 +134,10 @@ router.post('/?', async (req, res) => {
     const value =
       league.nteams - pick.pick + 1 > 0 ? league.nteams - pick.pick + 1 : 1
 
+    if (slot === constants.slots.BENCH && roster.availableCap < value) {
+      return res.status(400).send({ error: 'exceeds salary cap' })
+    }
+
     const insertRoster = db('rosters_players').insert({
       rid: roster.uid,
       player: playerId,

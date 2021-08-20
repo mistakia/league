@@ -31,10 +31,14 @@ export default function DraftPage() {
 
   const draftActive =
     league.ddate && dayjs().isAfter(dayjs.unix(league.ddate).startOf('day'))
+  const prevPick = picks.find((p) => p.pick === nextPick.pick - 1)
+  const isPreviousSelectionMade =
+    (nextPick && nextPick.pick === 1) || (prevPick && prevPick.player)
   const onTheClock =
     league.ddate &&
     nextPick &&
-    isDraftWindowOpen({ start: league.ddate, pickNum: nextPick.pick })
+    (isDraftWindowOpen({ start: league.ddate, pickNum: nextPick.pick }) ||
+      isPreviousSelectionMade)
 
   let draftInfo
   if (league.ddate) {
@@ -120,11 +124,15 @@ export default function DraftPage() {
   const pickItems = []
   const picksSorted = picks.sort((a, b) => a.round - b.round || a.pick - b.pick)
   for (const pick of picksSorted) {
+    const prevPick = picks.find((p) => p.pick === pick.pick - 1)
+    const isPreviousSelectionMade =
+      pick.pick === 1 || (prevPick && prevPick.player)
     const isActive =
       draftActive &&
       !pick.player &&
       pick.pick &&
-      isDraftWindowOpen({ start: league.ddate, pickNum: pick.pick })
+      (isDraftWindowOpen({ start: league.ddate, pickNum: pick.pick }) ||
+        isPreviousSelectionMade)
     pickItems.push(
       <DraftPick
         key={pick.uid}

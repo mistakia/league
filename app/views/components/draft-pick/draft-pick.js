@@ -11,7 +11,7 @@ import './draft-pick.styl'
 
 export default class DraftPick extends React.Component {
   render() {
-    const { player, pick, team, league } = this.props
+    const { player, pick, team, league, isActive } = this.props
 
     const pickNum = pick.pick % league.nteams || league.nteams
 
@@ -19,7 +19,6 @@ export default class DraftPick extends React.Component {
       start: league.ddate,
       pickNum: pick.pick
     })
-    const isActive = pick.pick && dayjs().isAfter(draftWindow)
 
     const classNames = ['draft__pick']
     if (isActive && !pick.player) {
@@ -44,7 +43,7 @@ export default class DraftPick extends React.Component {
           {isActive && !pick.player && (
             <div className='draft__pick-window active'>On the clock</div>
           )}
-          {!isActive && Boolean(pick.pick) && (
+          {!isActive && !pick.player && Boolean(pick.pick) && (
             <div className='draft__pick-window'>
               On the clock {dayjs().to(draftWindow)}
             </div>
