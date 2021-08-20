@@ -1390,6 +1390,7 @@ CREATE TABLE `draft` (
   `uid` int(6) unsigned NOT NULL AUTO_INCREMENT,
   `player` varchar(7) DEFAULT NULL,
   `round` tinyint(1) NOT NULL,
+  `comp` tinyint(1) DEFAULT 0,
   `pick` tinyint(2) DEFAULT NULL,
   `tid` int(6) NOT NULL,
   `otid` int(6) NOT NULL,

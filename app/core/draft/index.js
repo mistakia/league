@@ -2,6 +2,7 @@ export {
   getDraft,
   getPicks,
   getNextPick,
+  getDraftEnd,
   getSelectedDraftPlayer,
   isDrafted,
   isAfterDraft
