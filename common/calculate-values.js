@@ -49,8 +49,7 @@ const calculateValues = ({
     }
 
     // weighted average
-    player.vorp[week].default =
-      (player.vorp[week].defaultAvailable + 3 * player.vorp[week].starter) / 4
+    player.vorp[week].default = player.vorp[week].defaultAvailable
 
     if (player.vorp[week].default > 0) {
       total.default = total.default + player.vorp[week].default
