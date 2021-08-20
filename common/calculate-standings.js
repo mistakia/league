@@ -88,7 +88,8 @@ const calculateStandings = ({
         players: optimizePlayers,
         league
       })
-      if (optimizeResult.starters.length < minStarters) {
+      // TODO - determine regular season end based on league settings
+      if (optimizeResult.starters.length < minStarters && week < 14) {
         teamStats[tid].potentialPointsPenalty[week] = true
       }
       teamStats[tid].potentialPoints[week] = optimizeResult.total
