@@ -17,6 +17,7 @@ const createConditionalPick = async function ({ tid, league }) {
     tid,
     lid: league.uid,
     otid: tid,
+    comp: 1,
     round: 4,
     year
   })

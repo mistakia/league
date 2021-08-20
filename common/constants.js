@@ -1,13 +1,12 @@
 import Season from './season'
 // import MockDate from 'mockdate'
-// eslint-disable-next-line
 // import dayjs from 'dayjs'
 import * as espn from './espn-constants'
 export { espn }
 
 export const season = new Season()
 
-// MockDate.set(dayjs.unix('1600056000').toDate())
+// MockDate.set(dayjs.unix('1612673999').toDate())
 
 const getAvailableYears = () => {
   const arr = []
@@ -1095,7 +1094,8 @@ export const jobs = {
 
   PROCESS_TRANSITION_BIDS: 44,
   RESET_PLAYER_TAGS: 45,
-  RESET_PROTECTED_DESIGNATION: 46
+  RESET_PROTECTED_DESIGNATION: 46,
+  SET_DRAFT_PICK_NUMBER: 47
 }
 
 export const jobDetails = {
