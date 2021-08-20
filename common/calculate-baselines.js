@@ -56,7 +56,7 @@ const getDefaultBaselines = ({ players, league, week }) => {
   for (const position of constants.positions) {
     const player = data
       .filter((p) => p.pos === position)
-      .splice(0, Math.round(league.nteams * 2))
+      .splice(0, Math.round(league.nteams * 1))
       .pop()
     benchBaseline[position] = player
   }
@@ -280,10 +280,8 @@ const calculateBaselines = ({ players, rosterRows, league, week }) => {
     const ba = result[position].available
     const ws = players[players.length - 1]
     const avg = players[Math.floor(players.length / 2)]
-    result[position].starter =
-      ws && ws.points[week].total > ba.points[week].total ? ws : ba
-    result[position].average =
-      avg && avg.points[week].total > ba.points[week].total ? avg : ba
+    result[position].starter = ws
+    result[position].average = avg
     result[position].defaultAvailable = defaultBaselines[position]
   }
 

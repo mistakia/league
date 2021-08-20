@@ -4,7 +4,7 @@ const calculatePrices = ({ total, cap, players, week }) => {
     rate[type] = cap / total[type]
   }
 
-  rate.default = (cap * 0.96) / total.default
+  rate.default = cap / total.default
 
   for (const player of players) {
     player.values_adj[week] = {}
