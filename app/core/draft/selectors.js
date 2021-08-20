@@ -18,7 +18,7 @@ export function getPicks(state) {
 
 export function getNextPick(state) {
   const picks = getPicks(state)
-  return picks.filter(p => p.pick).find((p) => !p.player)
+  return picks.filter((p) => p.pick).find((p) => !p.player)
 }
 
 export function getLastPick(state) {
@@ -56,7 +56,8 @@ export function isAfterDraft(state) {
   const league = getCurrentLeague(state)
   const draftEnd = getDraftEnd(state)
   const afterDraft = league.ddate && draftEnd && dayjs().isAfter(draftEnd)
-  const afterWaivers = league.ddate && draftEnd && dayjs().isAfter(draftEnd.add(1, 'day'))
+  const afterWaivers =
+    league.ddate && draftEnd && dayjs().isAfter(draftEnd.add(1, 'day'))
   return {
     afterDraft,
     afterWaivers
