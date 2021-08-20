@@ -2,7 +2,7 @@ const express = require('express')
 const dayjs = require('dayjs')
 const router = express.Router({ mergeParams: true })
 
-const { constants, Roster } = require('../../../common')
+const { constants, Roster, isDraftWindowOpen } = require('../../../common')
 const {
   getRoster,
   sendNotifications,
@@ -66,7 +66,7 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'draft has not started' })
     }
 
-    // make sure team's clock has started
+    // check if previous pick has been made
     const picks = await db('draft').where({ uid: pickId }).whereNull('player')
     const pick = picks[0]
     if (!pick) {
@@ -75,8 +75,22 @@ router.post('/?', async (req, res) => {
     if (pick.tid !== teamId) {
       return res.status(400).send({ error: 'invalid pickId' })
     }
-    const clockStart = dayjs(draftStart).add(pick.pick - 1, 'days')
-    if (constants.season.now.isBefore(clockStart)) {
+
+    const prevQuery = await db('draft').where({
+      pick: pick.pick - 1,
+      lid,
+      year: constants.season.year
+    })
+    const prevPick = prevQuery[0]
+    const isPreviousSelectionMade =
+      pick.pick === 1 || Boolean(prevPick && prevPick.player)
+
+    // if previous selection is not made make, check if teams window has opened
+    const isWindowOpen = isDraftWindowOpen({
+      start: league.ddate,
+      pickNum: pick.pick
+    })
+    if (!isPreviousSelectionMade && !isWindowOpen) {
       return res.status(400).send({ error: 'draft pick not on the clock' })
     }
 
