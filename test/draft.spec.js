@@ -15,6 +15,7 @@ const { start } = constants.season
 const expect = chai.expect
 
 const {
+  selectPlayer,
   checkRoster,
   checkLastTransaction,
   notLoggedIn,
@@ -49,10 +50,7 @@ describe('API /draft', function () {
 
     const leagueId = 1
     const teamId = 1
-    const players = await knex('player')
-      .where('start', constants.season.year)
-      .limit(1)
-    const player = players[0]
+    const player = await selectPlayer({ rookie: true })
     const res = await chai
       .request(server)
       .post('/api/leagues/1/draft')
@@ -209,15 +207,16 @@ describe('API /draft', function () {
     })
 
     it('pick not on clock', async () => {
+      const player = await selectPlayer({ rookie: true })
       MockDate.set(start.subtract('1', 'month').add('1', 'minute').toDate())
       const request = chai
         .request(server)
         .post('/api/leagues/1/draft')
-        .set('Authorization', `Bearer ${user2}`)
+        .set('Authorization', `Bearer ${user3}`)
         .send({
-          teamId: 2,
-          playerId: 'xx',
-          pickId: 2
+          teamId: 3,
+          playerId: player.player,
+          pickId: 3
         })
 
       await error(request, 'draft pick not on the clock')

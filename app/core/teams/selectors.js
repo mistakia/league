@@ -5,6 +5,7 @@ import { getApp } from '@core/app'
 import { getNextPick } from '@core/draft'
 import { getActivePoachesAgainstMyPlayers } from '@core/poaches'
 import { getCurrentLeague } from '@core/leagues'
+import { getDraftWindow } from '@common'
 
 import { Team } from './team'
 
@@ -57,7 +58,10 @@ export function getTeamEvents(state) {
   }
 
   if (nextPick) {
-    const date = dayjs.unix(league.ddate).add(nextPick.pick - 1, 'days')
+    const date = getDraftWindow({
+      start: league.ddate,
+      pickNum: nextPick.pick
+    })
     events.push({
       detail: 'Draft Pick',
       date

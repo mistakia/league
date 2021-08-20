@@ -29,7 +29,11 @@ router.get('/?', async (req, res) => {
     const leagues = await db('leagues')
       .leftJoin('seasons', function () {
         this.on('leagues.uid', '=', 'seasons.lid')
-        this.on(db.raw(`seasons.year = ${constants.season.year} or seasons.year is null`))
+        this.on(
+          db.raw(
+            `seasons.year = ${constants.season.year} or seasons.year is null`
+          )
+        )
       })
       .whereIn('leagues.uid', leagueIds)
 

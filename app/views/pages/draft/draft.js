@@ -9,9 +9,9 @@ import PageLayout from '@layouts/page'
 import DraftPlayer from '@components/draft-player'
 import PlayerAge from '@components/player-age'
 import DraftPick from '@components/draft-pick'
-import DraftSchedule from '@components/draft-schedule'
+// import DraftSchedule from '@components/draft-schedule'
 import Position from '@components/position'
-import { constants } from '@common'
+import { constants, isDraftWindowOpen, getDraftWindow } from '@common'
 
 import './draft.styl'
 
@@ -34,7 +34,7 @@ export default function DraftPage() {
   const onTheClock =
     league.ddate &&
     nextPick &&
-    dayjs().isAfter(dayjs.unix(league.ddate).add(nextPick.pick - 1, 'days'))
+    isDraftWindowOpen({ start: league.ddate, pickNum: nextPick.pick })
 
   let draftInfo
   if (league.ddate) {
@@ -46,17 +46,24 @@ export default function DraftPage() {
         </div>
       )
     } else if (nextPick) {
-      const pickStart = dayjs.unix(league.ddate).add(nextPick.pick - 1, 'days')
-      if (dayjs().isBefore(pickStart)) {
+      const draftWindow = getDraftWindow({
+        start: league.ddate,
+        pickNum: nextPick.pick
+      })
+      if (dayjs().isBefore(draftWindow)) {
         draftInfo = (
           <div className='draft__side-top-pick'>
-            Your next pick is {dayjs().to(pickStart)}
+            Your next pick is {dayjs().to(draftWindow)}
           </div>
         )
       } else {
         const pickNum = nextPick.pick % league.nteams || league.nteams
-        const end = pickStart.add(1, 'd')
+        const end = getDraftWindow({
+          start: league.ddate,
+          pickNum: nextPick.pick + 1
+        })
         const now = dayjs()
+        const isWindowClosed = now.isAfter(end)
         const hours = end.diff(now, 'hours')
         const mins = end.diff(now, 'minutes') % 60
         draftInfo = (
@@ -65,9 +72,11 @@ export default function DraftPage() {
               Pick #{nextPick.pick} ({nextPick.round}.
               {('0' + pickNum).slice(-2)})
             </div>
-            <div>
-              Time Remaining: {hours}h {mins}m
-            </div>
+            {!isWindowClosed && (
+              <div>
+                Time Remaining: {hours}h {mins}m
+              </div>
+            )}
           </div>
         )
       }
@@ -114,10 +123,11 @@ export default function DraftPage() {
     const isActive =
       draftActive &&
       !pick.player &&
-      dayjs().isAfter(dayjs.unix(league.ddate).add(pick.pick - 1, 'days'))
+      pick.pick &&
+      isDraftWindowOpen({ start: league.ddate, pickNum: pick.pick })
     pickItems.push(
       <DraftPick
-        key={pick.pick}
+        key={pick.uid}
         pick={pick}
         playerId={pick.player}
         tid={pick.tid}
@@ -300,10 +310,7 @@ export default function DraftPage() {
         </div>
       </div>
       <div className='draft__side'>
-        <div className='draft__side-top'>
-          {league.ddate && <DraftSchedule />}
-          {draftInfo}
-        </div>
+        <div className='draft__side-top'>{draftInfo}</div>
         <div className='draft__side-main'>{pickItems}</div>
       </div>
     </div>
