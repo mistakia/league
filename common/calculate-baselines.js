@@ -277,7 +277,7 @@ const calculateBaselines = ({ players, rosterRows, league, week }) => {
   const defaultBaselines = getDefaultBaselines({ players, week, league })
   for (const position of constants.positions) {
     const players = groupedStarters[position]
-    const ba = result[position].available
+    // const ba = result[position].available
     const ws = players[players.length - 1]
     const avg = players[Math.floor(players.length / 2)]
     result[position].starter = ws
