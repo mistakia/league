@@ -11,7 +11,7 @@ import PlayerAge from '@components/player-age'
 import DraftPick from '@components/draft-pick'
 // import DraftSchedule from '@components/draft-schedule'
 import Position from '@components/position'
-import { constants, isDraftWindowOpen, getDraftWindow } from '@common'
+import { constants } from '@common'
 
 import './draft.styl'
 
@@ -19,13 +19,16 @@ dayjs.extend(relativeTime)
 
 export default function DraftPage() {
   const {
+    draftWindow,
+    windowEnd,
     players,
     nextPick,
     picks,
     league,
     selectedPlayer,
     drafted,
-    vbaseline
+    vbaseline,
+    isDraftWindowOpen
   } = this.props
   const { positions } = constants
 
@@ -33,12 +36,10 @@ export default function DraftPage() {
     league.ddate && dayjs().isAfter(dayjs.unix(league.ddate).startOf('day'))
   const prevPick = picks.find((p) => p.pick === nextPick.pick - 1)
   const isPreviousSelectionMade =
-    Boolean(nextPick && nextPick.pick === 1) || Boolean(prevPick && prevPick.player)
+    Boolean(nextPick && nextPick.pick === 1) ||
+    Boolean(prevPick && prevPick.player)
   const onTheClock =
-    league.ddate &&
-    nextPick &&
-    (isDraftWindowOpen({ start: league.ddate, pickNum: nextPick.pick }) ||
-      isPreviousSelectionMade)
+    league.ddate && nextPick && (isDraftWindowOpen || isPreviousSelectionMade)
 
   let draftInfo
   if (league.ddate) {
@@ -50,10 +51,6 @@ export default function DraftPage() {
         </div>
       )
     } else if (nextPick) {
-      const draftWindow = getDraftWindow({
-        start: league.ddate,
-        pickNum: nextPick.pick
-      })
       if (dayjs().isBefore(draftWindow) && !isPreviousSelectionMade) {
         draftInfo = (
           <div className='draft__side-top-pick'>
@@ -62,14 +59,10 @@ export default function DraftPage() {
         )
       } else {
         const pickNum = nextPick.pick % league.nteams || league.nteams
-        const end = getDraftWindow({
-          start: league.ddate,
-          pickNum: nextPick.pick + 1
-        })
         const now = dayjs()
-        const isWindowClosed = now.isAfter(end)
-        const hours = end.diff(now, 'hours')
-        const mins = end.diff(now, 'minutes') % 60
+        const isWindowClosed = now.isAfter(windowEnd)
+        const hours = windowEnd.diff(now, 'hours')
+        const mins = windowEnd.diff(now, 'minutes') % 60
         draftInfo = (
           <div className='draft__side-top-pick'>
             <div className='draft__side-top-pick-title'>
@@ -131,7 +124,7 @@ export default function DraftPage() {
       draftActive &&
       !pick.player &&
       pick.pick &&
-      (isDraftWindowOpen({ start: league.ddate, pickNum: pick.pick }) ||
+      (constants.season.now.isAfter(pick.draftWindow) ||
         isPreviousSelectionMade)
     pickItems.push(
       <DraftPick
