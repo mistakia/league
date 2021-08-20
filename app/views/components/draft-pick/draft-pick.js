@@ -5,7 +5,6 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import Team from '@components/team'
 import Position from '@components/position'
-import { getDraftWindow } from '@common'
 
 import './draft-pick.styl'
 
@@ -14,11 +13,6 @@ export default class DraftPick extends React.Component {
     const { player, pick, team, league, isActive } = this.props
 
     const pickNum = pick.pick % league.nteams || league.nteams
-
-    const draftWindow = getDraftWindow({
-      start: league.ddate,
-      pickNum: pick.pick
-    })
 
     const classNames = ['draft__pick']
     if (isActive && !pick.player) {
@@ -45,7 +39,7 @@ export default class DraftPick extends React.Component {
           )}
           {!isActive && !pick.player && Boolean(pick.pick) && (
             <div className='draft__pick-window'>
-              On the clock {dayjs().to(draftWindow)}
+              On the clock {dayjs().to(pick.draftWindow)}
             </div>
           )}
         </div>

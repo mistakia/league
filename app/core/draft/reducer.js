@@ -1,8 +1,11 @@
 import { List, Record } from 'immutable'
 
+import { getDraftWindow } from '@common'
 import { draftActions } from './actions'
+import { appActions } from '@core/app'
 
 const initialState = new Record({
+  ddate: null,
   isPending: false,
   selected: null,
   drafted: new List(),
@@ -13,6 +16,13 @@ export function draftReducer(state = initialState(), { payload, type }) {
   switch (type) {
     case draftActions.DRAFT_SELECT_PLAYER:
       return state.merge({ selected: payload.player })
+
+    case appActions.AUTH_FULFILLED:
+      return state.merge({
+        ddate: payload.data.leagues.length
+          ? payload.data.leagues[0].ddate
+          : undefined
+      })
 
     case draftActions.LOAD_DRAFT:
       return state.merge({ picks: new List() })
@@ -29,6 +39,14 @@ export function draftReducer(state = initialState(), { payload, type }) {
       const drafted = payload.data.picks
         .filter((p) => p.player)
         .map((p) => p.player)
+
+      for (const pick of payload.data.picks) {
+        pick.draftWindow = getDraftWindow({
+          start: state.ddate,
+          pickNum: pick.pick
+        })
+      }
+
       return state.merge({
         isPending: false,
         picks: new List(payload.data.picks),
