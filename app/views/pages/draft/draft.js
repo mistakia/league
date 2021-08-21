@@ -19,7 +19,6 @@ dayjs.extend(relativeTime)
 
 export default function DraftPage() {
   const {
-    draftWindow,
     windowEnd,
     players,
     nextPick,
@@ -51,10 +50,10 @@ export default function DraftPage() {
         </div>
       )
     } else if (nextPick) {
-      if (dayjs().isBefore(draftWindow) && !isPreviousSelectionMade) {
+      if (dayjs().isBefore(nextPick.draftWindow) && !isPreviousSelectionMade) {
         draftInfo = (
           <div className='draft__side-top-pick'>
-            Your next pick is {dayjs().to(draftWindow)}
+            Your next pick is {dayjs().to(nextPick.draftWindow)}
           </div>
         )
       } else {
@@ -119,11 +118,11 @@ export default function DraftPage() {
   for (const pick of picksSorted) {
     const prevPick = picks.find((p) => p.pick === pick.pick - 1)
     const isPreviousSelectionMade =
-      pick.pick === 1 || (prevPick && prevPick.player)
+      pick.pick === 1 || Boolean(prevPick && prevPick.player)
     const isActive =
       draftActive &&
       !pick.player &&
-      pick.pick &&
+      Boolean(pick.pick) &&
       (constants.season.now.isAfter(pick.draftWindow) ||
         isPreviousSelectionMade)
     pickItems.push(
