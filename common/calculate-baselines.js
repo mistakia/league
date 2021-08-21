@@ -64,7 +64,7 @@ const getDefaultBaselines = ({ players, league, week }) => {
   // calculate vorp of remaing player pool
   for (const player of data) {
     player._vorp =
-      player.points[week].total - benchBaseline[player.pos].points[week].total
+      player.points[week].total - (benchBaseline[player.pos] ? benchBaseline[player.pos].points[week].total : 0)
   }
 
   // take the top X based on bench size (exclude all kickers and defense)
