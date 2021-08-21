@@ -4,8 +4,6 @@ import { Map } from 'immutable'
 import { getApp } from '@core/app'
 import { getNextPick } from '@core/draft'
 import { getActivePoachesAgainstMyPlayers } from '@core/poaches'
-import { getCurrentLeague } from '@core/leagues'
-import { getDraftWindow } from '@common'
 
 import { Team } from './team'
 
@@ -43,7 +41,6 @@ export function getCurrentTeam(state) {
 }
 
 export function getTeamEvents(state) {
-  const league = getCurrentLeague(state)
   const nextPick = getNextPick(state)
   const activePoaches = getActivePoachesAgainstMyPlayers(state)
 
@@ -58,13 +55,9 @@ export function getTeamEvents(state) {
   }
 
   if (nextPick) {
-    const date = getDraftWindow({
-      start: league.ddate,
-      pickNum: nextPick.pick
-    })
     events.push({
       detail: 'Draft Pick',
-      date
+      date: nextPick.draftWindow
     })
   }
 
