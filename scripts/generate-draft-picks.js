@@ -1,17 +1,21 @@
 // eslint-disable-next-line
 require = require('esm')(module /*, options*/)
+const argv = require('yargs').argv
+const debug = require('debug')
 
 const db = require('../db')
 const { constants } = require('../common')
 
-const run = async () => {
+const log = debug('generate-draft-picks')
+
+const run = async ({ year = constants.season.year + 1 } = {}) => {
   const leagues = await db('leagues').where('hosted', 1)
 
-  if (!constants.season.isRegularSeason) {
-    return
-  }
+  /* if (!constants.season.isRegularSeason) {
+   *   return
+   * }
+   */
 
-  const year = constants.season.year + 1
   for (const league of leagues) {
     const picks = await db('draft').where({ lid: league.uid, year }).limit(1)
     if (picks.length) continue
@@ -19,29 +23,40 @@ const run = async () => {
     const teams = await db('teams').where({ lid: league.uid })
     for (const team of teams) {
       for (let i = 1; i < 4; i++) {
-        await db.raw(
-          db('draft')
-            .insert({
-              tid: team.uid,
-              otid: team.uid,
-              lid: league.uid,
-              round: i,
-              year
-            })
-            .toString()
-            .replace('insert', 'INSERT IGNORE')
-        )
+        const rows = await db('draft').where({
+          otid: team.uid,
+          round: i,
+          lid: league.uid,
+          year
+        })
+
+        if (rows.length) {
+          log(`picks exist for team ${team.uid} in round ${i}, year ${year}`)
+          continue
+        }
+
+        await db('draft').insert({
+          tid: team.uid,
+          otid: team.uid,
+          lid: league.uid,
+          round: i,
+          year
+        })
       }
     }
+
+    log(`generated picks for ${teams.length} teams`)
   }
 }
 
 module.exports = run
 
 const main = async () => {
+  debug.enable('generate-draft-picks')
   let error
   try {
-    await run()
+    const year = argv.year
+    await run({ year })
   } catch (err) {
     error = err
     console.log(error)
