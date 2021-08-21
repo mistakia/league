@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { constants, getDraftWindow, isDraftWindowOpen } from '@common'
+import { constants, getDraftWindow } from '@common'
 import {
   draftActions,
   getSelectedDraftPlayer,
@@ -46,13 +46,6 @@ const mapStateToProps = createSelector(
   getCurrentLeague,
   getApp,
   (players, selectedPlayer, nextPick, draft, league, app) => {
-    const draftWindow = nextPick
-      ? getDraftWindow({
-          start: league.ddate,
-          pickNum: nextPick.pick
-        })
-      : null
-
     const windowEnd = nextPick
       ? getDraftWindow({
           start: league.ddate,
@@ -60,12 +53,10 @@ const mapStateToProps = createSelector(
         })
       : null
 
-    const isWindowOpen = nextPick
-      ? isDraftWindowOpen({ start: league.ddate, pickNum: nextPick.pick })
-      : false
+    const isWindowOpen =
+      nextPick && constants.season.now.isAfter(nextPick.draftWindow)
 
     return {
-      draftWindow,
       windowEnd,
       isDraftWindowOpen: isWindowOpen,
       players,
