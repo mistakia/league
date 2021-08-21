@@ -111,6 +111,11 @@ router.get('/?', async (req, res) => {
             .where('player.dcp', '<=', 1)
         })
         .orWhere('player.pos', 'DST')
+
+      // include rookies during offseason
+      if (constants.season.week === 0) {
+        query.orWhere('player.start', constants.season.year)
+      }
     }
 
     const data = await query
