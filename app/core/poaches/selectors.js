@@ -37,6 +37,9 @@ export function getPoachPlayersForCurrentLeague(state) {
   for (const poach of poaches.values()) {
     const playerId = poach.player
     const player = getPlayerById(state, { playerId })
+
+    if (player.slot !== constants.slots.PS) continue
+
     poaches = poaches.setIn([playerId, 'player'], player)
     if (poach.release.size) {
       const releases = []
