@@ -56,11 +56,9 @@ router.post('/?', async (req, res) => {
         constants.season.now.isAfter(start) &&
         constants.season.now.isBefore(end)
       ) {
-        return res
-          .status(400)
-          .send({
-            error: 'Unable to release during FA period (<96 hrs before Auction)'
-          })
+        return res.status(400).send({
+          error: 'Unable to release during FA period (<96 hrs before Auction)'
+        })
       }
     }
 
