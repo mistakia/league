@@ -164,7 +164,7 @@ export default class AuctionMainBid extends React.Component {
     } else if (!isStarted) {
       main = (
         <div>
-          Auction will begin on {start.format('dddd, MMMM Do YYYY, h:mm:ss a')}
+          Auction will begin on {start.format('dddd, MMMM D YYYY, h:mm:ss a')}
         </div>
       )
     } else if (isPaused) {
