@@ -39,7 +39,7 @@ describe('API /teams - release', function () {
   describe('post', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.subtract('1', 'month').toDate())
+      MockDate.set(start.subtract('1', 'week').toDate())
       await league(knex)
     })
 
@@ -391,7 +391,7 @@ describe('API /teams - release', function () {
   describe('errors', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.subtract('1', 'month').toDate())
+      MockDate.set(start.subtract('1', 'week').toDate())
       await league(knex)
     })
 
@@ -510,6 +510,7 @@ describe('API /teams - release', function () {
     })
 
     it('player is protected', async () => {
+      MockDate.set(start.add('1', 'week').toDate())
       const player = await selectPlayer()
       await addPlayer({
         leagueId: 1,
