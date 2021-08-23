@@ -34,7 +34,9 @@ export default function DraftPage() {
 
   const draftActive =
     league.ddate && dayjs().isAfter(dayjs.unix(league.ddate).startOf('day'))
-  const prevPick = picks.find((p) => p.pick === nextPick.pick - 1)
+  const prevPick = picks.find(
+    (p) => p.pick === (nextPick ? nextPick.pick - 1 : null)
+  )
   const isPreviousSelectionMade =
     Boolean(nextPick && nextPick.pick === 1) ||
     Boolean(prevPick && prevPick.player)
