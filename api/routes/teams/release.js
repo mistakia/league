@@ -1,4 +1,5 @@
 const express = require('express')
+const dayjs = require('dayjs')
 const router = express.Router({ mergeParams: true })
 
 const { constants } = require('../../../common')
@@ -44,6 +45,25 @@ router.post('/?', async (req, res) => {
     }
     const playerRow = playerRows[0]
 
+    // verify not during FA Auction Period
+    const league = await getLeague(leagueId)
+    if (league.adate) {
+      const adate = dayjs.unix(league.adate)
+      const start = adate.subtract('4', 'days')
+      const end = adate.startOf('day').add('1', 'day')
+
+      if (
+        constants.season.now.isAfter(start) &&
+        constants.season.now.isBefore(end)
+      ) {
+        return res
+          .status(400)
+          .send({
+            error: 'Unable to release during FA period (<96 hrs before Auction)'
+          })
+      }
+    }
+
     let data
     try {
       data = await processRelease({
@@ -65,7 +85,6 @@ router.post('/?', async (req, res) => {
     // send notification
     const message = `${team.name} (${team.abbrv}) has released ${playerRow.fname} ${playerRow.lname} (${playerRow.pos}).`
 
-    const league = await getLeague(lid)
     await sendNotifications({
       league,
       teamIds: [],
