@@ -62,6 +62,7 @@ export default class PlayersPage extends React.Component {
     if (
       prevProps.order !== this.props.order ||
       prevProps.orderBy !== this.props.orderBy ||
+      prevProps.searchValue !== this.props.searchValue ||
       !prevProps.players.equals(this.props.players)
     ) {
       this.scroll.pageLoaded = 0
@@ -154,7 +155,9 @@ export default class PlayersPage extends React.Component {
     const index = this.state.page * 25
     players
       .slice(0, index)
-      .forEach((p, idx) => rowItems.push(<PlayerRow key={idx} player={p} />))
+      .forEach((p, idx) =>
+        rowItems.push(<PlayerRow key={p.player} player={p} />)
+      )
 
     const headerSeasonPassing = (
       <div className='player__row-group'>
