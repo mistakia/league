@@ -35,6 +35,21 @@ export default function DashboardPage() {
   const { positions } = constants
 
   const notices = []
+  if (league.adate) {
+    const adate = dayjs.unix(league.adate)
+    const start = adate.subtract('4', 'days')
+    if (constants.season.now.isBefore(start)) {
+      notices.push(
+        <Alert key='fa-period' severity='warning'>
+          <AlertTitle>
+            Free Agency (FA) period begins {dayjs().to(start)}
+          </AlertTitle>
+          The player pool will lock in preparation for the auction. You will not
+          be able to release any players once the FA period begins.
+        </Alert>
+      )
+    }
+  }
 
   const groups = {}
   for (const position of positions) {
