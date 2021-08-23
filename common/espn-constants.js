@@ -61,7 +61,7 @@ export const teamId = {
   11: 'IND',
   12: 'KC',
   13: 'OAK',
-  14: 'LAR',
+  14: 'LA',
   15: 'MIA',
   16: 'MIN',
   17: 'NE',
