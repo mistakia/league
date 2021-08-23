@@ -10,13 +10,17 @@ import './draft-pick.styl'
 
 export default class DraftPick extends React.Component {
   render() {
-    const { player, pick, team, league, isActive } = this.props
+    const { player, pick, team, league, isActive, isUser } = this.props
 
     const pickNum = pick.pick % league.nteams || league.nteams
 
     const classNames = ['draft__pick']
     if (isActive && !pick.player) {
       classNames.push('active')
+    }
+
+    if (isUser) {
+      classNames.push('user')
     }
 
     return (
@@ -56,5 +60,6 @@ DraftPick.propTypes = {
   pick: PropTypes.object,
   team: ImmutablePropTypes.record,
   isActive: PropTypes.bool,
+  isUser: PropTypes.bool,
   league: PropTypes.object
 }

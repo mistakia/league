@@ -34,6 +34,8 @@ export default class DraftPlayer extends React.Component {
       classNames.push('watchlist')
     }
 
+    const value = player.getIn(['values', '0', vbaseline])
+
     return (
       <div style={style}>
         <div className={classNames.join(' ')} onClick={this.handleClick}>
@@ -46,7 +48,9 @@ export default class DraftPlayer extends React.Component {
             <Team team={player.team} />
           </div>
           <div className='player-draft__item-metric'>
-            ${Math.round(player.getIn(['values', '0', vbaseline])) || '--'}
+            {value
+              ? `$${Math.round(player.getIn(['values', '0', vbaseline]))}`
+              : null}
           </div>
         </div>
       </div>
