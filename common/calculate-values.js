@@ -23,6 +23,7 @@ const calculateValues = ({
     const { pos } = player
     player.vorp[week] = {
       default: -99999,
+      defaultAvailable: -99999,
       available: -99999,
       starter: -99999,
       bench: -99999,
@@ -34,6 +35,7 @@ const calculateValues = ({
     for (const type in baselines[pos]) {
       player.vorp[week][type] =
         player.points[week].total - baselines[pos][type].points[week].total
+
       if (player.vorp[week][type] > 0) {
         total[type] = total[type] + player.vorp[week][type]
       }

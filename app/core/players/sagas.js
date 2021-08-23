@@ -38,9 +38,10 @@ export function* loadPlayers() {
 }
 
 export function* search() {
+  const { leagueId } = yield select(getApp)
   const players = yield select(getPlayers)
   const q = players.get('search')
-  yield call(searchPlayers, { q })
+  yield call(searchPlayers, { q, leagueId })
 }
 
 export function* loadProjections() {
