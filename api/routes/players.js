@@ -115,8 +115,10 @@ router.get('/?', async (req, res) => {
       // include rookies during offseason
       if (constants.season.week === 0) {
         query.orWhere(function () {
-          this.where('player.start', constants.season.year)
-            .whereIn('player.pos', constants.positions)
+          this.where('player.start', constants.season.year).whereIn(
+            'player.pos',
+            constants.positions
+          )
         })
       }
     }

@@ -27,7 +27,8 @@ export default function DraftPage() {
     selectedPlayer,
     drafted,
     vbaseline,
-    isDraftWindowOpen
+    isDraftWindowOpen,
+    teamId
   } = this.props
   const { positions } = constants
 
@@ -51,9 +52,14 @@ export default function DraftPage() {
       )
     } else if (nextPick) {
       if (dayjs().isBefore(nextPick.draftWindow) && !isPreviousSelectionMade) {
+        const pickNum = nextPick.pick % league.nteams || league.nteams
         draftInfo = (
           <div className='draft__side-top-pick'>
-            Your next pick is {dayjs().to(nextPick.draftWindow)}
+            <div className='draft__side-top-pick-title'>
+              Next: Pick #{nextPick.pick} ({nextPick.round}.
+              {('0' + pickNum).slice(-2)})
+            </div>
+            <div>Selection window opens {dayjs().to(nextPick.draftWindow)}</div>
           </div>
         )
       } else {
@@ -119,6 +125,7 @@ export default function DraftPage() {
     const prevPick = picks.find((p) => p.pick === pick.pick - 1)
     const isPreviousSelectionMade =
       pick.pick === 1 || Boolean(prevPick && prevPick.player)
+    const isUser = pick.tid === teamId
     const isActive =
       draftActive &&
       !pick.player &&
@@ -131,6 +138,7 @@ export default function DraftPage() {
         pick={pick}
         playerId={pick.player}
         tid={pick.tid}
+        isUser={isUser}
         isActive={isActive}
       />
     )
