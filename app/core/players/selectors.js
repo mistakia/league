@@ -89,6 +89,14 @@ function descendingComparator(a, b, orderBy) {
   const keyPath = orderBy.split('.')
   const aValue = a.getIn(keyPath)
   const bValue = b.getIn(keyPath)
+  if (typeof bValue === 'undefined' || bValue === null) {
+    return -1
+  }
+
+  if (typeof aValue === 'undefined' || aValue === null) {
+    return 1
+  }
+
   if (bValue < aValue) {
     return -1
   }
