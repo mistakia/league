@@ -103,7 +103,7 @@ module.exports = async function ({
   }). This claim will be processed around ${dayjs()
     .utcOffset(-4)
     .add('48', 'hours')
-    .format('dddd, MMMM Do h:mm a')} EST.`
+    .format('dddd, MMMM D h:mm a')} EST.`
   await sendNotifications({
     league,
     teamIds: [],

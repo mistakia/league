@@ -31,7 +31,7 @@ const run = async () => {
     const message = `The poaching claim for ${claim.fname} ${claim.lname} (${
       claim.pos
     }) will be processed ${time.toNow()} around ${time.format(
-      'dddd, MMMM Do h:mm a'
+      'dddd, MMMM D h:mm a'
     )} EST.`
     const league = await getLeague(claim.lid)
     await sendNotifications({
