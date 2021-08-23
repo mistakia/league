@@ -46,7 +46,9 @@ export default class EditableLeague extends React.Component {
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <div className='settings__section-title'>League</div>
           <div className='settings__section-description'>
-            {`${(isCommish ? 'Edit ' : '')}Scoring / Starting Lineup / Roster Limits`}
+            {`${
+              isCommish ? 'Edit ' : ''
+            }Scoring / Starting Lineup / Roster Limits`}
           </div>
         </AccordionSummary>
         <AccordionDetails>
