@@ -1415,6 +1415,7 @@ CREATE TABLE `leagues` (
   `commishid` int(6) NOT NULL,
   `name` varchar(50) NOT NULL,
   `nteams` tinyint(2) NOT NULL,
+
   `sqb` tinyint(1) NOT NULL,
   `srb` tinyint(1) NOT NULL,
   `swr` tinyint(1) NOT NULL,
@@ -1425,17 +1426,21 @@ CREATE TABLE `leagues` (
   `swrte` tinyint(1) NOT NULL,
   `sdst` tinyint(1) NOT NULL,
   `sk` tinyint(1) NOT NULL,
+
   `bench` tinyint(2) NOT NULL,
   `ps` tinyint(1) NOT NULL,
   `ir` tinyint(1) NOT NULL,
+
   `mqb` tinyint(1) NOT NULL,
   `mrb` tinyint(1) NOT NULL,
   `mwr` tinyint(1) NOT NULL,
   `mte` tinyint(1) NOT NULL,
   `mdst` tinyint(1) NOT NULL,
   `mk` tinyint(1) NOT NULL,
+
   `faab` int(4) NOT NULL,
   `cap` int(4) NOT NULL,
+
   `pa` decimal(3,2) NOT NULL,
   `pc` decimal(3,2) NOT NULL,
   `py` decimal(3,2) NOT NULL,
@@ -1454,22 +1459,35 @@ CREATE TABLE `leagues` (
   `fuml` tinyint(1) NOT NULL,
   `prtd` tinyint(1) NOT NULL,
   `krtd` tinyint(1) NOT NULL,
+
   `tag2` tinyint(1) unsigned NOT NULL DEFAULT '1', -- franchise tag count
   `tag3` tinyint(1) unsigned NOT NULL DEFAULT '1', -- rookie tag count
   `tag4` tinyint(1) unsigned NOT NULL DEFAULT '2', -- transition tag count
+
   `ext1` int(4) DEFAULT 5,
   `ext2` int(4) DEFAULT 10,
   `ext3` int(4) DEFAULT 20,
   `ext4` int(4) DEFAULT 35,
+
   `ddate` int(11) DEFAULT NULL,
   `adate` int(11) DEFAULT NULL,
+  `tddate` int(11) DEFAULT NULL,
+
   `discord_webhook_url` varchar(255) DEFAULT NULL,
   `groupme_token` varchar(45) DEFAULT NULL,
   `groupme_id` varchar(26) DEFAULT NULL,
+
   `minBid` tinyint(1) DEFAULT 0,
   `hosted` tinyint(1) DEFAULT 0,
   `host` tinyint(1) DEFAULT NULL,
-  `tddate` int(11) DEFAULT NULL,
+
+  `b_qb` tinyint(2) unsigned DEFAULT NULL, -- baseline qb rank
+  `b_rb` tinyint(2) unsigned DEFAULT NULL, -- baseline rb rank
+  `b_wr` tinyint(2) unsigned DEFAULT NULL, -- baseline wr rank
+  `b_te` tinyint(2) unsigned DEFAULT NULL, -- baseline te rank
+  `b_k` tinyint(2) unsigned DEFAULT NULL, -- baseline k rank
+  `b_dst` tinyint(2) unsigned DEFAULT NULL, -- baseline dst rank
+
   UNIQUE KEY `uid` (`uid`),
   KEY `commishid` (`commishid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -1856,7 +1874,7 @@ CREATE TABLE `users` (
   `password` varchar(60) NOT NULL DEFAULT '',
   `vorpw` decimal(2,2) DEFAULT NULL,
   `volsw` decimal(2,2) DEFAULT NULL,
-  `vbaseline` varchar(9) NOT NULL DEFAULT 'starter',
+  `vbaseline` varchar(9) NOT NULL DEFAULT 'default',
   `watchlist` mediumtext,
   `lastvisit` datetime DEFAULT NULL,
   `qbb` varchar(7) DEFAULT NULL,

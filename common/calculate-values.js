@@ -51,7 +51,10 @@ const calculateValues = ({
     }
 
     // weighted average
-    player.vorp[week].default = player.vorp[week].defaultAvailable || 0
+    const isSeasonProjection = week === 0
+    player.vorp[week].default = isSeasonProjection
+      ? player.vorp[week].defaultAvailable || 0
+      : player.vorp[week].starter
 
     if (player.vorp[week].default > 0) {
       total.default = total.default + player.vorp[week].default

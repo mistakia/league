@@ -4,14 +4,15 @@ const regression = require('regression')
 const argv = require('yargs').argv
 const { Table } = require('console-table-printer')
 
-const { groupBy } = require('../common')
+const { groupBy, constants, getPlayerCountBySlot } = require('../common')
 const { getLeague } = require('../utils')
+const db = require('../db')
 const calculateVOR = require('./calculate-vor')
 
 const LATEST_YEAR = 2020
 
 const calculateHistoricalPositionalValue = async ({ league }) => {
-  const years = 10
+  const years = 3
   let year = LATEST_YEAR - years
 
   const data = {}
@@ -67,12 +68,18 @@ const calculateHistoricalPositionalValue = async ({ league }) => {
      * const values = Object.values(sums).map(v => ({ reg: vorReg.predict(v.rank)[1], ...v }))
      */
     const regValues = Object.values(sums).map((v) => [v.rank, v.value || 0.01])
-    const reg =
+    const regV =
       pos === 'QB'
         ? regression.linear(regValues)
-        : regression.exponential(regValues)
+        : regression.logarithmic(regValues)
+    const regPoints = Object.values(sums).map((v) => [v.rank, v.points || 0.01])
+    const regP =
+      pos === 'QB'
+        ? regression.linear(regPoints)
+        : regression.logarithmic(regPoints)
     const values = Object.values(sums).map((v) => ({
-      reg: reg.predict(v.rank)[1],
+      regV: regV.predict(v.rank)[1],
+      regP: regP.predict(v.rank)[1],
       ...v
     }))
 
@@ -92,6 +99,10 @@ if (!module.parent) {
 
     const league = await getLeague(lid)
     const result = await calculateHistoricalPositionalValue({ league })
+    const baselines = {}
+    for (const pos of constants.positions) {
+      baselines[pos] = {}
+    }
 
     const p = new Table()
     const getColor = (pos) => {
@@ -108,11 +119,16 @@ if (!module.parent) {
     }
 
     for (const player of result) {
+      if (player.vor > 0) {
+        baselines[player.pos] = player
+      }
+
       p.addRow(
         {
           position: `${player.pos}${player.rank}`,
           value: player.vor.toFixed(1),
-          regression: player.reg,
+          reg_value: player.regV,
+          reg_points: player.regP,
           salary: player.value.toFixed(2),
           points: player.points.toFixed(1)
         },
@@ -122,7 +138,21 @@ if (!module.parent) {
       )
     }
 
-    p.printTable()
+    if (argv.display) {
+      p.printTable()
+    } else if (argv.save) {
+      const playerCountBySlot = getPlayerCountBySlot({ league })
+      const update = {}
+      for (const pos of constants.positions) {
+        if (baselines[pos].rank) {
+          const min = playerCountBySlot[pos]
+          update[`b_${pos.toLowerCase()}`] = Math.max(baselines[pos].rank, min)
+        }
+      }
+
+      await db('leagues').update(update).where({ uid: lid })
+    }
+
     process.exit()
   }
 
