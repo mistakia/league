@@ -54,7 +54,7 @@ const run = async () => {
         league,
         teamIds: [claim.tid],
         voice: false,
-        notifyLeague: true,
+        notifyLeague: false,
         message: player
           ? `Your poaching claim for ${player.fname} ${player.lname} (${player.pos}) was unsuccessful`
           : 'Your poaching claim was unsuccessful.'
