@@ -50,7 +50,7 @@ const run = async () => {
       inserts.push(pick)
       const num = picks.length + inserts.length
       await db('draft')
-        .update({ pick: num, round: Math.ceil((num + 1) / league.nteams) })
+        .update({ pick: num, round: Math.ceil(num / league.nteams) })
         .where('uid', pick.uid)
     }
 
