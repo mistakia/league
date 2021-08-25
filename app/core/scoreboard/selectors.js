@@ -103,9 +103,10 @@ export function getStartersByMatchupId(state, { mid }) {
   for (const player of players) {
     if (!player.player) continue
     const game = getGameByTeam(state, { team: player.team, week: matchup.week })
+    const dateStr = `${game.date} ${game.time_est}`
     if (!game) continue
-    if (!games[game.date]) games[game.date] = []
-    games[game.date].push(player)
+    if (!games[dateStr]) games[dateStr] = []
+    games[dateStr].push(player)
   }
 
   return { matchup, games, teams }
@@ -187,7 +188,11 @@ export function getPlaysByMatchupId(state, { mid }) {
         league
       })
     }
-    const date = dayjs.tz(game.date, 'M/D/YYYY HH:mm', 'America/New_York')
+    const date = dayjs.tz(
+      `${game.date} ${game.time_est}`,
+      'YYYY/MM/DD HH:mm:SS',
+      'America/New_York'
+    )
     const time = dayjs.utc(
       `${date.utc().format('YYYY-MM-DD')} ${play.timeOfDay}`,
       'YYYY-MM-DD HH:mm:ss'

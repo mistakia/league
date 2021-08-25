@@ -50,7 +50,11 @@ function GameStatus({ status, player }) {
 
   if (!status.lastPlay) {
     const gameTime = dayjs
-      .tz(status.game.date, 'M/D/YYYY H:m', 'America/New_York')
+      .tz(
+        `${status.game.date} ${status.game.time_est}`,
+        'YYYY/MM/DD HH:mm:SS',
+        'America/New_York'
+      )
       .local()
       .format('ddd, h:mmA')
 

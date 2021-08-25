@@ -31,8 +31,8 @@ const mapStateToProps = createSelector(
     const dates = Object.keys(starters.games)
     const sorted = dates.sort(
       (a, b) =>
-        dayjs.tz(a, 'M/D/YYYY HH:mm', 'America/New_York').unix() -
-        dayjs.tz(b, 'M/D/YYYY HH:mm', 'America/New_York').unix()
+        dayjs.tz(a, 'YYYY/MM/DD HH:mm:SS', 'America/New_York').unix() -
+        dayjs.tz(b, 'YYYY/MM/DD HH:mm:SS', 'America/New_York').unix()
     )
     for (const date of sorted) {
       const players = starters.games[date]
@@ -53,7 +53,7 @@ const mapStateToProps = createSelector(
           )
         }
       }
-      const start = dayjs.tz(date, 'M/D/YYYY HH:mm', 'America/New_York')
+      const start = dayjs.tz(date, 'YYYY/MM/DD HH:mm:SS', 'America/New_York')
       const end = start.add(3, 'hours')
 
       const isLast = sorted[sorted.length - 1] === date

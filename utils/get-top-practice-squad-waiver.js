@@ -65,13 +65,14 @@ module.exports = async (leagueId) => {
 
   if (constants.season.isRegularSeason) {
     query
-      .select('schedule.date')
+      .select('nfl_games.date')
+      .select('nfl_games.time_est')
       .join('player', 'waivers.player', 'player.player')
       .joinRaw(
-        'left join schedule on player.cteam = schedule.v or player.cteam = schedule.h'
+        'left join nfl_games on player.cteam = nfl_games.v or player.cteam = nfl_games.h'
       )
-      .where('schedule.wk', constants.season.week)
-      .where('schedule.seas', constants.season.year)
+      .where('nfl_games.wk', constants.season.week)
+      .where('nfl_games.seas', constants.season.year)
   }
 
   if (playerIds.length) {
@@ -88,8 +89,8 @@ module.exports = async (leagueId) => {
     const now = dayjs()
     const filtered = waivers.filter((player) => {
       const gameStart = dayjs.tz(
-        player.date,
-        'M/D/YYYY H:m',
+        `${player.date} ${player.time_est}`,
+        'YYYY/MM/DD HH:mm:SS',
         'America/New_York'
       )
       return now.isBefore(gameStart)
