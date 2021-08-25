@@ -17,6 +17,7 @@ router.get('/?', async (req, res) => {
     const games = await db('nfl_games')
       .select('seas', 'wk', 'date', 'time_est', 'v', 'h')
       .where('seas', constants.season.year)
+      .where('type', 'REG')
       .orderBy('wk', 'asc')
 
     for (const team of constants.nflTeams) {
