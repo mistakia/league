@@ -754,21 +754,73 @@ CREATE TABLE `seasons` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `schedule`
+-- Table structure for table `nfl_games`
 --
 
-DROP TABLE IF EXISTS `schedule`;
+DROP TABLE IF EXISTS `nfl_games`;
 
-CREATE TABLE `schedule` (
-  `gid` int(5) NOT NULL,
+CREATE TABLE `nfl_games` (
+  `esbid` int(10) DEFAULT NULL,
+  `gsisid` int(5) DEFAULT NULL,
+  `gameid` varchar(20) DEFAULT NULL,
+  `espnid` int(15) DEFAULT NULL,
+  `ngsid` int(10) DEFAULT NULL,
+  `shieldid` varchar(36) DEFAULT NULL,
+  `detailid` varchar(36) DEFAULT NULL,
+  `pfrid` varchar(20) DEFAULT NULL,
+
   `seas` int(4) NOT NULL,
   `wk` tinyint(2) NOT NULL,
-  `day` varchar(3) NOT NULL,
-  `date` text NOT NULL,
+  `day` varchar(3) DEFAULT NULL, -- FRI, MN, SAT, SB, SN, SUN, THU, TN, TUE, WED
+  `date` varchar(10) DEFAULT NULL,
+  `time_est` varchar(8) DEFAULT NULL,
+  `time_tz_offset` tinyint(2) DEFAULT NULL,
+  `time_start` varchar(36) DEFAULT NULL,
+  `time_end` varchar(36) DEFAULT NULL,
+
   `v` varchar(3) NOT NULL,
   `h` varchar(3) NOT NULL,
-  `stad` varchar(45) NOT NULL,
-  `surf` varchar(30) NOT NULL
+
+  `type` varchar(10) NOT NULL, -- PRE, REG, POST
+  `ot` tinyint(1) DEFAULT NULL, -- overtime
+  `div` tinyint(1) DEFAULT NULL, -- division game
+
+  `home_team_id` varchar(36) DEFAULT NULL,
+  `away_team_id` varchar(36) DEFAULT NULL,
+  `home_ngsid` varchar(10) DEFAULT NULL,
+  `away_ngsid` varchar(10) DEFAULT NULL,
+
+  `home_score` int(5) DEFAULT 0,
+  `away_score` int(5) DEFAULT 0,
+
+  `stad` varchar(45) DEFAULT NULL,
+  `stadium_id` varchar(8) DEFAULT NULL,
+  `site_ngsid` int(5) DEFAULT NULL,
+
+  `clock` varchar(10) DEFAULT NULL,
+  `status` varchar(10) DEFAULT NULL,
+
+  `away_rest` int(1) DEFAULT NULL,
+  `home_rest` int(1) DEFAULT NULL,
+  `home_moneyline` int(5) DEFAULT NULL,
+  `away_moneyline` int(5) DEFAULT NULL,
+  `spread_line` int(3) DEFAULT NULL,
+  `total_line` int(3) DEFAULT NULL,
+
+  `roof` varchar(30) DEFAULT NULL,
+  `surf` varchar(30) DEFAULT NULL,
+
+  `temp` int(3) DEFAULT NULL,
+  `wind` int(3) DEFAULT NULL,
+
+  `away_coach` varchar(36) DEFAULT NULL,
+  `home_coach` varchar(36) DEFAULT NULL,
+  `off_play_caller` varchar(36) DEFAULT NULL,
+
+  `referee` varchar(36) DEFAULT NULL,
+
+  UNIQUE KEY `game` (`v`, `h`, `wk`, `seas`, `type`),
+  UNIQUE KEY `esbid` (`esbid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -1331,12 +1383,6 @@ ALTER TABLE `sack`
 ALTER TABLE `safety`
   ADD UNIQUE KEY `pid` (`pid`),
   ADD KEY `saf` (`saf`);
-
---
--- Indexes for table `schedule`
---
-ALTER TABLE `schedule`
-  ADD UNIQUE KEY `gid` (`gid`);
 
 --
 -- Indexes for table `snap`
@@ -2000,39 +2046,6 @@ CREATE TABLE `changelog` (
   `new` text DEFAULT NULL,
   `timestamp` int(11) NOT NULL,
   PRIMARY KEY (`uid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `changelog`
---
-
-DROP TABLE IF EXISTS `nflSchedule`;
-
-CREATE TABLE `nflSchedule` (
-  `gid` int(5) NOT NULL,
-  `esbid` int(10) NOT NULL,
-  `gsisid` int(5) NOT NULL,
-  `season` int(4) NOT NULL,
-  `seasonType` varchar(10) NOT NULL,
-  `week` int(2) NOT NULL,
-  `gameShieldId` varchar(36) NOT NULL,
-  `gameDetailId` varchar(36) DEFAULT NULL,
-  `homeTeamId` varchar(36) NOT NULL,
-  `homeTeamAbbr` varchar(36) NOT NULL,
-  `homeScore` int(5) DEFAULT 0,
-  `awayTeamId` varchar(36) NOT NULL,
-  `awayTeamAbbr` varchar(36) NOT NULL,
-  `awayScore` int(5) DEFAULT 0,
-  `gameClock` varchar(10) DEFAULT NULL,
-  `gameStatus` varchar(10) DEFAULT NULL,
-  `possessionTeamId` varchar(36) DEFAULT NULL,
-  `possessionTeamAbbr` varchar(36) DEFAULT NULL,
-  `gameDate` varchar(10) NOT NULL,
-  `gameTimeEastern` varchar(8) NOT NULL,
-  UNIQUE KEY `gid` (`gid`),
-  UNIQUE KEY `esbid` (`esbid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------

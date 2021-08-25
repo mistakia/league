@@ -13,10 +13,10 @@ module.exports = async (player) => {
   const players = await db('player')
     .where({ player })
     .joinRaw(
-      'left join schedule on player.cteam = schedule.v or player.cteam = schedule.h'
+      'left join nfl_games on player.cteam = nfl_games.v or player.cteam = nfl_games.h'
     )
-    .where('schedule.wk', constants.season.week)
-    .where('schedule.seas', constants.season.year)
+    .where('nfl_games.wk', constants.season.week)
+    .where('nfl_games.seas', constants.season.year)
     .limit(1)
 
   const playerRow = players[0]
@@ -25,7 +25,11 @@ module.exports = async (player) => {
     return false
   }
 
-  const gameStart = dayjs.tz(playerRow.date, 'M/D/YYYY H:m', 'America/New_York')
+  const gameStart = dayjs.tz(
+    `${playerRow.date} ${playerRow.time_est}`,
+    'YYYY/MM/DD HH:mm:SS',
+    'America/New_York'
+  )
   if (dayjs().isAfter(gameStart)) {
     return true
   }

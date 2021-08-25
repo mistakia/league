@@ -11,10 +11,7 @@ export function getPlaysForPlayer(state, { player, week }) {
 
   if (player.pos === 'DST') {
     return formatted.filter((p) => {
-      if (
-        fixTeam(p.homeTeamAbbr) !== player.team &&
-        fixTeam(p.awayTeamAbbr) !== player.team
-      ) {
+      if (fixTeam(p.h) !== player.team && fixTeam(p.v) !== player.team) {
         return false
       }
 

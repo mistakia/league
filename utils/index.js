@@ -64,14 +64,14 @@ const fields = [
   'nflPlay.playTypeNFL',
   'nflPlay.updated',
 
-  'nflSchedule.homeTeamAbbr',
-  'nflSchedule.awayTeamAbbr'
+  'nfl_games.h',
+  'nfl_games.v'
 ]
 
 const getPlayByPlayQuery = (db) =>
   db('nflPlay')
     .select(fields)
-    .join('nflSchedule', 'nflPlay.esbid', '=', 'nflSchedule.esbid')
+    .join('nfl_games', 'nflPlay.esbid', '=', 'nfl_games.esbid')
 
 module.exports = {
   readCSV: require('./read-csv'),

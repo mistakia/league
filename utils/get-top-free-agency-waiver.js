@@ -24,17 +24,18 @@ module.exports = async (leagueId) => {
       'waivers.player',
       'waivers.tid',
       'waivers.userid',
-      'schedule.date'
+      'nfl_games.date',
+      'nfl_games.time_est'
     )
     .join('teams', 'waivers.tid', 'teams.uid')
     .join('player', 'waivers.player', 'player.player')
     .joinRaw(
-      `left join schedule on (player.cteam = schedule.v or player.cteam = schedule.h) and (schedule.wk = ${constants.season.week} or schedule.wk is null) and (schedule.seas = ${constants.season.year} or schedule.seas is null)`
+      `left join nfl_games on (player.cteam = nfl_games.v or player.cteam = nfl_games.h) and (nfl_games.wk = ${constants.season.week} or nfl_games.wk is null) and (nfl_games.seas = ${constants.season.year} or nfl_games.seas is null)`
     )
     .where('waivers.lid', leagueId)
     .whereNull('processed')
     .whereNull('cancelled')
-    .where('type', constants.waivers.FREE_AGENCY)
+    .where('waivers.type', constants.waivers.FREE_AGENCY)
     .orderBy([
       {
         column: 'waivers.bid',
@@ -63,7 +64,11 @@ module.exports = async (leagueId) => {
   const now = dayjs()
   const filtered = waivers.filter((player) => {
     if (!player.date) return true
-    const gameStart = dayjs.tz(player.date, 'M/D/YYYY H:m', 'America/New_York')
+    const gameStart = dayjs.tz(
+      `${player.date} ${player.time_est}`,
+      'YYYY/MM/DD HH:mm:SS',
+      'America/New_York'
+    )
     return now.isBefore(gameStart)
   })
 

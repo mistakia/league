@@ -14,7 +14,8 @@ router.get('/?', async (req, res) => {
     res.set('Surrogate-Control', null)
 
     const teams = {}
-    const games = await db('schedule')
+    const games = await db('nfl_games')
+      .select('seas', 'wk', 'date', 'time_est', 'v', 'h')
       .where('seas', constants.season.year)
       .orderBy('wk', 'asc')
 

@@ -76,11 +76,11 @@ const run = async () => {
       'nflPlayStat.*',
       'nflPlay.drivePlayCount',
       'nflPlay.playTypeNFL',
-      'nflSchedule.homeTeamAbbr',
-      'nflSchedule.awayTeamAbbr',
+      'nfl_games.h',
+      'nfl_games.v',
       'nflPlay.possessionTeam'
     )
-    .join('nflSchedule', 'nflPlayStat.esbid', '=', 'nflSchedule.esbid')
+    .join('nfl_games', 'nflPlayStat.esbid', '=', 'nfl_games.esbid')
     .join('nflPlay', function () {
       this.on('nflPlay.esbid', '=', 'nflPlayStat.esbid')
       this.andOn('nflPlay.playId', '=', 'nflPlayStat.playId')
