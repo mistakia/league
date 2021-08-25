@@ -17,6 +17,7 @@ module.exports = async (player) => {
     )
     .where('nfl_games.wk', constants.season.week)
     .where('nfl_games.seas', constants.season.year)
+    .where('nfl_games.type', 'REG')
     .limit(1)
 
   const playerRow = players[0]

@@ -30,7 +30,7 @@ module.exports = async (leagueId) => {
     .join('teams', 'waivers.tid', 'teams.uid')
     .join('player', 'waivers.player', 'player.player')
     .joinRaw(
-      `left join nfl_games on (player.cteam = nfl_games.v or player.cteam = nfl_games.h) and (nfl_games.wk = ${constants.season.week} or nfl_games.wk is null) and (nfl_games.seas = ${constants.season.year} or nfl_games.seas is null)`
+      `left join nfl_games on (player.cteam = nfl_games.v or player.cteam = nfl_games.h) and (nfl_games.wk = ${constants.season.week} or nfl_games.wk is null) and (nfl_games.seas = ${constants.season.year} or nfl_games.seas is null) and (nfl_games.type = 'REG' or nfl_games.type is null)`
     )
     .where('waivers.lid', leagueId)
     .whereNull('processed')

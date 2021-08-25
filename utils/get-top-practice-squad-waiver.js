@@ -73,6 +73,7 @@ module.exports = async (leagueId) => {
       )
       .where('nfl_games.wk', constants.season.week)
       .where('nfl_games.seas', constants.season.year)
+      .where('nfl_games.type', 'REG')
   }
 
   if (playerIds.length) {
