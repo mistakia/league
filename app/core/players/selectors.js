@@ -353,7 +353,11 @@ export function isPlayerLocked(state, { player, playerId }) {
     return false
   }
 
-  const gameStart = dayjs.tz(game.date, 'M/D/YYYY H:m', 'America/New_York')
+  const gameStart = dayjs.tz(
+    `${game.date} ${game.time_est}`,
+    'YYYY/MM/DD HH:mm:SS',
+    'America/New_York'
+  )
   if (dayjs().isAfter(gameStart)) {
     return true
   }

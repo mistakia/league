@@ -57,7 +57,7 @@ export const scoring = {
   PPR: 3
 }
 export const years = getAvailableYears()
-export const byeWeeks = [4, 5, 6, 7, 8, 9, 10, 11, 13]
+export const byeWeeks = [6, 7, 8, 9, 10, 11, 12, 13, 14]
 export const weeks = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
 export const fantasyWeeks = [
   1,
@@ -1061,10 +1061,12 @@ export const jobs = {
 
   PLAYERS_ARMCHAIR: 19,
 
-  NFL_GAMES_NGS: 20,
+  NFL_GAMES: 20,
+  NFL_GAME_IDS: 23,
+
   NFL_PLAYS_NGS: 21,
   NFL_PLAYS_NFL: 22,
-  NFL_GAMES_NFL: 23,
+
   NFL_PLAYERS: 24,
   NFL_PLAYER_IDS: 25,
 
