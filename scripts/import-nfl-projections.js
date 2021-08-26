@@ -140,7 +140,8 @@ const run = async () => {
   if (argv.season) {
     await runOne()
   } else {
-    for (let week = constants.season.week; week < 17; week++) {
+    let week = Math.max(1, constants.season.week)
+    for (; week <= constants.season.finalWeek; week++) {
       await runOne(week)
     }
   }
