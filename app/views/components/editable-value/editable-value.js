@@ -59,7 +59,6 @@ export default class EditableValue extends React.Component {
             <MenuItem value='default'>Default</MenuItem>
             <MenuItem value='available'>Best Available</MenuItem>
             <MenuItem value='starter'>Worst Starter</MenuItem>
-            <MenuItem value='average'>Average Starter</MenuItem>
             <MenuItem value='hybrid'>Hybrid</MenuItem>
             <MenuItem value='manual'>Manual</MenuItem>
           </Select>

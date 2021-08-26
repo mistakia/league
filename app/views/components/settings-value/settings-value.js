@@ -83,21 +83,6 @@ export default class SettingsValue extends React.Component {
         )
         break
 
-      case 'average':
-        baselineDescription = (
-          <>
-            <p>
-              <strong>Average Starter: </strong> The average player at each
-              position on a starting lineup
-            </p>
-            <p>
-              Useful for comparing starters across positions (i.e. comparing a
-              RB to a WR or QB)
-            </p>
-          </>
-        )
-        break
-
       case 'hybrid':
         baselineDescription = (
           <p>
