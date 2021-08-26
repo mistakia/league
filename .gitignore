@@ -15,3 +15,6 @@ config.development.js
 key.pem
 cert.pem
 dist/*.worker.js*
+*.tar.qz
+drive-credentials.json
+drive-token.json
