@@ -3,7 +3,7 @@ import * as constants from './constants'
 import getEligibleSlots from './get-eligible-slots'
 import getPlayerCountBySlot from './get-player-count-by-slot'
 
-const types = ['available', 'starter', 'average']
+const types = ['available', 'starter']
 
 const countOccurrences = (arr, val) =>
   arr.reduce((a, v) => (v === val ? a + 1 : a), 0)
@@ -201,10 +201,8 @@ const calculateBaselines = ({ players, rosterRows, league, week }) => {
   for (const position of constants.positions) {
     const players = groupedStarters[position]
     const ws = players[players.length - 1]
-    const avg = players[Math.floor(players.length / 2)]
     const historicBaseline = league[`b_${position.toLowerCase()}`]
     result[position].starter = ws
-    result[position].average = avg
     if (isSeasonProjections && historicBaseline) {
       result[position].defaultAvailable = grouped[position][historicBaseline]
     } else {

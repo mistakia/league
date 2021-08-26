@@ -143,7 +143,6 @@ export function calculatePlayerValues(payload) {
     default: 0,
     available: 0,
     starter: 0,
-    average: 0,
     hybrid: 0,
     manual: 0
   }
@@ -152,7 +151,6 @@ export function calculatePlayerValues(payload) {
     default: 0,
     available: 0,
     starter: 0,
-    average: 0,
     hybrid: 0,
     manual: 0
   }
@@ -161,7 +159,6 @@ export function calculatePlayerValues(payload) {
     default: 0,
     available: 0,
     starter: 0,
-    average: 0,
     hybrid: 0,
     manual: 0
   }
