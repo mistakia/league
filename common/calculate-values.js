@@ -9,7 +9,6 @@ const calculateValues = ({
     default: 0,
     available: 0,
     starter: 0,
-    average: 0,
     hybrid: 0,
     bench: 0,
     manual: 0
@@ -27,7 +26,6 @@ const calculateValues = ({
       available: -99999,
       starter: -99999,
       bench: -99999,
-      average: -99999,
       hybrid: -99999,
       manual: -99999
     }
