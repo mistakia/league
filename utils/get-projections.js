@@ -3,6 +3,7 @@ const db = require('../db')
 
 module.exports = async function () {
   const players = await db('player')
+    .select('player')
     .whereIn('pos', constants.positions)
     .whereNot({ cteam: 'INA' })
   const playerIds = players.map((p) => p.player)
