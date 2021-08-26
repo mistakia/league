@@ -57,6 +57,7 @@ router.get('/?', async (req, res) => {
       'player.cteam',
       'player.gsisid',
       'player.gsispid',
+      'player.espn_id',
       'player.status',
       'player.injury_status',
       'practice.status as gamestatus'

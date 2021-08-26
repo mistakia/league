@@ -232,17 +232,21 @@ export default function DashboardPage() {
             />
           </Grid>
           <Grid item xs={12}>
-            <DashboardPlayersTable
-              items={reserveIRItems}
-              title='Reserve/IR'
-              limit={league.ir}
-            />
+            {Boolean(reserveIRItems.length) && (
+              <DashboardPlayersTable
+                items={reserveIRItems}
+                title='Reserve/IR'
+                limit={league.ir}
+              />
+            )}
           </Grid>
           <Grid item xs={12}>
-            <DashboardPlayersTable
-              items={reserveCOVItems}
-              title='Reserve/COVID-19'
-            />
+            {Boolean(reserveCOVItems.length) && (
+              <DashboardPlayersTable
+                items={reserveCOVItems}
+                title='Reserve/COVID-19'
+              />
+            )}
           </Grid>
           <Grid item xs={12}>
             <div className='section'>

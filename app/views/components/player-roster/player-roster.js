@@ -77,6 +77,12 @@ class PlayerRoster extends Player {
       <div className={classNames.join(' ')}>
         {reorder && <DragHandle />}
         <div className='player__item-name table__cell sticky__column'>
+          <PlayerName
+            playerId={player.player}
+            waiverId={waiverId}
+            hideActions={isPoach}
+            headshot
+          />
           <div className='player__item-menu'>
             {Boolean(player.player && isHosted) && (
               <IconButton
@@ -87,11 +93,6 @@ class PlayerRoster extends Player {
               />
             )}
           </div>
-          <PlayerName
-            playerId={player.player}
-            waiverId={waiverId}
-            hideActions={isPoach}
-          />
         </div>
         {isClaim && (
           <div className='player__item-name table__cell'>

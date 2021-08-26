@@ -20,7 +20,7 @@ export default class TransactionRow extends React.Component {
           </div>
           <div className='transaction__value'>${transaction.value}</div>
           <div className='transaction__player'>
-            <PlayerName playerId={transaction.player} />
+            <PlayerName playerId={transaction.player} headshot />
           </div>
           <div className='transaction__team'>
             <TeamName tid={transaction.tid} />
