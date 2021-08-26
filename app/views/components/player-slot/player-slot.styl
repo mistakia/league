@@ -3,7 +3,9 @@
   padding 8px
   display flex
   align-items center
-  border-bottom 1px solid $borderColor
+
+  &:not(:last-child)
+    border-bottom 1px solid $borderColor
 
   .player__name-expanded
     margin-bottom 8px

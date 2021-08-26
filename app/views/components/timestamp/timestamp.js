@@ -1,8 +1,11 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import dayjs from 'dayjs'
+import localizedFormat from 'dayjs/plugin/localizedFormat'
 
 import './timestamp.styl'
+
+dayjs.extend(localizedFormat)
 
 export default class Timestamp extends React.Component {
   render = () => {
