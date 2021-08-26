@@ -1,4 +1,4 @@
-## General / Analysis
+### General / Analysis
 
 | Name                                        | Description                                    |
 | ------------------------------------------- | ---------------------------------------------- |
@@ -6,14 +6,14 @@
 | [PFF](https://www.pff.com/fantasy)          | Player grades, staff rankings, advanced stats  |
 | [KeepTradeCut](https://keeptradecut.com/)   | Up-to-date crowdsourced dynasty rankings       |
 
-## Forums & Discussions
+### Forums & Discussions
 
 | Name                                                          | Description                                                |
 | ------------------------------------------------------------- | ---------------------------------------------------------- |
 | [r/fantasyfootball](https://www.reddit.com/r/fantasyfootball) | General fantasy discussion with a focus on redraft formats |
 | [r/dynastyff](https://www.reddit.com/r/dynastyff)             | Fantasy discussion with a focus toward dynasty formats     |
 
-## Stats & Research
+### Stats & Research
 
 | Name                                                              | Description                               |
 | ----------------------------------------------------------------- | ----------------------------------------- |
@@ -25,22 +25,22 @@
 | [Stathead](https://stathead.com/football/)                        | Player split and season stat tools        |
 | [Next Gen Stats](https://nextgenstats.nfl.com/)                   | Advanced Stats using player tracking data |
 
-## Premium Content
+### Premium Content
 
 | Name                                                              |
 | ----------------------------------------------------------------- |
 | [RotoViz](http://www.rotoviz.com/)                                |
-| [FantasyOmatic](https://fantasyomatic.com/)                       |
 | [Rotowire](https://www.rotowire.com/football/)                    |
-| [Fantasy Sharks](https://www.fantasysharks.com/)                  |
 | [The Fantasy Footballers](https://www.thefantasyfootballers.com/) |
 | [Fantasypoints.com](https://www.fantasypoints.com/)               |
+| [Dynasty Nerds](https://www.dynastynerds.com/)                    |
 | [Numberfire](https://www.numberfire.com/)                         |
 | [Reception Perception](https://receptionperception.com/)          |
 | [Dynasty League Football](https://dynastyleaguefootball.com/)     |
-| [Dynasty Nerds](https://www.dynastynerds.com/)                    |
+| [Fantasy Sharks](https://www.fantasysharks.com/)                  |
+| [FantasyOmatic](https://fantasyomatic.com/)                       |
 
-## Projections
+### Projections
 
 | Name                                                                              |
 | --------------------------------------------------------------------------------- |
@@ -48,7 +48,7 @@
 | [FantasyPros - Aggregated](https://www.fantasypros.com/nfl/projections/qb.php)    |
 | [NFL](https://fantasy.nfl.com/research/projections)                               |
 
-## Rankings & ADP
+### Rankings & ADP
 
 | Name                                                                                                                                         |
 | -------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -61,7 +61,7 @@
 | [Fantasydata - ADP Superflex](https://fantasydata.com/nfl/fantasy-football-2qb-adp-rankings)                                                 |
 | [Fantasy Football Calculator](https://fantasyfootballcalculator.com/)                                                                        |
 
-## Trade Tools
+### Trade Tools
 
 | Name                                                                                               |
 | -------------------------------------------------------------------------------------------------- |
@@ -71,26 +71,26 @@
 | [DynastyProcess.com Trade Calculator](https://apps.dynastyprocess.com/calculator/)                 |
 | [Dynasty Trade Calculator](https://dynastytradecalculator.com/)                                    |
 
-## Misc Tools
+### Misc Tools
 
 | Name                                                                     |
 | ------------------------------------------------------------------------ |
 | [Dynasty League Football Tools](https://dynastyleaguefootball.com/tools) |
 
-## Analytics / Research
+### Analytics / Research
 
 | Name                                                                    |
 | ----------------------------------------------------------------------- |
 | [Harvard Sports Analysis Collective](http://harvardsportsanalysis.org/) |
 | [Fantasy Football Analytics](https://fantasyfootballanalytics.net/)     |
 
-## NFL Draft
+### NFL Draft
 
 | Name                                      | Description                                                 |
 | ----------------------------------------- | ----------------------------------------------------------- |
 | [Tankathon](http://www.tankathon.com/nfl) | Projected NFL Draft Order, Mock Drafts, and Player Rankings |
 
-## Data
+### Data
 
 | Name                                                    | Description                                 |
 | ------------------------------------------------------- | ------------------------------------------- |
