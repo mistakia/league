@@ -9,6 +9,7 @@ import { constants } from '@common'
 import PlayerLabel from '@components/player-label'
 import PlayerTag from '@components/player-tag'
 import PlayerStatus from '@components/player-status'
+import PlayerHeadshot from '@components/player-headshot'
 
 import './player-name.styl'
 
@@ -18,11 +19,16 @@ export default class PlayerName extends React.Component {
   }
 
   render = () => {
-    const { player, isOnCutlist } = this.props
+    const { player, isOnCutlist, headshot } = this.props
 
     return (
       <>
         <div className='player__name cursor' onClick={this.handleClick}>
+          {Boolean(headshot) && (
+            <div className='player__name-headshot'>
+              <PlayerHeadshot player={player} />
+            </div>
+          )}
           <div className='player__name-position'>
             <Position pos={player.pos} />
           </div>
@@ -51,6 +57,7 @@ export default class PlayerName extends React.Component {
 
 PlayerName.propTypes = {
   player: ImmutablePropTypes.record,
+  headshot: PropTypes.bool,
   select: PropTypes.func,
   isOnCutlist: PropTypes.bool
 }
