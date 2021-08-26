@@ -80,6 +80,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0",
     "eslint-plugin-react": "^7.23.2",
+    "googleapis": "^84.0.0",
     "highcharts": "^8.2.0",
     "highcharts-react-official": "^3.0.0",
     "html-webpack-inline-source-plugin": "^1.0.0-beta.2",
