@@ -48,7 +48,7 @@ export default function DashboardPage() {
           be able to release any players once the FA period begins.
           <br />
           <br />
-          {start.local().format('[Starts] l [at] LT')}
+          {start.local().format('[Starts] l [at] LT z')}
         </Alert>
       )
     }

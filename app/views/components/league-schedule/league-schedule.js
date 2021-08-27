@@ -2,11 +2,13 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import advancedFormat from 'dayjs/plugin/advancedFormat'
 import Popover from '@material-ui/core/Popover'
 
 import './league-schedule.styl'
 
 dayjs.extend(relativeTime)
+dayjs.extend(advancedFormat)
 
 export default class LeagueSchedule extends React.Component {
   constructor(props) {
@@ -42,7 +44,7 @@ export default class LeagueSchedule extends React.Component {
             <strong>{event.detail}</strong> {dayjs().to(event.date)}
           </div>
           <div className='league__schedule-item-date'>
-            {event.date.local().format('l LT')}
+            {event.date.local().format('l LT z')}
           </div>
         </div>
       )
