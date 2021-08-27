@@ -1,16 +1,20 @@
 const dayjs = require('dayjs')
 
 const db = require('../db')
-const { constants } = require('../common')
+const { constants, getDraftDates } = require('../common')
 const getLeague = require('./get-league')
 
 module.exports = async (leagueId) => {
   const league = await getLeague(leagueId)
-  const days = league.nteams * 3 + 1 // total picks + waiver day
-  if (
-    !league.ddate ||
-    dayjs().isBefore(dayjs.unix(league.ddate).add(days, 'day'))
-  ) {
+  const picks = await db('draft').where({
+    year: constants.season.year,
+    lid: leagueId
+  })
+  const draftDates = getDraftDates({
+    start: league.ddate,
+    picks: picks.length
+  })
+  if (!league.ddate || dayjs().isBefore(draftDates.waiverEnd)) {
     return undefined
   }
 

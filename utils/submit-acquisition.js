@@ -2,7 +2,7 @@ const dayjs = require('dayjs')
 
 const db = require('../db')
 
-const { constants, Roster } = require('../common')
+const { constants, Roster, getDraftDates } = require('../common')
 const sendNotifications = require('./send-notifications')
 const getRoster = require('./get-roster')
 const isPlayerOnWaivers = require('./is-player-on-waivers')
@@ -82,11 +82,16 @@ module.exports = async function ({
     }
 
     // verify rookie draft is complete
-    const days = league.nteams * 3 + 1 // total picks + waiver day
-    if (
-      !league.ddate ||
-      dayjs().isBefore(dayjs.unix(league.ddate).add(days, 'day'))
-    ) {
+    const picks = await db('draft').where({
+      year: constants.season.year,
+      lid: leagueId
+    })
+    const draftDates = getDraftDates({
+      start: league.ddate,
+      picks: picks.length
+    })
+
+    if (!league.ddate || dayjs().isBefore(draftDates.waiverEnd)) {
       throw new Error('rookie free agency not open')
     }
   }

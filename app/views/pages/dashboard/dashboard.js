@@ -46,6 +46,9 @@ export default function DashboardPage() {
           </AlertTitle>
           The player pool will lock in preparation for the auction. You will not
           be able to release any players once the FA period begins.
+          <br />
+          <br />
+          {start.local().format('[Starts] l [at] LT')}
         </Alert>
       )
     }
