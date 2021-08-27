@@ -8,13 +8,15 @@
 
 .league__schedule-item
   padding 8px 16px
-  border-bottom 1px solid $borderColor
   font-family monospace
   font-size 11px
   display flex
   align-items left
   min-width 275px
   flex-direction column
+
+  :not(:last-child)
+    border-bottom 1px solid $borderColor
 
 .league__schedule-item-date
   flex 1

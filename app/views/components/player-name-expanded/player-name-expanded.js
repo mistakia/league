@@ -10,6 +10,7 @@ import { constants, nth } from '@common'
 import IconButton from '@components/icon-button'
 import PlayerLabel from '@components/player-label'
 import PlayerTag from '@components/player-tag'
+import PlayerHeadshot from '@components/player-headshot'
 
 import './player-name-expanded.styl'
 
@@ -95,6 +96,9 @@ class PlayerNameExpanded extends Player {
             />
           </div>
         )}
+        <div className='player__name-headshot'>
+          <PlayerHeadshot player={player} />
+        </div>
         <div className='player__name-expanded-main'>
           <div
             className='player__name-expanded-row player__name-expanded-name cursor'

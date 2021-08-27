@@ -1,29 +1,27 @@
 import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
+import PropTypes from 'prop-types'
 
-export default function PlayerHeadshot({ player }) {
-  const height = 32
-  const width = 43
-  const src = `https://a.espncdn.com/combiner/i?img=/i/headshots/nfl/players/full/${player.espn_id}.png&w=96&h=70&cb=1`
-  const nomug = `https://a.espncdn.com/combiner/i?img=/games/lm-static/ffl/images/nomug.png&w=${width}&h=${height}&cb=1`
+import Avatar from '@material-ui/core/Avatar'
 
-  const onError = (ev) => {
-    if (ev.target.src === nomug) {
-      ev.target.style.display = 'none'
-      return
-    }
-    ev.target.src = nomug
-  }
+import './player-headshot.styl'
+
+export default function PlayerHeadshot({ player, width = 48 }) {
+  const height = Math.round((width * 70) / 96)
+  const src = `https://a.espncdn.com/combiner/i?img=/i/headshots/nfl/players/full/${
+    player.espn_id
+  }.png&w=${width * 2}&h=${height * 2}&cb=1`
+
   return (
-    <img
-      width={`${width}px`}
-      height={`${height}px`}
-      src={player.espn_id ? src : nomug}
-      onError={onError}
+    <Avatar
+      src={src}
+      className='player__headshot'
+      style={{ width, height: width }}
     />
   )
 }
 
 PlayerHeadshot.propTypes = {
-  player: ImmutablePropTypes.record
+  player: ImmutablePropTypes.record,
+  width: PropTypes.number
 }

@@ -24,14 +24,14 @@ export default class PlayerName extends React.Component {
     return (
       <>
         <div className='player__name cursor' onClick={this.handleClick}>
-          {Boolean(headshot) && (
-            <div className='player__name-headshot'>
-              <PlayerHeadshot player={player} />
-            </div>
-          )}
           <div className='player__name-position'>
             <Position pos={player.pos} />
           </div>
+          {Boolean(headshot) && (
+            <div className='player__name-headshot'>
+              <PlayerHeadshot player={player} width={32} />
+            </div>
+          )}
           <div className='player__name-main'>
             <span>{player.pname}</span>
             {constants.season.year === player.draft_year && (

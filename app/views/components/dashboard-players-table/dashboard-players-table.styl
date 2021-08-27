@@ -1,6 +1,11 @@
 $color = lighten(yellow, 92%)
 $cutlistColor = lighten(red, 92%)
 
+.dashboard__players-table
+  .table__row:not(.table__row-summary)
+    .table__cell.metric
+      height 35px
+
 .section.waiver
   background $color
   .table__row
