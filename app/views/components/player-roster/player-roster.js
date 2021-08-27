@@ -1,12 +1,13 @@
 import React from 'react'
 import { List } from 'immutable'
+import DragIndicatorIcon from '@material-ui/icons/DragIndicator'
+import { sortableHandle } from 'react-sortable-hoc'
 
 import { constants, getExtensionAmount } from '@common'
 import PlayerName from '@components/player-name'
 import IconButton from '@components/icon-button'
 import { Player, connect } from '@components/player'
-import { sortableHandle } from 'react-sortable-hoc'
-import DragIndicatorIcon from '@material-ui/icons/DragIndicator'
+import PlayerHeadshotGroup from '@components/player-headshot-group'
 
 const DragHandle = sortableHandle(() => (
   <div className='player__item-action reorder table__cell'>
@@ -96,16 +97,9 @@ class PlayerRoster extends Player {
         </div>
         {isClaim && (
           <div className='player__item-name table__cell'>
-            {Boolean(claim.release.size) &&
-              claim.release
-                .toArray()
-                .map((player, index) => (
-                  <PlayerName
-                    key={index}
-                    playerId={player.player}
-                    hideActions={isClaim}
-                  />
-                ))}
+            {Boolean(claim.release.size) && (
+              <PlayerHeadshotGroup players={claim.release} />
+            )}
           </div>
         )}
         {isWaiver && (
