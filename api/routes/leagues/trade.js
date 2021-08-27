@@ -6,7 +6,8 @@ const {
   getRoster,
   getLeague,
   sendNotifications,
-  verifyRestrictedFreeAgency
+  verifyRestrictedFreeAgency,
+  isPlayerLocked
 } = require('../../../utils')
 
 const getTrade = async (req, res) => {
@@ -158,24 +159,6 @@ router.post(
         .join('player', 'transactions.player', 'player.player')
         .whereIn('player.player', allPlayers)
 
-      // clear any existing poaching claims
-      const activePoaches = await db('poaches')
-        .where('lid', leagueId)
-        .whereNull('processed')
-        .whereIn('player', allPlayers)
-
-      if (activePoaches.length) {
-        await db('poaches')
-          .update('processed', Math.round(Date.now() / 1000))
-          .update('reason', 'Player traded')
-          .update('succ', 0)
-          .where('lid', leagueId)
-          .whereIn(
-            'player',
-            activePoaches.map((p) => p.player)
-          )
-      }
-
       // validate accepting team roster
       const acceptingTeamRosterRow = await getRoster({ tid: trade.tid })
       const acceptingTeamRoster = new Roster({
@@ -188,11 +171,35 @@ router.post(
             .status(400)
             .send({ error: 'release player not on accepting team' })
         }
+
+        // check if accepting team release player is a locked starter
+        if (acceptingTeamRoster.isStarter(player)) {
+          const isLocked = await isPlayerLocked(player)
+          if (isLocked) {
+            return res
+              .status(400)
+              .send({ error: 'release player is a locked starter' })
+          }
+        }
       }
+
+      // check if accepting team trade players are a locked starter
+      for (const player of acceptingTeamPlayers) {
+        if (acceptingTeamRoster.isStarter(player)) {
+          const isLocked = await isPlayerLocked(player)
+          if (isLocked) {
+            return res
+              .status(400)
+              .send({ error: 'player in trade is a locked starter' })
+          }
+        }
+      }
+
       acceptingTeamReleasePlayers.forEach((p) =>
         acceptingTeamRoster.removePlayer(p)
       )
       acceptingTeamPlayers.forEach((p) => acceptingTeamRoster.removePlayer(p))
+
       for (const playerId of proposingTeamPlayers) {
         const player = players.find((p) => p.player === playerId)
         const hasSlot = acceptingTeamRoster.hasOpenBenchSlot(player.pos)
@@ -209,12 +216,37 @@ router.post(
         })
       }
 
-      // validate proposing team roster
       const proposingTeamRosterRow = await getRoster({ tid: trade.pid })
       const proposingTeamRoster = new Roster({
         roster: proposingTeamRosterRow,
         league
       })
+
+      // check if proposing team trade players are a locked starter
+      for (const player of proposingTeamPlayers) {
+        if (proposingTeamRoster.isStarter(player)) {
+          const isLocked = await isPlayerLocked(player)
+          if (isLocked) {
+            return res
+              .status(400)
+              .send({ error: 'player in trade is a locked starter' })
+          }
+        }
+      }
+
+      // check if proposing team release players are a locked starter
+      for (const player of proposingTeamReleasePlayerIds) {
+        if (proposingTeamRoster.isStarter(player)) {
+          const isLocked = await isPlayerLocked(player)
+          if (isLocked) {
+            return res
+              .status(400)
+              .send({ error: 'player in trade is a locked starter' })
+          }
+        }
+      }
+
+      // validate proposing team roster
       proposingTeamReleasePlayerIds.forEach((p) =>
         proposingTeamRoster.removePlayer(p)
       )
@@ -233,6 +265,24 @@ router.post(
           pos: player.pos,
           value: player.value
         })
+      }
+
+      // clear any existing poaching claims
+      const activePoaches = await db('poaches')
+        .where('lid', leagueId)
+        .whereNull('processed')
+        .whereIn('player', allPlayers)
+
+      if (activePoaches.length) {
+        await db('poaches')
+          .update('processed', Math.round(Date.now() / 1000))
+          .update('reason', 'Player traded')
+          .update('succ', 0)
+          .where('lid', leagueId)
+          .whereIn(
+            'player',
+            activePoaches.map((p) => p.player)
+          )
       }
 
       // insert receiving team releases
@@ -485,6 +535,7 @@ router.post(
 
       next()
     } catch (error) {
+      console.log(error)
       logger(error)
       res.status(500).send({ error: error.toString() })
     }

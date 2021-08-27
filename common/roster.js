@@ -4,6 +4,14 @@ import getExtensionAmount from './get-extension-amount'
 import getActiveRosterLimit from './get-active-roster-limit'
 import isSlotActive from './is-slot-active'
 
+const nonStarterSlots = [
+  constants.slots.IR,
+  constants.slots.PS,
+  constants.slots.PSP,
+  constants.slots.BENCH,
+  constants.slots.COV
+]
+
 export default class Roster {
   constructor({ roster, league }) {
     this.uid = roster.uid
@@ -73,15 +81,8 @@ export default class Roster {
   }
 
   get starters() {
-    const exclude = [
-      constants.slots.IR,
-      constants.slots.PS,
-      constants.slots.PSP,
-      constants.slots.BENCH,
-      constants.slots.COV
-    ]
     return Array.from(this._players.values()).filter(
-      (p) => !exclude.includes(p.slot)
+      (p) => !nonStarterSlots.includes(p.slot)
     )
   }
 
@@ -189,6 +190,11 @@ export default class Roster {
       const count = this.getCountBySlot(slot)
       return count < this._league[`s${slotName.toLowerCase()}`]
     }
+  }
+
+  isStarter(player) {
+    const p = this.get(player)
+    return !nonStarterSlots.includes(p.slot)
   }
 
   isEligibleForTag({ tag, player }) {
