@@ -238,6 +238,7 @@ export function getCurrentTradeAnalysis(state) {
   })
 
   const proposingTeam = {
+    team: getTeamById(state, { tid: trade.pid }),
     before: getTeamTradeSummary(proposingTeamLineups, proposingTeamPlayers),
     after: getTeamTradeSummary(
       proposingTeamProjectedLineups,
@@ -246,6 +247,7 @@ export function getCurrentTradeAnalysis(state) {
   }
 
   const acceptingTeam = {
+    team: getTeamById(state, { tid: trade.tid }),
     before: getTeamTradeSummary(acceptingTeamLineups, acceptingTeamPlayers),
     after: getTeamTradeSummary(
       acceptingTeamProjectedLineups,

@@ -151,7 +151,8 @@ export default function TradePage() {
               <div className='trade__box-head'>
                 <List component='nav'>
                   <ListItem>
-                    <TeamName tid={trade.pid || proposingTeamRoster.tid} />
+                    <TeamName tid={trade.pid || proposingTeamRoster.tid} />{' '}
+                    Sends
                   </ListItem>
                 </List>
               </div>
