@@ -13,7 +13,7 @@ import TransactionTeamFilter from '@components/transaction-team-filter'
 
 import './transactions.styl'
 
-const ROW_HEIGHT = 45
+const ROW_HEIGHT = window.innerWidth < 800 ? 75 : 45
 
 export default class TransactionsPage extends React.Component {
   componentDidMount = () => {

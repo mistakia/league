@@ -138,10 +138,12 @@ export default class PlayerSlot extends React.Component {
           {/* projected output */}
           {/* expert consensus ranking */}
         </div>
-        <div className='player__slot-projected-points metric'>
-          {player.getIn(['points', `${week}`, 'total'], 0).toFixed(1)}
+        <div className='player__slot-right'>
+          <div className='player__slot-action'>{action}</div>
+          <div className='player__slot-projected-points metric'>
+            {player.getIn(['points', `${week}`, 'total'], 0).toFixed(1)}
+          </div>
         </div>
-        <div className='player__slot-action'>{action}</div>
       </div>
     )
   }
