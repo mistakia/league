@@ -4,17 +4,30 @@
   border-radius 3px
   padding 3px 16px
 
+.transaction__main
+  display flex
+  flex 1
+
+.transaction__meta
+  flex 1
+  display flex
+  flex-direction column
+
 .transaction__value
-  flex 0 0 50px
+  flex 0 0 35px
   display flex
   align-items center
 
 .transaction__timestamp
-  flex 0 0 100px
+  flex 1
   display flex
+  .timestamp
+    flex-direction row
+    width 100%
+    font-size 10px
 
 .transaction__type
-  flex 0 0 100px
+  flex 1
   display flex
   text-transform uppercase
   align-items center
@@ -29,3 +42,16 @@
   display flex
   align-items center
   max-width 200px
+  .team__name
+    padding 0
+
+@media (max-width 800px)
+  .transaction
+    padding 6px 3px
+
+  .transaction__main
+    flex-direction column
+    flex 0 0 185px
+
+  .transaction__type
+    padding 8px 0
