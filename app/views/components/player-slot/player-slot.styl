@@ -18,8 +18,14 @@
 .player__slot-player
   flex 1
 
+.player__slot-right
+  flex 0 0 80px
+  display flex
+  flex-direction column
+
 .player__slot-projected-points
   flex 0 0 40px
+  align-items center
   display flex
   justify-content flex-end
 
@@ -30,10 +36,15 @@
   font-size 11px
 
 .player__slot-action
-  flex 0 0 100px
   display flex
   justify-content flex-end
 
 @media (max-width 600px)
   .player__slot
-    padding 4px 8px
+    padding 24px 8px 4px
+    position relative
+
+  .player__slot-slotName
+    flex 0 0 30px
+    position absolute
+    top 4px
