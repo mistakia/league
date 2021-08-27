@@ -6,92 +6,137 @@ import TableCell from '@material-ui/core/TableCell'
 import TableContainer from '@material-ui/core/TableContainer'
 import TableHead from '@material-ui/core/TableHead'
 import TableRow from '@material-ui/core/TableRow'
-import Paper from '@material-ui/core/Paper'
 
-function getPct(type, analysis) {
+import './trade-team-summary.styl'
+
+function Percentage(type, analysis) {
+  if (!analysis.after[type] || !analysis.before[type]) return '-'
   const delta = analysis.after[type] - analysis.before[type]
-  return ((delta / analysis.before[type]) * 100 || 0).toFixed(1)
+  const isPositive = delta >= 0
+  const sign = isPositive ? '+' : '-'
+  const deltaPct = ((delta / analysis.before[type]) * 100 || 0).toFixed(1)
+  const classNames = ['trade__percentage']
+  if (isPositive) {
+    classNames.push('positive')
+  } else {
+    classNames.push('negative')
+
+    if (deltaPct > -1.5) {
+      classNames.push('warning')
+    }
+  }
+
+  return (
+    <div className={classNames.join(' ')}>
+      {`${sign}${Math.abs(deltaPct)}%`}
+    </div>
+  )
 }
 
 export default class TradeTeamSummary extends React.Component {
   render = () => {
     const { analysis } = this.props
 
-    const pctPoints = getPct('points', analysis)
-    const pctValue = getPct('value', analysis)
-    const pctValueAdj = getPct('value_adj', analysis)
-    const pctSalary = getPct('salary', analysis)
+    const pctPoints = Percentage('points', analysis)
+    const pctValue = Percentage('value', analysis)
+    const pctValueAdj = Percentage('value_adj', analysis)
 
     return (
-      <TableContainer component={Paper}>
-        <Table size='small'>
-          <TableHead>
-            <TableRow>
-              <TableCell align='center' colSpan={2}>
-                Team Summary
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            <TableRow>
-              <TableCell component='th' scope='row'>
-                Points
-              </TableCell>
-              <TableCell align='right'>
-                {analysis.after.points} ({pctPoints}%)
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell component='th' scope='row'>
-                Value
-              </TableCell>
-              <TableCell align='right'>
-                {(analysis.after.value || 0).toFixed(1)} ({pctValue}%)
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell component='th' scope='row'>
-                Salary Adjusted Value
-              </TableCell>
-              <TableCell align='right'>
-                {(analysis.after.value_adj || 0).toFixed(1)} ({pctValueAdj}%)
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell component='th' scope='row'>
-                Record
-              </TableCell>
-              <TableCell />
-            </TableRow>
-            <TableRow>
-              <TableCell component='th' scope='row'>
-                Playoff Odds
-              </TableCell>
-              <TableCell align='right' />
-            </TableRow>
-            <TableRow>
-              <TableCell component='th' scope='row'>
-                Championship Odds
-              </TableCell>
-              <TableCell align='right' />
-            </TableRow>
-            <TableRow>
-              <TableCell component='th' scope='row'>
-                Team Salary
-              </TableCell>
-              <TableCell align='right'>
-                {analysis.after.salary || 0} ({pctSalary}%)
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell component='th' scope='row'>
-                Roster Space
-              </TableCell>
-              <TableCell align='right' />
-            </TableRow>
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <>
+        <TableContainer className='trade__summary-section'>
+          <Table size='small'>
+            <TableHead>
+              <TableRow>
+                <TableCell align='center' colSpan={3}>
+                  {analysis.team.name || 'Summary'}
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              <TableRow>
+                <TableCell component='th' scope='row'>
+                  Points
+                </TableCell>
+                <TableCell align='right'>
+                  <div className='metric'>
+                    {analysis.before.points || analysis.after.points || '-'}
+                  </div>
+                </TableCell>
+                <TableCell>{pctPoints}</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell component='th' scope='row'>
+                  Value
+                </TableCell>
+                <TableCell align='right'>
+                  <div className='metric'>
+                    {analysis.after.value
+                      ? analysis.after.value.toFixed(1)
+                      : '-'}
+                  </div>
+                </TableCell>
+                <TableCell>{pctValue}</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell component='th' scope='row'>
+                  Salary Adjusted Value
+                </TableCell>
+                <TableCell align='right'>
+                  <div className='metric'>
+                    {analysis.after.value_adj
+                      ? analysis.after.value_adj.toFixed(1)
+                      : '-'}
+                  </div>
+                </TableCell>
+                <TableCell>{pctValueAdj}</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell component='th' scope='row'>
+                  Team Salary
+                </TableCell>
+                <TableCell align='right'>
+                  <div className='metric'>{analysis.after.salary || '-'}</div>
+                </TableCell>
+                <TableCell>
+                  <div className='metric'>
+                    {analysis.after.salary - analysis.before.salary || '-'}
+                  </div>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </TableContainer>
+        <TableContainer className='trade__summary-section'>
+          <Table size='small'>
+            <TableBody>
+              <TableRow>
+                <TableCell component='th' scope='row'>
+                  Record
+                </TableCell>
+                <TableCell />
+              </TableRow>
+              <TableRow>
+                <TableCell component='th' scope='row'>
+                  Playoff Odds
+                </TableCell>
+                <TableCell align='right' />
+              </TableRow>
+              <TableRow>
+                <TableCell component='th' scope='row'>
+                  Championship Odds
+                </TableCell>
+                <TableCell align='right' />
+              </TableRow>
+              <TableRow>
+                <TableCell component='th' scope='row'>
+                  Roster Space
+                </TableCell>
+                <TableCell align='right' />
+              </TableRow>
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </>
     )
   }
 }

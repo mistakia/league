@@ -18,7 +18,7 @@ export default class TradeSelectPick extends React.Component {
     }
 
     const team = teams.get(pick.otid)
-    text += ` (${team.abbrv})`
+    text += ` (${team.name})`
 
     const classNames = ['trade__select-pick']
     if (isSelected) classNames.push('selected')

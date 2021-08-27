@@ -15,16 +15,16 @@ export default class TransactionRow extends React.Component {
     return (
       <div style={style}>
         <div className='transaction'>
+          <div className='transaction__team'>
+            <TeamName tid={transaction.tid} />
+          </div>
+          <div className='transaction__player'>
+            <PlayerName playerId={transaction.player} headshot />
+          </div>
           <div className='transaction__type'>
             {constants.transactionsDetail[transaction.type]}
           </div>
           <div className='transaction__value'>${transaction.value}</div>
-          <div className='transaction__player'>
-            <PlayerName playerId={transaction.player} headshot />
-          </div>
-          <div className='transaction__team'>
-            <TeamName tid={transaction.tid} />
-          </div>
           <div className='transaction__timestamp'>
             <Timestamp timestamp={transaction.timestamp} />
           </div>
