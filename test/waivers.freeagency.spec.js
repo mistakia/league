@@ -10,7 +10,7 @@ const server = require('../api')
 const knex = require('../db')
 
 const league = require('../db/seeds/league')
-const { constants } = require('../common')
+const { constants, getDraftDates } = require('../common')
 const { start } = constants.season
 const { user1 } = require('./fixtures/token')
 const { getRoster } = require('../utils')
@@ -406,8 +406,12 @@ describe('API /waivers - free agency', function () {
     })
 
     it('rookie free agent waiver w/ full practice squad and no release', async () => {
-      const picks = 12 * 3
-      MockDate.set(start.subtract('2', 'month').add(picks, 'day').toDate())
+      const picks = await knex('draft')
+      const draftDates = getDraftDates({
+        start: constants.season.now.unix(),
+        picks: picks.length
+      })
+      MockDate.set(draftDates.draftEnd.toDate())
       const leagueId = 1
       const teamId = 1
       await fillRoster({ leagueId, teamId })

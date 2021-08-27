@@ -1,10 +1,11 @@
 import dayjs from 'dayjs'
 import { createSelector } from 'reselect'
 
-import { constants } from '@common'
+import { constants, getDraftDates } from '@common'
 import { getTeams } from '@core/teams'
 import { getApp } from '@core/app'
 import { League } from './league'
+import { getLastPick } from '@core/draft'
 
 export function getLeagues(state) {
   return state.get('leagues').toList()
@@ -30,31 +31,53 @@ export function getLeagueEvents(state) {
   const events = []
   const now = dayjs()
   if (league.ddate) {
-    const totalPicks = league.nteams * 3
-    const date = dayjs.unix(league.ddate).add(totalPicks, 'days')
-    if (now.isBefore(date)) {
+    const ddate = dayjs.unix(league.ddate)
+    if (now.isBefore(ddate)) {
       events.push({
-        detail: 'Sign Rookie FAs',
-        date
+        detail: 'Rookie Draft Begins',
+        date: ddate
       })
+    }
+
+    const lastPick = getLastPick(state)
+    if (lastPick) {
+      const draftDates = getDraftDates({
+        start: league.ddate,
+        picks: lastPick.pick
+      })
+
+      if (now.isBefore(draftDates.draftEnd)) {
+        events.push({
+          detail: 'Rookie Draft Ends',
+          date: draftDates.draftEnd
+        })
+      }
+
+      if (now.isBefore(draftDates.waiverEnds)) {
+        events.push({
+          detail: 'Rookie Waivers Clear',
+          date: draftDates.waiverEnd
+        })
+      }
     }
   }
 
   const firstDayOfRegularSeason = constants.season.start.add('1', 'week')
   if (now.isBefore(firstDayOfRegularSeason)) {
     events.push({
-      detail: 'Start of Regular Season',
+      detail: 'Regular Season Begins',
       date: firstDayOfRegularSeason
     })
   }
 
   const firstWaiverDate = constants.season.start
     .add('1', 'week')
+    .utcOffset(-4)
     .day(3)
-    .hour(14)
+    .hour(15)
   if (now.isBefore(firstWaiverDate)) {
     events.push({
-      detail: 'Waivers Processed',
+      detail: 'Veteran Waivers Clear',
       date: firstWaiverDate
     })
   } else if (constants.season.isRegularSeason) {
@@ -80,6 +103,11 @@ export function getLeagueEvents(state) {
     const date = dayjs.unix(league.adate)
     if (now.isBefore(date)) {
       events.push({
+        detail: 'Free Agency Period Begins',
+        date: date.subtract('4', 'days')
+      })
+
+      events.push({
         detail: 'Auction',
         date
       })
@@ -98,7 +126,7 @@ export function getLeagueEvents(state) {
 
   if (now.isBefore(constants.season.end)) {
     events.push({
-      detail: 'Offseason',
+      detail: 'Offseason Begins',
       date: constants.season.end
     })
   }

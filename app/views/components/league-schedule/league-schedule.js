@@ -38,11 +38,11 @@ export default class LeagueSchedule extends React.Component {
     for (const [index, event] of events.entries()) {
       items.push(
         <div key={index} className='league__schedule-item'>
-          <div className='league__schedule-item-date'>
-            {event.date.format('M/D')}
-          </div>
           <div className='league__schedule-item-body'>
             <strong>{event.detail}</strong> {dayjs().to(event.date)}
+          </div>
+          <div className='league__schedule-item-date'>
+            {event.date.local().format('l LT')}
           </div>
         </div>
       )
