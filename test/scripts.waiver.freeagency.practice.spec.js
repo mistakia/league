@@ -6,7 +6,7 @@ const MockDate = require('mockdate')
 const knex = require('../db')
 
 const league = require('../db/seeds/league')
-const { constants } = require('../common')
+const { constants, getDraftDates } = require('../common')
 const { getLeague } = require('../utils')
 const { start } = constants.season
 const { selectPlayer, checkLastTransaction, checkRoster } = require('./utils')
@@ -35,8 +35,12 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
     it('rookie post draft single waiver - offseason', async () => {
       const leagueId = 1
       const league = await getLeague(leagueId)
-      const days = league.nteams * 3 + 1
-      MockDate.set(start.subtract('2', 'month').add(days, 'day').toDate())
+      const picks = await knex('draft')
+      const draftDates = getDraftDates({
+        start: league.ddate,
+        picks: picks.length
+      })
+      MockDate.set(draftDates.waiverEnd.toDate())
 
       const player = await selectPlayer({ rookie: true })
       const teamId = 1
@@ -124,10 +128,12 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
     it('no waivers ready to process - offseason', async () => {
       const leagueId = 1
       const league = await getLeague(leagueId)
-      const days = league.nteams * 3
-      MockDate.set(
-        start.subtract('2', 'month').add(days, 'day').add('1', 'hour').toDate()
-      )
+      const picks = await knex('draft')
+      const draftDates = getDraftDates({
+        start: league.ddate,
+        picks: picks.length
+      })
+      MockDate.set(draftDates.draftEnd.add('1', 'hour').toDate())
 
       const player = await selectPlayer({ rookie: true })
       const teamId = 1

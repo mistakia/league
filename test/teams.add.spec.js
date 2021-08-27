@@ -109,11 +109,14 @@ describe('API /teams - add', function () {
     })
 
     it('rookie free agent - practice squad - offseason', async () => {
-      MockDate.set(start.subtract('1', 'week').toDate())
+      const leagueId = 1
+      await knex('leagues')
+        .update({ ddate: start.subtract('1', 'week').unix() })
+        .where({ uid: leagueId })
+      MockDate.set(start.subtract('4', 'days').toDate())
       const player = await selectPlayer({ rookie: true })
 
       const teamId = 1
-      const leagueId = 1
       const userId = 1
       const res = await chai
         .request(server)

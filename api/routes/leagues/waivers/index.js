@@ -4,7 +4,7 @@ const router = express.Router({ mergeParams: true })
 
 const report = require('./report')
 
-const { constants, Roster } = require('../../../../common')
+const { constants, Roster, getDraftDates } = require('../../../../common')
 const {
   getRoster,
   isPlayerRostered,
@@ -189,19 +189,21 @@ router.post('/?', async (req, res) => {
 
         // reject practice waivers before day after draft
         if (type === constants.waivers.FREE_AGENCY_PRACTICE) {
-          const totalPicks = league.nteams * 3
-          const dcutoff = dayjs
-            .unix(league.ddate)
-            .tz('America/New_York')
-            .add(totalPicks, 'day')
-            .startOf('day')
+          const picks = await db('draft').where({
+            year: constants.season.year,
+            lid: leagueId
+          })
+          const draftDates = getDraftDates({
+            start: league.ddate,
+            picks: picks.length
+          })
 
-          if (!league.ddate || dayjs().isBefore(dcutoff)) {
+          if (!league.ddate || dayjs().isBefore(draftDates.draftEnd)) {
             return res
               .status(400)
               .send({ error: 'practice squad waivers are not open' })
           }
-          if (league.ddate && dayjs().isAfter(dcutoff.add('1', 'day'))) {
+          if (league.ddate && dayjs().isAfter(draftDates.waiverEnd)) {
             // if after rookie draft waivers cleared, check if player is on release waivers
             const isOnWaivers = await isPlayerOnWaivers({ player, leagueId })
             if (!isOnWaivers) {

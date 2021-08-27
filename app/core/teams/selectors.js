@@ -49,14 +49,14 @@ export function getTeamEvents(state) {
   for (const poach of activePoaches.valueSeq()) {
     const date = dayjs.unix(poach.submitted).add('48', 'hours')
     events.push({
-      detail: 'Claim Expires',
+      detail: 'Poaching Claim Expires',
       date
     })
   }
 
   if (nextPick) {
     events.push({
-      detail: 'Draft Pick',
+      detail: 'Next Draft Pick',
       date: nextPick.draftWindow
     })
   }

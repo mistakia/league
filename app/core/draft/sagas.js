@@ -5,8 +5,9 @@ import { call, takeLatest, fork, select } from 'redux-saga/effects'
 import { getApp, appActions } from '@core/app'
 import { draftActions } from './actions'
 import { fetchDraft, postDraft } from '@core/api'
-import { getDraft, getDraftEnd, getNextPick } from './selectors'
+import { getDraft, getNextPick } from './selectors'
 import { getCurrentLeague } from '@core/leagues'
+import { constants } from '@common'
 
 dayjs.extend(isBetween)
 
@@ -25,12 +26,8 @@ export function* draftPlayer() {
 
 export function* init() {
   const league = yield select(getCurrentLeague)
-  if (league.ddate) {
-    const start = dayjs.unix(league.ddate)
-    const end = yield select(getDraftEnd)
-    if (dayjs().isBetween(start, end)) {
-      yield call(fetchDraft, { leagueId: league.uid })
-    }
+  if (league.ddate && constants.season.week === 0) {
+    yield call(fetchDraft, { leagueId: league.uid })
   }
 }
 
