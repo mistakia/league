@@ -8,7 +8,7 @@ const debug = require('debug')
 const argv = require('yargs').argv
 
 const log = debug('import:players:sleeper')
-debug.enable('league:player:get,import:players:sleeper')
+debug.enable('import:players:sleeper')
 
 const { getPlayerId } = require('../utils')
 const { constants, fixTeam } = require('../common')
@@ -35,10 +35,10 @@ const run = async () => {
       fields[field] = true
     }
 
-    const params = { name, pos }
+    const params = { name, pos, team }
     let playerId
     try {
-      playerId = await getPlayerId(params)
+      playerId = await getPlayerId({ sleeper_id })
       if (!playerId) {
         missing.push(params)
         continue
@@ -89,7 +89,7 @@ const run = async () => {
     inserts.push(data)
   }
 
-  log(`Complete field list: ${Object.keys(fields)}`)
+  // log(`Complete field list: ${Object.keys(fields)}`)
   log(`Could not locate ${missing.length} players`)
   missing.forEach((m) => {
     if (!constants.positions.includes(m.pos)) return
@@ -102,22 +102,21 @@ const run = async () => {
   }
 
   log(`Inserting ${inserts.length} players into database`)
-  const playerIds = inserts.map((p) => p.player)
   const sleeperIds = inserts.map((p) => p.sleeper_id)
 
   const currentPlayers = await db('player')
-    .whereIn('player', playerIds)
-    .orWhereIn('sleeper_id', sleeperIds)
-  // const currentPlayerIds = currentPlayers.map((p) => p.player)
+    .whereIn('sleeper_id', sleeperIds)
 
+  let editCount = 0
   for (const player of currentPlayers) {
     const row = inserts.find(
-      (r) => r.player === player.player || r.sleeper_id === player.sleeper_id
+      (r) => r.sleeper_id === player.sleeper_id
     )
     const differences = diff(player, row)
 
     const edits = differences.filter((d) => d.kind === 'E')
     if (edits.length) {
+      editCount += edits.length
       for (const edit of edits) {
         const prop = edit.path[0]
         log(`Updating ${player.player} - ${prop} - ${edit.rhs}`)
@@ -140,6 +139,8 @@ const run = async () => {
       }
     }
   }
+
+  log(`updated ${editCount} player fields`)
 
   // TODO - create new players
   /* const missingPlayerIds = playerIds.filter(
