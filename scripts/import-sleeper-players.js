@@ -104,14 +104,11 @@ const run = async () => {
   log(`Inserting ${inserts.length} players into database`)
   const sleeperIds = inserts.map((p) => p.sleeper_id)
 
-  const currentPlayers = await db('player')
-    .whereIn('sleeper_id', sleeperIds)
+  const currentPlayers = await db('player').whereIn('sleeper_id', sleeperIds)
 
   let editCount = 0
   for (const player of currentPlayers) {
-    const row = inserts.find(
-      (r) => r.sleeper_id === player.sleeper_id
-    )
+    const row = inserts.find((r) => r.sleeper_id === player.sleeper_id)
     const differences = diff(player, row)
 
     const edits = differences.filter((d) => d.kind === 'E')

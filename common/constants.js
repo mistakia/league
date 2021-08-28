@@ -1119,11 +1119,11 @@ export const jobDetails = {
   16: 'Notifications (Poach) 1HR',
   17: 'Generate Rosters',
   18: 'Generate Draft Picks',
-  19: 'Players (Armchair)',
-  20: 'NFL Games (NGS)',
-  21: 'NFL Plays (NGS)',
-  22: 'NFL Plays (NFL)',
-  23: 'NFL Games (NFL)',
+  19: 'Import Players (Armchair)',
+  20: 'Import NFL Games',
+  21: 'Import NFL Plays (NGS)',
+  22: 'Import NFL Plays (NFL)',
+  23: 'Import NFL Game Ids',
   24: 'NFL Players (NFL)',
   25: 'NFL Player Ids (NFL)',
   26: 'Projections (FBG)',
@@ -1132,9 +1132,18 @@ export const jobDetails = {
   29: 'Projections (Numberfire)',
   30: 'Process Play Stats',
   31: 'Armchair (Data)',
-  32: 'Football Outsiders (Data)',
+  32: 'Import Football Outsiders (Data)',
 
-  39: 'Calculate Franchise Tags'
+  39: 'Calculate Franchise Tags',
+
+  40: 'Process Matchups',
+  41: 'Draw Divisions',
+  42: 'Generate Schedule',
+  43: 'Process Extensions',
+  44: 'Process Transition Bids',
+  45: 'Reset Player Tags',
+  46: 'Reset Player Protected Designation',
+  47: 'Set Draft Pick Order'
 }
 
 export const changes = {

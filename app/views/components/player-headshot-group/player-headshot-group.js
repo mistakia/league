@@ -11,9 +11,11 @@ export default class PlayerHeadshotGroup extends React.Component {
     const height = Math.round((width * 70) / 96)
     const items = []
     players.forEach((player, index) => {
-      const src = player.espn_id ? `https://a.espncdn.com/combiner/i?img=/i/headshots/nfl/players/full/${
-        player.espn_id
-      }.png&w=${width * 2}&h=${height * 2}&cb=1` : null
+      const src = player.espn_id
+        ? `https://a.espncdn.com/combiner/i?img=/i/headshots/nfl/players/full/${
+            player.espn_id
+          }.png&w=${width * 2}&h=${height * 2}&cb=1`
+        : null
 
       items.push(
         <Tooltip key={index} title={player.name}>

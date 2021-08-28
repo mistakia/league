@@ -8,7 +8,7 @@ const MockDate = require('mockdate')
 const knex = require('../db')
 
 const league = require('../db/seeds/league')
-const { constants } = require('../common')
+const { constants, Errors } = require('../common')
 const { start } = constants.season
 const { selectPlayer, addPlayer } = require('./utils')
 
@@ -46,7 +46,8 @@ describe('SCRIPTS /waivers - poach', function () {
 
       // eslint-disable-next-line
       expect(error).to.exist
-      expect(error.message).to.equal('no waivers to process')
+      expect(error).to.be.instanceof(Errors.EmptyPoachingWaivers)
+      expect(error.message).to.equal('no poaching waivers to process')
     })
 
     it('no waivers to process - season', async () => {
@@ -61,7 +62,7 @@ describe('SCRIPTS /waivers - poach', function () {
 
       // eslint-disable-next-line
       expect(error).to.exist
-      expect(error.message).to.equal('no waivers to process')
+      expect(error).to.be.instanceof(Errors.EmptyPoachingWaivers)
     })
 
     it('no waivers ready to process - offseason', async () => {

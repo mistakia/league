@@ -2,7 +2,7 @@
 require = require('esm')(module /*, options*/)
 const debug = require('debug')
 
-const { constants } = require('../common')
+const { constants, Errors } = require('../common')
 const {
   sendNotifications,
   submitPoach,
@@ -30,7 +30,7 @@ const run = async () => {
   const leagueIds = results.map((w) => w.lid)
 
   if (!leagueIds.length) {
-    throw new Error('no waivers to process')
+    throw new Errors.EmptyPoachingWaivers()
   }
 
   for (const lid of leagueIds) {
@@ -101,12 +101,16 @@ const main = async () => {
     await run()
   } catch (err) {
     error = err
+  }
+
+  const succ = !error || error instanceof Errors.EmptyPoachingWaivers ? 1 : 0
+  if (!succ) {
     console.log(error)
   }
 
   await db('jobs').insert({
     type: constants.jobs.CLAIMS_WAIVERS_POACH,
-    succ: error ? 0 : 1,
+    succ,
     reason: error ? error.message : null,
     timestamp: Math.round(Date.now() / 1000)
   })
