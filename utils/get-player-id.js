@@ -232,20 +232,30 @@ const fixPosition = (pos) => {
   }
 }
 
-const getPlayerId = async ({ name, pos, team }) => {
+/* eslint-disable camelcase */
+const getPlayerId = async ({ name, pos, team, sleeper_id }) => {
   if (aliases[name]) {
     return aliases[name]
   }
 
-  const aname = nameAliases[name] || name
-  const sname = aname.replace(/jr.|jr|sr.|sr|II|III/gi, '').trim()
-  const fname = sname.split(' ').shift()
-  const lname = sname.split(' ').splice(1).join(' ')
+  const query = db('player').select('player')
 
-  const query = db('player').select('player').where({
-    fname,
-    lname
-  })
+  if (sleeper_id) {
+    query.where({ sleeper_id })
+  }
+  /* eslint-enable camelcase */
+
+  if (name) {
+    const aname = nameAliases[name] || name
+    const sname = aname.replace(/jr.|jr|sr.|sr|II|III/gi, '').trim()
+    const fname = sname.split(' ').shift()
+    const lname = sname.split(' ').splice(1).join(' ')
+
+    query.where({
+      fname,
+      lname
+    })
+  }
 
   if (pos) {
     const p = fixPosition(pos)

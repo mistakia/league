@@ -515,7 +515,7 @@ CREATE TABLE `player` (
 
   `sleeper_id` varchar(11) DEFAULT NULL,
   `rotoworld_id` int(11) DEFAULT NULL,
-  `rotowire_id` varchar(11) DEFAULT NULL,
+  `rotowire_id` int(11) DEFAULT NULL,
   `sportradar_id` varchar(36) DEFAULT NULL,
   `espn_id` int(11) DEFAULT NULL,
   `fantasy_data_id` int(11) DEFAULT NULL,
