@@ -25,7 +25,7 @@ router.get('/overall', async (req, res) => {
       return res.send({ status: 'operational' })
     }
 
-    const timestamp = dayjs.unix(failed.timestamp).format('YYYY/MM/DD HH:mm:SS')
+    const timestamp = dayjs.unix(failed.timestamp).format('YYYY/MM/DD HH:mm')
     const message = `${constants.jobDetails[failed.type]}: ${
       failed.reason
     } (${timestamp})`
