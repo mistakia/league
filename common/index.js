@@ -26,6 +26,7 @@ import isReserveCovEligible from './is-reserve-cov-eligible'
 import isSlotActive from './is-slot-active'
 import getDraftWindow from './get-draft-window'
 import getDraftDates from './get-draft-dates'
+import * as Errors from './errors'
 
 /* eslint-disable no-extra-semi */
 const groupBy = (xs, key) =>
@@ -115,5 +116,6 @@ export {
   isSlotActive,
   getDraftWindow,
   isDraftWindowOpen,
-  getDraftDates
+  getDraftDates,
+  Errors
 }

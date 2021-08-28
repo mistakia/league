@@ -6,7 +6,7 @@ const MockDate = require('mockdate')
 const knex = require('../db')
 
 const league = require('../db/seeds/league')
-const { constants } = require('../common')
+const { constants, Errors } = require('../common')
 const { start } = constants.season
 const { selectPlayer, checkLastTransaction, checkRoster } = require('./utils')
 
@@ -352,7 +352,8 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         error = err
       }
 
-      expect(error.message).to.equal('outside regular season')
+      expect(error).to.be.instanceof(Errors.NotRegularSeason)
+      expect(error.message).to.equal('not regular season')
     })
 
     it('no waivers to process', async () => {
@@ -364,7 +365,8 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         error = err
       }
 
-      expect(error.message).to.equal('no waivers to process')
+      expect(error).to.be.instanceof(Errors.EmptyFreeAgencyWaivers)
+      expect(error.message).to.equal('no free agency waivers to process')
     })
 
     it('release player not on team', async () => {
