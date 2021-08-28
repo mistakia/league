@@ -6,7 +6,7 @@ const MockDate = require('mockdate')
 const knex = require('../db')
 
 const league = require('../db/seeds/league')
-const { constants, getDraftDates } = require('../common')
+const { constants, getDraftDates, Errors } = require('../common')
 const { getLeague } = require('../utils')
 const { start } = constants.season
 const { selectPlayer, checkLastTransaction, checkRoster } = require('./utils')
@@ -198,7 +198,10 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
         error = err
       }
 
-      expect(error.message).to.equal('no waivers to process')
+      expect(error).to.be.instanceof(Errors.EmptyPracticeSquadFreeAgencyWaivers)
+      expect(error.message).to.equal(
+        'no practice squad free agency waivers to process'
+      )
     })
 
     it('no waivers ready to be processed - regular season waiver period', async () => {

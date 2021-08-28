@@ -109,5 +109,6 @@ module.exports = {
   verifyReserveStatus: require('./verify-reserve-status'),
   verifyRestrictedFreeAgency: require('./verify-restricted-free-agency'),
 
-  googleDrive: require('./google-drive')
+  googleDrive: require('./google-drive'),
+  getJobs: require('./get-jobs')
 }

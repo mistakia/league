@@ -4,7 +4,7 @@ const dayjs = require('dayjs')
 const debug = require('debug')
 
 const db = require('../db')
-const { constants } = require('../common')
+const { constants, Errors } = require('../common')
 const { processPoach, sendNotifications, getLeague } = require('../utils')
 
 const log = debug('process:claims')
@@ -21,7 +21,7 @@ const run = async () => {
     .whereNull('processed')
 
   if (!claims.length) {
-    throw new Error('no claims to process')
+    throw new Errors.EmptyPoachingClaims()
   }
 
   for (const claim of claims) {
@@ -81,12 +81,16 @@ const main = async () => {
     await run()
   } catch (err) {
     error = err
+  }
+
+  const succ = !error || error instanceof Errors.EmptyPoachingClaims ? 1 : 0
+  if (!succ) {
     console.log(error)
   }
 
   await db('jobs').insert({
     type: constants.jobs.CLAIMS_POACH,
-    succ: error ? 0 : 1,
+    succ,
     reason: error ? error.message : null,
     timestamp: Math.round(Date.now() / 1000)
   })

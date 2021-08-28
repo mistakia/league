@@ -3,7 +3,7 @@ require = require('esm')(module /*, options*/)
 const debug = require('debug')
 
 const db = require('../db')
-const { constants } = require('../common')
+const { constants, Errors } = require('../common')
 const {
   submitAcquisition,
   resetWaiverOrder,
@@ -35,7 +35,7 @@ const run = async () => {
 
   const leagueIds = results.map((w) => w.lid)
   if (!leagueIds.length) {
-    throw new Error('no waivers to process')
+    throw new Errors.EmptyPracticeSquadFreeAgencyWaivers()
   }
 
   for (const lid of leagueIds) {
@@ -116,12 +116,19 @@ const main = async () => {
     await run()
   } catch (err) {
     error = err
+  }
+
+  const succ =
+    !error || error instanceof Errors.EmptyPracticeSquadFreeAgencyWaivers
+      ? 1
+      : 0
+  if (!succ) {
     console.log(error)
   }
 
   await db('jobs').insert({
     type: constants.jobs.CLAIMS_WAIVERS_PRACTICE,
-    succ: error ? 0 : 1,
+    succ,
     reason: error ? error.message : null,
     timestamp: Math.round(Date.now() / 1000)
   })

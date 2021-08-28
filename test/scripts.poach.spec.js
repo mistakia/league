@@ -8,7 +8,7 @@ const MockDate = require('mockdate')
 const knex = require('../db')
 
 const league = require('../db/seeds/league')
-const { constants } = require('../common')
+const { constants, Errors } = require('../common')
 const { getRoster } = require('../utils')
 const { start } = constants.season
 const { addPlayer, selectPlayer } = require('./utils')
@@ -286,7 +286,8 @@ describe('SCRIPTS /waivers - poach', function () {
 
       // eslint-disable-next-line
       expect(error).to.exist
-      expect(error.message).to.equal('no claims to process')
+      expect(error).to.be.instanceof(Errors.EmptyPoachingClaims)
+      expect(error.message).to.equal('no poaching claims to process')
 
       // check rosters
       const rosterRow1 = await getRoster({ tid: 1 })

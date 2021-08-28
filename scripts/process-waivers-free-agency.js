@@ -3,7 +3,7 @@ require = require('esm')(module /*, options*/)
 const debug = require('debug')
 
 const db = require('../db')
-const { constants } = require('../common')
+const { constants, Errors } = require('../common')
 const {
   submitAcquisition,
   resetWaiverOrder,
@@ -19,7 +19,7 @@ const run = async () => {
   const timestamp = Math.round(Date.now() / 1000)
 
   if (!constants.season.isRegularSeason) {
-    throw new Error('outside regular season')
+    throw new Errors.NotRegularSeason()
   } else if (constants.season.isWaiverPeriod) {
     return
   }
@@ -33,7 +33,7 @@ const run = async () => {
 
   const leagueIds = results.map((w) => w.lid)
   if (!leagueIds.length) {
-    throw new Error('no waivers to process')
+    throw new Errors.EmptyFreeAgencyWaivers()
   }
 
   for (const lid of leagueIds) {
@@ -116,12 +116,21 @@ const main = async () => {
     await run()
   } catch (err) {
     error = err
+  }
+
+  const succ =
+    !error ||
+    error instanceof Errors.EmptyFreeAgencyWaivers ||
+    error instanceof Errors.NotRegularSeason
+      ? 1
+      : 0
+  if (!succ) {
     console.log(error)
   }
 
   await db('jobs').insert({
     type: constants.jobs.CLAIMS_WAIVERS_ACTIVE,
-    succ: error ? 0 : 1,
+    succ,
     reason: error ? error.message : null,
     timestamp: Math.round(Date.now() / 1000)
   })
