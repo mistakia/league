@@ -596,7 +596,7 @@ export function isPlayerPracticeSquadEligible(state, { player }) {
 
   // not eligible if player has been on active roster for more than 48 hours
   const cutoff = dayjs.unix(rosterPlayer.timestamp).add('48', 'hours')
-  if (dayjs().isAfter(cutoff)) {
+  if (isSlotActive(rosterPlayer.slot) && dayjs().isAfter(cutoff)) {
     return false
   }
 
