@@ -82,22 +82,21 @@ router.post('/?', async (req, res) => {
         .send({ error: 'player is not practice squad eligible' })
     }
 
+    const isActive = !!roster.active.find((p) => p.player === player)
+
     // make sure player has not been on the active roster for more than 48 hours
     const cutoff = dayjs.unix(lastTransaction.timestamp).add('48', 'hours')
-    if (dayjs().isAfter(cutoff)) {
+    if (isActive && dayjs().isAfter(cutoff)) {
       return res
         .status(400)
         .send({ error: 'player has exceeded 48 hours on active roster' })
     }
 
-    // if on active roster, make sure player he has not been previously deactivated
-    const isActive = !!roster.active.find((p) => p.player === player)
+    // make sure player he has not been previously activated
     if (
       isActive &&
       transactions.find(
-        (t) =>
-          t.type === constants.transactions.ROSTER_DEACTIVATE ||
-          t.type === constants.transactions.PRACTICE_ADD
+        (t) => t.type === constants.transactions.ROSTER_ACTIVATE
       )
     ) {
       return res
