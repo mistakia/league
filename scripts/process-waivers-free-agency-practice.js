@@ -98,7 +98,7 @@ const run = async () => {
       await db('waivers')
         .update({
           succ: error ? 0 : 1,
-          reason: error ? error.message : null, // TODO - add error codes
+          reason: error ? error.message : null,
           processed: timestamp
         })
         .where('uid', waiver.wid)
