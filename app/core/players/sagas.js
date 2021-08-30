@@ -157,8 +157,7 @@ export function* init({ payload }) {
   if (watchlist) {
     try {
       const array = watchlist.split(',')
-      const filtered = array.filter((p) => p.length === 7)
-      yield put(playerActions.setWatchlist(filtered))
+      yield put(playerActions.setWatchlist(array))
     } catch (err) {
       console.log(err)
     }
