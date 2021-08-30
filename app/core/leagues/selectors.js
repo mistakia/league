@@ -53,7 +53,7 @@ export function getLeagueEvents(state) {
         })
       }
 
-      if (now.isBefore(draftDates.waiverEnds)) {
+      if (now.isBefore(draftDates.waiverEnd)) {
         events.push({
           detail: 'Rookie Waivers Clear',
           date: draftDates.waiverEnd
@@ -102,10 +102,13 @@ export function getLeagueEvents(state) {
   if (league.adate) {
     const date = dayjs.unix(league.adate)
     if (now.isBefore(date)) {
-      events.push({
-        detail: 'Free Agency Period Begins',
-        date: date.subtract('4', 'days')
-      })
+      const faPeriod = date.subtract('4', 'days')
+      if (now.isBefore(faPeriod)) {
+        events.push({
+          detail: 'Free Agency Period Begins',
+          date: faPeriod
+        })
+      }
 
       events.push({
         detail: 'Auction',
