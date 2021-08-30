@@ -2,12 +2,13 @@ const express = require('express')
 const dayjs = require('dayjs')
 const router = express.Router({ mergeParams: true })
 
-const { constants } = require('../../../common')
+const { constants, isSlotActive, Roster } = require('../../../common')
 const {
   verifyUserTeam,
   sendNotifications,
   processRelease,
-  getLeague
+  getLeague,
+  getRoster
 } = require('../../../utils')
 
 router.post('/?', async (req, res) => {
@@ -45,16 +46,28 @@ router.post('/?', async (req, res) => {
     }
     const playerRow = playerRows[0]
 
-    // verify not during FA Auction Period
+    // if active roster, verify not during FA Auction Period
     const league = await getLeague(leagueId)
     if (league.adate) {
       const adate = dayjs.unix(league.adate)
       const start = adate.subtract('4', 'days')
       const end = adate.startOf('day').add('1', 'day')
 
+      const rosterRow = await getRoster({ tid })
+      const roster = new Roster({ roster: rosterRow, league })
+      if (!roster.has(player)) {
+        return res.status(400).send({
+          error: 'player not on roster'
+        })
+      }
+
+      const rosterPlayer = roster.get(player)
+      const isOnActiveRoster = isSlotActive(rosterPlayer.slot)
+
       if (
         constants.season.now.isAfter(start) &&
-        constants.season.now.isBefore(end)
+        constants.season.now.isBefore(end) &&
+        isOnActiveRoster
       ) {
         return res.status(400).send({
           error: 'Unable to release player from active roster during FA period'
