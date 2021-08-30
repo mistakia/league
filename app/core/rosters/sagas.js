@@ -39,6 +39,7 @@ import {
 } from '@core/trade'
 import {
   getActivePlayersByRosterForCurrentLeague,
+  getRostersForCurrentLeague,
   getCurrentTeamRosterRecord,
   getCurrentPlayers
 } from './selectors'
@@ -46,6 +47,8 @@ import { poachActions, getPoachPlayersForCurrentTeam } from '@core/poaches'
 import { waiverActions, getWaiverPlayersForCurrentTeam } from '@core/waivers'
 import { getCurrentLeague } from '@core/leagues'
 import Worker from 'workerize-loader?inline!../worker' // eslint-disable-line import/no-webpack-loader-syntax
+import { csv } from '@core/export'
+import { getTeamById } from '@core/teams'
 
 export function* loadRosters() {
   const { leagueId } = yield select(getApp)
@@ -360,6 +363,50 @@ export function* updateTransitionTag({ payload }) {
   yield call(putTransitionTag, { leagueId, teamId, ...payload })
 }
 
+export function* exportRosters() {
+  const rosters = yield select(getRostersForCurrentLeague)
+  const players = yield select(getAllPlayers)
+
+  const data = []
+  for (const [tid, roster] of rosters.entrySeq()) {
+    const team = yield select(getTeamById, { tid })
+    for (const rosterPlayer of roster.players) {
+      const player = players.get(rosterPlayer.player)
+      data.push({
+        tid,
+        team: team.name,
+        salary: rosterPlayer.value,
+        player: player.pname,
+        playerid: player.player,
+        pos: player.pos,
+        last_transaction_timestamp: rosterPlayer.timestamp,
+        last_transaction_type: constants.transactionsDetail[rosterPlayer.type],
+        slot: constants.slotName[rosterPlayer.slot],
+        draft_year: player.draft_year,
+        player_team: player.team
+      })
+    }
+  }
+
+  csv({
+    headers: {
+      tid: 'Team Id',
+      team: 'Team Name',
+      salary: 'Salary',
+      player: 'Player Name',
+      playerid: 'Player Id',
+      pos: 'Position',
+      last_transaction_timestamp: 'Last Transaction Timestamp',
+      last_transaction_type: 'Last Transaction',
+      slot: 'Roster Slot',
+      draft_year: 'Player Draft Year',
+      player_team: 'NFL Team'
+    },
+    data,
+    fileName: `TeflonLeagueRosters-${constants.season.year}-Week${constants.season.week}`
+  })
+}
+
 //= ====================================
 //  WATCHERS
 // -------------------------------------
@@ -513,6 +560,10 @@ export function* watchPutTransitionTagFulfilled() {
   )
 }
 
+export function* watchExportRosters() {
+  yield takeLatest(rosterActions.EXPORT_ROSTERS, exportRosters)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -558,5 +609,7 @@ export const rosterSagas = [
 
   fork(watchPostTransitionTagFulfilled),
   fork(watchPutTransitionTagFulfilled),
-  fork(watchDeleteTransiionTagFulfilled)
+  fork(watchDeleteTransiionTagFulfilled),
+
+  fork(watchExportRosters)
 ]
