@@ -1,6 +1,8 @@
 export const rosterActions = {
   PROJECT_LINEUPS: 'PROJECT_LINEUPS',
 
+  EXPORT_ROSTERS: 'EXPORT_ROSTERS',
+
   // USER
   SET_LINEUPS: 'SET_LINEUPS',
   SET_ROSTER_RESERVE: 'SET_ROSTER_RESERVE',
@@ -91,6 +93,10 @@ export const rosterActions = {
   POST_RELEASE_PENDING: 'POST_RELEASE_PENDING',
   POST_RELEASE_FAILED: 'POST_RELEASE_FAILED',
   POST_RELEASE_FULFILLED: 'POST_RELEASE_FULFILLED',
+
+  exportRosters: () => ({
+    type: rosterActions.EXPORT_ROSTERS
+  }),
 
   addFreeAgent: ({ player, release, slot }) => ({
     type: rosterActions.ADD_FREE_AGENT,

@@ -1,6 +1,8 @@
 import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
+import GetAppIcon from '@material-ui/icons/GetApp'
+import Button from '@material-ui/core/Button'
 
 import PageLayout from '@layouts/page'
 import Roster from '@components/roster'
@@ -9,6 +11,10 @@ import { constants } from '@common'
 import './rosters.styl'
 
 export default class RostersPage extends React.Component {
+  handleExport = () => {
+    this.props.exportRosters()
+  }
+
   render = () => {
     const { rosters, league } = this.props
 
@@ -154,10 +160,20 @@ export default class RostersPage extends React.Component {
     }
 
     const body = (
-      <div className='rosters'>
-        <div className='rosters__head'>{labels}</div>
-        <div className='rosters__body'>{items}</div>
-      </div>
+      <>
+        <div className='rosters'>
+          <div className='rosters__head'>{labels}</div>
+          <div className='rosters__body'>{items}</div>
+        </div>
+        <div className='rosters__footer'>
+          <Button
+            variant='containerd'
+            startIcon={<GetAppIcon />}
+            onClick={this.handleExport}>
+            Export CSV
+          </Button>
+        </div>
+      </>
     )
 
     return <PageLayout body={body} scroll />
@@ -166,5 +182,6 @@ export default class RostersPage extends React.Component {
 
 RostersPage.propTypes = {
   rosters: ImmutablePropTypes.map,
-  league: PropTypes.object
+  league: PropTypes.object,
+  exportRosters: PropTypes.func
 }
