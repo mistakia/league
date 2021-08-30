@@ -1,6 +1,6 @@
 import { List, Map } from 'immutable'
 
-import { Roster, constants } from '@common'
+import { Roster, constants, isSlotActive } from '@common'
 import { getApp } from '@core/app'
 import { getPlayerById, getAllPlayers } from '@core/players'
 import { getCurrentLeague } from '@core/leagues'
@@ -116,11 +116,7 @@ export function getActiveRosterPlayerIdsForCurrentLeague(state) {
   const players = []
   for (const roster of rosters.values()) {
     roster.players.forEach((p) => {
-      if (
-        p.slot !== constants.slots.IR ||
-        p.slot !== constants.slots.PS ||
-        p.slot !== constants.slots.PSP
-      ) {
+      if (isSlotActive(p.slot)) {
         players.push(p.player)
       }
     })
