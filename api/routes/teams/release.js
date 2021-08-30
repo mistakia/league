@@ -57,7 +57,7 @@ router.post('/?', async (req, res) => {
         constants.season.now.isBefore(end)
       ) {
         return res.status(400).send({
-          error: 'Unable to release during FA period (<96 hrs before Auction)'
+          error: 'Unable to release player from active roster during FA period'
         })
       }
     }
