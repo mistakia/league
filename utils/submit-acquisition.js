@@ -123,9 +123,11 @@ module.exports = async function ({
         throw new Error('invalid release')
       }
 
-      if (releasePlayer.slot !== constants.slots.PSP) {
-        roster.removePlayer(player)
+      if (releasePlayer.slot === constants.slots.PSP) {
+        throw new Error('invalid release')
       }
+
+      roster.removePlayer(player)
     }
   }
 
@@ -139,16 +141,13 @@ module.exports = async function ({
   // process release
   if (release.length) {
     for (const player of release) {
-      const releasePlayer = roster.get(player)
-      if (releasePlayer && releasePlayer.slot !== constants.slots.PSP) {
-        const releaseData = await processRelease({
-          player,
-          tid: teamId,
-          lid: leagueId,
-          userid: userId
-        })
-        result.push(releaseData)
-      }
+      const releaseData = await processRelease({
+        player,
+        tid: teamId,
+        lid: leagueId,
+        userid: userId
+      })
+      result.push(releaseData)
     }
   }
 
