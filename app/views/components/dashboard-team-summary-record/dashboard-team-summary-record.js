@@ -35,14 +35,16 @@ export default class DashboardTeamSummaryRecord extends React.Component {
       <Accordion TransitionProps={{ unmountOnExit: true }}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Grid container>
-            <Grid item xs={8}>
+            <Grid item xs={7}>
               Record
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={3}>
               {team.getIn(['stats', 'wins'], 0)}-
               {team.getIn(['stats', 'losses'], 0)}-
-              {team.getIn(['stats', 'ties'], 0)} (
-              <Rank rank={rank} size={teams.size} />)
+              {team.getIn(['stats', 'ties'], 0)}
+            </Grid>
+            <Grid item xs={2}>
+              <Rank rank={rank} size={teams.size} />
             </Grid>
           </Grid>
         </AccordionSummary>

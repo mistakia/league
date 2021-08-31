@@ -26,11 +26,14 @@ export default class DashboardTeamSummarySalary extends React.Component {
       <Accordion TransitionProps={{ unmountOnExit: true }}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Grid container>
-            <Grid item xs={8}>
+            <Grid item xs={7}>
               Salary Space
             </Grid>
-            <Grid item xs={4}>
-              ${team.cap} (<Rank rank={rank} size={teams.size} />)
+            <Grid item xs={3}>
+              ${team.cap}
+            </Grid>
+            <Grid item xs={2}>
+              <Rank rank={rank} size={teams.size} />
             </Grid>
           </Grid>
         </AccordionSummary>
