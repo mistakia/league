@@ -5,6 +5,7 @@ const fs = require('fs')
 const cp = require('child_process')
 const argv = require('yargs').argv
 
+const db = require('../db')
 const config = require('../config')
 const { googleDrive } = require('../utils')
 

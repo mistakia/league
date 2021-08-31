@@ -57,22 +57,18 @@ router.post('/?', async (req, res) => {
     }
 
     // verify player does not have outstanding unprocessed waiver claim
-    if (constants.season.isRegularSeason) {
-      // verify not in waiver period
-      if (constants.season.isWaiverPeriod) {
-        return res.status(400).send({ error: 'player is on waivers' })
-      }
+    const waivers = await db('waivers')
+      .where({ player, lid: leagueId })
+      .whereNull('cancelled')
+      .whereNull('processed')
 
-      const waivers = await db('waivers')
-        .where({ player, lid: leagueId })
-        .whereNull('cancelled')
-        .whereNull('processed')
+    if (waivers.length) {
+      return res.status(400).send({ error: 'player has pending waiver claim' })
+    }
 
-      if (waivers.length) {
-        return res
-          .status(400)
-          .send({ error: 'player has pending waiver claim' })
-      }
+    // verify not in waiver period during the regular season
+    if (constants.season.isRegularSeason && constants.season.isWaiverPeriod) {
+      return res.status(400).send({ error: 'player is on waivers' })
     }
 
     try {

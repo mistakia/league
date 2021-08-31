@@ -393,6 +393,14 @@ describe('API /teams - add', function () {
       await error(request, 'Reserve player violation')
     })
 
+    it('player has outstanding practice waiver claim', async () => {
+      // TODO
+    })
+
+    it('player has outstanding active roster waiver claim', async () => {
+      // TODO
+    })
+
     it('release protected practice squad player', async () => {
       // TODO
     })
