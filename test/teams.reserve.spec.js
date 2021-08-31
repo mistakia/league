@@ -117,7 +117,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('move player to reserve - cov', async () => {
-      MockDate.set(start.subtract('1', 'week').toDate())
+      MockDate.set(start.add('1', 'week').toDate())
       const player = await selectPlayer()
       const teamId = 1
       const leagueId = 1
@@ -131,6 +131,21 @@ describe('API /teams - reserve', function () {
         slot: constants.slots.BENCH,
         transaction: constants.transactions.DRAFT,
         value
+      })
+
+      const rosters = await knex('rosters')
+        .where({
+          week: constants.season.week - 1,
+          year: constants.season.year,
+          tid: teamId
+        })
+        .limit(1)
+      const rosterId = rosters[0].uid
+      await knex('rosters_players').insert({
+        rid: rosterId,
+        player: player.player,
+        slot: constants.slots.BENCH,
+        pos: player.pos1
       })
 
       await knex('player')
@@ -360,6 +375,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('player not on reserve/ir', async () => {
+      MockDate.set(start.add('1', 'week').toDate())
       const player = await selectPlayer()
       const teamId = 1
       const leagueId = 1
@@ -416,6 +432,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('player not on reserve/cov - ir', async () => {
+      MockDate.set(start.add('1', 'week').toDate())
       const player = await selectPlayer()
       const teamId = 1
       const leagueId = 1
