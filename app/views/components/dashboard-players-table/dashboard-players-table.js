@@ -21,7 +21,7 @@ const MarketSalaryHeader = () => (
 const SalaryDifferenceHeader = () => (
   <PlayerRosterHeader
     tooltip='Difference between a players salary and the market salary'
-    title='Diff.'
+    title='Savings'
   />
 )
 

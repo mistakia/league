@@ -23,14 +23,16 @@ class PlayerRosterTotal extends Player {
     players.forEach((player) => {
       const extensions = player.get('extensions', new List()).size
       const { pos, tag, value, bid } = player
-      const extendedSalary = getExtensionAmount({
-        pos,
-        tag,
-        extensions,
-        league,
-        value,
-        bid
-      })
+      const extendedSalary = isBeforeExtensionDeadline
+        ? getExtensionAmount({
+            pos,
+            tag,
+            extensions,
+            league,
+            value,
+            bid
+          })
+        : bid || value
       const projectedSalary = player.getIn(['values', type, 'default'], 0)
       const savings = projectedSalary - extendedSalary
 
