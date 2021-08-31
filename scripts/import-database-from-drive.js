@@ -66,16 +66,15 @@ const run = async ({ full = false } = {}) => {
 
   const { user, database } = config.mysql.connection
   const sqlFile = filename.replace('tar.gz', 'sql')
-  cp.exec(
-    `tar -xvzf ${filename} && mysql -h 127.0.0.1 -u ${user} ${database} < ${sqlFile}`,
-    (error, stdout, stderr) => {
-      fs.unlinkSync(filename)
-      fs.unlinkSync(sqlFile)
+  try {
+    cp.execSync(`tar -xvzf ${filename}`)
 
-      if (error) throw error
-      log(`imported ${sqlFile} into mysql`)
-    }
-  )
+    cp.execSync(`mysql -h 127.0.0.1 -u ${user} ${database} < ${sqlFile}`)
+    log(`imported ${sqlFile} into mysql`)
+  } finally {
+    fs.unlinkSync(filename)
+    fs.unlinkSync(sqlFile)
+  }
 
   // clear database notification info
   await db('users').update('phone', null)
@@ -98,7 +97,7 @@ const main = async () => {
     console.log(error)
   }
 
-  // process.exit()
+  process.exit()
 }
 
 if (!module.parent) {
