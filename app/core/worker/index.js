@@ -202,7 +202,7 @@ export function calculatePlayerValues(payload) {
   // calculate ros contract value
   calculatePrices({ cap: leagueTotalCap, total, players, week: 'ros' })
 
-  // calculate ros inflation prices
+  // calculate ros proj inflation rate
   const rate = {}
   for (const type in availableTotalsRestOfSeason) {
     rate[type] = availableTotalsRestOfSeason[type]
@@ -210,6 +210,7 @@ export function calculatePlayerValues(payload) {
       : 0
   }
 
+  // calculate season proj inflation rate
   const seasonRate = {}
   for (const type in availableTotalsSeason) {
     seasonRate[type] = availableTotalsSeason[type]
