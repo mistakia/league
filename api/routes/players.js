@@ -90,26 +90,22 @@ router.get('/?', async (req, res) => {
         .orWhere(function () {
           this.where('player.pos', 'RB')
             .where('player.posd', 'RB')
-            .where('player.dcp', '<', 3)
             .whereNot('player.cteam', 'INA')
         })
         .orWhere(function () {
           this.where('player.pos', 'WR')
             .whereNot('player.posd', 'PS')
             .whereNot('player.cteam', 'INA')
-            .where('player.dcp', '<', 3)
         })
         .orWhere(function () {
           this.where('player.pos', 'TE')
             .whereNot('player.posd', 'PS')
             .whereNot('player.cteam', 'INA')
-            .where('player.dcp', '<', 2)
         })
         .orWhere(function () {
           this.where('player.pos', 'K')
             .whereNot('player.posd', 'PS')
             .whereNot('player.cteam', 'INA')
-            .where('player.dcp', '<=', 1)
         })
         .orWhere('player.pos', 'DST')
 
