@@ -41,20 +41,24 @@ class PlayerRow extends Player {
       selectedPlayer === player.player || selected === player.player
 
     const seasonSummary = () => {
-      // let inflation = null
+      let inflation = null
       const value = player.values.getIn([`${week}`, vbaseline])
-      /* if (isRestOfSeasonView || isSeasonView) {
-       *   const type = isRestOfSeasonView ? 'inflation' : 'inflationSeason'
-       *   const diff = player.values.getIn([type, vbaseline]) - value
-       *   const classNames = ['value__inflation']
-       *   const isPos = diff > 0
-       *   if (isPos) classNames.push('positive')
-       *   else classNames.push('negative')
-       *   inflation = (
-       *     <span className={classNames.join(' ')}>{isPos && '+'}{diff || ''}</span>
-       *   )
-       * }
-       */
+      const isRostered = Boolean(player.tid)
+      if (!isRostered && (isRestOfSeasonView || isSeasonView)) {
+        const type = isRestOfSeasonView ? 'inflation' : 'inflationSeason'
+        const diff = player.values.getIn([type, vbaseline]) - value
+        const classNames = ['value__inflation']
+        const isPos = diff > 0
+        if (isPos) classNames.push('positive')
+        else classNames.push('negative')
+        inflation = (
+          <span className={classNames.join(' ')}>
+            {isPos && '+'}
+            {diff || ''}
+          </span>
+        )
+      }
+
       return (
         <div className='row__group'>
           <div className='row__group-body'>
@@ -64,7 +68,7 @@ class PlayerRow extends Player {
             {!constants.season.isRegularSeason && (
               <div className='table__cell metric'>
                 ${Math.round(value) || '--'}
-                {/* {inflation} */}
+                {inflation}
               </div>
             )}
             <div className='table__cell metric'>
