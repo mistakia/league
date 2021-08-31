@@ -27,11 +27,14 @@ export default class DashboardTeamSummaryFAAB extends React.Component {
       <Accordion TransitionProps={{ unmountOnExit: true }}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Grid container>
-            <Grid item xs={8}>
+            <Grid item xs={7}>
               Free Agency Budget
             </Grid>
-            <Grid item xs={4}>
-              ${team.faab} (<Rank rank={rank} size={teams.size} />)
+            <Grid item xs={3}>
+              ${team.faab}
+            </Grid>
+            <Grid item xs={2}>
+              <Rank rank={rank} size={teams.size} />
             </Grid>
           </Grid>
         </AccordionSummary>

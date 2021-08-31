@@ -30,10 +30,10 @@ export default class DashboardTeamSummaryWaiverOrder extends React.Component {
       <Accordion TransitionProps={{ unmountOnExit: true }}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Grid container>
-            <Grid item xs={8}>
+            <Grid item xs={10}>
               Waiver Order
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={2}>
               <Rank rank={team.wo} size={teams.size} />
             </Grid>
           </Grid>
