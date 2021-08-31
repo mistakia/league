@@ -11,6 +11,11 @@ const sendNotifications = async ({
   notifyLeague,
   voice
 }) => {
+  // prevent notifications in development environment
+  if (process.env.NODE_ENV !== 'production') {
+    return
+  }
+
   const textMessages = []
   const voiceMessages = []
   const users = await db('users_teams')

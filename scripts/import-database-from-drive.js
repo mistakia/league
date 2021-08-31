@@ -75,6 +75,14 @@ const run = async ({ full = false } = {}) => {
       log(`imported ${sqlFile} into mysql`)
     }
   )
+
+  // clear database notification info
+  await db('users').update('phone', null)
+  await db('leagues').update({
+    groupme_token: null,
+    groupme_id: null,
+    discord_webhook_url: null
+  })
 }
 
 module.exports = run
