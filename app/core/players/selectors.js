@@ -523,7 +523,11 @@ export function getPlayerStatus(state, { player, playerId }) {
           status.reserve.ir = true
         }
 
-        if (reserve.cov && player.slot !== constants.slots.COV) {
+        if (
+          reserve.cov &&
+          player.slot !== constants.slots.COV &&
+          constants.season.isRegularSeason
+        ) {
           status.reserve.cov = true
         }
       }
