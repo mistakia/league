@@ -57,7 +57,9 @@ export function isAfterDraft(state) {
   const draftEnd = getDraftEnd(state)
   const afterDraft = league.ddate && draftEnd && dayjs().isAfter(draftEnd)
   const afterWaivers =
-    league.ddate && draftEnd && dayjs().isAfter(draftEnd.add(1, 'day'))
+    league.ddate &&
+    draftEnd &&
+    dayjs().isAfter(draftEnd.endOf('day').add(1, 'day'))
   return {
     afterDraft,
     afterWaivers
