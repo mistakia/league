@@ -28,12 +28,14 @@ export default class DashboardTeamSummaryDivisionOdds extends React.Component {
       <Accordion TransitionProps={{ unmountOnExit: true }}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Grid container>
-            <Grid item xs={8}>
+            <Grid item xs={7}>
               Division Odds
             </Grid>
-            <Grid item xs={4}>
-              {toPercent(team.divisionOdds)} (
-              <Rank rank={rank} size={teams.size} />)
+            <Grid item xs={3}>
+              {toPercent(team.divisionOdds)}
+            </Grid>
+            <Grid item xs={2}>
+              <Rank rank={rank} size={teams.size} />
             </Grid>
           </Grid>
         </AccordionSummary>
