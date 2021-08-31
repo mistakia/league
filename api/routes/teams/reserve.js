@@ -84,6 +84,12 @@ router.post('/?', async (req, res) => {
     const playerRow = players[0]
 
     if (slot === constants.slots.COV) {
+      if (constants.season.week === 0) {
+        return res.status(400).send({
+          error: 'player is not eligible for Reserve/COV during the Offseason'
+        })
+      }
+
       if (!isReserveCovEligible(playerRow)) {
         return res
           .status(400)
