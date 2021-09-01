@@ -1,4 +1,4 @@
-/* global WebSocket */
+/* global WebSocket, setInterval, clearInterval */
 
 import queryString from 'query-string'
 
@@ -9,6 +9,12 @@ import { wsActions } from './actions'
 
 export let ws = null
 let messages = []
+let interval = null
+
+const keepaliveMessage = JSON.stringify({ type: 'KEEPALIVE' })
+const keepalive = () => {
+  if (ws && ws.readyState === 1) ws.send(keepaliveMessage)
+}
 
 export const openWS = (params) => {
   if (ws && ws.close) ws.close()
@@ -21,9 +27,12 @@ export const openWS = (params) => {
     messages.forEach((msg) => ws.send(JSON.stringify(msg)))
     messages = []
 
+    interval = setInterval(keepalive, 30000)
+
     ws.onclose = () => {
       console.log('disconnected from websocket')
       store.dispatch(wsActions.close())
+      clearInterval(interval)
     }
   }
 

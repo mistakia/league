@@ -64,7 +64,9 @@ export default class AuctionTargets extends React.Component {
             <div className='auction__targets-player-bye'>
               <NFLTeamBye team={player.team} />
             </div>
-            <div className='auction__targets-player-salary'>${salary}</div>
+            <div className='auction__targets-player-salary metric'>
+              ${salary}
+            </div>
           </div>
         )
         items[position].push(item)

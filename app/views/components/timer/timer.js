@@ -20,10 +20,12 @@ export default class Timer extends React.Component {
     if (seconds < 0) {
       clearInterval(this.interval)
       this.interval = null
-      this.setState({ seconds: 0 })
+      this.setState({ seconds: 0, alertFired: false })
     } else if (seconds < 5) {
-      this.setState({ seconds, warning: true })
-      beep()
+      if (!this.state.alertFired && this.props.alert) {
+        beep()
+      }
+      this.setState({ seconds, warning: true, alertFired: true })
     } else {
       this.setState({ seconds, warning: false })
     }
@@ -34,12 +36,12 @@ export default class Timer extends React.Component {
     const seconds = this.props.expiration - now
 
     if (!this.interval && seconds > 0) {
-      this.interval = setInterval(this.tick, 1000)
+      this.interval = setInterval(this.tick, 500)
     }
   }
 
   componentDidMount = () => {
-    this.interval = setInterval(this.tick, 1000)
+    this.interval = setInterval(this.tick, 500)
   }
 
   render = () => {
@@ -48,7 +50,7 @@ export default class Timer extends React.Component {
     return (
       <div className={classNames.join(' ')}>
         <div className='timer__flash' />
-        <div className='timer__time'>
+        <div className='timer__time metric'>
           {('0' + this.state.seconds).slice(-2)}
         </div>
       </div>
@@ -57,5 +59,6 @@ export default class Timer extends React.Component {
 }
 
 Timer.propTypes = {
-  expiration: PropTypes.number
+  expiration: PropTypes.number,
+  alert: PropTypes.bool
 }

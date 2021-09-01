@@ -25,6 +25,7 @@ import {
   getPlayers
 } from '@core/players'
 import { constants, getEligibleSlots } from '@common'
+import { beep } from '@core/audio'
 import Worker from 'workerize-loader?inline!../worker' // eslint-disable-line import/no-webpack-loader-syntax
 
 export function* optimize() {
@@ -179,6 +180,10 @@ export function pause() {
   send({ type: auctionActions.AUCTION_PAUSE })
 }
 
+export function soundNotification() {
+  beep()
+}
+
 //= ====================================
 //  WATCHERS
 // -------------------------------------
@@ -230,6 +235,14 @@ export function* watchSetValueType() {
   yield takeLatest(auctionActions.SET_VALUE_TYPE, optimize)
 }
 
+export function* watchAuctionStart() {
+  yield takeLatest(auctionActions.AUCTION_START, soundNotification)
+}
+
+export function* watchAuctionPaused() {
+  yield takeLatest(auctionActions.AUCTION_PAUSED, soundNotification)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -245,5 +258,7 @@ export const auctionSagas = [
   fork(watchSetAuctionBudget),
   fork(watchAuctionPause),
   fork(watchAuctionResume),
-  fork(watchSetValueType)
+  fork(watchSetValueType),
+  fork(watchAuctionStart),
+  fork(watchAuctionPaused)
 ]
