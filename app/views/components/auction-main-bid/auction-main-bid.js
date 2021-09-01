@@ -131,16 +131,32 @@ export default class AuctionMainBid extends React.Component {
     if (!auctionStart || !isStarted || isComplete) {
       action = null
     } else if (isPaused) {
-      action = <Button disabled>Paused</Button>
+      action = (
+        <Button disabled text>
+          Paused
+        </Button>
+      )
     } else if (isLocked) {
-      action = <Button disabled>Locked</Button>
+      action = (
+        <Button disabled text>
+          Locked
+        </Button>
+      )
     } else if (playerId) {
       if (isWinningBid) {
         action = <Button disabled>Winning Bid</Button>
       } else if (isAboveCap) {
-        action = <Button disabled>Exceeded CAP</Button>
+        action = (
+          <Button disabled text>
+            Exceeded CAP
+          </Button>
+        )
       } else if (!isEligible) {
-        action = <Button disabled>Ineligible</Button>
+        action = (
+          <Button disabled text>
+            Ineligible
+          </Button>
+        )
       } else {
         action = (
           <Button onClick={this.handleClickBid}>Bid ${this.state.value}</Button>
@@ -153,7 +169,11 @@ export default class AuctionMainBid extends React.Component {
         </Button>
       )
     } else {
-      action = <Button disabled>Waiting</Button>
+      action = (
+        <Button disabled text>
+          Waiting
+        </Button>
+      )
     }
 
     let main
@@ -190,7 +210,10 @@ export default class AuctionMainBid extends React.Component {
       <div className='auction__main-bid'>
         {isStarted && !isComplete && (
           <div className='auction__main-timer'>
-            <Timer expiration={timer} />
+            <Timer
+              expiration={timer}
+              alert={isNominating || Boolean(playerId)}
+            />
           </div>
         )}
         <div className='auction__main-body'>{main}</div>

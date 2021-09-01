@@ -66,12 +66,12 @@ export default class AuctionCommissionerControls extends React.Component {
           onOpen={this.handleOpen}
           open={open}>
           {action}
-          <SpeedDialAction
-            icon={<Icon name='previous' />}
-            tooltipTitle='Rewind'
-            tooltipOpen
-            onClick={this.handleRewind}
-          />
+          {/* <SpeedDialAction
+              icon={<Icon name='previous' />}
+              tooltipTitle='Rewind'
+              tooltipOpen
+              onClick={this.handleRewind}
+              /> */}
         </SpeedDial>
       </div>
     )
