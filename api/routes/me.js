@@ -135,8 +135,6 @@ router.put('/?', async (req, res) => {
       'email',
       'password',
       'vbaseline',
-      'vorpw',
-      'volsw',
       'watchlist',
       'text',
       'voice'
@@ -152,18 +150,6 @@ router.put('/?', async (req, res) => {
     if (type === 'password') {
       const salt = await bcrypt.genSalt(10)
       value = await bcrypt.hash(value, salt)
-    }
-
-    if (type === 'vorpw' || type === 'volsw') {
-      if (isNaN(value)) {
-        return res.status(400).send({ error: 'invalid value param' })
-      }
-
-      value = parseFloat(value)
-
-      if (value === 1) {
-        value = null
-      }
     }
 
     await db('users')

@@ -14,8 +14,6 @@ const initialState = new Record({
   isPending: true,
   isUpdating: false,
   authError: null,
-  vorpw: null,
-  volsw: null,
   email: null,
   vbaseline: 'default',
   text: 0,
@@ -54,8 +52,6 @@ export function appReducer(state = initialState(), { payload, type }) {
           ? payload.data.teams[0].uid
           : undefined,
         userId: payload.data.user.id,
-        vorpw: payload.data.user.vorpw,
-        volsw: payload.data.user.volsw,
         vbaseline: payload.data.user.vbaseline,
         email: payload.data.user.eamil,
         text: payload.data.user.text,
