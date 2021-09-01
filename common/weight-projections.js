@@ -1,4 +1,4 @@
-import { fantasyStats } from './constants'
+import { fantasyStats, sources } from './constants'
 
 const removeFalsy = (obj) => {
   const newObj = {}
@@ -17,7 +17,7 @@ const weightProjections = ({ projections, weights = [], userId, week }) => {
   const userProjection =
     projections.find((p) => p.userid === userId && p.week === week) || {}
   const sourceProjections = projections.filter(
-    (p) => p.sourceid && p.week === week
+    (p) => p.sourceid && p.week === week && p.sourceid !== sources.AVERAGE
   )
 
   for (const projection of sourceProjections) {
@@ -34,6 +34,7 @@ const weightProjections = ({ projections, weights = [], userId, week }) => {
       }
     }
   }
+
   const result = {}
   for (const r in data) {
     const item = data[r]

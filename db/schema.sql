@@ -1611,6 +1611,7 @@ CREATE TABLE `projections` (
   `twoptc` decimal(3,1) DEFAULT NULL,
   `snp` decimal(5,1) DEFAULT NULL,
   `fgm` decimal(4,1) DEFAULT NULL,
+  `fgy` int(3) DEFAULT 0,
   `fg19` decimal(3,1) DEFAULT NULL,
   `fg29` decimal(3,1) DEFAULT NULL,
   `fg39` decimal(3,1) DEFAULT NULL,
@@ -1637,6 +1638,82 @@ CREATE TABLE `projections` (
   UNIQUE KEY `userid` (`userid`,`player`,`year`,`week`),
   UNIQUE KEY `sourceid` (`sourceid`,`player`,`year`,`week`,`timestamp`),
   KEY `player` (`player`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `league_player_projection_points`
+--
+
+DROP TABLE IF EXISTS `league_player_projection_points`;
+
+CREATE TABLE `league_player_projection_points` (
+  `player` varchar(7) NOT NULL,
+  `week` varchar(3) NOT NULL,
+  `year` int(4) NOT NULL,
+  `lid` int(6) NOT NULL,
+
+  `total` decimal(5,2) DEFAULT NULL,
+
+  `pa` decimal(5,1) DEFAULT NULL,
+  `pc` decimal(5,1) DEFAULT NULL,
+  `py` decimal(5,1) DEFAULT NULL,
+  `ints` decimal(3,1) DEFAULT NULL,
+  `tdp` decimal(3,1) DEFAULT NULL,
+  `ra` decimal(4,1) DEFAULT NULL,
+  `ry` decimal(5,1) DEFAULT NULL,
+  `tdr` decimal(3,1) DEFAULT NULL,
+  `trg` decimal(4,1) DEFAULT NULL,
+  `rec` decimal(4,1) DEFAULT NULL,
+  `recy` decimal(5,1) DEFAULT NULL,
+  `tdrec` decimal(3,1) DEFAULT NULL,
+  `fuml` decimal(3,1) DEFAULT NULL,
+  `twoptc` decimal(3,1) DEFAULT NULL,
+  `snp` decimal(5,1) DEFAULT NULL,
+  `fgm` decimal(4,1) DEFAULT NULL,
+  `fg19` decimal(3,1) DEFAULT NULL,
+  `fg29` decimal(3,1) DEFAULT NULL,
+  `fg39` decimal(3,1) DEFAULT NULL,
+  `fg49` decimal(3,1) DEFAULT NULL,
+  `fg50` decimal(3,1) DEFAULT NULL,
+  `xpm` decimal(3,1) DEFAULT NULL,
+  `dsk` decimal(4,1) DEFAULT NULL,
+  `dint` decimal(4,1) DEFAULT NULL,
+  `dff` decimal(4,1) DEFAULT NULL,
+  `drf` decimal(4,1) DEFAULT NULL,
+  `dtno` decimal(4,1) DEFAULT NULL,
+  `dfds` decimal(4,1) DEFAULT NULL,
+  `dpa` decimal(4,1) DEFAULT NULL,
+  `dya` decimal(5,1) DEFAULT NULL,
+  `dblk` decimal(4,1) DEFAULT NULL,
+  `dsf` decimal(4,1) DEFAULT NULL,
+  `dtpr` decimal(4,1) DEFAULT NULL,
+  `dtd` decimal(4,1) DEFAULT NULL,
+  `krtd` decimal(4,1) DEFAULT NULL,
+  `prtd` decimal(4,1) DEFAULT NULL,
+  KEY `player` (`player`),
+  UNIQUE KEY `player_league_points` (`player`, `lid`, `week`, `year`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `league_player_projection_values`
+--
+
+DROP TABLE IF EXISTS `leauge_player_projection_values`;
+
+CREATE TABLE `league_player_projection_values` (
+  `player` varchar(7) NOT NULL,
+  `week` varchar(3) NOT NULL,
+  `year` int(4) NOT NULL,
+  `lid` int(6) NOT NULL,
+
+  `vorp` decimal(5,2) DEFAULT NULL,
+  `salary` decimal(5,2) DEFAULT NULL,
+  KEY `player` (`player`),
+  UNIQUE KEY `player_value` (`player`, `lid`, `week`, `year`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
