@@ -110,13 +110,11 @@ export function playersReducer(state = initialState, { payload, type }) {
         }
         payload.players.forEach((p) => {
           state.mergeIn(['items', p.player], {
-            projection: new Map(p.projection),
             points: new Map(p.points),
             values: new Map(p.values),
             values_adj: new Map(p.values_adj),
             vorp: new Map(p.vorp),
-            vorp_adj: new Map(p.vorp_adj),
-            projWks: p.projWks
+            vorp_adj: new Map(p.vorp_adj)
           })
         })
       })

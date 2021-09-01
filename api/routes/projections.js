@@ -1,22 +1,24 @@
 const express = require('express')
-const dayjs = require('dayjs')
+// const dayjs = require('dayjs')
 const router = express.Router()
 
 const { constants } = require('../../common')
-const { getProjections } = require('../../utils')
 
 router.get('/?', async (req, res) => {
   const { db, logger, cache } = req.app.locals
   try {
     // 12 hours
-    res.set('Expires', dayjs().add('12', 'hour').toDate().toUTCString())
-    res.set('Cache-Control', 'public, max-age=43200')
-    res.set('Pragma', null)
-    res.set('Surrogate-Control', null)
-
+    /* res.set('Expires', dayjs().add('12', 'hour').toDate().toUTCString())
+     * res.set('Cache-Control', 'public, max-age=43200')
+     * res.set('Pragma', null)
+     * res.set('Surrogate-Control', null)
+     */
     let projections = cache.get('projections')
     if (!projections) {
-      projections = await getProjections()
+      projections = await db('projections')
+        .where('sourceid', constants.sources.AVERAGE)
+        .where('year', constants.season.year)
+        .where('week', '>=', constants.season.week)
       cache.set('projections', projections, 14400) // 4 hours
     }
 

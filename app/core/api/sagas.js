@@ -34,7 +34,6 @@ import {
   playersRequestActions,
   playersSearchActions,
   getPlayerActions,
-  getProjectionsActions,
   putProjectionActions,
   delProjectionActions,
   getCutlistActions,
@@ -236,11 +235,6 @@ export const fetchTeamGamelogs = fetch.bind(
   getTeamGamelogsActions
 )
 
-export const getProjections = fetch.bind(
-  null,
-  api.getProjections,
-  getProjectionsActions
-)
 export const putProjection = fetch.bind(
   null,
   api.putProjection,

@@ -48,7 +48,6 @@ export const Player = new Record({
   status: null,
   injury_status: null,
   injuyrBodyPart: null,
-  projWks: null,
   espn_id: null,
   gsisid: null,
   esbid: null,

@@ -79,6 +79,12 @@ export default class SelectedPlayer extends React.Component {
 
     if (!player.player) return null
 
+    const blacklist = ['0', 'ros']
+    const projWks = player.projection
+      .keySeq()
+      .toArray()
+      .filter((week) => !blacklist.includes(week)).length
+
     return (
       <Dialog
         open={!!player.player}
@@ -135,9 +141,9 @@ export default class SelectedPlayer extends React.Component {
           <div className='selected__player-header-section'>
             <div className='selected__player-header-item'>
               <label>Proj/G</label>
-              {(
-                player.getIn(['points', 'ros', 'total']) / player.projWks
-              ).toFixed(1) || '-'}
+              {(player.getIn(['points', 'ros', 'total']) / projWks).toFixed(
+                1
+              ) || '-'}
             </div>
             <div className='selected__player-header-item'>
               <label>VOBA</label>

@@ -4,7 +4,6 @@ import {
   uniqBy,
   constants,
   calculatePercentiles,
-  weightProjections,
   calculatePoints,
   calculateBaselines,
   calculateValues,
@@ -44,7 +43,7 @@ export function processTeamGamelogs(gamelogs) {
 
 export function calculatePlayerValues(payload) {
   const currentWeek = constants.season.week
-  const { userId, vorpw, volsw, league, players, rosterRows } = payload
+  const { vorpw, volsw, league, players, rosterRows } = payload
   const customBaselines = payload.baselines
 
   const rows = []
@@ -69,48 +68,11 @@ export function calculatePlayerValues(payload) {
 
   const finalWeek = constants.season.finalWeek
   for (const player of players) {
-    const { projections } = player
-
-    player.projection = {}
     for (let week = 0; week <= finalWeek; week++) {
-      const projection = weightProjections({
-        projections,
-        weights: payload.sources,
-        userId,
-        week
-      })
-      player.projection[week] = projection
-
-      // calculate points based on projection
-      const points = calculatePoints({
-        stats: projection,
-        position: player.pos,
-        league
-      })
-      player.points[week] = points
+      player.points[week] = player.points[week] || { total: 0 }
       player.vorp[week] = {}
       player.values[week] = {}
     }
-
-    // calculate ros projection
-    const ros = constants.createStats()
-    let projWks = 0
-    for (const [week, projection] of Object.entries(player.projection)) {
-      if (week && week !== '0' && week >= currentWeek) {
-        projWks += 1
-        for (const [key, value] of Object.entries(projection)) {
-          ros[key] += value
-        }
-      }
-    }
-
-    player.projWks = projWks
-    player.projection.ros = ros
-    player.points.ros = calculatePoints({
-      stats: ros,
-      position: player.pos,
-      league
-    })
   }
 
   const baselines = {}
