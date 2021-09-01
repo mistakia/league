@@ -83,17 +83,6 @@ export default class SettingsValue extends React.Component {
         )
         break
 
-      case 'hybrid':
-        baselineDescription = (
-          <p>
-            <strong>Hybrid</strong> allows for you to mix{' '}
-            <strong>Best Available</strong> and <strong>Worst Starter</strong>{' '}
-            based on specified weights. Weights are relative and normalized,
-            thus equal weight values are the same as each having a weight of 1.
-          </p>
-        )
-        break
-
       case 'manual':
         baselineDescription = (
           <p>

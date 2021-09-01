@@ -43,7 +43,7 @@ export function processTeamGamelogs(gamelogs) {
 
 export function calculatePlayerValues(payload) {
   const currentWeek = constants.season.week
-  const { vorpw, volsw, league, players, rosterRows } = payload
+  const { league, players, rosterRows } = payload
   const customBaselines = payload.baselines
 
   const rows = []
@@ -96,7 +96,7 @@ export function calculatePlayerValues(payload) {
     baselines[week] = b
 
     // calculate values
-    const total = calculateValues({ players, baselines: b, vorpw, volsw, week })
+    const total = calculateValues({ players, baselines: b, week })
     calculatePrices({ cap: leagueTotalCap, total, players, week })
   }
 
@@ -105,7 +105,6 @@ export function calculatePlayerValues(payload) {
     default: 0,
     available: 0,
     starter: 0,
-    hybrid: 0,
     manual: 0
   }
 
@@ -113,7 +112,6 @@ export function calculatePlayerValues(payload) {
     default: 0,
     available: 0,
     starter: 0,
-    hybrid: 0,
     manual: 0
   }
 
@@ -121,7 +119,6 @@ export function calculatePlayerValues(payload) {
     default: 0,
     available: 0,
     starter: 0,
-    hybrid: 0,
     manual: 0
   }
 
