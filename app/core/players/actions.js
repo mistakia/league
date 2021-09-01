@@ -29,10 +29,6 @@ export const playerActions = {
   GET_PLAYER_PENDING: 'GET_PLAYER_PENDING',
   GET_PLAYER_FULFILLED: 'GET_PLAYER_FULFILLED',
 
-  GET_PROJECTIONS_FAILED: 'GET_PROJECTIONS_FAILED',
-  GET_PROJECTIONS_PENDING: 'GET_PROJECTIONS_PENDING',
-  GET_PROJECTIONS_FULFILLED: ' GET_PROJECTIONS_FULFILLED',
-
   SAVE_PROJECTION: 'SAVE_PROJECTION',
   DELETE_PROJECTION: 'DELETE_PROJECTION',
   SET_PROJECTION: 'SET_PROJECTION',
@@ -254,29 +250,6 @@ export const playerActions = {
     }
   }),
 
-  getProjectionsFailed: (opts, error) => ({
-    type: playerActions.GET_PROJECTIONS_FAILED,
-    payload: {
-      opts,
-      error
-    }
-  }),
-
-  getProjectionsPending: (opts) => ({
-    type: playerActions.GET_PROJECTIONS_PENDING,
-    payload: {
-      opts
-    }
-  }),
-
-  getProjectionsFulfilled: (opts, data) => ({
-    type: playerActions.GET_PROJECTIONS_FULFILLED,
-    payload: {
-      opts,
-      data
-    }
-  }),
-
   putProjectionFailed: (opts, error) => ({
     type: playerActions.PUT_PROJECTION_FAILED,
     payload: {
@@ -401,12 +374,6 @@ export const getPlayerActions = {
   failed: playerActions.getPlayerFailed,
   fulfilled: playerActions.getPlayerFulfilled,
   pending: playerActions.getPlayerPending
-}
-
-export const getProjectionsActions = {
-  failed: playerActions.getProjectionsFailed,
-  pending: playerActions.getProjectionsPending,
-  fulfilled: playerActions.getProjectionsFulfilled
 }
 
 export const putProjectionActions = {

@@ -1221,7 +1221,10 @@ export const sourcesTitle = {
   13: 'Numberfire',
   14: 'Draft Kings',
   15: 'BetOnline',
-  16: '4For4'
+  16: '4For4',
+  17: 'FantasyPros',
+
+  18: 'Average'
 }
 
 export const rankings = {

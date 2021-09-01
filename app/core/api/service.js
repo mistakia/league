@@ -189,10 +189,6 @@ export const api = {
     const url = `${BASE_URL}/stats/gamelogs/teams`
     return { url }
   },
-  getProjections() {
-    const url = `${BASE_URL}/projections`
-    return { url }
-  },
   putProjection(data) {
     const url = `${BASE_URL}/projections/${data.playerId}`
     return { url, ...PUT(data) }

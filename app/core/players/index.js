@@ -23,7 +23,6 @@ export {
   playersRequestActions,
   playersSearchActions,
   getPlayerActions,
-  getProjectionsActions,
   putProjectionActions,
   delProjectionActions,
   getCutlistActions,

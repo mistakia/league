@@ -17,7 +17,6 @@ import {
   fetchPlayers,
   searchPlayers,
   getPlayer,
-  getProjections,
   putProjection,
   delProjection,
   putSetting
@@ -42,15 +41,6 @@ export function* search() {
   const players = yield select(getPlayers)
   const q = players.get('search')
   yield call(searchPlayers, { q, leagueId })
-}
-
-export function* loadProjections() {
-  yield put(
-    notificationActions.show({
-      message: 'Loading Projections'
-    })
-  )
-  yield fork(getProjections)
 }
 
 export function* calculateValues() {
@@ -210,12 +200,8 @@ export function* cutlistNotification() {
 //  WATCHERS
 // -------------------------------------
 
-export function* watchGetProjectionsFulfilled() {
-  yield takeLatest(playerActions.GET_PROJECTIONS_FULFILLED, calculateValues)
-}
-
 export function* watchFetchPlayersFulfilled() {
-  yield takeLatest(playerActions.FETCH_PLAYERS_FULFILLED, loadProjections)
+  yield takeLatest(playerActions.FETCH_PLAYERS_FULFILLED, calculateValues)
 }
 
 export function* watchAuthFulfilled() {
@@ -307,7 +293,6 @@ export function* watchPostCutlistFulfilled() {
 // -------------------------------------
 
 export const playerSagas = [
-  fork(watchGetProjectionsFulfilled),
   fork(watchFetchPlayersFulfilled),
   fork(watchAuthFulfilled),
   fork(watchAuthFailed),

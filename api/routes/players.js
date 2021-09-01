@@ -3,7 +3,7 @@ const express = require('express')
 const router = express.Router()
 
 router.get('/?', async (req, res) => {
-  const { db, logger } = req.app.locals
+  const { db, logger, cache } = req.app.locals
   try {
     const search = req.query.q
     const { leagueId } = req.query
@@ -179,8 +179,49 @@ router.get('/?', async (req, res) => {
       }
     }
 
+    const playerMap = {}
+    for (const player of data) {
+      player.points = {}
+      player.projection = {}
+      playerMap[player.player] = player
+    }
+
+    if (leagueId) {
+      const cacheKey = `/league/${leagueId}/projections`
+      let leaguePointsProj = cache.get(cacheKey)
+      if (!leaguePointsProj) {
+        leaguePointsProj = await db('league_player_projection_points')
+          .where({
+            lid: leagueId,
+            year: constants.season.year
+          })
+          .whereIn('player', Object.keys(playerMap))
+        cache.set(cacheKey, leaguePointsProj, 14400) // 4 hours
+      }
+
+      for (const pointProjection of leaguePointsProj) {
+        playerMap[pointProjection.player].points[
+          pointProjection.week
+        ] = pointProjection
+      }
+    }
+
+    let projections = cache.get('projections')
+    if (!projections) {
+      projections = await db('projections')
+        .where('sourceid', constants.sources.AVERAGE)
+        .where('year', constants.season.year)
+        .where('week', '>=', constants.season.week)
+        .whereIn('player', Object.keys(playerMap))
+      cache.set('projections', projections, 14400) // 4 hours
+    }
+
+    for (const projection of projections) {
+      playerMap[projection.player].projection[projection.week] = projection
+    }
+
     logger(`responding with ${data.length} players`)
-    res.send(data)
+    res.send(Object.values(playerMap))
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })

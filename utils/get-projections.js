@@ -1,7 +1,7 @@
 const { constants } = require('../common')
 const db = require('../db')
 
-module.exports = async function () {
+module.exports = async function (week) {
   const players = await db('player')
     .select('player')
     .whereIn('pos', constants.positions)
@@ -14,7 +14,7 @@ module.exports = async function () {
     .where('year', constants.season.year)
     .whereNull('userid')
 
-  const projections = await db
+  const query = db
     .select('*')
     .from(db.raw('(' + sub.toString() + ') AS X'))
     .innerJoin('projections', function () {
@@ -24,8 +24,13 @@ module.exports = async function () {
       })
     })
     .whereIn('player', playerIds)
-    .where('week', '>=', constants.season.week)
     .whereNull('userid')
 
-  return projections
+  if (typeof week !== 'undefined') {
+    query.where('week', week)
+  } else {
+    query.where('week', '>=', constants.season.week)
+  }
+
+  return query
 }
