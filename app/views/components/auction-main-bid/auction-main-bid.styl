@@ -26,7 +26,9 @@
     margin-left 60px
     text-align center
     font-size 20px
+    padding-top 12px
     background #fafafa
+    font-family 'IBM Plex Mono', monospace
     &::-webkit-inner-spin-button
     &::-webkit-outer-spin-button
       -webkit-appearance none
@@ -50,19 +52,20 @@
   cursor pointer
   user-select none
   color white
-  background #fafafa
   border-left 1px solid #f0f0f0
   border-right 1px solid $borderColor
   &:hover
-    background #f0f0f0
+    background #fafafa
 
 .auction__main-input-up
   absolute top
+  font-size 30px
   color saturate(green, 10%)
   border-bottom 1px solid #f0f0f0
 
 .auction__main-input-down
   absolute bottom
+  font-weight 900
   color saturate(red, 10%)
 
 .auction__main-action
@@ -77,6 +80,5 @@
   display flex
   justify-content center
   align-items center
-  font-size 30px
   background #fafafa
   border-right 1px solid #f0f0f0

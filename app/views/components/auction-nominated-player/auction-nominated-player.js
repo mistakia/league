@@ -15,7 +15,9 @@ export default class AuctionNominatedPlayer extends React.Component {
 
     return (
       <div className='auction__nominated-player'>
-        <PlayerName playerId={player.player} />
+        <div className='nominated__player'>
+          <PlayerName playerId={player.player} headshot />
+        </div>
         <div className='nominated__player-details'>
           <div className='nominated__player-detail'>
             Retail: ${player.getIn(['values', valueType, vbaseline], 0)}
