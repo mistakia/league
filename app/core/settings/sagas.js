@@ -17,7 +17,7 @@ export function* updateSetting({ payload }) {
   if (token) yield call(putSetting, payload)
   else yield putResolve(settingActions.set(payload))
 
-  if (['vbaseline', 'vorpw', 'volsw'].includes(payload.type)) {
+  if (['vbaseline'].includes(payload.type)) {
     yield call(calculateValues)
   }
 }

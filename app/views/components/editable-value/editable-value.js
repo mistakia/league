@@ -1,7 +1,6 @@
 import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
-import EditableValueWeight from '@components/editable-value-weight'
 import FormControl from '@material-ui/core/FormControl'
 import Select from '@material-ui/core/Select'
 import InputLabel from '@material-ui/core/InputLabel'
@@ -13,13 +12,13 @@ export default class EditableValue extends React.Component {
   constructor(props) {
     super(props)
 
-    const { vbaseline, vorpw, volsw } = this.props.app
-    this.state = { vbaseline, vorpw, volsw }
+    const { vbaseline } = this.props.app
+    this.state = { vbaseline }
   }
 
   static getDerivedStateFromProps(props, state) {
-    const { vbaseline, vorpw, volsw } = props.app
-    return { vbaseline, vorpw, volsw }
+    const { vbaseline } = props.app
+    return { vbaseline }
   }
 
   handleChange = (event) => {
@@ -29,21 +28,7 @@ export default class EditableValue extends React.Component {
   }
 
   render = () => {
-    const { vbaseline, vorpw, volsw } = this.state
-    const weights = (
-      <div className='editable__value-weights'>
-        <EditableValueWeight
-          weight={vorpw}
-          type='vorpw'
-          label='Best Available Weight'
-        />
-        <EditableValueWeight
-          weight={volsw}
-          type='volsw'
-          label='Worst Starter Weight'
-        />
-      </div>
-    )
+    const { vbaseline } = this.state
     return (
       <div className='editable__value'>
         <FormControl
@@ -59,11 +44,9 @@ export default class EditableValue extends React.Component {
             <MenuItem value='default'>Default</MenuItem>
             <MenuItem value='available'>Best Available</MenuItem>
             <MenuItem value='starter'>Worst Starter</MenuItem>
-            <MenuItem value='hybrid'>Hybrid</MenuItem>
             <MenuItem value='manual'>Manual</MenuItem>
           </Select>
         </FormControl>
-        {vbaseline === 'hybrid' && weights}
       </div>
     )
   }

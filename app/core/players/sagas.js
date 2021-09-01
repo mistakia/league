@@ -49,7 +49,7 @@ export function* calculateValues() {
       message: 'Calculating values'
     })
   )
-  const { userId, vorpw, volsw } = yield select(getApp)
+  const { userId } = yield select(getApp)
   const league = yield select(getCurrentLeague)
   const players = yield select(getAllPlayers)
   const sources = yield select(getSources)
@@ -63,9 +63,7 @@ export function* calculateValues() {
     sources: sources.toList().toJS(),
     rosterRows,
     baselines,
-    userId,
-    vorpw,
-    volsw
+    userId
   })
   worker.terminate()
   yield putResolve(playerActions.setValues(result))
