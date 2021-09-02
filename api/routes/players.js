@@ -193,7 +193,10 @@ router.get('/?', async (req, res) => {
 
     const playerMap = {}
     for (const player of data) {
-      player.value = player.value || null
+      player.value =
+        typeof player.value === 'undefined' || player.value === null
+          ? null
+          : player.value
       player.points = {}
       player.vorp = {}
       player.vorp_adj = {}
