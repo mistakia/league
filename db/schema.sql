@@ -1660,7 +1660,7 @@ CREATE TABLE `league_player_projection_points` (
   `pc` decimal(5,1) DEFAULT NULL,
   `py` decimal(5,1) DEFAULT NULL,
   `ints` decimal(3,1) DEFAULT NULL,
-  `tdp` decimal(3,1) DEFAULT NULL,
+  `tdp` decimal(4,1) DEFAULT NULL,
   `ra` decimal(4,1) DEFAULT NULL,
   `ry` decimal(5,1) DEFAULT NULL,
   `tdr` decimal(3,1) DEFAULT NULL,
