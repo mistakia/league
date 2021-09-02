@@ -38,6 +38,21 @@ export function getPlayers(state) {
   return state.get('players')
 }
 
+export function getBaselines(state) {
+  const result = state.getIn(['players', 'baselines'])
+  const players = getAllPlayers(state)
+  return result.withMutations((b) => {
+    for (const [week, positions] of b.entrySeq()) {
+      if (constants.positions.includes(week)) continue
+      for (const [position, baselines] of positions.entrySeq()) {
+        for (const [baseline, player] of baselines.entrySeq()) {
+          b.setIn([week, position, baseline], players.get(player))
+        }
+      }
+    }
+  })
+}
+
 export function getTransitionPlayers(state) {
   const players = getAllPlayers(state)
   return players.filter((p) => p.tag === constants.tags.TRANSITION)

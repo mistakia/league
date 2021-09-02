@@ -91,21 +91,20 @@ export default class PlayersPage extends React.Component {
   }
 
   handleExport = () => {
-    const { players, vbaseline, isSeasonView, week } = this.props
+    const { players, isSeasonView, week } = this.props
     const data = players.map((p) => {
       const item = {
         name: p.name,
         team: p.team,
         pos: p.pos,
-        salary: p.getIn(['values', `${week}`, vbaseline], 0).toFixed(1),
+        salary: p.getIn(['market_salary', `${week}`], 0).toFixed(1),
         inflation: p
           .getIn([
-            'values',
-            isSeasonView ? 'inflationSeason' : 'inflation',
-            vbaseline
+            'market_salary',
+            isSeasonView ? 'inflationSeason' : 'inflation'
           ])
           .toFixed(1),
-        vorp: p.getIn(['vorp', `${week}`, vbaseline], 0).toFixed(1)
+        vorp: p.getIn(['vorp', `${week}`], 0).toFixed(1)
       }
 
       for (const stat of constants.stats) {
@@ -135,7 +134,6 @@ export default class PlayersPage extends React.Component {
   render = () => {
     const {
       players,
-      vbaseline,
       isSeasonView,
       isStatsView,
       isStatsPassingView,
@@ -252,18 +250,18 @@ export default class PlayersPage extends React.Component {
             <PlayerHeader
               className='table__cell metric'
               label='Market'
-              value={`values.${week}.${vbaseline}`}
+              value={`market_salary.${week}`}
             />
           )}
           <PlayerHeader
             className='table__cell metric'
             label='Value'
-            value={`vorp.${week}.${vbaseline}`}
+            value={`vorp.${week}`}
           />
           <PlayerHeader
             className='table__cell metric'
             label='Adj Value'
-            value={`vorp_adj.${week}.${vbaseline}`}
+            value={`vorp_adj.${week}`}
           />
           <PlayerHeader
             className='table__cell metric'
@@ -382,7 +380,6 @@ PlayersPage.propTypes = {
   orderBy: PropTypes.string,
   players: ImmutablePropTypes.list,
   selected: PropTypes.string,
-  vbaseline: PropTypes.string,
   week: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   isSeasonView: PropTypes.bool,
   isStatsView: PropTypes.bool,

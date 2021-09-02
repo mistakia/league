@@ -22,6 +22,7 @@ module.exports = {
   rules: {
     curly: ['off'],
     indent: ['off'],
+    camelcase: ['off'],
     'multiline-ternary': ['off', 'always'],
     'generator-star-spacing': [
       'error',

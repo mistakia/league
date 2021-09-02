@@ -26,7 +26,6 @@ export default function DraftPage() {
     league,
     selectedPlayer,
     drafted,
-    vbaseline,
     isDraftWindowOpen,
     teamId
   } = this.props
@@ -94,7 +93,7 @@ export default function DraftPage() {
   }
 
   const sorted = players.sort(
-    (a, b) => b.vorp.getIn(['0', vbaseline]) - a.vorp.getIn(['0', vbaseline])
+    (a, b) => b.vorp.getIn(['0']) - a.vorp.getIn(['0'])
   )
   const allRow = ({ index, key, ...params }) => {
     const player = sorted.get(index)

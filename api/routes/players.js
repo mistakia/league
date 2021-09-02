@@ -1,6 +1,8 @@
-import { constants } from '../../common'
 const express = require('express')
 const router = express.Router()
+
+const { constants } = require('../../common')
+const { getPlayerTransactions } = require('../../utils')
 
 router.get('/?', async (req, res) => {
   const { db, logger, cache } = req.app.locals
@@ -177,18 +179,33 @@ router.get('/?', async (req, res) => {
           }
         }
       }
+
+      const playerTransactions = await getPlayerTransactions({
+        lid: leagueId,
+        playerIds: leaguePlayerIds
+      })
+
+      for (const tran of playerTransactions) {
+        const player = data.find((p) => p.player === tran.player)
+        player.value = tran.value
+      }
     }
 
     const playerMap = {}
     for (const player of data) {
+      player.value = player.value || null
       player.points = {}
+      player.vorp = {}
+      player.vorp_adj = {}
+      player.market_salary = {}
+      player.market_salary_adj = {}
       player.projection = {}
       playerMap[player.player] = player
     }
 
     if (leagueId) {
-      const cacheKey = `/league/${leagueId}/projections`
-      let leaguePointsProj = cache.get(cacheKey)
+      const pointsCacheKey = `/league/${leagueId}/points`
+      let leaguePointsProj = cache.get(pointsCacheKey)
       if (!leaguePointsProj) {
         leaguePointsProj = await db('league_player_projection_points')
           .where({
@@ -196,13 +213,44 @@ router.get('/?', async (req, res) => {
             year: constants.season.year
           })
           .whereIn('player', Object.keys(playerMap))
-        cache.set(cacheKey, leaguePointsProj, 14400) // 4 hours
+        cache.set(pointsCacheKey, leaguePointsProj, 14400) // 4 hours
       }
 
       for (const pointProjection of leaguePointsProj) {
         playerMap[pointProjection.player].points[
           pointProjection.week
         ] = pointProjection
+      }
+
+      const valuesCacheKey = `/league/${leagueId}/values`
+      let leagueValuesProj = cache.get(valuesCacheKey)
+      if (!leagueValuesProj) {
+        leagueValuesProj = await db('league_player_projection_values')
+          .where({
+            lid: leagueId,
+            year: constants.season.year
+          })
+          .whereIn('player', Object.keys(playerMap))
+        cache.set(valuesCacheKey, leagueValuesProj, 14400) // 4 hours
+      }
+
+      for (const pointProjection of leagueValuesProj) {
+        const {
+          vorp,
+          vorp_adj,
+          market_salary,
+          market_salary_adj
+        } = pointProjection
+        playerMap[pointProjection.player].vorp[pointProjection.week] = vorp
+        playerMap[pointProjection.player].vorp_adj[
+          pointProjection.week
+        ] = vorp_adj
+        playerMap[pointProjection.player].market_salary[
+          pointProjection.week
+        ] = market_salary
+        playerMap[pointProjection.player].market_salary_adj[
+          pointProjection.week
+        ] = market_salary_adj
       }
     }
 

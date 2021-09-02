@@ -18,11 +18,11 @@ export default class TradePlayer extends React.Component {
         </div>
         <div className='trade__player-metric metric'>
           <label>Val</label>
-          {player.getIn(['vorp', 'ros', 'default'], 0).toFixed(1)}
+          {player.getIn(['vorp', 'ros'], 0).toFixed(1)}
         </div>
         <div className='trade__player-metric metric'>
           <label>aVal</label>
-          {player.getIn(['vorp_adj', 'ros', 'default'], 0).toFixed(1)}
+          {player.getIn(['vorp_adj', 'ros'], 0).toFixed(1)}
         </div>
         <div className='trade__player-metric metric'>
           <label>Pts+</label>

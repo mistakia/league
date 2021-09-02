@@ -50,39 +50,6 @@ export default class SettingsValue extends React.Component {
         )
         break
 
-      case 'available':
-        baselineDescription = (
-          <>
-            <p>
-              <strong>Best Available: </strong> The best available player at
-              each position that can be added. This is estimated when rosters
-              are not full but dynamically updates with each roster transaction.
-            </p>
-            <p>
-              Somewhat useful for determining the value of depth. Provides a
-              good &quot;floor&quot; value for starters. Provides a good
-              &quot;ceiling&quot; value for depth players.
-            </p>
-          </>
-        )
-        break
-
-      case 'starter':
-        baselineDescription = (
-          <>
-            <p>
-              <strong>Worst Starter: </strong> The worst player at each position
-              on a starting lineup
-            </p>
-            <p>
-              Useful for determining the true value of a players contribution to
-              your starting lineup. Provides a good &quot;ceiling&quot; value
-              for starters.
-            </p>
-          </>
-        )
-        break
-
       case 'manual':
         baselineDescription = (
           <p>

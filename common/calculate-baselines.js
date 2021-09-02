@@ -204,12 +204,12 @@ const calculateBaselines = ({ players, rosterRows, league, week }) => {
     const historicBaseline = league[`b_${position.toLowerCase()}`]
 
     if (isSeasonProjections && historicBaseline) {
-      result[position].defaultAvailable = grouped[position][historicBaseline]
+      result[position].historical = grouped[position][historicBaseline]
     } else {
-      result[position].defaultAvailable = defaultBaselines[position]
+      result[position].historical = defaultBaselines[position]
     }
 
-    result[position].starter = ws || result[position].defaultAvailable
+    result[position].starter = ws || result[position].historical
   }
 
   return result

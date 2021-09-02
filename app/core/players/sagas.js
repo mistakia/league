@@ -78,7 +78,6 @@ export function* calculateValues() {
 
 export function* toggleOrder({ payload }) {
   const { orderBy } = payload
-  const app = yield select(getApp)
   const players = yield select(getPlayers)
   const currentOrderBy = players.get('orderBy')
   const currentOrder = players.get('order')
@@ -87,7 +86,7 @@ export function* toggleOrder({ payload }) {
       yield put(
         playerActions.setOrder({
           order: 'desc',
-          orderBy: `vorp.ros.${app.vbaseline}` // TODO set based on view
+          orderBy: 'vorp.ros' // TODO set based on view
         })
       )
     } else {

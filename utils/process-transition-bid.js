@@ -7,7 +7,6 @@ const sendNotifications = require('./send-notifications')
 const createConditionalPick = require('./create-conditional-pick')
 const getTeam = require('./get-team')
 
-/* eslint-disable camelcase */
 module.exports = async function ({
   player,
   bid,
@@ -20,7 +19,6 @@ module.exports = async function ({
   // check player is on original team roster
   const isOriginalTeam = player_tid === tid
   const originalTeamRoster = await getRoster({ tid: player_tid })
-  /* eslint-enable camelcase */
   const playerRosterRow = originalTeamRoster.players.find(
     (p) => p.player === player
   )

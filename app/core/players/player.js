@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 import { Record, List, Map } from 'immutable'
 
 import { constants } from '@common'
@@ -32,8 +31,8 @@ export const Player = new Record({
   projection: new Map(),
   stats: new Map(constants.createFullStats()),
   points: new Map(),
-  values: new Map(),
-  values_adj: new Map(),
+  market_salary: new Map(),
+  market_salary_adj: new Map(),
   vorp: new Map(),
   vorp_adj: new Map(),
   projections: new List(),
@@ -85,8 +84,8 @@ export function createPlayer({
   dcp,
   projection,
   points,
-  values,
-  values_adj,
+  market_salary,
+  market_salary_adj,
   vorp,
   vorp_adj,
   projections,
@@ -135,8 +134,8 @@ export function createPlayer({
     depth_number: dcp,
     projection: new Map(projection),
     points: new Map(points),
-    values: new Map(values),
-    values_adj: new Map(values_adj),
+    market_salary: new Map(market_salary),
+    market_salary_adj: new Map(market_salary_adj),
     vorp: new Map(vorp),
     vorp_adj: new Map(vorp_adj),
     projections: new List(projections),

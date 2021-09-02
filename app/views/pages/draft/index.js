@@ -63,7 +63,6 @@ const mapStateToProps = createSelector(
       nextPick,
       selectedPlayer,
       teamId: app.teamId,
-      vbaseline: app.vbaseline,
       picks: draft.picks,
       drafted: draft.drafted,
       league
