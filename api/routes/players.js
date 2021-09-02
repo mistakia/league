@@ -36,7 +36,7 @@ router.get('/?', async (req, res) => {
     }
 
     const leaguePlayerIds = []
-    if (req.user && !search && leagueId) {
+    if (req.user && leagueId) {
       const playerSlots = await db('rosters_players')
         .join('rosters', 'rosters_players.rid', 'rosters.uid')
         .where('rosters.lid', leagueId)
@@ -124,7 +124,24 @@ router.get('/?', async (req, res) => {
 
     const data = await query
 
-    if (leaguePlayerIds.length) {
+    const playerMap = {}
+    for (const player of data) {
+      player.value = null
+      player.points = {}
+      player.vorp = {}
+      player.vorp_adj = {}
+      player.market_salary = {}
+      player.market_salary_adj = {}
+      player.projection = {}
+      playerMap[player.player] = player
+    }
+
+    const playerIds = Object.keys(playerMap)
+    const playerIdsInLeague = playerIds.filter((player) =>
+      leaguePlayerIds.includes(player)
+    )
+
+    if (playerIdsInLeague.length) {
       // TODO - get extension count for player
       const transactions = await db('transactions')
         .select(
@@ -148,7 +165,7 @@ router.get('/?', async (req, res) => {
         .where('rosters.year', constants.season.year)
         .where('rosters.lid', leagueId)
         .whereIn('type', [constants.transactions.EXTENSION])
-        .whereIn('transactions.player', leaguePlayerIds)
+        .whereIn('transactions.player', playerIdsInLeague)
 
       if (transactions.length) {
         for (const player of data) {
@@ -182,7 +199,7 @@ router.get('/?', async (req, res) => {
 
       const playerTransactions = await getPlayerTransactions({
         lid: leagueId,
-        playerIds: leaguePlayerIds
+        playerIds: playerIdsInLeague
       })
 
       for (const tran of playerTransactions) {
@@ -191,28 +208,13 @@ router.get('/?', async (req, res) => {
       }
     }
 
-    const playerMap = {}
-    for (const player of data) {
-      player.value =
-        typeof player.value === 'undefined' || player.value === null
-          ? null
-          : player.value
-      player.points = {}
-      player.vorp = {}
-      player.vorp_adj = {}
-      player.market_salary = {}
-      player.market_salary_adj = {}
-      player.projection = {}
-      playerMap[player.player] = player
-    }
-
     if (leagueId) {
       const leaguePointsProj = await db('league_player_projection_points')
         .where({
           lid: leagueId,
           year: constants.season.year
         })
-        .whereIn('player', Object.keys(playerMap))
+        .whereIn('player', playerIds)
 
       for (const pointProjection of leaguePointsProj) {
         playerMap[pointProjection.player].points[
@@ -225,7 +227,7 @@ router.get('/?', async (req, res) => {
           lid: leagueId,
           year: constants.season.year
         })
-        .whereIn('player', Object.keys(playerMap))
+        .whereIn('player', playerIds)
 
       for (const pointProjection of leagueValuesProj) {
         const {
@@ -251,7 +253,7 @@ router.get('/?', async (req, res) => {
       .where('sourceid', constants.sources.AVERAGE)
       .where('year', constants.season.year)
       .where('week', '>=', constants.season.week)
-      .whereIn('player', Object.keys(playerMap))
+      .whereIn('player', playerIds)
 
     for (const projection of projections) {
       playerMap[projection.player].projection[projection.week] = projection
