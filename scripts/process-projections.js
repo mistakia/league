@@ -51,7 +51,10 @@ const run = async ({ year = constants.season.year } = {}) => {
     projectionPlayerIds.concat(rosteredIds)
   )
 
-  const transactions = await getPlayerTransactions({ lid, playerIds: rosteredIds })
+  const transactions = await getPlayerTransactions({
+    lid,
+    playerIds: rosteredIds
+  })
 
   for (const tran of transactions) {
     const player = players.find((p) => p.player === tran.player)
@@ -59,7 +62,10 @@ const run = async ({ year = constants.season.year } = {}) => {
   }
 
   for (const player of players) {
-    player.value = player.value || null
+    player.value =
+      typeof player.value === 'undefined' || player.value === null
+        ? null
+        : player.value
     player.projection = {}
     player.points = {}
     player.vorp = {}
