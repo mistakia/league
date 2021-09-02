@@ -29,15 +29,8 @@ export default function AuctionPageRender() {
     tids,
     playerId,
     isCommish,
-    isHosted,
-    valueType
+    isHosted
   } = this.props
-
-  const sorted = players
-    .sort((a, b) => {
-      return b.getIn(['vorp', valueType]) - a.getIn(['vorp', valueType])
-    })
-    .toList()
 
   const TransactionRow = ({ index, key, ...params }) => {
     const transaction = transactions.get(index)
@@ -52,7 +45,7 @@ export default function AuctionPageRender() {
   }
 
   const playerRow = ({ index, key, ...params }) => {
-    const player = sorted.get(index)
+    const player = players.get(index)
     return <AuctionPlayer key={key} player={player} {...params} index={index} />
   }
 
@@ -78,7 +71,7 @@ export default function AuctionPageRender() {
                 width={width}
                 height={height}
                 rowHeight={25}
-                rowCount={sorted.size}
+                rowCount={players.size}
                 rowRenderer={playerRow}
               />
             )}

@@ -29,17 +29,27 @@ const mapStateToProps = createSelector(
   getAuction,
   getApp,
   getCurrentLeague,
-  (players, auction, app, league) => ({
-    players,
-    valueType: auction.valueType,
-    searchValue: auction.search,
-    playerId: auction.player,
-    transactions: auction.transactions,
-    hideRostered: auction.hideRostered,
-    tids: auction.tids,
-    isHosted: league.hosted,
-    isCommish: app.userId === league.commishid
-  })
+  (players, auction, app, league) => {
+    const sorted = players
+      .sort((a, b) => {
+        return (
+          b.getIn(['vorp', auction.valueType]) -
+          a.getIn(['vorp', auction.valueType])
+        )
+      })
+      .toList()
+
+    return {
+      players: sorted,
+      searchValue: auction.search,
+      playerId: auction.player,
+      transactions: auction.transactions,
+      hideRostered: auction.hideRostered,
+      tids: auction.tids,
+      isHosted: league.hosted,
+      isCommish: app.userId === league.commishid
+    }
+  }
 )
 
 const mapDispatchToProps = {

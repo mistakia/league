@@ -1,6 +1,6 @@
 import { List, Record } from 'immutable'
 
-import { getDraftWindow } from '@common'
+import { constants, getDraftWindow } from '@common'
 import { draftActions } from './actions'
 import { appActions } from '@core/app'
 
@@ -40,11 +40,20 @@ export function draftReducer(state = initialState(), { payload, type }) {
         .filter((p) => p.player)
         .map((p) => p.player)
 
-      for (const pick of payload.data.picks) {
-        pick.draftWindow = getDraftWindow({
-          start: state.ddate,
-          pickNum: pick.pick
-        })
+      const lastPick = payload.data.picks[payload.data.picks.length - 1]
+      const draftEnd = getDraftWindow({
+        start: state.ddate,
+        pickNum: lastPick.pick + 1
+      })
+
+      // calculate draft windows only if draft is active
+      if (constants.season.now.isBefore(draftEnd)) {
+        for (const pick of payload.data.picks) {
+          pick.draftWindow = getDraftWindow({
+            start: state.ddate,
+            pickNum: pick.pick
+          })
+        }
       }
 
       return state.merge({
