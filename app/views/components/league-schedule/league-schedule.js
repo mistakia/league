@@ -27,12 +27,9 @@ export default class LeagueSchedule extends React.Component {
   }
 
   render = () => {
-    const { teamEvents, leagueEvents } = this.props
+    const { events } = this.props
     const open = Boolean(this.state.anchorEl)
 
-    const events = teamEvents
-      .concat(leagueEvents)
-      .sort((a, b) => a.date.unix() - b.date.unix())
     const items = []
     const next = events.length
       ? `${events[0].detail} ${dayjs().to(events[0].date)}`
@@ -78,6 +75,5 @@ export default class LeagueSchedule extends React.Component {
 }
 
 LeagueSchedule.propTypes = {
-  teamEvents: PropTypes.array,
-  leagueEvents: PropTypes.array
+  events: PropTypes.array
 }

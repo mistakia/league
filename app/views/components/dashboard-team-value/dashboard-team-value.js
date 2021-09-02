@@ -10,11 +10,8 @@ HighchartsMore(Highcharts)
 
 export default class DashboardTeamValue extends React.Component {
   render = () => {
-    const { summary, league } = this.props
-    const quarterOfLeague = Math.ceil(league.nteams / 4)
+    const { summary, league, quarterOfLeague, allRank } = this.props
 
-    const allValues = Object.values(summary.total).sort((a, b) => b - a)
-    const allRank = allValues.indexOf(summary.team_total) + 1
     const allClassNames = []
     if (allRank <= quarterOfLeague) allClassNames.push('text-green')
     if (allRank >= league.nteams - quarterOfLeague) {
@@ -149,5 +146,7 @@ export default class DashboardTeamValue extends React.Component {
 
 DashboardTeamValue.propTypes = {
   summary: PropTypes.object,
-  league: PropTypes.object
+  league: PropTypes.object,
+  quarterOfLeague: PropTypes.number,
+  allRank: PropTypes.number
 }
