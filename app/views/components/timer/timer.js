@@ -1,7 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import { beep } from '@core/audio'
 import './timer.styl'
 
 export default class Timer extends React.Component {
@@ -23,7 +22,7 @@ export default class Timer extends React.Component {
       this.setState({ seconds: 0, alertFired: false })
     } else if (seconds < 5) {
       if (!this.state.alertFired && this.props.alert) {
-        beep()
+        this.props.soundNotification()
       }
       this.setState({ seconds, warning: true, alertFired: true })
     } else {
@@ -60,5 +59,6 @@ export default class Timer extends React.Component {
 
 Timer.propTypes = {
   expiration: PropTypes.number,
+  soundNotification: PropTypes.func,
   alert: PropTypes.bool
 }

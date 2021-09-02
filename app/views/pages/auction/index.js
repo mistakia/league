@@ -14,10 +14,6 @@ class AuctionPage extends React.Component {
     this.props.join()
   }
 
-  handleToggle = () => {
-    this.props.toggleHideRostered()
-  }
-
   render() {
     return render.call(this)
   }

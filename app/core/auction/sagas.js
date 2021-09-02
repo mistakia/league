@@ -180,8 +180,11 @@ export function pause() {
   send({ type: auctionActions.AUCTION_PAUSE })
 }
 
-export function soundNotification() {
-  beep()
+export function* soundNotification() {
+  const { muted } = yield select(getAuction)
+  if (!muted) {
+    beep()
+  }
 }
 
 //= ====================================
