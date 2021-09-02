@@ -1702,7 +1702,7 @@ CREATE TABLE `league_player_projection_points` (
 -- Table structure for table `league_player_projection_values`
 --
 
-DROP TABLE IF EXISTS `leauge_player_projection_values`;
+DROP TABLE IF EXISTS `league_player_projection_values`;
 
 CREATE TABLE `league_player_projection_values` (
   `player` varchar(7) NOT NULL,
@@ -1711,7 +1711,9 @@ CREATE TABLE `league_player_projection_values` (
   `lid` int(6) NOT NULL,
 
   `vorp` decimal(5,2) DEFAULT NULL,
-  `salary` decimal(5,2) DEFAULT NULL,
+  `vorp_adj` decimal(5,2) DEFAULT NULL,
+  `market_salary` decimal(5,2) DEFAULT NULL,
+  `market_salary_adj` decimal(5,2) DEFAULT NULL,
   KEY `player` (`player`),
   UNIQUE KEY `player_value` (`player`, `lid`, `week`, `year`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;

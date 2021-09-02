@@ -28,7 +28,6 @@ export default function AuctionPageRender() {
     transactions,
     tids,
     playerId,
-    vbaseline,
     isCommish,
     isHosted,
     valueType
@@ -36,10 +35,7 @@ export default function AuctionPageRender() {
 
   const sorted = players
     .sort((a, b) => {
-      return (
-        b.getIn(['vorp', valueType, vbaseline]) -
-        a.getIn(['vorp', valueType, vbaseline])
-      )
+      return b.getIn(['vorp', valueType]) - a.getIn(['vorp', valueType])
     })
     .toList()
 

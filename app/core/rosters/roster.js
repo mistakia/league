@@ -1,4 +1,3 @@
-/* eslint camelcase: 'off' */
 import { Record, List, Map } from 'immutable'
 
 export const Roster = new Record({

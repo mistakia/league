@@ -32,7 +32,6 @@ export function* optimize() {
   const league = yield select(getCurrentLeague)
   const watchlist = yield select(getPlayersForWatchlist)
   const players = yield select(getAllPlayers)
-  const { vbaseline } = yield select(getApp)
 
   // make sure player values have been calculated
   const pState = yield select(getPlayers)
@@ -67,7 +66,6 @@ export function* optimize() {
   const worker = new Worker()
   let result = yield call(worker.optimizeAuctionLineup, {
     limits: defaultLimit,
-    vbaseline,
     players: sortedWatchlist.valueSeq().toJS(),
     active: currentPlayers.active.toJS(),
     league
@@ -100,7 +98,6 @@ export function* optimize() {
 
     result = yield call(worker.optimizeLineup, {
       limits,
-      vbaseline,
       players: sortedPlayers.valueSeq().toJS(),
       active: currentPlayers.active.toJS(),
       league

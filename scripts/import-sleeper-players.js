@@ -1,4 +1,3 @@
-/* eslint camelcase: 'off' */
 // eslint-disable-next-line
 require = require('esm')(module /*, options*/)
 const fetch = require('node-fetch')

@@ -6,7 +6,6 @@ import { createSelector } from 'reselect'
 
 import { contextMenuActions, getContextMenuInfo } from '@core/context-menu'
 import { getCurrentLeague } from '@core/leagues'
-import { getApp } from '@core/app'
 import { playerActions } from '@core/players'
 
 import './player.styl'
@@ -36,11 +35,9 @@ Player.propTypes = {
 }
 
 const mapStateToProps = createSelector(
-  getApp,
   getContextMenuInfo,
   getCurrentLeague,
-  (app, contextMenu, league) => ({
-    vbaseline: app.vbaseline,
+  (contextMenu, league) => ({
     selected: contextMenu.data.playerId,
     league,
     isHosted: !!league.hosted

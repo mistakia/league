@@ -9,7 +9,7 @@ import './auction-nominated-player.styl'
 
 export default class AuctionNominatedPlayer extends React.Component {
   render = () => {
-    const { player, vbaseline, valueType } = this.props
+    const { player, valueType } = this.props
 
     const inflationType = valueType === 'ros' ? 'inflation' : 'inflationSeason'
 
@@ -20,10 +20,10 @@ export default class AuctionNominatedPlayer extends React.Component {
         </div>
         <div className='nominated__player-details'>
           <div className='nominated__player-detail'>
-            Retail: ${player.getIn(['values', valueType, vbaseline], 0)}
+            Retail: ${player.getIn(['market_salary', valueType], 0)}
           </div>
           <div className='nominated__player-detail'>
-            Inflation: ${player.getIn(['values', inflationType, vbaseline], 0)}
+            Inflation: ${player.getIn(['market_salary', inflationType], 0)}
           </div>
           <div className='nominated__player-detail'>
             Bye: <NFLTeamBye team={player.team} />
@@ -36,6 +36,5 @@ export default class AuctionNominatedPlayer extends React.Component {
 
 AuctionNominatedPlayer.propTypes = {
   player: ImmutablePropTypes.record,
-  vbaseline: PropTypes.string,
   valueType: PropTypes.string
 }

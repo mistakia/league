@@ -71,7 +71,7 @@ export function calculatePlayerValues(payload) {
     for (let week = 0; week <= finalWeek; week++) {
       player.points[week] = player.points[week] || { total: 0 }
       player.vorp[week] = {}
-      player.values[week] = {}
+      player.market_salary[week] = {}
     }
   }
 
@@ -100,102 +100,70 @@ export function calculatePlayerValues(payload) {
     calculatePrices({ cap: leagueTotalCap, total, players, week })
   }
 
-  // calculate ros vorp
-  const total = {
-    default: 0,
-    available: 0,
-    starter: 0,
-    manual: 0
-  }
-
-  const availableTotalsRestOfSeason = {
-    default: 0,
-    available: 0,
-    starter: 0,
-    manual: 0
-  }
-
-  const availableTotalsSeason = {
-    default: 0,
-    available: 0,
-    starter: 0,
-    manual: 0
-  }
+  // calculate total available vorp
+  let totalVorp = 0
+  let availableVorpRestOfSeason = 0
+  let availableVorpSeason = 0
 
   for (const player of players) {
-    const ros = {}
+    let vorpRos = 0
     const isAvailable = !rosteredPlayerIds.includes(player.player)
-    for (const [week, vorp] of Object.entries(player.vorp)) {
-      if (week && week >= currentWeek) {
-        for (const [key, value] of Object.entries(vorp)) {
-          if (value < 0) {
-            if (!ros[key]) ros[key] = 0
-            continue
-          }
+    for (const [week, value] of Object.entries(player.vorp)) {
+      const wk = parseInt(week, 10)
+      if (wk && wk >= currentWeek) {
+        if (value < 0) {
+          continue
+        }
 
-          if (ros[key]) {
-            ros[key] += value
-          } else {
-            ros[key] = value
-          }
+        vorpRos += value
+        totalVorp += value
 
-          total[key] += value
-
-          // if player is availble add to inflation
-          if (isAvailable) {
-            availableTotalsRestOfSeason[key] += value
-          }
+        if (isAvailable) {
+          availableVorpRestOfSeason += value
         }
       }
     }
     if (isAvailable) {
-      for (const [type, value] of Object.entries(player.vorp['0'])) {
-        if (value > 0) {
-          availableTotalsSeason[type] += value
-        }
+      if (player.vorp['0'] > 0) {
+        availableVorpSeason += player.vorp['0']
       }
     }
-    player.vorp.ros = ros
+    player.vorp.ros = vorpRos
   }
 
   // calculate ros contract value
-  calculatePrices({ cap: leagueTotalCap, total, players, week: 'ros' })
+  calculatePrices({
+    cap: leagueTotalCap,
+    total: totalVorp,
+    players,
+    week: 'ros'
+  })
 
   // calculate ros proj inflation rate
-  const rate = {}
-  for (const type in availableTotalsRestOfSeason) {
-    rate[type] = availableTotalsRestOfSeason[type]
-      ? leagueAvailableCap / availableTotalsRestOfSeason[type]
-      : 0
-  }
+  const rosRate = availableVorpRestOfSeason
+    ? leagueAvailableCap / availableVorpRestOfSeason
+    : 0
 
   // calculate season proj inflation rate
-  const seasonRate = {}
-  for (const type in availableTotalsSeason) {
-    seasonRate[type] = availableTotalsSeason[type]
-      ? leagueAvailableCap / availableTotalsSeason[type]
-      : 0
-  }
+  const seasonRate = availableVorpSeason
+    ? leagueAvailableCap / availableVorpSeason
+    : 0
 
+  // calculate player market salary inflation using ROS projections
   for (const player of players) {
-    player.values.inflation = {}
-    for (const type in rate) {
-      if (!rate[type]) {
-        player.values.inflation[type] = player.values.ros[type]
-        continue
-      }
-      const value = Math.round(rate[type] * player.vorp.ros[type])
-      player.values.inflation[type] = value > 0 ? value : 0
+    if (!rosRate) {
+      player.market_salary.inflation = player.market_salary.ros
+    } else {
+      const value = Math.round(rosRate * player.vorp.ros)
+      player.market_salary.inflation = value > 0 ? value : 0
     }
 
-    player.values.inflationSeason = {}
-    for (const type in seasonRate) {
-      if (!seasonRate[type]) {
-        player.values.inflationSeason[type] = player.values[0][type]
-        continue
-      }
-      const value = Math.round(seasonRate[type] * player.vorp['0'][type])
-      player.values.inflationSeason[type] = value > 0 ? value : 0
+    // calculate player market salary inflation using season projections
+    if (!seasonRate) {
+      player.market_salary.inflationSeason = player.market_salary[0]
+    } else {
+      const value = Math.round(seasonRate * player.vorp['0'])
+      player.market_salary.inflationSeason = value > 0 ? value : 0
     }
   }
 
@@ -691,7 +659,6 @@ export function optimizeLineup({ players, league }) {
 export function optimizeAuctionLineup({
   limits = {},
   players,
-  vbaseline,
   league,
   active = [],
   valueType = '0'
@@ -731,7 +698,7 @@ export function optimizeAuctionLineup({
     if (freeAgent) {
       variables[player.player].fa = 1
       variables[player.player].value = Math.round(
-        player.values[valueType][vbaseline] || 0
+        player.market_salary[valueType] || 0
       )
     }
   }

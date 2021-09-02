@@ -232,7 +232,6 @@ const fixPosition = (pos) => {
   }
 }
 
-/* eslint-disable camelcase */
 const getPlayerId = async ({ name, pos, team, sleeper_id }) => {
   if (aliases[name]) {
     return aliases[name]
@@ -243,7 +242,6 @@ const getPlayerId = async ({ name, pos, team, sleeper_id }) => {
   if (sleeper_id) {
     query.where({ sleeper_id })
   }
-  /* eslint-enable camelcase */
 
   if (name) {
     const aname = nameAliases[name] || name

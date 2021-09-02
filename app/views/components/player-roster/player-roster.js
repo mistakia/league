@@ -42,7 +42,6 @@ class PlayerRoster extends Player {
     const salary = isRestrictedFreeAgent ? bid : player.value
 
     const week = Math.max(constants.season.week, 1)
-    const type = isRegularSeason ? 'ros' : '0'
 
     const extensions = player.get('extensions', new List()).size
     const extendedSalary = isBeforeExtensionDeadline
@@ -55,15 +54,16 @@ class PlayerRoster extends Player {
           bid
         })
       : salary
-    const projectedSalary = player.getIn(['values', type, 'default'], 0)
+    const projectionType = isRegularSeason ? 'ros' : '0'
+    const projectedSalary = player.getIn(['market_salary', projectionType], 0)
     const savings =
       !isRestrictedFreeAgencyPeriod || bid || !isRestrictedFreeAgent
         ? projectedSalary - extendedSalary
         : null
 
-    const vorp = player.getIn(['vorp', type, 'default'], 0)
-    const vorpAdj = player.getIn(['vorp_adj', type, 'default'], 0)
-    const rosPoints = player.getIn(['points', type, 'total'], 0)
+    const vorp = player.getIn(['vorp', projectionType], 0)
+    const vorpAdj = player.getIn(['vorp_adj', projectionType], 0)
+    const rosPoints = player.getIn(['points', projectionType, 'total'], 0)
     const weekPoints = player.getIn(['points', week, 'total'], 0)
     const starts = player.getIn(['lineups', 'starts'], 0)
     const startPoints = player.getIn(['lineups', 'sp'], 0)

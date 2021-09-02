@@ -24,7 +24,6 @@ export default class AuctionTargets extends React.Component {
   render = () => {
     const {
       players,
-      vbaseline,
       lineupPlayerIds,
       // lineupBudget,
       lineupPoints,
@@ -55,7 +54,7 @@ export default class AuctionTargets extends React.Component {
         if (lineupPlayerIds.includes(player.player)) classNames.push('optimal')
         const salary = rosterSlot
           ? rosterSlot.value
-          : player.getIn(['values', valueType, vbaseline])
+          : player.getIn(['market_salary', valueType])
 
         const item = (
           <div className={classNames.join(' ')} key={index}>
@@ -149,7 +148,6 @@ AuctionTargets.propTypes = {
   toggleHideRostered: PropTypes.func,
   toggleMuted: PropTypes.func,
   players: ImmutablePropTypes.set,
-  vbaseline: PropTypes.string,
   lineupPlayerIds: ImmutablePropTypes.list,
   lineupPoints: PropTypes.number,
   lineupFeasible: PropTypes.bool,

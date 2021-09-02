@@ -29,7 +29,6 @@ export default class AuctionPlayer extends React.Component {
       player,
       isFreeAgent,
       isEligible,
-      vbaseline,
       watchlist,
       style,
       valueType,
@@ -63,8 +62,7 @@ export default class AuctionPlayer extends React.Component {
             <PlayerName playerId={player.player} />
           </div>
           <div className='auction__player-metric'>
-            $
-            {Math.round(player.getIn(['values', valueType, vbaseline])) || '--'}
+            ${Math.round(player.getIn(['market_salary', valueType])) || '--'}
           </div>
           <div className='auction__player-nominate'>
             <Tooltip title='Nominate'>
@@ -86,7 +84,6 @@ AuctionPlayer.propTypes = {
   player: ImmutablePropTypes.record,
   index: PropTypes.number,
   isEligible: PropTypes.bool,
-  vbaseline: PropTypes.string,
   watchlist: ImmutablePropTypes.set,
   style: PropTypes.object,
   valueType: PropTypes.string,
