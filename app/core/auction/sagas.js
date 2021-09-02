@@ -211,18 +211,18 @@ export function* watchInitAuctionLineup() {
       take(playerActions.SET_PLAYER_VALUES),
       take(auctionActions.AUCTION_JOIN)
     ])
-    yield call(optimize)
+    // yield call(optimize)
   }
 }
 
-export function* watchToggleWatchlist() {
-  yield takeLatest(playerActions.TOGGLE_WATCHLIST, optimize)
-}
-
-export function* watchSetAuctionBudget() {
-  yield takeLatest(auctionActions.SET_AUCTION_BUDGET, optimize)
-}
-
+/* export function* watchToggleWatchlist() {
+ *   yield takeLatest(playerActions.TOGGLE_WATCHLIST, optimize)
+ * }
+ *
+ * export function* watchSetAuctionBudget() {
+ *   yield takeLatest(auctionActions.SET_AUCTION_BUDGET, optimize)
+ * }
+ *  */
 export function* watchAuctionPause() {
   yield takeLatest(auctionActions.AUCTION_PAUSE, pause)
 }
@@ -231,10 +231,10 @@ export function* watchAuctionResume() {
   yield takeLatest(auctionActions.AUCTION_RESUME, resume)
 }
 
-export function* watchSetValueType() {
-  yield takeLatest(auctionActions.SET_VALUE_TYPE, optimize)
-}
-
+/* export function* watchSetValueType() {
+ *   yield takeLatest(auctionActions.SET_VALUE_TYPE, optimize)
+ * }
+ *  */
 export function* watchAuctionStart() {
   yield takeLatest(auctionActions.AUCTION_START, soundNotification)
 }
@@ -254,11 +254,11 @@ export const auctionSagas = [
   fork(watchAuctionSubmitNomination),
   fork(watchAuctionBid),
   fork(watchInitAuctionLineup),
-  fork(watchToggleWatchlist),
-  fork(watchSetAuctionBudget),
+  // fork(watchToggleWatchlist),
+  // fork(watchSetAuctionBudget),
   fork(watchAuctionPause),
   fork(watchAuctionResume),
-  fork(watchSetValueType),
+  // fork(watchSetValueType),
   fork(watchAuctionStart),
   fork(watchAuctionPaused)
 ]
