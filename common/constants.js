@@ -1097,7 +1097,9 @@ export const jobs = {
   PROCESS_TRANSITION_BIDS: 44,
   RESET_PLAYER_TAGS: 45,
   RESET_PROTECTED_DESIGNATION: 46,
-  SET_DRAFT_PICK_NUMBER: 47
+  SET_DRAFT_PICK_NUMBER: 47,
+
+  PROCESS_PROJECTIONS: 48
 }
 
 export const jobDetails = {
@@ -1143,7 +1145,8 @@ export const jobDetails = {
   44: 'Process Transition Bids',
   45: 'Reset Player Tags',
   46: 'Reset Player Protected Designation',
-  47: 'Set Draft Pick Order'
+  47: 'Set Draft Pick Order',
+  48: 'Process Projections'
 }
 
 export const changes = {
