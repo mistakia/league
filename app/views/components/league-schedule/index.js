@@ -9,7 +9,13 @@ import LeagueSchedule from './league-schedule'
 const mapStateToProps = createSelector(
   getTeamEvents,
   getLeagueEvents,
-  (teamEvents, leagueEvents) => ({ teamEvents, leagueEvents })
+  (teamEvents, leagueEvents) => {
+    const events = teamEvents
+      .concat(leagueEvents)
+      .sort((a, b) => a.date.unix() - b.date.unix())
+
+    return { events }
+  }
 )
 
 export default connect(mapStateToProps)(LeagueSchedule)
