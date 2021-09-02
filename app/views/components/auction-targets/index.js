@@ -27,6 +27,7 @@ const mapStateToProps = createSelector(
     lineupFeasible: auction.lineupFeasible,
     lineupPoints: auction.lineupPoints,
     hideRostered: auction.hideRostered,
+    muted: auction.muted,
     lineupBudget: auction.lineupBudget,
     vbaseline: app.vbaseline,
     team,
@@ -35,7 +36,8 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  toggleHideRostered: auctionActions.toggleHideRostered
+  toggleHideRostered: auctionActions.toggleHideRostered,
+  toggleMuted: auctionActions.toggleMuted
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(AuctionTargets)

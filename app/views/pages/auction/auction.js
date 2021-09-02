@@ -95,7 +95,7 @@ export default function AuctionPageRender() {
                 <Switch
                   size='small'
                   checked={this.props.hideRostered}
-                  onChange={this.handleToggle}
+                  onChange={this.props.toggleHideRostered}
                 />
               }
               labelPlacement='start'
