@@ -245,8 +245,7 @@ export default class Auction {
     const current = this._transactions[0]
 
     const team = this._teams.find((t) => t.uid === tid)
-    const newCap = team.cap - value
-    if (newCap < 0) {
+    if ((team.cap - value) < 0) {
       this.reply(userid, 'exceeds salary limit')
       this._startBidTimer()
       this.logger(

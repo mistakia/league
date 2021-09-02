@@ -8,7 +8,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel'
 
 // import EditableAuctionBudget from '@components/editable-auction-budget'
 import NFLTeamBye from '@components/nfl-team-bye'
-import AuctionValueTypeToggle from '@components/auction-value-type-toggle'
+// import AuctionValueTypeToggle from '@components/auction-value-type-toggle'
 import PlayerWatchlistAction from '@components/player-watchlist-action'
 import AuctionTargetHeader from '@components/auction-target-header'
 import PlayerName from '@components/player-name'
@@ -86,14 +86,26 @@ export default class AuctionTargets extends React.Component {
                 <Switch
                   size='small'
                   checked={this.props.hideRostered}
-                  onChange={this.handleToggle}
+                  onChange={this.props.toggleHideRostered}
                 />
               }
               labelPlacement='top'
               label='Hide Rostered'
             />
           </FormGroup>
-          <AuctionValueTypeToggle />
+          <FormGroup>
+            <FormControlLabel
+              control={
+                <Switch
+                  size='small'
+                  checked={this.props.muted}
+                  onChange={this.props.toggleMuted}
+                />
+              }
+              labelPlacement='top'
+              label='Sound Muted'
+            />
+          </FormGroup>
           <div className='optimal__lineup-key'>{lineupText}</div>
         </div>
         <div className='auction__targets-body'>
@@ -135,6 +147,7 @@ export default class AuctionTargets extends React.Component {
 
 AuctionTargets.propTypes = {
   toggleHideRostered: PropTypes.func,
+  toggleMuted: PropTypes.func,
   players: ImmutablePropTypes.set,
   vbaseline: PropTypes.string,
   lineupPlayerIds: ImmutablePropTypes.list,
@@ -143,5 +156,6 @@ AuctionTargets.propTypes = {
   valueType: PropTypes.string,
   rosteredPlayerIds: ImmutablePropTypes.list,
   team: PropTypes.object,
-  hideRostered: PropTypes.bool
+  hideRostered: PropTypes.bool,
+  muted: PropTypes.bool
 }

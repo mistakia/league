@@ -25,7 +25,8 @@ const initialState = new Record({
   search: null,
   timer: null,
   valueType: '0',
-  hideRostered: false
+  hideRostered: true,
+  muted: true
 })
 
 export function auctionReducer(state = initialState(), { payload, type }) {
@@ -47,6 +48,9 @@ export function auctionReducer(state = initialState(), { payload, type }) {
 
     case auctionActions.AUCTION_TOGGLE_HIDE_ROSTERED:
       return state.merge({ hideRostered: !state.hideRostered })
+
+    case auctionActions.AUCTION_TOGGLE_MUTED:
+      return state.merge({ muted: !state.muted })
 
     case auctionActions.AUCTION_RELEASE_LOCK:
       return state.merge({ isLocked: false })

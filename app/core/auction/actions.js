@@ -12,6 +12,7 @@ export const auctionActions = {
   AUCTION_COMPLETE: 'AUCTION_COMPLETE',
 
   AUCTION_TOGGLE_HIDE_ROSTERED: 'AUCTION_TOGGLE_HIDE_ROSTERED',
+  AUCTION_TOGGLE_MUTED: 'AUCTION_TOGGLE_MUTED',
 
   AUCTION_PAUSE: 'AUCTION_PAUSE',
   AUCTION_RESUME: 'AUCTION_RESUME',
@@ -29,8 +30,18 @@ export const auctionActions = {
   SET_AUCTION_BUDGET: 'SET_AUCTION_BUDGET',
   SET_VALUE_TYPE: 'SET_VALUE_TYPE',
 
+  SOUND_NOTIFICATION: 'SOUND_NOTIFICATION',
+
+  soundNotification: () => ({
+    type: auctionActions.SOUND_NOTIFICATION
+  }),
+
   toggleHideRostered: () => ({
     type: auctionActions.AUCTION_TOGGLE_HIDE_ROSTERED
+  }),
+
+  toggleMuted: () => ({
+    type: auctionActions.AUCTION_TOGGLE_MUTED
   }),
 
   setOptimalLineup: ({ players, feasible, result }) => ({
