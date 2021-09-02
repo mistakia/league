@@ -14,7 +14,12 @@ const {
   calculatePrices,
   calculateBaselines
 } = require('../common')
-const { getProjections, getRoster, getLeague } = require('../utils')
+const {
+  getProjections,
+  getRoster,
+  getLeague,
+  getPlayerTransactions
+} = require('../utils')
 
 const log = debug('process-projections')
 debug.enable('process-projections')
@@ -46,13 +51,21 @@ const run = async ({ year = constants.season.year } = {}) => {
     projectionPlayerIds.concat(rosteredIds)
   )
 
+  const transactions = await getPlayerTransactions({ lid, playerIds: rosteredIds })
+
+  for (const tran of transactions) {
+    const player = players.find((p) => p.player === tran.player)
+    player.value = tran.value
+  }
+
   for (const player of players) {
+    player.value = player.value || null
     player.projection = {}
     player.points = {}
     player.vorp = {}
-    player.values = {}
     player.vorp_adj = {}
-    player.values_adj = {}
+    player.market_salary = {}
+    player.market_salary_adj = {}
 
     const projections = groupedProjs[player.player] || []
 
@@ -61,9 +74,9 @@ const run = async ({ year = constants.season.year } = {}) => {
       player.projection[week] = {}
       player.points[week] = {}
       player.vorp[week] = {}
-      player.values[week] = {}
       player.vorp_adj[week] = {}
-      player.values_adj[week] = {}
+      player.market_salary[week] = {}
+      player.market_salary_adj[week] = {}
 
       // average projection
       const projection = weightProjections({
@@ -116,12 +129,9 @@ const run = async ({ year = constants.season.year } = {}) => {
     calculatePrices({ cap: leagueTotalCap, total, players, week })
   }
 
-  // vorp
-  // salary
-  // vorp_adj
-
   const projectionInserts = []
   const pointsInserts = []
+  const valueInserts = []
   for (const player of players) {
     if (!projectionPlayerIds.includes(player.player)) {
       continue
@@ -147,6 +157,19 @@ const run = async ({ year = constants.season.year } = {}) => {
         ...points
       })
     }
+
+    for (const [week, vorp] of Object.entries(player.vorp)) {
+      valueInserts.push({
+        player: player.player,
+        year: constants.season.year,
+        lid,
+        week,
+        vorp: vorp,
+        vorp_adj: player.vorp_adj[week],
+        market_salary: player.market_salary[week],
+        market_salary_adj: player.market_salary_adj[week]
+      })
+    }
   }
 
   if (projectionInserts.length) {
@@ -160,6 +183,14 @@ const run = async ({ year = constants.season.year } = {}) => {
       .onConflict()
       .merge()
     log(`processed and saved ${pointsInserts.length} player points`)
+  }
+
+  if (valueInserts.length) {
+    await db('league_player_projection_values')
+      .insert(valueInserts)
+      .onConflict()
+      .merge()
+    log(`processed and saved ${valueInserts.length} player values`)
   }
 }
 

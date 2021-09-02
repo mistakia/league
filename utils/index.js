@@ -110,5 +110,7 @@ module.exports = {
   verifyRestrictedFreeAgency: require('./verify-restricted-free-agency'),
 
   googleDrive: require('./google-drive'),
-  getJobs: require('./get-jobs')
+  getJobs: require('./get-jobs'),
+
+  getPlayerTransactions: require('./get-player-transactions')
 }

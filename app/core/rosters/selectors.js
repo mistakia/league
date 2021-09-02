@@ -216,6 +216,7 @@ export function getCurrentTeamRosterPositionalValue(state) {
     values.rosters[roster.tid] = {}
   }
 
+  const seasonType = constants.season.isOffSeason ? '0' : 'ros'
   for (const position of constants.positions) {
     const league = []
     const div = []
@@ -224,7 +225,7 @@ export function getCurrentTeamRosterPositionalValue(state) {
       const players = rosterPlayers.map((p) =>
         getPlayerById(state, { playerId: p.player })
       )
-      const vorps = players.map((p) => p.getIn(['vorp', 'ros', 'default'], 0))
+      const vorps = players.map((p) => p.getIn(['vorp', seasonType], 0))
       const sum = vorps.reduce((s, i) => s + i, 0)
       league.push(sum)
       values.rosters[roster.tid][position] = sum

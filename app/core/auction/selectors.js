@@ -2,7 +2,6 @@ import dayjs from 'dayjs'
 import { Set } from 'immutable'
 import { createSelector } from 'reselect'
 
-import { getApp } from '@core/app'
 import { getPlayersForWatchlist, getAllPlayers } from '@core/players'
 import {
   getRosteredPlayerIdsForCurrentLeague,
@@ -42,7 +41,6 @@ export function getAuctionTargetPlayers(state) {
   const optimalPlayers = getPlayersForOptimalLineup(state)
   const rosteredPlayerIds = getRosteredPlayerIdsForCurrentLeague(state)
   const currentPlayers = getCurrentPlayers(state)
-  const { vbaseline } = getApp(state)
 
   let combined = Set(watchlistPlayers).union(Set(optimalPlayers))
   if (hideRostered) {
@@ -50,9 +48,7 @@ export function getAuctionTargetPlayers(state) {
   }
   const players = combined.union(Set(currentPlayers.active))
   return players.sort(
-    (a, b) =>
-      b.getIn(['vorp', valueType, vbaseline]) -
-      a.getIn(['vorp', valueType, vbaseline])
+    (a, b) => b.getIn(['vorp', valueType]) - a.getIn(['vorp', valueType])
   )
 }
 
@@ -89,22 +85,21 @@ export function getAuctionPosition(state) {
 
 export function getAuctionInfoForPosition(state, { pos }) {
   const { valueType } = getAuction(state)
-  const { vbaseline } = getApp(state)
   const all = getAllPlayers(state)
   const players = all.filter((p) => p.pos === pos)
   const activePlayerIds = getActiveRosterPlayerIdsForCurrentLeague(state)
   const rostered = players.filter((p) => activePlayerIds.includes(p.player))
 
   const totalVorp = players.reduce(
-    (a, b) => a + Math.max(b.getIn(['vorp', valueType, vbaseline]) || 0, 0),
+    (a, b) => a + Math.max(b.getIn(['vorp', valueType]) || 0, 0),
     0
   )
   const rosteredVorp = rostered.reduce(
-    (a, b) => a + Math.max(b.getIn(['vorp', valueType, vbaseline]) || 0, 0),
+    (a, b) => a + Math.max(b.getIn(['vorp', valueType]) || 0, 0),
     0
   )
   const retail = rostered.reduce(
-    (a, b) => a + (b.getIn(['values', valueType, vbaseline]) || 0),
+    (a, b) => a + (b.getIn(['market_salary', valueType]) || 0),
     0
   )
   const actual = rostered.reduce((a, b) => a + (b.value || 0), 0)

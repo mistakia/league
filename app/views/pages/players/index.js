@@ -19,7 +19,6 @@ const mapStateToProps = createSelector(
     isPending:
       pState.get('isPending') ||
       (pState.get('view') === 'stats' && stats.isPending),
-    vbaseline: app.vbaseline,
     searchValue: pState.get('search'),
     selected: pState.get('selected'),
     order: pState.get('order'),

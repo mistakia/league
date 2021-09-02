@@ -17,14 +17,12 @@ const TOKEN_PATH = 'drive-token.json'
 // Create an OAuth2 client with the given credentials, and then execute the
 // given callback function.
 async function authorize(credentials) {
-  /* eslint-disable camelcase */
   const { client_secret, client_id, redirect_uris } = credentials.installed
   const oAuth2Client = new google.auth.OAuth2(
     client_id,
     client_secret,
     redirect_uris[0]
   )
-  /* eslint-enable camelcase */
 
   // Check if we have previously stored a token.
   try {

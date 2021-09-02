@@ -32,7 +32,7 @@ const initialState = new Map({
   items: new Map(),
   order: 'desc',
   view: isOffseason ? 'season' : 'ros',
-  orderBy: isOffseason ? 'vorp.0.default' : 'vorp.ros.default',
+  orderBy: isOffseason ? 'vorp.0' : 'vorp.ros',
   watchlist: new Set(),
   cutlist: new List(),
   baselines: new Map(),
@@ -97,7 +97,6 @@ export function playersReducer(state = initialState, { payload, type }) {
 
     case playerActions.SET_PLAYER_VALUES:
       return state.withMutations((state) => {
-        state.set('isPending', false)
         for (const week in payload.baselines) {
           for (const b in payload.baselines[week]) {
             for (const type in payload.baselines[week][b]) {
@@ -111,8 +110,8 @@ export function playersReducer(state = initialState, { payload, type }) {
         payload.players.forEach((p) => {
           state.mergeIn(['items', p.player], {
             points: new Map(p.points),
-            values: new Map(p.values),
-            values_adj: new Map(p.values_adj),
+            market_salary: new Map(p.market_salary),
+            market_salary_adj: new Map(p.market_salary_adj),
             vorp: new Map(p.vorp),
             vorp_adj: new Map(p.vorp_adj)
           })
@@ -184,6 +183,7 @@ export function playersReducer(state = initialState, { payload, type }) {
     case playerActions.FETCH_PLAYERS_FULFILLED:
       return state.withMutations((players) => {
         players.set('isInitializing', false)
+        players.set('isPending', false)
 
         const now = dayjs()
         const ages = []
@@ -229,7 +229,7 @@ export function playersReducer(state = initialState, { payload, type }) {
       return state.withMutations((players) => {
         const week = isOffseason ? '0' : 'ros'
         players.merge({
-          orderBy: `vorp.${week}.${payload.data.user.vbaseline}`
+          orderBy: `vorp.${week}`
         })
 
         if (payload.data.user.qbb) {
@@ -257,16 +257,16 @@ export function playersReducer(state = initialState, { payload, type }) {
         }
       })
 
-    case settingActions.SET_SETTING:
-    case settingActions.PUT_SETTING_FULFILLED: {
-      if (payload.opts.type !== 'vbaseline') {
-        return state
-      }
-      const value = payload.data ? payload.data.value : payload.opts.value
-      const week = isOffseason ? '0' : 'ros'
-      return state.merge({ orderBy: `vorp.${week}.${value}` })
-    }
-
+    /* case settingActions.SET_SETTING:
+     * case settingActions.PUT_SETTING_FULFILLED: {
+     *   if (payload.opts.type !== 'vbaseline') {
+     *     return state
+     *   }
+     *   const value = payload.data ? payload.data.value : payload.opts.value
+     *   const week = isOffseason ? '0' : 'ros'
+     *   return state.merge({ orderBy: `vorp.${week}.${value}` })
+     * }
+     */
     case playerActions.GET_CUTLIST_FULFILLED:
       return state.merge({
         cutlist: new List(payload.data)

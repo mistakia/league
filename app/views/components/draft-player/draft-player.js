@@ -13,15 +13,7 @@ export default class DraftPlayer extends React.Component {
   }
 
   render = () => {
-    const {
-      player,
-      selected,
-      isDrafted,
-      index,
-      vbaseline,
-      watchlist,
-      style
-    } = this.props
+    const { player, selected, isDrafted, index, watchlist, style } = this.props
 
     const classNames = ['player-draft__item']
     if (selected === player.player) {
@@ -34,7 +26,7 @@ export default class DraftPlayer extends React.Component {
       classNames.push('watchlist')
     }
 
-    const value = player.getIn(['values', '0', vbaseline])
+    const value = player.getIn(['market_salary', '0'])
 
     return (
       <div style={style}>
@@ -49,7 +41,7 @@ export default class DraftPlayer extends React.Component {
           </div>
           <div className='player-draft__item-metric'>
             {value
-              ? `$${Math.round(player.getIn(['values', '0', vbaseline]))}`
+              ? `$${Math.round(player.getIn(['market_salary', '0']))}`
               : null}
           </div>
         </div>
@@ -64,7 +56,6 @@ DraftPlayer.propTypes = {
   selected: PropTypes.string,
   isDrafted: PropTypes.bool,
   index: PropTypes.number,
-  vbaseline: PropTypes.string,
   watchlist: ImmutablePropTypes.set,
   style: PropTypes.object
 }

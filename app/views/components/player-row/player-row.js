@@ -19,7 +19,6 @@ class PlayerRow extends Player {
     const {
       player,
       selectedPlayer,
-      vbaseline,
       isSeasonView,
       isHosted,
       isWeekView,
@@ -42,11 +41,11 @@ class PlayerRow extends Player {
 
     const seasonSummary = () => {
       let inflation = null
-      const value = player.values.getIn([`${week}`, vbaseline])
+      const value = player.market_salary.getIn([`${week}`])
       const isRostered = Boolean(player.tid)
       if (!isRostered && (isRestOfSeasonView || isSeasonView)) {
         const type = isRestOfSeasonView ? 'inflation' : 'inflationSeason'
-        const diff = player.values.getIn([type, vbaseline]) - value
+        const diff = player.market_salary.getIn([type]) - value
         const classNames = ['value__inflation']
         const isPos = diff > 0
         if (isPos) classNames.push('positive')
@@ -72,10 +71,10 @@ class PlayerRow extends Player {
               </div>
             )}
             <div className='table__cell metric'>
-              {Math.round(player.vorp.getIn([`${week}`, vbaseline]) || 0)}
+              {Math.round(player.vorp.getIn([`${week}`]) || 0)}
             </div>
             <div className='table__cell metric'>
-              {Math.round(player.vorp_adj.getIn([`${week}`, vbaseline]) || 0)}
+              {Math.round(player.vorp_adj.getIn([`${week}`]) || 0)}
             </div>
             <div className='table__cell metric'>
               {(player.points.getIn([`${week}`, 'total']) || 0).toFixed(1)}

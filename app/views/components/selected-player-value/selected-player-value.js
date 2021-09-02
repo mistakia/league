@@ -1,5 +1,5 @@
 import React from 'react'
-import ImmutablePropTypes from 'react-immutable-proptypes'
+import PropTypes from 'prop-types'
 import Highcharts from 'highcharts'
 import HighchartsReact from 'highcharts-react-official'
 
@@ -7,19 +7,7 @@ import { constants } from '@common'
 
 export default class SelectedPlayerValue extends React.Component {
   render = () => {
-    const { player } = this.props
-
-    const baData = []
-    const wsData = []
-    for (const week of constants.fantasyWeeks) {
-      if (week < constants.season.week) continue
-      baData.push(
-        parseFloat(player.getIn(['vorp', `${week}`, 'available'], 0).toFixed(1))
-      )
-      wsData.push(
-        parseFloat(player.getIn(['vorp', `${week}`, 'starter'], 0).toFixed(1))
-      )
-    }
+    const { baData, wsData } = this.props
 
     const options = {
       chart: {
@@ -78,5 +66,6 @@ export default class SelectedPlayerValue extends React.Component {
 }
 
 SelectedPlayerValue.propTypes = {
-  player: ImmutablePropTypes.record
+  baData: PropTypes.array,
+  wsData: PropTypes.array
 }

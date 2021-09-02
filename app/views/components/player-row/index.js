@@ -18,7 +18,6 @@ const mapStateToProps = createSelector(
     isLoggedIn: !!app.userId,
     selectedPlayer: players.get('selected'),
     baselines: players.get('baselines'),
-    vbaseline: app.vbaseline,
     percentiles: statsState.playsPercentiles,
     week: players.get('view') === 'ros' ? 'ros' : players.get('week').get(0),
     isRestOfSeasonView: players.get('view') === 'ros',
