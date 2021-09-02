@@ -5,7 +5,7 @@ const { constants } = require('../../common')
 const { getPlayerTransactions } = require('../../utils')
 
 router.get('/?', async (req, res) => {
-  const { db, logger, cache } = req.app.locals
+  const { db, logger } = req.app.locals
   try {
     const search = req.query.q
     const { leagueId } = req.query
@@ -207,17 +207,12 @@ router.get('/?', async (req, res) => {
     }
 
     if (leagueId) {
-      const pointsCacheKey = `/league/${leagueId}/points`
-      let leaguePointsProj = cache.get(pointsCacheKey)
-      if (!leaguePointsProj) {
-        leaguePointsProj = await db('league_player_projection_points')
-          .where({
-            lid: leagueId,
-            year: constants.season.year
-          })
-          .whereIn('player', Object.keys(playerMap))
-        cache.set(pointsCacheKey, leaguePointsProj, 14400) // 4 hours
-      }
+      const leaguePointsProj = await db('league_player_projection_points')
+        .where({
+          lid: leagueId,
+          year: constants.season.year
+        })
+        .whereIn('player', Object.keys(playerMap))
 
       for (const pointProjection of leaguePointsProj) {
         playerMap[pointProjection.player].points[
@@ -225,17 +220,12 @@ router.get('/?', async (req, res) => {
         ] = pointProjection
       }
 
-      const valuesCacheKey = `/league/${leagueId}/values`
-      let leagueValuesProj = cache.get(valuesCacheKey)
-      if (!leagueValuesProj) {
-        leagueValuesProj = await db('league_player_projection_values')
-          .where({
-            lid: leagueId,
-            year: constants.season.year
-          })
-          .whereIn('player', Object.keys(playerMap))
-        cache.set(valuesCacheKey, leagueValuesProj, 14400) // 4 hours
-      }
+      const leagueValuesProj = await db('league_player_projection_values')
+        .where({
+          lid: leagueId,
+          year: constants.season.year
+        })
+        .whereIn('player', Object.keys(playerMap))
 
       for (const pointProjection of leagueValuesProj) {
         const {
@@ -257,15 +247,11 @@ router.get('/?', async (req, res) => {
       }
     }
 
-    let projections = cache.get('projections')
-    if (!projections) {
-      projections = await db('projections')
-        .where('sourceid', constants.sources.AVERAGE)
-        .where('year', constants.season.year)
-        .where('week', '>=', constants.season.week)
-        .whereIn('player', Object.keys(playerMap))
-      cache.set('projections', projections, 14400) // 4 hours
-    }
+    const projections = await db('projections')
+      .where('sourceid', constants.sources.AVERAGE)
+      .where('year', constants.season.year)
+      .where('week', '>=', constants.season.week)
+      .whereIn('player', Object.keys(playerMap))
 
     for (const projection of projections) {
       playerMap[projection.player].projection[projection.week] = projection
