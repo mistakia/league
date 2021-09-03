@@ -568,7 +568,9 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 
 16. Each team will have three (3) IR slots.
 
-17. Before or during the Regular Season, players may be placed on Injured Reserve (IR) if they are designated as PUP (Physically Unable to Play) or IR by the NFL. If they are not listed as such on the official injury list, they cannot be placed in IR. Once the injured player is no longer listed as PUP or IR due to injury, he must immediately be placed into a regular roster slot and a player must be dropped from the roster slot in order to fit him in (unless another IR-like injury occurs that can be moved into an empty IR slot). The Team will be unable to make any transactions until the ineligible player is removed.
+17. A player may be placed on Injured Reserve (IR) if they are Inactive, have an injury designation by the team (PUP, IR), or have a game designation of Doubtful. Once the injured player is no longer eligible, the player must immediately be removed from Injured Reserve. The Team will be unable to make any transactions until the ineligible player is removed.
+
+18. During the season, a player must have been on your roster the previous week or received via a trade to have Reserve eligibility.
 
 ## Article XIV
 
