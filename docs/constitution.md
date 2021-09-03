@@ -438,13 +438,13 @@ xiv. 10-13 points allowed (2)
 
 ## Article IX
 
-> BLIND TRANSITION AUCTION
+> RESTRCIED FREE AGENCY AUCTION
 
-1. Each team may nominate a maximum of two (2) players for the “fair-market” Blind Transition Auction.
+1. Each team may nominate a maximum of two (2) players for the “fair-market” Restricted Free Agency Auction.
 
 2. Original team will submit a contract offer via a blind offer process (blind to all other league managers).
 
-3. Non-original teams will have the option to submit an offer for any of the designated players entered into this Blind Transition Auction.
+3. Non-original teams will have the option to submit an offer for any of the designated players entered into this Restricted Free Agecy Auction.
 
 4. If no non-original teams offer a contract that exceeds the original team’s offer by 20% or $2, whichever is greater, the player will be awarded to the original team. Otherwise, the player will be awarded to the highest bidder.
 
