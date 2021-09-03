@@ -24,6 +24,7 @@ import SelectedPlayerValue from '@components/selected-player-value'
 import SelectedPlayerGamelogs from '@components/selected-player-gamelogs'
 import SelectedPlayerPractice from '@components/selected-player-practice'
 import SelectedPlayerMatchup from '@components/selected-player-matchup'
+import SelectedPlayerTransactions from '@components/selected-player-transactions'
 
 import './selected-player.styl'
 
@@ -181,6 +182,7 @@ export default class SelectedPlayer extends React.Component {
             <Tab label='Value' />
             <Tab label='Matchup' />
             <Tab label='Projections' />
+            <Tab label='Transactions' />
             <Tab label='Game Log' />
             <Tab label='Stats' />
             <Tab label='Team Splits' />
@@ -202,26 +204,29 @@ export default class SelectedPlayer extends React.Component {
             <SelectedPlayerProjections />
           </TabPanel>
           <TabPanel value={value} index={4}>
-            <SelectedPlayerGamelogs />
+            <SelectedPlayerTransactions />
           </TabPanel>
           <TabPanel value={value} index={5}>
-            <SelectedPlayerSeasonStats pos={player.pos} />
+            <SelectedPlayerGamelogs />
           </TabPanel>
           <TabPanel value={value} index={6}>
+            <SelectedPlayerSeasonStats pos={player.pos} />
+          </TabPanel>
+          <TabPanel value={value} index={7}>
             <SelectedPlayerTeamStats />
             <SelectedPlayerTeamSituationSplits />
             <SelectedPlayerTeamPositionSplits />
           </TabPanel>
-          <TabPanel value={value} index={7}>
+          <TabPanel value={value} index={8}>
             Coming Soon
           </TabPanel>
-          <TabPanel value={value} index={8}>
+          <TabPanel value={value} index={9}>
             <SelectedPlayerEfficiencyStats />
           </TabPanel>
-          <TabPanel value={value} index={9}>
+          <TabPanel value={value} index={10}>
             <SelectedPlayerPractice />
           </TabPanel>
-          <TabPanel value={value} index={10}>
+          <TabPanel value={value} index={11}>
             Coming soon
           </TabPanel>
         </div>

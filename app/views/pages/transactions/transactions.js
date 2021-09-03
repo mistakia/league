@@ -25,7 +25,7 @@ export default class TransactionsPage extends React.Component {
 
     const Row = ({ index, ...params }) => {
       const transaction = transactions.get(index)
-      return <TransactionRow transaction={transaction} {...params} />
+      return <TransactionRow transaction={transaction} showPlayer {...params} />
     }
 
     const isRowLoaded = ({ index }) => !hasMore || index < transactions.size

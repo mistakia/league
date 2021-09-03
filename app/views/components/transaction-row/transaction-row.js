@@ -10,7 +10,7 @@ import './transaction-row.styl'
 
 export default class TransactionRow extends React.Component {
   render = () => {
-    const { transaction, style } = this.props
+    const { transaction, style, showPlayer } = this.props
 
     return (
       <div style={style}>
@@ -29,9 +29,11 @@ export default class TransactionRow extends React.Component {
               </div>
             </div>
           </div>
-          <div className='transaction__player'>
-            <PlayerName playerId={transaction.player} headshot />
-          </div>
+          {Boolean(showPlayer) && (
+            <div className='transaction__player'>
+              <PlayerName playerId={transaction.player} headshot />
+            </div>
+          )}
         </div>
       </div>
     )
@@ -40,5 +42,6 @@ export default class TransactionRow extends React.Component {
 
 TransactionRow.propTypes = {
   style: PropTypes.object,
-  transaction: PropTypes.object
+  transaction: PropTypes.object,
+  showPlayer: PropTypes.bool
 }
