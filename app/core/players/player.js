@@ -54,6 +54,8 @@ export const Player = new Record({
   gamestatus: null,
   practice: new List(),
   extensions: new List(),
+  transactions: new List(),
+  loadingTransactions: false,
   bid: null
 })
 
@@ -104,7 +106,8 @@ export function createPlayer({
   gamestatus,
   practice,
   extensions,
-  bid
+  bid,
+  transactions
 }) {
   return new Player({
     player,
@@ -154,6 +157,7 @@ export function createPlayer({
     gamestatus,
     practice: new List(practice),
     extensions: new List(extensions),
+    transactions: new List(transactions),
     bid
   })
 }

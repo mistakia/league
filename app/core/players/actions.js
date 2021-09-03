@@ -29,6 +29,11 @@ export const playerActions = {
   GET_PLAYER_PENDING: 'GET_PLAYER_PENDING',
   GET_PLAYER_FULFILLED: 'GET_PLAYER_FULFILLED',
 
+  GET_PLAYER_TRANSACTIONS: 'GET_PLAYER_TRANSACTIONS',
+  GET_PLAYER_TRANSACTIONS_FAILED: 'GET_PLAYER_TRANSACTIONS_FAILED',
+  GET_PLAYER_TRANSACTIONS_PENDING: 'GET_PLAYER_TRANSACTIONS_PENDING',
+  GET_PLAYER_TRANSACTIONS_FULFILLED: 'GET_PLAYER_TRANSACTIONS_FULFILLED',
+
   SAVE_PROJECTION: 'SAVE_PROJECTION',
   DELETE_PROJECTION: 'DELETE_PROJECTION',
   SET_PROJECTION: 'SET_PROJECTION',
@@ -355,6 +360,36 @@ export const playerActions = {
       opts,
       error
     }
+  }),
+
+  getPlayerTransactions: (player) => ({
+    type: playerActions.GET_PLAYER_TRANSACTIONS,
+    payload: {
+      player
+    }
+  }),
+
+  getPlayerTransactionsPending: (opts) => ({
+    type: playerActions.GET_PLAYER_TRANSACTIONS_PENDING,
+    payload: {
+      opts
+    }
+  }),
+
+  getPlayerTransactionsFulfilled: (opts, data) => ({
+    type: playerActions.GET_PLAYER_TRANSACTIONS_FULFILLED,
+    payload: {
+      opts,
+      data
+    }
+  }),
+
+  getPlayerTransactionsFailed: (opts, error) => ({
+    type: playerActions.GET_PLAYER_TRANSACTIONS_FAILED,
+    payload: {
+      opts,
+      error
+    }
   })
 }
 
@@ -398,4 +433,10 @@ export const postCutlistActions = {
   failed: playerActions.postCutlistFailed,
   pending: playerActions.postCutlistPending,
   fulfilled: playerActions.postCutlistFulfilled
+}
+
+export const getPlayerTransactionsActions = {
+  failed: playerActions.getPlayerTransactionsFailed,
+  pending: playerActions.getPlayerTransactionsPending,
+  fulfilled: playerActions.getPlayerTransactionsFulfilled
 }
