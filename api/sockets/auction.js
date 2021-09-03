@@ -45,7 +45,9 @@ export default class Auction {
     } else {
       // starting with the tid of the last nomination
       const idx = this._tids.indexOf(lastNomination.tid)
-      const list = this._tids.slice(idx + 1).concat(this._tids.slice(0, idx))
+      const list = this._tids
+        .slice(idx + 1)
+        .concat(this._tids.slice(0, idx + 1))
       for (const tid of list) {
         const team = this._teams.find((t) => t.uid === tid)
         if (team.availableSpace) {
