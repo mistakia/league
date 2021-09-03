@@ -37,7 +37,8 @@ import {
   putProjectionActions,
   delProjectionActions,
   getCutlistActions,
-  postCutlistActions
+  postCutlistActions,
+  getPlayerTransactionsActions
 } from '@core/players'
 import { getChartedPlaysActions, getTeamStatActions } from '@core/stats'
 import { getPlaysActions, getPlayStatsActions } from '@core/plays'
@@ -309,4 +310,10 @@ export const putTransitionTag = fetch.bind(
   null,
   api.putTransitionTag,
   putTransitionTagActions
+)
+
+export const getPlayerTransactions = fetch.bind(
+  null,
+  api.getTransactions,
+  getPlayerTransactionsActions
 )

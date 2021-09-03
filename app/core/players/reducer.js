@@ -430,6 +430,24 @@ export function playersReducer(state = initialState, { payload, type }) {
       })
     }
 
+    case playerActions.GET_PLAYER_TRANSACTIONS_PENDING:
+      return state.setIn(
+        ['items', payload.opts.player, 'loadingTransactions'],
+        true
+      )
+
+    case playerActions.GET_PLAYER_TRANSACTIONS_FAILED:
+      return state.setIn(
+        ['items', payload.opts.player, 'loadingTransactions'],
+        false
+      )
+
+    case playerActions.GET_PLAYER_TRANSACTIONS_FULFILLED:
+      return state.mergeIn(['items', payload.opts.player], {
+        transactions: new List(payload.data),
+        loadingTransactions: false
+      })
+
     default:
       return state
   }

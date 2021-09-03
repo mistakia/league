@@ -19,7 +19,8 @@ import {
   getPlayer,
   putProjection,
   delProjection,
-  putSetting
+  putSetting,
+  getPlayerTransactions
 } from '@core/api'
 import { draftActions } from '@core/draft'
 import { playerActions } from './actions'
@@ -193,6 +194,12 @@ export function* cutlistNotification() {
   )
 }
 
+export function* fetchPlayerTransactions({ payload }) {
+  const { leagueId } = yield select(getApp)
+  const { player } = payload
+  yield call(getPlayerTransactions, { player, leagueId })
+}
+
 //= ====================================
 //  WATCHERS
 // -------------------------------------
@@ -285,6 +292,13 @@ export function* watchPostCutlistFulfilled() {
   yield takeLatest(playerActions.POST_CUTLIST_FULFILLED, cutlistNotification)
 }
 
+export function* watchGetPlayerTransactions() {
+  yield takeLatest(
+    playerActions.GET_PLAYER_TRANSACTIONS,
+    fetchPlayerTransactions
+  )
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -315,5 +329,7 @@ export const playerSagas = [
   fork(watchPostCutlistFulfilled),
 
   fork(watchAddCutlist),
-  fork(watchReorderCutlist)
+  fork(watchReorderCutlist),
+
+  fork(watchGetPlayerTransactions)
 ]

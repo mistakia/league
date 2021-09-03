@@ -10,7 +10,7 @@ router.get('/?', async (req, res) => {
     const { leagueId } = req.params
 
     // TODO validate
-    const { limit = 100, offset = 0 } = req.query
+    const { limit = 100, offset = 0, player } = req.query
     const types = req.query.types
       ? Array.isArray(req.query.types)
         ? req.query.types
@@ -35,6 +35,10 @@ router.get('/?', async (req, res) => {
 
     if (teams.length) {
       query = query.whereIn('tid', teams)
+    }
+
+    if (player) {
+      query = query.where('player', player)
     }
 
     const transactions = await query
