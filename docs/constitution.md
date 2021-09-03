@@ -484,7 +484,9 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 
 **Interpretive Note:** _A team’s Potential Points and All-Play Losses make up 90% and 10% of their DOI, respectively. A lower value yields a higher draft pick._
 
-3. Playoff team draft order will be based on the following results:
+3. In the event a team’s optimal lineup does not meet the requirements of a complete set of starters who were active, they will receive a Potential Points Penalty (PPP) so that their Potential Points for that week is equal to that of the team with the highest Potential Points for that week.
+
+4. Playoff team draft order will be based on the following results:
 
 (a) The losers of the Week 14 Wildcard round will receive the 7th and 8th pick, with the lowest scoring team receiving the 7th pick
 
@@ -492,13 +494,13 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 
 **Contracts.**
 
-4. Rookie contracts are based on when they are picked, starting at $12 for the first pick and decreasing $1 for each subsequent pick with the minimum contract being $1.
+5. Rookie contracts are based on when they are picked, starting at $12 for the first pick and decreasing $1 for each subsequent pick with the minimum contract being $1.
 
 **Compensatory Picks.**
 
-5. Compensatory picks will follow the draft order and take place at the conclusion of the three (3) round draft.
+6. Compensatory picks will follow the draft order and take place at the conclusion of the three (3) round draft.
 
-6. Teams who have more than one (1) compensatory pick will make their second selection after all the Teams with a compensatory pick have made their first selection.
+7. Teams who have more than one (1) compensatory pick will make their second selection after all the Teams with a compensatory pick have made their first selection.
 
 ## Article XII
 
