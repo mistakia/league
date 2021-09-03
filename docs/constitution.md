@@ -728,6 +728,8 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 
 i. Collusion shall be assumed in any case where one Manager acts for more than one Team at the same time.
 
+ii. Sharing of limited resources, including but not limited to active roster space, salary space, or players.
+
 (c\) Non-Competitive Behaviour: Demonstrates an intention not to compete that goes beyond mere negligence.
 
 i. Under extreme circumstances, a recurring refusal to engage in reasonable transactions may be considered non-competitive behaviour.
