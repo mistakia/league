@@ -2509,6 +2509,40 @@ CREATE TABLE `transition_releases` (
   UNIQUE KEY `player` (`transitionid`, `player`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `league_team_lineups`
+--
+
+DROP TABLE IF EXISTS `league_team_lineups`;
+
+CREATE TABLE `league_team_lineups` (
+  `week` varchar(3) NOT NULL,
+  `year` int(4) NOT NULL,
+  `tid` int(6) NOT NULL,
+  `lid` int(6) NOT NULL,
+  `total` decimal(5,2) DEFAULT NULL,
+  UNIQUE KEY `lineup` (`tid`,`year`, `week`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `league_team_lineup_starters`
+--
+
+DROP TABLE IF EXISTS `league_team_lineup_starters`;
+
+CREATE TABLE `league_team_lineup_starters` (
+  `player` varchar(7) NOT NULL,
+  `week` varchar(3) NOT NULL,
+  `year` int(4) NOT NULL,
+  `tid` int(6) NOT NULL,
+  `lid` int(6) NOT NULL,
+  UNIQUE KEY `starter` (`lid`,`player`,`year`, `week`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

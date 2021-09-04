@@ -117,11 +117,9 @@ router.put('/?', async (req, res) => {
           const roster = new Roster({ roster: offseasonRosterRow, league })
           const reservePlayerIds = roster.reserve.map((p) => p.player)
           if (reservePlayerIds.includes(item.player)) {
-            return res
-              .status(400)
-              .send({
-                error: 'player ineligible to start during first six weeks'
-              })
+            return res.status(400).send({
+              error: 'player ineligible to start during first six weeks'
+            })
           }
         }
       }
