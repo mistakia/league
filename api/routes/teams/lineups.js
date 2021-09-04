@@ -110,6 +110,20 @@ router.put('/?', async (req, res) => {
         if (!isEligible) {
           return res.status(400).send({ error: 'invalid slot' })
         }
+
+        // if during first six weeks, verify player was not Reserve to start the year
+        if (week <= 6) {
+          const offseasonRosterRow = await getRoster({ tid, week: 0, year })
+          const roster = new Roster({ roster: offseasonRosterRow, league })
+          const reservePlayerIds = roster.reserve.map((p) => p.player)
+          if (reservePlayerIds.includes(item.player)) {
+            return res
+              .status(400)
+              .send({
+                error: 'player ineligible to start during first six weeks'
+              })
+          }
+        }
       }
 
       // verify player is not locked
