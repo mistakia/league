@@ -20,9 +20,9 @@ const {
   getLeague,
   getPlayerTransactions
 } = require('../utils')
+const projectLineups = require('./project-lineups')
 
 const log = debug('process-projections')
-debug.enable('process-projections')
 
 const run = async ({ year = constants.season.year } = {}) => {
   let week = year === constants.season.year ? constants.season.week : 0
@@ -198,11 +198,14 @@ const run = async ({ year = constants.season.year } = {}) => {
       .merge()
     log(`processed and saved ${valueInserts.length} player values`)
   }
+
+  await projectLineups()
 }
 
 module.exports = run
 
 const main = async () => {
+  debug.enable('process-projections,project-lineups')
   let error
   try {
     await run()

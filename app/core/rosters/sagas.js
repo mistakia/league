@@ -123,7 +123,7 @@ export function* calculatePlayerLineupContribution({ player }) {
     ? currentRosterPlayers.active.filter((p) => p.player !== player.player)
     : currentRosterPlayers.active.push(player)
   const worker = new Worker()
-  const result = yield call(worker.optimizeLineup, {
+  const result = yield call(worker.workerOptimizeLineup, {
     players: playerPool.toJS(),
     league
   })
@@ -182,7 +182,7 @@ export function* projectLineups() {
   const worker = new Worker()
   for (const [teamId, players] of rosters.entrySeq()) {
     lineups[teamId] = {}
-    lineups[teamId] = yield call(worker.optimizeLineup, {
+    lineups[teamId] = yield call(worker.workerOptimizeLineup, {
       players: players.toJS(),
       league
     })
@@ -230,7 +230,7 @@ export function* projectTrade() {
   const proposingTeamTradedPlayers = yield select(
     getProposingTeamTradedRosterPlayers
   )
-  const proposingTeamLineups = yield call(worker.optimizeLineup, {
+  const proposingTeamLineups = yield call(worker.workerOptimizeLineup, {
     players: proposingTeamTradedPlayers.map((p) => p.toJS()),
     league
   })
@@ -238,7 +238,7 @@ export function* projectTrade() {
   const acceptingTeamTradedPlayers = yield select(
     getAcceptingTeamTradedRosterPlayers
   )
-  const acceptingTeamLineups = yield call(worker.optimizeLineup, {
+  const acceptingTeamLineups = yield call(worker.workerOptimizeLineup, {
     players: acceptingTeamTradedPlayers.map((p) => p.toJS()),
     league
   })

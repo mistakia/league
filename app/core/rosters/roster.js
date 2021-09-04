@@ -16,11 +16,12 @@ export function createRoster(roster) {
     return
   }
 
-  const { tid, lid, week, year, last_updated, players } = roster
+  const { tid, lid, week, year, last_updated, players, lineups } = roster
 
   return new Roster({
     isPending: false,
     players: new List(players),
+    lineups: new Map(lineups),
     tid,
     lid,
     week,

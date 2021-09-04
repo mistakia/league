@@ -26,6 +26,7 @@ import isReserveCovEligible from './is-reserve-cov-eligible'
 import isSlotActive from './is-slot-active'
 import getDraftWindow from './get-draft-window'
 import getDraftDates from './get-draft-dates'
+import optimizeLineup from './optimize-lineup'
 import * as Errors from './errors'
 
 /* eslint-disable no-extra-semi */
@@ -117,5 +118,6 @@ export {
   getDraftWindow,
   isDraftWindowOpen,
   getDraftDates,
-  Errors
+  Errors,
+  optimizeLineup
 }
