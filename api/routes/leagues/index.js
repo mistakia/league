@@ -243,6 +243,11 @@ router.get('/:leagueId/rosters/?', async (req, res) => {
       .where({ lid: leagueId, year: constants.season.year })
       .orderBy('week', 'desc')
 
+    const lineups = await db('league_team_lineups').where({ lid: leagueId })
+    const lineupStarters = await db('league_team_lineup_starters').where({
+      lid: leagueId
+    })
+
     const players = await db('rosters_players')
       .select(
         'rosters_players.*',
@@ -268,6 +273,16 @@ router.get('/:leagueId/rosters/?', async (req, res) => {
 
     rosters.forEach((r) => {
       r.players = players.filter((p) => p.rid === r.uid)
+      r.lineups = {}
+      const teamLineups = lineups.filter((l) => l.tid === r.tid)
+      const teamStarters = lineupStarters.filter((l) => l.tid === r.tid)
+      for (const lineup of teamLineups) {
+        const lineupStarters = teamStarters.filter(
+          (l) => l.week === lineup.week
+        )
+        const starters = lineupStarters.map((l) => l.player)
+        r.lineups[lineup.week] = { total: lineup.total, starters }
+      }
     })
 
     const query1 = await db('teams')
