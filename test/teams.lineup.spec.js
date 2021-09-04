@@ -318,5 +318,42 @@ describe('API /teams - lineups', function () {
     it('locked starter', async () => {
       // TODO
     })
+
+    it('player started Regular Season on reserve', async () => {
+      MockDate.set(start.subtract('1', 'week').toDate())
+      const player = await selectPlayer({ pos: 'WR' })
+      await addPlayer({
+        leagueId: 1,
+        teamId: 1,
+        player,
+        userId: 1,
+        slot: constants.slots.IR
+      })
+
+      MockDate.set(start.add('6', 'week').toDate())
+      await addPlayer({
+        leagueId: 1,
+        teamId: 1,
+        player,
+        userId: 1
+      })
+
+      const request = chai
+        .request(server)
+        .put('/api/teams/1/lineups')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          leagueId: 1,
+          players: [
+            {
+              player: player.player,
+              slot: constants.slots.WR
+            }
+          ],
+          week: 6
+        })
+
+      await error(request, 'player ineligible to start during first six weeks')
+    })
   })
 })
