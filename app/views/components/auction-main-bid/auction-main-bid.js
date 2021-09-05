@@ -1,6 +1,5 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import dayjs from 'dayjs'
 
 import TeamName from '@components/team-name'
 import Button from '@components/button'
@@ -120,15 +119,13 @@ export default class AuctionMainBid extends React.Component {
       nominatingTeamId,
       timer,
       isWinningBid,
-      auctionStart
+      league,
+      isStarted,
+      adate
     } = this.props
 
-    const now = dayjs()
-    const start = dayjs.unix(auctionStart)
-    const isStarted = start.isBefore(now)
-
-    let action
-    if (!auctionStart || !isStarted || isComplete) {
+    let action = null
+    if (!league.adate || !isStarted || isComplete) {
       action = null
     } else if (isPaused) {
       action = (
@@ -177,14 +174,14 @@ export default class AuctionMainBid extends React.Component {
     }
 
     let main
-    if (!auctionStart) {
+    if (!league.adate) {
       main = <div>Auction is not scheduled.</div>
     } else if (isComplete) {
       main = <div>Auction is complete.</div>
     } else if (!isStarted) {
       main = (
         <div>
-          Auction will begin on {start.format('dddd, MMMM D YYYY, h:mm:ss a')}
+          Auction will begin on {adate.format('dddd, MMMM D YYYY, h:mm:ss a')}
         </div>
       )
     } else if (isPaused) {
@@ -261,5 +258,7 @@ AuctionMainBid.propTypes = {
   nominatingTeamId: PropTypes.number,
   timer: PropTypes.number,
   isWinningBid: PropTypes.bool,
-  auctionStart: PropTypes.number
+  league: PropTypes.object,
+  isStarted: PropTypes.bool,
+  adate: PropTypes.object
 }

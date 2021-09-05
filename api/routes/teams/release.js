@@ -1,8 +1,12 @@
 const express = require('express')
-const dayjs = require('dayjs')
 const router = express.Router({ mergeParams: true })
 
-const { constants, isSlotActive, Roster } = require('../../../common')
+const {
+  constants,
+  isSlotActive,
+  Roster,
+  getFreeAgentPeriod
+} = require('../../../common')
 const {
   verifyUserTeam,
   sendNotifications,
@@ -49,10 +53,6 @@ router.post('/?', async (req, res) => {
     // if active roster, verify not during FA Auction Period
     const league = await getLeague(leagueId)
     if (league.adate) {
-      const adate = dayjs.unix(league.adate)
-      const start = adate.subtract('4', 'days')
-      const end = adate.startOf('day').add('1', 'day')
-
       const rosterRow = await getRoster({ tid })
       const roster = new Roster({ roster: rosterRow, league })
       if (!roster.has(player)) {
@@ -64,9 +64,10 @@ router.post('/?', async (req, res) => {
       const rosterPlayer = roster.get(player)
       const isOnActiveRoster = isSlotActive(rosterPlayer.slot)
 
+      const faPeriod = getFreeAgentPeriod(league.adate)
       if (
-        constants.season.now.isAfter(start) &&
-        constants.season.now.isBefore(end) &&
+        constants.season.now.isAfter(faPeriod.start) &&
+        constants.season.now.isBefore(faPeriod.end) &&
         isOnActiveRoster
       ) {
         return res.status(400).send({
