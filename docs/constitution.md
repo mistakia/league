@@ -14,7 +14,7 @@ This TEFLON (LEAGUE) Constitution constitutes an agreement among the LEAGUE Foot
 
 ### Terms Defined.
 
-**“Boards”** shall mean the GroupMe message group
+**“Boards”** shall mean the “League” Discord server.
 
 **“Buy-In”** shall mean the sum of money submitted by a Team in order to be eligible to participate in the LEAGUE in a given year.
 
@@ -36,9 +36,9 @@ This TEFLON (LEAGUE) Constitution constitutes an agreement among the LEAGUE Foot
 
 **“LEAGUE CHAMPIONSHIP”** shall mean the championship round between the four finalists in the fantasy league.
 
-**“Regular Season”** shall mean the period of time between 10:00 AM on the day upon which the first game of NFL football is played in a given year and the resolution of the LEAGUE CHAMPIONSHIP.
+**“Regular Season”** shall mean the period of time between 12:00 AM EST on the first Tuesday of Week 1 of the NFL Regular Season and the resolution of the LEAGUE CHAMPIONSHIP.
 
-**“Offseason”** shall mean the period of time between the resolution of the LEAGUE CHAMPIONSHIP and 10:00 AM on the day upon which the first game of NFL football is played in a given year.
+**“Offseason”** shall mean the period of time between the resolution of the LEAGUE CHAMPIONSHIP and 12:00 AM EST on the first Tuesday of Week 1 of the NFL Regular Season.
 
 **“Opening Day”** shall mean the first day upon which a regular season NFL football game is played within a given season.
 
