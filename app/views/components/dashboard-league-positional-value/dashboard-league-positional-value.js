@@ -17,7 +17,7 @@ export default class DashboardLeaguePositionalValue extends React.Component {
         const rounded = parseInt(summary.rosters[tid][position].toFixed(1), 0)
         data.push(rounded)
       }
-      series.push({ name: position, data })
+      series.push({ name: position, data, borderColor: 'transparent' })
     }
 
     const teamNames = []
