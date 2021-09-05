@@ -1,7 +1,7 @@
 import dayjs from 'dayjs'
 import { createSelector } from 'reselect'
 
-import { constants, getDraftDates } from '@common'
+import { constants, getDraftDates, getFreeAgentPeriod } from '@common'
 import { getTeams } from '@core/teams'
 import { getApp } from '@core/app'
 import { League } from './league'
@@ -100,19 +100,26 @@ export function getLeagueEvents(state) {
   }
 
   if (league.adate) {
+    const faPeriod = getFreeAgentPeriod(league.adata)
     const date = dayjs.unix(league.adate)
     if (now.isBefore(date)) {
-      const faPeriod = date.subtract('4', 'days')
-      if (now.isBefore(faPeriod)) {
+      if (now.isBefore(faPeriod.start)) {
         events.push({
           detail: 'Free Agency Period Begins',
-          date: faPeriod
+          date: faPeriod.start
         })
       }
 
       events.push({
         detail: 'Auction',
         date
+      })
+    }
+
+    if (now.isBefore(faPeriod.end)) {
+      events.push({
+        detail: 'Free Agency Period Ends',
+        data: faPeriod.end
       })
     }
   }

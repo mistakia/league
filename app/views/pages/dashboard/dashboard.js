@@ -15,7 +15,12 @@ import DashboardTeamSummary from '@components/dashboard-team-summary'
 import DashboardTeamValue from '@components/dashboard-team-value'
 import PlayerRoster from '@components/player-roster'
 import PageLayout from '@layouts/page'
-import { constants, isReserveEligible, isReserveCovEligible } from '@common'
+import {
+  constants,
+  isReserveEligible,
+  isReserveCovEligible,
+  getFreeAgentPeriod
+} from '@common'
 
 import './dashboard.styl'
 
@@ -36,19 +41,18 @@ export default function DashboardPage() {
 
   const notices = []
   if (league.adate) {
-    const adate = dayjs.unix(league.adate)
-    const start = adate.subtract('4', 'days')
-    if (constants.season.now.isBefore(start)) {
+    const faPeriod = getFreeAgentPeriod(league.adate)
+    if (constants.season.now.isBefore(faPeriod.start)) {
       notices.push(
         <Alert key='fa-period' severity='warning'>
           <AlertTitle>
-            Free Agency (FA) period begins {dayjs().to(start)}
+            Free Agency (FA) period begins {dayjs().to(faPeriod.start)}
           </AlertTitle>
           The player pool will lock in preparation for the auction. You will not
           be able to release any players once the FA period begins.
           <br />
           <br />
-          {start.local().format('[Starts] l [at] LT z')}
+          {faPeriod.start.local().format('[Starts] l [at] LT z')}
         </Alert>
       )
     }
