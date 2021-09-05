@@ -20,7 +20,7 @@ router.get('/?', async (req, res) => {
      */
     const players = await getPlayers({
       leagueId,
-      userId: req.user.userId,
+      userId: req.user ? req.user.userId : null,
       textSearch: search
     })
 
