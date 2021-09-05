@@ -29,6 +29,7 @@ import getDraftDates from './get-draft-dates'
 import optimizeLineup from './optimize-lineup'
 import simulate from './simulate'
 import groupBy from './group-by'
+import getFreeAgentPeriod from './get-free-agent-period'
 import * as Errors from './errors'
 
 const uniqBy = (a, key) => {
@@ -114,5 +115,6 @@ export {
   getDraftDates,
   Errors,
   optimizeLineup,
-  simulate
+  simulate,
+  getFreeAgentPeriod
 }

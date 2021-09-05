@@ -9,7 +9,7 @@ import {
   getActiveRosterPlayerIdsForCurrentLeague
 } from '@core/rosters'
 import { getCurrentLeague } from '@core/leagues'
-import { constants } from '@common'
+import { constants, getFreeAgentPeriod } from '@common'
 import { fuzzySearch } from '@core/utils'
 
 export function getAuction(state) {
@@ -126,13 +126,8 @@ export function isAfterAuction(state) {
     return false
   }
 
-  // day after auction starts
-  const cutoff = dayjs
-    .unix(league.adate)
-    .tz('America/New_York')
-    .add('1', 'day')
-    .startOf('day')
-  if (dayjs().isBefore(cutoff)) {
+  const faPeriod = getFreeAgentPeriod(league.adate)
+  if (dayjs().isBefore(faPeriod.end)) {
     return false
   }
 
