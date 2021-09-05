@@ -19,9 +19,9 @@ export const Team = new Record({
   picks: new List(),
   stats: new Map(constants.createFantasyTeamStats()),
 
-  playoffOdds: null,
-  divisionOdds: null,
-  byeOdds: null
+  playoff_odds: null,
+  division_odds: null,
+  bye_odds: null
 })
 
 export function createTeam({
@@ -36,10 +36,15 @@ export function createTeam({
   wo,
   pc,
   ac,
+
   teamtext,
   teamvoice,
   leaguetext,
-  picks = []
+  picks = [],
+
+  playoff_odds,
+  division_odds,
+  bye_odds
 }) {
   return new Team({
     uid,
@@ -56,6 +61,10 @@ export function createTeam({
     teamtext,
     teamvoice,
     leaguetext,
-    picks: new List(picks)
+    picks: new List(picks),
+
+    playoff_odds,
+    division_odds,
+    bye_odds
   })
 }
