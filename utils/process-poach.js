@@ -34,10 +34,12 @@ module.exports = async function ({ player, release = [], lid, tid, userid }) {
   const league = await getLeague(lid)
   const rosterRow = await getRoster({ tid })
   const roster = new Roster({ roster: rosterRow, league })
+  const releasePlayers = []
   if (release.length) {
     for (const player of release) {
       if (roster.has(player)) {
         roster.removePlayer(player)
+        releasePlayers.push(player)
       }
     }
   }
@@ -65,11 +67,9 @@ module.exports = async function ({ player, release = [], lid, tid, userid }) {
   }
 
   // process release
-  if (release.length) {
-    for (const player of release) {
-      if (roster.has(player)) {
-        await processRelease({ player, tid, lid, userid })
-      }
+  if (releasePlayers.length) {
+    for (const player of releasePlayers) {
+      await processRelease({ player, tid, lid, userid })
     }
   }
 
