@@ -7,10 +7,10 @@ import ListItemText from '@material-ui/core/ListItemText'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import advancedFormat from 'dayjs/plugin/advancedFormat'
 
+import './league-schedule-list.styl'
+
 dayjs.extend(relativeTime)
 dayjs.extend(advancedFormat)
-
-import './league-schedule-list.styl'
 
 export default class LeagueScheduleList extends React.Component {
   render() {

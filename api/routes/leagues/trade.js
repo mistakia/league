@@ -465,7 +465,7 @@ router.post(
           .update({ cancelled: Math.round(Date.now() / 1000) })
       }
 
-      const teams = await db('teams').whereIn('uid', [trade.pid, trade.tid])
+      const teams = await db('teams').where('lid', leagueId)
       const proposingTeam = teams.find((t) => t.uid === trade.pid)
       const acceptingTeam = teams.find((t) => t.uid === trade.tid)
       const proposingTeamItems = []
@@ -488,10 +488,13 @@ router.post(
         pickRows.map((p) => p.pickid)
       )
       for (const pick of picks) {
+        const pickTeam = teams.find((t) => t.tid === pick.otid)
         const pickNum = pick.pick % league.nteams || league.nteams
-        const pickStr = pick.pick
+        let pickStr = pick.pick
           ? `${pick.year} ${pick.round}.${('0' + pickNum).slice(-2)}`
           : `${pick.year} ${pick.round}${nth(pick.round)}`
+
+        pickStr = `${pickStr} (${pickTeam.name})`
 
         // pick.tid is the team the pick belongs to
         const pickTradeInfo = pickRows.find((p) => p.pickid === pick.uid)

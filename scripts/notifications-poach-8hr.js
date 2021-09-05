@@ -1,10 +1,13 @@
 // eslint-disable-next-line
 require = require('esm')(module /*, options*/)
 const dayjs = require('dayjs')
+const advancedFormat = require('dayjs/plugin/advancedFormat')
 
 const { constants } = require('../common')
 const { sendNotifications, getLeague } = require('../utils')
 const db = require('../db')
+
+dayjs.extend(advancedFormat)
 
 const run = async () => {
   // get list of poaches that were submitted more than 40 hours ago
@@ -31,7 +34,7 @@ const run = async () => {
     const message = `The poaching claim for ${claim.fname} ${claim.lname} (${
       claim.pos
     }) will be processed ${time.toNow()} around ${time.format(
-      'dddd, MMMM D h:mm a'
+      'dddd, MMMM Do h:mm a'
     )} EST.`
     const league = await getLeague(claim.lid)
     await sendNotifications({

@@ -59,7 +59,12 @@ export default class DashboardDraftPicks extends React.Component {
 
     for (const [year, picks] of Object.entries(draftPicksByYear)) {
       draftPickItems.push(
-        <SeasonDraftPicks key={year} year={year} picks={picks} league={league} />
+        <SeasonDraftPicks
+          key={year}
+          year={year}
+          picks={picks}
+          league={league}
+        />
       )
     }
 
