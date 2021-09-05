@@ -19,8 +19,8 @@ function StandingsTeam({ team }) {
       <div className='table__cell metric'>
         {team.getIn(['stats', 'pf'], 0).toFixed(1)}
       </div>
-      <div className='table__cell metric'>{toPercent(team.playoffOdds)}</div>
-      <div className='table__cell metric'>{toPercent(team.byeOdds)}</div>
+      <div className='table__cell metric'>{toPercent(team.playoff_odds)}</div>
+      <div className='table__cell metric'>{toPercent(team.bye_odds)}</div>
       <div className='table__cell metric'>
         {team.getIn(['stats', 'doi'], 0).toFixed(2)}
       </div>

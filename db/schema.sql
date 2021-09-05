@@ -2543,6 +2543,27 @@ CREATE TABLE `league_team_lineup_starters` (
   UNIQUE KEY `starter` (`lid`,`player`,`year`, `week`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `league_team_forecast`
+--
+
+DROP TABLE IF EXISTS `league_team_forecast`;
+
+CREATE TABLE `league_team_forecast` (
+  `tid` int(6) NOT NULL,
+  `lid` int(6) NOT NULL,
+  `week` varchar(3) NOT NULL,
+  `year` int(4) NOT NULL,
+  `day` int(3) NOT NULL,
+  `playoff_odds` decimal(5,4) NOT NULL,
+  `division_odds` decimal(5,4) NOT NULL,
+  `bye_odds` decimal(5,4) NOT NULL,
+  `timestamp` int(11) NOT NULL,
+  UNIQUE KEY `team_forecast_day` (`tid`,`year`,`week`,`day`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
