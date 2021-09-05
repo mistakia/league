@@ -318,13 +318,18 @@ export function playersReducer(state = initialState, { payload, type }) {
         rosters.forEach((roster) => {
           roster.players.forEach((rosterSlot) => {
             const { player, value, type, slot, tag } = rosterSlot
-            state.mergeIn(['items', player], {
+            const params = {
               value,
               tag,
               type,
               tid: roster.tid,
               slot
-            })
+            }
+            if (state.hasIn(['items', player])) {
+              state.mergeIn(['items', player], params)
+            } else {
+              state.setIn(['items', player], createPlayer(params))
+            }
           })
         })
       })
