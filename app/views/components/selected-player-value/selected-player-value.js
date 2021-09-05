@@ -50,11 +50,13 @@ export default class SelectedPlayerValue extends React.Component {
       series: [
         {
           name: 'Worst Starter',
+          borderColor: 'transparent',
           data: wsData,
           pointPadding: 0.2
         },
         {
           name: 'Best Available',
+          borderColor: 'transparent',
           data: baData,
           pointPadding: 0.4
         }
