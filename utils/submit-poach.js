@@ -1,4 +1,5 @@
 const dayjs = require('dayjs')
+const advancedFormat = require('dayjs/plugin/advancedFormat')
 
 const db = require('../db')
 
@@ -6,6 +7,8 @@ const { constants, Roster } = require('../common')
 const sendNotifications = require('./send-notifications')
 const getRoster = require('./get-roster')
 const getLeague = require('./get-league')
+
+dayjs.extend(advancedFormat)
 
 module.exports = async function ({
   leagueId,
@@ -103,7 +106,7 @@ module.exports = async function ({
   }). This claim will be processed around ${dayjs()
     .utcOffset(-4)
     .add('48', 'hours')
-    .format('dddd, MMMM D h:mm a')} EST.`
+    .format('dddd, MMMM Do h:mm a')} EST.`
   await sendNotifications({
     league,
     teamIds: [],
