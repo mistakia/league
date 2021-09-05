@@ -1,4 +1,5 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 import Toolbar from '@material-ui/core/Toolbar'
 
@@ -58,7 +59,7 @@ export default class DashboardDraftPicks extends React.Component {
 
     for (const [year, picks] of Object.entries(draftPicksByYear)) {
       draftPickItems.push(
-        <SeasonDraftPicks year={year} picks={picks} league={league} />
+        <SeasonDraftPicks key={year} year={year} picks={picks} league={league} />
       )
     }
 
@@ -74,6 +75,6 @@ export default class DashboardDraftPicks extends React.Component {
 }
 
 DashboardDraftPicks.propTypes = {
-  picks: PropTypes.array,
+  picks: ImmutablePropTypes.list,
   league: PropTypes.object
 }
