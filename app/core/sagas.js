@@ -22,7 +22,6 @@ import { statusSagas } from './status'
 import { scoreboardSagas } from './scoreboard'
 import { playSagas } from './plays'
 import { gamelogSagas } from './gamelogs'
-import { forecastSagas } from './forecast'
 import { standingsSagas } from './standings'
 import { propSagas } from './props'
 
@@ -50,7 +49,6 @@ export default function* rootSaga() {
     ...scoreboardSagas,
     ...playSagas,
     ...gamelogSagas,
-    ...forecastSagas,
     ...standingsSagas,
     ...propSagas
   ])

@@ -68,11 +68,6 @@ export function* calculateValues() {
   })
   worker.terminate()
   yield putResolve(playerActions.setValues(result))
-  yield put(
-    notificationActions.show({
-      message: 'Projecting Lineups'
-    })
-  )
   yield put(rosterActions.projectLineups())
   // TODO calculate bid up to values
 }

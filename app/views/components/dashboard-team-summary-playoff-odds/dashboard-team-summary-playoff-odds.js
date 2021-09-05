@@ -19,7 +19,7 @@ export default class DashboardTeamSummaryPlayoffOdds extends React.Component {
       items.push(
         <tr key={team.uid}>
           <td>{team.name}</td>
-          <td>{toPercent(team.playoffOdds)}</td>
+          <td>{toPercent(team.playoff_odds)}</td>
         </tr>
       )
     }
@@ -32,7 +32,7 @@ export default class DashboardTeamSummaryPlayoffOdds extends React.Component {
               Playoff Odds
             </Grid>
             <Grid item xs={3}>
-              {toPercent(team.playoffOdds)}
+              {toPercent(team.playoff_odds)}
             </Grid>
             <Grid item xs={2}>
               <Rank rank={rank} size={teams.size} />

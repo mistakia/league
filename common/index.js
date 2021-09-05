@@ -27,15 +27,9 @@ import isSlotActive from './is-slot-active'
 import getDraftWindow from './get-draft-window'
 import getDraftDates from './get-draft-dates'
 import optimizeLineup from './optimize-lineup'
+import simulate from './simulate'
+import groupBy from './group-by'
 import * as Errors from './errors'
-
-/* eslint-disable no-extra-semi */
-const groupBy = (xs, key) =>
-  xs.reduce((rv, x) => {
-    ;(rv[x[key]] = rv[x[key]] || []).push(x)
-    return rv
-  }, {})
-/* eslint-enable no-extra-semi */
 
 const uniqBy = (a, key) => {
   const seen = new Set()
@@ -119,5 +113,6 @@ export {
   isDraftWindowOpen,
   getDraftDates,
   Errors,
-  optimizeLineup
+  optimizeLineup,
+  simulate
 }

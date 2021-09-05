@@ -21,6 +21,7 @@ const {
   getPlayerTransactions
 } = require('../utils')
 const projectLineups = require('./project-lineups')
+const simulateSeason = require('./simulate-season')
 
 const log = debug('process-projections')
 
@@ -200,12 +201,13 @@ const run = async ({ year = constants.season.year } = {}) => {
   }
 
   await projectLineups()
+  await simulateSeason()
 }
 
 module.exports = run
 
 const main = async () => {
-  debug.enable('process-projections,project-lineups')
+  debug.enable('process-projections,project-lineups,simulate-season')
   let error
   try {
     await run()

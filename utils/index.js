@@ -113,5 +113,6 @@ module.exports = {
   getJobs: require('./get-jobs'),
 
   getPlayerTransactions: require('./get-player-transactions'),
-  getPlayers: require('./get-players')
+  getPlayers: require('./get-players'),
+  getRosters: require('./get-rosters')
 }

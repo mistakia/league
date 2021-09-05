@@ -7,7 +7,6 @@ import { auctionActions } from '@core/auction'
 import { draftActions } from '@core/draft'
 import { tradeActions } from '@core/trade'
 import { standingsActions } from '@core/standings'
-import { forecastActions } from '@core/forecast'
 
 const initialState = new Map()
 
@@ -111,20 +110,6 @@ export function teamsReducer(state = initialState, { payload, type }) {
           state.updateIn([t.tid], (team) =>
             team.merge({
               stats: new Map(t.stats)
-            })
-          )
-        }
-      })
-
-    case forecastActions.SET_FORECAST:
-      return state.withMutations((state) => {
-        for (const teamId in payload.forecast) {
-          const t = payload.forecast[teamId]
-          state.updateIn([t.tid], (team) =>
-            team.merge({
-              playoffOdds: t.playoffOdds,
-              divisionOdds: t.divisionOdds,
-              byeOdds: t.byeOdds
             })
           )
         }

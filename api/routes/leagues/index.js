@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 
+const { getRosters } = require('../../../utils')
 const { constants } = require('../../../common')
 const transactions = require('./transactions')
 const draft = require('./draft')
@@ -206,6 +207,20 @@ router.get('/:leagueId/teams/?', async (req, res) => {
     const teams = await db('teams').where({ lid: leagueId })
     const picks = await db('draft').where({ lid: leagueId }).whereNull('player')
 
+    const forecastSub = db('league_team_forecast')
+      .select(db.raw('max(timestamp) AS maxtime, tid AS teamid'))
+      .groupBy('teamid')
+      .where('year', constants.season.year)
+    const forecasts = await db
+      .select('playoff_odds', 'bye_odds', 'division_odds', 'tid')
+      .from(db.raw('(' + forecastSub.toString() + ') AS X'))
+      .innerJoin('league_team_forecast', function () {
+        this.on(function () {
+          this.on('teamid', '=', 'tid')
+          this.andOn('timestamp', '=', 'maxtime')
+        })
+      })
+
     const teamIds = teams.map((t) => t.uid)
 
     const usersTeams = await db('users_teams')
@@ -213,7 +228,11 @@ router.get('/:leagueId/teams/?', async (req, res) => {
       .whereIn('tid', teamIds)
 
     for (const team of teams) {
+      const forecast = forecasts.find((f) => f.tid === team.uid)
       team.picks = picks.filter((p) => p.tid === team.uid)
+      team.playoff_odds = forecast.playoff_odds
+      team.division_odds = forecast.division_odds
+      team.bye_odds = forecast.bye_odds
     }
 
     for (const usersTeam of usersTeams) {
@@ -234,81 +253,10 @@ router.get('/:leagueId/teams/?', async (req, res) => {
 })
 
 router.get('/:leagueId/rosters/?', async (req, res) => {
-  const { logger, db } = req.app.locals
+  const { logger } = req.app.locals
   try {
     const { leagueId } = req.params
-
-    const rosters = await db('rosters')
-      .select('*')
-      .where({ lid: leagueId, year: constants.season.year })
-      .orderBy('week', 'desc')
-
-    const lineups = await db('league_team_lineups').where({ lid: leagueId })
-    const lineupStarters = await db('league_team_lineup_starters').where({
-      lid: leagueId
-    })
-
-    const players = await db('rosters_players')
-      .select(
-        'rosters_players.*',
-        'transactions.type',
-        'transactions.value',
-        'transactions.timestamp',
-        'transactions.year'
-      )
-      .join('rosters', 'rosters_players.rid', '=', 'rosters.uid')
-      .leftJoin('transactions', function () {
-        this.on(
-          'transactions.uid',
-          '=',
-          db.raw(
-            '(select max(uid) from transactions where transactions.tid = rosters.tid and transactions.player = rosters_players.player)'
-          )
-        )
-      })
-      .whereIn(
-        'rid',
-        rosters.map((r) => r.uid)
-      )
-
-    rosters.forEach((r) => {
-      r.players = players.filter((p) => p.rid === r.uid)
-      r.lineups = {}
-      const teamLineups = lineups.filter((l) => l.tid === r.tid)
-      const teamStarters = lineupStarters.filter((l) => l.tid === r.tid)
-      for (const lineup of teamLineups) {
-        const lineupStarters = teamStarters.filter(
-          (l) => l.week === lineup.week
-        )
-        const starters = lineupStarters.map((l) => l.player)
-        r.lineups[lineup.week] = { total: lineup.total, starters }
-      }
-    })
-
-    const query1 = await db('teams')
-      .select('teams.*')
-      .join('users_teams', 'teams.uid', 'users_teams.userid')
-      .where('users_teams.userid', req.user.userId)
-      .where('teams.lid', leagueId)
-
-    if (query1.length) {
-      const tid = query1[0].uid
-      const bids = await db('transition_bids')
-        .where('tid', tid)
-        .where('player_tid', tid)
-        .where('year', constants.season.year)
-        .whereNull('cancelled')
-        .whereNull('processed')
-
-      if (bids.length) {
-        const teamRoster = rosters.find((r) => r.tid === tid)
-        for (const bid of bids) {
-          const player = teamRoster.players.find((p) => p.player === bid.player)
-          player.bid = bid.bid
-        }
-      }
-    }
-
+    const rosters = await getRosters({ lid: leagueId, userId: req.user.userId })
     res.send(rosters)
   } catch (err) {
     logger(err)

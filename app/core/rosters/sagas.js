@@ -173,23 +173,7 @@ export function* calculatePlayerLineupContribution({ player }) {
   return playerData
 }
 
-export function* projectLineups() {
-  const league = yield select(getCurrentLeague)
-
-  const rosters = yield select(getActivePlayersByRosterForCurrentLeague)
-  const lineups = {}
-
-  const worker = new Worker()
-  for (const [teamId, players] of rosters.entrySeq()) {
-    lineups[teamId] = {}
-    lineups[teamId] = yield call(worker.workerOptimizeLineup, {
-      players: players.toJS(),
-      league
-    })
-  }
-  worker.terminate()
-
-  yield putResolve(rosterActions.setLineupProjections(lineups))
+export function* projectContributions() {
   const currentRosterPlayers = yield select(getCurrentPlayers)
 
   const projectedContribution = {}
@@ -221,6 +205,32 @@ export function* projectLineups() {
   }
 
   yield put(playerActions.setProjectedContribution(claimContribution))
+}
+
+export function* projectLineups() {
+  yield put(
+    notificationActions.show({
+      message: 'Projecting Lineups'
+    })
+  )
+
+  const league = yield select(getCurrentLeague)
+
+  const rosters = yield select(getActivePlayersByRosterForCurrentLeague)
+  const lineups = {}
+
+  const worker = new Worker()
+  for (const [teamId, players] of rosters.entrySeq()) {
+    lineups[teamId] = {}
+    lineups[teamId] = yield call(worker.workerOptimizeLineup, {
+      players: players.toJS(),
+      league
+    })
+  }
+  worker.terminate()
+
+  yield putResolve(rosterActions.setLineupProjections(lineups))
+  yield call(projectContributions)
 }
 
 export function* projectTrade() {
