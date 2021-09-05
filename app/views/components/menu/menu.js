@@ -13,8 +13,12 @@ import ListItem from '@material-ui/core/ListItem'
 import ListItemText from '@material-ui/core/ListItemText'
 import ListItemAvatar from '@material-ui/core/ListItemAvatar'
 import Avatar from '@material-ui/core/Avatar'
+import ExpandLess from '@material-ui/icons/ExpandLess'
+import ExpandMore from '@material-ui/icons/ExpandMore'
+import Collapse from '@material-ui/core/Collapse'
 
 import LeagueSchedule from '@components/league-schedule'
+import LeagueScheduleList from '@components/league-schedule-list'
 import { constants } from '@common'
 
 import './menu.styl'
@@ -26,7 +30,8 @@ export default class Menu extends React.Component {
     super(props)
 
     this.state = {
-      open: false
+      open: false,
+      scheduleOpen: false
     }
   }
 
@@ -43,17 +48,31 @@ export default class Menu extends React.Component {
     this.setState({ open: true })
   }
 
+  toggleSchedule = () => {
+    this.setState({ scheduleOpen: !this.state.scheduleOpen })
+  }
+
   render = () => {
     const { isLoggedIn, team } = this.props
     let header
     if (isLoggedIn) {
       header = (
-        <ListItem alignItems='flex-start'>
-          <ListItemAvatar>
-            <Avatar alt={team.image} />
-          </ListItemAvatar>
-          <ListItemText primary={team.name} secondary='0-0' />
-        </ListItem>
+        <>
+          <ListItem alignItems='flex-start'>
+            <ListItemAvatar>
+              <Avatar alt={team.image} />
+            </ListItemAvatar>
+            <ListItemText primary={team.name} secondary='0-0' />
+          </ListItem>
+          <Divider />
+          <ListItem button onClick={this.toggleSchedule}>
+            <ListItemText primary='League Schedule' />
+            {this.state.scheduleOpen ? <ExpandLess /> : <ExpandMore />}
+          </ListItem>
+          <Collapse in={this.state.scheduleOpen} timeout='auto' unmountOnExit>
+            <LeagueScheduleList />
+          </Collapse>
+        </>
       )
     } else {
       header = (
