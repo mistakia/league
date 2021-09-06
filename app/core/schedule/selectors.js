@@ -14,7 +14,8 @@ export function getByeByTeam(state, { team }) {
   return state.getIn(['schedule', 'teams', team, 'bye'])
 }
 
-export function getGameByTeam(state, { team, week = constants.season.week }) {
+const currentWeek = Math.max(constants.season.week, 1)
+export function getGameByTeam(state, { team, week = currentWeek }) {
   const nflTeam = state.getIn(['schedule', 'teams', team])
   if (!nflTeam) {
     return null
