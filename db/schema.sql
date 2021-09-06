@@ -2564,6 +2564,23 @@ CREATE TABLE `league_team_forecast` (
   UNIQUE KEY `team_forecast_day` (`tid`,`year`,`week`,`day`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `league_baselines`
+--
+
+DROP TABLE IF EXISTS `league_baselines`;
+
+CREATE TABLE `league_baselines` (
+  `lid` int(6) NOT NULL,
+  `week` varchar(3) NOT NULL,
+  `year` int(4) NOT NULL,
+  `player` varchar(7) NOT NULL,
+  `type` varchar(10),
+  `pos` varchar(3) NOT NULL,
+  UNIQUE KEY `baseline` (`lid`,`week`,`pos`,`type`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

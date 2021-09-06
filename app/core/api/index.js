@@ -63,5 +63,6 @@ export {
   postTransitionTag,
   deleteTransitionTag,
   putTransitionTag,
-  getPlayerTransactions
+  getPlayerTransactions,
+  getBaselines
 } from './sagas'
