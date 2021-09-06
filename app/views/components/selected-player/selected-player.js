@@ -186,10 +186,9 @@ export default class SelectedPlayer extends React.Component {
             <Tab label='Game Log' />
             <Tab label='Stats' />
             <Tab label='Team Splits' />
-            <Tab label='Opportunity' />
             <Tab label='Efficiency' />
             <Tab label='Practice' />
-            <Tab label='News' />
+            {/* <Tab label='News' /> */}
           </Tabs>
           <TabPanel value={value} index={0}>
             <SelectedPlayerLineupImpact />
@@ -218,17 +217,14 @@ export default class SelectedPlayer extends React.Component {
             <SelectedPlayerTeamPositionSplits />
           </TabPanel>
           <TabPanel value={value} index={8}>
-            Coming Soon
-          </TabPanel>
-          <TabPanel value={value} index={9}>
             <SelectedPlayerEfficiencyStats />
           </TabPanel>
-          <TabPanel value={value} index={10}>
+          <TabPanel value={value} index={9}>
             <SelectedPlayerPractice />
           </TabPanel>
-          <TabPanel value={value} index={11}>
-            Coming soon
-          </TabPanel>
+          {/* <TabPanel value={value} index={11}>
+              Coming soon
+              </TabPanel> */}
         </div>
       </Dialog>
     )
