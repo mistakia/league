@@ -14,6 +14,7 @@ const poaches = require('./poaches')
 const sync = require('./sync')
 const teams = require('./teams')
 const rosters = require('./rosters')
+const baselines = require('./baselines')
 
 router.put('/:leagueId', async (req, res) => {
   const { db, logger } = req.app.locals
@@ -275,5 +276,6 @@ router.use('/:leagueId/poaches', poaches)
 router.use('/:leagueId/sync', sync)
 router.use('/:leagueId/teams', teams)
 router.use('/:leagueId/rosters', rosters)
+router.use('/:leagueId/baselines', baselines)
 
 module.exports = router

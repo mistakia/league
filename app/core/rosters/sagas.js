@@ -1,4 +1,5 @@
 import {
+  all,
   take,
   call,
   takeLatest,
@@ -574,6 +575,17 @@ export function* watchExportRosters() {
   yield takeLatest(rosterActions.EXPORT_ROSTERS, exportRosters)
 }
 
+export function* watchPlayersAndBaselinesFulfilled() {
+  while (true) {
+    yield all([
+      take(playerActions.FETCH_PLAYERS_FULFILLED),
+      take(playerActions.GET_BASELINES_FULFILLED)
+    ])
+
+    yield call(projectContributions)
+  }
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -621,5 +633,7 @@ export const rosterSagas = [
   fork(watchPutTransitionTagFulfilled),
   fork(watchDeleteTransiionTagFulfilled),
 
-  fork(watchExportRosters)
+  fork(watchExportRosters),
+
+  fork(watchPlayersAndBaselinesFulfilled)
 ]
