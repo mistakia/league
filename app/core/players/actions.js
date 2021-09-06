@@ -60,6 +60,10 @@ export const playerActions = {
   POST_CUTLIST_PENDING: 'POST_CUTLIST_PENDING',
   POST_CUTLIST_FAILED: 'POST_CUTLIST_FAILED',
 
+  GET_BASELINES_FULFILLED: 'GET_BASELINES_FULFILLED',
+  GET_BASELINES_PENDING: 'GET_BASELINES_PENDING',
+  GET_BASELINES_FAILED: 'GET_BASELINES_FAILED',
+
   setStats: ({ players, percentiles }) => ({
     type: playerActions.SET_PLAYER_STATS,
     payload: {
@@ -390,6 +394,29 @@ export const playerActions = {
       opts,
       error
     }
+  }),
+
+  getBaselinesFailed: (opts, error) => ({
+    type: playerActions.GET_BASELINES_FAILED,
+    payload: {
+      opts,
+      error
+    }
+  }),
+
+  getBaselinesPending: (opts) => ({
+    type: playerActions.GET_BASELINES_PENDING,
+    payload: {
+      opts
+    }
+  }),
+
+  getBaselinesFulfilled: (opts, data) => ({
+    type: playerActions.GET_BASELINES_FULFILLED,
+    payload: {
+      opts,
+      data
+    }
   })
 }
 
@@ -439,4 +466,10 @@ export const getPlayerTransactionsActions = {
   failed: playerActions.getPlayerTransactionsFailed,
   pending: playerActions.getPlayerTransactionsPending,
   fulfilled: playerActions.getPlayerTransactionsFulfilled
+}
+
+export const getBaselinesActions = {
+  failed: playerActions.getBaselinesFailed,
+  pending: playerActions.getBaselinesPending,
+  fulfilled: playerActions.getBaselinesFulfilled
 }

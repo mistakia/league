@@ -20,7 +20,8 @@ import {
   putProjection,
   delProjection,
   putSetting,
-  getPlayerTransactions
+  getPlayerTransactions,
+  getBaselines
 } from '@core/api'
 import { draftActions } from '@core/draft'
 import { playerActions } from './actions'
@@ -130,6 +131,7 @@ export function* deleteProjection({ payload }) {
 export function* init({ payload }) {
   const league = yield select(getCurrentLeague)
   yield fork(loadPlayers)
+  yield fork(getBaselines, { leagueId: league.uid })
 
   const now = dayjs()
   if (now.isBefore(dayjs.unix(league.tran_date))) {
@@ -198,10 +200,6 @@ export function* fetchPlayerTransactions({ payload }) {
 //= ====================================
 //  WATCHERS
 // -------------------------------------
-
-export function* watchFetchPlayersFulfilled() {
-  yield takeLatest(playerActions.FETCH_PLAYERS_FULFILLED, calculateValues)
-}
 
 export function* watchAuthFulfilled() {
   yield takeLatest(appActions.AUTH_FULFILLED, init)
@@ -299,7 +297,6 @@ export function* watchGetPlayerTransactions() {
 // -------------------------------------
 
 export const playerSagas = [
-  fork(watchFetchPlayersFulfilled),
   fork(watchAuthFulfilled),
   fork(watchAuthFailed),
   fork(watchSetLeague),

@@ -292,6 +292,10 @@ export const api = {
   putTransitionTag({ teamId, ...data }) {
     const url = `${BASE_URL}/teams/${teamId}/tag/transition`
     return { url, ...PUT(data) }
+  },
+  getBaselines({ leagueId }) {
+    const url = `${BASE_URL}/leagues/${leagueId}/baselines`
+    return { url }
   }
 }
 

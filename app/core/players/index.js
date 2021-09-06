@@ -28,6 +28,7 @@ export {
   delProjectionActions,
   getCutlistActions,
   postCutlistActions,
-  getPlayerTransactionsActions
+  getPlayerTransactionsActions,
+  getBaselinesActions
 } from './actions'
 export { playerSagas, calculateValues, loadPlayers } from './sagas'

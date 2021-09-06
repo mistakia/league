@@ -179,6 +179,27 @@ const run = async ({ year = constants.season.year } = {}) => {
     }
   }
 
+  const baselineInserts = []
+  for (const [week, positions] of Object.entries(baselines)) {
+    for (const [position, types] of Object.entries(positions)) {
+      for (const [type, baseline] of Object.entries(types)) {
+        baselineInserts.push({
+          lid,
+          week,
+          year: constants.season.year,
+          pos: position,
+          player: baseline.player,
+          type
+        })
+      }
+    }
+  }
+
+  if (baselineInserts.length) {
+    await db('league_baselines').insert(baselineInserts).onConflict().merge()
+    log(`saved ${baselineInserts.length} baselines`)
+  }
+
   if (projectionInserts.length) {
     await db('projections').insert(projectionInserts).onConflict().merge()
     log(`processed and saved ${projectionInserts.length} projections`)

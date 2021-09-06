@@ -38,7 +38,8 @@ import {
   delProjectionActions,
   getCutlistActions,
   postCutlistActions,
-  getPlayerTransactionsActions
+  getPlayerTransactionsActions,
+  getBaselinesActions
 } from '@core/players'
 import { getChartedPlaysActions, getTeamStatActions } from '@core/stats'
 import { getPlaysActions, getPlayStatsActions } from '@core/plays'
@@ -316,4 +317,10 @@ export const getPlayerTransactions = fetch.bind(
   null,
   api.getTransactions,
   getPlayerTransactionsActions
+)
+
+export const getBaselines = fetch.bind(
+  null,
+  api.getBaselines,
+  getBaselinesActions
 )
