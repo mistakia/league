@@ -93,7 +93,7 @@ export default function DraftPage() {
   }
 
   const sorted = players.sort(
-    (a, b) => b.vorp.getIn(['0']) - a.vorp.getIn(['0'])
+    (a, b) => b.getIn(['vorp', '0'], -9999) - a.getIn(['vorp', '0'], -9999)
   )
   const allRow = ({ index, key, ...params }) => {
     const player = sorted.get(index)
