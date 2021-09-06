@@ -72,10 +72,12 @@ export default class SelectedPlayerLineupImpact extends React.Component {
       series: [
         {
           name: 'Starter Points Added',
+          borderColor: 'transparent',
           data: spData
         },
         {
           name: 'Bench Points Added',
+          borderColor: 'transparent',
           data: bpData
         }
       ]

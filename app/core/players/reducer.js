@@ -454,12 +454,10 @@ export function playersReducer(state = initialState, { payload, type }) {
       })
 
     case playerActions.GET_BASELINES_FULFILLED:
-      return state.withMutations(state => {
+      return state.withMutations((state) => {
         for (const baseline of payload.data) {
           const { week, pos, type, player } = baseline
-          state.setIn(
-            ['baselines', week, pos, type], player
-          )
+          state.setIn(['baselines', week, pos, type], player)
         }
       })
 
