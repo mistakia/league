@@ -33,8 +33,8 @@ const mapStateToProps = createSelector(
     const sorted = players
       .sort((a, b) => {
         return (
-          b.getIn(['vorp', auction.valueType]) -
-          a.getIn(['vorp', auction.valueType])
+          b.getIn(['vorp', auction.valueType], -9999) -
+          a.getIn(['vorp', auction.valueType], -9999)
         )
       })
       .toList()
