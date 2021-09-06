@@ -114,5 +114,6 @@ module.exports = {
 
   getPlayerTransactions: require('./get-player-transactions'),
   getPlayers: require('./get-players'),
-  getRosters: require('./get-rosters')
+  getRosters: require('./get-rosters'),
+  getBaselines: require('./get-baselines')
 }
