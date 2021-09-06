@@ -106,36 +106,36 @@ export default class TradeTeamSummary extends React.Component {
             </TableBody>
           </Table>
         </TableContainer>
-        <TableContainer className='trade__summary-section'>
-          <Table size='small'>
+        {/* <TableContainer className='trade__summary-section'>
+            <Table size='small'>
             <TableBody>
-              <TableRow>
-                <TableCell component='th' scope='row'>
-                  Record
-                </TableCell>
-                <TableCell />
-              </TableRow>
-              <TableRow>
-                <TableCell component='th' scope='row'>
-                  Playoff Odds
-                </TableCell>
-                <TableCell align='right' />
-              </TableRow>
-              <TableRow>
-                <TableCell component='th' scope='row'>
-                  Championship Odds
-                </TableCell>
-                <TableCell align='right' />
-              </TableRow>
-              <TableRow>
-                <TableCell component='th' scope='row'>
-                  Roster Space
-                </TableCell>
-                <TableCell align='right' />
-              </TableRow>
+            <TableRow>
+            <TableCell component='th' scope='row'>
+            Record
+            </TableCell>
+            <TableCell />
+            </TableRow>
+            <TableRow>
+            <TableCell component='th' scope='row'>
+            Playoff Odds
+            </TableCell>
+            <TableCell align='right' />
+            </TableRow>
+            <TableRow>
+            <TableCell component='th' scope='row'>
+            Championship Odds
+            </TableCell>
+            <TableCell align='right' />
+            </TableRow>
+            <TableRow>
+            <TableCell component='th' scope='row'>
+            Roster Space
+            </TableCell>
+            <TableCell align='right' />
+            </TableRow>
             </TableBody>
-          </Table>
-        </TableContainer>
+            </Table>
+            </TableContainer> */}
       </>
     )
   }
