@@ -73,7 +73,6 @@ const run = async ({ year = constants.season.year } = {}) => {
     player.vorp = {}
     player.vorp_adj = {}
     player.market_salary = {}
-    player.market_salary_adj = {}
 
     const projections = groupedProjs[player.player] || []
 
@@ -84,7 +83,6 @@ const run = async ({ year = constants.season.year } = {}) => {
       player.vorp[week] = {}
       player.vorp_adj[week] = {}
       player.market_salary[week] = {}
-      player.market_salary_adj[week] = {}
 
       // average projection
       const projection = weightProjections({
@@ -180,8 +178,7 @@ const run = async ({ year = constants.season.year } = {}) => {
         week,
         vorp: vorp,
         vorp_adj: player.vorp_adj[week],
-        market_salary: player.market_salary[week],
-        market_salary_adj: player.market_salary_adj[week]
+        market_salary: player.market_salary[week]
       })
     }
   }
