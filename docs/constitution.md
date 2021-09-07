@@ -154,7 +154,7 @@ _The Commissioner refuses to reconsider, and a vote is therefore held. More than
 
 12. The Commissioner vows to remain impartial and unbiased when making decisions involving the League and its Players.
 
-\*\*Impeachment
+**Impeachment.**
 
 13. A two-thirds majority vote of Teams is needed to Impeach the Commissioner.
 
@@ -654,9 +654,9 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 
 > CHAMPIONSHIP
 
-** Format.**
+**Format.**
 
-1. The CHAMPIONSHIP is a two (2) week competition wherein four (4) Teams compete and the top scoring Team becomes the CHAMPION.
+1. The CHAMPIONSHIP is a three (3) week competition wherein four (4) Teams compete and the top-scoring Team becomes the CHAMPION.
 
 **Timing.**
 
