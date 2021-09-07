@@ -1,7 +1,6 @@
 import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
-import Toolbar from '@material-ui/core/Toolbar'
 
 import TeamName from '@components/team-name'
 import { groupBy, nth } from '@common'
@@ -16,7 +15,7 @@ function SeasonDraftPicks({ picks, year, league }) {
     const pickStr = `${pick.round}.${('0' + pickNum).slice(-2)}`
     pickItems.push(
       <div key={pick.uid} className='player__item table__row'>
-        <div className='metric table__cell'>{pick.pick || '-'}</div>
+        {/* <div className='metric table__cell'>{pick.pick || '-'}</div> */}
         <div className='metric table__cell'>
           {pick.pick ? pickStr : `${pick.round}${nth(pick.round)}`}
         </div>
@@ -33,7 +32,7 @@ function SeasonDraftPicks({ picks, year, league }) {
       <div className='season__draft-picks-body'>
         <div className='table__container'>
           <div className='table__row table__head'>
-            <div className='metric table__cell'>#</div>
+            {/* <div className='metric table__cell'>#</div> */}
             <div className='metric table__cell'>Round</div>
             <div className='metric table__cell draft-pick__team'>Team</div>
           </div>
@@ -68,14 +67,7 @@ export default class DashboardDraftPicks extends React.Component {
       )
     }
 
-    return (
-      <div className='section'>
-        <Toolbar>
-          <div className='dashboard__section-header-title'>Draft Picks</div>
-        </Toolbar>
-        <div className='dashboard__draft-picks'>{draftPickItems}</div>
-      </div>
-    )
+    return <div className='dashboard__draft-picks'>{draftPickItems}</div>
   }
 }
 
