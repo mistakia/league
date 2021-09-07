@@ -10,10 +10,10 @@ import {
   calculatePrices,
   getRosterSize,
   getOptimizerPositionConstraints,
-  Roster,
   optimizeStandingsLineup,
   optimizeLineup,
-  simulate
+  simulate,
+  calculatePlayerValuesRestOfSeason
 } from '@common'
 import solver from 'javascript-lp-solver'
 
@@ -48,101 +48,6 @@ export function processTeamGamelogs(gamelogs) {
     items: gamelogs,
     stats: constants.teamStats
   })
-}
-
-export function calculatePlayerValuesInflation({
-  players,
-  rosterRows,
-  league
-}) {
-  // calculate total available vorp
-  let totalVorp = 0
-  let availableVorpRestOfSeason = 0
-  let availableVorpSeason = 0
-
-  const { nteams, cap, minBid } = league
-  const rosterSize = getRosterSize(league)
-  const leagueTotalCap = nteams * cap - nteams * rosterSize * minBid
-
-  const rows = []
-  for (let i = 0; i < league.nteams; i++) {
-    rows.push(rosterRows[i] || { players: [] })
-  }
-  const rosteredPlayerIds = []
-  const rosters = []
-  for (const rosterRow of rows) {
-    const roster = new Roster({ roster: rosterRow, league })
-    roster.players.forEach((p) => rosteredPlayerIds.push(p.player))
-    rosters.push(roster)
-  }
-
-  const leagueAvailableCap = rosters.reduce((s, r) => {
-    return s + (r.availableCap - minBid * r.availableSpace)
-  }, 0)
-
-  for (const player of players) {
-    let vorpRos = 0
-    const isAvailable = !rosteredPlayerIds.includes(player.player)
-    for (const [week, value] of Object.entries(player.vorp)) {
-      const wk = parseInt(week, 10)
-      if (wk && wk >= constants.season.week) {
-        if (value < 0) {
-          continue
-        }
-
-        vorpRos += value
-        totalVorp += value
-
-        if (isAvailable) {
-          availableVorpRestOfSeason += value
-        }
-      }
-    }
-    if (isAvailable) {
-      if (player.vorp['0'] > 0) {
-        availableVorpSeason += player.vorp['0']
-      }
-    }
-    player.vorp.ros = vorpRos
-  }
-
-  // calculate ros contract value
-  calculatePrices({
-    cap: leagueTotalCap,
-    total: totalVorp,
-    players,
-    week: 'ros'
-  })
-
-  // calculate ros proj inflation rate
-  const rosRate = availableVorpRestOfSeason
-    ? leagueAvailableCap / availableVorpRestOfSeason
-    : 0
-
-  // calculate season proj inflation rate
-  const seasonRate = availableVorpSeason
-    ? leagueAvailableCap / availableVorpSeason
-    : 0
-
-  // calculate player market salary inflation using ROS projections
-  for (const player of players) {
-    if (!rosRate) {
-      player.market_salary.inflation = player.market_salary.ros
-    } else {
-      const value = Math.round(rosRate * player.vorp.ros)
-      player.market_salary.inflation = value > 0 ? value : 0
-    }
-
-    // calculate player market salary inflation using season projections
-    if (!seasonRate) {
-      player.market_salary.inflationSeason = player.market_salary[0]
-    } else {
-      const value = Math.round(seasonRate * player.vorp['0'])
-      player.market_salary.inflationSeason = value > 0 ? value : 0
-    }
-  }
-
-  return { players }
 }
 
 export function calculatePlayerValues(payload) {
@@ -187,7 +92,7 @@ export function calculatePlayerValues(payload) {
     calculatePrices({ cap: leagueTotalCap, total, players, week })
   }
 
-  calculatePlayerValuesInflation({ players, rosterRows, league })
+  calculatePlayerValuesRestOfSeason({ players, rosterRows, league })
 
   return { baselines: baselines, players }
 }

@@ -30,6 +30,7 @@ import optimizeLineup from './optimize-lineup'
 import simulate from './simulate'
 import groupBy from './group-by'
 import getFreeAgentPeriod from './get-free-agent-period'
+import calculatePlayerValuesRestOfSeason from './calculate-player-values-rest-of-season'
 import * as Errors from './errors'
 
 const uniqBy = (a, key) => {
@@ -116,5 +117,6 @@ export {
   Errors,
   optimizeLineup,
   simulate,
-  getFreeAgentPeriod
+  getFreeAgentPeriod,
+  calculatePlayerValuesRestOfSeason
 }

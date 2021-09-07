@@ -44,8 +44,7 @@ class PlayerRow extends Player {
       const value = player.market_salary.getIn([`${week}`])
       const isRostered = Boolean(player.tid)
       if (!isRostered && (isRestOfSeasonView || isSeasonView)) {
-        const type = isRestOfSeasonView ? 'inflation' : 'inflationSeason'
-        const diff = player.market_salary.getIn([type]) - value
+        const diff = player.market_salary.getIn(['inflation']) - value
         const classNames = ['value__inflation']
         const isPos = diff > 0
         if (isPos) classNames.push('positive')

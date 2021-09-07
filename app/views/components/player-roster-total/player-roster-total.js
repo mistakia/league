@@ -59,12 +59,16 @@ class PlayerRosterTotal extends Player {
         {isBeforeExtensionDeadline && (
           <div className='metric table__cell'>${extendedSalaryTotal}</div>
         )}
-        <div className='metric table__cell'>
-          {projectedSalaryTotal ? `$${projectedSalaryTotal.toFixed(0)}` : '-'}
-        </div>
-        <div className='metric table__cell'>
-          {savingsTotal ? `$${savingsTotal.toFixed(0)}` : '-'}
-        </div>
+        {constants.season.isOffseason && (
+          <div className='metric table__cell'>
+            {projectedSalaryTotal ? `$${projectedSalaryTotal.toFixed(0)}` : '-'}
+          </div>
+        )}
+        {constants.season.isOffseason && (
+          <div className='metric table__cell'>
+            {savingsTotal ? `$${savingsTotal.toFixed(0)}` : '-'}
+          </div>
+        )}
         <div className='metric table__cell'>
           {valueTotal ? valueTotal.toFixed(1) : '-'}
         </div>
