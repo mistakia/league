@@ -572,6 +572,8 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 
 18. During the season, a player must have been on your roster the previous week or received via a trade to have Reserve eligibility.
 
+19. Players placed on INJURED RESERVE between the start of the Free Agency Auction and the Regular Season can not be placed in the starting lineup during the first six (6) weeks of the Regular Season.
+
 ## Article XIV
 
 > PRACTICE SQUAD
