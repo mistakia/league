@@ -6,8 +6,7 @@ const argv = require('yargs').argv
 const db = require('../db')
 const { constants } = require('../common')
 
-const run = async ({ year = argv.year } = {}) => {
-  const nextSeason = !!year
+const run = async ({ nextSeason = argv.season } = {}) => {
   // do not run once season is over unless generating roster for next season
   if (constants.season.week >= constants.season.finalWeek && !nextSeason) {
     return
@@ -17,9 +16,13 @@ const run = async ({ year = argv.year } = {}) => {
   const leagues = await db('leagues')
 
   const nextWeek = nextSeason ? 0 : constants.season.week + 1
-  const nextYear = nextSeason ? year : constants.season.year
-  const previousWeek = nextSeason ? 16 : constants.season.week
-  const previousYear = nextSeason ? year - 1 : constants.season.year
+  const nextYear = nextSeason
+    ? constants.season.year + 1
+    : constants.season.year
+  const previousWeek = nextSeason
+    ? constants.season.finalWeek
+    : constants.season.week
+  const previousYear = constants.season.year
 
   for (const league of leagues) {
     // get latest rosters for league
