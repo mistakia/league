@@ -8,7 +8,8 @@ const {
   constants,
   Roster,
   getDraftDates,
-  isSantuaryPeriod
+  isSantuaryPeriod,
+  getFreeAgentPeriod
 } = require('../../../../common')
 const {
   getRoster,
@@ -122,17 +123,11 @@ router.post('/?', async (req, res) => {
     }
     const playerRow = players[0]
 
-    // verify player is practice squad eligible if type is practice waiver
-    // TODO - verify player was not previously on team practice squad
     if (type === constants.waivers.FREE_AGENCY_PRACTICE) {
-      if (playerRow.start !== constants.season.year) {
-        return res
-          .status(400)
-          .send({ error: 'player is not practice squad eligible' })
-      }
-
       // set bid to zero for practice squad waivers
       bid = 0
+
+      // TODO - verify player was not previously on team active roster
     }
 
     const transactions = await db('transactions')
@@ -177,22 +172,19 @@ router.post('/?', async (req, res) => {
 
         // otherwise, it's a waiver period and all players are on waivers
       } else {
+        // Offseason
+
         // reject active roster waivers before day after auction
-        const acutoff = dayjs
-          .unix(league.adate)
-          .tz('America/New_York')
-          .add('1', 'day')
-          .startOf('day')
+        const faPeriod = getFreeAgentPeriod(league.adate)
         if (
           type === constants.waivers.FREE_AGENCY &&
-          (!league.adate || dayjs().isBefore(acutoff))
+          (!league.adate || dayjs().isBefore(faPeriod.end))
         ) {
           return res
             .status(400)
             .send({ error: 'active roster waivers not open' })
         }
 
-        // reject practice waivers before day after draft
         if (type === constants.waivers.FREE_AGENCY_PRACTICE) {
           const picks = await db('draft').where({
             year: constants.season.year,
@@ -203,16 +195,30 @@ router.post('/?', async (req, res) => {
             picks: picks.length
           })
 
-          if (!league.ddate || dayjs().isBefore(draftDates.draftEnd)) {
-            return res
-              .status(400)
-              .send({ error: 'practice squad waivers are not open' })
-          }
-          if (league.ddate && dayjs().isAfter(draftDates.waiverEnd)) {
+          // if player is a rookie
+          if (playerRow.start === constants.season.year) {
+            // reject practice waivers before day after draft
+            if (!league.ddate || dayjs().isBefore(draftDates.draftEnd)) {
+              return res.status(400).send({
+                error: 'practice squad waivers are not open for rookies'
+              })
+            }
+
             // if after rookie draft waivers cleared, check if player is on release waivers
-            const isOnWaivers = await isPlayerOnWaivers({ player, leagueId })
-            if (!isOnWaivers) {
-              return res.status(400).send({ error: 'player is not on waivers' })
+            if (league.ddate && dayjs().isAfter(draftDates.waiverEnd)) {
+              const isOnWaivers = await isPlayerOnWaivers({ player, leagueId })
+              if (!isOnWaivers) {
+                return res
+                  .status(400)
+                  .send({ error: 'player is not on waivers' })
+              }
+            }
+          } else {
+            // reject practice waivers before fa period ends
+            if (!league.adata || dayjs().isBefore(faPeriod.end)) {
+              return res.status(400).send({
+                error: 'practice squad waivers are not open for non-rookies'
+              })
             }
           }
         }

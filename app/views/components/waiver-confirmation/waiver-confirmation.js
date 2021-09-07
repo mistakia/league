@@ -195,7 +195,6 @@ export default class WaiverConfirmation extends React.Component {
                   error={this.state.missingRelease}
                   value={this.state.release}
                   onChange={this.handleRelease}
-                  multiple
                   label='Release'>
                   {menuItems}
                 </Select>
