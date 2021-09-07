@@ -44,16 +44,14 @@ class PlayerRoster extends Player {
     const week = Math.max(constants.season.week, 1)
 
     const extensions = player.get('extensions', new List()).size
-    const extendedSalary = isBeforeExtensionDeadline
-      ? getExtensionAmount({
-          pos,
-          tag,
-          extensions,
-          league,
-          value,
-          bid
-        })
-      : salary
+    const extendedSalary = getExtensionAmount({
+      pos,
+      tag,
+      extensions,
+      league,
+      value,
+      bid
+    })
     const projectionType = isRegularSeason ? 'ros' : '0'
     const projectedSalary = player.getIn(['market_salary', projectionType], 0)
     const savings =
@@ -112,7 +110,7 @@ class PlayerRoster extends Player {
             {isPoach ? player.value + 2 || '-' : salary ? `$${salary}` : '-'}
           </div>
         )}
-        {!isWaiver && !isPoach && isBeforeExtensionDeadline && (
+        {!isWaiver && !isPoach && (
           <div className='metric table__cell'>
             {extendedSalary ? `$${extendedSalary}` : '-'}
           </div>
