@@ -259,7 +259,7 @@ describe('API /waivers - free agency', function () {
       await error(request, 'player is not on waivers')
     })
 
-    it('practice waiver for non rookie', async () => {
+    it('practice waiver for non rookie - offseason', async () => {
       MockDate.set(start.subtract('1', 'month').toDate())
       const leagueId = 1
       const player = await selectPlayer({ rookie: false })
@@ -277,7 +277,7 @@ describe('API /waivers - free agency', function () {
           leagueId
         })
 
-      await error(request, 'player is not practice squad eligible')
+      await error(request, 'practice squad waivers are not open for non-rookies')
     })
 
     it('player is no longer on waivers - outside waiver period', async () => {
