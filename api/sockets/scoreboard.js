@@ -44,6 +44,7 @@ export default class Scoreboard {
 
     const query = getPlayByPlayQuery(db)
     const plays = await query
+      .where('nflPlay.season', constants.season.year)
       .where('nflPlay.week', constants.season.week)
       .where('updated', '>', updated)
 
