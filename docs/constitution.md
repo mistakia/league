@@ -516,7 +516,7 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 
 3. Each Team's budget will be determined by subtracting the sum of the contract values for all players on the Team’s active roster from $200.
 
-4. Following the rookie draft order, Teams will nominate players for bidding and set a bid themselves (minimum $1). Teams who have a full active roster will be skipped.
+4. Following the rookie draft order, Teams will nominate players for bidding and set a bid themselves (minimum $0). Teams who have a full active roster will be skipped.
 
 ## Article XIII
 
