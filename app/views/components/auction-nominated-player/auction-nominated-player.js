@@ -1,5 +1,4 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import PlayerName from '@components/player-name'
@@ -9,9 +8,7 @@ import './auction-nominated-player.styl'
 
 export default class AuctionNominatedPlayer extends React.Component {
   render = () => {
-    const { player, valueType } = this.props
-
-    const inflationType = valueType === 'ros' ? 'inflation' : 'inflationSeason'
+    const { player } = this.props
 
     return (
       <div className='auction__nominated-player'>
@@ -20,10 +17,10 @@ export default class AuctionNominatedPlayer extends React.Component {
         </div>
         <div className='nominated__player-details'>
           <div className='nominated__player-detail'>
-            Retail: ${player.getIn(['market_salary', valueType], 0)}
+            Retail: ${player.getIn(['market_salary', '0'], 0)}
           </div>
           <div className='nominated__player-detail'>
-            Inflation: ${player.getIn(['market_salary', inflationType], 0)}
+            Inflation: ${player.getIn(['market_salary', 'inflation'], 0)}
           </div>
           <div className='nominated__player-detail'>
             Bye: <NFLTeamBye team={player.team} />
@@ -35,6 +32,5 @@ export default class AuctionNominatedPlayer extends React.Component {
 }
 
 AuctionNominatedPlayer.propTypes = {
-  player: ImmutablePropTypes.record,
-  valueType: PropTypes.string
+  player: ImmutablePropTypes.record
 }

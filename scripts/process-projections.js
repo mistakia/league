@@ -12,7 +12,8 @@ const {
   calculatePoints,
   calculateValues,
   calculatePrices,
-  calculateBaselines
+  calculateBaselines,
+  calculatePlayerValuesRestOfSeason
 } = require('../common')
 const {
   getProjections,
@@ -135,6 +136,12 @@ const run = async ({ year = constants.season.year } = {}) => {
     const total = calculateValues({ players, baselines: baseline, week })
     calculatePrices({ cap: leagueTotalCap, total, players, week })
   }
+
+  calculatePlayerValuesRestOfSeason({
+    players,
+    rosterRows,
+    league
+  })
 
   const projectionInserts = []
   const pointsInserts = []

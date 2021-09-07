@@ -109,9 +109,9 @@ export default class Menu extends React.Component {
             )}
             {isLoggedIn && <NavLink to='/league'>League</NavLink>}
             {isLoggedIn && <NavLink to='/trade'>Trade</NavLink>}
-            {isLoggedIn && constants.season.week > 0 && (
-              <NavLink to='/props'>Props</NavLink>
-            )}
+            {/* {isLoggedIn && constants.season.week > 0 && (
+                <NavLink to='/props'>Props</NavLink>
+                )} */}
             {isLoggedIn && !week && <NavLink to='/draft'>Draft</NavLink>}
             {isLoggedIn && !week && <NavLink to='/auction'>Auction</NavLink>}
             <NavLink to='/settings'>Settings</NavLink>
