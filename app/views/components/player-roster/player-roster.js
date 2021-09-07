@@ -117,12 +117,12 @@ class PlayerRoster extends Player {
             {extendedSalary ? `$${extendedSalary}` : '-'}
           </div>
         )}
-        {!isWaiver && !isPoach && (
+        {!isWaiver && !isPoach && constants.season.isOffseason && (
           <div className='metric table__cell'>
             {projectedSalary ? `$${projectedSalary.toFixed(0)}` : '-'}
           </div>
         )}
-        {!isWaiver && (
+        {!isWaiver && constants.season.isOffseason && (
           <div className={`metric table__cell ${isNegative && 'warning'}`}>
             {savings ? `$${savings.toFixed(0)}` : '-'}
           </div>

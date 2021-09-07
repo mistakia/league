@@ -98,12 +98,7 @@ export default class PlayersPage extends React.Component {
         team: p.team,
         pos: p.pos,
         salary: p.getIn(['market_salary', `${week}`], 0).toFixed(1),
-        inflation: p
-          .getIn([
-            'market_salary',
-            isSeasonView ? 'inflationSeason' : 'inflation'
-          ])
-          .toFixed(1),
+        inflation: p.getIn(['market_salary', 'inflation']).toFixed(1),
         vorp: p.getIn(['vorp', `${week}`], 0).toFixed(1)
       }
 

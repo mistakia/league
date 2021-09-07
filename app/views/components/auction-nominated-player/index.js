@@ -1,18 +1,12 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getAuction } from '@core/auction'
 import { getPlayerById } from '@core/players'
 
 import AuctionNominatedPlayer from './auction-nominated-player'
 
-const mapStateToProps = createSelector(
-  getPlayerById,
-  getAuction,
-  (player, auction) => ({
-    player,
-    valueType: auction.valueType
-  })
-)
+const mapStateToProps = createSelector(getPlayerById, (player) => ({
+  player
+}))
 
 export default connect(mapStateToProps)(AuctionNominatedPlayer)
