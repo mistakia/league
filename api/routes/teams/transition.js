@@ -138,7 +138,6 @@ router.post('/?', async (req, res) => {
 
       // make sure extension has not passed
       if (
-        constants.season.week === 0 &&
         league.ext_date &&
         constants.season.now.isAfter(dayjs.unix(league.ext_date))
       ) {
@@ -177,7 +176,6 @@ router.post('/?', async (req, res) => {
 
       // make sure transition has not passed
       if (
-        constants.season.week === 0 &&
         league.tran_date &&
         constants.season.now.isAfter(dayjs.unix(league.tran_date))
       ) {
@@ -311,7 +309,6 @@ router.delete('/?', async (req, res) => {
 
     // make sure transition deadline has not passed
     if (
-      constants.season.week === 0 &&
       league.tran_date &&
       constants.season.now.isAfter(dayjs.unix(league.tran_date))
     ) {
@@ -459,7 +456,6 @@ router.put('/?', async (req, res) => {
 
     // make sure extension has not passed
     if (
-      constants.season.week === 0 &&
       league.tran_date &&
       constants.season.now.isAfter(dayjs.unix(league.tran_date))
     ) {
