@@ -34,9 +34,11 @@ describe('API /waivers - poach', function () {
     await league(knex)
     await draftPicks(knex)
 
-    await knex('leagues').update({
-      adate: start.subtract('1', 'week').unix()
-    }).where('uid', 1)
+    await knex('leagues')
+      .update({
+        adate: start.subtract('1', 'week').unix()
+      })
+      .where('uid', 1)
   })
 
   it('submit poaching waiver for drafted player', async () => {
@@ -60,7 +62,13 @@ describe('API /waivers - poach', function () {
         pickId: 1
       })
 
-    MockDate.set(start.subtract('1', 'month').add('10', 'minute').add('25', 'hours').toDate())
+    MockDate.set(
+      start
+        .subtract('1', 'month')
+        .add('10', 'minute')
+        .add('25', 'hours')
+        .toDate()
+    )
 
     // submit poaching waiver
     const teamId = 2

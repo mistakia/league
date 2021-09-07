@@ -488,7 +488,6 @@ export function getPlayerStatus(state, { player, playerId }) {
       const isBeforeExtensionDeadline = now.isBefore(
         dayjs.unix(league.ext_date)
       )
-      status.eligible.franchiseTag = isBeforeExtensionDeadline
       if (
         isBeforeExtensionDeadline &&
         player.draft_year === constants.season.year - 1
@@ -498,8 +497,9 @@ export function getPlayerStatus(state, { player, playerId }) {
         status.eligible.rookieTag = true
       }
 
-      if (constants.season.week === 0 && isBeforeExtensionDeadline) {
-        status.eligible.transitionTag = true
+      if (constants.season.week > 0 || isBeforeExtensionDeadline) {
+        status.eligible.transitionTag = isBeforeExtensionDeadline
+        status.eligible.franchiseTag = true
       }
 
       const isActive = !!roster.active.find((p) => p.player === player.player)

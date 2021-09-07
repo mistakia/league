@@ -7,7 +7,6 @@ import {
   putResolve,
   debounce
 } from 'redux-saga/effects'
-import dayjs from 'dayjs'
 
 import { getApp, appActions } from '@core/app'
 import { notificationActions } from '@core/notifications'
@@ -132,11 +131,7 @@ export function* init({ payload }) {
   const league = yield select(getCurrentLeague)
   yield fork(loadPlayers)
   yield fork(getBaselines, { leagueId: league.uid })
-
-  const now = dayjs()
-  if (now.isBefore(dayjs.unix(league.tran_date))) {
-    yield fork(fetchCutlist)
-  }
+  yield fork(fetchCutlist)
 
   const { watchlist } = payload.data.user
   if (watchlist) {
