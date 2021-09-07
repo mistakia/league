@@ -488,7 +488,7 @@ router.post(
         pickRows.map((p) => p.pickid)
       )
       for (const pick of picks) {
-        const pickTeam = teams.find((t) => t.tid === pick.otid)
+        const pickTeam = teams.find((t) => t.uid === pick.otid)
         const pickNum = pick.pick % league.nteams || league.nteams
         let pickStr = pick.pick
           ? `${pick.year} ${pick.round}.${('0' + pickNum).slice(-2)}`
