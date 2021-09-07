@@ -2,6 +2,7 @@
   padding 16px
   display flex
   overflow auto
+  flex-wrap wrap
 
 .rosters__body
   display flex
@@ -24,3 +25,19 @@
   padding 16px
   background white
   border-top 1px solid $borderColor
+
+.rosters__picks
+  display flex
+  margin-left 48px
+
+  .dashboard__draft-picks
+    flex-direction column
+
+  .season__draft-picks
+    flex 1
+    width 220px
+    padding 16px 4px
+    margin 0
+    border 0
+    border-right 1px solid $borderColor
+    border-radius 0

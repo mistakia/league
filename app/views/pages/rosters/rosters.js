@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 import GetAppIcon from '@material-ui/icons/GetApp'
 import Button from '@material-ui/core/Button'
 
+import DashboardDraftPicks from '@components/dashboard-draft-picks'
 import PageLayout from '@layouts/page'
 import Roster from '@components/roster'
 import { constants } from '@common'
@@ -16,7 +17,7 @@ export default class RostersPage extends React.Component {
   }
 
   render = () => {
-    const { rosters, league } = this.props
+    const { rosters, league, teams } = this.props
 
     const labels = []
     if (league.sqb) {
@@ -146,7 +147,7 @@ export default class RostersPage extends React.Component {
         (p) => p.slot === constants.slots.BENCH
       ).size
       if (benchSize > benchMax) benchMax = benchSize
-      items.push(<Roster key={index} roster={roster} />)
+      items.push(<Roster key={index} roster={roster} tid={roster.tid} />)
     }
 
     if (benchMax) {
@@ -159,11 +160,17 @@ export default class RostersPage extends React.Component {
       }
     }
 
+    const pickItems = []
+    for (const team of teams.valueSeq()) {
+      pickItems.push(<DashboardDraftPicks picks={team.picks} league={league} />)
+    }
+
     const body = (
       <>
         <div className='rosters'>
           <div className='rosters__head'>{labels}</div>
           <div className='rosters__body'>{items}</div>
+          <div className='rosters__picks'>{pickItems}</div>
         </div>
         <div className='rosters__footer'>
           <Button
@@ -182,6 +189,7 @@ export default class RostersPage extends React.Component {
 
 RostersPage.propTypes = {
   rosters: ImmutablePropTypes.map,
+  teams: ImmutablePropTypes.map,
   league: PropTypes.object,
   exportRosters: PropTypes.func
 }

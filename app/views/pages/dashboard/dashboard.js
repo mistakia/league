@@ -6,6 +6,7 @@ import AlertTitle from '@material-ui/lab/AlertTitle'
 import Container from '@material-ui/core/Container'
 import Grid from '@material-ui/core/Grid'
 import NotInterestedIcon from '@material-ui/icons/NotInterested'
+import Toolbar from '@material-ui/core/Toolbar'
 
 import DashboardDraftPicks from '@components/dashboard-draft-picks'
 import DashboardByeWeeks from '@components/dashboard-bye-weeks'
@@ -239,7 +240,14 @@ export default function DashboardPage() {
             )}
           </Grid>
           <Grid item xs={12}>
-            <DashboardDraftPicks picks={picks} league={league} />
+            <div className='section'>
+              <Toolbar>
+                <div className='dashboard__section-header-title'>
+                  Draft Picks
+                </div>
+              </Toolbar>
+              <DashboardDraftPicks picks={picks} league={league} />
+            </div>
           </Grid>
         </Grid>
         <Grid item xs={12} md={4}>
