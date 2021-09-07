@@ -580,7 +580,7 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 
 1. The practice squad (PS) will consist of a maximum of four (4) players.
 
-2. Only rookies, unsigned, and practice squad NFL players can be placed onto the PS.
+2. During the Regular Season, all Free Agents (FA) who have cleared waivers are eligible. During the Offseason, rookies who have cleared waivers, unsigned NFL players, and practice squad NFL players are eligible.
 
 3. PS players will not count towards the active roster limit or toward the player retention salary cap.
 
@@ -590,13 +590,13 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 
 6. When an offer is made to poach a player, the PS player may not be released or traded from the team unless brought up to the activated roster first.
 
-7. PS players may be traded and can be placed on the receiving team’s PS but must be demoted within 48 hours of the trade being completed or remain on the active roster permanently.
+7. PS players may be traded and can be placed on the receiving team’s practice squad (PS) or their active roster. Players placed on the active roster must be deactivated within 48 hours of the trade being completed or remain on the active roster permanently.
 
 8. Any rookie that is acquired by waivers or free agency during the Regular Season must be placed onto the PS within 48 hours of the acquisition or remain on the active roster.
 
 9. The Manager of poached PS player will be awarded a Compensatory draft pick
 
-10. Releasing a player that was poached during the same offseason will result in a Salary Cap penalty equal to the salary of the released poached player. The Salary Cap penalty can be appealed. The appealing team must prove the poach was not frivolous and a release was warranted by establishing the players value at the time of the poach was worth an active roster spot and changed at the time of the release.
+10. Releasing a player that was poached during the same Offseason will result in a Salary Cap penalty equal to the salary of the released poached player. Similarly, releasing a poached player during the same Regular Season will result in a Free Agent Auction Budget penalty equal to the salary of the released player or five dollars ($5), whichever is greater. The Commissioner may, in his discretion, levy any penalties available under Article III Subsection (3) if it is deemed the poach and subsequent release was done frivolously.
 
 11. At any time during the regular season, Manager’s may elect to designate practice squad players as protected. Protected practice squad players can not be activated, released or poached during the regular season. However, they can still be traded. Their protected status can not be reversed and will expire at the start of the offseason and thus is only in effect during the regular season.
 
