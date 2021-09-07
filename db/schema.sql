@@ -1713,7 +1713,6 @@ CREATE TABLE `league_player_projection_values` (
   `vorp` decimal(5,2) DEFAULT NULL,
   `vorp_adj` decimal(5,2) DEFAULT NULL,
   `market_salary` decimal(5,2) DEFAULT NULL,
-  `market_salary_adj` decimal(5,2) DEFAULT NULL,
   KEY `player` (`player`),
   UNIQUE KEY `player_value` (`player`, `lid`, `week`, `year`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
