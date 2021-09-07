@@ -110,7 +110,6 @@ module.exports = async function ({
     player.vorp = {}
     player.vorp_adj = {}
     player.market_salary = {}
-    player.market_salary_adj = {}
     player.projection = {}
     playerMap[player.player] = player
   }
@@ -208,12 +207,7 @@ module.exports = async function ({
       .whereIn('player', returnedPlayerIds)
 
     for (const pointProjection of leagueValuesProj) {
-      const {
-        vorp,
-        vorp_adj,
-        market_salary,
-        market_salary_adj
-      } = pointProjection
+      const { vorp, vorp_adj, market_salary } = pointProjection
       playerMap[pointProjection.player].vorp[pointProjection.week] = vorp
       playerMap[pointProjection.player].vorp_adj[
         pointProjection.week
@@ -221,9 +215,6 @@ module.exports = async function ({
       playerMap[pointProjection.player].market_salary[
         pointProjection.week
       ] = market_salary
-      playerMap[pointProjection.player].market_salary_adj[
-        pointProjection.week
-      ] = market_salary_adj
     }
   }
 

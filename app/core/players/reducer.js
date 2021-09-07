@@ -111,7 +111,6 @@ export function playersReducer(state = initialState, { payload, type }) {
           state.mergeIn(['items', p.player], {
             points: new Map(p.points),
             market_salary: new Map(p.market_salary),
-            market_salary_adj: new Map(p.market_salary_adj),
             vorp: new Map(p.vorp),
             vorp_adj: new Map(p.vorp_adj)
           })
