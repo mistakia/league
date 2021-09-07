@@ -109,7 +109,7 @@ router.post('/?', async (req, res) => {
     await db('transition_bids')
       .update('cancelled', timestamp)
       .where({
-        year: constants.seaosn.year,
+        year: constants.season.year,
         player,
         tid
       })

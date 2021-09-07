@@ -33,9 +33,11 @@ describe('SCRIPTS /waivers - poach', function () {
       MockDate.set(start.subtract('1', 'month').toDate())
       await league(knex)
 
-      await knex('leagues').update({
-        adate: start.subtract('1', 'week').unix()
-      }).where('uid', 1)
+      await knex('leagues')
+        .update({
+          adate: start.subtract('1', 'week').unix()
+        })
+        .where('uid', 1)
     })
 
     it('no waivers to process - offseason', async () => {
