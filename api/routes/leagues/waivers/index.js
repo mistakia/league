@@ -4,7 +4,12 @@ const router = express.Router({ mergeParams: true })
 
 const report = require('./report')
 
-const { constants, Roster, getDraftDates } = require('../../../../common')
+const {
+  constants,
+  Roster,
+  getDraftDates,
+  isSantuaryPeriod
+} = require('../../../../common')
 const {
   getRoster,
   isPlayerRostered,
@@ -243,9 +248,17 @@ router.post('/?', async (req, res) => {
         return res.status(400).send({ error: 'player is not on waivers' })
       }
 
-      // transaction should have been within the last 24 hours
+      // verify it is not Regular Season or Free Agency Sanctuary Period
+      if (isSantuaryPeriod(league)) {
+        return res.status(400).send({ error: 'Santuary Period' })
+      }
+
+      // transaction should have been within the last 48 hours
       if (
         dayjs().isAfter(
+          dayjs.unix(transactions[0].timestamp).add('48', 'hours')
+        ) ||
+        dayjs().isBefore(
           dayjs.unix(transactions[0].timestamp).add('24', 'hours')
         )
       ) {

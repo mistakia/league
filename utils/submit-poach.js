@@ -3,7 +3,7 @@ const advancedFormat = require('dayjs/plugin/advancedFormat')
 
 const db = require('../db')
 
-const { constants, Roster } = require('../common')
+const { constants, Roster, isSantuaryPeriod } = require('../common')
 const sendNotifications = require('./send-notifications')
 const getRoster = require('./get-roster')
 const getLeague = require('./get-league')
@@ -70,6 +70,11 @@ module.exports = async function ({
   const hasSlot = roster.hasOpenBenchSlot(poachPlayer.pos)
   if (!hasSlot) {
     throw new Error('poaching claim unsuccessful, no available roster space')
+  }
+
+  // verify it is not Regular Season or Free Agency Sanctuary Period
+  if (isSantuaryPeriod(league)) {
+    throw new Error('Santuary period')
   }
 
   // verify team has enough cap if during the offseason

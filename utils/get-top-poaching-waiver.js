@@ -4,8 +4,8 @@ const db = require('../db')
 const { constants } = require('../common')
 
 module.exports = async (leagueId) => {
-  // get relevant transactions from last 24 hours
-  const cutoff = dayjs().subtract('24', 'hours').unix()
+  // get relevant transactions from last 48 hours
+  const cutoff = dayjs().subtract('48', 'hours').unix()
   const transactions = await db('transactions')
     .whereIn('type', [
       constants.transactions.DRAFT,
