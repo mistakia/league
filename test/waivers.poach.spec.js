@@ -33,6 +33,10 @@ describe('API /waivers - poach', function () {
 
     await league(knex)
     await draftPicks(knex)
+
+    await knex('leagues').update({
+      adate: start.subtract('1', 'week').unix()
+    }).where('uid', 1)
   })
 
   it('submit poaching waiver for drafted player', async () => {
@@ -43,6 +47,7 @@ describe('API /waivers - poach', function () {
     const players = await knex('player')
       .where('start', constants.season.year)
       .limit(1)
+
     const player = players[0]
     playerId = player.player
     await chai
@@ -54,6 +59,8 @@ describe('API /waivers - poach', function () {
         playerId,
         pickId: 1
       })
+
+    MockDate.set(start.subtract('1', 'month').add('10', 'minute').add('25', 'hours').toDate())
 
     // submit poaching waiver
     const teamId = 2
@@ -328,10 +335,10 @@ describe('API /waivers - poach', function () {
       await error(request, 'player is not on waivers')
     })
 
-    it('player is not on waivers - past 24 hours', async () => {
+    it('player is not on waivers - past 48 hours', async () => {
       const time = start
         .subtract('1', 'month')
-        .add('1', 'day')
+        .add('2', 'day')
         .add('11', 'minute')
         .toDate()
       MockDate.set(time)
@@ -354,6 +361,22 @@ describe('API /waivers - poach', function () {
     })
 
     it('claim exceeds available cap', async () => {
+      // TODO
+    })
+
+    it('santuary period - free agency period', async () => {
+      // TODO
+    })
+
+    it('santuary period - regular season start', async () => {
+      // TODO
+    })
+
+    it('santuary period - first 24 hours on practice squad', async () => {
+      // TODO
+    })
+
+    it('protected player prior to extension deadline', async () => {
       // TODO
     })
   })

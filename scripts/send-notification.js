@@ -3,8 +3,6 @@ require = require('esm')(module /*, options*/)
 const debug = require('debug')
 const argv = require('yargs').argv
 
-const db = require('../db')
-const { constants } = require('../common')
 const { getLeague, sendNotifications } = require('../utils')
 
 const log = debug('send-notification')

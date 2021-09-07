@@ -33,6 +33,10 @@ describe('API /waivers - cancel', function () {
 
     await league(knex)
     await draftPicks(knex)
+
+    await knex('leagues').update({
+      adate: start.subtract('1', 'week').unix()
+    }).where('uid', 1)
   })
 
   it('cancel poaching waiver', async () => {
@@ -54,6 +58,8 @@ describe('API /waivers - cancel', function () {
         playerId,
         pickId: 1
       })
+
+    MockDate.set(start.subtract('1', 'month').add('10', 'minute').add('25', 'hours').toDate())
 
     // submit poaching waiver
     const teamId = 2

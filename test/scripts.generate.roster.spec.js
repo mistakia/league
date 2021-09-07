@@ -117,7 +117,7 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
 
       let error
       try {
-        await run({ year: constants.season.year + 1 })
+        await run({ nextSeason: true })
       } catch (err) {
         console.log(err)
         error = err

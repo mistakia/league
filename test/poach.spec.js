@@ -79,6 +79,22 @@ describe('API /poaches', function () {
     it('poach player after final week - locked', async () => {
       // TODO
     })
+
+    it('santuary period - free agency period', async () => {
+      // TODO
+    })
+
+    it('santuary period - regular season start', async () => {
+      // TODO
+    })
+
+    it('santuary period - first 24 hours on practice squad', async () => {
+      // TODO
+    })
+
+    it('protected player prior to extension deadline', async () => {
+      // TODO
+    })
   })
   // errors
 
