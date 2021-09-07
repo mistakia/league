@@ -587,6 +587,7 @@ export function isPlayerPracticeSquadEligible(state, { player }) {
 
   // is a rookie OR is not on a team OR is on a teams practice squad
   if (
+    !constants.season.isRegularSeason &&
     player.draft_year !== constants.season.year &&
     player.depth_position !== 'PS' &&
     player.team !== 'INA'
