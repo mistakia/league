@@ -64,7 +64,7 @@ class PlayerRoster extends Player {
     const vorp = player.getIn(['vorp', projectionType], 0)
     const vorpAdj = player.getIn(['vorp_adj', projectionType], 0)
     const rosPoints = player.getIn(['points', projectionType, 'total'], 0)
-    const weekPoints = player.getIn(['points', week, 'total'], 0)
+    const weekPoints = player.getIn(['points', `${week}`, 'total'], 0)
     const starts = player.getIn(['lineups', 'starts'], 0)
     const startPoints = player.getIn(['lineups', 'sp'], 0)
     const benchPoints = player.getIn(['lineups', 'bp'], 0)
