@@ -32,6 +32,10 @@ describe('SCRIPTS /waivers - poach', function () {
       this.timeout(60 * 1000)
       MockDate.set(start.subtract('1', 'month').toDate())
       await league(knex)
+
+      await knex('leagues').update({
+        adate: start.subtract('1', 'week').unix()
+      }).where('uid', 1)
     })
 
     it('no waivers to process - offseason', async () => {
@@ -179,7 +183,7 @@ describe('SCRIPTS /waivers - poach', function () {
       })
 
       MockDate.set(
-        start.subtract('1', 'month').day(6).add('1', 'minute').toDate()
+        start.subtract('1', 'month').day(7).add('1', 'minute').toDate()
       )
 
       let error
@@ -250,7 +254,7 @@ describe('SCRIPTS /waivers - poach', function () {
         type: constants.waivers.POACH
       })
 
-      MockDate.set(start.add('1', 'month').day(6).add('1', 'minute').toDate())
+      MockDate.set(start.add('1', 'month').day(7).add('1', 'minute').toDate())
 
       let error
       try {
@@ -333,7 +337,7 @@ describe('SCRIPTS /waivers - poach', function () {
         type: constants.waivers.POACH
       })
 
-      MockDate.set(start.add('1', 'month').day(6).add('1', 'minute').toDate())
+      MockDate.set(start.add('1', 'month').day(7).add('1', 'minute').toDate())
 
       let error
       try {
@@ -435,7 +439,7 @@ describe('SCRIPTS /waivers - poach', function () {
         type: constants.waivers.POACH
       })
 
-      MockDate.set(start.add('1', 'month').day(6).add('1', 'minute').toDate())
+      MockDate.set(start.add('1', 'month').day(7).add('1', 'minute').toDate())
 
       let error
       try {
@@ -561,7 +565,7 @@ describe('SCRIPTS /waivers - poach', function () {
         type: constants.waivers.POACH
       })
 
-      MockDate.set(start.add('1', 'month').day(6).add('1', 'minute').toDate())
+      MockDate.set(start.add('1', 'month').day(7).add('1', 'minute').toDate())
 
       let error
       try {
@@ -683,7 +687,7 @@ describe('SCRIPTS /waivers - poach', function () {
         timestamp: Math.round(Date.now() / 1000)
       })
 
-      MockDate.set(start.add('1', 'month').day(6).add('1', 'minute').toDate())
+      MockDate.set(start.add('1', 'month').day(7).add('1', 'minute').toDate())
 
       let error
       try {

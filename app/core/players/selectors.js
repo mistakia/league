@@ -9,6 +9,7 @@ import {
   getExtensionAmount,
   isReserveEligible,
   isReserveCovEligible,
+  isSantuaryPeriod,
   isSlotActive
 } from '@common'
 import { getApp } from '@core/app'
@@ -547,18 +548,22 @@ export function getPlayerStatus(state, { player, playerId }) {
         }
       }
     } else if (isPlayerOnPracticeSquad(state, { player })) {
-      // make sure player is unprotected
-      if (player.slot === constants.slots.PS) {
-        // check if player has existing poaching claim
-        const leaguePoaches = getPoachesForCurrentLeague(state)
-        if (!leaguePoaches.has(player.player)) {
-          status.eligible.poach = true
-        }
-
+      // make sure player is unprotected and it is not a santuary period
+      if (player.slot === constants.slots.PS && !isSantuaryPeriod(league)) {
         const rosterInfo = getRosterInfoForPlayerId(state, {
           playerId: player.player
         })
-        const cutoff = dayjs.unix(rosterInfo.timestamp).add('24', 'hours')
+        const sanctuaryEnd = dayjs.unix(rosterInfo.timestamp).add('24', 'hours')
+        const cutoff = dayjs.unix(rosterInfo.timestamp).add('48', 'hours')
+
+        // check if player has existing poaching claim and is after sanctuary period
+        const leaguePoaches = getPoachesForCurrentLeague(state)
+        if (
+          !leaguePoaches.has(player.player) &&
+          dayjs().isAfter(sanctuaryEnd)
+        ) {
+          status.eligible.poach = true
+        }
 
         if (
           (rosterInfo.type === constants.transactions.ROSTER_DEACTIVATE ||

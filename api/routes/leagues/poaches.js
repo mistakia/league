@@ -36,7 +36,6 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid teamId' })
     }
 
-    // verify player is not on waivers
     const transactions = await db('transactions')
       .where({
         player,
@@ -46,13 +45,25 @@ router.post('/?', async (req, res) => {
       .orderBy('uid', 'desc')
       .limit(1)
     const tran = transactions[0]
+
+    // verify player is not in sanctuary period
     if (
       (tran.type === constants.transactions.ROSTER_DEACTIVATE ||
         tran.type === constants.transactions.DRAFT ||
         tran.type === constants.transactions.PRACTICE_ADD) &&
       dayjs().isBefore(dayjs.unix(tran.timestamp).add('24', 'hours'))
     ) {
-      return res.status(400).send({ error: 'player is on waivers' })
+      return res.status(400).send({ error: 'Player on Sanctuary Period' })
+    }
+
+    // verify player is not on waivers
+    if (
+      (tran.type === constants.transactions.ROSTER_DEACTIVATE ||
+        tran.type === constants.transactions.DRAFT ||
+        tran.type === constants.transactions.PRACTICE_ADD) &&
+      dayjs().isBefore(dayjs.unix(tran.timestamp).add('48', 'hours'))
+    ) {
+      return res.status(400).send({ error: 'Player is on waivers' })
     }
 
     // check team reserve status
