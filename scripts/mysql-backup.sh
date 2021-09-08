@@ -36,7 +36,7 @@ if $FULL; then
 else
     mysqldump --defaults-extra-file=$DB_FILE $DB_NAME $DB_TABLES > $sql_file
 fi
-tar -zvcf $gz_file $sql_file
+tar -vcf $gz_file $sql_file
 rm $sql_file
 
 /root/.google-drive-upload/bin/gupload $gz_file

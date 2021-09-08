@@ -186,12 +186,10 @@ module.exports = async function ({
 
   // send notification
   let message = `${team.name} (${team.abbrv}) has signed free agent ${playerRow.fname} ${playerRow.lname} (${playerRow.pos}) for $${bid}.`
-  if (release.length) {
-    for (const player of release) {
-      if (roster.has(player)) {
-        const releasePlayer = playerRows.find((p) => p.player === player)
-        message += ` ${releasePlayer.fname} ${releasePlayer.lname} (${releasePlayer.pos}) has been released.`
-      }
+  if (releasePlayers.length) {
+    for (const player of releasePlayers) {
+      const releasePlayer = playerRows.find((p) => p.player === player)
+      message += ` ${releasePlayer.fname} ${releasePlayer.lname} (${releasePlayer.pos}) has been released.`
     }
   }
 
