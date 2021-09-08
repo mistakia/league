@@ -71,16 +71,16 @@
 
 ## Process Free Agency Waivers / Active
 ## At every 5th minute on Monday.
-# */5 * * * 1 NODE_ENV=production /root/.nvm/versions/node/v12.18.1/bin/node /root/league/scripts/process-waivers-free-agency.js > /var/log/league-waivers-free-agency-active.log 2>&1
+# */5 * * * 1 NODE_ENV=production /root/.nvm/versions/node/v12.18.1/bin/node /root/league/scripts/process-waivers-free-agency-active.js > /var/log/league-waivers-free-agency-active.log 2>&1
 
 ## At 15:00 on Wednesday.
-# 0 15 * * 3 NODE_ENV=production /root/.nvm/versions/node/v12.18.1/bin/node /root/league/scripts/process-waivers-free-agency.js > /var/log/league-waivers-free-agency-active.log 2>&1
+# 0 15 * * 3 NODE_ENV=production /root/.nvm/versions/node/v12.18.1/bin/node /root/league/scripts/process-waivers-free-agency-active.js > /var/log/league-waivers-free-agency-active.log 2>&1
 
 ## At every 5th minute past every hour from 15 through 23 on Wednesday.
-# */5 15-23 * * 3 NODE_ENV=production /root/.nvm/versions/node/v12.18.1/bin/node /root/league/scripts/process-waivers-free-agency.js > /var/log/league-waivers-free-agency-active.log 2>&1
+# */5 15-23 * * 3 NODE_ENV=production /root/.nvm/versions/node/v12.18.1/bin/node /root/league/scripts/process-waivers-free-agency-active.js > /var/log/league-waivers-free-agency-active.log 2>&1
 
 ## At every 5th minute on every day-of-week from Thursday through Sunday.
-# */5 * * * 4-7 NODE_ENV=production /root/.nvm/versions/node/v12.18.1/bin/node /root/league/scripts/process-waivers-free-agency.js > /var/log/league-waivers-free-agency-active.log 2>&1
+# */5 * * * 4-7 NODE_ENV=production /root/.nvm/versions/node/v12.18.1/bin/node /root/league/scripts/process-waivers-free-agency-active.js > /var/log/league-waivers-free-agency-active.log 2>&1
 
 ## Process Poaching Claims Every Hour
 0 */1 * * * NODE_ENV=production /root/.nvm/versions/node/v12.18.1/bin/node /root/league/scripts/process-poaching-claims.js > /var/log/league-process-poaching-claims.log 2>&1
