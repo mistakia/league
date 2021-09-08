@@ -46,7 +46,7 @@ export default class Season {
       return true
     }
 
-    if (now.day() === 3 && now.hour() < 16) {
+    if (now.day() === 3 && now.hour() < 15) {
       // is Wednesday before 3PM
       return true
     }
