@@ -39,10 +39,8 @@ class PlayerRoster extends Player {
       !isBeforeExtensionDeadline && isBeforeTransitionDeadline
 
     const { pos, tag, value, bid } = player
-    const salary = isRestrictedFreeAgent ? bid : player.value
-
+    const salary = isRestrictedFreeAgent ? bid : value
     const week = Math.max(constants.season.week, 1)
-
     const extensions = player.get('extensions', new List()).size
     const extendedSalary = getExtensionAmount({
       pos,
