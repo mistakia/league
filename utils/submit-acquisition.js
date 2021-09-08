@@ -121,11 +121,12 @@ module.exports = async function ({
   if (release.length) {
     for (const player of release) {
       const releasePlayer = roster.get(player)
-      /* if (!releasePlayer) {
-       *   throw new Error('invalid release')
-       * }
-       */
-      if (releasePlayer && releasePlayer.slot === constants.slots.PSP) {
+      if (!releasePlayer) {
+        continue
+        // throw new Error('invalid release')
+      }
+
+      if (releasePlayer.slot === constants.slots.PSP) {
         throw new Error('invalid release')
       }
 
