@@ -9,6 +9,7 @@ module.exports = async function ({
   playerIds = []
 }) {
   const leaguePlayerIds = []
+  const baselinePlayerIds = []
   if (leagueId) {
     const query = db('rosters_players')
       .join('rosters', 'rosters_players.rid', 'rosters.uid')
@@ -22,6 +23,12 @@ module.exports = async function ({
 
     const playerSlots = await query
     playerSlots.forEach((s) => leaguePlayerIds.push(s.player))
+
+    const baselines = await db('league_baselines')
+      .select('player')
+      .where({ lid: leagueId })
+      .groupBy('player')
+    baselines.forEach((b) => baselinePlayerIds.push(b.player))
   }
 
   const selects = [
@@ -60,6 +67,10 @@ module.exports = async function ({
   } else {
     if (leaguePlayerIds.length) {
       query.whereIn('player.player', leaguePlayerIds)
+    }
+
+    if (baselinePlayerIds.length) {
+      query.orWhereIn('player.player', baselinePlayerIds)
     }
 
     query

@@ -111,7 +111,11 @@ const run = async () => {
     return
   }
 
-  for (let week = constants.season.week; week <= constants.season.nflFinalWeek; week++) {
+  for (
+    let week = constants.season.week;
+    week <= constants.season.nflFinalWeek;
+    week++
+  ) {
     await runOne(week)
   }
 }
