@@ -237,7 +237,14 @@ router.post('/?', async (req, res) => {
       const claims = await claimsQuery
 
       if (claims.length) {
-        return res.status(400).send({ error: 'duplicate waiver claim' })
+        // compare releases
+        for (const claim of claims) {
+          const releases = await db('waiver_releases').where('waiverid', claim.uid)
+          const releasePlayers = releases.map(r => r.player)
+          if (releasePlayers.sort().join(',') === release.sort().join(',')) {
+            return res.status(400).send({ error: 'duplicate waiver claim' })
+          }
+        }
       }
     } else if (type === constants.waivers.POACH) {
       // player can not be on waivers if he has no transactions
