@@ -48,7 +48,7 @@ const run = async () => {
       try {
         const release = await db('waiver_releases')
           .select('player')
-          .where('waiverid', waiver.uid)
+          .where('waiverid', waiver.wid)
         await submitAcquisition({
           release: release.map((r) => r.player),
           leagueId: lid,
@@ -59,20 +59,20 @@ const run = async () => {
         })
 
         // cancel any outstanding waivers with the same release player
-        if (release.length) {
-          await db('waivers')
-            .update({
-              succ: 0,
-              reason: 'invalid release',
-              processed: timestamp
-            })
-            .join('waiver_releases', 'waiver_releases.waiverid', 'waviers.uid')
-            .whereNull('processed')
-            .whereNull('cancelled')
-            .where('tid', waiver.tid)
-            .whereIn('waiver_releases', release)
-        }
-
+        /* if (release.length) {
+         *   await db('waivers')
+         *     .update({
+         *       succ: 0,
+         *       reason: 'invalid release',
+         *       processed: timestamp
+         *     })
+         *     .join('waiver_releases', 'waiver_releases.waiverid', 'waviers.uid')
+         *     .whereNull('processed')
+         *     .whereNull('cancelled')
+         *     .where('tid', waiver.tid)
+         *     .whereIn('waiver_releases', release)
+         * }
+         */
         // reset waiver order if necessary
         const tiedWaivers = await db('waivers')
           .where({
