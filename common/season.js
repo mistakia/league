@@ -34,7 +34,7 @@ export default class Season {
       return true
     }
 
-    const now = this.now
+    const now = this.now.utcOffset(-4)
     if (now.day() === 2) {
       // is Tuesday
       return true

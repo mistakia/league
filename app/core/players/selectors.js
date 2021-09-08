@@ -439,7 +439,8 @@ export function getPlayerStatus(state, { player, playerId }) {
   const isFreeAgent = isPlayerFreeAgent(state, { player })
   status.fa = isFreeAgent
   if (isFreeAgent) {
-    if (constants.season.isRegularSeason && constants.season.isWaiverPeriod) {
+    const { isWaiverPeriod, isRegularSeason } = constants.season
+    if (isRegularSeason && isWaiverPeriod) {
       status.waiver.active = true
       const isPracticeSquadEligible = isPlayerPracticeSquadEligible(state, {
         player
