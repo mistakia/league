@@ -117,17 +117,19 @@ module.exports = async function ({
   // verify team has bench space & passes roster constraints
   const rosterRow = await getRoster({ tid: teamId })
   const roster = new Roster({ roster: rosterRow, league })
+  const releasePlayers = []
   if (release.length) {
     for (const player of release) {
       const releasePlayer = roster.get(player)
-      if (!releasePlayer) {
+      /* if (!releasePlayer) {
+       *   throw new Error('invalid release')
+       * }
+       */
+      if (releasePlayer && releasePlayer.slot === constants.slots.PSP) {
         throw new Error('invalid release')
       }
 
-      if (releasePlayer.slot === constants.slots.PSP) {
-        throw new Error('invalid release')
-      }
-
+      releasePlayers.push(player)
       roster.removePlayer(player)
     }
   }
@@ -140,8 +142,8 @@ module.exports = async function ({
   const result = []
 
   // process release
-  if (release.length) {
-    for (const player of release) {
+  if (releasePlayers.length) {
+    for (const player of releasePlayers) {
       const releaseData = await processRelease({
         player,
         tid: teamId,

@@ -53,7 +53,7 @@ module.exports = async (leagueId) => {
     .whereNull('processed')
     .whereNull('cancelled')
     .where('waivers.lid', leagueId)
-    .where('type', constants.waivers.FREE_AGENCY_PRACTICE)
+    .where('waivers.type', constants.waivers.FREE_AGENCY_PRACTICE)
     .orderBy([
       {
         column: 'teams.wo',

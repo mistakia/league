@@ -72,16 +72,15 @@ export function getLeagueEvents(state) {
 
   const firstWaiverDate = constants.season.start
     .add('1', 'week')
-    .utcOffset(-4)
     .day(3)
-    .hour(15)
+    .hour(16)
   if (now.isBefore(firstWaiverDate)) {
     events.push({
       detail: 'Veteran Waivers Clear',
       date: firstWaiverDate
     })
   } else if (constants.season.isRegularSeason) {
-    const waiverDate = dayjs.utc().utcOffset(-4).day(3).hour(15)
+    const waiverDate = dayjs.utc().utcOffset(-4).day(3).hour(16)
     const nextWaiverDate = now.isBefore(waiverDate)
       ? waiverDate
       : waiverDate.add('1', 'week')
