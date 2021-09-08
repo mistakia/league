@@ -63,43 +63,17 @@ module.exports = async function ({
   if (textSearch) {
     query.whereRaw('MATCH(fname, lname) AGAINST(? IN BOOLEAN MODE)', textSearch)
   } else if (playerIds.length) {
-    query.whereIn('player.player', playerIds)
+    query.orWhereIn('player.player', playerIds)
   } else {
     if (leaguePlayerIds.length) {
-      query.whereIn('player.player', leaguePlayerIds)
+      query.orWhereIn('player.player', leaguePlayerIds)
     }
 
     if (baselinePlayerIds.length) {
       query.orWhereIn('player.player', baselinePlayerIds)
     }
 
-    query
-      .orWhere(function () {
-        this.where('player.pos', 'QB')
-          .whereNot('player.posd', 'PS')
-          .whereNot('player.cteam', 'INA')
-      })
-      .orWhere(function () {
-        this.where('player.pos', 'RB')
-          .where('player.posd', 'RB')
-          .whereNot('player.cteam', 'INA')
-      })
-      .orWhere(function () {
-        this.where('player.pos', 'WR')
-          .whereNot('player.posd', 'PS')
-          .whereNot('player.cteam', 'INA')
-      })
-      .orWhere(function () {
-        this.where('player.pos', 'TE')
-          .whereNot('player.posd', 'PS')
-          .whereNot('player.cteam', 'INA')
-      })
-      .orWhere(function () {
-        this.where('player.pos', 'K')
-          .whereNot('player.posd', 'PS')
-          .whereNot('player.cteam', 'INA')
-      })
-      .orWhere('player.pos', 'DST')
+    query.whereNot('player.cteam', 'INA')
 
     // include rookies during offseason
     if (constants.season.week === 0) {
