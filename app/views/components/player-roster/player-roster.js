@@ -95,9 +95,16 @@ class PlayerRoster extends Player {
         </div>
         {isClaim && (
           <div className='player__item-name table__cell'>
-            {Boolean(claim.release.size) && (
-              <PlayerHeadshotGroup players={claim.release} />
-            )}
+            {Boolean(claim.release.size) &&
+              (claim.release.size > 1 ? (
+                <PlayerHeadshotGroup players={claim.release} />
+              ) : (
+                <PlayerName
+                  playerId={claim.release.get(0).player}
+                  hideActions={isClaim}
+                  headshot
+                />
+              ))}
           </div>
         )}
         {isWaiver && (

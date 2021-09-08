@@ -1,8 +1,9 @@
-import { Map, Record, List } from 'immutable'
+import { Map, List } from 'immutable'
 
 import { constants } from '@common'
 import { waiverActions } from './actions'
 import { appActions } from '@core/app'
+import { createWaiver } from './waiver'
 
 const initialState = new Map({
   report: new List(),
@@ -13,25 +14,13 @@ const initialState = new Map({
   isPending: false
 })
 
-const Waiver = new Record({
-  uid: null,
-  tid: null,
-  player: null,
-  po: 0,
-  release: new List(),
-  succ: null,
-  reason: null,
-  bid: null,
-  type: null
-})
-
 export function waiversReducer(state = initialState, { payload, type }) {
   switch (type) {
     case waiverActions.POST_WAIVER_FULFILLED:
       return state.withMutations((state) => {
         state.setIn(
           ['teams', payload.data.tid, payload.data.uid],
-          new Waiver(payload.data)
+          createWaiver(payload.data)
         )
       })
 
@@ -46,7 +35,7 @@ export function waiversReducer(state = initialState, { payload, type }) {
     case appActions.AUTH_FULFILLED:
       return state.withMutations((state) => {
         payload.data.waivers.forEach((waiver) => {
-          state.setIn(['teams', waiver.tid, waiver.uid], new Waiver(waiver))
+          state.setIn(['teams', waiver.tid, waiver.uid], createWaiver(waiver))
         })
       })
 
@@ -90,7 +79,7 @@ export function waiversReducer(state = initialState, { payload, type }) {
 
     case waiverActions.GET_WAIVER_REPORT_FULFILLED:
       return state.merge({
-        report: new List(payload.data.map((p) => new Waiver(p))),
+        report: new List(payload.data.map((p) => createWaiver(p))),
         isPending: false
       })
 

@@ -20,8 +20,8 @@ export default class PlayerHeadshotGroup extends React.Component {
       items.push(
         <Tooltip key={index} title={player.name}>
           <Avatar src={src} className='player__headshot'>
-            {player.fname.charAt(0)}
-            {player.lname.charAt(0)}
+            {(player.fname || '').charAt(0)}
+            {(player.lname || '').charAt(0)}
           </Avatar>
         </Tooltip>
       )
