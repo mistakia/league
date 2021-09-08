@@ -30,6 +30,8 @@ module.exports = async (leagueId) => {
     .groupBy('player')
   const activeWaiverPlayerIds = activeWaivers.map((w) => w.player)
 
+  // TODO - return undefined if there are any active waivers and practice waiver players
+
   // get relevant transactions from last 24 hours
   const cutoff = dayjs().subtract('24', 'hours').unix()
   const transactions = await db('transactions')
