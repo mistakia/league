@@ -239,8 +239,11 @@ router.post('/?', async (req, res) => {
       if (claims.length) {
         // compare releases
         for (const claim of claims) {
-          const releases = await db('waiver_releases').where('waiverid', claim.uid)
-          const releasePlayers = releases.map(r => r.player)
+          const releases = await db('waiver_releases').where(
+            'waiverid',
+            claim.uid
+          )
+          const releasePlayers = releases.map((r) => r.player)
           if (releasePlayers.sort().join(',') === release.sort().join(',')) {
             return res.status(400).send({ error: 'duplicate waiver claim' })
           }
