@@ -101,7 +101,6 @@ export default class AddFreeAgentDialog extends React.Component {
                   value={this.state.release}
                   onChange={this.handleRelease}
                   error={this.state.error}
-                  multiple
                   label='Release'>
                   {menuItems}
                 </Select>

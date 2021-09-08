@@ -3,7 +3,7 @@ import dayjs from 'dayjs'
 import { getCurrentLeague } from '@core/leagues'
 import { getPlayerById } from '@core/players'
 import { getApp } from '@core/app'
-import { getDraftWindow } from '@common'
+import { getDraftWindow, constants } from '@common'
 
 export function getDraft(state) {
   return state.get('draft')
@@ -53,6 +53,13 @@ export function getDraftEnd(state) {
 }
 
 export function isAfterDraft(state) {
+  if (constants.season.isRegularSeason) {
+    return {
+      afterDraft: true,
+      afterWaivers: true
+    }
+  }
+
   const league = getCurrentLeague(state)
   const draftEnd = getDraftEnd(state)
   const afterDraft = league.ddate && draftEnd && dayjs().isAfter(draftEnd)
