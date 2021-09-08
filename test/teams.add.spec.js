@@ -276,25 +276,6 @@ describe('API /teams - add', function () {
       await invalid(request, 'teamId')
     })
 
-    it('release player not on team', async () => {
-      MockDate.set(start.add('2', 'week').day(4).toDate())
-      const player = await selectPlayer()
-      const release = await selectPlayer()
-      const request = chai
-        .request(server)
-        .post('/api/teams/1/add')
-        .set('Authorization', `Bearer ${user1}`)
-        .send({
-          teamId: 1,
-          player: player.player,
-          release: release.player,
-          leagueId: 1,
-          slot: constants.slots.BENCH
-        })
-
-      await invalid(request, 'release')
-    })
-
     it('player is not free agent', async () => {
       const player = await selectPlayer()
       await addPlayer({ leagueId: 1, player, teamId: 2, userId: 2 })
