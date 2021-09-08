@@ -277,7 +277,10 @@ describe('API /waivers - free agency', function () {
           leagueId
         })
 
-      await error(request, 'practice squad waivers are not open for non-rookies')
+      await error(
+        request,
+        'practice squad waivers are not open for non-rookies'
+      )
     })
 
     it('player is no longer on waivers - outside waiver period', async () => {

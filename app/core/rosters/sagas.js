@@ -31,7 +31,7 @@ import {
 } from '@core/api'
 import { getApp, appActions } from '@core/app'
 import { constants } from '@common'
-import { getPlayers, getAllPlayers, playerActions } from '@core/players'
+import { getPlayers, getAllPlayers, playerActions, Player } from '@core/players'
 import {
   tradeActions,
   getCurrentTradePlayers,
@@ -159,7 +159,7 @@ export function* calculatePlayerLineupContribution({ player }) {
       weekData.sp = diff
     } else {
       const baselinePlayerId = baselines.getIn([week, player.pos, 'available'])
-      const baselinePlayer = playerItems.get(baselinePlayerId)
+      const baselinePlayer = playerItems.get(baselinePlayerId, new Player())
       // bench+ is difference between player output and best available
       const diff =
         projectedPoints - baselinePlayer.getIn(['points', week, 'total'])
