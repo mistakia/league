@@ -50,6 +50,10 @@ $height = 50px
       right -12px
       transform skewX(20deg)
 
+  .scoreboard__team-head .team__name
+    padding-right 16px
+    padding-left 32px
+
 .home
   .player__name-headshot
     order 1
@@ -72,6 +76,10 @@ $height = 50px
       left -12px
       transform skewX(-20deg)
 
+  .scoreboard__team-head .team__name
+    padding-left 16px
+    padding-right 32px
+
 .scoreboard__team-line
   position absolute
   bottom 0
@@ -86,3 +94,11 @@ $height = 50px
   display flex
   align-items center
   justify-content space-between
+
+  .team__name
+    white-space pre-wrap
+    overflow hidden
+    text-overflow ellipsis
+    display -webkit-box
+    -webkit-line-clamp 3
+    -webkit-box-orient vertical
