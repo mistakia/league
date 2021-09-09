@@ -1689,7 +1689,7 @@ CREATE TABLE `ros_projections` (
   `dtd` decimal(4,1) DEFAULT NULL,
   `krtd` decimal(4,1) DEFAULT NULL,
   `prtd` decimal(4,1) DEFAULT NULL,
-  `week` int(2) NOT NULL,
+  `week` varchar(3) NOT NULL,
   `year` int(4) NOT NULL,
   `timestamp` datetime NOT NULL,
   UNIQUE KEY `sourceid` (`sourceid`,`player`,`year`),
