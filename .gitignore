@@ -18,3 +18,8 @@ dist/*.worker.js*
 *.tar.qz
 drive-credentials.json
 drive-token.json
+
+# Deployment
+current
+source
+.deploys
