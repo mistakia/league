@@ -1,7 +1,7 @@
 // eslint-disable-next-line
 require = require('esm')(module /*, options*/)
-const debug = require('debug')
-const argv = require('yargs').argv
+// const debug = require('debug')
+// const argv = require('yargs').argv
 
 const db = require('../db')
 const { constants, Errors } = require('../common')
@@ -9,7 +9,7 @@ const { constants, Errors } = require('../common')
 const processActiveWaivers = require('./process-waivers-free-agency-active')
 const processPracticeWaivers = require('./process-waivers-free-agency-practice')
 
-const log = debug('process-waivers-free-agency')
+// const log = debug('process-waivers-free-agency')
 
 const runActive = async () => {
   let error
