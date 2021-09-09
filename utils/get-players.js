@@ -63,7 +63,7 @@ module.exports = async function ({
   if (textSearch) {
     query.whereRaw('MATCH(fname, lname) AGAINST(? IN BOOLEAN MODE)', textSearch)
   } else if (playerIds.length) {
-    query.orWhereIn('player.player', playerIds)
+    query.whereIn('player.player', playerIds)
   } else {
     if (leaguePlayerIds.length) {
       query.orWhereIn('player.player', leaguePlayerIds)
