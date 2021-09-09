@@ -162,7 +162,13 @@ export default class RostersPage extends React.Component {
 
     const pickItems = []
     for (const team of teams.valueSeq()) {
-      pickItems.push(<DashboardDraftPicks picks={team.picks} league={league} />)
+      pickItems.push(
+        <DashboardDraftPicks
+          key={team.uid}
+          picks={team.picks}
+          league={league}
+        />
+      )
     }
 
     const body = (
@@ -173,10 +179,7 @@ export default class RostersPage extends React.Component {
           <div className='rosters__picks'>{pickItems}</div>
         </div>
         <div className='rosters__footer'>
-          <Button
-            variant='containerd'
-            startIcon={<GetAppIcon />}
-            onClick={this.handleExport}>
+          <Button startIcon={<GetAppIcon />} onClick={this.handleExport}>
             Export CSV
           </Button>
         </div>
