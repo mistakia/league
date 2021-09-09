@@ -115,6 +115,8 @@ export default class PlayerSlot extends React.Component {
       }
     }
 
+    const projectedPoints = player.getIn(['points', `${week}`, 'total'], 0)
+
     return (
       <div className={classNames.join(' ')}>
         <div className='player__slot-slotName'>{slotName}</div>
@@ -139,10 +141,10 @@ export default class PlayerSlot extends React.Component {
           {/* expert consensus ranking */}
         </div>
         <div className='player__slot-right'>
-          <div className='player__slot-action'>{action}</div>
           <div className='player__slot-projected-points metric'>
-            {player.getIn(['points', `${week}`, 'total'], 0).toFixed(1)}
+            {projectedPoints ? projectedPoints.toFixed(1) : '-'}
           </div>
+          <div className='player__slot-action'>{action}</div>
         </div>
       </div>
     )

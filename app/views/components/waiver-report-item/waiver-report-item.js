@@ -1,7 +1,13 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import Table from '@material-ui/core/Table'
+import TableBody from '@material-ui/core/TableBody'
+import TableCell from '@material-ui/core/TableCell'
+import TableContainer from '@material-ui/core/TableContainer'
+import TableHead from '@material-ui/core/TableHead'
+import TableRow from '@material-ui/core/TableRow'
 
-import PlayerName from '@components/player-name'
+import PlayerNameExpanded from '@components/player-name-expanded'
 import TeamName from '@components/team-name'
 
 import './waiver-report-item.styl'
@@ -14,25 +20,29 @@ function AlternateClaims({ waivers }) {
   const items = []
   for (const [index, item] of waivers.entries()) {
     items.push(
-      <div className='table__row' key={index}>
-        <div className='table__cell metric'>${item.bid}</div>
-        <div className='table__cell'>
+      <TableRow key={index}>
+        <TableCell className='metric'>${item.bid}</TableCell>
+        <TableCell>
           <TeamName tid={item.tid} />
-        </div>
-        <div className='table__cell reason'>{item.reason}</div>
-      </div>
+        </TableCell>
+        <TableCell>{item.reason}</TableCell>
+      </TableRow>
     )
   }
 
   return (
-    <div className='table__container'>
-      <div className='table__head table__row'>
-        <div className='table__cell'>Bid</div>
-        <div className='table__cell'>Team</div>
-        <div className='table__cell'>Reason</div>
-      </div>
-      {items}
-    </div>
+    <TableContainer>
+      <Table size='small'>
+        <TableHead>
+          <TableRow>
+            <TableCell>Bid</TableCell>
+            <TableCell>Team</TableCell>
+            <TableCell>Reason Failed</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>{items}</TableBody>
+      </Table>
+    </TableContainer>
   )
 }
 
@@ -44,15 +54,19 @@ export default class WaiverReportItem extends React.Component {
   render = () => {
     const { waiver } = this.props
 
+    console.log(waiver)
+
     return (
       <div className='waiver__report-item'>
         <div className='waiver__report-item-head'>
-          <TeamName tid={waiver.tid} />
           <div className='waiver__report-item-winning-bid metric'>
             ${waiver.bid}
           </div>
+          <div className='waiver__report-meta'>
+            <TeamName tid={waiver.tid} />
+            <PlayerNameExpanded playerId={waiver.player} hideActions />
+          </div>
         </div>
-        <PlayerName playerId={waiver.player} hideActions />
         <AlternateClaims waivers={waiver.waivers} />
       </div>
     )

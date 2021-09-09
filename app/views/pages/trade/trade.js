@@ -120,13 +120,15 @@ export default function TradePage() {
   const acceptingTeamReleaseSection = (
     <div className='trade__box'>
       <div className='trade__box-body'>
-        {isOpen && (
+        {isOpen ? (
           <TradeSelectItems
             title='Select players to release'
             onChange={this.handleReleaseChange}
             selectedPlayers={tradePlayers.acceptingTeamReleasePlayers.toJS()}
             players={teamReleasePlayers}
           />
+        ) : (
+          <div className='trade__team-release'>Released</div>
         )}
         {acceptingTeamReleasePlayers}
       </div>

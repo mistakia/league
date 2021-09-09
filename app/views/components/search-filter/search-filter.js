@@ -37,7 +37,7 @@ export default class SearchFilter extends React.Component {
         <input
           className='search__filter-input'
           type='text'
-          placeholder='Filter players'
+          placeholder='Search players'
           value={this.state.value}
           onChange={this.handleChange}
         />
