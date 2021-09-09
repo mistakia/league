@@ -1,9 +1,13 @@
 .waiver__report-item
   background white
   margin 8px
-  border 1px solid $borderColor
-  border-radius 3px
-  padding 16px
+  border-radius 12px
+  padding 4px
+
+  .MuiTableCell-head
+    font-weight 600
+    font-family 'IBM Plex Mono', monospace
+    font-size 12px
 
   .player__name
     padding-top 8px
@@ -17,18 +21,26 @@
 
 .waiver__report-item-head
   display flex
+  align-items center
   .team__name
     flex 1
-    font-size 14px
+    font-size 16px
     color rgba(0, 0, 0, 0.54)
-    font-family "Inter", "Helvetica", "Arial", sans-serif
-    font-weight 400
     line-height 1.5
     letter-spacing 0.00938em
 
-.waiver__report-item-winning-bid
-  flex 0 0 auto
-  font-size 1em
+.waiver__report-item-winning-bid.metric
+  flex 1
+  font-size 24px
+  padding 0 8px
+  display flex
+  align-items center
+  justify-content center
+
+.waiver__report-meta
+  flex 5
+  .player__name-expanded
+    padding 16px 0
 
 .waiver__report-item-alternates
   display flex

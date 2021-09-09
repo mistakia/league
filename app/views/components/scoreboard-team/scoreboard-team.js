@@ -185,8 +185,10 @@ export default class ScoreboardTeam extends React.Component {
           <TeamImage tid={team.uid} />
           <TeamName tid={team.uid} />
           <div className='scoreboard__team-score'>
-            <div className='score'>{(scoreboard.points || 0).toFixed(2)}</div>
-            <div className='projected'>
+            <div className='score metric'>
+              {scoreboard.points ? scoreboard.points.toFixed(2) : '-'}
+            </div>
+            <div className='projected metric'>
               {(scoreboard.projected || 0).toFixed(2)}
             </div>
           </div>

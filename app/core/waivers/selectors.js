@@ -20,7 +20,9 @@ export function getWaiverReportItems(state) {
   const result = []
   for (const playerId in grouped) {
     const waiver = grouped[playerId].find((w) => w.succ)
+    const { player } = grouped[playerId][0]
     result.push({
+      player,
       ...waiver,
       waivers: grouped[playerId].filter((w) => !w.succ)
     })
