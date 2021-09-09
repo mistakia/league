@@ -37,7 +37,7 @@ export default class EditableProjection extends React.Component {
 
 EditableProjection.propTypes = {
   save: PropTypes.func,
-  week: PropTypes.number,
+  week: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   userId: PropTypes.number,
   type: PropTypes.string,
   player: ImmutablePropTypes.record
