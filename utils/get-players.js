@@ -209,8 +209,17 @@ module.exports = async function ({
     .where('week', '>=', constants.season.week)
     .whereIn('player', returnedPlayerIds)
 
+  const rosProjections = await db('ros_projections')
+    .where('sourceid', constants.sources.AVERAGE)
+    .where('year', constants.season.year)
+    .whereIn('player', returnedPlayerIds)
+
   for (const projection of projections) {
     playerMap[projection.player].projection[projection.week] = projection
+  }
+
+  for (const rosProjection of rosProjections) {
+    playerMap[rosProjection.player].projection.ros = rosProjection
   }
 
   return Object.values(playerMap)

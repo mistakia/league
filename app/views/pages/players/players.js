@@ -248,13 +248,13 @@ export default class PlayersPage extends React.Component {
           )}
           <PlayerHeader
             className='table__cell metric'
-            label='Value'
+            label='Pts Over Replace.'
             value={`vorp.${week}`}
           />
           {constants.season.isOffseason && (
             <PlayerHeader
               className='table__cell metric'
-              label='Adj Value'
+              label='Value'
               value={`vorp_adj.${week}`}
             />
           )}
