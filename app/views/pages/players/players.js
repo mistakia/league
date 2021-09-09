@@ -234,14 +234,12 @@ export default class PlayersPage extends React.Component {
     const headerSeasonSummary = (
       <div className='player__row-group'>
         <div className='player__row-group-body'>
-          {!constants.season.isRegularSeason && (
-            <PlayerHeader
-              className='table__cell metric'
-              label='Salary'
-              value='value'
-            />
-          )}
-          {!constants.season.isRegularSeason && (
+          <PlayerHeader
+            className='table__cell metric'
+            label='Salary'
+            value='value'
+          />
+          {constants.season.isOffseason && (
             <PlayerHeader
               className='table__cell metric'
               label='Market'
@@ -253,11 +251,13 @@ export default class PlayersPage extends React.Component {
             label='Value'
             value={`vorp.${week}`}
           />
-          <PlayerHeader
-            className='table__cell metric'
-            label='Adj Value'
-            value={`vorp_adj.${week}`}
-          />
+          {constants.season.isOffseason && (
+            <PlayerHeader
+              className='table__cell metric'
+              label='Adj Value'
+              value={`vorp_adj.${week}`}
+            />
+          )}
           <PlayerHeader
             className='table__cell metric'
             label='Proj'

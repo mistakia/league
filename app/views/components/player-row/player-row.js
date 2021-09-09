@@ -60,10 +60,8 @@ class PlayerRow extends Player {
       return (
         <div className='row__group'>
           <div className='row__group-body'>
-            {!constants.season.isRegularSeason && (
-              <div className='table__cell metric'>${player.value || '--'}</div>
-            )}
-            {!constants.season.isRegularSeason && (
+            <div className='table__cell metric'>${player.value || '--'}</div>
+            {constants.season.isOffseason && (
               <div className='table__cell metric'>
                 ${Math.round(value) || '--'}
                 {inflation}
@@ -72,9 +70,11 @@ class PlayerRow extends Player {
             <div className='table__cell metric'>
               {Math.round(player.vorp.getIn([`${week}`]) || 0)}
             </div>
-            <div className='table__cell metric'>
-              {Math.round(player.vorp_adj.getIn([`${week}`]) || 0)}
-            </div>
+            {constants.season.isOffseason && (
+              <div className='table__cell metric'>
+                {Math.round(player.vorp_adj.getIn([`${week}`]) || 0)}
+              </div>
+            )}
             <div className='table__cell metric'>
               {(player.points.getIn([`${week}`, 'total']) || 0).toFixed(1)}
             </div>

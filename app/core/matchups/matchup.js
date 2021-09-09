@@ -23,7 +23,7 @@ export function createMatchup({
 } = {}) {
   return new Matchup({
     uid,
-    tids,
+    tids: new List(tids),
     hid,
     aid,
     type,
