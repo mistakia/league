@@ -362,35 +362,36 @@ export default class PlayerContextMenu extends React.Component {
     } else {
       // player is a free agent
 
-      menuItems.push(
-        <MenuItem
-          key='waiver'
-          dense
-          disabled={!status.waiver.active && !status.waiver.practice}
-          onClick={this.handleWaiver}>
-          Submit Waiver Claim
-        </MenuItem>
-      )
+      if (status.waiver.practice) {
+        menuItems.push(
+          <MenuItem key='waiver' dense onClick={this.handleWaiver}>
+            Submit Practice Squad Waiver
+          </MenuItem>
+        )
+      } else if (status.sign.practice) {
+        menuItems.push(
+          <MenuItem
+            key='sign-ps'
+            dense
+            onClick={() => this.handleAdd({ practice: true })}>
+            Sign to Practice Squad
+          </MenuItem>
+        )
+      }
 
-      menuItems.push(
-        <MenuItem
-          key='sign-active'
-          dense
-          disabled={!status.sign.active}
-          onClick={() => this.handleAdd()}>
-          Sign to Active Roster
-        </MenuItem>
-      )
-
-      menuItems.push(
-        <MenuItem
-          key='sign-ps'
-          dense
-          disabled={!status.sign.practice}
-          onClick={() => this.handleAdd({ practice: true })}>
-          Sign to Practice Squad
-        </MenuItem>
-      )
+      if (status.waiver.active) {
+        menuItems.push(
+          <MenuItem key='waiver' dense onClick={this.handleWaiver}>
+            Submit Active Roster Waiver
+          </MenuItem>
+        )
+      } else if (status.sign.active) {
+        menuItems.push(
+          <MenuItem key='sign-active' dense onClick={() => this.handleAdd()}>
+            Sign to Active Roster
+          </MenuItem>
+        )
+      }
     }
 
     return (
