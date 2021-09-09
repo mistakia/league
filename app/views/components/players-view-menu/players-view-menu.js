@@ -5,6 +5,8 @@ import Select from '@material-ui/core/Select'
 import InputLabel from '@material-ui/core/InputLabel'
 import MenuItem from '@material-ui/core/MenuItem'
 
+import { constants } from '@common'
+
 export default class PlayersViewMenu extends React.Component {
   handleChange = (event) => {
     const { value } = event.target
@@ -23,9 +25,9 @@ export default class PlayersViewMenu extends React.Component {
           value={this.props.view}
           onChange={this.handleChange}
           label='View'>
-          <MenuItem value='season'>Season Projection</MenuItem>
+          {constants.season.isOffseason && <MenuItem value='season'>Season Projection</MenuItem>}
           <MenuItem value='stats'>Stats</MenuItem>
-          <MenuItem value='ros'>Rest Of Season</MenuItem>
+          {constants.season.isRegularSeason && <MenuItem value='ros'>Rest Of Season</MenuItem>}
           <MenuItem value='week'>Weekly Projection</MenuItem>
         </Select>
       </FormControl>
