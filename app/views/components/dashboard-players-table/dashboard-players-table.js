@@ -25,17 +25,17 @@ const SalaryDifferenceHeader = () => (
   />
 )
 
-const ValueHeader = () => (
+const PointsOverReplacementHeader = () => (
   <PlayerRosterHeader
     tooltip='Projected points over baseline player'
-    title='Market Value'
+    title='Pts Over Replace.'
   />
 )
 
-const ValueAdjustedHeader = () => (
+const ValueHeader = () => (
   <PlayerRosterHeader
-    tooltip='Salary Adjusted Projected points over baseline player'
-    title='Adj Value'
+    tooltip='Salary Adjusted points over baseline player'
+    title='Value'
   />
 )
 
@@ -57,10 +57,10 @@ const BenchPlusHeader = () => (
   />
 )
 
-const ROSHeader = () => (
+const RestOfSeasonHeader = () => (
   <PlayerRosterHeader
     tooltip='Projected points for the remainder of the season'
-    title='ROS'
+    title='ROS Points'
   />
 )
 
@@ -225,17 +225,19 @@ export default class DashboardPlayersTable extends React.Component {
               </div>
             )}
             <div className='table__cell metric'>
-              <ValueHeader />
+              <PointsOverReplacementHeader />
             </div>
-            <div className='table__cell metric'>
-              <ValueAdjustedHeader />
-            </div>
-            {constants.season.week > 0 && (
+            {constants.season.isOffseason && (
               <div className='table__cell metric'>
-                <ROSHeader />
+                <ValueHeader />
               </div>
             )}
-            {constants.season.week > 0 && (
+            {constants.season.isRegularSeason && (
+              <div className='table__cell metric'>
+                <RestOfSeasonHeader />
+              </div>
+            )}
+            {constants.season.isRegularSeason && (
               <div className='table__cell metric'>Week {week}</div>
             )}
             <div className='table__cell metric'>

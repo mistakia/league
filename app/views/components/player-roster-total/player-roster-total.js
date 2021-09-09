@@ -8,6 +8,7 @@ class PlayerRosterTotal extends Player {
   render() {
     const { players, league, reorder } = this.props
 
+    const { isOffseason } = constants.season
     const week = Math.max(constants.season.week, 1)
     const projectionType = constants.season.isRegularSeason ? 'ros' : '0'
 
@@ -55,12 +56,12 @@ class PlayerRosterTotal extends Player {
         </div>
         <div className='metric table__cell'>${baseSalaryTotal.toFixed(0)}</div>
         {<div className='metric table__cell'>${extendedSalaryTotal}</div>}
-        {constants.season.isOffseason && (
+        {isOffseason && (
           <div className='metric table__cell'>
             {projectedSalaryTotal ? `$${projectedSalaryTotal.toFixed(0)}` : '-'}
           </div>
         )}
-        {constants.season.isOffseason && (
+        {isOffseason && (
           <div className='metric table__cell'>
             {savingsTotal ? `$${savingsTotal.toFixed(0)}` : '-'}
           </div>
@@ -68,9 +69,11 @@ class PlayerRosterTotal extends Player {
         <div className='metric table__cell'>
           {valueTotal ? valueTotal.toFixed(1) : '-'}
         </div>
-        <div className='metric table__cell'>
-          {valueAdjTotal ? valueAdjTotal.toFixed(1) : '-'}
-        </div>
+        {isOffseason && (
+          <div className='metric table__cell'>
+            {valueAdjTotal ? valueAdjTotal.toFixed(1) : '-'}
+          </div>
+        )}
         {constants.season.week > 0 && (
           <div className='metric table__cell'>
             {rosPointsTotal ? rosPointsTotal.toFixed(1) : '-'}

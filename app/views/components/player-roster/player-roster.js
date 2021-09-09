@@ -33,7 +33,7 @@ class PlayerRoster extends Player {
     const isWaiver = Boolean(waiverId)
     const isPoach = Boolean(poach)
     const isClaim = isWaiver || isPoach
-    const isRegularSeason = constants.season.isRegularSeason
+    const { isRegularSeason, isOffseason } = constants.season
     const isRestrictedFreeAgent = player.tag === constants.tags.TRANSITION
     const isRestrictedFreeAgencyPeriod =
       !isBeforeExtensionDeadline && isBeforeTransitionDeadline
@@ -120,20 +120,22 @@ class PlayerRoster extends Player {
             {extendedSalary ? `$${extendedSalary}` : '-'}
           </div>
         )}
-        {!isWaiver && !isPoach && constants.season.isOffseason && (
+        {!isWaiver && !isPoach && isOffseason && (
           <div className='metric table__cell'>
             {projectedSalary ? `$${projectedSalary.toFixed(0)}` : '-'}
           </div>
         )}
-        {!isWaiver && constants.season.isOffseason && (
+        {!isWaiver && isOffseason && (
           <div className={`metric table__cell ${isNegative && 'warning'}`}>
             {savings ? `$${savings.toFixed(0)}` : '-'}
           </div>
         )}
         <div className='metric table__cell'>{vorp ? vorp.toFixed(1) : '-'}</div>
-        <div className='metric table__cell'>
-          {vorpAdj ? vorpAdj.toFixed(1) : '-'}
-        </div>
+        {isOffseason && (
+          <div className='metric table__cell'>
+            {vorpAdj ? vorpAdj.toFixed(1) : '-'}
+          </div>
+        )}
         {isRegularSeason && (
           <div className='metric table__cell'>
             {rosPoints ? rosPoints.toFixed(1) : '-'}
