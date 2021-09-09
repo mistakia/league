@@ -25,6 +25,7 @@ module.exports = async function (week) {
     })
     .whereIn('player', playerIds)
     .whereNull('userid')
+    .whereNot('sourceid', constants.sources.AVERAGE)
 
   if (typeof week !== 'undefined') {
     query.where('week', week)

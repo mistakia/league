@@ -142,6 +142,7 @@ const run = async ({ year = constants.season.year } = {}) => {
   })
 
   const projectionInserts = []
+  const rosProjectionInserts = []
   const pointsInserts = []
   const valueInserts = []
   for (const player of players) {
@@ -150,14 +151,25 @@ const run = async ({ year = constants.season.year } = {}) => {
     }
 
     for (const [week, projection] of Object.entries(player.projection)) {
-      projectionInserts.push({
-        player: player.player,
-        sourceid: constants.sources.AVERAGE,
-        year: constants.season.year,
-        timestamp: 0, // must be set at zero for unique key
-        week,
-        ...projection
-      })
+      if (week === 'ros') {
+        rosProjectionInserts.push({
+          player: player.player,
+          sourceid: constants.sources.AVERAGE,
+          year: constants.season.year,
+          timestamp: 0,
+          week,
+          ...projection
+        })
+      } else {
+        projectionInserts.push({
+          player: player.player,
+          sourceid: constants.sources.AVERAGE,
+          year: constants.season.year,
+          timestamp: 0, // must be set at zero for unique key
+          week,
+          ...projection
+        })
+      }
     }
 
     for (const [week, points] of Object.entries(player.points)) {
@@ -207,6 +219,14 @@ const run = async ({ year = constants.season.year } = {}) => {
   if (projectionInserts.length) {
     await db('projections').insert(projectionInserts).onConflict().merge()
     log(`processed and saved ${projectionInserts.length} projections`)
+  }
+
+  if (rosProjectionInserts.length) {
+    await db('ros_projections')
+      .insert(rosProjectionInserts)
+      .onConflict()
+      .merge()
+    log(`processed and saved ${rosProjectionInserts.length} ros projections`)
   }
 
   if (pointsInserts.length) {
