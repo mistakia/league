@@ -130,15 +130,15 @@ class PlayerRoster extends Player {
             {savings ? `$${savings.toFixed(0)}` : '-'}
           </div>
         )}
-        <div className='metric table__cell'>{vorp ? vorp.toFixed(1) : '-'}</div>
+        <div className='metric table__cell'>{vorp ? vorp.toFixed(0) : '-'}</div>
         {isOffseason && (
           <div className='metric table__cell'>
-            {vorpAdj ? vorpAdj.toFixed(1) : '-'}
+            {vorpAdj ? vorpAdj.toFixed(0) : '-'}
           </div>
         )}
         {isRegularSeason && (
           <div className='metric table__cell'>
-            {rosPoints ? rosPoints.toFixed(1) : '-'}
+            {rosPoints ? rosPoints.toFixed(0) : '-'}
           </div>
         )}
         {constants.season.week > 0 && (
@@ -148,10 +148,10 @@ class PlayerRoster extends Player {
         )}
         <div className='metric table__cell'>{starts || '-'}</div>
         <div className='metric table__cell'>
-          {startPoints ? startPoints.toFixed(1) : '-'}
+          {startPoints ? startPoints.toFixed(0) : '-'}
         </div>
         <div className='metric table__cell'>
-          {benchPoints ? benchPoints.toFixed(1) : '-'}
+          {benchPoints ? benchPoints.toFixed(0) : '-'}
         </div>
       </div>
     )

@@ -140,20 +140,28 @@ class PlayerRow extends Player {
     const passingBasic = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <PercentileMetric stats={stats} percentiles={percentiles} type='py' />
           <PercentileMetric
             stats={stats}
             percentiles={percentiles}
+            fixed={0}
+            type='py'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            fixed={0}
             type='tdp'
           />
           <PercentileMetric
             stats={stats}
             percentiles={percentiles}
+            fixed={0}
             type='ints'
           />
           <PercentileMetric
             stats={stats}
             percentiles={percentiles}
+            fixed={0}
             type='drppy'
           />
         </div>
@@ -193,6 +201,7 @@ class PlayerRow extends Player {
           <PercentileMetric
             stats={stats}
             percentiles={percentiles}
+            fixed={0}
             type='pyac'
           />
           <PercentileMetric
@@ -220,6 +229,7 @@ class PlayerRow extends Player {
           <PercentileMetric
             stats={stats}
             percentiles={percentiles}
+            fixed={0}
             type='pdot'
           />
           <PercentileMetric
@@ -243,6 +253,7 @@ class PlayerRow extends Player {
           <PercentileMetric
             stats={stats}
             percentiles={percentiles}
+            fixed={0}
             type='sky'
           />
           <PercentileMetric
@@ -277,10 +288,16 @@ class PlayerRow extends Player {
     const rushingBasic = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <PercentileMetric stats={stats} percentiles={percentiles} type='ry' />
           <PercentileMetric
             stats={stats}
             percentiles={percentiles}
+            fixed={0}
+            type='ry'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            fixed={0}
             type='tdr'
           />
           <PercentileMetric
@@ -295,15 +312,22 @@ class PlayerRow extends Player {
     const rushingProductivity = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <PercentileMetric stats={stats} percentiles={percentiles} type='ra' />
           <PercentileMetric
             stats={stats}
             percentiles={percentiles}
+            fixed={0}
+            type='ra'
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            fixed={0}
             type='rfd'
           />
           <PercentileMetric
             stats={stats}
             percentiles={percentiles}
+            fixed={0}
             type='posra'
           />
         </div>
@@ -316,6 +340,7 @@ class PlayerRow extends Player {
           <PercentileMetric
             stats={stats}
             percentiles={percentiles}
+            fixed={0}
             type='ryaco'
           />
           <PercentileMetric

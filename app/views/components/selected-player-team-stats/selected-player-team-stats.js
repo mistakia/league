@@ -19,12 +19,14 @@ export default class SelectedPlayerTeamStats extends React.Component {
             className='row__single-metric'
             stats={year}
             percentiles={percentiles}
+            fixed={0}
             type='drv'
           />
           <PercentileMetric
             className='row__single-metric'
             stats={year}
             percentiles={percentiles}
+            fixed={0}
             type='snpo'
           />
           <div className='row__group'>
@@ -32,36 +34,43 @@ export default class SelectedPlayerTeamStats extends React.Component {
               <PercentileMetric
                 stats={year}
                 percentiles={percentiles}
+                fixed={0}
                 type='pa'
               />
               <PercentileMetric
                 stats={year}
                 percentiles={percentiles}
+                fixed={0}
                 type='py'
               />
               <PercentileMetric
                 stats={year}
                 percentiles={percentiles}
+                fixed={0}
                 type='tdp'
               />
               <PercentileMetric
                 stats={year}
                 percentiles={percentiles}
+                fixed={0}
                 type='pfd'
               />
               <PercentileMetric
                 stats={year}
                 percentiles={percentiles}
+                fixed={0}
                 type='spp'
               />
               <PercentileMetric
                 stats={year}
                 percentiles={percentiles}
+                fixed={0}
                 type='rzpa'
               />
               <PercentileMetric
                 stats={year}
                 percentiles={percentiles}
+                fixed={0}
                 type='rzpy'
               />
             </div>
@@ -71,36 +80,43 @@ export default class SelectedPlayerTeamStats extends React.Component {
               <PercentileMetric
                 stats={year}
                 percentiles={percentiles}
+                fixed={0}
                 type='ra'
               />
               <PercentileMetric
                 stats={year}
                 percentiles={percentiles}
+                fixed={0}
                 type='ry'
               />
               <PercentileMetric
                 stats={year}
                 percentiles={percentiles}
+                fixed={0}
                 type='tdr'
               />
               <PercentileMetric
                 stats={year}
                 percentiles={percentiles}
+                fixed={0}
                 type='rfd'
               />
               <PercentileMetric
                 stats={year}
                 percentiles={percentiles}
+                fixed={0}
                 type='srp'
               />
               <PercentileMetric
                 stats={year}
                 percentiles={percentiles}
+                fixed={0}
                 type='rzra'
               />
               <PercentileMetric
                 stats={year}
                 percentiles={percentiles}
+                fixed={0}
                 type='rzry'
               />
             </div>
@@ -116,8 +132,8 @@ export default class SelectedPlayerTeamStats extends React.Component {
         </div>
         <div className='selected__section-header'>
           <div className='row__name'>Year</div>
-          <div className='row__single-metric'>DRV</div>
-          <div className='row__single-metric'>SNP</div>
+          <div className='table__cell metric row__single-metric'>DRV</div>
+          <div className='table__cell metric row__single-metric'>SNP</div>
           <div className='row__group'>
             <div className='row__group-head'>Passing Volume</div>
             <div className='row__group-body'>
