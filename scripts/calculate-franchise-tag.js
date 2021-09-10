@@ -33,7 +33,7 @@ const run = async () => {
       })
       .where('rosters.lid', lid)
       .where('rosters.week', 0)
-      .where('rosters.year', year - 1)
+      .where('rosters.year', year)
 
     if (!rosters.length) {
       log(`Missing roster, skipping lid ${lid}`)
