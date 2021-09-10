@@ -8,7 +8,7 @@ export default function PlayerStatus({ player }) {
   const label =
     constants.status[player.status] ||
     constants.status[player.injury_status] ||
-    player.gamestatus
+    constants.status[player.gamestatus]
 
   if (!label) {
     return null
