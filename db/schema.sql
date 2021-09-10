@@ -2204,7 +2204,7 @@ CREATE TABLE `nflPlay` (
   `possessionTeamId` varchar(36) DEFAULT NULL,
   `quarter` int(1) DEFAULT NULL,
   `season` int(4) DEFAULT NULL,
-  `seasonType` varchar(36) DEFAULT NULL,
+  `seasonType` varchar(36) DEFAULT NULL, -- PRE, REG, POST
   `visitorScore` int(4) DEFAULT NULL,
   `week` int(2) DEFAULT NULL,
   `yardlineNumber` int(4) DEFAULT NULL,
