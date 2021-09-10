@@ -16,35 +16,56 @@ const getAvailableYears = () => {
   return arr
 }
 export const status = {
-  'Physically Unable to Perform': 'PUP',
   'Voluntary Opt Out': 'OPT',
-  'Injured Reserve': 'IR',
-  Suspended: 'SUS',
-  'Commissioner Exempt List': 'NFL-E',
-  'Non Football Injury': 'NFI-INJ',
-  'Non-Football Illness': 'NFI-ILL',
+  DNR: 'DNR',
   'Did Not Report': 'DNR',
-  'Reserve/COVID-19': 'COV',
+
+  SUSP: 'SUSP',
+  Suspended: 'SUSP',
+
   'Practice Squad': 'NFL-PS',
+
   PUP: 'PUP',
-  Questionable: 'Q',
+  'Physically Unable to Perform': 'PUP',
+
   Inactive: 'INA',
+  Questionable: 'Q',
   Out: 'O',
   Doubtful: 'D',
-  IR: 'IR'
+
+  'Injured Reserve': 'IR',
+  IR: 'IR',
+  'IR-R': 'IR', // IR - Return
+
+  NFI: 'NFI',
+  'NFI-A': 'NFI', // Non-Football Injury (Active)
+  'NFI-R': 'NFI', // Non-Football Injury (Reserve)
+  'Non Football Injury': 'NFI',
+  'Non-Football Illness': 'NFI',
+
+  CEL: 'CEL',
+  'Commissioner Exempt List': 'CEL',
+  'Reserve-CEL': 'CEL', // Reserve: Commissioner Exempt List
+
+  'Reserve/COVID-19': 'COV',
+  'Reserve-Covid-19': 'COV',
+  'COVID-19': 'COV',
+
+  EX: 'EX',
+  'Reserve-Ex': 'EX' // Reserve: Exemption
 }
 
 export const statusDescriptions = {
   PUP: 'Physically Unable to Perform',
   OPT: 'Voluntary Opt Out',
   IR: 'Injured Reserve',
-  SUS: 'Suspended',
-  'NFL-E': 'Commissioner Exempt List',
-  'NFI-INJ': 'Non Football Injury',
-  'NFI-ILL': 'Non-Football Illness',
+  SUSP: 'Suspended',
+  CEL: 'Commissioner Exempt List',
+  NFI: 'Non Football Injury',
   DNR: 'Did Not Report',
   COV: 'Reserve/COVID-19',
   'NFL-PS': 'Practice Squad',
+  EX: 'Exemption',
   Q: 'Questionable',
   INA: 'Inactive',
   O: 'Out',
