@@ -20,11 +20,13 @@ export default class SelectedPlayerTeamPositionSplits extends React.Component {
               <PercentileMetric
                 stats={year}
                 percentiles={percentiles}
+                fixed={0}
                 type='rba'
               />
               <PercentileMetric
                 stats={year}
                 percentiles={percentiles}
+                fixed={0}
                 type='rby'
               />
             </div>
@@ -34,11 +36,13 @@ export default class SelectedPlayerTeamPositionSplits extends React.Component {
               <PercentileMetric
                 stats={year}
                 percentiles={percentiles}
+                fixed={0}
                 type='wr1a'
               />
               <PercentileMetric
                 stats={year}
                 percentiles={percentiles}
+                fixed={0}
                 type='wr1y'
               />
             </div>
@@ -48,11 +52,13 @@ export default class SelectedPlayerTeamPositionSplits extends React.Component {
               <PercentileMetric
                 stats={year}
                 percentiles={percentiles}
+                fixed={0}
                 type='wr3a'
               />
               <PercentileMetric
                 stats={year}
                 percentiles={percentiles}
+                fixed={0}
                 type='wr3y'
               />
             </div>
@@ -62,11 +68,13 @@ export default class SelectedPlayerTeamPositionSplits extends React.Component {
               <PercentileMetric
                 stats={year}
                 percentiles={percentiles}
+                fixed={0}
                 type='tea'
               />
               <PercentileMetric
                 stats={year}
                 percentiles={percentiles}
+                fixed={0}
                 type='tey'
               />
             </div>
@@ -76,11 +84,13 @@ export default class SelectedPlayerTeamPositionSplits extends React.Component {
               <PercentileMetric
                 stats={year}
                 percentiles={percentiles}
+                fixed={0}
                 type='qba'
               />
               <PercentileMetric
                 stats={year}
                 percentiles={percentiles}
+                fixed={0}
                 type='qby'
               />
             </div>

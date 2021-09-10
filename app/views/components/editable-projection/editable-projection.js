@@ -18,8 +18,9 @@ export default class EditableProjection extends React.Component {
   render = () => {
     const { player, type, week } = this.props
 
+    const decimal = week === 'ros' || week === '0' ? 0 : 1
     const value = parseFloat(
-      player.projection.getIn([`${week}`, type], 0).toFixed(1)
+      player.projection.getIn([`${week}`, type], 0).toFixed(decimal)
     )
     const disabled = week !== '0'
 

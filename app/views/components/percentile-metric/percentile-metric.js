@@ -3,7 +3,14 @@ import PropTypes from 'prop-types'
 
 export default class PercentileMetric extends React.Component {
   render = () => {
-    const { percentiles, type, stats, className, scaled } = this.props
+    const {
+      percentiles,
+      type,
+      stats,
+      className,
+      scaled,
+      fixed = 1
+    } = this.props
     const value = stats[type]
     const percentile = percentiles[type] || {}
     let color
@@ -24,7 +31,7 @@ export default class PercentileMetric extends React.Component {
     if (className) classNames.push(className)
     return (
       <div className={classNames.join(' ')} style={{ backgroundColor: color }}>
-        {value ? value.toFixed(1) : '-'}
+        {value ? value.toFixed(fixed) : '-'}
       </div>
     )
   }
@@ -36,5 +43,6 @@ PercentileMetric.propTypes = {
   type: PropTypes.string,
   stats: PropTypes.object,
   scaled: PropTypes.bool,
-  title: PropTypes.string
+  title: PropTypes.string,
+  fixed: PropTypes.number
 }
