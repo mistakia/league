@@ -20,7 +20,8 @@ import {
   delProjection,
   putSetting,
   getPlayerTransactions,
-  getBaselines
+  getBaselines,
+  getPlayerProjections
 } from '@core/api'
 import { draftActions } from '@core/draft'
 import { playerActions } from './actions'
@@ -192,6 +193,11 @@ export function* fetchPlayerTransactions({ payload }) {
   yield call(getPlayerTransactions, { player, leagueId })
 }
 
+export function* fetchPlayerProjections({ payload }) {
+  const { player } = payload
+  yield call(getPlayerProjections, { player })
+}
+
 //= ====================================
 //  WATCHERS
 // -------------------------------------
@@ -287,6 +293,10 @@ export function* watchGetPlayerTransactions() {
   )
 }
 
+export function* watchGetPlayerProjections() {
+  yield takeLatest(playerActions.GET_PLAYER_PROJECTIONS, fetchPlayerProjections)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -318,5 +328,6 @@ export const playerSagas = [
   fork(watchAddCutlist),
   fork(watchReorderCutlist),
 
-  fork(watchGetPlayerTransactions)
+  fork(watchGetPlayerTransactions),
+  fork(watchGetPlayerProjections)
 ]

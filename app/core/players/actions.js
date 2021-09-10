@@ -64,6 +64,19 @@ export const playerActions = {
   GET_BASELINES_PENDING: 'GET_BASELINES_PENDING',
   GET_BASELINES_FAILED: 'GET_BASELINES_FAILED',
 
+  GET_PLAYER_PROJECTIONS: 'GET_PLAYER_PROJECTIONS',
+
+  GET_PLAYER_PROJECTIONS_FULFILLED: 'GET_PLAYER_PROJECTIONS_FULFILLED',
+  GET_PLAYER_PROJECTIONS_FAILED: 'GET_PLAYER_PROJECTIONS_FAILED',
+  GET_PLAYER_PROJECTIONS_PENDING: 'GET_PLAYER_PROJECTIONS_PENDING',
+
+  getPlayerProjections: (player) => ({
+    type: playerActions.GET_PLAYER_PROJECTIONS,
+    payload: {
+      player
+    }
+  }),
+
   setStats: ({ players, percentiles }) => ({
     type: playerActions.SET_PLAYER_STATS,
     payload: {
@@ -417,6 +430,29 @@ export const playerActions = {
       opts,
       data
     }
+  }),
+
+  getPlayerProjectionsFulfilled: (opts, data) => ({
+    type: playerActions.GET_PLAYER_PROJECTIONS_FULFILLED,
+    payload: {
+      opts,
+      data
+    }
+  }),
+
+  getPlayerProjectionsPending: (opts) => ({
+    type: playerActions.GET_PLAYER_PROJECTIONS_PENDING,
+    payload: {
+      opts
+    }
+  }),
+
+  getPlayerProjectionsFailed: (opts, error) => ({
+    type: playerActions.GET_PLAYER_PROJECTIONS_FAILED,
+    payload: {
+      opts,
+      error
+    }
   })
 }
 
@@ -472,4 +508,10 @@ export const getBaselinesActions = {
   failed: playerActions.getBaselinesFailed,
   pending: playerActions.getBaselinesPending,
   fulfilled: playerActions.getBaselinesFulfilled
+}
+
+export const getPlayerProjectionsActions = {
+  failed: playerActions.getPlayerProjectionsFailed,
+  pending: playerActions.getPlayerProjectionsPending,
+  fulfilled: playerActions.getPlayerProjectionsFulfilled
 }

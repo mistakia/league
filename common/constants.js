@@ -96,7 +96,8 @@ export const fantasyWeeks = [
   13,
   14,
   15,
-  16
+  16,
+  17
 ]
 export const nflWeeks = [
   1,

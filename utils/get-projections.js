@@ -1,12 +1,14 @@
 const { constants } = require('../common')
 const db = require('../db')
 
-module.exports = async function (week) {
-  const players = await db('player')
-    .select('player')
-    .whereIn('pos', constants.positions)
-    .whereNot({ cteam: 'INA' })
-  const playerIds = players.map((p) => p.player)
+module.exports = async function ({ week, playerIds = [] } = {}) {
+  if (!playerIds.length) {
+    const players = await db('player')
+      .select('player')
+      .whereIn('pos', constants.positions)
+      .whereNot({ cteam: 'INA' })
+    players.forEach((p) => playerIds.push(p.player))
+  }
 
   const sub = db('projections')
     .select(db.raw('max(timestamp) AS maxtime, sourceid AS sid'))

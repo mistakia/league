@@ -27,7 +27,7 @@ export default class SelectedPlayerSeasonStats extends React.Component {
     return (
       <div className='selected__section'>
         <div className='selected__section-header'>
-          <div className='row__group-head'>Player Season Stats</div>
+          <div className='row__group-head'>Seasons</div>
         </div>
         <div className='selected__section-header'>
           <div className='row__name'>Year</div>

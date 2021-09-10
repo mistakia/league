@@ -178,13 +178,13 @@ export default class SelectedPlayer extends React.Component {
             value={value}
             className='selected__player-menu'
             onChange={this.handleChange}>
-            <Tab label='Impact' />
+            <Tab label='Contribution' />
             <Tab label='Value' />
             <Tab label='Matchup' />
             <Tab label='Projections' />
             <Tab label='Transactions' />
             <Tab label='Game Log' />
-            <Tab label='Stats' />
+            <Tab label='Seasons' />
             <Tab label='Team Splits' />
             <Tab label='Efficiency' />
             <Tab label='Practice' />

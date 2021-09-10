@@ -296,6 +296,10 @@ export const api = {
   getBaselines({ leagueId }) {
     const url = `${BASE_URL}/leagues/${leagueId}/baselines`
     return { url }
+  },
+  getPlayerProjections({ player }) {
+    const url = `${BASE_URL}/projections/${player}`
+    return { url }
   }
 }
 
