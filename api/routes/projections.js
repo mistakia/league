@@ -3,6 +3,7 @@ const express = require('express')
 const router = express.Router()
 
 const { constants } = require('../../common')
+const { getProjections } = require('../../utils')
 
 router.get('/?', async (req, res) => {
   const { db, logger, cache } = req.app.locals
@@ -36,6 +37,18 @@ router.get('/?', async (req, res) => {
     }
 
     res.send(projections.concat(userProjections))
+  } catch (error) {
+    logger(error)
+    res.status(500).send({ error: error.toString() })
+  }
+})
+
+router.get('/:playerId/?', async (req, res) => {
+  const { logger } = req.app.locals
+  try {
+    const { playerId } = req.params
+    const projections = await getProjections({ playerIds: [playerId] })
+    res.send(projections)
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })

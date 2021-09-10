@@ -460,6 +460,12 @@ export function playersReducer(state = initialState, { payload, type }) {
         }
       })
 
+    case playerActions.GET_PLAYER_PROJECTIONS_FULFILLED:
+      return state.setIn(
+        ['items', payload.opts.player, 'projections'],
+        new List(payload.data)
+      )
+
     default:
       return state
   }
