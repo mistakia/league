@@ -2,7 +2,6 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 import Icon from '@components/icon'
-import { weightProjections } from '@common'
 import Source from '@components/source'
 import PlayerSelectedRow from '@components/player-selected-row'
 import PlayerSelectedRowHeader from '@components/player-selected-row-header'
@@ -42,29 +41,12 @@ export default class SelectedPlayerProjection extends React.Component {
       rows.push(item)
     })
 
-    const projAvg = weightProjections({
-      projections: projections.filter((p) => p.sourceid),
-      week,
-      userId: 0
-    })
-
     rows.push(
       <PlayerSelectedRow
         className='average__row'
         key='average'
-        stats={projAvg}
-        title='Average'
-        pos={pos}
-        action={<div className='row__action' />}
-      />
-    )
-
-    rows.push(
-      <PlayerSelectedRow
-        className='average__row'
-        key='weighted'
         stats={projection}
-        title='Weighted'
+        title='Average'
         pos={pos}
         action={<div className='row__action' />}
       />

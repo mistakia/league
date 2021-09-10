@@ -18,8 +18,8 @@ export default class Season {
       .tz('2021-09-09', 'America/New_York')
       .utc()
       .utcOffset(-4) // first game
-    this.finalWeek = 16
-    this.nflFinalWeek = 17
+    this.finalWeek = 17
+    this.nflFinalWeek = 18
   }
 
   get now() {
