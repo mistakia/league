@@ -41,16 +41,18 @@ export default class SelectedPlayerProjection extends React.Component {
       rows.push(item)
     })
 
-    rows.push(
-      <PlayerSelectedRow
-        className='average__row'
-        key='average'
-        stats={projection}
-        title='Average'
-        pos={pos}
-        action={<div className='row__action' />}
-      />
-    )
+    if (projection) {
+      rows.push(
+        <PlayerSelectedRow
+          className='average__row'
+          key='average'
+          stats={projection}
+          title='Average'
+          pos={pos}
+          action={<div className='row__action' />}
+        />
+      )
+    }
 
     return (
       <div className='selected__section'>
