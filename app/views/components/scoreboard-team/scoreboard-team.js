@@ -184,6 +184,8 @@ export default class ScoreboardTeam extends React.Component {
           />
           <TeamImage tid={team.uid} />
           <TeamName tid={team.uid} />
+        </div>
+        <div className='scoreboard__team-meta'>
           <div className='scoreboard__team-score'>
             <div className='score metric'>
               {scoreboard.points ? scoreboard.points.toFixed(2) : '-'}

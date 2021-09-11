@@ -35,11 +35,11 @@ function getClock({ playDescription, clockTime, quarter }) {
 
 function GameStatus({ status, player }) {
   if (!constants.season.isRegularSeason) {
-    return null
+    return <div className='player__name-expanded-game'>-</div>
   }
 
   if (!player || !player.player) {
-    return null
+    return <div className='player__name-expanded-game'>-</div>
   }
 
   if (!status || !status.game) {
@@ -82,10 +82,18 @@ GameStatus.propTypes = {
 
 class PlayerNameExpanded extends Player {
   render = () => {
-    const { player, isHosted, hideActions, status } = this.props
+    const { player, isHosted, hideActions, status, minimize } = this.props
+
+    const classNames = ['player__name-expanded']
+    if (minimize) classNames.push('minimize')
+
+    const playerName =
+      window.innerWidth < 600
+        ? player.pname
+        : `${player.fname || ''} ${player.lname || ''}`
 
     return (
-      <div className='player__name-expanded'>
+      <div className={classNames.join(' ')}>
         {Boolean(isHosted && player.player && !hideActions) && (
           <div className='player__name-expanded-action'>
             <IconButton
@@ -104,7 +112,7 @@ class PlayerNameExpanded extends Player {
             className='player__name-expanded-row player__name-expanded-name cursor'
             onClick={this.handleClick}>
             <div className='player__name-expanded-full-name'>
-              {player.fname} {player.lname}
+              {playerName || '-'}
             </div>
             {constants.season.year === player.draft_year && (
               <PlayerLabel label='R' type='rookie' description='Rookie' />
