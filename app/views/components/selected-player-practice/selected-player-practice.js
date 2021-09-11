@@ -5,16 +5,16 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 const Row = ({ data }) => (
   <div className='player__selected-row'>
     <div className='row__group-body'>
-      <div className='row__text'>{data.week}</div>
-      <div className='row__text'>{data.status || '-'}</div>
-      <div className='row__text'>{data.inj || '-'}</div>
-      <div className='row__text'>{data.m || '-'}</div>
-      <div className='row__text'>{data.t || '-'}</div>
-      <div className='row__text'>{data.w || '-'}</div>
-      <div className='row__text'>{data.th || '-'}</div>
-      <div className='row__text'>{data.f || '-'}</div>
-      <div className='row__text'>{data.s || '-'}</div>
-      <div className='row__text'>{data.su || '-'}</div>
+      <div className='table__cell metric'>{data.week}</div>
+      <div className='table__cell metric'>{data.status || '-'}</div>
+      <div className='table__cell metric'>{data.inj || '-'}</div>
+      <div className='table__cell metric'>{data.m || '-'}</div>
+      <div className='table__cell metric'>{data.t || '-'}</div>
+      <div className='table__cell metric'>{data.w || '-'}</div>
+      <div className='table__cell metric'>{data.th || '-'}</div>
+      <div className='table__cell metric'>{data.f || '-'}</div>
+      <div className='table__cell metric'>{data.s || '-'}</div>
+      <div className='table__cell metric'>{data.su || '-'}</div>
     </div>
   </div>
 )
@@ -38,16 +38,16 @@ export default class SelectedPlayerPractice extends React.Component {
         <div className='selected__section-header'>
           <div className='row__group'>
             <div className='row__group-body'>
-              <div className='row__text'>Wk</div>
-              <div className='row__text'>St</div>
-              <div className='row__text'>Inj</div>
-              <div className='row__text'>M</div>
-              <div className='row__text'>Tu</div>
-              <div className='row__text'>W</div>
-              <div className='row__text'>Th</div>
-              <div className='row__text'>F</div>
-              <div className='row__text'>Sa</div>
-              <div className='row__text'>Su</div>
+              <div className='table__cell metric'>Wk</div>
+              <div className='table__cell metric'>St</div>
+              <div className='table__cell metric'>Inj</div>
+              <div className='table__cell metric'>M</div>
+              <div className='table__cell metric'>Tu</div>
+              <div className='table__cell metric'>W</div>
+              <div className='table__cell metric'>Th</div>
+              <div className='table__cell metric'>F</div>
+              <div className='table__cell metric'>Sa</div>
+              <div className='table__cell metric'>Su</div>
             </div>
           </div>
         </div>
