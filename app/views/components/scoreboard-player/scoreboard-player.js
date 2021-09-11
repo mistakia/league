@@ -27,6 +27,7 @@ class ScoreboardPlayer extends Player {
             playerId={player.player}
             week={week}
             hideActions
+            minimize
           />
           <ScoreboardPlayerGameStatus playerId={player.player} week={week} />
         </div>

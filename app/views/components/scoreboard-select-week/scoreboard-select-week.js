@@ -20,7 +20,7 @@ export default class ScoreboardSelectWeek extends React.Component {
     for (; wk > 0; wk--) {
       menuItems.push(
         <MenuItem key={wk} value={wk}>
-          Week {wk}
+          {wk}
         </MenuItem>
       )
     }
