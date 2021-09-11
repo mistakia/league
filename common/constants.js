@@ -1227,7 +1227,9 @@ export const sources = {
   '4FOR4': 16,
   FANTASYPROS: 17,
 
-  AVERAGE: 18
+  AVERAGE: 18,
+
+  FBG_CONSENSUS: 19
 }
 
 export const sourcesTitle = {
@@ -1249,7 +1251,8 @@ export const sourcesTitle = {
   16: '4For4',
   17: 'FantasyPros',
 
-  18: 'Average'
+  18: 'Average',
+  19: 'Footballguys'
 }
 
 export const rankings = {
