@@ -30,7 +30,7 @@ const run = async ({ year = constants.season.year } = {}) => {
   let week = year === constants.season.year ? constants.season.week : 0
 
   const lid = 1
-  const finalWeek = constants.season.finalWeek
+  const { finalWeek } = constants.season
   const league = await getLeague(lid)
   const teams = await db('teams').where({ lid })
   const { nteams, cap, minBid } = league
