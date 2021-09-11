@@ -14,8 +14,12 @@
   color lighten(black, 50%)
   display flex
 
-.scoreboard__player-score
+.scoreboard__player-score.metric
   font-size 1em
+  flex 0 0 40px
+  display flex
+  color #2ea3dd
+  font-weight 900
 
 .scoreboard__player-body
   flex 1
@@ -33,6 +37,7 @@
     order 2
   .scoreboard__player-score
     order 3
+    justify-content flex-end
 
 .home
   .scoreboard__player
@@ -58,3 +63,16 @@
     order 1
   .player__name-expanded-full-name
     order 2
+
+@media (max-width 600px)
+  .scoreboard__player-score.metric
+    flex 0 0 30px
+    font-size 11px
+
+  .away .scoreboard__player
+    margin-left 8px
+    margin-right 4px
+
+  .home .scoreboard__player
+    margin-left 4px
+    margin-right 8px
