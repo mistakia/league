@@ -8,7 +8,7 @@ export default class TeamName extends React.Component {
   render = () => {
     const { team, abbrv } = this.props
 
-    const style = { color: `#${team.pc}` }
+    const style = { background: `#${team.pc}`, color: `#${team.ac}` }
     return (
       <div className='team__name' style={style}>
         {abbrv ? team.abbrv : team.name}
