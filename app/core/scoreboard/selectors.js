@@ -210,6 +210,10 @@ export function getPlaysByMatchupId(state, { mid }) {
 }
 
 function getYardline(str, possessionTeam) {
+  if (!str) {
+    return ''
+  }
+
   if (str === '50') {
     return 50
   }
