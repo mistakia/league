@@ -61,7 +61,7 @@ export function getScoreboardByTeamId(state, { tid }) {
         const quarterMinutes =
           lp.playDescription === 'END GAME'
             ? 0
-            : parseInt(lp.clockTime.split(':').pop(), 10) // TODO - double check
+            : parseInt((lp.clockTime || '').split(':').pop(), 10) // TODO - double check
         const quartersRemaining = lp.quarter === 5 ? 0 : 4 - lp.quarter
         minutes += quartersRemaining * 15 + quarterMinutes
       }
