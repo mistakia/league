@@ -96,12 +96,12 @@ const run = async () => {
   const missingGsispids = gsispids.filter((p) => !playerGsispids.includes(p))
   const missing = []
   for (const gsispid of missingGsispids) {
-    const playStat = groups[gsispid].find((p) => p.teamid && p.playerName)
+    const playStat = groups[gsispid].find((p) => p.clubCode && p.playerName)
     if (!playStat) continue
 
     const params = {
       pname: playStat.playerName,
-      cteam: constants.nflTeamIds[playStat.teamid]
+      cteam: fixTeam(playStat.clubCode)
     }
 
     const results = await db('player').where(params)
@@ -145,7 +145,7 @@ const run = async () => {
     await upsert({
       player: player.player,
       pos: player.pos,
-      tm: constants.nflTeamIds[playStat.teamid],
+      tm: fixTeam(playStat.clubCode),
       opp,
       stats
     })
