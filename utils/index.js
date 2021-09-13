@@ -44,6 +44,7 @@ const getChartedPlayByPlayQuery = (db) =>
 const fields = [
   'nflPlay.esbid',
   'nflPlay.playId',
+  'nflPlay.sequence',
   'nflPlay.down',
   'nflPlay.playDescription',
   'nflPlay.possessionTeam',
