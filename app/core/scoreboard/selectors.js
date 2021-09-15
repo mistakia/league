@@ -248,7 +248,9 @@ export function getGameStatusByPlayerId(
     return { game }
   }
 
-  const filteredPlays = plays.filter((p) => p.esbid === play.esbid && p.playDescription)
+  const filteredPlays = plays.filter(
+    (p) => p.esbid === play.esbid && p.playDescription
+  )
   const lastPlay = filteredPlays.maxBy((p) => p.sequence)
   if (!lastPlay.possessionTeam) {
     return { game, lastPlay }

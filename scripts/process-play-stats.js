@@ -153,10 +153,7 @@ const run = async () => {
 
   for (const team of constants.nflTeams) {
     const opponentPlays = playStats.filter((p) => {
-      if (
-        fixTeam(p.h) !== team &&
-        fixTeam(p.v) !== team
-      ) {
+      if (fixTeam(p.h) !== team && fixTeam(p.v) !== team) {
         return false
       }
 
@@ -164,10 +161,7 @@ const run = async () => {
     })
     if (!opponentPlays.length) continue
     const play = opponentPlays[0]
-    const opp =
-      fixTeam(play.h) === team
-        ? play.v
-        : play.h
+    const opp = fixTeam(play.h) === team ? play.v : play.h
     const groupedPlays = groupBy(opponentPlays, 'playId')
     const formattedPlays = []
     for (const playId in groupedPlays) {

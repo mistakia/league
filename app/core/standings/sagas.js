@@ -1,6 +1,7 @@
 import { fork, all, take, call, select, put } from 'redux-saga/effects'
 
 import { constants } from '@common'
+import { playerActions } from '@core/players'
 import { getCurrentLeague } from '@core/leagues'
 import { teamActions, getTeamsForCurrentLeague } from '@core/teams'
 import {
@@ -68,6 +69,7 @@ export function* calculate() {
 export function* watchAll() {
   while (true) {
     yield all([
+      take(playerActions.FETCH_PLAYERS_FULFILLED),
       take(teamActions.GET_TEAMS_FULFILLED),
       take(rosterActions.GET_ROSTERS_FULFILLED),
       take(gamelogsActions.GET_PLAYER_GAMELOGS_FULFILLED),
