@@ -15,15 +15,19 @@
 
 ### Stats & Research
 
-| Name                                                              | Description                               |
-| ----------------------------------------------------------------- | ----------------------------------------- |
-| [fantasydata.com](https://fantasydata.com/nfl)                    | General & advanced stats                  |
-| [PlayerProfiler](https://www.playerprofiler.com/)                 | Player prospect profile & advanced stats  |
-| [Football Outsiders](https://www.footballoutsiders.com/)          | Team & Player DVOA data                   |
-| [Pro Football Reference](https://www.pro-football-reference.com/) | Historical Team & Player stats            |
-| [SIS Datahub](https://sisdatahub.com/)                            | Player split and situational stat tools   |
-| [Stathead](https://stathead.com/football/)                        | Player split and season stat tools        |
-| [Next Gen Stats](https://nextgenstats.nfl.com/)                   | Advanced Stats using player tracking data |
+| Name                                                              | Description                                                           |
+| ----------------------------------------------------------------- | --------------------------------------------------------------------- |
+| [fantasydata.com](https://fantasydata.com/nfl)                    | General & advanced stats                                              |
+| [PlayerProfiler](https://www.playerprofiler.com/)                 | Player prospect profile & advanced stats                              |
+| [Football Outsiders](https://www.footballoutsiders.com/)          | Team & Player DVOA data                                               |
+| [Pro Football Reference](https://www.pro-football-reference.com/) | Historical Team & Player stats                                        |
+| [SIS Datahub](https://sisdatahub.com/)                            | Player split and situational stat tools                               |
+| [Stathead](https://stathead.com/football/)                        | Player split and season stat tools                                    |
+| [Next Gen Stats](https://nextgenstats.nfl.com/)                   | Advanced Stats using player tracking data                             |
+| [rbsdm.com/stats/stats/](https://rbsdm.com/stats/stats/)          | Team tiers, rushing and passing EPA on offense and defense, QB stats. |
+| [rbsdm.com/stats/pass_freq/](https://rbsdm.com/stats/pass_freq/)  | Team pass-heaviness.                                                  |
+| [ras.football](https://ras.football/)                             | Relative Athletic Score. A simple 1-10 measure of athleticism         |
+| [mockdraftable.com](https://www.mockdraftable.com/)               | Player NFL-combine database                                           |
 
 ### Premium Content
 
