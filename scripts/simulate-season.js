@@ -20,6 +20,8 @@ const run = async () => {
   const teamRows = await db('teams').where({ lid: leagueId })
   const matchups = await db('matchups').where({ lid: leagueId })
   const rosterRows = await getRosters({ lid: leagueId })
+  const tids = teamRows.map((t) => t.uid)
+  const teamStats = await db('team_stats').whereIn('tid', tids)
 
   const rosters = {}
   for (const row of rosterRows) {
@@ -29,7 +31,9 @@ const run = async () => {
   const teams = {}
   for (const row of teamRows) {
     teams[row.uid] = row
-    teams[row.uid].stats = constants.createFantasyTeamStats()
+    teams[row.uid].stats =
+      teamStats.find((t) => t.tid === row.uid) ||
+      constants.createFantasyTeamStats()
   }
 
   const result = simulate({
