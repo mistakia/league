@@ -54,8 +54,6 @@ export default class WaiverReportItem extends React.Component {
   render = () => {
     const { waiver } = this.props
 
-    console.log(waiver)
-
     return (
       <div className='waiver__report-item'>
         <div className='waiver__report-item-head'>
