@@ -170,7 +170,7 @@ const calculateStandings = ({
     const apl = teamStats[tid].stats.apLosses
     const normPP = (pp - minPP) / (maxPP - minPP)
     const normAPL = (apl - minAPL) / (maxAPL - minAPL)
-    teamStats[tid].stats.doi = (9 * normPP + normAPL) || 0
+    teamStats[tid].stats.doi = 9 * normPP + normAPL || 0
 
     const points = Object.values(teamStats[tid].points.weeks)
     teamStats[tid].stats.pdev = points.length ? standardDeviation(points) : null
