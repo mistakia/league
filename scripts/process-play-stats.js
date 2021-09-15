@@ -136,9 +136,9 @@ const run = async () => {
 
     const playStat = groups[gsispid].find((p) => p.possessionTeam)
     const opp =
-      fixTeam(playStat.possessionTeam) === fixTeam(playStat.homeTeamAbbr)
-        ? fixTeam(playStat.awayTeamAbbr)
-        : fixTeam(playStat.homeTeamAbbr)
+      fixTeam(playStat.possessionTeam) === fixTeam(playStat.h)
+        ? fixTeam(playStat.v)
+        : fixTeam(playStat.h)
     const stats = calculateStatsFromPlayStats(groups[gsispid])
     if (argv.dry) continue
 
@@ -154,8 +154,8 @@ const run = async () => {
   for (const team of constants.nflTeams) {
     const opponentPlays = playStats.filter((p) => {
       if (
-        fixTeam(p.homeTeamAbbr) !== team &&
-        fixTeam(p.awayTeamAbbr) !== team
+        fixTeam(p.h) !== team &&
+        fixTeam(p.v) !== team
       ) {
         return false
       }
@@ -165,9 +165,9 @@ const run = async () => {
     if (!opponentPlays.length) continue
     const play = opponentPlays[0]
     const opp =
-      fixTeam(play.homeTeamAbbr) === team
-        ? play.awayTeamAbbr
-        : play.homeTeamAbbr
+      fixTeam(play.h) === team
+        ? play.v
+        : play.h
     const groupedPlays = groupBy(opponentPlays, 'playId')
     const formattedPlays = []
     for (const playId in groupedPlays) {
