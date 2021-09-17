@@ -654,9 +654,9 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 
 **Participation.**
 
-3. The two (2) DIVISION WINNERS with the lowest win percentage are admitted along with two (2) non-division winners with the highest Total Points For (PF).
+3. The two (2) DIVISION WINNERS with the lowest All Play win percentage are admitted along with two (2) non-division winners with the highest Total Points For (PF).
 
-4. In the event that any Teams should be tied in respect of win percentage, the tie breaker shall be the Total Points For (PF) during the LEAGUE regular season.
+4. In the event that any Teams should be tied in respect of All Play win percentage, the tie breaker shall be the Total Points For (PF) during the LEAGUE regular season.
 
 **Tiebreakers.**
 
@@ -676,11 +676,13 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 
 **Participation.**
 
-3. The two (2) DIVISION WINNERS with the highest win percentage are admitted along with the two (2) WILDCARD ROUND winners.
+3. The two (2) DIVISION WINNERS with the highest All Play win percentage are admitted along with the two (2) WILDCARD ROUND winners.
 
-4. In the event that any Teams should be tied in respect of win percentage, the tie breaker shall be the Total Points For (PF) during the LEAGUE regular season.
+4. In the event that any Teams should be tied in respect of All Play win percentage, the tie breaker shall be the Total Points For (PF) during the LEAGUE regular season.
 
-**Tiebreakers.** 5. In the event that any Teams should be tied in score, the tie breaker shall be the Team with the higher Total Points For (PF) during the LEAGUE regular season.
+**Tiebreakers.**
+
+5. In the event that any Teams should be tied in score, the tie breaker shall be the Team with the higher Total Points For (PF) during the LEAGUE regular season.
 
 **Awards.**
 
