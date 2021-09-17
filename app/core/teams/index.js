@@ -4,7 +4,8 @@ export {
   getCurrentTeam,
   getDraftPickById,
   getTeamEvents,
-  getTeamsForCurrentLeague
+  getTeamsForCurrentLeague,
+  getOverallStandings
 } from './selectors'
 
 export { teamsReducer } from './reducer'

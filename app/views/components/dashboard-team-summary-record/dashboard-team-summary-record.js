@@ -11,11 +11,11 @@ import Rank from '@components/rank'
 
 export default class DashboardTeamSummaryRecord extends React.Component {
   render = () => {
-    const { team, teams, rank } = this.props
+    const { team, overall, standings, rank } = this.props
 
     const leagueStandings = []
     const divStandings = []
-    for (const t of teams.valueSeq()) {
+    for (const [index, t] of overall.entries()) {
       const item = (
         <tr key={t.uid}>
           <td>{t.name}</td>
@@ -28,6 +28,27 @@ export default class DashboardTeamSummaryRecord extends React.Component {
       )
 
       leagueStandings.push(item)
+
+      if (index === 1) {
+        leagueStandings.push(
+          <tr key='bye'>
+            <td colSpan='3'>Bye Teams</td>
+          </tr>
+        )
+      } else if (index === 3) {
+        leagueStandings.push(
+          <tr key='division'>
+            <td colSpan='3'>Division Leaders</td>
+          </tr>
+        )
+      } else if (index === 5) {
+        leagueStandings.push(
+          <tr key='wildcard'>
+            <td colSpan='3'>Wildcard Teams</td>
+          </tr>
+        )
+      }
+
       if (t.div === team.div) divStandings.push(item)
     }
 
@@ -44,7 +65,7 @@ export default class DashboardTeamSummaryRecord extends React.Component {
               {team.getIn(['stats', 'ties'], 0)}
             </Grid>
             <Grid item xs={2}>
-              <Rank rank={rank} size={teams.size} />
+              <Rank rank={rank} size={standings.teams.size} />
             </Grid>
           </Grid>
         </AccordionSummary>
@@ -77,6 +98,7 @@ export default class DashboardTeamSummaryRecord extends React.Component {
 
 DashboardTeamSummaryRecord.propTypes = {
   team: ImmutablePropTypes.record,
-  teams: ImmutablePropTypes.list,
+  standings: PropTypes.object,
+  overall: ImmutablePropTypes.list,
   rank: PropTypes.number
 }
