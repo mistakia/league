@@ -253,6 +253,10 @@ export const api = {
     const url = `${BASE_URL}/leagues/${data.leagueId}/poaches`
     return { url, ...POST(data) }
   },
+  putPoach(data) {
+    const url = `${BASE_URL}/leagues/${data.leagueId}/poaches/${data.poachId}`
+    return { url, ...PUT(data) }
+  },
   postError(data) {
     const url = `${BASE_URL}/errors`
     return { url, ...POST(data) }

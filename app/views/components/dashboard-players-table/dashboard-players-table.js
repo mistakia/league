@@ -115,7 +115,12 @@ export default class DashboardPlayersTable extends React.Component {
     if (isPoach) {
       poaches.forEach((poach, index) => {
         items.push(
-          <PlayerRoster key={index} claim={poach} poach player={poach.player} />
+          <PlayerRoster
+            key={index}
+            claim={poach}
+            poachId={poach.uid}
+            player={poach.player}
+          />
         )
       })
     }
@@ -268,7 +273,7 @@ DashboardPlayersTable.propTypes = {
   isBeforeExtensionDeadline: PropTypes.bool,
   items: PropTypes.array,
   title: PropTypes.node,
-  poaches: PropTypes.array,
+  poaches: ImmutablePropTypes.list,
   claims: PropTypes.array,
   waiverType: PropTypes.string,
   reorderWaivers: PropTypes.func,

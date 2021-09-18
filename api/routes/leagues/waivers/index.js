@@ -13,6 +13,7 @@ const {
 } = require('../../../../common')
 const {
   getRoster,
+  getLeague,
   isPlayerRostered,
   isPlayerOnWaivers,
   verifyUserTeam,
@@ -477,11 +478,10 @@ router.put('/:waiverId', async (req, res) => {
       return res.status(400).send({ error: 'bid exceeds available faab' })
     }
 
-    const leagues = await db('leagues').where({ uid: leagueId })
-    if (!leagues.length) {
+    const league = await getLeague(leagueId)
+    if (!league) {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
-    const league = leagues[0]
     const players = await db('player').where('player', waiver.player).limit(1)
     if (!players.length) {
       return res.status(400).send({ error: 'invalid player' })

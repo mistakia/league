@@ -72,11 +72,12 @@ export default class PlayerContextMenu extends React.Component {
   }
 
   handlePoach = () => {
-    const { player } = this.props
+    const { player, poachId } = this.props
     this.props.showConfirmation({
       id: 'POACH',
       data: {
-        player
+        player,
+        poachId
       }
     })
     this.props.hide()
@@ -188,7 +189,7 @@ export default class PlayerContextMenu extends React.Component {
   }
 
   render = () => {
-    const { waiverId, status, isOnCutlist } = this.props
+    const { waiverId, status, isOnCutlist, poachId } = this.props
 
     const menuItems = []
 
@@ -326,6 +327,12 @@ export default class PlayerContextMenu extends React.Component {
           Release
         </MenuItem>
       )
+    } else if (poachId) {
+      menuItems.push(
+        <MenuItem key='update-poach' dense onClick={this.handlePoach}>
+          Update Poach
+        </MenuItem>
+      )
     } else if (!status.fa) {
       if (status.eligible.transitionBid) {
         menuItems.push(
@@ -415,6 +422,7 @@ PlayerContextMenu.propTypes = {
   release: PropTypes.func,
   protect: PropTypes.func,
   waiverId: PropTypes.string,
+  poachId: PropTypes.number,
   toggleCutlist: PropTypes.func,
   isOnCutlist: PropTypes.bool
 }

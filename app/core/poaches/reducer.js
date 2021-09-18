@@ -1,29 +1,14 @@
-import { Map, Record, List } from 'immutable'
+import { Map } from 'immutable'
 
 import { appActions } from '@core/app'
 import { poachActions } from './actions'
-
-const Poach = new Record({
-  tid: null,
-  player: null,
-  processed: null,
-  release: new List(),
-  submitted: null
-})
-
-const createPoach = ({ tid, player, processed, release, submitted }) =>
-  new Poach({
-    tid,
-    player,
-    processed,
-    release: new List(release),
-    submitted
-  })
+import { createPoach } from './poach'
 
 export function poachesReducer(state = new Map(), { payload, type }) {
   switch (type) {
     case poachActions.POACH_SUBMITTED:
     case poachActions.POST_POACH_FULFILLED:
+    case poachActions.PUT_POACH_FULFILLED:
       return state.withMutations((state) => {
         let leaguePoaches = state.get(payload.data.lid) || new Map()
         leaguePoaches = leaguePoaches.set(
