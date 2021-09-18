@@ -2,8 +2,14 @@ const dayjs = require('dayjs')
 const express = require('express')
 const router = express.Router()
 
-const { submitPoach, verifyReserveStatus } = require('../../../utils')
-const { constants } = require('../../../common')
+const {
+  submitPoach,
+  verifyReserveStatus,
+  verifyUserTeam,
+  getRoster,
+  getLeague
+} = require('../../../utils')
+const { constants, Roster } = require('../../../common')
 
 router.post('/?', async (req, res) => {
   const { db, logger, broadcast } = req.app.locals
@@ -92,6 +98,136 @@ router.post('/?', async (req, res) => {
       type: 'POACH_SUBMITTED',
       payload: { data }
     })
+  } catch (error) {
+    logger(error)
+    res.status(500).send({ error: error.toString() })
+  }
+})
+
+router.put('/:poachId', async (req, res) => {
+  const { db, logger } = req.app.locals
+  try {
+    const { poachId } = req.params
+    const { teamId, leagueId } = req.body
+    let { release } = req.body
+
+    if (!Array.isArray(release)) {
+      release = release ? [release] : []
+    }
+
+    if (!teamId) {
+      return res.status(400).send({ error: 'missing teamId' })
+    }
+
+    if (!leagueId) {
+      return res.status(400).send({ error: 'missing leagueId' })
+    }
+
+    // verify teamId, leagueId belongs to user
+    try {
+      await verifyUserTeam({
+        userId: req.user.userId,
+        leagueId,
+        teamId,
+        requireLeague: true
+      })
+    } catch (error) {
+      return res.status(400).send({ error: error.message })
+    }
+
+    const tid = parseInt(teamId, 10)
+    const league = await getLeague(leagueId)
+    if (!league) {
+      return res.status(400).send({ error: 'invalid leagueId' })
+    }
+
+    // verify poachId belongs to teamId
+    const poaches = await db('poaches')
+      .where({
+        uid: poachId,
+        tid,
+        lid: leagueId
+      })
+      .whereNull('processed')
+
+    if (!poaches.length) {
+      return res.status(400).send({ error: 'invalid poachId' })
+    }
+    const poach = poaches[0]
+    const playerRows = await db('player').where('player', poach.player)
+    const poachPlayer = playerRows[0]
+
+    // verify release players exists
+    const players = await db('player').whereIn('player', release)
+    if (players.length !== release.length) {
+      return res.status(400).send({ error: 'invalid release' })
+    }
+
+    // verify release player not use in different poach
+    const otherPendingPoachReleases = await db('poaches')
+      .select('poach_releases.player')
+      .join('poach_releases', 'poaches.uid', 'poach_releases.poachid')
+      .whereNot('uid', poachId)
+      .whereNull('processed')
+
+    const otherPoachReleasePlayers = otherPendingPoachReleases.map(
+      (p) => p.player
+    )
+    for (const player of release) {
+      if (otherPoachReleasePlayers.includes(player)) {
+        return res
+          .status(400)
+          .send({ error: 'release player used in another poach' })
+      }
+    }
+
+    // verify team has space for poach player
+    const rosterRow = await getRoster({ tid: teamId })
+    const roster = new Roster({ roster: rosterRow, league })
+    if (release.length) {
+      for (const player of release) {
+        if (!roster.has(player)) {
+          return res
+            .status(400)
+            .send({ error: 'invalid release player, not on roster' })
+        }
+        roster.removePlayer(player)
+      }
+    }
+    const hasSlot = roster.hasOpenBenchSlot(poachPlayer.pos)
+    if (!hasSlot) {
+      return res
+        .status(400)
+        .send({ error: 'invalid release player, exceeds roster limits' })
+    }
+
+    // verify team has salary space during offseason
+    const transactions = await db('transactions')
+      .where({ player: poachPlayer.player, lid: leagueId })
+      .orderBy('timestamp', 'desc')
+      .orderBy('uid', 'desc')
+      .limit(1)
+    const tran = transactions[0]
+    const playerPoachValue = tran.value + 2
+    if (
+      !constants.season.isRegularSeason &&
+      roster.availableCap - playerPoachValue < 0
+    ) {
+      return res.status(400).send({ error: 'not enough available cap' })
+    }
+
+    // update releases
+    const releaseInserts = release.map((player) => ({
+      poachid: poachId,
+      player
+    }))
+    await db('poach_releases').insert(releaseInserts).onConflict().merge()
+    await db('poach_releases')
+      .del()
+      .where('poachid', poachId)
+      .whereNotIn('player', release)
+
+    res.send({ ...poach, release })
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })

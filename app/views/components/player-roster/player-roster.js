@@ -23,7 +23,7 @@ class PlayerRoster extends Player {
       claim,
       reorder,
       waiverId,
-      poach,
+      poachId,
       isHosted,
       league,
       isBeforeExtensionDeadline,
@@ -31,7 +31,7 @@ class PlayerRoster extends Player {
     } = this.props
 
     const isWaiver = Boolean(waiverId)
-    const isPoach = Boolean(poach)
+    const isPoach = Boolean(poachId)
     const isClaim = isWaiver || isPoach
     const { isRegularSeason, isOffseason } = constants.season
     const isRestrictedFreeAgent = player.tag === constants.tags.TRANSITION
@@ -77,6 +77,7 @@ class PlayerRoster extends Player {
           <PlayerName
             playerId={player.player}
             waiverId={waiverId}
+            poachId={poachId}
             hideActions={isPoach}
             headshot
           />

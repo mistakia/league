@@ -1,9 +1,11 @@
-export { poachActions, postPoachActions } from './actions'
+export { poachActions, postPoachActions, putPoachActions } from './actions'
 export { poachesReducer } from './reducer'
 export { poachSagas } from './sagas'
 export {
   getPoachesForCurrentLeague,
   getPoachPlayersForCurrentTeam,
   getPoachPlayersForCurrentLeague,
-  getActivePoachesAgainstMyPlayers
+  getActivePoachesAgainstMyPlayers,
+  getPoachById,
+  getPoachReleasePlayers
 } from './selectors'

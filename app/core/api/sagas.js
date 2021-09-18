@@ -65,7 +65,7 @@ import {
 import { putLeagueActions } from '@core/leagues'
 import { getSourcesActions, putSourceActions } from '@core/sources'
 import { putSettingActions, putBaselinesActions } from '@core/settings'
-import { postPoachActions } from '@core/poaches'
+import { postPoachActions, putPoachActions } from '@core/poaches'
 import {
   postWaiverActions,
   putWaiverActions,
@@ -275,6 +275,7 @@ export const postCancelWaiver = fetch.bind(
   postCancelWaiverActions
 )
 export const postPoach = fetch.bind(null, api.postPoach, postPoachActions)
+export const putPoach = fetch.bind(null, api.putPoach, putPoachActions)
 export const fetchWaivers = fetch.bind(null, api.getWaivers, getWaiversActions)
 export const getWaiverReport = fetch.bind(
   null,

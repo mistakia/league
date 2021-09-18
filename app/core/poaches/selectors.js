@@ -4,10 +4,21 @@ import { getApp } from '@core/app'
 import { getPlayerById } from '@core/players'
 import { getCurrentPlayers } from '@core/rosters'
 import { constants } from '@common'
+import { Poach } from './poach'
 
 export function getPoachesForCurrentLeague(state) {
   const { leagueId } = getApp(state)
   return state.get('poaches').get(leagueId) || new Map()
+}
+
+export function getPoachById(state, { poachId }) {
+  const poaches = getPoachesForCurrentLeague(state)
+  return poaches.find((p) => p.uid === poachId) || new Poach()
+}
+
+export function getPoachReleasePlayers(state, { poachId }) {
+  const poach = getPoachById(state, { poachId })
+  return poach.release.map((playerId) => getPlayerById(state, { playerId }))
 }
 
 export function getActivePoachesAgainstMyPlayers(state) {

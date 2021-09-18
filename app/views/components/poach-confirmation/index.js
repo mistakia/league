@@ -2,38 +2,44 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import {
-  isPlayerEligible,
   getCurrentPlayers,
   getCurrentTeamRosterRecord,
   getRosterInfoForPlayerId
 } from '@core/rosters'
 import { getCurrentLeague } from '@core/leagues'
-import { poachActions } from '@core/poaches'
+import {
+  getPoachById,
+  poachActions,
+  getPoachReleasePlayers
+} from '@core/poaches'
 import { getPlayerStatus } from '@core/players'
 import { waiverActions } from '@core/waivers'
 
 import PoachConfirmation from './poach-confirmation'
 
 const mapStateToProps = createSelector(
-  isPlayerEligible,
   getCurrentPlayers,
   getCurrentTeamRosterRecord,
   getCurrentLeague,
   getPlayerStatus,
   getRosterInfoForPlayerId,
-  (isPlayerEligible, team, roster, league, status, rosterInfo) => ({
-    isPlayerEligible,
+  getPoachById,
+  getPoachReleasePlayers,
+  (team, roster, league, status, rosterInfo, poach, releasePlayers) => ({
     team,
     roster,
     league,
     status,
-    rosterInfo
+    rosterInfo,
+    poach,
+    releasePlayers
   })
 )
 
 const mapDispatchToProps = {
-  claim: waiverActions.claim,
-  poach: poachActions.poach
+  submitWaiverClaim: waiverActions.claim,
+  submitPoach: poachActions.poach,
+  updatePoach: poachActions.update
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PoachConfirmation)

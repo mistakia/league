@@ -12,11 +12,11 @@ import './player.styl'
 
 export class Player extends React.Component {
   handleContextClick = (event) => {
-    const { waiverId, player } = this.props
+    const { waiverId, player, poachId } = this.props
     event.stopPropagation()
     this.props.showContext({
       id: 'player',
-      data: { playerId: player.player, waiverId },
+      data: { playerId: player.player, waiverId, poachId },
       clickX: event.clientX,
       clickY: event.clientY
     })
@@ -29,6 +29,7 @@ export class Player extends React.Component {
 
 Player.propTypes = {
   waiverId: PropTypes.number,
+  poachId: PropTypes.number,
   player: ImmutablePropTypes.record,
   showContext: PropTypes.func,
   select: PropTypes.func

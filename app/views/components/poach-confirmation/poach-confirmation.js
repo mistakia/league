@@ -21,7 +21,7 @@ export default class PoachConfirmation extends React.Component {
     super(props)
 
     const releases = []
-    const { league, player } = props
+    const { league, player, poach } = props
     for (const rPlayer of props.team.active) {
       const r = new Roster({ roster: props.roster.toJS(), league })
       r.removePlayer(rPlayer.player)
@@ -30,43 +30,58 @@ export default class PoachConfirmation extends React.Component {
       }
     }
 
+    const release = poach ? poach.release : []
+    const isValid = this.isPoachValid(release)
+
     this._releases = releases
-    this.state = { release: [], error: false }
+    this.state = {
+      release,
+      error: !isValid
+    }
+  }
+
+  isPoachValid = (release) => {
+    const { roster, league, player } = this.props
+    const r = new Roster({ roster: roster.toJS(), league })
+    for (const player of release) {
+      r.removePlayer(player)
+    }
+
+    // TODO - valid salary during offseason
+
+    return r.hasOpenBenchSlot(player.pos)
   }
 
   handleRelease = (event, value) => {
     const playerIds = value.map((p) => p.id)
-    this.setState({ release: playerIds })
+    const isValid = this.isPoachValid(playerIds)
+    this.setState({ release: playerIds, error: !isValid })
   }
 
   handleSubmit = () => {
-    const { isPlayerEligible } = this.props
-    const player = this.props.player.player
-    const { release } = this.state
-
-    if (!isPlayerEligible && !release.length) {
-      return this.setState({ error: true })
-    } else {
-      this.setState({ error: false })
+    if (this.state.error) {
+      return
     }
 
+    const { poach, player } = this.props
+    const { release } = this.state
+
     if (this.props.status.waiver.poach) {
-      this.props.claim({ release, player, type: constants.waivers.POACH })
+      this.props.submitWaiverClaim({
+        release,
+        player: player.player,
+        type: constants.waivers.POACH
+      })
+    } else if (this.props.poach) {
+      this.props.updatePoach({ poachId: poach.uid, release })
     } else {
-      this.props.poach({ release, player })
+      this.props.submitPoach({ release, player: player.player })
     }
     this.props.onClose()
   }
 
   render = () => {
-    const {
-      isPlayerEligible,
-      rosterInfo,
-      status,
-      player,
-      team,
-      league
-    } = this.props
+    const { rosterInfo, status, player, team, league } = this.props
 
     const options = []
     team.active.forEach((player) => {
@@ -113,14 +128,18 @@ export default class PoachConfirmation extends React.Component {
     const renderInput = (params) => (
       <TextField
         {...params}
+        error={this.state.error}
         variant='outlined'
         label={title}
         placeholder={title}
       />
     )
     const releasePlayers = []
+    const releasePlayerPool = this.props.team.players.concat(
+      this.props.releasePlayers
+    )
     this.state.release.forEach((playerId) => {
-      const player = this.props.team.players.find((p) => p.player === playerId)
+      const player = releasePlayerPool.find((p) => p.player === playerId)
       const { pos, team, pname, value, name } = player
       releasePlayers.push({
         id: player.player,
@@ -150,7 +169,7 @@ export default class PoachConfirmation extends React.Component {
               ? "This is a waiver claim and can be cancelled anytime before it's processed."
               : 'This is a poaching claim and can not be cancelled once submitted.'}
           </DialogContentText>
-          {!isPlayerEligible && (
+          {this.state.error && (
             <DialogContentText>
               There is not enough roster or salary space on your active roster.
               Please select a player to release. They will only be released if
@@ -186,12 +205,14 @@ export default class PoachConfirmation extends React.Component {
 PoachConfirmation.propTypes = {
   league: PropTypes.object,
   status: PropTypes.object,
-  claim: PropTypes.func,
-  poach: PropTypes.func,
-  isPlayerEligible: PropTypes.bool,
+  submitWaiverClaim: PropTypes.func,
+  submitPoach: PropTypes.func,
+  updatePoach: PropTypes.func,
   player: ImmutablePropTypes.record,
   team: PropTypes.object,
   roster: ImmutablePropTypes.record,
   onClose: PropTypes.func,
-  rosterInfo: PropTypes.object
+  rosterInfo: PropTypes.object,
+  poach: ImmutablePropTypes.record,
+  releasePlayers: ImmutablePropTypes.list
 }

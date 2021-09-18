@@ -35,6 +35,10 @@ describe('COMMON Season', function () {
 
     // start of week 17
     MockDate.set(start.add('17', 'week').toDate())
+    expect(constants.season.isRegularSeason).to.equal(true)
+
+    // start of week 18
+    MockDate.set(start.add('18', 'week').toDate())
     expect(constants.season.isRegularSeason).to.equal(false)
   })
 
