@@ -112,7 +112,7 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
     })
 
     it('generate rosters for next year', async () => {
-      MockDate.set(start.add(16, 'week').toDate())
+      MockDate.set(start.add(17, 'week').toDate())
       await draft(knex)
 
       let error
