@@ -507,7 +507,7 @@ CREATE TABLE `player` (
   `nflid` int(10) NOT NULL,
   `esbid` varchar(10) DEFAULT NULL,
   `gsisid` varchar(15) DEFAULT NULL,
-  `gsispid` varchar(36) DEFAULT NULL,
+  `gsispid` varchar(47) DEFAULT NULL,
 
   `status` varchar(255) DEFAULT NULL,
   `injury_status` varchar(255) DEFAULT NULL,
