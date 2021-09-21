@@ -72,7 +72,7 @@ export default class PoachConfirmation extends React.Component {
         player: player.player,
         type: constants.waivers.POACH
       })
-    } else if (this.props.poach) {
+    } else if (poach.uid) {
       this.props.updatePoach({ poachId: poach.uid, release })
     } else {
       this.props.submitPoach({ release, player: player.player })
