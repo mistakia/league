@@ -7,10 +7,11 @@ module.exports = async ({ lid, userId }) => {
     .where({ lid, year: constants.season.year })
     .orderBy('week', 'desc')
 
-  const lineups = await db('league_team_lineups').where({ lid })
+  const currentWeek = Math.max(constants.season.week, 1)
+  const lineups = await db('league_team_lineups').where({ lid }).where('week', '>=', currentWeek)
   const lineupStarters = await db('league_team_lineup_starters').where({
     lid
-  })
+  }).where('week', '>=', currentWeek)
 
   const players = await db('rosters_players')
     .select(
