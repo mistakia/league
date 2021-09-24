@@ -1,46 +1,11 @@
-.editable__league
-  margin-top 16px
-  border 1px solid $borderColor
-  border-radius 3px
-  user-select none
-  background white
-
-  &.expanded
-    .editable__league-icon
-      transform rotate(180deg)
-
-    .editable__league-head
-      border-bottom 1px solid $borderColor
-
-  &:hover .editable__league-head
-    color $accentColor
-
-.editable__league-head
-  text-transform uppercase
-  text-weight 600
-  padding 16px
-  font-size 14px
-  color lighten($textColor, 40%)
-  display flex
-  align-items center
-  cursor pointer
-
-.editable__league-title
-  flex 1
-
-.editable__league-icon
-  flex 0 0 auto
-  transition opacity 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,transform 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms
-
 .editable__league-section
   display flex
+  .MuiTextField-root.MuiFormControl-root
+    flex 1
+    margin 8px
 
 .editable__league-body
   padding 8px
-
-.MuiTextField-root.MuiFormControl-root
-  flex 1
-  margin 8px
 
 .editable__league-section-title
   text-transform uppercase

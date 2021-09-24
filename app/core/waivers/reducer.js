@@ -28,7 +28,7 @@ export function waiversReducer(state = initialState, { payload, type }) {
       const uid = parseInt(payload.data.uid, 10)
       return state.mergeIn(['teams', payload.opts.teamId, uid], {
         bid: payload.data.bid,
-        release: payload.data.release
+        release: new List(payload.data.release)
       })
     }
 
