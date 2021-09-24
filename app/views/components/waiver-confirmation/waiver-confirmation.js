@@ -12,9 +12,14 @@ import DialogContentText from '@material-ui/core/DialogContentText'
 import Dialog from '@material-ui/core/Dialog'
 import DialogActions from '@material-ui/core/DialogActions'
 import DialogTitle from '@material-ui/core/DialogTitle'
+import Autocomplete from '@material-ui/lab/Autocomplete'
+import Chip from '@material-ui/core/Chip'
+import { List } from 'immutable'
 
+import Position from '@components/position'
+import Team from '@components/team'
 import Button from '@components/button'
-import { Roster, constants } from '@common'
+import { Roster, constants, getExtensionAmount } from '@common'
 
 import './waiver-confirmation.styl'
 
@@ -26,7 +31,7 @@ export default class WaiverConfirmation extends React.Component {
     this._isEligible = false
     this._releases = []
     this.state = {
-      release: waiver ? waiver.release : [],
+      release: waiver ? waiver.release.toJS() : [],
       type: waiver ? waiver.type : '',
       bid: waiver ? waiver.bid : 0,
       error: false,
@@ -65,9 +70,10 @@ export default class WaiverConfirmation extends React.Component {
     this._releases = releases
   }
 
-  handleRelease = (event) => {
-    const { value } = event.target
-    this.setState({ release: value, missingRelease: false })
+  handleRelease = (event, value) => {
+    const release = value.map((p) => p.id)
+    const missingRelease = !this._isEligible && !release.length
+    this.setState({ release, missingRelease })
   }
 
   handleType = (event) => {
@@ -117,16 +123,43 @@ export default class WaiverConfirmation extends React.Component {
   }
 
   render = () => {
-    const { team, player, status, waiver } = this.props
+    const { team, player, status, waiver, league } = this.props
 
-    const menuItems = []
-    for (const rPlayer of this._releases) {
-      menuItems.push(
-        <MenuItem key={rPlayer.player} value={rPlayer.player}>
-          {rPlayer.name} ({rPlayer.pos})
-        </MenuItem>
-      )
+    const options = []
+    for (const player of this._releases) {
+      const { pos, team, pname, value, name, tag, bid } = player
+      const extensions = player.get('extensions', new List()).size
+      const salary = getExtensionAmount({
+        pos,
+        tag,
+        extensions,
+        league,
+        value,
+        bid
+      })
+      options.push({
+        id: player.player,
+        label: name,
+        pos,
+        team,
+        pname,
+        value: salary
+      })
     }
+
+    const releasePlayers = []
+    this.state.release.forEach((playerId) => {
+      const player = this._releases.find((p) => p.player === playerId)
+      const { pos, team, pname, value, name } = player
+      releasePlayers.push({
+        id: player.player,
+        label: name,
+        pos,
+        team,
+        pname,
+        value
+      })
+    })
 
     const typeItems = []
     if (
@@ -150,6 +183,37 @@ export default class WaiverConfirmation extends React.Component {
         </MenuItem>
       )
     }
+
+    const getOptionSelected = (option, value) => option.id === value.id
+    const renderOption = (option) => {
+      return (
+        <div className='release__select-player'>
+          <div className='release__select-player-value'>${option.value}</div>
+          <div className='player__name-position'>
+            <Position pos={option.pos} />
+          </div>
+          <div className='player__name-main'>
+            <span>{option.pname}</span>
+            <Team team={option.team} />
+          </div>
+        </div>
+      )
+    }
+    const renderTags = (value, getTagProps) =>
+      value.map((option, index) => (
+        // eslint-disable-next-line
+        <Chip label={option.label} {...getTagProps({ index })} />
+      ))
+    const title = 'Conditionally release'
+    const renderInput = (params) => (
+      <TextField
+        {...params}
+        error={this.state.missingRelease}
+        variant='outlined'
+        label={title}
+        placeholder={title}
+      />
+    )
 
     return (
       <Dialog open onClose={this.props.onClose}>
@@ -188,17 +252,18 @@ export default class WaiverConfirmation extends React.Component {
               </Select>
             </FormControl>
             {this.state.type && (
-              <FormControl size='small' variant='outlined'>
-                <InputLabel id='release-label'>Release</InputLabel>
-                <Select
-                  labelId='release-label'
-                  error={this.state.missingRelease}
-                  value={this.state.release}
-                  onChange={this.handleRelease}
-                  label='Release'>
-                  {menuItems}
-                </Select>
-              </FormControl>
+              <Autocomplete
+                multiple
+                options={options}
+                getOptionLabel={(x) => x.label}
+                getOptionSelected={getOptionSelected}
+                renderOption={renderOption}
+                filterSelectedOptions
+                value={releasePlayers}
+                onChange={this.handleRelease}
+                renderTags={renderTags}
+                renderInput={renderInput}
+              />
             )}
           </div>
         </DialogContent>
