@@ -274,7 +274,7 @@ DashboardPlayersTable.propTypes = {
   items: PropTypes.array,
   title: PropTypes.node,
   poaches: ImmutablePropTypes.list,
-  claims: PropTypes.array,
+  claims: ImmutablePropTypes.list,
   waiverType: PropTypes.string,
   reorderWaivers: PropTypes.func,
   leadColumn: PropTypes.string,

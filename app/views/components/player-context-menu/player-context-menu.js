@@ -421,7 +421,7 @@ PlayerContextMenu.propTypes = {
   reserve: PropTypes.func,
   release: PropTypes.func,
   protect: PropTypes.func,
-  waiverId: PropTypes.string,
+  waiverId: PropTypes.number,
   poachId: PropTypes.number,
   toggleCutlist: PropTypes.func,
   isOnCutlist: PropTypes.bool
