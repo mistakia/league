@@ -10,6 +10,7 @@ const {
 const {
   getRoster,
   getLeague,
+  getAcquisitionTransaction,
   sendNotifications,
   verifyUserTeam,
   isPlayerLocked
@@ -107,14 +108,22 @@ router.post('/?', async (req, res) => {
       }
     }
 
-    // make sure player was on previous week roster
+    // make sure player was on previous week roster, unless acquired via a trade
     const prevRosterRow = await getRoster({
       tid,
       week: Math.max(constants.season.week - 1, 0),
       year: constants.season.year
     })
     const prevRoster = new Roster({ roster: prevRosterRow, league })
-    if (!prevRoster.has(player)) {
+    const acquisitionTransaction = await getAcquisitionTransaction({
+      lid: leagueId,
+      player,
+      tid
+    })
+    if (
+      acquisitionTransaction.type !== constants.transactions.TRADE &&
+      !prevRoster.has(player)
+    ) {
       return res
         .status(400)
         .send({ error: 'not eligible, not rostered long enough' })
