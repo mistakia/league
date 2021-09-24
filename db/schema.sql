@@ -2226,7 +2226,6 @@ CREATE TABLE `nflPlay` (
   `firstDown` tinyint(1) DEFAULT NULL,
   `goalToGo` tinyint(1) DEFAULT NULL,
   `nextPlayType` varchar(36) DEFAULT NULL,
-  `orderSequence` int(10) DEFAULT NULL,
   `penaltyOnPlay` tinyint(1) DEFAULT NULL,
   `playClock` varchar(10) DEFAULT NULL,
   `playDeleted` tinyint(1) DEFAULT NULL,
