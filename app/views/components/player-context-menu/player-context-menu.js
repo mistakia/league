@@ -361,7 +361,7 @@ export default class PlayerContextMenu extends React.Component {
         <MenuItem
           key='poach'
           dense
-          disabled={status.locked || !status.eligible.poach}
+          disabled={!status.eligible.poach}
           onClick={this.handlePoach}>
           {text}
         </MenuItem>
