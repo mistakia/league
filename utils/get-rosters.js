@@ -8,10 +8,14 @@ module.exports = async ({ lid, userId }) => {
     .orderBy('week', 'desc')
 
   const currentWeek = Math.max(constants.season.week, 1)
-  const lineups = await db('league_team_lineups').where({ lid }).where('week', '>=', currentWeek)
-  const lineupStarters = await db('league_team_lineup_starters').where({
-    lid
-  }).where('week', '>=', currentWeek)
+  const lineups = await db('league_team_lineups')
+    .where({ lid })
+    .where('week', '>=', currentWeek)
+  const lineupStarters = await db('league_team_lineup_starters')
+    .where({
+      lid
+    })
+    .where('week', '>=', currentWeek)
 
   const players = await db('rosters_players')
     .select(
