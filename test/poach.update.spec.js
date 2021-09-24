@@ -1,4 +1,4 @@
-/* global describe before beforeEach */
+/* global describe before beforeEach it */
 process.env.NODE_ENV = 'test'
 
 const chai = require('chai')
@@ -32,6 +32,10 @@ describe('API /poaches - update', function () {
       this.timeout(60 * 1000)
       MockDate.set(start.subtract('2', 'month').toDate())
       await league(knex)
+    })
+
+    it('release player used in another poach', async () => {
+      // TODO
     })
   })
   // errors

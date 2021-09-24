@@ -92,6 +92,23 @@ module.exports = async function ({
     throw new Error('not enough available cap')
   }
 
+  // TODO - verify team does not have any tied up cap in a pending poach
+
+  // verify release player is not used in a pending poach
+  if (release.length) {
+    const pendingPoachReleases = await db('poach_releases')
+      .select('poach_releases.player')
+      .join('poaches', 'poach_releases.poachid', 'poaches.uid')
+      .whereNull('processed')
+      .where('tid', teamId)
+    const pendingPoachReleasePlayers = pendingPoachReleases.map((p) => p.player)
+    for (const player of release) {
+      if (pendingPoachReleasePlayers.includes(player)) {
+        throw new Error('release player used in another poach')
+      }
+    }
+  }
+
   const data = {
     userid: userId,
     tid: teamId,
