@@ -95,6 +95,10 @@ describe('API /poaches', function () {
     it('protected player prior to extension deadline', async () => {
       // TODO
     })
+
+    it('release player used in another poach', async () => {
+      // TODO
+    })
   })
   // errors
 

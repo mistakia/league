@@ -15,6 +15,15 @@ export function* update({ payload }) {
   yield call(putPoach, { leagueId, teamId, ...payload })
 }
 
+export function* poachNotification() {
+  yield put(
+    notificationActions.show({
+      message: 'Poach Submitted',
+      severity: 'success'
+    })
+  )
+}
+
 export function* updateNotification() {
   yield put(
     notificationActions.show({
@@ -36,6 +45,10 @@ export function* watchUpdatePoach() {
   yield takeLatest(poachActions.UPDATE_POACH, update)
 }
 
+export function* watchPostPoachFulfilled() {
+  yield takeLatest(poachActions.POST_POACH_FULFILLED, poachNotification)
+}
+
 export function* watchPutPoachFulfilled() {
   yield takeLatest(poachActions.PUT_POACH_FULFILLED, updateNotification)
 }
@@ -47,5 +60,6 @@ export function* watchPutPoachFulfilled() {
 export const poachSagas = [
   fork(watchPoach),
   fork(watchUpdatePoach),
-  fork(watchPutPoachFulfilled)
+  fork(watchPutPoachFulfilled),
+  fork(watchPostPoachFulfilled)
 ]
