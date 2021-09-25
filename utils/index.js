@@ -18,7 +18,6 @@ const getChartedPlayByPlayQuery = (db) =>
       'pbp.dwn',
       'pbp.qtr',
       'chart.dot',
-      'chart.tay',
       'chart.qbp',
       'chart.qbhi',
       'chart.qbhu',
