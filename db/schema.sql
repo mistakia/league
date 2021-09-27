@@ -771,7 +771,7 @@ CREATE TABLE `nfl_games` (
 
   `seas` int(4) NOT NULL,
   `wk` tinyint(2) NOT NULL,
-  `day` varchar(3) DEFAULT NULL, -- FRI, MN, SAT, SB, SN, SUN, THU, TN, TUE, WED
+  `day` varchar(3) DEFAULT NULL, -- FRI, MN, SAT, SN, SUN, THU, TUE, WED, SB, PRO
   `date` varchar(10) DEFAULT NULL,
   `time_est` varchar(8) DEFAULT NULL,
   `time_tz_offset` tinyint(2) DEFAULT NULL,
@@ -2193,8 +2193,15 @@ CREATE TABLE `nflPlay` (
   `playId` int(10) DEFAULT NULL,
   `sequence` int(10) DEFAULT NULL,
   `playState` varchar(36) DEFAULT NULL,
-  `down` int(1) DEFAULT NULL,
+
+  `wk` int(2) DEFAULT NULL,
+  `dwn` int(1) DEFAULT NULL,
+  `qtr` int(1) DEFAULT NULL,
+  `season` int(4) DEFAULT NULL,
+  `seasonType` varchar(36) DEFAULT NULL, -- PRE, REG, POST
+
   `homeScore` int(5) DEFAULT NULL,
+  `visitorScore` int(4) DEFAULT NULL,
   `isBigPlay` tinyint(1) DEFAULT NULL,
   `isSTPlay` tinyint(1) DEFAULT NULL,
   `isScoring` tinyint(1) DEFAULT NULL,
@@ -2202,15 +2209,12 @@ CREATE TABLE `nflPlay` (
   `playType` text DEFAULT NULL,
   `possessionTeam` varchar(10) DEFAULT NULL,
   `possessionTeamId` varchar(36) DEFAULT NULL,
-  `quarter` int(1) DEFAULT NULL,
-  `season` int(4) DEFAULT NULL,
-  `seasonType` varchar(36) DEFAULT NULL, -- PRE, REG, POST
-  `visitorScore` int(4) DEFAULT NULL,
-  `week` int(2) DEFAULT NULL,
+
   `yardlineNumber` int(4) DEFAULT NULL,
   `yardlineSide` varchar(10) DEFAULT NULL,
   `yardsToGo` int(3) DEFAULT NULL,
   `isRedzonePlay` tinyint(1) DEFAULT NULL,
+
   `offenseFormation` varchar(100) DEFAULT NULL,
   `offensePersonnel` varchar(100) DEFAULT NULL,
   `defendersInTheBox` int(3) DEFAULT NULL,
@@ -2223,7 +2227,6 @@ CREATE TABLE `nflPlay` (
   `driveSequenceNumber` int(4) DEFAULT NULL,
   `startYardLine` varchar(10) DEFAULT NULl,
   `endYardLine` varchar(10) DEFAULT NULl,
-  `firstDown` tinyint(1) DEFAULT NULL,
   `goalToGo` tinyint(1) DEFAULT NULL,
   `nextPlayType` varchar(36) DEFAULT NULL,
   `penaltyOnPlay` tinyint(1) DEFAULT NULL,
@@ -2237,6 +2240,41 @@ CREATE TABLE `nflPlay` (
   `timeOfDay` varchar(10) DEFAULT NULL,
   `playTypeNFL` varchar(36) DEFAULT NULL,
 
+  `off` varchar(3) DEFAULT NULL,                    -- offense
+  `def` varchar(3) DEFAULT NULL,                    -- defense
+  `type` varchar(4) DEFAULT NULL,                   -- RUSH, PASS, FGXP, PUNT, KOFF, ONSD, NOPL, CONV
+
+  `fum` varchar(7) DEFAULT NULL,                -- fumbling player
+  `bc` varchar(7) DEFAULT NULL,                 -- ball carrier
+  `psr` varchar(7) DEFAULT NULL,                -- passer
+  `trg` varchar(7) DEFAULT NULL,                -- targeted player
+  `ints` varchar(7) DEFAULT NULL,               -- intercepting player
+  `sk1` varchar(7) DEFAULT NULL,                -- sacking player 1
+
+  `yds` varchar(3) DEFAULT NULL,                -- yardage
+  `dot` int(3) DEFAULT NULL,                    -- depth of target
+  `yac` int(3) DEFAULT NULL,                    -- yard after catch
+  `yaco` int(3) DEFAULT NULL,                   -- yards after contact
+
+  `qbp` tinyint(2) DEFAULT NULL,                -- QB pressure
+  `qbhi` tinyint(2) DEFAULT NULL,               -- QB hit
+  `qbhu` tinyint(2) DEFAULT NULL,               -- QB hurry
+
+  `high` tinyint(1) DEFAULT NULL,               -- hightlight throw
+  `intw` tinyint(1) DEFAULT NULL,               -- interception worthy
+
+  `drp` tinyint(1) DEFAULT NULL,                -- dropped pass
+  `cnb` tinyint(1) DEFAULT NULL,                -- contested ball
+
+  `mbt` tinyint(1) DEFAULT NULL,                -- missed or broken tackles
+
+  `fuml` tinyint(1) DEFAULT NULL,               -- fumble lost
+  `fd` tinyint(1) DEFAULT NULL,                 -- first down
+  `succ` tinyint(1) DEFAULT NULL,               -- successful play
+  `comp` tinyint(1) DEFAULT NULL,               -- completion
+  `td` tinyint(1) DEFAULT NULL,                 -- touchdown
+
+  `charted` tinyint(1) DEFAULT NULL,
   `updated` int(11) NOT NULL,
   UNIQUE KEY `gamePlay` (`esbid`,`playId`),
   KEY `esbid` (`esbid`),
