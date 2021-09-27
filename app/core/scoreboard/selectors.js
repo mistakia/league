@@ -63,7 +63,7 @@ export function getScoreboardByTeamId(state, { tid }) {
           lp.playDescription === 'END GAME'
             ? 0
             : parseInt((lp.clockTime || '').split(':').pop(), 10) // TODO - double check
-        const quartersRemaining = lp.quarter === 5 ? 0 : 4 - lp.quarter
+        const quartersRemaining = lp.qtr === 5 ? 0 : 4 - lp.qtr
         minutes += quartersRemaining * 15 + quarterMinutes
       }
     } else {

@@ -9,6 +9,7 @@ module.exports = async ({
   def,
 
   qtr,
+  clockTime,
   dwn,
   type,
   yardlineNumber,
@@ -34,6 +35,10 @@ module.exports = async ({
 
   if (qtr) {
     query.where({ qtr: parseInt(qtr, 10) })
+  }
+
+  if (clockTime) {
+    query.where({ clockTime })
   }
 
   if (dwn) {

@@ -1,4 +1,4 @@
-const re = /([A-Z]*)\s([1-9]*)/i
+const re = /([A-Z]*)\s([0-9]*)/i
 
 export default function getYardlineInfoFromString(str) {
   if (!str) {

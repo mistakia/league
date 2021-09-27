@@ -1,67 +1,62 @@
 const getChartedPlayByPlayQuery = (db) =>
-  db('pbp')
+  db('nflPlay')
     .select(
-      'pbp.fuml',
-      'pbp.fum',
-      'pbp.off',
-      'pbp.type',
-      'pbp.bc',
-      'pbp.yds',
-      'pbp.fd',
-      'pbp.succ',
-      'pbp.psr',
-      'pbp.trg',
-      'pbp.ints',
-      'pbp.comp',
-      'pbp.pts',
-      'pbp.sk1',
-      'pbp.dwn',
-      'pbp.qtr',
-      'chart.dot',
-      'chart.qbp',
-      'chart.qbhi',
-      'chart.qbhu',
-      'chart.high',
-      'chart.intw',
-      'chart.drp',
-      'chart.cnb',
-      'chart.mbt',
-      'chart.yac',
-      'chart.yaco',
-      'game.wk',
-      'game.day'
+      'nflPlay.fum',
+      'nflPlay.fuml',
+      'nflPlay.off',
+      'nflPlay.type',
+      'nflPlay.bc',
+      'nflPlay.yds',
+      'nflPlay.yds_gained',
+      'nflPlay.fd',
+      'nflPlay.succ',
+      'nflPlay.psr',
+      'nflPlay.trg',
+      'nflPlay.intp',
+      'nflPlay.comp',
+      'nflPlay.td',
+      'nflPlay.sk',
+      'nflPlay.dwn',
+      'nflPlay.qtr',
+      'nflPlay.dot',
+      'nflPlay.qbp',
+      'nflPlay.qbhi',
+      'nflPlay.qbhu',
+      'nflPlay.high',
+      'nflPlay.intw',
+      'nflPlay.drp',
+      'nflPlay.cnb',
+      'nflPlay.mbt',
+      'nflPlay.yac',
+      'nflPlay.yaco',
+      'nfl_games.wk',
+      'nfl_games.day'
     )
-    .join('game', 'pbp.gid', 'game.gid')
-    .leftJoin('chart', 'pbp.pid', 'chart.pid')
-    .whereNot('pbp.type', 'NOPL')
-    .where(function () {
-      this.whereNot({ 'pbp.act1': 'A' })
-      this.orWhereNot({ 'pbp.act2': 'A' })
-      this.orWhereNot({ 'pbp.act3': 'A' })
-    })
+    .join('nfl_games', 'nflPlay.esbid', 'nfl_games.esbid')
+    .whereNot('nflPlay.type', 'NOPL')
 
 const fields = [
   'nflPlay.esbid',
   'nflPlay.playId',
   'nflPlay.sequence',
-  'nflPlay.down',
+  'nflPlay.dwn',
   'nflPlay.playDescription',
   'nflPlay.possessionTeam',
   'nflPlay.seas',
   'nflPlay.wk',
-  'nflPlay.quarter',
+  'nflPlay.qtr',
   'nflPlay.yardsToGo',
   'nflPlay.clockTime',
   'nflPlay.driveSequenceNumber',
   'nflPlay.endYardLine',
   'nflPlay.startYardLine',
-  'nflPlay.firstDown',
+  'nflPlay.fd',
   'nflPlay.goalToGo',
   'nflPlay.drivePlayCount',
   'nflPlay.playClock',
   'nflPlay.scoringPlay',
   'nflPlay.timeOfDay',
-  'nflPlay.playTypeNFL',
+  'nflPlay.type_nfl',
   'nflPlay.updated',
 
   'nfl_games.h',

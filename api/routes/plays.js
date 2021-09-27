@@ -100,23 +100,23 @@ router.get('/charted', async (req, res) => {
     }
 
     if (years.length) {
-      pbpQuery = pbpQuery.whereIn('game.seas', years)
+      pbpQuery = pbpQuery.whereIn('nfl_games.seas', years)
     }
 
     if (weeks.length) {
-      pbpQuery = pbpQuery.whereIn('game.wk', weeks)
+      pbpQuery = pbpQuery.whereIn('nfl_games.wk', weeks)
     }
 
     if (days.length) {
-      pbpQuery = pbpQuery.whereIn('game.day', days)
+      pbpQuery = pbpQuery.whereIn('nfl_games.day', days)
     }
 
     if (quarters.length) {
-      pbpQuery = pbpQuery.whereIn('pbp.qtr', quarters)
+      pbpQuery = pbpQuery.whereIn('nflPlay.qtr', quarters)
     }
 
     if (downs.length) {
-      pbpQuery = pbpQuery.whereIn('pbp.dwn', downs)
+      pbpQuery = pbpQuery.whereIn('nflPlay.dwn', downs)
     }
 
     const data = await pbpQuery
