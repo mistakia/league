@@ -124,7 +124,7 @@ export const nflWeeks = [
 ]
 export const days = ['WED', 'THU', 'TN', 'FRI', 'SAT', 'SUN', 'MN', 'SN']
 export const quarters = [1, 2, 3, 4, 5]
-export const downs = ['1', '2', '3', '4']
+export const downs = [1, 2, 3, 4]
 export const positions = ['QB', 'RB', 'WR', 'TE', 'K', 'DST']
 export const stats = [
   'pa',

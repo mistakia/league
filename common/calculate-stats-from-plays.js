@@ -20,6 +20,7 @@ const calculateStatsFromPlays = ({ plays, qualifiers }) => {
   }
 
   const addStat = (playerId, stat, value) => {
+    if (!playerId) return
     value = parseInt(value, 10)
     // TODO record longest rushing, receiving, passing play
     // TODO count big plays
@@ -41,7 +42,7 @@ const calculateStatsFromPlays = ({ plays, qualifiers }) => {
         addTeamStat(play.off, 'ry', play.yds)
         addStat(play.bc, 'ra', 1)
         addStat(play.bc, 'ry', play.yds)
-        addStat(play.bc, 'ryaco', play.yaco)
+        if (play.yaco) addStat(play.bc, 'ryaco', play.yaco)
         if (play.fd) {
           addStat(play.bc, 'fd', 1)
           addStat(play.bc, 'rfd', 1)
@@ -53,7 +54,7 @@ const calculateStatsFromPlays = ({ plays, qualifiers }) => {
         if (play.mbt) addStat(play.bc, 'mbt', play.mbt)
         if (play.yds > 0) addStat(play.bc, 'posra', 1)
         if (play.fd) addStat(play.bc, 'rfd', 1)
-        if (play.pts >= 6) addStat(play.bc, 'tdr', 1)
+        if (play.td) addStat(play.bc, 'tdr', 1)
         break
       }
 
@@ -92,9 +93,9 @@ const calculateStatsFromPlays = ({ plays, qualifiers }) => {
           }
         }
 
-        if (play.ints) {
+        if (play.intp) {
           addStat(play.psr, 'ints', 1)
-        } else if (play.comp === 'Y' && play.trg) {
+        } else if (play.comp && play.trg) {
           // TODO deprecate - temp fix for missing trg
           // receiver
           addStat(play.trg, 'rec', 1)
@@ -116,13 +117,13 @@ const calculateStatsFromPlays = ({ plays, qualifiers }) => {
             addStat(play.trg, 'fd', 1)
           }
 
-          if (play.pts >= 6) {
+          if (play.td) {
             addStat(play.psr, 'tdp', 1)
             addStat(play.trg, 'tdrec', 1)
           }
-        } else if (play.sk1) {
+        } else if (play.sk) {
           addStat(play.psr, 'sk', 1)
-          addStat(play.psr, 'sky', Math.abs(play.yds))
+          addStat(play.psr, 'sky', Math.abs(play.yds_gained)) // TODO - consolidate to play.yds
         } else {
           addStat(play.psr, 'pa', 1)
         }
