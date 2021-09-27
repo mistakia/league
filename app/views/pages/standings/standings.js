@@ -50,7 +50,7 @@ function Standings({ teams, title }) {
   const sorted = teams.sort(
     (a, b) =>
       b.getIn(['stats', 'wins'], 0) - a.getIn(['stats', 'wins'], 0) ||
-      b.getIn(['stats', 'apWins'], 0) - a.getIn(['stats', 'apWins'], 0)
+      b.getIn(['stats', 'pf'], 0) - a.getIn(['stats', 'pf'], 0)
   )
 
   const overallRows = []
