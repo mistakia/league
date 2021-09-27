@@ -2198,7 +2198,7 @@ CREATE TABLE `nflPlay` (
   `dwn` int(1) DEFAULT NULL,
   `qtr` int(1) DEFAULT NULL,
   `seas` int(4) DEFAULT NULL,
-  `seasonType` varchar(36) DEFAULT NULL, -- PRE, REG, POST
+  `seas_type` varchar(36) DEFAULT NULL, -- PRE, REG, POST
 
   `homeScore` int(5) DEFAULT NULL,
   `visitorScore` int(4) DEFAULT NULL,
@@ -2206,12 +2206,14 @@ CREATE TABLE `nflPlay` (
   `isSTPlay` tinyint(1) DEFAULT NULL,
   `isScoring` tinyint(1) DEFAULT NULL,
   `playDescription` text DEFAULT NULL,
-  `playType` text DEFAULT NULL,
   `possessionTeam` varchar(10) DEFAULT NULL,
   `possessionTeamId` varchar(36) DEFAULT NULL,
 
   `yardlineNumber` int(4) DEFAULT NULL,
   `yardlineSide` varchar(10) DEFAULT NULL,
+  `startYardLine` varchar(10) DEFAULT NULl,
+  `endYardLine` varchar(10) DEFAULT NULl,
+
   `yardsToGo` int(3) DEFAULT NULL,
   `isRedzonePlay` tinyint(1) DEFAULT NULL,
 
@@ -2225,8 +2227,6 @@ CREATE TABLE `nflPlay` (
   `drivePlayCount` int(3) DEFAULT NULL,
   `clockTime` varchar(10) DEFAULT NULL,
   `driveSequenceNumber` int(4) DEFAULT NULL,
-  `startYardLine` varchar(10) DEFAULT NULl,
-  `endYardLine` varchar(10) DEFAULT NULl,
   `goalToGo` tinyint(1) DEFAULT NULL,
   `nextPlayType` varchar(36) DEFAULT NULL,
   `penaltyOnPlay` tinyint(1) DEFAULT NULL,
@@ -2238,23 +2238,31 @@ CREATE TABLE `nflPlay` (
   `scoringTeam` varchar(4) DEFAULT NULL,
   `stPlayType` text DEFAULT NULL,
   `timeOfDay` varchar(10) DEFAULT NULL,
-  `playTypeNFL` varchar(36) DEFAULT NULL,
 
   `off` varchar(3) DEFAULT NULL,                    -- offense
   `def` varchar(3) DEFAULT NULL,                    -- defense
+
   `type` varchar(4) DEFAULT NULL,                   -- RUSH, PASS, FGXP, PUNT, KOFF, ONSD, NOPL, CONV
+  `type_nfl` varchar(36) DEFAULT NULL,
+  `type_ngs` text DEFAULT NULL,
 
   `fum` varchar(7) DEFAULT NULL,                -- fumbling player
+  `fum_gsis` varchar(36) DEFAULT NULL,          -- fumbling player gsis
   `bc` varchar(7) DEFAULT NULL,                 -- ball carrier
+  `bc_gsis` varchar(36) DEFAULT NULL,           -- ball carrier gsis
   `psr` varchar(7) DEFAULT NULL,                -- passer
+  `psr_gsis` varchar(36) DEFAULT NULL,          -- passer gsis
   `trg` varchar(7) DEFAULT NULL,                -- targeted player
-  `ints` varchar(7) DEFAULT NULL,               -- intercepting player
-  `sk1` varchar(7) DEFAULT NULL,                -- sacking player 1
+  `trg_gsis` varchar(36) DEFAULT NULL,          -- targeted player gsis
+  `intp` varchar(7) DEFAULT NULL,               -- intercepting player
+  `intp_gsis` varchar(36) DEFAULT NULL,         -- intercepting player gsis
 
   `yds` varchar(3) DEFAULT NULL,                -- yardage
+  `yds_gained` varchar(3) DEFAULT NULL,         -- yardage gained (or lost) by the possessing team, excluding yards gained via fumble recoveries and laterals
   `dot` int(3) DEFAULT NULL,                    -- depth of target
   `yac` int(3) DEFAULT NULL,                    -- yard after catch
   `yaco` int(3) DEFAULT NULL,                   -- yards after contact
+  `ret_yds` int(3) DEFAULT NULl,                -- return yardage
 
   `qbp` tinyint(2) DEFAULT NULL,                -- QB pressure
   `qbhi` tinyint(2) DEFAULT NULL,               -- QB hit
@@ -2269,10 +2277,16 @@ CREATE TABLE `nflPlay` (
   `mbt` tinyint(1) DEFAULT NULL,                -- missed or broken tackles
 
   `fuml` tinyint(1) DEFAULT NULL,               -- fumble lost
+  `int` tinyint(1) DEFAULT NULL,                -- interception
+  `sk` tinyint(1) DEFAULT NULL,                 -- sack
   `fd` tinyint(1) DEFAULT NULL,                 -- first down
   `succ` tinyint(1) DEFAULT NULL,               -- successful play
   `comp` tinyint(1) DEFAULT NULL,               -- completion
   `td` tinyint(1) DEFAULT NULL,                 -- touchdown
+  `ret_td` tinyint(1) DEFAULT NULL,             -- return touchdown
+
+  `td_tm` varchar(5) DEFAULT NULL,              -- touchdown team abbreviation
+  `ret_tm` varchar(5) DEFAULT NULL,             -- return team abbrevation
 
   `charted` tinyint(1) DEFAULT NULL,
   `updated` int(11) NOT NULL,

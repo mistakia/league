@@ -14,7 +14,7 @@ import PlayerHeadshot from '@components/player-headshot'
 
 import './player-name-expanded.styl'
 
-function getClock({ playDescription, clockTime, quarter }) {
+function getClock({ playDescription, clockTime, qtr }) {
   switch (playDescription) {
     case 'END QUARTER 1':
       return 'End of 1st'
@@ -29,7 +29,7 @@ function getClock({ playDescription, clockTime, quarter }) {
       return 'Final'
 
     default:
-      return quarter ? `${clockTime} ${quarter}${nth(quarter)}` : '-'
+      return qtr ? `${clockTime} ${qtr}${nth(qtr)}` : '-'
   }
 }
 

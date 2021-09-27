@@ -3,7 +3,7 @@ import * as constants from './constants'
 const calculateDstStatsFromPlays = (plays, team) => {
   const dstStats = constants.createStats()
   dstStats.dtno = plays.filter(
-    (p) => p.drivePlayCount === 3 && p.playTypeNFL === 'PUNT'
+    (p) => p.drivePlayCount === 3 && p.type_nfl === 'PUNT'
   ).length
   const playStats = plays.map((p) => p.playStats).flat()
 

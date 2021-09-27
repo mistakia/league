@@ -37,8 +37,8 @@ export default class ScoreboardPlay extends React.Component {
             {dayjs.unix(play.time).format('ddd h:mm')}
           </div>
           <div className='scoreboard__play-info-play'>
-            {play.play.down}
-            {nth(play.play.down)} & {play.play.yardsToGo} -{' '}
+            {play.play.dwn}
+            {nth(play.play.dwn)} & {play.play.yardsToGo} -{' '}
             {play.play.startYardLine}
           </div>
         </div>

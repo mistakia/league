@@ -4,13 +4,50 @@ const debug = require('debug')
 const dayjs = require('dayjs')
 const argv = require('yargs').argv
 
+// TODO - add KNEE, SPKE
+const getPlayType = (type_ngs) => {
+  switch (type_ngs) {
+    case 'play_type_field_goal':
+      return 'FGXP'
+
+    case 'play_type_kickoff':
+      return 'KOFF'
+
+    case 'play_type_pass':
+      return 'PASS'
+
+    case 'play_type_punt':
+      return 'PUNT'
+
+    case 'play_type_rush':
+      return 'RUSH'
+
+    case 'play_type_sack':
+      return 'PASS'
+
+    case 'play_type_two_point_conversion':
+      return 'CONV'
+
+    // penalty or timeout
+    case 'play_type_unknown':
+      return 'NOPL'
+
+    case 'play_type_xp':
+      return 'FGXP'
+
+    default:
+      return null
+  }
+}
+
 const db = require('../db')
 const {
   constants,
   groupBy,
   fixTeam,
   calculateStatsFromPlayStats,
-  calculateDstStatsFromPlays
+  calculateDstStatsFromPlays,
+  getPlayFromPlayStats
 } = require('../common')
 
 const log = debug('process:play-stats')
@@ -27,14 +64,6 @@ const week =
 const year = constants.season.year
 
 const upsert = async ({ player, stats, opp, pos, tm }) => {
-  const exists = await db('gamelogs')
-    .where({
-      player,
-      week,
-      year
-    })
-    .limit(1)
-
   const cleanedStats = Object.keys(stats)
     .filter((key) => constants.fantasyStats.includes(key))
     .reduce((obj, key) => {
@@ -42,19 +71,8 @@ const upsert = async ({ player, stats, opp, pos, tm }) => {
       return obj
     }, {})
 
-  if (exists.length) {
-    await db('gamelogs')
-      .update({
-        tm,
-        ...cleanedStats
-      })
-      .where({
-        player,
-        week,
-        year
-      })
-  } else {
-    await db('gamelogs').insert({
+  await db('gamelogs')
+    .insert({
       tm,
       player,
       pos,
@@ -63,7 +81,8 @@ const upsert = async ({ player, stats, opp, pos, tm }) => {
       year,
       ...cleanedStats
     })
-  }
+    .onConflict()
+    .merge()
 }
 
 const run = async () => {
@@ -75,7 +94,8 @@ const run = async () => {
     .select(
       'nflPlayStat.*',
       'nflPlay.drivePlayCount',
-      'nflPlay.playTypeNFL',
+      'nflPlay.type_ngs',
+      'nflPlay.type_nfl',
       'nfl_games.h',
       'nfl_games.v',
       'nflPlay.possessionTeam'
@@ -86,17 +106,22 @@ const run = async () => {
       this.andOn('nflPlay.playId', '=', 'nflPlayStat.playId')
     })
     .where('nflPlay.seas', year)
-    .where('nflPlay.week', week)
+    .where('nflPlay.wk', week)
     .where('nflPlayStat.valid', 1)
 
-  const groups = groupBy(playStats, 'gsispid')
-  const gsispids = Object.keys(groups)
-  const players = await db('player').whereIn('gsispid', gsispids)
-  const playerGsispids = players.map((p) => p.gsispid)
-  const missingGsispids = gsispids.filter((p) => !playerGsispids.includes(p))
   const missing = []
+
+  const playStatsByGsispid = groupBy(playStats, 'gsispid')
+  const gsispids = Object.keys(playStatsByGsispid)
+  const players_gsispid = await db('player').whereIn('gsispid', gsispids)
+
+  // Update players with missing gsispids
+  const playerGsispids = players_gsispid.map((p) => p.gsispid)
+  const missingGsispids = gsispids.filter((p) => !playerGsispids.includes(p))
   for (const gsispid of missingGsispids) {
-    const playStat = groups[gsispid].find((p) => p.clubCode && p.playerName)
+    const playStat = playStatsByGsispid[gsispid].find(
+      (p) => p.clubCode && p.playerName
+    )
     if (!playStat) continue
 
     const params = {
@@ -126,20 +151,64 @@ const run = async () => {
       await db('player').update({ gsispid }).where({ player: player.player })
     }
     player.gsispid = gsispid
-    players.push(player)
+    players_gsispid.push(player)
   }
 
-  for (const gsispid of Object.keys(groups)) {
-    const player = players.find((p) => p.gsispid === gsispid)
+  // Update players with missing gsisids
+  const playStatsByGsisid = groupBy(playStats, 'gsisId')
+  const gsisids = Object.keys(playStatsByGsisid)
+  const players_gsisid = await db('player').whereIn('gsisid', gsisids)
+
+  const playerGsisids = players_gsisid.map((p) => p.gsisid)
+  const missingGsisids = gsisids.filter((p) => !playerGsisids.includes(p))
+  for (const gsisid of missingGsisids) {
+    const playStat = playStatsByGsisid[gsisid].find(
+      (p) => p.clubCode && p.playerName
+    )
+    if (!playStat) continue
+
+    const params = {
+      pname: playStat.playerName,
+      cteam: fixTeam(playStat.clubCode)
+    }
+
+    const results = await db('player').where(params)
+
+    if (results.length !== 1) {
+      missing.push(params)
+      continue
+    }
+
+    const player = results[0]
+
+    if (!argv.dry) {
+      await db('changelog').insert({
+        type: constants.changes.PLAYER_EDIT,
+        id: player.player,
+        prop: 'gsisid',
+        prev: player.gsisid,
+        new: gsisid,
+        timestamp
+      })
+
+      await db('player').update({ gsisid }).where({ player: player.player })
+    }
+    player.gsisid = gsisid
+    players_gsisid.push(player)
+  }
+
+  // generate player gamelogs
+  for (const gsispid of Object.keys(playStatsByGsispid)) {
+    const player = players_gsispid.find((p) => p.gsispid === gsispid)
     if (!player) continue
     if (!constants.positions.includes(player.pos)) continue
 
-    const playStat = groups[gsispid].find((p) => p.possessionTeam)
+    const playStat = playStatsByGsispid[gsispid].find((p) => p.possessionTeam)
     const opp =
       fixTeam(playStat.possessionTeam) === fixTeam(playStat.h)
         ? fixTeam(playStat.v)
         : fixTeam(playStat.h)
-    const stats = calculateStatsFromPlayStats(groups[gsispid])
+    const stats = calculateStatsFromPlayStats(playStatsByGsispid[gsispid])
     if (argv.dry) continue
 
     await upsert({
@@ -151,6 +220,7 @@ const run = async () => {
     })
   }
 
+  // generate defense gamelogs
   for (const team of constants.nflTeams) {
     const opponentPlays = playStats.filter((p) => {
       if (fixTeam(p.h) !== team && fixTeam(p.v) !== team) {
@@ -170,7 +240,7 @@ const run = async () => {
       formattedPlays.push({
         possessionTeam: p.possessionTeam,
         drivePlayCount: p.drivePlayCount,
-        playTypeNFL: p.playTypeNFL,
+        type_nfl: p.type_nfl,
         playStats
       })
     }
@@ -187,6 +257,99 @@ const run = async () => {
 
   log(`Could not locate ${missing.length} players`)
   missing.forEach((m) => log(`could not find player: ${m.pname} / ${m.cteam}`))
+
+  // update play row data - off, def
+  const nflPlays = await db('nflPlay')
+    .select(
+      'nfl_games.h',
+      'nfl_games.v',
+      'nflPlay.esbid',
+      'nflPlay.playId',
+      'nflPlay.type_ngs',
+      'nflPlay.possessionTeam'
+    )
+    .join('nfl_games', 'nflPlay.esbid', '=', 'nfl_games.esbid')
+    .where('nflPlay.seas', year)
+    .where('nflPlay.wk', week)
+  for (const nflPlay of nflPlays) {
+    const off = nflPlay.possessionTeam
+    if (!off) continue
+    const def = off === nflPlay.h ? nflPlay.v : nflPlay.h
+    const type = getPlayType(nflPlay.type_ngs)
+
+    const { esbid, playId } = nflPlay
+    await db('nflPlay')
+      .update({
+        off,
+        def,
+        type
+      })
+      .where({
+        esbid,
+        playId
+      })
+  }
+
+  // update play row data
+  const playStatsByEsbid = groupBy(playStats, 'esbid')
+  const playRows = []
+  for (const [esbid, playStats] of Object.entries(playStatsByEsbid)) {
+    const playStatsByPlay = groupBy(playStats, 'playId')
+    for (const [playId, playStats] of Object.entries(playStatsByPlay)) {
+      // ignore plays with no possessionTeam, likely a timeout or two minute warning
+      const playStat = playStats.find((p) => p.possessionTeam)
+      if (!playStat) continue
+
+      const playRow = getPlayFromPlayStats({ playStats })
+      if (Object.keys(playRow).length === 0) continue
+      playRows.push(playRow)
+
+      // TODO - succ
+
+      if (playRow.fum_gsis) {
+        const player = players_gsisid.find((p) => p.gsisid === playRow.fum_gsis)
+        if (player) {
+          playRow.fum = player.player
+        }
+      }
+
+      if (playRow.bc_gsis) {
+        const player = players_gsisid.find((p) => p.gsisid === playRow.bc_gsis)
+        if (player) {
+          playRow.bc = player.player
+        }
+      }
+
+      if (playRow.psr_gsis) {
+        const player = players_gsisid.find((p) => p.gsisid === playRow.psr_gsis)
+        if (player) {
+          playRow.psr = player.player
+        }
+      }
+
+      if (playRow.trg_gsis) {
+        const player = players_gsisid.find((p) => p.gsisid === playRow.trg_gsis)
+        if (player) {
+          playRow.trg = player.player
+        }
+      }
+
+      if (playRow.intp_gsis) {
+        const player = players_gsisid.find(
+          (p) => p.gsisid === playRow.intp_gsis
+        )
+        if (player) {
+          playRow.intp = player.player
+        }
+      }
+
+      await db('nflPlay').update(playRow).where({
+        esbid,
+        playId
+      })
+    }
+  }
+  log(`Updated ${playRows.length} plays`)
 }
 
 module.exports = run
