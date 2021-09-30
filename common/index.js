@@ -32,6 +32,7 @@ import groupBy from './group-by'
 import getFreeAgentPeriod from './get-free-agent-period'
 import calculatePlayerValuesRestOfSeason from './calculate-player-values-rest-of-season'
 import isSantuaryPeriod from './is-santuary-period'
+import getYardlineInfoFromString from './get-yardline-info-from-string'
 import * as Errors from './errors'
 
 const uniqBy = (a, key) => {
@@ -120,5 +121,6 @@ export {
   simulate,
   getFreeAgentPeriod,
   calculatePlayerValuesRestOfSeason,
-  isSantuaryPeriod
+  isSantuaryPeriod,
+  getYardlineInfoFromString
 }

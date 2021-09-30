@@ -7,7 +7,8 @@ import {
   constants,
   fixTeam,
   calculateStatsFromPlayStats,
-  calculatePoints
+  calculatePoints,
+  getYardlineInfoFromString
 } from '@common'
 import { getGamelogForPlayer } from '@core/stats'
 import { getPlayerById } from '@core/players'
@@ -218,11 +219,7 @@ function getYardline(str, possessionTeam) {
     return 50
   }
 
-  const re = /([A-Z]*)\s([1-9]*)/i
-  const results = str.match(re)
-  const yardlineSide = results[1]
-  const yardlineNumber = parseInt(results[2], 10)
-
+  const { yardlineSide, yardlineNumber } = getYardlineInfoFromString(str)
   return yardlineSide === possessionTeam ? yardlineNumber : 100 - yardlineNumber
 }
 

@@ -8,7 +8,7 @@ router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const query = getPlayByPlayQuery(db)
-    const data = await query.where('nflPlay.season', constants.season.year)
+    const data = await query.where('nflPlay.seas', constants.season.year)
     res.send(data)
   } catch (error) {
     logger(error)
@@ -28,7 +28,7 @@ router.get('/stats', async (req, res) => {
           'nflPlay.playId'
         )
       })
-      .where('nflPlay.season', constants.season.year)
+      .where('nflPlay.seas', constants.season.year)
       .where('nflPlayStat.valid', 1)
     res.send(data)
   } catch (error) {
