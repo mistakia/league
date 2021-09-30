@@ -47,7 +47,7 @@ const fields = [
   'nflPlay.down',
   'nflPlay.playDescription',
   'nflPlay.possessionTeam',
-  'nflPlay.season',
+  'nflPlay.seas',
   'nflPlay.week',
   'nflPlay.quarter',
   'nflPlay.yardsToGo',
@@ -115,5 +115,6 @@ module.exports = {
   getPlayerTransactions: require('./get-player-transactions'),
   getPlayers: require('./get-players'),
   getRosters: require('./get-rosters'),
-  getAcquisitionTransaction: require('./get-acquisition-transaction')
+  getAcquisitionTransaction: require('./get-acquisition-transaction'),
+  getPlay: require('./get-play')
 }
