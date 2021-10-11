@@ -51,8 +51,8 @@ export default function (team) {
     case 'WSH':
       return 'WAS'
 
-    case 'JAX':
-      return 'JAC'
+    case 'JAC':
+      return 'JAX'
 
     default:
       return team
