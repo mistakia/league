@@ -636,7 +636,7 @@ export const nflTeams = [
   'GB',
   'HOU',
   'IND',
-  'JAC',
+  'JAX',
   'KC',
   'LA',
   'LAC',

@@ -1,6 +1,6 @@
 const db = require('../db')
 
-const fixTeam = require('./fix-team')
+const { fixTeam } = require('../common')
 
 module.exports = async ({
   wk,
