@@ -85,7 +85,7 @@ const run = async () => {
       this.on('nflPlay.esbid', '=', 'nflPlayStat.esbid')
       this.andOn('nflPlay.playId', '=', 'nflPlayStat.playId')
     })
-    .where('nflPlay.season', year)
+    .where('nflPlay.seas', year)
     .where('nflPlay.week', week)
     .where('nflPlayStat.valid', 1)
 
