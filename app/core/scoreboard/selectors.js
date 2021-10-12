@@ -104,8 +104,8 @@ export function getStartersByMatchupId(state, { mid }) {
   for (const player of players) {
     if (!player.player) continue
     const game = getGameByTeam(state, { team: player.team, week: matchup.week })
-    const dateStr = `${game.date} ${game.time_est}`
     if (!game) continue
+    const dateStr = `${game.date} ${game.time_est}`
     if (!games[dateStr]) games[dateStr] = []
     games[dateStr].push(player)
   }
