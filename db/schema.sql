@@ -2197,7 +2197,7 @@ CREATE TABLE `nflPlay` (
   `wk` int(2) DEFAULT NULL,
   `dwn` int(1) DEFAULT NULL,
   `qtr` int(1) DEFAULT NULL,
-  `season` int(4) DEFAULT NULL,
+  `seas` int(4) DEFAULT NULL,
   `seasonType` varchar(36) DEFAULT NULL, -- PRE, REG, POST
 
   `homeScore` int(5) DEFAULT NULL,
