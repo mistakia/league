@@ -2300,7 +2300,8 @@ CREATE TABLE `nflPlayStat` (
   `gsispid` varchar(47) DEFAULT NULL,
   `teamid` varchar(36) DEFAULT NULL,
   `valid` tinyint(1) DEFAULT NULL,
-  KEY `playId` (`playId`)
+  KEY `playId` (`playId`),
+  UNIQUE KEY `esbid` (`esbid`,`playId`,`statId`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
