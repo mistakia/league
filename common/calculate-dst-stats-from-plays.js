@@ -147,6 +147,7 @@ const calculateDstStatsFromPlays = (plays, team) => {
 
       case 64:
         // touchdown (team)
+        dstStats.dtd += 1
         break
 
       case 70:
