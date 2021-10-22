@@ -70,18 +70,6 @@ router.post('/?', async (req, res) => {
     const lastTransaction = transactions.reduce((a, b) =>
       a.timestamp > b.timestamp ? a : b
     )
-
-    // make sure player is a rookie OR not on a team OR on a teams practice squad
-    if (
-      playerRow.start !== constants.season.year &&
-      playerRow.posd !== 'PS' &&
-      playerRow.cteam !== 'INA'
-    ) {
-      return res
-        .status(400)
-        .send({ error: 'player is not practice squad eligible' })
-    }
-
     const isActive = !!roster.active.find((p) => p.player === player)
 
     // make sure player has not been on the active roster for more than 48 hours
