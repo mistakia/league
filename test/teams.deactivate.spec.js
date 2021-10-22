@@ -211,27 +211,6 @@ describe('API /teams - deactivate', function () {
       await error(request, 'player is already on practice squad')
     })
 
-    it('player is not a rookie', async () => {
-      const player = await selectPlayer({ excludePS: true })
-      await addPlayer({
-        leagueId: 1,
-        player,
-        teamId: 1,
-        userId: 1,
-        slot: constants.slots.BENCH
-      })
-      const request = chai
-        .request(server)
-        .post('/api/teams/1/deactivate')
-        .set('Authorization', `Bearer ${user1}`)
-        .send({
-          player: player.player,
-          leagueId: 1
-        })
-
-      await error(request, 'player is not practice squad eligible')
-    })
-
     it('exceed roster limits', async () => {
       // TODO
     })
