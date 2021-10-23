@@ -20,7 +20,7 @@ router.get('/stats', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const data = await db('nflPlayStat')
-      .select('nflPlayStat.*', 'nflPlay.week')
+      .select('nflPlayStat.*', 'nflPlay.wk')
       .leftJoin('nflPlay', function () {
         this.on('nflPlayStat.esbid', '=', 'nflPlay.esbid').andOn(
           'nflPlayStat.playId',
