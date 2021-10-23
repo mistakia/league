@@ -48,7 +48,7 @@ const fields = [
   'nflPlay.playDescription',
   'nflPlay.possessionTeam',
   'nflPlay.seas',
-  'nflPlay.week',
+  'nflPlay.wk',
   'nflPlay.quarter',
   'nflPlay.yardsToGo',
   'nflPlay.clockTime',
