@@ -45,7 +45,7 @@ export default class Scoreboard {
     const query = getPlayByPlayQuery(db)
     const plays = await query
       .where('nflPlay.seas', constants.season.year)
-      .where('nflPlay.week', constants.season.week)
+      .where('nflPlay.wk', constants.season.week)
       .where('updated', '>', updated)
 
     this._log(`${plays.length} updated plays found`)
