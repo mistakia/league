@@ -8,7 +8,7 @@ router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const query = getPlayByPlayQuery(db)
-    const data = await query.where('nflPlay.seas', constants.season.year)
+    const data = await query.where('nfl_plays.seas', constants.season.year)
     res.send(data)
   } catch (error) {
     logger(error)
@@ -19,17 +19,17 @@ router.get('/?', async (req, res) => {
 router.get('/stats', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    const data = await db('nflPlayStat')
-      .select('nflPlayStat.*', 'nflPlay.wk')
-      .leftJoin('nflPlay', function () {
-        this.on('nflPlayStat.esbid', '=', 'nflPlay.esbid').andOn(
-          'nflPlayStat.playId',
+    const data = await db('nfl_play_stats')
+      .select('nfl_play_stats.*', 'nfl_plays.wk')
+      .leftJoin('nfl_plays', function () {
+        this.on('nfl_play_stats.esbid', '=', 'nfl_plays.esbid').andOn(
+          'nfl_play_stats.playId',
           '=',
-          'nflPlay.playId'
+          'nfl_plays.playId'
         )
       })
-      .where('nflPlay.seas', constants.season.year)
-      .where('nflPlayStat.valid', 1)
+      .where('nfl_plays.seas', constants.season.year)
+      .where('nfl_play_stats.valid', 1)
     res.send(data)
   } catch (error) {
     logger(error)
@@ -91,35 +91,35 @@ router.get('/charted', async (req, res) => {
       return res.status(400).send({ error: 'too many years listed' })
     }
 
-    let pbpQuery = getChartedPlayByPlayQuery(db)
+    let query = getChartedPlayByPlayQuery(db)
 
     if (playerId) {
       const players = await db('player').where('player', playerId).limit(1)
       const player = players[0]
-      pbpQuery = pbpQuery.where('pbp.off', player.cteam)
+      query = query.where('nfl_plays.off', player.cteam)
     }
 
     if (years.length) {
-      pbpQuery = pbpQuery.whereIn('nfl_games.seas', years)
+      query = query.whereIn('nfl_games.seas', years)
     }
 
     if (weeks.length) {
-      pbpQuery = pbpQuery.whereIn('nfl_games.wk', weeks)
+      query = query.whereIn('nfl_games.wk', weeks)
     }
 
     if (days.length) {
-      pbpQuery = pbpQuery.whereIn('nfl_games.day', days)
+      query = query.whereIn('nfl_games.day', days)
     }
 
     if (quarters.length) {
-      pbpQuery = pbpQuery.whereIn('nflPlay.qtr', quarters)
+      query = query.whereIn('nfl_plays.qtr', quarters)
     }
 
     if (downs.length) {
-      pbpQuery = pbpQuery.whereIn('nflPlay.dwn', downs)
+      query = query.whereIn('nfl_plays.dwn', downs)
     }
 
-    const data = await pbpQuery
+    const data = await query
     res.send(data)
   } catch (error) {
     logger(error)

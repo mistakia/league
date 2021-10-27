@@ -15,7 +15,7 @@ module.exports = async ({
   yardlineNumber,
   yardlineSide
 }) => {
-  const query = db('nflPlay')
+  const query = db('nfl_plays')
 
   if (wk) {
     query.where({ wk })

@@ -2183,12 +2183,12 @@ CREATE TABLE `changelog` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `nflPlay`
+-- Table structure for table `nfl_plays`
 --
 
-DROP TABLE IF EXISTS `nflPlay`;
+DROP TABLE IF EXISTS `nfl_plays`;
 
-CREATE TABLE `nflPlay` (
+CREATE TABLE `nfl_plays` (
   `esbid` int(10) NOT NULL,
   `playId` int(10) DEFAULT NULL,
   `sequence` int(10) DEFAULT NULL,
@@ -2214,7 +2214,12 @@ CREATE TABLE `nflPlay` (
   `startYardLine` varchar(10) DEFAULT NULl,
   `endYardLine` varchar(10) DEFAULT NULl,
 
-  `yardsToGo` int(3) DEFAULT NULL,
+  `hash` varchar(1) DEFAULT NULL,           -- hash location, values: (L)eft hash, (R)ight hash or in-between (M)
+  `mot` varchar(2) DEFAULT NULL,            -- motion, There are 2 types of motion: Pre-snap (P) which starts and stops before the snap and the more aggressive type of motion that is occurring during the snap (S). When both occur we mark 'PS'
+
+  `ytg` int(3) DEFAULT NULL,                -- yards to go
+  `yfog` int(3) DEFAULT NULL,               -- yards from own goal (1-99)
+
   `isRedzonePlay` tinyint(1) DEFAULT NULL,
 
   `offenseFormation` varchar(100) DEFAULT NULL,
@@ -2260,21 +2265,38 @@ CREATE TABLE `nflPlay` (
   `yds` varchar(3) DEFAULT NULL,                -- yardage
   `yds_gained` varchar(3) DEFAULT NULL,         -- yardage gained (or lost) by the possessing team, excluding yards gained via fumble recoveries and laterals
   `dot` int(3) DEFAULT NULL,                    -- depth of target
+  `tay` tinyint(1) DEFAULT NULL,                -- true air yards, Distance ball travels in the air from point of throw to a receivers hands; back of endzone or sideline.
   `yac` int(3) DEFAULT NULL,                    -- yard after catch
   `yaco` int(3) DEFAULT NULL,                   -- yards after contact
   `ret_yds` int(3) DEFAULT NULl,                -- return yardage
+
+  `td_tm` varchar(5) DEFAULT NULL,              -- touchdown team abbreviation
+  `ret_tm` varchar(5) DEFAULT NULL,             -- return team abbrevation
 
   `qbp` tinyint(2) DEFAULT NULL,                -- QB pressure
   `qbhi` tinyint(2) DEFAULT NULL,               -- QB hit
   `qbhu` tinyint(2) DEFAULT NULL,               -- QB hurry
 
-  `high` tinyint(1) DEFAULT NULL,               -- hightlight throw
   `intw` tinyint(1) DEFAULT NULL,               -- interception worthy
+  `cball` tinyint(1) DEFAULT NULL,              -- catchable ball, A pass in which an eligible receiver has the opportunity to get his hands on the football with reasonable movement, timing, and opportunity.
+  `qbta` tinyint(1) DEFAULT NULL,               -- QB Throw Away
+  `shov` tinyint(1) DEFAULT NULL,               -- Shovel/Touch Pass
+  `side` tinyint(1) DEFAULT NULL,               -- Sideline pass, Balls outside of the field but catchable when the receiver extends body/arms.
+  `high` tinyint(1) DEFAULT NULL,               -- Highlight pass, Perfect pass that only the receiver can reach. Features perfect placement in a tight window.
 
   `drp` tinyint(1) DEFAULT NULL,                -- dropped pass
-  `cnb` tinyint(1) DEFAULT NULL,                -- contested ball
+  `cnb` tinyint(1) DEFAULT NULL,                -- contested ball, Passes into close coverage that involve a physical battle between receiver and defender for control of the ball.
+  `crr` tinyint(1) DEFAULT NULL,                -- Created Reception, Difficult catches that require exceptional body control; hands; acrobatics, or any combination thereof.
 
   `mbt` tinyint(1) DEFAULT NULL,                -- missed or broken tackles
+  `avsk` tinyint(1) DEFAULT NULL,               -- number of avoided sacks
+
+  `sg` tinyint(1) DEFAULT NULL,                 -- shotgun
+  `nh` tinyint(1) DEFAULT NULL,                 -- no huddle
+  `pap` tinyint(1) DEFAULT NULL,                -- play action pass
+
+  `option` varchar(3) DEFAULT NULL,             -- option play, values: RPO (run/pass), RUN (run/qbrun)
+  `tlook` tinyint(1) DEFAULT NULL,              -- trick look
 
   `fuml` tinyint(1) DEFAULT NULL,               -- fumble lost
   `int` tinyint(1) DEFAULT NULL,                -- interception
@@ -2284,9 +2306,37 @@ CREATE TABLE `nflPlay` (
   `comp` tinyint(1) DEFAULT NULL,               -- completion
   `td` tinyint(1) DEFAULT NULL,                 -- touchdown
   `ret_td` tinyint(1) DEFAULT NULL,             -- return touchdown
+  `trick` tinyint(1) DEFAULT NULL,              -- trick play
 
-  `td_tm` varchar(5) DEFAULT NULL,              -- touchdown team abbreviation
-  `ret_tm` varchar(5) DEFAULT NULL,             -- return team abbrevation
+  `qbru` tinyint(1) DEFAULT NULL,               -- QB run, a designed running play for the QB. These are only marked on runs by a natural QB where he lined up as a QB. Also, sneaks and kneel-downs are not counted.
+  `sneak` tinyint(1) DEFAULT NULL,              -- QB sneak
+  `scrm` tinyint(1) DEFAULT NULL,               -- QB scramble
+  `htm` tinyint(1) DEFAULT NULL,                -- hindered throwing motion
+  `zblz` tinyint(1) DEFAULT NULL,               -- zone blitz, at least one Off-Ball LB rushed the passer instead of a DL who dropped into coverage
+  `stnt` tinyint(1) DEFAULT NULL,               -- stunt, when any two pass rushers cross, trading pass rush lanes on a passing down
+  `oop` tinyint(1) DEFAULT NULL,                -- out of pocket pass
+  `phyb` tinyint(1) DEFAULT NULL,               -- physical ball, Pass target takes significant punishment whether the pass is caught or not. Most 'Contested Balls' will also be a 'Physical Ball'.
+  `bap` tinyint(1) DEFAULT NULL,                -- batted pass
+  `fread` tinyint(1) DEFAULT NULL,              -- first read
+  `scre` tinyint(1) DEFAULT NULL,               -- screen pass
+  `pfp` tinyint(1) DEFAULT NULL,                -- pain free play, Ball carrier is only lightly touched by a defender on the field (ie QB slide) or runs out of bounds with little or no physical contact with the defender or sideline personnel/equipment. Includes TD's
+  `qbsk` tinyint(1) DEFAULT NULL,               -- qb sack, QB was to blame for the sack: held ball too long; missed wide open receiver etc
+
+  `ttscrm` decimal(3,1) DEFAULT NULL,           -- time to scramble
+  `ttp` decimal(3,1) DEFAULT NULL,              -- time to pass
+  `ttsk` decimal(3,1) DEFAULT NULL,             -- time to sack
+  `ttpr` decimal(3,1) DEFAULT NULL,             -- time to pressure
+
+  `back` tinyint(2) DEFAULT NULL,               -- number in backfield (wr, rb, te, fb)
+  `xlm` tinyint(1) DEFAULT NULL,                -- extra men on the line, Number of players lined up on either side of the Offensive Tackles - usually a Tight End.
+  `db` tinyint(2) DEFAULT NULL,                 -- number of defensive backs
+  `box` tinyint(2) DEFAULT NULL,                -- number of defenders in the box
+  `boxdb` tinyint(2) DEFAULT NULL,              -- number of dbs in the box
+  `pru` tinyint(1) DEFAULT NULL,                -- pass rushers
+  `blz` tinyint(1) DEFAULT NULL,                -- number of LB's and DB's blitzing
+  `dblz` tinyint(1) DEFAULT NULL,               -- Number of DB's blitzing
+  `oopd` varchar(2) DEFAULT NULL,               -- out of pocket pass details, Clean [C], Pressure [P], Designed [D], Designed Rollout [DR]
+  `cov` tinyint(1) DEFAULT NULL,                -- coverage on target, Uncovered is 0, single coverage is 1, double is 2.
 
   `charted` tinyint(1) DEFAULT NULL,
   `updated` int(11) NOT NULL,
@@ -2298,12 +2348,12 @@ CREATE TABLE `nflPlay` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `nflPlayStat`
+-- Table structure for table `nfl_play_stats`
 --
 
-DROP TABLE IF EXISTS `nflPlayStat`;
+DROP TABLE IF EXISTS `nfl_play_stats`;
 
-CREATE TABLE `nflPlayStat` (
+CREATE TABLE `nfl_play_stats` (
   `esbid` int(10) NOT NULL,
   `playId` int(10) NOT NULL,
   `clubCode` varchar(10) DEFAULT NULL,

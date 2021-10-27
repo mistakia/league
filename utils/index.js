@@ -1,72 +1,72 @@
 const getChartedPlayByPlayQuery = (db) =>
-  db('nflPlay')
+  db('nfl_plays')
     .select(
-      'nflPlay.fum',
-      'nflPlay.fuml',
-      'nflPlay.off',
-      'nflPlay.type',
-      'nflPlay.bc',
-      'nflPlay.yds',
-      'nflPlay.yds_gained',
-      'nflPlay.fd',
-      'nflPlay.succ',
-      'nflPlay.psr',
-      'nflPlay.trg',
-      'nflPlay.intp',
-      'nflPlay.comp',
-      'nflPlay.td',
-      'nflPlay.sk',
-      'nflPlay.dwn',
-      'nflPlay.qtr',
-      'nflPlay.dot',
-      'nflPlay.qbp',
-      'nflPlay.qbhi',
-      'nflPlay.qbhu',
-      'nflPlay.high',
-      'nflPlay.intw',
-      'nflPlay.drp',
-      'nflPlay.cnb',
-      'nflPlay.mbt',
-      'nflPlay.yac',
-      'nflPlay.yaco',
+      'nfl_plays.fum',
+      'nfl_plays.fuml',
+      'nfl_plays.off',
+      'nfl_plays.type',
+      'nfl_plays.bc',
+      'nfl_plays.yds',
+      'nfl_plays.yds_gained',
+      'nfl_plays.fd',
+      'nfl_plays.succ',
+      'nfl_plays.psr',
+      'nfl_plays.trg',
+      'nfl_plays.intp',
+      'nfl_plays.comp',
+      'nfl_plays.td',
+      'nfl_plays.sk',
+      'nfl_plays.dwn',
+      'nfl_plays.qtr',
+      'nfl_plays.dot',
+      'nfl_plays.qbp',
+      'nfl_plays.qbhi',
+      'nfl_plays.qbhu',
+      'nfl_plays.high',
+      'nfl_plays.intw',
+      'nfl_plays.drp',
+      'nfl_plays.cnb',
+      'nfl_plays.mbt',
+      'nfl_plays.yac',
+      'nfl_plays.yaco',
       'nfl_games.wk',
       'nfl_games.day'
     )
-    .join('nfl_games', 'nflPlay.esbid', 'nfl_games.esbid')
-    .whereNot('nflPlay.type', 'NOPL')
+    .join('nfl_games', 'nfl_plays.esbid', 'nfl_games.esbid')
+    .whereNot('nfl_plays.type', 'NOPL')
 
 const fields = [
-  'nflPlay.esbid',
-  'nflPlay.playId',
-  'nflPlay.sequence',
-  'nflPlay.dwn',
-  'nflPlay.playDescription',
-  'nflPlay.possessionTeam',
-  'nflPlay.seas',
-  'nflPlay.wk',
-  'nflPlay.qtr',
-  'nflPlay.yardsToGo',
-  'nflPlay.clockTime',
-  'nflPlay.driveSequenceNumber',
-  'nflPlay.endYardLine',
-  'nflPlay.startYardLine',
-  'nflPlay.fd',
-  'nflPlay.goalToGo',
-  'nflPlay.drivePlayCount',
-  'nflPlay.playClock',
-  'nflPlay.scoringPlay',
-  'nflPlay.timeOfDay',
-  'nflPlay.type_nfl',
-  'nflPlay.updated',
+  'nfl_plays.esbid',
+  'nfl_plays.playId',
+  'nfl_plays.sequence',
+  'nfl_plays.dwn',
+  'nfl_plays.playDescription',
+  'nfl_plays.possessionTeam',
+  'nfl_plays.seas',
+  'nfl_plays.wk',
+  'nfl_plays.qtr',
+  'nfl_plays.ytg',
+  'nfl_plays.clockTime',
+  'nfl_plays.driveSequenceNumber',
+  'nfl_plays.endYardLine',
+  'nfl_plays.startYardLine',
+  'nfl_plays.fd',
+  'nfl_plays.goalToGo',
+  'nfl_plays.drivePlayCount',
+  'nfl_plays.playClock',
+  'nfl_plays.scoringPlay',
+  'nfl_plays.timeOfDay',
+  'nfl_plays.type_nfl',
+  'nfl_plays.updated',
 
   'nfl_games.h',
   'nfl_games.v'
 ]
 
 const getPlayByPlayQuery = (db) =>
-  db('nflPlay')
+  db('nfl_plays')
     .select(fields)
-    .join('nfl_games', 'nflPlay.esbid', '=', 'nfl_games.esbid')
+    .join('nfl_games', 'nfl_plays.esbid', '=', 'nfl_games.esbid')
 
 module.exports = {
   readCSV: require('./read-csv'),

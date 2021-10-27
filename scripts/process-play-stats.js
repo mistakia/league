@@ -90,24 +90,24 @@ const run = async () => {
     return
   }
 
-  const playStats = await db('nflPlayStat')
+  const playStats = await db('nfl_play_stats')
     .select(
-      'nflPlayStat.*',
-      'nflPlay.drivePlayCount',
-      'nflPlay.type_ngs',
-      'nflPlay.type_nfl',
+      'nfl_play_stats.*',
+      'nfl_plays.drivePlayCount',
+      'nfl_plays.type_ngs',
+      'nfl_plays.type_nfl',
+      'nfl_plays.possessionTeam',
       'nfl_games.h',
-      'nfl_games.v',
-      'nflPlay.possessionTeam'
+      'nfl_games.v'
     )
-    .join('nfl_games', 'nflPlayStat.esbid', '=', 'nfl_games.esbid')
-    .join('nflPlay', function () {
-      this.on('nflPlay.esbid', '=', 'nflPlayStat.esbid')
-      this.andOn('nflPlay.playId', '=', 'nflPlayStat.playId')
+    .join('nfl_games', 'nfl_play_stats.esbid', '=', 'nfl_games.esbid')
+    .join('nfl_plays', function () {
+      this.on('nfl_plays.esbid', '=', 'nfl_play_stats.esbid')
+      this.andOn('nfl_plays.playId', '=', 'nfl_play_stats.playId')
     })
-    .where('nflPlay.seas', year)
-    .where('nflPlay.wk', week)
-    .where('nflPlayStat.valid', 1)
+    .where('nfl_plays.seas', year)
+    .where('nfl_plays.wk', week)
+    .where('nfl_play_stats.valid', 1)
 
   const missing = []
 
@@ -259,26 +259,26 @@ const run = async () => {
   missing.forEach((m) => log(`could not find player: ${m.pname} / ${m.cteam}`))
 
   // update play row data - off, def
-  const nflPlays = await db('nflPlay')
+  const plays = await db('nfl_plays')
     .select(
       'nfl_games.h',
       'nfl_games.v',
-      'nflPlay.esbid',
-      'nflPlay.playId',
-      'nflPlay.type_ngs',
-      'nflPlay.possessionTeam'
+      'nfl_plays.esbid',
+      'nfl_plays.playId',
+      'nfl_plays.type_ngs',
+      'nfl_plays.possessionTeam'
     )
-    .join('nfl_games', 'nflPlay.esbid', '=', 'nfl_games.esbid')
-    .where('nflPlay.seas', year)
-    .where('nflPlay.wk', week)
-  for (const nflPlay of nflPlays) {
-    const off = nflPlay.possessionTeam
+    .join('nfl_games', 'nfl_plays.esbid', '=', 'nfl_games.esbid')
+    .where('nfl_plays.seas', year)
+    .where('nfl_plays.wk', week)
+  for (const play of plays) {
+    const off = play.possessionTeam
     if (!off) continue
-    const def = off === nflPlay.h ? nflPlay.v : nflPlay.h
-    const type = getPlayType(nflPlay.type_ngs)
+    const def = off === play.h ? play.v : play.h
+    const type = getPlayType(play.type_ngs)
 
-    const { esbid, playId } = nflPlay
-    await db('nflPlay')
+    const { esbid, playId } = play
+    await db('nfl_plays')
       .update({
         off,
         def,
@@ -343,7 +343,7 @@ const run = async () => {
         }
       }
 
-      await db('nflPlay').update(playRow).where({
+      await db('nfl_plays').update(playRow).where({
         esbid,
         playId
       })
