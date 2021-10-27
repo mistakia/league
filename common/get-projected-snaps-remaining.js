@@ -1,9 +1,4 @@
-const getProjectedSnapsRemaining = ({
-  quarter,
-  clockTime,
-  down,
-  yardsToGo
-}) => {
+const getProjectedSnapsRemaining = ({ qtr, dwn, clockTime, ytg }) => {
   // count plays
   // calculate time elapsed
   // calculate play rate
