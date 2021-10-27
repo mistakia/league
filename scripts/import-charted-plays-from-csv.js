@@ -23,8 +23,56 @@ const formatPlay = (play) => ({
   drp: Boolean(play.drp),
   qbp: Boolean(play.qbp),
   qbhi: Boolean(play.qbhi),
-  mbt: parseInt(play.mbt, 0) || null,
-  yaco: parseInt(play.yaco, 0) || null
+  intw: Boolean(play.intw),
+  succ: Boolean(play.succ),
+  mbt: parseInt(play.mbt, 10) || null,
+  yaco: parseInt(play.yaco, 10) || null,
+  sg: Boolean(play.sg),
+  nh: Boolean(play.nh),
+  hash: play.hash || null,
+  mot: play.mot || null,
+  tay: parseInt(play.tay, 10) || null,
+  crr: Boolean(play.crr),
+  avsk: Boolean(play.avsk),
+  pap: Boolean(play.pap),
+  option: play.option || null,
+  tlook: Boolean(play.tlook),
+  trick: Boolean(play.trick),
+  qbru: Boolean(play.qbru),
+  sneak: Boolean(play.sneak),
+  scrm: Boolean(play.scrm),
+  htm: Boolean(play.htm),
+  zblz: Boolean(play.zblz),
+  stnt: Boolean(play.stnt),
+  oop: Boolean(play.oop),
+  phyb: Boolean(play.phyb),
+  cnb: Boolean(play.cnb),
+  cball: Boolean(play.cball),
+  qbta: Boolean(play.qbta),
+  shov: Boolean(play.shov),
+  side: Boolean(play.side),
+  high: Boolean(play.high),
+  bap: Boolean(play.bap),
+  fread: Boolean(play.fread),
+  scre: Boolean(play.scre),
+  pfp: Boolean(play.pfp),
+  qbsk: Boolean(play.qbsk),
+
+  ttscrm: parseFloat(play.ttscrm) || null,
+  ttp: parseFloat(play.ttp) || null,
+  ttsk: parseFloat(play.ttsk) || null,
+  ttpr: parseFloat(play.ttpr) || null,
+
+  back: parseInt(play.back, 10) || null,
+  xlm: parseInt(play.xlm, 10) || null,
+  db: parseInt(play.db, 10) || null,
+  box: parseInt(play.box, 10) || null,
+  boxdb: parseInt(play.boxdb, 10) || null,
+  pru: parseInt(play.pru, 10) || null,
+  blz: parseInt(play.blz, 10) || null,
+  dblz: parseInt(play.dblz, 10) || null,
+  oopd: play.oopd || null,
+  cov: play.cov
 })
 
 const run = async () => {
@@ -62,12 +110,12 @@ const run = async () => {
       dwn: cPlay.dwn,
       ...getYardlineInfoFromString(cPlay.los)
     }
-    const nflPlay = await getPlay(opts)
+    const dbPlay = await getPlay(opts)
 
-    if (nflPlay) {
-      await db('nflPlay').update(formatPlay(cPlay)).where({
-        esbid: nflPlay.esbid,
-        playId: nflPlay.playId
+    if (dbPlay) {
+      await db('nfl_plays').update(formatPlay(cPlay)).where({
+        esbid: dbPlay.esbid,
+        playId: dbPlay.playId
       })
     } else {
       log(`${cPlay.pid} - ${cPlay.detail}`)

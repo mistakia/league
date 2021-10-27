@@ -18,9 +18,9 @@ router.get('/?', async (req, res) => {
     }
 
     const query = getPlayByPlayQuery(db)
-    const plays = await query.where('nflPlay.wk', week)
+    const plays = await query.where('nfl_plays.wk', week)
     const esbids = Array.from(uniqBy(plays, 'esbid')).map((p) => p.esbid)
-    const playStats = await db('nflPlayStat').whereIn('esbid', esbids)
+    const playStats = await db('nfl_play_stats').whereIn('esbid', esbids)
     const playSnaps = await db('nflSnap').whereIn('esbid', esbids)
 
     for (const play of plays) {

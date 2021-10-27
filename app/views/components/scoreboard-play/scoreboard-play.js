@@ -38,8 +38,7 @@ export default class ScoreboardPlay extends React.Component {
           </div>
           <div className='scoreboard__play-info-play'>
             {play.play.dwn}
-            {nth(play.play.dwn)} & {play.play.yardsToGo} -{' '}
-            {play.play.startYardLine}
+            {nth(play.play.dwn)} & {play.play.ytg} - {play.play.startYardLine}
           </div>
         </div>
         <div className='scoreboard__play-description'>
