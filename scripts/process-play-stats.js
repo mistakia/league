@@ -139,7 +139,7 @@ const run = async () => {
     const player = results[0]
 
     if (!argv.dry) {
-      await db('changelog').insert({
+      await db('player_changelog').insert({
         type: constants.changes.PLAYER_EDIT,
         id: player.player,
         prop: 'gsispid',
@@ -182,7 +182,7 @@ const run = async () => {
     const player = results[0]
 
     if (!argv.dry) {
-      await db('changelog').insert({
+      await db('player_changelog').insert({
         type: constants.changes.PLAYER_EDIT,
         id: player.player,
         prop: 'gsisid',
