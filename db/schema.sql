@@ -1163,12 +1163,12 @@ CREATE TABLE `trades_transactions` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `cutlist`
+-- Table structure for table `league_cutlist`
 --
 
-DROP TABLE IF EXISTS `cutlist`;
+DROP TABLE IF EXISTS `league_cutlist`;
 
-CREATE TABLE `cutlist` (
+CREATE TABLE `league_cutlist` (
   `player` varchar(7) NOT NULL,
   `tid` int(6) NOT NULL,
   `order` tinyint(2) NOT NULL,

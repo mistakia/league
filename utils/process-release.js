@@ -90,7 +90,7 @@ module.exports = async function ({ lid, tid, player, userid }) {
     .whereIn('rid', rosterIds)
     .where('player', player)
     .del()
-  await db('cutlist')
+  await db('league_cutlist')
     .where({
       player,
       tid
