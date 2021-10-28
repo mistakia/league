@@ -70,7 +70,7 @@ const run = async () => {
               player: player.player
             })
 
-          await db('changelog').insert({
+          await db('player_changelog').insert({
             type: constants.changes.PLAYER_EDIT,
             id: player.player,
             prop,
@@ -98,7 +98,7 @@ const run = async () => {
         ...formatted
       })
 
-      await db('changelog').insert({
+      await db('player_changelog').insert({
         type: constants.changes.PLAYER_NEW,
         id: row.player,
         timestamp

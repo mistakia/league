@@ -116,7 +116,7 @@ const run = async () => {
       for (const edit of edits) {
         const prop = edit.path[0]
         log(`Updating ${player.player} - ${prop} - ${edit.rhs}`)
-        await db('changelog').insert({
+        await db('player_changelog').insert({
           type: constants.changes.PLAYER_EDIT,
           id: player.player,
           prop,
@@ -145,7 +145,7 @@ const run = async () => {
 
    * for (const missingPlayerId of missingPlayerIds) {
    *   const row = inserts.find((r) => r.player === missingPlayerId)
-   *   await db('changelog').insert({
+   *   await db('player_changelog').insert({
    *     type: constants.changes.PLAYER_NEW,
    *     id: row.player,
    *     timestamp

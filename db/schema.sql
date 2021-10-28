@@ -1325,12 +1325,12 @@ CREATE TABLE `jobs` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `changelog`
+-- Table structure for table `player_changelog`
 --
 
-DROP TABLE IF EXISTS `changelog`;
+DROP TABLE IF EXISTS `player_changelog`;
 
-CREATE TABLE `changelog` (
+CREATE TABLE `player_changelog` (
   `uid` int(11) NOT NULL AUTO_INCREMENT,
   `id` text NOT NULL,
   `type` tinyint(2) NOT NULL,
