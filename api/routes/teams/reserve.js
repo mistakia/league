@@ -168,7 +168,7 @@ router.post('/?', async (req, res) => {
     }
     await db('transactions').insert(transaction)
 
-    await db('cutlist')
+    await db('league_cutlist')
       .where({
         player,
         tid

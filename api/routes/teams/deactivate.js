@@ -117,7 +117,7 @@ router.post('/?', async (req, res) => {
       player
     })
 
-    await db('cutlist').where({ player, tid }).del()
+    await db('league_cutlist').where({ player, tid }).del()
 
     const transaction = {
       userid: req.user.userId,

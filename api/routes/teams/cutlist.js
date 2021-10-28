@@ -8,7 +8,7 @@ router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const { teamId } = req.params
-    const cutlist = await db('cutlist')
+    const cutlist = await db('league_cutlist')
       .select('player')
       .where('tid', teamId)
       .orderBy('order', 'asc')
@@ -76,8 +76,8 @@ router.post('/?', async (req, res) => {
       })
     }
 
-    await db('cutlist').insert(result).onConflict().merge()
-    await db('cutlist').del().whereNotIn('player', players).where('tid', tid)
+    await db('league_cutlist').insert(result).onConflict().merge()
+    await db('league_cutlist').del().whereNotIn('player', players).where('tid', tid)
     res.send(players)
   } catch (error) {
     logger(error)
