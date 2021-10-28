@@ -442,7 +442,7 @@ router.post(
         .whereNull('trades.vetoed')
 
       // remove players from cutlist
-      await db('cutlist')
+      await db('league_cutlist')
         .whereIn('player', allPlayers)
         .whereIn('tid', [trade.pid, trade.tid])
         .del()
