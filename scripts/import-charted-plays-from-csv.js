@@ -30,12 +30,18 @@ const formatPlay = (play) => ({
   sg: Boolean(parseInt(play.sg, 10)),
   nh: Boolean(parseInt(play.nh, 10)),
   hash: play.hash || null,
+
+  // TODO - unexpected values
   // mot: play.mot || null,
+
   tay: parseInt(play.tay, 10) || null,
   crr: Boolean(parseInt(play.crr, 10)),
   avsk: Boolean(parseInt(play.avsk, 10)),
   pap: Boolean(parseInt(play.pap, 10)),
-  option: play.option || null,
+
+  // TODO - unexpected value: PASS
+  // option: play.option || null,
+
   tlook: Boolean(parseInt(play.tlook, 10)),
   trick: Boolean(parseInt(play.trick, 10)),
   qbru: Boolean(parseInt(play.qbru, 10)),
