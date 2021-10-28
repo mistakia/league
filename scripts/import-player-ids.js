@@ -41,7 +41,7 @@ const run = async () => {
     const players = await db('player').where({ player: playerId })
     const player = players[0]
     if (!player.gsispid || player.gsispid !== row.player_id) {
-      await db('changelog').insert({
+      await db('player_changelog').insert({
         type: constants.changes.PLAYER_EDIT,
         id: playerId,
         prop: 'gsispid',
