@@ -159,7 +159,7 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
         order: idx,
         tid: teamId
       }))
-      await knex('cutlist').insert(cutlist)
+      await knex('league_cutlist').insert(cutlist)
 
       let error
       try {

@@ -33,7 +33,9 @@ module.exports = async function ({
   const roster = new Roster({ roster: rosterRow, league })
 
   const releases = await db('transition_releases').where('transitionid', uid)
-  const cutlist = await db('league_cutlist').where('tid', tid).orderBy('order', 'asc')
+  const cutlist = await db('league_cutlist')
+    .where('tid', tid)
+    .orderBy('order', 'asc')
   const releasePlayers = []
 
   const isValid = () =>
