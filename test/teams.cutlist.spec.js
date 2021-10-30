@@ -67,7 +67,7 @@ describe('API /teams - cutlist', function () {
       res.body.length.should.equal(1)
       res.body[0].should.equal(player.player)
 
-      const players = await knex('cutlist')
+      const players = await knex('league_cutlist')
       expect(players.length).to.equal(1)
       expect(players[0].player).to.equal(player.player)
       expect(players[0].tid).to.equal(teamId)
@@ -113,7 +113,7 @@ describe('API /teams - cutlist', function () {
       res.body.length.should.equal(2)
       res.body.should.deep.equal(players)
 
-      const cutlist = await knex('cutlist')
+      const cutlist = await knex('league_cutlist')
       expect(cutlist.length).to.equal(2)
       expect(cutlist[0].player).to.equal(player1.player)
       expect(cutlist[0].tid).to.equal(teamId)
@@ -171,7 +171,7 @@ describe('API /teams - cutlist', function () {
       res2.body.length.should.equal(2)
       res2.body.should.deep.equal(players)
 
-      const cutlist = await knex('cutlist')
+      const cutlist = await knex('league_cutlist')
       expect(cutlist.length).to.equal(2)
       expect(cutlist[0].player).to.equal(player2.player)
       expect(cutlist[0].tid).to.equal(teamId)
@@ -227,7 +227,7 @@ describe('API /teams - cutlist', function () {
 
       res2.body.length.should.equal(0)
 
-      const cutlist = await knex('cutlist')
+      const cutlist = await knex('league_cutlist')
       expect(cutlist.length).to.equal(0)
     })
   })

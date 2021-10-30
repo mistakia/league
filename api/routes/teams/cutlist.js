@@ -77,7 +77,10 @@ router.post('/?', async (req, res) => {
     }
 
     await db('league_cutlist').insert(result).onConflict().merge()
-    await db('league_cutlist').del().whereNotIn('player', players).where('tid', tid)
+    await db('league_cutlist')
+      .del()
+      .whereNotIn('player', players)
+      .where('tid', tid)
     res.send(players)
   } catch (error) {
     logger(error)

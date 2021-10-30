@@ -183,7 +183,9 @@ router.post('/?', async (req, res) => {
       }
     }
 
-    const cutlist = await db('league_cutlist').select('player').where('tid', tid)
+    const cutlist = await db('league_cutlist')
+      .select('player')
+      .where('tid', tid)
 
     for (const row of cutlist) {
       roster.removePlayer(row.player)
@@ -447,7 +449,9 @@ router.put('/?', async (req, res) => {
       }
     }
 
-    const cutlist = await db('league_cutlist').select('player').where('tid', teamId)
+    const cutlist = await db('league_cutlist')
+      .select('player')
+      .where('tid', teamId)
 
     // remove cutlist players
     for (const row of cutlist) {
