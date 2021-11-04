@@ -19,7 +19,7 @@ const run = async ({ lid, year }) => {
 
   const finalWeek =
     year === constants.season.year
-      ? constants.season.week
+      ? Math.max(constants.season.week - 1, 0)
       : constants.season.finalWeek
 
   const starters = {}
