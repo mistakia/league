@@ -61,7 +61,7 @@ const week =
     1
   )
 
-const year = constants.season.year
+const year = argv.year || constants.season.year
 
 const upsert = async ({ player, stats, opp, pos, tm }) => {
   const cleanedStats = Object.keys(stats)
@@ -203,9 +203,10 @@ const run = async () => {
     if (!player) continue
     if (!constants.positions.includes(player.pos)) continue
 
-    const playStat = playStatsByGsispid[gsispid].find((p) => p.possessionTeam)
+    const playStat = playStatsByGsispid[gsispid].find((p) => p.clubCode)
+    if (!playStat) continue
     const opp =
-      fixTeam(playStat.possessionTeam) === fixTeam(playStat.h)
+      fixTeam(playStat.clubCode) === fixTeam(playStat.h)
         ? fixTeam(playStat.v)
         : fixTeam(playStat.h)
     const stats = calculateStatsFromPlayStats(playStatsByGsispid[gsispid])
