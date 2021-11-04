@@ -28,8 +28,8 @@ export default function simulate({ teams, matchups, rosters }) {
     // TODO - use individual player probability curves
     // TODO - calculate team std dev based on history
     const dist = {}
-    dist.home = gaussian(home.total, Math.pow(15, 2))
-    dist.away = gaussian(away.total, Math.pow(15, 2))
+    dist.home = gaussian(home.total, Math.pow(18, 2))
+    dist.away = gaussian(away.total, Math.pow(18, 2))
     distributions[matchup.uid] = dist
   }
 

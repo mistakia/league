@@ -24,7 +24,9 @@ const run = async () => {
     .where('week', '>=', currentWeek)
   const rosterRows = await getRosters({ lid: leagueId })
   const tids = teamRows.map((t) => t.uid)
-  const teamStats = await db('team_stats').whereIn('tid', tids)
+  const teamStats = await db('team_stats')
+    .where('year', constants.season.year)
+    .whereIn('tid', tids)
 
   const rosters = {}
   for (const row of rosterRows) {
