@@ -70,7 +70,7 @@ router.post('/?', async (req, res) => {
     const lastTransaction = transactions.reduce((a, b) =>
       a.timestamp > b.timestamp ? a : b
     )
-    const isActive = !!roster.active.find((p) => p.player === player)
+    const isActive = Boolean(roster.active.find((p) => p.player === player))
 
     // make sure player has not been on the active roster for more than 48 hours
     const cutoff = dayjs.unix(lastTransaction.timestamp).add('48', 'hours')
@@ -82,14 +82,15 @@ router.post('/?', async (req, res) => {
 
     // make sure player he has not been previously activated
     if (
-      isActive &&
       transactions.find(
         (t) => t.type === constants.transactions.ROSTER_ACTIVATE
       )
     ) {
       return res
         .status(400)
-        .send({ error: 'player can not be deactivated once activated' })
+        .send({
+          error: 'player can not be deactivated once previously activated'
+        })
     }
 
     // make sure player has not been poached since the last time they were a free agent
