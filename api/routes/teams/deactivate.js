@@ -86,11 +86,9 @@ router.post('/?', async (req, res) => {
         (t) => t.type === constants.transactions.ROSTER_ACTIVATE
       )
     ) {
-      return res
-        .status(400)
-        .send({
-          error: 'player can not be deactivated once previously activated'
-        })
+      return res.status(400).send({
+        error: 'player can not be deactivated once previously activated'
+      })
     }
 
     // make sure player has not been poached since the last time they were a free agent
