@@ -22,6 +22,11 @@ const HeaderStatsReceivingOpportunity = () => (
       />
       <PlayerHeader
         className='table__cell metric'
+        label='AY'
+        value='stats.rdot'
+      />
+      <PlayerHeader
+        className='table__cell metric'
         label='AY%'
         value='stats._stray'
       />
