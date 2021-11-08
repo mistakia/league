@@ -461,6 +461,12 @@ class PlayerRow extends Player {
           <PercentileMetric
             stats={stats}
             percentiles={percentiles}
+            type='rdot'
+            fixed={0}
+          />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
             type='_stray'
           />
           <PercentileMetric
