@@ -28,6 +28,7 @@ import StatQualifierFilter from '@components/stat-qualifier-filter'
 import CollegeFilter from '@components/college-filter'
 import CollegeDivisionFilter from '@components/college-division-filter'
 import NFLTeamsFilter from '@components/nfl-teams-filter'
+import HeaderStatsFantasy from '@components/header-stats-fantasy'
 import HeaderStatsPassingBasic from '@components/header-stats-passing-basic'
 import HeaderStatsPassingEfficiency from '@components/header-stats-passing-efficiency'
 import HeaderStatsPassingAdvanced from '@components/header-stats-passing-advanced'
@@ -41,7 +42,7 @@ import HeaderStatsRushingAdvanced from '@components/header-stats-rushing-advance
 import HeaderStatsRushingBrokenTackles from '@components/header-stats-rushing-broken-tackles'
 import HeaderStatsReceivingBasic from '@components/header-stats-receiving-basic'
 import HeaderStatsReceivingOpportunity from '@components/header-stats-receiving-opportunity'
-import HeaderStatsReceivingAdvanced from '@components/header-stats-receiving-advanced'
+import HeaderStatsReceivingEfficiency from '@components/header-stats-receiving-efficiency'
 import Loading from '@components/loading'
 import Icon from '@components/icon'
 import { csv } from '@core/export'
@@ -149,7 +150,7 @@ export default class PlayersPage extends React.Component {
     players
       .slice(0, index)
       .forEach((p, idx) =>
-        rowItems.push(<PlayerRow key={p.player} player={p} />)
+        rowItems.push(<PlayerRow key={p.player} player={p} index={idx} />)
       )
 
     const headerSeasonPassing = (
@@ -324,6 +325,7 @@ export default class PlayersPage extends React.Component {
       <div className='players__table'>
         <div className='players__header'>
           <div className='player__row-lead'>
+            <div className='player__row-index' />
             <div className='player__row-action' />
             <div className='player__row-pos' />
             <div className='player__row-name'>Name</div>
@@ -337,6 +339,7 @@ export default class PlayersPage extends React.Component {
           {projectionView && headerSeasonPassing}
           {projectionView && headerSeasonRushing}
           {projectionView && headerSeasonReceiving}
+          {isStatsView && <HeaderStatsFantasy />}
           {isStatsPassingAdvancedView && <HeaderStatsPassingBasic />}
           {isStatsPassingAdvancedView && <HeaderStatsPassingEfficiency />}
           {isStatsPassingAdvancedView && <HeaderStatsPassingAdvanced />}
@@ -350,7 +353,7 @@ export default class PlayersPage extends React.Component {
           {isStatsRushingView && <HeaderStatsRushingBrokenTackles />}
           {isStatsReceivingView && <HeaderStatsReceivingBasic />}
           {isStatsReceivingView && <HeaderStatsReceivingOpportunity />}
-          {isStatsReceivingView && <HeaderStatsReceivingAdvanced />}
+          {isStatsReceivingView && <HeaderStatsReceivingEfficiency />}
         </div>
         <InfiniteScroll
           ref={(scroll) => {

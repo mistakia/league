@@ -3,6 +3,7 @@ import PlayerHeader from '@components/player-header'
 
 const HeaderStatsRushingBasic = () => (
   <div className='player__row-group'>
+    <div className='player__row-group-head'>Rushing</div>
     <div className='player__row-group-body'>
       <PlayerHeader
         className='table__cell metric'
