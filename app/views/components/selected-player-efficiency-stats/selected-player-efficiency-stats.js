@@ -131,10 +131,10 @@ const receiving = ({ stats, percentiles }) => (
       type='recy_pg'
     />
     <PercentileChart
-      title='aDOT'
+      title='DOT'
       stats={stats}
       percentiles={percentiles}
-      type='rdot_ptrg'
+      type='_ayptrg'
     />
     <PercentileChart
       title='YAC Per Rec'

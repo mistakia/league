@@ -177,7 +177,6 @@ const calculateStatsFromPlays = ({ plays, qualifiers, league }) => {
     stats._sttrg = round(toPct(sttrg), 1) || 0
 
     stats.dptrg_pct = round(toPct(stats.dptrg / stats.trg), 1) || 0
-    stats.rdot_ptrg = round(stats.rdot / stats.trg, 1) || 0
 
     // stats._ayps
     stats._ayprec = round(stats.rdot / stats.rec, 1) || 0

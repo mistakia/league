@@ -484,7 +484,7 @@ class PlayerRow extends Player {
           <PercentileMetric
             stats={stats}
             percentiles={percentiles}
-            type='rdot_ptrg'
+            type='_ayptrg'
           />
           <PercentileMetric
             stats={stats}
@@ -511,14 +511,9 @@ class PlayerRow extends Player {
       </div>
     )
 
-    const receivingAdvanced = (
+    const receivingEfficiency = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <PercentileMetric
-            stats={stats}
-            percentiles={percentiles}
-            type='_ayptrg'
-          />
           <PercentileMetric
             stats={stats}
             percentiles={percentiles}
@@ -627,7 +622,7 @@ class PlayerRow extends Player {
         {isStatsRushingView && rushingBrokenTackles}
         {isStatsReceivingView && receivingBasic}
         {isStatsReceivingView && receivingOpportunity}
-        {isStatsReceivingView && receivingAdvanced}
+        {isStatsReceivingView && receivingEfficiency}
       </div>
     )
   }

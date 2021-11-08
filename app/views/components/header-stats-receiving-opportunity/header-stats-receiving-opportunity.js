@@ -18,7 +18,7 @@ const HeaderStatsReceivingOpportunity = () => (
       <PlayerHeader
         className='table__cell metric'
         label='DOT'
-        value='stats.rdot_ptrg'
+        value='stats._ayptrg'
       />
       <PlayerHeader
         className='table__cell metric'

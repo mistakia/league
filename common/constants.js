@@ -269,13 +269,12 @@ export const fullStats = [
   'dptrg', // deep target
   'dptrg_pct', // deep pass percentage
   'rdot', // depth of target
-  'rdot_ptrg', // average depth of target
 
   // advanced
   'rcay', // completed air yards
   '_ayps', // air yards per snap
   '_ayprec', // air yards per reception
-  '_ayptrg', // air yards per target
+  '_ayptrg', // average depth of tagret / air yards per target
   '_recypay', // receiving yards per air yard
   '_recypsnp', // receiving yards per snap
   '_recyprec', // receiving yards per reception
@@ -349,7 +348,6 @@ export const qualifiers = {
 
   recy_prec: receivingQualifier,
   dptrg_pct: receivingQualifier,
-  rdot_ptrg: receivingQualifier,
   _ayps: receivingQualifier,
   _ayprec: receivingQualifier,
   _ayptrg: receivingQualifier,

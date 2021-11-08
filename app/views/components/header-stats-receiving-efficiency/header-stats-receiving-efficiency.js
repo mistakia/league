@@ -7,11 +7,6 @@ const HeaderStatsReceivingEfficiency = () => (
     <div className='player__row-group-body'>
       <PlayerHeader
         className='table__cell metric'
-        label='AY/T'
-        value='stats._ayptrg'
-      />
-      <PlayerHeader
-        className='table__cell metric'
         label='RACR'
         value='stats._recypay'
       />
