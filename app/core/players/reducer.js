@@ -47,7 +47,15 @@ export function playersReducer(state = initialState, { payload, type }) {
         payload.view === 'season'
           ? new List([0])
           : new List([Math.max(constants.season.week, 1)])
-      return state.merge({ view: payload.view, week })
+      if (payload.view === 'stats') {
+        return state.merge({
+          view: 'stats',
+          orderBy: 'stats.pts',
+          order: 'desc'
+        })
+      } else {
+        return state.merge({ view: payload.view, week })
+      }
     }
 
     case playerActions.SEARCH_PLAYERS:

@@ -201,6 +201,9 @@ export const statHeaders = {
 }
 
 export const fullStats = [
+  // fantasy
+  'pts',
+
   // ////// PASSING ////////
   // basic
   'pc_pct',
