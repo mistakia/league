@@ -1,5 +1,6 @@
 import * as constants from './constants'
 import calculatePercentiles from './calculate-percentiles'
+import calculatePoints from './calculate-points'
 
 const round = (value, precision) => {
   const multiplier = Math.pow(10, precision || 0)
@@ -8,7 +9,7 @@ const round = (value, precision) => {
 
 const toPct = (value) => value * 100
 
-const calculateStatsFromPlays = ({ plays, qualifiers }) => {
+const calculateStatsFromPlays = ({ plays, qualifiers, league }) => {
   const players = {}
   const teams = {}
   const playerToTeam = {}
@@ -137,6 +138,10 @@ const calculateStatsFromPlays = ({ plays, qualifiers }) => {
     const teamStats = teams[team]
 
     const skpa = stats.sk + stats.pa
+
+    // TODO - need player position for te premium, etc
+    const points = calculatePoints({ stats, league })
+    stats.pts = points.total
 
     stats._tch = stats.ra + stats.rec
 

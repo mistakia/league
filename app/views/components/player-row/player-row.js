@@ -19,6 +19,7 @@ class PlayerRow extends Player {
     const {
       player,
       selectedPlayer,
+      isStatsView,
       isSeasonView,
       isHosted,
       isWeekView,
@@ -33,7 +34,8 @@ class PlayerRow extends Player {
       selected,
       status,
       baselines,
-      teamId
+      teamId,
+      index
     } = this.props
 
     const isSelected =
@@ -136,7 +138,22 @@ class PlayerRow extends Player {
         </div>
       </div>
     )
+
     const stats = player.stats.toJS()
+
+    const fantasyPoints = (
+      <div className='row__group'>
+        <div className='row__group-body'>
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            fixed={1}
+            type='pts'
+          />
+        </div>
+      </div>
+    )
+
     const passingBasic = (
       <div className='row__group'>
         <div className='row__group-body'>
@@ -249,7 +266,12 @@ class PlayerRow extends Player {
     const passingPressure = (
       <div className='row__group'>
         <div className='row__group-body'>
-          <PercentileMetric stats={stats} percentiles={percentiles} type='sk' />
+          <PercentileMetric
+            stats={stats}
+            percentiles={percentiles}
+            type='sk'
+            fixed={0}
+          />
           <PercentileMetric
             stats={stats}
             percentiles={percentiles}
@@ -414,26 +436,31 @@ class PlayerRow extends Player {
           <PercentileMetric
             stats={stats}
             percentiles={percentiles}
+            fixed={0}
             type='rec'
           />
           <PercentileMetric
             stats={stats}
             percentiles={percentiles}
+            fixed={0}
             type='recy'
           />
           <PercentileMetric
             stats={stats}
             percentiles={percentiles}
+            fixed={0}
             type='tdrec'
           />
           <PercentileMetric
             stats={stats}
             percentiles={percentiles}
+            fixed={0}
             type='drp'
           />
           <PercentileMetric
             stats={stats}
             percentiles={percentiles}
+            fixed={0}
             type='drprecy'
           />
         </div>
@@ -446,6 +473,7 @@ class PlayerRow extends Player {
           <PercentileMetric
             stats={stats}
             percentiles={percentiles}
+            fixed={0}
             type='trg'
           />
           <PercentileMetric
@@ -537,6 +565,7 @@ class PlayerRow extends Player {
     return (
       <div className={classNames.join(' ')}>
         <div className='player__row-lead'>
+          <div className='player__row-index'>{index + 1}</div>
           <div className='player__row-action'>
             <PlayerWatchlistAction playerId={player.player} />
           </div>
@@ -584,6 +613,7 @@ class PlayerRow extends Player {
         {projectionView && seasonPassing}
         {projectionView && seasonRushing}
         {projectionView && seasonReceiving}
+        {isStatsView && fantasyPoints}
         {isStatsPassingAdvancedView && passingBasic}
         {isStatsPassingAdvancedView && passingEfficiency}
         {isStatsPassingAdvancedView && passingAdvanced}

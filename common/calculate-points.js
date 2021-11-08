@@ -8,7 +8,7 @@ const getScoring = ({ league }) => {
   return result
 }
 
-const calculatePoints = ({ stats, position, league }) => {
+const calculatePoints = ({ stats, position = '', league }) => {
   const scoring = getScoring({ league })
 
   const result = { total: 0 }
