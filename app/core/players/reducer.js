@@ -34,6 +34,7 @@ const initialState = new Map({
   view: isOffseason ? 'season' : 'ros',
   orderBy: isOffseason ? 'vorp.0' : 'vorp.ros',
   watchlist: new Set(),
+  watchlistOnly: false,
   cutlist: new List(),
   baselines: new Map(),
   selected: null
@@ -97,6 +98,9 @@ export function playersReducer(state = initialState, { payload, type }) {
 
     case playerActions.FILTER_PLAYERS:
       return state.merge({ [payload.type]: new List(payload.values) })
+
+    case playerActions.TOGGLE_WATCHLIST_ONLY:
+      return state.merge({ watchlistOnly: !state.get('watchlistOnly') })
 
     case playerActions.SET_ORDER: {
       const { order, orderBy } = payload
