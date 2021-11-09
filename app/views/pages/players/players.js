@@ -12,6 +12,7 @@ import PositionFilter from '@components/position-filter'
 import ExperienceFilter from '@components/experience-filter'
 import WeekFilter from '@components/week-filter'
 import AgeFilter from '@components/age-filter'
+import WatchlistFilter from '@components/watchlist-filter'
 import PageLayout from '@layouts/page'
 import PlayerHeader from '@components/player-header'
 import PlayerRow from '@components/player-row'
@@ -281,9 +282,10 @@ export default class PlayersPage extends React.Component {
               search={this.props.search}
               value={this.props.searchValue}
             />
+            {isLoggedIn && <WatchlistFilter />}
+            <PlayersViewMenu />
             <PositionFilter />
             {isLoggedIn && <AvailabilityFilter />}
-            <PlayersViewMenu />
             {isWeekView && <WeekFilter />}
             {isStatsView && <StatMenu />}
             {isStatsPassingView && <StatPassingMenu />}

@@ -6,6 +6,7 @@ export const playerActions = {
 
   SEARCH_PLAYERS: 'SEARCH_PLAYERS',
   FILTER_PLAYERS: 'FILTER_PLAYERS',
+  TOGGLE_WATCHLIST_ONLY: 'TOGGLE_WATCHLIST_ONLY',
   TOGGLE_ORDER: 'TOGGLE_ORDER',
   SET_ORDER: 'SET_ORDER',
   PLAYERS_SELECT_PLAYER: 'PLAYERS_SELECT_PLAYER',
@@ -179,6 +180,10 @@ export const playerActions = {
       type,
       values
     }
+  }),
+
+  toggleWatchlistOnly: () => ({
+    type: playerActions.TOGGLE_WATCHLIST_ONLY
   }),
 
   search: (value) => ({
