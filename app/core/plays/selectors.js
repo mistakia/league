@@ -16,7 +16,11 @@ export function getPlaysForPlayer(state, { player, week }) {
       }
 
       return (
-        Boolean(p.possessionTeam) && fixTeam(p.possessionTeam) !== player.player
+        (Boolean(p.possessionTeam) &&
+          fixTeam(p.possessionTeam) !== player.player) ||
+        p.type_nfl === 'PUNT' ||
+        p.type_nfl === 'KICK_OFF' ||
+        p.type_nfl === 'XP_KICK'
       )
     })
   }

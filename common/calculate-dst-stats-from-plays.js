@@ -1,9 +1,13 @@
 import * as constants from './constants'
+import fixTeam from './fix-team'
 
 const calculateDstStatsFromPlays = (plays, team) => {
   const dstStats = constants.createStats()
   dstStats.dtno = plays.filter(
-    (p) => p.drivePlayCount === 3 && p.type_nfl === 'PUNT'
+    (p) =>
+      p.drivePlayCount === 3 &&
+      p.type_nfl === 'PUNT' &&
+      p.possessionTeam !== team
   ).length
   const playStats = plays.map((p) => p.playStats).flat()
 
@@ -103,8 +107,7 @@ const calculateDstStatsFromPlays = (plays, team) => {
         break
 
       case 52:
-        // forced fumble
-        dstStats.dff += 1
+        // forced fumble (offensive player)
         break
 
       case 55:
@@ -132,8 +135,10 @@ const calculateDstStatsFromPlays = (plays, team) => {
 
       case 60:
         // fumble return for touchdown (defense)
-        dstStats.drf += 1
-        dstStats.dtd += 1
+        if (fixTeam(playStat.clubCode) === team) {
+          dstStats.drf += 1
+          dstStats.dtd += 1
+        }
         break
 
       case 61:
@@ -201,6 +206,9 @@ const calculateDstStatsFromPlays = (plays, team) => {
 
       case 91:
         // forced fumble player
+        if (fixTeam(playStat.clubCode) === team) {
+          dstStats.dff += 1
+        }
         break
 
       case 96:
