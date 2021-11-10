@@ -137,12 +137,12 @@ export function getFilteredPlayers(state) {
 
   const watchlist = players.get('watchlist')
   if (players.get('watchlistOnly')) {
-    filtered = items.filter((player) => watchlist.includes(player.player))
+    filtered = filtered.filter((player) => watchlist.includes(player.player))
   }
 
   const positions = players.get('positions')
   if (positions.size !== constants.positions.length) {
-    filtered = items.filter((player) => positions.includes(player.pos))
+    filtered = filtered.filter((player) => positions.includes(player.pos))
   }
 
   const experience = players.get('experience')
