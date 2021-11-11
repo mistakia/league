@@ -34,8 +34,8 @@ class TradePage extends React.Component {
   }
 
   handleProposeChange = (event, value) => {
-    const players = value.filter((p) => p.type === 'player')
-    const picks = value.filter((p) => p.type === 'pick')
+    const players = value.filter((p) => p.type !== 'Draft Picks')
+    const picks = value.filter((p) => p.type === 'Draft Picks')
     const playerIds = players.map((p) => p.id)
     const pickIds = picks.map((p) => p.id)
     this.props.setProposingTeamPlayers(playerIds)
@@ -43,8 +43,8 @@ class TradePage extends React.Component {
   }
 
   handleAcceptChange = (event, value) => {
-    const players = value.filter((p) => p.type === 'player')
-    const picks = value.filter((p) => p.type === 'pick')
+    const players = value.filter((p) => p.type !== 'Draft Picks')
+    const picks = value.filter((p) => p.type === 'Draft Picks')
     const playerIds = players.map((p) => p.id)
     const pickIds = picks.map((p) => p.id)
     this.props.setAcceptingTeamPlayers(playerIds)

@@ -42,12 +42,15 @@ export function getTradeIsValid(state) {
   removePlayerIds.forEach((p) => roster.removePlayer(p))
   for (const playerId of addPlayerIds) {
     const player = players.get(playerId)
+    const isOnPracticeSquad =
+      player.slot === constants.slots.PS || player.slot === constants.slots.PSP
+    const hasOpenPracticeSquadSlot = roster.hasOpenPracticeSquadSlot()
     const hasOpenBenchSlot = roster.hasOpenBenchSlot(player.pos)
-    if (!hasOpenBenchSlot) {
+    if (!hasOpenBenchSlot && !hasOpenPracticeSquadSlot) {
       return false
     }
     roster.addPlayer({
-      slot: constants.slots.BENCH,
+      slot: hasOpenPracticeSquadSlot ? constants.slots.PS : constants.slots.BENCH,
       player: playerId,
       pos: player.pos,
       value: player.value

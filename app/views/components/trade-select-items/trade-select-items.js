@@ -5,6 +5,7 @@ import Autocomplete from '@material-ui/lab/Autocomplete'
 import TextField from '@material-ui/core/TextField'
 import Chip from '@material-ui/core/Chip'
 
+import { constants } from '@common'
 import TradeSelectPlayer from '@components/trade-select-player'
 import TradeSelectPick from '@components/trade-select-pick'
 
@@ -37,30 +38,36 @@ export default class TradeSelectItems extends React.Component {
 
     const options = []
     players.forEach((player) => {
-      options.push({ id: player.player, label: player.name, type: 'player' })
+      const isOnPracticeSquad =
+        player.slot === constants.slots.PS || player.slot === constants.slots.PSP
+      const type = isOnPracticeSquad ? 'Practice Squad' : 'Active'
+      options.push({ id: player.player, label: player.name, type })
     })
     picks.forEach((pick) => {
       options.push({
         id: pick.uid,
         label: getPickLabel(pick, teams),
-        type: 'pick'
+        type: 'Draft Picks'
       })
     })
 
     const value = []
     selectedPlayers.forEach((player) => {
-      value.push({ id: player.player, label: player.name, type: 'player' })
+      // const isOnPracticeSquad =
+        player.slot === constants.slots.PS || player.slot === constants.slots.PSP
+      // const type = isOnPracticeSquad ? 'Practice Squad' : 'Active'
+      value.push({ id: player.player, label: player.name, type: 'Active' })
     })
     selectedPicks.forEach((pick) => {
       value.push({
         id: pick.uid,
         label: getPickLabel(pick, teams),
-        type: 'pick'
+        type: 'Draft Picks'
       })
     })
 
     const renderOption = (option, state) => {
-      if (option.type === 'pick') {
+      if (option.type === 'Draft Picks') {
         return <TradeSelectPick pickId={option.id} />
       } else {
         return <TradeSelectPlayer playerId={option.id} />
@@ -84,11 +91,14 @@ export default class TradeSelectItems extends React.Component {
       />
     )
 
+    const sorted = options.sort((a, b) => -a.type.localeCompare(b.type))
+
     return (
       <Autocomplete
         multiple
         disabled={disabled}
-        options={options}
+        options={sorted}
+        groupBy={(option) => option.type}
         getOptionLabel={(x) => x.label}
         getOptionSelected={getOptionSelected}
         renderOption={renderOption}

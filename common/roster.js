@@ -162,6 +162,7 @@ export default class Roster {
     })
   }
 
+  // TODO - handle adding practice squad player
   addPlayer({ slot, player, pos, value = 0, tag = 1 }) {
     if (this.isFull) {
       throw new Error('Roster is full')
