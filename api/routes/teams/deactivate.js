@@ -67,9 +67,11 @@ router.post('/?', async (req, res) => {
       tid,
       player
     })
-    const lastTransaction = transactions.reduce((a, b) =>
-      a.timestamp > b.timestamp ? a : b
+    const sortedTransactions = transactions.sort(
+      (a, b) => a.timestamp - b.timestamp
     )
+    const lastTransaction = sortedTransactions[sortedTransactions.length - 1]
+    const firstTransaction = sortedTransactions[0]
     const isActive = Boolean(roster.active.find((p) => p.player === player))
 
     // make sure player has not been on the active roster for more than 48 hours
@@ -102,6 +104,35 @@ router.post('/?', async (req, res) => {
       return res
         .status(400)
         .send({ error: 'player can not be deactivated once poached' })
+    }
+
+    // if signed through waivers, make sure player had no competing bids
+    if (firstTransaction.waiverid) {
+      const waivers = await db('waivers').where({
+        uid: firstTransaction.waiverid
+      })
+      const transactionWaiver = waivers[0]
+
+      // search for competing waivers
+      if (transactionWaiver) {
+        const competingWaivers = await db('waivers')
+          .where({
+            player,
+            processed: transactionWaiver.processed,
+            succ: 0,
+            type: 1,
+            lid: leagueId,
+            reason: 'player is not a free agent'
+          })
+          .whereNot({
+            tid: transactionWaiver.tid
+          })
+        if (competingWaivers.length) {
+          return res
+            .status(400)
+            .send({ error: 'player is not eligible, had competing waivers' })
+        }
+      }
     }
 
     // make sure team has space on practice squad

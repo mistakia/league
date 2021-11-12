@@ -55,7 +55,8 @@ const run = async () => {
           player: waiver.player,
           teamId: waiver.tid,
           bid: waiver.bid,
-          userId: waiver.userid
+          userId: waiver.userid,
+          waiverId: waiver.uid
         })
 
         // cancel any outstanding waivers with the same release player

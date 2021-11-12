@@ -9,7 +9,6 @@ const league = require('../db/seeds/league')
 const { constants, Errors } = require('../common')
 const { start } = constants.season
 const { selectPlayer, checkLastTransaction, checkRoster } = require('./utils')
-
 const run = require('../scripts/process-waivers-free-agency-active')
 
 chai.should()
