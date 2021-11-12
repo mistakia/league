@@ -21,6 +21,7 @@ const {
   invalid,
   error
 } = require('./utils')
+const run = require('../scripts/process-waivers-free-agency-active')
 
 chai.should()
 chai.use(chaiHTTP)
@@ -57,6 +58,83 @@ describe('API /teams - deactivate', function () {
         transaction: constants.transactions.DRAFT,
         value
       })
+
+      const res = await chai
+        .request(server)
+        .post('/api/teams/1/deactivate')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          player: player.player,
+          leagueId
+        })
+
+      res.should.have.status(200)
+      // eslint-disable-next-line
+      res.should.be.json
+
+      res.body.tid.should.equal(teamId)
+      res.body.player.should.equal(player.player)
+      res.body.slot.should.equal(constants.slots.PS)
+      res.body.transaction.userid.should.equal(userId)
+      res.body.transaction.tid.should.equal(teamId)
+      res.body.transaction.lid.should.equal(leagueId)
+      res.body.transaction.player.should.equal(player.player)
+      res.body.transaction.type.should.equal(
+        constants.transactions.ROSTER_DEACTIVATE
+      )
+      res.body.transaction.value.should.equal(value)
+      res.body.transaction.year.should.equal(constants.season.year)
+      res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
+
+      const rosterRows = await knex('rosters_players')
+        .join('rosters', 'rosters_players.rid', 'rosters.uid')
+        .where({
+          year: constants.season.year,
+          week: constants.season.week,
+          player: player.player
+        })
+        .limit(1)
+
+      const rosterRow = rosterRows[0]
+      expect(rosterRow.slot).to.equal(constants.slots.PS)
+
+      await checkLastTransaction({
+        leagueId,
+        type: constants.transactions.ROSTER_DEACTIVATE,
+        value,
+        year: constants.season.year,
+        player: player.player,
+        teamId,
+        userId
+      })
+    })
+
+    it('signed via waivers, with no competing bids', async () => {
+      MockDate.set(start.add('1', 'month').day(4).toDate())
+      const leagueId = 1
+      const teamId = 1
+      const userId = 1
+      const value = 2
+      const player = await selectPlayer()
+      await knex('waivers').insert({
+        tid: teamId,
+        userid: 1,
+        lid: leagueId,
+        player: player.player,
+        po: 9999,
+        submitted: Math.round(Date.now() / 1000),
+        bid: value,
+        type: constants.waivers.FREE_AGENCY
+      })
+
+      let error
+      try {
+        await run()
+      } catch (err) {
+        error = err
+      }
+
+      expect(error).to.equal(undefined)
 
       const res = await chai
         .request(server)
@@ -225,6 +303,53 @@ describe('API /teams - deactivate', function () {
 
     it('player on roster for more than 48 hours', async () => {
       // TODO
+    })
+
+    it('signed via free agency waivers with multiple bids', async () => {
+      MockDate.set(start.add('1', 'month').day(4).toDate())
+      const leagueId = 1
+      const player = await selectPlayer()
+      await knex('waivers').insert({
+        tid: 1,
+        userid: 1,
+        lid: leagueId,
+        player: player.player,
+        po: 9999,
+        submitted: Math.round(Date.now() / 1000),
+        bid: 1,
+        type: constants.waivers.FREE_AGENCY
+      })
+
+      await knex('waivers').insert({
+        tid: 2,
+        userid: 1,
+        lid: leagueId,
+        player: player.player,
+        po: 9999,
+        submitted: Math.round(Date.now() / 1000),
+        bid: 0,
+        type: constants.waivers.FREE_AGENCY
+      })
+
+      let err
+      try {
+        await run()
+      } catch (error) {
+        err = error
+      }
+
+      expect(err).to.equal(undefined)
+
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/deactivate')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          player: player.player,
+          leagueId
+        })
+
+      await error(request, 'player is not eligible, had competing waivers')
     })
   })
 })

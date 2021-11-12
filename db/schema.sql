@@ -1195,6 +1195,7 @@ CREATE TABLE `transactions` (
   `value` int(4) NOT NULL,
   `year` int(4) NOT NULL,
   `timestamp` int(11) NOT NULL,
+  `waiverid` int(11) DEFAULT NULL,
   UNIQUE KEY `uid` (`uid`),
   KEY `player` (`player`),
   KEY `teamid` (`tid`),

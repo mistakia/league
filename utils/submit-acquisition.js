@@ -17,7 +17,8 @@ module.exports = async function ({
   teamId,
   bid = 0,
   userId,
-  slot = constants.slots.BENCH
+  slot = constants.slots.BENCH,
+  waiverId
 }) {
   const type =
     slot === constants.slots.BENCH
@@ -172,6 +173,7 @@ module.exports = async function ({
     type,
     value: bid,
     year: constants.season.year,
+    waiverid: waiverId,
     timestamp: Math.round(Date.now() / 1000)
   }
   await db('transactions').insert(addTransaction)
