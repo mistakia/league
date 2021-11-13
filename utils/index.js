@@ -30,7 +30,9 @@ const getChartedPlayByPlayQuery = (db) =>
       'nfl_plays.yac',
       'nfl_plays.yaco',
       'nfl_games.wk',
-      'nfl_games.day'
+      'nfl_games.day',
+      'nfl_plays.cov_type',
+      'nfl_plays.sep'
     )
     .join('nfl_games', 'nfl_plays.esbid', 'nfl_games.esbid')
     .whereNot('nfl_plays.type', 'NOPL')
