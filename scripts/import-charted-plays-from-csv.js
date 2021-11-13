@@ -78,7 +78,9 @@ const formatPlay = (play) => ({
   blz: parseInt(play.blz, 10) || null,
   dblz: parseInt(play.dblz, 10) || null,
   oopd: play.oopd || null,
-  cov: play.cov || null
+  cov: play.cov || null,
+  cov_type: play.cov_type || null,
+  sep: play.sep || null
 })
 
 const run = async () => {
