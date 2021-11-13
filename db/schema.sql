@@ -1499,6 +1499,8 @@ CREATE TABLE `nfl_plays` (
   `dblz` tinyint(1) DEFAULT NULL,               -- Number of DB's blitzing
   `oopd` varchar(2) DEFAULT NULL,               -- out of pocket pass details, Clean [C], Pressure [P], Designed [D], Designed Rollout [DR]
   `cov` tinyint(1) DEFAULT NULL,                -- coverage on target, Uncovered is 0, single coverage is 1, double is 2.
+  `cov_type` varchar(3) DEFAULT NULL,           -- Type of coverage on the intended target. SNG = Man/Single coverage, SNH = Man/Single with help, DUB = Double coverage, BST = Busted coverage, HIZ = Hole in Zone, UND, Underneath the coverage, ZNC = Zone Carry, ZNT = Zone Top, PRD = Prevent Defense
+  `sep` varchar(3) DEFAULT NULL,                -- Type of separation the receiver has on the play. TCV = Tight coverage, STP = Receiver has a step on the coverage, OPN = Receiver is open, WO = Receiver is wide open on busted coverage, CLS = Coverage is closing on the receiver
 
   `charted` tinyint(1) DEFAULT NULL,
   `updated` int(11) NOT NULL,
