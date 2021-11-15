@@ -17,7 +17,8 @@ module.exports = async function ({ lid, player, tid }) {
     constants.transactions.POACHED,
     constants.transactions.AUCTION_PROCESSED,
     constants.transactions.DRAFT,
-    constants.transactions.PRACTICE_ADD
+    constants.transactions.PRACTICE_ADD,
+    constants.transactions.TRANSITION_TAG
   ]
 
   return transactions.find((t) => types.includes(t.type))
