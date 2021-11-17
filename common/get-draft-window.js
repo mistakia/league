@@ -2,10 +2,12 @@ import dayjs from 'dayjs'
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore'
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
 import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
 
 dayjs.extend(isSameOrBefore)
 dayjs.extend(isSameOrAfter)
 dayjs.extend(utc)
+dayjs.extend(timezone)
 
 export default function getDraftWindow({
   start,
@@ -14,7 +16,7 @@ export default function getDraftWindow({
   pickNum,
   type = 'hour'
 }) {
-  let clockStart = dayjs.unix(start).utc().utcOffset(-4).startOf('day')
+  let clockStart = dayjs.unix(start).tz('America/New_York').startOf('day')
   const isValid = (time) =>
     time.isSameOrAfter(time.hour(min)) && time.isSameOrBefore(time.hour(max))
 
