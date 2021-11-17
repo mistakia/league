@@ -18,7 +18,7 @@ describe('COMMON Season', function () {
     expect(constants.season.isRegularSeason).to.equal(false)
 
     // 1 minute before start of week 1
-    MockDate.set(start.add('7', 'day').subtract('1', 'minute').utc())
+    MockDate.set(start.add('7', 'day').subtract('1', 'minute').toDate())
     expect(constants.season.isRegularSeason).to.equal(false)
 
     // start of week 1

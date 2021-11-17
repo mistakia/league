@@ -126,8 +126,7 @@ module.exports = async function ({
     poachPlayer.fname
   } ${poachPlayer.lname} (${
     poachPlayer.pos
-  }). This claim will be processed around ${dayjs()
-    .utcOffset(-4)
+  }). This claim will be processed around ${constants.season.now
     .add('48', 'hours')
     .format('dddd, MMMM Do h:mm a')} EST.`
   await sendNotifications({
