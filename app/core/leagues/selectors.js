@@ -80,7 +80,7 @@ export function getLeagueEvents(state) {
       date: firstWaiverDate
     })
   } else if (constants.season.isRegularSeason) {
-    const waiverDate = dayjs.utc().utcOffset(-4).day(3).hour(15).minute(0)
+    const waiverDate = constants.season.now.day(3).hour(15).minute(0)
     const nextWaiverDate = now.isBefore(waiverDate)
       ? waiverDate
       : waiverDate.add('1', 'week')
