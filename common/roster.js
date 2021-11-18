@@ -150,6 +150,11 @@ export default class Roster {
     this._players.set(player, { ...data, value })
   }
 
+  updateSlot(player, slot) {
+    const data = this.get(player)
+    this._players.set(player, { ...data, slot })
+  }
+
   removePlayer(player) {
     this._players.delete(player)
   }

@@ -82,6 +82,8 @@ module.exports = {
   isPlayerRostered: require('./is-player-rostered'),
   isPlayerLocked: require('./is-player-locked'),
   submitPoach: require('./submit-poach'),
+  submitReserve: require('./submit-reserve'),
+  submitActivate: require('./submit-activate'),
   processPoach: require('./process-poach'),
   processRelease: require('./process-release'),
   processTransitionBid: require('./process-transition-bid'),
