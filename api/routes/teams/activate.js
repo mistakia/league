@@ -1,19 +1,19 @@
 const express = require('express')
 const router = express.Router({ mergeParams: true })
 
-const { constants, Roster } = require('../../../common')
+const { constants } = require('../../../common')
 const {
-  getRoster,
-  getLeague,
-  sendNotifications,
+  submitReserve,
+  submitActivate,
+  processRelease,
   verifyUserTeam
 } = require('../../../utils')
 
 router.post('/?', async (req, res) => {
-  const { db, logger, broadcast } = req.app.locals
+  const { logger, broadcast } = req.app.locals
   try {
     const { teamId } = req.params
-    const { player, leagueId } = req.body
+    const { player, leagueId, release, reserve, slot } = req.body
 
     if (constants.season.week > constants.season.finalWeek) {
       return res.status(400).send({ error: 'player locked' })
@@ -40,90 +40,75 @@ router.post('/?', async (req, res) => {
     }
 
     const tid = parseInt(teamId, 10)
-    const league = await getLeague(leagueId)
-    if (!league) {
-      return res.status(400).send({ error: 'invalid leagueId' })
-    }
-    const rosterRow = await getRoster({ tid })
-    const roster = new Roster({ roster: rosterRow, league })
 
-    // make sure player is on team
-    if (!roster.has(player)) {
-      return res.status(400).send({ error: 'invalid player' })
-    }
+    // process release
+    if (release) {
+      let releaseData
+      try {
+        releaseData = await processRelease({
+          player: release,
+          tid,
+          lid: leagueId,
+          userid: req.user.userId,
+          activate: player
+        })
+      } catch (error) {
+        return res.status(400).send({ error: error.message })
+      }
 
-    // make sure player is not on active roster
-    if (roster.active.find((p) => p.player === player)) {
-      return res.status(400).send({ error: 'player is on active roster' })
-    }
+      for (const item of releaseData) {
+        broadcast(leagueId, {
+          type: 'ROSTER_TRANSACTION',
+          payload: { data: item }
+        })
+      }
 
-    // make sure player is not protected
-    if (
-      roster.players.find(
-        (p) => p.player === player && p.slot === constants.slots.PSP
-      )
-    ) {
-      return res.status(400).send({ error: 'player is protected' })
-    }
+      // return activate transaction data
+      res.send(releaseData[1])
+    } else if (reserve) {
+      let reserveData
+      try {
+        reserveData = await submitReserve({
+          slot,
+          tid,
+          player: reserve,
+          leagueId,
+          userId: req.user.userId,
+          activate: player
+        })
+      } catch (error) {
+        return res.status(400).send({ error: error.message })
+      }
 
-    const players = await db('player')
-      .join('transactions', 'player.player', 'transactions.player')
-      .where('player.player', player)
-      .where({
-        lid: leagueId,
-        tid
+      for (const item of reserveData) {
+        broadcast(leagueId, {
+          type: 'ROSTER_TRANSACTION',
+          payload: { data: item }
+        })
+      }
+
+      // return activate transaction data
+      res.send(reserveData[1])
+    } else {
+      let data
+      try {
+        data = await submitActivate({
+          tid,
+          player,
+          leagueId,
+          userId: req.user.userId
+        })
+      } catch (error) {
+        return res.status(400).send({ error: error.message })
+      }
+
+      broadcast(leagueId, {
+        type: 'ROSTER_TRANSACTION',
+        payload: { data }
       })
-      .orderBy('transactions.timestamp', 'desc')
-    const playerRow = players[0]
 
-    // make sure team has space on active roster
-    if (!roster.hasOpenBenchSlot(playerRow.pos)) {
-      return res
-        .status(400)
-        .send({ error: 'no available space on active roster' })
+      res.send(data)
     }
-
-    await db('rosters_players').update({ slot: constants.slots.BENCH }).where({
-      rid: rosterRow.uid,
-      player
-    })
-
-    const transaction = {
-      userid: req.user.userId,
-      tid,
-      lid: leagueId,
-      player,
-      type: constants.transactions.ROSTER_ACTIVATE,
-      value: playerRow.value,
-      year: constants.season.year,
-      timestamp: Math.round(Date.now() / 1000)
-    }
-    await db('transactions').insert(transaction)
-
-    const data = {
-      player,
-      tid,
-      slot: constants.slots.BENCH,
-      rid: roster.uid,
-      pos: playerRow.pos,
-      transaction
-    }
-    res.send(data)
-    broadcast(leagueId, {
-      type: 'ROSTER_TRANSACTION',
-      payload: { data }
-    })
-
-    const teams = await db('teams').where({ uid: tid })
-    const team = teams[0]
-
-    const message = `${team.name} (${team.abbrv}) has activated ${playerRow.fname} ${playerRow.lname} (${playerRow.pos}).`
-
-    await sendNotifications({
-      league,
-      notifyLeague: true,
-      message
-    })
   } catch (error) {
     logger(error)
     return res.status(400).send({ error: error.toString() })

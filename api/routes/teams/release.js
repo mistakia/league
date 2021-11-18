@@ -76,9 +76,9 @@ router.post('/?', async (req, res) => {
       }
     }
 
-    let data
+    let result
     try {
-      data = await processRelease({
+      result = await processRelease({
         player,
         tid,
         lid,
@@ -88,6 +88,7 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: error.message })
     }
 
+    const data = result[0]
     res.send(data)
     broadcast(lid, {
       type: 'ROSTER_TRANSACTION',

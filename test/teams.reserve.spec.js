@@ -116,94 +116,6 @@ describe('API /teams - reserve', function () {
       })
     })
 
-    it('move player to reserve - cov', async () => {
-      MockDate.set(start.add('1', 'week').toDate())
-      const player = await selectPlayer()
-      const teamId = 1
-      const leagueId = 1
-      const userId = 1
-      const value = 2
-      await addPlayer({
-        teamId,
-        leagueId,
-        userId,
-        player,
-        slot: constants.slots.BENCH,
-        transaction: constants.transactions.DRAFT,
-        value
-      })
-
-      const rosters = await knex('rosters')
-        .where({
-          week: constants.season.week - 1,
-          year: constants.season.year,
-          tid: teamId
-        })
-        .limit(1)
-      const rosterId = rosters[0].uid
-      await knex('rosters_players').insert({
-        rid: rosterId,
-        player: player.player,
-        slot: constants.slots.BENCH,
-        pos: player.pos1
-      })
-
-      await knex('player')
-        .update({
-          status: 'Reserve/COVID-19'
-        })
-        .where({
-          player: player.player
-        })
-
-      const res = await chai
-        .request(server)
-        .post('/api/teams/1/reserve')
-        .set('Authorization', `Bearer ${user1}`)
-        .send({
-          player: player.player,
-          leagueId,
-          slot: constants.slots.COV
-        })
-
-      res.should.have.status(200)
-      // eslint-disable-next-line
-      res.should.be.json
-
-      res.body.player.should.equal(player.player)
-      res.body.slot.should.equal(constants.slots.COV)
-      res.body.transaction.userid.should.equal(userId)
-      res.body.transaction.tid.should.equal(teamId)
-      res.body.transaction.lid.should.equal(leagueId)
-      res.body.transaction.player.should.equal(player.player)
-      res.body.transaction.type.should.equal(constants.transactions.RESERVE_COV)
-      res.body.transaction.value.should.equal(value)
-      res.body.transaction.year.should.equal(constants.season.year)
-      res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
-
-      const rosterRows = await knex('rosters_players')
-        .join('rosters', 'rosters_players.rid', 'rosters.uid')
-        .where({
-          year: constants.season.year,
-          week: constants.season.week,
-          player: player.player
-        })
-        .limit(1)
-
-      const rosterRow = rosterRows[0]
-      expect(rosterRow.slot).to.equal(constants.slots.COV)
-
-      await checkLastTransaction({
-        leagueId,
-        type: constants.transactions.RESERVE_COV,
-        value,
-        year: constants.season.year,
-        player: player.player,
-        teamId,
-        userId
-      })
-    })
-
     it('move player from reserve/ir to reserve/cov', async () => {
       // TODO
     })
@@ -300,7 +212,7 @@ describe('API /teams - reserve', function () {
           slot: constants.slots.IR
         })
 
-      await invalid(request, 'player')
+      await error(request, 'player not on roster')
     })
 
     it('teamId does not belong to userId', async () => {
@@ -468,6 +380,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('exceeds ir roster limits', async () => {
+      MockDate.set(start.subtract('1', 'week').toDate())
       const teamId = 1
       const leagueId = 1
       await fillRoster({ leagueId, teamId })
@@ -484,7 +397,6 @@ describe('API /teams - reserve', function () {
         .limit(1)
 
       const player = players[0].player
-
       await knex('player')
         .update({
           status: 'Injured Reserve'

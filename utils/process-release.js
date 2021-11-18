@@ -5,7 +5,9 @@ const { constants, Roster } = require('../common')
 const isPlayerLocked = require('./is-player-locked')
 const getRoster = require('./get-roster')
 
-module.exports = async function ({ lid, tid, player, userid }) {
+module.exports = async function ({ lid, tid, player, userid, activate }) {
+  const data = []
+
   // verify player id
   const playerRows = await db('player').where('player', player).limit(1)
   if (!playerRows.length) {
@@ -67,6 +69,66 @@ module.exports = async function ({ lid, tid, player, userid }) {
     }
   }
 
+  let activatePlayerRow
+  if (activate) {
+    const players = await db('player').where('player', activate)
+    activatePlayerRow = players[0]
+
+    // make sure player is on team
+    if (!roster.has(activate)) {
+      throw new Error('invalid player')
+    }
+
+    // make sure player is not on active roster
+    if (roster.active.find((p) => p.player === activate)) {
+      throw new Error('player is on active roster')
+    }
+
+    // make sure player is not protected
+    if (
+      roster.players.find(
+        (p) => p.player === activate && p.slot === constants.slots.PSP
+      )
+    ) {
+      throw new Error('player is protected')
+    }
+
+    // make sure roster has bench space
+    roster.removePlayer(player)
+    if (!roster.hasOpenBenchSlot(activatePlayerRow.pos)) {
+      throw new Error('exceeds roster limits')
+    }
+
+    // activate player
+    await db('rosters_players').update({ slot: constants.slots.BENCH }).where({
+      rid: rosterRow.uid,
+      player: activate
+    })
+
+    const activateRosterPlayer = roster.get(activate)
+    const transaction = {
+      userid,
+      tid,
+      lid,
+      player: activate,
+      type: constants.transactions.ROSTER_ACTIVATE,
+      value: activateRosterPlayer.value,
+      year: constants.season.year,
+      timestamp: Math.round(Date.now() / 1000)
+    }
+    await db('transactions').insert(transaction)
+
+    // return data
+    data.push({
+      player: activate,
+      tid,
+      slot: constants.slots.BENCH,
+      rid: roster.uid,
+      pos: activatePlayerRow.pos,
+      transaction
+    })
+  }
+
   // create transaction
   const transaction = {
     userid,
@@ -97,12 +159,14 @@ module.exports = async function ({ lid, tid, player, userid }) {
     })
     .del()
 
-  return {
+  data.unshift({
     player,
     slot: null,
     tid,
     rid: roster.uid,
     pos: playerRow.pos,
     transaction
-  }
+  })
+
+  return data
 }
