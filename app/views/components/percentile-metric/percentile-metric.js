@@ -14,7 +14,7 @@ export default class PercentileMetric extends React.Component {
     const value = stats[type]
     const percentile = percentiles[type] || {}
     let color
-    if (value < percentile.p25) {
+    if (value && value < percentile.p25) {
       const maxPercent =
         (percentile.p25 - value) / (percentile.p25 - percentile.min) / 1.5
       color = `rgba(253, 162, 145, ${maxPercent}`

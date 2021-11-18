@@ -233,21 +233,27 @@ export default class PlayersPage extends React.Component {
       </div>
     )
 
+    const headerSalary = (
+      <>
+        <PlayerHeader
+          className='table__cell metric'
+          label='Salary'
+          value='value'
+        />
+        {constants.season.isOffseason && (
+           <PlayerHeader
+             className='table__cell metric'
+             label='Market'
+             value={`market_salary.${week}`}
+           />
+        )}
+      </>
+    )
+
     const headerSeasonSummary = (
       <div className='player__row-group'>
         <div className='player__row-group-body'>
-          <PlayerHeader
-            className='table__cell metric'
-            label='Salary'
-            value='value'
-          />
-          {constants.season.isOffseason && (
-            <PlayerHeader
-              className='table__cell metric'
-              label='Market'
-              value={`market_salary.${week}`}
-            />
-          )}
+          {isLoggedIn && headerSalary}
           <PlayerHeader
             className='table__cell metric'
             label='Pts Over Replace.'
