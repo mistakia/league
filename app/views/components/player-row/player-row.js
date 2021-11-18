@@ -63,10 +63,10 @@ class PlayerRow extends Player {
         <>
           <div className='table__cell metric'>${player.value || '--'}</div>
           {constants.season.isOffseason && (
-             <div className='table__cell metric'>
-               ${Math.round(value) || '--'}
-               {inflation}
-             </div>
+            <div className='table__cell metric'>
+              ${Math.round(value) || '--'}
+              {inflation}
+            </div>
           )}
         </>
       )
