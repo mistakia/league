@@ -152,7 +152,7 @@ module.exports = async function ({
         lid: leagueId,
         userid: userId
       })
-      result.push(releaseData)
+      result.push(releaseData[0])
     }
   }
 
