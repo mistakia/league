@@ -241,11 +241,11 @@ export default class PlayersPage extends React.Component {
           value='value'
         />
         {constants.season.isOffseason && (
-           <PlayerHeader
-             className='table__cell metric'
-             label='Market'
-             value={`market_salary.${week}`}
-           />
+          <PlayerHeader
+            className='table__cell metric'
+            label='Market'
+            value={`market_salary.${week}`}
+          />
         )}
       </>
     )

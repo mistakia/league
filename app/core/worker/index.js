@@ -56,9 +56,27 @@ export function calculatePlayerValues(payload) {
   const finalWeek = constants.season.finalWeek
   for (const player of players) {
     for (let week = 0; week <= finalWeek; week++) {
-      player.points[week] = player.points[week] || { total: 0 }
+      const projection = player.projection[week]
+      if (projection) {
+        const points = calculatePoints({
+          stats: projection,
+          position: player.pos,
+          league
+        })
+        player.points[week] = points
+      } else {
+        player.points[week] = player.points[week] || { total: 0 }
+      }
       player.vorp[week] = {}
       player.market_salary[week] = {}
+    }
+
+    if (player.projection.ros) {
+      player.points.ros = calculatePoints({
+        stats: player.projection.ros,
+        position: player.pos,
+        league
+      })
     }
   }
 
