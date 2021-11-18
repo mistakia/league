@@ -45,7 +45,7 @@ class PlayerRow extends Player {
       let inflation = null
       const value = player.market_salary.getIn([`${week}`])
       const isRostered = Boolean(player.tid)
-      if (!isRostered && (isRestOfSeasonView || isSeasonView)) {
+      if (isLoggedIn && !isRostered && (isRestOfSeasonView || isSeasonView)) {
         const diff = player.market_salary.getIn(['inflation']) - value
         const classNames = ['value__inflation']
         const isPos = diff > 0
@@ -59,16 +59,22 @@ class PlayerRow extends Player {
         )
       }
 
+      const playerSalary = (
+        <>
+          <div className='table__cell metric'>${player.value || '--'}</div>
+          {constants.season.isOffseason && (
+             <div className='table__cell metric'>
+               ${Math.round(value) || '--'}
+               {inflation}
+             </div>
+          )}
+        </>
+      )
+
       return (
         <div className='row__group'>
           <div className='row__group-body'>
-            <div className='table__cell metric'>${player.value || '--'}</div>
-            {constants.season.isOffseason && (
-              <div className='table__cell metric'>
-                ${Math.round(value) || '--'}
-                {inflation}
-              </div>
-            )}
+            {isLoggedIn && playerSalary}
             <div className='table__cell metric'>
               {Math.round(player.vorp.getIn([`${week}`]) || 0)}
             </div>
@@ -540,7 +546,7 @@ class PlayerRow extends Player {
 
     const classNames = ['player__row']
     if (isSelected) classNames.push('selected')
-    if (!player.tid) classNames.push('fa')
+    if (isLoggedIn && !player.tid) classNames.push('fa')
     else if (player.tid === teamId) classNames.push('rostered')
 
     const projectionView = isRestOfSeasonView || isSeasonView || isWeekView
