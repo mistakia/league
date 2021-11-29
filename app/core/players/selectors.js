@@ -535,10 +535,7 @@ export function getPlayerStatus(state, { player, playerId }) {
         constants.season.week < constants.season.finalWeek
       ) {
         const reserve = isPlayerReserveEligible(state, { player })
-        if (
-          reserve.ir &&
-          player.slot !== constants.slots.IR
-        ) {
+        if (reserve.ir && player.slot !== constants.slots.IR) {
           status.reserve.ir = true
         }
 
