@@ -228,7 +228,13 @@ const run = async () => {
         return false
       }
 
-      return Boolean(p.possessionTeam) && fixTeam(p.possessionTeam) !== team
+      return (
+        (Boolean(p.possessionTeam) &&
+          fixTeam(p.possessionTeam) !== team) ||
+        p.type_nfl === 'PUNT' ||
+        p.type_nfl === 'KICK_OFF' ||
+        p.type_nfl === 'XP_KICK'
+      )
     })
     if (!opponentPlays.length) continue
     const play = opponentPlays[0]
