@@ -14,56 +14,50 @@ import DialogTitle from '@material-ui/core/DialogTitle'
 import Button from '@components/button'
 import { constants } from '@common'
 
-export default class FranchiseConfirmation extends React.Component {
+export default class ReserveConfirmation extends React.Component {
   constructor(props) {
     super(props)
 
     this.state = {
-      untag: '',
-      error: false,
-      missingUntag: false
+      activate: '',
+      missingActivate: false
     }
 
-    const { team, player } = props
-    this._isEligible = team.roster.isEligibleForTag({
-      tag: constants.tags.FRANCHISE,
-      player: player.player
-    })
-    this._untags = []
-    const taggedPlayers = team.roster.getPlayersByTag(constants.tags.FRANCHISE)
-    const taggedPlayerIds = taggedPlayers.map((p) => p.player)
-    for (const playerId of taggedPlayerIds) {
+    const { team } = props
+    this._hasReserveSpace = team.roster.hasOpenInjuredReserveSlot()
+    this._activatable = []
+
+    const reservePlayerIds = team.roster.reserve.map((p) => p.player)
+    for (const playerId of reservePlayerIds) {
       const player = team.players.find((p) => p.player === playerId)
-      this._untags.push(player)
+      this._activatable.push(player)
     }
   }
 
-  handleUntag = (event) => {
+  handleSelectActivate = (event) => {
     const { value } = event.target
-    this.setState({ untag: value, missingUntag: false })
+    this.setState({ activate: value, missingActivate: false })
   }
 
   handleSubmit = () => {
-    const { untag, error } = this.state
+    const { activate } = this.state
     const { player } = this.props.player
 
-    if (!this._isEligible && !untag) {
-      return this.setState({ missingUntag: true })
+    if (!this._hasReserveSpace && !activate) {
+      return this.setState({ missingActivate: true })
     } else {
-      this.setState({ missingUntag: false })
+      this.setState({ missingActivate: false })
     }
 
-    if (!error) {
-      this.props.add({ remove: untag, tag: constants.tags.FRANCHISE, player })
-      this.props.onClose()
-    }
+    this.props.reserve({ player, slot: constants.slots.IR, activate })
+    this.props.onClose()
   }
 
   render = () => {
     const { player } = this.props
 
     const menuItems = []
-    for (const rPlayer of this._untags) {
+    for (const rPlayer of this._activatable) {
       menuItems.push(
         <MenuItem key={rPlayer.player} value={rPlayer.player}>
           {rPlayer.name} ({rPlayer.pos})
@@ -73,21 +67,27 @@ export default class FranchiseConfirmation extends React.Component {
 
     return (
       <Dialog open onClose={this.props.onClose}>
-        <DialogTitle>Franchise Tag</DialogTitle>
+        <DialogTitle>Designate Reserve</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {`Apply Franchise Tag to ${player.name} (${player.pos})`}
+            {`${player.fname} ${player.lname} (${player.pos}) will be placed on Reserves/IR. He will not be available to use in lineups until he's activated.`}
           </DialogContentText>
+          {!this._hasReserveSpace && (
+            <DialogContentText>
+              No reserve space available, make room by activating a player from
+              reserve.
+            </DialogContentText>
+          )}
           <div className='waiver__claim-inputs'>
-            {!this._isEligible && (
+            {!this._hasReserveSpace && (
               <FormControl size='small' variant='outlined'>
-                <InputLabel id='untag-label'>Remove Tag</InputLabel>
+                <InputLabel id='activate-label'>Activate</InputLabel>
                 <Select
-                  labelId='untag-label'
-                  error={this.state.missingUntag}
-                  value={this.state.untag}
-                  onChange={this.handleUntag}
-                  label='Remove Tag'>
+                  labelId='activate-label'
+                  error={this.state.missingActivate}
+                  value={this.state.activate}
+                  onChange={this.handleSelectActivate}
+                  label='Activate'>
                   {menuItems}
                 </Select>
               </FormControl>
@@ -107,12 +107,9 @@ export default class FranchiseConfirmation extends React.Component {
   }
 }
 
-FranchiseConfirmation.propTypes = {
-  team: PropTypes.object,
+ReserveConfirmation.propTypes = {
   onClose: PropTypes.func,
-  league: PropTypes.object,
-  add: PropTypes.func,
-  status: PropTypes.object,
+  reserve: PropTypes.func,
   player: ImmutablePropTypes.record,
-  waiver: PropTypes.object
+  team: PropTypes.object
 }

@@ -7,6 +7,8 @@ import DialogContent from '@material-ui/core/DialogContent'
 import DialogContentText from '@material-ui/core/DialogContentText'
 import DialogTitle from '@material-ui/core/DialogTitle'
 
+import ReserveConfirmation from '@components/reserve-confirmation'
+import ActivateConfirmation from '@components/activate-confirmation'
 import WaiverConfirmation from '@components/waiver-confirmation'
 import PoachConfirmation from '@components/poach-confirmation'
 import AddPlayerDialog from '@components/add-player-dialog'
@@ -33,6 +35,10 @@ export default class Confirmation extends React.Component {
     if (this.props.info.id) {
       const getComponent = (id) => {
         switch (id) {
+          case 'RESERVE':
+            return ReserveConfirmation
+          case 'ACTIVATE':
+            return ActivateConfirmation
           case 'WAIVER':
             return WaiverConfirmation
           case 'POACH':

@@ -114,11 +114,12 @@ export const rosterActions = {
     }
   }),
 
-  reserve: ({ player, slot }) => ({
+  reserve: ({ player, slot, activate }) => ({
     type: rosterActions.SET_ROSTER_RESERVE,
     payload: {
       player,
-      slot
+      slot,
+      activate
     }
   }),
 
@@ -151,10 +152,13 @@ export const rosterActions = {
     }
   }),
 
-  activate: (player) => ({
+  activate: ({ player, release, reserve, slot }) => ({
     type: rosterActions.ACTIVATE_PLAYER,
     payload: {
-      player
+      player,
+      release,
+      reserve,
+      slot
     }
   }),
 
