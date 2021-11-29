@@ -28,7 +28,14 @@ export function getPlaysForPlayer(state, { player, week }) {
   let filtered = new List()
   for (const play of formatted.valueSeq()) {
     const pos = play.possessionTeam
-    if (!pos || fixTeam(pos) !== player.team) continue
+    if (
+      !pos ||
+      (fixTeam(pos) !== player.team &&
+        play.type_nfl !== 'PUNT' &&
+        play.type_nfl !== 'KICK_OFF' &&
+        play.type_nfl !== 'XP_KICK')
+    )
+      continue
 
     const playStats = play.playStats.filter(
       (ps) =>

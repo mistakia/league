@@ -15,7 +15,10 @@ const calculateDstStatsFromPlays = (plays, team) => {
     switch (playStat.statId) {
       case 2:
         // punt block
-        dstStats.dblk += 1
+        // clubCode belongs to possession team
+        if (fixTeam(playStat.clubCode) !== team) {
+          dstStats.dblk += 1
+        }
         break
 
       case 7:
@@ -164,7 +167,9 @@ const calculateDstStatsFromPlays = (plays, team) => {
 
       case 71:
         // blocked field goal
-        dstStats.dblk += 1
+        if (fixTeam(playStat.clubCode) !== team) {
+          dstStats.dblk += 1
+        }
         break
 
       case 72:
@@ -174,7 +179,9 @@ const calculateDstStatsFromPlays = (plays, team) => {
 
       case 74:
         // blocked extra point
-        dstStats.dblk += 1
+        if (fixTeam(playStat.clubCode) !== team) {
+          dstStats.dblk += 1
+        }
         break
 
       case 83:
