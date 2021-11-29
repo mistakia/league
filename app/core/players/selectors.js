@@ -510,9 +510,7 @@ export function getPlayerStatus(state, { player, playerId }) {
 
       const isActive = !!roster.active.find((p) => p.player === player.player)
       if (!isActive) {
-        if (roster.hasOpenBenchSlot(player.pos)) {
-          status.eligible.activate = true
-        }
+        status.eligible.activate = true
 
         // is regular season and is on practice squad && has no poaching claims
         const leaguePoaches = getPoachesForCurrentLeague(state)
@@ -539,7 +537,6 @@ export function getPlayerStatus(state, { player, playerId }) {
         const reserve = isPlayerReserveEligible(state, { player })
         if (
           reserve.ir &&
-          roster.hasOpenInjuredReserveSlot() &&
           player.slot !== constants.slots.IR
         ) {
           status.reserve.ir = true
