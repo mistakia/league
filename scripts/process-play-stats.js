@@ -229,8 +229,7 @@ const run = async () => {
       }
 
       return (
-        (Boolean(p.possessionTeam) &&
-          fixTeam(p.possessionTeam) !== team) ||
+        (Boolean(p.possessionTeam) && fixTeam(p.possessionTeam) !== team) ||
         p.type_nfl === 'PUNT' ||
         p.type_nfl === 'KICK_OFF' ||
         p.type_nfl === 'XP_KICK'
