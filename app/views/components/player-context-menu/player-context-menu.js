@@ -29,11 +29,12 @@ export default class PlayerContextMenu extends React.Component {
   }
 
   handleActivate = () => {
-    const { player, activate } = this.props
+    const { player } = this.props
     this.props.showConfirmation({
-      title: 'Roster Activation',
-      description: `${player.fname} ${player.lname} (${player.pos}) will be placed on the active roster. He will no longer be eligble for the practice squad.`,
-      onConfirm: () => activate(player.player)
+      id: 'ACTIVATE',
+      data: {
+        player
+      }
     })
     this.props.hide()
   }
@@ -96,12 +97,12 @@ export default class PlayerContextMenu extends React.Component {
   }
 
   handleReserveIR = () => {
-    const { player, reserve } = this.props
+    const { player } = this.props
     this.props.showConfirmation({
-      title: 'Roster Reserve',
-      description: `${player.fname} ${player.lname} (${player.pos}) will be placed on Reserves/IR. He will not be available to use in lineups until he's activated.`,
-      onConfirm: () =>
-        reserve({ player: player.player, slot: constants.slots.IR })
+      id: 'RESERVE',
+      data: {
+        player
+      }
     })
     this.props.hide()
   }
@@ -414,7 +415,6 @@ PlayerContextMenu.propTypes = {
   status: PropTypes.object,
   showContext: PropTypes.func,
   hide: PropTypes.func,
-  activate: PropTypes.func,
   deactivate: PropTypes.func,
   showConfirmation: PropTypes.func,
   cancelClaim: PropTypes.func,

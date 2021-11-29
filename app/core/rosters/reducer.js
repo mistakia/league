@@ -137,20 +137,30 @@ export function rostersReducer(state = new Map(), { payload, type }) {
         if (!players) return state
 
         const index = players.findIndex((p) => p.player === payload.data.player)
-        state.setIn(
-          [payload.data.tid, constants.season.week, 'players', index, 'slot'],
-          payload.data.slot
-        )
-        if (payload.data.transaction) {
-          const { type, value, timestamp } = payload.data.transaction
-          state.mergeIn(
-            [payload.data.tid, constants.season.week, 'players', index],
-            {
-              type,
-              value,
-              timestamp
-            }
+        if (payload.data.slot) {
+          state.setIn(
+            [payload.data.tid, constants.season.week, 'players', index, 'slot'],
+            payload.data.slot
           )
+
+          if (payload.data.transaction) {
+            const { type, value, timestamp } = payload.data.transaction
+            state.mergeIn(
+              [payload.data.tid, constants.season.week, 'players', index],
+              {
+                type,
+                value,
+                timestamp
+              }
+            )
+          }
+        } else {
+          state.deleteIn([
+            payload.data.tid,
+            constants.season.week,
+            'players',
+            index
+          ])
         }
       })
     }
