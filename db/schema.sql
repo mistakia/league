@@ -1881,6 +1881,7 @@ CREATE TABLE `league_team_forecast` (
   `playoff_odds` decimal(5,4) NOT NULL,
   `division_odds` decimal(5,4) NOT NULL,
   `bye_odds` decimal(5,4) NOT NULL,
+  `championship_odds` decimal(5,4) NOT NULL,
   `timestamp` int(11) NOT NULL,
   UNIQUE KEY `team_forecast_day` (`tid`,`year`,`week`,`day`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
