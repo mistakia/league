@@ -21,7 +21,8 @@ export const Team = new Record({
 
   playoff_odds: null,
   division_odds: null,
-  bye_odds: null
+  bye_odds: null,
+  championship_odds: null
 })
 
 export function createTeam({
@@ -44,7 +45,8 @@ export function createTeam({
 
   playoff_odds,
   division_odds,
-  bye_odds
+  bye_odds,
+  championship_odds
 }) {
   return new Team({
     uid,
@@ -65,6 +67,7 @@ export function createTeam({
 
     playoff_odds,
     division_odds,
-    bye_odds
+    bye_odds,
+    championship_odds
   })
 }
