@@ -26,6 +26,10 @@ module.exports = async (player) => {
     return false
   }
 
+  if (playerRow.status === 'Inactive') {
+    return false
+  }
+
   const gameStart = dayjs.tz(
     `${playerRow.date} ${playerRow.time_est}`,
     'YYYY/MM/DD HH:mm:SS',
