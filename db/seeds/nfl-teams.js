@@ -127,13 +127,13 @@ module.exports = async function (knex) {
       cteam: 'IND'
     },
     {
-      player: 'JAC',
+      player: 'JAX',
       fname: 'Jacksonville',
       lname: 'Jaguars',
       pname: 'Jaguars',
       pos: 'DST',
       pos1: 'DST',
-      cteam: 'JAC'
+      cteam: 'JAX'
     },
     {
       player: 'KC',
