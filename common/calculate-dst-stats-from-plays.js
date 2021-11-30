@@ -232,6 +232,13 @@ const calculateDstStatsFromPlays = (plays, team) => {
         // two point pass safety
         break
 
+      case 404:
+        // defender intercepted or recovered two point return
+        if (fixTeam(playStat.clubCode) === team) {
+          dstStats.dtpr += 1
+        }
+        break
+
       case 420:
         // two point return
         dstStats.dtpr += 1
