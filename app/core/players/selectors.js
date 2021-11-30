@@ -369,6 +369,10 @@ export function isPlayerLocked(state, { player, playerId }) {
     return false
   }
 
+  if (player.status === 'Inactive') {
+    return false
+  }
+
   const game = getGameByTeam(state, { team: player.team })
   if (!game) {
     return false
