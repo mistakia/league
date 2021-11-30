@@ -125,6 +125,7 @@ function Overall({ standings }) {
           <div className='table__cell metric'>Points</div>
           <div className='table__cell metric'>P Odds</div>
           <div className='table__cell metric'>Bye Odds</div>
+          <div className='table__cell metric'>C Odds</div>
           <div className='table__cell metric'>DOI</div>
         </div>
       </div>
