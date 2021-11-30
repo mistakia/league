@@ -213,7 +213,13 @@ router.get('/:leagueId/teams/?', async (req, res) => {
       .groupBy('teamid')
       .where('year', constants.season.year)
     const forecasts = await db
-      .select('playoff_odds', 'bye_odds', 'division_odds', 'tid')
+      .select(
+        'playoff_odds',
+        'bye_odds',
+        'division_odds',
+        'championship_odds',
+        'tid'
+      )
       .from(db.raw('(' + forecastSub.toString() + ') AS X'))
       .innerJoin('league_team_forecast', function () {
         this.on(function () {
@@ -234,6 +240,7 @@ router.get('/:leagueId/teams/?', async (req, res) => {
       team.playoff_odds = forecast.playoff_odds
       team.division_odds = forecast.division_odds
       team.bye_odds = forecast.bye_odds
+      team.championship_odds = forecast.championship_odds
     }
 
     for (const usersTeam of usersTeams) {

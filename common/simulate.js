@@ -224,7 +224,5 @@ export default function simulate({ teams, matchups, rosters }) {
     result[tid].championship_odds = team.championship_round_wins / SIMULATIONS
   }
 
-  console.log(result)
-
   return result
 }
