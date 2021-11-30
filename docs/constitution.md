@@ -394,6 +394,10 @@ xiv. 10-13 points allowed (2)
 
 **Interpretive Note:** _Note that a two-week period of Inactivity, under the Offences section, is grounds for permanent suspension._
 
+**Lineups**
+
+13. Only active players in the starting lineup will become locked when their team’s scheduled game begins.
+
 ## Article VI
 
 > INAUGURAL ROOKIE DRAFT
