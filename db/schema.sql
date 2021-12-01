@@ -588,12 +588,12 @@ CREATE TABLE `team` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `draft`
+-- Table structure for table `league_draft`
 --
 
-DROP TABLE IF EXISTS `draft`;
+DROP TABLE IF EXISTS `league_draft`;
 
-CREATE TABLE `draft` (
+CREATE TABLE `league_draft` (
   `uid` int(6) unsigned NOT NULL AUTO_INCREMENT,
   `player` varchar(7) DEFAULT NULL,
   `round` tinyint(1) NOT NULL,
@@ -1575,12 +1575,12 @@ CREATE TABLE `practice` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `gamelogs`
+-- Table structure for table `nfl_gamelogs`
 --
 
-DROP TABLE IF EXISTS `gamelogs`;
+DROP TABLE IF EXISTS `nfl_gamelogs`;
 
-CREATE TABLE `gamelogs` (
+CREATE TABLE `nfl_gamelogs` (
   `player` varchar(7) NOT NULL,
   `tm` varchar(3) NOT NULL,
   `opp` varchar(3) NOT NULL,

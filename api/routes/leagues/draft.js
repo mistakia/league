@@ -17,7 +17,7 @@ router.get('/?', async (req, res) => {
     const { leagueId } = req.params
     const year = req.query.year || constants.season.year
 
-    const picks = await db('draft').where({ lid: leagueId, year })
+    const picks = await db('league_draft').where({ lid: leagueId, year })
     res.send({ picks })
   } catch (err) {
     logger(err)
@@ -67,7 +67,7 @@ router.post('/?', async (req, res) => {
     }
 
     // check if previous pick has been made
-    const picks = await db('draft').where({ uid: pickId }).whereNull('player')
+    const picks = await db('league_draft').where({ uid: pickId }).whereNull('player')
     const pick = picks[0]
     if (!pick) {
       return res.status(400).send({ error: 'invalid pickId' })
@@ -76,7 +76,7 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid pickId' })
     }
 
-    const prevQuery = await db('draft').where({
+    const prevQuery = await db('league_draft').where({
       pick: pick.pick - 1,
       lid,
       year: constants.season.year
@@ -156,7 +156,7 @@ router.post('/?', async (req, res) => {
       value
     })
 
-    const updateDraft = db('draft')
+    const updateDraft = db('league_draft')
       .where({ uid: pickId })
       .update({ player: playerId })
 

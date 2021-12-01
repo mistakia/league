@@ -35,7 +35,7 @@ router.get('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid type' })
     }
 
-    const waivers = await db('waivers')
+    const waivers = await db('league_waivers')
       .select('uid', 'processed')
       .where('lid', leagueId)
       .where('type', type)
@@ -43,7 +43,7 @@ router.get('/?', async (req, res) => {
       .groupBy('processed')
       .orderBy('processed', 'desc')
     const waiverIds = waivers.map((p) => p.uid)
-    const waiverReleases = await db('waiver_releases').whereIn(
+    const waiverReleases = await db('league_waiver_releases').whereIn(
       'waiverid',
       waiverIds
     )
@@ -131,7 +131,7 @@ router.post('/?', async (req, res) => {
       // TODO - verify player was not previously on team active roster
     }
 
-    const transactions = await db('transactions')
+    const transactions = await db('league_transactions')
       .where('player', player)
       .where({ lid: leagueId })
       .orderBy('timestamp', 'desc')
@@ -187,7 +187,7 @@ router.post('/?', async (req, res) => {
         }
 
         if (type === constants.waivers.FREE_AGENCY_PRACTICE) {
-          const picks = await db('draft').where({
+          const picks = await db('league_draft').where({
             year: constants.season.year,
             lid: leagueId
           })
@@ -226,7 +226,7 @@ router.post('/?', async (req, res) => {
       }
 
       // check for duplicate claims
-      const claimsQuery = db('waivers')
+      const claimsQuery = db('league_waivers')
         .where({ player, lid: leagueId, tid, type })
         .whereNull('processed')
         .whereNull('cancelled')
@@ -240,7 +240,7 @@ router.post('/?', async (req, res) => {
       if (claims.length) {
         // compare releases
         for (const claim of claims) {
-          const releases = await db('waiver_releases').where(
+          const releases = await db('league_waiver_releases').where(
             'waiverid',
             claim.uid
           )
@@ -283,8 +283,8 @@ router.post('/?', async (req, res) => {
       }
 
       // verify player is on practice squad
-      const slots = await db('rosters_players')
-        .join('rosters', 'rosters_players.rid', 'rosters.uid')
+      const slots = await db('league_rosters_players')
+        .join('league_rosters', 'league_rosters_players.rid', 'league_rosters.uid')
         .where({
           lid: leagueId,
           week: constants.season.week,
@@ -299,7 +299,7 @@ router.post('/?', async (req, res) => {
       }
 
       // check for duplicate waiver
-      const claims = await db('waivers')
+      const claims = await db('league_waivers')
         .where({ player, lid: leagueId, tid })
         .whereNull('processed')
         .whereNull('cancelled')
@@ -350,14 +350,14 @@ router.post('/?', async (req, res) => {
       bid,
       type
     }
-    const ids = await db('waivers').insert(data)
+    const ids = await db('league_waivers').insert(data)
     data.uid = ids[0]
     if (release.length) {
       const releaseInserts = release.map((player) => ({
         waiverid: ids[0],
         player
       }))
-      await db('waiver_releases').insert(releaseInserts)
+      await db('league_waiver_releases').insert(releaseInserts)
     }
 
     data.release = release
@@ -402,7 +402,7 @@ router.put('/order', async (req, res) => {
 
     const result = []
     for (const [index, waiverId] of waivers.entries()) {
-      await db('waivers').update('po', index).where({
+      await db('league_waivers').update('po', index).where({
         uid: waiverId,
         tid,
         lid: leagueId
@@ -459,7 +459,7 @@ router.put('/:waiverId', async (req, res) => {
     const tid = parseInt(teamId, 10)
 
     // verify waiverId belongs to teamId
-    const waivers = await db('waivers')
+    const waivers = await db('league_waivers')
       .where({
         uid: waiverId,
         tid,
@@ -507,13 +507,13 @@ router.put('/:waiverId', async (req, res) => {
       return res.status(400).send({ error: 'exceeds roster limits' })
     }
 
-    await db('waivers').update({ bid }).where({ uid: waiverId })
+    await db('league_waivers').update({ bid }).where({ uid: waiverId })
     const releaseInserts = release.map((player) => ({
       waiverid: waiverId,
       player
     }))
-    await db('waiver_releases').insert(releaseInserts).onConflict().merge()
-    await db('waiver_releases')
+    await db('league_waiver_releases').insert(releaseInserts).onConflict().merge()
+    await db('league_waiver_releases')
       .del()
       .where('waiverid', waiverId)
       .whereNotIn('player', release)
@@ -558,7 +558,7 @@ router.post('/:waiverId/cancel', async (req, res) => {
     const tid = parseInt(teamId, 10)
 
     // verify waiverId belongs to teamId
-    const waivers = await db('waivers')
+    const waivers = await db('league_waivers')
       .where({
         uid: waiverId,
         tid,
@@ -572,7 +572,7 @@ router.post('/:waiverId/cancel', async (req, res) => {
     }
 
     const cancelled = Math.round(Date.now() / 1000)
-    await db('waivers').update('cancelled', cancelled).where('uid', waiverId)
+    await db('league_waivers').update('cancelled', cancelled).where('uid', waiverId)
 
     res.send({
       uid: waiverId,

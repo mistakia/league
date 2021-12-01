@@ -205,8 +205,8 @@ router.get('/:leagueId/teams/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const { leagueId } = req.params
-    const teams = await db('teams').where({ lid: leagueId })
-    const picks = await db('draft').where({ lid: leagueId }).whereNull('player')
+    const teams = await db('league_teams').where({ lid: leagueId })
+    const picks = await db('league_draft').where({ lid: leagueId }).whereNull('player')
 
     const forecastSub = db('league_team_forecast')
       .select(db.raw('max(timestamp) AS maxtime, tid AS teamid'))
@@ -230,7 +230,7 @@ router.get('/:leagueId/teams/?', async (req, res) => {
 
     const teamIds = teams.map((t) => t.uid)
 
-    const usersTeams = await db('users_teams')
+    const usersTeams = await db('league_users_teams')
       .where({ userid: req.user.userId })
       .whereIn('tid', teamIds)
 

@@ -34,7 +34,7 @@ router.post('/?', async (req, res) => {
     }
 
     // verify poaching teamId using userId
-    const userTeams = await db('users_teams')
+    const userTeams = await db('league_users_teams')
       .join('teams', 'users_teams.tid', 'teams.uid')
       .where('userid', req.user.userId)
     const team = userTeams.find((p) => p.tid === teamId)
@@ -42,7 +42,7 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid teamId' })
     }
 
-    const transactions = await db('transactions')
+    const transactions = await db('league_transactions')
       .where({
         player,
         lid: leagueId
@@ -142,7 +142,7 @@ router.put('/:poachId', async (req, res) => {
     }
 
     // verify poachId belongs to teamId
-    const poaches = await db('poaches')
+    const poaches = await db('league_poaches')
       .where({
         uid: poachId,
         tid,
@@ -164,7 +164,7 @@ router.put('/:poachId', async (req, res) => {
     }
 
     // verify release player not use in different poach
-    const otherPendingPoachReleases = await db('poaches')
+    const otherPendingPoachReleases = await db('league_poaches')
       .select('poach_releases.player')
       .join('poach_releases', 'poaches.uid', 'poach_releases.poachid')
       .whereNot('uid', poachId)
@@ -202,7 +202,7 @@ router.put('/:poachId', async (req, res) => {
     }
 
     // verify team has salary space during offseason
-    const transactions = await db('transactions')
+    const transactions = await db('league_transactions')
       .where({ player: poachPlayer.player, lid: leagueId })
       .orderBy('timestamp', 'desc')
       .orderBy('uid', 'desc')
@@ -221,8 +221,8 @@ router.put('/:poachId', async (req, res) => {
       poachid: poachId,
       player
     }))
-    await db('poach_releases').insert(releaseInserts).onConflict().merge()
-    await db('poach_releases')
+    await db('league_poach_releases').insert(releaseInserts).onConflict().merge()
+    await db('league_poach_releases')
       .del()
       .where('poachid', poachId)
       .whereNotIn('player', release)

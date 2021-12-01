@@ -16,15 +16,15 @@ const getTrade = async (req, res) => {
     const { tradeId } = req.params
 
     // validate trade exists
-    const trades = await db('trades').where({ uid: tradeId })
+    const trades = await db('league_trades').where({ uid: tradeId })
     const trade = trades[0]
     if (!trade) {
       res.status(400).send({ error: `could not find tradeid: ${tradeId}` })
     }
 
-    const releases = await db('trade_releases').where({ tradeid: tradeId })
-    const players = await db('trades_players').where({ tradeid: tradeId })
-    const picks = await db('trades_picks')
+    const releases = await db('league_trade_releases').where({ tradeid: tradeId })
+    const players = await db('league_trades_players').where({ tradeid: tradeId })
+    const picks = await db('league_trades_picks')
       .select(
         'trades_picks.*',
         'draft.uid',
@@ -83,10 +83,10 @@ router.post(
     const { db, logger } = req.app.locals
     try {
       const { tradeId, leagueId } = req.params
-      const trades = await db('trades')
-        .join('users_teams', 'trades.tid', 'users_teams.tid')
-        .where('trades.uid', tradeId)
-        .where('users_teams.userid', req.user.userId)
+      const trades = await db('league_trades')
+        .join('league_users_teams', 'league_trades.tid', 'league_users_teams.tid')
+        .where('league_trades.uid', tradeId)
+        .where('league_users_teams.userid', req.user.userId)
         .whereNull('accepted')
         .whereNull('rejected')
         .whereNull('cancelled')
@@ -106,7 +106,7 @@ router.post(
           : [req.body.releasePlayers]
         : []
 
-      const proposingTeamReleasePlayerRows = await db('trade_releases').where({
+      const proposingTeamReleasePlayerRows = await db('league_trade_releases').where({
         tradeid: tradeId
       })
       const proposingTeamReleasePlayerIds = proposingTeamReleasePlayerRows.map(
@@ -114,7 +114,7 @@ router.post(
       )
 
       // gather traded players
-      const playerRows = await db('trades_players').where({ tradeid: tradeId })
+      const playerRows = await db('league_trades_players').where({ tradeid: tradeId })
       const proposingTeamPlayers = [] // players on proposing team
       const acceptingTeamPlayers = [] // players on accepting team
       for (const row of playerRows) {
@@ -146,17 +146,17 @@ router.post(
         return res.status(400).send({ error: error.message })
       }
 
-      const sub = db('transactions')
+      const sub = db('league_transactions')
         .select(db.raw('max(uid) as uid'))
         .whereIn('player', allPlayers)
         .where('lid', leagueId)
         .groupBy('player')
 
       const players = await db
-        .select('player.*', 'transactions.value')
+        .select('player.*', 'league_transactions.value')
         .from(db.raw('(' + sub.toString() + ') AS X'))
-        .join('transactions', 'X.uid', 'transactions.uid')
-        .join('player', 'transactions.player', 'player.player')
+        .join('league_transactions', 'X.uid', 'league_transactions.uid')
+        .join('player', 'league_transactions.player', 'player.player')
         .whereIn('player.player', allPlayers)
 
       // validate accepting team roster
@@ -268,13 +268,13 @@ router.post(
       }
 
       // clear any existing poaching claims
-      const activePoaches = await db('poaches')
+      const activePoaches = await db('league_poaches')
         .where('lid', leagueId)
         .whereNull('processed')
         .whereIn('player', allPlayers)
 
       if (activePoaches.length) {
-        await db('poaches')
+        await db('league_poaches')
           .update('processed', Math.round(Date.now() / 1000))
           .update('reason', 'Player traded')
           .update('succ', 0)
@@ -295,14 +295,14 @@ router.post(
         })
       }
       if (insertReleases.length) {
-        await db('trade_releases').insert(insertReleases)
+        await db('league_trade_releases').insert(insertReleases)
       }
 
-      await db('trades')
+      await db('league_trades')
         .where({ uid: tradeId })
         .update({ accepted: Math.round(Date.now() / 1000) })
 
-      const subQuery = db('transactions')
+      const subQuery = db('league_transactions')
         .select(
           db.raw('max(uid) AS maxuid, CONCAT(player, "_", lid) AS Group1')
         )
@@ -313,7 +313,7 @@ router.post(
       const transactionHistory = await db
         .select('*')
         .from(db.raw('(' + subQuery.toString() + ') AS X'))
-        .join('transactions', function () {
+        .join('league_transactions', function () {
           this.on(function () {
             this.on(db.raw('CONCAT(player, "_", lid) = X.Group1'))
             this.andOn('uid', '=', 'maxuid')
@@ -349,8 +349,8 @@ router.post(
 
       // insert trade transactions
       if (insertTransactions.length) {
-        const tranIds = await db('transactions').insert(insertTransactions)
-        await db('trades_transactions').insert(
+        const tranIds = await db('league_transactions').insert(insertTransactions)
+        await db('league_trades_transactions').insert(
           tranIds.map((t) => ({ transactionid: t, tradeid: trade.uid }))
         )
       }
@@ -383,63 +383,63 @@ router.post(
           })
         }
 
-        await db('transactions').insert(releaseTransactions)
+        await db('league_transactions').insert(releaseTransactions)
       }
 
       // update receiving roster
       if (acceptingTeamPlayers.length || proposingTeamPlayers.length) {
-        await db('rosters_players')
+        await db('league_rosters_players')
           .del()
           .where({ rid: acceptingTeamRoster.uid })
-        await db('rosters_players').insert(acceptingTeamRoster.players)
+        await db('league_rosters_players').insert(acceptingTeamRoster.players)
       }
 
       // update proposing team roster
       if (acceptingTeamPlayers.length || proposingTeamPlayers.length) {
-        await db('rosters_players')
+        await db('league_rosters_players')
           .del()
           .where({ rid: proposingTeamRoster.uid })
-        await db('rosters_players').insert(proposingTeamRoster.players)
+        await db('league_rosters_players').insert(proposingTeamRoster.players)
       }
 
       // update traded picks
-      const pickRows = await db('trades_picks').where({ tradeid: tradeId })
+      const pickRows = await db('league_trades_picks').where({ tradeid: tradeId })
       for (const pick of pickRows) {
-        await db('draft')
+        await db('league_draft')
           .update({ tid: pick.tid === trade.pid ? trade.tid : trade.pid }) // swap team ids
           .where({ uid: pick.pickid })
       }
 
       // cancel other trades that include any picks in this trade
-      const pickTradeRows = await db('trades')
-        .innerJoin('trades_picks', 'trades.uid', 'trades_picks.tradeid')
+      const pickTradeRows = await db('league_trades')
+        .innerJoin('league_trades_picks', 'league_trades.uid', 'league_trades_picks.tradeid')
         .whereIn(
-          'trades_picks.pickid',
+          'league_trades_picks.pickid',
           pickRows.map((p) => p.pickid)
         )
-        .whereNull('trades.accepted')
-        .whereNull('trades.cancelled')
-        .whereNull('trades.rejected')
-        .whereNull('trades.vetoed')
+        .whereNull('league_trades.accepted')
+        .whereNull('league_trades.cancelled')
+        .whereNull('league_trades.rejected')
+        .whereNull('league_trades.vetoed')
 
       if (pickTradeRows.length) {
         // TODO - broadcast on WS
         // TODO - broadcast notifications
         const tradeids = pickTradeRows.map((t) => t.uid)
-        await db('trades')
+        await db('league_trades')
           .whereIn('uid', tradeids)
           .update({ cancelled: Math.round(Date.now() / 1000) })
       }
 
       // cancel other trades that include any players in this trade
-      const playerTradeRows = await db('trades')
-        .innerJoin('trades_players', 'trades.uid', 'trades_players.tradeid')
-        .whereIn('trades_players.player', allPlayers)
-        .where('trades.lid', leagueId)
-        .whereNull('trades.accepted')
-        .whereNull('trades.cancelled')
-        .whereNull('trades.rejected')
-        .whereNull('trades.vetoed')
+      const playerTradeRows = await db('league_trades')
+        .innerJoin('league_trades_players', 'league_trades.uid', 'league_trades_players.tradeid')
+        .whereIn('league_trades_players.player', allPlayers)
+        .where('league_trades.lid', leagueId)
+        .whereNull('league_trades.accepted')
+        .whereNull('league_trades.cancelled')
+        .whereNull('league_trades.rejected')
+        .whereNull('league_trades.vetoed')
 
       // remove players from cutlist
       await db('league_cutlist')
@@ -448,7 +448,7 @@ router.post(
         .del()
 
       // cancel any transition bids
-      await db('transition_bids')
+      await db('league_transition_bids')
         .update('cancelled', Math.round(Date.now() / 1000))
         .whereIn('player', allPlayers)
         .whereNull('cancelled')
@@ -460,12 +460,12 @@ router.post(
         // TODO - broadcast on WS
         // TODO - broadcast notifications
         const tradeids = playerTradeRows.map((t) => t.uid)
-        await db('trades')
+        await db('league_trades')
           .whereIn('uid', tradeids)
           .update({ cancelled: Math.round(Date.now() / 1000) })
       }
 
-      const teams = await db('teams').where('lid', leagueId)
+      const teams = await db('league_teams').where('lid', leagueId)
       const proposingTeam = teams.find((t) => t.uid === trade.pid)
       const acceptingTeam = teams.find((t) => t.uid === trade.tid)
       const proposingTeamItems = []
@@ -483,7 +483,7 @@ router.post(
         )
       }
 
-      const picks = await db('draft').whereIn(
+      const picks = await db('league_draft').whereIn(
         'uid',
         pickRows.map((p) => p.pickid)
       )
@@ -553,11 +553,11 @@ router.post(
     try {
       const { tradeId, leagueId } = req.params
 
-      const trades = await db('trades')
-        .join('teams', 'trades.tid', 'teams.uid')
-        .join('users_teams', 'trades.tid', 'users_teams.tid')
-        .where('trades.uid', tradeId)
-        .where('users_teams.userid', req.user.userId)
+      const trades = await db('league_trades')
+        .join('league_teams', 'league_trades.tid', 'league_teams.uid')
+        .join('league_users_teams', 'league_trades.tid', 'league_users_teams.tid')
+        .where('league_trades.uid', tradeId)
+        .where('league_users_teams.userid', req.user.userId)
         .whereNull('accepted')
         .whereNull('vetoed')
         .whereNull('cancelled')
@@ -571,7 +571,7 @@ router.post(
 
       const trade = trades[0]
 
-      await db('trades')
+      await db('league_trades')
         .where({ uid: tradeId })
         .update({ rejected: Math.round(Date.now() / 1000) })
 
@@ -598,11 +598,11 @@ router.post(
     try {
       const { tradeId, leagueId } = req.params
 
-      const trades = await db('trades')
-        .join('users_teams', 'trades.pid', 'users_teams.tid')
-        .join('teams', 'trades.pid', 'teams.uid')
-        .where('trades.uid', tradeId)
-        .where('users_teams.userid', req.user.userId)
+      const trades = await db('league_trades')
+        .join('league_users_teams', 'league_trades.pid', 'league_users_teams.tid')
+        .join('league_teams', 'league_trades.pid', 'league_teams.uid')
+        .where('league_trades.uid', tradeId)
+        .where('league_users_teams.userid', req.user.userId)
         .whereNull('accepted')
         .whereNull('vetoed')
         .whereNull('cancelled')
@@ -616,7 +616,7 @@ router.post(
 
       const trade = trades[0]
 
-      await db('trades')
+      await db('league_trades')
         .where({ uid: tradeId })
         .update({ cancelled: Math.round(Date.now() / 1000) })
 
@@ -650,7 +650,7 @@ router.post(
           .send({ error: 'only the commissioner can veto trades' })
       }
 
-      const trades = await db('trades').where({ uid: tradeId, lid: leagueId })
+      const trades = await db('league_trades').where({ uid: tradeId, lid: leagueId })
       if (!trades.length) {
         return res
           .status(400)
@@ -659,7 +659,7 @@ router.post(
 
       const trade = trades[0]
 
-      await db('trades')
+      await db('league_trades')
         .where({ uid: tradeId, lid: leagueId })
         .update({ vetoed: Math.round(Date.now() / 1000) })
 

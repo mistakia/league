@@ -14,24 +14,24 @@ router.get('/?', async (req, res) => {
     }
     delete user.password
 
-    const teams = await db('teams')
-      .select('teams.*')
+    const teams = await db('league_teams')
+      .select('league_teams.*')
       .select(
-        'users_teams.teamtext',
-        'users_teams.teamvoice',
-        'users_teams.leaguetext'
+        'league_users_teams.teamtext',
+        'league_users_teams.teamvoice',
+        'league_users_teams.leaguetext'
       )
       .where({ userid: req.user.userId })
-      .join('users_teams', 'users_teams.tid', 'teams.uid')
+      .join('league_users_teams', 'league_users_teams.tid', 'league_teams.uid')
 
     const leagueIds = teams.map((t) => t.lid)
     const teamIds = teams.map((t) => t.uid)
     const leagues = await db('leagues')
-      .leftJoin('seasons', function () {
-        this.on('leagues.uid', '=', 'seasons.lid')
+      .leftJoin('league_seasons', function () {
+        this.on('leagues.uid', '=', 'league_seasons.lid')
         this.on(
           db.raw(
-            `seasons.year = ${constants.season.year} or seasons.year is null`
+            `league_seasons.year = ${constants.season.year} or league_seasons.year is null`
           )
         )
       })
@@ -47,11 +47,11 @@ router.get('/?', async (req, res) => {
       source.weight = userSource ? userSource.weight : 1
     }
 
-    const poaches = await db('poaches')
+    const poaches = await db('league_poaches')
       .whereIn('lid', leagueIds)
       .whereNull('processed')
     const poachIds = poaches.map((p) => p.uid)
-    const poachReleases = await db('poach_releases').whereIn(
+    const poachReleases = await db('league_poach_releases').whereIn(
       'poachid',
       poachIds
     )
@@ -61,12 +61,12 @@ router.get('/?', async (req, res) => {
         .map((p) => p.player)
     }
 
-    const waivers = await db('waivers')
+    const waivers = await db('league_waivers')
       .whereIn('tid', teamIds)
       .whereNull('processed')
       .whereNull('cancelled')
     const waiverIds = waivers.map((p) => p.uid)
-    const waiverReleases = await db('waiver_releases').whereIn(
+    const waiverReleases = await db('league_waiver_releases').whereIn(
       'waiverid',
       waiverIds
     )

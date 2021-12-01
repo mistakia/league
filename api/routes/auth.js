@@ -69,7 +69,7 @@ router.post('/register', async (req, res) => {
         return res.status(400).send({ error: 'league does not exist' })
       }
 
-      const teams = await db('teams').where({ lid: leagueId })
+      const teams = await db('league_teams').where({ lid: leagueId })
       if (teamId) {
         if (!teams.find((t) => t.uid === teamId)) {
           return res.status(400).send({ error: 'team does not exist' })
@@ -88,9 +88,9 @@ router.post('/register', async (req, res) => {
       league = createDefaultLeague({ userId })
       const leagues = await db('leagues').insert(league)
       leagueId = leagues[0]
-      await db('seasons').insert({ lid: leagueId, year: constants.season.year })
+      await db('league_seasons').insert({ lid: leagueId, year: constants.season.year })
 
-      const teams = await db('teams').insert({
+      const teams = await db('league_teams').insert({
         lid: leagueId,
         name: 'Team Name',
         abbrv: 'TM'
@@ -99,7 +99,7 @@ router.post('/register', async (req, res) => {
     }
 
     if (!req.body.teamId) {
-      await db('rosters').insert({
+      await db('league_rosters').insert({
         tid: teamId,
         lid: leagueId,
         week: constants.season.week,
@@ -108,7 +108,7 @@ router.post('/register', async (req, res) => {
       })
     }
 
-    await db('users_teams').insert({
+    await db('league_users_teams').insert({
       userid: userId,
       tid: teamId
     })
