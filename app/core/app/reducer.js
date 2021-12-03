@@ -1,16 +1,16 @@
 import { Record, List } from 'immutable'
 import Bugsnag from '@bugsnag/js'
 
-import { DEFAULT_LEAGUE_ID } from '@core/constants'
 import { appActions } from './actions'
 import { settingActions } from '@core/settings'
 import { standingsActions } from '@core/standings'
+import { constants } from '@common'
 
 const initialState = new Record({
   token: null,
   userId: undefined,
   teamId: undefined,
-  leagueId: DEFAULT_LEAGUE_ID,
+  leagueId: constants.DEFAULTS.LEAGUE_ID,
   isPending: true,
   isUpdating: false,
   authError: null,
@@ -19,7 +19,7 @@ const initialState = new Record({
   text: 0,
   voice: 0,
   teamIds: new List(),
-  leagueIds: new List([DEFAULT_LEAGUE_ID]),
+  leagueIds: new List([constants.DEFAULTS.LEAGUE_ID]),
   teamPercentiles: {}
 })
 
