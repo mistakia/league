@@ -11,6 +11,7 @@ module.exports = async (player) => {
   }
 
   const players = await db('player')
+    .select('player.*', 'nfl_games.date', 'nfl_games.time_est')
     .where({ player })
     .joinRaw(
       'left join nfl_games on player.cteam = nfl_games.v or player.cteam = nfl_games.h'
