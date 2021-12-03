@@ -6,7 +6,7 @@ import AccordionSummary from '@material-ui/core/AccordionSummary'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 
 import EditableLeagueField from '@components/editable-league-field'
-import { DEFAULT_LEAGUE_ID } from '@core/constants'
+import { constants } from '@common'
 
 import './editable-league.styl'
 
@@ -24,7 +24,7 @@ export default class EditableLeague extends React.Component {
   }
 
   onchange = (value) => {
-    const leagueId = this.props.league.uid || DEFAULT_LEAGUE_ID
+    const leagueId = this.props.league.uid || constants.DEFAULTS.LEAGUE_ID
     this.props.update({ leagueId, ...value })
   }
 

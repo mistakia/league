@@ -8,13 +8,10 @@ export const season = new Season()
 
 // MockDate.set(dayjs.unix(1631127600).toDate())
 
-const getAvailableYears = () => {
-  const arr = []
-  for (let i = season.year; i >= 2000; i--) {
-    arr.push(i)
-  }
-  return arr
+export const DEFAULTS = {
+  LEAGUE_ID: 0
 }
+
 export const status = {
   'Voluntary Opt Out': 'OPT',
   DNR: 'DNR',
@@ -77,7 +74,16 @@ export const scoring = {
   HALF: 2,
   PPR: 3
 }
+
+const getAvailableYears = () => {
+  const arr = []
+  for (let i = season.year; i >= 2000; i--) {
+    arr.push(i)
+  }
+  return arr
+}
 export const years = getAvailableYears()
+
 export const byeWeeks = [6, 7, 8, 9, 10, 11, 12, 13, 14]
 export const weeks = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
 export const fantasyWeeks = [

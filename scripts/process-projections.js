@@ -26,10 +26,8 @@ const simulateSeason = require('./simulate-season')
 
 const log = debug('process-projections')
 
-const run = async ({ year = constants.season.year } = {}) => {
+const processLeague = async ({ year, lid }) => {
   let week = year === constants.season.year ? constants.season.week : 0
-
-  const lid = 1
   const { finalWeek } = constants.season
   const league = await getLeague(lid)
   const teams = await db('teams').where({ lid })
@@ -247,6 +245,13 @@ const run = async ({ year = constants.season.year } = {}) => {
 
   await projectLineups()
   await simulateSeason()
+}
+
+const run = async ({ year = constants.season.year } = {}) => {
+  const lids = [0, 1]
+  for (const lid of lids) {
+    await processLeague({ year, lid })
+  }
 }
 
 module.exports = run

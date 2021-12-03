@@ -4,12 +4,12 @@ import { appActions } from '@core/app'
 import { createLeague, League } from './league'
 import { teamActions } from '@core/teams'
 import { leagueActions } from './actions'
-import { DEFAULT_LEAGUE_ID } from '@core/constants'
-import { createDefaultLeague } from '@common'
+import { constants, createDefaultLeague } from '@common'
 
-const initialState = new Map({
-  [DEFAULT_LEAGUE_ID]: new League(createDefaultLeague({ userId: undefined }))
-})
+const initialState = new Map().set(
+  constants.DEFAULTS.LEAGUE_ID,
+  new League(createDefaultLeague({ userId: 0 }))
+)
 
 export function leaguesReducer(state = initialState, { payload, type }) {
   switch (type) {

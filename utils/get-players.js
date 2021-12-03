@@ -10,6 +10,9 @@ module.exports = async function ({
 }) {
   const leaguePlayerIds = []
   const baselinePlayerIds = []
+
+  const projectionLeagueId = leagueId || constants.DEFAULTS.LEAGUE_ID
+
   if (leagueId) {
     const query = db('rosters_players')
       .join('rosters', 'rosters_players.rid', 'rosters.uid')
@@ -23,13 +26,13 @@ module.exports = async function ({
 
     const playerSlots = await query
     playerSlots.forEach((s) => leaguePlayerIds.push(s.player))
-
-    const baselines = await db('league_baselines')
-      .select('player')
-      .where({ lid: leagueId })
-      .groupBy('player')
-    baselines.forEach((b) => baselinePlayerIds.push(b.player))
   }
+
+  const baselines = await db('league_baselines')
+    .select('player')
+    .where({ lid: projectionLeagueId })
+    .groupBy('player')
+  baselines.forEach((b) => baselinePlayerIds.push(b.player))
 
   const selects = [
     'player.player',
@@ -170,37 +173,33 @@ module.exports = async function ({
     }
   }
 
-  if (leagueId) {
-    const leaguePointsProj = await db('league_player_projection_points')
-      .where({
-        lid: leagueId,
-        year: constants.season.year
-      })
-      .whereIn('player', returnedPlayerIds)
+  const leaguePointsProj = await db('league_player_projection_points')
+    .where({
+      lid: projectionLeagueId,
+      year: constants.season.year
+    })
+    .whereIn('player', returnedPlayerIds)
 
-    for (const pointProjection of leaguePointsProj) {
-      playerMap[pointProjection.player].points[
-        pointProjection.week
-      ] = pointProjection
-    }
+  for (const pointProjection of leaguePointsProj) {
+    playerMap[pointProjection.player].points[
+      pointProjection.week
+    ] = pointProjection
+  }
 
-    const leagueValuesProj = await db('league_player_projection_values')
-      .where({
-        lid: leagueId,
-        year: constants.season.year
-      })
-      .whereIn('player', returnedPlayerIds)
+  const leagueValuesProj = await db('league_player_projection_values')
+    .where({
+      lid: projectionLeagueId,
+      year: constants.season.year
+    })
+    .whereIn('player', returnedPlayerIds)
 
-    for (const pointProjection of leagueValuesProj) {
-      const { vorp, vorp_adj, market_salary } = pointProjection
-      playerMap[pointProjection.player].vorp[pointProjection.week] = vorp
-      playerMap[pointProjection.player].vorp_adj[
-        pointProjection.week
-      ] = vorp_adj
-      playerMap[pointProjection.player].market_salary[
-        pointProjection.week
-      ] = market_salary
-    }
+  for (const pointProjection of leagueValuesProj) {
+    const { vorp, vorp_adj, market_salary } = pointProjection
+    playerMap[pointProjection.player].vorp[pointProjection.week] = vorp
+    playerMap[pointProjection.player].vorp_adj[pointProjection.week] = vorp_adj
+    playerMap[pointProjection.player].market_salary[
+      pointProjection.week
+    ] = market_salary
   }
 
   const projections = await db('projections')
