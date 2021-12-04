@@ -8,7 +8,7 @@ import { getCurrentTeam } from '@core/teams'
 import Menu from './menu'
 
 const mapStateToProps = createSelector(getApp, getCurrentTeam, (app, team) => ({
-  isLoggedIn: !!app.userId,
+  isLoggedIn: Boolean(app.userId),
   team
 }))
 
