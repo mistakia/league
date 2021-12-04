@@ -90,7 +90,9 @@ router.put('/?', async (req, res) => {
 
     for (const item of players) {
       // verify player is on roster
-      const isActive = !!roster.active.find((p) => p.player === item.player)
+      const isActive = Boolean(
+        roster.active.find((p) => p.player === item.player)
+      )
       if (!isActive) {
         return res.status(400).send({ error: 'invalid player' })
       }

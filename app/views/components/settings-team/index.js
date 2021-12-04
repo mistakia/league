@@ -9,7 +9,7 @@ import SettingsTeam from './settings-team'
 const mapStateToProps = createSelector(
   getTeamById,
   getCurrentLeague,
-  (team, league) => ({ team, isHosted: !!league.hosted })
+  (team, league) => ({ team, isHosted: Boolean(league.hosted) })
 )
 
 const mapDispatchToProps = {

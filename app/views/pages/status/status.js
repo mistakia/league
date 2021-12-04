@@ -26,7 +26,7 @@ export default class StatusPage extends React.Component {
     const items = []
 
     for (const [index, statusItem] of status.entries()) {
-      const isOperational = !!statusItem.succ
+      const isOperational = Boolean(statusItem.succ)
 
       const icon = isOperational ? (
         <CheckCircleOutlineIcon style={{ color: green[500] }} />

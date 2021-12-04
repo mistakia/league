@@ -122,17 +122,17 @@ export default class PlayerSlot extends React.Component {
         <div className='player__slot-slotName'>{slotName}</div>
         <div className='player__slot-player'>
           <PlayerNameExpanded playerId={player.player} hideActions />
-          {!!passing.length && (
+          {Boolean(passing.length) && (
             <div className='player__slot-projected-stats'>
               {toStringArray(passing)}
             </div>
           )}
-          {!!rushing.length && (
+          {Boolean(rushing.length) && (
             <div className='player__slot-projected-stats'>
               {toStringArray(rushing)}
             </div>
           )}
-          {!!receiving.length && (
+          {Boolean(receiving.length) && (
             <div className='player__slot-projected-stats'>
               {toStringArray(receiving)}
             </div>

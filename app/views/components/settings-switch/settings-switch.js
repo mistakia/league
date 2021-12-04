@@ -10,7 +10,7 @@ export default class SettingsSwitch extends React.Component {
     super(props)
 
     const { app, field } = props
-    const checked = !!app[field]
+    const checked = Boolean(app[field])
     this.state = { checked }
   }
 
