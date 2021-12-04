@@ -1,6 +1,6 @@
-.selected__player-paper.MuiDialog-paper
-  width 90%
+.selected__player-paper.MuiDrawer-paper
   height calc(100% - 64px)
+  border-radius 36px 36px 0 0
 
 .selected__player-header
   display flex
@@ -19,7 +19,7 @@
   flex 0 0 auto
   display flex
   flex-direction column
-  padding 0 16px
+  padding 8px 16px 0 24px
   justify-content center
 
 .selected__player-first-name
@@ -51,9 +51,6 @@
   display flex
   overflow hidden
   height 100%
-
-.selected__player-menu
-  border-right 1px solid $borderColor
 
 .selected__player-body
   flex 1
@@ -104,3 +101,14 @@
   &:hover .icon
     fill $accentColor
     cursor pointer
+
+@media (min-width 601px)
+  .selected__player-menu
+    border-right 1px solid $borderColor
+
+@media (max-width 600px)
+  .selected__player-menu
+    border-bottom 1px solid $borderColor
+
+  .selected__player-main
+    flex-direction column
