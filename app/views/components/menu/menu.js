@@ -97,7 +97,7 @@ export default class Menu extends React.Component {
               onClick={this.handleOpen}>
               <MenuIcon />
             </IconButton>
-            <LeagueSchedule />
+            {isLoggedIn && <LeagueSchedule />}
             {isLoggedIn && <NavLink to='/dashboard'>Roster</NavLink>}
             {isLoggedIn &&
               constants.season.week < constants.season.finalWeek && (
@@ -124,7 +124,10 @@ export default class Menu extends React.Component {
           anchor='left'
           open={this.state.open}
           onOpen={this.handleOpen}
-          onClose={this.handleClose}>
+          onClose={this.handleClose}
+          classes={{
+            paper: 'main__menu-paper'
+          }}>
           <List>{header}</List>
           <Divider />
           <List>
