@@ -28,7 +28,7 @@ export function appReducer(state = initialState(), { payload, type }) {
     case appActions.INIT_APP:
       return state.merge({
         token: payload.token,
-        isPending: !!payload.token
+        isPending: Boolean(payload.token)
       })
 
     case appActions.LOGOUT:

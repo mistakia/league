@@ -9,7 +9,7 @@ import SelectedPlayerLineupImpact from './selected-player-lineup-impact'
 const mapStateToProps = createSelector(
   getSelectedPlayer,
   getApp,
-  (player, app) => ({ player, isLoggedIn: !!app.userId })
+  (player, app) => ({ player, isLoggedIn: Boolean(app.userId) })
 )
 
 export default connect(mapStateToProps)(SelectedPlayerLineupImpact)

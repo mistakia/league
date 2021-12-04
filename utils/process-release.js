@@ -38,13 +38,15 @@ module.exports = async function ({ lid, tid, player, userid, activate }) {
 
   // verify player is not locked and is a starter
   const isLocked = await isPlayerLocked(player)
-  const isStarter = !!roster.starters.find((p) => p.player === player)
+  const isStarter = Boolean(roster.starters.find((p) => p.player === player))
   if (isLocked && isStarter) {
     throw new Error('starter is locked')
   }
 
   // verify player does not have a poaching claim
-  const isOnPracticeSquad = !!roster.practice.find((p) => p.player === player)
+  const isOnPracticeSquad = Boolean(
+    roster.practice.find((p) => p.player === player)
+  )
   if (isOnPracticeSquad) {
     const poaches = await db('poaches')
       .where({ player, lid })

@@ -71,7 +71,7 @@ export default class Confirmation extends React.Component {
     }
 
     return (
-      <Dialog open={!!this.props.info.title} onClose={this.handleClose}>
+      <Dialog open={Boolean(this.props.info.title)} onClose={this.handleClose}>
         <DialogTitle>{this.props.info.title}</DialogTitle>
         <DialogContent>
           <DialogContentText>{this.props.info.description}</DialogContentText>

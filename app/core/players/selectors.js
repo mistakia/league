@@ -512,7 +512,9 @@ export function getPlayerStatus(state, { player, playerId }) {
         status.eligible.franchiseTag = true
       }
 
-      const isActive = !!roster.active.find((p) => p.player === player.player)
+      const isActive = Boolean(
+        roster.active.find((p) => p.player === player.player)
+      )
       if (!isActive) {
         status.eligible.activate = true
 

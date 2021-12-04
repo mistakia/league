@@ -15,7 +15,7 @@ const mapStateToProps = createSelector(
   (players, app, statsState, status) => ({
     status,
     teamId: app.teamId,
-    isLoggedIn: !!app.userId,
+    isLoggedIn: Boolean(app.userId),
     selectedPlayer: players.get('selected'),
     baselines: players.get('baselines'),
     percentiles: statsState.playsPercentiles,

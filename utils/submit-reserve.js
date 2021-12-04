@@ -92,7 +92,7 @@ module.exports = async function ({
 
   // verify player is not locked and is a starter
   const isLocked = await isPlayerLocked(player)
-  const isStarter = !!roster.starters.find((p) => p.player === player)
+  const isStarter = Boolean(roster.starters.find((p) => p.player === player))
   if (isLocked && isStarter) {
     throw new Error('not eligible, locked starter')
   }

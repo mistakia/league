@@ -151,7 +151,7 @@ export function getPlaysByMatchupId(state, { mid }) {
       const matchSingleGsisPid = p.playStats.find((p) =>
         gsispids.includes(p.gsispid)
       )
-      return !!matchSingleGsisPid
+      return Boolean(matchSingleGsisPid)
     })
 
   const league = getCurrentLeague(state)

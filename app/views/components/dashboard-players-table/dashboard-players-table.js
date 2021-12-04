@@ -86,8 +86,8 @@ export default class DashboardPlayersTable extends React.Component {
       limit
     } = this.props
 
-    const isWaiver = !!waiverType
-    const isPoach = !!poaches
+    const isWaiver = Boolean(waiverType)
+    const isPoach = Boolean(poaches)
     const isClaim = isWaiver || isPoach
     const showReorder = isWaiver || cutlist
 

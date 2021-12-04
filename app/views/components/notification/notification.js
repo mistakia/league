@@ -13,7 +13,7 @@ export default class Notification extends React.Component {
 
     const { key } = props.info
     this.state = {
-      open: !!key,
+      open: Boolean(key),
       info: key ? props.info.toJS() : undefined,
       list: []
     }
