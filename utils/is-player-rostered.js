@@ -11,5 +11,5 @@ module.exports = async ({ player, leagueId }) => {
       year: constants.season.year
     })
 
-  return !!rosterRows.length
+  return Boolean(rosterRows.length)
 }

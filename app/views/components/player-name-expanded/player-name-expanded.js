@@ -126,7 +126,7 @@ class PlayerNameExpanded extends Player {
             <Position pos={player.pos} />
             <Team team={player.team} />
             <GameStatus status={status} player={player} />
-            {!!(constants.status[player.status] || player.gamestatus) && (
+            {Boolean(constants.status[player.status] || player.gamestatus) && (
               <PlayerLabel
                 type='game'
                 label={

@@ -582,7 +582,7 @@ class PlayerRow extends Player {
           </div>
           {isLoggedIn && (
             <div className='player__row-action'>
-              {!!isHosted && (
+              {Boolean(isHosted) && (
                 <IconButton
                   small
                   text

@@ -9,7 +9,7 @@ export default class EditableTeamSwitch extends React.Component {
 
     const { team, field } = props
     const value = team[field]
-    this.state = { checked: !!value }
+    this.state = { checked: Boolean(value) }
   }
 
   handleChange = (event) => {

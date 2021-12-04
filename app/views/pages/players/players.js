@@ -305,7 +305,7 @@ export default class PlayersPage extends React.Component {
               <Icon className='players__head-icon' name='arrow-down' />
             </div>
             <div className='players__head-actions'>
-              {!!(isSeasonView || isRestOfSeasonView) && (
+              {Boolean(isSeasonView || isRestOfSeasonView) && (
                 <IconButton onClick={this.handleExport} disabled={isPending}>
                   <GetAppIcon />
                 </IconButton>

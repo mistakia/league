@@ -91,11 +91,11 @@ export default class AuthPage extends React.Component {
               id='email'
               label='Email Address'
               type='email'
-              error={!!authError}
+              error={Boolean(authError)}
               variant='outlined'
             />
             <TextField
-              error={!!authError || this.state.passwordError}
+              error={Boolean(authError || this.state.passwordError)}
               helperText={this.state.passwordError && 'Password does not match'}
               id='password'
               label='Password'
@@ -106,7 +106,7 @@ export default class AuthPage extends React.Component {
             />
             {this.state.menu === 'register' && (
               <TextField
-                error={!!authError || this.state.passwordError}
+                error={Boolean(authError || this.state.passwordError)}
                 helperText={
                   this.state.passwordError && 'Password does not match'
                 }

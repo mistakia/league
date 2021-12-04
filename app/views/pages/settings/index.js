@@ -13,7 +13,7 @@ const mapStateToProps = createSelector(
     teamId: app.teamId,
     leagueId: app.leagueId,
     userId: app.userId,
-    isHosted: !!league.hosted
+    isHosted: Boolean(league.hosted)
   })
 )
 

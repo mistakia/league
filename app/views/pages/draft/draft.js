@@ -158,7 +158,7 @@ export default function DraftPage() {
             <Position pos={p.pos} />
           </div>
           <div>{p.team}</div>
-          {!!p.jersey && <div>#{p.jersey}</div>}
+          {Boolean(p.jersey) && <div>#{p.jersey}</div>}
         </div>
         {draftActive && onTheClock && !isDrafted && (
           <div className='draft__selected-action'>

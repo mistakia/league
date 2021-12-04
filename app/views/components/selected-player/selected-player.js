@@ -76,7 +76,7 @@ export default class SelectedPlayer extends React.Component {
     return (
       <SwipeableDrawer
         anchor='bottom'
-        open={!!player.player}
+        open={Boolean(player.player)}
         onClose={this.handleClose}
         classes={{
           paper: 'selected__player-paper'
