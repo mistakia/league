@@ -39,10 +39,11 @@ export function getScoreboardByTeamId(state, { tid }) {
   let points = 0
   let minutes = 0
 
-  if (week === 16) {
-    const starters = getStartersByTeamId(state, { tid, week: 15 })
+  if (week === constants.season.finalWeek) {
+    const prevWeek = constants.season.finalWeek - 1
+    const starters = getStartersByTeamId(state, { tid, week: prevWeek })
     starters.forEach((player) => {
-      const gamelog = getGamelogForPlayer(state, { player, week: 15 })
+      const gamelog = getGamelogForPlayer(state, { player, week: prevWeek })
       points += gamelog.total
     })
   }

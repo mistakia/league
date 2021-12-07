@@ -33,7 +33,7 @@ export default class ScoreboardTeams extends React.Component {
   render = () => {
     const { onClick, selected, scoreboards, week } = this.props
 
-    const isWC = week === 14
+    const isWC = week === constants.season.wildcardWeek
     const sorted = scoreboards.sort((a, b) => b.points - a.points)
     const cutoff = isWC ? sorted[1].points : sorted[0].points
     const challenger = isWC ? sorted[2].points : sorted[1].points
