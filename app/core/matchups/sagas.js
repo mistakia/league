@@ -2,6 +2,7 @@ import { call, takeLatest, fork, select, put } from 'redux-saga/effects'
 
 import { getApp, appActions } from '@core/app'
 import { fetchMatchups, postMatchups } from '@core/api'
+import { constants } from '@common'
 import { matchupsActions } from './actions'
 import { getMatchups } from './selectors'
 import { getScoreboard, scoreboardActions } from '@core/scoreboard'
@@ -20,7 +21,7 @@ export function* selectMatchup() {
   const { teamId } = yield select(getApp)
   const scoreboard = yield select(getScoreboard)
   const week = scoreboard.get('week')
-  if (week < 14) {
+  if (week <= constants.season.regularSeasonFinalWeek) {
     const matchups = state.get('items')
     const matchup = matchups.find(
       (m) => m.tids.includes(teamId) && m.week === week
