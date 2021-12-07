@@ -32,19 +32,14 @@ export default class ScoreboardPlay extends React.Component {
 
     return (
       <div className={classNames.join(' ')} style={style}>
+        <div className='scoreboard__play-players'>{players}</div>
         <div className='scoreboard__play-info'>
-          <div className='scoreboard__play-info-time'>
-            {dayjs.unix(play.time).format('ddd h:mm')}
-          </div>
           <div className='scoreboard__play-info-play'>
             {play.play.dwn}
             {nth(play.play.dwn)} & {play.play.ytg} - {play.play.startYardLine}
+            {play.play.playDescription}
           </div>
         </div>
-        <div className='scoreboard__play-description'>
-          {play.play.playDescription}
-        </div>
-        <div className='scoreboard__play-players'>{players}</div>
       </div>
     )
   }
