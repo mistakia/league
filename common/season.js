@@ -40,6 +40,8 @@ export default class Season {
       .utcOffset(-4) // first game
     this.finalWeek = 17
     this.nflFinalWeek = 18
+    this.regularSeasonFinalWeek = 14
+    this.wildcardWeek = 15
   }
 
   get now() {

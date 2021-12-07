@@ -1,4 +1,5 @@
 import { getTeamById } from '@core/teams'
+import { constants } from '@common'
 import { createMatchup } from './matchup'
 
 export function getMatchups(state) {
@@ -28,7 +29,7 @@ export function getSelectedMatchup(state) {
   if (!matchupId) return createMatchup()
 
   const week = state.getIn(['scoreboard', 'week'])
-  if (week < 14) {
+  if (week <= constants.season.regularSeasonFinalWeek) {
     const items = matchups.get('items')
     return items.find((m) => m.uid === matchupId)
   } else {
