@@ -119,6 +119,8 @@ describe('API /teams - reserve', function () {
     it('move player from reserve/ir to reserve/cov', async () => {
       // TODO
     })
+
+    // move player to reserve/cov with full reserve slots
   })
 
   describe('errors', function () {

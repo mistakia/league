@@ -159,7 +159,7 @@ module.exports = async function ({
     roster.updateSlot(activate, constants.slots.BENCH)
   }
 
-  if (!roster.hasOpenInjuredReserveSlot()) {
+  if (slot === constants.slots.IR && !roster.hasOpenInjuredReserveSlot()) {
     throw new Error('exceeds roster limits')
   }
 
