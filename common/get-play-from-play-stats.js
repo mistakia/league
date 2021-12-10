@@ -449,7 +449,7 @@ export default function getPlayFromPlayStats(play) {
       // Fumble - Lost
       case 106:
         playRow.fuml = 1
-        playRow.fum_gsis = playStat.gsisId
+        playRow.player_fuml_gsis = playStat.gsisId
         break
 
       // Own Kickoff Recovery

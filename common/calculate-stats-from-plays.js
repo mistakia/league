@@ -32,8 +32,8 @@ const calculateStatsFromPlays = ({ plays, qualifiers, league }) => {
 
   plays.forEach((play) => {
     if (play.fuml) {
-      addStat(play.fum, 'fuml', 1)
-      playerToTeam[play.fum] = play.off
+      addStat(play.player_fuml, 'fuml', 1)
+      playerToTeam[play.player_fuml] = play.off
     }
 
     switch (play.type) {

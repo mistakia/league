@@ -3,19 +3,30 @@ const db = require('../db')
 const { fixTeam } = require('../common')
 
 module.exports = async ({
+  esbid,
+  playId,
+
   wk,
   seas,
   off,
   def,
 
   qtr,
-  clockTime,
+  game_clock_start,
   dwn,
   type,
-  yardlineNumber,
-  yardlineSide
+  ydl_num,
+  ydl_side
 }) => {
   const query = db('nfl_plays')
+
+  if (esbid) {
+    query.where({ esbid })
+  }
+
+  if (playId) {
+    query.where({ playId })
+  }
 
   if (wk) {
     query.where({ wk })
@@ -37,8 +48,8 @@ module.exports = async ({
     query.where({ qtr: parseInt(qtr, 10) })
   }
 
-  if (clockTime) {
-    query.where({ clockTime })
+  if (game_clock_start) {
+    query.where({ game_clock_start })
   }
 
   if (dwn) {
@@ -49,12 +60,12 @@ module.exports = async ({
     query.where({ type })
   }
 
-  if (yardlineNumber) {
-    query.where({ yardlineNumber })
+  if (ydl_num) {
+    query.where({ ydl_num })
   }
 
-  if (yardlineSide) {
-    query.where({ yardlineSide: fixTeam(yardlineSide) })
+  if (ydl_side) {
+    query.where({ ydl_side: fixTeam(ydl_side) })
   }
 
   const plays = await query
