@@ -93,10 +93,10 @@ const run = async () => {
   const playStats = await db('nfl_play_stats')
     .select(
       'nfl_play_stats.*',
-      'nfl_plays.drivePlayCount',
+      'nfl_plays.drive_play_count',
       'nfl_plays.type_ngs',
       'nfl_plays.type_nfl',
-      'nfl_plays.possessionTeam',
+      'nfl_plays.pos_team',
       'nfl_games.h',
       'nfl_games.v'
     )
@@ -229,7 +229,7 @@ const run = async () => {
       }
 
       return (
-        (Boolean(p.possessionTeam) && fixTeam(p.possessionTeam) !== team) ||
+        (Boolean(p.pos_team) && fixTeam(p.pos_team) !== team) ||
         p.type_nfl === 'PUNT' ||
         p.type_nfl === 'KICK_OFF' ||
         p.type_nfl === 'XP_KICK'
@@ -244,8 +244,8 @@ const run = async () => {
       const playStats = groupedPlays[playId]
       const p = playStats[0]
       formattedPlays.push({
-        possessionTeam: p.possessionTeam,
-        drivePlayCount: p.drivePlayCount,
+        pos_team: p.pos_team,
+        drive_play_count: p.drive_play_count,
         type_nfl: p.type_nfl,
         playStats
       })
@@ -272,13 +272,13 @@ const run = async () => {
       'nfl_plays.esbid',
       'nfl_plays.playId',
       'nfl_plays.type_ngs',
-      'nfl_plays.possessionTeam'
+      'nfl_plays.pos_team'
     )
     .join('nfl_games', 'nfl_plays.esbid', '=', 'nfl_games.esbid')
     .where('nfl_plays.seas', year)
     .where('nfl_plays.wk', week)
   for (const play of plays) {
-    const off = play.possessionTeam
+    const off = play.pos_team
     if (!off) continue
     const def = off === play.h ? play.v : play.h
     const type = getPlayType(play.type_ngs)
@@ -302,8 +302,8 @@ const run = async () => {
   for (const [esbid, playStats] of Object.entries(playStatsByEsbid)) {
     const playStatsByPlay = groupBy(playStats, 'playId')
     for (const [playId, playStats] of Object.entries(playStatsByPlay)) {
-      // ignore plays with no possessionTeam, likely a timeout or two minute warning
-      const playStat = playStats.find((p) => p.possessionTeam)
+      // ignore plays with no pos_team, likely a timeout or two minute warning
+      const playStat = playStats.find((p) => p.pos_team)
       if (!playStat) continue
 
       const playRow = getPlayFromPlayStats({ playStats })
@@ -312,10 +312,12 @@ const run = async () => {
 
       // TODO - succ
 
-      if (playRow.fum_gsis) {
-        const player = players_gsisid.find((p) => p.gsisid === playRow.fum_gsis)
+      if (playRow.player_fuml_gsis) {
+        const player = players_gsisid.find(
+          (p) => p.gsisid === playRow.player_fuml_gsis
+        )
         if (player) {
-          playRow.fum = player.player
+          playRow.player_fuml = player.player
         }
       }
 

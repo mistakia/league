@@ -102,7 +102,7 @@ const run = async () => {
   for (const cPlay of chartedPlays) {
     const game = games.find((g) => g.gid === cPlay.gid)
     const play = plays.find((p) => p.pid === cPlay.pid)
-    const clockTime = dayjs
+    const game_clock_start = dayjs
       .duration({
         minutes: play.min,
         seconds: play.sec
@@ -114,7 +114,7 @@ const run = async () => {
       off: cPlay.off,
       def: cPlay.def,
       qtr: cPlay.qtr,
-      clockTime,
+      game_clock_start,
       dwn: cPlay.dwn,
       ...getYardlineInfoFromString(cPlay.los)
     }

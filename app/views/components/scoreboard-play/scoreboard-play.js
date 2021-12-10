@@ -27,8 +27,7 @@ export default class ScoreboardPlay extends React.Component {
     }
 
     const classNames = ['scoreboard__play']
-    if (play.play.isBigPlay) classNames.push('big')
-    if (play.play.scoringPlayType === 'TD') classNames.push('td')
+    if (play.play.score_type === 'TD') classNames.push('td')
 
     return (
       <div className={classNames.join(' ')} style={style}>
@@ -38,12 +37,10 @@ export default class ScoreboardPlay extends React.Component {
           </div>
           <div className='scoreboard__play-info-play'>
             {play.play.dwn}
-            {nth(play.play.dwn)} & {play.play.ytg} - {play.play.startYardLine}
+            {nth(play.play.dwn)} & {play.play.ytg} - {play.play.ydl_start}
           </div>
         </div>
-        <div className='scoreboard__play-description'>
-          {play.play.playDescription}
-        </div>
+        <div className='scoreboard__play-description'>{play.play.desc}</div>
         <div className='scoreboard__play-players'>{players}</div>
       </div>
     )
