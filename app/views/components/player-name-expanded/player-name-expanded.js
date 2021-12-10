@@ -14,8 +14,8 @@ import PlayerHeadshot from '@components/player-headshot'
 
 import './player-name-expanded.styl'
 
-function getClock({ playDescription, clockTime, qtr }) {
-  switch (playDescription) {
+function getClock({ desc, game_clock_start, qtr }) {
+  switch (desc) {
     case 'END QUARTER 1':
       return 'End of 1st'
 
@@ -29,7 +29,7 @@ function getClock({ playDescription, clockTime, qtr }) {
       return 'Final'
 
     default:
-      return qtr ? `${clockTime} ${qtr}${nth(qtr)}` : '-'
+      return qtr ? `${game_clock_start} ${qtr}${nth(qtr)}` : '-'
   }
 }
 

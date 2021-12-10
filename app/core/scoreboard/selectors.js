@@ -61,9 +61,9 @@ export function getScoreboardByTeamId(state, { tid }) {
       if (gameStatus && gameStatus.lastPlay) {
         const lp = gameStatus.lastPlay
         const quarterMinutes =
-          lp.playDescription === 'END GAME'
+          lp.desc === 'END GAME'
             ? 0
-            : parseInt((lp.clockTime || '').split(':').pop(), 10) // TODO - double check
+            : parseInt((lp.game_clock_start || '').split(':').pop(), 10) // TODO - double check
         const quartersRemaining = lp.qtr === 5 ? 0 : 4 - lp.qtr
         minutes += quartersRemaining * 15 + quarterMinutes
       }
@@ -159,7 +159,7 @@ export function getPlaysByMatchupId(state, { mid }) {
   let result = new List()
   for (const play of filteredPlays) {
     const game = getGameByTeam(state, {
-      team: fixTeam(play.possessionTeam),
+      team: fixTeam(play.pos_team),
       week: matchup.week
     })
 
@@ -196,7 +196,7 @@ export function getPlaysByMatchupId(state, { mid }) {
       'America/New_York'
     )
     const time = dayjs.utc(
-      `${date.utc().format('YYYY-MM-DD')} ${play.timeOfDay}`,
+      `${date.utc().format('YYYY-MM-DD')} ${play.timestamp}`,
       'YYYY-MM-DD HH:mm:ss'
     )
     result = result.push({
@@ -211,7 +211,7 @@ export function getPlaysByMatchupId(state, { mid }) {
   return result.sort((a, b) => b.time - a.time)
 }
 
-function getYardline(str, possessionTeam) {
+function getYardline(str, pos_team) {
   if (!str) {
     return ''
   }
@@ -220,8 +220,8 @@ function getYardline(str, possessionTeam) {
     return 50
   }
 
-  const { yardlineSide, yardlineNumber } = getYardlineInfoFromString(str)
-  return yardlineSide === possessionTeam ? yardlineNumber : 100 - yardlineNumber
+  const { side, number } = getYardlineInfoFromString(str)
+  return side === pos_team ? number : 100 - number
 }
 
 export function getGameStatusByPlayerId(
@@ -236,9 +236,9 @@ export function getGameStatusByPlayerId(
   const plays = getPlays(state, { week })
   const player = getPlayerById(state, { playerId })
   const play = plays.find((p) => {
-    if (!p.possessionTeam) return false
+    if (!p.pos_team) return false
 
-    const team = fixTeam(p.possessionTeam)
+    const team = fixTeam(p.pos_team)
     return team === game.h || team === game.v
   })
 
@@ -246,18 +246,16 @@ export function getGameStatusByPlayerId(
     return { game }
   }
 
-  const filteredPlays = plays.filter(
-    (p) => p.esbid === play.esbid && p.playDescription
-  )
+  const filteredPlays = plays.filter((p) => p.esbid === play.esbid && p.desc)
   const lastPlay = filteredPlays.maxBy((p) => p.sequence)
-  if (!lastPlay.possessionTeam) {
+  if (!lastPlay.pos_team) {
     return { game, lastPlay }
   }
 
-  const hasPossession = fixTeam(lastPlay.possessionTeam) === player.team
+  const hasPossession = fixTeam(lastPlay.pos_team) === player.team
   const yardline = getYardline(
-    lastPlay.endYardLine || lastPlay.startYardLine,
-    lastPlay.possessionTeam
+    lastPlay.ydl_end || lastPlay.ydl_start,
+    lastPlay.pos_team
   )
   const isRedzone = yardline >= 80
 
