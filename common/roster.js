@@ -224,7 +224,7 @@ export default class Roster {
       return false
     }
 
-    const count = this.players.filter((p) => p.pos === pos).length
+    const count = this.active.filter((p) => p.pos === pos).length
     const limit = this._league[`m${pos.toLowerCase()}`]
     return !limit || count < limit
   }
