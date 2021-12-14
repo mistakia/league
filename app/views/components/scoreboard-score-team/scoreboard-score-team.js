@@ -13,11 +13,6 @@ export default class ScoreboardScoreTeam extends React.Component {
     return (
       <div className='scoreboard__score-team'>
         <TeamName tid={tid} />
-        {type === constants.matchups.TOURNAMENT && (
-          <div className='scoreboard__score-minutes metric'>
-            {scoreboard.minutes + (scoreboard.minutes > 1 ? ' mins' : ' min')}
-          </div>
-        )}
         <div className='scoreboard__score-score metric'>
           {scoreboard.points.toFixed(0)}
         </div>
@@ -29,6 +24,11 @@ export default class ScoreboardScoreTeam extends React.Component {
             {isAdvancing
               ? `+${(scoreboard.points - challenger).toFixed(1)}`
               : `-${(cutoff - scoreboard.points).toFixed(1)}`}
+          </div>
+        )}
+        {type === constants.matchups.TOURNAMENT && (
+          <div className='scoreboard__score-minutes'>
+            {scoreboard.minutes + (scoreboard.minutes > 1 ? ' mins' : ' min')}
           </div>
         )}
       </div>
