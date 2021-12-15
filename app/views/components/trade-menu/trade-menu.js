@@ -2,22 +2,26 @@ import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 
+import TeamName from '@components/team-name'
+
 import './trade-menu.styl'
 
 export default class TradeMenu extends React.Component {
   render = () => {
-    const { trades, selectedTradeId, select } = this.props
+    const { trades, selectedTradeId, select, teamId } = this.props
 
     const menuItems = []
     for (const [index, trade] of trades.entries()) {
       const classNames = ['trade__menu-item']
       if (selectedTradeId === trade.uid) classNames.push('selected')
+      const otherTeamId = teamId === trade.pid ? trade.tid : trade.pid
       menuItems.push(
         <div
           key={index}
           className={classNames.join(' ')}
           onClick={() => select(trade.uid)}>
-          #{trade.uid}
+          <div className='trade__id'>#{trade.uid}</div>
+          <TeamName tid={otherTeamId} abbrv />
         </div>
       )
     }
@@ -41,5 +45,6 @@ export default class TradeMenu extends React.Component {
 TradeMenu.propTypes = {
   trades: ImmutablePropTypes.map,
   selectedTradeId: PropTypes.number,
-  select: PropTypes.func
+  select: PropTypes.func,
+  teamId: PropTypes.number
 }
