@@ -54,16 +54,13 @@ const log = debug('process:play-stats')
 debug.enable('process:play-stats')
 
 const timestamp = Math.round(Date.now() / 1000)
-const week =
-  argv.week ||
+const currentWeek =
   Math.max(
     dayjs().day() === 2 ? constants.season.week - 1 : constants.season.week,
     1
   )
 
-const year = argv.year || constants.season.year
-
-const upsert = async ({ player, stats, opp, pos, tm }) => {
+const upsert = async ({ player, stats, opp, pos, tm, week, year }) => {
   const cleanedStats = Object.keys(stats)
     .filter((key) => constants.fantasyStats.includes(key))
     .reduce((obj, key) => {
@@ -85,11 +82,7 @@ const upsert = async ({ player, stats, opp, pos, tm }) => {
     .merge()
 }
 
-const run = async () => {
-  if (week > constants.season.nflFinalWeek) {
-    return
-  }
-
+const run = async ({ year = constants.season.year, week = currentWeek, type = 'REG' } = {}) => {
   const playStats = await db('nfl_play_stats')
     .select(
       'nfl_play_stats.*',
@@ -108,6 +101,7 @@ const run = async () => {
     .where('nfl_plays.seas', year)
     .where('nfl_plays.wk', week)
     .where('nfl_play_stats.valid', 1)
+    .where('nfl_games.type', type)
 
   const missing = []
 
@@ -217,7 +211,9 @@ const run = async () => {
       pos: player.pos,
       tm: fixTeam(playStat.clubCode),
       opp,
-      stats
+      stats,
+      year,
+      week
     })
   }
 
@@ -257,7 +253,9 @@ const run = async () => {
       pos: 'DST',
       tm: team,
       opp: fixTeam(opp),
-      stats
+      stats,
+      year,
+      week
     })
   }
 
@@ -277,6 +275,7 @@ const run = async () => {
     .join('nfl_games', 'nfl_plays.esbid', '=', 'nfl_games.esbid')
     .where('nfl_plays.seas', year)
     .where('nfl_plays.wk', week)
+    .where('nfl_games.type', type)
   for (const play of plays) {
     const off = play.pos_team
     if (!off) continue
@@ -365,7 +364,13 @@ module.exports = run
 const main = async () => {
   let error
   try {
-    await run()
+    if (argv.all) {
+      for (let year = 2002; year <= constants.season.year; year++) {
+        await run({ year, week })
+      }
+    } else {
+      await run()
+    }
   } catch (err) {
     error = err
     console.log(error)
