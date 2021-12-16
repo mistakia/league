@@ -1,105 +1,66 @@
 import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
+import Tabs from '@material-ui/core/Tabs'
+import Tab from '@material-ui/core/Tab'
 
-import PlayerSelectedRow from '@components/player-selected-row'
-import PlayerSelectedRowHeader from '@components/player-selected-row-header'
-import PlayerNameText from '@components/player-name-text'
+import { constants } from '@common'
+import SelectedPlayerMatchupTable from '@components/selected-player-matchup-table'
+
+import './selected-player-matchup.styl'
 
 export default class SelectedPlayerMatchup extends React.Component {
+  constructor(props) {
+    super(props)
+
+    const currentWeek = Math.max(constants.season.week, 1)
+    this.state = {
+      value: currentWeek
+    }
+  }
+
+  handleChange = (event, value) => {
+    this.setState({ value })
+  }
+
   render = () => {
-    const {
-      gamelogs,
-      player,
-      opp,
-      defenseStats,
-      defensePercentiles,
-      playerPercentiles
-    } = this.props
+    const { player, games } = this.props
+    const { value } = this.state
 
-    if (!opp) {
-      return <div>BYE</div>
+    if (!games.length) {
+      return null
     }
 
-    const rows = []
-    for (const item of defenseStats) {
-      const percentiles = defensePercentiles[item.type]
-
-      const lead = (
-        <div className='row__group'>
-          <div className='row__group-body'>
-            <div className='row__text'>{item.title}</div>
-            <div className='table__cell metric' />
-            <div className='table__cell metric'>
-              {(item.points || 0).toFixed(1)}
-            </div>
-          </div>
-        </div>
+    const labels = []
+    for (const game of games) {
+      const opp = player.team === game.h ? game.v : game.h
+      const isHome = opp === game.h
+      const label = (
+        <>
+          <div>{`W${game.wk}`}</div>
+          <div>{`${isHome ? '' : '@'}${opp}`}</div>
+        </>
       )
-      rows.push(
-        <PlayerSelectedRow
-          key={item.title}
-          stats={item.stats}
-          lead={lead}
-          pos={player.pos}
-          percentiles={percentiles}
-        />
-      )
-    }
-
-    for (const [index, gamelog] of gamelogs.entrySeq()) {
-      const lead = (
-        <div className='row__group'>
-          <div className='row__group-body'>
-            <div className='row__text'>
-              <PlayerNameText playerId={gamelog.player} />
-            </div>
-            <div className='table__cell metric'>{gamelog.week}</div>
-            <div className='table__cell metric'>
-              {(gamelog.pts || 0).toFixed(1)}
-            </div>
-          </div>
-        </div>
-      )
-      rows.push(
-        <PlayerSelectedRow
-          key={index}
-          stats={gamelog}
-          lead={lead}
-          pos={player.pos}
-          percentiles={playerPercentiles}
-        />
-      )
+      labels.push(<Tab label={label} value={game.wk} />)
     }
 
     return (
-      <div className='selected__section'>
-        <div className='selected__section-header'>
-          <div className='row__group-head'>
-            {player.pos} vs {opp} Gamelogs
-          </div>
-        </div>
-        <div className='selected__section-header'>
-          <div className='row__group'>
-            <div className='row__group-body'>
-              <div className='row__text'>Player</div>
-              <div className='table__cell metric'>Wk</div>
-              <div className='table__cell metric'>Pts</div>
-            </div>
-          </div>
-          <PlayerSelectedRowHeader pos={player.pos} />
-        </div>
-        {rows}
+      <div className='selected__player-matchup'>
+        <Tabs
+          value={value}
+          onChange={this.handleChange}
+          variant='scrollable'
+          className='selected__player-matchup-tabs'
+          orientation='horizontal'>
+          {labels}
+        </Tabs>
+        <SelectedPlayerMatchupTable week={value} />
       </div>
     )
   }
 }
 
 SelectedPlayerMatchup.propTypes = {
-  gamelogs: ImmutablePropTypes.list,
   player: ImmutablePropTypes.record,
-  opp: PropTypes.string,
-  defenseStats: PropTypes.array,
-  defensePercentiles: PropTypes.object,
-  playerPercentiles: PropTypes.object
+  games: PropTypes.array
 }
