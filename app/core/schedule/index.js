@@ -2,6 +2,7 @@ export {
   getSchedule,
   getByeByTeam,
   getGameByTeam,
+  getGamesByTeam,
   getGameByPlayerId
 } from './selectors'
 export { scheduleSagas } from './sagas'

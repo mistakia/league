@@ -23,3 +23,12 @@ export function getGameByTeam(state, { team, week = currentWeek }) {
 
   return nflTeam.games.find((g) => g.wk === week)
 }
+
+export function getGamesByTeam(state, { team }) {
+  const nflTeam = state.getIn(['schedule', 'teams', team])
+  if (!nflTeam) {
+    return []
+  }
+
+  return nflTeam.games
+}

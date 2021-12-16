@@ -85,10 +85,12 @@ export default class PlayerSelectedRow extends React.Component {
       games,
       lead,
       pos,
-      percentiles
+      percentiles,
+      header
     } = this.props
     const classNames = ['player__selected-row']
     if (className) classNames.push(className)
+    if (header) classNames.push('header')
     const rows = getStatRows(pos, stats, percentiles)
     return (
       <div className={classNames.join(' ')}>
@@ -109,5 +111,6 @@ PlayerSelectedRow.propTypes = {
   games: PropTypes.number,
   lead: PropTypes.element,
   pos: PropTypes.string,
-  percentiles: PropTypes.object
+  percentiles: PropTypes.object,
+  header: PropTypes.bool
 }
