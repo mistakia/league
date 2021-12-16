@@ -8,7 +8,7 @@ const log = debug('import:projections')
 debug.enable('import:projections')
 
 const { constants } = require('../common')
-const { getPlayerId } = require('../utils')
+const { getPlayer } = require('../utils')
 const db = require('../db')
 
 const week = argv.season ? 0 : constants.season.week
@@ -35,17 +35,17 @@ const run = async () => {
 
   const inserts = []
   const missing = []
-  for (const player of data.players) {
-    const name = player.player.fullName
-    const team = constants.espn.teamId[player.player.proTeamId]
-    const pos = constants.espn.positionId[player.player.defaultPositionId]
+  for (const item of data.players) {
+    const name = item.player.fullName
+    const team = constants.espn.teamId[item.player.proTeamId]
+    const pos = constants.espn.positionId[item.player.defaultPositionId]
     const params = { name, team, pos }
-    let playerId
+    let player
 
     // TODO cleanup
     try {
-      playerId = await getPlayerId(params)
-      if (!playerId) {
+      player = await getPlayer(params)
+      if (!player) {
         missing.push(params)
         continue
       }
@@ -62,7 +62,7 @@ const run = async () => {
     const data = constants.espn.stats(projections.stats)
 
     inserts.push({
-      player: playerId,
+      player: player.player,
       year,
       week,
       sourceid: constants.sources.ESPN,

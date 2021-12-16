@@ -129,6 +129,7 @@ CREATE TABLE `player` (
   `espn_id` int(11) DEFAULT NULL,
   `fantasy_data_id` int(11) DEFAULT NULL,
   `yahoo_id` int(11) DEFAULT NULL,
+  `keeptradecut_id` int(11) DEFAULT NULL,
   FULLTEXT KEY `name` (`fname`,`lname`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 

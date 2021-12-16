@@ -234,12 +234,13 @@ const fixPosition = (pos) => {
   }
 }
 
-const getPlayerId = async ({ name, pos, team, sleeper_id }) => {
+const getPlayer = async ({ name, pos, team, sleeper_id }) => {
   if (aliases[name]) {
-    return aliases[name]
+    const result = await db('player').where({ player: aliases[name] })
+    return result[0]
   }
 
-  const query = db('player').select('player')
+  const query = db('player')
 
   if (sleeper_id) {
     query.where({ sleeper_id })
@@ -276,10 +277,10 @@ const getPlayerId = async ({ name, pos, team, sleeper_id }) => {
     throw new Error('matched multiple players')
   }
 
-  return players.length ? players[0].player : undefined
+  return players.length ? players[0] : undefined
 }
 
-module.exports = getPlayerId
+module.exports = getPlayer
 
 const main = async () => {
   let error
@@ -290,7 +291,7 @@ const main = async () => {
       team: argv.team
     }
     console.log(options)
-    const playerId = await getPlayerId(options)
+    const playerId = await getPlayer(options)
     console.log(playerId)
   } catch (err) {
     error = err

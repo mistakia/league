@@ -8,7 +8,7 @@ const argv = require('yargs').argv
 const log = debug('import:projections')
 debug.enable('import:projections')
 
-const { getPlayerId } = require('../utils')
+const { getPlayer } = require('../utils')
 const db = require('../db')
 
 const timestamp = new Date()
@@ -31,16 +31,16 @@ const runOne = async (week) => {
   }
 
   const inserts = []
-  for (const player of result.player_projections) {
-    const name = player.player_name
-    const team = player.team_name
-    const pos = player.position.toUpperCase()
+  for (const item of result.player_projections) {
+    const name = item.player_name
+    const team = item.team_name
+    const pos = item.position.toUpperCase()
     const params = { name, team, pos }
-    let playerId
+    let player
 
     try {
-      playerId = await getPlayerId(params)
-      if (!playerId) {
+      player = await getPlayer(params)
+      if (!player) {
         missing.push(params)
         continue
       }
@@ -81,7 +81,7 @@ const runOne = async (week) => {
     }
 
     inserts.push({
-      player: playerId,
+      player: player.player,
       week,
       year,
       sourceid: 6, // pff sourceid,
