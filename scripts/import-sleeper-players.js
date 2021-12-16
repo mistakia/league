@@ -1,7 +1,6 @@
 // eslint-disable-next-line
 require = require('esm')(module /*, options*/)
 const fetch = require('node-fetch')
-const diff = require('deep-diff')
 
 const debug = require('debug')
 const argv = require('yargs').argv
@@ -9,7 +8,7 @@ const argv = require('yargs').argv
 const log = debug('import:players:sleeper')
 debug.enable('import:players:sleeper')
 
-const { getPlayerId } = require('../utils')
+const { getPlayer, updatePlayer } = require('../utils')
 const { constants, fixTeam } = require('../common')
 const db = require('../db')
 const timestamp = Math.round(Date.now() / 1000)
@@ -35,10 +34,10 @@ const run = async () => {
     }
 
     const params = { name, pos, team }
-    let playerId
+    let player
     try {
-      playerId = await getPlayerId({ sleeper_id })
-      if (!playerId) {
+      player = await getPlayer({ sleeper_id })
+      if (!player) {
         missing.push(params)
         continue
       }
@@ -79,7 +78,7 @@ const run = async () => {
       status,
       injury_status,
       sleeper_id,
-      player: playerId,
+      player: player.player,
       // name,
       cteam: team
       // pos
@@ -107,33 +106,9 @@ const run = async () => {
 
   let editCount = 0
   for (const player of currentPlayers) {
-    const row = inserts.find((r) => r.sleeper_id === player.sleeper_id)
-    const differences = diff(player, row)
-
-    const edits = differences.filter((d) => d.kind === 'E')
-    if (edits.length) {
-      editCount += edits.length
-      for (const edit of edits) {
-        const prop = edit.path[0]
-        log(`Updating ${player.player} - ${prop} - ${edit.rhs}`)
-        await db('player_changelog').insert({
-          type: constants.changes.PLAYER_EDIT,
-          id: player.player,
-          prop,
-          prev: edit.lhs,
-          new: edit.rhs,
-          timestamp
-        })
-
-        await db('player')
-          .update({
-            [prop]: edit.rhs
-          })
-          .where({
-            player: player.player
-          })
-      }
-    }
+    const update = inserts.find((r) => r.sleeper_id === player.sleeper_id)
+    const edits = await updatePlayer({ player, update })
+    editCount += edits
   }
 
   log(`updated ${editCount} player fields`)
