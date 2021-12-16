@@ -8,7 +8,7 @@ const log = debug('import:projections')
 debug.enable('import:projections')
 
 const { constants } = require('../common')
-const { getPlayerId } = require('../utils')
+const { getPlayer } = require('../utils')
 const db = require('../db')
 
 const URL = argv.season
@@ -55,11 +55,11 @@ const run = async () => {
     const fname = n.pop().trim()
     const lname = n.shift().trim()
     const fullname = `${fname} ${lname}`
-    let playerId
+    let player
     const params = { name: fullname, team: Team, pos: Pos }
     try {
-      playerId = await getPlayerId(params)
-      if (!playerId) {
+      player = await getPlayer(params)
+      if (!player) {
         missing.push(params)
         continue
       }
@@ -71,7 +71,7 @@ const run = async () => {
 
     const entry = createEntry(item)
     inserts.push({
-      player: playerId,
+      player: player.player,
       year,
       week,
       sourceid: 1, // fantasy sharks sourceid

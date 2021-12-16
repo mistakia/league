@@ -8,7 +8,7 @@ const argv = require('yargs').argv
 const log = debug('import:players:mfl')
 debug.enable('league:player:get,import:players:mfl')
 
-const { getPlayerId } = require('../utils')
+const { getPlayer } = require('../utils')
 const db = require('../db')
 const config = require('../config')
 
@@ -49,10 +49,10 @@ const run = async () => {
     }
 
     const params = { name, team, pos }
-    let playerId
+    let player
     try {
-      playerId = await getPlayerId(params)
-      if (!playerId) {
+      player = await getPlayer(params)
+      if (!player) {
         missing.push(params)
       }
     } catch (err) {
@@ -94,7 +94,7 @@ const run = async () => {
     }
 
     inserts.push({
-      player: playerId,
+      player: player.player,
       name,
       team,
       pos,
