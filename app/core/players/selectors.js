@@ -32,7 +32,7 @@ import {
   isPlayerOnPracticeSquad,
   getRosterInfoForPlayerId
 } from '@core/rosters'
-import { getGameByTeam } from '@core/schedule'
+import { getGameByTeam, getGamesByTeam } from '@core/schedule'
 import { getPlayerGamelogs } from '@core/gamelogs'
 
 export function getPlayers(state) {
@@ -92,9 +92,14 @@ export function getSelectedPlayer(state) {
   return getPlayerById(state, { playerId })
 }
 
-export function getSelectedPlayerGame(state) {
+export function getSelectedPlayerGame(state, { week }) {
   const player = getSelectedPlayer(state)
-  return getGameByTeam(state, { team: player.team })
+  return getGameByTeam(state, { team: player.team, week })
+}
+
+export function getSelectedPlayerGames(state) {
+  const player = getSelectedPlayer(state)
+  return getGamesByTeam(state, { team: player.team })
 }
 
 export function getAllPlayers(state) {

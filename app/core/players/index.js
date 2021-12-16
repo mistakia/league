@@ -8,6 +8,7 @@ export {
   getPlayersByPosition,
   getSelectedPlayer,
   getSelectedPlayerGame,
+  getSelectedPlayerGames,
   getAllPlayers,
   getFilteredPlayers,
   getRookiePlayers,
