@@ -234,7 +234,7 @@ const fixPosition = (pos) => {
   }
 }
 
-const getPlayer = async ({ name, pos, team, sleeper_id }) => {
+const getPlayer = async ({ name, pos, team, sleeper_id, keeptradecut_id }) => {
   if (aliases[name]) {
     const result = await db('player').where({ player: aliases[name] })
     return result[0]
@@ -246,28 +246,32 @@ const getPlayer = async ({ name, pos, team, sleeper_id }) => {
     query.where({ sleeper_id })
   }
 
-  if (name) {
-    const aname = nameAliases[name] || name
-    const sname = aname.replace(/jr.|jr|sr.|sr|II|III/gi, '').trim()
-    const fname = sname.split(' ').shift()
-    const lname = sname.split(' ').splice(1).join(' ')
+  if (keeptradecut_id) {
+    query.where({ keeptradecut_id })
+  } else {
+    if (name) {
+      const aname = nameAliases[name] || name
+      const sname = aname.replace(/jr.|jr|sr.|sr|II|III/gi, '').trim()
+      const fname = sname.split(' ').shift()
+      const lname = sname.split(' ').splice(1).join(' ')
 
-    query.where({
-      fname,
-      lname
-    })
-  }
+      query.where({
+        fname,
+        lname
+      })
+    }
 
-  if (pos) {
-    const p = fixPosition(pos)
-    query.where(function () {
-      this.where({ pos: p }).orWhere({ pos1: p }).orWhere({ pos2: p })
-    })
-  }
+    if (pos) {
+      const p = fixPosition(pos)
+      query.where(function () {
+        this.where({ pos: p }).orWhere({ pos1: p }).orWhere({ pos2: p })
+      })
+    }
 
-  if (team) {
-    const t = fixTeam(team)
-    query.where({ cteam: t })
+    if (team) {
+      const t = fixTeam(team)
+      query.where({ cteam: t })
+    }
   }
 
   log(query.toString())
