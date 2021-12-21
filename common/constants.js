@@ -1203,3 +1203,9 @@ export const rankings = {
   FLX: 7,
   OP: 8
 }
+
+export const KEEPTRADECUT = {
+  VALUE: 1,
+  POSITION_RANK: 2,
+  OVERALL_RANK: 3
+}

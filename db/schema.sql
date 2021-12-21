@@ -2068,6 +2068,23 @@ CREATE TABLE `league_baselines` (
   UNIQUE KEY `baseline` (`lid`,`week`,`pos`,`type`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `league_baselines`
+--
+
+DROP TABLE IF EXISTS `keeptradecut_rankings`;
+
+CREATE TABLE `keeptradecut_rankings` (
+  `player` varchar(7) NOT NULL,
+  `qb` tinyint(1) NOT NULL,
+  `d` int(11) NOT NULL,
+  `v` int(5) NOT NULL,
+  `type` tinyint(1) NOT NULL,
+  UNIQUE KEY `player_value` (`player`,`d`,`qb`,`type`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
 --
 -- Indexes for table `game`
 --
