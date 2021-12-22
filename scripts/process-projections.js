@@ -244,7 +244,7 @@ const processLeague = async ({ year, lid }) => {
   }
 
   await projectLineups()
-  await simulateSeason()
+  if (constants.season.week <= constants.season.regularSeasonFinalWeek) await simulateSeason()
 }
 
 const run = async ({ year = constants.season.year } = {}) => {
