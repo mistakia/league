@@ -55,7 +55,7 @@ const run = async () => {
       continue
     }
 
-    const projections = player.player.stats.find(
+    const projections = item.player.stats.find(
       (s) => s.scoringPeriodId === week && s.seasonId === year
     )
     if (!projections) continue
