@@ -122,7 +122,10 @@ export function calculateStandings({
   gamelogs,
   matchups
 }) {
-  const currentWeek = constants.season.week
+  const finalWeek = Math.min(
+    Math.max(constants.season.week - 1, 0),
+    constants.season.regularSeasonFinalWeek
+  )
   const result = {}
   for (const tid of tids) {
     result[tid] = {
@@ -152,7 +155,7 @@ export function calculateStandings({
     league.sdst +
     league.sk
 
-  for (let week = 1; week < currentWeek; week++) {
+  for (let week = 1; week <= finalWeek; week++) {
     for (const tid of tids) {
       const startingPlayers = starters[week][tid]
       const starterIds = startingPlayers.map((p) => p.player)
@@ -206,7 +209,7 @@ export function calculateStandings({
     }
   }
 
-  for (let week = 1; week < currentWeek; week++) {
+  for (let week = 1; week <= finalWeek; week++) {
     const weekMatchups = matchups.filter((m) => m.week === week)
     for (const m of weekMatchups) {
       const homeScore = result[m.hid].points.weeks[week]
