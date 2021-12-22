@@ -1029,9 +1029,9 @@ CREATE TABLE `team_stats` (
   `losses` tinyint(2) DEFAULT 0,
   `ties` tinyint(2) DEFAULT 0,
 
-  `apWins` tinyint(2) DEFAULT 0,
-  `apLosses` tinyint(2) DEFAULT 0,
-  `apTies` tinyint(2) DEFAULT 0,
+  `apWins` smallint(3) DEFAULT 0,
+  `apLosses` smallint(3) DEFAULT 0,
+  `apTies` smallint(3) DEFAULT 0,
 
   `pf` decimal(6,2) DEFAULT 0,
   `pa` decimal(6,2) DEFAULT 0,
