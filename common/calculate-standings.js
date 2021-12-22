@@ -17,7 +17,10 @@ const calculateStandings = ({
 }) => {
   const finalWeek =
     year === constants.season.year
-      ? Math.min(Math.max(constants.season.week - 1, 0), constants.season.regularSeasonFinalWeek)
+      ? Math.min(
+          Math.max(constants.season.week - 1, 0),
+          constants.season.regularSeasonFinalWeek
+        )
       : constants.season.regularSeasonFinalWeek
   const teamStats = {}
   for (const tid of tids) {

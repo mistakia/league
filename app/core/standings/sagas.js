@@ -19,7 +19,11 @@ export function* calculate() {
   const teams = yield select(getTeamsForCurrentLeague)
   const starters = {}
   const active = {}
-  for (let week = 1; week < constants.season.week; week++) {
+  const finalWeek = Math.min(
+    Math.max(constants.season.week - 1, 0),
+    constants.season.regularSeasonFinalWeek
+  )
+  for (let week = 1; week <= finalWeek; week++) {
     starters[week] = {}
     active[week] = {}
     for (const team of teams.valueSeq()) {
