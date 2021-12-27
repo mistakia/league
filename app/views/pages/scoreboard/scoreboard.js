@@ -20,7 +20,7 @@ export default class ScoreboardPage extends React.Component {
     super(props)
 
     this.state = {
-      tid: props.matchup.tids[0] || props.matchup.hid,
+      tid: props.matchup.getIn(['tids', '0']) || props.matchup.hid,
       show: false
     }
   }
@@ -28,7 +28,7 @@ export default class ScoreboardPage extends React.Component {
   componentDidUpdate = (prevProps) => {
     if (prevProps.matchup.uid !== this.props.matchup.uid) {
       this.setState({
-        tid: this.props.matchup.tids[0] || this.props.matchup.hid
+        tid: this.props.matchup.getIn(['tids', '0']) || this.props.matchup.hid
       })
     }
   }
