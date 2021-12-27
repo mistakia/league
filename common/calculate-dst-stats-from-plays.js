@@ -117,7 +117,9 @@ const calculateDstStatsFromPlays = (plays, team) => {
 
       case 56:
         // fumble recovery touchdown (offensive player)
-        dstStats.dpa += 6
+        if (fixTeam(playStat.clubCode) !== team) {
+          dstStats.dpa += 6
+        }
         break
 
       case 57:
@@ -160,7 +162,9 @@ const calculateDstStatsFromPlays = (plays, team) => {
 
       case 70:
         // made field goal
-        dstStats.dpa += 3
+        if (fixTeam(playStat.clubCode) !== team) {
+          dstStats.dpa += 3
+        }
         break
 
       case 71:
@@ -172,7 +176,9 @@ const calculateDstStatsFromPlays = (plays, team) => {
 
       case 72:
         // made extra point
-        dstStats.dpa += 1
+        if (fixTeam(playStat.clubCode) !== team) {
+          dstStats.dpa += 1
+        }
         break
 
       case 74:
