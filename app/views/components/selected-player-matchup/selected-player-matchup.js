@@ -34,7 +34,7 @@ export default class SelectedPlayerMatchup extends React.Component {
     const labels = []
     for (const game of games) {
       const opp = player.team === game.h ? game.v : game.h
-      const isHome = opp === game.h
+      const isHome = opp === game.v
       const label = (
         <>
           <div>{`W${game.wk}`}</div>
