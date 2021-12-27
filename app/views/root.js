@@ -14,7 +14,8 @@ Bugsnag.start({
   apiKey: '183fca706d9f94c00a661167bf8cfc5d',
   autoDetectErrors: !IS_DEV,
   appVersion: APP_VERSION,
-  plugins: [new BugsnagPluginReact()]
+  plugins: [new BugsnagPluginReact()],
+  enabledReleaseStages: [ 'production' ]
 })
 
 const initialState = window.__INITIAL_STATE__
