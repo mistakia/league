@@ -1,5 +1,6 @@
 import { getTeamById } from '@core/teams'
 import { constants } from '@common'
+import { getPointsByTeamId } from '@core/scoreboard'
 import { createMatchup } from './matchup'
 
 export function getMatchups(state) {
@@ -40,7 +41,18 @@ export function getSelectedMatchup(state) {
 
 export function getSelectedMatchupTeams(state) {
   const matchup = getSelectedMatchup(state)
-  return matchup.tids.map((tid) => getTeamById(state, { tid }))
+  const teams = matchup.tids.map((tid) => getTeamById(state, { tid }))
+  if (matchup.week === constants.season.finalWeek) {
+    const prevWeek = constants.season.finalWeek - 1
+    return teams.map((teamRecord) => {
+      const previousWeekScore = getPointsByTeamId(state, {
+        tid: teamRecord.uid,
+        week: prevWeek
+      })
+      return { previousWeekScore, ...teamRecord.toJS() }
+    })
+  }
+  return teams
 }
 
 export function getMatchupsForSelectedWeek(state) {
