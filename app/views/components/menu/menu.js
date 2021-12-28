@@ -100,7 +100,7 @@ export default class Menu extends React.Component {
             {isLoggedIn && <LeagueSchedule />}
             {isLoggedIn && <NavLink to='/dashboard'>Roster</NavLink>}
             {isLoggedIn &&
-              constants.season.week < constants.season.finalWeek && (
+              constants.season.week <= constants.season.finalWeek && (
                 <NavLink to='/lineups'>Lineup</NavLink>
               )}
             <NavLink to='/players'>Players</NavLink>
