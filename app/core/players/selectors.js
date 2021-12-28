@@ -543,7 +543,7 @@ export function getPlayerStatus(state, { player, playerId }) {
 
       if (
         !status.protected &&
-        constants.season.week < constants.season.finalWeek
+        constants.season.week <= constants.season.finalWeek
       ) {
         const reserve = isPlayerReserveEligible(state, { player })
         if (reserve.ir && player.slot !== constants.slots.IR) {
