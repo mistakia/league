@@ -34,20 +34,24 @@ export function getSelectedMatchupScoreboards(state) {
   }))
 }
 
+export function getPointsByTeamId(state, { tid, week }) {
+  let points = 0
+  const starters = getStartersByTeamId(state, { tid, week })
+  starters.forEach((player) => {
+    const gamelog = getGamelogForPlayer(state, { player, week })
+    points += gamelog.total
+  })
+  return points
+}
+
 export function getScoreboardByTeamId(state, { tid }) {
   const week = state.getIn(['scoreboard', 'week'])
-  let points = 0
-  let minutes = 0
-
-  if (week === constants.season.finalWeek) {
-    const prevWeek = constants.season.finalWeek - 1
-    const starters = getStartersByTeamId(state, { tid, week: prevWeek })
-    starters.forEach((player) => {
-      const gamelog = getGamelogForPlayer(state, { player, week: prevWeek })
-      points += gamelog.total
-    })
-  }
+  const isChampRound = week === constants.season.finalWeek
+  let points = isChampRound
+    ? getPointsByTeamId(state, { tid, week: constants.season.finalWeek - 1 })
+    : 0
   const previousWeek = points
+  let minutes = 0
 
   const starters = getStartersByTeamId(state, { tid, week })
   const projected = starters.reduce((sum, player) => {

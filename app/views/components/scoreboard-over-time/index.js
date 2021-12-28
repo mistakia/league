@@ -15,16 +15,17 @@ const mapStateToProps = createSelector(
     const breaks = []
     const week = starters.matchup.week
     let lastTime
+
     const data = teams.map((team) => ({
       team,
       starters: starters.teams[team.uid] || [],
       projection: [],
-      projectedPoints: 0,
-      points: 0,
+      projectedPoints: team.previousWeekScore || 0,
+      points: team.previousWeekScore || 0,
       data: []
     }))
 
-    if (!teams.length) {
+    if (!teams.size) {
       return { data, breaks }
     }
 
