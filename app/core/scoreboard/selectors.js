@@ -39,7 +39,7 @@ export function getPointsByTeamId(state, { tid, week }) {
   const starters = getStartersByTeamId(state, { tid, week })
   starters.forEach((player) => {
     const gamelog = getGamelogForPlayer(state, { player, week })
-    points += gamelog.total
+    if (gamelog) points += gamelog.total
   })
   return points
 }
