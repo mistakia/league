@@ -29,7 +29,8 @@ module.exports = {
       host: 'localhost',
       user: 'root',
       password: 'xxxxx',
-      database: 'league_production'
+      database: 'league_production',
+      decimalNumbers: true
     },
     pool: {
       min: 2,
