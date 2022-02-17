@@ -9,10 +9,13 @@ module.exports = async ({
 } = {}) => {
   const query = db('player')
     .whereNot('cteam', 'INA')
-    .whereNotIn('player', exclude)
     .where('pos1', pos)
     .orderByRaw('RAND()')
     .limit(1)
+
+  if (exclude.length) {
+    query.whereNotIn('player', exclude)
+  }
 
   if (rookie) {
     query.where('start', constants.season.year)

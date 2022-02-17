@@ -27,6 +27,9 @@ const expect = chai.expect
 describe('API /teams - activate', function () {
   before(async function () {
     this.timeout(60 * 1000)
+
+    MockDate.set(start.subtract('1', 'week').toDate())
+
     await knex.migrate.forceFreeMigrationsLock()
     await knex.migrate.rollback()
     await knex.migrate.latest()
@@ -39,7 +42,6 @@ describe('API /teams - activate', function () {
     })
 
     it('activate and release player', async () => {
-      MockDate.set(start.subtract('1', 'week').toDate())
       const teamId = 1
       const leagueId = 1
       const userId = 1
@@ -133,7 +135,6 @@ describe('API /teams - activate', function () {
     })
 
     it('invalid release player - does not exist', async () => {
-      MockDate.set(start.subtract('1', 'week').toDate())
       const player1 = await selectPlayer()
       const teamId = 1
       const leagueId = 1
@@ -163,7 +164,6 @@ describe('API /teams - activate', function () {
     })
 
     it('release player not on team', async () => {
-      MockDate.set(start.subtract('1', 'week').toDate())
       const player1 = await selectPlayer()
       const player2 = await selectPlayer()
       const teamId = 1
@@ -194,7 +194,6 @@ describe('API /teams - activate', function () {
     })
 
     it('exceeds roster limits', async () => {
-      MockDate.set(start.subtract('1', 'week').toDate())
       const teamId = 1
       const leagueId = 1
 
@@ -228,7 +227,6 @@ describe('API /teams - activate', function () {
     })
 
     it('activate player is on active roster', async () => {
-      MockDate.set(start.subtract('1', 'week').toDate())
       const player1 = await selectPlayer()
       const player2 = await selectPlayer()
       const teamId = 1

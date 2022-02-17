@@ -75,7 +75,7 @@ describe('API /leagues - update', function () {
     })
 
     it('update rec', async () => {
-      const value = 1.0
+      const value = 1.5
       const res = await chai
         .request(server)
         .put('/api/leagues/1')
