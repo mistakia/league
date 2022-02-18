@@ -14,14 +14,14 @@ module.exports = {
   deploy: {
     production: {
       user: 'root',
-      host: '134.122.30.24',
+      host: '38.242.199.45',
       ref: 'origin/master',
       repo: 'https://github.com/mistakia/league.git',
       path: '/root/league',
       'pre-deploy': 'git pull',
       'pre-deploy-local': '',
       'post-deploy':
-        'source /root/.bash_profile && /root/.yarn/bin/yarn install && pm2 reload ecosystem.config.js --env production',
+        'source /root/.bash_profile && /root/.nvm/versions/node/v17.4.0/bin/yarn install && pm2 reload ecosystem.config.js --env production',
       'pre-setup': ''
     }
   }
