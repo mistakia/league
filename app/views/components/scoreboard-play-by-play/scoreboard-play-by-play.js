@@ -46,7 +46,8 @@ export default class ScoreboardPlayByPlay extends React.Component {
           columnIndex={0}
           key={key}
           parent={parent}
-          rowIndex={index}>
+          rowIndex={index}
+        >
           <ScoreboardPlay key={key} play={play} {...params} />
         </CellMeasurer>
       )

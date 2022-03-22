@@ -18,13 +18,15 @@ export default class PlayersViewMenu extends React.Component {
       <FormControl
         size='small'
         variant='outlined'
-        className='players__view-menu player__filter'>
+        className='players__view-menu player__filter'
+      >
         <InputLabel id='players__view-menu-label'>View</InputLabel>
         <Select
           labelId='players__view-menu-label'
           value={this.props.view}
           onChange={this.handleChange}
-          label='View'>
+          label='View'
+        >
           {constants.season.isOffseason && (
             <MenuItem value='season'>Season Projection</MenuItem>
           )}

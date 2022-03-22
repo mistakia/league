@@ -41,7 +41,8 @@ export default class TradeSelectTeam extends React.Component {
         <MenuItem
           key={team.uid}
           selected={team.uid === trade.tid}
-          onClick={() => this.handleSelect(team.uid)}>
+          onClick={() => this.handleSelect(team.uid)}
+        >
           {team.name}
         </MenuItem>
       ))
@@ -52,14 +53,16 @@ export default class TradeSelectTeam extends React.Component {
           <ListItem
             button
             disabled={Boolean(trade.uid)}
-            onClick={this.handleOpen}>
+            onClick={this.handleOpen}
+          >
             <TeamName tid={trade.tid} /> Sends
           </ListItem>
         </List>
         <Menu
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}
-          onClose={this.handleClose}>
+          onClose={this.handleClose}
+        >
           {menuItems}
         </Menu>
       </div>

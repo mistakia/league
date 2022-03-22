@@ -266,7 +266,8 @@ export default class TransitionConfirmation extends React.Component {
                   error={this.state.missingUntag}
                   value={this.state.untag}
                   onChange={this.handleUntag}
-                  label='Remove Tag'>
+                  label='Remove Tag'
+                >
                   {menuItems}
                 </Select>
               </FormControl>

@@ -190,15 +190,8 @@ export function rostersReducer(state = new Map(), { payload, type }) {
 
     case rosterActions.POST_ROSTERS_FULFILLED: {
       const { rid, slot, pos, player } = payload.data
-      const {
-        userid,
-        tid,
-        lid,
-        type,
-        value,
-        year,
-        timestamp
-      } = payload.data.transaction
+      const { userid, tid, lid, type, value, year, timestamp } =
+        payload.data.transaction
       return state.updateIn(
         [payload.opts.teamId, constants.season.week, 'players'],
         (arr) =>

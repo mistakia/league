@@ -219,12 +219,14 @@ export default class AuctionMainBid extends React.Component {
           <div className='auction__main-input'>
             <div
               className='auction__main-input-up'
-              onClick={this.handleUpClick}>
+              onClick={this.handleUpClick}
+            >
               +
             </div>
             <div
               className='auction__main-input-down'
-              onClick={this.handleDownClick}>
+              onClick={this.handleDownClick}
+            >
               —
             </div>
             <label>Enter Bid</label>

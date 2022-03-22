@@ -208,7 +208,9 @@ const run = async () => {
     })
   }
 
-  await db('players_status').insert(statuses)
+  if (statuses.length) {
+    await db('players_status').insert(statuses)
+  }
 }
 
 module.exports = run

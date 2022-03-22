@@ -217,11 +217,13 @@ router.put('/:poachId', async (req, res) => {
     }
 
     // update releases
-    const releaseInserts = release.map((player) => ({
-      poachid: poachId,
-      player
-    }))
-    await db('poach_releases').insert(releaseInserts).onConflict().merge()
+    if (release.length) {
+      const releaseInserts = release.map((player) => ({
+        poachid: poachId,
+        player
+      }))
+      await db('poach_releases').insert(releaseInserts).onConflict().merge()
+    }
     await db('poach_releases')
       .del()
       .where('poachid', poachId)

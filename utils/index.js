@@ -100,8 +100,6 @@ module.exports = {
   getTransactionsSinceAcquisition: require('./get-transactions-since-acquisition'),
   getTransactionsSinceFreeAgent: require('./get-transactions-since-free-agent'),
 
-  upsert: require('./upsert'),
-
   verifyUserTeam: require('./verify-user-team'),
   verifyReserveStatus: require('./verify-reserve-status'),
   verifyRestrictedFreeAgency: require('./verify-restricted-free-agency'),

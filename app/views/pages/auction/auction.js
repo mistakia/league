@@ -23,14 +23,8 @@ import './auction.styl'
 const ROW_HEIGHT = 30
 
 export default function AuctionPageRender() {
-  const {
-    players,
-    transactions,
-    tids,
-    playerId,
-    isCommish,
-    isHosted
-  } = this.props
+  const { players, transactions, tids, playerId, isCommish, isHosted } =
+    this.props
 
   const TransactionRow = ({ index, key, ...params }) => {
     const transaction = transactions.get(index)

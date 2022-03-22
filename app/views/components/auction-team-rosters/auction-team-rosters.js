@@ -207,7 +207,8 @@ export default class AuctonTeamRosters extends React.Component {
             <Select
               value={this.state.tid}
               onChange={this.handleChange}
-              label='Roster'>
+              label='Roster'
+            >
               {menuItems}
             </Select>
           </FormControl>

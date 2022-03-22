@@ -19,7 +19,8 @@ export default class TradeMenu extends React.Component {
         <div
           key={index}
           className={classNames.join(' ')}
-          onClick={() => select(trade.uid)}>
+          onClick={() => select(trade.uid)}
+        >
           <div className='trade__id'>#{trade.uid}</div>
           <TeamName tid={otherTeamId} abbrv />
         </div>

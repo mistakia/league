@@ -7,7 +7,6 @@ const { Map } = require('immutable')
 
 const db = require('../db')
 const { constants, fixTeam } = require('../common')
-const { upsert } = require('../utils')
 
 const log = debug('import:footballoutsiders')
 debug.enable('import:footballoutsiders')
@@ -230,12 +229,15 @@ const run = async () => {
 
   for (const [team, data] of Object.entries(teams.toJS())) {
     if (team === 'NFL') continue
-    await upsert('footballoutsiders', {
-      team: fixTeam(team),
-      week: constants.season.week,
-      year: constants.season.year,
-      ...data
-    }).catch((err) => console.log(err))
+    await db('footballoutsiders')
+      .insert({
+        team: fixTeam(team),
+        week: constants.season.week,
+        year: constants.season.year,
+        ...data
+      })
+      .onConflict()
+      .merge()
   }
 }
 

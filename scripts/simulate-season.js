@@ -49,13 +49,8 @@ const run = async () => {
 
   const forecastInserts = []
   for (const forecast of Object.values(result)) {
-    const {
-      playoff_odds,
-      division_odds,
-      bye_odds,
-      championship_odds,
-      tid
-    } = forecast
+    const { playoff_odds, division_odds, bye_odds, championship_odds, tid } =
+      forecast
     forecastInserts.push({
       tid,
       lid: leagueId,

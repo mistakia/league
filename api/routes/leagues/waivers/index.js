@@ -508,11 +508,13 @@ router.put('/:waiverId', async (req, res) => {
     }
 
     await db('waivers').update({ bid }).where({ uid: waiverId })
-    const releaseInserts = release.map((player) => ({
-      waiverid: waiverId,
-      player
-    }))
-    await db('waiver_releases').insert(releaseInserts).onConflict().merge()
+    if (release.length) {
+      const releaseInserts = release.map((player) => ({
+        waiverid: waiverId,
+        player
+      }))
+      await db('waiver_releases').insert(releaseInserts).onConflict().merge()
+    }
     await db('waiver_releases')
       .del()
       .where('waiverid', waiverId)

@@ -72,10 +72,15 @@ const run = async ({ lid, year }) => {
     })
   }
 
-  await db('team_stats').insert(teamStats).onConflict().merge()
-  log(`saved team stats for ${teamStats.length} teams`)
-  await db('matchups').insert(matchups).onConflict().merge()
-  log(`saved ${matchups.length} matchups`)
+  if (teamStats.length) {
+    await db('team_stats').insert(teamStats).onConflict().merge()
+    log(`saved team stats for ${teamStats.length} teams`)
+  }
+
+  if (matchups.length) {
+    await db('matchups').insert(matchups).onConflict().merge()
+    log(`saved ${matchups.length} matchups`)
+  }
 }
 
 module.exports = run
