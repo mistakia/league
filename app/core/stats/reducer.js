@@ -19,7 +19,7 @@ const initialState = new Record({
   quarters: new List(constants.quarters),
   downs: new List(constants.downs),
   playsPercentiles: {},
-  teamStatsPercentiles: new Record()
+  teamStatsPercentiles: new Record({})
 })
 
 export function statsReducer(state = initialState(), { payload, type }) {

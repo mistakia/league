@@ -50,7 +50,7 @@ export default class Season {
   }
 
   get isOffseason() {
-    return this.week === 0
+    return this.week === 0 || this.now.isAfter(this.end)
   }
 
   get isRegularSeason() {
@@ -78,8 +78,9 @@ export default class Season {
   }
 
   get week() {
-    const diff = this.now.diff(this.start, 'weeks')
-    return diff < 0 ? 0 : diff
+    const diff = Math.max(0, this.now.diff(this.start, 'weeks'))
+    const isOffseason = this.now.isAfter(this.end)
+    return isOffseason ? 0 : diff
   }
 
   get year() {
