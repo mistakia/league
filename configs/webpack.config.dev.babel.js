@@ -88,7 +88,7 @@ module.exports = merge.smart(baseConfig, {
     contentBase: path.join(__dirname, '..', 'app'),
     watchOptions: {
       aggregateTimeout: 300,
-      ignored: /node_modules/,
+      ignored: [/\/\.#.+$/, /node_modules/],
       poll: 100
     },
     historyApiFallback: {

@@ -1,14 +1,19 @@
 // eslint-disable-next-line
 require = require('esm')(module /*, options*/)
+const debug = require('debug')
 
 const argv = require('yargs').argv
 
 const db = require('../db')
 const { constants } = require('../common')
 
+const log = debug('generate-rosters')
+debug.enable('generate-rosters')
+
 const run = async ({ nextSeason = argv.season } = {}) => {
   // do not run once season is over unless generating roster for next season
   if (constants.season.week >= constants.season.finalWeek && !nextSeason) {
+    log('season over')
     return
   }
 
@@ -17,12 +22,18 @@ const run = async ({ nextSeason = argv.season } = {}) => {
 
   const nextWeek = nextSeason ? 0 : constants.season.week + 1
   const nextYear = nextSeason
-    ? constants.season.year + 1
+    ? constants.season.week > constants.season.finalWeek
+      ? constants.season.year
+      : constants.season.year + 1
     : constants.season.year
   const previousWeek = nextSeason
     ? constants.season.finalWeek
     : constants.season.week
-  const previousYear = constants.season.year
+  const previousYear = nextSeason ? nextYear - 1 : constants.season.year
+
+  log(
+    `Generating rosters for ${nextYear} Week ${nextWeek} using ${previousYear} Week ${previousWeek}`
+  )
 
   for (const league of leagues) {
     // get latest rosters for league
