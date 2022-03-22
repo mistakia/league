@@ -36,7 +36,8 @@ class App extends React.Component {
       <main>
         <Backdrop
           classes={{ root: 'initializing__backdrop' }}
-          open={isInitializing}>
+          open={isInitializing}
+        >
           <CircularProgress color='inherit' />
         </Backdrop>
         <Menu />

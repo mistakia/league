@@ -29,13 +29,15 @@ export default class ScoreboardSelectWeek extends React.Component {
       <FormControl
         size='small'
         variant='outlined'
-        className='scoreboard__select-week'>
+        className='scoreboard__select-week'
+      >
         <InputLabel id='players__view-menu-label'>Week</InputLabel>
         <Select
           labelId='players__view-menu-label'
           value={this.props.week}
           onChange={this.handleChange}
-          label='Week'>
+          label='Week'
+        >
           {menuItems}
         </Select>
       </FormControl>

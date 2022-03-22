@@ -46,7 +46,8 @@ export default class TransactionsPage extends React.Component {
           <InfiniteLoader
             isRowLoaded={isRowLoaded}
             loadMoreRows={loadMoreRows}
-            rowCount={rowCount}>
+            rowCount={rowCount}
+          >
             {({ onRowsRendered, registerChild }) => (
               <AutoSizer>
                 {({ height, width }) => (

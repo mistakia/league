@@ -80,7 +80,8 @@ export default class SelectedPlayer extends React.Component {
         onClose={this.handleClose}
         classes={{
           paper: 'selected__player-paper'
-        }}>
+        }}
+      >
         <div className='selected__player-header'>
           <div className='selected__player-header-lead'>
             <div className='selected__player-first-name'>{player.fname}</div>
@@ -167,7 +168,8 @@ export default class SelectedPlayer extends React.Component {
             variant='scrollable'
             value={value}
             className='selected__player-menu'
-            onChange={this.handleChange}>
+            onChange={this.handleChange}
+          >
             <Tab label='Projections' />
             <Tab label='Matchup' />
             <Tab label='Game Log' />

@@ -371,7 +371,8 @@ export default class PlayersPage extends React.Component {
           loadMore={this.loadMore.bind(this)}
           hasMore={this.state.hasMore}
           loader={<Loading loading key={0} />}
-          useWindow={false}>
+          useWindow={false}
+        >
           {rowItems}
         </InfiniteScroll>
       </div>

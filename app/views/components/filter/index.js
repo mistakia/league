@@ -64,7 +64,8 @@ export default class Filter extends React.Component {
         <div
           key={v.value}
           className={classNames.join(' ')}
-          onClick={(e) => this.handleClick(e, index)}>
+          onClick={(e) => this.handleClick(e, index)}
+        >
           {v.label}
         </div>
       )
@@ -85,7 +86,8 @@ export default class Filter extends React.Component {
           this.root = ref
         }}
         className='player__filter'
-        onClick={this.handleToggleClick}>
+        onClick={this.handleToggleClick}
+      >
         <div className='player__filter-label'>{label}</div>
         <div className='player__filter-selection'>{selectedLabel}</div>
         {visible && (
@@ -93,17 +95,20 @@ export default class Filter extends React.Component {
             ref={(ref) => {
               this.body = ref
             }}
-            className='player__filter-dropdown'>
+            className='player__filter-dropdown'
+          >
             {!single && (
               <div className='player__filter-dropdown-head'>
                 <div
                   className='player__filter-dropdown-action'
-                  onClick={this.handleAllClick}>
+                  onClick={this.handleAllClick}
+                >
                   All
                 </div>
                 <div
                   className='player__filter-dropdown-action'
-                  onClick={this.handleClearClick}>
+                  onClick={this.handleClearClick}
+                >
                   Clear
                 </div>
               </div>

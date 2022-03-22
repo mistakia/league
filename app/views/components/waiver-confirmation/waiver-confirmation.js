@@ -247,7 +247,8 @@ export default class WaiverConfirmation extends React.Component {
                 value={this.state.type}
                 disabled={Boolean(waiver)}
                 onChange={this.handleType}
-                label='Type'>
+                label='Type'
+              >
                 {typeItems}
               </Select>
             </FormControl>

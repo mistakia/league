@@ -48,13 +48,15 @@ export default class EditableBaseline extends React.Component {
         <FormControl
           size='small'
           variant='outlined'
-          className='editable__baseline-select'>
+          className='editable__baseline-select'
+        >
           <InputLabel id='baseline-label'>{`${this.props.position} Baseline`}</InputLabel>
           <Select
             labelId='baseline-label'
             value={this.state.value}
             onChange={this.handleChange}
-            label={`${this.props.position} Baseline`}>
+            label={`${this.props.position} Baseline`}
+          >
             {menuItems}
           </Select>
         </FormControl>

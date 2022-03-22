@@ -34,13 +34,15 @@ export default class EditableValue extends React.Component {
         <FormControl
           size='small'
           variant='outlined'
-          className='editable__value-select'>
+          className='editable__value-select'
+        >
           <InputLabel id='value-label'>Value Baseline</InputLabel>
           <Select
             labelId='value-label'
             value={vbaseline}
             onChange={this.handleChange}
-            label='VORP Baseline'>
+            label='VORP Baseline'
+          >
             <MenuItem value='default'>Default</MenuItem>
             <MenuItem value='manual'>Manual</MenuItem>
           </Select>

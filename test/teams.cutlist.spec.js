@@ -3,14 +3,14 @@ process.env.NODE_ENV = 'test'
 
 const chai = require('chai')
 const chaiHTTP = require('chai-http')
-// const MockDate = require('mockdate')
+const MockDate = require('mockdate')
 
 const server = require('../api')
 const knex = require('../db')
 
 const league = require('../db/seeds/league')
 const { constants } = require('../common')
-// const { start } = constants.season
+const { start } = constants.season
 const { user1, user2 } = require('./fixtures/token')
 const {
   selectPlayer,
@@ -30,6 +30,9 @@ describe('API /teams - cutlist', function () {
     await knex.migrate.forceFreeMigrationsLock()
     await knex.migrate.rollback()
     await knex.migrate.latest()
+
+    MockDate.set(start.subtract('1', 'month').toDate())
+
     await knex.seed.run()
   })
 

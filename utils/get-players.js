@@ -181,9 +181,8 @@ module.exports = async function ({
     .whereIn('player', returnedPlayerIds)
 
   for (const pointProjection of leaguePointsProj) {
-    playerMap[pointProjection.player].points[
-      pointProjection.week
-    ] = pointProjection
+    playerMap[pointProjection.player].points[pointProjection.week] =
+      pointProjection
   }
 
   const leagueValuesProj = await db('league_player_projection_values')
@@ -197,9 +196,8 @@ module.exports = async function ({
     const { vorp, vorp_adj, market_salary } = pointProjection
     playerMap[pointProjection.player].vorp[pointProjection.week] = vorp
     playerMap[pointProjection.player].vorp_adj[pointProjection.week] = vorp_adj
-    playerMap[pointProjection.player].market_salary[
-      pointProjection.week
-    ] = market_salary
+    playerMap[pointProjection.player].market_salary[pointProjection.week] =
+      market_salary
   }
 
   const projections = await db('projections')

@@ -87,7 +87,8 @@ export default class ReserveConfirmation extends React.Component {
                   error={this.state.missingActivate}
                   value={this.state.activate}
                   onChange={this.handleSelectActivate}
-                  label='Activate'>
+                  label='Activate'
+                >
                   {menuItems}
                 </Select>
               </FormControl>

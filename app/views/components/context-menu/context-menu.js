@@ -97,7 +97,8 @@ export default class ContextMenu extends React.Component {
           ref={(ref) => {
             this.root = ref
           }}
-          className='context__menu'>
+          className='context__menu'
+        >
           <ContextMenuComponent {...data} />
         </div>
         <div className='context__menu-backdrop' />

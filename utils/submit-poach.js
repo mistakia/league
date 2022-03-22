@@ -120,7 +120,9 @@ module.exports = async function ({
   const rows = await db('poaches').insert(data)
   const poachid = rows[0]
   const releaseInserts = release.map((player) => ({ poachid, player }))
-  await db('poach_releases').insert(releaseInserts)
+  if (releaseInserts.length) {
+    await db('poach_releases').insert(releaseInserts)
+  }
 
   const message = `${team.name} has submitted a poaching claim for ${
     poachPlayer.fname

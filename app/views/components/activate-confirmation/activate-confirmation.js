@@ -112,7 +112,8 @@ export default class ActivateConfirmation extends React.Component {
                     error={this.state.missing}
                     value={this.state.reserve}
                     onChange={this.handleSelectReserve}
-                    label='Reserve'>
+                    label='Reserve'
+                  >
                     {reserveItems}
                   </Select>
                 </FormControl>
@@ -127,7 +128,8 @@ export default class ActivateConfirmation extends React.Component {
                   error={this.state.missing}
                   value={this.state.release}
                   onChange={this.handleSelectRelease}
-                  label='Release'>
+                  label='Release'
+                >
                   {releaseItems}
                 </Select>
               </FormControl>

@@ -137,8 +137,10 @@ const run = async () => {
     return
   }
 
-  log(`Inserting ${inserts.length} projections into database`)
-  await db('projections').insert(inserts)
+  if (inserts.length) {
+    log(`Inserting ${inserts.length} projections into database`)
+    await db('projections').insert(inserts)
+  }
 }
 
 module.exports = run

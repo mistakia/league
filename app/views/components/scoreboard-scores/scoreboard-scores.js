@@ -22,7 +22,8 @@ export default class ScoreboardScores extends React.Component {
         <div
           key={index}
           className={classNames.join(' ')}
-          onClick={() => this.handleClick(matchup.uid)}>
+          onClick={() => this.handleClick(matchup.uid)}
+        >
           <ScoreboardScoreTeam tid={matchup.aid} />
           <ScoreboardScoreTeam tid={matchup.hid} />
         </div>

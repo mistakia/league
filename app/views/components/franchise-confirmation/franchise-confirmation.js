@@ -87,7 +87,8 @@ export default class FranchiseConfirmation extends React.Component {
                   error={this.state.missingUntag}
                   value={this.state.untag}
                   onChange={this.handleUntag}
-                  label='Remove Tag'>
+                  label='Remove Tag'
+                >
                   {menuItems}
                 </Select>
               </FormControl>

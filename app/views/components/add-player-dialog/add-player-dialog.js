@@ -90,7 +90,8 @@ export default class AddPlayerDialog extends React.Component {
                 native
                 value={this.state.player}
                 onChange={this.handleChangePlayer}
-                label='Player'>
+                label='Player'
+              >
                 {menuItems}
               </Select>
             </FormControl>
