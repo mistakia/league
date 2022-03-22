@@ -213,7 +213,8 @@ export default class PlayerContextMenu extends React.Component {
           key='activate'
           dense
           disabled={status.protected || !status.eligible.activate}
-          onClick={this.handleActivate}>
+          onClick={this.handleActivate}
+        >
           Activate
         </MenuItem>
       )
@@ -223,7 +224,8 @@ export default class PlayerContextMenu extends React.Component {
           key='ps'
           dense
           disabled={!status.eligible.ps}
-          onClick={this.handleDeactivate}>
+          onClick={this.handleDeactivate}
+        >
           Move to Practice Squad
         </MenuItem>
       )
@@ -233,7 +235,8 @@ export default class PlayerContextMenu extends React.Component {
           key='protect'
           dense
           disabled={!status.eligible.protect}
-          onClick={this.handleProtect}>
+          onClick={this.handleProtect}
+        >
           Designate Protected
         </MenuItem>
       )
@@ -247,7 +250,8 @@ export default class PlayerContextMenu extends React.Component {
               status.tagged.franchise
                 ? this.handleRemoveTag
                 : this.handleFranchiseTag
-            }>
+            }
+          >
             {`${status.tagged.franchise ? 'Remove' : 'Apply'} Franchise Tag`}
           </MenuItem>
         )
@@ -265,7 +269,8 @@ export default class PlayerContextMenu extends React.Component {
             <MenuItem
               key='transition-remove'
               dense
-              onClick={this.handleRemoveTransitionTag}>
+              onClick={this.handleRemoveTransitionTag}
+            >
               Remove Transition Tag
             </MenuItem>
           )
@@ -285,7 +290,8 @@ export default class PlayerContextMenu extends React.Component {
             dense
             onClick={
               status.tagged.rookie ? this.handleRemoveTag : this.handleRookieTag
-            }>
+            }
+          >
             {`${status.tagged.rookie ? 'Remove' : 'Apply'} Rookie Tag`}
           </MenuItem>
         )
@@ -304,7 +310,8 @@ export default class PlayerContextMenu extends React.Component {
           key='ir'
           dense
           disabled={!status.reserve.ir || (status.locked && status.starter)}
-          onClick={this.handleReserveIR}>
+          onClick={this.handleReserveIR}
+        >
           Move to Reserve/IR
         </MenuItem>
       )
@@ -314,7 +321,8 @@ export default class PlayerContextMenu extends React.Component {
           key='cov'
           dense
           disabled={!status.reserve.cov || (status.locked && status.starter)}
-          onClick={this.handleReserveCOV}>
+          onClick={this.handleReserveCOV}
+        >
           Move to Reserve/COV
         </MenuItem>
       )
@@ -324,7 +332,8 @@ export default class PlayerContextMenu extends React.Component {
           key='release'
           dense
           disabled={status.protected || (status.locked && status.starter)}
-          onClick={this.handleRelease}>
+          onClick={this.handleRelease}
+        >
           Release
         </MenuItem>
       )
@@ -347,7 +356,8 @@ export default class PlayerContextMenu extends React.Component {
             <MenuItem
               key='transition-remove'
               dense
-              onClick={this.handleRemoveTransitionTag}>
+              onClick={this.handleRemoveTransitionTag}
+            >
               Remove Transition Bid
             </MenuItem>
           )
@@ -363,7 +373,8 @@ export default class PlayerContextMenu extends React.Component {
           key='poach'
           dense
           disabled={!status.eligible.poach}
-          onClick={this.handlePoach}>
+          onClick={this.handlePoach}
+        >
           {text}
         </MenuItem>
       )
@@ -381,7 +392,8 @@ export default class PlayerContextMenu extends React.Component {
           <MenuItem
             key='sign-ps'
             dense
-            onClick={() => this.handleAdd({ practice: true })}>
+            onClick={() => this.handleAdd({ practice: true })}
+          >
             Sign to Practice Squad
           </MenuItem>
         )

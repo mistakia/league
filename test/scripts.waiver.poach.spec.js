@@ -24,13 +24,12 @@ describe('SCRIPTS /waivers - poach', function () {
     await knex.migrate.forceFreeMigrationsLock()
     await knex.migrate.rollback()
     await knex.migrate.latest()
-    await knex.seed.run()
   })
 
   describe('process', function () {
     beforeEach(async function () {
-      this.timeout(60 * 1000)
       MockDate.set(start.subtract('1', 'month').toDate())
+      await knex.seed.run()
       await league(knex)
 
       await knex('leagues')

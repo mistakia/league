@@ -77,7 +77,10 @@ const run = async ({ nextSeason = argv.season } = {}) => {
         return item.slot !== p.slot || item.tag !== p.tag
       })
 
-      await db('rosters_players').insert(inserts)
+      if (inserts.length) {
+        await db('rosters_players').insert(inserts)
+      }
+
       if (excessive.length) {
         await db('rosters_players')
           .where('rid', rid)

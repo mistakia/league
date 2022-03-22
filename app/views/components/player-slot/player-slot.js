@@ -10,14 +10,8 @@ import './player-slot.styl'
 
 export default class PlayerSlot extends React.Component {
   render() {
-    const {
-      player,
-      slot,
-      handleSelect,
-      selected,
-      handleUpdate,
-      isLocked
-    } = this.props
+    const { player, slot, handleSelect, selected, handleUpdate, isLocked } =
+      this.props
 
     const slotPositions = Object.keys(constants.slots).find(
       (key) => constants.slots[key] === slot
@@ -34,7 +28,8 @@ export default class PlayerSlot extends React.Component {
           onClick={() =>
             handleSelect({ slot, player: player.player, pos: player.pos })
           }
-          small>
+          small
+        >
           {isLocked ? 'Locked' : 'Move'}
         </Button>
       )

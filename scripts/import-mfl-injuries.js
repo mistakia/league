@@ -66,8 +66,10 @@ const run = async () => {
     return
   }
 
-  log(`Inserting ${inserts.length} status updates into database`)
-  await db('players_status').insert(inserts)
+  if (inserts.length) {
+    log(`Inserting ${inserts.length} status updates into database`)
+    await db('players_status').insert(inserts)
+  }
 }
 
 module.exports = run

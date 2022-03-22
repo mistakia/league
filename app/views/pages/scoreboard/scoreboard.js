@@ -80,7 +80,8 @@ export default class ScoreboardPage extends React.Component {
               </div>
               <div
                 className='scoreboard__bench cursor'
-                onClick={this.handleBenchToggle}>
+                onClick={this.handleBenchToggle}
+              >
                 Show Bench
               </div>
             </Grid>

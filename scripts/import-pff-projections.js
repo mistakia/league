@@ -101,8 +101,10 @@ const runOne = async (week) => {
     return
   }
 
-  log(`Inserting ${inserts.length} projections into database`)
-  await db('projections').insert(inserts)
+  if (inserts.length) {
+    log(`Inserting ${inserts.length} projections into database`)
+    await db('projections').insert(inserts)
+  }
 }
 
 const run = async () => {

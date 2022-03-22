@@ -110,7 +110,8 @@ class PlayerNameExpanded extends Player {
         <div className='player__name-expanded-main'>
           <div
             className='player__name-expanded-row player__name-expanded-name cursor'
-            onClick={this.handleClick}>
+            onClick={this.handleClick}
+          >
             <div className='player__name-expanded-full-name'>
               {playerName || '-'}
             </div>

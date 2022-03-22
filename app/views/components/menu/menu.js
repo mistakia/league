@@ -94,7 +94,8 @@ export default class Menu extends React.Component {
               className='main__menu-button'
               color='inherit'
               aria-label='menu'
-              onClick={this.handleOpen}>
+              onClick={this.handleOpen}
+            >
               <MenuIcon />
             </IconButton>
             {isLoggedIn && <LeagueSchedule />}
@@ -127,7 +128,8 @@ export default class Menu extends React.Component {
           onClose={this.handleClose}
           classes={{
             paper: 'main__menu-paper'
-          }}>
+          }}
+        >
           <List>{header}</List>
           <Divider />
           <List>
@@ -170,7 +172,8 @@ export default class Menu extends React.Component {
             <List>
               <ListItem
                 button
-                onClick={this.handleClick('/league/transactions')}>
+                onClick={this.handleClick('/league/transactions')}
+              >
                 <ListItemText primary='Transactions' />
               </ListItem>
               <ListItem button onClick={this.handleClick('/league/waivers')}>

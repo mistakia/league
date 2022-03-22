@@ -18,7 +18,10 @@ module.exports = async function ({ lid }) {
       })
     }
   }
-  await db('matchups').insert(inserts)
+
+  if (inserts.length) {
+    await db('matchups').insert(inserts)
+  }
 
   return inserts
 }

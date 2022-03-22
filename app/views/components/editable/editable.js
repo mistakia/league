@@ -89,7 +89,8 @@ export default class Editable extends React.Component {
         onKeyDown={this.handleKeyDown}
         suppressContentEditableWarning
         contentEditable
-        {...this.props.defaultProps}>
+        {...this.props.defaultProps}
+      >
         {this.props.value}
       </span>
     )

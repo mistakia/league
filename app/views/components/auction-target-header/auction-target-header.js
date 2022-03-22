@@ -43,7 +43,8 @@ export default class AuctionTargetHeader extends React.Component {
         <div className='auction__target-header-inflation'>
           <Tooltip
             title='Positional Salary Inflation. A positive value indicates rostered player salaries at this position are below market salaries'
-            placement='bottom'>
+            placement='bottom'
+          >
             <span>
               {positive ? '+' : null}
               {inflation.toFixed(1)}%

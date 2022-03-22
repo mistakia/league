@@ -27,10 +27,10 @@ describe('API /waivers - poach', function () {
     await knex.migrate.forceFreeMigrationsLock()
     await knex.migrate.rollback()
     await knex.migrate.latest()
-    await knex.seed.run()
 
     MockDate.set(start.subtract('1', 'month').toDate())
 
+    await knex.seed.run()
     await league(knex)
     await draftPicks(knex)
 

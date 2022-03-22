@@ -76,7 +76,10 @@ router.post('/?', async (req, res) => {
       })
     }
 
-    await db('league_cutlist').insert(result).onConflict().merge()
+    if (result.length) {
+      await db('league_cutlist').insert(result).onConflict().merge()
+    }
+
     await db('league_cutlist')
       .del()
       .whereNotIn('player', players)

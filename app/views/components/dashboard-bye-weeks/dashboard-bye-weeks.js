@@ -46,7 +46,8 @@ function ByeWeekPopover({ players, bye }) {
       <div
         className='dashboard__bye-week-row-body'
         onMouseEnter={handlePopoverOpen}
-        onMouseLeave={handlePopoverClose}>
+        onMouseLeave={handlePopoverClose}
+      >
         {items}
       </div>
       <Popover
@@ -62,7 +63,8 @@ function ByeWeekPopover({ players, bye }) {
           horizontal: 'left'
         }}
         onClose={handlePopoverClose}
-        disableRestoreFocus>
+        disableRestoreFocus
+      >
         <div className='dashboard__bye-week-pop-label'>Week {bye} Byes</div>
         {labels}
       </Popover>

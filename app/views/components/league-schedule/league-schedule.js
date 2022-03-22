@@ -52,7 +52,8 @@ export default class LeagueSchedule extends React.Component {
           transformOrigin={{
             vertical: 'top',
             horizontal: 'center'
-          }}>
+          }}
+        >
           <LeagueScheduleList />
         </Popover>
       </div>

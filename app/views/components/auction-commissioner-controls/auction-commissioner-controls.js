@@ -64,7 +64,8 @@ export default class AuctionCommissionerControls extends React.Component {
           icon={<SpeedDialIcon />}
           onClose={this.handleClose}
           onOpen={this.handleOpen}
-          open={open}>
+          open={open}
+        >
           {action}
           {/* <SpeedDialAction
               icon={<Icon name='previous' />}

@@ -16,13 +16,15 @@ export default class StatMenu extends React.Component {
       <FormControl
         size='small'
         variant='outlined'
-        className='stat__view-menu player__filter'>
+        className='stat__view-menu player__filter'
+      >
         <InputLabel id='stat__view-menu-label'>Stat</InputLabel>
         <Select
           labelId='stat__view-menu-label'
           value={this.props.view}
           onChange={this.handleChange}
-          label='Stat'>
+          label='Stat'
+        >
           <MenuItem value='passing'>Passing</MenuItem>
           <MenuItem value='rushing'>Rushing</MenuItem>
           <MenuItem value='receiving'>Receiving</MenuItem>

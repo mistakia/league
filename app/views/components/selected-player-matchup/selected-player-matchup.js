@@ -51,7 +51,8 @@ export default class SelectedPlayerMatchup extends React.Component {
           onChange={this.handleChange}
           variant='scrollable'
           className='selected__player-matchup-tabs'
-          orientation='horizontal'>
+          orientation='horizontal'
+        >
           {labels}
         </Tabs>
         <SelectedPlayerMatchupTable week={value} />

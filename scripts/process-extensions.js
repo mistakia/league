@@ -70,8 +70,11 @@ const run = async ({ lid }) => {
       const transaction = await createTransaction({ player, tid, league })
       if (transaction) transactions.push(transaction)
     }
-    log(`creating ${transactions.length} transactions for teamId: ${tid}`)
-    await db('transactions').insert(transactions)
+
+    if (transactions.length) {
+      log(`creating ${transactions.length} transactions for teamId: ${tid}`)
+      await db('transactions').insert(transactions)
+    }
   }
 }
 
