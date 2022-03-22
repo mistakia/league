@@ -235,7 +235,7 @@ router.get('/:leagueId/teams/?', async (req, res) => {
       .whereIn('tid', teamIds)
 
     for (const team of teams) {
-      const forecast = forecasts.find((f) => f.tid === team.uid)
+      const forecast = forecasts.find((f) => f.tid === team.uid) || {}
       team.picks = picks.filter((p) => p.tid === team.uid)
       team.playoff_odds = forecast.playoff_odds
       team.division_odds = forecast.division_odds
