@@ -50,12 +50,12 @@ export default class Season {
   }
 
   get isOffseason() {
-    return this.week === 0 || this.now.isAfter(this.end)
+    return this.week === 0
   }
 
   get isRegularSeason() {
     const week = this.week
-    return week > 0 && week <= this.finalWeek
+    return week > 0
   }
 
   get isWaiverPeriod() {
@@ -79,7 +79,7 @@ export default class Season {
 
   get week() {
     const diff = Math.max(0, this.now.diff(this.start, 'weeks'))
-    const isOffseason = this.now.isAfter(this.end)
+    const isOffseason = diff > this.finalWeek
     return isOffseason ? 0 : diff
   }
 

@@ -22,7 +22,7 @@ const run = async ({ nextSeason = argv.season } = {}) => {
 
   const nextWeek = nextSeason ? 0 : constants.season.week + 1
   const nextYear = nextSeason
-    ? constants.season.week > constants.season.finalWeek
+    ? constants.season.week === 0
       ? constants.season.year
       : constants.season.year + 1
     : constants.season.year
