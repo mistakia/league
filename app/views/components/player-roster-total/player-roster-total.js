@@ -33,7 +33,8 @@ class PlayerRosterTotal extends Player {
         bid
       })
       const projectedSalary = player.getIn(['market_salary', projectionType], 0)
-      const savings = projectedSalary - extendedSalary
+      const hasProjections = player.hasIn(['market_salary', projectionType])
+      const savings = hasProjections ? projectedSalary - extendedSalary : 0
 
       baseSalaryTotal = baseSalaryTotal + (bid || value)
       extendedSalaryTotal = extendedSalaryTotal + extendedSalary

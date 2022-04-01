@@ -51,9 +51,11 @@ class PlayerRoster extends Player {
       bid
     })
     const projectionType = isRegularSeason ? 'ros' : '0'
+    const hasProjections = player.hasIn(['market_salary', projectionType])
     const projectedSalary = player.getIn(['market_salary', projectionType], 0)
     const savings =
-      !isRestrictedFreeAgencyPeriod || bid || !isRestrictedFreeAgent
+      hasProjections &&
+      (!isRestrictedFreeAgencyPeriod || bid || !isRestrictedFreeAgent)
         ? projectedSalary - extendedSalary
         : null
 
