@@ -50,8 +50,12 @@ export default class SelectedPlayer extends React.Component {
   constructor(props) {
     super(props)
 
+    const projectionView = 0
+    const transactionsView = 9
     this.state = {
-      value: 0
+      value: constants.season.isRegularSeason
+        ? projectionView
+        : transactionsView
     }
   }
 

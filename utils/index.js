@@ -99,6 +99,7 @@ module.exports = {
   getPlayByPlayQuery,
   getTransactionsSinceAcquisition: require('./get-transactions-since-acquisition'),
   getTransactionsSinceFreeAgent: require('./get-transactions-since-free-agent'),
+  getPlayerExtensions: require('./get-player-extensions'),
 
   verifyUserTeam: require('./verify-user-team'),
   verifyReserveStatus: require('./verify-reserve-status'),

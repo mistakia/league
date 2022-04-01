@@ -5,7 +5,7 @@ const argv = require('yargs').argv
 
 const db = require('../db')
 const { constants, Roster, getExtensionAmount } = require('../common')
-const { getLeague, getRoster } = require('../utils')
+const { getLeague, getRoster, getPlayerExtensions } = require('../utils')
 
 const log = debug('process-extensions')
 debug.enable('process-extensions')
@@ -26,10 +26,10 @@ const createTransaction = async ({ player, tid, league }) => {
     return null
   }
 
-  const extensions = await db('transactions')
-    .where('tid', tid)
-    .where('player', player.player)
-    .where('type', constants.transactions.EXTENSION)
+  const extensions = await getPlayerExtensions({
+    lid: league.uid,
+    player: player.player
+  })
   const value = getExtensionAmount({
     extensions: extensions.length,
     tag: player.tag,

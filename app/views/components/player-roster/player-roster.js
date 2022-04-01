@@ -40,7 +40,6 @@ class PlayerRoster extends Player {
 
     const { pos, tag, value, bid } = player
     const salary = isRestrictedFreeAgent ? bid : value
-    const week = Math.max(constants.season.week, 1)
     const extensions = player.get('extensions', new List()).size
     const extendedSalary = getExtensionAmount({
       pos,
@@ -62,6 +61,7 @@ class PlayerRoster extends Player {
     const vorp = player.getIn(['vorp', projectionType], 0)
     const vorpAdj = player.getIn(['vorp_adj', projectionType], 0)
     const rosPoints = player.getIn(['points', projectionType, 'total'], 0)
+    const week = Math.max(constants.season.week, 1)
     const weekPoints = player.getIn(['points', `${week}`, 'total'], 0)
     const starts = player.getIn(['lineups', 'starts'], 0)
     const startPoints = player.getIn(['lineups', 'sp'], 0)
