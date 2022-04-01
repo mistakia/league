@@ -1,5 +1,4 @@
 import React from 'react'
-import { List } from 'immutable'
 import DragIndicatorIcon from '@material-ui/icons/DragIndicator'
 import { sortableHandle } from 'react-sortable-hoc'
 
@@ -40,7 +39,7 @@ class PlayerRoster extends Player {
 
     const { pos, tag, value, bid } = player
     const salary = isRestrictedFreeAgent ? bid : value
-    const extensions = player.get('extensions', new List()).size
+    const extensions = player.get('extensions', 0)
     const extendedSalary = getExtensionAmount({
       pos,
       tag,

@@ -14,7 +14,6 @@ import DialogActions from '@material-ui/core/DialogActions'
 import DialogTitle from '@material-ui/core/DialogTitle'
 import Autocomplete from '@material-ui/lab/Autocomplete'
 import Chip from '@material-ui/core/Chip'
-import { List } from 'immutable'
 
 import Position from '@components/position'
 import Team from '@components/team'
@@ -128,7 +127,7 @@ export default class WaiverConfirmation extends React.Component {
     const options = []
     for (const player of this._releases) {
       const { pos, team, pname, value, name, tag, bid } = player
-      const extensions = player.get('extensions', new List()).size
+      const extensions = player.get('extensions', 0)
       const salary = getExtensionAmount({
         pos,
         tag,

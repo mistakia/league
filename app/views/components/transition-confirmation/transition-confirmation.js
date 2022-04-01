@@ -62,7 +62,7 @@ export default class TransitionConfirmation extends React.Component {
     const available = this.props.team.roster.availableCap
     const { isBeforeExtensionDeadline } = this.props
     const { pos, tag, value, bid } = this.props.player
-    const extensions = this.props.player.get('extensions', new List()).size
+    const extensions = this.props.player.get('extensions', 0)
     const { league, cutlistTotalSalary } = this.props
     const playerSalary = isBeforeExtensionDeadline
       ? getExtensionAmount({
@@ -81,7 +81,7 @@ export default class TransitionConfirmation extends React.Component {
     const releaseSalary = notInCutlist.reduce((sum, playerId) => {
       const player = this.props.team.players.find((p) => p.player === playerId)
       const { pos, value, tag, bid } = player
-      const extensions = player.get('extensions', new List()).size
+      const extensions = player.get('extensions', 0)
       const salary = isBeforeExtensionDeadline
         ? getExtensionAmount({
             pos,
