@@ -25,17 +25,19 @@ const sendNotifications = async ({
 
   if (notifyLeague) {
     // send league text messages
-    for (const [index, user] of users.entries()) {
-      if (user.phone && user.text && user.leaguetext) {
-        textMessages.push({
-          number: user.phone,
-          message
-        })
 
-        users.splice(index, 1)
-      }
-    }
+    // disable league text notifications
+    /* for (const [index, user] of users.entries()) {
+     *   if (user.phone && user.text && user.leaguetext) {
+     *     textMessages.push({
+     *       number: user.phone,
+     *       message
+     *     })
 
+     *     users.splice(index, 1)
+     *   }
+     * }
+     */
     // send league groupme messages
     if (league.groupme_token && league.groupme_id) {
       await sendGroupmeMessage({
