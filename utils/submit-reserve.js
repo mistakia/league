@@ -10,6 +10,7 @@ const db = require('../db')
 const sendNotifications = require('./send-notifications')
 const getAcquisitionTransaction = require('./get-acquisition-transaction')
 const isPlayerLocked = require('./is-player-locked')
+const getLastTransaction = require('./get-last-transaction')
 
 module.exports = async function ({
   slot,
@@ -132,14 +133,18 @@ module.exports = async function ({
       player: activate
     })
 
-    const activateRosterPlayer = roster.get(activate)
+    const { value } = await getLastTransaction({
+      player: activate,
+      lid: leagueId,
+      tid
+    })
     const transaction = {
       userid: userId,
       tid,
       lid: leagueId,
       player: activate,
       type: constants.transactions.ROSTER_ACTIVATE,
-      value: activateRosterPlayer.value,
+      value,
       year: constants.season.year,
       timestamp: Math.round(Date.now() / 1000)
     }
@@ -172,17 +177,7 @@ module.exports = async function ({
     player
   })
 
-  const transactions = await db('transactions')
-    .orderBy('transactions.timestamp', 'desc')
-    .orderBy('transactions.uid', 'desc')
-    .where({
-      player,
-      lid: leagueId,
-      tid
-    })
-    .limit(1)
-  const { value } = transactions[0]
-
+  const { value } = await getLastTransaction({ player, lid: leagueId, tid })
   const transaction = {
     userid: userId,
     tid,
