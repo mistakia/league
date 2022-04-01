@@ -30,6 +30,9 @@ describe('API /teams - activate', function () {
     await knex.migrate.forceFreeMigrationsLock()
     await knex.migrate.rollback()
     await knex.migrate.latest()
+
+    MockDate.set(start.subtract('1', 'week').toDate())
+
     await knex.seed.run()
   })
 

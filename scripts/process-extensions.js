@@ -5,7 +5,12 @@ const argv = require('yargs').argv
 
 const db = require('../db')
 const { constants, Roster, getExtensionAmount } = require('../common')
-const { getLeague, getRoster, getPlayerExtensions } = require('../utils')
+const {
+  getLeague,
+  getRoster,
+  getPlayerExtensions,
+  getLastTransaction
+} = require('../utils')
 
 const log = debug('process-extensions')
 debug.enable('process-extensions')
@@ -30,12 +35,13 @@ const createTransaction = async ({ player, tid, league }) => {
     lid: league.uid,
     player: player.player
   })
-  const value = getExtensionAmount({
+  const { value } = await getLastTransaction({ player, tid, lid: league.uid })
+  const extensionValue = getExtensionAmount({
     extensions: extensions.length,
     tag: player.tag,
     pos: player.pos,
     league,
-    value: player.value
+    value
   })
   return {
     userid: 0,
@@ -43,7 +49,7 @@ const createTransaction = async ({ player, tid, league }) => {
     lid: league.uid,
     player: player.player,
     type: getTransactionType(player.tag),
-    value,
+    value: extensionValue,
     year: constants.season.year,
     timestamp: league.ext_date
   }

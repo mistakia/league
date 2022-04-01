@@ -30,6 +30,8 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
     await knex.migrate.forceFreeMigrationsLock()
     await knex.migrate.rollback()
     await knex.migrate.latest()
+
+    MockDate.set(start.subtract('1', 'month').toDate())
     await knex.seed.run()
   })
 
@@ -37,11 +39,13 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
       await league(knex)
-      const tranDate = start.subtract('1', 'month').unix()
+      const tranDate = start.subtract('5', 'week').unix()
+      const extDate = start.subtract('6', 'week').unix()
       await knex('seasons').insert({
         lid: leagueId,
         year: constants.season.year,
-        tran_date: tranDate
+        tran_date: tranDate,
+        ext_date: extDate
       })
       MockDate.set(start.subtract('1', 'month').toDate())
     })
