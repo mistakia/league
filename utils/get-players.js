@@ -1,6 +1,7 @@
 const db = require('../db')
 const { constants } = require('../common')
 const getPlayerTransactions = require('./get-player-transactions')
+const getPlayerExtensions = require('./get-player-extensions')
 
 module.exports = async function ({
   textSearch,
@@ -108,33 +109,11 @@ module.exports = async function ({
   )
 
   if (playerIdsInLeague.length) {
-    // TODO - get extension count for player
-    const transactions = await db('transactions')
-      .select(
-        'transactions.type',
-        'transactions.value',
-        'transactions.timestamp',
-        'transactions.tid',
-        'transactions.lid',
-        'transactions.player'
-      )
-      .join('rosters_players', 'transactions.player', 'rosters_players.player')
-      .join('rosters', function () {
-        this.on('rosters_players.rid', '=', 'rosters.uid')
-        this.on('transactions.tid', '=', 'rosters.tid')
+    for (const player of data) {
+      player.extensions = await getPlayerExtensions({
+        player: player.player,
+        lid: leagueId
       })
-      .where('rosters.week', constants.season.week)
-      .where('rosters.year', constants.season.year)
-      .where('rosters.lid', leagueId)
-      .whereIn('type', [constants.transactions.EXTENSION])
-      .whereIn('transactions.player', playerIdsInLeague)
-
-    if (transactions.length) {
-      for (const player of data) {
-        player.extensions = transactions.filter(
-          (p) => p.player === player.player
-        )
-      }
     }
 
     // include player restricted free agency bid

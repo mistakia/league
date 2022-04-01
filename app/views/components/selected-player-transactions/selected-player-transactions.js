@@ -9,7 +9,7 @@ import TableHead from '@material-ui/core/TableHead'
 import TableRow from '@material-ui/core/TableRow'
 import LinearProgress from '@material-ui/core/LinearProgress'
 
-import { constants } from '@common'
+import { constants, getExtensionAmount } from '@common'
 import TeamName from '@components/team-name'
 import Timestamp from '@components/timestamp'
 import TransactionRow from '@components/transaction-row'
@@ -22,8 +22,9 @@ export default class SelectedPlayerTransactions extends React.Component {
   }
 
   render = () => {
-    const { teams, maxTransaction } = this.props
-    const { transactions, loadingTransactions } = this.props.player
+    const { teams, maxTransaction, player } = this.props
+    const { transactions, loadingTransactions } = player
+
     if (loadingTransactions && !transactions.size) {
       return <LinearProgress color='secondary' />
     }
@@ -65,6 +66,18 @@ export default class SelectedPlayerTransactions extends React.Component {
       )
     }
 
+    const isRestrictedFreeAgent = player.tag === constants.tags.TRANSITION
+    const { pos, tag, value, bid } = player
+    const extensions = player.get('extensions', new List()).size
+    const extendedSalary = getExtensionAmount({
+      pos,
+      tag,
+      extensions,
+      league,
+      value,
+      bid
+    })
+
     return (
       <div className='selected__player-transactions'>
         <div className='selected__player-transactions-all'>{items}</div>
@@ -72,6 +85,10 @@ export default class SelectedPlayerTransactions extends React.Component {
           <TableContainer>
             <Table size='small'>
               <TableBody>
+                <TableRow>
+                  <TableCell>{constants.season.year} Extended Salary</TableCell>
+                  <TableCell colSpan={2}>${extendedSalary}</TableCell>
+                </TableRow>
                 <TableRow>
                   <TableCell>Total Teams</TableCell>
                   <TableCell colSpan={2}>{Object.keys(teams).length}</TableCell>
