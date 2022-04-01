@@ -1,5 +1,4 @@
 import React from 'react'
-import { List } from 'immutable'
 import dayjs from 'dayjs'
 
 import { getExtensionAmount, constants } from '@common'
@@ -20,7 +19,7 @@ class PlayerRosterRow extends Player {
     const deadline = dayjs.unix(league.ext_date)
     const calculateExtension = constants.season.now.isBefore(deadline)
     const { pos, tag, value, bid } = player
-    const extensions = player.get('extensions', new List()).size
+    const extensions = player.get('extensions', 0)
     const salary = calculateExtension
       ? getExtensionAmount({
           pos,

@@ -1,7 +1,6 @@
 const db = require('../db')
 const { constants } = require('../common')
 const getPlayerTransactions = require('./get-player-transactions')
-const getPlayerExtensions = require('./get-player-extensions')
 
 module.exports = async function ({
   textSearch,
@@ -109,11 +108,14 @@ module.exports = async function ({
   )
 
   if (playerIdsInLeague.length) {
-    for (const player of data) {
-      player.extensions = await getPlayerExtensions({
-        player: player.player,
-        lid: leagueId
-      })
+    const playerTransactions = await getPlayerTransactions({
+      lid: leagueId,
+      playerIds: playerIdsInLeague
+    })
+
+    for (const tran of playerTransactions) {
+      const player = data.find((p) => p.player === tran.player)
+      player.value = tran.value
     }
 
     // include player restricted free agency bid
@@ -139,16 +141,6 @@ module.exports = async function ({
           }
         }
       }
-    }
-
-    const playerTransactions = await getPlayerTransactions({
-      lid: leagueId,
-      playerIds: playerIdsInLeague
-    })
-
-    for (const tran of playerTransactions) {
-      const player = data.find((p) => p.player === tran.player)
-      player.value = tran.value
     }
   }
 

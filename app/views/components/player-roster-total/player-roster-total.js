@@ -1,5 +1,4 @@
 import React from 'react'
-import { List } from 'immutable'
 
 import { Player, connect } from '@components/player'
 import { constants, getExtensionAmount } from '@common'
@@ -22,7 +21,7 @@ class PlayerRosterTotal extends Player {
     let weekPointsTotal = 0
 
     players.forEach((player) => {
-      const extensions = player.get('extensions', new List()).size
+      const extensions = player.get('extensions', 0)
       const { pos, tag, value, bid } = player
       const extendedSalary = getExtensionAmount({
         pos,

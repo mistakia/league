@@ -1,5 +1,4 @@
 import React from 'react'
-import { List } from 'immutable'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import DialogContent from '@material-ui/core/DialogContent'
@@ -86,7 +85,7 @@ export default class PoachConfirmation extends React.Component {
     const options = []
     team.active.forEach((player) => {
       const { pos, team, pname, value, name, tag, bid } = player
-      const extensions = player.get('extensions', new List()).size
+      const extensions = player.get('extensions', 0)
       const salary = getExtensionAmount({
         pos,
         tag,

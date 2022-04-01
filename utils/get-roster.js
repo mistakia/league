@@ -28,9 +28,8 @@ module.exports = async ({
 
     if (transactions.length) {
       for (const player of rosterRow.players) {
-        player.extensions = transactions.filter(
-          (p) => p.player === player.player
-        )
+        const matches = transactions.filter((p) => p.player === player.player)
+        player.extensions = matches.length
       }
     }
 
