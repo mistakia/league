@@ -22,7 +22,7 @@ export default class SelectedPlayerTransactions extends React.Component {
   }
 
   render = () => {
-    const { teams, maxTransaction, player } = this.props
+    const { teams, maxTransaction, player, league } = this.props
     const { transactions, loadingTransactions } = player
 
     if (loadingTransactions && !transactions.size) {
@@ -66,9 +66,8 @@ export default class SelectedPlayerTransactions extends React.Component {
       )
     }
 
-    const isRestrictedFreeAgent = player.tag === constants.tags.TRANSITION
     const { pos, tag, value, bid } = player
-    const extensions = player.get('extensions', new List()).size
+    const extensions = player.get('extensions', 0)
     const extendedSalary = getExtensionAmount({
       pos,
       tag,
@@ -126,5 +125,6 @@ SelectedPlayerTransactions.propTypes = {
   player: ImmutablePropTypes.record,
   teams: PropTypes.object,
   maxTransaction: PropTypes.object,
-  load: PropTypes.func
+  load: PropTypes.func,
+  league: ImmutablePropTypes.record
 }

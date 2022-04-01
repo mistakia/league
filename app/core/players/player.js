@@ -51,7 +51,7 @@ export const Player = new Record({
   gsispid: null,
   gamestatus: null,
   practice: new List(),
-  extensions: new List(),
+  extensions: null,
   transactions: new List(),
   loadingTransactions: false,
   bid: null
@@ -152,7 +152,7 @@ export function createPlayer({
     gsispid,
     gamestatus,
     practice: new List(practice),
-    extensions: new List(extensions),
+    extensions,
     transactions: new List(transactions),
     bid
   })

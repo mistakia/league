@@ -100,10 +100,9 @@ export default class Menu extends React.Component {
             </IconButton>
             {isLoggedIn && <LeagueSchedule />}
             {isLoggedIn && <NavLink to='/dashboard'>Roster</NavLink>}
-            {isLoggedIn &&
-              constants.season.isRegularSeason && (
-                <NavLink to='/lineups'>Lineup</NavLink>
-              )}
+            {isLoggedIn && constants.season.isRegularSeason && (
+              <NavLink to='/lineups'>Lineup</NavLink>
+            )}
             <NavLink to='/players'>Players</NavLink>
             {isLoggedIn && Boolean(constants.season.week) && (
               <NavLink to='/scoreboard'>Scoreboard</NavLink>

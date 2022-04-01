@@ -328,12 +328,13 @@ export function playersReducer(state = initialState, { payload, type }) {
       return state.withMutations((state) => {
         rosters.forEach((roster) => {
           roster.players.forEach((rosterSlot) => {
-            const { player, value, type, slot, tag } = rosterSlot
+            const { player, value, type, slot, tag, extensions } = rosterSlot
             const params = {
               value,
               tag,
               type,
               tid: roster.tid,
+              extensions,
               slot
             }
             if (state.hasIn(['items', player])) {

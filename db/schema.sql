@@ -969,6 +969,7 @@ CREATE TABLE `rosters_players` (
   `player` varchar(7) NOT NULL,
   `pos` varchar(3) NOT NULL,
   `tag` tinyint(1) unsigned NOT NULL DEFAULT '1',
+  `extensions` tinyint(1) unsigned NOT NULL DEFAULT '0',
   UNIQUE KEY `player` (`rid`,`player`),
   KEY `rid` (`rid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;

@@ -30,14 +30,14 @@ export default class Roster {
       pos,
       value,
       tag,
-      extensions = [],
+      extensions,
       bid
     } of roster.players) {
       const salary = isBeforeExtensionDeadline
         ? getExtensionAmount({
             pos,
             tag,
-            extensions: extensions.length,
+            extensions,
             league,
             value,
             bid
