@@ -108,6 +108,8 @@ module.exports = {
   googleDrive: require('./google-drive'),
   getJobs: require('./get-jobs'),
 
+  getLastTransaction: require('./get-last-transaction'),
+
   getPlayerTransactions: require('./get-player-transactions'),
   getPlayers: require('./get-players'),
   getRosters: require('./get-rosters'),

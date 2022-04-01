@@ -55,6 +55,7 @@ const run = async () => {
             })
             .whereNull('cancelled')
             .whereNull('processed')
+            .whereNot('uid', transitionBid.uid)
         } else {
           // multiple bids tied with no original team
           log(`tied top bids for league ${lid}`)

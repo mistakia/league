@@ -33,6 +33,9 @@ describe('API /teams - transition', function () {
     await knex.migrate.forceFreeMigrationsLock()
     await knex.migrate.rollback()
     await knex.migrate.latest()
+
+    MockDate.set(start.subtract('1', 'month').toDate())
+
     await knex.seed.run()
   })
 

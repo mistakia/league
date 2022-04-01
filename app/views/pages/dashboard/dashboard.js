@@ -72,11 +72,15 @@ export default function DashboardPage() {
 
   const activeItems = []
   let activePlayers = new List()
-  const cutlistPlayerIds = cutlist.map(c => c.player).toJS()
+  const cutlistPlayerIds = cutlist.map((c) => c.player).toJS()
   for (const position in groups) {
     const players = groups[position]
     for (const player of players) {
-      if (!constants.season.isRegularSeason && cutlistPlayerIds.includes(player.player)) continue
+      if (
+        !constants.season.isRegularSeason &&
+        cutlistPlayerIds.includes(player.player)
+      )
+        continue
       if (!player.player) continue
       activePlayers = activePlayers.push(player)
       activeItems.push(<PlayerRoster key={player.player} player={player} />)

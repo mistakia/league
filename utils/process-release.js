@@ -4,6 +4,7 @@ const db = require('../db')
 const { constants, Roster } = require('../common')
 const isPlayerLocked = require('./is-player-locked')
 const getRoster = require('./get-roster')
+const getLastTransaction = require('./get-last-transaction')
 
 module.exports = async function ({ lid, tid, player, userid, activate }) {
   const data = []
@@ -107,14 +108,18 @@ module.exports = async function ({ lid, tid, player, userid, activate }) {
       player: activate
     })
 
-    const activateRosterPlayer = roster.get(activate)
+    const { value } = await getLastTransaction({
+      player: activate,
+      lid,
+      tid
+    })
     const transaction = {
       userid,
       tid,
       lid,
       player: activate,
       type: constants.transactions.ROSTER_ACTIVATE,
-      value: activateRosterPlayer.value,
+      value,
       year: constants.season.year,
       timestamp: Math.round(Date.now() / 1000)
     }
