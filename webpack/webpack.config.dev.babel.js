@@ -60,7 +60,7 @@ module.exports = merge.smart(baseConfig, {
      * 'staging', for example, by changing the ENV variables in the npm scripts
      */
     new webpack.DefinePlugin({
-      IS_DEV: true,
+      IS_DEV: !process.env.NC_DEV_LIVE,
       APP_VERSION: JSON.stringify('0.0.x')
     }),
 
@@ -94,20 +94,6 @@ module.exports = merge.smart(baseConfig, {
     historyApiFallback: {
       verbose: true,
       disableDotRule: false
-    },
-    before() {
-      if (process.env.START_HOT) {
-        console.log('Starting API...')
-        const api = spawn('npm', ['run', 'start:api'], {
-          shell: true,
-          env: process.env,
-          stdio: 'inherit'
-        })
-          .on('close', (code) => process.exit(code))
-          .on('error', (spawnError) => console.error(spawnError))
-
-        process.on('exit', () => api.kill())
-      }
     }
   }
 })
