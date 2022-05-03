@@ -3,7 +3,6 @@ const path = require('path')
 const webpack = require('webpack')
 // const chalk = require('chalk')
 const merge = require('webpack-merge')
-const { spawn } = require('child_process')
 
 const baseConfig = require('./webpack.config.base')
 // import CheckNodeEnv from '../internals/scripts/CheckNodeEnv'
@@ -22,28 +21,16 @@ module.exports = merge.smart(baseConfig, {
 
   mode: 'development',
 
-  entry: [
-    ...(process.env.PLAIN_HMR ? [] : ['react-hot-loader/patch']),
-    `webpack-dev-server/client?http://localhost:${port}/`,
-    'webpack/hot/only-dev-server',
-    require.resolve('../app/index.js')
-  ],
+  // Add hot reloading in development
+  entry: [path.join(process.cwd(), 'app/index.js')],
 
   output: {
     publicPath: `http://localhost:${port}/dist/`,
     filename: 'index.js'
   },
 
-  resolve: {
-    alias: {
-      'react-dom': '@hot-loader/react-dom'
-    }
-  },
-
   plugins: [
-    new webpack.HotModuleReplacementPlugin({
-      multiStep: true
-    }),
+    new webpack.HotModuleReplacementPlugin(),
 
     new webpack.NoEmitOnErrorsPlugin(),
 

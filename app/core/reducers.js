@@ -1,5 +1,4 @@
 import { combineReducers } from 'redux-immutable'
-import { connectRouter } from 'connected-react-router'
 
 import { appReducer } from './app'
 import { auctionReducer } from './auction'
@@ -25,9 +24,9 @@ import { playsReducer } from './plays'
 import { gamelogsReducer } from './gamelogs'
 import { propsReducer } from './props'
 
-const rootReducer = (history) => {
-  return combineReducers({
-    router: connectRouter(history),
+const rootReducer = (router) =>
+  combineReducers({
+    router,
     app: appReducer,
     auction: auctionReducer,
     confirmation: confirmationReducer,
@@ -52,6 +51,5 @@ const rootReducer = (history) => {
     gamelogs: gamelogsReducer,
     props: propsReducer
   })
-}
 
 export default rootReducer
