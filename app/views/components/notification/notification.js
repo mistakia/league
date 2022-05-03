@@ -56,7 +56,7 @@ export default class Notification extends React.Component {
         open={this.state.open}
         autoHideDuration={6000}
         onClose={this.handleClose}
-        onExited={this.handleExited}
+        TransitionProps={{ onExited: this.handleExited }}
         message={info && !info.severity ? info.message : undefined}
       >
         {info && info.severity && (
