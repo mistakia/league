@@ -63,6 +63,10 @@ export default class SelectedPlayer extends React.Component {
     this.setState({ value })
   }
 
+  handleOpen = () => {
+    // required function
+  }
+
   handleClose = () => {
     this.props.deselect()
   }
@@ -80,6 +84,7 @@ export default class SelectedPlayer extends React.Component {
     return (
       <SwipeableDrawer
         anchor='bottom'
+        onOpen={this.handleOpen}
         open={Boolean(player.player)}
         onClose={this.handleClose}
         classes={{
