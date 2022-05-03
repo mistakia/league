@@ -1,14 +1,16 @@
 /* global IS_DEV, APP_VERSION */
 import React from 'react'
 import { Provider } from 'react-redux'
-import { BrowserRouter as Router, withRouter } from 'react-router-dom'
-import { ConnectedRouter } from 'connected-react-router/immutable'
+import { HistoryRouter as Router } from 'redux-first-history/rr6'
+
 import Bugsnag from '@bugsnag/js'
 import BugsnagPluginReact from '@bugsnag/plugin-react'
 
-import createStore from '@core/store'
-import history from '@core/history'
+import { store, history } from '@core/store.js'
+import storeRegistry from '@core/store-registry'
 import App from '@components/app'
+
+storeRegistry.register(store)
 
 Bugsnag.start({
   apiKey: '183fca706d9f94c00a661167bf8cfc5d',
@@ -18,20 +20,14 @@ Bugsnag.start({
   enabledReleaseStages: ['production']
 })
 
-const initialState = window.__INITIAL_STATE__
-const store = createStore(initialState, history)
-
-const ConnectedApp = withRouter(App)
 const ErrorBoundary = Bugsnag.getPlugin('react').createErrorBoundary(React)
 
 const Root = () => (
   <ErrorBoundary>
     <Provider store={store}>
-      <ConnectedRouter history={history}>
-        <Router>
-          <ConnectedApp />
-        </Router>
-      </ConnectedRouter>
+      <Router history={history}>
+        <App />
+      </Router>
     </Provider>
   </ErrorBoundary>
 )

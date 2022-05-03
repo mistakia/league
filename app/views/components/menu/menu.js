@@ -20,6 +20,7 @@ import Collapse from '@material-ui/core/Collapse'
 import LeagueSchedule from '@components/league-schedule'
 import LeagueScheduleList from '@components/league-schedule-list'
 import { constants } from '@common'
+import { history } from '@core/store'
 
 import './menu.styl'
 
@@ -37,7 +38,7 @@ export default class Menu extends React.Component {
 
   handleClick = (path) => () => {
     this.handleClose()
-    this.props.history.push(path)
+    history.push(path)
   }
 
   handleClose = () => {
@@ -211,7 +212,6 @@ export default class Menu extends React.Component {
 }
 
 Menu.propTypes = {
-  history: PropTypes.object,
   isLoggedIn: PropTypes.bool,
   team: ImmutablePropTypes.record
 }

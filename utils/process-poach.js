@@ -50,7 +50,11 @@ module.exports = async function ({ player, release = [], lid, tid, userid }) {
   }
 
   // verify team has enough cap if during the offseason
-  const { value } = await getLastTransaction({ player, lid, tid: rosterSlot.tid })
+  const { value } = await getLastTransaction({
+    player,
+    lid,
+    tid: rosterSlot.tid
+  })
   const playerPoachValue = value + 2
   if (
     !constants.season.isRegularSeason &&

@@ -1,6 +1,6 @@
 import { race, call, put, take, cancelled, select } from 'redux-saga/effects'
 import Bugsnag from '@bugsnag/js'
-import { LOCATION_CHANGE } from 'connected-react-router'
+import { LOCATION_CHANGE } from 'redux-first-history'
 
 import { api, apiRequest } from '@core/api/service'
 import { authActions, loginActions, registerActions, getApp } from '@core/app'
