@@ -1,6 +1,5 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
-import { withRouter } from 'react-router-dom'
 
 import { getApp } from '@core/app'
 import { getCurrentTeam } from '@core/teams'
@@ -12,4 +11,4 @@ const mapStateToProps = createSelector(getApp, getCurrentTeam, (app, team) => ({
   team
 }))
 
-export default withRouter(connect(mapStateToProps)(Menu))
+export default connect(mapStateToProps)(Menu)

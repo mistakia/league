@@ -79,10 +79,7 @@ module.exports = {
    */
   resolve: {
     extensions: ['.js', '.json'],
-    modules: [path.join(__dirname, '..', 'app'), 'node_modules'],
-    alias: {
-      'react-dom': '@hot-loader/react-dom'
-    }
+    modules: [path.join(__dirname, '..', 'app'), 'node_modules']
   },
 
   plugins: [new webpack.IgnorePlugin(/^(fs|child_process)$/)]

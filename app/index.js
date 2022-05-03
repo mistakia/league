@@ -1,6 +1,5 @@
 import React from 'react'
-import { render } from 'react-dom'
-import { AppContainer } from 'react-hot-loader'
+import { createRoot } from 'react-dom/client'
 // import 'abortcontroller-polyfill/dist/polyfill-patch-fetch'
 import 'whatwg-fetch'
 
@@ -8,11 +7,8 @@ import Root from '@views/root'
 
 import 'react-virtualized/styles.css'
 
-document.addEventListener('DOMContentLoaded', () =>
-  render(
-    <AppContainer>
-      <Root />
-    </AppContainer>,
-    document.getElementById('root')
-  )
-)
+document.addEventListener('DOMContentLoaded', () => {
+  const rootElement = document.getElementById('root')
+  const root = createRoot(rootElement)
+  root.render(<Root />)
+})
