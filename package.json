@@ -2,12 +2,12 @@
   "scripts": {
     "dev": "concurrently \"yarn start\" \"yarn start:api\"",
     "dev:live": "NC_DEV_LIVE=true yarn start",
-    "start": "cross-env START_HOT=1 NODE_ENV=development webpack serve --config webpack/webpack.config.dev.babel.js",
+    "start": "cross-env START_HOT=1 NODE_ENV=development webpack serve --config webpack/webpack.config.dev.babel.mjs",
     "lint": "eslint .",
     "prettier": "prettier --write .",
     "test": "NODE_ENV=test TEST=all mocha -r esm --exit --exclude test/importer-espn.spec.js",
     "start:api": "node server.js",
-    "build": "cross-env NODE_ENV=production webpack --config ./webpack/webpack.config.prod.babel.js",
+    "build": "cross-env NODE_ENV=production webpack --config ./webpack/webpack.config.prod.babel.mjs",
     "deploy": "pm2 deploy production",
     "todo": "grep -rni todo app api common scripts",
     "count:lines": "git ls-files | xargs wc -l"
