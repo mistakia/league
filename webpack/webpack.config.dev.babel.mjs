@@ -1,22 +1,15 @@
-const path = require('path')
-// const fs = require('fs')
-const webpack = require('webpack')
-// const chalk = require('chalk')
-const merge = require('webpack-merge')
+import path, { dirname } from 'path'
+import webpack from 'webpack'
+import merge from 'webpack-merge'
+import { fileURLToPath } from 'url'
 
-const baseConfig = require('./webpack.config.base')
-// import CheckNodeEnv from '../internals/scripts/CheckNodeEnv'
+import baseConfig from './webpack.config.base.mjs'
 
-// When an ESLint server is running, we can't set the NODE_ENV so we'll check if it's
-// at the dev webpack config is not accidentally run in a production environment
-/* if (process.env.NODE_ENV === 'production') {
- *   CheckNodeEnv('development')
- * }
- *  */
 const port = process.env.PORT || 1212
 const publicPath = `http://localhost:${port}/dist`
+const __dirname = dirname(fileURLToPath(import.meta.url))
 
-module.exports = merge.smart(baseConfig, {
+export default merge.smart(baseConfig, {
   devtool: 'inline-source-map',
 
   mode: 'development',

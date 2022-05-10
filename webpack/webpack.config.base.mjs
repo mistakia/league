@@ -2,11 +2,14 @@
  * Base webpack config used across other specific configs
  */
 
-const path = require('path')
-const webpack = require('webpack')
-const nib = require('nib')
+import path, { dirname } from 'path'
+import webpack from 'webpack'
+import nib from 'nib'
+import { fileURLToPath } from 'url'
 
-module.exports = {
+const __dirname = dirname(fileURLToPath(import.meta.url))
+
+export default {
   externals: ['fs', 'child_process'],
 
   target: 'web',
