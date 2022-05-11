@@ -1,0 +1,44 @@
+import dayjs from 'dayjs'
+import timezone from 'dayjs/plugin/timezone.js'
+import db from '#db'
+import { constants } from '#common'
+
+dayjs.extend(timezone)
+
+export default async function (player) {
+  if (constants.season.week === 0) {
+    return false
+  }
+
+  const players = await db('player')
+    .select('player.*', 'nfl_games.date', 'nfl_games.time_est')
+    .where({ player })
+    .joinRaw(
+      'left join nfl_games on player.cteam = nfl_games.v or player.cteam = nfl_games.h'
+    )
+    .where('nfl_games.wk', constants.season.week)
+    .where('nfl_games.seas', constants.season.year)
+    .where('nfl_games.type', 'REG')
+    .limit(1)
+
+  const playerRow = players[0]
+
+  if (!playerRow) {
+    return false
+  }
+
+  if (playerRow.status === 'Inactive') {
+    return false
+  }
+
+  const gameStart = dayjs.tz(
+    `${playerRow.date} ${playerRow.time_est}`,
+    'YYYY/MM/DD HH:mm:SS',
+    'America/New_York'
+  )
+  if (dayjs().isAfter(gameStart)) {
+    return true
+  }
+
+  return false
+}

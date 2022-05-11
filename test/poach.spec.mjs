@@ -1,0 +1,118 @@
+/* global describe before it beforeEach */
+process.env.NODE_ENV = 'test'
+
+import chai from 'chai'
+import chaiHTTP from 'chai-http'
+import MockDate from 'mockdate'
+
+import server from '#api'
+import knex from '#db'
+import league from '#db/seeds/league.mjs'
+import { constants } from '#common'
+import { addPlayer, selectPlayer, error } from './utils/index.mjs'
+import { user1 } from './fixtures/token.mjs'
+
+chai.use(chaiHTTP)
+const { start } = constants.season
+
+describe('API /poaches', function () {
+  before(async function () {
+    this.timeout(60 * 1000)
+    await knex.migrate.forceFreeMigrationsLock()
+    await knex.migrate.rollback()
+    await knex.migrate.latest()
+    await knex.seed.run()
+  })
+
+  // claim for drafted
+  // claim for added
+  // claim for deactivated
+  // claim for traded and deactivated
+
+  describe('errors', function () {
+    beforeEach(async function () {
+      this.timeout(60 * 1000)
+      MockDate.set(start.subtract('2', 'month').toDate())
+      await league(knex)
+    })
+
+    it('reserve player violation', async () => {
+      MockDate.set(start.add('1', 'week').toDate())
+      const reservePlayer = await selectPlayer()
+      const teamId = 1
+      const leagueId = 1
+      await addPlayer({
+        leagueId,
+        player: reservePlayer,
+        teamId,
+        slot: constants.slots.IR,
+        userId: 1
+      })
+
+      const player = await selectPlayer({ rookie: true })
+      await addPlayer({
+        leagueId,
+        player,
+        teamId: 2,
+        slot: constants.slots.PS,
+        userId: 2
+      })
+
+      MockDate.set(start.add('1', 'week').add('3', 'day').toDate())
+
+      const request = chai
+        .request(server)
+        .post('/api/leagues/1/poaches')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          teamId,
+          player: player.player,
+          leagueId
+        })
+
+      await error(request, 'Reserve player violation')
+    })
+
+    it('poach player after final week - locked', async () => {
+      // TODO
+    })
+
+    it('santuary period - free agency period', async () => {
+      // TODO
+    })
+
+    it('santuary period - regular season start', async () => {
+      // TODO
+    })
+
+    it('santuary period - first 24 hours on practice squad', async () => {
+      // TODO
+    })
+
+    it('protected player prior to extension deadline', async () => {
+      // TODO
+    })
+
+    it('release player used in another poach', async () => {
+      // TODO
+    })
+  })
+  // errors
+
+  // - not logged in
+  // - invalid userId
+  // - invalid leagueId
+  // - invalid teamId
+  // - invalid player
+  // - invalid release
+  // - teamId doesn't belong to userId
+  // - release player not on team
+  // - poaching claim with reserve violation
+
+  // errors
+  // - player on waivers - within 24 hours
+  // - player has existing poaching claim
+  // - player not on practice squad
+  // - exceed roster space
+  // - exceed available cap
+})

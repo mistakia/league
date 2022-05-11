@@ -12,10 +12,12 @@ module.exports = {
     },
     migrations: {
       directory: path.resolve(__dirname, './db/migrations'),
+      loadExtensions: ['.mjs'],
       tableName: 'league_migrations'
     },
     seeds: {
-      directory: path.resolve(__dirname, './db/seeds/test')
+      directory: path.resolve(__dirname, './db/seeds/test'),
+      loadExtensions: ['.mjs']
     }
   },
   ssl: false,
