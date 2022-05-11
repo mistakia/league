@@ -1,11 +1,7 @@
 import express from 'express'
 
 import { constants } from '#common'
-import {
-  submitAcquisition,
-  verifyUserTeam,
-  verifyReserveStatus
-} from '#utils'
+import { submitAcquisition, verifyUserTeam, verifyReserveStatus } from '#utils'
 
 const router = express.Router({ mergeParams: true })
 

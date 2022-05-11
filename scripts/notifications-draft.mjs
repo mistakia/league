@@ -1,5 +1,4 @@
 import dayjs from 'dayjs'
-import debug from 'debug'
 
 import db from '#db'
 import { constants } from '#common'
@@ -36,12 +35,29 @@ const run = async () => {
       })
     }
   }
+}
+
+const main = async () => {
+  let error
+  try {
+    await run()
+  } catch (err) {
+    error = err
+    console.log(error)
+  }
+
+  await db('jobs').insert({
+    type: constants.jobs.NOTIFICATIONS_DRAFT,
+    succ: error ? 0 : 1,
+    reason: error ? error.message : null,
+    timestamp: Math.round(Date.now() / 1000)
+  })
 
   process.exit()
 }
 
-try {
-  run()
-} catch (error) {
-  console.log(error)
+if (isMain()) {
+  main()
 }
+
+export default run

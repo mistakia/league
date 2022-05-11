@@ -4,7 +4,7 @@ import config from '#config'
 
 const logger = debug('notifications:text')
 
-export default async function(items) {
+export default async function (items) {
   if (!config.clickSend.auth) {
     return
   }

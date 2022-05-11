@@ -5,7 +5,7 @@ import sendTextNotifications from './send-text-notifications.mjs'
 import sendGroupmeMessage from './send-groupme-message.mjs'
 import sendDiscordMessage from './send-discord-message.mjs'
 
-export default async function({
+export default async function ({
   teamIds = [],
   league, // required
   message, // required

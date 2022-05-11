@@ -2,11 +2,7 @@ import express from 'express'
 import dayjs from 'dayjs'
 
 import { constants, Roster } from '#common'
-import {
-  getRoster,
-  getLeague,
-  verifyRestrictedFreeAgency
-} from '#utils'
+import { getRoster, getLeague, verifyRestrictedFreeAgency } from '#utils'
 import trade, { getTrade } from './trade.mjs'
 
 const router = express.Router({ mergeParams: true })

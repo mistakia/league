@@ -50,24 +50,17 @@ const Routes = ({ app }) => {
 
   return (
     <RouterRoutes>
-      {app.userId && (
-        <Route path='/dashboard' element={<DashboardPage />} />
-      )}
+      {app.userId && <Route path='/dashboard' element={<DashboardPage />} />}
       {app.userId && <Route path='/lineups' element={<LineupsPage />} />}
       <Route path='/players' element={<PlayersPage />} />
-      {app.userId && (
-        <Route path='/scoreboard' element={<ScoreboardPage />} />
-      )}
+      {app.userId && <Route path='/scoreboard' element={<ScoreboardPage />} />}
       {app.userId && <Route path='/auction' element={<AuctionPage />} />}
       {app.userId && <Route path='/draft' element={<DraftPage />} />}
       {app.userId && <Route path='/trade' element={<TradePage />} />}
       {!app.userId && <Route path='/login' element={<AuthPage />} />}
       {app.userId && (
         <Route path='/league' element={<LeaguePage />}>
-          <Route
-            path='/league/transactions'
-            element={<TransactionsPage />}
-          />
+          <Route path='/league/transactions' element={<TransactionsPage />} />
           <Route path='/league/standings' element={<StandingsPage />} />
           <Route path='/league/stats' element={<StatsPage />} />
           <Route path='/league/schedule' element={<SchedulePage />} />

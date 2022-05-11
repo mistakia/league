@@ -1,10 +1,9 @@
 /* global describe it */
-process.env.NODE_ENV = 'test'
-
 import chai from 'chai'
 
 import { constants, Roster } from '#common'
 
+process.env.NODE_ENV = 'test'
 chai.should()
 
 describe('COMMON Roster', function () {

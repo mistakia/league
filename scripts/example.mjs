@@ -2,13 +2,13 @@ import debug from 'debug'
 // import yargs from 'yargs'
 // import { hideBin } from 'yargs/helpers'
 
-// import db from '#db'
+import db from '#db'
 import { constants } from '#common'
 import { isMain } from '#utils'
 
 // const argv = yargs(hideBin(process.argv)).argv
-// const log = debug('example')
-// debug.enable('example')
+const log = debug('example')
+debug.enable('example')
 
 const run = async () => {}
 const main = async () => {
@@ -17,7 +17,7 @@ const main = async () => {
     await run()
   } catch (err) {
     error = err
-    console.log(error)
+    log(error)
   }
 
   await db('jobs').insert({

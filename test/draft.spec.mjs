@@ -1,6 +1,4 @@
 /* global describe before it after */
-process.env.NODE_ENV = 'test'
-
 import chai from 'chai'
 import chaiHTTP from 'chai-http'
 import MockDate from 'mockdate'
@@ -21,6 +19,7 @@ import {
 } from './utils/index.mjs'
 import { user1, user2, user3 } from './fixtures/token.mjs'
 
+process.env.NODE_ENV = 'test'
 chai.use(chaiHTTP)
 const { start } = constants.season
 const expect = chai.expect

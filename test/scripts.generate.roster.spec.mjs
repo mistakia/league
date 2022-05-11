@@ -1,6 +1,4 @@
 /* global describe before beforeEach it */
-process.env.NODE_ENV = 'test'
-
 import chai from 'chai'
 import MockDate from 'mockdate'
 
@@ -10,6 +8,8 @@ import draft from '#db/seeds/draft.mjs'
 import { constants } from '#common'
 import { getRoster } from '#utils'
 import run from '#scripts/generate-rosters.mjs'
+
+process.env.NODE_ENV = 'test'
 
 chai.should()
 const { start } = constants.season
