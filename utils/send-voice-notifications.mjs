@@ -1,7 +1,7 @@
 import fetch from 'node-fetch'
 import config from '#config'
 
-export default async function(items) {
+export default async function (items) {
   if (!config.clickSend.auth) {
     return
   }

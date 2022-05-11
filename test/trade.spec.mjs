@@ -1,6 +1,4 @@
 /* global describe before it beforeEach */
-process.env.NODE_ENV = 'test'
-
 import chai from 'chai'
 import chaiHTTP from 'chai-http'
 import MockDate from 'mockdate'
@@ -17,6 +15,8 @@ import {
   checkLastTransaction,
   error
 } from './utils/index.mjs'
+
+process.env.NODE_ENV = 'test'
 
 const should = chai.should()
 chai.use(chaiHTTP)

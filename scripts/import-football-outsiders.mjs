@@ -3,7 +3,7 @@ import { Map } from 'immutable'
 import debug from 'debug'
 
 import db from '#db'
-import { constants, fixteam } from '#common'
+import { constants, fixTeam } from '#common'
 import { isMain } from '#utils'
 
 const log = debug('import:footballoutsiders')

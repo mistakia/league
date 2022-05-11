@@ -1,6 +1,4 @@
 /* global describe before beforeEach it */
-process.env.NODE_ENV = 'test'
-
 import chai from 'chai'
 import MockDate from 'mockdate'
 
@@ -16,6 +14,8 @@ import {
   fillRoster
 } from './utils/index.mjs'
 import run from '#scripts/process-transition-bids.mjs'
+
+process.env.NODE_ENV = 'test'
 
 chai.should()
 const expect = chai.expect

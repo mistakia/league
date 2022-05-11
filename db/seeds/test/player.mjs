@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const sqlFile = path.resolve(__dirname, './player.sql')
 
-export async function seed (knex, Promise) {
+export async function seed(knex, Promise) {
   await knex('player').del()
 
   const sql = await fs.readFile(sqlFile, 'utf8')

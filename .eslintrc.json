@@ -1,0 +1,42 @@
+{
+  "ignorePatterns": ["dist/*"],
+  "parser": "@babel/eslint-parser",
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "extends": ["standard", "eslint:recommended", "plugin:react/recommended"],
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  },
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "ecmaVersion": 12,
+    "requireConfigFile": false
+  },
+  "rules": {
+    "camelcase": ["off"],
+    "curly": ["off"],
+    "indent": ["off"],
+    "multiline-ternary": ["off", "always"],
+    "generator-star-spacing": [
+      "error",
+      {
+        "before": false,
+        "after": true
+      }
+    ],
+    "space-before-function-paren": [
+      "error",
+      {
+        "anonymous": "always",
+        "named": "never",
+        "asyncArrow": "always"
+      }
+    ]
+  }
+}

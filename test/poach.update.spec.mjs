@@ -1,6 +1,4 @@
 /* global describe before beforeEach it */
-process.env.NODE_ENV = 'test'
-
 import chai from 'chai'
 import chaiHTTP from 'chai-http'
 import knex from '#db'
@@ -9,6 +7,7 @@ import MockDate from 'mockdate'
 import league from '#db/seeds/league.mjs'
 import { constants } from '#common'
 
+process.env.NODE_ENV = 'test'
 const { start } = constants.season
 chai.use(chaiHTTP)
 
