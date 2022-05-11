@@ -1534,12 +1534,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@bugsnag/browser@npm:^7.16.1":
-  version: 7.16.1
-  resolution: "@bugsnag/browser@npm:7.16.1"
+"@bugsnag/browser@npm:^7.16.2":
+  version: 7.16.2
+  resolution: "@bugsnag/browser@npm:7.16.2"
   dependencies:
     "@bugsnag/core": ^7.16.1
-  checksum: e9252362813107369f8bd5a0a35c9b6cd1d34221b9f1dfcd99279fc3f8846dbf11db893e06fd823f52adefef725736030988a8a4fa1351b2b6e05f4e627b1e9c
+  checksum: 824572eea20fafa863da944d68c82148187f1de937dbc7612f8acdbf15bfca79f14fc0c4f8ddebb52f3fc11d6ca1a4c960bcf2ad8afd5df9d669fd66cd697ad0
   languageName: node
   linkType: hard
 
@@ -1563,19 +1563,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@bugsnag/js@npm:^7.3.3":
-  version: 7.16.1
-  resolution: "@bugsnag/js@npm:7.16.1"
+"@bugsnag/js@npm:^7.16.2":
+  version: 7.16.2
+  resolution: "@bugsnag/js@npm:7.16.2"
   dependencies:
-    "@bugsnag/browser": ^7.16.1
-    "@bugsnag/node": ^7.16.1
-  checksum: 1a4e03dfa42a8752e8786935132cd24d3bb65ec8c8284be034d471d51db4c59f66b3663037be1739d2e2896dcc292eee4cf1fbaed666007efed466f734c87e0d
+    "@bugsnag/browser": ^7.16.2
+    "@bugsnag/node": ^7.16.2
+  checksum: 17f6c3cc7d82d90462423035b1936c84da283b4f7d3828264a5a60e537e446aa2c8ea56702b9042b37ec76b3b7bf36904a9e2fbd3644a8d500db86b585e80eb6
   languageName: node
   linkType: hard
 
-"@bugsnag/node@npm:^7.16.1":
-  version: 7.16.1
-  resolution: "@bugsnag/node@npm:7.16.1"
+"@bugsnag/node@npm:^7.16.2":
+  version: 7.16.2
+  resolution: "@bugsnag/node@npm:7.16.2"
   dependencies:
     "@bugsnag/core": ^7.16.1
     byline: ^5.0.0
@@ -1583,16 +1583,16 @@ __metadata:
     iserror: ^0.0.2
     pump: ^3.0.0
     stack-generator: ^2.0.3
-  checksum: 68758f634da79a398d70d6730602fd9da739ab4718cae4e564b0705e45b2b1b1262c477b32114534a082211e39cb56d78733d8ea83b3349254853b9262e48ad4
+  checksum: 484254472d07aa899ee072741c0516d4cb1c347bf4a78cc5163dd3311add0dad37fb27f12e9a24f959f17814cef52a4b72b1a07c7293b13aa01c75356b9e3297
   languageName: node
   linkType: hard
 
-"@bugsnag/plugin-react@npm:^7.3.3":
-  version: 7.16.1
-  resolution: "@bugsnag/plugin-react@npm:7.16.1"
+"@bugsnag/plugin-react@npm:^7.16.4":
+  version: 7.16.4
+  resolution: "@bugsnag/plugin-react@npm:7.16.4"
   peerDependencies:
     "@bugsnag/core": ^7.0.0
-  checksum: 9894ed10193dc46ff9abc5db428bef4f52dcf5248d64f5a60e4b3b39bc6e65e3b66eb7082209484d8b06b1eed571b457dba59204fd6b9399a3f1eca5a6f53518
+  checksum: cdd97ee12102c6db9aff12a0ee0828cbea022f33d89ac8c0af3ad7305c44826135deca69bde02d55b8329458dafab76876fdca2aac5d4378a00e90a544ff0879
   languageName: node
   linkType: hard
 
@@ -3205,7 +3205,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"body-parser@npm:1.19.2, body-parser@npm:^1.19.0":
+"body-parser@npm:1.19.2":
   version: 1.19.2
   resolution: "body-parser@npm:1.19.2"
   dependencies:
@@ -3223,7 +3223,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"body-parser@npm:1.20.0":
+"body-parser@npm:1.20.0, body-parser@npm:^1.20.0":
   version: 1.20.0
   resolution: "body-parser@npm:1.20.0"
   dependencies:
@@ -3555,7 +3555,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chai@npm:^4.2.0":
+"chai@npm:^4.3.6":
   version: 4.3.6
   resolution: "chai@npm:4.3.6"
   dependencies:
@@ -4437,10 +4437,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dayjs@npm:1.11.0":
-  version: 1.11.0
-  resolution: "dayjs@npm:1.11.0"
-  checksum: 2d36f6d71345114cdcd89147adf9e05b4f8fe81684e08c8bf1f86b140aa0b86ecc3cae661a9348d96feb7fbefd03e1bc3697303688e95209670abcb36b4ece15
+"dayjs@npm:1.11.2":
+  version: 1.11.2
+  resolution: "dayjs@npm:1.11.2"
+  checksum: 78f8bd04a9e5f5554aa06eacda65a7d59e162d39f621a46fd34fb3b51367c3662426d86b4e2f4ac535f81e0c4d5af3e8a83b37e672412eb556267d726c61f8f3
   languageName: node
   linkType: hard
 
@@ -4474,7 +4474,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"debug@npm:4.3.4, debug@npm:^4.3.2, debug@npm:^4.3.3":
+"debug@npm:4.3.4, debug@npm:^4.3.2, debug@npm:^4.3.3, debug@npm:^4.3.4":
   version: 4.3.4
   resolution: "debug@npm:4.3.4"
   dependencies:
@@ -5484,7 +5484,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"express-slow-down@npm:^1.3.1":
+"express-slow-down@npm:^1.4.0":
   version: 1.4.0
   resolution: "express-slow-down@npm:1.4.0"
   dependencies:
@@ -8525,7 +8525,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mockdate@npm:^3.0.2":
+"mockdate@npm:^3.0.5":
   version: 3.0.5
   resolution: "mockdate@npm:3.0.5"
   checksum: 72b66786d9e072379693f80bf9fb82eb5153c9741030a4294184e3ccaf952d0713fae8966f77780580cf902f8ec7ccc95577b0ad47980d255e2ffb71fc7ca49c
@@ -10695,7 +10695,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"reselect@npm:^4.0.0":
+"reselect@npm:^4.0.0, reselect@npm:^4.1.5":
   version: 4.1.5
   resolution: "reselect@npm:4.1.5"
   checksum: 54c13c1e795b2ea70cba8384138aebe78adda00cbea303cc94b64da0a70d74c896cc9a03115ae38b8bff990e7a60dcd6452ab68cbec01b0b38c1afda70714cf0
@@ -10887,8 +10887,8 @@ __metadata:
     "@babel/preset-env": ^7.17.10
     "@babel/preset-react": ^7.16.7
     "@babel/register": ^7.17.7
-    "@bugsnag/js": ^7.3.3
-    "@bugsnag/plugin-react": ^7.3.3
+    "@bugsnag/js": ^7.16.2
+    "@bugsnag/plugin-react": ^7.16.4
     "@material-ui/core": ^4.11.0
     "@material-ui/icons": ^4.9.1
     "@material-ui/lab": ^4.0.0-alpha.56
@@ -10899,8 +10899,8 @@ __metadata:
     babel-plugin-module-resolver: ^4.0.0
     babel-plugin-transform-react-remove-prop-types: ^0.4.24
     bcrypt: ^4.0.1
-    body-parser: ^1.19.0
-    chai: ^4.2.0
+    body-parser: ^1.20.0
+    chai: ^4.3.6
     chai-http: ^4.3.0
     chalk: 4.1.2
     compression: ^1.7.4
@@ -10909,8 +10909,8 @@ __metadata:
     cross-env: ^7.0.2
     css-loader: ^3.5.3
     csv-parser: ^2.3.2
-    dayjs: 1.11.0
-    debug: ^4.1.1
+    dayjs: 1.11.2
+    debug: ^4.3.4
     deep-diff: ^1.0.2
     deep-extend: ^0.6.0
     deepmerge: ^4.2.2
@@ -10923,7 +10923,7 @@ __metadata:
     esm: ^3.2.25
     express: ^4.17.1
     express-jwt: ^5.3.3
-    express-slow-down: ^1.3.1
+    express-slow-down: ^1.4.0
     fetch-cheerio-object: ^1.3.0
     gaussian: "errcw/gaussian#3b3e49c"
     googleapis: ^84.0.0
@@ -10940,7 +10940,7 @@ __metadata:
     marked: ^1.1.0
     mini-css-extract-plugin: ^0.9.0
     mocha: ^10.0.0
-    mockdate: ^3.0.2
+    mockdate: ^3.0.5
     morgan: ^1.10.0
     morgan-debug: ^2.0.0
     mysql2: ^2.3.3
@@ -10968,7 +10968,7 @@ __metadata:
     redux-immutable: ^4.0.0
     redux-saga: ^1.1.3
     regression: ^2.0.1
-    reselect: ^4.0.0
+    reselect: ^4.1.5
     serve-favicon: ^2.5.0
     style-loader: ^1.2.1
     stylus: ^0.54.7
@@ -10983,7 +10983,7 @@ __metadata:
     whatwg-fetch: 3.6.2
     workerize-loader: "mistakia/workerize-loader#464a90a7ccdd4853d1afaf10cef78588899e11d4"
     ws: ^7.2.5
-    yargs: 17.4.0
+    yargs: 17.4.1
   languageName: unknown
   linkType: soft
 
@@ -13252,9 +13252,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yargs@npm:17.4.0":
-  version: 17.4.0
-  resolution: "yargs@npm:17.4.0"
+"yargs@npm:17.4.1":
+  version: 17.4.1
+  resolution: "yargs@npm:17.4.1"
   dependencies:
     cliui: ^7.0.2
     escalade: ^3.1.1
@@ -13263,7 +13263,7 @@ __metadata:
     string-width: ^4.2.3
     y18n: ^5.0.5
     yargs-parser: ^21.0.0
-  checksum: 63985bddddf1fb6b9c98744591e8b70f99839591521cb84eea60903d52ec0da35ab46c42c325d151f3ab5c41935f976c10da096b5a7067c217714a91c0bd4be3
+  checksum: e9012322870d7e4e912a6ae1f63b203e365f911c0cf158be92c36edefddfb3bd38ce17eb9ef0d18858a4777f047c50589ea22dacb44bd949169ba37dc6d34bee
   languageName: node
   linkType: hard
 
