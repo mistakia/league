@@ -1,13 +1,15 @@
-import path from 'path'
+import path, { dirname } from 'path'
 import webpack from 'webpack'
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 import HtmlWebpackInlineSourcePlugin from 'html-webpack-inline-source-plugin'
-import nib from 'nib'
 import { merge } from 'webpack-merge'
 import TerserPlugin from 'terser-webpack-plugin'
+import { fileURLToPath } from 'url'
+
 import baseConfig from './webpack.config.base.mjs'
 
+const __dirname = dirname(fileURLToPath(import.meta.url))
 const VERSION = '0.0.1'
 
 export default merge(baseConfig, {
@@ -21,49 +23,6 @@ export default merge(baseConfig, {
     path: path.join(__dirname, '..', 'dist'),
     publicPath: './dist/',
     filename: 'index.js'
-  },
-
-  module: {
-    rules: [
-      {
-        test: /\.m?js$/,
-        exclude: /(node_modules|bower_components)/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            presets: ['@babel/preset-env']
-          }
-        }
-      },
-      {
-        test: /\.(styl|css)$/,
-        use: [
-          {
-            loader: 'style-loader'
-          },
-          {
-            loader: 'css-loader'
-          },
-          {
-            loader: 'stylus-loader',
-            options: {
-              use: [nib()],
-              import: [
-                '~nib/lib/nib/index.styl',
-                path.resolve(__dirname, '../app/styles/variables.styl')
-              ]
-            }
-          }
-        ]
-      },
-      {
-        test: /\.(png|jpg)$/,
-        loader: 'url-loader',
-        options: {
-          limit: 8192
-        }
-      }
-    ]
   },
 
   optimization: {

@@ -1,7 +1,3 @@
-/**
- * Base webpack config used across other specific configs
- */
-
 import path, { dirname } from 'path'
 import webpack from 'webpack'
 import nib from 'nib'
@@ -32,6 +28,7 @@ export default {
         use: {
           loader: 'babel-loader',
           options: {
+            presets: ['@babel/preset-env'],
             cacheDirectory: true
           }
         }
