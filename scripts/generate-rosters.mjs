@@ -112,8 +112,6 @@ const run = async ({ nextSeason = argv.season } = {}) => {
   }
 }
 
-export default run
-
 const main = async () => {
   let error
   try {
@@ -136,3 +134,5 @@ const main = async () => {
 if (isMain()) {
   main()
 }
+
+export default run
