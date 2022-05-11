@@ -4,13 +4,13 @@ import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 import HtmlWebpackInlineSourcePlugin from 'html-webpack-inline-source-plugin'
 import nib from 'nib'
-import merge from 'webpack-merge'
+import { merge } from 'webpack-merge'
 import TerserPlugin from 'terser-webpack-plugin'
 import baseConfig from './webpack.config.base.mjs'
 
 const VERSION = '0.0.1'
 
-export default merge.smart(baseConfig, {
+export default merge(baseConfig, {
   devtool: 'source-map',
 
   mode: 'production',
@@ -72,8 +72,7 @@ export default merge.smart(baseConfig, {
       ? []
       : [
           new TerserPlugin({
-            parallel: true,
-            sourceMap: true
+            parallel: true
           })
         ]
   },
@@ -93,10 +92,6 @@ export default merge.smart(baseConfig, {
       APP_VERSION: JSON.stringify(VERSION)
     }),
 
-    /* new MiniCssExtractPlugin({
-     *   filename: 'style.css'
-     * }),
-     */
     new HtmlWebpackPlugin({
       template: 'app/index.prod.html',
       inlineSource: '.(js|css)$'
