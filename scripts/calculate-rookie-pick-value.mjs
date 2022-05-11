@@ -51,7 +51,7 @@ const calculateRookiePickValue = async ({ year }) => {
   return result
 }
 
-if (isMain()) {
+if (isMain(import.meta.url)) {
   debug.enable('script:calculate-vor')
   const main = async () => {
     try {

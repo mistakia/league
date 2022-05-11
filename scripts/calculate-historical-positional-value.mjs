@@ -89,7 +89,7 @@ const calculateHistoricalPositionalValue = async ({ league }) => {
   return output.sort((a, b) => b.vor - a.vor)
 }
 
-if (isMain()) {
+if (isMain(import.meta.url)) {
   const main = async () => {
     const lid = argv.lid
     if (!lid) {
