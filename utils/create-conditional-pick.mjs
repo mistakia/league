@@ -26,7 +26,7 @@ const createConditionalPick = async function ({ tid, league }) {
 
 export default createConditionalPick
 
-if (isMain()) {
+if (isMain(import.meta.url)) {
   const run = async () => {
     const tid = argv.tid
     if (!tid) {

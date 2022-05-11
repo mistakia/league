@@ -54,6 +54,7 @@ const format = (item) => {
 }
 
 const run = async ({ year = constants.season.year }) => {
+  log(`Importing games for ${year}`)
   const url = `${config.ngs_api_url}/league/schedule?season=${year}`
   const data = await fetch(url, {
     headers: {
@@ -92,7 +93,7 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain()) {
+if (isMain(import.meta.url)) {
   main()
 }
 
