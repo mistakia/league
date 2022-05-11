@@ -35,7 +35,7 @@ module.exports = (api) => {
         {
           root: ['./'],
           alias: {
-            '@common': './common',
+            '@common': './common/index.mjs',
             '@views': './app/views',
             '@pages': './app/views/pages',
             '@core': './app/core',

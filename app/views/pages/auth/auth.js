@@ -1,6 +1,7 @@
 import React from 'react'
 import queryString from 'query-string'
 import PropTypes from 'prop-types'
+import { useLocation } from 'react-router-dom'
 
 import TextField from '@material-ui/core/TextField'
 import Button from '@components/button'
@@ -9,7 +10,14 @@ import PageLayout from '@layouts/page'
 
 import './auth.styl'
 
-export default class AuthPage extends React.Component {
+const AuthPageWrapper = (Component) => {
+  return function WrappedAuthPage(props) {
+    const location = useLocation()
+    return <Component location={location} {...props} />
+  }
+}
+
+class AuthPage extends React.Component {
   constructor(props) {
     super(props)
 
@@ -140,3 +148,5 @@ AuthPage.propTypes = {
   authError: PropTypes.string,
   register: PropTypes.func
 }
+
+export default AuthPageWrapper(AuthPage)
