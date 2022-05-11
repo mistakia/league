@@ -35,7 +35,7 @@ router.get('/?', async (req, res) => {
     // verify teamId, leagueId belongs to user
     try {
       await verifyUserTeam({
-        userId: req.user.userId,
+        userId: req.auth.userId,
         leagueId,
         teamId: tid,
         requireLeague: true

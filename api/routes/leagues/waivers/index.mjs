@@ -106,7 +106,7 @@ router.post('/?', async (req, res) => {
     // verify teamId, leagueId belongs to user
     try {
       await verifyUserTeam({
-        userId: req.user.userId,
+        userId: req.auth.userId,
         leagueId,
         teamId,
         requireLeague: true
@@ -343,7 +343,7 @@ router.post('/?', async (req, res) => {
 
     const data = {
       tid,
-      userid: req.user.userId,
+      userid: req.auth.userId,
       lid: leagueId,
       player,
       po: 9999,
@@ -390,7 +390,7 @@ router.put('/order', async (req, res) => {
     // verify teamId, leagueId belongs to user
     try {
       await verifyUserTeam({
-        userId: req.user.userId,
+        userId: req.auth.userId,
         leagueId,
         teamId,
         requireLeague: true
@@ -448,7 +448,7 @@ router.put('/:waiverId', async (req, res) => {
     let team
     try {
       team = await verifyUserTeam({
-        userId: req.user.userId,
+        userId: req.auth.userId,
         leagueId,
         teamId,
         requireLeague: true
@@ -549,7 +549,7 @@ router.post('/:waiverId/cancel', async (req, res) => {
     // verify teamId, leagueId belongs to user
     try {
       await verifyUserTeam({
-        userId: req.user.userId,
+        userId: req.auth.userId,
         leagueId,
         teamId,
         requireLeague: true

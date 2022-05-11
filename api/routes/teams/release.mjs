@@ -28,7 +28,7 @@ router.post('/?', async (req, res) => {
     let team
     try {
       team = await verifyUserTeam({
-        userId: req.user.userId,
+        userId: req.auth.userId,
         teamId,
         leagueId,
         requireLeague: true
@@ -78,7 +78,7 @@ router.post('/?', async (req, res) => {
         player,
         tid,
         lid,
-        userid: req.user.userId
+        userid: req.auth.userId
       })
     } catch (error) {
       return res.status(400).send({ error: error.message })

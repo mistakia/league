@@ -21,6 +21,7 @@ module.exports = {
   },
   jwt: {
     secret: 'xxxxx',
+    algorithms: ['HS256'],
     credentialsRequired: false
   },
   mysql: {

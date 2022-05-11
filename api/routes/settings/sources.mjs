@@ -7,7 +7,7 @@ router.put('/:sourceId', async (req, res) => {
     const { sourceId } = req.params
     let { weight } = req.body
 
-    const { userId } = req.user
+    const { userId } = req.auth
 
     if (!sourceId) {
       return res.status(400).send({ error: 'missing sourceId' })

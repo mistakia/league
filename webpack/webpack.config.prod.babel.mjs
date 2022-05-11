@@ -94,7 +94,19 @@ export default merge(baseConfig, {
 
     new HtmlWebpackPlugin({
       template: 'app/index.prod.html',
-      inlineSource: '.(js|css)$'
+      inlineSource: '.(js|css)$',
+      minify: {
+        removeComments: true,
+        collapseWhitespace: true,
+        removeRedundantAttributes: true,
+        useShortDoctype: true,
+        removeEmptyAttributes: true,
+        removeStyleLinkTypeAttributes: true,
+        keepClosingSlash: true,
+        minifyJS: true,
+        minifyCSS: true,
+        minifyURLs: true
+      }
     }),
     new HtmlWebpackInlineSourcePlugin(HtmlWebpackPlugin),
     new BundleAnalyzerPlugin({

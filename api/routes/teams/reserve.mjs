@@ -30,7 +30,7 @@ router.post('/?', async (req, res) => {
     // verify teamId
     try {
       await verifyUserTeam({
-        userId: req.user.userId,
+        userId: req.auth.userId,
         teamId,
         leagueId,
         requireLeague: true
@@ -47,7 +47,7 @@ router.post('/?', async (req, res) => {
         tid,
         player,
         leagueId,
-        userId: req.user.userId,
+        userId: req.auth.userId,
         activate
       })
     } catch (error) {

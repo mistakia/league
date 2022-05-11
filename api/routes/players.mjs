@@ -21,7 +21,7 @@ router.get('/?', async (req, res) => {
      */
     const players = await getPlayers({
       leagueId,
-      userId: req.user ? req.user.userId : null,
+      userId: req.auth ? req.auth.userId : null,
       textSearch: search
     })
 

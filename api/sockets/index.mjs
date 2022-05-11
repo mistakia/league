@@ -7,7 +7,7 @@ export default function (wss) {
   const scoreboard = new Scoreboard(wss)
 
   wss.on('connection', function (ws, request) {
-    const { userId } = request.user
+    const { userId } = request.auth
     ws.on('message', async (msg) => {
       const message = JSON.parse(msg)
 

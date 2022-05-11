@@ -37,7 +37,7 @@ router.post('/?', async (req, res) => {
     // verify poaching teamId using userId
     const userTeams = await db('users_teams')
       .join('teams', 'users_teams.tid', 'teams.uid')
-      .where('userid', req.user.userId)
+      .where('userid', req.auth.userId)
     const team = userTeams.find((p) => p.tid === teamId)
     if (!team) {
       return res.status(400).send({ error: 'invalid teamId' })
@@ -88,7 +88,7 @@ router.post('/?', async (req, res) => {
         player,
         teamId,
         team,
-        userId: req.user.userId
+        userId: req.auth.userId
       })
     } catch (error) {
       return res.status(400).send({ error: error.message })
@@ -127,7 +127,7 @@ router.put('/:poachId', async (req, res) => {
     // verify teamId, leagueId belongs to user
     try {
       await verifyUserTeam({
-        userId: req.user.userId,
+        userId: req.auth.userId,
         leagueId,
         teamId,
         requireLeague: true
