@@ -59,8 +59,8 @@ export function getOverallStandings(state) {
   )
 
   return {
-    teams: teams,
-    divisionTeams: divisionTeams,
+    teams,
+    divisionTeams,
     divisionLeaders: sortedDivisionLeaders,
     wildcardTeams: sortedWildcardTeams
   }
