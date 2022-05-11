@@ -1,6 +1,4 @@
 /* global describe before beforeEach it */
-process.env.NODE_ENV = 'test'
-
 import chai from 'chai'
 import chaiHTTP from 'chai-http'
 import MockDate from 'mockdate'
@@ -10,6 +8,8 @@ import league from '#db/seeds/league.mjs'
 import { constants, Errors } from '#common'
 import { selectPlayer, addPlayer } from './utils/index.mjs'
 import run from '../scripts/process-poaching-waivers.mjs'
+
+process.env.NODE_ENV = 'test'
 
 chai.should()
 chai.use(chaiHTTP)

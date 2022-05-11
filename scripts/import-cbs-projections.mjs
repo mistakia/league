@@ -143,8 +143,6 @@ const run = async () => {
   }
 }
 
-module.exports = run
-
 const main = async () => {
   let error
   try {
@@ -164,6 +162,8 @@ const main = async () => {
   process.exit()
 }
 
-if (!module.parent) {
+if (isMain()) {
   main()
 }
+
+export default run

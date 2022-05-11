@@ -6,7 +6,6 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#common'
 import { isMain, googleDrive } from '#utils'
 import config from '#config'
 

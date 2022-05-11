@@ -1,6 +1,4 @@
 /* global describe before it */
-process.env.NODE_ENV = 'test'
-
 import chai from 'chai'
 import chaiHTTP from 'chai-http'
 
@@ -9,6 +7,8 @@ import knex from '#db'
 import league from '#db/seeds/league.mjs'
 import { user1, user2 } from './fixtures/token.mjs'
 import { notLoggedIn, missing, invalid } from './utils/index.mjs'
+
+process.env.NODE_ENV = 'test'
 
 chai.should()
 chai.use(chaiHTTP)

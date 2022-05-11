@@ -1,6 +1,4 @@
 /* global describe before beforeEach it */
-process.env.NODE_ENV = 'test'
-
 import chai from 'chai'
 import MockDate from 'mockdate'
 
@@ -8,8 +6,14 @@ import knex from '#db'
 import league from '#db/seeds/league.mjs'
 import { constants, getDraftDates, Errors } from '#common'
 import { getLeague } from '#utils'
-import { selectPlayer, checkLastTransaction, checkRoster } from './utils/index.mjs'
+import {
+  selectPlayer,
+  checkLastTransaction,
+  checkRoster
+} from './utils/index.mjs'
 import run from '../scripts/process-waivers-free-agency-practice.mjs'
+
+process.env.NODE_ENV = 'test'
 
 chai.should()
 const expect = chai.expect

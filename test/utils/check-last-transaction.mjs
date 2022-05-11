@@ -4,7 +4,14 @@ import db from '#db'
 
 const expect = chai.expect
 
-export default async function ({ leagueId, type, value, player, teamId, userId }) {
+export default async function ({
+  leagueId,
+  type,
+  value,
+  player,
+  teamId,
+  userId
+}) {
   const transactions = await db('transactions')
     .orderBy('timestamp', 'desc')
     .orderBy('uid', 'desc')

@@ -5,7 +5,7 @@ if (config.email && config.email.api) {
   sgMail.setApiKey(config.email.api)
 }
 
-export default async function({ to, subject, message }) {
+export default async function ({ to, subject, message }) {
   if (!config.email || !config.email.api) return
   const msg = {
     to,

@@ -1,5 +1,7 @@
 import fetch from 'node-fetch'
 import debug from 'debug'
+import yargs from 'yargs'
+import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants } from '#common'

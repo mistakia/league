@@ -1,6 +1,4 @@
 /* global describe before it beforeEach */
-process.env.NODE_ENV = 'test'
-
 import chai from 'chai'
 import chaiHTTP from 'chai-http'
 import MockDate from 'mockdate'
@@ -13,6 +11,7 @@ import { constants } from '#common'
 import { user1, user2 } from './fixtures/token.mjs'
 import { missing, invalid, error, notLoggedIn } from './utils/index.mjs'
 
+process.env.NODE_ENV = 'test'
 chai.should()
 chai.use(chaiHTTP)
 const expect = chai.expect

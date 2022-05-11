@@ -1,11 +1,6 @@
 import express from 'express'
 
-import {
-  constants,
-  isSlotActive,
-  Roster,
-  getFreeAgentPeriod
-} from '#common'
+import { constants, isSlotActive, Roster, getFreeAgentPeriod } from '#common'
 import {
   verifyUserTeam,
   sendNotifications,

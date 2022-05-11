@@ -1,6 +1,4 @@
 /* global describe, before it */
-process.env.NODE_ENV = 'test'
-
 import chai from 'chai'
 import chaiHTTP from 'chai-http'
 
@@ -9,6 +7,7 @@ import knex from '#db'
 import users from '#db/seeds/users.mjs'
 import { user1 } from './fixtures/token.mjs'
 
+process.env.NODE_ENV = 'test'
 chai.use(chaiHTTP)
 chai.should()
 

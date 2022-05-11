@@ -1,6 +1,5 @@
 import dayjs from 'dayjs'
 import advancedFormat from 'dayjs/plugin/advancedFormat.js'
-import debug from 'debug'
 
 import db from '#db'
 import { constants } from '#common'

@@ -5,7 +5,7 @@ import matchups from '../matchups.mjs'
 import draftPicks from '../draft-picks.mjs'
 import nflTeams from '../nfl-teams.mjs'
 
-export async function seed (knex, Promise) {
+export async function seed(knex, Promise) {
   try {
     await knex('waivers').del()
     await knex('poaches').del()
