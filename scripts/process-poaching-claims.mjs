@@ -96,6 +96,6 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain()) {
+if (isMain(import.meta.url)) {
   main()
 }
