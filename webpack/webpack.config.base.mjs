@@ -20,13 +20,12 @@ export default {
 
   module: {
     rules: [
-      // TODO - webpack 5
-      /* {
-       *   test: /\.m?js/,
-       *   resolve: {
-       *     fullySpecified: false
-       *   }
-       * }, */
+      {
+        test: /\.m?js/,
+        resolve: {
+          fullySpecified: false
+        }
+      },
       {
         test: /\.m?js$/,
         exclude: /(node_modules)/,
@@ -85,5 +84,7 @@ export default {
     modules: [path.join(__dirname, '..', 'app'), 'node_modules']
   },
 
-  plugins: [new webpack.IgnorePlugin(/^(fs|child_process)$/)]
+  plugins: [
+    new webpack.IgnorePlugin({ resourceRegExp: /^(fs|child_process)$/ })
+  ]
 }
