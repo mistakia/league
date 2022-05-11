@@ -40,6 +40,10 @@ import getRosters from './get-rosters.mjs'
 import getAcquisitionTransaction from './get-acquisition-transaction.mjs'
 import getPlay from './get-play.mjs'
 import isMain from './is-main.mjs'
+import getGameDetailUrl from './get-game-detail-url.mjs'
+import getToken from './get-token.mjs'
+
+export const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 export const getChartedPlayByPlayQuery = (db) =>
   db('nfl_plays')
@@ -152,5 +156,7 @@ export {
   getRosters,
   getAcquisitionTransaction,
   getPlay,
-  isMain
+  isMain,
+  getGameDetailUrl,
+  getToken
 }
