@@ -38,6 +38,7 @@ module.exports = {
     },
     migrations: {
       directory: path.resolve(__dirname, './db/migrations'),
+      loadExtensions: ['.mjs'],
       tableName: 'league_migrations'
     },
     seeds: {

@@ -1,0 +1,158 @@
+import https from 'https'
+import http from 'http'
+import fs from 'fs'
+import url, { fileURLToPath } from 'url'
+import path, { dirname } from 'path'
+
+import WebSocket from 'ws'
+import express from 'express'
+import morgan from 'morgan-debug'
+import bodyParser from 'body-parser'
+import compression from 'compression'
+import extend from 'deep-extend'
+import debug from 'debug'
+
+import jwt from 'jsonwebtoken'
+import expressJwt from 'express-jwt'
+import slowDown from 'express-slow-down'
+import favicon from 'serve-favicon'
+import NodeCache from 'node-cache'
+
+import config from '#config'
+import routes from './routes/index.mjs'
+import db from '#db'
+import sockets from './sockets/index.mjs'
+
+const logger = debug('api')
+const defaults = {}
+const options = extend(defaults, config)
+const __dirname = dirname(fileURLToPath(import.meta.url))
+
+const api = express()
+
+api.locals.db = db
+api.locals.config = config
+api.locals.logger = logger
+api.locals.cache = new NodeCache()
+
+api.enable('etag')
+api.disable('x-powered-by')
+api.use(compression())
+api.use(morgan('api', 'combined'))
+api.use(bodyParser.json())
+
+api.use(
+  favicon(path.join(__dirname, '../', 'dist', 'favicon.ico'), {
+    maxAge: '604800'
+  })
+)
+api.use((req, res, next) => {
+  res.set('Access-Control-Allow-Origin', req.headers.origin || config.url)
+  res.set('Access-Control-Allow-Credentials', 'true')
+  res.set('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS, PUT')
+  res.set(
+    'Access-Control-Allow-Headers',
+    'Authorization, Origin, X-Requested-With, Content-Type, Accept'
+  )
+  res.set('Cache-Control', 'no-cache, must-revalidate, proxy-revalidate')
+  next()
+})
+
+if (options.ssl) {
+  api.use(function (req, res, next) {
+    if (!req.secure) {
+      res.redirect('https://' + req.host + req.url)
+    } else {
+      next()
+    }
+  })
+}
+
+const speedLimiter = slowDown({
+  windowMs: 5 * 60 * 1000,
+  delayAfter: 5,
+  delayMs: 500,
+  maxDelayMs: 2500
+})
+
+api.use('/api/*', expressJwt(config.jwt), (err, req, res, next) => {
+  res.set('Expires', '0')
+  res.set('Pragma', 'no-cache')
+  res.set('Surrogate-Control', 'no-store')
+  if (err.code === 'invalid_token') return next()
+  return next(err)
+})
+api.use('/api/status', routes.status)
+api.use('/api/errors', routes.errors)
+api.use('/api/stats', speedLimiter, routes.stats)
+api.use('/api/players', routes.players)
+api.use('/api/projections', routes.projections)
+api.use('/api/plays', speedLimiter, routes.plays)
+api.use('/api/schedule', routes.schedule)
+api.use('/api/sources', routes.sources)
+api.use('/api/auth', routes.auth)
+api.use('/api/*', (err, req, res, next) => {
+  if (err.name === 'UnauthorizedError') {
+    return res.status(401).send({ error: 'invalid token' })
+  }
+  next()
+})
+api.use('/api/odds', routes.odds)
+api.use('/api/scoreboard', routes.scoreboard)
+api.use('/api/me', routes.me)
+api.use('/api/teams', routes.teams)
+api.use('/api/leagues', routes.leagues)
+api.use('/api/settings', routes.settings)
+api.use('/index.js.map', (req, res) => {
+  res.sendFile(path.join(__dirname, '../', 'dist', 'index.js.map'))
+})
+api.use('/*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../', 'dist', 'index.html'))
+})
+
+const createServer = () => {
+  if (!options.ssl) {
+    return http.createServer(api)
+  }
+
+  const sslOptions = {
+    key: fs.readFileSync(config.key),
+    cert: fs.readFileSync(config.cert)
+  }
+  return https.createServer(sslOptions, api)
+}
+
+const server = createServer()
+const wss = new WebSocket.Server({ noServer: true })
+
+server.on('upgrade', async (request, socket, head) => {
+  const parsed = new url.URL(request.url, config.url)
+  try {
+    const token = parsed.searchParams.get('token')
+    const decoded = await jwt.verify(token, config.jwt.secret)
+    request.user = decoded
+  } catch (error) {
+    logger(error)
+    return socket.destroy()
+  }
+
+  wss.handleUpgrade(request, socket, head, function (ws) {
+    ws.leagueId = parseInt(parsed.searchParams.get('leagueId'), 10)
+    ws.userId = request.user.userId
+    wss.emit('connection', ws, request)
+  })
+})
+
+sockets(wss)
+
+api.locals.broadcast = (leagueId, message) => {
+  wss.clients.forEach((c) => {
+    if (c.leagueId === leagueId) {
+      if (c && c.readyState === WebSocket.OPEN) {
+        c.send(JSON.stringify(message))
+      }
+    }
+  })
+}
+
+export default server
