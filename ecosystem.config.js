@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      script: 'server.js',
+      script: 'server.mjs',
       args: '--config /root/league/config.production.js',
       watch: '.',
       env_production: {
