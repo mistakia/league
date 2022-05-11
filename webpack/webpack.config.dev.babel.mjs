@@ -1,11 +1,11 @@
 import path from 'path'
 import webpack from 'webpack'
-import merge from 'webpack-merge'
+import { merge } from 'webpack-merge'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 
 import baseConfig from './webpack.config.base.mjs'
 
-export default merge.smart(baseConfig, {
+export default merge(baseConfig, {
   devtool: 'inline-source-map',
 
   mode: 'development',
