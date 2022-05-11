@@ -184,7 +184,7 @@ const processLeague = async ({ year, lid }) => {
         year: constants.season.year,
         lid,
         week,
-        vorp: vorp,
+        vorp,
         vorp_adj: player.vorp_adj[week],
         market_salary: player.market_salary[week]
       })

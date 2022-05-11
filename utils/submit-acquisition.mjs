@@ -178,7 +178,7 @@ export default async function ({
   await db('transactions').insert(addTransaction)
 
   result.push({
-    player: player,
+    player,
     slot,
     rid: roster.uid,
     pos: playerRow.pos,

@@ -61,7 +61,7 @@ export function* calculateValues() {
   const worker = new Worker()
   const result = yield call(worker.calculatePlayerValues, {
     players: players.valueSeq().toJS(),
-    league: league,
+    league,
     sources: sources.toList().toJS(),
     rosterRows,
     baselines,

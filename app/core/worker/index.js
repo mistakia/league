@@ -107,7 +107,7 @@ export function calculatePlayerValues(payload) {
 
   calculatePlayerValuesRestOfSeason({ players, rosterRows, league })
 
-  return { baselines: baselines, players }
+  return { baselines, players }
 }
 
 const average = (data) => data.reduce((sum, value) => sum + value) / data.length

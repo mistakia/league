@@ -100,7 +100,7 @@ export default async function ({
 
   // create transaction
   const addTransaction = {
-    userid: userid,
+    userid,
     tid,
     lid,
     player,
