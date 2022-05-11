@@ -37,7 +37,22 @@ export default {
         }
       },
       {
-        test: /\.(styl|css)$/,
+        test: /\.css$/,
+        use: [
+          {
+            loader: 'style-loader',
+            options: {
+              insert: 'head', // insert style tag inside of <head>
+              injectType: 'singletonStyleTag' // this is for wrap all your style in just one style tag
+            }
+          },
+          {
+            loader: 'css-loader'
+          }
+        ]
+      },
+      {
+        test: /\.styl$/,
         use: [
           {
             loader: 'style-loader',
@@ -52,11 +67,13 @@ export default {
           {
             loader: 'stylus-loader',
             options: {
-              use: [nib()],
-              import: [
-                '~nib/lib/nib/index.styl',
-                path.resolve(__dirname, '../app/styles/variables.styl')
-              ]
+              stylusOptions: {
+                use: [nib()],
+                import: [
+                  'nib',
+                  path.resolve(__dirname, '../app/styles/variables.styl')
+                ]
+              }
             }
           }
         ]
