@@ -30,7 +30,7 @@ router.post('/?', async (req, res) => {
     // verify teamId
     try {
       await verifyUserTeam({
-        userId: req.user.userId,
+        userId: req.auth.userId,
         teamId,
         leagueId,
         requireLeague: true
@@ -151,7 +151,7 @@ router.post('/?', async (req, res) => {
     await db('league_cutlist').where({ player, tid }).del()
 
     const transaction = {
-      userid: req.user.userId,
+      userid: req.auth.userId,
       tid,
       lid: leagueId,
       player,

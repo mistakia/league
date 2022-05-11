@@ -14,7 +14,7 @@ router.get('/?', async (req, res) => {
 
     const tid = parseInt(teamId, 10)
 
-    const teams = await db('users_teams').where({ userid: req.user.userId })
+    const teams = await db('users_teams').where({ userid: req.auth.userId })
     const teamIds = teams.map((r) => r.tid)
 
     if (!teamIds.includes(tid)) {
@@ -41,7 +41,7 @@ router.put('/?', async (req, res) => {
 
     // verify teamId
     try {
-      await verifyUserTeam({ userId: req.user.userId, teamId })
+      await verifyUserTeam({ userId: req.auth.userId, teamId })
     } catch (error) {
       return res.status(400).send({ error: error.message })
     }

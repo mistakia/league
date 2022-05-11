@@ -18,7 +18,7 @@ router.put('/:sourceid', async (req, res) => {
     const weight = parseFloat(req.body.weight)
     const { sourceid } = req.params
 
-    if (!req.user || !req.user.userId) {
+    if (!req.auth || !req.auth.userId) {
       return res.status(401).send({ error: 'invalid userId' })
     }
 
@@ -33,19 +33,19 @@ router.put('/:sourceid', async (req, res) => {
     if (weight === 1) {
       await db('users_sources')
         .del()
-        .where({ userid: req.user.userId, sourceid })
+        .where({ userid: req.auth.userId, sourceid })
     } else {
       const rows = await db('users_sources').where({
-        userid: req.user.userId,
+        userid: req.auth.userId,
         sourceid
       })
       if (rows.length) {
         await db('users_sources')
           .update({ weight })
-          .where({ userid: req.user.userId, sourceid })
+          .where({ userid: req.auth.userId, sourceid })
       } else {
         await db('users_sources').insert({
-          userid: req.user.userId,
+          userid: req.auth.userId,
           sourceid,
           weight
         })

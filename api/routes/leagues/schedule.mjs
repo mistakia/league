@@ -12,7 +12,7 @@ router.post('/?', async (req, res) => {
 
     const results = await db('leagues').where({ uid: leagueId })
     const league = results[0]
-    if (league.commishid !== req.user.userId) {
+    if (league.commishid !== req.auth.userId) {
       return res.status(401).send({ error: 'user is not commish' })
     }
 

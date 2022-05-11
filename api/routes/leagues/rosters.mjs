@@ -36,7 +36,7 @@ router.post('/?', async (req, res) => {
     }
 
     // verify user is commish
-    if (league.commishid !== req.user.userId) {
+    if (league.commishid !== req.auth.userId) {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
 
@@ -61,7 +61,7 @@ router.post('/?', async (req, res) => {
 
     // create transactions
     const transaction = {
-      userid: req.user.userId,
+      userid: req.auth.userId,
       tid: teamId,
       lid: leagueId,
       player,
@@ -126,7 +126,7 @@ router.put('/?', async (req, res) => {
     }
 
     // verify user is commish
-    if (league.commishid !== req.user.userId) {
+    if (league.commishid !== req.auth.userId) {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
 
@@ -196,7 +196,7 @@ router.delete('/?', async (req, res) => {
     }
 
     // verify user is commish
-    if (league.commishid !== req.user.userId) {
+    if (league.commishid !== req.auth.userId) {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
 

@@ -46,7 +46,7 @@ router.post('/?', async (req, res) => {
 
     try {
       await verifyUserTeam({
-        userId: req.user.userId,
+        userId: req.auth.userId,
         leagueId,
         teamId,
         requireLeague: true
@@ -147,7 +147,7 @@ router.post('/?', async (req, res) => {
     })
 
     const insertTransaction = db('transactions').insert({
-      userid: req.user.userId,
+      userid: req.auth.userId,
       tid: teamId,
       lid,
       player: playerId,

@@ -80,7 +80,7 @@ router.post('/?', async (req, res) => {
     // verify teamId, leagueId belongs to user
     try {
       await verifyUserTeam({
-        userId: req.user.userId,
+        userId: req.auth.userId,
         leagueId,
         teamId,
         requireLeague: true
@@ -243,7 +243,7 @@ router.post('/?', async (req, res) => {
     // insert into transitionBids
     const data = {
       tid,
-      userid: req.user.userId,
+      userid: req.auth.userId,
       lid: leagueId,
       player,
       submitted: Math.round(Date.now() / 1000),
@@ -292,7 +292,7 @@ router.delete('/?', async (req, res) => {
     // verify teamId, leagueId belongs to user
     try {
       await verifyUserTeam({
-        userId: req.user.userId,
+        userId: req.auth.userId,
         leagueId,
         teamId,
         requireLeague: true
@@ -396,7 +396,7 @@ router.put('/?', async (req, res) => {
     // verify teamId, leagueId belongs to user
     try {
       await verifyUserTeam({
-        userId: req.user.userId,
+        userId: req.auth.userId,
         leagueId,
         teamId,
         requireLeague: true
@@ -503,7 +503,7 @@ router.put('/?', async (req, res) => {
     // insert into transitionBids
     await db('transition_bids')
       .update({
-        userid: req.user.userId,
+        userid: req.auth.userId,
         bid
       })
       .where('uid', transitionBid.uid)
@@ -527,7 +527,7 @@ router.put('/?', async (req, res) => {
     res.send({
       ...transitionBid,
       bid,
-      userid: req.user.userId,
+      userid: req.auth.userId,
       release
     })
   } catch (error) {

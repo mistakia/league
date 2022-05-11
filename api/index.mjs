@@ -13,7 +13,7 @@ import extend from 'deep-extend'
 import debug from 'debug'
 
 import jwt from 'jsonwebtoken'
-import expressJwt from 'express-jwt'
+import { expressjwt } from 'express-jwt'
 import slowDown from 'express-slow-down'
 import favicon from 'serve-favicon'
 import NodeCache from 'node-cache'
@@ -75,7 +75,7 @@ const speedLimiter = slowDown({
   maxDelayMs: 2500
 })
 
-api.use('/api/*', expressJwt(config.jwt), (err, req, res, next) => {
+api.use('/api/*', expressjwt(config.jwt), (err, req, res, next) => {
   res.set('Expires', '0')
   res.set('Pragma', 'no-cache')
   res.set('Surrogate-Control', 'no-store')
@@ -130,7 +130,7 @@ server.on('upgrade', async (request, socket, head) => {
   try {
     const token = parsed.searchParams.get('token')
     const decoded = await jwt.verify(token, config.jwt.secret)
-    request.user = decoded
+    request.auth = decoded
   } catch (error) {
     logger(error)
     return socket.destroy()
@@ -138,7 +138,7 @@ server.on('upgrade', async (request, socket, head) => {
 
   wss.handleUpgrade(request, socket, head, function (ws) {
     ws.leagueId = parseInt(parsed.searchParams.get('leagueId'), 10)
-    ws.userId = request.user.userId
+    ws.userId = request.auth.userId
     wss.emit('connection', ws, request)
   })
 })

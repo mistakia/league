@@ -1,4 +1,4 @@
-import odds from 'oddslib'
+import { Odds } from 'oddslib'
 
 import { getPlayerById } from '@core/players'
 import { constants } from '@common'
@@ -60,7 +60,7 @@ export function getFilteredProps(state) {
 
     prop.diff = prop.proj - prop.ln
     prop.abs = Math.abs(prop.diff)
-    prop.odds = odds
+    prop.odds = Odds
       .from('decimal', prop.diff > 0 ? prop.o : prop.u)
       .to('moneyline', { precision: 0 })
   }

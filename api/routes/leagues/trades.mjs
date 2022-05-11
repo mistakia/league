@@ -257,7 +257,7 @@ router.post(
       const result = await db('trades').insert({
         pid,
         tid,
-        userid: req.user.userId,
+        userid: req.auth.userId,
         year: constants.season.year,
         lid: leagueId,
         offered: Math.round(Date.now() / 1000)

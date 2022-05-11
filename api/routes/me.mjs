@@ -8,7 +8,7 @@ const router = express.Router()
 router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    const users = await db('users').where({ id: req.user.userId })
+    const users = await db('users').where({ id: req.auth.userId })
     const user = users[0]
     if (!user) {
       return res.status(400).send({ error: 'user does not exist' })
@@ -22,7 +22,7 @@ router.get('/?', async (req, res) => {
         'users_teams.teamvoice',
         'users_teams.leaguetext'
       )
-      .where({ userid: req.user.userId })
+      .where({ userid: req.auth.userId })
       .join('users_teams', 'users_teams.tid', 'teams.uid')
 
     const leagueIds = teams.map((t) => t.lid)
@@ -41,7 +41,7 @@ router.get('/?', async (req, res) => {
     const sources = await db('sources')
     const userSources = await db('users_sources').where(
       'userid',
-      req.user.userId
+      req.auth.userId
     )
     for (const source of sources) {
       const userSource = userSources.find((s) => s.sourceid === source.uid)
@@ -87,7 +87,7 @@ router.get('/?', async (req, res) => {
     })
 
     await db('users')
-      .where({ id: req.user.userId })
+      .where({ id: req.auth.userId })
       .update({ lastvisit: new Date() })
   } catch (error) {
     logger(error)
@@ -98,7 +98,7 @@ router.get('/?', async (req, res) => {
 router.put('/baselines', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    const { userId } = req.user
+    const { userId } = req.auth
     const baselines = {
       qbb: req.body.QB,
       rbb: req.body.RB,
@@ -124,7 +124,7 @@ router.put('/baselines', async (req, res) => {
 router.put('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    const { userId } = req.user
+    const { userId } = req.auth
     let { value } = req.body
     const { type } = req.body
 

@@ -31,7 +31,7 @@ router.post('/?', async (req, res) => {
     // verify teamId
     try {
       await verifyUserTeam({
-        userId: req.user.userId,
+        userId: req.auth.userId,
         teamId,
         leagueId,
         requireLeague: true
@@ -50,7 +50,7 @@ router.post('/?', async (req, res) => {
           player: release,
           tid,
           lid: leagueId,
-          userid: req.user.userId,
+          userid: req.auth.userId,
           activate: player
         })
       } catch (error) {
@@ -74,7 +74,7 @@ router.post('/?', async (req, res) => {
           tid,
           player: reserve,
           leagueId,
-          userId: req.user.userId,
+          userId: req.auth.userId,
           activate: player
         })
       } catch (error) {
@@ -97,7 +97,7 @@ router.post('/?', async (req, res) => {
           tid,
           player,
           leagueId,
-          userId: req.user.userId
+          userId: req.auth.userId
         })
       } catch (error) {
         return res.status(400).send({ error: error.message })
