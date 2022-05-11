@@ -39,7 +39,7 @@ router.post('/?', async (req, res) => {
     // verify teamId
     try {
       await verifyUserTeam({
-        userId: req.user.userId,
+        userId: req.auth.userId,
         teamId,
         leagueId,
         requireLeague: true
@@ -81,7 +81,7 @@ router.post('/?', async (req, res) => {
         release,
         player,
         teamId: tid,
-        userId: req.user.userId,
+        userId: req.auth.userId,
         slot
       })
     } catch (error) {

@@ -19,7 +19,7 @@ router.post('/?', async (req, res) => {
     }
 
     // make sure user is commish
-    if (league.commishid !== req.user.userId) {
+    if (league.commishid !== req.auth.userId) {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
 
@@ -77,7 +77,7 @@ router.delete('/?', async (req, res) => {
     }
 
     // make sure user is commish
-    if (league.commishid !== req.user.userId) {
+    if (league.commishid !== req.auth.userId) {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
 
@@ -87,7 +87,7 @@ router.delete('/?', async (req, res) => {
       .where({
         lid: leagueId,
         tid: teamId,
-        userid: req.user.userId
+        userid: req.auth.userId
       })
     if (teamRows.length) {
       return res.status(400).send({ error: 'can not remove user team' })

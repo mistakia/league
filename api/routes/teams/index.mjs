@@ -21,7 +21,7 @@ router.put('/:teamId', async (req, res) => {
 
     // verify teamId
     try {
-      await verifyUserTeam({ userId: req.user.userId, teamId })
+      await verifyUserTeam({ userId: req.auth.userId, teamId })
     } catch (error) {
       return res.status(400).send({ error: error.message })
     }
@@ -58,7 +58,7 @@ router.put('/:teamId', async (req, res) => {
     } else {
       await db('users_teams')
         .update({ [field]: value })
-        .where({ tid: teamId, userid: req.user.userId })
+        .where({ tid: teamId, userid: req.auth.userId })
     }
     res.send({ value })
   } catch (error) {

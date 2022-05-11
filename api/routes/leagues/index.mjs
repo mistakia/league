@@ -33,7 +33,7 @@ router.put('/:leagueId', async (req, res) => {
 
     // verify user is commish
     const league = leagues[0]
-    if (league.commishid !== req.user.userId) {
+    if (league.commishid !== req.auth.userId) {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
 
@@ -232,7 +232,7 @@ router.get('/:leagueId/teams/?', async (req, res) => {
     const teamIds = teams.map((t) => t.uid)
 
     const usersTeams = await db('users_teams')
-      .where({ userid: req.user.userId })
+      .where({ userid: req.auth.userId })
       .whereIn('tid', teamIds)
 
     for (const team of teams) {
@@ -265,7 +265,7 @@ router.get('/:leagueId/rosters/?', async (req, res) => {
   const { logger } = req.app.locals
   try {
     const { leagueId } = req.params
-    const rosters = await getRosters({ lid: leagueId, userId: req.user.userId })
+    const rosters = await getRosters({ lid: leagueId, userId: req.auth.userId })
     res.send(rosters)
   } catch (err) {
     logger(err)

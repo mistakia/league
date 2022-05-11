@@ -24,6 +24,7 @@ module.exports = {
   key: null,
   cert: null,
   jwt: {
-    secret: 'WajgVhpr4iCFjGq7rW'
+    secret: 'WajgVhpr4iCFjGq7rW',
+    algorithms: ['HS256']
   }
 }

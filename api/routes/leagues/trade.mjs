@@ -88,7 +88,7 @@ router.post(
       const trades = await db('trades')
         .join('users_teams', 'trades.tid', 'users_teams.tid')
         .where('trades.uid', tradeId)
-        .where('users_teams.userid', req.user.userId)
+        .where('users_teams.userid', req.auth.userId)
         .whereNull('accepted')
         .whereNull('rejected')
         .whereNull('cancelled')
@@ -338,7 +338,7 @@ router.post(
       }
       for (const player of proposingTeamPlayers) {
         insertTransactions.push({
-          userid: req.user.userId,
+          userid: req.auth.userId,
           tid: trade.tid,
           lid: leagueId,
           player,
@@ -374,7 +374,7 @@ router.post(
 
         for (const player of acceptingTeamReleasePlayers) {
           releaseTransactions.push({
-            userid: req.user.userId,
+            userid: req.auth.userId,
             tid: trade.tid,
             lid: leagueId,
             player,
@@ -559,7 +559,7 @@ router.post(
         .join('teams', 'trades.tid', 'teams.uid')
         .join('users_teams', 'trades.tid', 'users_teams.tid')
         .where('trades.uid', tradeId)
-        .where('users_teams.userid', req.user.userId)
+        .where('users_teams.userid', req.auth.userId)
         .whereNull('accepted')
         .whereNull('vetoed')
         .whereNull('cancelled')
@@ -604,7 +604,7 @@ router.post(
         .join('users_teams', 'trades.pid', 'users_teams.tid')
         .join('teams', 'trades.pid', 'teams.uid')
         .where('trades.uid', tradeId)
-        .where('users_teams.userid', req.user.userId)
+        .where('users_teams.userid', req.auth.userId)
         .whereNull('accepted')
         .whereNull('vetoed')
         .whereNull('cancelled')
@@ -646,7 +646,7 @@ router.post(
       const { tradeId, leagueId } = req.params
 
       const league = await getLeague(leagueId)
-      if (league.commishid !== req.user.userId) {
+      if (league.commishid !== req.auth.userId) {
         return res
           .status(401)
           .send({ error: 'only the commissioner can veto trades' })

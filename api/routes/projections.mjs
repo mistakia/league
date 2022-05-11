@@ -24,7 +24,7 @@ router.get('/?', async (req, res) => {
     }
 
     let userProjections = []
-    if (req.user) {
+    if (req.auth) {
       userProjections = await db('projections')
         .select('projections.*')
         .join('player', 'projections.player', 'player.player')
@@ -32,7 +32,7 @@ router.get('/?', async (req, res) => {
         .whereNot('player.cteam', 'INA')
         .where({
           year: constants.season.year,
-          userid: req.user.userId
+          userid: req.auth.userId
         })
     }
 
@@ -69,7 +69,7 @@ router.put(
       let { value } = req.body
       const { playerId } = req.params
       const { type, week } = req.body
-      const { userId } = req.user
+      const { userId } = req.auth
 
       if (!type) {
         return res.status(400).send({ error: 'missing type param' })
@@ -144,7 +144,7 @@ router.delete(
   async (req, res) => {
     const { db, logger } = req.app.locals
     try {
-      const { userId } = req.user
+      const { userId } = req.auth
       const { playerId } = req.params
       const { week } = req.body
 
