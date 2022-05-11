@@ -60,9 +60,10 @@ export function getFilteredProps(state) {
 
     prop.diff = prop.proj - prop.ln
     prop.abs = Math.abs(prop.diff)
-    prop.odds = Odds
-      .from('decimal', prop.diff > 0 ? prop.o : prop.u)
-      .to('moneyline', { precision: 0 })
+    prop.odds = Odds.from('decimal', prop.diff > 0 ? prop.o : prop.u).to(
+      'moneyline',
+      { precision: 0 }
+    )
   }
 
   return items.sort((a, b) => b.abs - a.abs)

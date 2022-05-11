@@ -249,8 +249,6 @@ const calculateVOR = async ({ year, rookie, league }) => {
   return output
 }
 
-module.exports = calculateVOR
-
 const main = async () => {
   try {
     const year = argv.year
@@ -308,7 +306,9 @@ const main = async () => {
   process.exit()
 }
 
-if (!module.parent) {
+if (isMain()) {
   debug.enable('calculate-vor')
   main()
 }
+
+export default calculateVOR

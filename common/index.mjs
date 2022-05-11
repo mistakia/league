@@ -35,6 +35,7 @@ import getPlayFromPlayStats from './get-play-from-play-stats.mjs'
 import isSantuaryPeriod from './is-santuary-period.mjs'
 import getYardlineInfoFromString from './get-yardline-info-from-string.mjs'
 import * as Errors from './errors.mjs'
+import getGameDayAbbreviation from './get-game-day-abbreviation.mjs'
 
 const uniqBy = (a, key) => {
   const seen = new Set()
@@ -124,5 +125,6 @@ export {
   calculatePlayerValuesRestOfSeason,
   isSantuaryPeriod,
   getYardlineInfoFromString,
-  getPlayFromPlayStats
+  getPlayFromPlayStats,
+  getGameDayAbbreviation
 }
