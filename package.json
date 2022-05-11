@@ -23,7 +23,7 @@
     "#league-import/*": "./league-import/*"
   },
   "dependencies": {
-    "@material-ui/lab": "^4.0.0-alpha.56",
+    "@material-ui/lab": "^4.0.0-alpha.61",
     "@sendgrid/mail": "^7.2.3",
     "bcrypt": "^4.0.1",
     "body-parser": "^1.20.0",
@@ -69,8 +69,8 @@
     "@babel/register": "^7.17.7",
     "@bugsnag/js": "^7.16.2",
     "@bugsnag/plugin-react": "^7.16.4",
-    "@material-ui/core": "^4.11.0",
-    "@material-ui/icons": "^4.9.1",
+    "@material-ui/core": "^4.12.4",
+    "@material-ui/icons": "^4.11.3",
     "@simonwep/pickr": "^1.7.2",
     "babel-loader": "^8.2.5",
     "babel-plugin-dev-expression": "^0.2.3",
@@ -94,7 +94,7 @@
     "highcharts": "^8.2.0",
     "highcharts-react-official": "3.1.0",
     "html-webpack-inline-source-plugin": "^1.0.0-beta.2",
-    "html-webpack-plugin": "^4.3.0",
+    "html-webpack-plugin": "^5.5.0",
     "immutable": "4.0.0",
     "javascript-lp-solver": "^0.4.24",
     "mini-css-extract-plugin": "^0.9.0",
