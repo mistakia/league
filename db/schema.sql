@@ -105,7 +105,7 @@ CREATE TABLE `player` (
   `cone` decimal(3,2) DEFAULT NULL,
   `arm` decimal(5,3) DEFAULT NULL,
   `hand` decimal(5,3) DEFAULT NULL,
-  `dpos` int(3) NOT NULL,
+  `dpos` int(3) NOT NULL DEFAULT '0', -- draft position
   `col` varchar(35) NOT NULL,
   `dv` varchar(35) DEFAULT NULL,
   `start` int(4) NOT NULL,
@@ -113,6 +113,7 @@ CREATE TABLE `player` (
   `posd` varchar(8) NOT NULL,
   `jnum` tinyint(2) NOT NULL,
   `dcp` tinyint(1) NOT NULL,
+
   `nflid` int(10) NOT NULL,
   `esbid` varchar(10) DEFAULT NULL,
   `gsisid` varchar(15) DEFAULT NULL,
@@ -130,7 +131,22 @@ CREATE TABLE `player` (
   `fantasy_data_id` int(11) DEFAULT NULL,
   `yahoo_id` int(11) DEFAULT NULL,
   `keeptradecut_id` int(11) DEFAULT NULL,
-  FULLTEXT KEY `name` (`fname`,`lname`)
+
+  FULLTEXT KEY `name` (`fname`,`lname`),
+
+  -- UNIQUE KEY `nflid` (`nflid`), TODO
+  UNIQUE KEY `esbid` (`esbid`),
+  UNIQUE KEY `gsisid` (`gsisid`),
+  UNIQUE KEY `gsispid` (`gsispid`),
+
+  UNIQUE KEY `sleeper_id` (`sleeper_id`),
+  UNIQUE KEY `rotoworld_id` (`rotoworld_id`),
+  UNIQUE KEY `rotowire_id` (`rotowire_id`),
+  UNIQUE KEY `sportradar_id` (`sportradar_id`),
+  UNIQUE KEY `espn_id` (`espn_id`),
+  UNIQUE KEY `fantasy_data_id` (`fantasy_data_id`),
+  UNIQUE KEY `yahoo_id` (`yahoo_id`),
+  UNIQUE KEY `keeptradecut_id` (`keeptradecut_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------

@@ -2,7 +2,10 @@ import fs from 'fs'
 import fsPromises from 'fs/promises'
 import { google } from 'googleapis'
 import readline from 'readline'
-import path from 'path'
+import path, { dirname } from 'path'
+import { fileURLToPath } from 'url'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
 
 // If modifying these scopes, delete token.json.
 const SCOPES = [
