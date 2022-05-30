@@ -9,7 +9,7 @@ import { isMain, getPlayer, updatePlayer, createPlayer } from '#utils'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-sleeper-players')
-debug.enable('import-sleeper-players,update-player,add-player')
+debug.enable('import-sleeper-players,update-player,create-player')
 const timestamp = Math.round(Date.now() / 1000)
 
 const run = async () => {
