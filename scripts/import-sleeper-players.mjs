@@ -106,6 +106,7 @@ const run = async () => {
   log(`Could not locate ${missing.length} players`)
   for (const item of missing) {
     if (!constants.positions.includes(item.position)) continue
+    if (item.first_name === 'Duplicate') continue
     // log(`adding player: ${item.full_name} / ${item.position} / ${item.team}`)
     const player = {
       fname: item.first_name,
@@ -117,7 +118,7 @@ const run = async () => {
       weight: item.weight,
       dob: item.birth_date,
       col: item.college,
-      cteam: item.team,
+      cteam: fixTeam(item.team),
       jnum: item.number,
 
       rotoworld_id: item.rotoworld_id,
