@@ -42,7 +42,7 @@ export { default as getPlay } from './get-play.mjs'
 export { default as isMain } from './is-main.mjs'
 export { default as getGameDetailUrl } from './get-game-detail-url.mjs'
 export { default as getToken } from './get-token.mjs'
-export { default as addPlayer } from './add-player.mjs'
+export { default as createPlayer } from './create-player.mjs'
 export * as espn from './espn.mjs'
 export * as sportradar from './sportradar.mjs'
 

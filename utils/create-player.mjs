@@ -6,10 +6,10 @@ import generatePlayerId from './generate-player-id.mjs'
 import * as espn from './espn.mjs'
 import * as sportradar from './sportradar.mjs'
 
-const log = debug('update-player')
-debug.enable('update-player')
+const log = debug('create-player')
+debug.enable('create-player')
 
-const addPlayer = async (player) => {
+const createPlayer = async (player) => {
   const playerId = await generatePlayerId(player)
 
   if (!player.start) {
@@ -40,6 +40,8 @@ const addPlayer = async (player) => {
       id: playerId,
       timestamp: Math.round(Date.now() / 1000)
     })
+
+    log(`Created player: ${playerId}`)
   } catch (error) {
     log('Unable to create player')
     log(error)
@@ -50,4 +52,4 @@ const addPlayer = async (player) => {
   return player
 }
 
-export default addPlayer
+export default createPlayer

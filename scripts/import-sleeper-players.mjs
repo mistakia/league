@@ -5,7 +5,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants, fixTeam } from '#common'
-import { isMain, getPlayer, updatePlayer, addPlayer } from '#utils'
+import { isMain, getPlayer, updatePlayer, createPlayer } from '#utils'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-sleeper-players')
@@ -134,7 +134,7 @@ const run = async () => {
       sleeper_id: item.player_id
     }
 
-    await addPlayer(player)
+    await createPlayer(player)
   }
 
   const statuses = []
