@@ -11,13 +11,13 @@ export default function (str) {
     return null
   }
 
-  if (!str.includes(`'`)) {
+  if (!str.includes('\'')) {
     return parseInt(str, 10)
   }
 
-  const s = str.split(`'`)
+  const s = str.split('\'')
   const feet = parseInt(s[0], 10)
   const inches = parseInt(s[1], 10) || 0
 
-  return (feet * 12) + inches
+  return feet * 12 + inches
 }

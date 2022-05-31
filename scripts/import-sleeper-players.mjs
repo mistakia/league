@@ -118,7 +118,7 @@ const run = async () => {
       weight: item.weight,
       dob: item.birth_date,
       col: item.college,
-      cteam: fixTeam(item.team),
+      cteam: item.team,
       jnum: item.number,
 
       rotoworld_id: item.rotoworld_id,

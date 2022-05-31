@@ -16,19 +16,19 @@ describe('COMMON formatHeight', function () {
 
   it('feet and inches', () => {
     const target = 74
-    expect(formatHeight(`6' 2"`)).to.equal(target)
-    expect(formatHeight(`6'2"`)).to.equal(target)
-    expect(formatHeight(`6 ' 2 "`)).to.equal(target)
-    expect(formatHeight(`6 ' 2"`)).to.equal(target)
-    expect(formatHeight(`6  ' 2  "`)).to.equal(target)
+    expect(formatHeight('6\' 2"')).to.equal(target)
+    expect(formatHeight('6\'2"')).to.equal(target)
+    expect(formatHeight('6 \' 2 "')).to.equal(target)
+    expect(formatHeight('6 \' 2"')).to.equal(target)
+    expect(formatHeight('6  \' 2  "')).to.equal(target)
   })
 
   it('feet', () => {
     const target = 72
-    expect(formatHeight(`6'`)).to.equal(target)
-    expect(formatHeight(`6 '`)).to.equal(target)
-    expect(formatHeight(`6 ' `)).to.equal(target)
-    expect(formatHeight(`6 ' 0"`)).to.equal(target)
+    expect(formatHeight('6\'')).to.equal(target)
+    expect(formatHeight('6 \'')).to.equal(target)
+    expect(formatHeight('6 \' ')).to.equal(target)
+    expect(formatHeight('6 \' 0"')).to.equal(target)
   })
 
   describe('errors', function () {
