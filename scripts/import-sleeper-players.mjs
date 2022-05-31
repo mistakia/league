@@ -121,6 +121,8 @@ const run = async () => {
       cteam: item.team,
       jnum: item.number,
 
+      posd: item.position,
+
       rotoworld_id: item.rotoworld_id,
       high_school: item.high_school,
       rotowire_id: item.rotowire_id,

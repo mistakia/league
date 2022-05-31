@@ -23,6 +23,15 @@ const createPlayer = async (player) => {
       try {
         const sportradarPlayer = await sportradar.getPlayer({ sportradar_id })
         player.start = sportradarPlayer.rookie_year
+
+        if (!player.start) {
+          if (sportradarPlayer.draft) {
+            player.start = sportradarPlayer.draft.year
+          } else if (sportradarPlayer.seasons.length) {
+            const seasons = sportradarPlayer.seasons.map((s) => s.year)
+            player.start = Math.min(...seasons)
+          }
+        }
       } catch (e) {
         log(e)
       }
