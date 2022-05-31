@@ -12,6 +12,7 @@ module.exports = {
   nfl_api_url: '',
   ngs_api_url: '',
   mflUserAgent: '',
+  sportradar_api: '',
   email: {
     api: '', // sendgrid api
     admin: '',

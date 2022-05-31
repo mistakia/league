@@ -5,11 +5,11 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants, fixTeam } from '#common'
-import { isMain, getPlayer, updatePlayer } from '#utils'
+import { isMain, getPlayer, updatePlayer, createPlayer } from '#utils'
 
 const argv = yargs(hideBin(process.argv)).argv
-const log = debug('import:players:sleeper')
-debug.enable('import:players:sleeper')
+const log = debug('import-sleeper-players')
+debug.enable('import-sleeper-players,update-player,create-player')
 const timestamp = Math.round(Date.now() / 1000)
 
 const run = async () => {
@@ -19,7 +19,7 @@ const run = async () => {
   const result = await fetch(URL).then((res) => res.json())
 
   const fields = {}
-  const inserts = []
+  const updates = []
   for (const sleeper_id in result) {
     const item = result[sleeper_id]
     const name = item.full_name || ''
@@ -32,17 +32,15 @@ const run = async () => {
       fields[field] = true
     }
 
-    const params = { name, pos, team }
     let player
     try {
       player = await getPlayer({ sleeper_id })
       if (!player) {
-        missing.push(params)
+        missing.push(item)
         continue
       }
     } catch (err) {
       console.log(err)
-      missing.push(params)
       continue
     }
 
@@ -66,7 +64,7 @@ const run = async () => {
       rotoworld_id,
       high_school,
       rotowire_id,
-      gsisid: gsis_id,
+      gsisid: gsis_id ? gsis_id.trim() : null,
       sportradar_id,
       // practice_description,
       espn_id,
@@ -83,92 +81,66 @@ const run = async () => {
       // pos
     }
 
-    inserts.push(data)
+    updates.push(data)
   }
 
-  // log(`Complete field list: ${Object.keys(fields)}`)
-  log(`Could not locate ${missing.length} players`)
-  missing.forEach((m) => {
-    if (!constants.positions.includes(m.pos)) return
-    log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`)
-  })
-
   if (argv.dry) {
-    log(inserts[0])
+    log(updates[0])
     return
   }
 
-  log(`Inserting ${inserts.length} players into database`)
-  const sleeperIds = inserts.map((p) => p.sleeper_id)
+  log(`Updating data for ${updates.length} players`)
+  const sleeperIds = updates.map((p) => p.sleeper_id)
 
   const currentPlayers = await db('player').whereIn('sleeper_id', sleeperIds)
 
   let editCount = 0
   for (const player of currentPlayers) {
-    const update = inserts.find((r) => r.sleeper_id === player.sleeper_id)
+    const update = updates.find((r) => r.sleeper_id === player.sleeper_id)
     const edits = await updatePlayer({ player, update })
     editCount += edits
   }
 
   log(`updated ${editCount} player fields`)
 
-  // TODO - create new players
-  /* const missingPlayerIds = playerIds.filter(
-   *   (p) => !currentPlayerIds.includes(p)
-   * )
+  log(`Could not locate ${missing.length} players`)
+  for (const item of missing) {
+    if (!constants.positions.includes(item.position)) continue
+    if (item.first_name === 'Duplicate') continue
+    // log(`adding player: ${item.full_name} / ${item.position} / ${item.team}`)
+    const player = {
+      fname: item.first_name,
+      lname: item.last_name,
+      pname: `${item.first_name.charAt(0).toUpperCase()}.${item.last_name}`,
+      pos: item.position,
+      pos1: item.position,
+      height: item.height,
+      weight: item.weight,
+      dob: item.birth_date,
+      col: item.college,
+      cteam: item.team,
+      jnum: item.number,
 
-   * for (const missingPlayerId of missingPlayerIds) {
-   *   const row = inserts.find((r) => r.player === missingPlayerId)
-   *   await db('player_changelog').insert({
-   *     type: constants.changes.PLAYER_NEW,
-   *     id: row.player,
-   *     timestamp
-   *   })
+      posd: item.position,
 
-   *   await db('player').insert({
-   *     pos: row.pos1,
-   *     ...formatted
-   *   })
-   * }
-   *
-   * for (const insert of inserts) {
-   *   const rows = await db('players').where('sleeper_id', insert.sleeper_id)
-   *   if (rows.length) {
-   *     const {
-   *       active,
-   *       depth_chart_order,
-   *       depth_chart_position,
-   *       injury_body_part,
-   *       injury_start_date,
-   *       injury_status,
-   *       injury_notes,
-   *       practice_participation,
-   *       practice_description,
-   *       status,
-   *       search_rank
-   *     } = insert
-   *     await db('players')
-   *       .update({
-   *         active,
-   *         depth_chart_order,
-   *         depth_chart_position,
-   *         injury_body_part,
-   *         injury_start_date,
-   *         injury_status,
-   *         injury_notes,
-   *         practice_participation,
-   *         practice_description,
-   *         status,
-   *         search_rank
-   *       })
-   *       .where('sleeper_id', insert.sleeper_id)
-   *   } else {
-   *     await db('players').insert(insert)
-   *   }
-   * } */
+      rotoworld_id: item.rotoworld_id,
+      high_school: item.high_school,
+      rotowire_id: item.rotowire_id,
+      gsisid: item.gsis_id ? item.gsis_id.trim() : null,
+      sportradar_id: item.sportradar_id,
+      espn_id: item.espn_id,
+      fantasy_data_id: item.fantasy_data_id,
+      yahoo_id: item.yahoo_id,
+      status: item.status,
+      injury_status: item.injury_status,
+      sleeper_id: item.player_id
+    }
+
+    await createPlayer(player)
+  }
 
   const statuses = []
-  for (const insert of inserts) {
+  for (const update of updates) {
     const {
       active,
       depth_chart_order,
@@ -184,7 +156,7 @@ const run = async () => {
 
       player,
       sleeper_id
-    } = insert
+    } = update
 
     if (!injury_status) continue
 
@@ -209,6 +181,10 @@ const run = async () => {
 
   if (statuses.length) {
     await db('players_status').insert(statuses)
+  }
+
+  if (argv.fields) {
+    log(`Complete field list: ${Object.keys(fields)}`)
   }
 }
 
