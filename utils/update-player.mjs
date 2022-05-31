@@ -101,8 +101,9 @@ const main = async () => {
       update[key] = argv[key]
     })
 
-    const data = await updatePlayer({ player: argv.player, update })
-    log(data)
+    const changes = await updatePlayer({ player: argv.player, update })
+    log(`player ${argv.player} updated, changes: ${changes}`)
+    process.exit()
   } catch (err) {
     error = err
     log(error)
