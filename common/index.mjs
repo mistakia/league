@@ -36,6 +36,8 @@ import isSantuaryPeriod from './is-santuary-period.mjs'
 import getYardlineInfoFromString from './get-yardline-info-from-string.mjs'
 import * as Errors from './errors.mjs'
 import getGameDayAbbreviation from './get-game-day-abbreviation.mjs'
+export { default as formatHeight } from './format-height.mjs'
+export { default as formatPlayerName } from './format-player-name.mjs'
 
 const uniqBy = (a, key) => {
   const seen = new Set()

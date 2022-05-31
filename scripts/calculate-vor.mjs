@@ -5,7 +5,7 @@ import { hideBin } from 'yargs/helpers'
 import { Table } from 'console-table-printer'
 
 import db from '#db'
-import { getLeague } from '#utils'
+import { isMain, getLeague } from '#utils'
 import {
   constants,
   groupBy,
