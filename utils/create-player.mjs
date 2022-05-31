@@ -9,6 +9,25 @@ import * as sportradar from './sportradar.mjs'
 const log = debug('create-player')
 debug.enable('create-player')
 
+/*
+   player
+   fname
+   lname
+   pname
+   pos
+   pos1
+   height
+   weight
+   col
+   start
+   cteam
+   posd
+   jnum
+
+   dpos 0
+   dcp 0
+*/
+
 const createPlayer = async (player) => {
   const playerId = await generatePlayerId(player)
 
