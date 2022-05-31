@@ -10,15 +10,19 @@ debug.enable('update-formatted-names')
 const updateFormattedNames = async () => {
   const players = await db('player')
 
+  let count = 0
   for (const player of players) {
     try {
       const formatted = formatPlayerNames(`${player.fname} ${player.lname}`)
-      await updatePlayer({ player, update: { formatted } })
+      const changes = await updatePlayer({ player, update: { formatted } })
+      count += changes
     } catch (err) {
       log(err)
       log(player)
     }
   }
+
+  log(`Updated formatted names, count: ${count}`)
 }
 
 const main = async () => {
