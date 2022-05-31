@@ -1060,7 +1060,9 @@ export const jobs = {
   PROCESS_PROJECTIONS: 48,
   PLAYERS_KEEPTRADECUT: 49,
   UPDATE_FORMATTED_NAMES: 50,
-  IMPORT_KEEPTRADECUT: 51
+  IMPORT_KEEPTRADECUT: 51,
+
+  IMPORT_PLAYS_NFLFASTR: 52
 }
 
 export const jobDetails = {
@@ -1110,7 +1112,8 @@ export const jobDetails = {
   48: 'Process Projections',
   49: 'Import Keeptradecut Players',
   50: 'Update Formatted Names',
-  51: 'Import Keeptradecut'
+  51: 'Import Keeptradecut',
+  52: 'Import Plays nflfastR'
 }
 
 export const changes = {

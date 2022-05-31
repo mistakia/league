@@ -263,7 +263,7 @@ const main = async () => {
   }
 
   await db('jobs').insert({
-    type: constants.jobs.EXAMPLE,
+    type: constants.jobs.IMPORT_PLAYS_NFLFASTR,
     succ: error ? 0 : 1,
     reason: error ? error.message : null,
     timestamp: Math.round(Date.now() / 1000)
