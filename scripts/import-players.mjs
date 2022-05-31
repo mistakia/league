@@ -2,8 +2,9 @@ import fetch from 'node-fetch'
 import debug from 'debug'
 
 import db from '#db'
-import { getToken, getPlayer, wait } from '#utils'
+import { isMain, getToken, getPlayer, wait } from '#utils'
 import { constants, fixTeam } from '#common'
+import config from '#config'
 
 const log = debug('import:nfl:players')
 debug.enable('import:nfl:players')
@@ -15,7 +16,7 @@ const run = async () => {
   log('fetching team ids')
   // get team ids
   const data = await fetch(
-    'https://api.nfl.com/v1/teams?s=%7B%22%24query%22%3A%7B%22season%22%3A2020%7D,%22%24take%22%3A40%7D&fs=%7Bid,season,fullName,nickName,abbr,teamType,conference%7Babbr%7D,division%7Babbr%7D%7D',
+    `${config.nfl_api_url}/v1/teams?s=%7B%22%24query%22%3A%7B%22season%22%3A2020%7D,%22%24take%22%3A40%7D&fs=%7Bid,season,fullName,nickName,abbr,teamType,conference%7Babbr%7D,division%7Babbr%7D%7D`,
     {
       headers: {
         authorization: `Bearer ${token}`
@@ -34,7 +35,7 @@ const run = async () => {
     const fs = encodeURIComponent(
       '{id,season,fullName,nickName,abbr,teamType,roster{ week, id,firstName,lastName,displayName,birthDate,gsisId,esbId},depthChart{person{id,firstName,lastName},unit,depthOrder,positionAbbr},injuries{id,type,person{firstName,lastName,id},injury,injuryStatus,practice,practiceStatus,status}}'
     )
-    const url = `https://api.nfl.com/v1/teams/${id}?s=${s}&fs=${fs}`
+    const url = `${config.nfl_api_url}/v1/teams/${id}?s=${s}&fs=${fs}`
     log(url)
     const rosterData = await fetch(url, {
       headers: {

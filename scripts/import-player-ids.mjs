@@ -1,10 +1,12 @@
-import path from 'path'
+import path, { dirname } from 'path'
 import debug from 'debug'
+import { fileURLToPath } from 'url'
 
 import db from '#db'
 import { constants } from '#common'
 import { isMain, readCSV, getPlayerId } from '#utils'
 
+const __dirname = dirname(fileURLToPath(import.meta.url))
 const log = debug('import:nfl:player:ids')
 debug.enable('import:nfl:player:ids')
 

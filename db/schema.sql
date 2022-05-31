@@ -91,12 +91,13 @@ CREATE TABLE `player` (
   `fname` varchar(20) NOT NULL,
   `lname` varchar(25) NOT NULL,
   `pname` varchar(25) NOT NULL,
+  `formatted` varchar(30) NOT NULL,
   `pos` varchar(3) NOT NULL,
   `pos1` varchar(3) NOT NULL,
   `pos2` varchar(2) DEFAULT NULL,
   `height` tinyint(2) NOT NULL,
   `weight` int(3) NOT NULL,
-  `dob` varchar(10) DEFAULT NULL,
+  `dob` varchar(10) NOT NULL,
   `forty` decimal(3,2) DEFAULT NULL,
   `bench` tinyint(2) DEFAULT NULL,
   `vertical` decimal(3,1) DEFAULT NULL,
@@ -105,15 +106,16 @@ CREATE TABLE `player` (
   `cone` decimal(3,2) DEFAULT NULL,
   `arm` decimal(5,3) DEFAULT NULL,
   `hand` decimal(5,3) DEFAULT NULL,
-  `dpos` int(3) NOT NULL,
+  `dpos` int(3) NOT NULL DEFAULT '0', -- draft position
   `col` varchar(35) NOT NULL,
   `dv` varchar(35) DEFAULT NULL,
   `start` int(4) NOT NULL,
   `cteam` varchar(3) NOT NULL,
   `posd` varchar(8) NOT NULL,
   `jnum` tinyint(2) NOT NULL,
-  `dcp` tinyint(1) NOT NULL,
-  `nflid` int(10) NOT NULL,
+  `dcp` tinyint(1) NOT NULL DEFAULT 0,
+
+  `nflid` int(10) DEFAULT NULL,
   `esbid` varchar(10) DEFAULT NULL,
   `gsisid` varchar(15) DEFAULT NULL,
   `gsispid` varchar(47) DEFAULT NULL,
@@ -130,7 +132,22 @@ CREATE TABLE `player` (
   `fantasy_data_id` int(11) DEFAULT NULL,
   `yahoo_id` int(11) DEFAULT NULL,
   `keeptradecut_id` int(11) DEFAULT NULL,
-  FULLTEXT KEY `name` (`fname`,`lname`)
+
+  FULLTEXT KEY `name` (`fname`,`lname`),
+
+  -- UNIQUE KEY `nflid` (`nflid`), TODO
+  UNIQUE KEY `esbid` (`esbid`),
+  UNIQUE KEY `gsisid` (`gsisid`),
+  UNIQUE KEY `gsispid` (`gsispid`),
+
+  UNIQUE KEY `sleeper_id` (`sleeper_id`),
+  UNIQUE KEY `rotoworld_id` (`rotoworld_id`),
+  UNIQUE KEY `rotowire_id` (`rotowire_id`),
+  UNIQUE KEY `sportradar_id` (`sportradar_id`),
+  UNIQUE KEY `espn_id` (`espn_id`),
+  UNIQUE KEY `fantasy_data_id` (`fantasy_data_id`),
+  UNIQUE KEY `yahoo_id` (`yahoo_id`),
+  UNIQUE KEY `keeptradecut_id` (`keeptradecut_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
