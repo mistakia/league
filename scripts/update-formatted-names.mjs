@@ -1,7 +1,7 @@
 import debug from 'debug'
 
 import db from '#db'
-import { constants, formatPlayerNames } from '#common'
+import { constants, formatPlayerName } from '#common'
 import { isMain, updatePlayer } from '#utils'
 
 const log = debug('update-formatted-names')
@@ -13,7 +13,7 @@ const updateFormattedNames = async () => {
   let count = 0
   for (const player of players) {
     try {
-      const formatted = formatPlayerNames(`${player.fname} ${player.lname}`)
+      const formatted = formatPlayerName(`${player.fname} ${player.lname}`)
       const changes = await updatePlayer({ player, update: { formatted } })
       count += changes
     } catch (err) {
