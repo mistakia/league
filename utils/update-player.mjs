@@ -11,7 +11,7 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('update-player')
 debug.enable('update-player')
 
-const uniques = [
+const protected_props = [
   'player',
   'esbid',
   'gsisid',
@@ -51,7 +51,7 @@ const updatePlayer = async ({ player, update }) => {
 
     const prop = edit.path[0]
 
-    if (uniques.includes(prop)) {
+    if (protected_props.includes(prop)) {
       const exists = await db('player').where(prop, edit.rhs).limit(1)
       if (exists.length) {
         log(
