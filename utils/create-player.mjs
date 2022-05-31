@@ -14,14 +14,17 @@ debug.enable('create-player')
    fname
    lname
    pname
+
    pos
    pos1
+   posd
+
    height
    weight
+
    col
    start
    cteam
-   posd
    jnum
 
    dpos 0

@@ -96,7 +96,7 @@ CREATE TABLE `player` (
   `pos2` varchar(2) DEFAULT NULL,
   `height` tinyint(2) NOT NULL,
   `weight` int(3) NOT NULL,
-  `dob` varchar(10) DEFAULT NULL,
+  `dob` varchar(10) NOT NULL,
   `forty` decimal(3,2) DEFAULT NULL,
   `bench` tinyint(2) DEFAULT NULL,
   `vertical` decimal(3,1) DEFAULT NULL,

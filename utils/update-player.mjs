@@ -1,13 +1,18 @@
 import diff from 'deep-diff'
 import debug from 'debug'
+import yargs from 'yargs'
+import { hideBin } from 'yargs/helpers'
 
 import { constants } from '#common'
+import isMain from './is-main.mjs'
 import db from '#db'
 
+const argv = yargs(hideBin(process.argv)).argv
 const log = debug('update-player')
 debug.enable('update-player')
 
 const uniques = [
+  'player',
   'esbid',
   'gsisid',
   'gsispid',
@@ -21,7 +26,16 @@ const uniques = [
   'keeptradecut_id'
 ]
 
+/*
+   player can be a string identifier or player db entry
+*/
+
 const updatePlayer = async ({ player, update }) => {
+  if (typeof player === 'string' || player instanceof String) {
+    const rows = await db('player').where({ player })
+    player = rows[0]
+  }
+
   const differences = diff(player, update)
 
   const edits = differences.filter((d) => d.kind === 'E')
@@ -71,3 +85,30 @@ const updatePlayer = async ({ player, update }) => {
 }
 
 export default updatePlayer
+
+const main = async () => {
+  let error
+  try {
+    if (!argv.player) {
+      log('missing --player')
+      process.exit()
+    }
+
+    const ignore = ['_', '$0', 'player']
+    const keys = Object.keys(argv).filter((key) => !ignore.includes(key))
+    const update = {}
+    keys.forEach((key) => {
+      update[key] = argv[key]
+    })
+
+    const data = await updatePlayer({ player: argv.player, update })
+    log(data)
+  } catch (err) {
+    error = err
+    log(error)
+  }
+}
+
+if (isMain(import.meta.url)) {
+  main()
+}
