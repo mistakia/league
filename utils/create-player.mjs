@@ -1,6 +1,6 @@
 import debug from 'debug'
 
-import { constants, formatHeight, fixTeam } from '#common'
+import { constants, formatHeight, formatPlayerName, fixTeam } from '#common'
 import db from '#db'
 import generatePlayerId from './generate-player-id.mjs'
 import * as espn from './espn.mjs'
@@ -14,18 +14,20 @@ debug.enable('create-player')
    fname
    lname
    pname
+   dob
+   start
 
    pos
    pos1
    posd
 
+   cteam
+   jnum
+
    height
    weight
 
    col
-   start
-   cteam
-   jnum
 
    dpos 0
    dcp 0
@@ -60,6 +62,7 @@ const createPlayer = async (player) => {
     }
   }
 
+  player.formatted = formatPlayerName(`${player.fname} ${player.lname}`)
   player.height = formatHeight(player.height)
   player.cteam = fixTeam(player.cteam)
 
