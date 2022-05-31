@@ -7,13 +7,62 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants } from '#common'
-import { isMain, getPlayer, wait } from '#utils'
+import { isMain, getPlayer, wait, createPlayer, updatePlayer } from '#utils'
 
 const argv = yargs(hideBin(process.argv)).argv
-const log = debug('import-ktc-rankings')
-debug.enable('import-ktc-rankings')
+const log = debug('import-keeptradecut')
+debug.enable('import-keeptradecut,update-player,create-player')
 
-const run = async () => {
+const importPlayer = async (item) => {
+  let player
+  const dob = item.birthday ? dayjs.unix(item.birthday).format('YYYY-MM-DD') : null
+  try {
+    player = await getPlayer({ keeptradecut_id: item.playerID })
+    if (!player) {
+      player = await getPlayer({
+        name: item.playerName,
+        pos: item.position,
+        team: item.team,
+        dob
+      })
+    }
+  } catch (err) {
+    log(err)
+    return null
+  }
+
+  if (!player) {
+    player = await createPlayer({
+      fname: item.playerName.split(' ').shift(),
+      lname: item.playerName.substr(item.playerName.indexOf(' ') + 1),
+      dob,
+      start: item.draftYear,
+
+      pos: item.position,
+      pos1: item.position,
+      posd: item.position,
+
+      cteam: item.team,
+      jnum: item.number,
+
+      height: item.heightFeet * 12 + item.heightInches,
+      weight: item.weight,
+
+      col: item.college,
+
+      keeptradecut_id: item.playerID
+    })
+  } else {
+    await updatePlayer({
+      player,
+      update: { keeptradecut_id: item.playerID }
+    })
+  }
+
+  return player
+}
+
+const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
   const url = 'https://keeptradecut.com/dynasty-rankings/history'
   const data = await fetch(url, {
     method: 'POST',
@@ -23,12 +72,14 @@ const run = async () => {
   log(`Processing ${data.length} players`)
 
   for (const item of data) {
-    const player = await getPlayer({ keeptradecut_id: item.playerID })
+    if (!constants.positions.includes(item.position)) continue
+
+    const player = await importPlayer(item)
     if (!player) continue
 
     const inserts = []
 
-    if (argv.full) {
+    if (full) {
       const html = await fetch(
         `https://keeptradecut.com/dynasty-rankings/players/${item.slug}`
       ).then((res) => res.text())
@@ -115,7 +166,7 @@ const run = async () => {
       })
     }
 
-    if (argv.dry) {
+    if (dry) {
       log(`${item.playerName} values: ${inserts.length}`)
       log(inserts[0])
       continue
@@ -123,26 +174,26 @@ const run = async () => {
 
     await db('keeptradecut_rankings').insert(inserts).onConflict().ignore()
 
-    if (argv.full) await wait(4000)
+    if (full) await wait(4000)
   }
 }
 
 const main = async () => {
   let error
   try {
-    await run()
+    await importKeepTradeCut({ full: argv.full, dry: argv.dry })
   } catch (err) {
     error = err
-    console.log(error)
+    log(err)
   }
 
-  /* await db('jobs').insert({
-   *   type: constants.jobs.EXAMPLE,
-   *   succ: error ? 0 : 1,
-   *   reason: error ? error.message : null,
-   *   timestamp: Math.round(Date.now() / 1000)
-   * })
-   */
+  await db('jobs').insert({
+    type: constants.jobs.IMPORT_KEEPTRADECUT,
+    succ: error ? 0 : 1,
+    reason: error ? error.message : null,
+    timestamp: Math.round(Date.now() / 1000)
+  })
+
   process.exit()
 }
 
@@ -150,4 +201,4 @@ if (isMain(import.meta.url)) {
   main()
 }
 
-export default run
+export default importKeepTradeCut

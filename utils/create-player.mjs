@@ -6,14 +6,13 @@ import generatePlayerId from './generate-player-id.mjs'
 import * as espn from './espn.mjs'
 import * as sportradar from './sportradar.mjs'
 
+const IS_PROD = process.env.NODE_ENV === 'production'
 const log = debug('create-player')
 debug.enable('create-player')
 
 /*
-   player
    fname
    lname
-   pname
    dob
    start
 
@@ -43,7 +42,7 @@ const createPlayer = async (player) => {
       player.start = espnPlayer.athlete.debutYear
     }
 
-    if (!player.start && sportradar_id) {
+    if (IS_PROD && !player.start && sportradar_id) {
       try {
         const sportradarPlayer = await sportradar.getPlayer({ sportradar_id })
         player.start = sportradarPlayer.rookie_year
@@ -62,6 +61,7 @@ const createPlayer = async (player) => {
     }
   }
 
+  player.pname = `${player.fname.charAt(0).toUpperCase()}.${player.lname}`
   player.formatted = formatPlayerName(`${player.fname} ${player.lname}`)
   player.height = formatHeight(player.height)
   player.cteam = fixTeam(player.cteam)

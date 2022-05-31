@@ -36,11 +36,15 @@ const run = async () => {
     try {
       player = await getPlayer({ sleeper_id })
       if (!player) {
-        missing.push(item)
-        continue
+        player = await getPlayer({ name, pos, team })
       }
     } catch (err) {
       console.log(err)
+      continue
+    }
+
+    if (!player) {
+      missing.push(item)
       continue
     }
 
@@ -76,9 +80,7 @@ const run = async () => {
       injury_status,
       sleeper_id,
       player: player.player,
-      // name,
       cteam: team
-      // pos
     }
 
     updates.push(data)
@@ -111,7 +113,6 @@ const run = async () => {
     const player = {
       fname: item.first_name,
       lname: item.last_name,
-      pname: `${item.first_name.charAt(0).toUpperCase()}.${item.last_name}`,
       pos: item.position,
       pos1: item.position,
       height: item.height,

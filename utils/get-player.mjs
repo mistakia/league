@@ -2,93 +2,14 @@ import debug from 'debug'
 import yargs from 'yargs'
 
 import isMain from './is-main.mjs'
-import { fixTeam } from '#common'
+import { fixTeam, formatPlayerName } from '#common'
 import db from '#db'
 
 const argv = yargs.argv
-const log = debug('league:player:get')
+const log = debug('get-player')
+debug.enable('get-player')
 
 const aliases = {
-  'AJ Dillon': 'AD-1184',
-  'AJ Brown': 'AB-3150',
-  'AJ Derby': 'AD-1175',
-  'AJ Feeley': 'AF-0300',
-  'AJ Green': 'AG-1500',
-  'AJ Jenkins': 'AJ-0460',
-  'AJ McCarron': 'AM-1150',
-  'Allen Robinson II': 'AR-1250',
-  'Anthony McFarland Jr': 'AM-1525',
-  'Anthony McFarland Jr.': 'AM-1525',
-  'Antonio Brown': 'AB-3500',
-  'Antonio Gibson': 'AG-0725',
-  'BJ Daniels': 'BD-0150',
-  'Benny Snell': 'BS-2950',
-  'Benny Snell Jr.': 'BS-2950',
-  'Chris Herndon IV': 'CH-2950',
-  'CJ Anderson': 'CA-0750',
-  'CJ Beathard': 'CB-1145',
-  'Darrell Henderson Jr.': 'DH-2325',
-  'DAndre Swift': 'DS-5175',
-  'Dante Fowler': 'DF-1481',
-  'DJ Chark Jr.': 'DC-1418',
-  'D.J. Chark Jr.': 'DC-1418',
-  'DK Metcalf': 'DM-2275',
-  'Duke Johnson Jr.': 'DJ-1850',
-  'Dwayne Haskins': 'DH-1912',
-  'Dwayne Haskins Jr.': 'DH-1912',
-  'Gardner Minshew II': 'GM-1350',
-  'Greg Ward': 'GW-0250',
-  'Henry Ruggs': 'HR-0200',
-  'Henry Ruggs III': 'HR-0200',
-  'Irv Smith': 'IS-0275',
-  'Irv Smith Jr': 'IS-0275',
-  'Irv Smith Jr.': 'IS-0275',
-  'JaMarr Chase': 'JC-0135',
-  'JC Tretter': 'JT-3350',
-  'Jedrick Wills': 'JW-4918',
-  'Jeff Wilson Jr.': 'JW-4975',
-  'JJ Arcega-Whiteside': 'JA-1975',
-  'JK Dobbins': 'JD-2225',
-  'JD McKissic': 'JM-3475',
-  'Keelan Cole Sr.': 'KC-1550',
-  'KJ Hamler': 'KH-0250',
-  "La'Mical Perine": 'LP-0437',
-  'Laviska Shenault': 'LS-0650',
-  'Laviska Shenault Jr': 'LS-0650',
-  'Laviska Shenault Jr.': 'LS-0650',
-  'Lynn Bowden Jr.': 'LB-0775',
-  'Mark Ingram II': 'MI-0100',
-  'Marvin Jones Jr.': 'MJ-2250',
-  'Melvin Gordon III': 'MG-1150',
-  'Michael Gesicki': 'MG-0325',
-  'Michael Pittman Jr.': 'MP-1350',
-  'Michael Pittman Jr': 'MP-1350',
-  'Miles Gaskin': 'MG-0293',
-  'Nkeal Harry': 'NH-0825',
-  'NKeal Harry': 'NH-0825',
-  'Odell Beckham': 'OB-0075',
-  'Odell Beckham Jr': 'OB-0075',
-  'Odell Beckham Jr.': 'OB-0075',
-  'OJ Howard': 'OH-0250',
-  'Patrick Mahomes II': 'PM-0025',
-  'Phillip Dorsett II': 'PD-0800',
-  'Richie James Jr.': 'RJ-0450',
-  'Robert Griffin III': 'RG-1850',
-  'Robert Tonyan': 'RT-1250',
-  'Ronald Jones II': 'RJ-2250',
-  'Scotty Miller': 'SM-2653',
-  'Steven Sims': 'SS-1537',
-  'Terrace Marshall': 'TM-0135',
-  'Terrace Marshall Jr.': 'TM-0135',
-  'Todd Gurley II': 'TG-1950',
-  'TY Hilton': 'TH-1850',
-  'TySon Williams': 'TW-0105',
-  'TJ Hockenson': 'TH-1875',
-  'Will Fuller V': 'WF-0300',
-  'Will Lutz': 'WL-0300',
-  'William Fuller V': 'WF-0300',
-  'Willie Snead IV': 'WS-0925',
-
   'Arizona (ARI)': 'ARI',
   'Atlanta (ATL)': 'ATL',
   'Baltimore (BAL)': 'BAL',
@@ -204,10 +125,6 @@ const aliases = {
   'Washington Football Team': 'WAS'
 }
 
-const nameAliases = {
-  'DJ Moore': 'D.J. Moore'
-}
-
 const fixPosition = (pos) => {
   switch (pos) {
     case 'C':
@@ -236,7 +153,7 @@ const fixPosition = (pos) => {
   }
 }
 
-const getPlayer = async ({ name, pos, team, sleeper_id, keeptradecut_id }) => {
+const getPlayer = async ({ name, pos, team, dob, sleeper_id, keeptradecut_id }) => {
   if (aliases[name]) {
     const result = await db('player').where({ player: aliases[name] })
     return result[0]
@@ -252,15 +169,9 @@ const getPlayer = async ({ name, pos, team, sleeper_id, keeptradecut_id }) => {
     query.where({ keeptradecut_id })
   } else {
     if (name) {
-      const aname = nameAliases[name] || name
-      const sname = aname.replace(/jr.|jr|sr.|sr|II|III/gi, '').trim()
-      const fname = sname.split(' ').shift()
-      const lname = sname.split(' ').splice(1).join(' ')
+      const formatted = formatPlayerName(name)
 
-      query.where({
-        fname,
-        lname
-      })
+      query.where({ formatted })
     }
 
     if (pos) {
@@ -273,6 +184,10 @@ const getPlayer = async ({ name, pos, team, sleeper_id, keeptradecut_id }) => {
     if (team) {
       const t = fixTeam(team)
       query.where({ cteam: t })
+    }
+
+    if (dob) {
+      query.where({ dob })
     }
   }
 
@@ -296,12 +211,12 @@ const main = async () => {
       pos: argv.pos,
       team: argv.team
     }
-    console.log(options)
-    const playerId = await getPlayer(options)
-    console.log(playerId)
+    log(options)
+    const player = await getPlayer(options)
+    log(player)
   } catch (err) {
     error = err
-    console.log(error)
+    log(error)
   }
 
   process.exit()
