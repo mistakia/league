@@ -74,7 +74,7 @@ const run = async () => {
       high_school,
       rotowire_id,
       gsisid: gsis_id ? gsis_id.trim() : null,
-      sportradar_id,
+      sportradar_id: sportradar_id || null,
       espn_id,
       fantasy_data_id,
       yahoo_id,
