@@ -51,16 +51,16 @@
 ################################### PLAYERS ########################################
 
 ## At 02:30AM Everyday
-# 30 2 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-sleeper-players.mjs &>> /var/log/league/import-sleeper.log
+# 30 2 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-players-sleeper.mjs &>> /var/log/league/import-players-sleeper.log
 
 ## At 12:15PM Everyday
-# 15 12 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-sleeper-players.mjs &>> /var/log/league/import-sleeper.log
+# 15 12 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-players-sleeper.mjs &>> /var/log/league/import-players-sleeper.log
 
 ## At 8:10PM Everyday
-# 10 20 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-sleeper-players.mjs &>> /var/log/league/import-sleeper.log
+# 10 20 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-players-sleeper.mjs &>> /var/log/league/import-players-sleeper.log
 
 ## At 5:10PM Friday
-# 10 17 * * 5 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-sleeper-players.mjs &>> /var/log/league/import-sleeper.log
+# 10 17 * * 5 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-players-sleeper.mjs &>> /var/log/league/import-players-sleeper.log
 
 ## At 8PM on Monday
 # 0 20 * * 1 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-mfl-players.mjs &>> /var/log/league/import-mfl-players.log
