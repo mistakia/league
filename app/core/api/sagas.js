@@ -1,6 +1,5 @@
-import { race, call, put, take, cancelled, select } from 'redux-saga/effects'
+import { call, put, cancelled, select } from 'redux-saga/effects'
 import Bugsnag from '@bugsnag/js'
-import { LOCATION_CHANGE } from 'redux-first-history'
 
 import { api, apiRequest } from '@core/api/service'
 import { authActions, loginActions, registerActions, getApp } from '@core/app'
@@ -99,13 +98,14 @@ function* fetchAPI(apiFunction, actions, opts = {}) {
     yield put(actions.failed(opts, err.toString()))
   } finally {
     if (yield cancelled()) {
+      console.log('request cancelled')
       abort()
     }
   }
 }
 
 function* fetch(...args) {
-  yield race([call(fetchAPI.bind(null, ...args)), take(LOCATION_CHANGE)])
+  yield call(fetchAPI.bind(null, ...args))
 }
 
 export const postRegister = fetch.bind(null, api.postRegister, registerActions)
