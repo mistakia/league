@@ -15,7 +15,9 @@ debug.enable('import-keeptradecut,update-player,create-player')
 
 const importPlayer = async (item) => {
   let player
-  const dob = item.birthday ? dayjs.unix(item.birthday).format('YYYY-MM-DD') : null
+  const dob = item.birthday
+    ? dayjs.unix(item.birthday).format('YYYY-MM-DD')
+    : null
   try {
     player = await getPlayer({ keeptradecut_id: item.playerID })
     if (!player) {

@@ -112,7 +112,7 @@ CREATE TABLE `player` (
   `start` int(4) NOT NULL,
   `cteam` varchar(3) NOT NULL,
   `posd` varchar(8) NOT NULL,
-  `jnum` tinyint(2) NOT NULL,
+  `jnum` tinyint(2) NOT NULL DEFAULT 0,
   `dcp` tinyint(1) NOT NULL DEFAULT 0,
 
   `nflid` int(10) DEFAULT NULL,

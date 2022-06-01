@@ -21,7 +21,6 @@ debug.enable('create-player')
    posd
 
    cteam
-   jnum
 
    height
    weight
@@ -30,7 +29,21 @@ debug.enable('create-player')
 
    dpos 0
    dcp 0
-*/
+   jnum 0
+ */
+
+const required = [
+  'fname',
+  'lname',
+  'dob',
+  'start',
+  'pos',
+  'pos1',
+  'height',
+  'weight',
+  'col',
+  'posd'
+]
 
 const createPlayer = async (player) => {
   const playerId = await generatePlayerId(player)
@@ -58,6 +71,14 @@ const createPlayer = async (player) => {
       } catch (e) {
         log(e)
       }
+    }
+  }
+
+  for (const field of required) {
+    if (!player[field]) {
+      log(`Unable to create player, missing ${field} field`)
+      log(player)
+      return null
     }
   }
 
