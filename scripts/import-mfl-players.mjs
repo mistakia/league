@@ -10,7 +10,7 @@ import config from '#config'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import:players:mfl')
-debug.enable('league:player:get,import:players:mfl')
+debug.enable('league:player:get,import:players:mfl,get-player')
 
 const run = async () => {
   const missing = []

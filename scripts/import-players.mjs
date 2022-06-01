@@ -7,7 +7,7 @@ import { constants, fixTeam } from '#common'
 import config from '#config'
 
 const log = debug('import:nfl:players')
-debug.enable('import:nfl:players')
+debug.enable('import:nfl:players,get-player')
 
 const run = async () => {
   const missing = []

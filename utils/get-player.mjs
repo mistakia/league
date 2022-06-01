@@ -198,10 +198,11 @@ const getPlayer = async ({
     }
   }
 
-  log(query.toString())
+
 
   const players = await query
   if (players.length > 1) {
+    log(query.toString())
     throw new Error('matched multiple players')
   }
 

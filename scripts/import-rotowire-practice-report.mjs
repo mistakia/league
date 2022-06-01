@@ -6,7 +6,7 @@ import { constants } from '#common'
 import { isMain, getPlayer } from '#utils'
 
 const log = debug('import:practice-report')
-debug.enable('import:practice-report')
+debug.enable('import:practice-report,get-player')
 
 const url = 'https://www.rotowire.com/football/tables/practice-report.php?team='
 const { week, year } = constants.season
