@@ -9,7 +9,7 @@ import { isMain, getPlayer } from '#utils'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import:odds')
-debug.enable('import:odds')
+debug.enable('import:odds,get-player')
 
 const URL = 'https://sportsbook.draftkings.com/leagues/football/3'
 

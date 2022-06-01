@@ -10,7 +10,7 @@ import config from '#config'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import:rankings:dynasty')
-debug.enable('import:rankings:dynasty')
+debug.enable('import:rankings:dynasty,get-player')
 
 const timestamp = Math.round(Date.now() / 1000)
 const year = argv.year ? argv.year : constants.season.year

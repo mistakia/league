@@ -9,7 +9,7 @@ import { isMain, getPlayer } from '#utils'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import:projections')
-debug.enable('import:projections')
+debug.enable('import:projections,get-player')
 const timestamp = new Date()
 
 const run = async () => {

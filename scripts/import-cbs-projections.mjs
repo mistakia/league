@@ -9,7 +9,7 @@ import { isMain, getPlayer } from '#utils'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import:projections')
-debug.enable('import:projections')
+debug.enable('import:projections,get-player')
 
 const type = argv.season ? 'season' : constants.season.week
 const week = argv.season ? 0 : constants.season.week

@@ -10,7 +10,7 @@ import { constants } from '#common'
 import db from '#db'
 
 const log = debug('import:projections')
-debug.enable('import:projections')
+debug.enable('import:projections,get-player')
 
 const timestamp = new Date()
 const argv = yargs(hideBin(process.argv)).argv
