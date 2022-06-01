@@ -91,8 +91,11 @@
 
 ################################### GAMES ########################################
 
-## Update NFL Schedule At 03:00 every day
+## Update NFL Schedule At 03:00 every day (Regular Season)
 0 3 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-games.mjs &>> /var/log/league/import-nfl-games.log
+
+## Update NFL Schedule At 03:00 every day (Off Season)
+0 3 * 5-8 0 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-games.mjs &>> /var/log/league/import-nfl-games.log
 
 ################################### RANKINGS ########################################
 
