@@ -1000,7 +1000,7 @@ export const jobs = {
   CLAIMS_POACH: 4,
 
   PLAYERS_MFL: 5,
-  PLAYERS_SLEEPER: 6,
+  IMPORT_PLAYERS_SLEEPER: 6,
   PLAYERS_MFL_INJURIES: 7,
 
   PROJECTIONS_PFF: 8,
@@ -1071,7 +1071,7 @@ export const jobDetails = {
   3: 'Poaching Waivers',
   4: 'Poaching Claims',
   5: 'Player Status (MFL)',
-  6: 'Player Status (Sleeper)',
+  6: 'Import Players (Sleeper)',
   7: 'Player Status (MFL Injuries)',
   8: 'Projections (PFF)',
   9: 'Projections (FFToday)',

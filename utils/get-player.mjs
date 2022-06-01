@@ -153,7 +153,14 @@ const fixPosition = (pos) => {
   }
 }
 
-const getPlayer = async ({ name, pos, team, dob, sleeper_id, keeptradecut_id }) => {
+const getPlayer = async ({
+  name,
+  pos,
+  team,
+  dob,
+  sleeper_id,
+  keeptradecut_id
+}) => {
   if (aliases[name]) {
     const result = await db('player').where({ player: aliases[name] })
     return result[0]
