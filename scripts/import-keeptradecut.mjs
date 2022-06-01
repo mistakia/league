@@ -11,7 +11,7 @@ import { isMain, getPlayer, wait, createPlayer, updatePlayer } from '#utils'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-keeptradecut')
-debug.enable('import-keeptradecut,update-player,create-player')
+debug.enable('import-keeptradecut,update-player,create-player,get-player')
 
 const importPlayer = async (item) => {
   let player
