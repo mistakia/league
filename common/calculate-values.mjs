@@ -1,6 +1,6 @@
 const defaultValue = -999
 
-  const calculateValues = ({ players, baselines, week }) => {
+const calculateValues = ({ players, baselines, week }) => {
   const isSeasonProjection = week === 0
   let total = 0
 

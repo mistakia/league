@@ -1,6 +1,5 @@
 import fetch from 'node-fetch'
-import fs from 'fs'
-import jsonfile from 'jsonfile'
+import fs from 'fs-extra'
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
@@ -58,10 +57,10 @@ const run = async () => {
 
   const tmpFile = '/tmp/betonline.json'
   if (argv.test && fs.existsSync(tmpFile)) {
-    parsed = jsonfile.readFileSync(tmpFile)
+    parsed = fs.readJsonSync(tmpFile)
   } else {
     parsed = await fetch(URL).then((res) => res.json())
-    jsonfile.writeFileSync(tmpFile, parsed, { spaces: 2 })
+    fs.writeJsonSync(tmpFile, parsed, { spaces: 2 })
   }
 
   const missing = []
