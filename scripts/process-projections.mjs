@@ -195,6 +195,8 @@ const processLeague = async ({ year, lid }) => {
   for (const [week, positions] of Object.entries(baselines)) {
     for (const [position, types] of Object.entries(positions)) {
       for (const [type, baseline] of Object.entries(types)) {
+        if (!baseline) continue
+
         baselineInserts.push({
           lid,
           week,
