@@ -29,13 +29,13 @@ const getEstOffset = () => {
 export default class Season {
   constructor() {
     this.offseason = dayjs
-      .tz('2021-02-07', 'America/New_York')
+      .tz('2022-02-07', 'America/New_York')
       .utc()
       .utcOffset(-5) // Super Bowl
-    this.start = dayjs.tz('2021-08-31', 'America/New_York').utc().utcOffset(-4) // Two Tuesdays before first game
-    this.end = dayjs.tz('2022-02-06', 'America/New_York').utc().utcOffset(-5) // super bowl
+    this.start = dayjs.tz('2022-08-30', 'America/New_York').utc().utcOffset(-4) // Two Tuesdays before first game
+    this.end = dayjs.tz('2023-02-12', 'America/New_York').utc().utcOffset(-5) // super bowl
     this.openingDay = dayjs
-      .tz('2021-09-09', 'America/New_York')
+      .tz('2022-09-08', 'America/New_York')
       .utc()
       .utcOffset(-4) // first game
     this.finalWeek = 17
