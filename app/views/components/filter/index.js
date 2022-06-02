@@ -12,6 +12,9 @@ export default class Filter extends React.Component {
   }
 
   handleToggleClick = (event) => {
+    event.preventDefault()
+    event.stopPropagation()
+
     if (this.state.visible) {
       const wasOutsideBody = this.body
         ? !this.body.contains(event.target)
@@ -45,7 +48,6 @@ export default class Filter extends React.Component {
         this.props.values[index].value
       ])
     }
-
     const values = this.props.values.map((v, i) =>
       index === i ? { ...v, selected: !v.selected } : v
     )
