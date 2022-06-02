@@ -43,7 +43,6 @@
     "groupme": "^0.5.8",
     "hotkeys-js": "^3.9.3",
     "jsdom": "^19.0.0",
-    "jsonfile": "^6.1.0",
     "jsonwebtoken": "^8.5.1",
     "knex": "2.0.0",
     "marked": "^1.1.0",
