@@ -54,8 +54,8 @@ const run = async () => {
   // format data
   const parsed = JSON.parse(embeddedData[1].slice(0, -1))
 
-  // jsonfile.writeFileSync('draftkings.json', parsed, { spaces: 2 })
-  // const parsed = jsonfile.readFileSync('draftkings.json')
+  // fs.writeJsonSync('draftkings.json', parsed, { spaces: 2 })
+  // const parsed = fs.readJsonSync('draftkings.json')
 
   const offers = {}
   const missing = []

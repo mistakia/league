@@ -7173,7 +7173,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jsonfile@npm:^6.0.1, jsonfile@npm:^6.1.0":
+"jsonfile@npm:^6.0.1":
   version: 6.1.0
   resolution: "jsonfile@npm:6.1.0"
   dependencies:
@@ -10251,7 +10251,6 @@ __metadata:
     immutable: 4.0.0
     javascript-lp-solver: ^0.4.24
     jsdom: ^19.0.0
-    jsonfile: ^6.1.0
     jsonwebtoken: ^8.5.1
     knex: 2.0.0
     marked: ^1.1.0

@@ -198,8 +198,6 @@ const getPlayer = async ({
     }
   }
 
-
-
   const players = await query
   if (players.length > 1) {
     log(query.toString())
