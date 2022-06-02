@@ -49,33 +49,33 @@ const runOne = async (week) => {
     }
 
     const data = {
-      fuml: player.fumbles_lost || 0,
-      pa: player.pass_att || 0,
-      pc: player.pass_comp || 0,
-      ints: player.pass_int || 0,
-      tdp: player.pass_td || 0,
-      py: player.pass_yds || 0,
-      ra: player.rush_att || 0,
-      tdr: player.rush_td || 0,
-      ry: player.rush_yds || 0,
-      twoptc: player.two_pt || 0,
-      rec: player.recv_receptions || 0,
-      trg: player.recv_targets || 0,
-      tdrec: player.recv_td || 0,
-      recy: player.recv_yds || 0,
+      fuml: item.fumbles_lost || 0,
+      pa: item.pass_att || 0,
+      pc: item.pass_comp || 0,
+      ints: item.pass_int || 0,
+      tdp: item.pass_td || 0,
+      py: item.pass_yds || 0,
+      ra: item.rush_att || 0,
+      tdr: item.rush_td || 0,
+      ry: item.rush_yds || 0,
+      twoptc: item.two_pt || 0,
+      rec: item.recv_receptions || 0,
+      trg: item.recv_targets || 0,
+      tdrec: item.recv_td || 0,
+      recy: item.recv_yds || 0,
 
-      fg29: player.fg_made_20_29 || 0,
-      fg39: player.fg_made_30_39 || 0,
-      fg49: player.fg_made_40_49 || 0,
-      fg50: player.fg_made_50plus || 0,
-      xpm: player.pat_made || 0,
+      fg29: item.fg_made_20_29 || 0,
+      fg39: item.fg_made_30_39 || 0,
+      fg49: item.fg_made_40_49 || 0,
+      fg50: item.fg_made_50plus || 0,
+      xpm: item.pat_made || 0,
 
-      dff: player.dst_fumbles_forced || 0,
-      drf: player.dst_fumbles_recovered || 0,
-      dint: player.dst_int || 0,
-      dsk: player.dst_sacks || 0,
-      dsf: player.dst_safeties || 0,
-      dtd: player.dst_td || 0
+      dff: item.dst_fumbles_forced || 0,
+      drf: item.dst_fumbles_recovered || 0,
+      dint: item.dst_int || 0,
+      dsk: item.dst_sacks || 0,
+      dsf: item.dst_safeties || 0,
+      dtd: item.dst_td || 0
     }
 
     inserts.push({
