@@ -283,9 +283,9 @@ CREATE TABLE `seasons` (
   `fte` mediumint(3) unsigned DEFAULT NULL, -- te franchise tag amount
   `tran_date` int(11) unsigned DEFAULT NULL,
   `ext_date` int(11) unsigned DEFAULT NULL, -- extension deadline
-  `ddate` int(11) DEFAULT NULL,
-  `adate` int(11) DEFAULT NULL,
-  `tddate` int(11) DEFAULT NULL,
+  `ddate` int(11) unsigned DEFAULT NULL,
+  `adate` int(11) unsigned DEFAULT NULL,
+  `tddate` int(11) unsigned DEFAULT NULL,
   UNIQUE KEY `season` (`lid`,`year`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
