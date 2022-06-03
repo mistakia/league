@@ -30,11 +30,11 @@ describe('SCRIPTS /waivers - poach', function () {
       await knex.seed.run()
       await league(knex)
 
-      await knex('leagues')
+      await knex('seasons')
         .update({
           adate: start.subtract('1', 'week').unix()
         })
-        .where('uid', 1)
+        .where('lid', 1)
     })
 
     it('no waivers to process - offseason', async () => {

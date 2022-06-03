@@ -34,11 +34,11 @@ describe('API /waivers - cancel', function () {
     await league(knex)
     await draftPicks(knex)
 
-    await knex('leagues')
+    await knex('seasons')
       .update({
         adate: start.subtract('1', 'week').unix()
       })
-      .where('uid', 1)
+      .where('lid', 1)
   })
 
   it('cancel poaching waiver', async () => {

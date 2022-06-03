@@ -146,11 +146,10 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'player is not on waivers' })
     }
 
-    const leagues = await db('leagues').where({ uid: leagueId })
-    if (!leagues.length) {
+    const league = await getLeague(leagueId)
+    if (!league) {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
-    const league = leagues[0]
 
     // check free agency waivers
     if (
