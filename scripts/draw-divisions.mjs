@@ -27,12 +27,11 @@ const run = async ({ lid, print = true, dry = false }) => {
   let maxWin = 0
   let minWin = Infinity
 
-
   for (const team of teams) {
     const stats = teamStats.filter((t) => t.tid === team.uid)
-    team.wins = sum(stats.map(s => s.wins))
-    team.losses = sum(stats.map(s => s.losses))
-    team.pf = sum(stats.map(s => s.pf))
+    team.wins = sum(stats.map((s) => s.wins))
+    team.losses = sum(stats.map((s) => s.losses))
+    team.pf = sum(stats.map((s) => s.pf))
 
     if (team.wins > maxWin) maxWin = team.wins
     if (team.wins < minWin) minWin = team.wins
