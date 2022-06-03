@@ -44,10 +44,18 @@ export default async function (knex) {
     twoptc: 2,
     tdrec: 6,
     fuml: -1,
+    hosted: true,
+    prtd: 6,
+    krtd: 6
+  })
+
+  await knex('seasons').del()
+  await knex('seasons').insert({
+    lid: 1,
+    year: constants.season.year,
     ddate: Math.round(Date.now() / 1000),
     adate: Math.round(Date.now() / 1000),
-    tddate: constants.season.start.add('12', 'weeks').unix(),
-    hosted: true
+    tddate: constants.season.start.add('12', 'weeks').unix()
   })
 
   const leagues = await knex('leagues').where({ uid: 1 })
@@ -95,7 +103,6 @@ export default async function (knex) {
   await knex('transactions').del()
   await knex('waivers').del()
   await knex('waiver_releases').del()
-  await knex('seasons').del()
   await knex('transition_bids').del()
   await knex('transition_releases').del()
   await knex('poaches').del()

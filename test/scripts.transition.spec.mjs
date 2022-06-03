@@ -40,12 +40,15 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
       await league(knex)
       const tranDate = start.subtract('5', 'week').unix()
       const extDate = start.subtract('6', 'week').unix()
-      await knex('seasons').insert({
-        lid: leagueId,
-        year: constants.season.year,
-        tran_date: tranDate,
-        ext_date: extDate
-      })
+      await knex('seasons')
+        .update({
+          year: constants.season.year,
+          tran_date: tranDate,
+          ext_date: extDate
+        })
+        .where({
+          lid: leagueId
+        })
       MockDate.set(start.subtract('1', 'month').toDate())
     })
 
@@ -232,11 +235,14 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
 
     it('no bids to process', async () => {
       const tranDate = start.subtract('1', 'week').unix()
-      await knex('seasons').insert({
-        lid: leagueId,
-        year: constants.season.year,
-        tran_date: tranDate
-      })
+      await knex('seasons')
+        .update({
+          year: constants.season.year,
+          tran_date: tranDate
+        })
+        .where({
+          lid: leagueId
+        })
 
       const player = await selectPlayer()
       const teamId = 1
@@ -289,11 +295,14 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
 
     it('tied bids among competing team', async () => {
       const tranDate = start.subtract('1', 'month').unix()
-      await knex('seasons').insert({
-        lid: leagueId,
-        year: constants.season.year,
-        tran_date: tranDate
-      })
+      await knex('seasons')
+        .update({
+          year: constants.season.year,
+          tran_date: tranDate
+        })
+        .where({
+          lid: leagueId
+        })
 
       const player = await selectPlayer()
       const teamId = 1

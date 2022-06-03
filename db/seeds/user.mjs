@@ -1,3 +1,5 @@
+import { constants } from '#common'
+
 export default async function (knex) {
   await knex('users_sources').del()
   await knex('users_teams').del()
@@ -59,6 +61,13 @@ export default async function (knex) {
     twoptc: 2,
     tdrec: 6,
     fuml: -1,
+    prtd: 6,
+    krtd: 6
+  })
+  await knex('seasons').del()
+  await knex('seasons').insert({
+    lid: 1,
+    year: constants.season.year,
     ddate: Math.round(Date.now() / 1000),
     adate: Math.round(Date.now() / 1000),
     tddate: 1606626000
