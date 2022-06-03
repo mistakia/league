@@ -32,6 +32,7 @@ describe('API /waivers - free agency', function () {
     await knex.migrate.rollback()
     await knex.migrate.latest()
     await knex.seed.run()
+    await league(knex)
   })
 
   describe('put', function () {

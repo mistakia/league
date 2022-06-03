@@ -86,10 +86,18 @@ router.post('/register', async (req, res) => {
     const userId = users[0]
 
     if (!leagueId) {
-      league = createDefaultLeague({ userId })
+      const { ddate, adate, tddate, ...league } = createDefaultLeague({
+        userId
+      })
       const leagues = await db('leagues').insert(league)
       leagueId = leagues[0]
-      await db('seasons').insert({ lid: leagueId, year: constants.season.year })
+      await db('seasons').insert({
+        lid: leagueId,
+        year: constants.season.year,
+        ddate,
+        adate,
+        tddate
+      })
 
       const teams = await db('teams').insert({
         lid: leagueId,

@@ -283,6 +283,9 @@ CREATE TABLE `seasons` (
   `fte` mediumint(3) unsigned DEFAULT NULL, -- te franchise tag amount
   `tran_date` int(11) unsigned DEFAULT NULL,
   `ext_date` int(11) unsigned DEFAULT NULL, -- extension deadline
+  `ddate` int(11) DEFAULT NULL,
+  `adate` int(11) DEFAULT NULL,
+  `tddate` int(11) DEFAULT NULL,
   UNIQUE KEY `season` (`lid`,`year`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -693,10 +696,6 @@ CREATE TABLE `leagues` (
   `ext2` int(4) DEFAULT 10,
   `ext3` int(4) DEFAULT 20,
   `ext4` int(4) DEFAULT 35,
-
-  `ddate` int(11) DEFAULT NULL,
-  `adate` int(11) DEFAULT NULL,
-  `tddate` int(11) DEFAULT NULL,
 
   `discord_webhook_url` varchar(255) DEFAULT NULL,
   `groupme_token` varchar(45) DEFAULT NULL,

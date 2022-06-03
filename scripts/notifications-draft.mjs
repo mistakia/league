@@ -2,17 +2,18 @@ import dayjs from 'dayjs'
 
 import db from '#db'
 import { constants } from '#common'
-import { isMain, sendNotifications } from '#utils'
+import { isMain, sendNotifications, getLeague } from '#utils'
 
 const run = async () => {
   // get lists of leagues after draft start date
   const now = dayjs().unix()
-  const leagues = await db('leagues')
+  const league_seasons = await db('leagues')
     .whereNotNull('ddate')
     .where('ddate', '<', now)
 
-  for (const league of leagues) {
-    const draftStart = dayjs.unix(league.ddate)
+  for (const league_season of league_seasons) {
+    const league = await getLeague(league_season.lid)
+    const draftStart = dayjs.unix(league_season.ddate)
     const difference = dayjs().diff(draftStart, 'days')
     const pick = difference + 1
 
