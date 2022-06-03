@@ -4,14 +4,14 @@ import { hideBin } from 'yargs/helpers'
 import { Table } from 'console-table-printer'
 
 import db from '#db'
-import { constants } from '#common'
+import { constants, sum } from '#common'
 import { isMain } from '#utils'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('draw-divisions')
 debug.enable('draw-divisions')
 
-const run = async ({ lid }) => {
+const run = async ({ lid, print = true, dry = false }) => {
   log(`Drawing divisions for leagueId: ${lid}`)
   const teams = await db('teams').where({ lid })
   const tids = teams.map((t) => t.uid)
@@ -22,23 +22,34 @@ const run = async ({ lid }) => {
     .where('year', '>=', cutoff)
     .whereIn('tid', tids)
 
-  const wins = teamStats.map((t) => t.wins)
-  const minWin = Math.min(...wins)
-  const maxWin = Math.max(...wins)
+  let maxPf = 0
+  let minPf = Infinity
+  let maxWin = 0
+  let minWin = Infinity
 
-  const pfs = teamStats.map((t) => t.pf)
-  const maxPf = Math.max(...pfs)
-  const minPf = Math.min(...pfs)
+
+  for (const team of teams) {
+    const stats = teamStats.filter((t) => t.tid === team.uid)
+    team.wins = sum(stats.map(s => s.wins))
+    team.losses = sum(stats.map(s => s.losses))
+    team.pf = sum(stats.map(s => s.pf))
+
+    if (team.wins > maxWin) maxWin = team.wins
+    if (team.wins < minWin) minWin = team.wins
+    if (team.pf > maxPf) maxPf = team.pf
+    if (team.pf < minPf) minPf = team.pf
+  }
 
   const powerIndexes = []
-  for (const teamStat of teamStats) {
-    const team = teams.find((t) => t.uid === teamStat.tid)
-    const normWins = (teamStat.wins - minWin) / (maxWin - minWin)
-    const normPf = (teamStat.pf - minPf) / (maxPf - minPf)
+  for (const team of teams) {
+    const normWins = (team.wins - minWin) / (maxWin - minWin)
+    const normPf = (team.pf - minPf) / (maxPf - minPf)
     powerIndexes.push({
-      tid: teamStat.tid,
+      tid: team.uid,
       name: team.name,
-      powerIndex: normWins + normPf
+      powerIndex: normWins + normPf,
+      wins: team.wins,
+      pf: team.pf
     })
   }
 
@@ -49,14 +60,16 @@ const run = async ({ lid }) => {
     pools.push(sorted.splice(0, poolLimit))
   }
 
-  if (argv.print) {
+  if (print) {
     pools.forEach((pool, index) => {
       const p = new Table()
       console.log(`Pool ${index + 1}`)
       for (const team of pool) {
         p.addRow({
           team: team.name,
-          PowerIndex: team.powerIndex.toFixed(2)
+          PowerIndex: team.powerIndex.toFixed(2),
+          Wins: team.wins,
+          PF: Math.floor(team.pf)
         })
       }
       p.printTable()
@@ -71,11 +84,13 @@ const run = async ({ lid }) => {
       division.push(team[0])
     }
 
-    for (const team of division) {
-      await db('teams').update({ div }).where({ uid: team.tid })
+    if (!argv.dry) {
+      for (const team of division) {
+        await db('teams').update({ div }).where({ uid: team.tid })
+      }
     }
 
-    if (argv.print) {
+    if (print) {
       console.log(`Division ${div}`)
       const p = new Table()
       for (const team of division) {
@@ -99,7 +114,7 @@ const main = async () => {
       console.log('missing --lid')
     }
 
-    await run({ lid })
+    await run({ lid, print: argv.print, dry: argv.dry })
   } catch (err) {
     error = err
     console.log(error)

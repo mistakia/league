@@ -39,6 +39,8 @@ import getGameDayAbbreviation from './get-game-day-abbreviation.mjs'
 export { default as formatHeight } from './format-height.mjs'
 export { default as formatPlayerName } from './format-player-name.mjs'
 
+export const sum = (arr) => arr.reduce((sum, a) => sum + a, 0)
+
 const uniqBy = (a, key) => {
   const seen = new Set()
   return a.filter((item) => {
