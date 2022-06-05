@@ -21,7 +21,11 @@ const calculateRookiePickValue = async ({ year }) => {
   const seasons = {}
   const limit = LATEST_YEAR - year + 1
   for (let i = 1; i <= limit; i++) {
-    seasons[i] = await calculateVOR({ year: year + (i - 1), rookie: i === 1 })
+    const { players } = await calculateVOR({
+      year: year + (i - 1),
+      rookie: i === 1
+    })
+    seasons[i] = players
   }
 
   const result = {}

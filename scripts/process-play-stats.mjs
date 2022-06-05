@@ -3,7 +3,7 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { isMain } from '#utils'
+import { isMain, updatePlayer } from '#utils'
 import db from '#db'
 import {
   constants,
@@ -16,15 +16,12 @@ import {
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('process:play-stats')
-debug.enable('process:play-stats')
+debug.enable('process:play-stats,update-player')
 const timestamp = Math.round(Date.now() / 1000)
-const week =
-  argv.week ||
-  Math.max(
-    dayjs().day() === 2 ? constants.season.week - 1 : constants.season.week,
-    1
-  )
-const year = argv.year || constants.season.year
+const current_week = Math.max(
+  dayjs().day() === 2 ? constants.season.week - 1 : constants.season.week,
+  1
+)
 
 // TODO - add KNEE, SPKE
 const getPlayType = (type_ngs) => {
@@ -62,7 +59,7 @@ const getPlayType = (type_ngs) => {
   }
 }
 
-const upsert = async ({ player, stats, opp, pos, tm }) => {
+const upsert = async ({ player, stats, opp, pos, tm, week, year }) => {
   const cleanedStats = Object.keys(stats)
     .filter((key) => constants.fantasyStats.includes(key))
     .reduce((obj, key) => {
@@ -84,7 +81,10 @@ const upsert = async ({ player, stats, opp, pos, tm }) => {
     .merge()
 }
 
-const run = async () => {
+const run = async ({
+  week = current_week,
+  year = constants.season.year
+} = {}) => {
   if (week > constants.season.nflFinalWeek) {
     return
   }
@@ -138,22 +138,12 @@ const run = async () => {
     const player = results[0]
 
     if (!argv.dry) {
-      await db('player_changelog').insert({
-        type: constants.changes.PLAYER_EDIT,
-        id: player.player,
-        prop: 'gsispid',
-        prev: player.gsispid,
-        new: gsispid,
-        timestamp
-      })
-
-      await db('player').update({ gsispid }).where({ player: player.player })
+      await updatePlayer({ player, update: { gsispid } })
     }
     player.gsispid = gsispid
     players_gsispid.push(player)
   }
 
-  // Update players with missing gsisids
   const playStatsByGsisid = groupBy(playStats, 'gsisId')
   const gsisids = Object.keys(playStatsByGsisid)
   const players_gsisid = await db('player').whereIn('gsisid', gsisids)
@@ -216,7 +206,9 @@ const run = async () => {
       pos: player.pos,
       tm: fixTeam(playStat.clubCode),
       opp,
-      stats
+      stats,
+      year,
+      week
     })
   }
 
@@ -256,7 +248,9 @@ const run = async () => {
       pos: 'DST',
       tm: team,
       opp: fixTeam(opp),
-      stats
+      stats,
+      year,
+      week
     })
   }
 
@@ -362,7 +356,7 @@ const run = async () => {
 const main = async () => {
   let error
   try {
-    await run()
+    await run({ year: argv.year, week: argv.week })
   } catch (err) {
     error = err
     console.log(error)

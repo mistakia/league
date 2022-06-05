@@ -3,22 +3,21 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import { Table } from 'console-table-printer'
 
-import { groupBy } from '#common'
+import { groupBy, constants } from '#common'
 import { getLeague, isMain } from '#utils'
 import calculateVOR from './calculate-vor.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
-const LATEST_YEAR = 2020
 
 const calculateHistoricalPositionalRankingValue = async ({ league }) => {
-  const years = 3
-  let year = LATEST_YEAR - years
+  const years = 2
+  let year = constants.season.year - years
 
   const data = {}
 
-  for (; year < LATEST_YEAR; year++) {
-    const res = await calculateVOR({ year, league })
-    const values = Object.values(res)
+  for (; year < constants.season.year; year++) {
+    const { players } = await calculateVOR({ year, league })
+    const values = Object.values(players)
     const byPosition = groupBy(values, 'pos')
     for (const pos in byPosition) {
       if (data[pos]) {
