@@ -1,6 +1,6 @@
 const defaultValue = -999
 
-const calculateValues = ({ players, baselines, week }) => {
+const calculateValues = ({ players, baselines, week, historicBaselines }) => {
   const isSeasonProjection = week === 0
   let total = 0
 
@@ -10,8 +10,7 @@ const calculateValues = ({ players, baselines, week }) => {
 
     if (isSeasonProjection) {
       player.vorp[week] =
-        player.points[week].total -
-          baselines[pos].historical.points[week].total || defaultValue
+        player.points[week].total - historicBaselines[pos] || defaultValue
     } else {
       player.vorp[week] =
         player.points[week].total - baselines[pos].starter.points[week].total

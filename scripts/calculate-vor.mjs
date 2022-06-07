@@ -7,120 +7,43 @@ import { Table } from 'console-table-printer'
 import db from '#db'
 import { isMain, getLeague } from '#utils'
 import {
+  sum,
   constants,
   groupBy,
-  getPlayerCountBySlot,
-  getActiveRosterLimit,
-  calculatePoints
+  getRosterSize,
+  calculatePoints,
+  calculateValues,
+  calculatePrices,
+  calculateBaselines
 } from '#common'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('calculate-vor')
 debug.enable('calculate-vor')
 
-const POSITIONS = ['QB', 'RB', 'WR', 'TE']
-
-// Stats is an object with positions as properties and player stats as values
-// i.e. { QB: [{ player1 }, { player2 }, ... ], RB: [{ player1 }, { player2 }, ... ] ... }
-const getBaselinePlayers = ({ stats, playerCount }) => {
-  const baselinePlayers = {}
-  for (const position of POSITIONS) {
-    baselinePlayers[position] = stats[position].slice(playerCount[position])
-  }
-
-  if (!playerCount.RBWRTE && !playerCount.QBRBWRTE && !playerCount.RBWR) {
-    const result = {}
-    for (const position of POSITIONS) {
-      result[position] = baselinePlayers[position][0]
-    }
-    return result
-  }
-
-  let baselineRBWR
-  let baselineRBWRTE
-  let baselineQBRBWRTE
-
-  if (playerCount.RBWR) {
-    const rbwr = baselinePlayers.RB.concat(baselinePlayers.WR).sort(
-      (b, a) => b.points - a.points
-    )
-    baselineRBWR = rbwr.slice(playerCount.RBWR)
-  }
-
-  /* eslint-disable indent */
-  if (playerCount.RBWRTE) {
-    const rbwrte = baselineRBWR
-      ? baselineRBWR
-          .concat(baselinePlayers.TE)
-          .sort((a, b) => b.points - a.points)
-      : baselinePlayers.RB.concat(baselinePlayers.WR, baselinePlayers.TE).sort(
-          (a, b) => b.points - a.points
-        )
-
-    baselineRBWRTE = rbwrte.slice(playerCount.RBWRTE)
-  }
-  /* eslint-enable indent */
-
-  if (playerCount.QBRBWRTE) {
-    const sf = baselineRBWR
-      ? baselineRBWRTE
-          .concat(baselinePlayers.QB)
-          .sort((a, b) => b.points - a.points)
-      : baselineRBWR
-      ? baselineRBWR
-          .concat(baselinePlayers.QB)
-          .sort((a, b) => b.points - a.points)
-      : baselinePlayers.RB.concat(
-          baselinePlayers.WR,
-          baselinePlayers.TE,
-          baselinePlayers.QB
-        ).sort((a, b) => b.points - a.points)
-
-    baselineQBRBWRTE = sf.slice(playerCount.QBRBWRTE)
-  }
-
-  const qbBaseline = playerCount.QBRBWRTE
-    ? baselineQBRBWRTE[0]
-    : baselinePlayers.QB[0]
-
-  if (playerCount.RBWRTE) {
-    return {
-      QB: qbBaseline,
-      RB: baselineRBWRTE[0],
-      WR: baselineRBWRTE[0],
-      TE: baselineRBWRTE[0]
-    }
-  }
-
-  return {
-    QB: qbBaseline,
-    RB: baselineRBWR[0],
-    WR: baselineRBWR[0],
-    TE: baselineRBWR[0]
-  }
-}
-
 const calculateVOR = async ({ year, rookie, league }) => {
   if (!Number.isInteger(year)) {
     throw new Error(`${year} invalid year`)
   }
 
+  const { nteams, cap, minBid } = league
+  const rosterSize = getRosterSize(league)
+  const leagueTotalCap = nteams * cap - nteams * rosterSize * minBid
+
   log(`calculating VOR for ${year}`)
 
   // get player stats for year
-  const rows = await db('offense')
+  const rows = await db('gamelogs')
     .select(
-      'offense.*',
+      'gamelogs.*',
       'player.pname',
       'player.pos',
-      'game.wk',
-      'offense.player',
-      'offense.seas'
+      'player.start',
+      'gamelogs.player'
     )
-    .where('offense.year', year)
-    .andWhere('game.wk', '<=', constants.season.finalWeek)
-    .join('player', 'offense.player', 'player.player')
-    .join('game', 'offense.gid', 'game.gid')
+    .where('gamelogs.year', year)
+    .andWhere('gamelogs.week', '<=', constants.season.finalWeek)
+    .join('player', 'gamelogs.player', 'player.player')
 
   const playerIds = rows.map((p) => p.player)
   const sub = db('rankings')
@@ -140,101 +63,105 @@ const calculateVOR = async ({ year, rookie, league }) => {
     .where('year', year)
     .whereIn('player', playerIds)
 
-  for (let row of rows) {
-    const ranking = rankings.find((r) => r.player === row.player)
+  const grouped = groupBy(rows, 'player')
+
+  const players = []
+  for (const playerId of Object.keys(grouped)) {
+    let item = {}
+    const games = grouped[playerId]
+    // item.games = games
+
+    const ranking = rankings.find((r) => r.player === playerId)
     if (ranking) {
       const { ornk, prnk, avg, std } = ranking
-      row = { ...row, ornk, prnk, avg, std }
+      item = { ornk, prnk, avg, std }
     }
+
+    item.points = {}
+    item.vorp = {}
+    item.vorp_adj = {}
+    item.market_salary = {}
+
+    for (let week = 0; week <= constants.season.finalWeek; week++) {
+      item.points[week] = { total: 0 }
+      item.vorp[week] = -999
+      item.vorp_adj[week] = 0
+      item.market_salary[week] = 0
+    }
+
+    for (const game of games) {
+      // calculate fantasy points
+      const points = calculatePoints({
+        stats: game,
+        position: game.pos,
+        league
+      })
+      item.points[game.week] = points
+    }
+
+    const { pname, pos, start } = games[0]
+    players.push({ player: playerId, pname, pos, start, ...item })
   }
 
   log(`calculating VOR for ${rows.length} players`)
 
-  // calculate fantasy points
-  for (const row of rows) {
-    const points = calculatePoints({ stats: row, position: row.pos, league })
-    row.points = points.total
-  }
+  const baselines = {}
+  const baselineTotals = {}
+  constants.positions.forEach((p) => (baselineTotals[p] = 0))
+  const max_week = Math.max(...rows.map((r) => r.week))
+  for (let week = 1; week <= max_week; week++) {
+    const baseline = calculateBaselines({ players, league, week })
+    baselines[week] = baseline
 
-  // group by position
-  const statsByPosition = {}
-  for (const position of POSITIONS) {
-    statsByPosition[position] = rows
-      .filter((p) => p.pos === position)
-      .sort((a, b) => b.points - a.points)
-  }
-
-  // calculate VOR by week
-  let stats = []
-  for (let week = 1; week <= constants.season.finalWeek; week++) {
-    const weekStatsByPosition = {}
-    for (const position of POSITIONS) {
-      weekStatsByPosition[position] = statsByPosition[position].filter(
-        (p) => p.wk === week
-      )
+    for (const position of constants.positions) {
+      const p = baseline[position].starter
+      baselineTotals[position] += p.points[week].total
       log(
-        `Top ${position} of week ${week} is ${weekStatsByPosition[position][0].pname} with ${weekStatsByPosition[position][0].points}pts`
+        `Baseline ${position} of week ${week} is ${p.pname} (${p.pos}) with ${p.points[week].total}pts`
       )
     }
 
-    // get player VOR baselines
-    const playerCount = getPlayerCountBySlot({ league })
-    const baselinePlayers = getBaselinePlayers({
-      stats: weekStatsByPosition,
-      playerCount
-    })
+    // calculate values
+    const total = calculateValues({ players, baselines: baseline, week })
+    calculatePrices({ cap: leagueTotalCap, total, players, week })
+  }
 
-    for (const position of POSITIONS) {
-      const p = baselinePlayers[position]
-      log(
-        `Baseline ${position} of week ${week} is ${p.pname} with ${p.points}pts`
-      )
-    }
-
-    // calculate individual VOR
-    for (const position of POSITIONS) {
-      const baselinePlayer = baselinePlayers[position]
-      for (const player of weekStatsByPosition[position]) {
-        player.vor = player.points - baselinePlayer.points
+  // calculate earned contract value
+  let totalVorp = 0
+  for (const player of players) {
+    player.vorp.earned = 0
+    player.starts = Object.values(player.vorp).filter((v) => v > 0).length
+    player.points = sum(Object.values(player.points).map((p) => p.total))
+    for (const value of Object.values(player.vorp)) {
+      if (value <= 0) {
+        continue
       }
+
+      player.vorp.earned += value
+      totalVorp += value
     }
-    const weeklyPlayerStats = Object.values(weekStatsByPosition).flat()
-    stats = stats.concat(weeklyPlayerStats)
   }
 
-  // group results by player
-  const players = groupBy(stats, 'player')
+  calculatePrices({
+    cap: leagueTotalCap,
+    total: totalVorp,
+    players,
+    week: 'earned'
+  })
 
-  // add up player vor
   const output = {}
-  let totalVOR = 0
-  for (const player in players) {
-    const games = players[player]
-    const vor = games.reduce((a, b) => a + (b.vor || 0), 0)
-    const points = games.reduce((a, b) => a + (b.points || 0), 0)
-    if (vor > 0) {
-      totalVOR = totalVOR + vor
+  for (const player of players) {
+    output[player.player] = {
+      player: player.pname,
+      rookie: player.start === year,
+      pos: player.pos,
+      prnk: player.prnk,
+      vor: player.vorp.earned,
+      value: player.market_salary.earned,
+      points: player.points,
+      games: player.games,
+      starts: player.starts
     }
-    output[player] = {
-      player: games[0].pname,
-      rookie: games[0].seas === 1,
-      pos: games[0].pos,
-      seas: games[0].seas,
-      prnk: games[0].prnk,
-      vor,
-      points,
-      games
-    }
-  }
-
-  // set player contract value
-  const rosterLimit = getActiveRosterLimit(league)
-  const leagueCAP = league.nteams * league.cap - league.nteams * rosterLimit
-  const pricePerVOR = leagueCAP / totalVOR
-  for (const player in players) {
-    const vor = output[player].vor
-    const value = Math.round(pricePerVOR * vor)
-    output[player].value = value > 0 ? value : 0
   }
 
   if (rookie) {
@@ -246,7 +173,7 @@ const calculateVOR = async ({ year, rookie, league }) => {
     }
   }
 
-  return output
+  return { players: output, baselineTotals, weeks: max_week }
 }
 
 const main = async () => {
@@ -259,8 +186,12 @@ const main = async () => {
       return
     }
     const league = await getLeague(lid)
-    const results = await calculateVOR({ year, rookie, league })
-    const top200 = Object.values(results)
+    const { players, baselineTotals, weeks } = await calculateVOR({
+      year,
+      rookie,
+      league
+    })
+    const top200 = Object.values(players)
       .sort((a, b) => b.vor - a.vor)
       .slice(0, 200)
     const p = new Table()
@@ -286,7 +217,8 @@ const main = async () => {
           rank: player.prnk,
           value: `$${player.value}`,
           pos: player.pos,
-          rookie: player.rookie ? 'rookie' : ''
+          rookie: player.rookie ? 'rookie' : '',
+          startable: player.starts
         },
         {
           color: getColor(player.pos)
@@ -299,6 +231,12 @@ const main = async () => {
       )
     )
     p.printTable()
+
+    for (const position of constants.positions) {
+      const total = baselineTotals[position]
+      const avg = total / weeks
+      log(`${position} baseline per week: ${avg.toFixed(2)}`)
+    }
   } catch (e) {
     log(e)
   }

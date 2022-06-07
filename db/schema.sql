@@ -705,12 +705,12 @@ CREATE TABLE `leagues` (
   `hosted` tinyint(1) DEFAULT 0,
   `host` tinyint(1) DEFAULT NULL,
 
-  `b_qb` tinyint(2) unsigned DEFAULT NULL, -- baseline qb rank
-  `b_rb` tinyint(2) unsigned DEFAULT NULL, -- baseline rb rank
-  `b_wr` tinyint(2) unsigned DEFAULT NULL, -- baseline wr rank
-  `b_te` tinyint(2) unsigned DEFAULT NULL, -- baseline te rank
-  `b_k` tinyint(2) unsigned DEFAULT NULL, -- baseline k rank
-  `b_dst` tinyint(2) unsigned DEFAULT NULL, -- baseline dst rank
+  `b_QB` decimal(2,1) unsigned DEFAULT NULL, -- baseline qb pts/game
+  `b_RB` decimal(2,1) unsigned DEFAULT NULL, -- baseline rb pts/game
+  `b_WR` decimal(2,1) unsigned DEFAULT NULL, -- baseline wr pts/game
+  `b_TE` decimal(2,1) unsigned DEFAULT NULL, -- baseline te pts/game
+  `b_K` decimal(2,1) unsigned DEFAULT NULL, -- baseline k pts/game
+  `b_DST` decimal(2,1) unsigned DEFAULT NULL, -- baseline dst pts/game
 
   UNIQUE KEY `uid` (`uid`),
   KEY `commishid` (`commishid`)
