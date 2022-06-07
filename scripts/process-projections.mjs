@@ -10,7 +10,8 @@ import {
   calculateValues,
   calculatePrices,
   calculateBaselines,
-  calculatePlayerValuesRestOfSeason
+  calculatePlayerValuesRestOfSeason,
+  getHistoricBaselines
 } from '#common'
 import {
   getProjections,
@@ -121,13 +122,19 @@ const processLeague = async ({ year, lid }) => {
   week = year === constants.season.year ? constants.season.week : 0
 
   const baselines = {}
+  const historicBaselines = getHistoricBaselines({ league })
   for (; week <= finalWeek; week++) {
     // baselines
     const baseline = calculateBaselines({ players, league, rosterRows, week })
     baselines[week] = baseline
 
     // calculate values
-    const total = calculateValues({ players, baselines: baseline, week })
+    const total = calculateValues({
+      players,
+      baselines: baseline,
+      week,
+      historicBaselines
+    })
     calculatePrices({ cap: leagueTotalCap, total, players, week })
   }
 

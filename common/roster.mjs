@@ -197,6 +197,14 @@ export default class Roster {
     }
   }
 
+  hasOpenSlot(slot) {
+    const slotName = Object.keys(constants.slots).find(
+      (key) => constants.slots[key] === slot
+    )
+    const count = this.getCountBySlot(slot)
+    return count < this._league[`s${slotName.toLowerCase()}`]
+  }
+
   isStarter(player) {
     const p = this.get(player)
     return !nonStarterSlots.includes(p.slot)
