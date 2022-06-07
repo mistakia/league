@@ -7,14 +7,14 @@ import { constants } from '#common'
 import { isMain } from '#utils'
 
 // const argv = yargs(hideBin(process.argv)).argv
-const log = debug('example')
-debug.enable('example')
+const log = debug('script')
+debug.enable('script')
 
-const run = async () => {}
+const script = async () => {}
 const main = async () => {
   let error
   try {
-    await run()
+    await script()
   } catch (err) {
     error = err
     log(error)
@@ -34,4 +34,4 @@ if (isMain(import.meta.url)) {
   main()
 }
 
-export default run
+export default script

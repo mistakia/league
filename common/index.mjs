@@ -38,8 +38,8 @@ import * as Errors from './errors.mjs'
 import getGameDayAbbreviation from './get-game-day-abbreviation.mjs'
 export { default as formatHeight } from './format-height.mjs'
 export { default as formatPlayerName } from './format-player-name.mjs'
-
-export const sum = (arr) => arr.reduce((sum, a) => sum + a, 0)
+export { default as sum } from './sum.mjs'
+export { default as getHistoricBaselines } from './get-historic-baselines.mjs'
 
 const uniqBy = (a, key) => {
   const seen = new Set()
