@@ -48,7 +48,7 @@ export function getAuctionTargetPlayers(state) {
   }
   const players = combined.union(Set(currentPlayers.active))
   return players.sort(
-    (a, b) => b.getIn(['vorp', valueType]) - a.getIn(['vorp', valueType])
+    (a, b) => b.getIn(['vorp', valueType], 0) - a.getIn(['vorp', valueType], 0)
   )
 }
 

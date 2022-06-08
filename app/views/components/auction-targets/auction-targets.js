@@ -8,7 +8,6 @@ import FormControlLabel from '@material-ui/core/FormControlLabel'
 
 // import EditableAuctionBudget from '@components/editable-auction-budget'
 import NFLTeamBye from '@components/nfl-team-bye'
-// import AuctionValueTypeToggle from '@components/auction-value-type-toggle'
 import PlayerWatchlistAction from '@components/player-watchlist-action'
 import AuctionTargetHeader from '@components/auction-target-header'
 import PlayerName from '@components/player-name'
@@ -54,7 +53,7 @@ export default class AuctionTargets extends React.Component {
         if (lineupPlayerIds.includes(player.player)) classNames.push('optimal')
         const salary = rosterSlot
           ? rosterSlot.value
-          : player.getIn(['market_salary', valueType])
+          : player.getIn(['market_salary', valueType], 0)
 
         const item = (
           <div className={classNames.join(' ')} key={index}>
