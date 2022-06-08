@@ -231,10 +231,6 @@ export function* watchAuctionResume() {
   yield takeLatest(auctionActions.AUCTION_RESUME, resume)
 }
 
-/* export function* watchSetValueType() {
- *   yield takeLatest(auctionActions.SET_VALUE_TYPE, optimize)
- * }
- *  */
 export function* watchAuctionStart() {
   yield takeLatest(auctionActions.AUCTION_START, soundNotification)
 }
@@ -258,7 +254,6 @@ export const auctionSagas = [
   // fork(watchSetAuctionBudget),
   fork(watchAuctionPause),
   fork(watchAuctionResume),
-  // fork(watchSetValueType),
   fork(watchAuctionStart),
   fork(watchAuctionPaused)
 ]

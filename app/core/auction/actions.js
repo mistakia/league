@@ -28,7 +28,6 @@ export const auctionActions = {
 
   SET_OPTIMAL_LINEUP: 'SET_OPTIMAL_LINEUP',
   SET_AUCTION_BUDGET: 'SET_AUCTION_BUDGET',
-  SET_VALUE_TYPE: 'SET_VALUE_TYPE',
 
   SOUND_NOTIFICATION: 'SOUND_NOTIFICATION',
 
@@ -50,13 +49,6 @@ export const auctionActions = {
       players,
       feasible,
       result
-    }
-  }),
-
-  setValueType: (type) => ({
-    type: auctionActions.SET_VALUE_TYPE,
-    payload: {
-      type
     }
   }),
 
