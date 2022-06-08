@@ -42,13 +42,13 @@ export default class AuctonTeamRosters extends React.Component {
     const { league } = this.props
 
     const menuItems = []
-    for (const [index, team] of this.props.teams.entries()) {
+    this.props.teams.forEach((team, index) => {
       menuItems.push(
         <MenuItem key={index} value={team.uid}>
           {team.name}
         </MenuItem>
       )
-    }
+    })
 
     const counts = {}
     const roster = this.props.rosters.find((r) => r.tid === this.state.tid)
@@ -190,14 +190,14 @@ export default class AuctonTeamRosters extends React.Component {
         {r ? r.availableSpace : '-'}
       </div>
     )
-    for (const position of constants.positions) {
+    constants.positions.forEach((position, index) => {
       countItems.push(
-        <div key={position} className='auction__team-rosters-footer-item'>
+        <div key={index} className='auction__team-rosters-footer-item'>
           <label>{position}</label>
           {counts[position] || '-'}
         </div>
       )
-    }
+    })
 
     return (
       <div className='auction__team-rosters'>

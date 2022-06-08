@@ -31,11 +31,6 @@ const initialState = new Record({
 
 export function auctionReducer(state = initialState(), { payload, type }) {
   switch (type) {
-    case auctionActions.SET_VALUE_TYPE:
-      return state.merge({
-        valueType: payload.type
-      })
-
     case auctionActions.AUCTION_SEARCH_PLAYERS:
       return state.merge({
         search: payload.value
