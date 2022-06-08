@@ -28,6 +28,7 @@ dist/*.worker.js*
 *.tar.qz
 drive-credentials.json
 drive-token.json
+dist/stats.html
 
 # Deployment
 current

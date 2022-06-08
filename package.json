@@ -8,6 +8,7 @@
     "test": "NODE_ENV=test TEST=all mocha --exit --exclude test/importer-espn.spec.mjs",
     "start:api": "node server.mjs",
     "build": "cross-env NODE_ENV=production webpack --config ./webpack/webpack.config.prod.babel.mjs",
+    "analyze": "cross-env OPEN_ANALYZER=true NODE_ENV=production webpack --config ./webpack/webpack.config.prod.babel.mjs",
     "deploy": "pm2 deploy production",
     "todo": "grep -rni todo app api common scripts",
     "count:lines": "git ls-files | xargs wc -l"
@@ -132,6 +133,7 @@
     "webpack-cli": "4.9.2",
     "webpack-dev-server": "4.9.0",
     "webpack-merge": "^5.8.0",
+    "webpack-visualizer-plugin2": "^1.0.0",
     "whatwg-fetch": "3.6.2",
     "workerize-loader": "mistakia/workerize-loader#464a90a7ccdd4853d1afaf10cef78588899e11d4",
     "yargs": "17.4.1"
