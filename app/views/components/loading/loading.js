@@ -1,15 +1,14 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-
-import LoadingIndicator from '@components/loading-indicator'
+import CircularProgress from '@material-ui/core/CircularProgress'
 
 import './loading.styl'
 
-const Loading = ({ loading, onClick }) => {
+const Loading = ({ loading }) => {
   if (loading) {
     return (
       <div className='loading'>
-        <LoadingIndicator />
+        <CircularProgress />
       </div>
     )
   }
@@ -18,8 +17,7 @@ const Loading = ({ loading, onClick }) => {
 }
 
 Loading.propTypes = {
-  loading: PropTypes.bool,
-  onClick: PropTypes.func
+  loading: PropTypes.bool
 }
 
 export default Loading

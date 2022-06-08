@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import LoadingIndicator from '@components/loading-indicator'
+import CircularProgress from '@material-ui/core/CircularProgress'
 
 import './button.styl'
 
@@ -35,7 +35,7 @@ function Button({
       disabled={disabled}
       type={type}
     >
-      {isLoading ? <LoadingIndicator /> : children}
+      {isLoading ? <CircularProgress /> : children}
       {haveCount && <span className='count'>{count}</span>}
     </button>
   )
