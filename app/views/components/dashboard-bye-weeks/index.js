@@ -12,7 +12,7 @@ const mapStateToProps = createSelector(
   (team, schedule) => {
     const byes = {}
     for (const player of team.active) {
-      const bye = schedule.getIn(['teams', player.team, 'bye'])
+      const bye = schedule.getIn(['teams', player.team, 'bye']) || 0
       if (!byes[bye]) byes[bye] = []
       byes[bye].push(player)
     }

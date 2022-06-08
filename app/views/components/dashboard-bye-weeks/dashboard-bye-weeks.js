@@ -81,15 +81,15 @@ export default class DashboardByeWeeks extends React.Component {
   render = () => {
     const { byes } = this.props
     const items = []
-    for (const bye in byes) {
+    Object.keys(byes).forEach((bye, idx) => {
       const players = byes[bye]
       items.push(
-        <div key={bye} className='dashboard__bye-week-row'>
+        <div key={idx} className='dashboard__bye-week-row'>
           <div className='dashboard__bye-week-row-label metric'>W{bye}</div>
           <ByeWeekPopover players={players} bye={bye} />
         </div>
       )
-    }
+    })
     return (
       <div className='dashboard__bye-week'>
         <div className='dashboard__section-side-title'>Bye Weeks</div>

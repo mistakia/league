@@ -28,7 +28,7 @@ export default class DashboardTeamValue extends React.Component {
         )}`}</td>
       </tr>
     )
-    for (const [index, position] of constants.positions.entries()) {
+    constants.positions.forEach((position, idx) => {
       const values = summary.league[position].sort((a, b) => b - a)
       const value = summary.team[position] || 0
       const rank = values.indexOf(value) + 1
@@ -36,13 +36,13 @@ export default class DashboardTeamValue extends React.Component {
       if (rank <= quarterOfLeague) classNames.push('text-green')
       if (rank >= league.nteams - quarterOfLeague) classNames.push('text-red')
       rows.push(
-        <tr key={index}>
+        <tr key={idx}>
           <td>{position}</td>
           <td>{value.toFixed(1)}</td>
           <td className={classNames.join(' ')}>{`${rank}${nth(rank)}`}</td>
         </tr>
       )
-    }
+    })
 
     const options = {
       chart: {
