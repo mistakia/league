@@ -44,9 +44,9 @@ export default function AuctionPageRender() {
   }
 
   const teamItems = []
-  for (const [index, tid] of tids.entries()) {
+  tids.forEach((tid, index) => {
     teamItems.push(<AuctionTeam key={index} tid={tid} />)
-  }
+  })
 
   const body = (
     <div className='auction'>
