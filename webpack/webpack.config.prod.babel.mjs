@@ -1,12 +1,15 @@
 import path, { dirname } from 'path'
 import webpack from 'webpack'
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
+import MiniCssExtractPlugin from 'mini-css-extract-plugin'
+import CssMinimizerPlugin from 'css-minimizer-webpack-plugin'
 import Visualizer from 'webpack-visualizer-plugin2'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 import HtmlWebpackInlineSourcePlugin from 'html-webpack-inline-source-plugin'
 import { merge } from 'webpack-merge'
 import TerserPlugin from 'terser-webpack-plugin'
 import { fileURLToPath } from 'url'
+import nib from 'nib'
 
 import baseConfig from './webpack.config.base.mjs'
 
@@ -26,6 +29,34 @@ export default merge(baseConfig, {
     filename: 'index.js'
   },
 
+  module: {
+    rules: [
+      {
+        test: /\.css$/,
+        use: [MiniCssExtractPlugin.loader, 'css-loader']
+      },
+      {
+        test: /\.styl$/,
+        use: [
+          MiniCssExtractPlugin.loader,
+          'css-loader',
+          {
+            loader: 'stylus-loader',
+            options: {
+              stylusOptions: {
+                use: [nib()],
+                import: [
+                  'nib',
+                  path.resolve(__dirname, '../app/styles/variables.styl')
+                ]
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+
   optimization: {
     minimize: true,
     minimizer: process.env.E2E_BUILD
@@ -33,7 +64,8 @@ export default merge(baseConfig, {
       : [
           new TerserPlugin({
             parallel: true
-          })
+          }),
+          new CssMinimizerPlugin()
         ]
   },
 
@@ -68,6 +100,11 @@ export default merge(baseConfig, {
         minifyURLs: true
       }
     }),
+
+    new MiniCssExtractPlugin({
+      filename: 'style.css'
+    }),
+
     new HtmlWebpackInlineSourcePlugin(HtmlWebpackPlugin),
     new BundleAnalyzerPlugin({
       analyzerMode:
