@@ -39,10 +39,10 @@
 0 0 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-4for4-projections.mjs &>> /var/log/league/import-4for4.log
 
 ## import season projections
-# 0 0 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-cbs-projections.mjs --season &>> /var/log/league/import-cbs-season.log
-# 0 0 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-espn-projections.mjs --season &>> /var/log/league/import-espn-season.log
-# 0 0 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-fantasysharks-projections.mjs --season &>> /var/log/league/import-fantasysharks-season.log
-# 0 0 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-fftoday-projections.mjs --season &>> /var/log/league/import-fftoday-season.log
+0 0 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-cbs-projections.mjs --season &>> /var/log/league/import-cbs-season.log
+0 0 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-espn-projections.mjs --season &>> /var/log/league/import-espn-season.log
+0 0 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-fantasysharks-projections.mjs --season &>> /var/log/league/import-fantasysharks-season.log
+0 0 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-fftoday-projections.mjs --season &>> /var/log/league/import-fftoday-season.log
 # 0 0 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-projections.mjs --season &>> /var/log/league/import-nfl-season.log
 
 ## process projections & generate vorp, market salary
