@@ -42,7 +42,7 @@ export default class AuctionTargets extends React.Component {
     for (const position in groups) {
       if (!items[position]) items[position] = []
       const players = groups[position]
-      for (const [index, player] of players.entries()) {
+      players.forEach((player, index) => {
         const classNames = ['auction__targets-player']
         const rosterSlot = team.roster.get(player.player)
 
@@ -69,7 +69,7 @@ export default class AuctionTargets extends React.Component {
           </div>
         )
         items[position].push(item)
-      }
+      })
     }
 
     const lineupText = lineupFeasible
