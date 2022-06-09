@@ -575,6 +575,7 @@ export function* watchExportRosters() {
   yield takeLatest(rosterActions.EXPORT_ROSTERS, exportRosters)
 }
 
+// TODO - move to backend
 export function* watchPlayersAndBaselinesFulfilled() {
   while (true) {
     yield all([

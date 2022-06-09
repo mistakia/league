@@ -17,7 +17,7 @@ const DragHandle = sortableHandle(() => (
 class PlayerRoster extends Player {
   render() {
     const {
-      player,
+      playerMap,
       selected,
       claim,
       reorder,
@@ -33,15 +33,17 @@ class PlayerRoster extends Player {
     const isPoach = Boolean(poachId)
     const isClaim = isWaiver || isPoach
     const { isRegularSeason, isOffseason } = constants.season
-    const isRestrictedFreeAgent = player.tag === constants.tags.TRANSITION
+    const tag = playerMap.get('tag')
+    const isRestrictedFreeAgent = tag === constants.tags.TRANSITION
     const isRestrictedFreeAgencyPeriod =
       !isBeforeExtensionDeadline && isBeforeTransitionDeadline
 
-    const { pos, tag, value, bid } = player
+    const value = playerMap.get('value', 0)
+    const bid = playerMap.get('bid', 0)
     const salary = isRestrictedFreeAgent ? bid : value
-    const extensions = player.get('extensions', 0)
+    const extensions = playerMap.get('extensions', 0)
     const extendedSalary = getExtensionAmount({
-      pos,
+      pos: playerMap.get('pos'),
       tag,
       extensions,
       league,
@@ -49,41 +51,44 @@ class PlayerRoster extends Player {
       bid
     })
     const projectionType = isRegularSeason ? 'ros' : '0'
-    const hasProjections = player.hasIn(['market_salary', projectionType])
-    const projectedSalary = player.getIn(['market_salary', projectionType], 0)
+    const hasProjections = playerMap.hasIn(['market_salary', projectionType])
+    const projectedSalary = playerMap.getIn(
+      ['market_salary', projectionType],
+      0
+    )
     const savings =
       hasProjections &&
       (!isRestrictedFreeAgencyPeriod || bid || !isRestrictedFreeAgent)
         ? projectedSalary - extendedSalary
         : null
 
-    const vorp = player.getIn(['vorp', projectionType], 0)
-    const vorpAdj = player.getIn(['vorp_adj', projectionType], 0)
-    const rosPoints = player.getIn(['points', projectionType, 'total'], 0)
+    const vorp = playerMap.getIn(['vorp', projectionType], 0)
+    const vorpAdj = playerMap.getIn(['vorp_adj', projectionType], 0)
+    const rosPoints = playerMap.getIn(['points', projectionType, 'total'], 0)
     const week = Math.max(constants.season.week, 1)
-    const weekPoints = player.getIn(['points', `${week}`, 'total'], 0)
-    const starts = player.getIn(['lineups', 'starts'], 0)
-    const startPoints = player.getIn(['lineups', 'sp'], 0)
-    const benchPoints = player.getIn(['lineups', 'bp'], 0)
+    const weekPoints = playerMap.getIn(['points', `${week}`, 'total'], 0)
+    const starts = playerMap.getIn(['lineups', 'starts'], 0)
+    const startPoints = playerMap.getIn(['lineups', 'sp'], 0)
+    const benchPoints = playerMap.getIn(['lineups', 'bp'], 0)
 
     const isNegative = Math.sign(savings) === -1
 
     const classNames = ['player__item', 'table__row']
-    if (selected === player.player) classNames.push('selected')
+    if (selected === playerMap.get('player')) classNames.push('selected')
 
     return (
       <div className={classNames.join(' ')}>
         {reorder && <DragHandle />}
         <div className='player__item-name table__cell sticky__column'>
           <PlayerName
-            playerId={player.player}
+            playerId={playerMap.get('player')}
             waiverId={waiverId}
             poachId={poachId}
             hideActions={isPoach}
             headshot
           />
           <div className='player__item-menu'>
-            {Boolean(player.player && isHosted) && (
+            {Boolean(playerMap.get('player') && isHosted) && (
               <IconButton
                 small
                 text
@@ -114,7 +119,7 @@ class PlayerRoster extends Player {
         )}
         {!isWaiver && (
           <div className='metric table__cell'>
-            {isPoach ? player.value + 2 || '-' : salary ? `$${salary}` : '-'}
+            {isPoach ? value + 2 || '-' : salary ? `$${salary}` : '-'}
           </div>
         )}
         {!isWaiver && !isPoach && (

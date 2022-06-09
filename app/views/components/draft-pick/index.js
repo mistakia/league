@@ -11,7 +11,7 @@ const mapStateToProps = createSelector(
   getPlayerById,
   getTeamById,
   getCurrentLeague,
-  (player, team, league) => ({ player, team, league })
+  (playerMap, team, league) => ({ playerMap, team, league })
 )
 
 export default connect(mapStateToProps)(DraftPick)

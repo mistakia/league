@@ -4,11 +4,11 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 import { constants } from '@common'
 import PlayerLabel from '@components/player-label'
 
-export default function PlayerStatus({ player }) {
+export default function PlayerStatus({ playerMap }) {
   const label =
-    constants.status[player.status] ||
-    constants.status[player.injury_status] ||
-    constants.status[player.gamestatus]
+    constants.status[playerMap.get('status')] ||
+    constants.status[playerMap.get('injury_status')] ||
+    constants.status[playerMap.get('gamestatus')]
 
   if (!label) {
     return null
@@ -24,5 +24,5 @@ export default function PlayerStatus({ player }) {
 }
 
 PlayerStatus.propTypes = {
-  player: ImmutablePropTypes.record
+  playerMap: ImmutablePropTypes.map
 }

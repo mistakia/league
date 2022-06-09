@@ -96,8 +96,10 @@ export default function DraftPage() {
     (a, b) => b.getIn(['vorp', '0'], -9999) - a.getIn(['vorp', '0'], -9999)
   )
   const allRow = ({ index, key, ...params }) => {
-    const player = sorted.get(index)
-    return <DraftPlayer key={key} index={index} player={player} {...params} />
+    const playerMap = sorted.get(index)
+    return (
+      <DraftPlayer key={key} index={index} playerMap={playerMap} {...params} />
+    )
   }
 
   const groups = {}
@@ -116,8 +118,10 @@ export default function DraftPage() {
   }
 
   const positionRow = ({ index, key, pos, ...params }) => {
-    const player = items[pos][index]
-    return <DraftPlayer key={key} index={index} player={player} {...params} />
+    const playerMap = items[pos][index]
+    return (
+      <DraftPlayer key={key} index={index} playerMap={playerMap} {...params} />
+    )
   }
 
   const pickItems = []

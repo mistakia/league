@@ -24,17 +24,21 @@ export default class RookieConfirmation extends React.Component {
       missingUntag: false
     }
 
-    const { team, player } = props
+    const { team, playerMap } = props
     this._isEligible = team.roster.isEligibleForTag({
       tag: constants.tags.ROOKIE,
-      player: player.player
+      player: playerMap.get('player') // TODO pid
     })
     this._untags = []
-    const taggedPlayers = team.roster.getPlayersByTag(constants.tags.ROOKIE)
-    const taggedPlayerIds = taggedPlayers.map((p) => p.player)
-    for (const playerId of taggedPlayerIds) {
-      const player = team.players.find((p) => p.player === playerId)
-      this._untags.push(player)
+    const tagged_players = team.roster.getPlayersByTag(constants.tags.ROOKIE)
+    const tagged_pids = tagged_players.map((playerMap) =>
+      playerMap.get('player')
+    ) // TODO pid
+    for (const pid of tagged_pids) {
+      const taggedPlayerMap = team.players.find(
+        (playerMap) => playerMap.get('player') === pid
+      )
+      this._untags.push(taggedPlayerMap)
     }
   }
 
@@ -45,7 +49,7 @@ export default class RookieConfirmation extends React.Component {
 
   handleSubmit = () => {
     const { untag, error } = this.state
-    const { player } = this.props.player
+    const pid = this.props.playerMap.get('player') // TODO pid
 
     if (!this._isEligible && !untag) {
       return this.setState({ missingUntag: true })
@@ -54,19 +58,20 @@ export default class RookieConfirmation extends React.Component {
     }
 
     if (!error) {
-      this.props.add({ remove: untag, tag: constants.tags.ROOKIE, player })
+      this.props.add({ remove: untag, tag: constants.tags.ROOKIE, player: pid })
       this.props.onClose()
     }
   }
 
   render = () => {
-    const { player } = this.props
+    const { playerMap } = this.props
 
     const menuItems = []
-    for (const rPlayer of this._untags) {
+    for (const taggedPlayerMap of this._untags) {
+      const pid = taggedPlayerMap.get('player') // TODO pid
       menuItems.push(
-        <MenuItem key={rPlayer.player} value={rPlayer.player}>
-          {rPlayer.name} ({rPlayer.pos})
+        <MenuItem key={pid} value={pid}>
+          {taggedPlayerMap.get('name')} ({taggedPlayerMap.get('pos')})
         </MenuItem>
       )
     }
@@ -76,7 +81,9 @@ export default class RookieConfirmation extends React.Component {
         <DialogTitle>Rookie Tag</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {`Apply Rookie Tag to ${player.name} (${player.pos})`}
+            {`Apply Rookie Tag to ${playerMap.get('name')} (${playerMap.get(
+              'pos'
+            )})`}
           </DialogContentText>
           <div className='waiver__claim-inputs'>
             {!this._isEligible && (
@@ -111,7 +118,7 @@ export default class RookieConfirmation extends React.Component {
 RookieConfirmation.propTypes = {
   team: PropTypes.object,
   add: PropTypes.func,
-  player: ImmutablePropTypes.record,
+  playerMap: ImmutablePropTypes.map,
   status: PropTypes.object,
   onClose: PropTypes.func,
   waiver: PropTypes.object

@@ -75,32 +75,40 @@ export default function DashboardPage() {
   const cutlistPlayerIds = cutlist.map((c) => c.player).toJS()
   for (const position in groups) {
     const players = groups[position]
-    for (const player of players) {
+    for (const playerMap of players) {
       if (
         !constants.season.isRegularSeason &&
-        cutlistPlayerIds.includes(player.player)
+        cutlistPlayerIds.includes(playerMap.get('player'))
       )
         continue
-      if (!player.player) continue
-      activePlayers = activePlayers.push(player)
-      activeItems.push(<PlayerRoster key={player.player} player={player} />)
+      if (!playerMap.get('player')) continue
+      activePlayers = activePlayers.push(playerMap)
+      activeItems.push(
+        <PlayerRoster key={playerMap.get('player')} playerMap={playerMap} />
+      )
     }
   }
 
   const transitionItems = []
-  for (const player of transitionPlayers.valueSeq()) {
-    transitionItems.push(<PlayerRoster key={player.player} player={player} />)
+  for (const playerMap of transitionPlayers.valueSeq()) {
+    transitionItems.push(
+      <PlayerRoster key={playerMap.get('player')} playerMap={playerMap} />
+    )
   }
 
   const reserveIRItems = []
-  for (const player of players.ir) {
-    if (!player.player) continue
-    reserveIRItems.push(<PlayerRoster key={player.player} player={player} />)
+  for (const playerMap of players.ir) {
+    if (!playerMap.get('player')) continue
+    reserveIRItems.push(
+      <PlayerRoster key={playerMap.get('player')} playerMap={playerMap} />
+    )
 
-    if (!isReserveEligible(player)) {
+    if (!isReserveEligible(playerMap.toJS())) {
       notices.push(
-        <Alert key={player.player} severity='error'>
-          <AlertTitle>{player.name} not eligible for Reserve/IR</AlertTitle>
+        <Alert key={playerMap.get('player')} severity='error'>
+          <AlertTitle>
+            {playerMap.get('name', 'N/A')} not eligible for Reserve/IR
+          </AlertTitle>
           You will need to activate or release him before you can make any
           acquisitions or claims.
         </Alert>
@@ -109,15 +117,17 @@ export default function DashboardPage() {
   }
 
   const reserveCOVItems = []
-  for (const player of players.cov) {
-    if (!player.player) continue
-    reserveCOVItems.push(<PlayerRoster key={player.player} player={player} />)
+  for (const playerMap of players.cov) {
+    if (!playerMap.get('player')) continue
+    reserveCOVItems.push(
+      <PlayerRoster key={playerMap.get('player')} playerMap={playerMap} />
+    )
 
-    if (!isReserveCovEligible(player)) {
+    if (!isReserveCovEligible(playerMap.toJS())) {
       notices.push(
-        <Alert key={player.player} severity='error'>
+        <Alert key={playerMap.get('player')} severity='error'>
           <AlertTitle>
-            {player.name} not eligible for Reserve/COVID-19
+            {playerMap.get('name', 'N/A')} not eligible for Reserve/COVID-19
           </AlertTitle>
           You will need to activate or release him before you can make any
           acquisitions or claims.
@@ -127,19 +137,22 @@ export default function DashboardPage() {
   }
 
   const practiceItems = []
-  for (const player of players.practice) {
-    if (!player.player) continue
-    practiceItems.push(<PlayerRoster key={player.player} player={player} />)
+  for (const playerMap of players.practice) {
+    if (!playerMap.get('player')) continue
+    practiceItems.push(
+      <PlayerRoster key={playerMap.get('player')} playerMap={playerMap} />
+    )
 
     const poach = poaches.find(
-      (p) => p.getIn(['player', 'player']) === player.player
+      (p) => p.getIn(['player', 'player']) === playerMap.get('player')
     )
     if (poach) {
       const processingTime = dayjs.unix(poach.submitted).add('48', 'hours')
       notices.push(
-        <Alert key={player.player} severity='warning'>
-          {player.name} has a poaching claim that will be processed{' '}
-          {processingTime.fromNow()} on {processingTime.format('dddd, h:mm a')}.
+        <Alert key={playerMap.get('player')} severity='warning'>
+          {playerMap.get('name', 'N/A')} has a poaching claim that will be
+          processed {processingTime.fromNow()} on{' '}
+          {processingTime.format('dddd, h:mm a')}.
         </Alert>
       )
     }

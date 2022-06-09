@@ -2,6 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
+import { constants } from '@common'
 import PercentileChart from '@components/percentile-chart'
 
 // TODO - pass epa per play
@@ -165,23 +166,23 @@ const defense = () => (
 
 export default class SelectedPlayerEfficiencyStats extends React.Component {
   render = () => {
-    const { player, percentiles } = this.props
-    const stats = player.stats.toJS()
+    const { playerMap, percentiles } = this.props
+    const stats = playerMap.get('stats', constants.createFullStats()).toJS()
+    const pos = playerMap.get('pos')
 
     return (
       <div>
-        {player.pos === 'QB' && passing({ stats, percentiles })}
-        {['QB', 'RB'].includes(player.pos) && rushing({ stats, percentiles })}
-        {['RB', 'WR', 'TE'].includes(player.pos) &&
-          receiving({ stats, percentiles })}
-        {player.pos === 'K' && kicker({ stats, percentiles })}
-        {player.pos === 'DST' && defense({ stats, percentiles })}
+        {pos === 'QB' && passing({ stats, percentiles })}
+        {['QB', 'RB'].includes(pos) && rushing({ stats, percentiles })}
+        {['RB', 'WR', 'TE'].includes(pos) && receiving({ stats, percentiles })}
+        {pos === 'K' && kicker({ stats, percentiles })}
+        {pos === 'DST' && defense({ stats, percentiles })}
       </div>
     )
   }
 }
 
 SelectedPlayerEfficiencyStats.propTypes = {
-  player: ImmutablePropTypes.record,
+  playerMap: ImmutablePropTypes.map,
   percentiles: PropTypes.object
 }

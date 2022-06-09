@@ -10,18 +10,19 @@ export default class PlayerHeadshotGroup extends React.Component {
     const { players, width = 48 } = this.props
     const height = Math.round((width * 70) / 96)
     const items = []
-    players.forEach((player, index) => {
-      const src = player.espn_id
-        ? `https://a.espncdn.com/combiner/i?img=/i/headshots/nfl/players/full/${
-            player.espn_id
-          }.png&w=${width * 2}&h=${height * 2}&cb=1`
+    players.forEach((playerMap, index) => {
+      const espn_id = playerMap.get('espn_id')
+      const src = espn_id
+        ? `https://a.espncdn.com/combiner/i?img=/i/headshots/nfl/players/full/${espn_id}.png&w=${
+            width * 2
+          }&h=${height * 2}&cb=1`
         : null
 
       items.push(
-        <Tooltip key={index} title={player.name}>
+        <Tooltip key={index} title={playerMap.get('name')}>
           <Avatar src={src} className='player__headshot'>
-            {(player.fname || '').charAt(0)}
-            {(player.lname || '').charAt(0)}
+            {playerMap.get('fname', '').charAt(0)}
+            {playerMap.get('lname', '').charAt(0)}
           </Avatar>
         </Tooltip>
       )

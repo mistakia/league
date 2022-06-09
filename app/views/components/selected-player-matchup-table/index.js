@@ -14,19 +14,20 @@ const mapStateToProps = createSelector(
   getPlayerGamelogs,
   getCurrentLeague,
   getGamelogs,
-  (player, game, logs, league, gamelogState) => {
+  (playerMap, game, logs, league, gamelogState) => {
     if (!game) {
       return {}
     }
-    const opp = player.team === game.h ? game.v : game.h
+    const opp = playerMap.get('team') === game.h ? game.v : game.h
+    const position = playerMap.get('pos')
     const gamelogs = logs
-      .filter((g) => g.opp === opp && g.pos === player.pos)
+      .filter((g) => g.opp === opp && g.pos === position)
       .sort((a, b) => a.week - b.week)
       .withMutations((g) => {
         for (const [index, gamelog] of g.entrySeq()) {
           const points = calculatePoints({
             stats: gamelog,
-            position: player.pos,
+            position,
             league
           })
           g.setIn([index, 'pts'], points.total)
@@ -34,14 +35,14 @@ const mapStateToProps = createSelector(
       })
 
     const defense = gamelogState.getIn(['playersAnalysis', 'defense'], {})
-    const dPos = defense[player.pos]
+    const dPos = defense[position]
 
     const defenseStats = []
     if (dPos) {
       const types = { total: 'Total', adj: 'Adjusted', avg: 'Average' }
       for (const [type, title] of Object.entries(types)) {
         const stats = dPos.stats[type].find((d) => d.opp === opp)
-        const points = calculatePoints({ stats, position: player.pos, league })
+        const points = calculatePoints({ stats, position, league })
         defenseStats.push({
           type,
           stats,
@@ -54,12 +55,12 @@ const mapStateToProps = createSelector(
     const individual = gamelogState.getIn(['playersAnalysis', 'individual'], {})
 
     return {
-      player,
       gamelogs,
       defenseStats,
-      playerPercentiles: individual ? individual[player.pos] : {},
+      playerPercentiles: individual ? individual[position] : {},
       defensePercentiles: dPos ? dPos.percentiles : {},
-      opp
+      opp,
+      position
     }
   }
 )

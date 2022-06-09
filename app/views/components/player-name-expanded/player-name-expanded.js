@@ -33,12 +33,12 @@ function getClock({ desc, game_clock_start, qtr }) {
   }
 }
 
-function GameStatus({ status, player }) {
+function GameStatus({ status, playerMap }) {
   if (!constants.season.isRegularSeason) {
     return <div className='player__name-expanded-game'>-</div>
   }
 
-  if (!player || !player.player) {
+  if (!playerMap || !playerMap.get('player')) {
     return <div className='player__name-expanded-game'>-</div>
   }
 
@@ -47,7 +47,9 @@ function GameStatus({ status, player }) {
   }
 
   const opponent =
-    player.team === status.game.h ? `v${status.game.v}` : `@${status.game.h}`
+    playerMap.get('team') === status.game.h
+      ? `v${status.game.v}`
+      : `@${status.game.h}`
 
   if (!status.lastPlay) {
     const gameTime = dayjs
@@ -77,24 +79,27 @@ function GameStatus({ status, player }) {
 
 GameStatus.propTypes = {
   status: PropTypes.object,
-  player: ImmutablePropTypes.record
+  playerMap: ImmutablePropTypes.map
 }
 
 class PlayerNameExpanded extends Player {
   render = () => {
-    const { player, isHosted, hideActions, status, minimize } = this.props
+    const { playerMap, isHosted, hideActions, status, minimize } = this.props
 
     const classNames = ['player__name-expanded']
     if (minimize) classNames.push('minimize')
 
     const playerName =
       window.innerWidth < 600
-        ? player.pname
-        : `${player.fname || ''} ${player.lname || ''}`
+        ? playerMap.get('pname')
+        : `${playerMap.get('fname', '')} ${playerMap.get('lname', '')}`
 
+    const playerStatus = playerMap.get('status')
+    const playerGamestatus = playerMap.get('gamestatus')
+    // TODO pid
     return (
       <div className={classNames.join(' ')}>
-        {Boolean(isHosted && player.player && !hideActions) && (
+        {Boolean(isHosted && playerMap.get('player') && !hideActions) && (
           <div className='player__name-expanded-action'>
             <IconButton
               small
@@ -105,7 +110,7 @@ class PlayerNameExpanded extends Player {
           </div>
         )}
         <div className='player__name-headshot'>
-          <PlayerHeadshot player={player} />
+          <PlayerHeadshot playerMap={playerMap} />
         </div>
         <div className='player__name-expanded-main'>
           <div
@@ -115,29 +120,29 @@ class PlayerNameExpanded extends Player {
             <div className='player__name-expanded-full-name'>
               {playerName || '-'}
             </div>
-            {constants.season.year === player.draft_year && (
+            {constants.season.year === playerMap.get('draft_year') && (
               <PlayerLabel label='R' type='rookie' description='Rookie' />
             )}
-            {player.slot === constants.slots.PSP && (
+            {playerMap.get('slot') === constants.slots.PSP && (
               <PlayerLabel label='P' description='Protected Practice Squad' />
             )}
-            <PlayerTag tag={player.tag} />
+            <PlayerTag tag={playerMap.get('tag')} />
           </div>
           <div className='player__name-expanded-row'>
-            <Position pos={player.pos} />
-            <Team team={player.team} />
-            <GameStatus status={status} player={player} />
-            {Boolean(constants.status[player.status] || player.gamestatus) && (
+            <Position pos={playerMap.get('pos')} />
+            <Team team={playerMap.get('team')} />
+            <GameStatus status={status} playerMap={playerMap} />
+            {Boolean(constants.status[playerStatus] || playerGamestatus) && (
               <PlayerLabel
                 type='game'
                 label={
-                  constants.status[player.status] ||
-                  constants.status[player.gamestatus]
+                  constants.status[playerStatus] ||
+                  constants.status[playerGamestatus]
                 }
                 description={
-                  constants.status[player.status]
-                    ? player.status
-                    : player.gamestatus
+                  constants.status[playerStatus]
+                    ? playerStatus
+                    : playerGamestatus
                 }
               />
             )}
@@ -150,7 +155,7 @@ class PlayerNameExpanded extends Player {
 
 PlayerNameExpanded.propTypes = {
   status: PropTypes.object,
-  player: ImmutablePropTypes.record
+  playerMap: ImmutablePropTypes.map
 }
 
 export default connect(PlayerNameExpanded)

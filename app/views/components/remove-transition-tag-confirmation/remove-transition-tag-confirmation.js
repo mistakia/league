@@ -11,21 +11,23 @@ import Button from '@components/button'
 
 export default class RemoveTransitionTagConfirmation extends React.Component {
   handleSubmit = () => {
-    const { player } = this.props.player
+    const pid = this.props.playerMap.get('player')
     const { tid } = this.props.team.roster
-    this.props.remove({ player, teamId: tid })
+    this.props.remove({ player: pid, teamId: tid }) // TODO pid
     this.props.onClose()
   }
 
   render() {
-    const { player } = this.props
+    const { playerMap } = this.props
 
     return (
       <Dialog open onClose={this.props.onClose}>
         <DialogTitle>Remove Transition Bid</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {`Remove Transition Bid on ${player.name} (${player.pos})`}
+            {`Remove Transition Bid on ${playerMap.get(
+              'name'
+            )} (${playerMap.get('pos')})`}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -42,7 +44,7 @@ export default class RemoveTransitionTagConfirmation extends React.Component {
 }
 
 RemoveTransitionTagConfirmation.propTypes = {
-  player: ImmutablePropTypes.record,
+  playerMap: ImmutablePropTypes.map,
   team: PropTypes.object,
   remove: PropTypes.func,
   onClose: PropTypes.func

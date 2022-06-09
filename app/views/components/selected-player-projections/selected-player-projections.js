@@ -1,31 +1,33 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
+import { List } from 'immutable'
 
 import SelectedPlayerProjection from '@components/selected-player-projection'
-import { groupBy } from '@common'
 
 export default class SelectedPlayerSeasonProjections extends React.Component {
   componentDidMount() {
-    const { player } = this.props.player
-    this.props.load(player)
+    const pid = this.props.playerMap.get('player') // TODO pid
+    this.props.load(pid)
   }
 
   render = () => {
-    const { player } = this.props
+    const { playerMap } = this.props
 
+    const pid = playerMap.get('player') // TODO pid
+    const pos = playerMap.get('pos')
     const tables = []
-    const weeks = groupBy(player.projections.toJS(), 'week')
-    for (const wk in weeks) {
-      const week = parseInt(wk, 0)
+    const projs = playerMap.get('projections', new List()).toJS()
+    const weeks = projs.map((p) => parseInt(p.week, 10))
+    for (const wk of weeks) {
       tables.push(
         <SelectedPlayerProjection
           key={wk}
-          week={week}
-          projections={weeks[wk]}
-          playerId={player.player}
-          pos={player.pos}
-          projection={player.getIn(['projection', wk])}
+          week={wk}
+          projections={playerMap.getIn(['projections', wk])}
+          playerId={pid}
+          pos={pos}
+          projection={playerMap.getIn(['projection', wk])}
         />
       )
     }
@@ -35,6 +37,6 @@ export default class SelectedPlayerSeasonProjections extends React.Component {
 }
 
 SelectedPlayerSeasonProjections.propTypes = {
-  player: ImmutablePropTypes.record,
+  playerMap: ImmutablePropTypes.map,
   load: PropTypes.func
 }

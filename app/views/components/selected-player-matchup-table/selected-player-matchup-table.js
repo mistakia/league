@@ -10,7 +10,7 @@ export default class SelectedPlayerMatchupTable extends React.Component {
   render = () => {
     const {
       gamelogs,
-      player,
+      position,
       opp,
       defenseStats,
       defensePercentiles,
@@ -42,7 +42,7 @@ export default class SelectedPlayerMatchupTable extends React.Component {
           key={item.title}
           stats={item.stats}
           lead={lead}
-          pos={player.pos}
+          pos={position}
           percentiles={percentiles}
           header
         />
@@ -50,6 +50,7 @@ export default class SelectedPlayerMatchupTable extends React.Component {
     }
 
     for (const [index, gamelog] of gamelogs.entrySeq()) {
+      // TODO pid
       const lead = (
         <div className='row__group'>
           <div className='row__group-body'>
@@ -69,7 +70,7 @@ export default class SelectedPlayerMatchupTable extends React.Component {
           key={index}
           stats={gamelog}
           lead={lead}
-          pos={player.pos}
+          pos={position}
           percentiles={playerPercentiles}
         />
       )
@@ -79,7 +80,7 @@ export default class SelectedPlayerMatchupTable extends React.Component {
       <>
         <div className='selected__section-header'>
           <div className='row__group-head'>
-            {player.pos}s vs {opp} Gamelogs
+            {position}s vs {opp} Gamelogs
           </div>
         </div>
         <div className='selected__section-header'>
@@ -91,7 +92,7 @@ export default class SelectedPlayerMatchupTable extends React.Component {
               <div className='table__cell metric'>Pts</div>
             </div>
           </div>
-          <PlayerSelectedRowHeader pos={player.pos} />
+          <PlayerSelectedRowHeader pos={position} />
         </div>
         {rows}
       </>
@@ -101,7 +102,7 @@ export default class SelectedPlayerMatchupTable extends React.Component {
 
 SelectedPlayerMatchupTable.propTypes = {
   gamelogs: ImmutablePropTypes.list,
-  player: ImmutablePropTypes.record,
+  position: PropTypes.string,
   opp: PropTypes.string,
   defenseStats: PropTypes.array,
   defensePercentiles: PropTypes.object,

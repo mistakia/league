@@ -8,7 +8,7 @@ import SelectedPlayerMatchup from './selected-player-matchup'
 const mapStateToProps = createSelector(
   getSelectedPlayer,
   getSelectedPlayerGames,
-  (player, games) => ({ player, games })
+  (playerMap, games) => ({ team: playerMap.get('team'), games })
 )
 
 export default connect(mapStateToProps)(SelectedPlayerMatchup)

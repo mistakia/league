@@ -20,12 +20,13 @@ export default class PoachConfirmation extends React.Component {
     super(props)
 
     const releases = []
-    const { league, player, poach } = props
-    for (const rPlayer of props.team.active) {
+    const { league, playerMap, poach } = props
+    const pos = playerMap.get('pos')
+    for (const activePlayerMap of props.team.active) {
       const r = new Roster({ roster: props.roster.toJS(), league })
-      r.removePlayer(rPlayer.player)
-      if (r.hasOpenBenchSlot(player.pos)) {
-        releases.push(rPlayer)
+      r.removePlayer(activePlayerMap.get('player'))
+      if (r.hasOpenBenchSlot(pos)) {
+        releases.push(activePlayerMap)
       }
     }
 
@@ -40,21 +41,21 @@ export default class PoachConfirmation extends React.Component {
   }
 
   isPoachValid = (release) => {
-    const { roster, league, player } = this.props
+    const { roster, league, playerMap } = this.props
     const r = new Roster({ roster: roster.toJS(), league })
-    for (const player of release) {
-      r.removePlayer(player)
+    for (const pid of release) {
+      r.removePlayer(pid)
     }
 
     // TODO - valid salary during offseason
 
-    return r.hasOpenBenchSlot(player.pos)
+    return r.hasOpenBenchSlot(playerMap.get('pos'))
   }
 
   handleRelease = (event, value) => {
-    const playerIds = value.map((p) => p.id)
-    const isValid = this.isPoachValid(playerIds)
-    this.setState({ release: playerIds, error: !isValid })
+    const pids = value.map((p) => p.id)
+    const isValid = this.isPoachValid(pids)
+    this.setState({ release: pids, error: !isValid })
   }
 
   handleSubmit = () => {
@@ -62,44 +63,44 @@ export default class PoachConfirmation extends React.Component {
       return
     }
 
-    const { poach, player } = this.props
+    const { poach, playerMap } = this.props
     const { release } = this.state
 
     if (this.props.status.waiver.poach) {
       this.props.submitWaiverClaim({
         release,
-        player: player.player,
+        player: playerMap.get('player'), // TODO pid
         type: constants.waivers.POACH
       })
     } else if (poach.uid) {
       this.props.updatePoach({ poachId: poach.uid, release })
     } else {
-      this.props.submitPoach({ release, player: player.player })
+      this.props.submitPoach({ release, player: playerMap.get('player') })
     }
     this.props.onClose()
   }
 
   render = () => {
-    const { rosterInfo, status, player, team, league } = this.props
+    const { rosterInfo, status, playerMap, team, league } = this.props
 
     const options = []
-    team.active.forEach((player) => {
-      const { pos, team, pname, value, name, tag, bid } = player
-      const extensions = player.get('extensions', 0)
+    team.active.forEach((activePlayerMap) => {
+      const pos = activePlayerMap.get('pos')
+      const extensions = playerMap.get('extensions', 0)
       const salary = getExtensionAmount({
         pos,
-        tag,
+        tag: activePlayerMap.get('tag'),
         extensions,
         league,
-        value,
-        bid
+        value: activePlayerMap.get('value'),
+        bid: activePlayerMap.get('bid')
       })
       options.push({
-        id: player.player,
-        label: name,
+        id: activePlayerMap.get('player'), // TODO pid
+        label: activePlayerMap.get('name'),
         pos,
-        team,
-        pname,
+        team: activePlayerMap.get('team'),
+        pname: activePlayerMap.get('pname'),
         value: salary
       })
     })
@@ -137,16 +138,15 @@ export default class PoachConfirmation extends React.Component {
     const releasePlayerPool = this.props.team.players.concat(
       this.props.releasePlayers
     )
-    this.state.release.forEach((playerId) => {
-      const player = releasePlayerPool.find((p) => p.player === playerId)
-      const { pos, team, pname, value, name } = player
+    this.state.release.forEach((pid) => {
+      const releasePlayerMap = releasePlayerPool.find((p) => p.player === pid)
       releasePlayers.push({
-        id: player.player,
-        label: name,
-        pos,
-        team,
-        pname,
-        value
+        id: releasePlayerMap.get('player'), // TODO pid
+        label: releasePlayerMap.get('name'),
+        pos: releasePlayerMap.get('pos'),
+        team: releasePlayerMap.get('team'),
+        pname: releasePlayerMap.get('pname'),
+        value: releasePlayerMap.get('value')
       })
     })
 
@@ -157,9 +157,9 @@ export default class PoachConfirmation extends React.Component {
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {`Poach ${player.name} (${
-              player.pos
-            }). If your claim is successful, he will be added to your active roster with a salary of $${
+            {`Poach ${playerMap.get('name')} (${playerMap.get(
+              'pos'
+            )}). If your claim is successful, he will be added to your active roster with a salary of $${
               rosterInfo.value + 2
             } and will not be eligible for the practice squad.`}
           </DialogContentText>
@@ -207,7 +207,7 @@ PoachConfirmation.propTypes = {
   submitWaiverClaim: PropTypes.func,
   submitPoach: PropTypes.func,
   updatePoach: PropTypes.func,
-  player: ImmutablePropTypes.record,
+  playerMap: ImmutablePropTypes.map,
   team: PropTypes.object,
   roster: ImmutablePropTypes.record,
   onClose: PropTypes.func,

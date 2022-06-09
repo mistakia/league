@@ -24,17 +24,21 @@ export default class FranchiseConfirmation extends React.Component {
       missingUntag: false
     }
 
-    const { team, player } = props
+    const { team, playerMap } = props
+    // TODO - pid
     this._isEligible = team.roster.isEligibleForTag({
       tag: constants.tags.FRANCHISE,
-      player: player.player
+      player: playerMap.get('player')
     })
     this._untags = []
-    const taggedPlayers = team.roster.getPlayersByTag(constants.tags.FRANCHISE)
-    const taggedPlayerIds = taggedPlayers.map((p) => p.player)
-    for (const playerId of taggedPlayerIds) {
-      const player = team.players.find((p) => p.player === playerId)
-      this._untags.push(player)
+    const tagged_players = team.roster.getPlayersByTag(constants.tags.FRANCHISE)
+    // TODO - pid
+    const tagged_pids = tagged_players.map((p) => p.player)
+    for (const pid of tagged_pids) {
+      const playerMap = team.players.find(
+        (playerMap) => playerMap.get('player') === pid
+      )
+      this._untags.push(playerMap)
     }
   }
 
@@ -45,7 +49,8 @@ export default class FranchiseConfirmation extends React.Component {
 
   handleSubmit = () => {
     const { untag, error } = this.state
-    const { player } = this.props.player
+    // TODO pid
+    const player = this.props.playerMap.get('player')
 
     if (!this._isEligible && !untag) {
       return this.setState({ missingUntag: true })
@@ -60,13 +65,14 @@ export default class FranchiseConfirmation extends React.Component {
   }
 
   render = () => {
-    const { player } = this.props
+    const { playerMap } = this.props
 
     const menuItems = []
-    for (const rPlayer of this._untags) {
+    for (const rPlayerMap of this._untags) {
+      const pid = rPlayerMap.get('player')
       menuItems.push(
-        <MenuItem key={rPlayer.player} value={rPlayer.player}>
-          {rPlayer.name} ({rPlayer.pos})
+        <MenuItem key={pid} value={pid}>
+          {rPlayerMap.get('name')} ({rPlayerMap.get('pos')})
         </MenuItem>
       )
     }
@@ -76,7 +82,9 @@ export default class FranchiseConfirmation extends React.Component {
         <DialogTitle>Franchise Tag</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {`Apply Franchise Tag to ${player.name} (${player.pos})`}
+            {`Apply Franchise Tag to ${playerMap.get('name')} (${playerMap.get(
+              'pos'
+            )})`}
           </DialogContentText>
           <div className='waiver__claim-inputs'>
             {!this._isEligible && (
@@ -114,6 +122,6 @@ FranchiseConfirmation.propTypes = {
   league: PropTypes.object,
   add: PropTypes.func,
   status: PropTypes.object,
-  player: ImmutablePropTypes.record,
+  playerMap: ImmutablePropTypes.map,
   waiver: PropTypes.object
 }

@@ -8,31 +8,31 @@ import './trade-player.styl'
 
 export default class TradePlayer extends React.Component {
   render = () => {
-    const { player } = this.props
+    const { playerMap } = this.props
     const vorpType = constants.season.isOffseason ? '0' : 'ros'
     return (
       <div className='trade__player'>
         <div className='trade__player-name'>
-          <PlayerNameExpanded playerId={player.player} hideActions />
+          <PlayerNameExpanded playerId={playerMap.get('player')} hideActions />
         </div>
         <div className='trade__player-metric metric'>
-          <label>Sal</label>${player.getIn(['value'], 0)}
+          <label>Sal</label>${playerMap.getIn(['value'], 0)}
         </div>
         <div className='trade__player-metric metric'>
           <label>Val</label>
-          {player.getIn(['vorp', vorpType], 0).toFixed(1)}
+          {playerMap.getIn(['vorp', vorpType], 0).toFixed(1)}
         </div>
         <div className='trade__player-metric metric'>
           <label>aVal</label>
-          {player.getIn(['vorp_adj', vorpType], 0).toFixed(1)}
+          {playerMap.getIn(['vorp_adj', vorpType], 0).toFixed(1)}
         </div>
         <div className='trade__player-metric metric'>
           <label>Pts+</label>
-          {player.getIn(['lineups', 'sp'], 0).toFixed(1)}
+          {playerMap.getIn(['lineups', 'sp'], 0).toFixed(1)}
         </div>
         <div className='trade__player-metric metric'>
           <label>Be+</label>
-          {player.getIn(['lineups', 'bp'], 0).toFixed(1)}
+          {playerMap.getIn(['lineups', 'bp'], 0).toFixed(1)}
         </div>
       </div>
     )
@@ -40,5 +40,5 @@ export default class TradePlayer extends React.Component {
 }
 
 TradePlayer.propTypes = {
-  player: ImmutablePropTypes.record
+  playerMap: ImmutablePropTypes.map
 }

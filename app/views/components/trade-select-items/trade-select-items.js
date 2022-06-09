@@ -36,8 +36,13 @@ export default class TradeSelectItems extends React.Component {
     } = this.props
 
     const options = []
-    players.forEach((player) => {
-      options.push({ id: player.player, label: player.name, type: 'player' })
+    players.forEach((playerMap) => {
+      // TODO pid
+      options.push({
+        id: playerMap.get('player'),
+        label: playerMap.get('name'),
+        type: 'player'
+      })
     })
     picks.forEach((pick) => {
       options.push({
@@ -48,8 +53,13 @@ export default class TradeSelectItems extends React.Component {
     })
 
     const value = []
-    selectedPlayers.forEach((player) => {
-      value.push({ id: player.player, label: player.name, type: 'player' })
+    selectedPlayers.forEach((playerMap) => {
+      // TODO pid
+      value.push({
+        id: playerMap.get('player'),
+        label: playerMap.get('name'),
+        type: 'player'
+      })
     })
     selectedPicks.forEach((pick) => {
       value.push({
@@ -63,6 +73,7 @@ export default class TradeSelectItems extends React.Component {
       if (option.type === 'pick') {
         return <TradeSelectPick pickId={option.id} />
       } else {
+        // TODO pid
         return <TradeSelectPlayer playerId={option.id} />
       }
     }

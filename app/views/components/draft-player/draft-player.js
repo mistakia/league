@@ -9,39 +9,41 @@ import './draft-player.styl'
 
 export default class DraftPlayer extends React.Component {
   handleClick = () => {
-    this.props.select(this.props.player.player)
+    this.props.select(this.props.playerMap.get('player'))
   }
 
   render = () => {
-    const { player, selected, isDrafted, index, watchlist, style } = this.props
+    const { playerMap, selected, isDrafted, index, watchlist, style } =
+      this.props
 
+    const pid = playerMap.get('player') // TODO pid
     const classNames = ['player-draft__item']
-    if (selected === player.player) {
+    if (selected === pid) {
       classNames.push('selected')
     }
 
     if (isDrafted) {
       classNames.push('drafted')
-    } else if (watchlist.has(player.player)) {
+    } else if (watchlist.has(pid)) {
       classNames.push('watchlist')
     }
 
-    const value = player.getIn(['market_salary', '0'])
+    const value = playerMap.getIn(['market_salary', '0'])
 
     return (
       <div style={style}>
         <div className={classNames.join(' ')} onClick={this.handleClick}>
           <div className='player-draft__item-action'>
-            <PlayerWatchlistAction playerId={player.player} />
+            <PlayerWatchlistAction playerId={pid} />
           </div>
           <div className='player-draft__item-index'>{index + 1}.</div>
           <div className='player-draft__item-name'>
-            <span>{player.pname}</span>
-            <Team team={player.team} />
+            <span>{playerMap.get('pname')}</span>
+            <Team team={playerMap.get('team')} />
           </div>
           <div className='player-draft__item-metric'>
             {value
-              ? `$${Math.round(player.getIn(['market_salary', '0']))}`
+              ? `$${Math.round(playerMap.getIn(['market_salary', '0']))}`
               : null}
           </div>
         </div>
@@ -52,7 +54,7 @@ export default class DraftPlayer extends React.Component {
 
 DraftPlayer.propTypes = {
   select: PropTypes.func,
-  player: ImmutablePropTypes.record,
+  playerMap: ImmutablePropTypes.map,
   selected: PropTypes.string,
   isDrafted: PropTypes.bool,
   index: PropTypes.number,

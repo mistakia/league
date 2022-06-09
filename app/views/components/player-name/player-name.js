@@ -15,40 +15,40 @@ import './player-name.styl'
 
 export default class PlayerName extends React.Component {
   handleClick = () => {
-    this.props.select(this.props.player.player)
+    this.props.select(this.props.playerMap.get('player'))
   }
 
   render = () => {
-    const { player, isOnCutlist, headshot } = this.props
+    const { playerMap, isOnCutlist, headshot } = this.props
 
     return (
       <>
         <div className='player__name cursor' onClick={this.handleClick}>
           <div className='player__name-position'>
-            <Position pos={player.pos} />
+            <Position pos={playerMap.get('pos')} />
           </div>
           {Boolean(headshot) && (
             <div className='player__name-headshot'>
-              <PlayerHeadshot player={player} width={32} />
+              <PlayerHeadshot playerMap={playerMap} width={32} />
             </div>
           )}
           <div className='player__name-main'>
-            <span>{player.pname}</span>
-            {constants.season.year === player.draft_year && (
+            <span>{playerMap.get('pname')}</span>
+            {constants.season.year === playerMap.get('draft_year') && (
               <PlayerLabel label='R' type='rookie' description='Rookie' />
             )}
-            <Team team={player.team} />
+            <Team team={playerMap.get('team')} />
           </div>
         </div>
         <div className='player__name-label'>
-          {player.slot === constants.slots.PSP && (
+          {playerMap.get('slot') === constants.slots.PSP && (
             <PlayerLabel label='P' description='Protected Practice Squad' />
           )}
           {isOnCutlist && (
             <PlayerLabel label={<NotInterestedIcon />} description='Cutlist' />
           )}
-          <PlayerStatus player={player} />
-          <PlayerTag tag={player.tag} />
+          <PlayerStatus playerMap={playerMap} />
+          <PlayerTag tag={playerMap.get('tag')} />
         </div>
       </>
     )
@@ -56,7 +56,7 @@ export default class PlayerName extends React.Component {
 }
 
 PlayerName.propTypes = {
-  player: ImmutablePropTypes.record,
+  playerMap: ImmutablePropTypes.map,
   headshot: PropTypes.bool,
   select: PropTypes.func,
   isOnCutlist: PropTypes.bool

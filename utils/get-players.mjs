@@ -141,24 +141,24 @@ export default async function ({ textSearch, leagueId, playerIds = [] }) {
       market_salary
   }
 
-  const projections = await db('projections')
-    .where('sourceid', constants.sources.AVERAGE)
-    .where('year', constants.season.year)
-    .where('week', '>=', constants.season.week)
-    .whereIn('player', returnedPlayerIds)
+  /* const projections = await db('projections')
+   *   .where('sourceid', constants.sources.AVERAGE)
+   *   .where('year', constants.season.year)
+   *   .where('week', '>=', constants.season.week)
+   *   .whereIn('player', returnedPlayerIds)
 
-  const rosProjections = await db('ros_projections')
-    .where('sourceid', constants.sources.AVERAGE)
-    .where('year', constants.season.year)
-    .whereIn('player', returnedPlayerIds)
+   * const rosProjections = await db('ros_projections')
+   *   .where('sourceid', constants.sources.AVERAGE)
+   *   .where('year', constants.season.year)
+   *   .whereIn('player', returnedPlayerIds)
 
-  for (const projection of projections) {
-    playerMap[projection.player].projection[projection.week] = projection
-  }
+   * for (const projection of projections) {
+   *   playerMap[projection.player].projection[projection.week] = projection
+   * }
 
-  for (const rosProjection of rosProjections) {
-    playerMap[rosProjection.player].projection.ros = rosProjection
-  }
-
+   * for (const rosProjection of rosProjections) {
+   *   playerMap[rosProjection.player].projection.ros = rosProjection
+   * }
+   */
   return Object.values(playerMap)
 }

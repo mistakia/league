@@ -24,11 +24,15 @@ class DraftPage extends React.Component {
   }
 
   handleDraft = () => {
-    const player = this.props.selectedPlayer
+    const playerMap = this.props.selectedPlayer
     const { nextPick, draftPlayer } = this.props
     this.props.showConfirmation({
       title: 'Draft Selection',
-      description: `Select ${player.fname} ${player.lname} (${player.pos}) with the #${nextPick.pick} pick in the ${constants.season.year} draft.`,
+      description: `Select ${playerMap.get('fname')} ${playerMap.get(
+        'lname'
+      )} (${playerMap.get('pos')}) with the #${nextPick.pick} pick in the ${
+        constants.season.year
+      } draft.`,
       onConfirm: draftPlayer
     })
   }

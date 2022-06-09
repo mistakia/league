@@ -15,7 +15,7 @@ export default class SettingsTeamsTeamPlayer extends React.Component {
         'Player will be removed from roster and any related transactions',
       onConfirm: () =>
         this.props.remove({
-          player: this.props.playerId,
+          player: this.props.playerId, // TODO - pid
           teamId: this.props.teamId
         })
     })
@@ -23,6 +23,7 @@ export default class SettingsTeamsTeamPlayer extends React.Component {
 
   render = () => {
     // TODO edit value
+    // TODO pid
     return (
       <div className='settings__teams-team-player'>
         <div className='settings__teams-team-player-value'>

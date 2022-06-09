@@ -24,17 +24,19 @@ export default class ActivateConfirmation extends React.Component {
       missing: false
     }
 
-    const { team, player } = props
-    this._hasBenchSpace = team.roster.hasOpenBenchSlot(player.pos)
+    const { team, playerMap } = props
+    this._hasBenchSpace = team.roster.hasOpenBenchSlot(playerMap.get('pos'))
     this._reserveEligible = []
     this._activePlayers = []
 
-    const activePlayerIds = team.roster.active.map((p) => p.player)
-    for (const playerId of activePlayerIds) {
-      const player = team.players.find((p) => p.player === playerId)
-      this._activePlayers.push(player)
-      if (isReserveEligible(player)) {
-        this._reserveEligible.push(player)
+    const active_pids = team.roster.active.map((p) => p.player) // TODO pid
+    for (const pid of active_pids) {
+      const activePlayerMap = team.players.find(
+        (playerMap) => playerMap.get('player') === pid
+      )
+      this._activePlayers.push(activePlayerMap)
+      if (isReserveEligible(activePlayerMap.toJS())) {
+        this._reserveEligible.push(activePlayerMap)
       }
     }
   }
@@ -51,7 +53,7 @@ export default class ActivateConfirmation extends React.Component {
 
   handleSubmit = () => {
     const { reserve, release } = this.state
-    const { player } = this.props.player
+    const pid = this.props.playerMap.get('player') // TODO pid
 
     if (!this._hasBenchSpace && !reserve && !release) {
       return this.setState({ missing: true })
@@ -59,32 +61,39 @@ export default class ActivateConfirmation extends React.Component {
       this.setState({ missing: false })
     }
 
-    this.props.activate({ player, reserve, release, slot: constants.slots.IR })
+    this.props.activate({
+      player: pid,
+      reserve,
+      release,
+      slot: constants.slots.IR
+    })
     this.props.onClose()
   }
 
   render = () => {
-    const { player } = this.props
+    const { playerMap } = this.props
 
     const reserveItems = []
-    for (const rPlayer of this._reserveEligible) {
+    for (const reservePlayerMap of this._reserveEligible) {
+      const pid = reservePlayerMap.get('player')
       reserveItems.push(
-        <MenuItem key={rPlayer.player} value={rPlayer.player}>
-          {rPlayer.name} ({rPlayer.pos})
+        <MenuItem key={pid} value={pid}>
+          {reservePlayerMap.get('name')} ({reservePlayerMap.get('pos')})
         </MenuItem>
       )
     }
 
     const releaseItems = []
-    for (const rPlayer of this._activePlayers) {
+    for (const activePlayerMap of this._activePlayers) {
+      const pid = activePlayerMap.get('player') // TODO pid
       releaseItems.push(
-        <MenuItem key={rPlayer.player} value={rPlayer.player}>
-          {rPlayer.name} ({rPlayer.pos})
+        <MenuItem key={pid} value={pid}>
+          {activePlayerMap.get('name')} ({activePlayerMap.get('pos')})
         </MenuItem>
       )
     }
 
-    const isReservePlayer = player.slot === constants.slots.IR
+    const isReservePlayer = playerMap.get('slot') === constants.slots.IR
     let noBenchSpaceMessage =
       'No active roster space available, make room by releasing a player'
     if (isReservePlayer)
@@ -96,7 +105,11 @@ export default class ActivateConfirmation extends React.Component {
         <DialogTitle>Activate Player</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {`${player.fname} ${player.lname} (${player.pos}) will be placed on the active roster. If the player was not previously activated, activating them will make them ineligible for the practice squad.`}
+            {`${playerMap.get('fname')} ${playerMap.get(
+              'lname'
+            )} (${playerMap.get(
+              'pos'
+            )}) will be placed on the active roster. If the player was not previously activated, activating them will make them ineligible for the practice squad.`}
           </DialogContentText>
           {!this._hasBenchSpace && (
             <DialogContentText>{noBenchSpaceMessage}</DialogContentText>
@@ -152,6 +165,6 @@ export default class ActivateConfirmation extends React.Component {
 ActivateConfirmation.propTypes = {
   onClose: PropTypes.func,
   activate: PropTypes.func,
-  player: ImmutablePropTypes.record,
+  playerMap: ImmutablePropTypes.map,
   team: PropTypes.object
 }

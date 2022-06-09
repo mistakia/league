@@ -346,11 +346,11 @@ export function isPlayerReserveEligible(state, { player }) {
     cov: false
   }
 
-  if (isReserveEligible(player)) {
+  if (isReserveEligible(player.toJS())) {
     reserve.ir = true
   }
 
-  if (isReserveCovEligible(player)) {
+  if (isReserveCovEligible(player.toJS())) {
     reserve.cov = true
   }
 
