@@ -16,9 +16,9 @@ import jwt from 'jsonwebtoken'
 import { expressjwt } from 'express-jwt'
 import slowDown from 'express-slow-down'
 import favicon from 'serve-favicon'
-import NodeCache from 'node-cache'
 
 import config from '#config'
+import cache from './cache.mjs'
 import routes from './routes/index.mjs'
 import db from '#db'
 import sockets from './sockets/index.mjs'
@@ -33,7 +33,7 @@ const api = express()
 api.locals.db = db
 api.locals.config = config
 api.locals.logger = logger
-api.locals.cache = new NodeCache()
+api.locals.cache = cache
 
 api.enable('etag')
 api.disable('x-powered-by')

@@ -1,33 +1,62 @@
 import express from 'express'
+import cron from 'node-cron'
 
 import { constants } from '#common'
-import { getPlayers } from '#utils'
+import cache from '#api/cache.mjs'
+import { getPlayers, updatePlayersWithTransitionBids } from '#utils'
 
 const router = express.Router()
+
+const leagueIds = [0, 1]
+const loadPlayers = async () => {
+  for (const leagueId of leagueIds) {
+    const players = await getPlayers({ leagueId })
+    const cacheKey = `/players/${leagueId}`
+    cache.set(cacheKey, players, 1800) // 30 mins
+  }
+}
+
+loadPlayers()
+
+cron.schedule('*/5 * * * *', loadPlayers)
 
 router.get('/?', async (req, res) => {
   const { logger } = req.app.locals
   try {
     const search = req.query.q
     const { leagueId } = req.query
+    const userId = req.auth ? req.auth.userId : null
 
-    /* const cacheKey = `/players/${leagueId || 0}`
-     * if (!search) {
-     *   const cacheValue = cache.get(cacheKey)
-     *   if (cacheValue) {
-     *     return res.send(cacheValue)
-     *   }
-     * }
-     */
+    const cacheKey = `/players/${leagueId || 0}`
+    if (!search) {
+      const cacheValue = cache.get(cacheKey)
+      if (cacheValue) {
+        logger('USING CACHE')
+        if (userId) {
+          updatePlayersWithTransitionBids({
+            players: cacheValue,
+            userId,
+            leagueId
+          })
+        }
+
+        return res.send(cacheValue)
+      }
+    }
+
     const players = await getPlayers({
       leagueId,
-      userId: req.auth ? req.auth.userId : null,
       textSearch: search
     })
 
-    /* if (!search) {
-     *   cache.set(cacheKey, players, 14400) // 4 hours
-     * } */
+    if (!search) {
+      cache.set(cacheKey, players, 1800) // 30 mins
+    }
+
+    if (userId) {
+      updatePlayersWithTransitionBids({ players, userId, leagueId })
+    }
+
     res.send(players)
   } catch (error) {
     logger(error)
