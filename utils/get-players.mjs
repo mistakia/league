@@ -2,12 +2,7 @@ import db from '#db'
 import { constants } from '#common'
 import getPlayerTransactions from './get-player-transactions.mjs'
 
-export default async function ({
-  textSearch,
-  userId,
-  leagueId,
-  playerIds = []
-}) {
+export default async function ({ textSearch, leagueId, playerIds = [] }) {
   const leaguePlayerIds = []
   const baselinePlayerIds = []
 
@@ -116,31 +111,6 @@ export default async function ({
     for (const tran of playerTransactions) {
       const player = data.find((p) => p.player === tran.player)
       player.value = tran.value
-    }
-
-    // include player restricted free agency bid
-    if (userId) {
-      const query1 = await db('teams')
-        .select('teams.*')
-        .join('users_teams', 'teams.uid', 'users_teams.tid')
-        .where('users_teams.userid', userId)
-        .where('teams.lid', leagueId)
-
-      if (query1.length) {
-        const tid = query1[0].uid
-        const bids = await db('transition_bids')
-          .where('tid', tid)
-          .where('year', constants.season.year)
-          .whereNull('cancelled')
-          .whereNull('processed')
-
-        if (bids.length) {
-          for (const player of data) {
-            const { bid } = bids.find((b) => b.player === player.player) || {}
-            player.bid = bid
-          }
-        }
-      }
     }
   }
 
