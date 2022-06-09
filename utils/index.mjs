@@ -45,6 +45,7 @@ export { default as getToken } from './get-token.mjs'
 export { default as createPlayer } from './create-player.mjs'
 export * as espn from './espn.mjs'
 export * as sportradar from './sportradar.mjs'
+export { default as updatePlayersWithTransitionBids } from './update-players-with-transition-bids.mjs'
 
 export const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 

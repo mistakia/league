@@ -8610,6 +8610,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"node-cron@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "node-cron@npm:3.0.1"
+  checksum: 98636a3d4373d48b5c7f5b922c93d22ca81a4bd38284f264812c7b88f06c995eb9ccde34ee2753cbec9bf5b77bd220c817c18ca82de504e3e324df9af6983b5d
+  languageName: node
+  linkType: hard
+
 "node-domexception@npm:^1.0.0":
   version: 1.0.0
   resolution: "node-domexception@npm:1.0.0"
@@ -10831,6 +10838,7 @@ __metadata:
     mysql2: ^2.3.3
     nib: ^1.1.2
     node-cache: ^5.1.2
+    node-cron: ^3.0.1
     node-fetch: ^3.2.4
     normalize.css: ^8.0.1
     oddslib: ^2.1.0
