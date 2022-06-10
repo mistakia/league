@@ -31,7 +31,6 @@ import Worker from 'workerize-loader?inline!../worker' // eslint-disable-line im
 export function* optimize() {
   const league = yield select(getCurrentLeague)
   const watchlist = yield select(getPlayersForWatchlist)
-  const players = yield select(getAllPlayers)
 
   // make sure player values have been calculated
   const pState = yield select(getPlayers)
@@ -40,16 +39,13 @@ export function* optimize() {
     return
   }
 
-  const rosteredPlayerIds = yield select(getRosteredPlayerIdsForCurrentLeague)
-  const availablePlayers = players.filter(
-    (p) => !rosteredPlayerIds.includes(p.player)
-  )
-  const sortedPlayers = availablePlayers.sort(
-    (a, b) => b.points.total - a.points.total
-  )
+  const rostered_pids = yield select(getRosteredPlayerIdsForCurrentLeague)
   const sortedWatchlist = watchlist
-    .filter((p) => !rosteredPlayerIds.includes(p.player))
-    .sort((a, b) => b.points.total - a.points.total)
+    .filter((pMap) => !rostered_pids.includes(pMap.get('pid')))
+    .sort(
+      (a, b) =>
+        b.getIn(['points', 'total'], 0) - a.getIn(['points', 'total'], 0)
+    )
   const currentPlayers = yield select(getCurrentPlayers)
 
   const defaultLimit = {
@@ -62,15 +58,22 @@ export function* optimize() {
     }
   }
 
+  const formatAuctionPlayer = (playerMap) => ({
+    pid: playerMap.get('pid'),
+    pos: playerMap.get('pos'),
+    market_salary: playerMap.getIn(['market_salary', '0'], 0),
+    points: playerMap.getIn(['points', '0', 'total'], 0)
+  })
+
   // optimze lineup using current players and watchlist
   const worker = new Worker()
   let result = yield call(worker.optimizeAuctionLineup, {
     limits: defaultLimit,
-    players: sortedWatchlist.valueSeq().toJS(),
-    active: currentPlayers.active.toJS(),
+    players: sortedWatchlist.map(formatAuctionPlayer).toJS(),
+    active: currentPlayers.active.map(formatAuctionPlayer).toJS(),
     league
   })
-  let starterPlayerIds = Object.keys(result).filter(
+  let starter_pids = Object.keys(result).filter(
     (r) => r.match(/^([A-Z]{2,})-([0-9]{4,})$/gi) || r.match(/^([A-Z]{1,3})$/gi)
   )
 
@@ -88,28 +91,36 @@ export function* optimize() {
     .reduce((a, b) => a + b)
 
   // if lineup incomplete, optimize with available players
-  if (starterPlayerIds.length < starterLimit) {
+  if (starter_pids.length < starterLimit) {
     const limits = {
       ...defaultLimit
     }
-    for (const player of starterPlayerIds) {
-      limits[player] = { min: 1 }
+    for (const pid of starter_pids) {
+      limits[pid] = { min: 1 }
     }
+
+    const playerMaps = yield select(getAllPlayers)
+    const availablePlayers = playerMaps
+      .filter((pMap) => !rostered_pids.includes(pMap.get('pid')))
+      .sort(
+        (a, b) =>
+          b.getIn(['points', 'total'], 0) - a.getIn(['points', 'total'], 0)
+      )
 
     result = yield call(worker.optimizeLineup, {
       limits,
-      players: sortedPlayers.valueSeq().toJS(),
-      active: currentPlayers.active.toJS(),
+      players: availablePlayers.map(formatAuctionPlayer).toJS(),
+      active: currentPlayers.active.map(formatAuctionPlayer).toJS(),
       league
     })
   }
   worker.terminate()
-  starterPlayerIds = Object.keys(result).filter(
+  starter_pids = Object.keys(result).filter(
     (r) => r.match(/^([A-Z]{2,})-([0-9]{4,})$/gi) || r.match(/^([A-Z]{1,3})$/gi)
   )
   yield put(
     auctionActions.setOptimalLineup({
-      players: starterPlayerIds,
+      pids: starter_pids,
       ...result
     })
   )

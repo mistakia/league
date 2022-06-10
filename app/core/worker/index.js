@@ -103,8 +103,6 @@ export function calculatePlayerValues(payload) {
   return { baselines: baselinesByWeek, players }
 }
 
-const average = (data) => data.reduce((sum, value) => sum + value) / data.length
-
 function rollup(group) {
   const stats = {
     total: [],
@@ -219,8 +217,7 @@ export function optimizeAuctionLineup({
   limits = {},
   players,
   league,
-  active = [],
-  valueType = '0'
+  active = []
 }) {
   const variables = {}
   const ints = {}
@@ -238,27 +235,25 @@ export function optimizeAuctionLineup({
   }
 
   const addPlayer = ({ player, freeAgent }) => {
-    variables[player.player] = {
-      points: Math.round(player.points[valueType].total || 0),
+    variables[player.pid] = {
+      points: Math.round(player.points || 0),
       starter: 1
     }
-    variables[player.player][player.player] = 1
+    variables[player.pid][player.pid] = 1
     // variables[player.player][player.pos] = 1
-    if (constraints[player.player]) {
-      constraints[player.player].max = 1
+    if (constraints[player.pid]) {
+      constraints[player.pid].max = 1
     } else {
-      constraints[player.player] = { max: 1 }
+      constraints[player.pid] = { max: 1 }
     }
-    ints[player.player] = 1
+    ints[player.pid] = 1
     for (const pos of constants.positions) {
-      variables[player.player][pos] = player.pos === pos ? 1 : 0
+      variables[player.pid][pos] = player.pos === pos ? 1 : 0
     }
 
     if (freeAgent) {
-      variables[player.player].fa = 1
-      variables[player.player].value = Math.round(
-        player.market_salary[valueType] || 0
-      )
+      variables[player.pid].fa = 1
+      variables[player.pid].value = Math.round(player.market_salary || 0)
     }
   }
 

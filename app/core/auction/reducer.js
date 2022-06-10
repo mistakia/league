@@ -134,7 +134,7 @@ export function auctionReducer(state = initialState(), { payload, type }) {
 
     case auctionActions.SET_OPTIMAL_LINEUP:
       return state.merge({
-        lineupPlayers: new List(payload.feasible ? payload.players : []),
+        lineupPlayers: new List(payload.feasible ? payload.pids : []),
         lineupPoints: payload.result,
         lineupFeasible: payload.feasible
       })
