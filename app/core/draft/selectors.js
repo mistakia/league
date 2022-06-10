@@ -1,4 +1,5 @@
 import dayjs from 'dayjs'
+import { Map } from 'immutable'
 
 import { getCurrentLeague } from '@core/leagues'
 import { getPlayerById } from '@core/players'
@@ -31,8 +32,12 @@ export function getSelectedDraftPlayer(state) {
   return getPlayerById(state, { playerId: draft.selected })
 }
 
-export function isDrafted(state, { playerId, player }) {
-  const id = playerId || player.player
+export function isDrafted(state, { playerId, playerMap = new Map() }) {
+  const id = playerId || playerMap.get('player') // TODO pid
+  if (!id) {
+    return false
+  }
+
   const { drafted } = state.get('draft')
   return drafted.includes(id)
 }
