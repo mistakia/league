@@ -10,43 +10,54 @@ import './player-slot.styl'
 
 export default class PlayerSlot extends React.Component {
   render() {
-    const { player, slot, handleSelect, selected, handleUpdate, isLocked } =
-      this.props
+    const {
+      playerMap,
+      slot,
+      handleSelect,
+      selectedPlayerMap,
+      handleUpdate,
+      isLocked
+    } = this.props
 
     const slotPositions = Object.keys(constants.slots).find(
       (key) => constants.slots[key] === slot
     )
     const slotName = constants.slotName[slot]
+    const pid = playerMap.get('player')
+    const selectedPid = selectedPlayerMap.get('player')
 
     let action
     if (constants.season.week > constants.season.finalWeek) {
       return null
-    } else if (!selected && player.player) {
+    } else if (!selectedPid && pid) {
       action = (
         <Button
           disabled={isLocked}
           onClick={() =>
-            handleSelect({ slot, player: player.player, pos: player.pos })
+            handleSelect({ slot, player: pid, pos: playerMap.get('pos') })
           }
           small
         >
           {isLocked ? 'Locked' : 'Move'}
         </Button>
       )
-    } else if (selected) {
-      if (player.player && selected.player === player.player) {
+    } else if (selectedPid) {
+      if (pid && selectedPid === pid) {
         action = (
           <Button onClick={() => handleSelect(null)} small>
             Cancel
           </Button>
         )
-      } else if (!isLocked && slotPositions.includes(selected.pos)) {
+      } else if (
+        !isLocked &&
+        slotPositions.includes(selectedPlayerMap.get('pos'))
+      ) {
         action = (
-          <Button onClick={() => handleUpdate({ slot, player })} small>
+          <Button onClick={() => handleUpdate({ slot, playerMap })} small>
             Here
           </Button>
         )
-      } else if (!player.player && slot === constants.slots.BENCH) {
+      } else if (!pid && slot === constants.slots.BENCH) {
         action = (
           <Button onClick={() => handleUpdate({ slot })} small>
             Here
@@ -58,7 +69,7 @@ export default class PlayerSlot extends React.Component {
     }
 
     const classNames = ['player__slot']
-    if (selected) {
+    if (selectedPid) {
       classNames.push('selected')
     }
 
@@ -88,7 +99,7 @@ export default class PlayerSlot extends React.Component {
 
     const passing = []
     for (const stat of ['pa', 'pc', 'py', 'ints', 'tdp']) {
-      const value = player.getIn(['projection', `${week}`, stat], 0)
+      const value = playerMap.getIn(['projection', `${week}`, stat], 0)
       if (value) {
         passing.push(`${value.toFixed(1)} ${statSuffix[stat]}`)
       }
@@ -96,7 +107,7 @@ export default class PlayerSlot extends React.Component {
 
     const rushing = []
     for (const stat of ['ra', 'ry', 'tdr', 'fuml']) {
-      const value = player.getIn(['projection', `${week}`, stat], 0)
+      const value = playerMap.getIn(['projection', `${week}`, stat], 0)
       if (value) {
         rushing.push(`${value.toFixed(1)} ${statSuffix[stat]}`)
       }
@@ -104,19 +115,19 @@ export default class PlayerSlot extends React.Component {
 
     const receiving = []
     for (const stat of ['trg', 'rec', 'recy', 'tdrec']) {
-      const value = player.getIn(['projection', `${week}`, stat], 0)
+      const value = playerMap.getIn(['projection', `${week}`, stat], 0)
       if (value) {
         receiving.push(`${value.toFixed(1)} ${statSuffix[stat]}`)
       }
     }
 
-    const projectedPoints = player.getIn(['points', `${week}`, 'total'], 0)
+    const projectedPoints = playerMap.getIn(['points', `${week}`, 'total'], 0)
 
     return (
       <div className={classNames.join(' ')}>
         <div className='player__slot-slotName'>{slotName}</div>
         <div className='player__slot-player'>
-          <PlayerNameExpanded playerId={player.player} hideActions />
+          <PlayerNameExpanded playerId={pid} hideActions />
           {Boolean(passing.length) && (
             <div className='player__slot-projected-stats'>
               {toStringArray(passing)}
@@ -147,10 +158,10 @@ export default class PlayerSlot extends React.Component {
 }
 
 PlayerSlot.propTypes = {
-  player: ImmutablePropTypes.record,
+  playerMap: ImmutablePropTypes.map,
   slot: PropTypes.number,
   handleSelect: PropTypes.func,
-  selected: ImmutablePropTypes.record,
+  selectedPlayerMap: ImmutablePropTypes.map,
   handleUpdate: PropTypes.func,
   isLocked: PropTypes.bool
 }
