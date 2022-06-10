@@ -16,34 +16,35 @@ export default class AuctionPlayer extends React.Component {
       return
     }
 
-    if (this.props.nominatedPlayer) {
+    if (this.props.nominatedPid) {
       return
     }
 
-    this.props.select(this.props.player.player)
+    this.props.select(this.props.playerMap.get('pid'))
   }
 
   render = () => {
     const {
       index,
-      player,
+      playerMap,
       isFreeAgent,
       isEligible,
       watchlist,
       style,
       valueType,
       selected,
-      nominatedPlayer
+      nominatedPid
     } = this.props
 
+    const pid = playerMap.get('pid')
     const classNames = ['auction__player']
     if (!isFreeAgent) {
       classNames.push('signed')
-    } else if (watchlist.has(player.player)) {
+    } else if (watchlist.has(pid)) {
       classNames.push('watchlist')
     }
 
-    if (selected === player.player || nominatedPlayer === player.player) {
+    if (selected === pid || nominatedPid === pid) {
       classNames.push('selected')
     }
 
@@ -55,14 +56,14 @@ export default class AuctionPlayer extends React.Component {
       <div style={style}>
         <div className={classNames.join(' ')} onClick={this.handleClick}>
           <div className='auction__player-action'>
-            <PlayerWatchlistAction playerId={player.player} />
+            <PlayerWatchlistAction playerId={pid} />
           </div>
           <div className='auction__player-index'>{index + 1}.</div>
           <div className='auction__player-name'>
-            <PlayerName playerId={player.player} />
+            <PlayerName playerId={pid} />
           </div>
           <div className='auction__player-metric'>
-            ${Math.round(player.getIn(['market_salary', valueType])) || '--'}
+            ${Math.round(playerMap.getIn(['market_salary', valueType])) || '--'}
           </div>
           <div className='auction__player-nominate'>
             <Tooltip title='Nominate'>
@@ -79,9 +80,9 @@ export default class AuctionPlayer extends React.Component {
 
 AuctionPlayer.propTypes = {
   isFreeAgent: PropTypes.bool,
-  nominatedPlayer: PropTypes.string,
+  nominatedPid: PropTypes.string,
   select: PropTypes.func,
-  player: ImmutablePropTypes.record,
+  playerMap: ImmutablePropTypes.map,
   index: PropTypes.number,
   isEligible: PropTypes.bool,
   watchlist: ImmutablePropTypes.set,

@@ -20,37 +20,37 @@ export function getTrade(state) {
 export function getTradeIsValid(state) {
   const { teamId } = getApp(state)
   const trade = getCurrentTrade(state)
-  const isProposer = trade.pid === teamId
+  const isProposer = trade.pid === teamId // TODO rename
 
   const rosterRecord = isProposer
     ? getProposingTeamRoster(state)
     : getAcceptingTeamRoster(state)
-  const addPlayerIds = isProposer
+  const add_pids = isProposer
     ? trade.acceptingTeamPlayers
     : trade.proposingTeamPlayers
-  const releasePlayerIds = isProposer
+  const release_pids = isProposer
     ? trade.proposingTeamReleasePlayers
     : trade.acceptingTeamReleasePlayers
-  const removePlayerIds = isProposer
+  const remove_pids = isProposer
     ? trade.proposingTeamPlayers
     : trade.acceptingTeamPlayers
 
   const league = getCurrentLeague(state)
-  const players = getAllPlayers(state)
+  const playerMaps = getAllPlayers(state)
   const roster = new Roster({ roster: rosterRecord.toJS(), league })
-  releasePlayerIds.forEach((p) => roster.removePlayer(p))
-  removePlayerIds.forEach((p) => roster.removePlayer(p))
-  for (const playerId of addPlayerIds) {
-    const player = players.get(playerId)
-    const hasOpenBenchSlot = roster.hasOpenBenchSlot(player.pos)
+  release_pids.forEach((pid) => roster.removePlayer(pid))
+  remove_pids.forEach((pid) => roster.removePlayer(pid))
+  for (const pid of add_pids) {
+    const playerMap = playerMaps.get(pid)
+    const hasOpenBenchSlot = roster.hasOpenBenchSlot(playerMap.get('pos'))
     if (!hasOpenBenchSlot) {
       return false
     }
     roster.addPlayer({
       slot: constants.slots.BENCH,
-      player: playerId,
-      pos: player.pos,
-      value: player.value
+      pid,
+      pos: playerMap.get('pos'),
+      value: playerMap.get('value')
     })
   }
 
@@ -114,26 +114,22 @@ export function getCurrentTradePlayers(state) {
   const trade = getCurrentTrade(state)
 
   const acceptingTeamPlayers = new List(
-    trade.acceptingTeamPlayers.map((playerId) =>
-      getPlayerById(state, { playerId })
-    )
+    trade.acceptingTeamPlayers.map((pid) => getPlayerById(state, { pid }))
   )
 
   const proposingTeamPlayers = new List(
-    trade.proposingTeamPlayers.map((playerId) =>
-      getPlayerById(state, { playerId })
-    )
+    trade.proposingTeamPlayers.map((pid) => getPlayerById(state, { pid }))
   )
 
   const acceptingTeamReleasePlayers = new List(
-    trade.acceptingTeamReleasePlayers.map((playerId) =>
-      getPlayerById(state, { playerId })
+    trade.acceptingTeamReleasePlayers.map((pid) =>
+      getPlayerById(state, { pid })
     )
   )
 
   const proposingTeamReleasePlayers = new List(
-    trade.proposingTeamReleasePlayers.map((playerId) =>
-      getPlayerById(state, { playerId })
+    trade.proposingTeamReleasePlayers.map((pid) =>
+      getPlayerById(state, { pid })
     )
   )
 
@@ -146,23 +142,21 @@ export function getCurrentTradePlayers(state) {
 }
 
 function calculateTradedRosterPlayers({ state, roster, add, remove, release }) {
-  const activePlayerIds = roster.active.map((p) => p.player)
+  const active_pids = roster.active.map((p) => p.pid)
 
-  const removePlayers = []
-  remove.forEach((playerId) => removePlayers.push(playerId))
-  release.forEach((playerId) => removePlayers.push(playerId))
+  const remove_pids = []
+  remove.forEach((pid) => remove_pids.push(pid))
+  release.forEach((pid) => remove_pids.push(pid))
 
-  const filteredPlayerIds = activePlayerIds.filter(
-    (p) => !removePlayers.includes(p)
-  )
-  add.forEach((playerId) => filteredPlayerIds.push(playerId))
+  const filtered_pids = active_pids.filter((pid) => !remove_pids.includes(pid))
+  add.forEach((pid) => filtered_pids.push(pid))
 
-  return filteredPlayerIds.map((playerId) => getPlayerById(state, { playerId }))
+  return filtered_pids.map((pid) => getPlayerById(state, { pid }))
 }
 
 export function getProposingTeamTradedRosterPlayers(state) {
   const trade = getCurrentTrade(state)
-  const roster = getRosterByTeamId(state, { tid: trade.pid })
+  const roster = getRosterByTeamId(state, { tid: trade.pid }) // TODO rename
 
   return calculateTradedRosterPlayers({
     state,
@@ -186,19 +180,19 @@ export function getAcceptingTeamTradedRosterPlayers(state) {
   })
 }
 
-function getTeamTradeSummary(lineups, players) {
+function getTeamTradeSummary(lineups, playerMaps) {
   const vorpType = constants.season.isOffseason ? '0' : 'ros'
   const values = {
     points: lineups.reduce((sum, l) => sum + l.total, 0),
-    value: players.reduce(
-      (sum, p) => sum + Math.max(p.getIn(['vorp', vorpType]), 0),
+    value: playerMaps.reduce(
+      (sum, pMap) => sum + Math.max(pMap.getIn(['vorp', vorpType]), 0),
       0
     ),
-    value_adj: players.reduce(
-      (sum, p) => sum + Math.max(p.getIn(['vorp_adj', vorpType]), 0),
+    value_adj: playerMaps.reduce(
+      (sum, pMap) => sum + Math.max(pMap.getIn(['vorp_adj', vorpType]), 0),
       0
     ),
-    salary: players.reduce((sum, p) => sum + p.value, 0)
+    salary: playerMaps.reduce((sum, pMap) => sum + pMap.get('value', 0), 0)
   }
 
   return values

@@ -15,17 +15,17 @@ export function getStats(state) {
 }
 
 export function getGamelogsForSelectedPlayer(state) {
-  const player = getSelectedPlayer(state)
+  const playerMap = getSelectedPlayer(state)
   const gamelogs = []
   for (let week = 1; week <= constants.season.week; week++) {
-    const gamelog = getGamelogForPlayer(state, { player, week })
+    const gamelog = getGamelogForPlayer(state, { playerMap, week })
     if (gamelog) gamelogs.push(gamelog)
   }
   return gamelogs
 }
 
-export function getGamelogForPlayer(state, { player, week }) {
-  if (!player || !player.player) return null
+export function getGamelogForPlayer(state, { playerMap, week }) {
+  if (!playerMap || !playerMap.get('player')) return null
 
   const league = getCurrentLeague(state)
 
@@ -43,16 +43,17 @@ export function getGamelogForPlayer(state, { player, week }) {
     }
   }
 
-  const gamelog = getGamelogByPlayerId(state, { playerId: player.player, week })
+  const pid = playerMap.get('player') // TODO pid
+  const gamelog = getGamelogByPlayerId(state, { playerId: pid, week })
   if (gamelog) return process(gamelog)
 
-  const plays = getPlaysForPlayer(state, { player, week }).toJS()
+  const plays = getPlaysForPlayer(state, { playerMap, week }).toJS()
   if (!plays.length) return null
 
-  const { pos } = player
+  const pos = playerMap.get('pos')
   const stats =
     pos === 'DST'
-      ? calculateDstStatsFromPlays(plays, player.team)
+      ? calculateDstStatsFromPlays(plays, playerMap.get('team'))
       : calculateStatsFromPlayStats(plays.flatMap((p) => p.playStats))
   const play = plays.find((p) => p.possessionTeam)
   const opp = play
@@ -62,7 +63,7 @@ export function getGamelogForPlayer(state, { player, week }) {
     : null
 
   return process({
-    player: player.player,
+    player: pid,
     week,
     year: constants.season.year,
     pos,

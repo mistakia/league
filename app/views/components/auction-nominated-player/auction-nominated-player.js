@@ -8,22 +8,22 @@ import './auction-nominated-player.styl'
 
 export default class AuctionNominatedPlayer extends React.Component {
   render = () => {
-    const { player } = this.props
+    const { playerMap } = this.props
 
     return (
       <div className='auction__nominated-player'>
         <div className='nominated__player'>
-          <PlayerName playerId={player.player} headshot />
+          <PlayerName playerId={playerMap.get('player')} headshot />
         </div>
         <div className='nominated__player-details'>
           <div className='nominated__player-detail'>
-            Retail: ${player.getIn(['market_salary', '0'], 0)}
+            Retail: ${playerMap.getIn(['market_salary', '0'], 0)}
           </div>
           <div className='nominated__player-detail'>
-            Inflation: ${player.getIn(['market_salary', 'inflation'], 0)}
+            Inflation: ${playerMap.getIn(['market_salary', 'inflation'], 0)}
           </div>
           <div className='nominated__player-detail'>
-            Bye: <NFLTeamBye team={player.team} />
+            Bye: <NFLTeamBye team={playerMap.get('team')} />
           </div>
         </div>
       </div>
@@ -32,5 +32,5 @@ export default class AuctionNominatedPlayer extends React.Component {
 }
 
 AuctionNominatedPlayer.propTypes = {
-  player: ImmutablePropTypes.record
+  playerMap: ImmutablePropTypes.map
 }

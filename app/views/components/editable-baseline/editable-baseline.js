@@ -34,11 +34,12 @@ export default class EditableBaseline extends React.Component {
     const { players } = this.props
 
     const menuItems = []
-    for (const [index, player] of players.entries()) {
+    for (const [index, playerMap] of players.entries()) {
+      const pid = playerMap.get('player')
       menuItems.push(
-        <MenuItem key={player.player} value={player.player}>
-          {index + 1}. {player.fname} {player.lname} (
-          {Math.round(player.getIn(['points', '0', 'total']))} pts)
+        <MenuItem key={pid} value={pid}>
+          {index + 1}. {playerMap.get('fname')} {playerMap.get('lname')} (
+          {Math.round(playerMap.getIn(['points', '0', 'total']))} pts)
         </MenuItem>
       )
     }

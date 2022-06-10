@@ -14,11 +14,8 @@ function ByeWeekPopover({ players, bye }) {
 
   const items = []
   const labels = []
-  const sorted = players.sort(
-    (a, b) => b.getIn(['lineups', 'starts']) - a.getIn(['lineups', 'starts'])
-  )
-  for (const [index, player] of sorted.entries()) {
-    const starts = player.getIn(['lineups', 'starts'], 0)
+  for (const [index, playerMap] of players.entries()) {
+    const starts = playerMap.getIn(['lineups', 'starts'], 0)
     // TODO - use global variable tied to settings
     const isStarter = starts / weeksRemaining > 0.4
     const classNames = ['dashboard__bye-week-row-item']
@@ -26,13 +23,14 @@ function ByeWeekPopover({ players, bye }) {
 
     labels.push(
       <div key={index} className='dashboard__bye-week-pop-player'>
-        {player.name} ({player.pos} - {player.team})
+        {playerMap.get('name')} ({playerMap.get('pos')} -{' '}
+        {playerMap.get('team')})
       </div>
     )
 
     items.push(
       <div key={index} className={classNames.join(' ')}>
-        <Position pos={player.pos} />
+        <Position pos={playerMap.get('pos')} />
       </div>
     )
   }

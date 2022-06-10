@@ -8,6 +8,7 @@ import TableContainer from '@material-ui/core/TableContainer'
 import TableHead from '@material-ui/core/TableHead'
 import TableRow from '@material-ui/core/TableRow'
 import LinearProgress from '@material-ui/core/LinearProgress'
+import { List } from 'immutable'
 
 import { constants, getExtensionAmount } from '@common'
 import TeamName from '@components/team-name'
@@ -18,12 +19,13 @@ import './selected-player-transactions.styl'
 
 export default class SelectedPlayerTransactions extends React.Component {
   componentDidMount() {
-    this.props.load(this.props.player.player)
+    this.props.load(this.props.playerMap.get('player'))
   }
 
   render = () => {
-    const { teams, maxTransaction, player, league } = this.props
-    const { transactions, loadingTransactions } = player
+    const { teams, maxTransaction, playerMap, league } = this.props
+    const transactions = playerMap.get('transactions', new List())
+    const loadingTransactions = playerMap.get('loadingTransactions', false)
 
     if (loadingTransactions && !transactions.size) {
       return <LinearProgress color='secondary' />
@@ -66,15 +68,14 @@ export default class SelectedPlayerTransactions extends React.Component {
       )
     }
 
-    const { pos, tag, value, bid } = player
-    const extensions = player.get('extensions', 0)
+    const extensions = playerMap.get('extensions', 0)
     const extendedSalary = getExtensionAmount({
-      pos,
-      tag,
+      pos: playerMap.get('pos'),
+      tag: playerMap.get('tag'),
       extensions,
       league,
-      value,
-      bid
+      value: playerMap.get('value'),
+      bid: playerMap.get('bid')
     })
 
     return (
@@ -122,7 +123,7 @@ export default class SelectedPlayerTransactions extends React.Component {
 }
 
 SelectedPlayerTransactions.propTypes = {
-  player: ImmutablePropTypes.record,
+  playerMap: ImmutablePropTypes.map,
   teams: PropTypes.object,
   maxTransaction: PropTypes.object,
   load: PropTypes.func,

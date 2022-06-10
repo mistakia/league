@@ -11,11 +11,20 @@ const mapStateToProps = createSelector(
   getSchedule,
   (team, schedule) => {
     const byes = {}
-    for (const player of team.active) {
-      const bye = schedule.getIn(['teams', player.team, 'bye']) || 0
+    for (const playerMap of team.active) {
+      const bye = schedule.getIn(['teams', playerMap.get('team'), 'bye']) || 0
       if (!byes[bye]) byes[bye] = []
-      byes[bye].push(player)
+      byes[bye].push(playerMap)
     }
+
+    Object.keys(byes).forEach((bye, idx) => {
+      const players = byes[bye]
+      const sorted = players.sort(
+        (a, b) =>
+          b.getIn(['lineups', 'starts']) - a.getIn(['lineups', 'starts'])
+      )
+      byes[bye] = sorted
+    })
 
     return { byes }
   }

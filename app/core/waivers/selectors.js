@@ -38,14 +38,14 @@ export function getWaiversForCurrentTeam(state) {
 export function getWaiverPlayersForCurrentTeam(state) {
   let teamWaivers = getWaiversForCurrentTeam(state) || new Map()
   for (const waiver of teamWaivers.values()) {
-    const playerId = waiver.player
-    const player = getPlayerById(state, { playerId })
-    teamWaivers = teamWaivers.setIn([waiver.uid, 'player'], player)
+    const pid = waiver.pid
+    const playerMap = getPlayerById(state, { pid })
+    teamWaivers = teamWaivers.setIn([waiver.uid, 'playerMap'], playerMap)
     if (waiver.release.size) {
       const releases = []
-      for (const playerId of waiver.release) {
-        const player = getPlayerById(state, { playerId })
-        releases.push(player)
+      for (const pid of waiver.release) {
+        const playerMap = getPlayerById(state, { pid })
+        releases.push(playerMap)
       }
       teamWaivers = teamWaivers.setIn(
         [waiver.uid, 'release'],
