@@ -55,7 +55,6 @@ export function* calculateValues() {
   const league = yield select(getCurrentLeague)
   const players = yield select(getAllPlayers)
   const sources = yield select(getSources)
-  const baselines = (yield select(getPlayers)).get('baselines').toJS()
   const rosterRows = (yield select(getRostersForCurrentLeague)).toList().toJS()
 
   const worker = new Worker()
@@ -64,7 +63,6 @@ export function* calculateValues() {
     league,
     sources: sources.toList().toJS(),
     rosterRows,
-    baselines,
     userId
   })
   worker.terminate()

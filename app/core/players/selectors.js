@@ -94,8 +94,8 @@ export function getSelectedPlayer(state) {
 }
 
 export function getSelectedPlayerGame(state, { week }) {
-  const player = getSelectedPlayer(state)
-  return getGameByTeam(state, { team: player.team, week })
+  const playerMap = getSelectedPlayer(state)
+  return getGameByTeam(state, { team: playerMap.get('team'), week })
 }
 
 export function getSelectedPlayerGames(state) {

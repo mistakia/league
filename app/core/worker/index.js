@@ -10,7 +10,6 @@ import {
   calculatePrices,
   getRosterSize,
   getOptimizerPositionConstraints,
-  optimizeStandingsLineup,
   optimizeLineup,
   calculatePlayerValuesRestOfSeason,
   getHistoricBaselines
@@ -48,7 +47,6 @@ export function processTeamGamelogs(gamelogs) {
 
 export function calculatePlayerValues(payload) {
   const { league, players, rosterRows } = payload
-  const customBaselines = payload.baselines
 
   const { nteams, cap, minBid } = league
   const rosterSize = getRosterSize(league)
@@ -56,6 +54,8 @@ export function calculatePlayerValues(payload) {
 
   const finalWeek = constants.season.finalWeek
   for (const player of players) {
+    player.points = player.points || {}
+    player.projection = player.projection || {}
     for (let week = 0; week <= finalWeek; week++) {
       const projection = player.projection[week]
       if (projection) {
@@ -81,31 +81,17 @@ export function calculatePlayerValues(payload) {
     }
   }
 
-  const baselines = {}
+  const baselinesByWeek = {}
   const historicBaselines = getHistoricBaselines({ league })
   for (let week = 0; week <= finalWeek; week++) {
     // calculate baseline
-    const b = calculateBaselines({ players, league, rosterRows, week })
-
-    // set manual baselines if they exist, use starter baseline by default
-    for (const pos in b) {
-      if (customBaselines[pos] && customBaselines[pos].manual) {
-        b[pos].manual = players.find(
-          (p) => p.player === customBaselines[pos].manual
-        )
-      }
-
-      if (!b[pos].manual) {
-        b[pos].manual = b[pos].starter
-      }
-    }
-
-    baselines[week] = b
+    const baselines = calculateBaselines({ players, league, rosterRows, week })
+    baselinesByWeek[week] = baselines
 
     // calculate values
     const total = calculateValues({
       players,
-      baselines: b,
+      baselines,
       week,
       historicBaselines
     })
@@ -114,191 +100,10 @@ export function calculatePlayerValues(payload) {
 
   calculatePlayerValuesRestOfSeason({ players, rosterRows, league })
 
-  return { baselines, players }
+  return { baselines: baselinesByWeek, players }
 }
 
 const average = (data) => data.reduce((sum, value) => sum + value) / data.length
-const standardDeviation = (values) =>
-  Math.sqrt(average(values.map((value) => (value - average(values)) ** 2)))
-
-export function calculateStandings({
-  league,
-  tids,
-  starters,
-  active,
-  gamelogs,
-  matchups
-}) {
-  const finalWeek = Math.min(
-    Math.max(constants.season.week - 1, 0),
-    constants.season.regularSeasonFinalWeek
-  )
-  const result = {}
-  for (const tid of tids) {
-    result[tid] = {
-      tid,
-      gamelogs: [],
-      games: {},
-      points: {
-        weeks: {}
-      },
-      stats: constants.createFantasyTeamStats(),
-      potentialPoints: {},
-      potentialPointsPenalty: {}
-    }
-
-    result[tid].stats.pmin = 99999
-  }
-
-  const minStarters =
-    league.sqb +
-    league.srb +
-    league.swr +
-    league.ste +
-    league.srbwr +
-    league.srbwrte +
-    league.sqbrbwrte +
-    league.swrte +
-    league.sdst +
-    league.sk
-
-  for (let week = 1; week <= finalWeek; week++) {
-    for (const tid of tids) {
-      const startingPlayers = starters[week][tid]
-      const starterIds = startingPlayers.map((p) => p.player)
-      let total = 0
-      result[tid].games[week] = {}
-      const optimizePlayers = []
-      for (const { player, pos } of active[week][tid]) {
-        const gamelog = gamelogs.find(
-          (g) => g.week === week && g.player === player
-        )
-        if (!gamelog) {
-          continue
-        }
-
-        result[tid].gamelogs.push(gamelog)
-        const points = calculatePoints({
-          stats: gamelog,
-          position: pos,
-          league
-        })
-        result[tid].games[week][player] = points.total
-        if (starterIds.includes(player)) {
-          const starter = startingPlayers.find((p) => p.player === player)
-          total = points.total + total
-          result[tid].stats[`pPos${pos}`] += points.total
-          result[tid].stats[`pSlot${starter.slot}`] += points.total
-        }
-        optimizePlayers.push({
-          player,
-          pos,
-          points: points.total
-        })
-      }
-
-      // calculate optimal lineup
-      const optimizeResult = optimizeStandingsLineup({
-        players: optimizePlayers,
-        league
-      })
-      if (optimizeResult.starters.length < minStarters) {
-        result[tid].potentialPointsPenalty[week] = true
-      }
-      result[tid].potentialPoints[week] = optimizeResult.total
-      result[tid].stats.pp += optimizeResult.total
-
-      if (result[tid].stats.pmax < total) result[tid].stats.pmax = total
-      if (result[tid].stats.pmin > total) result[tid].stats.pmin = total
-
-      result[tid].points.weeks[week] = total
-      result[tid].stats.pf += total
-    }
-  }
-
-  for (let week = 1; week <= finalWeek; week++) {
-    const weekMatchups = matchups.filter((m) => m.week === week)
-    for (const m of weekMatchups) {
-      const homeScore = result[m.hid].points.weeks[week]
-      const awayScore = result[m.aid].points.weeks[week]
-
-      const pHomeScore = result[m.hid].potentialPoints[week]
-      const pAwayScore = result[m.aid].potentialPoints[week]
-
-      result[m.hid].stats.pa += awayScore
-      result[m.aid].stats.pa += homeScore
-
-      if (homeScore > awayScore) {
-        result[m.hid].stats.wins += 1
-        result[m.aid].stats.losses += 1
-
-        if (pAwayScore > homeScore) {
-          result[m.aid].stats.pw += 1
-          result[m.hid].stats.pl += 1
-        }
-      } else if (homeScore < awayScore) {
-        result[m.hid].stats.losses += 1
-        result[m.aid].stats.wins += 1
-
-        if (pHomeScore > awayScore) {
-          result[m.hid].stats.pw += 1
-          result[m.aid].stats.pl += 1
-        }
-      } else {
-        result[m.hid].stats.ties += 1
-        result[m.aid].stats.ties += 1
-      }
-    }
-
-    // calculate all play record
-
-    for (const tid of tids) {
-      const scores = Object.values(result)
-        .filter((p) => p.tid !== tid)
-        .map((p) => p.points.weeks[week])
-      const score = result[tid].points.weeks[week]
-      result[tid].stats.apWins += scores.filter((p) => p < score).length
-      result[tid].stats.apLosses += scores.filter((p) => p > score).length
-      result[tid].stats.apTies += scores.filter((p) => p === score).length
-
-      if (result[tid].potentialPointsPenalty[week]) {
-        const pps = Object.values(result).map((p) => p.potentialPoints[week])
-        const max = Math.max(...pps)
-        result[tid].stats.ppp += max - result[tid].potentialPoints[week]
-      }
-    }
-  }
-
-  // calculate draft order
-  const potentialPoints = Object.values(result).map(
-    (p) => p.stats.pp + p.stats.ppp
-  )
-  const allPlayLosses = Object.values(result).map((p) => p.stats.apLosses)
-  const minPP = Math.min(...potentialPoints)
-  const maxPP = Math.max(...potentialPoints)
-  const minAPL = Math.min(...allPlayLosses)
-  const maxAPL = Math.max(...allPlayLosses)
-  for (const tid of tids) {
-    const pp = result[tid].stats.pp + result[tid].stats.ppp
-    const apl = result[tid].stats.apLosses
-    const normPP = (pp - minPP) / (maxPP - minPP)
-    const normAPL = (apl - minAPL) / (maxAPL - minAPL)
-    result[tid].stats.doi = 9 * normPP + normAPL
-
-    const points = Object.values(result[tid].points.weeks)
-    result[tid].stats.pdev = points.length ? standardDeviation(points) : null
-    result[tid].stats.pdiff = result[tid].stats.pf - result[tid].stats.pa
-    result[tid].stats.pp_pct =
-      (result[tid].stats.pf / result[tid].stats.pp) * 100
-  }
-
-  const percentiles = calculatePercentiles({
-    items: Object.values(result).map((t) => t.stats),
-    stats: constants.fantasyTeamStats
-  })
-
-  return { teams: result, percentiles }
-}
 
 function rollup(group) {
   const stats = {
