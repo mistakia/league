@@ -12,9 +12,9 @@ import { constants } from '@common'
 
 export default class RemoveTagConfirmation extends React.Component {
   handleSubmit = () => {
-    const pid = this.props.playerMap.get('player')
+    const pid = this.props.playerMap.get('pid')
     const { tid } = this.props.team.roster
-    this.props.remove({ player: pid, teamId: tid }) // TODO pid
+    this.props.remove({ pid, teamId: tid })
     this.props.onClose()
   }
 

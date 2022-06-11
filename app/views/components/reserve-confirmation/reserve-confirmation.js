@@ -29,7 +29,7 @@ export default class ReserveConfirmation extends React.Component {
 
     const reserve_pids = team.roster.reserve.map((p) => p.player)
     for (const pid of reserve_pids) {
-      const playerMap = team.players.find((p) => p.get('player') === pid)
+      const playerMap = team.players.find((p) => p.get('pid') === pid)
       this._activatable.push(playerMap)
     }
   }
@@ -41,7 +41,7 @@ export default class ReserveConfirmation extends React.Component {
 
   handleSubmit = () => {
     const { activate } = this.state
-    const pid = this.props.playerMap.get('player')
+    const pid = this.props.playerMap.get('pid')
 
     if (!this._hasReserveSpace && !activate) {
       return this.setState({ missingActivate: true })
@@ -49,7 +49,7 @@ export default class ReserveConfirmation extends React.Component {
       this.setState({ missingActivate: false })
     }
 
-    this.props.reserve({ player: pid, slot: constants.slots.IR, activate }) // TODO pid
+    this.props.reserve({ pid, slot: constants.slots.IR, activate })
     this.props.onClose()
   }
 
@@ -58,7 +58,7 @@ export default class ReserveConfirmation extends React.Component {
 
     const menuItems = []
     for (const aPlayerMap of this._activatable) {
-      const pid = aPlayerMap.get('player')
+      const pid = aPlayerMap.get('pid')
       menuItems.push(
         <MenuItem key={pid} value={pid}>
           {aPlayerMap.get('name')} ({aPlayerMap.get('pos')})

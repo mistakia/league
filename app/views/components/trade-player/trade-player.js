@@ -13,7 +13,7 @@ export default class TradePlayer extends React.Component {
     return (
       <div className='trade__player'>
         <div className='trade__player-name'>
-          <PlayerNameExpanded playerId={playerMap.get('player')} hideActions />
+          <PlayerNameExpanded playerId={playerMap.get('pid')} hideActions />
         </div>
         <div className='trade__player-metric metric'>
           <label>Sal</label>${playerMap.getIn(['value'], 0)}

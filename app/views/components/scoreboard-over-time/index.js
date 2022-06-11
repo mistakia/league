@@ -43,10 +43,9 @@ const mapStateToProps = createSelector(
       })
 
       for (const playerMap of playerMaps) {
+        const pid = playerMap.get('pid')
         const team = data.find((t) =>
-          t.starters.find(
-            (pMap) => pMap.get('player') === playerMap.get('player')
-          )
+          t.starters.find((pMap) => pMap.get('pid') === pid)
         )
 
         if (team) {
@@ -99,7 +98,7 @@ const mapStateToProps = createSelector(
 
       for (const [pid, points] of Object.entries(play.points)) {
         const team = data.find((t) =>
-          t.starters.find((pMap) => pMap.get('player') === pid)
+          t.starters.find((pMap) => pMap.get('pid') === pid)
         )
         if (team) teamPoints[team.team.uid] += points.total
       }

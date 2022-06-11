@@ -58,7 +58,7 @@ export default class WaiverConfirmation extends React.Component {
     for (const releasePlayerMap of players) {
       const r = new Roster({ roster: roster.toJS(), league })
       if (releasePlayerMap.get('slot') === constants.slots.PSP) continue
-      r.removePlayer(releasePlayerMap.get('player'))
+      r.removePlayer(releasePlayerMap.get('pid'))
       if (isActiveRoster) {
         if (r.hasOpenBenchSlot(releasePlayerMap.get('pos')))
           releases.push(releasePlayerMap)
@@ -98,7 +98,7 @@ export default class WaiverConfirmation extends React.Component {
 
   handleSubmit = () => {
     const { bid, release, error, type } = this.state
-    const pid = this.props.playerMap.get('player')
+    const pid = this.props.playerMap.get('pid')
 
     if (!type) {
       return this.setState({ missingType: true })
@@ -138,7 +138,7 @@ export default class WaiverConfirmation extends React.Component {
         bid: releasePlayerMap.get('bid')
       })
       options.push({
-        id: releasePlayerMap.get('player'),
+        id: releasePlayerMap.get('pid'),
         label: releasePlayerMap.get('name'),
         pos,
         team: releasePlayerMap.get('team'),
@@ -149,11 +149,9 @@ export default class WaiverConfirmation extends React.Component {
 
     const releasePlayers = []
     this.state.release.forEach((pid) => {
-      const releasePlayerMap = this._releases.find(
-        (p) => p.get('player') === pid
-      )
+      const releasePlayerMap = this._releases.find((p) => p.get('pid') === pid)
       releasePlayers.push({
-        id: releasePlayerMap.get('player'),
+        id: releasePlayerMap.get('pid'),
         label: releasePlayerMap.get('name'),
         pos: releasePlayerMap.get('pos'),
         team: releasePlayerMap.get('team'),

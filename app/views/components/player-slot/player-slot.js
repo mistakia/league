@@ -23,8 +23,8 @@ export default class PlayerSlot extends React.Component {
       (key) => constants.slots[key] === slot
     )
     const slotName = constants.slotName[slot]
-    const pid = playerMap.get('player')
-    const selectedPid = selectedPlayerMap.get('player')
+    const pid = playerMap.get('pid')
+    const selectedPid = selectedPlayerMap.get('pid')
 
     let action
     if (constants.season.week > constants.season.finalWeek) {
@@ -33,9 +33,7 @@ export default class PlayerSlot extends React.Component {
       action = (
         <Button
           disabled={isLocked}
-          onClick={() =>
-            handleSelect({ slot, player: pid, pos: playerMap.get('pos') })
-          }
+          onClick={() => handleSelect({ slot, pid, pos: playerMap.get('pos') })}
           small
         >
           {isLocked ? 'Locked' : 'Move'}
@@ -127,7 +125,7 @@ export default class PlayerSlot extends React.Component {
       <div className={classNames.join(' ')}>
         <div className='player__slot-slotName'>{slotName}</div>
         <div className='player__slot-player'>
-          <PlayerNameExpanded playerId={pid} hideActions />
+          <PlayerNameExpanded pid={pid} hideActions />
           {Boolean(passing.length) && (
             <div className='player__slot-projected-stats'>
               {toStringArray(passing)}

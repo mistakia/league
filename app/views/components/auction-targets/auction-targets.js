@@ -34,7 +34,7 @@ export default class AuctionTargets extends React.Component {
       const players = playersByPosition[position]
       players.forEach((playerMap, index) => {
         const classNames = ['auction__targets-player']
-        const pid = playerMap.get('player')
+        const pid = playerMap.get('pid')
         const rosterSlot = team.roster.get(pid)
 
         if (rosterSlot) classNames.push('signed')
@@ -49,8 +49,8 @@ export default class AuctionTargets extends React.Component {
 
         const item = (
           <div className={classNames.join(' ')} key={index}>
-            <PlayerName playerId={pid} />
-            <PlayerWatchlistAction playerId={pid} />
+            <PlayerName pid={pid} />
+            <PlayerWatchlistAction pid={pid} />
             <div className='auction__targets-player-bye'>
               <NFLTeamBye team={playerMap.get('team')} />
             </div>

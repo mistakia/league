@@ -38,7 +38,7 @@ class PlayerRow extends Player {
       index
     } = this.props
 
-    const pid = playerMap.get('player')
+    const pid = playerMap.get('pid')
     const tid = playerMap.get('tid')
     const pos = playerMap.get('pos')
     const team = playerMap.get('team')

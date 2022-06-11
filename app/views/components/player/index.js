@@ -16,14 +16,14 @@ export class Player extends React.Component {
     event.stopPropagation()
     this.props.showContext({
       id: 'player',
-      data: { playerId: playerMap.get('player'), waiverId, poachId },
+      data: { playerId: playerMap.get('pid'), waiverId, poachId },
       clickX: event.clientX,
       clickY: event.clientY
     })
   }
 
   handleClick = () => {
-    this.props.select(this.props.playerMap.get('player'))
+    this.props.select(this.props.playerMap.get('pid'))
   }
 }
 

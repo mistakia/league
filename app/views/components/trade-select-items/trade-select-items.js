@@ -39,7 +39,7 @@ export default class TradeSelectItems extends React.Component {
     players.forEach((playerMap) => {
       // TODO pid
       options.push({
-        id: playerMap.get('player'),
+        id: playerMap.get('pid'),
         label: playerMap.get('name'),
         type: 'player'
       })
@@ -56,7 +56,7 @@ export default class TradeSelectItems extends React.Component {
     selectedPlayers.forEach((playerMap) => {
       // TODO pid
       value.push({
-        id: playerMap.get('player'),
+        id: playerMap.get('pid'),
         label: playerMap.get('name'),
         type: 'player'
       })

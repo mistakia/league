@@ -42,15 +42,15 @@ export default class TransitionConfirmation extends React.Component {
     const tagged_players = team.roster.getPlayersByTag(
       constants.tags.TRANSITION
     )
-    const tagged_pids = tagged_players.map((p) => p.player) // TODO pid
+    const tagged_pids = tagged_players.map((p) => p.pid)
     for (const pid of tagged_pids) {
       const playerMap = team.players.find(
-        (playerMap) => playerMap.get('player') === pid
-      ) // TODO pid
+        (playerMap) => playerMap.get('pid') === pid
+      )
       this._untags.push(playerMap)
     }
 
-    const pid = playerMap.get('player')
+    const pid = playerMap.get('pid')
     this._isUpdate = Boolean(tagged_pids.includes(pid) || playerMap.get('bid'))
     this._isOriginalTeam = team.roster.tid === playerMap.get('tid')
     // TODO - check roster size limit eligiblity
@@ -58,8 +58,7 @@ export default class TransitionConfirmation extends React.Component {
       this._isUpdate ||
       !this._isOriginalTeam ||
       team.roster.isEligibleForTag({
-        tag: constants.tags.TRANSITION,
-        player: pid // TODO pid
+        tag: constants.tags.TRANSITION
       })
   }
 
@@ -86,8 +85,8 @@ export default class TransitionConfirmation extends React.Component {
     )
     const releaseSalary = notInCutlist.reduce((sum, pid) => {
       const playerMap = this.props.team.players.find(
-        (playerMap) => playerMap.get('player') === pid
-      ) // TODO pid
+        (playerMap) => playerMap.get('pid') === pid
+      )
       const value = playerMap.get('value', 0)
       const bid = playerMap.get('bid', 0)
       const extensions = playerMap.get('extensions', 0)
@@ -136,7 +135,7 @@ export default class TransitionConfirmation extends React.Component {
   handleSubmit = () => {
     const { untag, error, bid } = this.state
     const { tid } = this.props.team.roster
-    const pid = this.props.playerMap.get('player') // TODO pid
+    const pid = this.props.playerMap.get('pid')
     const playerTid = this.props.playerMap.get('tid')
 
     if (!this._isEligible && !untag) {
@@ -170,7 +169,7 @@ export default class TransitionConfirmation extends React.Component {
 
     const menuItems = []
     for (const rPlayerMap of this._untags) {
-      const pid = rPlayerMap.get('player')
+      const pid = rPlayerMap.get('pid')
       menuItems.push(
         <MenuItem key={pid} value={pid}>
           {rPlayerMap.get('name')} ({rPlayerMap.get('pos')})
@@ -179,9 +178,9 @@ export default class TransitionConfirmation extends React.Component {
     }
 
     const options = []
-    const pid = playerMap.get('player') // TODO pid
+    const pid = playerMap.get('pid')
     team.players.forEach((playerMap) => {
-      const pid_i = playerMap.get('player') // TODO pid
+      const pid_i = playerMap.get('pid')
       if (pid_i === pid) {
         return
       }
@@ -237,10 +236,10 @@ export default class TransitionConfirmation extends React.Component {
     const releasePlayers = []
     this.state.releaseIds.forEach((pid) => {
       const playerMap = this.props.team.players.find(
-        (playerMap) => playerMap.get('player') === pid
-      ) // TODO pid
+        (playerMap) => playerMap.get('pid') === pid
+      )
       releasePlayers.push({
-        id: playerMap.get('player'), // TODO pid
+        id: playerMap.get('pid'),
         label: playerMap.get('name'),
         pos: playerMap.get('pos'),
         team: playerMap.get('team'),

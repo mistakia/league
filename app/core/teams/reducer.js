@@ -41,7 +41,7 @@ export function teamsReducer(state = initialState, { payload, type }) {
       const { data } = payload
       const teamPicks = state.getIn([data.tid, 'picks'])
       const key = teamPicks.findKey((p) => p.uid === data.uid)
-      return state.setIn([data.tid, 'picks', key, 'player'], data.player)
+      return state.setIn([data.tid, 'picks', key, 'pid'], data.pid)
     }
 
     case tradeActions.POST_TRADE_ACCEPT_FULFILLED:

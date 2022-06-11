@@ -25,18 +25,16 @@ export default class FranchiseConfirmation extends React.Component {
     }
 
     const { team, playerMap } = props
-    // TODO - pid
     this._isEligible = team.roster.isEligibleForTag({
       tag: constants.tags.FRANCHISE,
-      player: playerMap.get('player')
+      pid: playerMap.get('pid')
     })
     this._untags = []
     const tagged_players = team.roster.getPlayersByTag(constants.tags.FRANCHISE)
-    // TODO - pid
-    const tagged_pids = tagged_players.map((p) => p.player)
+    const tagged_pids = tagged_players.map((p) => p.pid)
     for (const pid of tagged_pids) {
       const playerMap = team.players.find(
-        (playerMap) => playerMap.get('player') === pid
+        (playerMap) => playerMap.get('pid') === pid
       )
       this._untags.push(playerMap)
     }
@@ -49,8 +47,7 @@ export default class FranchiseConfirmation extends React.Component {
 
   handleSubmit = () => {
     const { untag, error } = this.state
-    // TODO pid
-    const player = this.props.playerMap.get('player')
+    const pid = this.props.playerMap.get('pid')
 
     if (!this._isEligible && !untag) {
       return this.setState({ missingUntag: true })
@@ -59,7 +56,11 @@ export default class FranchiseConfirmation extends React.Component {
     }
 
     if (!error) {
-      this.props.add({ remove: untag, tag: constants.tags.FRANCHISE, player })
+      this.props.add({
+        remove: untag,
+        tag: constants.tags.FRANCHISE,
+        player: pid
+      })
       this.props.onClose()
     }
   }
@@ -69,7 +70,7 @@ export default class FranchiseConfirmation extends React.Component {
 
     const menuItems = []
     for (const rPlayerMap of this._untags) {
-      const pid = rPlayerMap.get('player')
+      const pid = rPlayerMap.get('pid')
       menuItems.push(
         <MenuItem key={pid} value={pid}>
           {rPlayerMap.get('name')} ({rPlayerMap.get('pos')})

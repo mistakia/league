@@ -17,7 +17,7 @@ export default class PlayerContextMenu extends React.Component {
       )} (${playerMap.get(
         'pos'
       )}) will be placed on the practice squad. He will not be available to use in lineups until he's reactivated.`,
-      onConfirm: () => deactivate(playerMap.get('player')) // TODO pid
+      onConfirm: () => deactivate(playerMap.get('pid'))
     })
     this.props.hide()
   }
@@ -31,7 +31,7 @@ export default class PlayerContextMenu extends React.Component {
       )} (${playerMap.get(
         'pos'
       )}) will be designated as protected. This will protect the player from poaches but you will not be able to activate or release this player until the off-season.`,
-      onConfirm: () => protect(playerMap.get('player')) // TODO pid
+      onConfirm: () => protect(playerMap.get('pid'))
     })
     this.props.hide()
   }
@@ -127,7 +127,7 @@ export default class PlayerContextMenu extends React.Component {
         'pos'
       )}) will be placed on Reserves/COV. He will not be available to use in lineups until he's activated.`,
       onConfirm: () =>
-        reserve({ player: playerMap.get('player'), slot: constants.slots.COV }) // TODO pid
+        reserve({ pid: playerMap.get('pid'), slot: constants.slots.COV })
     })
     this.props.hide()
   }
@@ -141,7 +141,7 @@ export default class PlayerContextMenu extends React.Component {
       )} (${playerMap.get(
         'pos'
       )}) will be released and placed on waivers for 24 hours before becoming a free agent.`,
-      onConfirm: () => release(playerMap.get('player'))
+      onConfirm: () => release(playerMap.get('pid'))
     })
     this.props.hide()
   }
@@ -202,7 +202,7 @@ export default class PlayerContextMenu extends React.Component {
   }
 
   handleCutlist = () => {
-    const pid = this.props.playerMap.get('player') // TODO pid
+    const pid = this.props.playerMap.get('pid')
     this.props.toggleCutlist(pid)
     this.props.hide()
   }

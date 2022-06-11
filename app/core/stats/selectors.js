@@ -25,7 +25,7 @@ export function getGamelogsForSelectedPlayer(state) {
 }
 
 export function getGamelogForPlayer(state, { playerMap, week }) {
-  if (!playerMap || !playerMap.get('player')) return null
+  if (!playerMap || !playerMap.get('pid')) return null
 
   const league = getCurrentLeague(state)
 
@@ -43,8 +43,8 @@ export function getGamelogForPlayer(state, { playerMap, week }) {
     }
   }
 
-  const pid = playerMap.get('player') // TODO pid
-  const gamelog = getGamelogByPlayerId(state, { playerId: pid, week })
+  const pid = playerMap.get('pid')
+  const gamelog = getGamelogByPlayerId(state, { pid, week })
   if (gamelog) return process(gamelog)
 
   const plays = getPlaysForPlayer(state, { playerMap, week }).toJS()
@@ -63,7 +63,7 @@ export function getGamelogForPlayer(state, { playerMap, week }) {
     : null
 
   return process({
-    player: pid,
+    pid,
     week,
     year: constants.season.year,
     pos,

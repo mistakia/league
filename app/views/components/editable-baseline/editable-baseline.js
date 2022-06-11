@@ -35,7 +35,7 @@ export default class EditableBaseline extends React.Component {
 
     const menuItems = []
     for (const [index, playerMap] of players.entries()) {
-      const pid = playerMap.get('player')
+      const pid = playerMap.get('pid')
       menuItems.push(
         <MenuItem key={pid} value={pid}>
           {index + 1}. {playerMap.get('fname')} {playerMap.get('lname')} (

@@ -12,7 +12,7 @@ class PlayerRosterRow extends Player {
   render = () => {
     const { playerMap, selected, isHosted, league } = this.props
 
-    const pid = playerMap.get('player')
+    const pid = playerMap.get('pid')
     const isSelected = selected === pid
     const classNames = ['roster__item']
     if (isSelected) classNames.push('selected')
@@ -35,7 +35,7 @@ class PlayerRosterRow extends Player {
     return (
       <div className={classNames.join(' ')}>
         <div className='roster__item-name'>
-          <PlayerName playerId={pid} />
+          <PlayerName pid={pid} />
         </div>
         {Boolean(pid) && (
           <div className='roster__item-salary metric'>{`$${salary}`}</div>

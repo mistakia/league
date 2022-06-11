@@ -20,13 +20,12 @@ class ScoreboardPlayer extends Player {
           .getIn(['points', `${constants.season.week}`, 'total'], 0)
           .toFixed(1)
 
-    // TODO pid
-    const pid = playerMap.get('player')
+    const pid = playerMap.get('pid')
     return (
       <div className={classNames.join(' ')}>
         <div className='scoreboard__player-body'>
-          <PlayerNameExpanded playerId={pid} week={week} hideActions minimize />
-          <ScoreboardPlayerGameStatus playerId={pid} week={week} />
+          <PlayerNameExpanded pid={pid} week={week} hideActions minimize />
+          <ScoreboardPlayerGameStatus pid={pid} week={week} />
         </div>
         <div className='scoreboard__player-score metric'>{points}</div>
       </div>

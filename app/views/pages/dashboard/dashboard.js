@@ -78,13 +78,13 @@ export default function DashboardPage() {
     for (const playerMap of players) {
       if (
         !constants.season.isRegularSeason &&
-        cutlistPlayerIds.includes(playerMap.get('player'))
+        cutlistPlayerIds.includes(playerMap.get('pid'))
       )
         continue
-      if (!playerMap.get('player')) continue
+      if (!playerMap.get('pid')) continue
       activePlayers = activePlayers.push(playerMap)
       activeItems.push(
-        <PlayerRoster key={playerMap.get('player')} playerMap={playerMap} />
+        <PlayerRoster key={playerMap.get('pid')} playerMap={playerMap} />
       )
     }
   }
@@ -92,20 +92,20 @@ export default function DashboardPage() {
   const transitionItems = []
   for (const playerMap of transitionPlayers.valueSeq()) {
     transitionItems.push(
-      <PlayerRoster key={playerMap.get('player')} playerMap={playerMap} />
+      <PlayerRoster key={playerMap.get('pid')} playerMap={playerMap} />
     )
   }
 
   const reserveIRItems = []
   for (const playerMap of players.ir) {
-    if (!playerMap.get('player')) continue
+    if (!playerMap.get('pid')) continue
     reserveIRItems.push(
-      <PlayerRoster key={playerMap.get('player')} playerMap={playerMap} />
+      <PlayerRoster key={playerMap.get('pid')} playerMap={playerMap} />
     )
 
     if (!isReserveEligible(playerMap.toJS())) {
       notices.push(
-        <Alert key={playerMap.get('player')} severity='error'>
+        <Alert key={playerMap.get('pid')} severity='error'>
           <AlertTitle>
             {playerMap.get('name', 'N/A')} not eligible for Reserve/IR
           </AlertTitle>
@@ -118,14 +118,14 @@ export default function DashboardPage() {
 
   const reserveCOVItems = []
   for (const playerMap of players.cov) {
-    if (!playerMap.get('player')) continue
+    if (!playerMap.get('pid')) continue
     reserveCOVItems.push(
-      <PlayerRoster key={playerMap.get('player')} playerMap={playerMap} />
+      <PlayerRoster key={playerMap.get('pid')} playerMap={playerMap} />
     )
 
     if (!isReserveCovEligible(playerMap.toJS())) {
       notices.push(
-        <Alert key={playerMap.get('player')} severity='error'>
+        <Alert key={playerMap.get('pid')} severity='error'>
           <AlertTitle>
             {playerMap.get('name', 'N/A')} not eligible for Reserve/COVID-19
           </AlertTitle>
@@ -138,18 +138,18 @@ export default function DashboardPage() {
 
   const practiceItems = []
   for (const playerMap of players.practice) {
-    if (!playerMap.get('player')) continue
+    if (!playerMap.get('pid')) continue
     practiceItems.push(
-      <PlayerRoster key={playerMap.get('player')} playerMap={playerMap} />
+      <PlayerRoster key={playerMap.get('pid')} playerMap={playerMap} />
     )
 
     const poach = poaches.find(
-      (p) => p.getIn(['player', 'player']) === playerMap.get('player')
+      (p) => p.getIn(['playerMap', 'pid']) === playerMap.get('pid')
     )
     if (poach) {
       const processingTime = dayjs.unix(poach.submitted).add('48', 'hours')
       notices.push(
-        <Alert key={playerMap.get('player')} severity='warning'>
+        <Alert key={playerMap.get('pid')} severity='warning'>
           {playerMap.get('name', 'N/A')} has a poaching claim that will be
           processed {processingTime.fromNow()} on{' '}
           {processingTime.format('dddd, h:mm a')}.

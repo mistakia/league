@@ -17,10 +17,10 @@ router.post('/?', async (req, res) => {
   const { db, logger, broadcast } = req.app.locals
   try {
     const { teamId } = req.params
-    const { player, leagueId } = req.body
+    const { pid, leagueId } = req.body
 
-    if (!player) {
-      return res.status(400).send({ error: 'missing player' })
+    if (!pid) {
+      return res.status(400).send({ error: 'missing pid' })
     }
 
     if (!leagueId) {
@@ -49,31 +49,31 @@ router.post('/?', async (req, res) => {
     const roster = new Roster({ roster: rosterRow, league })
 
     // make sure player is on roster
-    if (!roster.has(player)) {
-      return res.status(400).send({ error: 'invalid player' })
+    if (!roster.has(pid)) {
+      return res.status(400).send({ error: 'invalid pid' })
     }
 
     // make sure player is not on practice squad
-    if (roster.practice.find((p) => p.player === player)) {
+    if (roster.practice.find((p) => p.pid === pid)) {
       return res
         .status(400)
         .send({ error: 'player is already on practice squad' })
     }
 
-    const players = await db('player').where('player', player).limit(1)
+    const players = await db('player').where('pid', pid).limit(1)
     const playerRow = players[0]
 
     const transactions = await getTransactionsSinceAcquisition({
       lid: leagueId,
       tid,
-      player
+      pid
     })
     const sortedTransactions = transactions.sort(
       (a, b) => a.timestamp - b.timestamp
     )
     const lastTransaction = sortedTransactions[sortedTransactions.length - 1]
     const firstTransaction = sortedTransactions[0]
-    const isActive = Boolean(roster.active.find((p) => p.player === player))
+    const isActive = Boolean(roster.active.find((p) => p.pid === pid))
 
     // make sure player has not been on the active roster for more than 48 hours
     const cutoff = dayjs.unix(lastTransaction.timestamp).add('48', 'hours')
@@ -97,7 +97,7 @@ router.post('/?', async (req, res) => {
     // make sure player has not been poached since the last time they were a free agent
     const transactionsSinceFA = await getTransactionsSinceFreeAgent({
       lid: leagueId,
-      player
+      pid
     })
     if (
       transactionsSinceFA.find((t) => t.type === constants.transactions.POACHED)
@@ -118,7 +118,7 @@ router.post('/?', async (req, res) => {
       if (transactionWaiver) {
         const competingWaivers = await db('waivers')
           .where({
-            player,
+            pid,
             processed: transactionWaiver.processed,
             succ: 0,
             type: 1,
@@ -145,16 +145,16 @@ router.post('/?', async (req, res) => {
 
     await db('rosters_players').update({ slot: constants.slots.PS }).where({
       rid: rosterRow.uid,
-      player
+      pid
     })
 
-    await db('league_cutlist').where({ player, tid }).del()
+    await db('league_cutlist').where({ pid, tid }).del()
 
     const transaction = {
       userid: req.auth.userId,
       tid,
       lid: leagueId,
-      player,
+      pid,
       type: constants.transactions.ROSTER_DEACTIVATE,
       value: lastTransaction.value,
       year: constants.season.year,
@@ -163,7 +163,7 @@ router.post('/?', async (req, res) => {
     await db('transactions').insert(transaction)
 
     const data = {
-      player,
+      pid,
       tid,
       slot: constants.slots.PS,
       rid: roster.uid,

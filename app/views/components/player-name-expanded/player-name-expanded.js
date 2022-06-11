@@ -38,7 +38,7 @@ function GameStatus({ status, playerMap }) {
     return <div className='player__name-expanded-game'>-</div>
   }
 
-  if (!playerMap || !playerMap.get('player')) {
+  if (!playerMap.get('pid')) {
     return <div className='player__name-expanded-game'>-</div>
   }
 
@@ -99,7 +99,7 @@ class PlayerNameExpanded extends Player {
     // TODO pid
     return (
       <div className={classNames.join(' ')}>
-        {Boolean(isHosted && playerMap.get('player') && !hideActions) && (
+        {Boolean(isHosted && playerMap.get('pid') && !hideActions) && (
           <div className='player__name-expanded-action'>
             <IconButton
               small

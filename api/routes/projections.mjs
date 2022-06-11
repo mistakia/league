@@ -27,7 +27,7 @@ router.get('/?', async (req, res) => {
     if (req.auth) {
       userProjections = await db('projections')
         .select('projections.*')
-        .join('player', 'projections.player', 'player.player')
+        .join('player', 'projections.pid', 'player.pid')
         .whereIn('player.pos', constants.positions)
         .whereNot('player.cteam', 'INA')
         .where({
@@ -43,11 +43,11 @@ router.get('/?', async (req, res) => {
   }
 })
 
-router.get('/:playerId/?', async (req, res) => {
+router.get('/:pid/?', async (req, res) => {
   const { logger } = req.app.locals
   try {
-    const { playerId } = req.params
-    const projections = await getProjections({ playerIds: [playerId] })
+    const { pid } = req.params
+    const projections = await getProjections({ pids: [pid] })
     res.send(projections)
   } catch (error) {
     logger(error)
@@ -56,7 +56,7 @@ router.get('/:playerId/?', async (req, res) => {
 })
 
 router.put(
-  '/:playerId/?',
+  '/:pid/?',
   (err, req, res, next) => {
     if (err.name === 'UnauthorizedError') {
       return res.status(401).send({ error: 'invalid token' })
@@ -67,9 +67,11 @@ router.put(
     const { db, logger } = req.app.locals
     try {
       let { value } = req.body
-      const { playerId } = req.params
+      const { pid } = req.params
       const { type, week } = req.body
       const { userId } = req.auth
+
+      // TODO validate pid
 
       if (!type) {
         return res.status(400).send({ error: 'missing type param' })
@@ -97,7 +99,7 @@ router.put(
 
       const rows = await db('projections').where({
         userid: userId,
-        player: playerId,
+        pid,
         week,
         year: constants.season.year
       })
@@ -110,7 +112,7 @@ router.put(
           })
           .where({
             userid: userId,
-            player: playerId,
+            pid,
             week,
             year: constants.season.year
           })
@@ -119,7 +121,7 @@ router.put(
           [type]: value,
           timestamp: new Date(),
           userid: userId,
-          player: playerId,
+          pid,
           week,
           year: constants.season.year
         })
@@ -134,7 +136,7 @@ router.put(
 )
 
 router.delete(
-  '/:playerId/?',
+  '/:pid/?',
   (err, req, res, next) => {
     if (err.name === 'UnauthorizedError') {
       return res.status(401).send({ error: 'invalid token' })
@@ -145,17 +147,19 @@ router.delete(
     const { db, logger } = req.app.locals
     try {
       const { userId } = req.auth
-      const { playerId } = req.params
+      const { pid } = req.params
       const { week } = req.body
+
+      // TODO validate pid
 
       await db('projections').del().where({
         userid: userId,
-        player: playerId,
+        pid,
         week,
         year: constants.season.year
       })
 
-      res.send({ success: true, week, playerId })
+      res.send({ success: true, week, pid })
     } catch (error) {
       logger(error)
       res.status(500).send({ error: error.toString() })

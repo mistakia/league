@@ -21,10 +21,8 @@ export default class Lineup extends React.Component {
   }
 
   handleUpdate = ({ slot, playerMap }) => {
-    const players = [
-      { slot, player: this.state.selectedPlayerMap.get('player') }
-    ]
-    const pid = playerMap.get('player')
+    const players = [{ slot, player: this.state.selectedPlayerMap.get('pid') }]
+    const pid = playerMap.get('pid')
     if (pid) {
       const { league, roster } = this.props
       const r = new Roster({ roster: roster.toJS(), league })
@@ -36,7 +34,7 @@ export default class Lineup extends React.Component {
         ? selectedSlot
         : constants.slots.BENCH
       players.push({
-        player: pid, // TODO pid
+        pid,
         slot
       })
     }
@@ -57,12 +55,9 @@ export default class Lineup extends React.Component {
       const slot = constants.slots.QB
       const rosterPlayers = r.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.sqb; i++) {
-        const { player } = rosterPlayers[i] || {} // TODO pid
+        const { pid } = rosterPlayers[i] || {}
         starters.push(
-          <PlayerSlot
-            key={`${slot}${i}`}
-            {...{ playerId: player, slot, ...slotProps }}
-          />
+          <PlayerSlot key={`${slot}${i}`} {...{ pid, slot, ...slotProps }} />
         )
       }
     }
@@ -71,12 +66,9 @@ export default class Lineup extends React.Component {
       const slot = constants.slots.RB
       const rosterPlayers = r.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.srb; i++) {
-        const { player } = rosterPlayers[i] || {} // TODO pid
+        const { pid } = rosterPlayers[i] || {}
         starters.push(
-          <PlayerSlot
-            key={`${slot}${i}`}
-            {...{ playerId: player, slot, ...slotProps }}
-          />
+          <PlayerSlot key={`${slot}${i}`} {...{ pid, slot, ...slotProps }} />
         )
       }
     }
@@ -85,12 +77,9 @@ export default class Lineup extends React.Component {
       const slot = constants.slots.WR
       const rosterPlayers = r.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.swr; i++) {
-        const { player } = rosterPlayers[i] || {} // TODO pid
+        const { pid } = rosterPlayers[i] || {}
         starters.push(
-          <PlayerSlot
-            key={`${slot}${i}`}
-            {...{ playerId: player, slot, ...slotProps }}
-          />
+          <PlayerSlot key={`${slot}${i}`} {...{ pid, slot, ...slotProps }} />
         )
       }
     }

@@ -27,7 +27,7 @@ export default class AddFreeAgentDialog extends React.Component {
       props.rosterPlayers.practice.forEach((practicePlayerMap) => {
         if (practicePlayerMap.get('slot') === constants.slots.PSP) return
         const r = new Roster({ roster: props.roster.toJS(), league })
-        r.removePlayer(practicePlayerMap.get('player'))
+        r.removePlayer(practicePlayerMap.get('pid'))
         if (r.hasOpenPracticeSquadSlot()) {
           releases.push(practicePlayerMap)
         }
@@ -35,7 +35,7 @@ export default class AddFreeAgentDialog extends React.Component {
     } else {
       props.rosterPlayers.active.forEach((activePlayerMap) => {
         const r = new Roster({ roster: props.roster.toJS(), league })
-        r.removePlayer(activePlayerMap.get('player'))
+        r.removePlayer(activePlayerMap.get('pid'))
         if (r.hasOpenBenchSlot(pos)) {
           releases.push(activePlayerMap)
         }
@@ -63,7 +63,7 @@ export default class AddFreeAgentDialog extends React.Component {
     }
 
     this.props.addFreeAgent({
-      player: playerMap.get('player'), // TODO pid
+      pid: playerMap.get('pid'),
       release,
       slot: practice ? constants.slots.PS : constants.slots.BENCH
     })
@@ -76,7 +76,7 @@ export default class AddFreeAgentDialog extends React.Component {
     const menuItems = []
     if (!this._isPlayerEligible) {
       for (const releasePlayerMap of this._releases) {
-        const pid = releasePlayerMap.get('player') // TODO pid
+        const pid = releasePlayerMap.get('pid')
         menuItems.push(
           <MenuItem key={pid} value={pid}>
             {releasePlayerMap.get('name')} ({releasePlayerMap.get('pos')})

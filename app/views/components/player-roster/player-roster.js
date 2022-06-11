@@ -74,21 +74,21 @@ class PlayerRoster extends Player {
     const isNegative = Math.sign(savings) === -1
 
     const classNames = ['player__item', 'table__row']
-    if (selected === playerMap.get('player')) classNames.push('selected')
+    if (selected === playerMap.get('pid')) classNames.push('selected')
 
     return (
       <div className={classNames.join(' ')}>
         {reorder && <DragHandle />}
         <div className='player__item-name table__cell sticky__column'>
           <PlayerName
-            playerId={playerMap.get('player')}
+            pid={playerMap.get('pid')}
             waiverId={waiverId}
             poachId={poachId}
             hideActions={isPoach}
             headshot
           />
           <div className='player__item-menu'>
-            {Boolean(playerMap.get('player') && isHosted) && (
+            {Boolean(playerMap.get('pid') && isHosted) && (
               <IconButton
                 small
                 text

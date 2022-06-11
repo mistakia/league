@@ -9,14 +9,14 @@ import './draft-player.styl'
 
 export default class DraftPlayer extends React.Component {
   handleClick = () => {
-    this.props.select(this.props.playerMap.get('player'))
+    this.props.select(this.props.playerMap.get('pid'))
   }
 
   render = () => {
     const { playerMap, selected, isDrafted, index, watchlist, style } =
       this.props
 
-    const pid = playerMap.get('player') // TODO pid
+    const pid = playerMap.get('pid')
     const classNames = ['player-draft__item']
     if (selected === pid) {
       classNames.push('selected')

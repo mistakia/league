@@ -24,7 +24,7 @@ export const getTrade = async (req, res) => {
       res.status(400).send({ error: `could not find tradeid: ${tradeId}` })
     }
 
-    const releases = await db('trade_releases').where({ tradeid: tradeId })
+    const release_rows = await db('trade_releases').where({ tradeid: tradeId })
     const players = await db('trades_players').where({ tradeid: tradeId })
     const picks = await db('trades_picks')
       .select(
@@ -46,11 +46,11 @@ export const getTrade = async (req, res) => {
     trade.proposingTeamPicks = []
     trade.acceptingTeamPicks = []
 
-    for (const player of releases) {
-      if (player.tid === trade.pid) {
-        trade.proposingTeamReleasePlayers.push(player.player)
+    for (const release_row of release_rows) {
+      if (release_row.tid === trade.pid) {
+        trade.proposingTeamReleasePlayers.push(release_row.pid)
       } else {
-        trade.acceptingTeamReleasePlayers.push(player.player)
+        trade.acceptingTeamReleasePlayers.push(release_row.pid)
       }
     }
 
@@ -150,16 +150,16 @@ router.post(
 
       const sub = db('transactions')
         .select(db.raw('max(uid) as uid'))
-        .whereIn('player', allPlayers)
+        .whereIn('pid', allPlayers)
         .where('lid', leagueId)
-        .groupBy('player')
+        .groupBy('pid')
 
       const players = await db
         .select('player.*', 'transactions.value')
         .from(db.raw('(' + sub.toString() + ') AS X'))
         .join('transactions', 'X.uid', 'transactions.uid')
-        .join('player', 'transactions.player', 'player.player')
-        .whereIn('player.player', allPlayers)
+        .join('player', 'transactions.pid', 'player.pid')
+        .whereIn('player.pid', allPlayers)
 
       // validate accepting team roster
       const acceptingTeamRosterRow = await getRoster({ tid: trade.tid })
@@ -273,7 +273,7 @@ router.post(
       const activePoaches = await db('poaches')
         .where('lid', leagueId)
         .whereNull('processed')
-        .whereIn('player', allPlayers)
+        .whereIn('pid', allPlayers)
 
       if (activePoaches.length) {
         await db('poaches')
@@ -282,22 +282,22 @@ router.post(
           .update('succ', 0)
           .where('lid', leagueId)
           .whereIn(
-            'player',
-            activePoaches.map((p) => p.player)
+            'pid',
+            activePoaches.map((p) => p.pid)
           )
       }
 
       // insert receiving team releases
-      const insertReleases = []
-      for (const player of acceptingTeamReleasePlayers) {
-        insertReleases.push({
+      const release_inserts = []
+      for (const pid of acceptingTeamReleasePlayers) {
+        release_inserts.push({
           tradeid: tradeId,
-          player,
+          pid,
           tid: trade.tid
         })
       }
-      if (insertReleases.length) {
-        await db('trade_releases').insert(insertReleases)
+      if (release_inserts.length) {
+        await db('trade_releases').insert(release_inserts)
       }
 
       await db('trades')
@@ -309,7 +309,7 @@ router.post(
           db.raw('max(uid) AS maxuid, CONCAT(player, "_", lid) AS Group1')
         )
         .groupBy('Group1')
-        .whereIn('player', tradedPlayers)
+        .whereIn('pid', tradedPlayers)
         .where({ lid: leagueId })
 
       const transactionHistory = await db
@@ -317,33 +317,33 @@ router.post(
         .from(db.raw('(' + subQuery.toString() + ') AS X'))
         .join('transactions', function () {
           this.on(function () {
-            this.on(db.raw('CONCAT(player, "_", lid) = X.Group1'))
+            this.on(db.raw('CONCAT(pid, "_", lid) = X.Group1'))
             this.andOn('uid', '=', 'maxuid')
           })
         })
 
       // insert transactions
       const insertTransactions = []
-      for (const player of acceptingTeamPlayers) {
+      for (const pid of acceptingTeamPlayers) {
         insertTransactions.push({
           userid: trade.userid,
           tid: trade.pid,
           lid: leagueId,
-          player,
+          pid,
           type: constants.transactions.TRADE,
-          value: transactionHistory.find((t) => t.player === player).value,
+          value: transactionHistory.find((t) => t.pid === pid).value,
           year: constants.season.year,
           timestamp: Math.round(Date.now() / 1000)
         })
       }
-      for (const player of proposingTeamPlayers) {
+      for (const pid of proposingTeamPlayers) {
         insertTransactions.push({
           userid: req.auth.userId,
           tid: trade.tid,
           lid: leagueId,
-          player,
+          pid,
           type: constants.transactions.TRADE,
-          value: transactionHistory.find((t) => t.player === player).value,
+          value: transactionHistory.find((t) => t.pid === pid).value,
           year: constants.season.year,
           timestamp: Math.round(Date.now() / 1000)
         })
@@ -359,12 +359,12 @@ router.post(
 
       if (releasePlayers.length) {
         const releaseTransactions = []
-        for (const player of proposingTeamReleasePlayerIds) {
+        for (const pid of proposingTeamReleasePlayerIds) {
           releaseTransactions.push({
             userid: trade.userid,
             tid: trade.pid,
             lid: leagueId,
-            player,
+            pid,
             type: constants.transactions.ROSTER_RELEASE,
             value: 0,
             year: constants.season.year,
@@ -372,12 +372,12 @@ router.post(
           })
         }
 
-        for (const player of acceptingTeamReleasePlayers) {
+        for (const pid of acceptingTeamReleasePlayers) {
           releaseTransactions.push({
             userid: req.auth.userId,
             tid: trade.tid,
             lid: leagueId,
-            player,
+            pid,
             type: constants.transactions.ROSTER_RELEASE,
             value: 0,
             year: constants.season.year,
@@ -436,7 +436,7 @@ router.post(
       // cancel other trades that include any players in this trade
       const playerTradeRows = await db('trades')
         .innerJoin('trades_players', 'trades.uid', 'trades_players.tradeid')
-        .whereIn('trades_players.player', allPlayers)
+        .whereIn('trades_players.pid', allPlayers)
         .where('trades.lid', leagueId)
         .whereNull('trades.accepted')
         .whereNull('trades.cancelled')
@@ -445,14 +445,14 @@ router.post(
 
       // remove players from cutlist
       await db('league_cutlist')
-        .whereIn('player', allPlayers)
+        .whereIn('pid', allPlayers)
         .whereIn('tid', [trade.pid, trade.tid])
         .del()
 
       // cancel any transition bids
       await db('transition_bids')
         .update('cancelled', Math.round(Date.now() / 1000))
-        .whereIn('player', allPlayers)
+        .whereIn('pid', allPlayers)
         .whereNull('cancelled')
         .whereNull('processed')
         .where('lid', leagueId)
@@ -472,14 +472,14 @@ router.post(
       const acceptingTeam = teams.find((t) => t.uid === trade.tid)
       const proposingTeamItems = []
       const acceptingTeamItems = []
-      for (const playerId of proposingTeamPlayers) {
-        const player = players.find((p) => p.player === playerId)
+      for (const pid of proposingTeamPlayers) {
+        const player = players.find((p) => p.pid === pid)
         proposingTeamItems.push(
           `${player.fname} ${player.lname} (${player.pos})`
         )
       }
-      for (const playerId of acceptingTeamPlayers) {
-        const player = players.find((p) => p.player === playerId)
+      for (const pid of acceptingTeamPlayers) {
+        const player = players.find((p) => p.pid === pid)
         acceptingTeamItems.push(
           `${player.fname} ${player.lname} (${player.pos})`
         )
@@ -513,8 +513,8 @@ router.post(
 
       if (releasePlayers.length) {
         const releaseItems = []
-        for (const playerId of releasePlayers) {
-          const player = players.find((p) => p.player === playerId)
+        for (const pid of releasePlayers) {
+          const player = players.find((p) => p.pid === pid)
           releaseItems.push(`${player.fname} ${player.lname} (${player.pos})`)
         }
         const releaseItemsStr = toStringArray(releaseItems)
@@ -524,7 +524,7 @@ router.post(
       if (activePoaches.length) {
         const poachItems = []
         for (const poach of activePoaches) {
-          const player = players.find((p) => p.player === poach.player)
+          const player = players.find((p) => p.pid === poach.pid)
           poachItems.push(`${player.fname} ${player.lname} (${player.pos})`)
         }
         const poachItemsStr = toStringArray(poachItems)

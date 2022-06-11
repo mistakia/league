@@ -29,10 +29,10 @@ export default class ActivateConfirmation extends React.Component {
     this._reserveEligible = []
     this._activePlayers = []
 
-    const active_pids = team.roster.active.map((p) => p.player) // TODO pid
+    const active_pids = team.roster.active.map((p) => p.pid)
     for (const pid of active_pids) {
       const activePlayerMap = team.players.find(
-        (playerMap) => playerMap.get('player') === pid
+        (playerMap) => playerMap.get('pid') === pid
       )
       this._activePlayers.push(activePlayerMap)
       if (isReserveEligible(activePlayerMap.toJS())) {
@@ -53,7 +53,7 @@ export default class ActivateConfirmation extends React.Component {
 
   handleSubmit = () => {
     const { reserve, release } = this.state
-    const pid = this.props.playerMap.get('player') // TODO pid
+    const pid = this.props.playerMap.get('pid')
 
     if (!this._hasBenchSpace && !reserve && !release) {
       return this.setState({ missing: true })
@@ -62,7 +62,7 @@ export default class ActivateConfirmation extends React.Component {
     }
 
     this.props.activate({
-      player: pid,
+      pid,
       reserve,
       release,
       slot: constants.slots.IR
@@ -75,7 +75,7 @@ export default class ActivateConfirmation extends React.Component {
 
     const reserveItems = []
     for (const reservePlayerMap of this._reserveEligible) {
-      const pid = reservePlayerMap.get('player')
+      const pid = reservePlayerMap.get('pid')
       reserveItems.push(
         <MenuItem key={pid} value={pid}>
           {reservePlayerMap.get('name')} ({reservePlayerMap.get('pos')})
@@ -85,7 +85,7 @@ export default class ActivateConfirmation extends React.Component {
 
     const releaseItems = []
     for (const activePlayerMap of this._activePlayers) {
-      const pid = activePlayerMap.get('player') // TODO pid
+      const pid = activePlayerMap.get('pid')
       releaseItems.push(
         <MenuItem key={pid} value={pid}>
           {activePlayerMap.get('name')} ({activePlayerMap.get('pos')})

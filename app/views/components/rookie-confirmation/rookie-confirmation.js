@@ -24,22 +24,18 @@ export default class RookieConfirmation extends React.Component {
       missingUntag: false
     }
 
-    const { team, playerMap } = props
+    const { team } = props
     this._isEligible = team.roster.isEligibleForTag({
-      tag: constants.tags.ROOKIE,
-      player: playerMap.get('player') // TODO pid
+      tag: constants.tags.ROOKIE
     })
     this._untags = []
     const tagged_players = team.roster.getPlayersByTag(constants.tags.ROOKIE)
-    const tagged_pids = tagged_players.map((playerMap) =>
-      playerMap.get('player')
-    ) // TODO pid
-    for (const pid of tagged_pids) {
+    tagged_players.forEach(({ pid }) => {
       const taggedPlayerMap = team.players.find(
-        (playerMap) => playerMap.get('player') === pid
+        (playerMap) => playerMap.get('pid') === pid
       )
       this._untags.push(taggedPlayerMap)
-    }
+    })
   }
 
   handleUntag = (event) => {
@@ -49,7 +45,7 @@ export default class RookieConfirmation extends React.Component {
 
   handleSubmit = () => {
     const { untag, error } = this.state
-    const pid = this.props.playerMap.get('player') // TODO pid
+    const pid = this.props.playerMap.get('pid')
 
     if (!this._isEligible && !untag) {
       return this.setState({ missingUntag: true })
@@ -68,7 +64,7 @@ export default class RookieConfirmation extends React.Component {
 
     const menuItems = []
     for (const taggedPlayerMap of this._untags) {
-      const pid = taggedPlayerMap.get('player') // TODO pid
+      const pid = taggedPlayerMap.get('pid')
       menuItems.push(
         <MenuItem key={pid} value={pid}>
           {taggedPlayerMap.get('name')} ({taggedPlayerMap.get('pos')})

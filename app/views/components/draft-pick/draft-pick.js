@@ -29,7 +29,7 @@ export default class DraftPick extends React.Component {
           {pick.round}.{('0' + pickNum).slice(-2)}
         </div>
         <div className='draft__pick-main'>
-          {Boolean(playerMap.get('player')) && (
+          {Boolean(playerMap.get('pid')) && (
             <div className='draft__pick-player'>
               <span className='draft__pick-player-name'>
                 {playerMap.get('fname')} {playerMap.get('lname')}

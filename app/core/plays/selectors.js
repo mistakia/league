@@ -17,8 +17,7 @@ export function getPlaysForPlayer(state, { playerMap, week }) {
       }
 
       return (
-        (Boolean(p.pos_team) &&
-          fixTeam(p.pos_team) !== playerMap.get('player')) ||
+        (Boolean(p.pos_team) && fixTeam(p.pos_team) !== playerMap.get('pid')) ||
         p.type_nfl === 'PUNT' ||
         p.type_nfl === 'KICK_OFF' ||
         p.type_nfl === 'XP_KICK'

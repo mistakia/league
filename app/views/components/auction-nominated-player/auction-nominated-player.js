@@ -13,7 +13,7 @@ export default class AuctionNominatedPlayer extends React.Component {
     return (
       <div className='auction__nominated-player'>
         <div className='nominated__player'>
-          <PlayerName playerId={playerMap.get('player')} headshot />
+          <PlayerName pid={playerMap.get('pid')} headshot />
         </div>
         <div className='nominated__player-details'>
           <div className='nominated__player-detail'>

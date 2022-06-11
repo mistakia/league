@@ -16,7 +16,7 @@ const mapStateToProps = createSelector(
   (playerMap, status, players) => ({
     playerMap,
     status,
-    isOnCutlist: players.get('cutlist').includes(playerMap.get('player'))
+    isOnCutlist: players.get('cutlist').includes(playerMap.get('pid'))
   })
 )
 

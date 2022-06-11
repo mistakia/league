@@ -15,7 +15,7 @@ import './player-name.styl'
 
 export default class PlayerName extends React.Component {
   handleClick = () => {
-    this.props.select(this.props.playerMap.get('player'))
+    this.props.select(this.props.playerMap.get('pid'))
   }
 
   render = () => {

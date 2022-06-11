@@ -64,15 +64,15 @@ router.get('/?', async (req, res) => {
   }
 })
 
-router.get('/:playerId', async (req, res) => {
+router.get('/:pid', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    const { playerId } = req.params
+    const { pid } = req.params
 
-    const players = await db('player').where({ player: playerId }).limit(1)
+    const players = await db('player').where({ pid }).limit(1)
     const player = players[0]
     const practice = await db('practice').where({
-      player: playerId,
+      pid,
       year: constants.season.year
     })
 

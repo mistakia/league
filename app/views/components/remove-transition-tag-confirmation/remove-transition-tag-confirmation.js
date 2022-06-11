@@ -11,9 +11,9 @@ import Button from '@components/button'
 
 export default class RemoveTransitionTagConfirmation extends React.Component {
   handleSubmit = () => {
-    const pid = this.props.playerMap.get('player')
+    const pid = this.props.playerMap.get('pid')
     const { tid } = this.props.team.roster
-    this.props.remove({ player: pid, teamId: tid }) // TODO pid
+    this.props.remove({ pid, teamId: tid })
     this.props.onClose()
   }
 

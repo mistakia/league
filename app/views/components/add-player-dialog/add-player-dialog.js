@@ -74,7 +74,7 @@ export default class AddPlayerDialog extends React.Component {
     for (const [index, playerMap] of sorted.entries()) {
       // TODO pid
       menuItems.push(
-        <option key={index} value={playerMap.get('player')}>
+        <option key={index} value={playerMap.get('pid')}>
           {playerMap.get('name')} ({playerMap.get('pos')})
         </option>
       )

@@ -59,7 +59,7 @@ export function getScoreboardByTeamId(state, { tid }) {
     if (gamelog) {
       points += gamelog.total
       const gameStatus = getGameStatusByPlayerId(state, {
-        playerId: playerMap.get('player'),
+        pid: playerMap.get('pid'),
         week
       })
       if (gameStatus && gameStatus.lastPlay) {
@@ -107,7 +107,7 @@ export function getStartersByMatchupId(state, { mid }) {
 
   const games = {}
   for (const playerMap of playerMaps) {
-    if (!playerMap.get('player')) continue
+    if (!playerMap.get('pid')) continue
     const game = getGameByTeam(state, {
       team: playerMap.get('team'),
       week: matchup.week
@@ -124,7 +124,7 @@ export function getStartersByMatchupId(state, { mid }) {
 export function getScoreboardGamelogByPlayerId(state, { playerId }) {
   const playerMap = getPlayerById(state, { playerId })
 
-  if (!playerMap.get('player')) return
+  if (!playerMap.get('pid')) return
 
   const week = state.getIn(['scoreboard', 'week'])
   return getGamelogForPlayer(state, { playerMap, week })
@@ -182,14 +182,14 @@ export function getPlaysByMatchupId(state, { mid }) {
         return false
       })
       if (!playerMap) continue
-      const pid = playerMap.get('player')
+      const pid = playerMap.get('pid')
       if (!grouped[pid]) grouped[pid] = []
       grouped[pid].push(playStat)
     }
     const points = {}
     const stats = {}
     for (const pid in grouped) {
-      const playerMap = playerMaps.find((pMap) => pMap.get('player') === pid)
+      const playerMap = playerMaps.find((pMap) => pMap.get('pid') === pid)
       const playStats = grouped[pid]
       stats[pid] = calculateStatsFromPlayStats(playStats)
       points[pid] = calculatePoints({

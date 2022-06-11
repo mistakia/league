@@ -7,14 +7,14 @@ import SelectedPlayerProjection from '@components/selected-player-projection'
 
 export default class SelectedPlayerSeasonProjections extends React.Component {
   componentDidMount() {
-    const pid = this.props.playerMap.get('player') // TODO pid
+    const pid = this.props.playerMap.get('pid')
     this.props.load(pid)
   }
 
   render = () => {
     const { playerMap } = this.props
 
-    const pid = playerMap.get('player') // TODO pid
+    const pid = playerMap.get('pid')
     const pos = playerMap.get('pos')
     const tables = []
     const projs = playerMap.get('projections', new List()).toJS()

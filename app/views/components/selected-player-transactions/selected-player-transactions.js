@@ -19,7 +19,7 @@ import './selected-player-transactions.styl'
 
 export default class SelectedPlayerTransactions extends React.Component {
   componentDidMount() {
-    this.props.load(this.props.playerMap.get('player'))
+    this.props.load(this.props.playerMap.get('pid'))
   }
 
   render = () => {

@@ -152,7 +152,7 @@ export default class PlayersPage extends React.Component {
       (playerMap, idx) =>
         rowItems.push(
           <PlayerRow
-            key={playerMap.get('player')}
+            key={playerMap.get('pid')}
             playerMap={playerMap}
             index={idx}
           />

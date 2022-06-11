@@ -1,13 +1,13 @@
 import { constants } from '#common'
 import db from '#db'
 
-export default async function ({ week, playerIds = [] } = {}) {
-  if (!playerIds.length) {
+export default async function ({ week, pids = [] } = {}) {
+  if (!pids.length) {
     const players = await db('player')
-      .select('player')
+      .select('pid')
       .whereIn('pos', constants.positions)
       .whereNot({ cteam: 'INA' })
-    players.forEach((p) => playerIds.push(p.player))
+    players.forEach((p) => pids.push(p.pid))
   }
 
   const sub = db('projections')
@@ -25,7 +25,7 @@ export default async function ({ week, playerIds = [] } = {}) {
         this.andOn('timestamp', '=', 'maxtime')
       })
     })
-    .whereIn('player', playerIds)
+    .whereIn('pid', pids)
     .whereNull('userid')
     .whereNot('sourceid', constants.sources.AVERAGE)
 

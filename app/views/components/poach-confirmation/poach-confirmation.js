@@ -24,7 +24,7 @@ export default class PoachConfirmation extends React.Component {
     const pos = playerMap.get('pos')
     for (const activePlayerMap of props.team.active) {
       const r = new Roster({ roster: props.roster.toJS(), league })
-      r.removePlayer(activePlayerMap.get('player'))
+      r.removePlayer(activePlayerMap.get('pid'))
       if (r.hasOpenBenchSlot(pos)) {
         releases.push(activePlayerMap)
       }
@@ -69,13 +69,13 @@ export default class PoachConfirmation extends React.Component {
     if (this.props.status.waiver.poach) {
       this.props.submitWaiverClaim({
         release,
-        player: playerMap.get('player'), // TODO pid
+        player: playerMap.get('pid'), // TODO pid
         type: constants.waivers.POACH
       })
     } else if (poach.uid) {
       this.props.updatePoach({ poachId: poach.uid, release })
     } else {
-      this.props.submitPoach({ release, player: playerMap.get('player') })
+      this.props.submitPoach({ release, player: playerMap.get('pid') })
     }
     this.props.onClose()
   }
@@ -96,7 +96,7 @@ export default class PoachConfirmation extends React.Component {
         bid: activePlayerMap.get('bid')
       })
       options.push({
-        id: activePlayerMap.get('player'), // TODO pid
+        id: activePlayerMap.get('pid'),
         label: activePlayerMap.get('name'),
         pos,
         team: activePlayerMap.get('team'),
@@ -141,7 +141,7 @@ export default class PoachConfirmation extends React.Component {
     this.state.release.forEach((pid) => {
       const releasePlayerMap = releasePlayerPool.find((p) => p.player === pid)
       releasePlayers.push({
-        id: releasePlayerMap.get('player'), // TODO pid
+        id: releasePlayerMap.get('pid'),
         label: releasePlayerMap.get('name'),
         pos: releasePlayerMap.get('pos'),
         team: releasePlayerMap.get('team'),

@@ -11,7 +11,7 @@ export default class EditableProjection extends React.Component {
       week: parseInt(this.props.week, 10),
       userId: this.props.userId,
       type: this.props.type,
-      playerId: this.props.playerMap.get('player') // TODO pid
+      pid: this.props.playerMap.get('pid')
     })
   }
 
