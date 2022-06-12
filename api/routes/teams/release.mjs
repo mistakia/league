@@ -75,7 +75,7 @@ router.post('/?', async (req, res) => {
     let result
     try {
       result = await processRelease({
-        pid,
+        release_pid: pid,
         tid,
         lid,
         userid: req.auth.userId

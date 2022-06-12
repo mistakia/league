@@ -12,7 +12,7 @@ import getLeague from './get-league.mjs'
 export default async function ({
   leagueId,
   release = [],
-  player,
+  pid,
   teamId,
   bid = 0,
   userId,
@@ -25,18 +25,18 @@ export default async function ({
       : constants.transactions.PRACTICE_ADD
 
   // verify player and release ids
-  const playerIds = [player]
+  const pids = [pid]
   if (release.length) {
-    release.forEach((player) => playerIds.push(player))
+    release.forEach((pid) => pids.push(pid))
   }
-  const playerRows = await db('player').whereIn('player', playerIds)
-  const playerRow = playerRows.find((p) => p.player === player)
-  if (!playerRow) {
+  const player_rows = await db('player').whereIn('pid', pid)
+  const player_row = player_rows.find((p) => p.pid === pid)
+  if (!player_row) {
     throw new Error('invalid player')
   }
   if (release.length) {
-    for (const player of release) {
-      if (!playerRows.some((p) => p.player === player)) {
+    for (const release_pid of release) {
+      if (!player_rows.some((p) => p.pid === release_pid)) {
         throw new Error('invalid release')
       }
     }
@@ -62,7 +62,7 @@ export default async function ({
       lid: leagueId,
       week: constants.season.week,
       year: constants.season.year,
-      player
+      pid
     })
     .limit(1)
   if (rosters.length) {
@@ -70,14 +70,14 @@ export default async function ({
   }
 
   // verify player is not locked
-  const isLocked = await isPlayerLocked(player)
+  const isLocked = await isPlayerLocked(pid)
   if (isLocked) {
     throw new Error('player is locked, game has started')
   }
 
   // verify no veterans are signed in the offseason & the rookie draft is complete
   if (!constants.season.isRegularSeason) {
-    if (playerRow.start !== constants.season.year) {
+    if (player_row.start !== constants.season.year) {
       throw new Error('veteran free agency not open')
     }
 
@@ -97,7 +97,7 @@ export default async function ({
   }
 
   // verify player is not on waivers - released in the last 24 hours excluding cycling
-  const isOnWaivers = await isPlayerOnWaivers({ player, leagueId })
+  const isOnWaivers = await isPlayerOnWaivers({ pid, leagueId })
   if (isOnWaivers) {
     throw new Error('player is on waivers')
   }
@@ -105,9 +105,9 @@ export default async function ({
   // verify player is practice squad eligible (rookie, not on a team, or on a PS)
   /* if (type === constants.transactions.PRACTICE_ADD) {
    *   if (
-   *     playerRow.start !== constants.season.year &&
-   *     playerRow.posd !== 'PS' &&
-   *     playerRow.cteam !== 'INA'
+   *     player_row.start !== constants.season.year &&
+   *     player_row.posd !== 'PS' &&
+   *     player_row.cteam !== 'INA'
    *   ) {
    *     throw new Error('player is not practice squad eligible')
    *   }
@@ -119,8 +119,8 @@ export default async function ({
   const roster = new Roster({ roster: rosterRow, league })
   const releasePlayers = []
   if (release.length) {
-    for (const player of release) {
-      const releasePlayer = roster.get(player)
+    for (const release_pid of release) {
+      const releasePlayer = roster.get(release_pid)
       if (!releasePlayer) {
         continue
         // throw new Error('invalid release')
@@ -130,12 +130,12 @@ export default async function ({
         throw new Error('invalid release')
       }
 
-      releasePlayers.push(player)
-      roster.removePlayer(player)
+      releasePlayers.push(release_pid)
+      roster.removePlayer(release_pid)
     }
   }
 
-  const hasSlot = roster.isEligibleForSlot({ slot, player, pos: playerRow.pos })
+  const hasSlot = roster.isEligibleForSlot({ slot, pid, pos: player_row.pos })
   if (!hasSlot) {
     throw new Error('exceeds roster limits')
   }
@@ -144,9 +144,9 @@ export default async function ({
 
   // process release
   if (releasePlayers.length) {
-    for (const player of releasePlayers) {
+    for (const release_pid of releasePlayers) {
       const releaseData = await processRelease({
-        player,
+        pid: release_pid,
         tid: teamId,
         lid: leagueId,
         userid: userId
@@ -158,8 +158,8 @@ export default async function ({
   // add player to roster
   await db('rosters_players').insert({
     rid: roster.uid,
-    player,
-    pos: playerRow.pos,
+    pid,
+    pos: player_row.pos,
     slot
   })
 
@@ -168,7 +168,7 @@ export default async function ({
     userid: userId,
     tid: teamId,
     lid: leagueId,
-    player,
+    pid,
     type,
     value: bid,
     year: constants.season.year,
@@ -178,19 +178,19 @@ export default async function ({
   await db('transactions').insert(addTransaction)
 
   result.push({
-    player,
+    pid,
     slot,
     rid: roster.uid,
-    pos: playerRow.pos,
+    pos: player_row.pos,
     transaction: addTransaction
   })
 
   // send notification
-  let message = `${team.name} (${team.abbrv}) has signed free agent ${playerRow.fname} ${playerRow.lname} (${playerRow.pos}) for $${bid}.`
+  let message = `${team.name} (${team.abbrv}) has signed free agent ${player_row.fname} ${player_row.lname} (${player_row.pos}) for $${bid}.`
   if (releasePlayers.length) {
-    for (const player of releasePlayers) {
-      const releasePlayer = playerRows.find((p) => p.player === player)
-      message += ` ${releasePlayer.fname} ${releasePlayer.lname} (${releasePlayer.pos}) has been released.`
+    for (const release_pid of releasePlayers) {
+      const release_player_row = player_rows.find((p) => p.pid === release_pid)
+      message += ` ${release_player_row.fname} ${release_player_row.lname} (${release_player_row.pos}) has been released.`
     }
   }
 
