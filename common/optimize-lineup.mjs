@@ -41,14 +41,14 @@ export default function optimizeLineup({ players, league }) {
     }
 
     const result = solver.Solve(model)
-    const starters = Object.keys(result).filter(
+    const starter_pids = Object.keys(result).filter(
       (r) =>
         r.match(/^([A-Z]{2,})-([0-9]{4,})$/gi) || r.match(/^([A-Z]{1,3})$/gi)
     )
 
     results[week] = {
       total: result.result,
-      starters
+      starter_pids
     }
   }
 

@@ -31,22 +31,22 @@ const calculateRookiePickValue = async ({ year }) => {
   const result = {}
 
   const rookieSeason = seasons['1']
-  for (const playerId in rookieSeason) {
-    const playerRookieSeason = rookieSeason[playerId]
+  for (const pid in rookieSeason) {
+    const playerRookieSeason = rookieSeason[pid]
     const playerResult = {
       vor: playerRookieSeason.vor,
       value: playerRookieSeason.value,
       points: playerRookieSeason.points
     }
     for (let i = 2; i <= limit; i++) {
-      const playerSeason = seasons[i][playerId]
+      const playerSeason = seasons[i][pid]
       if (playerSeason) {
         playerResult.vor += playerSeason.vor
         playerResult.value += playerSeason.value
         playerResult.points += playerSeason.points
       }
     }
-    result[playerId] = {
+    result[pid] = {
       ...playerRookieSeason,
       ...playerResult
     }
@@ -81,7 +81,7 @@ if (isMain(import.meta.url)) {
         p.addRow(
           {
             index: index + 1,
-            player: player.player,
+            pid: player.pid,
             vor: player.vor.toFixed(2),
             points: player.points.toFixed(2),
             prnk: player.prnk,

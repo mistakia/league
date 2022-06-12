@@ -11,30 +11,30 @@ const run = async () => {
   const leagueId = 1
   const league = await getLeague(leagueId)
   const teams = await db('teams').where({ lid: leagueId })
-  const teamLineupsInserts = []
-  const teamLineupStartersInserts = []
+  const team_lineup_inserts = []
+  const team_lineup_starter_inserts = []
   for (const team of teams) {
     const tid = team.uid
     const rosterRows = await getRoster({ tid })
     const roster = new Roster({ roster: rosterRows, league })
-    const activePlayerIds = roster.active.map((p) => p.player)
-    const players = await getPlayers({ leagueId, playerIds: activePlayerIds })
+    const active_pids = roster.active.map((p) => p.pid)
+    const players = await getPlayers({ leagueId, pids: active_pids })
     const lineups = optimizeLineup({
       players,
       league
     })
 
     for (const [week, lineup] of Object.entries(lineups)) {
-      teamLineupsInserts.push({
+      team_lineup_inserts.push({
         week,
         tid,
         lid: leagueId,
         year,
         total: lineup.total
       })
-      for (const player of lineup.starters) {
-        teamLineupStartersInserts.push({
-          player,
+      for (const pid of lineup.starter_pids) {
+        team_lineup_starter_inserts.push({
+          pid,
           week,
           lid: leagueId,
           year,
@@ -44,20 +44,20 @@ const run = async () => {
     }
   }
 
-  if (teamLineupsInserts.length) {
+  if (team_lineup_inserts.length) {
     await db('league_team_lineups')
-      .insert(teamLineupsInserts)
+      .insert(team_lineup_inserts)
       .onConflict()
       .merge()
-    log(`saved ${teamLineupsInserts.length} team lineups`)
+    log(`saved ${team_lineup_inserts.length} team lineups`)
   }
 
-  if (teamLineupStartersInserts.length) {
+  if (team_lineup_starter_inserts.length) {
     await db('league_team_lineup_starters')
-      .insert(teamLineupStartersInserts)
+      .insert(team_lineup_starter_inserts)
       .onConflict()
       .merge()
-    log(`saved ${teamLineupStartersInserts.length} team lineup starters`)
+    log(`saved ${team_lineup_starter_inserts.length} team lineup starters`)
   }
 }
 

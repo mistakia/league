@@ -34,12 +34,12 @@ const run = async ({ lid, year }) => {
       const rosterRow = await getRoster({ tid: team.uid, week, year })
       const roster = new Roster({ roster: rosterRow, league })
       starters[week][team.uid] = roster.starters.map((p) => ({
-        player: p.player,
+        pid: p.pid,
         pos: p.pos,
         slot: p.slot
       }))
       active[week][team.uid] = roster.active.map((p) => ({
-        player: p.player,
+        pid: p.pid,
         pos: p.pos
       }))
     }

@@ -52,7 +52,7 @@ const run = async () => {
           const transactions = await db('transactions').where({
             lid,
             type: constants.transactions.DRAFT,
-            player: waiver.player
+            pid: waiver.pid
           })
 
           if (transactions.length) {
@@ -61,13 +61,13 @@ const run = async () => {
         }
 
         const release = await db('waiver_releases')
-          .select('player')
+          .select('pid')
           .where('waiverid', waiver.wid)
 
         await submitAcquisition({
-          release: release.map((r) => r.player),
+          release: release.map((r) => r.pid),
           leagueId: lid,
-          player: waiver.player,
+          pid: waiver.pid,
           teamId: waiver.tid,
           bid: value,
           userId: waiver.userid,

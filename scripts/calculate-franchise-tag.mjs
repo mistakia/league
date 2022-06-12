@@ -26,7 +26,7 @@ const run = async () => {
           'transactions.uid',
           '=',
           db.raw(
-            '(select max(uid) from transactions where transactions.tid = rosters.tid and transactions.player = rosters_players.player)'
+            '(select max(uid) from transactions where transactions.tid = rosters.tid and transactions.pid = rosters_players.pid)'
           )
         )
       })

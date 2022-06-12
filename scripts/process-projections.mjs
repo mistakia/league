@@ -35,51 +35,51 @@ const processLeague = async ({ year, lid }) => {
   const leagueTotalCap = nteams * cap - nteams * rosterSize * minBid
 
   const rosterRows = []
-  const rosteredIds = []
+  const rostered_pids = []
   for (const team of teams) {
     const rosterRow = await getRoster({ tid: team.uid, week })
     rosterRows.push(rosterRow)
-    rosterRow.players.forEach((p) => rosteredIds.push(p.player))
+    rosterRow.players.forEach((p) => rostered_pids.push(p.pid))
   }
 
-  const playerProjections = await getProjections()
-  const groupedProjs = groupBy(playerProjections, 'player')
-  const projectionPlayerIds = Object.keys(groupedProjs)
-  const players = await db('player').whereIn(
-    'player',
-    projectionPlayerIds.concat(rosteredIds)
+  const projections = await getProjections()
+  const projections_by_pid = groupBy(projections, 'pid')
+  const projection_pids = Object.keys(projections_by_pid)
+  const player_rows = await db('player').whereIn(
+    'pid',
+    projection_pids.concat(rostered_pids)
   )
 
   const transactions = await getPlayerTransactions({
     lid,
-    playerIds: rosteredIds
+    pids: rostered_pids
   })
 
   for (const tran of transactions) {
-    const player = players.find((p) => p.player === tran.player)
-    player.value = tran.value
+    const player_row = player_rows.find((p) => p.pid === tran.pid)
+    player_row.value = tran.value
   }
 
-  for (const player of players) {
-    player.value =
-      typeof player.value === 'undefined' || player.value === null
+  for (const player_row of player_rows) {
+    player_row.value =
+      typeof player_row.value === 'undefined' || player_row.value === null
         ? null
-        : player.value
-    player.projection = {}
-    player.points = {}
-    player.vorp = {}
-    player.vorp_adj = {}
-    player.market_salary = {}
+        : player_row.value
+    player_row.projection = {}
+    player_row.points = {}
+    player_row.vorp = {}
+    player_row.vorp_adj = {}
+    player_row.market_salary = {}
 
-    const projections = groupedProjs[player.player] || []
+    const projections = projections_by_pid[player_row.pid] || []
 
     week = year === constants.season.year ? constants.season.week : 0
     for (; week <= finalWeek; week++) {
-      player.projection[week] = {}
-      player.points[week] = {}
-      player.vorp[week] = {}
-      player.vorp_adj[week] = {}
-      player.market_salary[week] = {}
+      player_row.projection[week] = {}
+      player_row.points[week] = {}
+      player_row.vorp[week] = {}
+      player_row.vorp_adj[week] = {}
+      player_row.market_salary[week] = {}
 
       // average projection
       const projection = weightProjections({
@@ -90,18 +90,18 @@ const processLeague = async ({ year, lid }) => {
       // points
       const points = calculatePoints({
         stats: projection,
-        position: player.pos,
+        position: player_row.pos,
         league
       })
 
-      player.projection[week] = projection
-      player.points[week] = points
+      player_row.projection[week] = projection
+      player_row.points[week] = points
     }
 
     // calculate ros projection
     const ros = constants.createStats()
     let projWks = 0
-    for (const [week, projection] of Object.entries(player.projection)) {
+    for (const [week, projection] of Object.entries(player_row.projection)) {
       if (week && week !== '0' && week >= constants.season.week) {
         projWks += 1
         for (const [key, value] of Object.entries(projection)) {
@@ -110,11 +110,11 @@ const processLeague = async ({ year, lid }) => {
       }
     }
 
-    player.projWks = projWks
-    player.projection.ros = ros
-    player.points.ros = calculatePoints({
+    player_row.projWks = projWks
+    player_row.projection.ros = ros
+    player_row.points.ros = calculatePoints({
       stats: ros,
-      position: player.pos,
+      position: player_row.pos,
       league
     })
   }
@@ -125,21 +125,26 @@ const processLeague = async ({ year, lid }) => {
   const historicBaselines = getHistoricBaselines({ league })
   for (; week <= finalWeek; week++) {
     // baselines
-    const baseline = calculateBaselines({ players, league, rosterRows, week })
+    const baseline = calculateBaselines({
+      players: player_rows,
+      league,
+      rosterRows,
+      week
+    })
     baselines[week] = baseline
 
     // calculate values
     const total = calculateValues({
-      players,
+      players: player_rows,
       baselines: baseline,
       week,
       historicBaselines
     })
-    calculatePrices({ cap: leagueTotalCap, total, players, week })
+    calculatePrices({ cap: leagueTotalCap, total, players: player_rows, week })
   }
 
   calculatePlayerValuesRestOfSeason({
-    players,
+    players: player_rows,
     rosterRows,
     league
   })
@@ -148,15 +153,15 @@ const processLeague = async ({ year, lid }) => {
   const rosProjectionInserts = []
   const pointsInserts = []
   const valueInserts = []
-  for (const player of players) {
-    if (!projectionPlayerIds.includes(player.player)) {
+  for (const player_row of player_rows) {
+    if (!projection_pids.includes(player_row.pid)) {
       continue
     }
 
-    for (const [week, projection] of Object.entries(player.projection)) {
+    for (const [week, projection] of Object.entries(player_row.projection)) {
       if (week === 'ros') {
         rosProjectionInserts.push({
-          player: player.player,
+          pid: player_row.pid,
           sourceid: constants.sources.AVERAGE,
           year: constants.season.year,
           timestamp: 0,
@@ -165,7 +170,7 @@ const processLeague = async ({ year, lid }) => {
         })
       } else {
         projectionInserts.push({
-          player: player.player,
+          pid: player_row.pid,
           sourceid: constants.sources.AVERAGE,
           year: constants.season.year,
           timestamp: 0, // must be set at zero for unique key
@@ -175,9 +180,9 @@ const processLeague = async ({ year, lid }) => {
       }
     }
 
-    for (const [week, points] of Object.entries(player.points)) {
+    for (const [week, points] of Object.entries(player_row.points)) {
       pointsInserts.push({
-        player: player.player,
+        pid: player_row.pid,
         year: constants.season.year,
         lid,
         week,
@@ -185,15 +190,15 @@ const processLeague = async ({ year, lid }) => {
       })
     }
 
-    for (const [week, vorp] of Object.entries(player.vorp)) {
+    for (const [week, vorp] of Object.entries(player_row.vorp)) {
       valueInserts.push({
-        player: player.player,
+        pid: player_row.pid,
         year: constants.season.year,
         lid,
         week,
         vorp,
-        vorp_adj: player.vorp_adj[week],
-        market_salary: player.market_salary[week]
+        vorp_adj: player_row.vorp_adj[week],
+        market_salary: player_row.market_salary[week]
       })
     }
   }
@@ -209,7 +214,7 @@ const processLeague = async ({ year, lid }) => {
           week,
           year: constants.season.year,
           pos: position,
-          player: baseline.player,
+          pid: baseline.pid,
           type
         })
       }

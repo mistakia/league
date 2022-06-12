@@ -74,11 +74,11 @@ const run = async () => {
       const prop = {}
 
       // find player
-      let player
+      let player_row
       const params = { name: bets[0].participant }
       try {
-        player = await getPlayer(params)
-        if (!player) {
+        player_row = await getPlayer(params)
+        if (!player_row) {
           missing.push(params)
           continue
         }
@@ -88,7 +88,7 @@ const run = async () => {
         continue
       }
 
-      prop.player = player.player
+      prop.pid = player_row.pid
       prop.type = types[type]
       prop.id = id
       prop.timestamp = timestamp

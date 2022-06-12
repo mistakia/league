@@ -39,13 +39,13 @@ const calculateVOR = async ({ year, rookie, league }) => {
       'player.pname',
       'player.pos',
       'player.start',
-      'gamelogs.player'
+      'gamelogs.pid'
     )
     .where('gamelogs.year', year)
     .andWhere('gamelogs.week', '<=', constants.season.finalWeek)
-    .join('player', 'gamelogs.player', 'player.player')
+    .join('player', 'gamelogs.pid', 'player.pid')
 
-  const playerIds = rows.map((p) => p.player)
+  const pids = rows.map((p) => p.pid)
   const sub = db('rankings')
     .select(db.raw('max(timestamp) AS maxtime, sourceid AS sid'))
     .groupBy('sid')
@@ -61,17 +61,17 @@ const calculateVOR = async ({ year, rookie, league }) => {
     })
     .where('sf', 1)
     .where('year', year)
-    .whereIn('player', playerIds)
+    .whereIn('pid', pids)
 
-  const grouped = groupBy(rows, 'player')
+  const grouped_by_pid = groupBy(rows, 'pid')
 
   const players = []
-  for (const playerId of Object.keys(grouped)) {
+  for (const pid of Object.keys(grouped_by_pid)) {
     let item = {}
-    const games = grouped[playerId]
+    const games = grouped_by_pid[pid]
     // item.games = games
 
-    const ranking = rankings.find((r) => r.player === playerId)
+    const ranking = rankings.find((r) => r.pid === pid)
     if (ranking) {
       const { ornk, prnk, avg, std } = ranking
       item = { ornk, prnk, avg, std }
@@ -100,7 +100,7 @@ const calculateVOR = async ({ year, rookie, league }) => {
     }
 
     const { pname, pos, start } = games[0]
-    players.push({ player: playerId, pname, pos, start, ...item })
+    players.push({ pid, pname, pos, start, ...item })
   }
 
   log(`calculating VOR for ${rows.length} players`)
@@ -151,7 +151,7 @@ const calculateVOR = async ({ year, rookie, league }) => {
 
   const output = {}
   for (const player of players) {
-    output[player.player] = {
+    output[player.pid] = {
       player: player.pname,
       rookie: player.start === year,
       pos: player.pos,
@@ -165,10 +165,10 @@ const calculateVOR = async ({ year, rookie, league }) => {
   }
 
   if (rookie) {
-    for (const player in players) {
-      const isRookie = output[player].rookie
+    for (const pid in players) {
+      const isRookie = output[pid].rookie
       if (!isRookie) {
-        delete output[player]
+        delete output[pid]
       }
     }
   }
@@ -211,7 +211,7 @@ const main = async () => {
       p.addRow(
         {
           index: index + 1,
-          player: player.player,
+          pid: player.pid,
           vor: player.vor.toFixed(2),
           points: player.points.toFixed(2),
           rank: player.prnk,

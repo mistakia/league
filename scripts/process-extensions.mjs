@@ -27,29 +27,31 @@ const getTransactionType = (tag) => {
   }
 }
 
-const createTransaction = async ({ player, tid, league }) => {
-  if (player.tag === constants.tags.TRANSITION) {
+const createTransaction = async ({ roster_player, tid, league }) => {
+  const { tag, pid, pos } = roster_player
+  if (tag === constants.tags.TRANSITION) {
     return null
   }
 
   const extensions = await getPlayerExtensions({
     lid: league.uid,
-    player: player.player
+    pid
   })
-  const { value } = await getLastTransaction({ player, tid, lid: league.uid })
+  const { value } = await getLastTransaction({ pid, tid, lid: league.uid })
   const extensionValue = getExtensionAmount({
     extensions: extensions.length,
-    tag: player.tag,
-    pos: player.pos,
+    tag,
+    pos,
     league,
     value
   })
+
   return {
     userid: 0,
     tid,
     lid: league.uid,
-    player: player.player,
-    type: getTransactionType(player.tag),
+    pid,
+    type: getTransactionType(tag),
     value: extensionValue,
     year: constants.season.year,
     timestamp: league.ext_date
@@ -72,9 +74,13 @@ const run = async ({ lid }) => {
     const rosterRow = await getRoster({ tid })
     const roster = new Roster({ roster: rosterRow, league })
     const transactions = []
-    const players = [...roster.active, ...roster.ir, ...roster.reserve]
-    for (const player of players) {
-      const transaction = await createTransaction({ player, tid, league })
+    const roster_players = [...roster.active, ...roster.ir, ...roster.reserve]
+    for (const roster_player of roster_players) {
+      const transaction = await createTransaction({
+        roster_player,
+        tid,
+        league
+      })
       if (transaction) transactions.push(transaction)
     }
 

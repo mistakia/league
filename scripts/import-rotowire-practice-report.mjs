@@ -37,7 +37,7 @@ const run = async () => {
 
   const missing = []
   for (const item of data) {
-    let player
+    let player_row
 
     const params = {
       name: item.player,
@@ -46,8 +46,8 @@ const run = async () => {
     }
 
     try {
-      player = await getPlayer(params)
-      if (!player) {
+      player_row = await getPlayer(params)
+      if (!player_row) {
         missing.push(params)
         continue
       }
@@ -58,7 +58,7 @@ const run = async () => {
     }
 
     const currentPRs = await db('practice')
-      .where({ player: player.player, week, year })
+      .where({ pid: player_row.pid, week, year })
       .limit(1)
     const currentPR = currentPRs[0]
 
@@ -69,13 +69,13 @@ const run = async () => {
           ...practiceReport
         })
         .where({
-          player: player.player,
+          pid: player_row.pid,
           week,
           year
         })
     } else {
       await db('practice').insert({
-        player: player.player,
+        pid: player_row.pid,
         week,
         year,
         ...practiceReport

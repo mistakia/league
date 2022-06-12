@@ -38,7 +38,7 @@ const run = async () => {
           log('processing transition bid', transitionBid)
           await processTransitionBid(transitionBid)
 
-          const { player } = transitionBid
+          const { pid } = transitionBid
           await db('transition_bids')
             .update({
               succ: 0,
@@ -46,7 +46,7 @@ const run = async () => {
               processed: timestamp
             })
             .where({
-              player,
+              pid,
               lid,
               year: constants.season.year
             })

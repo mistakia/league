@@ -46,8 +46,8 @@ const run = async ({ nextSeason = argv.season } = {}) => {
     for (const roster of rosters) {
       // get current roster players
       const { tid, lid, uid } = roster
-      const players = await db('rosters_players').where({ rid: uid })
-      const currentPlayerIds = players.map((p) => p.player)
+      const roster_player_rows = await db('rosters_players').where({ rid: uid })
+      const current_pids = roster_player_rows.map((p) => p.pid)
 
       // get roster id
       const rosterData = {
@@ -59,32 +59,32 @@ const run = async ({ nextSeason = argv.season } = {}) => {
       const rosterRows = await db('rosters').where(rosterData)
       let rid = rosterRows.length ? rosterRows[0].uid : null
       if (!rid) {
-        const newRoster = await db('rosters').insert(rosterData)
-        rid = newRoster[0]
+        const inserted_rows = await db('rosters').insert(rosterData)
+        rid = inserted_rows[0]
       }
 
       // insert any missing players & remove excess players
-      const existingPlayers = await db('rosters_players').where({ rid })
-      const existingPlayerIds = existingPlayers.map((p) => p.player)
-      const matching = players.filter((p) =>
-        existingPlayerIds.includes(p.player)
+      const existing_rows = await db('rosters_players').where({ rid })
+      const existing_pids = existing_rows.map((p) => p.pid)
+      const overlapping_pids = roster_player_rows.filter((p) =>
+        existing_pids.includes(p.pid)
       )
-      const missing = players.filter(
-        (p) => !existingPlayerIds.includes(p.player)
+      const missing_pids = roster_player_rows.filter(
+        (p) => !existing_pids.includes(p.pid)
       )
-      const excessive = existingPlayers.filter(
-        (p) => !currentPlayerIds.includes(p.player)
+      const extra_pids = existing_rows.filter(
+        (p) => !current_pids.includes(p.pid)
       )
-      const inserts = missing.map((p) => ({
+      const inserts = missing_pids.map((p) => ({
         rid,
         tag: p.tag,
         slot: p.slot,
-        player: p.player,
+        pid: p.pid,
         pos: p.pos
       }))
 
-      const updates = matching.filter((p) => {
-        const item = existingPlayers.find((i) => i.player === p.player)
+      const updates = overlapping_pids.filter((p) => {
+        const item = existing_rows.find((i) => i.pid === p.pid)
         return item.slot !== p.slot || item.tag !== p.tag
       })
 
@@ -92,20 +92,18 @@ const run = async ({ nextSeason = argv.season } = {}) => {
         await db('rosters_players').insert(inserts)
       }
 
-      if (excessive.length) {
+      if (extra_pids.length) {
         await db('rosters_players')
           .where('rid', rid)
           .whereIn(
-            'player',
-            excessive.map((p) => p.player)
+            'pid',
+            extra_pids.map((p) => p.pid)
           )
       }
 
       if (updates.length) {
-        for (const { player, slot, tag } of updates) {
-          await db('rosters_players')
-            .where({ rid, player })
-            .update({ slot, tag })
+        for (const { pid, slot, tag } of updates) {
+          await db('rosters_players').where({ rid, pid }).update({ slot, tag })
         }
       }
     }

@@ -47,10 +47,10 @@ const run = async () => {
     }
 
     const params = { name, team, pos }
-    let player
+    let player_row
     try {
-      player = await getPlayer(params)
-      if (!player) {
+      player_row = await getPlayer(params)
+      if (!player_row) {
         missing.push(params)
       }
     } catch (err) {
@@ -92,7 +92,7 @@ const run = async () => {
     }
 
     inserts.push({
-      player: player.player,
+      pid: player_row.pid,
       name,
       team,
       pos,
