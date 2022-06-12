@@ -18,17 +18,17 @@ export default function optimizeLineup({ players, league }) {
     const ints = {}
 
     for (const player of players) {
-      variables[player.player] = {
+      variables[player.pid] = {
         points: Math.round(
           (player.points[week] && player.points[week].total) || 0
         ),
         starter: 1
       }
-      variables[player.player][player.player] = 1
-      constraints[player.player] = { max: 1 }
-      ints[player.player] = 1
+      variables[player.pid][player.pid] = 1
+      constraints[player.pid] = { max: 1 }
+      ints[player.pid] = 1
       for (const pos of constants.positions) {
-        variables[player.player][pos] = player.pos === pos ? 1 : 0
+        variables[player.pid][pos] = player.pos === pos ? 1 : 0
       }
     }
 
