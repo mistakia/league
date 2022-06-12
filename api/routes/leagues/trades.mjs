@@ -18,9 +18,15 @@ router.get('/?', async (req, res) => {
       })
     const tradeids = trades.map((t) => t.uid)
 
-    const releases = await db('trade_releases').whereIn('tradeid', tradeids)
-    const players = await db('trades_players').whereIn('tradeid', tradeids)
-    const picks = await db('trades_picks')
+    const trade_releases_rows = await db('trade_releases').whereIn(
+      'tradeid',
+      tradeids
+    )
+    const trade_players_rows = await db('trades_players').whereIn(
+      'tradeid',
+      tradeids
+    )
+    const trade_picks_rows = await db('trades_picks')
       .select(
         'trades_picks.*',
         'draft.uid',
@@ -41,30 +47,30 @@ router.get('/?', async (req, res) => {
       trade.proposingTeamPicks = []
       trade.acceptingTeamPicks = []
 
-      for (const player of releases) {
-        if (player.tradeid !== trade.uid) continue
-        if (player.tid === trade.pid) {
-          trade.proposingTeamReleasePlayers.push(player.player)
+      for (const row of trade_releases_rows) {
+        if (row.tradeid !== trade.uid) continue
+        if (row.tid === trade.pid) {
+          trade.proposingTeamReleasePlayers.push(row.pid)
         } else {
-          trade.acceptingTeamReleasePlayers.push(player.player)
+          trade.acceptingTeamReleasePlayers.push(row.pid)
         }
       }
 
-      for (const pick of picks) {
-        if (pick.tradeid !== trade.uid) continue
-        if (pick.tid === trade.pid) {
-          trade.proposingTeamPicks.push(pick)
+      for (const row of trade_picks_rows) {
+        if (row.tradeid !== trade.uid) continue
+        if (row.tid === trade.pid) {
+          trade.proposingTeamPicks.push(row)
         } else {
-          trade.acceptingTeamPicks.push(pick)
+          trade.acceptingTeamPicks.push(row)
         }
       }
 
-      for (const player of players) {
-        if (player.tradeid !== trade.uid) continue
-        if (player.tid === trade.pid) {
-          trade.proposingTeamPlayers.push(player.player)
+      for (const row of trade_players_rows) {
+        if (row.tradeid !== trade.uid) continue
+        if (row.tid === trade.pid) {
+          trade.proposingTeamPlayers.push(row.pid)
         } else {
-          trade.acceptingTeamPlayers.push(player.player)
+          trade.acceptingTeamPlayers.push(row.pid)
         }
       }
     }
@@ -118,13 +124,13 @@ router.post(
       }
 
       // make sure no player is on the practice squad with an existing poaching claim
-      const allPlayers = proposingTeamPlayers.concat(
+      const trade_pids = proposingTeamPlayers.concat(
         acceptingTeamPlayers,
         releasePlayers
       )
       const psPlayers = await db('rosters_players')
         .join('rosters', 'rosters_players.rid', 'rosters.uid')
-        .join('poaches', 'rosters_players.player', 'poaches.player')
+        .join('poaches', 'rosters_players.pid', 'poaches.pid')
         .where({
           year: constants.season.year,
           week: constants.season.week,
@@ -132,7 +138,7 @@ router.post(
         })
         .whereNull('poaches.processed')
         .where('poaches.lid', leagueId)
-        .whereIn('rosters_players.player', allPlayers)
+        .whereIn('rosters_players.pid', trade_pids)
 
       if (psPlayers.length) {
         return res.status(400).send({ error: 'player has poaching claim' })
@@ -143,7 +149,7 @@ router.post(
 
       // check for restricted free agency players during RFA
       try {
-        await verifyRestrictedFreeAgency({ league, players: allPlayers })
+        await verifyRestrictedFreeAgency({ league, pids: trade_pids })
       } catch (error) {
         return res.status(400).send({ error: error.message })
       }
@@ -177,13 +183,13 @@ router.post(
       }
 
       const pickids = proposingTeamPicks.concat(acceptingTeamPicks)
-      const picks = await db('draft')
+      const draft_pick_rows = await db('draft')
         .whereIn('uid', pickids)
         .whereNull('player')
 
       // validate sending picks
       for (const pick of proposingTeamPicks) {
-        const p = picks.find((p) => p.uid === pick)
+        const p = draft_pick_rows.find((p) => p.uid === pick)
         if (!p) {
           return res.status(400).send({ error: 'pick is not valid' })
         }
@@ -211,7 +217,7 @@ router.post(
 
       // validate receiving picks
       for (const pick of acceptingTeamPicks) {
-        const p = picks.find((p) => p.uid === pick)
+        const p = draft_pick_rows.find((p) => p.uid === pick)
         if (!p) {
           return res.status(400).send({ error: 'pick is not valid' })
         }

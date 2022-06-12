@@ -17,10 +17,10 @@ router.post('/?', async (req, res) => {
   try {
     const { teamId } = req.params
     let { tag } = req.body
-    const { player, leagueId, remove } = req.body
+    const { pid, leagueId, remove } = req.body
 
-    if (!player) {
-      return res.status(400).send({ error: 'missing player' })
+    if (!pid) {
+      return res.status(400).send({ error: 'missing pid' })
     }
 
     if (!leagueId) {
@@ -66,7 +66,7 @@ router.post('/?', async (req, res) => {
     }
 
     // make sure player is on roster
-    if (!roster.has(player)) {
+    if (!roster.has(pid)) {
       return res.status(400).send({ error: 'invalid player' })
     }
 
@@ -75,7 +75,7 @@ router.post('/?', async (req, res) => {
     }
 
     // make sure player is on active roster
-    if (!roster.active.find((r) => r.player === player)) {
+    if (!roster.active.find((r) => r.pid === pid)) {
       return res.status(400).send({ error: 'player is not on active roster' })
     }
 
@@ -92,7 +92,7 @@ router.post('/?', async (req, res) => {
     if (remove) {
       roster.removeTag(remove)
     }
-    const isEligible = roster.isEligibleForTag({ tag, player })
+    const isEligible = roster.isEligibleForTag({ tag, pid })
     if (!isEligible) {
       return res.status(400).send({ error: 'exceeds tag limit' })
     }
@@ -100,7 +100,7 @@ router.post('/?', async (req, res) => {
     if (remove) {
       await db('rosters_players').update({ tag: 1 }).where({
         rid: rosterRow.uid,
-        player: remove
+        pid: remove
       })
     }
 
@@ -110,7 +110,7 @@ router.post('/?', async (req, res) => {
       .update('cancelled', timestamp)
       .where({
         year: constants.season.year,
-        player,
+        pid,
         tid
       })
       .whereNull('cancelled')
@@ -118,7 +118,7 @@ router.post('/?', async (req, res) => {
 
     await db('rosters_players').update({ tag }).where({
       rid: rosterRow.uid,
-      player
+      pid
     })
 
     res.send({ success: true })
@@ -132,10 +132,10 @@ router.delete('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const { teamId } = req.params
-    const { player, leagueId } = req.body
+    const { pid, leagueId } = req.body
 
-    if (!player) {
-      return res.status(400).send({ error: 'missing player' })
+    if (!pid) {
+      return res.status(400).send({ error: 'missing pid' })
     }
 
     if (!leagueId) {
@@ -164,12 +164,12 @@ router.delete('/?', async (req, res) => {
     const roster = new Roster({ roster: rosterRow, league })
 
     // make sure player is on roster
-    if (!roster.has(player)) {
+    if (!roster.has(pid)) {
       return res.status(400).send({ error: 'invalid player' })
     }
 
     // make sure player is on active roster
-    if (!roster.active.find((r) => r.player === player)) {
+    if (!roster.active.find((r) => r.pid === pid)) {
       return res.status(400).send({ error: 'player is not on active roster' })
     }
 
@@ -184,10 +184,10 @@ router.delete('/?', async (req, res) => {
 
     await db('rosters_players').update({ tag: 1 }).where({
       rid: rosterRow.uid,
-      player
+      pid
     })
 
-    res.send({ success: true, player })
+    res.send({ success: true, pid })
   } catch (error) {
     logger(error)
     return res.status(400).send({ error: error.toString() })

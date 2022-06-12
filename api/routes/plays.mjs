@@ -75,7 +75,7 @@ router.get('/charted', async (req, res) => {
         : [req.query.downs]
       : []
 
-    const { playerId } = req.query
+    const { pid } = req.query
 
     // TODO filter by yfog range
     // TODO filter by ytg range
@@ -94,10 +94,10 @@ router.get('/charted', async (req, res) => {
 
     let query = getChartedPlayByPlayQuery(db)
 
-    if (playerId) {
-      const players = await db('player').where('player', playerId).limit(1)
-      const player = players[0]
-      query = query.where('nfl_plays.off', player.cteam)
+    if (pid) {
+      const player_rows = await db('player').where({ pid }).limit(1)
+      const player_row = player_rows[0]
+      query = query.where('nfl_plays.off', player_row.cteam)
     }
 
     if (years.length) {

@@ -25,7 +25,9 @@ export const getTrade = async (req, res) => {
     }
 
     const release_rows = await db('trade_releases').where({ tradeid: tradeId })
-    const players = await db('trades_players').where({ tradeid: tradeId })
+    const trades_players_rows = await db('trades_players').where({
+      tradeid: tradeId
+    })
     const picks = await db('trades_picks')
       .select(
         'trades_picks.*',
@@ -62,11 +64,11 @@ export const getTrade = async (req, res) => {
       }
     }
 
-    for (const player of players) {
-      if (player.tid === trade.pid) {
-        trade.proposingTeamPlayers.push(player.player)
+    for (const trades_players_row of trades_players_rows) {
+      if (trades_players_row.tid === trade.pid) {
+        trade.proposingTeamPlayers.push(trades_players_row.pid)
       } else {
-        trade.acceptingTeamPlayers.push(player.player)
+        trade.acceptingTeamPlayers.push(trades_players_row.pid)
       }
     }
 
@@ -108,22 +110,24 @@ router.post(
           : [req.body.releasePlayers]
         : []
 
-      const proposingTeamReleasePlayerRows = await db('trade_releases').where({
+      const proposing_release_rows = await db('trade_releases').where({
         tradeid: tradeId
       })
-      const proposingTeamReleasePlayerIds = proposingTeamReleasePlayerRows.map(
-        (p) => p.player
+      const proposingTeamReleasePlayerIds = proposing_release_rows.map(
+        ({ pid }) => pid
       )
 
       // gather traded players
-      const playerRows = await db('trades_players').where({ tradeid: tradeId })
+      const trades_players_rows = await db('trades_players').where({
+        tradeid: tradeId
+      })
       const proposingTeamPlayers = [] // players on proposing team
       const acceptingTeamPlayers = [] // players on accepting team
-      for (const row of playerRows) {
+      for (const row of trades_players_rows) {
         if (row.tid === trade.pid) {
-          proposingTeamPlayers.push(row.player)
+          proposingTeamPlayers.push(row.pid)
         } else {
-          acceptingTeamPlayers.push(row.player)
+          acceptingTeamPlayers.push(row.pid)
         }
       }
 

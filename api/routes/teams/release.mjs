@@ -14,14 +14,14 @@ const router = express.Router({ mergeParams: true })
 router.post('/?', async (req, res) => {
   const { db, logger, broadcast } = req.app.locals
   try {
-    const { player, teamId, leagueId } = req.body
+    const { pid, teamId, leagueId } = req.body
 
     if (constants.season.week > constants.season.finalWeek) {
       return res.status(400).send({ error: 'player locked' })
     }
 
-    if (!player) {
-      return res.status(400).send({ error: 'missing player' })
+    if (!pid) {
+      return res.status(400).send({ error: 'missing pid' })
     }
 
     // verify teamId
@@ -40,24 +40,24 @@ router.post('/?', async (req, res) => {
     const lid = parseInt(leagueId, 10)
 
     // verify player id
-    const playerRows = await db('player').where('player', player).limit(1)
-    if (!playerRows.length) {
+    const player_rows = await db('player').where({ pid }).limit(1)
+    if (!player_rows.length) {
       return res.status(400).send({ error: 'invalid player' })
     }
-    const playerRow = playerRows[0]
+    const player_row = player_rows[0]
 
     // if active roster, verify not during FA Auction Period
     const league = await getLeague(leagueId)
     if (league.adate) {
       const rosterRow = await getRoster({ tid })
       const roster = new Roster({ roster: rosterRow, league })
-      if (!roster.has(player)) {
+      if (!roster.has(pid)) {
         return res.status(400).send({
           error: 'player not on roster'
         })
       }
 
-      const rosterPlayer = roster.get(player)
+      const rosterPlayer = roster.get(pid)
       const isOnActiveRoster = isSlotActive(rosterPlayer.slot)
 
       const faPeriod = getFreeAgentPeriod(league.adate)
@@ -75,7 +75,7 @@ router.post('/?', async (req, res) => {
     let result
     try {
       result = await processRelease({
-        player,
+        pid,
         tid,
         lid,
         userid: req.auth.userId
@@ -92,7 +92,7 @@ router.post('/?', async (req, res) => {
     })
 
     // send notification
-    const message = `${team.name} (${team.abbrv}) has released ${playerRow.fname} ${playerRow.lname} (${playerRow.pos}).`
+    const message = `${team.name} (${team.abbrv}) has released ${player_row.fname} ${player_row.lname} (${player_row.pos}).`
 
     await sendNotifications({
       league,

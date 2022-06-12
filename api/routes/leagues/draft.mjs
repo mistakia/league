@@ -103,9 +103,9 @@ router.post('/?', async (req, res) => {
     }
 
     // make sure player is a rookie
-    const players = await db('player').where({ pid })
-    const player = players[0]
-    if (!player || player.start !== constants.season.year) {
+    const player_rows = await db('player').where({ pid })
+    const player_row = player_rows[0]
+    if (!player_row || player_row.start !== constants.season.year) {
       return res.status(400).send({ error: 'invalid pid' })
     }
 
@@ -126,7 +126,7 @@ router.post('/?', async (req, res) => {
     const roster = new Roster({ roster: rosterRow, league })
     const slot = roster.hasOpenPracticeSquadSlot()
       ? constants.slots.PS
-      : roster.hasOpenBenchSlot(player.pos) && constants.slots.BENCH
+      : roster.hasOpenBenchSlot(player_row.pos) && constants.slots.BENCH
 
     if (!slot) {
       return res.status(400).send({ error: 'unavailable roster spot' })
@@ -142,7 +142,7 @@ router.post('/?', async (req, res) => {
     const insertRoster = db('rosters_players').insert({
       rid: roster.uid,
       pid,
-      pos: player.pos,
+      pos: player_row.pos,
       slot
     })
 
@@ -188,7 +188,7 @@ router.post('/?', async (req, res) => {
     const teams = await db('teams').where({ uid: teamId })
     const team = teams[0]
 
-    let message = `${team.name} has selected ${player.fname} ${player.lname} (${player.pos}) with `
+    let message = `${team.name} has selected ${player_row.fname} ${player_row.lname} (${player_row.pos}) with `
     if (pick.pick === 1) {
       message += 'the first overall pick '
     } else {

@@ -69,8 +69,8 @@ router.get('/:pid', async (req, res) => {
   try {
     const { pid } = req.params
 
-    const players = await db('player').where({ pid }).limit(1)
-    const player = players[0]
+    const player_rows = await db('player').where({ pid }).limit(1)
+    const player_row = player_rows[0]
     const practice = await db('practice').where({
       pid,
       year: constants.season.year
@@ -89,7 +89,7 @@ router.get('/:pid', async (req, res) => {
 
     // advanced rushing
     // - yardage by direction
-    res.send({ ...player, practice })
+    res.send({ ...player_row, practice })
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })

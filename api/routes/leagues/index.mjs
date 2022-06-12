@@ -207,7 +207,7 @@ router.get('/:leagueId/teams/?', async (req, res) => {
   try {
     const { leagueId } = req.params
     const teams = await db('teams').where({ lid: leagueId })
-    const picks = await db('draft').where({ lid: leagueId }).whereNull('player')
+    const picks = await db('draft').where({ lid: leagueId }).whereNull('pid')
 
     const forecastSub = db('league_team_forecast')
       .select(db.raw('max(timestamp) AS maxtime, tid AS teamid'))

@@ -9,14 +9,14 @@ router.post('/?', async (req, res) => {
   const { logger, broadcast } = req.app.locals
   try {
     const { teamId } = req.params
-    const { player, leagueId, slot, activate } = req.body
+    const { pid, leagueId, slot, activate } = req.body
 
     if (constants.season.week > constants.season.finalWeek) {
       return res.status(400).send({ error: 'player locked' })
     }
 
-    if (!player) {
-      return res.status(400).send({ error: 'missing player' })
+    if (!pid) {
+      return res.status(400).send({ error: 'missing pid' })
     }
 
     if (!leagueId) {
@@ -45,7 +45,7 @@ router.post('/?', async (req, res) => {
       data = await submitReserve({
         slot,
         tid,
-        player,
+        pid,
         leagueId,
         userId: req.auth.userId,
         activate

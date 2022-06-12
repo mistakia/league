@@ -15,9 +15,9 @@ router.post('/?', async (req, res) => {
   const { db, logger, broadcast } = req.app.locals
   try {
     const { teamId } = req.params
-    const { player, leagueId } = req.body
+    const { pid, leagueId } = req.body
 
-    if (!player) {
+    if (!pid) {
       return res.status(400).send({ error: 'missing player' })
     }
 
@@ -52,39 +52,39 @@ router.post('/?', async (req, res) => {
     }
 
     // make sure player is on roster
-    if (!roster.has(player)) {
+    if (!roster.has(pid)) {
       return res.status(400).send({ error: 'invalid player' })
     }
 
     // make sure player is on practice squad
-    if (!roster.practice.find((p) => p.player === player)) {
+    if (!roster.practice.find((p) => p.pid === pid)) {
       return res.status(400).send({ error: 'player is not on practice squad' })
     }
 
     // make sure player is not already protected
     if (
       roster.practice.find(
-        (p) => p.player === player && p.slot === constants.slots.PSP
+        (p) => p.pid === pid && p.slot === constants.slots.PSP
       )
     ) {
       return res.status(400).send({ error: 'player is already protected' })
     }
 
     // make sure player has no pending poaching claims
-    const poaches = await db('poaches').where({ player }).whereNull('processed')
+    const poaches = await db('poaches').where({ pid }).whereNull('processed')
     if (poaches.length) {
       return res
         .status(400)
         .send({ error: 'player has an existing poaching claim' })
     }
 
-    const players = await db('player').where('player', player).limit(1)
-    const playerRow = players[0]
+    const player_rows = await db('player').where({ pid }).limit(1)
+    const player_row = player_rows[0]
 
     const transactions = await getTransactionsSinceAcquisition({
       lid: leagueId,
       tid,
-      player
+      pid
     })
     const lastTransaction = transactions.reduce((a, b) =>
       a.timestamp > b.timestamp ? a : b
@@ -92,14 +92,14 @@ router.post('/?', async (req, res) => {
 
     await db('rosters_players').update({ slot: constants.slots.PSP }).where({
       rid: rosterRow.uid,
-      player
+      pid
     })
 
     const transaction = {
       userid: req.auth.userId,
       tid,
       lid: leagueId,
-      player,
+      pid,
       type: constants.transactions.PRACTICE_PROTECTED,
       value: lastTransaction.value,
       year: constants.season.year,
@@ -108,11 +108,11 @@ router.post('/?', async (req, res) => {
     await db('transactions').insert(transaction)
 
     const data = {
-      player,
+      pid,
       tid,
       slot: constants.slots.PSP,
       rid: roster.uid,
-      pos: playerRow.pos,
+      pos: player_row.pos,
       transaction
     }
     res.send(data)
@@ -124,7 +124,7 @@ router.post('/?', async (req, res) => {
     const teams = await db('teams').where({ uid: tid })
     const team = teams[0]
 
-    const message = `${team.name} (${team.abbrv}) has designated ${playerRow.fname} ${playerRow.lname} (${playerRow.pos}) as a protected practice squad member.`
+    const message = `${team.name} (${team.abbrv}) has designated ${player_row.fname} ${player_row.lname} (${player_row.pos}) as a protected practice squad member.`
 
     await sendNotifications({
       league,

@@ -60,8 +60,8 @@ router.post('/?', async (req, res) => {
         .send({ error: 'player is already on practice squad' })
     }
 
-    const players = await db('player').where('pid', pid).limit(1)
-    const playerRow = players[0]
+    const player_rows = await db('player').where('pid', pid).limit(1)
+    const player_row = player_rows[0]
 
     const transactions = await getTransactionsSinceAcquisition({
       lid: leagueId,
@@ -167,7 +167,7 @@ router.post('/?', async (req, res) => {
       tid,
       slot: constants.slots.PS,
       rid: roster.uid,
-      pos: playerRow.pos,
+      pos: player_row.pos,
       transaction
     }
     res.send(data)
@@ -179,7 +179,7 @@ router.post('/?', async (req, res) => {
     const teams = await db('teams').where({ uid: tid })
     const team = teams[0]
 
-    const message = `${team.name} (${team.abbrv}) has placed ${playerRow.fname} ${playerRow.lname} (${playerRow.pos}) on the practice squad.`
+    const message = `${team.name} (${team.abbrv}) has placed ${player_row.fname} ${player_row.lname} (${player_row.pos}) on the practice squad.`
 
     await sendNotifications({
       league,
