@@ -13,21 +13,21 @@ dayjs.extend(advancedFormat)
 export default async function ({
   leagueId,
   release = [],
-  player,
+  pid,
   teamId,
   team,
   userId
 }) {
   // verify player and release ids
-  const playerIds = [player]
+  const pids = [pid]
   if (release.length) {
-    release.forEach((player) => playerIds.push(player))
+    release.forEach((pid) => pids.push(pid))
   }
-  const playerRows = await db('player').whereIn('player', playerIds)
-  if (playerRows.length !== playerIds.length) {
+  const player_rows = await db('player').whereIn('pid', pids)
+  if (player_rows.length !== pids.length) {
     throw new Error('could not find playerIds')
   }
-  const poachPlayer = playerRows.find((p) => p.player === player)
+  const poachPlayer = player_rows.find((p) => p.pid === pid)
 
   // verify leagueId
   const league = await getLeague(leagueId)
@@ -42,7 +42,7 @@ export default async function ({
       lid: leagueId,
       week: constants.season.week,
       year: constants.season.year,
-      player,
+      pid,
       slot: constants.slots.PS
     })
   if (!slots.length) {
@@ -51,7 +51,7 @@ export default async function ({
   const playerTid = slots[0].tid
 
   // verify no existing poaches exist
-  const poaches = await db('poaches').where({ player }).whereNull('processed')
+  const poaches = await db('poaches').where({ pid }).whereNull('processed')
   if (poaches.length) {
     throw new Error('player has existing poaching claim')
   }
@@ -60,11 +60,11 @@ export default async function ({
   const rosterRow = await getRoster({ tid: teamId })
   const roster = new Roster({ roster: rosterRow, league })
   if (release.length) {
-    for (const player of release) {
-      if (!roster.has(player)) {
+    for (const release_pid of release) {
+      if (!roster.has(release_pid)) {
         throw new Error('invalid release player, not on roster')
       }
-      roster.removePlayer(player)
+      roster.removePlayer(release_pid)
     }
   }
   const hasSlot = roster.hasOpenBenchSlot(poachPlayer.pos)
@@ -79,7 +79,7 @@ export default async function ({
 
   // verify team has enough cap if during the offseason
   const transactions = await db('transactions')
-    .where({ player, lid: leagueId })
+    .where({ pid, lid: leagueId })
     .orderBy('timestamp', 'desc')
     .orderBy('uid', 'desc')
     .limit(1)
@@ -97,13 +97,13 @@ export default async function ({
   // verify release player is not used in a pending poach
   if (release.length) {
     const pendingPoachReleases = await db('poach_releases')
-      .select('poach_releases.player')
+      .select('poach_releases.pid')
       .join('poaches', 'poach_releases.poachid', 'poaches.uid')
       .whereNull('processed')
       .where('tid', teamId)
-    const pendingPoachReleasePlayers = pendingPoachReleases.map((p) => p.player)
-    for (const player of release) {
-      if (pendingPoachReleasePlayers.includes(player)) {
+    const pendingPoachReleasePlayers = pendingPoachReleases.map((p) => p.pid)
+    for (const release_pid of release) {
+      if (pendingPoachReleasePlayers.includes(release_pid)) {
         throw new Error('release player used in another poach')
       }
     }
@@ -114,12 +114,12 @@ export default async function ({
     tid: teamId,
     lid: leagueId,
     player_tid: playerTid,
-    player,
+    pid,
     submitted: Math.round(Date.now() / 1000)
   }
   const rows = await db('poaches').insert(data)
   const poachid = rows[0]
-  const releaseInserts = release.map((player) => ({ poachid, player }))
+  const releaseInserts = release.map((pid) => ({ poachid, pid }))
   if (releaseInserts.length) {
     await db('poach_releases').insert(releaseInserts)
   }

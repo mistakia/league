@@ -14,14 +14,14 @@ const log = debug('import-keeptradecut')
 debug.enable('import-keeptradecut,update-player,create-player,get-player')
 
 const importPlayer = async (item) => {
-  let player
+  let player_row
   const dob = item.birthday
     ? dayjs.unix(item.birthday).format('YYYY-MM-DD')
     : null
   try {
-    player = await getPlayer({ keeptradecut_id: item.playerID })
-    if (!player) {
-      player = await getPlayer({
+    player_row = await getPlayer({ keeptradecut_id: item.playerID })
+    if (!player_row) {
+      player_row = await getPlayer({
         name: item.playerName,
         pos: item.position,
         team: item.team,
@@ -33,8 +33,8 @@ const importPlayer = async (item) => {
     return null
   }
 
-  if (!player) {
-    player = await createPlayer({
+  if (!player_row) {
+    player_row = await createPlayer({
       fname: item.playerName.split(' ').shift(),
       lname: item.playerName.substr(item.playerName.indexOf(' ') + 1),
       dob,
@@ -56,12 +56,12 @@ const importPlayer = async (item) => {
     })
   } else {
     await updatePlayer({
-      player,
+      player_row,
       update: { keeptradecut_id: item.playerID }
     })
   }
 
-  return player
+  return player_row
 }
 
 const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
@@ -76,10 +76,11 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
   for (const item of data) {
     if (!constants.positions.includes(item.position)) continue
 
-    const player = await importPlayer(item)
-    if (!player) continue
+    const player_row = await importPlayer(item)
+    if (!player_row) continue
 
     const inserts = []
+    const { pid } = player_row
 
     if (full) {
       const html = await fetch(
@@ -90,7 +91,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
       dom.window.playerOneQB.overallValue.forEach((i) => {
         inserts.push({
           qb: 1,
-          player: player.player,
+          pid,
           d: dayjs(i.d, 'YYYY-MM-DD').unix(),
           v: i.v,
           type: constants.KEEPTRADECUT.VALUE
@@ -100,7 +101,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
       dom.window.playerOneQB.overallRankHistory.forEach((i) => {
         inserts.push({
           qb: 1,
-          player: player.player,
+          pid,
           d: dayjs(i.d, 'YYYY-MM-DD').unix(),
           v: i.v,
           type: constants.KEEPTRADECUT.OVERALL_RANK
@@ -110,7 +111,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
       dom.window.playerOneQB.positionalRankHistory.forEach((i) => {
         inserts.push({
           qb: 1,
-          player: player.player,
+          pid,
           d: dayjs(i.d, 'YYYY-MM-DD').unix(),
           v: i.v,
           type: constants.KEEPTRADECUT.POSITION_RANK
@@ -120,7 +121,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
       dom.window.playerSuperflex.overallValue.forEach((i) => {
         inserts.push({
           qb: 2,
-          player: player.player,
+          pid,
           d: dayjs(i.d, 'YYYY-MM-DD').unix(),
           v: i.v,
           type: constants.KEEPTRADECUT.VALUE
@@ -130,7 +131,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
       dom.window.playerSuperflex.overallRankHistory.forEach((i) => {
         inserts.push({
           qb: 2,
-          player: player.player,
+          pid,
           d: dayjs(i.d, 'YYYY-MM-DD').unix(),
           v: i.v,
           type: constants.KEEPTRADECUT.OVERALL_RANK
@@ -140,7 +141,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
       dom.window.playerSuperflex.positionalRankHistory.forEach((i) => {
         inserts.push({
           qb: 2,
-          player: player.player,
+          pid,
           d: dayjs(i.d, 'YYYY-MM-DD').unix(),
           v: i.v,
           type: constants.KEEPTRADECUT.POSITION_RANK
@@ -150,7 +151,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
       item.oneQBValues.history.forEach((i) => {
         inserts.push({
           qb: 1,
-          player: player.player,
+          pid,
           d: dayjs(i.d, 'YYYY-MM-DD').unix(),
           v: i.v,
           type: constants.KEEPTRADECUT.VALUE
@@ -160,7 +161,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
       item.superflexValues.history.forEach((i) => {
         inserts.push({
           qb: 2,
-          player: player.player,
+          pid,
           d: dayjs(i.d, 'YYYY-MM-DD').unix(),
           v: i.v,
           type: constants.KEEPTRADECUT.VALUE

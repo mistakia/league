@@ -3,7 +3,7 @@ import dayjs from 'dayjs'
 import db from '#db'
 import { constants } from '#common'
 
-export default async function ({ league, players }) {
+export default async function ({ league, pids }) {
   const now = dayjs()
   const isBeforeExtensionDeadline =
     (!constants.season.isRegularSeason && !league.ext_date) ||
@@ -16,7 +16,7 @@ export default async function ({ league, players }) {
 
   if (isRestrictedFreeAgency) {
     const transitionBids = await db('transition_bids')
-      .whereIn('player', players)
+      .whereIn('pid', pids)
       .where('year', constants.season.year)
       .whereNull('processed')
       .whereNull('cancelled')

@@ -135,7 +135,7 @@ router.post(
       const releasePlayers = acceptingTeamReleasePlayers.concat(
         proposingTeamReleasePlayerIds
       )
-      const allPlayers = tradedPlayers.concat(releasePlayers)
+      const all_pids = tradedPlayers.concat(releasePlayers)
 
       const league = await getLeague(leagueId)
 
@@ -147,14 +147,14 @@ router.post(
 
       // check for restricted free agency players during RFA
       try {
-        await verifyRestrictedFreeAgency({ league, players: allPlayers })
+        await verifyRestrictedFreeAgency({ league, pids: all_pids })
       } catch (error) {
         return res.status(400).send({ error: error.message })
       }
 
       const sub = db('transactions')
         .select(db.raw('max(uid) as uid'))
-        .whereIn('pid', allPlayers)
+        .whereIn('pid', all_pids)
         .where('lid', leagueId)
         .groupBy('pid')
 
@@ -163,7 +163,7 @@ router.post(
         .from(db.raw('(' + sub.toString() + ') AS X'))
         .join('transactions', 'X.uid', 'transactions.uid')
         .join('player', 'transactions.pid', 'player.pid')
-        .whereIn('player.pid', allPlayers)
+        .whereIn('player.pid', all_pids)
 
       // validate accepting team roster
       const acceptingTeamRosterRow = await getRoster({ tid: trade.tid })
@@ -277,7 +277,7 @@ router.post(
       const activePoaches = await db('poaches')
         .where('lid', leagueId)
         .whereNull('processed')
-        .whereIn('pid', allPlayers)
+        .whereIn('pid', all_pids)
 
       if (activePoaches.length) {
         await db('poaches')
@@ -440,7 +440,7 @@ router.post(
       // cancel other trades that include any players in this trade
       const playerTradeRows = await db('trades')
         .innerJoin('trades_players', 'trades.uid', 'trades_players.tradeid')
-        .whereIn('trades_players.pid', allPlayers)
+        .whereIn('trades_players.pid', all_pids)
         .where('trades.lid', leagueId)
         .whereNull('trades.accepted')
         .whereNull('trades.cancelled')
@@ -449,14 +449,14 @@ router.post(
 
       // remove players from cutlist
       await db('league_cutlist')
-        .whereIn('pid', allPlayers)
+        .whereIn('pid', all_pids)
         .whereIn('tid', [trade.pid, trade.tid])
         .del()
 
       // cancel any transition bids
       await db('transition_bids')
         .update('cancelled', Math.round(Date.now() / 1000))
-        .whereIn('pid', allPlayers)
+        .whereIn('pid', all_pids)
         .whereNull('cancelled')
         .whereNull('processed')
         .where('lid', leagueId)

@@ -111,7 +111,7 @@ const run = async () => {
       }
     } else {
       const changes = await updatePlayer({
-        player: player.player,
+        pid: player.pid,
         ...data
       })
       changeCount += changes

@@ -135,13 +135,13 @@ const run = async ({
       continue
     }
 
-    const player = results[0]
+    const player_row = results[0]
 
     if (!argv.dry) {
-      await updatePlayer({ player, update: { gsispid } })
+      await updatePlayer({ player_row, update: { gsispid } })
     }
-    player.gsispid = gsispid
-    players_gsispid.push(player)
+    player_row.gsispid = gsispid
+    players_gsispid.push(player_row)
   }
 
   const playStatsByGsisid = groupBy(playStats, 'gsisId')

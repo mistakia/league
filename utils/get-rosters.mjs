@@ -31,7 +31,7 @@ export default async function ({ lid, userId }) {
         'transactions.uid',
         '=',
         db.raw(
-          '(select max(uid) from transactions where transactions.tid = rosters.tid and transactions.player = rosters_players.player)'
+          '(select max(uid) from transactions where transactions.tid = rosters.tid and transactions.pid = rosters_players.pid)'
         )
       )
     })
@@ -47,7 +47,7 @@ export default async function ({ lid, userId }) {
     const teamStarters = lineupStarters.filter((l) => l.tid === r.tid)
     for (const lineup of teamLineups) {
       const lineupStarters = teamStarters.filter((l) => l.week === lineup.week)
-      const starters = lineupStarters.map((l) => l.player)
+      const starters = lineupStarters.map((l) => l.pid)
       r.lineups[lineup.week] = { total: lineup.total, starters }
     }
   })
@@ -72,7 +72,7 @@ export default async function ({ lid, userId }) {
       if (bids.length) {
         const teamRoster = rosters.find((r) => r.tid === tid)
         for (const bid of bids) {
-          const player = teamRoster.players.find((p) => p.player === bid.player)
+          const player = teamRoster.players.find((p) => p.pid === bid.pid)
           player.bid = bid.bid
         }
       }
