@@ -17,7 +17,7 @@ export async function seed(knex, Promise) {
   for (let i = 0; i < 200; i++) {
     const pos = constants.positions[i % constants.positions.length]
     rookies.push({
-      player: `TT-${i * 5}`,
+      pid: `TT-${i * 5}`,
       pname: `Test${i}`,
       lname: `Test${i}`,
       pos,
