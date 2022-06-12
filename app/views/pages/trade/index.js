@@ -115,7 +115,7 @@ const mapStateToProps = createSelector(
     analysis
   ) => ({
     isValid,
-    isProposer: trade.pid === app.teamId,
+    isProposer: trade.propose_tid === app.teamId,
     trade,
     tradePlayers,
 

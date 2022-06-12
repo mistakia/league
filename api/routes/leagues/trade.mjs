@@ -49,7 +49,7 @@ export const getTrade = async (req, res) => {
     trade.acceptingTeamPicks = []
 
     for (const release_row of release_rows) {
-      if (release_row.tid === trade.pid) {
+      if (release_row.tid === trade.propose_tid) {
         trade.proposingTeamReleasePlayers.push(release_row.pid)
       } else {
         trade.acceptingTeamReleasePlayers.push(release_row.pid)
@@ -57,7 +57,7 @@ export const getTrade = async (req, res) => {
     }
 
     for (const pick of picks) {
-      if (pick.tid === trade.pid) {
+      if (pick.tid === trade.propose_tid) {
         trade.proposingTeamPicks.push(pick)
       } else {
         trade.acceptingTeamPicks.push(pick)
@@ -65,7 +65,7 @@ export const getTrade = async (req, res) => {
     }
 
     for (const trades_players_row of trades_players_rows) {
-      if (trades_players_row.tid === trade.pid) {
+      if (trades_players_row.tid === trade.propose_tid) {
         trade.proposingTeamPlayers.push(trades_players_row.pid)
       } else {
         trade.acceptingTeamPlayers.push(trades_players_row.pid)
@@ -88,7 +88,7 @@ router.post(
     try {
       const { tradeId, leagueId } = req.params
       const trades = await db('trades')
-        .join('users_teams', 'trades.tid', 'users_teams.tid')
+        .join('users_teams', 'trades.accept_tid', 'users_teams.tid')
         .where('trades.uid', tradeId)
         .where('users_teams.userid', req.auth.userId)
         .whereNull('accepted')
@@ -124,7 +124,7 @@ router.post(
       const proposingTeamPlayers = [] // players on proposing team
       const acceptingTeamPlayers = [] // players on accepting team
       for (const row of trades_players_rows) {
-        if (row.tid === trade.pid) {
+        if (row.tid === trade.propose_tid) {
           proposingTeamPlayers.push(row.pid)
         } else {
           acceptingTeamPlayers.push(row.pid)
@@ -166,7 +166,7 @@ router.post(
         .whereIn('player.pid', all_pids)
 
       // validate accepting team roster
-      const acceptingTeamRosterRow = await getRoster({ tid: trade.tid })
+      const acceptingTeamRosterRow = await getRoster({ tid: trade.accept_tid })
       const acceptingTeamRoster = new Roster({
         roster: acceptingTeamRosterRow,
         league
@@ -222,7 +222,7 @@ router.post(
         })
       }
 
-      const proposingTeamRosterRow = await getRoster({ tid: trade.pid })
+      const proposingTeamRosterRow = await getRoster({ tid: trade.propose_tid })
       const proposingTeamRoster = new Roster({
         roster: proposingTeamRosterRow,
         league
@@ -297,7 +297,7 @@ router.post(
         release_inserts.push({
           tradeid: tradeId,
           pid,
-          tid: trade.tid
+          tid: trade.accept_tid
         })
       }
       if (release_inserts.length) {
@@ -331,7 +331,7 @@ router.post(
       for (const pid of acceptingTeamPlayers) {
         insertTransactions.push({
           userid: trade.userid,
-          tid: trade.pid,
+          tid: trade.propose_tid,
           lid: leagueId,
           pid,
           type: constants.transactions.TRADE,
@@ -343,7 +343,7 @@ router.post(
       for (const pid of proposingTeamPlayers) {
         insertTransactions.push({
           userid: req.auth.userId,
-          tid: trade.tid,
+          tid: trade.accept_tid,
           lid: leagueId,
           pid,
           type: constants.transactions.TRADE,
@@ -366,7 +366,7 @@ router.post(
         for (const pid of proposingTeamReleasePlayerIds) {
           releaseTransactions.push({
             userid: trade.userid,
-            tid: trade.pid,
+            tid: trade.propose_tid,
             lid: leagueId,
             pid,
             type: constants.transactions.ROSTER_RELEASE,
@@ -379,7 +379,7 @@ router.post(
         for (const pid of acceptingTeamReleasePlayers) {
           releaseTransactions.push({
             userid: req.auth.userId,
-            tid: trade.tid,
+            tid: trade.accept_tid,
             lid: leagueId,
             pid,
             type: constants.transactions.ROSTER_RELEASE,
@@ -412,7 +412,12 @@ router.post(
       const pickRows = await db('trades_picks').where({ tradeid: tradeId })
       for (const pick of pickRows) {
         await db('draft')
-          .update({ tid: pick.tid === trade.pid ? trade.tid : trade.pid }) // swap team ids
+          .update({
+            tid:
+              pick.tid === trade.propose_tid
+                ? trade.accept_tid
+                : trade.propose_tid
+          }) // swap team ids
           .where({ uid: pick.pickid })
       }
 
@@ -450,7 +455,7 @@ router.post(
       // remove players from cutlist
       await db('league_cutlist')
         .whereIn('pid', all_pids)
-        .whereIn('tid', [trade.pid, trade.tid])
+        .whereIn('tid', [trade.propose_tid, trade.accept_tid])
         .del()
 
       // cancel any transition bids
@@ -472,8 +477,8 @@ router.post(
       }
 
       const teams = await db('teams').where('lid', leagueId)
-      const proposingTeam = teams.find((t) => t.uid === trade.pid)
-      const acceptingTeam = teams.find((t) => t.uid === trade.tid)
+      const proposingTeam = teams.find((t) => t.uid === trade.propose_tid)
+      const acceptingTeam = teams.find((t) => t.uid === trade.accept_tid)
       const proposingTeamItems = []
       const acceptingTeamItems = []
       for (const pid of proposingTeamPlayers) {
@@ -504,7 +509,7 @@ router.post(
 
         // pick.tid is the team the pick belongs to
         const pickTradeInfo = pickRows.find((p) => p.pickid === pick.uid)
-        if (pickTradeInfo.tid === trade.pid) {
+        if (pickTradeInfo.tid === trade.propose_tid) {
           proposingTeamItems.push(pickStr)
         } else {
           acceptingTeamItems.push(pickStr)
@@ -560,8 +565,8 @@ router.post(
       const { tradeId, leagueId } = req.params
 
       const trades = await db('trades')
-        .join('teams', 'trades.tid', 'teams.uid')
-        .join('users_teams', 'trades.tid', 'users_teams.tid')
+        .join('teams', 'trades.accept_tid', 'teams.uid')
+        .join('users_teams', 'trades.accept_tid', 'users_teams.tid')
         .where('trades.uid', tradeId)
         .where('users_teams.userid', req.auth.userId)
         .whereNull('accepted')
@@ -584,7 +589,7 @@ router.post(
       const league = await getLeague(leagueId)
       await sendNotifications({
         league,
-        teamIds: [trade.pid],
+        teamIds: [trade.propose_tid],
         message: `${trade.name} (${trade.abbrv}) has rejected your trade offer.`
       })
 
@@ -605,8 +610,8 @@ router.post(
       const { tradeId, leagueId } = req.params
 
       const trades = await db('trades')
-        .join('users_teams', 'trades.pid', 'users_teams.tid')
-        .join('teams', 'trades.pid', 'teams.uid')
+        .join('users_teams', 'trades.propose_tid', 'users_teams.tid')
+        .join('teams', 'trades.propose_tid', 'teams.uid')
         .where('trades.uid', tradeId)
         .where('users_teams.userid', req.auth.userId)
         .whereNull('accepted')
@@ -629,7 +634,7 @@ router.post(
       const league = await getLeague(leagueId)
       await sendNotifications({
         league,
-        teamIds: [trade.tid],
+        teamIds: [trade.accept_tid],
         message: `${trade.name} (${trade.abbrv}) has cancelled their trade offer.`
       })
 
@@ -674,7 +679,7 @@ router.post(
       await sendNotifications({
         league,
         notifyLeague: true,
-        teamIds: [trade.tid, trade.pid],
+        teamIds: [trade.accept_tid, trade.propose_tid],
         message
       })
 

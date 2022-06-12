@@ -20,7 +20,7 @@ export function getTrade(state) {
 export function getTradeIsValid(state) {
   const { teamId } = getApp(state)
   const trade = getCurrentTrade(state)
-  const isProposer = trade.pid === teamId // TODO rename
+  const isProposer = trade.propose_tid === teamId
 
   const rosterRecord = isProposer
     ? getProposingTeamRoster(state)
@@ -85,7 +85,7 @@ export function getCurrentTrade(state) {
     const trade = items.get(selectedTradeId)
     const isOpen =
       !trade.cancelled && !trade.rejected && !trade.accepted && !trade.vetoed
-    const isAcceptingTeam = trade.tid === teamId
+    const isAcceptingTeam = trade.accept_tid === teamId
     if (isOpen && isAcceptingTeam) {
       return trade.merge({ acceptingTeamReleasePlayers: releasePlayers })
     } else {
@@ -93,10 +93,10 @@ export function getCurrentTrade(state) {
     }
   } else {
     const { teamId } = getApp(state)
-    const tid = getTradeSelectedTeamId(state)
+    const accept_tid = getTradeSelectedTeamId(state)
     return createTrade({
-      tid,
-      pid: teamId,
+      accept_tid,
+      propose_tid: teamId,
       proposingTeamReleasePlayers: releasePlayers,
       acceptingTeamPlayers,
       proposingTeamPlayers,
@@ -156,7 +156,7 @@ function calculateTradedRosterPlayers({ state, roster, add, remove, release }) {
 
 export function getProposingTeamTradedRosterPlayers(state) {
   const trade = getCurrentTrade(state)
-  const roster = getRosterByTeamId(state, { tid: trade.pid }) // TODO rename
+  const roster = getRosterByTeamId(state, { tid: trade.propose_tid })
 
   return calculateTradedRosterPlayers({
     state,
@@ -169,7 +169,7 @@ export function getProposingTeamTradedRosterPlayers(state) {
 
 export function getAcceptingTeamTradedRosterPlayers(state) {
   const trade = getCurrentTrade(state)
-  const roster = getRosterByTeamId(state, { tid: trade.tid })
+  const roster = getRosterByTeamId(state, { tid: trade.accept_tid })
 
   return calculateTradedRosterPlayers({
     state,
@@ -201,8 +201,12 @@ function getTeamTradeSummary(lineups, playerMaps) {
 export function getCurrentTradeAnalysis(state) {
   const trade = getCurrentTrade(state)
 
-  const proposingTeamRoster = getRosterRecordByTeamId(state, { tid: trade.pid })
-  const acceptingTeamRoster = getRosterRecordByTeamId(state, { tid: trade.tid })
+  const proposingTeamRoster = getRosterRecordByTeamId(state, {
+    tid: trade.propose_tid
+  })
+  const acceptingTeamRoster = getRosterRecordByTeamId(state, {
+    tid: trade.accept_tid
+  })
 
   const proposingTeamLineups = proposingTeamRoster
     .get('lineups', new Map())
@@ -226,14 +230,14 @@ export function getCurrentTradeAnalysis(state) {
   const acceptingTeamTradedPlayers = getAcceptingTeamTradedRosterPlayers(state)
 
   const proposingTeamPlayers = getActivePlayersByTeamId(state, {
-    tid: trade.pid
+    tid: trade.propose_tid
   })
   const acceptingTeamPlayers = getActivePlayersByTeamId(state, {
-    tid: trade.tid
+    tid: trade.accept_tid
   })
 
   const proposingTeam = {
-    team: getTeamById(state, { tid: trade.pid }),
+    team: getTeamById(state, { tid: trade.propose_tid }),
     before: getTeamTradeSummary(proposingTeamLineups, proposingTeamPlayers),
     after: getTeamTradeSummary(
       proposingTeamProjectedLineups,
@@ -242,7 +246,7 @@ export function getCurrentTradeAnalysis(state) {
   }
 
   const acceptingTeam = {
-    team: getTeamById(state, { tid: trade.tid }),
+    team: getTeamById(state, { tid: trade.accept_tid }),
     before: getTeamTradeSummary(acceptingTeamLineups, acceptingTeamPlayers),
     after: getTeamTradeSummary(
       acceptingTeamProjectedLineups,
@@ -255,30 +259,30 @@ export function getCurrentTradeAnalysis(state) {
 
 export function getProposingTeamPlayers(state) {
   const trade = getCurrentTrade(state)
-  return getPlayersByTeamId(state, { tid: trade.pid })
+  return getPlayersByTeamId(state, { tid: trade.propose_tid })
 }
 
 export function getAcceptingTeamPlayers(state) {
   const trade = getCurrentTrade(state)
-  return getPlayersByTeamId(state, { tid: trade.tid })
+  return getPlayersByTeamId(state, { tid: trade.accept_tid })
 }
 
 export function getProposingTeam(state) {
   const trade = getCurrentTrade(state)
-  return getTeamById(state, { tid: trade.pid })
+  return getTeamById(state, { tid: trade.propose_tid })
 }
 
 export function getAcceptingTeam(state) {
   const trade = getCurrentTrade(state)
-  return getTeamById(state, { tid: trade.tid })
+  return getTeamById(state, { tid: trade.accept_tid })
 }
 
 export function getProposingTeamRoster(state) {
   const trade = getCurrentTrade(state)
-  return getRosterRecordByTeamId(state, { tid: trade.pid })
+  return getRosterRecordByTeamId(state, { tid: trade.propose_tid })
 }
 
 export function getAcceptingTeamRoster(state) {
   const trade = getCurrentTrade(state)
-  return getRosterRecordByTeamId(state, { tid: trade.tid })
+  return getRosterRecordByTeamId(state, { tid: trade.accept_tid })
 }

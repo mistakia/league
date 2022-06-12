@@ -67,16 +67,16 @@ describe('API /trades', function () {
         .send({
           proposingTeamPlayers,
           acceptingTeamPlayers,
-          pid: 1,
-          tid: 2,
+          propose_tid: 1,
+          accept_tid: 2,
           leagueId: 1
         })
 
       proposeRes.should.have.status(200)
       // eslint-disable-next-line
       proposeRes.should.be.json
-      proposeRes.body.pid.should.be.equal(1)
-      proposeRes.body.tid.should.be.equal(2)
+      proposeRes.body.propose_tid.should.be.equal(1)
+      proposeRes.body.accept_tid.should.be.equal(2)
       proposeRes.body.userid.should.be.equal(1)
       proposeRes.body.year.should.be.equal(constants.season.year)
       should.exist(proposeRes.body.offered)
@@ -97,8 +97,8 @@ describe('API /trades', function () {
       acceptRes.should.have.status(200)
       // eslint-disable-next-line
       acceptRes.should.be.json
-      acceptRes.body.pid.should.be.equal(1)
-      acceptRes.body.tid.should.be.equal(2)
+      acceptRes.body.propose_tid.should.be.equal(1)
+      acceptRes.body.accept_tid.should.be.equal(2)
       acceptRes.body.userid.should.be.equal(1)
       acceptRes.body.year.should.be.equal(constants.season.year)
       should.exist(acceptRes.body.offered)
@@ -183,16 +183,16 @@ describe('API /trades', function () {
         .send({
           proposingTeamPlayers,
           acceptingTeamPlayers,
-          pid: 1,
-          tid: 2,
+          propose_tid: 1,
+          accept_tid: 2,
           leagueId: 1
         })
 
       proposeRes.should.have.status(200)
       // eslint-disable-next-line
       proposeRes.should.be.json
-      proposeRes.body.pid.should.be.equal(1)
-      proposeRes.body.tid.should.be.equal(2)
+      proposeRes.body.propose_tid.should.be.equal(1)
+      proposeRes.body.accept_tid.should.be.equal(2)
       proposeRes.body.userid.should.be.equal(1)
       proposeRes.body.year.should.be.equal(constants.season.year)
       should.exist(proposeRes.body.offered)
@@ -213,8 +213,8 @@ describe('API /trades', function () {
       acceptRes.should.have.status(200)
       // eslint-disable-next-line
       acceptRes.should.be.json
-      acceptRes.body.pid.should.be.equal(1)
-      acceptRes.body.tid.should.be.equal(2)
+      acceptRes.body.propose_tid.should.be.equal(1)
+      acceptRes.body.accept_tid.should.be.equal(2)
       acceptRes.body.userid.should.be.equal(1)
       acceptRes.body.year.should.be.equal(constants.season.year)
       should.exist(acceptRes.body.offered)
@@ -369,8 +369,8 @@ describe('API /trades', function () {
         .send({
           proposingTeamPlayers,
           acceptingTeamPlayers,
-          pid: 1,
-          tid: 2,
+          propose_tid: 1,
+          accept_tid: 2,
           leagueId: 1
         })
 
@@ -386,8 +386,8 @@ describe('API /trades', function () {
         .send({
           proposingTeamPlayers: [],
           acceptingTeamPlayers: [],
-          pid: 1,
-          tid: 2,
+          propose_tid: 1,
+          accept_tid: 2,
           leagueId: 1
         })
 

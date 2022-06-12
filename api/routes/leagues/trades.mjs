@@ -14,7 +14,7 @@ router.get('/?', async (req, res) => {
     const trades = await db('trades')
       .where('year', constants.season.year)
       .where(function () {
-        this.where('pid', teamId).orWhere('tid', teamId)
+        this.where('propose_tid', teamId).orWhere('accept_tid', teamId)
       })
     const tradeids = trades.map((t) => t.uid)
 
@@ -49,7 +49,7 @@ router.get('/?', async (req, res) => {
 
       for (const row of trade_releases_rows) {
         if (row.tradeid !== trade.uid) continue
-        if (row.tid === trade.pid) {
+        if (row.tid === trade.propose_tid) {
           trade.proposingTeamReleasePlayers.push(row.pid)
         } else {
           trade.acceptingTeamReleasePlayers.push(row.pid)
@@ -58,7 +58,7 @@ router.get('/?', async (req, res) => {
 
       for (const row of trade_picks_rows) {
         if (row.tradeid !== trade.uid) continue
-        if (row.tid === trade.pid) {
+        if (row.tid === trade.propose_tid) {
           trade.proposingTeamPicks.push(row)
         } else {
           trade.acceptingTeamPicks.push(row)
@@ -67,7 +67,7 @@ router.get('/?', async (req, res) => {
 
       for (const row of trade_players_rows) {
         if (row.tradeid !== trade.uid) continue
-        if (row.tid === trade.pid) {
+        if (row.tid === trade.propose_tid) {
           trade.proposingTeamPlayers.push(row.pid)
         } else {
           trade.acceptingTeamPlayers.push(row.pid)
@@ -113,14 +113,14 @@ router.post(
         : []
 
       const { leagueId } = req.params
-      const { pid, tid } = req.body
+      const { propose_tid, accept_tid } = req.body
 
-      if (!pid) {
-        return res.status(400).send({ error: 'missing param pid' })
+      if (!propose_tid) {
+        return res.status(400).send({ error: 'missing param propose_tid' })
       }
 
-      if (!tid) {
-        return res.status(400).send({ error: 'missing param tid' })
+      if (!accept_tid) {
+        return res.status(400).send({ error: 'missing param accept_tid' })
       }
 
       // make sure no player is on the practice squad with an existing poaching claim
@@ -160,7 +160,7 @@ router.post(
         return res.status(400).send({ error: 'deadline has passed' })
       }
 
-      const proposingTeamRosterRow = await getRoster({ tid: pid })
+      const proposingTeamRosterRow = await getRoster({ tid: propose_tid })
       const proposingTeamRoster = new Roster({
         roster: proposingTeamRosterRow,
         league
@@ -194,7 +194,7 @@ router.post(
           return res.status(400).send({ error: 'pick is not valid' })
         }
 
-        if (p.tid !== pid) {
+        if (p.tid !== propose_tid) {
           return res
             .status(400)
             .send({ error: 'pick is not owned by proposing team' })
@@ -202,7 +202,7 @@ router.post(
       }
 
       // validate receiving players
-      const acceptingTeamRosterRow = await getRoster({ tid })
+      const acceptingTeamRosterRow = await getRoster({ tid: accept_tid })
       const acceptingTeamRoster = new Roster({
         roster: acceptingTeamRosterRow,
         league
@@ -222,7 +222,7 @@ router.post(
           return res.status(400).send({ error: 'pick is not valid' })
         }
 
-        if (p.tid !== tid) {
+        if (p.tid !== accept_tid) {
           return res
             .status(400)
             .send({ error: 'pick is not owned by accepting team' })
@@ -261,8 +261,8 @@ router.post(
 
       // insert trade
       const result = await db('trades').insert({
-        pid,
-        tid,
+        propose_tid,
+        accept_tid,
         userid: req.auth.userId,
         year: constants.season.year,
         lid: leagueId,
@@ -276,14 +276,14 @@ router.post(
       for (const player of proposingTeamPlayers) {
         insertPlayers.push({
           tradeid,
-          tid: pid,
+          tid: propose_tid,
           player
         })
       }
       for (const player of acceptingTeamPlayers) {
         insertPlayers.push({
           tradeid,
-          tid,
+          tid: accept_tid,
           player
         })
       }
@@ -291,14 +291,14 @@ router.post(
         insertPicks.push({
           tradeid,
           pickid,
-          tid: pid
+          tid: propose_tid
         })
       }
       for (const pickid of acceptingTeamPicks) {
         insertPicks.push({
           tradeid,
           pickid,
-          tid
+          tid: accept_tid
         })
       }
 
@@ -307,7 +307,7 @@ router.post(
         insertReleases.push({
           tradeid,
           player,
-          tid: pid
+          tid: propose_tid
         })
       }
 

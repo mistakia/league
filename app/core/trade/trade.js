@@ -2,8 +2,8 @@ import { Record, List } from 'immutable'
 
 export const Trade = new Record({
   uid: null,
-  pid: null,
-  tid: null,
+  propose_tid: null,
+  accept_tid: null,
   lid: null,
   year: null,
   offered: null,
@@ -21,8 +21,8 @@ export const Trade = new Record({
 
 export function createTrade({
   uid,
-  pid,
-  tid,
+  propose_tid,
+  accept_tid,
   lid,
   year,
   offered,
@@ -39,8 +39,8 @@ export function createTrade({
 }) {
   return new Trade({
     uid,
-    pid,
-    tid,
+    propose_tid,
+    accept_tid,
     lid,
     year,
     offered,

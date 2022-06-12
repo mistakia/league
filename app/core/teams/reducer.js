@@ -54,8 +54,8 @@ export function teamsReducer(state = initialState, { payload, type }) {
 
       return state.withMutations((state) => {
         // make changes to proposing team picks
-        if (state.get(payload.data.pid)) {
-          const proposingTeam = state.get(payload.data.pid)
+        if (state.get(payload.data.propose_tid)) {
+          const proposingTeam = state.get(payload.data.propose_tid)
           let proposingTeamPicks = proposingTeam.get('picks')
           // remove traded picks
           if (payload.data.proposingTeamPicks.length) {
@@ -72,11 +72,11 @@ export function teamsReducer(state = initialState, { payload, type }) {
             )
           }
 
-          state.setIn([payload.data.pid, 'picks'], proposingTeamPicks)
+          state.setIn([payload.data.propose_tid, 'picks'], proposingTeamPicks)
         }
 
-        if (state.get(payload.data.tid)) {
-          const acceptingTeam = state.get(payload.data.tid)
+        if (state.get(payload.data.accept_tid)) {
+          const acceptingTeam = state.get(payload.data.accept_tid)
           let acceptingTeamPicks = acceptingTeam.get('picks')
           // remove traded picks
           if (payload.data.acceptingTeamPicks.length) {
@@ -93,7 +93,7 @@ export function teamsReducer(state = initialState, { payload, type }) {
             )
           }
 
-          state.setIn([payload.data.tid, 'picks'], acceptingTeamPicks)
+          state.setIn([payload.data.accept_tid, 'picks'], acceptingTeamPicks)
         }
       })
 

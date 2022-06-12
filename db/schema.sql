@@ -1102,8 +1102,8 @@ DROP TABLE IF EXISTS `trades`;
 
 CREATE TABLE `trades` (
   `uid` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `pid` int(6) NOT NULL,
-  `tid` int(6) NOT NULL,
+  `propose_tid` int(6) NOT NULL,
+  `accept_tid` int(6) NOT NULL,
   `lid` int(6) NOT NULL,
   `userid` int(6) NOT NULL,
   `year` int(4) NOT NULL,
