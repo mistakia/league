@@ -46,9 +46,9 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
       const teamId = 1
       const roster1 = await getRoster({ tid: teamId })
       const roster1Players = roster1.players.map(
-        ({ lid, player, pos, slot, tid, type }) => ({
+        ({ lid, pid, pos, slot, tid, type }) => ({
           lid,
-          player,
+          pid,
           pos,
           slot,
           tid,
@@ -60,9 +60,9 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
         week: constants.season.week + 1
       })
       const roster2Players = roster2.players.map(
-        ({ lid, player, pos, slot, tid, type }) => ({
+        ({ lid, pid, pos, slot, tid, type }) => ({
           lid,
-          player,
+          pid,
           pos,
           slot,
           tid,
@@ -81,9 +81,9 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
 
       const roster3 = await getRoster({ tid: teamId })
       const roster3Players = roster3.players.map(
-        ({ lid, player, pos, slot, tid, type }) => ({
+        ({ lid, pid, pos, slot, tid, type }) => ({
           lid,
-          player,
+          pid,
           pos,
           slot,
           tid,
@@ -95,9 +95,9 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
         week: constants.season.week + 1
       })
       const roster4Players = roster4.players.map(
-        ({ lid, player, pos, slot, tid, type }) => ({
+        ({ lid, pid, pos, slot, tid, type }) => ({
           lid,
-          player,
+          pid,
           pos,
           slot,
           tid,
@@ -127,9 +127,9 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
       const teamId = 1
       const roster1 = await getRoster({ tid: teamId })
       const roster1Players = roster1.players.map(
-        ({ lid, player, pos, slot, tid, type }) => ({
+        ({ lid, pid, pos, slot, tid, type }) => ({
           lid,
-          player,
+          pid,
           pos,
           slot,
           tid,
@@ -142,9 +142,9 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
         year: constants.season.year + 1
       })
       const roster2Players = roster2.players.map(
-        ({ lid, player, pos, slot, tid, type }) => ({
+        ({ lid, pid, pos, slot, tid, type }) => ({
           lid,
-          player,
+          pid,
           pos,
           slot,
           tid,
@@ -163,9 +163,9 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
 
       const roster3 = await getRoster({ tid: teamId })
       const roster3Players = roster3.players.map(
-        ({ lid, player, pos, slot, tid, type }) => ({
+        ({ lid, pid, pos, slot, tid, type }) => ({
           lid,
-          player,
+          pid,
           pos,
           slot,
           tid,
@@ -178,9 +178,9 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
         year: constants.season.year + 1
       })
       const roster4Players = roster4.players.map(
-        ({ lid, player, pos, slot, tid, type }) => ({
+        ({ lid, pid, pos, slot, tid, type }) => ({
           lid,
-          player,
+          pid,
           pos,
           slot,
           tid,

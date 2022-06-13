@@ -54,7 +54,7 @@ describe('API /draft', function () {
       .set('Authorization', `Bearer ${user1}`)
       .send({
         teamId,
-        playerId: player.player,
+        pid: player.pid,
         pickId: 1
       })
 
@@ -63,17 +63,17 @@ describe('API /draft', function () {
     res.should.be.json
 
     res.body.uid.should.equal(1)
-    res.body.player.should.equal(player.player)
+    res.body.pid.should.equal(player.pid)
     res.body.lid.should.equal(leagueId)
     res.body.tid.should.equal(teamId)
 
-    await checkRoster({ teamId, player: player.player, leagueId })
+    await checkRoster({ teamId, pid: player.pid, leagueId })
     await checkLastTransaction({
       leagueId,
       type: constants.transactions.DRAFT,
       value: 12,
       year: constants.season.year,
-      player: player.player,
+      pid: player.pid,
       teamId,
       userId: 1
     })
@@ -81,7 +81,7 @@ describe('API /draft', function () {
     const picks = await knex('draft').where({ uid: 1 })
     const pick = picks[0]
 
-    expect(pick.player).to.equal(player.player)
+    expect(pick.pid).to.equal(player.pid)
   })
 
   // - draft a rookie with a traded pick
@@ -100,7 +100,7 @@ describe('API /draft', function () {
         .request(server)
         .post('/api/leagues/1/draft')
         .set('Authorization', `Bearer ${user2}`)
-        .send({ playerId: 'xx', pickId: 1 })
+        .send({ pid: 'xx', pickId: 1 })
 
       await missing(request, 'teamId')
     })
@@ -120,7 +120,7 @@ describe('API /draft', function () {
         .request(server)
         .post('/api/leagues/1/draft')
         .set('Authorization', `Bearer ${user2}`)
-        .send({ playerId: 'xx', teamId: 2 })
+        .send({ pid: 'xx', teamId: 2 })
 
       await missing(request, 'pickId')
     })
@@ -130,7 +130,7 @@ describe('API /draft', function () {
         .request(server)
         .post('/api/leagues/1/draft')
         .set('Authorization', `Bearer ${user2}`)
-        .send({ playerId: 'xx', pickId: 2, teamId: 'a' })
+        .send({ pid: 'xx', pickId: 2, teamId: 'a' })
 
       await invalid(request, 'teamId')
     })
@@ -141,7 +141,7 @@ describe('API /draft', function () {
         .request(server)
         .post('/api/leagues/1/draft')
         .set('Authorization', `Bearer ${user2}`)
-        .send({ playerId: 'xx', pickId: 2, teamId: 2 })
+        .send({ pid: 'xx', pickId: 2, teamId: 2 })
 
       await invalid(request, 'playerId')
     })
@@ -171,7 +171,7 @@ describe('API /draft', function () {
         .set('Authorization', `Bearer ${user2}`)
         .send({
           teamId: 2,
-          playerId: player.player,
+          pid: player.pid,
           pickId: 2
         })
 
@@ -196,7 +196,7 @@ describe('API /draft', function () {
         .set('Authorization', `Bearer ${user2}`)
         .send({
           teamId: 2,
-          playerId: 'xx',
+          pid: 'xx',
           pickId: 2
         })
 
@@ -212,7 +212,7 @@ describe('API /draft', function () {
         .set('Authorization', `Bearer ${user3}`)
         .send({
           teamId: 3,
-          playerId: player.player,
+          pid: player.pid,
           pickId: 3
         })
 
@@ -227,7 +227,7 @@ describe('API /draft', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1,
-          playerId: 'xx',
+          pid: 'xx',
           pickId: 1
         })
 
@@ -251,7 +251,7 @@ describe('API /draft', function () {
 
     it('player rostered', async () => {
       const picks = await knex('draft').where({ uid: 1 }).limit(1)
-      const { player } = picks[0]
+      const { pid } = picks[0]
       MockDate.set(start.subtract('1', 'month').add('2', 'day').toDate())
       const request = chai
         .request(server)
@@ -259,7 +259,7 @@ describe('API /draft', function () {
         .set('Authorization', `Bearer ${user2}`)
         .send({
           teamId: 2,
-          playerId: player,
+          pid,
           pickId: 2
         })
 

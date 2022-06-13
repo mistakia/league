@@ -23,7 +23,7 @@ export default async function ({
     userid: userId,
     tid: teamId,
     lid: leagueId,
-    player: player.player,
+    pid: player.pid,
     type: transaction,
     value,
     year: constants.season.year,
@@ -32,7 +32,7 @@ export default async function ({
 
   await db('rosters_players').insert({
     rid: rosterId,
-    player: player.player,
+    pid: player.pid,
     slot,
     pos: player.pos1
   })

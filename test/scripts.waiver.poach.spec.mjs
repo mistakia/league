@@ -86,7 +86,7 @@ describe('SCRIPTS /waivers - poach', function () {
         tid: 2,
         userid: 2,
         lid: 1,
-        player: player.player,
+        pid: player.pid,
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 0,
@@ -105,7 +105,7 @@ describe('SCRIPTS /waivers - poach', function () {
       const waivers = await knex('waivers')
 
       expect(waivers.length).to.equal(1)
-      expect(waivers[0].player).to.equal(player.player)
+      expect(waivers[0].pid).to.equal(player.pid)
       expect(waivers[0].succ).to.equal(null)
       expect(waivers[0].reason).to.equal(null)
       expect(waivers[0].processed).to.equal(null)
@@ -130,7 +130,7 @@ describe('SCRIPTS /waivers - poach', function () {
         tid: 2,
         userid: 2,
         lid: 1,
-        player: player.player,
+        pid: player.pid,
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 0,
@@ -149,7 +149,7 @@ describe('SCRIPTS /waivers - poach', function () {
       const waivers = await knex('waivers')
 
       expect(waivers.length).to.equal(1)
-      expect(waivers[0].player).to.equal(player.player)
+      expect(waivers[0].pid).to.equal(player.pid)
       expect(waivers[0].succ).to.equal(null)
       expect(waivers[0].reason).to.equal(null)
       expect(waivers[0].processed).to.equal(null)
@@ -174,7 +174,7 @@ describe('SCRIPTS /waivers - poach', function () {
         tid: 2,
         userid: 2,
         lid: 1,
-        player: player.player,
+        pid: player.pid,
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 0,
@@ -197,7 +197,7 @@ describe('SCRIPTS /waivers - poach', function () {
       // check waivers
       const waivers = await knex('waivers')
       expect(waivers.length).to.equal(1)
-      expect(waivers[0].player).to.equal(player.player)
+      expect(waivers[0].pid).to.equal(player.pid)
       expect(waivers[0].succ).to.equal(1)
       expect(waivers[0].reason).to.equal(null)
       expect(waivers[0].processed).to.equal(Math.round(Date.now() / 1000))
@@ -217,7 +217,7 @@ describe('SCRIPTS /waivers - poach', function () {
       // verify poaching claim
       const poaches = await knex('poaches').where({ lid: 1 })
       expect(poaches.length).to.equal(1)
-      expect(poaches[0].player).to.equal(player.player)
+      expect(poaches[0].pid).to.equal(player.pid)
       expect(poaches[0].player_tid).to.equal(1)
       expect(poaches[0].userid).to.equal(2)
       expect(poaches[0].tid).to.equal(2)
@@ -246,7 +246,7 @@ describe('SCRIPTS /waivers - poach', function () {
         tid: 2,
         userid: 2,
         lid: 1,
-        player: player.player,
+        pid: player.pid,
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 0,
@@ -267,7 +267,7 @@ describe('SCRIPTS /waivers - poach', function () {
       // check waivers
       const waivers = await knex('waivers')
       expect(waivers.length).to.equal(1)
-      expect(waivers[0].player).to.equal(player.player)
+      expect(waivers[0].pid).to.equal(player.pid)
       expect(waivers[0].succ).to.equal(1)
       expect(waivers[0].reason).to.equal(null)
       expect(waivers[0].processed).to.equal(Math.round(Date.now() / 1000))
@@ -287,7 +287,7 @@ describe('SCRIPTS /waivers - poach', function () {
       // verify poaching claim
       const poaches = await knex('poaches').where({ lid: 1 })
       expect(poaches.length).to.equal(1)
-      expect(poaches[0].player).to.equal(player.player)
+      expect(poaches[0].pid).to.equal(player.pid)
       expect(poaches[0].player_tid).to.equal(1)
       expect(poaches[0].userid).to.equal(2)
       expect(poaches[0].tid).to.equal(2)
@@ -317,7 +317,7 @@ describe('SCRIPTS /waivers - poach', function () {
         tid: 2,
         userid: 2,
         lid: 1,
-        player: player.player,
+        pid: player.pid,
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 0,
@@ -329,7 +329,7 @@ describe('SCRIPTS /waivers - poach', function () {
         tid: 4,
         userid: 4,
         lid: 1,
-        player: player.player,
+        pid: player.pid,
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 0,
@@ -352,13 +352,13 @@ describe('SCRIPTS /waivers - poach', function () {
       const waiver1 = waivers.find((w) => w.tid === 2)
       const waiver2 = waivers.find((w) => w.tid === 4)
       expect(waivers.length).to.equal(2)
-      expect(waiver1.player).to.equal(player.player)
+      expect(waiver1.pid).to.equal(player.pid)
       expect(waiver1.succ).to.equal(1)
       expect(waiver1.reason).to.equal(null)
       expect(waiver1.processed).to.equal(Math.round(Date.now() / 1000))
       expect(waiver1.cancelled).to.equal(null)
 
-      expect(waiver2.player).to.equal(player.player)
+      expect(waiver2.pid).to.equal(player.pid)
       expect(waiver2.succ).to.equal(0)
       expect(waiver2.reason).to.equal('player has existing poaching claim')
       expect(waiver2.processed).to.equal(Math.round(Date.now() / 1000))
@@ -378,7 +378,7 @@ describe('SCRIPTS /waivers - poach', function () {
       // verify poaching claim
       const poaches = await knex('poaches').where({ lid: 1 })
       expect(poaches.length).to.equal(1)
-      expect(poaches[0].player).to.equal(player.player)
+      expect(poaches[0].pid).to.equal(player.pid)
       expect(poaches[0].player_tid).to.equal(1)
       expect(poaches[0].userid).to.equal(2)
       expect(poaches[0].tid).to.equal(2)
@@ -419,7 +419,7 @@ describe('SCRIPTS /waivers - poach', function () {
         tid: 2,
         userid: 2,
         lid: 1,
-        player: player1.player,
+        pid: player1.pid,
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 0,
@@ -431,7 +431,7 @@ describe('SCRIPTS /waivers - poach', function () {
         tid: 4,
         userid: 4,
         lid: 1,
-        player: player2.player,
+        pid: player2.pid,
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 0,
@@ -454,13 +454,13 @@ describe('SCRIPTS /waivers - poach', function () {
       const waiver1 = waivers.find((w) => w.tid === 2)
       const waiver2 = waivers.find((w) => w.tid === 4)
       expect(waivers.length).to.equal(2)
-      expect(waiver1.player).to.equal(player1.player)
+      expect(waiver1.pid).to.equal(player1.pid)
       expect(waiver1.succ).to.equal(1)
       expect(waiver1.reason).to.equal(null)
       expect(waiver1.processed).to.equal(Math.round(Date.now() / 1000))
       expect(waiver1.cancelled).to.equal(null)
 
-      expect(waiver2.player).to.equal(player2.player)
+      expect(waiver2.pid).to.equal(player2.pid)
       expect(waiver2.reason).to.equal(null)
       expect(waiver2.succ).to.equal(1)
       expect(waiver2.processed).to.equal(Math.round(Date.now() / 1000))
@@ -482,7 +482,7 @@ describe('SCRIPTS /waivers - poach', function () {
       const poach1 = poaches.find((p) => p.tid === 2)
       const poach2 = poaches.find((p) => p.tid === 4)
       expect(poaches.length).to.equal(2)
-      expect(poach1.player).to.equal(player1.player)
+      expect(poach1.pid).to.equal(player1.pid)
       expect(poach1.player_tid).to.equal(1)
       expect(poach1.userid).to.equal(2)
       expect(poach1.tid).to.equal(2)
@@ -492,7 +492,7 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(poach1.reason).to.equal(null)
       expect(poach1.processed).to.equal(null)
 
-      expect(poach2.player).to.equal(player2.player)
+      expect(poach2.pid).to.equal(player2.pid)
       expect(poach2.player_tid).to.equal(3)
       expect(poach2.userid).to.equal(4)
       expect(poach2.tid).to.equal(4)
@@ -533,7 +533,7 @@ describe('SCRIPTS /waivers - poach', function () {
         tid: 2,
         userid: 2,
         lid: 1,
-        player: player1.player,
+        pid: player1.pid,
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 0,
@@ -545,7 +545,7 @@ describe('SCRIPTS /waivers - poach', function () {
         tid: 4,
         userid: 4,
         lid: 1,
-        player: player2.player,
+        pid: player2.pid,
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 0,
@@ -557,7 +557,7 @@ describe('SCRIPTS /waivers - poach', function () {
         tid: 6,
         userid: 6,
         lid: 1,
-        player: player1.player,
+        pid: player1.pid,
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 0,
@@ -581,19 +581,19 @@ describe('SCRIPTS /waivers - poach', function () {
       const waiver2 = waivers.find((w) => w.tid === 4)
       const waiver3 = waivers.find((w) => w.tid === 6)
       expect(waivers.length).to.equal(3)
-      expect(waiver1.player).to.equal(player1.player)
+      expect(waiver1.pid).to.equal(player1.pid)
       expect(waiver1.succ).to.equal(1)
       expect(waiver1.reason).to.equal(null)
       expect(waiver1.processed).to.equal(Math.round(Date.now() / 1000))
       expect(waiver1.cancelled).to.equal(null)
 
-      expect(waiver2.player).to.equal(player2.player)
+      expect(waiver2.pid).to.equal(player2.pid)
       expect(waiver2.succ).to.equal(1)
       expect(waiver2.reason).to.equal(null)
       expect(waiver2.processed).to.equal(Math.round(Date.now() / 1000))
       expect(waiver2.cancelled).to.equal(null)
 
-      expect(waiver3.player).to.equal(player1.player)
+      expect(waiver3.pid).to.equal(player1.pid)
       expect(waiver3.succ).to.equal(0)
       expect(waiver3.reason).to.equal('player has existing poaching claim')
       expect(waiver3.processed).to.equal(Math.round(Date.now() / 1000))
@@ -617,7 +617,7 @@ describe('SCRIPTS /waivers - poach', function () {
       const poach1 = poaches.find((p) => p.tid === 2)
       const poach2 = poaches.find((p) => p.tid === 4)
       expect(poaches.length).to.equal(2)
-      expect(poach1.player).to.equal(player1.player)
+      expect(poach1.pid).to.equal(player1.pid)
       expect(poach1.player_tid).to.equal(1)
       expect(poach1.userid).to.equal(2)
       expect(poach1.tid).to.equal(2)
@@ -627,7 +627,7 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(poach1.reason).to.equal(null)
       expect(poach1.processed).to.equal(null)
 
-      expect(poach2.player).to.equal(player2.player)
+      expect(poach2.pid).to.equal(player2.pid)
       expect(poach2.player_tid).to.equal(3)
       expect(poach2.userid).to.equal(4)
       expect(poach2.tid).to.equal(4)
@@ -664,7 +664,7 @@ describe('SCRIPTS /waivers - poach', function () {
         tid: 2,
         userid: 2,
         lid: 1,
-        player: player.player,
+        pid: player.pid,
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 0,
@@ -673,13 +673,13 @@ describe('SCRIPTS /waivers - poach', function () {
 
       await knex('rosters_players')
         .update({ slot: constants.slots.BENCH })
-        .where({ player: player.player })
+        .where({ pid: player.pid })
 
       await knex('transactions').insert({
         userid: 1,
         tid: 1,
         lid: 1,
-        player: player.player,
+        pid: player.pid,
         type: constants.transactions.ROSTER_ACTIVATE,
         value: 1,
         year: constants.season.year,
@@ -700,7 +700,7 @@ describe('SCRIPTS /waivers - poach', function () {
       // check waivers
       const waivers = await knex('waivers')
       expect(waivers.length).to.equal(1)
-      expect(waivers[0].player).to.equal(player.player)
+      expect(waivers[0].pid).to.equal(player.pid)
       expect(waivers[0].succ).to.equal(0)
       expect(waivers[0].reason).to.equal(
         'player is not in an unprotected practice squad slot'

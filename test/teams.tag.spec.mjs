@@ -81,7 +81,7 @@ describe('API /teams - tag', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          player: player.player
+          pid: player.pid
         })
 
       await missing(request, 'tag')
@@ -107,7 +107,7 @@ describe('API /teams - tag', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           tag: constants.tags.REGULAR,
-          player: 'x'
+          pid: 'x'
         })
 
       await missing(request, 'leagueId')
@@ -120,7 +120,7 @@ describe('API /teams - tag', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           tag: constants.tags.REGULAR,
-          player: 'x',
+          pid: 'x',
           leagueId: 1
         })
 
@@ -146,7 +146,7 @@ describe('API /teams - tag', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           tag: 'x',
-          player: player.player,
+          pid: player.pid,
           leagueId: 1
         })
 
@@ -160,7 +160,7 @@ describe('API /teams - tag', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           tag: constants.tags.REGULAR,
-          player: 'x',
+          pid: 'x',
           leagueId: 2
         })
 
@@ -174,7 +174,7 @@ describe('API /teams - tag', function () {
         .set('Authorization', `Bearer ${user2}`)
         .send({
           tag: constants.tags.REGULAR,
-          player: 'x',
+          pid: 'x',
           leagueId: 1
         })
 
@@ -189,7 +189,7 @@ describe('API /teams - tag', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           tag: constants.tags.REGULAR,
-          player: player.player,
+          pid: player.pid,
           leagueId: 1
         })
 

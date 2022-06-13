@@ -50,12 +50,12 @@ describe('API /trades', function () {
         .where('rosters.tid', 2)
         .limit(1)
 
-      const proposingTeamPlayers = proposingTeamPlayerRows.map((p) => p.player)
-      const acceptingTeamPlayers = acceptingTeamPlayerRows.map((p) => p.player)
+      const proposingTeamPlayers = proposingTeamPlayerRows.map((p) => p.pid)
+      const acceptingTeamPlayers = acceptingTeamPlayerRows.map((p) => p.pid)
 
       // set values to zero
       await knex('transactions')
-        .whereIn('player', proposingTeamPlayers.concat(acceptingTeamPlayers))
+        .whereIn('pid', proposingTeamPlayers.concat(acceptingTeamPlayers))
         .update('value', 0)
 
       // TODO - get trading player values
@@ -144,19 +144,19 @@ describe('API /trades', function () {
         userid: 3,
         tid: 3,
         lid: 1,
-        player: player1.player,
+        pid: player1.pid,
         submitted: Math.round(Date.now() / 1000)
       })
 
       // active player
       await knex('rosters_players')
         .update('slot', constants.slots.BENCH)
-        .where('player', player1.player)
+        .where('pid', player1.pid)
       await knex('transactions').insert({
         userid: userId,
         tid: teamId,
         lid: leagueId,
-        player: player1.player,
+        pid: player1.pid,
         type: constants.transactions.ROSTER_ACTIVATE,
         value: 0,
         year: constants.season.year,
@@ -174,8 +174,8 @@ describe('API /trades', function () {
         value
       })
 
-      const proposingTeamPlayers = [player1.player]
-      const acceptingTeamPlayers = [player2.player]
+      const proposingTeamPlayers = [player1.pid]
+      const acceptingTeamPlayers = [player2.pid]
       const proposeRes = await chai
         .request(server)
         .post('/api/leagues/1/trades')
@@ -228,22 +228,22 @@ describe('API /trades', function () {
       const rows = await knex('rosters_players')
         .leftJoin('rosters', 'rosters_players.rid', 'rosters.uid')
         .whereIn(
-          'rosters_players.player',
+          'rosters_players.pid',
           proposingTeamPlayers.concat(acceptingTeamPlayers)
         )
 
       rows.length.should.equal(2)
       const proposingRow = rows.find((p) => p.tid === 1)
       const acceptingRow = rows.find((p) => p.tid === 2)
-      proposingRow.player.should.equal(acceptingTeamPlayers[0])
-      acceptingRow.player.should.equal(proposingTeamPlayers[0])
+      proposingRow.pid.should.equal(acceptingTeamPlayers[0])
+      acceptingRow.pid.should.equal(proposingTeamPlayers[0])
 
       const res = await chai
         .request(server)
         .post('/api/teams/1/deactivate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player2.player,
+          pid: player2.pid,
           leagueId
         })
 
@@ -252,12 +252,12 @@ describe('API /trades', function () {
       res.should.be.json
 
       res.body.tid.should.equal(teamId)
-      res.body.player.should.equal(player2.player)
+      res.body.pid.should.equal(player2.pid)
       res.body.slot.should.equal(constants.slots.PS)
       res.body.transaction.userid.should.equal(userId)
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
-      res.body.transaction.player.should.equal(player2.player)
+      res.body.transaction.pid.should.equal(player2.pid)
       res.body.transaction.type.should.equal(
         constants.transactions.ROSTER_DEACTIVATE
       )
@@ -278,7 +278,7 @@ describe('API /trades', function () {
         .where({
           year: constants.season.year,
           week: constants.season.week,
-          player: player2.player
+          pid: player2.pid
         })
         .limit(1)
 
@@ -290,7 +290,7 @@ describe('API /trades', function () {
         type: constants.transactions.ROSTER_DEACTIVATE,
         value,
         year: constants.season.year,
-        player: player2.player,
+        pid: player2.pid,
         teamId,
         userId
       })
@@ -346,7 +346,7 @@ describe('API /trades', function () {
         userid: 3,
         tid: 3,
         lid: 1,
-        player: player1.player,
+        pid: player1.pid,
         submitted: Math.round(Date.now() / 1000)
       })
 
@@ -360,8 +360,8 @@ describe('API /trades', function () {
         transaction: constants.transactions.DRAFT
       })
 
-      const proposingTeamPlayers = [player1.player]
-      const acceptingTeamPlayers = [player2.player]
+      const proposingTeamPlayers = [player1.pid]
+      const acceptingTeamPlayers = [player2.pid]
       const request = chai
         .request(server)
         .post('/api/leagues/1/trades')

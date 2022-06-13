@@ -39,7 +39,7 @@ describe('COMMON Roster', function () {
     for (let i = 0; i < 7; i++) {
       roster.players.push({
         slot: `slot${i}`,
-        player: `player${i}`,
+        pid: `player${i}`,
         pos: 'RB'
       })
     }
@@ -82,7 +82,7 @@ describe('COMMON Roster', function () {
     for (let i = 0; i < 18; i++) {
       roster.players.push({
         slot: constants.slots.BENCH,
-        player: `player${i}`,
+        pid: `player${i}`,
         pos: 'RB'
       })
     }
@@ -129,7 +129,7 @@ describe('COMMON Roster', function () {
     for (let i = 0; i < 2; i++) {
       roster.players.push({
         slot: constants.slots.BENCH,
-        player: `player-wr-${i}`,
+        pid: `player-wr-${i}`,
         pos: 'WR'
       })
     }
@@ -137,7 +137,7 @@ describe('COMMON Roster', function () {
     for (let i = 0; i < 2; i++) {
       roster.players.push({
         slot: constants.slots.BENCH,
-        player: `player-rb-${i}`,
+        pid: `player-rb-${i}`,
         pos: 'RB'
       })
     }
@@ -184,7 +184,7 @@ describe('COMMON Roster', function () {
     for (let i = 0; i < 2; i++) {
       roster.players.push({
         slot: constants.slots.BENCH,
-        player: `player-wr-${i}`,
+        pid: `player-wr-${i}`,
         pos: 'WR'
       })
     }
@@ -192,7 +192,7 @@ describe('COMMON Roster', function () {
     for (let i = 0; i < 2; i++) {
       roster.players.push({
         slot: constants.slots.BENCH,
-        player: `player-rb-${i}`,
+        pid: `player-rb-${i}`,
         pos: 'RB'
       })
     }
@@ -208,7 +208,7 @@ describe('COMMON Roster', function () {
 
     r.addPlayer({
       slot: constants.slots.BENCH,
-      player: 'player-rb-add',
+      pid: 'player-rb-add',
       pos: 'RB'
     })
     r.removePlayer('player-rb-0')

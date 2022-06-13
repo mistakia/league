@@ -17,8 +17,8 @@ export default async function ({ leagueId, teamId, excludeIR = false }) {
         week: constants.season.week,
         year: constants.season.year
       })
-    const excludePlayerIds = players.map((p) => p.player)
-    const player = await selectPlayer({ exclude: excludePlayerIds })
+    const exclude_pids = players.map((p) => p.pid)
+    const player = await selectPlayer({ exclude_pids })
     const hasSlot = roster.hasOpenBenchSlot(player.pos1)
     if (hasSlot) {
       await addPlayer({
@@ -40,9 +40,9 @@ export default async function ({ leagueId, teamId, excludeIR = false }) {
         week: constants.season.week,
         year: constants.season.year
       })
-    const excludePlayerIds = players.map((p) => p.player)
+    const exclude_pids = players.map((p) => p.pid)
     const player = await selectPlayer({
-      exclude: excludePlayerIds,
+      exclude_pids,
       rookie: true
     })
     await addPlayer({
@@ -68,8 +68,8 @@ export default async function ({ leagueId, teamId, excludeIR = false }) {
         week: constants.season.week,
         year: constants.season.year
       })
-    const excludePlayerIds = players.map((p) => p.player)
-    const player = await selectPlayer({ exclude: excludePlayerIds })
+    const exclude_pids = players.map((p) => p.pid)
+    const player = await selectPlayer({ exclude_pids })
     await addPlayer({
       leagueId,
       teamId,

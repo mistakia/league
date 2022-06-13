@@ -55,7 +55,7 @@ describe('API /leagues/rosters - delete', function () {
         .delete('/api/leagues/1/rosters')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player.player,
+          pid: player.pid,
           teamId,
           leagueId
         })
@@ -103,7 +103,7 @@ describe('API /leagues/rosters - delete', function () {
         .delete('/api/leagues/1/rosters')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: 'x',
+          pid: 'x',
           leagueId: 1
         })
 
@@ -116,7 +116,7 @@ describe('API /leagues/rosters - delete', function () {
         .delete('/api/leagues/1/rosters')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: 'x',
+          pid: 'x',
           teamId: 1
         })
 
@@ -131,7 +131,7 @@ describe('API /leagues/rosters - delete', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1,
-          player: player.player,
+          pid: player.pid,
           leagueId: 2
         })
 
@@ -159,7 +159,7 @@ describe('API /leagues/rosters - delete', function () {
         .delete('/api/leagues/1/rosters')
         .set('Authorization', `Bearer ${user2}`)
         .send({
-          player: player.player,
+          pid: player.pid,
           teamId: 1,
           leagueId: 1
         })

@@ -42,7 +42,7 @@ describe('API /leagues/rosters - add', function () {
         .post('/api/leagues/1/rosters')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player.player,
+          pid: player.pid,
           teamId,
           leagueId,
           value
@@ -52,7 +52,7 @@ describe('API /leagues/rosters - add', function () {
       // eslint-disable-next-line
       res.should.be.json
 
-      res.body.player.should.equal(player.player)
+      res.body.pid.should.equal(player.pid)
       res.body.pos.should.equal(player.pos1)
       res.body.slot.should.equal(constants.slots.BENCH)
       res.body.transaction.userid.should.equal(1)
@@ -66,7 +66,7 @@ describe('API /leagues/rosters - add', function () {
       expect(rosterRow.lid).to.equal(leagueId)
       expect(rosterRow.players.length).to.equal(1)
       expect(rosterRow.players[0].slot).to.equal(constants.slots.BENCH)
-      expect(rosterRow.players[0].player).to.equal(player.player)
+      expect(rosterRow.players[0].pid).to.equal(player.pid)
       expect(rosterRow.players[0].pos).to.equal(player.pos1)
       expect(rosterRow.players[0].userid).to.equal(1)
       expect(rosterRow.players[0].tid).to.equal(teamId)
@@ -109,7 +109,7 @@ describe('API /leagues/rosters - add', function () {
         .post('/api/leagues/1/rosters')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: 'x',
+          pid: 'x',
           leagueId: 1
         })
 
@@ -122,7 +122,7 @@ describe('API /leagues/rosters - add', function () {
         .post('/api/leagues/1/rosters')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: 'x',
+          pid: 'x',
           teamId: 1
         })
 
@@ -137,7 +137,7 @@ describe('API /leagues/rosters - add', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1,
-          player: player.player,
+          pid: player.pid,
           leagueId: 2
         })
 
@@ -150,7 +150,7 @@ describe('API /leagues/rosters - add', function () {
         .post('/api/leagues/2/rosters')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: 'x',
+          pid: 'x',
           teamId: 1,
           leagueId: 1
         })
@@ -165,7 +165,7 @@ describe('API /leagues/rosters - add', function () {
         .post('/api/leagues/2/rosters')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player.player,
+          pid: player.pid,
           teamId: 1,
           leagueId: 1,
           value: 'x'
@@ -181,7 +181,7 @@ describe('API /leagues/rosters - add', function () {
         .post('/api/leagues/1/rosters')
         .set('Authorization', `Bearer ${user2}`)
         .send({
-          player: player.player,
+          pid: player.pid,
           teamId: 1,
           leagueId: 1
         })

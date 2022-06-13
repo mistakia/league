@@ -70,7 +70,7 @@ describe('API /teams - protect', function () {
         .post('/api/teams/1/protect')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: 'x'
+          pid: 'x'
         })
 
       await missing(request, 'leagueId')
@@ -83,7 +83,7 @@ describe('API /teams - protect', function () {
         .set('Authorization', `Bearer ${user2}`)
         .send({
           leagueId: 1,
-          player: 'x'
+          pid: 'x'
         })
 
       await invalid(request, 'teamId')
@@ -97,7 +97,7 @@ describe('API /teams - protect', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          player: player.player
+          pid: player.pid
         })
 
       await invalid(request, 'player')
@@ -117,7 +117,7 @@ describe('API /teams - protect', function () {
         .post('/api/teams/1/protect')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player.player,
+          pid: player.pid,
           leagueId: 1
         })
 

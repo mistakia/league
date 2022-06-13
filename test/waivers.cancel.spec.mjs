@@ -19,7 +19,7 @@ chai.use(chaiHTTP)
 const { start } = constants.season
 
 describe('API /waivers - cancel', function () {
-  let playerId
+  let pid
   let waiverId
 
   before(async function () {
@@ -46,18 +46,19 @@ describe('API /waivers - cancel', function () {
 
     // make draft selection
     const leagueId = 1
-    const players = await knex('player')
+    const player_rows = await knex('player')
       .where('start', constants.season.year)
       .limit(1)
-    const player = players[0]
-    playerId = player.player
+    const player_row = player_rows[0]
+    pid = player_row.pid
+
     await chai
       .request(server)
       .post('/api/leagues/1/draft')
       .set('Authorization', `Bearer ${user1}`)
       .send({
         teamId: 1,
-        playerId,
+        pid,
         pickId: 1
       })
 
@@ -77,7 +78,7 @@ describe('API /waivers - cancel', function () {
       .set('Authorization', `Bearer ${user2}`)
       .send({
         teamId,
-        player: playerId,
+        pid,
         type: constants.waivers.POACH,
         leagueId
       })
@@ -113,7 +114,7 @@ describe('API /waivers - cancel', function () {
       .set('Authorization', `Bearer ${user2}`)
       .send({
         teamId,
-        player: playerId,
+        pid,
         type: constants.waivers.POACH,
         leagueId
       })

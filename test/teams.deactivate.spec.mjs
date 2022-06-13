@@ -63,7 +63,7 @@ describe('API /teams - deactivate', function () {
         .post('/api/teams/1/deactivate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player.player,
+          player: player.pid,
           leagueId
         })
 
@@ -72,12 +72,12 @@ describe('API /teams - deactivate', function () {
       res.should.be.json
 
       res.body.tid.should.equal(teamId)
-      res.body.player.should.equal(player.player)
+      res.body.player.should.equal(player.pid)
       res.body.slot.should.equal(constants.slots.PS)
       res.body.transaction.userid.should.equal(userId)
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
-      res.body.transaction.player.should.equal(player.player)
+      res.body.transaction.player.should.equal(player.pid)
       res.body.transaction.type.should.equal(
         constants.transactions.ROSTER_DEACTIVATE
       )
@@ -90,7 +90,7 @@ describe('API /teams - deactivate', function () {
         .where({
           year: constants.season.year,
           week: constants.season.week,
-          player: player.player
+          player: player.pid
         })
         .limit(1)
 
@@ -102,7 +102,7 @@ describe('API /teams - deactivate', function () {
         type: constants.transactions.ROSTER_DEACTIVATE,
         value,
         year: constants.season.year,
-        player: player.player,
+        player: player.pid,
         teamId,
         userId
       })
@@ -119,7 +119,7 @@ describe('API /teams - deactivate', function () {
         tid: teamId,
         userid: 1,
         lid: leagueId,
-        player: player.player,
+        player: player.pid,
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: value,
@@ -140,7 +140,7 @@ describe('API /teams - deactivate', function () {
         .post('/api/teams/1/deactivate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player.player,
+          player: player.pid,
           leagueId
         })
 
@@ -149,12 +149,12 @@ describe('API /teams - deactivate', function () {
       res.should.be.json
 
       res.body.tid.should.equal(teamId)
-      res.body.player.should.equal(player.player)
+      res.body.player.should.equal(player.pid)
       res.body.slot.should.equal(constants.slots.PS)
       res.body.transaction.userid.should.equal(userId)
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
-      res.body.transaction.player.should.equal(player.player)
+      res.body.transaction.player.should.equal(player.pid)
       res.body.transaction.type.should.equal(
         constants.transactions.ROSTER_DEACTIVATE
       )
@@ -167,7 +167,7 @@ describe('API /teams - deactivate', function () {
         .where({
           year: constants.season.year,
           week: constants.season.week,
-          player: player.player
+          player: player.pid
         })
         .limit(1)
 
@@ -179,7 +179,7 @@ describe('API /teams - deactivate', function () {
         type: constants.transactions.ROSTER_DEACTIVATE,
         value,
         year: constants.season.year,
-        player: player.player,
+        player: player.pid,
         teamId,
         userId
       })
@@ -261,7 +261,7 @@ describe('API /teams - deactivate', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          player: player.player
+          player: player.pid
         })
 
       await invalid(request, 'player')
@@ -312,7 +312,7 @@ describe('API /teams - deactivate', function () {
         tid: 1,
         userid: 1,
         lid: leagueId,
-        player: player.player,
+        player: player.pid,
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 1,
@@ -323,7 +323,7 @@ describe('API /teams - deactivate', function () {
         tid: 2,
         userid: 1,
         lid: leagueId,
-        player: player.player,
+        player: player.pid,
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 0,
@@ -344,7 +344,7 @@ describe('API /teams - deactivate', function () {
         .post('/api/teams/1/deactivate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player.player,
+          player: player.pid,
           leagueId
         })
 

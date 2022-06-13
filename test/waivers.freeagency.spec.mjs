@@ -56,7 +56,7 @@ describe('API /waivers - free agency', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: player.player,
+          pid: player.pid,
           type: constants.waivers.FREE_AGENCY,
           leagueId
         })
@@ -68,7 +68,7 @@ describe('API /waivers - free agency', function () {
       res.body.tid.should.equal(teamId)
       res.body.userid.should.equal(1)
       res.body.lid.should.equal(leagueId)
-      res.body.player.should.equal(player.player)
+      res.body.pid.should.equal(player.pid)
       res.body.po.should.equal(9999)
       res.body.submitted.should.equal(Math.round(Date.now() / 1000))
       res.body.bid.should.equal(0)
@@ -109,7 +109,7 @@ describe('API /waivers - free agency', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: player.player,
+          pid: player.pid,
           type: constants.waivers.FREE_AGENCY_PRACTICE,
           leagueId
         })
@@ -121,7 +121,7 @@ describe('API /waivers - free agency', function () {
       res.body.tid.should.equal(teamId)
       res.body.userid.should.equal(1)
       res.body.lid.should.equal(leagueId)
-      res.body.player.should.equal(player.player)
+      res.body.pid.should.equal(player.pid)
       res.body.po.should.equal(9999)
       res.body.submitted.should.equal(Math.round(Date.now() / 1000))
       res.body.bid.should.equal(0)
@@ -176,7 +176,7 @@ describe('API /waivers - free agency', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: player.player,
+          pid: player.pid,
           type: constants.waivers.FREE_AGENCY,
           leagueId
         })
@@ -187,7 +187,7 @@ describe('API /waivers - free agency', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: player.player,
+          pid: player.pid,
           type: constants.waivers.FREE_AGENCY,
           leagueId
         })
@@ -211,7 +211,7 @@ describe('API /waivers - free agency', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: players[0].player,
+          pid: players[0].pid,
           type: constants.waivers.FREE_AGENCY,
           leagueId
         })
@@ -252,7 +252,7 @@ describe('API /waivers - free agency', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: player.player,
+          pid: player.pid,
           type: constants.waivers.FREE_AGENCY,
           leagueId
         })
@@ -273,7 +273,7 @@ describe('API /waivers - free agency', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: player.player,
+          pid: player.pid,
           type: constants.waivers.FREE_AGENCY_PRACTICE,
           leagueId
         })
@@ -295,7 +295,7 @@ describe('API /waivers - free agency', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: player.player,
+          pid: player.pid,
           type: constants.waivers.FREE_AGENCY,
           leagueId
         })
@@ -335,7 +335,7 @@ describe('API /waivers - free agency', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: player.player,
+          pid: player.pid,
           type: constants.waivers.FREE_AGENCY_PRACTICE,
           leagueId
         })
@@ -349,15 +349,15 @@ describe('API /waivers - free agency', function () {
       const teamId = 1
       await fillRoster({ leagueId, teamId })
       const roster = await getRoster({ tid: teamId })
-      const playerIds = roster.players.map((p) => p.player)
-      const player = await selectPlayer({ exclude: playerIds })
+      const exclude_pids = roster.players.map((p) => p.pid)
+      const player = await selectPlayer({ exclude_pids })
       const request = chai
         .request(server)
         .post('/api/leagues/1/waivers')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: player.player,
+          pid: player.pid,
           type: constants.waivers.FREE_AGENCY,
           leagueId
         })
@@ -385,7 +385,7 @@ describe('API /waivers - free agency', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: player.player,
+          pid: player.pid,
           type: constants.waivers.FREE_AGENCY,
           leagueId
         })
@@ -420,15 +420,15 @@ describe('API /waivers - free agency', function () {
       const teamId = 1
       await fillRoster({ leagueId, teamId })
       const roster = await getRoster({ tid: teamId })
-      const playerIds = roster.players.map((p) => p.player)
-      const player = await selectPlayer({ exclude: playerIds, rookie: true })
+      const exclude_pids = roster.players.map((p) => p.pid)
+      const player = await selectPlayer({ exclude_pids, rookie: true })
       const request = chai
         .request(server)
         .post('/api/leagues/1/waivers')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: player.player,
+          pid: player.pid,
           type: constants.waivers.FREE_AGENCY_PRACTICE,
           leagueId
         })

@@ -62,7 +62,7 @@ describe('API /teams - release', function () {
         .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player.player,
+          pid: player.pid,
           teamId,
           leagueId
         })
@@ -72,13 +72,13 @@ describe('API /teams - release', function () {
       res.should.be.json
 
       res.body.tid.should.equal(teamId)
-      res.body.player.should.equal(player.player)
+      res.body.pid.should.equal(player.pid)
       expect(res.body.slot).to.equal(null)
       res.body.pos.should.equal(player.pos1)
       res.body.transaction.userid.should.equal(userId)
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
-      res.body.transaction.player.should.equal(player.player)
+      res.body.transaction.pid.should.equal(player.pid)
       res.body.transaction.type.should.equal(
         constants.transactions.ROSTER_RELEASE
       )
@@ -92,7 +92,7 @@ describe('API /teams - release', function () {
         leagueId,
         type: constants.transactions.ROSTER_RELEASE,
         value: 0,
-        player: player.player,
+        pid: player.pid,
         teamId,
         userId
       })
@@ -118,7 +118,7 @@ describe('API /teams - release', function () {
         .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player.player,
+          pid: player.pid,
           teamId,
           leagueId
         })
@@ -128,13 +128,13 @@ describe('API /teams - release', function () {
       res.should.be.json
 
       res.body.tid.should.equal(teamId)
-      res.body.player.should.equal(player.player)
+      res.body.pid.should.equal(player.pid)
       expect(res.body.slot).to.equal(null)
       res.body.pos.should.equal(player.pos1)
       res.body.transaction.userid.should.equal(userId)
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
-      res.body.transaction.player.should.equal(player.player)
+      res.body.transaction.pid.should.equal(player.pid)
       res.body.transaction.type.should.equal(
         constants.transactions.ROSTER_RELEASE
       )
@@ -148,7 +148,7 @@ describe('API /teams - release', function () {
         leagueId,
         type: constants.transactions.ROSTER_RELEASE,
         value: 0,
-        player: player.player,
+        pid: player.pid,
         teamId,
         userId
       })
@@ -174,7 +174,7 @@ describe('API /teams - release', function () {
         .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player.player,
+          pid: player.pid,
           teamId,
           leagueId
         })
@@ -184,13 +184,13 @@ describe('API /teams - release', function () {
       res.should.be.json
 
       res.body.tid.should.equal(teamId)
-      res.body.player.should.equal(player.player)
+      res.body.pid.should.equal(player.pid)
       expect(res.body.slot).to.equal(null)
       res.body.pos.should.equal(player.pos1)
       res.body.transaction.userid.should.equal(userId)
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
-      res.body.transaction.player.should.equal(player.player)
+      res.body.transaction.pid.should.equal(player.pid)
       res.body.transaction.type.should.equal(
         constants.transactions.ROSTER_RELEASE
       )
@@ -204,7 +204,7 @@ describe('API /teams - release', function () {
         leagueId,
         type: constants.transactions.ROSTER_RELEASE,
         value: 0,
-        player: player.player,
+        pid: player.pid,
         teamId,
         userId
       })
@@ -230,7 +230,7 @@ describe('API /teams - release', function () {
         .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player.player,
+          pid: player.pid,
           teamId,
           leagueId
         })
@@ -240,13 +240,13 @@ describe('API /teams - release', function () {
       res.should.be.json
 
       res.body.tid.should.equal(teamId)
-      res.body.player.should.equal(player.player)
+      res.body.pid.should.equal(player.pid)
       expect(res.body.slot).to.equal(null)
       res.body.pos.should.equal(player.pos1)
       res.body.transaction.userid.should.equal(userId)
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
-      res.body.transaction.player.should.equal(player.player)
+      res.body.transaction.pid.should.equal(player.pid)
       res.body.transaction.type.should.equal(
         constants.transactions.ROSTER_RELEASE
       )
@@ -260,7 +260,7 @@ describe('API /teams - release', function () {
         leagueId,
         type: constants.transactions.ROSTER_RELEASE,
         value: 0,
-        player: player.player,
+        pid: player.pid,
         teamId,
         userId
       })
@@ -286,7 +286,7 @@ describe('API /teams - release', function () {
         .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player.player,
+          pid: player.pid,
           teamId,
           leagueId
         })
@@ -296,13 +296,13 @@ describe('API /teams - release', function () {
       res.should.be.json
 
       res.body.tid.should.equal(teamId)
-      res.body.player.should.equal(player.player)
+      res.body.pid.should.equal(player.pid)
       expect(res.body.slot).to.equal(null)
       res.body.pos.should.equal(player.pos1)
       res.body.transaction.userid.should.equal(userId)
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
-      res.body.transaction.player.should.equal(player.player)
+      res.body.transaction.pid.should.equal(player.pid)
       res.body.transaction.type.should.equal(
         constants.transactions.ROSTER_RELEASE
       )
@@ -316,7 +316,7 @@ describe('API /teams - release', function () {
         leagueId,
         type: constants.transactions.ROSTER_RELEASE,
         value: 0,
-        player: player.player,
+        pid: player.pid,
         teamId,
         userId
       })
@@ -342,7 +342,7 @@ describe('API /teams - release', function () {
         .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player.player,
+          pid: player.pid,
           teamId,
           leagueId
         })
@@ -352,13 +352,13 @@ describe('API /teams - release', function () {
       res.should.be.json
 
       res.body.tid.should.equal(teamId)
-      res.body.player.should.equal(player.player)
+      res.body.pid.should.equal(player.pid)
       expect(res.body.slot).to.equal(null)
       res.body.pos.should.equal(player.pos1)
       res.body.transaction.userid.should.equal(userId)
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
-      res.body.transaction.player.should.equal(player.player)
+      res.body.transaction.pid.should.equal(player.pid)
       res.body.transaction.type.should.equal(
         constants.transactions.ROSTER_RELEASE
       )
@@ -372,7 +372,7 @@ describe('API /teams - release', function () {
         leagueId,
         type: constants.transactions.ROSTER_RELEASE,
         value: 0,
-        player: player.player,
+        pid: player.pid,
         teamId,
         userId
       })
@@ -418,7 +418,7 @@ describe('API /teams - release', function () {
         .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: 'x',
+          pid: 'x',
           leagueId: 1
         })
 
@@ -431,7 +431,7 @@ describe('API /teams - release', function () {
         .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: 'x',
+          pid: 'x',
           teamId: 1
         })
 
@@ -444,7 +444,7 @@ describe('API /teams - release', function () {
         .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user2}`)
         .send({
-          player: 'x',
+          pid: 'x',
           leagueId: 1,
           teamId: 1
         })
@@ -464,7 +464,7 @@ describe('API /teams - release', function () {
         .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player.player,
+          pid: player.pid,
           teamId,
           leagueId
         })
@@ -488,7 +488,7 @@ describe('API /teams - release', function () {
       })
 
       await knex('poaches').insert({
-        player: player.player,
+        pid: player.pid,
         userid: 2,
         tid: 2,
         lid: leagueId,
@@ -500,7 +500,7 @@ describe('API /teams - release', function () {
         .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player.player,
+          pid: player.pid,
           teamId,
           leagueId
         })
@@ -523,7 +523,7 @@ describe('API /teams - release', function () {
         .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player.player,
+          pid: player.pid,
           teamId: 1,
           leagueId: 1
         })

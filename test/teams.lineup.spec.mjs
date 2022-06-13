@@ -55,7 +55,7 @@ describe('API /teams - lineups', function () {
         .send({
           players: [
             {
-              player: player.player,
+              pid: player.pid,
               slot: constants.slots.RB
             }
           ],
@@ -68,7 +68,7 @@ describe('API /teams - lineups', function () {
 
       expect(res.body.length).to.equal(1)
       res.body[0].slot.should.equal(constants.slots.RB)
-      res.body[0].player.should.equal(player.player)
+      res.body[0].player.should.equal(player.pid)
       res.body[0].week.should.equal(constants.season.week)
       res.body[0].year.should.equal(constants.season.year)
       res.body[0].tid.should.equal(teamId)
@@ -76,14 +76,14 @@ describe('API /teams - lineups', function () {
       const rosterRows = await knex('rosters_players')
         .join('rosters', 'rosters_players.rid', 'rosters.uid')
         .where({
-          player: player.player,
+          pid: player.pid,
           tid: teamId,
           week: constants.season.week,
           year: constants.season.year
         })
 
       expect(rosterRows[0].slot).to.equal(constants.slots.RB)
-      expect(rosterRows[0].player).to.equal(player.player)
+      expect(rosterRows[0].pid).to.equal(player.pid)
       expect(rosterRows[0].pos).to.equal(player.pos1)
       expect(rosterRows[0].tid).to.equal(teamId)
       expect(rosterRows[0].lid).to.equal(leagueId)
@@ -127,7 +127,7 @@ describe('API /teams - lineups', function () {
         .send({
           players: [
             {
-              player: 'x'
+              pid: 'x'
             }
           ],
           leagueId: 1
@@ -161,7 +161,7 @@ describe('API /teams - lineups', function () {
         .send({
           players: [
             {
-              player: 'x',
+              pid: 'x',
               slot: constants.slots.RB
             }
           ]
@@ -179,7 +179,7 @@ describe('API /teams - lineups', function () {
           leagueId: 1,
           players: [
             {
-              player: 'x',
+              pid: 'x',
               slot: constants.slots.RB
             }
           ]
@@ -197,7 +197,7 @@ describe('API /teams - lineups', function () {
           leagueId: 1,
           players: [
             {
-              player: 'x',
+              pid: 'x',
               slot: constants.slots.RB
             }
           ]
@@ -223,7 +223,7 @@ describe('API /teams - lineups', function () {
           leagueId: 1,
           players: [
             {
-              player: player.player,
+              pid: player.pid,
               slot: constants.slots.RB
             }
           ]
@@ -251,7 +251,7 @@ describe('API /teams - lineups', function () {
           players: [
             {
               slot: constants.slots.RB,
-              player: player.player
+              pid: player.pid
             }
           ]
         })
@@ -269,7 +269,7 @@ describe('API /teams - lineups', function () {
           leagueId: 1,
           players: [
             {
-              player: player.player,
+              pid: player.pid,
               slot: constants.slots.RB
             }
           ]
@@ -304,7 +304,7 @@ describe('API /teams - lineups', function () {
           leagueId: 1,
           players: [
             {
-              player: player.player,
+              pid: player.pid,
               slot: constants.slots.WR
             }
           ],
@@ -345,7 +345,7 @@ describe('API /teams - lineups', function () {
           leagueId: 1,
           players: [
             {
-              player: player.player,
+              pid: player.pid,
               slot: constants.slots.WR
             }
           ],

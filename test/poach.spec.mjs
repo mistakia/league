@@ -65,7 +65,7 @@ describe('API /poaches', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: player.player,
+          pid: player.pid,
           leagueId
         })
 

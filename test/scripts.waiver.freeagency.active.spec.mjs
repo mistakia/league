@@ -44,7 +44,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         tid: teamId,
         userid: 1,
         lid: leagueId,
-        player: player.player,
+        pid: player.pid,
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: value,
@@ -63,7 +63,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
       // check waivers
       const waivers = await knex('waivers')
       expect(waivers.length).to.equal(1)
-      expect(waivers[0].player).to.equal(player.player)
+      expect(waivers[0].pid).to.equal(player.pid)
       expect(waivers[0].succ).to.equal(1)
       expect(waivers[0].reason).to.equal(null)
       expect(waivers[0].processed).to.equal(Math.round(Date.now() / 1000))
@@ -83,14 +83,14 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
       // verify roster
       await checkRoster({
         teamId,
-        player: player.player,
+        pid: player.pid,
         leagueId
       })
 
       // verify transaction
       await checkLastTransaction({
         leagueId,
-        player: player.player,
+        pid: player.pid,
         teamId,
         userId: 1,
         value,
@@ -110,7 +110,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         tid: 1,
         userid: 1,
         lid: leagueId,
-        player: player1.player,
+        pid: player1.pid,
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: value1,
@@ -121,7 +121,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         tid: 2,
         userid: 1,
         lid: leagueId,
-        player: player1.player,
+        pid: player1.pid,
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 80,
@@ -134,7 +134,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         tid: 2,
         userid: 1,
         lid: leagueId,
-        player: player2.player,
+        pid: player2.pid,
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: value2,
@@ -147,7 +147,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         tid: 1,
         userid: 1,
         lid: leagueId,
-        player: player3.player,
+        pid: player3.pid,
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 30,
@@ -157,7 +157,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         tid: 2,
         userid: 1,
         lid: leagueId,
-        player: player3.player,
+        pid: player3.pid,
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: value3,
@@ -170,7 +170,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         tid: 1,
         userid: 1,
         lid: leagueId,
-        player: player4.player,
+        pid: player4.pid,
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: value4,
@@ -180,7 +180,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         tid: 4,
         userid: 1,
         lid: leagueId,
-        player: player4.player,
+        pid: player4.pid,
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: value4,
@@ -199,7 +199,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
       // check waivers
       const waivers = await knex('waivers').orderBy('uid')
       expect(waivers.length).to.equal(7)
-      expect(waivers[0].player).to.equal(player1.player)
+      expect(waivers[0].pid).to.equal(player1.pid)
       expect(waivers[0].succ).to.equal(1)
       expect(waivers[0].reason).to.equal(null)
       expect(waivers[0].processed).to.equal(Math.round(Date.now() / 1000))
@@ -207,29 +207,29 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
 
       expect(waivers[1].succ).to.equal(0)
       expect(waivers[1].reason).to.equal('player is not a free agent')
-      expect(waivers[1].player).to.equal(player1.player)
+      expect(waivers[1].pid).to.equal(player1.pid)
 
       expect(waivers[2].succ).to.equal(1)
       expect(waivers[2].reason).to.equal(null)
-      expect(waivers[2].player).to.equal(player2.player)
+      expect(waivers[2].pid).to.equal(player2.pid)
 
       expect(waivers[3].succ).to.equal(0)
       expect(waivers[3].reason).to.equal(
         'exceeds available free agent auction budget'
       )
-      expect(waivers[3].player).to.equal(player3.player)
+      expect(waivers[3].pid).to.equal(player3.pid)
 
       expect(waivers[4].succ).to.equal(1)
       expect(waivers[4].reason).to.equal(null)
-      expect(waivers[4].player).to.equal(player3.player)
+      expect(waivers[4].pid).to.equal(player3.pid)
 
       expect(waivers[5].succ).to.equal(1)
       expect(waivers[5].reason).to.equal(null)
-      expect(waivers[5].player).to.equal(player4.player)
+      expect(waivers[5].pid).to.equal(player4.pid)
 
       expect(waivers[6].succ).to.equal(0)
       expect(waivers[6].reason).to.equal('player is not a free agent')
-      expect(waivers[6].player).to.equal(player4.player)
+      expect(waivers[6].pid).to.equal(player4.pid)
 
       // check team waiver order
       const teams = await knex('teams').where({ lid: 1 })
@@ -245,25 +245,25 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
       // verify roster
       await checkRoster({
         teamId: 1,
-        player: player1.player,
+        pid: player1.pid,
         leagueId
       })
 
       await checkRoster({
         teamId: 2,
-        player: player2.player,
+        pid: player2.pid,
         leagueId
       })
 
       await checkRoster({
         teamId: 2,
-        player: player3.player,
+        pid: player3.pid,
         leagueId
       })
 
       await checkRoster({
         teamId: 1,
-        player: player4.player,
+        pid: player4.pid,
         leagueId
       })
 
@@ -272,22 +272,22 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         .where('lid', leagueId)
         .orderBy('uid')
       expect(transactions.length).to.equal(4)
-      expect(transactions[0].player).to.equal(player1.player)
+      expect(transactions[0].pid).to.equal(player1.pid)
       expect(transactions[0].tid).to.equal(1)
       expect(transactions[0].value).to.equal(value1)
       expect(transactions[0].type).to.equal(constants.transactions.ROSTER_ADD)
 
-      expect(transactions[1].player).to.equal(player2.player)
+      expect(transactions[1].pid).to.equal(player2.pid)
       expect(transactions[1].tid).to.equal(2)
       expect(transactions[1].value).to.equal(value2)
       expect(transactions[1].type).to.equal(constants.transactions.ROSTER_ADD)
 
-      expect(transactions[2].player).to.equal(player3.player)
+      expect(transactions[2].pid).to.equal(player3.pid)
       expect(transactions[2].tid).to.equal(2)
       expect(transactions[2].value).to.equal(value3)
       expect(transactions[2].type).to.equal(constants.transactions.ROSTER_ADD)
 
-      expect(transactions[3].player).to.equal(player4.player)
+      expect(transactions[3].pid).to.equal(player4.pid)
       expect(transactions[3].tid).to.equal(1)
       expect(transactions[3].value).to.equal(value4)
       expect(transactions[3].type).to.equal(constants.transactions.ROSTER_ADD)
@@ -301,7 +301,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         userid: 2,
         tid: 2,
         lid: leagueId,
-        player: player.player,
+        pid: player.pid,
         type: constants.transactions.ROSTER_RELEASE,
         value: 0,
         year: constants.season.year,
@@ -314,7 +314,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         tid: teamId,
         userid: 1,
         lid: leagueId,
-        player: player.player,
+        pid: player.pid,
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: value,
@@ -332,7 +332,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
 
       const waivers = await knex('waivers').orderBy('uid')
       expect(waivers.length).to.equal(1)
-      expect(waivers[0].player).to.equal(player.player)
+      expect(waivers[0].pid).to.equal(player.pid)
       expect(waivers[0].succ).to.equal(null)
       expect(waivers[0].reason).to.equal(null)
       expect(waivers[0].processed).to.equal(null)
