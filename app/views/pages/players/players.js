@@ -77,7 +77,7 @@ export default class PlayersPage extends React.Component {
 
     if (this.props.selected) {
       // TODO
-      // const index = this.props.players.findIndex(p => p.player === this.props.selected)
+      // const index = this.props.players.findIndex(p => p.pid === this.props.selected)
       // this.list.current.scrollToRow(index)
     }
   }

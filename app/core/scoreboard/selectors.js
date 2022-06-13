@@ -121,8 +121,8 @@ export function getStartersByMatchupId(state, { mid }) {
   return { matchup, games, teams }
 }
 
-export function getScoreboardGamelogByPlayerId(state, { playerId }) {
-  const playerMap = getPlayerById(state, { playerId })
+export function getScoreboardGamelogByPlayerId(state, { pid }) {
+  const playerMap = getPlayerById(state, { pid })
 
   if (!playerMap.get('pid')) return
 
@@ -234,15 +234,15 @@ function getYardline(str, pos_team) {
 
 export function getGameStatusByPlayerId(
   state,
-  { playerId, week = constants.season.week }
+  { pid, week = constants.season.week }
 ) {
-  const game = getGameByPlayerId(state, { playerId, week })
+  const game = getGameByPlayerId(state, { pid, week })
   if (!game) {
     return null
   }
 
   const plays = getPlays(state, { week })
-  const playerMap = getPlayerById(state, { playerId })
+  const playerMap = getPlayerById(state, { pid })
   const play = plays.find((p) => {
     if (!p.pos_team) return false
 

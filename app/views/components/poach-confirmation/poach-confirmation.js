@@ -69,13 +69,13 @@ export default class PoachConfirmation extends React.Component {
     if (this.props.status.waiver.poach) {
       this.props.submitWaiverClaim({
         release,
-        player: playerMap.get('pid'), // TODO pid
+        pid: playerMap.get('pid'),
         type: constants.waivers.POACH
       })
     } else if (poach.uid) {
       this.props.updatePoach({ poachId: poach.uid, release })
     } else {
-      this.props.submitPoach({ release, player: playerMap.get('pid') })
+      this.props.submitPoach({ release, pid: playerMap.get('pid') })
     }
     this.props.onClose()
   }
@@ -139,7 +139,7 @@ export default class PoachConfirmation extends React.Component {
       this.props.releasePlayers
     )
     this.state.release.forEach((pid) => {
-      const releasePlayerMap = releasePlayerPool.find((p) => p.player === pid)
+      const releasePlayerMap = releasePlayerPool.find((p) => p.pid === pid)
       releasePlayers.push({
         id: releasePlayerMap.get('pid'),
         label: releasePlayerMap.get('name'),

@@ -9,8 +9,8 @@ import SelectedPlayer from './selected-player'
 const mapStateToProps = createSelector(
   getSelectedPlayer,
   getApp,
-  (player, app) => ({
-    player,
+  (playerMap, app) => ({
+    playerMap,
     isLoggedIn: Boolean(app.userId)
   })
 )

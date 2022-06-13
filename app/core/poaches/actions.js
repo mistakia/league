@@ -19,10 +19,10 @@ export const poachActions = {
     }
   }),
 
-  poach: ({ player, release }) => ({
+  poach: ({ pid, release }) => ({
     type: poachActions.POACH_PLAYER,
     payload: {
-      player,
+      pid,
       release
     }
   }),

@@ -88,12 +88,9 @@ export default class Lineup extends React.Component {
       const slot = constants.slots.RBWR
       const rosterPlayers = r.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.srbwr; i++) {
-        const { player } = rosterPlayers[i] || {}
+        const { pid } = rosterPlayers[i] || {}
         starters.push(
-          <PlayerSlot
-            key={`${slot}${i}`}
-            {...{ playerId: player, slot, ...slotProps }}
-          />
+          <PlayerSlot key={`${slot}${i}`} {...{ pid, slot, ...slotProps }} />
         )
       }
     }
@@ -102,12 +99,9 @@ export default class Lineup extends React.Component {
       const slot = constants.slots.RBWRTE
       const rosterPlayers = r.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.srbwrte; i++) {
-        const { player } = rosterPlayers[i] || {}
+        const { pid } = rosterPlayers[i] || {}
         starters.push(
-          <PlayerSlot
-            key={`${slot}${i}`}
-            {...{ playerId: player, slot, ...slotProps }}
-          />
+          <PlayerSlot key={`${slot}${i}`} {...{ pid, slot, ...slotProps }} />
         )
       }
     }
@@ -116,12 +110,9 @@ export default class Lineup extends React.Component {
       const slot = constants.slots.QBRBWRTE
       const rosterPlayers = r.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.sqbrbwrte; i++) {
-        const { player } = rosterPlayers[i] || {}
+        const { pid } = rosterPlayers[i] || {}
         starters.push(
-          <PlayerSlot
-            key={`${slot}${i}`}
-            {...{ playerId: player, slot, ...slotProps }}
-          />
+          <PlayerSlot key={`${slot}${i}`} {...{ pid, slot, ...slotProps }} />
         )
       }
     }
@@ -130,12 +121,9 @@ export default class Lineup extends React.Component {
       const slot = constants.slots.WRTE
       const rosterPlayers = r.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.swrte; i++) {
-        const { player } = rosterPlayers[i] || {}
+        const { pid } = rosterPlayers[i] || {}
         starters.push(
-          <PlayerSlot
-            key={`${slot}${i}`}
-            {...{ playerId: player, slot, ...slotProps }}
-          />
+          <PlayerSlot key={`${slot}${i}`} {...{ pid, slot, ...slotProps }} />
         )
       }
     }
@@ -144,12 +132,9 @@ export default class Lineup extends React.Component {
       const slot = constants.slots.TE
       const rosterPlayers = r.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.ste; i++) {
-        const { player } = rosterPlayers[i] || {}
+        const { pid } = rosterPlayers[i] || {}
         starters.push(
-          <PlayerSlot
-            key={`${slot}${i}`}
-            {...{ playerId: player, slot, ...slotProps }}
-          />
+          <PlayerSlot key={`${slot}${i}`} {...{ pid, slot, ...slotProps }} />
         )
       }
     }
@@ -158,12 +143,9 @@ export default class Lineup extends React.Component {
       const slot = constants.slots.K
       const rosterPlayers = r.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.sk; i++) {
-        const { player } = rosterPlayers[i] || {}
+        const { pid } = rosterPlayers[i] || {}
         starters.push(
-          <PlayerSlot
-            key={`${slot}${i}`}
-            {...{ playerId: player, slot, ...slotProps }}
-          />
+          <PlayerSlot key={`${slot}${i}`} {...{ pid, slot, ...slotProps }} />
         )
       }
     }
@@ -172,12 +154,9 @@ export default class Lineup extends React.Component {
       const slot = constants.slots.DST
       const rosterPlayers = r.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.sdst; i++) {
-        const { player } = rosterPlayers[i] || {}
+        const { pid } = rosterPlayers[i] || {}
         starters.push(
-          <PlayerSlot
-            key={`${slot}${i}`}
-            {...{ playerId: player, slot, ...slotProps }}
-          />
+          <PlayerSlot key={`${slot}${i}`} {...{ pid, slot, ...slotProps }} />
         )
       }
     }
@@ -188,30 +167,25 @@ export default class Lineup extends React.Component {
       bench.push(
         <PlayerSlot
           key='bench'
-          {...{ playerId: null, slot: constants.slots.BENCH, ...slotProps }}
+          {...{ pid: null, slot: constants.slots.BENCH, ...slotProps }}
         />
       )
     }
-    for (const { slot, player } of r.bench) {
-      bench.push(
-        <PlayerSlot
-          key={player}
-          {...{ playerId: player, slot, ...slotProps }}
-        />
-      )
+    for (const { slot, pid } of r.bench) {
+      bench.push(<PlayerSlot key={pid} {...{ pid, slot, ...slotProps }} />)
     }
 
     /* const ir = []
-     * for (const { slot, player } of r.ir) {
+     * for (const { slot, pid } of r.ir) {
      *   ir.push(
-     *     <PlayerSlot key={player} {...{ playerId: player, slot, roster }} />
+     *     <PlayerSlot key={pid} {...{ pid, slot, roster }} />
      *   )
      * }
 
      * const ps = []
-     * for (const { slot, player } of r.practice) {
+     * for (const { slot, pid } of r.practice) {
      *   ps.push(
-     *     <PlayerSlot key={player} {...{ playerId: player, slot, roster }} />
+     *     <PlayerSlot key={pid} {...{ pid, slot, roster }} />
      *   )
      * }
      */

@@ -60,7 +60,7 @@ export default class SettingsTeamsTeam extends React.Component {
       rosterItems.push(
         <SettingsTeamsTeamPlayer
           key={index}
-          playerId={rosterPlayer.player}
+          pid={rosterPlayer.pid}
           teamId={team.uid}
           value={rosterPlayer.value}
         />

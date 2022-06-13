@@ -31,7 +31,7 @@ import {
 } from '@core/api'
 import { getApp, appActions } from '@core/app'
 import { constants } from '@common'
-import { getPlayers, getAllPlayers, playerActions, Player } from '@core/players'
+import { getPlayers, getAllPlayers, playerActions } from '@core/players'
 import {
   tradeActions,
   getCurrentTradePlayers,
@@ -77,15 +77,15 @@ export function* protect({ payload }) {
 }
 
 export function* setWaiverPlayerLineupContribution({ payload }) {
-  yield call(setPlayerLineupContribution, { pid: payload.data.player })
+  yield call(setPlayerLineupContribution, { pid: payload.data.pid })
 }
 
 export function* setPoachPlayerLineupContribution({ payload }) {
-  yield call(setPlayerLineupContribution, { pid: payload.data.player })
+  yield call(setPlayerLineupContribution, { pid: payload.data.pid })
 }
 
 export function* setSelectedPlayerLineupContribution({ payload }) {
-  yield call(setPlayerLineupContribution, { pid: payload.player })
+  yield call(setPlayerLineupContribution, { pid: payload.pid })
 }
 
 export function* setPlayerLineupContribution({ pid }) {
@@ -163,7 +163,7 @@ export function* calculatePlayerLineupContribution({ playerMap }) {
         playerMap.get('pos'),
         'available'
       ])
-      const baselinePlayer = playerItems.get(baselinePlayerId, new Player())
+      const baselinePlayer = playerItems.get(baselinePlayerId, new Map())
       // bench+ is difference between player output and best available
       const diff =
         projectedPoints - baselinePlayer.getIn(['points', week, 'total'])
@@ -400,7 +400,7 @@ export function* exportRosters() {
         last_transaction_timestamp: rosterPlayer.timestamp,
         last_transaction_type: constants.transactionsDetail[rosterPlayer.type],
         slot: constants.slotName[rosterPlayer.slot],
-        draft_year: playerMap.get('draft_year'),
+        draft_year: playerMap.get('start'),
         player_team: playerMap.get('team')
       })
     }

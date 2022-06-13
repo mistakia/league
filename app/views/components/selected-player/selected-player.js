@@ -86,7 +86,7 @@ export default class SelectedPlayer extends React.Component {
     const tid = playerMap.get('tid', false)
     const playerStatus = playerMap.get('status')
     const draftNum = playerMap.get('dpos')
-    const draftYear = playerMap.get('draft_year')
+    const draftYear = playerMap.get('start')
     return (
       <SwipeableDrawer
         anchor='bottom'
@@ -108,7 +108,7 @@ export default class SelectedPlayer extends React.Component {
             <div className='selected__player-meta'>
               <Position pos={pos} />
               <Team team={playerMap.get('team')} />
-              <span>#{playerMap.get('jersey', '-')}</span>
+              <span>#{playerMap.get('jnum', '-')}</span>
             </div>
           </div>
           <div className='selected__player-header-section'>

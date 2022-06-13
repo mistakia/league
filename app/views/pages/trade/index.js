@@ -55,13 +55,13 @@ class TradePage extends React.Component {
     this.props.load()
   }
 
-  handleReleasePlayerClick = (player) => this.props.setReleasePlayers(player)
+  handleReleasePlayerClick = (pid) => this.props.setReleasePlayers(pid)
 
-  handleProposingTeamPlayerClick = (player) =>
-    this.props.setProposingTeamPlayers(player)
+  handleProposingTeamPlayerClick = (pid) =>
+    this.props.setProposingTeamPlayers(pid)
 
-  handleAcceptingTeamPlayerClick = (player) =>
-    this.props.setAcceptingTeamPlayers(player)
+  handleAcceptingTeamPlayerClick = (pid) =>
+    this.props.setAcceptingTeamPlayers(pid)
 
   handleProposingTeamPickClick = (pick) =>
     this.props.setProposingTeamPicks(pick)

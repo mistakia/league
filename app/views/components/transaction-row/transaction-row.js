@@ -31,7 +31,7 @@ export default class TransactionRow extends React.Component {
           </div>
           {Boolean(showPlayer) && (
             <div className='transaction__player'>
-              <PlayerName playerId={transaction.player} headshot />
+              <PlayerName pid={transaction.pid} headshot />
             </div>
           )}
         </div>

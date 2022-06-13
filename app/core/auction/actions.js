@@ -78,10 +78,10 @@ export const auctionActions = {
     }
   }),
 
-  select: (player) => ({
+  select: (pid) => ({
     type: auctionActions.AUCTION_SELECT_PLAYER,
     payload: {
-      player
+      pid
     }
   }),
 

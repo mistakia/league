@@ -54,7 +54,7 @@ export default class RookieConfirmation extends React.Component {
     }
 
     if (!error) {
-      this.props.add({ remove: untag, tag: constants.tags.ROOKIE, player: pid })
+      this.props.add({ remove: untag, tag: constants.tags.ROOKIE, pid })
       this.props.onClose()
     }
   }

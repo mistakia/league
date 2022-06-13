@@ -13,13 +13,9 @@ import './auction-team-rosters.styl'
 
 function RosterRow({ rosterPlayer = {}, slot }) {
   return (
-    <div key={rosterPlayer.player} className='auction__team-rosters-player'>
+    <div key={rosterPlayer.pid} className='auction__team-rosters-player'>
       <div className='auction__team-rosters-player-slot'>{slot}</div>
-      {rosterPlayer.player ? (
-        <PlayerName playerId={rosterPlayer.player} />
-      ) : (
-        '-'
-      )}
+      {rosterPlayer.pid ? <PlayerName pid={rosterPlayer.pid} /> : '-'}
     </div>
   )
 }

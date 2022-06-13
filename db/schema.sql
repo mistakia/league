@@ -31,7 +31,10 @@ CREATE TABLE `game` (
   `ou` decimal(3,1) NOT NULL,
   `sprv` decimal(3,1) NOT NULL,
   `ptsv` tinyint(2) NOT NULL,
-  `ptsh` tinyint(2) NOT NULL
+  `ptsh` tinyint(2) NOT NULL,
+
+  UNIQUE KEY `gid` (`gid`),
+  KEY `seas` (`seas`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -75,7 +78,11 @@ CREATE TABLE `offense` (
   `team` varchar(3) NOT NULL,
   `posd` varchar(8) NOT NULL,
   `jnum` tinyint(2) NOT NULL,
-  `dcp` tinyint(1) NOT NULL
+  `dcp` tinyint(1) NOT NULL,
+
+  UNIQUE KEY `uid` (`uid`),
+  KEY `gid` (`gid`),
+  KEY `pid` (`pid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -147,7 +154,10 @@ CREATE TABLE `player` (
   UNIQUE KEY `espn_id` (`espn_id`),
   UNIQUE KEY `fantasy_data_id` (`fantasy_data_id`),
   UNIQUE KEY `yahoo_id` (`yahoo_id`),
-  UNIQUE KEY `keeptradecut_id` (`keeptradecut_id`)
+  UNIQUE KEY `keeptradecut_id` (`keeptradecut_id`),
+  UNIQUE KEY `pid` (`pid`),
+  KEY `fname` (`fname`),
+  KEY `lname` (`lname`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -603,7 +613,11 @@ CREATE TABLE `team` (
   `cov1y` int(3) NOT NULL,
   `cov2` tinyint(2) NOT NULL,
   `cov2y` int(3) NOT NULL,
-  `drp` tinyint(2) NOT NULL
+  `drp` tinyint(2) NOT NULL,
+
+  UNIQUE KEY `tid` (`tid`),
+  KEY `gid` (`gid`),
+  KEY `tname` (`tname`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -1192,7 +1206,7 @@ CREATE TABLE `league_cutlist` (
   `order` tinyint(2) NOT NULL,
   KEY `pid` (`pid`),
   KEY `teamid` (`tid`),
-  UNIQUE KEY `teamplayer` (`tid`, `pid`)
+  UNIQUE KEY `tid_pid` (`tid`, `pid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -1321,7 +1335,7 @@ CREATE TABLE `waiver_releases` (
   `waiverid` int(11) NOT NULL,
   `pid` varchar(7) NOT NULL,
   KEY `waiverid` (`waiverid`),
-  UNIQUE KEY `pid` (`waiverid`, `pid`)
+  UNIQUE KEY `waiverid_pid` (`waiverid`, `pid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -2101,37 +2115,6 @@ CREATE TABLE `keeptradecut_rankings` (
   `type` tinyint(1) NOT NULL,
   UNIQUE KEY `player_value` (`pid`,`d`,`qb`,`type`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
---
--- Indexes for table `game`
---
-ALTER TABLE `game`
-  ADD UNIQUE KEY `gid` (`gid`),
-  ADD KEY `seas` (`seas`);
-
---
--- Indexes for table `offense`
---
-ALTER TABLE `offense`
-  ADD UNIQUE KEY `uid` (`uid`),
-  ADD KEY `gid` (`gid`),
-  ADD KEY `pid` (`pid`);
-
---
--- Indexes for table `player`
---
-ALTER TABLE `player`
-  ADD UNIQUE KEY `pid` (`pid`),
-  ADD KEY `fname` (`fname`),
-  ADD KEY `lname` (`lname`);
-
---
--- Indexes for table `team`
---
-ALTER TABLE `team`
-  ADD UNIQUE KEY `tid` (`tid`),
-  ADD KEY `gid` (`gid`),
-  ADD KEY `tname` (`tname`);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

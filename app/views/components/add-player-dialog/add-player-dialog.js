@@ -58,7 +58,7 @@ export default class AddPlayerDialog extends React.Component {
     const { team } = this.props
     if (!error && pid) {
       this.props.add({
-        player: pid, // TODO pid
+        pid,
         value,
         teamId: team.uid
       })
@@ -89,7 +89,7 @@ export default class AddPlayerDialog extends React.Component {
               <InputLabel id='player'>Player</InputLabel>
               <Select
                 native
-                value={this.state.player}
+                value={this.state.pid}
                 onChange={this.handleChangePlayer}
                 label='Player'
               >

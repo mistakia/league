@@ -16,7 +16,7 @@ export class Player extends React.Component {
     event.stopPropagation()
     this.props.showContext({
       id: 'player',
-      data: { playerId: playerMap.get('pid'), waiverId, poachId },
+      data: { pid: playerMap.get('pid'), waiverId, poachId },
       clickX: event.clientX,
       clickY: event.clientY
     })
@@ -39,7 +39,7 @@ const mapStateToProps = createSelector(
   getContextMenuInfo,
   getCurrentLeague,
   (contextMenu, league) => ({
-    selected: contextMenu.data.playerId,
+    selected: contextMenu.data.pid,
     league,
     isHosted: Boolean(league.hosted)
   })

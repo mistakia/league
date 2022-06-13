@@ -22,7 +22,7 @@ export default class PropsPage extends React.Component {
       return (
         <div className='item' {...{ style, key }}>
           <div className='item__col lead'>
-            <PlayerName playerId={prop.player} />
+            <PlayerName pid={prop.pid} />
           </div>
           <div className='item__col-group'>
             <div className='item__col'>{constants.oddTypeDesc[prop.type]}</div>

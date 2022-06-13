@@ -142,7 +142,7 @@ export function* releaseLock() {
 
 export function* submitBid({ payload }) {
   const { userId, teamId } = yield select(getApp)
-  const { player, bid } = yield select(getAuction)
+  const { nominated_pid, bid } = yield select(getAuction)
   if (payload.value <= bid) {
     yield put(auctionActions.release())
     // TODO notify user
@@ -156,7 +156,7 @@ export function* submitBid({ payload }) {
     payload: {
       userid: userId,
       tid: teamId,
-      player,
+      pid: nominated_pid,
       value
     }
   }
@@ -166,7 +166,7 @@ export function* submitBid({ payload }) {
 
 export function* submitNomination({ payload }) {
   const { userId, teamId } = yield select(getApp)
-  const { selected } = yield select(getAuction)
+  const { selected_pid } = yield select(getAuction)
   const { value } = payload
   const message = {
     type: auctionActions.AUCTION_SUBMIT_NOMINATION,
@@ -174,7 +174,7 @@ export function* submitNomination({ payload }) {
       userid: userId,
       tid: teamId,
       value,
-      player: selected
+      pid: selected_pid
     }
   }
   send(message)

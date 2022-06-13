@@ -14,10 +14,10 @@ export const draftActions = {
   POST_DRAFT_PENDING: 'POST_DRAFT_PENDING',
   POST_DRAFT_FULFILLED: 'POST_DRAFT_FULFILLED',
 
-  selectPlayer: (player) => ({
+  selectPlayer: (pid) => ({
     type: draftActions.DRAFT_SELECT_PLAYER,
     payload: {
-      player
+      pid
     }
   }),
 

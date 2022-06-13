@@ -23,7 +23,7 @@ import './auction.styl'
 const ROW_HEIGHT = 30
 
 export default function AuctionPageRender() {
-  const { players, transactions, tids, playerId, isCommish, isHosted } =
+  const { players, transactions, tids, nominated_pid, isCommish, isHosted } =
     this.props
 
   const TransactionRow = ({ index, key, ...params }) => {
@@ -39,8 +39,15 @@ export default function AuctionPageRender() {
   }
 
   const playerRow = ({ index, key, ...params }) => {
-    const player = players.get(index)
-    return <AuctionPlayer key={key} player={player} {...params} index={index} />
+    const playerMap = players.get(index)
+    return (
+      <AuctionPlayer
+        key={key}
+        playerMap={playerMap}
+        {...params}
+        index={index}
+      />
+    )
   }
 
   const teamItems = []
@@ -88,7 +95,7 @@ export default function AuctionPageRender() {
         </div>
       </div>
       <div className='auction__main'>
-        <AuctionMainBid playerId={playerId} />
+        <AuctionMainBid nominated_pid={nominated_pid} />
         <div className='auction__teams'>{teamItems}</div>
         <div className='auction__main-board'>
           <AuctionTargets />

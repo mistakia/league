@@ -98,45 +98,45 @@ export const rosterActions = {
     type: rosterActions.EXPORT_ROSTERS
   }),
 
-  addFreeAgent: ({ player, release, slot }) => ({
+  addFreeAgent: ({ pid, release, slot }) => ({
     type: rosterActions.ADD_FREE_AGENT,
     payload: {
-      player,
+      pid,
       release,
       slot
     }
   }),
 
-  release: (player) => ({
+  release: (pid) => ({
     type: rosterActions.RELEASE_PLAYER,
     payload: {
-      player
+      pid
     }
   }),
 
-  reserve: ({ player, slot, activate }) => ({
+  reserve: ({ pid, slot, activate }) => ({
     type: rosterActions.SET_ROSTER_RESERVE,
     payload: {
-      player,
+      pid,
       slot,
       activate
     }
   }),
 
   // rookie, franchise tag
-  addTag: ({ player, tag, remove }) => ({
+  addTag: ({ pid, tag, remove }) => ({
     type: rosterActions.ADD_TAG,
     payload: {
-      player,
+      pid,
       tag,
       remove
     }
   }),
 
-  removeTag: ({ player, teamId }) => ({
+  removeTag: ({ pid, teamId }) => ({
     type: rosterActions.REMOVE_TAG,
     payload: {
-      player,
+      pid,
       teamId
     }
   }),
@@ -152,27 +152,27 @@ export const rosterActions = {
     }
   }),
 
-  activate: ({ player, release, reserve, slot }) => ({
+  activate: ({ pid, release, reserve, slot }) => ({
     type: rosterActions.ACTIVATE_PLAYER,
     payload: {
-      player,
+      pid,
       release,
       reserve,
       slot
     }
   }),
 
-  deactivate: (player) => ({
+  deactivate: (pid) => ({
     type: rosterActions.DEACTIVATE_PLAYER,
     payload: {
-      player
+      pid
     }
   }),
 
-  protect: (player) => ({
+  protect: (pid) => ({
     type: rosterActions.PROTECT_PLAYER,
     payload: {
-      player
+      pid
     }
   }),
 
@@ -183,28 +183,28 @@ export const rosterActions = {
     }
   }),
 
-  add: ({ player, value, teamId }) => ({
+  add: ({ pid, value, teamId }) => ({
     type: rosterActions.ADD_PLAYER_ROSTER,
     payload: {
-      player,
+      pid,
       value,
       teamId
     }
   }),
 
-  remove: ({ player, teamId }) => ({
+  remove: ({ pid, teamId }) => ({
     type: rosterActions.REMOVE_PLAYER_ROSTER,
     payload: {
-      player,
+      pid,
       teamId
     }
   }),
 
   // commish
-  updateValue: ({ player, value, teamId }) => ({
+  updateValue: ({ pid, value, teamId }) => ({
     type: rosterActions.UPDATE_PLAYER_ROSTER,
     payload: {
-      player,
+      pid,
       teamId
     }
   }),
@@ -485,10 +485,10 @@ export const rosterActions = {
     }
   }),
 
-  addTransitionTag: ({ player, release, playerTid, teamId, bid, remove }) => ({
+  addTransitionTag: ({ pid, release, playerTid, teamId, bid, remove }) => ({
     type: rosterActions.ADD_TRANSITION_TAG,
     payload: {
-      player,
+      pid,
       release,
       teamId,
       playerTid,
@@ -497,10 +497,10 @@ export const rosterActions = {
     }
   }),
 
-  updateTransitionTag: ({ player, release, playerTid, teamId, bid }) => ({
+  updateTransitionTag: ({ pid, release, playerTid, teamId, bid }) => ({
     type: rosterActions.UPDATE_TRANSITION_TAG,
     payload: {
-      player,
+      pid,
       release,
       teamId,
       playerTid,
@@ -508,10 +508,10 @@ export const rosterActions = {
     }
   }),
 
-  removeTransitionTag: ({ player, teamId }) => ({
+  removeTransitionTag: ({ pid, teamId }) => ({
     type: rosterActions.REMOVE_TRANSITION_TAG,
     payload: {
-      player,
+      pid,
       teamId
     }
   }),

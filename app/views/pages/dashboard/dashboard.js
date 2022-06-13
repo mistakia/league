@@ -72,7 +72,7 @@ export default function DashboardPage() {
 
   const activeItems = []
   let activePlayers = new List()
-  const cutlistPlayerIds = cutlist.map((c) => c.player).toJS()
+  const cutlistPlayerIds = cutlist.map((c) => c.pid).toJS()
   for (const position in groups) {
     const players = groups[position]
     for (const playerMap of players) {

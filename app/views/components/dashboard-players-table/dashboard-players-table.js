@@ -95,7 +95,7 @@ export default class DashboardPlayersTable extends React.Component {
       // TODO pid
       return (
         <PlayerRoster
-          player={waiver.player}
+          pid={waiver.pid}
           waiverId={waiver.uid}
           claim={waiver}
           reorder
@@ -121,7 +121,7 @@ export default class DashboardPlayersTable extends React.Component {
             key={index}
             claim={poach}
             poachId={poach.uid}
-            player={poach.player}
+            pid={poach.pid}
           />
         )
       })

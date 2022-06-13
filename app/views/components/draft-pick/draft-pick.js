@@ -15,7 +15,7 @@ export default class DraftPick extends React.Component {
     const pickNum = pick.pick % league.nteams || league.nteams
 
     const classNames = ['draft__pick']
-    if (isActive && !pick.player) {
+    if (isActive && !pick.pid) {
       classNames.push('active')
     }
 
@@ -38,10 +38,10 @@ export default class DraftPick extends React.Component {
             </div>
           )}
           <div className='draft__pick-team'>{team.name}</div>
-          {isActive && !pick.player && (
+          {isActive && !pick.pid && (
             <div className='draft__pick-window active'>On the clock</div>
           )}
-          {!isActive && !pick.player && Boolean(pick.pick) && (
+          {!isActive && !pick.pid && Boolean(pick.pick) && (
             <div className='draft__pick-window'>
               On the clock {dayjs().to(pick.draftWindow)}
             </div>

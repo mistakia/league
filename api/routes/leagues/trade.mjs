@@ -158,7 +158,7 @@ router.post(
         .where('lid', leagueId)
         .groupBy('pid')
 
-      const players = await db
+      const player_rows = await db
         .select('player.*', 'transactions.value')
         .from(db.raw('(' + sub.toString() + ') AS X'))
         .join('transactions', 'X.uid', 'transactions.uid')
@@ -171,16 +171,16 @@ router.post(
         roster: acceptingTeamRosterRow,
         league
       })
-      for (const player of acceptingTeamReleasePlayers) {
-        if (!acceptingTeamRoster.has(player)) {
+      for (const pid of acceptingTeamReleasePlayers) {
+        if (!acceptingTeamRoster.has(pid)) {
           return res
             .status(400)
             .send({ error: 'release player not on accepting team' })
         }
 
         // check if accepting team release player is a locked starter
-        if (acceptingTeamRoster.isStarter(player)) {
-          const isLocked = await isPlayerLocked(player)
+        if (acceptingTeamRoster.isStarter(pid)) {
+          const isLocked = await isPlayerLocked(pid)
           if (isLocked) {
             return res
               .status(400)
@@ -190,9 +190,9 @@ router.post(
       }
 
       // check if accepting team trade players are a locked starter
-      for (const player of acceptingTeamPlayers) {
-        if (acceptingTeamRoster.isStarter(player)) {
-          const isLocked = await isPlayerLocked(player)
+      for (const pid of acceptingTeamPlayers) {
+        if (acceptingTeamRoster.isStarter(pid)) {
+          const isLocked = await isPlayerLocked(pid)
           if (isLocked) {
             return res
               .status(400)
@@ -207,8 +207,8 @@ router.post(
       acceptingTeamPlayers.forEach((p) => acceptingTeamRoster.removePlayer(p))
 
       for (const pid of proposingTeamPlayers) {
-        const player = players.find((p) => p.pid === pid)
-        const hasSlot = acceptingTeamRoster.hasOpenBenchSlot(player.pos)
+        const player_row = player_rows.find((p) => p.pid === pid)
+        const hasSlot = acceptingTeamRoster.hasOpenBenchSlot(player_row.pos)
         if (!hasSlot) {
           return res
             .status(400)
@@ -217,8 +217,8 @@ router.post(
         acceptingTeamRoster.addPlayer({
           slot: constants.slots.BENCH,
           pid,
-          pos: player.pos,
-          value: player.value
+          pos: player_row.pos,
+          value: player_row.value
         })
       }
 
@@ -258,8 +258,8 @@ router.post(
       )
       proposingTeamPlayers.forEach((p) => proposingTeamRoster.removePlayer(p))
       for (const pid of acceptingTeamPlayers) {
-        const player = players.find((p) => p.pid === pid)
-        const hasSlot = proposingTeamRoster.hasOpenBenchSlot(player.pos)
+        const player_row = player_rows.find((p) => p.pid === pid)
+        const hasSlot = proposingTeamRoster.hasOpenBenchSlot(player_row.pos)
         if (!hasSlot) {
           return res
             .status(400)
@@ -268,8 +268,8 @@ router.post(
         proposingTeamRoster.addPlayer({
           slot: constants.slots.BENCH,
           pid,
-          pos: player.pos,
-          value: player.value
+          pos: player_row.pos,
+          value: player_row.value
         })
       }
 
@@ -480,15 +480,15 @@ router.post(
       const proposingTeamItems = []
       const acceptingTeamItems = []
       for (const pid of proposingTeamPlayers) {
-        const player = players.find((p) => p.pid === pid)
+        const player_row = player_rows.find((p) => p.pid === pid)
         proposingTeamItems.push(
-          `${player.fname} ${player.lname} (${player.pos})`
+          `${player_row.fname} ${player_row.lname} (${player_row.pos})`
         )
       }
       for (const pid of acceptingTeamPlayers) {
-        const player = players.find((p) => p.pid === pid)
+        const player_row = player_rows.find((p) => p.pid === pid)
         acceptingTeamItems.push(
-          `${player.fname} ${player.lname} (${player.pos})`
+          `${player_row.fname} ${player_row.lname} (${player_row.pos})`
         )
       }
 
@@ -521,8 +521,8 @@ router.post(
       if (releasePlayers.length) {
         const releaseItems = []
         for (const pid of releasePlayers) {
-          const player = players.find((p) => p.pid === pid)
-          releaseItems.push(`${player.fname} ${player.lname} (${player.pos})`)
+          const { fname, lname, pos } = player_rows.find((p) => p.pid === pid)
+          releaseItems.push(`${fname} ${lname} (${pos})`)
         }
         const releaseItemsStr = toStringArray(releaseItems)
         message = `${message} ${releaseItemsStr} have been released.`
@@ -531,8 +531,10 @@ router.post(
       if (activePoaches.length) {
         const poachItems = []
         for (const poach of activePoaches) {
-          const player = players.find((p) => p.pid === poach.pid)
-          poachItems.push(`${player.fname} ${player.lname} (${player.pos})`)
+          const { fname, lname, pos } = player_rows.find(
+            (p) => p.pid === poach.pid
+          )
+          poachItems.push(`${fname} ${lname} (${pos})`)
         }
         const poachItemsStr = toStringArray(poachItems)
 

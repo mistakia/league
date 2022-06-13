@@ -57,7 +57,7 @@ export default class SelectedPlayerMatchupTable extends React.Component {
             <div className='table__cell metric'>{gamelog.week}</div>
             <div className='table__cell metric'>{gamelog.tm}</div>
             <div className='row__text'>
-              <PlayerNameText playerId={gamelog.player} />
+              <PlayerNameText pid={gamelog.pid} />
             </div>
             <div className='table__cell metric'>
               {(gamelog.pts || 0).toFixed(1)}

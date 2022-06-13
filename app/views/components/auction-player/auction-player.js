@@ -16,7 +16,7 @@ export default class AuctionPlayer extends React.Component {
       return
     }
 
-    if (this.props.nominatedPid) {
+    if (this.props.nominated_pid) {
       return
     }
 
@@ -33,7 +33,7 @@ export default class AuctionPlayer extends React.Component {
       style,
       valueType,
       selected,
-      nominatedPid
+      nominated_pid
     } = this.props
 
     const pid = playerMap.get('pid')
@@ -44,7 +44,7 @@ export default class AuctionPlayer extends React.Component {
       classNames.push('watchlist')
     }
 
-    if (selected === pid || nominatedPid === pid) {
+    if (selected === pid || nominated_pid === pid) {
       classNames.push('selected')
     }
 
@@ -56,11 +56,11 @@ export default class AuctionPlayer extends React.Component {
       <div style={style}>
         <div className={classNames.join(' ')} onClick={this.handleClick}>
           <div className='auction__player-action'>
-            <PlayerWatchlistAction playerId={pid} />
+            <PlayerWatchlistAction pid={pid} />
           </div>
           <div className='auction__player-index'>{index + 1}.</div>
           <div className='auction__player-name'>
-            <PlayerName playerId={pid} />
+            <PlayerName pid={pid} />
           </div>
           <div className='auction__player-metric'>
             ${Math.round(playerMap.getIn(['market_salary', valueType])) || '--'}
@@ -80,7 +80,7 @@ export default class AuctionPlayer extends React.Component {
 
 AuctionPlayer.propTypes = {
   isFreeAgent: PropTypes.bool,
-  nominatedPid: PropTypes.string,
+  nominated_pid: PropTypes.string,
   select: PropTypes.func,
   playerMap: ImmutablePropTypes.map,
   index: PropTypes.number,

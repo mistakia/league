@@ -34,7 +34,7 @@ export default class PlayerName extends React.Component {
           )}
           <div className='player__name-main'>
             <span>{playerMap.get('pname')}</span>
-            {constants.season.year === playerMap.get('draft_year') && (
+            {constants.season.year === playerMap.get('start') && (
               <PlayerLabel label='R' type='rookie' description='Rookie' />
             )}
             <Team team={playerMap.get('team')} />

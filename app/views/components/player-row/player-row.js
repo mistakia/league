@@ -577,14 +577,14 @@ class PlayerRow extends Player {
         <div className='player__row-lead'>
           <div className='player__row-index'>{index + 1}</div>
           <div className='player__row-action'>
-            <PlayerWatchlistAction playerId={pid} />
+            <PlayerWatchlistAction pid={pid} />
           </div>
           <div className='player__row-pos'>
             <Position pos={pos} />
           </div>
           <div className='player__row-name cursor' onClick={this.handleClick}>
             <span>{playerMap.get('name')}</span>
-            {constants.season.year === playerMap.get('draft_year') && (
+            {constants.season.year === playerMap.get('start') && (
               <PlayerLabel label='R' type='rookie' description='Rookie' />
             )}
             <Team team={team} />

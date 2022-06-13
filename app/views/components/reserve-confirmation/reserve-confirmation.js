@@ -27,7 +27,7 @@ export default class ReserveConfirmation extends React.Component {
     this._hasReserveSpace = team.roster.hasOpenInjuredReserveSlot()
     this._activatable = []
 
-    const reserve_pids = team.roster.reserve.map((p) => p.player)
+    const reserve_pids = team.roster.reserve.map((p) => p.pid)
     for (const pid of reserve_pids) {
       const playerMap = team.players.find((p) => p.get('pid') === pid)
       this._activatable.push(playerMap)

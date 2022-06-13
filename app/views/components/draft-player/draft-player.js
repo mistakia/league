@@ -34,7 +34,7 @@ export default class DraftPlayer extends React.Component {
       <div style={style}>
         <div className={classNames.join(' ')} onClick={this.handleClick}>
           <div className='player-draft__item-action'>
-            <PlayerWatchlistAction playerId={pid} />
+            <PlayerWatchlistAction pid={pid} />
           </div>
           <div className='player-draft__item-index'>{index + 1}.</div>
           <div className='player-draft__item-name'>

@@ -24,7 +24,7 @@ export default function DraftPage() {
     nextPick,
     picks,
     league,
-    selectedPlayer,
+    selectedPlayerMap,
     drafted,
     isDraftWindowOpen,
     teamId
@@ -38,7 +38,7 @@ export default function DraftPage() {
   )
   const isPreviousSelectionMade =
     Boolean(nextPick && nextPick.pick === 1) ||
-    Boolean(prevPick && prevPick.player)
+    Boolean(prevPick && prevPick.pid)
   const onTheClock =
     league.ddate && nextPick && (isDraftWindowOpen || isPreviousSelectionMade)
 
@@ -129,11 +129,11 @@ export default function DraftPage() {
   for (const pick of picksSorted) {
     const prevPick = picks.find((p) => p.pick === pick.pick - 1)
     const isPreviousSelectionMade =
-      pick.pick === 1 || Boolean(prevPick && prevPick.player)
+      pick.pick === 1 || Boolean(prevPick && prevPick.pid)
     const isUser = pick.tid === teamId
     const isActive =
       draftActive &&
-      !pick.player &&
+      !pick.pid &&
       Boolean(pick.pick) &&
       (constants.season.now.isAfter(pick.draftWindow) ||
         isPreviousSelectionMade)
@@ -141,7 +141,7 @@ export default function DraftPage() {
       <DraftPick
         key={pick.uid}
         pick={pick}
-        playerId={pick.player}
+        pid={pick.pid}
         tid={pick.tid}
         isUser={isUser}
         isActive={isActive}
@@ -149,20 +149,20 @@ export default function DraftPage() {
     )
   }
 
-  const p = selectedPlayer
-  const isDrafted = drafted.includes(p.player)
+  const p = selectedPlayerMap
+  const isDrafted = drafted.includes(p.get('pid'))
   const selected = (
     <div className='draft__selected'>
       <div className='draft__selected-head'>
         <div className='draft__selected-title'>
-          {p.fname} {p.lname}
+          {p.get('fname')} {p.get('lname')}
         </div>
         <div className='draft__selected-alt'>
           <div>
-            <Position pos={p.pos} />
+            <Position pos={p.get('pos')} />
           </div>
-          <div>{p.team}</div>
-          {Boolean(p.jersey) && <div>#{p.jersey}</div>}
+          <div>{p.get('team')}</div>
+          {Boolean(p.get('jnum')) && <div>#{p.get('jnum')}</div>}
         </div>
         {draftActive && onTheClock && !isDrafted && (
           <div className='draft__selected-action'>
@@ -173,7 +173,7 @@ export default function DraftPage() {
       <div className='draft__selected-body'>
         <div>
           <label>Drafted</label>
-          {p.dpos ? `#${p.dpos}` : '-'}
+          {p.get('dpos') ? `#${p.get('dpos')}` : '-'}
         </div>
         <div>
           <label>Proj.</label>
@@ -181,55 +181,55 @@ export default function DraftPage() {
         </div>
         <div>
           <label>Age</label>
-          {p.dob ? <PlayerAge date={p.dob} /> : '-'}
+          {p.get('dob') ? <PlayerAge date={p.get('dob')} /> : '-'}
         </div>
         <div>
           <label>Height</label>
-          {Math.floor(p.height / 12)}-{p.height % 12}
+          {Math.floor(p.get('height') / 12)}-{p.get('height') % 12}
         </div>
         <div>
           <label>Weight</label>
-          {p.weight || '-'}
+          {p.get('weight', '-')}
         </div>
         <div>
           <label>Forty</label>
-          {p.forty || '-'}
+          {p.get('forty', '-')}
         </div>
         <div>
           <label>Bench</label>
-          {p.bench || '-'}
+          {p.get('bench', '-')}
         </div>
         <div>
           <label>Vertical</label>
-          {p.vertical || '-'}
+          {p.get('vertical', '-')}
         </div>
         <div>
           <label>Broad</label>
-          {p.broad || '-'}
+          {p.get('broad', '-')}
         </div>
         <div>
           <label>Shuttle</label>
-          {p.shuttle || '-'}
+          {p.get('shuttle', '-')}
         </div>
         <div>
           <label>Cone</label>
-          {p.cone || '-'}
+          {p.get('cone', '-')}
         </div>
         <div>
           <label>Arm</label>
-          {p.arm || '-'}
+          {p.get('arm', '-')}
         </div>
         <div>
           <label>Hand</label>
-          {p.hand || '-'}
+          {p.get('hand', '-')}
         </div>
         <div>
           <label>College</label>
-          {p.college || '-'}
+          {p.get('col', '-')}
         </div>
         <div>
           <label>Division</label>
-          {p.college_division}
+          {p.get('dv', '-')}
         </div>
       </div>
     </div>
@@ -238,7 +238,7 @@ export default function DraftPage() {
   const body = (
     <div className='draft'>
       <div className='draft__main'>
-        {p.player && selected}
+        {p.get('pid') && selected}
         <div className='draft__main-board'>
           <div className='draft__main-board-pos'>
             <div className='draft__main-board-pos-head'>Overall</div>

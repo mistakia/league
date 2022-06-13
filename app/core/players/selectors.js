@@ -1,5 +1,6 @@
 import { createSelector } from 'reselect'
 import dayjs from 'dayjs'
+import { Map } from 'immutable'
 
 import {
   constants,
@@ -13,7 +14,6 @@ import {
 } from '@common'
 import { getApp } from '@core/app'
 import { getStats } from '@core/stats'
-import { Player } from './player'
 import { fuzzySearch } from '@core/utils'
 import { isAfterDraft } from '@core/draft'
 import { isAfterAuction } from '@core/auction'
@@ -159,7 +159,7 @@ export function getFilteredPlayers(state) {
     const veterans = experience.includes(-1)
     filtered = filtered.filter((playerMap) => {
       // exclude defenses
-      const draft_year = playerMap.get('draft_year')
+      const draft_year = playerMap.get('start')
       if (!draft_year) {
         return false
       }
@@ -183,14 +183,14 @@ export function getFilteredPlayers(state) {
   const colleges = pState.get('colleges')
   if (colleges.size !== constants.colleges.length) {
     filtered = filtered.filter((playerMap) =>
-      colleges.includes(playerMap.get('college'))
+      colleges.includes(playerMap.get('col'))
     )
   }
 
   const collegeDivisions = pState.get('collegeDivisions')
   if (collegeDivisions.size !== constants.collegeDivisions.length) {
     filtered = filtered.filter((playerMap) =>
-      collegeDivisions.includes(playerMap.get('college_division'))
+      collegeDivisions.includes(playerMap.get('dv'))
     )
   }
 
@@ -301,13 +301,13 @@ export function getPlayersByPosition(state, { position }) {
 export function getRookiePlayers(state) {
   const playerMaps = state.getIn(['players', 'items'])
   return playerMaps
-    .filter((pMap) => pMap.get('draft_year') === constants.season.year)
+    .filter((pMap) => pMap.get('start') === constants.season.year)
     .toList()
 }
 
 export function getPlayerById(state, { pid }) {
   const playerMaps = getAllPlayers(state)
-  return playerMaps.get(pid) || new Player()
+  return playerMaps.get(pid) || new Map()
 }
 
 export function getGamesByYearForSelectedPlayer(state) {
@@ -520,7 +520,7 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
       const isBeforeExtensionDeadline = now.isBefore(
         dayjs.unix(league.ext_date)
       )
-      const draft_year = playerMap.get('draft_year')
+      const draft_year = playerMap.get('start')
       if (
         isBeforeExtensionDeadline &&
         draft_year === constants.season.year - 1
@@ -618,8 +618,8 @@ export function isPlayerPracticeSquadEligible(
   // is a rookie OR is not on a team OR is on a teams practice squad
   if (
     !constants.season.isRegularSeason &&
-    playerMap.get('draft_year') !== constants.season.year &&
-    playerMap.get('depth_position') !== 'PS' &&
+    playerMap.get('start') !== constants.season.year &&
+    playerMap.get('posd') !== 'PS' &&
     playerMap.get('team') !== 'INA'
   ) {
     return false
@@ -672,5 +672,5 @@ export const getPlayersForWatchlist = createSelector(getPlayers, (players) => {
   return players
     .get('watchlist')
     .toList()
-    .map((pid) => players.get('items').get(pid) || new Player())
+    .map((pid) => players.get('items').get(pid) || new Map())
 })

@@ -116,7 +116,7 @@ export default class WaiverConfirmation extends React.Component {
       if (this.props.waiver) {
         this.props.update({ waiverId: this.props.waiver.uid, release, bid })
       } else {
-        this.props.claim({ bid, release, type, player: pid }) // TODO pid
+        this.props.claim({ bid, release, type, pid })
       }
       this.props.onClose()
     }
