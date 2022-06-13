@@ -68,7 +68,7 @@ describe('API /teams - lineups', function () {
 
       expect(res.body.length).to.equal(1)
       res.body[0].slot.should.equal(constants.slots.RB)
-      res.body[0].player.should.equal(player.pid)
+      res.body[0].pid.should.equal(player.pid)
       res.body[0].week.should.equal(constants.season.week)
       res.body[0].year.should.equal(constants.season.year)
       res.body[0].tid.should.equal(teamId)
@@ -136,7 +136,7 @@ describe('API /teams - lineups', function () {
       await missing(request, 'slot')
     })
 
-    it('missing player', async () => {
+    it('missing pid', async () => {
       const request = chai
         .request(server)
         .put('/api/teams/1/lineups')
@@ -150,7 +150,7 @@ describe('API /teams - lineups', function () {
           ]
         })
 
-      await missing(request, 'player')
+      await missing(request, 'pid')
     })
 
     it('missing leagueId', async () => {

@@ -72,12 +72,12 @@ describe('API /teams - deactivate', function () {
       res.should.be.json
 
       res.body.tid.should.equal(teamId)
-      res.body.player.should.equal(player.pid)
+      res.body.pid.should.equal(player.pid)
       res.body.slot.should.equal(constants.slots.PS)
       res.body.transaction.userid.should.equal(userId)
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
-      res.body.transaction.player.should.equal(player.pid)
+      res.body.transaction.pid.should.equal(player.pid)
       res.body.transaction.type.should.equal(
         constants.transactions.ROSTER_DEACTIVATE
       )
@@ -90,7 +90,7 @@ describe('API /teams - deactivate', function () {
         .where({
           year: constants.season.year,
           week: constants.season.week,
-          player: player.pid
+          pid: player.pid
         })
         .limit(1)
 
@@ -102,7 +102,7 @@ describe('API /teams - deactivate', function () {
         type: constants.transactions.ROSTER_DEACTIVATE,
         value,
         year: constants.season.year,
-        player: player.pid,
+        pid: player.pid,
         teamId,
         userId
       })
@@ -119,7 +119,7 @@ describe('API /teams - deactivate', function () {
         tid: teamId,
         userid: 1,
         lid: leagueId,
-        player: player.pid,
+        pid: player.pid,
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: value,
@@ -140,7 +140,7 @@ describe('API /teams - deactivate', function () {
         .post('/api/teams/1/deactivate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player.pid,
+          pid: player.pid,
           leagueId
         })
 
@@ -149,12 +149,12 @@ describe('API /teams - deactivate', function () {
       res.should.be.json
 
       res.body.tid.should.equal(teamId)
-      res.body.player.should.equal(player.pid)
+      res.body.pid.should.equal(player.pid)
       res.body.slot.should.equal(constants.slots.PS)
       res.body.transaction.userid.should.equal(userId)
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
-      res.body.transaction.player.should.equal(player.pid)
+      res.body.transaction.pid.should.equal(player.pid)
       res.body.transaction.type.should.equal(
         constants.transactions.ROSTER_DEACTIVATE
       )
@@ -167,7 +167,7 @@ describe('API /teams - deactivate', function () {
         .where({
           year: constants.season.year,
           week: constants.season.week,
-          player: player.pid
+          pid: player.pid
         })
         .limit(1)
 
@@ -179,7 +179,7 @@ describe('API /teams - deactivate', function () {
         type: constants.transactions.ROSTER_DEACTIVATE,
         value,
         year: constants.season.year,
-        player: player.pid,
+        pid: player.pid,
         teamId,
         userId
       })
@@ -216,7 +216,7 @@ describe('API /teams - deactivate', function () {
       await notLoggedIn(request)
     })
 
-    it('missing player', async () => {
+    it('missing pid', async () => {
       const request = chai
         .request(server)
         .post('/api/teams/1/deactivate')
@@ -225,7 +225,7 @@ describe('API /teams - deactivate', function () {
           leagueId: 1
         })
 
-      await missing(request, 'player')
+      await missing(request, 'pid')
     })
 
     it('missing leagueId', async () => {
@@ -234,7 +234,7 @@ describe('API /teams - deactivate', function () {
         .post('/api/teams/1/deactivate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: 'x'
+          pid: 'x'
         })
 
       await missing(request, 'leagueId')
@@ -247,7 +247,7 @@ describe('API /teams - deactivate', function () {
         .set('Authorization', `Bearer ${user2}`)
         .send({
           leagueId: 1,
-          player: 'x'
+          pid: 'x'
         })
 
       await invalid(request, 'teamId')
@@ -261,10 +261,10 @@ describe('API /teams - deactivate', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          player: player.pid
+          pid: player.pid
         })
 
-      await invalid(request, 'player')
+      await invalid(request, 'pid')
     })
 
     it('player already on practice squad', async () => {
@@ -281,7 +281,7 @@ describe('API /teams - deactivate', function () {
         .post('/api/teams/1/deactivate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player.player,
+          pid: player.pid,
           leagueId: 1
         })
 
@@ -312,7 +312,7 @@ describe('API /teams - deactivate', function () {
         tid: 1,
         userid: 1,
         lid: leagueId,
-        player: player.pid,
+        pid: player.pid,
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 1,
@@ -323,7 +323,7 @@ describe('API /teams - deactivate', function () {
         tid: 2,
         userid: 1,
         lid: leagueId,
-        player: player.pid,
+        pid: player.pid,
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 0,
@@ -344,7 +344,7 @@ describe('API /teams - deactivate', function () {
         .post('/api/teams/1/deactivate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player.pid,
+          pid: player.pid,
           leagueId
         })
 

@@ -71,7 +71,7 @@ describe('API /teams - reserve', function () {
         .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          pid: player.pid,
+          reserve_pid: player.pid,
           leagueId,
           slot: constants.slots.IR
         })
@@ -134,7 +134,7 @@ describe('API /teams - reserve', function () {
       await notLoggedIn(request)
     })
 
-    it('missing player', async () => {
+    it('missing reserve_pid', async () => {
       const request = chai
         .request(server)
         .post('/api/teams/1/reserve')
@@ -144,7 +144,7 @@ describe('API /teams - reserve', function () {
           slot: constants.slots.IR
         })
 
-      await missing(request, 'player')
+      await missing(request, 'reserve_pid')
     })
 
     it('missing leagueId', async () => {
@@ -153,7 +153,7 @@ describe('API /teams - reserve', function () {
         .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          pid: 'x',
+          reserve_pid: 'x',
           slot: constants.slots.IR
         })
 
@@ -167,7 +167,7 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          pid: 'x'
+          reserve_pid: 'x'
         })
 
       await missing(request, 'slot')
@@ -180,7 +180,7 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          pid: 'x',
+          reserve_pid: 'x',
           slot: 'x'
         })
 
@@ -194,7 +194,7 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          pid: 'x',
+          reserve_pid: 'x',
           slot: constants.slots.IR
         })
 
@@ -209,7 +209,7 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          pid: player.pid,
+          reserve_pid: player.pid,
           slot: constants.slots.IR
         })
 
@@ -224,7 +224,7 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user2}`)
         .send({
           leagueId: 1,
-          pid: player.pid,
+          reserve_pid: player.pid,
           slot: constants.slots.IR
         })
 
@@ -252,7 +252,7 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          pid: player.pid,
+          reserve_pid: player.pid,
           slot: constants.slots.IR
         })
 
@@ -280,7 +280,7 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          pid: player.pid,
+          reserve_pid: player.pid,
           slot: constants.slots.COV
         })
 
@@ -309,7 +309,7 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          pid: player.pid,
+          reserve_pid: player.pid,
           slot: constants.slots.IR
         })
 
@@ -337,7 +337,7 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          pid: player.pid,
+          reserve_pid: player.pid,
           slot: constants.slots.COV
         })
 
@@ -373,7 +373,7 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          pid: player.pid,
+          reserve_pid: player.pid,
           slot: constants.slots.COV
         })
 
@@ -411,7 +411,7 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          pid,
+          reserve_pid: pid,
           slot: constants.slots.IR
         })
 
@@ -443,7 +443,7 @@ describe('API /teams - reserve', function () {
         .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          pid: player.pid,
+          reserve_pid: player.pid,
           slot: constants.slots.IR,
           leagueId: 1
         })
@@ -481,7 +481,7 @@ describe('API /teams - reserve', function () {
         .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          pid: player.pid,
+          reserve_pid: player.pid,
           leagueId,
           slot: constants.slots.IR
         })

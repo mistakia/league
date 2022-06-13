@@ -84,7 +84,7 @@ describe('API /leagues/rosters - delete', function () {
       await notLoggedIn(request)
     })
 
-    it('missing player', async () => {
+    it('missing pid', async () => {
       const request = chai
         .request(server)
         .delete('/api/leagues/1/rosters')
@@ -94,7 +94,7 @@ describe('API /leagues/rosters - delete', function () {
           teamId: 1
         })
 
-      await missing(request, 'player')
+      await missing(request, 'pid')
     })
 
     it('missing teamId', async () => {

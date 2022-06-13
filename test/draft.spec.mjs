@@ -105,14 +105,14 @@ describe('API /draft', function () {
       await missing(request, 'teamId')
     })
 
-    it('missing playerId', async () => {
+    it('missing pid', async () => {
       const request = chai
         .request(server)
         .post('/api/leagues/1/draft')
         .set('Authorization', `Bearer ${user2}`)
         .send({ teamId: 2, pickId: 1 })
 
-      await missing(request, 'playerId')
+      await missing(request, 'pid')
     })
 
     it('missing pickId', async () => {

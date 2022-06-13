@@ -90,7 +90,7 @@ describe('API /leagues/rosters - add', function () {
       await notLoggedIn(request)
     })
 
-    it('missing player', async () => {
+    it('missing pid', async () => {
       const request = chai
         .request(server)
         .post('/api/leagues/1/rosters')
@@ -100,7 +100,7 @@ describe('API /leagues/rosters - add', function () {
           teamId: 1
         })
 
-      await missing(request, 'player')
+      await missing(request, 'pid')
     })
 
     it('missing teamId', async () => {

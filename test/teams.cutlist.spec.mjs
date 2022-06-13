@@ -59,7 +59,7 @@ describe('API /teams - cutlist', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          players: player.pid
+          pids: player.pid
         })
 
       res.should.have.status(200)
@@ -98,14 +98,14 @@ describe('API /teams - cutlist', function () {
         slot: constants.slots.BENCH
       })
 
-      const players = [player1.pid, player2.pid]
+      const pids = [player1.pid, player2.pid]
       const res = await chai
         .request(server)
         .post('/api/teams/1/cutlist')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          players
+          pids
         })
 
       res.should.have.status(200)
@@ -113,7 +113,7 @@ describe('API /teams - cutlist', function () {
       res.should.be.json
 
       res.body.length.should.equal(2)
-      res.body.should.deep.equal(players)
+      res.body.should.deep.equal(pids)
 
       const cutlist = await knex('league_cutlist')
       expect(cutlist.length).to.equal(2)
@@ -153,25 +153,25 @@ describe('API /teams - cutlist', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          players: [player2.pid, player1.pid]
+          pids: [player2.pid, player1.pid]
         })
 
       res1.should.have.status(200)
       // eslint-disable-next-line
       res1.should.be.json
 
-      const players = [player1.pid, player2.pid]
+      const pids = [player1.pid, player2.pid]
       const res2 = await chai
         .request(server)
         .post('/api/teams/1/cutlist')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          players
+          pids
         })
 
       res2.body.length.should.equal(2)
-      res2.body.should.deep.equal(players)
+      res2.body.should.deep.equal(pids)
 
       const cutlist = await knex('league_cutlist')
       expect(cutlist.length).to.equal(2)
@@ -211,7 +211,7 @@ describe('API /teams - cutlist', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          players: [player2.pid, player1.pid]
+          pids: [player2.pid, player1.pid]
         })
 
       res1.should.have.status(200)
@@ -224,7 +224,7 @@ describe('API /teams - cutlist', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          players: []
+          pids: []
         })
 
       res2.body.length.should.equal(0)
@@ -244,7 +244,7 @@ describe('API /teams - cutlist', function () {
       await notLoggedIn(request)
     })
 
-    it('missing players', async () => {
+    it('missing pids', async () => {
       const request = chai
         .request(server)
         .post('/api/teams/1/cutlist')
@@ -253,7 +253,7 @@ describe('API /teams - cutlist', function () {
           leagueId: 1
         })
 
-      await missing(request, 'players')
+      await missing(request, 'pids')
     })
 
     it('missing leagueId', async () => {
@@ -262,7 +262,7 @@ describe('API /teams - cutlist', function () {
         .post('/api/teams/1/cutlist')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          players: 'x'
+          pids: 'x'
         })
 
       await missing(request, 'leagueId')
@@ -274,7 +274,7 @@ describe('API /teams - cutlist', function () {
         .post('/api/teams/1/cutlist')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          players: 'x',
+          pids: 'x',
           leagueId: 1
         })
 
@@ -287,7 +287,7 @@ describe('API /teams - cutlist', function () {
         .post('/api/teams/1/cutlist')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          players: 'x',
+          pids: 'x',
           leagueId: 2
         })
 
@@ -300,7 +300,7 @@ describe('API /teams - cutlist', function () {
         .post('/api/teams/1/cutlist')
         .set('Authorization', `Bearer ${user2}`)
         .send({
-          players: 'x',
+          pids: 'x',
           leagueId: 1
         })
 
@@ -314,7 +314,7 @@ describe('API /teams - cutlist', function () {
         .post('/api/teams/1/cutlist')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          players: player.pid,
+          pids: player.pid,
           leagueId: 1
         })
 

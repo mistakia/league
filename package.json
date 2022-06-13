@@ -5,7 +5,7 @@
     "start": "cross-env START_HOT=1 NODE_ENV=development webpack serve --mode=development --config webpack/webpack.config.dev.babel.mjs",
     "lint": "eslint . --ext js,mjs",
     "prettier": "prettier --write .",
-    "test": "NODE_ENV=test TEST=all mocha --exit --exclude test/importer-espn.spec.mjs",
+    "test": "NODE_ENV=test TEST=all mocha --exit --exclude test/importer-espn.spec.mjs --require test/global.mjs",
     "start:api": "node server.mjs",
     "build": "cross-env NODE_ENV=production webpack --config ./webpack/webpack.config.prod.babel.mjs",
     "analyze": "cross-env OPEN_ANALYZER=true NODE_ENV=production webpack --config ./webpack/webpack.config.prod.babel.mjs",

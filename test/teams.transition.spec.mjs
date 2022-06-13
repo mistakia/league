@@ -76,7 +76,7 @@ describe('API /teams - transition', function () {
           bid,
           playerTid: teamId,
           release: [releasePlayer.pid],
-          player: player.pid
+          pid: player.pid
         })
 
       res.should.have.status(200)
@@ -85,7 +85,7 @@ describe('API /teams - transition', function () {
 
       res.body.tid.should.equal(teamId)
       res.body.userid.should.equal(userId)
-      res.body.player.should.equal(player.pid)
+      res.body.pid.should.equal(player.pid)
       res.body.submitted.should.equal(Math.round(Date.now() / 1000))
       res.body.bid.should.equal(bid)
       res.body.year.should.equal(constants.season.year)
@@ -98,7 +98,7 @@ describe('API /teams - transition', function () {
 
       query1.length.should.equal(1)
       query1[0].uid.should.equal(1)
-      query1[0].player.should.equal(player.pid)
+      query1[0].pid.should.equal(player.pid)
       query1[0].userid.should.equal(userId)
       query1[0].bid.should.equal(bid)
       query1[0].year.should.equal(constants.season.year)
@@ -115,7 +115,7 @@ describe('API /teams - transition', function () {
 
       query2.length.should.equal(1)
       query2[0].transitionid.should.equal(1)
-      query2[0].player.should.equal(releasePlayer.pid)
+      query2[0].pid.should.equal(releasePlayer.pid)
 
       const roster = await getRoster({ tid: teamId })
 
@@ -147,7 +147,7 @@ describe('API /teams - transition', function () {
           leagueId,
           bid: 1,
           playerTid,
-          player: player.pid
+          pid: player.pid
         })
 
       res1.should.have.status(200)
@@ -160,7 +160,7 @@ describe('API /teams - transition', function () {
           leagueId,
           bid,
           playerTid,
-          player: player.pid
+          pid: player.pid
         })
 
       res2.should.have.status(200)
@@ -169,7 +169,7 @@ describe('API /teams - transition', function () {
 
       res2.body.tid.should.equal(1)
       res2.body.userid.should.equal(userId)
-      res2.body.player.should.equal(player.pid)
+      res2.body.pid.should.equal(player.pid)
       res2.body.year.should.equal(constants.season.year)
       res2.body.submitted.should.equal(Math.round(Date.now() / 1000))
       res2.body.bid.should.equal(bid)
@@ -234,7 +234,7 @@ describe('API /teams - transition', function () {
           leagueId,
           bid,
           playerTid: teamId,
-          player: tagPlayer.pid,
+          pid: tagPlayer.pid,
           release: releasePlayer.pid
         })
 
@@ -245,7 +245,7 @@ describe('API /teams - transition', function () {
       res2.body.tid.should.equal(teamId)
       res2.body.userid.should.equal(userId)
       res2.body.year.should.equal(constants.season.year)
-      res2.body.player.should.equal(tagPlayer.pid)
+      res2.body.pid.should.equal(tagPlayer.pid)
       res2.body.submitted.should.equal(Math.round(Date.now() / 1000))
       res2.body.bid.should.equal(bid)
       res2.body.player_tid.should.equal(teamId)
@@ -269,7 +269,7 @@ describe('API /teams - transition', function () {
       await notLoggedIn(request)
     })
 
-    it('missing player', async () => {
+    it('missing pid', async () => {
       const request = chai
         .request(server)
         .post('/api/teams/1/tag/transition')
@@ -280,7 +280,7 @@ describe('API /teams - transition', function () {
           leagueId: 1
         })
 
-      await missing(request, 'player')
+      await missing(request, 'pid')
     })
 
     it('missing bid', async () => {
@@ -289,7 +289,7 @@ describe('API /teams - transition', function () {
         .post('/api/teams/1/tag/transition')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: 'x',
+          pid: 'x',
           playerTid: 1,
           leagueId: 1
         })
@@ -305,7 +305,7 @@ describe('API /teams - transition', function () {
         .send({
           bid: 1,
           playerTid: 1,
-          player: 'x'
+          pid: 'x'
         })
 
       await missing(request, 'leagueId')
@@ -319,7 +319,7 @@ describe('API /teams - transition', function () {
         .send({
           bid: 1,
           leagueId: 1,
-          player: 'x'
+          pid: 'x'
         })
 
       await missing(request, 'playerTid')
@@ -333,7 +333,7 @@ describe('API /teams - transition', function () {
         .send({
           bid: -1,
           playerTid: 1,
-          player: 'x',
+          pid: 'x',
           leagueId: 1
         })
 
@@ -348,7 +348,7 @@ describe('API /teams - transition', function () {
         .send({
           bid: 1,
           playerTid: 1,
-          player: 'x',
+          pid: 'x',
           leagueId: 1
         })
 
@@ -377,7 +377,7 @@ describe('API /teams - transition', function () {
         .send({
           bid,
           playerTid: teamId,
-          player: player.pid,
+          pid: player.pid,
           release: releasePlayer.pid,
           leagueId
         })
@@ -393,7 +393,7 @@ describe('API /teams - transition', function () {
         .send({
           bid: 1,
           playerTid: 1,
-          player: 'x',
+          pid: 'x',
           leagueId: 2
         })
 
@@ -408,7 +408,7 @@ describe('API /teams - transition', function () {
         .send({
           bid: 1,
           playerTid: 1,
-          player: 'x',
+          pid: 'x',
           leagueId: 1
         })
 
@@ -424,7 +424,7 @@ describe('API /teams - transition', function () {
         .send({
           bid: 1,
           playerTid: 1,
-          player: player.pid,
+          pid: player.pid,
           leagueId: 1
         })
 
@@ -440,7 +440,7 @@ describe('API /teams - transition', function () {
         .send({
           bid: 1,
           playerTid: 2,
-          player: player.pid,
+          pid: player.pid,
           leagueId: 1
         })
 
@@ -478,7 +478,7 @@ describe('API /teams - transition', function () {
           leagueId,
           bid,
           playerTid: originalTeamId,
-          player: player.pid
+          pid: player.pid
         })
 
       res1.should.have.status(200)
@@ -491,7 +491,7 @@ describe('API /teams - transition', function () {
         .send({
           bid,
           playerTid: originalTeamId,
-          player: player.pid,
+          pid: player.pid,
           leagueId
         })
 
@@ -530,7 +530,7 @@ describe('API /teams - transition', function () {
      *     .send({
      *       bid,
      *       playerTid: teamId,
-     *       player: tagPlayer.pid,
+     *       pid: tagPlayer.pid,
      *       leagueId
      *     })
 
@@ -590,7 +590,7 @@ describe('API /teams - transition', function () {
      *     .send({
      *       bid,
      *       playerTid: teamId,
-     *       player: tagPlayer.pid,
+     *       pid: tagPlayer.pid,
      *       leagueId
      *     })
 
@@ -639,7 +639,7 @@ describe('API /teams - transition', function () {
      *     .send({
      *       bid,
      *       playerTid: teamId,
-     *       player: tagPlayer.pid,
+     *       pid: tagPlayer.pid,
      *       release: releasePlayer.pid,
      *       leagueId
      *     })
@@ -677,7 +677,7 @@ describe('API /teams - transition', function () {
         .send({
           bid,
           playerTid: teamId,
-          player: player.pid,
+          pid: player.pid,
           leagueId
         })
 

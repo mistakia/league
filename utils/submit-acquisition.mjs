@@ -29,7 +29,7 @@ export default async function ({
   if (release.length) {
     release.forEach((pid) => pids.push(pid))
   }
-  const player_rows = await db('player').whereIn('pid', pid)
+  const player_rows = await db('player').whereIn('pid', pids)
   const player_row = player_rows.find((p) => p.pid === pid)
   if (!player_row) {
     throw new Error('invalid player')

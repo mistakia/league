@@ -52,7 +52,7 @@ describe('API /teams - protect', function () {
       await notLoggedIn(request)
     })
 
-    it('missing player', async () => {
+    it('missing pid', async () => {
       const request = chai
         .request(server)
         .post('/api/teams/1/protect')
@@ -61,7 +61,7 @@ describe('API /teams - protect', function () {
           leagueId: 1
         })
 
-      await missing(request, 'player')
+      await missing(request, 'pid')
     })
 
     it('missing leagueId', async () => {

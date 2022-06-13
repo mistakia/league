@@ -75,8 +75,8 @@ describe('API /teams - activate', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           slot: constants.slots.IR,
-          pid: player1.pid,
-          reserve: player2.pid,
+          activate_pid: player1.pid,
+          reserve_pid: player2.pid,
           leagueId
         })
 
@@ -167,7 +167,7 @@ describe('API /teams - activate', function () {
           leagueId: 1,
           reserve: 'x',
           slot: constants.slots.IR,
-          pid: player1.pid
+          activate_pid: player1.pid
         })
 
       await invalid(request, 'player')
@@ -199,7 +199,7 @@ describe('API /teams - activate', function () {
           leagueId: 1,
           reserve: player2.pid,
           slot: constants.slots.IR,
-          pid: player1.pid
+          activate_pid: player1.pid
         })
 
       await error(request, 'player not on roster')
@@ -231,8 +231,8 @@ describe('API /teams - activate', function () {
         .post('/api/teams/1/activate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          pid: player1.pid,
-          reserve: player2.pid,
+          activate_pid: player1.pid,
+          reserve_pid: player2.pid,
           slot: constants.slots.IR,
           leagueId
         })
@@ -283,8 +283,8 @@ describe('API /teams - activate', function () {
         .post('/api/teams/1/activate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          pid: player1.pid,
-          reserve: player2.pid,
+          activate_pid: player1.pid,
+          reserve_pid: player2.pid,
           slot: constants.slots.IR,
           leagueId
         })
@@ -334,9 +334,9 @@ describe('API /teams - activate', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          reserve: player2.pid,
+          reserve_pid: player2.pid,
           slot: constants.slots.IR,
-          pid: player1.pid
+          activate_pid: player1.pid
         })
 
       await error(request, 'player is on active roster')

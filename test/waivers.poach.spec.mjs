@@ -128,7 +128,7 @@ describe('API /waivers - poach', function () {
       await notLoggedIn(request)
     })
 
-    it('missing player', async () => {
+    it('missing pid', async () => {
       const request = chai
         .request(server)
         .post('/api/leagues/1/waivers')
@@ -139,7 +139,7 @@ describe('API /waivers - poach', function () {
           leagueId: 1
         })
 
-      await missing(request, 'player')
+      await missing(request, 'pid')
     })
 
     it('missing teamId', async () => {

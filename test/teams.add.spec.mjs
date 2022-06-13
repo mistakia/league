@@ -189,7 +189,7 @@ describe('API /teams - add', function () {
       await notLoggedIn(request)
     })
 
-    it('missing player', async () => {
+    it('missing pid', async () => {
       const request = chai
         .request(server)
         .post('/api/teams/1/add')
@@ -200,7 +200,7 @@ describe('API /teams - add', function () {
           slot: constants.slots.PS
         })
 
-      await missing(request, 'player')
+      await missing(request, 'pid')
     })
 
     it('missing leagueId', async () => {

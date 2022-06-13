@@ -87,7 +87,7 @@ describe('API /teams - tag', function () {
       await missing(request, 'tag')
     })
 
-    it('missing player', async () => {
+    it('missing pid', async () => {
       const request = chai
         .request(server)
         .post('/api/teams/1/tag')
@@ -97,7 +97,7 @@ describe('API /teams - tag', function () {
           leagueId: 1
         })
 
-      await missing(request, 'player')
+      await missing(request, 'pid')
     })
 
     it('missing leagueId', async () => {

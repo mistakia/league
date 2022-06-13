@@ -68,7 +68,7 @@ router.put('/?', async (req, res) => {
       }
 
       if (!item.pid) {
-        return res.status(400).send({ error: 'missing player' })
+        return res.status(400).send({ error: 'missing pid' })
       }
     }
 

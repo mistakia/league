@@ -16,9 +16,11 @@ const loadPlayers = async () => {
   }
 }
 
-loadPlayers()
+if (process.env.NODE_ENV === 'production') {
+  loadPlayers()
 
-cron.schedule('*/5 * * * *', loadPlayers)
+  cron.schedule('*/5 * * * *', loadPlayers)
+}
 
 router.get('/?', async (req, res) => {
   const { logger } = req.app.locals

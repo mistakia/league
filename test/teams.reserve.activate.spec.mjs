@@ -175,7 +175,7 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          activate: 'x',
+          activate_pid: 'x',
           reserve_pid: player1.pid,
           slot: constants.slots.IR
         })
