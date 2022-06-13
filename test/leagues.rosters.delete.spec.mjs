@@ -144,7 +144,7 @@ describe('API /leagues/rosters - delete', function () {
         .delete('/api/leagues/2/rosters')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: 'x',
+          pid: 'x',
           teamId: 1,
           leagueId: 1
         })

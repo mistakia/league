@@ -63,7 +63,7 @@ describe('API /teams - deactivate', function () {
         .post('/api/teams/1/deactivate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player.pid,
+          pid: player.pid,
           leagueId
         })
 

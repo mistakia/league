@@ -206,8 +206,8 @@ router.post(
       )
       acceptingTeamPlayers.forEach((p) => acceptingTeamRoster.removePlayer(p))
 
-      for (const playerId of proposingTeamPlayers) {
-        const player = players.find((p) => p.player === playerId)
+      for (const pid of proposingTeamPlayers) {
+        const player = players.find((p) => p.pid === pid)
         const hasSlot = acceptingTeamRoster.hasOpenBenchSlot(player.pos)
         if (!hasSlot) {
           return res
@@ -216,7 +216,7 @@ router.post(
         }
         acceptingTeamRoster.addPlayer({
           slot: constants.slots.BENCH,
-          player: playerId,
+          pid,
           pos: player.pos,
           value: player.value
         })
@@ -229,9 +229,9 @@ router.post(
       })
 
       // check if proposing team trade players are a locked starter
-      for (const player of proposingTeamPlayers) {
-        if (proposingTeamRoster.isStarter(player)) {
-          const isLocked = await isPlayerLocked(player)
+      for (const pid of proposingTeamPlayers) {
+        if (proposingTeamRoster.isStarter(pid)) {
+          const isLocked = await isPlayerLocked(pid)
           if (isLocked) {
             return res
               .status(400)
@@ -241,9 +241,9 @@ router.post(
       }
 
       // check if proposing team release players are a locked starter
-      for (const player of proposingTeamReleasePlayerIds) {
-        if (proposingTeamRoster.isStarter(player)) {
-          const isLocked = await isPlayerLocked(player)
+      for (const pid of proposingTeamReleasePlayerIds) {
+        if (proposingTeamRoster.isStarter(pid)) {
+          const isLocked = await isPlayerLocked(pid)
           if (isLocked) {
             return res
               .status(400)
@@ -257,8 +257,8 @@ router.post(
         proposingTeamRoster.removePlayer(p)
       )
       proposingTeamPlayers.forEach((p) => proposingTeamRoster.removePlayer(p))
-      for (const playerId of acceptingTeamPlayers) {
-        const player = players.find((p) => p.player === playerId)
+      for (const pid of acceptingTeamPlayers) {
+        const player = players.find((p) => p.pid === pid)
         const hasSlot = proposingTeamRoster.hasOpenBenchSlot(player.pos)
         if (!hasSlot) {
           return res
@@ -267,7 +267,7 @@ router.post(
         }
         proposingTeamRoster.addPlayer({
           slot: constants.slots.BENCH,
-          player: playerId,
+          pid,
           pos: player.pos,
           value: player.value
         })
@@ -309,9 +309,7 @@ router.post(
         .update({ accepted: Math.round(Date.now() / 1000) })
 
       const subQuery = db('transactions')
-        .select(
-          db.raw('max(uid) AS maxuid, CONCAT(player, "_", lid) AS Group1')
-        )
+        .select(db.raw('max(uid) AS maxuid, CONCAT(pid, "_", lid) AS Group1'))
         .groupBy('Group1')
         .whereIn('pid', tradedPlayers)
         .where({ lid: leagueId })

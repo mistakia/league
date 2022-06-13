@@ -221,7 +221,7 @@ describe('API /teams - transition', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId,
-          players: cutlistPlayer.pid
+          pids: cutlistPlayer.pid
         })
 
       res1.should.have.status(200)
@@ -578,7 +578,7 @@ describe('API /teams - transition', function () {
      *     .set('Authorization', `Bearer ${user1}`)
      *     .send({
      *       leagueId,
-     *       players: cutlistPlayer.pid
+     *       pids: cutlistPlayer.pid
      *     })
 
      *   res1.should.have.status(200)

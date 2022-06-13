@@ -185,7 +185,7 @@ router.post(
       const pickids = proposingTeamPicks.concat(acceptingTeamPicks)
       const draft_pick_rows = await db('draft')
         .whereIn('uid', pickids)
-        .whereNull('player')
+        .whereNull('pid')
 
       // validate sending picks
       for (const pick of proposingTeamPicks) {
@@ -232,28 +232,28 @@ router.post(
       // validate proposing team roster
       const sub = db('transactions')
         .select(db.raw('max(uid) as uid'))
-        .whereIn('player', acceptingTeamPlayers)
+        .whereIn('pid', acceptingTeamPlayers)
         .where('lid', leagueId)
-        .groupBy('player')
+        .groupBy('pid')
 
       const players = await db
         .select('player.*', 'transactions.value')
         .from(db.raw('(' + sub.toString() + ') AS X'))
         .join('transactions', 'X.uid', 'transactions.uid')
-        .join('player', 'transactions.player', 'player.player')
-        .whereIn('player.player', acceptingTeamPlayers)
+        .join('player', 'transactions.pid', 'player.pid')
+        .whereIn('player.pid', acceptingTeamPlayers)
 
       releasePlayers.forEach((p) => proposingTeamRoster.removePlayer(p))
       proposingTeamPlayers.forEach((p) => proposingTeamRoster.removePlayer(p))
-      for (const playerId of acceptingTeamPlayers) {
-        const player = players.find((p) => p.player === playerId)
+      for (const pid of acceptingTeamPlayers) {
+        const player = players.find((p) => p.pid === pid)
         const hasSlot = proposingTeamRoster.hasOpenBenchSlot(player.pos)
         if (!hasSlot) {
           return res.status(400).send({ error: 'no slots available' })
         }
         proposingTeamRoster.addPlayer({
           slot: constants.slots.BENCH,
-          player: playerId,
+          pid,
           pos: player.pos,
           value: player.value
         })
@@ -273,18 +273,18 @@ router.post(
       // insert join entries
       const insertPlayers = []
       const insertPicks = []
-      for (const player of proposingTeamPlayers) {
+      for (const pid of proposingTeamPlayers) {
         insertPlayers.push({
           tradeid,
           tid: propose_tid,
-          player
+          pid
         })
       }
-      for (const player of acceptingTeamPlayers) {
+      for (const pid of acceptingTeamPlayers) {
         insertPlayers.push({
           tradeid,
           tid: accept_tid,
-          player
+          pid
         })
       }
       for (const pickid of proposingTeamPicks) {
@@ -303,10 +303,10 @@ router.post(
       }
 
       const insertReleases = []
-      for (const player of releasePlayers) {
+      for (const pid of releasePlayers) {
         insertReleases.push({
           tradeid,
-          player,
+          pid,
           tid: propose_tid
         })
       }

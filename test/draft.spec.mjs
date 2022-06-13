@@ -135,7 +135,7 @@ describe('API /draft', function () {
       await invalid(request, 'teamId')
     })
 
-    it('invalid playerId - does not exist', async () => {
+    it('invalid pid - does not exist', async () => {
       MockDate.set(start.subtract('1', 'month').add('1', 'day').toDate())
       const request = chai
         .request(server)
@@ -143,10 +143,10 @@ describe('API /draft', function () {
         .set('Authorization', `Bearer ${user2}`)
         .send({ pid: 'xx', pickId: 2, teamId: 2 })
 
-      await invalid(request, 'playerId')
+      await invalid(request, 'pid')
     })
 
-    it('invalid playerId - position', async () => {
+    it('invalid pid - position', async () => {
       // TODO
     })
 
@@ -155,12 +155,12 @@ describe('API /draft', function () {
         .request(server)
         .post('/api/leagues/0/draft')
         .set('Authorization', `Bearer ${user2}`)
-        .send({ playerId: 'xx', pickId: 2, teamId: 2 })
+        .send({ pid: 'xx', pickId: 2, teamId: 2 })
 
       await invalid(request, 'leagueId')
     })
 
-    it('invalid playerId - not a rookie', async () => {
+    it('invalid pid - not a rookie', async () => {
       const players = await knex('player')
         .where('start', constants.season.year - 1)
         .limit(1)
@@ -175,7 +175,7 @@ describe('API /draft', function () {
           pickId: 2
         })
 
-      await invalid(request, 'playerId')
+      await invalid(request, 'pid')
     })
 
     it('teamId does not belong to userId', async () => {
@@ -183,7 +183,7 @@ describe('API /draft', function () {
         .request(server)
         .post('/api/leagues/1/draft')
         .set('Authorization', `Bearer ${user3}`)
-        .send({ playerId: 'xx', pickId: 2, teamId: 2 })
+        .send({ pid: 'xx', pickId: 2, teamId: 2 })
 
       await invalid(request, 'teamId')
     })
@@ -242,7 +242,7 @@ describe('API /draft', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1,
-          playerId: 'xx',
+          pid: 'xx',
           pickId: 2
         })
 

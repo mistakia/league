@@ -112,15 +112,15 @@ describe('API /trades', function () {
       const rows = await knex('rosters_players')
         .leftJoin('rosters', 'rosters_players.rid', 'rosters.uid')
         .whereIn(
-          'rosters_players.player',
+          'rosters_players.pid',
           proposingTeamPlayers.concat(acceptingTeamPlayers)
         )
 
       rows.length.should.equal(2)
       const proposingRow = rows.find((p) => p.tid === 1)
       const acceptingRow = rows.find((p) => p.tid === 2)
-      proposingRow.player.should.equal(acceptingTeamPlayers[0])
-      acceptingRow.player.should.equal(proposingTeamPlayers[0])
+      proposingRow.pid.should.equal(acceptingTeamPlayers[0])
+      acceptingRow.pid.should.equal(proposingTeamPlayers[0])
 
       // TODO - check player values pre/post trade
     })
@@ -145,6 +145,7 @@ describe('API /trades', function () {
         tid: 3,
         lid: 1,
         pid: player1.pid,
+        player_tid: teamId,
         submitted: Math.round(Date.now() / 1000)
       })
 
@@ -347,6 +348,7 @@ describe('API /trades', function () {
         tid: 3,
         lid: 1,
         pid: player1.pid,
+        player_tid: teamId,
         submitted: Math.round(Date.now() / 1000)
       })
 

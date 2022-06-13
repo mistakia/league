@@ -165,7 +165,7 @@ describe('API /teams - activate', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          reserve: 'x',
+          reserve_pid: 'x',
           slot: constants.slots.IR,
           activate_pid: player1.pid
         })
@@ -197,7 +197,7 @@ describe('API /teams - activate', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          reserve: player2.pid,
+          reserve_pid: player2.pid,
           slot: constants.slots.IR,
           activate_pid: player1.pid
         })

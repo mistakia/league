@@ -11,7 +11,7 @@ router.post('/?', async (req, res) => {
     const { pid, teamId, leagueId } = req.body
     const value = req.body.value || 0
     if (!pid) {
-      return res.status(400).send({ error: 'missing player' })
+      return res.status(400).send({ error: 'missing pid' })
     }
 
     if (!teamId) {

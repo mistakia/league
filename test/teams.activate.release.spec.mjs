@@ -65,8 +65,8 @@ describe('API /teams - activate', function () {
         .post('/api/teams/1/activate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          pid: player1.pid,
-          release: player2.player,
+          activate_pid: player1.pid,
+          release_pid: player2.pid,
           leagueId
         })
 
@@ -155,8 +155,8 @@ describe('API /teams - activate', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          release: 'x',
-          pid: player1.pid
+          release_pid: 'x',
+          activate_pid: player1.pid
         })
 
       await invalid(request, 'player')
@@ -185,8 +185,8 @@ describe('API /teams - activate', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          release: player2.pid,
-          pid: player1.pid
+          release_pid: player2.pid,
+          activate_pid: player1.pid
         })
 
       await error(request, 'player not on roster')
@@ -217,8 +217,8 @@ describe('API /teams - activate', function () {
         .post('/api/teams/1/activate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          pid: player1.pid,
-          release: player2.pid,
+          activate_pid: player1.pid,
+          release_pid: player2.pid,
           leagueId
         })
 
@@ -258,8 +258,8 @@ describe('API /teams - activate', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          release: player2.pid,
-          pid: player1.pid
+          release_pid: player2.pid,
+          activate_pid: player1.pid
         })
 
       await error(request, 'player is on active roster')

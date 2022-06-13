@@ -278,7 +278,7 @@ router.delete('/?', async (req, res) => {
     const { pid, leagueId } = req.body
 
     if (!pid) {
-      return res.status(400).send({ error: 'missing player' })
+      return res.status(400).send({ error: 'missing pid' })
     }
 
     if (!leagueId) {
