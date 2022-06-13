@@ -187,6 +187,7 @@ describe('API /teams - transition', function () {
 
       const league = await getLeague(leagueId)
 
+      const exclude_pids = []
       const tagPlayer = await selectPlayer()
       await addPlayer({
         leagueId,
@@ -194,8 +195,9 @@ describe('API /teams - transition', function () {
         teamId,
         userId
       })
+      exclude_pids.push(tagPlayer.pid)
 
-      const cutlistPlayer = await selectPlayer()
+      const cutlistPlayer = await selectPlayer({ exclude_pids })
       await addPlayer({
         leagueId,
         player: cutlistPlayer,
@@ -203,8 +205,9 @@ describe('API /teams - transition', function () {
         userId,
         value: league.cap - bid + 1
       })
+      exclude_pids.push(cutlistPlayer.pid)
 
-      const releasePlayer = await selectPlayer()
+      const releasePlayer = await selectPlayer({ exclude_pids })
       await addPlayer({
         leagueId,
         player: releasePlayer,
@@ -212,8 +215,9 @@ describe('API /teams - transition', function () {
         userId,
         value: bid
       })
+      exclude_pids.push(releasePlayer.pid)
 
-      await fillRoster({ leagueId, teamId, excludeIR: true })
+      await fillRoster({ leagueId, teamId, excludeIR: true, exclude_pids })
 
       const res1 = await chai
         .request(server)
@@ -466,7 +470,8 @@ describe('API /teams - transition', function () {
       await fillRoster({
         leagueId,
         teamId: competingTeamId,
-        excludeIR: true
+        excludeIR: true,
+        exclude_pids: [player.pid]
       })
 
       // original team bid

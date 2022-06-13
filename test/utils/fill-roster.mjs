@@ -4,7 +4,12 @@ import { getRoster, getLeague } from '#utils'
 import selectPlayer from './select-player.mjs'
 import addPlayer from './add-player.mjs'
 
-export default async function ({ leagueId, teamId, excludeIR = false }) {
+export default async function ({
+  leagueId,
+  teamId,
+  excludeIR = false,
+  exclude_pids = []
+}) {
   const league = await getLeague(leagueId)
   const rosterRow = await getRoster({ tid: teamId })
   let roster = new Roster({ roster: rosterRow, league })
@@ -17,8 +22,10 @@ export default async function ({ leagueId, teamId, excludeIR = false }) {
         week: constants.season.week,
         year: constants.season.year
       })
-    const exclude_pids = players.map((p) => p.pid)
-    const player = await selectPlayer({ exclude_pids })
+    const existing_pids = players.map((p) => p.pid)
+    const player = await selectPlayer({
+      exclude_pids: [...existing_pids, ...exclude_pids]
+    })
     const hasSlot = roster.hasOpenBenchSlot(player.pos1)
     if (hasSlot) {
       await addPlayer({
@@ -40,9 +47,9 @@ export default async function ({ leagueId, teamId, excludeIR = false }) {
         week: constants.season.week,
         year: constants.season.year
       })
-    const exclude_pids = players.map((p) => p.pid)
+    const existing_pids = players.map((p) => p.pid)
     const player = await selectPlayer({
-      exclude_pids,
+      exclude_pids: [...existing_pids, ...exclude_pids],
       rookie: true
     })
     await addPlayer({
@@ -68,8 +75,10 @@ export default async function ({ leagueId, teamId, excludeIR = false }) {
         week: constants.season.week,
         year: constants.season.year
       })
-    const exclude_pids = players.map((p) => p.pid)
-    const player = await selectPlayer({ exclude_pids })
+    const existing_pids = players.map((p) => p.pid)
+    const player = await selectPlayer({
+      exclude_pids: [...existing_pids, ...exclude_pids]
+    })
     await addPlayer({
       leagueId,
       teamId,
