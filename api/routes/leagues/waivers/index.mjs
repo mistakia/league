@@ -117,7 +117,7 @@ router.post('/?', async (req, res) => {
 
     const pids = [pid]
     if (release.length) {
-      release.forEach((releasePid) => pids.push(releasePid))
+      release.forEach((release_pid) => pids.push(release_pid))
     }
     const player_rows = await db('player').whereIn('pid', pids)
     if (player_rows.length !== pids.length) {
@@ -244,8 +244,8 @@ router.post('/?', async (req, res) => {
             'waiverid',
             claim.uid
           )
-          const release_pids = release_rows.map((r) => r.pid)
-          if (release_pids.sort().join(',') === release_rows.sort().join(',')) {
+          const existing_release_pids = release_rows.map((r) => r.pid)
+          if (existing_release_pids.sort().join(',') === release.sort().join(',')) {
             return res.status(400).send({ error: 'duplicate waiver claim' })
           }
         }

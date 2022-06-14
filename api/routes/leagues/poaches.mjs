@@ -155,8 +155,8 @@ router.put('/:poachId', async (req, res) => {
       return res.status(400).send({ error: 'invalid poachId' })
     }
     const poach = poaches[0]
-    const playerRows = await db('player').where('pid', poach.pid)
-    const poachPlayer = playerRows[0]
+    const player_rows = await db('player').where('pid', poach.pid)
+    const poach_player_row = player_rows[0]
 
     // verify release players exists
     const players = await db('player').whereIn('pid', release)
@@ -193,7 +193,7 @@ router.put('/:poachId', async (req, res) => {
         roster.removePlayer(releasePlayerId)
       }
     }
-    const hasSlot = roster.hasOpenBenchSlot(poachPlayer.pos)
+    const hasSlot = roster.hasOpenBenchSlot(poach_player_row.pos)
     if (!hasSlot) {
       return res
         .status(400)
@@ -202,7 +202,7 @@ router.put('/:poachId', async (req, res) => {
 
     // verify team has salary space during offseason
     const transactions = await db('transactions')
-      .where({ pid: poachPlayer.pid, lid: leagueId })
+      .where({ pid: poach_player_row.pid, lid: leagueId })
       .orderBy('timestamp', 'desc')
       .orderBy('uid', 'desc')
       .limit(1)
