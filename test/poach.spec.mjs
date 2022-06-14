@@ -48,7 +48,10 @@ describe('API /poaches', function () {
         userId: 1
       })
 
-      const player = await selectPlayer({ rookie: true })
+      const player = await selectPlayer({
+        rookie: true,
+        exclude_pids: [reservePlayer.pid]
+      })
       await addPlayer({
         leagueId,
         player,
