@@ -236,7 +236,7 @@ const run = async ({
     const stats = calculateDstStatsFromPlays(formattedPlays, team)
     if (argv.dry) continue
     await upsert({
-      player: team,
+      pid: team,
       pos: 'DST',
       tm: team,
       opp: fixTeam(opp),

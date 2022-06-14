@@ -59,7 +59,7 @@ export default class FranchiseConfirmation extends React.Component {
       this.props.add({
         remove: untag,
         tag: constants.tags.FRANCHISE,
-        player: pid
+        pid
       })
       this.props.onClose()
     }

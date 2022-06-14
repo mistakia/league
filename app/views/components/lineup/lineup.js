@@ -21,7 +21,7 @@ export default class Lineup extends React.Component {
   }
 
   handleUpdate = ({ slot, playerMap }) => {
-    const players = [{ slot, player: this.state.selectedPlayerMap.get('pid') }]
+    const players = [{ slot, pid: this.state.selectedPlayerMap.get('pid') }]
     const pid = playerMap.get('pid')
     if (pid) {
       const { league, roster } = this.props

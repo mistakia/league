@@ -240,7 +240,7 @@ export function optimizeAuctionLineup({
       starter: 1
     }
     variables[player.pid][player.pid] = 1
-    // variables[player.player][player.pos] = 1
+    // variables[player.pid][player.pos] = 1
     if (constraints[player.pid]) {
       constraints[player.pid].max = 1
     } else {
