@@ -146,7 +146,7 @@ export default async function ({
   if (releasePlayers.length) {
     for (const release_pid of releasePlayers) {
       const releaseData = await processRelease({
-        pid: release_pid,
+        release_pid,
         tid: teamId,
         lid: leagueId,
         userid: userId

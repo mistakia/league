@@ -95,7 +95,7 @@ router.post('/?', async (req, res) => {
       try {
         data = await submitActivate({
           tid,
-          pid: activate_pid,
+          activate_pid,
           leagueId,
           userId: req.auth.userId
         })

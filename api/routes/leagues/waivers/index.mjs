@@ -245,7 +245,9 @@ router.post('/?', async (req, res) => {
             claim.uid
           )
           const existing_release_pids = release_rows.map((r) => r.pid)
-          if (existing_release_pids.sort().join(',') === release.sort().join(',')) {
+          if (
+            existing_release_pids.sort().join(',') === release.sort().join(',')
+          ) {
             return res.status(400).send({ error: 'duplicate waiver claim' })
           }
         }

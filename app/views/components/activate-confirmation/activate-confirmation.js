@@ -19,8 +19,8 @@ export default class ActivateConfirmation extends React.Component {
     super(props)
 
     this.state = {
-      reserve: '',
-      release: '',
+      reserve_pid: '',
+      release_pid: '',
       missing: false
     }
 
@@ -43,28 +43,28 @@ export default class ActivateConfirmation extends React.Component {
 
   handleSelectReserve = (event) => {
     const { value } = event.target
-    this.setState({ reserve: value, missing: false })
+    this.setState({ reserve_pid: value, missing: false })
   }
 
   handleSelectRelease = (event) => {
     const { value } = event.target
-    this.setState({ release: value, missing: false })
+    this.setState({ release_pid: value, missing: false })
   }
 
   handleSubmit = () => {
-    const { reserve, release } = this.state
-    const pid = this.props.playerMap.get('pid')
+    const { reserve_pid, release_pid } = this.state
+    const activate_pid = this.props.playerMap.get('pid')
 
-    if (!this._hasBenchSpace && !reserve && !release) {
+    if (!this._hasBenchSpace && !reserve_pid && !release_pid) {
       return this.setState({ missing: true })
     } else {
       this.setState({ missing: false })
     }
 
     this.props.activate({
-      pid,
-      reserve,
-      release,
+      activate_pid,
+      reserve_pid,
+      release_pid,
       slot: constants.slots.IR
     })
     this.props.onClose()
@@ -123,7 +123,7 @@ export default class ActivateConfirmation extends React.Component {
                   <Select
                     labelId='reserve-label'
                     error={this.state.missing}
-                    value={this.state.reserve}
+                    value={this.state.reserve_pid}
                     onChange={this.handleSelectReserve}
                     label='Reserve'
                   >
@@ -139,7 +139,7 @@ export default class ActivateConfirmation extends React.Component {
                 <Select
                   labelId='release-label'
                   error={this.state.missing}
-                  value={this.state.release}
+                  value={this.state.release_pid}
                   onChange={this.handleSelectRelease}
                   label='Release'
                 >

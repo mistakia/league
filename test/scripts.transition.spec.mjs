@@ -112,12 +112,18 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
     })
 
     it('process single bid with cutlist and conditional release', async () => {
-      // TODO - make sure selected players are unique
+      const exclude_pids = []
       const player1 = await selectPlayer() // 30 - rfa
-      const player2 = await selectPlayer() // 20 - cutlist
-      const player3 = await selectPlayer() // 20 - cutlist
-      const player4 = await selectPlayer() // 20 - release
-      const player5 = await selectPlayer() // 160 - high salary retained
+      exclude_pids.push(player1.pid)
+      const player2 = await selectPlayer({ exclude_pids }) // 20 - cutlist
+      exclude_pids.push(player2.pid)
+      const player3 = await selectPlayer({ exclude_pids }) // 20 - cutlist
+      exclude_pids.push(player3.pid)
+      const player4 = await selectPlayer({ exclude_pids }) // 20 - release
+      exclude_pids.push(player4.pid)
+      const player5 = await selectPlayer({ exclude_pids }) // 160 - high salary retained
+      exclude_pids.push(player5.pid)
+
       const teamId = 1
       const userId = 1
       const bid = 30
@@ -141,7 +147,7 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
         value: 160
       })
 
-      await fillRoster({ leagueId, teamId, excludeIR: true })
+      await fillRoster({ leagueId, teamId, excludeIR: true, exclude_pids })
 
       const timestamp = Math.round(Date.now() / 1000)
       const query1 = await knex('transition_bids').insert({

@@ -5,7 +5,7 @@ import getRoster from './get-roster.mjs'
 import db from '#db'
 import sendNotifications from './send-notifications.mjs'
 
-export default async function ({ tid, pid, leagueId, userId }) {
+export default async function ({ tid, activate_pid, leagueId, userId }) {
   const league = await getLeague(leagueId)
   if (!league) {
     throw new Error('invalid leagueId')
@@ -15,25 +15,27 @@ export default async function ({ tid, pid, leagueId, userId }) {
   const roster = new Roster({ roster: rosterRow, league })
 
   // make sure player is on team
-  if (!roster.has(pid)) {
+  if (!roster.has(activate_pid)) {
     throw new Error('invalid player')
   }
 
   // make sure player is not on active roster
-  if (roster.active.find((p) => p.pid === pid)) {
+  if (roster.active.find((p) => p.pid === activate_pid)) {
     throw new Error('player is on active roster')
   }
 
   // make sure player is not protected
   if (
-    roster.players.find((p) => p.pid === pid && p.slot === constants.slots.PSP)
+    roster.players.find(
+      (p) => p.pid === activate_pid && p.slot === constants.slots.PSP
+    )
   ) {
     throw new Error('player is protected')
   }
 
   const player_rows = await db('player')
     .join('transactions', 'player.pid', 'transactions.pid')
-    .where('player.pid', pid)
+    .where('player.pid', activate_pid)
     .where({
       lid: leagueId,
       tid
@@ -48,14 +50,14 @@ export default async function ({ tid, pid, leagueId, userId }) {
 
   await db('rosters_players').update({ slot: constants.slots.BENCH }).where({
     rid: rosterRow.uid,
-    pid
+    pid: activate_pid
   })
 
   const transaction = {
     userid: userId,
     tid,
     lid: leagueId,
-    pid,
+    pid: activate_pid,
     type: constants.transactions.ROSTER_ACTIVATE,
     value: player_row.value,
     year: constants.season.year,
@@ -64,7 +66,7 @@ export default async function ({ tid, pid, leagueId, userId }) {
   await db('transactions').insert(transaction)
 
   const data = {
-    pid,
+    pid: activate_pid,
     tid,
     slot: constants.slots.BENCH,
     rid: roster.uid,
