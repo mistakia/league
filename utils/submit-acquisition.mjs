@@ -135,7 +135,7 @@ export default async function ({
     }
   }
 
-  const hasSlot = roster.isEligibleForSlot({ slot, pid, pos: player_row.pos })
+  const hasSlot = roster.isEligibleForSlot({ slot, pos: player_row.pos })
   if (!hasSlot) {
     throw new Error('exceeds roster limits')
   }

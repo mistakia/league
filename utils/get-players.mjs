@@ -142,24 +142,24 @@ export default async function ({ textSearch, leagueId, pids = [] }) {
       market_salary
   }
 
-  /* const projections = await db('projections')
-   *   .where('sourceid', constants.sources.AVERAGE)
-   *   .where('year', constants.season.year)
-   *   .where('week', '>=', constants.season.week)
-   *   .whereIn('pid', returnedPlayerIds)
+  const projections = await db('projections')
+    .where('sourceid', constants.sources.AVERAGE)
+    .where('year', constants.season.year)
+    .where('week', '>=', constants.season.week)
+    .whereIn('pid', returnedPlayerIds)
 
-   * const rosProjections = await db('ros_projections')
-   *   .where('sourceid', constants.sources.AVERAGE)
-   *   .where('year', constants.season.year)
-   *   .whereIn('pid', returnedPlayerIds)
+  const rosProjections = await db('ros_projections')
+    .where('sourceid', constants.sources.AVERAGE)
+    .where('year', constants.season.year)
+    .whereIn('pid', returnedPlayerIds)
 
-   * for (const projection of projections) {
-   *   players_by_pid[projection.pid].projection[projection.week] = projection
-   * }
+  for (const projection of projections) {
+    players_by_pid[projection.pid].projection[projection.week] = projection
+  }
 
-   * for (const rosProjection of rosProjections) {
-   *   players_by_pid[rosProjection.pid].projection.ros = rosProjection
-   * }
-   */
+  for (const rosProjection of rosProjections) {
+    players_by_pid[rosProjection.pid].projection.ros = rosProjection
+  }
+
   return Object.values(players_by_pid)
 }

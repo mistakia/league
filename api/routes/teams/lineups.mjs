@@ -105,7 +105,6 @@ router.put('/?', async (req, res) => {
       if (item.slot !== constants.slots.BENCH) {
         const isEligible = roster.isEligibleForSlot({
           slot: item.slot,
-          pid: item.pid,
           pos: player_row.pos
         })
         if (!isEligible) {

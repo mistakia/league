@@ -163,7 +163,10 @@ export default class Lineup extends React.Component {
 
     const bench = []
     const selectedSlot = selectedPlayerMap.get('slot')
-    if (selectedPlayerMap.get('pid') && selectedSlot !== constants.slots.BENCH) {
+    if (
+      selectedPlayerMap.get('pid') &&
+      selectedSlot !== constants.slots.BENCH
+    ) {
       bench.push(
         <PlayerSlot
           key='bench'

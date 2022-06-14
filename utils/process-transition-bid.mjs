@@ -39,7 +39,7 @@ export default async function ({
   const isValid = () =>
     roster.availableSpace >= 1 &&
     roster.availableCap >= bid &&
-    roster.isEligibleForSlot({ slot, pid, pos })
+    roster.isEligibleForSlot({ slot, pos })
 
   if (isOriginalTeam) {
     roster.removePlayer(pid)

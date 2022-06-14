@@ -139,7 +139,9 @@ export default class PoachConfirmation extends React.Component {
       this.props.releasePlayers
     )
     this.state.release.forEach((pid) => {
-      const releasePlayerMap = releasePlayerMaps.find((pMap) => pMap.get('pid') === pid)
+      const releasePlayerMap = releasePlayerMaps.find(
+        (pMap) => pMap.get('pid') === pid
+      )
       releasePlayers.push({
         id: releasePlayerMap.get('pid'),
         label: releasePlayerMap.get('name'),

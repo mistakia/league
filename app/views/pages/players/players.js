@@ -148,8 +148,9 @@ export default class PlayersPage extends React.Component {
 
     const rowItems = []
     const index = this.state.page * 25
-    players.slice(0, index).forEach(
-      (playerMap, idx) =>
+    players
+      .slice(0, index)
+      .forEach((playerMap, idx) =>
         rowItems.push(
           <PlayerRow
             key={playerMap.get('pid')}
@@ -157,7 +158,7 @@ export default class PlayersPage extends React.Component {
             index={idx}
           />
         )
-    )
+      )
 
     const headerSeasonPassing = (
       <div className='player__row-group'>
