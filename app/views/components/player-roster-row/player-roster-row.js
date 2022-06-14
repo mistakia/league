@@ -10,37 +10,38 @@ import './player-roster-row.styl'
 
 class PlayerRosterRow extends Player {
   render = () => {
-    const { player, selected, isHosted, league } = this.props
+    const { playerMap, selected, isHosted, league } = this.props
 
-    const isSelected = selected === player.player
+    const pid = playerMap.get('pid')
+    const isSelected = selected === pid
     const classNames = ['roster__item']
     if (isSelected) classNames.push('selected')
 
     const deadline = dayjs.unix(league.ext_date)
     const calculateExtension = constants.season.now.isBefore(deadline)
-    const { pos, tag, value, bid } = player
-    const extensions = player.get('extensions', 0)
+    const extensions = playerMap.get('extensions', 0)
+    const value = playerMap.get('value')
     const salary = calculateExtension
       ? getExtensionAmount({
-          pos,
-          tag,
+          pos: playerMap.get('pos'),
+          tag: playerMap.get('tag'),
           extensions,
           league,
           value,
-          bid
+          bid: playerMap.get('bid')
         })
       : value
 
     return (
       <div className={classNames.join(' ')}>
         <div className='roster__item-name'>
-          <PlayerName playerId={player.player} />
+          <PlayerName pid={pid} />
         </div>
-        {Boolean(player.player) && (
+        {Boolean(pid) && (
           <div className='roster__item-salary metric'>{`$${salary}`}</div>
         )}
         <div className='roster__item-action'>
-          {Boolean(player.player && isHosted) && (
+          {Boolean(pid && isHosted) && (
             <IconButton
               small
               text

@@ -21,7 +21,7 @@ export default class AddPlayerDialog extends React.Component {
     super(props)
 
     this.state = {
-      player: undefined,
+      pid: undefined,
       value: 0,
       error: false
     }
@@ -50,15 +50,15 @@ export default class AddPlayerDialog extends React.Component {
 
   handleChangePlayer = (event) => {
     const { value } = event.target
-    this.setState({ player: value })
+    this.setState({ pid: value })
   }
 
   handleSubmit = () => {
-    const { value, player, error } = this.state
+    const { value, pid, error } = this.state
     const { team } = this.props
-    if (!error && player) {
+    if (!error && pid) {
       this.props.add({
-        player,
+        pid,
         value,
         teamId: team.uid
       })
@@ -69,12 +69,12 @@ export default class AddPlayerDialog extends React.Component {
   render = () => {
     const { players } = this.props
 
-    const sorted = players.sortBy((player) => player.name)
+    const sorted = players.sortBy((playerMap) => playerMap.get('name', 0))
     const menuItems = [<option key='default' value='' />]
-    for (const [index, player] of sorted.entries()) {
+    for (const [index, playerMap] of sorted.entries()) {
       menuItems.push(
-        <option key={index} value={player.player}>
-          {player.name} ({player.pos})
+        <option key={index} value={playerMap.get('pid')}>
+          {playerMap.get('name')} ({playerMap.get('pos')})
         </option>
       )
     }
@@ -88,7 +88,7 @@ export default class AddPlayerDialog extends React.Component {
               <InputLabel id='player'>Player</InputLabel>
               <Select
                 native
-                value={this.state.player}
+                value={this.state.pid}
                 onChange={this.handleChangePlayer}
                 label='Player'
               >

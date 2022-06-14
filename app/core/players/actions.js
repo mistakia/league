@@ -71,10 +71,10 @@ export const playerActions = {
   GET_PLAYER_PROJECTIONS_FAILED: 'GET_PLAYER_PROJECTIONS_FAILED',
   GET_PLAYER_PROJECTIONS_PENDING: 'GET_PLAYER_PROJECTIONS_PENDING',
 
-  getPlayerProjections: (player) => ({
+  getPlayerProjections: (pid) => ({
     type: playerActions.GET_PLAYER_PROJECTIONS,
     payload: {
-      player
+      pid
     }
   }),
 
@@ -123,17 +123,17 @@ export const playerActions = {
     }
   }),
 
-  toggleWatchlist: (playerId) => ({
+  toggleWatchlist: (pid) => ({
     type: playerActions.TOGGLE_WATCHLIST,
     payload: {
-      playerId
+      pid
     }
   }),
 
-  selectPlayer: (player) => ({
+  selectPlayer: (pid) => ({
     type: playerActions.PLAYERS_SELECT_PLAYER,
     payload: {
-      player
+      pid
     }
   }),
 
@@ -141,21 +141,21 @@ export const playerActions = {
     type: playerActions.PLAYERS_DESELECT_PLAYER
   }),
 
-  saveProjection: ({ playerId, value, type, userId, week }) => ({
+  saveProjection: ({ pid, value, type, userId, week }) => ({
     type: playerActions.SAVE_PROJECTION,
     payload: {
       userId,
-      playerId,
+      pid,
       value,
       type,
       week
     }
   }),
 
-  deleteProjection: ({ playerId, week }) => ({
+  deleteProjection: ({ pid, week }) => ({
     type: playerActions.DELETE_PROJECTION,
     payload: {
-      playerId,
+      pid,
       week
     }
   }),
@@ -346,10 +346,10 @@ export const playerActions = {
     }
   }),
 
-  toggleCutlist: (player) => ({
+  toggleCutlist: (pid) => ({
     type: playerActions.TOGGLE_CUTLIST,
     payload: {
-      player
+      pid
     }
   }),
 
@@ -384,10 +384,10 @@ export const playerActions = {
     }
   }),
 
-  getPlayerTransactions: (player) => ({
+  getPlayerTransactions: (pid) => ({
     type: playerActions.GET_PLAYER_TRANSACTIONS,
     payload: {
-      player
+      pid
     }
   }),
 

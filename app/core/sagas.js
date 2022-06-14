@@ -22,7 +22,6 @@ import { statusSagas } from './status'
 import { scoreboardSagas } from './scoreboard'
 import { playSagas } from './plays'
 import { gamelogSagas } from './gamelogs'
-import { standingsSagas } from './standings'
 import { propSagas } from './props'
 
 export default function* rootSaga() {
@@ -49,7 +48,6 @@ export default function* rootSaga() {
     ...scoreboardSagas,
     ...playSagas,
     ...gamelogSagas,
-    ...standingsSagas,
     ...propSagas
   ])
 }

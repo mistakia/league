@@ -13,11 +13,11 @@ export default class ScoreboardPlay extends React.Component {
     const { play, style } = this.props
 
     const players = []
-    for (const [playerId, points] of Object.entries(play.points)) {
+    for (const [pid, points] of Object.entries(play.points)) {
       players.push(
-        <div key={playerId} className='scoreboard__play-player'>
+        <div key={pid} className='scoreboard__play-player'>
           <div className='scoreboard__play-player-name'>
-            <PlayerName playerId={playerId} />
+            <PlayerName pid={pid} />
           </div>
           <div className='scoreboard__play-player-points metric'>
             {points.total.toFixed(1)}

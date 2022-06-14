@@ -15,8 +15,8 @@ export function getFilteredProps(state) {
   const items = props.toJS()
 
   for (const prop of items) {
-    const player = getPlayerById(state, { playerId: prop.player })
-    const proj = player.getIn(['projection', `${prop.wk}`], {})
+    const playerMap = getPlayerById(state, { pid: prop.pid })
+    const proj = playerMap.getIn(['projection', `${prop.wk}`], {})
     switch (prop.type) {
       case constants.oddTypes.GAME_PASSING:
         prop.proj = proj.py

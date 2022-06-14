@@ -2,7 +2,6 @@
 import chai from 'chai'
 import chaiHTTP from 'chai-http'
 import MockDate from 'mockdate'
-import dayjs from 'dayjs'
 
 import server from '#api'
 import knex from '#db'
@@ -38,12 +37,12 @@ describe('API /waivers - free agency', function () {
   describe('put', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.subtract('2', 'month').toDate())
+      MockDate.set(start.subtract('2', 'month').toISOString())
       await league(knex)
     })
 
     it('submit waiver for player', async () => {
-      MockDate.set(start.add('1', 'week').toDate())
+      MockDate.set(start.add('1', 'week').toISOString())
 
       const player = await selectPlayer()
 
@@ -56,7 +55,7 @@ describe('API /waivers - free agency', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: player.player,
+          pid: player.pid,
           type: constants.waivers.FREE_AGENCY,
           leagueId
         })
@@ -68,7 +67,7 @@ describe('API /waivers - free agency', function () {
       res.body.tid.should.equal(teamId)
       res.body.userid.should.equal(1)
       res.body.lid.should.equal(leagueId)
-      res.body.player.should.equal(player.player)
+      res.body.pid.should.equal(player.pid)
       res.body.po.should.equal(9999)
       res.body.submitted.should.equal(Math.round(Date.now() / 1000))
       res.body.bid.should.equal(0)
@@ -78,7 +77,7 @@ describe('API /waivers - free agency', function () {
     })
 
     it('submit waiver for released rookie - offseason', async () => {
-      MockDate.set(start.subtract('1', 'month').toDate())
+      MockDate.set(start.subtract('1', 'month').toISOString())
       const leagueId = 1
       const player = await selectPlayer({ rookie: true })
       await addPlayer({
@@ -91,7 +90,7 @@ describe('API /waivers - free agency', function () {
         value: 3
       })
 
-      MockDate.set(start.subtract('3', 'week').toDate())
+      MockDate.set(start.subtract('3', 'week').toISOString())
       await releasePlayer({
         leagueId,
         player,
@@ -99,7 +98,7 @@ describe('API /waivers - free agency', function () {
         userId: 2
       })
 
-      MockDate.set(start.subtract('3', 'week').add('4', 'hour').toDate())
+      MockDate.set(start.subtract('3', 'week').add('4', 'hour').toISOString())
 
       // submit waiver claim
       const teamId = 1
@@ -109,7 +108,7 @@ describe('API /waivers - free agency', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: player.player,
+          pid: player.pid,
           type: constants.waivers.FREE_AGENCY_PRACTICE,
           leagueId
         })
@@ -121,7 +120,7 @@ describe('API /waivers - free agency', function () {
       res.body.tid.should.equal(teamId)
       res.body.userid.should.equal(1)
       res.body.lid.should.equal(leagueId)
-      res.body.player.should.equal(player.player)
+      res.body.pid.should.equal(player.pid)
       res.body.po.should.equal(9999)
       res.body.submitted.should.equal(Math.round(Date.now() / 1000))
       res.body.bid.should.equal(0)
@@ -142,12 +141,12 @@ describe('API /waivers - free agency', function () {
   describe('errors', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.subtract('2', 'month').toDate())
+      MockDate.set(start.subtract('2', 'month').toISOString())
       await league(knex)
     })
 
     it('duplicate waiver claim', async () => {
-      MockDate.set(start.subtract('1', 'month').toDate())
+      MockDate.set(start.subtract('1', 'month').toISOString())
       const leagueId = 1
       const player = await selectPlayer({ rookie: true })
       await addPlayer({
@@ -160,7 +159,7 @@ describe('API /waivers - free agency', function () {
         value: 3
       })
 
-      MockDate.set(start.subtract('3', 'week').toDate())
+      MockDate.set(start.subtract('3', 'week').toISOString())
       await releasePlayer({
         leagueId,
         player,
@@ -168,7 +167,7 @@ describe('API /waivers - free agency', function () {
         userId: 2
       })
 
-      MockDate.set(start.subtract('3', 'week').add('4', 'hour').toDate())
+      MockDate.set(start.subtract('3', 'week').add('4', 'hour').toISOString())
       const teamId = 1
       await chai
         .request(server)
@@ -176,7 +175,7 @@ describe('API /waivers - free agency', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: player.player,
+          pid: player.pid,
           type: constants.waivers.FREE_AGENCY,
           leagueId
         })
@@ -187,7 +186,7 @@ describe('API /waivers - free agency', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: player.player,
+          pid: player.pid,
           type: constants.waivers.FREE_AGENCY,
           leagueId
         })
@@ -211,7 +210,7 @@ describe('API /waivers - free agency', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: players[0].player,
+          pid: players[0].pid,
           type: constants.waivers.FREE_AGENCY,
           leagueId
         })
@@ -229,19 +228,21 @@ describe('API /waivers - free agency', function () {
       const player = players[0]
 
       // set time to thursday
-      MockDate.set(start.add('1', 'week').day(5).toDate())
+      MockDate.set(start.add('1', 'week').day(5).toISOString())
 
       // add player
       await addPlayer({ leagueId: 1, player, teamId: 2, userId: 2 })
 
       // set time to 5 mins later
-      MockDate.set(dayjs().add('5', 'minute').toDate())
+      MockDate.set(constants.season.now.add('5', 'minute').toISOString())
 
       // release player
       await releasePlayer({ leagueId: 1, player, teamId: 2, userId: 2 })
 
       // set time to 24 hours and 1 minute later
-      MockDate.set(dayjs().add('24', 'hour').add('1', 'minute').toDate())
+      MockDate.set(
+        constants.season.now.add('24', 'hour').add('1', 'minute').toISOString()
+      )
 
       // submit waiver
       const teamId = 1
@@ -252,7 +253,7 @@ describe('API /waivers - free agency', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: player.player,
+          pid: player.pid,
           type: constants.waivers.FREE_AGENCY,
           leagueId
         })
@@ -261,7 +262,7 @@ describe('API /waivers - free agency', function () {
     })
 
     it('practice waiver for non rookie - offseason', async () => {
-      MockDate.set(start.subtract('1', 'month').toDate())
+      MockDate.set(start.subtract('1', 'month').toISOString())
       const leagueId = 1
       const player = await selectPlayer({ rookie: false })
 
@@ -273,7 +274,7 @@ describe('API /waivers - free agency', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: player.player,
+          pid: player.pid,
           type: constants.waivers.FREE_AGENCY_PRACTICE,
           leagueId
         })
@@ -285,7 +286,7 @@ describe('API /waivers - free agency', function () {
     })
 
     it('player is no longer on waivers - outside waiver period', async () => {
-      MockDate.set(start.add('1', 'month').day(5).toDate())
+      MockDate.set(start.add('1', 'month').day(5).toISOString())
       const leagueId = 1
       const player = await selectPlayer()
       const teamId = 1
@@ -295,7 +296,7 @@ describe('API /waivers - free agency', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: player.player,
+          pid: player.pid,
           type: constants.waivers.FREE_AGENCY,
           leagueId
         })
@@ -304,7 +305,7 @@ describe('API /waivers - free agency', function () {
     })
 
     it('player is no longer on waivers - outside waiver period - practice', async () => {
-      MockDate.set(start.subtract('1', 'month').toDate())
+      MockDate.set(start.subtract('1', 'month').toISOString())
       const leagueId = 1
       const player = await selectPlayer({ rookie: true })
       await addPlayer({
@@ -317,7 +318,7 @@ describe('API /waivers - free agency', function () {
         value: 3
       })
 
-      MockDate.set(start.subtract('3', 'week').toDate())
+      MockDate.set(start.subtract('3', 'week').toISOString())
       await releasePlayer({
         leagueId,
         player,
@@ -325,7 +326,7 @@ describe('API /waivers - free agency', function () {
         userId: 2
       })
 
-      MockDate.set(start.subtract('3', 'week').add('25', 'hour').toDate())
+      MockDate.set(start.subtract('3', 'week').add('25', 'hour').toISOString())
 
       // submit waiver claim
       const teamId = 1
@@ -335,7 +336,7 @@ describe('API /waivers - free agency', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: player.player,
+          pid: player.pid,
           type: constants.waivers.FREE_AGENCY_PRACTICE,
           leagueId
         })
@@ -344,20 +345,20 @@ describe('API /waivers - free agency', function () {
     })
 
     it('team exceeds roster limits', async () => {
-      MockDate.set(start.add('1', 'month').day(2).toDate())
+      MockDate.set(start.add('1', 'month').day(2).toISOString())
       const leagueId = 1
       const teamId = 1
       await fillRoster({ leagueId, teamId })
       const roster = await getRoster({ tid: teamId })
-      const playerIds = roster.players.map((p) => p.player)
-      const player = await selectPlayer({ exclude: playerIds })
+      const exclude_pids = roster.players.map((p) => p.pid)
+      const player = await selectPlayer({ exclude_pids })
       const request = chai
         .request(server)
         .post('/api/leagues/1/waivers')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: player.player,
+          pid: player.pid,
           type: constants.waivers.FREE_AGENCY,
           leagueId
         })
@@ -366,7 +367,7 @@ describe('API /waivers - free agency', function () {
     })
 
     it('reserve player violation', async () => {
-      MockDate.set(start.add('1', 'week').toDate())
+      MockDate.set(start.add('1', 'week').toISOString())
       const reservePlayer = await selectPlayer()
       const teamId = 1
       const leagueId = 1
@@ -385,7 +386,7 @@ describe('API /waivers - free agency', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: player.player,
+          pid: player.pid,
           type: constants.waivers.FREE_AGENCY,
           leagueId
         })
@@ -415,20 +416,20 @@ describe('API /waivers - free agency', function () {
         start: constants.season.now.unix(),
         picks: picks.length
       })
-      MockDate.set(draftDates.draftEnd.toDate())
+      MockDate.set(draftDates.draftEnd.toISOString())
       const leagueId = 1
       const teamId = 1
       await fillRoster({ leagueId, teamId })
       const roster = await getRoster({ tid: teamId })
-      const playerIds = roster.players.map((p) => p.player)
-      const player = await selectPlayer({ exclude: playerIds, rookie: true })
+      const exclude_pids = roster.players.map((p) => p.pid)
+      const player = await selectPlayer({ exclude_pids, rookie: true })
       const request = chai
         .request(server)
         .post('/api/leagues/1/waivers')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: player.player,
+          pid: player.pid,
           type: constants.waivers.FREE_AGENCY_PRACTICE,
           leagueId
         })

@@ -9,15 +9,15 @@ import './player-watchlist-action.styl'
 export default class PlayerWatchlistAction extends React.Component {
   handleClick = (event) => {
     event.stopPropagation()
-    this.props.toggle(this.props.playerId)
+    this.props.toggle(this.props.pid)
   }
 
   render = () => {
-    const { watchlist, playerId, userId } = this.props
+    const { watchlist, pid, userId } = this.props
     if (!userId) {
       return null
     }
-    const selected = watchlist.has(playerId)
+    const selected = watchlist.has(pid)
     const classNames = ['player__watchlist-action']
     if (selected) classNames.push('selected')
     return (
@@ -30,7 +30,7 @@ export default class PlayerWatchlistAction extends React.Component {
 
 PlayerWatchlistAction.propTypes = {
   toggle: PropTypes.func,
-  playerId: PropTypes.string,
+  pid: PropTypes.string,
   watchlist: ImmutablePropTypes.set,
   userId: PropTypes.number
 }

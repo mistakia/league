@@ -1,12 +1,12 @@
 import { constants } from '#common'
 import db from '#db'
 
-export default async function ({ lid, player, tid }) {
+export default async function ({ lid, pid, tid }) {
   const transactions = await db('transactions')
     .where({
       lid,
       tid,
-      player
+      pid
     })
     .orderBy('timestamp', 'desc')
     .orderBy('uid', 'desc')

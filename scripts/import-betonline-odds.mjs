@@ -71,14 +71,14 @@ const run = async () => {
     if (!types[item.statistic.title]) continue
 
     // find player
-    let player
+    let player_row
     const params = {
       name: item.player1.name,
       team: item.player1.team.abbreviation
     }
     try {
-      player = await getPlayer(params)
-      if (!player) {
+      player_row = await getPlayer(params)
+      if (!player_row) {
         missing.push(params)
         continue
       }
@@ -93,12 +93,12 @@ const run = async () => {
         bet.type !== 1
           ? props.findIndex(
               (p) =>
-                p.player === player.player &&
+                p.pid === player_row.pid &&
                 p.type === types[item.statistic.title]
             )
           : -1
       const prop = index > -1 ? props[index] : {}
-      prop.player = player.player
+      prop.pid = player_row.pid
       prop.type = types[item.statistic.title]
       prop.id = bet.id
       prop.timestamp = timestamp

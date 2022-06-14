@@ -19,31 +19,32 @@ export default class AddFreeAgentDialog extends React.Component {
     super(props)
 
     const releases = []
-    const { league, player, practice } = props
+    const { league, playerMap, practice } = props
     const r = new Roster({ roster: props.roster.toJS(), league })
+    const pos = playerMap.get('pos')
 
     if (practice) {
-      props.rosterPlayers.practice.forEach((p) => {
-        if (p.slot === constants.slots.PSP) return
+      props.rosterPlayers.practice.forEach((practicePlayerMap) => {
+        if (practicePlayerMap.get('slot') === constants.slots.PSP) return
         const r = new Roster({ roster: props.roster.toJS(), league })
-        r.removePlayer(p.player)
+        r.removePlayer(practicePlayerMap.get('pid'))
         if (r.hasOpenPracticeSquadSlot()) {
-          releases.push(p)
+          releases.push(practicePlayerMap)
         }
       })
     } else {
-      props.rosterPlayers.active.forEach((p) => {
+      props.rosterPlayers.active.forEach((activePlayerMap) => {
         const r = new Roster({ roster: props.roster.toJS(), league })
-        r.removePlayer(p.player)
-        if (r.hasOpenBenchSlot(player.pos)) {
-          releases.push(p)
+        r.removePlayer(activePlayerMap.get('pid'))
+        if (r.hasOpenBenchSlot(pos)) {
+          releases.push(activePlayerMap)
         }
       })
     }
 
     this._isPlayerEligible = practice
       ? r.hasOpenPracticeSquadSlot()
-      : r.hasOpenBenchSlot(player.pos)
+      : r.hasOpenBenchSlot(pos)
     this._releases = releases
     this.state = { release: [], error: false }
   }
@@ -54,7 +55,7 @@ export default class AddFreeAgentDialog extends React.Component {
   }
 
   handleSubmit = () => {
-    const { player, practice } = this.props
+    const { playerMap, practice } = this.props
     const { release } = this.state
 
     if (!this._isPlayerEligible && !release) {
@@ -62,7 +63,7 @@ export default class AddFreeAgentDialog extends React.Component {
     }
 
     this.props.addFreeAgent({
-      player: player.player,
+      pid: playerMap.get('pid'),
       release,
       slot: practice ? constants.slots.PS : constants.slots.BENCH
     })
@@ -70,20 +71,23 @@ export default class AddFreeAgentDialog extends React.Component {
   }
 
   render = () => {
-    const { player, practice } = this.props
+    const { playerMap, practice } = this.props
 
     const menuItems = []
     if (!this._isPlayerEligible) {
-      for (const rPlayer of this._releases) {
+      for (const releasePlayerMap of this._releases) {
+        const pid = releasePlayerMap.get('pid')
         menuItems.push(
-          <MenuItem key={rPlayer.player} value={rPlayer.player}>
-            {rPlayer.name} ({rPlayer.pos})
+          <MenuItem key={pid} value={pid}>
+            {releasePlayerMap.get('name')} ({releasePlayerMap.get('pos')})
           </MenuItem>
         )
       }
     }
 
-    let text = `Sign ${player.name} (${player.pos}) to a salary of $0 and add them to the `
+    let text = `Sign ${playerMap.get('name')} (${playerMap.get(
+      'pos'
+    )}) to a salary of $0 and add them to the `
     if (practice) text += 'practice squad.'
     else text += 'active roster.'
 
@@ -124,7 +128,7 @@ export default class AddFreeAgentDialog extends React.Component {
 
 AddFreeAgentDialog.propTypes = {
   league: PropTypes.object,
-  player: ImmutablePropTypes.record,
+  playerMap: ImmutablePropTypes.map,
   practice: PropTypes.bool,
   roster: ImmutablePropTypes.record,
   rosterPlayers: PropTypes.object,

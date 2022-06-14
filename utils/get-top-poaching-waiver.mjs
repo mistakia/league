@@ -15,12 +15,12 @@ export default async function (leagueId) {
     .where('timestamp', '>=', cutoff)
     .where('lid', leagueId)
 
-  const excludePlayerIds = transactions.map((t) => t.player)
+  const exclude_pids = transactions.map((t) => t.pid)
   const waiversQuery = db('waivers')
     .select(
       'teams.*',
       'waivers.uid as wid',
-      'waivers.player',
+      'waivers.pid',
       'waivers.tid',
       'waivers.userid'
     )
@@ -30,8 +30,8 @@ export default async function (leagueId) {
     .where('type', constants.waivers.POACH)
     .orderBy(['teams.wo', 'waivers.po', 'waivers.uid'])
 
-  if (excludePlayerIds.length) {
-    waiversQuery.whereNotIn('waivers.player', excludePlayerIds)
+  if (exclude_pids.length) {
+    waiversQuery.whereNotIn('waivers.pid', exclude_pids)
   }
 
   const waivers = await waiversQuery

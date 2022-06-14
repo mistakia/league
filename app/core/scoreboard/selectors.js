@@ -36,9 +36,9 @@ export function getSelectedMatchupScoreboards(state) {
 
 export function getPointsByTeamId(state, { tid, week }) {
   let points = 0
-  const starters = getStartersByTeamId(state, { tid, week })
-  starters.forEach((player) => {
-    const gamelog = getGamelogForPlayer(state, { player, week })
+  const starterMaps = getStartersByTeamId(state, { tid, week })
+  starterMaps.forEach((playerMap) => {
+    const gamelog = getGamelogForPlayer(state, { playerMap, week })
     if (gamelog) points += gamelog.total
   })
   return points
@@ -53,13 +53,13 @@ export function getScoreboardByTeamId(state, { tid }) {
   const previousWeek = points
   let minutes = 0
 
-  const starters = getStartersByTeamId(state, { tid, week })
-  const projected = starters.reduce((sum, player) => {
-    const gamelog = getGamelogForPlayer(state, { player, week })
+  const starterMaps = getStartersByTeamId(state, { tid, week })
+  const projected = starterMaps.reduce((sum, playerMap) => {
+    const gamelog = getGamelogForPlayer(state, { playerMap, week })
     if (gamelog) {
       points += gamelog.total
       const gameStatus = getGameStatusByPlayerId(state, {
-        playerId: player.player,
+        pid: playerMap.get('pid'),
         week
       })
       if (gameStatus && gameStatus.lastPlay) {
@@ -76,7 +76,7 @@ export function getScoreboardByTeamId(state, { tid }) {
     }
     const add = gamelog
       ? gamelog.total
-      : player.getIn(['points', `${week}`, 'total'], 0)
+      : playerMap.getIn(['points', `${week}`, 'total'], 0)
     return add + sum
   }, 0)
 
@@ -103,42 +103,45 @@ export function getStartersByMatchupId(state, { mid }) {
   matchup.tids.forEach((tid) => {
     teams[tid] = getStartersByTeamId(state, { tid, week: matchup.week })
   })
-  const players = Object.values(teams).flat()
+  const playerMaps = Object.values(teams).flat()
 
   const games = {}
-  for (const player of players) {
-    if (!player.player) continue
-    const game = getGameByTeam(state, { team: player.team, week: matchup.week })
+  for (const playerMap of playerMaps) {
+    if (!playerMap.get('pid')) continue
+    const game = getGameByTeam(state, {
+      team: playerMap.get('team'),
+      week: matchup.week
+    })
     if (!game) continue
     const dateStr = `${game.date} ${game.time_est}`
     if (!games[dateStr]) games[dateStr] = []
-    games[dateStr].push(player)
+    games[dateStr].push(playerMap)
   }
 
   return { matchup, games, teams }
 }
 
-export function getScoreboardGamelogByPlayerId(state, { playerId }) {
-  const player = getPlayerById(state, { playerId })
+export function getScoreboardGamelogByPlayerId(state, { pid }) {
+  const playerMap = getPlayerById(state, { pid })
 
-  if (!player.player) return
+  if (!playerMap.get('pid')) return
 
   const week = state.getIn(['scoreboard', 'week'])
-  return getGamelogForPlayer(state, { player, week })
+  return getGamelogForPlayer(state, { playerMap, week })
 }
 
 export function getPlaysByMatchupId(state, { mid }) {
   const matchup = getSelectedMatchup(state)
   if (!matchup) return new List()
 
-  const players = matchup.tids.reduce((arr, tid) => {
+  const playerMaps = matchup.tids.reduce((arr, tid) => {
     const starters = getStartersByTeamId(state, { tid, week: matchup.week })
     return arr.concat(starters)
   }, [])
-  const gsisids = players.map((p) => p.gsisid).filter(Boolean)
+  const gsisids = playerMaps.map((pMap) => pMap.get('gsisid')).filter(Boolean)
   if (!gsisids.length) return new List()
 
-  const gsispids = players.map((p) => p.gsispid).filter(Boolean)
+  const gsispids = playerMaps.map((pMap) => pMap.get('gsispid')).filter(Boolean)
 
   const plays = getPlays(state, { week: matchup.week })
   // TODO - match/filter dst plays
@@ -173,24 +176,25 @@ export function getPlaysByMatchupId(state, { mid }) {
     const playStats = play.playStats.filter((p) => p.gsispid)
     const grouped = {}
     for (const playStat of playStats) {
-      const player = players.find((p) => {
-        if (p.gsispid && p.gsispid === playStat.gsispid) return true
-        if (p.gsisid && p.gsisid === playStat.gsisId) return true
+      const playerMap = playerMaps.find((pMap) => {
+        if (pMap.get('gsispid', false) === playStat.gsispid) return true
+        if (pMap.get('gsisid', false) === playStat.gsisId) return true
         return false
       })
-      if (!player) continue
-      if (!grouped[player.player]) grouped[player.player] = []
-      grouped[player.player].push(playStat)
+      if (!playerMap) continue
+      const pid = playerMap.get('pid')
+      if (!grouped[pid]) grouped[pid] = []
+      grouped[pid].push(playStat)
     }
     const points = {}
     const stats = {}
-    for (const playerId in grouped) {
-      const player = players.find((p) => p.player === playerId)
-      const playStats = grouped[playerId]
-      stats[playerId] = calculateStatsFromPlayStats(playStats)
-      points[playerId] = calculatePoints({
-        stats: stats[playerId],
-        position: player.pos,
+    for (const pid in grouped) {
+      const playerMap = playerMaps.find((pMap) => pMap.get('pid') === pid)
+      const playStats = grouped[pid]
+      stats[pid] = calculateStatsFromPlayStats(playStats)
+      points[pid] = calculatePoints({
+        stats: stats[pid],
+        position: playerMap.get('pos'),
         league
       })
     }
@@ -230,15 +234,15 @@ function getYardline(str, pos_team) {
 
 export function getGameStatusByPlayerId(
   state,
-  { playerId, week = constants.season.week }
+  { pid, week = constants.season.week }
 ) {
-  const game = getGameByPlayerId(state, { playerId, week })
+  const game = getGameByPlayerId(state, { pid, week })
   if (!game) {
     return null
   }
 
   const plays = getPlays(state, { week })
-  const player = getPlayerById(state, { playerId })
+  const playerMap = getPlayerById(state, { pid })
   const play = plays.find((p) => {
     if (!p.pos_team) return false
 
@@ -256,7 +260,7 @@ export function getGameStatusByPlayerId(
     return { game, lastPlay }
   }
 
-  const hasPossession = fixTeam(lastPlay.pos_team) === player.team
+  const hasPossession = fixTeam(lastPlay.pos_team) === playerMap.get('team')
   const yardline = getYardline(
     lastPlay.ydl_end || lastPlay.ydl_start,
     lastPlay.pos_team

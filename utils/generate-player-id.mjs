@@ -6,43 +6,44 @@ import isMain from './is-main.mjs'
 const log = debug('generate-player-id')
 debug.enable('generate-player-id')
 
-const generatePlayerId = async (player) => {
-  const firstInitial = player.fname.charAt(0).toUpperCase()
-  const lastInitial = player.lname.charAt(0).toUpperCase()
+const generatePlayerId = async (player_data) => {
+  const firstInitial = player_data.fname.charAt(0).toUpperCase()
+  const lastInitial = player_data.lname.charAt(0).toUpperCase()
   const preset = firstInitial + lastInitial
 
-  const playerIds = await db('player')
-    .select('player')
-    .where('player', 'like', `${preset}-%`)
-    .orderBy('player', 'desc')
+  const player_rows = await db('player')
+    .select('pid')
+    .where('pid', 'like', `${preset}-%`)
+    .orderBy('pid', 'desc')
     .limit(1)
 
-  if (!playerIds.length) {
+  if (!player_rows.length) {
     return `${preset}-1000`
   }
 
-  const cursor = playerIds[0].player
-  const results = /[A-Z]{2}-(?<index>[0-9]{4})/.exec(cursor)
-  const currentIndex = parseInt(results.groups.index, 10)
-  log(`current index: ${currentIndex}`)
-  // increase currentIndex by 10 and round to the nearest 10
-  const newIndex = Math.ceil((currentIndex + 10) / 10) * 10
-  const paddedIndex = ('0000' + newIndex).slice(-4)
-  log(`new index: ${paddedIndex}`)
+  const cursor_pid = player_rows[0].pid
+  const re_results = /[A-Z]{2}-(?<index>[0-9]{4})/.exec(cursor_pid)
+  const cursor_pid_index = parseInt(re_results.groups.index, 10)
+  log(`current index: ${cursor_pid_index}`)
 
-  return `${preset}-${paddedIndex}`
+  // increase cursor_pid_index by 10 and round to the nearest 10
+  const new_index = Math.ceil((cursor_pid_index + 10) / 10) * 10
+  const formatted_index = ('0000' + new_index).slice(-4)
+  log(`new index: ${formatted_index}`)
+
+  return `${preset}-${formatted_index}`
 }
 
 export default generatePlayerId
 
 if (isMain(import.meta.url)) {
   const main = async () => {
-    const playerId = await generatePlayerId({
+    const pid = await generatePlayerId({
       fname: 'Francis',
       lname: 'Scott'
     })
 
-    console.log(playerId)
+    console.log(pid)
     process.exit()
   }
 

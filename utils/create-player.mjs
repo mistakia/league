@@ -45,27 +45,27 @@ const required = [
   'posd'
 ]
 
-const createPlayer = async (player) => {
-  const playerId = await generatePlayerId(player)
+const createPlayer = async (playerData) => {
+  const playerId = await generatePlayerId(playerData)
 
-  if (!player.start) {
-    const { espn_id, sportradar_id } = player
+  if (!playerData.start) {
+    const { espn_id, sportradar_id } = playerData
     if (espn_id) {
       const espnPlayer = await espn.getPlayer({ espn_id })
-      player.start = espnPlayer.athlete.debutYear
+      playerData.start = espnPlayer.athlete.debutYear
     }
 
-    if (IS_PROD && !player.start && sportradar_id) {
+    if (IS_PROD && !playerData.start && sportradar_id) {
       try {
         const sportradarPlayer = await sportradar.getPlayer({ sportradar_id })
-        player.start = sportradarPlayer.rookie_year
+        playerData.start = sportradarPlayer.rookie_year
 
-        if (!player.start) {
+        if (!playerData.start) {
           if (sportradarPlayer.draft) {
-            player.start = sportradarPlayer.draft.year
+            playerData.start = sportradarPlayer.draft.year
           } else if (sportradarPlayer.seasons.length) {
             const seasons = sportradarPlayer.seasons.map((s) => s.year)
-            player.start = Math.min(...seasons)
+            playerData.start = Math.min(...seasons)
           }
         }
       } catch (e) {
@@ -75,22 +75,26 @@ const createPlayer = async (player) => {
   }
 
   for (const field of required) {
-    if (!player[field]) {
+    if (!playerData[field]) {
       log(`Unable to create player, missing ${field} field`)
-      log(player)
+      log(playerData)
       return null
     }
   }
 
-  player.pname = `${player.fname.charAt(0).toUpperCase()}.${player.lname}`
-  player.formatted = formatPlayerName(`${player.fname} ${player.lname}`)
-  player.height = formatHeight(player.height)
-  player.cteam = fixTeam(player.cteam)
+  playerData.pname = `${playerData.fname.charAt(0).toUpperCase()}.${
+    playerData.lname
+  }`
+  playerData.formatted = formatPlayerName(
+    `${playerData.fname} ${playerData.lname}`
+  )
+  playerData.height = formatHeight(playerData.height)
+  playerData.cteam = fixTeam(playerData.cteam)
 
   try {
     await db('player').insert({
-      player: playerId,
-      ...player
+      pid: playerId,
+      ...playerData
     })
 
     await db('player_changelog').insert({
@@ -103,11 +107,11 @@ const createPlayer = async (player) => {
   } catch (error) {
     log('Unable to create player')
     log(error)
-    log(player)
+    log(playerData)
     return null
   }
 
-  return player
+  return { pid: playerId, ...playerData }
 }
 
 export default createPlayer

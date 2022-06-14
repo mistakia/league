@@ -30,7 +30,7 @@ export default async function (knex) {
 
     await knex('rosters_players').insert({
       slot: constants.slots.BENCH,
-      player: player.player,
+      pid: player.pid,
       pos: player.pos1,
       rid: roster.uid
     })
@@ -40,7 +40,7 @@ export default async function (knex) {
         userid: roster.tid,
         tid: roster.tid,
         lid: league.uid,
-        player: player.player,
+        pid: player.pid,
         type: constants.transactions.AUCTION_BID,
         value,
         year: constants.season.year,
@@ -50,7 +50,7 @@ export default async function (knex) {
         userid: roster.tid,
         tid: roster.tid,
         lid: league.uid,
-        player: player.player,
+        pid: player.pid,
         type: constants.transactions.AUCTION_PROCESSED,
         value,
         year: constants.season.year,

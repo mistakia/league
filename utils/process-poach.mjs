@@ -7,10 +7,10 @@ import getLeague from './get-league.mjs'
 import createConditionalPick from './create-conditional-pick.mjs'
 import getLastTransaction from './get-last-transaction.mjs'
 
-export default async function ({ player, release = [], lid, tid, userid }) {
+export default async function ({ pid, release = [], lid, tid, userid }) {
   const rosterSlots = await db('rosters')
     .join('rosters_players', 'rosters.uid', 'rosters_players.rid')
-    .where('rosters_players.player', player)
+    .where('rosters_players.pid', pid)
     .where({ week: constants.season.week, year: constants.season.year })
 
   // verify player is on a team
@@ -26,32 +26,32 @@ export default async function ({ player, release = [], lid, tid, userid }) {
   }
 
   // verify poaching team has active roster space
-  const claimPlayerIds = [player]
+  const pids = [pid]
   if (release.length) {
-    release.map((player) => claimPlayerIds.push(player))
+    release.map((pid) => pids.push(pid))
   }
-  const playerRows = await db('player').whereIn('player', claimPlayerIds)
-  const poachPlayer = playerRows.find((p) => p.player === player)
+  const player_rows = await db('player').whereIn('pid', pids)
+  const poach_player_row = player_rows.find((p) => p.pid === pid)
   const league = await getLeague(lid)
   const rosterRow = await getRoster({ tid })
   const roster = new Roster({ roster: rosterRow, league })
   const releasePlayers = []
   if (release.length) {
-    for (const player of release) {
-      if (roster.has(player)) {
-        roster.removePlayer(player)
-        releasePlayers.push(player)
+    for (const release_pid of release) {
+      if (roster.has(release_pid)) {
+        roster.removePlayer(release_pid)
+        releasePlayers.push(release_pid)
       }
     }
   }
-  const hasSlot = roster.hasOpenBenchSlot(poachPlayer.pos)
+  const hasSlot = roster.hasOpenBenchSlot(poach_player_row.pos)
   if (!hasSlot) {
     throw new Error('poaching claim unsuccessful, no available roster space')
   }
 
   // verify team has enough cap if during the offseason
   const { value } = await getLastTransaction({
-    player,
+    pid,
     lid,
     tid: rosterSlot.tid
   })
@@ -65,8 +65,8 @@ export default async function ({ player, release = [], lid, tid, userid }) {
 
   // process release
   if (releasePlayers.length) {
-    for (const player of releasePlayers) {
-      await processRelease({ player, tid, lid, userid })
+    for (const release_pid of releasePlayers) {
+      await processRelease({ release_pid, tid, lid, userid })
     }
   }
 
@@ -78,14 +78,14 @@ export default async function ({ player, release = [], lid, tid, userid }) {
   const poachedTeamRosterIds = poachedTeamRosters.map((r) => r.uid)
   await db('rosters_players')
     .whereIn('rid', poachedTeamRosterIds)
-    .where('player', player)
+    .where('pid', pid)
     .del()
 
   const transaction = {
     userid,
     tid,
     lid,
-    player,
+    pid,
     type: constants.transactions.POACHED,
     value: playerPoachValue,
     year: constants.season.year,
@@ -97,8 +97,8 @@ export default async function ({ player, release = [], lid, tid, userid }) {
   await db('rosters_players').insert({
     rid: rosterRow.uid,
     slot: constants.slots.BENCH,
-    player,
-    pos: poachPlayer.pos
+    pid,
+    pos: poach_player_row.pos
   })
 
   // award conditional pick to poached team
@@ -108,12 +108,14 @@ export default async function ({ player, release = [], lid, tid, userid }) {
   })
 
   // send notification
-  let message = `Poaching claim for ${poachPlayer.fname} ${poachPlayer.lname} (${poachPlayer.pos}) successfully processed.`
+  let message = `Poaching claim for ${poach_player_row.fname} ${poach_player_row.lname} (${poach_player_row.pos}) successfully processed.`
   if (release.length) {
-    for (const player of release) {
-      if (roster.has(player)) {
-        const releasePlayer = playerRows.find((p) => p.player === player)
-        message += ` ${releasePlayer.fname} ${releasePlayer.lname} (${releasePlayer.pos}) has been released.`
+    for (const release_pid of release) {
+      if (roster.has(release_pid)) {
+        const release_player_row = player_rows.find(
+          (p) => p.pid === release_pid
+        )
+        message += ` ${release_player_row.fname} ${release_player_row.lname} (${release_player_row.pos}) has been released.`
       }
     }
   }

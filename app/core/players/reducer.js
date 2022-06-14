@@ -64,34 +64,34 @@ export function playersReducer(state = initialState, { payload, type }) {
 
     case playerActions.SET_PROJECTION:
     case playerActions.PUT_PROJECTION_FULFILLED: {
-      const { value, type, week, playerId, userId } = payload.opts
+      const { value, type, week, pid, userId } = payload.opts
       const key = state
         .get('items')
-        .get(playerId)
+        .get(pid)
         .get('projections')
         .findKey((p) => !p.sourceid)
       if (typeof key !== 'undefined') {
-        return state.setIn(['items', playerId, 'projections', key, type], value)
+        return state.setIn(['items', pid, 'projections', key, type], value)
       }
-      const newProj = { [type]: value, userid: userId, week, player: playerId }
-      return state.updateIn(['items', playerId, 'projections'], (arr) =>
+      const newProj = { [type]: value, userid: userId, week, pid }
+      return state.updateIn(['items', pid, 'projections'], (arr) =>
         arr.push(newProj)
       )
     }
 
     case playerActions.REMOVE_PROJECTION:
     case playerActions.DEL_PROJECTION_FULFILLED: {
-      const { playerId, week } = payload.opts
+      const { pid, week } = payload.opts
       return state.setIn(
-        ['items', playerId, 'projections'],
+        ['items', pid, 'projections'],
         state
-          .getIn(['items', playerId, 'projections'])
+          .getIn(['items', pid, 'projections'])
           .filter((p) => p.sourceid || p.week !== week)
       )
     }
 
     case playerActions.PLAYERS_SELECT_PLAYER:
-      return state.merge({ selected: payload.player })
+      return state.merge({ selected: payload.pid })
 
     case playerActions.PLAYERS_DESELECT_PLAYER:
       return state.merge({ selected: null })
@@ -114,13 +114,13 @@ export function playersReducer(state = initialState, { payload, type }) {
             for (const type in payload.baselines[week][b]) {
               state.setIn(
                 ['baselines', week, b, type],
-                payload.baselines[week][b][type].player
+                payload.baselines[week][b][type].pid
               )
             }
           }
         }
         payload.players.forEach((p) => {
-          state.mergeIn(['items', p.player], {
+          state.mergeIn(['items', p.pid], {
             points: new Map(p.points),
             market_salary: new Map(p.market_salary),
             vorp: new Map(p.vorp),
@@ -133,18 +133,18 @@ export function playersReducer(state = initialState, { payload, type }) {
       return state.withMutations((state) => {
         state.set('isPending', true)
         const stats = constants.createFullStats()
-        for (const player of state.get('items').keys()) {
-          state.setIn(['items', player, 'stats'], new Map(stats))
+        for (const pid of state.get('items').keys()) {
+          state.setIn(['items', pid, 'stats'], new Map(stats))
         }
       })
 
     case playerActions.SET_PLAYER_STATS:
       return state.withMutations((state) => {
         state.set('isPending', false)
-        for (const player in payload.players) {
-          if (state.get('items').get(player)) {
-            const stats = payload.players[player]
-            state.mergeIn(['items', player, 'stats'], new Map(stats))
+        for (const pid in payload.players) {
+          if (state.get('items').get(pid)) {
+            const stats = payload.players[pid]
+            state.mergeIn(['items', pid, 'stats'], new Map(stats))
           }
         }
       })
@@ -162,8 +162,8 @@ export function playersReducer(state = initialState, { payload, type }) {
     case playerActions.GET_PROJECTIONS_FULFILLED:
       return state.withMutations((players) => {
         payload.data.forEach((p) => {
-          if (players.hasIn(['items', p.player])) {
-            players.updateIn(['items', p.player, 'projections'], (arr) =>
+          if (players.hasIn(['items', p.pid])) {
+            players.updateIn(['items', p.pid, 'projections'], (arr) =>
               arr.push(p)
             )
           }
@@ -173,20 +173,17 @@ export function playersReducer(state = initialState, { payload, type }) {
     case playerActions.SEARCH_PLAYERS_FULFILLED:
       return state.withMutations((players) => {
         payload.data.forEach((playerData) => {
-          if (players.hasIn(['items', playerData.player])) {
-            const data = players.getIn(['items', playerData.player])
+          if (players.hasIn(['items', playerData.pid])) {
+            const data = players.getIn(['items', playerData.pid])
             players.setIn(
-              ['items', playerData.player],
+              ['items', playerData.pid],
               createPlayer({
                 ...data.toJS(),
                 ...playerData
               })
             )
           } else {
-            players.setIn(
-              ['items', playerData.player],
-              createPlayer(playerData)
-            )
+            players.setIn(['items', playerData.pid], createPlayer(playerData))
           }
         })
       })
@@ -208,20 +205,17 @@ export function playersReducer(state = initialState, { payload, type }) {
         players.set('allAges', new List(distinctAges))
 
         payload.data.forEach((playerData) => {
-          if (players.hasIn(['items', playerData.player])) {
-            const data = players.getIn(['items', playerData.player])
+          if (players.hasIn(['items', playerData.pid])) {
+            const data = players.getIn(['items', playerData.pid])
             players.setIn(
-              ['items', playerData.player],
+              ['items', playerData.pid],
               createPlayer({
                 ...data.toJS(),
                 ...playerData
               })
             )
           } else {
-            players.setIn(
-              ['items', playerData.player],
-              createPlayer(playerData)
-            )
+            players.setIn(['items', playerData.pid], createPlayer(playerData))
           }
         })
       })
@@ -229,9 +223,9 @@ export function playersReducer(state = initialState, { payload, type }) {
     case playerActions.GET_PLAYER_FULFILLED:
       return state.withMutations((players) => {
         const { practice, ...player } = payload.data
-        players.mergeIn(['items', payload.opts.playerId], player)
+        players.mergeIn(['items', payload.opts.pid], player)
         players.setIn(
-          ['items', payload.opts.playerId, 'practice'],
+          ['items', payload.opts.pid, 'practice'],
           new List(practice)
         )
       })
@@ -285,18 +279,18 @@ export function playersReducer(state = initialState, { payload, type }) {
 
     case playerActions.TOGGLE_CUTLIST: {
       const cutlist = state.get('cutlist')
-      const { player } = payload
-      const index = cutlist.keyOf(player)
+      const { pid } = payload
+      const index = cutlist.keyOf(pid)
       return state.merge({
-        cutlist: index >= 0 ? cutlist.delete(index) : cutlist.push(player)
+        cutlist: index >= 0 ? cutlist.delete(index) : cutlist.push(pid)
       })
     }
 
     case playerActions.REORDER_CUTLIST: {
       const cutlist = state.get('cutlist')
       const { oldIndex, newIndex } = payload
-      const player = cutlist.get(oldIndex)
-      const newCutlist = cutlist.delete(oldIndex).insert(newIndex, player)
+      const pid = cutlist.get(oldIndex)
+      const newCutlist = cutlist.delete(oldIndex).insert(newIndex, pid)
       return state.set('cutlist', newCutlist)
     }
 
@@ -307,18 +301,18 @@ export function playersReducer(state = initialState, { payload, type }) {
 
     case playerActions.TOGGLE_WATCHLIST: {
       const watchlist = state.get('watchlist')
-      const { playerId } = payload
+      const { pid } = payload
       return state.merge({
-        watchlist: watchlist.has(playerId)
-          ? watchlist.delete(playerId)
-          : watchlist.add(playerId)
+        watchlist: watchlist.has(pid)
+          ? watchlist.delete(pid)
+          : watchlist.add(pid)
       })
     }
 
     case playerActions.SET_PROJECTED_CONTRIBUTION:
       return state.withMutations((state) => {
-        for (const playerId in payload.players) {
-          state.setIn(['items', playerId, 'lineups'], payload.players[playerId])
+        for (const pid in payload.players) {
+          state.setIn(['items', pid, 'lineups'], payload.players[pid])
         }
       })
 
@@ -328,7 +322,7 @@ export function playersReducer(state = initialState, { payload, type }) {
       return state.withMutations((state) => {
         rosters.forEach((roster) => {
           roster.players.forEach((rosterSlot) => {
-            const { player, value, type, slot, tag, extensions } = rosterSlot
+            const { pid, value, type, slot, tag, extensions } = rosterSlot
             const params = {
               value,
               tag,
@@ -337,10 +331,10 @@ export function playersReducer(state = initialState, { payload, type }) {
               extensions,
               slot
             }
-            if (state.hasIn(['items', player])) {
-              state.mergeIn(['items', player], params)
+            if (state.hasIn(['items', pid])) {
+              state.mergeIn(['items', pid], params)
             } else {
-              state.setIn(['items', player], createPlayer(params))
+              state.setIn(['items', pid], createPlayer(params))
             }
           })
         })
@@ -348,8 +342,8 @@ export function playersReducer(state = initialState, { payload, type }) {
     }
 
     case auctionActions.AUCTION_PROCESSED: {
-      const { tid, player, value, type } = payload
-      return state.mergeIn(['items', player], {
+      const { tid, pid, value, type } = payload
+      return state.mergeIn(['items', pid], {
         value,
         type,
         tid,
@@ -358,7 +352,7 @@ export function playersReducer(state = initialState, { payload, type }) {
     }
 
     case rosterActions.POST_RELEASE_FULFILLED:
-      return state.mergeIn(['items', payload.data.player], {
+      return state.mergeIn(['items', payload.data.pid], {
         value: null,
         tag: null,
         type: null,
@@ -371,7 +365,7 @@ export function playersReducer(state = initialState, { payload, type }) {
         payload.data.forEach((p) => {
           const t = p.transaction
           if (t.type === constants.transactions.ROSTER_RELEASE) {
-            state.mergeIn(['items', t.player], {
+            state.mergeIn(['items', t.pid], {
               value: null,
               tag: null,
               type: null,
@@ -379,7 +373,7 @@ export function playersReducer(state = initialState, { payload, type }) {
               slot: null
             })
           } else {
-            state.mergeIn(['items', t.player], {
+            state.mergeIn(['items', t.pid], {
               value: t.value,
               type: t.type,
               tid: t.tid,
@@ -391,7 +385,7 @@ export function playersReducer(state = initialState, { payload, type }) {
 
     case rosterActions.POST_TAG_FULFILLED:
       return state.withMutations((state) => {
-        state.mergeIn(['items', payload.opts.player], { tag: payload.opts.tag })
+        state.mergeIn(['items', payload.opts.pid], { tag: payload.opts.tag })
         if (payload.opts.remove)
           state.mergeIn(['items', payload.opts.remove], {
             tag: constants.tags.REGULAR
@@ -401,7 +395,7 @@ export function playersReducer(state = initialState, { payload, type }) {
     case rosterActions.POST_TRANSITION_TAG_FULFILLED:
     case rosterActions.PUT_TRANSITION_TAG_FULFILLED:
       return state.withMutations((state) => {
-        state.mergeIn(['items', payload.data.player], {
+        state.mergeIn(['items', payload.data.pid], {
           tag: constants.tags.TRANSITION,
           bid: payload.data.bid
         })
@@ -421,13 +415,13 @@ export function playersReducer(state = initialState, { payload, type }) {
       ) {
         data.tag = constants.tags.REGULAR
       }
-      return state.mergeIn(['items', payload.data.player], data)
+      return state.mergeIn(['items', payload.data.pid], data)
     }
 
     case rosterActions.PUT_ROSTER_FULFILLED: {
       return state.withMutations((state) => {
-        payload.data.forEach(({ player, slot }) =>
-          state.mergeIn(['items', player], { slot })
+        payload.data.forEach(({ pid, slot }) =>
+          state.mergeIn(['items', pid], { slot })
         )
       })
     }
@@ -437,9 +431,9 @@ export function playersReducer(state = initialState, { payload, type }) {
     case rosterActions.POST_PROTECT_FULFILLED:
     case rosterActions.POST_RESERVE_FULFILLED:
     case rosterActions.ROSTER_TRANSACTION: {
-      const { player, slot, transaction } = payload.data
+      const { pid, slot, transaction } = payload.data
       const { value, type, tid } = transaction
-      return state.mergeIn(['items', player], {
+      return state.mergeIn(['items', pid], {
         value,
         type,
         slot,
@@ -449,18 +443,18 @@ export function playersReducer(state = initialState, { payload, type }) {
 
     case playerActions.GET_PLAYER_TRANSACTIONS_PENDING:
       return state.setIn(
-        ['items', payload.opts.player, 'loadingTransactions'],
+        ['items', payload.opts.pid, 'loadingTransactions'],
         true
       )
 
     case playerActions.GET_PLAYER_TRANSACTIONS_FAILED:
       return state.setIn(
-        ['items', payload.opts.player, 'loadingTransactions'],
+        ['items', payload.opts.pid, 'loadingTransactions'],
         false
       )
 
     case playerActions.GET_PLAYER_TRANSACTIONS_FULFILLED:
-      return state.mergeIn(['items', payload.opts.player], {
+      return state.mergeIn(['items', payload.opts.pid], {
         transactions: new List(payload.data),
         loadingTransactions: false
       })
@@ -468,14 +462,14 @@ export function playersReducer(state = initialState, { payload, type }) {
     case playerActions.GET_BASELINES_FULFILLED:
       return state.withMutations((state) => {
         for (const baseline of payload.data) {
-          const { week, pos, type, player } = baseline
-          state.setIn(['baselines', week, pos, type], player)
+          const { week, pos, type, pid } = baseline
+          state.setIn(['baselines', week, pos, type], pid)
         }
       })
 
     case playerActions.GET_PLAYER_PROJECTIONS_FULFILLED:
       return state.setIn(
-        ['items', payload.opts.player, 'projections'],
+        ['items', payload.opts.pid, 'projections'],
         new List(payload.data)
       )
 

@@ -40,12 +40,12 @@ const run = async () => {
     const team = constants.espn.teamId[item.player.proTeamId]
     const pos = constants.espn.positionId[item.player.defaultPositionId]
     const params = { name, team, pos }
-    let player
+    let player_row
 
     // TODO cleanup
     try {
-      player = await getPlayer(params)
-      if (!player) {
+      player_row = await getPlayer(params)
+      if (!player_row) {
         missing.push(params)
         continue
       }
@@ -62,7 +62,7 @@ const run = async () => {
     const data = constants.espn.stats(projections.stats)
 
     inserts.push({
-      player: player.player,
+      pid: player_row.pid,
       year,
       week,
       sourceid: constants.sources.ESPN,

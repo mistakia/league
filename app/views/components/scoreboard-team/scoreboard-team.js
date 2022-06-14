@@ -18,13 +18,8 @@ export default class ScoreboardTeam extends React.Component {
       const slot = constants.slots.QB
       const players = roster.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.sqb; i++) {
-        const { player } = players[i] || {}
-        rows.push(
-          <ScoreboardPlayer
-            key={`${slot}${i}`}
-            {...{ playerId: player, roster }}
-          />
-        )
+        const { pid } = players[i] || {}
+        rows.push(<ScoreboardPlayer key={`${slot}${i}`} {...{ pid, roster }} />)
       }
     }
 
@@ -32,13 +27,8 @@ export default class ScoreboardTeam extends React.Component {
       const slot = constants.slots.RB
       const players = roster.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.srb; i++) {
-        const { player } = players[i] || {}
-        rows.push(
-          <ScoreboardPlayer
-            key={`${slot}${i}`}
-            {...{ playerId: player, roster }}
-          />
-        )
+        const { pid } = players[i] || {}
+        rows.push(<ScoreboardPlayer key={`${slot}${i}`} {...{ pid, roster }} />)
       }
     }
 
@@ -46,13 +36,8 @@ export default class ScoreboardTeam extends React.Component {
       const slot = constants.slots.WR
       const players = roster.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.swr; i++) {
-        const { player } = players[i] || {}
-        rows.push(
-          <ScoreboardPlayer
-            key={`${slot}${i}`}
-            {...{ playerId: player, roster }}
-          />
-        )
+        const { pid } = players[i] || {}
+        rows.push(<ScoreboardPlayer key={`${slot}${i}`} {...{ pid, roster }} />)
       }
     }
 
@@ -60,13 +45,8 @@ export default class ScoreboardTeam extends React.Component {
       const slot = constants.slots.RBWR
       const players = roster.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.srbwr; i++) {
-        const { player } = players[i] || {}
-        rows.push(
-          <ScoreboardPlayer
-            key={`${slot}${i}`}
-            {...{ playerId: player, roster }}
-          />
-        )
+        const { pid } = players[i] || {}
+        rows.push(<ScoreboardPlayer key={`${slot}${i}`} {...{ pid, roster }} />)
       }
     }
 
@@ -74,13 +54,8 @@ export default class ScoreboardTeam extends React.Component {
       const slot = constants.slots.RBWRTE
       const players = roster.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.srbwrte; i++) {
-        const { player } = players[i] || {}
-        rows.push(
-          <ScoreboardPlayer
-            key={`${slot}${i}`}
-            {...{ playerId: player, roster }}
-          />
-        )
+        const { pid } = players[i] || {}
+        rows.push(<ScoreboardPlayer key={`${slot}${i}`} {...{ pid, roster }} />)
       }
     }
 
@@ -88,13 +63,8 @@ export default class ScoreboardTeam extends React.Component {
       const slot = constants.slots.QBRBWRTE
       const players = roster.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.sqbrbwrte; i++) {
-        const { player } = players[i] || {}
-        rows.push(
-          <ScoreboardPlayer
-            key={`${slot}${i}`}
-            {...{ playerId: player, roster }}
-          />
-        )
+        const { pid } = players[i] || {}
+        rows.push(<ScoreboardPlayer key={`${slot}${i}`} {...{ pid, roster }} />)
       }
     }
 
@@ -102,13 +72,8 @@ export default class ScoreboardTeam extends React.Component {
       const slot = constants.slots.WRTE
       const players = roster.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.swrte; i++) {
-        const { player } = players[i] || {}
-        rows.push(
-          <ScoreboardPlayer
-            key={`${slot}${i}`}
-            {...{ playerId: player, roster }}
-          />
-        )
+        const { pid } = players[i] || {}
+        rows.push(<ScoreboardPlayer key={`${slot}${i}`} {...{ pid, roster }} />)
       }
     }
 
@@ -116,13 +81,8 @@ export default class ScoreboardTeam extends React.Component {
       const slot = constants.slots.TE
       const players = roster.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.ste; i++) {
-        const { player } = players[i] || {}
-        rows.push(
-          <ScoreboardPlayer
-            key={`${slot}${i}`}
-            {...{ playerId: player, roster }}
-          />
-        )
+        const { pid } = players[i] || {}
+        rows.push(<ScoreboardPlayer key={`${slot}${i}`} {...{ pid, roster }} />)
       }
     }
 
@@ -130,13 +90,8 @@ export default class ScoreboardTeam extends React.Component {
       const slot = constants.slots.K
       const players = roster.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.sk; i++) {
-        const { player } = players[i] || {}
-        rows.push(
-          <ScoreboardPlayer
-            key={`${slot}${i}`}
-            {...{ playerId: player, roster }}
-          />
-        )
+        const { pid } = players[i] || {}
+        rows.push(<ScoreboardPlayer key={`${slot}${i}`} {...{ pid, roster }} />)
       }
     }
 
@@ -144,23 +99,16 @@ export default class ScoreboardTeam extends React.Component {
       const slot = constants.slots.DST
       const players = roster.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.sdst; i++) {
-        const { player } = players[i] || {}
-        rows.push(
-          <ScoreboardPlayer
-            key={`${slot}${i}`}
-            {...{ playerId: player, roster }}
-          />
-        )
+        const { pid } = players[i] || {}
+        rows.push(<ScoreboardPlayer key={`${slot}${i}`} {...{ pid, roster }} />)
       }
     }
 
     const bench = []
     if (showBench) {
       for (const [index, rosterSlot] of roster.bench.entries()) {
-        const { player } = rosterSlot
-        bench.push(
-          <ScoreboardPlayer key={index} {...{ playerId: player, roster }} />
-        )
+        const { pid } = rosterSlot
+        bench.push(<ScoreboardPlayer key={index} {...{ pid, roster }} />)
       }
     }
 

@@ -42,7 +42,7 @@ const mapStateToProps = createSelector(
     return {
       players: sorted,
       searchValue: auction.search,
-      playerId: auction.player,
+      nominated_pid: auction.nominated_pid,
       transactions: auction.transactions,
       hideRostered: auction.hideRostered,
       tids: auction.tids,

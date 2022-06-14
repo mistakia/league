@@ -13,10 +13,10 @@ const mapStateToProps = createSelector(
   getContextMenuPlayer,
   getPlayerStatus,
   getPlayers,
-  (player, status, players) => ({
-    player,
+  (playerMap, status, players) => ({
+    playerMap,
     status,
-    isOnCutlist: players.get('cutlist').includes(player.player)
+    isOnCutlist: players.get('cutlist').includes(playerMap.get('pid'))
   })
 )
 

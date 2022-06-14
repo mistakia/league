@@ -18,51 +18,51 @@ export function getPoachById(state, { poachId }) {
 
 export function getPoachReleasePlayers(state, { poachId }) {
   const poach = getPoachById(state, { poachId })
-  return poach.release.map((playerId) => getPlayerById(state, { playerId }))
+  return poach.release.map((pid) => getPlayerById(state, { pid }))
 }
 
 export function getActivePoachesAgainstMyPlayers(state) {
   const poaches = getPoachesForCurrentLeague(state)
   const players = getCurrentPlayers(state)
-  const playerIds = players.practice.map((p) => p.player)
-  return poaches.filter((p) => playerIds.includes(p.player))
+  const pids = players.practice.map((pMap) => pMap.get('pid'))
+  return poaches.filter((p) => pids.includes(p.pid))
 }
 
 export function getPoachPlayersForCurrentTeam(state) {
   const poaches = getPoachesForCurrentLeague(state)
   const { teamId } = getApp(state)
 
-  let poachPlayers = new List()
+  const poachPlayers = []
   for (const poach of poaches.valueSeq()) {
     if (poach.tid !== teamId) continue
-    const playerId = poach.player
-    const player = getPlayerById(state, { playerId })
-    poachPlayers = poachPlayers.push(poach.set('player', player))
+    const pid = poach.pid
+    const playerMap = getPlayerById(state, { pid })
+    poachPlayers.push(poach.set('playerMap', playerMap))
   }
 
-  return poachPlayers
+  return new List(poachPlayers)
 }
 
 export function getPoachPlayersForCurrentLeague(state) {
   let poaches = getPoachesForCurrentLeague(state)
 
   for (const poach of poaches.values()) {
-    const playerId = poach.player
-    const player = getPlayerById(state, { playerId })
+    const pid = poach.pid
+    const playerMap = getPlayerById(state, { pid })
 
-    if (player.slot !== constants.slots.PS) {
-      poaches = poaches.delete(playerId)
+    if (playerMap.get('slot') !== constants.slots.PS) {
+      poaches = poaches.delete(pid)
       continue
     }
 
-    poaches = poaches.setIn([playerId, 'player'], player)
+    poaches = poaches.setIn([pid, 'playerMap'], playerMap)
     if (poach.release.size) {
       const releases = []
-      for (const playerId of poach.release) {
-        const player = getPlayerById(state, { playerId })
-        releases.push(player)
+      for (const pid of poach.release) {
+        const playerMap = getPlayerById(state, { pid })
+        releases.push(playerMap)
       }
-      poaches = poaches.setIn([playerId, 'release'], new List(releases))
+      poaches = poaches.setIn([pid, 'release'], new List(releases))
     }
   }
 

@@ -36,15 +36,15 @@ describe('API /waivers - update', function () {
   describe('put', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.subtract('1', 'month').toDate())
+      MockDate.set(start.subtract('1', 'month').toISOString())
       await league(knex)
     })
 
     it('change order for single waiver', async () => {
-      MockDate.set(start.add('1', 'week').toDate())
+      MockDate.set(start.add('1', 'week').toISOString())
 
       const players = await knex('player').whereNot('cteam', 'INA').limit(1)
-      const playerId = players[0].player
+      const pid = players[0].pid
 
       // submit waiver claim
       const teamId = 1
@@ -55,7 +55,7 @@ describe('API /waivers - update', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: playerId,
+          pid,
           type: constants.waivers.FREE_AGENCY,
           leagueId
         })
@@ -82,11 +82,11 @@ describe('API /waivers - update', function () {
     })
 
     it('change order for two waivers', async () => {
-      MockDate.set(start.add('1', 'week').toDate())
+      MockDate.set(start.add('1', 'week').toISOString())
 
       const players = await knex('player').whereNot('cteam', 'INA').limit(2)
-      const playerId1 = players[0].player
-      const playerId2 = players[1].player
+      const pid1 = players[0].pid
+      const pid2 = players[1].pid
 
       // submit waiver claim #1
       const teamId = 1
@@ -97,7 +97,7 @@ describe('API /waivers - update', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: playerId1,
+          pid: pid1,
           type: constants.waivers.FREE_AGENCY,
           leagueId
         })
@@ -111,7 +111,7 @@ describe('API /waivers - update', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: playerId2,
+          pid: pid2,
           type: constants.waivers.FREE_AGENCY,
           leagueId
         })
@@ -139,12 +139,12 @@ describe('API /waivers - update', function () {
     })
 
     it('change order for three waivers', async () => {
-      MockDate.set(start.add('1', 'week').toDate())
+      MockDate.set(start.add('1', 'week').toISOString())
 
       const players = await knex('player').whereNot('cteam', 'INA').limit(3)
-      const playerId1 = players[0].player
-      const playerId2 = players[1].player
-      const playerId3 = players[2].player
+      const pid1 = players[0].pid
+      const pid2 = players[1].pid
+      const pid3 = players[2].pid
 
       // submit waiver claim #1
       const teamId = 1
@@ -155,7 +155,7 @@ describe('API /waivers - update', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: playerId1,
+          pid: pid1,
           type: constants.waivers.FREE_AGENCY,
           leagueId
         })
@@ -169,7 +169,7 @@ describe('API /waivers - update', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: playerId2,
+          pid: pid2,
           type: constants.waivers.FREE_AGENCY,
           leagueId
         })
@@ -183,7 +183,7 @@ describe('API /waivers - update', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: playerId3,
+          pid: pid3,
           type: constants.waivers.FREE_AGENCY,
           leagueId
         })
@@ -212,10 +212,10 @@ describe('API /waivers - update', function () {
     })
 
     it('update bid', async () => {
-      MockDate.set(start.add('1', 'week').toDate())
+      MockDate.set(start.add('1', 'week').toISOString())
 
       const players = await knex('player').whereNot('cteam', 'INA').limit(1)
-      const playerId = players[0].player
+      const pid = players[0].pid
 
       // submit waiver claim
       const teamId = 1
@@ -226,7 +226,7 @@ describe('API /waivers - update', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: playerId,
+          pid,
           type: constants.waivers.FREE_AGENCY,
           leagueId
         })
@@ -258,13 +258,13 @@ describe('API /waivers - update', function () {
     })
 
     it('update release', async () => {
-      MockDate.set(start.add('1', 'week').toDate())
+      MockDate.set(start.add('1', 'week').toISOString())
 
       const players = await knex('player')
         .whereNot('cteam', 'INA')
         .where('pos1', 'WR')
         .limit(2)
-      const playerId = players[0].player
+      const pid = players[0].pid
       const releasePlayer = players[1]
 
       // submit waiver claim
@@ -276,7 +276,7 @@ describe('API /waivers - update', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: playerId,
+          pid,
           type: constants.waivers.FREE_AGENCY,
           leagueId
         })
@@ -294,19 +294,19 @@ describe('API /waivers - update', function () {
         .send({
           teamId,
           leagueId,
-          release: releasePlayer.player
+          release: releasePlayer.pid
         })
 
       res.should.have.status(200)
       // eslint-disable-next-line
       res.should.be.json
-      res.body.release.should.deep.equal([releasePlayer.player])
+      res.body.release.should.deep.equal([releasePlayer.pid])
 
       const waivers = await knex('waiver_releases')
         .where({ waiverid: res.body.uid })
         .limit(1)
       expect(waivers.length).to.equal(1)
-      expect(waivers[0].player).to.equal(releasePlayer.player)
+      expect(waivers[0].pid).to.equal(releasePlayer.pid)
     })
   })
 
@@ -314,13 +314,13 @@ describe('API /waivers - update', function () {
     let waiverId
     before(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.subtract('1', 'month').toDate())
+      MockDate.set(start.subtract('1', 'month').toISOString())
       await league(knex)
 
-      MockDate.set(start.add('1', 'week').toDate())
+      MockDate.set(start.add('1', 'week').toISOString())
 
       const players = await knex('player').whereNot('cteam', 'INA').limit(1)
-      const playerId = players[0].player
+      const pid = players[0].pid
 
       // submit waiver claim
       const teamId = 1
@@ -331,7 +331,7 @@ describe('API /waivers - update', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: playerId,
+          pid,
           type: constants.waivers.FREE_AGENCY,
           leagueId
         })
@@ -511,14 +511,14 @@ describe('API /waivers - update', function () {
     })
 
     it('release player not on team', async () => {
-      MockDate.set(start.add('1', 'week').toDate())
+      MockDate.set(start.add('1', 'week').toISOString())
 
       const players = await knex('player')
         .whereNot('cteam', 'INA')
         .where('pos1', 'WR')
         .limit(2)
-      const playerId = players[0].player
-      const releasePlayerId = players[1].player
+      const pid = players[0].pid
+      const releasePlayerId = players[1].pid
 
       // submit waiver claim
       const teamId = 1
@@ -529,7 +529,7 @@ describe('API /waivers - update', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: playerId,
+          pid,
           type: constants.waivers.FREE_AGENCY,
           leagueId
         })

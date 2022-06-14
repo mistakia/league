@@ -12,21 +12,26 @@ export default async function ({ teamId, leagueId }) {
   const league = leagues[0]
   const rosterRow = await getRoster({ tid: teamId })
   const roster = new Roster({ roster: rosterRow, league })
-  const reservePlayerIds = roster.reserve.map((p) => p.player)
+  const reserve_pids = roster.reserve.map((p) => p.pid)
 
-  const players = await db('player').whereIn('player', reservePlayerIds)
+  const player_rows = await db('player').whereIn('pid', reserve_pids)
 
-  for (const player of roster.reserve) {
-    const playerItem = players.find((p) => p.player === player.player)
-    if (!playerItem) {
+  for (const roster_player of roster.reserve) {
+    const player_row = player_rows.find((p) => p.pid === roster_player.pid)
+    if (!player_row) {
       throw new Error('Reserve player violation')
     }
 
-    if (player.slot === constants.slots.IR && !isReserveEligible(playerItem)) {
+    const { status, injury_status } = player_row
+
+    if (
+      roster_player.slot === constants.slots.IR &&
+      !isReserveEligible({ status, injury_status })
+    ) {
       throw new Error('Reserve player violation')
     } else if (
-      player.slot === constants.slots.COV &&
-      !isReserveCovEligible(playerItem)
+      roster_player.slot === constants.slots.COV &&
+      !isReserveCovEligible({ status, injury_status })
     ) {
       throw new Error('Reserve player violation')
     }

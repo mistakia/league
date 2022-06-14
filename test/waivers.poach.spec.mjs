@@ -20,7 +20,7 @@ chai.use(chaiHTTP)
 const { start } = constants.season
 
 describe('API /waivers - poach', function () {
-  let playerId
+  let pid
 
   before(async function () {
     this.timeout(60 * 1000)
@@ -28,7 +28,7 @@ describe('API /waivers - poach', function () {
     await knex.migrate.rollback()
     await knex.migrate.latest()
 
-    MockDate.set(start.subtract('1', 'month').toDate())
+    MockDate.set(start.subtract('1', 'month').toISOString())
 
     await knex.seed.run()
     await league(knex)
@@ -42,7 +42,7 @@ describe('API /waivers - poach', function () {
   })
 
   it('submit poaching waiver for drafted player', async () => {
-    MockDate.set(start.subtract('1', 'month').add('10', 'minute').toDate())
+    MockDate.set(start.subtract('1', 'month').add('10', 'minute').toISOString())
 
     // make draft selection
     const leagueId = 1
@@ -51,14 +51,14 @@ describe('API /waivers - poach', function () {
       .limit(1)
 
     const player = players[0]
-    playerId = player.player
+    pid = player.pid
     await chai
       .request(server)
       .post('/api/leagues/1/draft')
       .set('Authorization', `Bearer ${user1}`)
       .send({
         teamId: 1,
-        playerId,
+        pid,
         pickId: 1
       })
 
@@ -67,7 +67,7 @@ describe('API /waivers - poach', function () {
         .subtract('1', 'month')
         .add('10', 'minute')
         .add('25', 'hours')
-        .toDate()
+        .toISOString()
     )
 
     // submit poaching waiver
@@ -78,7 +78,7 @@ describe('API /waivers - poach', function () {
       .set('Authorization', `Bearer ${user2}`)
       .send({
         teamId,
-        player: playerId,
+        pid,
         type: constants.waivers.POACH,
         leagueId
       })
@@ -90,7 +90,7 @@ describe('API /waivers - poach', function () {
     res.body.tid.should.equal(teamId)
     res.body.userid.should.equal(2)
     res.body.lid.should.equal(leagueId)
-    res.body.player.should.equal(playerId)
+    res.body.pid.should.equal(pid)
     res.body.po.should.equal(9999)
     const submitted = Math.round(Date.now() / 1000)
     res.body.submitted.should.equal(submitted)
@@ -104,7 +104,7 @@ describe('API /waivers - poach', function () {
     const waiver = waivers[0]
     expect(waiver.uid).to.equal(1)
     expect(waiver.userid).to.equal(2)
-    expect(waiver.player).to.equal(playerId)
+    expect(waiver.pid).to.equal(pid)
     expect(waiver.tid).to.equal(teamId)
     expect(waiver.lid).to.equal(leagueId)
     expect(waiver.submitted).to.equal(submitted)
@@ -128,7 +128,7 @@ describe('API /waivers - poach', function () {
       await notLoggedIn(request)
     })
 
-    it('missing player', async () => {
+    it('missing pid', async () => {
       const request = chai
         .request(server)
         .post('/api/leagues/1/waivers')
@@ -139,7 +139,7 @@ describe('API /waivers - poach', function () {
           leagueId: 1
         })
 
-      await missing(request, 'player')
+      await missing(request, 'pid')
     })
 
     it('missing teamId', async () => {
@@ -148,7 +148,7 @@ describe('API /waivers - poach', function () {
         .post('/api/leagues/1/waivers')
         .set('Authorization', `Bearer ${user2}`)
         .send({
-          player: playerId,
+          pid,
           type: constants.waivers.POACH,
           leagueId: 1
         })
@@ -163,7 +163,7 @@ describe('API /waivers - poach', function () {
         .set('Authorization', `Bearer ${user2}`)
         .send({
           teamId: 2,
-          player: playerId,
+          pid,
           type: constants.waivers.POACH
         })
 
@@ -177,7 +177,7 @@ describe('API /waivers - poach', function () {
         .set('Authorization', `Bearer ${user2}`)
         .send({
           teamId: 2,
-          player: playerId,
+          pid,
           leagueId: 1
         })
 
@@ -192,7 +192,7 @@ describe('API /waivers - poach', function () {
         .send({
           teamId: 2,
           type: constants.waivers.POACH,
-          player: 'x',
+          pid: 'x',
           leagueId: 1
         })
 
@@ -207,7 +207,7 @@ describe('API /waivers - poach', function () {
         .send({
           teamId: 2,
           type: constants.waivers.POACH,
-          player: playerId,
+          pid,
           release: 'x',
           leagueId: 1
         })
@@ -223,7 +223,7 @@ describe('API /waivers - poach', function () {
         .send({
           teamId: 2,
           type: constants.waivers.POACH,
-          player: playerId,
+          pid,
           leagueId: 2
         })
 
@@ -239,7 +239,7 @@ describe('API /waivers - poach', function () {
           teamId: 2,
           type: constants.waivers.POACH,
           bid: 'x',
-          player: playerId,
+          pid,
           leagueId: 1
         })
 
@@ -254,7 +254,7 @@ describe('API /waivers - poach', function () {
         .send({
           teamId: 2,
           type: 4,
-          player: playerId,
+          pid,
           leagueId: 1
         })
 
@@ -269,7 +269,7 @@ describe('API /waivers - poach', function () {
         .send({
           teamId: 'x',
           type: constants.waivers.POACH,
-          player: playerId,
+          pid,
           leagueId: 1
         })
 
@@ -284,7 +284,7 @@ describe('API /waivers - poach', function () {
         .send({
           teamId: 1,
           type: constants.waivers.POACH,
-          player: playerId,
+          pid,
           leagueId: 1
         })
 
@@ -293,7 +293,7 @@ describe('API /waivers - poach', function () {
 
     it('release player not on team', async () => {
       const players = await knex('player').whereNot('cteam', 'INA').limit(1)
-      const releasePlayerId = players[0].player
+      const releasePlayerId = players[0].pid
 
       const request = chai
         .request(server)
@@ -303,7 +303,7 @@ describe('API /waivers - poach', function () {
           teamId: 3,
           release: releasePlayerId,
           type: constants.waivers.POACH,
-          player: playerId,
+          pid,
           leagueId: 1
         })
 
@@ -318,7 +318,7 @@ describe('API /waivers - poach', function () {
         .send({
           teamId: 2,
           type: constants.waivers.POACH,
-          player: playerId,
+          pid,
           leagueId: 1
         })
 
@@ -327,7 +327,7 @@ describe('API /waivers - poach', function () {
 
     it('player not on a practice squad', async () => {
       const players = await knex('player').whereNot('cteam', 'INA').limit(1)
-      const randomPlayerId = players[0].player
+      const randomPlayerId = players[0].pid
 
       const request = chai
         .request(server)
@@ -336,7 +336,7 @@ describe('API /waivers - poach', function () {
         .send({
           teamId: 2,
           type: constants.waivers.POACH,
-          player: randomPlayerId,
+          pid: randomPlayerId,
           leagueId: 1
         })
 
@@ -348,7 +348,7 @@ describe('API /waivers - poach', function () {
         .subtract('1', 'month')
         .add('2', 'day')
         .add('11', 'minute')
-        .toDate()
+        .toISOString()
       MockDate.set(time)
       const request = chai
         .request(server)
@@ -357,7 +357,7 @@ describe('API /waivers - poach', function () {
         .send({
           teamId: 3,
           type: constants.waivers.POACH,
-          player: playerId,
+          pid,
           leagueId: 1
         })
 

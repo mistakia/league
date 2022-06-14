@@ -19,7 +19,7 @@ export {
   isPlayerPracticeSquadEligible,
   isPlayerLocked
 } from './selectors'
-export { Player, createPlayer } from './player'
+export { createPlayer } from './player'
 export {
   playerActions,
   playersRequestActions,

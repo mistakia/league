@@ -28,7 +28,7 @@ describe('API /leagues/teams - add', function () {
 
   describe('post', function () {
     beforeEach(async function () {
-      MockDate.set(start.subtract('2', 'month').toDate())
+      MockDate.set(start.subtract('2', 'month').toISOString())
       await user(knex)
     })
 
@@ -67,7 +67,7 @@ describe('API /leagues/teams - add', function () {
 
   describe('errors', function () {
     beforeEach(async function () {
-      MockDate.set(start.subtract('2', 'month').toDate())
+      MockDate.set(start.subtract('2', 'month').toISOString())
       await user(knex)
     })
 

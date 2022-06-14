@@ -2,12 +2,12 @@ import fetch from 'node-fetch'
 import debug from 'debug'
 
 import db from '#db'
-import { isMain, getToken, getPlayer, wait } from '#utils'
+import { isMain, getToken, getPlayer, wait, updatePlayer } from '#utils'
 import { constants, fixTeam } from '#common'
 import config from '#config'
 
 const log = debug('import:nfl:players')
-debug.enable('import:nfl:players,get-player')
+debug.enable('import:nfl:players,get-player,update-player')
 
 const run = async () => {
   const missing = []
@@ -44,54 +44,29 @@ const run = async () => {
     }).then((res) => res.json())
 
     // iterate through players and make updates
-    const timestamp = Math.round(Date.now() / 1000)
     for (const item of rosterData.roster.data) {
       const teamAbbr = fixTeam(rosterData.abbr)
 
       const name = `${item.firstName} ${item.lastName}`
-      const player = await getPlayer({ name, team: teamAbbr })
+      const player_row = await getPlayer({ name, team: teamAbbr })
 
-      if (!player) {
-        missing.push(player)
+      if (!player_row) {
+        missing.push(item)
         continue
       }
-      const players = await db('player')
-        .where({ player: player.player })
-        .limit(1)
-      const currentPlayer = players[0]
 
-      if (player.gsisId && player.gsisId !== currentPlayer.gsisid) {
-        await db('player_changelog').insert({
-          type: constants.changes.PLAYER_EDIT,
-          id: player.player,
-          prop: 'gsisid',
-          prev: currentPlayer.gsisid,
-          new: player.gsisId,
-          timestamp
-        })
+      if (item.gsisId || item.esbId) {
+        const update = {}
 
-        await db('player')
-          .update({
-            gsisid: player.gsisId
-          })
-          .where({ player: player.player })
-      }
+        if (item.gsisId) {
+          update.gsisid = item.gsisId
+        }
 
-      if (player.esbId && player.esbId !== currentPlayer.esbid) {
-        await db('player_changelog').insert({
-          type: constants.changes.PLAYER_EDIT,
-          id: player.player,
-          prop: 'esbid',
-          prev: currentPlayer.esbid,
-          new: player.esbId,
-          timestamp
-        })
+        if (item.esbId) {
+          update.esbid = item.esbId
+        }
 
-        await db('player')
-          .update({
-            esbid: player.esbId
-          })
-          .where({ player: player.player })
+        await updatePlayer({ player_row, update })
       }
     }
 

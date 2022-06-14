@@ -1,9 +1,9 @@
 import db from '#db'
 
-export default async function ({ lid, playerIds }) {
+export default async function ({ lid, pids }) {
   const sub = db('transactions')
-    .select(db.raw('max(timestamp) AS maxtime, player AS playerid'))
-    .groupBy('player')
+    .select(db.raw('max(timestamp) AS maxtime, pid AS playerid'))
+    .groupBy('pid')
     .where('lid', lid)
 
   const transactions = await db
@@ -11,12 +11,12 @@ export default async function ({ lid, playerIds }) {
     .from(db.raw('(' + sub.toString() + ') AS X'))
     .innerJoin('transactions', function () {
       this.on(function () {
-        this.on('playerid', '=', 'player')
+        this.on('playerid', '=', 'pid')
         this.andOn('maxtime', '=', 'timestamp')
       })
     })
     .where('lid', lid)
-    .whereIn('player', playerIds)
+    .whereIn('pid', pids)
 
   return transactions
 }

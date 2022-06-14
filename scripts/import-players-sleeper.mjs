@@ -32,11 +32,11 @@ const run = async () => {
       fields[field] = true
     }
 
-    let player
+    let player_row
     try {
-      player = await getPlayer({ sleeper_id })
-      if (!player) {
-        player = await getPlayer({ name, pos, team })
+      player_row = await getPlayer({ sleeper_id })
+      if (!player_row) {
+        player_row = await getPlayer({ name, pos, team })
       }
     } catch (err) {
       log(err)
@@ -85,12 +85,12 @@ const run = async () => {
       cteam: team
     }
 
-    if (!player) {
+    if (!player_row) {
       if (!constants.positions.includes(item.position)) continue
       if (item.first_name === 'Duplicate') continue
 
       try {
-        player = await createPlayer({
+        player_row = await createPlayer({
           fname: item.first_name,
           lname: item.last_name,
           pos: item.position,
@@ -111,16 +111,16 @@ const run = async () => {
       }
     } else {
       const changes = await updatePlayer({
-        player: player.player,
-        ...data
+        player_row,
+        update: data
       })
       changeCount += changes
     }
 
-    if (!player || !injury_status) continue
+    if (!player_row || !injury_status) continue
 
     statuses.push({
-      player: player.player,
+      pid: player_row.pid,
       sleeper_id,
 
       active,

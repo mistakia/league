@@ -9,7 +9,7 @@ import SelectedPlayerTeamStats from './selected-player-team-stats'
 const mapStateToProps = createSelector(
   getSelectedPlayer,
   getStats,
-  (player, stats) => ({ player, stats })
+  (playerMap, stats) => ({ team: playerMap.get('team'), stats })
 )
 
 export default connect(mapStateToProps)(SelectedPlayerTeamStats)

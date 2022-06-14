@@ -10,8 +10,8 @@ const mapStateToProps = createSelector(
   getPlayerById,
   getScoreboardGamelogByPlayerId,
   getScoreboard,
-  (player, gamelog, scoreboard) => ({
-    player,
+  (playerMap, gamelog, scoreboard) => ({
+    playerMap,
     gamelog,
     week: scoreboard.get('week')
   })

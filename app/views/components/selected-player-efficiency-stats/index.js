@@ -9,7 +9,7 @@ import SelectedPlayerEfficiencyStats from './selected-player-efficiency-stats'
 const mapStateToProps = createSelector(
   getSelectedPlayer,
   getStats,
-  (player, stats) => ({ player, percentiles: stats.playsPercentiles })
+  (playerMap, stats) => ({ playerMap, percentiles: stats.playsPercentiles })
 )
 
 export default connect(mapStateToProps)(SelectedPlayerEfficiencyStats)

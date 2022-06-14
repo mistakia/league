@@ -33,15 +33,15 @@ const run = async () => {
       fields[field] = true
     }
 
-    let playerId
+    let pid
     try {
-      const rows = await db('players').where('mfl_id', mfl_id)
-      if (!rows.length) {
+      const player_rows = await db('players').where('mfl_id', mfl_id)
+      if (!player_rows.length) {
         missing.push(mfl_id)
         continue
       }
-      const row = rows[0]
-      playerId = row.player
+      const player_row = player_rows[0]
+      pid = player_row.pid
     } catch (err) {
       console.log(err)
       missing.push(mfl_id)
@@ -53,7 +53,7 @@ const run = async () => {
       status,
       details,
       mfl_id,
-      player: playerId,
+      pid,
       timestamp
     })
   }

@@ -2,17 +2,17 @@ import db from '#db'
 import { constants } from '#common'
 
 export default async function (leagueId) {
-  const transitionBids = await db('transition_bids')
+  const transition_bid_rows = await db('transition_bids')
     .where('lid', leagueId)
     .where('year', constants.season.year)
     .whereNull('cancelled')
     .whereNull('processed')
 
-  if (!transitionBids.length) {
+  if (!transition_bid_rows.length) {
     return []
   }
 
-  transitionBids.forEach((t) => {
+  transition_bid_rows.forEach((t) => {
     if (t.player_tid !== t.tid) {
       t._bid = t.bid
       return
@@ -24,11 +24,14 @@ export default async function (leagueId) {
     t._bid = t.bid + boost
   })
 
-  const bidAmounts = transitionBids.map((t) => t._bid)
-  const topBid = Math.max(...bidAmounts)
-  const topBids = transitionBids.filter((t) => t._bid === topBid)
-  const players = topBids.map((p) => p.player)
-  const sortedPlayers = players.sort((a, b) => a - b)
-  const topPlayer = sortedPlayers[0]
-  return topBids.filter((b) => b.player === topPlayer)
+  // find highest transition bids
+  const bid_amounts = transition_bid_rows.map((t) => t._bid)
+  const max_bid = Math.max(...bid_amounts)
+  const max_bids = transition_bid_rows.filter((t) => t._bid === max_bid)
+
+  // if more than one, process player based on alphabetical order
+  const max_pids = max_bids.map((p) => p.pid)
+  const sorted_pids = max_pids.sort((a, b) => a - b)
+  const top_pid = sorted_pids[0]
+  return max_bids.filter((b) => b.pid === top_pid)
 }

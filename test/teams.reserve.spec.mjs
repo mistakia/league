@@ -42,7 +42,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('move player to reserve - ir', async () => {
-      MockDate.set(start.subtract('1', 'week').toDate())
+      MockDate.set(start.subtract('1', 'week').toISOString())
       const player = await selectPlayer()
       const teamId = 1
       const leagueId = 1
@@ -63,7 +63,7 @@ describe('API /teams - reserve', function () {
           status: 'Injured Reserve'
         })
         .where({
-          player: player.player
+          pid: player.pid
         })
 
       const res = await chai
@@ -71,7 +71,7 @@ describe('API /teams - reserve', function () {
         .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player.player,
+          reserve_pid: player.pid,
           leagueId,
           slot: constants.slots.IR
         })
@@ -81,12 +81,12 @@ describe('API /teams - reserve', function () {
       res.should.be.json
 
       res.body.tid.should.equal(teamId)
-      res.body.player.should.equal(player.player)
+      res.body.pid.should.equal(player.pid)
       res.body.slot.should.equal(constants.slots.IR)
       res.body.transaction.userid.should.equal(userId)
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
-      res.body.transaction.player.should.equal(player.player)
+      res.body.transaction.pid.should.equal(player.pid)
       res.body.transaction.type.should.equal(constants.transactions.RESERVE_IR)
       res.body.transaction.value.should.equal(value)
       res.body.transaction.year.should.equal(constants.season.year)
@@ -97,7 +97,7 @@ describe('API /teams - reserve', function () {
         .where({
           year: constants.season.year,
           week: constants.season.week,
-          player: player.player
+          pid: player.pid
         })
         .limit(1)
 
@@ -109,7 +109,7 @@ describe('API /teams - reserve', function () {
         type: constants.transactions.RESERVE_IR,
         value,
         year: constants.season.year,
-        player: player.player,
+        pid: player.pid,
         teamId,
         userId
       })
@@ -134,7 +134,7 @@ describe('API /teams - reserve', function () {
       await notLoggedIn(request)
     })
 
-    it('missing player', async () => {
+    it('missing reserve_pid', async () => {
       const request = chai
         .request(server)
         .post('/api/teams/1/reserve')
@@ -144,7 +144,7 @@ describe('API /teams - reserve', function () {
           slot: constants.slots.IR
         })
 
-      await missing(request, 'player')
+      await missing(request, 'reserve_pid')
     })
 
     it('missing leagueId', async () => {
@@ -153,7 +153,7 @@ describe('API /teams - reserve', function () {
         .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: 'x',
+          reserve_pid: 'x',
           slot: constants.slots.IR
         })
 
@@ -167,7 +167,7 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          player: 'x'
+          reserve_pid: 'x'
         })
 
       await missing(request, 'slot')
@@ -180,7 +180,7 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          player: 'x',
+          reserve_pid: 'x',
           slot: 'x'
         })
 
@@ -194,7 +194,7 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          player: 'x',
+          reserve_pid: 'x',
           slot: constants.slots.IR
         })
 
@@ -209,7 +209,7 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          player: player.player,
+          reserve_pid: player.pid,
           slot: constants.slots.IR
         })
 
@@ -224,7 +224,7 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user2}`)
         .send({
           leagueId: 1,
-          player: player.player,
+          reserve_pid: player.pid,
           slot: constants.slots.IR
         })
 
@@ -252,7 +252,7 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          player: player.player,
+          reserve_pid: player.pid,
           slot: constants.slots.IR
         })
 
@@ -280,7 +280,7 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          player: player.player,
+          reserve_pid: player.pid,
           slot: constants.slots.COV
         })
 
@@ -288,7 +288,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('player not on reserve/ir', async () => {
-      MockDate.set(start.add('1', 'week').toDate())
+      MockDate.set(start.add('1', 'week').toISOString())
       const player = await selectPlayer()
       const teamId = 1
       const leagueId = 1
@@ -309,7 +309,7 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          player: player.player,
+          reserve_pid: player.pid,
           slot: constants.slots.IR
         })
 
@@ -337,7 +337,7 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          player: player.player,
+          reserve_pid: player.pid,
           slot: constants.slots.COV
         })
 
@@ -345,7 +345,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('player not on reserve/cov - ir', async () => {
-      MockDate.set(start.add('1', 'week').toDate())
+      MockDate.set(start.add('1', 'week').toISOString())
       const player = await selectPlayer()
       const teamId = 1
       const leagueId = 1
@@ -365,7 +365,7 @@ describe('API /teams - reserve', function () {
           status: 'Injured Reserve'
         })
         .where({
-          player: player.player
+          pid: player.pid
         })
       const request = chai
         .request(server)
@@ -373,7 +373,7 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          player: player.player,
+          reserve_pid: player.pid,
           slot: constants.slots.COV
         })
 
@@ -381,7 +381,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('exceeds ir roster limits', async () => {
-      MockDate.set(start.subtract('1', 'week').toDate())
+      MockDate.set(start.subtract('1', 'week').toISOString())
       const teamId = 1
       const leagueId = 1
       await fillRoster({ leagueId, teamId })
@@ -397,13 +397,13 @@ describe('API /teams - reserve', function () {
         .whereNot('slot', constants.slots.IR)
         .limit(1)
 
-      const player = players[0].player
+      const pid = players[0].pid
       await knex('player')
         .update({
           status: 'Injured Reserve'
         })
         .where({
-          player
+          pid
         })
       const request = chai
         .request(server)
@@ -411,7 +411,7 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          player,
+          reserve_pid: pid,
           slot: constants.slots.IR
         })
 
@@ -436,14 +436,14 @@ describe('API /teams - reserve', function () {
           status: 'Injured Reserve'
         })
         .where({
-          player: player.player
+          pid: player.pid
         })
       const request = chai
         .request(server)
         .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player.player,
+          reserve_pid: player.pid,
           slot: constants.slots.IR,
           leagueId: 1
         })
@@ -452,7 +452,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('player not rostered on previous week roster', async () => {
-      MockDate.set(start.add('2', 'week').toDate())
+      MockDate.set(start.add('2', 'week').toISOString())
       const player = await selectPlayer()
       const teamId = 1
       const leagueId = 1
@@ -473,7 +473,7 @@ describe('API /teams - reserve', function () {
           status: 'Injured Reserve'
         })
         .where({
-          player: player.player
+          pid: player.pid
         })
 
       const request = chai
@@ -481,7 +481,7 @@ describe('API /teams - reserve', function () {
         .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player.player,
+          reserve_pid: player.pid,
           leagueId,
           slot: constants.slots.IR
         })

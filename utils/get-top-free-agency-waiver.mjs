@@ -10,25 +10,25 @@ export default async function (leagueId) {
   // get relevant transactions from last 24 hours
   const cutoff = dayjs().subtract('24', 'hours').unix()
 
-  const transactions = await db('transactions')
+  const recent_transaction_rows = await db('transactions')
     .where('type', constants.transactions.ROSTER_RELEASE)
     .where('timestamp', '>=', cutoff)
     .where('lid', leagueId)
 
-  const playerIds = transactions.map((t) => t.player)
+  const recent_transaction_pids = recent_transaction_rows.map((t) => t.pid)
   const query = db('waivers')
     .select(
       'teams.*',
       'waivers.uid as wid',
       'waivers.bid',
-      'waivers.player',
+      'waivers.pid',
       'waivers.tid',
       'waivers.userid',
       'nfl_games.date',
       'nfl_games.time_est'
     )
     .join('teams', 'waivers.tid', 'teams.uid')
-    .join('player', 'waivers.player', 'player.player')
+    .join('player', 'waivers.pid', 'player.pid')
     .joinRaw(
       `left join nfl_games on (player.cteam = nfl_games.v or player.cteam = nfl_games.h) and (nfl_games.wk = ${constants.season.week} or nfl_games.wk is null) and (nfl_games.seas = ${constants.season.year} or nfl_games.seas is null) and (nfl_games.type = 'REG' or nfl_games.type is null)`
     )
@@ -55,17 +55,17 @@ export default async function (leagueId) {
       }
     ])
 
-  if (playerIds.length) {
-    query.whereNotIn('waivers.player', playerIds)
+  if (recent_transaction_pids.length) {
+    query.whereNotIn('waivers.pid', recent_transaction_pids)
   }
 
-  const waivers = await query
+  const waiver_rows = await query
 
   const now = dayjs()
-  const filtered = waivers.filter((player) => {
-    if (!player.date) return true
+  const filtered = waiver_rows.filter((waiver_row_player) => {
+    if (!waiver_row_player.date) return true
     const gameStart = dayjs.tz(
-      `${player.date} ${player.time_est}`,
+      `${waiver_row_player.date} ${waiver_row_player.time_est}`,
       'YYYY/MM/DD HH:mm:SS',
       'America/New_York'
     )

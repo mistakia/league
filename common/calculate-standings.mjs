@@ -54,14 +54,12 @@ const calculateStandings = ({
   for (let week = 1; week <= finalWeek; week++) {
     for (const tid of tids) {
       const startingPlayers = starters[week][tid]
-      const starterIds = startingPlayers.map((p) => p.player)
+      const starter_pids = startingPlayers.map((p) => p.pid)
       let total = 0
       teamStats[tid].games[week] = {}
       const optimizePlayers = []
-      for (const { player, pos } of active[week][tid]) {
-        const gamelog = gamelogs.find(
-          (g) => g.week === week && g.player === player
-        )
+      for (const { pid, pos } of active[week][tid]) {
+        const gamelog = gamelogs.find((g) => g.week === week && g.pid === pid)
         if (!gamelog) {
           continue
         }
@@ -72,15 +70,15 @@ const calculateStandings = ({
           position: pos,
           league
         })
-        teamStats[tid].games[week][player] = points.total
-        if (starterIds.includes(player)) {
-          const starter = startingPlayers.find((p) => p.player === player)
+        teamStats[tid].games[week][pid] = points.total
+        if (starter_pids.includes(pid)) {
+          const starter = startingPlayers.find((p) => p.pid === pid)
           total = points.total + total
           teamStats[tid].stats[`pPos${pos}`] += points.total
           teamStats[tid].stats[`pSlot${starter.slot}`] += points.total
         }
         optimizePlayers.push({
-          player,
+          pid,
           pos,
           points: points.total
         })
