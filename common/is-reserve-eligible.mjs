@@ -1,8 +1,8 @@
-export default function isReserveEligible(player) {
+export default function isReserveEligible({ status, injury_status } = {}) {
   return (
-    (player.status && player.status !== 'Active') ||
-    player.injury_status === 'PUP' ||
-    player.injury_status === 'IR' ||
-    player.injury_status === 'Doubtful'
+    (status && status !== 'Active') ||
+    injury_status === 'PUP' ||
+    injury_status === 'IR' ||
+    injury_status === 'Doubtful'
   )
 }

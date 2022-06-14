@@ -22,14 +22,16 @@ export default async function ({ teamId, leagueId }) {
       throw new Error('Reserve player violation')
     }
 
+    const { status, injury_status } = player_row
+
     if (
       roster_player.slot === constants.slots.IR &&
-      !isReserveEligible(player_row)
+      !isReserveEligible({ status, injury_status })
     ) {
       throw new Error('Reserve player violation')
     } else if (
       roster_player.slot === constants.slots.COV &&
-      !isReserveCovEligible(player_row)
+      !isReserveCovEligible({ status, injury_status })
     ) {
       throw new Error('Reserve player violation')
     }

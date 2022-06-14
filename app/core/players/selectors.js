@@ -364,11 +364,16 @@ export function isPlayerReserveEligible(state, { playerMap }) {
     cov: false
   }
 
-  if (isReserveEligible(playerMap.toJS())) {
+  const params = {
+    status: playerMap.get('status'),
+    injury_status: playerMap.get('injury_status')
+  }
+
+  if (isReserveEligible(params)) {
     reserve.ir = true
   }
 
-  if (isReserveCovEligible(playerMap.toJS())) {
+  if (isReserveCovEligible(params)) {
     reserve.cov = true
   }
 

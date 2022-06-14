@@ -35,7 +35,12 @@ export default class ActivateConfirmation extends React.Component {
         (playerMap) => playerMap.get('pid') === pid
       )
       this._activePlayers.push(activePlayerMap)
-      if (isReserveEligible(activePlayerMap.toJS())) {
+      if (
+        isReserveEligible({
+          status: activePlayerMap.get('status'),
+          injury_status: activePlayerMap.get('injury_status')
+        })
+      ) {
         this._reserveEligible.push(activePlayerMap)
       }
     }

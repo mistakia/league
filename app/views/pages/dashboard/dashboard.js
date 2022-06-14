@@ -101,7 +101,12 @@ export default function DashboardPage() {
       <PlayerRoster key={playerMap.get('pid')} playerMap={playerMap} />
     )
 
-    if (!isReserveEligible(playerMap.toJS())) {
+    if (
+      !isReserveEligible({
+        status: playerMap.get('status'),
+        injury_status: playerMap.get('injury_status')
+      })
+    ) {
       notices.push(
         <Alert key={playerMap.get('pid')} severity='error'>
           <AlertTitle>
@@ -121,7 +126,12 @@ export default function DashboardPage() {
       <PlayerRoster key={playerMap.get('pid')} playerMap={playerMap} />
     )
 
-    if (!isReserveCovEligible(playerMap.toJS())) {
+    if (
+      !isReserveCovEligible({
+        status: playerMap.get('status'),
+        injury_status: playerMap.get('injury_status')
+      })
+    ) {
       notices.push(
         <Alert key={playerMap.get('pid')} severity='error'>
           <AlertTitle>
