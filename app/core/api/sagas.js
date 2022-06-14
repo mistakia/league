@@ -98,7 +98,7 @@ function* fetchAPI(apiFunction, actions, opts = {}) {
     yield put(actions.failed(opts, err.toString()))
   } finally {
     if (yield cancelled()) {
-      // TODO
+      // TODO re-enable request cancellation
       // console.log('request cancelled')
       // abort()
     }

@@ -50,7 +50,6 @@ export default class SelectedPlayerMatchupTable extends React.Component {
     }
 
     for (const [index, gamelog] of gamelogs.entrySeq()) {
-      // TODO pid
       const lead = (
         <div className='row__group'>
           <div className='row__group-body'>

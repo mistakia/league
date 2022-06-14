@@ -72,7 +72,6 @@ export default class AddPlayerDialog extends React.Component {
     const sorted = players.sortBy((playerMap) => playerMap.get('name', 0))
     const menuItems = [<option key='default' value='' />]
     for (const [index, playerMap] of sorted.entries()) {
-      // TODO pid
       menuItems.push(
         <option key={index} value={playerMap.get('pid')}>
           {playerMap.get('name')} ({playerMap.get('pos')})

@@ -92,7 +92,6 @@ export default class DashboardPlayersTable extends React.Component {
     const showReorder = Boolean(isWaiver || (cutlist && cutlist.size))
 
     const SortableItem = SortableElement(({ waiver }) => {
-      // TODO pid
       return (
         <PlayerRoster
           pid={waiver.pid}
@@ -115,7 +114,6 @@ export default class DashboardPlayersTable extends React.Component {
 
     if (isPoach) {
       poaches.forEach((poach, index) => {
-        // TODO pid
         items.push(
           <PlayerRoster
             key={index}

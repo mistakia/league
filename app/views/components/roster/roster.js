@@ -152,7 +152,6 @@ export default class Roster extends React.Component {
     }
 
     for (const { pid } of r.bench) {
-      // TODO pid
       rows.push(
         <PlayerRosterRow
           key={pid}

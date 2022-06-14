@@ -105,7 +105,7 @@ class PlayerRoster extends Player {
                 <PlayerHeadshotGroup players={claim.release} />
               ) : (
                 <PlayerName
-                  playerId={claim.release.get(0).pid}
+                  pid={claim.release.get(0).get('pid')}
                   hideActions={isClaim}
                   headshot
                 />

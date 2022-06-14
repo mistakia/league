@@ -146,7 +146,7 @@ export default class TransitionConfirmation extends React.Component {
 
     if (!error) {
       const data = {
-        player: pid, // TODO pid
+        pid,
         release: this.state.releaseIds,
         playerTid,
         teamId: tid,
