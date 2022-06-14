@@ -148,6 +148,7 @@ export function* calculatePlayerLineupContribution({ playerMap }) {
       ['lineups', week, 'starter_pids'],
       []
     )
+
     const isStarter = isActive
       ? starter_pids.includes(pid)
       : result[week].starter_pids.includes(pid)
@@ -595,7 +596,8 @@ export function* watchPlayersAndBaselinesFulfilled() {
   while (true) {
     yield all([
       take(playerActions.FETCH_PLAYERS_FULFILLED),
-      take(playerActions.GET_BASELINES_FULFILLED)
+      take(playerActions.GET_BASELINES_FULFILLED),
+      take(rosterActions.GET_ROSTERS_FULFILLED)
     ])
 
     yield call(projectContributions)
