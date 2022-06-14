@@ -37,7 +37,6 @@ export default class TradeSelectItems extends React.Component {
 
     const options = []
     players.forEach((playerMap) => {
-      // TODO pid
       options.push({
         id: playerMap.get('pid'),
         label: playerMap.get('name'),
@@ -54,7 +53,6 @@ export default class TradeSelectItems extends React.Component {
 
     const value = []
     selectedPlayers.forEach((playerMap) => {
-      // TODO pid
       value.push({
         id: playerMap.get('pid'),
         label: playerMap.get('name'),
@@ -73,8 +71,7 @@ export default class TradeSelectItems extends React.Component {
       if (option.type === 'pick') {
         return <TradeSelectPick pickId={option.id} />
       } else {
-        // TODO pid
-        return <TradeSelectPlayer playerId={option.id} />
+        return <TradeSelectPlayer pid={option.id} />
       }
     }
 
@@ -117,7 +114,7 @@ TradeSelectItems.propTypes = {
   teams: ImmutablePropTypes.map,
   onChange: PropTypes.func,
   disabled: PropTypes.bool,
-  selectedPlayers: PropTypes.array,
+  selectedPlayers: ImmutablePropTypes.list,
   selectedPicks: PropTypes.array,
   players: PropTypes.array,
   picks: ImmutablePropTypes.list,

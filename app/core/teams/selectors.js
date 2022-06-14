@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import { Map, List } from 'immutable'
+import { List } from 'immutable'
 
 import { getApp } from '@core/app'
 import { getNextPick } from '@core/draft'
@@ -26,7 +26,7 @@ export function getDraftPickById(state, { pickId }) {
     }
   }
 
-  return new Map()
+  return {}
 }
 
 export function getOverallStandings(state) {

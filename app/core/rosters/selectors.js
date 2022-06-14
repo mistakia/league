@@ -228,6 +228,7 @@ export function getCurrentTeamRosterPositionalValue(state) {
         Math.max(pMap.getIn(['vorp', seasonType], 0), 0)
       )
       const sum = vorps.reduce((s, i) => s + i, 0)
+      league.push(sum)
       values.rosters[roster.tid][position] = sum
       if (divTeamIds.includes(roster.tid)) div.push(sum)
       if (roster.tid === team.uid) values.team[position] = sum

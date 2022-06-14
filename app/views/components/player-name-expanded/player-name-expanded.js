@@ -96,7 +96,6 @@ class PlayerNameExpanded extends Player {
 
     const playerStatus = playerMap.get('status')
     const playerGamestatus = playerMap.get('gamestatus')
-    // TODO pid
     return (
       <div className={classNames.join(' ')}>
         {Boolean(isHosted && playerMap.get('pid') && !hideActions) && (

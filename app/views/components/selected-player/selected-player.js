@@ -88,6 +88,7 @@ export default class SelectedPlayer extends React.Component {
     const playerStatus = playerMap.get('status')
     const draftNum = playerMap.get('dpos')
     const draftYear = playerMap.get('start')
+    const playerValue = playerMap.get('value')
     const rosPoints = playerMap.getIn(['points', 'ros', 'total'], 0)
 
     return (
@@ -124,7 +125,7 @@ export default class SelectedPlayer extends React.Component {
             {isLoggedIn && (
               <div className='selected__player-header-item'>
                 <label>Salary</label>
-                {`$${playerMap.get('value', '-')}`}
+                {playerValue ? `$${playerValue}` : '-'}
               </div>
             )}
             <div className='selected__player-header-item'>

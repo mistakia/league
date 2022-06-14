@@ -29,7 +29,7 @@ export default class TradeSelectPick extends React.Component {
 
 TradeSelectPick.propTypes = {
   isSelected: PropTypes.bool,
-  pick: ImmutablePropTypes.map,
+  pick: PropTypes.object,
   teams: ImmutablePropTypes.map,
   league: PropTypes.object
 }

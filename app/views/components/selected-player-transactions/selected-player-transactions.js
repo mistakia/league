@@ -127,5 +127,5 @@ SelectedPlayerTransactions.propTypes = {
   teams: PropTypes.object,
   maxTransaction: PropTypes.object,
   load: PropTypes.func,
-  league: ImmutablePropTypes.record
+  league: PropTypes.object
 }

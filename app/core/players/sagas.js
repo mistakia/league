@@ -173,7 +173,7 @@ export function* updateCutlist() {
   const players = yield select(getPlayers)
   const cutlist = players.get('cutlist').toArray()
   const { teamId, leagueId } = yield select(getApp)
-  yield call(postCutlist, { players: cutlist, teamId, leagueId })
+  yield call(postCutlist, { pids: cutlist, teamId, leagueId })
 }
 
 export function* cutlistNotification() {

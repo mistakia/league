@@ -101,7 +101,7 @@ export default function TradePage() {
           <TradeSelectItems
             title='Select players to release'
             onChange={this.handleReleaseChange}
-            selectedPlayers={tradePlayers.proposingTeamReleasePlayers.toJS()}
+            selectedPlayers={tradePlayers.proposingTeamReleasePlayers}
             players={teamReleasePlayers}
           />
         )}
@@ -120,7 +120,7 @@ export default function TradePage() {
           <TradeSelectItems
             title='Select players to release'
             onChange={this.handleReleaseChange}
-            selectedPlayers={tradePlayers.acceptingTeamReleasePlayers.toJS()}
+            selectedPlayers={tradePlayers.acceptingTeamReleasePlayers}
             players={teamReleasePlayers}
           />
         ) : (
@@ -160,7 +160,7 @@ export default function TradePage() {
                 {!isProposed && (
                   <TradeSelectItems
                     onChange={this.handleProposeChange}
-                    selectedPlayers={tradePlayers.proposingTeamPlayers.toJS()}
+                    selectedPlayers={tradePlayers.proposingTeamPlayers}
                     selectedPicks={trade.proposingTeamPicks.toJS()}
                     picks={proposingTeam.picks}
                     players={proposingTeamPlayers}
@@ -180,7 +180,7 @@ export default function TradePage() {
                 {!isProposed && (
                   <TradeSelectItems
                     onChange={this.handleAcceptChange}
-                    selectedPlayers={tradePlayers.acceptingTeamPlayers.toJS()}
+                    selectedPlayers={tradePlayers.acceptingTeamPlayers}
                     selectedPicks={trade.acceptingTeamPicks.toJS()}
                     players={acceptingTeamPlayers}
                     picks={acceptingTeam.picks}

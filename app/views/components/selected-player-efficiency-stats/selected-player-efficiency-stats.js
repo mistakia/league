@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
+import { Map } from 'immutable'
 
 import { constants } from '@common'
 import PercentileChart from '@components/percentile-chart'
@@ -167,7 +168,9 @@ const defense = () => (
 export default class SelectedPlayerEfficiencyStats extends React.Component {
   render = () => {
     const { playerMap, percentiles } = this.props
-    const stats = playerMap.get('stats', constants.createFullStats()).toJS()
+    const stats = playerMap
+      .get('stats', new Map(constants.createFullStats()))
+      .toJS()
     const pos = playerMap.get('pos')
 
     return (

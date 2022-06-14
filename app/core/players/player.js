@@ -15,6 +15,8 @@ export function createPlayer({
   ...data
 }) {
   const params = {
+    fname,
+    lname,
     name: `${fname} ${lname}`,
     team: cteam,
     ...data
