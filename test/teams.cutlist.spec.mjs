@@ -30,7 +30,7 @@ describe('API /teams - cutlist', function () {
     await knex.migrate.rollback()
     await knex.migrate.latest()
 
-    MockDate.set(start.subtract('1', 'month').toDate())
+    MockDate.set(start.subtract('1', 'month').toISOString())
 
     await knex.seed.run()
   })

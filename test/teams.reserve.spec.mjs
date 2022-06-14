@@ -42,7 +42,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('move player to reserve - ir', async () => {
-      MockDate.set(start.subtract('1', 'week').toDate())
+      MockDate.set(start.subtract('1', 'week').toISOString())
       const player = await selectPlayer()
       const teamId = 1
       const leagueId = 1
@@ -288,7 +288,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('player not on reserve/ir', async () => {
-      MockDate.set(start.add('1', 'week').toDate())
+      MockDate.set(start.add('1', 'week').toISOString())
       const player = await selectPlayer()
       const teamId = 1
       const leagueId = 1
@@ -345,7 +345,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('player not on reserve/cov - ir', async () => {
-      MockDate.set(start.add('1', 'week').toDate())
+      MockDate.set(start.add('1', 'week').toISOString())
       const player = await selectPlayer()
       const teamId = 1
       const leagueId = 1
@@ -381,7 +381,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('exceeds ir roster limits', async () => {
-      MockDate.set(start.subtract('1', 'week').toDate())
+      MockDate.set(start.subtract('1', 'week').toISOString())
       const teamId = 1
       const leagueId = 1
       await fillRoster({ leagueId, teamId })
@@ -452,7 +452,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('player not rostered on previous week roster', async () => {
-      MockDate.set(start.add('2', 'week').toDate())
+      MockDate.set(start.add('2', 'week').toISOString())
       const player = await selectPlayer()
       const teamId = 1
       const leagueId = 1

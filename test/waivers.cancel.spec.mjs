@@ -29,7 +29,7 @@ describe('API /waivers - cancel', function () {
     await knex.migrate.latest()
     await knex.seed.run()
 
-    MockDate.set(start.subtract('1', 'month').toDate())
+    MockDate.set(start.subtract('1', 'month').toISOString())
 
     await league(knex)
     await draftPicks(knex)
@@ -42,7 +42,7 @@ describe('API /waivers - cancel', function () {
   })
 
   it('cancel poaching waiver', async () => {
-    MockDate.set(start.subtract('1', 'month').add('10', 'minute').toDate())
+    MockDate.set(start.subtract('1', 'month').add('10', 'minute').toISOString())
 
     // make draft selection
     const leagueId = 1
@@ -67,7 +67,7 @@ describe('API /waivers - cancel', function () {
         .subtract('1', 'month')
         .add('10', 'minute')
         .add('25', 'hours')
-        .toDate()
+        .toISOString()
     )
 
     // submit poaching waiver

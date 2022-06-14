@@ -30,12 +30,12 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
   describe('process', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.subtract('1', 'month').toDate())
+      MockDate.set(start.subtract('1', 'month').toISOString())
       await league(knex)
     })
 
     it('process single faab waiver', async () => {
-      MockDate.set(start.add('1', 'month').day(4).toDate())
+      MockDate.set(start.add('1', 'month').day(4).toISOString())
       const player = await selectPlayer()
       const teamId = 1
       const leagueId = 1
@@ -102,7 +102,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
     })
 
     it('process multiple faab waivers', async () => {
-      MockDate.set(start.add('1', 'month').day(4).toDate())
+      MockDate.set(start.add('1', 'month').day(4).toISOString())
       const leagueId = 1
       const player1 = await selectPlayer()
       const value1 = 180
@@ -294,7 +294,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
     })
 
     it('no waivers ready to process', async () => {
-      MockDate.set(start.add('1', 'month').day(4).toDate())
+      MockDate.set(start.add('1', 'month').day(4).toISOString())
       const player = await selectPlayer()
       const leagueId = 1
       await knex('transactions').insert({
@@ -343,7 +343,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
   describe('errors', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.subtract('1', 'month').toDate())
+      MockDate.set(start.subtract('1', 'month').toISOString())
       await league(knex)
     })
 
@@ -360,7 +360,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
     })
 
     it('no waivers to process', async () => {
-      MockDate.set(start.add('1', 'month').day(4).toDate())
+      MockDate.set(start.add('1', 'month').day(4).toISOString())
       let error
       try {
         await run()

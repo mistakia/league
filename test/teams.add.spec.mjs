@@ -36,12 +36,12 @@ describe('API /teams - add', function () {
 
   describe('post', async function () {
     beforeEach(async function () {
-      MockDate.set(start.subtract('2', 'month').toDate())
+      MockDate.set(start.subtract('2', 'month').toISOString())
       await league(knex)
     })
 
     it('free agent - active roster - season', async () => {
-      MockDate.set(start.add('2', 'week').day(4).toDate())
+      MockDate.set(start.add('2', 'week').day(4).toISOString())
       const player = await selectPlayer()
 
       const teamId = 1
@@ -112,7 +112,7 @@ describe('API /teams - add', function () {
       await knex('seasons')
         .update({ ddate: start.subtract('1', 'week').unix() })
         .where({ lid: leagueId })
-      MockDate.set(start.subtract('4', 'days').toDate())
+      MockDate.set(start.subtract('4', 'days').toISOString())
       const player = await selectPlayer({ rookie: true })
 
       const teamId = 1
@@ -180,7 +180,7 @@ describe('API /teams - add', function () {
 
   describe('error', function () {
     beforeEach(async function () {
-      MockDate.set(start.subtract('2', 'month').toDate())
+      MockDate.set(start.subtract('2', 'month').toISOString())
       await league(knex)
     })
 
@@ -294,7 +294,7 @@ describe('API /teams - add', function () {
     })
 
     it('add veteran free agent to active roster - offseason', async () => {
-      MockDate.set(start.subtract('1', 'week').toDate())
+      MockDate.set(start.subtract('1', 'week').toISOString())
       const player = await selectPlayer({ rookie: false })
       const request = chai
         .request(server)
@@ -315,7 +315,7 @@ describe('API /teams - add', function () {
     })
 
     it('free agent has unprocessed waiver claim', async () => {
-      MockDate.set(start.add('2', 'week').day(3).hour(15).toDate())
+      MockDate.set(start.add('2', 'week').day(3).hour(15).toISOString())
       const player = await selectPlayer({ rookie: false })
 
       await knex('waivers').insert({

@@ -31,7 +31,7 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
   describe('process', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.subtract('2', 'month').toDate())
+      MockDate.set(start.subtract('2', 'month').toISOString())
       await league(knex)
     })
 
@@ -43,7 +43,7 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
         start: league.ddate,
         picks: picks.length
       })
-      MockDate.set(draftDates.waiverEnd.toDate())
+      MockDate.set(draftDates.waiverEnd.toISOString())
 
       const player = await selectPlayer({ rookie: true })
       const teamId = 1
@@ -136,7 +136,7 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
         start: league.ddate,
         picks: picks.length
       })
-      MockDate.set(draftDates.draftEnd.add('1', 'hour').toDate())
+      MockDate.set(draftDates.draftEnd.add('1', 'hour').toISOString())
 
       const player = await selectPlayer({ rookie: true })
       const teamId = 1
@@ -188,12 +188,12 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
   describe('errors', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.subtract('1', 'month').toDate())
+      MockDate.set(start.subtract('1', 'month').toISOString())
       await league(knex)
     })
 
     it('no waivers to process', async () => {
-      MockDate.set(start.add('1', 'month').day(4).toDate())
+      MockDate.set(start.add('1', 'month').day(4).toISOString())
       let error
       try {
         await run()

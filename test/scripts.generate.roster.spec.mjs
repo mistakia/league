@@ -27,7 +27,7 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
   describe('process', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.subtract('1', 'month').toDate())
+      MockDate.set(start.subtract('1', 'month').toISOString())
       await league(knex)
     })
 
@@ -111,7 +111,7 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
     })
 
     it('generate rosters for next year', async () => {
-      MockDate.set(start.add(17, 'week').toDate())
+      MockDate.set(start.add(17, 'week').toISOString())
       await draft(knex)
 
       let error
@@ -197,7 +197,7 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
   /* describe('errors', function () {
    *   beforeEach(async function () {
    *     this.timeout(60 * 1000)
-   *     MockDate.set(start.subtract('1', 'month').toDate())
+   *     MockDate.set(start.subtract('1', 'month').toISOString())
    *     await league(knex)
    *   })
    * }) */

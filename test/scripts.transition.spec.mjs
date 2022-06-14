@@ -30,7 +30,7 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
     await knex.migrate.rollback()
     await knex.migrate.latest()
 
-    MockDate.set(start.subtract('1', 'month').toDate())
+    MockDate.set(start.subtract('1', 'month').toISOString())
     await knex.seed.run()
   })
 
@@ -49,7 +49,7 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
         .where({
           lid: leagueId
         })
-      MockDate.set(start.subtract('1', 'month').toDate())
+      MockDate.set(start.subtract('1', 'month').toISOString())
     })
 
     it('process single bid', async () => {
@@ -229,7 +229,7 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
   describe('errors', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.subtract('1', 'month').toDate())
+      MockDate.set(start.subtract('1', 'month').toISOString())
       await league(knex)
     })
 

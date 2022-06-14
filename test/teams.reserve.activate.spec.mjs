@@ -39,7 +39,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('move player to reserve and activate player', async () => {
-      MockDate.set(start.subtract('1', 'week').toDate())
+      MockDate.set(start.subtract('1', 'week').toISOString())
       const player1 = await selectPlayer()
       const player2 = await selectPlayer()
       const teamId = 1
@@ -145,7 +145,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('invalid activate player - does not exist', async () => {
-      MockDate.set(start.subtract('1', 'week').toDate())
+      MockDate.set(start.subtract('1', 'week').toISOString())
       const player1 = await selectPlayer()
       const teamId = 1
       const leagueId = 1
@@ -184,7 +184,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('invalid activate player - not on team', async () => {
-      MockDate.set(start.subtract('1', 'week').toDate())
+      MockDate.set(start.subtract('1', 'week').toISOString())
       const player1 = await selectPlayer()
       const player2 = await selectPlayer()
       const teamId = 1
@@ -224,7 +224,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('invalid activate player - on active roster', async () => {
-      MockDate.set(start.subtract('1', 'week').toDate())
+      MockDate.set(start.subtract('1', 'week').toISOString())
       const player1 = await selectPlayer()
       const player2 = await selectPlayer()
       const teamId = 1
@@ -274,7 +274,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('activate player is not on reserve', async () => {
-      MockDate.set(start.subtract('1', 'week').toDate())
+      MockDate.set(start.subtract('1', 'week').toISOString())
       const player1 = await selectPlayer()
       const player2 = await selectPlayer()
       const teamId = 1

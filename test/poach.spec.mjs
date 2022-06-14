@@ -31,12 +31,12 @@ describe('API /poaches', function () {
   describe('errors', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.subtract('2', 'month').toDate())
+      MockDate.set(start.subtract('2', 'month').toISOString())
       await league(knex)
     })
 
     it('reserve player violation', async () => {
-      MockDate.set(start.add('1', 'week').toDate())
+      MockDate.set(start.add('1', 'week').toISOString())
       const reservePlayer = await selectPlayer()
       const teamId = 1
       const leagueId = 1
@@ -57,7 +57,7 @@ describe('API /poaches', function () {
         userId: 2
       })
 
-      MockDate.set(start.add('1', 'week').add('3', 'day').toDate())
+      MockDate.set(start.add('1', 'week').add('3', 'day').toISOString())
 
       const request = chai
         .request(server)

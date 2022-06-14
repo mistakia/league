@@ -27,7 +27,7 @@ describe('API /teams - activate', function () {
   before(async function () {
     this.timeout(60 * 1000)
 
-    MockDate.set(start.subtract('1', 'week').toDate())
+    MockDate.set(start.subtract('1', 'week').toISOString())
 
     await knex.migrate.forceFreeMigrationsLock()
     await knex.migrate.rollback()

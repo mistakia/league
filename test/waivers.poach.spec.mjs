@@ -28,7 +28,7 @@ describe('API /waivers - poach', function () {
     await knex.migrate.rollback()
     await knex.migrate.latest()
 
-    MockDate.set(start.subtract('1', 'month').toDate())
+    MockDate.set(start.subtract('1', 'month').toISOString())
 
     await knex.seed.run()
     await league(knex)
@@ -42,7 +42,7 @@ describe('API /waivers - poach', function () {
   })
 
   it('submit poaching waiver for drafted player', async () => {
-    MockDate.set(start.subtract('1', 'month').add('10', 'minute').toDate())
+    MockDate.set(start.subtract('1', 'month').add('10', 'minute').toISOString())
 
     // make draft selection
     const leagueId = 1
@@ -67,7 +67,7 @@ describe('API /waivers - poach', function () {
         .subtract('1', 'month')
         .add('10', 'minute')
         .add('25', 'hours')
-        .toDate()
+        .toISOString()
     )
 
     // submit poaching waiver
@@ -348,7 +348,7 @@ describe('API /waivers - poach', function () {
         .subtract('1', 'month')
         .add('2', 'day')
         .add('11', 'minute')
-        .toDate()
+        .toISOString()
       MockDate.set(time)
       const request = chai
         .request(server)

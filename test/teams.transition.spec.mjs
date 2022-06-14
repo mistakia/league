@@ -33,7 +33,7 @@ describe('API /teams - transition', function () {
     await knex.migrate.rollback()
     await knex.migrate.latest()
 
-    MockDate.set(start.subtract('1', 'month').toDate())
+    MockDate.set(start.subtract('1', 'month').toISOString())
 
     await knex.seed.run()
   })
@@ -44,7 +44,7 @@ describe('API /teams - transition', function () {
     })
 
     it('original team', async () => {
-      MockDate.set(start.subtract('2', 'month').toDate())
+      MockDate.set(start.subtract('2', 'month').toISOString())
 
       const player = await selectPlayer()
       const releasePlayer = await selectPlayer()
@@ -124,7 +124,7 @@ describe('API /teams - transition', function () {
     })
 
     it('competing team', async () => {
-      MockDate.set(start.subtract('2', 'month').toDate())
+      MockDate.set(start.subtract('2', 'month').toISOString())
 
       const leagueId = 1
       const playerTid = 2
@@ -178,7 +178,7 @@ describe('API /teams - transition', function () {
     })
 
     it('original team with cutlist and release, salary cap check', async () => {
-      MockDate.set(start.subtract('2', 'month').toDate())
+      MockDate.set(start.subtract('2', 'month').toISOString())
 
       const teamId = 1
       const leagueId = 1

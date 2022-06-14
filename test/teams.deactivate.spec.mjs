@@ -42,7 +42,7 @@ describe('API /teams - deactivate', function () {
     })
 
     it('drafted player', async () => {
-      MockDate.set(start.subtract('1', 'week').toDate())
+      MockDate.set(start.subtract('1', 'week').toISOString())
       const player = await selectPlayer({ rookie: true })
       const teamId = 1
       const leagueId = 1
@@ -109,7 +109,7 @@ describe('API /teams - deactivate', function () {
     })
 
     it('signed via waivers, with no competing bids', async () => {
-      MockDate.set(start.add('1', 'month').day(4).toDate())
+      MockDate.set(start.add('1', 'month').day(4).toISOString())
       const leagueId = 1
       const teamId = 1
       const userId = 1
@@ -305,7 +305,7 @@ describe('API /teams - deactivate', function () {
     })
 
     it('signed via free agency waivers with multiple bids', async () => {
-      MockDate.set(start.add('1', 'month').day(4).toDate())
+      MockDate.set(start.add('1', 'month').day(4).toISOString())
       const leagueId = 1
       const player = await selectPlayer()
       await knex('waivers').insert({
