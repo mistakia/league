@@ -72,7 +72,11 @@ describe('SCRIPTS /waivers - poach', function () {
       })
 
       MockDate.set(
-        start.subtract('1', 'month').add('2', 'day').add('1', 'minute').toISOString()
+        start
+          .subtract('1', 'month')
+          .add('2', 'day')
+          .add('1', 'minute')
+          .toISOString()
       )
 
       let error
@@ -187,7 +191,11 @@ describe('SCRIPTS /waivers - poach', function () {
       })
 
       MockDate.set(
-        start.subtract('1', 'month').add('2', 'day').add('1', 'minute').toISOString()
+        start
+          .subtract('1', 'month')
+          .add('2', 'day')
+          .add('1', 'minute')
+          .toISOString()
       )
 
       let error
@@ -373,7 +381,11 @@ describe('SCRIPTS /waivers - poach', function () {
       })
 
       MockDate.set(
-        start.subtract('1', 'month').add('2', 'day').add('1', 'minute').toISOString()
+        start
+          .subtract('1', 'month')
+          .add('2', 'day')
+          .add('1', 'minute')
+          .toISOString()
       )
 
       let error
@@ -469,7 +481,11 @@ describe('SCRIPTS /waivers - poach', function () {
       })
 
       MockDate.set(
-        start.subtract('1', 'month').add('2', 'day').add('1', 'minute').toISOString()
+        start
+          .subtract('1', 'month')
+          .add('2', 'day')
+          .add('1', 'minute')
+          .toISOString()
       )
 
       let error

@@ -189,7 +189,9 @@ describe('API /draft', function () {
     })
 
     it('draft hasnt started', async () => {
-      MockDate.set(start.subtract('1', 'month').subtract('1', 'day').toISOString())
+      MockDate.set(
+        start.subtract('1', 'month').subtract('1', 'day').toISOString()
+      )
       const request = chai
         .request(server)
         .post('/api/leagues/1/draft')
@@ -205,7 +207,9 @@ describe('API /draft', function () {
 
     it('pick not on clock', async () => {
       const player = await selectPlayer({ rookie: true })
-      MockDate.set(start.subtract('1', 'month').add('1', 'minute').toISOString())
+      MockDate.set(
+        start.subtract('1', 'month').add('1', 'minute').toISOString()
+      )
       const request = chai
         .request(server)
         .post('/api/leagues/1/draft')
@@ -220,7 +224,9 @@ describe('API /draft', function () {
     })
 
     it('pick is already selected', async () => {
-      MockDate.set(start.subtract('1', 'month').add('1', 'minute').toISOString())
+      MockDate.set(
+        start.subtract('1', 'month').add('1', 'minute').toISOString()
+      )
       const request = chai
         .request(server)
         .post('/api/leagues/1/draft')
@@ -235,7 +241,9 @@ describe('API /draft', function () {
     })
 
     it('pickId does not belong to teamId', async () => {
-      MockDate.set(start.subtract('1', 'month').add('1', 'minute').toISOString())
+      MockDate.set(
+        start.subtract('1', 'month').add('1', 'minute').toISOString()
+      )
       const request = chai
         .request(server)
         .post('/api/leagues/1/draft')

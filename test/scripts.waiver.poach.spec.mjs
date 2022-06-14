@@ -253,7 +253,9 @@ describe('SCRIPTS /waivers - poach', function () {
         type: constants.waivers.POACH
       })
 
-      MockDate.set(start.add('1', 'month').day(7).add('1', 'minute').toISOString())
+      MockDate.set(
+        start.add('1', 'month').day(7).add('1', 'minute').toISOString()
+      )
 
       let error
       try {
@@ -336,7 +338,9 @@ describe('SCRIPTS /waivers - poach', function () {
         type: constants.waivers.POACH
       })
 
-      MockDate.set(start.add('1', 'month').day(7).add('1', 'minute').toISOString())
+      MockDate.set(
+        start.add('1', 'month').day(7).add('1', 'minute').toISOString()
+      )
 
       let error
       try {
@@ -438,7 +442,9 @@ describe('SCRIPTS /waivers - poach', function () {
         type: constants.waivers.POACH
       })
 
-      MockDate.set(start.add('1', 'month').day(7).add('1', 'minute').toISOString())
+      MockDate.set(
+        start.add('1', 'month').day(7).add('1', 'minute').toISOString()
+      )
 
       let error
       try {
@@ -564,7 +570,9 @@ describe('SCRIPTS /waivers - poach', function () {
         type: constants.waivers.POACH
       })
 
-      MockDate.set(start.add('1', 'month').day(7).add('1', 'minute').toISOString())
+      MockDate.set(
+        start.add('1', 'month').day(7).add('1', 'minute').toISOString()
+      )
 
       let error
       try {
@@ -686,7 +694,9 @@ describe('SCRIPTS /waivers - poach', function () {
         timestamp: Math.round(Date.now() / 1000)
       })
 
-      MockDate.set(start.add('1', 'month').day(7).add('1', 'minute').toISOString())
+      MockDate.set(
+        start.add('1', 'month').day(7).add('1', 'minute').toISOString()
+      )
 
       let error
       try {

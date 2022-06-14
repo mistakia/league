@@ -116,7 +116,9 @@ describe('COMMON Season', function () {
     expect(constants.season.week).to.equal(16)
 
     // end of week 16 - day light savings
-    MockDate.set(start.add('119', 'days').subtract('61', 'minute').toISOString())
+    MockDate.set(
+      start.add('119', 'days').subtract('61', 'minute').toISOString()
+    )
     expect(constants.season.week).to.equal(16)
 
     // start of week 17

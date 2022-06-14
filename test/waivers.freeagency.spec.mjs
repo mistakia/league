@@ -240,7 +240,9 @@ describe('API /waivers - free agency', function () {
       await releasePlayer({ leagueId: 1, player, teamId: 2, userId: 2 })
 
       // set time to 24 hours and 1 minute later
-      MockDate.set(constants.season.now.add('24', 'hour').add('1', 'minute').toISOString())
+      MockDate.set(
+        constants.season.now.add('24', 'hour').add('1', 'minute').toISOString()
+      )
 
       // submit waiver
       const teamId = 1
