@@ -32,7 +32,7 @@ class PlayerRow extends Player {
       percentiles,
       isLoggedIn,
       isRestOfSeasonView,
-      selected,
+      selected, // inherited from Player class
       status,
       baselines,
       teamId,
