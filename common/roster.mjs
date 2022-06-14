@@ -211,7 +211,7 @@ export default class Roster {
   }
 
   isEligibleForTag({ tag }) {
-    if (tag === 1) {
+    if (tag === constants.tags.REGULAR) {
       return true
     }
 

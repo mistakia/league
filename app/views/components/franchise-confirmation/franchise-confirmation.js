@@ -24,10 +24,9 @@ export default class FranchiseConfirmation extends React.Component {
       missingUntag: false
     }
 
-    const { team, playerMap } = props
+    const { team } = props
     this._isEligible = team.roster.isEligibleForTag({
-      tag: constants.tags.FRANCHISE,
-      pid: playerMap.get('pid')
+      tag: constants.tags.FRANCHISE
     })
     this._untags = []
     const tagged_players = team.roster.getPlayersByTag(constants.tags.FRANCHISE)

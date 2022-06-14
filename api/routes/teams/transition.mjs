@@ -153,8 +153,7 @@ router.post('/?', async (req, res) => {
         roster.removeTag(remove)
       }
       const isEligible = roster.isEligibleForTag({
-        tag: constants.tags.TRANSITION,
-        pid
+        tag: constants.tags.TRANSITION
       })
       if (!isEligible) {
         return res.status(400).send({ error: 'exceeds tag limit' })
