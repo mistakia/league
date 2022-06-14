@@ -89,7 +89,7 @@ describe('API /teams - cutlist', function () {
         slot: constants.slots.BENCH
       })
 
-      const player2 = await selectPlayer()
+      const player2 = await selectPlayer({ exclude_pids: [player1.pid] })
       await addPlayer({
         player: player2,
         leagueId,
@@ -138,7 +138,7 @@ describe('API /teams - cutlist', function () {
         slot: constants.slots.BENCH
       })
 
-      const player2 = await selectPlayer()
+      const player2 = await selectPlayer({ exclude_pids: [player1.pid] })
       await addPlayer({
         player: player2,
         leagueId,
@@ -196,7 +196,7 @@ describe('API /teams - cutlist', function () {
         slot: constants.slots.BENCH
       })
 
-      const player2 = await selectPlayer()
+      const player2 = await selectPlayer({ exclude_pids: [player1.pid] })
       await addPlayer({
         player: player2,
         leagueId,

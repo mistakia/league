@@ -164,7 +164,10 @@ describe('API /trades', function () {
         timestamp: Math.round(Date.now() / 1000)
       })
 
-      const player2 = await selectPlayer({ rookie: true })
+      const player2 = await selectPlayer({
+        rookie: true,
+        exclude_pids: [player1.pid]
+      })
       await addPlayer({
         teamId: 2,
         leagueId,

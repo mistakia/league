@@ -104,7 +104,9 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
     it('process multiple faab waivers', async () => {
       MockDate.set(start.add('1', 'month').day(4).toISOString())
       const leagueId = 1
+      const exclude_pids = []
       const player1 = await selectPlayer()
+      exclude_pids.push(player1.pid)
       const value1 = 180
       await knex('waivers').insert({
         tid: 1,
@@ -128,7 +130,8 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         type: constants.waivers.FREE_AGENCY
       })
 
-      const player2 = await selectPlayer()
+      const player2 = await selectPlayer({ exclude_pids })
+      exclude_pids.push(player2.pid)
       const value2 = 80
       await knex('waivers').insert({
         tid: 2,
@@ -141,7 +144,8 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         type: constants.waivers.FREE_AGENCY
       })
 
-      const player3 = await selectPlayer()
+      const player3 = await selectPlayer({ exclude_pids })
+      exclude_pids.push(player3.pid)
       const value3 = 20
       await knex('waivers').insert({
         tid: 1,
@@ -164,7 +168,8 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         type: constants.waivers.FREE_AGENCY
       })
 
-      const player4 = await selectPlayer()
+      const player4 = await selectPlayer({ exclude_pids })
+      exclude_pids.push(player4.pid)
       const value4 = 2
       await knex('waivers').insert({
         tid: 1,
