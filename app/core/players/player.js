@@ -4,6 +4,7 @@ export function createPlayer({
   fname,
   lname,
   cteam,
+
   projection,
   points,
   market_salary,
@@ -36,6 +37,10 @@ export function createPlayer({
 
   if (vorp) {
     params.vorp = new Map(vorp)
+  }
+
+  if (vorp_adj) {
+    params.vorp_adj = new Map(vorp_adj)
   }
 
   if (projections) {
