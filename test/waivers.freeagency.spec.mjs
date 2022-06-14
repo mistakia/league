@@ -2,7 +2,6 @@
 import chai from 'chai'
 import chaiHTTP from 'chai-http'
 import MockDate from 'mockdate'
-import dayjs from 'dayjs'
 
 import server from '#api'
 import knex from '#db'
