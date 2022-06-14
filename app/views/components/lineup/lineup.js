@@ -39,7 +39,7 @@ export default class Lineup extends React.Component {
       })
     }
     this.props.update(players)
-    this.setState({ selected: new Map() })
+    this.setState({ selectedPlayerMap: new Map() })
   }
 
   render = () => {
