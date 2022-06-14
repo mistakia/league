@@ -135,11 +135,11 @@ export default class PoachConfirmation extends React.Component {
       />
     )
     const releasePlayers = []
-    const releasePlayerPool = this.props.team.players.concat(
+    const releasePlayerMaps = this.props.team.players.concat(
       this.props.releasePlayers
     )
     this.state.release.forEach((pid) => {
-      const releasePlayerMap = releasePlayerPool.find((p) => p.pid === pid)
+      const releasePlayerMap = releasePlayerMaps.find((pMap) => pMap.get('pid') === pid)
       releasePlayers.push({
         id: releasePlayerMap.get('pid'),
         label: releasePlayerMap.get('name'),
