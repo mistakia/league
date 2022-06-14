@@ -55,6 +55,9 @@ api.use((req, res, next) => {
     'Authorization, Origin, X-Requested-With, Content-Type, Accept'
   )
   res.set('Cache-Control', 'no-cache, must-revalidate, proxy-revalidate')
+  res.set('Expires', '0')
+  res.set('Pragma', 'no-cache')
+  res.set('Surrogate-Control', 'no-store')
   next()
 })
 
@@ -75,13 +78,7 @@ const speedLimiter = slowDown({
   maxDelayMs: 2500
 })
 
-api.use('/api/*', expressjwt(config.jwt), (err, req, res, next) => {
-  res.set('Expires', '0')
-  res.set('Pragma', 'no-cache')
-  res.set('Surrogate-Control', 'no-store')
-  if (err.code === 'invalid_token') return next()
-  return next(err)
-})
+api.use('/api/*', expressjwt(config.jwt))
 api.use('/api/status', routes.status)
 api.use('/api/errors', routes.errors)
 api.use('/api/stats', speedLimiter, routes.stats)
@@ -93,6 +90,12 @@ api.use('/api/sources', routes.sources)
 api.use('/api/auth', routes.auth)
 api.use('/api/*', (err, req, res, next) => {
   if (err.name === 'UnauthorizedError') {
+    return res.status(401).send({ error: 'invalid token' })
+  }
+  next()
+})
+api.use('/api/*', (req, res, next) => {
+  if (!req.auth) {
     return res.status(401).send({ error: 'invalid token' })
   }
   next()
