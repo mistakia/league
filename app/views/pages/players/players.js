@@ -156,7 +156,7 @@ export default class PlayersPage extends React.Component {
             playerMap={playerMap}
             index={idx}
           />
-        ) // TODO pid
+        )
     )
 
     const headerSeasonPassing = (
