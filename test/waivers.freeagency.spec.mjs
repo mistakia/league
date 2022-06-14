@@ -379,7 +379,7 @@ describe('API /waivers - free agency', function () {
         userId: 1
       })
 
-      const player = await selectPlayer()
+      const player = await selectPlayer({ exclude_pids: [reservePlayer.pid] })
       const request = chai
         .request(server)
         .post('/api/leagues/1/waivers')

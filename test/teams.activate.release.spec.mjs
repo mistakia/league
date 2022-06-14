@@ -164,7 +164,7 @@ describe('API /teams - activate', function () {
 
     it('release player not on team', async () => {
       const player1 = await selectPlayer()
-      const player2 = await selectPlayer()
+      const player2 = await selectPlayer({ exclude_pids: [player1.pid] })
       const teamId = 1
       const leagueId = 1
       const userId = 1
@@ -227,7 +227,7 @@ describe('API /teams - activate', function () {
 
     it('activate player is on active roster', async () => {
       const player1 = await selectPlayer()
-      const player2 = await selectPlayer()
+      const player2 = await selectPlayer({ exclude_pids: [player1.pid] })
       const teamId = 1
       const leagueId = 1
       const userId = 1

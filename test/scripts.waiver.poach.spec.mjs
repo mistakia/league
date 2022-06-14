@@ -407,7 +407,10 @@ describe('SCRIPTS /waivers - poach', function () {
         value: 1
       })
 
-      const player2 = await selectPlayer({ rookie: true })
+      const player2 = await selectPlayer({
+        rookie: true,
+        exclude_pids: [player1.pid]
+      })
       await addPlayer({
         leagueId: 1,
         player: player2,
@@ -523,7 +526,10 @@ describe('SCRIPTS /waivers - poach', function () {
         value: 1
       })
 
-      const player2 = await selectPlayer({ rookie: true })
+      const player2 = await selectPlayer({
+        rookie: true,
+        exclude_pids: [player1.pid]
+      })
       await addPlayer({
         leagueId: 1,
         player: player2,

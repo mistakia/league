@@ -47,7 +47,8 @@ describe('API /teams - transition', function () {
       MockDate.set(start.subtract('2', 'month').toISOString())
 
       const player = await selectPlayer()
-      const releasePlayer = await selectPlayer()
+      const exclude_pids = [player.pid]
+      const releasePlayer = await selectPlayer({ exclude_pids })
       const teamId = 1
       const leagueId = 1
       const userId = 1
@@ -361,7 +362,8 @@ describe('API /teams - transition', function () {
 
     it('invalid release - not on team', async () => {
       const player = await selectPlayer()
-      const releasePlayer = await selectPlayer()
+      const exclude_pids = [player.pid]
+      const releasePlayer = await selectPlayer({ exclude_pids })
       const leagueId = 1
       const teamId = 1
       const userId = 1
@@ -505,7 +507,8 @@ describe('API /teams - transition', function () {
 
     /* it('not enough cap space', async () => {
      *   const player = await selectPlayer()
-     *   const tagPlayer = await selectPlayer()
+     *   const exclude_pids = [player.pid]
+     *   const tagPlayer = await selectPlayer({ exclude_pids })
      *   const leagueId = 1
      *   const userId = 1
      *   const teamId = 1
@@ -540,12 +543,15 @@ describe('API /teams - transition', function () {
      *     })
 
      *   await error(request, 'exceeds salary cap')
-     * })
-     */
+     * }) */
+
     /* it('not enough cap space with cutlist', async () => {
+     *   const exclude_pids = []
      *   const player = await selectPlayer()
-     *   const tagPlayer = await selectPlayer()
-     *   const cutlistPlayer = await selectPlayer()
+     *   exclude_pids.push(player.pid)
+     *   const tagPlayer = await selectPlayer({ exclude_pids })
+     *   exclude_pids.push(tagPlayer.pid)
+     *   const cutlistPlayer = await selectPlayer({ exclude_pids })
      *   const leagueId = 1
      *   const userId = 1
      *   const teamId = 1
@@ -600,12 +606,15 @@ describe('API /teams - transition', function () {
      *     })
 
      *   await error(request, 'exceeds salary cap')
-     * })
-     */
+     * }) */
+
     /* it('not enough cap space with release', async () => {
+     *   const exclude_pids = []
      *   const player = await selectPlayer()
-     *   const tagPlayer = await selectPlayer()
-     *   const releasePlayer = await selectPlayer()
+     *   exclude_pids.push(player.pid)
+     *   const tagPlayer = await selectPlayer({ exclude_pids })
+     *   exclude_pids.push(tagPlayer.pid)
+     *   const releasePlayer = await selectPlayer({ exclude_pids })
      *   const leagueId = 1
      *   const userId = 1
      *   const teamId = 1
@@ -651,44 +660,44 @@ describe('API /teams - transition', function () {
 
      *   await error(request, 'exceeds salary cap')
      * })
+     *
+     * it('reserve violation', async () => {
+     *   const leagueId = 1
+     *   const teamId = 1
+     *   const userId = 1
+     *   const bid = 10
+     *   const player = await selectPlayer()
+     *   const reservePlayer = await selectPlayer()
+
+     *   await addPlayer({
+     *     leagueId,
+     *     player,
+     *     teamId,
+     *     userId
+     *   })
+
+     *   await addPlayer({
+     *     leagueId,
+     *     player: reservePlayer,
+     *     teamId,
+     *     userId,
+     *     slot: constants.slots.IR
+     *   })
+
+     *   const request = chai
+     *     .request(server)
+     *     .post(`/api/teams/${teamId}/tag/transition`)
+     *     .set('Authorization', `Bearer ${user1}`)
+     *     .send({
+     *       bid,
+     *       playerTid: teamId,
+     *       pid: player.pid,
+     *       leagueId
+     *     })
+
+     *   await error(request, 'Reserve player violation')
+     * })
      */
-    it('reserve violation', async () => {
-      const leagueId = 1
-      const teamId = 1
-      const userId = 1
-      const bid = 10
-      const player = await selectPlayer()
-      const reservePlayer = await selectPlayer()
-
-      await addPlayer({
-        leagueId,
-        player,
-        teamId,
-        userId
-      })
-
-      await addPlayer({
-        leagueId,
-        player: reservePlayer,
-        teamId,
-        userId,
-        slot: constants.slots.IR
-      })
-
-      const request = chai
-        .request(server)
-        .post(`/api/teams/${teamId}/tag/transition`)
-        .set('Authorization', `Bearer ${user1}`)
-        .send({
-          bid,
-          playerTid: teamId,
-          pid: player.pid,
-          leagueId
-        })
-
-      await error(request, 'Reserve player violation')
-    })
-
     it('invalid remove - not on team', async () => {
       // TODO
     })

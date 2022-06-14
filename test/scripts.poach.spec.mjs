@@ -157,7 +157,10 @@ describe('SCRIPTS /waivers - poach', function () {
       })
 
       MockDate.set(start.subtract('1', 'month').add('2', 'hour').toISOString())
-      const player2 = await selectPlayer({ rookie: true })
+      const player2 = await selectPlayer({
+        rookie: true,
+        exclude_pids: [player1.pid]
+      })
       await addPlayer({
         leagueId: 1,
         player: player2,
@@ -337,7 +340,10 @@ describe('SCRIPTS /waivers - poach', function () {
     it('release player not on roster - have roster space', async () => {
       MockDate.set(start.subtract('1', 'month').toISOString())
       const releasePlayer = await selectPlayer({ pos: 'RB' })
-      const player = await selectPlayer({ rookie: true })
+      const player = await selectPlayer({
+        rookie: true,
+        exclude_pids: [releasePlayer.pid]
+      })
       await addPlayer({
         leagueId: 1,
         player,
