@@ -36,12 +36,12 @@ describe('API /teams - add', function () {
 
   describe('post', async function () {
     beforeEach(async function () {
-      MockDate.set(start.subtract('2', 'month').toDate())
+      MockDate.set(start.subtract('2', 'month').toISOString())
       await league(knex)
     })
 
     it('free agent - active roster - season', async () => {
-      MockDate.set(start.add('2', 'week').day(4).toDate())
+      MockDate.set(start.add('2', 'week').day(4).toISOString())
       const player = await selectPlayer()
 
       const teamId = 1
@@ -53,7 +53,7 @@ describe('API /teams - add', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: player.player,
+          pid: player.pid,
           leagueId,
           slot: constants.slots.BENCH
         })
@@ -63,7 +63,7 @@ describe('API /teams - add', function () {
       res.should.be.json
 
       res.body.length.should.equal(1)
-      res.body[0].player.should.equal(player.player)
+      res.body[0].pid.should.equal(player.pid)
       res.body[0].slot.should.equal(constants.slots.BENCH)
       // eslint-disable-next-line
       res.body[0].rid.should.exist
@@ -71,7 +71,7 @@ describe('API /teams - add', function () {
       res.body[0].transaction.userid.should.equal(userId)
       res.body[0].transaction.tid.should.equal(teamId)
       res.body[0].transaction.lid.should.equal(leagueId)
-      res.body[0].transaction.player.should.equal(player.player)
+      res.body[0].transaction.pid.should.equal(player.pid)
       res.body[0].transaction.type.should.equal(
         constants.transactions.ROSTER_ADD
       )
@@ -81,7 +81,7 @@ describe('API /teams - add', function () {
       const rosters = await knex('rosters_players')
         .join('rosters', 'rosters_players.rid', 'rosters.uid')
         .where({
-          player: player.player,
+          pid: player.pid,
           tid: teamId,
           week: constants.season.week,
           year: constants.season.year
@@ -89,7 +89,7 @@ describe('API /teams - add', function () {
 
       expect(rosters.length).to.equal(1)
       expect(rosters[0].slot).to.equal(constants.slots.BENCH)
-      expect(rosters[0].player).to.equal(player.player)
+      expect(rosters[0].pid).to.equal(player.pid)
       expect(rosters[0].pos).to.equal(player.pos1)
       expect(rosters[0].tid).to.equal(teamId)
       expect(rosters[0].lid).to.equal(leagueId)
@@ -101,7 +101,7 @@ describe('API /teams - add', function () {
         type: constants.transactions.ROSTER_ADD,
         value: 0,
         year: constants.season.year,
-        player: player.player,
+        pid: player.pid,
         teamId,
         userId
       })
@@ -112,7 +112,7 @@ describe('API /teams - add', function () {
       await knex('seasons')
         .update({ ddate: start.subtract('1', 'week').unix() })
         .where({ lid: leagueId })
-      MockDate.set(start.subtract('4', 'days').toDate())
+      MockDate.set(start.subtract('4', 'days').toISOString())
       const player = await selectPlayer({ rookie: true })
 
       const teamId = 1
@@ -123,7 +123,7 @@ describe('API /teams - add', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId,
-          player: player.player,
+          pid: player.pid,
           leagueId,
           slot: constants.slots.PS
         })
@@ -133,7 +133,7 @@ describe('API /teams - add', function () {
       res.should.be.json
 
       res.body.length.should.equal(1)
-      res.body[0].player.should.equal(player.player)
+      res.body[0].pid.should.equal(player.pid)
       res.body[0].slot.should.equal(constants.slots.PS)
       // eslint-disable-next-line
       res.body[0].rid.should.exist
@@ -141,7 +141,7 @@ describe('API /teams - add', function () {
       res.body[0].transaction.userid.should.equal(userId)
       res.body[0].transaction.tid.should.equal(teamId)
       res.body[0].transaction.lid.should.equal(leagueId)
-      res.body[0].transaction.player.should.equal(player.player)
+      res.body[0].transaction.pid.should.equal(player.pid)
       res.body[0].transaction.type.should.equal(
         constants.transactions.PRACTICE_ADD
       )
@@ -151,7 +151,7 @@ describe('API /teams - add', function () {
       const rosters = await knex('rosters_players')
         .join('rosters', 'rosters_players.rid', 'rosters.uid')
         .where({
-          player: player.player,
+          pid: player.pid,
           tid: teamId,
           week: constants.season.week,
           year: constants.season.year
@@ -159,7 +159,7 @@ describe('API /teams - add', function () {
 
       expect(rosters.length).to.equal(1)
       expect(rosters[0].slot).to.equal(constants.slots.PS)
-      expect(rosters[0].player).to.equal(player.player)
+      expect(rosters[0].pid).to.equal(player.pid)
       expect(rosters[0].pos).to.equal(player.pos1)
       expect(rosters[0].tid).to.equal(teamId)
       expect(rosters[0].lid).to.equal(leagueId)
@@ -171,7 +171,7 @@ describe('API /teams - add', function () {
         type: constants.transactions.PRACTICE_ADD,
         value: 0,
         year: constants.season.year,
-        player: player.player,
+        pid: player.pid,
         teamId,
         userId
       })
@@ -180,7 +180,7 @@ describe('API /teams - add', function () {
 
   describe('error', function () {
     beforeEach(async function () {
-      MockDate.set(start.subtract('2', 'month').toDate())
+      MockDate.set(start.subtract('2', 'month').toISOString())
       await league(knex)
     })
 
@@ -189,7 +189,7 @@ describe('API /teams - add', function () {
       await notLoggedIn(request)
     })
 
-    it('missing player', async () => {
+    it('missing pid', async () => {
       const request = chai
         .request(server)
         .post('/api/teams/1/add')
@@ -200,7 +200,7 @@ describe('API /teams - add', function () {
           slot: constants.slots.PS
         })
 
-      await missing(request, 'player')
+      await missing(request, 'pid')
     })
 
     it('missing leagueId', async () => {
@@ -210,7 +210,7 @@ describe('API /teams - add', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1,
-          player: 'x',
+          pid: 'x',
           slot: constants.slots.PS
         })
 
@@ -225,7 +225,7 @@ describe('API /teams - add', function () {
         .send({
           teamId: 1,
           leagueId: 1,
-          player: 'x'
+          pid: 'x'
         })
 
       await missing(request, 'slot')
@@ -237,7 +237,7 @@ describe('API /teams - add', function () {
         .post('/api/teams/1/add')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: 'x',
+          pid: 'x',
           leagueId: 1,
           slot: constants.slots.PS
         })
@@ -253,7 +253,7 @@ describe('API /teams - add', function () {
         .send({
           teamId: 1,
           leagueId: 1,
-          player: 'x',
+          pid: 'x',
           slot: 'x'
         })
 
@@ -267,7 +267,7 @@ describe('API /teams - add', function () {
         .set('Authorization', `Bearer ${user2}`)
         .send({
           teamId: 1,
-          player: 'x',
+          pid: 'x',
           leagueId: 1,
           slot: constants.slots.PS
         })
@@ -285,7 +285,7 @@ describe('API /teams - add', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1,
-          player: player.player,
+          pid: player.pid,
           leagueId: 1,
           slot: constants.slots.BENCH
         })
@@ -294,7 +294,7 @@ describe('API /teams - add', function () {
     })
 
     it('add veteran free agent to active roster - offseason', async () => {
-      MockDate.set(start.subtract('1', 'week').toDate())
+      MockDate.set(start.subtract('1', 'week').toISOString())
       const player = await selectPlayer({ rookie: false })
       const request = chai
         .request(server)
@@ -302,7 +302,7 @@ describe('API /teams - add', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1,
-          player: player.player,
+          pid: player.pid,
           leagueId: 1,
           slot: constants.slots.BENCH
         })
@@ -315,12 +315,12 @@ describe('API /teams - add', function () {
     })
 
     it('free agent has unprocessed waiver claim', async () => {
-      MockDate.set(start.add('2', 'week').day(3).hour(15).toDate())
+      MockDate.set(start.add('2', 'week').day(3).hour(15).toISOString())
       const player = await selectPlayer({ rookie: false })
 
       await knex('waivers').insert({
         userid: 2,
-        player: player.player,
+        pid: player.pid,
         tid: 2,
         lid: 1,
         submitted: Math.round(Date.now() / 1000),
@@ -334,7 +334,7 @@ describe('API /teams - add', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1,
-          player: player.player,
+          pid: player.pid,
           leagueId: 1,
           slot: constants.slots.BENCH
         })
@@ -365,7 +365,7 @@ describe('API /teams - add', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           teamId: 1,
-          player: player.player,
+          pid: player.pid,
           leagueId: 1,
           slot: constants.slots.BENCH
         })

@@ -5,14 +5,14 @@ import { constants } from '#common'
 
 dayjs.extend(timezone)
 
-export default async function (player) {
+export default async function (pid) {
   if (constants.season.week === 0) {
     return false
   }
 
-  const players = await db('player')
+  const player_rows = await db('player')
     .select('player.*', 'nfl_games.date', 'nfl_games.time_est')
-    .where({ player })
+    .where({ pid })
     .joinRaw(
       'left join nfl_games on player.cteam = nfl_games.v or player.cteam = nfl_games.h'
     )
@@ -21,18 +21,18 @@ export default async function (player) {
     .where('nfl_games.type', 'REG')
     .limit(1)
 
-  const playerRow = players[0]
+  const player_row = player_rows[0]
 
-  if (!playerRow) {
+  if (!player_row) {
     return false
   }
 
-  if (playerRow.status === 'Inactive') {
+  if (player_row.status === 'Inactive') {
     return false
   }
 
   const gameStart = dayjs.tz(
-    `${playerRow.date} ${playerRow.time_est}`,
+    `${player_row.date} ${player_row.time_est}`,
     'YYYY/MM/DD HH:mm:SS',
     'America/New_York'
   )

@@ -2,7 +2,7 @@ import db from '#db'
 import { constants } from '#common'
 import getPlayerTransactions from './get-player-transactions.mjs'
 
-export default async function ({ textSearch, leagueId, playerIds = [] }) {
+export default async function ({ textSearch, leagueId, pids = [] }) {
   const leaguePlayerIds = []
   const baselinePlayerIds = []
 
@@ -13,24 +13,24 @@ export default async function ({ textSearch, leagueId, playerIds = [] }) {
       .join('rosters', 'rosters_players.rid', 'rosters.uid')
       .where('rosters.lid', leagueId)
       .where('rosters.year', constants.season.year)
-      .groupBy('rosters_players.player')
+      .groupBy('rosters_players.pid')
 
-    if (playerIds.length) {
-      query.whereIn('rosters_players.player', playerIds)
+    if (pids.length) {
+      query.whereIn('rosters_players.pid', pids)
     }
 
     const playerSlots = await query
-    playerSlots.forEach((s) => leaguePlayerIds.push(s.player))
+    playerSlots.forEach((s) => leaguePlayerIds.push(s.pid))
   }
 
   const baselines = await db('league_baselines')
-    .select('player')
+    .select('pid')
     .where({ lid: projectionLeagueId })
-    .groupBy('player')
-  baselines.forEach((b) => baselinePlayerIds.push(b.player))
+    .groupBy('pid')
+  baselines.forEach((b) => baselinePlayerIds.push(b.pid))
 
   const selects = [
-    'player.player',
+    'player.pid',
     'player.fname',
     'player.lname',
     'player.pname',
@@ -51,24 +51,24 @@ export default async function ({ textSearch, leagueId, playerIds = [] }) {
   const query = db('player')
     .select(db.raw(selects.join(',')))
     .leftJoin('practice', function () {
-      this.on('player.player', '=', 'practice.player')
+      this.on('player.pid', '=', 'practice.pid')
         .andOn('practice.week', '=', constants.season.week)
         .andOn('practice.year', '=', constants.season.year)
     })
     .whereIn('player.pos', constants.positions)
-    .groupBy('player.player')
+    .groupBy('player.pid')
 
   if (textSearch) {
     query.whereRaw('MATCH(fname, lname) AGAINST(? IN BOOLEAN MODE)', textSearch)
-  } else if (playerIds.length) {
-    query.whereIn('player.player', playerIds)
+  } else if (pids.length) {
+    query.whereIn('player.pid', pids)
   } else {
     if (leaguePlayerIds.length) {
-      query.orWhereIn('player.player', leaguePlayerIds)
+      query.orWhereIn('player.pid', leaguePlayerIds)
     }
 
     if (baselinePlayerIds.length) {
-      query.orWhereIn('player.player', baselinePlayerIds)
+      query.orWhereIn('player.pid', baselinePlayerIds)
     }
 
     query.whereNot('player.cteam', 'INA')
@@ -84,33 +84,33 @@ export default async function ({ textSearch, leagueId, playerIds = [] }) {
     }
   }
 
-  const data = await query
+  const player_rows = await query
 
-  const playerMap = {}
-  for (const player of data) {
-    player.value = null
-    player.points = {}
-    player.vorp = {}
-    player.vorp_adj = {}
-    player.market_salary = {}
-    player.projection = {}
-    playerMap[player.player] = player
+  const players_by_pid = {}
+  for (const player_row of player_rows) {
+    player_row.value = null
+    player_row.points = {}
+    player_row.vorp = {}
+    player_row.vorp_adj = {}
+    player_row.market_salary = {}
+    player_row.projection = {}
+    players_by_pid[player_row.pid] = player_row
   }
 
-  const returnedPlayerIds = Object.keys(playerMap)
-  const playerIdsInLeague = returnedPlayerIds.filter((player) =>
-    leaguePlayerIds.includes(player)
+  const returnedPlayerIds = Object.keys(players_by_pid)
+  const playerIdsInLeague = returnedPlayerIds.filter((pid) =>
+    leaguePlayerIds.includes(pid)
   )
 
   if (playerIdsInLeague.length) {
     const playerTransactions = await getPlayerTransactions({
       lid: leagueId,
-      playerIds: playerIdsInLeague
+      pids: playerIdsInLeague
     })
 
     for (const tran of playerTransactions) {
-      const player = data.find((p) => p.player === tran.player)
-      player.value = tran.value
+      const player_row = player_rows.find((p) => p.pid === tran.pid)
+      player_row.value = tran.value
     }
   }
 
@@ -119,10 +119,10 @@ export default async function ({ textSearch, leagueId, playerIds = [] }) {
       lid: projectionLeagueId,
       year: constants.season.year
     })
-    .whereIn('player', returnedPlayerIds)
+    .whereIn('pid', returnedPlayerIds)
 
   for (const pointProjection of leaguePointsProj) {
-    playerMap[pointProjection.player].points[pointProjection.week] =
+    players_by_pid[pointProjection.pid].points[pointProjection.week] =
       pointProjection
   }
 
@@ -131,13 +131,14 @@ export default async function ({ textSearch, leagueId, playerIds = [] }) {
       lid: projectionLeagueId,
       year: constants.season.year
     })
-    .whereIn('player', returnedPlayerIds)
+    .whereIn('pid', returnedPlayerIds)
 
   for (const pointProjection of leagueValuesProj) {
     const { vorp, vorp_adj, market_salary } = pointProjection
-    playerMap[pointProjection.player].vorp[pointProjection.week] = vorp
-    playerMap[pointProjection.player].vorp_adj[pointProjection.week] = vorp_adj
-    playerMap[pointProjection.player].market_salary[pointProjection.week] =
+    players_by_pid[pointProjection.pid].vorp[pointProjection.week] = vorp
+    players_by_pid[pointProjection.pid].vorp_adj[pointProjection.week] =
+      vorp_adj
+    players_by_pid[pointProjection.pid].market_salary[pointProjection.week] =
       market_salary
   }
 
@@ -145,20 +146,20 @@ export default async function ({ textSearch, leagueId, playerIds = [] }) {
     .where('sourceid', constants.sources.AVERAGE)
     .where('year', constants.season.year)
     .where('week', '>=', constants.season.week)
-    .whereIn('player', returnedPlayerIds)
+    .whereIn('pid', returnedPlayerIds)
 
   const rosProjections = await db('ros_projections')
     .where('sourceid', constants.sources.AVERAGE)
     .where('year', constants.season.year)
-    .whereIn('player', returnedPlayerIds)
+    .whereIn('pid', returnedPlayerIds)
 
   for (const projection of projections) {
-    playerMap[projection.player].projection[projection.week] = projection
+    players_by_pid[projection.pid].projection[projection.week] = projection
   }
 
   for (const rosProjection of rosProjections) {
-    playerMap[rosProjection.player].projection.ros = rosProjection
+    players_by_pid[rosProjection.pid].projection.ros = rosProjection
   }
 
-  return Object.values(playerMap)
+  return Object.values(players_by_pid)
 }

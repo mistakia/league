@@ -28,7 +28,7 @@ describe('API /leagues/teams - delete', function () {
 
   describe('delete', function () {
     beforeEach(async function () {
-      MockDate.set(start.subtract('2', 'month').toDate())
+      MockDate.set(start.subtract('2', 'month').toISOString())
       await user(knex)
     })
 
@@ -76,7 +76,7 @@ describe('API /leagues/teams - delete', function () {
 
   describe('errors', function () {
     beforeEach(async function () {
-      MockDate.set(start.subtract('2', 'month').toDate())
+      MockDate.set(start.subtract('2', 'month').toISOString())
       await user(knex)
     })
 

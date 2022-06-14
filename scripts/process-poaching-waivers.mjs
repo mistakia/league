@@ -44,19 +44,19 @@ const run = async () => {
 
       try {
         const release = await db('waiver_releases')
-          .select('player')
+          .select('pid')
           .where('waiverid', waiver.uid)
         await submitPoach({
-          release: release.map((r) => r.player),
+          release: release.map((r) => r.pid),
           leagueId: waiver.lid,
           userId: waiver.userid,
-          player: waiver.player,
+          pid: waiver.pid,
           teamId: waiver.tid,
           team: waiver
         })
 
         log(
-          `poaching waiver awarded to ${waiver.name} (${waiver.tid}) for ${waiver.player}`
+          `poaching waiver awarded to ${waiver.name} (${waiver.tid}) for ${waiver.pid}`
         )
 
         await resetWaiverOrder({ leagueId: waiver.lid, teamId: waiver.tid })
@@ -65,17 +65,15 @@ const run = async () => {
         log(
           `poaching waiver unsuccessful for ${waiver.name} (${waiver.tid}) because ${error.message}`
         )
-        const players = await db('player')
-          .where('player', waiver.player)
-          .limit(1)
-        const player = players[0]
+        const player_rows = await db('player').where('pid', waiver.pid).limit(1)
+        const player_row = player_rows[0]
         const league = await getLeague(waiver.lid)
         await sendNotifications({
           league,
           teamIds: [waiver.tid],
           voice: false,
           notifyLeague: false,
-          message: `Your waiver claim to poach ${player.fname} ${player.lname} was unsuccessful.`
+          message: `Your waiver claim to poach ${player_row.fname} ${player_row.lname} was unsuccessful.`
         })
       }
 

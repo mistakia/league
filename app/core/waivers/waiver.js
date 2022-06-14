@@ -3,7 +3,7 @@ import { Record, List } from 'immutable'
 export const Waiver = new Record({
   uid: null,
   tid: null,
-  player: null,
+  pid: null,
   po: 0,
   release: new List(),
   succ: null,
@@ -15,7 +15,7 @@ export const Waiver = new Record({
 export function createWaiver({
   uid,
   tid,
-  player,
+  pid,
   po,
   release,
   succ,
@@ -26,7 +26,7 @@ export function createWaiver({
   return new Waiver({
     uid,
     tid,
-    player,
+    pid,
     po,
     release: new List(release),
     succ,

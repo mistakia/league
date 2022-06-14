@@ -56,13 +56,13 @@ export default class SettingsTeamsTeam extends React.Component {
     const { team, teamId, roster } = this.props
 
     const rosterItems = []
-    for (const [index, player] of roster.all.entries()) {
+    for (const [index, rosterPlayer] of roster.all.entries()) {
       rosterItems.push(
         <SettingsTeamsTeamPlayer
           key={index}
-          playerId={player.player}
+          pid={rosterPlayer.pid}
           teamId={team.uid}
-          value={player.value}
+          value={rosterPlayer.value}
         />
       )
     }

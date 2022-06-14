@@ -12,7 +12,7 @@ const log = debug('update-player')
 debug.enable('update-player')
 
 const protected_props = [
-  'player',
+  'pid',
   'esbid',
   'gsisid',
   'gsispid',
@@ -30,13 +30,13 @@ const protected_props = [
    player can be a string identifier or player db entry
 */
 
-const updatePlayer = async ({ player, update }) => {
-  if (typeof player === 'string' || player instanceof String) {
-    const rows = await db('player').where({ player })
-    player = rows[0]
+const updatePlayer = async ({ player_row, pid, update }) => {
+  if (!player_row && (typeof pid === 'string' || pid instanceof String)) {
+    const player_rows = await db('player').where({ pid })
+    player_row = player_rows[0]
   }
 
-  const differences = diff(player, update)
+  const differences = diff(player_row, update)
 
   const edits = differences.filter((d) => d.kind === 'E')
   if (!edits.length) {
@@ -55,17 +55,17 @@ const updatePlayer = async ({ player, update }) => {
       const exists = await db('player').where(prop, edit.rhs).limit(1)
       if (exists.length) {
         log(
-          `Player (${exists[0].player}) has existing value (${edit.rhs}) for field (${prop})`
+          `Player (${exists[0].pid}) has existing value (${edit.rhs}) for field (${prop})`
         )
         continue
       }
     }
 
     changes += 1
-    // log(`Player: ${player.player}, Field: ${prop}, Value: ${edit.rhs}`)
+    // log(`Player: ${player_row.pid}, Field: ${prop}, Value: ${edit.rhs}`)
     await db('player_changelog').insert({
       type: constants.changes.PLAYER_EDIT,
-      id: player.player,
+      id: player_row.pid,
       prop,
       prev: edit.lhs,
       new: edit.rhs,
@@ -77,7 +77,7 @@ const updatePlayer = async ({ player, update }) => {
         [prop]: edit.rhs
       })
       .where({
-        player: player.player
+        pid: player_row.pid
       })
   }
 
@@ -89,20 +89,20 @@ export default updatePlayer
 const main = async () => {
   let error
   try {
-    if (!argv.player) {
-      log('missing --player')
+    if (!argv.pid) {
+      log('missing --pid')
       process.exit()
     }
 
-    const ignore = ['_', '$0', 'player']
+    const ignore = ['_', '$0', 'pid']
     const keys = Object.keys(argv).filter((key) => !ignore.includes(key))
     const update = {}
     keys.forEach((key) => {
       update[key] = argv[key]
     })
 
-    const changes = await updatePlayer({ player: argv.player, update })
-    log(`player ${argv.player} updated, changes: ${changes}`)
+    const changes = await updatePlayer({ pid: argv.pid, update })
+    log(`player ${argv.pid} updated, changes: ${changes}`)
     process.exit()
   } catch (err) {
     error = err

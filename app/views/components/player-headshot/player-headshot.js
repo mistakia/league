@@ -6,12 +6,13 @@ import Avatar from '@material-ui/core/Avatar'
 
 import './player-headshot.styl'
 
-export default function PlayerHeadshot({ player, width = 48 }) {
+export default function PlayerHeadshot({ playerMap, width = 48 }) {
   const height = Math.round((width * 70) / 96)
-  const src = player.espn_id
-    ? `https://a.espncdn.com/combiner/i?img=/i/headshots/nfl/players/full/${
-        player.espn_id
-      }.png&w=${width * 2}&h=${height * 2}&cb=1`
+  const espn_id = playerMap.get('espn_id')
+  const src = espn_id
+    ? `https://a.espncdn.com/combiner/i?img=/i/headshots/nfl/players/full/${espn_id}.png&w=${
+        width * 2
+      }&h=${height * 2}&cb=1`
     : null
 
   return (
@@ -24,6 +25,6 @@ export default function PlayerHeadshot({ player, width = 48 }) {
 }
 
 PlayerHeadshot.propTypes = {
-  player: ImmutablePropTypes.record,
+  playerMap: ImmutablePropTypes.map,
   width: PropTypes.number
 }

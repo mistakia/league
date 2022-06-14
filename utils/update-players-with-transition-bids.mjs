@@ -1,6 +1,7 @@
 import db from '#db'
 import { constants } from '#common'
 
+// players are player rows
 export default async function ({ players, userId, leagueId }) {
   // include player restricted free agency bid
 
@@ -19,9 +20,9 @@ export default async function ({ players, userId, leagueId }) {
       .whereNull('processed')
 
     if (bids.length) {
-      for (const player of players) {
-        const { bid } = bids.find((b) => b.player === player.player) || {}
-        player.bid = bid
+      for (const player_row of players) {
+        const { bid } = bids.find((b) => b.pid === player_row.pid) || {}
+        player_row.bid = bid
       }
     }
   }

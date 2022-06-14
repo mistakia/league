@@ -91,11 +91,11 @@ const run = async () => {
 
   const inserts = []
   for (const { params, data } of items) {
-    let player
+    let player_row
 
     try {
-      player = await getPlayer(params)
-      if (!player) {
+      player_row = await getPlayer(params)
+      if (!player_row) {
         missing.push(params)
         continue
       }
@@ -106,7 +106,7 @@ const run = async () => {
     }
 
     inserts.push({
-      player: player.player,
+      pid: player_row.pid,
       week,
       year,
       sourceid: 5, // fftoday sourceid,

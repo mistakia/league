@@ -28,15 +28,15 @@ export function getRosterByTeamId(state, { tid, week }) {
 
 export function getPlayersByTeamId(state, { tid }) {
   const roster = getRosterByTeamId(state, { tid })
-  const playerIds = roster.all.map((p) => p.player)
-  return playerIds.map((playerId) => getPlayerById(state, { playerId }))
+  const pids = roster.all.map(({ pid }) => pid)
+  return pids.map((pid) => getPlayerById(state, { pid }))
 }
 
 export function getStartersByTeamId(state, { tid, week }) {
   const roster = getRosterByTeamId(state, { tid, week })
-  return roster.starters.map((p) => {
-    const player = getPlayerById(state, { playerId: p.player })
-    return player.set('slot', p.slot)
+  return roster.starters.map(({ pid, slot }) => {
+    const playerMap = getPlayerById(state, { pid })
+    return playerMap.set('slot', slot)
   })
 }
 
@@ -45,8 +45,7 @@ export function getActivePlayersByTeamId(
   { tid, week = constants.season.week }
 ) {
   const roster = getRosterByTeamId(state, { tid, week })
-  const activePlayerIds = roster.active.map((p) => p.player)
-  return activePlayerIds.map((playerId) => getPlayerById(state, { playerId }))
+  return roster.active.map(({ pid }) => getPlayerById(state, { pid }))
 }
 
 export function getRostersForCurrentLeague(state) {
@@ -63,9 +62,9 @@ export function getRostersForCurrentLeague(state) {
 }
 
 export function getAvailablePlayersForCurrentLeague(state) {
-  const rosteredPlayerIds = getRosteredPlayerIdsForCurrentLeague(state)
-  const all = getAllPlayers(state)
-  return all.filter((p) => !rosteredPlayerIds.includes(p.player))
+  const rostered_pids = getRosteredPlayerIdsForCurrentLeague(state)
+  const playerMaps = getAllPlayers(state)
+  return playerMaps.filter((pMap) => !rostered_pids.includes(pMap.get('pid')))
 }
 
 export function getActivePlayersByRosterForCurrentLeague(state) {
@@ -75,10 +74,7 @@ export function getActivePlayersByRosterForCurrentLeague(state) {
   for (const ros of rosters.valueSeq()) {
     if (!ros) continue
     const r = new Roster({ roster: ros.toJS(), league })
-    const activePlayerIds = r.active.map((p) => p.player)
-    const active = activePlayerIds.map((playerId) =>
-      getPlayerById(state, { playerId })
-    )
+    const active = r.active.map(({ pid }) => getPlayerById(state, { pid }))
     result = result.set(ros.get('tid'), new List(active))
   }
 
@@ -87,15 +83,18 @@ export function getActivePlayersByRosterForCurrentLeague(state) {
 
 export function getRosteredPlayerIdsForCurrentLeague(state) {
   const rosters = getRostersForCurrentLeague(state)
-  const players = []
+  const pids = []
   for (const roster of rosters.values()) {
-    roster.players.forEach((p) => players.push(p.player))
+    roster.players.forEach(({ pid }) => pids.push(pid))
   }
-  return new List(players)
+  return new List(pids)
 }
 
-export function getRosterInfoForPlayerId(state, { playerId, player }) {
-  const pid = playerId || player.player
+export function getRosterInfoForPlayerId(
+  state,
+  { pid, playerMap = new Map() }
+) {
+  pid = pid || playerMap.get('pid')
   if (!pid) {
     return {}
   }
@@ -103,7 +102,7 @@ export function getRosterInfoForPlayerId(state, { playerId, player }) {
   const rosters = getRostersForCurrentLeague(state)
   for (const roster of rosters.values()) {
     for (const rosterPlayer of roster.players) {
-      if (rosterPlayer.player === pid) {
+      if (rosterPlayer.pid === pid) {
         return rosterPlayer
       }
     }
@@ -113,70 +112,71 @@ export function getRosterInfoForPlayerId(state, { playerId, player }) {
 
 export function getActiveRosterPlayerIdsForCurrentLeague(state) {
   const rosters = getRostersForCurrentLeague(state)
-  const players = []
+  const pids = []
   for (const roster of rosters.values()) {
-    roster.players.forEach((p) => {
-      if (isSlotActive(p.slot)) {
-        players.push(p.player)
+    roster.players.forEach(({ slot, pid }) => {
+      if (isSlotActive(slot)) {
+        pids.push(pid)
       }
     })
   }
-  return new List(players)
+  return new List(pids)
 }
 
 export function getPracticeSquadPlayerIdsForCurrentLeague(state) {
   const rosters = getRostersForCurrentLeague(state)
-  const players = []
+  const pids = []
   for (const roster of rosters.values()) {
-    roster.players.forEach((p) => {
-      if (p.slot === constants.slots.PS || p.slot === constants.slots.PSP) {
-        players.push(p.player)
+    roster.players.forEach(({ slot, pid }) => {
+      if (slot === constants.slots.PS || slot === constants.slots.PSP) {
+        pids.push(pid)
       }
     })
   }
-  return new List(players)
+  return new List(pids)
 }
 
 export function getInjuredReservePlayerIdsForCurrentLeague(state) {
   const rosters = getRostersForCurrentLeague(state)
-  const players = []
+  const pids = []
   for (const roster of rosters.values()) {
-    roster.players.forEach((p) => {
-      if (p.slot === constants.slots.IR) {
-        players.push(p.player)
+    roster.players.forEach(({ slot, pid }) => {
+      if (slot === constants.slots.IR) {
+        pids.push(pid)
       }
     })
   }
-  return new List(players)
+  return new List(pids)
 }
 
-export function isPlayerFreeAgent(state, { player }) {
+export function isPlayerFreeAgent(state, { playerMap }) {
   const rostered = getRosteredPlayerIdsForCurrentLeague(state)
-  return !rostered.includes(player.player)
+  return !rostered.includes(playerMap.get('pid'))
 }
 
-export function isPlayerOnPracticeSquad(state, { player }) {
+export function isPlayerOnPracticeSquad(state, { playerMap }) {
   const practiceSquads = getPracticeSquadPlayerIdsForCurrentLeague(state)
-  return practiceSquads.includes(player.player)
+  return practiceSquads.includes(playerMap.get('pid'))
 }
 
-export function isPlayerEligible(state, { player, playerId }) {
-  if (playerId) {
-    player = getPlayerById(state, { playerId })
+export function isPlayerEligible(state, { playerMap, pid }) {
+  if (pid) {
+    playerMap = getPlayerById(state, { pid })
   }
 
-  if (!player) {
+  if (!playerMap) {
     return false
   }
 
-  if (!player.pos) {
+  const pos = playerMap.get('pos')
+  if (!pos) {
     return false
   }
 
   const roster = getCurrentTeamRosterRecord(state)
   const league = getCurrentLeague(state)
   const ros = new Roster({ roster: roster.toJS(), league })
-  return ros.hasOpenBenchSlot(player.pos)
+  return ros.hasOpenBenchSlot(pos)
 }
 
 export function getCurrentTeamRosterRecord(state) {
@@ -221,11 +221,11 @@ export function getCurrentTeamRosterPositionalValue(state) {
     const div = []
     for (const roster of rosters) {
       const rosterPlayers = roster.active.filter((p) => p.pos === position)
-      const players = rosterPlayers.map((p) =>
-        getPlayerById(state, { playerId: p.player })
+      const playerMaps = rosterPlayers.map(({ pid }) =>
+        getPlayerById(state, { pid })
       )
-      const vorps = players.map((p) =>
-        Math.max(p.getIn(['vorp', seasonType], 0), 0)
+      const vorps = playerMaps.map((pMap) =>
+        Math.max(pMap.getIn(['vorp', seasonType], 0), 0)
       )
       const sum = vorps.reduce((s, i) => s + i, 0)
       league.push(sum)
@@ -263,23 +263,14 @@ export function getCurrentPlayers(state) {
   }
 
   const r = new Roster({ roster: roster.toJS(), league })
-  const activePlayerIds = r.active.map((p) => p.player)
   const active = new List(
-    activePlayerIds.map((playerId) => getPlayerById(state, { playerId }))
+    r.active.map(({ pid }) => getPlayerById(state, { pid }))
   )
-  const practicePlayerIds = r.practice.map((p) => p.player)
   const practice = new List(
-    practicePlayerIds.map((playerId) => getPlayerById(state, { playerId }))
+    r.practice.map(({ pid }) => getPlayerById(state, { pid }))
   )
-
-  const reserveIRPlayerIds = r.ir.map((p) => p.player)
-  const ir = new List(
-    reserveIRPlayerIds.map((playerId) => getPlayerById(state, { playerId }))
-  )
-  const reserveCOVPlayerIds = r.cov.map((p) => p.player)
-  const cov = new List(
-    reserveCOVPlayerIds.map((playerId) => getPlayerById(state, { playerId }))
-  )
+  const ir = new List(r.ir.map(({ pid }) => getPlayerById(state, { pid })))
+  const cov = new List(r.cov.map(({ pid }) => getPlayerById(state, { pid })))
 
   const players = active.concat(practice).concat(ir).concat(cov)
 

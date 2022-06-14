@@ -9,75 +9,85 @@ import { constants } from '@common'
 
 export default class PlayerContextMenu extends React.Component {
   handleDeactivate = () => {
-    const { player, deactivate } = this.props
+    const { playerMap, deactivate } = this.props
     this.props.showConfirmation({
       title: 'Roster Deactivation',
-      description: `${player.fname} ${player.lname} (${player.pos}) will be placed on the practice squad. He will not be available to use in lineups until he's reactivated.`,
-      onConfirm: () => deactivate(player.player)
+      description: `${playerMap.get('fname')} ${playerMap.get(
+        'lname'
+      )} (${playerMap.get(
+        'pos'
+      )}) will be placed on the practice squad. He will not be available to use in lineups until he's reactivated.`,
+      onConfirm: () => deactivate(playerMap.get('pid'))
     })
     this.props.hide()
   }
 
   handleProtect = () => {
-    const { player, protect } = this.props
+    const { playerMap, protect } = this.props
     this.props.showConfirmation({
       title: 'Designate Protected',
-      description: `${player.fname} ${player.lname} (${player.pos}) will be designated as protected. This will protect the player from poaches but you will not be able to activate or release this player until the off-season.`,
-      onConfirm: () => protect(player.player)
+      description: `${playerMap.get('fname')} ${playerMap.get(
+        'lname'
+      )} (${playerMap.get(
+        'pos'
+      )}) will be designated as protected. This will protect the player from poaches but you will not be able to activate or release this player until the off-season.`,
+      onConfirm: () => protect(playerMap.get('pid'))
     })
     this.props.hide()
   }
 
   handleActivate = () => {
-    const { player } = this.props
+    const { playerMap } = this.props
     this.props.showConfirmation({
       id: 'ACTIVATE',
       data: {
-        player
+        playerMap
       }
     })
     this.props.hide()
   }
 
   handleWaiver = () => {
-    const { player } = this.props
+    const { playerMap } = this.props
     this.props.showConfirmation({
       id: 'WAIVER',
       data: {
-        player
+        playerMap
       }
     })
     this.props.hide()
   }
 
   handleCancelWaiver = () => {
-    const { player, waiverId, cancelClaim } = this.props
+    const { playerMap, waiverId, cancelClaim } = this.props
     this.props.showConfirmation({
       title: 'Cancel claim',
-      description: `Your claim for ${player.fname} ${player.lname} (${player.pos}) will no longer be processed.`,
+      description: `Your claim for ${playerMap.get('fname')} ${playerMap.get(
+        'lname'
+      )} (${playerMap.get('pos')}) will no longer be processed.`,
       onConfirm: () => cancelClaim(waiverId)
     })
     this.props.hide()
   }
 
   handleUpdateWaiver = () => {
-    const { player, waiverId } = this.props
+    const { playerMap, waiverId } = this.props
     this.props.showConfirmation({
       id: 'WAIVER',
       data: {
         waiverId,
-        player
+        playerMap
       }
     })
     this.props.hide()
   }
 
   handlePoach = () => {
-    const { player, poachId } = this.props
+    const { playerMap, poachId } = this.props
     this.props.showConfirmation({
       id: 'POACH',
       data: {
-        player,
+        playerMap,
         poachId
       }
     })
@@ -85,11 +95,11 @@ export default class PlayerContextMenu extends React.Component {
   }
 
   handleAdd = ({ practice = false } = {}) => {
-    const { player } = this.props
+    const { playerMap } = this.props
     this.props.showConfirmation({
       id: 'ADD_FREE_AGENT',
       data: {
-        player,
+        playerMap,
         practice
       }
     })
@@ -97,95 +107,106 @@ export default class PlayerContextMenu extends React.Component {
   }
 
   handleReserveIR = () => {
-    const { player } = this.props
+    const { playerMap } = this.props
     this.props.showConfirmation({
       id: 'RESERVE',
       data: {
-        player
+        playerMap
       }
     })
     this.props.hide()
   }
 
   handleReserveCOV = () => {
-    const { player, reserve } = this.props
+    const { playerMap, reserve } = this.props
     this.props.showConfirmation({
       title: 'Roster Reserve',
-      description: `${player.fname} ${player.lname} (${player.pos}) will be placed on Reserves/COV. He will not be available to use in lineups until he's activated.`,
+      description: `${playerMap.get('fname')} ${playerMap.get(
+        'lname'
+      )} (${playerMap.get(
+        'pos'
+      )}) will be placed on Reserves/COV. He will not be available to use in lineups until he's activated.`,
       onConfirm: () =>
-        reserve({ player: player.player, slot: constants.slots.COV })
+        reserve({
+          reserve_pid: playerMap.get('pid'),
+          slot: constants.slots.COV
+        })
     })
     this.props.hide()
   }
 
   handleRelease = () => {
-    const { player, release } = this.props
+    const { playerMap, release } = this.props
     this.props.showConfirmation({
       title: 'Release Player',
-      description: `${player.fname} ${player.lname} (${player.pos}) will be released and placed on waivers for 24 hours before becoming a free agent.`,
-      onConfirm: () => release(player.player)
+      description: `${playerMap.get('fname')} ${playerMap.get(
+        'lname'
+      )} (${playerMap.get(
+        'pos'
+      )}) will be released and placed on waivers for 24 hours before becoming a free agent.`,
+      onConfirm: () => release(playerMap.get('pid'))
     })
     this.props.hide()
   }
 
   handleFranchiseTag = () => {
-    const { player } = this.props
+    const { playerMap } = this.props
     this.props.showConfirmation({
       id: 'FRANCHISE',
       data: {
-        player
+        playerMap
       }
     })
     this.props.hide()
   }
 
   handleRookieTag = () => {
-    const { player } = this.props
+    const { playerMap } = this.props
     this.props.showConfirmation({
       id: 'ROOKIE',
       data: {
-        player
+        playerMap
       }
     })
     this.props.hide()
   }
 
   handleRemoveTag = () => {
-    const { player } = this.props
+    const { playerMap } = this.props
     this.props.showConfirmation({
       id: 'REMOVE_TAG',
       data: {
-        player
+        playerMap
       }
     })
     this.props.hide()
   }
 
   handleTransitionTag = () => {
-    const { player } = this.props
+    const { playerMap } = this.props
     this.props.showConfirmation({
       id: 'TRANSITION',
       data: {
-        player
+        playerMap
       }
     })
     this.props.hide()
   }
 
   handleRemoveTransitionTag = () => {
-    const { player } = this.props
+    const { playerMap } = this.props
     this.props.showConfirmation({
       id: 'REMOVE_TRANSITION_TAG',
       data: {
-        player
+        playerMap
       }
     })
     this.props.hide()
   }
 
   handleCutlist = () => {
-    const { player } = this.props.player
-    this.props.toggleCutlist(player)
+    const pid = this.props.playerMap.get('pid')
+    this.props.toggleCutlist(pid)
     this.props.hide()
   }
 
@@ -423,7 +444,7 @@ export default class PlayerContextMenu extends React.Component {
 }
 
 PlayerContextMenu.propTypes = {
-  player: ImmutablePropTypes.record,
+  playerMap: ImmutablePropTypes.map,
   status: PropTypes.object,
   showContext: PropTypes.func,
   hide: PropTypes.func,

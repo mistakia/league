@@ -21,11 +21,11 @@ const run = async ({ lid }) => {
     rosters.map((r) => r.uid)
   )
 
-  for (const { player, rid } of rows) {
-    const extensions = await getPlayerExtensions({ lid, player })
+  for (const { pid, rid } of rows) {
+    const extensions = await getPlayerExtensions({ lid, pid })
     await db('rosters_players')
       .update({ extensions: extensions.length })
-      .where({ player, rid })
+      .where({ pid, rid })
   }
 
   log(`set extensions for ${rows.length} players`)

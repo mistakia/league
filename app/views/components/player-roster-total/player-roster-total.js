@@ -1,9 +1,10 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
+import PropTypes from 'prop-types'
 
-import { Player, connect } from '@components/player'
 import { constants, getExtensionAmount } from '@common'
 
-class PlayerRosterTotal extends Player {
+export default class PlayerRosterTotal extends React.Component {
   render() {
     const { players, league, reorder } = this.props
 
@@ -20,32 +21,36 @@ class PlayerRosterTotal extends Player {
     let rosPointsTotal = 0
     let weekPointsTotal = 0
 
-    players.forEach((player) => {
-      const extensions = player.get('extensions', 0)
-      const { pos, tag, value, bid } = player
+    players.forEach((playerMap) => {
+      const extensions = playerMap.get('extensions', 0)
+      const value = playerMap.get('value', 0)
+      const bid = playerMap.get('bid', 0)
       const extendedSalary = getExtensionAmount({
-        pos,
-        tag,
+        pos: playerMap.get('pos'),
+        tag: playerMap.get('tag'),
         extensions,
         league,
         value,
         bid
       })
-      const projectedSalary = player.getIn(['market_salary', projectionType], 0)
-      const hasProjections = player.hasIn(['market_salary', projectionType])
+      const projectedSalary = playerMap.getIn(
+        ['market_salary', projectionType],
+        0
+      )
+      const hasProjections = playerMap.hasIn(['market_salary', projectionType])
       const savings = hasProjections ? projectedSalary - extendedSalary : 0
 
       baseSalaryTotal = baseSalaryTotal + (bid || value)
       extendedSalaryTotal = extendedSalaryTotal + extendedSalary
       projectedSalaryTotal = projectedSalaryTotal + projectedSalary
       savingsTotal = savingsTotal + savings
-      valueTotal = valueTotal + player.getIn(['vorp', projectionType], 0)
+      valueTotal = valueTotal + playerMap.getIn(['vorp', projectionType], 0)
       valueAdjTotal =
-        valueAdjTotal + player.getIn(['vorp_adj', projectionType], 0)
+        valueAdjTotal + playerMap.getIn(['vorp_adj', projectionType], 0)
       rosPointsTotal =
-        rosPointsTotal + player.getIn(['points', projectionType, 'total'], 0)
+        rosPointsTotal + playerMap.getIn(['points', projectionType, 'total'], 0)
       weekPointsTotal =
-        weekPointsTotal + player.getIn(['points', `${week}`, 'total'], 0)
+        weekPointsTotal + playerMap.getIn(['points', `${week}`, 'total'], 0)
     })
 
     return (
@@ -92,4 +97,8 @@ class PlayerRosterTotal extends Player {
   }
 }
 
-export default connect(PlayerRosterTotal)
+PlayerRosterTotal.propTypes = {
+  players: ImmutablePropTypes.list,
+  reorder: PropTypes.bool,
+  league: PropTypes.object
+}

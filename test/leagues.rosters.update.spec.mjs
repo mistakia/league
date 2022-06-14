@@ -36,7 +36,7 @@ describe('API /leagues/rosters - update', function () {
 
   describe('put', function () {
     beforeEach(async function () {
-      MockDate.set(start.subtract('2', 'month').toDate())
+      MockDate.set(start.subtract('2', 'month').toISOString())
       await league(knex)
     })
 
@@ -58,7 +58,7 @@ describe('API /leagues/rosters - update', function () {
         .put('/api/leagues/1/rosters')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player.player,
+          pid: player.pid,
           teamId,
           leagueId,
           value
@@ -75,7 +75,7 @@ describe('API /leagues/rosters - update', function () {
       expect(rosterRow.lid).to.equal(leagueId)
       expect(rosterRow.players.length).to.equal(1)
       expect(rosterRow.players[0].slot).to.equal(constants.slots.BENCH)
-      expect(rosterRow.players[0].player).to.equal(player.player)
+      expect(rosterRow.players[0].pid).to.equal(player.pid)
       expect(rosterRow.players[0].pos).to.equal(player.pos1)
       expect(rosterRow.players[0].userid).to.equal(1)
       expect(rosterRow.players[0].tid).to.equal(teamId)
@@ -90,7 +90,7 @@ describe('API /leagues/rosters - update', function () {
 
   describe('errors', function () {
     beforeEach(async function () {
-      MockDate.set(start.subtract('2', 'month').toDate())
+      MockDate.set(start.subtract('2', 'month').toISOString())
       await league(knex)
     })
 
@@ -99,7 +99,7 @@ describe('API /leagues/rosters - update', function () {
       await notLoggedIn(request)
     })
 
-    it('missing player', async () => {
+    it('missing pid', async () => {
       const request = chai
         .request(server)
         .put('/api/leagues/1/rosters')
@@ -110,7 +110,7 @@ describe('API /leagues/rosters - update', function () {
           teamId: 1
         })
 
-      await missing(request, 'player')
+      await missing(request, 'pid')
     })
 
     it('missing teamId', async () => {
@@ -119,7 +119,7 @@ describe('API /leagues/rosters - update', function () {
         .put('/api/leagues/1/rosters')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: 'x',
+          pid: 'x',
           value: 2,
           leagueId: 1
         })
@@ -133,7 +133,7 @@ describe('API /leagues/rosters - update', function () {
         .put('/api/leagues/1/rosters')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: 'x',
+          pid: 'x',
           value: 2,
           teamId: 1
         })
@@ -147,7 +147,7 @@ describe('API /leagues/rosters - update', function () {
         .put('/api/leagues/1/rosters')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: 'x',
+          pid: 'x',
           teamId: 1
         })
 
@@ -163,7 +163,7 @@ describe('API /leagues/rosters - update', function () {
         .send({
           teamId: 1,
           value: 2,
-          player: player.player,
+          pid: player.pid,
           leagueId: 2
         })
 
@@ -176,7 +176,7 @@ describe('API /leagues/rosters - update', function () {
         .put('/api/leagues/2/rosters')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: 'x',
+          pid: 'x',
           value: 2,
           teamId: 1,
           leagueId: 1
@@ -192,7 +192,7 @@ describe('API /leagues/rosters - update', function () {
         .put('/api/leagues/1/rosters')
         .set('Authorization', `Bearer ${user2}`)
         .send({
-          player: player.player,
+          pid: player.pid,
           value: 2,
           teamId: 1,
           leagueId: 1
@@ -223,7 +223,7 @@ describe('API /leagues/rosters - update', function () {
         .put('/api/leagues/1/rosters')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player.player,
+          pid: player.pid,
           teamId,
           leagueId,
           value

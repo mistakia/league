@@ -1,5 +1,4 @@
 import React from 'react'
-import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 import Tabs from '@material-ui/core/Tabs'
 import Tab from '@material-ui/core/Tab'
@@ -24,7 +23,7 @@ export default class SelectedPlayerMatchup extends React.Component {
   }
 
   render = () => {
-    const { player, games } = this.props
+    const { team, games } = this.props
     const { value } = this.state
 
     if (!games.length) {
@@ -33,7 +32,7 @@ export default class SelectedPlayerMatchup extends React.Component {
 
     const labels = []
     for (const game of games) {
-      const opp = player.team === game.h ? game.v : game.h
+      const opp = team === game.h ? game.v : game.h
       const isHome = opp === game.v
       const label = (
         <>
@@ -62,6 +61,6 @@ export default class SelectedPlayerMatchup extends React.Component {
 }
 
 SelectedPlayerMatchup.propTypes = {
-  player: ImmutablePropTypes.record,
+  team: PropTypes.string,
   games: PropTypes.array
 }

@@ -26,7 +26,7 @@ export default class Roster {
       constants.season.now.isBefore(dayjs.unix(league.ext_date))
     for (const {
       slot,
-      player,
+      pid,
       pos,
       value,
       tag,
@@ -44,9 +44,9 @@ export default class Roster {
           })
         : bid || value
 
-      this._players.set(player, {
+      this._players.set(pid, {
         slot,
-        player,
+        pid,
         pos,
         rid: roster.uid,
         value: salary,
@@ -74,8 +74,8 @@ export default class Roster {
 
   get players() {
     const arr = []
-    for (const { slot, player, pos, rid, tag } of this._players.values()) {
-      arr.push({ slot, player, pos, rid, tag })
+    for (const { slot, pid, pos, rid, tag } of this._players.values()) {
+      arr.push({ slot, pid, pos, rid, tag })
     }
     return arr
   }
@@ -121,12 +121,12 @@ export default class Roster {
     )
   }
 
-  get(player) {
-    return this._players.get(player)
+  get(pid) {
+    return this._players.get(pid)
   }
 
-  has(player) {
-    return this._players.has(player)
+  has(pid) {
+    return this._players.has(pid)
   }
 
   getCountByTag(tag) {
@@ -145,39 +145,39 @@ export default class Roster {
     return this.players.filter((p) => p.slot === slot)
   }
 
-  updateValue(player, value = 0) {
-    const data = this.get(player)
-    this._players.set(player, { ...data, value })
+  updateValue(pid, value = 0) {
+    const data = this.get(pid)
+    this._players.set(pid, { ...data, value })
   }
 
-  updateSlot(player, slot) {
-    const data = this.get(player)
-    this._players.set(player, { ...data, slot })
+  updateSlot(pid, slot) {
+    const data = this.get(pid)
+    this._players.set(pid, { ...data, slot })
   }
 
-  removePlayer(player) {
-    this._players.delete(player)
+  removePlayer(pid) {
+    this._players.delete(pid)
   }
 
-  removeTag(player) {
-    const p = this.get(player)
-    this._players.set(player, {
-      ...p,
+  removeTag(pid) {
+    const data = this.get(pid)
+    this._players.set(pid, {
+      ...data,
       tag: 1
     })
   }
 
-  addPlayer({ slot, player, pos, value = 0, tag = 1 }) {
+  addPlayer({ slot, pid, pos, value = 0, tag = 1 }) {
     if (this.isFull) {
       throw new Error('Roster is full')
     }
 
-    const isEligible = this.isEligibleForSlot({ slot, player, pos })
+    const isEligible = this.isEligibleForSlot({ slot, pos })
     if (!isEligible) throw new Error('Player is not eligible')
-    this._players.set(player, { slot, player, pos, rid: this.uid, value, tag })
+    this._players.set(pid, { slot, pid, pos, rid: this.uid, value, tag })
   }
 
-  isEligibleForSlot({ slot, player, pos }) {
+  isEligibleForSlot({ slot, pos }) {
     if (slot === constants.slots.IR) {
       return this.hasOpenInjuredReserveSlot()
     } else if (slot === constants.slots.BENCH) {
@@ -205,13 +205,13 @@ export default class Roster {
     return count < this._league[`s${slotName.toLowerCase()}`]
   }
 
-  isStarter(player) {
-    const p = this.get(player)
-    return !nonStarterSlots.includes(p.slot)
+  isStarter(pid) {
+    const data = this.get(pid)
+    return !nonStarterSlots.includes(data.slot)
   }
 
-  isEligibleForTag({ tag, player }) {
-    if (tag === 1) {
+  isEligibleForTag({ tag }) {
+    if (tag === constants.tags.REGULAR) {
       return true
     }
 

@@ -36,19 +36,20 @@ const mapStateToProps = createSelector(
         dayjs.tz(b, 'YYYY/MM/DD HH:mm:SS', 'America/New_York').unix()
     )
     for (const date of sorted) {
-      const players = starters.games[date]
+      const playerMaps = starters.games[date]
       const teamPoints = {}
       teams.forEach((t) => {
         teamPoints[t.uid] = 0
       })
 
-      for (const player of players) {
+      for (const playerMap of playerMaps) {
+        const pid = playerMap.get('pid')
         const team = data.find((t) =>
-          t.starters.find((p) => p.player === player.player)
+          t.starters.find((pMap) => pMap.get('pid') === pid)
         )
 
         if (team) {
-          teamPoints[team.team.uid] += player.getIn(
+          teamPoints[team.team.uid] += playerMap.getIn(
             ['points', `${week}`, 'total'],
             0
           )
@@ -95,9 +96,9 @@ const mapStateToProps = createSelector(
         teamPoints[t.uid] = 0
       })
 
-      for (const [player, points] of Object.entries(play.points)) {
+      for (const [pid, points] of Object.entries(play.points)) {
         const team = data.find((t) =>
-          t.starters.find((p) => p.player === player)
+          t.starters.find((pMap) => pMap.get('pid') === pid)
         )
         if (team) teamPoints[team.team.uid] += points.total
       }

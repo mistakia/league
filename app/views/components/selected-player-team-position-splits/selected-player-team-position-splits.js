@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import { fixTeam } from '@common'
@@ -6,11 +7,9 @@ import PercentileMetric from '@components/percentile-metric'
 
 export default class SelectedPlayerTeamPositionSplits extends React.Component {
   render = () => {
-    const { player, stats } = this.props
+    const { team, stats } = this.props
 
-    const teamStats = stats.teamStats.filter(
-      (t) => fixTeam(t.tname) === player.team
-    )
+    const teamStats = stats.teamStats.filter((t) => fixTeam(t.tname) === team)
     const sorted = teamStats.sort((a, b) => b.seas - a.seas)
     const items = []
     for (const [index, year] of sorted.entries()) {
@@ -152,6 +151,6 @@ export default class SelectedPlayerTeamPositionSplits extends React.Component {
 }
 
 SelectedPlayerTeamPositionSplits.propTypes = {
-  player: ImmutablePropTypes.record,
+  team: PropTypes.string,
   stats: ImmutablePropTypes.record
 }

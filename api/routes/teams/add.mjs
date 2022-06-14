@@ -8,14 +8,14 @@ const router = express.Router({ mergeParams: true })
 router.post('/?', async (req, res) => {
   const { db, logger, broadcast } = req.app.locals
   try {
-    const { player, leagueId, teamId, slot } = req.body
+    const { pid, leagueId, teamId, slot } = req.body
     let { release } = req.body
     if (!Array.isArray(release)) {
       release = release ? [release] : []
     }
 
-    if (!player) {
-      return res.status(400).send({ error: 'missing player' })
+    if (!pid) {
+      return res.status(400).send({ error: 'missing pid' })
     }
 
     if (!leagueId) {
@@ -55,7 +55,7 @@ router.post('/?', async (req, res) => {
 
     // verify player does not have outstanding unprocessed waiver claim
     const waivers = await db('waivers')
-      .where({ player, lid: leagueId })
+      .where({ pid, lid: leagueId })
       .whereNull('cancelled')
       .whereNull('processed')
 
@@ -79,7 +79,7 @@ router.post('/?', async (req, res) => {
       transactions = await submitAcquisition({
         leagueId,
         release,
-        player,
+        pid,
         teamId: tid,
         userId: req.auth.userId,
         slot

@@ -24,11 +24,15 @@ class DraftPage extends React.Component {
   }
 
   handleDraft = () => {
-    const player = this.props.selectedPlayer
+    const playerMap = this.props.selectedPlayerMap
     const { nextPick, draftPlayer } = this.props
     this.props.showConfirmation({
       title: 'Draft Selection',
-      description: `Select ${player.fname} ${player.lname} (${player.pos}) with the #${nextPick.pick} pick in the ${constants.season.year} draft.`,
+      description: `Select ${playerMap.get('fname')} ${playerMap.get(
+        'lname'
+      )} (${playerMap.get('pos')}) with the #${nextPick.pick} pick in the ${
+        constants.season.year
+      } draft.`,
       onConfirm: draftPlayer
     })
   }
@@ -45,7 +49,7 @@ const mapStateToProps = createSelector(
   getDraft,
   getCurrentLeague,
   getApp,
-  (players, selectedPlayer, nextPick, draft, league, app) => {
+  (players, selectedPlayerMap, nextPick, draft, league, app) => {
     const windowEnd = nextPick
       ? getDraftWindow({
           start: league.ddate,
@@ -61,7 +65,7 @@ const mapStateToProps = createSelector(
       isDraftWindowOpen: isWindowOpen,
       players,
       nextPick,
-      selectedPlayer,
+      selectedPlayerMap,
       teamId: app.teamId,
       picks: draft.picks,
       drafted: draft.drafted,
@@ -80,7 +84,7 @@ DraftPage.propTypes = {
   loadDraft: PropTypes.func,
   draftPlayer: PropTypes.func,
   showConfirmation: PropTypes.func,
-  selectedPlayer: ImmutablePropTypes.record,
+  selectedPlayerMap: ImmutablePropTypes.map,
   nextPick: PropTypes.object
 }
 

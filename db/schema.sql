@@ -31,7 +31,10 @@ CREATE TABLE `game` (
   `ou` decimal(3,1) NOT NULL,
   `sprv` decimal(3,1) NOT NULL,
   `ptsv` tinyint(2) NOT NULL,
-  `ptsh` tinyint(2) NOT NULL
+  `ptsh` tinyint(2) NOT NULL,
+
+  UNIQUE KEY `gid` (`gid`),
+  KEY `seas` (`seas`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -45,7 +48,7 @@ DROP TABLE IF EXISTS `offense`;
 CREATE TABLE `offense` (
   `uid` int(6) NOT NULL,
   `gid` int(5) NOT NULL,
-  `player` varchar(7) NOT NULL,
+  `pid` varchar(7) NOT NULL,
   `pa` tinyint(2) NOT NULL,
   `pc` tinyint(2) NOT NULL,
   `py` int(3) NOT NULL,
@@ -75,7 +78,11 @@ CREATE TABLE `offense` (
   `team` varchar(3) NOT NULL,
   `posd` varchar(8) NOT NULL,
   `jnum` tinyint(2) NOT NULL,
-  `dcp` tinyint(1) NOT NULL
+  `dcp` tinyint(1) NOT NULL,
+
+  UNIQUE KEY `uid` (`uid`),
+  KEY `gid` (`gid`),
+  KEY `pid` (`pid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -87,7 +94,7 @@ CREATE TABLE `offense` (
 DROP TABLE IF EXISTS `player`;
 
 CREATE TABLE `player` (
-  `player` varchar(7) NOT NULL,
+  `pid` varchar(7) NOT NULL,
   `fname` varchar(20) NOT NULL,
   `lname` varchar(25) NOT NULL,
   `pname` varchar(25) NOT NULL,
@@ -147,7 +154,10 @@ CREATE TABLE `player` (
   UNIQUE KEY `espn_id` (`espn_id`),
   UNIQUE KEY `fantasy_data_id` (`fantasy_data_id`),
   UNIQUE KEY `yahoo_id` (`yahoo_id`),
-  UNIQUE KEY `keeptradecut_id` (`keeptradecut_id`)
+  UNIQUE KEY `keeptradecut_id` (`keeptradecut_id`),
+  UNIQUE KEY `pid` (`pid`),
+  KEY `fname` (`fname`),
+  KEY `lname` (`lname`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -159,7 +169,7 @@ CREATE TABLE `player` (
 DROP TABLE IF EXISTS `players`;
 
 CREATE TABLE `players` (
-  `player` varchar(7) DEFAULT NULL,
+  `pid` varchar(7) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `team` varchar(5) NOT NULL,
   `pos` varchar(5) NOT NULL,
@@ -196,7 +206,7 @@ CREATE TABLE `players` (
   `status` varchar(255) DEFAULT NULL,
   `search_rank` int(7) DEFAULT NULL,
 
-  KEY `player` (`player`)
+  KEY `pid` (`pid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -208,7 +218,7 @@ CREATE TABLE `players` (
 DROP TABLE IF EXISTS `players_status`;
 
 CREATE TABLE `players_status` (
-  `player` varchar(7) DEFAULT NULL,
+  `pid` varchar(7) DEFAULT NULL,
   `mfl_id` varchar(11) DEFAULT NULL,
   `sleeper_id` varchar(11) DEFAULT NULL,
   `active` tinyint(1) DEFAULT NULL,
@@ -225,7 +235,7 @@ CREATE TABLE `players_status` (
   `status` varchar(255) DEFAULT NULL,
   `search_rank` int(7) DEFAULT NULL,
   `timestamp` int(11) NOT NULL,
-  KEY `player` (`player`)
+  KEY `pid` (`pid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -238,7 +248,7 @@ DROP TABLE IF EXISTS `poaches`;
 
 CREATE TABLE `poaches` (
   `uid` int(11) NOT NULL AUTO_INCREMENT,
-  `player` varchar(7) NOT NULL,
+  `pid` varchar(7) NOT NULL,
   `userid` int(6) NOT NULL,
   `tid` int(5) NOT NULL,
   `player_tid` int(5) NOT NULL,
@@ -261,9 +271,9 @@ DROP TABLE IF EXISTS `poach_releases`;
 
 CREATE TABLE `poach_releases` (
   `poachid` int(11) NOT NULL,
-  `player` varchar(7) NOT NULL,
+  `pid` varchar(7) NOT NULL,
   KEY `poachid` (`poachid`),
-  UNIQUE KEY `player` (`poachid`, `player`)
+  UNIQUE KEY `pid` (`poachid`, `pid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -603,7 +613,11 @@ CREATE TABLE `team` (
   `cov1y` int(3) NOT NULL,
   `cov2` tinyint(2) NOT NULL,
   `cov2y` int(3) NOT NULL,
-  `drp` tinyint(2) NOT NULL
+  `drp` tinyint(2) NOT NULL,
+
+  UNIQUE KEY `tid` (`tid`),
+  KEY `gid` (`gid`),
+  KEY `tname` (`tname`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -616,7 +630,7 @@ DROP TABLE IF EXISTS `draft`;
 
 CREATE TABLE `draft` (
   `uid` int(6) unsigned NOT NULL AUTO_INCREMENT,
-  `player` varchar(7) DEFAULT NULL,
+  `pid` varchar(7) DEFAULT NULL,
   `round` tinyint(1) NOT NULL,
   `comp` tinyint(1) DEFAULT 0,
   `pick` tinyint(2) DEFAULT NULL,
@@ -770,7 +784,7 @@ CREATE TABLE `playoffs` (
 DROP TABLE IF EXISTS `projections`;
 
 CREATE TABLE `projections` (
-  `player` varchar(7) NOT NULL,
+  `pid` varchar(7) NOT NULL,
   `sourceid` int(3) DEFAULT NULL,
   `userid` int(4) DEFAULT NULL,
   `pa` decimal(5,1) DEFAULT NULL,
@@ -813,9 +827,9 @@ CREATE TABLE `projections` (
   `week` int(2) NOT NULL,
   `year` int(4) NOT NULL,
   `timestamp` datetime NOT NULL,
-  UNIQUE KEY `userid` (`userid`,`player`,`year`,`week`),
-  UNIQUE KEY `sourceid` (`sourceid`,`player`,`year`,`week`,`timestamp`),
-  KEY `player` (`player`)
+  UNIQUE KEY `userid` (`userid`,`pid`,`year`,`week`),
+  UNIQUE KEY `sourceid` (`sourceid`,`pid`,`year`,`week`,`timestamp`),
+  KEY `pid` (`pid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -827,7 +841,7 @@ CREATE TABLE `projections` (
 DROP TABLE IF EXISTS `ros_projections`;
 
 CREATE TABLE `ros_projections` (
-  `player` varchar(7) NOT NULL,
+  `pid` varchar(7) NOT NULL,
   `sourceid` int(3) DEFAULT NULL,
   `userid` int(4) DEFAULT NULL,
   `pa` decimal(5,1) DEFAULT NULL,
@@ -870,8 +884,8 @@ CREATE TABLE `ros_projections` (
   `week` varchar(3) NOT NULL,
   `year` int(4) NOT NULL,
   `timestamp` datetime NOT NULL,
-  UNIQUE KEY `sourceid` (`sourceid`,`player`,`year`),
-  KEY `player` (`player`)
+  UNIQUE KEY `sourceid` (`sourceid`,`pid`,`year`),
+  KEY `pid` (`pid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -883,7 +897,7 @@ CREATE TABLE `ros_projections` (
 DROP TABLE IF EXISTS `league_player_projection_points`;
 
 CREATE TABLE `league_player_projection_points` (
-  `player` varchar(7) NOT NULL,
+  `pid` varchar(7) NOT NULL,
   `week` varchar(3) NOT NULL,
   `year` int(4) NOT NULL,
   `lid` int(6) NOT NULL,
@@ -926,8 +940,8 @@ CREATE TABLE `league_player_projection_points` (
   `dtd` decimal(4,1) DEFAULT NULL,
   `krtd` decimal(4,1) DEFAULT NULL,
   `prtd` decimal(4,1) DEFAULT NULL,
-  KEY `player` (`player`),
-  UNIQUE KEY `player_league_points` (`player`, `lid`, `week`, `year`)
+  KEY `pid` (`pid`),
+  UNIQUE KEY `player_league_points` (`pid`, `lid`, `week`, `year`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -939,7 +953,7 @@ CREATE TABLE `league_player_projection_points` (
 DROP TABLE IF EXISTS `league_player_projection_values`;
 
 CREATE TABLE `league_player_projection_values` (
-  `player` varchar(7) NOT NULL,
+  `pid` varchar(7) NOT NULL,
   `week` varchar(3) NOT NULL,
   `year` int(4) NOT NULL,
   `lid` int(6) NOT NULL,
@@ -947,8 +961,8 @@ CREATE TABLE `league_player_projection_values` (
   `vorp` decimal(5,2) DEFAULT NULL,
   `vorp_adj` decimal(5,2) DEFAULT NULL,
   `market_salary` decimal(5,2) DEFAULT NULL,
-  KEY `player` (`player`),
-  UNIQUE KEY `player_value` (`player`, `lid`, `week`, `year`)
+  KEY `pid` (`pid`),
+  UNIQUE KEY `player_value` (`pid`, `lid`, `week`, `year`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -982,11 +996,11 @@ DROP TABLE IF EXISTS `rosters_players`;
 CREATE TABLE `rosters_players` (
   `rid` int(11) NOT NULL,
   `slot` int(11) NOT NULL,
-  `player` varchar(7) NOT NULL,
+  `pid` varchar(7) NOT NULL,
   `pos` varchar(3) NOT NULL,
   `tag` tinyint(1) unsigned NOT NULL DEFAULT '1',
   `extensions` tinyint(1) unsigned NOT NULL DEFAULT '0',
-  UNIQUE KEY `player` (`rid`,`player`),
+  UNIQUE KEY `pid` (`rid`,`pid`),
   KEY `rid` (`rid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -1102,8 +1116,8 @@ DROP TABLE IF EXISTS `trades`;
 
 CREATE TABLE `trades` (
   `uid` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `pid` int(6) NOT NULL,
-  `tid` int(6) NOT NULL,
+  `propose_tid` int(6) NOT NULL,
+  `accept_tid` int(6) NOT NULL,
   `lid` int(6) NOT NULL,
   `userid` int(6) NOT NULL,
   `year` int(4) NOT NULL,
@@ -1126,9 +1140,9 @@ DROP TABLE IF EXISTS `trade_releases`;
 CREATE TABLE `trade_releases` (
   `tradeid` int(6) NOT NULL,
   `tid` int(6) NOT NULL,
-  `player` varchar(7) NOT NULL,
+  `pid` varchar(7) NOT NULL,
   KEY (`tradeid`),
-  UNIQUE KEY `player` (`tradeid`,`player`)
+  UNIQUE KEY `pid` (`tradeid`,`pid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 
@@ -1143,9 +1157,9 @@ DROP TABLE IF EXISTS `trades_players`;
 CREATE TABLE `trades_players` (
   `tradeid` int(6) NOT NULL,
   `tid` int(6) NOT NULL,
-  `player` varchar(7) NOT NULL,
+  `pid` varchar(7) NOT NULL,
   KEY (`tradeid`),
-  UNIQUE KEY `player` (`tradeid`,`player`)
+  UNIQUE KEY `pid` (`tradeid`,`pid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -1187,12 +1201,12 @@ CREATE TABLE `trades_transactions` (
 DROP TABLE IF EXISTS `league_cutlist`;
 
 CREATE TABLE `league_cutlist` (
-  `player` varchar(7) NOT NULL,
+  `pid` varchar(7) NOT NULL,
   `tid` int(6) NOT NULL,
   `order` tinyint(2) NOT NULL,
-  KEY `player` (`player`),
+  KEY `pid` (`pid`),
   KEY `teamid` (`tid`),
-  UNIQUE KEY `teamplayer` (`tid`, `player`)
+  UNIQUE KEY `tid_pid` (`tid`, `pid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -1208,14 +1222,14 @@ CREATE TABLE `transactions` (
   `userid` int(6) NOT NULL,
   `tid` int(6) NOT NULL,
   `lid` int(6) NOT NULL,
-  `player` varchar(7) NOT NULL,
+  `pid` varchar(7) NOT NULL,
   `type` tinyint(2) NOT NULL,
   `value` int(4) NOT NULL,
   `year` int(4) NOT NULL,
   `timestamp` int(11) NOT NULL,
   `waiverid` int(11) DEFAULT NULL,
   UNIQUE KEY `uid` (`uid`),
-  KEY `player` (`player`),
+  KEY `pid` (`pid`),
   KEY `teamid` (`tid`),
   KEY `lid` (`lid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -1290,7 +1304,7 @@ DROP TABLE IF EXISTS `waivers`;
 CREATE TABLE `waivers` (
   `uid` int(11) NOT NULL AUTO_INCREMENT,
   `userid` int(6) NOT NULL,
-  `player` varchar(7) NOT NULL,
+  `pid` varchar(7) NOT NULL,
   `drop` varchar(7) DEFAULT NULL,
   `tid` int(5) NOT NULL,
   `lid` int(6) NOT NULL,
@@ -1319,9 +1333,9 @@ DROP TABLE IF EXISTS `waiver_releases`;
 
 CREATE TABLE `waiver_releases` (
   `waiverid` int(11) NOT NULL,
-  `player` varchar(7) NOT NULL,
+  `pid` varchar(7) NOT NULL,
   KEY `waiverid` (`waiverid`),
-  UNIQUE KEY `player` (`waiverid`, `player`)
+  UNIQUE KEY `waiverid_pid` (`waiverid`, `pid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -1738,7 +1752,7 @@ CREATE TABLE `nflSnap` (
 DROP TABLE IF EXISTS `practice`;
 
 CREATE TABLE `practice` (
-  `player` varchar(7) NOT NULL,
+  `pid` varchar(7) NOT NULL,
   `week` tinyint(2) NOT NULL,
   `year` int(4) NOT NULL,
   `status` varchar(100) DEFAULT NULL,
@@ -1750,7 +1764,7 @@ CREATE TABLE `practice` (
   `f` varchar(20) DEFAULT NULL,
   `s` varchar(20) DEFAULT NULL,
   `su` varchar(20) DEFAULT NULL,
-  UNIQUE KEY `player` (`player`, `week`, `year`)
+  UNIQUE KEY `pid` (`pid`, `week`, `year`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -1762,7 +1776,7 @@ CREATE TABLE `practice` (
 DROP TABLE IF EXISTS `gamelogs`;
 
 CREATE TABLE `gamelogs` (
-  `player` varchar(7) NOT NULL,
+  `pid` varchar(7) NOT NULL,
   `tm` varchar(3) NOT NULL,
   `opp` varchar(3) NOT NULL,
   `pos` varchar(3) NOT NULL,
@@ -1814,7 +1828,7 @@ CREATE TABLE `gamelogs` (
   `dtpr` tinyint(2) DEFAULT 0,
   `dtd` tinyint(2) DEFAULT 0,
 
-  UNIQUE KEY `player` (`player`, `week`, `year`)
+  UNIQUE KEY `pid` (`pid`, `week`, `year`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -1928,7 +1942,7 @@ CREATE TABLE `footballoutsiders` (
 DROP TABLE IF EXISTS `rankings`;
 
 CREATE TABLE `rankings` (
-  `player` varchar(7) NOT NULL,
+  `pid` varchar(7) NOT NULL,
   `pos` varchar(3) NOT NULL,
   `wk` tinyint(2) NOT NULL,
   `year` int(4) NOT NULL,
@@ -1958,7 +1972,7 @@ CREATE TABLE `rankings` (
 DROP TABLE IF EXISTS `props`;
 
 CREATE TABLE `props` (
-  `player` varchar(7) NOT NULL,
+  `pid` varchar(7) NOT NULL,
   `wk` tinyint(2) NOT NULL,
   `year` int(4) NOT NULL,
   `type` tinyint(3) NOT NULL,
@@ -1980,7 +1994,7 @@ DROP TABLE IF EXISTS `transition_bids`;
 
 CREATE TABLE `transition_bids` (
   `uid` int(11) NOT NULL AUTO_INCREMENT,
-  `player` varchar(7) NOT NULL,
+  `pid` varchar(7) NOT NULL,
   `userid` int(6) NOT NULL,
   `bid` int(4) DEFAULT NULL,
   `tid` int(5) NOT NULL,
@@ -2006,9 +2020,9 @@ DROP TABLE IF EXISTS `transition_releases`;
 
 CREATE TABLE `transition_releases` (
   `transitionid` int(11) NOT NULL,
-  `player` varchar(7) NOT NULL,
+  `pid` varchar(7) NOT NULL,
   KEY `transitionid` (`transitionid`),
-  UNIQUE KEY `player` (`transitionid`, `player`)
+  UNIQUE KEY `pid` (`transitionid`, `pid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -2037,12 +2051,12 @@ CREATE TABLE `league_team_lineups` (
 DROP TABLE IF EXISTS `league_team_lineup_starters`;
 
 CREATE TABLE `league_team_lineup_starters` (
-  `player` varchar(7) NOT NULL,
+  `pid` varchar(7) NOT NULL,
   `week` varchar(3) NOT NULL,
   `year` int(4) NOT NULL,
   `tid` int(6) NOT NULL,
   `lid` int(6) NOT NULL,
-  UNIQUE KEY `starter` (`lid`,`player`,`year`, `week`)
+  UNIQUE KEY `starter` (`lid`,`pid`,`year`, `week`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -2079,7 +2093,7 @@ CREATE TABLE `league_baselines` (
   `lid` int(6) NOT NULL,
   `week` varchar(3) NOT NULL,
   `year` int(4) NOT NULL,
-  `player` varchar(7) NOT NULL,
+  `pid` varchar(7) NOT NULL,
   `type` varchar(10),
   `pos` varchar(3) NOT NULL,
   UNIQUE KEY `baseline` (`lid`,`week`,`pos`,`type`)
@@ -2094,44 +2108,13 @@ CREATE TABLE `league_baselines` (
 DROP TABLE IF EXISTS `keeptradecut_rankings`;
 
 CREATE TABLE `keeptradecut_rankings` (
-  `player` varchar(7) NOT NULL,
+  `pid` varchar(7) NOT NULL,
   `qb` tinyint(1) NOT NULL,
   `d` int(11) NOT NULL,
   `v` int(5) NOT NULL,
   `type` tinyint(1) NOT NULL,
-  UNIQUE KEY `player_value` (`player`,`d`,`qb`,`type`)
+  UNIQUE KEY `player_value` (`pid`,`d`,`qb`,`type`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
---
--- Indexes for table `game`
---
-ALTER TABLE `game`
-  ADD UNIQUE KEY `gid` (`gid`),
-  ADD KEY `seas` (`seas`);
-
---
--- Indexes for table `offense`
---
-ALTER TABLE `offense`
-  ADD UNIQUE KEY `uid` (`uid`),
-  ADD KEY `gid` (`gid`),
-  ADD KEY `player` (`player`);
-
---
--- Indexes for table `player`
---
-ALTER TABLE `player`
-  ADD UNIQUE KEY `player` (`player`),
-  ADD KEY `fname` (`fname`),
-  ADD KEY `lname` (`lname`);
-
---
--- Indexes for table `team`
---
-ALTER TABLE `team`
-  ADD UNIQUE KEY `tid` (`tid`),
-  ADD KEY `gid` (`gid`),
-  ADD KEY `tname` (`tname`);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

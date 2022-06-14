@@ -46,12 +46,12 @@ const run = async () => {
       let error
       try {
         const release = await db('waiver_releases')
-          .select('player')
+          .select('pid')
           .where('waiverid', waiver.wid)
         await submitAcquisition({
-          release: release.map((r) => r.player),
+          release: release.map((r) => r.pid),
           leagueId: lid,
-          player: waiver.player,
+          pid: waiver.pid,
           teamId: waiver.tid,
           bid: waiver.bid,
           userId: waiver.userid,
@@ -77,7 +77,7 @@ const run = async () => {
         const tiedWaivers = await db('waivers')
           .where({
             bid: waiver.bid,
-            player: waiver.player,
+            pid: waiver.pid,
             lid: waiver.lid
           })
           .whereNot('uid', waiver.wid)

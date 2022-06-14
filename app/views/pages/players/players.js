@@ -77,7 +77,7 @@ export default class PlayersPage extends React.Component {
 
     if (this.props.selected) {
       // TODO
-      // const index = this.props.players.findIndex(p => p.player === this.props.selected)
+      // const index = this.props.players.findIndex(p => p.pid === this.props.selected)
       // this.list.current.scrollToRow(index)
     }
   }
@@ -150,8 +150,14 @@ export default class PlayersPage extends React.Component {
     const index = this.state.page * 25
     players
       .slice(0, index)
-      .forEach((p, idx) =>
-        rowItems.push(<PlayerRow key={p.player} player={p} index={idx} />)
+      .forEach((playerMap, idx) =>
+        rowItems.push(
+          <PlayerRow
+            key={playerMap.get('pid')}
+            playerMap={playerMap}
+            index={idx}
+          />
+        )
       )
 
     const headerSeasonPassing = (

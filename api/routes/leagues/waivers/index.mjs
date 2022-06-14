@@ -62,7 +62,7 @@ router.get('/?', async (req, res) => {
 router.post('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    const { player, leagueId, type, teamId } = req.body
+    const { pid, leagueId, type, teamId } = req.body
     let { release } = req.body
     let bid = parseInt(req.body.bid || 0, 10)
 
@@ -74,8 +74,8 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'player is locked' })
     }
 
-    if (!player) {
-      return res.status(400).send({ error: 'missing player' })
+    if (!pid) {
+      return res.status(400).send({ error: 'missing pid' })
     }
 
     if (!teamId) {
@@ -115,15 +115,15 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: error.message })
     }
 
-    const playerIds = [player]
+    const pids = [pid]
     if (release.length) {
-      release.forEach((player) => playerIds.push(player))
+      release.forEach((release_pid) => pids.push(release_pid))
     }
-    const players = await db('player').whereIn('player', playerIds)
-    if (players.length !== playerIds.length) {
+    const player_rows = await db('player').whereIn('pid', pids)
+    if (player_rows.length !== pids.length) {
       return res.status(400).send({ error: 'invalid player' })
     }
-    const playerRow = players[0]
+    const player_row = player_rows[0]
 
     if (type === constants.waivers.FREE_AGENCY_PRACTICE) {
       // set bid to zero for practice squad waivers
@@ -133,7 +133,7 @@ router.post('/?', async (req, res) => {
     }
 
     const transactions = await db('transactions')
-      .where('player', player)
+      .where('pid', pid)
       .where({ lid: leagueId })
       .orderBy('timestamp', 'desc')
       .orderBy('uid', 'desc')
@@ -157,7 +157,7 @@ router.post('/?', async (req, res) => {
       type === constants.waivers.FREE_AGENCY_PRACTICE
     ) {
       // make sure player is not rostered
-      const isRostered = await isPlayerRostered({ player, leagueId })
+      const isRostered = await isPlayerRostered({ pid, leagueId })
       if (isRostered) {
         return res.status(400).send({ error: 'player rostered' })
       }
@@ -165,7 +165,7 @@ router.post('/?', async (req, res) => {
       if (constants.season.isRegularSeason) {
         // if regular season and not during waiver period, check if player is on release waivers
         if (!constants.season.isWaiverPeriod) {
-          const isOnWaivers = await isPlayerOnWaivers({ player, leagueId })
+          const isOnWaivers = await isPlayerOnWaivers({ pid, leagueId })
           if (!isOnWaivers) {
             return res.status(400).send({ error: 'player is not on waivers' })
           }
@@ -197,7 +197,7 @@ router.post('/?', async (req, res) => {
           })
 
           // if player is a rookie
-          if (playerRow.start === constants.season.year) {
+          if (player_row.start === constants.season.year) {
             // reject practice waivers before day after draft
             if (!league.ddate || dayjs().isBefore(draftDates.draftEnd)) {
               return res.status(400).send({
@@ -207,7 +207,7 @@ router.post('/?', async (req, res) => {
 
             // if after rookie draft waivers cleared, check if player is on release waivers
             if (league.ddate && dayjs().isAfter(draftDates.waiverEnd)) {
-              const isOnWaivers = await isPlayerOnWaivers({ player, leagueId })
+              const isOnWaivers = await isPlayerOnWaivers({ pid, leagueId })
               if (!isOnWaivers) {
                 return res
                   .status(400)
@@ -227,7 +227,7 @@ router.post('/?', async (req, res) => {
 
       // check for duplicate claims
       const claimsQuery = db('waivers')
-        .where({ player, lid: leagueId, tid, type })
+        .where({ pid, lid: leagueId, tid, type })
         .whereNull('processed')
         .whereNull('cancelled')
 
@@ -240,12 +240,14 @@ router.post('/?', async (req, res) => {
       if (claims.length) {
         // compare releases
         for (const claim of claims) {
-          const releases = await db('waiver_releases').where(
+          const release_rows = await db('waiver_releases').where(
             'waiverid',
             claim.uid
           )
-          const releasePlayers = releases.map((r) => r.player)
-          if (releasePlayers.sort().join(',') === release.sort().join(',')) {
+          const existing_release_pids = release_rows.map((r) => r.pid)
+          if (
+            existing_release_pids.sort().join(',') === release.sort().join(',')
+          ) {
             return res.status(400).send({ error: 'duplicate waiver claim' })
           }
         }
@@ -289,7 +291,7 @@ router.post('/?', async (req, res) => {
           lid: leagueId,
           week: constants.season.week,
           year: constants.season.year,
-          player,
+          pid,
           slot: constants.slots.PS
         })
       if (!slots.length) {
@@ -300,7 +302,7 @@ router.post('/?', async (req, res) => {
 
       // check for duplicate waiver
       const claims = await db('waivers')
-        .where({ player, lid: leagueId, tid })
+        .where({ pid, lid: leagueId, tid })
         .whereNull('processed')
         .whereNull('cancelled')
 
@@ -313,22 +315,22 @@ router.post('/?', async (req, res) => {
     const rosterRow = await getRoster({ tid })
     const roster = new Roster({ roster: rosterRow, league })
     if (release.length) {
-      for (const player of release) {
-        if (!roster.has(player)) {
+      for (const release_pid of release) {
+        if (!roster.has(release_pid)) {
           return res.status(400).send({ error: 'invalid release' })
         }
 
-        const releasePlayer = roster.get(player)
+        const releasePlayer = roster.get(release_pid)
         if (releasePlayer.slot === constants.slots.PSP) {
           return res.status(400).send({ error: 'invalid release' })
         }
-        roster.removePlayer(player)
+        roster.removePlayer(release_pid)
       }
     }
     const hasSlot =
       type === constants.waivers.FREE_AGENCY_PRACTICE
         ? roster.hasOpenPracticeSquadSlot()
-        : roster.hasOpenBenchSlot(playerRow.pos)
+        : roster.hasOpenBenchSlot(player_row.pos)
     if (!hasSlot) {
       return res.status(400).send({ error: 'exceeds roster limits' })
     }
@@ -344,7 +346,7 @@ router.post('/?', async (req, res) => {
       tid,
       userid: req.auth.userId,
       lid: leagueId,
-      player,
+      pid,
       po: 9999,
       submitted: Math.round(Date.now() / 1000),
       bid,
@@ -353,9 +355,9 @@ router.post('/?', async (req, res) => {
     const ids = await db('waivers').insert(data)
     data.uid = ids[0]
     if (release.length) {
-      const releaseInserts = release.map((player) => ({
+      const releaseInserts = release.map((pid) => ({
         waiverid: ids[0],
-        player
+        pid
       }))
       await db('waiver_releases').insert(releaseInserts)
     }
@@ -482,43 +484,43 @@ router.put('/:waiverId', async (req, res) => {
     if (!league) {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
-    const players = await db('player').where('player', waiver.player).limit(1)
-    if (!players.length) {
+    const player_rows = await db('player').where('pid', waiver.pid).limit(1)
+    if (!player_rows.length) {
       return res.status(400).send({ error: 'invalid player' })
     }
-    const playerRow = players[0]
+    const player_row = player_rows[0]
 
     // verify team has space for player on active roster
     const rosterRow = await getRoster({ tid })
     const roster = new Roster({ roster: rosterRow, league })
     if (release.length) {
-      for (const player of release) {
-        if (!roster.has(player)) {
+      for (const release_pid of release) {
+        if (!roster.has(release_pid)) {
           return res.status(400).send({ error: 'invalid release' })
         }
-        roster.removePlayer(player)
+        roster.removePlayer(release_pid)
       }
     }
     const hasSlot =
       waiver.type === constants.waivers.FREE_AGENCY_PRACTICE
         ? roster.hasOpenPracticeSquadSlot()
-        : roster.hasOpenBenchSlot(playerRow.pos)
+        : roster.hasOpenBenchSlot(player_row.pos)
     if (!hasSlot) {
       return res.status(400).send({ error: 'exceeds roster limits' })
     }
 
     await db('waivers').update({ bid }).where({ uid: waiverId })
     if (release.length) {
-      const releaseInserts = release.map((player) => ({
+      const releaseInserts = release.map((pid) => ({
         waiverid: waiverId,
-        player
+        pid
       }))
       await db('waiver_releases').insert(releaseInserts).onConflict().merge()
     }
     await db('waiver_releases')
       .del()
       .where('waiverid', waiverId)
-      .whereNotIn('player', release)
+      .whereNotIn('pid', release)
 
     res.send({ bid, release, uid: waiverId })
   } catch (error) {

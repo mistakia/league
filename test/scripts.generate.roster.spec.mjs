@@ -27,7 +27,7 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
   describe('process', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.subtract('1', 'month').toDate())
+      MockDate.set(start.subtract('1', 'month').toISOString())
       await league(knex)
     })
 
@@ -46,9 +46,9 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
       const teamId = 1
       const roster1 = await getRoster({ tid: teamId })
       const roster1Players = roster1.players.map(
-        ({ lid, player, pos, slot, tid, type }) => ({
+        ({ lid, pid, pos, slot, tid, type }) => ({
           lid,
-          player,
+          pid,
           pos,
           slot,
           tid,
@@ -60,9 +60,9 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
         week: constants.season.week + 1
       })
       const roster2Players = roster2.players.map(
-        ({ lid, player, pos, slot, tid, type }) => ({
+        ({ lid, pid, pos, slot, tid, type }) => ({
           lid,
-          player,
+          pid,
           pos,
           slot,
           tid,
@@ -81,9 +81,9 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
 
       const roster3 = await getRoster({ tid: teamId })
       const roster3Players = roster3.players.map(
-        ({ lid, player, pos, slot, tid, type }) => ({
+        ({ lid, pid, pos, slot, tid, type }) => ({
           lid,
-          player,
+          pid,
           pos,
           slot,
           tid,
@@ -95,9 +95,9 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
         week: constants.season.week + 1
       })
       const roster4Players = roster4.players.map(
-        ({ lid, player, pos, slot, tid, type }) => ({
+        ({ lid, pid, pos, slot, tid, type }) => ({
           lid,
-          player,
+          pid,
           pos,
           slot,
           tid,
@@ -111,7 +111,7 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
     })
 
     it('generate rosters for next year', async () => {
-      MockDate.set(start.add(17, 'week').toDate())
+      MockDate.set(start.add(17, 'week').toISOString())
       await draft(knex)
 
       let error
@@ -127,9 +127,9 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
       const teamId = 1
       const roster1 = await getRoster({ tid: teamId })
       const roster1Players = roster1.players.map(
-        ({ lid, player, pos, slot, tid, type }) => ({
+        ({ lid, pid, pos, slot, tid, type }) => ({
           lid,
-          player,
+          pid,
           pos,
           slot,
           tid,
@@ -142,9 +142,9 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
         year: constants.season.year + 1
       })
       const roster2Players = roster2.players.map(
-        ({ lid, player, pos, slot, tid, type }) => ({
+        ({ lid, pid, pos, slot, tid, type }) => ({
           lid,
-          player,
+          pid,
           pos,
           slot,
           tid,
@@ -163,9 +163,9 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
 
       const roster3 = await getRoster({ tid: teamId })
       const roster3Players = roster3.players.map(
-        ({ lid, player, pos, slot, tid, type }) => ({
+        ({ lid, pid, pos, slot, tid, type }) => ({
           lid,
-          player,
+          pid,
           pos,
           slot,
           tid,
@@ -178,9 +178,9 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
         year: constants.season.year + 1
       })
       const roster4Players = roster4.players.map(
-        ({ lid, player, pos, slot, tid, type }) => ({
+        ({ lid, pid, pos, slot, tid, type }) => ({
           lid,
-          player,
+          pid,
           pos,
           slot,
           tid,
@@ -197,7 +197,7 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
   /* describe('errors', function () {
    *   beforeEach(async function () {
    *     this.timeout(60 * 1000)
-   *     MockDate.set(start.subtract('1', 'month').toDate())
+   *     MockDate.set(start.subtract('1', 'month').toISOString())
    *     await league(knex)
    *   })
    * }) */

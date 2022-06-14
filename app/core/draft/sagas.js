@@ -20,7 +20,7 @@ export function* draftPlayer() {
   const { selected } = yield select(getDraft)
   const { teamId, leagueId } = yield select(getApp)
   const { uid } = yield select(getNextPick)
-  const params = { leagueId, playerId: selected, teamId, pickId: uid }
+  const params = { leagueId, pid: selected, teamId, pickId: uid }
   yield call(postDraft, params)
 }
 

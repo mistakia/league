@@ -35,7 +35,7 @@ router.post('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const { teamId } = req.params
-    const { player, leagueId, remove } = req.body
+    const { pid, leagueId, remove } = req.body
     const playerTid = parseInt(req.body.playerTid || 0, 10)
     let { release } = req.body
     const bid = parseInt(req.body.bid || 0, 10)
@@ -44,8 +44,8 @@ router.post('/?', async (req, res) => {
       release = release ? [release] : []
     }
 
-    if (!player) {
-      return res.status(400).send({ error: 'missing player' })
+    if (!pid) {
+      return res.status(400).send({ error: 'missing pid' })
     }
 
     if (!leagueId) {
@@ -60,11 +60,11 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'missing playerTid' })
     }
 
-    if (player === remove) {
+    if (pid === remove) {
       return res.status(400).send({ error: 'invalid remove' })
     }
 
-    if (release.includes(player)) {
+    if (release.includes(pid)) {
       return res.status(400).send({ error: 'invalid release' })
     }
 
@@ -90,15 +90,15 @@ router.post('/?', async (req, res) => {
     }
 
     // get players info
-    const playerIds = [player]
+    const pids = [pid]
     if (release.length) {
-      release.forEach((player) => playerIds.push(player))
+      release.forEach((pid) => pids.push(pid))
     }
-    const players = await db('player').whereIn('player', playerIds)
-    if (players.length !== playerIds.length) {
+    const player_rows = await db('player').whereIn('pid', pids)
+    if (player_rows.length !== pids.length) {
       return res.status(400).send({ error: 'invalid player' })
     }
-    const playerRow = players[0]
+    const player_row = player_rows[0]
 
     // get league info
     const league = await getLeague(leagueId)
@@ -119,11 +119,11 @@ router.post('/?', async (req, res) => {
 
     // check if release players are on team
     if (release.length) {
-      for (const player of release) {
-        if (!roster.has(player)) {
+      for (const release_pid of release) {
+        if (!roster.has(release_pid)) {
           return res.status(400).send({ error: 'invalid release' })
         }
-        roster.removePlayer(player)
+        roster.removePlayer(release_pid)
       }
     }
 
@@ -133,7 +133,7 @@ router.post('/?', async (req, res) => {
 
     // if original bid, check if on team
     if (playerTid === tid) {
-      if (!roster.has(player)) {
+      if (!roster.has(pid)) {
         return res.status(400).send({ error: 'invalid player' })
       }
 
@@ -146,15 +146,14 @@ router.post('/?', async (req, res) => {
       }
 
       // update value to bid
-      roster.updateValue(player, bid)
+      roster.updateValue(pid, bid)
 
       // make sure tag does not exceed limits
       if (remove) {
         roster.removeTag(remove)
       }
       const isEligible = roster.isEligibleForTag({
-        tag: constants.tags.TRANSITION,
-        player
+        tag: constants.tags.TRANSITION
       })
       if (!isEligible) {
         return res.status(400).send({ error: 'exceeds tag limit' })
@@ -163,7 +162,7 @@ router.post('/?', async (req, res) => {
       // check if transition bid exists
       const transitionBids = await db('transition_bids')
         .where({
-          player,
+          pid,
           tid: playerTid,
           lid: leagueId,
           year: constants.season.year
@@ -184,25 +183,23 @@ router.post('/?', async (req, res) => {
       }
     }
 
-    const cutlist = await db('league_cutlist')
-      .select('player')
-      .where('tid', tid)
+    const cutlist = await db('league_cutlist').select('pid').where('tid', tid)
 
     for (const row of cutlist) {
-      roster.removePlayer(row.player)
+      roster.removePlayer(row.pid)
     }
 
     // if competing bid, make sure there is roster space
     if (playerTid !== tid) {
-      if (!roster.hasOpenBenchSlot(playerRow.pos)) {
+      if (!roster.hasOpenBenchSlot(player_row.pos)) {
         return res.status(400).send({ error: 'exceeds roster limits' })
       }
 
       // add to roster
       roster.addPlayer({
         slot: constants.slots.BENCH,
-        player,
-        pos: playerRow.pos,
+        pid,
+        pos: player_row.pos,
         value: bid
       })
     }
@@ -219,18 +216,18 @@ router.post('/?', async (req, res) => {
         .update({ tag: constants.tags.TRANSITION })
         .where({
           rid: rosterRow.uid,
-          player
+          pid
         })
 
       if (remove) {
         await db('rosters_players').update({ tag: 1 }).where({
           rid: rosterRow.uid,
-          player: remove
+          pid: remove
         })
 
         await db('transition_bids')
           .where({
-            player,
+            pid,
             tid,
             year: constants.season.year
           })
@@ -245,7 +242,7 @@ router.post('/?', async (req, res) => {
       tid,
       userid: req.auth.userId,
       lid: leagueId,
-      player,
+      pid,
       submitted: Math.round(Date.now() / 1000),
       year: constants.season.year,
       bid,
@@ -256,9 +253,9 @@ router.post('/?', async (req, res) => {
     data.uid = query[0]
 
     if (release.length) {
-      const releaseInserts = release.map((player) => ({
+      const releaseInserts = release.map((pid) => ({
         transitionid: query[0],
-        player
+        pid
       }))
       await db('transition_releases').insert(releaseInserts)
     }
@@ -277,10 +274,10 @@ router.delete('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const { teamId } = req.params
-    const { player, leagueId } = req.body
+    const { pid, leagueId } = req.body
 
-    if (!player) {
-      return res.status(400).send({ error: 'missing player' })
+    if (!pid) {
+      return res.status(400).send({ error: 'missing pid' })
     }
 
     if (!leagueId) {
@@ -321,7 +318,7 @@ router.delete('/?', async (req, res) => {
     // verify transition id exists
     const query1 = await db('transition_bids')
       .where({
-        player,
+        pid,
         tid,
         year: constants.season.year
       })
@@ -350,7 +347,7 @@ router.delete('/?', async (req, res) => {
     // update tag
     await db('rosters_players').update({ tag: constants.tags.REGULAR }).where({
       rid: rosterRow.uid,
-      player
+      pid
     })
 
     res.send({ ...transitionBid, cancelled })
@@ -364,7 +361,7 @@ router.put('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const { teamId } = req.params
-    const { player, leagueId } = req.body
+    const { pid, leagueId } = req.body
     let { release } = req.body
     const bid = parseInt(req.body.bid || 0, 10)
 
@@ -372,8 +369,8 @@ router.put('/?', async (req, res) => {
       release = release ? [release] : []
     }
 
-    if (!player) {
-      return res.status(400).send({ error: 'missing player' })
+    if (!pid) {
+      return res.status(400).send({ error: 'missing pid' })
     }
 
     if (!leagueId) {
@@ -408,7 +405,7 @@ router.put('/?', async (req, res) => {
     // verify transition id exists
     const query1 = await db('transition_bids')
       .where({
-        player,
+        pid,
         tid,
         year: constants.season.year
       })
@@ -420,15 +417,15 @@ router.put('/?', async (req, res) => {
     const transitionBid = query1[0]
 
     // get players info
-    const playerIds = [player]
+    const pids = [pid]
     if (release.length) {
-      release.forEach((player) => playerIds.push(player))
+      release.forEach((pid) => pids.push(pid))
     }
-    const players = await db('player').whereIn('player', playerIds)
-    if (players.length !== playerIds.length) {
+    const player_rows = await db('player').whereIn('pid', pids)
+    if (player_rows.length !== pids.length) {
       return res.status(400).send({ error: 'invalid player' })
     }
-    const playerRow = players[0]
+    const player_row = player_rows[0]
 
     // get league info
     const league = await getLeague(leagueId)
@@ -442,21 +439,21 @@ router.put('/?', async (req, res) => {
 
     // check if release players are on team
     if (release.length) {
-      for (const player of release) {
-        if (!roster.has(player)) {
+      for (const release_pid of release) {
+        if (!roster.has(release_pid)) {
           return res.status(400).send({ error: 'invalid release' })
         }
-        roster.removePlayer(player)
+        roster.removePlayer(release_pid)
       }
     }
 
     const cutlist = await db('league_cutlist')
-      .select('player')
+      .select('pid')
       .where('tid', teamId)
 
     // remove cutlist players
     for (const row of cutlist) {
-      roster.removePlayer(row.player)
+      roster.removePlayer(row.pid)
     }
 
     // make sure extension has not passed
@@ -469,20 +466,20 @@ router.put('/?', async (req, res) => {
 
     // if competing bid, make sure there is roster space
     if (transitionBid.player_tid !== teamId) {
-      if (!roster.hasOpenBenchSlot(playerRow.pos)) {
+      if (!roster.hasOpenBenchSlot(player_row.pos)) {
         return res.status(400).send({ error: 'exceeds roster limits' })
       }
 
       // add to roster
       roster.addPlayer({
         slot: constants.slots.BENCH,
-        player,
-        pos: playerRow.pos,
+        pid,
+        pos: player_row.pos,
         value: bid
       })
     } else {
       // update value to bid
-      roster.updateValue(player, bid)
+      roster.updateValue(pid, bid)
     }
 
     // make sure there is enough cap space
@@ -496,7 +493,7 @@ router.put('/?', async (req, res) => {
         .update({ tag: constants.tags.TRANSITION })
         .where({
           rid: rosterRow.uid,
-          player
+          pid
         })
     }
 
@@ -509,9 +506,9 @@ router.put('/?', async (req, res) => {
       .where('uid', transitionBid.uid)
 
     if (release.length) {
-      const releaseInserts = release.map((player) => ({
+      const releaseInserts = release.map((pid) => ({
         transitionid: transitionBid.uid,
-        player
+        pid
       }))
       await db('transition_releases')
         .insert(releaseInserts)
@@ -522,7 +519,7 @@ router.put('/?', async (req, res) => {
     await db('transition_releases')
       .del()
       .where('transitionid', transitionBid.uid)
-      .whereNotIn('player', release)
+      .whereNotIn('pid', release)
 
     res.send({
       ...transitionBid,

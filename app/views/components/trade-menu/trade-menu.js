@@ -14,7 +14,8 @@ export default class TradeMenu extends React.Component {
     for (const [index, trade] of trades.entries()) {
       const classNames = ['trade__menu-item']
       if (selectedTradeId === trade.uid) classNames.push('selected')
-      const otherTeamId = teamId === trade.pid ? trade.tid : trade.pid
+      const otherTeamId =
+        teamId === trade.propose_tid ? trade.accept_tid : trade.propose_tid
       menuItems.push(
         <div
           key={index}

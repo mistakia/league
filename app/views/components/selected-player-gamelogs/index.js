@@ -9,7 +9,7 @@ import SelectedPlayerGamelogs from './selected-player-gamelogs'
 const mapStateToProps = createSelector(
   getSelectedPlayer,
   getGamelogsForSelectedPlayer,
-  (player, gamelogs) => ({ player, gamelogs })
+  (playerMap, gamelogs) => ({ playerMap, gamelogs })
 )
 
 export default connect(mapStateToProps)(SelectedPlayerGamelogs)

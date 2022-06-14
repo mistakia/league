@@ -156,16 +156,16 @@ export default class Auction {
   async sold() {
     this._locked = true
     const bid = this._transactions[0]
-    const { userid, tid, player, value, year } = bid
+    const { userid, tid, pid, value, year } = bid
 
-    this.logger(`processing ${player} bid`)
+    this.logger(`processing ${pid} bid`)
 
-    const players = await db('player').where('player', player)
+    const players = await db('player').where('pid', pid)
     const playerInfo = players[0]
     if (!playerInfo) {
       this._startBidTimer()
       this.reply(userid, 'invalid player')
-      this.logger(`can not process invalid player ${player}`)
+      this.logger(`can not process invalid player ${pid}`)
       return
     }
 
@@ -175,7 +175,7 @@ export default class Auction {
     const hasSlot = r.hasOpenBenchSlot(playerInfo.pos)
     if (!hasSlot) {
       this._startBidTimer()
-      this.logger(`no open slots available for ${player} on teamId ${tid}`)
+      this.logger(`no open slots available for ${pid} on teamId ${tid}`)
       this.reply(userid, 'exceeds roster limits')
       return
     }
@@ -192,12 +192,12 @@ export default class Auction {
         rid: r.uid,
         slot: constants.slots.BENCH,
         pos: playerInfo.pos,
-        player
+        pid
       })
     } catch (err) {
       this.logger(err)
       this._startBidTimer()
-      this.logger(`unable to add player ${player} to roster of teamId ${tid}`)
+      this.logger(`unable to add player ${pid} to roster of teamId ${tid}`)
       this.reply(userid, err.message)
       return
     }
@@ -218,7 +218,7 @@ export default class Auction {
     const transaction = {
       userid,
       tid,
-      player,
+      pid,
       lid: this._lid,
       type: constants.transactions.AUCTION_PROCESSED,
       value,
@@ -243,7 +243,7 @@ export default class Auction {
     if (this._locked) return
     this._locked = true
 
-    const { userid, tid, player, value } = message
+    const { userid, tid, pid, value } = message
     const current = this._transactions[0]
 
     const team = this._teams.find((t) => t.uid === tid)
@@ -267,11 +267,11 @@ export default class Auction {
       return
     }
 
-    this.logger(`received bid of ${value} for ${player} from teamId ${tid}`)
+    this.logger(`received bid of ${value} for ${pid} from teamId ${tid}`)
 
-    if (current.player !== player) {
+    if (current.pid !== pid) {
       this.logger(
-        `received bid for player ${player} is not the current player of ${current.player}`
+        `received bid for player ${pid} is not the current player of ${current.pid}`
       )
       this.reply(userid, 'invalid bid')
       this._startBidTimer()
@@ -294,7 +294,7 @@ export default class Auction {
     const bid = {
       userid,
       tid,
-      player,
+      pid,
       lid: this._lid,
       type: constants.transactions.AUCTION_BID,
       value,
@@ -314,9 +314,9 @@ export default class Auction {
   async nominate(message = {}, { userId, tid }) {
     const nominatingTeamId = this.nominatingTeamId
     let { userid, value = 0 } = message
-    const { player } = message
+    const { pid } = message
 
-    if (!player) {
+    if (!pid) {
       this.logger('no player to nominate')
       return
     }
@@ -327,11 +327,11 @@ export default class Auction {
       return
     }
 
-    const players = await db('player').where('player', player)
+    const players = await db('player').where('pid', pid)
     const playerInfo = players[0]
     if (!playerInfo) {
       this.reply(userid, 'invalid nomination')
-      this.logger(`can not nominate invalid player ${player}`)
+      this.logger(`can not nominate invalid player ${pid}`)
       return
     }
 
@@ -340,10 +340,10 @@ export default class Auction {
       .join('rosters', 'rosters_players.rid', 'rosters.uid')
       .where('lid', this._lid)
       .where('year', constants.season.year)
-      .where('player', player)
+      .where('pid', pid)
     if (rosterRows.length) {
       this.reply(userid, 'invalid nomination')
-      this.logger(`can not nominate invalid player ${player}`)
+      this.logger(`can not nominate invalid player ${pid}`)
       return
     }
 
@@ -353,7 +353,7 @@ export default class Auction {
     const hasSlot = r.hasOpenBenchSlot(playerInfo.pos)
     if (!hasSlot) {
       this.logger(
-        `no open slots available for ${player} on teamId ${nominatingTeamId}`
+        `no open slots available for ${pid} on teamId ${nominatingTeamId}`
       )
       this.reply(userid, 'exceeds roster limits')
       return
@@ -377,12 +377,12 @@ export default class Auction {
       value = 0
     }
 
-    this.logger(`nominating ${player}`)
+    this.logger(`nominating ${pid}`)
 
     const bid = {
       userid,
       tid: nominatingTeamId,
-      player,
+      pid,
       type: constants.transactions.AUCTION_BID,
       value,
       lid: this._lid,

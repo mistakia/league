@@ -20,14 +20,14 @@ const calculateStatsFromPlays = ({ plays, qualifiers, league }) => {
     teams[team][stat] += value
   }
 
-  const addStat = (playerId, stat, value) => {
-    if (!playerId) return
+  const addStat = (pid, stat, value) => {
+    if (!pid) return
     value = parseInt(value, 10)
     // TODO record longest rushing, receiving, passing play
     // TODO count big plays
     // TODO situational splits (i.e. # of defenders in box)
-    players[playerId] = players[playerId] || constants.createFullStats()
-    players[playerId][stat] += value
+    players[pid] = players[pid] || constants.createFullStats()
+    players[pid][stat] += value
   }
 
   plays.forEach((play) => {
@@ -132,9 +132,9 @@ const calculateStatsFromPlays = ({ plays, qualifiers, league }) => {
     }
   })
 
-  for (const player in players) {
-    const stats = players[player]
-    const team = playerToTeam[player]
+  for (const pid in players) {
+    const stats = players[pid]
+    const team = playerToTeam[pid]
     const teamStats = teams[team]
 
     const skpa = stats.sk + stats.pa

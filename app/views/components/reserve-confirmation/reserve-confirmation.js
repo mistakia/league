@@ -19,7 +19,7 @@ export default class ReserveConfirmation extends React.Component {
     super(props)
 
     this.state = {
-      activate: '',
+      activate_pid: '',
       missingActivate: false
     }
 
@@ -27,40 +27,41 @@ export default class ReserveConfirmation extends React.Component {
     this._hasReserveSpace = team.roster.hasOpenInjuredReserveSlot()
     this._activatable = []
 
-    const reservePlayerIds = team.roster.reserve.map((p) => p.player)
-    for (const playerId of reservePlayerIds) {
-      const player = team.players.find((p) => p.player === playerId)
-      this._activatable.push(player)
+    const reserve_pids = team.roster.reserve.map((p) => p.pid)
+    for (const pid of reserve_pids) {
+      const playerMap = team.players.find((p) => p.get('pid') === pid)
+      this._activatable.push(playerMap)
     }
   }
 
   handleSelectActivate = (event) => {
     const { value } = event.target
-    this.setState({ activate: value, missingActivate: false })
+    this.setState({ activate_pid: value, missingActivate: false })
   }
 
   handleSubmit = () => {
-    const { activate } = this.state
-    const { player } = this.props.player
+    const { activate_pid } = this.state
+    const reserve_pid = this.props.playerMap.get('pid')
 
-    if (!this._hasReserveSpace && !activate) {
+    if (!this._hasReserveSpace && !activate_pid) {
       return this.setState({ missingActivate: true })
     } else {
       this.setState({ missingActivate: false })
     }
 
-    this.props.reserve({ player, slot: constants.slots.IR, activate })
+    this.props.reserve({ reserve_pid, slot: constants.slots.IR, activate_pid })
     this.props.onClose()
   }
 
   render = () => {
-    const { player } = this.props
+    const { playerMap } = this.props
 
     const menuItems = []
-    for (const rPlayer of this._activatable) {
+    for (const aPlayerMap of this._activatable) {
+      const pid = aPlayerMap.get('pid')
       menuItems.push(
-        <MenuItem key={rPlayer.player} value={rPlayer.player}>
-          {rPlayer.name} ({rPlayer.pos})
+        <MenuItem key={pid} value={pid}>
+          {aPlayerMap.get('name')} ({aPlayerMap.get('pos')})
         </MenuItem>
       )
     }
@@ -70,7 +71,11 @@ export default class ReserveConfirmation extends React.Component {
         <DialogTitle>Designate Reserve</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {`${player.fname} ${player.lname} (${player.pos}) will be placed on Reserves/IR. He will not be available to use in lineups until he's activated.`}
+            {`${playerMap.get('fname')} ${playerMap.get(
+              'lname'
+            )} (${playerMap.get(
+              'pos'
+            )}) will be placed on Reserves/IR. He will not be available to use in lineups until he's activated.`}
           </DialogContentText>
           {!this._hasReserveSpace && (
             <DialogContentText>
@@ -85,7 +90,7 @@ export default class ReserveConfirmation extends React.Component {
                 <Select
                   labelId='activate-label'
                   error={this.state.missingActivate}
-                  value={this.state.activate}
+                  value={this.state.activate_pid}
                   onChange={this.handleSelectActivate}
                   label='Activate'
                 >
@@ -111,6 +116,6 @@ export default class ReserveConfirmation extends React.Component {
 ReserveConfirmation.propTypes = {
   onClose: PropTypes.func,
   reserve: PropTypes.func,
-  player: ImmutablePropTypes.record,
+  playerMap: ImmutablePropTypes.map,
   team: PropTypes.object
 }

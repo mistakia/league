@@ -5,6 +5,6 @@ export function getContextMenuInfo(state) {
 }
 
 export function getContextMenuPlayer(state) {
-  const playerId = state.getIn(['contextMenu', 'data', 'playerId'])
-  return getPlayerById(state, { playerId })
+  const pid = state.getIn(['contextMenu', 'data', 'pid'])
+  return getPlayerById(state, { pid })
 }

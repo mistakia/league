@@ -47,10 +47,10 @@ const runOne = async (opts) => {
       pos: item.player_position_id
     }
 
-    let player
+    let player_row
     try {
-      player = await getPlayer(params)
-      if (!player) {
+      player_row = await getPlayer(params)
+      if (!player_row) {
         missing.push(params)
         continue
       }
@@ -62,7 +62,7 @@ const runOne = async (opts) => {
 
     const ranking = getRanking(item)
     inserts.push({
-      player: player.player,
+      pid: player_row.pid,
       pos: params.pos,
       year,
       wk: 0,

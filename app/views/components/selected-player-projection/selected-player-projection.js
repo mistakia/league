@@ -8,8 +8,8 @@ import PlayerSelectedRowHeader from '@components/player-selected-row-header'
 
 export default class SelectedPlayerProjection extends React.Component {
   handleClearClick = () => {
-    const { playerId, week } = this.props
-    this.props.delete({ playerId, week })
+    const { pid, week } = this.props
+    this.props.delete({ pid, week })
   }
 
   render = () => {
@@ -73,7 +73,7 @@ export default class SelectedPlayerProjection extends React.Component {
 }
 
 SelectedPlayerProjection.propTypes = {
-  playerId: PropTypes.string,
+  pid: PropTypes.string,
   delete: PropTypes.func,
   pos: PropTypes.string,
   week: PropTypes.number,

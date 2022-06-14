@@ -10,6 +10,7 @@ import {
   getCurrentPlayers,
   getRosteredPlayerIdsForCurrentLeague
 } from '@core/rosters'
+import { constants } from '@common'
 
 import AuctionTargets from './auction-targets'
 
@@ -18,18 +19,27 @@ const mapStateToProps = createSelector(
   getAuctionTargetPlayers,
   getCurrentPlayers,
   getRosteredPlayerIdsForCurrentLeague,
-  (auction, players, team, rosteredPlayerIds) => ({
-    valueType: auction.valueType,
-    players,
-    lineupPlayerIds: auction.lineupPlayers,
-    lineupFeasible: auction.lineupFeasible,
-    lineupPoints: auction.lineupPoints,
-    hideRostered: auction.hideRostered,
-    muted: auction.muted,
-    lineupBudget: auction.lineupBudget,
-    team,
-    rosteredPlayerIds
-  })
+  (auction, players, team, rosteredPlayerIds) => {
+    const playersByPosition = {}
+    for (const position of constants.positions) {
+      if (!playersByPosition[position]) playersByPosition[position] = {}
+      playersByPosition[position] = players.filter(
+        (pMap) => pMap.get('pos') === position
+      )
+    }
+
+    return {
+      valueType: auction.valueType,
+      playersByPosition,
+      lineupPlayerIds: auction.lineupPlayers,
+      lineupFeasible: auction.lineupFeasible,
+      lineupPoints: auction.lineupPoints,
+      hideRostered: auction.hideRostered,
+      muted: auction.muted,
+      team,
+      rosteredPlayerIds
+    }
+  }
 )
 
 const mapDispatchToProps = {

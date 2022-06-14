@@ -89,12 +89,12 @@ export default class DashboardPlayersTable extends React.Component {
     const isWaiver = Boolean(waiverType)
     const isPoach = Boolean(poaches)
     const isClaim = isWaiver || isPoach
-    const showReorder = isWaiver || cutlist
+    const showReorder = Boolean(isWaiver || (cutlist && cutlist.size))
 
     const SortableItem = SortableElement(({ waiver }) => {
       return (
         <PlayerRoster
-          player={waiver.player}
+          pid={waiver.pid}
           waiverId={waiver.uid}
           claim={waiver}
           reorder
@@ -119,7 +119,7 @@ export default class DashboardPlayersTable extends React.Component {
             key={index}
             claim={poach}
             poachId={poach.uid}
-            player={poach.player}
+            pid={poach.pid}
           />
         )
       })
@@ -143,15 +143,15 @@ export default class DashboardPlayersTable extends React.Component {
         </div>
       )
     } else if (cutlist) {
-      const SortableItem = SortableElement(({ player }) => {
-        return <PlayerRoster player={player} reorder />
+      const SortableItem = SortableElement(({ playerMap }) => {
+        return <PlayerRoster playerMap={playerMap} reorder />
       })
 
       const SortableCutlist = SortableContainer(({ items }) => {
         return (
           <div>
-            {items.map((player, index) => (
-              <SortableItem key={index} index={index} player={player} />
+            {items.map((playerMap, index) => (
+              <SortableItem key={index} index={index} playerMap={playerMap} />
             ))}
           </div>
         )

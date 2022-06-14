@@ -30,7 +30,7 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
     await knex.migrate.rollback()
     await knex.migrate.latest()
 
-    MockDate.set(start.subtract('1', 'month').toDate())
+    MockDate.set(start.subtract('1', 'month').toISOString())
     await knex.seed.run()
   })
 
@@ -49,7 +49,7 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
         .where({
           lid: leagueId
         })
-      MockDate.set(start.subtract('1', 'month').toDate())
+      MockDate.set(start.subtract('1', 'month').toISOString())
     })
 
     it('process single bid', async () => {
@@ -67,7 +67,7 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
 
       const timestamp = Math.round(Date.now() / 1000)
       await knex('transition_bids').insert({
-        player: player.player,
+        pid: player.pid,
         userid: userId,
         bid: value,
         tid: teamId,
@@ -96,14 +96,14 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
       // verify roster
       await checkRoster({
         teamId,
-        player: player.player,
+        pid: player.pid,
         leagueId
       })
 
       // verify transaction
       await checkLastTransaction({
         leagueId,
-        player: player.player,
+        pid: player.pid,
         teamId,
         userId: 1,
         value,
@@ -112,12 +112,18 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
     })
 
     it('process single bid with cutlist and conditional release', async () => {
-      // TODO - make sure selected players are unique
+      const exclude_pids = []
       const player1 = await selectPlayer() // 30 - rfa
-      const player2 = await selectPlayer() // 20 - cutlist
-      const player3 = await selectPlayer() // 20 - cutlist
-      const player4 = await selectPlayer() // 20 - release
-      const player5 = await selectPlayer() // 160 - high salary retained
+      exclude_pids.push(player1.pid)
+      const player2 = await selectPlayer({ exclude_pids }) // 20 - cutlist
+      exclude_pids.push(player2.pid)
+      const player3 = await selectPlayer({ exclude_pids }) // 20 - cutlist
+      exclude_pids.push(player3.pid)
+      const player4 = await selectPlayer({ exclude_pids }) // 20 - release
+      exclude_pids.push(player4.pid)
+      const player5 = await selectPlayer({ exclude_pids }) // 160 - high salary retained
+      exclude_pids.push(player5.pid)
+
       const teamId = 1
       const userId = 1
       const bid = 30
@@ -141,11 +147,11 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
         value: 160
       })
 
-      await fillRoster({ leagueId, teamId, excludeIR: true })
+      await fillRoster({ leagueId, teamId, excludeIR: true, exclude_pids })
 
       const timestamp = Math.round(Date.now() / 1000)
       const query1 = await knex('transition_bids').insert({
-        player: player1.player,
+        pid: player1.pid,
         userid: userId,
         bid,
         tid: teamId,
@@ -157,11 +163,11 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
 
       await knex('transition_releases').insert({
         transitionid: query1[0],
-        player: player4.player
+        pid: player4.pid
       })
 
       const cutlist = [player2, player3].map((p, idx) => ({
-        player: p.player,
+        pid: p.pid,
         order: idx,
         tid: teamId
       }))
@@ -186,14 +192,14 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
       // verify roster
       await checkRoster({
         teamId,
-        player: player1.player,
+        pid: player1.pid,
         leagueId
       })
 
       // verify transaction
       await checkLastTransaction({
         leagueId,
-        player: player1.player,
+        pid: player1.pid,
         teamId,
         userId: 1,
         value: bid,
@@ -205,9 +211,9 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
       const rosterRow = await getRoster({ tid: teamId })
       const roster = new Roster({ roster: rosterRow, league })
 
-      expect(roster.has(player2.player)).to.equal(false)
-      expect(roster.has(player3.player)).to.equal(false)
-      expect(roster.has(player4.player)).to.equal(false)
+      expect(roster.has(player2.pid)).to.equal(false)
+      expect(roster.has(player3.pid)).to.equal(false)
+      expect(roster.has(player4.pid)).to.equal(false)
 
       // verify cutlist
       const transactions = await knex('transactions').where({ lid: leagueId })
@@ -229,7 +235,7 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
   describe('errors', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.subtract('1', 'month').toDate())
+      MockDate.set(start.subtract('1', 'month').toISOString())
       await league(knex)
     })
 
@@ -258,7 +264,7 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
 
       const timestamp = Math.round(Date.now() / 1000)
       await knex('transition_bids').insert({
-        player: player.player,
+        pid: player.pid,
         userid: userId,
         bid: value,
         tid: teamId,
@@ -323,7 +329,7 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
 
       const timestamp = Math.round(Date.now() / 1000)
       await knex('transition_bids').insert({
-        player: player.player,
+        pid: player.pid,
         userid: userId,
         bid: value1,
         tid: teamId,
@@ -334,7 +340,7 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
       })
 
       await knex('transition_bids').insert({
-        player: player.player,
+        pid: player.pid,
         userid: userId2,
         bid: value2,
         tid: teamId2,
@@ -345,7 +351,7 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
       })
 
       await knex('transition_bids').insert({
-        player: player.player,
+        pid: player.pid,
         userid: userId3,
         bid: value2,
         tid: teamId3,

@@ -7,8 +7,9 @@ import PlayerSelectedRowHeader from '@components/player-selected-row-header'
 
 export default class SelectedPlayerGamelogs extends React.Component {
   render = () => {
-    const { gamelogs, player } = this.props
+    const { gamelogs, playerMap } = this.props
 
+    const position = playerMap.get('pos')
     const rows = []
     for (const [index, game] of gamelogs.entries()) {
       const lead = (
@@ -17,7 +18,9 @@ export default class SelectedPlayerGamelogs extends React.Component {
             <div className='table__cell metric'>{game.week}</div>
             <div className='table__cell metric'>{game.opp}</div>
             <div className='table__cell metric'>
-              {player.getIn(['points', `${game.week}`, 'total'], 0).toFixed(1)}
+              {playerMap
+                .getIn(['points', `${game.week}`, 'total'], 0)
+                .toFixed(1)}
             </div>
             <div className='table__cell metric'>
               {(game.total || 0).toFixed(1)}
@@ -30,7 +33,7 @@ export default class SelectedPlayerGamelogs extends React.Component {
           key={index}
           stats={game}
           lead={lead}
-          pos={player.pos}
+          pos={position}
         />
       )
     }
@@ -49,7 +52,7 @@ export default class SelectedPlayerGamelogs extends React.Component {
               <div className='table__cell metric'>Pts</div>
             </div>
           </div>
-          <PlayerSelectedRowHeader pos={player.pos} />
+          <PlayerSelectedRowHeader pos={position} />
         </div>
         {rows}
       </div>
@@ -59,5 +62,5 @@ export default class SelectedPlayerGamelogs extends React.Component {
 
 SelectedPlayerGamelogs.propTypes = {
   gamelogs: PropTypes.array,
-  player: ImmutablePropTypes.record
+  playerMap: ImmutablePropTypes.map
 }

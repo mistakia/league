@@ -27,7 +27,7 @@ describe('API /teams - activate', function () {
   before(async function () {
     this.timeout(60 * 1000)
 
-    MockDate.set(start.subtract('1', 'week').toDate())
+    MockDate.set(start.subtract('1', 'week').toISOString())
 
     await knex.migrate.forceFreeMigrationsLock()
     await knex.migrate.rollback()
@@ -65,8 +65,8 @@ describe('API /teams - activate', function () {
         .post('/api/teams/1/activate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player1.player,
-          release: player2.player,
+          activate_pid: player1.pid,
+          release_pid: player2.pid,
           leagueId
         })
 
@@ -75,12 +75,12 @@ describe('API /teams - activate', function () {
       res.should.be.json
 
       res.body.tid.should.equal(teamId)
-      res.body.player.should.equal(player1.player)
+      res.body.pid.should.equal(player1.pid)
       res.body.slot.should.equal(constants.slots.BENCH)
       res.body.transaction.userid.should.equal(userId)
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
-      res.body.transaction.player.should.equal(player1.player)
+      res.body.transaction.pid.should.equal(player1.pid)
       res.body.transaction.type.should.equal(
         constants.transactions.ROSTER_ACTIVATE
       )
@@ -93,7 +93,7 @@ describe('API /teams - activate', function () {
         .where({
           year: constants.season.year,
           week: constants.season.week,
-          player: player1.player
+          pid: player1.pid
         })
         .limit(1)
 
@@ -110,7 +110,7 @@ describe('API /teams - activate', function () {
         constants.transactions.ROSTER_ACTIVATE
       )
       expect(activateTransaction.value).to.equal(value)
-      expect(activateTransaction.player).to.equal(player1.player)
+      expect(activateTransaction.pid).to.equal(player1.pid)
       expect(activateTransaction.tid).to.equal(teamId)
       expect(activateTransaction.userid).to.equal(userId)
 
@@ -122,7 +122,7 @@ describe('API /teams - activate', function () {
         constants.transactions.ROSTER_RELEASE
       )
       expect(releaseTransaction.value).to.equal(value)
-      expect(releaseTransaction.player).to.equal(player2.player)
+      expect(releaseTransaction.pid).to.equal(player2.pid)
       expect(releaseTransaction.tid).to.equal(teamId)
       expect(releaseTransaction.userid).to.equal(userId)
     })
@@ -155,8 +155,8 @@ describe('API /teams - activate', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          release: 'x',
-          player: player1.player
+          release_pid: 'x',
+          activate_pid: player1.pid
         })
 
       await invalid(request, 'player')
@@ -185,8 +185,8 @@ describe('API /teams - activate', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          release: player2.player,
-          player: player1.player
+          release_pid: player2.pid,
+          activate_pid: player1.pid
         })
 
       await error(request, 'player not on roster')
@@ -209,7 +209,7 @@ describe('API /teams - activate', function () {
 
       const player1 = players.find((p) => p.slot === constants.slots.IR)
       const player2 = players.find(
-        (p) => p.slot === constants.slots.IR && p.player !== player1.player
+        (p) => p.slot === constants.slots.IR && p.pid !== player1.pid
       )
 
       const request = chai
@@ -217,8 +217,8 @@ describe('API /teams - activate', function () {
         .post('/api/teams/1/activate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player1.player,
-          release: player2.player,
+          activate_pid: player1.pid,
+          release_pid: player2.pid,
           leagueId
         })
 
@@ -258,8 +258,8 @@ describe('API /teams - activate', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          release: player2.player,
-          player: player1.player
+          release_pid: player2.pid,
+          activate_pid: player1.pid
         })
 
       await error(request, 'player is on active roster')

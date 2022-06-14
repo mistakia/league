@@ -38,8 +38,6 @@ export default function DashboardPage() {
     roster
   } = this.props
 
-  const { positions } = constants
-
   const notices = []
   if (league.adate) {
     const faPeriod = getFreeAgentPeriod(league.adate)
@@ -60,10 +58,10 @@ export default function DashboardPage() {
   }
 
   const groups = {}
-  for (const position of positions) {
+  for (const position of constants.positions) {
     if (!groups[position]) groups[position] = []
     groups[position] = players.active
-      .filter((p) => p.pos === position)
+      .filter((pMap) => pMap.get('pos') === position)
       .sort(
         (a, b) =>
           b.getIn(['lineups', 'starts'], 0) - a.getIn(['lineups', 'starts'], 0)
@@ -72,35 +70,48 @@ export default function DashboardPage() {
 
   const activeItems = []
   let activePlayers = new List()
-  const cutlistPlayerIds = cutlist.map((c) => c.player).toJS()
+  const cutlist_pids = cutlist.map((cMap) => cMap.get('pid')).toJS()
   for (const position in groups) {
     const players = groups[position]
-    for (const player of players) {
+    for (const playerMap of players) {
       if (
         !constants.season.isRegularSeason &&
-        cutlistPlayerIds.includes(player.player)
+        cutlist_pids.includes(playerMap.get('pid'))
       )
         continue
-      if (!player.player) continue
-      activePlayers = activePlayers.push(player)
-      activeItems.push(<PlayerRoster key={player.player} player={player} />)
+      if (!playerMap.get('pid')) continue
+      activePlayers = activePlayers.push(playerMap)
+      activeItems.push(
+        <PlayerRoster key={playerMap.get('pid')} playerMap={playerMap} />
+      )
     }
   }
 
   const transitionItems = []
-  for (const player of transitionPlayers.valueSeq()) {
-    transitionItems.push(<PlayerRoster key={player.player} player={player} />)
+  for (const playerMap of transitionPlayers.valueSeq()) {
+    transitionItems.push(
+      <PlayerRoster key={playerMap.get('pid')} playerMap={playerMap} />
+    )
   }
 
   const reserveIRItems = []
-  for (const player of players.ir) {
-    if (!player.player) continue
-    reserveIRItems.push(<PlayerRoster key={player.player} player={player} />)
+  for (const playerMap of players.ir) {
+    if (!playerMap.get('pid')) continue
+    reserveIRItems.push(
+      <PlayerRoster key={playerMap.get('pid')} playerMap={playerMap} />
+    )
 
-    if (!isReserveEligible(player)) {
+    if (
+      !isReserveEligible({
+        status: playerMap.get('status'),
+        injury_status: playerMap.get('injury_status')
+      })
+    ) {
       notices.push(
-        <Alert key={player.player} severity='error'>
-          <AlertTitle>{player.name} not eligible for Reserve/IR</AlertTitle>
+        <Alert key={playerMap.get('pid')} severity='error'>
+          <AlertTitle>
+            {playerMap.get('name', 'N/A')} not eligible for Reserve/IR
+          </AlertTitle>
           You will need to activate or release him before you can make any
           acquisitions or claims.
         </Alert>
@@ -109,15 +120,22 @@ export default function DashboardPage() {
   }
 
   const reserveCOVItems = []
-  for (const player of players.cov) {
-    if (!player.player) continue
-    reserveCOVItems.push(<PlayerRoster key={player.player} player={player} />)
+  for (const playerMap of players.cov) {
+    if (!playerMap.get('pid')) continue
+    reserveCOVItems.push(
+      <PlayerRoster key={playerMap.get('pid')} playerMap={playerMap} />
+    )
 
-    if (!isReserveCovEligible(player)) {
+    if (
+      !isReserveCovEligible({
+        status: playerMap.get('status'),
+        injury_status: playerMap.get('injury_status')
+      })
+    ) {
       notices.push(
-        <Alert key={player.player} severity='error'>
+        <Alert key={playerMap.get('pid')} severity='error'>
           <AlertTitle>
-            {player.name} not eligible for Reserve/COVID-19
+            {playerMap.get('name', 'N/A')} not eligible for Reserve/COVID-19
           </AlertTitle>
           You will need to activate or release him before you can make any
           acquisitions or claims.
@@ -127,19 +145,22 @@ export default function DashboardPage() {
   }
 
   const practiceItems = []
-  for (const player of players.practice) {
-    if (!player.player) continue
-    practiceItems.push(<PlayerRoster key={player.player} player={player} />)
+  for (const playerMap of players.practice) {
+    if (!playerMap.get('pid')) continue
+    practiceItems.push(
+      <PlayerRoster key={playerMap.get('pid')} playerMap={playerMap} />
+    )
 
     const poach = poaches.find(
-      (p) => p.getIn(['player', 'player']) === player.player
+      (p) => p.getIn(['playerMap', 'pid']) === playerMap.get('pid')
     )
     if (poach) {
       const processingTime = dayjs.unix(poach.submitted).add('48', 'hours')
       notices.push(
-        <Alert key={player.player} severity='warning'>
-          {player.name} has a poaching claim that will be processed{' '}
-          {processingTime.fromNow()} on {processingTime.format('dddd, h:mm a')}.
+        <Alert key={playerMap.get('pid')} severity='warning'>
+          {playerMap.get('name', 'N/A')} has a poaching claim that will be
+          processed {processingTime.fromNow()} on{' '}
+          {processingTime.format('dddd, h:mm a')}.
         </Alert>
       )
     }

@@ -43,11 +43,11 @@ export default class WaiverConfirmation extends React.Component {
 
   _setType = (type) => {
     const isActiveRoster = type === constants.waivers.FREE_AGENCY
-    const { league, player, roster, rosterPlayers } = this.props
+    const { league, playerMap, roster, rosterPlayers } = this.props
 
     const ros = new Roster({ roster: roster.toJS(), league })
     this._isEligible = isActiveRoster
-      ? ros.hasOpenBenchSlot(player.pos)
+      ? ros.hasOpenBenchSlot(playerMap.get('pos'))
       : ros.hasOpenPracticeSquadSlot()
 
     const releases = []
@@ -55,14 +55,15 @@ export default class WaiverConfirmation extends React.Component {
       ? rosterPlayers.active
       : rosterPlayers.practice
 
-    for (const rPlayer of players) {
+    for (const releasePlayerMap of players) {
       const r = new Roster({ roster: roster.toJS(), league })
-      if (rPlayer.slot === constants.slots.PSP) continue
-      r.removePlayer(rPlayer.player)
+      if (releasePlayerMap.get('slot') === constants.slots.PSP) continue
+      r.removePlayer(releasePlayerMap.get('pid'))
       if (isActiveRoster) {
-        if (r.hasOpenBenchSlot(player.pos)) releases.push(rPlayer)
+        if (r.hasOpenBenchSlot(releasePlayerMap.get('pos')))
+          releases.push(releasePlayerMap)
       } else {
-        if (r.hasOpenPracticeSquadSlot()) releases.push(rPlayer)
+        if (r.hasOpenPracticeSquadSlot()) releases.push(releasePlayerMap)
       }
     }
 
@@ -97,7 +98,7 @@ export default class WaiverConfirmation extends React.Component {
 
   handleSubmit = () => {
     const { bid, release, error, type } = this.state
-    const player = this.props.player.player
+    const pid = this.props.playerMap.get('pid')
 
     if (!type) {
       return this.setState({ missingType: true })
@@ -115,48 +116,47 @@ export default class WaiverConfirmation extends React.Component {
       if (this.props.waiver) {
         this.props.update({ waiverId: this.props.waiver.uid, release, bid })
       } else {
-        this.props.claim({ bid, release, type, player })
+        this.props.claim({ bid, release, type, pid })
       }
       this.props.onClose()
     }
   }
 
   render = () => {
-    const { team, player, status, waiver, league } = this.props
+    const { team, playerMap, status, waiver, league } = this.props
 
     const options = []
-    for (const player of this._releases) {
-      const { pos, team, pname, value, name, tag, bid } = player
-      const extensions = player.get('extensions', 0)
+    for (const releasePlayerMap of this._releases) {
+      const extensions = releasePlayerMap.get('extensions', 0)
+      const pos = releasePlayerMap.get('pos')
       const salary = getExtensionAmount({
         pos,
-        tag,
+        tag: releasePlayerMap.get('tag'),
         extensions,
         league,
-        value,
-        bid
+        value: releasePlayerMap.get('value'),
+        bid: releasePlayerMap.get('bid')
       })
       options.push({
-        id: player.player,
-        label: name,
+        id: releasePlayerMap.get('pid'),
+        label: releasePlayerMap.get('name'),
         pos,
-        team,
-        pname,
+        team: releasePlayerMap.get('team'),
+        pname: releasePlayerMap.get('pname'),
         value: salary
       })
     }
 
     const releasePlayers = []
-    this.state.release.forEach((playerId) => {
-      const player = this._releases.find((p) => p.player === playerId)
-      const { pos, team, pname, value, name } = player
+    this.state.release.forEach((pid) => {
+      const releasePlayerMap = this._releases.find((p) => p.get('pid') === pid)
       releasePlayers.push({
-        id: player.player,
-        label: name,
-        pos,
-        team,
-        pname,
-        value
+        id: releasePlayerMap.get('pid'),
+        label: releasePlayerMap.get('name'),
+        pos: releasePlayerMap.get('pos'),
+        team: releasePlayerMap.get('team'),
+        pname: releasePlayerMap.get('pname'),
+        value: releasePlayerMap.get('value')
       })
     })
 
@@ -219,7 +219,7 @@ export default class WaiverConfirmation extends React.Component {
         <DialogTitle>Waiver Claim</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {`Add ${player.name} (${player.pos})`}
+            {`Add ${playerMap.get('name')} (${playerMap.get('pos')})`}
           </DialogContentText>
           <div className='waiver__claim-inputs'>
             {this.state.type === constants.waivers.FREE_AGENCY && (
@@ -281,7 +281,7 @@ export default class WaiverConfirmation extends React.Component {
 }
 
 WaiverConfirmation.propTypes = {
-  player: ImmutablePropTypes.record,
+  playerMap: ImmutablePropTypes.map,
   rosterPlayers: PropTypes.object,
   waiver: PropTypes.object,
   roster: ImmutablePropTypes.record,

@@ -5,6 +5,8 @@ import { getPlayerById } from '@core/players'
 
 import TradePlayer from './trade-player'
 
-const mapStateToProps = createSelector(getPlayerById, (player) => ({ player }))
+const mapStateToProps = createSelector(getPlayerById, (playerMap) => ({
+  playerMap
+}))
 
 export default connect(mapStateToProps)(TradePlayer)

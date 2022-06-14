@@ -80,7 +80,7 @@ import { getPropsActions } from '@core/props'
 
 function* fetchAPI(apiFunction, actions, opts = {}) {
   const { token } = yield select(getApp)
-  const { abort, request } = apiRequest(apiFunction, opts, token)
+  const { request } = apiRequest(apiFunction, opts, token)
   try {
     yield put(actions.pending(opts))
     const data = yield call(request)
@@ -98,8 +98,9 @@ function* fetchAPI(apiFunction, actions, opts = {}) {
     yield put(actions.failed(opts, err.toString()))
   } finally {
     if (yield cancelled()) {
-      console.log('request cancelled')
-      abort()
+      // TODO re-enable request cancellation
+      // console.log('request cancelled')
+      // abort()
     }
   }
 }

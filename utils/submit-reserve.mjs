@@ -15,10 +15,10 @@ import getLastTransaction from './get-last-transaction.mjs'
 export default async function ({
   slot,
   tid,
-  player,
+  reserve_pid,
   leagueId,
   userId,
-  activate
+  activate_pid
 }) {
   const data = []
 
@@ -27,10 +27,10 @@ export default async function ({
     throw new Error('invalid slot')
   }
 
-  const players = await db('player').where('player', player)
-  const playerRow = players[0]
+  const player_rows = await db('player').where({ pid: reserve_pid })
+  const player_row = player_rows[0]
 
-  if (!playerRow) {
+  if (!player_row) {
     throw new Error('invalid player')
   }
 
@@ -41,7 +41,7 @@ export default async function ({
   }
   const rosterRow = await getRoster({ tid })
   const roster = new Roster({ roster: rosterRow, league })
-  const rosterPlayer = roster.get(player)
+  const rosterPlayer = roster.get(reserve_pid)
   if (!rosterPlayer) {
     throw new Error('player not on roster')
   }
@@ -63,11 +63,13 @@ export default async function ({
       )
     }
 
-    if (!isReserveCovEligible(playerRow)) {
+    const { status, injury_status } = player_row
+    if (!isReserveCovEligible({ status, injury_status })) {
       throw new Error('player not eligible for Reserve/COV')
     }
   } else {
-    if (!isReserveEligible(playerRow)) {
+    const { status, injury_status } = player_row
+    if (!isReserveEligible({ status, injury_status })) {
       throw new Error('player not eligible for Reserve')
     }
   }
@@ -81,60 +83,60 @@ export default async function ({
   const prevRoster = new Roster({ roster: prevRosterRow, league })
   const acquisitionTransaction = await getAcquisitionTransaction({
     lid: leagueId,
-    player,
+    pid: reserve_pid,
     tid
   })
   if (
     acquisitionTransaction.type !== constants.transactions.TRADE &&
-    !prevRoster.has(player)
+    !prevRoster.has(reserve_pid)
   ) {
     throw new Error('not eligible, not rostered long enough')
   }
 
   // verify player is not locked and is a starter
-  const isLocked = await isPlayerLocked(player)
-  const isStarter = Boolean(roster.starters.find((p) => p.player === player))
+  const isLocked = await isPlayerLocked(reserve_pid)
+  const isStarter = Boolean(roster.starters.find((p) => p.pid === reserve_pid))
   if (isLocked && isStarter) {
     throw new Error('not eligible, locked starter')
   }
 
-  let activatePlayerRow
-  if (activate) {
-    const players = await db('player').where('player', activate)
-    activatePlayerRow = players[0]
+  let activate_player_row
+  if (activate_pid) {
+    const player_rows = await db('player').where('pid', activate_pid)
+    activate_player_row = player_rows[0]
 
     // make sure player is on team
-    if (!roster.has(activate)) {
+    if (!roster.has(activate_pid)) {
       throw new Error('invalid player')
     }
 
     // make sure player is not on active roster
-    if (roster.active.find((p) => p.player === activate)) {
+    if (roster.active.find((p) => p.pid === activate_pid)) {
       throw new Error('player is on active roster')
     }
 
     // make sure player is on reserve
     if (
       roster.players.find(
-        (p) => p.player === activate && p.slot !== constants.slots.IR
+        (p) => p.pid === activate_pid && p.slot !== constants.slots.IR
       )
     ) {
       throw new Error('player is not on reserve')
     }
 
-    roster.removePlayer(player)
-    if (!roster.hasOpenBenchSlot(activatePlayerRow.pos)) {
+    roster.removePlayer(reserve_pid)
+    if (!roster.hasOpenBenchSlot(activate_player_row.pos)) {
       throw new Error('exceeds roster limits')
     }
 
     // activate player
     await db('rosters_players').update({ slot: constants.slots.BENCH }).where({
       rid: rosterRow.uid,
-      player: activate
+      pid: activate_pid
     })
 
     const { value } = await getLastTransaction({
-      player: activate,
+      pid: activate_pid,
       lid: leagueId,
       tid
     })
@@ -142,7 +144,7 @@ export default async function ({
       userid: userId,
       tid,
       lid: leagueId,
-      player: activate,
+      pid: activate_pid,
       type: constants.transactions.ROSTER_ACTIVATE,
       value,
       year: constants.season.year,
@@ -152,16 +154,16 @@ export default async function ({
 
     // return data
     data.push({
-      player: activate,
+      pid: activate_pid,
       tid,
       slot: constants.slots.BENCH,
       rid: roster.uid,
-      pos: activatePlayerRow.pos,
+      pos: activate_player_row.pos,
       transaction
     })
 
     // update roster
-    roster.updateSlot(activate, constants.slots.BENCH)
+    roster.updateSlot(activate_pid, constants.slots.BENCH)
   }
 
   if (slot === constants.slots.IR && !roster.hasOpenInjuredReserveSlot()) {
@@ -174,15 +176,19 @@ export default async function ({
       : constants.transactions.RESERVE_COV
   await db('rosters_players').update({ slot }).where({
     rid: rosterRow.uid,
-    player
+    pid: reserve_pid
   })
 
-  const { value } = await getLastTransaction({ player, lid: leagueId, tid })
+  const { value } = await getLastTransaction({
+    pid: reserve_pid,
+    lid: leagueId,
+    tid
+  })
   const transaction = {
     userid: userId,
     tid,
     lid: leagueId,
-    player,
+    pid: reserve_pid,
     type,
     value,
     year: constants.season.year,
@@ -192,17 +198,17 @@ export default async function ({
 
   await db('league_cutlist')
     .where({
-      player,
+      pid: reserve_pid,
       tid
     })
     .del()
 
   const teams = await db('teams').where({ uid: tid })
   const team = teams[0]
-  let message = `${team.name} (${team.abbrv}) has placed ${playerRow.fname} ${playerRow.lname} (${playerRow.pos}) on ${constants.transactionsDetail[type]}.`
+  let message = `${team.name} (${team.abbrv}) has placed ${player_row.fname} ${player_row.lname} (${player_row.pos}) on ${constants.transactionsDetail[type]}.`
 
-  if (activate) {
-    message += ` ${activatePlayerRow.fname} ${activatePlayerRow.lname} (${playerRow.pos}) has been activated`
+  if (activate_player_row) {
+    message += ` ${activate_player_row.fname} ${activate_player_row.lname} (${player_row.pos}) has been activated`
   }
 
   await sendNotifications({
@@ -214,10 +220,10 @@ export default async function ({
   data.unshift({
     transaction,
     slot,
-    player,
+    pid: reserve_pid,
     rid: roster.uid,
     tid,
-    pos: playerRow.pos
+    pos: player_row.pos
   })
 
   return data

@@ -40,8 +40,7 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  select: playerActions.selectPlayer,
-  delete: playerActions.deleteProjection
+  select: playerActions.selectPlayer
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PlayerRow)

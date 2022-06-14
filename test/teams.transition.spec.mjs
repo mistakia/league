@@ -33,7 +33,7 @@ describe('API /teams - transition', function () {
     await knex.migrate.rollback()
     await knex.migrate.latest()
 
-    MockDate.set(start.subtract('1', 'month').toDate())
+    MockDate.set(start.subtract('1', 'month').toISOString())
 
     await knex.seed.run()
   })
@@ -44,7 +44,7 @@ describe('API /teams - transition', function () {
     })
 
     it('original team', async () => {
-      MockDate.set(start.subtract('2', 'month').toDate())
+      MockDate.set(start.subtract('2', 'month').toISOString())
 
       const player = await selectPlayer()
       const releasePlayer = await selectPlayer()
@@ -75,8 +75,8 @@ describe('API /teams - transition', function () {
           leagueId,
           bid,
           playerTid: teamId,
-          release: [releasePlayer.player],
-          player: player.player
+          release: [releasePlayer.pid],
+          pid: player.pid
         })
 
       res.should.have.status(200)
@@ -85,20 +85,20 @@ describe('API /teams - transition', function () {
 
       res.body.tid.should.equal(teamId)
       res.body.userid.should.equal(userId)
-      res.body.player.should.equal(player.player)
+      res.body.pid.should.equal(player.pid)
       res.body.submitted.should.equal(Math.round(Date.now() / 1000))
       res.body.bid.should.equal(bid)
       res.body.year.should.equal(constants.season.year)
       res.body.player_tid.should.equal(teamId)
       res.body.uid.should.equal(1)
       res.body.release.length.should.equal(1)
-      res.body.release[0].should.equal(releasePlayer.player)
+      res.body.release[0].should.equal(releasePlayer.pid)
 
       const query1 = await knex('transition_bids').select()
 
       query1.length.should.equal(1)
       query1[0].uid.should.equal(1)
-      query1[0].player.should.equal(player.player)
+      query1[0].pid.should.equal(player.pid)
       query1[0].userid.should.equal(userId)
       query1[0].bid.should.equal(bid)
       query1[0].year.should.equal(constants.season.year)
@@ -115,18 +115,16 @@ describe('API /teams - transition', function () {
 
       query2.length.should.equal(1)
       query2[0].transitionid.should.equal(1)
-      query2[0].player.should.equal(releasePlayer.player)
+      query2[0].pid.should.equal(releasePlayer.pid)
 
       const roster = await getRoster({ tid: teamId })
 
-      const taggedPlayer = roster.players.find(
-        (p) => p.player === player.player
-      )
+      const taggedPlayer = roster.players.find((p) => p.pid === player.pid)
       taggedPlayer.tag.should.equal(constants.tags.TRANSITION)
     })
 
     it('competing team', async () => {
-      MockDate.set(start.subtract('2', 'month').toDate())
+      MockDate.set(start.subtract('2', 'month').toISOString())
 
       const leagueId = 1
       const playerTid = 2
@@ -149,7 +147,7 @@ describe('API /teams - transition', function () {
           leagueId,
           bid: 1,
           playerTid,
-          player: player.player
+          pid: player.pid
         })
 
       res1.should.have.status(200)
@@ -162,7 +160,7 @@ describe('API /teams - transition', function () {
           leagueId,
           bid,
           playerTid,
-          player: player.player
+          pid: player.pid
         })
 
       res2.should.have.status(200)
@@ -171,7 +169,7 @@ describe('API /teams - transition', function () {
 
       res2.body.tid.should.equal(1)
       res2.body.userid.should.equal(userId)
-      res2.body.player.should.equal(player.player)
+      res2.body.pid.should.equal(player.pid)
       res2.body.year.should.equal(constants.season.year)
       res2.body.submitted.should.equal(Math.round(Date.now() / 1000))
       res2.body.bid.should.equal(bid)
@@ -180,7 +178,7 @@ describe('API /teams - transition', function () {
     })
 
     it('original team with cutlist and release, salary cap check', async () => {
-      MockDate.set(start.subtract('2', 'month').toDate())
+      MockDate.set(start.subtract('2', 'month').toISOString())
 
       const teamId = 1
       const leagueId = 1
@@ -189,6 +187,7 @@ describe('API /teams - transition', function () {
 
       const league = await getLeague(leagueId)
 
+      const exclude_pids = []
       const tagPlayer = await selectPlayer()
       await addPlayer({
         leagueId,
@@ -196,8 +195,9 @@ describe('API /teams - transition', function () {
         teamId,
         userId
       })
+      exclude_pids.push(tagPlayer.pid)
 
-      const cutlistPlayer = await selectPlayer()
+      const cutlistPlayer = await selectPlayer({ exclude_pids })
       await addPlayer({
         leagueId,
         player: cutlistPlayer,
@@ -205,8 +205,9 @@ describe('API /teams - transition', function () {
         userId,
         value: league.cap - bid + 1
       })
+      exclude_pids.push(cutlistPlayer.pid)
 
-      const releasePlayer = await selectPlayer()
+      const releasePlayer = await selectPlayer({ exclude_pids })
       await addPlayer({
         leagueId,
         player: releasePlayer,
@@ -214,8 +215,9 @@ describe('API /teams - transition', function () {
         userId,
         value: bid
       })
+      exclude_pids.push(releasePlayer.pid)
 
-      await fillRoster({ leagueId, teamId, excludeIR: true })
+      await fillRoster({ leagueId, teamId, excludeIR: true, exclude_pids })
 
       const res1 = await chai
         .request(server)
@@ -223,7 +225,7 @@ describe('API /teams - transition', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId,
-          players: cutlistPlayer.player
+          pids: cutlistPlayer.pid
         })
 
       res1.should.have.status(200)
@@ -236,8 +238,8 @@ describe('API /teams - transition', function () {
           leagueId,
           bid,
           playerTid: teamId,
-          player: tagPlayer.player,
-          release: releasePlayer.player
+          pid: tagPlayer.pid,
+          release: releasePlayer.pid
         })
 
       res2.should.have.status(200)
@@ -247,12 +249,12 @@ describe('API /teams - transition', function () {
       res2.body.tid.should.equal(teamId)
       res2.body.userid.should.equal(userId)
       res2.body.year.should.equal(constants.season.year)
-      res2.body.player.should.equal(tagPlayer.player)
+      res2.body.pid.should.equal(tagPlayer.pid)
       res2.body.submitted.should.equal(Math.round(Date.now() / 1000))
       res2.body.bid.should.equal(bid)
       res2.body.player_tid.should.equal(teamId)
       res2.body.release.length.should.equal(1)
-      res2.body.release[0].should.equal(releasePlayer.player)
+      res2.body.release[0].should.equal(releasePlayer.pid)
     })
 
     it('remove tag', async () => {
@@ -271,7 +273,7 @@ describe('API /teams - transition', function () {
       await notLoggedIn(request)
     })
 
-    it('missing player', async () => {
+    it('missing pid', async () => {
       const request = chai
         .request(server)
         .post('/api/teams/1/tag/transition')
@@ -282,7 +284,7 @@ describe('API /teams - transition', function () {
           leagueId: 1
         })
 
-      await missing(request, 'player')
+      await missing(request, 'pid')
     })
 
     it('missing bid', async () => {
@@ -291,7 +293,7 @@ describe('API /teams - transition', function () {
         .post('/api/teams/1/tag/transition')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: 'x',
+          pid: 'x',
           playerTid: 1,
           leagueId: 1
         })
@@ -307,7 +309,7 @@ describe('API /teams - transition', function () {
         .send({
           bid: 1,
           playerTid: 1,
-          player: 'x'
+          pid: 'x'
         })
 
       await missing(request, 'leagueId')
@@ -321,7 +323,7 @@ describe('API /teams - transition', function () {
         .send({
           bid: 1,
           leagueId: 1,
-          player: 'x'
+          pid: 'x'
         })
 
       await missing(request, 'playerTid')
@@ -335,7 +337,7 @@ describe('API /teams - transition', function () {
         .send({
           bid: -1,
           playerTid: 1,
-          player: 'x',
+          pid: 'x',
           leagueId: 1
         })
 
@@ -350,7 +352,7 @@ describe('API /teams - transition', function () {
         .send({
           bid: 1,
           playerTid: 1,
-          player: 'x',
+          pid: 'x',
           leagueId: 1
         })
 
@@ -379,8 +381,8 @@ describe('API /teams - transition', function () {
         .send({
           bid,
           playerTid: teamId,
-          player: player.player,
-          release: releasePlayer.player,
+          pid: player.pid,
+          release: releasePlayer.pid,
           leagueId
         })
 
@@ -395,7 +397,7 @@ describe('API /teams - transition', function () {
         .send({
           bid: 1,
           playerTid: 1,
-          player: 'x',
+          pid: 'x',
           leagueId: 2
         })
 
@@ -410,7 +412,7 @@ describe('API /teams - transition', function () {
         .send({
           bid: 1,
           playerTid: 1,
-          player: 'x',
+          pid: 'x',
           leagueId: 1
         })
 
@@ -426,7 +428,7 @@ describe('API /teams - transition', function () {
         .send({
           bid: 1,
           playerTid: 1,
-          player: player.player,
+          pid: player.pid,
           leagueId: 1
         })
 
@@ -442,7 +444,7 @@ describe('API /teams - transition', function () {
         .send({
           bid: 1,
           playerTid: 2,
-          player: player.player,
+          pid: player.pid,
           leagueId: 1
         })
 
@@ -468,7 +470,8 @@ describe('API /teams - transition', function () {
       await fillRoster({
         leagueId,
         teamId: competingTeamId,
-        excludeIR: true
+        excludeIR: true,
+        exclude_pids: [player.pid]
       })
 
       // original team bid
@@ -480,7 +483,7 @@ describe('API /teams - transition', function () {
           leagueId,
           bid,
           playerTid: originalTeamId,
-          player: player.player
+          pid: player.pid
         })
 
       res1.should.have.status(200)
@@ -493,7 +496,7 @@ describe('API /teams - transition', function () {
         .send({
           bid,
           playerTid: originalTeamId,
-          player: player.player,
+          pid: player.pid,
           leagueId
         })
 
@@ -532,7 +535,7 @@ describe('API /teams - transition', function () {
      *     .send({
      *       bid,
      *       playerTid: teamId,
-     *       player: tagPlayer.player,
+     *       pid: tagPlayer.pid,
      *       leagueId
      *     })
 
@@ -580,7 +583,7 @@ describe('API /teams - transition', function () {
      *     .set('Authorization', `Bearer ${user1}`)
      *     .send({
      *       leagueId,
-     *       players: cutlistPlayer.player
+     *       pids: cutlistPlayer.pid
      *     })
 
      *   res1.should.have.status(200)
@@ -592,7 +595,7 @@ describe('API /teams - transition', function () {
      *     .send({
      *       bid,
      *       playerTid: teamId,
-     *       player: tagPlayer.player,
+     *       pid: tagPlayer.pid,
      *       leagueId
      *     })
 
@@ -641,8 +644,8 @@ describe('API /teams - transition', function () {
      *     .send({
      *       bid,
      *       playerTid: teamId,
-     *       player: tagPlayer.player,
-     *       release: releasePlayer.player,
+     *       pid: tagPlayer.pid,
+     *       release: releasePlayer.pid,
      *       leagueId
      *     })
 
@@ -679,7 +682,7 @@ describe('API /teams - transition', function () {
         .send({
           bid,
           playerTid: teamId,
-          player: player.player,
+          pid: player.pid,
           leagueId
         })
 

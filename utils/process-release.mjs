@@ -6,15 +6,21 @@ import isPlayerLocked from './is-player-locked.mjs'
 import getRoster from './get-roster.mjs'
 import getLastTransaction from './get-last-transaction.mjs'
 
-export default async function ({ lid, tid, player, userid, activate }) {
+export default async function ({
+  lid,
+  tid,
+  release_pid,
+  userid,
+  activate_pid
+}) {
   const data = []
 
   // verify player id
-  const playerRows = await db('player').where('player', player).limit(1)
-  if (!playerRows.length) {
+  const player_rows = await db('player').where({ pid: release_pid }).limit(1)
+  if (!player_rows.length) {
     throw new Error('invalid player')
   }
-  const playerRow = playerRows[0]
+  const player_row = player_rows[0]
 
   // verify player is on current roster
   const leagues = await db('leagues').where({ uid: lid }).limit(1)
@@ -24,33 +30,33 @@ export default async function ({ lid, tid, player, userid, activate }) {
   const league = leagues[0]
   const rosterRow = await getRoster({ tid })
   const roster = new Roster({ roster: rosterRow, league })
-  if (!roster.has(player)) {
+  if (!roster.has(release_pid)) {
     throw new Error('player not on roster')
   }
 
   // verify player is not protected
   if (
     roster.players.find(
-      (p) => p.player === player && p.slot === constants.slots.PSP
+      (p) => p.pid === release_pid && p.slot === constants.slots.PSP
     )
   ) {
     throw new Error('player is protected')
   }
 
   // verify player is not locked and is a starter
-  const isLocked = await isPlayerLocked(player)
-  const isStarter = Boolean(roster.starters.find((p) => p.player === player))
+  const isLocked = await isPlayerLocked(release_pid)
+  const isStarter = Boolean(roster.starters.find((p) => p.pid === release_pid))
   if (isLocked && isStarter) {
     throw new Error('starter is locked')
   }
 
   // verify player does not have a poaching claim
   const isOnPracticeSquad = Boolean(
-    roster.practice.find((p) => p.player === player)
+    roster.practice.find((p) => p.pid === release_pid)
   )
   if (isOnPracticeSquad) {
     const poaches = await db('poaches')
-      .where({ player, lid })
+      .where({ pid: release_pid, lid })
       .whereNull('processed')
 
     if (poaches.length) {
@@ -61,7 +67,7 @@ export default async function ({ lid, tid, player, userid, activate }) {
   // verify player was not poached this offseason
   if (!constants.season.isRegularSeason) {
     const poaches = await db('poaches')
-      .where({ player, lid, tid, succ: 1 })
+      .where({ pid: release_pid, lid, tid, succ: 1 })
       .orderBy('processed', 'desc')
 
     if (poaches.length) {
@@ -73,31 +79,31 @@ export default async function ({ lid, tid, player, userid, activate }) {
   }
 
   let activatePlayerRow
-  if (activate) {
-    const players = await db('player').where('player', activate)
+  if (activate_pid) {
+    const players = await db('player').where('pid', activate_pid)
     activatePlayerRow = players[0]
 
     // make sure player is on team
-    if (!roster.has(activate)) {
+    if (!roster.has(activate_pid)) {
       throw new Error('invalid player')
     }
 
     // make sure player is not on active roster
-    if (roster.active.find((p) => p.player === activate)) {
+    if (roster.active.find((p) => p.pid === activate_pid)) {
       throw new Error('player is on active roster')
     }
 
     // make sure player is not protected
     if (
       roster.players.find(
-        (p) => p.player === activate && p.slot === constants.slots.PSP
+        (p) => p.pid === activate_pid && p.slot === constants.slots.PSP
       )
     ) {
       throw new Error('player is protected')
     }
 
     // make sure roster has bench space
-    roster.removePlayer(player)
+    roster.removePlayer(release_pid)
     if (!roster.hasOpenBenchSlot(activatePlayerRow.pos)) {
       throw new Error('exceeds roster limits')
     }
@@ -105,11 +111,11 @@ export default async function ({ lid, tid, player, userid, activate }) {
     // activate player
     await db('rosters_players').update({ slot: constants.slots.BENCH }).where({
       rid: rosterRow.uid,
-      player: activate
+      pid: activate_pid
     })
 
     const { value } = await getLastTransaction({
-      player: activate,
+      pid: activate_pid,
       lid,
       tid
     })
@@ -117,7 +123,7 @@ export default async function ({ lid, tid, player, userid, activate }) {
       userid,
       tid,
       lid,
-      player: activate,
+      pid: activate_pid,
       type: constants.transactions.ROSTER_ACTIVATE,
       value,
       year: constants.season.year,
@@ -127,7 +133,7 @@ export default async function ({ lid, tid, player, userid, activate }) {
 
     // return data
     data.push({
-      player: activate,
+      pid: activate_pid,
       tid,
       slot: constants.slots.BENCH,
       rid: roster.uid,
@@ -141,7 +147,7 @@ export default async function ({ lid, tid, player, userid, activate }) {
     userid,
     tid,
     lid,
-    player,
+    pid: release_pid,
     type: constants.transactions.ROSTER_RELEASE,
     value: 0,
     year: constants.season.year,
@@ -157,21 +163,21 @@ export default async function ({ lid, tid, player, userid, activate }) {
   const rosterIds = teamRosters.map((r) => r.uid)
   await db('rosters_players')
     .whereIn('rid', rosterIds)
-    .where('player', player)
+    .where('pid', release_pid)
     .del()
   await db('league_cutlist')
     .where({
-      player,
+      pid: release_pid,
       tid
     })
     .del()
 
   data.unshift({
-    player,
+    pid: release_pid,
     slot: null,
     tid,
     rid: roster.uid,
-    pos: playerRow.pos,
+    pos: player_row.pos,
     transaction
   })
 

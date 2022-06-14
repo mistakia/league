@@ -5,9 +5,9 @@ export function getSchedule(state) {
   return state.get('schedule')
 }
 
-export function getGameByPlayerId(state, { playerId, week }) {
-  const player = getPlayerById(state, { playerId })
-  return getGameByTeam(state, { team: player.team, week })
+export function getGameByPlayerId(state, { pid, week }) {
+  const playerMap = getPlayerById(state, { pid })
+  return getGameByTeam(state, { team: playerMap.get('team'), week })
 }
 
 export function getByeByTeam(state, { team }) {

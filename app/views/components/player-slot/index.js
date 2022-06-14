@@ -8,7 +8,7 @@ import PlayerSlot from './player-slot'
 const mapStateToProps = createSelector(
   getPlayerById,
   isPlayerLocked,
-  (player, isLocked) => ({ player, isLocked })
+  (playerMap, isLocked) => ({ playerMap, isLocked })
 )
 
 export default connect(mapStateToProps)(PlayerSlot)

@@ -9,7 +9,7 @@ import PlayerNameExpanded from './player-name-expanded'
 const mapStateToProps = createSelector(
   getPlayerById,
   getGameStatusByPlayerId,
-  (player, status) => ({ player, status })
+  (playerMap, status) => ({ playerMap, status })
 )
 
 const mapDispatchToProps = {

@@ -3,24 +3,17 @@ import { Record, List } from 'immutable'
 export const Poach = new Record({
   uid: null,
   tid: null,
-  player: null,
+  pid: null,
   processed: null,
   release: new List(),
   submitted: null
 })
 
-export const createPoach = ({
-  uid,
-  tid,
-  player,
-  processed,
-  release,
-  submitted
-}) =>
+export const createPoach = ({ uid, tid, pid, processed, release, submitted }) =>
   new Poach({
     uid,
     tid,
-    player,
+    pid,
     processed,
     release: new List(release),
     submitted
