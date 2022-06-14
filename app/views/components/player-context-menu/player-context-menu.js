@@ -127,7 +127,10 @@ export default class PlayerContextMenu extends React.Component {
         'pos'
       )}) will be placed on Reserves/COV. He will not be available to use in lineups until he's activated.`,
       onConfirm: () =>
-        reserve({ pid: playerMap.get('pid'), slot: constants.slots.COV })
+        reserve({
+          reserve_pid: playerMap.get('pid'),
+          slot: constants.slots.COV
+        })
     })
     this.props.hide()
   }

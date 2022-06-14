@@ -19,7 +19,7 @@ export default class ReserveConfirmation extends React.Component {
     super(props)
 
     this.state = {
-      activate: '',
+      activate_pid: '',
       missingActivate: false
     }
 
@@ -36,20 +36,20 @@ export default class ReserveConfirmation extends React.Component {
 
   handleSelectActivate = (event) => {
     const { value } = event.target
-    this.setState({ activate: value, missingActivate: false })
+    this.setState({ activate_pid: value, missingActivate: false })
   }
 
   handleSubmit = () => {
-    const { activate } = this.state
-    const pid = this.props.playerMap.get('pid')
+    const { activate_pid } = this.state
+    const reserve_pid = this.props.playerMap.get('pid')
 
-    if (!this._hasReserveSpace && !activate) {
+    if (!this._hasReserveSpace && !activate_pid) {
       return this.setState({ missingActivate: true })
     } else {
       this.setState({ missingActivate: false })
     }
 
-    this.props.reserve({ pid, slot: constants.slots.IR, activate })
+    this.props.reserve({ reserve_pid, slot: constants.slots.IR, activate_pid })
     this.props.onClose()
   }
 
@@ -90,7 +90,7 @@ export default class ReserveConfirmation extends React.Component {
                 <Select
                   labelId='activate-label'
                   error={this.state.missingActivate}
-                  value={this.state.activate}
+                  value={this.state.activate_pid}
                   onChange={this.handleSelectActivate}
                   label='Activate'
                 >

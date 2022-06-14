@@ -114,12 +114,12 @@ export const rosterActions = {
     }
   }),
 
-  reserve: ({ pid, slot, activate }) => ({
+  reserve: ({ reserve_pid, slot, activate_pid }) => ({
     type: rosterActions.SET_ROSTER_RESERVE,
     payload: {
-      pid,
+      reserve_pid,
       slot,
-      activate
+      activate_pid
     }
   }),
 
@@ -152,12 +152,12 @@ export const rosterActions = {
     }
   }),
 
-  activate: ({ pid, release, reserve, slot }) => ({
+  activate: ({ activate_pid, release_pid, reserve_pid, slot }) => ({
     type: rosterActions.ACTIVATE_PLAYER,
     payload: {
-      pid,
-      release,
-      reserve,
+      activate_pid,
+      release_pid,
+      reserve_pid,
       slot
     }
   }),
