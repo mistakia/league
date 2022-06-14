@@ -53,6 +53,7 @@ const run = async () => {
   }
 
   if (team_lineup_starter_inserts.length) {
+    await db('league_team_lineup_starters').del().where({ lid: leagueId, year })
     await db('league_team_lineup_starters')
       .insert(team_lineup_starter_inserts)
       .onConflict()
