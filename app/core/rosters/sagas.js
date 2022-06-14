@@ -8,6 +8,7 @@ import {
   put,
   putResolve
 } from 'redux-saga/effects'
+import { Map } from 'immutable'
 
 import { rosterActions } from './actions'
 import { notificationActions } from '@core/notifications'
@@ -143,18 +144,25 @@ export function* calculatePlayerLineupContribution({ playerMap }) {
       continue
     }
 
-    const currentProjectedWeek = currentRoster.lineups.get(week)
+    const starter_pids = currentRoster.getIn(
+      ['lineups', week, 'starter_pids'],
+      []
+    )
     const isStarter = isActive
-      ? currentProjectedWeek.starters.includes(pid)
-      : result[week].starters.includes(pid)
+      ? starter_pids.includes(pid)
+      : result[week].starter_pids.includes(pid)
 
     if (isStarter) {
       playerData.starts += 1
       weekData.start = 1
       // starter+ is difference between current lineup and lineup without player
+      const current_projected_total = currentRoster.getIn(
+        ['lineups', week, 'total'],
+        0
+      )
       const diff = isActive
-        ? currentProjectedWeek.total - result[week].total
-        : result[week].total - currentProjectedWeek.total
+        ? current_projected_total - result[week].total
+        : result[week].total - current_projected_total
       playerData.sp += diff
       weekData.sp = diff
     } else {

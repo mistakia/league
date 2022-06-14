@@ -103,7 +103,7 @@
     "highcharts-react-official": "3.1.0",
     "html-webpack-inline-source-plugin": "^1.0.0-beta.2",
     "html-webpack-plugin": "^5.5.0",
-    "immutable": "4.0.0",
+    "immutable": "4.1.0",
     "javascript-lp-solver": "^0.4.24",
     "mini-css-extract-plugin": "^2.6.0",
     "mocha": "^10.0.0",

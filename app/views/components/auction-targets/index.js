@@ -23,7 +23,9 @@ const mapStateToProps = createSelector(
     const playersByPosition = {}
     for (const position of constants.positions) {
       if (!playersByPosition[position]) playersByPosition[position] = {}
-      playersByPosition[position] = players.filter((p) => p.pos === position)
+      playersByPosition[position] = players.filter(
+        (pMap) => pMap.get('pos') === position
+      )
     }
 
     return {

@@ -54,9 +54,9 @@ export default class PlayerRosterTotal extends React.Component {
     })
 
     return (
-      <div className='playerMap__item table__row table__row-summary'>
-        {reorder && <div className='playerMap__item-action table__cell' />}
-        <div className='playerMap__item-name table__cell sticky__column'>
+      <div className='player__item table__row table__row-summary'>
+        {reorder && <div className='player__item-action table__cell' />}
+        <div className='player__item-name table__cell sticky__column'>
           Total
         </div>
         <div className='metric table__cell'>${baseSalaryTotal.toFixed(0)}</div>

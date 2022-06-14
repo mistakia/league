@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import { List } from 'immutable'
 
+import { groupBy } from '@common'
 import SelectedPlayerProjection from '@components/selected-player-projection'
 
 export default class SelectedPlayerSeasonProjections extends React.Component {
@@ -17,17 +18,18 @@ export default class SelectedPlayerSeasonProjections extends React.Component {
     const pid = playerMap.get('pid')
     const pos = playerMap.get('pos')
     const tables = []
-    const projs = playerMap.get('projections', new List()).toJS()
-    const weeks = projs.map((p) => parseInt(p.week, 10))
-    for (const wk of weeks) {
+    const projections = playerMap.get('projections', new List()).toJS()
+    const projections_by_week = groupBy(projections, 'week')
+    for (const week in projections_by_week) {
+      const wk = parseInt(week, 10)
       tables.push(
         <SelectedPlayerProjection
           key={wk}
           week={wk}
-          projections={playerMap.getIn(['projections', wk])}
+          projections={projections_by_week[week]}
           pid={pid}
           pos={pos}
-          projection={playerMap.getIn(['projection', wk])}
+          projection={playerMap.getIn(['projection', wk], {})}
         />
       )
     }

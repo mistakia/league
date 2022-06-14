@@ -38,8 +38,6 @@ export default function DashboardPage() {
     roster
   } = this.props
 
-  const { positions } = constants
-
   const notices = []
   if (league.adate) {
     const faPeriod = getFreeAgentPeriod(league.adate)
@@ -60,10 +58,10 @@ export default function DashboardPage() {
   }
 
   const groups = {}
-  for (const position of positions) {
+  for (const position of constants.positions) {
     if (!groups[position]) groups[position] = []
     groups[position] = players.active
-      .filter((p) => p.pos === position)
+      .filter((pMap) => pMap.get('pos') === position)
       .sort(
         (a, b) =>
           b.getIn(['lineups', 'starts'], 0) - a.getIn(['lineups', 'starts'], 0)
@@ -72,13 +70,13 @@ export default function DashboardPage() {
 
   const activeItems = []
   let activePlayers = new List()
-  const cutlistPlayerIds = cutlist.map((c) => c.pid).toJS()
+  const cutlist_pids = cutlist.map((cMap) => cMap.get('pid')).toJS()
   for (const position in groups) {
     const players = groups[position]
     for (const playerMap of players) {
       if (
         !constants.season.isRegularSeason &&
-        cutlistPlayerIds.includes(playerMap.get('pid'))
+        cutlist_pids.includes(playerMap.get('pid'))
       )
         continue
       if (!playerMap.get('pid')) continue

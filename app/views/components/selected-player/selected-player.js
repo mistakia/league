@@ -6,6 +6,7 @@ import Tabs from '@material-ui/core/Tabs'
 import Tab from '@material-ui/core/Tab'
 import SwipeableDrawer from '@material-ui/core/SwipeableDrawer'
 import CloseIcon from '@material-ui/icons/Close'
+import { Map } from 'immutable'
 
 import { constants } from '@common'
 import Team from '@components/team'
@@ -87,6 +88,8 @@ export default class SelectedPlayer extends React.Component {
     const playerStatus = playerMap.get('status')
     const draftNum = playerMap.get('dpos')
     const draftYear = playerMap.get('start')
+    const rosPoints = playerMap.getIn(['points', 'ros', 'total'], 0)
+
     return (
       <SwipeableDrawer
         anchor='bottom'
@@ -128,31 +131,29 @@ export default class SelectedPlayer extends React.Component {
               <label>Status</label>
               {constants.status[playerStatus]
                 ? playerStatus
-                : playerMap.get('gamestatus', 'Active')}
+                : playerMap.get('gamestatus') || 'Active'}
             </div>
           </div>
           {isLoggedIn && (
             <div className='selected__player-header-section'>
               <div className='selected__player-header-item'>
                 <label>Starts</label>
-                {playerMap.getIn(['lineups', 'starts']) || '-'}
+                {playerMap.getIn(['lineups', 'starts'], '-')}
               </div>
               <div className='selected__player-header-item'>
                 <label>Points+</label>
-                {playerMap.getIn(['lineups', 'sp'], 0).toFixed(1) || '-'}
+                {playerMap.getIn(['lineups', 'sp'], 0).toFixed(1)}
               </div>
               <div className='selected__player-header-item'>
                 <label>Bench+</label>
-                {playerMap.getIn(['lineups', 'bp'], 0).toFixed(1) || '-'}
+                {playerMap.getIn(['lineups', 'bp'], 0).toFixed(1)}
               </div>
             </div>
           )}
           <div className='selected__player-header-section'>
             <div className='selected__player-header-item'>
               <label>Proj/G</label>
-              {(playerMap.getIn(['points', 'ros', 'total']) / projWks).toFixed(
-                1
-              ) || '-'}
+              {rosPoints && projWks ? (rosPoints / projWks).toFixed(1) : '-'}
             </div>
             <div className='selected__player-header-item'>
               <label>VOBA</label>

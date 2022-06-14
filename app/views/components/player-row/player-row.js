@@ -1,4 +1,5 @@
 import React from 'react'
+import { Map } from 'immutable'
 
 import PlayerRowOpponent from '@components/player-row-opponent'
 import EditableProjection from '@components/editable-projection'
@@ -154,7 +155,9 @@ class PlayerRow extends Player {
       </div>
     )
 
-    const stats = playerMap.get('stats', constants.createFullStats()).toJS()
+    const stats = playerMap
+      .get('stats', new Map(constants.createFullStats()))
+      .toJS()
 
     const fantasyPoints = (
       <div className='row__group'>

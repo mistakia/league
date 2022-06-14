@@ -105,7 +105,7 @@ export default function DraftPage() {
   const groups = {}
   for (const position of positions) {
     if (!groups[position]) groups[position] = []
-    groups[position] = sorted.filter((p) => p.pos === position)
+    groups[position] = sorted.filter((pMap) => pMap.get('pos') === position)
   }
 
   const items = {}
@@ -177,7 +177,7 @@ export default function DraftPage() {
         </div>
         <div>
           <label>Proj.</label>
-          {Math.round(p.points.getIn(['0', 'total'], 0))}
+          {Math.round(p.getIn(['points', '0', 'total'], 0))}
         </div>
         <div>
           <label>Age</label>

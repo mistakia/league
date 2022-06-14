@@ -33,7 +33,7 @@ export function createPlayer({
   }
 
   if (vorp) {
-    params.market_salary = new Map(vorp)
+    params.vorp = new Map(vorp)
   }
 
   if (projections) {
@@ -48,15 +48,5 @@ export function createPlayer({
     params.transactions = new List(transactions)
   }
 
-  return new Map({
-    projection: new Map(projection),
-    points: new Map(points),
-    market_salary: new Map(market_salary),
-    vorp: new Map(vorp),
-    vorp_adj: new Map(vorp_adj),
-    projections: new List(projections),
-    practice: new List(practice),
-    transactions: new List(transactions),
-    ...data
-  })
+  return new Map(params)
 }
