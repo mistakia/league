@@ -30,7 +30,7 @@ export default class AuctionMainBid extends React.Component {
       return false
     }
 
-    if (this.props.playerId && value <= this.props.bidValue) {
+    if (this.props.nominated_pid && value <= this.props.bidValue) {
       return false
     } else if (value < 0) {
       return false
@@ -92,11 +92,11 @@ export default class AuctionMainBid extends React.Component {
     this.props.nominate(this.state.value)
   }
 
-  componentDidUpdate = ({ bidValue, selected, playerId }, { value }) => {
-    if (!playerId && this.props.playerId) {
+  componentDidUpdate = ({ bidValue, selected, nominated_pid }, { value }) => {
+    if (!nominated_pid && this.props.nominated_pid) {
       // new player nominated
       this.setState({ value: this.props.bidValue + 1 })
-    } else if (!this.props.playerId && playerId) {
+    } else if (!this.props.nominated_pid && nominated_pid) {
       // waiting on nomination
       this.setState({ value: 0 })
     } else if (this.props.bidValue > bidValue) {
@@ -112,7 +112,7 @@ export default class AuctionMainBid extends React.Component {
       isLocked,
       isEligible,
       isAboveCap,
-      playerId,
+      nominated_pid,
       isNominating,
       selected,
       isCommish,
@@ -139,7 +139,7 @@ export default class AuctionMainBid extends React.Component {
           Locked
         </Button>
       )
-    } else if (playerId) {
+    } else if (nominated_pid) {
       if (isWinningBid) {
         action = <Button disabled>Winning Bid</Button>
       } else if (isAboveCap) {
@@ -186,10 +186,10 @@ export default class AuctionMainBid extends React.Component {
       )
     } else if (isPaused) {
       main = <div>Auction is paused.</div>
-    } else if (playerId) {
-      main = <AuctionNominatedPlayer playerId={playerId} />
+    } else if (nominated_pid) {
+      main = <AuctionNominatedPlayer pid={nominated_pid} />
     } else if (selected) {
-      main = <AuctionNominatedPlayer playerId={selected} />
+      main = <AuctionNominatedPlayer pid={selected} />
     } else if (isNominating) {
       main = <div>Your turn to nominate a player</div>
     } else if (isCommish) {
@@ -209,7 +209,7 @@ export default class AuctionMainBid extends React.Component {
           <div className='auction__main-timer'>
             <Timer
               expiration={timer}
-              alert={isNominating || Boolean(playerId)}
+              alert={isNominating || Boolean(nominated_pid)}
             />
           </div>
         )}
@@ -245,7 +245,7 @@ export default class AuctionMainBid extends React.Component {
 AuctionMainBid.propTypes = {
   bid: PropTypes.func,
   availableCap: PropTypes.number,
-  playerId: PropTypes.string,
+  nominated_pid: PropTypes.string,
   bidValue: PropTypes.number,
   showNotification: PropTypes.func,
   nominate: PropTypes.func,

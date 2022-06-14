@@ -39,7 +39,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('move player to reserve and activate player', async () => {
-      MockDate.set(start.subtract('1', 'week').toDate())
+      MockDate.set(start.subtract('1', 'week').toISOString())
       const player1 = await selectPlayer()
       const player2 = await selectPlayer()
       const teamId = 1
@@ -71,7 +71,7 @@ describe('API /teams - reserve', function () {
           status: 'Injured Reserve'
         })
         .where({
-          player: player1.player
+          pid: player1.pid
         })
 
       const res = await chai
@@ -79,8 +79,8 @@ describe('API /teams - reserve', function () {
         .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player1.player,
-          activate: player2.player,
+          reserve_pid: player1.pid,
+          activate_pid: player2.pid,
           leagueId,
           slot: constants.slots.IR
         })
@@ -90,12 +90,12 @@ describe('API /teams - reserve', function () {
       res.should.be.json
 
       res.body.tid.should.equal(teamId)
-      res.body.player.should.equal(player1.player)
+      res.body.pid.should.equal(player1.pid)
       res.body.slot.should.equal(constants.slots.IR)
       res.body.transaction.userid.should.equal(userId)
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
-      res.body.transaction.player.should.equal(player1.player)
+      res.body.transaction.pid.should.equal(player1.pid)
       res.body.transaction.type.should.equal(constants.transactions.RESERVE_IR)
       res.body.transaction.value.should.equal(value)
       res.body.transaction.year.should.equal(constants.season.year)
@@ -106,7 +106,7 @@ describe('API /teams - reserve', function () {
         .where({
           year: constants.season.year,
           week: constants.season.week,
-          player: player1.player
+          pid: player1.pid
         })
         .limit(1)
 
@@ -118,7 +118,7 @@ describe('API /teams - reserve', function () {
         .where({
           year: constants.season.year,
           week: constants.season.week,
-          player: player2.player
+          pid: player2.pid
         })
         .limit(1)
 
@@ -130,7 +130,7 @@ describe('API /teams - reserve', function () {
         type: constants.transactions.RESERVE_IR,
         value,
         year: constants.season.year,
-        player: player1.player,
+        pid: player1.pid,
         teamId,
         userId
       })
@@ -145,7 +145,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('invalid activate player - does not exist', async () => {
-      MockDate.set(start.subtract('1', 'week').toDate())
+      MockDate.set(start.subtract('1', 'week').toISOString())
       const player1 = await selectPlayer()
       const teamId = 1
       const leagueId = 1
@@ -166,7 +166,7 @@ describe('API /teams - reserve', function () {
           status: 'Injured Reserve'
         })
         .where({
-          player: player1.player
+          pid: player1.pid
         })
 
       const request = chai
@@ -175,8 +175,8 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          activate: 'x',
-          player: player1.player,
+          activate_pid: 'x',
+          reserve_pid: player1.pid,
           slot: constants.slots.IR
         })
 
@@ -184,7 +184,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('invalid activate player - not on team', async () => {
-      MockDate.set(start.subtract('1', 'week').toDate())
+      MockDate.set(start.subtract('1', 'week').toISOString())
       const player1 = await selectPlayer()
       const player2 = await selectPlayer()
       const teamId = 1
@@ -206,7 +206,7 @@ describe('API /teams - reserve', function () {
           status: 'Injured Reserve'
         })
         .where({
-          player: player1.player
+          pid: player1.pid
         })
 
       const request = chai
@@ -215,8 +215,8 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          activate: player2.player,
-          player: player1.player,
+          activate_pid: player2.pid,
+          reserve_pid: player1.pid,
           slot: constants.slots.IR
         })
 
@@ -224,7 +224,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('invalid activate player - on active roster', async () => {
-      MockDate.set(start.subtract('1', 'week').toDate())
+      MockDate.set(start.subtract('1', 'week').toISOString())
       const player1 = await selectPlayer()
       const player2 = await selectPlayer()
       const teamId = 1
@@ -256,7 +256,7 @@ describe('API /teams - reserve', function () {
           status: 'Injured Reserve'
         })
         .where({
-          player: player1.player
+          pid: player1.pid
         })
 
       const request = chai
@@ -265,8 +265,8 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          activate: player2.player,
-          player: player1.player,
+          activate_pid: player2.pid,
+          reserve_pid: player1.pid,
           slot: constants.slots.IR
         })
 
@@ -274,7 +274,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('activate player is not on reserve', async () => {
-      MockDate.set(start.subtract('1', 'week').toDate())
+      MockDate.set(start.subtract('1', 'week').toISOString())
       const player1 = await selectPlayer()
       const player2 = await selectPlayer()
       const teamId = 1
@@ -306,7 +306,7 @@ describe('API /teams - reserve', function () {
           status: 'Injured Reserve'
         })
         .where({
-          player: player1.player
+          pid: player1.pid
         })
 
       const request = chai
@@ -315,8 +315,8 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          activate: player2.player,
-          player: player1.player,
+          activate_pid: player2.pid,
+          reserve_pid: player1.pid,
           slot: constants.slots.IR
         })
 

@@ -14,6 +14,7 @@ export default async function (leagueId) {
     start: league.ddate,
     picks: picks.length
   })
+
   if (!league.ddate || dayjs().isBefore(draftDates.waiverEnd)) {
     return undefined
   }
@@ -22,30 +23,30 @@ export default async function (leagueId) {
     return undefined
   }
 
-  const activeWaivers = await db('waivers')
+  const active_waiver_rows = await db('waivers')
     .whereNull('processed')
     .whereNull('cancelled')
     .where('lid', leagueId)
     .where('type', constants.waivers.FREE_AGENCY)
-    .groupBy('player')
-  const activeWaiverPlayerIds = activeWaivers.map((w) => w.player)
+    .groupBy('pid')
+  const active_waiver_pids = active_waiver_rows.map((w) => w.pid)
 
   // TODO - return undefined if there are any active waivers and practice waiver players
 
   // get relevant transactions from last 24 hours
   const cutoff = dayjs().subtract('24', 'hours').unix()
-  const transactions = await db('transactions')
+  const recent_transaction_rows = await db('transactions')
     .where('type', constants.transactions.ROSTER_RELEASE)
     .where('timestamp', '>=', cutoff)
     .where('lid', leagueId)
-  const playerIds = transactions.map((t) => t.player)
+  const recent_transaction_pids = recent_transaction_rows.map((t) => t.pid)
 
   const query = db('waivers')
     .select(
       'teams.*',
       'waivers.uid as wid',
       'waivers.bid',
-      'waivers.player',
+      'waivers.pid',
       'waivers.tid',
       'waivers.userid'
     )
@@ -73,7 +74,7 @@ export default async function (leagueId) {
     query
       .select('nfl_games.date')
       .select('nfl_games.time_est')
-      .join('player', 'waivers.player', 'player.player')
+      .join('player', 'waivers.pid', 'player.pid')
       .joinRaw(
         'left join nfl_games on player.cteam = nfl_games.v or player.cteam = nfl_games.h'
       )
@@ -82,21 +83,21 @@ export default async function (leagueId) {
       .where('nfl_games.type', 'REG')
   }
 
-  if (playerIds.length) {
-    query.whereNotIn('waivers.player', playerIds)
+  if (recent_transaction_pids.length) {
+    query.whereNotIn('waivers.pid', recent_transaction_pids)
   }
 
-  if (activeWaiverPlayerIds.length) {
-    query.whereNotIn('waivers.player', activeWaiverPlayerIds)
+  if (active_waiver_pids.length) {
+    query.whereNotIn('waivers.pid', active_waiver_pids)
   }
 
-  const waivers = await query
+  const waiver_rows = await query
 
   if (constants.season.isRegularSeason) {
     const now = dayjs()
-    const filtered = waivers.filter((player) => {
+    const filtered = waiver_rows.filter((waiver_row) => {
       const gameStart = dayjs.tz(
-        `${player.date} ${player.time_est}`,
+        `${waiver_row.date} ${waiver_row.time_est}`,
         'YYYY/MM/DD HH:mm:SS',
         'America/New_York'
       )
@@ -106,5 +107,5 @@ export default async function (leagueId) {
     return filtered.length ? filtered[0] : undefined
   }
 
-  return waivers.length ? waivers[0] : undefined
+  return waiver_rows.length ? waiver_rows[0] : undefined
 }

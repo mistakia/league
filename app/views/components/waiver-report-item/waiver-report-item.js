@@ -62,7 +62,7 @@ export default class WaiverReportItem extends React.Component {
           </div>
           <div className='waiver__report-meta'>
             <TeamName tid={waiver.tid} />
-            <PlayerNameExpanded playerId={waiver.player} hideActions />
+            <PlayerNameExpanded pid={waiver.pid} hideActions />
           </div>
         </div>
         <AlternateClaims waivers={waiver.waivers} />

@@ -24,24 +24,20 @@ const run = async () => {
 
   for (const claim of claims) {
     let error
-    let player
+    let player_row
     try {
-      const players = await db('player')
-        .where({ player: claim.player })
-        .limit(1)
-      player = players[0]
+      const player_rows = await db('player').where({ pid: claim.pid }).limit(1)
+      player_row = player_rows[0]
 
       const release = await db('poach_releases')
-        .select('player')
+        .select('pid')
         .where('poachid', claim.uid)
 
       await processPoach({
-        release: release.map((r) => r.player),
+        release: release.map((r) => r.pid),
         ...claim
       })
-      log(
-        `poaching claim awarded to teamId: (${claim.tid}) for ${claim.player}`
-      )
+      log(`poaching claim awarded to teamId: (${claim.tid}) for ${claim.pid}`)
     } catch (err) {
       error = err
       log(
@@ -53,8 +49,8 @@ const run = async () => {
         teamIds: [claim.tid],
         voice: false,
         notifyLeague: false,
-        message: player
-          ? `Your poaching claim for ${player.fname} ${player.lname} (${player.pos}) was unsuccessful`
+        message: player_row
+          ? `Your poaching claim for ${player_row.fname} ${player_row.lname} (${player_row.pos}) was unsuccessful`
           : 'Your poaching claim was unsuccessful.'
       })
     }
@@ -64,7 +60,7 @@ const run = async () => {
       .update('reason', error ? error.message : null) // TODO - add error codes
       .update('succ', error ? 0 : 1)
       .where({
-        player: claim.player,
+        pid: claim.pid,
         tid: claim.tid,
         lid: claim.lid
       })

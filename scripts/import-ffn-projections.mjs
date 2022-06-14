@@ -69,10 +69,10 @@ const run = async () => {
         pos: item.position === 'DEF' ? 'DST' : item.position
       }
 
-      let player
+      let player_row
       try {
-        player = await getPlayer(params)
-        if (!player) {
+        player_row = await getPlayer(params)
+        if (!player_row) {
           missing.push(params)
           continue
         }
@@ -84,7 +84,7 @@ const run = async () => {
 
       const proj = getProjection(item)
       inserts.push({
-        player: player.player,
+        pid: player_row.pid,
         year: constants.season.year,
         week: constants.season.week,
         sourceid: 12,

@@ -14,7 +14,7 @@ export default async function ({ leagueId, player, teamId, userId }) {
 
   await db('rosters_players')
     .where({
-      player: player.player,
+      pid: player.pid,
       rid
     })
     .del()
@@ -23,7 +23,7 @@ export default async function ({ leagueId, player, teamId, userId }) {
     userid: userId,
     tid: teamId,
     lid: leagueId,
-    player: player.player,
+    pid: player.pid,
     type: constants.transactions.ROSTER_RELEASE,
     value: 0,
     year: constants.season.year,

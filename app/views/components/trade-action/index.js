@@ -16,7 +16,7 @@ const mapStateToProps = createSelector(
     league,
     trade,
     isValid,
-    isProposer: trade.pid === app.teamId
+    isProposer: trade.propose_tid === app.teamId
   })
 )
 

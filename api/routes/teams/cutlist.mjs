@@ -10,11 +10,11 @@ router.get('/?', async (req, res) => {
   try {
     const { teamId } = req.params
     const cutlist = await db('league_cutlist')
-      .select('player')
+      .select('pid')
       .where('tid', teamId)
       .orderBy('order', 'asc')
 
-    res.send(cutlist.map((p) => p.player))
+    res.send(cutlist.map((p) => p.pid))
   } catch (error) {
     logger(error)
     return res.status(400).send({ error: error.toString() })
@@ -26,14 +26,14 @@ router.post('/?', async (req, res) => {
   try {
     const { teamId } = req.params
     const { leagueId } = req.body
-    let { players } = req.body
+    let { pids } = req.body
 
-    if (!players) {
-      return res.status(400).send({ error: 'missing players' })
+    if (!pids) {
+      return res.status(400).send({ error: 'missing pids' })
     }
 
-    if (!Array.isArray(players)) {
-      players = [players]
+    if (!Array.isArray(pids)) {
+      pids = [pids]
     }
 
     // verify teamId
@@ -59,8 +59,8 @@ router.post('/?', async (req, res) => {
     const roster = new Roster({ roster: rosterRow, league })
 
     // make sure all players are on roster
-    for (const player of players) {
-      if (!roster.has(player)) {
+    for (const pid of pids) {
+      if (!roster.has(pid)) {
         return res.status(400).send({ error: 'invalid player' })
       }
     }
@@ -69,10 +69,10 @@ router.post('/?', async (req, res) => {
 
     // save
     const result = []
-    for (const [index, player] of players.entries()) {
+    for (const [index, pid] of pids.entries()) {
       result.push({
         tid,
-        player,
+        pid,
         order: index
       })
     }
@@ -81,11 +81,8 @@ router.post('/?', async (req, res) => {
       await db('league_cutlist').insert(result).onConflict().merge()
     }
 
-    await db('league_cutlist')
-      .del()
-      .whereNotIn('player', players)
-      .where('tid', tid)
-    res.send(players)
+    await db('league_cutlist').del().whereNotIn('pid', pids).where('tid', tid)
+    res.send(pids)
   } catch (error) {
     logger(error)
     return res.status(400).send({ error: error.toString() })

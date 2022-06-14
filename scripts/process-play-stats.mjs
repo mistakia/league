@@ -17,7 +17,6 @@ import {
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('process:play-stats')
 debug.enable('process:play-stats,update-player')
-const timestamp = Math.round(Date.now() / 1000)
 const current_week = Math.max(
   dayjs().day() === 2 ? constants.season.week - 1 : constants.season.week,
   1
@@ -59,7 +58,7 @@ const getPlayType = (type_ngs) => {
   }
 }
 
-const upsert = async ({ player, stats, opp, pos, tm, week, year }) => {
+const upsert = async ({ pid, stats, opp, pos, tm, week, year }) => {
   const cleanedStats = Object.keys(stats)
     .filter((key) => constants.fantasyStats.includes(key))
     .reduce((obj, key) => {
@@ -70,7 +69,7 @@ const upsert = async ({ player, stats, opp, pos, tm, week, year }) => {
   await db('gamelogs')
     .insert({
       tm,
-      player,
+      pid,
       pos,
       opp,
       week,
@@ -110,15 +109,17 @@ const run = async ({
 
   const missing = []
 
-  const playStatsByGsispid = groupBy(playStats, 'gsispid')
-  const gsispids = Object.keys(playStatsByGsispid)
-  const players_gsispid = await db('player').whereIn('gsispid', gsispids)
+  const play_stats_by_gsispid = groupBy(playStats, 'gsispid')
+  const gsispids = Object.keys(play_stats_by_gsispid)
+  const player_gsispid_rows = await db('player').whereIn('gsispid', gsispids)
 
   // Update players with missing gsispids
-  const playerGsispids = players_gsispid.map((p) => p.gsispid)
-  const missingGsispids = gsispids.filter((p) => !playerGsispids.includes(p))
-  for (const gsispid of missingGsispids) {
-    const playStat = playStatsByGsispid[gsispid].find(
+  const existing_gsispids = player_gsispid_rows.map((p) => p.gsispid)
+  const missing_gsispids = gsispids.filter(
+    (p) => !existing_gsispids.includes(p)
+  )
+  for (const gsispid of missing_gsispids) {
+    const playStat = play_stats_by_gsispid[gsispid].find(
       (p) => p.clubCode && p.playerName
     )
     if (!playStat) continue
@@ -135,23 +136,23 @@ const run = async ({
       continue
     }
 
-    const player = results[0]
+    const player_row = results[0]
 
     if (!argv.dry) {
-      await updatePlayer({ player, update: { gsispid } })
+      await updatePlayer({ player_row, update: { gsispid } })
     }
-    player.gsispid = gsispid
-    players_gsispid.push(player)
+    player_row.gsispid = gsispid
+    player_gsispid_rows.push(player_row)
   }
 
-  const playStatsByGsisid = groupBy(playStats, 'gsisId')
-  const gsisids = Object.keys(playStatsByGsisid)
+  const play_stats_by_gsisid = groupBy(playStats, 'gsisId')
+  const gsisids = Object.keys(play_stats_by_gsisid)
   const players_gsisid = await db('player').whereIn('gsisid', gsisids)
 
-  const playerGsisids = players_gsisid.map((p) => p.gsisid)
-  const missingGsisids = gsisids.filter((p) => !playerGsisids.includes(p))
-  for (const gsisid of missingGsisids) {
-    const playStat = playStatsByGsisid[gsisid].find(
+  const existing_gsisids = players_gsisid.map((p) => p.gsisid)
+  const missing_gsisids = gsisids.filter((p) => !existing_gsisids.includes(p))
+  for (const gsisid of missing_gsisids) {
+    const playStat = play_stats_by_gsisid[gsisid].find(
       (p) => p.clubCode && p.playerName
     )
     if (!playStat) continue
@@ -161,49 +162,40 @@ const run = async ({
       cteam: fixTeam(playStat.clubCode)
     }
 
-    const results = await db('player').where(params)
+    const player_rows = await db('player').where(params)
 
-    if (results.length !== 1) {
+    if (player_rows.length !== 1) {
       missing.push(params)
       continue
     }
 
-    const player = results[0]
+    const player_row = player_rows[0]
 
     if (!argv.dry) {
-      await db('player_changelog').insert({
-        type: constants.changes.PLAYER_EDIT,
-        id: player.player,
-        prop: 'gsisid',
-        prev: player.gsisid,
-        new: gsisid,
-        timestamp
-      })
-
-      await db('player').update({ gsisid }).where({ player: player.player })
+      await updatePlayer({ player_row, update: { gsisid } })
     }
-    player.gsisid = gsisid
-    players_gsisid.push(player)
+    player_row.gsisid = gsisid
+    players_gsisid.push(player_row)
   }
 
   // generate player gamelogs
-  for (const gsispid of Object.keys(playStatsByGsispid)) {
-    const player = players_gsispid.find((p) => p.gsispid === gsispid)
-    if (!player) continue
-    if (!constants.positions.includes(player.pos)) continue
+  for (const gsispid of Object.keys(play_stats_by_gsispid)) {
+    const player_row = player_gsispid_rows.find((p) => p.gsispid === gsispid)
+    if (!player_row) continue
+    if (!constants.positions.includes(player_row.pos)) continue
 
-    const playStat = playStatsByGsispid[gsispid].find((p) => p.clubCode)
+    const playStat = play_stats_by_gsispid[gsispid].find((p) => p.clubCode)
     if (!playStat) continue
     const opp =
       fixTeam(playStat.clubCode) === fixTeam(playStat.h)
         ? fixTeam(playStat.v)
         : fixTeam(playStat.h)
-    const stats = calculateStatsFromPlayStats(playStatsByGsispid[gsispid])
+    const stats = calculateStatsFromPlayStats(play_stats_by_gsispid[gsispid])
     if (argv.dry) continue
 
     await upsert({
-      player: player.player,
-      pos: player.pos,
+      pid: player_row.pid,
+      pos: player_row.pos,
       tm: fixTeam(playStat.clubCode),
       opp,
       stats,
@@ -244,7 +236,7 @@ const run = async ({
     const stats = calculateDstStatsFromPlays(formattedPlays, team)
     if (argv.dry) continue
     await upsert({
-      player: team,
+      pid: team,
       pos: 'DST',
       tm: team,
       opp: fixTeam(opp),
@@ -291,7 +283,7 @@ const run = async ({
 
   // update play row data
   const playStatsByEsbid = groupBy(playStats, 'esbid')
-  const playRows = []
+  const play_rows = []
   for (const [esbid, playStats] of Object.entries(playStatsByEsbid)) {
     const playStatsByPlay = groupBy(playStats, 'playId')
     for (const [playId, playStats] of Object.entries(playStatsByPlay)) {
@@ -299,58 +291,62 @@ const run = async ({
       const playStat = playStats.find((p) => p.pos_team)
       if (!playStat) continue
 
-      const playRow = getPlayFromPlayStats({ playStats })
-      if (Object.keys(playRow).length === 0) continue
-      playRows.push(playRow)
+      const play_row = getPlayFromPlayStats({ playStats })
+      if (Object.keys(play_row).length === 0) continue
+      play_rows.push(play_row)
 
       // TODO - succ
 
-      if (playRow.player_fuml_gsis) {
+      if (play_row.player_fuml_gsis) {
         const player = players_gsisid.find(
-          (p) => p.gsisid === playRow.player_fuml_gsis
+          (p) => p.gsisid === play_row.player_fuml_gsis
         )
         if (player) {
-          playRow.player_fuml = player.player
+          play_row.player_fuml = player.pid
         }
       }
 
-      if (playRow.bc_gsis) {
-        const player = players_gsisid.find((p) => p.gsisid === playRow.bc_gsis)
+      if (play_row.bc_gsis) {
+        const player = players_gsisid.find((p) => p.gsisid === play_row.bc_gsis)
         if (player) {
-          playRow.bc = player.player
+          play_row.bc = player.pid
         }
       }
 
-      if (playRow.psr_gsis) {
-        const player = players_gsisid.find((p) => p.gsisid === playRow.psr_gsis)
-        if (player) {
-          playRow.psr = player.player
-        }
-      }
-
-      if (playRow.trg_gsis) {
-        const player = players_gsisid.find((p) => p.gsisid === playRow.trg_gsis)
-        if (player) {
-          playRow.trg = player.player
-        }
-      }
-
-      if (playRow.intp_gsis) {
+      if (play_row.psr_gsis) {
         const player = players_gsisid.find(
-          (p) => p.gsisid === playRow.intp_gsis
+          (p) => p.gsisid === play_row.psr_gsis
         )
         if (player) {
-          playRow.intp = player.player
+          play_row.psr = player.pid
         }
       }
 
-      await db('nfl_plays').update(playRow).where({
+      if (play_row.trg_gsis) {
+        const player = players_gsisid.find(
+          (p) => p.gsisid === play_row.trg_gsis
+        )
+        if (player) {
+          play_row.trg = player.pid
+        }
+      }
+
+      if (play_row.intp_gsis) {
+        const player = players_gsisid.find(
+          (p) => p.gsisid === play_row.intp_gsis
+        )
+        if (player) {
+          play_row.intp = player.pid
+        }
+      }
+
+      await db('nfl_plays').update(play_row).where({
         esbid,
         playId
       })
     }
   }
-  log(`Updated ${playRows.length} plays`)
+  log(`Updated ${play_rows.length} plays`)
 }
 
 const main = async () => {

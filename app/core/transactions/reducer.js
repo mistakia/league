@@ -66,8 +66,7 @@ export function transactionsReducer(state = initialState(), { payload, type }) {
     case teamActions.DELETE_ROSTERS_FULFILLED:
       return state.updateIn(['release'], (list) =>
         list.filter(
-          (t) =>
-            t.tid !== payload.opts.teamId && t.player !== payload.opts.player
+          (t) => t.tid !== payload.opts.teamId && t.pid !== payload.opts.pid
         )
       )
 

@@ -162,7 +162,7 @@ const getPlayer = async ({
   keeptradecut_id
 }) => {
   if (aliases[name]) {
-    const result = await db('player').where({ player: aliases[name] })
+    const result = await db('player').where({ pid: aliases[name] })
     return result[0]
   }
 
@@ -198,13 +198,13 @@ const getPlayer = async ({
     }
   }
 
-  const players = await query
-  if (players.length > 1) {
+  const player_rows = await query
+  if (player_rows.length > 1) {
     log(query.toString())
     throw new Error('matched multiple players')
   }
 
-  return players.length ? players[0] : undefined
+  return player_rows.length ? player_rows[0] : undefined
 }
 
 export default getPlayer
@@ -218,8 +218,8 @@ const main = async () => {
       team: argv.team
     }
     log(options)
-    const player = await getPlayer(options)
-    log(player)
+    const player_row = await getPlayer(options)
+    log(player_row)
   } catch (err) {
     error = err
     log(error)

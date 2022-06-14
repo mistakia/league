@@ -15,7 +15,7 @@ export default class SettingsTeamsTeamPlayer extends React.Component {
         'Player will be removed from roster and any related transactions',
       onConfirm: () =>
         this.props.remove({
-          player: this.props.playerId,
+          pid: this.props.pid,
           teamId: this.props.teamId
         })
     })
@@ -28,7 +28,7 @@ export default class SettingsTeamsTeamPlayer extends React.Component {
         <div className='settings__teams-team-player-value'>
           ${this.props.value}
         </div>
-        <PlayerName playerId={this.props.playerId} />
+        <PlayerName pid={this.props.pid} />
         <div>
           <IconButton onClick={this.handleRemove}>
             <DeleteIcon fontSize='small' />
@@ -43,7 +43,7 @@ SettingsTeamsTeamPlayer.propTypes = {
   update: PropTypes.func,
   remove: PropTypes.func,
   showConfirmation: PropTypes.func,
-  playerId: PropTypes.string,
+  pid: PropTypes.string,
   teamId: PropTypes.number,
   value: PropTypes.number
 }

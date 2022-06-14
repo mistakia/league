@@ -72,7 +72,7 @@ const run = async () => {
         continue
       }
 
-      let player
+      let player_row
 
       const params = {
         name: `${fbg_player.first} ${fbg_player.last}`,
@@ -81,8 +81,8 @@ const run = async () => {
       }
 
       try {
-        player = await getPlayer(params)
-        if (!player) {
+        player_row = await getPlayer(params)
+        if (!player_row) {
           missing.push(params)
           continue
         }
@@ -94,7 +94,7 @@ const run = async () => {
 
       const proj = getProjection(projections.projections[fbgId])
       inserts.push({
-        player: player.player,
+        pid: player_row.pid,
         year: constants.season.year,
         week: constants.season.week,
         sourceid: projectors[id],

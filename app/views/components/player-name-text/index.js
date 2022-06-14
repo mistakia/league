@@ -5,6 +5,8 @@ import { getPlayerById } from '@core/players'
 
 import PlayerNameText from './player-name-text'
 
-const mapStateToProps = createSelector(getPlayerById, (player) => ({ player }))
+const mapStateToProps = createSelector(getPlayerById, (playerMap) => ({
+  playerMap
+}))
 
 export default connect(mapStateToProps)(PlayerNameText)

@@ -67,15 +67,15 @@ router.put('/?', async (req, res) => {
         return res.status(400).send({ error: 'missing slot' })
       }
 
-      if (!item.player) {
-        return res.status(400).send({ error: 'missing player' })
+      if (!item.pid) {
+        return res.status(400).send({ error: 'missing pid' })
       }
     }
 
-    const playerIds = players.map((p) => p.player)
-    const playerRows = await db('player').whereIn('player', playerIds)
+    const pids = players.map((p) => p.pid)
+    const player_rows = await db('player').whereIn('pid', pids)
 
-    if (playerRows.length !== playerIds.length) {
+    if (player_rows.length !== pids.length) {
       return res.status(400).send({ error: 'invalid player' })
     }
 
@@ -91,24 +91,21 @@ router.put('/?', async (req, res) => {
 
     for (const item of players) {
       // verify player is on roster
-      const isActive = Boolean(
-        roster.active.find((p) => p.player === item.player)
-      )
+      const isActive = Boolean(roster.active.find((p) => p.pid === item.pid))
       if (!isActive) {
         return res.status(400).send({ error: 'invalid player' })
       }
 
-      roster.removePlayer(item.player)
+      roster.removePlayer(item.pid)
     }
 
     for (const item of players) {
-      const playerRow = playerRows.find((p) => p.player === item.player)
+      const player_row = player_rows.find((p) => p.pid === item.pid)
       // verify player is eligible for slot
       if (item.slot !== constants.slots.BENCH) {
         const isEligible = roster.isEligibleForSlot({
           slot: item.slot,
-          player: item.player,
-          pos: playerRow.pos
+          pos: player_row.pos
         })
         if (!isEligible) {
           return res.status(400).send({ error: 'invalid slot' })
@@ -118,8 +115,8 @@ router.put('/?', async (req, res) => {
         if (week <= 6) {
           const offseasonRosterRow = await getRoster({ tid, week: 0, year })
           const roster = new Roster({ roster: offseasonRosterRow, league })
-          const reservePlayerIds = roster.reserve.map((p) => p.player)
-          if (reservePlayerIds.includes(item.player)) {
+          const reserve_pids = roster.reserve.map((p) => p.pid)
+          if (reserve_pids.includes(item.pid)) {
             return res.status(400).send({
               error: 'player ineligible to start during first six weeks'
             })
@@ -128,7 +125,7 @@ router.put('/?', async (req, res) => {
       }
 
       // verify player is not locked
-      const isLocked = await isPlayerLocked(item.player)
+      const isLocked = await isPlayerLocked(item.pid)
       if (isLocked) {
         return res
           .status(400)
@@ -137,21 +134,21 @@ router.put('/?', async (req, res) => {
 
       roster.addPlayer({
         slot: item.slot,
-        player: item.player,
-        pos: playerRow.pos
+        pid: item.pid,
+        pos: player_row.pos
       })
     }
 
     const data = []
-    for (const item of players) {
+    for (const { slot, pid } of players) {
       const updateid = await db('rosters_players')
         .join('rosters', 'rosters_players.rid', 'rosters.uid')
-        .update({ slot: item.slot })
-        .where({ week, year, tid, player: item.player })
+        .update({ slot })
+        .where({ week, year, tid, pid })
 
       data.push({
-        slot: item.slot,
-        player: item.player,
+        slot,
+        pid,
         week,
         year,
         tid

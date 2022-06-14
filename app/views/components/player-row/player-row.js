@@ -1,4 +1,5 @@
 import React from 'react'
+import { Map } from 'immutable'
 
 import PlayerRowOpponent from '@components/player-row-opponent'
 import EditableProjection from '@components/editable-projection'
@@ -17,7 +18,7 @@ import './player-row.styl'
 class PlayerRow extends Player {
   render = () => {
     const {
-      player,
+      playerMap,
       selectedPlayer,
       isStatsView,
       isSeasonView,
@@ -31,22 +32,25 @@ class PlayerRow extends Player {
       percentiles,
       isLoggedIn,
       isRestOfSeasonView,
-      selected,
+      selected, // inherited from Player class
       status,
       baselines,
       teamId,
       index
     } = this.props
 
-    const isSelected =
-      selectedPlayer === player.player || selected === player.player
+    const pid = playerMap.get('pid')
+    const tid = playerMap.get('tid')
+    const pos = playerMap.get('pos')
+    const team = playerMap.get('team')
+    const isRostered = Boolean(tid)
+    const isSelected = selectedPlayer === pid || selected === pid
 
     const seasonSummary = () => {
       let inflation = null
-      const value = player.market_salary.getIn([`${week}`])
-      const isRostered = Boolean(player.tid)
+      const value = playerMap.getIn(['market_salary', `${week}`])
       if (isLoggedIn && !isRostered && (isRestOfSeasonView || isSeasonView)) {
-        const diff = player.market_salary.getIn(['inflation']) - value
+        const diff = playerMap.getIn(['market_salary', 'inflation']) - value
         const classNames = ['value__inflation']
         const isPos = diff > 0
         if (isPos) classNames.push('positive')
@@ -61,7 +65,9 @@ class PlayerRow extends Player {
 
       const playerSalary = (
         <>
-          <div className='table__cell metric'>${player.value || '--'}</div>
+          <div className='table__cell metric'>
+            ${playerMap.get('value', '--')}
+          </div>
           {constants.season.isOffseason && (
             <div className='table__cell metric'>
               ${Math.round(value) || '--'}
@@ -76,15 +82,15 @@ class PlayerRow extends Player {
           <div className='row__group-body'>
             {isLoggedIn && playerSalary}
             <div className='table__cell metric'>
-              {Math.round(player.vorp.getIn([`${week}`]) || 0)}
+              {Math.round(playerMap.getIn(['vorp', `${week}`], 0))}
             </div>
             {constants.season.isOffseason && (
               <div className='table__cell metric'>
-                {Math.round(player.vorp_adj.getIn([`${week}`]) || 0)}
+                {Math.round(playerMap.getIn(['vorp_adj', `${week}`], 0))}
               </div>
             )}
             <div className='table__cell metric'>
-              {(player.points.getIn([`${week}`, 'total']) || 0).toFixed(1)}
+              {playerMap.getIn(['points', `${week}`, 'total'], 0).toFixed(1)}
             </div>
           </div>
         </div>
@@ -95,13 +101,13 @@ class PlayerRow extends Player {
       <div className='row__group'>
         <div className='row__group-body'>
           <div className='table__cell metric'>
-            <EditableProjection player={player} type='py' week={week} />
+            <EditableProjection playerMap={playerMap} type='py' week={week} />
           </div>
           <div className='table__cell metric'>
-            <EditableProjection player={player} type='tdp' week={week} />
+            <EditableProjection playerMap={playerMap} type='tdp' week={week} />
           </div>
           <div className='table__cell metric'>
-            <EditableProjection player={player} type='ints' week={week} />
+            <EditableProjection playerMap={playerMap} type='ints' week={week} />
           </div>
         </div>
       </div>
@@ -111,16 +117,16 @@ class PlayerRow extends Player {
       <div className='row__group'>
         <div className='row__group-body'>
           <div className='table__cell metric'>
-            <EditableProjection player={player} type='ra' week={week} />
+            <EditableProjection playerMap={playerMap} type='ra' week={week} />
           </div>
           <div className='table__cell metric'>
-            <EditableProjection player={player} type='ry' week={week} />
+            <EditableProjection playerMap={playerMap} type='ry' week={week} />
           </div>
           <div className='table__cell metric'>
-            <EditableProjection player={player} type='tdr' week={week} />
+            <EditableProjection playerMap={playerMap} type='tdr' week={week} />
           </div>
           <div className='table__cell metric'>
-            <EditableProjection player={player} type='fuml' week={week} />
+            <EditableProjection playerMap={playerMap} type='fuml' week={week} />
           </div>
         </div>
       </div>
@@ -130,22 +136,28 @@ class PlayerRow extends Player {
       <div className='row__group'>
         <div className='row__group-body'>
           <div className='table__cell metric'>
-            <EditableProjection player={player} type='trg' week={week} />
+            <EditableProjection playerMap={playerMap} type='trg' week={week} />
           </div>
           <div className='table__cell metric'>
-            <EditableProjection player={player} type='rec' week={week} />
+            <EditableProjection playerMap={playerMap} type='rec' week={week} />
           </div>
           <div className='table__cell metric'>
-            <EditableProjection player={player} type='recy' week={week} />
+            <EditableProjection playerMap={playerMap} type='recy' week={week} />
           </div>
           <div className='table__cell metric'>
-            <EditableProjection player={player} type='tdrec' week={week} />
+            <EditableProjection
+              playerMap={playerMap}
+              type='tdrec'
+              week={week}
+            />
           </div>
         </div>
       </div>
     )
 
-    const stats = player.stats.toJS()
+    const stats = playerMap
+      .get('stats', new Map(constants.createFullStats()))
+      .toJS()
 
     const fantasyPoints = (
       <div className='row__group'>
@@ -546,19 +558,19 @@ class PlayerRow extends Player {
 
     const classNames = ['player__row']
     if (isSelected) classNames.push('selected')
-    if (isLoggedIn && !player.tid) classNames.push('fa')
-    else if (player.tid === teamId) classNames.push('rostered')
+    if (isLoggedIn && !isRostered) classNames.push('fa')
+    else if (tid === teamId) classNames.push('rostered')
 
     const projectionView = isRestOfSeasonView || isSeasonView || isWeekView
 
     if (isWeekView || isSeasonView) {
       const starterBaselinePlayerId = baselines.getIn([
         `${week}`,
-        player.pos,
+        pos,
         'default'
       ])
 
-      if (player.player === starterBaselinePlayerId) {
+      if (pid === starterBaselinePlayerId) {
         classNames.push('starter__baseline')
       }
     }
@@ -568,17 +580,17 @@ class PlayerRow extends Player {
         <div className='player__row-lead'>
           <div className='player__row-index'>{index + 1}</div>
           <div className='player__row-action'>
-            <PlayerWatchlistAction playerId={player.player} />
+            <PlayerWatchlistAction pid={pid} />
           </div>
           <div className='player__row-pos'>
-            <Position pos={player.pos} />
+            <Position pos={pos} />
           </div>
           <div className='player__row-name cursor' onClick={this.handleClick}>
-            <span>{player.name}</span>
-            {constants.season.year === player.draft_year && (
+            <span>{playerMap.get('name')}</span>
+            {constants.season.year === playerMap.get('start') && (
               <PlayerLabel label='R' type='rookie' description='Rookie' />
             )}
-            <Team team={player.team} />
+            <Team team={team} />
           </div>
           {isLoggedIn && (
             <div className='player__row-action'>
@@ -593,12 +605,12 @@ class PlayerRow extends Player {
             </div>
           )}
           {constants.season.week > 0 && (
-            <PlayerRowOpponent team={player.team} pos={player.pos} />
+            <PlayerRowOpponent team={team} pos={pos} />
           )}
           {isLoggedIn && (
             <div className='player__row-availability'>
-              {player.tid ? (
-                <TeamName abbrv tid={player.tid} />
+              {isRostered ? (
+                <TeamName abbrv tid={tid} />
               ) : status.waiver.active ||
                 status.waiver.poach ||
                 status.waiver.practice ||

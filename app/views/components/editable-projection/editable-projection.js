@@ -11,16 +11,16 @@ export default class EditableProjection extends React.Component {
       week: parseInt(this.props.week, 10),
       userId: this.props.userId,
       type: this.props.type,
-      playerId: this.props.player.player
+      pid: this.props.playerMap.get('pid')
     })
   }
 
   render = () => {
-    const { player, type, week } = this.props
+    const { playerMap, type, week } = this.props
 
     const decimal = week === 'ros' || week === '0' ? 0 : 1
     const value = parseFloat(
-      player.projection.getIn([`${week}`, type], 0).toFixed(decimal)
+      playerMap.getIn(['projection', `${week}`, type], 0).toFixed(decimal)
     )
     const disabled = week !== '0'
 
@@ -41,5 +41,5 @@ EditableProjection.propTypes = {
   week: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   userId: PropTypes.number,
   type: PropTypes.string,
-  player: ImmutablePropTypes.record
+  playerMap: ImmutablePropTypes.map
 }

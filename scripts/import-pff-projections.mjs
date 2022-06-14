@@ -34,11 +34,11 @@ const runOne = async (week) => {
     const team = item.team_name
     const pos = item.position.toUpperCase()
     const params = { name, team, pos }
-    let player
+    let player_row
 
     try {
-      player = await getPlayer(params)
-      if (!player) {
+      player_row = await getPlayer(params)
+      if (!player_row) {
         missing.push(params)
         continue
       }
@@ -79,7 +79,7 @@ const runOne = async (week) => {
     }
 
     inserts.push({
-      player: player.player,
+      pid: player_row.pid,
       week,
       year,
       sourceid: 6, // pff sourceid,

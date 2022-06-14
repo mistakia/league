@@ -55,11 +55,11 @@ const run = async () => {
     const fname = n.pop().trim()
     const lname = n.shift().trim()
     const fullname = `${fname} ${lname}`
-    let player
+    let player_row
     const params = { name: fullname, team: Team, pos: Pos }
     try {
-      player = await getPlayer(params)
-      if (!player) {
+      player_row = await getPlayer(params)
+      if (!player_row) {
         missing.push(params)
         continue
       }
@@ -71,7 +71,7 @@ const run = async () => {
 
     const entry = createEntry(item)
     inserts.push({
-      player: player.player,
+      pid: player_row.pid,
       year,
       week,
       sourceid: 1, // fantasy sharks sourceid

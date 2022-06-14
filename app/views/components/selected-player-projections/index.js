@@ -5,8 +5,8 @@ import { getSelectedPlayer, playerActions } from '@core/players'
 
 import SelectedPlayerSeasonProjections from './selected-player-projections'
 
-const mapStateToProps = createSelector(getSelectedPlayer, (player) => ({
-  player
+const mapStateToProps = createSelector(getSelectedPlayer, (playerMap) => ({
+  playerMap
 }))
 
 const mapDispatchToProps = {

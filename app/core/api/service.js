@@ -46,11 +46,10 @@ export const api = {
     const url = `${BASE_URL}/players?${queryString.stringify(params)}`
     return { url }
   },
-  getPlayer({ playerId }) {
-    const url = `${BASE_URL}/players/${playerId}`
+  getPlayer({ pid }) {
+    const url = `${BASE_URL}/players/${pid}`
     return { url }
   },
-  // TODO - unused / deprecate
   putRoster(data) {
     const url = `${BASE_URL}/teams/${data.teamId}/lineups`
     return { url, ...PUT(data) }
@@ -190,11 +189,11 @@ export const api = {
     return { url }
   },
   putProjection(data) {
-    const url = `${BASE_URL}/projections/${data.playerId}`
+    const url = `${BASE_URL}/projections/${data.pid}`
     return { url, ...PUT(data) }
   },
   delProjection(data) {
-    const url = `${BASE_URL}/projections/${data.playerId}`
+    const url = `${BASE_URL}/projections/${data.pid}`
     return { url, ...DELETE(data) }
   },
   putSetting(data) {
@@ -301,8 +300,8 @@ export const api = {
     const url = `${BASE_URL}/leagues/${leagueId}/baselines`
     return { url }
   },
-  getPlayerProjections({ player }) {
-    const url = `${BASE_URL}/projections/${player}`
+  getPlayerProjections({ pid }) {
+    const url = `${BASE_URL}/projections/${pid}`
     return { url }
   }
 }

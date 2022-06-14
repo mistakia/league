@@ -13,7 +13,7 @@ import {
 
 export function* propose() {
   const { teamId, leagueId } = yield select(getApp)
-  const tid = yield select(getTradeSelectedTeamId)
+  const accept_tid = yield select(getTradeSelectedTeamId)
   const trade = yield select(getTrade)
 
   const params = {
@@ -22,8 +22,8 @@ export function* propose() {
     proposingTeamPicks: trade.proposingTeamPicks.toJS(),
     acceptingTeamPicks: trade.acceptingTeamPicks.toJS(),
     releasePlayers: trade.releasePlayers.toJS(),
-    pid: teamId,
-    tid,
+    propose_tid: teamId,
+    accept_tid,
     leagueId
   }
   yield call(postProposeTrade, params)

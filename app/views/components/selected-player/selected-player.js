@@ -6,6 +6,7 @@ import Tabs from '@material-ui/core/Tabs'
 import Tab from '@material-ui/core/Tab'
 import SwipeableDrawer from '@material-ui/core/SwipeableDrawer'
 import CloseIcon from '@material-ui/icons/Close'
+import { Map } from 'immutable'
 
 import { constants } from '@common'
 import Team from '@components/team'
@@ -72,20 +73,29 @@ export default class SelectedPlayer extends React.Component {
   }
 
   render = () => {
-    const { player, isLoggedIn } = this.props
+    const { playerMap, isLoggedIn } = this.props
     const { value } = this.state
 
     const blacklist = ['0', 'ros']
-    const projWks = player.projection
+    const projWks = playerMap
+      .get('projection', new Map())
       .keySeq()
       .toArray()
       .filter((week) => !blacklist.includes(week)).length
+
+    const pos = playerMap.get('pos')
+    const tid = playerMap.get('tid', false)
+    const playerStatus = playerMap.get('status')
+    const draftNum = playerMap.get('dpos')
+    const draftYear = playerMap.get('start')
+    const playerValue = playerMap.get('value')
+    const rosPoints = playerMap.getIn(['points', 'ros', 'total'], 0)
 
     return (
       <SwipeableDrawer
         anchor='bottom'
         onOpen={this.handleOpen}
-        open={Boolean(player.player)}
+        open={Boolean(playerMap.get('pid'))}
         onClose={this.handleClose}
         classes={{
           paper: 'selected__player-paper'
@@ -93,78 +103,80 @@ export default class SelectedPlayer extends React.Component {
       >
         <div className='selected__player-header'>
           <div className='selected__player-header-lead'>
-            <div className='selected__player-first-name'>{player.fname}</div>
-            <div className='selected__player-last-name'>{player.lname}</div>
+            <div className='selected__player-first-name'>
+              {playerMap.get('fname')}
+            </div>
+            <div className='selected__player-last-name'>
+              {playerMap.get('lname')}
+            </div>
             <div className='selected__player-meta'>
-              <Position pos={player.pos} />
-              <Team team={player.team} />
-              <span>#{player.jersey}</span>
+              <Position pos={pos} />
+              <Team team={playerMap.get('team')} />
+              <span>#{playerMap.get('jnum', '-')}</span>
             </div>
           </div>
           <div className='selected__player-header-section'>
             {isLoggedIn && (
               <div className='selected__player-header-item'>
                 <label>Manager</label>
-                {player.tid ? <TeamName abbrv tid={player.tid} /> : '-'}
+                {tid ? <TeamName abbrv tid={tid} /> : '-'}
               </div>
             )}
-            {isLoggedIn && player.value !== null && (
+            {isLoggedIn && (
               <div className='selected__player-header-item'>
                 <label>Salary</label>
-                {`$${player.value}`}
+                {playerValue ? `$${playerValue}` : '-'}
               </div>
             )}
             <div className='selected__player-header-item'>
               <label>Status</label>
-              {constants.status[player.status]
-                ? player.status
-                : player.gamestatus || 'Active'}
+              {constants.status[playerStatus]
+                ? playerStatus
+                : playerMap.get('gamestatus') || 'Active'}
             </div>
           </div>
           {isLoggedIn && (
             <div className='selected__player-header-section'>
               <div className='selected__player-header-item'>
                 <label>Starts</label>
-                {player.getIn(['lineups', 'starts']) || '-'}
+                {playerMap.getIn(['lineups', 'starts'], '-')}
               </div>
               <div className='selected__player-header-item'>
                 <label>Points+</label>
-                {player.getIn(['lineups', 'sp'], 0).toFixed(1) || '-'}
+                {playerMap.getIn(['lineups', 'sp'], 0).toFixed(1)}
               </div>
               <div className='selected__player-header-item'>
                 <label>Bench+</label>
-                {player.getIn(['lineups', 'bp'], 0).toFixed(1) || '-'}
+                {playerMap.getIn(['lineups', 'bp'], 0).toFixed(1)}
               </div>
             </div>
           )}
           <div className='selected__player-header-section'>
             <div className='selected__player-header-item'>
               <label>Proj/G</label>
-              {(player.getIn(['points', 'ros', 'total']) / projWks).toFixed(
-                1
-              ) || '-'}
+              {rosPoints && projWks ? (rosPoints / projWks).toFixed(1) : '-'}
             </div>
             <div className='selected__player-header-item'>
               <label>VOBA</label>
-              {player.getIn(['vorp', 'ros', 'available'], 0).toFixed(1)}
+              {playerMap.getIn(['vorp', 'ros', 'available'], 0).toFixed(1)}
             </div>
             <div className='selected__player-header-item'>
               <label>VOWS</label>
-              {player.getIn(['vorp', 'ros', 'starter'], 0).toFixed(1)}
+              {playerMap.getIn(['vorp', 'ros', 'starter'], 0).toFixed(1)}
             </div>
           </div>
           <div className='selected__player-header-section'>
             <div className='selected__player-header-item'>
               <label>Draft</label>
-              {player.dpos ? `#${player.dpos}` : 'UDFA'}
+              {draftNum ? `#${draftNum}` : 'UDFA'}
             </div>
             <div className='selected__player-header-item'>
               <label>Age</label>
-              <PlayerAge date={player.dob} />
+              <PlayerAge date={playerMap.get('dob')} />
             </div>
             <div className='selected__player-header-item'>
               <label>Exp.</label>
-              {constants.season.year - player.draft_year || 'Rookie'}
+              {constants.season.year - draftYear || 'Rookie'}
             </div>
           </div>
           <Button onClick={this.handleClose}>
@@ -200,7 +212,7 @@ export default class SelectedPlayer extends React.Component {
             <SelectedPlayerGamelogs />
           </TabPanel>
           <TabPanel value={value} index={3}>
-            <SelectedPlayerSeasonStats pos={player.pos} />
+            <SelectedPlayerSeasonStats pos={pos} />
           </TabPanel>
           <TabPanel value={value} index={4}>
             <SelectedPlayerTeamStats />
@@ -231,6 +243,6 @@ export default class SelectedPlayer extends React.Component {
 SelectedPlayer.propTypes = {
   children: PropTypes.element,
   deselect: PropTypes.func,
-  player: ImmutablePropTypes.record,
+  playerMap: ImmutablePropTypes.map,
   isLoggedIn: PropTypes.bool
 }

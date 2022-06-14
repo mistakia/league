@@ -43,10 +43,10 @@ export const auctionActions = {
     type: auctionActions.AUCTION_TOGGLE_MUTED
   }),
 
-  setOptimalLineup: ({ players, feasible, result }) => ({
+  setOptimalLineup: ({ pids, feasible, result }) => ({
     type: auctionActions.SET_OPTIMAL_LINEUP,
     payload: {
-      players,
+      pids,
       feasible,
       result
     }
@@ -78,10 +78,10 @@ export const auctionActions = {
     }
   }),
 
-  select: (player) => ({
+  select: (pid) => ({
     type: auctionActions.AUCTION_SELECT_PLAYER,
     payload: {
-      player
+      pid
     }
   }),
 

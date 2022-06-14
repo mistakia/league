@@ -54,12 +54,12 @@ const run = async () => {
   const inserts = []
   const missing = []
   for (const { name, team, pos, data } of Object.values(items)) {
-    let player
+    let player_row
 
     const params = { name, team, pos }
     try {
-      player = await getPlayer(params)
-      if (!player) {
+      player_row = await getPlayer(params)
+      if (!player_row) {
         missing.push(params)
         continue
       }
@@ -70,7 +70,7 @@ const run = async () => {
     }
 
     inserts.push({
-      player: player.player,
+      pid: player_row.pid,
       year: constants.season.year,
       week: constants.season.week,
       sourceid: 13,

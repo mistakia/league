@@ -15,15 +15,15 @@ const router = express.Router()
 router.post('/?', async (req, res) => {
   const { db, logger, broadcast } = req.app.locals
   try {
-    const { player, release, leagueId } = req.body
+    const { pid, release, leagueId } = req.body
     const teamId = parseInt(req.body.teamId, 10)
 
     if (constants.season.week > constants.season.finalWeek) {
       return res.status(400).send({ error: 'player is locked' })
     }
 
-    if (!player) {
-      return res.status(400).send({ error: 'missing player param' })
+    if (!pid) {
+      return res.status(400).send({ error: 'missing pid param' })
     }
 
     if (!teamId) {
@@ -45,7 +45,7 @@ router.post('/?', async (req, res) => {
 
     const transactions = await db('transactions')
       .where({
-        player,
+        pid,
         lid: leagueId
       })
       .orderBy('timestamp', 'desc')
@@ -85,7 +85,7 @@ router.post('/?', async (req, res) => {
       data = await submitPoach({
         leagueId,
         release,
-        player,
+        pid,
         teamId,
         team,
         userId: req.auth.userId
@@ -155,27 +155,25 @@ router.put('/:poachId', async (req, res) => {
       return res.status(400).send({ error: 'invalid poachId' })
     }
     const poach = poaches[0]
-    const playerRows = await db('player').where('player', poach.player)
-    const poachPlayer = playerRows[0]
+    const player_rows = await db('player').where('pid', poach.pid)
+    const poach_player_row = player_rows[0]
 
     // verify release players exists
-    const players = await db('player').whereIn('player', release)
+    const players = await db('player').whereIn('pid', release)
     if (players.length !== release.length) {
       return res.status(400).send({ error: 'invalid release' })
     }
 
     // verify release player not use in different poach
     const otherPendingPoachReleases = await db('poaches')
-      .select('poach_releases.player')
+      .select('poach_releases.pid')
       .join('poach_releases', 'poaches.uid', 'poach_releases.poachid')
       .whereNot('uid', poachId)
       .whereNull('processed')
 
-    const otherPoachReleasePlayers = otherPendingPoachReleases.map(
-      (p) => p.player
-    )
-    for (const player of release) {
-      if (otherPoachReleasePlayers.includes(player)) {
+    const otherPoachReleasePlayers = otherPendingPoachReleases.map((p) => p.pid)
+    for (const releasePlayerId of release) {
+      if (otherPoachReleasePlayers.includes(releasePlayerId)) {
         return res
           .status(400)
           .send({ error: 'release player used in another poach' })
@@ -186,16 +184,16 @@ router.put('/:poachId', async (req, res) => {
     const rosterRow = await getRoster({ tid: teamId })
     const roster = new Roster({ roster: rosterRow, league })
     if (release.length) {
-      for (const player of release) {
-        if (!roster.has(player)) {
+      for (const releasePlayerId of release) {
+        if (!roster.has(releasePlayerId)) {
           return res
             .status(400)
             .send({ error: 'invalid release player, not on roster' })
         }
-        roster.removePlayer(player)
+        roster.removePlayer(releasePlayerId)
       }
     }
-    const hasSlot = roster.hasOpenBenchSlot(poachPlayer.pos)
+    const hasSlot = roster.hasOpenBenchSlot(poach_player_row.pos)
     if (!hasSlot) {
       return res
         .status(400)
@@ -204,7 +202,7 @@ router.put('/:poachId', async (req, res) => {
 
     // verify team has salary space during offseason
     const transactions = await db('transactions')
-      .where({ player: poachPlayer.player, lid: leagueId })
+      .where({ pid: poach_player_row.pid, lid: leagueId })
       .orderBy('timestamp', 'desc')
       .orderBy('uid', 'desc')
       .limit(1)
@@ -219,16 +217,16 @@ router.put('/:poachId', async (req, res) => {
 
     // update releases
     if (release.length) {
-      const releaseInserts = release.map((player) => ({
+      const releaseInserts = release.map((pid) => ({
         poachid: poachId,
-        player
+        pid
       }))
       await db('poach_releases').insert(releaseInserts).onConflict().merge()
     }
     await db('poach_releases')
       .del()
       .where('poachid', poachId)
-      .whereNotIn('player', release)
+      .whereNotIn('pid', release)
 
     res.send({ ...poach, release })
   } catch (error) {

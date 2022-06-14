@@ -55,7 +55,6 @@ export function* calculateValues() {
   const league = yield select(getCurrentLeague)
   const players = yield select(getAllPlayers)
   const sources = yield select(getSources)
-  const baselines = (yield select(getPlayers)).get('baselines').toJS()
   const rosterRows = (yield select(getRostersForCurrentLeague)).toList().toJS()
 
   const worker = new Worker()
@@ -64,7 +63,6 @@ export function* calculateValues() {
     league,
     sources: sources.toList().toJS(),
     rosterRows,
-    baselines,
     userId
   })
   worker.terminate()
@@ -106,25 +104,25 @@ export function* toggleOrder({ payload }) {
 
 export function* saveProjection({ payload }) {
   const { token } = yield select(getApp)
-  const { value, type, playerId, userId, week } = payload
-  if (token) yield call(putProjection, { value, type, playerId, userId, week })
+  const { value, type, pid, userId, week } = payload
+  if (token) yield call(putProjection, { value, type, pid, userId, week })
   else
     yield putResolve(
-      playerActions.setProjection({ value, type, playerId, userId, week })
+      playerActions.setProjection({ value, type, pid, userId, week })
     )
   yield call(calculateValues)
 }
 
 export function* loadPlayer({ payload }) {
-  const { player } = payload
-  yield call(getPlayer, { playerId: player })
+  const { pid } = payload
+  yield call(getPlayer, { pid })
 }
 
 export function* deleteProjection({ payload }) {
-  const { playerId, week } = payload
+  const { pid, week } = payload
   const { userId, token } = yield select(getApp)
-  if (token) yield call(delProjection, { userId, week, playerId })
-  else yield putResolve(playerActions.removeProjection({ playerId, week }))
+  if (token) yield call(delProjection, { userId, week, pid })
+  else yield putResolve(playerActions.removeProjection({ pid, week }))
   yield call(calculateValues)
 }
 
@@ -175,7 +173,7 @@ export function* updateCutlist() {
   const players = yield select(getPlayers)
   const cutlist = players.get('cutlist').toArray()
   const { teamId, leagueId } = yield select(getApp)
-  yield call(postCutlist, { players: cutlist, teamId, leagueId })
+  yield call(postCutlist, { pids: cutlist, teamId, leagueId })
 }
 
 export function* cutlistNotification() {
@@ -189,13 +187,13 @@ export function* cutlistNotification() {
 
 export function* fetchPlayerTransactions({ payload }) {
   const { leagueId } = yield select(getApp)
-  const { player } = payload
-  yield call(getPlayerTransactions, { player, leagueId })
+  const { pid } = payload
+  yield call(getPlayerTransactions, { pid, leagueId })
 }
 
 export function* fetchPlayerProjections({ payload }) {
-  const { player } = payload
-  yield call(getPlayerProjections, { player })
+  const { pid } = payload
+  yield call(getPlayerProjections, { pid })
 }
 
 //= ====================================

@@ -1,7 +1,7 @@
 export default async function (knex) {
   await knex('player').insert([
     {
-      player: 'ARI',
+      pid: 'ARI',
       fname: 'Arizona',
       lname: 'Cardinals',
       pname: 'Cardinals',
@@ -11,7 +11,7 @@ export default async function (knex) {
       dob: '0000-00-00'
     },
     {
-      player: 'ATL',
+      pid: 'ATL',
       fname: 'Atlanta',
       lname: 'Falcons',
       pname: 'Falcons',
@@ -21,7 +21,7 @@ export default async function (knex) {
       dob: '0000-00-00'
     },
     {
-      player: 'BAL',
+      pid: 'BAL',
       fname: 'Baltimore',
       lname: 'Ravens',
       pname: 'Ravens',
@@ -31,7 +31,7 @@ export default async function (knex) {
       dob: '0000-00-00'
     },
     {
-      player: 'BUF',
+      pid: 'BUF',
       fname: 'Buffalo',
       lname: 'Bills',
       pname: 'Bills',
@@ -41,7 +41,7 @@ export default async function (knex) {
       dob: '0000-00-00'
     },
     {
-      player: 'CAR',
+      pid: 'CAR',
       fname: 'Carolina',
       lname: 'Panthers',
       pname: 'Panthers',
@@ -51,7 +51,7 @@ export default async function (knex) {
       dob: '0000-00-00'
     },
     {
-      player: 'CHI',
+      pid: 'CHI',
       fname: 'Chicago',
       lname: 'Bears',
       pname: 'Bears',
@@ -61,7 +61,7 @@ export default async function (knex) {
       dob: '0000-00-00'
     },
     {
-      player: 'CIN',
+      pid: 'CIN',
       fname: 'Cincinnati',
       lname: 'Bengals',
       pname: 'Bengals',
@@ -71,7 +71,7 @@ export default async function (knex) {
       dob: '0000-00-00'
     },
     {
-      player: 'CLE',
+      pid: 'CLE',
       fname: 'Cleveland',
       lname: 'Browns',
       pname: 'Browns',
@@ -81,7 +81,7 @@ export default async function (knex) {
       dob: '0000-00-00'
     },
     {
-      player: 'DAL',
+      pid: 'DAL',
       fname: 'Dallas',
       lname: 'Cowboys',
       pname: 'Cowboys',
@@ -91,7 +91,7 @@ export default async function (knex) {
       dob: '0000-00-00'
     },
     {
-      player: 'DEN',
+      pid: 'DEN',
       fname: 'Denver',
       lname: 'Broncos',
       pname: 'Broncos',
@@ -101,7 +101,7 @@ export default async function (knex) {
       dob: '0000-00-00'
     },
     {
-      player: 'DET',
+      pid: 'DET',
       fname: 'Detroit',
       lname: 'Lions',
       pname: 'Lions',
@@ -111,7 +111,7 @@ export default async function (knex) {
       dob: '0000-00-00'
     },
     {
-      player: 'GB',
+      pid: 'GB',
       fname: 'Green Bay',
       lname: 'Packers',
       pname: 'Packers',
@@ -121,7 +121,7 @@ export default async function (knex) {
       dob: '0000-00-00'
     },
     {
-      player: 'HOU',
+      pid: 'HOU',
       fname: 'Houston',
       lname: 'Texans',
       pname: 'Texans',
@@ -131,7 +131,7 @@ export default async function (knex) {
       dob: '0000-00-00'
     },
     {
-      player: 'IND',
+      pid: 'IND',
       fname: 'Indianapolis',
       lname: 'Colts',
       pname: 'Colts',
@@ -141,7 +141,7 @@ export default async function (knex) {
       dob: '0000-00-00'
     },
     {
-      player: 'JAX',
+      pid: 'JAX',
       fname: 'Jacksonville',
       lname: 'Jaguars',
       pname: 'Jaguars',
@@ -151,7 +151,7 @@ export default async function (knex) {
       dob: '0000-00-00'
     },
     {
-      player: 'KC',
+      pid: 'KC',
       fname: 'Kansas City',
       lname: 'Chiefs',
       pname: 'Chiefs',
@@ -161,7 +161,7 @@ export default async function (knex) {
       dob: '0000-00-00'
     },
     {
-      player: 'LA',
+      pid: 'LA',
       fname: 'Los Angeles',
       lname: 'Rams',
       pname: 'Rams',
@@ -171,7 +171,7 @@ export default async function (knex) {
       dob: '0000-00-00'
     },
     {
-      player: 'LAC',
+      pid: 'LAC',
       fname: 'Los Angeles',
       lname: 'Chargers',
       pname: 'Chargers',
@@ -181,7 +181,7 @@ export default async function (knex) {
       dob: '0000-00-00'
     },
     {
-      player: 'LV',
+      pid: 'LV',
       fname: 'Las Vegas',
       lname: 'Raiders',
       pname: 'Raiders',
@@ -191,7 +191,7 @@ export default async function (knex) {
       dob: '0000-00-00'
     },
     {
-      player: 'MIA',
+      pid: 'MIA',
       fname: 'Miami',
       lname: 'Dolphins',
       pname: 'Dolphins',
@@ -201,7 +201,7 @@ export default async function (knex) {
       dob: '0000-00-00'
     },
     {
-      player: 'MIN',
+      pid: 'MIN',
       fname: 'Minnesota',
       lname: 'Vikings',
       pname: 'Vikings',
@@ -211,7 +211,7 @@ export default async function (knex) {
       dob: '0000-00-00'
     },
     {
-      player: 'NE',
+      pid: 'NE',
       fname: 'New England',
       lname: 'Patriots',
       pname: 'Patriots',
@@ -221,7 +221,7 @@ export default async function (knex) {
       dob: '0000-00-00'
     },
     {
-      player: 'NO',
+      pid: 'NO',
       fname: 'New Orleans',
       lname: 'Saints',
       pname: 'Saints',
@@ -231,7 +231,7 @@ export default async function (knex) {
       dob: '0000-00-00'
     },
     {
-      player: 'NYG',
+      pid: 'NYG',
       fname: 'New York',
       lname: 'Giants',
       pname: 'Giants',
@@ -241,7 +241,7 @@ export default async function (knex) {
       dob: '0000-00-00'
     },
     {
-      player: 'NYJ',
+      pid: 'NYJ',
       fname: 'New York',
       lname: 'Jets',
       pname: 'Jets',
@@ -251,7 +251,7 @@ export default async function (knex) {
       dob: '0000-00-00'
     },
     {
-      player: 'PHI',
+      pid: 'PHI',
       fname: 'Philadelphia',
       lname: 'Eagles',
       pname: 'Eagles',
@@ -261,7 +261,7 @@ export default async function (knex) {
       dob: '0000-00-00'
     },
     {
-      player: 'PIT',
+      pid: 'PIT',
       fname: 'Pittsburgh',
       lname: 'Steelers',
       pname: 'Steelers',
@@ -271,7 +271,7 @@ export default async function (knex) {
       dob: '0000-00-00'
     },
     {
-      player: 'SEA',
+      pid: 'SEA',
       fname: 'Seattle',
       lname: 'Seahawks',
       pname: 'Seahawks',
@@ -281,7 +281,7 @@ export default async function (knex) {
       dob: '0000-00-00'
     },
     {
-      player: 'SF',
+      pid: 'SF',
       fname: 'San Francisco',
       lname: '49ers',
       pname: '49ers',
@@ -291,7 +291,7 @@ export default async function (knex) {
       dob: '0000-00-00'
     },
     {
-      player: 'TB',
+      pid: 'TB',
       fname: 'Tampa Bay',
       lname: 'Buccaneers',
       pname: 'Buccaneers',
@@ -301,7 +301,7 @@ export default async function (knex) {
       dob: '0000-00-00'
     },
     {
-      player: 'TEN',
+      pid: 'TEN',
       fname: 'Tennessee',
       lname: 'Titans',
       pname: 'Titans',
@@ -311,7 +311,7 @@ export default async function (knex) {
       dob: '0000-00-00'
     },
     {
-      player: 'WAS',
+      pid: 'WAS',
       fname: 'Washington',
       lname: 'Redskins',
       pname: 'Redskins',

@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
+import { List } from 'immutable'
 
 const Row = ({ data }) => (
   <div className='player__selected-row'>
@@ -26,7 +27,8 @@ Row.propTypes = {
 export default class SelectedPlayerPractice extends React.Component {
   render = () => {
     const rows = []
-    for (const [index, p] of this.props.player.practice.entries()) {
+    const practice = this.props.playerMap.get('practice', new List())
+    for (const [index, p] of practice.entries()) {
       rows.push(<Row key={index} data={p} />)
     }
 
@@ -58,5 +60,5 @@ export default class SelectedPlayerPractice extends React.Component {
 }
 
 SelectedPlayerPractice.propTypes = {
-  player: ImmutablePropTypes.record
+  playerMap: ImmutablePropTypes.map
 }

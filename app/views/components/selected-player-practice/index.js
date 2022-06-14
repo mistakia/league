@@ -5,8 +5,8 @@ import { getSelectedPlayer } from '@core/players'
 
 import SelectedPlayerPractice from './selected-player-practice'
 
-const mapStateToProps = createSelector(getSelectedPlayer, (player) => ({
-  player
+const mapStateToProps = createSelector(getSelectedPlayer, (playerMap) => ({
+  playerMap
 }))
 
 export default connect(mapStateToProps)(SelectedPlayerPractice)

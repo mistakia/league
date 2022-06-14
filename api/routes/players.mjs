@@ -16,9 +16,11 @@ const loadPlayers = async () => {
   }
 }
 
-loadPlayers()
+if (process.env.NODE_ENV === 'production') {
+  loadPlayers()
 
-cron.schedule('*/5 * * * *', loadPlayers)
+  cron.schedule('*/5 * * * *', loadPlayers)
+}
 
 router.get('/?', async (req, res) => {
   const { logger } = req.app.locals
@@ -64,15 +66,15 @@ router.get('/?', async (req, res) => {
   }
 })
 
-router.get('/:playerId', async (req, res) => {
+router.get('/:pid', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    const { playerId } = req.params
+    const { pid } = req.params
 
-    const players = await db('player').where({ player: playerId }).limit(1)
-    const player = players[0]
+    const player_rows = await db('player').where({ pid }).limit(1)
+    const player_row = player_rows[0]
     const practice = await db('practice').where({
-      player: playerId,
+      pid,
       year: constants.season.year
     })
 
@@ -89,7 +91,7 @@ router.get('/:playerId', async (req, res) => {
 
     // advanced rushing
     // - yardage by direction
-    res.send({ ...player, practice })
+    res.send({ ...player_row, practice })
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })

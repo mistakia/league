@@ -30,14 +30,14 @@ router.post('/?', async (req, res) => {
   const { db, logger, broadcast } = req.app.locals
   try {
     const { leagueId } = req.params
-    const { teamId, playerId, pickId } = req.body
+    const { teamId, pid, pickId } = req.body
 
     if (!teamId) {
       return res.status(400).send({ error: 'missing teamId' })
     }
 
-    if (!playerId) {
-      return res.status(400).send({ error: 'missing playerId' })
+    if (!pid) {
+      return res.status(400).send({ error: 'missing pid' })
     }
 
     if (!pickId) {
@@ -68,7 +68,7 @@ router.post('/?', async (req, res) => {
     }
 
     // check if previous pick has been made
-    const picks = await db('draft').where({ uid: pickId }).whereNull('player')
+    const picks = await db('draft').where({ uid: pickId }).whereNull('pid')
     const pick = picks[0]
     if (!pick) {
       return res.status(400).send({ error: 'invalid pickId' })
@@ -84,7 +84,7 @@ router.post('/?', async (req, res) => {
     })
     const prevPick = prevQuery[0]
     const isPreviousSelectionMade =
-      pick.pick === 1 || Boolean(prevPick && prevPick.player)
+      pick.pick === 1 || Boolean(prevPick && prevPick.pid)
 
     // if previous selection is not made make, check if teams window has opened
     const isWindowOpen = isDraftWindowOpen({
@@ -103,16 +103,16 @@ router.post('/?', async (req, res) => {
     }
 
     // make sure player is a rookie
-    const players = await db('player').where({ player: playerId })
-    const player = players[0]
-    if (!player || player.start !== constants.season.year) {
-      return res.status(400).send({ error: 'invalid playerId' })
+    const player_rows = await db('player').where({ pid })
+    const player_row = player_rows[0]
+    if (!player_row || player_row.start !== constants.season.year) {
+      return res.status(400).send({ error: 'invalid pid' })
     }
 
     // make sure player is available/undrafted
     const rosterPlayers = await db('rosters_players')
       .join('rosters', 'rosters_players.rid', 'rosters.uid')
-      .where({ lid, year: constants.season.year, week: 0, player: playerId })
+      .where({ lid, year: constants.season.year, week: 0, pid })
     if (rosterPlayers.length) {
       return res.status(400).send({ error: 'player rostered' })
     }
@@ -126,7 +126,7 @@ router.post('/?', async (req, res) => {
     const roster = new Roster({ roster: rosterRow, league })
     const slot = roster.hasOpenPracticeSquadSlot()
       ? constants.slots.PS
-      : roster.hasOpenBenchSlot(player.pos) && constants.slots.BENCH
+      : roster.hasOpenBenchSlot(player_row.pos) && constants.slots.BENCH
 
     if (!slot) {
       return res.status(400).send({ error: 'unavailable roster spot' })
@@ -141,8 +141,8 @@ router.post('/?', async (req, res) => {
 
     const insertRoster = db('rosters_players').insert({
       rid: roster.uid,
-      player: playerId,
-      pos: player.pos,
+      pid,
+      pos: player_row.pos,
       slot
     })
 
@@ -150,16 +150,14 @@ router.post('/?', async (req, res) => {
       userid: req.auth.userId,
       tid: teamId,
       lid,
-      player: playerId,
+      pid,
       type: constants.transactions.DRAFT,
       year: constants.season.year,
       timestamp: Math.round(Date.now() / 1000),
       value
     })
 
-    const updateDraft = db('draft')
-      .where({ uid: pickId })
-      .update({ player: playerId })
+    const updateDraft = db('draft').where({ uid: pickId }).update({ pid })
 
     const trades = await db('trades')
       .innerJoin('trades_picks', 'trades.uid', 'trades_picks.tradeid')
@@ -180,7 +178,7 @@ router.post('/?', async (req, res) => {
 
     await Promise.all([insertRoster, insertTransaction, updateDraft])
 
-    const data = { uid: pickId, player: playerId, lid, tid: teamId }
+    const data = { uid: pickId, pid, lid, tid: teamId }
     broadcast(lid, {
       type: 'DRAFTED_PLAYER',
       payload: { data }
@@ -190,7 +188,7 @@ router.post('/?', async (req, res) => {
     const teams = await db('teams').where({ uid: teamId })
     const team = teams[0]
 
-    let message = `${team.name} has selected ${player.fname} ${player.lname} (${player.pos}) with `
+    let message = `${team.name} has selected ${player_row.fname} ${player_row.lname} (${player_row.pos}) with `
     if (pick.pick === 1) {
       message += 'the first overall pick '
     } else {

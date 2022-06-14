@@ -40,7 +40,7 @@ describe('API /teams - activate', function () {
     })
 
     it('drafted player', async () => {
-      MockDate.set(start.subtract('1', 'week').toDate())
+      MockDate.set(start.subtract('1', 'week').toISOString())
       const player = await selectPlayer()
       const teamId = 1
       const leagueId = 1
@@ -61,7 +61,7 @@ describe('API /teams - activate', function () {
         .post('/api/teams/1/activate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player.player,
+          activate_pid: player.pid,
           leagueId
         })
 
@@ -70,12 +70,12 @@ describe('API /teams - activate', function () {
       res.should.be.json
 
       res.body.tid.should.equal(teamId)
-      res.body.player.should.equal(player.player)
+      res.body.pid.should.equal(player.pid)
       res.body.slot.should.equal(constants.slots.BENCH)
       res.body.transaction.userid.should.equal(userId)
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
-      res.body.transaction.player.should.equal(player.player)
+      res.body.transaction.pid.should.equal(player.pid)
       res.body.transaction.type.should.equal(
         constants.transactions.ROSTER_ACTIVATE
       )
@@ -88,7 +88,7 @@ describe('API /teams - activate', function () {
         .where({
           year: constants.season.year,
           week: constants.season.week,
-          player: player.player
+          pid: player.pid
         })
         .limit(1)
 
@@ -100,7 +100,7 @@ describe('API /teams - activate', function () {
         type: constants.transactions.ROSTER_ACTIVATE,
         value,
         year: constants.season.year,
-        player: player.player,
+        pid: player.pid,
         teamId,
         userId
       })
@@ -121,7 +121,7 @@ describe('API /teams - activate', function () {
       await notLoggedIn(request)
     })
 
-    it('missing player', async () => {
+    it('missing pid', async () => {
       const request = chai
         .request(server)
         .post('/api/teams/1/activate')
@@ -130,7 +130,7 @@ describe('API /teams - activate', function () {
           leagueId: 1
         })
 
-      await missing(request, 'player')
+      await missing(request, 'pid')
     })
 
     it('missing leagueId', async () => {
@@ -139,7 +139,7 @@ describe('API /teams - activate', function () {
         .post('/api/teams/1/activate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: 'x'
+          activate_pid: 'x'
         })
 
       await missing(request, 'leagueId')
@@ -151,7 +151,7 @@ describe('API /teams - activate', function () {
         .post('/api/teams/1/activate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: 'x',
+          activate_pid: 'x',
           leagueId: 1
         })
 
@@ -164,7 +164,7 @@ describe('API /teams - activate', function () {
         .post('/api/teams/1/activate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: 'x',
+          activate_pid: 'x',
           leagueId: 2
         })
 
@@ -177,7 +177,7 @@ describe('API /teams - activate', function () {
         .post('/api/teams/1/activate')
         .set('Authorization', `Bearer ${user2}`)
         .send({
-          player: 'x',
+          activate_pid: 'x',
           leagueId: 1
         })
 
@@ -191,7 +191,7 @@ describe('API /teams - activate', function () {
         .post('/api/teams/1/activate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player.player,
+          activate_pid: player.pid,
           leagueId: 1
         })
 
@@ -206,7 +206,7 @@ describe('API /teams - activate', function () {
         .post('/api/teams/1/activate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player.player,
+          activate_pid: player.pid,
           leagueId: 1
         })
 
@@ -227,7 +227,7 @@ describe('API /teams - activate', function () {
         .post('/api/teams/1/activate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          player: player.player,
+          activate_pid: player.pid,
           leagueId: 1
         })
 

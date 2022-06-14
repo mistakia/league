@@ -4,7 +4,7 @@ import { constants } from '#common'
 export default async function ({
   pos = 'RB',
   rookie = false,
-  exclude = [],
+  exclude_pids = [],
   excludePS = false
 } = {}) {
   const query = db('player')
@@ -13,8 +13,8 @@ export default async function ({
     .orderByRaw('RAND()')
     .limit(1)
 
-  if (exclude.length) {
-    query.whereNotIn('player', exclude)
+  if (exclude_pids.length) {
+    query.whereNotIn('pid', exclude_pids)
   }
 
   if (rookie) {

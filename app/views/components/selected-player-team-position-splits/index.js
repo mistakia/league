@@ -9,7 +9,7 @@ import SelectedPlayerTeamPositionSplits from './selected-player-team-position-sp
 const mapStateToProps = createSelector(
   getSelectedPlayer,
   getStats,
-  (player, stats) => ({ player, stats })
+  (playerMap, stats) => ({ team: playerMap.get('team'), stats })
 )
 
 export default connect(mapStateToProps)(SelectedPlayerTeamPositionSplits)

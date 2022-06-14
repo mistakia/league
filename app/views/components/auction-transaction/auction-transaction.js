@@ -26,7 +26,7 @@ export default class AuctionTransaction extends React.Component {
         <div className='auction__transaction-type'>{icon}</div>
         <div className='auction__transaction-value'>${transaction.value}</div>
         <div className='auction__transaction-player'>
-          <PlayerName playerId={transaction.player} />
+          <PlayerName pid={transaction.pid} />
         </div>
         <div className='auction__transaction-team'>
           <TeamName tid={transaction.tid} abbrv />

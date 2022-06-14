@@ -1,4 +1,5 @@
 import dayjs from 'dayjs'
+import { Map } from 'immutable'
 
 import { getCurrentLeague } from '@core/leagues'
 import { getPlayerById } from '@core/players'
@@ -18,7 +19,7 @@ export function getPicks(state) {
 
 export function getNextPick(state) {
   const picks = getPicks(state)
-  return picks.filter((p) => p.pick).find((p) => !p.player)
+  return picks.filter((p) => p.pick).find((p) => !p.pid)
 }
 
 export function getLastPick(state) {
@@ -28,13 +29,17 @@ export function getLastPick(state) {
 
 export function getSelectedDraftPlayer(state) {
   const draft = state.get('draft')
-  return getPlayerById(state, { playerId: draft.selected })
+  return getPlayerById(state, { pid: draft.selected })
 }
 
-export function isDrafted(state, { playerId, player }) {
-  const id = playerId || player.player
+export function isDrafted(state, { pid, playerMap = new Map() }) {
+  pid = pid || playerMap.get('pid')
+  if (!pid) {
+    return false
+  }
+
   const { drafted } = state.get('draft')
-  return drafted.includes(id)
+  return drafted.includes(pid)
 }
 
 export function getDraftEnd(state) {

@@ -8,10 +8,10 @@ const router = express.Router()
 router.post('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    const { player, teamId, leagueId } = req.body
+    const { pid, teamId, leagueId } = req.body
     const value = req.body.value || 0
-    if (!player) {
-      return res.status(400).send({ error: 'missing player' })
+    if (!pid) {
+      return res.status(400).send({ error: 'missing pid' })
     }
 
     if (!teamId) {
@@ -23,9 +23,9 @@ router.post('/?', async (req, res) => {
     }
 
     // verify player
-    const players = await db('player').where({ player })
-    const playerRow = players[0]
-    if (!playerRow) {
+    const player_rows = await db('player').where({ pid })
+    const player_row = player_rows[0]
+    if (!player_row) {
       return res.status(400).send({ error: 'invalid player' })
     }
 
@@ -64,7 +64,7 @@ router.post('/?', async (req, res) => {
       userid: req.auth.userId,
       tid: teamId,
       lid: leagueId,
-      player,
+      pid,
       type: constants.transactions.ROSTER_ADD,
       value: val,
       year: constants.season.year,
@@ -75,8 +75,8 @@ router.post('/?', async (req, res) => {
     // add player to roster
     const rosterInsert = {
       rid: roster.uid,
-      player,
-      pos: playerRow.pos,
+      pid,
+      pos: player_row.pos,
       slot: constants.slots.BENCH
     }
     await db('rosters_players').insert(rosterInsert)
@@ -94,14 +94,14 @@ router.post('/?', async (req, res) => {
 router.put('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    const { player, teamId, leagueId, value } = req.body
+    const { pid, teamId, leagueId, value } = req.body
 
     if (typeof value === 'undefined') {
       return res.status(400).send({ error: 'missing value' })
     }
 
-    if (!player) {
-      return res.status(400).send({ error: 'missing player' })
+    if (!pid) {
+      return res.status(400).send({ error: 'missing pid' })
     }
 
     if (!teamId) {
@@ -113,9 +113,9 @@ router.put('/?', async (req, res) => {
     }
 
     // verify player
-    const players = await db('player').where({ player })
-    const playerRow = players[0]
-    if (!playerRow) {
+    const player_rows = await db('player').where({ pid })
+    const player_row = player_rows[0]
+    if (!player_row) {
       return res.status(400).send({ error: 'invalid player' })
     }
 
@@ -141,7 +141,7 @@ router.put('/?', async (req, res) => {
     // verify team cap
     const rosterRow = await getRoster({ tid: teamId })
     const roster = new Roster({ roster: rosterRow, league })
-    roster.removePlayer(player)
+    roster.removePlayer(pid)
     const val = parseInt(value, 10)
     if (roster.availableCap < val) {
       return res.status(400).send({ error: 'exceeds cap space' })
@@ -150,7 +150,7 @@ router.put('/?', async (req, res) => {
     // update player value
     await db('transactions')
       .where({
-        player,
+        pid,
         tid: teamId,
         lid: leagueId
       })
@@ -169,9 +169,9 @@ router.delete('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     // verify user is commish
-    const { player, teamId, leagueId } = req.body
-    if (!player) {
-      return res.status(400).send({ error: 'missing player' })
+    const { pid, teamId, leagueId } = req.body
+    if (!pid) {
+      return res.status(400).send({ error: 'missing pid' })
     }
 
     if (!teamId) {
@@ -183,9 +183,9 @@ router.delete('/?', async (req, res) => {
     }
 
     // verify player
-    const players = await db('player').where({ player })
-    const playerRow = players[0]
-    if (!playerRow) {
+    const player_rows = await db('player').where({ pid })
+    const player_row = player_rows[0]
+    if (!player_row) {
       return res.status(400).send({ error: 'invalid player' })
     }
 
@@ -213,7 +213,7 @@ router.delete('/?', async (req, res) => {
 
     const transaction = await db('transactions')
       .where({
-        player,
+        pid,
         tid: teamId,
         lid: leagueId
       })
@@ -222,7 +222,7 @@ router.delete('/?', async (req, res) => {
     const rosterRes = await db('rosters_players')
       .where({
         rid: roster.uid,
-        player
+        pid
       })
       .del()
 

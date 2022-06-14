@@ -24,7 +24,7 @@ const run = async () => {
         pick
       })
       .where('draft.lid', league.uid)
-      .whereNull('draft.player')
+      .whereNull('draft.pid')
 
     if (picks.length) {
       const pick = picks[0]

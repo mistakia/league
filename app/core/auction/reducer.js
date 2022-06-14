@@ -8,8 +8,8 @@ const initialState = new Record({
   isPaused: true,
   isLocked: false,
   isComplete: false,
-  selected: null,
-  player: null,
+  selected_pid: null,
+  nominated_pid: null,
   bid: null,
   connected: new List(),
   lineupPlayers: new List(),
@@ -66,17 +66,17 @@ export function auctionReducer(state = initialState(), { payload, type }) {
 
     case auctionActions.AUCTION_SELECT_PLAYER:
       return state.merge({
-        selected: payload.player,
+        selected_pid: payload.pid,
         bid: 0
       })
 
     case auctionActions.AUCTION_BID:
       return state.merge({
-        selected: null,
+        selected_pid: null,
         isPaused: false,
         transactions: state.transactions.unshift(payload),
         bid: payload.value,
-        player: payload.player,
+        nominated_pid: payload.pid,
         timer: Math.round((Date.now() + state.bidTimer) / 1000),
         isLocked: true
       })
@@ -88,11 +88,11 @@ export function auctionReducer(state = initialState(), { payload, type }) {
 
     case auctionActions.AUCTION_PROCESSED:
       return state.merge({
-        selected: null,
+        selected_pid: null,
         isPaused: false,
         bid: null,
         transactions: state.transactions.unshift(payload),
-        player: null,
+        nominated_pid: null,
         timer: Math.round((Date.now() + state.nominationTimer) / 1000)
       })
 
@@ -114,9 +114,9 @@ export function auctionReducer(state = initialState(), { payload, type }) {
           latest && latest.type === constants.transactions.AUCTION_BID
             ? latest.value
             : null,
-        player:
+        nominated_pid:
           latest && latest.type === constants.transactions.AUCTION_BID
-            ? latest.player
+            ? latest.pid
             : null,
         transactions: new List(payload.transactions),
         tids: new List(payload.tids),
@@ -134,7 +134,7 @@ export function auctionReducer(state = initialState(), { payload, type }) {
 
     case auctionActions.SET_OPTIMAL_LINEUP:
       return state.merge({
-        lineupPlayers: new List(payload.feasible ? payload.players : []),
+        lineupPlayers: new List(payload.feasible ? payload.pids : []),
         lineupPoints: payload.result,
         lineupFeasible: payload.feasible
       })

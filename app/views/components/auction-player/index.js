@@ -18,7 +18,7 @@ const mapStateToProps = createSelector(
     watchlist: players.get('watchlist'),
     valueType: auction.valueType,
     selected: auction.selected,
-    nominatedPlayer: auction.player
+    nominated_pid: auction.nominated_pid
   })
 )
 

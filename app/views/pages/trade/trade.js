@@ -40,16 +40,16 @@ export default function TradePage() {
     !trade.cancelled && !trade.rejected && !trade.accepted && !trade.vetoed
 
   const sItems = []
-  trade.proposingTeamPlayers.forEach((p) =>
-    sItems.push(<TradePlayer key={p} playerId={p} />)
+  trade.proposingTeamPlayers.forEach((pid) =>
+    sItems.push(<TradePlayer key={pid} pid={pid} />)
   )
   trade.proposingTeamPicks.forEach((p) =>
     sItems.push(<TradePick key={p.uid} pick={p} />)
   )
 
   const rItems = []
-  trade.acceptingTeamPlayers.forEach((p) =>
-    rItems.push(<TradePlayer key={p} playerId={p} />)
+  trade.acceptingTeamPlayers.forEach((pid) =>
+    rItems.push(<TradePlayer key={pid} pid={pid} />)
   )
   trade.acceptingTeamPicks.forEach((p) =>
     rItems.push(<TradePick key={p.uid} pick={p} />)
@@ -74,25 +74,21 @@ export default function TradePage() {
   )
 
   const proposingTeamReleasePlayers = []
-  for (const [index, player] of trade.proposingTeamReleasePlayers.entries()) {
-    proposingTeamReleasePlayers.push(
-      <TradePlayer key={index} playerId={player} />
-    )
+  for (const [index, pid] of trade.proposingTeamReleasePlayers.entries()) {
+    proposingTeamReleasePlayers.push(<TradePlayer key={index} pid={pid} />)
   }
 
   const acceptingTeamReleasePlayers = []
-  for (const [index, player] of trade.acceptingTeamReleasePlayers.entries()) {
-    acceptingTeamReleasePlayers.push(
-      <TradePlayer key={index} playerId={player} />
-    )
+  for (const [index, pid] of trade.acceptingTeamReleasePlayers.entries()) {
+    acceptingTeamReleasePlayers.push(<TradePlayer key={index} pid={pid} />)
   }
 
   const teamReleasePlayers = isProposer
     ? proposingTeamPlayers.filter(
-        (p) => !trade.proposingTeamPlayers.includes(p.player)
+        (p) => !trade.proposingTeamPlayers.includes(p.pid)
       )
     : acceptingTeamPlayers.filter(
-        (p) => !trade.acceptingTeamPlayers.includes(p.player)
+        (p) => !trade.acceptingTeamPlayers.includes(p.pid)
       )
 
   const showProposingTeamReleaseSection = Boolean(
@@ -105,7 +101,7 @@ export default function TradePage() {
           <TradeSelectItems
             title='Select players to release'
             onChange={this.handleReleaseChange}
-            selectedPlayers={tradePlayers.proposingTeamReleasePlayers.toJS()}
+            selectedPlayers={tradePlayers.proposingTeamReleasePlayers}
             players={teamReleasePlayers}
           />
         )}
@@ -124,7 +120,7 @@ export default function TradePage() {
           <TradeSelectItems
             title='Select players to release'
             onChange={this.handleReleaseChange}
-            selectedPlayers={tradePlayers.acceptingTeamReleasePlayers.toJS()}
+            selectedPlayers={tradePlayers.acceptingTeamReleasePlayers}
             players={teamReleasePlayers}
           />
         ) : (
@@ -153,7 +149,9 @@ export default function TradePage() {
               <div className='trade__box-head'>
                 <List component='nav'>
                   <ListItem>
-                    <TeamName tid={trade.pid || proposingTeamRoster.tid} />{' '}
+                    <TeamName
+                      tid={trade.propose_tid || proposingTeamRoster.tid}
+                    />{' '}
                     Sends
                   </ListItem>
                 </List>
@@ -162,7 +160,7 @@ export default function TradePage() {
                 {!isProposed && (
                   <TradeSelectItems
                     onChange={this.handleProposeChange}
-                    selectedPlayers={tradePlayers.proposingTeamPlayers.toJS()}
+                    selectedPlayers={tradePlayers.proposingTeamPlayers}
                     selectedPicks={trade.proposingTeamPicks.toJS()}
                     picks={proposingTeam.picks}
                     players={proposingTeamPlayers}
@@ -182,7 +180,7 @@ export default function TradePage() {
                 {!isProposed && (
                   <TradeSelectItems
                     onChange={this.handleAcceptChange}
-                    selectedPlayers={tradePlayers.acceptingTeamPlayers.toJS()}
+                    selectedPlayers={tradePlayers.acceptingTeamPlayers}
                     selectedPicks={trade.acceptingTeamPicks.toJS()}
                     players={acceptingTeamPlayers}
                     picks={acceptingTeam.picks}

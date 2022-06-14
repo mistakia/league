@@ -1,5 +1,6 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
+import { List } from 'immutable'
 
 import { playerActions, getSelectedPlayer } from '@core/players'
 import { getCurrentLeague } from '@core/leagues'
@@ -9,8 +10,8 @@ import SelectedPlayerTransactions from './selected-player-transactions'
 const mapStateToProps = createSelector(
   getSelectedPlayer,
   getCurrentLeague,
-  (player, league) => {
-    const transactions = player.get('transactions')
+  (playerMap, league) => {
+    const transactions = playerMap.get('transactions', new List())
     const teams = {}
     let maxTransaction = { value: 0 }
     for (const transaction of transactions.valueSeq()) {
@@ -29,7 +30,7 @@ const mapStateToProps = createSelector(
     }
     return {
       league,
-      player,
+      playerMap,
       teams,
       maxTransaction
     }
