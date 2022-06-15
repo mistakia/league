@@ -111,6 +111,7 @@ const main = async () => {
     const lid = argv.lid
     if (!lid) {
       console.log('missing --lid')
+      process.exit()
     }
 
     await run({ lid, print: argv.print, dry: argv.dry })
