@@ -6,7 +6,7 @@
     "lint": "eslint . --ext js,mjs",
     "prettier": "prettier --write .",
     "test": "TZ=America/New_York NODE_ENV=test TEST=all mocha --exit --exclude test/importer-espn.spec.mjs --require test/global.mjs",
-    "start:api": "node server.mjs",
+    "start:api": "NODE_ENV=development node server.mjs",
     "build": "cross-env NODE_ENV=production webpack --config ./webpack/webpack.config.prod.babel.mjs",
     "analyze": "cross-env OPEN_ANALYZER=true NODE_ENV=production webpack --config ./webpack/webpack.config.prod.babel.mjs",
     "deploy": "pm2 deploy production",

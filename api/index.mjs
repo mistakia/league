@@ -95,7 +95,7 @@ api.use('/api/*', (err, req, res, next) => {
   next()
 })
 api.use('/api/*', (req, res, next) => {
-  if (!req.auth) {
+  if (req.method !== 'OPTIONS' && !req.auth) {
     return res.status(401).send({ error: 'invalid token' })
   }
   next()
