@@ -19,8 +19,8 @@ export default class WaiversPage extends React.Component {
     const { items, isPending } = this.props
 
     const rows = []
-    for (const [index, waiver] of items.entries()) {
-      rows.push(<WaiverReportItem key={index} waiver={waiver} />)
+    for (const waiver of items) {
+      rows.push(<WaiverReportItem key={waiver.uid} waiver={waiver} />)
     }
 
     const body = (
