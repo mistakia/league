@@ -57,9 +57,9 @@ function Standings({ teams, title }) {
   )
 
   const overallRows = []
-  for (const [index, team] of sorted.entries()) {
+  sorted.forEach((team, index) => {
     overallRows.push(<StandingsTeam key={index} team={team} />)
-  }
+  })
 
   return (
     <div className='section'>
