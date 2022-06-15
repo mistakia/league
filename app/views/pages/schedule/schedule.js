@@ -16,19 +16,18 @@ export default class SchedulePage extends React.Component {
 
     const sections = []
     const groups = groupBy(matchups, 'week')
-    for (const group in groups) {
+    Object.values(groups).forEach((matchups, index) => {
       const items = []
-      const groupItems = groups[group]
-      for (const [index, matchup] of groupItems.entries()) {
+      for (const [index, matchup] of matchups.entries()) {
         items.push(<Matchup key={index} matchup={matchup} />)
       }
       const section = (
-        <div key={group} className='schedule__section'>
+        <div key={index} className='schedule__section'>
           {items}
         </div>
       )
       sections.push(section)
-    }
+    })
 
     const body = (
       <Container maxWidth='md'>
