@@ -3,7 +3,7 @@ import cron from 'node-cron'
 
 import { constants } from '#common'
 import cache from '#api/cache.mjs'
-import { getPlayers, updatePlayersWithTransitionBids } from '#utils'
+import { getPlayers, getTransitionBids } from '#utils'
 
 const router = express.Router()
 
@@ -16,7 +16,7 @@ const loadPlayers = async () => {
   }
 }
 
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV !== 'test') {
   loadPlayers()
 
   cron.schedule('*/5 * * * *', loadPlayers)
@@ -31,18 +31,28 @@ router.get('/?', async (req, res) => {
 
     const cacheKey = `/players/${leagueId || 0}`
     if (!search) {
-      const cacheValue = cache.get(cacheKey)
-      if (cacheValue) {
+      const players = cache.get(cacheKey)
+      if (players) {
         logger('USING CACHE')
         if (userId) {
-          updatePlayersWithTransitionBids({
-            players: cacheValue,
+          const bids = getTransitionBids({
             userId,
             leagueId
           })
+
+          if (!bids.length) {
+            return res.send(players)
+          }
+
+          return res.send(
+            players.map((p) => {
+              const { bid } = bids.find((b) => b.pid === p.pid) || {}
+              return { bid, ...p }
+            })
+          )
         }
 
-        return res.send(cacheValue)
+        return res.send(players)
       }
     }
 
@@ -56,7 +66,17 @@ router.get('/?', async (req, res) => {
     }
 
     if (userId) {
-      updatePlayersWithTransitionBids({ players, userId, leagueId })
+      const bids = getTransitionBids({ userId, leagueId })
+      if (!bids.length) {
+        return res.send(players)
+      }
+
+      return res.send(
+        players.map((p) => {
+          const { bid } = bids.find((b) => b.pid === p.pid) || {}
+          return { bid, ...p }
+        })
+      )
     }
 
     res.send(players)

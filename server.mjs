@@ -13,7 +13,7 @@ const logger = debug('server')
 const argv = yargs(hideBin(process.argv)).argv
 
 if (IS_DEV) {
-  debug.enable('server,api*,notifications*,auction*,scoreboard*,knex:*')
+  debug.enable('server,api*,notifications*,auction*,scoreboard*,express:*')
 } else if (IS_PROD) {
   debug.enable('api*,notifications*,auction*,scoreboard*')
 } else {
