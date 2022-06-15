@@ -3,6 +3,7 @@
     "dev": "concurrently \"yarn start\" \"yarn start:api\"",
     "dev:live": "NC_DEV_LIVE=true yarn start",
     "start": "cross-env START_HOT=1 NODE_ENV=development webpack serve --mode=development --config webpack/webpack.config.dev.babel.mjs",
+    "start:prod": "cross-env START_HOT=1 NODE_ENV=development TEST_PROD=true webpack serve --mode=production --config webpack/webpack.config.dev.babel.mjs",
     "lint": "eslint . --ext js,mjs",
     "prettier": "prettier --write .",
     "test": "TZ=America/New_York NODE_ENV=test TEST=all mocha --exit --exclude test/importer-espn.spec.mjs --require test/global.mjs",
