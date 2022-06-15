@@ -78,7 +78,10 @@ const speedLimiter = slowDown({
   maxDelayMs: 2500
 })
 
-api.use('/api/*', expressjwt(config.jwt))
+api.use('/api/*', expressjwt(config.jwt), (err, req, res, next) => {
+  if (err.code === 'invalid_token') return next()
+  return next(err)
+})
 api.use('/api/status', routes.status)
 api.use('/api/errors', routes.errors)
 api.use('/api/stats', speedLimiter, routes.stats)
@@ -88,12 +91,7 @@ api.use('/api/plays', speedLimiter, routes.plays)
 api.use('/api/schedule', routes.schedule)
 api.use('/api/sources', routes.sources)
 api.use('/api/auth', routes.auth)
-api.use('/api/*', (err, req, res, next) => {
-  if (err.name === 'UnauthorizedError') {
-    return res.status(401).send({ error: 'invalid token' })
-  }
-  next()
-})
+
 api.use('/api/*', (req, res, next) => {
   if (req.method !== 'OPTIONS' && !req.auth) {
     return res.status(401).send({ error: 'invalid token' })
