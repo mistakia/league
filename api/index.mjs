@@ -79,7 +79,9 @@ const speedLimiter = slowDown({
 })
 
 api.use('/api/*', expressjwt(config.jwt), (err, req, res, next) => {
-  if (err.code === 'invalid_token') return next()
+  if (err.code === 'invalid_token' || err.code === 'credentials_required') {
+    return next()
+  }
   return next(err)
 })
 api.use('/api/status', routes.status)
