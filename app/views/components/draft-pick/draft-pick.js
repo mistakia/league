@@ -41,11 +41,14 @@ export default class DraftPick extends React.Component {
           {isActive && !pick.pid && (
             <div className='draft__pick-window active'>On the clock</div>
           )}
-          {!isActive && !pick.pid && Boolean(pick.pick) && (
-            <div className='draft__pick-window'>
-              On the clock {dayjs().to(pick.draftWindow)}
-            </div>
-          )}
+          {!isActive &&
+            !pick.pid &&
+            Boolean(pick.pick) &&
+            Boolean(pick.draftWindow) && (
+              <div className='draft__pick-window'>
+                On the clock {dayjs().to(pick.draftWindow)}
+              </div>
+            )}
         </div>
         <div className='draf__pick-pos'>
           <Position pos={playerMap.get('pos')} />
