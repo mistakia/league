@@ -150,6 +150,10 @@ export default function DraftPage() {
   }
 
   const p = selectedPlayerMap
+  const playerHeight = p.get('height')
+  const formattedPlayerHeight = playerHeight
+    ? `${Math.floor(playerHeight / 12)}-${playerHeight % 12}`
+    : '-'
   const isDrafted = drafted.includes(p.get('pid'))
   const selected = (
     <div className='draft__selected'>
@@ -185,7 +189,7 @@ export default function DraftPage() {
         </div>
         <div>
           <label>Height</label>
-          {Math.floor(p.get('height') / 12)}-{p.get('height') % 12}
+          {formattedPlayerHeight}
         </div>
         <div>
           <label>Weight</label>
