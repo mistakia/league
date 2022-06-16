@@ -351,14 +351,23 @@ export function playersReducer(state = initialState, { payload, type }) {
       })
     }
 
-    case rosterActions.POST_RELEASE_FULFILLED:
-      return state.mergeIn(['items', payload.data.pid], {
+    case rosterActions.POST_RELEASE_FULFILLED: {
+      const cutlist = state.get('cutlist')
+      const { pid } = payload.data
+      const index = cutlist.keyOf(pid)
+
+      if (index >= 0) {
+        state = state.set('cutlist', cutlist.delete(index))
+      }
+
+      return state.mergeIn(['items', pid], {
         value: null,
         tag: null,
         type: null,
         tid: null,
         slot: null
       })
+    }
 
     case rosterActions.ROSTER_TRANSACTIONS:
       return state.withMutations((state) => {
