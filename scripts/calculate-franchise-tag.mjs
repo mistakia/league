@@ -32,7 +32,7 @@ const run = async () => {
       })
       .where('rosters.lid', lid)
       .where('rosters.week', 0)
-      .where('rosters.year', year)
+      .where('rosters.year', year - 1)
 
     if (!rosters.length) {
       log(`Missing roster, skipping lid ${lid}`)
@@ -61,7 +61,7 @@ const run = async () => {
       update[`f${pos.toLowerCase()}`] = Math.round(avg)
     }
 
-    log(`Updating lid ${lid} with:`, update)
+    log(`Updating lid ${lid} for ${constants.season.year} with:`, update)
     await db('seasons').update(update).where({ lid, year })
   }
 }
