@@ -1,7 +1,14 @@
+import yargs from 'yargs'
+import { hideBin } from 'yargs/helpers'
+
 import { constants } from '#common'
 import db from '#db'
 
-export default async function ({ lid, pid }) {
+import isMain from './is-main.mjs'
+
+const argv = yargs(hideBin(process.argv)).argv
+
+async function getTransactionsSinceFreeAgent({ lid, pid }) {
   const transactions = await db('transactions')
     .where({
       lid,
@@ -19,3 +26,25 @@ export default async function ({ lid, pid }) {
   if (index === -1) return transactions
   return transactions.slice(0, index + 1)
 }
+
+const main = async () => {
+  let error
+  try {
+    const trans = await getTransactionsSinceFreeAgent({
+      lid: argv.lid,
+      pid: argv.pid
+    })
+    console.log(trans)
+  } catch (err) {
+    error = err
+    console.log(error)
+  }
+
+  process.exit()
+}
+
+if (isMain(import.meta.url)) {
+  main()
+}
+
+export default getTransactionsSinceFreeAgent
