@@ -450,7 +450,7 @@ xiv. 10-13 points allowed (2)
 
 3. Non-original teams will have the option to submit an offer for any of the designated players entered into this Restricted Free Agecy Auction.
 
-4. If no non-original teams offer a contract that exceeds the original team’s offer by 20% or $2, whichever is greater, the player will be awarded to the original team. Otherwise, the player will be awarded to the highest bidder.
+4. If no non-original teams offer a contract that exceeds the original team’s offer by greater than 20% or $2, whichever is greater, the player will be awarded to the original team. Otherwise, the player will be awarded to the highest bidder.
 
 (a) In the event that two (2) or more non-original teams offer equal winning contracts, those teams will submit an additional blind contract offer.
 
