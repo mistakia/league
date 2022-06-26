@@ -165,7 +165,8 @@ export function createLeague({
   fwr,
   fte,
 
-  tran_date,
+  tran_start,
+  tran_end,
   ext_date
 }) {
   return new League({
@@ -247,7 +248,8 @@ export function createLeague({
     fwr,
     fte,
 
-    tran_date,
+    tran_start,
+    tran_end,
     ext_date
   })
 }
