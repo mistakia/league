@@ -291,7 +291,8 @@ CREATE TABLE `seasons` (
   `frb` mediumint(3) unsigned DEFAULT NULL, -- rb franchise tag amount
   `fwr` mediumint(3) unsigned DEFAULT NULL, -- wr franchise tag amount
   `fte` mediumint(3) unsigned DEFAULT NULL, -- te franchise tag amount
-  `tran_date` int(11) unsigned DEFAULT NULL,
+  `tran_start` int(11) unsigned DEFAULT NULL, -- start of restricted free agency
+  `tran_end` int(11) unsigned DEFAULT NULL, -- end of restricted free agency
   `ext_date` int(11) unsigned DEFAULT NULL, -- extension deadline
   `ddate` int(11) unsigned DEFAULT NULL,
   `adate` int(11) unsigned DEFAULT NULL,

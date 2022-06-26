@@ -7,7 +7,8 @@ export {
   getTeamsForCurrentLeague,
   getLeagueEvents,
   isBeforeExtensionDeadline,
-  isBeforeTransitionDeadline
+  isBeforeTransitionStart,
+  isRestrictedFreeAgencyPeriod
 } from './selectors'
 
 export { leaguesReducer } from './reducer'

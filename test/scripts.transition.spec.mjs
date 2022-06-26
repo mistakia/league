@@ -43,7 +43,7 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
       await knex('seasons')
         .update({
           year: constants.season.year,
-          tran_date: tranDate,
+          tran_end: tranDate,
           ext_date: extDate
         })
         .where({
@@ -244,7 +244,7 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
       await knex('seasons')
         .update({
           year: constants.season.year,
-          tran_date: tranDate
+          tran_end: tranDate
         })
         .where({
           lid: leagueId
@@ -304,7 +304,7 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
       await knex('seasons')
         .update({
           year: constants.season.year,
-          tran_date: tranDate
+          tran_end: tranDate
         })
         .where({
           lid: leagueId

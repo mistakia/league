@@ -72,7 +72,8 @@ export const League = new Record({
   fwr: null,
   fte: null,
 
-  tran_date: null,
+  tran_start: null,
+  tran_end: null,
   ext_date: null,
 
   b_qb: null,

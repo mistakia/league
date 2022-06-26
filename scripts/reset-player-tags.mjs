@@ -13,8 +13,8 @@ const run = async () => {
 
   // past transition deadline
   if (
-    !league.tran_date ||
-    constants.season.now.isBefore(dayjs.unix(league.tran_date))
+    !league.tran_start ||
+    constants.season.now.isBefore(dayjs.unix(league.tran_start))
   ) {
     log('aborted, before transition deadline')
     return

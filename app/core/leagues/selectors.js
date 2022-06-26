@@ -149,10 +149,20 @@ export function isBeforeExtensionDeadline(state) {
   return constants.season.now.isBefore(deadline)
 }
 
-export function isBeforeTransitionDeadline(state) {
+export function isBeforeTransitionStart(state) {
   const league = getCurrentLeague(state)
-  const deadline = dayjs.unix(league.tran_date)
+  const deadline = dayjs.unix(league.tran_start)
   return constants.season.now.isBefore(deadline)
+}
+
+export function isBeforeTransitionEnd(state) {
+  const league = getCurrentLeague(state)
+  const deadline = dayjs.unix(league.tran_end)
+  return constants.season.now.isBefore(deadline)
+}
+
+export function isRestrictedFreeAgencyPeriond(state) {
+  return !isBeforeTransitionStart(state) && isBeforeTransitionEnd(state)
 }
 
 export const getTeamsForCurrentLeague = createSelector(

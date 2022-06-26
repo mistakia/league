@@ -13,8 +13,8 @@ const run = async () => {
   // get leagues past tran date cutoff with bids pending processing
   const leagues = await db('transition_bids')
     .join('seasons', 'transition_bids.lid', 'seasons.lid')
-    .whereNotNull('tran_date')
-    .where('tran_date', '<=', timestamp)
+    .whereNotNull('tran_end')
+    .where('tran_end', '<=', timestamp)
     .where('transition_bids.year', constants.season.year)
     .groupBy('transition_bids.lid')
     .whereNull('processed')
