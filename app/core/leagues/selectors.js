@@ -161,7 +161,7 @@ export function isBeforeTransitionEnd(state) {
   return constants.season.now.isBefore(deadline)
 }
 
-export function isRestrictedFreeAgencyPeriond(state) {
+export function isRestrictedFreeAgencyPeriod(state) {
   return !isBeforeTransitionStart(state) && isBeforeTransitionEnd(state)
 }
 
