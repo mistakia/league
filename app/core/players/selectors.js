@@ -19,7 +19,11 @@ import { isAfterDraft } from '@core/draft'
 import { isAfterAuction } from '@core/auction'
 import { getPoachesForCurrentLeague } from '@core/poaches'
 import { getReleaseTransactions } from '@core/transactions'
-import { getCurrentLeague, isBeforeExtensionDeadline, isBeforeTransitionStart } from '@core/leagues'
+import {
+  getCurrentLeague,
+  isBeforeExtensionDeadline,
+  isBeforeTransitionStart
+} from '@core/leagues'
 import {
   getCurrentTeamRoster,
   getCurrentTeamRosterRecord,
@@ -528,10 +532,11 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
         status.eligible.rookieTag = true
       }
 
-      if (constants.season.week > 0 || isBeforeRestrictedFreeAgency) {
-        status.eligible.transitionTag = isBeforeRestrictedFreeAgency
+      if (constants.season.week > 0 || isBeforeExtension) {
         status.eligible.franchiseTag = true
       }
+
+      status.eligible.transitionTag = isBeforeRestrictedFreeAgency
 
       const isActive = Boolean(
         roster.active.find(({ pid }) => pid === playerId)
