@@ -139,8 +139,8 @@ router.post('/?', async (req, res) => {
 
       // make sure extension has not passed
       if (
-        league.ext_date &&
-        constants.season.now.isAfter(dayjs.unix(league.ext_date))
+        league.tran_start &&
+        constants.season.now.isAfter(dayjs.unix(league.tran_start))
       ) {
         return res.status(400).send({ error: 'extension deadline has passed' })
       }
@@ -176,8 +176,8 @@ router.post('/?', async (req, res) => {
 
       // make sure transition has not passed
       if (
-        league.tran_date &&
-        constants.season.now.isAfter(dayjs.unix(league.tran_date))
+        league.tran_end &&
+        constants.season.now.isAfter(dayjs.unix(league.tran_end))
       ) {
         return res.status(400).send({ error: 'transition deadline has passed' })
       }
@@ -309,8 +309,8 @@ router.delete('/?', async (req, res) => {
 
     // make sure transition deadline has not passed
     if (
-      league.tran_date &&
-      constants.season.now.isAfter(dayjs.unix(league.tran_date))
+      league.tran_end &&
+      constants.season.now.isAfter(dayjs.unix(league.tran_end))
     ) {
       return res.status(400).send({ error: 'transition deadline has passed' })
     }
@@ -329,10 +329,10 @@ router.delete('/?', async (req, res) => {
     }
     const transitionBid = query1[0]
 
-    // if its after the extension deadline, only competing bids can be cancelled
+    // if its after start of transition period, only competing bids can be cancelled
     if (
-      league.ext_date &&
-      constants.season.now.isAfter(dayjs.unix(league.ext_date)) &&
+      league.tran_start &&
+      constants.season.now.isAfter(dayjs.unix(league.tran_start)) &&
       transitionBid.player_tid === transitionBid.tid
     ) {
       return res.status(400).send({ error: 'restricted free agency has begun' })
@@ -458,8 +458,8 @@ router.put('/?', async (req, res) => {
 
     // make sure extension has not passed
     if (
-      league.tran_date &&
-      constants.season.now.isAfter(dayjs.unix(league.tran_date))
+      league.tran_end &&
+      constants.season.now.isAfter(dayjs.unix(league.tran_end))
     ) {
       return res.status(400).send({ error: 'transition deadline has passed' })
     }
