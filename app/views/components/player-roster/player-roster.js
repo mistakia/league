@@ -25,8 +25,7 @@ class PlayerRoster extends Player {
       poachId,
       isHosted,
       league,
-      isBeforeExtensionDeadline,
-      isBeforeTransitionDeadline
+      isRestrictedFreeAgencyPeriod
     } = this.props
 
     const isWaiver = Boolean(waiverId)
@@ -35,8 +34,6 @@ class PlayerRoster extends Player {
     const { isRegularSeason, isOffseason } = constants.season
     const tag = playerMap.get('tag')
     const isRestrictedFreeAgent = tag === constants.tags.TRANSITION
-    const isRestrictedFreeAgencyPeriod =
-      !isBeforeExtensionDeadline && isBeforeTransitionDeadline
 
     const value = playerMap.get('value', 0)
     const bid = playerMap.get('bid', 0)

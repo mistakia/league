@@ -5,14 +5,14 @@ import { constants } from '#common'
 
 export default async function ({ league, pids }) {
   const now = dayjs()
-  const isBeforeExtensionDeadline =
-    (!constants.season.isRegularSeason && !league.ext_date) ||
-    (league.ext_date && now.isBefore(dayjs.unix(league.ext_date)))
-  const isBeforeTransitionDeadline =
-    (!constants.season.isRegularSeason && !league.tran_date) ||
-    (league.tran_date && now.isBefore(dayjs.unix(league.tran_date)))
+  const isBeforeTransitionStart =
+    (!constants.season.isRegularSeason && !league.tran_start) ||
+    (league.tran_start && now.isBefore(dayjs.unix(league.tran_start)))
+  const isBeforeTransitionEnd =
+    (!constants.season.isRegularSeason && !league.tran_end) ||
+    (league.tran_end && now.isBefore(dayjs.unix(league.tran_end)))
   const isRestrictedFreeAgency =
-    !isBeforeExtensionDeadline && isBeforeTransitionDeadline
+    !isBeforeTransitionStart && isBeforeTransitionEnd
 
   if (isRestrictedFreeAgency) {
     const transitionBids = await db('transition_bids')

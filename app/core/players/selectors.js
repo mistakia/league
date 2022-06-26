@@ -19,7 +19,7 @@ import { isAfterDraft } from '@core/draft'
 import { isAfterAuction } from '@core/auction'
 import { getPoachesForCurrentLeague } from '@core/poaches'
 import { getReleaseTransactions } from '@core/transactions'
-import { getCurrentLeague, isBeforeExtensionDeadline } from '@core/leagues'
+import { getCurrentLeague, isBeforeExtensionDeadline, isBeforeTransitionStart } from '@core/leagues'
 import {
   getCurrentTeamRoster,
   getCurrentTeamRosterRecord,
@@ -509,10 +509,7 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
     const league = getCurrentLeague(state)
     const now = dayjs()
 
-    if (
-      status.tagged.transition &&
-      now.isBefore(dayjs.unix(league.tran_date))
-    ) {
+    if (status.tagged.transition && now.isBefore(dayjs.unix(league.tran_end))) {
       status.eligible.transitionBid = true
     }
 
@@ -522,21 +519,17 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
       // if before extension deadline
       //     was player a rookie last year
       //     otherwise are they a rookie now
-      const isBeforeExtensionDeadline = now.isBefore(
-        dayjs.unix(league.ext_date)
-      )
+      const isBeforeExtension = isBeforeExtensionDeadline(state)
+      const isBeforeRestrictedFreeAgency = isBeforeTransitionStart(state)
       const draft_year = playerMap.get('start')
-      if (
-        isBeforeExtensionDeadline &&
-        draft_year === constants.season.year - 1
-      ) {
+      if (isBeforeExtension && draft_year === constants.season.year - 1) {
         status.eligible.rookieTag = true
       } else if (draft_year === constants.season.year) {
         status.eligible.rookieTag = true
       }
 
-      if (constants.season.week > 0 || isBeforeExtensionDeadline) {
-        status.eligible.transitionTag = isBeforeExtensionDeadline
+      if (constants.season.week > 0 || isBeforeRestrictedFreeAgency) {
+        status.eligible.transitionTag = isBeforeRestrictedFreeAgency
         status.eligible.franchiseTag = true
       }
 
