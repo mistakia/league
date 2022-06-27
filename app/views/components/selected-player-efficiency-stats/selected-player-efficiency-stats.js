@@ -168,9 +168,9 @@ const defense = () => (
 export default class SelectedPlayerEfficiencyStats extends React.Component {
   render = () => {
     const { playerMap, percentiles } = this.props
-    const stats = playerMap
-      .get('stats', new Map(constants.createFullStats()))
-      .toJS()
+    const stats = (
+      playerMap.get('stats') || new Map(constants.createFullStats())
+    ).toJS()
     const pos = playerMap.get('pos')
 
     return (
