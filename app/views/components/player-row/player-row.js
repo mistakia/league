@@ -155,9 +155,9 @@ class PlayerRow extends Player {
       </div>
     )
 
-    const stats = playerMap
-      .get('stats', new Map(constants.createFullStats()))
-      .toJS()
+    const stats = (
+      playerMap.get('stats') || new Map(constants.createFullStats())
+    ).toJS()
 
     const fantasyPoints = (
       <div className='row__group'>
