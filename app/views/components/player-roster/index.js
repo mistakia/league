@@ -1,14 +1,19 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { isRestrictedFreeAgencyPeriod } from '@core/leagues'
+import {
+  isBeforeExtensionDeadline,
+  isRestrictedFreeAgencyPeriod
+} from '@core/leagues'
 
 import PlayerRoster from './player-roster'
 
 const mapStateToProps = createSelector(
   isRestrictedFreeAgencyPeriod,
-  (isRestrictedFreeAgencyPeriod) => ({
-    isRestrictedFreeAgencyPeriod
+  isBeforeExtensionDeadline,
+  (isRestrictedFreeAgencyPeriod, isBeforeExtensionDeadline) => ({
+    isRestrictedFreeAgencyPeriod,
+    isBeforeExtensionDeadline
   })
 )
 

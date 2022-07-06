@@ -6,7 +6,7 @@ import { constants, getExtensionAmount } from '@common'
 
 export default class PlayerRosterTotal extends React.Component {
   render() {
-    const { players, league, reorder } = this.props
+    const { players, league, reorder, isBeforeExtensionDeadline } = this.props
 
     const { isOffseason } = constants.season
     const week = Math.max(constants.season.week, 1)
@@ -60,7 +60,9 @@ export default class PlayerRosterTotal extends React.Component {
           Total
         </div>
         <div className='metric table__cell'>${baseSalaryTotal.toFixed(0)}</div>
-        {<div className='metric table__cell'>${extendedSalaryTotal}</div>}
+        {(!isOffseason || isBeforeExtensionDeadline) && (
+          <div className='metric table__cell'>${extendedSalaryTotal}</div>
+        )}
         {isOffseason && (
           <div className='metric table__cell'>
             {projectedSalaryTotal ? `$${projectedSalaryTotal.toFixed(0)}` : '-'}
@@ -100,5 +102,6 @@ export default class PlayerRosterTotal extends React.Component {
 PlayerRosterTotal.propTypes = {
   players: ImmutablePropTypes.list,
   reorder: PropTypes.bool,
-  league: PropTypes.object
+  league: PropTypes.object,
+  isBeforeExtensionDeadline: PropTypes.bool
 }

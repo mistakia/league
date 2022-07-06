@@ -344,6 +344,8 @@ router.delete('/?', async (req, res) => {
       .update('cancelled', cancelled)
       .where('uid', transitionBid.uid)
 
+    // TODO cancel any pending competing bids
+
     // update tag
     await db('rosters_players').update({ tag: constants.tags.REGULAR }).where({
       rid: rosterRow.uid,
