@@ -86,6 +86,7 @@ export default class DashboardPlayersTable extends React.Component {
       limit
     } = this.props
 
+    const { isOffseason, isRegularSeason } = constants.season
     const isWaiver = Boolean(waiverType)
     const isPoach = Boolean(poaches)
     const isClaim = isWaiver || isPoach
@@ -214,17 +215,19 @@ export default class DashboardPlayersTable extends React.Component {
             {!isWaiver && (
               <div className='metric table__cell'>{`${baseYear} Salary`}</div>
             )}
-            {!isWaiver && !isPoach && (
-              <div className='metric table__cell'>{`${
-                baseYear + 1
-              } Salary`}</div>
-            )}
-            {!isWaiver && !isPoach && constants.season.isOffseason && (
+            {!isWaiver &&
+              !isPoach &&
+              (!isOffseason || isBeforeExtensionDeadline) && (
+                <div className='metric table__cell'>{`${
+                  baseYear + 1
+                } Salary`}</div>
+              )}
+            {!isWaiver && !isPoach && isOffseason && (
               <div className='table__cell metric'>
                 <MarketSalaryHeader />
               </div>
             )}
-            {constants.season.isOffseason && (
+            {isOffseason && (
               <div className='table__cell metric'>
                 <SalaryDifferenceHeader />
               </div>
@@ -232,17 +235,17 @@ export default class DashboardPlayersTable extends React.Component {
             <div className='table__cell metric'>
               <PointsOverReplacementHeader />
             </div>
-            {constants.season.isOffseason && (
+            {isOffseason && (
               <div className='table__cell metric'>
                 <ValueHeader />
               </div>
             )}
-            {constants.season.isRegularSeason && (
+            {isRegularSeason && (
               <div className='table__cell metric'>
                 <RestOfSeasonHeader />
               </div>
             )}
-            {constants.season.isRegularSeason && (
+            {isRegularSeason && (
               <div className='table__cell metric'>Week {week}</div>
             )}
             <div className='table__cell metric'>

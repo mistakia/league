@@ -25,7 +25,8 @@ class PlayerRoster extends Player {
       poachId,
       isHosted,
       league,
-      isRestrictedFreeAgencyPeriod
+      isRestrictedFreeAgencyPeriod,
+      isBeforeExtensionDeadline
     } = this.props
 
     const isWaiver = Boolean(waiverId)
@@ -39,14 +40,16 @@ class PlayerRoster extends Player {
     const bid = playerMap.get('bid', 0)
     const salary = isRestrictedFreeAgent ? bid : value
     const extensions = playerMap.get('extensions', 0)
-    const extendedSalary = getExtensionAmount({
-      pos: playerMap.get('pos'),
-      tag,
-      extensions,
-      league,
-      value,
-      bid
-    })
+    const extendedSalary = isBeforeExtensionDeadline
+      ? getExtensionAmount({
+          pos: playerMap.get('pos'),
+          tag,
+          extensions,
+          league,
+          value,
+          bid
+        })
+      : bid || value
     const projectionType = isRegularSeason ? 'ros' : '0'
     const hasProjections = playerMap.hasIn(['market_salary', projectionType])
     const projectedSalary = playerMap.getIn(
@@ -119,11 +122,13 @@ class PlayerRoster extends Player {
             {isPoach ? value + 2 || '-' : salary ? `$${salary}` : '-'}
           </div>
         )}
-        {!isWaiver && !isPoach && (
-          <div className='metric table__cell'>
-            {extendedSalary ? `$${extendedSalary}` : '-'}
-          </div>
-        )}
+        {!isWaiver &&
+          !isPoach &&
+          (!isOffseason || isBeforeExtensionDeadline) && (
+            <div className='metric table__cell'>
+              {extendedSalary ? `$${extendedSalary}` : '-'}
+            </div>
+          )}
         {!isWaiver && !isPoach && isOffseason && (
           <div className='metric table__cell'>
             {projectedSalary ? `$${projectedSalary.toFixed(0)}` : '-'}
