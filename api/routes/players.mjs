@@ -35,7 +35,7 @@ router.get('/?', async (req, res) => {
       if (players) {
         logger('USING CACHE')
         if (userId) {
-          const bids = getTransitionBids({
+          const bids = await getTransitionBids({
             userId,
             leagueId
           })
@@ -66,7 +66,7 @@ router.get('/?', async (req, res) => {
     }
 
     if (userId) {
-      const bids = getTransitionBids({ userId, leagueId })
+      const bids = await getTransitionBids({ userId, leagueId })
       if (!bids.length) {
         return res.send(players)
       }
