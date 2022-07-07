@@ -38,7 +38,10 @@ export default class PlayerRosterTotal extends React.Component {
         0
       )
       const hasProjections = playerMap.hasIn(['market_salary', projectionType])
-      const savings = hasProjections ? projectedSalary - extendedSalary : 0
+      const savings = hasProjections
+        ? projectedSalary -
+          (isBeforeExtensionDeadline ? extendedSalary : bid || value)
+        : 0
 
       baseSalaryTotal = baseSalaryTotal + (bid || value)
       extendedSalaryTotal = extendedSalaryTotal + extendedSalary
@@ -60,9 +63,7 @@ export default class PlayerRosterTotal extends React.Component {
           Total
         </div>
         <div className='metric table__cell'>${baseSalaryTotal.toFixed(0)}</div>
-        {(!isOffseason || isBeforeExtensionDeadline) && (
-          <div className='metric table__cell'>${extendedSalaryTotal}</div>
-        )}
+        <div className='metric table__cell'>${extendedSalaryTotal}</div>
         {isOffseason && (
           <div className='metric table__cell'>
             {projectedSalaryTotal ? `$${projectedSalaryTotal.toFixed(0)}` : '-'}
