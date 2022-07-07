@@ -215,13 +215,11 @@ export default class DashboardPlayersTable extends React.Component {
             {!isWaiver && (
               <div className='metric table__cell'>{`${baseYear} Salary`}</div>
             )}
-            {!isWaiver &&
-              !isPoach &&
-              (!isOffseason || isBeforeExtensionDeadline) && (
-                <div className='metric table__cell'>{`${
-                  baseYear + 1
-                } Salary`}</div>
-              )}
+            {!isWaiver && !isPoach && (
+              <div className='metric table__cell'>{`${
+                baseYear + 1
+              } Salary`}</div>
+            )}
             {!isWaiver && !isPoach && isOffseason && (
               <div className='table__cell metric'>
                 <MarketSalaryHeader />

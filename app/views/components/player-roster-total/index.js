@@ -1,16 +1,11 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getCurrentLeague, isBeforeExtensionDeadline } from '@core/leagues'
+import { getCurrentLeague } from '@core/leagues'
 import PlayerRosterTotal from './player-roster-total'
 
-const mapStateToProps = createSelector(
-  getCurrentLeague,
-  isBeforeExtensionDeadline,
-  (league, isBeforeExtensionDeadline) => ({
-    league,
-    isBeforeExtensionDeadline
-  })
-)
+const mapStateToProps = createSelector(getCurrentLeague, (league) => ({
+  league
+}))
 
 export default connect(mapStateToProps)(PlayerRosterTotal)
