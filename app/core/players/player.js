@@ -16,11 +16,17 @@ export function createPlayer({
   ...data
 }) {
   const params = {
-    fname,
-    lname,
-    name: `${fname} ${lname}`,
-    team: cteam,
     ...data
+  }
+
+  if (cteam) {
+    params.team = cteam
+  }
+
+  if (fname && lname) {
+    params.fname = fname
+    params.lname = lname
+    params.name = `${fname} ${lname}`
   }
 
   if (projection) {

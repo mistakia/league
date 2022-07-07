@@ -27,7 +27,9 @@ export default class PlayerRosterTotal extends React.Component {
       const bid = playerMap.get('bid', 0)
       const extendedSalary = getExtensionAmount({
         pos: playerMap.get('pos'),
-        tag: isBeforeExtensionDeadline ? playerMap.get('tag') : constants.tags.REGULAR,
+        tag: isBeforeExtensionDeadline
+          ? playerMap.get('tag')
+          : constants.tags.REGULAR,
         extensions,
         league,
         value,
