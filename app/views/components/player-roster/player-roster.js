@@ -42,7 +42,7 @@ class PlayerRoster extends Player {
     const extensions = playerMap.get('extensions', 0)
     const extendedSalary = getExtensionAmount({
       pos: playerMap.get('pos'),
-      tag,
+      tag: isBeforeExtensionDeadline ? tag : constants.tags.REGULAR,
       extensions,
       league,
       value,
