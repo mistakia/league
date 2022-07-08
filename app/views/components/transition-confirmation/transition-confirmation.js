@@ -1,5 +1,4 @@
 import React from 'react'
-import { List } from 'immutable'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 import FormControl from '@mui/material/FormControl'
@@ -19,7 +18,7 @@ import Chip from '@mui/material/Chip'
 import Position from '@components/position'
 import Team from '@components/team'
 import Button from '@components/button'
-import { constants, getExtensionAmount } from '@common'
+import { constants } from '@common'
 
 import './transition-confirmation.styl'
 
@@ -64,21 +63,10 @@ export default class TransitionConfirmation extends React.Component {
 
   getMaxBid = () => {
     const availableSalary = this.props.team.roster.availableCap
-    const { isBeforeExtensionDeadline, playerMap, league, cutlistTotalSalary } =
-      this.props
+    const { playerMap, cutlistTotalSalary } = this.props
     const value = playerMap.get('value', 0)
     const bid = playerMap.get('bid', 0)
-    const extensions = this.props.playerMap.get('extensions', 0)
-    const playerSalary = isBeforeExtensionDeadline
-      ? getExtensionAmount({
-          pos: playerMap.get('pos'),
-          tag: playerMap.get('tag'),
-          extensions,
-          league,
-          value,
-          bid
-        })
-      : bid || value
+    const playerSalary = bid || value
 
     const notInCutlist = this.state.releaseIds.filter(
       (pid) => !this.props.cutlist.includes(pid)
@@ -88,20 +76,8 @@ export default class TransitionConfirmation extends React.Component {
         (playerMap) => playerMap.get('pid') === pid
       )
       const value = playerMap.get('value', 0)
-      const bid = playerMap.get('bid', 0)
-      const extensions = playerMap.get('extensions', 0)
-      const salary = isBeforeExtensionDeadline
-        ? getExtensionAmount({
-            pos: playerMap.get('pos'),
-            tag: playerMap.get('tag'),
-            extensions,
-            league,
-            value,
-            bid
-          })
-        : value
 
-      return sum + salary
+      return sum + value
     }, 0)
 
     const salarySpaceTotal =
@@ -169,7 +145,7 @@ export default class TransitionConfirmation extends React.Component {
   }
 
   render = () => {
-    const { team, playerMap, league } = this.props
+    const { team, playerMap } = this.props
 
     const menuItems = []
     for (const rPlayerMap of this._untags) {
@@ -189,23 +165,18 @@ export default class TransitionConfirmation extends React.Component {
         return
       }
 
+      if (playerMap.get('tag') === constants.tags.TRANSITION) {
+        return
+      }
+
       const pos = playerMap.get('pos')
-      const extensions = playerMap.get('extensions', new List()).size
-      const salary = getExtensionAmount({
-        pos,
-        tag: playerMap.get('tag'),
-        extensions,
-        league,
-        value: playerMap.get('value'),
-        bid: playerMap.get('bid')
-      })
       options.push({
         id: pid_i,
         label: playerMap.get('name'),
         pos,
         team: playerMap.get('team'),
         pname: playerMap.get('pname'),
-        value: salary
+        value: playerMap.get('value')
       })
     })
     const isOptionEqualToValue = (option, value) => option.id === value.id
@@ -322,11 +293,9 @@ export default class TransitionConfirmation extends React.Component {
 TransitionConfirmation.propTypes = {
   onClose: PropTypes.func,
   team: PropTypes.object,
-  league: PropTypes.object,
   playerMap: ImmutablePropTypes.map,
   cutlistTotalSalary: PropTypes.number,
   cutlist: ImmutablePropTypes.list,
   addTransitionTag: PropTypes.func,
-  updateTransitionTag: PropTypes.func,
-  isBeforeExtensionDeadline: PropTypes.bool
+  updateTransitionTag: PropTypes.func
 }
