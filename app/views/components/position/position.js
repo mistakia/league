@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import './position.styl'
 
 const Position = ({ pos }) => {
-  return <div className={'position ' + pos}>{pos}</div>
+  return <span className={'position ' + pos}>{pos}</span>
 }
 
 Position.propTypes = {

@@ -115,71 +115,73 @@ export default class SelectedPlayer extends React.Component {
               <span>#{playerMap.get('jnum', '-')}</span>
             </div>
           </div>
-          <div className='selected__player-header-section'>
-            {isLoggedIn && (
+          <div className='selected__player-header-secondary'>
+            <div className='selected__player-header-section'>
+              {isLoggedIn && (
+                <div className='selected__player-header-item'>
+                  <label>Manager</label>
+                  {tid ? <TeamName abbrv tid={tid} /> : '-'}
+                </div>
+              )}
+              {isLoggedIn && (
+                <div className='selected__player-header-item'>
+                  <label>Salary</label>
+                  {playerValue ? `$${playerValue}` : '-'}
+                </div>
+              )}
               <div className='selected__player-header-item'>
-                <label>Manager</label>
-                {tid ? <TeamName abbrv tid={tid} /> : '-'}
+                <label>Status</label>
+                {constants.status[playerStatus]
+                  ? playerStatus
+                  : playerMap.get('gamestatus') || 'Active'}
               </div>
-            )}
-            {isLoggedIn && (
-              <div className='selected__player-header-item'>
-                <label>Salary</label>
-                {playerValue ? `$${playerValue}` : '-'}
-              </div>
-            )}
-            <div className='selected__player-header-item'>
-              <label>Status</label>
-              {constants.status[playerStatus]
-                ? playerStatus
-                : playerMap.get('gamestatus') || 'Active'}
             </div>
-          </div>
-          {isLoggedIn && (
+            {isLoggedIn && (
+              <div className='selected__player-header-section'>
+                <div className='selected__player-header-item'>
+                  <label>Starts</label>
+                  {playerMap.getIn(['lineups', 'starts'], '-')}
+                </div>
+                <div className='selected__player-header-item'>
+                  <label>Points+</label>
+                  {playerMap.getIn(['lineups', 'sp'], 0).toFixed(1)}
+                </div>
+                <div className='selected__player-header-item'>
+                  <label>Bench+</label>
+                  {playerMap.getIn(['lineups', 'bp'], 0).toFixed(1)}
+                </div>
+              </div>
+            )}
             <div className='selected__player-header-section'>
               <div className='selected__player-header-item'>
-                <label>Starts</label>
-                {playerMap.getIn(['lineups', 'starts'], '-')}
+                <label>Proj/G</label>
+                {rosPoints && projWks ? (rosPoints / projWks).toFixed(1) : '-'}
               </div>
               <div className='selected__player-header-item'>
-                <label>Points+</label>
-                {playerMap.getIn(['lineups', 'sp'], 0).toFixed(1)}
+                <label>VOBA</label>
+                {playerMap.getIn(['vorp', 'ros', 'available'], 0).toFixed(1)}
               </div>
               <div className='selected__player-header-item'>
-                <label>Bench+</label>
-                {playerMap.getIn(['lineups', 'bp'], 0).toFixed(1)}
+                <label>VOWS</label>
+                {playerMap.getIn(['vorp', 'ros', 'starter'], 0).toFixed(1)}
               </div>
             </div>
-          )}
-          <div className='selected__player-header-section'>
-            <div className='selected__player-header-item'>
-              <label>Proj/G</label>
-              {rosPoints && projWks ? (rosPoints / projWks).toFixed(1) : '-'}
-            </div>
-            <div className='selected__player-header-item'>
-              <label>VOBA</label>
-              {playerMap.getIn(['vorp', 'ros', 'available'], 0).toFixed(1)}
-            </div>
-            <div className='selected__player-header-item'>
-              <label>VOWS</label>
-              {playerMap.getIn(['vorp', 'ros', 'starter'], 0).toFixed(1)}
-            </div>
-          </div>
-          <div className='selected__player-header-section'>
-            <div className='selected__player-header-item'>
-              <label>Draft</label>
-              {draftNum ? `#${draftNum}` : 'UDFA'}
-            </div>
-            <div className='selected__player-header-item'>
-              <label>Age</label>
-              <PlayerAge date={playerMap.get('dob')} />
-            </div>
-            <div className='selected__player-header-item'>
-              <label>Exp.</label>
-              {constants.season.year - draftYear || 'Rookie'}
+            <div className='selected__player-header-section'>
+              <div className='selected__player-header-item'>
+                <label>Draft</label>
+                {draftNum ? `#${draftNum}` : 'UDFA'}
+              </div>
+              <div className='selected__player-header-item'>
+                <label>Age</label>
+                <PlayerAge date={playerMap.get('dob')} />
+              </div>
+              <div className='selected__player-header-item'>
+                <label>Exp.</label>
+                {constants.season.year - draftYear || 'Rookie'}
+              </div>
             </div>
           </div>
-          <Button onClick={this.handleClose}>
+          <Button className='selected__player-close' onClick={this.handleClose}>
             <CloseIcon />
           </Button>
         </div>

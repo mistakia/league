@@ -17,4 +17,18 @@
 
 .selected__player-transactions-summary
   flex 0 0 300px
-  padding 0 16px
+
+@media (min-width 601px)
+  .selected__player-transactions-summary
+    padding 0 16px
+
+@media (max-width 600px)
+  .selected__player-transactions
+    flex-wrap wrap
+
+  .selected__player-transactions-all
+  .selected__player-transactions-summary
+    flex-basis 100%
+
+  .selected__player-transactions-summary
+    padding-top 16px
