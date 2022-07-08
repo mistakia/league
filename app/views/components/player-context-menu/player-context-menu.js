@@ -318,7 +318,7 @@ export default class PlayerContextMenu extends React.Component {
         )
       }
 
-      if (status.active) {
+      if (status.active && !status.tagged.transition) {
         menuItems.push(
           <MenuItem key='cutlist' dense onClick={this.handleCutlist}>
             {`${isOnCutlist ? 'Remove from' : 'Add to'} Cutlist`}

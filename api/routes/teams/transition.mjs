@@ -219,6 +219,13 @@ router.post('/?', async (req, res) => {
           pid
         })
 
+      await db('league_cutlist')
+        .where({
+          pid,
+          tid
+        })
+        .del()
+
       if (remove) {
         await db('rosters_players').update({ tag: 1 }).where({
           rid: rosterRow.uid,

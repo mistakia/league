@@ -262,6 +262,10 @@ describe('API /teams - transition', function () {
       // TODO
       // TODO - check to make sure cancelled is set
     })
+
+    it('tag player on cutlist', async () => {
+      // TODO
+    })
   })
 
   describe('errors', function () {
