@@ -61,7 +61,7 @@ export default class SelectedPlayerTransactions extends React.Component {
       teamRows.push(
         <TableRow key={transaction.uid}>
           <TableCell>
-            <TeamName tid={transaction.tid} key={transaction.tid} />
+            <TeamName tid={transaction.tid} key={transaction.tid} abbrv />
           </TableCell>
           <TableCell>${transaction.value}</TableCell>
           <TableCell>
