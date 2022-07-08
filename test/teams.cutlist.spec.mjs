@@ -281,6 +281,10 @@ describe('API /teams - cutlist', function () {
       await invalid(request, 'player')
     })
 
+    it('invalid player - player is restricted free agent', async () => {
+      // TODO
+    })
+
     it('invalid leagueId - does not exist', async () => {
       const request = chai
         .request(server)

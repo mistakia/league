@@ -404,6 +404,14 @@ export function playersReducer(state = initialState, { payload, type }) {
     case rosterActions.POST_TRANSITION_TAG_FULFILLED:
     case rosterActions.PUT_TRANSITION_TAG_FULFILLED:
       return state.withMutations((state) => {
+        const cutlist = state.get('cutlist')
+        const { pid } = payload.data
+        const index = cutlist.keyOf(pid)
+
+        if (index >= 0) {
+          state = state.set('cutlist', cutlist.delete(index))
+        }
+
         state.mergeIn(['items', payload.data.pid], {
           tag: constants.tags.TRANSITION,
           bid: payload.data.bid
