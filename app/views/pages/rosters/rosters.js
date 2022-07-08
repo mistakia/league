@@ -1,8 +1,8 @@
 import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
-import GetAppIcon from '@material-ui/icons/GetApp'
-import Button from '@material-ui/core/Button'
+import GetAppIcon from '@mui/icons-material/GetApp'
+import Button from '@mui/material/Button'
 
 import DashboardDraftPicks from '@components/dashboard-draft-picks'
 import PageLayout from '@layouts/page'

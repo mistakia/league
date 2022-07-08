@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
-import TextField from '@material-ui/core/TextField'
+import TextField from '@mui/material/TextField'
 
 export default class EditableSource extends React.Component {
   constructor(props) {

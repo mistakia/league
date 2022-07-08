@@ -1,9 +1,9 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
-import Autocomplete from '@material-ui/lab/Autocomplete'
-import TextField from '@material-ui/core/TextField'
-import Chip from '@material-ui/core/Chip'
+import Autocomplete from '@mui/material/Autocomplete'
+import TextField from '@mui/material/TextField'
+import Chip from '@mui/material/Chip'
 
 import TradeSelectPlayer from '@components/trade-select-player'
 import TradeSelectPick from '@components/trade-select-pick'
@@ -67,12 +67,15 @@ export default class TradeSelectItems extends React.Component {
       })
     })
 
-    const renderOption = (option, state) => {
-      if (option.type === 'pick') {
-        return <TradeSelectPick pickId={option.id} />
-      } else {
-        return <TradeSelectPlayer pid={option.id} />
-      }
+    const renderOption = (props, option) => {
+      const el =
+        option.type === 'pick' ? (
+          <TradeSelectPick pickId={option.id} />
+        ) : (
+          <TradeSelectPlayer pid={option.id} />
+        )
+
+      return <div {...props}>{el}</div>
     }
 
     const getOptionSelected = (option, value) => option.id === value.id

@@ -1,9 +1,9 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
-import AvatarGroup from '@material-ui/lab/AvatarGroup'
-import Tooltip from '@material-ui/core/Tooltip'
-import Avatar from '@material-ui/core/Avatar'
+import AvatarGroup from '@mui/material/AvatarGroup'
+import Tooltip from '@mui/material/Tooltip'
+import Avatar from '@mui/material/Avatar'
 
 export default class PlayerHeadshotGroup extends React.Component {
   render() {

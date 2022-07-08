@@ -2,7 +2,7 @@ import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 import { SortableContainer, SortableElement } from 'react-sortable-hoc'
-import Toolbar from '@material-ui/core/Toolbar'
+import Toolbar from '@mui/material/Toolbar'
 
 import { constants } from '@common'
 import PlayerRoster from '@components/player-roster'

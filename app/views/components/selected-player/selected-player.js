@@ -1,11 +1,11 @@
 import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
-import Button from '@material-ui/core/Button'
-import Tabs from '@material-ui/core/Tabs'
-import Tab from '@material-ui/core/Tab'
-import SwipeableDrawer from '@material-ui/core/SwipeableDrawer'
-import CloseIcon from '@material-ui/icons/Close'
+import Button from '@mui/material/Button'
+import Tabs from '@mui/material/Tabs'
+import Tab from '@mui/material/Tab'
+import SwipeableDrawer from '@mui/material/SwipeableDrawer'
+import CloseIcon from '@mui/icons-material/Close'
 import { Map } from 'immutable'
 
 import { constants } from '@common'
@@ -187,6 +187,8 @@ export default class SelectedPlayer extends React.Component {
           <Tabs
             orientation={window.innerWidth < 600 ? 'horizontal' : 'vertical'}
             variant='scrollable'
+            indicatorColor='primary'
+            textColor='inherit'
             value={value}
             className='selected__player-menu'
             onChange={this.handleChange}

@@ -1,7 +1,7 @@
 import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
-import Switch from '@material-ui/core/Switch'
+import Switch from '@mui/material/Switch'
 
 import './settings-switch.styl'
 

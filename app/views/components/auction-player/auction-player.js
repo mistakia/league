@@ -1,9 +1,9 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
-import IconButton from '@material-ui/core/IconButton'
-import PersonAddIcon from '@material-ui/icons/PersonAdd'
-import Tooltip from '@material-ui/core/Tooltip'
+import IconButton from '@mui/material/IconButton'
+import PersonAddIcon from '@mui/icons-material/PersonAdd'
+import Tooltip from '@mui/material/Tooltip'
 
 import PlayerName from '@components/player-name'
 import PlayerWatchlistAction from '@components/player-watchlist-action'

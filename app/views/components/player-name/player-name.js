@@ -1,7 +1,7 @@
 import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
-import NotInterestedIcon from '@material-ui/icons/NotInterested'
+import NotInterestedIcon from '@mui/icons-material/NotInterested'
 
 import Position from '@components/position'
 import Team from '@components/team'

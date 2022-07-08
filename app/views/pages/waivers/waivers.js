@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import Container from '@material-ui/core/Container'
+import Container from '@mui/material/Container'
 
 import Loading from '@components/loading'
 import WaiverTypeFilter from '@components/waiver-type-filter'
@@ -24,7 +24,7 @@ export default class WaiversPage extends React.Component {
     }
 
     const body = (
-      <Container maxWidth='sm' classes={{ root: 'waivers' }}>
+      <Container maxWidth='sm'>
         <div className='waivers__filter'>
           <WaiverTypeFilter />
           <WaiverProcessedFilter />

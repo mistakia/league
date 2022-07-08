@@ -1,7 +1,7 @@
 import React from 'react'
-import Container from '@material-ui/core/Container'
+import Container from '@mui/material/Container'
 import ImmutablePropTypes from 'react-immutable-proptypes'
-import Grid from '@material-ui/core/Grid'
+import Grid from '@mui/material/Grid'
 
 import PageLayout from '@layouts/page'
 import ScoreboardSelectWeek from '@components/scoreboard-select-week'

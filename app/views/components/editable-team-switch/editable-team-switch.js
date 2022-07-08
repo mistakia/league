@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
-import Switch from '@material-ui/core/Switch'
+import Switch from '@mui/material/Switch'
 
 export default class EditableTeamSwitch extends React.Component {
   constructor(props) {
