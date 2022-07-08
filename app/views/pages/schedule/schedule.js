@@ -1,6 +1,6 @@
 import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
-import Container from '@material-ui/core/Container'
+import Container from '@mui/material/Container'
 
 import PageLayout from '@layouts/page'
 import Matchup from '@components/matchup'

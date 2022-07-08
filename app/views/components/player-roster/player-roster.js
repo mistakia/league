@@ -1,5 +1,5 @@
 import React from 'react'
-import DragIndicatorIcon from '@material-ui/icons/DragIndicator'
+import DragIndicatorIcon from '@mui/icons-material/DragIndicator'
 import { sortableHandle } from 'react-sortable-hoc'
 
 import { constants, getExtensionAmount } from '@common'

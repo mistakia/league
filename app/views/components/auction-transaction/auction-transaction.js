@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import AttachMoneyIcon from '@material-ui/icons/AttachMoney'
-import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline'
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney'
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 
 import PlayerName from '@components/player-name'
 import TeamName from '@components/team-name'

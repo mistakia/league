@@ -1,19 +1,19 @@
 import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
-import FormControl from '@material-ui/core/FormControl'
-import Select from '@material-ui/core/Select'
-import InputLabel from '@material-ui/core/InputLabel'
-import MenuItem from '@material-ui/core/MenuItem'
-import InputAdornment from '@material-ui/core/InputAdornment'
-import TextField from '@material-ui/core/TextField'
-import DialogContent from '@material-ui/core/DialogContent'
-import DialogContentText from '@material-ui/core/DialogContentText'
-import Dialog from '@material-ui/core/Dialog'
-import DialogActions from '@material-ui/core/DialogActions'
-import DialogTitle from '@material-ui/core/DialogTitle'
-import Autocomplete from '@material-ui/lab/Autocomplete'
-import Chip from '@material-ui/core/Chip'
+import FormControl from '@mui/material/FormControl'
+import Select from '@mui/material/Select'
+import InputLabel from '@mui/material/InputLabel'
+import MenuItem from '@mui/material/MenuItem'
+import InputAdornment from '@mui/material/InputAdornment'
+import TextField from '@mui/material/TextField'
+import DialogContent from '@mui/material/DialogContent'
+import DialogContentText from '@mui/material/DialogContentText'
+import Dialog from '@mui/material/Dialog'
+import DialogActions from '@mui/material/DialogActions'
+import DialogTitle from '@mui/material/DialogTitle'
+import Autocomplete from '@mui/material/Autocomplete'
+import Chip from '@mui/material/Chip'
 
 import Position from '@components/position'
 import Team from '@components/team'
@@ -184,16 +184,18 @@ export default class WaiverConfirmation extends React.Component {
     }
 
     const getOptionSelected = (option, value) => option.id === value.id
-    const renderOption = (option) => {
+    const renderOption = (props, option) => {
       return (
-        <div className='release__select-player'>
-          <div className='release__select-player-value'>${option.value}</div>
-          <div className='player__name-position'>
-            <Position pos={option.pos} />
-          </div>
-          <div className='player__name-main'>
-            <span>{option.pname}</span>
-            <Team team={option.team} />
+        <div {...props}>
+          <div className='release__select-player'>
+            <div className='release__select-player-value'>${option.value}</div>
+            <div className='player__name-position'>
+              <Position pos={option.pos} />
+            </div>
+            <div className='player__name-main'>
+              <span>{option.pname}</span>
+              <Team team={option.team} />
+            </div>
           </div>
         </div>
       )

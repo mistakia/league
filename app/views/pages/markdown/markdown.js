@@ -2,7 +2,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import marked from 'marked'
-import Container from '@material-ui/core/Container'
+import Container from '@mui/material/Container'
 
 import { DOCS_URL } from '@core/constants'
 import PageLayout from '@layouts/page'
