@@ -1,6 +1,6 @@
 import express from 'express'
 
-import { Roster } from '#common'
+import { Roster, constants } from '#common'
 import { getRoster, verifyUserTeam } from '#utils'
 
 const router = express.Router({ mergeParams: true })
@@ -62,6 +62,11 @@ router.post('/?', async (req, res) => {
     for (const pid of pids) {
       if (!roster.has(pid)) {
         return res.status(400).send({ error: 'invalid player' })
+      }
+
+      const rosterPlayer = roster.get(pid)
+      if (rosterPlayer.tag === constants.tags.TRANSITION) {
+        return res.status(400).send({ error: 'restricted free agents are ineligible' })
       }
     }
 
