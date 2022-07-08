@@ -63,7 +63,7 @@ export default class TransitionConfirmation extends React.Component {
   }
 
   getMaxBid = () => {
-    const available = this.props.team.roster.availableCap
+    const availableSalary = this.props.team.roster.availableCap
     const { isBeforeExtensionDeadline, playerMap, league, cutlistTotalSalary } =
       this.props
     const value = playerMap.get('value', 0)
@@ -83,7 +83,7 @@ export default class TransitionConfirmation extends React.Component {
     const notInCutlist = this.state.releaseIds.filter(
       (pid) => !this.props.cutlist.includes(pid)
     )
-    const releaseSalary = notInCutlist.reduce((sum, pid) => {
+    const releaseTotalSalary = notInCutlist.reduce((sum, pid) => {
       const playerMap = this.props.team.players.find(
         (playerMap) => playerMap.get('pid') === pid
       )
@@ -104,8 +104,12 @@ export default class TransitionConfirmation extends React.Component {
       return sum + salary
     }, 0)
 
-    const space = available + cutlistTotalSalary + releaseSalary
-    return space + (this._isOriginalTeam ? playerSalary : 0)
+    const salarySpaceTotal =
+      availableSalary + cutlistTotalSalary + releaseTotalSalary
+    const onCutlist = this.props.cutlist.includes(playerMap.get('pid'))
+    return (
+      salarySpaceTotal + (this._isOriginalTeam && !onCutlist ? playerSalary : 0)
+    )
   }
 
   handleBid = (event) => {

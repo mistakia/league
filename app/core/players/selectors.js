@@ -77,6 +77,7 @@ export function getCutlistTotalSalary(state) {
   return playerMaps.reduce((sum, playerMap) => {
     const value = playerMap.get('value')
     const extensions = playerMap.get('extensions', 0)
+    const bid = playerMap.get('bid', 0)
     const salary = isBeforeExtension
       ? getExtensionAmount({
           pos: playerMap.get('pos'),
@@ -84,9 +85,9 @@ export function getCutlistTotalSalary(state) {
           extensions,
           league,
           value,
-          bid: playerMap.get('bid')
+          bid
         })
-      : value
+      : bid || value
 
     return sum + salary
   }, 0)
