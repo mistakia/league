@@ -28,7 +28,7 @@ export default class SelectedPlayerTransactions extends React.Component {
     const loadingTransactions = playerMap.get('loadingTransactions', false)
 
     if (loadingTransactions && !transactions.size) {
-      return <LinearProgress color='secondary' />
+      return <LinearProgress />
     }
 
     if (!transactions.size) {
