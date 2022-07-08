@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import Popover from '@material-ui/core/Popover'
+import Popover from '@mui/material/Popover'
 
 import { constants } from '@common'
 import Position from '@components/position'

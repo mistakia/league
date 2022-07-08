@@ -1,8 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
-import Container from '@material-ui/core/Container'
-import Toolbar from '@material-ui/core/Toolbar'
+import Container from '@mui/material/Container'
+import Toolbar from '@mui/material/Toolbar'
 
 import { toPercent } from '@common'
 import PageLayout from '@layouts/page'

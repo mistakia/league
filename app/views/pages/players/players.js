@@ -1,8 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
-import GetAppIcon from '@material-ui/icons/GetApp'
-import IconButton from '@material-ui/core/IconButton'
+import GetAppIcon from '@mui/icons-material/GetApp'
+import IconButton from '@mui/material/IconButton'
 import InfiniteScroll from 'react-infinite-scroller'
 
 import SearchFilter from '@components/search-filter'

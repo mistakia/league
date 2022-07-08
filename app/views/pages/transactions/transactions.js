@@ -4,7 +4,7 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 import AutoSizer from 'react-virtualized/dist/es/AutoSizer'
 import List from 'react-virtualized/dist/es/List'
 import InfiniteLoader from 'react-virtualized/dist/es/InfiniteLoader'
-import Container from '@material-ui/core/Container'
+import Container from '@mui/material/Container'
 
 import PageLayout from '@layouts/page'
 import TransactionRow from '@components/transaction-row'

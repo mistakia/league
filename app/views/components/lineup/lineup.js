@@ -1,7 +1,7 @@
 import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
-import Grid from '@material-ui/core/Grid'
+import Grid from '@mui/material/Grid'
 import { Map } from 'immutable'
 
 import { Roster, constants } from '@common'

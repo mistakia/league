@@ -2,19 +2,19 @@ import React from 'react'
 import { List } from 'immutable'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
-import FormControl from '@material-ui/core/FormControl'
-import MenuItem from '@material-ui/core/MenuItem'
-import InputLabel from '@material-ui/core/InputLabel'
-import Select from '@material-ui/core/Select'
-import DialogContent from '@material-ui/core/DialogContent'
-import DialogContentText from '@material-ui/core/DialogContentText'
-import Dialog from '@material-ui/core/Dialog'
-import DialogActions from '@material-ui/core/DialogActions'
-import DialogTitle from '@material-ui/core/DialogTitle'
-import InputAdornment from '@material-ui/core/InputAdornment'
-import TextField from '@material-ui/core/TextField'
-import Autocomplete from '@material-ui/lab/Autocomplete'
-import Chip from '@material-ui/core/Chip'
+import FormControl from '@mui/material/FormControl'
+import MenuItem from '@mui/material/MenuItem'
+import InputLabel from '@mui/material/InputLabel'
+import Select from '@mui/material/Select'
+import DialogContent from '@mui/material/DialogContent'
+import DialogContentText from '@mui/material/DialogContentText'
+import Dialog from '@mui/material/Dialog'
+import DialogActions from '@mui/material/DialogActions'
+import DialogTitle from '@mui/material/DialogTitle'
+import InputAdornment from '@mui/material/InputAdornment'
+import TextField from '@mui/material/TextField'
+import Autocomplete from '@mui/material/Autocomplete'
+import Chip from '@mui/material/Chip'
 
 import Position from '@components/position'
 import Team from '@components/team'
@@ -208,17 +208,19 @@ export default class TransitionConfirmation extends React.Component {
         value: salary
       })
     })
-    const getOptionSelected = (option, value) => option.id === value.id
-    const renderOption = (option) => {
+    const isOptionEqualToValue = (option, value) => option.id === value.id
+    const renderOption = (props, option) => {
       return (
-        <div className='release__select-player'>
-          <div className='release__select-player-value'>${option.value}</div>
-          <div className='player__name-position'>
-            <Position pos={option.pos} />
-          </div>
-          <div className='player__name-main'>
-            <span>{option.pname}</span>
-            <Team team={option.team} />
+        <div {...props}>
+          <div className='release__select-player'>
+            <div className='release__select-player-value'>${option.value}</div>
+            <div className='player__name-position'>
+              <Position pos={option.pos} />
+            </div>
+            <div className='player__name-main'>
+              <span>{option.pname}</span>
+              <Team team={option.team} />
+            </div>
           </div>
         </div>
       )
@@ -294,7 +296,7 @@ export default class TransitionConfirmation extends React.Component {
               multiple
               options={options}
               getOptionLabel={(x) => x.label}
-              getOptionSelected={getOptionSelected}
+              isOptionEqualToValue={isOptionEqualToValue}
               renderOption={renderOption}
               filterSelectedOptions
               value={releasePlayers}

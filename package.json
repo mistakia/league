@@ -25,7 +25,6 @@
     "#league-import/*": "./league-import/*"
   },
   "dependencies": {
-    "@material-ui/lab": "^4.0.0-alpha.61",
     "@sendgrid/mail": "^7.6.2",
     "bcrypt": "^4.0.1",
     "body-parser": "^1.20.0",
@@ -75,8 +74,11 @@
     "@babel/register": "^7.17.7",
     "@bugsnag/js": "^7.16.2",
     "@bugsnag/plugin-react": "^7.16.4",
-    "@material-ui/core": "^4.12.4",
-    "@material-ui/icons": "^4.11.3",
+    "@emotion/react": "^11.9.3",
+    "@emotion/styled": "^11.9.3",
+    "@mui/icons-material": "^5.8.4",
+    "@mui/material": "^5.8.7",
+    "@mui/styled-engine-sc": "^5.8.0",
     "@simonwep/pickr": "^1.7.2",
     "babel-loader": "^8.2.5",
     "babel-plugin-dev-expression": "^0.2.3",
@@ -128,6 +130,7 @@
     "regression": "^2.0.1",
     "reselect": "^4.1.5",
     "style-loader": "^3.3.1",
+    "styled-components": "^5.3.5",
     "stylus": "^0.57.0",
     "stylus-loader": "^6.2.0",
     "terser-webpack-plugin": "5.3.1",
@@ -141,6 +144,9 @@
     "whatwg-fetch": "3.6.2",
     "workerize-loader": "mistakia/workerize-loader#464a90a7ccdd4853d1afaf10cef78588899e11d4",
     "yargs": "17.4.1"
+  },
+  "resolutions": {
+    "@mui/styled-engine": "npm:@mui/styled-engine-sc@latest"
   },
   "packageManager": "yarn@3.2.0"
 }

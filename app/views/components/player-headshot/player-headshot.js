@@ -2,7 +2,7 @@ import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 
-import Avatar from '@material-ui/core/Avatar'
+import Avatar from '@mui/material/Avatar'
 
 import './player-headshot.styl'
 
