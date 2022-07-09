@@ -7,6 +7,7 @@ import PlayerName from '@components/player-name'
 import IconButton from '@components/icon-button'
 import { Player, connect } from '@components/player'
 import PlayerHeadshotGroup from '@components/player-headshot-group'
+import TeamName from '@components/team-name'
 
 const DragHandle = sortableHandle(() => (
   <div className='player__item-action reorder table__cell'>
@@ -26,7 +27,8 @@ class PlayerRoster extends Player {
       isHosted,
       league,
       isRestrictedFreeAgencyPeriod,
-      isBeforeExtensionDeadline
+      isBeforeExtensionDeadline,
+      isTransition
     } = this.props
 
     const isWaiver = Boolean(waiverId)
@@ -109,6 +111,11 @@ class PlayerRoster extends Player {
                   headshot
                 />
               ))}
+          </div>
+        )}
+        {Boolean(isTransition) && (
+          <div className='table__cell player__item-team'>
+            <TeamName abbrv tid={playerMap.get('tid')} />
           </div>
         )}
         {isWaiver && (

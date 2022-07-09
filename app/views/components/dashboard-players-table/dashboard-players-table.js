@@ -83,7 +83,8 @@ export default class DashboardPlayersTable extends React.Component {
       reorderWaivers,
       reorderCutlist,
       leadColumn = '',
-      limit
+      limit,
+      isTransition
     } = this.props
 
     const { isOffseason, isRegularSeason } = constants.season
@@ -211,6 +212,9 @@ export default class DashboardPlayersTable extends React.Component {
             {isClaim && (
               <div className='player__item-name table__cell'>Release</div>
             )}
+            {Boolean(isTransition) && (
+              <div className='table__cell player__item-team'>Team</div>
+            )}
             {isWaiver && <div className='metric table__cell'>Bid</div>}
             {!isWaiver && (
               <div className='metric table__cell'>{`${baseYear} Salary`}</div>
@@ -282,5 +286,6 @@ DashboardPlayersTable.propTypes = {
   limit: PropTypes.number,
   total: ImmutablePropTypes.list,
   cutlist: ImmutablePropTypes.list,
-  reorderCutlist: PropTypes.func
+  reorderCutlist: PropTypes.func,
+  isTransition: PropTypes.bool
 }
