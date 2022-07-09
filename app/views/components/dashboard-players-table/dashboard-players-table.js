@@ -215,11 +215,13 @@ export default class DashboardPlayersTable extends React.Component {
             {Boolean(isTransition) && (
               <div className='table__cell player__item-team'>Team</div>
             )}
-            {isWaiver && <div className='metric table__cell'>Bid</div>}
+            {(isWaiver || isTransition) && (
+              <div className='metric table__cell'>Bid</div>
+            )}
             {!isWaiver && (
               <div className='metric table__cell'>{`${baseYear} Salary`}</div>
             )}
-            {!isWaiver && !isPoach && (
+            {!isWaiver && !isPoach && !isOffseason && (
               <div className='metric table__cell'>{`${
                 baseYear + 1
               } Salary`}</div>
