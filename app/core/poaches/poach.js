@@ -1,4 +1,4 @@
-import { Record, List } from 'immutable'
+import { Record, List, Map } from 'immutable'
 
 export const Poach = new Record({
   uid: null,
@@ -6,7 +6,8 @@ export const Poach = new Record({
   pid: null,
   processed: null,
   release: new List(),
-  submitted: null
+  submitted: null,
+  playerMap: new Map()
 })
 
 export const createPoach = ({ uid, tid, pid, processed, release, submitted }) =>
