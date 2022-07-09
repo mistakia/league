@@ -40,6 +40,7 @@ class PlayerRoster extends Player {
 
     const value = playerMap.get('value', 0)
     const bid = playerMap.get('bid', 0)
+    const salary = isTransition ? value : bid || value
     const extensions = playerMap.get('extensions', 0)
     const extendedSalary = getExtensionAmount({
       pos: playerMap.get('pos'),
@@ -127,7 +128,7 @@ class PlayerRoster extends Player {
         )}
         {!isWaiver && (
           <div className='metric table__cell'>
-            {isPoach ? value + 2 || '-' : value ? `$${value}` : '-'}
+            {isPoach ? value + 2 || '-' : salary ? `$${salary}` : '-'}
           </div>
         )}
         {!isWaiver && !isPoach && !isOffseason && (
