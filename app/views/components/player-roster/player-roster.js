@@ -40,7 +40,6 @@ class PlayerRoster extends Player {
 
     const value = playerMap.get('value', 0)
     const bid = playerMap.get('bid', 0)
-    const salary = isRestrictedFreeAgent ? bid : value
     const extensions = playerMap.get('extensions', 0)
     const extendedSalary = getExtensionAmount({
       pos: playerMap.get('pos'),
@@ -118,6 +117,9 @@ class PlayerRoster extends Player {
             <TeamName abbrv tid={playerMap.get('tid')} />
           </div>
         )}
+        {Boolean(isTransition) && (
+          <div className='metric table__cell'>{bid ? `$${bid}` : '-'}</div>
+        )}
         {isWaiver && (
           <div className='metric table__cell'>
             {claim.bid && `$${claim.bid}`}
@@ -125,10 +127,10 @@ class PlayerRoster extends Player {
         )}
         {!isWaiver && (
           <div className='metric table__cell'>
-            {isPoach ? value + 2 || '-' : salary ? `$${salary}` : '-'}
+            {isPoach ? value + 2 || '-' : value ? `$${value}` : '-'}
           </div>
         )}
-        {!isWaiver && !isPoach && (
+        {!isWaiver && !isPoach && !isOffseason && (
           <div className='metric table__cell'>
             {extendedSalary ? `$${extendedSalary}` : '-'}
           </div>
