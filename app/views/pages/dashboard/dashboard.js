@@ -90,7 +90,11 @@ export default function DashboardPage() {
   const transitionItems = []
   for (const playerMap of transitionPlayers.valueSeq()) {
     transitionItems.push(
-      <PlayerRoster key={playerMap.get('pid')} playerMap={playerMap} />
+      <PlayerRoster
+        key={playerMap.get('pid')}
+        playerMap={playerMap}
+        isTransition
+      />
     )
   }
 
@@ -182,6 +186,7 @@ export default function DashboardPage() {
               <DashboardPlayersTable
                 title='Restricted Free Agents'
                 items={transitionItems}
+                isTransition
               />
             </Grid>
           )}
