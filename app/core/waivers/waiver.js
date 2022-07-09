@@ -1,4 +1,4 @@
-import { Record, List } from 'immutable'
+import { Record, List, Map } from 'immutable'
 
 export const Waiver = new Record({
   uid: null,
@@ -9,7 +9,8 @@ export const Waiver = new Record({
   succ: null,
   reason: null,
   bid: null,
-  type: null
+  type: null,
+  playerMap: new Map()
 })
 
 export function createWaiver({

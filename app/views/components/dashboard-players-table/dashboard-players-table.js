@@ -99,6 +99,7 @@ export default class DashboardPlayersTable extends React.Component {
           pid={waiver.pid}
           waiverId={waiver.uid}
           claim={waiver}
+          playerMap={waiver.playerMap}
           reorder
         />
       )
@@ -122,6 +123,7 @@ export default class DashboardPlayersTable extends React.Component {
             claim={poach}
             poachId={poach.uid}
             pid={poach.pid}
+            playerMap={poach.playerMap}
           />
         )
       })
