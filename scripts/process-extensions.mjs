@@ -23,15 +23,13 @@ const getTransactionType = (tag) => {
     case constants.tags.ROOKIE:
       return constants.transactions.ROOKIE_TAG
     case constants.tags.REGULAR:
+    case constants.tags.TRANSITION:
       return constants.transactions.EXTENSION
   }
 }
 
 const createTransaction = async ({ roster_player, tid, league }) => {
   const { tag, pid, pos } = roster_player
-  if (tag === constants.tags.TRANSITION) {
-    return null
-  }
 
   const extensions = await getPlayerExtensions({
     lid: league.uid,
@@ -40,7 +38,7 @@ const createTransaction = async ({ roster_player, tid, league }) => {
   const { value } = await getLastTransaction({ pid, tid, lid: league.uid })
   const extensionValue = getExtensionAmount({
     extensions: extensions.length,
-    tag,
+    tag: tag === constants.tags.TRANSITION ? constants.tags.REGULAR : tag,
     pos,
     league,
     value
