@@ -57,7 +57,7 @@ export default async function ({ lid, userId }) {
   if (userId) {
     const query1 = await db('teams')
       .select('teams.*')
-      .join('users_teams', 'teams.uid', 'users_teams.userid')
+      .join('users_teams', 'teams.uid', 'users_teams.tid')
       .where('users_teams.userid', userId)
       .where('teams.lid', lid)
 
