@@ -265,6 +265,13 @@ export function getFilteredPlayers(state) {
         return true
       }
 
+      if (
+        availability.includes('RESTRICTED FREE AGENT') &&
+        playerMap.get('tag') === constants.tags.TRANSITION
+      ) {
+        return true
+      }
+
       return false
     })
   }

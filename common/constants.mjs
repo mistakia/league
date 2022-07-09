@@ -977,7 +977,8 @@ export const availability = [
   'ACTIVE ROSTER',
   'FREE AGENT',
   'PRACTICE SQUAD',
-  'INJURED RESERVE'
+  'INJURED RESERVE',
+  'RESTRICTED FREE AGENT'
 ]
 
 export const errors = {
