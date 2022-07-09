@@ -72,7 +72,7 @@ const run = async ({ lid }) => {
     const rosterRow = await getRoster({ tid })
     const roster = new Roster({ roster: rosterRow, league })
     const transactions = []
-    const roster_players = [...roster.active, ...roster.ir, ...roster.reserve]
+    const roster_players = [...roster.active, ...roster.reserve]
     for (const roster_player of roster_players) {
       const transaction = await createTransaction({
         roster_player,
