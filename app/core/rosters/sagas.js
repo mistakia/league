@@ -393,6 +393,7 @@ export function* updateTransitionTag({ payload }) {
 export function* exportRosters() {
   const rosters = yield select(getRostersForCurrentLeague)
   const playerMaps = yield select(getAllPlayers)
+  const projectionType = constants.season.isRegularSeason ? 'ros' : '0'
 
   const data = []
   for (const [tid, roster] of rosters.entrySeq()) {
@@ -403,6 +404,9 @@ export function* exportRosters() {
         tid,
         team: team.name,
         salary: rosterPlayer.value,
+        market_salary: (
+          playerMap.getIn(['market_salary', projectionType]) || 0
+        ).toFixed(0),
         player: playerMap.get('pname'),
         playerid: playerMap.get('pid'),
         pos: playerMap.get('pos'),
@@ -420,6 +424,7 @@ export function* exportRosters() {
       tid: 'Team Id',
       team: 'Team Name',
       salary: 'Salary',
+      market_salary: 'Market Salary',
       player: 'Player Name',
       playerid: 'Player Id',
       pos: 'Position',
