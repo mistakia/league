@@ -10,8 +10,8 @@ import isMain from './is-main.mjs'
 const argv = yargs(hideBin(process.argv)).argv
 
 const createConditionalPick = async function ({ tid, league }) {
-  const isBeforeDraft = league.ddate
-    ? constants.season.now.isBefore(dayjs.unix(league.ddate))
+  const isBeforeDraft = league.draft_start
+    ? constants.season.now.isBefore(dayjs.unix(league.draft_start))
     : true
   const year = isBeforeDraft ? constants.season.year : constants.season.year + 1
   await db('draft').insert({

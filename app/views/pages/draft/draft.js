@@ -32,7 +32,8 @@ export default function DraftPage() {
   const { positions } = constants
 
   const draftActive =
-    league.ddate && dayjs().isAfter(dayjs.unix(league.ddate).startOf('day'))
+    league.draft_start &&
+    dayjs().isAfter(dayjs.unix(league.draft_start).startOf('day'))
   const prevPick = picks.find(
     (p) => p.pick === (nextPick ? nextPick.pick - 1 : null)
   )
@@ -40,11 +41,13 @@ export default function DraftPage() {
     Boolean(nextPick && nextPick.pick === 1) ||
     Boolean(prevPick && prevPick.pid)
   const onTheClock =
-    league.ddate && nextPick && (isDraftWindowOpen || isPreviousSelectionMade)
+    league.draft_start &&
+    nextPick &&
+    (isDraftWindowOpen || isPreviousSelectionMade)
 
   let draftInfo
-  if (league.ddate) {
-    const start = dayjs.unix(league.ddate).startOf('day')
+  if (league.draft_start) {
+    const start = dayjs.unix(league.draft_start).startOf('day')
     if (dayjs().isBefore(start)) {
       draftInfo = (
         <div className='draft__side-top-pick'>

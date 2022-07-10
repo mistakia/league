@@ -68,7 +68,7 @@ export default async function (knex) {
   await knex('seasons').insert({
     lid: 1,
     year: constants.season.year,
-    ddate: Math.round(Date.now() / 1000),
+    draft_start: Math.round(Date.now() / 1000),
     adate: Math.round(Date.now() / 1000),
     tddate: 1606626000
   })

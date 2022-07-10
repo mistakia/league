@@ -5,7 +5,10 @@ import { draftActions } from './actions'
 import { appActions } from '@core/app'
 
 const initialState = new Record({
-  ddate: null,
+  draft_start: null,
+  draft_type: null,
+  draft_hour_min: null,
+  draft_hour_max: null,
   isPending: false,
   selected: null,
   drafted: new List(),
@@ -17,12 +20,20 @@ export function draftReducer(state = initialState(), { payload, type }) {
     case draftActions.DRAFT_SELECT_PLAYER:
       return state.merge({ selected: payload.pid })
 
-    case appActions.AUTH_FULFILLED:
+    case appActions.AUTH_FULFILLED: {
+      if (!payload.data.leagues.length) {
+        return state
+      }
+
+      const league = payload.data.leagues[0]
+
       return state.merge({
-        ddate: payload.data.leagues.length
-          ? payload.data.leagues[0].ddate
-          : undefined
+        draft_start: league.draft_start,
+        draft_type: league.draft_type,
+        draft_hour_min: league.draft_hour_min,
+        draft_hour_max: league.draft_hour_max
       })
+    }
 
     case draftActions.LOAD_DRAFT:
       return state.merge({ picks: new List() })
@@ -40,7 +51,10 @@ export function draftReducer(state = initialState(), { payload, type }) {
 
       const lastPick = payload.data.picks[payload.data.picks.length - 1]
       const draftEnd = getDraftWindow({
-        start: state.ddate,
+        start: state.draft_start,
+        type: state.draft_type,
+        min: state.draft_hour_min,
+        max: state.draft_hour_max,
         pickNum: lastPick.pick + 1
       })
 
@@ -48,7 +62,10 @@ export function draftReducer(state = initialState(), { payload, type }) {
       if (constants.season.now.isBefore(draftEnd)) {
         for (const pick of payload.data.picks) {
           pick.draftWindow = getDraftWindow({
-            start: state.ddate,
+            start: state.draft_start,
+            type: state.draft_type,
+            min: state.draft_hour_min,
+            max: state.draft_hour_max,
             pickNum: pick.pick
           })
         }

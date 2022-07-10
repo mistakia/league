@@ -50,8 +50,11 @@ export function getDraftEnd(state) {
   }
 
   const draftEnd = getDraftWindow({
-    start: league.ddate,
-    pickNum: lastPick.pick + 1
+    start: league.draft_start,
+    pickNum: lastPick.pick + 1,
+    type: league.draft_type,
+    min: league.draft_hour_min,
+    max: league.draft_hour_max
   })
 
   return draftEnd
@@ -67,9 +70,9 @@ export function isAfterDraft(state) {
 
   const league = getCurrentLeague(state)
   const draftEnd = getDraftEnd(state)
-  const afterDraft = league.ddate && draftEnd && dayjs().isAfter(draftEnd)
+  const afterDraft = league.draft_start && draftEnd && dayjs().isAfter(draftEnd)
   const afterWaivers =
-    league.ddate &&
+    league.draft_start &&
     draftEnd &&
     dayjs().isAfter(draftEnd.endOf('day').add(1, 'day'))
   return {

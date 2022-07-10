@@ -52,7 +52,10 @@ const mapStateToProps = createSelector(
   (players, selectedPlayerMap, nextPick, draft, league, app) => {
     const windowEnd = nextPick
       ? getDraftWindow({
-          start: league.ddate,
+          start: league.draft_start,
+          type: league.draft_type,
+          min: league.draft_hour_min,
+          max: league.draft_hour_max,
           pickNum: nextPick.pick + 1
         })
       : null
