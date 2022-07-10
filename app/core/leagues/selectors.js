@@ -30,6 +30,37 @@ export function getLeagueEvents(state) {
   const league = getCurrentLeague(state)
   const events = []
   const now = dayjs()
+
+  if (league.ext_date) {
+    const ext_date = dayjs.unix(league.ext_date)
+    if (now.isBefore(ext_date)) {
+      events.push({
+        detail: 'Extension Deadline',
+        date: ext_date
+      })
+    }
+  }
+
+  if (league.tran_start) {
+    const tran_start = dayjs.unix(league.tran_start)
+    if (now.isBefore(tran_start)) {
+      events.push({
+        detail: 'Restricted FA Begins',
+        date: tran_start
+      })
+    }
+  }
+
+  if (league.tran_end) {
+    const tran_end = dayjs.unix(league.tran_end)
+    if (now.isBefore(tran_end)) {
+      events.push({
+        detail: 'Restricted FA Ends',
+        date: tran_end
+      })
+    }
+  }
+
   if (league.draft_start) {
     const draft_start = dayjs.unix(league.draft_start)
     if (now.isBefore(draft_start)) {
