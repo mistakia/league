@@ -40,8 +40,11 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
       const league = await getLeague(leagueId)
       const picks = await knex('draft')
       const draftDates = getDraftDates({
-        start: league.ddate,
-        picks: picks.length
+        start: league.draft_start,
+        picks: picks.length,
+        type: league.draft_type,
+        min: league.draft_hour_min,
+        max: league.draft_hour_max
       })
       MockDate.set(draftDates.waiverEnd.toISOString())
 
@@ -133,7 +136,10 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
       const league = await getLeague(leagueId)
       const picks = await knex('draft')
       const draftDates = getDraftDates({
-        start: league.ddate,
+        start: league.draft_start,
+        type: league.draft_type,
+        min: league.draft_hour_min,
+        max: league.draft_hour_max,
         picks: picks.length
       })
       MockDate.set(draftDates.draftEnd.add('1', 'hour').toISOString())

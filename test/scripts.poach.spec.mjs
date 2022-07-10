@@ -325,16 +325,7 @@ describe('SCRIPTS /waivers - poach', function () {
 
       // check conditional pick
       const draft = await knex('draft')
-      expect(draft.length).to.equal(2)
-      expect(draft[0].round).to.equal(4)
-      expect(draft[0].tid).to.equal(1)
-      expect(draft[0].otid).to.equal(1)
-      expect(draft[0].year).to.equal(constants.season.year + 1)
-
-      expect(draft[1].round).to.equal(4)
-      expect(draft[1].tid).to.equal(1)
-      expect(draft[1].otid).to.equal(1)
-      expect(draft[1].year).to.equal(constants.season.year + 1)
+      expect(draft.length).to.equal(0)
     })
 
     it('release player not on roster - have roster space', async () => {

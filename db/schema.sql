@@ -294,7 +294,10 @@ CREATE TABLE `seasons` (
   `tran_start` int(11) unsigned DEFAULT NULL, -- start of restricted free agency
   `tran_end` int(11) unsigned DEFAULT NULL, -- end of restricted free agency
   `ext_date` int(11) unsigned DEFAULT NULL, -- extension deadline
-  `ddate` int(11) unsigned DEFAULT NULL,
+  `draft_start` int(11) unsigned DEFAULT NULL,
+  `draft_type` varchar(10) DEFAULT NULL, -- `hour`, `day`
+  `draft_hour_min` tinyint(2) unsigned DEFAULT NULL,
+  `draft_hour_max` tinyint(2) unsigned DEFAULT NULL,
   `adate` int(11) unsigned DEFAULT NULL,
   `tddate` int(11) unsigned DEFAULT NULL,
   UNIQUE KEY `season` (`lid`,`year`)

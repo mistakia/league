@@ -53,7 +53,7 @@ export default async function (knex) {
   await knex('seasons').insert({
     lid: 1,
     year: constants.season.year,
-    ddate: Math.round(Date.now() / 1000),
+    draft_start: Math.round(Date.now() / 1000),
     adate: Math.round(Date.now() / 1000),
     tddate: constants.season.start.add('12', 'weeks').unix()
   })
@@ -107,4 +107,5 @@ export default async function (knex) {
   await knex('transition_releases').del()
   await knex('poaches').del()
   await knex('poach_releases').del()
+  await knex('draft').del()
 }

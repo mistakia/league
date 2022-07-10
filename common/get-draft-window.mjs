@@ -16,6 +16,18 @@ export default function getDraftWindow({
   pickNum,
   type = 'hour'
 }) {
+  if (type === null) {
+    type = 'hour'
+  }
+
+  if (min === null) {
+    min = 11
+  }
+
+  if (max === null) {
+    max = 16
+  }
+
   let clockStart = dayjs.unix(start).tz('America/New_York').startOf('day')
   const isValid = (time) =>
     time.isSameOrAfter(time.hour(min)) && time.isSameOrBefore(time.hour(max))
