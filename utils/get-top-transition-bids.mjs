@@ -13,12 +13,13 @@ export default async function (leagueId) {
   }
 
   transition_bid_rows.forEach((t) => {
+    // if competing bids, use bid amount
     if (t.player_tid !== t.tid) {
       t._bid = t.bid
       return
     }
 
-    // boost original team bids
+    // boost original team bids by 20% or $2, whichever is greater
     const _20pct = Math.min(t.bid * 0.2)
     const boost = Math.max(2, _20pct)
     t._bid = t.bid + boost
