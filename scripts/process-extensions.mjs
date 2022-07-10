@@ -14,7 +14,7 @@ import {
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('process-extensions')
-debug.enable('process-extensions,process-transition-bid')
+debug.enable('process-extensions')
 
 const getTransactionType = (tag) => {
   switch (tag) {

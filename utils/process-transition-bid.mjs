@@ -8,7 +8,7 @@ import createConditionalPick from './create-conditional-pick.mjs'
 import getTeam from './get-team.mjs'
 import debug from 'debug'
 
-const log = debug('process-transition-bid')
+const log = debug('process-transition-bids')
 
 export default async function ({
   pid,
