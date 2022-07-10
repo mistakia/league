@@ -57,30 +57,30 @@ export default async function ({
     }
   }
 
-  if (teamIds.length) {
-    // filter based on affected teams
-    const userTeams = users.filter((u) => teamIds.includes(u.tid))
+  /* if (teamIds.length) {
+   *   // filter based on affected teams
+   *   const userTeams = users.filter((u) => teamIds.includes(u.tid))
 
-    for (const user of userTeams) {
-      // send team text messages
-      if (voice && user.phone && user.voice && user.teamvoice) {
-        voiceMessages.push({
-          id: `${league.uid}:${user.tid}:${user.userid}:${Date.now()}`,
-          number: user.phone,
-          message
-        })
-      }
+   *   for (const user of userTeams) {
+   *     // send team voice messages
+   *     if (voice && user.phone && user.voice && user.teamvoice) {
+   *       voiceMessages.push({
+   *         id: `${league.uid}:${user.tid}:${user.userid}:${Date.now()}`,
+   *         number: user.phone,
+   *         message
+   *       })
+   *     }
 
-      // send team voice messages
-      if (user.phone && user.text && user.teamtext) {
-        textMessages.push({
-          number: user.phone,
-          message
-        })
-      }
-    }
-  }
-
+   *     // send team text messages
+   *     if (user.phone && user.text && user.teamtext) {
+   *       textMessages.push({
+   *         number: user.phone,
+   *         message
+   *       })
+   *     }
+   *   }
+   * }
+   */
   if (textMessages.length) await sendTextNotifications(textMessages)
   if (voiceMessages.length) await sendVoiceNotifications(voiceMessages)
 }
