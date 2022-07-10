@@ -1,4 +1,4 @@
-import db from '#db'
+// import db from '#db'
 
 import sendVoiceNotifications from './send-voice-notifications.mjs'
 import sendTextNotifications from './send-text-notifications.mjs'
@@ -19,11 +19,11 @@ export default async function ({
 
   const textMessages = []
   const voiceMessages = []
-  const users = await db('users_teams')
-    .join('teams', 'users_teams.tid', 'teams.uid')
-    .join('users', 'users_teams.userid', 'users.id')
-    .where('teams.lid', league.uid)
-
+  /* const users = await db('users_teams')
+   *   .join('teams', 'users_teams.tid', 'teams.uid')
+   *   .join('users', 'users_teams.userid', 'users.id')
+   *   .where('teams.lid', league.uid)
+   */
   if (notifyLeague) {
     // send league text messages
 

@@ -30,19 +30,22 @@ export function getLeagueEvents(state) {
   const league = getCurrentLeague(state)
   const events = []
   const now = dayjs()
-  if (league.ddate) {
-    const ddate = dayjs.unix(league.ddate)
-    if (now.isBefore(ddate)) {
+  if (league.draft_start) {
+    const draft_start = dayjs.unix(league.draft_start)
+    if (now.isBefore(draft_start)) {
       events.push({
         detail: 'Rookie Draft Begins',
-        date: ddate
+        date: draft_start
       })
     }
 
     const lastPick = getLastPick(state)
     if (lastPick) {
       const draftDates = getDraftDates({
-        start: league.ddate,
+        start: league.draft_start,
+        type: league.draft_type,
+        min: league.draft_hour_min,
+        max: league.draft_hour_max,
         picks: lastPick.pick
       })
 

@@ -62,7 +62,7 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
 
-    const draftStart = dayjs.unix(league.ddate)
+    const draftStart = dayjs.unix(league.draft_start)
     if (constants.season.now.isBefore(draftStart)) {
       return res.status(400).send({ error: 'draft has not started' })
     }
@@ -88,9 +88,13 @@ router.post('/?', async (req, res) => {
 
     // if previous selection is not made make, check if teams window has opened
     const isWindowOpen = isDraftWindowOpen({
-      start: league.ddate,
-      pickNum: pick.pick
+      start: league.draft_start,
+      pickNum: pick.pick,
+      min: league.draft_hour_min,
+      max: league.draft_hour_max,
+      type: league.draft_type
     })
+
     if (!isPreviousSelectionMade && !isWindowOpen) {
       return res.status(400).send({ error: 'draft pick not on the clock' })
     }

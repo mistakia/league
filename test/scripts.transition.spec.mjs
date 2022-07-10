@@ -62,7 +62,8 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
         leagueId,
         player,
         teamId,
-        userId
+        userId,
+        tag: constants.tags.TRANSITION
       })
 
       const timestamp = Math.round(Date.now() / 1000)
@@ -128,7 +129,16 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
       const userId = 1
       const bid = 30
 
-      const players = [player1, player2, player3, player4]
+      await addPlayer({
+        leagueId,
+        player: player1,
+        teamId,
+        userId,
+        value: 20,
+        tag: constants.tags.TRANSITION
+      })
+
+      const players = [player2, player3, player4]
       for (const player of players) {
         await addPlayer({
           leagueId,
@@ -259,7 +269,8 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
         leagueId,
         player,
         teamId,
-        userId
+        userId,
+        tag: constants.tags.TRANSITION
       })
 
       const timestamp = Math.round(Date.now() / 1000)
@@ -324,7 +335,8 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
         leagueId,
         player,
         teamId,
-        userId
+        userId,
+        tag: constants.tags.TRANSITION
       })
 
       const timestamp = Math.round(Date.now() / 1000)

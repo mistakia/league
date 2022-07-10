@@ -8,7 +8,7 @@ import './draft-schedule.styl'
 export default class DraftSchedule extends React.Component {
   render = () => {
     const { league, picks } = this.props
-    const m = dayjs.unix(league.ddate)
+    const m = dayjs.unix(league.draft_start)
     const startDate = m.date()
     const draftMonth = m.month()
 

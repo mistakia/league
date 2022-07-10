@@ -11,11 +11,14 @@ export default async function (leagueId) {
     lid: leagueId
   })
   const draftDates = getDraftDates({
-    start: league.ddate,
-    picks: picks.length
+    start: league.draft_start,
+    picks: picks.length,
+    type: league.draft_type,
+    min: league.draft_hour_min,
+    max: league.draft_hour_max
   })
 
-  if (!league.ddate || dayjs().isBefore(draftDates.waiverEnd)) {
+  if (!league.draft_start || dayjs().isBefore(draftDates.waiverEnd)) {
     return undefined
   }
 

@@ -192,21 +192,24 @@ router.post('/?', async (req, res) => {
             lid: leagueId
           })
           const draftDates = getDraftDates({
-            start: league.ddate,
+            start: league.draft_start,
+            type: league.draft_type,
+            min: league.draft_hour_min,
+            max: league.draft_hour_max,
             picks: picks.length
           })
 
           // if player is a rookie
           if (player_row.start === constants.season.year) {
             // reject practice waivers before day after draft
-            if (!league.ddate || dayjs().isBefore(draftDates.draftEnd)) {
+            if (!league.draft_start || dayjs().isBefore(draftDates.draftEnd)) {
               return res.status(400).send({
                 error: 'practice squad waivers are not open for rookies'
               })
             }
 
             // if after rookie draft waivers cleared, check if player is on release waivers
-            if (league.ddate && dayjs().isAfter(draftDates.waiverEnd)) {
+            if (league.draft_start && dayjs().isAfter(draftDates.waiverEnd)) {
               const isOnWaivers = await isPlayerOnWaivers({ pid, leagueId })
               if (!isOnWaivers) {
                 return res

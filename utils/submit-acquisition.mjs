@@ -87,11 +87,14 @@ export default async function ({
       lid: leagueId
     })
     const draftDates = getDraftDates({
-      start: league.ddate,
+      start: league.draft_start,
+      type: league.draft_type,
+      min: league.draft_hour_min,
+      max: league.draft_hour_max,
       picks: picks.length
     })
 
-    if (!league.ddate || dayjs().isBefore(draftDates.waiverEnd)) {
+    if (!league.draft_start || dayjs().isBefore(draftDates.waiverEnd)) {
       throw new Error('rookie free agency not open')
     }
   }

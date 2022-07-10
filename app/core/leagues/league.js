@@ -60,8 +60,12 @@ export const League = new Record({
   ext4: null,
 
   adate: null,
-  ddate: null,
   tddate: null,
+
+  draft_start: null,
+  draft_type: null,
+  draft_hour_min: null,
+  draft_hour_max: null,
 
   minBid: 0,
   hosted: 0,
@@ -146,8 +150,12 @@ export function createLeague({
   ext4,
 
   adate,
-  ddate,
   tddate,
+
+  draft_start,
+  draft_type,
+  draft_hour_min,
+  draft_hour_max,
 
   minBid,
   hosted,
@@ -229,8 +237,12 @@ export function createLeague({
     ext4,
 
     adate,
-    ddate,
     tddate,
+
+    draft_start,
+    draft_type,
+    draft_hour_min,
+    draft_hour_max,
 
     minBid,
     hosted,

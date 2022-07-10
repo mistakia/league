@@ -8,7 +8,8 @@ export default async function ({
   userId,
   slot = constants.slots.BENCH,
   transaction = constants.transactions.ROSTER_ADD,
-  value = 0
+  value = 0,
+  tag = constants.tags.REGULAR
 }) {
   const rosters = await db('rosters')
     .where({
@@ -34,6 +35,7 @@ export default async function ({
     rid: rosterId,
     pid: player.pid,
     slot,
-    pos: player.pos1
+    pos: player.pos1,
+    tag
   })
 }
