@@ -21,6 +21,7 @@ class PlayerRosterRow extends Player {
     const calculateExtension = constants.season.now.isBefore(deadline)
     const extensions = playerMap.get('extensions', 0)
     const value = playerMap.get('value')
+    const bid = playerMap.get('bid')
     const salary = calculateExtension
       ? getExtensionAmount({
           pos: playerMap.get('pos'),
@@ -28,9 +29,9 @@ class PlayerRosterRow extends Player {
           extensions,
           league,
           value,
-          bid: playerMap.get('bid')
+          bid
         })
-      : value
+      : bid || value
 
     return (
       <div className={classNames.join(' ')}>
