@@ -6,6 +6,9 @@ import processRelease from './process-release.mjs'
 import sendNotifications from './send-notifications.mjs'
 import createConditionalPick from './create-conditional-pick.mjs'
 import getTeam from './get-team.mjs'
+import debug from 'debug'
+
+const log = debug('process-transition-bid')
 
 export default async function ({
   pid,
@@ -22,6 +25,10 @@ export default async function ({
   const playerRosterRow = originalTeamRoster.players.find((p) => p.pid === pid)
   if (!playerRosterRow) {
     throw new Error('player no longer on original team roster')
+  }
+
+  if (playerRosterRow.tag !== constants.tags.TRANSITION) {
+    throw new Error('player no longer a restricted free agent')
   }
 
   const pos = playerRosterRow.pos
@@ -128,6 +135,8 @@ export default async function ({
 
     message += `${arrayToSentence(releaseMessages)} has been released.`
   }
+
+  log(message)
 
   await sendNotifications({
     league,

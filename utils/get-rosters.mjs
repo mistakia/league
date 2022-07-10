@@ -74,7 +74,8 @@ export default async function ({ lid, userId }) {
         const teamRoster = rosters.find((r) => r.tid === tid)
         for (const bid of bids) {
           const player = teamRoster.players.find((p) => p.pid === bid.pid)
-          if (player && player.tag === constants.tags.TRANSITION) player.bid = bid.bid
+          if (player && player.tag === constants.tags.TRANSITION)
+            player.bid = bid.bid
         }
       }
     }
