@@ -16,15 +16,15 @@ export default class PercentileMetric extends React.Component {
     let color
     if (value && value < percentile.p25) {
       const maxPercent =
-        (percentile.p25 - value) / (percentile.p25 - percentile.min) / 1.5
+        (percentile.p25 - value) / (percentile.p25 - percentile.min) / 1.5 || 0
       color = `rgba(253, 162, 145, ${maxPercent}`
     } else if (scaled) {
       const percent =
-        (value - percentile.p25) / (percentile.max - percentile.p25)
+        (value - percentile.p25) / (percentile.max - percentile.p25) || 0
       color = `rgba(46, 163, 221, ${percent}`
     } else {
       const maxPercent =
-        (value - percentile.p75) / (percentile.max - percentile.p75) / 1.5
+        (value - percentile.p75) / (percentile.max - percentile.p75) / 1.5 || 0
       color = `rgba(46, 163, 221, ${maxPercent}`
     }
     const classNames = ['table__cell', 'metric']
