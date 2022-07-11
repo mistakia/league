@@ -25,10 +25,12 @@ config.development.js
 key.pem
 cert.pem
 dist/*.worker.js*
-*.tar.qz
 drive-credentials.json
 drive-token.json
 dist/stats.html
+*.sql
+*.tar.qz
+*.tar.gz
 
 # Deployment
 current
