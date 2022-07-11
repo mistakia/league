@@ -47,7 +47,8 @@ import {
   getTeamsActions,
   putTeamActions,
   postTeamsActions,
-  deleteTeamsActions
+  deleteTeamsActions,
+  getLeagueTeamStatsActions
 } from '@core/teams'
 import {
   getTransactionsActions,
@@ -332,4 +333,10 @@ export const getPlayerProjections = fetch.bind(
   null,
   api.getPlayerProjections,
   getPlayerProjectionsActions
+)
+
+export const getLeagueTeamStats = fetch.bind(
+  null,
+  api.getLeagueTeamStats,
+  getLeagueTeamStatsActions
 )

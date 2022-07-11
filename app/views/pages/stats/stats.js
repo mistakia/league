@@ -1,15 +1,19 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
+import { Map } from 'immutable'
 
 import PageLayout from '@layouts/page'
 import PercentileMetric from '@components/percentile-metric'
 import { constants, getEligibleSlots, toPercent } from '@common'
+import StandingsSelectYear from '@components/standings-select-year'
 
 import './stats.styl'
 
-function SummaryRow({ team, percentiles }) {
-  const stats = team.get('stats').toJS()
+function SummaryRow({ team, percentiles, year }) {
+  const stats = team
+    .getIn(['stats', year], new Map(constants.createFantasyTeamStats()))
+    .toJS()
   return (
     <div className='table__row'>
       <div className='table__cell player__item-name'>{team.name}</div>
@@ -40,10 +44,10 @@ function SummaryRow({ team, percentiles }) {
           />
           <div className='table__cell metric'>
             {toPercent(
-              team.getIn(['stats', 'apWins'], 0) /
-                (team.getIn(['stats', 'apWins'], 0) +
-                  team.getIn(['stats', 'apLosses'], 0) +
-                  team.getIn(['stats', 'apTies'], 0))
+              team.getIn(['stats', year, 'apWins'], 0) /
+                (team.getIn(['stats', year, 'apWins'], 0) +
+                  team.getIn(['stats', year, 'apLosses'], 0) +
+                  team.getIn(['stats', year, 'apTies'], 0))
             )}
           </div>
         </div>
@@ -54,25 +58,28 @@ function SummaryRow({ team, percentiles }) {
 
 SummaryRow.propTypes = {
   team: ImmutablePropTypes.record,
-  percentiles: PropTypes.object
+  percentiles: PropTypes.object,
+  year: PropTypes.number
 }
 
-function PositionRow({ team, percentiles }) {
+function PositionRow({ team, percentiles, year }) {
   const positionCells = []
   for (const [index, position] of constants.positions.entries()) {
     const type = `pPos${position}`
-    const points = team.getIn(['stats', type], 0)
+    const points = team.getIn(['stats', year, type], 0)
     positionCells.push(
       <PercentileMetric
         key={index}
-        stats={team.get('stats').toJS()}
+        stats={team
+          .getIn(['stats', year], new Map(constants.createFantasyTeamStats()))
+          .toJS()}
         scaled
         {...{ percentiles, type }}
       />
     )
     positionCells.push(
       <div key={`${index}%`} className='table__cell metric'>
-        {toPercent(points / team.getIn(['stats', 'pf'], 0))}
+        {toPercent(points / team.getIn(['stats', year, 'pf'], 0))}
       </div>
     )
   }
@@ -87,26 +94,29 @@ function PositionRow({ team, percentiles }) {
 
 PositionRow.propTypes = {
   team: ImmutablePropTypes.record,
-  percentiles: PropTypes.object
+  percentiles: PropTypes.object,
+  year: PropTypes.number
 }
 
-function SlotRow({ team, slots, percentiles }) {
+function SlotRow({ team, slots, percentiles, year }) {
   const slotCells = []
   for (const [index, s] of slots.entries()) {
     const slot = constants.slots[s]
     const type = `pSlot${slot}`
-    const points = team.getIn(['stats', type], 0)
+    const points = team.getIn(['stats', year, type], 0)
     slotCells.push(
       <PercentileMetric
         key={index}
-        stats={team.get('stats').toJS()}
+        stats={team
+          .getIn(['stats', year], new Map(constants.createFantasyTeamStats()))
+          .toJS()}
         scaled
         {...{ percentiles, type }}
       />
     )
     slotCells.push(
       <div key={`${index}%`} className='table__cell metric'>
-        {toPercent(points / team.getIn(['stats', 'pf'], 0))}
+        {toPercent(points / team.getIn(['stats', year, 'pf'], 0))}
       </div>
     )
   }
@@ -122,12 +132,13 @@ function SlotRow({ team, slots, percentiles }) {
 SlotRow.propTypes = {
   team: ImmutablePropTypes.record,
   slots: PropTypes.array,
-  percentiles: PropTypes.object
+  percentiles: PropTypes.object,
+  year: PropTypes.number
 }
 
 export default class StatsPage extends React.Component {
   render = () => {
-    const { league, teams, percentiles } = this.props
+    const { league, teams, percentiles, year } = this.props
 
     const slotHeaders = []
     const eligibleStarterSlots = getEligibleSlots({ pos: 'ALL', league })
@@ -161,14 +172,20 @@ export default class StatsPage extends React.Component {
 
     const sorted = teams.sort(
       (a, b) =>
-        b.getIn(['stats', 'apWins'], 0) - a.getIn(['stats', 'apWins'], 0) ||
-        b.getIn(['stats', 'pf'], 0) - a.getIn(['stats', 'pf'], 0)
+        b.getIn(['stats', year, 'apWins'], 0) -
+          a.getIn(['stats', year, 'apWins'], 0) ||
+        b.getIn(['stats', year, 'pf'], 0) - a.getIn(['stats', year, 'pf'], 0)
     )
 
     const summaryRows = []
     for (const team of sorted.valueSeq()) {
       summaryRows.push(
-        <SummaryRow key={team.uid} team={team} percentiles={percentiles} />
+        <SummaryRow
+          key={team.uid}
+          team={team}
+          percentiles={percentiles}
+          year={year}
+        />
       )
     }
 
@@ -179,6 +196,7 @@ export default class StatsPage extends React.Component {
           key={team.uid}
           team={team}
           slots={slots}
+          year={year}
           percentiles={percentiles}
         />
       )
@@ -187,12 +205,18 @@ export default class StatsPage extends React.Component {
     const positionRows = []
     for (const team of sorted.valueSeq()) {
       positionRows.push(
-        <PositionRow key={team.uid} team={team} percentiles={percentiles} />
+        <PositionRow
+          key={team.uid}
+          team={team}
+          percentiles={percentiles}
+          year={year}
+        />
       )
     }
 
     const body = (
       <div className='stats'>
+        <StandingsSelectYear />
         <div className='section'>
           <div className='dashboard__section-header-title'>League Stats</div>
           <div className='table__container'>
@@ -254,5 +278,6 @@ export default class StatsPage extends React.Component {
 StatsPage.propTypes = {
   teams: ImmutablePropTypes.map,
   league: PropTypes.object,
-  percentiles: PropTypes.object
+  percentiles: PropTypes.object,
+  year: PropTypes.number
 }

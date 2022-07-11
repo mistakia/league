@@ -6,7 +6,6 @@ import { teamActions } from './actions'
 import { auctionActions } from '@core/auction'
 import { draftActions } from '@core/draft'
 import { tradeActions } from '@core/trade'
-import { standingsActions } from '@core/standings'
 
 const initialState = new Map()
 
@@ -103,15 +102,10 @@ export function teamsReducer(state = initialState, { payload, type }) {
     case teamActions.DELETE_TEAMS_FULFILLED:
       return state.delete(payload.opts.teamId)
 
-    case standingsActions.SET_STANDINGS:
+    case teamActions.GET_LEAGUE_TEAM_STATS_FULFILLED:
       return state.withMutations((state) => {
-        for (const teamId in payload.teams) {
-          const t = payload.teams[teamId]
-          state.updateIn([t.tid], (team) =>
-            team.merge({
-              stats: new Map(t.stats)
-            })
-          )
+        for (const stats of payload.data) {
+          state.setIn([stats.tid, 'stats', stats.year], new Map(stats))
         }
       })
 

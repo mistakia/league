@@ -6,6 +6,8 @@ export const teamActions = {
   ADD_TEAM: 'ADD_TEAM',
   DELETE_TEAM: 'DELETE_TEAM',
 
+  LOAD_LEAGUE_TEAM_STATS: 'LOAD_LEAGUE_TEAM_STATS',
+
   GET_TEAMS_FAILED: 'GET_TEAMS_FAILED',
   GET_TEAMS_PENDING: 'GET_TEAMS_PENDING',
   GET_TEAMS_FULFILLED: 'GET_TEAMS_FULFILLED',
@@ -22,8 +24,16 @@ export const teamActions = {
   DELETE_TEAMS_FAILED: 'DELETE_TEAMS_FAILED',
   DELETE_TEAMS_FULFILLED: 'DELETE_TEAMS_FULFILLED',
 
+  GET_LEAGUE_TEAM_STATS_FAILED: 'GET_LEAGUE_TEAM_STATS_FAILED',
+  GET_LEAGUE_TEAM_STATS_PENDING: 'GET_LEAGUE_TEAM_STATS_PENDING',
+  GET_LEAGUE_TEAM_STATS_FULFILLED: 'GET_LEAGUE_TEAM_STATS_FULFILLED',
+
   loadTeams: () => ({
     type: teamActions.LOAD_TEAMS
+  }),
+
+  loadLeagueTeamStats: () => ({
+    type: teamActions.LOAD_LEAGUE_TEAM_STATS
   }),
 
   add: () => ({
@@ -136,6 +146,29 @@ export const teamActions = {
       opts,
       data
     }
+  }),
+
+  getLeagueTeamStatsFailed: (opts, error) => ({
+    type: teamActions.GET_LEAGUE_TEAM_STATS_FAILED,
+    payload: {
+      opts,
+      error
+    }
+  }),
+
+  getLeagueTeamStatsPending: (opts) => ({
+    type: teamActions.GET_LEAGUE_TEAM_STATS_PENDING,
+    payload: {
+      opts
+    }
+  }),
+
+  getLeagueTeamStatsFulfilled: (opts, data) => ({
+    type: teamActions.GET_LEAGUE_TEAM_STATS_FULFILLED,
+    payload: {
+      opts,
+      data
+    }
   })
 }
 
@@ -161,4 +194,10 @@ export const deleteTeamsActions = {
   failed: teamActions.deleteTeamsFailed,
   pending: teamActions.deleteTeamsPending,
   fulfilled: teamActions.deleteTeamsFulfilled
+}
+
+export const getLeagueTeamStatsActions = {
+  failed: teamActions.getLeagueTeamStatsFailed,
+  pending: teamActions.getLeagueTeamStatsPending,
+  fulfilled: teamActions.getLeagueTeamStatsFulfilled
 }
