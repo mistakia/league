@@ -8,10 +8,12 @@ import AccordionSummary from '@mui/material/AccordionSummary'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 
 import Rank from '@components/rank'
+import { constants } from '@common'
 
 export default class DashboardTeamSummaryRecord extends React.Component {
   render = () => {
     const { team, overall, standings, rank } = this.props
+    const { year } = constants.season
 
     const leagueStandings = []
     const divStandings = []
@@ -20,10 +22,11 @@ export default class DashboardTeamSummaryRecord extends React.Component {
         <tr key={t.uid}>
           <td>{t.name}</td>
           <td>
-            {t.getIn(['stats', 'wins'], 0)}-{t.getIn(['stats', 'losses'], 0)}-
-            {t.getIn(['stats', 'ties'], 0)}
+            {t.getIn(['stats', year, 'wins'], 0)}-
+            {t.getIn(['stats', year, 'losses'], 0)}-
+            {t.getIn(['stats', year, 'ties'], 0)}
           </td>
-          <td>{t.getIn(['stats', 'pf'], 0).toFixed(1)}</td>
+          <td>{t.getIn(['stats', year, 'pf'], 0).toFixed(1)}</td>
         </tr>
       )
 
@@ -60,9 +63,9 @@ export default class DashboardTeamSummaryRecord extends React.Component {
               Record
             </Grid>
             <Grid item xs={3}>
-              {team.getIn(['stats', 'wins'], 0)}-
-              {team.getIn(['stats', 'losses'], 0)}-
-              {team.getIn(['stats', 'ties'], 0)}
+              {team.getIn(['stats', year, 'wins'], 0)}-
+              {team.getIn(['stats', year, 'losses'], 0)}-
+              {team.getIn(['stats', year, 'ties'], 0)}
             </Grid>
             <Grid item xs={2}>
               <Rank rank={rank} size={standings.teams.size} />

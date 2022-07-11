@@ -220,6 +220,12 @@ export const api = {
     const url = `${BASE_URL}/stats/teams`
     return { url }
   },
+  getLeagueTeamStats(params) {
+    const url = `${BASE_URL}/leagues/${
+      params.leagueId
+    }/team-stats?${queryString.stringify(params)}`
+    return { url }
+  },
   postWaiver(data) {
     const url = `${BASE_URL}/leagues/${data.leagueId}/waivers`
     return { url, ...POST(data) }

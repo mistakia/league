@@ -1057,6 +1057,7 @@ CREATE TABLE `teams` (
 DROP TABLE IF EXISTS `team_stats`;
 
 CREATE TABLE `team_stats` (
+  `lid` int(6) NOT NULL,
   `tid` int(6) NOT NULL,
   `year` int(4) NOT NULL,
 

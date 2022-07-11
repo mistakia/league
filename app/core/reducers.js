@@ -23,6 +23,7 @@ import { scoreboardReducer } from './scoreboard'
 import { playsReducer } from './plays'
 import { gamelogsReducer } from './gamelogs'
 import { propsReducer } from './props'
+import { standingsReducer } from './standings'
 
 const rootReducer = (router) =>
   combineReducers({
@@ -49,7 +50,8 @@ const rootReducer = (router) =>
     scoreboard: scoreboardReducer,
     plays: playsReducer,
     gamelogs: gamelogsReducer,
-    props: propsReducer
+    props: propsReducer,
+    standings: standingsReducer
   })
 
 export default rootReducer

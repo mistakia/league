@@ -1,7 +1,7 @@
 import express from 'express'
 import bcrypt from 'bcrypt'
 
-import { constants } from '#common'
+import { constants, groupBy } from '#common'
 
 const router = express.Router()
 
@@ -37,6 +37,14 @@ router.get('/?', async (req, res) => {
         )
       })
       .whereIn('leagues.uid', leagueIds)
+
+    const seasons = await db('seasons').whereIn('lid', leagueIds)
+
+    const seasonsByLeagueId = groupBy(seasons, 'lid')
+    for (const lid in seasonsByLeagueId) {
+      const league = leagues.find((l) => l.uid === parseInt(lid, 10))
+      league.years = seasonsByLeagueId[lid].map((s) => s.year)
+    }
 
     const sources = await db('sources')
     const userSources = await db('users_sources').where(
