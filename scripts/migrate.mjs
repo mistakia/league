@@ -11,10 +11,10 @@ const log = debug('migrate')
 debug.enable('migrate')
 
 const migrate = async () => {
-  await db.schema.alterTable('playoffs', function (table) {
-    table.decimal('points', 7, 2)
+  await db.schema.alterTable('team_stats', function (table) {
+    table.tinyint('div', 1)
   })
-  log('playoffs table migrated')
+  log('team_stats table migrated')
 
   log('all tables migrated')
 }
