@@ -1060,6 +1060,7 @@ DROP TABLE IF EXISTS `team_stats`;
 CREATE TABLE `team_stats` (
   `lid` int(6) NOT NULL,
   `tid` int(6) NOT NULL,
+  `div` tinyint(1) DEFAULT NULL,
   `year` int(4) NOT NULL,
 
   `wins` tinyint(2) DEFAULT 0,
