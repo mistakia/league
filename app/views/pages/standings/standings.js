@@ -4,6 +4,7 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 import Container from '@mui/material/Container'
 import Toolbar from '@mui/material/Toolbar'
 
+import StandingsSelectYear from '@components/standings-select-year'
 import { toPercent } from '@common'
 import PageLayout from '@layouts/page'
 
@@ -17,21 +18,22 @@ Divider.propTypes = {
   title: PropTypes.string
 }
 
-function StandingsTeam({ team }) {
+function StandingsTeam({ team, year }) {
   return (
     <div className='table__row'>
       <div className='table__cell player__item-name'>{team.name}</div>
       <div className='table__cell metric'>
-        {team.getIn(['stats', 'wins'], 0)}-{team.getIn(['stats', 'losses'], 0)}-
-        {team.getIn(['stats', 'ties'], 0)}
+        {team.getIn(['stats', year, 'wins'], 0)}-
+        {team.getIn(['stats', year, 'losses'], 0)}-
+        {team.getIn(['stats', year, 'ties'], 0)}
       </div>
       <div className='table__cell metric'>
-        {team.getIn(['stats', 'apWins'], 0)}-
-        {team.getIn(['stats', 'apLosses'], 0)}-
-        {team.getIn(['stats', 'apTies'], 0)}
+        {team.getIn(['stats', year, 'apWins'], 0)}-
+        {team.getIn(['stats', year, 'apLosses'], 0)}-
+        {team.getIn(['stats', year, 'apTies'], 0)}
       </div>
       <div className='table__cell metric'>
-        {team.getIn(['stats', 'pf'], 0).toFixed(1)}
+        {team.getIn(['stats', year, 'pf'], 0).toFixed(1)}
       </div>
       <div className='table__cell metric'>{toPercent(team.playoff_odds)}</div>
       <div className='table__cell metric'>{toPercent(team.bye_odds)}</div>
@@ -39,26 +41,28 @@ function StandingsTeam({ team }) {
         {toPercent(team.championship_odds)}
       </div>
       <div className='table__cell metric'>
-        {team.getIn(['stats', 'doi'], 0).toFixed(2)}
+        {team.getIn(['stats', year, 'doi'], 0).toFixed(2)}
       </div>
     </div>
   )
 }
 
 StandingsTeam.propTypes = {
-  team: ImmutablePropTypes.record
+  team: ImmutablePropTypes.record,
+  year: PropTypes.number
 }
 
-function Standings({ teams, title }) {
+function Standings({ teams, title, year }) {
   const sorted = teams.sort(
     (a, b) =>
-      b.getIn(['stats', 'wins'], 0) - a.getIn(['stats', 'wins'], 0) ||
-      b.getIn(['stats', 'pf'], 0) - a.getIn(['stats', 'pf'], 0)
+      b.getIn(['stats', year, 'wins'], 0) -
+        a.getIn(['stats', year, 'wins'], 0) ||
+      b.getIn(['stats', year, 'pf'], 0) - a.getIn(['stats', year, 'pf'], 0)
   )
 
   const overallRows = []
   sorted.forEach((team, index) => {
-    overallRows.push(<StandingsTeam key={index} team={team} />)
+    overallRows.push(<StandingsTeam key={index} team={team} year={year} />)
   })
 
   return (
@@ -85,14 +89,15 @@ function Standings({ teams, title }) {
 
 Standings.propTypes = {
   teams: ImmutablePropTypes.map,
-  title: PropTypes.string
+  title: PropTypes.string,
+  year: PropTypes.number
 }
 
-function Overall({ standings }) {
+function Overall({ standings, year }) {
   const overallRows = []
   let key = 0
   for (const team of standings.divisionLeaders.values()) {
-    overallRows.push(<StandingsTeam key={key} team={team} />)
+    overallRows.push(<StandingsTeam key={key} team={team} year={year} />)
     key++
     if (key === 2) {
       overallRows.push(<Divider key={key} title='Bye Teams' />)
@@ -104,7 +109,7 @@ function Overall({ standings }) {
   }
 
   for (const team of standings.wildcardTeams.values()) {
-    overallRows.push(<StandingsTeam key={key} team={team} />)
+    overallRows.push(<StandingsTeam key={key} team={team} year={year} />)
     key++
     if (key === 8) {
       overallRows.push(<Divider key={key} title='Wildcard Teams' />)
@@ -135,23 +140,34 @@ function Overall({ standings }) {
 }
 
 Overall.propTypes = {
-  standings: PropTypes.object
+  standings: PropTypes.object,
+  year: PropTypes.number
 }
 
 export default class StandingsPage extends React.Component {
+  componentDidMount = () => {
+    this.props.load()
+  }
+
   render = () => {
     const { standings } = this.props
 
     const divisions = []
     for (const [div, teams] of standings.divisionTeams.entries()) {
       divisions.push(
-        <Standings key={div} title={`Division ${div}`} teams={teams} />
+        <Standings
+          key={div}
+          title={`Division ${div}`}
+          teams={teams}
+          year={this.props.year}
+        />
       )
     }
 
     const body = (
       <Container maxWidth='md' classes={{ root: 'standings' }}>
-        <Overall standings={standings} />
+        <StandingsSelectYear />
+        <Overall standings={standings} year={this.props.year} />
         {divisions}
       </Container>
     )
@@ -161,5 +177,7 @@ export default class StandingsPage extends React.Component {
 }
 
 StandingsPage.propTypes = {
-  standings: PropTypes.object
+  standings: PropTypes.object,
+  load: PropTypes.func,
+  year: PropTypes.number
 }

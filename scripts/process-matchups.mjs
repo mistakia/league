@@ -67,6 +67,7 @@ const run = async ({ lid, year }) => {
   for (const [tid, team] of Object.entries(result)) {
     teamStats.push({
       tid,
+      lid,
       year,
       ...team.stats
     })

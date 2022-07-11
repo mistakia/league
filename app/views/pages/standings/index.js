@@ -1,12 +1,22 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getOverallStandings } from '@core/teams'
+import { getOverallStandings, teamActions } from '@core/teams'
+import { getStandingsYear } from '@core/standings'
 
 import StandingsPage from './standings'
 
-const mapStateToProps = createSelector(getOverallStandings, (standings) => ({
-  standings
-}))
+const mapStateToProps = createSelector(
+  getOverallStandings,
+  getStandingsYear,
+  (standings, year) => ({
+    standings,
+    year
+  })
+)
 
-export default connect(mapStateToProps)(StandingsPage)
+const mapDispatchToProps = {
+  load: teamActions.loadLeagueTeamStats
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(StandingsPage)

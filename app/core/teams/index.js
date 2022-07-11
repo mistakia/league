@@ -15,6 +15,7 @@ export {
   getTeamsActions,
   putTeamActions,
   postTeamsActions,
-  deleteTeamsActions
+  deleteTeamsActions,
+  getLeagueTeamStatsActions
 } from './actions'
 export { Team } from './team'

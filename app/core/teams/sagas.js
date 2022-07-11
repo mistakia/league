@@ -2,7 +2,14 @@ import { call, takeLatest, fork, select, put } from 'redux-saga/effects'
 
 import { teamActions } from './actions'
 import { getApp, appActions } from '@core/app'
-import { getTeams, putTeam, postTeams, deleteTeams } from '@core/api'
+import {
+  getTeams,
+  putTeam,
+  postTeams,
+  deleteTeams,
+  getLeagueTeamStats
+} from '@core/api'
+import { getStandingsYear, standingsActions } from '@core/standings'
 import { notificationActions } from '@core/notifications'
 
 export function* loadTeams() {
@@ -52,6 +59,12 @@ export function* deleteNotification() {
   )
 }
 
+export function* loadLeagueTeamStats() {
+  const year = yield select(getStandingsYear)
+  const { leagueId } = yield select(getApp)
+  yield call(getLeagueTeamStats, { leagueId, year })
+}
+
 //= ====================================
 //  WATCHERS
 // -------------------------------------
@@ -84,6 +97,14 @@ export function* watchDeleteTeamsFulfilled() {
   yield takeLatest(teamActions.DELETE_TEAMS_FULFILLED, deleteNotification)
 }
 
+export function* watchLoadLeagueTeamStats() {
+  yield takeLatest(teamActions.LOAD_LEAGUE_TEAM_STATS, loadLeagueTeamStats)
+}
+
+export function* watchStandingsSelectYear() {
+  yield takeLatest(standingsActions.STANDINGS_SELECT_YEAR, loadLeagueTeamStats)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -96,5 +117,8 @@ export const teamSagas = [
   fork(watchAddTeam),
 
   fork(watchPostTeamsFulfilled),
-  fork(watchDeleteTeamsFulfilled)
+  fork(watchDeleteTeamsFulfilled),
+
+  fork(watchLoadLeagueTeamStats),
+  fork(watchStandingsSelectYear)
 ]

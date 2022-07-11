@@ -1,11 +1,10 @@
 export const standingsActions = {
-  SET_STANDINGS: 'SET_STANDINGS',
+  STANDINGS_SELECT_YEAR: 'STANDINGS_SELECT_YEAR',
 
-  setStandings: ({ teams, percentiles }) => ({
-    type: standingsActions.SET_STANDINGS,
+  selectYear: (year) => ({
+    type: standingsActions.STANDINGS_SELECT_YEAR,
     payload: {
-      teams,
-      percentiles
+      year
     }
   })
 }

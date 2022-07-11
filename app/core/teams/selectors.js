@@ -4,6 +4,7 @@ import { List } from 'immutable'
 import { getApp } from '@core/app'
 import { getNextPick } from '@core/draft'
 import { getActivePoachesAgainstMyPlayers } from '@core/poaches'
+import { getStandingsYear } from '@core/standings'
 
 import { Team } from './team'
 
@@ -30,24 +31,29 @@ export function getDraftPickById(state, { pickId }) {
 }
 
 export function getOverallStandings(state) {
+  const year = getStandingsYear(state)
   const teams = getTeamsForCurrentLeague(state)
   const divisionTeams = teams.groupBy((x) => x.get('div'))
   let divisionLeaders = new List()
   for (const teams of divisionTeams.values()) {
     const sorted = teams.sort(
       (a, b) =>
-        b.getIn(['stats', 'wins'], 0) - a.getIn(['stats', 'wins'], 0) ||
-        b.getIn(['stats', 'ties'], 0) - a.getIn(['stats', 'ties'], 0) ||
-        b.getIn(['stats', 'pf'], 0) - a.getIn(['stats', 'pf'], 0)
+        b.getIn(['stats', year, 'wins'], 0) -
+          a.getIn(['stats', year, 'wins'], 0) ||
+        b.getIn(['stats', year, 'ties'], 0) -
+          a.getIn(['stats', year, 'ties'], 0) ||
+        b.getIn(['stats', year, 'pf'], 0) - a.getIn(['stats', year, 'pf'], 0)
     )
     divisionLeaders = divisionLeaders.push(sorted.first())
   }
 
   const sortedDivisionLeaders = divisionLeaders.sort(
     (a, b) =>
-      b.getIn(['stats', 'apWins'], 0) - a.getIn(['stats', 'apWins'], 0) ||
-      b.getIn(['stats', 'apTies'], 0) - a.getIn(['stats', 'apTies'], 0) ||
-      b.getIn(['stats', 'pf'], 0) - a.getIn(['stats', 'pf'], 0)
+      b.getIn(['stats', year, 'apWins'], 0) -
+        a.getIn(['stats', year, 'apWins'], 0) ||
+      b.getIn(['stats', year, 'apTies'], 0) -
+        a.getIn(['stats', year, 'apTies'], 0) ||
+      b.getIn(['stats', year, 'pf'], 0) - a.getIn(['stats', year, 'pf'], 0)
   )
 
   const playoffTeamTids = divisionLeaders.map((p) => p.uid)
@@ -55,7 +61,8 @@ export function getOverallStandings(state) {
     .filter((t) => !playoffTeamTids.includes(t.uid))
     .toList()
   const sortedWildcardTeams = wildcardTeams.sort(
-    (a, b) => b.getIn(['stats', 'pf'], 0) - a.getIn(['stats', 'pf'], 0)
+    (a, b) =>
+      b.getIn(['stats', year, 'pf'], 0) - a.getIn(['stats', year, 'pf'], 0)
   )
 
   return {

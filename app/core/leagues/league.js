@@ -1,5 +1,7 @@
 import { Record, List } from 'immutable'
 
+import { constants } from '@common'
+
 export const League = new Record({
   uid: null,
   commishid: null,
@@ -87,7 +89,8 @@ export const League = new Record({
   b_k: null,
   b_dst: null,
 
-  teams: new List()
+  teams: new List(),
+  years: new List()
 })
 
 export function createLeague({
@@ -175,7 +178,9 @@ export function createLeague({
 
   tran_start,
   tran_end,
-  ext_date
+  ext_date,
+
+  years
 }) {
   return new League({
     uid,
@@ -262,6 +267,8 @@ export function createLeague({
 
     tran_start,
     tran_end,
-    ext_date
+    ext_date,
+
+    years: years ? new List(years) : new List([constants.season.year])
   })
 }
