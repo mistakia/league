@@ -33,7 +33,7 @@ export function getDraftPickById(state, { pickId }) {
 export function getOverallStandings(state) {
   const year = getStandingsYear(state)
   const teams = getTeamsForCurrentLeague(state)
-  const divisionTeams = teams.groupBy((x) => x.get('div'))
+  const divisionTeams = teams.groupBy((x) => x.getIn(['stats', year, 'div'], 0))
   let divisionLeaders = new List()
   for (const teams of divisionTeams.values()) {
     const sorted = teams.sort(
