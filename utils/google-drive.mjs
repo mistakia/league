@@ -81,3 +81,35 @@ export default async function () {
     auth
   })
 }
+
+export const downloadFile = ({ drive, file }) =>
+  new Promise((resolve, reject) => {
+    const filename = file.name
+    const dest = fs.createWriteStream(`./${filename}`)
+    console.log('downloading', filename)
+
+    drive.files.get(
+      {
+        fileId: file.id,
+        alt: 'media'
+      },
+      {
+        responseType: 'stream'
+      },
+      (err, res) => {
+        if (err) {
+          return reject(err)
+        }
+
+        res.data
+          .on('end', function () {
+            console.log('download complete', filename)
+            resolve(filename)
+          })
+          .on('error', function (err) {
+            console.log(err)
+          })
+          .pipe(dest)
+      }
+    )
+  })

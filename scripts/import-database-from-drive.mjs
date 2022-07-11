@@ -6,44 +6,12 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { isMain, googleDrive } from '#utils'
+import { isMain, googleDrive, downloadFile } from '#utils'
 import config from '#config'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-database-from-drive')
 debug.enable('import-database-from-drive')
-
-const downloadFile = ({ drive, file }) =>
-  new Promise((resolve, reject) => {
-    const filename = file.name
-    const dest = fs.createWriteStream(`./${filename}`)
-    log('downloading', filename)
-
-    drive.files.get(
-      {
-        fileId: file.id,
-        alt: 'media'
-      },
-      {
-        responseType: 'stream'
-      },
-      (err, res) => {
-        if (err) {
-          return reject(err)
-        }
-
-        res.data
-          .on('end', function () {
-            log('download complete', filename)
-            resolve(filename)
-          })
-          .on('error', function (err) {
-            console.log(err)
-          })
-          .pipe(dest)
-      }
-    )
-  })
 
 const run = async ({ full = false } = {}) => {
   const drive = await googleDrive()
