@@ -18,8 +18,7 @@ const initialState = new Record({
   text: 0,
   voice: 0,
   teamIds: new List(),
-  leagueIds: new List([constants.DEFAULTS.LEAGUE_ID]),
-  teamPercentiles: {} // TODO - move to standings reducer
+  leagueIds: new List([constants.DEFAULTS.LEAGUE_ID])
 })
 
 export function appReducer(state = initialState(), { payload, type }) {
