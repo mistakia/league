@@ -96,6 +96,7 @@ const main = async () => {
 
     if (!year) {
       console.log('missing --year')
+      return
     }
 
     await run({ year, lid })
