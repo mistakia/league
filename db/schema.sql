@@ -775,6 +775,7 @@ CREATE TABLE `playoffs` (
   `lid` int(6) NOT NULL,
   `year` int(4) NOT NULL,
   `week` tinyint(2) NOT NULL,
+  `points` decimal(7,4) DEFAULT NULL,
   UNIQUE KEY `tid` (`tid`,`uid`,`year`),
   KEY `lid` (`lid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
