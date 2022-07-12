@@ -3,14 +3,15 @@ import { createSelector } from 'reselect'
 import { List } from 'immutable'
 
 import { playerActions, getSelectedPlayer } from '@core/players'
-import { getCurrentLeague } from '@core/leagues'
+import { getCurrentLeague, isBeforeExtensionDeadline } from '@core/leagues'
 
 import SelectedPlayerTransactions from './selected-player-transactions'
 
 const mapStateToProps = createSelector(
   getSelectedPlayer,
   getCurrentLeague,
-  (playerMap, league) => {
+  isBeforeExtensionDeadline,
+  (playerMap, league, isBeforeExtensionDeadline) => {
     const transactions = playerMap.get('transactions', new List())
     const teams = {}
     let maxTransaction = { value: 0 }
@@ -32,7 +33,8 @@ const mapStateToProps = createSelector(
       league,
       playerMap,
       teams,
-      maxTransaction
+      maxTransaction,
+      isBeforeExtensionDeadline
     }
   }
 )
