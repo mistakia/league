@@ -10,7 +10,7 @@ import './player-roster-row.styl'
 
 class PlayerRosterRow extends Player {
   render = () => {
-    const { playerMap, selected, isHosted, league } = this.props
+    const { playerMap, selected, isHosted, league, showBid } = this.props
 
     const pid = playerMap.get('pid')
     const isSelected = selected === pid
@@ -28,10 +28,9 @@ class PlayerRosterRow extends Player {
           tag: playerMap.get('tag'),
           extensions,
           league,
-          value,
-          bid
+          value
         })
-      : bid || value
+      : (showBid && bid) || value
 
     return (
       <div className={classNames.join(' ')}>

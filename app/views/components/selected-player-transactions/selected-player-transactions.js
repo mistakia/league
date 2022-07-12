@@ -23,7 +23,13 @@ export default class SelectedPlayerTransactions extends React.Component {
   }
 
   render = () => {
-    const { teams, maxTransaction, playerMap, league } = this.props
+    const {
+      teams,
+      maxTransaction,
+      playerMap,
+      league,
+      isBeforeExtensionDeadline
+    } = this.props
     const transactions = playerMap.get('transactions', new List())
     const loadingTransactions = playerMap.get('loadingTransactions', false)
 
@@ -69,14 +75,16 @@ export default class SelectedPlayerTransactions extends React.Component {
     }
 
     const extensions = playerMap.get('extensions', 0)
-    const extendedSalary = getExtensionAmount({
-      pos: playerMap.get('pos'),
-      tag: playerMap.get('tag'),
-      extensions,
-      league,
-      value: playerMap.get('value'),
-      bid: playerMap.get('bid')
-    })
+    const value = playerMap.get('value')
+    const extendedSalary = isBeforeExtensionDeadline
+      ? getExtensionAmount({
+          pos: playerMap.get('pos'),
+          tag: playerMap.get('tag'),
+          extensions,
+          league,
+          value
+        })
+      : value
 
     return (
       <div className='selected__player-transactions'>
@@ -127,5 +135,6 @@ SelectedPlayerTransactions.propTypes = {
   teams: PropTypes.object,
   maxTransaction: PropTypes.object,
   load: PropTypes.func,
-  league: PropTypes.object
+  league: PropTypes.object,
+  isBeforeExtensionDeadline: PropTypes.bool
 }
