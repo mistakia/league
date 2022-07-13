@@ -1,6 +1,6 @@
 export {
   gamelogsActions,
-  getPlayerGamelogsActions,
+  getPlayersGamelogsActions,
   getTeamGamelogsActions
 } from './actions'
 export { gamelogSagas } from './sagas'

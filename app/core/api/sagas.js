@@ -26,7 +26,7 @@ import {
   putTransitionTagActions
 } from '@core/rosters'
 import {
-  getPlayerGamelogsActions,
+  getPlayersGamelogsActions,
   getTeamGamelogsActions
 } from '@core/gamelogs'
 import {
@@ -39,7 +39,8 @@ import {
   postCutlistActions,
   getPlayerTransactionsActions,
   getBaselinesActions,
-  getPlayerProjectionsActions
+  getPlayerProjectionsActions,
+  getPlayerGamelogsActions
 } from '@core/players'
 import { getChartedPlaysActions, getTeamStatActions } from '@core/stats'
 import { getPlaysActions, getPlayStatsActions } from '@core/plays'
@@ -229,10 +230,10 @@ export const deleteTeams = fetch.bind(null, api.deleteTeams, deleteTeamsActions)
 export const getSources = fetch.bind(null, api.getSources, getSourcesActions)
 export const putSource = fetch.bind(null, api.putSource, putSourceActions)
 
-export const fetchPlayerGamelogs = fetch.bind(
+export const getPlayersGamelogs = fetch.bind(
   null,
-  api.getPlayerGamelogs,
-  getPlayerGamelogsActions
+  api.getPlayersGamelogs,
+  getPlayersGamelogsActions
 )
 export const fetchTeamGamelogs = fetch.bind(
   null,
@@ -339,4 +340,10 @@ export const getLeagueTeamStats = fetch.bind(
   null,
   api.getLeagueTeamStats,
   getLeagueTeamStatsActions
+)
+
+export const getPlayerGamelogs = fetch.bind(
+  null,
+  api.getPlayerGamelogs,
+  getPlayerGamelogsActions
 )

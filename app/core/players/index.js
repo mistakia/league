@@ -31,6 +31,7 @@ export {
   postCutlistActions,
   getPlayerTransactionsActions,
   getBaselinesActions,
-  getPlayerProjectionsActions
+  getPlayerProjectionsActions,
+  getPlayerGamelogsActions
 } from './actions'
 export { playerSagas, calculateValues, loadPlayers } from './sagas'

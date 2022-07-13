@@ -56,7 +56,7 @@ export {
   fetchWaivers,
   getWaiverReport,
   fetchScoreboard,
-  fetchPlayerGamelogs,
+  getPlayersGamelogs,
   fetchTeamGamelogs,
   fetchProps,
   getCutlist,
@@ -67,5 +67,6 @@ export {
   getPlayerTransactions,
   getBaselines,
   getPlayerProjections,
-  getLeagueTeamStats
+  getLeagueTeamStats,
+  getPlayerGamelogs
 } from './sagas'
