@@ -180,7 +180,7 @@ export const api = {
     const url = `${BASE_URL}/sources/${data.sourceId}`
     return { url, ...PUT(data) }
   },
-  getPlayerGamelogs() {
+  getPlayersGamelogs() {
     const url = `${BASE_URL}/stats/gamelogs/players`
     return { url }
   },
@@ -308,6 +308,10 @@ export const api = {
   },
   getPlayerProjections({ pid }) {
     const url = `${BASE_URL}/projections/${pid}`
+    return { url }
+  },
+  getPlayerGamelogs({ pid }) {
+    const url = `${BASE_URL}/players/${pid}/gamelogs`
     return { url }
   }
 }

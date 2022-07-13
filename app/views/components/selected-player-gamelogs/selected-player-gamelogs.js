@@ -6,6 +6,11 @@ import PlayerSelectedRow from '@components/player-selected-row'
 import PlayerSelectedRowHeader from '@components/player-selected-row-header'
 
 export default class SelectedPlayerGamelogs extends React.Component {
+  componentDidMount = () => {
+    const pid = this.props.playerMap.get('pid')
+    this.props.load(pid)
+  }
+
   render = () => {
     const { gamelogs, playerMap } = this.props
 
@@ -62,5 +67,6 @@ export default class SelectedPlayerGamelogs extends React.Component {
 
 SelectedPlayerGamelogs.propTypes = {
   gamelogs: PropTypes.array,
-  playerMap: ImmutablePropTypes.map
+  playerMap: ImmutablePropTypes.map,
+  load: PropTypes.func
 }

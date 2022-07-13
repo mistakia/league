@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getSelectedPlayer } from '@core/players'
+import { getSelectedPlayer, playerActions } from '@core/players'
 import { getGamelogsForSelectedPlayer } from '@core/stats'
 
 import SelectedPlayerGamelogs from './selected-player-gamelogs'
@@ -12,4 +12,11 @@ const mapStateToProps = createSelector(
   (playerMap, gamelogs) => ({ playerMap, gamelogs })
 )
 
-export default connect(mapStateToProps)(SelectedPlayerGamelogs)
+const mapDispatchToProps = {
+  load: playerActions.loadPlayerGamelogs
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(SelectedPlayerGamelogs)

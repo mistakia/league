@@ -118,4 +118,20 @@ router.get('/:pid', async (req, res) => {
   }
 })
 
+router.get('/:pid/gamelogs/?', async (req, res) => {
+  const { db, logger } = req.app.locals
+  try {
+    const { pid } = req.params
+    if (!pid) {
+      return res.status(400).send({ error: 'missing pid' })
+    }
+
+    const data = await db('gamelogs').where({ pid })
+    res.send(data)
+  } catch (error) {
+    logger(error)
+    res.status(500).send({ error: error.toString() })
+  }
+})
+
 export default router

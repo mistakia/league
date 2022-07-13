@@ -1,10 +1,16 @@
 import React from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 
 import PlayerSelectedRow from '@components/player-selected-row'
 import PlayerSelectedRowHeader from '@components/player-selected-row-header'
 
 export default class SelectedPlayerSeasonStats extends React.Component {
+  componentDidMount = () => {
+    const pid = this.props.playerMap.get('pid')
+    this.props.load(pid)
+  }
+
   render = () => {
     const { stats, pos } = this.props
     const years = []
@@ -42,5 +48,7 @@ export default class SelectedPlayerSeasonStats extends React.Component {
 
 SelectedPlayerSeasonStats.propTypes = {
   stats: PropTypes.object,
-  pos: PropTypes.string
+  pos: PropTypes.string,
+  playerMap: ImmutablePropTypes.map,
+  load: PropTypes.func
 }
