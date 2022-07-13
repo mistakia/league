@@ -1,13 +1,13 @@
 import { fork, takeLatest, select, call, put } from 'redux-saga/effects'
 
 import { appActions } from '@core/app'
-import { fetchPlayerGamelogs, fetchTeamGamelogs } from '@core/api'
+import { getPlayersGamelogs, fetchTeamGamelogs } from '@core/api'
 import { getPlayerGamelogs, getTeamGamelogs } from './selectors'
 import { gamelogsActions } from './actions'
 import Worker from 'workerize-loader?inline!../worker' // eslint-disable-line import/no-webpack-loader-syntax
 
 export function* load() {
-  yield fork(fetchPlayerGamelogs)
+  yield fork(getPlayersGamelogs)
   yield fork(fetchTeamGamelogs)
 }
 
@@ -31,9 +31,9 @@ export function* processTeamGamelogs() {
 //  WATCHERS
 // -------------------------------------
 
-export function* watchGetPlayerGamelogsFulfilled() {
+export function* watchGetPlayersGamelogsFulfilled() {
   yield takeLatest(
-    gamelogsActions.GET_PLAYER_GAMELOGS_FULFILLED,
+    gamelogsActions.GET_PLAYERS_GAMELOGS_FULFILLED,
     processPlayerGamelogs
   )
 }
@@ -56,5 +56,5 @@ export function* watchInitApp() {
 export const gamelogSagas = [
   fork(watchInitApp),
   fork(watchGetTeamGamelogsFulfilled),
-  fork(watchGetPlayerGamelogsFulfilled)
+  fork(watchGetPlayersGamelogsFulfilled)
 ]

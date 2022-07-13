@@ -1,7 +1,7 @@
 export const gamelogsActions = {
-  GET_PLAYER_GAMELOGS_FAILED: 'GET_PLAYER_GAMELOGS_FAILED',
-  GET_PLAYER_GAMELOGS_PENDING: 'GET_PLAYER_GAMELOGS_PENDING',
-  GET_PLAYER_GAMELOGS_FULFILLED: 'GET_PLAYER_GAMELOGS_FULFILLED',
+  GET_PLAYERS_GAMELOGS_FAILED: 'GET_PLAYERS_GAMELOGS_FAILED',
+  GET_PLAYERS_GAMELOGS_PENDING: 'GET_PLAYERS_GAMELOGS_PENDING',
+  GET_PLAYERS_GAMELOGS_FULFILLED: 'GET_PLAYERS_GAMELOGS_FULFILLED',
 
   GET_TEAM_GAMELOGS_FAILED: 'GET_TEAM_GAMELOGS_FAILED',
   GET_TEAM_GAMELOGS_PENDING: 'GET_TEAM_GAMELOGS_PENDING',
@@ -24,23 +24,23 @@ export const gamelogsActions = {
     }
   }),
 
-  getPlayerGamelogsFailed: (opts, error) => ({
-    type: gamelogsActions.GET_PLAYER_GAMELOGS_FAILED,
+  getPlayersGamelogsFailed: (opts, error) => ({
+    type: gamelogsActions.GET_PLAYERS_GAMELOGS_FAILED,
     payload: {
       opts,
       error
     }
   }),
 
-  getPlayerGamelogsPending: (opts) => ({
-    type: gamelogsActions.GET_PLAYER_GAMELOGS_PENDING,
+  getPlayersGamelogsPending: (opts) => ({
+    type: gamelogsActions.GET_PLAYERS_GAMELOGS_PENDING,
     payload: {
       opts
     }
   }),
 
-  getPlayerGamelogsFulfilled: (opts, data) => ({
-    type: gamelogsActions.GET_PLAYER_GAMELOGS_FULFILLED,
+  getPlayersGamelogsFulfilled: (opts, data) => ({
+    type: gamelogsActions.GET_PLAYERS_GAMELOGS_FULFILLED,
     payload: {
       opts,
       data
@@ -71,10 +71,10 @@ export const gamelogsActions = {
   })
 }
 
-export const getPlayerGamelogsActions = {
-  failed: gamelogsActions.getPlayerGamelogsFailed,
-  pending: gamelogsActions.getPlayerGamelogsPending,
-  fulfilled: gamelogsActions.getPlayerGamelogsFulfilled
+export const getPlayersGamelogsActions = {
+  failed: gamelogsActions.getPlayersGamelogsFailed,
+  pending: gamelogsActions.getPlayersGamelogsPending,
+  fulfilled: gamelogsActions.getPlayersGamelogsFulfilled
 }
 
 export const getTeamGamelogsActions = {
