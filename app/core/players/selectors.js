@@ -272,6 +272,17 @@ export function getFilteredPlayers(state) {
         return true
       }
 
+      if (
+        availability.includes('POTENTIAL FREE AGENT') &&
+        playerMap.get('tid')
+      ) {
+        const salary = playerMap.get('value')
+        const market_salary = playerMap.getIn(['market_salary', '0'], 0)
+        if (salary - market_salary > 0) {
+          return true
+        }
+      }
+
       return false
     })
   }
