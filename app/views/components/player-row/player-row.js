@@ -12,6 +12,7 @@ import { Player, connect } from '@components/player'
 import IconButton from '@components/icon-button'
 import { constants } from '@common'
 import PlayerLabel from '@components/player-label'
+import PlayerTag from '@components/player-tag'
 
 import './player-row.styl'
 
@@ -579,7 +580,7 @@ class PlayerRow extends Player {
       <div className={classNames.join(' ')}>
         <div className='player__row-lead'>
           <div className='player__row-index'>{index + 1}</div>
-          <div className='player__row-action'>
+          <div className='player__row-action watchlist'>
             <PlayerWatchlistAction pid={pid} />
           </div>
           <div className='player__row-pos'>
@@ -593,7 +594,12 @@ class PlayerRow extends Player {
             <Team team={team} />
           </div>
           {isLoggedIn && (
-            <div className='player__row-action'>
+            <div className='player__row-tag'>
+              <PlayerTag tag={playerMap.get('tag')} />
+            </div>
+          )}
+          {isLoggedIn && (
+            <div className='player__row-action actions'>
               {Boolean(isHosted) && (
                 <IconButton
                   small
