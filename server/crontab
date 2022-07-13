@@ -142,6 +142,9 @@
 
 ################################### Backup ########################################
 
+## Backup User Data (At minute 0 in every month from June through August)
+0 * * 6-8 * /bin/bash /root/league/scripts/mysql-backup.sh &>> /var/log/league/league-mysql-backup.log
+
 ## Backup User Data (At every 15th minute in every month from September through December.)
 */15 * * 9-12 * /bin/bash /root/league/scripts/mysql-backup.sh &>> /var/log/league/league-mysql-backup.log
 
