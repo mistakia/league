@@ -340,10 +340,11 @@ export default class PlayersPage extends React.Component {
         <div className='players__header'>
           <div className='player__row-lead'>
             <div className='player__row-index' />
-            <div className='player__row-action' />
+            <div className='player__row-action watchlist' />
             <div className='player__row-pos' />
             <div className='player__row-name'>Name</div>
-            {isLoggedIn && <div className='player__row-action' />}
+            {isLoggedIn && <div className='player__row-tag' />}
+            {isLoggedIn && <div className='player__row-action actions' />}
             {constants.season.week > 0 && (
               <div className='player__row-opponent'>Opp</div>
             )}

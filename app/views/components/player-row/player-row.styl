@@ -87,6 +87,11 @@ $height = 30px
   width 50px
   display flex
 
+.player__row-tag
+  flex 0 0 45px
+  width 45px
+  display flex
+
 .row__action
   flex 0 0 24px
   cursor pointer
@@ -112,12 +117,22 @@ $height = 30px
 
 
 @media (min-width 601px)
+  .players__header .player__row-action.actions
+    display none
+
   .player__row
-    .player__row-action button
+    .player__row-action.actions
+      display none
+
     .player__watchlist-action
       opacity 0
 
     .player__watchlist-action.selected
-    &:hover .player__row-action button
     &:hover .player__watchlist-action
       opacity 1
+
+    &:hover
+      .player__row-action.actions
+        display flex
+      .player__row-tag
+        display none
