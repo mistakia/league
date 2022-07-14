@@ -8,7 +8,8 @@ export {
   getLeagueEvents,
   isBeforeExtensionDeadline,
   isBeforeTransitionStart,
-  isRestrictedFreeAgencyPeriod
+  isRestrictedFreeAgencyPeriod,
+  isBeforeTransitionEnd
 } from './selectors'
 
 export { leaguesReducer } from './reducer'
