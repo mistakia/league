@@ -5,7 +5,7 @@ import { createSelector } from 'reselect'
 import { getApp } from '@core/app'
 import { getCurrentTeam } from '@core/teams'
 import { getCurrentPlayers, getCurrentTeamRoster } from '@core/rosters'
-import { getCurrentLeague } from '@core/leagues'
+import { getCurrentLeague, isBeforeTransitionEnd } from '@core/leagues'
 import { getWaiverPlayersForCurrentTeam } from '@core/waivers'
 import { getPoachPlayersForCurrentLeague } from '@core/poaches'
 import { getTransitionPlayers, getCutlistPlayers } from '@core/players'
@@ -28,6 +28,7 @@ const mapStateToProps = createSelector(
   getCurrentTeamRoster,
   getWaiverPlayersForCurrentTeam,
   getPoachPlayersForCurrentLeague,
+  isBeforeTransitionEnd,
   (
     app,
     transitionPlayers,
@@ -37,7 +38,8 @@ const mapStateToProps = createSelector(
     league,
     roster,
     waivers,
-    poaches
+    poaches,
+    isBeforeTransitionEnd
   ) => ({
     transitionPlayers,
     teamId: app.teamId,
@@ -47,7 +49,8 @@ const mapStateToProps = createSelector(
     league,
     roster,
     waivers,
-    poaches
+    poaches,
+    isBeforeTransitionEnd
   })
 )
 

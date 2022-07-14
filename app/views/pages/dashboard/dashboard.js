@@ -35,7 +35,8 @@ export default function DashboardPage() {
     waivers,
     poaches,
     teamId,
-    roster
+    roster,
+    isBeforeTransitionEnd
   } = this.props
 
   const notices = []
@@ -181,7 +182,7 @@ export default function DashboardPage() {
               {notices}
             </Grid>
           ) : null}
-          {Boolean(transitionPlayers.size) && (
+          {isBeforeTransitionEnd && Boolean(transitionPlayers.size) && (
             <Grid item xs={12}>
               <DashboardPlayersTable
                 title='Restricted Free Agents'
