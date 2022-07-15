@@ -298,7 +298,30 @@ describe('API /teams - deactivate', function () {
     })
 
     it('player previously poached', async () => {
-      // TODO
+      MockDate.set(start.add('1', 'month').day(4).toISOString())
+      const leagueId = 1
+      const player = await selectPlayer()
+
+      await addPlayer({
+        teamId: 1,
+        leagueId,
+        userId: 1,
+        player,
+        slot: constants.slots.BENCH,
+        transaction: constants.transactions.POACHED,
+        value: 2
+      })
+
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/deactivate')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          pid: player.pid,
+          leagueId
+        })
+
+      await error(request, 'player can not be deactivated once poached')
     })
 
     it('player previously activated', async () => {
