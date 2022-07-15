@@ -1,13 +1,12 @@
 .draft
   display flex
   height 100%
+  flex-direction column
 
 .draft__selected
-  flex 1
-  background white
+  flex 0 0 auto
+  background lighten($backgroundColor, 80%)
   display flex
-  border-bottom 1px solid $borderColor
-  max-height 180px
 
 .draft__selected-head
   flex 0 0 auto
@@ -79,24 +78,32 @@
   min-height 0
 
 .draft__side
-  flex 1
+  flex 0 0 auto
+  height 120px
   display flex
   flex-direction column
+  width 100%
 
 .draft__side-top
   flex 0 0 auto
 
 .draft__side-top-pick
-  padding 16px
-  background darken($backgroundColor, 7%)
-  border-top 1px solid $borderColor
-  border-bottom 1px solid $borderColor
+  padding 4px 16px 8px
+  font-size 11px
+  margin 0 auto
 
 .draft__side-top-pick-title
-  font-size 24px
-  padding-bottom 8px
+  font-size 12px
+  padding-bottom 4px
 
 .draft__side-main
   flex 9
-  overflow-y scroll
-  padding 16px
+  padding 8px 16px
+  overflow hidden
+  overflow-x scroll
+  display flex
+  flex-direction row
+
+ @media (max-width 1000px)
+   .draft__main-board-pos:not(.overall)
+     display none
