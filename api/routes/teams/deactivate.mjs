@@ -108,7 +108,6 @@ router.post('/?', async (req, res) => {
       })
     }
 
-
     // if signed through waivers, make sure player had no competing bids
     if (firstTransaction.waiverid) {
       const waivers = await db('waivers').where({

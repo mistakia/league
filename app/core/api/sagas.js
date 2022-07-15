@@ -65,7 +65,7 @@ import {
 } from '@core/trade'
 import { putLeagueActions } from '@core/leagues'
 import { getSourcesActions, putSourceActions } from '@core/sources'
-import { putSettingActions, putBaselinesActions } from '@core/settings'
+import { putSettingActions } from '@core/settings'
 import { postPoachActions, putPoachActions } from '@core/poaches'
 import {
   postWaiverActions,
@@ -253,11 +253,6 @@ export const delProjection = fetch.bind(
 )
 
 export const putSetting = fetch.bind(null, api.putSetting, putSettingActions)
-export const putBaselines = fetch.bind(
-  null,
-  api.putBaselines,
-  putBaselinesActions
-)
 
 export const getTeamStats = fetch.bind(
   null,

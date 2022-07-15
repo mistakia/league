@@ -30,7 +30,6 @@ import { auctionActions } from '@core/auction'
 import { getAllPlayers, getPlayers } from './selectors'
 import { leagueActions, getCurrentLeague } from '@core/leagues'
 import { sourceActions, getSources } from '@core/sources'
-import { settingActions } from '@core/settings'
 import { getRostersForCurrentLeague, rosterActions } from '@core/rosters'
 import Worker from 'workerize-loader?inline!../worker' // eslint-disable-line import/no-webpack-loader-syntax
 
@@ -152,19 +151,6 @@ export function* putWatchlist({ payload }) {
   yield call(putSetting, params)
 }
 
-export function* updateBaseline({ payload }) {
-  const baselines = (yield select(getPlayers)).get('baselines').toJS()
-  const { vbaseline } = yield select(getApp)
-  const baseline = {}
-  for (const b in baselines['0']) {
-    baseline[b] = baselines['0'][b][vbaseline]
-  }
-
-  baseline[payload.position] = payload.value
-  yield putResolve(settingActions.updateBaselines(baseline))
-  yield put(settingActions.update({ type: 'vbaseline', value: 'manual' }))
-}
-
 export function* fetchCutlist() {
   const { teamId } = yield select(getApp)
   yield call(getCutlist, { teamId })
@@ -254,10 +240,6 @@ export function* watchToggleWatchlist() {
   yield takeLatest(playerActions.TOGGLE_WATCHLIST, putWatchlist)
 }
 
-export function* watchUpdateBaseline() {
-  yield takeLatest(playerActions.UPDATE_PLAYER_BASELINE, updateBaseline)
-}
-
 export function* watchPutRostersFulfilled() {
   yield takeLatest(rosterActions.PUT_ROSTERS_FULFILLED, calculateValues)
 }
@@ -322,7 +304,6 @@ export const playerSagas = [
   fork(watchPutSourceFulfilled),
   fork(watchDeleteProjection),
   fork(watchToggleWatchlist),
-  fork(watchUpdateBaseline),
   fork(watchAuctionProcessed),
 
   fork(watchSearchPlayers),

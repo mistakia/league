@@ -565,14 +565,10 @@ class PlayerRow extends Player {
     const projectionView = isRestOfSeasonView || isSeasonView || isWeekView
 
     if (isWeekView || isSeasonView) {
-      const starterBaselinePlayerId = baselines.getIn([
-        `${week}`,
-        pos,
-        'default'
-      ])
+      const baseline_pid = baselines.getIn([`${week}`, pos, 'default'])
 
-      if (pid === starterBaselinePlayerId) {
-        classNames.push('starter__baseline')
+      if (pid === baseline_pid) {
+        classNames.push('baseline__player')
       }
     }
 

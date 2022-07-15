@@ -14,7 +14,6 @@ const initialState = new Record({
   isUpdating: false,
   authError: null,
   email: null,
-  vbaseline: 'default',
   text: 0,
   voice: 0,
   teamIds: new List(),
@@ -47,7 +46,6 @@ export function appReducer(state = initialState(), { payload, type }) {
           ? payload.data.teams[0].uid
           : undefined,
         userId: payload.data.user.id,
-        vbaseline: payload.data.user.vbaseline,
         email: payload.data.user.eamil,
         text: payload.data.user.text,
         voice: payload.data.user.voice,

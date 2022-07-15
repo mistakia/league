@@ -27,7 +27,6 @@ export {
   postMatchups,
   getSources,
   getTeamStats,
-  putBaselines,
   postRejectTrade,
   putRoster,
   postActivate,
