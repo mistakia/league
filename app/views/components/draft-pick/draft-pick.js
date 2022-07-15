@@ -3,8 +3,7 @@ import dayjs from 'dayjs'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
-import Team from '@components/team'
-import Position from '@components/position'
+import TeamName from '@components/team-name'
 
 import './draft-pick.styl'
 
@@ -23,6 +22,9 @@ export default class DraftPick extends React.Component {
       classNames.push('user')
     }
 
+    const pos = playerMap.get('pos')
+    if (pos) classNames.push(pos)
+
     return (
       <div className={classNames.join(' ')}>
         <div className='draft__pick-num'>
@@ -31,13 +33,14 @@ export default class DraftPick extends React.Component {
         <div className='draft__pick-main'>
           {Boolean(playerMap.get('pid')) && (
             <div className='draft__pick-player'>
-              <span className='draft__pick-player-name'>
-                {playerMap.get('fname')} {playerMap.get('lname')}
-              </span>
-              <Team team={playerMap.get('team')} />
+              <div className='draft__pick-player-name'>
+                {playerMap.get('lname')}
+              </div>
+              <div className='draft__pick-player-name'>
+                {playerMap.get('fname')}
+              </div>
             </div>
           )}
-          <div className='draft__pick-team'>{team.name}</div>
           {isActive && !pick.pid && (
             <div className='draft__pick-window active'>On the clock</div>
           )}
@@ -46,12 +49,12 @@ export default class DraftPick extends React.Component {
             Boolean(pick.pick) &&
             Boolean(pick.draftWindow) && (
               <div className='draft__pick-window'>
-                On the clock {dayjs().to(pick.draftWindow)}
+                {isUser && dayjs().to(pick.draftWindow)}
               </div>
             )}
-        </div>
-        <div className='draf__pick-pos'>
-          <Position pos={playerMap.get('pos')} />
+          <div className='draft__pick-team'>
+            <TeamName tid={team.uid} abbrv />
+          </div>
         </div>
       </div>
     )

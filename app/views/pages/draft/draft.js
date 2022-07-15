@@ -244,10 +244,14 @@ export default function DraftPage() {
 
   const body = (
     <div className='draft'>
+      <div className='draft__side'>
+        <div className='draft__side-main'>{pickItems}</div>
+        <div className='draft__side-top'>{draftInfo}</div>
+      </div>
       <div className='draft__main'>
         {p.get('pid') && selected}
         <div className='draft__main-board'>
-          <div className='draft__main-board-pos'>
+          <div className='draft__main-board-pos overall'>
             <div className='draft__main-board-pos-head'>Overall</div>
             <div className='draft__main-board-pos-body'>
               <AutoSizer>
@@ -328,10 +332,6 @@ export default function DraftPage() {
             </div>
           </div>
         </div>
-      </div>
-      <div className='draft__side'>
-        <div className='draft__side-top'>{draftInfo}</div>
-        <div className='draft__side-main'>{pickItems}</div>
       </div>
     </div>
   )
