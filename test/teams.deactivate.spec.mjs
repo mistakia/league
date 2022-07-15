@@ -325,7 +325,46 @@ describe('API /teams - deactivate', function () {
     })
 
     it('player previously activated', async () => {
-      // TODO
+      MockDate.set(start.add('1', 'month').day(4).toISOString())
+      const leagueId = 1
+      const userId = 1
+      const teamId = 1
+      const player = await selectPlayer()
+
+      await knex('transactions').insert({
+        userId,
+        tid: teamId,
+        lid: leagueId,
+        pid: player.pid,
+        type: constants.transactions.PRACTICE_ADD,
+        value: 2,
+        year: constants.season.year,
+        timestamp: Math.round(Date.now() / 1000) - 10
+      })
+
+      await addPlayer({
+        teamId,
+        leagueId,
+        userId,
+        player,
+        slot: constants.slots.BENCH,
+        transaction: constants.transactions.ROSTER_ACTIVATE,
+        value: 2
+      })
+
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/deactivate')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          pid: player.pid,
+          leagueId
+        })
+
+      await error(
+        request,
+        'player can not be deactivated once previously activated'
+      )
     })
 
     it('player on roster for more than 48 hours', async () => {
