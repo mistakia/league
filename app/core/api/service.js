@@ -200,10 +200,6 @@ export const api = {
     const url = `${BASE_URL}/me`
     return { url, ...PUT(data) }
   },
-  putBaselines(data) {
-    const url = `${BASE_URL}/me/baselines`
-    return { url, ...PUT(data) }
-  },
   getChartedPlays(params) {
     const url = `${BASE_URL}/plays/charted?${queryString.stringify(params)}`
     return { url }
