@@ -211,6 +211,11 @@ describe('API /teams - deactivate', function () {
   })
 
   describe('errors', function () {
+    before(async function () {
+      this.timeout(60 * 1000)
+      await league(knex)
+    })
+
     it('not logged in', async () => {
       const request = chai.request(server).post('/api/teams/1/deactivate')
       await notLoggedIn(request)
@@ -308,15 +313,28 @@ describe('API /teams - deactivate', function () {
       MockDate.set(start.add('1', 'month').day(4).toISOString())
       const leagueId = 1
       const player = await selectPlayer()
-      await knex('waivers').insert({
+      const timestamp = Math.round(Date.now() / 1000)
+
+      const result = await knex('waivers').insert({
         tid: 1,
         userid: 1,
         lid: leagueId,
         pid: player.pid,
         po: 9999,
-        submitted: Math.round(Date.now() / 1000),
+        submitted: timestamp,
         bid: 1,
         type: constants.waivers.FREE_AGENCY
+      })
+
+      await addPlayer({
+        teamId: 1,
+        leagueId,
+        userId: 1,
+        player,
+        slot: constants.slots.BENCH,
+        transaction: constants.transactions.ROSTER_ADD,
+        value: 1,
+        waiverid: result[0]
       })
 
       await knex('waivers').insert({
@@ -325,7 +343,7 @@ describe('API /teams - deactivate', function () {
         lid: leagueId,
         pid: player.pid,
         po: 9999,
-        submitted: Math.round(Date.now() / 1000),
+        submitted: timestamp,
         bid: 0,
         type: constants.waivers.FREE_AGENCY
       })
