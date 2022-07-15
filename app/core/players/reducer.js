@@ -1,7 +1,6 @@
 import dayjs from 'dayjs'
 import { Map, List, Set } from 'immutable'
 
-import { settingActions } from '@core/settings'
 import { appActions } from '@core/app'
 import { playerActions } from './actions'
 import { createPlayer } from './player'
@@ -110,11 +109,11 @@ export function playersReducer(state = initialState, { payload, type }) {
     case playerActions.SET_PLAYER_VALUES:
       return state.withMutations((state) => {
         for (const week in payload.baselines) {
-          for (const b in payload.baselines[week]) {
-            for (const type in payload.baselines[week][b]) {
+          for (const position in payload.baselines[week]) {
+            for (const baseline_type in payload.baselines[week][position]) {
               state.setIn(
-                ['baselines', week, b, type],
-                payload.baselines[week][b][type].pid
+                ['baselines', week, position, baseline_type],
+                payload.baselines[week][position][baseline_type].pid
               )
             }
           }
@@ -236,42 +235,8 @@ export function playersReducer(state = initialState, { payload, type }) {
         players.merge({
           orderBy: `vorp.${week}`
         })
-
-        if (payload.data.user.qbb) {
-          players.setIn(['baselines', 'QB', 'manual'], payload.data.user.qbb)
-        }
-
-        if (payload.data.user.rbb) {
-          players.setIn(['baselines', 'RB', 'manual'], payload.data.user.rbb)
-        }
-
-        if (payload.data.user.wrb) {
-          players.setIn(['baselines', 'WR', 'manual'], payload.data.user.wrb)
-        }
-
-        if (payload.data.user.teb) {
-          players.setIn(['baselines', 'TE', 'manual'], payload.data.user.teb)
-        }
       })
 
-    case settingActions.SET_BASELINES:
-    case settingActions.PUT_BASELINES_FULFILLED:
-      return state.withMutations((players) => {
-        for (const pos in payload.data) {
-          players.setIn(['baselines', pos, 'manual'], payload.data[pos])
-        }
-      })
-
-    /* case settingActions.SET_SETTING:
-     * case settingActions.PUT_SETTING_FULFILLED: {
-     *   if (payload.opts.type !== 'vbaseline') {
-     *     return state
-     *   }
-     *   const value = payload.data ? payload.data.value : payload.opts.value
-     *   const week = isOffseason ? '0' : 'ros'
-     *   return state.merge({ orderBy: `vorp.${week}.${value}` })
-     * }
-     */
     case playerActions.GET_CUTLIST_FULFILLED:
       return state.merge({
         cutlist: new List(payload.data)

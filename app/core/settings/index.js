@@ -1,6 +1,2 @@
-export {
-  settingActions,
-  putSettingActions,
-  putBaselinesActions
-} from './actions'
+export { settingActions, putSettingActions } from './actions'
 export { settingSagas } from './sagas'

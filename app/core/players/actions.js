@@ -16,8 +16,6 @@ export const playerActions = {
   SET_PLAYER_STATS: 'SET_PLAYER_STATS',
   SET_PROJECTED_CONTRIBUTION: 'SET_PROJECTED_CONTRIBUTION',
 
-  UPDATE_PLAYER_BASELINE: 'UPDATE_PLAYER_BASELINE',
-
   FETCH_PLAYERS_FAILED: 'FETCH_PLAYERS_FAILED',
   FETCH_PLAYERS_FULFILLED: 'FETCH_PLAYERS_FULFILLED',
   FETCH_PLAYERS_PENDING: 'FETCH_PLAYERS_PENDING',
@@ -118,14 +116,6 @@ export const playerActions = {
     type: playerActions.SET_PROJECTED_CONTRIBUTION,
     payload: {
       players
-    }
-  }),
-
-  updateBaseline: ({ position, value }) => ({
-    type: playerActions.UPDATE_PLAYER_BASELINE,
-    payload: {
-      position,
-      value
     }
   }),
 
