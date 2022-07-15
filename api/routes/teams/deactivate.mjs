@@ -83,9 +83,23 @@ router.post('/?', async (req, res) => {
         .send({ error: 'player has exceeded 48 hours on active roster' })
     }
 
-    // make sure player he has not been previously activated
+    const transactionsSinceFA = await getTransactionsSinceFreeAgent({
+      lid: leagueId,
+      pid
+    })
+
+    // make sure player has not been poached since the last time they were a free agent
     if (
-      transactions.find(
+      transactionsSinceFA.find((t) => t.type === constants.transactions.POACHED)
+    ) {
+      return res
+        .status(400)
+        .send({ error: 'player can not be deactivated once poached' })
+    }
+
+    // make sure player he has not been previously activated since they were a free agent
+    if (
+      transactionsSinceFA.find(
         (t) => t.type === constants.transactions.ROSTER_ACTIVATE
       )
     ) {
@@ -94,18 +108,6 @@ router.post('/?', async (req, res) => {
       })
     }
 
-    // make sure player has not been poached since the last time they were a free agent
-    const transactionsSinceFA = await getTransactionsSinceFreeAgent({
-      lid: leagueId,
-      pid
-    })
-    if (
-      transactionsSinceFA.find((t) => t.type === constants.transactions.POACHED)
-    ) {
-      return res
-        .status(400)
-        .send({ error: 'player can not be deactivated once poached' })
-    }
 
     // if signed through waivers, make sure player had no competing bids
     if (firstTransaction.waiverid) {
