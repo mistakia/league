@@ -9,7 +9,8 @@ export default async function ({
   slot = constants.slots.BENCH,
   transaction = constants.transactions.ROSTER_ADD,
   value = 0,
-  tag = constants.tags.REGULAR
+  tag = constants.tags.REGULAR,
+  waiverid
 }) {
   const rosters = await db('rosters')
     .where({
@@ -28,7 +29,8 @@ export default async function ({
     type: transaction,
     value,
     year: constants.season.year,
-    timestamp: Math.round(Date.now() / 1000)
+    timestamp: Math.round(Date.now() / 1000),
+    waiverid
   })
 
   await db('rosters_players').insert({
