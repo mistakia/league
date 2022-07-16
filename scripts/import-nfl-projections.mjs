@@ -22,7 +22,7 @@ const getURL = (week, offset) =>
         offset + 1
       }`
 
-const runOne = async (week) => {
+const runOne = async (week = 0) => {
   const missing = []
   const items = []
 
