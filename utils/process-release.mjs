@@ -65,7 +65,7 @@ export default async function ({
   }
 
   // verify player was not poached this offseason
-  if (!constants.season.isRegularSeason) {
+  if (constants.season.isOffseason) {
     const poaches = await db('poaches')
       .where({ pid: release_pid, lid, tid, succ: 1 })
       .orderBy('processed', 'desc')
@@ -75,6 +75,19 @@ export default async function ({
       if (dayjs.unix(poach.processed).isAfter(constants.season.offseason)) {
         throw new Error('player was poached')
       }
+    }
+
+    const transition_bids = await db('transition_bids')
+      .where({
+        year: constants.season.year,
+        pid: release_pid,
+        succ: 1,
+        tid
+      })
+      .whereNot({ player_tid: tid })
+
+    if (transition_bids.length) {
+      // TODO issue league salary penalty
     }
   }
 

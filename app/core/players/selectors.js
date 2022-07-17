@@ -450,6 +450,7 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
     protected: false,
     active: false,
     bid: null,
+    release_penalty: 0,
     tagged: {
       rookie: false,
       transition: false,
@@ -571,6 +572,17 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
           !leaguePoaches.has(playerId)
         ) {
           status.eligible.protect = true
+        }
+      } else {
+        // is active player
+        if (constants.season.isOffseason) {
+          // TODO if offseason and player was poached this offseason
+
+          // if offseason and player was acquired during RFA from another team
+          const rosterRec = getCurrentTeamRosterRecord(state)
+          if (rosterRec.acquired_rfa_pids.includes(playerId)) {
+            status.release_penalty = playerMap.get('value')
+          }
         }
       }
 

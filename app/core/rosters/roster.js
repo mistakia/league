@@ -9,7 +9,8 @@ export const Roster = new Record({
   penalty: null,
   last_updated: null,
   players: new List(),
-  lineups: new Map()
+  lineups: new Map(),
+  acquired_rfa_pids: new List()
 })
 
 export function createRoster(roster) {
@@ -17,8 +18,17 @@ export function createRoster(roster) {
     return
   }
 
-  const { tid, lid, week, year, last_updated, players, lineups, penalty } =
-    roster
+  const {
+    tid,
+    lid,
+    week,
+    year,
+    last_updated,
+    players,
+    lineups,
+    penalty,
+    acquired_rfa_pids
+  } = roster
 
   return new Roster({
     isPending: false,
@@ -29,6 +39,7 @@ export function createRoster(roster) {
     week,
     year,
     last_updated,
-    penalty
+    penalty,
+    acquired_rfa_pids
   })
 }

@@ -57,6 +57,21 @@ export default async function ({ lid, userId }) {
       const starter_pids = lineupStarters.map((l) => l.pid)
       roster.lineups[lineup.week] = { total: lineup.total, starter_pids }
     }
+
+    // TODO add poaches
+
+    roster.acquired_rfa_pids = []
+    if (constants.season.isOffseason) {
+      const result = await db('transition_bids')
+        .select('pid')
+        .where({
+          year: constants.season.year,
+          succ: 1,
+          tid: roster.tid
+        })
+        .whereNot({ player_tid: roster.tid })
+      roster.acquired_rfa_pids = result.map((p) => p.pid)
+    }
   }
 
   // include team restricted free agency bid

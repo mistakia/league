@@ -51,6 +51,7 @@ router.get('/?', async (req, res) => {
   }
 })
 
+// used to determine if player is on release waivers
 router.get('/release', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
