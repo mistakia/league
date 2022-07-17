@@ -2119,6 +2119,24 @@ CREATE TABLE `keeptradecut_rankings` (
   UNIQUE KEY `player_value` (`pid`,`d`,`qb`,`type`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `league_salary_penalty`
+--
+
+DROP TABLE IF EXISTS `league_salary_penalty`;
+
+CREATE TABLE `league_salary_penalty` (
+  `pid` varchar(7) NOT NULL,
+  `transaction_id` int(11) NOT NULL,
+  `tid` int(5) NOT NULL,
+  `year` int(4) NOT NULL,
+  `amount` int(4) NOT NULL,
+  `reason` text DEFAULT NULL,
+  UNIQUE KEY `penalty` (`transaction_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

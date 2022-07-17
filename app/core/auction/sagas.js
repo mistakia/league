@@ -54,7 +54,10 @@ export function* optimize() {
     },
     value: {
       // TODO - adjust based on bench depth
-      max: Math.min(currentPlayers.roster.availableCap, league.cap * 0.8)
+      max: Math.min(
+        currentPlayers.roster.availableSalarySpace,
+        league.cap * 0.8
+      )
     }
   }
 

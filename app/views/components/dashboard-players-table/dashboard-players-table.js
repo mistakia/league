@@ -84,7 +84,8 @@ export default class DashboardPlayersTable extends React.Component {
       reorderCutlist,
       leadColumn = '',
       limit,
-      isTransition
+      isTransition,
+      penalty
     } = this.props
 
     const { isOffseason, isRegularSeason } = constants.season
@@ -185,12 +186,17 @@ export default class DashboardPlayersTable extends React.Component {
     const week = Math.max(constants.season.week, 1)
 
     let summary
-    if (limit) {
+    if (limit || penalty) {
       const space = limit - items.length
       summary = (
         <div className='section__summary'>
           <div className='section__summary-item'>Rostered: {items.length}</div>
           <div className='section__summary-item'>Space: {space}</div>
+          {Boolean(penalty) && (
+            <div className='section__summary-item salary__penalty'>
+              Salary Penalty: ${penalty}
+            </div>
+          )}
         </div>
       )
     }
@@ -291,5 +297,6 @@ DashboardPlayersTable.propTypes = {
   total: ImmutablePropTypes.list,
   cutlist: ImmutablePropTypes.list,
   reorderCutlist: PropTypes.func,
-  isTransition: PropTypes.bool
+  isTransition: PropTypes.bool,
+  penalty: PropTypes.number
 }

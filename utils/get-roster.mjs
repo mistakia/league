@@ -1,6 +1,8 @@
 import { uniqBy, constants } from '#common'
 import db from '#db'
 
+import getRosterPenalty from './get-roster-penalty.mjs'
+
 export default async function ({
   tid,
   week = constants.season.week,
@@ -8,13 +10,15 @@ export default async function ({
 }) {
   const rows = await db('rosters').where({ tid, year, week })
   const roster_row = rows[0]
+
+  roster_row.penalty = await getRosterPenalty({ tid, year })
+
   const players = await db('rosters_players')
     .leftJoin('transactions', 'rosters_players.pid', 'transactions.pid')
     .where('rid', roster_row.uid)
     .where('transactions.tid', tid)
     .orderBy('transactions.timestamp', 'desc')
     .orderBy('transactions.uid', 'desc')
-
   roster_row.players = uniqBy(players, 'pid')
 
   if (week === 0) {

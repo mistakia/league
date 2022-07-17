@@ -22,7 +22,7 @@ const mapStateToProps = createSelector(
 
     const list = rosters.map((r) => {
       const team = teams.find((t) => t.uid === r.tid, null, {})
-      return { uid: r.tid, cap: r.availableCap, name: team.name }
+      return { uid: r.tid, cap: r.availableSalarySpace, name: team.name }
     })
     const team = list.find((t) => t.uid === app.teamId) || {}
     const sorted = list.sort((a, b) => b.cap - a.cap)

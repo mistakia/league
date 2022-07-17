@@ -210,7 +210,7 @@ router.put('/:poachId', async (req, res) => {
     const playerPoachValue = tran.value + 2
     if (
       !constants.season.isRegularSeason &&
-      roster.availableCap - playerPoachValue < 0
+      roster.availableSalarySpace - playerPoachValue < 0
     ) {
       return res.status(400).send({ error: 'not enough available cap' })
     }

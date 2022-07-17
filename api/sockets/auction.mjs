@@ -180,9 +180,9 @@ export default class Auction {
       return
     }
 
-    if (r.availableCap - value < 0) {
+    if (r.availableSalarySpace - value < 0) {
       this._startBidTimer()
-      this.logger('no available cap space')
+      this.logger('no available salary space')
       this.reply(userid, 'exceeds salary limit')
       return
     }
@@ -204,7 +204,7 @@ export default class Auction {
 
     const team = this._teams.find((t) => t.uid === tid)
     team.availableSpace = team.availableSpace - 1
-    const newCap = (team.cap = r.availableCap - value)
+    const newCap = (team.cap = r.availableSalarySpace - value)
     try {
       await db('teams').where({ uid: tid }).update('cap', newCap)
     } catch (err) {
@@ -360,7 +360,7 @@ export default class Auction {
     }
 
     // make sure bid is within budget
-    if (value > r.availableCap) {
+    if (value > r.availableSalarySpace) {
       this.reply(userid, 'exceeds salary limit')
       return
     }
@@ -421,7 +421,7 @@ export default class Auction {
       const roster = await getRoster({ tid: team.uid })
       const r = new Roster({ roster, league: this._league })
       team.availableSpace = r.availableSpace
-      team.cap = r.availableCap
+      team.cap = r.availableSalarySpace
     }
   }
 

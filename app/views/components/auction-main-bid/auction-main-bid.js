@@ -26,7 +26,7 @@ export default class AuctionMainBid extends React.Component {
       return false
     }
 
-    if (value > this.props.availableCap) {
+    if (value > this.props.availableSalarySpace) {
       return false
     }
 
@@ -45,7 +45,7 @@ export default class AuctionMainBid extends React.Component {
       return
     }
 
-    if (value && value > this.props.availableCap) {
+    if (value && value > this.props.availableSalarySpace) {
       return
     }
 
@@ -111,7 +111,7 @@ export default class AuctionMainBid extends React.Component {
       isComplete,
       isLocked,
       isEligible,
-      isAboveCap,
+      exceedsSalarySpace,
       nominated_pid,
       isNominating,
       selected,
@@ -142,7 +142,7 @@ export default class AuctionMainBid extends React.Component {
     } else if (nominated_pid) {
       if (isWinningBid) {
         action = <Button disabled>Winning Bid</Button>
-      } else if (isAboveCap) {
+      } else if (exceedsSalarySpace) {
         action = (
           <Button disabled text>
             Exceeded CAP
@@ -244,7 +244,7 @@ export default class AuctionMainBid extends React.Component {
 
 AuctionMainBid.propTypes = {
   bid: PropTypes.func,
-  availableCap: PropTypes.number,
+  availableSalarySpace: PropTypes.number,
   nominated_pid: PropTypes.string,
   bidValue: PropTypes.number,
   showNotification: PropTypes.func,
@@ -254,7 +254,7 @@ AuctionMainBid.propTypes = {
   isComplete: PropTypes.bool,
   isLocked: PropTypes.bool,
   isEligible: PropTypes.bool,
-  isAboveCap: PropTypes.bool,
+  exceedsSalarySpace: PropTypes.bool,
   isNominating: PropTypes.bool,
   isCommish: PropTypes.bool,
   nominatingTeamId: PropTypes.number,

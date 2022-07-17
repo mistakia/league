@@ -34,7 +34,9 @@ export default async function (knex) {
       pos: player.pos1,
       rid: roster.uid
     })
-    const value = Math.floor(Math.random() * Math.min(r.availableCap, 60))
+    const value = Math.floor(
+      Math.random() * Math.min(r.availableSalarySpace, 60)
+    )
     await knex('transactions').insert([
       {
         userid: roster.tid,

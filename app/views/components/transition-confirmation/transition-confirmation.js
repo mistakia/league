@@ -62,7 +62,7 @@ export default class TransitionConfirmation extends React.Component {
   }
 
   getMaxBid = () => {
-    const availableSalary = this.props.team.roster.availableCap
+    const { availableSalarySpace } = this.props.team.roster
     const { playerMap, cutlistTotalSalary } = this.props
     const value = playerMap.get('value', 0)
     const bid = playerMap.get('bid', 0)
@@ -81,7 +81,7 @@ export default class TransitionConfirmation extends React.Component {
     }, 0)
 
     const salarySpaceTotal =
-      availableSalary + cutlistTotalSalary + releaseTotalSalary
+      availableSalarySpace + cutlistTotalSalary + releaseTotalSalary
     const onCutlist = this.props.cutlist.includes(playerMap.get('pid'))
     return (
       salarySpaceTotal + (this._isOriginalTeam && !onCutlist ? playerSalary : 0)

@@ -45,7 +45,7 @@ export default async function ({
 
   const isValid = () =>
     roster.availableSpace >= 1 &&
-    roster.availableCap >= bid &&
+    roster.availableSalarySpace >= bid &&
     roster.isEligibleForSlot({ slot, pos })
 
   if (isOriginalTeam) {

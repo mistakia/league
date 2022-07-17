@@ -27,11 +27,11 @@ export default class AddPlayerDialog extends React.Component {
     }
   }
 
-  getAvailableCap = () => {
+  getAvailableSalarySpace = () => {
     const { rosters, league, team } = this.props
     const rosterData = rosters.find((r) => r.tid === team.uid)
     const roster = new Roster({ roster: rosterData.toJS(), league })
-    return roster.availableCap
+    return roster.availableSalarySpace
   }
 
   handleChangeValue = (event) => {
@@ -39,7 +39,7 @@ export default class AddPlayerDialog extends React.Component {
 
     if (isNaN(value) || value % 1 !== 0) {
       this.setState({ error: true })
-    } else if (value < 0 || value > this.getAvailableCap()) {
+    } else if (value < 0 || value > this.getAvailableSalarySpace()) {
       this.setState({ error: true })
     } else {
       this.setState({ error: false })
@@ -97,7 +97,7 @@ export default class AddPlayerDialog extends React.Component {
             </FormControl>
             <TextField
               label='Value'
-              helperText={`Max: ${this.getAvailableCap()}`}
+              helperText={`Max: ${this.getAvailableSalarySpace()}`}
               error={this.state.error}
               value={this.state.value}
               onChange={this.handleChangeValue}

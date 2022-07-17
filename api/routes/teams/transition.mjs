@@ -206,7 +206,7 @@ router.post('/?', async (req, res) => {
 
     // make sure there is enough cap space
     // TODO
-    /* if (roster.availableCap < 0) {
+    /* if (roster.availableSalarySpace < 0) {
      *   return res.status(400).send({ error: 'exceeds salary cap' })
      * }
      */
@@ -493,7 +493,7 @@ router.put('/?', async (req, res) => {
 
     // make sure there is enough cap space
     // TODO
-    /* if (!roster.availableCap) {
+    /* if (!roster.availableSalarySpace) {
      *   return res.stauts(400).send({ error: 'exceeds cap space' })
      * }
      */

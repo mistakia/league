@@ -1,6 +1,8 @@
 import db from '#db'
 import { constants } from '#common'
 
+import getRosterPenalty from './get-roster-penalty.mjs'
+
 export default async function ({ lid, userId }) {
   const rosters = await db('rosters')
     .select('*')
@@ -41,17 +43,21 @@ export default async function ({ lid, userId }) {
       rosters.map((r) => r.uid)
     )
 
-  rosters.forEach((r) => {
-    r.players = players.filter((p) => p.rid === r.uid)
-    r.lineups = {}
-    const teamLineups = lineups.filter((l) => l.tid === r.tid)
-    const teamStarters = lineupStarters.filter((l) => l.tid === r.tid)
+  for (const roster of rosters) {
+    roster.penalty = await getRosterPenalty({
+      tid: roster.tid,
+      year: constants.season.year
+    })
+    roster.players = players.filter((p) => p.rid === roster.uid)
+    roster.lineups = {}
+    const teamLineups = lineups.filter((l) => l.tid === roster.tid)
+    const teamStarters = lineupStarters.filter((l) => l.tid === roster.tid)
     for (const lineup of teamLineups) {
       const lineupStarters = teamStarters.filter((l) => l.week === lineup.week)
       const starter_pids = lineupStarters.map((l) => l.pid)
-      r.lineups[lineup.week] = { total: lineup.total, starter_pids }
+      roster.lineups[lineup.week] = { total: lineup.total, starter_pids }
     }
-  })
+  }
 
   // include team restricted free agency bid
   if (userId) {

@@ -58,7 +58,7 @@ export default async function ({ pid, release = [], lid, tid, userid }) {
   const playerPoachValue = value + 2
   if (
     !constants.season.isRegularSeason &&
-    roster.availableCap - playerPoachValue < 0
+    roster.availableSalarySpace - playerPoachValue < 0
   ) {
     throw new Error('not enough available cap')
   }

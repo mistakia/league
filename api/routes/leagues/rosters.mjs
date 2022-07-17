@@ -55,7 +55,7 @@ router.post('/?', async (req, res) => {
     }
 
     const val = parseInt(value, 10)
-    if (roster.availableCap < val) {
+    if (roster.availableSalarySpace < val) {
       return res.status(400).send({ error: 'exceeds cap space' })
     }
 
@@ -143,7 +143,7 @@ router.put('/?', async (req, res) => {
     const roster = new Roster({ roster: rosterRow, league })
     roster.removePlayer(pid)
     const val = parseInt(value, 10)
-    if (roster.availableCap < val) {
+    if (roster.availableSalarySpace < val) {
       return res.status(400).send({ error: 'exceeds cap space' })
     }
 

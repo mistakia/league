@@ -34,24 +34,24 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
     await knex.seed.run()
   })
 
-  describe('process', function () {
-    beforeEach(async function () {
-      this.timeout(60 * 1000)
-      await league(knex)
-      const tranDate = start.subtract('5', 'week').unix()
-      const extDate = start.subtract('6', 'week').unix()
-      await knex('seasons')
-        .update({
-          year: constants.season.year,
-          tran_end: tranDate,
-          ext_date: extDate
-        })
-        .where({
-          lid: leagueId
-        })
-      MockDate.set(start.subtract('1', 'month').toISOString())
-    })
+  beforeEach(async function () {
+    this.timeout(60 * 1000)
+    await league(knex)
+    const tranDate = start.subtract('5', 'week').unix()
+    const extDate = start.subtract('6', 'week').unix()
+    await knex('seasons')
+      .update({
+        year: constants.season.year,
+        tran_end: tranDate,
+        ext_date: extDate
+      })
+      .where({
+        lid: leagueId
+      })
+    MockDate.set(start.subtract('1', 'month').toISOString())
+  })
 
+  describe('process', function () {
     it('process single bid', async () => {
       const player = await selectPlayer()
       const teamId = 1
@@ -243,12 +243,6 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
   })
 
   describe('errors', function () {
-    beforeEach(async function () {
-      this.timeout(60 * 1000)
-      MockDate.set(start.subtract('1', 'month').toISOString())
-      await league(knex)
-    })
-
     it('no bids to process', async () => {
       const tranDate = start.subtract('1', 'week').unix()
       await knex('seasons')
@@ -308,6 +302,67 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
 
     it('exceeds roster cap limit', async () => {
       // TODO
+    })
+
+    it('exceeds roster cap limit with penalty', async () => {
+      const teamId = 1
+      const userId = 1
+
+      const value = 1
+      const player1 = await selectPlayer()
+      await addPlayer({
+        leagueId,
+        player: player1,
+        teamId,
+        userId,
+        tag: constants.tags.TRANSITION
+      })
+
+      const player2 = await selectPlayer()
+      await addPlayer({
+        leagueId,
+        player: player2,
+        teamId,
+        userId,
+        value: 190
+      })
+
+      await knex('league_salary_penalty').insert({
+        pid: player2.pid,
+        transaction_id: 0,
+        tid: teamId,
+        year: constants.season.year,
+        amount: 10,
+        reason: 'test penalty'
+      })
+
+      const timestamp = Math.round(Date.now() / 1000)
+      await knex('transition_bids').insert({
+        pid: player1.pid,
+        userid: userId,
+        bid: value,
+        tid: teamId,
+        year: constants.season.year,
+        player_tid: teamId,
+        lid: leagueId,
+        submitted: timestamp
+      })
+
+      let error
+      try {
+        await run()
+      } catch (err) {
+        error = err
+      }
+
+      expect(error).to.equal(undefined)
+
+      // check transition bid
+      const transitionBids = await knex('transition_bids')
+      expect(transitionBids.length).to.equal(1)
+      expect(transitionBids[0].succ).to.equal(0)
+      expect(transitionBids[0].processed).to.equal(timestamp)
+      expect(transitionBids[0].reason).to.equal('exceeds roster limits')
     })
 
     it('tied bids among competing team', async () => {

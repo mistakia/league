@@ -246,6 +246,7 @@ export default function DashboardPage() {
               title='Active Roster'
               limit={roster.activeRosterLimit}
               total={activePlayers}
+              penalty={roster.penalty}
             />
           </Grid>
           <Grid item xs={12}>

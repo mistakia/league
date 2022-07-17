@@ -13,9 +13,10 @@ const nonStarterSlots = [
 ]
 
 export default class Roster {
-  constructor({ roster, league }) {
+  constructor({ roster, league, penalty = 0 }) {
     this.uid = roster.uid
     this.tid = roster.tid
+    this.penalty = roster.penalty || penalty
     this._league = league
     this._players = new Map()
 
@@ -63,9 +64,9 @@ export default class Roster {
     return this.activeRosterLimit - this.active.length
   }
 
-  get availableCap() {
+  get availableSalarySpace() {
     const used = this.active.reduce((a, b) => a + b.value, 0) || 0
-    return this._league.cap - used
+    return this._league.cap - used - this.penalty
   }
 
   get all() {

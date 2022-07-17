@@ -139,7 +139,7 @@ router.post('/?', async (req, res) => {
     const value =
       league.nteams - pick.pick + 1 > 0 ? league.nteams - pick.pick + 1 : 1
 
-    if (slot === constants.slots.BENCH && roster.availableCap < value) {
+    if (slot === constants.slots.BENCH && roster.availableSalarySpace < value) {
       return res.status(400).send({ error: 'exceeds salary cap' })
     }
 
