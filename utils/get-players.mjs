@@ -55,11 +55,12 @@ export default async function ({ textSearch, leagueId, pids = [] }) {
         .andOn('practice.week', '=', constants.season.week)
         .andOn('practice.year', '=', constants.season.year)
     })
-    .whereIn('player.pos', constants.positions)
     .groupBy('player.pid')
 
   if (textSearch) {
-    query.whereRaw('MATCH(fname, lname) AGAINST(? IN BOOLEAN MODE)', textSearch)
+    query
+      .whereRaw('MATCH(fname, lname) AGAINST(? IN BOOLEAN MODE)', textSearch)
+      .whereIn('player.pos', constants.positions)
   } else if (pids.length) {
     query.whereIn('player.pid', pids)
   } else {
@@ -71,7 +72,12 @@ export default async function ({ textSearch, leagueId, pids = [] }) {
       query.orWhereIn('player.pid', baselinePlayerIds)
     }
 
-    query.whereNot('player.cteam', 'INA')
+    query.orWhere(function () {
+      this.whereIn('player.pos', constants.positions).whereNot(
+        'player.cteam',
+        'INA'
+      )
+    })
 
     // include rookies during offseason
     if (constants.season.week === 0) {
