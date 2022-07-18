@@ -1,5 +1,6 @@
 import dayjs from 'dayjs'
 import { List } from 'immutable'
+import { createSelector } from 'reselect'
 
 import { getApp } from '@core/app'
 import { getNextPick } from '@core/draft'
@@ -84,26 +85,27 @@ export function getCurrentTeam(state) {
   return getTeams(state).get(teamId)
 }
 
-export function getTeamEvents(state) {
-  const nextPick = getNextPick(state)
-  const activePoaches = getActivePoachesAgainstMyPlayers(state)
+export const getTeamEvents = createSelector(
+  getNextPick,
+  getActivePoachesAgainstMyPlayers,
+  (nextPick, activePoaches) => {
+    const events = []
 
-  const events = []
+    for (const poach of activePoaches.valueSeq()) {
+      const date = dayjs.unix(poach.submitted).add('48', 'hours')
+      events.push({
+        detail: 'Poaching Claim Expires',
+        date
+      })
+    }
 
-  for (const poach of activePoaches.valueSeq()) {
-    const date = dayjs.unix(poach.submitted).add('48', 'hours')
-    events.push({
-      detail: 'Poaching Claim Expires',
-      date
-    })
+    if (nextPick) {
+      events.push({
+        detail: 'Next Draft Pick',
+        date: nextPick.draftWindow
+      })
+    }
+
+    return events.sort((a, b) => a.date.unix() - b.date.unix())
   }
-
-  if (nextPick) {
-    events.push({
-      detail: 'Next Draft Pick',
-      date: nextPick.draftWindow
-    })
-  }
-
-  return events.sort((a, b) => a.date.unix() - b.date.unix())
-}
+)
