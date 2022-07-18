@@ -11,15 +11,44 @@ export function getDraft(state) {
 }
 
 export function getPicks(state) {
-  const { picks } = getDraft(state)
+  const { picks, draft_start, draft_type, draft_hour_min, draft_hour_max } =
+    getDraft(state)
   const { teamId } = getApp(state)
+  return picks.map((p) => {
+    if (p.tid !== teamId) {
+      return p
+    }
 
-  return picks.filter((p) => p.tid === teamId).sort((a, b) => a.pick - b.pick)
+    p.draftWindow = getDraftWindow({
+      start: draft_start,
+      type: draft_type,
+      min: draft_hour_min,
+      max: draft_hour_max,
+      pickNum: p.pick
+    })
+
+    return p
+  })
 }
 
 export function getNextPick(state) {
-  const picks = getPicks(state)
-  return picks.filter((p) => p.pick).find((p) => !p.pid)
+  const { draft_start, draft_type, draft_hour_min, draft_hour_max, picks } =
+    getDraft(state)
+  const { teamId } = getApp(state)
+  const team_picks = picks
+    .filter((p) => p.tid === teamId)
+    .sort((a, b) => a.pick - b.pick)
+  const pick = team_picks.filter((p) => p.pick).find((p) => !p.pid)
+  if (!pick) return null
+
+  pick.draftWindow = getDraftWindow({
+    start: draft_start,
+    type: draft_type,
+    min: draft_hour_min,
+    max: draft_hour_max,
+    pickNum: pick.pick
+  })
+  return pick
 }
 
 export function getLastPick(state) {

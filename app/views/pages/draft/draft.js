@@ -9,7 +9,6 @@ import PageLayout from '@layouts/page'
 import DraftPlayer from '@components/draft-player'
 import PlayerAge from '@components/player-age'
 import DraftPick from '@components/draft-pick'
-// import DraftSchedule from '@components/draft-schedule'
 import Position from '@components/position'
 import { constants } from '@common'
 

@@ -1,6 +1,5 @@
 import { List, Record } from 'immutable'
 
-import { constants, getDraftWindow } from '@common'
 import { draftActions } from './actions'
 import { appActions } from '@core/app'
 
@@ -48,28 +47,6 @@ export function draftReducer(state = initialState(), { payload, type }) {
 
     case draftActions.GET_DRAFT_FULFILLED: {
       const drafted = payload.data.picks.filter((p) => p.pid).map((p) => p.pid)
-
-      const lastPick = payload.data.picks[payload.data.picks.length - 1]
-      const draftEnd = getDraftWindow({
-        start: state.draft_start,
-        type: state.draft_type,
-        min: state.draft_hour_min,
-        max: state.draft_hour_max,
-        pickNum: lastPick.pick + 1
-      })
-
-      // calculate draft windows only if draft is active
-      if (constants.season.now.isBefore(draftEnd)) {
-        for (const pick of payload.data.picks) {
-          pick.draftWindow = getDraftWindow({
-            start: state.draft_start,
-            type: state.draft_type,
-            min: state.draft_hour_min,
-            max: state.draft_hour_max,
-            pickNum: pick.pick
-          })
-        }
-      }
 
       return state.merge({
         isPending: false,
