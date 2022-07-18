@@ -9,6 +9,7 @@ import {
   draftActions,
   getSelectedDraftPlayer,
   getDraft,
+  getPicks,
   getNextPick
 } from '@core/draft'
 import { getCurrentLeague } from '@core/leagues'
@@ -47,9 +48,10 @@ const mapStateToProps = createSelector(
   getSelectedDraftPlayer,
   getNextPick,
   getDraft,
+  getPicks,
   getCurrentLeague,
   getApp,
-  (players, selectedPlayerMap, nextPick, draft, league, app) => {
+  (players, selectedPlayerMap, nextPick, draft, picks, league, app) => {
     const windowEnd = nextPick
       ? getDraftWindow({
           start: league.draft_start,
@@ -70,7 +72,7 @@ const mapStateToProps = createSelector(
       nextPick,
       selectedPlayerMap,
       teamId: app.teamId,
-      picks: draft.picks,
+      picks,
       drafted: draft.drafted,
       league
     }
