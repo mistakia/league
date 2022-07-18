@@ -1,4 +1,3 @@
-import dayjs from 'dayjs'
 import { Map, List, Set } from 'immutable'
 
 import { appActions } from '@core/app'
@@ -26,8 +25,8 @@ const initialState = new Map({
   teams: new List(),
   availability: new List(constants.availability),
   week: new List([constants.season.week]),
-  age: new List(),
-  allAges: new List(),
+  age: new List(), // TODO
+  allAges: new List(), // TODO
   items: new Map(),
   order: 'desc',
   view: isOffseason ? 'season' : 'ros',
@@ -192,17 +191,6 @@ export function playersReducer(state = initialState, { payload, type }) {
       return state.withMutations((players) => {
         players.set('isInitializing', false)
         players.set('isPending', false)
-
-        const now = dayjs()
-        const ages = []
-        payload.data.forEach((p) => {
-          const age = parseInt(now.diff(dayjs(p.dob), 'years'), 10)
-          if (!isNaN(age)) ages.push(age)
-        })
-
-        const distinctAges = Array.from(new Set(ages)).sort((a, b) => a - b)
-        players.set('age', new List(distinctAges))
-        players.set('allAges', new List(distinctAges))
 
         payload.data.forEach((playerData) => {
           if (players.hasIn(['items', playerData.pid])) {
