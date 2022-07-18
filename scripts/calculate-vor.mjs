@@ -211,7 +211,7 @@ const main = async () => {
       p.addRow(
         {
           index: index + 1,
-          pid: player.pid,
+          name: player.player,
           vor: player.vor.toFixed(2),
           points: player.points.toFixed(2),
           rank: player.prnk,
