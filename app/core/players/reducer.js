@@ -187,7 +187,8 @@ export function playersReducer(state = initialState, { payload, type }) {
         })
       })
 
-    case playerActions.FETCH_PLAYERS_FULFILLED:
+    case playerActions.FETCH_PLAYERS_FULFILLED: {
+      console.log(`loaded ${payload.data.length} players`)
       return state.withMutations((players) => {
         players.set('isInitializing', false)
         players.set('isPending', false)
@@ -218,6 +219,7 @@ export function playersReducer(state = initialState, { payload, type }) {
           }
         })
       })
+    }
 
     case playerActions.GET_PLAYER_FULFILLED:
       return state.withMutations((players) => {
