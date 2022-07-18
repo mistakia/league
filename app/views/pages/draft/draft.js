@@ -85,10 +85,6 @@ export default function DraftPage() {
           </div>
         )
       }
-    } else {
-      draftInfo = (
-        <div className='draft__side-top-pick'>You have no picks left.</div>
-      )
     }
   } else {
     draftInfo = <div className='draft__side-top-pick'>Draft not scheduled</div>
