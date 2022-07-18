@@ -2,9 +2,12 @@ import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 import Highcharts from 'highcharts'
+import HighchartsCustomEvents from 'highcharts-custom-events'
 import HighchartsReact from 'highcharts-react-official'
 
-import { constants } from '@common'
+import { constants, sum } from '@common'
+
+HighchartsCustomEvents(Highcharts)
 
 export default class DashboardLeaguePositionalValue extends React.Component {
   render = () => {
@@ -36,7 +39,41 @@ export default class DashboardLeaguePositionalValue extends React.Component {
         text: ''
       },
       xAxis: {
-        categories: teamNames
+        categories: teamNames,
+        labels: {
+          events: {
+            mouseover: function (e) {
+              const chart = this.chart
+              if (chart.myLabel) {
+                chart.myLabel.destroy()
+                delete chart.myLabel
+              }
+              const values = chart.series
+                .filter((s) => s.visible)
+                .map((s) => s.yData[this.pos])
+              const value = sum(values)
+              chart.myLabel = chart.renderer
+                .label(value, e.layerX + 8, e.layerY, 'rectangle', true)
+                .css({
+                  color: '#FFFFFF'
+                })
+                .attr({
+                  fill: 'rgba(0, 0, 0, 0.75)',
+                  padding: 8,
+                  r: 4
+                })
+                .add()
+                .toFront()
+            },
+            mouseout: function (e) {
+              const chart = this.chart
+              if (chart.myLabel) {
+                chart.myLabel.destroy()
+                delete chart.myLabel
+              }
+            }
+          }
+        }
       },
       colors: [
         '#ff3f3f',
