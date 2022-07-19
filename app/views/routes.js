@@ -31,6 +31,7 @@ import StatsPage from '@pages/stats'
 import SchedulePage from '@pages/schedule'
 import RostersPage from '@pages/rosters'
 import WaiversPage from '@pages/waivers'
+import MatchupsPage from '@pages/matchups'
 
 const mapStateToProps = createSelector(getApp, (app) => ({ app }))
 
@@ -51,6 +52,7 @@ const Routes = ({ app }) => {
   return (
     <RouterRoutes>
       {app.userId && <Route path='/dashboard' element={<DashboardPage />} />}
+      {app.userId && <Route path='/matchups' element={<MatchupsPage />} />}
       {app.userId && <Route path='/lineups' element={<LineupsPage />} />}
       <Route path='/players' element={<PlayersPage />} />
       {app.userId && <Route path='/scoreboard' element={<ScoreboardPage />} />}

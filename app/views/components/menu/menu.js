@@ -101,6 +101,7 @@ export default class Menu extends React.Component {
             </IconButton>
             {isLoggedIn && <LeagueSchedule />}
             {isLoggedIn && <NavLink to='/dashboard'>Roster</NavLink>}
+            {isLoggedIn && <NavLink to='/matchups'>Matchups</NavLink>}
             {isLoggedIn && constants.season.isRegularSeason && (
               <NavLink to='/lineups'>Lineup</NavLink>
             )}
@@ -139,6 +140,11 @@ export default class Menu extends React.Component {
               </ListItem>
             )}
             {isLoggedIn && (
+              <ListItem button onClick={this.handleClick('/matchups')}>
+                <ListItemText primary='Matchups' />
+              </ListItem>
+            )}
+            {isLoggedIn && constants.season.isRegularSeason && (
               <ListItem button onClick={this.handleClick('/lineups')}>
                 <ListItemText primary='Lineups' />
               </ListItem>
