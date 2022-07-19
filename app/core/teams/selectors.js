@@ -101,7 +101,7 @@ export const getTeamEvents = createSelector(
 
     if (nextPick) {
       events.push({
-        detail: 'Next Draft Pick',
+        detail: 'Your Next Pick',
         date: nextPick.draftWindow
       })
     }
