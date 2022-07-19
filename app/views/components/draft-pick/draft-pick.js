@@ -49,7 +49,7 @@ export default class DraftPick extends React.Component {
             Boolean(pick.pick) &&
             Boolean(pick.draftWindow) && (
               <div className='draft__pick-window'>
-                {isUser && dayjs().to(pick.draftWindow)}
+                {dayjs().to(pick.draftWindow)}
               </div>
             )}
           <div className='draft__pick-team'>
