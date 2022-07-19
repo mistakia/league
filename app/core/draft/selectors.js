@@ -16,21 +16,37 @@ export const getPicks = createSelector(
     const { picks, draft_start, draft_type, draft_hour_min, draft_hour_max } =
       draft
     const { teamId } = app
-    return picks.map((p) => {
-      if (p.tid !== teamId) {
+    let previousSelected = true
+    let previousActive = true
+    let previousNotActive = false
+    return picks
+      .sort((a, b) => a.pick - b.pick)
+      .map((p) => {
+        if (p.pid || (p.tid !== teamId && previousNotActive)) {
+          return p
+        }
+
+        p.draftWindow = getDraftWindow({
+          start: draft_start,
+          type: draft_type,
+          min: draft_hour_min,
+          max: draft_hour_max,
+          pickNum: p.pick
+        })
+
+        if (previousNotActive) {
+          return p
+        }
+
+        const isActive =
+          constants.season.now.isAfter(p.draftWindow) || previousSelected
+
+        previousNotActive = !isActive && previousActive
+        previousActive = isActive
+        previousSelected = Boolean(p.pid)
+
         return p
-      }
-
-      p.draftWindow = getDraftWindow({
-        start: draft_start,
-        type: draft_type,
-        min: draft_hour_min,
-        max: draft_hour_max,
-        pickNum: p.pick
       })
-
-      return p
-    })
   }
 )
 
