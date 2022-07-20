@@ -7,17 +7,15 @@
   background #f0f0f0
   cursor pointer
   user-select none
-  max-width 150px
-  margin 0px !important
   min-height 35px
   flex 0 0 auto
+  max-width 100px
+  &:not(.switch)
+    background lighten($backgroundColor, 60%)
   &:hover
     background white
     .player__filter-label
       color $accentColor
-
-  + .player__filter
-    margin-left 8px !important
 
   &.switch
     align-items center
@@ -25,7 +23,7 @@
 .player__filter-label
   font-size 0.6875rem
   font-weight 700
-  color lighten($textColor, 10)
+  color lighten($accentColor, 25)
   text-transform uppercase
   letter-spacing 0.02em
 
@@ -81,3 +79,10 @@
   border-radius 3px
   &:hover
     background darken(#f0f0f0, 30%)
+
+@media (max-width 800px)
+  .player__filter-dropdown
+    position fixed
+    left 50%
+    top 50%
+    transform translate(-50%, -50%)

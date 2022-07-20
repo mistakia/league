@@ -9,7 +9,7 @@ export default class StatYearsFilter extends React.Component {
     const state = {
       single: true,
       type: 'years',
-      label: 'YEARS',
+      label: 'YEAR',
       values: []
     }
 

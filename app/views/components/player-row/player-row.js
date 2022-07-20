@@ -572,6 +572,9 @@ class PlayerRow extends Player {
       }
     }
 
+    const name =
+      window.innerWidth <= 600 ? playerMap.get('pname') : playerMap.get('name')
+
     return (
       <div className={classNames.join(' ')}>
         <div className='player__row-lead'>
@@ -583,7 +586,7 @@ class PlayerRow extends Player {
             <Position pos={pos} />
           </div>
           <div className='player__row-name cursor' onClick={this.handleClick}>
-            <span>{playerMap.get('name')}</span>
+            <span>{name}</span>
             {constants.season.year === playerMap.get('start') && (
               <PlayerLabel label='R' type='rookie' description='Rookie' />
             )}
