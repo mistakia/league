@@ -7,6 +7,7 @@
 .players__head-expand
   flex 0 0 auto
   display flex
+  align-items center
   cursor pointer
   padding 0 16px
   .icon
@@ -32,9 +33,17 @@
 .players__filters-row
   flex 0 0 auto
   border-bottom 1px solid $borderColor
-  padding 8px 32px
+  padding 0px 32px
   display flex
   align-items center
+  flex-wrap wrap
+  >
+    .search__filter
+    .player__filter
+    .players__view-menu
+    .players__head-expand
+    .players__head-actions
+      margin 8px 4px
 
 .players__header
   position sticky
@@ -86,3 +95,25 @@
   overflow scroll
   height 100%
   width 100%
+
+.players__view-menu
+  flex 1 0 150px
+  max-width 250px
+
+
+@media (max-width 600px)
+  .players__head-actions
+    display none
+
+  .players__head-expand
+    flex 1
+    display flex
+    justify-content flex-end
+
+  .players__filters-row
+    padding 0 4px
+    justify-content space-between
+
+@media (min-width 601px)
+  .players__filters-row > .players__view-menu
+    margin 8px 4px 8px 16px
