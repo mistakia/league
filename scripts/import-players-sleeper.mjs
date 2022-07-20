@@ -87,7 +87,8 @@ const run = async () => {
 
     if (!player_row) {
       if (!constants.positions.includes(item.position)) continue
-      if (item.first_name === 'Duplicate' || item.first_name === 'Player') continue
+      if (item.first_name === 'Duplicate' || item.first_name === 'Player')
+        continue
 
       try {
         player_row = await createPlayer({
