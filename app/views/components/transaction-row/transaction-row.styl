@@ -2,27 +2,26 @@
   display flex
   background white
   border-radius 3px
-  padding 3px 16px
-
-.transaction__main
-  display flex
-  flex 1
-
-.transaction__meta
-  flex 1
-  display flex
+  overflow hidden
 
 .transaction__value
   flex 0 0 35px
   display flex
   align-items center
-  font-size 11px
+  font-size 14px
+  font-weight bold
+  margin-left 16px
 
 .transaction__timestamp
-  flex 1
+  flex 0 0 auto
   display flex
+  justify-content flex-end
   .timestamp
     font-size 10px
+  .timestamp__date
+    min-width 100px
+  .timestamp__time
+    min-width 80px
 
 .transaction__type
   flex 0 0 80px
@@ -30,36 +29,69 @@
   text-transform uppercase
   align-items center
   color lighten($textColor, 40%)
-  font-size 10px
+  font-size 12px
   font-weight bold
 
 .transaction__player
   flex 1
   display flex
+  padding 0 16px
 
 .transaction__team
   flex 1
   display flex
   align-items center
-  max-width 200px
+  max-width 130px
   .team__name
     padding 0
     font-size 12px
+  .team__image
+    margin 4px
+    height 30px
+    width 30px
+
+.transaction__top
+  display flex
+  justify-content space-between
+  background lighten($borderColor, 85%)
+  padding 0 4px
+
+.transaction__body
+  display flex
+
+@media (min-width 601px)
+  .transaction
+    height 39px
 
 @media (max-width 800px)
-  .transaction
-    padding 6px 3px
-
-  .transaction__main
-    flex-direction column
-    flex 0 0 185px
-
   .transaction__type
     padding 8px 0
 
-  .transaction__meta
-    flex-direction column
-
   .transaction__timestamp .timestamp
     flex-direction row
-    width 100%
+    flex-wrap wrap
+    width 100px
+
+@media (max-width 600px)
+  .transaction
+    margin-top 4px
+    flex-direction column
+    border 1px solid $borderColor
+    border-radius 8px
+
+  .transaction__type
+    color $textColor
+    min-width 120px
+
+  .transaction__team
+    max-width 80px
+
+  .transaction__timestamp
+    .timestamp
+      flex-wrap nowrap
+      width 100%
+
+    .timestamp__date
+    .timestamp__time
+      justify-content flex-end
+      min-width auto
