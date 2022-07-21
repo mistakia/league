@@ -13,11 +13,25 @@ import TransactionTeamFilter from '@components/transaction-team-filter'
 
 import './transactions.styl'
 
-const ROW_HEIGHT = window.innerWidth < 800 ? 75 : 45
+const getHeight = () => (window.innerWidth <= 600 ? 75 : 40)
 
 export default class TransactionsPage extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = { height: getHeight() }
+  }
+
+  update = () => {
+    this.setState({ height: getHeight() })
+  }
+
   componentDidMount = () => {
     this.props.load()
+    window.addEventListener('resize', this.update)
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.update)
   }
 
   render = () => {
@@ -55,7 +69,7 @@ export default class TransactionsPage extends React.Component {
                     ref={registerChild}
                     width={width}
                     height={height}
-                    rowHeight={ROW_HEIGHT}
+                    rowHeight={this.state.height}
                     rowCount={transactions.size}
                     onRowsRendered={onRowsRendered}
                     rowRenderer={Row}
