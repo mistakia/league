@@ -12,10 +12,10 @@
 
 .player__name-main
   flex 1
-  overflow-x hidden
+  overflow hidden
   text-overflow ellipsis
-  white-space nowrap
   line-height 20px
+  max-height 40px
   &:hover
     color $accentColor
 
@@ -24,3 +24,5 @@
 
 .player__name-label
   flex 0 0 20px
+  display flex
+  align-items center

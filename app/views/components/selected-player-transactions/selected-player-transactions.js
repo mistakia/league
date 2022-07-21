@@ -17,9 +17,25 @@ import TransactionRow from '@components/transaction-row'
 
 import './selected-player-transactions.styl'
 
+const getHeight = () => (window.innerWidth <= 600 ? 75 : 40)
+
 export default class SelectedPlayerTransactions extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = { height: getHeight() }
+  }
+
+  update = () => {
+    this.setState({ height: getHeight() })
+  }
+
   componentDidMount() {
     this.props.load(this.props.playerMap.get('pid'))
+    window.addEventListener('resize', this.update)
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.update)
   }
 
   render = () => {
@@ -51,7 +67,7 @@ export default class SelectedPlayerTransactions extends React.Component {
         <TransactionRow
           transaction={transaction}
           key={transaction.uid}
-          style={{ height: 40 }}
+          style={{ height: this.state.height }}
         />
       )
     }
