@@ -1,0 +1,25 @@
+.TabsListUnstyled-root.TabsListUnstyled-horizontal
+  display flex
+  overflow-x scroll
+  padding 4px
+  background $backgroundColor
+  &::before
+  &::after
+    content: ''
+    margin: auto
+
+  .TabUnstyled-root
+    flex-shrink 0
+    padding 16px 8px
+    margin 6px 6px
+    border-radius 5px
+    display flex
+    justify-content center
+    align-items center
+    cursor pointer
+    font-size 12px
+    font-weight bold
+    border 0
+    background $backgroundColor
+    &.Mui-selected
+      background white
