@@ -2,6 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import { List } from 'immutable'
+import LinearProgress from '@mui/material/LinearProgress'
 
 import { groupBy } from '@common'
 import SelectedPlayerProjection from '@components/selected-player-projection'
@@ -19,6 +20,10 @@ export default class SelectedPlayerSeasonProjections extends React.Component {
     const pos = playerMap.get('pos')
     const tables = []
     const projections = playerMap.get('projections', new List()).toJS()
+    if (!projections.length) {
+      return <LinearProgress />
+    }
+
     const projections_by_week = groupBy(projections, 'week')
     for (const week in projections_by_week) {
       const wk = parseInt(week, 10)
