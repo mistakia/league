@@ -1,5 +1,6 @@
 import React from 'react'
-import { Map } from 'immutable'
+import { Map, isImmutable } from 'immutable'
+import Bugsnag from '@bugsnag/js'
 
 import PlayerRowOpponent from '@components/player-row-opponent'
 import EditableProjection from '@components/editable-projection'
@@ -156,9 +157,13 @@ class PlayerRow extends Player {
       </div>
     )
 
-    const stats = (
+    const map =
       playerMap.get('stats', new Map()) || new Map(constants.createFullStats())
-    ).toJS()
+    if (!isImmutable(map)) {
+      const err = Error('player stats properties is not a map')
+      Bugsnag.notify(err)
+    }
+    const stats = isImmutable(map) ? map.toJS() : map
 
     const fantasyPoints = (
       <div className='row__group'>

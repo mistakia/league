@@ -13,6 +13,7 @@ export function createPlayer({
   projections,
   practice,
   transactions,
+  stats,
   ...data
 }) {
   const params = {
@@ -59,6 +60,10 @@ export function createPlayer({
 
   if (transactions) {
     params.transactions = new List(transactions)
+  }
+
+  if (stats) {
+    params.stats = new Map(stats)
   }
 
   return new Map(params)
