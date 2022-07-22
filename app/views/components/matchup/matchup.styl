@@ -1,20 +1,23 @@
 $height = 55px
 
 .matchup
-  display flex
-  height $height
-  align-items center
   margin-bottom 8px
+  overflow hidden
+  border 1px solid #747678
+  margin 8px 16px
+  flex 1
+  min-width 260px
 
-.matchup__week
-  flex 0 0 60px
-  text-transform uppercase
-  color lighten($textColor, 30%)
-  font-size 10px
+  .team__image
+    flex 0 0 36px
+    width 36px
+    height 36px
+    margin 0 8px 0 24px
+
+  .team__name
+    flex 1
 
 .matchup__body
-  flex 1
-  display flex
   background white
 
 .matchup__home
@@ -22,55 +25,16 @@ $height = 55px
   position relative
   height $height
   flex 1
-  width 48%
-  border-top 1px solid $borderColor
-  padding 8px 32px
   display flex
   align-items center
   justify-content space-between
 
-.matchup__away
-  border-right 0
-  .matchup__banner
-    left 0
-    &:after
-      right -12px
-      transform skewX(20deg)
-
-  .team__image
-    margin-left 15%
-
-.matchup__home
-  border-left 0
-  .matchup__banner
-    right 0
-    &:after
-      left -12px
-      transform skewX(-20deg)
-
-  .team__image
-    margin-right 15%
-
-.matchup__divider
-  flex 0 0 0
-  position relative
-  height $height
-
-.matchup__versus
-  absolute top left -20px
-  height $height
-  width 40px
-  display flex
-  justify-content center
-  align-items center
-  font-family 'Inter', sans-serif
-  font-size 20px
-
 .matchup__banner
   position absolute
   background-color $borderColor
-  width 25%
-  height $height - 1px
+  width 48px
+  opacity 1
+  height $height
   &:after
     position absolute
     content ""
@@ -81,8 +45,8 @@ $height = 55px
 
 .matchup__line
   position absolute
-  bottom 0
-  height 3px
+  width 8px
   background-color $borderColor
   left 0
-  right 0
+  top 0
+  bottom 0
