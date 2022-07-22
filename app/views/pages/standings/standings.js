@@ -81,8 +81,8 @@ function Standings({ teams, title, year }) {
           <div className='table__cell metric'>C Odds</div>
           <div className='table__cell metric'>DOI</div>
         </div>
+        {overallRows}
       </div>
-      {overallRows}
     </div>
   )
 }
@@ -133,8 +133,8 @@ function Overall({ standings, year }) {
           <div className='table__cell metric'>C Odds</div>
           <div className='table__cell metric'>DOI</div>
         </div>
+        {overallRows}
       </div>
-      {overallRows}
     </div>
   )
 }
