@@ -15,7 +15,6 @@ export default class Matchup extends React.Component {
 
     return (
       <div className='matchup'>
-        <div className='matchup__week'>Week {matchup.week}</div>
         <div className='matchup__body'>
           <div className='matchup__away'>
             <div
@@ -33,9 +32,6 @@ export default class Matchup extends React.Component {
             <TeamImage tid={matchup.aid} />
             <TeamName tid={matchup.aid} />
           </div>
-          <div className='matchup__divider'>
-            <div className='matchup__versus'>@</div>
-          </div>
           <div className='matchup__home'>
             <div
               className='matchup__banner'
@@ -49,8 +45,8 @@ export default class Matchup extends React.Component {
                 backgroundColor: `#${home.ac}`
               }}
             />
-            <TeamName tid={matchup.hid} />
             <TeamImage tid={matchup.hid} />
+            <TeamName tid={matchup.hid} />
           </div>
         </div>
       </div>
