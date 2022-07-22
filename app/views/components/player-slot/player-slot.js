@@ -14,7 +14,7 @@ export default class PlayerSlot extends React.Component {
       playerMap,
       slot,
       handleSelect,
-      selectedPlayerMap,
+      selected_player_slot,
       handleUpdate,
       isLocked
     } = this.props
@@ -24,12 +24,11 @@ export default class PlayerSlot extends React.Component {
     )
     const slotName = constants.slotName[slot]
     const pid = playerMap.get('pid')
-    const selectedPid = selectedPlayerMap.get('pid')
 
     let action
     if (constants.season.week > constants.season.finalWeek) {
       return null
-    } else if (!selectedPid && pid) {
+    } else if (!selected_player_slot && pid) {
       action = (
         <Button
           disabled={isLocked}
@@ -39,8 +38,8 @@ export default class PlayerSlot extends React.Component {
           {isLocked ? 'Locked' : 'Move'}
         </Button>
       )
-    } else if (selectedPid) {
-      if (pid && selectedPid === pid) {
+    } else if (selected_player_slot) {
+      if (pid && selected_player_slot.pid === pid) {
         action = (
           <Button onClick={() => handleSelect(null)} small>
             Cancel
@@ -48,7 +47,7 @@ export default class PlayerSlot extends React.Component {
         )
       } else if (
         !isLocked &&
-        slotPositions.includes(selectedPlayerMap.get('pos'))
+        slotPositions.includes(selected_player_slot.pos)
       ) {
         action = (
           <Button onClick={() => handleUpdate({ slot, playerMap })} small>
@@ -67,7 +66,7 @@ export default class PlayerSlot extends React.Component {
     }
 
     const classNames = ['player__slot']
-    if (selectedPid) {
+    if (selected_player_slot) {
       classNames.push('selected')
     }
 
@@ -159,7 +158,7 @@ PlayerSlot.propTypes = {
   playerMap: ImmutablePropTypes.map,
   slot: PropTypes.number,
   handleSelect: PropTypes.func,
-  selectedPlayerMap: ImmutablePropTypes.map,
+  selected_player_slot: PropTypes.object,
   handleUpdate: PropTypes.func,
   isLocked: PropTypes.bool
 }

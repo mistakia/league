@@ -13,20 +13,20 @@ export default class Lineup extends React.Component {
   constructor(props) {
     super(props)
 
-    this.state = { selectedPlayerMap: new Map() }
+    this.state = { selected_player_slot: null }
   }
 
-  handleSelect = (selectedPlayerMap) => {
-    this.setState({ selectedPlayerMap })
+  handleSelect = (selected_player_slot) => {
+    this.setState({ selected_player_slot })
   }
 
-  handleUpdate = ({ slot, playerMap }) => {
-    const players = [{ slot, pid: this.state.selectedPlayerMap.get('pid') }]
+  handleUpdate = ({ slot, playerMap = new Map() }) => {
+    const players = [{ slot, pid: this.state.selected_player_slot.pid }]
     const pid = playerMap.get('pid')
     if (pid) {
       const { league, roster } = this.props
       const r = new Roster({ roster: roster.toJS(), league })
-      const selectedSlot = this.state.selectedPlayerMap.get('slot')
+      const selectedSlot = this.state.selected_player_slot.slot
       const slot = r.isEligibleForSlot({
         slot: selectedSlot,
         pos: playerMap.get('pos')
@@ -39,14 +39,19 @@ export default class Lineup extends React.Component {
       })
     }
     this.props.update(players)
-    this.setState({ selectedPlayerMap: new Map() })
+    this.setState({ selected_player_slot: null })
   }
 
   render = () => {
     const { league, roster } = this.props
-    const { selectedPlayerMap } = this.state
+    const { selected_player_slot } = this.state
     const { handleSelect, handleUpdate } = this
-    const slotProps = { roster, selectedPlayerMap, handleSelect, handleUpdate }
+    const slotProps = {
+      roster,
+      selected_player_slot,
+      handleSelect,
+      handleUpdate
+    }
 
     const r = new Roster({ roster: roster.toJS(), league })
 
@@ -162,10 +167,9 @@ export default class Lineup extends React.Component {
     }
 
     const bench = []
-    const selectedSlot = selectedPlayerMap.get('slot')
     if (
-      selectedPlayerMap.get('pid') &&
-      selectedSlot !== constants.slots.BENCH
+      selected_player_slot &&
+      selected_player_slot.slot !== constants.slots.BENCH
     ) {
       bench.push(
         <PlayerSlot
