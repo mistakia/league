@@ -10,6 +10,7 @@ import Drawer from '@mui/material/Drawer'
 import CloseIcon from '@mui/icons-material/Close'
 import { Map } from 'immutable'
 
+import PlayerHeadshot from '@components/player-headshot'
 import { constants } from '@common'
 import Team from '@components/team'
 import TeamName from '@components/team-name'
@@ -31,6 +32,16 @@ import PlayerWatchlistAction from '@components/player-watchlist-action'
 
 import './selected-player.styl'
 
+const getHeadshotWidth = () => {
+  if (window.innerWidth > 990) {
+    return 200
+  } else if (window.innerWidth < 750) {
+    return 120
+  } else {
+    return 178
+  }
+}
+
 export default class SelectedPlayer extends React.Component {
   constructor(props) {
     super(props)
@@ -40,8 +51,21 @@ export default class SelectedPlayer extends React.Component {
     this.state = {
       value: constants.season.isRegularSeason
         ? projectionView
-        : transactionsView
+        : transactionsView,
+      headshot_width: getHeadshotWidth()
     }
+  }
+
+  update = () => {
+    this.setState({ headshot_width: getHeadshotWidth() })
+  }
+
+  componentDidMount = () => {
+    window.addEventListener('resize', this.update)
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.update)
   }
 
   handleChange = (event, value) => {
@@ -87,6 +111,11 @@ export default class SelectedPlayer extends React.Component {
         }}
       >
         <div className='selected__player-header'>
+          <PlayerHeadshot
+            playerMap={playerMap}
+            width={this.state.headshot_width}
+            square={window.innerWidth < 900}
+          />
           <div className='selected__player-header-lead'>
             <div className='selected__player-first-name'>
               {playerMap.get('fname')}
