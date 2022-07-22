@@ -1,6 +1,7 @@
 import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
+import Tooltip from '@mui/material/Tooltip'
 
 import Icon from '@components/icon'
 
@@ -21,9 +22,11 @@ export default class PlayerWatchlistAction extends React.Component {
     const classNames = ['player__watchlist-action']
     if (selected) classNames.push('selected')
     return (
-      <div className={classNames.join(' ')} onClick={this.handleClick}>
-        {selected ? <Icon name='star-solid' /> : <Icon name='star-outline' />}
-      </div>
+      <Tooltip title={selected ? 'Remove from watchlist' : 'Add to watchlist'}>
+        <div className={classNames.join(' ')} onClick={this.handleClick}>
+          {selected ? <Icon name='star-solid' /> : <Icon name='star-outline' />}
+        </div>
+      </Tooltip>
     )
   }
 }
