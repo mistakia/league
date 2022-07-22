@@ -2,9 +2,11 @@ import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 import Button from '@mui/material/Button'
-import Tabs from '@mui/material/Tabs'
-import Tab from '@mui/material/Tab'
-import SwipeableDrawer from '@mui/material/SwipeableDrawer'
+import Tabs from '@mui/base/TabsUnstyled'
+import Tab from '@mui/base/TabUnstyled'
+import TabPanel from '@mui/base/TabPanelUnstyled'
+import TabsList from '@mui/base/TabsListUnstyled'
+import Drawer from '@mui/material/Drawer'
 import CloseIcon from '@mui/icons-material/Close'
 import { Map } from 'immutable'
 
@@ -29,25 +31,6 @@ import PlayerWatchlistAction from '@components/player-watchlist-action'
 
 import './selected-player.styl'
 
-function TabPanel(props) {
-  const { children, value, index, ...other } = props
-
-  return (
-    <div className='selected__player-body' hidden={value !== index} {...other}>
-      {value === index && children}
-    </div>
-  )
-}
-
-TabPanel.propTypes = {
-  children: PropTypes.oneOfType([
-    PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node
-  ]),
-  value: PropTypes.number,
-  index: PropTypes.number
-}
-
 export default class SelectedPlayer extends React.Component {
   constructor(props) {
     super(props)
@@ -65,12 +48,13 @@ export default class SelectedPlayer extends React.Component {
     this.setState({ value })
   }
 
-  handleOpen = () => {
-    // required function
-  }
-
   handleClose = () => {
     this.props.deselect()
+  }
+
+  componentDidUpdate() {
+    const element = document.querySelector('.TabUnstyled-root.Mui-selected')
+    if (element) element.scrollIntoView({ behavior: 'smooth' })
   }
 
   render = () => {
@@ -94,9 +78,8 @@ export default class SelectedPlayer extends React.Component {
     const rosPoints = playerMap.getIn(['points', 'ros', 'total'], 0)
 
     return (
-      <SwipeableDrawer
+      <Drawer
         anchor='bottom'
-        onOpen={this.handleOpen}
         open={Boolean(pid)}
         onClose={this.handleClose}
         classes={{
@@ -138,24 +121,22 @@ export default class SelectedPlayer extends React.Component {
                   ? playerStatus
                   : playerMap.get('gamestatus') || 'Active'}
               </div>
-            </div>
-            {isLoggedIn && (
-              <div className='selected__player-header-section'>
-                <div className='selected__player-header-item'>
-                  <label>Starts</label>
-                  {playerMap.getIn(['lineups', 'starts'], '-')}
-                </div>
-                <div className='selected__player-header-item'>
-                  <label>Points+</label>
-                  {playerMap.getIn(['lineups', 'sp'], 0).toFixed(1)}
-                </div>
-                <div className='selected__player-header-item'>
-                  <label>Bench+</label>
-                  {playerMap.getIn(['lineups', 'bp'], 0).toFixed(1)}
-                </div>
-              </div>
-            )}
-            <div className='selected__player-header-section'>
+              {isLoggedIn && (
+                <>
+                  <div className='selected__player-header-item'>
+                    <label>Starts</label>
+                    {playerMap.getIn(['lineups', 'starts'], '-')}
+                  </div>
+                  <div className='selected__player-header-item'>
+                    <label>Points+</label>
+                    {playerMap.getIn(['lineups', 'sp'], 0).toFixed(1)}
+                  </div>
+                  <div className='selected__player-header-item'>
+                    <label>Bench+</label>
+                    {playerMap.getIn(['lineups', 'bp'], 0).toFixed(1)}
+                  </div>
+                </>
+              )}
               <div className='selected__player-header-item'>
                 <label>Proj/G</label>
                 {rosPoints && projWks ? (rosPoints / projWks).toFixed(1) : '-'}
@@ -168,8 +149,6 @@ export default class SelectedPlayer extends React.Component {
                 <label>VOWS</label>
                 {playerMap.getIn(['vorp', 'ros', 'starter'], 0).toFixed(1)}
               </div>
-            </div>
-            <div className='selected__player-header-section'>
               <div className='selected__player-header-item'>
                 <label>Draft</label>
                 {draftNum ? `#${draftNum}` : 'UDFA'}
@@ -190,59 +169,62 @@ export default class SelectedPlayer extends React.Component {
         </div>
         <div className='selected__player-main'>
           <Tabs
-            orientation={window.innerWidth < 600 ? 'horizontal' : 'vertical'}
+            orientation='horizontal'
             variant='scrollable'
             indicatorColor='primary'
             textColor='inherit'
             value={value}
             className='selected__player-menu'
             onChange={this.handleChange}
+            defaultValue={0}
           >
-            <Tab label='Projections' />
-            <Tab label='Matchup' />
-            <Tab label='Game Log' />
-            <Tab label='Seasons' />
-            <Tab label='Team Splits' />
-            <Tab label='Efficiency' />
-            <Tab label='Practice' />
-            {isLoggedIn && <Tab label='Contribution' />}
-            {isLoggedIn && <Tab label='Value' />}
-            {isLoggedIn && <Tab label='Transactions' />}
+            <TabsList>
+              <Tab>Projections</Tab>
+              <Tab>Matchup</Tab>
+              <Tab>Game Log</Tab>
+              <Tab>Seasons</Tab>
+              <Tab>Team Splits</Tab>
+              <Tab>Efficiency</Tab>
+              <Tab>Practice</Tab>
+              {isLoggedIn && <Tab>Contribution</Tab>}
+              {isLoggedIn && <Tab>Value</Tab>}
+              {isLoggedIn && <Tab>Transactions</Tab>}
+            </TabsList>
+            <TabPanel value={0}>
+              <SelectedPlayerProjections />
+            </TabPanel>
+            <TabPanel value={1}>
+              <SelectedPlayerMatchup />
+            </TabPanel>
+            <TabPanel value={2}>
+              <SelectedPlayerGamelogs />
+            </TabPanel>
+            <TabPanel value={3}>
+              <SelectedPlayerSeasonStats pos={pos} />
+            </TabPanel>
+            <TabPanel value={4}>
+              <SelectedPlayerTeamStats />
+              <SelectedPlayerTeamSituationSplits />
+              <SelectedPlayerTeamPositionSplits />
+            </TabPanel>
+            <TabPanel value={5}>
+              <SelectedPlayerEfficiencyStats />
+            </TabPanel>
+            <TabPanel value={6}>
+              <SelectedPlayerPractice />
+            </TabPanel>
+            <TabPanel value={7}>
+              <SelectedPlayerLineupImpact />
+            </TabPanel>
+            <TabPanel value={8}>
+              <SelectedPlayerValue />
+            </TabPanel>
+            <TabPanel value={9}>
+              <SelectedPlayerTransactions />
+            </TabPanel>
           </Tabs>
-          <TabPanel value={value} index={0}>
-            <SelectedPlayerProjections />
-          </TabPanel>
-          <TabPanel value={value} index={1}>
-            <SelectedPlayerMatchup />
-          </TabPanel>
-          <TabPanel value={value} index={2}>
-            <SelectedPlayerGamelogs />
-          </TabPanel>
-          <TabPanel value={value} index={3}>
-            <SelectedPlayerSeasonStats pos={pos} />
-          </TabPanel>
-          <TabPanel value={value} index={4}>
-            <SelectedPlayerTeamStats />
-            <SelectedPlayerTeamSituationSplits />
-            <SelectedPlayerTeamPositionSplits />
-          </TabPanel>
-          <TabPanel value={value} index={5}>
-            <SelectedPlayerEfficiencyStats />
-          </TabPanel>
-          <TabPanel value={value} index={6}>
-            <SelectedPlayerPractice />
-          </TabPanel>
-          <TabPanel value={value} index={7}>
-            <SelectedPlayerLineupImpact />
-          </TabPanel>
-          <TabPanel value={value} index={8}>
-            <SelectedPlayerValue />
-          </TabPanel>
-          <TabPanel value={value} index={9}>
-            <SelectedPlayerTransactions />
-          </TabPanel>
         </div>
-      </SwipeableDrawer>
+      </Drawer>
     )
   }
 }
