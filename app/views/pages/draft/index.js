@@ -20,6 +20,11 @@ import { confirmationActions } from '@core/confirmations'
 import render from './draft'
 
 class DraftPage extends React.Component {
+  componentDidUpdate() {
+    const element = document.querySelector('.draft__side-main .draft__pick.active')
+    if (element) element.scrollIntoView({ behavior: 'smooth', inline: 'center' })
+  }
+
   componentDidMount() {
     this.props.loadDraft()
   }
