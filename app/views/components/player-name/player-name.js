@@ -29,7 +29,7 @@ export default class PlayerName extends React.Component {
           </div>
           {Boolean(headshot) && (
             <div className='player__name-headshot'>
-              <PlayerHeadshot playerMap={playerMap} width={32} />
+              <PlayerHeadshot playerMap={playerMap} width={48} />
             </div>
           )}
           <div className='player__name-main'>
