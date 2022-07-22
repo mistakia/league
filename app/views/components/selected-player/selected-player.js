@@ -25,6 +25,7 @@ import SelectedPlayerGamelogs from '@components/selected-player-gamelogs'
 import SelectedPlayerPractice from '@components/selected-player-practice'
 import SelectedPlayerMatchup from '@components/selected-player-matchup'
 import SelectedPlayerTransactions from '@components/selected-player-transactions'
+import PlayerWatchlistAction from '@components/player-watchlist-action'
 
 import './selected-player.styl'
 
@@ -84,6 +85,7 @@ export default class SelectedPlayer extends React.Component {
       .filter((week) => !blacklist.includes(week)).length
 
     const pos = playerMap.get('pos')
+    const pid = playerMap.get('pid')
     const tid = playerMap.get('tid', false)
     const playerStatus = playerMap.get('status')
     const draftNum = playerMap.get('dpos')
@@ -95,7 +97,7 @@ export default class SelectedPlayer extends React.Component {
       <SwipeableDrawer
         anchor='bottom'
         onOpen={this.handleOpen}
-        open={Boolean(playerMap.get('pid'))}
+        open={Boolean(pid)}
         onClose={this.handleClose}
         classes={{
           paper: 'selected__player-paper'
@@ -115,6 +117,7 @@ export default class SelectedPlayer extends React.Component {
               <span>#{playerMap.get('jnum', '-')}</span>
             </div>
           </div>
+          <PlayerWatchlistAction pid={pid} />
           <div className='selected__player-header-secondary'>
             <div className='selected__player-header-section'>
               {isLoggedIn && (
