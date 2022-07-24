@@ -10,7 +10,7 @@ import './roster.styl'
 
 export default class Roster extends React.Component {
   render = () => {
-    const { roster, league, team, teamId } = this.props
+    const { roster, league, team, teamId, ps_count_max } = this.props
 
     if (!roster) {
       return null
@@ -163,7 +163,7 @@ export default class Roster extends React.Component {
     if (league.ps) {
       const slot = constants.slots.PS
       const players = r.practice
-      for (let i = 0; i < league.ps; i++) {
+      for (let i = 0; i < ps_count_max; i++) {
         const { pid } = players[i] || {}
         rows.push(
           <PlayerRosterRow

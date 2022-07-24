@@ -128,26 +128,14 @@ router.post('/?', async (req, res) => {
       week: 0
     })
     const roster = new Roster({ roster: rosterRow, league })
-    const slot = roster.hasOpenPracticeSquadSlot()
-      ? constants.slots.PS
-      : roster.hasOpenBenchSlot(player_row.pos) && constants.slots.BENCH
-
-    if (!slot) {
-      return res.status(400).send({ error: 'unavailable roster spot' })
-    }
-
     const value =
       league.nteams - pick.pick + 1 > 0 ? league.nteams - pick.pick + 1 : 1
-
-    if (slot === constants.slots.BENCH && roster.availableCap < value) {
-      return res.status(400).send({ error: 'exceeds salary cap' })
-    }
 
     const insertRoster = db('rosters_players').insert({
       rid: roster.uid,
       pid,
       pos: player_row.pos,
-      slot
+      slot: constants.slots.PS
     })
 
     const insertTransaction = db('transactions').insert({
