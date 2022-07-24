@@ -17,7 +17,7 @@ export default class RostersPage extends React.Component {
   }
 
   render = () => {
-    const { rosters, league, teams } = this.props
+    const { rosters, league, teams, ps_count_max } = this.props
 
     const labels = []
     if (league.sqb) {
@@ -121,7 +121,7 @@ export default class RostersPage extends React.Component {
     }
 
     if (league.ps) {
-      for (let i = 0; i < league.ps; i++) {
+      for (let i = 0; i < ps_count_max; i++) {
         labels.push(
           <div key={`${i}PS`} className='roster__item'>
             PS
@@ -147,7 +147,9 @@ export default class RostersPage extends React.Component {
         (p) => p.slot === constants.slots.BENCH
       ).size
       if (benchSize > benchMax) benchMax = benchSize
-      items.push(<Roster key={index} roster={roster} tid={roster.tid} />)
+      items.push(
+        <Roster key={index} tid={roster.tid} {...{ roster, ps_count_max }} />
+      )
     }
 
     if (benchMax) {
