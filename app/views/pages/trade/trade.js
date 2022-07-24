@@ -74,14 +74,14 @@ export default function TradePage() {
   )
 
   const proposingTeamReleasePlayers = []
-  for (const [index, pid] of trade.proposingTeamReleasePlayers.entries()) {
+  trade.proposingTeamReleasePlayers.forEach((pid, index) => {
     proposingTeamReleasePlayers.push(<TradePlayer key={index} pid={pid} />)
-  }
+  })
 
   const acceptingTeamReleasePlayers = []
-  for (const [index, pid] of trade.acceptingTeamReleasePlayers.entries()) {
+  trade.acceptingTeamReleasePlayers.forEach((pid, index) => {
     acceptingTeamReleasePlayers.push(<TradePlayer key={index} pid={pid} />)
-  }
+  })
 
   const teamReleasePlayers = isProposer
     ? proposingTeamPlayers.filter(
