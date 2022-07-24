@@ -31,11 +31,13 @@ const run = async () => {
     await db('draft').update({ pick: num }).where('uid', pick.uid)
   }
 
-  const compPicks = await db('draft').where({
+  const query_params = {
     comp: 1,
     lid: leagueId,
     year: constants.season.year
-  })
+  }
+  await db('draft').update({ pick: null }).where(query_params)
+  const compPicks = await db('draft').where(query_params)
 
   const inserts = []
   let count = 0
