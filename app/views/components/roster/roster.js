@@ -161,8 +161,9 @@ export default class Roster extends React.Component {
     }
 
     if (bench_count_max) {
+      const players = r.bench.sort((a, b) => b.value - a.value)
       for (let i = 0; i < bench_count_max; i++) {
-        const { pid } = r.bench[i] || {}
+        const { pid } = players[i] || {}
         rows.push(
           <PlayerRosterRow
             key={pid}
@@ -174,7 +175,7 @@ export default class Roster extends React.Component {
 
     if (league.ps) {
       const slot = constants.slots.PS
-      const players = r.practice
+      const players = r.practice.sort((a, b) => b.value - a.value)
       for (let i = 0; i < ps_count_max; i++) {
         const { pid } = players[i] || {}
         rows.push(
