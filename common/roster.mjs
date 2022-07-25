@@ -74,8 +74,8 @@ export default class Roster {
 
   get players() {
     const arr = []
-    for (const { slot, pid, pos, rid, tag } of this._players.values()) {
-      arr.push({ slot, pid, pos, rid, tag })
+    for (const { slot, pid, pos, rid, tag, value } of this._players.values()) {
+      arr.push({ slot, pid, pos, rid, tag, value })
     }
     return arr
   }
