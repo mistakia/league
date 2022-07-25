@@ -10,12 +10,22 @@ import './player-roster-row.styl'
 
 class PlayerRosterRow extends Player {
   render = () => {
-    const { playerMap, selected, isHosted, league, showBid } = this.props
+    const {
+      playerMap,
+      selected,
+      isHosted,
+      league,
+      showBid,
+      practice,
+      reserve
+    } = this.props
 
     const pid = playerMap.get('pid')
-    const isSelected = selected === pid
+    const isSelected = pid && selected === pid
     const classNames = ['roster__item']
     if (isSelected) classNames.push('selected')
+    if (practice) classNames.push('practice')
+    if (reserve) classNames.push('reserve')
 
     const deadline = dayjs.unix(league.ext_date)
     const calculateExtension = constants.season.now.isBefore(deadline)

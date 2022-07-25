@@ -3,14 +3,14 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 
 import PlayerRosterRow from '@components/player-roster-row'
-import { Roster as RosterBuilder, constants, nth } from '@common'
+import { Roster as RosterBuilder, constants } from '@common'
 import TeamName from '@components/team-name'
 
 import './roster.styl'
 
 export default class Roster extends React.Component {
   render = () => {
-    const { roster, league, team, teamId, ps_count_max } = this.props
+    const { roster, league, teamId, ps_count_max, bench_count_max } = this.props
 
     if (!roster) {
       return null
@@ -160,6 +160,18 @@ export default class Roster extends React.Component {
       }
     }
 
+    if (bench_count_max) {
+      for (let i = 0; i < bench_count_max; i++) {
+        const { pid } = r.bench[i] || {}
+        rows.push(
+          <PlayerRosterRow
+            key={pid}
+            {...{ pid, slot: constants.slots.BENCH, roster, showBid }}
+          />
+        )
+      }
+    }
+
     if (league.ps) {
       const slot = constants.slots.PS
       const players = r.practice
@@ -168,6 +180,7 @@ export default class Roster extends React.Component {
         rows.push(
           <PlayerRosterRow
             key={`${slot}${i}`}
+            practice
             {...{ pid, slot, roster, showBid }}
           />
         )
@@ -182,34 +195,11 @@ export default class Roster extends React.Component {
         rows.push(
           <PlayerRosterRow
             key={`${slot}${i}`}
+            reserve
             {...{ pid, slot, roster, showBid }}
           />
         )
       }
-    }
-
-    for (const { pid } of r.bench) {
-      rows.push(
-        <PlayerRosterRow
-          key={pid}
-          {...{ pid, slot: constants.slots.BENCH, roster, showBid }}
-        />
-      )
-    }
-
-    const picks = []
-    for (const pick of team.picks) {
-      const pickNum = pick.pick % league.nteams || league.nteams
-      const pickStr = `${pick.round}.${('0' + pickNum).slice(-2)}`
-
-      picks.push(
-        <div>
-          {pick.pick ? pickStr : `${pick.round}${nth(pick.round)}`}
-          <div className='table__cell draft-pick__team'>
-            <TeamName tid={pick.otid} abbrv />
-          </div>
-        </div>
-      )
     }
 
     return (
@@ -226,8 +216,8 @@ export default class Roster extends React.Component {
 
 Roster.propTypes = {
   roster: ImmutablePropTypes.record,
-  team: ImmutablePropTypes.record,
   league: PropTypes.object,
   teamId: PropTypes.number,
-  ps_count_max: PropTypes.number
+  ps_count_max: PropTypes.number,
+  bench_count_max: PropTypes.number
 }

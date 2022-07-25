@@ -7,7 +7,6 @@ import Button from '@mui/material/Button'
 import DashboardDraftPicks from '@components/dashboard-draft-picks'
 import PageLayout from '@layouts/page'
 import Roster from '@components/roster'
-import { constants } from '@common'
 
 import './rosters.styl'
 
@@ -17,7 +16,7 @@ export default class RostersPage extends React.Component {
   }
 
   render = () => {
-    const { rosters, league, teams, ps_count_max } = this.props
+    const { rosters, league, teams, ps_count_max, bench_count_max } = this.props
 
     const labels = []
     if (league.sqb) {
@@ -120,6 +119,16 @@ export default class RostersPage extends React.Component {
       }
     }
 
+    if (bench_count_max) {
+      for (let i = 0; i < bench_count_max; i++) {
+        labels.push(
+          <div key={`${i}BENCH`} className='roster__item'>
+            BE
+          </div>
+        )
+      }
+    }
+
     if (league.ps) {
       for (let i = 0; i < ps_count_max; i++) {
         labels.push(
@@ -140,26 +149,15 @@ export default class RostersPage extends React.Component {
       }
     }
 
-    let benchMax = 0
     const items = []
     for (const [index, roster] of rosters.entries()) {
-      const benchSize = roster.players.filter(
-        (p) => p.slot === constants.slots.BENCH
-      ).size
-      if (benchSize > benchMax) benchMax = benchSize
       items.push(
-        <Roster key={index} tid={roster.tid} {...{ roster, ps_count_max }} />
+        <Roster
+          key={index}
+          tid={roster.tid}
+          {...{ roster, ps_count_max, bench_count_max }}
+        />
       )
-    }
-
-    if (benchMax) {
-      for (let i = 0; i < benchMax; i++) {
-        labels.push(
-          <div key={`${i}BENCH`} className='roster__item'>
-            BE
-          </div>
-        )
-      }
     }
 
     const pickItems = []
@@ -197,5 +195,6 @@ RostersPage.propTypes = {
   teams: ImmutablePropTypes.map,
   league: PropTypes.object,
   exportRosters: PropTypes.func,
-  ps_count_max: PropTypes.number
+  ps_count_max: PropTypes.number,
+  bench_count_max: PropTypes.number
 }
