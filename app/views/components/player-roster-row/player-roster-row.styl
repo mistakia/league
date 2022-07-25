@@ -3,12 +3,24 @@
   align-items center
   border-bottom 1px solid $borderColor
   height 30px
+  padding 0 8px
 
   .roster__item-action
     display none
 
-  &:hover .roster__item-action
-    display flex
+  &:hover
+    background white
+    .roster__item-action
+      display flex
+    .roster__item-salary
+    .player__name-label
+      display none
+
+  &.practice
+    background lighten(yellow, 85%)
+
+  &.reserve
+    background lighten(red, 90%)
 
   &.selected
     background lighten($accentColor, 85%)
@@ -24,7 +36,3 @@
 
 .roster__item-metric
   flex 0 0 30px
-
-@media (min-width 601px)
-  .roster__item:hover .roster__item-salary
-    display none
