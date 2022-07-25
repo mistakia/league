@@ -196,5 +196,6 @@ RostersPage.propTypes = {
   rosters: ImmutablePropTypes.map,
   teams: ImmutablePropTypes.map,
   league: PropTypes.object,
-  exportRosters: PropTypes.func
+  exportRosters: PropTypes.func,
+  ps_count_max: PropTypes.number
 }
