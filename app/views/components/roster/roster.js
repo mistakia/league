@@ -228,5 +228,6 @@ Roster.propTypes = {
   roster: ImmutablePropTypes.record,
   team: ImmutablePropTypes.record,
   league: PropTypes.object,
-  teamId: PropTypes.number
+  teamId: PropTypes.number,
+  ps_count_max: PropTypes.number
 }
