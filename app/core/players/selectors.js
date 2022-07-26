@@ -18,7 +18,10 @@ import { fuzzySearch } from '@core/utils'
 import { isAfterDraft } from '@core/draft'
 import { isAfterAuction } from '@core/auction'
 import { getPoachesForCurrentLeague } from '@core/poaches'
-import { getReleaseTransactions } from '@core/transactions'
+import {
+  getReleaseTransactions,
+  getReserveTransactionsByPlayerId
+} from '@core/transactions'
 import {
   getCurrentLeague,
   isBeforeExtensionDeadline,
@@ -645,17 +648,22 @@ export function isPlayerPracticeSquadEligible(
     return false
   }
 
-  // is a rookie OR is not on a team OR is on a teams practice squad
+  const rosterInfo = getRosterInfoForPlayerId(state, { pid })
+
+  // if player is a FA during the offseason, they must be either:
+  // - a rookie
+  // - not on a nfl team
+  // - on a nfl practice squad
   if (
-    !constants.season.isRegularSeason &&
-    playerMap.get('start') !== constants.season.year &&
-    playerMap.get('posd') !== 'PS' &&
-    playerMap.get('team') !== 'INA'
+    !rosterInfo.tid && // not on a team
+    !constants.season.isRegularSeason && // during the offseason
+    playerMap.get('start') !== constants.season.year && // not a rookie
+    playerMap.get('posd') !== 'PS' && // not on a nfl practice squad
+    playerMap.get('team') !== 'INA' // not on a nfl team
   ) {
     return false
   }
 
-  const rosterInfo = getRosterInfoForPlayerId(state, { pid })
   const { teamId } = getApp(state)
 
   // not eligible if already on another team
@@ -683,16 +691,43 @@ export function isPlayerPracticeSquadEligible(
     return false
   }
 
-  // TODO - check transaction history for deactivation or practice_add
+  const transactions = getReserveTransactionsByPlayerId(state, { pid })
+
   // not eligible if activated previously
-  if (rosterPlayer.type === constants.transactions.ROSTER_ACTIVATE) {
+  const activations = transactions.filter(
+    (t) => t.type === constants.transactions.ROSTER_ACTIVATE
+  )
+  if (activations.size) {
     return false
   }
 
-  // TODO - check entire transaction history for a poach
   // not eligible if player has been poached
-  if (rosterPlayer.type === constants.transactions.POACHED) {
+  const poaches = transactions.filter(
+    (t) => t.type === constants.transactions.POACHED
+  )
+  if (poaches.size) {
     return false
+  }
+
+  // if reserve player, must have been on practice squad previously
+  const ps_types = [
+    constants.transactions.ROSTER_DEACTIVATE,
+    constants.transactions.PRACTICE_ADD,
+    constants.transactions.DRAFT
+  ]
+  if (rosterInfo.slot === constants.slots.IR) {
+    for (const tran of transactions.values()) {
+      if (ps_types.includes(tran.type)) {
+        break
+      }
+
+      if (
+        tran.type === constants.transactions.ROSTER_ADD ||
+        tran.type === constants.transactions.TRADE
+      ) {
+        return false
+      }
+    }
   }
 
   return true

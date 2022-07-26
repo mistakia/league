@@ -53,7 +53,8 @@ import {
 } from '@core/teams'
 import {
   getTransactionsActions,
-  getReleaseTransactionsActions
+  getReleaseTransactionsActions,
+  getReserveTransactionsActions
 } from '@core/transactions'
 import { getMatchupsActions, postMatchupsActions } from '@core/matchups'
 import {
@@ -185,6 +186,11 @@ export const getReleaseTransactions = fetch.bind(
   null,
   api.getReleaseTransactions,
   getReleaseTransactionsActions
+)
+export const getReserveTransactions = fetch.bind(
+  null,
+  api.getReserveTransactions,
+  getReserveTransactionsActions
 )
 
 export const fetchMatchups = fetch.bind(

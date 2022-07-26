@@ -103,7 +103,7 @@ export function getRosterInfoForPlayerId(
   for (const roster of rosters.values()) {
     for (const rosterPlayer of roster.players) {
       if (rosterPlayer.pid === pid) {
-        return rosterPlayer
+        return { tid: roster.tid, ...rosterPlayer }
       }
     }
   }

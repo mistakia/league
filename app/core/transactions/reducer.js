@@ -10,6 +10,7 @@ const initialState = new Record({
   isPending: false,
   hasMore: true,
   release: new List(),
+  reserve: new List(),
   items: new List(),
   types: new List(Object.values(constants.transactions)),
   teams: new List()
@@ -22,6 +23,9 @@ export function transactionsReducer(state = initialState(), { payload, type }) {
 
     case transactionsActions.GET_RELEASE_TRANSACTIONS_FULFILLED:
       return state.merge({ release: new List(payload.data) })
+
+    case transactionsActions.GET_RESERVE_TRANSACTIONS_FULFILLED:
+      return state.merge({ reserve: new List(payload.data) })
 
     case transactionsActions.GET_TRANSACTIONS_PENDING:
       return state.merge({ isPending: true })

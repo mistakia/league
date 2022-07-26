@@ -48,6 +48,7 @@ export {
   deleteRosters,
   postAddFreeAgent,
   getReleaseTransactions,
+  getReserveTransactions,
   postReserve,
   postRelease,
   getSchedule,
