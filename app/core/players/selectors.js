@@ -277,11 +277,16 @@ export function getFilteredPlayers(state) {
         playerMap.get('tid')
       ) {
         const salary = playerMap.get('value')
-        const market_salary = playerMap.getIn(['market_salary', '0'], 0)
+        const market_salary_adj = playerMap.get('market_salary_adj', 0)
         const tag = playerMap.get('tag')
+        const slot = playerMap.get('slot')
         const isRestrictedOrFranchised =
           tag === constants.tags.TRANSITION || tag === constants.tags.FRANCHISE
-        if (!isRestrictedOrFranchised && salary - market_salary > 0) {
+        if (
+          slot !== constants.slots.PS &&
+          !isRestrictedOrFranchised &&
+          salary - market_salary_adj * 0.85 > 0
+        ) {
           return true
         }
       }
