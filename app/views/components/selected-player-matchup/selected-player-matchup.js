@@ -31,7 +31,7 @@ export default class SelectedPlayerMatchup extends React.Component {
     }
 
     const labels = []
-    for (const game of games) {
+    games.forEach((game, index) => {
       const opp = team === game.h ? game.v : game.h
       const isHome = opp === game.v
       const label = (
@@ -40,8 +40,8 @@ export default class SelectedPlayerMatchup extends React.Component {
           <div>{`${isHome ? '' : '@'}${opp}`}</div>
         </>
       )
-      labels.push(<Tab label={label} value={game.wk} />)
-    }
+      labels.push(<Tab key={index} label={label} value={game.wk} />)
+    })
 
     return (
       <div className='selected__player-matchup'>
