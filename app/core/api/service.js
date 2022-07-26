@@ -134,6 +134,10 @@ export const api = {
     const url = `${BASE_URL}/leagues/${params.leagueId}/transactions/release`
     return { url }
   },
+  getReserveTransactions({ teamId, leagueId }) {
+    const url = `${BASE_URL}/teams/${teamId}/transactions/reserve?leagueId=${leagueId}`
+    return { url }
+  },
   getTrades(params) {
     const url = `${BASE_URL}/leagues/${
       params.leagueId

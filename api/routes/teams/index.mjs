@@ -10,6 +10,7 @@ import lineups from './lineups.mjs'
 import reserve from './reserve.mjs'
 import protect from './protect.mjs'
 import tag from './tag.mjs'
+import transactions from './transactions.mjs'
 
 const router = express.Router()
 
@@ -76,5 +77,6 @@ router.use('/:teamId/reserve', reserve)
 router.use('/:teamId/protect', protect)
 router.use('/:teamId/tag', tag)
 router.use('/:teamId/cutlist', cutlist)
+router.use('/:teamId/transactions', transactions)
 
 export default router
