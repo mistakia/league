@@ -101,7 +101,7 @@ export default class TradeSelectItems extends React.Component {
         disabled={disabled}
         options={options}
         getOptionLabel={(x) => x.label}
-        getOptionSelected={getOptionSelected}
+        isOptionEqualToValue={getOptionSelected}
         renderOption={renderOption}
         filterSelectedOptions
         value={value}
