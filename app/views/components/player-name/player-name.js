@@ -19,7 +19,7 @@ export default class PlayerName extends React.Component {
   }
 
   render = () => {
-    const { playerMap, isOnCutlist, headshot } = this.props
+    const { playerMap, isOnCutlist, headshot, square } = this.props
 
     return (
       <>
@@ -29,7 +29,11 @@ export default class PlayerName extends React.Component {
           </div>
           {Boolean(headshot) && (
             <div className='player__name-headshot'>
-              <PlayerHeadshot playerMap={playerMap} width={48} />
+              <PlayerHeadshot
+                playerMap={playerMap}
+                width={48}
+                square={square}
+              />
             </div>
           )}
           <div className='player__name-main'>
@@ -59,5 +63,6 @@ PlayerName.propTypes = {
   playerMap: ImmutablePropTypes.map,
   headshot: PropTypes.bool,
   select: PropTypes.func,
-  isOnCutlist: PropTypes.bool
+  isOnCutlist: PropTypes.bool,
+  square: PropTypes.bool
 }
