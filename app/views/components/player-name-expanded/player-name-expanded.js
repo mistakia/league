@@ -35,11 +35,11 @@ function getClock({ desc, game_clock_start, qtr }) {
 
 function GameStatus({ status, playerMap }) {
   if (!constants.season.isRegularSeason) {
-    return <div className='player__name-expanded-game'>-</div>
+    return null
   }
 
   if (!playerMap.get('pid')) {
-    return <div className='player__name-expanded-game'>-</div>
+    return null
   }
 
   if (!status || !status.game) {
@@ -84,7 +84,8 @@ GameStatus.propTypes = {
 
 class PlayerNameExpanded extends Player {
   render = () => {
-    const { playerMap, isHosted, hideActions, status, minimize } = this.props
+    const { playerMap, isHosted, hideActions, status, minimize, square } =
+      this.props
 
     const classNames = ['player__name-expanded']
     if (minimize) classNames.push('minimize')
@@ -109,7 +110,7 @@ class PlayerNameExpanded extends Player {
           </div>
         )}
         <div className='player__name-headshot'>
-          <PlayerHeadshot playerMap={playerMap} />
+          <PlayerHeadshot playerMap={playerMap} square={square} />
         </div>
         <div className='player__name-expanded-main'>
           <div
@@ -154,7 +155,8 @@ class PlayerNameExpanded extends Player {
 
 PlayerNameExpanded.propTypes = {
   status: PropTypes.object,
-  playerMap: ImmutablePropTypes.map
+  playerMap: ImmutablePropTypes.map,
+  square: PropTypes.bool
 }
 
 export default connect(PlayerNameExpanded)

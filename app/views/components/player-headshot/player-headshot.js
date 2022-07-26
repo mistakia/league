@@ -19,10 +19,13 @@ export default function PlayerHeadshot({
       }&h=${height * 2}&cb=1`
     : null
 
+  const classNames = ['player__headshot']
+  if (square) classNames.push('square')
+
   return (
     <Avatar
       src={src}
-      className='player__headshot'
+      className={classNames.join(' ')}
       style={{ width, height: square ? width : height }}
     />
   )

@@ -1,8 +1,8 @@
 .waiver__report-item
   background white
-  margin 8px
+  margin 8px 0
   border-radius 12px
-  padding 4px
+  overflow hidden
 
   .MuiTableCell-head
     font-weight 600
@@ -19,6 +19,17 @@
     color rgba(0,0,0,0.5)
     font-size 11px
 
+.waiver__report-team
+  background lighten($backgroundColor, 70%)
+  padding 4px 2px
+  font-size 12px
+
+.waiver__report-claims
+  border-radius 12px
+  background lighten($backgroundColor, 50%)
+  margin 4px
+  overflow hidden
+
 .waiver__report-item-head
   display flex
   align-items center
@@ -30,7 +41,7 @@
     letter-spacing 0.00938em
 
 .waiver__report-item-winning-bid.metric
-  flex 1
+  flex 0 0 60px
   font-size 24px
   padding 0 8px
   display flex
@@ -38,15 +49,8 @@
   justify-content center
 
 .waiver__report-meta
-  flex 5
+  flex 1
+  min-width 0
+  padding-left 16px
   .player__name-expanded
     padding 16px 0
-
-.waiver__report-item-alternates
-  display flex
-  flex-direction column
-
-.waiver__report-item-alt
-  display flex
-  border-top 1px solid $borderColor
-  padding 16px
