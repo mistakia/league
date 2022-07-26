@@ -1,5 +1,4 @@
 import React from 'react'
-import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 import FormControl from '@mui/material/FormControl'
 import Select from '@mui/material/Select'
@@ -43,7 +42,7 @@ export default class StandingsSelectYear extends React.Component {
 }
 
 StandingsSelectYear.propTypes = {
-  league: ImmutablePropTypes.record,
+  league: PropTypes.object,
   year: PropTypes.number,
   selectYear: PropTypes.func
 }
