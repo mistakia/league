@@ -430,7 +430,7 @@ xiv. 10-13 points allowed (2)
 
 (d) 4th+ extension: +$35
 
-2. Extension counts are reset when a player changes Teams through free agency.
+2. Extension counts are reset when a player changes Teams through Free Agency or on a successful Restricted Free Agency acquisition.
 
 **Rookie Tag.**
 
