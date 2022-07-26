@@ -4,6 +4,7 @@ import db from '#db'
 import {
   constants,
   groupBy,
+  Roster,
   getRosterSize,
   weightProjections,
   calculatePoints,
@@ -33,6 +34,7 @@ const processLeague = async ({ year, lid }) => {
   const { nteams, cap, minBid } = league
   const rosterSize = getRosterSize(league)
   const leagueTotalCap = nteams * cap - nteams * rosterSize * minBid
+  let league_available_salary_space = 0
 
   const rosterRows = []
   const rostered_pids = []
@@ -40,6 +42,13 @@ const processLeague = async ({ year, lid }) => {
     const rosterRow = await getRoster({ tid: team.uid, week })
     rosterRows.push(rosterRow)
     rosterRow.players.forEach((p) => rostered_pids.push(p.pid))
+    const roster = new Roster({ roster: rosterRow, league })
+    const team_available_salary_space =
+      roster.availableCap - minBid * roster.availableSpace
+    if (team_available_salary_space > 0) {
+      league_available_salary_space =
+        league_available_salary_space + team_available_salary_space
+    }
   }
 
   const projections = await getProjections()
@@ -143,6 +152,14 @@ const processLeague = async ({ year, lid }) => {
     calculatePrices({ cap: leagueTotalCap, total, players: player_rows, week })
   }
 
+  let league_available_vorp = 0
+  for (const player_row of player_rows) {
+    const is_available = !rostered_pids.includes(player_row.pid)
+    if (is_available && player_row.vorp[0] > 0) {
+      league_available_vorp = league_available_vorp + player_row.vorp[0]
+    }
+  }
+
   calculatePlayerValuesRestOfSeason({
     players: player_rows,
     rosterRows,
@@ -157,6 +174,15 @@ const processLeague = async ({ year, lid }) => {
     if (!projection_pids.includes(player_row.pid)) {
       continue
     }
+
+    const is_available = !rostered_pids.includes(player_row.pid)
+    const league_adjusted_rate = is_available
+      ? league_available_salary_space / league_available_vorp
+      : (league_available_salary_space + player_row.value) /
+        (league_available_vorp + player_row.vorp[0])
+    const market_salary_adj =
+      Math.round(league_adjusted_rate * player_row.vorp[0]) || 0
+    player_row.market_salary_adj = Math.max(market_salary_adj, 0)
 
     for (const [week, projection] of Object.entries(player_row.projection)) {
       if (week === 'ros') {
@@ -191,7 +217,7 @@ const processLeague = async ({ year, lid }) => {
     }
 
     for (const [week, vorp] of Object.entries(player_row.vorp)) {
-      valueInserts.push({
+      const params = {
         pid: player_row.pid,
         year: constants.season.year,
         lid,
@@ -199,7 +225,12 @@ const processLeague = async ({ year, lid }) => {
         vorp,
         vorp_adj: player_row.vorp_adj[week],
         market_salary: player_row.market_salary[week]
-      })
+      }
+
+      if (week === '0' && market_salary_adj > 0) {
+        params.market_salary_adj = market_salary_adj
+      }
+      valueInserts.push(params)
     }
   }
 

@@ -17,10 +17,10 @@ export default class AuctionNominatedPlayer extends React.Component {
         </div>
         <div className='nominated__player-details'>
           <div className='nominated__player-detail'>
-            Retail: ${playerMap.getIn(['market_salary', '0'], 0)}
+            Market: ${playerMap.getIn(['market_salary', '0'], 0)}
           </div>
           <div className='nominated__player-detail'>
-            Inflation: ${playerMap.getIn(['market_salary', 'inflation'], 0)}
+            Adjusted: ${playerMap.get('market_salary_adj', 0)}
           </div>
           <div className='nominated__player-detail'>
             Bye: <NFLTeamBye team={playerMap.get('team')} />

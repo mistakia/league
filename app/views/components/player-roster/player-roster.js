@@ -56,6 +56,7 @@ class PlayerRoster extends Player {
       ['market_salary', projectionType],
       0
     )
+    const market_salary_adj = playerMap.get('market_salary_adj', 0)
     const savings =
       hasProjections &&
       (!isRestrictedFreeAgencyPeriod || bid || !isRestrictedFreeAgent)
@@ -134,6 +135,11 @@ class PlayerRoster extends Player {
         {!isWaiver && !isPoach && !isOffseason && (
           <div className='metric table__cell'>
             {extendedSalary ? `$${extendedSalary}` : '-'}
+          </div>
+        )}
+        {!isWaiver && !isPoach && isOffseason && (
+          <div className='metric table__cell'>
+            {market_salary_adj ? `$${market_salary_adj.toFixed(0)}` : '-'}
           </div>
         )}
         {!isWaiver && !isPoach && isOffseason && (
