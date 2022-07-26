@@ -10,9 +10,13 @@
     color rgba(50,50,50,0.9)
     border-radius $borderRadius
     display inline
-    border-radius 3px
+    padding 4px 8px
+    margin 6px 6px
+    border-radius 5px
     &:hover
-      background darken($backgroundColor, 15%)
+      background lighten($backgroundColor, 60%)
+      color $accentColor
     &.active
-      color $textColorDark
+      background white
+      color black
       font-weight 700
