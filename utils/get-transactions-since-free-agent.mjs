@@ -8,7 +8,11 @@ import isMain from './is-main.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 
-async function getTransactionsSinceFreeAgent({ lid, pid, include_restricted = false }) {
+async function getTransactionsSinceFreeAgent({
+  lid,
+  pid,
+  include_restricted = false
+}) {
   const transactions = await db('transactions')
     .where({
       lid,
