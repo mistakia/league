@@ -200,8 +200,6 @@ export default class SelectedPlayer extends React.Component {
           <Tabs
             orientation='horizontal'
             variant='scrollable'
-            indicatorColor='primary'
-            textColor='inherit'
             value={value}
             className='selected__player-menu'
             onChange={this.handleChange}
