@@ -36,7 +36,7 @@ const calculateStandings = ({
       potentialPointsPenalty: {}
     }
 
-    teamStats[tid].stats.pmin = 99999
+    teamStats[tid].stats.pmin = Infinity
   }
 
   const minStarters =
@@ -181,7 +181,9 @@ const calculateStandings = ({
     teamStats[tid].stats.pdiff =
       teamStats[tid].stats.pf - teamStats[tid].stats.pa
     teamStats[tid].stats.pp_pct =
-      (teamStats[tid].stats.pf / teamStats[tid].stats.pp) * 100
+      (teamStats[tid].stats.pf / teamStats[tid].stats.pp) * 100 || null
+
+    if (teamStats[tid].stats.pmin === Infinity) teamStats[tid].stats.pmin = null
   }
 
   return teamStats
