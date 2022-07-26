@@ -2,6 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import { Map } from 'immutable'
+import Toolbar from '@mui/material/Toolbar'
 
 import PageLayout from '@layouts/page'
 import PercentileMetric from '@components/percentile-metric'
@@ -218,7 +219,9 @@ export default class StatsPage extends React.Component {
       <div className='stats'>
         <StandingsSelectYear />
         <div className='section'>
-          <div className='dashboard__section-header-title'>League Stats</div>
+          <Toolbar>
+            <div className='dashboard__section-header-title'>League Stats</div>
+          </Toolbar>
           <div className='table__container'>
             <div className='table__row table__head'>
               <div className='table__cell player__item-name'>Team</div>
@@ -247,7 +250,9 @@ export default class StatsPage extends React.Component {
           </div>
         </div>
         <div className='section'>
-          <div className='dashboard__section-header-title'>Lineup Stats</div>
+          <Toolbar>
+            <div className='dashboard__section-header-title'>Lineup Stats</div>
+          </Toolbar>
           <div className='table__container'>
             <div className='table__row table__head'>
               <div className='table__cell player__item-name'>Team</div>
@@ -257,9 +262,11 @@ export default class StatsPage extends React.Component {
           </div>
         </div>
         <div className='section'>
-          <div className='dashboard__section-header-title'>
-            Positional Stats
-          </div>
+          <Toolbar>
+            <div className='dashboard__section-header-title'>
+              Positional Stats
+            </div>
+          </Toolbar>
           <div className='table__container'>
             <div className='table__row table__head'>
               <div className='table__cell player__item-name'>Team</div>
