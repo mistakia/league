@@ -65,10 +65,12 @@ const run = async ({ lid, year }) => {
 
   const teamStats = []
   for (const [tid, team] of Object.entries(result)) {
+    const tm = teams.find((t) => t.uid === team.tid)
     teamStats.push({
       tid,
       lid,
       year,
+      div: tm.div,
       ...team.stats
     })
   }
