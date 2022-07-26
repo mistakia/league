@@ -19,12 +19,15 @@
 .MuiDrawer-paper.main__menu-paper
   width 250px
 
+.main__menu-button.MuiFab-root
+  fixed left 16px bottom 32px
+
 @media (min-width 1051px)
   .main__menu .MuiToolbar-root
     justify-content center
-    .main__menu-button
-      display none
+  .main__menu-button.MuiFab-root
+    display none
 
 @media screen and (max-width 1050px)
-  .main__menu .MuiToolbar-root a
+  .main__menu
     display none
