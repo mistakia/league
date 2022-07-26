@@ -150,7 +150,7 @@ export default class RostersPage extends React.Component {
     }
 
     const items = []
-    for (const [index, roster] of rosters.entries()) {
+    rosters.forEach((roster, index) => {
       items.push(
         <Roster
           key={index}
@@ -158,7 +158,7 @@ export default class RostersPage extends React.Component {
           {...{ roster, ps_count_max, bench_count_max }}
         />
       )
-    }
+    })
 
     const pickItems = []
     for (const team of teams.valueSeq()) {
