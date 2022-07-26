@@ -51,7 +51,8 @@ router.post('/?', async (req, res) => {
           tid,
           lid: leagueId,
           userid: req.auth.userId,
-          activate_pid
+          activate_pid,
+          create_notification: true
         })
       } catch (error) {
         return res.status(400).send({ error: error.message })
