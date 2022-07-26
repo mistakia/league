@@ -5,9 +5,6 @@
   display flex
   flex-direction column
 
-main > .page
-  padding-top $menuHeight
-
 .page__main
   flex 1
   display flex
@@ -35,6 +32,10 @@ main > .page
     a
       font-size 13px
       font-family 'IBM Plex Mono'
+
+@media (min-width: 1051px)
+  main > .page
+    padding-top $menuHeight
 
 @media screen and (max-width: 1050px)
   .page__menu
