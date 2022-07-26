@@ -30,9 +30,7 @@ export default class DraftPick extends React.Component {
         <div className='draft__pick-num formatted'>
           {`${pick.round}.${('0' + pickNum).slice(-2)}`}
         </div>
-        <div className='draft__pick-num pick'>
-          {`#${pick.pick}`}
-        </div>
+        <div className='draft__pick-num pick'>{`#${pick.pick}`}</div>
         <div className='draft__pick-main'>
           {Boolean(playerMap.get('pid')) && (
             <div className='draft__pick-player'>
