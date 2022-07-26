@@ -166,7 +166,7 @@ export default class Roster extends React.Component {
         const { pid } = players[i] || {}
         rows.push(
           <PlayerRosterRow
-            key={pid}
+            key={`bench_${i}`}
             {...{ pid, slot: constants.slots.BENCH, roster, showBid }}
           />
         )
