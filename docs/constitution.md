@@ -604,13 +604,17 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 
 11. At any time during the Regular Season, Manager’s may elect to designate practice squad players as protected when a player has no outstanding poaching claim. Protected practice squad players can not be activated, released or poached during the Regular Season. They can only be traded. Traded players will arrive without a designation and can be designated in the future. A protected designation can not be reversed and will expire at the extension deadline the following Offseason.
 
+12. Reserve players with a poaching claim since being acquired are ineligible for the practice squad.
+
+13. Players acquired through free agency waivers that had one or more competing bids are ineligible for the practice squad.
+
 **Poaching.**
 
-12. Players on a PS may be poached by another team at any point for an extra $2 on their current contract. The Manager of the PS player has 48 hours to promote the player to the active roster or lose that player.
+14. Players on a PS may be poached by another team at any point for an extra $2 on their current contract. The Manager of the PS player has 48 hours to promote the player to the active roster or lose that player.
 
 **Sanctuary Periods.**
 
-13. Poaching claims can not be submitted during the following Sanctuary Periods:
+15. Poaching claims can not be submitted during the following Sanctuary Periods:
 
 (a) First twenty-four (24) hours of the Regular Season;
 
