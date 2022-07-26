@@ -18,10 +18,17 @@ const MarketSalaryHeader = () => (
   />
 )
 
+const MarketSalaryAdjustedHeader = () => (
+  <PlayerRosterHeader
+    tooltip='Market Salary adjusted for player availability and salary space'
+    title='Market Salary Adjusted'
+  />
+)
+
 const SalaryDifferenceHeader = () => (
   <PlayerRosterHeader
     tooltip='Difference between a players salary and the market salary'
-    title='Savings'
+    title='Market Savings'
   />
 )
 
@@ -227,6 +234,11 @@ export default class DashboardPlayersTable extends React.Component {
               <div className='metric table__cell'>{`${
                 baseYear + 1
               } Salary`}</div>
+            )}
+            {!isWaiver && !isPoach && isOffseason && (
+              <div className='table__cell metric'>
+                <MarketSalaryAdjustedHeader />
+              </div>
             )}
             {!isWaiver && !isPoach && isOffseason && (
               <div className='table__cell metric'>

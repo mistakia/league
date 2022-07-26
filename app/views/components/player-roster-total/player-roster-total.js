@@ -68,6 +68,7 @@ export default class PlayerRosterTotal extends React.Component {
         {!isOffseason && (
           <div className='metric table__cell'>${extendedSalaryTotal}</div>
         )}
+        {isOffseason && <div className='metric table__cell'>-</div>}
         {isOffseason && (
           <div className='metric table__cell'>
             {projectedSalaryTotal ? `$${projectedSalaryTotal.toFixed(0)}` : '-'}

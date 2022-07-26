@@ -239,7 +239,7 @@ export default class PlayersPage extends React.Component {
       </div>
     )
 
-    const headerSalary = (
+    const headerSalary = week === 0 && (
       <>
         <PlayerHeader
           className='table__cell metric'
@@ -249,8 +249,22 @@ export default class PlayersPage extends React.Component {
         {constants.season.isOffseason && (
           <PlayerHeader
             className='table__cell metric'
+            label='Value'
+            value={`vorp_adj.${week}`}
+          />
+        )}
+        {constants.season.isOffseason && (
+          <PlayerHeader
+            className='table__cell metric'
             label='Market'
             value={`market_salary.${week}`}
+          />
+        )}
+        {constants.season.isOffseason && (
+          <PlayerHeader
+            className='table__cell metric'
+            label='Market Adjusted'
+            value={'market_salary_adj'}
           />
         )}
       </>
@@ -265,13 +279,6 @@ export default class PlayersPage extends React.Component {
             label='Pts Over Replace.'
             value={`vorp.${week}`}
           />
-          {constants.season.isOffseason && (
-            <PlayerHeader
-              className='table__cell metric'
-              label='Value'
-              value={`vorp_adj.${week}`}
-            />
-          )}
           <PlayerHeader
             className='table__cell metric'
             label='Proj'

@@ -49,31 +49,26 @@ class PlayerRow extends Player {
     const isSelected = selectedPlayer === pid || selected === pid
 
     const seasonSummary = () => {
-      let inflation = null
-      const value = playerMap.getIn(['market_salary', `${week}`])
-      if (isLoggedIn && !isRostered && (isRestOfSeasonView || isSeasonView)) {
-        const diff = playerMap.getIn(['market_salary', 'inflation']) - value
-        const classNames = ['value__inflation']
-        const isPos = diff > 0
-        if (isPos) classNames.push('positive')
-        else classNames.push('negative')
-        inflation = (
-          <span className={classNames.join(' ')}>
-            {isPos && '+'}
-            {diff || ''}
-          </span>
-        )
-      }
-
-      const playerSalary = (
+      const market_salary = playerMap.getIn(['market_salary', `${week}`])
+      const market_salary_adj = playerMap.get('market_salary_adj', 0)
+      const playerSalary = week === 0 && (
         <>
           <div className='table__cell metric'>
             ${playerMap.get('value', '--')}
           </div>
           {constants.season.isOffseason && (
             <div className='table__cell metric'>
-              ${Math.round(value) || '--'}
-              {inflation}
+              {Math.round(playerMap.getIn(['vorp_adj', `${week}`], 0))}
+            </div>
+          )}
+          {constants.season.isOffseason && (
+            <div className='table__cell metric'>
+              ${Math.round(market_salary) || '--'}
+            </div>
+          )}
+          {constants.season.isOffseason && (
+            <div className='table__cell metric'>
+              ${Math.round(market_salary_adj) || '--'}
             </div>
           )}
         </>
@@ -86,11 +81,6 @@ class PlayerRow extends Player {
             <div className='table__cell metric'>
               {Math.round(playerMap.getIn(['vorp', `${week}`], 0))}
             </div>
-            {constants.season.isOffseason && (
-              <div className='table__cell metric'>
-                {Math.round(playerMap.getIn(['vorp_adj', `${week}`], 0))}
-              </div>
-            )}
             <div className='table__cell metric'>
               {playerMap.getIn(['points', `${week}`, 'total'], 0).toFixed(1)}
             </div>

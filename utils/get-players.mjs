@@ -140,12 +140,16 @@ export default async function ({ textSearch, leagueId, pids = [] }) {
     .whereIn('pid', returnedPlayerIds)
 
   for (const pointProjection of leagueValuesProj) {
-    const { vorp, vorp_adj, market_salary } = pointProjection
+    const { vorp, vorp_adj, market_salary, market_salary_adj } = pointProjection
     players_by_pid[pointProjection.pid].vorp[pointProjection.week] = vorp
     players_by_pid[pointProjection.pid].vorp_adj[pointProjection.week] =
       vorp_adj
     players_by_pid[pointProjection.pid].market_salary[pointProjection.week] =
       market_salary
+
+    if (pointProjection.week === '0') {
+      players_by_pid[pointProjection.pid].market_salary_adj = market_salary_adj
+    }
   }
 
   const projections = await db('projections')
