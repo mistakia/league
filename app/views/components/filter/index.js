@@ -12,17 +12,26 @@ export default class Filter extends React.Component {
   }
 
   handleToggleClick = (event) => {
-    event.preventDefault()
-    event.stopPropagation()
+    // ignore multiple events on same click
+    if (this._timestamp && event.timeStamp === this._timestamp) {
+      return
+    }
+    this._timestamp = event.timeStamp
+
+    // close on PointerEvent outside of element
+    if (event.constructor.name === 'PointerEvent') {
+      const isOutside = this.body ? !this.body.contains(event.target) : false
+      if (isOutside) {
+        document.removeEventListener('click', this.handleToggleClick)
+        this.setState({ visible: false })
+      }
+
+      return
+    }
 
     if (this.state.visible) {
-      const wasOutsideBody = this.body
-        ? !this.body.contains(event.target)
-        : false
-      if (wasOutsideBody) {
-        document.removeEventListener('click', this.handleToggleClick)
-        return this.setState({ visible: false })
-      }
+      document.removeEventListener('click', this.handleToggleClick)
+      this.setState({ visible: false })
     } else {
       document.addEventListener('click', this.handleToggleClick)
       this.setState({ visible: true })
