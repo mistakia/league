@@ -3,6 +3,7 @@
   height 100%
   overflow hidden
   display flex
+  flex-direction column
 
 main > .page
   padding-top $menuHeight
@@ -24,16 +25,16 @@ main > .page
   overflow hidden
 
 .page__menu
-  flex 0 120px
-  border-left 1px solid $borderColor
+  flex 0 0 auto
+  background lighten($backgroundColor, 50%)
+  border-bottom 1px solid lighten($borderColor, 40%)
+  padding 8px 0
   .menu
     display flex
-    flex-direction column
-    padding-top 15px
+    justify-content center
     a
-      border-radius 0
-    a.active
-      border-color darken($borderColor, 50%)
+      font-size 13px
+      font-family 'IBM Plex Mono'
 
 @media screen and (max-width: 1050px)
   .page__menu
