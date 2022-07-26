@@ -110,6 +110,10 @@ export default class SelectedPlayerTransactions extends React.Component {
             <Table size='small'>
               <TableBody>
                 <TableRow>
+                  <TableCell>Extension Count</TableCell>
+                  <TableCell colSpan={2}>{extensions}</TableCell>
+                </TableRow>
+                <TableRow>
                   <TableCell>{constants.season.year} Extended Salary</TableCell>
                   <TableCell colSpan={2}>${extendedSalary}</TableCell>
                 </TableRow>
