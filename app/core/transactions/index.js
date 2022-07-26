@@ -3,6 +3,11 @@ export { transactionsReducer } from './reducer'
 export {
   transactionsActions,
   getTransactionsActions,
-  getReleaseTransactionsActions
+  getReleaseTransactionsActions,
+  getReserveTransactionsActions
 } from './actions'
-export { getTransactions, getReleaseTransactions } from './selectors'
+export {
+  getTransactions,
+  getReleaseTransactions,
+  getReserveTransactionsByPlayerId
+} from './selectors'

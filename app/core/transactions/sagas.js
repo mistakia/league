@@ -4,7 +4,11 @@ import { getApp, appActions } from '@core/app'
 import { getTransactions } from './selectors'
 import { transactionsActions } from './actions'
 import { TRANSACTIONS_PER_LOAD } from '@core/constants'
-import { fetchTransactions, getReleaseTransactions } from '@core/api'
+import {
+  fetchTransactions,
+  getReleaseTransactions,
+  getReserveTransactions
+} from '@core/api'
 
 export function* load() {
   const { leagueId } = yield select(getApp)
@@ -27,6 +31,11 @@ export function* loadReleaseTransactions() {
   yield call(getReleaseTransactions, { leagueId })
 }
 
+export function* loadReserveTransactions() {
+  const { leagueId, teamId } = yield select(getApp)
+  yield call(getReserveTransactions, { leagueId, teamId })
+}
+
 //= ====================================
 //  WATCHERS
 // -------------------------------------
@@ -45,6 +54,7 @@ export function* watchFilterTransactions() {
 
 export function* watchAuthFulfilled() {
   yield takeLatest(appActions.AUTH_FULFILLED, loadReleaseTransactions)
+  yield takeLatest(appActions.AUTH_FULFILLED, loadReserveTransactions)
 }
 
 //= ====================================
