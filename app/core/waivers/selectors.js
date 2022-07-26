@@ -27,7 +27,11 @@ export function getWaiverReportItems(state) {
       waivers: grouped[playerId].filter((w) => !w.succ)
     })
   }
-  return result.sort((a, b) => b.bid - a.bid)
+  return result.sort((a, b) => {
+    if (!a.tid) return 1
+    if (!b.tid) return -1
+    return (b.bid || 0) - (a.bid || 0)
+  })
 }
 
 export function getWaiversForCurrentTeam(state) {
