@@ -11,12 +11,14 @@
   align-items flex-start
   width 100%
   margin-left 8px
+  min-width 0
 
 .player__name-expanded-name:hover
   color $accentColor
 
 .player__name-expanded-row
   flex 1
+  width 100%
   white-space nowrap
   line-height 20px
   display flex
@@ -28,7 +30,7 @@
   align-items center
 
 .player__name-expanded-full-name
-  flex 0 0 auto
+  flex 1 1 0
   overflow hidden
   text-overflow ellipsis
   font-size 16px
