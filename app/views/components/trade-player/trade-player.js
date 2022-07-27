@@ -9,7 +9,7 @@ import './trade-player.styl'
 export default class TradePlayer extends React.Component {
   render = () => {
     const { playerMap } = this.props
-    const vorpType = constants.season.isOffseason ? '0' : 'ros'
+    const vorpType = constants.isOffseason ? '0' : 'ros'
     return (
       <div className='trade__player'>
         <div className='trade__player-name'>

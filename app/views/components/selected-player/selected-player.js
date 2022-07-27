@@ -55,9 +55,7 @@ export default class SelectedPlayer extends React.Component {
     const projectionView = 0
     const transactionsView = 9
     this.state = {
-      value: constants.season.isRegularSeason
-        ? projectionView
-        : transactionsView,
+      value: constants.isRegularSeason ? projectionView : transactionsView,
       headshot_width: getHeadshotWidth(),
       show_collapse: showCollapse(),
       collapsed: showCollapse()

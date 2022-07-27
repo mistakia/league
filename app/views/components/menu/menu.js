@@ -100,7 +100,7 @@ export default class Menu extends React.Component {
             <Toolbar variant='dense'>
               {isLoggedIn && <LeagueSchedule />}
               {isLoggedIn && <NavLink to='/dashboard'>Roster</NavLink>}
-              {isLoggedIn && constants.season.isRegularSeason && (
+              {isLoggedIn && constants.isRegularSeason && (
                 <NavLink to='/lineups'>Lineup</NavLink>
               )}
               <NavLink to='/players'>Players</NavLink>

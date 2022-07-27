@@ -8,9 +8,9 @@ export default class PlayerRosterTotal extends React.Component {
   render() {
     const { players, league, reorder, isBeforeExtensionDeadline } = this.props
 
-    const { isOffseason } = constants.season
+    const { isOffseason } = constants
     const week = Math.max(constants.week, 1)
-    const projectionType = constants.season.isRegularSeason ? 'ros' : '0'
+    const projectionType = constants.isRegularSeason ? 'ros' : '0'
 
     let baseSalaryTotal = 0
     let extendedSalaryTotal = 0

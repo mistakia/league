@@ -7,7 +7,7 @@ import { send, wsActions } from '@core/ws'
 import { constants } from '@common'
 
 export function* register() {
-  if (!constants.season.isRegularSeason) return
+  if (!constants.isRegularSeason) return
   const updated = yield select(getScoreboardUpdated)
   console.log(`register scoreboard ${updated}`)
   send({

@@ -181,7 +181,7 @@ export function getAcceptingTeamTradedRosterPlayers(state) {
 }
 
 function getTeamTradeSummary(lineups, playerMaps) {
-  const vorpType = constants.season.isOffseason ? '0' : 'ros'
+  const vorpType = constants.isOffseason ? '0' : 'ros'
   const values = {
     points: lineups.reduce((sum, l) => sum + l.total, 0),
     value: playerMaps.reduce(

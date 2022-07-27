@@ -246,21 +246,21 @@ export default class PlayersPage extends React.Component {
           label='Salary'
           value='value'
         />
-        {constants.season.isOffseason && (
+        {constants.isOffseason && (
           <PlayerHeader
             className='table__cell metric'
             label='Value'
             value={`vorp_adj.${week}`}
           />
         )}
-        {constants.season.isOffseason && (
+        {constants.isOffseason && (
           <PlayerHeader
             className='table__cell metric'
             label='Market'
             value={`market_salary.${week}`}
           />
         )}
-        {constants.season.isOffseason && (
+        {constants.isOffseason && (
           <PlayerHeader
             className='table__cell metric'
             label='Market Adjusted'

@@ -7,6 +7,8 @@ export { espn }
 export const season = new Season()
 export const week = season.week
 export const year = season.year
+export const isOffseason = season.isOffseason
+export const isRegularSeason = season.isRegularSeason
 
 // MockDate.set(dayjs.unix(1631127600).toDate())
 

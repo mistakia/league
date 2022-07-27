@@ -9,8 +9,6 @@ import { auctionActions } from '@core/auction'
 
 import { constants } from '@common'
 
-const isOffseason = constants.season.isOffseason
-
 const initialState = new Map({
   isInitializing: true,
   isPending: false,
@@ -29,8 +27,8 @@ const initialState = new Map({
   allAges: new List(), // TODO
   items: new Map(),
   order: 'desc',
-  view: isOffseason ? 'season' : 'ros',
-  orderBy: isOffseason ? 'vorp.0' : 'vorp.ros',
+  view: constants.isOffseason ? 'season' : 'ros',
+  orderBy: constants.isOffseason ? 'vorp.0' : 'vorp.ros',
   watchlist: new Set(),
   watchlistOnly: false,
   cutlist: new List(),
@@ -221,7 +219,7 @@ export function playersReducer(state = initialState, { payload, type }) {
 
     case appActions.AUTH_FULFILLED:
       return state.withMutations((players) => {
-        const week = isOffseason ? '0' : 'ros'
+        const week = constants.isOffseason ? '0' : 'ros'
         players.merge({
           orderBy: `vorp.${week}`
         })
