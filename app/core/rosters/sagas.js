@@ -91,7 +91,7 @@ export function* setSelectedPlayerLineupContribution({ payload }) {
 
 export function* setPlayerLineupContribution({ pid }) {
   const currentRoster = yield select(getCurrentTeamRosterRecord)
-  const week = Math.max(constants.season.week, 1)
+  const week = Math.max(constants.week, 1)
   if (!currentRoster.getIn(['lineups', `${week}`])) {
     yield take(rosterActions.SET_LINEUPS)
   }
@@ -435,7 +435,7 @@ export function* exportRosters() {
       player_team: 'NFL Team'
     },
     data,
-    fileName: `TeflonLeagueRosters-${constants.season.year}-Week${constants.season.week}`
+    fileName: `TeflonLeagueRosters-${constants.year}-Week${constants.week}`
   })
 }
 

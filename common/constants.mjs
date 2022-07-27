@@ -5,6 +5,8 @@ import Season from './season.mjs'
 export { espn }
 
 export const season = new Season()
+export const week = season.week
+export const year = season.year
 
 // MockDate.set(dayjs.unix(1631127600).toDate())
 

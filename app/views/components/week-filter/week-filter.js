@@ -14,7 +14,7 @@ export default class WeekFilter extends React.Component {
     }
 
     for (
-      let week = Math.max(constants.season.week, 1);
+      let week = Math.max(constants.week, 1);
       week <= constants.season.finalWeek;
       week++
     ) {

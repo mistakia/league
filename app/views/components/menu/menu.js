@@ -24,8 +24,6 @@ import { history } from '@core/store'
 
 import './menu.styl'
 
-const week = constants.season.week
-
 export default class Menu extends React.Component {
   constructor(props) {
     super(props)
@@ -106,16 +104,20 @@ export default class Menu extends React.Component {
                 <NavLink to='/lineups'>Lineup</NavLink>
               )}
               <NavLink to='/players'>Players</NavLink>
-              {isLoggedIn && Boolean(constants.season.week) && (
+              {isLoggedIn && Boolean(constants.week) && (
                 <NavLink to='/scoreboard'>Scoreboard</NavLink>
               )}
               {isLoggedIn && <NavLink to='/league'>League</NavLink>}
               {isLoggedIn && <NavLink to='/trade'>Trade</NavLink>}
-              {/* {isLoggedIn && constants.season.week > 0 && (
+              {/* {isLoggedIn && constants.week > 0 && (
                   <NavLink to='/props'>Props</NavLink>
                   )} */}
-              {isLoggedIn && !week && <NavLink to='/draft'>Draft</NavLink>}
-              {isLoggedIn && !week && <NavLink to='/auction'>Auction</NavLink>}
+              {isLoggedIn && !constants.week && (
+                <NavLink to='/draft'>Draft</NavLink>
+              )}
+              {isLoggedIn && !constants.week && (
+                <NavLink to='/auction'>Auction</NavLink>
+              )}
               <NavLink to='/settings'>Settings</NavLink>
               <NavLink to='/resources'>Resources</NavLink>
               <NavLink to='/glossary'>Glossary</NavLink>
@@ -157,12 +159,12 @@ export default class Menu extends React.Component {
                   <ListItemText primary='Trade' />
                 </ListItem>
               )}
-              {isLoggedIn && !week && (
+              {isLoggedIn && !constants.week && (
                 <ListItem button onClick={this.handleClick('/auction')}>
                   <ListItemText primary='Auction' />
                 </ListItem>
               )}
-              {isLoggedIn && !week && (
+              {isLoggedIn && !constants.week && (
                 <ListItem button onClick={this.handleClick('/draft')}>
                   <ListItemText primary='Draft' />
                 </ListItem>

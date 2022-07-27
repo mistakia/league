@@ -213,7 +213,7 @@ export default class SelectedPlayer extends React.Component {
                   </div>
                   <div className='selected__player-header-item'>
                     <label>Exp.</label>
-                    {constants.season.year - draftYear || 'Rookie'}
+                    {constants.year - draftYear || 'Rookie'}
                   </div>
                 </>
               )}

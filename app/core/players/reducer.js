@@ -24,7 +24,7 @@ const initialState = new Map({
   status: new List(Object.keys(constants.status)),
   teams: new List(),
   availability: new List(constants.availability),
-  week: new List([constants.season.week]),
+  week: new List([constants.week]),
   age: new List(), // TODO
   allAges: new List(), // TODO
   items: new Map(),
@@ -45,7 +45,7 @@ export function playersReducer(state = initialState, { payload, type }) {
       const week =
         payload.view === 'season'
           ? new List([0])
-          : new List([Math.max(constants.season.week, 1)])
+          : new List([Math.max(constants.week, 1)])
       if (payload.view === 'stats') {
         return state.merge({
           view: 'stats',
@@ -276,7 +276,7 @@ export function playersReducer(state = initialState, { payload, type }) {
       })
 
     case rosterActions.GET_ROSTERS_FULFILLED: {
-      const week = constants.season.week
+      const week = constants.week
       const rosters = payload.data.filter((r) => r.week === week)
       return state.withMutations((state) => {
         rosters.forEach((roster) => {

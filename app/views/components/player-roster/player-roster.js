@@ -67,7 +67,7 @@ class PlayerRoster extends Player {
     const vorp = playerMap.getIn(['vorp', projectionType], 0)
     const vorpAdj = playerMap.getIn(['vorp_adj', projectionType], 0)
     const rosPoints = playerMap.getIn(['points', projectionType, 'total'], 0)
-    const week = Math.max(constants.season.week, 1)
+    const week = Math.max(constants.week, 1)
     const weekPoints = playerMap.getIn(['points', `${week}`, 'total'], 0)
     const starts = playerMap.getIn(['lineups', 'starts'], 0)
     const startPoints = playerMap.getIn(['lineups', 'sp'], 0)
@@ -163,7 +163,7 @@ class PlayerRoster extends Player {
             {rosPoints ? rosPoints.toFixed(0) : '-'}
           </div>
         )}
-        {constants.season.week > 0 && (
+        {constants.week > 0 && (
           <div className='metric table__cell'>
             {weekPoints ? weekPoints.toFixed(1) : '-'}
           </div>

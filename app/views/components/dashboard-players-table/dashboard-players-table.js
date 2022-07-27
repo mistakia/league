@@ -189,7 +189,7 @@ export default class DashboardPlayersTable extends React.Component {
     if (isClaim) classNames.push('waiver')
     if (cutlist) classNames.push('cutlist')
 
-    const week = Math.max(constants.season.week, 1)
+    const week = Math.max(constants.week, 1)
 
     let summary
     if (limit) {
@@ -203,8 +203,8 @@ export default class DashboardPlayersTable extends React.Component {
     }
 
     const baseYear = isBeforeExtensionDeadline
-      ? constants.season.year - 1
-      : constants.season.year
+      ? constants.year - 1
+      : constants.year
 
     return (
       <div className={classNames.join(' ')}>

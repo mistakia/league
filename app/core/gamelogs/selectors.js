@@ -10,7 +10,7 @@ export function getPlayerGamelogs(state) {
 
 export function getCurrentYearPlayerGamelogs(state) {
   const gamelogs = getPlayerGamelogs(state)
-  return gamelogs.filter((g) => g.year === constants.season.year)
+  return gamelogs.filter((g) => g.year === constants.year)
 }
 
 export function getTeamGamelogs(state) {
@@ -19,7 +19,7 @@ export function getTeamGamelogs(state) {
 
 export function getGamelogByPlayerId(
   state,
-  { pid, week, year = constants.season.year }
+  { pid, week, year = constants.year }
 ) {
   return state.getIn(['gamelogs', 'players', `${year}/${week}/${pid}`])
 }

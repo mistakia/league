@@ -40,7 +40,7 @@ class DraftPage extends React.Component {
       description: `Select ${playerMap.get('fname')} ${playerMap.get(
         'lname'
       )} (${playerMap.get('pos')}) with the #${nextPick.pick} pick in the ${
-        constants.season.year
+        constants.year
       } draft.`,
       onConfirm: draftPlayer
     })

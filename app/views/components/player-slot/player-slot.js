@@ -26,7 +26,7 @@ export default class PlayerSlot extends React.Component {
     const pid = playerMap.get('pid')
 
     let action
-    if (constants.season.week > constants.season.finalWeek) {
+    if (constants.week > constants.season.finalWeek) {
       return null
     } else if (!selected_player_slot && pid) {
       action = (
@@ -70,7 +70,7 @@ export default class PlayerSlot extends React.Component {
       classNames.push('selected')
     }
 
-    const week = Math.max(constants.season.week, 1)
+    const week = Math.max(constants.week, 1)
 
     const statSuffix = {
       pa: 'att',

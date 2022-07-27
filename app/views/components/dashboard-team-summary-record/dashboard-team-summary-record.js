@@ -13,7 +13,7 @@ import { constants } from '@common'
 export default class DashboardTeamSummaryRecord extends React.Component {
   render = () => {
     const { team, overall, standings, rank } = this.props
-    const { year } = constants.season
+    const { year } = constants
 
     const leagueStandings = []
     const divStandings = []

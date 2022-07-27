@@ -17,7 +17,7 @@ export function getStats(state) {
 export function getGamelogsForSelectedPlayer(state) {
   const playerMap = getSelectedPlayer(state)
   const gamelogs = []
-  for (let week = 1; week <= constants.season.week; week++) {
+  for (let week = 1; week <= constants.week; week++) {
     const gamelog = getGamelogForPlayer(state, { playerMap, week })
     if (gamelog) gamelogs.push(gamelog)
   }
@@ -65,7 +65,7 @@ export function getGamelogForPlayer(state, { playerMap, week }) {
   return process({
     pid,
     week,
-    year: constants.season.year,
+    year: constants.year,
     pos,
     opp,
     ...stats

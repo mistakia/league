@@ -172,7 +172,7 @@ export function getFilteredPlayers(state) {
         return false
       }
 
-      const exp = constants.season.year - draft_year
+      const exp = constants.year - draft_year
       if (veterans && exp > 1) {
         return true
       }
@@ -322,7 +322,7 @@ export function getFilteredPlayers(state) {
 export function getPlayersByPosition(state, { position }) {
   const playerMaps = state.getIn(['players', 'items'])
   const filtered = playerMaps.filter((p) => p.pos === position)
-  const period = !constants.season.week ? '0' : 'ros'
+  const period = !constants.week ? '0' : 'ros'
   return filtered
     .sort(
       (a, b) =>
@@ -335,7 +335,7 @@ export function getPlayersByPosition(state, { position }) {
 export function getRookiePlayers(state) {
   const playerMaps = state.getIn(['players', 'items'])
   return playerMaps
-    .filter((pMap) => pMap.get('start') === constants.season.year)
+    .filter((pMap) => pMap.get('start') === constants.year)
     .toList()
 }
 
@@ -415,7 +415,7 @@ export function isPlayerReserveEligible(state, { playerMap }) {
 }
 
 export function isPlayerLocked(state, { playerMap = new Map(), pid }) {
-  if (constants.season.week > constants.season.finalWeek) {
+  if (constants.week > constants.season.finalWeek) {
     return true
   }
 
@@ -556,13 +556,13 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
       const isBeforeExtension = isBeforeExtensionDeadline(state)
       const isBeforeRestrictedFreeAgency = isBeforeTransitionStart(state)
       const draft_year = playerMap.get('start')
-      if (isBeforeExtension && draft_year === constants.season.year - 1) {
+      if (isBeforeExtension && draft_year === constants.year - 1) {
         status.eligible.rookieTag = true
-      } else if (draft_year === constants.season.year) {
+      } else if (draft_year === constants.year) {
         status.eligible.rookieTag = true
       }
 
-      if (constants.season.week > 0 || isBeforeExtension) {
+      if (constants.week > 0 || isBeforeExtension) {
         status.eligible.franchiseTag = true
       }
 
@@ -592,10 +592,7 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
         status.eligible.ps = true
       }
 
-      if (
-        !status.protected &&
-        constants.season.week <= constants.season.finalWeek
-      ) {
+      if (!status.protected && constants.week <= constants.season.finalWeek) {
         const reserve = isPlayerReserveEligible(state, { playerMap })
         if (reserve.ir && playerSlot !== constants.slots.IR) {
           status.reserve.ir = true
@@ -657,7 +654,7 @@ export function isPlayerPracticeSquadEligible(
   if (
     !rosterInfo.tid && // not on a team
     !constants.season.isRegularSeason && // during the offseason
-    playerMap.get('start') !== constants.season.year && // not a rookie
+    playerMap.get('start') !== constants.year && // not a rookie
     playerMap.get('posd') !== 'PS' && // not on a nfl practice squad
     playerMap.get('team') !== 'INA' // not on a nfl team
   ) {
