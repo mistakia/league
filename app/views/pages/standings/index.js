@@ -11,7 +11,11 @@ const mapStateToProps = createSelector(
   getStandingsYear,
   (standings, year) => ({
     standings,
-    year
+    year,
+    division_teams_sorted: standings.divisionTeams.sortBy(
+      (v, k) => k,
+      (a, b) => a - b
+    )
   })
 )
 
