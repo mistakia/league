@@ -190,7 +190,7 @@ const processLeague = async ({ year, lid }) => {
           pid: player_row.pid,
           sourceid: constants.sources.AVERAGE,
           year: constants.season.year,
-          timestamp: 0,
+          timestamp: 0, // must be set at zero for unique key
           week,
           ...projection
         })
