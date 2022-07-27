@@ -212,7 +212,7 @@ export function getCurrentTeamRosterPositionalValue(state) {
     values.rosters[roster.tid] = {}
   }
 
-  const seasonType = constants.season.isOffseason ? '0' : 'ros'
+  const seasonType = constants.isOffseason ? '0' : 'ros'
   for (const position of constants.positions) {
     const league = []
     const div = []

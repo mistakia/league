@@ -15,14 +15,12 @@ const DashboardTeamSummary = () => (
   <div className='dashboard__section-side'>
     <div className='dashboard__section-side-title'>Summary</div>
     <div className='dashboard__section-side-body'>
-      {constants.season.isRegularSeason && <DashboardTeamSummaryRecord />}
-      {constants.season.isRegularSeason && <DashboardTeamSummaryPlayoffOdds />}
-      {constants.season.isRegularSeason && <DashboardTeamSummaryDivisionOdds />}
-      {constants.season.isRegularSeason && <DashboardTeamSummaryByeOdds />}
-      {constants.season.isRegularSeason && (
-        <DashboardTeamSummaryChampionshipOdds />
-      )}
-      {constants.season.isRegularSeason && <DashboardTeamSummaryFAAB />}
+      {constants.isRegularSeason && <DashboardTeamSummaryRecord />}
+      {constants.isRegularSeason && <DashboardTeamSummaryPlayoffOdds />}
+      {constants.isRegularSeason && <DashboardTeamSummaryDivisionOdds />}
+      {constants.isRegularSeason && <DashboardTeamSummaryByeOdds />}
+      {constants.isRegularSeason && <DashboardTeamSummaryChampionshipOdds />}
+      {constants.isRegularSeason && <DashboardTeamSummaryFAAB />}
       <DashboardTeamSummarySalary />
       <DashboardTeamSummaryWaiverOrder />
       <DashboardTeamSummaryFranchiseTags />

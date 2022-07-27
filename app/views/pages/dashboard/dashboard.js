@@ -76,7 +76,7 @@ export default function DashboardPage() {
     const players = groups[position]
     for (const playerMap of players) {
       if (
-        !constants.season.isRegularSeason &&
+        !constants.isRegularSeason &&
         cutlist_pids.includes(playerMap.get('pid'))
       )
         continue

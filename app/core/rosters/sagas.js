@@ -393,7 +393,7 @@ export function* updateTransitionTag({ payload }) {
 export function* exportRosters() {
   const rosters = yield select(getRostersForCurrentLeague)
   const playerMaps = yield select(getAllPlayers)
-  const projectionType = constants.season.isRegularSeason ? 'ros' : '0'
+  const projectionType = constants.isRegularSeason ? 'ros' : '0'
 
   const data = []
   for (const [tid, roster] of rosters.entrySeq()) {
