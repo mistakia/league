@@ -235,6 +235,10 @@ export function playersReducer(state = initialState, { payload, type }) {
     case playerActions.TOGGLE_CUTLIST: {
       const cutlist = state.get('cutlist')
       const { pid } = payload
+      if (!pid) {
+        return state
+      }
+
       const index = cutlist.keyOf(pid)
       return state.merge({
         cutlist: index >= 0 ? cutlist.delete(index) : cutlist.push(pid)

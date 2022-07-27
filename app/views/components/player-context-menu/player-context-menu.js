@@ -4,6 +4,8 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 import Paper from '@mui/material/Paper'
 import MenuItem from '@mui/material/MenuItem'
 import MenuList from '@mui/material/MenuList'
+import Button from '@mui/material/Button'
+import ButtonGroup from '@mui/material/ButtonGroup'
 
 import { constants } from '@common'
 
@@ -211,177 +213,162 @@ export default class PlayerContextMenu extends React.Component {
   }
 
   render = () => {
-    const { waiverId, status, isOnCutlist, poachId } = this.props
+    const {
+      waiverId,
+      status,
+      isOnCutlist,
+      poachId,
+      hideDisabled,
+      buttonGroup
+    } = this.props
 
-    const menuItems = []
+    const items = []
+
+    const add = ({ disabled, label, ...params }) => {
+      if (disabled && hideDisabled) return
+      if (buttonGroup) {
+        items.push(
+          <Button size='small' {...{ disabled, ...params }}>
+            {label}
+          </Button>
+        )
+      } else {
+        items.push(
+          <MenuItem dense {...{ disabled, ...params }}>
+            {label}
+          </MenuItem>
+        )
+      }
+    }
 
     // context menu for waiver claims
     if (waiverId) {
-      menuItems.push(
-        <MenuItem key='update-waiver' dense onClick={this.handleUpdateWaiver}>
-          Update Claim
-        </MenuItem>
-      )
+      add({
+        key: 'update-waiver',
+        onClick: this.handleUpdateWaiver,
+        label: 'Update Claim'
+      })
 
-      menuItems.push(
-        <MenuItem key='cancel-waiver' dense onClick={this.handleCancelWaiver}>
-          Cancel Claim
-        </MenuItem>
-      )
+      add({
+        key: 'cancel-waiver',
+        onClick: this.handleCancelWaiver,
+        label: 'Cancel Claim'
+      })
     } else if (status.rostered) {
-      menuItems.push(
-        <MenuItem
-          key='activate'
-          dense
-          disabled={status.protected || !status.eligible.activate}
-          onClick={this.handleActivate}
-        >
-          Activate
-        </MenuItem>
-      )
+      add({
+        key: 'activate',
+        onClick: this.handleActivate,
+        disabled: status.protected || !status.eligible.activate,
+        label: 'Activate'
+      })
 
-      menuItems.push(
-        <MenuItem
-          key='ps'
-          dense
-          disabled={!status.eligible.ps}
-          onClick={this.handleDeactivate}
-        >
-          Move to Practice Squad
-        </MenuItem>
-      )
+      add({
+        key: 'ps',
+        onClick: this.handleDeactivate,
+        disabled: !status.eligible.ps,
+        label: 'Move to Practice Squad'
+      })
 
-      menuItems.push(
-        <MenuItem
-          key='protect'
-          dense
-          disabled={!status.eligible.protect}
-          onClick={this.handleProtect}
-        >
-          Designate Protected
-        </MenuItem>
-      )
+      add({
+        key: 'protect',
+        onClick: this.handleProtect,
+        disabled: !status.eligible.protect,
+        label: 'Designate Protected'
+      })
 
       if (status.eligible.franchiseTag) {
-        menuItems.push(
-          <MenuItem
-            key='franchise'
-            dense
-            onClick={
-              status.tagged.franchise
-                ? this.handleRemoveTag
-                : this.handleFranchiseTag
-            }
-          >
-            {`${status.tagged.franchise ? 'Remove' : 'Apply'} Franchise Tag`}
-          </MenuItem>
-        )
+        add({
+          key: 'franchise',
+          onClick: status.tagged.franchise
+            ? this.handleRemoveTag
+            : this.handleFranchiseTag,
+          label: `${status.tagged.franchise ? 'Remove' : 'Apply'} Franchise Tag`
+        })
       }
 
       if (status.eligible.transitionTag) {
-        menuItems.push(
-          <MenuItem key='transition' dense onClick={this.handleTransitionTag}>
-            {`${status.tagged.transition ? 'Update' : 'Apply'} Transition Tag`}
-          </MenuItem>
-        )
+        add({
+          key: 'transition',
+          onClick: this.handleTransitionTag,
+          disabled: !status.eligible.protect,
+          label: `${
+            status.tagged.transition ? 'Update' : 'Apply'
+          } Transition Tag`
+        })
 
         if (status.tagged.transition) {
-          menuItems.push(
-            <MenuItem
-              key='transition-remove'
-              dense
-              onClick={this.handleRemoveTransitionTag}
-            >
-              Remove Transition Tag
-            </MenuItem>
-          )
+          add({
+            key: 'transition-remove',
+            onClick: this.handleRemoveTransitionTag,
+            label: 'Remove Transition Tag'
+          })
         }
       } else if (status.eligible.transitionBid) {
-        menuItems.push(
-          <MenuItem key='transition' dense onClick={this.handleTransitionTag}>
-            Update Transition Tag
-          </MenuItem>
-        )
+        add({
+          key: 'transition',
+          onClick: this.handleTransitionTag,
+          label: 'Update Transition Tag'
+        })
       }
 
       if (status.eligible.rookieTag) {
-        menuItems.push(
-          <MenuItem
-            key='rookie'
-            dense
-            onClick={
-              status.tagged.rookie ? this.handleRemoveTag : this.handleRookieTag
-            }
-          >
-            {`${status.tagged.rookie ? 'Remove' : 'Apply'} Rookie Tag`}
-          </MenuItem>
-        )
+        add({
+          key: 'rookie',
+          onClick: status.tagged.rookie
+            ? this.handleRemoveTag
+            : this.handleRookieTag,
+          label: `${status.tagged.rookie ? 'Remove' : 'Apply'} Rookie Tag`
+        })
       }
 
       if (status.active && !status.tagged.transition) {
-        menuItems.push(
-          <MenuItem key='cutlist' dense onClick={this.handleCutlist}>
-            {`${isOnCutlist ? 'Remove from' : 'Add to'} Cutlist`}
-          </MenuItem>
-        )
+        add({
+          key: 'cutlist',
+          onClick: this.handleCutlist,
+          label: `${isOnCutlist ? 'Remove from' : 'Add to'} Cutlist`
+        })
       }
 
-      menuItems.push(
-        <MenuItem
-          key='ir'
-          dense
-          disabled={!status.reserve.ir || (status.locked && status.starter)}
-          onClick={this.handleReserveIR}
-        >
-          Move to Reserve/IR
-        </MenuItem>
-      )
+      add({
+        key: 'ir',
+        onClick: this.handleReserveIR,
+        disabled: !status.reserve.ir || (status.locked && status.starter),
+        label: 'Move to Reserve/IR'
+      })
 
-      menuItems.push(
-        <MenuItem
-          key='cov'
-          dense
-          disabled={!status.reserve.cov || (status.locked && status.starter)}
-          onClick={this.handleReserveCOV}
-        >
-          Move to Reserve/COV
-        </MenuItem>
-      )
+      add({
+        key: 'cov',
+        onClick: this.handleReserveCOV,
+        disabled: !status.reserve.cov || (status.locked && status.starter),
+        label: 'Move to Reserve/COV'
+      })
 
-      menuItems.push(
-        <MenuItem
-          key='release'
-          dense
-          disabled={status.protected || (status.locked && status.starter)}
-          onClick={this.handleRelease}
-        >
-          Release
-        </MenuItem>
-      )
+      add({
+        key: 'release',
+        onClick: this.handleRelease,
+        disabled: status.protected || (status.locked && status.starter),
+        label: 'Release'
+      })
     } else if (poachId) {
-      menuItems.push(
-        <MenuItem key='update-poach' dense onClick={this.handlePoach}>
-          Update Poach
-        </MenuItem>
-      )
+      add({
+        key: 'update-poach',
+        onClick: this.handlePoach,
+        label: 'Update Poach'
+      })
     } else if (!status.fa) {
       if (status.eligible.transitionBid) {
-        menuItems.push(
-          <MenuItem key='transition' dense onClick={this.handleTransitionTag}>
-            {`${status.bid ? 'Update' : 'Place'} Transition Bid`}
-          </MenuItem>
-        )
+        add({
+          key: 'transition',
+          onClick: this.handleTransitionTag,
+          label: `${status.bid ? 'Update' : 'Place'} Transition Bid`
+        })
 
         if (status.bid) {
-          menuItems.push(
-            <MenuItem
-              key='transition-remove'
-              dense
-              onClick={this.handleRemoveTransitionTag}
-            >
-              Remove Transition Bid
-            </MenuItem>
-          )
+          add({
+            key: 'transition-remove',
+            onClick: this.handleRemoveTransitionTag,
+            label: 'Remove Transition Bid'
+          })
         }
       }
 
@@ -389,55 +376,49 @@ export default class PlayerContextMenu extends React.Component {
         ? 'Submit Poaching Waiver Claim'
         : 'Submit Poaching Claim'
 
-      menuItems.push(
-        <MenuItem
-          key='poach'
-          dense
-          disabled={!status.eligible.poach}
-          onClick={this.handlePoach}
-        >
-          {text}
-        </MenuItem>
-      )
+      add({
+        key: 'poach',
+        onClick: this.handlePoach,
+        disabled: !status.eligible.poach,
+        label: text
+      })
     } else {
       // player is a free agent
 
       if (status.waiver.practice) {
-        menuItems.push(
-          <MenuItem key='waiver' dense onClick={this.handleWaiver}>
-            Submit Practice Squad Waiver
-          </MenuItem>
-        )
+        add({
+          key: 'waiver',
+          onClick: this.handleWaiver,
+          label: 'Submit Practice Squad Waiver'
+        })
       } else if (status.sign.practice) {
-        menuItems.push(
-          <MenuItem
-            key='sign-ps'
-            dense
-            onClick={() => this.handleAdd({ practice: true })}
-          >
-            Sign to Practice Squad
-          </MenuItem>
-        )
+        add({
+          key: 'sign-ps',
+          onClick: () => this.handleAdd({ practice: true }),
+          label: 'Sign To Practice Squad'
+        })
       }
 
       if (status.waiver.active) {
-        menuItems.push(
-          <MenuItem key='waiver' dense onClick={this.handleWaiver}>
-            Submit Active Roster Waiver
-          </MenuItem>
-        )
+        add({
+          key: 'waiver',
+          onClick: this.handleWaiver,
+          label: 'Submit Active Roster Waiver'
+        })
       } else if (status.sign.active) {
-        menuItems.push(
-          <MenuItem key='sign-active' dense onClick={() => this.handleAdd()}>
-            Sign to Active Roster
-          </MenuItem>
-        )
+        add({
+          key: 'sign-active',
+          onClick: this.handleAdd,
+          label: 'Sign to Active Roster'
+        })
       }
     }
 
-    return (
+    return buttonGroup ? (
+      <ButtonGroup variant='contained'>{items}</ButtonGroup>
+    ) : (
       <Paper>
-        <MenuList>{menuItems}</MenuList>
+        <MenuList>{items}</MenuList>
       </Paper>
     )
   }
@@ -457,5 +438,7 @@ PlayerContextMenu.propTypes = {
   waiverId: PropTypes.number,
   poachId: PropTypes.number,
   toggleCutlist: PropTypes.func,
-  isOnCutlist: PropTypes.bool
+  isOnCutlist: PropTypes.bool,
+  hideDisabled: PropTypes.bool,
+  buttonGroup: PropTypes.bool
 }
