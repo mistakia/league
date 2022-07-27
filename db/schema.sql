@@ -840,6 +840,63 @@ CREATE TABLE `projections` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `projections_archive`
+--
+
+DROP TABLE IF EXISTS `projections_archive`;
+
+CREATE TABLE `projections_archive` (
+  `pid` varchar(7) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `sourceid` int DEFAULT NULL,
+  `userid` int DEFAULT NULL,
+  `pa` decimal(5,1) DEFAULT NULL,
+  `pc` decimal(5,1) DEFAULT NULL,
+  `py` decimal(5,1) DEFAULT NULL,
+  `ints` decimal(3,1) DEFAULT NULL,
+  `tdp` decimal(3,1) DEFAULT NULL,
+  `ra` decimal(4,1) DEFAULT NULL,
+  `ry` decimal(5,1) DEFAULT NULL,
+  `tdr` decimal(3,1) DEFAULT NULL,
+  `trg` decimal(4,1) DEFAULT NULL,
+  `rec` decimal(4,1) DEFAULT NULL,
+  `recy` decimal(5,1) DEFAULT NULL,
+  `tdrec` decimal(3,1) DEFAULT NULL,
+  `fuml` decimal(3,1) DEFAULT NULL,
+  `snp` decimal(5,1) DEFAULT NULL,
+  `twoptc` decimal(3,1) DEFAULT NULL,
+  `week` int NOT NULL,
+  `year` int NOT NULL,
+  `timestamp` datetime NOT NULL,
+  `fgm` decimal(4,1) DEFAULT NULL,
+  `fgy` int DEFAULT '0',
+  `fg19` decimal(3,1) DEFAULT NULL,
+  `fg29` decimal(3,1) DEFAULT NULL,
+  `fg39` decimal(3,1) DEFAULT NULL,
+  `fg49` decimal(3,1) DEFAULT NULL,
+  `fg50` decimal(3,1) DEFAULT NULL,
+  `xpm` decimal(3,1) DEFAULT NULL,
+  `dsk` decimal(4,1) DEFAULT NULL,
+  `dint` decimal(4,1) DEFAULT NULL,
+  `dff` decimal(4,1) DEFAULT NULL,
+  `drf` decimal(4,1) DEFAULT NULL,
+  `dtno` decimal(4,1) DEFAULT NULL,
+  `dfds` decimal(4,1) DEFAULT NULL,
+  `dpa` decimal(4,1) DEFAULT NULL,
+  `dya` decimal(5,1) DEFAULT NULL,
+  `dblk` decimal(4,1) DEFAULT NULL,
+  `dsf` decimal(4,1) DEFAULT NULL,
+  `dtpr` decimal(4,1) DEFAULT NULL,
+  `dtd` decimal(4,1) DEFAULT NULL,
+  `krtd` decimal(4,1) DEFAULT NULL,
+  `prtd` decimal(4,1) DEFAULT NULL,
+  UNIQUE KEY `userid` (`userid`,`pid`,`year`,`week`),
+  UNIQUE KEY `sourceid` (`sourceid`,`pid`,`year`,`week`,`timestamp`),
+  KEY `pid` (`pid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb3;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `ros_projections`
 --
 
