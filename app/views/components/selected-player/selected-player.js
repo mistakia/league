@@ -8,6 +8,9 @@ import TabPanel from '@mui/base/TabPanelUnstyled'
 import TabsList from '@mui/base/TabsListUnstyled'
 import Drawer from '@mui/material/Drawer'
 import CloseIcon from '@mui/icons-material/Close'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import ExpandLessIcon from '@mui/icons-material/ExpandLess'
+import IconButton from '@mui/material/IconButton'
 import { Map } from 'immutable'
 
 import PlayerHeadshot from '@components/player-headshot'
@@ -29,6 +32,7 @@ import SelectedPlayerPractice from '@components/selected-player-practice'
 import SelectedPlayerMatchup from '@components/selected-player-matchup'
 import SelectedPlayerTransactions from '@components/selected-player-transactions'
 import PlayerWatchlistAction from '@components/player-watchlist-action'
+import PlayerContextMenu from '@components/player-context-menu'
 
 import './selected-player.styl'
 
@@ -42,6 +46,8 @@ const getHeadshotWidth = () => {
   }
 }
 
+const showCollapse = () => window.innerWidth < 750
+
 export default class SelectedPlayer extends React.Component {
   constructor(props) {
     super(props)
@@ -52,12 +58,18 @@ export default class SelectedPlayer extends React.Component {
       value: constants.season.isRegularSeason
         ? projectionView
         : transactionsView,
-      headshot_width: getHeadshotWidth()
+      headshot_width: getHeadshotWidth(),
+      show_collapse: showCollapse(),
+      collapsed: showCollapse()
     }
   }
 
   update = () => {
-    this.setState({ headshot_width: getHeadshotWidth() })
+    this.setState({
+      headshot_width: getHeadshotWidth(),
+      show_collapse: showCollapse(),
+      collapsed: showCollapse()
+    })
   }
 
   componentDidMount = () => {
@@ -70,6 +82,10 @@ export default class SelectedPlayer extends React.Component {
 
   handleChange = (event, value) => {
     this.setState({ value })
+  }
+
+  handleToggleExpand = (event) => {
+    this.setState({ collapsed: !this.state.collapsed })
   }
 
   handleClose = () => {
@@ -111,11 +127,13 @@ export default class SelectedPlayer extends React.Component {
         }}
       >
         <div className='selected__player-header'>
-          <PlayerHeadshot
-            playerMap={playerMap}
-            width={this.state.headshot_width}
-            square={window.innerWidth < 900}
-          />
+          <div className='selected__player-headshot'>
+            <PlayerHeadshot
+              playerMap={playerMap}
+              width={this.state.headshot_width}
+              square={window.innerWidth < 900}
+            />
+          </div>
           <div className='selected__player-header-lead'>
             <div className='selected__player-first-name'>
               {playerMap.get('fname')}
@@ -150,46 +168,65 @@ export default class SelectedPlayer extends React.Component {
                   ? playerStatus
                   : playerMap.get('gamestatus') || 'Active'}
               </div>
-              {isLoggedIn && (
-                <>
-                  <div className='selected__player-header-item'>
-                    <label>Starts</label>
-                    {playerMap.getIn(['lineups', 'starts'], '-')}
-                  </div>
-                  <div className='selected__player-header-item'>
-                    <label>Points+</label>
-                    {playerMap.getIn(['lineups', 'sp'], 0).toFixed(1)}
-                  </div>
-                  <div className='selected__player-header-item'>
-                    <label>Bench+</label>
-                    {playerMap.getIn(['lineups', 'bp'], 0).toFixed(1)}
-                  </div>
-                </>
-              )}
-              <div className='selected__player-header-item'>
-                <label>Proj/G</label>
-                {rosPoints && projWks ? (rosPoints / projWks).toFixed(1) : '-'}
-              </div>
-              <div className='selected__player-header-item'>
-                <label>VOBA</label>
-                {playerMap.getIn(['vorp', 'ros', 'available'], 0).toFixed(1)}
-              </div>
-              <div className='selected__player-header-item'>
-                <label>VOWS</label>
-                {playerMap.getIn(['vorp', 'ros', 'starter'], 0).toFixed(1)}
-              </div>
-              <div className='selected__player-header-item'>
-                <label>Draft</label>
-                {draftNum ? `#${draftNum}` : 'UDFA'}
-              </div>
               <div className='selected__player-header-item'>
                 <label>Age</label>
                 <PlayerAge date={playerMap.get('dob')} />
               </div>
-              <div className='selected__player-header-item'>
-                <label>Exp.</label>
-                {constants.season.year - draftYear || 'Rookie'}
-              </div>
+              {isLoggedIn &&
+                (this.state.show_collapse ? !this.state.collapsed : true) && (
+                  <>
+                    <div className='selected__player-header-item'>
+                      <label>Starts</label>
+                      {playerMap.getIn(['lineups', 'starts'], '-')}
+                    </div>
+                    <div className='selected__player-header-item'>
+                      <label>Points+</label>
+                      {playerMap.getIn(['lineups', 'sp'], 0).toFixed(1)}
+                    </div>
+                    <div className='selected__player-header-item'>
+                      <label>Bench+</label>
+                      {playerMap.getIn(['lineups', 'bp'], 0).toFixed(1)}
+                    </div>
+                  </>
+                )}
+              {(this.state.show_collapse ? !this.state.collapsed : true) && (
+                <>
+                  <div className='selected__player-header-item'>
+                    <label>Proj/G</label>
+                    {rosPoints && projWks
+                      ? (rosPoints / projWks).toFixed(1)
+                      : '-'}
+                  </div>
+                  <div className='selected__player-header-item'>
+                    <label>VOBA</label>
+                    {playerMap
+                      .getIn(['vorp', 'ros', 'available'], 0)
+                      .toFixed(1)}
+                  </div>
+                  <div className='selected__player-header-item'>
+                    <label>VOWS</label>
+                    {playerMap.getIn(['vorp', 'ros', 'starter'], 0).toFixed(1)}
+                  </div>
+                  <div className='selected__player-header-item'>
+                    <label>Draft</label>
+                    {draftNum ? `#${draftNum}` : 'UDFA'}
+                  </div>
+                  <div className='selected__player-header-item'>
+                    <label>Exp.</label>
+                    {constants.season.year - draftYear || 'Rookie'}
+                  </div>
+                </>
+              )}
+              {this.state.show_collapse && (
+                <IconButton onClick={this.handleToggleExpand}>
+                  {this.state.collapsed ? (
+                    <ExpandMoreIcon />
+                  ) : (
+                    <ExpandLessIcon />
+                  )}
+                </IconButton>
+              )}
+              <PlayerContextMenu pid={pid} hideDisabled buttonGroup />
             </div>
           </div>
           <Button className='selected__player-close' onClick={this.handleClose}>

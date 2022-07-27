@@ -7,13 +7,6 @@
   .player__item-menu
     display none
 
-  &:hover
-    background #fafafa
-    .player__item-name.table__cell
-      background #fafafa
-    .player__item-menu
-      display flex
-
 .player__item-position
   flex 0 0 50px
   display flex
@@ -48,3 +41,11 @@
 
 .player__item-menu
   margin-right 4px
+
+@media (pointer:fine)
+  .player__item:hover
+    background #fafafa
+    .player__item-name.table__cell
+      background #fafafa
+    .player__item-menu
+      display flex

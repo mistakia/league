@@ -1,16 +1,21 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { contextMenuActions, getContextMenuPlayer } from '@core/context-menu'
+import { contextMenuActions } from '@core/context-menu'
 import { rosterActions } from '@core/rosters'
 import { confirmationActions } from '@core/confirmations'
 import { waiverActions } from '@core/waivers'
-import { playerActions, getPlayerStatus, getPlayers } from '@core/players'
+import {
+  playerActions,
+  getPlayerStatus,
+  getPlayers,
+  getPlayerById
+} from '@core/players'
 
 import PlayerContextMenu from './player-context-menu'
 
 const mapStateToProps = createSelector(
-  getContextMenuPlayer,
+  getPlayerById,
   getPlayerStatus,
   getPlayers,
   (playerMap, status, players) => ({
