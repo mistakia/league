@@ -150,10 +150,10 @@ export default class StandingsPage extends React.Component {
   }
 
   render = () => {
-    const { standings } = this.props
+    const { standings, division_teams_sorted } = this.props
 
     const divisions = []
-    for (const [div, teams] of standings.divisionTeams.entries()) {
+    for (const [div, teams] of division_teams_sorted.entries()) {
       divisions.push(
         <Standings
           key={div}
@@ -179,5 +179,6 @@ export default class StandingsPage extends React.Component {
 StandingsPage.propTypes = {
   standings: PropTypes.object,
   load: PropTypes.func,
-  year: PropTypes.number
+  year: PropTypes.number,
+  division_teams_sorted: ImmutablePropTypes.map
 }
