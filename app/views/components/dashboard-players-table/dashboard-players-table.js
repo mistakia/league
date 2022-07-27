@@ -94,7 +94,7 @@ export default class DashboardPlayersTable extends React.Component {
       isTransition
     } = this.props
 
-    const { isOffseason, isRegularSeason } = constants.season
+    const { isOffseason, isRegularSeason } = constants
     const isWaiver = Boolean(waiverType)
     const isPoach = Boolean(poaches)
     const isClaim = isWaiver || isPoach

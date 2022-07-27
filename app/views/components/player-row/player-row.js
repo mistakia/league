@@ -56,17 +56,17 @@ class PlayerRow extends Player {
           <div className='table__cell metric'>
             ${playerMap.get('value', '--')}
           </div>
-          {constants.season.isOffseason && (
+          {constants.isOffseason && (
             <div className='table__cell metric'>
               {Math.round(playerMap.getIn(['vorp_adj', `${week}`], 0))}
             </div>
           )}
-          {constants.season.isOffseason && (
+          {constants.isOffseason && (
             <div className='table__cell metric'>
               ${Math.round(market_salary) || '--'}
             </div>
           )}
-          {constants.season.isOffseason && (
+          {constants.isOffseason && (
             <div className='table__cell metric'>
               ${Math.round(market_salary_adj) || '--'}
             </div>

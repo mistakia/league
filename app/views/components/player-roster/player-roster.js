@@ -34,7 +34,7 @@ class PlayerRoster extends Player {
     const isWaiver = Boolean(waiverId)
     const isPoach = Boolean(poachId)
     const isClaim = isWaiver || isPoach
-    const { isRegularSeason, isOffseason } = constants.season
+    const { isRegularSeason, isOffseason } = constants
     const tag = playerMap.get('tag')
     const isRestrictedFreeAgent = tag === constants.tags.TRANSITION
 

@@ -529,7 +529,7 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
           status.waiver.practice = true
       } else {
         if (afterAuction && !status.locked) {
-          if (constants.season.isRegularSeason) status.sign.active = true
+          if (constants.isRegularSeason) status.sign.active = true
           else status.waiver.active = true
         }
         if (isPracticeSquadEligible && !status.locked) {
@@ -577,7 +577,7 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
         // is regular season and is on practice squad && has no poaching claims
         const leaguePoaches = getPoachesForCurrentLeague(state)
         if (
-          constants.season.isRegularSeason &&
+          constants.isRegularSeason &&
           playerSlot === constants.slots.PS &&
           !leaguePoaches.has(playerId)
         ) {
@@ -601,7 +601,7 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
         if (
           reserve.cov &&
           playerSlot !== constants.slots.COV &&
-          constants.season.isRegularSeason
+          constants.isRegularSeason
         ) {
           status.reserve.cov = true
         }
@@ -653,7 +653,7 @@ export function isPlayerPracticeSquadEligible(
   // - on a nfl practice squad
   if (
     !rosterInfo.tid && // not on a team
-    !constants.season.isRegularSeason && // during the offseason
+    !constants.isRegularSeason && // during the offseason
     playerMap.get('start') !== constants.year && // not a rookie
     playerMap.get('posd') !== 'PS' && // not on a nfl practice squad
     playerMap.get('team') !== 'INA' // not on a nfl team

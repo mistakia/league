@@ -27,11 +27,11 @@ export default class PlayersViewMenu extends React.Component {
           onChange={this.handleChange}
           label='View'
         >
-          {constants.season.isOffseason && (
+          {constants.isOffseason && (
             <MenuItem value='season'>Season Projection</MenuItem>
           )}
           <MenuItem value='stats'>Stats</MenuItem>
-          {constants.season.isRegularSeason && (
+          {constants.isRegularSeason && (
             <MenuItem value='ros'>Rest Of Season</MenuItem>
           )}
           <MenuItem value='week'>Weekly Projection</MenuItem>

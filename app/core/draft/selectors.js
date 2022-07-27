@@ -96,7 +96,7 @@ export const isAfterDraft = createSelector(
   (state) => state.get('leagues'),
   getDraftEnd,
   (leagueId, leagues, draftEnd) => {
-    if (constants.season.isRegularSeason) {
+    if (constants.isRegularSeason) {
       return {
         afterDraft: true,
         afterWaivers: true

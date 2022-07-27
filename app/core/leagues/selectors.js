@@ -147,7 +147,7 @@ export const getLeagueEvents = createSelector(
         detail: 'Veteran Waivers Clear',
         date: firstWaiverDate
       })
-    } else if (constants.season.isRegularSeason) {
+    } else if (constants.isRegularSeason) {
       const waiverDate = constants.season.now.day(3).hour(15).minute(0)
       const nextWaiverDate = now.isBefore(waiverDate)
         ? waiverDate

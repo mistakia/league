@@ -14,7 +14,7 @@ export function* loadPlays() {
 // -------------------------------------
 
 export function* watchFetchPlayersFulfilled() {
-  if (constants.season.isRegularSeason) {
+  if (constants.isRegularSeason) {
     yield takeLatest(playerActions.FETCH_PLAYERS_FULFILLED, loadPlays)
   }
 }
