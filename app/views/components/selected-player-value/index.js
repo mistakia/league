@@ -14,7 +14,7 @@ const mapStateToProps = createSelector(
     const wsData = []
     const position = playerMap.get('pos')
     for (const week of constants.fantasyWeeks) {
-      if (week < constants.season.week) continue
+      if (week < constants.week) continue
       baData.push(
         parseFloat(
           (

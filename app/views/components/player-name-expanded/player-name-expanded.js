@@ -120,7 +120,7 @@ class PlayerNameExpanded extends Player {
             <div className='player__name-expanded-full-name'>
               {playerName || '-'}
             </div>
-            {constants.season.year === playerMap.get('start') && (
+            {constants.year === playerMap.get('start') && (
               <PlayerLabel label='R' type='rookie' description='Rookie' />
             )}
             {playerMap.get('slot') === constants.slots.PSP && (

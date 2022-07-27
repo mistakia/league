@@ -17,7 +17,7 @@ export default class SelectedPlayerLineupImpact extends React.Component {
     const spData = []
     const bpData = []
     for (const week in playerMap.getIn(['lineups', 'weeks'], {})) {
-      if (week >= constants.season.week) {
+      if (week >= constants.week) {
         spData.push(
           parseFloat(
             playerMap.getIn(['lineups', 'weeks', week, 'sp'], 0).toFixed(1)
@@ -40,9 +40,7 @@ export default class SelectedPlayerLineupImpact extends React.Component {
         text: ''
       },
       xAxis: {
-        categories: constants.fantasyWeeks.filter(
-          (w) => w >= constants.season.week
-        ),
+        categories: constants.fantasyWeeks.filter((w) => w >= constants.week),
         title: {
           text: 'Week'
         },

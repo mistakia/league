@@ -9,7 +9,7 @@ export default class PlayerRosterTotal extends React.Component {
     const { players, league, reorder, isBeforeExtensionDeadline } = this.props
 
     const { isOffseason } = constants.season
-    const week = Math.max(constants.season.week, 1)
+    const week = Math.max(constants.week, 1)
     const projectionType = constants.season.isRegularSeason ? 'ros' : '0'
 
     let baseSalaryTotal = 0
@@ -87,12 +87,12 @@ export default class PlayerRosterTotal extends React.Component {
             {valueAdjTotal ? valueAdjTotal.toFixed(1) : '-'}
           </div>
         )}
-        {constants.season.week > 0 && (
+        {constants.week > 0 && (
           <div className='metric table__cell'>
             {rosPointsTotal ? rosPointsTotal.toFixed(1) : '-'}
           </div>
         )}
-        {constants.season.week > 0 && (
+        {constants.week > 0 && (
           <div className='metric table__cell'>
             {weekPointsTotal ? weekPointsTotal.toFixed(1) : '-'}
           </div>

@@ -12,7 +12,7 @@ export default class SelectedPlayerMatchup extends React.Component {
   constructor(props) {
     super(props)
 
-    const currentWeek = Math.max(constants.season.week, 1)
+    const currentWeek = Math.max(constants.week, 1)
     this.state = {
       value: currentWeek
     }

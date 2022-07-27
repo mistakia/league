@@ -18,7 +18,7 @@ export const Team = new Record({
   leaguetext: 0,
   picks: new List(),
   stats: new Map({
-    [constants.season.year]: constants.createFantasyTeamStats()
+    [constants.year]: constants.createFantasyTeamStats()
   }),
 
   playoff_odds: null,

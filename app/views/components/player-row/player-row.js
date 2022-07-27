@@ -582,7 +582,7 @@ class PlayerRow extends Player {
           </div>
           <div className='player__row-name cursor' onClick={this.handleClick}>
             <span>{name}</span>
-            {constants.season.year === playerMap.get('start') && (
+            {constants.year === playerMap.get('start') && (
               <PlayerLabel label='R' type='rookie' description='Rookie' />
             )}
             <Team team={team} />
@@ -604,9 +604,7 @@ class PlayerRow extends Player {
               )}
             </div>
           )}
-          {constants.season.week > 0 && (
-            <PlayerRowOpponent team={team} pos={pos} />
-          )}
+          {constants.week > 0 && <PlayerRowOpponent team={team} pos={pos} />}
           {isLoggedIn && (
             <div className='player__row-availability'>
               {isRostered ? (

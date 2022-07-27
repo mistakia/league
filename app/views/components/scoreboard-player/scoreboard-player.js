@@ -16,9 +16,7 @@ class ScoreboardPlayer extends Player {
 
     const points = gamelog
       ? (gamelog.total || 0).toFixed(1)
-      : playerMap
-          .getIn(['points', `${constants.season.week}`, 'total'], 0)
-          .toFixed(1)
+      : playerMap.getIn(['points', `${constants.week}`, 'total'], 0).toFixed(1)
 
     const pid = playerMap.get('pid')
     return (

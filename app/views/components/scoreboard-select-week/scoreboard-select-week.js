@@ -13,10 +13,10 @@ export default class ScoreboardSelectWeek extends React.Component {
   }
 
   render = () => {
-    if (!constants.season.week) return null
+    if (!constants.week) return null
 
     const menuItems = []
-    let wk = constants.season.week
+    let wk = constants.week
     for (; wk > 0; wk--) {
       menuItems.push(
         <MenuItem key={wk} value={wk}>
