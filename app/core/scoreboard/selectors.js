@@ -84,7 +84,7 @@ export function getScoreboardByTeamId(state, { tid }) {
 }
 
 export function getScoreboardUpdated(state) {
-  const plays = getPlays(state, { week: constants.season.week })
+  const plays = getPlays(state, { week: constants.week })
   const play = plays.maxBy((x) => x.updated)
   return play ? play.updated : 0
 }
@@ -232,10 +232,7 @@ function getYardline(str, pos_team) {
   return side === pos_team ? number : 100 - number
 }
 
-export function getGameStatusByPlayerId(
-  state,
-  { pid, week = constants.season.week }
-) {
+export function getGameStatusByPlayerId(state, { pid, week = constants.week }) {
   const game = getGameByPlayerId(state, { pid, week })
   if (!game) {
     return null

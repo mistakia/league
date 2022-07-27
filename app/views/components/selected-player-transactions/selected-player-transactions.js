@@ -114,7 +114,7 @@ export default class SelectedPlayerTransactions extends React.Component {
                   <TableCell colSpan={2}>{extensions}</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell>{constants.season.year} Extended Salary</TableCell>
+                  <TableCell>{constants.year} Extended Salary</TableCell>
                   <TableCell colSpan={2}>${extendedSalary}</TableCell>
                 </TableRow>
                 <TableRow>

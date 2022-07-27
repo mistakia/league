@@ -11,9 +11,7 @@ const initialState = new Record({
   qualifiers: new Map(constants.qualifiers),
   view: 'passing',
   passing: 'advanced',
-  years: new List([
-    constants.season.week ? constants.season.year : constants.season.year - 1
-  ]),
+  years: new List([constants.week ? constants.year : constants.year - 1]),
   weeks: new List(constants.nflWeeks),
   days: new List(constants.days),
   quarters: new List(constants.quarters),

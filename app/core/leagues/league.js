@@ -269,6 +269,6 @@ export function createLeague({
     tran_end,
     ext_date,
 
-    years: years ? new List(years) : new List([constants.season.year])
+    years: years ? new List(years) : new List([constants.year])
   })
 }

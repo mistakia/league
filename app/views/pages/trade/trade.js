@@ -65,7 +65,7 @@ export default function TradePage() {
   const action = (
     <Grid item xs={12}>
       <div className='trade__action'>
-        {isValid && constants.season.week < constants.season.finalWeek && (
+        {isValid && constants.week < constants.season.finalWeek && (
           <TradeAction />
         )}
         {isOpen && !isValid && invalidNotice}

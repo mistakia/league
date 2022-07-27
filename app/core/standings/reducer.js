@@ -4,7 +4,7 @@ import { standingsActions } from './actions'
 import { constants } from '@common'
 
 const initialState = new Map({
-  year: constants.season.year
+  year: constants.year
 })
 
 export function standingsReducer(state = initialState, { payload, type }) {

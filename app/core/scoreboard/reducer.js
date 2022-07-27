@@ -7,10 +7,7 @@ import { constants } from '@common'
 
 const initialState = new Map({
   isLoaded: false,
-  week: Math.max(
-    dayjs().day() === 2 ? constants.season.week - 1 : constants.season.week,
-    1
-  )
+  week: Math.max(dayjs().day() === 2 ? constants.week - 1 : constants.week, 1)
 })
 
 export function scoreboardReducer(state = initialState, { payload, type }) {
