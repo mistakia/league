@@ -8,12 +8,14 @@ import {
   debounce
 } from 'redux-saga/effects'
 
-import { getApp, appActions } from '@core/app'
+import { getApp, getRouter, appActions } from '@core/app'
 import { notificationActions } from '@core/notifications'
 import {
   getCutlist,
   postCutlist,
-  fetchPlayers,
+  getTeamPlayers,
+  getLeaguePlayers,
+  fetchAllPlayers,
   searchPlayers,
   getPlayer,
   putProjection,
@@ -33,9 +35,27 @@ import { sourceActions, getSources } from '@core/sources'
 import { getRostersForCurrentLeague, rosterActions } from '@core/rosters'
 import Worker from 'workerize-loader?inline!../worker' // eslint-disable-line import/no-webpack-loader-syntax
 
-export function* loadPlayers() {
+export function* loadAllPlayers() {
+  const state = yield select(getPlayers)
+  const isLoaded = state.get('allPlayersLoaded', false)
+  const isPending = state.get('allPlayersPending', false)
+  if (isLoaded || isPending) return
   const { leagueId } = yield select(getApp)
-  yield call(fetchPlayers, { leagueId })
+  yield call(fetchAllPlayers, { leagueId })
+}
+
+export function* loadTeamPlayers() {
+  const { teamId, leagueId } = yield select(getApp)
+  yield call(getTeamPlayers, { teamId, leagueId })
+}
+
+export function* loadLeaguePlayers() {
+  const state = yield select(getPlayers)
+  const isLoaded = state.get('leaguePlayersLoaded', false)
+  const isPending = state.get('leaguePlayersPending', false)
+  if (isLoaded || isPending) return
+  const { leagueId } = yield select(getApp)
+  yield call(getLeaguePlayers, { leagueId })
 }
 
 export function* search() {
@@ -128,7 +148,17 @@ export function* deleteProjection({ payload }) {
 
 export function* init({ payload }) {
   const league = yield select(getCurrentLeague)
-  yield fork(loadPlayers)
+  const router = yield select(getRouter)
+  const all_player_paths = ['/players', '/auction']
+  const league_player_paths = ['/', '/dashboard', '/trade', '/league/rosters']
+  const { pathname } = router.location
+  if (all_player_paths.includes(pathname)) {
+    yield fork(loadAllPlayers)
+  } else if (league_player_paths.includes(pathname)) {
+    yield fork(loadLeaguePlayers)
+  } else {
+    yield fork(loadTeamPlayers)
+  }
   yield fork(getBaselines, { leagueId: league.uid })
   yield fork(fetchCutlist)
 
@@ -197,7 +227,7 @@ export function* watchAuthFulfilled() {
 }
 
 export function* watchAuthFailed() {
-  yield takeLatest(appActions.AUTH_FAILED, loadPlayers)
+  yield takeLatest(appActions.AUTH_FAILED, loadAllPlayers)
 }
 
 export function* watchToggleOrder() {
@@ -287,6 +317,14 @@ export function* watchLoadPlayerGamelogs() {
   yield takeLatest(playerActions.LOAD_PLAYER_GAMELOGS, loadPlayerGamelogs)
 }
 
+export function* watchLoadAllPlayers() {
+  yield takeLatest(playerActions.LOAD_ALL_PLAYERS, loadAllPlayers)
+}
+
+export function* watchLoadLeaguePlayers() {
+  yield takeLatest(playerActions.LOAD_LEAGUE_PLAYERS, loadLeaguePlayers)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -320,5 +358,7 @@ export const playerSagas = [
   fork(watchGetPlayerTransactions),
   fork(watchGetPlayerProjections),
 
-  fork(watchLoadPlayerGamelogs)
+  fork(watchLoadPlayerGamelogs),
+  fork(watchLoadAllPlayers),
+  fork(watchLoadLeaguePlayers)
 ]

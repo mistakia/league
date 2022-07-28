@@ -2,13 +2,32 @@ import db from '#db'
 import { constants } from '#common'
 import getPlayerTransactions from './get-player-transactions.mjs'
 
-export default async function ({ textSearch, leagueId, pids = [] }) {
+export default async function ({
+  textSearch,
+  leagueId,
+  pids = [],
+  all = false,
+  teamId
+}) {
   const leaguePlayerIds = []
   const baselinePlayerIds = []
 
   const projectionLeagueId = leagueId || constants.DEFAULTS.LEAGUE_ID
 
-  if (leagueId) {
+  if (teamId) {
+    const query = db('rosters_players')
+      .join('rosters', 'rosters_players.rid', 'rosters.uid')
+      .where('rosters.tid', teamId)
+      .where('rosters.year', constants.season.year)
+      .groupBy('rosters_players.pid')
+
+    if (pids.length) {
+      query.whereIn('rosters_players.pid', pids)
+    }
+
+    const playerSlots = await query
+    playerSlots.forEach((s) => leaguePlayerIds.push(s.pid))
+  } else if (leagueId) {
     const query = db('rosters_players')
       .join('rosters', 'rosters_players.rid', 'rosters.uid')
       .where('rosters.lid', leagueId)
@@ -23,11 +42,14 @@ export default async function ({ textSearch, leagueId, pids = [] }) {
     playerSlots.forEach((s) => leaguePlayerIds.push(s.pid))
   }
 
-  const baselines = await db('league_baselines')
-    .select('pid')
-    .where({ lid: projectionLeagueId })
-    .groupBy('pid')
-  baselines.forEach((b) => baselinePlayerIds.push(b.pid))
+  if (!textSearch && !pids.length) {
+    // TODO
+    /* const baselines = await db('league_baselines')
+     *   .select('pid')
+     *   .where({ lid: projectionLeagueId })
+     *   .groupBy('pid')
+     * baselines.forEach((b) => baselinePlayerIds.push(b.pid)) */
+  }
 
   const selects = [
     'player.pid',
@@ -63,15 +85,7 @@ export default async function ({ textSearch, leagueId, pids = [] }) {
       .whereIn('player.pos', constants.positions)
   } else if (pids.length) {
     query.whereIn('player.pid', pids)
-  } else {
-    if (leaguePlayerIds.length) {
-      query.orWhereIn('player.pid', leaguePlayerIds)
-    }
-
-    if (baselinePlayerIds.length) {
-      query.orWhereIn('player.pid', baselinePlayerIds)
-    }
-
+  } else if (all) {
     query.orWhere(function () {
       this.whereIn('player.pos', constants.positions).whereNot(
         'player.cteam',
@@ -88,6 +102,14 @@ export default async function ({ textSearch, leagueId, pids = [] }) {
         )
       })
     }
+  }
+
+  if (leaguePlayerIds.length) {
+    query.orWhereIn('player.pid', leaguePlayerIds)
+  }
+
+  if (baselinePlayerIds.length) {
+    query.orWhereIn('player.pid', baselinePlayerIds)
   }
 
   const player_rows = await query

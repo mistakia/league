@@ -15,6 +15,10 @@ export default class RostersPage extends React.Component {
     this.props.exportRosters()
   }
 
+  componentDidMount() {
+    this.props.loadLeaguePlayers()
+  }
+
   render = () => {
     const { rosters, league, teams, ps_count_max, bench_count_max } = this.props
 
@@ -196,5 +200,6 @@ RostersPage.propTypes = {
   league: PropTypes.object,
   exportRosters: PropTypes.func,
   ps_count_max: PropTypes.number,
-  bench_count_max: PropTypes.number
+  bench_count_max: PropTypes.number,
+  loadLeaguePlayers: PropTypes.func
 }

@@ -58,6 +58,10 @@ export default class PlayersPage extends React.Component {
     this.state = { expanded: false, page: 0, hasMore: true }
   }
 
+  componentDidMount() {
+    this.props.loadAllPlayers()
+  }
+
   componentDidUpdate(prevProps) {
     if (!this.scroll) return
 
@@ -415,5 +419,6 @@ PlayersPage.propTypes = {
   isLoggedIn: PropTypes.bool,
   isRestOfSeasonView: PropTypes.bool,
   search: PropTypes.func,
-  searchValue: PropTypes.string
+  searchValue: PropTypes.string,
+  loadAllPlayers: PropTypes.func
 }

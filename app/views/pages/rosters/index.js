@@ -5,6 +5,7 @@ import { getRostersForCurrentLeague, rosterActions } from '@core/rosters'
 import { getCurrentLeague } from '@core/leagues'
 import { getTeamsForCurrentLeague } from '@core/teams'
 import { constants } from '@common'
+import { playerActions } from '@core/players'
 
 import RostersPage from './rosters'
 
@@ -32,7 +33,8 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  exportRosters: rosterActions.exportRosters
+  exportRosters: rosterActions.exportRosters,
+  loadLeaguePlayers: playerActions.loadLeaguePlayers
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(RostersPage)

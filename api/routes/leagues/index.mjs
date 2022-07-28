@@ -15,6 +15,7 @@ import teams from './teams.mjs'
 import rosters from './rosters.mjs'
 import baselines from './baselines.mjs'
 import teamStats from './team-stats.mjs'
+import players from './players.mjs'
 
 const router = express.Router()
 
@@ -287,5 +288,6 @@ router.use('/:leagueId/teams', teams)
 router.use('/:leagueId/rosters', rosters)
 router.use('/:leagueId/baselines', baselines)
 router.use('/:leagueId/team-stats', teamStats)
+router.use('/:leagueId/players', players)
 
 export default router

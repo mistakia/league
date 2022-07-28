@@ -218,7 +218,7 @@ export function* watchAuctionBid() {
 export function* watchInitAuctionLineup() {
   while (true) {
     yield all([
-      take(playerActions.FETCH_PLAYERS_FULFILLED),
+      take(playerActions.FETCH_ALL_PLAYERS_FULFILLED),
       take(playerActions.SET_PLAYER_VALUES),
       take(auctionActions.AUCTION_JOIN)
     ])

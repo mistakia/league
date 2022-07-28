@@ -1,6 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
+import PropTypes from 'prop-types'
 
 import { getApp } from '@core/app'
 import { getCurrentTeam } from '@core/teams'
@@ -8,14 +9,26 @@ import { getCurrentPlayers, getCurrentTeamRoster } from '@core/rosters'
 import { getCurrentLeague, isBeforeTransitionEnd } from '@core/leagues'
 import { getWaiverPlayersForCurrentTeam } from '@core/waivers'
 import { getPoachPlayersForCurrentLeague } from '@core/poaches'
-import { getTransitionPlayers, getCutlistPlayers } from '@core/players'
+import {
+  playerActions,
+  getTransitionPlayers,
+  getCutlistPlayers
+} from '@core/players'
 
 import render from './dashboard'
 
 class DashboardPage extends React.Component {
+  componentDidMount() {
+    this.props.loadLeaguePlayers()
+  }
+
   render() {
     return render.call(this)
   }
+}
+
+DashboardPage.propTypes = {
+  loadLeaguePlayers: PropTypes.func
 }
 
 const mapStateToProps = createSelector(
@@ -54,4 +67,8 @@ const mapStateToProps = createSelector(
   })
 )
 
-export default connect(mapStateToProps)(DashboardPage)
+const mapDispatchToProps = {
+  loadLeaguePlayers: playerActions.loadLeaguePlayers
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(DashboardPage)

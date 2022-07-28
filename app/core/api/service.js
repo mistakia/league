@@ -46,6 +46,14 @@ export const api = {
     const url = `${BASE_URL}/players?${queryString.stringify(params)}`
     return { url }
   },
+  getLeaguePlayers({ leagueId }) {
+    const url = `${BASE_URL}/leagues/${leagueId}/players`
+    return { url }
+  },
+  getTeamPlayers({ teamId, leagueId }) {
+    const url = `${BASE_URL}/teams/${teamId}/players?leagueId=${leagueId}`
+    return { url }
+  },
   getPlayer({ pid }) {
     const url = `${BASE_URL}/players/${pid}`
     return { url }
