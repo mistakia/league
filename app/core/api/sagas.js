@@ -3,7 +3,6 @@ import Bugsnag from '@bugsnag/js'
 
 import { api, apiRequest } from '@core/api/service'
 import { authActions, loginActions, registerActions, getApp } from '@core/app'
-
 import { getStatusActions } from '@core/status'
 import { getScheduleActions } from '@core/schedule'
 import { getDraftActions, postDraftActions } from '@core/draft'
@@ -31,6 +30,9 @@ import {
 } from '@core/gamelogs'
 import {
   playersRequestActions,
+  allPlayersRequestActions,
+  leaguePlayersRequestActions,
+  teamPlayersRequestActions,
   playersSearchActions,
   getPlayerActions,
   putProjectionActions,
@@ -120,6 +122,21 @@ export const fetchPlayers = fetch.bind(
   null,
   api.fetchPlayers,
   playersRequestActions
+)
+export const fetchAllPlayers = fetch.bind(
+  null,
+  api.fetchPlayers,
+  allPlayersRequestActions
+)
+export const getTeamPlayers = fetch.bind(
+  null,
+  api.getTeamPlayers,
+  teamPlayersRequestActions
+)
+export const getLeaguePlayers = fetch.bind(
+  null,
+  api.getLeaguePlayers,
+  leaguePlayersRequestActions
 )
 export const searchPlayers = fetch.bind(
   null,

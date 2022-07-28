@@ -10,7 +10,7 @@ const router = express.Router()
 const leagueIds = [0, 1]
 const loadPlayers = async () => {
   for (const leagueId of leagueIds) {
-    const players = await getPlayers({ leagueId })
+    const players = await getPlayers({ leagueId, all: true })
     const cacheKey = `/players/${leagueId}`
     cache.set(cacheKey, players, 1800) // 30 mins
   }
@@ -28,9 +28,14 @@ router.get('/?', async (req, res) => {
     const search = req.query.q
     const { leagueId } = req.query
     const userId = req.auth ? req.auth.userId : null
+    const pids = req.query.pids
+      ? Array.isArray(req.query.pids)
+        ? req.query.pids
+        : [req.query.pids]
+      : []
 
     const cacheKey = `/players/${leagueId || 0}`
-    if (!search) {
+    if (!search && !pids.length) {
       const players = cache.get(cacheKey)
       if (players) {
         logger('USING CACHE')
@@ -58,10 +63,12 @@ router.get('/?', async (req, res) => {
 
     const players = await getPlayers({
       leagueId,
-      textSearch: search
+      pids,
+      textSearch: search,
+      all: !pids.length
     })
 
-    if (!search) {
+    if (!search && !pids.length) {
       cache.set(cacheKey, players, 1800) // 30 mins
     }
 

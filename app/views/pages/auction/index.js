@@ -6,11 +6,13 @@ import { createSelector } from 'reselect'
 import { getApp } from '@core/app'
 import { auctionActions, getAuction, getAuctionPlayers } from '@core/auction'
 import { getCurrentLeague } from '@core/leagues'
+import { playerActions } from '@core/players'
 
 import render from './auction'
 
 class AuctionPage extends React.Component {
   componentDidMount() {
+    this.props.loadAllPlayers()
     this.props.join()
   }
 
@@ -21,7 +23,8 @@ class AuctionPage extends React.Component {
 
 AuctionPage.propTypes = {
   join: PropTypes.func,
-  toggleHideRostered: PropTypes.func
+  toggleHideRostered: PropTypes.func,
+  loadAllPlayers: PropTypes.func
 }
 
 const mapStateToProps = createSelector(
@@ -55,7 +58,8 @@ const mapStateToProps = createSelector(
 const mapDispatchToProps = {
   join: auctionActions.join,
   search: auctionActions.search,
-  toggleHideRostered: auctionActions.toggleHideRostered
+  toggleHideRostered: auctionActions.toggleHideRostered,
+  loadAllPlayers: playerActions.loadAllPlayers
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(AuctionPage)

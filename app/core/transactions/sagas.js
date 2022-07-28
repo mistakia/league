@@ -6,9 +6,11 @@ import { transactionsActions } from './actions'
 import { TRANSACTIONS_PER_LOAD } from '@core/constants'
 import {
   fetchTransactions,
+  fetchPlayers,
   getReleaseTransactions,
   getReserveTransactions
 } from '@core/api'
+import { getAllPlayers } from '@core/players'
 
 export function* load() {
   const { leagueId } = yield select(getApp)
@@ -36,6 +38,15 @@ export function* loadReserveTransactions() {
   yield call(getReserveTransactions, { leagueId, teamId })
 }
 
+export function* loadPlayers({ payload }) {
+  const players = yield select(getAllPlayers)
+  const missing = payload.data.filter((p) => !players.getIn([p.pid, 'fname']))
+  if (missing.length) {
+    const { leagueId } = yield select(getApp)
+    yield call(fetchPlayers, { leagueId, pids: missing.map((p) => p.pid) })
+  }
+}
+
 //= ====================================
 //  WATCHERS
 // -------------------------------------
@@ -57,6 +68,10 @@ export function* watchAuthFulfilled() {
   yield takeLatest(appActions.AUTH_FULFILLED, loadReserveTransactions)
 }
 
+export function* watchGetTransactionsFulfilled() {
+  yield takeLatest(transactionsActions.GET_TRANSACTIONS_FULFILLED, loadPlayers)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -65,5 +80,6 @@ export const transactionSagas = [
   fork(watchLoadTransactions),
   fork(watchLoadNextTransactions),
   fork(watchFilterTransactions),
-  fork(watchAuthFulfilled)
+  fork(watchAuthFulfilled),
+  fork(watchGetTransactionsFulfilled)
 ]

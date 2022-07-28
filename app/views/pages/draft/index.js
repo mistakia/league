@@ -13,7 +13,7 @@ import {
   getNextPick
 } from '@core/draft'
 import { getCurrentLeague } from '@core/leagues'
-import { getRookiePlayers } from '@core/players'
+import { getRookiePlayers, playerActions } from '@core/players'
 import { getApp } from '@core/app'
 import { confirmationActions } from '@core/confirmations'
 
@@ -30,6 +30,7 @@ class DraftPage extends React.Component {
 
   componentDidMount() {
     this.props.loadDraft()
+    this.props.loadAllPlayers()
   }
 
   handleDraft = () => {
@@ -90,7 +91,8 @@ const mapStateToProps = createSelector(
 const mapDispatchToProps = {
   loadDraft: draftActions.loadDraft,
   draftPlayer: draftActions.draftPlayer,
-  showConfirmation: confirmationActions.show
+  showConfirmation: confirmationActions.show,
+  loadAllPlayers: playerActions.loadAllPlayers
 }
 
 DraftPage.propTypes = {
@@ -98,7 +100,8 @@ DraftPage.propTypes = {
   draftPlayer: PropTypes.func,
   showConfirmation: PropTypes.func,
   selectedPlayerMap: ImmutablePropTypes.map,
-  nextPick: PropTypes.object
+  nextPick: PropTypes.object,
+  loadAllPlayers: PropTypes.func
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(DraftPage)

@@ -1,5 +1,6 @@
 export const playerActions = {
-  LOAD_PLAYERS: 'LOAD_PLAYERS',
+  LOAD_ALL_PLAYERS: 'LOAD_ALL_PLAYERS',
+  LOAD_LEAGUE_PLAYERS: 'LOAD_LEAGUE_PLAYERS',
 
   SET_WATCHLIST: 'SET_WATCHLIST',
   TOGGLE_WATCHLIST: 'TOGGLE_WATCHLIST',
@@ -19,6 +20,18 @@ export const playerActions = {
   FETCH_PLAYERS_FAILED: 'FETCH_PLAYERS_FAILED',
   FETCH_PLAYERS_FULFILLED: 'FETCH_PLAYERS_FULFILLED',
   FETCH_PLAYERS_PENDING: 'FETCH_PLAYERS_PENDING',
+
+  FETCH_ALL_PLAYERS_FAILED: 'FETCH_ALL_PLAYERS_FAILED',
+  FETCH_ALL_PLAYERS_FULFILLED: 'FETCH_ALL_PLAYERS_FULFILLED',
+  FETCH_ALL_PLAYERS_PENDING: 'FETCH_ALL_PLAYERS_PENDING',
+
+  FETCH_LEAGUE_PLAYERS_FAILED: 'FETCH_LEAGUE_PLAYERS_FAILED',
+  FETCH_LEAGUE_PLAYERS_FULFILLED: 'FETCH_LEAGUE_PLAYERS_FULFILLED',
+  FETCH_LEAGUE_PLAYERS_PENDING: 'FETCH_LEAGUE_PLAYERS_PENDING',
+
+  FETCH_TEAM_PLAYERS_FAILED: 'FETCH_TEAM_PLAYERS_FAILED',
+  FETCH_TEAM_PLAYERS_FULFILLED: 'FETCH_TEAM_PLAYERS_FULFILLED',
+  FETCH_TEAM_PLAYERS_PENDING: 'FETCH_TEAM_PLAYERS_PENDING',
 
   SEARCH_PLAYERS_FAILED: 'SEARCH_PLAYERS_FAILED',
   SEARCH_PLAYERS_PENDING: 'SEARCH_PLAYERS_PENDING',
@@ -74,6 +87,14 @@ export const playerActions = {
   GET_PLAYER_GAMELOGS_FULFILLED: 'GET_PLAYER_GAMELOGS_FULFILLED',
   GET_PLAYER_GAMELOGS_FAILED: 'GET_PLAYER_GAMELOGS_FAILED',
   GET_PLAYER_GAMELOGS_PENDING: 'GET_PLAYER_GAMELOGS_PENDING',
+
+  loadAllPlayers: () => ({
+    type: playerActions.LOAD_ALL_PLAYERS
+  }),
+
+  loadLeaguePlayers: () => ({
+    type: playerActions.LOAD_LEAGUE_PLAYERS
+  }),
 
   getPlayerProjections: (pid) => ({
     type: playerActions.GET_PLAYER_PROJECTIONS,
@@ -221,6 +242,75 @@ export const playerActions = {
 
   fetchPlayersFailed: (opts, error) => ({
     type: playerActions.FETCH_PLAYERS_FAILED,
+    payload: {
+      opts,
+      error
+    }
+  }),
+
+  fetchAllPlayersPending: (opts) => ({
+    type: playerActions.FETCH_ALL_PLAYERS_PENDING,
+    payload: {
+      opts
+    }
+  }),
+
+  fetchAllPlayersFulfilled: (opts, data) => ({
+    type: playerActions.FETCH_ALL_PLAYERS_FULFILLED,
+    payload: {
+      opts,
+      data
+    }
+  }),
+
+  fetchAllPlayersFailed: (opts, error) => ({
+    type: playerActions.FETCH_ALL_PLAYERS_FAILED,
+    payload: {
+      opts,
+      error
+    }
+  }),
+
+  fetchLeaguePlayersPending: (opts) => ({
+    type: playerActions.FETCH_LEAGUE_PLAYERS_PENDING,
+    payload: {
+      opts
+    }
+  }),
+
+  fetchLeaguePlayersFulfilled: (opts, data) => ({
+    type: playerActions.FETCH_LEAGUE_PLAYERS_FULFILLED,
+    payload: {
+      opts,
+      data
+    }
+  }),
+
+  fetchLeaguePlayersFailed: (opts, error) => ({
+    type: playerActions.FETCH_LEAGUE_PLAYERS_FAILED,
+    payload: {
+      opts,
+      error
+    }
+  }),
+
+  fetchTeamPlayersPending: (opts) => ({
+    type: playerActions.FETCH_TEAM_PLAYERS_PENDING,
+    payload: {
+      opts
+    }
+  }),
+
+  fetchTeamPlayersFulfilled: (opts, data) => ({
+    type: playerActions.FETCH_TEAM_PLAYERS_FULFILLED,
+    payload: {
+      opts,
+      data
+    }
+  }),
+
+  fetchTeamPlayersFailed: (opts, error) => ({
+    type: playerActions.FETCH_TEAM_PLAYERS_FAILED,
     payload: {
       opts,
       error
@@ -497,6 +587,24 @@ export const playersRequestActions = {
   failed: playerActions.fetchPlayersFailed,
   fulfilled: playerActions.fetchPlayersFulfilled,
   pending: playerActions.fetchPlayersPending
+}
+
+export const allPlayersRequestActions = {
+  failed: playerActions.fetchAllPlayersFailed,
+  fulfilled: playerActions.fetchAllPlayersFulfilled,
+  pending: playerActions.fetchAllPlayersPending
+}
+
+export const leaguePlayersRequestActions = {
+  failed: playerActions.fetchLeaguePlayersFailed,
+  fulfilled: playerActions.fetchLeaguePlayersFulfilled,
+  pending: playerActions.fetchLeaguePlayersPending
+}
+
+export const teamPlayersRequestActions = {
+  failed: playerActions.fetchTeamPlayersFailed,
+  fulfilled: playerActions.fetchTeamPlayersFulfilled,
+  pending: playerActions.fetchTeamPlayersPending
 }
 
 export const getPlayerActions = {

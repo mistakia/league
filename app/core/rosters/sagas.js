@@ -600,7 +600,10 @@ export function* watchExportRosters() {
 export function* watchPlayersAndBaselinesFulfilled() {
   while (true) {
     yield all([
-      take(playerActions.FETCH_PLAYERS_FULFILLED),
+      take([
+        playerActions.FETCH_TEAM_PLAYERS_FULFILLED,
+        playerActions.FETCH_LEAGUE_PLAYERS_FULFILLED
+      ]),
       take(playerActions.GET_BASELINES_FULFILLED),
       take(rosterActions.GET_ROSTERS_FULFILLED)
     ])

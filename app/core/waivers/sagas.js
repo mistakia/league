@@ -8,10 +8,12 @@ import {
   postCancelWaiver,
   postWaiverOrder,
   fetchWaivers,
-  getWaiverReport
+  getWaiverReport,
+  fetchPlayers
 } from '@core/api'
 import { getWaivers, getWaiverPlayersForCurrentTeam } from './selectors'
 import { notificationActions } from '@core/notifications'
+import { getAllPlayers } from '@core/players'
 
 export function* claim({ payload }) {
   const { leagueId, teamId } = yield select(getApp)
@@ -108,6 +110,15 @@ export function* filterWaivers({ payload }) {
   }
 }
 
+export function* loadPlayers({ payload }) {
+  const players = yield select(getAllPlayers)
+  const missing = payload.data.filter((p) => !players.getIn([p.pid, 'fname']))
+  if (missing.length) {
+    const { leagueId } = yield select(getApp)
+    yield call(fetchPlayers, { leagueId, pids: missing.map((p) => p.pid) })
+  }
+}
+
 //= ====================================
 //  WATCHERS
 // -------------------------------------
@@ -162,6 +173,10 @@ export function* watchPutWaiverFulfilled() {
   yield takeLatest(waiverActions.PUT_WAIVER_FULFILLED, updateNotification)
 }
 
+export function* watchWaiverReportFulfilled() {
+  yield takeLatest(waiverActions.GET_WAIVER_REPORT_FULFILLED, loadPlayers)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -179,5 +194,7 @@ export const waiverSagas = [
   fork(watchGetWaiversFulfilled),
   fork(watchFilterWaivers),
 
-  fork(watchLoadWaivers)
+  fork(watchLoadWaivers),
+
+  fork(watchWaiverReportFulfilled)
 ]
