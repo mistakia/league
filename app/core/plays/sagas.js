@@ -15,7 +15,14 @@ export function* loadPlays() {
 
 export function* watchFetchPlayersFulfilled() {
   if (constants.isRegularSeason) {
-    yield takeLatest(playerActions.FETCH_PLAYERS_FULFILLED, loadPlays)
+    yield takeLatest(
+      [
+        playerActions.FETCH_ALL_PLAYERS_FULFILLED,
+        playerActions.FETCH_LEAGUE_PLAYERS_FULFILLED,
+        playerActions.FETCH_TEAM_PLAYERS_FULFILLED
+      ],
+      loadPlays
+    )
   }
 }
 

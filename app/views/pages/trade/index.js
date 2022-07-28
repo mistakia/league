@@ -16,6 +16,7 @@ import {
   getProposingTeam,
   getProposingTeamRoster
 } from '@core/trade'
+import { playerActions } from '@core/players'
 
 import render from './trade'
 
@@ -53,6 +54,7 @@ class TradePage extends React.Component {
 
   componentDidMount = () => {
     this.props.load()
+    this.props.loadLeaguePlayers()
   }
 
   handleReleasePlayerClick = (pid) => this.props.setReleasePlayers(pid)
@@ -80,7 +82,8 @@ TradePage.propTypes = {
   setProposingTeamPicks: PropTypes.func,
   setAcceptingTeamPlayers: PropTypes.func,
   setAcceptingTeamPicks: PropTypes.func,
-  load: PropTypes.func
+  load: PropTypes.func,
+  loadLeaguePlayers: PropTypes.func
 }
 
 const mapStateToProps = createSelector(
@@ -136,7 +139,8 @@ const mapDispatchToProps = {
   setProposingTeamPlayers: tradeActions.setProposingTeamPlayers,
   setAcceptingTeamPlayers: tradeActions.setAcceptingTeamPlayers,
   setProposingTeamPicks: tradeActions.setProposingTeamPicks,
-  setAcceptingTeamPicks: tradeActions.setAcceptingTeamPicks
+  setAcceptingTeamPicks: tradeActions.setAcceptingTeamPicks,
+  loadLeaguePlayers: playerActions.loadLeaguePlayers
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(TradePage)

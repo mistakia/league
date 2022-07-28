@@ -17,7 +17,7 @@ const mapStateToProps = createSelector(
     week: pState.get('view') === 'ros' ? 'ros' : pState.get('week').get(0),
     isLoggedIn: Boolean(app.userId),
     isPending:
-      pState.get('isPending') ||
+      pState.get('allPlayersPending') ||
       (pState.get('view') === 'stats' && stats.isPending),
     searchValue: pState.get('search'),
     selected: pState.get('selected'),
@@ -48,7 +48,8 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  search: playerActions.search
+  search: playerActions.search,
+  loadAllPlayers: playerActions.loadAllPlayers
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PlayersPage)

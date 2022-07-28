@@ -12,6 +12,10 @@ import { constants } from '@common'
 const initialState = new Map({
   isInitializing: true,
   isPending: false,
+  allPlayersLoaded: false,
+  allPlayersPending: false,
+  leaguePlayersLoaded: false,
+  leaguePlayersPending: false,
   search: null,
   positions: new List(['QB', 'RB', 'WR', 'TE', 'K', 'DST']),
   nflTeams: new List(constants.nflTeams),
@@ -145,16 +149,6 @@ export function playersReducer(state = initialState, { payload, type }) {
         }
       })
 
-    case playerActions.FETCH_PLAYERS_PENDING:
-      return state.merge({
-        isPending: true
-      })
-
-    case playerActions.FETCH_PLAYERS_FAILED:
-      return state.merge({
-        isPending: false
-      })
-
     case playerActions.GET_PROJECTIONS_FULFILLED:
       return state.withMutations((players) => {
         payload.data.forEach((p) => {
@@ -184,9 +178,25 @@ export function playersReducer(state = initialState, { payload, type }) {
         })
       })
 
+    case playerActions.FETCH_LEAGUE_PLAYERS_PENDING:
+      return state.set('leaguePlayersPending', true)
+
+    case playerActions.FETCH_ALL_PLAYERS_PENDING:
+      return state.set('allPlayersPending', true)
+
+    case playerActions.FETCH_ALL_PLAYERS_FULFILLED:
+    case playerActions.FETCH_TEAM_PLAYERS_FULFILLED:
+    case playerActions.FETCH_LEAGUE_PLAYERS_FULFILLED:
     case playerActions.FETCH_PLAYERS_FULFILLED: {
       console.log(`loaded ${payload.data.length} players`)
       return state.withMutations((players) => {
+        if (type === playerActions.FETCH_ALL_PLAYERS_FULFILLED) {
+          players.set('allPlayersLoaded', true)
+          players.set('allPlayersPending', false)
+        } else if (type === playerActions.FETCH_LEAGUE_PLAYERS_FULFILLED) {
+          players.set('leaguePlayersLoaded', true)
+          players.set('leaguePlayersPending', false)
+        }
         players.set('isInitializing', false)
         players.set('isPending', false)
 
