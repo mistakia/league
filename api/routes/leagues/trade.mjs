@@ -395,7 +395,7 @@ router.post(
         await db('rosters_players')
           .del()
           .where({ rid: acceptingTeamRoster.uid })
-        await db('rosters_players').insert(acceptingTeamRoster.players)
+        await db('rosters_players').insert(acceptingTeamRoster.rosters_players)
       }
 
       // update proposing team roster
@@ -403,7 +403,7 @@ router.post(
         await db('rosters_players')
           .del()
           .where({ rid: proposingTeamRoster.uid })
-        await db('rosters_players').insert(proposingTeamRoster.players)
+        await db('rosters_players').insert(proposingTeamRoster.rosters_players)
       }
 
       // update traded picks
