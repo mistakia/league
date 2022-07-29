@@ -5,6 +5,7 @@ import path from 'path'
 import debug from 'debug'
 
 import config from '#config'
+import { wait } from './wait.mjs'
 
 const cache_path = path.join(os.homedir(), '/espn')
 const log = debug('espn')
@@ -21,6 +22,8 @@ export const getPlayer = async ({ espn_id }) => {
   log(`fetching ${url}`)
   const res = await fetch(url)
   const data = await res.json()
+
+  await wait(4000)
 
   if (res.ok) {
     fs.ensureFileSync(full_path)

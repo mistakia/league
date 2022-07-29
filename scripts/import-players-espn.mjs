@@ -4,7 +4,7 @@ import debug from 'debug'
 
 import db from '#db'
 // import { constants } from '#common'
-import { isMain, espn, wait, getPlayer, updatePlayer } from '#utils'
+import { isMain, espn, getPlayer, updatePlayer } from '#utils'
 
 // const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-players-espn')
@@ -30,9 +30,11 @@ const importPlayersESPN = async () => {
           continue
         }
 
-        await wait(4000)
-
         const espn_player = await espn.getPlayer({ espn_id })
+        if (!espn_player.athlete) {
+          log(`skipping ${espn_id}, espn api response missing athlete`)
+          continue
+        }
 
         const name = `${espn_player.athlete.firstName} ${espn_player.athlete.lastName}`
         const pos = espn_player.athlete.position.abbreviation
