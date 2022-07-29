@@ -80,6 +80,15 @@ export default class Roster {
     return arr
   }
 
+  // used for inserting into rosters_players table
+  get rosters_players() {
+    const arr = []
+    for (const { slot, pid, pos, rid, tag } of this._players.values()) {
+      arr.push({ slot, pid, pos, rid, tag })
+    }
+    return arr
+  }
+
   get starters() {
     return Array.from(this._players.values()).filter(
       (p) => !nonStarterSlots.includes(p.slot)
