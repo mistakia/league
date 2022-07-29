@@ -36,6 +36,10 @@ const updatePlayer = async ({ player_row, pid, update }) => {
     player_row = player_rows[0]
   }
 
+  if (!player_row) {
+    return 0
+  }
+
   const differences = diff(player_row, update)
 
   const edits = differences.filter((d) => d.kind === 'E')
