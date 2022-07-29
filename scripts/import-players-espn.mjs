@@ -30,6 +30,8 @@ const importPlayersESPN = async () => {
           continue
         }
 
+        await wait(4000)
+
         const espn_player = await espn.getPlayer({ espn_id })
 
         const name = `${espn_player.athlete.firstName} ${espn_player.athlete.lastName}`
@@ -60,8 +62,6 @@ const importPlayersESPN = async () => {
         })
 
         changeCount += changes
-
-        await wait(4000)
       }
     }
 
