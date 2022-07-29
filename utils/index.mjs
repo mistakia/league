@@ -46,8 +46,7 @@ export { default as createPlayer } from './create-player.mjs'
 export * as espn from './espn.mjs'
 export * as sportradar from './sportradar.mjs'
 export { default as getTransitionBids } from './get-transition-bids.mjs'
-
-export const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+export { wait } from './wait.mjs'
 
 export const getChartedPlayByPlayQuery = (db) =>
   db('nfl_plays')
