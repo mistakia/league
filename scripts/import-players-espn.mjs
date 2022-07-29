@@ -17,7 +17,7 @@ const importPlayersESPN = async () => {
   do {
     res = await espn.getPlayers({ page })
     if (res && res.items && res.items.length) {
-      for (const item of res.items.slice(0, 10)) {
+      for (const item of res.items) {
         const re = /athletes\/(?<espn_id>[0-9]+)?/gi
         const re_result = re.exec(item.$ref)
         const {
@@ -44,6 +44,11 @@ const importPlayersESPN = async () => {
         } catch (err) {
           log(err)
           log({ name, pos, team, espn_id })
+          continue
+        }
+
+        if (!player_row) {
+          log(`espn_id ${espn_id} matched no player rows`)
           continue
         }
 
