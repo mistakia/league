@@ -183,6 +183,24 @@ const main = async () => {
           await wait(4000)
         }
       }
+    } else if (argv.year) {
+      const year = argv.year
+      log(`loading plays for ${year}`)
+
+      for (let week = 0; week <= 4; week++) {
+        await run({ year, week, type: 'PRE' })
+        await wait(4000)
+      }
+
+      for (let week = 1; week <= 18; week++) {
+        await run({ year, week, type: 'REG' })
+        await wait(4000)
+      }
+
+      for (let week = 18; week <= 22; week++) {
+        await run({ year, week, type: 'POST' })
+        await wait(4000)
+      }
     } else {
       const week = argv.week
       const type = argv.type
