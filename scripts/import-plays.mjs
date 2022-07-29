@@ -15,7 +15,7 @@ const currentRegularSeasonWeek = Math.max(
   1
 )
 
-const log = debug('import:games:nfl:ngs')
+const log = debug('import:plays:ngs')
 
 const getPlayData = (play) => ({
   sequence: play.sequence,
