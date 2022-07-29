@@ -78,13 +78,13 @@ const upsertPlayStat = async ({ playStat, esbid, playId }) => {
     .merge()
 }
 
-const log = debug('import:games:nfl:ngs')
-debug.enable('import:games:nfl:ngs')
+const log = debug('import:plays:nfl')
+debug.enable('import:plays:nfl')
 
-const run = async ({ week = currentRegularSeasonWeek, type = 'REG' } = {}) => {
+const run = async ({ year = constants.season.year, week = currentRegularSeasonWeek, type = 'REG' } = {}) => {
   let token
   const games = await db('nfl_games').where({
-    seas: constants.season.year,
+    seas: year,
     wk: week,
     type
   })
