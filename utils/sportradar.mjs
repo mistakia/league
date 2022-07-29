@@ -37,8 +37,10 @@ export const getPlayer = ({ sportradar_id }) =>
     const res = await fetch(url)
     const data = await res.json()
 
-    fs.ensureFileSync(full_path)
-    fs.writeJsonSync(full_path, data, { spaces: 2 })
+    if (res.ok) {
+      fs.ensureFileSync(full_path)
+      fs.writeJsonSync(full_path, data, { spaces: 2 })
+    }
 
     return data
   })
