@@ -13,6 +13,8 @@ module.exports = {
   ngs_api_url: '',
   mflUserAgent: '',
   sportradar_api: '',
+  espn_api_v2_url: '',
+  espn_api_v3_url: '',
   email: {
     api: '', // sendgrid api
     admin: '',
