@@ -2106,6 +2106,44 @@ CREATE TABLE `league_team_lineups` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `league_team_lineup_contributions`
+--
+
+DROP TABLE IF EXISTS `league_team_lineup_contributions`;
+
+CREATE TABLE `league_team_lineup_contributions` (
+  `pid` varchar(7) NOT NULL,
+  `year` int(4) NOT NULL,
+  `tid` int(6) NOT NULL,
+  `lid` int(6) NOT NULL,
+  `starts` tinyint(2) NOT NULL,
+  `sp` decimal(5,2) NOT NULL,
+  `bp` decimal(5,2) NOT NULL,
+  UNIQUE KEY `contribution` (`lid`,`pid`,`year`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `league_team_lineup_contribution_weeks`
+--
+
+DROP TABLE IF EXISTS `league_team_lineup_contribution_weeks`;
+
+CREATE TABLE `league_team_lineup_contribution_weeks` (
+  `pid` varchar(7) NOT NULL,
+  `week` varchar(3) NOT NULL,
+  `year` int(4) NOT NULL,
+  `tid` int(6) NOT NULL,
+  `lid` int(6) NOT NULL,
+  `sp` decimal(5,2) NOT NULL,
+  `bp` decimal(5,2) NOT NULL,
+  UNIQUE KEY `contribution` (`lid`,`pid`,`year`, `week`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `league_team_lineup_starters`
 --
 
