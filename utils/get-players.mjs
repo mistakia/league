@@ -7,7 +7,8 @@ export default async function ({
   leagueId,
   pids = [],
   all = false,
-  teamId
+  teamId,
+  baseline_players = false
 }) {
   const leaguePlayerIds = []
   const baselinePlayerIds = []
@@ -42,13 +43,12 @@ export default async function ({
     playerSlots.forEach((s) => leaguePlayerIds.push(s.pid))
   }
 
-  if (!textSearch && !pids.length) {
-    // TODO
-    /* const baselines = await db('league_baselines')
-     *   .select('pid')
-     *   .where({ lid: projectionLeagueId })
-     *   .groupBy('pid')
-     * baselines.forEach((b) => baselinePlayerIds.push(b.pid)) */
+  if (baseline_players) {
+    const baselines = await db('league_baselines')
+      .select('pid')
+      .where({ lid: projectionLeagueId })
+      .groupBy('pid')
+    baselines.forEach((b) => baselinePlayerIds.push(b.pid))
   }
 
   const selects = [
