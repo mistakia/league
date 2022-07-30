@@ -193,5 +193,35 @@ export default async function ({
     players_by_pid[rosProjection.pid].projection.ros = rosProjection
   }
 
+  if (!all && !textSearch && !pids.length && (teamId || leagueId)) {
+    const params = leagueId ? { lid: leagueId } : { tid: teamId }
+    const contributions = await db('league_team_lineup_contributions').where(
+      params
+    )
+    const contribution_weeks = await db(
+      'league_team_lineup_contribution_weeks'
+    ).where(params)
+
+    for (const player_contribution of contributions) {
+      const { pid, starts, sp, bp } = player_contribution
+      if (!players_by_pid[pid]) continue
+
+      const player_contribution_weeks = contribution_weeks.filter(
+        (w) => w.pid === player_contribution.pid
+      )
+      const weeks = {}
+      for (const { week, start, sp, bp } of player_contribution_weeks) {
+        weeks[week] = { week, start, sp, bp }
+      }
+
+      players_by_pid[pid].lineups = {
+        starts,
+        sp,
+        bp,
+        weeks
+      }
+    }
+  }
+
   return Object.values(players_by_pid)
 }

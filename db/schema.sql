@@ -2136,6 +2136,7 @@ CREATE TABLE `league_team_lineup_contribution_weeks` (
   `year` int(4) NOT NULL,
   `tid` int(6) NOT NULL,
   `lid` int(6) NOT NULL,
+  `start` tinyint(1) NOT NULL,
   `sp` decimal(5,2) NOT NULL,
   `bp` decimal(5,2) NOT NULL,
   UNIQUE KEY `contribution` (`lid`,`pid`,`year`, `week`)
