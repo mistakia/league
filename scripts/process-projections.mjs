@@ -49,6 +49,9 @@ const processLeague = async ({ year, lid }) => {
       league_available_salary_space =
         league_available_salary_space + team_available_salary_space
     }
+
+    team._roster_row = rosterRow
+    team._roster = roster
   }
 
   const projections = await getProjections()
@@ -287,7 +290,10 @@ const processLeague = async ({ year, lid }) => {
   }
 
   await projectLineups()
-  if (constants.season.week <= constants.season.regularSeasonFinalWeek)
+  if (
+    constants.season.week &&
+    constants.season.week <= constants.season.regularSeasonFinalWeek
+  )
     await simulateSeason()
 }
 
