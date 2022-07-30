@@ -137,13 +137,14 @@ const run = async () => {
         bp
       })
       for (const week in playerData.weeks) {
-        const { sp, bp } = playerData.weeks[week]
+        const { start, sp, bp } = playerData.weeks[week]
         team_lineup_contribution_week_inserts.push({
           week,
           tid,
           lid: leagueId,
           pid,
           year,
+          start,
           sp,
           bp
         })
