@@ -21,10 +21,10 @@ import Position from '@components/position'
 import PlayerAge from '@components/player-age'
 import SelectedPlayerSeasonStats from '@components/selected-player-season-stats'
 import SelectedPlayerProjections from '@components/selected-player-projections'
-import SelectedPlayerTeamStats from '@components/selected-player-team-stats'
-import SelectedPlayerTeamSituationSplits from '@components/selected-player-team-situation-splits'
-import SelectedPlayerTeamPositionSplits from '@components/selected-player-team-position-splits'
-import SelectedPlayerEfficiencyStats from '@components/selected-player-efficiency-stats'
+/* import SelectedPlayerTeamStats from '@components/selected-player-team-stats'
+ * import SelectedPlayerTeamSituationSplits from '@components/selected-player-team-situation-splits'
+ * import SelectedPlayerTeamPositionSplits from '@components/selected-player-team-position-splits'
+ * import SelectedPlayerEfficiencyStats from '@components/selected-player-efficiency-stats' */
 import SelectedPlayerLineupImpact from '@components/selected-player-lineup-impact'
 import SelectedPlayerValue from '@components/selected-player-value'
 import SelectedPlayerGamelogs from '@components/selected-player-gamelogs'
@@ -53,7 +53,7 @@ export default class SelectedPlayer extends React.Component {
     super(props)
 
     const projectionView = 0
-    const transactionsView = 9
+    const transactionsView = 7
     this.state = {
       value: constants.isRegularSeason ? projectionView : transactionsView,
       headshot_width: getHeadshotWidth(),
@@ -246,7 +246,7 @@ export default class SelectedPlayer extends React.Component {
               <Tab>Game Log</Tab>
               <Tab>Seasons</Tab>
               <Tab>Team Splits</Tab>
-              <Tab>Efficiency</Tab>
+              {/* <Tab>Efficiency</Tab> */}
               <Tab>Practice</Tab>
               {isLoggedIn && <Tab>Contribution</Tab>}
               {isLoggedIn && <Tab>Value</Tab>}
@@ -264,24 +264,24 @@ export default class SelectedPlayer extends React.Component {
             <TabPanel value={3}>
               <SelectedPlayerSeasonStats pos={pos} />
             </TabPanel>
+            {/* <TabPanel value={4}>
+                <SelectedPlayerTeamStats />
+                <SelectedPlayerTeamSituationSplits />
+                <SelectedPlayerTeamPositionSplits />
+                </TabPanel> */}
+            {/* <TabPanel value={5}>
+                <SelectedPlayerEfficiencyStats />
+                </TabPanel> */}
             <TabPanel value={4}>
-              <SelectedPlayerTeamStats />
-              <SelectedPlayerTeamSituationSplits />
-              <SelectedPlayerTeamPositionSplits />
-            </TabPanel>
-            <TabPanel value={5}>
-              <SelectedPlayerEfficiencyStats />
-            </TabPanel>
-            <TabPanel value={6}>
               <SelectedPlayerPractice />
             </TabPanel>
-            <TabPanel value={7}>
+            <TabPanel value={5}>
               <SelectedPlayerLineupImpact />
             </TabPanel>
-            <TabPanel value={8}>
+            <TabPanel value={6}>
               <SelectedPlayerValue />
             </TabPanel>
-            <TabPanel value={9}>
+            <TabPanel value={7}>
               <SelectedPlayerTransactions />
             </TabPanel>
           </Tabs>
