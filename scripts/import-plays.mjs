@@ -94,8 +94,8 @@ const run = async ({
 
     if (!argv.final && haveEndPlay) continue
 
+    log(`loading plays for esbid: ${esbid}`)
     const url = `${config.ngs_api_url}/live/plays/playlist/game?gameId=${esbid}`
-    log(url)
     const data = await fetch(url, {
       headers: {
         origin: 'https://nextgenstats.nfl.com',
@@ -170,6 +170,7 @@ const main = async () => {
 
         if (!argv.type || argv.type.toLowerCase() === 'pre') {
           for (let week = 0; week <= 4; week++) {
+            log(`loading plays for week: ${week} (PRE)`)
             await run({ year, week, type: 'PRE' })
             await wait(4000)
           }
@@ -177,6 +178,7 @@ const main = async () => {
 
         if (!argv.type || argv.type.toLowerCase() === 'reg') {
           for (let week = 1; week <= 18; week++) {
+            log(`loading plays for week: ${week} (REG)`)
             await run({ year, week, type: 'REG' })
             await wait(4000)
           }
@@ -184,6 +186,7 @@ const main = async () => {
 
         if (!argv.type || argv.type.toLowerCase() === 'post') {
           for (let week = 18; week <= 22; week++) {
+            log(`loading plays for week: ${week} (POST)`)
             await run({ year, week, type: 'POST' })
             await wait(4000)
           }
@@ -202,6 +205,7 @@ const main = async () => {
           await run({ year, week: argv.week, type: 'REG' })
         } else {
           for (let week = 0; week <= 4; week++) {
+            log(`loading plays for week: ${week} (PRE)`)
             await run({ year, week, type: 'PRE' })
             await wait(4000)
           }
@@ -213,6 +217,7 @@ const main = async () => {
           await run({ year, week: argv.week, type: 'REG' })
         } else {
           for (let week = 1; week <= 18; week++) {
+            log(`loading plays for week: ${week} (REG)`)
             await run({ year, week, type: 'REG' })
             await wait(4000)
           }
@@ -224,6 +229,7 @@ const main = async () => {
           await run({ year, week: argv.week, type: 'POST' })
         } else {
           for (let week = 18; week <= 22; week++) {
+            log(`loading plays for week: ${week} (POST)`)
             await run({ year, week, type: 'POST' })
             await wait(4000)
           }
