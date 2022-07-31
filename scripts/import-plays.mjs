@@ -159,7 +159,7 @@ const run = async ({
 }
 
 const main = async () => {
-  debug.enable('import:games:nfl:ngs')
+  debug.enable('import:plays:ngs')
   let error
   try {
     if (argv.current) {
