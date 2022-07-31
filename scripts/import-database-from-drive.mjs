@@ -13,7 +13,7 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-database-from-drive')
 debug.enable('import-database-from-drive')
 
-const run = async ({ full = false } = {}) => {
+const run = async ({ full = false, lite = false } = {}) => {
   const drive = await googleDrive()
   const listParams = {
     q: '"1OnikVibAJ5-1uUhEyMHBRpkFGbzUM23v" in parents and trashed=false',
@@ -22,9 +22,16 @@ const run = async ({ full = false } = {}) => {
   }
   const res = await drive.files.list(listParams)
 
-  const file = full
-    ? res.data.files.find((f) => f.name.includes('full'))
-    : res.data.files.find((f) => !f.name.includes('full'))
+  let file
+  if (full) {
+    file = res.data.files.find((f) => f.name.includes('full'))
+  } else if (lite) {
+    file = res.data.files.find((f) => f.name.includes('lite'))
+  } else {
+    file = res.data.files.find(
+      (f) => !f.name.includes('full') && !f.name.includes('lite')
+    )
+  }
 
   if (!file) {
     log('file not found')
@@ -58,7 +65,8 @@ const main = async () => {
   let error
   try {
     const full = argv.full
-    await run({ full })
+    const lite = argv.lite
+    await run({ full, lite })
   } catch (err) {
     error = err
     console.log(error)
