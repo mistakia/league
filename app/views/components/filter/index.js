@@ -30,8 +30,10 @@ export default class Filter extends React.Component {
     }
 
     if (this.state.visible) {
-      document.removeEventListener('click', this.handleToggleClick)
-      this.setState({ visible: false })
+      if (!this.body.contains(event.target)) {
+        document.removeEventListener('click', this.handleToggleClick)
+        this.setState({ visible: false })
+      }
     } else {
       document.addEventListener('click', this.handleToggleClick)
       this.setState({ visible: true })
