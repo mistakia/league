@@ -11,8 +11,19 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('update-player')
 debug.enable('update-player')
 
-const protected_props = [
+const excluded_props = [
   'pid',
+  'fname',
+  'lname',
+  'pname',
+  'formatted',
+  'pos',
+  'pos1',
+  'pos2'
+]
+
+const protected_props = [
+  'nflid',
   'esbid',
   'gsisid',
   'gsispid',
@@ -55,6 +66,11 @@ const updatePlayer = async ({ player_row, pid, update }) => {
 
     const prop = edit.path[0]
 
+    if (excluded_props.includes(prop)) {
+      log(`not allowed to updated ${prop}`)
+      continue
+    }
+
     if (protected_props.includes(prop)) {
       const exists = await db('player').where(prop, edit.rhs).limit(1)
       if (exists.length) {
@@ -66,7 +82,9 @@ const updatePlayer = async ({ player_row, pid, update }) => {
     }
 
     changes += 1
-    // log(`Player: ${player_row.pid}, Field: ${prop}, Value: ${edit.rhs}`)
+    log(
+      `Updating player: ${player_row.pid}, Field: ${prop}, Value: ${edit.rhs}`
+    )
     await db('player_changelog').insert({
       type: constants.changes.PLAYER_EDIT,
       id: player_row.pid,
