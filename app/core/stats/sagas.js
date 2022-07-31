@@ -2,7 +2,7 @@ import { call, takeLatest, fork, select, put } from 'redux-saga/effects'
 
 import { getPlayers, playerActions } from '@core/players'
 import { statActions } from './actions'
-import { getChartedPlays, getTeamStats } from '@core/api'
+import { getChartedPlays } from '@core/api'
 import { getCurrentLeague } from '@core/leagues'
 import { getStats } from './selectors'
 import Worker from 'workerize-loader?inline!../worker' // eslint-disable-line import/no-webpack-loader-syntax
@@ -55,14 +55,6 @@ export function* calculateTeamStats() {
   yield put(statActions.setTeamStatsPercentiles(result))
 }
 
-export function* loadStats() {
-  const { teamStats, plays } = yield select(getStats)
-  if (!plays.size) yield fork(getChartedPlays)
-  if (!teamStats.size) {
-    yield call(getTeamStats)
-  }
-}
-
 //= ====================================
 //  WATCHERS
 // -------------------------------------
@@ -83,10 +75,6 @@ export function* watchFilterStats() {
   yield takeLatest(statActions.FILTER_STATS, filterPlays)
 }
 
-export function* watchPlayersSelectPlayer() {
-  yield takeLatest(playerActions.PLAYERS_SELECT_PLAYER, loadStats)
-}
-
 export function* watchGetTeamStatsFulfilled() {
   yield takeLatest(statActions.GET_TEAM_STATS_FULFILLED, calculateTeamStats)
 }
@@ -99,7 +87,6 @@ export const statSagas = [
   fork(watchSetPlayersView),
   fork(watchGetChartedPlaysFulfilled),
   fork(watchFilterStats),
-  fork(watchPlayersSelectPlayer),
   fork(watchGetTeamStatsFulfilled),
   fork(watchUpdateQualifier)
 ]
