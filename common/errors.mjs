@@ -32,3 +32,10 @@ export class EmptyPracticeSquadFreeAgencyWaivers extends Error {
     this.name = 'EmptyPracticeSquadFreeAgencyError'
   }
 }
+
+export class MatchedMultiplePlayers extends Error {
+  constructor(message = 'matched multiple players') {
+    super(message)
+    this.name = 'MatchedMultiplePlayersError'
+  }
+}

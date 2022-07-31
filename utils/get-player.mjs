@@ -2,7 +2,7 @@ import debug from 'debug'
 import yargs from 'yargs'
 
 import isMain from './is-main.mjs'
-import { fixTeam, formatPlayerName } from '#common'
+import { fixTeam, formatPlayerName, Errors } from '#common'
 import db from '#db'
 
 const argv = yargs.argv
@@ -159,7 +159,9 @@ const getPlayer = async ({
   team,
   dob,
   sleeper_id,
-  keeptradecut_id
+  keeptradecut_id,
+  esbid,
+  gsisid
 }) => {
   if (aliases[name]) {
     const result = await db('player').where({ pid: aliases[name] })
@@ -174,6 +176,10 @@ const getPlayer = async ({
 
   if (keeptradecut_id) {
     query.where({ keeptradecut_id })
+  } else if (esbid) {
+    query.where({ esbid })
+  } else if (gsisid) {
+    query.where({ gsisid })
   } else {
     if (name) {
       const formatted = formatPlayerName(name)
@@ -201,7 +207,7 @@ const getPlayer = async ({
   const player_rows = await query
   if (player_rows.length > 1) {
     log(query.toString())
-    throw new Error('matched multiple players')
+    throw new Errors.MatchedMultiplePlayers()
   }
 
   return player_rows.length ? player_rows[0] : undefined
