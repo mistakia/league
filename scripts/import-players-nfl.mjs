@@ -63,7 +63,7 @@ const importPlayersNFL = async ({ year = constants.season.year, token }) => {
     const dpos = node.person.draftNumberOverall
     const start = node.person.draftYear
     const weight = node.weight
-    const cteam = node.currentTeam.abbreviation
+    const cteam = node.currentTeam ? node.currentTeam.abbreviation : null
     const jnum = node.jerseyNumber
     const height = formatHeight(node.height)
     // TODO status
