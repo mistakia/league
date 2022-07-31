@@ -166,40 +166,68 @@ const main = async () => {
       await run()
     } else if (argv.all) {
       for (let year = 2002; year < constants.season.year; year++) {
-        log(`loading plays for ${year}`)
+        log(`loading plays for year: ${year}, type: ${argv.type || 'all'}`)
 
-        for (let week = 0; week <= 4; week++) {
-          await run({ year, week, type: 'PRE' })
-          await wait(4000)
+        if (!argv.type || argv.type.toLowerCase() === 'pre') {
+          for (let week = 0; week <= 4; week++) {
+            await run({ year, week, type: 'PRE' })
+            await wait(4000)
+          }
         }
 
-        for (let week = 1; week <= 18; week++) {
-          await run({ year, week, type: 'REG' })
-          await wait(4000)
+        if (!argv.type || argv.type.toLowerCase() === 'reg') {
+          for (let week = 1; week <= 18; week++) {
+            await run({ year, week, type: 'REG' })
+            await wait(4000)
+          }
         }
 
-        for (let week = 18; week <= 22; week++) {
-          await run({ year, week, type: 'POST' })
-          await wait(4000)
+        if (!argv.type || argv.type.toLowerCase() === 'post') {
+          for (let week = 18; week <= 22; week++) {
+            await run({ year, week, type: 'POST' })
+            await wait(4000)
+          }
         }
       }
     } else if (argv.year) {
       const year = argv.year
-      log(`loading plays for ${year}`)
+      log(
+        `loading plays for year: ${year}, week: ${argv.week || 'all'}, type: ${
+          argv.type || 'all'
+        }`
+      )
 
-      for (let week = 0; week <= 4; week++) {
-        await run({ year, week, type: 'PRE' })
-        await wait(4000)
+      if (!argv.type || argv.type.toLowerCase() === 'pre') {
+        if (argv.week) {
+          await run({ year, week: argv.week, type: 'REG' })
+        } else {
+          for (let week = 0; week <= 4; week++) {
+            await run({ year, week, type: 'PRE' })
+            await wait(4000)
+          }
+        }
       }
 
-      for (let week = 1; week <= 18; week++) {
-        await run({ year, week, type: 'REG' })
-        await wait(4000)
+      if (!argv.type || argv.type.toLowerCase() === 'reg') {
+        if (argv.week) {
+          await run({ year, week: argv.week, type: 'REG' })
+        } else {
+          for (let week = 1; week <= 18; week++) {
+            await run({ year, week, type: 'REG' })
+            await wait(4000)
+          }
+        }
       }
 
-      for (let week = 18; week <= 22; week++) {
-        await run({ year, week, type: 'POST' })
-        await wait(4000)
+      if (!argv.type || argv.type.toLowerCase() === 'post') {
+        if (argv.week) {
+          await run({ year, week: argv.week, type: 'POST' })
+        } else {
+          for (let week = 18; week <= 22; week++) {
+            await run({ year, week, type: 'POST' })
+            await wait(4000)
+          }
+        }
       }
     } else {
       const week = argv.week
