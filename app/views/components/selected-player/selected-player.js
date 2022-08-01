@@ -245,7 +245,7 @@ export default class SelectedPlayer extends React.Component {
               <Tab>Matchup</Tab>
               <Tab>Game Log</Tab>
               <Tab>Seasons</Tab>
-              <Tab>Team Splits</Tab>
+              {/* <Tab>Team Splits</Tab> */}
               {/* <Tab>Efficiency</Tab> */}
               <Tab>Practice</Tab>
               {isLoggedIn && <Tab>Contribution</Tab>}
