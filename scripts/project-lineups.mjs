@@ -34,13 +34,20 @@ const run = async () => {
       league
     })
 
+    const baseline_lineups = optimizeLineup({
+      players: active_players,
+      league,
+      use_baseline_when_missing: true
+    })
+
     for (const [week, lineup] of Object.entries(lineups)) {
       team_lineup_inserts.push({
         week,
         tid,
         lid: leagueId,
         year,
-        total: lineup.total
+        total: lineup.total,
+        baseline_total: baseline_lineups[week].baseline_total
       })
       for (const pid of lineup.starter_pids) {
         team_lineup_starter_inserts.push({

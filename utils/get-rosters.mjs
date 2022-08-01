@@ -49,7 +49,11 @@ export default async function ({ lid, userId }) {
     for (const lineup of teamLineups) {
       const lineupStarters = teamStarters.filter((l) => l.week === lineup.week)
       const starter_pids = lineupStarters.map((l) => l.pid)
-      r.lineups[lineup.week] = { total: lineup.total, starter_pids }
+      r.lineups[lineup.week] = {
+        total: lineup.total,
+        baseline_total: lineup.baseline_total,
+        starter_pids
+      }
     }
   })
 
