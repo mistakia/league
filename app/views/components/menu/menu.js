@@ -52,7 +52,7 @@ export default class Menu extends React.Component {
   }
 
   render = () => {
-    const { isLoggedIn, team } = this.props
+    const { isLoggedIn, team, leagueId } = this.props
     let header
     if (isLoggedIn) {
       header = (
@@ -107,7 +107,9 @@ export default class Menu extends React.Component {
               {isLoggedIn && Boolean(constants.week) && (
                 <NavLink to='/scoreboard'>Scoreboard</NavLink>
               )}
-              {isLoggedIn && <NavLink to='/league'>League</NavLink>}
+              {isLoggedIn && (
+                <NavLink to={`/leagues/${leagueId}`}>League</NavLink>
+              )}
               {isLoggedIn && <NavLink to='/trade'>Trade</NavLink>}
               {/* {isLoggedIn && constants.week > 0 && (
                   <NavLink to='/props'>Props</NavLink>
@@ -175,26 +177,29 @@ export default class Menu extends React.Component {
               <List>
                 <ListItem
                   button
-                  onClick={this.handleClick('/league/transactions')}
+                  onClick={this.handleClick('/leagues/transactions')}
                 >
                   <ListItemText primary='Transactions' />
                 </ListItem>
-                <ListItem button onClick={this.handleClick('/league/waivers')}>
+                <ListItem button onClick={this.handleClick('/leagues/waivers')}>
                   <ListItemText primary='Waivers' />
                 </ListItem>
-                <ListItem button onClick={this.handleClick('/league/rosters')}>
+                <ListItem button onClick={this.handleClick('/leagues/rosters')}>
                   <ListItemText primary='Rosters' />
                 </ListItem>
                 <ListItem
                   button
-                  onClick={this.handleClick('/league/standings')}
+                  onClick={this.handleClick('/leagues/standings')}
                 >
                   <ListItemText primary='Standings' />
                 </ListItem>
-                <ListItem button onClick={this.handleClick('/league/stats')}>
+                <ListItem button onClick={this.handleClick('/leagues/stats')}>
                   <ListItemText primary='Stats' />
                 </ListItem>
-                <ListItem button onClick={this.handleClick('/league/schedule')}>
+                <ListItem
+                  button
+                  onClick={this.handleClick('/leagues/schedule')}
+                >
                   <ListItemText primary='Schedule' />
                 </ListItem>
               </List>
@@ -226,6 +231,7 @@ export default class Menu extends React.Component {
 
 Menu.propTypes = {
   isLoggedIn: PropTypes.bool,
+  leagueId: PropTypes.number,
   team: ImmutablePropTypes.record,
   logout: PropTypes.func
 }
