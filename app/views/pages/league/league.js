@@ -1,17 +1,19 @@
 import React from 'react'
-import { Outlet, NavLink } from 'react-router-dom'
+import { Outlet, NavLink, useParams } from 'react-router-dom'
 
 import PageLayout from '@layouts/page'
 
 export default function LeaguePage() {
+  const { lid } = useParams()
+
   const menu = (
     <div className='menu'>
-      <NavLink to='/league/transactions'>Transactions</NavLink>
-      <NavLink to='/league/waivers'>Waivers</NavLink>
-      <NavLink to='/league/rosters'>Rosters</NavLink>
-      <NavLink to='/league/standings'>Standings</NavLink>
-      <NavLink to='/league/stats'>Stats</NavLink>
-      <NavLink to='/league/schedule'>Schedule</NavLink>
+      <NavLink to={`/leagues/${lid}/transactions`}>Transactions</NavLink>
+      <NavLink to={`/leagues/${lid}/waivers`}>Waivers</NavLink>
+      <NavLink to={`/leagues/${lid}/rosters`}>Rosters</NavLink>
+      <NavLink to={`/leagues/${lid}/standings`}>Standings</NavLink>
+      <NavLink to={`/leagues/${lid}/stats`}>Stats</NavLink>
+      <NavLink to={`/leagues/${lid}/schedule`}>Schedule</NavLink>
     </div>
   )
 
