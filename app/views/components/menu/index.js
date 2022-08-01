@@ -8,6 +8,7 @@ import Menu from './menu'
 
 const mapStateToProps = createSelector(getApp, getCurrentTeam, (app, team) => ({
   isLoggedIn: Boolean(app.userId),
+  leagueId: app.leagueId,
   team
 }))
 
