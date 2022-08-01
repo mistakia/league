@@ -2100,6 +2100,7 @@ CREATE TABLE `league_team_lineups` (
   `tid` int(6) NOT NULL,
   `lid` int(6) NOT NULL,
   `total` decimal(5,2) DEFAULT NULL,
+  `baseline_total` decimal(5,2) DEFAULT NULL,
   UNIQUE KEY `lineup` (`tid`,`year`, `week`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 

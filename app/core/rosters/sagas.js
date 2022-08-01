@@ -238,7 +238,8 @@ export function* projectLineups() {
     lineups[teamId] = {}
     lineups[teamId] = yield call(worker.workerOptimizeLineup, {
       players: players.toJS(),
-      league
+      league,
+      use_baseline_when_missing: true
     })
   }
   worker.terminate()
@@ -256,7 +257,8 @@ export function* projectTrade() {
   )
   const proposingTeamLineups = yield call(worker.workerOptimizeLineup, {
     players: proposingTeamTradedPlayers.map((p) => p.toJS()),
-    league
+    league,
+    use_baseline_when_missing: true
   })
 
   const acceptingTeamTradedPlayers = yield select(
@@ -264,7 +266,8 @@ export function* projectTrade() {
   )
   const acceptingTeamLineups = yield call(worker.workerOptimizeLineup, {
     players: acceptingTeamTradedPlayers.map((p) => p.toJS()),
-    league
+    league,
+    use_baseline_when_missing: true
   })
   worker.terminate()
   yield put(

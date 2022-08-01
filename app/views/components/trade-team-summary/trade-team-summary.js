@@ -59,7 +59,7 @@ export default class TradeTeamSummary extends React.Component {
                 </TableCell>
                 <TableCell align='right'>
                   <div className='metric'>
-                    {analysis.before.points || analysis.after.points || '-'}
+                    {analysis.after.points || analysis.before.points || '-'}
                   </div>
                 </TableCell>
                 <TableCell>{pctPoints}</TableCell>
