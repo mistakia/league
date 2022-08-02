@@ -385,8 +385,9 @@ const main = async () => {
         .where({ seas: year, seas_type })
         .groupBy('wk')
       log(`processing plays for ${weeks.length} weeks in ${year}`)
-      for (const week of weeks) {
-        await run({ year, week, seas_type })
+      for (const { wk } of weeks) {
+        log(`processing plays for week ${wk} in ${year}`)
+        await run({ year, week: wk, seas_type })
       }
     } else {
       await run({ year: argv.year, week: argv.week, seas_type: argv.seas_type })
