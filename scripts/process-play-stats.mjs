@@ -89,6 +89,8 @@ const run = async ({
     return
   }
 
+  let gamelog_update_count = 0
+
   const playStats = await db('nfl_play_stats')
     .select(
       'nfl_play_stats.*',
@@ -203,6 +205,7 @@ const run = async ({
     const stats = calculateStatsFromPlayStats(play_stats_by_gsispid[gsispid])
     if (argv.dry) continue
 
+    gamelog_update_count += 1
     await upsert({
       pid: player_row.pid,
       pos: player_row.pos,
@@ -245,6 +248,7 @@ const run = async ({
     }
     const stats = calculateDstStatsFromPlays(formattedPlays, team)
     if (argv.dry) continue
+    gamelog_update_count += 1
     await upsert({
       pid: team,
       pos: 'DST',
@@ -357,6 +361,7 @@ const run = async ({
     }
   }
   log(`Updated ${play_rows.length} plays`)
+  log(`Updated ${gamelog_update_count} gamelogs`)
 }
 
 const main = async () => {
