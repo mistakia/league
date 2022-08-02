@@ -3,7 +3,7 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { isMain, updatePlayer } from '#utils'
+import { isMain, getPlayer, updatePlayer } from '#utils'
 import db from '#db'
 import {
   constants,
@@ -16,7 +16,7 @@ import {
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('process:play-stats')
-debug.enable('process:play-stats,update-player')
+debug.enable('process:play-stats,update-player,get-player')
 const current_week = Math.max(
   dayjs().day() === 2 ? constants.season.week - 1 : constants.season.week,
   1
@@ -126,17 +126,21 @@ const run = async ({
 
     const params = {
       pname: playStat.playerName,
-      cteam: fixTeam(playStat.clubCode)
+      team: playStat.clubCode,
+      gsisid: playStat.gsisId
     }
 
-    const results = await db('player').where(params)
+    let player_row
+    try {
+      player_row = await getPlayer(params)
+    } catch (e) {
+      // ignore
+    }
 
-    if (results.length !== 1) {
+    if (!player_row) {
       missing.push(params)
       continue
     }
-
-    const player_row = results[0]
 
     if (!argv.dry) {
       await updatePlayer({ player_row, update: { gsispid } })
@@ -157,19 +161,23 @@ const run = async ({
     )
     if (!playStat) continue
 
+    // TODO - include gsispid?
     const params = {
       pname: playStat.playerName,
-      cteam: fixTeam(playStat.clubCode)
+      team: playStat.clubCode
     }
 
-    const player_rows = await db('player').where(params)
+    let player_row
+    try {
+      player_row = await getPlayer(params)
+    } catch (e) {
+      // ignore
+    }
 
-    if (player_rows.length !== 1) {
+    if (!player_row) {
       missing.push(params)
       continue
     }
-
-    const player_row = player_rows[0]
 
     if (!argv.dry) {
       await updatePlayer({ player_row, update: { gsisid } })

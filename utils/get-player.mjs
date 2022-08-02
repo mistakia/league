@@ -161,7 +161,8 @@ const getPlayer = async ({
   sleeper_id,
   keeptradecut_id,
   esbid,
-  gsisid
+  gsisid,
+  pname
 }) => {
   if (aliases[name]) {
     const result = await db('player').where({ pid: aliases[name] })
@@ -185,6 +186,10 @@ const getPlayer = async ({
       const formatted = formatPlayerName(name)
 
       query.where({ formatted })
+    }
+
+    if (pname) {
+      query.where({ pname })
     }
 
     if (pos) {
