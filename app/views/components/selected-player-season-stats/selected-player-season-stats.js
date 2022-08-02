@@ -13,22 +13,24 @@ export default class SelectedPlayerSeasonStats extends React.Component {
 
   render = () => {
     const { stats, pos } = this.props
-    const years = []
-    for (const year in stats.overall) {
+    const items = []
+
+    const years = Object.keys(stats.overall).sort((a, b) => b - a)
+    years.forEach((year, index) => {
       const games = Object.keys(stats.years[year]).length
       const p = stats.overall[year]
       const item = (
         <PlayerSelectedRow
           games={games}
-          key={year}
+          key={index}
           title={year}
           stats={p}
           pos={pos}
         />
       )
-      years.push(item)
+      items.push(item)
       // TODO year average
-    }
+    })
 
     return (
       <div className='selected__section'>
@@ -40,7 +42,7 @@ export default class SelectedPlayerSeasonStats extends React.Component {
           <div className='row__single-metric'>G</div>
           <PlayerSelectedRowHeader pos={pos} />
         </div>
-        {years}
+        {items}
       </div>
     )
   }
