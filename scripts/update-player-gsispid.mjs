@@ -1,16 +1,16 @@
 import debug from 'debug'
-// import yargs from 'yargs'
-// import { hideBin } from 'yargs/helpers'
+import yargs from 'yargs'
+import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 // import { constants } from '#common'
 import { isMain, updatePlayer } from '#utils'
 
-// const argv = yargs(hideBin(process.argv)).argv
+const argv = yargs(hideBin(process.argv)).argv
 const log = debug('update-player-gsispid')
 debug.enable('update-player-gsispid,update-player')
 
-const updatePlayerGsispid = async () => {
+const updatePlayerGsispid = async ({ dry = false } = {}) => {
   const query = db('nfl_play_stats')
     .select(
       'player.pid',
@@ -51,7 +51,7 @@ const updatePlayerGsispid = async () => {
     }
   }
 
-  if (result.mismatch.length) {
+  if (!dry && result.mismatch.length) {
     for (const { pid, gsisId, player_gsispid } of result.mismatch) {
       const results = await db('nfl_play_stats')
         .count('* as count')
@@ -72,7 +72,7 @@ const updatePlayerGsispid = async () => {
     }
   }
 
-  if (result.update.length) {
+  if (!dry && result.update.length) {
     for (const { pid, gsisId, player_gsispid } of result.update) {
       const results = await db('nfl_play_stats')
         .count('* as count')
@@ -103,7 +103,7 @@ const updatePlayerGsispid = async () => {
 const main = async () => {
   let error
   try {
-    await updatePlayerGsispid()
+    await updatePlayerGsispid({ dry: argv.dry })
   } catch (err) {
     error = err
     log(error)
