@@ -73,8 +73,21 @@ const updatePlayerGsispid = async () => {
   }
 
   if (result.update.length) {
-    for (const { pid, gsispid } of result.update) {
-      await updatePlayer({ pid, update: { gsispid } })
+    for (const { pid, gsispid, gsisId, player_gsispid } of result.update) {
+      const results = await db('nfl_play_stats')
+        .count('* as count')
+        .select('gsispId')
+        .where({ gsisid: gsisId })
+        .groupBy('gsispId')
+        .orderBy('count', 'desc')
+      const value = results[0].gsispId
+
+      if (value === player_gsispid) {
+        // skip, player gsispid matches most common pairing with play_stats, mismatch likely amonst play_stats
+        continue
+      }
+
+      await updatePlayer({ pid, update: { gsispid: value } })
     }
   }
 
