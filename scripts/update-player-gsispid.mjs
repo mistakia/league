@@ -73,7 +73,7 @@ const updatePlayerGsispid = async () => {
   }
 
   if (result.update.length) {
-    for (const { pid, gsispid, gsisId, player_gsispid } of result.update) {
+    for (const { pid, gsisId, player_gsispid } of result.update) {
       const results = await db('nfl_play_stats')
         .count('* as count')
         .select('gsispId')
