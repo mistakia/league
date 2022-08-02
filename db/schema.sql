@@ -1837,6 +1837,7 @@ CREATE TABLE `practice` (
 DROP TABLE IF EXISTS `gamelogs`;
 
 CREATE TABLE `gamelogs` (
+  `esbid` int(10) DEFAULT NULL,
   `pid` varchar(7) NOT NULL,
   `tm` varchar(3) NOT NULL,
   `opp` varchar(3) NOT NULL,

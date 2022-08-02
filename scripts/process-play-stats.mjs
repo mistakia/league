@@ -58,7 +58,7 @@ const getPlayType = (type_ngs) => {
   }
 }
 
-const upsert = async ({ pid, stats, opp, pos, tm, week, year }) => {
+const upsert = async ({ esbid, pid, stats, opp, pos, tm, week, year }) => {
   const cleanedStats = Object.keys(stats)
     .filter((key) => constants.fantasyStats.includes(key))
     .reduce((obj, key) => {
@@ -68,6 +68,7 @@ const upsert = async ({ pid, stats, opp, pos, tm, week, year }) => {
 
   await db('gamelogs')
     .insert({
+      esbid,
       tm,
       pid,
       pos,
@@ -100,7 +101,8 @@ const run = async ({
       'nfl_plays.type_nfl',
       'nfl_plays.pos_team',
       'nfl_games.h',
-      'nfl_games.v'
+      'nfl_games.v',
+      'nfl_games.esbid'
     )
     .join('nfl_games', 'nfl_play_stats.esbid', '=', 'nfl_games.esbid')
     .join('nfl_plays', function () {
@@ -216,6 +218,7 @@ const run = async ({
       pos: player_row.pos,
       tm: fixTeam(playStat.clubCode),
       opp,
+      esbid: playStat.esbid,
       stats,
       year,
       week
@@ -258,6 +261,7 @@ const run = async ({
       pid: team,
       pos: 'DST',
       tm: team,
+      esbid: play.esbid,
       opp: fixTeam(opp),
       stats,
       year,
