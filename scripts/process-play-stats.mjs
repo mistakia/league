@@ -82,7 +82,8 @@ const upsert = async ({ pid, stats, opp, pos, tm, week, year }) => {
 
 const run = async ({
   week = current_week,
-  year = constants.season.year
+  year = constants.season.year,
+  seas_type = 'REG'
 } = {}) => {
   if (week > constants.season.nflFinalWeek) {
     return
@@ -106,6 +107,7 @@ const run = async ({
     .where('nfl_plays.seas', year)
     .where('nfl_plays.wk', week)
     .where('nfl_play_stats.valid', 1)
+    .where('nfl_plays.seas_type', seas_type)
 
   const missing = []
 
@@ -360,7 +362,7 @@ const run = async ({
 const main = async () => {
   let error
   try {
-    await run({ year: argv.year, week: argv.week })
+    await run({ year: argv.year, week: argv.week, seas_type: argv.seas_type })
   } catch (err) {
     error = err
     console.log(error)
