@@ -375,7 +375,22 @@ const run = async ({
 const main = async () => {
   let error
   try {
-    await run({ year: argv.year, week: argv.week, seas_type: argv.seas_type })
+    const year = argv.year
+    const week = argv.week
+    const seas_type = argv.seas_type || 'REG'
+
+    if (!week) {
+      const weeks = await db('nfl_plays')
+        .select('wk')
+        .where({ seas: year, seas_type })
+        .groupBy('wk')
+      log(`processing plays for ${weeks.length} weeks in ${year}`)
+      for (const week of weeks) {
+        await run({ year, week, seas_type })
+      }
+    } else {
+      await run({ year: argv.year, week: argv.week, seas_type: argv.seas_type })
+    }
   } catch (err) {
     error = err
     console.log(error)
