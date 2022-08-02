@@ -169,25 +169,43 @@ const main = async () => {
         log(`loading plays for year: ${year}, type: ${argv.type || 'all'}`)
 
         if (!argv.type || argv.type.toLowerCase() === 'pre') {
-          for (let week = 0; week <= 4; week++) {
-            log(`loading plays for week: ${week} (PRE)`)
-            await run({ year, week, type: 'PRE' })
+          const weeks = await db('nfl_games')
+            .select('wk')
+            .where({ seas: year, type: 'PRE' })
+            .groupBy('wk')
+
+          log(`processing plays for ${weeks.length} weeks in ${year} (PRE)`)
+          for (const { wk } of weeks) {
+            log(`loading plays for week: ${wk} (PRE)`)
+            await run({ year, week: wk, type: 'PRE' })
             await wait(4000)
           }
         }
 
         if (!argv.type || argv.type.toLowerCase() === 'reg') {
-          for (let week = 1; week <= 18; week++) {
-            log(`loading plays for week: ${week} (REG)`)
-            await run({ year, week, type: 'REG' })
+          const weeks = await db('nfl_games')
+            .select('wk')
+            .where({ seas: year, type: 'REG' })
+            .groupBy('wk')
+
+          log(`processing plays for ${weeks.length} weeks in ${year} (REG)`)
+          for (const { wk } of weeks) {
+            log(`loading plays for week: ${wk} (REG)`)
+            await run({ year, week: wk, type: 'REG' })
             await wait(4000)
           }
         }
 
         if (!argv.type || argv.type.toLowerCase() === 'post') {
-          for (let week = 18; week <= 22; week++) {
-            log(`loading plays for week: ${week} (POST)`)
-            await run({ year, week, type: 'POST' })
+          const weeks = await db('nfl_games')
+            .select('wk')
+            .where({ seas: year, type: 'POST' })
+            .groupBy('wk')
+
+          log(`processing plays for ${weeks.length} weeks in ${year} (POST)`)
+          for (const { wk } of weeks) {
+            log(`loading plays for week: ${wk} (POST)`)
+            await run({ year, week: wk, type: 'POST' })
             await wait(4000)
           }
         }
@@ -204,9 +222,15 @@ const main = async () => {
         if (argv.week) {
           await run({ year, week: argv.week, type: 'REG' })
         } else {
-          for (let week = 0; week <= 4; week++) {
-            log(`loading plays for week: ${week} (PRE)`)
-            await run({ year, week, type: 'PRE' })
+          const weeks = await db('nfl_games')
+            .select('wk')
+            .where({ seas: year, type: 'PRE' })
+            .groupBy('wk')
+
+          log(`processing plays for ${weeks.length} weeks in ${year} (PRE)`)
+          for (const { wk } of weeks) {
+            log(`loading plays for week: ${wk} (PRE)`)
+            await run({ year, week: wk, type: 'PRE' })
             await wait(4000)
           }
         }
@@ -216,9 +240,15 @@ const main = async () => {
         if (argv.week) {
           await run({ year, week: argv.week, type: 'REG' })
         } else {
-          for (let week = 1; week <= 18; week++) {
-            log(`loading plays for week: ${week} (REG)`)
-            await run({ year, week, type: 'REG' })
+          const weeks = await db('nfl_games')
+            .select('wk')
+            .where({ seas: year, type: 'REG' })
+            .groupBy('wk')
+
+          log(`processing plays for ${weeks.length} weeks in ${year} (REG)`)
+          for (const { wk } of weeks) {
+            log(`loading plays for week: ${wk} (REG)`)
+            await run({ year, week: wk, type: 'REG' })
             await wait(4000)
           }
         }
@@ -228,9 +258,15 @@ const main = async () => {
         if (argv.week) {
           await run({ year, week: argv.week, type: 'POST' })
         } else {
-          for (let week = 18; week <= 22; week++) {
-            log(`loading plays for week: ${week} (POST)`)
-            await run({ year, week, type: 'POST' })
+          const weeks = await db('nfl_games')
+            .select('wk')
+            .where({ seas: year, type: 'POST' })
+            .groupBy('wk')
+
+          log(`processing plays for ${weeks.length} weeks in ${year} (POST)`)
+          for (const { wk } of weeks) {
+            log(`loading plays for week: ${wk} (POST)`)
+            await run({ year, week: wk, type: 'POST' })
             await wait(4000)
           }
         }
