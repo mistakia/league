@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { useParams } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import AutoSizer from 'react-virtualized/dist/es/AutoSizer'
@@ -15,75 +16,79 @@ import './transactions.styl'
 
 const getHeight = () => (window.innerWidth <= 600 ? 75 : 40)
 
-export default class TransactionsPage extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = { height: getHeight() }
-  }
+export default function TransactionsPage({
+  transactions,
+  isPending,
+  hasMore,
+  loadNext,
+  load
+}) {
+  const [height, setHeight] = useState(getHeight())
 
-  update = () => {
-    this.setState({ height: getHeight() })
-  }
+  const update = () => setHeight(getHeight())
+  const { lid } = useParams()
 
-  componentDidMount = () => {
-    this.props.load()
-    window.addEventListener('resize', this.update)
-  }
+  useEffect(() => {
+    load(lid)
+  }, [])
 
-  componentWillUnmount() {
-    window.removeEventListener('resize', this.update)
-  }
-
-  render = () => {
-    const { transactions, isPending, hasMore, loadNext } = this.props
-
-    const Row = ({ index, ...params }) => {
-      const transaction = transactions.get(index)
-      return <TransactionRow transaction={transaction} showPlayer {...params} />
+  useEffect(() => {
+    window.addEventListener('resize', update)
+    return function () {
+      window.removeEventListener('resize', update)
     }
+  })
 
-    const isRowLoaded = ({ index }) => !hasMore || index < transactions.size
-    const loadMoreRows = isPending
-      ? () => {}
-      : () => {
-          loadNext()
-        }
-    const rowCount = hasMore ? transactions.size + 1 : transactions.size
-
-    const body = (
-      <Container maxWidth='md' classes={{ root: 'transactions' }}>
-        <div className='transactions__filter'>
-          <TransactionTypeFilter />
-          <TransactionTeamFilter />
-        </div>
-        <div className='transactions__body'>
-          <InfiniteLoader
-            isRowLoaded={isRowLoaded}
-            loadMoreRows={loadMoreRows}
-            rowCount={rowCount}
-          >
-            {({ onRowsRendered, registerChild }) => (
-              <AutoSizer>
-                {({ height, width }) => (
-                  <List
-                    ref={registerChild}
-                    width={width}
-                    height={height}
-                    rowHeight={this.state.height}
-                    rowCount={transactions.size}
-                    onRowsRendered={onRowsRendered}
-                    rowRenderer={Row}
-                  />
-                )}
-              </AutoSizer>
-            )}
-          </InfiniteLoader>
-        </div>
-      </Container>
-    )
-
-    return <PageLayout body={body} />
+  const Row = ({ index, ...params }) => {
+    const transaction = transactions.get(index)
+    return <TransactionRow transaction={transaction} showPlayer {...params} />
   }
+
+  Row.propTypes = {
+    index: PropTypes.number
+  }
+
+  const isRowLoaded = ({ index }) => !hasMore || index < transactions.size
+  const loadMoreRows = isPending
+    ? () => {}
+    : () => {
+        loadNext()
+      }
+  const rowCount = hasMore ? transactions.size + 1 : transactions.size
+
+  const body = (
+    <Container maxWidth='md' classes={{ root: 'transactions' }}>
+      <div className='transactions__filter'>
+        <TransactionTypeFilter />
+        <TransactionTeamFilter />
+      </div>
+      <div className='transactions__body'>
+        <InfiniteLoader
+          isRowLoaded={isRowLoaded}
+          loadMoreRows={loadMoreRows}
+          rowCount={rowCount}
+        >
+          {({ onRowsRendered, registerChild }) => (
+            <AutoSizer>
+              {({ height: h, width }) => (
+                <List
+                  ref={registerChild}
+                  width={width}
+                  height={h}
+                  rowHeight={height}
+                  rowCount={transactions.size}
+                  onRowsRendered={onRowsRendered}
+                  rowRenderer={Row}
+                />
+              )}
+            </AutoSizer>
+          )}
+        </InfiniteLoader>
+      </div>
+    </Container>
+  )
+
+  return <PageLayout body={body} />
 }
 
 TransactionsPage.propTypes = {

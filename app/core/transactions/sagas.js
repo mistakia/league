@@ -12,8 +12,8 @@ import {
 } from '@core/api'
 import { getAllPlayers } from '@core/players'
 
-export function* load() {
-  const { leagueId } = yield select(getApp)
+export function* load({ payload }) {
+  const { leagueId } = payload
   const transactions = yield select(getTransactions)
   const offset = transactions.items.size
   const types = transactions.types.toJS()
