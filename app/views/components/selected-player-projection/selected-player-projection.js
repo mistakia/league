@@ -36,6 +36,7 @@ export default class SelectedPlayerProjection extends React.Component {
           title={title}
           action={action}
           pos={pos}
+          fixed={1}
         />
       )
       rows.push(item)
@@ -49,6 +50,7 @@ export default class SelectedPlayerProjection extends React.Component {
           stats={projection}
           title='Average'
           pos={pos}
+          fixed={1}
           action={<div className='row__action' />}
         />
       )
