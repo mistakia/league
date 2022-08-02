@@ -16,20 +16,27 @@ export const transactionsActions = {
   GET_RESERVE_TRANSACTIONS_FULFILLED: 'GET_RESERVE_TRANSACTIONS_FULFILLED',
   GET_RESERVE_TRANSACTIONS_FAILED: 'GET_RESERVE_TRANSACTIONS_FAILED',
 
-  filter: (type, values) => ({
+  filter: ({ leagueId, type, values }) => ({
     type: transactionsActions.FILTER_TRANSACTIONS,
     payload: {
+      leagueId,
       type,
       values
     }
   }),
 
-  load: () => ({
-    type: transactionsActions.LOAD_TRANSACTIONS
+  load: (leagueId) => ({
+    type: transactionsActions.LOAD_TRANSACTIONS,
+    payload: {
+      leagueId
+    }
   }),
 
-  loadNext: () => ({
-    type: transactionsActions.LOAD_NEXT_TRANSACTIONS
+  loadNext: (leagueId) => ({
+    type: transactionsActions.LOAD_NEXT_TRANSACTIONS,
+    payload: {
+      leagueId
+    }
   }),
 
   getTransactionsPending: (opts) => ({

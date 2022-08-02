@@ -1,137 +1,134 @@
-import React from 'react'
+import React, { useState, useRef } from 'react'
+import { useParams } from 'react-router-dom'
 import PropTypes from 'prop-types'
 
 import './filter.styl'
 
-export default class Filter extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      visible: false
-    }
-  }
+export default function Filter(props) {
+  const [visible, setVisible] = useState(false)
+  const button_ref = useRef()
+  const dropdown_ref = useRef()
+  const { lid: leagueId } = useParams()
 
-  handleToggleClick = (event) => {
+  let timestamp
+
+  const handleToggleClick = (event) => {
     // ignore multiple events on same click
-    if (this._timestamp && event.timeStamp === this._timestamp) {
+    if (timestamp && event.timeStamp === timestamp) {
       return
     }
-    this._timestamp = event.timeStamp
+    timestamp = event.timeStamp
 
     // close on PointerEvent outside of element
     if (event.constructor.name === 'PointerEvent') {
-      const isOutside = this.body ? !this.body.contains(event.target) : false
-      if (isOutside) {
-        document.removeEventListener('click', this.handleToggleClick)
-        this.setState({ visible: false })
+      const isOutsideDropdown = dropdown_ref.current
+        ? !dropdown_ref.current.contains(event.target)
+        : false
+      if (isOutsideDropdown) {
+        document.removeEventListener('click', handleToggleClick)
+        setVisible(false)
+      } else {
+        const isInsideButton = button_ref.current
+          ? button_ref.current.contains(event.target)
+          : false
+        if (isInsideButton && !visible) {
+          setVisible(true)
+        }
       }
 
       return
     }
 
-    if (this.state.visible) {
-      if (!this.body.contains(event.target)) {
-        document.removeEventListener('click', this.handleToggleClick)
-        this.setState({ visible: false })
+    if (visible) {
+      if (!dropdown_ref.current.contains(event.target)) {
+        document.removeEventListener('click', handleToggleClick)
+        setVisible(false)
       }
     } else {
-      document.addEventListener('click', this.handleToggleClick)
-      this.setState({ visible: true })
+      document.addEventListener('click', handleToggleClick)
+      setVisible(true)
     }
   }
 
-  handleAllClick = (event) => {
-    this.props.filter(
-      this.props.type,
-      this.props.values.map((i) => i.value)
-    )
+  const handleAllClick = (event) => {
+    const values = props.values.map((i) => i.value)
+    const { type } = props
+    props.filter({ leagueId, type, values })
   }
 
-  handleClearClick = (event) => {
-    this.props.filter(this.props.type, [])
+  const handleClearClick = (event) => {
+    props.filter({ leagueId, type: props.type, values: [] })
   }
 
-  handleClick = (event, index) => {
+  const handleClick = (event, index) => {
     event.preventDefault()
     event.stopPropagation()
-    if (this.props.single) {
-      return this.props.filter(this.props.type, [
-        this.props.values[index].value
-      ])
+    if (props.single) {
+      return props.filter(props.type, [props.values[index].value])
     }
-    const values = this.props.values.map((v, i) =>
+    const values = props.values.map((v, i) =>
       index === i ? { ...v, selected: !v.selected } : v
     )
     const filteredValues = values.filter((i) => i.selected).map((i) => i.value)
-    this.props.filter(this.props.type, filteredValues)
+    props.filter({ leagueId, type: props.type, values: filteredValues })
   }
 
-  render = () => {
-    const { label, values, single } = this.props
-    const { visible } = this.state
+  const { label, values, single } = props
 
-    const items = values.map((v, index) => {
-      const classNames = ['player__filter-dropdown-item']
-      if (v.selected) classNames.push('selected')
-      return (
-        <div
-          key={v.value}
-          className={classNames.join(' ')}
-          onClick={(e) => this.handleClick(e, index)}
-        >
-          {v.label}
-        </div>
-      )
-    })
-
-    const count = values.filter((v) => v.selected).length
-    const all = count === values.length
-    const selectedLabel = all
-      ? 'ALL'
-      : values
-          .filter((v) => v.selected)
-          .map((v) => v.label)
-          .join(', ')
-
+  const items = values.map((v, index) => {
+    const classNames = ['player__filter-dropdown-item']
+    if (v.selected) classNames.push('selected')
     return (
       <div
-        ref={(ref) => {
-          this.root = ref
-        }}
-        className='player__filter'
-        onClick={this.handleToggleClick}
+        key={v.value}
+        className={classNames.join(' ')}
+        onClick={(e) => handleClick(e, index)}
       >
-        <div className='player__filter-label'>{label}</div>
-        <div className='player__filter-selection'>{selectedLabel}</div>
-        {visible && (
-          <div
-            ref={(ref) => {
-              this.body = ref
-            }}
-            className='player__filter-dropdown'
-          >
-            {!single && (
-              <div className='player__filter-dropdown-head'>
-                <div
-                  className='player__filter-dropdown-action'
-                  onClick={this.handleAllClick}
-                >
-                  All
-                </div>
-                <div
-                  className='player__filter-dropdown-action'
-                  onClick={this.handleClearClick}
-                >
-                  Clear
-                </div>
-              </div>
-            )}
-            <div className='player__filter-dropdown-body'>{items}</div>
-          </div>
-        )}
+        {v.label}
       </div>
     )
-  }
+  })
+
+  const count = values.filter((v) => v.selected).length
+  const all = count === values.length
+  const selectedLabel = all
+    ? 'ALL'
+    : values
+        .filter((v) => v.selected)
+        .map((v) => v.label)
+        .join(', ')
+
+  return (
+    <div
+      className='player__filter'
+      onClick={handleToggleClick}
+      ref={button_ref}
+    >
+      <div className='player__filter-label'>{label}</div>
+      <div className='player__filter-selection'>{selectedLabel}</div>
+      {visible && (
+        <div ref={dropdown_ref} className='player__filter-dropdown'>
+          {!single && (
+            <div className='player__filter-dropdown-head'>
+              <div
+                className='player__filter-dropdown-action'
+                onClick={handleAllClick}
+              >
+                All
+              </div>
+              <div
+                className='player__filter-dropdown-action'
+                onClick={handleClearClick}
+              >
+                Clear
+              </div>
+            </div>
+          )}
+          <div className='player__filter-dropdown-body'>{items}</div>
+        </div>
+      )}
+    </div>
+  )
 }
 
 Filter.propTypes = {
