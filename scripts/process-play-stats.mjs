@@ -90,6 +90,7 @@ const run = async ({
   }
 
   let gamelog_update_count = 0
+  let play_update_count = 0
 
   const playStats = await db('nfl_play_stats')
     .select(
@@ -116,6 +117,10 @@ const run = async ({
   const play_stats_by_gsispid = groupBy(playStats, 'gsispid')
   const gsispids = Object.keys(play_stats_by_gsispid)
   const player_gsispid_rows = await db('player').whereIn('gsispid', gsispids)
+
+  log(
+    `loaded play stats for ${Object.keys(play_stats_by_gsispid).length} players`
+  )
 
   // Update players with missing gsispids
   const existing_gsispids = player_gsispid_rows.map((p) => p.gsispid)
@@ -354,13 +359,16 @@ const run = async ({
         }
       }
 
+      if (argv.dry) continue
+
+      play_update_count += 1
       await db('nfl_plays').update(play_row).where({
         esbid,
         playId
       })
     }
   }
-  log(`Updated ${play_rows.length} plays`)
+  log(`Updated ${play_update_count} plays`)
   log(`Updated ${gamelog_update_count} gamelogs`)
 }
 

@@ -13,7 +13,7 @@ const currentRegularSeasonWeek = Math.max(
   dayjs().day() === 2 ? constants.season.week - 1 : constants.season.week,
   1
 )
-const getPlayData = (play, week, type) => {
+const getPlayData = ({ play, year, week, type }) => {
   const data = {
     desc: play.playDescription,
     dwn: play.down,
@@ -25,7 +25,7 @@ const getPlayData = (play, week, type) => {
     ydl_start: play.yardLine,
     fd: play.firstDown,
     gtg: play.goalToGo,
-    seas: constants.season.year,
+    seas: year,
     seas_type: type,
     wk: week,
     next_play_type: play.nextPlayType,
@@ -135,7 +135,7 @@ const run = async ({
     for (const play of data.data.viewer.gameDetail.plays) {
       const { playId } = play
       const currentPlay = currentPlays.find((p) => p.playId === play.playId)
-      const playData = getPlayData(play, week, type)
+      const playData = getPlayData({ play, year, week, type })
       if (currentPlay) {
         // TODO - only update changes
         await db('nfl_plays')
