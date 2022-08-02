@@ -87,6 +87,8 @@ const updatePlayerGsispid = async () => {
         continue
       }
 
+      // clear any duplicates
+      await db('player').update({ gsispid: null }).where({ gsispid: value })
       await updatePlayer({ pid, update: { gsispid: value } })
     }
   }
