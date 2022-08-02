@@ -27,9 +27,9 @@ import SelectedPlayerProjections from '@components/selected-player-projections'
  * import SelectedPlayerEfficiencyStats from '@components/selected-player-efficiency-stats' */
 import SelectedPlayerLineupImpact from '@components/selected-player-lineup-impact'
 import SelectedPlayerValue from '@components/selected-player-value'
-import SelectedPlayerGamelogs from '@components/selected-player-gamelogs'
+// import SelectedPlayerGamelogs from '@components/selected-player-gamelogs'
 import SelectedPlayerPractice from '@components/selected-player-practice'
-import SelectedPlayerMatchup from '@components/selected-player-matchup'
+// import SelectedPlayerMatchup from '@components/selected-player-matchup'
 import SelectedPlayerTransactions from '@components/selected-player-transactions'
 import PlayerWatchlistAction from '@components/player-watchlist-action'
 import PlayerContextMenu from '@components/player-context-menu'
@@ -53,7 +53,7 @@ export default class SelectedPlayer extends React.Component {
     super(props)
 
     const projectionView = 0
-    const transactionsView = 7
+    const transactionsView = 5
     this.state = {
       value: constants.isRegularSeason ? projectionView : transactionsView,
       headshot_width: getHeadshotWidth(),
@@ -242,8 +242,8 @@ export default class SelectedPlayer extends React.Component {
           >
             <TabsList>
               <Tab>Projections</Tab>
-              <Tab>Matchup</Tab>
-              <Tab>Game Log</Tab>
+              {/* <Tab>Matchup</Tab>
+                  <Tab>Game Log</Tab> */}
               <Tab>Seasons</Tab>
               {/* <Tab>Team Splits</Tab> */}
               {/* <Tab>Efficiency</Tab> */}
@@ -255,13 +255,13 @@ export default class SelectedPlayer extends React.Component {
             <TabPanel value={0}>
               <SelectedPlayerProjections />
             </TabPanel>
+            {/* <TabPanel value={1}>
+                <SelectedPlayerMatchup />
+                </TabPanel>
+                <TabPanel value={2}>
+                <SelectedPlayerGamelogs />
+                </TabPanel> */}
             <TabPanel value={1}>
-              <SelectedPlayerMatchup />
-            </TabPanel>
-            <TabPanel value={2}>
-              <SelectedPlayerGamelogs />
-            </TabPanel>
-            <TabPanel value={3}>
               <SelectedPlayerSeasonStats pos={pos} />
             </TabPanel>
             {/* <TabPanel value={4}>
@@ -272,16 +272,16 @@ export default class SelectedPlayer extends React.Component {
             {/* <TabPanel value={5}>
                 <SelectedPlayerEfficiencyStats />
                 </TabPanel> */}
-            <TabPanel value={4}>
+            <TabPanel value={2}>
               <SelectedPlayerPractice />
             </TabPanel>
-            <TabPanel value={5}>
+            <TabPanel value={3}>
               <SelectedPlayerLineupImpact />
             </TabPanel>
-            <TabPanel value={6}>
+            <TabPanel value={4}>
               <SelectedPlayerValue />
             </TabPanel>
-            <TabPanel value={7}>
+            <TabPanel value={5}>
               <SelectedPlayerTransactions />
             </TabPanel>
           </Tabs>
