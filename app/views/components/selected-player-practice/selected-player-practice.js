@@ -10,14 +10,30 @@ const Row = ({ data }) => (
       <div className='table__cell metric'>
         <div className='table__cell-text'>{data.status || '-'}</div>
       </div>
-      <div className='table__cell metric'>{data.inj || '-'}</div>
-      <div className='table__cell metric'>{data.m || '-'}</div>
-      <div className='table__cell metric'>{data.t || '-'}</div>
-      <div className='table__cell metric'>{data.w || '-'}</div>
-      <div className='table__cell metric'>{data.th || '-'}</div>
-      <div className='table__cell metric'>{data.f || '-'}</div>
-      <div className='table__cell metric'>{data.s || '-'}</div>
-      <div className='table__cell metric'>{data.su || '-'}</div>
+      <div className='table__cell metric'>
+        <div className='table__cell-text'>{data.inj || '-'}</div>
+      </div>
+      <div className='table__cell metric'>
+        <div className='table__cell-text'>{data.m || '-'}</div>
+      </div>
+      <div className='table__cell metric'>
+        <div className='table__cell-text'>{data.t || '-'}</div>
+      </div>
+      <div className='table__cell metric'>
+        <div className='table__cell-text'>{data.w || '-'}</div>
+      </div>
+      <div className='table__cell metric'>
+        <div className='table__cell-text'>{data.th || '-'}</div>
+      </div>
+      <div className='table__cell metric'>
+        <div className='table__cell-text'>{data.f || '-'}</div>
+      </div>
+      <div className='table__cell metric'>
+        <div className='table__cell-text'>{data.s || '-'}</div>
+      </div>
+      <div className='table__cell metric'>
+        <div className='table__cell-text'>{data.su || '-'}</div>
+      </div>
     </div>
   </div>
 )
