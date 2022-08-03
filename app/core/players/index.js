@@ -35,6 +35,7 @@ export {
   getPlayerTransactionsActions,
   getBaselinesActions,
   getPlayerProjectionsActions,
-  getPlayerGamelogsActions
+  getPlayerGamelogsActions,
+  getPlayerPracticesActions
 } from './actions'
 export { playerSagas, calculateValues, loadAllPlayers } from './sagas'

@@ -219,11 +219,14 @@ export function playersReducer(state = initialState, { payload, type }) {
 
     case playerActions.GET_PLAYER_FULFILLED:
       return state.withMutations((players) => {
-        const { practice, ...player } = payload.data
-        players.mergeIn(['items', payload.opts.pid], player)
+        players.mergeIn(['items', payload.opts.pid], payload.data)
+      })
+
+    case playerActions.GET_PLAYER_PRACTICES_FULFILLED:
+      return state.withMutations((players) => {
         players.setIn(
           ['items', payload.opts.pid, 'practice'],
-          new List(practice)
+          new List(payload.data)
         )
       })
 
