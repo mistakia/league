@@ -13,15 +13,36 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-games-ngs')
 debug.enable('import-games-ngs')
 
+const getWeek = (week, week_type) => {
+  switch (week_type) {
+    case 'PRE':
+    case 'REG':
+      return week
+
+    case 'WC':
+      return 1
+
+    case 'DIV':
+      return 2
+
+    case 'CON':
+      return 3
+
+    case 'SB':
+      return 4
+  }
+}
+
 const format = (item) => {
   const date = item.gameDate ? dayjs(item.gameDate).format('YYYY/MM/DD') : null
-  const type = item.seasonType
+  const seas_type = item.seasonType
+  const week_type = item.gameType
   const time_est = item.gameTimeEastern
-  const wk = item.week
+  const wk = getWeek(item.week, week_type)
   const seas = item.season
   const score = item.score || {}
   const day = date
-    ? getGameDayAbbreviation({ type, date, time_est, wk, seas })
+    ? getGameDayAbbreviation({ seas_type, date, time_est, week_type, seas })
     : null
 
   return {
@@ -39,7 +60,8 @@ const format = (item) => {
     v: fixTeam(item.visitorTeamAbbr),
     h: fixTeam(item.homeTeamAbbr),
 
-    type,
+    seas_type,
+    week_type,
     ot: (score.phase || '').includes('OVERTIME'),
 
     home_score: (score.homeTeamScore || {}).pointTotal,

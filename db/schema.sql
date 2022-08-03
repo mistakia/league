@@ -333,7 +333,8 @@ CREATE TABLE `nfl_games` (
   `v` varchar(3) NOT NULL,
   `h` varchar(3) NOT NULL,
 
-  `type` varchar(10) NOT NULL, -- PRE, REG, POST
+  `seas_type` varchar(10) NOT NULL, -- PRE, REG, POST
+  `week_type` varchar(10) DEFAULT NULL,
   `ot` tinyint(1) DEFAULT NULL, -- overtime
   `div` tinyint(1) DEFAULT NULL, -- division game
 
@@ -346,7 +347,7 @@ CREATE TABLE `nfl_games` (
   `away_score` int(5) DEFAULT 0,
 
   `stad` varchar(45) DEFAULT NULL,
-  `stadium_id` varchar(8) DEFAULT NULL,
+  `stad_nflid` varchar(8) DEFAULT NULL,
   `site_ngsid` int(5) DEFAULT NULL,
 
   `clock` varchar(10) DEFAULT NULL,

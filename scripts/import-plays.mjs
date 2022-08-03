@@ -67,13 +67,13 @@ const upsertPlayStat = async ({ playStat, esbid, playId }) => {
 const run = async ({
   year = constants.season.year,
   week = currentRegularSeasonWeek,
-  type = 'REG'
+  seas_type = 'REG'
 } = {}) => {
   // get list of games for this week
   const games = await db('nfl_games').where({
     seas: year,
     wk: week,
-    type
+    seas_type
   })
 
   for (const game of games) {
@@ -166,46 +166,50 @@ const main = async () => {
       await run()
     } else if (argv.all) {
       for (let year = 2002; year < constants.season.year; year++) {
-        log(`loading plays for year: ${year}, type: ${argv.type || 'all'}`)
+        log(
+          `loading plays for year: ${year}, seas_type: ${
+            argv.seas_type || 'all'
+          }`
+        )
 
-        if (!argv.type || argv.type.toLowerCase() === 'pre') {
+        if (!argv.seas_type || argv.seas_type.toLowerCase() === 'pre') {
           const weeks = await db('nfl_games')
             .select('wk')
-            .where({ seas: year, type: 'PRE' })
+            .where({ seas: year, seas_type: 'PRE' })
             .groupBy('wk')
 
           log(`processing plays for ${weeks.length} weeks in ${year} (PRE)`)
           for (const { wk } of weeks) {
             log(`loading plays for week: ${wk} (PRE)`)
-            await run({ year, week: wk, type: 'PRE' })
+            await run({ year, week: wk, seas_type: 'PRE' })
             await wait(4000)
           }
         }
 
-        if (!argv.type || argv.type.toLowerCase() === 'reg') {
+        if (!argv.seas_type || argv.seas_type.toLowerCase() === 'reg') {
           const weeks = await db('nfl_games')
             .select('wk')
-            .where({ seas: year, type: 'REG' })
+            .where({ seas: year, seas_type: 'REG' })
             .groupBy('wk')
 
           log(`processing plays for ${weeks.length} weeks in ${year} (REG)`)
           for (const { wk } of weeks) {
             log(`loading plays for week: ${wk} (REG)`)
-            await run({ year, week: wk, type: 'REG' })
+            await run({ year, week: wk, seas_type: 'REG' })
             await wait(4000)
           }
         }
 
-        if (!argv.type || argv.type.toLowerCase() === 'post') {
+        if (!argv.seas_type || argv.seas_type.toLowerCase() === 'post') {
           const weeks = await db('nfl_games')
             .select('wk')
-            .where({ seas: year, type: 'POST' })
+            .where({ seas: year, seas_type: 'POST' })
             .groupBy('wk')
 
           log(`processing plays for ${weeks.length} weeks in ${year} (POST)`)
           for (const { wk } of weeks) {
             log(`loading plays for week: ${wk} (POST)`)
-            await run({ year, week: wk, type: 'POST' })
+            await run({ year, week: wk, seas_type: 'POST' })
             await wait(4000)
           }
         }
@@ -213,68 +217,68 @@ const main = async () => {
     } else if (argv.year) {
       const year = argv.year
       log(
-        `loading plays for year: ${year}, week: ${argv.week || 'all'}, type: ${
-          argv.type || 'all'
-        }`
+        `loading plays for year: ${year}, week: ${
+          argv.week || 'all'
+        }, seas_type: ${argv.seas_type || 'all'}`
       )
 
-      if (!argv.type || argv.type.toLowerCase() === 'pre') {
+      if (!argv.seas_type || argv.seas_type.toLowerCase() === 'pre') {
         if (argv.week) {
-          await run({ year, week: argv.week, type: 'REG' })
+          await run({ year, week: argv.week, seas_type: 'REG' })
         } else {
           const weeks = await db('nfl_games')
             .select('wk')
-            .where({ seas: year, type: 'PRE' })
+            .where({ seas: year, seas_type: 'PRE' })
             .groupBy('wk')
 
           log(`processing plays for ${weeks.length} weeks in ${year} (PRE)`)
           for (const { wk } of weeks) {
             log(`loading plays for week: ${wk} (PRE)`)
-            await run({ year, week: wk, type: 'PRE' })
+            await run({ year, week: wk, seas_type: 'PRE' })
             await wait(4000)
           }
         }
       }
 
-      if (!argv.type || argv.type.toLowerCase() === 'reg') {
+      if (!argv.seas_type || argv.seas_type.toLowerCase() === 'reg') {
         if (argv.week) {
-          await run({ year, week: argv.week, type: 'REG' })
+          await run({ year, week: argv.week, seas_type: 'REG' })
         } else {
           const weeks = await db('nfl_games')
             .select('wk')
-            .where({ seas: year, type: 'REG' })
+            .where({ seas: year, seas_type: 'REG' })
             .groupBy('wk')
 
           log(`processing plays for ${weeks.length} weeks in ${year} (REG)`)
           for (const { wk } of weeks) {
             log(`loading plays for week: ${wk} (REG)`)
-            await run({ year, week: wk, type: 'REG' })
+            await run({ year, week: wk, seas_type: 'REG' })
             await wait(4000)
           }
         }
       }
 
-      if (!argv.type || argv.type.toLowerCase() === 'post') {
+      if (!argv.seas_type || argv.seas_type.toLowerCase() === 'post') {
         if (argv.week) {
-          await run({ year, week: argv.week, type: 'POST' })
+          await run({ year, week: argv.week, seas_type: 'POST' })
         } else {
           const weeks = await db('nfl_games')
             .select('wk')
-            .where({ seas: year, type: 'POST' })
+            .where({ seas: year, seas_type: 'POST' })
             .groupBy('wk')
 
           log(`processing plays for ${weeks.length} weeks in ${year} (POST)`)
           for (const { wk } of weeks) {
             log(`loading plays for week: ${wk} (POST)`)
-            await run({ year, week: wk, type: 'POST' })
+            await run({ year, week: wk, seas_type: 'POST' })
             await wait(4000)
           }
         }
       }
     } else {
       const week = argv.week
-      const type = argv.type
-      await run({ week, type })
+      const seas_type = argv.seas_type
+      await run({ week, seas_type })
     }
   } catch (err) {
     error = err
