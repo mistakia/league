@@ -26,6 +26,7 @@ const run = async ({
   week = currentRegularSeasonWeek,
   type = 'REG'
 } = {}) => {
+  log(`processing ${type} season games for week ${week} in ${year}`)
   const games = await db('nfl_games').where({
     seas: year,
     wk: week,
