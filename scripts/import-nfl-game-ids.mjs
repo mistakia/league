@@ -14,7 +14,7 @@ const log = debug('import-nfl-game-ids')
 debug.enable('import-nfl-game-ids')
 
 const getUrl = ({ week, year, type = 'REG' }) =>
-  `${config.url}/football/v1/games?season=${year}&seasonType=${type}&week=${week}&withExternalIds=true`
+  `${config.nfl_api_url}/football/v1/games?season=${year}&seasonType=${type}&week=${week}&withExternalIds=true`
 
 const currentRegularSeasonWeek = Math.max(
   dayjs().day() === 2 ? constants.season.week - 1 : constants.season.week,
