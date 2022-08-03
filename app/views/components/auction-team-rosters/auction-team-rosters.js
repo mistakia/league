@@ -54,10 +54,9 @@ export default class AuctonTeamRosters extends React.Component {
     const roster = this.props.rosters.find((r) => r.tid === this.state.tid)
     const rows = []
     const excludeSlots = [
-      constants.slots.PS,
-      constants.slots.PSP,
       constants.slots.IR,
-      constants.slots.COV
+      constants.slots.COV,
+      ...constants.ps_slots
     ]
     const rosterPlayers = roster
       ? roster

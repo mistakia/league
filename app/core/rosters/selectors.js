@@ -125,7 +125,7 @@ export function getPracticeSquadPlayerIdsForCurrentLeague(state) {
   const pids = []
   for (const roster of rosters.values()) {
     roster.players.forEach(({ slot, pid }) => {
-      if (slot === constants.slots.PS || slot === constants.slots.PSP) {
+      if (constants.ps_slots.includes(slot)) {
         pids.push(pid)
       }
     })

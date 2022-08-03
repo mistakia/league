@@ -6,10 +6,9 @@ import isSlotActive from './is-slot-active.mjs'
 
 const nonStarterSlots = [
   constants.slots.IR,
-  constants.slots.PS,
-  constants.slots.PSP,
   constants.slots.BENCH,
-  constants.slots.COV
+  constants.slots.COV,
+  ...constants.ps_slots
 ]
 
 export default class Roster {
@@ -68,6 +67,14 @@ export default class Roster {
     return this._league.cap - used
   }
 
+  get availablePracticeSpace() {
+    return this._league.ps - this.practice_non_rookie.length
+  }
+
+  get availableReserveSpace() {
+    return this._league.ir - this.ir.length
+  }
+
   get all() {
     return Array.from(this._players.values())
   }
@@ -102,6 +109,10 @@ export default class Roster {
   }
 
   get practice() {
+    return this.players.filter((p) => constants.ps_slots.includes(p.slot))
+  }
+
+  get practice_non_rookie() {
     return this.players.filter(
       (p) => p.slot === constants.slots.PS || p.slot === constants.slots.PSP
     )
@@ -233,7 +244,7 @@ export default class Roster {
   }
 
   hasOpenPracticeSquadSlot() {
-    return this.practice.length < this._league.ps
+    return this.practice_non_rookie.length < this._league.ps
   }
 
   hasOpenBenchSlot(pos) {

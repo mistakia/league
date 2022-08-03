@@ -26,10 +26,7 @@ export default class Roster extends React.Component {
       for (let i = 0; i < league.sqb; i++) {
         const { pid } = players[i] || {}
         rows.push(
-          <PlayerRosterRow
-            key={`${slot}${i}`}
-            {...{ pid, slot, roster, showBid }}
-          />
+          <PlayerRosterRow key={`${slot}${i}`} {...{ pid, roster, showBid }} />
         )
       }
     }
@@ -40,10 +37,7 @@ export default class Roster extends React.Component {
       for (let i = 0; i < league.srb; i++) {
         const { pid } = players[i] || {}
         rows.push(
-          <PlayerRosterRow
-            key={`${slot}${i}`}
-            {...{ pid, slot, roster, showBid }}
-          />
+          <PlayerRosterRow key={`${slot}${i}`} {...{ pid, roster, showBid }} />
         )
       }
     }
@@ -54,10 +48,7 @@ export default class Roster extends React.Component {
       for (let i = 0; i < league.swr; i++) {
         const { pid } = players[i] || {}
         rows.push(
-          <PlayerRosterRow
-            key={`${slot}${i}`}
-            {...{ pid, slot, roster, showBid }}
-          />
+          <PlayerRosterRow key={`${slot}${i}`} {...{ pid, roster, showBid }} />
         )
       }
     }
@@ -68,10 +59,7 @@ export default class Roster extends React.Component {
       for (let i = 0; i < league.srbwr; i++) {
         const { pid } = players[i] || {}
         rows.push(
-          <PlayerRosterRow
-            key={`${slot}${i}`}
-            {...{ pid, slot, roster, showBid }}
-          />
+          <PlayerRosterRow key={`${slot}${i}`} {...{ pid, roster, showBid }} />
         )
       }
     }
@@ -82,10 +70,7 @@ export default class Roster extends React.Component {
       for (let i = 0; i < league.srbwrte; i++) {
         const { pid } = players[i] || {}
         rows.push(
-          <PlayerRosterRow
-            key={`${slot}${i}`}
-            {...{ pid, slot, roster, showBid }}
-          />
+          <PlayerRosterRow key={`${slot}${i}`} {...{ pid, roster, showBid }} />
         )
       }
     }
@@ -96,10 +81,7 @@ export default class Roster extends React.Component {
       for (let i = 0; i < league.sqbrbwrte; i++) {
         const { pid } = players[i] || {}
         rows.push(
-          <PlayerRosterRow
-            key={`${slot}${i}`}
-            {...{ pid, slot, roster, showBid }}
-          />
+          <PlayerRosterRow key={`${slot}${i}`} {...{ pid, roster, showBid }} />
         )
       }
     }
@@ -110,10 +92,7 @@ export default class Roster extends React.Component {
       for (let i = 0; i < league.swrte; i++) {
         const { pid } = players[i] || {}
         rows.push(
-          <PlayerRosterRow
-            key={`${slot}${i}`}
-            {...{ pid, slot, roster, showBid }}
-          />
+          <PlayerRosterRow key={`${slot}${i}`} {...{ pid, roster, showBid }} />
         )
       }
     }
@@ -124,10 +103,7 @@ export default class Roster extends React.Component {
       for (let i = 0; i < league.ste; i++) {
         const { pid } = players[i] || {}
         rows.push(
-          <PlayerRosterRow
-            key={`${slot}${i}`}
-            {...{ pid, slot, roster, showBid }}
-          />
+          <PlayerRosterRow key={`${slot}${i}`} {...{ pid, roster, showBid }} />
         )
       }
     }
@@ -138,10 +114,7 @@ export default class Roster extends React.Component {
       for (let i = 0; i < league.sk; i++) {
         const { pid } = players[i] || {}
         rows.push(
-          <PlayerRosterRow
-            key={`${slot}${i}`}
-            {...{ pid, slot, roster, showBid }}
-          />
+          <PlayerRosterRow key={`${slot}${i}`} {...{ pid, roster, showBid }} />
         )
       }
     }
@@ -152,10 +125,7 @@ export default class Roster extends React.Component {
       for (let i = 0; i < league.sdst; i++) {
         const { pid } = players[i] || {}
         rows.push(
-          <PlayerRosterRow
-            key={`${slot}${i}`}
-            {...{ pid, slot, roster, showBid }}
-          />
+          <PlayerRosterRow key={`${slot}${i}`} {...{ pid, roster, showBid }} />
         )
       }
     }
@@ -182,7 +152,7 @@ export default class Roster extends React.Component {
           <PlayerRosterRow
             key={`${slot}${i}`}
             practice
-            {...{ pid, slot, roster, showBid }}
+            {...{ pid, roster, showBid }}
           />
         )
       }
@@ -197,7 +167,7 @@ export default class Roster extends React.Component {
           <PlayerRosterRow
             key={`${slot}${i}`}
             reserve
-            {...{ pid, slot, roster, showBid }}
+            {...{ pid, roster, showBid }}
           />
         )
       }

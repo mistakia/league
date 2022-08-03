@@ -135,7 +135,7 @@ router.post('/?', async (req, res) => {
       rid: roster.uid,
       pid,
       pos: player_row.pos,
-      slot: constants.slots.PS
+      slot: constants.slots.PSR
     })
 
     const insertTransaction = db('transactions').insert({

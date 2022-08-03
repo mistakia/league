@@ -97,6 +97,7 @@ class PlayerNameExpanded extends Player {
 
     const playerStatus = playerMap.get('status')
     const playerGamestatus = playerMap.get('gamestatus')
+    const slot = playerMap.get('slot')
     return (
       <div className={classNames.join(' ')}>
         {Boolean(isHosted && playerMap.get('pid') && !hideActions) && (
@@ -123,7 +124,8 @@ class PlayerNameExpanded extends Player {
             {constants.year === playerMap.get('start') && (
               <PlayerLabel label='R' type='rookie' description='Rookie' />
             )}
-            {playerMap.get('slot') === constants.slots.PSP && (
+            {(slot === constants.slots.PSP ||
+              slot === constants.slots.PSRP) && (
               <PlayerLabel label='P' description='Protected Practice Squad' />
             )}
             <PlayerTag tag={playerMap.get('tag')} />

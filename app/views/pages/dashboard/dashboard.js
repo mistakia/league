@@ -244,7 +244,7 @@ export default function DashboardPage() {
             <DashboardPlayersTable
               items={activeItems}
               title='Active Roster'
-              limit={roster.activeRosterLimit}
+              space={roster.availableSpace}
               total={activePlayers}
             />
           </Grid>
@@ -252,7 +252,7 @@ export default function DashboardPage() {
             <DashboardPlayersTable
               items={practiceItems}
               title='Practice Squad'
-              limit={league.ps}
+              space={roster.availablePracticeSpace}
             />
           </Grid>
           <Grid item xs={12}>
@@ -260,7 +260,7 @@ export default function DashboardPage() {
               <DashboardPlayersTable
                 items={reserveIRItems}
                 title='Reserve/IR'
-                limit={league.ir}
+                space={roster.availableReserveSpace}
               />
             )}
           </Grid>

@@ -286,7 +286,7 @@ export function getFilteredPlayers(state) {
         const isRestrictedOrFranchised =
           tag === constants.tags.TRANSITION || tag === constants.tags.FRANCHISE
         if (
-          slot !== constants.slots.PS &&
+          !constants.ps_slots.includes(slot) &&
           !isRestrictedOrFranchised &&
           salary - market_salary_adj * 0.85 > 0
         ) {
@@ -501,7 +501,8 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
   status.tagged.rookie = playerTag === constants.tags.ROOKIE
   status.tagged.transition = playerTag === constants.tags.TRANSITION
   status.tagged.franchise = playerTag === constants.tags.FRANCHISE
-  status.protected = playerSlot === constants.slots.PSP
+  status.protected =
+    playerSlot === constants.slots.PSP || playerSlot === constants.slots.PSRP
   status.starter = constants.starterSlots.includes(playerSlot)
   status.locked = isPlayerLocked(state, { playerMap })
   status.active = isSlotActive(playerSlot)
@@ -578,7 +579,8 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
         const leaguePoaches = getPoachesForCurrentLeague(state)
         if (
           constants.isRegularSeason &&
-          playerSlot === constants.slots.PS &&
+          (playerSlot === constants.slots.PS ||
+            playerSlot === constants.slots.PSR) &&
           !leaguePoaches.has(playerId)
         ) {
           status.eligible.protect = true
@@ -608,7 +610,11 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
       }
     } else if (isPlayerOnPracticeSquad(state, { playerMap })) {
       // make sure player is unprotected and it is not a santuary period
-      if (playerSlot === constants.slots.PS && !isSantuaryPeriod(league)) {
+      if (
+        (playerSlot === constants.slots.PS ||
+          playerSlot === constants.slots.PSR) &&
+        !isSantuaryPeriod(league)
+      ) {
         const rosterInfo = getRosterInfoForPlayerId(state, {
           pid: playerId
         })
