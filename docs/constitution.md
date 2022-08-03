@@ -582,7 +582,7 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 
 > PRACTICE SQUAD
 
-1. The practice squad (PS) will consist of a maximum of four (4) players, only to be exceeded through a draft selection.
+1. The practice squad (PS) will consist of a maximum of four (4) players that were signed as Free Agents and no limit to the number of players acquired through the Rookie Draft.
 
 2. During the Regular Season, all Free Agents (FA) who have cleared waivers are eligible. During the Offseason, rookies who have cleared waivers, unsigned NFL players, and practice squad NFL players are eligible.
 
