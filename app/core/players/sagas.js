@@ -24,7 +24,8 @@ import {
   getPlayerTransactions,
   getBaselines,
   getPlayerProjections,
-  getPlayerGamelogs
+  getPlayerGamelogs,
+  getPlayerPractices
 } from '@core/api'
 import { draftActions } from '@core/draft'
 import { playerActions } from './actions'
@@ -218,6 +219,11 @@ export function* loadPlayerGamelogs({ payload }) {
   yield call(getPlayerGamelogs, { pid })
 }
 
+export function* loadPlayerPractices({ payload }) {
+  const { pid } = payload
+  yield call(getPlayerPractices, { pid })
+}
+
 //= ====================================
 //  WATCHERS
 // -------------------------------------
@@ -317,6 +323,10 @@ export function* watchLoadPlayerGamelogs() {
   yield takeLatest(playerActions.LOAD_PLAYER_GAMELOGS, loadPlayerGamelogs)
 }
 
+export function* watchLoadPlayerPractices() {
+  yield takeLatest(playerActions.LOAD_PLAYER_PRACTICES, loadPlayerPractices)
+}
+
 export function* watchLoadAllPlayers() {
   yield takeLatest(playerActions.LOAD_ALL_PLAYERS, loadAllPlayers)
 }
@@ -359,6 +369,7 @@ export const playerSagas = [
   fork(watchGetPlayerProjections),
 
   fork(watchLoadPlayerGamelogs),
+  fork(watchLoadPlayerPractices),
   fork(watchLoadAllPlayers),
   fork(watchLoadLeaguePlayers)
 ]
