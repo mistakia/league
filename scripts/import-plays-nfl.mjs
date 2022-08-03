@@ -106,7 +106,10 @@ const run = async ({
 
     const currentPlays = await db('nfl_plays').where({ esbid: game.esbid })
     const haveEndPlay = currentPlays.find((p) => p.type_nfl === 'END_GAME')
-    if (!argv.final && haveEndPlay) continue
+    if (!argv.final && haveEndPlay) {
+      log(`skipping esbid: ${game.esbid}, already have final play`)
+      continue
+    }
 
     if (!token) {
       token = await getToken()
