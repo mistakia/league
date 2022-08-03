@@ -111,7 +111,6 @@ export default class SelectedPlayerTransactions extends React.Component {
     for (let i = extensions; extension_salaries.length < 4; i++) {
       salary = getExtensionAmount({
         pos: playerMap.get('pos'),
-        tag: playerMap.get('tag'),
         extensions: i,
         league,
         value: salary
