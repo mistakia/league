@@ -156,7 +156,9 @@ const main = async () => {
         await wait(3000)
       }
     } else if (argv.all) {
-      for (let year = 1970; year < 2002; year++) {
+      const start = argv.start || 1970
+      const end = argv.end || 2002
+      for (let year = start; year < end; year++) {
         const token = await getToken()
 
         for (let week = 0; week < 5; week++) {
