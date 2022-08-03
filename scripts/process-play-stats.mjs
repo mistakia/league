@@ -383,7 +383,25 @@ const main = async () => {
     const week = argv.week
     const seas_type = argv.seas_type || 'REG'
 
-    if (!week) {
+    if (argv.all) {
+      log('processing all plays')
+      const years = await db('nfl_plays').select('seas').groupBy('seas')
+      for (const { seas } of years) {
+        for (const seas_type of constants.seas_types) {
+          const weeks = await db('nfl_plays')
+            .select('wk')
+            .where({ seas, seas_type })
+            .groupBy('wk')
+          log(
+            `processing plays for ${weeks.length} weeks in ${seas} (${seas_type})`
+          )
+          for (const { wk } of weeks) {
+            log(`processing plays for week ${wk} in ${seas} (${seas_type})`)
+            await run({ year: seas, week: wk, seas_type })
+          }
+        }
+      }
+    } else if (!week) {
       const weeks = await db('nfl_plays')
         .select('wk')
         .where({ seas: year, seas_type })
