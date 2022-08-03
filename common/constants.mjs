@@ -1219,6 +1219,8 @@ export const rankings = {
   OP: 8
 }
 
+export const seas_types = ['PRE', 'REG', 'POST']
+
 export const KEEPTRADECUT = {
   VALUE: 1,
   POSITION_RANK: 2,
