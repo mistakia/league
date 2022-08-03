@@ -83,7 +83,7 @@ export default async function (leagueId) {
       )
       .where('nfl_games.wk', constants.season.week)
       .where('nfl_games.seas', constants.season.year)
-      .where('nfl_games.type', 'REG')
+      .where('nfl_games.seas_type', 'REG')
   }
 
   if (recent_transaction_pids.length) {
