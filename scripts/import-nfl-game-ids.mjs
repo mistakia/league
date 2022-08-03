@@ -85,18 +85,30 @@ const main = async () => {
     } else if (argv.all) {
       const year = argv.year || constants.season.year
 
-      for (let week = 0; week <= 4; week++) {
-        await run({ year, week, type: 'PRE' })
+      const pre_weeks = await db('nfl_games')
+        .select('wk')
+        .where({ seas: year, type: 'PRE' })
+        .groupBy('wk')
+      for (const { wk } of pre_weeks) {
+        await run({ year, week: wk, type: 'PRE' })
         await wait(3000)
       }
 
-      for (let week = 1; week <= 18; week++) {
-        await run({ year, week, type: 'REG' })
+      const reg_weeks = await db('nfl_games')
+        .select('wk')
+        .where({ seas: year, type: 'REG' })
+        .groupBy('wk')
+      for (const { wk } of reg_weeks) {
+        await run({ year, week: wk, type: 'REG' })
         await wait(3000)
       }
 
-      for (let week = 18; week <= 22; week++) {
-        await run({ year, week, type: 'POST' })
+      const post_weeks = await db('nfl_games')
+        .select('wk')
+        .where({ seas: year, type: 'POST' })
+        .groupBy('wk')
+      for (const { wk } of post_weeks) {
+        await run({ year, week: wk, type: 'POST' })
         await wait(3000)
       }
     } else {
