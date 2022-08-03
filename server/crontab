@@ -92,10 +92,10 @@
 ################################### GAMES ########################################
 
 ## Update NFL Schedule At 03:00 every day (Regular Season)
-0 3 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-games.mjs &>> /var/log/league/import-nfl-games.log
+0 3 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-games-ngs.mjs &>> /var/log/league/import-nfl-games-ngs.log
 
 ## Update NFL Schedule At 03:00 every day (Off Season)
-0 3 * 5-8 0 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-games.mjs &>> /var/log/league/import-nfl-games.log
+0 3 * 5-8 0 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-games-ngs.mjs &>> /var/log/league/import-nfl-games-ngs.log
 
 ################################### RANKINGS ########################################
 
@@ -155,35 +155,35 @@
 ################################### Live Game Plays ########################################
 
 ## At every 15th minute on Sunday.
-*/15 * * 1,2,9-12 7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-game-ids.mjs --current &>> /var/log/league/league-import-nfl-game-ids.log
+*/15 * * 1,2,9-12 7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-games-nfl.mjs --current &>> /var/log/league/league-import-nfl-games-nfl.log
 
 ## At every minute on Sunday.
 */1 13-23 * 1,2,9-12 7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays.mjs &>> /var/log/league/league-import-plays.log
 */1 13-23 * 1,2,9-12 7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays-nfl.mjs &>> /var/log/league/league-import-plays-nfl.log
 
 ## At every 15th minute past every hour from 19 through 20 on Thursday.
-*/15 19-20 * 1,2,9-12 4 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-game-ids.mjs --current &>> /var/log/league/league-import-nfl-game-ids.log
+*/15 19-20 * 1,2,9-12 4 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-games-nfl.mjs --current &>> /var/log/league/league-import-nfl-games-nfl.log
 
 ## At every minute past every hour from 20 through 23 on Thursday.
 */1 20-23 * 1,2,9-12 4 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays-nfl.mjs &>> /var/log/league/league-import-plays-nfl.log
 */1 20-23 * 1,2,9-12 4 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays.mjs &>> /var/log/league/league-import-plays.log
 
 ## At every 15th minute past every hour from 19 through 20 on Monday
-*/15 19-20 * 1,2,9-12 1 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-game-ids.mjs --current &>> /var/log/league/league-import-nfl-game-ids.log
+*/15 19-20 * 1,2,9-12 1 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-games-nfl.mjs --current &>> /var/log/league/league-import-nfl-games-nfl.log
 
 ## At every minute past every hour from 20 through 23 on Monday.
 */1 20-23 * 1,2,9-12 1 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays-nfl.mjs &>> /var/log/league/league-import-plays-nfl.log
 */1 20-23 * 1,2,9-12 1 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays.mjs &>> /var/log/league/league-import-plays.log
 
 ## At every 15th minute past every hour from 15 through 19 on Tuesday.
-# */15 15-19 * 1,2,9-12 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-game-ids.mjs --current &>> /var/log/league/league-import-nfl-game-ids.log
+# */15 15-19 * 1,2,9-12 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-games-nfl.mjs --current &>> /var/log/league/league-import-nfl-games-nfl.log
 
 ## At every minute past every hour from 20 through 23 on Tuesday.
 # */1 19-23 * 1,2,9-12 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays.mjs &>> /var/log/league/league-import-plays.log
 # */1 19-23 * 1,2,9-12 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays-nfl.mjs &>> /var/log/league/league-import-plays-nfl.log
 
 ## At every 15th minute on Saturday.
-*/15 * * 1,2,9-12 6 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-game-ids.mjs --current &>> /var/log/league/league-import-nfl-game-ids.log
+*/15 * * 1,2,9-12 6 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-games-nfl.mjs --current &>> /var/log/league/league-import-nfl-games-nfl.log
 
 ## At every minute on Saturday.
 */1 13-23 * 1,2,9-12 6 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays-nfl.mjs &>> /var/log/league/league-import-plays-nfl.log
