@@ -100,9 +100,15 @@ const run = async ({
       'YYYY/MM/DD HH:mm:SS',
       'America/New_York'
     )
-    if (dayjs().isBefore(gameStart)) continue
+    if (dayjs().isBefore(gameStart)) {
+      log(`skipping esbid: ${game.esbid}, game hasn't started`)
+      continue
+    }
 
-    if (!game.detailid) continue
+    if (!game.detailid) {
+      log(`skipping esbid: ${game.esbid}, missing detailid`)
+      continue
+    }
 
     const currentPlays = await db('nfl_plays').where({ esbid: game.esbid })
     const haveEndPlay = currentPlays.find((p) => p.type_nfl === 'END_GAME')
