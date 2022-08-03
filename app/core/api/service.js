@@ -321,6 +321,10 @@ export const api = {
   getPlayerGamelogs({ pid }) {
     const url = `${BASE_URL}/players/${pid}/gamelogs`
     return { url }
+  },
+  getPlayerPractices({ pid }) {
+    const url = `${BASE_URL}/players/${pid}/practices`
+    return { url }
   }
 }
 

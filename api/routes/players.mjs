@@ -1,7 +1,6 @@
 import express from 'express'
 import cron from 'node-cron'
 
-import { constants } from '#common'
 import cache from '#api/cache.mjs'
 import { getPlayers, getTransitionBids } from '#utils'
 
@@ -100,10 +99,6 @@ router.get('/:pid', async (req, res) => {
 
     const player_rows = await db('player').where({ pid }).limit(1)
     const player_row = player_rows[0]
-    const practice = await db('practice').where({
-      pid,
-      year: constants.season.year
-    })
 
     // snaps per game by year
 
@@ -118,7 +113,24 @@ router.get('/:pid', async (req, res) => {
 
     // advanced rushing
     // - yardage by direction
-    res.send({ ...player_row, practice })
+
+    res.send(player_row)
+  } catch (error) {
+    logger(error)
+    res.status(500).send({ error: error.toString() })
+  }
+})
+
+router.get('/:pid/practices/?', async (req, res) => {
+  const { db, logger } = req.app.locals
+  try {
+    const { pid } = req.params
+    if (!pid) {
+      return res.status(400).send({ error: 'missing pid' })
+    }
+
+    const data = await db('practice').where({ pid })
+    res.send(data)
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })

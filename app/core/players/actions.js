@@ -88,6 +88,12 @@ export const playerActions = {
   GET_PLAYER_GAMELOGS_FAILED: 'GET_PLAYER_GAMELOGS_FAILED',
   GET_PLAYER_GAMELOGS_PENDING: 'GET_PLAYER_GAMELOGS_PENDING',
 
+  LOAD_PLAYER_PRACTICES: 'LOAD_PLAYER_PRACTICES',
+
+  GET_PLAYER_PRACTICES_FULFILLED: 'GET_PLAYER_PRACTICES_FULFILLED',
+  GET_PLAYER_PRACTICES_FAILED: 'GET_PLAYER_PRACTICES_FAILED',
+  GET_PLAYER_PRACTICES_PENDING: 'GET_PLAYER_PRACTICES_PENDING',
+
   loadAllPlayers: () => ({
     type: playerActions.LOAD_ALL_PLAYERS
   }),
@@ -574,6 +580,36 @@ export const playerActions = {
       opts,
       error
     }
+  }),
+
+  loadPlayerPractices: (pid) => ({
+    type: playerActions.LOAD_PLAYER_PRACTICES,
+    payload: {
+      pid
+    }
+  }),
+
+  getPlayerPracticesFulfilled: (opts, data) => ({
+    type: playerActions.GET_PLAYER_PRACTICES_FULFILLED,
+    payload: {
+      opts,
+      data
+    }
+  }),
+
+  getPlayerPracticesPending: (opts) => ({
+    type: playerActions.GET_PLAYER_PRACTICES_PENDING,
+    payload: {
+      opts
+    }
+  }),
+
+  getPlayerPracticesFailed: (opts, error) => ({
+    type: playerActions.GET_PLAYER_PRACTICES_FAILED,
+    payload: {
+      opts,
+      error
+    }
   })
 }
 
@@ -659,4 +695,10 @@ export const getPlayerGamelogsActions = {
   failed: playerActions.getPlayerGamelogsFailed,
   pending: playerActions.getPlayerGamelogsPending,
   fulfilled: playerActions.getPlayerGamelogsFulfilled
+}
+
+export const getPlayerPracticesActions = {
+  failed: playerActions.getPlayerPracticesFailed,
+  pending: playerActions.getPlayerPracticesPending,
+  fulfilled: playerActions.getPlayerPracticesFulfilled
 }
