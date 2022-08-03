@@ -92,7 +92,8 @@ export default class SelectedPlayerTransactions extends React.Component {
 
     const extensions = playerMap.get('extensions', 0)
     const value = playerMap.get('value')
-    const extendedSalary = isBeforeExtensionDeadline
+    const extension_salaries = []
+    const extended_salary = isBeforeExtensionDeadline
       ? getExtensionAmount({
           pos: playerMap.get('pos'),
           tag: playerMap.get('tag'),
@@ -101,6 +102,25 @@ export default class SelectedPlayerTransactions extends React.Component {
           value
         })
       : value
+    extension_salaries.push({
+      year: constants.year,
+      extended_salary
+    })
+
+    let salary = extended_salary
+    for (let i = extensions; extension_salaries.length < 4; i++) {
+      salary = getExtensionAmount({
+        pos: playerMap.get('pos'),
+        tag: playerMap.get('tag'),
+        extensions: i,
+        league,
+        value: salary
+      })
+      extension_salaries.push({
+        year: constants.year + i,
+        extended_salary: salary
+      })
+    }
 
     return (
       <div className='selected__player-transactions'>
@@ -110,19 +130,31 @@ export default class SelectedPlayerTransactions extends React.Component {
             <Table size='small'>
               <TableBody>
                 <TableRow>
-                  <TableCell>Extension Count</TableCell>
+                  <TableCell variant='head'>Extension Count</TableCell>
                   <TableCell colSpan={2}>{extensions}</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell>{constants.year} Extended Salary</TableCell>
-                  <TableCell colSpan={2}>${extendedSalary}</TableCell>
+                  <TableCell variant='head'>Current Salary</TableCell>
+                  <TableCell colSpan={2}>${value}</TableCell>
                 </TableRow>
+                {extension_salaries.map((item, index) => (
+                  <TableRow key={index}>
+                    <TableCell variant='head'>{item.year} Salary</TableCell>
+                    <TableCell colSpan={2}>${item.extended_salary}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <TableContainer>
+            <Table size='small'>
+              <TableBody>
                 <TableRow>
-                  <TableCell>Total Teams</TableCell>
+                  <TableCell variant='head'>Total Teams</TableCell>
                   <TableCell colSpan={2}>{Object.keys(teams).length}</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell>Max Salary</TableCell>
+                  <TableCell variant='head'>Max Salary</TableCell>
                   <TableCell>${maxTransaction.value}</TableCell>
                   <TableCell>
                     <Timestamp timestamp={maxTransaction.timestamp} />
