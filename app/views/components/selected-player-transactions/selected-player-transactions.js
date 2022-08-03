@@ -108,6 +108,7 @@ export default class SelectedPlayerTransactions extends React.Component {
     })
 
     let salary = extended_salary
+    let year = constants.year
     for (let i = extensions; extension_salaries.length < 4; i++) {
       salary = getExtensionAmount({
         pos: playerMap.get('pos'),
@@ -115,8 +116,9 @@ export default class SelectedPlayerTransactions extends React.Component {
         league,
         value: salary
       })
+      year += 1
       extension_salaries.push({
-        year: constants.year + i,
+        year,
         extended_salary: salary
       })
     }
