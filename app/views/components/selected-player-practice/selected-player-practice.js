@@ -34,9 +34,9 @@ export default class SelectedPlayerPractice extends React.Component {
 
   render = () => {
     const rows = []
-    for (const [index, p] of this.props.practices.entries()) {
-      rows.push(<Row key={index} data={p} />)
-    }
+    this.props.practices.forEach((practice, index) => {
+      rows.push(<Row key={index} data={practice} />)
+    })
 
     return (
       <div className='selected__section'>
