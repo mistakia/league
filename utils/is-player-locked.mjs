@@ -18,7 +18,7 @@ export default async function (pid) {
     )
     .where('nfl_games.wk', constants.season.week)
     .where('nfl_games.seas', constants.season.year)
-    .where('nfl_games.type', 'REG')
+    .where('nfl_games.seas_type', 'REG')
     .limit(1)
 
   const player_row = player_rows[0]
