@@ -129,7 +129,10 @@ export default async function ({
         // throw new Error('invalid release')
       }
 
-      if (releasePlayer.slot === constants.slots.PSP) {
+      if (
+        releasePlayer.slot === constants.slots.PSP ||
+        releasePlayer.slot === constants.slots.PSRP
+      ) {
         throw new Error('invalid release')
       }
 

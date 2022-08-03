@@ -17,8 +17,8 @@ const mapStateToProps = createSelector(
     let ps_count_max = 0
     let bench_count_max = 0
     for (const roster of rosters.values()) {
-      const ps_count = roster.players.filter(
-        (r) => r.slot === constants.slots.PS || r.slot === constants.slots.PSP
+      const ps_count = roster.players.filter((r) =>
+        constants.ps_slots.includes(r.slot)
       )
       ps_count_max = Math.max(ps_count.size, ps_count_max)
 

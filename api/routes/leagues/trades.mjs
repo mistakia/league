@@ -133,8 +133,14 @@ router.post(
         .join('poaches', 'rosters_players.pid', 'poaches.pid')
         .where({
           year: constants.season.year,
-          week: constants.season.week,
-          slot: constants.slots.PS
+          week: constants.season.week
+        })
+        .where(function () {
+          this.where({
+            slot: constants.slots.PS
+          }).orWhere({
+            slot: constants.slots.PSR
+          })
         })
         .whereNull('poaches.processed')
         .where('poaches.lid', leagueId)

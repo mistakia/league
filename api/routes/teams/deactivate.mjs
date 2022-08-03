@@ -63,12 +63,12 @@ router.post('/?', async (req, res) => {
     const player_rows = await db('player').where('pid', pid).limit(1)
     const player_row = player_rows[0]
 
-    const transactions = await getTransactionsSinceAcquisition({
+    const transactionsSinceAcquisition = await getTransactionsSinceAcquisition({
       lid: leagueId,
       tid,
       pid
     })
-    const sortedTransactions = transactions.sort(
+    const sortedTransactions = transactionsSinceAcquisition.sort(
       (a, b) => a.timestamp - b.timestamp
     )
     const lastTransaction = sortedTransactions[sortedTransactions.length - 1]
@@ -144,7 +144,12 @@ router.post('/?', async (req, res) => {
         .send({ error: 'no available space on practice squad' })
     }
 
-    await db('rosters_players').update({ slot: constants.slots.PS }).where({
+    const isDraftedRookie = transactionsSinceAcquisition.find(
+      (t) => t.type === constants.transactions.DRAFT
+    )
+    const slot = isDraftedRookie ? constants.slots.PSR : constants.slots.PS
+
+    await db('rosters_players').update({ slot }).where({
       rid: rosterRow.uid,
       pid
     })
@@ -166,7 +171,7 @@ router.post('/?', async (req, res) => {
     const data = {
       pid,
       tid,
-      slot: constants.slots.PS,
+      slot,
       rid: roster.uid,
       pos: player_row.pos,
       transaction

@@ -90,7 +90,7 @@ export default class DashboardPlayersTable extends React.Component {
       reorderWaivers,
       reorderCutlist,
       leadColumn = '',
-      limit,
+      space,
       isTransition
     } = this.props
 
@@ -192,8 +192,7 @@ export default class DashboardPlayersTable extends React.Component {
     const week = Math.max(constants.week, 1)
 
     let summary
-    if (limit) {
-      const space = limit - items.length
+    if (space) {
       summary = (
         <div className='section__summary'>
           <div className='section__summary-item'>Rostered: {items.length}</div>
@@ -299,7 +298,7 @@ DashboardPlayersTable.propTypes = {
   waiverType: PropTypes.string,
   reorderWaivers: PropTypes.func,
   leadColumn: PropTypes.string,
-  limit: PropTypes.number,
+  space: PropTypes.number,
   total: ImmutablePropTypes.list,
   cutlist: ImmutablePropTypes.list,
   reorderCutlist: PropTypes.func,

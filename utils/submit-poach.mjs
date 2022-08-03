@@ -42,8 +42,14 @@ export default async function ({
       lid: leagueId,
       week: constants.season.week,
       year: constants.season.year,
-      pid,
-      slot: constants.slots.PS
+      pid
+    })
+    .where(function () {
+      this.where({
+        slot: constants.slots.PS
+      }).orWhere({
+        slot: constants.slots.PSR
+      })
     })
   if (!slots.length) {
     throw new Error('player is not in an unprotected practice squad slot')

@@ -445,7 +445,9 @@ export const slots = {
   PS: 12,
   IR: 13,
   COV: 14,
-  PSP: 15
+  PSP: 15,
+  PSR: 16,
+  PSRP: 17
 }
 
 export const starterSlots = [
@@ -460,6 +462,8 @@ export const starterSlots = [
   slots.K,
   slots.DST
 ]
+
+export const ps_slots = [slots.PS, slots.PSP, slots.PSR, slots.PSRP]
 
 export const slotName = {
   [slots.QB]: 'QB',
@@ -476,7 +480,9 @@ export const slotName = {
   [slots.PS]: 'PS',
   [slots.IR]: 'IR',
   [slots.COV]: 'COV',
-  [slots.PSP]: 'PS (P)'
+  [slots.PSP]: 'PS (P)',
+  [slots.PSR]: 'PSR',
+  [slots.PSRP]: 'PSR (P)'
 }
 
 export const matchups = {
