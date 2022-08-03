@@ -44,7 +44,10 @@ const run = async ({
     return !game.detailid
   })
 
-  if (!startedGameWithMissingDetailId) return
+  if (!startedGameWithMissingDetailId) {
+    log('found no started games with missing ids')
+    return
+  }
 
   let token
   if (!token) {
