@@ -10,8 +10,8 @@ import { isMain } from '#utils'
 import config from '#config'
 
 const argv = yargs(hideBin(process.argv)).argv
-const log = debug('import-nfl-games')
-debug.enable('import-nfl-games')
+const log = debug('import-games-ngs')
+debug.enable('import-games-ngs')
 
 const format = (item) => {
   const date = item.gameDate ? dayjs(item.gameDate).format('YYYY/MM/DD') : null
@@ -84,7 +84,7 @@ const main = async () => {
   }
 
   await db('jobs').insert({
-    type: constants.jobs.NFL_GAMES,
+    type: constants.jobs.IMPORT_NFL_GAMES_NGS,
     succ: error ? 0 : 1,
     reason: error ? error.message : null,
     timestamp: Math.round(Date.now() / 1000)
