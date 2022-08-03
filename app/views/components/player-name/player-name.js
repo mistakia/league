@@ -20,6 +20,7 @@ export default class PlayerName extends React.Component {
 
   render = () => {
     const { playerMap, isOnCutlist, headshot, square } = this.props
+    const slot = playerMap.get('slot')
 
     return (
       <>
@@ -45,7 +46,7 @@ export default class PlayerName extends React.Component {
           </div>
         </div>
         <div className='player__name-label'>
-          {playerMap.get('slot') === constants.slots.PSP && (
+          {(slot === constants.slots.PSP || slot === constants.slots.PSRP) && (
             <PlayerLabel label='P' description='Protected Practice Squad' />
           )}
           {isOnCutlist && (

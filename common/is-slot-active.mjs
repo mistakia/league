@@ -4,6 +4,8 @@ const exclude = [
   constants.slots.IR,
   constants.slots.PS,
   constants.slots.PSP,
+  constants.slots.PSR,
+  constants.slots.PSRP,
   constants.slots.COV
 ]
 

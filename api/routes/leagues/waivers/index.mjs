@@ -294,8 +294,14 @@ router.post('/?', async (req, res) => {
           lid: leagueId,
           week: constants.season.week,
           year: constants.season.year,
-          pid,
-          slot: constants.slots.PS
+          pid
+        })
+        .where(function () {
+          this.where({
+            slot: constants.slots.PS
+          }).orWhere({
+            slot: constants.slots.PSR
+          })
         })
       if (!slots.length) {
         return res.status(400).send({
@@ -324,7 +330,10 @@ router.post('/?', async (req, res) => {
         }
 
         const releasePlayer = roster.get(release_pid)
-        if (releasePlayer.slot === constants.slots.PSP) {
+        if (
+          releasePlayer.slot === constants.slots.PSP ||
+          releasePlayer.slot === constants.slots.PSRP
+        ) {
           return res.status(400).send({ error: 'invalid release' })
         }
         roster.removePlayer(release_pid)
