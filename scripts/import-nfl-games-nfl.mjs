@@ -10,8 +10,8 @@ import { isMain, getToken, wait } from '#utils'
 import config from '#config'
 
 const argv = yargs(hideBin(process.argv)).argv
-const log = debug('import-nfl-game-ids')
-debug.enable('import-nfl-game-ids')
+const log = debug('import-nfl-games-nfl')
+debug.enable('import-nfl-games-nfl')
 
 const getUrl = ({ week, year, type = 'REG' }) =>
   `${config.nfl_api_url}/football/v1/games?season=${year}&seasonType=${type}&week=${week}&withExternalIds=true`
@@ -127,7 +127,7 @@ const main = async () => {
   }
 
   await db('jobs').insert({
-    type: constants.jobs.NFL_GAME_IDS,
+    type: constants.jobs.IMPORT_NFL_GAMES_NFL,
     succ: error ? 0 : 1,
     reason: error ? error.message : null,
     timestamp: Math.round(Date.now() / 1000)

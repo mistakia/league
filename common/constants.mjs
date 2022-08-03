@@ -1031,8 +1031,8 @@ export const jobs = {
 
   PLAYERS_ARMCHAIR: 19,
 
-  NFL_GAMES: 20,
-  NFL_GAME_IDS: 23,
+  IMPORT_NFL_GAMES_NGS: 20,
+  IMPORT_NFL_GAMES_NFL: 23,
 
   NFL_PLAYS_NGS: 21,
   NFL_PLAYS_NFL: 22,
@@ -1098,10 +1098,10 @@ export const jobDetails = {
   17: 'Generate Rosters',
   18: 'Generate Draft Picks',
   19: 'Import Players (Armchair)',
-  20: 'Import NFL Games',
+  20: 'Import NFL Games (NGS)',
   21: 'Import NFL Plays (NGS)',
   22: 'Import NFL Plays (NFL)',
-  23: 'Import NFL Game Ids',
+  23: 'Import NFL Games (NFL)',
   24: 'NFL Players (NFL)',
   25: 'NFL Player Ids (NFL)',
   26: 'Projections (FBG)',
