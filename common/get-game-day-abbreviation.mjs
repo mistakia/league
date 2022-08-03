@@ -1,18 +1,22 @@
 import dayjs from 'dayjs'
 
 export default function getGameDayAbbreviation({
-  type,
   date,
   time_est,
-  wk,
-  seas
+  week_type,
+  seas,
+  seas_type
 }) {
-  if (type === 'PRO') {
+  if (seas_type === 'PRO') {
     return 'PRO'
   }
 
-  if (seas <= 2019 && wk === 21) {
-    return 'SB'
+  if (week_type && week_type !== 'REG') {
+    return week_type
+  }
+
+  if (!date || !time_est) {
+    return null
   }
 
   const gameDate = dayjs.tz(

@@ -1,36 +1,86 @@
-import fetch from 'node-fetch'
 import dayjs from 'dayjs'
+import timezone from 'dayjs/plugin/timezone.js'
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#common'
-import { isMain, getToken, wait } from '#utils'
-import config from '#config'
+import { constants, fixTeam, getGameDayAbbreviation } from '#common'
+import { isMain, getToken, wait, nfl } from '#utils'
+
+dayjs.extend(timezone)
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-nfl-games-nfl')
-debug.enable('import-nfl-games-nfl')
-
-const getUrl = ({ week, year, type = 'REG' }) =>
-  `${config.nfl_api_url}/football/v1/games?season=${year}&seasonType=${type}&week=${week}&withExternalIds=true`
+debug.enable('import-nfl-games-nfl,nfl')
 
 const currentRegularSeasonWeek = Math.max(
   dayjs().day() === 2 ? constants.season.week - 1 : constants.season.week,
   1
 )
 
+const format = (item) => {
+  const datetime = item.time ? dayjs.tz(item.time, 'America/New_York') : null
+  const date = datetime ? datetime.format('YYYY/MM/DD') : null
+  const seas_type = item.seasonType
+  const week_type = item.weekType
+  const time_est = datetime
+    ? datetime.tz('America/New_York').format('HH:mm:ss')
+    : null
+  const seas = item.season
+  const score = item.detail || {}
+
+  const esbid = (item.externalIds.find((e) => e.source === 'elias') || {}).id
+  const shieldid = (item.externalIds.find((e) => e.source === 'shield') || {})
+    .id
+  const detailid = (
+    item.externalIds.find((e) => e.source === 'gamedetail') || {}
+  ).id
+
+  const day = date
+    ? getGameDayAbbreviation({ seas_type, date, time_est, week_type, seas })
+    : null
+
+  return {
+    esbid,
+    shieldid,
+    detailid,
+
+    seas,
+    wk: item.week,
+    date,
+    time_est,
+    day,
+
+    v: fixTeam(item.awayTeam.abbreviation),
+    h: fixTeam(item.homeTeam.abbreviation),
+
+    seas_type,
+    week_type,
+    ot: (score.detail ? score.detail.phase || '' : '').includes('OVERTIME'),
+
+    home_score: score.homePointsTotal,
+    away_score: score.visitorPointsTotal,
+
+    stad: item.venue ? item.venue.name : null,
+    stad_nflid: item.venue ? item.venue.id : null
+
+    // clock: score.time,
+    // status: score.phase
+  }
+}
+
 const run = async ({
   year = constants.season.year,
   week = currentRegularSeasonWeek,
-  type = 'REG'
+  seas_type = 'REG',
+  token
 } = {}) => {
-  log(`processing ${type} season games for week ${week} in ${year}`)
+  log(`processing ${seas_type} season games for week ${week} in ${year}`)
   const games = await db('nfl_games').where({
     seas: year,
     wk: week,
-    type
+    seas_type
   })
 
   const startedGameWithMissingDetailId = games.find((game) => {
@@ -45,12 +95,11 @@ const run = async ({
     return !game.detailid
   })
 
-  if (!startedGameWithMissingDetailId) {
+  if (games.length && !startedGameWithMissingDetailId) {
     log('found no started games with missing ids')
     return
   }
 
-  let token
   if (!token) {
     token = await getToken()
   }
@@ -58,26 +107,17 @@ const run = async ({
   if (!token) {
     throw new Error('missing access token')
   }
-  const url = getUrl({ week, year, type })
-  log(url)
-  const data = await fetch(url, {
-    headers: {
-      authorization: `Bearer ${token}`
-    }
-  }).then((res) => res.json())
 
+  const data = await nfl.getGames({ year, week, seas_type, token })
+
+  const inserts = []
   for (const game of data.games) {
-    const esb = game.externalIds.find((e) => e.source === 'Elias')
-    const gameDetail = game.externalIds.find((e) => e.source === 'GameDetail')
-    if (gameDetail) {
-      await db('nfl_games')
-        .update({
-          detailid: gameDetail.id
-        })
-        .where({
-          esbid: esb.id
-        })
-    }
+    inserts.push(format(game))
+  }
+
+  if (inserts.length) {
+    await db('nfl_games').insert(inserts).onConflict().merge()
+    log(`saved data for ${inserts.length} games`)
   }
 }
 
@@ -86,40 +126,59 @@ const main = async () => {
   try {
     if (argv.current) {
       await run()
-    } else if (argv.all) {
-      const year = argv.year || constants.season.year
+    } else if (argv.year && argv.all) {
+      const year = argv.year
 
       const pre_weeks = await db('nfl_games')
         .select('wk')
-        .where({ seas: year, type: 'PRE' })
+        .where({ seas: year, seas_type: 'PRE' })
         .groupBy('wk')
       for (const { wk } of pre_weeks) {
-        await run({ year, week: wk, type: 'PRE' })
+        await run({ year, week: wk, seas_type: 'PRE' })
         await wait(3000)
       }
 
       const reg_weeks = await db('nfl_games')
         .select('wk')
-        .where({ seas: year, type: 'REG' })
+        .where({ seas: year, seas_type: 'REG' })
         .groupBy('wk')
       for (const { wk } of reg_weeks) {
-        await run({ year, week: wk, type: 'REG' })
+        await run({ year, week: wk, seas_type: 'REG' })
         await wait(3000)
       }
 
       const post_weeks = await db('nfl_games')
         .select('wk')
-        .where({ seas: year, type: 'POST' })
+        .where({ seas: year, seas_type: 'POST' })
         .groupBy('wk')
       for (const { wk } of post_weeks) {
-        await run({ year, week: wk, type: 'POST' })
+        await run({ year, week: wk, seas_type: 'POST' })
         await wait(3000)
+      }
+    } else if (argv.all) {
+      for (let year = 1970; year < 2002; year++) {
+        const token = await getToken()
+
+        for (let week = 0; week < 5; week++) {
+          await run({ year, week, seas_type: 'PRE', token })
+          await wait(3000)
+        }
+
+        for (let week = 0; week < 18; week++) {
+          await run({ year, week, seas_type: 'REG', token })
+          await wait(3000)
+        }
+
+        for (let week = 0; week < 5; week++) {
+          await run({ year, week, seas_type: 'POST', token })
+          await wait(3000)
+        }
       }
     } else {
       const year = argv.year
-      const type = argv.type
+      const seas_type = argv.seas_type
       const week = argv.week
-      await run({ year, week, type })
+      await run({ year, week, seas_type })
     }
   } catch (err) {
     error = err

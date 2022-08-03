@@ -115,3 +115,28 @@ query {
 
   return results
 }
+
+export const getGames = async ({ year, week, seas_type, token }) => {
+  const api_path = `/games/${year}/${seas_type}/${week}.json`
+  const full_path = path.join(cache_path, api_path)
+  if (fs.pathExistsSync(full_path)) {
+    return fs.readJsonSync(full_path)
+  }
+
+  const url = `${config.nfl_api_url}/experience/v1/games?season=${year}&seasonType=${seas_type}&week=${week}&withExternalIds=true&limit=100`
+  log(url)
+  const res = await fetch(url, {
+    headers: {
+      authorization: `Bearer ${token}`
+    }
+  })
+
+  const data = await res.json()
+
+  if (data && data.games.length) {
+    fs.ensureFileSync(full_path)
+    fs.writeJsonSync(full_path, data, { spaces: 2 })
+  }
+
+  return data
+}
