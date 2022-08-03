@@ -52,7 +52,7 @@ export default function TransactionsPage({
   const loadMoreRows = isPending
     ? () => {}
     : () => {
-        loadNext()
+        loadNext(lid)
       }
   const rowCount = hasMore ? transactions.size + 1 : transactions.size
 
