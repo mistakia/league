@@ -1,12 +1,12 @@
-$height = 55px
+$height = 45px
 
 .matchup
   margin-bottom 8px
   overflow hidden
-  border 1px solid #747678
   margin 8px 16px
   flex 1
   min-width 260px
+  background lighten($backgroundColor, 90%)
 
   .team__image
     flex 0 0 36px
@@ -16,9 +16,6 @@ $height = 55px
 
   .team__name
     flex 1
-
-.matchup__body
-  background white
 
 .matchup__home
 .matchup__away
@@ -32,7 +29,7 @@ $height = 55px
 .matchup__banner
   position absolute
   background-color $borderColor
-  width 48px
+  width 8px
   opacity 1
   height $height
   &:after
@@ -43,10 +40,23 @@ $height = 55px
     height 100%
     width 100%
 
-.matchup__line
-  position absolute
-  width 8px
-  background-color $borderColor
-  left 0
-  top 0
-  bottom 0
+.matchup__col
+  flex 0 0 50px
+  width 50px
+  display flex
+  justify-content center
+  align-items center
+  font-weight 900
+  background lighten(#666, 95%)
+  height 100%
+
+.matchup__head
+  background $backgroundColor
+  display flex
+  justify-content flex-end
+
+  .metric
+    text-transform uppercase
+    font-size 10px
+    padding 4px 0
+    background lighten(#666, 75%)
