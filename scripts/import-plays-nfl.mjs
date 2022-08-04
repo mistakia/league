@@ -1,4 +1,3 @@
-import fetch from 'node-fetch'
 import dayjs from 'dayjs'
 import debug from 'debug'
 import yargs from 'yargs'
@@ -6,7 +5,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants, fixTeam } from '#common'
-import { isMain, getToken, getGameDetailUrl, wait } from '#utils'
+import { isMain, getToken, wait, nfl } from '#utils'
 
 const argv = yargs(hideBin(process.argv)).argv
 const currentRegularSeasonWeek = Math.max(
@@ -84,9 +83,10 @@ debug.enable('import:plays:nfl')
 const run = async ({
   year = constants.season.year,
   week = currentRegularSeasonWeek,
-  seas_type = 'REG'
+  seas_type = 'REG',
+  bypass_cache = false,
+  token
 } = {}) => {
-  let token
   const games = await db('nfl_games').where({
     seas: year,
     wk: week,
@@ -126,14 +126,8 @@ const run = async ({
     }
 
     log(`loading plays for esbid: ${game.esbid}`)
-    const url = getGameDetailUrl(game.detailid)
-    const response = await fetch(url, {
-      headers: {
-        authorization: `Bearer ${token}`
-      }
-    })
 
-    const data = await response.json()
+    const data = await nfl.getPlays({ id: game.detailid, token, bypass_cache })
 
     if (!data.data) continue
 
@@ -178,9 +172,14 @@ const main = async () => {
   let error
   try {
     if (argv.current) {
-      await run()
+      await run({ bypass_cache: true })
     } else if (argv.all) {
-      for (let year = 2002; year < constants.season.year; year++) {
+      const years = await db('nfl_games')
+        .select('seas')
+        .groupBy('seas')
+        .orderBy('seas', 'asc')
+
+      for (const { seas: year } of years) {
         log(
           `loading plays for year: ${year}, seas_type: ${
             argv.seas_type || 'all'
@@ -293,7 +292,7 @@ const main = async () => {
     } else {
       const week = argv.week
       const seas_type = argv.seas_type
-      await run({ week, seas_type })
+      await run({ week, seas_type, bypass_cache: true })
     }
   } catch (err) {
     error = err
