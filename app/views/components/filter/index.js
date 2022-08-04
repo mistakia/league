@@ -64,7 +64,11 @@ export default function Filter(props) {
     event.preventDefault()
     event.stopPropagation()
     if (props.single) {
-      return props.filter(props.type, [props.values[index].value])
+      return props.filter({
+        leagueId,
+        type: props.type,
+        values: [props.values[index].value]
+      })
     }
     const values = props.values.map((v, i) =>
       index === i ? { ...v, selected: !v.selected } : v

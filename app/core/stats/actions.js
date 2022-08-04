@@ -31,11 +31,11 @@ export const statActions = {
     }
   }),
 
-  filter: ({ type, value }) => ({
+  filter: ({ type, values }) => ({
     type: statActions.FILTER_STATS,
     payload: {
       type,
-      value
+      values
     }
   }),
 
