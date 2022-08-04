@@ -31,7 +31,7 @@ export const statActions = {
     }
   }),
 
-  filter: (type, value) => ({
+  filter: ({ type, value }) => ({
     type: statActions.FILTER_STATS,
     payload: {
       type,

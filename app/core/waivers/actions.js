@@ -32,7 +32,7 @@ export const waiverActions = {
   GET_WAIVER_REPORT_FAILED: 'GET_WAIVER_REPORT_FAILED',
   GET_WAIVER_REPORT_FULFILLED: 'GET_WAIVER_REPORT_FULFILLED',
 
-  filter: (type, values) => ({
+  filter: ({ type, values }) => ({
     type: waiverActions.FILTER_WAIVERS,
     payload: {
       type,
