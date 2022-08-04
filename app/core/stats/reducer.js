@@ -44,7 +44,7 @@ export function statsReducer(state = initialState(), { payload, type }) {
       return state.merge({ teamStatsPercentiles: payload.percentiles })
 
     case statActions.FILTER_STATS:
-      return state.merge({ [payload.type]: new List(payload.value) })
+      return state.merge({ [payload.type]: new List(payload.values) })
 
     case statActions.SET_STAT_VIEW:
       return state.merge({
