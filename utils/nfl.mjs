@@ -140,3 +140,244 @@ export const getGames = async ({ year, week, seas_type, token }) => {
 
   return data
 }
+
+export const getPlays = async ({ id, token, bypass_cache = false }) => {
+  const api_path = `/plays/${id}.json`
+  const full_path = path.join(cache_path, api_path)
+  if (!bypass_cache && fs.pathExistsSync(full_path)) {
+    return fs.readJsonSync(full_path)
+  }
+
+  log(`getting game details for ${id}`)
+
+  const query = `
+query {
+  viewer {
+    gameDetail(id: "${id}") {
+      attendance
+      coinTossWinner {
+        abbreviation
+      }
+      coinTossResults {
+        losingChoice
+        winningChoice
+        winningTeamId
+      }
+      backJudge
+      drives {
+        yardsPenalized
+        yards
+        totalEndedWithScore
+        timeOfPossession
+        startYardLine
+        startTransition
+        realStartTime
+        quarterStart
+        quarterEnd
+        endTransition
+        endYardLine
+        endedWithScore
+        firstDowns
+        gameClockEnd
+        gameClockStart
+        howEndedDescription
+        howStartedDescription
+        inside20
+        orderSequence
+        playCount
+        playIdEnded
+        playIdStarted
+        playSeqEnded
+        playSeqStarted
+        possessionTeam {
+          abbreviation
+          id
+        }
+        gsisId
+      }
+      fieldJudge
+      fileNumber
+      gameInjuries {
+        team {
+          abbreviation
+        }
+        returnStatus
+        playerName
+        playId
+        gsisPlayerId
+      }
+      homeLiveGameRoster {
+        status
+        lastName
+        firstName
+        gsisPlayer {
+          id
+        }
+        jerseyNumber
+        position
+      }
+      plays {
+        clockTime
+        createdDate
+        down
+        driveNetYards
+        drivePlayCount
+        driveSequenceNumber
+        driveTimeOfPossession
+        endClockTime
+        endQuarterPlay
+        endYardLine
+        firstDown
+        gameDetailId
+        goalToGo
+        gsisId
+        isBigPlay
+        lastModifiedDate
+        nextPlayIsGoalToGo
+        nextPlayType
+        orderSequence
+        penaltyOnPlay
+        playClock
+        playDeleted
+        playDescription
+        playDescriptionWithJerseyNumbers
+        playId
+        playReviewStatus
+        playType
+        prePlayByPlay
+        quarter
+        scoringPlay
+        scoringPlayType
+        shortDescription
+        specialTeamsPlay
+        stPlayType
+        timeOfDay
+        timeOfDayAsDate
+        yardLine
+        yards
+        yardsToGo
+        latestPlay
+        playStats {
+          playId
+          playerName
+          statId
+          team {
+            abbreviation
+            id
+          }
+          gsisPlayer {
+            id
+            position
+            displayName
+            birthDate
+          }
+          playStatSeq
+          uniformNumber
+          yards
+        }
+        possessionTeam {
+          id
+          abbreviation
+          nickName
+        }
+        scoringTeam {
+          id
+          abbreviation
+          nickName
+        }
+      }
+      weather {
+        windSpeedMph
+        windGustMph
+        windDirection
+        visibilityMiles
+        shortDescription
+        observeDate
+        lowRealFeelFahrenheit
+        lowFahrenheit
+        longDescription
+        highRealFeelFahrenheit
+        highFahrenheit
+        location
+      }
+      visitorTimeoutsUsed
+      visitorTeam {
+        abbreviation
+        id
+        fullName
+      }
+      visitorHeadCoach
+      umpire
+      startTime
+      stadium
+      sideJudge
+      replayOfficial
+      referee
+      visitorLiveGameRoster {
+        firstName
+        gsisPlayer {
+          id
+        }
+        jerseyNumber
+        lastName
+        position
+        status
+      }
+      headLinesman
+      homeHeadCoach
+      homePointsTotal
+      homePointsOvertime
+      homePointsOvertimeTotal
+      homePointsQ1
+      homePointsQ2
+      homePointsQ3
+      homePointsQ4
+      homeTeam {
+        abbreviation
+        id
+        fullName
+      }
+      homeTimeoutsRemaining
+      homeTimeoutsUsed
+      id
+      lineJudge
+      phase
+      playReview
+      playReviewPlayId
+      visitorPointsOvertime
+      visitorPointsOvertimeTotal
+      visitorPointsQ1
+      visitorPointsQ2
+      visitorPointsQ3
+      visitorPointsQ4
+      visitorPointsTotal
+      visitorTimeoutsRemaining
+      gameTime
+      period
+      yardLine
+      yardsToGo
+      distance
+      down
+      gameKey
+    }
+  }
+}
+  `
+  const url = `${config.nfl_api_url}/v3/shield/?query=${encodeURIComponent(
+    query
+  )}&variables=null`
+  const res = await fetch(url, {
+    headers: {
+      authorization: `Bearer ${token}`
+    }
+  })
+
+  const data = await res.json()
+
+  if (data && data.games.length) {
+    fs.ensureFileSync(full_path)
+    fs.writeJsonSync(full_path, data, { spaces: 2 })
+  }
+
+  return data
+}
