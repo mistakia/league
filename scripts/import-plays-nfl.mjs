@@ -174,12 +174,17 @@ const main = async () => {
     if (argv.current) {
       await run({ bypass_cache: true })
     } else if (argv.all) {
-      const years = await db('nfl_games')
+      const nfl_games_result = await db('nfl_games')
         .select('seas')
         .groupBy('seas')
         .orderBy('seas', 'asc')
 
-      for (const { seas: year } of years) {
+      let years = nfl_games_result.map((i) => i.seas)
+      if (argv.start) {
+        years = years.fitler((year) => year >= argv.start)
+      }
+
+      for (const year of years) {
         log(
           `loading plays for year: ${year}, seas_type: ${
             argv.seas_type || 'all'
@@ -191,6 +196,7 @@ const main = async () => {
             .select('wk')
             .where({ seas: year, seas_type: 'PRE' })
             .groupBy('wk')
+            .orderBy('wk', 'asc')
 
           log(`processing plays for ${weeks.length} weeks in ${year} (PRE)`)
           for (const { wk } of weeks) {
@@ -205,6 +211,7 @@ const main = async () => {
             .select('wk')
             .where({ seas: year, seas_type: 'REG' })
             .groupBy('wk')
+            .orderBy('wk', 'asc')
 
           log(`processing plays for ${weeks.length} weeks in ${year} (REG)`)
           for (const { wk } of weeks) {
@@ -219,6 +226,7 @@ const main = async () => {
             .select('wk')
             .where({ seas: year, seas_type: 'POST' })
             .groupBy('wk')
+            .orderBy('wk', 'asc')
 
           log(`processing plays for ${weeks.length} weeks in ${year} (POST)`)
           for (const { wk } of weeks) {
@@ -244,6 +252,7 @@ const main = async () => {
             .select('wk')
             .where({ seas: year, seas_type: 'PRE' })
             .groupBy('wk')
+            .orderBy('wk', 'asc')
 
           log(`processing plays for ${weeks.length} weeks in ${year} (PRE)`)
           for (const { wk } of weeks) {
@@ -262,6 +271,7 @@ const main = async () => {
             .select('wk')
             .where({ seas: year, seas_type: 'REG' })
             .groupBy('wk')
+            .orderBy('wk', 'asc')
 
           log(`processing plays for ${weeks.length} weeks in ${year} (REG)`)
           for (const { wk } of weeks) {
@@ -280,6 +290,7 @@ const main = async () => {
             .select('wk')
             .where({ seas: year, seas_type: 'POST' })
             .groupBy('wk')
+            .orderBy('wk', 'asc')
 
           log(`processing plays for ${weeks.length} weeks in ${year} (POST)`)
           for (const { wk } of weeks) {
