@@ -43,7 +43,7 @@
 0 0 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-espn-projections.mjs --season &>> /var/log/league/import-espn-season.log
 0 0 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-fantasysharks-projections.mjs --season &>> /var/log/league/import-fantasysharks-season.log
 0 0 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-fftoday-projections.mjs --season &>> /var/log/league/import-fftoday-season.log
-# 0 0 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-projections.mjs --season &>> /var/log/league/import-nfl-season.log
+0 0 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-projections.mjs --season &>> /var/log/league/import-nfl-season.log
 
 ## process projections & generate vorp, market salary
 30 * * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-projections.mjs &>> /var/log/league/process-projections.log
