@@ -14,7 +14,7 @@ debug.enable('import:projections,get-player')
 const timestamp = new Date()
 const year = constants.season.year
 const getURL = (week, offset) =>
-  argv.season
+  week === 0
     ? `https://fantasy.nfl.com/research/projections?position=O&sort=projectedPts&statCategory=projectedStats&statSeason=${year}&statType=seasonProjectedStats&offset=${
         offset + 1
       }`
@@ -45,7 +45,7 @@ const runOne = async (week = 0) => {
       const params = { name, team: team && team.trim(), pos }
       const data = {}
 
-      if (argv.season) {
+      if (week === 0) {
         // passing
         data.py = parseFloat($(el).find('td').eq(3).text().trim()) || 0
         data.tdp = parseFloat($(el).find('td').eq(4).text().trim()) || 0
@@ -140,11 +140,11 @@ const run = async () => {
 
   if (argv.season) {
     await runOne()
-  } else {
-    let week = Math.max(1, constants.season.week)
-    for (; week <= constants.season.finalWeek; week++) {
-      await runOne(week)
-    }
+  }
+
+  let week = Math.max(1, constants.season.week)
+  for (; week <= constants.season.finalWeek; week++) {
+    await runOne(week)
   }
 }
 
