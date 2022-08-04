@@ -19,7 +19,7 @@ export const matchupsActions = {
     }
   }),
 
-  filter: (type, values) => ({
+  filter: ({ type, values }) => ({
     type: matchupsActions.FILTER_MATCHUPS,
     payload: {
       type,

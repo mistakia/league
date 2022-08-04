@@ -197,7 +197,7 @@ export const playerActions = {
     }
   }),
 
-  filter: (type, values) => ({
+  filter: ({ type, values }) => ({
     type: playerActions.FILTER_PLAYERS,
     payload: {
       type,
