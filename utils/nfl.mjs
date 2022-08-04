@@ -363,18 +363,22 @@ query {
   }
 }
   `
-  const url = `${config.nfl_api_url}/v3/shield/?query=${encodeURIComponent(
-    query
-  )}&variables=null`
+  const url = `${config.nfl_api_url}/v3/shield/`
   const res = await fetch(url, {
     headers: {
-      authorization: `Bearer ${token}`
-    }
+      authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    method: 'POST',
+    body: JSON.stringify({
+      query: `${query}`,
+      variables: null
+    })
   })
 
   const data = await res.json()
 
-  if (data && data.games.length) {
+  if (data && data.data) {
     fs.ensureFileSync(full_path)
     fs.writeJsonSync(full_path, data, { spaces: 2 })
   }
