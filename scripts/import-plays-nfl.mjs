@@ -181,7 +181,7 @@ const main = async () => {
 
       let years = nfl_games_result.map((i) => i.seas)
       if (argv.start) {
-        years = years.fitler((year) => year >= argv.start)
+        years = years.filter((year) => year >= argv.start)
       }
 
       for (const year of years) {
