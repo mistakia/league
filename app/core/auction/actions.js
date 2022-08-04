@@ -63,7 +63,7 @@ export const auctionActions = {
     type: auctionActions.AUCTION_RELEASE_LOCK
   }),
 
-  filter: (type, values) => ({
+  filter: ({ type, values }) => ({
     type: auctionActions.AUCTION_FILTER,
     payload: {
       type,
