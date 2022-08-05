@@ -177,28 +177,39 @@ export default class Menu extends React.Component {
               <List>
                 <ListItem
                   button
-                  onClick={this.handleClick('/leagues/transactions')}
+                  onClick={this.handleClick(
+                    `/leagues/${leagueId}/transactions`
+                  )}
                 >
                   <ListItemText primary='Transactions' />
                 </ListItem>
-                <ListItem button onClick={this.handleClick('/leagues/waivers')}>
+                <ListItem
+                  button
+                  onClick={this.handleClick(`/leagues/${leagueId}/waivers`)}
+                >
                   <ListItemText primary='Waivers' />
                 </ListItem>
-                <ListItem button onClick={this.handleClick('/leagues/rosters')}>
+                <ListItem
+                  button
+                  onClick={this.handleClick(`/leagues/${leagueId}/rosters`)}
+                >
                   <ListItemText primary='Rosters' />
                 </ListItem>
                 <ListItem
                   button
-                  onClick={this.handleClick('/leagues/standings')}
+                  onClick={this.handleClick(`/leagues/${leagueId}/standings`)}
                 >
                   <ListItemText primary='Standings' />
                 </ListItem>
-                <ListItem button onClick={this.handleClick('/leagues/stats')}>
+                <ListItem
+                  button
+                  onClick={this.handleClick(`/leagues/${leagueId}/stats`)}
+                >
                   <ListItemText primary='Stats' />
                 </ListItem>
                 <ListItem
                   button
-                  onClick={this.handleClick('/leagues/schedule')}
+                  onClick={this.handleClick(`/leagues/${leagueId}/schedule`)}
                 >
                   <ListItemText primary='Schedule' />
                 </ListItem>
