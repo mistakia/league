@@ -6,16 +6,21 @@ import getLeague from './get-league.mjs'
 
 export default async function (leagueId) {
   const league = await getLeague(leagueId)
-  const picks = await db('draft').where({
-    year: constants.season.year,
-    lid: leagueId
-  })
+  const picks = await db('draft')
+    .where({
+      year: constants.season.year,
+      lid: leagueId
+    })
+    .orderBy('pick', 'asc')
+
+  const lastPick = picks[picks.length - 1]
   const draftDates = getDraftDates({
     start: league.draft_start,
     picks: picks.length,
     type: league.draft_type,
     min: league.draft_hour_min,
-    max: league.draft_hour_max
+    max: league.draft_hour_max,
+    last_selection_timestamp: lastPick ? lastPick.selection_timestamp : null
   })
 
   if (!league.draft_start || dayjs().isBefore(draftDates.waiverEnd)) {

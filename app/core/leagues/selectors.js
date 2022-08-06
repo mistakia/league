@@ -111,7 +111,8 @@ export const getLeagueEvents = createSelector(
           type: league.draft_type,
           min: league.draft_hour_min,
           max: league.draft_hour_max,
-          picks: lastPick.pick
+          picks: lastPick.pick,
+          last_selection_timestamp: lastPick.selection_timestamp
         })
 
         if (now.isBefore(draftDates.draftEnd)) {
