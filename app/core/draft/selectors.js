@@ -1,9 +1,12 @@
 import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc.js'
 import { Map } from 'immutable'
 import { createSelector } from 'reselect'
 
 import { getPlayerById } from '@core/players'
 import { getDraftWindow, constants } from '@common'
+
+dayjs.extend(utc)
 
 export function getDraft(state) {
   return state.get('draft')
@@ -79,6 +82,10 @@ export const getDraftEnd = createSelector(
     }
 
     const league = leagues.get(leagueId)
+    if (lastPick.selection_timestamp) {
+      return dayjs.unix(lastPick.selection_timestamp).endOf('day')
+    }
+
     const draftEnd = getDraftWindow({
       start: league.draft_start,
       pickNum: lastPick.pick + 1,
