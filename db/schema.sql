@@ -372,7 +372,7 @@ CREATE TABLE `nfl_games` (
 
   `referee` varchar(36) DEFAULT NULL,
 
-  UNIQUE KEY `game` (`v`, `h`, `wk`, `seas`, `type`),
+  UNIQUE KEY `game` (`v`, `h`, `wk`, `seas`, `seas_type`),
   UNIQUE KEY `esbid` (`esbid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -643,6 +643,7 @@ CREATE TABLE `draft` (
   `otid` int(6) NOT NULL,
   `lid` int(6) NOT NULL,
   `year` int(4) NOT NULL,
+  `selection_timestamp` int(11) DEFAULT NULL,
   PRIMARY KEY (`uid`),
   UNIQUE KEY `pick` (`round`,`pick`,`lid`,`year`),
   KEY `lid` (`lid`),

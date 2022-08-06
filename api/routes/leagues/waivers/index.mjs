@@ -187,16 +187,22 @@ router.post('/?', async (req, res) => {
         }
 
         if (type === constants.waivers.FREE_AGENCY_PRACTICE) {
-          const picks = await db('draft').where({
-            year: constants.season.year,
-            lid: leagueId
-          })
+          const picks = await db('draft')
+            .where({
+              year: constants.season.year,
+              lid: leagueId
+            })
+            .orderBy('pick', 'asc')
+          const lastPick = picks[picks.length - 1]
           const draftDates = getDraftDates({
             start: league.draft_start,
             type: league.draft_type,
             min: league.draft_hour_min,
             max: league.draft_hour_max,
-            picks: picks.length
+            picks: picks.length,
+            last_selection_timestamp: lastPick
+              ? lastPick.selection_timestamp
+              : null
           })
 
           // if player is a rookie
