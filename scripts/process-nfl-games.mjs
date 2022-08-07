@@ -17,17 +17,7 @@ debug.enable('process-nfl-games')
 const processNflGames = async () => {
   const games = await db('nfl_games')
   const updates = []
-  for (const {
-    timestamp,
-    date,
-    time_est,
-    v,
-    h,
-    wk,
-    seas,
-    seas_type
-  } of games) {
-
+  for (const { date, time_est, v, h, wk, seas, seas_type } of games) {
     if (date && time_est) {
       const datetime = dayjs.tz(
         `${date} ${time_est}`,
