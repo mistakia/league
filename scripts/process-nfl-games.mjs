@@ -27,13 +27,14 @@ const processNflGames = async () => {
     seas,
     seas_type
   } of games) {
-    if (timestamp) continue
-    const datetime = dayjs(`${date} ${time_est}`, 'YYYY/MM/DD HH:mm:ss').tz(
-      'America/New_York'
-    )
 
-    // set timestamp
     if (date && time_est) {
+      const datetime = dayjs.tz(
+        `${date} ${time_est}`,
+        'YYYY/MM/DD HH:mm:ss',
+        'America/New_York'
+      )
+
       updates.push({
         v,
         h,
