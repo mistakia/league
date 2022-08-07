@@ -7,7 +7,7 @@ import {
 } from '@common'
 import { getCurrentLeague } from '@core/leagues'
 import { getPlaysForPlayer } from '@core/plays'
-import { getGamelogByPlayerId } from '@core/gamelogs'
+import { getPlayerGamelogs, getGamelogByPlayerId } from '@core/gamelogs'
 import { getSelectedPlayer } from '@core/players'
 
 export function getStats(state) {
@@ -16,12 +16,12 @@ export function getStats(state) {
 
 export function getGamelogsForSelectedPlayer(state) {
   const playerMap = getSelectedPlayer(state)
-  const gamelogs = []
-  for (let week = 1; week <= constants.week; week++) {
-    const gamelog = getGamelogForPlayer(state, { playerMap, week })
-    if (gamelog) gamelogs.push(gamelog)
-  }
-  return gamelogs
+  const gamelogs = getPlayerGamelogs(state)
+  const pid = playerMap.get('pid')
+  const games = gamelogs
+    .filter((p) => p.pid === pid)
+    .sort((a, b) => b.timestamp - a.timestamp)
+  return games.toJS()
 }
 
 export function getGamelogForPlayer(state, { playerMap, week }) {
