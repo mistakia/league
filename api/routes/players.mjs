@@ -145,7 +145,15 @@ router.get('/:pid/gamelogs/?', async (req, res) => {
       return res.status(400).send({ error: 'missing pid' })
     }
 
-    const data = await db('gamelogs').where({ pid })
+    const data = await db('gamelogs')
+      .select(
+        'gamelogs.*',
+        'nfl_games.day',
+        'nfl_games.date',
+        'nfl_games.seas_type'
+      )
+      .join('nfl_games', 'nfl_games.esbid', '=', 'gamelogs.esbid')
+      .where({ pid })
     res.send(data)
   } catch (error) {
     logger(error)
