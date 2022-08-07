@@ -51,6 +51,7 @@ const format = (item) => {
     date,
     time_est,
     day,
+    timestamp: datetime.unix(),
 
     v: fixTeam(item.awayTeam.abbreviation),
     h: fixTeam(item.homeTeam.abbreviation),
