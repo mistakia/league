@@ -329,6 +329,7 @@ CREATE TABLE `nfl_games` (
   `time_tz_offset` tinyint(2) DEFAULT NULL,
   `time_start` varchar(36) DEFAULT NULL,
   `time_end` varchar(36) DEFAULT NULL,
+  `timestamp` int(11) DEFAULT NULL,
 
   `v` varchar(3) NOT NULL,
   `h` varchar(3) NOT NULL,
@@ -1891,7 +1892,6 @@ CREATE TABLE `gamelogs` (
   `dsf` tinyint(2) DEFAULT 0,
   `dtpr` tinyint(2) DEFAULT 0,
   `dtd` tinyint(2) DEFAULT 0,
-
   UNIQUE KEY `pid` (`pid`, `week`, `year`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
