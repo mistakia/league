@@ -15,6 +15,7 @@ import {
   postCutlist,
   getTeamPlayers,
   getLeaguePlayers,
+  fetchPlayers,
   fetchAllPlayers,
   searchPlayers,
   getPlayer,
@@ -171,6 +172,14 @@ export function* init({ payload }) {
     } catch (err) {
       console.log(err)
     }
+  }
+
+  if (payload.data.waivers.length || payload.data.poaches.length) {
+    const pids = []
+    payload.data.waivers.forEach((w) => pids.push(w.pid))
+    payload.data.poaches.forEach((p) => pids.push(p.pid))
+    const { leagueId } = yield select(getApp)
+    yield call(fetchPlayers, { leagueId, pids })
   }
 }
 
