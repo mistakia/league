@@ -16,7 +16,7 @@ export default class SelectedPlayerGamelogs extends React.Component {
 
     const position = playerMap.get('pos')
     const rows = []
-    for (const [index, game] of gamelogs.entries()) {
+    gamelogs.forEach((game, index) => {
       const lead = (
         <div className='row__group'>
           <div className='row__group-body'>
@@ -38,7 +38,7 @@ export default class SelectedPlayerGamelogs extends React.Component {
           pos={position}
         />
       )
-    }
+    })
 
     return (
       <div className='selected__section'>
