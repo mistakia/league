@@ -3,11 +3,14 @@ import fetch from 'node-fetch'
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
+import timezone from 'dayjs/plugin/timezone.js'
 
 import db from '#db'
 import { constants, fixTeam, getGameDayAbbreviation } from '#common'
 import { isMain } from '#utils'
 import config from '#config'
+
+dayjs.extend(timezone)
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-games-ngs')
@@ -45,6 +48,11 @@ const format = (item) => {
     ? getGameDayAbbreviation({ seas_type, date, time_est, week_type, seas })
     : null
 
+  const datetime = dayjs(
+    `${item.gameDate} ${item.gameTimeEastern}`,
+    'DD/MM/YYYY HH:mm:ss'
+  ).tz(item.time, 'America/New_York')
+
   return {
     esbid: item.gameId,
     gsisid: item.gameKey,
@@ -56,6 +64,7 @@ const format = (item) => {
     date,
     time_est,
     day,
+    timestamp: datetime.unix(),
 
     v: fixTeam(item.visitorTeamAbbr),
     h: fixTeam(item.homeTeamAbbr),
