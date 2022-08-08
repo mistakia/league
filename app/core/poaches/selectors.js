@@ -50,7 +50,8 @@ export function getPoachPlayersForCurrentLeague(state) {
     const pid = poach.pid
     const playerMap = getPlayerById(state, { pid })
 
-    if (playerMap.get('slot') !== constants.slots.PS) {
+    const slot = playerMap.get('slot')
+    if (slot !== constants.slots.PS && slot !== constants.slots.PSR) {
       poaches = poaches.delete(pid)
       continue
     }
