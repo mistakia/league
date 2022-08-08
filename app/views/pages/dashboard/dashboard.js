@@ -8,6 +8,7 @@ import Grid from '@mui/material/Grid'
 import NotInterestedIcon from '@mui/icons-material/NotInterested'
 import Toolbar from '@mui/material/Toolbar'
 
+import TeamName from '@components/team-name'
 import DashboardDraftPicks from '@components/dashboard-draft-picks'
 import DashboardByeWeeks from '@components/dashboard-bye-weeks'
 import DashboardLeaguePositionalValue from '@components/dashboard-league-positional-value'
@@ -163,9 +164,14 @@ export default function DashboardPage() {
       const processingTime = dayjs.unix(poach.submitted).add('48', 'hours')
       notices.push(
         <Alert key={playerMap.get('pid')} severity='warning'>
-          {playerMap.get('name', 'N/A')} has a poaching claim that will be
-          processed {processingTime.fromNow()} on{' '}
-          {processingTime.format('dddd, h:mm a')}.
+          <div>
+            {playerMap.get('name', 'N/A')} has a poaching claim that will be
+            processed {processingTime.fromNow()} on{' '}
+            {processingTime.format('dddd, h:mm a')}.
+          </div>
+          <div>
+            Submitted by: <TeamName tid={poach.tid} />
+          </div>
         </Alert>
       )
     }
