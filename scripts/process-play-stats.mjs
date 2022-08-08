@@ -385,13 +385,17 @@ const main = async () => {
 
     if (argv.all) {
       log('processing all plays')
-      const years = await db('nfl_plays').select('seas').groupBy('seas')
+      const years = await db('nfl_plays')
+        .select('seas')
+        .groupBy('seas')
+        .orderBy('seas', 'asc')
       for (const { seas } of years) {
         for (const seas_type of constants.seas_types) {
           const weeks = await db('nfl_plays')
             .select('wk')
             .where({ seas, seas_type })
             .groupBy('wk')
+            .orderBy('wk', 'asc')
           log(
             `processing plays for ${weeks.length} weeks in ${seas} (${seas_type})`
           )
