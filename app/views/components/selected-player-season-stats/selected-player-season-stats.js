@@ -34,12 +34,12 @@ export default class SelectedPlayerSeasonStats extends React.Component {
 
     return (
       <div className='selected__section'>
-        <div className='selected__section-header'>
+        <div className='selected__section-header sticky__column'>
           <div className='row__group-head'>Seasons</div>
         </div>
         <div className='selected__section-header'>
           <div className='table__cell text'>Year</div>
-          <div className='row__single-metric'>G</div>
+          <div className='table__cell metric'>G</div>
           <PlayerSelectedRowHeader pos={pos} />
         </div>
         {items}

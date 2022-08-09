@@ -82,7 +82,7 @@ export default class PlayerSelectedRow extends React.Component {
     return (
       <div className={classNames.join(' ')}>
         {lead || <div className='table__cell text'>{title}</div>}
-        {games && <div className='row__single-metric'>{games}</div>}
+        {games && <div className='table__cell metric'>{games}</div>}
         {rows}
         {action}
       </div>
