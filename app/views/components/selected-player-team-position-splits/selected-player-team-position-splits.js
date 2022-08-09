@@ -16,7 +16,7 @@ export default class SelectedPlayerTeamPositionSplits extends React.Component {
       const percentiles = stats.teamStatsPercentiles[year.seas] || {}
       items.push(
         <div key={index} className='player__selected-row'>
-          <div className='row__name'>{year.seas}</div>
+          <div className='table__cell text'>{year.seas}</div>
           <div className='row__group'>
             <div className='row__group-body'>
               <PercentileMetric
@@ -107,7 +107,7 @@ export default class SelectedPlayerTeamPositionSplits extends React.Component {
           <div className='row__group-head'>Team Season Position Splits</div>
         </div>
         <div className='selected__section-header'>
-          <div className='row__name'>Year</div>
+          <div className='table__cell text'>Year</div>
           <div className='row__group'>
             <div className='row__group-head'>RB Receiving</div>
             <div className='row__group-body'>

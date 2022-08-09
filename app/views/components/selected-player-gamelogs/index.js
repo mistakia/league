@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { calculatePoints } from '@common'
+import { calculatePoints, groupBy } from '@common'
 import { getSelectedPlayer, playerActions } from '@core/players'
 import { getGamelogsForSelectedPlayer } from '@core/stats'
 import { getCurrentLeague } from '@core/leagues'
@@ -22,7 +22,9 @@ const mapStateToProps = createSelector(
       }
     })
 
-    return { playerMap, gamelogs }
+    const years = groupBy(gamelogs, 'year')
+
+    return { playerMap, years }
   }
 )
 
