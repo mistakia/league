@@ -93,6 +93,7 @@ api.use('/api/plays', speedLimiter, routes.plays)
 api.use('/api/schedule', routes.schedule)
 api.use('/api/sources', routes.sources)
 api.use('/api/auth', routes.auth)
+api.use('/api/leagues', routes.leagues)
 
 api.use('/api/*', (req, res, next) => {
   if (req.method !== 'OPTIONS' && !req.auth) {
@@ -104,7 +105,6 @@ api.use('/api/odds', routes.odds)
 api.use('/api/scoreboard', routes.scoreboard)
 api.use('/api/me', routes.me)
 api.use('/api/teams', routes.teams)
-api.use('/api/leagues', routes.leagues)
 api.use('/api/settings', routes.settings)
 api.use('/index.js.map', (req, res) => {
   res.sendFile(path.join(__dirname, '../', 'dist', 'index.js.map'))
