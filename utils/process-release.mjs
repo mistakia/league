@@ -191,10 +191,21 @@ export default async function ({
     const teams = await db('teams').where({ uid: tid })
     const team = teams[0]
 
-    let message = `${team.name} (${team.abbrv}) has activated ${player_row.fname} ${player_row.lname} (${player_row.pos}).`
+    let message
+    if (activate_pid) {
+      const activate_player_row = player_rows.find(
+        (p) => p.pid === activate_pid
+      )
+      message = `${team.name} (${team.abbrv}) has activated ${activate_player_row.fname} ${activate_player_row.lname} (${activate_player_row.pos}).`
+    }
+
     if (release_pid) {
       const release_player_row = player_rows.find((p) => p.pid === release_pid)
-      message += ` ${release_player_row.fname} ${release_player_row.lname} (${release_player_row.pos}) has been released.`
+      if (!activate_pid) {
+        message += `${team.name} (${team.abbrv}) has released ${release_player_row.fname} ${release_player_row.lname} (${release_player_row.pos}).`
+      } else {
+        message += ` ${release_player_row.fname} ${release_player_row.lname} (${release_player_row.pos}) has been released.`
+      }
     }
 
     await sendNotifications({
