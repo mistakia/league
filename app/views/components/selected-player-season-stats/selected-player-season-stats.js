@@ -38,7 +38,7 @@ export default class SelectedPlayerSeasonStats extends React.Component {
           <div className='row__group-head'>Seasons</div>
         </div>
         <div className='selected__section-header'>
-          <div className='row__name'>Year</div>
+          <div className='table__cell text'>Year</div>
           <div className='row__single-metric'>G</div>
           <PlayerSelectedRowHeader pos={pos} />
         </div>
