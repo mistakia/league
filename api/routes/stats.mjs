@@ -51,7 +51,11 @@ router.get('/gamelogs/teams', async (req, res) => {
 router.get('/gamelogs/players', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    const data = await db('gamelogs').where('year', constants.season.year)
+    const data = await db('gamelogs')
+      .select('gamelogs.*')
+      .join('nfl_games', 'nfl_games.esbid', 'gamelogs.esbid')
+      .where('nfl_games.seas', constants.season.year)
+      .where('nfl_games.seas_type', 'REG')
     res.send(data)
   } catch (error) {
     logger(error)

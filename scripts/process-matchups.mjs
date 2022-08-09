@@ -13,7 +13,11 @@ debug.enable('process-matchups')
 const run = async ({ lid, year }) => {
   const league = await getLeague(lid)
   const matchups = await db('matchups').where({ lid, year })
-  const gamelogs = await db('gamelogs').where({ year })
+  const gamelogs = await db('gamelogs')
+    .select('gamelogs.*')
+    .join('nfl_games', 'nfl_games.esbid', 'gamelogs.esbid')
+    .where('nfl_games.seas', year)
+    .where('nfl_games.seas_type', 'REG')
   const teams = await db('teams').where({ lid })
   const tids = teams.map((t) => t.uid)
 
