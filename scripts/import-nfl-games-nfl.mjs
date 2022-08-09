@@ -75,7 +75,8 @@ const run = async ({
   year = constants.season.year,
   week = currentRegularSeasonWeek,
   seas_type = 'REG',
-  token
+  token,
+  force_import = false
 } = {}) => {
   log(`processing ${seas_type} season games for week ${week} in ${year}`)
   const games = await db('nfl_games').where({
@@ -96,7 +97,7 @@ const run = async ({
     return !game.detailid
   })
 
-  if (games.length && !startedGameWithMissingDetailId) {
+  if (!force_import && games.length && !startedGameWithMissingDetailId) {
     log('found no started games with missing ids')
     return
   }
@@ -125,8 +126,10 @@ const run = async ({
 const main = async () => {
   let error
   try {
+    const force_import = argv.force
+
     if (argv.current) {
-      await run()
+      await run({ force_import })
     } else if (argv.year && argv.all) {
       const year = argv.year
 
@@ -135,7 +138,7 @@ const main = async () => {
         .where({ seas: year, seas_type: 'PRE' })
         .groupBy('wk')
       for (const { wk } of pre_weeks) {
-        await run({ year, week: wk, seas_type: 'PRE' })
+        await run({ year, week: wk, seas_type: 'PRE', force_import })
         await wait(3000)
       }
 
@@ -144,7 +147,7 @@ const main = async () => {
         .where({ seas: year, seas_type: 'REG' })
         .groupBy('wk')
       for (const { wk } of reg_weeks) {
-        await run({ year, week: wk, seas_type: 'REG' })
+        await run({ year, week: wk, seas_type: 'REG', force_import })
         await wait(3000)
       }
 
@@ -153,7 +156,7 @@ const main = async () => {
         .where({ seas: year, seas_type: 'POST' })
         .groupBy('wk')
       for (const { wk } of post_weeks) {
-        await run({ year, week: wk, seas_type: 'POST' })
+        await run({ year, week: wk, seas_type: 'POST', force_import })
         await wait(3000)
       }
     } else if (argv.all) {
@@ -163,17 +166,17 @@ const main = async () => {
         const token = await getToken()
 
         for (let week = 0; week < 5; week++) {
-          await run({ year, week, seas_type: 'PRE', token })
+          await run({ year, week, seas_type: 'PRE', token, force_import })
           await wait(3000)
         }
 
         for (let week = 0; week < 18; week++) {
-          await run({ year, week, seas_type: 'REG', token })
+          await run({ year, week, seas_type: 'REG', token, force_import })
           await wait(3000)
         }
 
         for (let week = 0; week < 5; week++) {
-          await run({ year, week, seas_type: 'POST', token })
+          await run({ year, week, seas_type: 'POST', token, force_import })
           await wait(3000)
         }
       }
@@ -181,7 +184,7 @@ const main = async () => {
       const year = argv.year
       const seas_type = argv.seas_type
       const week = argv.week
-      await run({ year, week, seas_type })
+      await run({ year, week, seas_type, force_import })
     }
   } catch (err) {
     error = err
