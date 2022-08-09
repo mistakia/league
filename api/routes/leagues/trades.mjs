@@ -2,7 +2,12 @@ import express from 'express'
 import dayjs from 'dayjs'
 
 import { constants, Roster } from '#common'
-import { getRoster, getLeague, verifyRestrictedFreeAgency } from '#utils'
+import {
+  getRoster,
+  getLeague,
+  verifyRestrictedFreeAgency,
+  verifyUserTeam
+} from '#utils'
 import trade, { getTrade } from './trade.mjs'
 
 const router = express.Router({ mergeParams: true })
@@ -121,6 +126,17 @@ router.post(
 
       if (!accept_tid) {
         return res.status(400).send({ error: 'missing param accept_tid' })
+      }
+
+      try {
+        await verifyUserTeam({
+          userId: req.auth.userId,
+          leagueId,
+          teamId: propose_tid,
+          requireLeague: true
+        })
+      } catch (error) {
+        return res.status(400).send({ error: error.message })
       }
 
       // make sure no player is on the practice squad with an existing poaching claim
