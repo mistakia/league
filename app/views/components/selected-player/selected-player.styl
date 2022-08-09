@@ -95,21 +95,42 @@
 
 .selected__section-header
   flex 1
-  height 40px
   display flex
   align-items center
   font-weight 500
   border-bottom 1px solid $borderColor
   font-size 12px
 
+.selected__table
+  height 100%
+  max-width fit-content
+  margin 0 auto
+  overflow scroll
+
+.selected__table-header
+  height 40px
+  display flex
+  align-items stretch
+  font-weight 500
+  border-bottom 1px solid $borderColor
+  font-size 12px
+  width fit-content
+  background white
+
+  &.sticky
+    position sticky
+    top 0
+    z-index 2
+
 .player__selected-row
   flex 1
   display flex
   height 24px
   line-height 16px
-  align-items center
+  align-items stretch
+  width fit-content
   &:hover
-    background #f0f0f0
+    background $yellowColor
 
   &.header
     border-bottom 1px solid #f0f0f0

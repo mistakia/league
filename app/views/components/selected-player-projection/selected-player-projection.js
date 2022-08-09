@@ -64,7 +64,7 @@ export default class SelectedPlayerProjection extends React.Component {
           </div>
         </div>
         <div className='selected__section-header'>
-          <div className='row__name'>Source</div>
+          <div className='table__cell text'>Source</div>
           <PlayerSelectedRowHeader pos={pos} />
           <div className='row__action' />
         </div>

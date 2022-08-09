@@ -25,7 +25,6 @@
   width 60px
   display flex
   align-items center
-  height 100%
   padding 6px 24px 6px 16px
   &.metric
     justify-content flex-start
@@ -33,6 +32,13 @@
   &.date
     flex 1 0 120px
     width 120px
+
+  &.text
+    width 150px
+    flex 1 0 150px
+    overflow hidden
+    text-overflow ellipsis
+    white-space nowrap
 
 .table__cell-text
   text-overflow ellipsis
@@ -49,11 +55,6 @@
 .table__row:last-child .table__cell
   border-bottom none
 
-.sticky__column
-  position sticky
-  left 0
-  z-index 1
-
 .table__row-summary
   .table__cell.sticky__column
     justify-content flex-end
@@ -67,3 +68,23 @@
   font-size 9px
   text-transform uppercase
   padding 2px 0
+
+.header__row
+  background #eee
+  color rgb(0,0,0)
+  font-weight 700
+  padding 4px 3px
+  font-size 11px
+  font-family 'IBM Plex Mono'
+
+.sticky__column
+  position sticky
+  z-index 1
+  left 0
+  &.sticky__two
+    left 60px
+
+.sticky__row
+  position sticky
+  z-index 2
+  top 40px
