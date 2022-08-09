@@ -6,7 +6,7 @@ import timezone from 'dayjs/plugin/timezone.js'
 
 import db from '#db'
 // import { constants } from '#common'
-import { isMain } from '#utils'
+import { isMain, getGameDayAbbreviation } from '#utils'
 
 dayjs.extend(timezone)
 
@@ -17,7 +17,16 @@ debug.enable('process-nfl-games')
 const processNflGames = async () => {
   const games = await db('nfl_games')
   const updates = []
-  for (const { date, time_est, v, h, wk, seas, seas_type } of games) {
+  for (const {
+    date,
+    time_est,
+    v,
+    h,
+    wk,
+    seas,
+    seas_type,
+    week_type
+  } of games) {
     if (date && time_est) {
       const datetime = dayjs.tz(
         `${date} ${time_est}`,
@@ -25,14 +34,26 @@ const processNflGames = async () => {
         'America/New_York'
       )
 
-      updates.push({
+      const update = {
         v,
         h,
         wk,
         seas,
         seas_type,
         timestamp: datetime.unix()
-      })
+      }
+
+      if (week_type) {
+        update.day = getGameDayAbbreviation({
+          seas_type,
+          date,
+          time_est,
+          week_type,
+          seas
+        })
+      }
+
+      updates.push(update)
     }
   }
 
