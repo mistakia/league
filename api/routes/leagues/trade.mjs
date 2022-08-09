@@ -7,7 +7,8 @@ import {
   getLeague,
   sendNotifications,
   verifyRestrictedFreeAgency,
-  isPlayerLocked
+  isPlayerLocked,
+  verifyUserTeam
 } from '#utils'
 
 const router = express.Router({ mergeParams: true })
@@ -87,6 +88,7 @@ router.post(
     const { db, logger } = req.app.locals
     try {
       const { tradeId, leagueId } = req.params
+
       const trades = await db('trades')
         .join('users_teams', 'trades.accept_tid', 'users_teams.tid')
         .where('trades.uid', tradeId)
@@ -102,6 +104,17 @@ router.post(
         res
           .status(400)
           .send({ error: `no valid trade with tradeid: ${tradeId}` })
+      }
+
+      try {
+        await verifyUserTeam({
+          userId: req.auth.userId,
+          leagueId,
+          teamId: trade.accept_tid,
+          requireLeague: true
+        })
+      } catch (error) {
+        return res.status(400).send({ error: error.message })
       }
 
       const acceptingTeamReleasePlayers = req.body.releasePlayers
@@ -582,6 +595,17 @@ router.post(
 
       const trade = trades[0]
 
+      try {
+        await verifyUserTeam({
+          userId: req.auth.userId,
+          leagueId,
+          teamId: trade.accept_tid,
+          requireLeague: true
+        })
+      } catch (error) {
+        return res.status(400).send({ error: error.message })
+      }
+
       await db('trades')
         .where({ uid: tradeId })
         .update({ rejected: Math.round(Date.now() / 1000) })
@@ -626,6 +650,17 @@ router.post(
       }
 
       const trade = trades[0]
+
+      try {
+        await verifyUserTeam({
+          userId: req.auth.userId,
+          leagueId,
+          teamId: trade.propose_tid,
+          requireLeague: true
+        })
+      } catch (error) {
+        return res.status(400).send({ error: error.message })
+      }
 
       await db('trades')
         .where({ uid: tradeId })

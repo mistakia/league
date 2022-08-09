@@ -34,6 +34,17 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'missing leagueId param' })
     }
 
+    try {
+      await verifyUserTeam({
+        userId: req.auth.userId,
+        leagueId,
+        teamId,
+        requireLeague: true
+      })
+    } catch (error) {
+      return res.status(400).send({ error: error.message })
+    }
+
     // verify poaching teamId using userId
     const userTeams = await db('users_teams')
       .join('teams', 'users_teams.tid', 'teams.uid')
