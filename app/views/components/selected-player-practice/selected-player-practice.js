@@ -7,31 +7,27 @@ const Row = ({ data }) => (
     <div className='row__group-body'>
       <div className='table__cell metric'>{data.year}</div>
       <div className='table__cell metric'>{data.week}</div>
-      <div className='table__cell metric'>
-        <div className='table__cell-text'>{data.status || '-'}</div>
-      </div>
-      <div className='table__cell metric'>
-        <div className='table__cell-text'>{data.inj || '-'}</div>
-      </div>
-      <div className='table__cell metric'>
+      <div className='table__cell text'>{data.status || '-'}</div>
+      <div className='table__cell text'>{data.inj || '-'}</div>
+      <div className='table__cell'>
         <div className='table__cell-text'>{data.m || '-'}</div>
       </div>
-      <div className='table__cell metric'>
+      <div className='table__cell'>
         <div className='table__cell-text'>{data.t || '-'}</div>
       </div>
-      <div className='table__cell metric'>
+      <div className='table__cell'>
         <div className='table__cell-text'>{data.w || '-'}</div>
       </div>
-      <div className='table__cell metric'>
+      <div className='table__cell'>
         <div className='table__cell-text'>{data.th || '-'}</div>
       </div>
-      <div className='table__cell metric'>
+      <div className='table__cell'>
         <div className='table__cell-text'>{data.f || '-'}</div>
       </div>
-      <div className='table__cell metric'>
+      <div className='table__cell'>
         <div className='table__cell-text'>{data.s || '-'}</div>
       </div>
-      <div className='table__cell metric'>
+      <div className='table__cell'>
         <div className='table__cell-text'>{data.su || '-'}</div>
       </div>
     </div>
@@ -56,7 +52,7 @@ export default class SelectedPlayerPractice extends React.Component {
 
     return (
       <div className='selected__section'>
-        <div className='selected__section-header'>
+        <div className='selected__section-header sticky__column'>
           <div className='row__group-head'>Practice Reports</div>
         </div>
         <div className='selected__section-header'>
@@ -64,15 +60,15 @@ export default class SelectedPlayerPractice extends React.Component {
             <div className='row__group-body'>
               <div className='table__cell metric'>Year</div>
               <div className='table__cell metric'>Week</div>
-              <div className='table__cell metric'>Status</div>
-              <div className='table__cell metric'>Injury</div>
-              <div className='table__cell metric'>Mon</div>
-              <div className='table__cell metric'>Tue</div>
-              <div className='table__cell metric'>Wed</div>
-              <div className='table__cell metric'>Thu</div>
-              <div className='table__cell metric'>Fri</div>
-              <div className='table__cell metric'>Sat</div>
-              <div className='table__cell metric'>Sun</div>
+              <div className='table__cell text'>Status</div>
+              <div className='table__cell text'>Injury</div>
+              <div className='table__cell'>Mon</div>
+              <div className='table__cell'>Tue</div>
+              <div className='table__cell'>Wed</div>
+              <div className='table__cell'>Thu</div>
+              <div className='table__cell'>Fri</div>
+              <div className='table__cell'>Sat</div>
+              <div className='table__cell'>Sun</div>
             </div>
           </div>
         </div>
