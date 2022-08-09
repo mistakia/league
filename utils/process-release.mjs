@@ -22,7 +22,7 @@ export default async function ({
   if (!player_rows.length) {
     throw new Error('invalid player')
   }
-  const player_row = player_rows[0]
+  const release_player_row = player_rows[0]
 
   // verify player is on current roster
   const leagues = await db('leagues').where({ uid: lid }).limit(1)
@@ -82,10 +82,10 @@ export default async function ({
     }
   }
 
-  let activatePlayerRow
+  let activate_player_row
   if (activate_pid) {
     const players = await db('player').where('pid', activate_pid)
-    activatePlayerRow = players[0]
+    activate_player_row = players[0]
 
     // make sure player is on team
     if (!roster.has(activate_pid)) {
@@ -110,7 +110,7 @@ export default async function ({
 
     // make sure roster has bench space
     roster.removePlayer(release_pid)
-    if (!roster.hasOpenBenchSlot(activatePlayerRow.pos)) {
+    if (!roster.hasOpenBenchSlot(activate_player_row.pos)) {
       throw new Error('exceeds roster limits')
     }
 
@@ -143,7 +143,7 @@ export default async function ({
       tid,
       slot: constants.slots.BENCH,
       rid: roster.uid,
-      pos: activatePlayerRow.pos,
+      pos: activate_player_row.pos,
       transaction
     })
   }
@@ -183,7 +183,7 @@ export default async function ({
     slot: null,
     tid,
     rid: roster.uid,
-    pos: player_row.pos,
+    pos: release_player_row.pos,
     transaction
   })
 
@@ -193,19 +193,9 @@ export default async function ({
 
     let message
     if (activate_pid) {
-      const activate_player_row = player_rows.find(
-        (p) => p.pid === activate_pid
-      )
-      message = `${team.name} (${team.abbrv}) has activated ${activate_player_row.fname} ${activate_player_row.lname} (${activate_player_row.pos}).`
-    }
-
-    if (release_pid) {
-      const release_player_row = player_rows.find((p) => p.pid === release_pid)
-      if (!activate_pid) {
-        message += `${team.name} (${team.abbrv}) has released ${release_player_row.fname} ${release_player_row.lname} (${release_player_row.pos}).`
-      } else {
-        message += ` ${release_player_row.fname} ${release_player_row.lname} (${release_player_row.pos}) has been released.`
-      }
+      message = `${team.name} (${team.abbrv}) has activated ${activate_player_row.fname} ${activate_player_row.lname} (${activate_player_row.pos}). ${release_player_row.fname} ${release_player_row.lname} (${release_player_row.pos}) has been released.`
+    } else {
+      message = `${team.name} (${team.abbrv}) has released ${release_player_row.fname} ${release_player_row.lname} (${release_player_row.pos}).`
     }
 
     await sendNotifications({
