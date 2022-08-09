@@ -38,6 +38,12 @@ export default class SelectedPlayerGamelogs extends React.Component {
             <div className='table__cell metric'>
               {(game.total || 0).toFixed(1)}
             </div>
+            <div className='table__cell metric'>
+              {game.points_added ? game.points_added.toFixed(1) : '-'}
+            </div>
+            <div className='table__cell metric'>
+              {game.points_added ? game.pos_rank.toFixed(1) : '-'}
+            </div>
           </>
         )
         rows.push(
@@ -63,7 +69,14 @@ export default class SelectedPlayerGamelogs extends React.Component {
           </div>
           <div className='table__cell metric date'>Date</div>
           <div className='table__cell metric'>Opp</div>
-          <div className='table__cell metric'>Pts</div>
+          <div className='row__group'>
+            <div className='row__group-head'>Fantasy</div>
+            <div className='row__group-body'>
+              <div className='table__cell metric'>Pts</div>
+              <div className='table__cell metric'>Pts+</div>
+              <div className='table__cell metric'>Rnk</div>
+            </div>
+          </div>
           <PlayerSelectedRowHeader pos={position} />
         </div>
         {rows}
