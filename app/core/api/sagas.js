@@ -67,7 +67,7 @@ import {
   postTradeRejectActions,
   getTradesActions
 } from '@core/trade'
-import { putLeagueActions } from '@core/leagues'
+import { putLeagueActions, getLeagueActions } from '@core/leagues'
 import { getSourcesActions, putSourceActions } from '@core/sources'
 import { putSettingActions } from '@core/settings'
 import { postPoachActions, putPoachActions } from '@core/poaches'
@@ -245,6 +245,7 @@ export const postRejectTrade = fetch.bind(
   postTradeRejectActions
 )
 
+export const getLeague = fetch.bind(null, api.getLeague, getLeagueActions)
 export const putLeague = fetch.bind(null, api.putLeague, putLeagueActions)
 
 export const putTeam = fetch.bind(null, api.putTeam, putTeamActions)

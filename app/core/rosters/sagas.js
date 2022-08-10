@@ -51,8 +51,20 @@ import Worker from 'workerize-loader?inline!../worker' // eslint-disable-line im
 import { csv } from '@core/export'
 import { getTeamById } from '@core/teams'
 
-export function* loadRosters() {
+export function* initRosters() {
   const { leagueId } = yield select(getApp)
+  yield call(getRosters, { leagueId })
+}
+
+export function* loadRosters({ payload }) {
+  const { leagueId } = payload
+  const state = yield select()
+  const isLoading = state.getIn(['rosters', 'isLoading'])
+  const isLoaded = state.getIn(['rosters', 'isLoaded'])
+  if (isLoading === leagueId || isLoaded === leagueId) {
+    return
+  }
+
   yield call(getRosters, { leagueId })
 }
 
@@ -465,7 +477,7 @@ export function* watchProtectPlayer() {
 }
 
 export function* watchAuthFulfilled() {
-  yield takeLatest(appActions.AUTH_FULFILLED, loadRosters)
+  yield takeLatest(appActions.AUTH_FULFILLED, initRosters)
 }
 
 export function* watchProjectLineups() {
@@ -598,6 +610,10 @@ export function* watchExportRosters() {
   yield takeLatest(rosterActions.EXPORT_ROSTERS, exportRosters)
 }
 
+export function* watchLoadRosters() {
+  yield takeLatest(rosterActions.LOAD_ROSTERS, loadRosters)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -645,5 +661,7 @@ export const rosterSagas = [
   fork(watchPutTransitionTagFulfilled),
   fork(watchDeleteTransiionTagFulfilled),
 
-  fork(watchExportRosters)
+  fork(watchExportRosters),
+
+  fork(watchLoadRosters)
 ]

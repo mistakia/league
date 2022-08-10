@@ -40,8 +40,11 @@ export const waiverActions = {
     }
   }),
 
-  loadWaivers: () => ({
-    type: waiverActions.LOAD_WAIVERS
+  loadWaivers: (leagueId) => ({
+    type: waiverActions.LOAD_WAIVERS,
+    payload: {
+      leagueId: Number(leagueId)
+    }
   }),
 
   reorderWaivers: ({ oldIndex, newIndex, type }) => ({

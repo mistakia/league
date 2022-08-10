@@ -1,4 +1,4 @@
-export { leagueActions, putLeagueActions } from './actions'
+export { leagueActions, putLeagueActions, getLeagueActions } from './actions'
 export {
   getLeagueById,
   getCurrentLeague,

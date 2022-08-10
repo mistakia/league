@@ -90,7 +90,10 @@ export const League = new Record({
   b_DST: null,
 
   teams: new List(),
-  years: new List()
+  years: new List(),
+
+  isLoading: false,
+  isLoaded: false
 })
 
 export function createLeague({
@@ -180,7 +183,11 @@ export function createLeague({
   tran_end,
   ext_date,
 
-  years
+  teams,
+  years,
+
+  isLoaded,
+  isLoading
 }) {
   return new League({
     uid,
@@ -269,6 +276,10 @@ export function createLeague({
     tran_end,
     ext_date,
 
-    years: years ? new List(years) : new List([constants.year])
+    teams: new List(teams),
+    years: years ? new List(years) : new List([constants.year]),
+
+    isLoading,
+    isLoaded
   })
 }

@@ -1,5 +1,6 @@
 import dayjs from 'dayjs'
 import { createSelector } from 'reselect'
+import { List } from 'immutable'
 
 import { constants, getDraftDates, getFreeAgentPeriod } from '@common'
 import { getTeams } from '@core/teams'
@@ -15,13 +16,13 @@ export const getCurrentLeague = createSelector(
   (state) => state.getIn(['app', 'leagueId']),
   (state) => state.get('leagues'),
   (leagueId, leagues) => {
-    return leagues.get(leagueId).toJS()
+    return leagues.get(leagueId, new League()).toJS()
   }
 )
 
 export function getCurrentLeagueTeamIds(state) {
   const { leagueId } = getApp(state)
-  return state.get('leagues').get(leagueId).teams
+  return state.getIn(['leagues', leagueId, 'teams'], new List())
 }
 
 export function getLeagueById(state, { lid }) {

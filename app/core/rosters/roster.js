@@ -1,7 +1,6 @@
 import { Record, List, Map } from 'immutable'
 
 export const Roster = new Record({
-  isPending: false,
   tid: null,
   lid: null,
   week: null,
@@ -19,7 +18,6 @@ export function createRoster(roster) {
   const { tid, lid, week, year, last_updated, players, lineups } = roster
 
   return new Roster({
-    isPending: false,
     players: new List(players),
     lineups: new Map(lineups),
     tid,
