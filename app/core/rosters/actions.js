@@ -2,6 +2,7 @@ export const rosterActions = {
   PROJECT_LINEUPS: 'PROJECT_LINEUPS',
 
   EXPORT_ROSTERS: 'EXPORT_ROSTERS',
+  LOAD_ROSTERS: 'LOAD_ROSTERS',
 
   // USER
   SET_LINEUPS: 'SET_LINEUPS',
@@ -93,6 +94,13 @@ export const rosterActions = {
   POST_RELEASE_PENDING: 'POST_RELEASE_PENDING',
   POST_RELEASE_FAILED: 'POST_RELEASE_FAILED',
   POST_RELEASE_FULFILLED: 'POST_RELEASE_FULFILLED',
+
+  loadRosters: (leagueId) => ({
+    type: rosterActions.LOAD_ROSTERS,
+    payload: {
+      leagueId: Number(leagueId)
+    }
+  }),
 
   exportRosters: () => ({
     type: rosterActions.EXPORT_ROSTERS

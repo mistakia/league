@@ -168,6 +168,10 @@ export const api = {
     const url = `${BASE_URL}/leagues/${data.leagueId}/trades/${data.tradeId}/reject`
     return { url, ...POST(data) }
   },
+  getLeague({ leagueId }) {
+    const url = `${BASE_URL}/leagues/${leagueId}`
+    return { url }
+  },
   putLeague(data) {
     const url = `${BASE_URL}/leagues/${data.leagueId}`
     return { url, ...PUT(data) }

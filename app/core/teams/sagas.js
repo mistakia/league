@@ -11,9 +11,25 @@ import {
 } from '@core/api'
 import { getStandingsYear, standingsActions } from '@core/standings'
 import { notificationActions } from '@core/notifications'
+import { transactionsActions } from '@core/transactions'
+import { waiverActions } from '@core/waivers'
+import { matchupsActions } from '@core/matchups'
+import { rosterActions } from '@core/rosters'
 
-export function* loadTeams() {
+export function* initTeams() {
   const { leagueId } = yield select(getApp)
+  yield call(getTeams, { leagueId })
+}
+
+export function* loadTeams({ payload }) {
+  const { leagueId } = payload
+  const state = yield select()
+  const isLoading = state.getIn(['teams', 'isLoading'])
+  const isLoaded = state.getIn(['teams', 'isLoaded'])
+  if (isLoading === leagueId || isLoaded === leagueId) {
+    return
+  }
+
   yield call(getTeams, { leagueId })
 }
 
@@ -59,9 +75,10 @@ export function* deleteNotification() {
   )
 }
 
-export function* loadLeagueTeamStats() {
+export function* loadLeagueTeamStats({ payload }) {
   const year = yield select(getStandingsYear)
   const { leagueId } = yield select(getApp)
+  yield call(loadTeams, { payload })
   yield call(getLeagueTeamStats, { leagueId, year })
 }
 
@@ -70,7 +87,7 @@ export function* loadLeagueTeamStats() {
 // -------------------------------------
 
 export function* watchAuthFulfilled() {
-  yield takeLatest(appActions.AUTH_FULFILLED, loadTeams)
+  yield takeLatest(appActions.AUTH_FULFILLED, initTeams)
 }
 
 export function* watchUpdateTeam() {
@@ -105,6 +122,22 @@ export function* watchStandingsSelectYear() {
   yield takeLatest(standingsActions.STANDINGS_SELECT_YEAR, loadLeagueTeamStats)
 }
 
+export function* watchLoadTransactions() {
+  yield takeLatest(transactionsActions.LOAD_TRANSACTIONS, loadTeams)
+}
+
+export function* watchLoadWaivers() {
+  yield takeLatest(waiverActions.LOAD_WAIVERS, loadTeams)
+}
+
+export function* watchLoadMatchups() {
+  yield takeLatest(matchupsActions.LOAD_MATCHUPS, loadTeams)
+}
+
+export function* watchLoadRosters() {
+  yield takeLatest(rosterActions.LOAD_ROSTERS, loadTeams)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -120,5 +153,10 @@ export const teamSagas = [
   fork(watchDeleteTeamsFulfilled),
 
   fork(watchLoadLeagueTeamStats),
-  fork(watchStandingsSelectYear)
+  fork(watchStandingsSelectYear),
+
+  fork(watchLoadTransactions),
+  fork(watchLoadWaivers),
+  fork(watchLoadMatchups),
+  fork(watchLoadRosters)
 ]

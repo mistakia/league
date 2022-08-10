@@ -58,23 +58,21 @@ const Routes = ({ app }) => {
       {app.userId && <Route path='/draft' element={<DraftPage />} />}
       {app.userId && <Route path='/trade' element={<TradePage />} />}
       {!app.userId && <Route path='/login' element={<AuthPage />} />}
-      {app.userId && (
-        <Route path='/leagues/:lid' element={<LeaguePage />}>
-          <Route
-            path='/leagues/:lid/transactions'
-            element={<TransactionsPage />}
-          />
-          <Route path='/leagues/:lid/standings' element={<StandingsPage />} />
-          <Route path='/leagues/:lid/stats' element={<StatsPage />} />
-          <Route path='/leagues/:lid/schedule' element={<SchedulePage />} />
-          <Route path='/leagues/:lid/rosters' element={<RostersPage />} />
-          <Route path='/leagues/:lid/waivers' element={<WaiversPage />} />
-          <Route
-            path='/leagues/:lid'
-            element={<Navigate to={`/leagues/${app.leagueId}/rosters`} />}
-          />
-        </Route>
-      )}
+      <Route path='/leagues/:lid' element={<LeaguePage />}>
+        <Route
+          path='/leagues/:lid/transactions'
+          element={<TransactionsPage />}
+        />
+        <Route path='/leagues/:lid/standings' element={<StandingsPage />} />
+        <Route path='/leagues/:lid/stats' element={<StatsPage />} />
+        <Route path='/leagues/:lid/schedule' element={<SchedulePage />} />
+        <Route path='/leagues/:lid/rosters' element={<RostersPage />} />
+        <Route path='/leagues/:lid/waivers' element={<WaiversPage />} />
+        <Route
+          path='/leagues/:lid'
+          element={<Navigate to={`/leagues/${app.leagueId}/rosters`} />}
+        />
+      </Route>
       {app.userId && <Route path='/props' element={<PropsPage />} />}
       <Route path='/status' element={<StatusPage />} />
       <Route path='/settings' element={<SettingsPage />} />

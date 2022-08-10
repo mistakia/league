@@ -34,7 +34,8 @@ const mapStateToProps = createSelector(
 
 const mapDispatchToProps = {
   exportRosters: rosterActions.exportRosters,
-  loadLeaguePlayers: playerActions.loadLeaguePlayers
+  loadLeaguePlayers: playerActions.loadLeaguePlayers,
+  loadRosters: rosterActions.loadRosters
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(RostersPage)

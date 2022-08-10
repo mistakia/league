@@ -19,6 +19,7 @@ export {
   postCancelTrade,
   postAcceptTrade,
   putLeague,
+  getLeague,
   putTeam,
   putSource,
   putProjection,

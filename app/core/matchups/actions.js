@@ -1,6 +1,8 @@
 export const matchupsActions = {
   GENERATE_MATCHUPS: 'GENERATE_MATCHUPS',
 
+  LOAD_MATCHUPS: 'LOAD_MATCHUPS',
+
   SELECT_MATCHUP: 'SELECT_MATCHUP',
   FILTER_MATCHUPS: 'FILTER_MATCHUPS',
 
@@ -11,6 +13,13 @@ export const matchupsActions = {
   POST_MATCHUPS_FAILED: 'POST_MATCHUPS_FAILED',
   POST_MATCHUPS_PENDING: 'POST_MATCHUPS_PENDING',
   POST_MATCHUPS_FULFILLED: 'POST_MATCHUPS_FULFILLED',
+
+  loadMatchups: (leagueId) => ({
+    type: matchupsActions.LOAD_MATCHUPS,
+    payload: {
+      leagueId: Number(leagueId)
+    }
+  }),
 
   select: (matchupId) => ({
     type: matchupsActions.SELECT_MATCHUP,

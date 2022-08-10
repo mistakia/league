@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useEffect } from 'react'
+import { useParams } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import Container from '@mui/material/Container'
@@ -144,36 +145,39 @@ Overall.propTypes = {
   year: PropTypes.number
 }
 
-export default class StandingsPage extends React.Component {
-  componentDidMount = () => {
-    this.props.load()
-  }
+export default function StandingsPage({
+  load,
+  standings,
+  division_teams_sorted,
+  year
+}) {
+  const { lid } = useParams()
 
-  render = () => {
-    const { standings, division_teams_sorted } = this.props
+  useEffect(() => {
+    load(lid)
+  }, [])
 
-    const divisions = []
-    for (const [div, teams] of division_teams_sorted.entries()) {
-      divisions.push(
-        <Standings
-          key={div}
-          title={`Division ${div}`}
-          teams={teams}
-          year={this.props.year}
-        />
-      )
-    }
-
-    const body = (
-      <Container maxWidth='md' classes={{ root: 'standings' }}>
-        <StandingsSelectYear />
-        <Overall standings={standings} year={this.props.year} />
-        {divisions}
-      </Container>
+  const divisions = []
+  for (const [div, teams] of division_teams_sorted.entries()) {
+    divisions.push(
+      <Standings
+        key={div}
+        title={`Division ${div}`}
+        teams={teams}
+        year={year}
+      />
     )
-
-    return <PageLayout body={body} scroll />
   }
+
+  const body = (
+    <Container maxWidth='md' classes={{ root: 'standings' }}>
+      <StandingsSelectYear />
+      <Overall standings={standings} year={year} />
+      {divisions}
+    </Container>
+  )
+
+  return <PageLayout body={body} scroll />
 }
 
 StandingsPage.propTypes = {
