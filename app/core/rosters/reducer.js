@@ -12,17 +12,8 @@ export function rostersReducer(state = new Map(), { payload, type }) {
     case appActions.LOGOUT:
       return new Map()
 
-    case rosterActions.GET_ROSTERS_PENDING:
-      return state.set('isLoading', payload.opts.leagueId)
-
-    case rosterActions.GET_ROSTERS_FAILED:
-      return state.delete('isLoading')
-
     case rosterActions.GET_ROSTERS_FULFILLED:
       return state.withMutations((state) => {
-        state.delete('isLoading')
-        state.set('isLoaded', payload.opts.leagueId)
-
         payload.data.forEach((r) =>
           state.setIn([r.tid, r.week], createRoster(r))
         )
