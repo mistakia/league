@@ -33,6 +33,30 @@ export function appReducer(state = initialState(), { payload, type }) {
         isPending: Boolean(payload.token)
       })
 
+    case rosterActions.GET_ROSTERS_PENDING:
+      return state.set('isLoadingRosters', payload.opts.leagueId)
+
+    case rosterActions.GET_ROSTERS_FAILED:
+      return state.delete('isLoadingRosters')
+
+    case rosterActions.GET_ROSTERS_FULFILLED:
+      return state.withMutations((state) => {
+        state.delete('isLoadingRosters')
+        state.set('isLoadedRosters', payload.opts.leagueId)
+      })
+
+    case teamActions.GET_TEAMS_PENDING:
+      return state.set('isLoadingTeams', payload.opts.leagueId)
+
+    case teamActions.GET_TEAMS_FAILED:
+      return state.delete('isLoadingTeams')
+
+    case teamActions.GET_TEAMS_FULFILLED:
+      return state.withMutations((state) => {
+        state.delete('isLoadingTeams')
+        state.set('isLoadedTeams', payload.opts.leagueId)
+      })
+
     case appActions.LOGOUT:
       return initialState().merge({ isPending: false })
 

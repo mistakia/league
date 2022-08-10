@@ -13,23 +13,14 @@ export function teamsReducer(state = initialState, { payload, type }) {
   switch (type) {
     case appActions.AUTH_FULFILLED:
       return state.withMutations((state) => {
-        state.set('isLoaded', payload.opts.leagueId)
         payload.data.teams.forEach((t) => state.set(t.uid, createTeam(t)))
       })
 
     case appActions.LOGOUT:
       return initialState
 
-    case teamActions.GET_TEAMS_PENDING:
-      return state.set('isLoading', payload.opts.leagueId)
-
-    case teamActions.GET_TEAMS_FAILED:
-      return state.delete('isLoading')
-
     case teamActions.GET_TEAMS_FULFILLED:
       return state.withMutations((state) => {
-        state.delete('isLoading')
-        state.set('isLoaded', payload.opts.leagueId)
         payload.data.teams.forEach((t) => state.set(t.uid, createTeam(t)))
       })
 

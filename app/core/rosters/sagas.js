@@ -59,8 +59,8 @@ export function* initRosters() {
 export function* loadRosters({ payload }) {
   const { leagueId } = payload
   const state = yield select()
-  const isLoading = state.getIn(['rosters', 'isLoading'])
-  const isLoaded = state.getIn(['rosters', 'isLoaded'])
+  const isLoading = state.getIn(['app', 'isLoadingRosters'])
+  const isLoaded = state.getIn(['app', 'isLoadedRosters'])
   if (isLoading === leagueId || isLoaded === leagueId) {
     return
   }
