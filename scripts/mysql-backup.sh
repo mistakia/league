@@ -4,8 +4,8 @@ set -x
 
 FULL=false
 LOGS=false
-STATS=true
-CACHE=true
+STATS=false
+CACHE=false
 
 while getopts 'fcls' opt; do
     case $opt in
