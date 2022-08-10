@@ -20,37 +20,35 @@ router.get('/?', async (req, res) => {
       return res.status(400).send({ error: 'missing type' })
     }
 
-    if (!teamId) {
-      return res.status(400).send({ error: 'missing teamId' })
-    }
-
     // verify type
     const types = Object.values(constants.waivers)
     if (!types.includes(type)) {
       return res.status(400).send({ error: 'invalid type' })
     }
 
-    const tid = parseInt(teamId, 10)
+    const query = db('waivers').where({
+      lid: leagueId,
+      type,
+      processed
+    })
 
-    // verify teamId, leagueId belongs to user
-    try {
-      await verifyUserTeam({
-        userId: req.auth.userId,
-        leagueId,
-        teamId: tid,
-        requireLeague: true
-      })
-    } catch (error) {
-      return res.status(400).send({ error: error.message })
-    }
+    // verify teamId and get failed bids for teamId
+    if (teamId) {
+      const tid = parseInt(teamId, 10)
 
-    const waivers = await db('waivers')
-      .where({
-        lid: leagueId,
-        type,
-        processed
-      })
-      .where(function () {
+      // verify teamId, leagueId belongs to user
+      try {
+        await verifyUserTeam({
+          userId: req.auth.userId,
+          leagueId,
+          teamId: tid,
+          requireLeague: true
+        })
+      } catch (error) {
+        return res.status(400).send({ error: error.message })
+      }
+
+      query.where(function () {
         this.where('succ', 1)
           .orWhere({
             succ: 0,
@@ -61,6 +59,17 @@ router.get('/?', async (req, res) => {
             reason: 'player is not a free agent' // TODO use code
           })
       })
+    } else {
+      // show successful bids or only failed bids due to player no longer being a free agent
+      query.where(function () {
+        this.where('succ', 1).orWhere({
+          succ: 0,
+          reason: 'player is not a free agent' // TODO use code
+        })
+      })
+    }
+
+    const waivers = await query
     res.send(waivers)
   } catch (error) {
     logger(error)
