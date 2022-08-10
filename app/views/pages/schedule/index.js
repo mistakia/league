@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getFilteredMatchups } from '@core/matchups'
+import { getFilteredMatchups, matchupsActions } from '@core/matchups'
 
 import SchedulePage from './schedule'
 
@@ -9,4 +9,8 @@ const mapStateToProps = createSelector(getFilteredMatchups, (matchups) => ({
   matchups
 }))
 
-export default connect(mapStateToProps)(SchedulePage)
+const mapDispatchToProps = {
+  load: matchupsActions.loadMatchups
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(SchedulePage)

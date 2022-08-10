@@ -28,7 +28,7 @@ export const transactionsActions = {
   load: (leagueId) => ({
     type: transactionsActions.LOAD_TRANSACTIONS,
     payload: {
-      leagueId
+      leagueId: Number(leagueId)
     }
   }),
 

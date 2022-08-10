@@ -1,4 +1,6 @@
-import React from 'react'
+import React, { useEffect } from 'react'
+import { useParams } from 'react-router-dom'
+import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import Container from '@mui/material/Container'
 
@@ -10,42 +12,45 @@ import { groupBy } from '@common'
 
 import './schedule.styl'
 
-export default class SchedulePage extends React.Component {
-  render = () => {
-    const { matchups } = this.props
+export default function SchedulePage({ matchups, load }) {
+  const { lid } = useParams()
 
-    const sections = []
-    const groups = groupBy(matchups, 'week')
-    Object.entries(groups).forEach((entry, index) => {
-      const week = entry[0]
-      const matchups = entry[1]
-      const items = []
-      for (const matchup of matchups) {
-        items.push(<Matchup key={matchup.uid} matchup={matchup} />)
-      }
-      const section = (
-        <div key={index} className='schedule__section'>
-          <div className='schedule__section-week'>Week {week}</div>
-          <div className='schedule__section-matchups'>{items}</div>
-        </div>
-      )
-      sections.push(section)
-    })
+  useEffect(() => {
+    load(lid)
+  }, [])
 
-    const body = (
-      <Container maxWidth='md'>
-        <div className='schedule__filter'>
-          <ScheduleWeeksFilter />
-          <ScheduleTeamsFilter />
-        </div>
-        <div className='schedule__body empty'>{sections}</div>
-      </Container>
+  const sections = []
+  const groups = groupBy(matchups, 'week')
+  Object.entries(groups).forEach((entry, index) => {
+    const week = entry[0]
+    const matchups = entry[1]
+    const items = []
+    for (const matchup of matchups) {
+      items.push(<Matchup key={matchup.uid} matchup={matchup} />)
+    }
+    const section = (
+      <div key={index} className='schedule__section'>
+        <div className='schedule__section-week'>Week {week}</div>
+        <div className='schedule__section-matchups'>{items}</div>
+      </div>
     )
+    sections.push(section)
+  })
 
-    return <PageLayout body={body} scroll />
-  }
+  const body = (
+    <Container maxWidth='md'>
+      <div className='schedule__filter'>
+        <ScheduleWeeksFilter />
+        <ScheduleTeamsFilter />
+      </div>
+      <div className='schedule__body empty'>{sections}</div>
+    </Container>
+  )
+
+  return <PageLayout body={body} scroll />
 }
 
 SchedulePage.propTypes = {
-  matchups: ImmutablePropTypes.list
+  matchups: ImmutablePropTypes.list,
+  load: PropTypes.func
 }

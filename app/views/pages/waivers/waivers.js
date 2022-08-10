@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useEffect } from 'react'
+import { useParams } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import Container from '@mui/material/Container'
 
@@ -10,34 +11,32 @@ import PageLayout from '@layouts/page'
 
 import './waivers.styl'
 
-export default class WaiversPage extends React.Component {
-  componentDidMount = () => {
-    this.props.load()
-  }
+export default function WaiversPage({ load, items, isPending }) {
+  const { lid } = useParams()
 
-  render = () => {
-    const { items, isPending } = this.props
+  useEffect(() => {
+    load(lid)
+  }, [])
 
-    const rows = []
-    items.forEach((waiver, index) => {
-      rows.push(<WaiverReportItem key={index} waiver={waiver} />)
-    })
+  const rows = []
+  items.forEach((waiver, index) => {
+    rows.push(<WaiverReportItem key={index} waiver={waiver} />)
+  })
 
-    const body = (
-      <Container maxWidth='sm'>
-        <div className='waivers__filter'>
-          <WaiverTypeFilter />
-          <WaiverProcessedFilter />
-        </div>
-        <div className='waivers__body empty'>
-          {isPending && <Loading loading />}
-          {rows}
-        </div>
-      </Container>
-    )
+  const body = (
+    <Container maxWidth='sm'>
+      <div className='waivers__filter'>
+        <WaiverTypeFilter />
+        <WaiverProcessedFilter />
+      </div>
+      <div className='waivers__body empty'>
+        {isPending && <Loading loading />}
+        {rows}
+      </div>
+    </Container>
+  )
 
-    return <PageLayout body={body} scroll />
-  }
+  return <PageLayout body={body} scroll />
 }
 
 WaiversPage.propTypes = {

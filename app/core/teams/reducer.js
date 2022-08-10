@@ -13,14 +13,23 @@ export function teamsReducer(state = initialState, { payload, type }) {
   switch (type) {
     case appActions.AUTH_FULFILLED:
       return state.withMutations((state) => {
+        state.set('isLoaded', payload.opts.leagueId)
         payload.data.teams.forEach((t) => state.set(t.uid, createTeam(t)))
       })
 
     case appActions.LOGOUT:
       return initialState
 
+    case teamActions.GET_TEAMS_PENDING:
+      return state.set('isLoading', payload.opts.leagueId)
+
+    case teamActions.GET_TEAMS_FAILED:
+      return state.delete('isLoading')
+
     case teamActions.GET_TEAMS_FULFILLED:
       return state.withMutations((state) => {
+        state.delete('isLoading')
+        state.set('isLoaded', payload.opts.leagueId)
         payload.data.teams.forEach((t) => state.set(t.uid, createTeam(t)))
       })
 
@@ -104,9 +113,17 @@ export function teamsReducer(state = initialState, { payload, type }) {
 
     case teamActions.GET_LEAGUE_TEAM_STATS_FULFILLED:
       return state.withMutations((state) => {
-        for (const stats of payload.data) {
-          state.setIn([stats.tid, 'stats', stats.year], new Map(stats))
-        }
+        payload.data.forEach((stats) => {
+          if (state.hasIn([stats.tid, 'uid'])) {
+            const team = state.get(stats.tid)
+            state.set(
+              stats.tid,
+              team.setIn(['stats', stats.year], new Map(stats))
+            )
+          } else {
+            state.set(stats.tid, createTeam({ stats }))
+          }
+        })
       })
 
     default:

@@ -4,6 +4,11 @@ import Bugsnag from '@bugsnag/js'
 import { appActions } from './actions'
 import { settingActions } from '@core/settings'
 import { constants } from '@common'
+import { rosterActions } from '@core/rosters'
+import { transactionsActions } from '@core/transactions'
+import { waiverActions } from '@core/waivers'
+import { teamActions } from '@core/teams'
+import { matchupsActions } from '@core/matchups'
 
 const initialState = new Record({
   token: null,
@@ -52,6 +57,15 @@ export function appReducer(state = initialState(), { payload, type }) {
         teamIds: new List(payload.data.teams.map((t) => t.uid)),
         leagueIds: new List(payload.data.leagues.map((l) => l.uid)),
         isPending: false
+      })
+
+    case transactionsActions.LOAD_TRANSACTIONS:
+    case rosterActions.LOAD_ROSTERS:
+    case waiverActions.LOAD_WAIVERS:
+    case teamActions.LOAD_LEAGUE_TEAM_STATS:
+    case matchupsActions.LOAD_MATCHUPS:
+      return state.merge({
+        leagueId: Number(payload.leagueId)
       })
 
     case appActions.REGISTER_FAILED:

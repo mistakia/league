@@ -32,8 +32,11 @@ export const teamActions = {
     type: teamActions.LOAD_TEAMS
   }),
 
-  loadLeagueTeamStats: () => ({
-    type: teamActions.LOAD_LEAGUE_TEAM_STATS
+  loadLeagueTeamStats: (leagueId) => ({
+    type: teamActions.LOAD_LEAGUE_TEAM_STATS,
+    payload: {
+      leagueId: Number(leagueId)
+    }
   }),
 
   add: () => ({

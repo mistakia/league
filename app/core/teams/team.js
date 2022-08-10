@@ -48,7 +48,9 @@ export function createTeam({
   playoff_odds,
   division_odds,
   bye_odds,
-  championship_odds
+  championship_odds,
+
+  stats
 }) {
   return new Team({
     uid,
@@ -66,6 +68,12 @@ export function createTeam({
     teamvoice,
     leaguetext,
     picks: new List(picks),
+
+    stats: stats
+      ? new Map({
+          [stats.year]: stats
+        })
+      : undefined,
 
     playoff_odds,
     division_odds,

@@ -7,6 +7,10 @@ export const leagueActions = {
   PUT_LEAGUE_PENDING: 'PUT_LEAGUE_PENDING',
   PUT_LEAGUE_FULFILLED: 'PUT_LEAGUE_FULFILLED',
 
+  GET_LEAGUE_FAILED: 'GET_LEAGUE_FAILED',
+  GET_LEAGUE_PENDING: 'GET_LEAGUE_PENDING',
+  GET_LEAGUE_FULFILLED: 'GET_LEAGUE_FULFILLED',
+
   update: ({ leagueId, value, field }) => ({
     type: leagueActions.UPDATE_LEAGUE,
     payload: {
@@ -44,6 +48,29 @@ export const leagueActions = {
       opts,
       data
     }
+  }),
+
+  getLeaguePending: (opts) => ({
+    type: leagueActions.GET_LEAGUE_PENDING,
+    payload: {
+      opts
+    }
+  }),
+
+  getLeagueFailed: (opts, error) => ({
+    type: leagueActions.GET_LEAGUE_FAILED,
+    payload: {
+      opts,
+      error
+    }
+  }),
+
+  getLeagueFulfilled: (opts, data) => ({
+    type: leagueActions.GET_LEAGUE_FULFILLED,
+    payload: {
+      opts,
+      data
+    }
   })
 }
 
@@ -51,4 +78,10 @@ export const putLeagueActions = {
   failed: leagueActions.putLeagueFailed,
   pending: leagueActions.putLeaguePending,
   fulfilled: leagueActions.putLeagueFulfilled
+}
+
+export const getLeagueActions = {
+  failed: leagueActions.getLeagueFailed,
+  pending: leagueActions.getLeaguePending,
+  fulfilled: leagueActions.getLeagueFulfilled
 }
