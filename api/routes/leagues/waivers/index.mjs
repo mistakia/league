@@ -66,6 +66,10 @@ router.post('/?', async (req, res) => {
     let { release } = req.body
     let bid = parseInt(req.body.bid || 0, 10)
 
+    if (!req.auth) {
+      return res.status(401).send({ error: 'invalid token' })
+    }
+
     if (!Array.isArray(release)) {
       release = release ? [release] : []
     }
@@ -444,6 +448,10 @@ router.put('/:waiverId', async (req, res) => {
     let { release } = req.body
     const bid = parseInt(req.body.bid || 0, 10)
 
+    if (!req.auth) {
+      return res.status(401).send({ error: 'invalid token' })
+    }
+
     if (!Array.isArray(release)) {
       release = release ? [release] : []
     }
@@ -550,6 +558,10 @@ router.put('/:waiverId', async (req, res) => {
 router.post('/:waiverId/cancel', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
+    if (!req.auth) {
+      return res.status(401).send({ error: 'invalid token' })
+    }
+
     if (isNaN(req.params.waiverId)) {
       return res.status(400).send({ error: 'invalid waiverId' })
     }
