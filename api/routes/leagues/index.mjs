@@ -204,6 +204,31 @@ router.put('/:leagueId', async (req, res) => {
   }
 })
 
+router.get('/:leagueId/?', async (req, res) => {
+  const { db, logger } = req.app.locals
+  try {
+    const { leagueId } = req.params
+    const leagues = await db('leagues')
+      .leftJoin('seasons', function () {
+        this.on('leagues.uid', '=', 'seasons.lid')
+        this.on(
+          db.raw(
+            `seasons.year = ${constants.season.year} or seasons.year is null`
+          )
+        )
+      })
+      .where('leagues.uid', leagueId)
+
+    const league = leagues[0]
+    const seasons = await db('seasons').where('lid', leagueId)
+    league.years = seasons.map((s) => s.year)
+    res.send(league)
+  } catch (err) {
+    logger(err)
+    res.status(500).send({ error: err.toString() })
+  }
+})
+
 router.get('/:leagueId/teams/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
