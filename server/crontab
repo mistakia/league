@@ -149,8 +149,11 @@
 ## Backup User Data (At every 15th minute in every month from September through December.)
 */15 * * 9-12 * /bin/bash /root/league/scripts/mysql-backup.sh &>> /var/log/league/league-mysql-backup.log
 
-## Backup All Data (At 04:00 on Tuesday and Saturday in every month from September through December.)
-0 4 * 9-12 2,6 /bin/bash /root/league/scripts/mysql-backup.sh -f &>> /var/log/league/league-mysql-backup-full.log
+## Backup Stat Data (At 00:00 on Wednesday in every month from September through December)
+0 0 * 9-12 3 /bin/bash /root/league/scripts/mysql-backup.sh -s &>> /var/log/league/league-mysql-backup.log
+
+## Backup All Data (At 04:00 on Wednesday in every month from September through December)
+0 4 * 9-12 3 /bin/bash /root/league/scripts/mysql-backup.sh -f &>> /var/log/league/league-mysql-backup-full.log
 
 
 ################################### Live Game Plays ########################################
