@@ -7,13 +7,12 @@ LOGS=false
 STATS=true
 CACHE=true
 
-while getopts 'flsu' opt; do
+while getopts 'fcls' opt; do
     case $opt in
         f) FULL=true ;;
         c) CACHE=true ;;
         l) LOGS=true ;;
         s) STATS=true ;;
-        u) USER=true ;;
 
         *) echo 'Error in command line parsing' >&2
     esac
