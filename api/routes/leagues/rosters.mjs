@@ -10,6 +10,11 @@ router.post('/?', async (req, res) => {
   try {
     const { pid, teamId, leagueId } = req.body
     const value = req.body.value || 0
+
+    if (!req.auth) {
+      return res.status(401).send({ error: 'invalid token' })
+    }
+
     if (!pid) {
       return res.status(400).send({ error: 'missing pid' })
     }
@@ -96,6 +101,10 @@ router.put('/?', async (req, res) => {
   try {
     const { pid, teamId, leagueId, value } = req.body
 
+    if (!req.auth) {
+      return res.status(401).send({ error: 'invalid token' })
+    }
+
     if (typeof value === 'undefined') {
       return res.status(400).send({ error: 'missing value' })
     }
@@ -170,6 +179,11 @@ router.delete('/?', async (req, res) => {
   try {
     // verify user is commish
     const { pid, teamId, leagueId } = req.body
+
+    if (!req.auth) {
+      return res.status(401).send({ error: 'invalid token' })
+    }
+
     if (!pid) {
       return res.status(400).send({ error: 'missing pid' })
     }

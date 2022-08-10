@@ -26,6 +26,10 @@ router.put('/:leagueId', async (req, res) => {
     const { field } = req.body
     let { value } = req.body
 
+    if (!req.auth) {
+      return res.status(401).send({ error: 'invalid token' })
+    }
+
     // verify leagueId
     const lid = parseInt(leagueId, 10)
     const leagues = await db('leagues').where({ uid: lid }).limit(1)

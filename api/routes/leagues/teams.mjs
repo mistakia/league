@@ -9,6 +9,11 @@ router.post('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const { leagueId } = req.body
+
+    if (!req.auth) {
+      return res.status(401).send({ error: 'invalid token' })
+    }
+
     if (!leagueId) {
       return res.status(400).send({ error: 'missing leagueId' })
     }
