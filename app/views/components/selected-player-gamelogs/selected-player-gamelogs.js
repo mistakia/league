@@ -41,9 +41,7 @@ export default class SelectedPlayerGamelogs extends React.Component {
             <div className='table__cell metric'>
               {game.points_added ? game.points_added.toFixed(1) : '-'}
             </div>
-            <div className='table__cell metric'>
-              {game.pos_rank ? game.pos_rank.toFixed(1) : '-'}
-            </div>
+            <div className='table__cell metric'>{game.pos_rnk || '-'}</div>
           </>
         )
         rows.push(
