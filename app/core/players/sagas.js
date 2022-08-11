@@ -225,7 +225,8 @@ export function* fetchPlayerProjections({ payload }) {
 
 export function* loadPlayerGamelogs({ payload }) {
   const { pid } = payload
-  yield call(getPlayerGamelogs, { pid })
+  const { leagueId } = yield select(getApp)
+  yield call(getPlayerGamelogs, { pid, leagueId })
 }
 
 export function* loadPlayerPractices({ payload }) {

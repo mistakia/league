@@ -322,8 +322,8 @@ export const api = {
     const url = `${BASE_URL}/projections/${pid}`
     return { url }
   },
-  getPlayerGamelogs({ pid }) {
-    const url = `${BASE_URL}/players/${pid}/gamelogs`
+  getPlayerGamelogs({ pid, leagueId }) {
+    const url = `${BASE_URL}/players/${pid}/gamelogs?leagueId=${leagueId}`
     return { url }
   },
   getPlayerPractices({ pid }) {
