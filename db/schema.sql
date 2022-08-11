@@ -1898,6 +1898,25 @@ CREATE TABLE `gamelogs` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `league_player_gamelogs`
+--
+
+DROP TABLE IF EXISTS `league_player_gamelogs`;
+
+CREATE TABLE `league_player_gamelogs` (
+  `pid` varchar(7) NOT NULL,
+  `esbid` int(10) DEFAULT NULL,
+  `lid` int(6) NOT NULL,
+  `points` decimal(4,1) DEFAULT NULL,
+  `points_added` decimal(4,1) DEFAULT NULL,
+  `pos_rnk` tinyint(2) DEFAULT NULL,
+
+  UNIQUE KEY `pid` (`pid`, `esbid`, `lid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `footballoutsiders`
 --
 
