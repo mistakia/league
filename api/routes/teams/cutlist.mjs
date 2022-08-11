@@ -9,6 +9,21 @@ router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const { teamId } = req.params
+
+    if (!req.auth) {
+      return res.status(401).send({ error: 'invalid token' })
+    }
+
+    // verify teamId belongs to userId
+    try {
+      await verifyUserTeam({
+        userId: req.auth.userId,
+        teamId
+      })
+    } catch (error) {
+      return res.status(400).send({ error: error.message })
+    }
+
     const cutlist = await db('league_cutlist')
       .select('pid')
       .where('tid', teamId)
@@ -27,6 +42,10 @@ router.post('/?', async (req, res) => {
     const { teamId } = req.params
     const { leagueId } = req.body
     let { pids } = req.body
+
+    if (!req.auth) {
+      return res.status(401).send({ error: 'invalid token' })
+    }
 
     if (!pids) {
       return res.status(400).send({ error: 'missing pids' })

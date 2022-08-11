@@ -14,6 +14,10 @@ router.post('/?', async (req, res) => {
       release = release ? [release] : []
     }
 
+    if (!req.auth) {
+      return res.status(401).send({ error: 'invalid token' })
+    }
+
     if (!pid) {
       return res.status(400).send({ error: 'missing pid' })
     }
