@@ -36,13 +36,13 @@ export default class SelectedPlayerGamelogs extends React.Component {
             <div className='table__cell metric date'>{game.date}</div>
             <div className='table__cell metric'>{game.opp}</div>
             <div className='table__cell metric'>
-              {(game.total || 0).toFixed(1)}
+              {(game.points || 0).toFixed(1)}
             </div>
             <div className='table__cell metric'>
               {game.points_added ? game.points_added.toFixed(1) : '-'}
             </div>
             <div className='table__cell metric'>
-              {game.points_added ? game.pos_rank.toFixed(1) : '-'}
+              {game.pos_rank ? game.pos_rank.toFixed(1) : '-'}
             </div>
           </>
         )
