@@ -33,7 +33,6 @@ export default class SelectedPlayerGamelogs extends React.Component {
             <div className='table__cell metric sticky__column sticky__two game__week'>
               {game.week}
             </div>
-            <div className='table__cell metric date'>{game.date}</div>
             <div className='table__cell metric'>{game.opp}</div>
             <div className='table__cell metric'>
               {(game.points || 0).toFixed(1)}
@@ -61,11 +60,10 @@ export default class SelectedPlayerGamelogs extends React.Component {
           <div className='row__group-head'>Gamelogs</div>
         </div>
         <div className='selected__table-header sticky'>
-          <div className='table__cell metric sticky__column game__day'>Day</div>
+          <div className='table__cell metric sticky__column game__day' />
           <div className='table__cell metric sticky__column sticky__two game__week'>
             Wk
           </div>
-          <div className='table__cell metric date'>Date</div>
           <div className='table__cell metric'>Opp</div>
           <div className='row__group'>
             <div className='row__group-head'>Fantasy</div>
