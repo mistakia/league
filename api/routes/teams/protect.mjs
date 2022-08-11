@@ -17,6 +17,10 @@ router.post('/?', async (req, res) => {
     const { teamId } = req.params
     const { pid, leagueId } = req.body
 
+    if (!req.auth) {
+      return res.status(401).send({ error: 'invalid token' })
+    }
+
     if (!pid) {
       return res.status(400).send({ error: 'missing pid' })
     }

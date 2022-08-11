@@ -16,6 +16,20 @@ router.get('/?', async (req, res) => {
   try {
     const { teamId } = req.params
 
+    if (!req.auth) {
+      return res.status(401).send({ error: 'invalid token' })
+    }
+
+    // verify teamId belongs to userId
+    try {
+      await verifyUserTeam({
+        userId: req.auth.userId,
+        teamId
+      })
+    } catch (error) {
+      return res.status(400).send({ error: error.message })
+    }
+
     const transitionBids = await db('transition_bids')
       .where({
         tid: teamId,
@@ -42,6 +56,10 @@ router.post('/?', async (req, res) => {
 
     if (!Array.isArray(release)) {
       release = release ? [release] : []
+    }
+
+    if (!req.auth) {
+      return res.status(401).send({ error: 'invalid token' })
     }
 
     if (!pid) {
@@ -283,6 +301,10 @@ router.delete('/?', async (req, res) => {
     const { teamId } = req.params
     const { pid, leagueId } = req.body
 
+    if (!req.auth) {
+      return res.status(401).send({ error: 'invalid token' })
+    }
+
     if (!pid) {
       return res.status(400).send({ error: 'missing pid' })
     }
@@ -376,6 +398,10 @@ router.put('/?', async (req, res) => {
 
     if (!Array.isArray(release)) {
       release = release ? [release] : []
+    }
+
+    if (!req.auth) {
+      return res.status(401).send({ error: 'invalid token' })
     }
 
     if (!pid) {

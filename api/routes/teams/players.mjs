@@ -1,7 +1,7 @@
 import express from 'express'
 
 import cache from '#api/cache.mjs'
-import { getPlayers, getTransitionBids } from '#utils'
+import { getPlayers, getTransitionBids, verifyUserTeam } from '#utils'
 
 const router = express.Router({ mergeParams: true })
 
@@ -12,14 +12,23 @@ router.get('/?', async (req, res) => {
     const { leagueId } = req.query
     const userId = req.auth ? req.auth.userId : null
 
-    // TODO verify teamId
-    // TODO verify leagueId
-
     const cacheKey = `/players/${leagueId}/${teamId}`
     let players = cache.get(cacheKey)
     if (players) {
       logger('USING CACHE')
       if (userId) {
+        // verify teamId
+        try {
+          await verifyUserTeam({
+            userId,
+            teamId,
+            leagueId,
+            requireLeague: true
+          })
+        } catch (error) {
+          return res.status(400).send({ error: error.message })
+        }
+
         const bids = await getTransitionBids({
           userId,
           leagueId
@@ -44,6 +53,18 @@ router.get('/?', async (req, res) => {
     cache.set(cacheKey, players, 1800) // 30 mins
 
     if (userId) {
+      // verify teamId
+      try {
+        await verifyUserTeam({
+          userId,
+          teamId,
+          leagueId,
+          requireLeague: true
+        })
+      } catch (error) {
+        return res.status(400).send({ error: error.message })
+      }
+
       const bids = await getTransitionBids({ userId, leagueId })
       if (!bids.length) {
         return res.send(players)

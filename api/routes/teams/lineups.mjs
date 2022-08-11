@@ -12,6 +12,10 @@ router.get('/?', async (req, res) => {
     const week = req.query.week || constants.season.week
     const year = req.query.year || constants.season.year
 
+    if (!req.auth) {
+      return res.status(401).send({ error: 'invalid token' })
+    }
+
     const tid = parseInt(teamId, 10)
 
     const teams = await db('users_teams').where({ userid: req.auth.userId })
@@ -38,6 +42,10 @@ router.put('/?', async (req, res) => {
     const week = req.body.week || constants.season.week
     const year = req.body.year || constants.season.year
     const { players, leagueId } = req.body
+
+    if (!req.auth) {
+      return res.status(401).send({ error: 'invalid token' })
+    }
 
     // verify teamId
     try {

@@ -21,6 +21,10 @@ router.put('/:teamId', async (req, res) => {
     const { teamId } = req.params
     const { value, field } = req.body
 
+    if (!req.auth) {
+      return res.status(401).send({ error: 'invalid token' })
+    }
+
     // verify teamId
     try {
       await verifyUserTeam({ userId: req.auth.userId, teamId })
