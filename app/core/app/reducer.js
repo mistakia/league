@@ -30,7 +30,9 @@ export function appReducer(state = initialState(), { payload, type }) {
     case appActions.INIT_APP:
       return state.merge({
         token: payload.token,
-        isPending: Boolean(payload.token)
+        isPending: Boolean(payload.token),
+        leagueId: payload.leagueId,
+        leagueIds: new List([payload.leagueId])
       })
 
     case rosterActions.GET_ROSTERS_PENDING:
