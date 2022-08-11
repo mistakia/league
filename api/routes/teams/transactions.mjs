@@ -11,6 +11,10 @@ router.get('/reserve', async (req, res) => {
     const { teamId } = req.params
     const { leagueId } = req.query
 
+    if (!req.auth) {
+      return res.status(401).send({ error: 'invalid token' })
+    }
+
     // verify teamId
     try {
       await verifyUserTeam({

@@ -16,6 +16,10 @@ router.post('/?', async (req, res) => {
   try {
     const { pid, teamId, leagueId } = req.body
 
+    if (!req.auth) {
+      return res.status(401).send({ error: 'invalid token' })
+    }
+
     if (constants.season.week > constants.season.finalWeek) {
       return res.status(400).send({ error: 'player locked' })
     }
