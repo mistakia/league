@@ -50,7 +50,7 @@ const main = async () => {
         .groupBy('gamelogs.year')
         .orderBy('gamelogs.year', 'asc')
 
-      let years = results.map(r => r.year)
+      let years = results.map((r) => r.year)
       if (argv.start) {
         years = years.filter((year) => year >= argv.start)
       }

@@ -15,9 +15,13 @@ const mapStateToProps = createSelector(
   (playerMap, gamelogs, league) => {
     const position = playerMap.get('pos')
     gamelogs = gamelogs.map((gamelog) => {
-      const points = calculatePoints({ stats: gamelog, position, league })
+      let points
+      if (!gamelog.points) {
+        points = calculatePoints({ stats: gamelog, position, league })
+      }
+
       return {
-        total: points.total,
+        points: gamelog.points || points.total,
         ...gamelog
       }
     })
