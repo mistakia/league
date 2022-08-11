@@ -21,7 +21,7 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('calculate-vor')
 debug.enable('calculate-vor')
 
-const calculateVOR = async ({ year, rookie, league }) => {
+const calculateVOR = async ({ year, rookie, league, week = 'ALL' }) => {
   if (!Number.isInteger(year)) {
     throw new Error(`${year} invalid year`)
   }
@@ -33,7 +33,7 @@ const calculateVOR = async ({ year, rookie, league }) => {
   log(`calculating VOR for ${year}`)
 
   // get player stats for year
-  const rows = await db('gamelogs')
+  const query = db('gamelogs')
     .select(
       'gamelogs.*',
       'player.pname',
@@ -44,55 +44,40 @@ const calculateVOR = async ({ year, rookie, league }) => {
     .join('nfl_games', 'nfl_games.esbid', 'gamelogs.esbid')
     .where('nfl_games.seas', year)
     .where('nfl_games.seas_type', 'REG')
-    .andWhere('gamelogs.week', '<=', constants.season.finalWeek) // TODO - should be set per season
+
     .join('player', 'gamelogs.pid', 'player.pid')
 
-  const pids = rows.map((p) => p.pid)
-  const sub = db('rankings')
-    .select(db.raw('max(timestamp) AS maxtime, sourceid AS sid'))
-    .groupBy('sid')
-    .where('year', year)
-  const rankings = await db('rankings')
-    .select('*')
-    .from(db.raw('(' + sub.toString() + ') AS X'))
-    .innerJoin('rankings', function () {
-      this.on(function () {
-        this.on('sourceid', '=', 'sid')
-        this.andOn('timestamp', '=', 'maxtime')
-      })
-    })
-    .where('sf', 1)
-    .where('year', year)
-    .whereIn('pid', pids)
+  if (week === 'ALL') {
+    query.where('gamelogs.week', '<=', constants.season.finalWeek) // TODO - should be set per season
+  } else {
+    query.where('gamelogs.week', week)
+  }
 
+  const rows = await query
+  const weeks = [...new Set(rows.map((r) => r.week))]
   const grouped_by_pid = groupBy(rows, 'pid')
 
   const players = []
   for (const pid of Object.keys(grouped_by_pid)) {
-    let item = {}
+    const item = {}
     const games = grouped_by_pid[pid]
-    // item.games = games
-
-    const ranking = rankings.find((r) => r.pid === pid)
-    if (ranking) {
-      const { ornk, prnk, avg, std } = ranking
-      item = { ornk, prnk, avg, std }
-    }
+    item.games = games
 
     item.points = {}
     item.vorp = {}
     item.vorp_adj = {}
     item.market_salary = {}
 
-    for (let week = 0; week <= constants.season.finalWeek; week++) {
+    // set default values
+    for (const week of weeks) {
       item.points[week] = { total: 0 }
       item.vorp[week] = -999
       item.vorp_adj[week] = 0
       item.market_salary[week] = 0
     }
 
+    // calculate fantasy points
     for (const game of games) {
-      // calculate fantasy points
       const points = calculatePoints({
         stats: game,
         position: game.pos,
@@ -110,8 +95,7 @@ const calculateVOR = async ({ year, rookie, league }) => {
   const baselines = {}
   const baselineTotals = {}
   constants.positions.forEach((p) => (baselineTotals[p] = 0))
-  const max_week = Math.max(...rows.map((r) => r.week))
-  for (let week = 1; week <= max_week; week++) {
+  for (const week of weeks) {
     const baseline = calculateBaselines({ players, league, week })
     baselines[week] = baseline
 
@@ -128,6 +112,11 @@ const calculateVOR = async ({ year, rookie, league }) => {
     calculatePrices({ cap: leagueTotalCap, total, players, week })
   }
 
+  const points_by_position = {}
+  for (const pos of constants.positions) {
+    points_by_position[pos] = []
+  }
+
   // calculate earned contract value
   let totalVorp = 0
   for (const player of players) {
@@ -142,6 +131,16 @@ const calculateVOR = async ({ year, rookie, league }) => {
       player.vorp.earned += value
       totalVorp += value
     }
+
+    points_by_position[player.pos].push(player.points)
+  }
+
+  for (const pos of constants.positions) {
+    points_by_position[pos] = points_by_position[pos].sort((a, b) => b - a)
+  }
+
+  for (const player of players) {
+    player.pos_rnk = points_by_position[player.pos].indexOf(player.points) + 1
   }
 
   calculatePrices({
@@ -157,7 +156,7 @@ const calculateVOR = async ({ year, rookie, league }) => {
       player: player.pname,
       rookie: player.start === year,
       pos: player.pos,
-      prnk: player.prnk,
+      pos_rnk: player.pos_rnk,
       vor: player.vorp.earned,
       value: player.market_salary.earned,
       points: player.points,
@@ -175,7 +174,7 @@ const calculateVOR = async ({ year, rookie, league }) => {
     }
   }
 
-  return { players: output, baselineTotals, weeks: max_week }
+  return { players: output, baselineTotals, weeks }
 }
 
 const main = async () => {
@@ -183,6 +182,7 @@ const main = async () => {
     const year = argv.year
     const rookie = argv.rookie
     const lid = argv.lid
+    const week = argv.week
     if (!lid) {
       console.log('missing --lid')
       return
@@ -191,7 +191,8 @@ const main = async () => {
     const { players, baselineTotals, weeks } = await calculateVOR({
       year,
       rookie,
-      league
+      league,
+      week
     })
     const top200 = Object.values(players)
       .sort((a, b) => b.vor - a.vor)
@@ -216,9 +217,8 @@ const main = async () => {
           name: player.player,
           vor: player.vor.toFixed(2),
           points: player.points.toFixed(2),
-          rank: player.prnk,
+          rank: `${player.pos}${player.pos_rnk}`,
           value: `$${player.value}`,
-          pos: player.pos,
           rookie: player.rookie ? 'rookie' : '',
           startable: player.starts
         },
