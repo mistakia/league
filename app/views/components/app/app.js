@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useEffect } from 'react'
+import { useMatch } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
@@ -20,36 +21,39 @@ import '@styles/normalize.css'
 import '@styles/index.styl'
 import './app.styl'
 
-class App extends React.Component {
-  async componentDidMount() {
-    const token = await localStorageAdapter.getItem('token')
-    this.props.init({ token })
-  }
+export default function App({ init, isPending, userId, isInitializing }) {
+  const match = useMatch('leagues/:leagueId/*')
+  const leagueId = match ? Number(match.params.leagueId) : null
 
-  render() {
-    const { isPending, userId, isInitializing } = this.props
-    if (isPending) {
-      return <Loading loading={isPending} />
+  useEffect(() => {
+    async function onLoad() {
+      const token = await localStorageAdapter.getItem('token')
+      init({ token, leagueId })
     }
+    onLoad()
+  }, [])
 
-    return (
-      <main>
-        <Backdrop
-          classes={{ root: 'initializing__backdrop' }}
-          open={isInitializing}
-        >
-          <CircularProgress color='inherit' />
-        </Backdrop>
-        <Menu />
-        <Routes />
-        {userId && <Logout />}
-        <ContextMenu />
-        <Confirmation />
-        <Notification />
-        <SelectedPlayer />
-      </main>
-    )
+  if (isPending) {
+    return <Loading loading={isPending} />
   }
+
+  return (
+    <main>
+      <Backdrop
+        classes={{ root: 'initializing__backdrop' }}
+        open={isInitializing}
+      >
+        <CircularProgress color='inherit' />
+      </Backdrop>
+      <Menu />
+      <Routes />
+      {userId && <Logout />}
+      <ContextMenu />
+      <Confirmation />
+      <Notification />
+      <SelectedPlayer />
+    </main>
+  )
 }
 
 App.propTypes = {
@@ -58,5 +62,3 @@ App.propTypes = {
   userId: PropTypes.number,
   isInitializing: PropTypes.bool
 }
-
-export default App

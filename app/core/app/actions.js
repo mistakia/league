@@ -1,3 +1,5 @@
+import { constants } from '@common'
+
 export const appActions = {
   INIT_APP: 'INIT_APP',
 
@@ -17,10 +19,11 @@ export const appActions = {
   LOGIN_PENDING: 'LOGIN_PENDING',
   LOGIN_FULFILLED: 'LOGIN_FULFILLED',
 
-  init: ({ token }) => ({
+  init: ({ token, leagueId = constants.DEFAULTS.LEAGUE_ID }) => ({
     type: appActions.INIT_APP,
     payload: {
-      token
+      token,
+      leagueId
     }
   }),
 
