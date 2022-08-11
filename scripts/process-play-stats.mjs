@@ -410,7 +410,7 @@ const main = async () => {
         .select('wk')
         .where({ seas: year, seas_type })
         .groupBy('wk')
-      log(`processing plays for ${weeks.length} weeks in ${year}`)
+      log(`processing plays for ${year} ${seas_type}: ${weeks.length} weeks`)
       for (const { wk } of weeks) {
         log(`processing plays for week ${wk} in ${year}`)
         await run({ year, week: wk, seas_type })
