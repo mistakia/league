@@ -13,7 +13,7 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-database-from-drive')
 debug.enable('import-database-from-drive')
 
-const run = async ({ full = false, lite = false } = {}) => {
+const run = async ({ full, logs, stats, cache, user } = {}) => {
   const drive = await googleDrive()
   const listParams = {
     q: '"1OnikVibAJ5-1uUhEyMHBRpkFGbzUM23v" in parents and trashed=false',
@@ -25,12 +25,14 @@ const run = async ({ full = false, lite = false } = {}) => {
   let file
   if (full) {
     file = res.data.files.find((f) => f.name.includes('full'))
-  } else if (lite) {
-    file = res.data.files.find((f) => f.name.includes('lite'))
+  } else if (logs) {
+    file = res.data.files.find((f) => f.name.includes('logs'))
+  } else if (stats) {
+    file = res.data.files.find((f) => f.name.includes('stats'))
+  } else if (cache) {
+    file = res.data.files.find((f) => f.name.includes('cache'))
   } else {
-    file = res.data.files.find(
-      (f) => !f.name.includes('full') && !f.name.includes('lite')
-    )
+    file = res.data.files.find((f) => f.name.includes('user'))
   }
 
   if (!file) {
@@ -40,12 +42,12 @@ const run = async ({ full = false, lite = false } = {}) => {
 
   const filename = await downloadFile({ drive, file })
 
-  const { user, database } = config.mysql.connection
+  const { user: mysql_user, database } = config.mysql.connection
   const sqlFile = filename.replace('tar.gz', 'sql')
   try {
     cp.execSync(`tar -xvzf ${filename}`)
 
-    cp.execSync(`mysql -h 127.0.0.1 -u ${user} ${database} < ${sqlFile}`)
+    cp.execSync(`mysql -h 127.0.0.1 -u ${mysql_user} ${database} < ${sqlFile}`)
     log(`imported ${sqlFile} into mysql`)
   } finally {
     fs.unlinkSync(filename)
@@ -65,8 +67,11 @@ const main = async () => {
   let error
   try {
     const full = argv.full
-    const lite = argv.lite
-    await run({ full, lite })
+    const logs = argv.logs
+    const stats = argv.stats
+    const user = argv.user
+    const cache = argv.cache
+    await run({ full, logs, stats, user, cache })
   } catch (err) {
     error = err
     console.log(error)
