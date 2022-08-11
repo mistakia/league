@@ -16,7 +16,7 @@ import Autocomplete from '@mui/material/Autocomplete'
 import Chip from '@mui/material/Chip'
 
 import Position from '@components/position'
-import Team from '@components/team'
+import NFLTeam from '@components/nfl-team'
 import Button from '@components/button'
 import { constants } from '@common'
 
@@ -190,7 +190,7 @@ export default class TransitionConfirmation extends React.Component {
             </div>
             <div className='player__name-main'>
               <span>{option.pname}</span>
-              <Team team={option.team} />
+              <NFLTeam team={option.team} />
             </div>
           </div>
         </div>

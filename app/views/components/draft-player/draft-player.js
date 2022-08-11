@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
-import Team from '@components/team'
+import NFLTeam from '@components/nfl-team'
 import PlayerWatchlistAction from '@components/player-watchlist-action'
 
 import './draft-player.styl'
@@ -39,7 +39,7 @@ export default class DraftPlayer extends React.Component {
           <div className='player-draft__item-index'>{index + 1}.</div>
           <div className='player-draft__item-name'>
             <span>{playerMap.get('pname')}</span>
-            <Team team={playerMap.get('team')} />
+            <NFLTeam team={playerMap.get('team')} />
           </div>
           <div className='player-draft__item-metric'>
             {value

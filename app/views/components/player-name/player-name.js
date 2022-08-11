@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import NotInterestedIcon from '@mui/icons-material/NotInterested'
 
 import Position from '@components/position'
-import Team from '@components/team'
+import NFLTeam from '@components/nfl-team'
 import { constants } from '@common'
 import PlayerLabel from '@components/player-label'
 import PlayerTag from '@components/player-tag'
@@ -42,7 +42,7 @@ export default class PlayerName extends React.Component {
             {constants.year === playerMap.get('start') && (
               <PlayerLabel label='R' type='rookie' description='Rookie' />
             )}
-            <Team team={playerMap.get('team')} />
+            <NFLTeam team={playerMap.get('team')} />
           </div>
         </div>
         <div className='player__name-label'>
