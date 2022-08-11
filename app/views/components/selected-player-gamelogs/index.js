@@ -21,8 +21,8 @@ const mapStateToProps = createSelector(
       }
 
       return {
-        points: gamelog.points || points.total,
-        ...gamelog
+        ...gamelog,
+        points: gamelog.points || points.total
       }
     })
 
