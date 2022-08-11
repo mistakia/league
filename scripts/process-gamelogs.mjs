@@ -43,13 +43,19 @@ const main = async () => {
   let error
   try {
     if (argv.all) {
-      const years = await db('gamelogs')
+      const results = await db('gamelogs')
         .join('nfl_games', 'nfl_games.esbid', '=', 'gamelogs.esbid')
         .select('gamelogs.year')
         .where('nfl_games.seas_type', 'REG')
         .groupBy('gamelogs.year')
         .orderBy('gamelogs.year', 'asc')
-      for (const { year } of years) {
+
+      let years = results.map(r => r.year)
+      if (argv.start) {
+        years = years.filter((year) => year >= argv.start)
+      }
+
+      for (const year of years) {
         const weeks = await db('gamelogs')
           .join('nfl_games', 'nfl_games.esbid', '=', 'gamelogs.esbid')
           .select('gamelogs.week')
