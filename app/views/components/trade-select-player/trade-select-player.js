@@ -3,7 +3,7 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 
 import Position from '@components/position'
-import Team from '@components/team'
+import NFLTeam from '@components/nfl-team'
 import { constants } from '@common'
 import PlayerLabel from '@components/player-label'
 
@@ -24,7 +24,7 @@ export default class TradeSelectPlayer extends React.Component {
           {constants.year === playerMap.get('start') && (
             <PlayerLabel label='R' type='rookie' description='Rookie' />
           )}
-          <Team team={playerMap.get('team')} />
+          <NFLTeam team={playerMap.get('team')} />
         </div>
       </div>
     )

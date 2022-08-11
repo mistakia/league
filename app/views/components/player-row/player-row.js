@@ -7,7 +7,7 @@ import EditableProjection from '@components/editable-projection'
 import Position from '@components/position'
 import PlayerWatchlistAction from '@components/player-watchlist-action'
 import PercentileMetric from '@components/percentile-metric'
-import Team from '@components/team'
+import NFLTeam from '@components/nfl-team'
 import TeamName from '@components/team-name'
 import { Player, connect } from '@components/player'
 import IconButton from '@components/icon-button'
@@ -585,7 +585,7 @@ class PlayerRow extends Player {
             {constants.year === playerMap.get('start') && (
               <PlayerLabel label='R' type='rookie' description='Rookie' />
             )}
-            <Team team={team} />
+            <NFLTeam team={team} />
           </div>
           {isLoggedIn && (
             <div className='player__row-tag'>

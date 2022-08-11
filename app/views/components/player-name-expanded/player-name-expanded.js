@@ -5,7 +5,7 @@ import dayjs from 'dayjs'
 
 import { Player, connect } from '@components/player'
 import Position from '@components/position'
-import Team from '@components/team'
+import NFLTeam from '@components/nfl-team'
 import { constants, nth } from '@common'
 import IconButton from '@components/icon-button'
 import PlayerLabel from '@components/player-label'
@@ -132,7 +132,7 @@ class PlayerNameExpanded extends Player {
           </div>
           <div className='player__name-expanded-row'>
             <Position pos={playerMap.get('pos')} />
-            <Team team={playerMap.get('team')} />
+            <NFLTeam team={playerMap.get('team')} />
             <GameStatus status={status} playerMap={playerMap} />
             {Boolean(constants.status[playerStatus] || playerGamestatus) && (
               <PlayerLabel
