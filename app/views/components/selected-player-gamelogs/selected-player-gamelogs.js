@@ -19,12 +19,12 @@ export default class SelectedPlayerGamelogs extends React.Component {
     const position = playerMap.get('pos')
     const rows = []
     const sorted_years = Object.keys(years).sort((a, b) => b - a)
-    sorted_years.forEach((year, index) => {
+    sorted_years.forEach((year, yearIndex) => {
       rows.push(
-        <div className='header__row sticky__column sticky__row'>{year}</div>
+        <div key={yearIndex} className='header__row sticky__column sticky__row'>{year}</div>
       )
       const gamelogs = years[year]
-      gamelogs.forEach((game, index) => {
+      gamelogs.forEach((game, gameIndex) => {
         const lead = (
           <>
             <div className='table__cell metric sticky__column game__day'>
@@ -46,7 +46,7 @@ export default class SelectedPlayerGamelogs extends React.Component {
         )
         rows.push(
           <PlayerSelectedRow
-            key={index}
+            key={`${yearIndex}/${gameIndex}`}
             stats={game}
             lead={lead}
             pos={position}
