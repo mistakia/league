@@ -1840,7 +1840,7 @@ CREATE TABLE `practice` (
 DROP TABLE IF EXISTS `gamelogs`;
 
 CREATE TABLE `gamelogs` (
-  `esbid` int(10) DEFAULT NULL,
+  `esbid` int(10) NOT NULL,
   `pid` varchar(7) NOT NULL,
   `tm` varchar(3) NOT NULL,
   `opp` varchar(3) NOT NULL,
@@ -1892,7 +1892,7 @@ CREATE TABLE `gamelogs` (
   `dsf` tinyint(2) DEFAULT 0,
   `dtpr` tinyint(2) DEFAULT 0,
   `dtd` tinyint(2) DEFAULT 0,
-  UNIQUE KEY `pid` (`pid`, `week`, `year`)
+  UNIQUE KEY `pid` (`pid`, `esbid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
