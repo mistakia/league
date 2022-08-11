@@ -23,7 +23,7 @@ import './app.styl'
 
 export default function App({ init, isPending, userId, isInitializing }) {
   const match = useMatch('leagues/:leagueId/*')
-  const leagueId = match ? Number(match.params.leagueId) : null
+  const leagueId = match ? Number(match.params.leagueId) : undefined
 
   useEffect(() => {
     async function onLoad() {
