@@ -15,7 +15,7 @@ import { Map } from 'immutable'
 
 import PlayerHeadshot from '@components/player-headshot'
 import { constants } from '@common'
-import Team from '@components/team'
+import NFLTeam from '@components/nfl-team'
 import TeamName from '@components/team-name'
 import Position from '@components/position'
 import PlayerAge from '@components/player-age'
@@ -146,7 +146,7 @@ export default class SelectedPlayer extends React.Component {
             </div>
             <div className='selected__player-meta'>
               <Position pos={pos} />
-              <Team team={playerMap.get('team')} />
+              <NFLTeam team={playerMap.get('team')} />
               <span>#{playerMap.get('jnum', '-')}</span>
             </div>
           </div>
