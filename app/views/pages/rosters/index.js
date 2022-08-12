@@ -14,13 +14,22 @@ const mapStateToProps = createSelector(
   getCurrentLeague,
   getTeamsForCurrentLeague,
   (rosters, league, teams) => {
-    let ps_count_max = 0
+    let ps_drafted_count_max = 0
+    let ps_signed_count_max = 0
     let bench_count_max = 0
     for (const roster of rosters.values()) {
-      const ps_count = roster.players.filter((r) =>
-        constants.ps_slots.includes(r.slot)
+      const ps_drafted_count = roster.players.filter((r) =>
+        constants.ps_drafted_slots.includes(r.slot)
       )
-      ps_count_max = Math.max(ps_count.size, ps_count_max)
+      ps_drafted_count_max = Math.max(
+        ps_drafted_count.size,
+        ps_drafted_count_max
+      )
+
+      const ps_signed_count = roster.players.filter((r) =>
+        constants.ps_signed_slots.includes(r.slot)
+      )
+      ps_signed_count_max = Math.max(ps_signed_count.size, ps_signed_count_max)
 
       const bench_count = roster.players.filter(
         (r) => r.slot === constants.slots.BENCH
@@ -28,7 +37,14 @@ const mapStateToProps = createSelector(
       bench_count_max = Math.max(bench_count.size, bench_count_max)
     }
 
-    return { rosters, league, teams, ps_count_max, bench_count_max }
+    return {
+      rosters,
+      league,
+      teams,
+      ps_drafted_count_max,
+      ps_signed_count_max,
+      bench_count_max
+    }
   }
 )
 

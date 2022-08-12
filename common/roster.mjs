@@ -68,7 +68,7 @@ export default class Roster {
   }
 
   get availablePracticeSpace() {
-    return this._league.ps - this.practice_non_rookie.length
+    return this._league.ps - this.practice_signed.length
   }
 
   get availableReserveSpace() {
@@ -112,9 +112,15 @@ export default class Roster {
     return this.players.filter((p) => constants.ps_slots.includes(p.slot))
   }
 
-  get practice_non_rookie() {
+  get practice_signed() {
     return this.players.filter(
       (p) => p.slot === constants.slots.PS || p.slot === constants.slots.PSP
+    )
+  }
+
+  get practice_drafted() {
+    return this.players.filter(
+      (p) => p.slot === constants.slots.PSD || p.slot === constants.slots.PSDP
     )
   }
 
@@ -244,7 +250,7 @@ export default class Roster {
   }
 
   hasOpenPracticeSquadSlot() {
-    return this.practice_non_rookie.length < this._league.ps
+    return this.practice_signed.length < this._league.ps
   }
 
   hasOpenBenchSlot(pos) {

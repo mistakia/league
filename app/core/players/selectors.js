@@ -502,7 +502,7 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
   status.tagged.transition = playerTag === constants.tags.TRANSITION
   status.tagged.franchise = playerTag === constants.tags.FRANCHISE
   status.protected =
-    playerSlot === constants.slots.PSP || playerSlot === constants.slots.PSRP
+    playerSlot === constants.slots.PSP || playerSlot === constants.slots.PSDP
   status.starter = constants.starterSlots.includes(playerSlot)
   status.locked = isPlayerLocked(state, { playerMap })
   status.active = isSlotActive(playerSlot)
@@ -580,7 +580,7 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
         if (
           constants.isRegularSeason &&
           (playerSlot === constants.slots.PS ||
-            playerSlot === constants.slots.PSR) &&
+            playerSlot === constants.slots.PSD) &&
           !leaguePoaches.has(playerId)
         ) {
           status.eligible.protect = true
@@ -612,7 +612,7 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
       // make sure player is unprotected and it is not a santuary period
       if (
         (playerSlot === constants.slots.PS ||
-          playerSlot === constants.slots.PSR) &&
+          playerSlot === constants.slots.PSD) &&
         !isSantuaryPeriod(league)
       ) {
         const rosterInfo = getRosterInfoForPlayerId(state, {

@@ -155,7 +155,7 @@ router.post(
           this.where({
             slot: constants.slots.PS
           }).orWhere({
-            slot: constants.slots.PSR
+            slot: constants.slots.PSD
           })
         })
         .whereNull('poaches.processed')

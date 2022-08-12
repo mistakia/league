@@ -151,7 +151,7 @@ router.post('/?', async (req, res) => {
     const isDraftedRookie = transactionsSinceAcquisition.find(
       (t) => t.type === constants.transactions.DRAFT
     )
-    const slot = isDraftedRookie ? constants.slots.PSR : constants.slots.PS
+    const slot = isDraftedRookie ? constants.slots.PSD : constants.slots.PS
 
     await db('rosters_players').update({ slot }).where({
       rid: rosterRow.uid,

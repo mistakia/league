@@ -251,6 +251,8 @@ export function getGroupedPlayersByTeamId(state, { tid }) {
     return {
       active: new List(),
       practice: new List(),
+      practice_signed: new List(),
+      practice_drafted: new List(),
       ir: new List(),
       cov: new List(),
       players: new List(),
@@ -265,12 +267,27 @@ export function getGroupedPlayersByTeamId(state, { tid }) {
   const practice = new List(
     r.practice.map(({ pid }) => getPlayerById(state, { pid }))
   )
+  const practice_signed = new List(
+    r.practice_signed.map(({ pid }) => getPlayerById(state, { pid }))
+  )
+  const practice_drafted = new List(
+    r.practice_drafted.map(({ pid }) => getPlayerById(state, { pid }))
+  )
   const ir = new List(r.ir.map(({ pid }) => getPlayerById(state, { pid })))
   const cov = new List(r.cov.map(({ pid }) => getPlayerById(state, { pid })))
 
   const players = active.concat(practice).concat(ir).concat(cov)
 
-  return { active, practice, players, ir, cov, roster: r }
+  return {
+    active,
+    practice,
+    practice_signed,
+    practice_drafted,
+    players,
+    ir,
+    cov,
+    roster: r
+  }
 }
 
 export function getCurrentPlayers(state) {

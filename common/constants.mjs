@@ -442,12 +442,12 @@ export const slots = {
   K: 9,
   DST: 10,
   BENCH: 11,
-  PS: 12,
+  PS: 12, // practice squad - signed
   IR: 13,
   COV: 14,
-  PSP: 15,
-  PSR: 16,
-  PSRP: 17
+  PSP: 15, // practice squad - signed and protected
+  PSD: 16, // practice squad - drafted
+  PSDP: 17 // practice squad - drafted and protected
 }
 
 export const starterSlots = [
@@ -463,7 +463,9 @@ export const starterSlots = [
   slots.DST
 ]
 
-export const ps_slots = [slots.PS, slots.PSP, slots.PSR, slots.PSRP]
+export const ps_slots = [slots.PS, slots.PSP, slots.PSD, slots.PSDP]
+export const ps_signed_slots = [slots.PS, slots.PSP]
+export const ps_drafted_slots = [slots.PSD, slots.PSDP]
 
 export const slotName = {
   [slots.QB]: 'QB',
@@ -481,8 +483,8 @@ export const slotName = {
   [slots.IR]: 'IR',
   [slots.COV]: 'COV',
   [slots.PSP]: 'PS (P)',
-  [slots.PSR]: 'PSR',
-  [slots.PSRP]: 'PSR (P)'
+  [slots.PSD]: 'PSD',
+  [slots.PSDP]: 'PSD (P)'
 }
 
 export const matchups = {
