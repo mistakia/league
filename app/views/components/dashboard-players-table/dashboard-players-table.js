@@ -192,7 +192,7 @@ export default class DashboardPlayersTable extends React.Component {
     const week = Math.max(constants.week, 1)
 
     let summary
-    if (space) {
+    if (typeof space !== 'undefined') {
       summary = (
         <div className='section__summary'>
           <div className='section__summary-item'>Rostered: {items.length}</div>
