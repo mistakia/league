@@ -86,10 +86,6 @@ const run = async ({
   year = constants.season.year,
   seas_type = 'REG'
 } = {}) => {
-  if (week > constants.season.nflFinalWeek) {
-    return
-  }
-
   let gamelog_update_count = 0
   let play_update_count = 0
 
