@@ -73,7 +73,7 @@ describe('API /teams - deactivate', function () {
 
       res.body.tid.should.equal(teamId)
       res.body.pid.should.equal(player.pid)
-      res.body.slot.should.equal(constants.slots.PSR)
+      res.body.slot.should.equal(constants.slots.PSD)
       res.body.transaction.userid.should.equal(userId)
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
@@ -95,7 +95,7 @@ describe('API /teams - deactivate', function () {
         .limit(1)
 
       const rosterRow = rosterRows[0]
-      expect(rosterRow.slot).to.equal(constants.slots.PSR)
+      expect(rosterRow.slot).to.equal(constants.slots.PSD)
 
       await checkLastTransaction({
         leagueId,

@@ -150,31 +150,44 @@ export default function DashboardPage() {
     }
   }
 
-  const practiceItems = []
   for (const playerMap of players.practice) {
     if (!playerMap.get('pid')) continue
-    practiceItems.push(
-      <PlayerRoster key={playerMap.get('pid')} playerMap={playerMap} />
-    )
 
     const poach = poaches.find(
       (p) => p.getIn(['playerMap', 'pid']) === playerMap.get('pid')
     )
-    if (poach) {
-      const processingTime = dayjs.unix(poach.submitted).add('48', 'hours')
-      notices.push(
-        <Alert key={playerMap.get('pid')} severity='warning'>
-          <div>
-            {playerMap.get('name', 'N/A')} has a poaching claim that will be
-            processed {processingTime.fromNow()} on{' '}
-            {processingTime.format('dddd, h:mm a')}.
-          </div>
-          <div>
-            Submitted by: <TeamName tid={poach.tid} />
-          </div>
-        </Alert>
-      )
-    }
+
+    if (!poach) continue
+
+    const processingTime = dayjs.unix(poach.submitted).add('48', 'hours')
+    notices.push(
+      <Alert key={playerMap.get('pid')} severity='warning'>
+        <div>
+          {playerMap.get('name', 'N/A')} has a poaching claim that will be
+          processed {processingTime.fromNow()} on{' '}
+          {processingTime.format('dddd, h:mm a')}.
+        </div>
+        <div>
+          Submitted by: <TeamName tid={poach.tid} />
+        </div>
+      </Alert>
+    )
+  }
+
+  const practice_signed_items = []
+  for (const playerMap of players.practice_signed) {
+    if (!playerMap.get('pid')) continue
+    practice_signed_items.push(
+      <PlayerRoster key={playerMap.get('pid')} playerMap={playerMap} />
+    )
+  }
+
+  const practice_drafted_items = []
+  for (const playerMap of players.practice_drafted) {
+    if (!playerMap.get('pid')) continue
+    practice_drafted_items.push(
+      <PlayerRoster key={playerMap.get('pid')} playerMap={playerMap} />
+    )
   }
 
   const teamPoaches = poaches.filter((p) => p.tid === teamId)
@@ -256,9 +269,15 @@ export default function DashboardPage() {
           </Grid>
           <Grid item xs={12}>
             <DashboardPlayersTable
-              items={practiceItems}
-              title='Practice Squad'
+              items={practice_signed_items}
+              title='Practice Squad — Signed'
               space={roster.availablePracticeSpace}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <DashboardPlayersTable
+              items={practice_drafted_items}
+              title='Practice Squad — Drafted'
             />
           </Grid>
           <Grid item xs={12}>

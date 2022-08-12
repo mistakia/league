@@ -23,7 +23,7 @@ export default async function ({ pid, release = [], lid, tid, userid }) {
   // verify player is on the practice squad
   if (
     rosterSlot.slot !== constants.slots.PS &&
-    rosterSlot.slot !== constants.slots.PSR
+    rosterSlot.slot !== constants.slots.PSD
   ) {
     throw new Error('player is not on a practice squad')
   }

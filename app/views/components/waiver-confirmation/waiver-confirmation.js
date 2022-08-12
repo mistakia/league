@@ -58,7 +58,7 @@ export default class WaiverConfirmation extends React.Component {
     for (const releasePlayerMap of players) {
       const r = new Roster({ roster: roster.toJS(), league })
       const slot = releasePlayerMap.get('slot')
-      if (slot === constants.slots.PSP || slot === constants.slots.PSRP)
+      if (slot === constants.slots.PSP || slot === constants.slots.PSDP)
         continue
       r.removePlayer(releasePlayerMap.get('pid'))
       if (isActiveRoster) {

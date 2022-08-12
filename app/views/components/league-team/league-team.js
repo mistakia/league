@@ -57,10 +57,18 @@ export default function LeagueTeam({
     }
   }
 
-  const practiceItems = []
-  for (const playerMap of players.practice) {
+  const practice_signed_items = []
+  for (const playerMap of players.practice_signed) {
     if (!playerMap.get('pid')) continue
-    practiceItems.push(
+    practice_signed_items.push(
+      <PlayerRoster key={playerMap.get('pid')} playerMap={playerMap} />
+    )
+  }
+
+  const practice_drafted_items = []
+  for (const playerMap of players.practice_drafted) {
+    if (!playerMap.get('pid')) continue
+    practice_drafted_items.push(
       <PlayerRoster key={playerMap.get('pid')} playerMap={playerMap} />
     )
   }
@@ -94,9 +102,15 @@ export default function LeagueTeam({
         </Grid>
         <Grid item xs={12}>
           <DashboardPlayersTable
-            items={practiceItems}
-            title='Practice Squad'
+            items={practice_signed_items}
+            title='Practice Squad — Signed'
             space={roster.availablePracticeSpace}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <DashboardPlayersTable
+            items={practice_drafted_items}
+            title='Practice Squad — Drafted'
           />
         </Grid>
         <Grid item xs={12}>

@@ -41,7 +41,7 @@ export default async function ({
     roster.players.find(
       (p) =>
         p.pid === release_pid &&
-        (p.slot === constants.slots.PSP || p.slot === constants.slots.PSRP)
+        (p.slot === constants.slots.PSP || p.slot === constants.slots.PSDP)
     )
   ) {
     throw new Error('player is protected')
@@ -102,7 +102,7 @@ export default async function ({
       roster.players.find(
         (p) =>
           p.pid === activate_pid &&
-          (p.slot === constants.slots.PSP || p.slot === constants.slots.PSRP)
+          (p.slot === constants.slots.PSP || p.slot === constants.slots.PSDP)
       )
     ) {
       throw new Error('player is protected')

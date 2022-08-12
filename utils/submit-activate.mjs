@@ -29,7 +29,7 @@ export default async function ({ tid, activate_pid, leagueId, userId }) {
     roster.players.find(
       (p) =>
         p.pid === activate_pid &&
-        (p.slot === constants.slots.PSP || p.slot === constants.slots.PSRP)
+        (p.slot === constants.slots.PSP || p.slot === constants.slots.PSDP)
     )
   ) {
     throw new Error('player is protected')
