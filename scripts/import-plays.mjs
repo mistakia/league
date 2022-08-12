@@ -30,7 +30,7 @@ const getPlayData = (play) => ({
   pos_team_id: play.possessionTeamId,
   qtr: play.quarter,
   seas: play.season,
-  seas_type: play.seasonType,
+  // seas_type: play.seasonType,
   away_score: play.visitorScore,
   wk: play.week,
   ydl_num: play.yardlineNumber,
@@ -120,6 +120,7 @@ const run = async ({
         await db('nfl_plays')
           .update({
             ...playData,
+            seas_type,
             updated: timestamp
           })
           .where({ playId, esbid })
@@ -128,6 +129,7 @@ const run = async ({
           playId,
           esbid,
           updated: timestamp,
+          seas_type,
           ...playData
         })
       }
@@ -224,7 +226,7 @@ const main = async () => {
 
       if (!argv.seas_type || argv.seas_type.toLowerCase() === 'pre') {
         if (argv.week) {
-          await run({ year, week: argv.week, seas_type: 'REG' })
+          await run({ year, week: argv.week, seas_type: 'PRE' })
         } else {
           const weeks = await db('nfl_games')
             .select('wk')
