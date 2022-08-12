@@ -10,47 +10,45 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { toPercent } from '@common'
 import Rank from '@components/rank'
 
-export default class DashboardTeamSummaryChampionshipOdds extends React.Component {
-  render = () => {
-    const { team, teams, rank } = this.props
+export default function DashboardTeamSummaryChampionshipOdds({ teams, tid }) {
+  const team = teams.find((t) => t.uid === tid)
+  const rank = teams.findIndex((t) => t.uid === tid) + 1
 
-    const items = []
-    for (const team of teams.valueSeq()) {
-      items.push(
-        <tr key={team.uid}>
-          <td>{team.name}</td>
-          <td>{toPercent(team.championship_odds)}</td>
-        </tr>
-      )
-    }
-
-    return (
-      <Accordion TransitionProps={{ unmountOnExit: true }}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Grid container>
-            <Grid item xs={7}>
-              Championship Odds
-            </Grid>
-            <Grid item xs={3}>
-              {toPercent(team.championship_odds)}
-            </Grid>
-            <Grid item xs={2}>
-              <Rank rank={rank} size={teams.size} />
-            </Grid>
-          </Grid>
-        </AccordionSummary>
-        <AccordionDetails>
-          <table>
-            <tbody>{items}</tbody>
-          </table>
-        </AccordionDetails>
-      </Accordion>
+  const items = []
+  for (const team of teams.valueSeq()) {
+    items.push(
+      <tr key={team.uid}>
+        <td>{team.name}</td>
+        <td>{toPercent(team.championship_odds)}</td>
+      </tr>
     )
   }
+
+  return (
+    <Accordion TransitionProps={{ unmountOnExit: true }}>
+      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+        <Grid container>
+          <Grid item xs={7}>
+            Championship Odds
+          </Grid>
+          <Grid item xs={3}>
+            {toPercent(team.championship_odds)}
+          </Grid>
+          <Grid item xs={2}>
+            <Rank rank={rank} size={teams.size} />
+          </Grid>
+        </Grid>
+      </AccordionSummary>
+      <AccordionDetails>
+        <table>
+          <tbody>{items}</tbody>
+        </table>
+      </AccordionDetails>
+    </Accordion>
+  )
 }
 
 DashboardTeamSummaryChampionshipOdds.propTypes = {
-  team: ImmutablePropTypes.record,
   teams: ImmutablePropTypes.list,
-  rank: PropTypes.number
+  tid: PropTypes.number
 }

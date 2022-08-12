@@ -14,8 +14,7 @@ export default class Rank extends React.Component {
 
     return (
       <span className={classNames.join(' ')}>
-        {rank}
-        {nth(rank)}
+        {Boolean(rank) && `${rank}${nth(rank)}`}
       </span>
     )
   }

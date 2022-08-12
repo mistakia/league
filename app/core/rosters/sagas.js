@@ -49,7 +49,7 @@ import { waiverActions, getWaiverPlayersForCurrentTeam } from '@core/waivers'
 import { getCurrentLeague } from '@core/leagues'
 import Worker from 'workerize-loader?inline!../worker' // eslint-disable-line import/no-webpack-loader-syntax
 import { csv } from '@core/export'
-import { getTeamById } from '@core/teams'
+import { teamActions, getTeamById } from '@core/teams'
 
 export function* initRosters() {
   const { leagueId } = yield select(getApp)
@@ -614,6 +614,10 @@ export function* watchLoadRosters() {
   yield takeLatest(rosterActions.LOAD_ROSTERS, loadRosters)
 }
 
+export function* watchLoadTeams() {
+  yield takeLatest(teamActions.LOAD_TEAMS, loadRosters)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -663,5 +667,6 @@ export const rosterSagas = [
 
   fork(watchExportRosters),
 
-  fork(watchLoadRosters)
+  fork(watchLoadRosters),
+  fork(watchLoadTeams)
 ]
