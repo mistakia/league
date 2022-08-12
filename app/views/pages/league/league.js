@@ -8,6 +8,7 @@ export default function LeaguePage() {
 
   const menu = (
     <div className='menu'>
+      <NavLink to={`/leagues/${lid}/teams`}>Team</NavLink>
       <NavLink to={`/leagues/${lid}/transactions`}>Transactions</NavLink>
       <NavLink to={`/leagues/${lid}/waivers`}>Waivers</NavLink>
       <NavLink to={`/leagues/${lid}/rosters`}>Rosters</NavLink>

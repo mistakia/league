@@ -1,13 +1,13 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getCurrentTeamRosterPositionalValue } from '@core/rosters'
+import { getRosterPositionalValueByTeamId } from '@core/rosters'
 import { getCurrentLeague } from '@core/leagues'
 
 import DashboardTeamValue from './dashboard-team-value'
 
 const mapStateToProps = createSelector(
-  getCurrentTeamRosterPositionalValue,
+  getRosterPositionalValueByTeamId,
   getCurrentLeague,
   (summary, league) => {
     const quarterOfLeague = Math.ceil(league.nteams / 4)

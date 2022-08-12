@@ -4,7 +4,7 @@ import { Roster, constants, isSlotActive } from '@common'
 import { getApp } from '@core/app'
 import { getPlayerById, getAllPlayers } from '@core/players'
 import { getCurrentLeague } from '@core/leagues'
-import { getTeamsForCurrentLeague, getCurrentTeam } from '@core/teams'
+import { getTeamsForCurrentLeague, getTeamById } from '@core/teams'
 
 import { Roster as RosterRecord } from './roster'
 
@@ -188,11 +188,11 @@ export function getCurrentTeamRoster(state) {
   return new Roster({ roster: rec.toJS(), league })
 }
 
-export function getCurrentTeamRosterPositionalValue(state) {
+export function getRosterPositionalValueByTeamId(state, { tid }) {
   const rosterRecords = getRostersForCurrentLeague(state)
   const league = getCurrentLeague(state)
   const teams = getTeamsForCurrentLeague(state)
-  const team = getCurrentTeam(state)
+  const team = getTeamById(state, { tid })
   const divTeamIds = teams.filter((t) => t.div === team.div).map((t) => t.uid)
 
   const values = {
@@ -243,11 +243,10 @@ export function getCurrentTeamRosterPositionalValue(state) {
   return values
 }
 
-export function getCurrentPlayers(state) {
+export function getGroupedPlayersByTeamId(state, { tid }) {
   const rosters = getRosters(state)
-  const { teamId, leagueId } = getApp(state)
-  const league = state.get('leagues').get(leagueId)
-  const roster = rosters.getIn([teamId, constants.week])
+  const league = getCurrentLeague(state)
+  const roster = rosters.getIn([tid, constants.week])
   if (!roster) {
     return {
       active: new List(),
@@ -272,4 +271,9 @@ export function getCurrentPlayers(state) {
   const players = active.concat(practice).concat(ir).concat(cov)
 
   return { active, practice, players, ir, cov, roster: r }
+}
+
+export function getCurrentPlayers(state) {
+  const { teamId } = getApp(state)
+  return getGroupedPlayersByTeamId(state, { tid: teamId })
 }

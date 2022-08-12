@@ -28,8 +28,11 @@ export const teamActions = {
   GET_LEAGUE_TEAM_STATS_PENDING: 'GET_LEAGUE_TEAM_STATS_PENDING',
   GET_LEAGUE_TEAM_STATS_FULFILLED: 'GET_LEAGUE_TEAM_STATS_FULFILLED',
 
-  loadTeams: () => ({
-    type: teamActions.LOAD_TEAMS
+  loadTeams: (leagueId) => ({
+    type: teamActions.LOAD_TEAMS,
+    payload: {
+      leagueId: Number(leagueId)
+    }
   }),
 
   loadLeagueTeamStats: (leagueId) => ({

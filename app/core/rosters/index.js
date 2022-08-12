@@ -5,6 +5,7 @@ export {
   getRostersForCurrentLeague,
   getStartersByTeamId,
   getPlayersByTeamId,
+  getGroupedPlayersByTeamId,
   getCurrentTeamRoster,
   getCurrentTeamRosterRecord,
   getCurrentPlayers,
@@ -19,7 +20,7 @@ export {
   getRosterInfoForPlayerId,
   getActivePlayersByRosterForCurrentLeague,
   getAvailablePlayersForCurrentLeague,
-  getCurrentTeamRosterPositionalValue
+  getRosterPositionalValueByTeamId
 } from './selectors'
 export { rosterSagas } from './sagas'
 export { rostersReducer } from './reducer'
