@@ -46,8 +46,8 @@ export function* loadAllPlayers() {
   yield call(fetchAllPlayers, { leagueId })
 }
 
-export function* loadTeamPlayers() {
-  const { teamId, leagueId } = yield select(getApp)
+export function* loadTeamPlayers({ payload }) {
+  const { teamId, leagueId } = payload
   yield call(getTeamPlayers, { teamId, leagueId })
 }
 
@@ -159,7 +159,9 @@ export function* init({ payload }) {
   } else if (league_player_paths.includes(pathname)) {
     yield fork(loadLeaguePlayers)
   } else {
-    yield fork(loadTeamPlayers)
+    const teamId = (payload.data.teams[0] || {}).uid
+    const leagueId = (payload.data.leagues[0] || {}).uid
+    yield fork(loadTeamPlayers, { payload: { teamId, leagueId } })
   }
   yield fork(getBaselines, { leagueId: league.uid })
   yield fork(fetchCutlist)
@@ -345,6 +347,10 @@ export function* watchLoadLeaguePlayers() {
   yield takeLatest(playerActions.LOAD_LEAGUE_PLAYERS, loadLeaguePlayers)
 }
 
+export function* watchLoadTeamPlayers() {
+  yield takeLatest(playerActions.LOAD_TEAM_PLAYERS, loadTeamPlayers)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -381,5 +387,6 @@ export const playerSagas = [
   fork(watchLoadPlayerGamelogs),
   fork(watchLoadPlayerPractices),
   fork(watchLoadAllPlayers),
-  fork(watchLoadLeaguePlayers)
+  fork(watchLoadLeaguePlayers),
+  fork(watchLoadTeamPlayers)
 ]

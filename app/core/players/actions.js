@@ -1,6 +1,7 @@
 export const playerActions = {
   LOAD_ALL_PLAYERS: 'LOAD_ALL_PLAYERS',
   LOAD_LEAGUE_PLAYERS: 'LOAD_LEAGUE_PLAYERS',
+  LOAD_TEAM_PLAYERS: 'LOAD_TEAM_PLAYERS',
 
   SET_WATCHLIST: 'SET_WATCHLIST',
   TOGGLE_WATCHLIST: 'TOGGLE_WATCHLIST',
@@ -100,6 +101,14 @@ export const playerActions = {
 
   loadLeaguePlayers: () => ({
     type: playerActions.LOAD_LEAGUE_PLAYERS
+  }),
+
+  loadTeamPlayers: ({ leagueId, teamId }) => ({
+    type: playerActions.LOAD_TEAM_PLAYERS,
+    payload: {
+      leagueId,
+      teamId
+    }
   }),
 
   getPlayerProjections: (pid) => ({

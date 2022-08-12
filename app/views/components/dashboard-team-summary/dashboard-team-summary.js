@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 import { constants } from '@common'
 import DashboardTeamSummaryFAAB from '@components/dashboard-team-summary-faab'
@@ -11,21 +12,31 @@ import DashboardTeamSummaryDivisionOdds from '@components/dashboard-team-summary
 import DashboardTeamSummaryChampionshipOdds from '@components/dashboard-team-summary-championship-odds'
 import DashboardTeamSummaryFranchiseTags from '@components/dashboard-team-summary-franchise-tags'
 
-const DashboardTeamSummary = () => (
-  <div className='dashboard__section-side'>
-    <div className='dashboard__section-side-title'>Summary</div>
-    <div className='dashboard__section-side-body'>
-      {constants.isRegularSeason && <DashboardTeamSummaryRecord />}
-      {constants.isRegularSeason && <DashboardTeamSummaryPlayoffOdds />}
-      {constants.isRegularSeason && <DashboardTeamSummaryDivisionOdds />}
-      {constants.isRegularSeason && <DashboardTeamSummaryByeOdds />}
-      {constants.isRegularSeason && <DashboardTeamSummaryChampionshipOdds />}
-      {constants.isRegularSeason && <DashboardTeamSummaryFAAB />}
-      <DashboardTeamSummarySalary />
-      <DashboardTeamSummaryWaiverOrder />
-      <DashboardTeamSummaryFranchiseTags />
+export default function DashboardTeamSummary({ tid }) {
+  return (
+    <div className='dashboard__section-side'>
+      <div className='dashboard__section-side-title'>Summary</div>
+      <div className='dashboard__section-side-body'>
+        {constants.isRegularSeason && <DashboardTeamSummaryRecord tid={tid} />}
+        {constants.isRegularSeason && (
+          <DashboardTeamSummaryPlayoffOdds tid={tid} />
+        )}
+        {constants.isRegularSeason && (
+          <DashboardTeamSummaryDivisionOdds tid={tid} />
+        )}
+        {constants.isRegularSeason && <DashboardTeamSummaryByeOdds tid={tid} />}
+        {constants.isRegularSeason && (
+          <DashboardTeamSummaryChampionshipOdds tid={tid} />
+        )}
+        {constants.isRegularSeason && <DashboardTeamSummaryFAAB tid={tid} />}
+        <DashboardTeamSummarySalary tid={tid} />
+        <DashboardTeamSummaryWaiverOrder tid={tid} />
+        <DashboardTeamSummaryFranchiseTags tid={tid} />
+      </div>
     </div>
-  </div>
-)
+  )
+}
 
-export default DashboardTeamSummary
+DashboardTeamSummary.propTypes = {
+  tid: PropTypes.number
+}

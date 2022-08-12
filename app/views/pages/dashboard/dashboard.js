@@ -290,10 +290,10 @@ export default function DashboardPage() {
           </Grid>
         </Grid>
         <Grid item xs={12} md={4}>
-          <DashboardTeamSummary />
-          <DashboardTeamValue />
-          <DashboardLeaguePositionalValue />
-          <DashboardByeWeeks />
+          <DashboardTeamSummary tid={teamId }/>
+          <DashboardTeamValue tid={teamId }/>
+          <DashboardLeaguePositionalValue tid={teamId} />
+          <DashboardByeWeeks tid={teamId} />
         </Grid>
       </Grid>
     </Container>

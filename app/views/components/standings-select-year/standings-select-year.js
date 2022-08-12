@@ -22,11 +22,7 @@ export default class StandingsSelectYear extends React.Component {
     })
 
     return (
-      <FormControl
-        size='small'
-        variant='outlined'
-        className='standings__select-year'
-      >
+      <FormControl size='small' variant='outlined'>
         <InputLabel id='standings__view-menu-label'>Year</InputLabel>
         <Select
           labelId='standings__view-menu-label'

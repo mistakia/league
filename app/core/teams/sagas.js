@@ -138,6 +138,10 @@ export function* watchLoadRosters() {
   yield takeLatest(rosterActions.LOAD_ROSTERS, loadTeams)
 }
 
+export function* watchLoadTeams() {
+  yield takeLatest(teamActions.LOAD_TEAMS, loadTeams)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -158,5 +162,6 @@ export const teamSagas = [
   fork(watchLoadTransactions),
   fork(watchLoadWaivers),
   fork(watchLoadMatchups),
-  fork(watchLoadRosters)
+  fork(watchLoadRosters),
+  fork(watchLoadTeams)
 ]

@@ -9,6 +9,7 @@ import { transactionsActions } from '@core/transactions'
 import { waiverActions } from '@core/waivers'
 import { teamActions } from '@core/teams'
 import { matchupsActions } from '@core/matchups'
+import { playerActions } from '@core/players'
 
 const initialState = new Record({
   token: null,
@@ -90,6 +91,7 @@ export function appReducer(state = initialState(), { payload, type }) {
     case waiverActions.LOAD_WAIVERS:
     case teamActions.LOAD_LEAGUE_TEAM_STATS:
     case matchupsActions.LOAD_MATCHUPS:
+    case playerActions.LOAD_TEAM_PLAYERS:
       return state.merge({
         leagueId: Number(payload.leagueId)
       })
