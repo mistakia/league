@@ -21,5 +21,5 @@ export function getGamelogByPlayerId(
   state,
   { pid, week, year = constants.year }
 ) {
-  return state.getIn(['gamelogs', 'players', `${year}/${week}/${pid}`])
+  return state.getIn(['gamelogs', 'players', `${year}/REG/${week}/${pid}`])
 }
