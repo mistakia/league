@@ -348,7 +348,7 @@ export function getGamesByYearForSelectedPlayer(state) {
   const pid = state.get('players').get('selected')
   const playerMap = getPlayerById(state, { pid })
   const gamelogs = getPlayerGamelogs(state)
-  const games = gamelogs.filter((p) => p.pid === pid)
+  const games = gamelogs.filter((p) => p.pid === pid && p.seas_type === 'REG')
 
   const years = {}
   for (const game of games) {

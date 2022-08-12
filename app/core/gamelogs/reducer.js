@@ -31,7 +31,10 @@ export function gamelogsReducer(state = initialState, { payload, type }) {
     case playerActions.GET_PLAYER_GAMELOGS_FULFILLED:
       return state.withMutations((state) => {
         payload.data.forEach((g) =>
-          state.setIn(['players', `${g.year}/${g.week}/${g.pid}`], g)
+          state.setIn(
+            ['players', `${g.year}/${g.seas_type}/${g.week}/${g.pid}`],
+            g
+          )
         )
       })
 

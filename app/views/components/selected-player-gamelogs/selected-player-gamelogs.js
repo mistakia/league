@@ -45,9 +45,11 @@ export default class SelectedPlayerGamelogs extends React.Component {
             <div className='table__cell metric'>{game.pos_rnk || '-'}</div>
           </>
         )
+
         rows.push(
           <PlayerSelectedRow
             key={`${yearIndex}/${gameIndex}`}
+            className={game.seas_type}
             stats={game}
             lead={lead}
             pos={position}
