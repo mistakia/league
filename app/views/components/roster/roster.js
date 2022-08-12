@@ -10,7 +10,14 @@ import './roster.styl'
 
 export default class Roster extends React.Component {
   render = () => {
-    const { roster, league, teamId, ps_count_max, bench_count_max } = this.props
+    const {
+      roster,
+      league,
+      teamId,
+      ps_drafted_count_max,
+      ps_signed_count_max,
+      bench_count_max
+    } = this.props
 
     if (!roster) {
       return null
@@ -144,14 +151,27 @@ export default class Roster extends React.Component {
     }
 
     if (league.ps) {
-      const slot = constants.slots.PS
-      const players = r.practice.sort((a, b) => b.value - a.value)
-      for (let i = 0; i < ps_count_max; i++) {
-        const { pid } = players[i] || {}
+      const signed_players = r.practice_signed.sort((a, b) => b.value - a.value)
+      for (let i = 0; i < ps_signed_count_max; i++) {
+        const { pid } = signed_players[i] || {}
         rows.push(
           <PlayerRosterRow
-            key={`${slot}${i}`}
-            practice
+            key={`${constants.slots.PS}${i}`}
+            practice_signed
+            {...{ pid, roster, showBid }}
+          />
+        )
+      }
+
+      const drafted_players = r.practice_drafted.sort(
+        (a, b) => b.value - a.value
+      )
+      for (let i = 0; i < ps_drafted_count_max; i++) {
+        const { pid } = drafted_players[i] || {}
+        rows.push(
+          <PlayerRosterRow
+            key={`${constants.slots.PSD}${i}`}
+            practice_drafted
             {...{ pid, roster, showBid }}
           />
         )
@@ -189,6 +209,7 @@ Roster.propTypes = {
   roster: ImmutablePropTypes.record,
   league: PropTypes.object,
   teamId: PropTypes.number,
-  ps_count_max: PropTypes.number,
+  ps_signed_count_max: PropTypes.number,
+  ps_drafted_count_max: PropTypes.number,
   bench_count_max: PropTypes.number
 }

@@ -310,7 +310,7 @@ router.post('/?', async (req, res) => {
           this.where({
             slot: constants.slots.PS
           }).orWhere({
-            slot: constants.slots.PSR
+            slot: constants.slots.PSD
           })
         })
       if (!slots.length) {
@@ -342,7 +342,7 @@ router.post('/?', async (req, res) => {
         const releasePlayer = roster.get(release_pid)
         if (
           releasePlayer.slot === constants.slots.PSP ||
-          releasePlayer.slot === constants.slots.PSRP
+          releasePlayer.slot === constants.slots.PSDP
         ) {
           return res.status(400).send({ error: 'invalid release' })
         }

@@ -53,7 +53,7 @@ export default async function ({
   // make sure player is not protected
   if (
     rosterPlayer.slot === constants.slots.PSP ||
-    rosterPlayer.slot === constants.slots.PSRP
+    rosterPlayer.slot === constants.slots.PSDP
   ) {
     throw new Error('protected players are not reserve eligible')
   }

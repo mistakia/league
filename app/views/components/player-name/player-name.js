@@ -46,7 +46,7 @@ export default class PlayerName extends React.Component {
           </div>
         </div>
         <div className='player__name-label'>
-          {(slot === constants.slots.PSP || slot === constants.slots.PSRP) && (
+          {(slot === constants.slots.PSP || slot === constants.slots.PSDP) && (
             <PlayerLabel label='P' description='Protected Practice Squad' />
           )}
           {isOnCutlist && (

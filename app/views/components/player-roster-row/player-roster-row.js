@@ -16,7 +16,8 @@ class PlayerRosterRow extends Player {
       isHosted,
       league,
       showBid,
-      practice,
+      practice_signed,
+      practice_drafted,
       reserve
     } = this.props
 
@@ -24,7 +25,8 @@ class PlayerRosterRow extends Player {
     const isSelected = pid && selected === pid
     const classNames = ['roster__item']
     if (isSelected) classNames.push('selected')
-    if (practice) classNames.push('practice')
+    if (practice_signed) classNames.push('practice__signed')
+    if (practice_drafted) classNames.push('practice__drafted')
     if (reserve) classNames.push('reserve')
 
     const deadline = dayjs.unix(league.ext_date)

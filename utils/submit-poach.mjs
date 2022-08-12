@@ -48,7 +48,7 @@ export default async function ({
       this.where({
         slot: constants.slots.PS
       }).orWhere({
-        slot: constants.slots.PSR
+        slot: constants.slots.PSD
       })
     })
   if (!slots.length) {

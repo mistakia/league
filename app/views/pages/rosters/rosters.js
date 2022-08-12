@@ -18,7 +18,8 @@ export default function RostersPage({
   rosters,
   league,
   teams,
-  ps_count_max,
+  ps_drafted_count_max,
+  ps_signed_count_max,
   bench_count_max
 }) {
   const { lid } = useParams()
@@ -140,10 +141,18 @@ export default function RostersPage({
   }
 
   if (league.ps) {
-    for (let i = 0; i < ps_count_max; i++) {
+    for (let i = 0; i < ps_signed_count_max; i++) {
       labels.push(
         <div key={`${i}PS`} className='roster__item'>
           PS
+        </div>
+      )
+    }
+
+    for (let i = 0; i < ps_drafted_count_max; i++) {
+      labels.push(
+        <div key={`${i}PS`} className='roster__item'>
+          PSD
         </div>
       )
     }
@@ -165,7 +174,12 @@ export default function RostersPage({
       <Roster
         key={index}
         tid={roster.tid}
-        {...{ roster, ps_count_max, bench_count_max }}
+        {...{
+          roster,
+          ps_drafted_count_max,
+          ps_signed_count_max,
+          bench_count_max
+        }}
       />
     )
   })
@@ -200,7 +214,8 @@ RostersPage.propTypes = {
   teams: ImmutablePropTypes.map,
   league: PropTypes.object,
   exportRosters: PropTypes.func,
-  ps_count_max: PropTypes.number,
+  ps_drafted_count_max: PropTypes.number,
+  ps_signed_count_max: PropTypes.number,
   bench_count_max: PropTypes.number,
   loadLeaguePlayers: PropTypes.func,
   loadRosters: PropTypes.func

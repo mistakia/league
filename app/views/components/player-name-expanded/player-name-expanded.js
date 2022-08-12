@@ -125,7 +125,7 @@ class PlayerNameExpanded extends Player {
               <PlayerLabel label='R' type='rookie' description='Rookie' />
             )}
             {(slot === constants.slots.PSP ||
-              slot === constants.slots.PSRP) && (
+              slot === constants.slots.PSDP) && (
               <PlayerLabel label='P' description='Protected Practice Squad' />
             )}
             <PlayerTag tag={playerMap.get('tag')} />

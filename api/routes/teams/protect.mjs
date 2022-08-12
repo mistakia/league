@@ -70,7 +70,7 @@ router.post('/?', async (req, res) => {
       roster.practice.find(
         (p) =>
           p.pid === pid &&
-          (p.slot === constants.slots.PSP || p.slot === constants.slots.PSRP)
+          (p.slot === constants.slots.PSP || p.slot === constants.slots.PSDP)
       )
     ) {
       return res.status(400).send({ error: 'player is already protected' })
@@ -96,7 +96,7 @@ router.post('/?', async (req, res) => {
       a.timestamp > b.timestamp ? a : b
     )
 
-    const slot = constants.slots.PS ? constants.slots.PSP : constants.slots.PSRP
+    const slot = constants.slots.PS ? constants.slots.PSP : constants.slots.PSDP
     await db('rosters_players').update({ slot }).where({
       rid: rosterRow.uid,
       pid
