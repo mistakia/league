@@ -12,6 +12,28 @@ export default function Filter(props) {
 
   let timestamp
 
+  const handleOutsideClick = (event) => {
+    // ignore multiple events on same click
+    if (timestamp && event.timeStamp === timestamp) {
+      return
+    }
+    timestamp = event.timeStamp
+
+    const isInsideButton = button_ref.current
+      ? button_ref.current.contains(event.target)
+      : false
+    const isOutsideDropdown = dropdown_ref.current
+      ? !dropdown_ref.current.contains(event.target)
+      : false
+
+    if (isInsideButton) {
+      handleToggleClick(event)
+    } else if (isOutsideDropdown) {
+      document.removeEventListener('click', handleOutsideClick)
+      setVisible(false)
+    }
+  }
+
   const handleToggleClick = (event) => {
     // ignore multiple events on same click
     if (timestamp && event.timeStamp === timestamp) {
@@ -19,33 +41,11 @@ export default function Filter(props) {
     }
     timestamp = event.timeStamp
 
-    // close on PointerEvent outside of element
-    if (event.constructor.name === 'PointerEvent') {
-      const isOutsideDropdown = dropdown_ref.current
-        ? !dropdown_ref.current.contains(event.target)
-        : false
-      if (isOutsideDropdown) {
-        document.removeEventListener('click', handleToggleClick)
-        setVisible(false)
-      } else {
-        const isInsideButton = button_ref.current
-          ? button_ref.current.contains(event.target)
-          : false
-        if (isInsideButton && !visible) {
-          setVisible(true)
-        }
-      }
-
-      return
-    }
-
     if (visible) {
-      if (!dropdown_ref.current.contains(event.target)) {
-        document.removeEventListener('click', handleToggleClick)
-        setVisible(false)
-      }
+      document.removeEventListener('click', handleOutsideClick)
+      setVisible(false)
     } else {
-      document.addEventListener('click', handleToggleClick)
+      document.addEventListener('click', handleOutsideClick)
       setVisible(true)
     }
   }
@@ -60,7 +60,7 @@ export default function Filter(props) {
     props.filter({ leagueId, type: props.type, values: [] })
   }
 
-  const handleClick = (event, index) => {
+  const handleSelect = (event, index) => {
     event.preventDefault()
     event.stopPropagation()
     if (props.single) {
@@ -86,7 +86,7 @@ export default function Filter(props) {
       <div
         key={v.value}
         className={classNames.join(' ')}
-        onClick={(e) => handleClick(e, index)}
+        onClick={(e) => handleSelect(e, index)}
       >
         {v.label}
       </div>
