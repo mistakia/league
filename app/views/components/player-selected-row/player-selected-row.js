@@ -36,6 +36,7 @@ const kickerStats = (stats, percentiles = {}, fixed = 0) => (
 
 const playerStats = (stats, percentiles = {}, fixed = 0) => [
   <>
+    <PercentileMetric {...{ stats, percentiles, fixed }} type='pa' />
     <PercentileMetric {...{ stats, percentiles, fixed }} type='py' />
     <PercentileMetric {...{ stats, percentiles, fixed }} type='tdp' />
     <PercentileMetric {...{ stats, percentiles, fixed }} type='ints' />

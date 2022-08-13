@@ -40,6 +40,7 @@ const player = () => [
   <div className='row__group' key={0}>
     <div className='row__group-head'>Passing</div>
     <div className='row__group-body'>
+      <div className='table__cell metric'>PA</div>
       <div className='table__cell metric'>YDS</div>
       <div className='table__cell metric'>TD</div>
       <div className='table__cell metric'>INT</div>
