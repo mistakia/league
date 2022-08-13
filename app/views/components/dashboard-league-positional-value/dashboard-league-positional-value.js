@@ -16,7 +16,7 @@ export default class DashboardLeaguePositionalValue extends React.Component {
     const series = []
     for (const position of constants.positions) {
       const data = []
-      for (const tid in summary.rosters) {
+      for (const { tid } of summary.sorted_tids) {
         const rounded = parseInt(summary.rosters[tid][position].toFixed(1), 0)
         data.push(rounded)
       }
@@ -24,7 +24,7 @@ export default class DashboardLeaguePositionalValue extends React.Component {
     }
 
     const teamNames = []
-    for (const tid in summary.rosters) {
+    for (const { tid } of summary.sorted_tids) {
       const id = parseInt(tid, 10)
       const name = teams.getIn([id, 'name'])
       teamNames.push(name)
