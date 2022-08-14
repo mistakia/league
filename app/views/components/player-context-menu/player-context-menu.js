@@ -11,15 +11,12 @@ import { constants } from '@common'
 
 export default class PlayerContextMenu extends React.Component {
   handleDeactivate = () => {
-    const { playerMap, deactivate } = this.props
+    const { playerMap } = this.props
     this.props.showConfirmation({
-      title: 'Roster Deactivation',
-      description: `${playerMap.get('fname')} ${playerMap.get(
-        'lname'
-      )} (${playerMap.get(
-        'pos'
-      )}) will be placed on the practice squad. He will not be available to use in lineups until he's reactivated.`,
-      onConfirm: () => deactivate(playerMap.get('pid'))
+      id: 'DEACTIVATE',
+      data: {
+        playerMap
+      }
     })
     this.props.hide()
   }
@@ -429,7 +426,6 @@ PlayerContextMenu.propTypes = {
   status: PropTypes.object,
   showContext: PropTypes.func,
   hide: PropTypes.func,
-  deactivate: PropTypes.func,
   showConfirmation: PropTypes.func,
   cancelClaim: PropTypes.func,
   reserve: PropTypes.func,

@@ -119,7 +119,7 @@ export default class ActivateConfirmation extends React.Component {
           {!this._hasBenchSpace && (
             <DialogContentText>{noBenchSpaceMessage}</DialogContentText>
           )}
-          <div className='waiver__claim-inputs'>
+          <div className='confirmation__inputs'>
             {isReservePlayer &&
               !this._hasBenchSpace &&
               Boolean(reserveItems.length) && (
@@ -137,7 +137,7 @@ export default class ActivateConfirmation extends React.Component {
                 </FormControl>
               )}
           </div>
-          <div className='waiver__claim-inputs'>
+          <div className='confirmation__inputs'>
             {!this._hasBenchSpace && (
               <FormControl size='small' variant='outlined'>
                 <InputLabel id='release-label'>Release</InputLabel>

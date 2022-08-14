@@ -587,10 +587,7 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
         }
       }
 
-      if (
-        isPlayerPracticeSquadEligible(state, { playerMap }) &&
-        roster.hasOpenPracticeSquadSlot()
-      ) {
+      if (isPlayerPracticeSquadEligible(state, { playerMap })) {
         status.eligible.ps = true
       }
 

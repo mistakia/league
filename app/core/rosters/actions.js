@@ -170,10 +170,11 @@ export const rosterActions = {
     }
   }),
 
-  deactivate: (pid) => ({
+  deactivate: ({ deactivate_pid, release_pid }) => ({
     type: rosterActions.DEACTIVATE_PLAYER,
     payload: {
-      pid
+      deactivate_pid,
+      release_pid
     }
   }),
 

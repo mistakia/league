@@ -63,7 +63,7 @@ describe('API /teams - deactivate', function () {
         .post('/api/teams/1/deactivate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          pid: player.pid,
+          deactivate_pid: player.pid,
           leagueId
         })
 
@@ -140,7 +140,7 @@ describe('API /teams - deactivate', function () {
         .post('/api/teams/1/deactivate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          pid: player.pid,
+          deactivate_pid: player.pid,
           leagueId
         })
 
@@ -221,7 +221,7 @@ describe('API /teams - deactivate', function () {
       await notLoggedIn(request)
     })
 
-    it('missing pid', async () => {
+    it('missing deactivate_pid', async () => {
       const request = chai
         .request(server)
         .post('/api/teams/1/deactivate')
@@ -230,7 +230,7 @@ describe('API /teams - deactivate', function () {
           leagueId: 1
         })
 
-      await missing(request, 'pid')
+      await missing(request, 'deactivate_pid')
     })
 
     it('missing leagueId', async () => {
@@ -239,7 +239,7 @@ describe('API /teams - deactivate', function () {
         .post('/api/teams/1/deactivate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          pid: 'x'
+          deactivate_pid: 'x'
         })
 
       await missing(request, 'leagueId')
@@ -252,7 +252,7 @@ describe('API /teams - deactivate', function () {
         .set('Authorization', `Bearer ${user2}`)
         .send({
           leagueId: 1,
-          pid: 'x'
+          deactivate_pid: 'x'
         })
 
       await invalid(request, 'teamId')
@@ -266,10 +266,10 @@ describe('API /teams - deactivate', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          pid: player.pid
+          deactivate_pid: player.pid
         })
 
-      await invalid(request, 'pid')
+      await invalid(request, 'deactivate_pid')
     })
 
     it('player already on practice squad', async () => {
@@ -286,7 +286,7 @@ describe('API /teams - deactivate', function () {
         .post('/api/teams/1/deactivate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          pid: player.pid,
+          deactivate_pid: player.pid,
           leagueId: 1
         })
 
@@ -294,6 +294,10 @@ describe('API /teams - deactivate', function () {
     })
 
     it('exceed roster limits', async () => {
+      // TODO
+    })
+
+    it('release_pid not on practice squad', async () => {
       // TODO
     })
 
@@ -317,7 +321,7 @@ describe('API /teams - deactivate', function () {
         .post('/api/teams/1/deactivate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          pid: player.pid,
+          deactivate_pid: player.pid,
           leagueId
         })
 
@@ -357,7 +361,7 @@ describe('API /teams - deactivate', function () {
         .post('/api/teams/1/deactivate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          pid: player.pid,
+          deactivate_pid: player.pid,
           leagueId
         })
 
@@ -424,7 +428,7 @@ describe('API /teams - deactivate', function () {
         .post('/api/teams/1/deactivate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          pid: player.pid,
+          deactivate_pid: player.pid,
           leagueId
         })
 

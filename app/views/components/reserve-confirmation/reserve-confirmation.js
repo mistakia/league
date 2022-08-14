@@ -83,7 +83,7 @@ export default class ReserveConfirmation extends React.Component {
               reserve.
             </DialogContentText>
           )}
-          <div className='waiver__claim-inputs'>
+          <div className='confirmation__inputs'>
             {!this._hasReserveSpace && (
               <FormControl size='small' variant='outlined'>
                 <InputLabel id='activate-label'>Activate</InputLabel>

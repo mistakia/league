@@ -9,6 +9,7 @@ import DialogTitle from '@mui/material/DialogTitle'
 
 import ReserveConfirmation from '@components/reserve-confirmation'
 import ActivateConfirmation from '@components/activate-confirmation'
+import DeactivateConfirmation from '@components/deactivate-confirmation'
 import WaiverConfirmation from '@components/waiver-confirmation'
 import PoachConfirmation from '@components/poach-confirmation'
 import AddPlayerDialog from '@components/add-player-dialog'
@@ -39,6 +40,8 @@ export default class Confirmation extends React.Component {
             return ReserveConfirmation
           case 'ACTIVATE':
             return ActivateConfirmation
+          case 'DEACTIVATE':
+            return DeactivateConfirmation
           case 'WAIVER':
             return WaiverConfirmation
           case 'POACH':
