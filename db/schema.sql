@@ -35,7 +35,7 @@ CREATE TABLE `game` (
 
   UNIQUE KEY `gid` (`gid`),
   KEY `seas` (`seas`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -83,7 +83,7 @@ CREATE TABLE `offense` (
   UNIQUE KEY `uid` (`uid`),
   KEY `gid` (`gid`),
   KEY `pid` (`pid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -158,56 +158,7 @@ CREATE TABLE `player` (
   UNIQUE KEY `pid` (`pid`),
   KEY `fname` (`fname`),
   KEY `lname` (`lname`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `players`
---
-
-DROP TABLE IF EXISTS `players`;
-
-CREATE TABLE `players` (
-  `pid` varchar(7) DEFAULT NULL,
-  `name` varchar(255) NOT NULL,
-  `team` varchar(5) NOT NULL,
-  `pos` varchar(5) NOT NULL,
-  `birth_country` varchar(255) DEFAULT NULL,
-  `birth_city` varchar(255) DEFAULT NULL,
-  `cbs_id` varchar(11) DEFAULT NULL,
-  `espn_id` varchar(11) DEFAULT NULL,
-  `fantasy_data_id` varchar(11) DEFAULT NULL,
-  `fleaflicker_id` varchar(11) DEFAULT NULL,
-  `gsis_id` varchar(13) DEFAULT NULL,
-  `high_school` varchar(255) DEFAULT NULL,
-  `nfl_id` varchar(255) DEFAULT NULL,
-  `mfl_id` varchar(11) DEFAULT NULL,
-  `rotoworld_id` varchar(11) DEFAULT NULL,
-  `rotowire_id` varchar(11) DEFAULT NULL,
-  `sleeper_id` varchar(11) DEFAULT NULL,
-  `stats_id` varchar(11) DEFAULT NULL,
-  `stats_global_id` varchar(11) DEFAULT NULL,
-  `sportradar_id` varchar(36) DEFAULT NULL,
-  `twitter_username` varchar(255) DEFAULT NULL,
-  `yahoo_id` varchar(11) DEFAULT NULL,
-
-  `active` tinyint(1) DEFAULT NULL,
-  `depth_chart_order` varchar(255) DEFAULT NULL, -- TODO refine
-  `depth_chart_position` varchar(255) DEFAULT NULL, -- TODO refine
-  `details` varchar(255) DEFAULT NULL,
-  `exp_return` varchar(255) DEFAULT NULL,
-  `injury_body_part` varchar(255) DEFAULT NULL,
-  `injury_start_date` varchar(255) DEFAULT NULL,
-  `injury_status` varchar(255) DEFAULT NULL,
-  `injury_notes` varchar(255) DEFAULT NULL,
-  `practice_participation` varchar(255) DEFAULT NULL, -- TODO refine
-  `practice_description` varchar(255) DEFAULT NULL, -- TODO refine
-  `status` varchar(255) DEFAULT NULL,
-  `search_rank` int(7) DEFAULT NULL,
-
-  KEY `pid` (`pid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -218,7 +169,7 @@ CREATE TABLE `players` (
 DROP TABLE IF EXISTS `players_status`;
 
 CREATE TABLE `players_status` (
-  `pid` varchar(7) DEFAULT NULL,
+  `pid` varchar(7) NOT NULL,
   `mfl_id` varchar(11) DEFAULT NULL,
   `sleeper_id` varchar(11) DEFAULT NULL,
   `active` tinyint(1) DEFAULT NULL,
@@ -235,8 +186,9 @@ CREATE TABLE `players_status` (
   `status` varchar(255) DEFAULT NULL,
   `search_rank` int(7) DEFAULT NULL,
   `timestamp` int(11) NOT NULL,
-  KEY `pid` (`pid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+  KEY `pid` (`pid`),
+  UNIQUE KEY `status` (`pid`, `timestamp`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -259,7 +211,7 @@ CREATE TABLE `poaches` (
   `processed` int(11) DEFAULT NULL,
   PRIMARY KEY (`uid`),
   KEY `lid` (`lid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -274,7 +226,7 @@ CREATE TABLE `poach_releases` (
   `pid` varchar(7) NOT NULL,
   KEY `poachid` (`poachid`),
   UNIQUE KEY `pid` (`poachid`, `pid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -301,7 +253,7 @@ CREATE TABLE `seasons` (
   `adate` int(11) unsigned DEFAULT NULL,
   `tddate` int(11) unsigned DEFAULT NULL,
   UNIQUE KEY `season` (`lid`,`year`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -375,7 +327,7 @@ CREATE TABLE `nfl_games` (
 
   UNIQUE KEY `game` (`v`, `h`, `wk`, `seas`, `seas_type`),
   UNIQUE KEY `esbid` (`esbid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -624,7 +576,7 @@ CREATE TABLE `team` (
   UNIQUE KEY `tid` (`tid`),
   KEY `gid` (`gid`),
   KEY `tname` (`tname`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -649,7 +601,7 @@ CREATE TABLE `draft` (
   UNIQUE KEY `pick` (`round`,`pick`,`lid`,`year`),
   KEY `lid` (`lid`),
   KEY `tid` (`tid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -735,7 +687,7 @@ CREATE TABLE `leagues` (
 
   UNIQUE KEY `uid` (`uid`),
   KEY `commishid` (`commishid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -762,7 +714,7 @@ CREATE TABLE `matchups` (
   PRIMARY KEY `uid` (`uid`),
   UNIQUE KEY `aid` (`aid`,`hid`,`year`,`week`),
   KEY `lid` (`lid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -781,7 +733,7 @@ CREATE TABLE `playoffs` (
   `points` decimal(7,4) DEFAULT NULL,
   UNIQUE KEY `tid` (`tid`,`uid`,`year`),
   KEY `lid` (`lid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -792,66 +744,9 @@ CREATE TABLE `playoffs` (
 DROP TABLE IF EXISTS `projections`;
 
 CREATE TABLE `projections` (
-  `pid` varchar(7) NOT NULL,
-  `sourceid` int(3) DEFAULT NULL,
-  `userid` int(4) DEFAULT NULL,
-  `pa` decimal(5,1) DEFAULT NULL,
-  `pc` decimal(5,1) DEFAULT NULL,
-  `py` decimal(5,1) DEFAULT NULL,
-  `ints` decimal(3,1) DEFAULT NULL,
-  `tdp` decimal(3,1) DEFAULT NULL,
-  `ra` decimal(4,1) DEFAULT NULL,
-  `ry` decimal(5,1) DEFAULT NULL,
-  `tdr` decimal(3,1) DEFAULT NULL,
-  `trg` decimal(4,1) DEFAULT NULL,
-  `rec` decimal(4,1) DEFAULT NULL,
-  `recy` decimal(5,1) DEFAULT NULL,
-  `tdrec` decimal(3,1) DEFAULT NULL,
-  `fuml` decimal(3,1) DEFAULT NULL,
-  `twoptc` decimal(3,1) DEFAULT NULL,
-  `snp` decimal(5,1) DEFAULT NULL,
-  `fgm` decimal(4,1) DEFAULT NULL,
-  `fgy` int(3) DEFAULT 0,
-  `fg19` decimal(3,1) DEFAULT NULL,
-  `fg29` decimal(3,1) DEFAULT NULL,
-  `fg39` decimal(3,1) DEFAULT NULL,
-  `fg49` decimal(3,1) DEFAULT NULL,
-  `fg50` decimal(3,1) DEFAULT NULL,
-  `xpm` decimal(3,1) DEFAULT NULL,
-  `dsk` decimal(4,1) DEFAULT NULL,
-  `dint` decimal(4,1) DEFAULT NULL,
-  `dff` decimal(4,1) DEFAULT NULL,
-  `drf` decimal(4,1) DEFAULT NULL,
-  `dtno` decimal(4,1) DEFAULT NULL,
-  `dfds` decimal(4,1) DEFAULT NULL,
-  `dpa` decimal(4,1) DEFAULT NULL,
-  `dya` decimal(5,1) DEFAULT NULL,
-  `dblk` decimal(4,1) DEFAULT NULL,
-  `dsf` decimal(4,1) DEFAULT NULL,
-  `dtpr` decimal(4,1) DEFAULT NULL,
-  `dtd` decimal(4,1) DEFAULT NULL,
-  `krtd` decimal(4,1) DEFAULT NULL,
-  `prtd` decimal(4,1) DEFAULT NULL,
-  `week` int(2) NOT NULL,
-  `year` int(4) NOT NULL,
-  `timestamp` datetime NOT NULL,
-  UNIQUE KEY `userid` (`userid`,`pid`,`year`,`week`),
-  UNIQUE KEY `sourceid` (`sourceid`,`pid`,`year`,`week`,`timestamp`),
-  KEY `pid` (`pid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `projections_archive`
---
-
-DROP TABLE IF EXISTS `projections_archive`;
-
-CREATE TABLE `projections_archive` (
   `pid` varchar(7) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  `sourceid` int DEFAULT NULL,
-  `userid` int DEFAULT NULL,
+  `sourceid` int NOT NULL DEFAULT '0',
+  `userid` int NOT NULL DEFAULT '0',
   `pa` decimal(5,1) DEFAULT NULL,
   `pc` decimal(5,1) DEFAULT NULL,
   `py` decimal(5,1) DEFAULT NULL,
@@ -892,10 +787,65 @@ CREATE TABLE `projections_archive` (
   `dtd` decimal(4,1) DEFAULT NULL,
   `krtd` decimal(4,1) DEFAULT NULL,
   `prtd` decimal(4,1) DEFAULT NULL,
-  UNIQUE KEY `userid` (`userid`,`pid`,`year`,`week`),
-  UNIQUE KEY `sourceid` (`sourceid`,`pid`,`year`,`week`,`timestamp`),
+  UNIQUE KEY `projection` (`sourceid`,`pid`,`userid`,`timestamp`,`week`,`year`),
   KEY `pid` (`pid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `projections_archive`
+--
+
+DROP TABLE IF EXISTS `projections_archive`;
+
+CREATE TABLE `projections_archive` (
+  `pid` varchar(7) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `sourceid` int NOT NULL DEFAULT '0',
+  `userid` int NOT NULL DEFAULT '0',
+  `pa` decimal(5,1) DEFAULT NULL,
+  `pc` decimal(5,1) DEFAULT NULL,
+  `py` decimal(5,1) DEFAULT NULL,
+  `ints` decimal(3,1) DEFAULT NULL,
+  `tdp` decimal(3,1) DEFAULT NULL,
+  `ra` decimal(4,1) DEFAULT NULL,
+  `ry` decimal(5,1) DEFAULT NULL,
+  `tdr` decimal(3,1) DEFAULT NULL,
+  `trg` decimal(4,1) DEFAULT NULL,
+  `rec` decimal(4,1) DEFAULT NULL,
+  `recy` decimal(5,1) DEFAULT NULL,
+  `tdrec` decimal(3,1) DEFAULT NULL,
+  `fuml` decimal(3,1) DEFAULT NULL,
+  `snp` decimal(5,1) DEFAULT NULL,
+  `twoptc` decimal(3,1) DEFAULT NULL,
+  `week` int NOT NULL,
+  `year` int NOT NULL,
+  `timestamp` datetime NOT NULL,
+  `fgm` decimal(4,1) DEFAULT NULL,
+  `fgy` int DEFAULT '0',
+  `fg19` decimal(3,1) DEFAULT NULL,
+  `fg29` decimal(3,1) DEFAULT NULL,
+  `fg39` decimal(3,1) DEFAULT NULL,
+  `fg49` decimal(3,1) DEFAULT NULL,
+  `fg50` decimal(3,1) DEFAULT NULL,
+  `xpm` decimal(3,1) DEFAULT NULL,
+  `dsk` decimal(4,1) DEFAULT NULL,
+  `dint` decimal(4,1) DEFAULT NULL,
+  `dff` decimal(4,1) DEFAULT NULL,
+  `drf` decimal(4,1) DEFAULT NULL,
+  `dtno` decimal(4,1) DEFAULT NULL,
+  `dfds` decimal(4,1) DEFAULT NULL,
+  `dpa` decimal(4,1) DEFAULT NULL,
+  `dya` decimal(5,1) DEFAULT NULL,
+  `dblk` decimal(4,1) DEFAULT NULL,
+  `dsf` decimal(4,1) DEFAULT NULL,
+  `dtpr` decimal(4,1) DEFAULT NULL,
+  `dtd` decimal(4,1) DEFAULT NULL,
+  `krtd` decimal(4,1) DEFAULT NULL,
+  `prtd` decimal(4,1) DEFAULT NULL,
+  UNIQUE KEY `projection` (`sourceid`,`pid`,`userid`,`week`,`year`,`timestamp`),
+  KEY `pid` (`pid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 -- --------------------------------------------------------
 
@@ -907,8 +857,7 @@ DROP TABLE IF EXISTS `ros_projections`;
 
 CREATE TABLE `ros_projections` (
   `pid` varchar(7) NOT NULL,
-  `sourceid` int(3) DEFAULT NULL,
-  `userid` int(4) DEFAULT NULL,
+  `sourceid` int(3) NOT NULL,
   `pa` decimal(5,1) DEFAULT NULL,
   `pc` decimal(5,1) DEFAULT NULL,
   `py` decimal(5,1) DEFAULT NULL,
@@ -951,7 +900,7 @@ CREATE TABLE `ros_projections` (
   `timestamp` datetime NOT NULL,
   UNIQUE KEY `sourceid` (`sourceid`,`pid`,`year`),
   KEY `pid` (`pid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -1007,7 +956,7 @@ CREATE TABLE `league_player_projection_points` (
   `prtd` decimal(4,1) DEFAULT NULL,
   KEY `pid` (`pid`),
   UNIQUE KEY `player_league_points` (`pid`, `lid`, `week`, `year`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -1029,7 +978,7 @@ CREATE TABLE `league_player_projection_values` (
   `market_salary_adj` decimal(5,2) DEFAULT NULL,
   KEY `pid` (`pid`),
   UNIQUE KEY `player_value` (`pid`, `lid`, `week`, `year`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -1049,7 +998,7 @@ CREATE TABLE `rosters` (
   PRIMARY KEY `uid` (`uid`),
   UNIQUE KEY `teamid` (`tid`,`week`,`year`),
   KEY `tid` (`tid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -1068,7 +1017,7 @@ CREATE TABLE `rosters_players` (
   `extensions` tinyint(1) unsigned NOT NULL DEFAULT '0',
   UNIQUE KEY `pid` (`rid`,`pid`),
   KEY `rid` (`rid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -1083,7 +1032,7 @@ CREATE TABLE `sources` (
   `name` varchar(50) NOT NULL DEFAULT '',
   `url` varchar(60) NOT NULL DEFAULT '',
   PRIMARY KEY (`uid`)
-) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -1108,7 +1057,7 @@ CREATE TABLE `teams` (
   `ac` varchar(6) DEFAULT NULL,
   UNIQUE KEY `uid` (`uid`),
   KEY `lid` (`lid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -1172,7 +1121,7 @@ CREATE TABLE `team_stats` (
   `pPosDST` decimal(6,2) DEFAULT 0,
 
   UNIQUE KEY `team` (`tid`, `year`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -1195,7 +1144,7 @@ CREATE TABLE `trades` (
   `rejected` int(11) DEFAULT NULL,
   `vetoed` int(11) DEFAULT NULL,
   UNIQUE KEY `uid` (`uid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -1211,7 +1160,7 @@ CREATE TABLE `trade_releases` (
   `pid` varchar(7) NOT NULL,
   KEY (`tradeid`),
   UNIQUE KEY `pid` (`tradeid`,`pid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 -- --------------------------------------------------------
@@ -1228,7 +1177,7 @@ CREATE TABLE `trades_players` (
   `pid` varchar(7) NOT NULL,
   KEY (`tradeid`),
   UNIQUE KEY `pid` (`tradeid`,`pid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -1244,7 +1193,7 @@ CREATE TABLE `trades_picks` (
   `pickid` int(6) NOT NULL,
   KEY (`tradeid`),
   UNIQUE KEY `pick` (`tradeid`,`pickid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -1258,7 +1207,7 @@ CREATE TABLE `trades_transactions` (
   `tradeid` int(6) NOT NULL,
   `transactionid` int(6) NOT NULL,
   UNIQUE KEY `transaction` (`tradeid`,`transactionid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -1275,7 +1224,7 @@ CREATE TABLE `league_cutlist` (
   KEY `pid` (`pid`),
   KEY `teamid` (`tid`),
   UNIQUE KEY `tid_pid` (`tid`, `pid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -1300,7 +1249,7 @@ CREATE TABLE `transactions` (
   KEY `pid` (`pid`),
   KEY `teamid` (`tid`),
   KEY `lid` (`lid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -1322,7 +1271,7 @@ CREATE TABLE `users` (
   `voice` tinyint(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -1338,7 +1287,7 @@ CREATE TABLE `users_sources` (
   `weight` decimal(2,2) NOT NULL,
   KEY (`userid`),
   UNIQUE KEY `sourceid` (`userid`,`sourceid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -1355,7 +1304,7 @@ CREATE TABLE `users_teams` (
   `teamvoice` tinyint(1) NOT NULL DEFAULT 1,
   `leaguetext` tinyint(1) NOT NULL DEFAULT 1,
   UNIQUE KEY `userid` (`userid`,`tid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -1385,7 +1334,7 @@ CREATE TABLE `waivers` (
   `cancelled` int(11) DEFAULT NULL,
   PRIMARY KEY (`uid`),
   KEY `lid` (`lid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -1400,7 +1349,7 @@ CREATE TABLE `waiver_releases` (
   `pid` varchar(7) NOT NULL,
   KEY `waiverid` (`waiverid`),
   UNIQUE KEY `waiverid_pid` (`waiverid`, `pid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -1417,7 +1366,7 @@ CREATE TABLE `jobs` (
   `reason` text DEFAULT NULL,
   `timestamp` int(11) NOT NULL,
   PRIMARY KEY (`uid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -1436,7 +1385,7 @@ CREATE TABLE `player_changelog` (
   `new` text DEFAULT NULL,
   `timestamp` int(11) NOT NULL,
   PRIMARY KEY (`uid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -1448,7 +1397,7 @@ DROP TABLE IF EXISTS `nfl_plays`;
 
 CREATE TABLE `nfl_plays` (
   `esbid` int(10) NOT NULL,
-  `playId` int(10) DEFAULT NULL,
+  `playId` int(10) NOT NULL,
   `sequence` int(10) DEFAULT NULL,
   `state` varchar(36) DEFAULT NULL,
 
@@ -1766,7 +1715,7 @@ CREATE TABLE `nfl_plays` (
   UNIQUE KEY `gamePlay` (`esbid`,`playId`),
   KEY `esbid` (`esbid`),
   KEY `playId` (`playId`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -1789,7 +1738,7 @@ CREATE TABLE `nfl_play_stats` (
   `valid` tinyint(1) DEFAULT NULL,
   KEY `playId` (`playId`),
   UNIQUE KEY `esbid` (`esbid`,`playId`,`statId`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -1805,7 +1754,7 @@ CREATE TABLE `nflSnap` (
   `nflId` int(10) NOT NULL,
   KEY `playId` (`playId`),
   UNIQUE KEY `snap` (`playId`,`nflId`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -1829,7 +1778,7 @@ CREATE TABLE `practice` (
   `s` varchar(20) DEFAULT NULL,
   `su` varchar(20) DEFAULT NULL,
   UNIQUE KEY `pid` (`pid`, `week`, `year`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -1893,7 +1842,7 @@ CREATE TABLE `gamelogs` (
   `dtpr` tinyint(2) DEFAULT 0,
   `dtd` tinyint(2) DEFAULT 0,
   UNIQUE KEY `pid` (`pid`, `esbid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -1905,14 +1854,14 @@ DROP TABLE IF EXISTS `league_player_gamelogs`;
 
 CREATE TABLE `league_player_gamelogs` (
   `pid` varchar(7) NOT NULL,
-  `esbid` int(10) DEFAULT NULL,
+  `esbid` int(10) NOT NULL,
   `lid` int(6) NOT NULL,
   `points` decimal(4,1) DEFAULT NULL,
   `points_added` decimal(4,1) DEFAULT NULL,
   `pos_rnk` tinyint(2) DEFAULT NULL,
 
   UNIQUE KEY `pid` (`pid`, `esbid`, `lid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2014,7 +1963,7 @@ CREATE TABLE `footballoutsiders` (
   `oavgld` decimal(4,2) DEFAULT NULL,
   `davgld` decimal(4,2) DEFAULT NULL,
   UNIQUE KEY `team` (`team`, `week`, `year`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2036,14 +1985,15 @@ CREATE TABLE `rankings` (
   `ornk` int(4) DEFAULT NULL,
   `prnk` int(4) DEFAULT NULL,
   `type` int(1) NOT NULL,
-  `adp` tinyint(1) DEFAULT NULL,
-  `ppr` int(1) DEFAULT NULL,
-  `sf` tinyint(1) DEFAULT NULL,
-  `dynasty` tinyint(1) DEFAULT NULL,
-  `rookie` tinyint(2) DEFAULT NULL,
+  `adp` tinyint(1) NOT NULL,
+  `ppr` int(1) NOT NULL,
+  `sf` tinyint(1) NOT NULL,
+  `dynasty` tinyint(1) NOT NULL,
+  `rookie` tinyint(2) NOT NULL,
   `sourceid` int(6) NOT NULL,
-  `timestamp` int(11) DEFAULT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+  `timestamp` int(11) NOT NULL,
+  UNIQUE KEY `ranking` (`pid`, `sourceid`, `type`, `adp`, `ppr`, `sf`, `dynasty`, `rookie`, `wk`, `year`, `timestamp`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 -- --------------------------------------------------------
@@ -2059,13 +2009,14 @@ CREATE TABLE `props` (
   `wk` tinyint(2) NOT NULL,
   `year` int(4) NOT NULL,
   `type` tinyint(3) NOT NULL,
-  `id` varchar(100) DEFAULT NULL,
+  `id` varchar(100) NOT NULL,
   `ln` decimal(4,1) NOT NULL,
   `o` decimal(5,2) NOT NULL,
   `u` decimal(5,2) NOT NULL,
   `sourceid` int(6) NOT NULL,
-  `timestamp` int(11) NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+  `timestamp` int(11) NOT NULL,
+  UNIQUE KEY `prop` (`sourceid`, `id`, `pid`, `wk`, `year`, `type`, `timestamp`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2091,7 +2042,7 @@ CREATE TABLE `transition_bids` (
   `cancelled` int(11) DEFAULT NULL,
   PRIMARY KEY (`uid`),
   KEY `lid` (`lid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2106,7 +2057,7 @@ CREATE TABLE `transition_releases` (
   `pid` varchar(7) NOT NULL,
   KEY `transitionid` (`transitionid`),
   UNIQUE KEY `pid` (`transitionid`, `pid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2124,7 +2075,7 @@ CREATE TABLE `league_team_lineups` (
   `total` decimal(5,2) DEFAULT NULL,
   `baseline_total` decimal(5,2) DEFAULT NULL,
   UNIQUE KEY `lineup` (`tid`,`year`, `week`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2143,7 +2094,7 @@ CREATE TABLE `league_team_lineup_contributions` (
   `sp` decimal(5,2) NOT NULL,
   `bp` decimal(5,2) NOT NULL,
   UNIQUE KEY `contribution` (`lid`,`pid`,`year`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2163,7 +2114,7 @@ CREATE TABLE `league_team_lineup_contribution_weeks` (
   `sp` decimal(5,2) NOT NULL,
   `bp` decimal(5,2) NOT NULL,
   UNIQUE KEY `contribution` (`lid`,`pid`,`year`, `week`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2180,7 +2131,7 @@ CREATE TABLE `league_team_lineup_starters` (
   `tid` int(6) NOT NULL,
   `lid` int(6) NOT NULL,
   UNIQUE KEY `starter` (`lid`,`pid`,`year`, `week`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2202,7 +2153,7 @@ CREATE TABLE `league_team_forecast` (
   `championship_odds` decimal(5,4) NOT NULL,
   `timestamp` int(11) NOT NULL,
   UNIQUE KEY `team_forecast_day` (`tid`,`year`,`week`,`day`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2217,10 +2168,10 @@ CREATE TABLE `league_baselines` (
   `week` varchar(3) NOT NULL,
   `year` int(4) NOT NULL,
   `pid` varchar(7) NOT NULL,
-  `type` varchar(10),
+  `type` varchar(10) NOT NULL,
   `pos` varchar(3) NOT NULL,
   UNIQUE KEY `baseline` (`lid`,`week`,`pos`,`type`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2237,7 +2188,7 @@ CREATE TABLE `keeptradecut_rankings` (
   `v` int(5) NOT NULL,
   `type` tinyint(1) NOT NULL,
   UNIQUE KEY `player_value` (`pid`,`d`,`qb`,`type`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
