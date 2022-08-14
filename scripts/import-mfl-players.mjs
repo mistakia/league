@@ -110,18 +110,21 @@ const run = async () => {
     return
   }
 
-  log(`Inserting ${inserts.length} players into database`)
-  for (const insert of inserts) {
-    const rows = await db('players').where('mfl_id', insert.mfl_id)
-    if (rows.length) {
-      const { twitter_username } = insert
-      if (!twitter_username) continue
-      await db('players')
-        .update({ twitter_username })
-        .where('mfl_id', insert.mfl_id)
-    } else {
-      await db('players').insert(insert)
-    }
+  if (inserts.length) {
+    log(`Inserting ${inserts.length} players into database`)
+    log(inserts[0])
+    /* for (const insert of inserts) {
+     *   const rows = await db('players').where('mfl_id', insert.mfl_id)
+     *   if (rows.length) {
+     *     const { twitter_username } = insert
+     *     if (!twitter_username) continue
+     *     await db('players')
+     *       .update({ twitter_username })
+     *       .where('mfl_id', insert.mfl_id)
+     *   } else {
+     *     await db('players').insert(insert)
+     *   }
+     * } */
   }
 }
 
