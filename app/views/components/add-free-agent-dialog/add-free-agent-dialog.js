@@ -98,7 +98,7 @@ export default class AddFreeAgentDialog extends React.Component {
         <DialogTitle>Sign Free Agent</DialogTitle>
         <DialogContent>
           <DialogContentText>{text}</DialogContentText>
-          <div className='waiver__claim-inputs'>
+          <div className='confirmation__inputs'>
             {!this._isPlayerEligible && (
               <FormControl size='small' variant='outlined'>
                 <InputLabel id='release-label'>Release</InputLabel>

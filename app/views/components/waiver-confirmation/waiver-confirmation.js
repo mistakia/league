@@ -225,7 +225,7 @@ export default class WaiverConfirmation extends React.Component {
           <DialogContentText>
             {`Add ${playerMap.get('name')} (${playerMap.get('pos')})`}
           </DialogContentText>
-          <div className='waiver__claim-inputs'>
+          <div className='confirmation__inputs'>
             {this.state.type === constants.waivers.FREE_AGENCY && (
               <TextField
                 label='Bid'

@@ -28,7 +28,6 @@ const mapStateToProps = createSelector(
 const mapDispatchToProps = {
   showContext: contextMenuActions.show,
   hide: contextMenuActions.hide,
-  deactivate: rosterActions.deactivate,
   showConfirmation: confirmationActions.show,
   cancelClaim: waiverActions.cancel,
   reserve: rosterActions.reserve,

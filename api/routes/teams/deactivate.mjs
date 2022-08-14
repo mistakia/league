@@ -8,7 +8,8 @@ import {
   sendNotifications,
   verifyUserTeam,
   getTransactionsSinceAcquisition,
-  getTransactionsSinceFreeAgent
+  getTransactionsSinceFreeAgent,
+  processRelease
 } from '#utils'
 
 const router = express.Router({ mergeParams: true })
@@ -17,14 +18,14 @@ router.post('/?', async (req, res) => {
   const { db, logger, broadcast } = req.app.locals
   try {
     const { teamId } = req.params
-    const { pid, leagueId } = req.body
+    const { deactivate_pid, leagueId, release_pid } = req.body
 
     if (!req.auth) {
       return res.status(401).send({ error: 'invalid token' })
     }
 
-    if (!pid) {
-      return res.status(400).send({ error: 'missing pid' })
+    if (!deactivate_pid) {
+      return res.status(400).send({ error: 'missing deactivate_pid' })
     }
 
     if (!leagueId) {
@@ -53,31 +54,33 @@ router.post('/?', async (req, res) => {
     const roster = new Roster({ roster: rosterRow, league })
 
     // make sure player is on roster
-    if (!roster.has(pid)) {
-      return res.status(400).send({ error: 'invalid pid' })
+    if (!roster.has(deactivate_pid)) {
+      return res.status(400).send({ error: 'invalid deactivate_pid' })
     }
 
     // make sure player is not on practice squad
-    if (roster.practice.find((p) => p.pid === pid)) {
+    if (roster.practice.find((p) => p.pid === deactivate_pid)) {
       return res
         .status(400)
         .send({ error: 'player is already on practice squad' })
     }
 
-    const player_rows = await db('player').where('pid', pid).limit(1)
+    const player_rows = await db('player').where('pid', deactivate_pid).limit(1)
     const player_row = player_rows[0]
 
     const transactionsSinceAcquisition = await getTransactionsSinceAcquisition({
       lid: leagueId,
       tid,
-      pid
+      pid: deactivate_pid
     })
     const sortedTransactions = transactionsSinceAcquisition.sort(
       (a, b) => a.timestamp - b.timestamp
     )
     const lastTransaction = sortedTransactions[sortedTransactions.length - 1]
     const firstTransaction = sortedTransactions[0]
-    const isActive = Boolean(roster.active.find((p) => p.pid === pid))
+    const isActive = Boolean(
+      roster.active.find((p) => p.pid === deactivate_pid)
+    )
 
     // make sure player has not been on the active roster for more than 48 hours
     const cutoff = dayjs.unix(lastTransaction.timestamp).add('48', 'hours')
@@ -89,7 +92,7 @@ router.post('/?', async (req, res) => {
 
     const transactionsSinceFA = await getTransactionsSinceFreeAgent({
       lid: leagueId,
-      pid
+      pid: deactivate_pid
     })
 
     // make sure player has not been poached since the last time they were a free agent
@@ -123,7 +126,7 @@ router.post('/?', async (req, res) => {
       if (transactionWaiver) {
         const competingWaivers = await db('waivers')
           .where({
-            pid,
+            pid: deactivate_pid,
             processed: transactionWaiver.processed,
             succ: 0,
             type: 1,
@@ -141,11 +144,36 @@ router.post('/?', async (req, res) => {
       }
     }
 
+    if (release_pid) {
+      // confirm player is on practice squad
+      if (!roster.has(release_pid)) {
+        return res.status(400).send({ error: 'invalid release_pid' })
+      }
+
+      // remove from roster
+      roster.removePlayer(release_pid)
+    }
+
     // make sure team has space on practice squad
     if (!roster.hasOpenPracticeSquadSlot()) {
       return res
         .status(400)
         .send({ error: 'no available space on practice squad' })
+    }
+
+    if (release_pid) {
+      const result = await processRelease({
+        release_pid,
+        lid: leagueId,
+        tid,
+        userid: req.auth.userId
+      })
+      for (const data of result) {
+        broadcast(leagueId, {
+          type: 'ROSTER_TRANSACTION',
+          payload: { data }
+        })
+      }
     }
 
     const isDraftedRookie = transactionsSinceAcquisition.find(
@@ -155,16 +183,16 @@ router.post('/?', async (req, res) => {
 
     await db('rosters_players').update({ slot }).where({
       rid: rosterRow.uid,
-      pid
+      pid: deactivate_pid
     })
 
-    await db('league_cutlist').where({ pid, tid }).del()
+    await db('league_cutlist').where({ pid: deactivate_pid, tid }).del()
 
     const transaction = {
       userid: req.auth.userId,
       tid,
       lid: leagueId,
-      pid,
+      pid: deactivate_pid,
       type: constants.transactions.ROSTER_DEACTIVATE,
       value: lastTransaction.value,
       year: constants.season.year,
@@ -173,7 +201,7 @@ router.post('/?', async (req, res) => {
     await db('transactions').insert(transaction)
 
     const data = {
-      pid,
+      pid: deactivate_pid,
       tid,
       slot,
       rid: roster.uid,
@@ -189,7 +217,15 @@ router.post('/?', async (req, res) => {
     const teams = await db('teams').where({ uid: tid })
     const team = teams[0]
 
-    const message = `${team.name} (${team.abbrv}) has placed ${player_row.fname} ${player_row.lname} (${player_row.pos}) on the practice squad.`
+    let message = `${team.name} (${team.abbrv}) has placed ${player_row.fname} ${player_row.lname} (${player_row.pos}) on the practice squad.`
+    if (release_pid) {
+      const release_player_rows = await db('player')
+        .where('pid', release_pid)
+        .limit(1)
+      const release_player_row = release_player_rows[0]
+
+      message += ` ${release_player_row.fname} ${release_player_row.lname} (${release_player_row.pos}) has been released.`
+    }
 
     await sendNotifications({
       league,

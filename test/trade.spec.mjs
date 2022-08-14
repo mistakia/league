@@ -247,7 +247,7 @@ describe('API /trades', function () {
         .post('/api/teams/1/deactivate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          pid: player2.pid,
+          deactivate_pid: player2.pid,
           leagueId
         })
 
