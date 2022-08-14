@@ -86,7 +86,7 @@ export default class FranchiseConfirmation extends React.Component {
               'pos'
             )})`}
           </DialogContentText>
-          <div className='waiver__claim-inputs'>
+          <div className='confirmation__inputs'>
             {!this._isEligible && (
               <FormControl size='small' variant='outlined'>
                 <InputLabel id='untag-label'>Remove Tag</InputLabel>
