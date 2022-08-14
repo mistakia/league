@@ -20,8 +20,7 @@ yarn-error.log
 
 # App specific
 #
-config.production.js
-config.development.js
+config.*.js
 key.pem
 cert.pem
 dist/*.worker.js*
