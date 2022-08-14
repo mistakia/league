@@ -69,7 +69,7 @@ describe('API /teams - cutlist', function () {
       res.body.length.should.equal(1)
       res.body[0].should.equal(player.pid)
 
-      const players = await knex('league_cutlist')
+      const players = await knex('league_cutlist').orderBy('order', 'asc')
       expect(players.length).to.equal(1)
       expect(players[0].pid).to.equal(player.pid)
       expect(players[0].tid).to.equal(teamId)
@@ -115,7 +115,7 @@ describe('API /teams - cutlist', function () {
       res.body.length.should.equal(2)
       res.body.should.deep.equal(pids)
 
-      const cutlist = await knex('league_cutlist')
+      const cutlist = await knex('league_cutlist').orderBy('order', 'asc')
       expect(cutlist.length).to.equal(2)
       expect(cutlist[0].pid).to.equal(player1.pid)
       expect(cutlist[0].tid).to.equal(teamId)
@@ -173,14 +173,14 @@ describe('API /teams - cutlist', function () {
       res2.body.length.should.equal(2)
       res2.body.should.deep.equal(pids)
 
-      const cutlist = await knex('league_cutlist')
+      const cutlist = await knex('league_cutlist').orderBy('order', 'asc')
       expect(cutlist.length).to.equal(2)
-      expect(cutlist[0].pid).to.equal(player2.pid)
+      expect(cutlist[0].order).to.equal(0)
+      expect(cutlist[0].pid).to.equal(player1.pid)
       expect(cutlist[0].tid).to.equal(teamId)
-      expect(cutlist[0].order).to.equal(1)
-      expect(cutlist[1].pid).to.equal(player1.pid)
+      expect(cutlist[1].order).to.equal(1)
+      expect(cutlist[1].pid).to.equal(player2.pid)
       expect(cutlist[1].tid).to.equal(teamId)
-      expect(cutlist[1].order).to.equal(0)
     })
 
     it('delete', async () => {

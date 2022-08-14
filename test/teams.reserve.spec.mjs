@@ -126,7 +126,6 @@ describe('API /teams - reserve', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
       await league(knex)
-      await knex('players').del()
     })
 
     it('not logged in', async () => {
