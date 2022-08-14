@@ -160,16 +160,6 @@ const updatePlayerId = async ({ pid, update_pid }) => {
 
   if (update_pid) {
     const [rows] = await db.raw(
-      `update ignore players set pid = '${update_pid}' where pid = '${pid}'`
-    )
-    log(`players rows updated: ${rows.info}`)
-  } else {
-    const players = await db('players').where({ pid })
-    log(`players rows: ${players.length}`)
-  }
-
-  if (update_pid) {
-    const [rows] = await db.raw(
       `update ignore players_status set pid = '${update_pid}' where pid = '${pid}'`
     )
     log(`players_status rows updated: ${rows.info}`)
