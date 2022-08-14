@@ -239,7 +239,10 @@ export function getRosterPositionalValueByTeamId(state, { tid }) {
     values.div[position] = div
   }
 
-  const team_values = Object.entries(values.total).map(([key, value]) => ({ tid: key, value }))
+  const team_values = Object.entries(values.total).map(([key, value]) => ({
+    tid: key,
+    value
+  }))
   values.sorted_tids = team_values.sort((a, b) => b.value - a.value)
 
   values.team_total = values.total[team.uid]
