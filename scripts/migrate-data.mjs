@@ -16,6 +16,7 @@ const migrateData = async () => {
   const transactions = await db('transactions')
   const transactions_by_year = groupBy(transactions, 'year')
   for (const year in transactions_by_year) {
+    log(`processing transactions for ${year}`)
     const season_dates = await generateSeasonDates({ year })
     const year_transactions = transactions_by_year[year]
     for (const { uid, timestamp } of year_transactions) {
@@ -24,6 +25,8 @@ const migrateData = async () => {
       await db('transactions').update({ week }).where({ uid })
     }
   }
+
+  log('completed')
 }
 
 const main = async () => {
