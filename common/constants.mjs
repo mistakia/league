@@ -1,16 +1,18 @@
 // import MockDate from 'mockdate'
 // import dayjs from 'dayjs'
+
 import * as espn from './espn-constants.mjs'
+import season_dates from './season-dates.mjs'
 import Season from './season.mjs'
 export { espn }
 
-export const season = new Season()
+// MockDate.set(dayjs.unix(1631127600).toDate())
+
+export const season = new Season(season_dates)
 export const week = season.week
 export const year = season.year
 export const isOffseason = season.isOffseason
 export const isRegularSeason = season.isRegularSeason
-
-// MockDate.set(dayjs.unix(1631127600).toDate())
 
 export const DEFAULTS = {
   LEAGUE_ID: 0
