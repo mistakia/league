@@ -40,6 +40,7 @@ export { default as formatHeight } from './format-height.mjs'
 export { default as formatPlayerName } from './format-player-name.mjs'
 export { default as sum } from './sum.mjs'
 export { default as getHistoricBaselines } from './get-historic-baselines.mjs'
+export { default as Season } from './season.mjs'
 
 const uniqBy = (a, key) => {
   const seen = new Set()

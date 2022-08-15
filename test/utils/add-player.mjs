@@ -28,6 +28,7 @@ export default async function ({
     pid: player.pid,
     type: transaction,
     value,
+    week: constants.season.week,
     year: constants.season.year,
     timestamp: Math.round(Date.now() / 1000),
     waiverid

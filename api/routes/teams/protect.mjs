@@ -109,6 +109,7 @@ router.post('/?', async (req, res) => {
       pid,
       type: constants.transactions.PRACTICE_PROTECTED,
       value: lastTransaction.value,
+      week: constants.season.week,
       year: constants.season.year,
       timestamp: Math.round(Date.now() / 1000)
     }

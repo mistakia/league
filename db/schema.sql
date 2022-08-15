@@ -1242,6 +1242,7 @@ CREATE TABLE `transactions` (
   `pid` varchar(7) NOT NULL,
   `type` tinyint(2) NOT NULL,
   `value` int(4) NOT NULL,
+  `week` tinyint(2) NOT NULL,
   `year` int(4) NOT NULL,
   `timestamp` int(11) NOT NULL,
   `waiverid` int(11) DEFAULT NULL,

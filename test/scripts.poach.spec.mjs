@@ -473,6 +473,7 @@ describe('SCRIPTS /waivers - poach', function () {
         pid: player.pid,
         type: constants.transactions.ROSTER_ACTIVATE,
         value: 1,
+        week: constants.season.week,
         year: constants.season.year,
         timestamp: Math.round(Date.now() / 1000)
       })
