@@ -6,20 +6,18 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 dayjs.extend(isBetween)
 
-const getEstOffset = () => {
+const getEstOffset = (datetime = new Date()) => {
   const stdTimezoneOffset = () => {
     const jan = new Date(0, 1)
     const jul = new Date(6, 1)
     return Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset())
   }
 
-  const today = new Date()
-
   const isDstObserved = (Date) => {
-    return today.getTimezoneOffset() < stdTimezoneOffset()
+    return datetime.getTimezoneOffset() < stdTimezoneOffset()
   }
 
-  if (isDstObserved(today)) {
+  if (isDstObserved(datetime)) {
     return -4
   } else {
     return -5
@@ -35,7 +33,8 @@ export default class Season {
     finalWeek,
     nflFinalWeek,
     regularSeasonFinalWeek,
-    wildcardWeek
+    wildcardWeek,
+    now
   }) {
     // Super Bowl
     this.offseason = dayjs.unix(offseason).utc().utcOffset(-5)
@@ -53,9 +52,16 @@ export default class Season {
     this.nflFinalWeek = nflFinalWeek
     this.regularSeasonFinalWeek = regularSeasonFinalWeek
     this.wildcardWeek = wildcardWeek
+
+    if (now) {
+      const d = dayjs.unix(now)
+      const offset = getEstOffset(d.toDate())
+      this._now = d.utc().utcOffset(offset)
+    }
   }
 
   get now() {
+    if (this._now) return this._now
     const offset = getEstOffset()
     return dayjs().utc().utcOffset(offset)
   }

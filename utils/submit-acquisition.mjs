@@ -181,6 +181,7 @@ export default async function ({
     pid,
     type,
     value: bid,
+    week: constants.season.week,
     year: constants.season.year,
     waiverid: waiverId,
     timestamp: Math.round(Date.now() / 1000)

@@ -132,6 +132,7 @@ export default async function ({
       pid: activate_pid,
       type: constants.transactions.ROSTER_ACTIVATE,
       value,
+      week: constants.season.week,
       year: constants.season.year,
       timestamp: Math.round(Date.now() / 1000)
     }
@@ -156,6 +157,7 @@ export default async function ({
     pid: release_pid,
     type: constants.transactions.ROSTER_RELEASE,
     value: 0,
+    week: constants.season.week,
     year: constants.season.year,
     timestamp: Math.round(Date.now() / 1000)
   }

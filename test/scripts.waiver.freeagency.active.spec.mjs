@@ -309,6 +309,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         pid: player.pid,
         type: constants.transactions.ROSTER_RELEASE,
         value: 0,
+        week: constants.season.week,
         year: constants.season.year,
         timestamp: Math.round(Date.now() / 1000)
       })

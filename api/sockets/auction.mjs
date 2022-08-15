@@ -222,6 +222,7 @@ export default class Auction {
       lid: this._lid,
       type: constants.transactions.AUCTION_PROCESSED,
       value,
+      week: 0,
       year,
       timestamp: Math.round(Date.now() / 1000)
     }
@@ -298,6 +299,7 @@ export default class Auction {
       lid: this._lid,
       type: constants.transactions.AUCTION_BID,
       value,
+      week: 0,
       year: constants.season.year,
       timestamp: Math.round(Date.now() / 1000)
     }
@@ -386,6 +388,7 @@ export default class Auction {
       type: constants.transactions.AUCTION_BID,
       value,
       lid: this._lid,
+      week: 0,
       year: constants.season.year,
       timestamp: Math.round(Date.now() / 1000)
     }

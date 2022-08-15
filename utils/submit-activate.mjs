@@ -62,6 +62,7 @@ export default async function ({ tid, activate_pid, leagueId, userId }) {
     pid: activate_pid,
     type: constants.transactions.ROSTER_ACTIVATE,
     value: player_row.value,
+    week: constants.season.week,
     year: constants.season.year,
     timestamp: Math.round(Date.now() / 1000)
   }

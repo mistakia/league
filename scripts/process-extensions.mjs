@@ -51,6 +51,7 @@ const createTransaction = async ({ roster_player, tid, league }) => {
     pid,
     type: getTransactionType(tag),
     value: extensionValue,
+    week: constants.season.week,
     year: constants.season.year,
     timestamp: league.ext_date
   }

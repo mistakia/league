@@ -160,6 +160,7 @@ describe('API /trades', function () {
         pid: player1.pid,
         type: constants.transactions.ROSTER_ACTIVATE,
         value: 0,
+        week: constants.season.week,
         year: constants.season.year,
         timestamp: Math.round(Date.now() / 1000)
       })
