@@ -1877,17 +1877,53 @@ CREATE TABLE `league_player_regular_seasons` (
   `seas` int(4) NOT NULL,
   `lid` int(6) NOT NULL,
   `start_tid` int(6) DEFAULT NULL,
-  `start_acquistion_type` tinyint(2) DEFAULT NULL,
+  `start_acquisition_type` tinyint(2) DEFAULT NULL,
   `end_tid` int(6) DEFAULT NULL,
-  `end_acquistion_type` tinyint(2) DEFAULT NULL,
+  `end_acquisition_type` tinyint(2) DEFAULT NULL,
   `salary` int(4) DEFAULT NULL,
   `starts` tinyint(2) DEFAULT NULL,
   `points` decimal(4,1) DEFAULT NULL,
+  `points_per_game` decimal(3,1) DEFAULT NULL,
   `points_added` decimal(4,1) DEFAULT NULL,
+  `points_added_per_game` decimal(3,1) DEFAULT NULL,
   `games` tinyint(2) DEFAULT NULL,
   `pos_rnk` SMALLINT(5) DEFAULT NULL,
 
   UNIQUE KEY `pid` (`pid`, `seas`, `lid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `league_player`
+--
+
+DROP TABLE IF EXISTS `league_player`;
+
+CREATE TABLE `league_player` (
+  `pid` varchar(7) NOT NULL,
+  `lid` int(6) NOT NULL,
+  `draft_rank` smallint(3) DEFAULT NULL,
+  `starts` smallint(3) DEFAULT NULL,
+  `points` decimal(6,1) DEFAULT NULL,
+  `points_per_game` decimal(3,1) DEFAULT NULL,
+  `points_added` decimal(6,1) DEFAULT NULL,
+  `points_added_per_game` decimal(3,1) DEFAULT NULL,
+  `best_season_points_added_per_game` decimal(3,1) DEFAULT NULL,
+  `points_added_first_three_seas` decimal(6,1) DEFAULT NULL,
+  `points_added_first_four_seas` decimal(6,1) DEFAULT NULL,
+  `points_added_first_five_seas` decimal(6,1) DEFAULT NULL,
+  `points_added_first_seas` decimal(6,1) DEFAULT NULL,
+  `points_added_second_seas` decimal(6,1) DEFAULT NULL,
+  `points_added_third_seas` decimal(6,1) DEFAULT NULL,
+  `games` smallint(3) DEFAULT NULL,
+  `top_3` TINYINT(2) DEFAULT NULL,
+  `top_6` TINYINT(2) DEFAULT NULL,
+  `top_12` TINYINT(2) DEFAULT NULL,
+  `top_24` TINYINT(2) DEFAULT NULL,
+  `top_36` TINYINT(2) DEFAULT NULL,
+
+  UNIQUE KEY `pid` (`pid`, `lid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------

@@ -88,21 +88,27 @@ const processSeasons = async ({ seas, lid = 1 }) => {
       }
     }
 
+    const games = player_gamelogs.length
+    const points = sum(player_gamelogs.map((g) => g.points))
+    const points_added = sum(player_gamelogs.map((g) => g.points_added))
+
     // process / create inserts
     inserts.push({
       pid,
       seas,
       lid,
       pos,
-      games: player_gamelogs.length,
-      points: sum(player_gamelogs.map((g) => g.points)),
+      games,
+      points,
+      points_per_game: points / games,
+      points_added,
+      points_added_per_game: points_added / games,
       starts: player_gamelogs.filter((p) => p.points_added > 0).length,
       salary,
       start_tid,
       start_acquisition_type,
       end_tid,
-      end_acquisition_type,
-      points_added: sum(player_gamelogs.map((g) => g.points_added))
+      end_acquisition_type
     })
   }
 
