@@ -195,6 +195,7 @@ router.post('/?', async (req, res) => {
       pid: deactivate_pid,
       type: constants.transactions.ROSTER_DEACTIVATE,
       value: lastTransaction.value,
+      week: constants.season.week,
       year: constants.season.year,
       timestamp: Math.round(Date.now() / 1000)
     }

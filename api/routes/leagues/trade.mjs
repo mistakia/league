@@ -347,6 +347,7 @@ router.post(
           pid,
           type: constants.transactions.TRADE,
           value: transactionHistory.find((t) => t.pid === pid).value,
+          week: constants.season.week,
           year: constants.season.year,
           timestamp: Math.round(Date.now() / 1000)
         })
@@ -359,6 +360,7 @@ router.post(
           pid,
           type: constants.transactions.TRADE,
           value: transactionHistory.find((t) => t.pid === pid).value,
+          week: constants.season.week,
           year: constants.season.year,
           timestamp: Math.round(Date.now() / 1000)
         })
@@ -382,6 +384,7 @@ router.post(
             pid,
             type: constants.transactions.ROSTER_RELEASE,
             value: 0,
+            week: constants.season.week,
             year: constants.season.year,
             timestamp: Math.round(Date.now() / 1000)
           })
@@ -395,6 +398,7 @@ router.post(
             pid,
             type: constants.transactions.ROSTER_RELEASE,
             value: 0,
+            week: constants.season.week,
             year: constants.season.year,
             timestamp: Math.round(Date.now() / 1000)
           })

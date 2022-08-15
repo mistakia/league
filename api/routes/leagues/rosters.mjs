@@ -72,6 +72,7 @@ router.post('/?', async (req, res) => {
       pid,
       type: constants.transactions.ROSTER_ADD,
       value: val,
+      week: constants.season.week,
       year: constants.season.year,
       timestamp: Math.round(Date.now() / 1000)
     }

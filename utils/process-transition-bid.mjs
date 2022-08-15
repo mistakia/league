@@ -112,6 +112,7 @@ export default async function ({
     pid,
     type: constants.transactions.TRANSITION_TAG,
     value: bid,
+    week: constants.season.week,
     year: constants.season.year,
     timestamp: Math.round(Date.now() / 1000)
   }

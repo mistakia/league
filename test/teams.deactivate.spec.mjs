@@ -342,6 +342,7 @@ describe('API /teams - deactivate', function () {
         pid: player.pid,
         type: constants.transactions.PRACTICE_ADD,
         value: 2,
+        week: constants.season.week,
         year: constants.season.year,
         timestamp: Math.round(Date.now() / 1000) - 10
       })
