@@ -1866,6 +1866,26 @@ CREATE TABLE `league_player_gamelogs` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `league_player_regular_seasons`
+--
+
+DROP TABLE IF EXISTS `league_player_regular_seasons`;
+
+CREATE TABLE `league_player_regular_seasons` (
+  `pid` varchar(7) NOT NULL,
+  `seas` int(4) NOT NULL,
+  `lid` int(6) NOT NULL,
+  `points` decimal(4,1) DEFAULT NULL,
+  `points_added` decimal(4,1) DEFAULT NULL,
+  `games` tinyint(2) DEFAULT NULL,
+  `pos_rnk` SMALLINT(5) DEFAULT NULL,
+
+  UNIQUE KEY `pid` (`pid`, `seas`, `lid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `footballoutsiders`
 --
 
