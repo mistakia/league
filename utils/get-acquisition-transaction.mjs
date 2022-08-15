@@ -1,8 +1,8 @@
 import { constants } from '#common'
 import db from '#db'
 
-export default async function ({ lid, pid, tid }) {
-  const transactions = await db('transactions')
+export default async function ({ lid, pid, tid, year, week }) {
+  const query = db('transactions')
     .where({
       lid,
       tid,
@@ -10,6 +10,19 @@ export default async function ({ lid, pid, tid }) {
     })
     .orderBy('timestamp', 'desc')
     .orderBy('uid', 'desc')
+
+  if (year) {
+    query.where(function () {
+      this.where(function () {
+        this.where('year', year)
+        this.where('week', '<=', week || 0)
+      }).orWhere(function () {
+        this.where('year', '<', year)
+      })
+    })
+  }
+
+  const transactions = await query
 
   const types = [
     constants.transactions.ROSTER_ADD,
