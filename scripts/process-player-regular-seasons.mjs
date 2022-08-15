@@ -4,13 +4,16 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { sum, groupBy } from '#common'
-import { isMain } from '#utils'
+import { isMain, getAcquisitionTransaction } from '#utils'
+import generateSeasonDates from './generate-season-dates.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('process-player-regular-seasons')
 debug.enable('process-player-regular-seasons')
 
 const processSeasons = async ({ seas, lid = 1 }) => {
+  const season_dates = await generateSeasonDates({ year: seas })
+
   // get league player gamelogs for season
   const gamelogs = await db('league_player_gamelogs')
     .select('league_player_gamelogs.*', 'player.pos')
@@ -26,6 +29,65 @@ const processSeasons = async ({ seas, lid = 1 }) => {
     const player_gamelogs = gamelogs.filter((g) => g.pid === pid)
     const pos = player_gamelogs[0].pos
 
+    // get start team
+    const rosters_start = await db('rosters_players')
+      .join('rosters', 'rosters.uid', 'rosters_players.rid')
+      .where('lid', lid)
+      .where('pid', pid)
+      .where('year', seas)
+      .where('week', 0)
+    const start_tid = rosters_start.length ? rosters_start[0].tid : null
+
+    let salary = null
+    if (start_tid) {
+      const salary_query = await db('transactions')
+        .where({ lid, pid, year: seas, week: 0, tid: start_tid })
+        .orderBy('timestamp', 'desc')
+        .limit(1)
+
+      salary = salary_query.length ? salary_query[0].value : 0
+    }
+
+    // get end team
+    const rosters_end = await db('rosters_players')
+      .join('rosters', 'rosters.uid', 'rosters_players.rid')
+      .where('lid', lid)
+      .where('pid', pid)
+      .where('year', seas)
+      .where('week', season_dates.finalWeek)
+    const end_tid = rosters_end.length ? rosters_end[0].tid : null
+
+    // get start team acquistion type
+    let start_acquistion_type = null
+    if (start_tid) {
+      const acquistion_transaction = await getAcquisitionTransaction({
+        lid,
+        pid,
+        tid: start_tid,
+        year: seas
+      })
+
+      if (acquistion_transaction) {
+        start_acquistion_type = acquistion_transaction.type
+      }
+    }
+
+    // get end team acquisition type
+    let end_acquistion_type = null
+    if (end_tid) {
+      const acquistion_transaction = await getAcquisitionTransaction({
+        lid,
+        pid,
+        tid: end_tid,
+        year: seas,
+        week: season_dates.finalWeek
+      })
+
+      if (acquistion_transaction) {
+        end_acquistion_type = acquistion_transaction.type
+      }
+    }
+
     // process / create inserts
     inserts.push({
       pid,
@@ -34,6 +96,12 @@ const processSeasons = async ({ seas, lid = 1 }) => {
       pos,
       games: player_gamelogs.length,
       points: sum(player_gamelogs.map((g) => g.points)),
+      starts: player_gamelogs.filter((p) => p.points_added > 0).length,
+      salary,
+      start_tid,
+      start_acquistion_type,
+      end_tid,
+      end_acquistion_type,
       points_added: sum(player_gamelogs.map((g) => g.points_added))
     })
   }
