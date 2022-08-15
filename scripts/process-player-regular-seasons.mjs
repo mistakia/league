@@ -57,25 +57,25 @@ const processSeasons = async ({ seas, lid = 1 }) => {
       .where('week', season_dates.finalWeek)
     const end_tid = rosters_end.length ? rosters_end[0].tid : null
 
-    // get start team acquistion type
-    let start_acquistion_type = null
+    // get start team acquisition type
+    let start_acquisition_type = null
     if (start_tid) {
-      const acquistion_transaction = await getAcquisitionTransaction({
+      const acquisition_transaction = await getAcquisitionTransaction({
         lid,
         pid,
         tid: start_tid,
         year: seas
       })
 
-      if (acquistion_transaction) {
-        start_acquistion_type = acquistion_transaction.type
+      if (acquisition_transaction) {
+        start_acquisition_type = acquisition_transaction.type
       }
     }
 
     // get end team acquisition type
-    let end_acquistion_type = null
+    let end_acquisition_type = null
     if (end_tid) {
-      const acquistion_transaction = await getAcquisitionTransaction({
+      const acquisition_transaction = await getAcquisitionTransaction({
         lid,
         pid,
         tid: end_tid,
@@ -83,8 +83,8 @@ const processSeasons = async ({ seas, lid = 1 }) => {
         week: season_dates.finalWeek
       })
 
-      if (acquistion_transaction) {
-        end_acquistion_type = acquistion_transaction.type
+      if (acquisition_transaction) {
+        end_acquisition_type = acquisition_transaction.type
       }
     }
 
@@ -99,9 +99,9 @@ const processSeasons = async ({ seas, lid = 1 }) => {
       starts: player_gamelogs.filter((p) => p.points_added > 0).length,
       salary,
       start_tid,
-      start_acquistion_type,
+      start_acquisition_type,
       end_tid,
-      end_acquistion_type,
+      end_acquisition_type,
       points_added: sum(player_gamelogs.map((g) => g.points_added))
     })
   }
