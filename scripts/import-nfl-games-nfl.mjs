@@ -51,7 +51,7 @@ const format = (item) => {
     date,
     time_est,
     day,
-    timestamp: datetime.unix(),
+    timestamp: datetime ? datetime.unix() : null,
 
     v: fixTeam(item.awayTeam.abbreviation),
     h: fixTeam(item.homeTeam.abbreviation),
@@ -86,6 +86,8 @@ const run = async ({
   })
 
   const startedGameWithMissingDetailId = games.find((game) => {
+    if (!game.date || !game.time_est) return false
+
     const timeStr = `${game.date} ${game.time_est}`
     const gameStart = dayjs.tz(
       timeStr,
