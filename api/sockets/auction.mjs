@@ -2,7 +2,7 @@ import WebSocket from 'ws'
 import config from '#config'
 import db from '#db'
 import { constants, Roster } from '#common'
-import { getRoster } from '#utils'
+import { getRoster, getLeague } from '#utils'
 import debug from 'debug'
 
 export default class Auction {
@@ -417,8 +417,7 @@ export default class Auction {
       .orderBy('timestamp', 'desc')
       .orderBy('uid', 'desc')
 
-    const leagues = await db('leagues').where('uid', this._lid)
-    this._league = leagues[0]
+    this._league = await getLeague(this._lid)
 
     for (const team of this._teams) {
       const roster = await getRoster({ tid: team.uid })
