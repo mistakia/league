@@ -5,6 +5,7 @@ import { getApp } from '@core/app'
 import { getPlayerById, getAllPlayers } from '@core/players'
 import { getCurrentLeague } from '@core/leagues'
 import { getTeamsForCurrentLeague, getTeamById } from '@core/teams'
+import { getDraftPickValueByPick } from '@core/draft-pick-value'
 
 import { Roster as RosterRecord } from './roster'
 
@@ -238,6 +239,31 @@ export function getRosterPositionalValueByTeamId(state, { tid }) {
     values.div_avg[position] = div.reduce((s, i) => s + i, 0) / div.length
     values.div[position] = div
   }
+
+  const league_draft_value = []
+  const div_draft_value = []
+  for (const [tid, team_i] of teams) {
+    const draft_value = team_i.picks.reduce(
+      (sum, pick) => sum + getDraftPickValueByPick(state, { pick }),
+      0
+    )
+    league_draft_value.push(draft_value)
+    if (divTeamIds.includes(tid)) div_draft_value.push(draft_value)
+    if (tid === team.uid) {
+      values.team.DRAFT = draft_value
+    }
+    if (values.rosters[tid]) {
+      values.rosters[tid].DRAFT = draft_value
+      values.total[tid] = values.total[tid] + draft_value
+    }
+  }
+
+  values.league_avg.DRAFT =
+    league_draft_value.reduce((s, i) => s + i, 0) / league_draft_value.length
+  values.league.DRAFT = league_draft_value
+  values.div_avg.DRAFT =
+    div_draft_value.reduce((s, i) => s + i, 0) / div_draft_value.length
+  values.div.DRAFT = div_draft_value
 
   const team_values = Object.entries(values.total).map(([key, value]) => ({
     tid: key,
