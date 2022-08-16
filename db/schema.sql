@@ -1929,6 +1929,23 @@ CREATE TABLE `league_player` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `league_draft_pick_value`
+--
+
+DROP TABLE IF EXISTS `league_draft_pick_value`;
+
+CREATE TABLE `league_draft_pick_value` (
+  `lid` int(6) NOT NULL,
+  `rank` smallint(3) NOT null,
+  `median_best_season_points_added_per_game` decimal(3,1) DEFAULT NULL,
+  `median_career_points_added_per_game` decimal(3,1) DEFAULT NULL,
+
+  UNIQUE KEY `pick` (`rank`, `lid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `footballoutsiders`
 --
 
