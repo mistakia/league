@@ -92,10 +92,7 @@ export default class AuctionMainBid extends React.Component {
     this.props.nominate(this.state.value)
   }
 
-  componentDidUpdate = (
-    { bidValue, nominated_pid },
-    { value }
-  ) => {
+  componentDidUpdate = ({ bidValue, nominated_pid }, { value }) => {
     if (!nominated_pid && this.props.nominated_pid) {
       // new player nominated
       this.setState({ value: this.props.bidValue + 1 })

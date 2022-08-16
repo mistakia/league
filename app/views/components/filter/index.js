@@ -41,6 +41,14 @@ export default function Filter(props) {
     }
     timestamp = event.timeStamp
 
+    const isInsideDropdown = dropdown_ref.current
+      ? dropdown_ref.current.contains(event.target)
+      : false
+
+    if (isInsideDropdown) {
+      return
+    }
+
     if (visible) {
       document.removeEventListener('click', handleOutsideClick)
       setVisible(false)
