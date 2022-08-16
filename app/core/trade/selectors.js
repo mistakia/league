@@ -12,6 +12,7 @@ import { getTeamById, getDraftPickById } from '@core/teams'
 import { createTrade } from './trade'
 import { Roster, constants } from '@common'
 import { getAllPlayers, getPlayerById } from '@core/players'
+import { getDraftPickValue } from '@core/draft-pick-value'
 
 export function getTrade(state) {
   return state.get('trade')
@@ -141,6 +142,39 @@ export function getCurrentTradePlayers(state) {
   }
 }
 
+function calculateTradedPicks({ picks, add, remove }) {
+  const pickids = remove.map((p) => p.uid)
+
+  let filtered = picks.filter((pick) => !pickids.includes(pick.uid))
+  for (const pick of add) {
+    filtered = filtered.push(pick)
+  }
+
+  return filtered
+}
+
+export function getProposingTeamTradedPicks(state) {
+  const trade = getCurrentTrade(state)
+  const team = getTeamById(state, { tid: trade.propose_tid })
+
+  return calculateTradedPicks({
+    picks: team.picks,
+    add: trade.acceptingTeamPicks,
+    remove: trade.proposingTeamPicks
+  })
+}
+
+export function getAcceptingTeamTradedPicks(state) {
+  const trade = getCurrentTrade(state)
+  const team = getTeamById(state, { tid: trade.accept_tid })
+
+  return calculateTradedPicks({
+    picks: team.picks,
+    add: trade.proposingTeamPicks,
+    remove: trade.acceptingTeamPicks
+  })
+}
+
 function calculateTradedRosterPlayers({ state, roster, add, remove, release }) {
   const active_pids = roster.active.map((p) => p.pid)
 
@@ -180,14 +214,21 @@ export function getAcceptingTeamTradedRosterPlayers(state) {
   })
 }
 
-function getTeamTradeSummary(lineups, playerMaps) {
+function getTeamTradeSummary(state, { lineups, playerMaps, picks }) {
   const vorpType = constants.isOffseason ? '0' : 'ros'
+  const draft_value = picks.reduce(
+    (sum, pick) => sum + getDraftPickValue(state, { ...pick }),
+    0
+  )
+  const player_value = playerMaps.reduce(
+    (sum, pMap) => sum + Math.max(pMap.getIn(['vorp', vorpType]), 0),
+    0
+  )
   const values = {
     points: lineups.reduce((sum, l) => sum + l.baseline_total, 0),
-    value: playerMaps.reduce(
-      (sum, pMap) => sum + Math.max(pMap.getIn(['vorp', vorpType]), 0),
-      0
-    ),
+    value: player_value + draft_value,
+    player_value,
+    draft_value,
     value_adj: playerMaps.reduce(
       (sum, pMap) => sum + Math.max(pMap.getIn(['vorp_adj', vorpType]), 0),
       0
@@ -226,6 +267,9 @@ export function getCurrentTradeAnalysis(state) {
     .valueSeq()
     .toArray()
 
+  const proposingTeamTradedPicks = getProposingTeamTradedPicks(state)
+  const acceptingTeamTradedPicks = getAcceptingTeamTradedPicks(state)
+
   const proposingTeamTradedPlayers = getProposingTeamTradedRosterPlayers(state)
   const acceptingTeamTradedPlayers = getAcceptingTeamTradedRosterPlayers(state)
 
@@ -236,22 +280,34 @@ export function getCurrentTradeAnalysis(state) {
     tid: trade.accept_tid
   })
 
+  const proposingTeamRecord = getTeamById(state, { tid: trade.propose_tid })
   const proposingTeam = {
-    team: getTeamById(state, { tid: trade.propose_tid }),
-    before: getTeamTradeSummary(proposingTeamLineups, proposingTeamPlayers),
-    after: getTeamTradeSummary(
-      proposingTeamProjectedLineups,
-      proposingTeamTradedPlayers
-    )
+    team: proposingTeamRecord,
+    before: getTeamTradeSummary(state, {
+      lineups: proposingTeamLineups,
+      playerMaps: proposingTeamPlayers,
+      picks: proposingTeamRecord.picks
+    }),
+    after: getTeamTradeSummary(state, {
+      lineups: proposingTeamProjectedLineups,
+      playerMaps: proposingTeamTradedPlayers,
+      picks: proposingTeamTradedPicks
+    })
   }
 
+  const acceptingTeamRecord = getTeamById(state, { tid: trade.accept_tid })
   const acceptingTeam = {
-    team: getTeamById(state, { tid: trade.accept_tid }),
-    before: getTeamTradeSummary(acceptingTeamLineups, acceptingTeamPlayers),
-    after: getTeamTradeSummary(
-      acceptingTeamProjectedLineups,
-      acceptingTeamTradedPlayers
-    )
+    team: acceptingTeamRecord,
+    before: getTeamTradeSummary(state, {
+      lineups: acceptingTeamLineups,
+      playerMaps: acceptingTeamPlayers,
+      picks: acceptingTeamRecord.picks
+    }),
+    after: getTeamTradeSummary(state, {
+      lineups: acceptingTeamProjectedLineups,
+      playerMaps: acceptingTeamTradedPlayers,
+      picks: acceptingTeamTradedPicks
+    })
   }
 
   return { proposingTeam, acceptingTeam }

@@ -40,6 +40,8 @@ export default class TradeTeamSummary extends React.Component {
     const pctPoints = Percentage('points', analysis)
     const pctValue = Percentage('value', analysis)
     const pctValueAdj = Percentage('value_adj', analysis)
+    const pctDraftValue = Percentage('draft_value', analysis)
+    const pctPlayerValue = Percentage('player_value', analysis)
 
     return (
       <>
@@ -66,7 +68,7 @@ export default class TradeTeamSummary extends React.Component {
               </TableRow>
               <TableRow>
                 <TableCell component='th' scope='row'>
-                  Value
+                  Overall Value
                 </TableCell>
                 <TableCell align='right'>
                   <div className='metric'>
@@ -79,7 +81,20 @@ export default class TradeTeamSummary extends React.Component {
               </TableRow>
               <TableRow>
                 <TableCell component='th' scope='row'>
-                  Salary Adjusted Value
+                  Player Value
+                </TableCell>
+                <TableCell align='right'>
+                  <div className='metric'>
+                    {analysis.after.player_value
+                      ? analysis.after.player_value.toFixed(1)
+                      : '-'}
+                  </div>
+                </TableCell>
+                <TableCell>{pctPlayerValue}</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell component='th' scope='row'>
+                  Player Salary Adjusted Value
                 </TableCell>
                 <TableCell align='right'>
                   <div className='metric'>
@@ -92,13 +107,26 @@ export default class TradeTeamSummary extends React.Component {
               </TableRow>
               <TableRow>
                 <TableCell component='th' scope='row'>
+                  Draft Value
+                </TableCell>
+                <TableCell align='right'>
+                  <div className='metric'>
+                    {analysis.after.draft_value
+                      ? analysis.after.draft_value.toFixed(1)
+                      : '-'}
+                  </div>
+                </TableCell>
+                <TableCell>{pctDraftValue}</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell component='th' scope='row'>
                   Team Salary
                 </TableCell>
                 <TableCell align='right'>
                   <div className='metric'>{analysis.after.salary || '-'}</div>
                 </TableCell>
                 <TableCell>
-                  <div className='metric'>
+                  <div className='trade__percentage metric'>
                     {analysis.after.salary - analysis.before.salary || '-'}
                   </div>
                 </TableCell>
