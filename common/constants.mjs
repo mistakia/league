@@ -1134,11 +1134,6 @@ export const jobDetails = {
   53: 'Process Playoffs'
 }
 
-export const changes = {
-  PLAYER_EDIT: 1,
-  PLAYER_NEW: 2
-}
-
 export const oddTypes = {
   SEASON_PASSING: 1,
   SEASON_RUSHING: 2,
