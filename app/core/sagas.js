@@ -23,6 +23,7 @@ import { scoreboardSagas } from './scoreboard'
 import { playSagas } from './plays'
 import { gamelogSagas } from './gamelogs'
 import { propSagas } from './props'
+import { draftPickValueSagas } from './draft-pick-value'
 
 export default function* rootSaga() {
   yield all([
@@ -48,6 +49,7 @@ export default function* rootSaga() {
     ...scoreboardSagas,
     ...playSagas,
     ...gamelogSagas,
-    ...propSagas
+    ...propSagas,
+    ...draftPickValueSagas
   ])
 }

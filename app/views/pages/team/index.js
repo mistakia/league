@@ -3,6 +3,7 @@ import { createSelector } from 'reselect'
 
 import { playerActions } from '@core/players'
 import { teamActions, getTeamsForCurrentLeague } from '@core/teams'
+import { draftPickValueActions } from '@core/draft-pick-value'
 
 import TeamPage from './team'
 
@@ -12,7 +13,8 @@ const mapStateToProps = createSelector(getTeamsForCurrentLeague, (teams) => ({
 
 const mapDispatchToProps = {
   loadTeams: teamActions.loadTeams,
-  loadLeaguePlayers: playerActions.loadLeaguePlayers
+  loadLeaguePlayers: playerActions.loadLeaguePlayers,
+  loadDraftPickValue: draftPickValueActions.loadDraftPickValue
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(TeamPage)
