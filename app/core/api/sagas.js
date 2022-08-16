@@ -2,6 +2,7 @@ import { call, put, cancelled, select } from 'redux-saga/effects'
 import Bugsnag from '@bugsnag/js'
 
 import { api, apiRequest } from '@core/api/service'
+import { getDraftPickValueActions } from '@core/draft-pick-value'
 import { authActions, loginActions, registerActions, getApp } from '@core/app'
 import { getStatusActions } from '@core/status'
 import { getScheduleActions } from '@core/schedule'
@@ -372,4 +373,10 @@ export const getPlayerPractices = fetch.bind(
   null,
   api.getPlayerPractices,
   getPlayerPracticesActions
+)
+
+export const getDraftPickValue = fetch.bind(
+  null,
+  api.getDraftPickValue,
+  getDraftPickValueActions
 )

@@ -73,5 +73,6 @@ export {
   getPlayerProjections,
   getLeagueTeamStats,
   getPlayerGamelogs,
-  getPlayerPractices
+  getPlayerPractices,
+  getDraftPickValue
 } from './sagas'

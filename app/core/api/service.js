@@ -329,6 +329,10 @@ export const api = {
   getPlayerPractices({ pid }) {
     const url = `${BASE_URL}/players/${pid}/practices`
     return { url }
+  },
+  getDraftPickValue({ leagueId }) {
+    const url = `${BASE_URL}/leagues/${leagueId}/draft-pick-value`
+    return { url }
   }
 }
 
