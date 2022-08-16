@@ -10,13 +10,19 @@ import LeagueTeam from '@components/league-team'
 
 import './team.styl'
 
-export default function TeamPage({ loadTeams, loadLeaguePlayers, teams }) {
+export default function TeamPage({
+  loadTeams,
+  loadLeaguePlayers,
+  teams,
+  loadDraftPickValue
+}) {
   const { lid, tid } = useParams()
   const navigate = useNavigate()
 
   useEffect(() => {
     loadTeams(lid)
     loadLeaguePlayers(lid)
+    loadDraftPickValue()
   }, [])
 
   useEffect(() => {
@@ -43,5 +49,6 @@ export default function TeamPage({ loadTeams, loadLeaguePlayers, teams }) {
 TeamPage.propTypes = {
   loadTeams: PropTypes.func,
   loadLeaguePlayers: PropTypes.func,
-  teams: ImmutablePropTypes.map
+  teams: ImmutablePropTypes.map,
+  loadDraftPickValue: PropTypes.func
 }

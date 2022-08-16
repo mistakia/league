@@ -14,12 +14,14 @@ import {
   getTransitionPlayers,
   getCutlistPlayers
 } from '@core/players'
+import { draftPickValueActions } from '@core/draft-pick-value'
 
 import render from './dashboard'
 
 class DashboardPage extends React.Component {
   componentDidMount() {
     this.props.loadLeaguePlayers()
+    this.props.loadDraftPickValue()
   }
 
   render() {
@@ -28,7 +30,8 @@ class DashboardPage extends React.Component {
 }
 
 DashboardPage.propTypes = {
-  loadLeaguePlayers: PropTypes.func
+  loadLeaguePlayers: PropTypes.func,
+  loadDraftPickValue: PropTypes.func
 }
 
 const mapStateToProps = createSelector(
@@ -68,7 +71,8 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  loadLeaguePlayers: playerActions.loadLeaguePlayers
+  loadLeaguePlayers: playerActions.loadLeaguePlayers,
+  loadDraftPickValue: draftPickValueActions.loadDraftPickValue
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(DashboardPage)
