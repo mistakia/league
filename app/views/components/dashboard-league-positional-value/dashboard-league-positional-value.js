@@ -23,6 +23,16 @@ export default class DashboardLeaguePositionalValue extends React.Component {
       series.push({ name: position, data, borderColor: 'transparent' })
     }
 
+    const draft_data = []
+    for (const { tid } of summary.sorted_tids) {
+      const draft_value = summary.rosters[tid].DRAFT
+        ? summary.rosters[tid].DRAFT.toFixed(1)
+        : 0
+      const rounded = parseInt(draft_value, 10)
+      draft_data.push(rounded)
+    }
+    series.push({ name: 'Draft', data: draft_data, borderColor: 'transparent' })
+
     const teamNames = []
     for (const { tid } of summary.sorted_tids) {
       const id = parseInt(tid, 10)
@@ -81,7 +91,8 @@ export default class DashboardLeaguePositionalValue extends React.Component {
         '#ffbb3f',
         '#3f3fff',
         '#9f9f9f',
-        '#3f3f3f'
+        '#3f3f3f',
+        '#800080'
       ],
       yAxis: {
         min: 0,
