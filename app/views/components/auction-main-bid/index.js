@@ -2,9 +2,13 @@ import { connect } from 'react-redux'
 import dayjs from 'dayjs'
 import { createSelector } from 'reselect'
 
-import { auctionActions, getAuction } from '@core/auction'
+import {
+  auctionActions,
+  getAuction,
+  isNominatedPlayerEligible
+} from '@core/auction'
 import { getApp } from '@core/app'
-import { isPlayerEligible, getCurrentTeamRoster } from '@core/rosters'
+import { getCurrentTeamRoster } from '@core/rosters'
 import { getCurrentLeague } from '@core/leagues'
 import { notificationActions } from '@core/notifications'
 import { getFreeAgentPeriod } from '@common'
@@ -15,7 +19,7 @@ const mapStateToProps = createSelector(
   getAuction,
   getApp,
   getCurrentTeamRoster,
-  isPlayerEligible,
+  isNominatedPlayerEligible,
   getCurrentLeague,
   (auction, app, roster, isEligible, league) => {
     const faPeriod = getFreeAgentPeriod(league.adate)
@@ -32,13 +36,14 @@ const mapStateToProps = createSelector(
       isWinningBid: auction.transactions.first()
         ? auction.transactions.first().tid === app.teamId
         : false,
-      selected: auction.selected,
+      selected_pid: auction.selected_pid,
       bidValue: auction.bid,
       isNominating: auction.nominatingTeamId === app.teamId,
       nominatingTeamId: auction.nominatingTeamId,
       timer: auction.timer,
       availableCap: roster.availableCap,
       isAboveCap: auction.bid >= roster.availableCap,
+      nominated_pid: auction.nominated_pid,
       isEligible,
       isStarted,
       adate,
