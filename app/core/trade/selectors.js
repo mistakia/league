@@ -12,7 +12,7 @@ import { getTeamById, getDraftPickById } from '@core/teams'
 import { createTrade } from './trade'
 import { Roster, constants } from '@common'
 import { getAllPlayers, getPlayerById } from '@core/players'
-import { getDraftPickValue } from '@core/draft-pick-value'
+import { getDraftPickValueByPick } from '@core/draft-pick-value'
 
 export function getTrade(state) {
   return state.get('trade')
@@ -217,7 +217,7 @@ export function getAcceptingTeamTradedRosterPlayers(state) {
 function getTeamTradeSummary(state, { lineups, playerMaps, picks }) {
   const vorpType = constants.isOffseason ? '0' : 'ros'
   const draft_value = picks.reduce(
-    (sum, pick) => sum + getDraftPickValue(state, { ...pick }),
+    (sum, pick) => sum + getDraftPickValueByPick(state, { pick }),
     0
   )
   const player_value = playerMaps.reduce(
