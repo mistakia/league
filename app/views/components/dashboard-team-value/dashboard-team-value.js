@@ -44,6 +44,23 @@ export default class DashboardTeamValue extends React.Component {
       )
     })
 
+    const draft_values = summary.league.DRAFT.sort((a, b) => b - a)
+    const draft_value = summary.team.DRAFT || 0
+    const draft_rank = draft_values.indexOf(draft_value) + 1
+    const classNames = []
+    if (draft_rank <= quarterOfLeague) classNames.push('text-green')
+    if (draft_rank >= league.nteams - quarterOfLeague)
+      classNames.push('text-red')
+    rows.push(
+      <tr key={'DRAFT'}>
+        <td>Draft</td>
+        <td>{draft_value.toFixed(1)}</td>
+        <td className={classNames.join(' ')}>{`${draft_rank}${nth(
+          draft_rank
+        )}`}</td>
+      </tr>
+    )
+
     const options = {
       chart: {
         polar: true,
@@ -60,7 +77,7 @@ export default class DashboardTeamValue extends React.Component {
       },
 
       xAxis: {
-        categories: constants.positions,
+        categories: [...constants.positions, 'Draft'],
         lineColor: '#cccccc',
         tickmarkPlacement: 'on',
         lineWidth: 0
