@@ -9,5 +9,6 @@ export {
   getAuctionTargetPlayers,
   getTeamBid,
   getAuctionInfoForPosition,
-  isAfterAuction
+  isAfterAuction,
+  isNominatedPlayerEligible
 } from './selectors'

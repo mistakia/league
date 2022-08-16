@@ -32,7 +32,7 @@ export default class AuctionPlayer extends React.Component {
       watchlist,
       style,
       valueType,
-      selected,
+      selected_pid,
       nominated_pid
     } = this.props
 
@@ -44,7 +44,7 @@ export default class AuctionPlayer extends React.Component {
       classNames.push('watchlist')
     }
 
-    if (selected === pid || nominated_pid === pid) {
+    if (selected_pid === pid || nominated_pid === pid) {
       classNames.push('selected')
     }
 
@@ -88,5 +88,5 @@ AuctionPlayer.propTypes = {
   watchlist: ImmutablePropTypes.set,
   style: PropTypes.object,
   valueType: PropTypes.string,
-  selected: PropTypes.string
+  selected_pid: PropTypes.string
 }

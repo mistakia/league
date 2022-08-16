@@ -6,7 +6,8 @@ import { getPlayersForWatchlist, getAllPlayers } from '@core/players'
 import {
   getRosteredPlayerIdsForCurrentLeague,
   getCurrentPlayers,
-  getActiveRosterPlayerIdsForCurrentLeague
+  getActiveRosterPlayerIdsForCurrentLeague,
+  isPlayerEligible
 } from '@core/rosters'
 import { getCurrentLeague } from '@core/leagues'
 import { constants, getFreeAgentPeriod } from '@common'
@@ -137,6 +138,11 @@ export function isAfterAuction(state) {
   }
 
   return true
+}
+
+export function isNominatedPlayerEligible(state) {
+  const auction = getAuction(state)
+  return isPlayerEligible(state, { pid: auction.nominated_pid })
 }
 
 export const getPlayersForOptimalLineup = createSelector(
