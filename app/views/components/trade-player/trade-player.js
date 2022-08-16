@@ -19,20 +19,20 @@ export default class TradePlayer extends React.Component {
           <label>Sal</label>${playerMap.getIn(['value'], 0)}
         </div>
         <div className='trade__player-metric metric'>
-          <label>Val</label>
-          {playerMap.getIn(['vorp', vorpType], 0).toFixed(1)}
-        </div>
-        <div className='trade__player-metric metric'>
-          <label>aVal</label>
-          {playerMap.getIn(['vorp_adj', vorpType], 0).toFixed(1)}
-        </div>
-        <div className='trade__player-metric metric'>
           <label>Pts+</label>
           {playerMap.getIn(['lineups', 'sp'], 0).toFixed(1)}
         </div>
         <div className='trade__player-metric metric'>
           <label>Be+</label>
           {playerMap.getIn(['lineups', 'bp'], 0).toFixed(1)}
+        </div>
+        <div className='trade__player-metric metric'>
+          <label>Adj Val</label>
+          {playerMap.getIn(['vorp_adj', vorpType], 0).toFixed(1)}
+        </div>
+        <div className='trade__player-metric metric'>
+          <label>Val</label>
+          {playerMap.getIn(['vorp', vorpType], 0).toFixed(1)}
         </div>
       </div>
     )

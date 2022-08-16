@@ -11,17 +11,17 @@ const getRank = ({ pick, round }) => {
     case 2:
       return 18
     case 3:
-      return 30
+      return 36
     case 4:
-      return 40
+      return 50
     default:
-      return 40
+      return 60
   }
 }
 
-export function getDraftPickValue(state, { pick, round }) {
+export function getDraftPickValueByPick(state, { pick }) {
   const values = state.get('draft_pick_value')
-  const rank = getRank({ pick, round })
+  const rank = getRank(pick)
   const item = values.find((value) => value.rank === rank)
 
   if (!item) {
@@ -29,9 +29,9 @@ export function getDraftPickValue(state, { pick, round }) {
   }
 
   const avg =
-    (item.median_best_season_points_added_per_game +
+    (3 * item.median_best_season_points_added_per_game +
       item.median_career_points_added_per_game) /
-    2
+    4
   const weeks_remaining = constants.season.finalWeek - constants.week
 
   return avg * weeks_remaining

@@ -8,7 +8,7 @@ import './trade-pick.styl'
 
 export default class TradePick extends React.Component {
   render = () => {
-    const { pick, league, isSelected, teams } = this.props
+    const { pick, league, teams, draft_value } = this.props
     let text = `${pick.year} - ${ordinalSuffixOf(pick.round)}`
     if (pick.pick) {
       const pickNum = pick.pick % league.nteams || league.nteams
@@ -19,16 +19,21 @@ export default class TradePick extends React.Component {
     const team = teams.get(pick.otid)
     text += ` (${team.abbrv})`
 
-    const classNames = ['trade__pick']
-    if (isSelected) classNames.push('selected')
-
-    return <div className={classNames.join(' ')}>{text}</div>
+    return (
+      <div className='trade__pick'>
+        <div className='trade__player-name'>{text}</div>
+        <div className='trade__player-metric metric'>
+          <label>Val</label>
+          {draft_value ? draft_value.toFixed(1) : 0}
+        </div>
+      </div>
+    )
   }
 }
 
 TradePick.propTypes = {
   pick: PropTypes.object,
   league: PropTypes.object,
-  isSelected: PropTypes.bool,
-  teams: ImmutablePropTypes.map
+  teams: ImmutablePropTypes.map,
+  draft_value: PropTypes.number
 }
