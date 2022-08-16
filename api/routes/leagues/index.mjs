@@ -16,6 +16,7 @@ import rosters from './rosters.mjs'
 import baselines from './baselines.mjs'
 import teamStats from './team-stats.mjs'
 import players from './players.mjs'
+import draft_pick_value from './draft-pick-value.mjs'
 
 const router = express.Router()
 
@@ -312,6 +313,7 @@ router.get('/:leagueId/rosters/?', async (req, res) => {
 router.use('/:leagueId/transactions', transactions)
 router.use('/:leagueId/games', games)
 router.use('/:leagueId/draft', draft)
+router.use('/:leagueId/draft-pick-value', draft_pick_value)
 router.use('/:leagueId/settings', settings)
 router.use('/:leagueId/trades', trades)
 router.use('/:leagueId/schedule', schedule)
