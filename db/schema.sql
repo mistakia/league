@@ -1380,10 +1380,9 @@ DROP TABLE IF EXISTS `player_changelog`;
 CREATE TABLE `player_changelog` (
   `uid` int(11) NOT NULL AUTO_INCREMENT,
   `id` text NOT NULL,
-  `type` tinyint(2) NOT NULL,
-  `prop` text DEFAULT NULL,
-  `prev` text DEFAULT NULL,
-  `new` text DEFAULT NULL,
+  `prop` text NOT NULL,
+  `prev` text NOT NULL,
+  `new` text NOT NULL,
   `timestamp` int(11) NOT NULL,
   PRIMARY KEY (`uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

@@ -3,7 +3,6 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { constants } from '#common'
 import isMain from './is-main.mjs'
 import db from '#db'
 
@@ -85,14 +84,17 @@ const updatePlayer = async ({ player_row, pid, update }) => {
     log(
       `Updating player: ${player_row.pid}, Field: ${prop}, Value: ${edit.rhs}`
     )
-    await db('player_changelog').insert({
-      type: constants.changes.PLAYER_EDIT,
-      id: player_row.pid,
-      prop,
-      prev: edit.lhs,
-      new: edit.rhs,
-      timestamp: Math.round(Date.now() / 1000)
-    })
+
+    const prev = edit.lh
+    if (prev) {
+      await db('player_changelog').insert({
+        id: player_row.pid,
+        prop,
+        prev,
+        new: edit.rhs,
+        timestamp: Math.round(Date.now() / 1000)
+      })
+    }
 
     await db('player')
       .update({

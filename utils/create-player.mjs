@@ -1,6 +1,6 @@
 import debug from 'debug'
 
-import { constants, formatHeight, formatPlayerName, fixTeam } from '#common'
+import { formatHeight, formatPlayerName, fixTeam } from '#common'
 import db from '#db'
 import generatePlayerId from './generate-player-id.mjs'
 import * as espn from './espn.mjs'
@@ -95,12 +95,6 @@ const createPlayer = async (playerData) => {
     await db('player').insert({
       pid: playerId,
       ...playerData
-    })
-
-    await db('player_changelog').insert({
-      type: constants.changes.PLAYER_NEW,
-      id: playerId,
-      timestamp: Math.round(Date.now() / 1000)
     })
 
     log(`Created player: ${playerId}`)
