@@ -53,20 +53,20 @@ const run = async ({ full, logs, stats, cache, user, download_only = false } = {
 
     cp.execSync(`mysql -h 127.0.0.1 -u ${mysql_user} ${database} < ${sqlFile}`)
     log(`imported ${sqlFile} into mysql`)
+
+    // clear database notification info
+    await db('users').update('phone', null)
+    await db('leagues').update({
+      groupme_token: null,
+      groupme_id: null,
+      discord_webhook_url: null
+    })
   } finally {
     if (!download_only) {
       fs.unlinkSync(filename)
       fs.unlinkSync(sqlFile)
     }
   }
-
-  // clear database notification info
-  await db('users').update('phone', null)
-  await db('leagues').update({
-    groupme_token: null,
-    groupme_id: null,
-    discord_webhook_url: null
-  })
 }
 
 const main = async () => {
