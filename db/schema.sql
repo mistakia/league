@@ -1378,13 +1378,14 @@ CREATE TABLE `jobs` (
 DROP TABLE IF EXISTS `player_changelog`;
 
 CREATE TABLE `player_changelog` (
-  `uid` int(11) NOT NULL AUTO_INCREMENT,
-  `id` text NOT NULL,
-  `prop` text NOT NULL,
-  `prev` text NOT NULL,
-  `new` text NOT NULL,
-  `timestamp` int(11) NOT NULL,
-  PRIMARY KEY (`uid`)
+  `uid` int NOT NULL AUTO_INCREMENT,
+  `id` varchar(7) NOT NULL,
+  `prop` varchar(100) NOT NULL,
+  `prev` varchar(400) NOT NULL,
+  `new` varchar(400) DEFAULT NULL,
+  `timestamp` int NOT NULL,
+  PRIMARY KEY (`uid`),
+  UNIQUE KEY `field value` (`id`,`prop`,`prev`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
