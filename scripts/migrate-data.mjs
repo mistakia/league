@@ -3,8 +3,6 @@ import debug from 'debug'
 // import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import generateSeasonDates from './generate-season-dates.mjs'
-import { groupBy, Season } from '#common'
 import { isMain } from '#utils'
 
 // const argv = yargs(hideBin(process.argv)).argv
@@ -12,18 +10,30 @@ const log = debug('migrate-data')
 debug.enable('migrate-data')
 
 const migrateData = async () => {
-  // get transactions for league and set week
-  const transactions = await db('transactions')
-  const transactions_by_year = groupBy(transactions, 'year')
-  for (const year in transactions_by_year) {
-    log(`processing transactions for ${year}`)
-    const season_dates = await generateSeasonDates({ year })
-    const year_transactions = transactions_by_year[year]
-    for (const { uid, timestamp } of year_transactions) {
-      const season = new Season({ ...season_dates, now: timestamp })
-      const week = season.week
-      await db('transactions').update({ week }).where({ uid })
-    }
+  // get duplicates for player_changelog
+  const query = db('player_changelog')
+    .select('*')
+    .count('* as count')
+    .groupBy('id', 'prop', 'prev')
+    .having('count', '>', 1)
+
+  log(query.toString())
+
+  const rows = await query
+
+  for (const row of rows) {
+    const { id, prop, prev } = row
+    const duplicate_rows = await db('player_changelog').where({
+      id,
+      prop,
+      prev
+    })
+
+    const sorted_rows = duplicate_rows.sort((a, b) => a.uid - b.uid)
+    const delete_rows = sorted_rows.slice(1)
+    const delete_uids = delete_rows.map((d) => d.uid)
+    log(`deleted ${delete_uids.length} duplicate rows`)
+    await db('player_changelog').whereIn('uid', delete_uids).del()
   }
 
   log('completed')
