@@ -13,7 +13,7 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-database-from-drive')
 debug.enable('import-database-from-drive')
 
-const run = async ({ full, logs, stats, cache, user } = {}) => {
+const run = async ({ full, logs, stats, cache, user, download_only = false } = {}) => {
   const drive = await googleDrive()
   const listParams = {
     q: '"1OnikVibAJ5-1uUhEyMHBRpkFGbzUM23v" in parents and trashed=false',
@@ -47,11 +47,17 @@ const run = async ({ full, logs, stats, cache, user } = {}) => {
   try {
     cp.execSync(`tar -xvzf ${filename}`)
 
+    if (download_only) {
+      return
+    }
+
     cp.execSync(`mysql -h 127.0.0.1 -u ${mysql_user} ${database} < ${sqlFile}`)
     log(`imported ${sqlFile} into mysql`)
   } finally {
-    fs.unlinkSync(filename)
-    fs.unlinkSync(sqlFile)
+    if (!download_only) {
+      fs.unlinkSync(filename)
+      fs.unlinkSync(sqlFile)
+    }
   }
 
   // clear database notification info
@@ -71,7 +77,8 @@ const main = async () => {
     const stats = argv.stats
     const user = argv.user
     const cache = argv.cache
-    await run({ full, logs, stats, user, cache })
+    const download_only = argv.download
+    await run({ full, logs, stats, user, cache, download_only })
   } catch (err) {
     error = err
     console.log(error)
