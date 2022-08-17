@@ -93,7 +93,7 @@ const updatePlayer = async ({ player_row, pid, update }) => {
         prev,
         new: edit.rhs,
         timestamp: Math.round(Date.now() / 1000)
-      })
+      }).onConflict().ignore()
     }
 
     await db('player')
