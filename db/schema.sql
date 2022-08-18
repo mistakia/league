@@ -1379,7 +1379,7 @@ DROP TABLE IF EXISTS `player_changelog`;
 
 CREATE TABLE `player_changelog` (
   `uid` int NOT NULL AUTO_INCREMENT,
-  `id` varchar(7) NOT NULL,
+  `pid` varchar(7) NOT NULL,
   `prop` varchar(100) NOT NULL,
   `prev` varchar(400) NOT NULL,
   `new` varchar(400) DEFAULT NULL,

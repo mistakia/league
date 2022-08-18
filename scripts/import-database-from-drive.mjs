@@ -13,7 +13,14 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-database-from-drive')
 debug.enable('import-database-from-drive')
 
-const run = async ({ full, logs, stats, cache, user, download_only = false } = {}) => {
+const run = async ({
+  full,
+  logs,
+  stats,
+  cache,
+  user,
+  download_only = false
+} = {}) => {
   const drive = await googleDrive()
   const listParams = {
     q: '"1OnikVibAJ5-1uUhEyMHBRpkFGbzUM23v" in parents and trashed=false',
