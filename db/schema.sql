@@ -128,6 +128,7 @@ CREATE TABLE `player` (
   `gsispid` varchar(47) DEFAULT NULL,
 
   `status` varchar(255) DEFAULT NULL,
+  `nfl_status` varchar(10) DEFAULT NULL,
   `injury_status` varchar(255) DEFAULT NULL,
   `high_school` varchar(255) DEFAULT NULL,
 
@@ -1843,6 +1844,68 @@ CREATE TABLE `gamelogs` (
   `dtpr` tinyint(2) DEFAULT 0,
   `dtd` tinyint(2) DEFAULT 0,
   UNIQUE KEY `pid` (`pid`, `esbid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `player_seasonlogs`
+--
+
+DROP TABLE IF EXISTS `player_seasonlogs`;
+
+CREATE TABLE `player_seasonlogs` (
+  `pid` varchar(7) NOT NULL,
+  `year` int(4) NOT NULL,
+  `seas_type` varchar(10) NOT NULL, -- PRE, REG, POST
+  `pos` varchar(3) NOT NULL,
+
+
+  `pa` smallint(4) DEFAULT 0,
+  `pc` smallint(4) DEFAULT 0,
+  `py` int(4) DEFAULT 0,
+  `ints` tinyint(2) DEFAULT 0,
+  `tdp` tinyint(2) DEFAULT 0,
+
+  `ra` smallint(3) DEFAULT 0,
+  `ry` int(4) DEFAULT 0,
+  `tdr` tinyint(2) DEFAULT 0,
+  `fuml` tinyint(2) DEFAULT 0,
+
+  `trg` smallint(3) DEFAULT 0,
+  `rec` smallint(3) DEFAULT 0,
+  `recy` int(4) DEFAULT 0,
+  `tdrec` tinyint(2) DEFAULT 0,
+
+  `twoptc` tinyint(2) DEFAULT 0,
+
+  `prtd` tinyint(2) DEFAULT 0,
+  `krtd` tinyint(2) DEFAULT 0,
+
+  `snp` smallint(4) DEFAULT 0,
+
+  `fgm` smallint(3) DEFAULT 0,
+  `fgy` int(5) DEFAULT 0,
+  `fg19` tinyint(2) DEFAULT 0,
+  `fg29` tinyint(2) DEFAULT 0,
+  `fg39` tinyint(2) DEFAULT 0,
+  `fg49` tinyint(2) DEFAULT 0,
+  `fg50` tinyint(2) DEFAULT 0,
+  `xpm` smallint(3) DEFAULT 0,
+
+  `dsk` smallint(3) DEFAULT 0,
+  `dint` smallint(3) DEFAULT 0,
+  `dff` smallint(3) DEFAULT 0,
+  `drf` smallint(3) DEFAULT 0,
+  `dtno` smallint(3) DEFAULT 0,
+  `dfds` smallint(3) DEFAULT 0,
+  `dpa` smallint(3) DEFAULT 0,
+  `dya` int(5) DEFAULT 0,
+  `dblk` smallint(3) DEFAULT 0,
+  `dsf` smallint(3) DEFAULT 0,
+  `dtpr` smallint(3) DEFAULT 0,
+  `dtd` smallint(3) DEFAULT 0,
+  UNIQUE KEY `pid` (`pid`, `year`, `seas_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------

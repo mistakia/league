@@ -66,7 +66,7 @@ const importPlayersNFL = async ({ year = constants.season.year, token }) => {
     const cteam = node.currentTeam ? node.currentTeam.abbreviation : null
     const jnum = node.jerseyNumber
     const height = formatHeight(node.height)
-    // TODO status
+    const status = node.person.status
 
     if (player_row) {
       await updatePlayer({
@@ -80,7 +80,8 @@ const importPlayersNFL = async ({ year = constants.season.year, token }) => {
           dpos,
           start,
           weight,
-          height
+          height,
+          status,
         }
       })
     } else if (
@@ -108,7 +109,8 @@ const importPlayersNFL = async ({ year = constants.season.year, token }) => {
 
         col,
         high_school,
-        dob
+        dob,
+        status
       })
     } else {
       log('unable to handle player')
