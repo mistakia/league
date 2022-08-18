@@ -16,7 +16,11 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-players-nfl')
 debug.enable('import-players-nfl,nfl,update-player,create-player,get-player')
 
-const importPlayersNFL = async ({ year = constants.season.year, token, ignore_cache = false }) => {
+const importPlayersNFL = async ({
+  year = constants.season.year,
+  token,
+  ignore_cache = false
+}) => {
   log(`loading players for year: ${year}`)
 
   if (!token) {
@@ -130,7 +134,10 @@ const main = async () => {
     } else if (argv.year) {
       await importPlayersNFL({ year: argv.year })
     } else {
-      await importPlayersNFL({ year: constants.season.year, ignore_cache: true })
+      await importPlayersNFL({
+        year: constants.season.year,
+        ignore_cache: true
+      })
     }
   } catch (err) {
     error = err
