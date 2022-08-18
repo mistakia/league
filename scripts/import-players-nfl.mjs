@@ -81,7 +81,7 @@ const importPlayersNFL = async ({ year = constants.season.year, token }) => {
           start,
           weight,
           height,
-          nfl_status,
+          nfl_status
         }
       })
     } else if (
