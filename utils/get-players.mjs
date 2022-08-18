@@ -89,7 +89,11 @@ export default async function ({
     query.orWhere(function () {
       this.whereIn('player.pos', constants.positions)
         .whereNot('player.cteam', 'INA')
-        .whereNotIn('player.nfl_status', ['RET'])
+        .where(function () {
+          this.whereNotIn('player.nfl_status', ['RET']).orWhereNull(
+            'player.nfl_status'
+          )
+        })
     })
 
     // include rookies during offseason
