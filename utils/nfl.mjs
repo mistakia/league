@@ -14,7 +14,7 @@ debug.enable('nfl')
 export const getPlayers = async ({ year, token, ignore_cache = false }) => {
   const api_path = `/players/${year}.json`
   const full_path = path.join(cache_path, api_path)
-  if (!ignore_cahce && fs.pathExistsSync(full_path)) {
+  if (!ignore_cache && fs.pathExistsSync(full_path)) {
     return fs.readJsonSync(full_path)
   }
 
