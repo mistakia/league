@@ -1386,7 +1386,7 @@ CREATE TABLE `player_changelog` (
   `new` varchar(400) DEFAULT NULL,
   `timestamp` int NOT NULL,
   PRIMARY KEY (`uid`),
-  UNIQUE KEY `field value` (`id`,`prop`,`prev`)
+  UNIQUE KEY `field value` (`pid`,`prop`,`prev`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
