@@ -36,6 +36,8 @@ const protected_props = [
   'keeptradecut_id'
 ]
 
+const nullable_props = ['injury_status']
+
 /*
    player can be a string identifier or player db entry
 */
@@ -59,11 +61,13 @@ const updatePlayer = async ({ player_row, pid, update }) => {
 
   let changes = 0
   for (const edit of edits) {
-    if (!edit.rhs) {
+    const prop = edit.path[0]
+    const isNull = !edit.rhs
+    const isNullable = nullable_props.includes(prop)
+
+    if (isNull && !isNullable) {
       continue
     }
-
-    const prop = edit.path[0]
 
     if (excluded_props.includes(prop)) {
       log(`not allowed to update ${prop}`)
