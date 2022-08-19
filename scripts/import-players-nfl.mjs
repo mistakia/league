@@ -136,6 +136,17 @@ const importPlayersNFL = async ({
 const main = async () => {
   let error
   try {
+    const setInactive = async (pids) => {
+      // set cteam to INA for pid not in pids
+      const player_rows = await db('player')
+        .whereNot('cteam', 'INA')
+        .whereNot('pos', 'DST')
+        .whereNotIn('pid', pids)
+      for (const player_row of player_rows) {
+        await updatePlayer({ player_row, update: { cteam: 'INA' } })
+      }
+    }
+
     if (argv.all) {
       const token = await getToken()
       for (let year = 1970; year < constants.season.year; year++) {
@@ -145,13 +156,7 @@ const main = async () => {
       const pids = await importPlayersNFL({ year: argv.year })
 
       if (argv.year === constants.season.year) {
-        // set cteam to INA for pid not in pids
-        const player_rows = await db('player')
-          .whereNot('cteam', 'INA')
-          .whereNotIn('pid', pids)
-        for (const player_row of player_rows) {
-          await updatePlayer({ player_row, update: { cteam: 'INA' } })
-        }
+        await setInactive(pids)
       }
     } else {
       const pids = await importPlayersNFL({
@@ -159,13 +164,7 @@ const main = async () => {
         ignore_cache: true
       })
 
-      // set cteam to INA for pid not in pids
-      const player_rows = await db('player')
-        .whereNot('cteam', 'INA')
-        .whereNotIn('pid', pids)
-      for (const player_row of player_rows) {
-        await updatePlayer({ player_row, update: { cteam: 'INA' } })
-      }
+      await setInactive(pids)
     }
   } catch (err) {
     error = err
