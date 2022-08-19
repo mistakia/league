@@ -11,6 +11,7 @@ import {
   updatePlayer,
   createPlayer
 } from '#utils'
+import db from '#db'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-players-nfl')
@@ -27,6 +28,7 @@ const importPlayersNFL = async ({
     token = await getToken()
   }
 
+  const pids = []
   const data = await nfl.getPlayers({ year, token, ignore_cache })
   for (const { node } of data) {
     const name = node.person.displayName
@@ -65,14 +67,19 @@ const importPlayersNFL = async ({
     const high_school = node.person.highSchool
     const col = node.person.collegeName
     const dpos = node.person.draftNumberOverall
-    const start = node.person.draftYear
+    let start = node.person.draftYear
     const weight = node.weight
     const cteam = node.currentTeam ? node.currentTeam.abbreviation : null
     const jnum = node.jerseyNumber
     const height = formatHeight(node.height)
     const nfl_status = node.person.status
 
+    if (!start && node.nflExperience === 0) {
+      start = year
+    }
+
     if (player_row) {
+      pids.push(player_row.pid)
       await updatePlayer({
         player_row,
         update: {
@@ -94,7 +101,7 @@ const importPlayersNFL = async ({
       pos &&
       dob
     ) {
-      await createPlayer({
+      const player_row = await createPlayer({
         fname: node.person.firstName,
         lname: node.person.suffix
           ? `${node.person.lastName} ${node.person.suffix}`
@@ -116,11 +123,14 @@ const importPlayersNFL = async ({
         dob,
         nfl_status
       })
+      if (player_row) pids.push(player_row.pid)
     } else {
       log('unable to handle player')
       log(node)
     }
   }
+
+  return pids
 }
 
 const main = async () => {
@@ -132,12 +142,30 @@ const main = async () => {
         await importPlayersNFL({ year, token })
       }
     } else if (argv.year) {
-      await importPlayersNFL({ year: argv.year })
+      const pids = await importPlayersNFL({ year: argv.year })
+
+      if (argv.year === constants.season.year) {
+        // set cteam to INA for pid not in pids
+        const player_rows = await db('player')
+          .whereNot('cteam', 'INA')
+          .whereNotIn('pid', pids)
+        for (const player_row of player_rows) {
+          await updatePlayer({ player_row, update: { cteam: 'INA' } })
+        }
+      }
     } else {
-      await importPlayersNFL({
+      const pids = await importPlayersNFL({
         year: constants.season.year,
         ignore_cache: true
       })
+
+      // set cteam to INA for pid not in pids
+      const player_rows = await db('player')
+        .whereNot('cteam', 'INA')
+        .whereNotIn('pid', pids)
+      for (const player_row of player_rows) {
+        await updatePlayer({ player_row, update: { cteam: 'INA' } })
+      }
     }
   } catch (err) {
     error = err
