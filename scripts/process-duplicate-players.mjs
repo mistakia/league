@@ -12,7 +12,16 @@ const processDuplicatePlayers = async () => {
 
   log(`${duplicates.length} players had duplicates`)
 
-  const accept_diff_props = ['pid', 'cteam', 'weight', 'height', 'jnum']
+  const accept_diff_props = [
+    'pid',
+    'cteam',
+    'weight',
+    'height',
+    'jnum',
+    'nfl_status',
+    'status',
+    'injury_status'
+  ]
 
   let deleted_count = 0
   let ignore_count = 0

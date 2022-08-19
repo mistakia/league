@@ -8,7 +8,7 @@ export default async function ({ update_player_row, remove_player_row }) {
     new_pid: update_player_row.pid
   })
   await updatePlayer({
-    player_row: update_player_row,
+    pid: update_player_row.pid,
     update: remove_player_row
   })
   await db('player').where('pid', remove_player_row.pid).del()
