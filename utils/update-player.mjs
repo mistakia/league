@@ -66,7 +66,7 @@ const updatePlayer = async ({ player_row, pid, update }) => {
     const prop = edit.path[0]
 
     if (excluded_props.includes(prop)) {
-      log(`not allowed to updated ${prop}`)
+      log(`not allowed to update ${prop}`)
       continue
     }
 
