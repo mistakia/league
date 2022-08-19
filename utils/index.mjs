@@ -47,6 +47,7 @@ export * as sportradar from './sportradar.mjs'
 export { default as getTransitionBids } from './get-transition-bids.mjs'
 export { wait } from './wait.mjs'
 export * as nfl from './nfl.mjs'
+export { default as mergePlayer } from './merge-player.mjs'
 
 export const getChartedPlayByPlayQuery = (db) =>
   db('nfl_plays')

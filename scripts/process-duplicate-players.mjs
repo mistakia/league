@@ -5,7 +5,7 @@ import db from '#db'
 import { isMain, mergePlayer } from '#utils'
 
 const log = debug('process-duplicate-players')
-debug.enable('process-duplicate-players')
+debug.enable('process-duplicate-players,update-player')
 
 const processDuplicatePlayers = async () => {
   const duplicates = await db('player').groupBy('formatted', 'dob', 'start')
