@@ -58,6 +58,7 @@ const run = async ({
       return
     }
 
+    cp.execSync(`mysql -h 127.0.0.1 -u ${mysql_user} -e "RESET MASTER"`)
     cp.execSync(`mysql -h 127.0.0.1 -u ${mysql_user} ${database} < ${sqlFile}`)
     log(`imported ${sqlFile} into mysql`)
 
