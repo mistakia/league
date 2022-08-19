@@ -169,7 +169,7 @@ export const getLeagueEvents = createSelector(
     }
 
     if (league.adate) {
-      const faPeriod = getFreeAgentPeriod(league.adata)
+      const faPeriod = getFreeAgentPeriod(league.adate)
       const date = dayjs.unix(league.adate)
       if (now.isBefore(date)) {
         if (now.isBefore(faPeriod.start)) {
@@ -188,7 +188,7 @@ export const getLeagueEvents = createSelector(
       if (now.isBefore(faPeriod.end)) {
         events.push({
           detail: 'Free Agency Period Ends',
-          data: faPeriod.end
+          date: faPeriod.end
         })
       }
     }
