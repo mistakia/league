@@ -90,7 +90,9 @@ const run = async () => {
           bp: 0
         }
 
-        const projectedPoints = player_row.points[week] ? player_row.points[week].total : 0
+        const projectedPoints = player_row.points[week]
+          ? player_row.points[week].total
+          : 0
         if (!projectedPoints) {
           playerData.weeks[week] = weekData
           continue
