@@ -201,12 +201,6 @@ export default class AuctionMainBid extends React.Component {
       main = <AuctionNominatedPlayer pid={selected_pid} />
     } else if (isNominating) {
       main = <div className='auction__text'>Your turn to nominate a player</div>
-    } else if (isCommish) {
-      main = (
-        <div className='auction__text'>
-          Nomination timer expired, waiting for commish
-        </div>
-      )
     } else {
       main = (
         <div className='auction__text'>

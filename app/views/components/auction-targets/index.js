@@ -39,8 +39,6 @@ const mapStateToProps = createSelector(
       playersByPosition,
       players: players.toList(),
       lineupPlayerIds: auction.lineupPlayers,
-      lineupFeasible: auction.lineupFeasible,
-      lineupPoints: auction.lineupPoints,
       muted: auction.muted,
       searchValue: auction.search,
       isNominating:

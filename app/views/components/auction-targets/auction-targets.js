@@ -22,8 +22,6 @@ import './auction-targets.styl'
 export default function AuctionTargets({
   playersByPosition,
   lineupPlayerIds,
-  lineupPoints,
-  lineupFeasible,
   rosteredPlayerIds,
   team,
   search,
@@ -92,10 +90,6 @@ export default function AuctionTargets({
     style: PropTypes.object
   }
 
-  const lineupText = lineupFeasible
-    ? `Optimal Lineup ${lineupPoints || 0} Pts`
-    : 'Not Feasible'
-
   return (
     <div className='auction__targets'>
       <div className='auction__targets-head'>
@@ -109,7 +103,6 @@ export default function AuctionTargets({
             label='Muted'
           />
         </FormGroup>
-        <div className='optimal__lineup-key'>{lineupText}</div>
       </div>
       <div className='auction__targets-body'>
         <div className='auction__targets-column'>
@@ -245,8 +238,6 @@ AuctionTargets.propTypes = {
   toggleMuted: PropTypes.func,
   playersByPosition: PropTypes.object,
   lineupPlayerIds: ImmutablePropTypes.list,
-  lineupPoints: PropTypes.number,
-  lineupFeasible: PropTypes.bool,
   rosteredPlayerIds: ImmutablePropTypes.list,
   team: PropTypes.object,
   muted: PropTypes.bool,
