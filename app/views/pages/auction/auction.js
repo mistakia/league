@@ -24,6 +24,12 @@ export default function AuctionPage({
     join()
   }, [])
 
+  useEffect(() => {
+    const element = document.querySelector('.auction__team.winning')
+    if (element)
+      element.scrollIntoView({ behavior: 'smooth', inline: 'center' })
+  }, [transactions])
+
   const TransactionRow = ({ index, key, ...params }) => {
     const transaction = transactions.get(index)
     return (
