@@ -4,6 +4,9 @@ import PropTypes from 'prop-types'
 import TeamName from '@components/team-name'
 import Button from '@mui/material/Button'
 import LoadingButton from '@mui/lab/LoadingButton'
+import ButtonGroup from '@mui/material/ButtonGroup'
+import AddIcon from '@mui/icons-material/Add'
+import RemoveIcon from '@mui/icons-material/Remove'
 import Timer from '@components/timer'
 import AuctionNominatedPlayer from '@components/auction-nominated-player'
 
@@ -126,11 +129,13 @@ export default class AuctionMainBid extends React.Component {
     } = this.props
 
     let action = null
+    let disabled = false
     if (!league.adate || !isStarted || isComplete) {
       action = null
     } else if (isPaused) {
       action = null
     } else if (isLocked) {
+      disabled = true
       action = (
         <LoadingButton disabled variant='contained' loading>
           Locked
@@ -138,14 +143,17 @@ export default class AuctionMainBid extends React.Component {
       )
     } else if (nominated_pid) {
       if (isWinningBid) {
+        disabled = true
         action = <Button disabled>Winning Bid</Button>
       } else if (isAboveCap) {
+        disabled = true
         action = (
           <Button disabled variant='contained'>
             Exceeded CAP
           </Button>
         )
       } else if (!isEligible) {
+        disabled = true
         action = (
           <Button disabled variant='contained'>
             Ineligible
@@ -157,12 +165,18 @@ export default class AuctionMainBid extends React.Component {
         )
       }
     } else if (isNominating || isCommish) {
+      disabled = !selected_pid
       action = (
-        <Button variant='contained' disabled={!selected_pid} onClick={this.handleClickNominate}>
+        <Button
+          variant='contained'
+          disabled={!selected_pid}
+          onClick={this.handleClickNominate}
+        >
           Nominate ${this.state.value}
         </Button>
       )
     } else {
+      disabled = true
       action = (
         <LoadingButton disabled variant='contained' loading>
           Waiting
@@ -172,28 +186,32 @@ export default class AuctionMainBid extends React.Component {
 
     let main
     if (!league.adate) {
-      main = <div>Auction is not scheduled.</div>
+      main = <div className='auction__text'>Auction is not scheduled</div>
     } else if (isComplete) {
-      main = <div>Auction is complete.</div>
+      main = <div className='auction__text'>Auction is complete</div>
     } else if (!isStarted) {
       main = (
-        <div>
-          Auction will begin on {adate.format('dddd, MMMM D YYYY, h:mm:ss a')}
+        <div className='auction__text'>
+          Auction will begin on {adate.format('dddd, MMMM D YYYY, ha')}
         </div>
       )
     } else if (isPaused) {
-      main = <div>Auction is paused.</div>
+      main = <div className='auction__text'>Paused</div>
     } else if (nominated_pid) {
       main = <AuctionNominatedPlayer pid={nominated_pid} />
     } else if (selected_pid) {
       main = <AuctionNominatedPlayer pid={selected_pid} />
     } else if (isNominating) {
-      main = <div>Your turn to nominate a player</div>
+      main = <div className='auction__text'>Your turn to nominate a player</div>
     } else if (isCommish) {
-      main = <div>Nomination timer expired, make a nomination</div>
+      main = (
+        <div className='auction__text'>
+          Nomination timer expired, waiting for commish
+        </div>
+      )
     } else {
       main = (
-        <div>
+        <div className='auction__text'>
           Waiting for a player to be nominated by{' '}
           <TeamName tid={nominatingTeamId} />
         </div>
@@ -201,39 +219,43 @@ export default class AuctionMainBid extends React.Component {
     }
 
     return (
-      <div className='auction__main-bid'>
-        {isStarted && !isComplete && !isPaused && (
-          <div className='auction__main-timer'>
-            <Timer
-              expiration={timer}
-              alert={isNominating || Boolean(nominated_pid)}
-            />
-          </div>
-        )}
-        <div className='auction__main-body'>{main}</div>
-        <div className='auction__main-action'>{action}</div>
-        {isStarted && !isComplete && !isPaused && (
-          <div className='auction__main-input'>
-            <div
-              className='auction__main-input-up'
-              onClick={this.handleUpClick}
-            >
-              +
+      <div className='auction__bar'>
+        <div className='auction__bar-body'>
+          <div className='auction__bid-info'>{main}</div>
+          {isStarted && !isComplete && !isPaused && (
+            <div className='auction__bid-actions'>
+              <div className='auction__main-timer'>
+                <Timer
+                  expiration={timer}
+                  alert={isNominating || Boolean(nominated_pid)}
+                />
+              </div>
+              <div className='auction__main-action'>
+                <ButtonGroup
+                  variant='contained'
+                  disabled={disabled}
+                  size='small'
+                >
+                  <Button onClick={this.handleDownClick}>
+                    <RemoveIcon />
+                  </Button>
+                  {action}
+                  <Button onClick={this.handleUpClick}>
+                    <AddIcon />
+                  </Button>
+                </ButtonGroup>
+              </div>
+              <div className='auction__main-input'>
+                <label>Enter Bid</label>
+                <input
+                  type='number'
+                  value={this.state.value}
+                  onChange={this.handleChange}
+                />
+              </div>
             </div>
-            <div
-              className='auction__main-input-down'
-              onClick={this.handleDownClick}
-            >
-              —
-            </div>
-            <label>Enter Bid</label>
-            <input
-              type='number'
-              value={this.state.value}
-              onChange={this.handleChange}
-            />
-          </div>
-        )}
+          )}
+        </div>
       </div>
     )
   }

@@ -7,6 +7,8 @@
   display flex
   align-items center
   padding 8px 16px
+  background $backgroundColor
+  border-bottom 1px solid $borderColor
   .MuiFormControlLabel-label
     font-size 11px
     font-weight 200
@@ -20,14 +22,14 @@
   overflow-x scroll
 
 .auction__targets-column
-  flex 1 1 200px
+  flex 1 1 236px
   height 100%
   display flex
   flex-direction column
   background white
-  border-left 1px solid $borderColor
-  border-top 1px solid $borderColor
-  min-width 200px
+  min-width 236px
+  + .auction__targets-column
+    border-left 1px solid $borderColor
 
 .auction__targets-column-body
   flex 1
