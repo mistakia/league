@@ -66,46 +66,49 @@ export function getAuctionPosition(state) {
   return processed.size
 }
 
-export function getAuctionInfoForPosition(state, { pos }) {
-  const playerMaps = getAllPlayers(state).filter((pMap) =>
-    pos ? pMap.get('pos') === pos : true
-  )
-  const active_pids = getActiveRosterPlayerIdsForCurrentLeague(state)
-  const rostered = playerMaps.filter((pMap) =>
-    active_pids.includes(pMap.get('pid'))
-  )
+export const getAuctionInfoForPosition = createSelector(
+  (state, { pos }) =>
+    getAllPlayers(state).filter((pMap) =>
+      pos ? pMap.get('pos') === pos : true
+    ),
+  getActiveRosterPlayerIdsForCurrentLeague,
+  (playerMaps, active_pids) => {
+    const rostered = playerMaps.filter((pMap) =>
+      active_pids.includes(pMap.get('pid'))
+    )
 
-  const totalVorp = playerMaps.reduce(
-    (a, b) => a + Math.max(b.getIn(['vorp', '0']) || 0, 0),
-    0
-  )
-  const rosteredVorp = rostered.reduce(
-    (a, b) => a + Math.max(b.getIn(['vorp', '0']) || 0, 0),
-    0
-  )
-  const retail = rostered.reduce(
-    (a, b) => a + (b.getIn(['market_salary', '0']) || 0),
-    0
-  )
-  const actual = rostered.reduce(
-    (sum, playerMap) => sum + (playerMap.get('value') || 0),
-    0
-  )
-  return {
-    count: {
-      total: playerMaps.size,
-      rostered: rostered.size
-    },
-    vorp: {
-      total: totalVorp,
-      rostered: rosteredVorp
-    },
-    value: {
-      retail,
-      actual
+    const totalVorp = playerMaps.reduce(
+      (a, b) => a + Math.max(b.getIn(['vorp', '0']) || 0, 0),
+      0
+    )
+    const rosteredVorp = rostered.reduce(
+      (a, b) => a + Math.max(b.getIn(['vorp', '0']) || 0, 0),
+      0
+    )
+    const retail = rostered.reduce(
+      (sum, playerMap) => sum + (playerMap.getIn(['market_salary', '0']) || 0),
+      0
+    )
+    const actual = rostered.reduce(
+      (sum, playerMap) => sum + (playerMap.get('value') || 0),
+      0
+    )
+    return {
+      count: {
+        total: playerMaps.size,
+        rostered: rostered.size
+      },
+      vorp: {
+        total: totalVorp,
+        rostered: rosteredVorp
+      },
+      value: {
+        retail,
+        actual
+      }
     }
   }
-}
+)
 
 export function isAfterAuction(state) {
   const league = getCurrentLeague(state)

@@ -20,7 +20,8 @@ export {
   getRosterInfoForPlayerId,
   getActivePlayersByRosterForCurrentLeague,
   getAvailablePlayersForCurrentLeague,
-  getRosterPositionalValueByTeamId
+  getRosterPositionalValueByTeamId,
+  getAvailableSalarySpaceForCurrentLeague
 } from './selectors'
 export { rosterSagas } from './sagas'
 export { rostersReducer } from './reducer'
