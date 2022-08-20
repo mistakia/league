@@ -2,7 +2,8 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 import TeamName from '@components/team-name'
-import Button from '@components/button'
+import Button from '@mui/material/Button'
+import LoadingButton from '@mui/lab/LoadingButton'
 import Timer from '@components/timer'
 import AuctionNominatedPlayer from '@components/auction-nominated-player'
 
@@ -128,29 +129,25 @@ export default class AuctionMainBid extends React.Component {
     if (!league.adate || !isStarted || isComplete) {
       action = null
     } else if (isPaused) {
-      action = (
-        <Button disabled text>
-          Paused
-        </Button>
-      )
+      action = null
     } else if (isLocked) {
       action = (
-        <Button disabled text>
+        <LoadingButton disabled variant='contained' loading>
           Locked
-        </Button>
+        </LoadingButton>
       )
     } else if (nominated_pid) {
       if (isWinningBid) {
         action = <Button disabled>Winning Bid</Button>
       } else if (isAboveCap) {
         action = (
-          <Button disabled text>
+          <Button disabled variant='contained'>
             Exceeded CAP
           </Button>
         )
       } else if (!isEligible) {
         action = (
-          <Button disabled text>
+          <Button disabled variant='contained'>
             Ineligible
           </Button>
         )
@@ -161,15 +158,15 @@ export default class AuctionMainBid extends React.Component {
       }
     } else if (isNominating || isCommish) {
       action = (
-        <Button disabled={!selected_pid} onClick={this.handleClickNominate}>
+        <Button variant='contained' disabled={!selected_pid} onClick={this.handleClickNominate}>
           Nominate ${this.state.value}
         </Button>
       )
     } else {
       action = (
-        <Button disabled text>
+        <LoadingButton disabled variant='contained' loading>
           Waiting
-        </Button>
+        </LoadingButton>
       )
     }
 
@@ -205,7 +202,7 @@ export default class AuctionMainBid extends React.Component {
 
     return (
       <div className='auction__main-bid'>
-        {isStarted && !isComplete && (
+        {isStarted && !isComplete && !isPaused && (
           <div className='auction__main-timer'>
             <Timer
               expiration={timer}
@@ -215,7 +212,7 @@ export default class AuctionMainBid extends React.Component {
         )}
         <div className='auction__main-body'>{main}</div>
         <div className='auction__main-action'>{action}</div>
-        {isStarted && !isComplete && (
+        {isStarted && !isComplete && !isPaused && (
           <div className='auction__main-input'>
             <div
               className='auction__main-input-up'
