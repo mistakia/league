@@ -19,7 +19,7 @@ import SearchFilter from '@components/search-filter'
 
 import './auction-targets.styl'
 
-export default function AuctionTargets ({
+export default function AuctionTargets({
   playersByPosition,
   lineupPlayerIds,
   lineupPoints,
@@ -83,6 +83,13 @@ export default function AuctionTargets ({
         </div>
       </div>
     )
+  }
+
+  AuctionPlayerRow.propTypes = {
+    index: PropTypes.number,
+    key: PropTypes.number,
+    pos: PropTypes.string,
+    style: PropTypes.object
   }
 
   const lineupText = lineupFeasible
