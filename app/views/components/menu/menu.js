@@ -72,7 +72,7 @@ export default function Menu({ logout, isLoggedIn, team, leagueId }) {
   return (
     <>
       <Fab
-        sx={{ position: 'fixed', left: 16, bottom: isAuction ? 134 : 16 }}
+        sx={{ position: 'fixed', right: 16, bottom: isAuction ? 204 : 16 }}
         color='primary'
         variant='extended'
         className='main__menu-button'

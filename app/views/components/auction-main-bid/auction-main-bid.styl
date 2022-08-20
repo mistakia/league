@@ -1,28 +1,31 @@
-.auction__main-bid
+.auction__bar
   flex 0 0 auto
-  height 60px
+  background $backgroundColor
+
+.auction__bar-body
+  flex 0 0 auto
+  height 70px
   display flex
-  align-items center
-  background white
   max-width 1000px
   margin 0 auto
 
-.auction__main-body
+.auction__bid-info
   flex 1
   display flex
-  padding 0 16px
+
+.auction__bid-actions
+  flex 0 0 auto
+  display flex
+  align-items center
 
 .auction__main-input
-  flex 0 0 120px
+  flex 0 0 auto
   position relative
   height 100%
-  width 120px
-  margin-left 16px
   input
     border none
     width 60px
     height 100%
-    margin-left 60px
     text-align center
     font-size 20px
     padding-top 12px
@@ -40,35 +43,9 @@
     font-weight 300
     text-transform uppercase
 
-.auction__main-input-up
-.auction__main-input-down
-  right 60px
-  left 0px
-  height 50%
-  display flex
-  align-items center
-  justify-content center
-  cursor pointer
-  user-select none
-  color white
-  border-left 1px solid #f0f0f0
-  border-right 1px solid $borderColor
-  &:hover
-    background #fafafa
-
-.auction__main-input-up
-  absolute top
-  font-size 30px
-  color saturate(green, 10%)
-  border-bottom 1px solid #f0f0f0
-
-.auction__main-input-down
-  absolute bottom
-  font-weight 900
-  color saturate(red, 10%)
-
 .auction__main-action
   flex 0 0 auto
+  padding 0 16px
   .button
     min-width 150px
 
@@ -79,5 +56,36 @@
   display flex
   justify-content center
   align-items center
-  background #fafafa
-  border-right 1px solid #f0f0f0
+
+.auction__text
+  font-weight 600
+  font-size 1.5em
+  display flex
+  align-items center
+
+@media (min-width 800px)
+  .auction__bid-actions
+    height 100%
+    background white
+
+@media (max-width 799px)
+  .auction__text
+    padding 0 16px
+
+  .auction__bar-body
+    flex-direction column
+    height 160px
+    align-items flex-start
+
+  .auction__bid-actions
+    padding 0 16px 8px
+    justify-content center
+    width 100%
+
+  .auction__bid-info
+    height 105px
+    position relative
+
+@media (max-width 400px)
+  .auction__main-timer
+    flex 0 0 30px
