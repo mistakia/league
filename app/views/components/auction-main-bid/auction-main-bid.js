@@ -128,6 +128,7 @@ export default class AuctionMainBid extends React.Component {
       adate
     } = this.props
 
+    const classNames = []
     let action = null
     let disabled = false
     if (!league.adate || !isStarted || isComplete) {
@@ -137,13 +138,14 @@ export default class AuctionMainBid extends React.Component {
     } else if (isLocked) {
       disabled = true
       action = (
-        <LoadingButton disabled variant='contained' loading>
+        <Button disabled variant='contained'>
           Locked
-        </LoadingButton>
+        </Button>
       )
     } else if (nominated_pid) {
       if (isWinningBid) {
         disabled = true
+        classNames.push('winning')
         action = <Button disabled>Winning Bid</Button>
       } else if (isAboveCap) {
         disabled = true
@@ -177,11 +179,7 @@ export default class AuctionMainBid extends React.Component {
       )
     } else {
       disabled = true
-      action = (
-        <LoadingButton disabled variant='contained' loading>
-          Waiting
-        </LoadingButton>
-      )
+      action = <LoadingButton disabled variant='contained' loading />
     }
 
     let main
@@ -232,17 +230,22 @@ export default class AuctionMainBid extends React.Component {
               </div>
               <div className='auction__main-action'>
                 <ButtonGroup
+                  className={classNames.join(' ')}
                   variant='contained'
                   disabled={disabled}
                   size='small'
                 >
-                  <Button onClick={this.handleDownClick}>
-                    <RemoveIcon />
-                  </Button>
+                  {(!nominated_pid || !isWinningBid) && (
+                    <Button onClick={this.handleDownClick}>
+                      <RemoveIcon />
+                    </Button>
+                  )}
                   {action}
-                  <Button onClick={this.handleUpClick}>
-                    <AddIcon />
-                  </Button>
+                  {(!nominated_pid || !isWinningBid) && (
+                    <Button onClick={this.handleUpClick}>
+                      <AddIcon />
+                    </Button>
+                  )}
                 </ButtonGroup>
               </div>
               <div className='auction__main-input'>
