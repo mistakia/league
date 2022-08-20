@@ -14,7 +14,7 @@ export default async function ({ week, pids = [] } = {}) {
     .select(db.raw('max(timestamp) AS maxtime, sourceid AS sid'))
     .groupBy('sid')
     .where('year', constants.season.year)
-    .whereNull('userid')
+    .where('userid', 0)
 
   const query = db
     .select('*')
@@ -26,7 +26,7 @@ export default async function ({ week, pids = [] } = {}) {
       })
     })
     .whereIn('pid', pids)
-    .whereNull('userid')
+    .where('userid', 0)
     .whereNot('sourceid', constants.sources.AVERAGE)
 
   if (typeof week !== 'undefined') {
