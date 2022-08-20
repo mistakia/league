@@ -1,13 +1,4 @@
-import {
-  all,
-  take,
-  takeLatest,
-  fork,
-  select,
-  delay,
-  put,
-  call
-} from 'redux-saga/effects'
+import { takeLatest, fork, select, delay, put, call } from 'redux-saga/effects'
 
 import { getApp } from '@core/app'
 import { getAuction } from './selectors'
@@ -21,7 +12,6 @@ import {
 import {
   getPlayersForWatchlist,
   getAllPlayers,
-  playerActions,
   getPlayers
 } from '@core/players'
 import { constants, getEligibleSlots } from '@common'
@@ -216,16 +206,16 @@ export function* watchAuctionBid() {
   yield takeLatest(auctionActions.AUCTION_BID, releaseLock)
 }
 
-export function* watchInitAuctionLineup() {
-  while (true) {
-    yield all([
-      take(playerActions.FETCH_ALL_PLAYERS_FULFILLED),
-      take(auctionActions.AUCTION_JOIN)
-    ])
-    yield call(optimize)
-  }
-}
-
+/* export function* watchInitAuctionLineup() {
+ *   while (true) {
+ *     yield all([
+ *       take(playerActions.FETCH_ALL_PLAYERS_FULFILLED),
+ *       take(auctionActions.AUCTION_JOIN)
+ *     ])
+ *     yield call(optimize)
+ *   }
+ * }
+ *  */
 /* export function* watchToggleWatchlist() {
  *   yield takeLatest(playerActions.TOGGLE_WATCHLIST, optimize)
  * }
@@ -260,7 +250,7 @@ export const auctionSagas = [
   fork(watchAuctionSubmitBid),
   fork(watchAuctionSubmitNomination),
   fork(watchAuctionBid),
-  fork(watchInitAuctionLineup),
+  // fork(watchInitAuctionLineup),
   // fork(watchToggleWatchlist),
   // fork(watchSetAuctionBudget),
   fork(watchAuctionPause),
