@@ -6,13 +6,15 @@ FULL=false
 LOGS=false
 STATS=false
 CACHE=false
+PROJECTIONS=false
 
-while getopts 'fcls' opt; do
+while getopts 'fclsp' opt; do
     case $opt in
         f) FULL=true ;;
         c) CACHE=true ;;
         l) LOGS=true ;;
         s) STATS=true ;;
+        p) PROJECTIONS=true ;;
 
         *) echo 'Error in command line parsing' >&2
     esac
@@ -79,9 +81,12 @@ nflSnap
 player
 players_status
 practice
-projections
 props
 rankings
+"
+
+DB_PROJECTIONS_TABLES="
+projections
 "
 
 DATE_FORMAT="%Y-%m-%d_%H-%M"
@@ -95,6 +100,8 @@ elif $STATS; then
     backup_type="stats"
 elif $CACHE; then
     backup_type="cache"
+elif $PROJECTIONS; then
+    backup_type="projections"
 else
     backup_type="user"
 fi
@@ -114,6 +121,8 @@ elif $STATS; then
     mysqldump --defaults-extra-file=$DB_FILE $DB_NAME $DB_STATS_TABLES > $sql_file
 elif $CACHE; then
     mysqldump --defaults-extra-file=$DB_FILE $DB_NAME $DB_CACHE_TABLES > $sql_file
+elif $PROJECTIONS; then
+    mysqldump --defaults-extra-file=$DB_FILE $DB_NAME $DB_PROJECTIONS_TABLES > $sql_file
 else
     mysqldump --defaults-extra-file=$DB_FILE $DB_NAME $DB_USER_TABLES > $sql_file
 fi
