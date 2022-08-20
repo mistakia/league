@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { List } from 'immutable'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 import FormControl from '@mui/material/FormControl'
@@ -12,14 +13,21 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogTitle from '@mui/material/DialogTitle'
 
 import Button from '@components/button'
+import { constants } from '@common'
 
 export default function DeactivateConfirmation({
   onClose,
   deactivate,
   playerMap,
-  team
+  team,
+  pid,
+  loadPlayerTransactions
 }) {
   const [release_pid, set_release_pid] = useState('')
+
+  useEffect(() => {
+    loadPlayerTransactions(pid)
+  }, [])
 
   const handleSelectRelease = (event) => {
     const { value } = event.target
@@ -37,7 +45,16 @@ export default function DeactivateConfirmation({
     onClose()
   }
 
-  const hasPracticeSquadSpace = team.roster.hasOpenPracticeSquadSlot()
+  const player_transactions = playerMap.get('transactions', new List())
+  const isDraftedRookie = Boolean(
+    player_transactions.filter(
+      (t) =>
+        t.type === constants.transactions.DRAFT &&
+        t.year === constants.season.year
+    )
+  )
+  const hasPracticeSquadSpace =
+    isDraftedRookie || team.roster.hasOpenPracticeSquadSlot()
 
   const releaseItems = []
   for (const { pid } of team.roster.practice_signed) {
@@ -103,5 +120,7 @@ DeactivateConfirmation.propTypes = {
   onClose: PropTypes.func,
   deactivate: PropTypes.func,
   playerMap: ImmutablePropTypes.map,
-  team: PropTypes.object
+  team: PropTypes.object,
+  loadPlayerTransactions: PropTypes.func,
+  pid: PropTypes.string
 }
