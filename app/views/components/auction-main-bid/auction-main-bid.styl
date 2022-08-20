@@ -56,6 +56,7 @@
   display flex
   justify-content center
   align-items center
+  user-select none
 
 .auction__text
   font-weight 600
@@ -66,7 +67,7 @@
     line-height 1.5em
 
 .MuiButtonGroup-root.winning .MuiButtonGroup-grouped
-  background-color lighten(green, 10%)
+  background-color rgb(46, 125, 50)
   color rgba(255,255,255,0.8)
 
 @media (min-width 800px)
@@ -80,7 +81,7 @@
 
   .auction__bar-body
     flex-direction column
-    height 160px
+    height 120px
     align-items flex-start
 
   .auction__bid-actions
@@ -91,6 +92,10 @@
   .auction__bid-info
     height 105px
     position relative
+
+  .auction__main-timer
+    border-radius 8px
+    overflow hidden
 
 @media (max-width 400px)
   .auction__main-timer
