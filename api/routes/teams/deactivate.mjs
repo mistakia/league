@@ -154,8 +154,12 @@ router.post('/?', async (req, res) => {
       roster.removePlayer(release_pid)
     }
 
+    const isDraftedRookie = transactionsSinceAcquisition.find(
+      (t) => t.type === constants.transactions.DRAFT
+    )
+
     // make sure team has space on practice squad
-    if (!roster.hasOpenPracticeSquadSlot()) {
+    if (!isDraftedRookie && !roster.hasOpenPracticeSquadSlot()) {
       return res
         .status(400)
         .send({ error: 'no available space on practice squad' })
@@ -176,9 +180,6 @@ router.post('/?', async (req, res) => {
       }
     }
 
-    const isDraftedRookie = transactionsSinceAcquisition.find(
-      (t) => t.type === constants.transactions.DRAFT
-    )
     const slot = isDraftedRookie ? constants.slots.PSD : constants.slots.PS
 
     await db('rosters_players').update({ slot }).where({
