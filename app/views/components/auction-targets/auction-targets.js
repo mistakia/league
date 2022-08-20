@@ -31,7 +31,9 @@ export default function AuctionTargets ({
   watchlist,
   select,
   isNominating,
-  players
+  players,
+  muted,
+  toggleMuted
 }) {
   const AuctionPlayerRow = ({ index, key, pos, style }) => {
     const playerMap = pos
@@ -96,8 +98,8 @@ export default function AuctionTargets ({
             control={
               <Switch
                 size='small'
-                checked={this.props.muted}
-                onChange={this.props.toggleMuted}
+                checked={muted}
+                onChange={toggleMuted}
               />
             }
             labelPlacement='top'
