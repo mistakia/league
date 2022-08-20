@@ -59,6 +59,18 @@ export function getRostersForCurrentLeague(state) {
   return filtered.map((r) => r.get(week))
 }
 
+export function getAvailableSalarySpaceForCurrentLeague(state) {
+  const rosters = getRostersForCurrentLeague(state)
+  const league = getCurrentLeague(state)
+  let available_salary_space = 0
+  for (const roster of rosters.valueSeq()) {
+    const r = new Roster({ roster: roster.toJS(), league })
+    available_salary_space += r.availableCap
+  }
+
+  return available_salary_space
+}
+
 export function getAvailablePlayersForCurrentLeague(state) {
   const rostered_pids = getRosteredPlayerIdsForCurrentLeague(state)
   const playerMaps = getAllPlayers(state)
