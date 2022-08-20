@@ -1231,3 +1231,5 @@ export const KEEPTRADECUT = {
   POSITION_RANK: 2,
   OVERALL_RANK: 3
 }
+
+export const default_points_added = -999

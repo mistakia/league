@@ -19,15 +19,18 @@ export default class PlayerName extends React.Component {
   }
 
   render = () => {
-    const { playerMap, isOnCutlist, headshot, square } = this.props
+    const { playerMap, isOnCutlist, headshot, square, hidePosition } =
+      this.props
     const slot = playerMap.get('slot')
 
     return (
       <>
         <div className='player__name cursor' onClick={this.handleClick}>
-          <div className='player__name-position'>
-            <Position pos={playerMap.get('pos')} />
-          </div>
+          {!hidePosition && (
+            <div className='player__name-position'>
+              <Position pos={playerMap.get('pos')} />
+            </div>
+          )}
           {Boolean(headshot) && (
             <div className='player__name-headshot'>
               <PlayerHeadshot
@@ -65,5 +68,6 @@ PlayerName.propTypes = {
   headshot: PropTypes.bool,
   select: PropTypes.func,
   isOnCutlist: PropTypes.bool,
-  square: PropTypes.bool
+  square: PropTypes.bool,
+  hidePosition: PropTypes.bool
 }

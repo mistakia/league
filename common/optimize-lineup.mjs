@@ -9,7 +9,7 @@ export default function optimizeLineup({
   use_baseline_when_missing
 }) {
   const results = {}
-  const player_positions = players.map((p) => p.pos)
+  const player_positions = players.map((p) => p.pos).filter(Boolean)
   const positions = use_baseline_when_missing
     ? player_positions.concat(constants.positions)
     : player_positions

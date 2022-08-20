@@ -1,29 +1,28 @@
-import React from 'react'
+import React, { useEffect } from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
-import AutoSizer from 'react-virtualized/dist/es/AutoSizer'
-import List from 'react-virtualized/dist/es/List'
-
-import Switch from '@mui/material/Switch'
-import FormGroup from '@mui/material/FormGroup'
-import FormControlLabel from '@mui/material/FormControlLabel'
 
 import PageLayout from '@layouts/page'
-import SearchFilter from '@components/search-filter'
 import AuctionTransaction from '@components/auction-transaction'
-import AuctionPlayer from '@components/auction-player'
 import AuctionTeam from '@components/auction-team'
 import AuctionMainBid from '@components/auction-main-bid'
 import AuctionTargets from '@components/auction-targets'
-import AuctionTeamRosters from '@components/auction-team-rosters'
-import AuctionPositionFilter from '@components/auction-position-filter'
 import AuctionCommissionerControls from '@components/auction-commissioner-controls'
 
 import './auction.styl'
 
-const ROW_HEIGHT = 30
-
-export default function AuctionPageRender() {
-  const { players, transactions, tids, isCommish, isHosted } = this.props
+export default function AuctionPage({
+  transactions,
+  tids,
+  isCommish,
+  isHosted,
+  loadAllPlayers,
+  join
+}) {
+  useEffect(() => {
+    loadAllPlayers()
+    join()
+  }, [])
 
   const TransactionRow = ({ index, key, ...params }) => {
     const transaction = transactions.get(index)
@@ -37,18 +36,6 @@ export default function AuctionPageRender() {
     key: PropTypes.number
   }
 
-  const playerRow = ({ index, key, ...params }) => {
-    const playerMap = players.get(index)
-    return (
-      <AuctionPlayer
-        key={key}
-        playerMap={playerMap}
-        {...params}
-        index={index}
-      />
-    )
-  }
-
   const teamItems = []
   tids.forEach((tid, index) => {
     teamItems.push(<AuctionTeam key={index} tid={tid} />)
@@ -56,69 +43,27 @@ export default function AuctionPageRender() {
 
   const body = (
     <div className='auction'>
-      <div className='auction__players'>
-        <div className='auction__players-header'>
-          <SearchFilter
-            search={this.props.search}
-            value={this.props.searchValue}
-          />
-          <AuctionPositionFilter />
-        </div>
-        <div className='auction__players-body'>
-          <AutoSizer>
-            {({ height, width }) => (
-              <List
-                width={width}
-                height={height}
-                rowHeight={25}
-                rowCount={players.size}
-                rowRenderer={playerRow}
-              />
-            )}
-          </AutoSizer>
-        </div>
-        <div className='auction__players-footer'>
-          <FormGroup>
-            <FormControlLabel
-              control={
-                <Switch
-                  size='small'
-                  checked={this.props.hideRostered}
-                  onChange={this.props.toggleHideRostered}
-                />
-              }
-              labelPlacement='start'
-              label='Hide Rostered'
-            />
-          </FormGroup>
-        </div>
-      </div>
-      <div className='auction__main'>
-        <AuctionMainBid />
-        <div className='auction__teams'>{teamItems}</div>
+      <div className='auction__menu'>
         <div className='auction__main-board'>
           <AuctionTargets />
         </div>
       </div>
-      <div className='auction__side'>
-        <AuctionTeamRosters />
-        <div className='auction__log'>
-          <AutoSizer>
-            {({ height, width }) => (
-              <List
-                width={width}
-                height={height}
-                rowHeight={ROW_HEIGHT}
-                rowCount={transactions.size}
-                rowRenderer={TransactionRow}
-              />
-            )}
-          </AutoSizer>
-        </div>
+      <div className='auction__header'>
+        <AuctionMainBid />
+        <div className='auction__teams'>{teamItems}</div>
       </div>
       {isCommish && isHosted ? <AuctionCommissionerControls /> : null}
     </div>
   )
 
   return <PageLayout body={body} />
+}
+
+AuctionPage.propTypes = {
+  join: PropTypes.func,
+  loadAllPlayers: PropTypes.func,
+  transactions: ImmutablePropTypes.list,
+  tids: ImmutablePropTypes.list,
+  isCommish: PropTypes.bool,
+  isHosted: PropTypes.bool
 }

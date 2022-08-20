@@ -223,7 +223,7 @@ export function optimizeAuctionLineup({
   const ints = {}
 
   const pool = players.concat(active)
-  const positions = pool.map((p) => p.pos)
+  const positions = pool.map((p) => p.pos).filter(Boolean)
   const positionConstraints = getOptimizerPositionConstraints({
     positions,
     league

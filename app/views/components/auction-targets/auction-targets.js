@@ -1,150 +1,254 @@
 import React from 'react'
+import { Map } from 'immutable'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import Switch from '@mui/material/Switch'
 import FormGroup from '@mui/material/FormGroup'
 import FormControlLabel from '@mui/material/FormControlLabel'
+import AutoSizer from 'react-virtualized/dist/es/AutoSizer'
+import List from 'react-virtualized/dist/es/List'
+import Tooltip from '@mui/material/Tooltip'
+import IconButton from '@mui/material/IconButton'
+import AddIcon from '@mui/icons-material/Add'
 
 import NFLTeamBye from '@components/nfl-team-bye'
 import PlayerWatchlistAction from '@components/player-watchlist-action'
 import AuctionTargetHeader from '@components/auction-target-header'
 import PlayerName from '@components/player-name'
+import SearchFilter from '@components/search-filter'
 
 import './auction-targets.styl'
 
-export default class AuctionTargets extends React.Component {
-  handleToggle = () => {
-    this.props.toggleHideRostered()
-  }
+export default function AuctionTargets ({
+  playersByPosition,
+  lineupPlayerIds,
+  lineupPoints,
+  lineupFeasible,
+  rosteredPlayerIds,
+  team,
+  search,
+  searchValue,
+  watchlist,
+  select,
+  isNominating,
+  players
+}) {
+  const AuctionPlayerRow = ({ index, key, pos, style }) => {
+    const playerMap = pos
+      ? playersByPosition[pos].get(index, new Map())
+      : players.get(index, new Map())
+    const classNames = ['auction__targets-player']
+    const pid = playerMap.get('pid')
+    const rosterSlot = team.roster.get(pid)
 
-  render = () => {
-    const {
-      playersByPosition,
-      lineupPlayerIds,
-      lineupPoints,
-      lineupFeasible,
-      valueType,
-      rosteredPlayerIds,
-      team
-    } = this.props
-
-    const items = {}
-    for (const position in playersByPosition) {
-      if (!items[position]) items[position] = []
-      const players = playersByPosition[position]
-      players.forEach((playerMap, index) => {
-        const classNames = ['auction__targets-player']
-        const pid = playerMap.get('pid')
-        const rosterSlot = team.roster.get(pid)
-
-        if (rosterSlot) classNames.push('signed')
-        else if (rosteredPlayerIds.includes(pid)) {
-          classNames.push('rostered')
-        }
-
-        if (lineupPlayerIds.includes(pid)) classNames.push('optimal')
-        const salary = rosterSlot
-          ? rosterSlot.value
-          : playerMap.getIn(['market_salary', valueType], 0)
-
-        const item = (
-          <div className={classNames.join(' ')} key={index}>
-            <PlayerName pid={pid} />
-            <PlayerWatchlistAction pid={pid} />
-            <div className='auction__targets-player-bye'>
-              <NFLTeamBye team={playerMap.get('team')} />
-            </div>
-            <div className='auction__targets-player-salary metric'>
-              ${salary}
-            </div>
-          </div>
-        )
-        items[position].push(item)
-      })
+    let isNominatable = false
+    if (rosterSlot) classNames.push('signed')
+    else if (rosteredPlayerIds.includes(pid)) {
+      classNames.push('rostered')
+    } else {
+      isNominatable = true
     }
 
-    const lineupText = lineupFeasible
-      ? `Optimal Lineup ${lineupPoints || 0} Pts`
-      : 'Not Feasible'
+    if (watchlist.has(pid)) {
+      classNames.push('watchlist')
+    }
+
+    if (lineupPlayerIds.includes(pid)) classNames.push('optimal')
+    const salary = rosterSlot
+      ? rosterSlot.value
+      : playerMap.getIn(['market_salary', '0'], 0)
 
     return (
-      <div className='auction__targets'>
-        <div className='auction__targets-head'>
-          <FormGroup>
-            <FormControlLabel
-              control={
-                <Switch
-                  size='small'
-                  checked={this.props.hideRostered}
-                  onChange={this.props.toggleHideRostered}
-                />
-              }
-              labelPlacement='top'
-              label='Hide Rostered'
-            />
-          </FormGroup>
-          <FormGroup>
-            <FormControlLabel
-              control={
-                <Switch
-                  size='small'
-                  checked={this.props.muted}
-                  onChange={this.props.toggleMuted}
-                />
-              }
-              labelPlacement='top'
-              label='Sound Muted'
-            />
-          </FormGroup>
-          <div className='optimal__lineup-key'>{lineupText}</div>
-        </div>
-        <div className='auction__targets-body'>
-          <div className='auction__targets-column'>
-            <div className='auction__targets-section'>
-              <AuctionTargetHeader pos='QB' />
-              <div className='empty'>{items.QB}</div>
+      <div key={key} index={index} style={style}>
+        <div className={classNames.join(' ')}>
+          {isNominating && isNominatable && (
+            <div className='auction__player-nominate'>
+              <Tooltip title='Nominate'>
+                <IconButton size='small' onClick={() => select(pid)}>
+                  <AddIcon fontSize='small' />
+                </IconButton>
+              </Tooltip>
             </div>
-            <div className='auction__targets-section'>
-              <AuctionTargetHeader pos='TE' />
-              <div className='empty'>{items.TE}</div>
-            </div>
+          )}
+          <PlayerName pid={pid} hidePosition />
+          <PlayerWatchlistAction pid={pid} />
+          <div className='auction__targets-player-bye'>
+            <NFLTeamBye team={playerMap.get('team')} />
           </div>
-          <div className='auction__targets-column'>
-            <div className='auction__targets-section'>
-              <AuctionTargetHeader pos='RB' />
-              <div className='empty'>{items.RB}</div>
-            </div>
-            <div className='auction__targets-section'>
-              <AuctionTargetHeader pos='K' />
-              <div className='empty'>{items.K}</div>
-            </div>
-          </div>
-          <div className='auction__targets-column'>
-            <div className='auction__targets-section'>
-              <AuctionTargetHeader pos='WR' />
-              <div className='empty'>{items.WR}</div>
-            </div>
-            <div className='auction__targets-section'>
-              <AuctionTargetHeader pos='DST' />
-              <div className='empty'>{items.DST}</div>
-            </div>
+          <div className='auction__targets-player-salary metric'>
+            {salary ? `$${salary}` : ''}
           </div>
         </div>
       </div>
     )
   }
+
+  const lineupText = lineupFeasible
+    ? `Optimal Lineup ${lineupPoints || 0} Pts`
+    : 'Not Feasible'
+
+  return (
+    <div className='auction__targets'>
+      <div className='auction__targets-head'>
+        <SearchFilter search={search} value={searchValue} />
+        <FormGroup>
+          <FormControlLabel
+            control={
+              <Switch
+                size='small'
+                checked={this.props.muted}
+                onChange={this.props.toggleMuted}
+              />
+            }
+            labelPlacement='top'
+            label='Muted'
+          />
+        </FormGroup>
+        <div className='optimal__lineup-key'>{lineupText}</div>
+      </div>
+      <div className='auction__targets-body'>
+        <div className='auction__targets-column'>
+          <AuctionTargetHeader />
+          <div className='auction__targets-column-body'>
+            <AutoSizer>
+              {({ height, width }) => (
+                <List
+                  width={width}
+                  height={height}
+                  rowHeight={30}
+                  rowCount={players.size}
+                  rowRenderer={AuctionPlayerRow}
+                />
+              )}
+            </AutoSizer>
+          </div>
+        </div>
+        <div className='auction__targets-column'>
+          <AuctionTargetHeader pos='QB' />
+          <div className='auction__targets-column-body'>
+            <AutoSizer>
+              {({ height, width }) => (
+                <List
+                  width={width}
+                  height={height}
+                  rowHeight={30}
+                  rowCount={playersByPosition.QB.size}
+                  rowRenderer={(args) =>
+                    AuctionPlayerRow({ pos: 'QB', ...args })
+                  }
+                />
+              )}
+            </AutoSizer>
+          </div>
+        </div>
+        <div className='auction__targets-column'>
+          <AuctionTargetHeader pos='RB' />
+          <div className='auction__targets-column-body'>
+            <AutoSizer>
+              {({ height, width }) => (
+                <List
+                  width={width}
+                  height={height}
+                  rowHeight={30}
+                  rowCount={playersByPosition.RB.size}
+                  rowRenderer={(args) =>
+                    AuctionPlayerRow({ pos: 'RB', ...args })
+                  }
+                />
+              )}
+            </AutoSizer>
+          </div>
+        </div>
+        <div className='auction__targets-column'>
+          <AuctionTargetHeader pos='WR' />
+          <div className='auction__targets-column-body'>
+            <AutoSizer>
+              {({ height, width }) => (
+                <List
+                  width={width}
+                  height={height}
+                  rowHeight={30}
+                  rowCount={playersByPosition.WR.size}
+                  rowRenderer={(args) =>
+                    AuctionPlayerRow({ pos: 'WR', ...args })
+                  }
+                />
+              )}
+            </AutoSizer>
+          </div>
+        </div>
+        <div className='auction__targets-column'>
+          <AuctionTargetHeader pos='TE' />
+          <div className='auction__targets-column-body'>
+            <AutoSizer>
+              {({ height, width }) => (
+                <List
+                  width={width}
+                  height={height}
+                  rowHeight={30}
+                  rowCount={playersByPosition.TE.size}
+                  rowRenderer={(args) =>
+                    AuctionPlayerRow({ pos: 'TE', ...args })
+                  }
+                />
+              )}
+            </AutoSizer>
+          </div>
+        </div>
+        <div className='auction__targets-column'>
+          <AuctionTargetHeader pos='K' />
+          <div className='auction__targets-column-body'>
+            <AutoSizer>
+              {({ height, width }) => (
+                <List
+                  width={width}
+                  height={height}
+                  rowHeight={30}
+                  rowCount={playersByPosition.K.size}
+                  rowRenderer={(args) =>
+                    AuctionPlayerRow({ pos: 'K', ...args })
+                  }
+                />
+              )}
+            </AutoSizer>
+          </div>
+        </div>
+        <div className='auction__targets-column'>
+          <AuctionTargetHeader pos='DST' />
+          <div className='auction__targets-column-body'>
+            <AutoSizer>
+              {({ height, width }) => (
+                <List
+                  width={width}
+                  height={height}
+                  rowHeight={30}
+                  rowCount={playersByPosition.DST.size}
+                  rowRenderer={(args) =>
+                    AuctionPlayerRow({ pos: 'DST', ...args })
+                  }
+                />
+              )}
+            </AutoSizer>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 AuctionTargets.propTypes = {
-  toggleHideRostered: PropTypes.func,
   toggleMuted: PropTypes.func,
   playersByPosition: PropTypes.object,
   lineupPlayerIds: ImmutablePropTypes.list,
   lineupPoints: PropTypes.number,
   lineupFeasible: PropTypes.bool,
-  valueType: PropTypes.string,
   rosteredPlayerIds: ImmutablePropTypes.list,
   team: PropTypes.object,
-  hideRostered: PropTypes.bool,
-  muted: PropTypes.bool
+  muted: PropTypes.bool,
+  search: PropTypes.func,
+  searchValue: PropTypes.string,
+  watchlist: ImmutablePropTypes.set,
+  select: PropTypes.func,
+  isNominating: PropTypes.bool,
+  players: ImmutablePropTypes.list
 }
