@@ -30,7 +30,6 @@ import {
 } from '@core/api'
 import { draftActions } from '@core/draft'
 import { playerActions } from './actions'
-import { auctionActions } from '@core/auction'
 import { getAllPlayers, getPlayers } from './selectors'
 import { leagueActions, getCurrentLeague } from '@core/leagues'
 import { sourceActions, getSources } from '@core/sources'
@@ -300,10 +299,6 @@ export function* watchDeleteRostersFulfilled() {
   yield takeLatest(rosterActions.DELETE_ROSTERS_FULFILLED, calculateValues)
 }
 
-export function* watchAuctionProcessed() {
-  yield takeLatest(auctionActions.AUCTION_PROCESSED, calculateValues)
-}
-
 export function* watchSearchPlayers() {
   yield debounce(1000, playerActions.SEARCH_PLAYERS, search)
 }
@@ -368,7 +363,6 @@ export const playerSagas = [
   fork(watchPutSourceFulfilled),
   fork(watchDeleteProjection),
   fork(watchToggleWatchlist),
-  fork(watchAuctionProcessed),
 
   fork(watchSearchPlayers),
 
