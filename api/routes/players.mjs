@@ -93,9 +93,15 @@ router.get('/?', async (req, res) => {
 })
 
 router.get('/:pid', async (req, res) => {
-  const { db, logger } = req.app.locals
+  const { db, logger, cache } = req.app.locals
   try {
     const { pid } = req.params
+
+    const cacheKey = `/player/${pid}`
+    const cached_player_row = cache.get(cacheKey)
+    if (cached_player_row) {
+      return res.send(cached_player_row)
+    }
 
     const player_rows = await db('player').where({ pid }).limit(1)
     const player_row = player_rows[0]
@@ -114,6 +120,7 @@ router.get('/:pid', async (req, res) => {
     // advanced rushing
     // - yardage by direction
 
+    cache.set(cacheKey, player_row, 1800) // 30 mins
     res.send(player_row)
   } catch (error) {
     logger(error)
