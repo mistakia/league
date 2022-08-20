@@ -17,8 +17,7 @@ const calculateValues = ({ players, baselines, week, historicBaselines }) => {
         player.points[week].total - baselines[pos].starter.points[week].total
     } else {
       const avg_baseline = historicBaselines[pos] / season.finalWeek
-      player.vorp[week] =
-        player.points[week].total - avg_baseline
+      player.vorp[week] = player.points[week].total - avg_baseline
     }
 
     if (player.vorp[week] > 0) {
