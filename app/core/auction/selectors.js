@@ -87,7 +87,10 @@ export function getAuctionInfoForPosition(state, { pos }) {
     (a, b) => a + (b.getIn(['market_salary', '0']) || 0),
     0
   )
-  const actual = rostered.reduce((a, b) => a + (b.value || 0), 0)
+  const actual = rostered.reduce(
+    (sum, playerMap) => sum + (playerMap.get('value') || 0),
+    0
+  )
   return {
     count: {
       total: playerMaps.size,
