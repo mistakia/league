@@ -2,6 +2,10 @@ import express from 'express'
 import dayjs from 'dayjs'
 
 import { constants } from '#common'
+import {
+  getTransactionsSinceAcquisition,
+  getTransactionsSinceFreeAgent
+} from '#utils'
 
 const router = express.Router({ mergeParams: true })
 
@@ -71,6 +75,26 @@ router.get('/release', async (req, res) => {
       .orderBy('uid', 'desc')
 
     res.send(transactions)
+  } catch (error) {
+    logger(error)
+    res.status(500).send({ error: error.toString() })
+  }
+})
+
+router.get('/teams/:tid/players/:pid', async (req, res) => {
+  const { logger } = req.app.locals
+  try {
+    const { pid, leagueId, tid } = req.params
+    const sinceFA = await getTransactionsSinceFreeAgent({ lid: leagueId, pid })
+    const sinceAcquisition = await getTransactionsSinceAcquisition({
+      lid: leagueId,
+      pid,
+      tid
+    })
+    res.send({
+      sinceFA,
+      sinceAcquisition
+    })
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })
