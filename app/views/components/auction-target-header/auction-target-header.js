@@ -2,11 +2,13 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import Tooltip from '@mui/material/Tooltip'
 
+import Position from '@components/position'
+
 import './auction-target-header.styl'
 
 export default class AuctionTargetHeader extends React.Component {
   render = () => {
-    const { info } = this.props
+    const { info, pos } = this.props
 
     const inflation =
       info.value.actual && info.value.retail
@@ -17,6 +19,7 @@ export default class AuctionTargetHeader extends React.Component {
 
     return (
       <div className='auction__target-header'>
+        {Boolean(pos) && <Position pos={pos} />}
         <div className='auction__target-header-scarcity'>
           <Tooltip title='Positional Value Remaining' placement='bottom'>
             <span>
@@ -57,5 +60,6 @@ export default class AuctionTargetHeader extends React.Component {
 }
 
 AuctionTargetHeader.propTypes = {
-  info: PropTypes.object
+  info: PropTypes.object,
+  pos: PropTypes.string
 }

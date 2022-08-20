@@ -1,6 +1,26 @@
 .auction
   display flex
   height 100%
+  flex-direction column
+
+.auction__header
+  flex 0 0 146px
+  display flex
+  flex-direction column
+  border-top 1px solid $borderColor
+  height 146px
+
+.auction__menu
+  display flex
+  height 100%
+  flex-direction column
+
+  .TabPanelUnstyled-root
+    height 100%
+    position relative
+
+  .TabsListUnstyled-root
+    flex 0 0 auto
 
 .auction__players
   flex 1
@@ -41,26 +61,22 @@
   overflow hidden
   overflow-y scroll
 
-.auction__main
-  flex 3
-  display flex
-  flex-direction column
-  margin 1% 1% 0
-
 .auction__teams
   display flex
   flex-wrap nowrap
-  justify-content center
   align-items center
   background white
-  border 1px solid $borderColor
   margin-bottom 24px
+  border-top 1px solid $borderColor
+  border-bottom 1px solid $borderColor
 
 .auction__main-board
+  display flex
+  height 100%
+  flex-direction column
   flex 1
   overflow hidden
   overflow-y scroll
-  border-top 1px solid $borderColor
 
 .auction__side
   flex 1
@@ -73,8 +89,25 @@
 
 .auction__log
   flex 1
-  border 1px solid $borderColor
+  border-top 1px solid $borderColor
   border-radius 3px
-  margin-top 8px
   height 100%
   overflow hidden
+
+@media (max-width 1049px)
+  .auction__players
+    display none
+
+@media (max-width 800px)
+  .auction__main
+    margin 0
+
+  .auction__side
+    display none
+
+  .auction__teams
+    overflow-x scroll
+
+@media (min-width 1000px)
+  .auction__teams
+    justify-content center

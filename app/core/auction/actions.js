@@ -11,7 +11,6 @@ export const auctionActions = {
   AUCTION_NOMINATION_INFO: 'AUCTION_NOMINATION_INFO',
   AUCTION_COMPLETE: 'AUCTION_COMPLETE',
 
-  AUCTION_TOGGLE_HIDE_ROSTERED: 'AUCTION_TOGGLE_HIDE_ROSTERED',
   AUCTION_TOGGLE_MUTED: 'AUCTION_TOGGLE_MUTED',
 
   AUCTION_PAUSE: 'AUCTION_PAUSE',
@@ -33,10 +32,6 @@ export const auctionActions = {
 
   soundNotification: () => ({
     type: auctionActions.SOUND_NOTIFICATION
-  }),
-
-  toggleHideRostered: () => ({
-    type: auctionActions.AUCTION_TOGGLE_HIDE_ROSTERED
   }),
 
   toggleMuted: () => ({

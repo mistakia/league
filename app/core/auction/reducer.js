@@ -24,8 +24,6 @@ const initialState = new Record({
   nominatingTeamId: null,
   search: null,
   timer: null,
-  valueType: '0',
-  hideRostered: true,
   muted: true
 })
 
@@ -40,9 +38,6 @@ export function auctionReducer(state = initialState(), { payload, type }) {
       return state.merge({
         connected: new List(payload.connected)
       })
-
-    case auctionActions.AUCTION_TOGGLE_HIDE_ROSTERED:
-      return state.merge({ hideRostered: !state.hideRostered })
 
     case auctionActions.AUCTION_TOGGLE_MUTED:
       return state.merge({ muted: !state.muted })

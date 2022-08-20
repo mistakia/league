@@ -5,12 +5,13 @@
   align-items center
   position relative
   padding 16px 0 8px
-  font-size 11px
+  font-size 12px
+  font-weight 900
   + .auction__team
     border-left 1px solid #f0f0f0
 
   &.offline
-    color lighten($textColor, 75%)
+    font-weight 400
 
   &.nominating
     background #f0f0f0
@@ -22,7 +23,7 @@
       display flex
       justify-content center
       padding-top 4px
-      color lighten($textColor, 60%)
+      color lighten($textColor, 20%)
 
   &.winning .auction__team-bid
     background $accentColor
@@ -48,3 +49,7 @@
 .auction__team-cap
   font-family 'IBM Plex Mono', monospace
   font-size 14px
+
+@media (max-width 800px)
+  .auction__team
+    min-width 60px

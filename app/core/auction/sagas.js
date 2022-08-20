@@ -106,8 +106,9 @@ export function* optimize() {
         (a, b) =>
           b.getIn(['points', 'total'], 0) - a.getIn(['points', 'total'], 0)
       )
+      .toList()
 
-    result = yield call(worker.optimizeLineup, {
+    result = yield call(worker.optimizeAuctionLineup, {
       limits,
       players: availablePlayers.map(formatAuctionPlayer).toJS(),
       active: currentPlayers.active.map(formatAuctionPlayer).toJS(),
@@ -219,10 +220,9 @@ export function* watchInitAuctionLineup() {
   while (true) {
     yield all([
       take(playerActions.FETCH_ALL_PLAYERS_FULFILLED),
-      take(playerActions.SET_PLAYER_VALUES),
       take(auctionActions.AUCTION_JOIN)
     ])
-    // yield call(optimize)
+    yield call(optimize)
   }
 }
 

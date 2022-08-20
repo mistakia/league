@@ -1,8 +1,12 @@
+.auction__targets
+  height 100%
+  display flex
+  flex-direction column
+
 .auction__targets-head
   display flex
-  justify-content flex-end
   align-items center
-  padding 8px 0
+  padding 8px 16px
   .MuiFormControlLabel-label
     font-size 11px
     font-weight 200
@@ -11,35 +15,42 @@
 
 .auction__targets-body
   display flex
+  height 100%
+  overflow hidden
+  overflow-x scroll
 
 .auction__targets-column
-  flex 1
+  flex 1 1 200px
+  height 100%
   display flex
   flex-direction column
-  + .auction__targets-column
-    margin-left 16px
-
-.auction__targets-section
-  flex 0 0 auto
   background white
-  border 1px solid $borderColor
-  + .auction__targets-section
-    margin-top 16px
+  border-left 1px solid $borderColor
+  border-top 1px solid $borderColor
+  min-width 200px
+
+.auction__targets-column-body
+  flex 1
 
 .auction__targets-player
   display flex
   border-left 4px solid transparent
+  height 30px
 
   &.optimal
     border-left 4px solid $accentColor
 
   .player__watchlist-action
     opacity 0
+
   &:hover .player__watchlist-action
     opacity 1
 
+  &.watchlist
+    background lighten(yellow, 80%)
+
   &.signed
-    background lighten(green, 93%)
+    background lighten(green, 80%)
     font-weight bold
 
   &.rostered
@@ -50,33 +61,35 @@
     padding 0 4px
     overflow hidden
 
+  .player__name-main
+    white-space nowrap
+
 .optimal__lineup-key
   background white
   border 1px solid $borderColor
   color $accentColor
-  border-right 4px solid $accentColor
+  border-left 4px solid $accentColor
   height 35px
   display flex
   align-items center
   padding 8px
   text-transform uppercase
   margin-left 8px
+  font-size 10px
+  font-weight 800
 
 .auction__targets-player-salary
   padding 8px
-  background #fafafa
-  border-left 1px solid $borderColor
   flex 0 0 45px
   display flex
   justify-content flex-end
+  align-items center
 
 .auction__targets-player-bye
   flex 0 0 20px
   font-size 10px
   display flex
   align-items center
-  background white
-  border-left 1px solid $borderColor
   justify-content center
   color lighten(black, 50%)
 
