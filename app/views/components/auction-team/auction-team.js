@@ -2,6 +2,8 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
+import TeamName from '@components/team-name'
+
 import './auction-team.styl'
 
 export default class AuctionTeam extends React.Component {
@@ -37,7 +39,9 @@ export default class AuctionTeam extends React.Component {
 
     return (
       <div className={classNames.join(' ')}>
-        <div className='auction__team-name'>{team.abbrv}</div>
+        <div className='auction__team-name'>
+          <TeamName abbrv color tid={team.uid} />
+        </div>
         <div className='auction__team-cap'>${roster.availableCap}</div>
         {hasBid && <div className='auction__team-bid'>$ {bid}</div>}
       </div>
