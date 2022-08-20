@@ -103,11 +103,7 @@ export default function AuctionTargets({
         <FormGroup>
           <FormControlLabel
             control={
-              <Switch
-                size='small'
-                checked={muted}
-                onChange={toggleMuted}
-              />
+              <Switch size='small' checked={muted} onChange={toggleMuted} />
             }
             labelPlacement='top'
             label='Muted'

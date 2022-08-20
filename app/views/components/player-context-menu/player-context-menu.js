@@ -15,7 +15,8 @@ export default class PlayerContextMenu extends React.Component {
     this.props.showConfirmation({
       id: 'DEACTIVATE',
       data: {
-        playerMap
+        playerMap,
+        pid: playerMap.get('pid')
       }
     })
     this.props.hide()
