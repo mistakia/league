@@ -34,6 +34,7 @@ import { getAllPlayers, getPlayers } from './selectors'
 import { leagueActions, getCurrentLeague } from '@core/leagues'
 import { sourceActions, getSources } from '@core/sources'
 import { getRostersForCurrentLeague, rosterActions } from '@core/rosters'
+import { auctionActions } from '@core/auction'
 import Worker from 'workerize-loader?inline!../worker' // eslint-disable-line import/no-webpack-loader-syntax
 
 export function* loadAllPlayers() {
@@ -263,6 +264,10 @@ export function* watchSelectPlayer() {
   yield takeLatest(playerActions.PLAYERS_SELECT_PLAYER, loadPlayer)
 }
 
+export function* watchAuctionSelectPlayer() {
+  yield takeLatest(auctionActions.AUCTION_SELECT_PLAYER, loadPlayer)
+}
+
 export function* watchSetLeague() {
   yield takeLatest(leagueActions.SET_LEAGUE, calculateValues)
 }
@@ -382,5 +387,6 @@ export const playerSagas = [
   fork(watchLoadPlayerPractices),
   fork(watchLoadAllPlayers),
   fork(watchLoadLeaguePlayers),
-  fork(watchLoadTeamPlayers)
+  fork(watchLoadTeamPlayers),
+  fork(watchAuctionSelectPlayer)
 ]
