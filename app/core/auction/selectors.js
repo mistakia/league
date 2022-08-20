@@ -1,11 +1,10 @@
 import dayjs from 'dayjs'
-import { Set } from 'immutable'
 import { createSelector } from 'reselect'
 
-import { getPlayersForWatchlist, getAllPlayers } from '@core/players'
+import { getAllPlayers } from '@core/players'
 import {
-  getRosteredPlayerIdsForCurrentLeague,
   getCurrentPlayers,
+  getRosteredPlayerIdsForCurrentLeague,
   getActiveRosterPlayerIdsForCurrentLeague,
   isPlayerEligible
 } from '@core/rosters'
@@ -35,47 +34,28 @@ export function getTeamBid(state, { tid }) {
 }
 
 export function getAuctionTargetPlayers(state) {
-  const { valueType, hideRostered } = getAuction(state)
-  const watchlistPlayerMaps = getPlayersForWatchlist(state)
-  const optimalPlayerMaps = getPlayersForOptimalLineup(state)
+  const playerMaps = state.get('players').get('items')
   const rostered_pids = getRosteredPlayerIdsForCurrentLeague(state)
+  const auction = state.get('auction')
+  const search = auction.get('search')
   const currentPlayers = getCurrentPlayers(state)
 
-  let combined = Set(watchlistPlayerMaps).union(Set(optimalPlayerMaps))
-  if (hideRostered) {
-    combined = combined.filter(
-      (pMap) => !rostered_pids.includes(pMap.get('pid'))
-    )
-  }
-  const playerMaps = combined.union(Set(currentPlayers.active))
-  return playerMaps.sort(
-    (a, b) => b.getIn(['vorp', valueType], 0) - a.getIn(['vorp', valueType], 0)
-  )
-}
-
-export function getAuctionPlayers(state) {
-  const auction = state.get('auction')
-  const playerMaps = state.get('players').get('items')
-  const search = auction.get('search')
-  const positions = auction.get('positions')
   let filtered = playerMaps
-
-  if (auction.hideRostered) {
-    const rostered_pids = getRosteredPlayerIdsForCurrentLeague(state)
-    filtered = filtered.filter(
-      (pMap) => !rostered_pids.includes(pMap.get('pid'))
-    )
-  }
-
-  if (positions.size !== constants.positions.length) {
-    filtered = filtered.filter((pMap) => positions.includes(pMap.get('pos')))
+  filtered = filtered.filter((pMap) => !rostered_pids.includes(pMap.get('pid')))
+  for (const playerMap of currentPlayers.active) {
+    const pid = playerMap.get('pid')
+    if (!pid) continue
+    filtered = filtered.set(pid, playerMap)
   }
 
   if (search) {
     filtered = filtered.filter((pMap) => fuzzySearch(search, pMap.get('name')))
   }
-
-  return filtered
+  return filtered.sort(
+    (a, b) =>
+      b.getIn(['vorp', '0'], constants.default_points_added) -
+      a.getIn(['vorp', '0'], constants.default_points_added)
+  )
 }
 
 export function getAuctionPosition(state) {
@@ -87,9 +67,8 @@ export function getAuctionPosition(state) {
 }
 
 export function getAuctionInfoForPosition(state, { pos }) {
-  const { valueType } = getAuction(state)
-  const playerMaps = getAllPlayers(state).filter(
-    (pMap) => pMap.get('pos') === pos
+  const playerMaps = getAllPlayers(state).filter((pMap) =>
+    pos ? pMap.get('pos') === pos : true
   )
   const active_pids = getActiveRosterPlayerIdsForCurrentLeague(state)
   const rostered = playerMaps.filter((pMap) =>
@@ -97,15 +76,15 @@ export function getAuctionInfoForPosition(state, { pos }) {
   )
 
   const totalVorp = playerMaps.reduce(
-    (a, b) => a + Math.max(b.getIn(['vorp', valueType]) || 0, 0),
+    (a, b) => a + Math.max(b.getIn(['vorp', '0']) || 0, 0),
     0
   )
   const rosteredVorp = rostered.reduce(
-    (a, b) => a + Math.max(b.getIn(['vorp', valueType]) || 0, 0),
+    (a, b) => a + Math.max(b.getIn(['vorp', '0']) || 0, 0),
     0
   )
   const retail = rostered.reduce(
-    (a, b) => a + (b.getIn(['market_salary', valueType]) || 0),
+    (a, b) => a + (b.getIn(['market_salary', '0']) || 0),
     0
   )
   const actual = rostered.reduce((a, b) => a + (b.value || 0), 0)
