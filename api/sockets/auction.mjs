@@ -495,7 +495,8 @@ export default class Auction {
 
   _startBidTimer() {
     this._clearBidTimer()
-    this._bidTimer = setTimeout(() => this.sold(), config.bidTimer)
+    // padded by one second for connection latency
+    this._bidTimer = setTimeout(() => this.sold(), config.bidTimer + 1000)
   }
 
   _clearBidTimer() {
