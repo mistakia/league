@@ -11,6 +11,7 @@ export default class Auction {
     this._lid = lid
     this._league = null
     this._paused = true
+    this._pause_on_team_disconnect = true
     this._locked = false
     this._nominationTimerExpired = false
     this._tids = []
@@ -74,6 +75,17 @@ export default class Auction {
           return this.start()
         }
 
+        case 'AUCTION_TOGGLE_PAUSE_ON_TEAM_DISCONNECT': {
+          if (userId !== this._league.commishid) return
+          this._pause_on_team_disconnect = !this._pause_on_team_disconnect
+          return this.broadcast({
+            type: 'AUCTION_CONFIG',
+            payload: {
+              pause_on_team_disconnect: this._pause_on_team_disconnect
+            }
+          })
+        }
+
         case 'AUCTION_BID':
           return this.bid(message.payload)
 
@@ -91,7 +103,7 @@ export default class Auction {
 
       if (!this._connected[tid].length) {
         delete this._connected[tid]
-        this.pause()
+        if (this._pause_on_team_disconnect) this.pause()
       }
 
       onclose()
@@ -123,7 +135,8 @@ export default class Auction {
         bidTimer: config.bidTimer,
         nominationTimer: config.nominationTimer,
         nominatingTeamId,
-        complete: !nominatingTeamId
+        complete: !nominatingTeamId,
+        pause_on_team_disconnect: this._pause_on_team_disconnect
       }
     })
   }

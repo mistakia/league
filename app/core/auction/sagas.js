@@ -186,6 +186,10 @@ export function* soundNotification() {
   }
 }
 
+export function toggle_pause_on_team_disconnect() {
+  send({ type: auctionActions.AUCTION_TOGGLE_PAUSE_ON_TEAM_DISCONNECT })
+}
+
 //= ====================================
 //  WATCHERS
 // -------------------------------------
@@ -240,6 +244,13 @@ export function* watchAuctionPaused() {
   yield takeLatest(auctionActions.AUCTION_PAUSED, soundNotification)
 }
 
+export function* watchAuctionTogglePauseOnTeamDisconnect() {
+  yield takeLatest(
+    auctionActions.AUCTION_TOGGLE_PAUSE_ON_TEAM_DISCONNECT,
+    toggle_pause_on_team_disconnect
+  )
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -256,5 +267,6 @@ export const auctionSagas = [
   fork(watchAuctionPause),
   fork(watchAuctionResume),
   fork(watchAuctionStart),
-  fork(watchAuctionPaused)
+  fork(watchAuctionPaused),
+  fork(watchAuctionTogglePauseOnTeamDisconnect)
 ]
