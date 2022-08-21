@@ -41,6 +41,7 @@ const mapStateToProps = createSelector(
       lineupPlayerIds: auction.lineupPlayers,
       muted: auction.muted,
       searchValue: auction.search,
+      nominated_pid: auction.nominated_pid,
       isNominating:
         !auction.isPaused &&
         !auction.nominated_pid &&

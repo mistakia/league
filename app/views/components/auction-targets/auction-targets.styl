@@ -42,12 +42,6 @@
   &.optimal
     border-left 4px solid $accentColor
 
-  .player__watchlist-action
-    opacity 0
-
-  &:hover .player__watchlist-action
-    opacity 1
-
   &.watchlist
     background lighten(yellow, 80%)
 
@@ -59,12 +53,24 @@
     text-decoration line-through
     color #8f8f8f
 
+  &.nominated
+    background lighten(red, 80%)
+
   .player__name
     padding 0 4px
     overflow hidden
 
   .player__name-main
     white-space nowrap
+
+.auction__targets-player .player__watchlist-action
+  opacity 0
+  &.selected
+    opacity 1
+
+@media (pointer:fine)
+  .auction__targets-player:hover .player__watchlist-action
+    opacity 1
 
 .optimal__lineup-key
   background white

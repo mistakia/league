@@ -31,7 +31,8 @@ export default function AuctionTargets({
   isNominating,
   players,
   muted,
-  toggleMuted
+  toggleMuted,
+  nominated_pid
 }) {
   const AuctionPlayerRow = ({ index, key, pos, style }) => {
     const playerMap = pos
@@ -48,6 +49,8 @@ export default function AuctionTargets({
     } else {
       isNominatable = true
     }
+
+    if (nominated_pid === pid) classNames.push('nominated')
 
     if (watchlist.has(pid)) {
       classNames.push('watchlist')
@@ -246,5 +249,6 @@ AuctionTargets.propTypes = {
   watchlist: ImmutablePropTypes.set,
   select: PropTypes.func,
   isNominating: PropTypes.bool,
-  players: ImmutablePropTypes.list
+  players: ImmutablePropTypes.list,
+  nominated_pid: PropTypes.string
 }
