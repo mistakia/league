@@ -205,7 +205,7 @@ export default class AuctionMainBid extends React.Component {
       main = (
         <div className='auction__text'>
           Waiting for a player to be nominated by{' '}
-          <TeamName tid={nominatingTeamId} />
+          <TeamName tid={nominatingTeamId} abbrv />
         </div>
       )
     }
