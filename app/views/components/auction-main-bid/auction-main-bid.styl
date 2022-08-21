@@ -6,8 +6,7 @@
   flex 0 0 auto
   height 70px
   display flex
-  max-width 1000px
-  margin 0 auto
+  max-width fit-content
 
 .auction__bid-info
   flex 1
@@ -75,9 +74,20 @@
     height 100%
     background white
 
-@media (max-width 799px)
+@media (min-width 1100px)
+  .auction__bar-body
+    max-width 1000px
+    margin 0 auto
+
+@media (max-width 1099px)
   .auction__text
     padding 0 16px
+
+@media (max-width 799px)
+  .auction__bar
+    display flex
+    align-items center
+    justify-content center
 
   .auction__bar-body
     flex-direction column

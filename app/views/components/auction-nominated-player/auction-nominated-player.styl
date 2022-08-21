@@ -8,6 +8,9 @@
 .auction__nominated-player
   flex 1
   display flex
+  .selected__player-header-item
+    min-width 0
+    flex 1 1 0
 
 .nominated__player-details
   flex 1
@@ -39,5 +42,11 @@
     display flex
     align-items flex-end
     justify-content center
-    top -90px
+    top -96px
     left 8px
+
+@media (max-width 500px)
+  .auction__nominated-player .selected__player-header-item
+    padding 4px
+    flex 0 0 auto
+    min-width 24px
