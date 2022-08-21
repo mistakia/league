@@ -24,7 +24,8 @@ const initialState = new Record({
   nominatingTeamId: null,
   search: null,
   timer: null,
-  muted: true
+  muted: true,
+  pause_on_team_disconnect: true
 })
 
 export function auctionReducer(state = initialState(), { payload, type }) {
@@ -120,9 +121,15 @@ export function auctionReducer(state = initialState(), { payload, type }) {
         connected: new List(payload.connected),
         nominationTimer: payload.nominationTimer,
         nominatingTeamId: payload.nominatingTeamId,
-        isComplete: payload.complete
+        isComplete: payload.complete,
+        pause_on_team_disconnect: payload.pause_on_team_disconnect
       })
     }
+
+    case auctionActions.AUCTION_CONFIG:
+      return state.merge({
+        pause_on_team_disconnect: payload.pause_on_team_disconnect
+      })
 
     case auctionActions.AUCTION_COMPLETE:
       return state.merge({ isComplete: true })

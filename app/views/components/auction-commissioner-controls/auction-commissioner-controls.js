@@ -4,6 +4,9 @@ import Backdrop from '@mui/material/Backdrop'
 import SpeedDial from '@mui/material/SpeedDial'
 import SpeedDialIcon from '@mui/material/SpeedDialIcon'
 import SpeedDialAction from '@mui/material/SpeedDialAction'
+import SafetyCheckIcon from '@mui/icons-material/SafetyCheck'
+import RemoveModeratorIcon from '@mui/icons-material/RemoveModerator'
+
 import Icon from '@components/icon'
 
 import './auction-commissioner-controls.styl'
@@ -35,7 +38,7 @@ export default class AuctionCommissionerControls extends React.Component {
 
   render = () => {
     const { open } = this.state
-    const { isPaused } = this.props
+    const { isPaused, pause_on_team_disconnect } = this.props
     let action
     if (isPaused) {
       action = (
@@ -67,6 +70,22 @@ export default class AuctionCommissionerControls extends React.Component {
           open={open}
         >
           {action}
+          <SpeedDialAction
+            icon={
+              pause_on_team_disconnect ? (
+                <RemoveModeratorIcon />
+              ) : (
+                <SafetyCheckIcon />
+              )
+            }
+            tooltipTitle={
+              pause_on_team_disconnect
+                ? 'Disable Auto-Pause'
+                : 'Enable Auto-Pause'
+            }
+            tooltipOpen
+            onClick={this.props.toggle_pause_on_team_disconnect}
+          />
           {/* <SpeedDialAction
               icon={<Icon name='previous' />}
               tooltipTitle='Rewind'
@@ -82,5 +101,7 @@ export default class AuctionCommissionerControls extends React.Component {
 AuctionCommissionerControls.propTypes = {
   pause: PropTypes.func,
   resume: PropTypes.func,
-  isPaused: PropTypes.bool
+  isPaused: PropTypes.bool,
+  toggle_pause_on_team_disconnect: PropTypes.func,
+  pause_on_team_disconnect: PropTypes.bool
 }
