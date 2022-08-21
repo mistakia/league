@@ -44,6 +44,7 @@ export default class Timer extends React.Component {
   }
 
   render = () => {
+    if (this.state.seconds <= 0) return null
     const classNames = ['timer']
     if (this.state.warning) classNames.push('warning')
     return (
