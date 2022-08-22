@@ -176,7 +176,7 @@ describe('API /waivers - free agency', function () {
         .send({
           teamId,
           pid: player.pid,
-          type: constants.waivers.FREE_AGENCY,
+          type: constants.waivers.FREE_AGENCY_PRACTICE,
           leagueId
         })
 
@@ -187,7 +187,7 @@ describe('API /waivers - free agency', function () {
         .send({
           teamId,
           pid: player.pid,
-          type: constants.waivers.FREE_AGENCY,
+          type: constants.waivers.FREE_AGENCY_PRACTICE,
           leagueId
         })
 
