@@ -16,7 +16,7 @@ import { getApp } from '@core/app'
 import { getStats } from '@core/stats'
 import { fuzzySearch } from '@core/utils'
 import { isAfterDraft } from '@core/draft'
-import { isAfterAuction } from '@core/auction'
+import { isFreeAgentPeriod } from '@core/auction'
 import { getPoachesForCurrentLeague } from '@core/poaches'
 import {
   getReleaseTransactions,
@@ -494,6 +494,7 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
     return status
   }
 
+  const league = getCurrentLeague(state)
   const playerTag = playerMap.get('tag')
   const playerSlot = playerMap.get('slot')
   const playerId = playerMap.get('pid')
@@ -517,21 +518,22 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
         playerMap
       })
       if (isPracticeSquadEligible) status.waiver.practice = true
+    } else if (isFreeAgentPeriod(state)) {
+      status.waiver.active = true
+      status.waiver.practice = true
     } else {
       const onReleaseWaivers = isPlayerOnReleaseWaivers(state, { pid })
-      const afterAuction = isAfterAuction(state)
       const draft = isAfterDraft(state)
       const isPracticeSquadEligible = isPlayerPracticeSquadEligible(state, {
         playerMap
       })
       if (onReleaseWaivers) {
-        if (afterAuction) status.waiver.active = true
+        if (isRegularSeason) status.waiver.active = true
         if (draft.afterDraft && isPracticeSquadEligible)
           status.waiver.practice = true
       } else {
-        if (afterAuction && !status.locked) {
-          if (constants.isRegularSeason) status.sign.active = true
-          else status.waiver.active = true
+        if (isRegularSeason && !status.locked) {
+          status.sign.active = true
         }
         if (isPracticeSquadEligible && !status.locked) {
           if (draft.afterWaivers) status.sign.practice = true
@@ -541,7 +543,6 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
     }
   } else {
     const roster = getCurrentTeamRoster(state)
-    const league = getCurrentLeague(state)
     const now = dayjs()
 
     if (status.tagged.transition && now.isBefore(dayjs.unix(league.tran_end))) {

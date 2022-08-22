@@ -124,7 +124,7 @@ class PlayerRoster extends Player {
         )}
         {isWaiver && (
           <div className='metric table__cell'>
-            {claim.bid && `$${claim.bid}`}
+            {isNaN(claim.bid) ? '-' : `$${claim.bid}`}
           </div>
         )}
         {!isWaiver && (
@@ -147,8 +147,8 @@ class PlayerRoster extends Player {
             {projectedSalary ? `$${projectedSalary.toFixed(0)}` : '-'}
           </div>
         )}
-        {!isWaiver && isOffseason && (
-          <div className={`metric table__cell ${isNegative && 'warning'}`}>
+        {isOffseason && (
+          <div className={`metric table__cell ${isNegative ? 'warning' : ''}`}>
             {savings ? `$${savings.toFixed(0)}` : '-'}
           </div>
         )}

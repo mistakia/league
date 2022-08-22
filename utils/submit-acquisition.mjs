@@ -1,7 +1,7 @@
 import dayjs from 'dayjs'
 
 import db from '#db'
-import { constants, Roster, getDraftDates } from '#common'
+import { constants, Roster, getDraftDates, getFreeAgentPeriod } from '#common'
 import sendNotifications from './send-notifications.mjs'
 import getRoster from './get-roster.mjs'
 import isPlayerOnWaivers from './is-player-on-waivers.mjs'
@@ -100,6 +100,13 @@ export default async function ({
 
     if (!league.draft_start || dayjs().isBefore(draftDates.waiverEnd)) {
       throw new Error('rookie free agency not open')
+    }
+
+    if (league.adate) {
+      const faPeriod = getFreeAgentPeriod(league.adate)
+      if (constants.season.now.isAfter(faPeriod.start)) {
+        throw new Error('player is on waivers during the Free Agency Period')
+      }
     }
   }
 

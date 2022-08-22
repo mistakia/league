@@ -17,6 +17,7 @@ if (process.env.NODE_ENV !== 'test') {
 const run = async () => {
   const timestamp = Math.round(Date.now() / 1000)
 
+  // TODO add Offseason Free Agency Waiver Period
   if (!constants.season.isRegularSeason) {
     throw new Errors.NotRegularSeason()
   } else if (constants.season.isWaiverPeriod) {
@@ -90,7 +91,11 @@ const run = async () => {
         }
 
         // update team budget
-        await db('teams').decrement('faab', waiver.bid).where('uid', waiver.tid)
+        if (constants.season.isRegularSeason) {
+          await db('teams')
+            .decrement('faab', waiver.bid)
+            .where('uid', waiver.tid)
+        }
       } catch (err) {
         error = err
       }

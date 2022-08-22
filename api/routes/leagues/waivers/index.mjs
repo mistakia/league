@@ -155,6 +155,8 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
 
+    const faPeriod = getFreeAgentPeriod(league.adate)
+
     // check free agency waivers
     if (
       type === constants.waivers.FREE_AGENCY ||
@@ -179,11 +181,10 @@ router.post('/?', async (req, res) => {
       } else {
         // Offseason
 
-        // reject active roster waivers before day after auction
-        const faPeriod = getFreeAgentPeriod(league.adate)
+        // reject active roster waivers before start of free agenct period
         if (
           type === constants.waivers.FREE_AGENCY &&
-          (!league.adate || dayjs().isBefore(faPeriod.end))
+          (!league.adate || dayjs().isBefore(faPeriod.start))
         ) {
           return res
             .status(400)
@@ -218,8 +219,12 @@ router.post('/?', async (req, res) => {
               })
             }
 
-            // if after rookie draft waivers cleared, check if player is on release waivers
-            if (league.draft_start && dayjs().isAfter(draftDates.waiverEnd)) {
+            // if after rookie draft waivers cleared and before free agency period, check if player is on release waivers
+            if (
+              league.draft_start &&
+              dayjs().isAfter(draftDates.waiverEnd) &&
+              (!league.adate || dayjs().isBefore(faPeriod.start))
+            ) {
               const isOnWaivers = await isPlayerOnWaivers({ pid, leagueId })
               if (!isOnWaivers) {
                 return res
@@ -228,8 +233,8 @@ router.post('/?', async (req, res) => {
               }
             }
           } else {
-            // reject practice waivers before fa period ends
-            if (!league.adata || dayjs().isBefore(faPeriod.end)) {
+            // reject practice waivers for veterans before fa period
+            if (!league.adate || dayjs().isBefore(faPeriod.start)) {
               return res.status(400).send({
                 error: 'practice squad waivers are not open for non-rookies'
               })

@@ -8,6 +8,6 @@ export default function getFreeAgentPeriod(auction_date) {
 
   return {
     start,
-    end: season.start.add('1', 'week')
+    end: season.start.add('1', 'week').subtract('1', 'minute')
   }
 }
