@@ -11,6 +11,6 @@ export {
   isRestrictedFreeAgencyPeriod,
   isBeforeTransitionEnd
 } from './selectors'
-
+export { League } from './league'
 export { leaguesReducer } from './reducer'
 export { leagueSagas } from './sagas'

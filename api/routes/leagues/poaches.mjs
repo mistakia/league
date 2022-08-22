@@ -8,7 +8,7 @@ import {
   getRoster,
   getLeague
 } from '#utils'
-import { constants, Roster } from '#common'
+import { constants, Roster, getFreeAgentPeriod } from '#common'
 
 const router = express.Router()
 
@@ -72,6 +72,14 @@ router.post('/?', async (req, res) => {
       dayjs().isBefore(dayjs.unix(tran.timestamp).add('24', 'hours'))
     ) {
       return res.status(400).send({ error: 'Player on Sanctuary Period' })
+    }
+
+    const league = await getLeague(leagueId)
+    if (!constants.season.isRegularSeason && league.adate) {
+      const faPeriod = getFreeAgentPeriod(league.adate)
+      if (constants.season.now.isBetween(faPeriod.start, faPeriod.end)) {
+        return res.status(400).send({ error: 'Player on Sanctuary Period' })
+      }
     }
 
     // verify player is not on waivers
