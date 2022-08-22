@@ -22,6 +22,8 @@ import RemoveTagConfirmation from '@components/remove-tag-confirmation'
 
 import Button from '@components/button'
 
+import './confirmation.styl'
+
 export default class Confirmation extends React.Component {
   handleClick = (args) => {
     this.props.info.onConfirm(args)

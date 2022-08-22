@@ -1,4 +1,3 @@
-import dayjs from 'dayjs'
 import { createSelector } from 'reselect'
 
 import { getAllPlayers } from '@core/players'
@@ -8,7 +7,7 @@ import {
   getActiveRosterPlayerIdsForCurrentLeague,
   isPlayerEligible
 } from '@core/rosters'
-import { getCurrentLeague } from '@core/leagues'
+import { League } from '@core/leagues'
 import { constants, getFreeAgentPeriod } from '@common'
 import { fuzzySearch } from '@core/utils'
 
@@ -110,25 +109,24 @@ export const getAuctionInfoForPosition = createSelector(
   }
 )
 
-export function isAfterAuction(state) {
-  const league = getCurrentLeague(state)
-
-  if (!league.adate) {
-    return false
-  }
-
-  const faPeriod = getFreeAgentPeriod(league.adate)
-  if (dayjs().isBefore(faPeriod.end)) {
-    return false
-  }
-
-  return true
-}
-
 export function isNominatedPlayerEligible(state) {
   const auction = getAuction(state)
   return isPlayerEligible(state, { pid: auction.nominated_pid })
 }
+
+export const isFreeAgentPeriod = createSelector(
+  (state) => state.getIn(['app', 'leagueId']),
+  (state) => state.get('leagues'),
+  (leagueId, leagues) => {
+    const league = leagues.get(leagueId, new League()).toJS()
+    if (!league.adate) {
+      return false
+    }
+
+    const faPeriod = getFreeAgentPeriod(league.adate)
+    return constants.season.now.isBetween(faPeriod.start, faPeriod.end)
+  }
+)
 
 export const getPlayersForOptimalLineup = createSelector(
   (state) => state.get('players'),

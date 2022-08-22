@@ -146,7 +146,7 @@ export const getLeagueEvents = createSelector(
       .hour(15)
     if (now.isBefore(firstWaiverDate)) {
       events.push({
-        detail: 'Veteran Waivers Clear',
+        detail: 'Regular Season Waivers Clear',
         date: firstWaiverDate
       })
     } else if (constants.isRegularSeason) {
