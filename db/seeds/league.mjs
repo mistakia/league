@@ -54,7 +54,7 @@ export default async function (knex) {
     lid: 1,
     year: constants.season.year,
     draft_start: Math.round(Date.now() / 1000),
-    adate: Math.round(Date.now() / 1000),
+    adate: null,
     tddate: constants.season.start.add('12', 'weeks').unix()
   })
 
