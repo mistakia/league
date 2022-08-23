@@ -649,6 +649,16 @@ export function isPlayerPracticeSquadEligible(
     return false
   }
 
+  const acceptable_types = [
+    constants.transactions.ROSTER_ADD,
+    constants.transactions.TRADE,
+    constants.transactions.DRAFT
+  ]
+  const type = playerMap.get('type')
+  if (type && !acceptable_types.includes(type)) {
+    return false
+  }
+
   const rosterInfo = getRosterInfoForPlayerId(state, { pid })
 
   // if player is a FA during the offseason, they must be either:
@@ -693,6 +703,7 @@ export function isPlayerPracticeSquadEligible(
   }
 
   const transactions = getReserveTransactionsByPlayerId(state, { pid })
+  console.log(transactions)
 
   // not eligible if activated previously
   const activations = transactions.filter(
