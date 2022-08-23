@@ -34,29 +34,7 @@ export default function WaiverConfirmation({
   onClose,
   status
 }) {
-  const ros = new Roster({ roster: roster.toJS(), league })
-  const [waiver_max_bid, set_waiver_max_bid] = useState(
-    constants.season.isRegularSeason ? team.faab : ros.availableCap
-  )
-  const [isEligible, set_isEligible] = useState(false)
-  const [release_options, set_release_options] = useState([])
-  const [waiver_release, set_waiver_release] = useState(
-    waiver ? waiver.release.toJS() : []
-  )
-  const [waiver_type, set_waiver_type] = useState(waiver ? waiver.type : '')
-  const [waiver_bid, set_waiver_bid] = useState(waiver ? waiver.bid : 0)
-  const [waiver_error, set_waiver_error] = useState(false)
-  const [missing_type, set_missing_type] = useState(false)
-  const [missing_release, set_missing_release] = useState(false)
-
-  const setType = (type) => {
-    const isActiveRoster = type === constants.waivers.FREE_AGENCY
-    const eligible = isActiveRoster
-      ? ros.hasOpenBenchSlot(playerMap.get('pos'))
-      : ros.hasOpenPracticeSquadSlot()
-    set_isEligible(eligible)
-    set_missing_release(!eligible)
-
+  const get_release_options = (isActiveRoster) => {
     const releases = []
     const players = isActiveRoster
       ? rosterPlayers.active
@@ -76,10 +54,44 @@ export default function WaiverConfirmation({
       }
     }
 
-    set_release_options(releases)
+    return releases
   }
 
-  if (waiver) setType(waiver.type)
+  const has_bench_space = (isActiveRoster) =>
+    isActiveRoster
+      ? ros.hasOpenBenchSlot(playerMap.get('pos'))
+      : ros.hasOpenPracticeSquadSlot()
+  const ros = new Roster({ roster: roster.toJS(), league })
+
+  const [waiver_max_bid, set_waiver_max_bid] = useState(
+    constants.season.isRegularSeason ? team.faab : ros.availableCap
+  )
+  const [isEligible, set_isEligible] = useState(
+    waiver
+      ? has_bench_space(waiver.type === constants.waivers.FREE_AGENCY)
+      : false
+  )
+  const [release_options, set_release_options] = useState(
+    waiver
+      ? get_release_options(waiver.type === constants.waivers.FREE_AGENCY)
+      : []
+  )
+  const [waiver_release, set_waiver_release] = useState(
+    waiver ? waiver.release.toJS() : []
+  )
+  const [waiver_type, set_waiver_type] = useState(waiver ? waiver.type : '')
+  const [waiver_bid, set_waiver_bid] = useState(waiver ? waiver.bid : 0)
+  const [waiver_error, set_waiver_error] = useState(false)
+  const [missing_type, set_missing_type] = useState(false)
+  const [missing_release, set_missing_release] = useState(false)
+
+  const setType = (type) => {
+    const isActiveRoster = type === constants.waivers.FREE_AGENCY
+    const eligible = has_bench_space(isActiveRoster)
+    set_isEligible(eligible)
+    set_missing_release(!eligible)
+    set_release_options(get_release_options(isActiveRoster))
+  }
 
   const handleRelease = (event, value) => {
     const release = value.map((p) => p.id)
@@ -174,6 +186,8 @@ export default function WaiverConfirmation({
   const releasePlayers = []
   waiver_release.forEach((pid) => {
     const releasePlayerMap = release_options.find((p) => p.get('pid') === pid)
+    if (!releasePlayerMap) return
+
     releasePlayers.push({
       id: releasePlayerMap.get('pid'),
       label: releasePlayerMap.get('name'),
