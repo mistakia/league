@@ -115,6 +115,18 @@ router.post('/?', async (req, res) => {
       })
     }
 
+    // players acquired through market bidding are ineligible
+    const acceptable_types = [
+      constants.transactions.ROSTER_ADD,
+      constants.transactions.TRADE,
+      constants.transactions.DRAFT
+    ]
+    if (!acceptable_types.includes(firstTransaction.type)) {
+      return res
+        .status(400)
+        .send({ error: 'player is not eligible' })
+    }
+
     // if signed through waivers, make sure player had no competing bids
     if (firstTransaction.waiverid) {
       const waivers = await db('waivers').where({
