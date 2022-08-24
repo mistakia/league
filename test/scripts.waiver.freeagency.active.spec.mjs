@@ -353,18 +353,6 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
       await league(knex)
     })
 
-    it('outside regular season', async () => {
-      let error
-      try {
-        await run()
-      } catch (err) {
-        error = err
-      }
-
-      expect(error).to.be.instanceof(Errors.NotRegularSeason)
-      expect(error.message).to.equal('not regular season')
-    })
-
     it('no waivers to process', async () => {
       MockDate.set(start.add('1', 'month').day(4).toISOString())
       let error
