@@ -52,6 +52,7 @@ const run = async () => {
           const transactions = await db('transactions').where({
             lid,
             type: constants.transactions.DRAFT,
+            year: constants.season.year,
             pid: waiver.pid
           })
 
