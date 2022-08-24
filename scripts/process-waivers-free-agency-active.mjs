@@ -1,12 +1,13 @@
 import debug from 'debug'
 
 import db from '#db'
-import { constants, Errors } from '#common'
+import { constants, Errors, getFreeAgentPeriod } from '#common'
 import {
   submitAcquisition,
   resetWaiverOrder,
   getTopFreeAgencyWaiver,
-  isMain
+  isMain,
+  getLeague
 } from '#utils'
 
 const log = debug('process:waivers:freeagency')
@@ -17,10 +18,7 @@ if (process.env.NODE_ENV !== 'test') {
 const run = async () => {
   const timestamp = Math.round(Date.now() / 1000)
 
-  // TODO add Offseason Free Agency Waiver Period
-  if (!constants.season.isRegularSeason) {
-    throw new Errors.NotRegularSeason()
-  } else if (constants.season.isWaiverPeriod) {
+  if (constants.season.isRegularSeason && constants.season.isWaiverPeriod) {
     return
   }
 
@@ -37,6 +35,22 @@ const run = async () => {
   }
 
   for (const lid of leagueIds) {
+    if (!constants.season.isRegularSeason) {
+      // check if during free agency period
+      const league = await getLeague(lid)
+
+      if (league.adate) {
+        const faPeriod = getFreeAgentPeriod(league.adate)
+        if (constants.season.now.isBefore(faPeriod.adate)) {
+          // skip leagues during offseason before start of free agency auction
+          continue
+        }
+      } else {
+        // skip leagues during offseason with no scheduled free agency period
+        continue
+      }
+    }
+
     let waiver = await getTopFreeAgencyWaiver(lid)
     if (!waiver) {
       log(`no waivers ready to be processed for league ${lid}`)
