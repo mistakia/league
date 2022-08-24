@@ -75,12 +75,8 @@ export default async function ({
     throw new Error('player is locked, game has started')
   }
 
-  // verify no veterans are signed in the offseason & the rookie draft is complete
+  // verify no veterans are signed in the offseason outside of the free agency period and the rookie draft is complete
   if (!constants.season.isRegularSeason) {
-    if (player_row.start !== constants.season.year) {
-      throw new Error('veteran free agency not open')
-    }
-
     // verify rookie draft is complete
     const picks = await db('draft')
       .where({
@@ -102,10 +98,20 @@ export default async function ({
       throw new Error('rookie free agency not open')
     }
 
-    if (league.adate) {
-      const faPeriod = getFreeAgentPeriod(league.adate)
-      if (constants.season.now.isAfter(faPeriod.start)) {
-        throw new Error('player is on waivers during the Free Agency Period')
+    // check if during free agency period for veterans
+    if (player_row.start !== constants.season.year) {
+      if (league.adate) {
+        const faPeriod = getFreeAgentPeriod(league.adate)
+        if (constants.season.now.isBefore(faPeriod.adate)) {
+          throw new Error('veteran free agency not open')
+        }
+
+        // accept only waiver claims
+        if (!waiverId) {
+          throw new Error('player is on waivers during the Free Agency Period')
+        }
+      } else {
+        throw new Error('veteran free agency not open')
       }
     }
   }
@@ -155,6 +161,10 @@ export default async function ({
   const hasSlot = roster.isEligibleForSlot({ slot, pos: player_row.pos })
   if (!hasSlot) {
     throw new Error('exceeds roster limits')
+  }
+
+  if (constants.season.isOffseason && roster.availableCap - bid < 0) {
+    throw new Error('exceeds salary space')
   }
 
   const result = []
