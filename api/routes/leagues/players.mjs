@@ -6,7 +6,7 @@ import { getPlayers, getTransitionBids } from '#utils'
 
 const router = express.Router({ mergeParams: true })
 
-const leagueIds = [0, 1]
+const leagueIds = [1]
 const loadPlayers = async () => {
   for (const leagueId of leagueIds) {
     const players = await getPlayers({ leagueId })
