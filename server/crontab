@@ -120,7 +120,7 @@
 ################################### Waivers ########################################
 
 ## At 15:00 every day in August
-# 0 15 * 8 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-waivers-free-agency.mjs &>> /var/log/league/league-waivers-free-agency.log
+0 15 * 8 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-waivers-free-agency.mjs &>> /var/log/league/league-waivers-free-agency.log
 
 ## At every 5th minute on Monday.
 # */5 * * * 1 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-waivers-free-agency.mjs &>> /var/log/league/league-waivers-free-agency.log
