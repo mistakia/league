@@ -16,9 +16,7 @@ const excluded_props = [
   'lname',
   'pname',
   'formatted',
-  'pos',
-  'pos1',
-  'pos2'
+  'pos'
 ]
 
 const protected_props = [
