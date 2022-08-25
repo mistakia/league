@@ -22,13 +22,26 @@ const processDuplicatePlayers = async () => {
     'weight',
     'height',
     'jnum',
+
     'nfl_status',
     'status',
     'injury_status',
+
     'pos',
     'pos1',
     'pos2',
-    'posd'
+    'posd',
+
+    'forty',
+    'bench',
+    'vertical',
+    'broad',
+    'shuffle',
+    'cone',
+    'arm',
+    'hand',
+
+    'dcp'
   ]
 
   let deleted_count = 0
