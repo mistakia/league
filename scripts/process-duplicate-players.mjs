@@ -8,7 +8,7 @@ const log = debug('process-duplicate-players')
 debug.enable('process-duplicate-players,update-player')
 
 const processDuplicatePlayers = async () => {
-  const duplicates = await db('player').groupBy('formatted', 'dob', 'start')
+  const duplicates = await db('player').select('*').count('* as count').groupBy('formatted', 'dob', 'start').having('count', '>', 1)
 
   log(`${duplicates.length} players had duplicates`)
 
@@ -20,7 +20,11 @@ const processDuplicatePlayers = async () => {
     'jnum',
     'nfl_status',
     'status',
-    'injury_status'
+    'injury_status',
+    'pos',
+    'pos1',
+    'pos2',
+    'posd'
   ]
 
   let deleted_count = 0
