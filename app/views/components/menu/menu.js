@@ -24,7 +24,7 @@ import { history } from '@core/store'
 
 import './menu.styl'
 
-export default function Menu({ logout, isLoggedIn, team, leagueId }) {
+export default function Menu({ logout, isLoggedIn, team, leagueId, league }) {
   const location = useLocation()
   const [open, set_open] = useState(false)
   const [schedule_open, set_schedule_open] = useState(false)
@@ -84,7 +84,12 @@ export default function Menu({ logout, isLoggedIn, team, leagueId }) {
       <div className='main__menu'>
         <AppBar color='transparent' elevation={0}>
           <Toolbar variant='dense'>
-            {isLoggedIn && <LeagueSchedule />}
+            {leagueId && (
+              <div className='league__head'>
+                <div className='league__title'>{league.name}</div>
+                <LeagueSchedule />
+              </div>
+            )}
             {isLoggedIn && <NavLink to='/dashboard'>Roster</NavLink>}
             {isLoggedIn && constants.isRegularSeason && (
               <NavLink to='/lineups'>Lineup</NavLink>
@@ -233,5 +238,6 @@ Menu.propTypes = {
   isLoggedIn: PropTypes.bool,
   leagueId: PropTypes.number,
   team: ImmutablePropTypes.record,
+  league: PropTypes.object,
   logout: PropTypes.func
 }
