@@ -1,12 +1,12 @@
 import express from 'express'
 
 import cache from '#api/cache.mjs'
-import { getPlayers, getTransitionBids, verifyUserTeam } from '#utils'
+import { getPlayers, getTransitionBids } from '#utils'
 
 const router = express.Router({ mergeParams: true })
 
 router.get('/?', async (req, res) => {
-  const { logger } = req.app.locals
+  const { logger, db } = req.app.locals
   try {
     const { teamId } = req.params
     const { leagueId } = req.query
@@ -17,16 +17,14 @@ router.get('/?', async (req, res) => {
     if (players) {
       logger('USING CACHE')
       if (userId) {
-        // verify teamId
-        try {
-          await verifyUserTeam({
-            userId,
-            teamId,
-            leagueId,
-            requireLeague: true
-          })
-        } catch (error) {
-          return res.status(400).send({ error: error.message })
+        // check if userId is a team manager
+        const rows = await db('users_teams').where({
+          userid: userId,
+          tid: teamId
+        })
+
+        if (!rows.length) {
+          return res.send(players)
         }
 
         const bids = await getTransitionBids({
@@ -53,16 +51,14 @@ router.get('/?', async (req, res) => {
     cache.set(cacheKey, players, 1800) // 30 mins
 
     if (userId) {
-      // verify teamId
-      try {
-        await verifyUserTeam({
-          userId,
-          teamId,
-          leagueId,
-          requireLeague: true
-        })
-      } catch (error) {
-        return res.status(400).send({ error: error.message })
+      // check if userId is a team manager
+      const rows = await db('users_teams').where({
+        userid: userId,
+        tid: teamId
+      })
+
+      if (!rows.length) {
+        return res.send(players)
       }
 
       const bids = await getTransitionBids({ userId, leagueId })
