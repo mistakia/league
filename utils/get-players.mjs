@@ -107,7 +107,7 @@ export default async function ({
     }
   }
 
-  if (leaguePlayerIds.length) {
+  if (leaguePlayerIds.length || teamId || leagueId) {
     query.orWhereIn('player.pid', leaguePlayerIds)
   }
 
