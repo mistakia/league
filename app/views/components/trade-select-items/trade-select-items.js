@@ -7,6 +7,7 @@ import Chip from '@mui/material/Chip'
 
 import TradeSelectPlayer from '@components/trade-select-player'
 import TradeSelectPick from '@components/trade-select-pick'
+import { Team } from '@core/teams'
 
 import './trade-select-items.styl'
 
@@ -16,7 +17,7 @@ const getPickLabel = (pick, teams) => {
     str += ` #${pick.pick}`
   }
 
-  const team = teams.get(pick.otid)
+  const team = teams.get(pick.otid, new Team())
   str += ` (${team.abbrv})`
 
   return str
