@@ -2,242 +2,197 @@ import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import { NavLink, useLocation } from 'react-router-dom'
-import AppBar from '@mui/material/AppBar'
-import Toolbar from '@mui/material/Toolbar'
 import MenuIcon from '@mui/icons-material/Menu'
 import SwipeableDrawer from '@mui/material/SwipeableDrawer'
-import List from '@mui/material/List'
-import Divider from '@mui/material/Divider'
-import ListItem from '@mui/material/ListItem'
-import ListItemText from '@mui/material/ListItemText'
-import ListItemAvatar from '@mui/material/ListItemAvatar'
 import Avatar from '@mui/material/Avatar'
-import ExpandLess from '@mui/icons-material/ExpandLess'
-import ExpandMore from '@mui/icons-material/ExpandMore'
-import Collapse from '@mui/material/Collapse'
 import Fab from '@mui/material/Fab'
+import MenuItem from '@mui/material/MenuItem'
+import Typography from '@mui/material/Typography'
+import Tooltip from '@mui/material/Tooltip'
+import IconButton from '@mui/material/IconButton'
+import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore'
+import NavigateNextIcon from '@mui/icons-material/NavigateNext'
+import Popover from '@mui/material/Popover'
 
+import TeamName from '@components/team-name'
 import LeagueSchedule from '@components/league-schedule'
-import LeagueScheduleList from '@components/league-schedule-list'
+
 import { constants } from '@common'
 import { history } from '@core/store'
 
 import './menu.styl'
 
-export default function Menu({ logout, isLoggedIn, team, leagueId, league }) {
+export default function AppMenu({
+  menu_open,
+  set_menu_open,
+  logout,
+  isLoggedIn,
+  teamId,
+  team,
+  leagueId,
+  league
+}) {
   const location = useLocation()
-  const [open, set_open] = useState(false)
-  const [schedule_open, set_schedule_open] = useState(false)
-
   const isAuction = location.pathname === '/auction'
-  const handleClose = () => set_open(false)
-  const handleOpen = () => set_open(true)
-  const toggleSchedule = () => set_schedule_open(!schedule_open)
+  const isMobile = window.innerWidth < 800
+
+  const [anchor_el_account, set_anchor_el_account] = useState(null)
+
   const handleClick = (path) => () => {
-    handleClose()
+    set_anchor_el_account(null)
+    if (isMobile) set_menu_open(false)
     history.push(path)
   }
 
-  let header
-  if (isLoggedIn) {
-    header = (
-      <>
-        <ListItem alignItems='flex-start'>
-          <ListItemAvatar>
-            <Avatar alt={team.image} />
-          </ListItemAvatar>
-          <ListItemText primary={team.name} secondary='0-0' />
-        </ListItem>
-        <Divider />
-        <ListItem button onClick={toggleSchedule}>
-          <ListItemText primary='League Schedule' />
-          {schedule_open ? <ExpandLess /> : <ExpandMore />}
-        </ListItem>
-        <Collapse in={schedule_open} timeout='auto' unmountOnExit>
-          <LeagueScheduleList />
-        </Collapse>
-      </>
-    )
-  } else {
-    header = (
-      <ListItem button onClick={handleClick('/login')}>
-        <ListItemAvatar>
-          <Avatar alt='' />
-        </ListItemAvatar>
-        <ListItemText primary='Login/Register' />
-      </ListItem>
-    )
-  }
+  const sx = isMobile ? { right: 16 } : { left: 16 }
 
   return (
     <>
       <Fab
-        sx={{ position: 'fixed', right: 16, bottom: isAuction ? 204 : 16 }}
+        sx={{ position: 'fixed', bottom: isAuction ? 204 : 16, ...sx }}
         color='primary'
         variant='extended'
         className='main__menu-button'
-        onClick={handleOpen}
+        onClick={() => set_menu_open(true)}
       >
         <MenuIcon sx={{ mr: 1 }} />
         Menu
       </Fab>
-      <div className='main__menu'>
-        <AppBar color='transparent' elevation={0}>
-          <Toolbar variant='dense'>
-            {leagueId && (
-              <div className='league__head'>
-                <div className='league__title'>{league.name}</div>
-                <LeagueSchedule />
+      <SwipeableDrawer
+        variant={isMobile ? 'temporary' : 'persistent'}
+        anchor={isMobile ? 'right' : 'left'}
+        open={menu_open}
+        onOpen={() => set_menu_open(true)}
+        onClose={() => set_menu_open(false)}
+        classes={{
+          paper: 'menu__drawer'
+        }}
+      >
+        <div className='main__menu'>
+          <div className='menu__sections'>
+            <div className='menu__section'>
+              <div className='league__title'>{league.name}</div>
+              <LeagueSchedule />
+              <div
+                className='menu__links'
+                onClick={() => isMobile && set_menu_open(false)}
+              >
+                {Boolean(leagueId) && <NavLink to='/dashboard'>Home</NavLink>}
+                <NavLink to='/players'>Players</NavLink>
+                {Boolean(leagueId) && (
+                  <>
+                    {Boolean(constants.week) && (
+                      <NavLink to='/scoreboard'>Scoreboard</NavLink>
+                    )}
+                    {teamId ? (
+                      <NavLink to={`/leagues/${leagueId}/teams/${teamId}`}>
+                        Teams
+                      </NavLink>
+                    ) : (
+                      <NavLink to={`/leagues/${leagueId}/teams`}>Teams</NavLink>
+                    )}
+                    <NavLink to={`/leagues/${leagueId}/transactions`}>
+                      Transactions
+                    </NavLink>
+                    <NavLink to={`/leagues/${leagueId}/waivers`}>
+                      Waivers
+                    </NavLink>
+                    <NavLink to={`/leagues/${leagueId}/rosters`}>
+                      Rosters
+                    </NavLink>
+                    <NavLink to={`/leagues/${leagueId}/standings`}>
+                      Standings
+                    </NavLink>
+                    <NavLink to={`/leagues/${leagueId}/stats`}>Stats</NavLink>
+                    <NavLink to={`/leagues/${leagueId}/schedule`}>
+                      Schedule
+                    </NavLink>
+                  </>
+                )}
+              </div>
+            </div>
+            {Boolean(teamId) && (
+              <div className='menu__section'>
+                <div className='menu__heading'>
+                  <TeamName image abbrv tid={teamId} />
+                </div>
+                <div
+                  className='menu__links'
+                  onClick={() => isMobile && set_menu_open(false)}
+                >
+                  <NavLink to='/lineups'>Lineup</NavLink>
+                  <NavLink to='/trade'>Trade</NavLink>
+                  <NavLink to='/draft'>Draft</NavLink>
+                  <NavLink to='/auction'>Auction</NavLink>
+                </div>
               </div>
             )}
-            {isLoggedIn && <NavLink to='/dashboard'>Roster</NavLink>}
-            {isLoggedIn && constants.isRegularSeason && (
-              <NavLink to='/lineups'>Lineup</NavLink>
-            )}
-            <NavLink to='/players'>Players</NavLink>
-            {isLoggedIn && Boolean(constants.week) && (
-              <NavLink to='/scoreboard'>Scoreboard</NavLink>
-            )}
-            {isLoggedIn && (
-              <NavLink to={`/leagues/${leagueId}`}>League</NavLink>
-            )}
-            {isLoggedIn && <NavLink to='/trade'>Trade</NavLink>}
-            {/* {isLoggedIn && constants.week > 0 && (
-                <NavLink to='/props'>Props</NavLink>
-                )} */}
-            {isLoggedIn && !constants.week && (
-              <NavLink to='/draft'>Draft</NavLink>
-            )}
-            {isLoggedIn && !constants.week && (
-              <NavLink to='/auction'>Auction</NavLink>
-            )}
-            <NavLink to='/settings'>Settings</NavLink>
-            <NavLink to='/resources'>Resources</NavLink>
-            <NavLink to='/glossary'>Glossary</NavLink>
-            {!isLoggedIn && <NavLink to='/login'>Login/Register</NavLink>}
-          </Toolbar>
-        </AppBar>
-        <SwipeableDrawer
-          anchor='left'
-          open={open}
-          onOpen={handleOpen}
-          onClose={handleClose}
-          classes={{
-            paper: 'main__menu-paper'
-          }}
-        >
-          <List>{header}</List>
-          <Divider />
-          <List>
-            {isLoggedIn && (
-              <ListItem button onClick={handleClick('/dashboard')}>
-                <ListItemText primary='Roster' />
-              </ListItem>
-            )}
-            {isLoggedIn && (
-              <ListItem button onClick={handleClick('/lineups')}>
-                <ListItemText primary='Lineups' />
-              </ListItem>
-            )}
-            <ListItem button onClick={handleClick('/players')}>
-              <ListItemText primary='Players' />
-            </ListItem>
-            {isLoggedIn && (
-              <ListItem button onClick={handleClick('/scoreboard')}>
-                <ListItemText primary='Scoreboard' />
-              </ListItem>
-            )}
-            {isLoggedIn && (
-              <ListItem button onClick={handleClick('/trade')}>
-                <ListItemText primary='Trade' />
-              </ListItem>
-            )}
-            {isLoggedIn && !constants.week && (
-              <ListItem button onClick={handleClick('/auction')}>
-                <ListItemText primary='Auction' />
-              </ListItem>
-            )}
-            {isLoggedIn && !constants.week && (
-              <ListItem button onClick={handleClick('/draft')}>
-                <ListItemText primary='Draft' />
-              </ListItem>
-            )}
-          </List>
-          {isLoggedIn && <Divider />}
-          {isLoggedIn && (
-            <List>
-              <ListItem
-                button
-                onClick={handleClick(`/leagues/${leagueId}/teams`)}
+            <div className='menu__section'>
+              <div className='menu__heading'>Site</div>
+              <div
+                className='menu__links'
+                onClick={() => isMobile && set_menu_open(false)}
               >
-                <ListItemText primary='Team' />
-              </ListItem>
-              <ListItem
-                button
-                onClick={handleClick(`/leagues/${leagueId}/transactions`)}
-              >
-                <ListItemText primary='Transactions' />
-              </ListItem>
-              <ListItem
-                button
-                onClick={handleClick(`/leagues/${leagueId}/waivers`)}
-              >
-                <ListItemText primary='Waivers' />
-              </ListItem>
-              <ListItem
-                button
-                onClick={handleClick(`/leagues/${leagueId}/rosters`)}
-              >
-                <ListItemText primary='Rosters' />
-              </ListItem>
-              <ListItem
-                button
-                onClick={handleClick(`/leagues/${leagueId}/standings`)}
-              >
-                <ListItemText primary='Standings' />
-              </ListItem>
-              <ListItem
-                button
-                onClick={handleClick(`/leagues/${leagueId}/stats`)}
-              >
-                <ListItemText primary='Stats' />
-              </ListItem>
-              <ListItem
-                button
-                onClick={handleClick(`/leagues/${leagueId}/schedule`)}
-              >
-                <ListItemText primary='Schedule' />
-              </ListItem>
-            </List>
-          )}
-          <Divider />
-          <List>
-            <ListItem button onClick={handleClick('/settings')}>
-              <ListItemText primary='Settings' />
-            </ListItem>
-            <ListItem button onClick={handleClick('/resources')}>
-              <ListItemText primary='Resources' />
-            </ListItem>
-            <ListItem button onClick={handleClick('/glossary')}>
-              <ListItemText primary='Glossary' />
-            </ListItem>
-          </List>
-          <Divider />
-          <List>
-            <ListItem button onClick={logout}>
-              <ListItemText primary='Logout' />
-            </ListItem>
-          </List>
-        </SwipeableDrawer>
-      </div>
+                <NavLink to='/status'>Status</NavLink>
+                <NavLink to='/glossary'>Glossary</NavLink>
+                <NavLink to='/resources'>Resources</NavLink>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className='menu__actions'>
+          <Tooltip title='View Account'>
+            <IconButton
+              variant='text'
+              onClick={(event) => set_anchor_el_account(event.currentTarget)}
+            >
+              <Avatar alt='' />
+            </IconButton>
+          </Tooltip>
+          <Popover
+            sx={{ mt: '45px' }}
+            anchorEl={anchor_el_account}
+            anchorOrigin={{
+              vertical: 'top',
+              horizontal: 'right'
+            }}
+            transformOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left'
+            }}
+            open={Boolean(anchor_el_account)}
+            onClose={() => set_anchor_el_account(null)}
+          >
+            <MenuItem onClick={handleClick('/settings')}>
+              <Typography textAlign='center'>Settings</Typography>
+            </MenuItem>
+            {!isLoggedIn && (
+              <MenuItem onClick={handleClick('/login')}>
+                Login/Register
+              </MenuItem>
+            )}
+            {isLoggedIn && <MenuItem onClick={logout}>Logout</MenuItem>}
+          </Popover>
+          <div className='menu__collapse'>
+            <Tooltip title='Collapse Menu'>
+              <IconButton onClick={() => set_menu_open(false)}>
+                {isMobile ? <NavigateNextIcon /> : <NavigateBeforeIcon />}
+              </IconButton>
+            </Tooltip>
+          </div>
+        </div>
+      </SwipeableDrawer>
     </>
   )
 }
 
-Menu.propTypes = {
+AppMenu.propTypes = {
   isLoggedIn: PropTypes.bool,
   leagueId: PropTypes.number,
+  teamId: PropTypes.number,
   team: ImmutablePropTypes.record,
   league: PropTypes.object,
-  logout: PropTypes.func
+  logout: PropTypes.func,
+  menu_open: PropTypes.bool,
+  set_menu_open: PropTypes.func
 }

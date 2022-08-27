@@ -1,11 +1,19 @@
 .league__schedule
   font-size 11px
   font-weight 700
+  border-top 1px solid lighten($borderColor, 40%)
+  border-bottom 1px solid lighten($borderColor, 40%)
   cursor pointer
   color red
-  &:hover
-    color $accentColor
+  display flex
+  flex-direction column
+  justify-content center
 
-@media screen and (max-width 1050px)
-  .league__schedule
-    display none
+.league__schedule-anchor
+  padding 8px 16px
+  display flex
+
+@media (pointer:fine)
+  .league__schedule:hover
+    color $accentColor
+    background lighten(yellow, 80%)

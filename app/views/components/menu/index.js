@@ -5,7 +5,7 @@ import { getApp, appActions } from '@core/app'
 import { getCurrentTeam } from '@core/teams'
 import { getCurrentLeague } from '@core/leagues'
 
-import Menu from './menu'
+import AppMenu from './menu'
 
 const mapStateToProps = createSelector(
   getApp,
@@ -14,6 +14,7 @@ const mapStateToProps = createSelector(
   (app, team, league) => ({
     isLoggedIn: Boolean(app.userId),
     leagueId: app.leagueId,
+    teamId: app.teamId,
     league,
     team
   })
@@ -23,4 +24,4 @@ const mapDispatchToProps = {
   logout: appActions.logout
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Menu)
+export default connect(mapStateToProps, mapDispatchToProps)(AppMenu)
