@@ -1,16 +1,7 @@
 .page
-  absolute left right top bottom 75px
-  height 100%
-  overflow hidden
+  absolute top 0 left 0 right 0 bottom 0
   display flex
   flex-direction column
-
-.page__main
-  flex 1
-  display flex
-  flex-direction column
-  width 100%
-  height 100%
 
 .page__head
   flex 0 0 auto
@@ -21,22 +12,8 @@
   position relative
   overflow hidden
 
-.page__menu
-  flex 0 0 auto
-  background lighten($backgroundColor, 50%)
-  border-bottom 1px solid lighten($borderColor, 40%)
-  padding 8px 0
-  .menu
-    display flex
-    justify-content center
-    a
-      font-size 13px
-      font-family 'IBM Plex Mono'
-
-@media (min-width: 1051px)
-  main > .page
-    padding-top $menuHeight
-
-@media screen and (max-width: 1050px)
-  .page__menu
-    display none
+@media (min-width 800px)
+  .page
+    transition margin 225ms cubic-bezier(0, 0, 0.2, 1) 0ms
+  .menu__open .page
+    margin-left $menuWidth

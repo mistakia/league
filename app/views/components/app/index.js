@@ -13,7 +13,6 @@ App.propTypes = {
 
 const mapStateToProps = createSelector(getApp, getPlayers, (app, players) => ({
   isPending: app.isPending,
-  userId: app.userId,
   isInitializing: players.get('isInitializing')
 }))
 

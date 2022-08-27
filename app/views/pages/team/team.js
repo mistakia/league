@@ -32,7 +32,7 @@ export default function TeamPage({
     }
   }, [!tid && teams.size])
 
-  if (!tid) return null
+  if (!tid) return <PageLayout />
 
   const teamId = Number(tid)
 
