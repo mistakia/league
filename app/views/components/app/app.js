@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useMatch } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import Backdrop from '@mui/material/Backdrop'
@@ -10,7 +10,6 @@ import Routes from '@views/routes'
 import Loading from '@components/loading'
 import ContextMenu from '@components/context-menu'
 import { localStorageAdapter } from '@core/utils'
-import Logout from '@components/logout'
 import Confirmation from '@components/confirmation'
 import Notification from '@components/notification'
 import SelectedPlayer from '@components/selected-player'
@@ -21,7 +20,9 @@ import '@styles/normalize.css'
 import '@styles/index.styl'
 import './app.styl'
 
-export default function App({ init, isPending, userId, isInitializing }) {
+export default function App({ init, isPending, isInitializing }) {
+  const isMobile = window.innerWidth < 800
+  const [menu_open, set_menu_open] = useState(!isMobile)
   const match = useMatch('leagues/:leagueId/*')
   const leagueId = match ? Number(match.params.leagueId) : undefined
 
@@ -37,17 +38,21 @@ export default function App({ init, isPending, userId, isInitializing }) {
     return <Loading loading={isPending} />
   }
 
+  const classNames = []
+  if (menu_open) {
+    classNames.push('menu__open')
+  }
+
   return (
-    <main>
+    <main className={classNames.join(' ')}>
       <Backdrop
         classes={{ root: 'initializing__backdrop' }}
         open={isInitializing}
       >
         <CircularProgress color='inherit' />
       </Backdrop>
-      <Menu />
+      <Menu {...{ menu_open, set_menu_open }} />
       <Routes />
-      {userId && <Logout />}
       <ContextMenu />
       <Confirmation />
       <Notification />
@@ -59,6 +64,5 @@ export default function App({ init, isPending, userId, isInitializing }) {
 App.propTypes = {
   init: PropTypes.func,
   isPending: PropTypes.bool,
-  userId: PropTypes.number,
   isInitializing: PropTypes.bool
 }
