@@ -18,7 +18,7 @@ import { rosterActions } from '@core/rosters'
 
 export function* initTeams() {
   const { leagueId } = yield select(getApp)
-  yield call(getTeams, { leagueId })
+  if (leagueId) yield call(getTeams, { leagueId })
 }
 
 export function* loadTeams({ payload }) {

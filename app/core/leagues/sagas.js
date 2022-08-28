@@ -2,14 +2,16 @@ import { call, takeLatest, fork, select, put } from 'redux-saga/effects'
 
 import { leagueActions } from './actions'
 import { putLeague, getLeague } from '@core/api'
-import { getApp } from '@core/app'
+import { getApp, appActions } from '@core/app'
 import { notificationActions } from '@core/notifications'
 import { teamActions } from '@core/teams'
 import { rosterActions } from '@core/rosters'
 import { getLeagueById } from './selectors'
 
-export function* loadLeague({ payload }) {
-  const { leagueId } = payload
+export function* loadLeague() {
+  const { leagueId } = yield select(getApp)
+  if (!leagueId) return
+
   const league = yield select(getLeagueById, { lid: leagueId })
   if (league.isLoading || league.isLoaded) {
     return
@@ -41,6 +43,10 @@ export function* watchUpdateLeague() {
   yield takeLatest(leagueActions.UPDATE_LEAGUE, updateLeague)
 }
 
+export function* watchAuthFulfilled() {
+  yield takeLatest(appActions.AUTH_FULFILLED, loadLeague)
+}
+
 export function* watchPutLeagueFulfilled() {
   yield takeLatest(leagueActions.PUT_LEAGUE_FULFILLED, saveNotification)
 }
@@ -66,5 +72,6 @@ export const leagueSagas = [
   fork(watchPutLeagueFulfilled),
   fork(watchLoadLeagueTeamStats),
   fork(watchLoadRosters),
-  fork(watchLoadTeams)
+  fork(watchLoadTeams),
+  fork(watchAuthFulfilled)
 ]

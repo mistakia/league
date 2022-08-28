@@ -77,7 +77,11 @@ export default function AppMenu({
                 className='menu__links'
                 onClick={() => isMobile && set_menu_open(false)}
               >
-                {Boolean(leagueId) && <NavLink to='/dashboard'>Home</NavLink>}
+                {Boolean(leagueId) && (
+                  <NavLink to={`/leagues/${leagueId}`} end>
+                    Home
+                  </NavLink>
+                )}
                 <NavLink to='/players'>Players</NavLink>
                 {Boolean(leagueId) && (
                   <>
@@ -128,7 +132,7 @@ export default function AppMenu({
               </div>
             )}
             <div className='menu__section'>
-              <div className='menu__heading'>Site</div>
+              <div className='menu__heading'>The Machine</div>
               <div
                 className='menu__links'
                 onClick={() => isMobile && set_menu_open(false)}

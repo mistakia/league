@@ -20,7 +20,7 @@ export default function TeamPage({
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (isNaN(lid) || isNaN(tid)) {
+    if (isNaN(lid) || (tid && isNaN(tid))) {
       return navigate('/', { replace: true })
     }
 

@@ -1,7 +1,5 @@
-import React from 'react'
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
-import PropTypes from 'prop-types'
 
 import { getApp } from '@core/app'
 import { getCurrentTeam } from '@core/teams'
@@ -16,23 +14,7 @@ import {
 } from '@core/players'
 import { draftPickValueActions } from '@core/draft-pick-value'
 
-import render from './dashboard'
-
-class DashboardPage extends React.Component {
-  componentDidMount() {
-    this.props.loadLeaguePlayers()
-    this.props.loadDraftPickValue()
-  }
-
-  render() {
-    return render.call(this)
-  }
-}
-
-DashboardPage.propTypes = {
-  loadLeaguePlayers: PropTypes.func,
-  loadDraftPickValue: PropTypes.func
-}
+import LeagueHomePage from './league-home'
 
 const mapStateToProps = createSelector(
   getApp,
@@ -75,4 +57,4 @@ const mapDispatchToProps = {
   loadDraftPickValue: draftPickValueActions.loadDraftPickValue
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(DashboardPage)
+export default connect(mapStateToProps, mapDispatchToProps)(LeagueHomePage)

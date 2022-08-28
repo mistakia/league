@@ -1,4 +1,7 @@
-import React from 'react'
+import React, { useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 import { List } from 'immutable'
 import dayjs from 'dayjs'
 import Alert from '@mui/material/Alert'
@@ -6,15 +9,12 @@ import AlertTitle from '@mui/material/AlertTitle'
 import Container from '@mui/material/Container'
 import Grid from '@mui/material/Grid'
 import NotInterestedIcon from '@mui/icons-material/NotInterested'
-import Toolbar from '@mui/material/Toolbar'
 
+import LeagueHeader from '@components/league-header'
 import TeamName from '@components/team-name'
-import DashboardDraftPicks from '@components/dashboard-draft-picks'
-import DashboardByeWeeks from '@components/dashboard-bye-weeks'
 import DashboardLeaguePositionalValue from '@components/dashboard-league-positional-value'
 import DashboardPlayersTable from '@components/dashboard-players-table'
 import DashboardTeamSummary from '@components/dashboard-team-summary'
-import DashboardTeamValue from '@components/dashboard-team-value'
 import PlayerRoster from '@components/player-roster'
 import PageLayout from '@layouts/page'
 import {
@@ -24,21 +24,33 @@ import {
   getFreeAgentPeriod
 } from '@common'
 
-import './dashboard.styl'
+import './league-home.styl'
 
-export default function DashboardPage() {
-  const {
-    players,
-    transitionPlayers,
-    cutlist,
-    picks,
-    league,
-    waivers,
-    poaches,
-    teamId,
-    roster,
-    isBeforeTransitionEnd
-  } = this.props
+export default function LeagueHomePage({
+  players,
+  transitionPlayers,
+  cutlist,
+  picks,
+  league,
+  waivers,
+  poaches,
+  teamId,
+  roster,
+  isBeforeTransitionEnd,
+  loadLeaguePlayers,
+  loadDraftPickValue
+}) {
+  const navigate = useNavigate()
+  const { lid } = useParams()
+
+  useEffect(() => {
+    if (isNaN(lid)) {
+      return navigate('/', { replace: true })
+    }
+
+    loadLeaguePlayers()
+    loadDraftPickValue()
+  }, [])
 
   const notices = []
   if (league.adate) {
@@ -193,9 +205,12 @@ export default function DashboardPage() {
   const teamPoaches = poaches.filter((p) => p.tid === teamId)
 
   const body = (
-    <Container maxWidth='lg' classes={{ root: 'dashboard' }}>
+    <Container maxWidth='lg' classes={{ root: 'league__home' }}>
       <Grid container spacing={2} alignItems='flex-start'>
         <Grid container item xs={12} md={8}>
+          <Grid item xs={12}>
+            <LeagueHeader />
+          </Grid>
           {notices.length ? (
             <Grid item xs={12}>
               {notices}
@@ -259,64 +274,29 @@ export default function DashboardPage() {
               />
             </Grid>
           )}
-          <Grid item xs={12}>
-            <DashboardPlayersTable
-              items={activeItems}
-              title='Active Roster'
-              space={roster.availableSpace}
-              total={activePlayers}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <DashboardPlayersTable
-              items={practice_signed_items}
-              title='Practice Squad — Signed'
-              space={roster.availablePracticeSpace}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <DashboardPlayersTable
-              items={practice_drafted_items}
-              title='Practice Squad — Drafted'
-            />
-          </Grid>
-          <Grid item xs={12}>
-            {Boolean(reserveIRItems.length) && (
-              <DashboardPlayersTable
-                items={reserveIRItems}
-                title='Reserve/IR'
-                space={roster.availableReserveSpace}
-              />
-            )}
-          </Grid>
-          <Grid item xs={12}>
-            {Boolean(reserveCOVItems.length) && (
-              <DashboardPlayersTable
-                items={reserveCOVItems}
-                title='Reserve/COVID-19'
-              />
-            )}
-          </Grid>
-          <Grid item xs={12}>
-            <div className='section'>
-              <Toolbar>
-                <div className='dashboard__section-header-title'>
-                  Draft Picks
-                </div>
-              </Toolbar>
-              <DashboardDraftPicks picks={picks} league={league} />
-            </div>
-          </Grid>
         </Grid>
         <Grid item xs={12} md={4}>
           <DashboardTeamSummary tid={teamId} />
-          <DashboardTeamValue tid={teamId} />
           <DashboardLeaguePositionalValue tid={teamId} />
-          <DashboardByeWeeks tid={teamId} />
         </Grid>
       </Grid>
     </Container>
   )
 
   return <PageLayout body={body} scroll />
+}
+
+LeagueHomePage.propTypes = {
+  players: PropTypes.object,
+  transitionPlayers: ImmutablePropTypes.map,
+  cutlist: ImmutablePropTypes.list,
+  picks: ImmutablePropTypes.list,
+  league: PropTypes.object,
+  waivers: PropTypes.object,
+  loadLeaguePlayers: PropTypes.func,
+  loadDraftPickValue: PropTypes.func,
+  poaches: ImmutablePropTypes.list,
+  teamId: PropTypes.number,
+  roster: PropTypes.object,
+  isBeforeTransitionEnd: PropTypes.bool
 }
