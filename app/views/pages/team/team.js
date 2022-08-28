@@ -20,6 +20,10 @@ export default function TeamPage({
   const navigate = useNavigate()
 
   useEffect(() => {
+    if (isNaN(lid) || isNaN(tid)) {
+      return navigate('/', { replace: true })
+    }
+
     loadTeams(lid)
     loadLeaguePlayers(lid)
     loadDraftPickValue()

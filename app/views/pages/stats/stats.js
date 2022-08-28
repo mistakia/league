@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import { Map } from 'immutable'
@@ -137,149 +138,154 @@ SlotRow.propTypes = {
   year: PropTypes.number
 }
 
-export default class StatsPage extends React.Component {
-  render = () => {
-    const { league, teams, percentiles, year } = this.props
+export default function StatsPage({ league, teams, percentiles, year }) {
+  const navigate = useNavigate()
+  const { lid } = useParams()
 
-    const slotHeaders = []
-    const eligibleStarterSlots = getEligibleSlots({ pos: 'ALL', league })
-    const slots = [...new Set(eligibleStarterSlots)]
-    for (const [index, slot] of slots.entries()) {
-      slotHeaders.push(
-        <div key={index} className='table__cell metric'>
-          {constants.slotName[constants.slots[slot]]}
-        </div>
-      )
-      slotHeaders.push(
-        <div key={`${index}%`} className='table__cell metric'>
-          %
-        </div>
-      )
+  useEffect(() => {
+    if (isNaN(lid)) {
+      return navigate('/', { replace: true })
     }
+  }, [])
 
-    const positionHeaders = []
-    for (const position of constants.positions) {
-      positionHeaders.push(
-        <div key={position} className='table__cell metric'>
-          {position}
-        </div>
-      )
-      positionHeaders.push(
-        <div key={`${position}%`} className='table__cell metric'>
-          %
-        </div>
-      )
-    }
-
-    const sorted = teams.sort(
-      (a, b) =>
-        b.getIn(['stats', year, 'apWins'], 0) -
-          a.getIn(['stats', year, 'apWins'], 0) ||
-        b.getIn(['stats', year, 'pf'], 0) - a.getIn(['stats', year, 'pf'], 0)
-    )
-
-    const summaryRows = []
-    for (const team of sorted.valueSeq()) {
-      summaryRows.push(
-        <SummaryRow
-          key={team.uid}
-          team={team}
-          percentiles={percentiles}
-          year={year}
-        />
-      )
-    }
-
-    const slotRows = []
-    for (const team of sorted.valueSeq()) {
-      slotRows.push(
-        <SlotRow
-          key={team.uid}
-          team={team}
-          slots={slots}
-          year={year}
-          percentiles={percentiles}
-        />
-      )
-    }
-
-    const positionRows = []
-    for (const team of sorted.valueSeq()) {
-      positionRows.push(
-        <PositionRow
-          key={team.uid}
-          team={team}
-          percentiles={percentiles}
-          year={year}
-        />
-      )
-    }
-
-    const body = (
-      <div className='stats'>
-        <StandingsSelectYear />
-        <div className='section'>
-          <Toolbar>
-            <div className='dashboard__section-header-title'>League Stats</div>
-          </Toolbar>
-          <div className='table__container'>
-            <div className='table__row table__head'>
-              <div className='table__cell player__item-name'>Team</div>
-              <div className='table__cell metric'>PF</div>
-              <div className='table__cell metric'>PA</div>
-              <div className='table__cell metric'>DIFF</div>
-              <div className='table__cell metric'>PP</div>
-              <div className='table__cell metric'>PP%</div>
-              <div className='table__cell metric'>PP Pen</div>
-              <div className='table__cell metric'>P WINS</div>
-              <div className='table__cell metric'>P LOSSES</div>
-              <div className='table__cell metric'>MAX</div>
-              <div className='table__cell metric'>MIN</div>
-              <div className='table__cell metric'>STDEV</div>
-              <div className='player__row-group'>
-                <div className='player__row-group-head'>All Play Record</div>
-                <div className='player__row-group-body'>
-                  <div className='table__cell metric'>W</div>
-                  <div className='table__cell metric'>L</div>
-                  <div className='table__cell metric'>T</div>
-                  <div className='table__cell metric'>PCT</div>
-                </div>
-              </div>
-            </div>
-            {summaryRows}
-          </div>
-        </div>
-        <div className='section'>
-          <Toolbar>
-            <div className='dashboard__section-header-title'>Lineup Stats</div>
-          </Toolbar>
-          <div className='table__container'>
-            <div className='table__row table__head'>
-              <div className='table__cell player__item-name'>Team</div>
-              {slotHeaders}
-            </div>
-            {slotRows}
-          </div>
-        </div>
-        <div className='section'>
-          <Toolbar>
-            <div className='dashboard__section-header-title'>
-              Positional Stats
-            </div>
-          </Toolbar>
-          <div className='table__container'>
-            <div className='table__row table__head'>
-              <div className='table__cell player__item-name'>Team</div>
-              {positionHeaders}
-            </div>
-            {positionRows}
-          </div>
-        </div>
+  const slotHeaders = []
+  const eligibleStarterSlots = getEligibleSlots({ pos: 'ALL', league })
+  const slots = [...new Set(eligibleStarterSlots)]
+  for (const [index, slot] of slots.entries()) {
+    slotHeaders.push(
+      <div key={index} className='table__cell metric'>
+        {constants.slotName[constants.slots[slot]]}
       </div>
     )
-
-    return <PageLayout body={body} scroll />
+    slotHeaders.push(
+      <div key={`${index}%`} className='table__cell metric'>
+        %
+      </div>
+    )
   }
+
+  const positionHeaders = []
+  for (const position of constants.positions) {
+    positionHeaders.push(
+      <div key={position} className='table__cell metric'>
+        {position}
+      </div>
+    )
+    positionHeaders.push(
+      <div key={`${position}%`} className='table__cell metric'>
+        %
+      </div>
+    )
+  }
+
+  const sorted = teams.sort(
+    (a, b) =>
+      b.getIn(['stats', year, 'apWins'], 0) -
+        a.getIn(['stats', year, 'apWins'], 0) ||
+      b.getIn(['stats', year, 'pf'], 0) - a.getIn(['stats', year, 'pf'], 0)
+  )
+
+  const summaryRows = []
+  for (const team of sorted.valueSeq()) {
+    summaryRows.push(
+      <SummaryRow
+        key={team.uid}
+        team={team}
+        percentiles={percentiles}
+        year={year}
+      />
+    )
+  }
+
+  const slotRows = []
+  for (const team of sorted.valueSeq()) {
+    slotRows.push(
+      <SlotRow
+        key={team.uid}
+        team={team}
+        slots={slots}
+        year={year}
+        percentiles={percentiles}
+      />
+    )
+  }
+
+  const positionRows = []
+  for (const team of sorted.valueSeq()) {
+    positionRows.push(
+      <PositionRow
+        key={team.uid}
+        team={team}
+        percentiles={percentiles}
+        year={year}
+      />
+    )
+  }
+
+  const body = (
+    <div className='stats'>
+      <StandingsSelectYear />
+      <div className='section'>
+        <Toolbar>
+          <div className='dashboard__section-header-title'>League Stats</div>
+        </Toolbar>
+        <div className='table__container'>
+          <div className='table__row table__head'>
+            <div className='table__cell player__item-name'>Team</div>
+            <div className='table__cell metric'>PF</div>
+            <div className='table__cell metric'>PA</div>
+            <div className='table__cell metric'>DIFF</div>
+            <div className='table__cell metric'>PP</div>
+            <div className='table__cell metric'>PP%</div>
+            <div className='table__cell metric'>PP Pen</div>
+            <div className='table__cell metric'>P WINS</div>
+            <div className='table__cell metric'>P LOSSES</div>
+            <div className='table__cell metric'>MAX</div>
+            <div className='table__cell metric'>MIN</div>
+            <div className='table__cell metric'>STDEV</div>
+            <div className='player__row-group'>
+              <div className='player__row-group-head'>All Play Record</div>
+              <div className='player__row-group-body'>
+                <div className='table__cell metric'>W</div>
+                <div className='table__cell metric'>L</div>
+                <div className='table__cell metric'>T</div>
+                <div className='table__cell metric'>PCT</div>
+              </div>
+            </div>
+          </div>
+          {summaryRows}
+        </div>
+      </div>
+      <div className='section'>
+        <Toolbar>
+          <div className='dashboard__section-header-title'>Lineup Stats</div>
+        </Toolbar>
+        <div className='table__container'>
+          <div className='table__row table__head'>
+            <div className='table__cell player__item-name'>Team</div>
+            {slotHeaders}
+          </div>
+          {slotRows}
+        </div>
+      </div>
+      <div className='section'>
+        <Toolbar>
+          <div className='dashboard__section-header-title'>
+            Positional Stats
+          </div>
+        </Toolbar>
+        <div className='table__container'>
+          <div className='table__row table__head'>
+            <div className='table__cell player__item-name'>Team</div>
+            {positionHeaders}
+          </div>
+          {positionRows}
+        </div>
+      </div>
+    </div>
+  )
+
+  return <PageLayout body={body} scroll />
 }
 
 StatsPage.propTypes = {

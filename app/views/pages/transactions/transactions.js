@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import AutoSizer from 'react-virtualized/dist/es/AutoSizer'
@@ -23,12 +23,17 @@ export default function TransactionsPage({
   loadNext,
   load
 }) {
+  const navigate = useNavigate()
   const [height, setHeight] = useState(getHeight())
 
   const update = () => setHeight(getHeight())
   const { lid } = useParams()
 
   useEffect(() => {
+    if (isNaN(lid)) {
+      return navigate('/', { replace: true })
+    }
+
     load(lid)
   }, [])
 

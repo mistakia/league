@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import Container from '@mui/material/Container'
@@ -14,8 +14,13 @@ import './schedule.styl'
 
 export default function SchedulePage({ matchups, load }) {
   const { lid } = useParams()
+  const navigate = useNavigate()
 
   useEffect(() => {
+    if (isNaN(lid)) {
+      return navigate('/', { replace: true })
+    }
+
     load(lid)
   }, [])
 
