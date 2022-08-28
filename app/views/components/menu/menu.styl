@@ -63,7 +63,8 @@ $menuActionsHeight = 57px
   margin-top 8px
   padding 0 16px 16px
   a
-    display block
+    display flex
+    align-items center
     padding 3px 0
     font-weight 400
     font-size 12px
@@ -108,3 +109,15 @@ $menuActionsHeight = 57px
     border-color $hoverBorder
     background $hoverBackground
     box-shadow $hoverShadow 4px 4px 0px 0px
+
+@media (max-width 500px)
+  .menu__links a
+    font-size 14px
+    line-height 18px
+    min-height 36px
+
+@media (pointer: coarse)
+  .menu__links a
+    font-size 14px
+    line-height 18px
+    min-height 36px
