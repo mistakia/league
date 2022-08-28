@@ -149,6 +149,7 @@ export function* deleteProjection({ payload }) {
 }
 
 export function* init({ payload }) {
+  const app = yield select(getApp)
   const league = yield select(getCurrentLeague)
   const router = yield select(getRouter)
   const all_player_paths = ['/players', '/auction']
@@ -164,7 +165,7 @@ export function* init({ payload }) {
     yield fork(loadTeamPlayers, { payload: { teamId, leagueId } })
   }
   yield fork(getBaselines, { leagueId: league.uid })
-  yield fork(fetchCutlist)
+  if (app.teamId) yield fork(fetchCutlist)
 
   const { watchlist } = payload.data.user
   if (watchlist) {

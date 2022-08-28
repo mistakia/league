@@ -7,14 +7,13 @@ import {
   Routes as RouterRoutes,
   Route,
   Navigate,
-  useLocation,
-  useParams
+  useLocation
 } from 'react-router-dom'
 import queryString from 'query-string'
 
 import { getApp } from '@core/app'
 import AuthPage from '@pages/auth'
-import DashboardPage from '@pages/dashboard'
+import LeagueHomePage from '@pages/league-home'
 import DraftPage from '@pages/draft'
 import AuctionPage from '@pages/auction'
 import PlayersPage from '@pages/players'
@@ -35,23 +34,13 @@ import TeamPage from '@pages/team'
 
 const mapStateToProps = createSelector(getApp, (app) => ({ app }))
 
-const LeagueRoute = () => {
-  const { lid } = useParams()
-
-  if (isNaN(lid)) {
-    return <Navigate to='/' replace />
-  }
-
-  return <Navigate to={`/leagues/${lid}/rosters`} replace />
-}
-
 const Routes = ({ app }) => {
   const location = useLocation()
-  const Redirect = () => {
+  const UnmatchedRoute = () => {
     const { leagueId, teamId } = queryString.parse(location.search)
 
-    if (app.userId) {
-      return <Navigate to='/dashboard' />
+    if (app.leagueId) {
+      return <Navigate to={`/leagues/${app.leagueId}`} />
     } else if (leagueId || teamId) {
       return <Navigate to={`/login${location.search}`} />
     } else {
@@ -61,7 +50,6 @@ const Routes = ({ app }) => {
 
   return (
     <RouterRoutes>
-      {app.userId && <Route path='/dashboard' element={<DashboardPage />} />}
       {app.userId && <Route path='/lineups' element={<LineupsPage />} />}
       <Route path='/players' element={<PlayersPage />} />
       {app.userId && <Route path='/scoreboard' element={<ScoreboardPage />} />}
@@ -81,7 +69,7 @@ const Routes = ({ app }) => {
         <Route path='/leagues/:lid/schedule' element={<SchedulePage />} />
         <Route path='/leagues/:lid/rosters' element={<RostersPage />} />
         <Route path='/leagues/:lid/waivers' element={<WaiversPage />} />
-        <Route path='/leagues/:lid' element={<LeagueRoute />} />
+        <Route path='/leagues/:lid' element={<LeagueHomePage />} />
       </Route>
       {app.userId && <Route path='/props' element={<PropsPage />} />}
       <Route path='/status' element={<StatusPage />} />
@@ -91,7 +79,7 @@ const Routes = ({ app }) => {
         element={<MarkdownPage path='/resources.md' />}
       />
       <Route path='/glossary' element={<MarkdownPage path='/glossary.md' />} />
-      <Route path='*' element={<Redirect />} />
+      <Route path='*' element={<UnmatchedRoute />} />
     </RouterRoutes>
   )
 }

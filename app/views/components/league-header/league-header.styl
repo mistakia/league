@@ -1,0 +1,35 @@
+.league__header
+  background lighten($backgroundColor, 90%)
+  padding 8px 32px
+  border-radius 16px
+  font-family 'IBM Plex Mono', monospace
+  h1
+    font-weight 100
+
+  .MuiChip-label
+    font-family 'IBM Plex Mono', monospace
+
+.league__chips
+  align-items center
+
+  .MuiChip-root
+    &.starters
+      color white
+    &.qb
+      background $qb_color
+    &.rb
+      background $rb_color
+    &.wr
+      background $wr_color
+    &.te
+      background $te_color
+    &.k
+      background $k_color
+    &.dst
+      background $dst_color
+    &.qbrbwrte
+      background $qbrbwrte_color
+    &.rbwrte
+      background $rbwrte_color
+    &.rbwr
+      background $rbwr_color
