@@ -82,7 +82,7 @@ export function getTeamsForCurrentLeague(state) {
 
 export function getCurrentTeam(state) {
   const { teamId } = getApp(state)
-  return getTeams(state).get(teamId)
+  return getTeams(state).get(teamId, new Team())
 }
 
 export const getTeamEvents = createSelector(

@@ -5,11 +5,7 @@ import { appActions } from './actions'
 import { settingActions } from '@core/settings'
 import { constants } from '@common'
 import { rosterActions } from '@core/rosters'
-import { transactionsActions } from '@core/transactions'
-import { waiverActions } from '@core/waivers'
 import { teamActions } from '@core/teams'
-import { matchupsActions } from '@core/matchups'
-import { playerActions } from '@core/players'
 
 const initialState = new Record({
   token: null,
@@ -56,6 +52,9 @@ export function appReducer(state = initialState(), { payload, type }) {
 
     case teamActions.GET_TEAMS_FULFILLED:
       return state.withMutations((state) => {
+        const teamId = state.get('teamId')
+        const team = payload.data.teams.find((t) => t.uid === teamId)
+        if (!team) state.set('teamId', null)
         state.delete('isLoadingTeams')
         state.set('isLoadedTeams', payload.opts.leagueId)
       })
@@ -70,30 +69,32 @@ export function appReducer(state = initialState(), { payload, type }) {
 
     case appActions.AUTH_FULFILLED:
       Bugsnag.setUser(payload.data.user.id, payload.data.user.email)
-      return state.merge({
-        leagueId: payload.data.leagues.length
-          ? payload.data.leagues[0].uid
-          : undefined,
-        teamId: payload.data.teams.length
-          ? payload.data.teams[0].uid
-          : undefined,
-        userId: payload.data.user.id,
-        email: payload.data.user.eamil,
-        text: payload.data.user.text,
-        voice: payload.data.user.voice,
-        teamIds: new List(payload.data.teams.map((t) => t.uid)),
-        leagueIds: new List(payload.data.leagues.map((l) => l.uid)),
-        isPending: false
-      })
+      return state.withMutations((state) => {
+        const leagueNotSet = !state.get('leagueId')
 
-    case transactionsActions.LOAD_TRANSACTIONS:
-    case rosterActions.LOAD_ROSTERS:
-    case waiverActions.LOAD_WAIVERS:
-    case teamActions.LOAD_LEAGUE_TEAM_STATS:
-    case matchupsActions.LOAD_MATCHUPS:
-    case playerActions.LOAD_TEAM_PLAYERS:
-      return state.merge({
-        leagueId: Number(payload.leagueId)
+        const leagueId = payload.data.leagues.length
+          ? payload.data.leagues[0].uid
+          : undefined
+        if (leagueNotSet && leagueId) {
+          state.set('leagueId', leagueId)
+        }
+
+        const teamId = payload.data.teams.length
+          ? payload.data.teams[0].uid
+          : undefined
+        if (leagueNotSet && teamId) {
+          state.set('teamId', teamId)
+        }
+
+        state.merge({
+          userId: payload.data.user.id,
+          email: payload.data.user.eamil,
+          text: payload.data.user.text,
+          voice: payload.data.user.voice,
+          teamIds: new List(payload.data.teams.map((t) => t.uid)),
+          leagueIds: new List(payload.data.leagues.map((l) => l.uid)),
+          isPending: false
+        })
       })
 
     case appActions.REGISTER_FAILED:

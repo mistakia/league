@@ -30,12 +30,13 @@ export function* load({ payload }) {
 
 export function* loadReleaseTransactions() {
   const { leagueId } = yield select(getApp)
-  yield call(getReleaseTransactions, { leagueId })
+  if (leagueId) yield call(getReleaseTransactions, { leagueId })
 }
 
 export function* loadReserveTransactions() {
   const { leagueId, teamId } = yield select(getApp)
-  yield call(getReserveTransactions, { leagueId, teamId })
+  if (leagueId && teamId)
+    yield call(getReserveTransactions, { leagueId, teamId })
 }
 
 export function* loadPlayers({ payload }) {

@@ -53,7 +53,7 @@ import { teamActions, getTeamById } from '@core/teams'
 
 export function* initRosters() {
   const { leagueId } = yield select(getApp)
-  yield call(getRosters, { leagueId })
+  if (leagueId) yield call(getRosters, { leagueId })
 }
 
 export function* loadRosters({ payload }) {
@@ -628,7 +628,6 @@ export const rosterSagas = [
   fork(watchDeactivatePlayer),
   fork(watchProtectPlayer),
   fork(watchAuthFulfilled),
-
   fork(watchPostWaiverFulfilled),
   fork(watchPostPoachFulfilled),
   fork(watchPlayersSelectPlayer),
