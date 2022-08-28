@@ -3,6 +3,7 @@ import utc from 'dayjs/plugin/utc.js'
 import { Map } from 'immutable'
 import { createSelector } from 'reselect'
 
+import { League } from '@core/leagues'
 import { getPlayerById } from '@core/players'
 import { getDraftWindow, constants } from '@common'
 
@@ -81,7 +82,7 @@ export const getDraftEnd = createSelector(
       return null
     }
 
-    const league = leagues.get(leagueId)
+    const league = leagues.get(leagueId, new League())
     if (lastPick.selection_timestamp) {
       return dayjs.unix(lastPick.selection_timestamp).endOf('day')
     }
@@ -110,7 +111,7 @@ export const isAfterDraft = createSelector(
       }
     }
 
-    const league = leagues.get(leagueId)
+    const league = leagues.get(leagueId, new League())
     const afterDraft =
       league.draft_start && draftEnd && dayjs().isAfter(draftEnd)
     const afterWaivers =

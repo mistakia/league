@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 import GetAppIcon from '@mui/icons-material/GetApp'
@@ -23,8 +23,13 @@ export default function RostersPage({
   bench_count_max
 }) {
   const { lid } = useParams()
+  const navigate = useNavigate()
 
   useEffect(() => {
+    if (isNaN(lid)) {
+      return navigate('/', { replace: true })
+    }
+
     loadLeaguePlayers()
     loadRosters(lid)
   }, [])
