@@ -24,7 +24,7 @@ export default function App({ init, isPending, isInitializing }) {
   const isMobile = window.innerWidth < 800
   const [menu_open, set_menu_open] = useState(!isMobile)
   const match = useMatch('leagues/:leagueId/*')
-  const leagueId = match ? Number(match.params.leagueId) : undefined
+  const leagueId = match ? Number(match.params.leagueId) || 0 : undefined
 
   useEffect(() => {
     async function onLoad() {

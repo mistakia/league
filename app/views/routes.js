@@ -7,7 +7,8 @@ import {
   Routes as RouterRoutes,
   Route,
   Navigate,
-  useLocation
+  useLocation,
+  useParams
 } from 'react-router-dom'
 import queryString from 'query-string'
 
@@ -33,6 +34,16 @@ import WaiversPage from '@pages/waivers'
 import TeamPage from '@pages/team'
 
 const mapStateToProps = createSelector(getApp, (app) => ({ app }))
+
+const LeagueRoute = () => {
+  const { lid } = useParams()
+
+  if (isNaN(lid)) {
+    return <Navigate to='/' replace />
+  }
+
+  return <Navigate to={`/leagues/${lid}/rosters`} replace />
+}
 
 const Routes = ({ app }) => {
   const location = useLocation()
@@ -70,10 +81,7 @@ const Routes = ({ app }) => {
         <Route path='/leagues/:lid/schedule' element={<SchedulePage />} />
         <Route path='/leagues/:lid/rosters' element={<RostersPage />} />
         <Route path='/leagues/:lid/waivers' element={<WaiversPage />} />
-        <Route
-          path='/leagues/:lid'
-          element={<Navigate to={`/leagues/${app.leagueId}/rosters`} />}
-        />
+        <Route path='/leagues/:lid' element={<LeagueRoute />} />
       </Route>
       {app.userId && <Route path='/props' element={<PropsPage />} />}
       <Route path='/status' element={<StatusPage />} />
