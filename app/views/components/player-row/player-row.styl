@@ -1,5 +1,15 @@
 $height = 30px
 
+.player__row-lead
+  background $backgroundColor
+  display inline-flex
+  height 100%
+  align-items center
+  position sticky
+  z-index 1
+  left 0
+  border-right 1px solid $borderColor
+
 .player__row
   height $height
   align-items center
@@ -10,30 +20,26 @@ $height = 30px
   min-width 100%
 
   &.selected
+  &.selected .player__row-lead
     background lighten($accentColor, 85%)
 
   &.fa
+  &.fa .player__row-lead
     background lighten(orange, 80%)
     .player__row-availability
       color rgba(0,0,0,0.3)
 
   &.rostered
+  &.rostered .player__row-lead
     background lighten(yellow, 80%)
 
   &.baseline__player
+  &.baseline__player .player__row-lead
     border-bottom 2px solid red
 
   &:hover
+  &:hover .player__row-lead
     background white
-
-.player__row-lead
-  background $backgroundColor
-  display inline-flex
-  height 100%
-  align-items center
-  position sticky
-  z-index 1
-  left 0
 
 .player__row-index
   flex 0 0 25px
