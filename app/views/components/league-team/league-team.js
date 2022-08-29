@@ -8,7 +8,6 @@ import Toolbar from '@mui/material/Toolbar'
 
 import DashboardDraftPicks from '@components/dashboard-draft-picks'
 import DashboardByeWeeks from '@components/dashboard-bye-weeks'
-import DashboardLeaguePositionalValue from '@components/dashboard-league-positional-value'
 import DashboardPlayersTable from '@components/dashboard-players-table'
 import DashboardTeamSummary from '@components/dashboard-team-summary'
 import DashboardTeamValue from '@components/dashboard-team-value'
@@ -142,7 +141,6 @@ export default function LeagueTeam({
       <Grid item xs={12} md={4}>
         <DashboardTeamSummary tid={teamId} />
         <DashboardTeamValue tid={teamId} />
-        <DashboardLeaguePositionalValue tid={teamId} />
         <DashboardByeWeeks tid={teamId} />
       </Grid>
     </Grid>
