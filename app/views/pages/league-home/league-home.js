@@ -14,7 +14,6 @@ import LeagueHeader from '@components/league-header'
 import TeamName from '@components/team-name'
 import DashboardLeaguePositionalValue from '@components/dashboard-league-positional-value'
 import DashboardPlayersTable from '@components/dashboard-players-table'
-import DashboardTeamSummary from '@components/dashboard-team-summary'
 import PlayerRoster from '@components/player-roster'
 import PageLayout from '@layouts/page'
 import {
@@ -274,9 +273,6 @@ export default function LeagueHomePage({
               />
             </Grid>
           )}
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <DashboardTeamSummary tid={teamId} />
           <DashboardLeaguePositionalValue tid={teamId} />
         </Grid>
       </Grid>

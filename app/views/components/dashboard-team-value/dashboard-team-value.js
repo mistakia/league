@@ -149,7 +149,6 @@ export default class DashboardTeamValue extends React.Component {
 
     return (
       <div className='dashboard__section-side'>
-        <div className='dashboard__section-side-title'>Positional value</div>
         <div className='dashboard__section-side-body'>
           <HighchartsReact highcharts={Highcharts} options={options} />
           <table>
