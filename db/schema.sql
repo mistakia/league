@@ -977,8 +977,8 @@ CREATE TABLE `league_player_projection_values` (
 
   `vorp` decimal(5,2) DEFAULT NULL,
   `vorp_adj` decimal(5,2) DEFAULT NULL,
-  `market_salary` decimal(5,2) DEFAULT NULL,
-  `market_salary_adj` decimal(5,2) DEFAULT NULL,
+  `market_salary` decimal(6,2) DEFAULT NULL,
+  `market_salary_adj` decimal(6,2) DEFAULT NULL,
   KEY `pid` (`pid`),
   UNIQUE KEY `player_value` (`pid`, `lid`, `week`, `year`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
