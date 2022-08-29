@@ -1,4 +1,5 @@
 import debug from 'debug'
+import dayjs from 'dayjs'
 
 import db from '#db'
 import {
@@ -232,7 +233,12 @@ const processLeague = async ({ year, lid }) => {
         market_salary: player_row.market_salary[week]
       }
 
-      if (week === '0' && market_salary_adj > 0) {
+      const adate = league.adate ? dayjs.unix(league.adate) : null
+      if (
+        week === '0' &&
+        (!adate || dayjs().isBefore(adate)) &&
+        market_salary_adj > 0
+      ) {
         params.market_salary_adj = market_salary_adj
       }
       valueInserts.push(params)
