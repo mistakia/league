@@ -26,6 +26,8 @@ import simulateSeason from './simulate-season.mjs'
 
 const log = debug('process-projections')
 
+const timestamp = Math.round(Date.now() / 1000)
+
 const processLeague = async ({ year, lid }) => {
   let week = year === constants.season.year ? constants.season.week : 0
   const { finalWeek } = constants.season
@@ -290,11 +292,17 @@ const processLeague = async ({ year, lid }) => {
   }
 
   await projectLineups()
+
   if (
     constants.season.week &&
     constants.season.week <= constants.season.regularSeasonFinalWeek
-  )
+  ) {
     await simulateSeason()
+  }
+
+  if (lid) {
+    await db('leagues').update({ processed_at: timestamp }).where({ uid: lid })
+  }
 }
 
 const run = async ({ year = constants.season.year } = {}) => {
@@ -318,7 +326,7 @@ const main = async () => {
     type: constants.jobs.PROCESS_PROJECTIONS,
     succ: error ? 0 : 1,
     reason: error ? error.message : null,
-    timestamp: Math.round(Date.now() / 1000)
+    timestamp
   })
 
   process.exit()
