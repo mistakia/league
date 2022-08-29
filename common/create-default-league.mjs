@@ -50,7 +50,8 @@ const createDefaultLeague = ({ userId }) => ({
   b_WR: 10.4,
   b_TE: 8.7,
   b_K: 9.7,
-  b_DST: 7.2
+  b_DST: 7.2,
+  processed_at: null
 })
 
 export default createDefaultLeague
