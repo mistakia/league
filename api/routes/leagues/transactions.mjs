@@ -15,7 +15,7 @@ router.get('/?', async (req, res) => {
     const { leagueId } = req.params
 
     // TODO validate
-    const { limit = 100, offset = 0, pid } = req.query
+    const { limit = 100, offset = 0, pid, since } = req.query
     const types = req.query.types
       ? Array.isArray(req.query.types)
         ? req.query.types
@@ -44,6 +44,10 @@ router.get('/?', async (req, res) => {
 
     if (pid) {
       query = query.where('pid', pid)
+    }
+
+    if (since) {
+      query = query.where('timestamp', '>', since)
     }
 
     const transactions = await query
