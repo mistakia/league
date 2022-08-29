@@ -686,6 +686,8 @@ CREATE TABLE `leagues` (
   `b_K` decimal(2,1) unsigned DEFAULT NULL, -- baseline k pts/game
   `b_DST` decimal(2,1) unsigned DEFAULT NULL, -- baseline dst pts/game
 
+  `processed_at` int(11) NOT NULL,
+
   UNIQUE KEY `uid` (`uid`),
   KEY `commishid` (`commishid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
