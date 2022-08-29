@@ -31,7 +31,11 @@ export default class DashboardLeaguePositionalValue extends React.Component {
       const rounded = parseInt(draft_value, 10)
       draft_data.push(rounded)
     }
-    series.push({ name: 'Draft', data: draft_data, borderColor: 'transparent' })
+    series.push({
+      name: 'Draft Picks',
+      data: draft_data,
+      borderColor: 'transparent'
+    })
 
     const teamNames = []
     for (const { tid } of summary.sorted_tids) {
@@ -97,7 +101,7 @@ export default class DashboardLeaguePositionalValue extends React.Component {
       yAxis: {
         min: 0,
         title: {
-          text: 'Value'
+          text: 'Projected Points Added (Team Value)'
         }
       },
       legend: {
