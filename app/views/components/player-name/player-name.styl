@@ -6,8 +6,16 @@
 
   .player__name-headshot
     margin-right 8px
-    .player__headshot
+    height 100%
+    display flex
+    align-items flex-end
+    .player__headshot:not(.square)
       border-radius 0
+
+  &.large
+    .player__name-headshot
+      display flex
+      align-items flex-end
 
 .player__name-position
   flex 0 0 34px
@@ -29,3 +37,22 @@
   flex 0 0 20px
   display flex
   align-items center
+
+.player__name-lead
+  flex 0 0 auto
+  display flex
+  flex-direction column
+  padding 8px 16px 0 24px
+  justify-content center
+
+.player__name-first
+  font-weight 400
+  text-transform uppercase
+
+.player__name-last
+  font-weight 600
+  font-size 2em
+  text-transform uppercase
+
+.player__name-meta .position
+  margin-right 8px

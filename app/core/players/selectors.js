@@ -339,7 +339,8 @@ export function getRookiePlayers(state) {
     .toList()
 }
 
-export function getPlayerById(state, { pid }) {
+export function getPlayerById(state, { pid, playerMap }) {
+  if (playerMap) return playerMap
   const playerMaps = getAllPlayers(state)
   return playerMaps.get(pid) || new Map()
 }

@@ -19,7 +19,7 @@ export default function PlayerHeadshot({
     const pid = playerMap.get('pid')
     src = `https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/${pid}.png&h=${
       height * 2
-    }&w=${width * 2}`
+    }&w=${height * 2}`
   } else {
     const espn_id = playerMap.get('espn_id')
     src = espn_id
@@ -30,15 +30,21 @@ export default function PlayerHeadshot({
   }
 
   const classNames = ['player__headshot']
-  if (square) classNames.push('square')
+  const style = {
+    width: square || isTeam ? height : width,
+    height
+  }
 
-  return (
-    <Avatar
-      src={src}
-      className={classNames.join(' ')}
-      style={{ width, height: square ? width : height }}
-    />
-  )
+  if (square) {
+    classNames.push('square')
+  }
+
+  if (square || isTeam) {
+    const diff = Math.round((width - height) / 2)
+    style.margin = `0 ${diff}px`
+  }
+
+  return <Avatar src={src} className={classNames.join(' ')} style={style} />
 }
 
 PlayerHeadshot.propTypes = {

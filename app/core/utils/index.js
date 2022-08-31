@@ -1,5 +1,6 @@
 export { localStorageAdapter } from './local-storage'
 export { fuzzySearch } from './fuzzy-search'
+export { timeago } from './timeago'
 
 export const ordinalSuffixOf = (i) => {
   const j = i % 10

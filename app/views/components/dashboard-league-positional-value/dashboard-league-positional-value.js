@@ -118,13 +118,7 @@ export default class DashboardLeaguePositionalValue extends React.Component {
       series
     }
 
-    return (
-      <div className='dashboard__section-side'>
-        <div className='dashboard__section-side-body'>
-          <HighchartsReact highcharts={Highcharts} options={options} />
-        </div>
-      </div>
-    )
+    return <HighchartsReact highcharts={Highcharts} options={options} />
   }
 }
 

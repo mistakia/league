@@ -49,7 +49,7 @@ export default class TransactionRow extends React.Component {
               </div>
               {Boolean(showPlayer) && (
                 <div className='transaction__player'>
-                  <PlayerName pid={transaction.pid} headshot />
+                  <PlayerName pid={transaction.pid} headshot_width={48} />
                 </div>
               )}
               <div className='transaction__value'>${transaction.value}</div>
@@ -70,7 +70,7 @@ export default class TransactionRow extends React.Component {
           </div>
           {Boolean(showPlayer) && (
             <div className='transaction__player'>
-              <PlayerName pid={transaction.pid} headshot />
+              <PlayerName pid={transaction.pid} headshot_width={48} />
             </div>
           )}
           <div className='transaction__timestamp'>

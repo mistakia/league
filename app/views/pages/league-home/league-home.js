@@ -15,6 +15,7 @@ import TeamName from '@components/team-name'
 import DashboardLeaguePositionalValue from '@components/dashboard-league-positional-value'
 import DashboardPlayersTable from '@components/dashboard-players-table'
 import PlayerRoster from '@components/player-roster'
+import LeagueRecentTransactions from '@components/league-recent-transactions'
 import PageLayout from '@layouts/page'
 import {
   constants,
@@ -37,7 +38,8 @@ export default function LeagueHomePage({
   roster,
   isBeforeTransitionEnd,
   loadLeaguePlayers,
-  loadDraftPickValue
+  loadDraftPickValue,
+  loadRecentTransactions
 }) {
   const navigate = useNavigate()
   const { lid } = useParams()
@@ -49,6 +51,7 @@ export default function LeagueHomePage({
 
     loadLeaguePlayers()
     loadDraftPickValue()
+    loadRecentTransactions()
   }, [])
 
   const notices = []
@@ -204,76 +207,79 @@ export default function LeagueHomePage({
   const teamPoaches = poaches.filter((p) => p.tid === teamId)
 
   const body = (
-    <Container maxWidth='lg' classes={{ root: 'league__home' }}>
+    <Container maxWidth='md' classes={{ root: 'league__home' }}>
       <Grid container spacing={2} alignItems='flex-start'>
-        <Grid container item xs={12} md={8}>
+        <Grid item xs={12}>
+          <LeagueHeader />
+        </Grid>
+        {notices.length ? (
           <Grid item xs={12}>
-            <LeagueHeader />
+            {notices}
           </Grid>
-          {notices.length ? (
-            <Grid item xs={12}>
-              {notices}
-            </Grid>
-          ) : null}
-          {isBeforeTransitionEnd && Boolean(transitionPlayers.size) && (
-            <Grid item xs={12}>
-              <DashboardPlayersTable
-                title='Restricted Free Agents'
-                items={transitionItems}
-                isTransition
-              />
-            </Grid>
-          )}
-          {Boolean(waivers.poach.size) && (
-            <Grid item xs={12}>
-              <DashboardPlayersTable
-                title='Poaching Waiver Claims'
-                claims={waivers.poach}
-                waiverType='poach'
-              />
-            </Grid>
-          )}
-          {Boolean(waivers.active.size) && (
-            <Grid item xs={12}>
-              <DashboardPlayersTable
-                title='Active Roster Waiver Claims'
-                claims={waivers.active}
-                waiverType='active'
-              />
-            </Grid>
-          )}
-          {Boolean(waivers.practice.size) && (
-            <Grid item xs={12}>
-              <DashboardPlayersTable
-                title='Practice Squad Waiver Claims'
-                claims={waivers.practice}
-                waiverType='practice'
-              />
-            </Grid>
-          )}
-          {Boolean(teamPoaches.size) && (
-            <Grid item xs={12}>
-              <DashboardPlayersTable
-                title='Poaching Claims'
-                poaches={teamPoaches}
-              />
-            </Grid>
-          )}
-          {Boolean(cutlist.size) && (
-            <Grid item xs={12}>
-              <DashboardPlayersTable
-                title={
-                  <>
-                    Cutlist
-                    <NotInterestedIcon />
-                  </>
-                }
-                cutlist={cutlist}
-                total={cutlist}
-              />
-            </Grid>
-          )}
+        ) : null}
+        {isBeforeTransitionEnd && Boolean(transitionPlayers.size) && (
+          <Grid item xs={12}>
+            <DashboardPlayersTable
+              title='Restricted Free Agents'
+              items={transitionItems}
+              isTransition
+            />
+          </Grid>
+        )}
+        {Boolean(waivers.poach.size) && (
+          <Grid item xs={12}>
+            <DashboardPlayersTable
+              title='Poaching Waiver Claims'
+              claims={waivers.poach}
+              waiverType='poach'
+            />
+          </Grid>
+        )}
+        {Boolean(waivers.active.size) && (
+          <Grid item xs={12}>
+            <DashboardPlayersTable
+              title='Active Roster Waiver Claims'
+              claims={waivers.active}
+              waiverType='active'
+            />
+          </Grid>
+        )}
+        {Boolean(waivers.practice.size) && (
+          <Grid item xs={12}>
+            <DashboardPlayersTable
+              title='Practice Squad Waiver Claims'
+              claims={waivers.practice}
+              waiverType='practice'
+            />
+          </Grid>
+        )}
+        {Boolean(teamPoaches.size) && (
+          <Grid item xs={12}>
+            <DashboardPlayersTable
+              title='Poaching Claims'
+              poaches={teamPoaches}
+            />
+          </Grid>
+        )}
+        {Boolean(cutlist.size) && (
+          <Grid item xs={12}>
+            <DashboardPlayersTable
+              title={
+                <>
+                  Cutlist
+                  <NotInterestedIcon />
+                </>
+              }
+              cutlist={cutlist}
+              total={cutlist}
+            />
+          </Grid>
+        )}
+        <Grid item xs={12}>
           <DashboardLeaguePositionalValue tid={teamId} />
+        </Grid>
+        <Grid item xs={12}>
+          <LeagueRecentTransactions />
         </Grid>
       </Grid>
     </Container>
@@ -294,5 +300,6 @@ LeagueHomePage.propTypes = {
   poaches: ImmutablePropTypes.list,
   teamId: PropTypes.number,
   roster: PropTypes.object,
-  isBeforeTransitionEnd: PropTypes.bool
+  isBeforeTransitionEnd: PropTypes.bool,
+  loadRecentTransactions: PropTypes.func
 }

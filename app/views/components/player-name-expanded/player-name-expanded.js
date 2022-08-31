@@ -84,8 +84,14 @@ GameStatus.propTypes = {
 
 class PlayerNameExpanded extends Player {
   render = () => {
-    const { playerMap, isHosted, hideActions, status, minimize, square } =
-      this.props
+    const {
+      playerMap,
+      isHosted,
+      hideActions,
+      status,
+      minimize,
+      headshot_square
+    } = this.props
 
     const classNames = ['player__name-expanded']
     if (minimize) classNames.push('minimize')
@@ -111,7 +117,7 @@ class PlayerNameExpanded extends Player {
           </div>
         )}
         <div className='player__name-headshot'>
-          <PlayerHeadshot playerMap={playerMap} square={square} />
+          <PlayerHeadshot playerMap={playerMap} square={headshot_square} />
         </div>
         <div className='player__name-expanded-main'>
           <div
@@ -158,7 +164,7 @@ class PlayerNameExpanded extends Player {
 PlayerNameExpanded.propTypes = {
   status: PropTypes.object,
   playerMap: ImmutablePropTypes.map,
-  square: PropTypes.bool
+  headshot_square: PropTypes.bool
 }
 
 export default connect(PlayerNameExpanded)

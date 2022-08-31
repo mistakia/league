@@ -3,10 +3,8 @@ import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import NFLTeamBye from '@components/nfl-team-bye'
-import NFLTeam from '@components/nfl-team'
-import Position from '@components/position'
 import PlayerAge from '@components/player-age'
-import PlayerHeadshot from '@components/player-headshot'
+import PlayerName from '@components/player-name'
 
 import './auction-nominated-player.styl'
 
@@ -35,22 +33,11 @@ export default function AuctionNominatedPlayer({
   return (
     <div className='auction__nominated-player'>
       <div className='nominated__player'>
-        <div className='selected__player-headshot'>
-          <PlayerHeadshot playerMap={playerMap} width={headshot_width} />
-        </div>
-        <div className='selected__player-header-lead'>
-          <div className='selected__player-first-name'>
-            {playerMap.get('fname')}
-          </div>
-          <div className='selected__player-last-name'>
-            {playerMap.get('lname')}
-          </div>
-          <div className='selected__player-meta'>
-            <Position pos={playerMap.get('pos')} />
-            <NFLTeam team={playerMap.get('team')} />
-            <span>#{playerMap.get('jnum', '-')}</span>
-          </div>
-        </div>
+        <PlayerName
+          large
+          playerMap={playerMap}
+          headshot_width={headshot_width}
+        />
       </div>
       <div className='nominated__player-details'>
         <div className='selected__player-header-item'>

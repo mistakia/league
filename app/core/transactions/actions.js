@@ -3,6 +3,7 @@ export const transactionsActions = {
 
   LOAD_TRANSACTIONS: 'LOAD_TRANSACTIONS',
   LOAD_NEXT_TRANSACTIONS: 'LOAD_NEXT_TRANSACTIONS',
+  LOAD_RECENT_TRANSACTIONS: 'LOAD_RECENT_TRANSACTIONS',
 
   GET_TRANSACTIONS_PENDING: 'GET_TRANSACTIONS_PENDING',
   GET_TRANSACTIONS_FULFILLED: 'GET_TRANSACTIONS_FULFILLED',
@@ -37,6 +38,10 @@ export const transactionsActions = {
     payload: {
       leagueId
     }
+  }),
+
+  loadRecentTransactions: () => ({
+    type: transactionsActions.LOAD_RECENT_TRANSACTIONS
   }),
 
   getTransactionsPending: (opts) => ({
