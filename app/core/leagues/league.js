@@ -89,6 +89,8 @@ export const League = new Record({
   b_K: null,
   b_DST: null,
 
+  processed_at: null,
+
   teams: new List(),
   years: new List(),
 
@@ -183,6 +185,8 @@ export function createLeague({
   tran_end,
   ext_date,
 
+  processed_at,
+
   teams,
   years,
 
@@ -275,6 +279,8 @@ export function createLeague({
     tran_start,
     tran_end,
     ext_date,
+
+    processed_at,
 
     teams: new List(teams),
     years: years ? new List(years) : new List([constants.year]),
