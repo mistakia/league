@@ -11,7 +11,7 @@
     "analyze": "cross-env OPEN_ANALYZER=true NODE_ENV=production webpack --config ./webpack/webpack.config.prod.babel.mjs",
     "deploy": "pm2 deploy production",
     "todo": "grep -rni todo app api common scripts",
-    "count:lines": "git ls-files | xargs wc -l"
+    "count:lines": "git ls-files -- ':!:yarn.lock' | xargs wc -l"
   },
   "imports": {
     "#config": "./config.js",
