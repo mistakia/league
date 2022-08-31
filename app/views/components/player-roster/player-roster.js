@@ -87,7 +87,7 @@ class PlayerRoster extends Player {
             waiverId={waiverId}
             poachId={poachId}
             hideActions={isPoach}
-            headshot
+            headshot_width={48}
           />
           <div className='player__item-menu'>
             {Boolean(playerMap.get('pid') && isHosted) && (
@@ -109,7 +109,7 @@ class PlayerRoster extends Player {
                 <PlayerName
                   pid={claim.release.get(0).get('pid')}
                   hideActions={isClaim}
-                  headshot
+                  headshot_width={48}
                 />
               ))}
           </div>

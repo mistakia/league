@@ -13,11 +13,9 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import IconButton from '@mui/material/IconButton'
 import { Map } from 'immutable'
 
-import PlayerHeadshot from '@components/player-headshot'
+import PlayerName from '@components/player-name'
 import { constants } from '@common'
-import NFLTeam from '@components/nfl-team'
 import TeamName from '@components/team-name'
-import Position from '@components/position'
 import PlayerAge from '@components/player-age'
 import SelectedPlayerSeasonStats from '@components/selected-player-season-stats'
 import SelectedPlayerProjections from '@components/selected-player-projections'
@@ -130,26 +128,12 @@ export default class SelectedPlayer extends React.Component {
         }}
       >
         <div className='selected__player-header'>
-          <div className='selected__player-headshot'>
-            <PlayerHeadshot
-              playerMap={playerMap}
-              width={this.state.headshot_width}
-              square={window.innerWidth < 900}
-            />
-          </div>
-          <div className='selected__player-header-lead'>
-            <div className='selected__player-first-name'>
-              {playerMap.get('fname')}
-            </div>
-            <div className='selected__player-last-name'>
-              {playerMap.get('lname')}
-            </div>
-            <div className='selected__player-meta'>
-              <Position pos={pos} />
-              <NFLTeam team={playerMap.get('team')} />
-              <span>#{playerMap.get('jnum', '-')}</span>
-            </div>
-          </div>
+          <PlayerName
+            large
+            headshot_width={this.state.headshot_width}
+            headshot_square={window.innerWidth < 900}
+            playerMap={playerMap}
+          />
           <PlayerWatchlistAction pid={pid} />
           <div className='selected__player-header-secondary'>
             <div className='selected__player-header-section'>
