@@ -174,7 +174,7 @@ const calculateVOR = async ({ year, rookie, league, week = 'ALL' }) => {
     }
   }
 
-  return { players: output, baselineTotals, weeks }
+  return { players: output, baselineTotals, weeks: weeks.length }
 }
 
 const main = async () => {

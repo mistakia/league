@@ -67,6 +67,13 @@ export function* search() {
   yield call(searchPlayers, { q, leagueId })
 }
 
+export function* initLeaguePlayers() {
+  const league = yield select(getCurrentLeague)
+  if (!league.processed_at) {
+    yield call(calculateValues)
+  }
+}
+
 export function* calculateValues() {
   yield put(
     notificationActions.show({
@@ -352,6 +359,10 @@ export function* watchLoadTeamPlayers() {
   yield takeLatest(playerActions.LOAD_TEAM_PLAYERS, loadTeamPlayers)
 }
 
+export function* watchFetchAllPlayersFulfilled() {
+  yield takeLatest(playerActions.FETCH_ALL_PLAYERS_FULFILLED, initLeaguePlayers)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -389,5 +400,6 @@ export const playerSagas = [
   fork(watchLoadAllPlayers),
   fork(watchLoadLeaguePlayers),
   fork(watchLoadTeamPlayers),
-  fork(watchAuctionSelectPlayer)
+  fork(watchAuctionSelectPlayer),
+  fork(watchFetchAllPlayersFulfilled)
 ]
