@@ -1,5 +1,6 @@
 import { call, takeLatest, fork, select } from 'redux-saga/effects'
 
+import { constants } from '@common'
 import { getApp, appActions } from '@core/app'
 import { getTransactions } from './selectors'
 import { transactionsActions } from './actions'
@@ -48,6 +49,22 @@ export function* loadPlayers({ payload }) {
   }
 }
 
+export function* loadRecentTransactions() {
+  const { leagueId } = yield select(getApp)
+  const params = {
+    leagueId,
+    types: [
+      constants.transactions.ROSTER_ADD,
+      constants.transactions.ROSTER_RELEASE,
+      constants.transactions.POACHED,
+      constants.transactions.DRAFT,
+      constants.transactions.PRACTICE_ADD
+    ],
+    since: Math.round(Date.now() / 1000) - 2592000 // last 30 days
+  }
+  yield call(fetchTransactions, params)
+}
+
 //= ====================================
 //  WATCHERS
 // -------------------------------------
@@ -73,6 +90,13 @@ export function* watchGetTransactionsFulfilled() {
   yield takeLatest(transactionsActions.GET_TRANSACTIONS_FULFILLED, loadPlayers)
 }
 
+export function* watchLoadRecentTransactions() {
+  yield takeLatest(
+    transactionsActions.LOAD_RECENT_TRANSACTIONS,
+    loadRecentTransactions
+  )
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -82,5 +106,6 @@ export const transactionSagas = [
   fork(watchLoadNextTransactions),
   fork(watchFilterTransactions),
   fork(watchAuthFulfilled),
-  fork(watchGetTransactionsFulfilled)
+  fork(watchGetTransactionsFulfilled),
+  fork(watchLoadRecentTransactions)
 ]

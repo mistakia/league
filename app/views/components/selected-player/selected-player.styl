@@ -16,9 +16,8 @@
   .player__watchlist-action
     margin 0 16px 0 8px
 
-.selected__player-headshot
-  display flex
-  align-items flex-end
+  .player__name
+    flex 0 0 auto
 
 .selected__player-header-item
   flex 0 1 10%
@@ -31,26 +30,10 @@
   padding 16px
   min-width 80px
 
-.selected__player-header-lead
-  flex 0 0 auto
-  display flex
-  flex-direction column
-  padding 8px 16px 0 24px
-  justify-content center
-
 .selected__player-header-secondary
   flex 1
   display flex
   background white
-
-.selected__player-first-name
-  font-weight 400
-  text-transform uppercase
-
-.selected__player-last-name
-  font-weight 600
-  font-size 2em
-  text-transform uppercase
 
 .selected__player-header-section
   flex 1
@@ -164,9 +147,6 @@
   &:hover .icon
     fill $accentColor
     cursor pointer
-
-.selected__player-meta .position
-  margin-right 8px
 
 .selected__player-menu
   flex 1

@@ -13,6 +13,7 @@ import {
   getCutlistPlayers
 } from '@core/players'
 import { draftPickValueActions } from '@core/draft-pick-value'
+import { transactionsActions } from '@core/transactions'
 
 import LeagueHomePage from './league-home'
 
@@ -54,7 +55,8 @@ const mapStateToProps = createSelector(
 
 const mapDispatchToProps = {
   loadLeaguePlayers: playerActions.loadLeaguePlayers,
-  loadDraftPickValue: draftPickValueActions.loadDraftPickValue
+  loadDraftPickValue: draftPickValueActions.loadDraftPickValue,
+  loadRecentTransactions: transactionsActions.loadRecentTransactions
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(LeagueHomePage)
