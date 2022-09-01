@@ -8,7 +8,7 @@ import { constants, createDefaultLeague } from '@common'
 
 const initialState = new Map().set(
   constants.DEFAULTS.LEAGUE_ID,
-  new League(createDefaultLeague())
+  new League(createDefaultLeague({ isLoaded: true }))
 )
 
 export function leaguesReducer(state = initialState, { payload, type }) {
