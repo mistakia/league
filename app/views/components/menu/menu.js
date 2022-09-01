@@ -124,7 +124,7 @@ export default function AppMenu({
                 className='menu__links'
                 onClick={() => isMobile && set_menu_open(false)}
               >
-                {isLoggedIn && <NavLink to='/settings'>Settings</NavLink>}
+                <NavLink to='/settings'>Settings</NavLink>
                 {isLoggedIn ? (
                   <a onClick={logout}>Logout</a>
                 ) : (
