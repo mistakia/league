@@ -10,7 +10,6 @@ import { auctionActions } from '@core/auction'
 import { constants } from '@common'
 
 const initialState = new Map({
-  isInitializing: true,
   isPending: false,
   allPlayersLoaded: false,
   allPlayersPending: false,
@@ -197,7 +196,6 @@ export function playersReducer(state = initialState, { payload, type }) {
           players.set('leaguePlayersLoaded', true)
           players.set('leaguePlayersPending', false)
         }
-        players.set('isInitializing', false)
         players.set('isPending', false)
 
         payload.data.forEach((playerData) => {
