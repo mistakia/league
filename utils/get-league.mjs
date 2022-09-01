@@ -3,7 +3,7 @@ import { constants, createDefaultLeague } from '#common'
 
 export default async function (leagueId) {
   if (!leagueId) {
-    const league = createDefaultLeague({ userId: 0 })
+    const league = createDefaultLeague()
     return { uid: 0, ...league }
   }
 

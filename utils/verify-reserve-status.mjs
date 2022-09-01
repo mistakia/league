@@ -1,5 +1,6 @@
 import db from '#db'
 import getRoster from './get-roster.mjs'
+import getLeague from './get-league.mjs'
 import {
   constants,
   Roster,
@@ -8,8 +9,7 @@ import {
 } from '#common'
 
 export default async function ({ teamId, leagueId }) {
-  const leagues = await db('leagues').where({ uid: leagueId })
-  const league = leagues[0]
+  const league = await getLeague(leagueId)
   const rosterRow = await getRoster({ tid: teamId })
   const roster = new Roster({ roster: rosterRow, league })
   const reserve_pids = roster.reserve.map((p) => p.pid)

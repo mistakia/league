@@ -1,6 +1,6 @@
 import express from 'express'
 
-import { getRosters } from '#utils'
+import { getRosters, getLeague } from '#utils'
 import { constants } from '#common'
 import transactions from './transactions.mjs'
 import draft from './draft.mjs'
@@ -33,13 +33,12 @@ router.put('/:leagueId', async (req, res) => {
 
     // verify leagueId
     const lid = parseInt(leagueId, 10)
-    const leagues = await db('leagues').where({ uid: lid }).limit(1)
-    if (!leagues.length) {
+    const league = await getLeague(lid)
+    if (!league) {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
 
     // verify user is commish
-    const league = leagues[0]
     if (league.commishid !== req.auth.userId) {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
@@ -199,9 +198,20 @@ router.put('/:leagueId', async (req, res) => {
       }
     }
 
-    await db('leagues')
-      .update({ [field]: value })
-      .where({ uid: lid })
+    const league_fields = ['name', 'nteams']
+
+    if (league_fields.includes(field)) {
+      await db('leagues')
+        .update({ [field]: value })
+        .where({ uid: lid })
+    } else {
+      await db('seasons')
+        .update({ [field]: value })
+        .where({ lid, year: constants.season.year })
+    }
+
+    // TODO create changelog
+
     res.send({ value })
   } catch (err) {
     logger(err)
@@ -213,18 +223,11 @@ router.get('/:leagueId/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const { leagueId } = req.params
-    const leagues = await db('leagues')
-      .leftJoin('seasons', function () {
-        this.on('leagues.uid', '=', 'seasons.lid')
-        this.on(
-          db.raw(
-            `seasons.year = ${constants.season.year} or seasons.year is null`
-          )
-        )
-      })
-      .where('leagues.uid', leagueId)
+    const league = await getLeague(leagueId)
+    if (!league) {
+      return res.status(400).send({ error: 'invalid leagueId' })
+    }
 
-    const league = leagues[0]
     const seasons = await db('seasons').where('lid', leagueId)
     league.years = seasons.map((s) => s.year)
     res.send(league)
