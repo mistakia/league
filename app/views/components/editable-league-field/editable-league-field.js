@@ -1,88 +1,97 @@
-import React from 'react'
+import React, { useState } from 'react'
 import PropTypes from 'prop-types'
+import Grid from '@mui/material/Grid'
 
 import TextField from '@mui/material/TextField'
 
-export default class EditableLeagueField extends React.Component {
-  constructor(props) {
-    super(props)
+export default function EditableLeagueField({
+  type,
+  league,
+  field,
+  length,
+  max,
+  min,
+  onchange,
+  isCommish,
+  isDefault,
+  label,
+  grid = { xs: '6', sm: '3' }
+}) {
+  const [value, set_value] = useState(league[field])
+  const [helper_text, set_helper_text] = useState('')
+  const [error, set_error] = useState(false)
 
-    const { league, field } = this.props
-    const value = league[field]
-
-    this.state = { value, helperText: '', error: false }
-  }
-
-  handleBlur = (event) => {
+  const handleBlur = (event) => {
     let { value } = event.target
-    const { type, field, league } = this.props
-
     let defaultValue = league[field]
 
     if (!value) {
-      this.setState({ value: defaultValue })
-      return
+      return set_value(defaultValue)
     }
 
     if (type === 'int') {
       if (isNaN(value) || value % 1 !== 0) {
-        this.setState({ value: defaultValue })
-        return
+        return set_value(defaultValue)
       }
 
       value = parseInt(value, 10)
       defaultValue = parseInt(defaultValue, 10)
     } else if (type === 'float') {
       if (isNaN(value)) {
-        this.setState({ value: defaultValue })
-        return
+        return set_value(defaultValue)
       }
 
       value = parseFloat(value)
       defaultValue = parseFloat(defaultValue)
     }
 
-    if (value !== defaultValue && !this.state.error) {
-      this.props.onchange({ value, field })
+    if (value !== defaultValue && !error) {
+      onchange({ value, field })
     }
   }
 
-  handleChange = (event) => {
+  const handleChange = (event) => {
     const { value } = event.target
-    const { length, max, min } = this.props
-    this.setState({ value })
+    set_value(value)
 
     if (length && value.length > length) {
-      return this.setState({ helperText: 'too long', error: true })
+      set_helper_text('too long')
+      set_error(true)
+      return
     }
 
     if (typeof max !== 'undefined' && value > max) {
-      return this.setState({ helperText: `Max: ${max}`, error: true })
+      set_helper_text(`Max: ${max}`)
+      set_error(true)
+      return
     }
 
     if (typeof min !== 'undefined' && value < min) {
-      return this.setState({ helperText: `Min: ${min}`, error: true })
+      set_helper_text(`Min: ${min}`)
+      set_error(true)
+      return
     }
 
-    this.setState({ helperText: '', error: false })
+    set_helper_text('')
+    set_error(false)
   }
 
-  render = () => {
-    const { isCommish, isDefault, label } = this.props
-    return (
+  return (
+    <Grid item container {...grid}>
       <TextField
         disabled={!isCommish && !isDefault}
         label={label}
-        helperText={this.state.helperText}
-        error={this.state.error}
-        value={this.state.value}
-        onBlur={this.handleBlur}
-        onChange={this.handleChange}
+        helperText={helper_text}
+        error={error}
+        value={value}
+        onBlur={handleBlur}
+        onChange={handleChange}
         size='small'
         variant='outlined'
+        sx={{ flex: 1 }}
       />
-    )
-  }
+    </Grid>
+  )
 }
 
 EditableLeagueField.propTypes = {
@@ -95,5 +104,6 @@ EditableLeagueField.propTypes = {
   min: PropTypes.number,
   isCommish: PropTypes.bool,
   isDefault: PropTypes.bool,
-  label: PropTypes.string
+  label: PropTypes.string,
+  grid: PropTypes.object
 }

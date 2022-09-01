@@ -1,41 +1,33 @@
-import React from 'react'
+import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import Switch from '@mui/material/Switch'
+import Grid from '@mui/material/Grid'
 
-export default class EditableTeamSwitch extends React.Component {
-  constructor(props) {
-    super(props)
+export default function EditableTeamSwitch({
+  team,
+  field,
+  label,
+  description,
+  onchange
+}) {
+  const [checked, set_checked] = useState(Boolean(team[field]))
 
-    const { team, field } = props
-    const value = team[field]
-    this.state = { checked: Boolean(value) }
-  }
-
-  handleChange = (event) => {
-    const { field } = this.props
+  const handleChange = (event) => {
     const { checked } = event.target
-    this.setState({ checked })
-    this.props.onchange({ field, value: checked ? 1 : 0 })
+    set_checked(checked)
+    onchange({ field, value: checked ? 1 : 0 })
   }
 
-  render = () => {
-    return (
-      <div className='settings__switch'>
-        <div className='settings__switch-body'>
-          <div className='settings__switch-body-label'>{this.props.label}</div>
-          <div className='settings__switch-body-description'>
-            {this.props.description}
-          </div>
-        </div>
-        <Switch
-          checked={this.state.checked}
-          onChange={this.handleChange}
-          color='primary'
-        />
+  return (
+    <Grid item xs='12' className='settings__switch'>
+      <div className='settings__switch-body'>
+        <div className='settings__switch-body-label'>{label}</div>
+        <div className='settings__switch-body-description'>{description}</div>
       </div>
-    )
-  }
+      <Switch checked={checked} onChange={handleChange} color='primary' />
+    </Grid>
+  )
 }
 
 EditableTeamSwitch.propTypes = {

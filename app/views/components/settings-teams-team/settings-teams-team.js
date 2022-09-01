@@ -86,7 +86,7 @@ export default class SettingsTeamsTeam extends React.Component {
             team={this.props.team}
             onchange={this.onChange}
           />
-          <div className='editable__league-section-title'>
+          <div className='heading__section-title'>
             Players
             <IconButton onClick={this.handleAdd}>
               <AddCircleOutlineIcon />
