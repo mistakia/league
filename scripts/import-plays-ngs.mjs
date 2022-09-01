@@ -15,7 +15,7 @@ const currentRegularSeasonWeek = Math.max(
   1
 )
 
-const log = debug('import:plays:ngs')
+const log = debug('import-plays-ngs')
 
 const getPlayData = (play) => ({
   sequence: play.sequence,
@@ -161,7 +161,7 @@ const run = async ({
 }
 
 const main = async () => {
-  debug.enable('import:plays:ngs')
+  debug.enable('import-plays-ngs')
   let error
   try {
     if (argv.current) {
