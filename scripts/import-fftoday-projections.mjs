@@ -12,7 +12,7 @@ const log = debug('import:projections')
 debug.enable('import:projections,get-player')
 const timestamp = new Date()
 const year = constants.season.year
-const week = argv.season ? 0 : constants.season.week
+const week = argv.season ? 0 : Math.max(constants.season.week, 1)
 const getURL = ({ position, page }) =>
   argv.season
     ? `https://www.fftoday.com/rankings/playerproj.php?Season=${year}&PosID=${position}&LeagueID=&order_by=FFPts&sort_order=DESC&cur_page=${page}`

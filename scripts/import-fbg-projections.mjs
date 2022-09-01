@@ -10,6 +10,7 @@ import { isMain, getPlayer } from '#utils'
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import:projections')
 debug.enable('import:projections,get-player')
+const week = Math.max(constants.season.week, 1)
 
 const getProjection = (stats) => ({
   py: stats.pyd,
@@ -96,7 +97,7 @@ const run = async () => {
       inserts.push({
         pid: player_row.pid,
         year: constants.season.year,
-        week: constants.season.week,
+        week,
         sourceid: projectors[id],
         timestamp,
         ...proj
