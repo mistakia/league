@@ -1,12 +1,10 @@
 import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
-import Accordion from '@mui/material/Accordion'
-import AccordionDetails from '@mui/material/AccordionDetails'
-import AccordionSummary from '@mui/material/AccordionSummary'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import Pickr from '@simonwep/pickr'
+import Grid from '@mui/material/Grid'
 
+import SettingsSection from '@components/settings-section'
 import EditableTeamField from '@components/editable-team-field'
 import EditableTeamSwitch from '@components/editable-team-switch'
 import TeamImage from '@components/team-image'
@@ -22,7 +20,7 @@ export default class SettingsTeam extends React.Component {
 
     const { team } = this.props
 
-    this.state = { open: false, pc: `#${team.pc}`, ac: `#${team.ac}` }
+    this.state = { pc: `#${team.pc}`, ac: `#${team.ac}` }
   }
 
   handleSubmit = (type) => {
@@ -76,10 +74,6 @@ export default class SettingsTeam extends React.Component {
     this._pickrAlt.destroyAndRemove()
   }
 
-  handleChange = () => {
-    this.setState({ open: !this.state.open })
-  }
-
   onchange = (value) => {
     const teamId = this.props.team.uid
     this.props.update({ teamId, ...value })
@@ -93,59 +87,48 @@ export default class SettingsTeam extends React.Component {
     let teamNotificationSection
     if (isHosted) {
       teamNotificationSection = (
-        <div>
-          <div className='settings__team-section'>
-            <EditableTeamSwitch
-              label='Team Text Notifications'
-              description='Poaching claims and trades'
-              field='teamtext'
-              {...props}
-            />
-          </div>
-          <div className='settings__team-section'>
-            <EditableTeamSwitch
-              label='Team Voice Notifications'
-              description='Poaching claims'
-              field='teamvoice'
-              {...props}
-            />
-          </div>
-          <div className='settings__team-section'>
-            <EditableTeamSwitch
-              label='League Text Notifications'
-              description='Poaching claims, trades, draft selections, released players and added players'
-              field='leaguetext'
-              {...props}
-            />
-          </div>
-        </div>
+        <>
+          <EditableTeamSwitch
+            label='Team Text Notifications'
+            description='Poaching claims and trades'
+            field='teamtext'
+            {...props}
+          />
+          <EditableTeamSwitch
+            label='Team Voice Notifications'
+            description='Poaching claims'
+            field='teamvoice'
+            {...props}
+          />
+          <EditableTeamSwitch
+            label='League Text Notifications'
+            description='Poaching claims, trades, draft selections, released players and added players'
+            field='leaguetext'
+            {...props}
+          />
+        </>
       )
     }
 
-    return (
-      <Accordion expanded={this.state.open} onChange={this.handleChange}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <div className='settings__section-title'>Team</div>
-          <div className='settings__section-description'>
-            Edit Name / Abbreviation / Logo
-          </div>
-        </AccordionSummary>
-        <AccordionDetails>
-          <div className='settings__team-section'>
-            <EditableTeamField
-              label='Team Name'
-              field='name'
-              limit={100}
-              {...props}
-            />
-            <EditableTeamField
-              label='Abbreviation'
-              field='abbrv'
-              limit={5}
-              {...props}
-            />
-            <EditableTeamField label='Logo (URL)' field='image' {...props} />
-          </div>
+    const title = 'Team'
+    const description = 'Edit Name / Abbreviation / Logo'
+    const body = (
+      <>
+        <EditableTeamField
+          label='Team Name'
+          field='name'
+          limit={100}
+          grid={{ xs: '12' }}
+          {...props}
+        />
+        <EditableTeamField
+          label='Abbreviation'
+          field='abbrv'
+          limit={5}
+          {...props}
+        />
+        <EditableTeamField label='Logo (URL)' field='image' {...props} />
+        <Grid xs='12' item container>
           <div className='settings__team-section team__brand'>
             <div
               className='team__brand-pc'
@@ -161,10 +144,12 @@ export default class SettingsTeam extends React.Component {
               <div ref={this.altRef} />
             </div>
           </div>
-          {teamNotificationSection}
-        </AccordionDetails>
-      </Accordion>
+        </Grid>
+        {teamNotificationSection}
+      </>
     )
+
+    return <SettingsSection defaultOpen {...{ title, description, body }} />
   }
 }
 

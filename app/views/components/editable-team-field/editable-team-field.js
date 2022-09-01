@@ -1,61 +1,64 @@
-import React from 'react'
+import React, { useState } from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
+import Grid from '@mui/material/Grid'
 
 import TextField from '@mui/material/TextField'
 
-export default class EditableTeamField extends React.Component {
-  constructor(props) {
-    super(props)
+export default function EditableTeamField({
+  team,
+  field,
+  onchange,
+  limit,
+  label,
+  grid = { xs: '6', sm: '3' }
+}) {
+  const [value, set_value] = useState(team[field])
+  const [invalid, set_invalid] = useState(false)
+  const [helper_text, set_helper_text] = useState('')
 
-    const { team, field } = this.props
-    const value = team[field]
-
-    this.state = { value, invalid: false, helper: '' }
-  }
-
-  handleBlur = (event) => {
-    const { field, team } = this.props
+  const handleBlur = (event) => {
     const { value } = event.target
     const defaultValue = team[field]
 
     if (!value) {
-      this.setState({ value: defaultValue })
+      return set_value(defaultValue)
+    }
+
+    if (value !== defaultValue && !invalid) {
+      onchange({ field, value })
+    }
+  }
+
+  const handleChange = (event) => {
+    const { value } = event.target
+    set_value(value)
+
+    if (limit && value.length > limit) {
+      set_invalid(true)
+      set_helper_text(`limit: ${limit}`)
       return
     }
 
-    if (value !== defaultValue && !this.state.invalid) {
-      this.props.onchange({ field, value })
-    }
+    set_invalid(false)
+    set_helper_text('')
   }
 
-  handleChange = (event) => {
-    const { limit } = this.props
-    const { value } = event.target
-    this.setState({ value })
-
-    if (limit && value.length > limit) {
-      return this.setState({ invalid: true, helper: `limit: ${limit}` })
-    }
-
-    this.setState({ invalid: false, helper: '' })
-  }
-
-  render = () => {
-    const { label } = this.props
-    return (
+  return (
+    <Grid item container {...grid}>
       <TextField
         label={label}
-        value={this.state.value}
-        onBlur={this.handleBlur}
-        error={this.state.invalid}
-        helperText={this.state.helper}
-        onChange={this.handleChange}
+        value={value}
+        onBlur={handleBlur}
+        error={invalid}
+        helperText={helper_text}
+        onChange={handleChange}
         size='small'
         variant='outlined'
+        sx={{ flex: 1 }}
       />
-    )
-  }
+    </Grid>
+  )
 }
 
 EditableTeamField.propTypes = {
@@ -63,5 +66,6 @@ EditableTeamField.propTypes = {
   field: PropTypes.string,
   onchange: PropTypes.func,
   limit: PropTypes.number,
-  label: PropTypes.string
+  label: PropTypes.string,
+  grid: PropTypes.object
 }
