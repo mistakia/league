@@ -33,7 +33,11 @@ export default class Roster extends React.Component {
       for (let i = 0; i < league.sqb; i++) {
         const { pid } = players[i] || {}
         rows.push(
-          <PlayerRosterRow key={`${slot}${i}`} {...{ pid, roster, showBid }} />
+          <PlayerRosterRow
+            starter
+            key={`${slot}${i}`}
+            {...{ pid, roster, showBid }}
+          />
         )
       }
     }
@@ -44,7 +48,11 @@ export default class Roster extends React.Component {
       for (let i = 0; i < league.srb; i++) {
         const { pid } = players[i] || {}
         rows.push(
-          <PlayerRosterRow key={`${slot}${i}`} {...{ pid, roster, showBid }} />
+          <PlayerRosterRow
+            starter
+            key={`${slot}${i}`}
+            {...{ pid, roster, showBid }}
+          />
         )
       }
     }
@@ -55,51 +63,11 @@ export default class Roster extends React.Component {
       for (let i = 0; i < league.swr; i++) {
         const { pid } = players[i] || {}
         rows.push(
-          <PlayerRosterRow key={`${slot}${i}`} {...{ pid, roster, showBid }} />
-        )
-      }
-    }
-
-    if (league.srbwr) {
-      const slot = constants.slots.RBWR
-      const players = r.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.srbwr; i++) {
-        const { pid } = players[i] || {}
-        rows.push(
-          <PlayerRosterRow key={`${slot}${i}`} {...{ pid, roster, showBid }} />
-        )
-      }
-    }
-
-    if (league.srbwrte) {
-      const slot = constants.slots.RBWRTE
-      const players = r.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.srbwrte; i++) {
-        const { pid } = players[i] || {}
-        rows.push(
-          <PlayerRosterRow key={`${slot}${i}`} {...{ pid, roster, showBid }} />
-        )
-      }
-    }
-
-    if (league.sqbrbwrte) {
-      const slot = constants.slots.QBRBWRTE
-      const players = r.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.sqbrbwrte; i++) {
-        const { pid } = players[i] || {}
-        rows.push(
-          <PlayerRosterRow key={`${slot}${i}`} {...{ pid, roster, showBid }} />
-        )
-      }
-    }
-
-    if (league.swrte) {
-      const slot = constants.slots.WRTE
-      const players = r.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.swrte; i++) {
-        const { pid } = players[i] || {}
-        rows.push(
-          <PlayerRosterRow key={`${slot}${i}`} {...{ pid, roster, showBid }} />
+          <PlayerRosterRow
+            starter
+            key={`${slot}${i}`}
+            {...{ pid, roster, showBid }}
+          />
         )
       }
     }
@@ -110,7 +78,11 @@ export default class Roster extends React.Component {
       for (let i = 0; i < league.ste; i++) {
         const { pid } = players[i] || {}
         rows.push(
-          <PlayerRosterRow key={`${slot}${i}`} {...{ pid, roster, showBid }} />
+          <PlayerRosterRow
+            starter
+            key={`${slot}${i}`}
+            {...{ pid, roster, showBid }}
+          />
         )
       }
     }
@@ -121,7 +93,11 @@ export default class Roster extends React.Component {
       for (let i = 0; i < league.sk; i++) {
         const { pid } = players[i] || {}
         rows.push(
-          <PlayerRosterRow key={`${slot}${i}`} {...{ pid, roster, showBid }} />
+          <PlayerRosterRow
+            starter
+            key={`${slot}${i}`}
+            {...{ pid, roster, showBid }}
+          />
         )
       }
     }
@@ -132,7 +108,71 @@ export default class Roster extends React.Component {
       for (let i = 0; i < league.sdst; i++) {
         const { pid } = players[i] || {}
         rows.push(
-          <PlayerRosterRow key={`${slot}${i}`} {...{ pid, roster, showBid }} />
+          <PlayerRosterRow
+            starter
+            key={`${slot}${i}`}
+            {...{ pid, roster, showBid }}
+          />
+        )
+      }
+    }
+
+    if (league.srbwr) {
+      const slot = constants.slots.RBWR
+      const players = r.starters.filter((p) => p.slot === slot)
+      for (let i = 0; i < league.srbwr; i++) {
+        const { pid } = players[i] || {}
+        rows.push(
+          <PlayerRosterRow
+            starter
+            key={`${slot}${i}`}
+            {...{ pid, roster, showBid }}
+          />
+        )
+      }
+    }
+
+    if (league.srbwrte) {
+      const slot = constants.slots.RBWRTE
+      const players = r.starters.filter((p) => p.slot === slot)
+      for (let i = 0; i < league.srbwrte; i++) {
+        const { pid } = players[i] || {}
+        rows.push(
+          <PlayerRosterRow
+            starter
+            key={`${slot}${i}`}
+            {...{ pid, roster, showBid }}
+          />
+        )
+      }
+    }
+
+    if (league.sqbrbwrte) {
+      const slot = constants.slots.QBRBWRTE
+      const players = r.starters.filter((p) => p.slot === slot)
+      for (let i = 0; i < league.sqbrbwrte; i++) {
+        const { pid } = players[i] || {}
+        rows.push(
+          <PlayerRosterRow
+            starter
+            key={`${slot}${i}`}
+            {...{ pid, roster, showBid }}
+          />
+        )
+      }
+    }
+
+    if (league.swrte) {
+      const slot = constants.slots.WRTE
+      const players = r.starters.filter((p) => p.slot === slot)
+      for (let i = 0; i < league.swrte; i++) {
+        const { pid } = players[i] || {}
+        rows.push(
+          <PlayerRosterRow
+            starter
+            key={`${slot}${i}`}
+            {...{ pid, roster, showBid }}
+          />
         )
       }
     }
