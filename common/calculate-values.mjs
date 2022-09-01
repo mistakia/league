@@ -1,17 +1,19 @@
 import { default_points_added, season } from './constants.mjs'
 
-const calculateValues = ({ players, baselines, week, historicBaselines }) => {
+const calculateValues = ({ players, baselines, week, league = {} }) => {
   let total = 0
 
   for (const player of players) {
     const { pos } = player
     player.vorp[week] = default_points_added
 
-    if (historicBaselines[pos]) {
+    const historic_baseline_per_game = league[`b_${pos}`]
+    if (historic_baseline_per_game) {
       const isSeasonProjection = week === 0
       const baseline = isSeasonProjection
-        ? historicBaselines[pos] * season.finalWeek
-        : historicBaselines[pos]
+        ? historic_baseline_per_game * (season.nflFinalWeek - 1)
+        : historic_baseline_per_game
+
       player.vorp[week] =
         player.points[week].total - baseline || default_points_added
     } else if (baselines[pos].starter) {
