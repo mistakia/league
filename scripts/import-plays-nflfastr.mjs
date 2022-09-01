@@ -256,7 +256,9 @@ const run = async () => {
 const main = async () => {
   let error
   try {
-    await run()
+    if (constants.season.week) {
+      await run()
+    }
   } catch (err) {
     error = err
     console.log(error)
