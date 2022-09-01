@@ -6,6 +6,7 @@ import isPlayerLocked from './is-player-locked.mjs'
 import getRoster from './get-roster.mjs'
 import getLastTransaction from './get-last-transaction.mjs'
 import sendNotifications from './send-notifications.mjs'
+import getLeague from './get-league.mjs'
 
 export default async function ({
   lid,
@@ -25,11 +26,10 @@ export default async function ({
   const release_player_row = player_rows[0]
 
   // verify player is on current roster
-  const leagues = await db('leagues').where({ uid: lid }).limit(1)
-  if (!leagues.length) {
+  const league = await getLeague(lid)
+  if (!league) {
     throw new Error('invalid leagueId')
   }
-  const league = leagues[0]
   const rosterRow = await getRoster({ tid })
   const roster = new Roster({ roster: rosterRow, league })
   if (!roster.has(release_pid)) {

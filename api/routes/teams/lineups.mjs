@@ -1,6 +1,6 @@
 import express from 'express'
 
-import { getRoster, verifyUserTeam, isPlayerLocked } from '#utils'
+import { getRoster, verifyUserTeam, isPlayerLocked, getLeague } from '#utils'
 import { constants, Roster } from '#common'
 
 const router = express.Router({ mergeParams: true })
@@ -87,11 +87,10 @@ router.put('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid player' })
     }
 
-    const leagues = await db('leagues').where({ uid: leagueId })
-    if (!leagues.length) {
+    const league = await getLeague(leagueId)
+    if (!league) {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
-    const league = leagues[0]
     const tid = parseInt(teamId, 10)
 
     const rosterRow = await getRoster({ tid, week, year })

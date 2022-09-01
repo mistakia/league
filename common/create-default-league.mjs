@@ -1,5 +1,5 @@
-const createDefaultLeague = ({ userId }) => ({
-  commishid: userId,
+const createDefaultLeague = ({ commishid = 0 } = {}) => ({
+  commishid,
   name: 'SUPERFLEX DYNASTY LEAGUE',
   nteams: 12,
   sqb: 1,

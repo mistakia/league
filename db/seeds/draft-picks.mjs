@@ -1,9 +1,9 @@
 import { constants } from '#common'
+import { getLeague } from '#utils'
 
 export default async function (knex) {
   const teams = await knex('teams').where({ lid: 1 })
-  const leagues = await knex('leagues').where({ uid: 1 })
-  const league = leagues[0]
+  const league = await getLeague(1)
   await knex('draft').del()
   for (let i = 0; i < 3 * league.nteams; i++) {
     const idx = i % league.nteams

@@ -8,6 +8,7 @@ import knex from '#db'
 import league from '#db/seeds/league.mjs'
 import { user1, user2 } from './fixtures/token.mjs'
 import { notLoggedIn, missing, invalid } from './utils/index.mjs'
+import { getLeague } from '#utils'
 
 process.env.NODE_ENV = 'test'
 const expect = chai.expect
@@ -43,8 +44,7 @@ describe('API /leagues - update', function () {
 
       // verify database change
       res.body.value.should.equal(value)
-      const leagues = await knex('leagues').where({ uid: 1 }).limit(1)
-      const league = leagues[0]
+      const league = await getLeague(1)
 
       expect(league.name).to.equal(value)
     })
@@ -66,8 +66,7 @@ describe('API /leagues - update', function () {
 
       // verify database change
       res.body.value.should.equal(value)
-      const leagues = await knex('leagues').where({ uid: 1 }).limit(1)
-      const league = leagues[0]
+      const league = await getLeague(1)
 
       expect(league.sqb).to.equal(value)
     })
@@ -89,8 +88,7 @@ describe('API /leagues - update', function () {
 
       // verify database change
       res.body.value.should.equal(value)
-      const leagues = await knex('leagues').where({ uid: 1 }).limit(1)
-      const league = leagues[0]
+      const league = await getLeague(1)
 
       expect(league.rec).to.equal(value)
     })
