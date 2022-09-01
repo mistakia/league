@@ -11,8 +11,7 @@ import {
   getRosterSize,
   getOptimizerPositionConstraints,
   optimizeLineup,
-  calculatePlayerValuesRestOfSeason,
-  getHistoricBaselines
+  calculatePlayerValuesRestOfSeason
 } from '@common'
 import solver from 'javascript-lp-solver'
 
@@ -82,7 +81,6 @@ export function calculatePlayerValues(payload) {
   }
 
   const baselinesByWeek = {}
-  const historicBaselines = getHistoricBaselines({ league })
   for (let week = 0; week <= finalWeek; week++) {
     // calculate baseline
     const baselines = calculateBaselines({ players, league, rosterRows, week })
@@ -93,7 +91,7 @@ export function calculatePlayerValues(payload) {
       players,
       baselines,
       week,
-      historicBaselines
+      league
     })
     calculatePrices({ cap: leagueTotalCap, total, players, week })
   }
