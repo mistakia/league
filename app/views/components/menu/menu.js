@@ -1,24 +1,19 @@
-import React, { useState } from 'react'
+import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import { NavLink, useLocation } from 'react-router-dom'
 import MenuIcon from '@mui/icons-material/Menu'
 import SwipeableDrawer from '@mui/material/SwipeableDrawer'
-import Avatar from '@mui/material/Avatar'
 import Fab from '@mui/material/Fab'
-import MenuItem from '@mui/material/MenuItem'
-import Typography from '@mui/material/Typography'
 import Tooltip from '@mui/material/Tooltip'
 import IconButton from '@mui/material/IconButton'
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore'
 import NavigateNextIcon from '@mui/icons-material/NavigateNext'
-import Popover from '@mui/material/Popover'
 
 import TeamName from '@components/team-name'
 import LeagueSchedule from '@components/league-schedule'
 
 import { constants } from '@common'
-import { history } from '@core/store'
 
 import './menu.styl'
 
@@ -35,14 +30,6 @@ export default function AppMenu({
   const location = useLocation()
   const isAuction = location.pathname === '/auction'
   const isMobile = window.innerWidth < 800
-
-  const [anchor_el_account, set_anchor_el_account] = useState(null)
-
-  const handleClick = (path) => () => {
-    set_anchor_el_account(null)
-    if (isMobile) set_menu_open(false)
-    history.push(path)
-  }
 
   const sx = isMobile ? { right: 16 } : { left: 16 }
 
@@ -132,6 +119,20 @@ export default function AppMenu({
               </div>
             )}
             <div className='menu__section'>
+              <div className='menu__heading'>Account</div>
+              <div
+                className='menu__links'
+                onClick={() => isMobile && set_menu_open(false)}
+              >
+                {isLoggedIn && <NavLink to='/settings'>Settings</NavLink>}
+                {isLoggedIn ? (
+                  <a onClick={logout}>Logout</a>
+                ) : (
+                  <NavLink to='/login'>Login/Register</NavLink>
+                )}
+              </div>
+            </div>
+            <div className='menu__section'>
               <div className='menu__heading'>The Machine</div>
               <div
                 className='menu__links'
@@ -145,38 +146,6 @@ export default function AppMenu({
           </div>
         </div>
         <div className='menu__actions'>
-          <Tooltip title='View Account'>
-            <IconButton
-              variant='text'
-              onClick={(event) => set_anchor_el_account(event.currentTarget)}
-            >
-              <Avatar alt='' />
-            </IconButton>
-          </Tooltip>
-          <Popover
-            sx={{ mt: '45px' }}
-            anchorEl={anchor_el_account}
-            anchorOrigin={{
-              vertical: 'top',
-              horizontal: 'right'
-            }}
-            transformOrigin={{
-              vertical: 'bottom',
-              horizontal: 'left'
-            }}
-            open={Boolean(anchor_el_account)}
-            onClose={() => set_anchor_el_account(null)}
-          >
-            <MenuItem onClick={handleClick('/settings')}>
-              <Typography textAlign='center'>Settings</Typography>
-            </MenuItem>
-            {!isLoggedIn && (
-              <MenuItem onClick={handleClick('/login')}>
-                Login/Register
-              </MenuItem>
-            )}
-            {isLoggedIn && <MenuItem onClick={logout}>Logout</MenuItem>}
-          </Popover>
           <div className='menu__collapse'>
             <Tooltip title='Collapse Menu'>
               <IconButton onClick={() => set_menu_open(false)}>
