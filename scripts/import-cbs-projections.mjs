@@ -11,8 +11,8 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import:projections')
 debug.enable('import:projections,get-player')
 
-const type = argv.season ? 'season' : constants.season.week
-const week = argv.season ? 0 : constants.season.week
+const week = argv.season ? 0 : Math.max(constants.season.week, 1)
+const type = argv.season ? 'season' : week
 const year = new Date().getFullYear()
 const timestamp = new Date()
 const getUrl = (pos) =>

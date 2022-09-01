@@ -14,7 +14,7 @@ debug.enable('import:projections,get-player')
 const URL = argv.season
   ? 'https://www.fantasysharks.com/apps/Projections/SeasonProjections.php?pos=ALL&format=json&l=2'
   : 'https://www.fantasysharks.com/apps/Projections/WeeklyProjections.php?pos=ALL&format=json'
-const week = argv.season ? 0 : constants.season.week
+const week = argv.season ? 0 : Math.max(constants.season.week, 1)
 const year = new Date().getFullYear()
 const timestamp = new Date()
 
