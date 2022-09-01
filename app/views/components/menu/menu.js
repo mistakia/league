@@ -25,7 +25,8 @@ export default function AppMenu({
   teamId,
   team,
   leagueId,
-  league
+  league,
+  isCommish
 }) {
   const location = useLocation()
   const isAuction = location.pathname === '/auction'
@@ -67,6 +68,11 @@ export default function AppMenu({
                 {Boolean(leagueId) && (
                   <NavLink to={`/leagues/${leagueId}`} end>
                     Home
+                  </NavLink>
+                )}
+                {isCommish && (
+                  <NavLink to={`/leagues/${leagueId}/settings`}>
+                    Settings
                   </NavLink>
                 )}
                 <NavLink to='/players'>Players</NavLink>
@@ -115,6 +121,7 @@ export default function AppMenu({
                   <NavLink to='/trade'>Trade</NavLink>
                   <NavLink to='/draft'>Draft</NavLink>
                   <NavLink to='/auction'>Auction</NavLink>
+                  <NavLink to='/settings'>Settings</NavLink>
                 </div>
               </div>
             )}
@@ -124,7 +131,6 @@ export default function AppMenu({
                 className='menu__links'
                 onClick={() => isMobile && set_menu_open(false)}
               >
-                <NavLink to='/settings'>Settings</NavLink>
                 {isLoggedIn ? (
                   <a onClick={logout}>Logout</a>
                 ) : (
@@ -167,5 +173,6 @@ AppMenu.propTypes = {
   league: PropTypes.object,
   logout: PropTypes.func,
   menu_open: PropTypes.bool,
-  set_menu_open: PropTypes.func
+  set_menu_open: PropTypes.func,
+  isCommish: PropTypes.bool
 }

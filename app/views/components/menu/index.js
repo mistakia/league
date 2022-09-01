@@ -15,6 +15,7 @@ const mapStateToProps = createSelector(
     isLoggedIn: Boolean(app.userId),
     leagueId: app.leagueId,
     teamId: app.teamId,
+    isCommish: league.commishid === app.userId,
     league,
     team
   })
