@@ -65,6 +65,36 @@ export default function RostersPage({
     }
   }
 
+  if (league.ste) {
+    for (let i = 0; i < league.ste; i++) {
+      labels.push(
+        <div key={`${i}TE`} className='roster__item'>
+          TE
+        </div>
+      )
+    }
+  }
+
+  if (league.sk) {
+    for (let i = 0; i < league.sk; i++) {
+      labels.push(
+        <div key={`${i}K`} className='roster__item'>
+          K
+        </div>
+      )
+    }
+  }
+
+  if (league.sdst) {
+    for (let i = 0; i < league.sdst; i++) {
+      labels.push(
+        <div key={`${i}DST`} className='roster__item'>
+          DST
+        </div>
+      )
+    }
+  }
+
   if (league.srbwr) {
     for (let i = 0; i < league.srbwr; i++) {
       labels.push(
@@ -105,36 +135,6 @@ export default function RostersPage({
     }
   }
 
-  if (league.ste) {
-    for (let i = 0; i < league.ste; i++) {
-      labels.push(
-        <div key={`${i}TE`} className='roster__item'>
-          TE
-        </div>
-      )
-    }
-  }
-
-  if (league.sk) {
-    for (let i = 0; i < league.sk; i++) {
-      labels.push(
-        <div key={`${i}K`} className='roster__item'>
-          K
-        </div>
-      )
-    }
-  }
-
-  if (league.sdst) {
-    for (let i = 0; i < league.sdst; i++) {
-      labels.push(
-        <div key={`${i}DST`} className='roster__item'>
-          DST
-        </div>
-      )
-    }
-  }
-
   if (bench_count_max) {
     for (let i = 0; i < bench_count_max; i++) {
       labels.push(
@@ -156,7 +156,7 @@ export default function RostersPage({
 
     for (let i = 0; i < ps_drafted_count_max; i++) {
       labels.push(
-        <div key={`${i}PS`} className='roster__item'>
+        <div key={`${i}PSD`} className='roster__item'>
           PSD
         </div>
       )
