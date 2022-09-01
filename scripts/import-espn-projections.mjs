@@ -11,7 +11,7 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import:projections')
 debug.enable('import:projections,get-player')
 
-const week = argv.season ? 0 : constants.season.week
+const week = argv.season ? 0 : Math.max(constants.season.week, 1)
 const year = new Date().getFullYear()
 const URL =
   `https://fantasy.espn.com/apis/v3/games/ffl/seasons/${year}/segments/0/leaguedefaults/3?view=kona_player_info` +

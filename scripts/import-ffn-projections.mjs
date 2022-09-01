@@ -11,10 +11,11 @@ import config from '#config'
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import:projections')
 debug.enable('import:projections,get-player')
+const week = Math.max(constants.season.week, 1)
 
 const timestamp = new Date()
 const getURL = (position) =>
-  `https://www.fantasyfootballnerd.com/service/weekly-projections/json/${config.ffn}/${position}/${constants.season.week}`
+  `https://www.fantasyfootballnerd.com/service/weekly-projections/json/${config.ffn}/${position}/${week}`
 const getProjection = (stats) => ({
   py: stats.passYds,
   pa: stats.passAtt,
@@ -86,7 +87,7 @@ const run = async () => {
       inserts.push({
         pid: player_row.pid,
         year: constants.season.year,
-        week: constants.season.week,
+        week,
         sourceid: 12,
         timestamp,
         ...proj
