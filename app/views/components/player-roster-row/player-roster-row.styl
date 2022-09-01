@@ -8,14 +8,6 @@
   .roster__item-action
     display none
 
-  &:hover
-    background white
-    .roster__item-action
-      display flex
-    .roster__item-salary
-    .player__name-label
-      display none
-
   &.practice__signed
     background lighten(yellow, 81%)
 
@@ -28,6 +20,9 @@
   &.selected
     background lighten($accentColor, 85%)
 
+  &.starter
+    background white
+
 .roster__item-name
   flex 1
   overflow hidden
@@ -39,3 +34,15 @@
 
 .roster__item-metric
   flex 0 0 30px
+
+@media (pointer: fine)
+  .roster__item:hover
+    background white
+    .roster__item-action
+      display flex
+    .roster__item-salary
+    .player__name-label
+      display none
+
+    &.starter
+      background yellow
