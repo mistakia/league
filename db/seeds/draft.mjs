@@ -1,10 +1,8 @@
 import { constants, Roster } from '#common'
-import { getRoster } from '#utils'
+import { getRoster, getLeague } from '#utils'
 
 export default async function (knex) {
-  const leagues = await knex('leagues').where({ uid: 1 })
-  const league = leagues[0]
-
+  const league = await getLeague(1)
   const players = await knex('player').orderByRaw('RAND()')
 
   await knex('rosters_players').del()

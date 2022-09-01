@@ -1,17 +1,16 @@
 import express from 'express'
 
 import { constants } from '#common'
-import { generateSchedule } from '#utils'
+import { generateSchedule, getLeague } from '#utils'
 
 const router = express.Router({ mergeParams: true })
 
 router.post('/?', async (req, res) => {
-  const { db, logger } = req.app.locals
+  const { logger } = req.app.locals
   try {
     const { leagueId } = req.params
 
-    const results = await db('leagues').where({ uid: leagueId })
-    const league = results[0]
+    const league = await getLeague(leagueId)
     if (league.commishid !== req.auth.userId) {
       return res.status(401).send({ error: 'user is not commish' })
     }

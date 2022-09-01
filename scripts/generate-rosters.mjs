@@ -18,7 +18,7 @@ const run = async ({ nextSeason = argv.season } = {}) => {
   }
 
   // get list of hosted leagues
-  const leagues = await db('leagues')
+  const leagues = await db('leagues').where('hosted', 1)
 
   const nextWeek = nextSeason ? 0 : constants.season.week + 1
   const nextYear = nextSeason

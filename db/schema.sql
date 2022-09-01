@@ -240,6 +240,61 @@ DROP TABLE IF EXISTS `seasons`;
 CREATE TABLE `seasons` (
   `lid` int(11) NOT NULL,
   `year` int(4) NOT NULL,
+
+  `sqb` tinyint(1) NOT NULL,
+  `srb` tinyint(1) NOT NULL,
+  `swr` tinyint(1) NOT NULL,
+  `ste` tinyint(1) NOT NULL,
+  `srbwr` tinyint(1) NOT NULL,
+  `srbwrte` tinyint(1) NOT NULL,
+  `sqbrbwrte` tinyint(1) NOT NULL,
+  `swrte` tinyint(1) NOT NULL,
+  `sdst` tinyint(1) NOT NULL,
+  `sk` tinyint(1) NOT NULL,
+
+  `bench` tinyint(2) NOT NULL,
+  `ps` tinyint(1) NOT NULL,
+  `ir` tinyint(1) NOT NULL,
+
+  `mqb` tinyint(1) NOT NULL,
+  `mrb` tinyint(1) NOT NULL,
+  `mwr` tinyint(1) NOT NULL,
+  `mte` tinyint(1) NOT NULL,
+  `mdst` tinyint(1) NOT NULL,
+  `mk` tinyint(1) NOT NULL,
+
+  `faab` int(4) NOT NULL,
+  `cap` int(4) NOT NULL,
+  `minBid` tinyint(1) DEFAULT 0,
+
+  `pa` decimal(3,2) NOT NULL,
+  `pc` decimal(3,2) NOT NULL,
+  `py` decimal(3,2) NOT NULL,
+  `ints` tinyint(1) NOT NULL,
+  `tdp` tinyint(1) NOT NULL,
+  `ra` decimal(2,1) NOT NULL,
+  `ry` decimal(2,1) NOT NULL,
+  `tdr` tinyint(1) NOT NULL,
+  `rec` decimal(2,1) NOT NULL,
+  `rbrec` decimal(2,1) NOT NULL,
+  `wrrec` decimal(2,1) NOT NULL,
+  `terec` decimal(2,1) NOT NULL,
+  `recy` decimal(2,1) NOT NULL,
+  `twoptc` tinyint(1) NOT NULL,
+  `tdrec` tinyint(1) NOT NULL,
+  `fuml` tinyint(1) NOT NULL,
+  `prtd` tinyint(1) NOT NULL,
+  `krtd` tinyint(1) NOT NULL,
+
+  `tag2` tinyint(1) unsigned NOT NULL DEFAULT '1', -- franchise tag count
+  `tag3` tinyint(1) unsigned NOT NULL DEFAULT '1', -- rookie tag count
+  `tag4` tinyint(1) unsigned NOT NULL DEFAULT '2', -- transition tag count
+
+  `ext1` int(4) DEFAULT 5,
+  `ext2` int(4) DEFAULT 10,
+  `ext3` int(4) DEFAULT 20,
+  `ext4` int(4) DEFAULT 35,
+
   `fqb` mediumint(3) unsigned DEFAULT NULL, -- qb franchise tag amount
   `frb` mediumint(3) unsigned DEFAULT NULL, -- rb franchise tag amount
   `fwr` mediumint(3) unsigned DEFAULT NULL, -- wr franchise tag amount
@@ -618,64 +673,10 @@ CREATE TABLE `leagues` (
   `name` varchar(50) NOT NULL,
   `nteams` tinyint(2) NOT NULL,
 
-  `sqb` tinyint(1) NOT NULL,
-  `srb` tinyint(1) NOT NULL,
-  `swr` tinyint(1) NOT NULL,
-  `ste` tinyint(1) NOT NULL,
-  `srbwr` tinyint(1) NOT NULL,
-  `srbwrte` tinyint(1) NOT NULL,
-  `sqbrbwrte` tinyint(1) NOT NULL,
-  `swrte` tinyint(1) NOT NULL,
-  `sdst` tinyint(1) NOT NULL,
-  `sk` tinyint(1) NOT NULL,
-
-  `bench` tinyint(2) NOT NULL,
-  `ps` tinyint(1) NOT NULL,
-  `ir` tinyint(1) NOT NULL,
-
-  `mqb` tinyint(1) NOT NULL,
-  `mrb` tinyint(1) NOT NULL,
-  `mwr` tinyint(1) NOT NULL,
-  `mte` tinyint(1) NOT NULL,
-  `mdst` tinyint(1) NOT NULL,
-  `mk` tinyint(1) NOT NULL,
-
-  `faab` int(4) NOT NULL,
-  `cap` int(4) NOT NULL,
-
-  `pa` decimal(3,2) NOT NULL,
-  `pc` decimal(3,2) NOT NULL,
-  `py` decimal(3,2) NOT NULL,
-  `ints` tinyint(1) NOT NULL,
-  `tdp` tinyint(1) NOT NULL,
-  `ra` decimal(2,1) NOT NULL,
-  `ry` decimal(2,1) NOT NULL,
-  `tdr` tinyint(1) NOT NULL,
-  `rec` decimal(2,1) NOT NULL,
-  `rbrec` decimal(2,1) NOT NULL,
-  `wrrec` decimal(2,1) NOT NULL,
-  `terec` decimal(2,1) NOT NULL,
-  `recy` decimal(2,1) NOT NULL,
-  `twoptc` tinyint(1) NOT NULL,
-  `tdrec` tinyint(1) NOT NULL,
-  `fuml` tinyint(1) NOT NULL,
-  `prtd` tinyint(1) NOT NULL,
-  `krtd` tinyint(1) NOT NULL,
-
-  `tag2` tinyint(1) unsigned NOT NULL DEFAULT '1', -- franchise tag count
-  `tag3` tinyint(1) unsigned NOT NULL DEFAULT '1', -- rookie tag count
-  `tag4` tinyint(1) unsigned NOT NULL DEFAULT '2', -- transition tag count
-
-  `ext1` int(4) DEFAULT 5,
-  `ext2` int(4) DEFAULT 10,
-  `ext3` int(4) DEFAULT 20,
-  `ext4` int(4) DEFAULT 35,
-
   `discord_webhook_url` varchar(255) DEFAULT NULL,
   `groupme_token` varchar(45) DEFAULT NULL,
   `groupme_id` varchar(26) DEFAULT NULL,
 
-  `minBid` tinyint(1) DEFAULT 0,
   `hosted` tinyint(1) DEFAULT 0,
   `host` tinyint(1) DEFAULT NULL,
 

@@ -2,7 +2,8 @@ import express from 'express'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 
-import { constants, createDefaultLeague } from '#common'
+import { constants } from '#common'
+import { createLeague } from '#utils'
 
 const router = express.Router()
 
@@ -86,18 +87,7 @@ router.post('/register', async (req, res) => {
     const userId = users[0]
 
     if (!leagueId) {
-      const { draft_start, adate, tddate, ...league } = createDefaultLeague({
-        userId
-      })
-      const leagues = await db('leagues').insert(league)
-      leagueId = leagues[0]
-      await db('seasons').insert({
-        lid: leagueId,
-        year: constants.season.year,
-        draft_start,
-        adate,
-        tddate
-      })
+      leagueId = await createLeague({ commishid: userId })
 
       const teams = await db('teams').insert({
         lid: leagueId,
