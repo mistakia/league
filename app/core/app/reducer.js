@@ -9,7 +9,7 @@ import { teamActions } from '@core/teams'
 
 const initialState = new Record({
   token: null,
-  userId: undefined,
+  userId: 0,
   teamId: undefined,
   leagueId: constants.DEFAULTS.LEAGUE_ID,
   isPending: true,
@@ -70,7 +70,8 @@ export function appReducer(state = initialState(), { payload, type }) {
     case appActions.AUTH_FULFILLED:
       Bugsnag.setUser(payload.data.user.id, payload.data.user.email)
       return state.withMutations((state) => {
-        const leagueNotSet = !state.get('leagueId')
+        const currentLeagueId = state.get('leagueId')
+        const leagueNotSet = !currentLeagueId
 
         const leagueId = payload.data.leagues.length
           ? payload.data.leagues[0].uid
@@ -82,7 +83,7 @@ export function appReducer(state = initialState(), { payload, type }) {
         const teamId = payload.data.teams.length
           ? payload.data.teams[0].uid
           : undefined
-        if (leagueNotSet && teamId) {
+        if ((leagueNotSet || currentLeagueId === leagueId) && teamId) {
           state.set('teamId', teamId)
         }
 
