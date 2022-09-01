@@ -3,7 +3,6 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { getApp, appActions } from '@core/app'
-import { getPlayers } from '@core/players'
 
 import App from './app'
 
@@ -11,9 +10,8 @@ App.propTypes = {
   children: PropTypes.element
 }
 
-const mapStateToProps = createSelector(getApp, getPlayers, (app, players) => ({
-  isPending: app.isPending,
-  isInitializing: players.get('isInitializing')
+const mapStateToProps = createSelector(getApp, (app) => ({
+  isPending: app.isPending
 }))
 
 const mapDispatchToProps = {
