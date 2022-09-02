@@ -15,7 +15,7 @@ function convertToCSV(objArray) {
   return str
 }
 
-export function csv({ headers, data, fileName = 'teflon-export.csv' }) {
+export function csv({ headers, data, fileName = 'xo-football-export.csv' }) {
   if (headers) {
     data.unshift(headers)
   }
