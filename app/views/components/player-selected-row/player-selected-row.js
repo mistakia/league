@@ -34,7 +34,7 @@ const kickerStats = (stats, percentiles = {}, fixed = 0) => (
   </>
 )
 
-const playerStats = (stats, percentiles = {}, fixed = 0) => [
+const playerStats = (stats, percentiles = {}, fixed = 0) => (
   <>
     <PercentileMetric {...{ stats, percentiles, fixed }} type='pa' />
     <PercentileMetric {...{ stats, percentiles, fixed }} type='py' />
@@ -49,7 +49,7 @@ const playerStats = (stats, percentiles = {}, fixed = 0) => [
     <PercentileMetric {...{ stats, percentiles, fixed }} type='recy' />
     <PercentileMetric {...{ stats, percentiles, fixed }} type='tdrec' />
   </>
-]
+)
 
 const getStatRows = (pos, stats, percentiles, fixed) => {
   switch (pos) {
