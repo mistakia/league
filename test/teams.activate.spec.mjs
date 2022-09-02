@@ -1,4 +1,4 @@
-/* global describe before it */
+/* global describe before beforeEach it */
 import chai from 'chai'
 import chaiHTTP from 'chai-http'
 import MockDate from 'mockdate'
@@ -116,6 +116,10 @@ describe('API /teams - activate', function () {
   })
 
   describe('errors', function () {
+    beforeEach(async function () {
+      await league(knex)
+    })
+
     it('not logged in', async () => {
       const request = chai.request(server).post('/api/teams/1/activate')
       await notLoggedIn(request)
