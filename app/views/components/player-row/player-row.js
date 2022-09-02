@@ -604,7 +604,9 @@ class PlayerRow extends Player {
               )}
             </div>
           )}
-          {constants.week > 0 && <PlayerRowOpponent team={team} pos={pos} />}
+          {isWeekView && (
+            <PlayerRowOpponent team={team} pos={pos} week={week} />
+          )}
           {isLoggedIn && (
             <div className='player__row-availability'>
               {isRostered ? (
