@@ -8,7 +8,8 @@ export default async function (items) {
 
   const messages = []
   for (const item of items) {
-    const prefix = 'Official Teflon League Operations Notification.'
+    // TODO use league name
+    const prefix = 'Official League Operations Notification.'
     messages.push({
       voice: 'female',
       to: item.number,

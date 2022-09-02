@@ -127,7 +127,7 @@ export default class PlayersPage extends React.Component {
       },
       data: data.toJS(),
       fileName:
-        'TeflonLeague-' +
+        'xo-football-players-' +
         (isSeasonView ? 'SeasonProjections' : 'RestOfSeasonProjections')
     })
   }

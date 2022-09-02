@@ -405,6 +405,7 @@ export function* updateTransitionTag({ payload }) {
 }
 
 export function* exportRosters() {
+  const league = yield select(getCurrentLeague)
   const rosters = yield select(getRostersForCurrentLeague)
   const playerMaps = yield select(getAllPlayers)
   const projectionType = constants.isRegularSeason ? 'ros' : '0'
@@ -449,7 +450,7 @@ export function* exportRosters() {
       player_team: 'NFL Team'
     },
     data,
-    fileName: `TeflonLeagueRosters-${constants.year}-Week${constants.week}`
+    fileName: `${league.name}-LeagueRosters-${constants.year}-Week${constants.week}`
   })
 }
 
