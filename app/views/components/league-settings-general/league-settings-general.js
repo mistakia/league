@@ -20,7 +20,7 @@ export default function LeagueSettingsGeneral({
         label='Name'
         length={80}
         {...props}
-        grid={{ xs: '12' }}
+        grid={{ xs: 12 }}
       />
       <EditableLeagueField
         label='Number of Teams'

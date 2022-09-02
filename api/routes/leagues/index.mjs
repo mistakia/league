@@ -85,7 +85,12 @@ router.put('/:leagueId', async (req, res) => {
       'nteams',
       'minBid',
       'prtd',
-      'krtd'
+      'krtd',
+
+      'espn_id',
+      'sleeper_id',
+      'mfl_id',
+      'fleaflicker_id'
     ]
 
     if (!field) {
@@ -141,7 +146,12 @@ router.put('/:leagueId', async (req, res) => {
       'nteams',
       'minBid',
       'prtd',
-      'krtd'
+      'krtd',
+
+      'espn_id',
+      'sleeper_id',
+      'mfl_id',
+      'fleaflicker_id'
     ]
     const positives = [
       'sqb',
@@ -167,7 +177,12 @@ router.put('/:leagueId', async (req, res) => {
       'cap',
       'minBid',
       'prtd',
-      'krtd'
+      'krtd',
+
+      'espn_id',
+      'sleeper_id',
+      'mfl_id',
+      'fleaflicker_id'
     ]
     const floats = [
       'pa',
@@ -198,7 +213,15 @@ router.put('/:leagueId', async (req, res) => {
       }
     }
 
-    const league_fields = ['name', 'nteams']
+    const league_fields = [
+      'name',
+      'nteams',
+
+      'espn_id',
+      'sleeper_id',
+      'mfl_id',
+      'fleaflicker_id'
+    ]
 
     if (league_fields.includes(field)) {
       await db('leagues')

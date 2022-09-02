@@ -8,6 +8,7 @@ import LeagueSettingsRushing from '@components/league-settings-rushing'
 import LeagueSettingsReceiving from '@components/league-settings-receiving'
 import LeagueSettingsMiscScoring from '@components/league-settings-misc-scoring'
 import LeagueSettingsGeneral from '@components/league-settings-general'
+import LeagueSettingsExternal from '@components/league-settings-external'
 import { constants } from '@common'
 
 export default function EditableLeague({ update, league, userId }) {
@@ -24,6 +25,7 @@ export default function EditableLeague({ update, league, userId }) {
   return (
     <>
       <LeagueSettingsGeneral {...props} />
+      <LeagueSettingsExternal {...props} />
       <LeagueSettingsStartingLineup {...props} />
       <LeagueSettingsRosterLimits {...props} />
       <LeagueSettingsPassing {...props} />
