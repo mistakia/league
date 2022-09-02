@@ -15,15 +15,17 @@ export default function EditableLeagueField({
   isCommish,
   isDefault,
   label,
-  grid = { xs: '6', sm: '3' }
+  grid = { xs: 6, sm: 3 },
+  disabled
 }) {
-  const [value, set_value] = useState(league[field])
+  const initialValue = league[field] === null ? '' : league[field]
+  const [value, set_value] = useState(initialValue)
   const [helper_text, set_helper_text] = useState('')
   const [error, set_error] = useState(false)
 
   const handleBlur = (event) => {
     let { value } = event.target
-    let defaultValue = league[field]
+    let defaultValue = league[field] === null ? '' : league[field]
 
     if (!value) {
       return set_value(defaultValue)
@@ -31,6 +33,8 @@ export default function EditableLeagueField({
 
     if (type === 'int') {
       if (isNaN(value) || value % 1 !== 0) {
+        set_helper_text('not a number')
+        set_error(true)
         return set_value(defaultValue)
       }
 
@@ -38,6 +42,8 @@ export default function EditableLeagueField({
       defaultValue = parseInt(defaultValue, 10)
     } else if (type === 'float') {
       if (isNaN(value)) {
+        set_helper_text('not a number')
+        set_error(true)
         return set_value(defaultValue)
       }
 
@@ -79,7 +85,7 @@ export default function EditableLeagueField({
   return (
     <Grid item container {...grid}>
       <TextField
-        disabled={!isCommish && !isDefault}
+        disabled={(!isCommish && !isDefault) || disabled}
         label={label}
         helperText={helper_text}
         error={error}
@@ -95,6 +101,7 @@ export default function EditableLeagueField({
 }
 
 EditableLeagueField.propTypes = {
+  disabled: PropTypes.bool,
   league: PropTypes.object,
   field: PropTypes.string,
   type: PropTypes.string,

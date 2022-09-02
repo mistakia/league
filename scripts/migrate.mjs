@@ -11,12 +11,12 @@ const log = debug('migrate')
 debug.enable('migrate')
 
 const migrate = async () => {
-  await db.schema.alterTable('nfl_games', function (table) {
-    table.renameColumn('type', 'seas_type')
-    table.string('week_type', 10)
-    table.renameColumn('stadium_id', 'stad_nflid')
+  await db.schema.alterTable('leagues', function (table) {
+    table.integer('espn_id').unsigned()
+    table.integer('sleeper_id').unsigned()
+    table.integer('mfl_id').unsigned()
+    table.integer('fleaflicker_id').unsigned()
   })
-  log('nfl_games table migrated')
 
   log('all tables migrated')
 }

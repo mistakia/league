@@ -33,7 +33,7 @@ export default function SettingsSection({
 
 SettingsSection.propTypes = {
   title: PropTypes.string,
-  description: PropTypes.description,
+  description: PropTypes.string,
   body: PropTypes.element,
   defaultOpen: PropTypes.bool
 }
