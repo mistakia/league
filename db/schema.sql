@@ -673,6 +673,11 @@ CREATE TABLE `leagues` (
   `name` varchar(50) NOT NULL,
   `nteams` tinyint(2) NOT NULL,
 
+  `espn_id` int unsigned DEFAULT NULL,
+  `sleeper_id` int unsigned DEFAULT NULL,
+  `mfl_id` int unsigned DEFAULT NULL,
+  `fleaflicker_id` int unsigned DEFAULT NULL,
+
   `discord_webhook_url` varchar(255) DEFAULT NULL,
   `groupme_token` varchar(45) DEFAULT NULL,
   `groupme_id` varchar(26) DEFAULT NULL,

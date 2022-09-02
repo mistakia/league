@@ -94,6 +94,11 @@ export const League = new Record({
   teams: new List(),
   years: new List(),
 
+  espn_id: null,
+  sleeper_id: null,
+  mfl_id: null,
+  fleaflicker_id: null,
+
   isLoading: false,
   isLoaded: false
 })
@@ -190,6 +195,11 @@ export function createLeague({
   teams,
   years,
 
+  espn_id,
+  sleeper_id,
+  mfl_id,
+  fleaflicker_id,
+
   isLoaded,
   isLoading
 }) {
@@ -284,6 +294,11 @@ export function createLeague({
 
     teams: new List(teams),
     years: years ? new List(years) : new List([constants.year]),
+
+    espn_id,
+    sleeper_id,
+    mfl_id,
+    fleaflicker_id,
 
     isLoading,
     isLoaded
