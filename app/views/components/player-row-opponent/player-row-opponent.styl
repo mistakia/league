@@ -1,12 +1,21 @@
 .player__row-opponent
-  flex 0 0 60px
-  width 60px
+  flex 0 0 90px
+  width 90px
   overflow hidden
   display flex
   align-items center
-  justify-content flex-end
+  justify-content space-around
+  font-size 11px
+  font-weight 900
   border-left 1px solid $borderColor
   background #f0f0f0
   height 100%
   padding 0 5px
   border-right 1px solid $borderColor
+
+@media (max-width 500px)
+  .player__row-opponent
+    flex 0 0 50px
+    width 50px
+    .nfl__team-logo
+      display none

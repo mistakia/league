@@ -353,11 +353,13 @@ export default class PlayersPage extends React.Component {
             <div className='player__row-index' />
             <div className='player__row-action watchlist' />
             <div className='player__row-pos' />
-            <div className='player__row-name'>Name</div>
+            <div className='player__row-name player__header'>Name</div>
             {isLoggedIn && <div className='player__row-tag' />}
             {isLoggedIn && <div className='player__row-action actions' />}
-            {constants.week > 0 && (
-              <div className='player__row-opponent'>Opp</div>
+            {isWeekView && (
+              <div className='player__row-opponent player__header metric'>
+                Opponent
+              </div>
             )}
             {isLoggedIn && <div className='player__row-availability' />}
           </div>
