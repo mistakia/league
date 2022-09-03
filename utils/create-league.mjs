@@ -19,7 +19,7 @@ export default async function ({ lid, commishid, ...params } = {}) {
 
   if (lid) league.uid = lid
 
-  const leagues = await db('leagues').insert(league)
+  const leagues = await db('leagues').insert(league).onConflict().merge()
   const leagueId = leagues[0]
 
   for (const position of constants.positions) {
@@ -33,7 +33,7 @@ export default async function ({ lid, commishid, ...params } = {}) {
     lid: leagueId,
     year: constants.season.year,
     ...season
-  })
+  }).onConflict().merge()
 
   return leagueId
 }
