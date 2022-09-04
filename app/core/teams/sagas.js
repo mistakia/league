@@ -9,7 +9,6 @@ import {
   deleteTeams,
   getLeagueTeamStats
 } from '@core/api'
-import { getStandingsYear, standingsActions } from '@core/standings'
 import { notificationActions } from '@core/notifications'
 import { transactionsActions } from '@core/transactions'
 import { waiverActions } from '@core/waivers'
@@ -76,8 +75,7 @@ export function* deleteNotification() {
 }
 
 export function* loadLeagueTeamStats({ payload }) {
-  const year = yield select(getStandingsYear)
-  const { leagueId } = yield select(getApp)
+  const { leagueId, year } = yield select(getApp)
   yield call(loadTeams, { payload })
   yield call(getLeagueTeamStats, { leagueId, year })
 }
@@ -118,8 +116,8 @@ export function* watchLoadLeagueTeamStats() {
   yield takeLatest(teamActions.LOAD_LEAGUE_TEAM_STATS, loadLeagueTeamStats)
 }
 
-export function* watchStandingsSelectYear() {
-  yield takeLatest(standingsActions.STANDINGS_SELECT_YEAR, loadLeagueTeamStats)
+export function* watchSelectYear() {
+  yield takeLatest(appActions.SELECT_YEAR, loadLeagueTeamStats)
 }
 
 export function* watchLoadTransactions() {
@@ -157,7 +155,7 @@ export const teamSagas = [
   fork(watchDeleteTeamsFulfilled),
 
   fork(watchLoadLeagueTeamStats),
-  fork(watchStandingsSelectYear),
+  fork(watchSelectYear),
 
   fork(watchLoadTransactions),
   fork(watchLoadWaivers),

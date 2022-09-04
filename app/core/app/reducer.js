@@ -10,6 +10,7 @@ import { teamActions } from '@core/teams'
 const initialState = new Record({
   token: null,
   userId: 0,
+  year: constants.season.year,
   teamId: undefined,
   leagueId: constants.DEFAULTS.LEAGUE_ID,
   isPending: true,
@@ -122,6 +123,11 @@ export function appReducer(state = initialState(), { payload, type }) {
         [payload.opts.type]: payload.data
           ? payload.data.value
           : payload.opts.value
+      })
+
+    case appActions.SELECT_YEAR:
+      return state.merge({
+        year: payload.year
       })
 
     default:

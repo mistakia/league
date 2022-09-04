@@ -19,6 +19,15 @@ export const appActions = {
   LOGIN_PENDING: 'LOGIN_PENDING',
   LOGIN_FULFILLED: 'LOGIN_FULFILLED',
 
+  SELECT_YEAR: 'SELECT_YEAR',
+
+  selectYear: (year) => ({
+    type: appActions.SELECT_YEAR,
+    payload: {
+      year
+    }
+  }),
+
   init: ({ token, leagueId = constants.DEFAULTS.LEAGUE_ID }) => ({
     type: appActions.INIT_APP,
     payload: {

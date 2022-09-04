@@ -5,7 +5,7 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 import Container from '@mui/material/Container'
 import Toolbar from '@mui/material/Toolbar'
 
-import StandingsSelectYear from '@components/standings-select-year'
+import SelectYear from '@components/select-year'
 import { toPercent } from '@common'
 import PageLayout from '@layouts/page'
 
@@ -176,7 +176,7 @@ export default function StandingsPage({
 
   const body = (
     <Container maxWidth='md' classes={{ root: 'standings' }}>
-      <StandingsSelectYear />
+      <SelectYear />
       <Overall standings={standings} year={year} />
       {divisions}
     </Container>

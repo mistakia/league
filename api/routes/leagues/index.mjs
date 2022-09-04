@@ -7,7 +7,6 @@ import draft from './draft.mjs'
 import games from './games.mjs'
 import settings from './settings.mjs'
 import trades from './trades.mjs'
-import schedule from './schedule.mjs'
 import waivers from './waivers/index.mjs'
 import poaches from './poaches.mjs'
 import sync from './sync.mjs'
@@ -16,6 +15,7 @@ import rosters from './rosters.mjs'
 import baselines from './baselines.mjs'
 import teamStats from './team-stats.mjs'
 import players from './players.mjs'
+import matchups from './matchups.mjs'
 import draft_pick_value from './draft-pick-value.mjs'
 
 const router = express.Router()
@@ -342,7 +342,6 @@ router.use('/:leagueId/draft', draft)
 router.use('/:leagueId/draft-pick-value', draft_pick_value)
 router.use('/:leagueId/settings', settings)
 router.use('/:leagueId/trades', trades)
-router.use('/:leagueId/schedule', schedule)
 router.use('/:leagueId/waivers', waivers)
 router.use('/:leagueId/poaches', poaches)
 router.use('/:leagueId/sync', sync)
@@ -351,5 +350,6 @@ router.use('/:leagueId/rosters', rosters)
 router.use('/:leagueId/baselines', baselines)
 router.use('/:leagueId/team-stats', teamStats)
 router.use('/:leagueId/players', players)
+router.use('/:leagueId/matchups', matchups)
 
 export default router

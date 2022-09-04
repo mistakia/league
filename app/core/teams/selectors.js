@@ -5,7 +5,6 @@ import { createSelector } from 'reselect'
 import { getApp } from '@core/app'
 import { getNextPick } from '@core/draft'
 import { getActivePoachesAgainstMyPlayers } from '@core/poaches'
-import { getStandingsYear } from '@core/standings'
 
 import { Team } from './team'
 
@@ -32,7 +31,7 @@ export function getDraftPickById(state, { pickId }) {
 }
 
 export function getOverallStandings(state) {
-  const year = getStandingsYear(state)
+  const { year } = getApp(state)
   const teams = getTeamsForCurrentLeague(state)
   const divisionTeams = teams.groupBy((x) => x.getIn(['stats', year, 'div'], 0))
   let divisionLeaders = new List()

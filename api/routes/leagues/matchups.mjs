@@ -1,7 +1,7 @@
 import express from 'express'
 
 import { constants } from '#common'
-import { generateSchedule, getLeague } from '#utils'
+import { getLeague, generateSchedule } from '#utils'
 
 const router = express.Router({ mergeParams: true })
 
@@ -41,5 +41,3 @@ router.get('/?', async (req, res) => {
     res.status(500).send({ error: err.toString() })
   }
 })
-
-export default router

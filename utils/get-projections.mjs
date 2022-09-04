@@ -11,7 +11,11 @@ export default async function ({ week, pids = [] } = {}) {
   }
 
   const sub = db('projections')
-    .select(db.raw('max(timestamp) AS maxtime, sourceid AS sid, week as wid, CONCAT(sourceid, week) AS sid_week'))
+    .select(
+      db.raw(
+        'max(timestamp) AS maxtime, sourceid AS sid, week as wid, CONCAT(sourceid, week) AS sid_week'
+      )
+    )
     .groupBy('sid_week')
     .where('year', constants.season.year)
     .where('userid', 0)
