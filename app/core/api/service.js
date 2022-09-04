@@ -125,11 +125,11 @@ export const api = {
     return { url }
   },
   getMatchups({ leagueId }) {
-    const url = `${BASE_URL}/leagues/${leagueId}/schedule`
+    const url = `${BASE_URL}/leagues/${leagueId}/matchups`
     return { url }
   },
   postMatchups({ leagueId }) {
-    const url = `${BASE_URL}/leagues/${leagueId}/schedule`
+    const url = `${BASE_URL}/leagues/${leagueId}/matchups`
     return { url, ...POST() }
   },
   getTransactions(params) {
