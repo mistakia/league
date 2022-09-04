@@ -11,8 +11,8 @@ export default async function ({ week, pids = [] } = {}) {
   }
 
   const sub = db('projections')
-    .select(db.raw('max(timestamp) AS maxtime, sourceid AS sid'))
-    .groupBy('sid')
+    .select(db.raw('max(timestamp) AS maxtime, sourceid AS sid, week as wid, CONCAT(sourceid, week) AS sid_week'))
+    .groupBy('sid_week')
     .where('year', constants.season.year)
     .where('userid', 0)
 
@@ -23,6 +23,7 @@ export default async function ({ week, pids = [] } = {}) {
       this.on(function () {
         this.on('sourceid', '=', 'sid')
         this.andOn('timestamp', '=', 'maxtime')
+        this.andOn('week', '=', 'wid')
       })
     })
     .whereIn('pid', pids)
