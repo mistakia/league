@@ -41,3 +41,5 @@ router.get('/?', async (req, res) => {
     res.status(500).send({ error: err.toString() })
   }
 })
+
+export default router
