@@ -8,7 +8,7 @@ import Toolbar from '@mui/material/Toolbar'
 import PageLayout from '@layouts/page'
 import PercentileMetric from '@components/percentile-metric'
 import { constants, getEligibleSlots, toPercent } from '@common'
-import StandingsSelectYear from '@components/standings-select-year'
+import SelectYear from '@components/select-year'
 
 import './stats.styl'
 
@@ -224,7 +224,7 @@ export default function StatsPage({ league, teams, percentiles, year }) {
 
   const body = (
     <div className='stats'>
-      <StandingsSelectYear />
+      <SelectYear />
       <div className='section'>
         <Toolbar>
           <div className='dashboard__section-header-title'>League Stats</div>

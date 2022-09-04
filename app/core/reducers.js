@@ -23,7 +23,6 @@ import { scoreboardReducer } from './scoreboard'
 import { playsReducer } from './plays'
 import { gamelogsReducer } from './gamelogs'
 import { propsReducer } from './props'
-import { standingsReducer } from './standings'
 import { draftPickValueReducer } from './draft-pick-value'
 
 const rootReducer = (router) =>
@@ -52,7 +51,6 @@ const rootReducer = (router) =>
     plays: playsReducer,
     gamelogs: gamelogsReducer,
     props: propsReducer,
-    standings: standingsReducer,
     draft_pick_value: draftPickValueReducer
   })
 
