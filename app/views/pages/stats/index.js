@@ -4,7 +4,7 @@ import { Map } from 'immutable'
 
 import { getTeamsForCurrentLeague } from '@core/teams'
 import { getCurrentLeague } from '@core/leagues'
-import { getStandingsYear } from '@core/standings'
+import { getApp } from '@core/app'
 import { constants, calculatePercentiles } from '@common'
 
 import StatsPage from './stats'
@@ -12,8 +12,9 @@ import StatsPage from './stats'
 const mapStateToProps = createSelector(
   getCurrentLeague,
   getTeamsForCurrentLeague,
-  getStandingsYear,
-  (league, teams, year) => {
+  getApp,
+  (league, teams, app) => {
+    const year = app.year
     const percentiles = calculatePercentiles({
       items: teams
         .map((t) =>

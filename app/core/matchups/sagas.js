@@ -8,8 +8,8 @@ import { getMatchups } from './selectors'
 import { getScoreboard, scoreboardActions } from '@core/scoreboard'
 
 export function* loadMatchups() {
-  const { leagueId } = yield select(getApp)
-  yield call(fetchMatchups, { leagueId })
+  const { leagueId, year } = yield select(getApp)
+  yield call(fetchMatchups, { leagueId, year })
 }
 
 export function* generate({ payload }) {
