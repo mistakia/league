@@ -29,7 +29,7 @@
 ## import weekly projections
 0 1 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-fftoday-projections.mjs &>> /var/log/league/import-fftoday.log
 0 2 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-projections.mjs &>> /var/log/league/import-nfl.log
-0 3 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-cbs-projections.mjs &>> /var/log/league/import-cbs.log
+# 0 3 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-cbs-projections.mjs &>> /var/log/league/import-cbs.log
 0 0 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-espn-projections.mjs &>> /var/log/league/import-espn.log
 0 0 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-fantasysharks-projections.mjs &>> /var/log/league/import-fantasysharks.log
 0 0 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-fbg-projections.mjs &>> /var/log/league/import-fbg.log
