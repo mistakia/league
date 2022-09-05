@@ -114,6 +114,7 @@ CREATE TABLE `player` (
   `arm` decimal(5,3) DEFAULT NULL,
   `hand` decimal(5,3) DEFAULT NULL,
   `dpos` int(3) NOT NULL DEFAULT '0', -- draft position
+  `round` tinyint(1) NOT NULL DEFAULT '0', -- draft round
   `col` varchar(255) NOT NULL,
   `dv` varchar(35) DEFAULT NULL,
   `start` int(4) NOT NULL,
