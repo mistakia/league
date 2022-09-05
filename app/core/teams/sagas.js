@@ -20,8 +20,8 @@ export function* initTeams() {
   if (leagueId) yield call(getTeams, { leagueId })
 }
 
-export function* loadTeams({ payload }) {
-  const { leagueId } = payload
+export function* loadTeams() {
+  const { leagueId } = yield select(getApp)
   const state = yield select()
   const isLoading = state.getIn(['app', 'isLoadingTeams'])
   const isLoaded = state.getIn(['app', 'isLoadedTeams'])
@@ -76,7 +76,7 @@ export function* deleteNotification() {
 
 export function* loadLeagueTeamStats({ payload }) {
   const { leagueId, year } = yield select(getApp)
-  yield call(loadTeams, { payload })
+  yield call(loadTeams)
   yield call(getLeagueTeamStats, { leagueId, year })
 }
 
@@ -116,10 +116,6 @@ export function* watchLoadLeagueTeamStats() {
   yield takeLatest(teamActions.LOAD_LEAGUE_TEAM_STATS, loadLeagueTeamStats)
 }
 
-export function* watchSelectYear() {
-  yield takeLatest(appActions.SELECT_YEAR, loadLeagueTeamStats)
-}
-
 export function* watchLoadTransactions() {
   yield takeLatest(transactionsActions.LOAD_TRANSACTIONS, loadTeams)
 }
@@ -155,7 +151,6 @@ export const teamSagas = [
   fork(watchDeleteTeamsFulfilled),
 
   fork(watchLoadLeagueTeamStats),
-  fork(watchSelectYear),
 
   fork(watchLoadTransactions),
   fork(watchLoadWaivers),

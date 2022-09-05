@@ -9,6 +9,13 @@ import { getScoreboard, scoreboardActions } from '@core/scoreboard'
 
 export function* loadMatchups() {
   const { leagueId, year } = yield select(getApp)
+  const state = yield select()
+  const isLoading = state.getIn(['app', 'isLoadingMatchups'])
+  const isLoaded = state.getIn(['app', 'isLoadedMatchups'])
+  if (isLoading === leagueId || isLoaded === leagueId) {
+    return
+  }
+
   yield call(fetchMatchups, { leagueId, year })
 }
 

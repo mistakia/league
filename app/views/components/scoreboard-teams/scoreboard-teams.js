@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 
 import ScoreboardScoreTeam from '@components/scoreboard-score-team'
 import { constants } from '@common'
+import { Scoreboard } from '@core/scoreboard'
 
 import './scoreboard-teams.styl'
 
@@ -35,8 +36,12 @@ export default class ScoreboardTeams extends React.Component {
 
     const isWC = week === constants.season.wildcardWeek
     const sorted = scoreboards.sort((a, b) => b.points - a.points)
-    const cutoff = isWC ? sorted.get(1).points : sorted.get(0).points
-    const challenger = isWC ? sorted.get(2).points : sorted.get(1).points
+    const cutoff = isWC
+      ? sorted.get(1, new Scoreboard()).points
+      : sorted.get(0, new Scoreboard()).points
+    const challenger = isWC
+      ? sorted.get(2, new Scoreboard()).points
+      : sorted.get(1, new Scoreboard()).points
     const items = []
     for (const [index, scoreboard] of sorted.entries()) {
       const { tid } = scoreboard

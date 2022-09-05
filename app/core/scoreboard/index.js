@@ -12,3 +12,4 @@ export {
   getPointsByTeamId
 } from './selectors'
 export { scoreboardReducer } from './reducer'
+export { Scoreboard } from './scoreboard'

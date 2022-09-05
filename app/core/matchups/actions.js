@@ -14,17 +14,14 @@ export const matchupsActions = {
   POST_MATCHUPS_PENDING: 'POST_MATCHUPS_PENDING',
   POST_MATCHUPS_FULFILLED: 'POST_MATCHUPS_FULFILLED',
 
-  loadMatchups: (leagueId) => ({
-    type: matchupsActions.LOAD_MATCHUPS,
-    payload: {
-      leagueId: Number(leagueId)
-    }
+  loadMatchups: () => ({
+    type: matchupsActions.LOAD_MATCHUPS
   }),
 
   select: (matchupId) => ({
     type: matchupsActions.SELECT_MATCHUP,
     payload: {
-      matchupId
+      matchupId: Number(matchupId)
     }
   }),
 

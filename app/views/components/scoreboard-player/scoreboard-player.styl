@@ -3,6 +3,9 @@
   height 60px
   align-items center
 
+  .player__label-tag
+    display none
+
   &.projection .scoreboard__player-score
     color rgba(0,0,0,0.3)
     font-weight 300
@@ -50,12 +53,15 @@
     order 2
 
   .player__name-expanded-main
-    align-items flex-end
+    justify-content flex-end
+    .player__name-expanded-row
+    .player__name-expanded-full-name
+      display flex
+      justify-content flex-end
     .position
       order 3
     .nfl__team
       order 2
-      margin-right 4px
     .player__label-game
       order 1
 
