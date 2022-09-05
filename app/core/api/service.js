@@ -124,8 +124,10 @@ export const api = {
     const url = `${BASE_URL}/leagues/${leagueId}/teams`
     return { url }
   },
-  getMatchups({ leagueId }) {
-    const url = `${BASE_URL}/leagues/${leagueId}/matchups`
+  getMatchups({ leagueId, ...params }) {
+    const url = `${BASE_URL}/leagues/${leagueId}/matchups?${queryString.stringify(
+      params
+    )}`
     return { url }
   },
   postMatchups({ leagueId }) {

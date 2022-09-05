@@ -709,7 +709,6 @@ export function isPlayerPracticeSquadEligible(
   }
 
   const transactions = getReserveTransactionsByPlayerId(state, { pid })
-  console.log(transactions)
 
   // not eligible if activated previously
   const activations = transactions.filter(

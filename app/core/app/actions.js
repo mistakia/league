@@ -24,7 +24,7 @@ export const appActions = {
   selectYear: (year) => ({
     type: appActions.SELECT_YEAR,
     payload: {
-      year
+      year: Number(year)
     }
   }),
 

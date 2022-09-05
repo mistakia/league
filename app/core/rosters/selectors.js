@@ -13,13 +13,16 @@ export function getRosters(state) {
   return state.get('rosters')
 }
 
-export function getRosterRecordByTeamId(state, { tid, week = constants.week }) {
+export function getRosterRecordByTeamId(
+  state,
+  { tid, week = constants.week, year = constants.year }
+) {
   const rosters = getRosters(state)
-  return rosters.getIn([tid, week]) || new RosterRecord()
+  return rosters.getIn([tid, year, week]) || new RosterRecord()
 }
 
-export function getRosterByTeamId(state, { tid, week }) {
-  const rec = getRosterRecordByTeamId(state, { tid, week })
+export function getRosterByTeamId(state, { tid, week, year = constants.year }) {
+  const rec = getRosterRecordByTeamId(state, { tid, week, year })
   const league = getCurrentLeague(state)
   return new Roster({ roster: rec.toJS(), league })
 }
@@ -50,13 +53,14 @@ export function getRostersForCurrentLeague(state) {
   const rosters = getRosters(state)
   const { leagueId } = getApp(state)
   const week = constants.week
+  const year = constants.year
   const filtered = rosters.filter((w) => {
-    const r = w.get(week)
+    const r = w.getIn([year, week])
     if (!r) return false
     return r.lid === leagueId
   })
 
-  return filtered.map((r) => r.get(week))
+  return filtered.map((r) => r.getIn([year, week]))
 }
 
 export function getAvailableSalarySpaceForCurrentLeague(state) {
@@ -192,7 +196,10 @@ export function isPlayerEligible(state, { playerMap, pid }) {
 export function getCurrentTeamRosterRecord(state) {
   const rosters = getRosters(state)
   const { teamId } = getApp(state)
-  return rosters.getIn([teamId, constants.week], new RosterRecord())
+  return rosters.getIn(
+    [teamId, constants.year, constants.week],
+    new RosterRecord()
+  )
 }
 
 export function getCurrentTeamRoster(state) {
@@ -291,7 +298,7 @@ export function getRosterPositionalValueByTeamId(state, { tid }) {
 export function getGroupedPlayersByTeamId(state, { tid }) {
   const rosters = getRosters(state)
   const league = getCurrentLeague(state)
-  const roster = rosters.getIn([tid, constants.week])
+  const roster = rosters.getIn([tid, constants.year, constants.week])
   if (!roster) {
     return {
       active: new List(),

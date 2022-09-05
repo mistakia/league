@@ -5,47 +5,40 @@ import Select from '@mui/material/Select'
 import InputLabel from '@mui/material/InputLabel'
 import MenuItem from '@mui/material/MenuItem'
 
-import { constants } from '@common'
+export default function ScoreboardSelectWeek({ selectWeek, week, weeks }) {
+  if (!week) return null
 
-export default class ScoreboardSelectWeek extends React.Component {
-  handleChange = (event) => {
-    this.props.select(event.target.value)
-  }
-
-  render = () => {
-    if (!constants.week) return null
-
-    const menuItems = []
-    let wk = constants.week
-    for (; wk > 0; wk--) {
-      menuItems.push(
-        <MenuItem key={wk} value={wk}>
-          {wk}
-        </MenuItem>
-      )
-    }
-
-    return (
-      <FormControl
-        size='small'
-        variant='outlined'
-        className='scoreboard__select-week'
-      >
-        <InputLabel id='players__view-menu-label'>Week</InputLabel>
-        <Select
-          labelId='players__view-menu-label'
-          value={this.props.week}
-          onChange={this.handleChange}
-          label='Week'
-        >
-          {menuItems}
-        </Select>
-      </FormControl>
+  const handleChange = (event) => selectWeek(event.target.value)
+  const menuItems = []
+  weeks.forEach((week, index) => {
+    menuItems.push(
+      <MenuItem key={index} value={week}>
+        {week}
+      </MenuItem>
     )
-  }
+  })
+
+  return (
+    <FormControl
+      size='small'
+      variant='outlined'
+      className='scoreboard__select-week'
+    >
+      <InputLabel id='players__view-menu-label'>Week</InputLabel>
+      <Select
+        labelId='players__view-menu-label'
+        value={week}
+        onChange={handleChange}
+        label='Week'
+      >
+        {menuItems}
+      </Select>
+    </FormControl>
+  )
 }
 
 ScoreboardSelectWeek.propTypes = {
-  select: PropTypes.func,
-  week: PropTypes.number
+  selectWeek: PropTypes.func,
+  week: PropTypes.number,
+  weeks: PropTypes.array
 }

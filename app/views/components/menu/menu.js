@@ -13,8 +13,6 @@ import NavigateNextIcon from '@mui/icons-material/NavigateNext'
 import TeamName from '@components/team-name'
 import LeagueSchedule from '@components/league-schedule'
 
-import { constants } from '@common'
-
 import './menu.styl'
 
 export default function AppMenu({
@@ -78,9 +76,6 @@ export default function AppMenu({
                 <NavLink to='/players'>Players</NavLink>
                 {Boolean(leagueId) && (
                   <>
-                    {Boolean(constants.week) && (
-                      <NavLink to='/scoreboard'>Scoreboard</NavLink>
-                    )}
                     {teamId ? (
                       <NavLink to={`/leagues/${leagueId}/teams/${teamId}`}>
                         Teams
@@ -103,6 +98,9 @@ export default function AppMenu({
                     <NavLink to={`/leagues/${leagueId}/stats`}>Stats</NavLink>
                     <NavLink to={`/leagues/${leagueId}/schedule`}>
                       Schedule
+                    </NavLink>
+                    <NavLink to={`/leagues/${leagueId}/matchups`}>
+                      Matchups
                     </NavLink>
                   </>
                 )}

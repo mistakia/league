@@ -12,26 +12,29 @@ import {
 } from '@common'
 import { getGamelogForPlayer } from '@core/stats'
 import { getPlayerById } from '@core/players'
-import { getSelectedMatchup } from '@core/matchups'
+import { getSelectedMatchup, getMatchupByTeamId } from '@core/matchups'
 import { getGameByPlayerId, getGameByTeam } from '@core/schedule'
 import { getPlays } from '@core/plays'
+import { Scoreboard } from './scoreboard'
 
 export function getScoreboard(state) {
   return state.get('scoreboard')
 }
 
 export function getScoreboardRosterByTeamId(state, { tid }) {
+  const year = state.getIn(['app', 'year'])
   const week = state.getIn(['scoreboard', 'week'])
-  return getRosterByTeamId(state, { tid, week })
+  const isFuture = year === constants.year && week > constants.week
+  return getRosterByTeamId(state, {
+    tid,
+    week: isFuture ? constants.week : week
+  })
 }
 
 export function getSelectedMatchupScoreboards(state) {
   const matchup = getSelectedMatchup(state)
   const week = state.getIn(['scoreboard', 'week'])
-  return matchup.tids.map((tid) => ({
-    tid,
-    ...getScoreboardByTeamId(state, { tid, week })
-  }))
+  return matchup.tids.map((tid) => getScoreboardByTeamId(state, { tid, week }))
 }
 
 export function getPointsByTeamId(state, { tid, week }) {
@@ -45,15 +48,34 @@ export function getPointsByTeamId(state, { tid, week }) {
 }
 
 export function getScoreboardByTeamId(state, { tid }) {
+  const year = state.getIn(['app', 'year'])
   const week = state.getIn(['scoreboard', 'week'])
+  const matchup = getMatchupByTeamId(state, { tid, year, week })
+
+  let minutes = 0
+
+  // TODO - set flag for processed matchup
+  if (matchup.ap) {
+    return new Scoreboard({
+      tid,
+      points: matchup.aid === tid ? matchup.ap : matchup.hp,
+      projected: 0,
+      minutes
+    })
+  }
+
   const isChampRound = week === constants.season.finalWeek
   let points = isChampRound
     ? getPointsByTeamId(state, { tid, week: constants.season.finalWeek - 1 })
     : 0
   const previousWeek = points
-  let minutes = 0
 
-  const starterMaps = getStartersByTeamId(state, { tid, week })
+  // TODO - instead use matchup projected value
+  const isFuture = year === constants.year && week > constants.week
+  const starterMaps = getStartersByTeamId(state, {
+    tid,
+    week: isFuture ? constants.week : week
+  })
   const projected = starterMaps.reduce((sum, playerMap) => {
     const gamelog = getGamelogForPlayer(state, { playerMap, week })
     if (gamelog) {
@@ -80,7 +102,12 @@ export function getScoreboardByTeamId(state, { tid }) {
     return add + sum
   }, 0)
 
-  return { points, projected: projected + previousWeek, minutes }
+  return new Scoreboard({
+    tid,
+    points,
+    projected: projected + previousWeek,
+    minutes
+  })
 }
 
 export function getScoreboardUpdated(state) {
