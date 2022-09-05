@@ -183,9 +183,11 @@ const processLeague = async ({ year, lid }) => {
     const league_adjusted_rate = is_available
       ? league_available_salary_space / league_available_vorp
       : (league_available_salary_space + player_row.value) /
-        (league_available_vorp + player_row.vorp[0])
-    const market_salary_adj =
-      Math.round(league_adjusted_rate * player_row.vorp[0]) || 0
+        (league_available_vorp + Math.max(player_row.vorp[0], 0))
+    const market_salary_adj = Math.max(
+      Math.round(league_adjusted_rate * player_row.vorp[0]) || 0,
+      0
+    )
     player_row.market_salary_adj = Math.max(market_salary_adj, 0)
 
     for (const [week, projection] of Object.entries(player_row.projection)) {
