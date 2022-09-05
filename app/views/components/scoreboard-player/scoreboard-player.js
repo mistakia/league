@@ -1,6 +1,5 @@
 import React from 'react'
 
-import { constants } from '@common'
 import { Player, connect } from '@components/player'
 import PlayerNameExpanded from '@components/player-name-expanded'
 import ScoreboardPlayerGameStatus from '@components/scoreboard-player-game-status'
@@ -16,7 +15,7 @@ class ScoreboardPlayer extends Player {
 
     const points = gamelog
       ? (gamelog.total || 0).toFixed(1)
-      : playerMap.getIn(['points', `${constants.week}`, 'total'], 0).toFixed(1)
+      : playerMap.getIn(['points', `${week}`, 'total'], 0).toFixed(1)
 
     const pid = playerMap.get('pid')
     return (

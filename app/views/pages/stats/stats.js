@@ -138,7 +138,13 @@ SlotRow.propTypes = {
   year: PropTypes.number
 }
 
-export default function StatsPage({ league, teams, percentiles, year }) {
+export default function StatsPage({
+  league,
+  teams,
+  percentiles,
+  year,
+  loadLeagueTeamStats
+}) {
   const navigate = useNavigate()
   const { lid } = useParams()
 
@@ -147,6 +153,10 @@ export default function StatsPage({ league, teams, percentiles, year }) {
       return navigate('/', { replace: true })
     }
   }, [])
+
+  useEffect(() => {
+    loadLeagueTeamStats()
+  }, [year])
 
   const slotHeaders = []
   const eligibleStarterSlots = getEligibleSlots({ pos: 'ALL', league })
@@ -292,5 +302,6 @@ StatsPage.propTypes = {
   teams: ImmutablePropTypes.map,
   league: PropTypes.object,
   percentiles: PropTypes.object,
-  year: PropTypes.number
+  year: PropTypes.number,
+  loadLeagueTeamStats: PropTypes.func
 }

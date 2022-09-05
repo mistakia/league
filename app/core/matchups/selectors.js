@@ -7,6 +7,12 @@ export function getMatchups(state) {
   return state.get('matchups')
 }
 
+export function getWeeksForSelectedYearMatchups(state) {
+  const matchups = getMatchupsForSelectedYear(state)
+  const weeks = matchups.map((m) => m.week)
+  return [...new Set(weeks)]
+}
+
 export function getMatchupById(state, { mid }) {
   const matchups = state.get('matchups')
   const items = matchups.get('items')
@@ -29,13 +35,14 @@ export function getSelectedMatchup(state) {
   const matchupId = matchups.get('selected')
   if (!matchupId) return createMatchup()
 
+  // TODO - fix / derive based on season schedule
   const week = state.getIn(['scoreboard', 'week'])
   if (week <= constants.season.regularSeasonFinalWeek) {
     const items = matchups.get('items')
-    return items.find((m) => m.uid === matchupId)
+    return items.find((m) => m.uid === matchupId) || createMatchup()
   } else {
     const items = matchups.get('playoffs')
-    return items.find((m) => m.uid === matchupId)
+    return items.find((m) => m.uid === matchupId) || createMatchup()
   }
 }
 
@@ -59,4 +66,20 @@ export function getMatchupsForSelectedWeek(state) {
   const matchups = state.getIn(['matchups', 'items'])
   const week = state.getIn(['scoreboard', 'week'])
   return matchups.filter((m) => m.week === week)
+}
+
+export function getMatchupsForSelectedYear(state) {
+  const matchups = state.getIn(['matchups', 'items'])
+  const year = state.getIn(['app', 'year'], constants.year)
+  return matchups.filter((m) => m.year === year)
+}
+
+export function getMatchupByTeamId(state, { tid, year, week }) {
+  const matchups = state.getIn(['matchups', 'items'])
+  return (
+    matchups.find(
+      (m) =>
+        m.year === year && m.week === week && (m.hid === tid || m.aid === tid)
+    ) || createMatchup()
+  )
 }

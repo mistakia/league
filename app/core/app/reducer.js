@@ -6,11 +6,12 @@ import { settingActions } from '@core/settings'
 import { constants } from '@common'
 import { rosterActions } from '@core/rosters'
 import { teamActions } from '@core/teams'
+import { matchupsActions } from '@core/matchups'
 
 const initialState = new Record({
   token: null,
   userId: 0,
-  year: constants.season.year,
+  year: constants.year,
   teamId: undefined,
   leagueId: constants.DEFAULTS.LEAGUE_ID,
   isPending: true,
@@ -20,7 +21,14 @@ const initialState = new Record({
   text: 0,
   voice: 0,
   teamIds: new List(),
-  leagueIds: new List([constants.DEFAULTS.LEAGUE_ID])
+  leagueIds: new List([constants.DEFAULTS.LEAGUE_ID]),
+
+  isLoadingRosters: null,
+  isLoadedRosters: null,
+  isLoadingTeams: null,
+  isLoadedTeams: null,
+  isLoadingMatchups: null,
+  isLoadedMatchups: null
 })
 
 export function appReducer(state = initialState(), { payload, type }) {
@@ -33,15 +41,24 @@ export function appReducer(state = initialState(), { payload, type }) {
         leagueIds: new List([payload.leagueId])
       })
 
+    case matchupsActions.GET_MATCHUPS_PENDING:
+      return state.set('isLoadingMatchups', payload.opts.leagueId)
+
+    case matchupsActions.GET_MATCHUPS_FAILED:
+      return state.set('isLoadingMatchups', null)
+
+    case matchupsActions.GET_MATCHUPS_FULFILLED:
+      return state.set('isLoadedMatchups', payload.opts.leagueId)
+
     case rosterActions.GET_ROSTERS_PENDING:
       return state.set('isLoadingRosters', payload.opts.leagueId)
 
     case rosterActions.GET_ROSTERS_FAILED:
-      return state.delete('isLoadingRosters')
+      return state.set('isLoadingRosters', null)
 
     case rosterActions.GET_ROSTERS_FULFILLED:
       return state.withMutations((state) => {
-        state.delete('isLoadingRosters')
+        state.set('isLoadingRosters', null)
         state.set('isLoadedRosters', payload.opts.leagueId)
       })
 
@@ -49,14 +66,14 @@ export function appReducer(state = initialState(), { payload, type }) {
       return state.set('isLoadingTeams', payload.opts.leagueId)
 
     case teamActions.GET_TEAMS_FAILED:
-      return state.delete('isLoadingTeams')
+      return state.set('isLoadingTeams', null)
 
     case teamActions.GET_TEAMS_FULFILLED:
       return state.withMutations((state) => {
         const teamId = state.get('teamId')
         const team = payload.data.teams.find((t) => t.uid === teamId)
         if (!team) state.set('teamId', null)
-        state.delete('isLoadingTeams')
+        state.set('isLoadingTeams', null)
         state.set('isLoadedTeams', payload.opts.leagueId)
       })
 

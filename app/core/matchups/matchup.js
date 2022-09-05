@@ -8,7 +8,10 @@ export const Matchup = new Record({
   type: null,
   year: null,
   week: null,
-  lid: null
+  lid: null,
+
+  ap: null,
+  hp: null
 })
 
 export function createMatchup({
@@ -19,7 +22,10 @@ export function createMatchup({
   type,
   year,
   week,
-  lid
+  lid,
+
+  ap,
+  hp
 } = {}) {
   return new Matchup({
     uid,
@@ -29,6 +35,8 @@ export function createMatchup({
     type,
     year,
     week,
-    lid
+    lid,
+    ap,
+    hp
   })
 }

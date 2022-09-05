@@ -21,7 +21,6 @@ import LineupsPage from '@pages/lineups'
 import TradePage from '@pages/trade'
 import SettingsPage from '@pages/settings'
 import MarkdownPage from '@pages/markdown'
-import ScoreboardPage from '@pages/scoreboard'
 import StatusPage from '@pages/status'
 import PropsPage from '@pages/props'
 import TransactionsPage from '@pages/transactions'
@@ -32,6 +31,7 @@ import RostersPage from '@pages/rosters'
 import WaiversPage from '@pages/waivers'
 import TeamPage from '@pages/team'
 import LeagueSettingsPage from '@pages/league-settings'
+import MatchupPage from '@pages/matchup'
 
 const mapStateToProps = createSelector(getApp, (app) => ({ app }))
 
@@ -53,7 +53,6 @@ const Routes = ({ app }) => {
     <RouterRoutes>
       {app.userId && <Route path='/lineups' element={<LineupsPage />} />}
       <Route path='/players' element={<PlayersPage />} />
-      {app.userId && <Route path='/scoreboard' element={<ScoreboardPage />} />}
       {app.userId && <Route path='/auction' element={<AuctionPage />} />}
       {app.userId && <Route path='/draft' element={<DraftPage />} />}
       {app.userId && <Route path='/trade' element={<TradePage />} />}
@@ -64,6 +63,15 @@ const Routes = ({ app }) => {
         <Route
           path='/leagues/:lid/transactions'
           element={<TransactionsPage />}
+        />
+        <Route path='/leagues/:lid/matchups' element={<MatchupPage />} />
+        <Route
+          path='/leagues/:lid/matchups/:seas_year/:seas_week'
+          element={<MatchupPage />}
+        />
+        <Route
+          path='/leagues/:lid/matchups/:seas_year/:seas_week/:matchupId'
+          element={<MatchupPage />}
         />
         <Route path='/leagues/:lid/standings' element={<StandingsPage />} />
         <Route path='/leagues/:lid/stats' element={<StatsPage />} />

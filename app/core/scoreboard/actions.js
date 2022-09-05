@@ -9,10 +9,10 @@ export const scoreboardActions = {
   GET_SCOREBOARD_FAILED: 'GET_SCOREBOARD_FAILED',
   GET_SCOREBOARD_FULFILLED: 'GET_SCOREBOARD_FULFILLED',
 
-  select: (week) => ({
+  selectWeek: (week) => ({
     type: scoreboardActions.SCOREBOARD_SELECT_WEEK,
     payload: {
-      week
+      week: Number(week)
     }
   }),
 

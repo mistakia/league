@@ -4,7 +4,9 @@ export {
   getSelectedMatchup,
   getMatchupsForSelectedWeek,
   getMatchupById,
-  getSelectedMatchupTeams
+  getSelectedMatchupTeams,
+  getWeeksForSelectedYearMatchups,
+  getMatchupByTeamId
 } from './selectors'
 export { matchupsReducer } from './reducer'
 export { matchupSagas } from './sagas'

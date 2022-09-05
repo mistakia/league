@@ -49,8 +49,7 @@ export default function DeactivateConfirmation({
   const isDraftedRookie = Boolean(
     player_transactions.filter(
       (t) =>
-        t.type === constants.transactions.DRAFT &&
-        t.year === constants.season.year
+        t.type === constants.transactions.DRAFT && t.year === constants.year
     )
   )
   const hasPracticeSquadSpace =

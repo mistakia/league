@@ -2,7 +2,7 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 import { Map } from 'immutable'
 
-import { getTeamsForCurrentLeague } from '@core/teams'
+import { getTeamsForCurrentLeague, teamActions } from '@core/teams'
 import { getCurrentLeague } from '@core/leagues'
 import { getApp } from '@core/app'
 import { constants, calculatePercentiles } from '@common'
@@ -34,4 +34,8 @@ const mapStateToProps = createSelector(
   }
 )
 
-export default connect(mapStateToProps)(StatsPage)
+const mapDispatchToProps = {
+  loadLeagueTeamStats: teamActions.loadLeagueTeamStats
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(StatsPage)
