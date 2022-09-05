@@ -1,5 +1,4 @@
 import debug from 'debug'
-import dayjs from 'dayjs'
 
 import db from '#db'
 import {
@@ -188,7 +187,7 @@ const processLeague = async ({ year, lid }) => {
       Math.round(league_adjusted_rate * player_row.vorp[0]) || 0,
       0
     )
-    player_row.market_salary_adj = Math.max(market_salary_adj, 0)
+    player_row.market_salary_adj = market_salary_adj
 
     for (const [week, projection] of Object.entries(player_row.projection)) {
       if (week === 'ros') {
@@ -233,12 +232,7 @@ const processLeague = async ({ year, lid }) => {
         market_salary: player_row.market_salary[week]
       }
 
-      const adate = league.adate ? dayjs.unix(league.adate) : null
-      if (
-        week === '0' &&
-        (!adate || dayjs().isBefore(adate)) &&
-        market_salary_adj > 0
-      ) {
+      if (week === '0') {
         params.market_salary_adj = market_salary_adj
       }
       valueInserts.push(params)
