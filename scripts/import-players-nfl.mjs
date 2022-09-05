@@ -67,6 +67,7 @@ const importPlayersNFL = async ({
     const high_school = node.person.highSchool
     const col = node.person.collegeName
     const dpos = node.person.draftNumberOverall
+    const round = node.person.draftRound
     let start = node.person.draftYear
     const weight = node.weight
     const cteam = node.currentTeam ? node.currentTeam.abbreviation : null
@@ -89,6 +90,7 @@ const importPlayersNFL = async ({
           high_school,
           col,
           dpos,
+          round,
           start,
           weight,
           height,
@@ -117,6 +119,9 @@ const importPlayersNFL = async ({
 
         weight,
         height,
+
+        dpos,
+        round,
 
         col,
         high_school,
