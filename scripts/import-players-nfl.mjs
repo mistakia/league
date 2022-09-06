@@ -154,7 +154,8 @@ const main = async () => {
 
     if (argv.all) {
       const token = await getToken()
-      for (let year = 1970; year < constants.season.year; year++) {
+      let year = argv.start || 1970
+      for (; year < constants.season.year; year++) {
         await importPlayersNFL({ year, token })
       }
     } else if (argv.year) {
