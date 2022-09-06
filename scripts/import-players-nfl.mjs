@@ -57,7 +57,7 @@ const importPlayersNFL = async ({
 
     if (!player_row) {
       try {
-        player_row = await getPlayer({ name, pos, dob })
+        player_row = await getPlayer({ name, dob })
       } catch (err) {
         error = err
         log(err)
