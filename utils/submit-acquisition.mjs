@@ -126,7 +126,6 @@ export default async function ({
   /* if (type === constants.transactions.PRACTICE_ADD) {
    *   if (
    *     player_row.start !== constants.season.year &&
-   *     player_row.posd !== 'PS' &&
    *     player_row.cteam !== 'INA'
    *   ) {
    *     throw new Error('player is not practice squad eligible')

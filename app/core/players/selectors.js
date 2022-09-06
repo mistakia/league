@@ -665,12 +665,10 @@ export function isPlayerPracticeSquadEligible(
   // if player is a FA during the offseason, they must be either:
   // - a rookie
   // - not on a nfl team
-  // - on a nfl practice squad
   if (
     !rosterInfo.tid && // not on a team
     !constants.isRegularSeason && // during the offseason
     playerMap.get('start') !== constants.year && // not a rookie
-    playerMap.get('posd') !== 'PS' && // not on a nfl practice squad
     playerMap.get('team') !== 'INA' // not on a nfl team
   ) {
     return false
