@@ -61,17 +61,15 @@ router.post('/?', async (req, res) => {
     }
 
     // make sure player is on practice squad
-    if (!roster.practice.find((p) => p.pid === pid)) {
+    const roster_player = roster.practice.find((p) => p.pid === pid)
+    if (!roster_player) {
       return res.status(400).send({ error: 'player is not on practice squad' })
     }
 
     // make sure player is not already protected
     if (
-      roster.practice.find(
-        (p) =>
-          p.pid === pid &&
-          (p.slot === constants.slots.PSP || p.slot === constants.slots.PSDP)
-      )
+      roster_player.slot === constants.slots.PSP ||
+      roster_player.slot === constants.slots.PSDP
     ) {
       return res.status(400).send({ error: 'player is already protected' })
     }
@@ -96,7 +94,10 @@ router.post('/?', async (req, res) => {
       a.timestamp > b.timestamp ? a : b
     )
 
-    const slot = constants.slots.PS ? constants.slots.PSP : constants.slots.PSDP
+    const slot =
+      roster_player.slot === constants.slots.PS
+        ? constants.slots.PSP
+        : constants.slots.PSDP
     await db('rosters_players').update({ slot }).where({
       rid: rosterRow.uid,
       pid
