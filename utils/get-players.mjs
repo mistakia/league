@@ -60,7 +60,7 @@ export default async function ({
     'player.col',
     'player.dv',
     'player.pos',
-    'player.draft',
+    'player.round',
     'player.cteam',
     'player.gsisid',
     'player.gsispid',
