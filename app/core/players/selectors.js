@@ -162,6 +162,13 @@ export function getFilteredPlayers(state) {
     )
   }
 
+  const nfl_draft_rounds = pState.get('nfl_draft_rounds')
+  if (nfl_draft_rounds.size !== constants.nfl_draft_rounds.length) {
+    filtered = filtered.filter((playerMap) =>
+      nfl_draft_rounds.includes(playerMap.get('round'))
+    )
+  }
+
   const experience = pState.get('experience')
   if (experience.size < 3) {
     const veterans = experience.includes(-1)

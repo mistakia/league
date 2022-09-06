@@ -21,6 +21,7 @@ const initialState = new Map({
   teamIds: new List(),
   colleges: new List(constants.colleges),
   collegeDivisions: new List(constants.collegeDivisions),
+  nfl_draft_rounds: new List(constants.nfl_draft_rounds),
   experience: new List([0, 1, -1]),
   status: new List(Object.keys(constants.status)),
   teams: new List(),
