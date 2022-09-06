@@ -9,7 +9,9 @@ router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const query = getPlayByPlayQuery(db)
-    const data = await query.where('nfl_plays.seas', constants.season.year)
+    const data = await query
+      .where('nfl_plays.seas', constants.season.year)
+      .where('nfl_plays.seas_type', 'REG')
     res.send(data)
   } catch (error) {
     logger(error)
@@ -94,6 +96,8 @@ router.get('/charted', async (req, res) => {
     }
 
     let query = getChartedPlayByPlayQuery(db)
+
+    query = query.where('nfl_games.seas_type', 'REG')
 
     if (pid) {
       const player_rows = await db('player').where({ pid }).limit(1)
