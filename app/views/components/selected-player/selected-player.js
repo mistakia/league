@@ -115,6 +115,7 @@ export default class SelectedPlayer extends React.Component {
     const playerStatus = playerMap.get('status')
     const draftNum = playerMap.get('dpos')
     const draftYear = playerMap.get('start')
+    const draftRound = playerMap.get('round')
     const playerValue = playerMap.get('value')
     const rosPoints = playerMap.getIn(['points', 'ros', 'total'], 0)
 
@@ -196,7 +197,7 @@ export default class SelectedPlayer extends React.Component {
                   </div>
                   <div className='selected__player-header-item'>
                     <label>Draft</label>
-                    {draftNum ? `#${draftNum}` : 'UDFA'}
+                    {draftNum ? `Rd ${draftRound} (#${draftNum})` : 'UDFA'}
                   </div>
                   <div className='selected__player-header-item'>
                     <label>Exp.</label>
