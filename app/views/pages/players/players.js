@@ -9,9 +9,10 @@ import SearchFilter from '@components/search-filter'
 import StatusFilter from '@components/status-filter'
 import TeamFilter from '@components/team-filter'
 import PositionFilter from '@components/position-filter'
+import DraftRoundFilter from '@components/draft-round-filter'
 import ExperienceFilter from '@components/experience-filter'
 import WeekFilter from '@components/week-filter'
-import AgeFilter from '@components/age-filter'
+// import AgeFilter from '@components/age-filter' TODO — fix
 import WatchlistFilter from '@components/watchlist-filter'
 import PageLayout from '@layouts/page'
 import PlayerHeader from '@components/player-header'
@@ -332,7 +333,8 @@ export default class PlayersPage extends React.Component {
           {this.state.expanded && (
             <div className='players__filters-row'>
               <ExperienceFilter />
-              <AgeFilter />
+              {/* <AgeFilter /> */}
+              <DraftRoundFilter />
               <NFLTeamsFilter />
               <CollegeFilter />
               <CollegeDivisionFilter />

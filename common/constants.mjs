@@ -14,6 +14,8 @@ export const year = season.year
 export const isOffseason = season.isOffseason
 export const isRegularSeason = season.isRegularSeason
 
+export const nfl_draft_rounds = [0, 1, 2, 3, 4, 5, 6, 7]
+
 export const DEFAULTS = {
   LEAGUE_ID: 0
 }
