@@ -30,6 +30,7 @@ router.get('/stats', async (req, res) => {
         )
       })
       .where('nfl_plays.seas', constants.season.year)
+      .where('nfl_plays.seas_type', 'REG')
       .where('nfl_play_stats.valid', 1)
     res.send(data)
   } catch (error) {
