@@ -4,7 +4,7 @@ import { propActions } from './actions'
 import { constants } from '@common'
 
 const initialState = new Map({
-  types: new List(Object.values(constants.oddTypes)),
+  types: new List(Object.values(constants.player_prop_types)),
   items: new List()
 })
 

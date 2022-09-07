@@ -25,7 +25,9 @@ export default class PropsPage extends React.Component {
             <PlayerName pid={prop.pid} />
           </div>
           <div className='item__col-group'>
-            <div className='item__col'>{constants.oddTypeDesc[prop.type]}</div>
+            <div className='item__col'>
+              {constants.player_prop_type_desc[prop.type]}
+            </div>
             <div className='item__col'>
               {constants.sourcesTitle[prop.sourceid]}
             </div>
