@@ -1164,22 +1164,22 @@ export const player_prop_type_desc = {
   2: 'Rush Yards (seas)',
   3: 'Recv Yards (seas)',
 
-  4: 'Pass Yards (game)',
-  5: 'Recv Yards (game)',
-  6: 'Rush Yards (game)',
-  7: 'Pass Comps (game)',
-  8: 'Pass TDs (game)',
-  9: 'Receptions (game)',
-  10: 'Ints (game)',
-  11: 'Rush Atts (game)',
-  12: 'Rush+Recv Yards (game)',
-  13: 'Recv TDs (game)',
-  14: 'Rush TDs (game)',
-  15: 'Pass Atts (game)',
-  16: 'Longest Comp (game)',
-  17: 'Longest Rec (game)',
-  18: 'TDs (game)',
-  19: 'Longest Rush (game)'
+  4: 'Pass Yards',
+  5: 'Recv Yards',
+  6: 'Rush Yards',
+  7: 'Pass Comps',
+  8: 'Pass TDs',
+  9: 'Receptions',
+  10: 'Ints',
+  11: 'Rush Atts',
+  12: 'Rush+Recv Yards',
+  13: 'Recv TDs',
+  14: 'Rush TDs',
+  15: 'Pass Atts',
+  16: 'Longest Comp',
+  17: 'Longest Rec',
+  18: 'TDs',
+  19: 'Longest Rush'
 }
 
 export const sources = {

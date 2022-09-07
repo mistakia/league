@@ -1,12 +1,20 @@
 import express from 'express'
 
 import { constants } from '#common'
+import cache from '#api/cache.mjs'
 
 const router = express.Router()
 
 router.get('/props', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
+    const cacheKey = '/odds'
+
+    const odds = cache.get(cacheKey)
+    if (odds) {
+      return res.send(odds)
+    }
+
     const sub = db('props')
       .select(db.raw('max(timestamp) AS maxtime, sourceid AS sid'))
       .groupBy('sid')
@@ -22,6 +30,9 @@ router.get('/props', async (req, res) => {
         })
       })
       .where({ wk: constants.season.week, year: constants.season.year })
+
+    cache.set(cacheKey, data, 300) // 5 mins
+
     res.send(data)
   } catch (error) {
     logger(error)

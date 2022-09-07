@@ -54,16 +54,30 @@ export function getFilteredProps(state) {
         prop.proj = proj.tdr + proj.tdrec
         break
 
+      case constants.player_prop_types.GAME_SCRIMMAGE_YARDS:
+        prop.proj = proj.ry + proj.recy
+        break
+
+      case constants.player_prop_types.GAME_PASSING_ATTEMPTS:
+        prop.proj = proj.pa
+        break
+
+      case constants.player_prop_types.GAME_RUSHING_TOUCHDOWNS:
+        prop.proj = proj.tdr
+        break
+
+      case constants.player_prop_types.GAME_RECEIVING_TOUCHDOWNS:
+        prop.proj = proj.tdrec
+        break
+
       default:
         console.log(`unrecognized betype: ${prop.type}`)
     }
 
     prop.diff = prop.proj - prop.ln
     prop.abs = Math.abs(prop.diff)
-    prop.odds = Odds.from('decimal', prop.diff > 0 ? prop.o : prop.u).to(
-      'moneyline',
-      { precision: 0 }
-    )
+    prop.over = Odds.from('decimal', prop.o).to('moneyline', { precision: 0 })
+    prop.under = Odds.from('decimal', prop.u).to('moneyline', { precision: 0 })
   }
 
   return items.sort((a, b) => b.abs - a.abs)
