@@ -28,7 +28,6 @@ const run = async () => {
 
   for (const category of draftkings.categories) {
     const offers = await draftkings.getOffers(category)
-    log(offers)
 
     if (!offers) continue
 
