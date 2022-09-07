@@ -16,6 +16,7 @@ export default async function ({
   activate_pid,
   create_notification = false
 }) {
+  const timestamp = Math.round(Date.now() / 1000)
   const data = []
 
   // verify player id
@@ -134,9 +135,22 @@ export default async function ({
       value,
       week: constants.season.week,
       year: constants.season.year,
-      timestamp: Math.round(Date.now() / 1000)
+      timestamp
     }
     await db('transactions').insert(transaction)
+
+    // clear any pending poaching claims for player
+    await db('poaches')
+      .update({
+        succ: 0,
+        processed: timestamp,
+        reason: 'player is not on a practice squad' // TODO use constant
+      })
+      .where({
+        lid,
+        pid: activate_pid
+      })
+      .whereNull('processed')
 
     // return data
     data.push({
@@ -159,7 +173,7 @@ export default async function ({
     value: 0,
     week: constants.season.week,
     year: constants.season.year,
-    timestamp: Math.round(Date.now() / 1000)
+    timestamp
   }
   await db('transactions').insert(transaction)
 
