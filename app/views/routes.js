@@ -81,7 +81,7 @@ const Routes = ({ app }) => {
         <Route path='/leagues/:lid/settings' element={<LeagueSettingsPage />} />
         <Route path='/leagues/:lid' element={<LeagueHomePage />} />
       </Route>
-      {app.userId && <Route path='/props' element={<PropsPage />} />}
+      <Route path='/props' element={<PropsPage />} />
       <Route path='/status' element={<StatusPage />} />
       <Route path='/settings' element={<SettingsPage />} />
       <Route
