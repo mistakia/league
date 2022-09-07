@@ -164,14 +164,9 @@ export default function LeagueHomePage({
     }
   }
 
-  for (const playerMap of players.practice) {
-    if (!playerMap.get('pid')) continue
-
-    const poach = poaches.find(
-      (p) => p.getIn(['playerMap', 'pid']) === playerMap.get('pid')
-    )
-
-    if (!poach) continue
+  for (const poach of poaches) {
+    const playerMap = poach.get('playerMap')
+    if (!playerMap) continue
 
     const processingTime = dayjs.unix(poach.submitted).add('48', 'hours')
     notices.push(
