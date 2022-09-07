@@ -276,6 +276,7 @@ const processLeague = async ({ year, lid }) => {
   }
 
   if (pointsInserts.length) {
+    await db('league_player_projection_points').del().where({ lid })
     await db('league_player_projection_points')
       .insert(pointsInserts)
       .onConflict()
@@ -284,6 +285,7 @@ const processLeague = async ({ year, lid }) => {
   }
 
   if (valueInserts.length) {
+    await db('league_player_projection_values').del().where({ lid })
     await db('league_player_projection_values')
       .insert(valueInserts)
       .onConflict()
