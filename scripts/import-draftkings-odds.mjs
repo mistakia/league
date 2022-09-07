@@ -1,35 +1,14 @@
 import debug from 'debug'
-import fetch from 'node-fetch'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants, groupBy } from '#common'
-import { isMain, getPlayer } from '#utils'
+import { constants } from '#common'
+import { isMain, getPlayer, draftkings, wait } from '#utils'
 
 const argv = yargs(hideBin(process.argv)).argv
-const log = debug('import:odds')
-debug.enable('import:odds,get-player')
-
-const URL = 'https://sportsbook.draftkings.com/leagues/football/3'
-
-const types = {
-  /* 'Most Passing Yards in the Regular Season': constants.oddTypes.SEASON_PASSING,
-   * 'Most Rushing Yards in the Regular Season': constants.oddTypes.SEASON_RUSHING,
-   * 'Most Receiving Yards in the Regular Season': constants.oddTypes.SEASON_RECEIVING, */
-  'Total Passing Yards by the Player': constants.oddTypes.GAME_PASSING,
-  'Total Pass Completions by the Player - Including Overtime':
-    constants.oddTypes.GAME_COMPLETIONS,
-  'Total Touchdown Passes Thrown by the Player - Including Overtime':
-    constants.oddTypes.GAME_PASSING_TOUCHDOWN,
-  'Total Interceptions thrown by the Player':
-    constants.oddTypes.GAME_INTERCEPTIONS,
-  'Total Rushing Yards by the Player - Including Overtime':
-    constants.oddTypes.GAME_RUSHING,
-  'Total Receiving Yards by the Player - Including Overtime':
-    constants.oddTypes.GAME_RECEIVING,
-  'Total Receptions by the Player': constants.oddTypes.GAME_RECEPTIONS
-}
+const log = debug('import-draft-kings')
+debug.enable('import-draft-kings,get-player,draftkings')
 
 const timestamp = Math.round(Date.now() / 1000)
 
@@ -44,72 +23,52 @@ const run = async () => {
     return
   }
 
-  // request page
-  const data = await fetch(URL).then((res) => res.text())
-
-  // parse out data
-  const regex = /window\.__INITIAL_STATE__\s=\s+([^\n]+)/i
-  const embeddedData = data.match(regex)
-
-  // format data
-  const parsed = JSON.parse(embeddedData[1].slice(0, -1))
-
-  // fs.writeJsonSync('draftkings.json', parsed, { spaces: 2 })
-  // const parsed = fs.readJsonSync('draftkings.json')
-
-  const offers = {}
   const missing = []
-  for (const offer of Object.values(parsed.offers[3])) {
-    if (!types[offer.label]) continue
-    if (!offers[offer.label]) offers[offer.label] = []
-    offer.outcomes.forEach((o) => offers[offer.label].push(o))
-  }
-
   const props = []
-  for (const [type, value] of Object.entries(offers)) {
-    // group by providerOfferId
-    const groups = groupBy(value, 'providerOfferId')
 
-    for (const [id, bets] of Object.entries(groups)) {
-      const prop = {}
+  for (const category of draftkings.categories) {
+    const offers = await draftkings.getOffers(category)
+    log(offers)
 
-      // find player
+    if (!offers) continue
+
+    for (const offer of offers) {
+      // TODO get event info to figure out team
       let player_row
-      const params = { name: bets[0].participant }
+      const params = { name: offer.outcomes[0].participant }
       try {
         player_row = await getPlayer(params)
-        if (!player_row) {
-          missing.push(params)
-          continue
-        }
       } catch (err) {
-        console.log(err)
+        log(err)
+      }
+
+      if (!player_row) {
         missing.push(params)
         continue
       }
 
+      const prop = {}
       prop.pid = player_row.pid
-      prop.type = types[type]
-      prop.id = id
+      prop.type = category.type
+      prop.id = offer.providerOfferId
       prop.timestamp = timestamp
       prop.wk = constants.season.week
       prop.year = constants.season.year
       prop.sourceid = constants.sources.DRAFT_KINGS
 
-      const betInfo = bets[0].label.split(' ')
-      prop.ln = parseFloat(betInfo[1], 10)
+      prop.ln = parseFloat(offer.outcomes[0].line, 10)
 
-      for (const bet of bets) {
-        const betInfo = bet.label.split(' ')
-        const betType = betInfo[0]
-        if (betType === 'Over') {
-          prop.o = bet.oddsDecimal
-        } else if (betType === 'Under') {
-          prop.u = bet.oddsDecimal
+      for (const outcome of offer.outcomes) {
+        if (outcome.label === 'Over') {
+          prop.o = outcome.oddsDecimal
+        } else if (outcome.label === 'Under') {
+          prop.u = outcome.oddsDecimal
         }
       }
       props.push(prop)
     }
+
+    await wait(5000)
   }
 
   log(`Could not locate ${missing.length} players`)
@@ -122,8 +81,10 @@ const run = async () => {
     return
   }
 
-  log(`Inserting ${props.length} props into database`)
-  await db('props').insert(props)
+  if (props.length) {
+    log(`Inserting ${props.length} props into database`)
+    await db('props').insert(props)
+  }
 }
 
 const main = async () => {

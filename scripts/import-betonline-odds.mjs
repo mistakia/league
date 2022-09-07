@@ -25,14 +25,14 @@ const URL =
   ].join('&')
 
 const types = {
-  'Passing Yards': constants.oddTypes.GAME_PASSING,
-  'Pass Completions': constants.oddTypes.GAME_COMPLETIONS,
-  'Passing TDs': constants.oddTypes.GAME_PASSING_TOUCHDOWN,
-  'Rushing Yards': constants.oddTypes.GAME_RUSHING,
-  'Receiving Yards': constants.oddTypes.GAME_RECEIVING,
-  Receptions: constants.oddTypes.GAME_RECEPTIONS,
-  Carries: constants.oddTypes.GAME_CARRIES,
-  Touchdowns: constants.oddTypes.GAME_TOUCHDOWNS
+  'Passing Yards': constants.player_prop_types.GAME_PASSING_YARDS,
+  'Pass Completions': constants.player_prop_types.GAME_PASSING_COMPLETIONS,
+  'Passing TDs': constants.player_prop_types.GAME_PASSING_TOUCHDOWNS,
+  'Rushing Yards': constants.player_prop_types.GAME_RUSHING_YARDS,
+  'Receiving Yards': constants.player_prop_types.GAME_RECEIVING_YARDS,
+  Receptions: constants.player_prop_types.GAME_RECEPTIONS,
+  Carries: constants.player_prop_types.GAME_RUSHING_ATTEMPTS,
+  Touchdowns: constants.player_prop_types.GAME_TOUCHDOWNS
 }
 
 const timestamp = Math.round(Date.now() / 1000)

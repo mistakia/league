@@ -1136,36 +1136,48 @@ export const jobDetails = {
   53: 'Process Playoffs'
 }
 
-export const oddTypes = {
-  SEASON_PASSING: 1,
-  SEASON_RUSHING: 2,
-  SEASON_RECEIVING: 3,
+export const player_prop_types = {
+  SEASON_PASSING_YARDS: 1,
+  SEASON_RUSHING_YARDS: 2,
+  SEASON_RECEIVING_YARDS: 3,
 
-  GAME_PASSING: 4,
-  GAME_RECEIVING: 5,
-  GAME_RUSHING: 6,
-  GAME_COMPLETIONS: 7,
+  GAME_PASSING_YARDS: 4,
+  GAME_RECEIVING_YARDS: 5,
+  GAME_RUSHING_YARDS: 6,
+  GAME_PASSING_COMPLETIONS: 7,
   GAME_PASSING_TOUCHDOWNS: 8,
   GAME_RECEPTIONS: 9,
-  GAME_INTERCEPTIONS: 10,
-  GAME_CARRIES: 11,
-  GAME_TOUCHDOWNDS: 12
+  GAME_PASSING_INTERCEPTIONS: 10,
+  GAME_RUSHING_ATTEMPTS: 11,
+  GAME_SCRIMMAGE_YARDS: 12,
+  GAME_RECEIVING_TOUCHDOWNS: 13,
+  GAME_RUSHING_TOUCHDOWNS: 14,
+  GAME_PASSING_ATTEMPTS: 15,
+  GAME_PASSING_LONGEST_COMPLETION: 16,
+  GAME_LONGEST_RECEPTION: 17,
+  GAME_TOUCHDOWNS: 18
 }
 
-export const oddTypeDesc = {
-  1: 'Pass (seas)',
-  2: 'Rush (seas)',
-  3: 'Recv (seas)',
+export const player_prop_type_desc = {
+  1: 'Pass Yards (seas)',
+  2: 'Rush Yards (seas)',
+  3: 'Recv Yards (seas)',
 
-  4: 'Pass',
-  5: 'Recv',
-  6: 'Rush',
-  7: 'Comp',
-  8: 'Pass TDs',
-  9: 'Rec',
-  10: 'Int',
-  11: 'Carry',
-  12: 'TDs'
+  4: 'Pass Yards (game)',
+  5: 'Recv Yards (game)',
+  6: 'Rush Yards (game)',
+  7: 'Pass Comps (game)',
+  8: 'Pass TDs (game)',
+  9: 'Receptions (game)',
+  10: 'Ints (game)',
+  11: 'Rush Atts (game)',
+  12: 'Rush+Recv Yards (game)',
+  13: 'Recv TDs (game)',
+  14: 'Rush TDs (game)',
+  15: 'Pass Atts (game)',
+  16: 'Longest Comp (game)',
+  17: 'Longest Rec (game)',
+  18: 'TDs (game)'
 }
 
 export const sources = {
