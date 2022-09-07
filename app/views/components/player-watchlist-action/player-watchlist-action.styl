@@ -5,9 +5,16 @@
   .icon
     width 20px
 
-  &:hover
-    .icon
-      fill $accentColor
-
   &.selected .icon
     fill $accentColor
+
+body.hide-watchlist
+  .player__watchlist-action
+  .player__watchlist-action.selected
+    opacity 0
+
+@media (pointer: fine)
+  .player__watchlist-action
+    &:hover
+      .icon
+        fill $accentColor
