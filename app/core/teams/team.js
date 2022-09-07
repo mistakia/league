@@ -11,6 +11,7 @@ export const Team = new Record({
   cap: null,
   faab: null,
   wo: null,
+  do: null,
   pc: null,
   ac: null,
   teamtext: 0,
@@ -50,7 +51,9 @@ export function createTeam({
   bye_odds,
   championship_odds,
 
-  stats
+  stats,
+
+  ...params
 }) {
   return new Team({
     uid,
@@ -62,6 +65,7 @@ export function createTeam({
     cap,
     faab,
     wo,
+    do: params.do,
     pc,
     ac,
     teamtext,

@@ -90,6 +90,7 @@ export default function Filter(props) {
   const items = values.map((v, index) => {
     const classNames = ['player__filter-dropdown-item']
     if (v.selected) classNames.push('selected')
+    if (v.className) classNames.push(v.className)
     return (
       <div
         key={v.value}

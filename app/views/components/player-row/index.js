@@ -4,6 +4,7 @@ import { createSelector } from 'reselect'
 import { getApp } from '@core/app'
 import { getStats } from '@core/stats'
 import { getPlayers, playerActions, getPlayerStatus } from '@core/players'
+import { getTeams } from '@core/teams'
 
 import PlayerRow from './player-row'
 
@@ -12,10 +13,13 @@ const mapStateToProps = createSelector(
   getApp,
   getStats,
   getPlayerStatus,
-  (players, app, statsState, status) => ({
+  getTeams,
+  (players, app, statsState, status, teams) => ({
     status,
+    teams,
     teamId: app.teamId,
     isLoggedIn: Boolean(app.userId),
+    highlight_teamIds: players.get('highlight_teamIds'),
     selectedPlayer: players.get('selected'),
     baselines: players.get('baselines'),
     percentiles: statsState.playsPercentiles,
