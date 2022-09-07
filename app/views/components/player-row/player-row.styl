@@ -1,7 +1,6 @@
 $height = 30px
 
 .player__row-lead
-  background $backgroundColor
   display inline-flex
   height 100%
   align-items center
@@ -31,15 +30,54 @@ $height = 30px
 
   &.rostered
   &.rostered .player__row-lead
-    background lighten(yellow, 80%)
+    background lighten($yellow, 12%)
 
   &.baseline__player
   &.baseline__player .player__row-lead
     border-bottom 2px solid red
 
-  &:hover
-  &:hover .player__row-lead
-    background white
+  &.draft-order-1
+    background lighten($red, 12%)
+    color white
+
+  &.draft-order-2
+    background lighten($orange, 12%)
+
+  &.draft-order-3
+    background lighten($purple, 12%)
+    color white
+
+  &.draft-order-4
+    background lighten($pink, 12%)
+
+  &.draft-order-5
+    background lighten($green, 12%)
+    color white
+
+  &.draft-order-6
+    background lighten($cyan, 12%)
+
+  &.draft-order-7
+    background lighten($blue, 12%)
+    color white
+
+  &.draft-order-8
+    background lighten($navy, 12%)
+    color white
+
+  &.draft-order-9
+    background lighten($lime, 12%)
+
+  &.draft-order-10
+    background lighten($brown, 12%)
+    color white
+
+  &.draft-order-11
+    background lighten($mint, 12%)
+
+  &.draft-order-12
+    background lighten($maroon, 12%)
+    color white
 
 .player__row-index
   flex 0 0 25px
@@ -55,8 +93,6 @@ $height = 30px
   white-space nowrap
   margin-right 16px
   line-height 20px
-  &:hover
-    color $accentColor
 
   .nfl__team
     margin-left 4px
@@ -100,8 +136,6 @@ $height = 30px
 .row__action
   flex 0 0 24px
   cursor pointer
-  &:hover
-    fill $accentColor
 
 .average__row
   border-top 1px solid $borderColor
@@ -148,3 +182,18 @@ $height = 30px
         display flex
       .player__row-tag
         display none
+
+@media (pointer: fine)
+  .player__row
+    &:hover
+    &:hover .player__row-lead
+      background white
+      color black
+
+  .player__row-name
+    &:hover
+      color $accentColor
+
+  .row__action
+    &:hover
+      fill $accentColor

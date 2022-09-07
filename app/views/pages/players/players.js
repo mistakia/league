@@ -7,6 +7,7 @@ import InfiniteScroll from 'react-infinite-scroller'
 
 import SearchFilter from '@components/search-filter'
 import StatusFilter from '@components/status-filter'
+import HighlightTeam from '@components/highlight-team'
 import TeamFilter from '@components/team-filter'
 import PositionFilter from '@components/position-filter'
 import DraftRoundFilter from '@components/draft-round-filter'
@@ -339,7 +340,8 @@ export default class PlayersPage extends React.Component {
               <CollegeFilter />
               <CollegeDivisionFilter />
               <StatusFilter />
-              {isLoggedIn && <TeamFilter />}
+              <TeamFilter />
+              <HighlightTeam />
             </div>
           )}
         </div>

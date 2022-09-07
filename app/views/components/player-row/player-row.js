@@ -14,6 +14,7 @@ import IconButton from '@components/icon-button'
 import { constants } from '@common'
 import PlayerLabel from '@components/player-label'
 import PlayerTag from '@components/player-tag'
+import { Team } from '@core/teams'
 
 import './player-row.styl'
 
@@ -38,13 +39,16 @@ class PlayerRow extends Player {
       status,
       baselines,
       teamId,
-      index
+      index,
+      teams,
+      highlight_teamIds
     } = this.props
 
     const pid = playerMap.get('pid')
     const tid = playerMap.get('tid')
+    const team = teams.get(tid) || new Team()
+    const nfl_team = playerMap.get('team')
     const pos = playerMap.get('pos')
-    const team = playerMap.get('team')
     const isRostered = Boolean(tid)
     const isSelected = selectedPlayer === pid || selected === pid
 
@@ -555,6 +559,8 @@ class PlayerRow extends Player {
     const classNames = ['player__row']
     if (isSelected) classNames.push('selected')
     if (isLoggedIn && !isRostered) classNames.push('fa')
+    else if (highlight_teamIds.includes(tid))
+      classNames.push(`draft-order-${team.get('do')}`)
     else if (tid === teamId) classNames.push('rostered')
 
     const projectionView = isRestOfSeasonView || isSeasonView || isWeekView
@@ -585,7 +591,7 @@ class PlayerRow extends Player {
             {constants.year === playerMap.get('start') && (
               <PlayerLabel label='R' type='rookie' description='Rookie' />
             )}
-            <NFLTeam team={team} />
+            <NFLTeam team={nfl_team} />
           </div>
           {isLoggedIn && (
             <div className='player__row-tag'>
@@ -605,7 +611,7 @@ class PlayerRow extends Player {
             </div>
           )}
           {isWeekView && (
-            <PlayerRowOpponent team={team} pos={pos} week={week} />
+            <PlayerRowOpponent team={nfl_team} pos={pos} week={week} />
           )}
           {isLoggedIn && (
             <div className='player__row-availability'>
