@@ -11,6 +11,8 @@ export default async function ({ tid, activate_pid, leagueId, userId }) {
     throw new Error('invalid leagueId')
   }
 
+  const timestamp = Math.round(Date.now() / 1000)
+
   const rosterRow = await getRoster({ tid })
   const roster = new Roster({ roster: rosterRow, league })
 
@@ -64,9 +66,22 @@ export default async function ({ tid, activate_pid, leagueId, userId }) {
     value: player_row.value,
     week: constants.season.week,
     year: constants.season.year,
-    timestamp: Math.round(Date.now() / 1000)
+    timestamp
   }
   await db('transactions').insert(transaction)
+
+  // clear any pending poaching claims for player
+  await db('poaches')
+    .update({
+      succ: 0,
+      processed: timestamp,
+      reason: 'player is not on a practice squad' // TODO use constant
+    })
+    .where({
+      lid: leagueId,
+      pid: activate_pid
+    })
+    .whereNull('processed')
 
   const data = {
     pid: activate_pid,
