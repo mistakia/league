@@ -1155,7 +1155,8 @@ export const player_prop_types = {
   GAME_PASSING_ATTEMPTS: 15,
   GAME_PASSING_LONGEST_COMPLETION: 16,
   GAME_LONGEST_RECEPTION: 17,
-  GAME_TOUCHDOWNS: 18
+  GAME_TOUCHDOWNS: 18,
+  GAME_LONGEST_RUSH: 19
 }
 
 export const player_prop_type_desc = {
@@ -1177,7 +1178,8 @@ export const player_prop_type_desc = {
   15: 'Pass Atts (game)',
   16: 'Longest Comp (game)',
   17: 'Longest Rec (game)',
-  18: 'TDs (game)'
+  18: 'TDs (game)',
+  19: 'Longest Rush (game)'
 }
 
 export const sources = {
