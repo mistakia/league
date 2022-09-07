@@ -18,6 +18,7 @@ const initialState = new Map({
   search: null,
   positions: new List(['QB', 'RB', 'WR', 'TE', 'K', 'DST']),
   nflTeams: new List(constants.nflTeams),
+  highlight_teamIds: new List(),
   teamIds: new List(),
   colleges: new List(constants.colleges),
   collegeDivisions: new List(constants.collegeDivisions),
