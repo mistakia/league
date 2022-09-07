@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useMatch } from 'react-router-dom'
 import PropTypes from 'prop-types'
-// import hotkeys from 'hotkeys-js'
+import hotkeys from 'hotkeys-js'
 
 import Menu from '@components/menu'
 import Routes from '@views/routes'
@@ -17,6 +17,10 @@ import '@simonwep/pickr/dist/themes/nano.min.css'
 import '@styles/normalize.css'
 import '@styles/index.styl'
 import './app.styl'
+
+hotkeys('control+command+w', function (event, handler) {
+  document.body.classList.toggle('hide-watchlist')
+})
 
 export default function App({ init, isPending }) {
   const isMobile = window.innerWidth < 800
