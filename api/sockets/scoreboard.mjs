@@ -44,18 +44,21 @@ export default class Scoreboard {
 
     const query = getPlayByPlayQuery(db)
     const plays = await query
-      .where('nfl_plays.seas', constants.season.year)
-      .where('nfl_plays.wk', constants.season.week)
-      .where('nfl_plays.seas_type', 'REG')
+      .where('nfl_plays_current_week.seas', constants.season.year)
+      .where('nfl_plays_current_week.wk', constants.season.week)
+      .where('nfl_plays_current_week.seas_type', 'REG')
       .where('updated', '>', updated)
 
     this._log(`${plays.length} updated plays found`)
 
     const esbids = Array.from(uniqBy(plays, 'esbid')).map((p) => p.esbid)
-    const playStats = await db('nfl_play_stats')
+    const playStats = await db('nfl_play_stats_current_week')
       .whereIn('esbid', esbids)
       .where('valid', 1)
-    const playSnaps = await db('nflSnap').whereIn('esbid', esbids)
+    const playSnaps = await db('nfl_snaps_current_week').whereIn(
+      'esbid',
+      esbids
+    )
 
     for (const play of plays) {
       play.playStats = playStats.filter(
