@@ -90,14 +90,6 @@
 ## Import football outsiders dvoa at 12:00 from Thursday to Saturday.
 # 0 12 * 1,2,9-12 4-6 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-football-outsiders.mjs &>> /var/log/league/import-football-outsiders.log
 
-################################### GAMES ########################################
-
-## Update NFL Schedule At 03:00 every day (Regular Season)
-0 3 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-games-ngs.mjs &>> /var/log/league/import-nfl-games-ngs.log
-
-## Update NFL Schedule At 03:00 every day (Off Season)
-0 3 * 5-8 0 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-games-ngs.mjs &>> /var/log/league/import-nfl-games-ngs.log
-
 ################################### RANKINGS ########################################
 
 ## At 00:00 on Wednesday and Saturday
@@ -148,30 +140,6 @@
 ## Backup All Data (At 04:00 on Wednesday in every month from September through December)
 0 4 * 9-12 3 /bin/bash /root/league/scripts/mysql-backup.sh -f &>> /var/log/league/league-mysql-backup-full.log
 
-
-################################### Live Game Plays ########################################
-
-## At every 15th minute past every hour from 19 through 20 on Monday in January, February, and every month from September through December.
-*/15 19-20 * 1,2,9-12 1 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-games-nfl.mjs --current &>> /var/log/league/league-import-nfl-games-nfl.log
-
-## At every 15th minute past every hour from 19 through 20 on Thursday in January, February, and every month from September through December.
-*/15 19-20 * 1,2,9-12 4 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-games-nfl.mjs --current &>> /var/log/league/league-import-nfl-games-nfl.log
-
-## At every 15th minute on Sunday in January, February, and every month from September through December.
-*/15 * * 1,2,9-12 7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-games-nfl.mjs --current &>> /var/log/league/league-import-nfl-games-nfl.log
-
-## At every minute past every hour from 20 through 23 on Monday in January, February, and every month from September through December.
-*/1 20-23 * 1,2,9-12 1 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays-nfl.mjs &>> /var/log/league/league-import-plays-nfl.log
-*/1 20-23 * 1,2,9-12 1 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays-ngs.mjs &>> /var/log/league/league-import-plays-ngs.log
-
-## At every minute past every hour from 20 through 23 on Thursday in January, February, and every month from September through December.
-*/1 20-23 * 1,2,9-12 4 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays-nfl.mjs &>> /var/log/league/league-import-plays-nfl.log
-*/1 20-23 * 1,2,9-12 4 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays-ngs.mjs &>> /var/log/league/league-import-plays-ngs.log
-
-## At every minute past every hour from 13 through 23 on Sunday in January, February, and every month from September through December.
-*/1 13-23 * 1,2,9-12 7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays-ngs.mjs &>> /var/log/league/league-import-plays-ngs.log
-*/1 13-23 * 1,2,9-12 7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays-nfl.mjs &>> /var/log/league/league-import-plays-nfl.log
-
 ################################### Finalize Game Plays ########################################
 
 ## At 00:00 on Monday
@@ -180,10 +148,6 @@
 ## At 00:00 on Tuesday.
 0 0 * 1,2,9-12 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-play-stats.mjs &>> /var/log/league/league-process-play-stats.log
 # 0 0 * 1,2,9-12 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-matchups.mjs --lid 1 --year 2021 &>> /var/log/league/league-process-matchups.log
-
-## At 01:00 on Tuesday.
-0 1 * 1,2,9-12 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays-ngs.mjs --final &>> /var/log/league/league-import-plays-ngs.log
-0 1 * 1,2,9-12 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays-nfl.mjs --final &>> /var/log/league/league-import-plays-nfl.log
 
 ## At 01:15 on Tuesday.
 15 1 * 1,2,9-12 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-play-stats.mjs &>> /var/log/league/league-process-play-stats.log
