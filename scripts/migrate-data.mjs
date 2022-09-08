@@ -12,15 +12,7 @@ debug.enable('migrate-data')
 
 const migrateData = async () => {
   const props = await db('props')
-    .select(
-      '*',
-      db.raw(
-        'concat(pid, "_", sourceid, "_", year, "_", wk, "_", type, "_", ln, "_", o, "_", u) as id'
-      )
-    )
-    .groupBy('id')
 
-  log(`found ${props.length} unique props`)
   for (const prop of props) {
     const { pid, sourceid, year, wk, type, ln, o, u, id } = prop
     const grouped_props = await db('props').where({
