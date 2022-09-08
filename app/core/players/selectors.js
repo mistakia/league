@@ -395,9 +395,8 @@ export function getGamesByYearForSelectedPlayer(state) {
 
 export function isPlayerOnReleaseWaivers(state, { pid }) {
   const transactions = getReleaseTransactions(state)
-  const playerTransactions = transactions.filter((t) => t.pid === pid)
-
-  return isOnReleaseWaivers({ transactions: playerTransactions.toJS() })
+  const player_transactions = transactions.filter((t) => t.pid === pid).toJS()
+  return isOnReleaseWaivers({ transactions: player_transactions })
 }
 
 export function isPlayerReserveEligible(state, { playerMap }) {
@@ -530,7 +529,9 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
       status.waiver.active = true
       status.waiver.practice = true
     } else {
-      const onReleaseWaivers = isPlayerOnReleaseWaivers(state, { pid })
+      const onReleaseWaivers = isPlayerOnReleaseWaivers(state, {
+        pid: playerId
+      })
       const draft = isAfterDraft(state)
       const isPracticeSquadEligible = isPlayerPracticeSquadEligible(state, {
         playerMap
