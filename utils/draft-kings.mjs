@@ -1,6 +1,7 @@
 import fetch from 'node-fetch'
 import debug from 'debug'
 
+import config from '#config'
 import { constants } from '#common'
 
 const log = debug('draft-kings')
@@ -75,7 +76,7 @@ export const categories = [
 ]
 
 export const getOffers = async ({ offerCategoryId, subcategoryId }) => {
-  const url = `https://sportsbook-us-va.draftkings.com//sites/US-VA-SB/api/v5/eventgroups/88808/categories/${offerCategoryId}/subcategories/${subcategoryId}?format=json`
+  const url = `${config.draftkings_api_v5_url}/eventgroups/88808/categories/${offerCategoryId}/subcategories/${subcategoryId}?format=json`
 
   log(`fetching ${url}`)
   const res = await fetch(url)

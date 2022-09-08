@@ -100,6 +100,11 @@ export default class Season {
     return isOffseason ? 0 : diff
   }
 
+  get week_end() {
+    const week = this.week
+    return this.start.add(week + 1, 'weeks')
+  }
+
   get year() {
     const now = this.now
     return now.isBefore(this.end) ? this.start.year() : this.end.year()

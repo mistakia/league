@@ -15,6 +15,8 @@ module.exports = {
   sportradar_api: '',
   espn_api_v2_url: '',
   espn_api_v3_url: '',
+  draftkings_api_v5_url: '',
+  caesars_api_v3_url: '',
   email: {
     api: '', // sendgrid api
     admin: '',
