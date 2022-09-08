@@ -2,6 +2,7 @@ export default function (team) {
   team = team ? team.toUpperCase() : null
 
   switch (team) {
+    case 'FA':
     case undefined:
     case null:
       return 'INA'
@@ -29,9 +30,6 @@ export default function (team) {
 
     case 'TBB':
       return 'TB'
-
-    case 'FA':
-      return 'INA'
 
     case 'NOS':
       return 'NO'
