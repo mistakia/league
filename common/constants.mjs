@@ -1083,7 +1083,8 @@ export const jobs = {
   IMPORT_PLAYS_NFLFASTR: 52,
   PROCESS_PLAYOFFS: 53,
 
-  CAESARS_ODDS: 54
+  CAESARS_ODDS: 54,
+  FANDUEL_ODDS: 55
 }
 
 export const jobDetails = {
@@ -1136,7 +1137,8 @@ export const jobDetails = {
   51: 'Import Keeptradecut',
   52: 'Import Plays nflfastR',
   53: 'Process Playoffs',
-  54: 'Caesars Player Prop Odds'
+  54: 'Caesars Player Prop Odds',
+  55: 'Fanduel Player Prop Odds'
 }
 
 export const player_prop_types = {
@@ -1207,7 +1209,8 @@ export const sources = {
   AVERAGE: 18,
 
   FBG_CONSENSUS: 19,
-  CAESARS: 20
+  CAESARS: 20,
+  FANDUEL: 21
 }
 
 export const sourcesTitle = {
@@ -1231,7 +1234,8 @@ export const sourcesTitle = {
 
   18: 'Average',
   19: 'Footballguys',
-  20: 'Caesars'
+  20: 'Caesars',
+  21: 'Fanduel'
 }
 
 export const rankings = {

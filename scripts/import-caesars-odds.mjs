@@ -41,6 +41,8 @@ const run = async () => {
     dayjs(event.startTime).isBefore(week_end)
   )
 
+  log(`Getting odds for ${current_week_events.length} events`)
+
   for (const event of current_week_events) {
     const event_odds = await caesars.getEvent(event.id)
 
