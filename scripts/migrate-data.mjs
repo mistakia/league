@@ -23,7 +23,6 @@ const migrateData = async () => {
   log(`found ${props.length} unique props`)
   for (const prop of props) {
     const { pid, sourceid, year, wk, type, ln, o, u, id } = prop
-    log({ pid, sourceid, year, wk, type, ln, o, u, id })
     const grouped_props = await db('props').where({
       pid,
       sourceid,
@@ -34,7 +33,10 @@ const migrateData = async () => {
       o,
       u
     })
+
     log(`grouped count ${grouped_props.length}`)
+    if (grouped_props.length < 2) continue
+
     const sorted = grouped_props.sort((a, b) => a.timestamp - b.timestamp)
     const earliest_timestamp = sorted[0].timestamp
     log(`first timestamp: ${earliest_timestamp}`)
