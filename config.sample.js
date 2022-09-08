@@ -17,6 +17,7 @@ module.exports = {
   espn_api_v3_url: '',
   draftkings_api_v5_url: '',
   caesars_api_v3_url: '',
+  fanduel_api_url: '',
   email: {
     api: '', // sendgrid api
     admin: '',
