@@ -50,9 +50,9 @@ const getPlayStatData = (playStat) => ({
   playerName: playStat.playerName
 })
 
-const upsertPlayStat = async ({ playStat, esbid, playId }) => {
+const upsertPlayStat = async ({ playStat, esbid, playId, isCurrentWeek }) => {
   const playStatData = getPlayStatData(playStat)
-  await db('nfl_play_stats')
+  await db(isCurrentWeek ? 'nfl_play_stats_current_week' : 'nfl_play_stats')
     .insert({
       playId,
       esbid,
@@ -67,8 +67,11 @@ const upsertPlayStat = async ({ playStat, esbid, playId }) => {
 const run = async ({
   year = constants.season.year,
   week = currentRegularSeasonWeek,
+  force_update = false,
   seas_type = 'REG'
 } = {}) => {
+  const isCurrentWeek =
+    year === constants.season.year && week === currentRegularSeasonWeek
   // get list of games for this week
   const games = await db('nfl_games').where({
     seas: year,
@@ -86,13 +89,15 @@ const run = async ({
     )
     if (dayjs().isBefore(gameStart)) continue
 
-    const currentPlays = await db('nfl_plays').where({ esbid })
+    const currentPlays = await db(
+      isCurrentWeek ? 'nfl_plays_current_week' : 'nfl_plays'
+    ).where({ esbid })
 
     const haveEndPlay = currentPlays.find(
       (p) => p.desc === 'END GAME' && p.state === 'APPROVED'
     )
 
-    if (!argv.final && haveEndPlay) continue
+    if (!force_update && haveEndPlay) continue
 
     log(`loading plays for esbid: ${esbid}`)
     const url = `${config.ngs_api_url}/live/plays/playlist/game?gameId=${esbid}`
@@ -106,7 +111,9 @@ const run = async ({
     if (!data || !data.plays) continue
 
     // reset playStats
-    await db('nfl_play_stats').update({ valid: 0 }).where({ esbid })
+    await db(isCurrentWeek ? 'nfl_play_stats_current_week' : 'nfl_play_stats')
+      .update({ valid: 0 })
+      .where({ esbid })
 
     const timestamp = Math.round(Date.now() / 1000)
     for (const play of data.plays) {
@@ -117,7 +124,7 @@ const run = async ({
 
       if (currentPlay) {
         // TODO only update changes
-        await db('nfl_plays')
+        await db(isCurrentWeek ? 'nfl_plays_current_week' : 'nfl_plays')
           .update({
             ...playData,
             seas_type,
@@ -125,20 +132,24 @@ const run = async ({
           })
           .where({ playId, esbid })
       } else {
-        await db('nfl_plays').insert({
-          playId,
-          esbid,
-          updated: timestamp,
-          seas_type,
-          ...playData
-        })
+        await db(isCurrentWeek ? 'nfl_plays_current_week' : 'nfl_plays').insert(
+          {
+            playId,
+            esbid,
+            updated: timestamp,
+            seas_type,
+            ...playData
+          }
+        )
       }
 
-      await db('nflSnap').where({ playId, esbid }).del()
+      await db(isCurrentWeek ? 'nfl_snaps_current_week' : 'nfl_snaps')
+        .where({ playId, esbid })
+        .del()
 
       // insert snaps
       for (const nflId of play.nflIds) {
-        await db('nflSnap')
+        await db(isCurrentWeek ? 'nfl_snaps_current_week' : 'nfl_snaps')
           .insert({
             esbid,
             nflId,
@@ -165,7 +176,7 @@ const main = async () => {
   let error
   try {
     if (argv.current) {
-      await run()
+      await run({ force_update: argv.final })
     } else if (argv.all) {
       for (let year = 2002; year < constants.season.year; year++) {
         log(
@@ -183,7 +194,12 @@ const main = async () => {
           log(`processing plays for ${weeks.length} weeks in ${year} (PRE)`)
           for (const { wk } of weeks) {
             log(`loading plays for week: ${wk} (PRE)`)
-            await run({ year, week: wk, seas_type: 'PRE' })
+            await run({
+              year,
+              week: wk,
+              seas_type: 'PRE',
+              force_update: argv.final
+            })
             await wait(4000)
           }
         }
@@ -197,7 +213,12 @@ const main = async () => {
           log(`processing plays for ${weeks.length} weeks in ${year} (REG)`)
           for (const { wk } of weeks) {
             log(`loading plays for week: ${wk} (REG)`)
-            await run({ year, week: wk, seas_type: 'REG' })
+            await run({
+              year,
+              week: wk,
+              seas_type: 'REG',
+              force_update: argv.final
+            })
             await wait(4000)
           }
         }
@@ -211,7 +232,12 @@ const main = async () => {
           log(`processing plays for ${weeks.length} weeks in ${year} (POST)`)
           for (const { wk } of weeks) {
             log(`loading plays for week: ${wk} (POST)`)
-            await run({ year, week: wk, seas_type: 'POST' })
+            await run({
+              year,
+              week: wk,
+              seas_type: 'POST',
+              force_update: argv.final
+            })
             await wait(4000)
           }
         }
@@ -226,7 +252,12 @@ const main = async () => {
 
       if (!argv.seas_type || argv.seas_type.toLowerCase() === 'pre') {
         if (argv.week) {
-          await run({ year, week: argv.week, seas_type: 'PRE' })
+          await run({
+            year,
+            week: argv.week,
+            seas_type: 'PRE',
+            force_update: argv.final
+          })
         } else {
           const weeks = await db('nfl_games')
             .select('wk')
@@ -236,7 +267,12 @@ const main = async () => {
           log(`processing plays for ${weeks.length} weeks in ${year} (PRE)`)
           for (const { wk } of weeks) {
             log(`loading plays for week: ${wk} (PRE)`)
-            await run({ year, week: wk, seas_type: 'PRE' })
+            await run({
+              year,
+              week: wk,
+              seas_type: 'PRE',
+              force_update: argv.final
+            })
             await wait(4000)
           }
         }
@@ -244,7 +280,12 @@ const main = async () => {
 
       if (!argv.seas_type || argv.seas_type.toLowerCase() === 'reg') {
         if (argv.week) {
-          await run({ year, week: argv.week, seas_type: 'REG' })
+          await run({
+            year,
+            week: argv.week,
+            seas_type: 'REG',
+            force_update: argv.final
+          })
         } else {
           const weeks = await db('nfl_games')
             .select('wk')
@@ -254,7 +295,12 @@ const main = async () => {
           log(`processing plays for ${weeks.length} weeks in ${year} (REG)`)
           for (const { wk } of weeks) {
             log(`loading plays for week: ${wk} (REG)`)
-            await run({ year, week: wk, seas_type: 'REG' })
+            await run({
+              year,
+              week: wk,
+              seas_type: 'REG',
+              force_update: argv.final
+            })
             await wait(4000)
           }
         }
@@ -262,7 +308,12 @@ const main = async () => {
 
       if (!argv.seas_type || argv.seas_type.toLowerCase() === 'post') {
         if (argv.week) {
-          await run({ year, week: argv.week, seas_type: 'POST' })
+          await run({
+            year,
+            week: argv.week,
+            seas_type: 'POST',
+            force_update: argv.final
+          })
         } else {
           const weeks = await db('nfl_games')
             .select('wk')
@@ -272,7 +323,12 @@ const main = async () => {
           log(`processing plays for ${weeks.length} weeks in ${year} (POST)`)
           for (const { wk } of weeks) {
             log(`loading plays for week: ${wk} (POST)`)
-            await run({ year, week: wk, seas_type: 'POST' })
+            await run({
+              year,
+              week: wk,
+              seas_type: 'POST',
+              force_update: argv.final
+            })
             await wait(4000)
           }
         }
@@ -280,7 +336,7 @@ const main = async () => {
     } else {
       const week = argv.week
       const seas_type = argv.seas_type
-      await run({ week, seas_type })
+      await run({ week, seas_type, force_update: argv.final })
     }
   } catch (err) {
     error = err

@@ -77,7 +77,7 @@ keeptradecut_rankings
 nfl_games
 nfl_play_stats
 nfl_plays
-nflSnap
+nfl_snaps
 player
 players_status
 practice
