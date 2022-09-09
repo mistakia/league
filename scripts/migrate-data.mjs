@@ -14,7 +14,7 @@ const migrateData = async () => {
   const props = await db('props')
 
   for (const prop of props) {
-    const { pid, sourceid, year, wk, type, ln, o, u, id } = prop
+    const { pid, sourceid, year, wk, type, ln, o, u } = prop
     const grouped_props = await db('props').where({
       pid,
       sourceid,
