@@ -162,7 +162,7 @@ const run = async ({
       // insert/update playStats
       if (play.playStats) {
         for (const playStat of play.playStats) {
-          await upsertPlayStat({ playStat, esbid, playId })
+          await upsertPlayStat({ playStat, esbid, playId, isCurrentWeek })
         }
       }
     }
