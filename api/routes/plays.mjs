@@ -25,7 +25,11 @@ router.get('/stats', async (req, res) => {
     const data = await db('nfl_play_stats_current_week')
       .select('nfl_play_stats_current_week.*', 'nfl_plays_current_week.wk')
       .leftJoin('nfl_plays_current_week', function () {
-        this.on('nfl_play_stats_current_week.esbid', '=', 'nfl_plays_current_week.esbid').andOn(
+        this.on(
+          'nfl_play_stats_current_week.esbid',
+          '=',
+          'nfl_plays_current_week.esbid'
+        ).andOn(
           'nfl_play_stats_current_week.playId',
           '=',
           'nfl_plays_current_week.playId'
