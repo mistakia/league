@@ -53,8 +53,4 @@ export function* watchInitApp() {
 //  ROOT
 // -------------------------------------
 
-export const gamelogSagas = [
-  fork(watchInitApp),
-  fork(watchGetTeamGamelogsFulfilled),
-  fork(watchGetPlayersGamelogsFulfilled)
-]
+export const gamelogSagas = [fork(watchInitApp)]
