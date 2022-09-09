@@ -110,10 +110,12 @@ const run = async ({
 
     if (!data || !data.plays) continue
 
-    // reset playStats
-    await db(isCurrentWeek ? 'nfl_play_stats_current_week' : 'nfl_play_stats')
-      .update({ valid: 0 })
-      .where({ esbid })
+    if (force_update) {
+      // reset playStats
+      await db(isCurrentWeek ? 'nfl_play_stats_current_week' : 'nfl_play_stats')
+        .update({ valid: 0 })
+        .where({ esbid })
+    }
 
     const timestamp = Math.round(Date.now() / 1000)
     for (const play of data.plays) {
