@@ -407,7 +407,7 @@ const main = async () => {
           }
         }
       }
-    } else if (!week) {
+    } else if (year && !week) {
       const weeks = await db('nfl_plays')
         .select('wk')
         .where({ seas: year, seas_type })
