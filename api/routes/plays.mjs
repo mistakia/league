@@ -10,8 +10,8 @@ router.get('/?', async (req, res) => {
   try {
     const query = getPlayByPlayQuery(db)
     const data = await query
-      .where('nfl_plays.seas', constants.season.year)
-      .where('nfl_plays.seas_type', 'REG')
+      .where('nfl_plays_current_week.seas', constants.season.year)
+      .where('nfl_plays_current_week.seas_type', 'REG')
     res.send(data)
   } catch (error) {
     logger(error)
@@ -22,18 +22,18 @@ router.get('/?', async (req, res) => {
 router.get('/stats', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    const data = await db('nfl_play_stats')
-      .select('nfl_play_stats.*', 'nfl_plays.wk')
-      .leftJoin('nfl_plays', function () {
-        this.on('nfl_play_stats.esbid', '=', 'nfl_plays.esbid').andOn(
-          'nfl_play_stats.playId',
+    const data = await db('nfl_play_stats_current_week')
+      .select('nfl_play_stats_current_week.*', 'nfl_plays_current_week.wk')
+      .leftJoin('nfl_plays_current_week', function () {
+        this.on('nfl_play_stats_current_week.esbid', '=', 'nfl_plays_current_week.esbid').andOn(
+          'nfl_play_stats_current_week.playId',
           '=',
-          'nfl_plays.playId'
+          'nfl_plays_current_week.playId'
         )
       })
-      .where('nfl_plays.seas', constants.season.year)
-      .where('nfl_plays.seas_type', 'REG')
-      .where('nfl_play_stats.valid', 1)
+      .where('nfl_plays_current_week.seas', constants.season.year)
+      .where('nfl_plays_current_week.seas_type', 'REG')
+      .where('nfl_play_stats_current_week.valid', 1)
     res.send(data)
   } catch (error) {
     logger(error)
