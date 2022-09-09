@@ -118,6 +118,6 @@ const fields = [
 ]
 
 export const getPlayByPlayQuery = (db) =>
-  db('nfl_plays')
+  db('nfl_plays_current_week')
     .select(fields)
-    .join('nfl_games', 'nfl_plays.esbid', '=', 'nfl_games.esbid')
+    .join('nfl_games', 'nfl_plays_current_week.esbid', '=', 'nfl_games.esbid')
