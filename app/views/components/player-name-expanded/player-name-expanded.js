@@ -29,7 +29,7 @@ function getClock({ desc, game_clock_start, qtr }) {
       return 'Final'
 
     default:
-      return qtr ? `${game_clock_start} ${qtr}${nth(qtr)}` : '-'
+      return qtr ? `${game_clock_start || ''} ${qtr}${nth(qtr)}` : '-'
   }
 }
 
