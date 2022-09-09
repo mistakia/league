@@ -70,8 +70,12 @@ const run = async ({
   force_update = false,
   seas_type = 'REG'
 } = {}) => {
+  // use current_week tables when importing live plays from the current week
   const isCurrentWeek =
-    year === constants.season.year && week === currentRegularSeasonWeek
+    !force_update &&
+    year === constants.season.year &&
+    week === currentRegularSeasonWeek
+
   // get list of games for this week
   const games = await db('nfl_games').where({
     seas: year,
