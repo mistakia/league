@@ -83,6 +83,8 @@ const run = async ({
     seas_type
   })
 
+  let skip_count = 0
+
   for (const game of games) {
     const { esbid } = game
     const timeStr = `${game.date} ${game.time_est}`
@@ -91,7 +93,10 @@ const run = async ({
       'YYYY/MM/DD HH:mm:SS',
       'America/New_York'
     )
-    if (dayjs().isBefore(gameStart)) continue
+    if (dayjs().isBefore(gameStart)) {
+      skip_count += 1
+      continue
+    }
 
     const currentPlays = await db(
       isCurrentWeek ? 'nfl_plays_current_week' : 'nfl_plays'
@@ -101,7 +106,10 @@ const run = async ({
       (p) => p.desc === 'END GAME' && p.state === 'APPROVED'
     )
 
-    if (!force_update && haveEndPlay) continue
+    if (!force_update && haveEndPlay) {
+      skip_count += 1
+      continue
+    }
 
     log(`loading plays for esbid: ${esbid}`)
     const url = `${config.ngs_api_url}/live/plays/playlist/game?gameId=${esbid}`
@@ -175,6 +183,8 @@ const run = async ({
 
     if (argv.all) await wait(3000)
   }
+
+  return skip_count === games.length
 }
 
 const main = async () => {
@@ -339,10 +349,24 @@ const main = async () => {
           }
         }
       }
+    } else if (argv.loop) {
+      let all_games_skipped = false
+      let loop_count = 1
+      while (!all_games_skipped) {
+        loop_count += 1
+        log(`running import count: ${loop_count}`)
+        all_games_skipped = await run({
+          week: argv.week,
+          seas_type: argv.seas_type,
+          force_update: argv.final
+        })
+      }
     } else {
-      const week = argv.week
-      const seas_type = argv.seas_type
-      await run({ week, seas_type, force_update: argv.final })
+      await run({
+        week: argv.week,
+        seas_type: argv.seas_type,
+        force_update: argv.final
+      })
     }
   } catch (err) {
     error = err
