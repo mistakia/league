@@ -100,6 +100,8 @@ const run = async ({
     seas_type
   })
 
+  let skip_count = 0
+
   for (const game of games) {
     const timeStr = `${game.date} ${game.time_est}`
     const gameStart = dayjs.tz(
@@ -109,11 +111,13 @@ const run = async ({
     )
     if (dayjs().isBefore(gameStart)) {
       log(`skipping esbid: ${game.esbid}, game hasn't started`)
+      skip_count += 1
       continue
     }
 
     if (!game.detailid) {
       log(`skipping esbid: ${game.esbid}, missing detailid`)
+      skip_count += 1
       continue
     }
 
@@ -123,6 +127,7 @@ const run = async ({
     const haveEndPlay = currentPlays.find((p) => p.type_nfl === 'END_GAME')
     if (!force_update && haveEndPlay) {
       log(`skipping esbid: ${game.esbid}, already have final play`)
+      skip_count += 1
       continue
     }
 
@@ -141,9 +146,11 @@ const run = async ({
     if (!data.data) continue
 
     // reset playStats
-    await db(isCurrentWeek ? 'nfl_play_stats_current_week' : 'nfl_play_stats')
-      .update({ valid: 0 })
-      .where({ esbid: game.esbid })
+    if (force_update) {
+      await db(isCurrentWeek ? 'nfl_play_stats_current_week' : 'nfl_play_stats')
+        .update({ valid: 0 })
+        .where({ esbid: game.esbid })
+    }
 
     const timestamp = Math.round(new Date() / 1000)
     for (const play of data.data.viewer.gameDetail.plays) {
@@ -184,6 +191,8 @@ const run = async ({
 
     if (argv.all) await wait(3000)
   }
+
+  return skip_count === games.length
 }
 
 const main = async () => {
@@ -358,12 +367,23 @@ const main = async () => {
           }
         }
       }
+    } else if (argv.loop) {
+      let all_games_skipped = false
+      let loop_count = 0
+      while (!all_games_skipped) {
+        loop_count += 1
+        log(`running import count: ${loop_count}`)
+        all_games_skipped = await run({
+          week: argv.week,
+          seas_type: argv.seas_type,
+          bypass_cache: true,
+          force_update: argv.final
+        })
+      }
     } else {
-      const week = argv.week
-      const seas_type = argv.seas_type
       await run({
-        week,
-        seas_type,
+        week: argv.week,
+        seas_type: argv.seas_type,
         bypass_cache: true,
         force_update: argv.final
       })
