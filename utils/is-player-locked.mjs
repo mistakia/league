@@ -27,9 +27,11 @@ export default async function (pid) {
     return false
   }
 
-  if (player_row.status === 'Inactive') {
-    return false
-  }
+  // TODO - fix check to exclude any players who have become inactive after the game
+  /* if (player_row.status === 'Inactive') {
+   *   return false
+   * }
+   */
 
   const gameStart = dayjs.tz(
     `${player_row.date} ${player_row.time_est}`,
