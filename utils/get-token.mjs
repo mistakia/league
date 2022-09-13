@@ -1,10 +1,9 @@
 import config from '#config'
-import FormData from 'form-data'
-import fetch from 'node-fetch'
+import fetch, { FormData } from 'node-fetch'
 
 const getToken = async () => {
   const form = new FormData()
-  form.append('grant_type', 'client_credentials')
+  form.set('grant_type', 'client_credentials')
   const data = await fetch(`${config.nfl_api_url}/v1/reroute`, {
     method: 'POST',
     body: form,
