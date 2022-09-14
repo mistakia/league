@@ -2302,7 +2302,7 @@ CREATE TABLE `league_player_gamelogs` (
   `lid` int(6) NOT NULL,
   `points` decimal(4,1) DEFAULT NULL,
   `points_added` decimal(4,1) DEFAULT NULL,
-  `pos_rnk` tinyint(2) DEFAULT NULL,
+  `pos_rnk` tinyint(2) unsigned DEFAULT NULL,
 
   UNIQUE KEY `pid` (`pid`, `esbid`, `lid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
