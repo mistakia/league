@@ -118,6 +118,7 @@ router.post('/?', async (req, res) => {
     // players acquired through market bidding are ineligible
     const acceptable_types = [
       constants.transactions.ROSTER_ADD,
+      constants.transactions.PRACTICE_ADD,
       constants.transactions.TRADE,
       constants.transactions.DRAFT
     ]

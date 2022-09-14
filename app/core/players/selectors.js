@@ -661,7 +661,9 @@ export function isPlayerPracticeSquadEligible(
   const acceptable_types = [
     constants.transactions.ROSTER_ADD,
     constants.transactions.TRADE,
-    constants.transactions.DRAFT
+    constants.transactions.DRAFT,
+    constants.transactions.RESERVE_IR,
+    constants.transactions.RESERVE_COV
   ]
   const type = playerMap.get('type')
   if (type && !acceptable_types.includes(type)) {
