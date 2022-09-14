@@ -274,7 +274,7 @@ export default class PlayerContextMenu extends React.Component {
         label: 'Designate Protected'
       })
 
-      if (status.eligible.franchiseTag) {
+      if (constants.season.isOffseason && status.eligible.franchiseTag) {
         add({
           key: 'franchise',
           onClick: status.tagged.franchise
@@ -284,7 +284,7 @@ export default class PlayerContextMenu extends React.Component {
         })
       }
 
-      if (status.eligible.transitionTag) {
+      if (constants.season.isOffseason && status.eligible.transitionTag) {
         add({
           key: 'transition',
           onClick: this.handleTransitionTag,
@@ -309,7 +309,7 @@ export default class PlayerContextMenu extends React.Component {
         })
       }
 
-      if (status.eligible.rookieTag) {
+      if (constants.season.isOffseason && status.eligible.rookieTag) {
         add({
           key: 'rookie',
           onClick: status.tagged.rookie
@@ -319,7 +319,7 @@ export default class PlayerContextMenu extends React.Component {
         })
       }
 
-      if (status.active && !status.tagged.transition) {
+      if (constants.season.isOffseason && status.active && !status.tagged.transition) {
         add({
           key: 'cutlist',
           onClick: this.handleCutlist,
