@@ -147,15 +147,15 @@
 
 ## At 00:00 on Tuesday.
 0 0 * 1,2,9-12 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-play-stats.mjs &>> /var/log/league/league-process-play-stats.log
-# 0 0 * 1,2,9-12 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-matchups.mjs --lid 1 --year 2021 &>> /var/log/league/league-process-matchups.log
+0 0 * 1,2,9-12 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-matchups.mjs &>> /var/log/league/league-process-matchups.log
 
 ## At 01:15 on Tuesday.
 15 1 * 1,2,9-12 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-play-stats.mjs &>> /var/log/league/league-process-play-stats.log
-# 15 1 * 1,2,9-12 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-matchups.mjs --lid 1 --year 2021 &>> /var/log/league/league-process-matchups.log
+15 1 * 1,2,9-12 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-matchups.mjs &>> /var/log/league/league-process-matchups.log
 
 ## At 02:00 on Tuesday.
 0 2 * 1,2,9-12 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-play-stats.mjs &>> /var/log/league/league-process-play-stats.log
-# 0 2 * 1,2,9-12 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-matchups.mjs --lid 1 --year 2021 &>> /var/log/league/league-process-matchups.log
+0 2 * 1,2,9-12 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-matchups.mjs &>> /var/log/league/league-process-matchups.log
 
 ## At 00:00 on Friday
 0 0 * 1,2,9-12 5 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-play-stats.mjs &>> /var/log/league/league-process-play-stats.log
