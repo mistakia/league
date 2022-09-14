@@ -10,7 +10,7 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('process-matchups')
 debug.enable('process-matchups')
 
-const run = async ({ lid, year }) => {
+const run = async ({ lid = 1, year = constants.season.year }) => {
   const league = await getLeague(lid)
   const matchups = await db('matchups').where({ lid, year })
   const gamelogs = await db('gamelogs')
@@ -48,6 +48,7 @@ const run = async ({ lid, year }) => {
       }))
     }
   }
+
   const result = calculateStandings({
     starters,
     active,
@@ -95,16 +96,6 @@ const main = async () => {
   try {
     const lid = argv.lid
     const year = argv.year
-    if (!lid) {
-      console.log('missing --lid')
-      return
-    }
-
-    if (!year) {
-      console.log('missing --year')
-      return
-    }
-
     await run({ year, lid })
   } catch (err) {
     error = err
