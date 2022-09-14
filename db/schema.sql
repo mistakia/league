@@ -1122,6 +1122,8 @@ CREATE TABLE `team_stats` (
   `pSlot13` decimal(6,2) DEFAULT 0,
   `pSlot14` decimal(6,2) DEFAULT 0,
   `pSlot15` decimal(6,2) DEFAULT 0,
+  `pSlot16` decimal(6,2) DEFAULT 0,
+  `pSlot17` decimal(6,2) DEFAULT 0,
 
   `pPosQB` decimal(6,2) DEFAULT 0,
   `pPosRB` decimal(6,2) DEFAULT 0,
