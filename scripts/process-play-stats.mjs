@@ -158,9 +158,9 @@ const run = async ({
 
   const play_stats_by_gsisid = groupBy(playStats, 'gsisId')
   const gsisids = Object.keys(play_stats_by_gsisid)
-  const players_gsisid = await db('player').whereIn('gsisid', gsisids)
+  const player_gsisid_rows = await db('player').whereIn('gsisid', gsisids)
 
-  const existing_gsisids = players_gsisid.map((p) => p.gsisid)
+  const existing_gsisids = player_gsisid_rows.map((p) => p.gsisid)
   const missing_gsisids = gsisids.filter((p) => !existing_gsisids.includes(p))
   for (const gsisid of missing_gsisids) {
     const playStat = play_stats_by_gsisid[gsisid].find(
@@ -190,11 +190,16 @@ const run = async ({
       await updatePlayer({ player_row, update: { gsisid } })
     }
     player_row.gsisid = gsisid
-    players_gsisid.push(player_row)
+    player_gsisid_rows.push(player_row)
   }
+
+  // track generated gamelogs by gsispids
+  const gamelog_gsispids = []
 
   // generate player gamelogs
   for (const gsispid of Object.keys(play_stats_by_gsispid)) {
+    if (gsispid === 'null') continue
+
     const player_row = player_gsispid_rows.find((p) => p.gsispid === gsispid)
     if (!player_row) continue
     if (!constants.positions.includes(player_row.pos)) continue
@@ -206,6 +211,41 @@ const run = async ({
         ? fixTeam(playStat.v)
         : fixTeam(playStat.h)
     const stats = calculateStatsFromPlayStats(play_stats_by_gsispid[gsispid])
+    if (argv.dry) continue
+
+    gamelog_update_count += 1
+    gamelog_gsispids.push(gsispid)
+    await upsert({
+      pid: player_row.pid,
+      pos: player_row.pos,
+      tm: fixTeam(playStat.clubCode),
+      opp,
+      esbid: playStat.esbid,
+      stats,
+      year,
+      week
+    })
+  }
+
+  for (const gsisid of Object.keys(play_stats_by_gsisid)) {
+    if (gsisid === 'null') continue
+
+    const player_row = player_gsisid_rows.find((p) => p.gsisid === gsisid)
+    if (!player_row) continue
+    if (!constants.positions.includes(player_row.pos)) continue
+
+    // check to see if gamelog was already generated using gsispid
+    if (player_row.gsispid && gamelog_gsispids.includes(player_row.gsispid))
+      continue
+
+    const playStat = play_stats_by_gsisid[gsisid].find((p) => p.clubCode)
+    if (!playStat) continue
+    const opp =
+      fixTeam(playStat.clubCode) === fixTeam(playStat.h)
+        ? fixTeam(playStat.v)
+        : fixTeam(playStat.h)
+
+    const stats = calculateStatsFromPlayStats(play_stats_by_gsisid[gsisid])
     if (argv.dry) continue
 
     gamelog_update_count += 1
@@ -317,7 +357,7 @@ const run = async ({
       // TODO - succ
 
       if (play_row.player_fuml_gsis) {
-        const player = players_gsisid.find(
+        const player = player_gsisid_rows.find(
           (p) => p.gsisid === play_row.player_fuml_gsis
         )
         if (player) {
@@ -326,14 +366,16 @@ const run = async ({
       }
 
       if (play_row.bc_gsis) {
-        const player = players_gsisid.find((p) => p.gsisid === play_row.bc_gsis)
+        const player = player_gsisid_rows.find(
+          (p) => p.gsisid === play_row.bc_gsis
+        )
         if (player) {
           play_row.bc = player.pid
         }
       }
 
       if (play_row.psr_gsis) {
-        const player = players_gsisid.find(
+        const player = player_gsisid_rows.find(
           (p) => p.gsisid === play_row.psr_gsis
         )
         if (player) {
@@ -342,7 +384,7 @@ const run = async ({
       }
 
       if (play_row.trg_gsis) {
-        const player = players_gsisid.find(
+        const player = player_gsisid_rows.find(
           (p) => p.gsisid === play_row.trg_gsis
         )
         if (player) {
@@ -351,7 +393,7 @@ const run = async ({
       }
 
       if (play_row.intp_gsis) {
-        const player = players_gsisid.find(
+        const player = player_gsisid_rows.find(
           (p) => p.gsisid === play_row.intp_gsis
         )
         if (player) {
