@@ -51,11 +51,42 @@ router.get('/gamelogs/teams', async (req, res) => {
 router.get('/gamelogs/players', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    const data = await db('gamelogs')
-      .select('gamelogs.*')
+    const { leagueId } = req.query
+
+    const query = db('gamelogs')
+      .select(
+        'gamelogs.*',
+        'nfl_games.day',
+        'nfl_games.date',
+        'nfl_games.seas_type',
+        'nfl_games.timestamp'
+      )
       .join('nfl_games', 'nfl_games.esbid', 'gamelogs.esbid')
       .where('nfl_games.seas', constants.season.year)
       .where('nfl_games.seas_type', 'REG')
+
+    if (leagueId) {
+      query
+        .leftJoin('league_player_gamelogs', function () {
+          this.on('league_player_gamelogs.pid', '=', 'gamelogs.pid').andOn(
+            'league_player_gamelogs.esbid',
+            '=',
+            'gamelogs.esbid'
+          )
+        })
+        .select(
+          'league_player_gamelogs.points',
+          'league_player_gamelogs.points_added',
+          'league_player_gamelogs.pos_rnk'
+        )
+        .where(function () {
+          this.where('league_player_gamelogs.lid', leagueId).orWhereNull(
+            'league_player_gamelogs.lid'
+          )
+        })
+    }
+
+    const data = await query
     res.send(data)
   } catch (error) {
     logger(error)
