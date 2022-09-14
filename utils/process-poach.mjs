@@ -91,6 +91,7 @@ export default async function ({ pid, release = [], lid, tid, userid }) {
     pid,
     type: constants.transactions.POACHED,
     value: playerPoachValue,
+    week: constants.season.week,
     year: constants.season.year,
     timestamp: Math.round(Date.now() / 1000)
   }
