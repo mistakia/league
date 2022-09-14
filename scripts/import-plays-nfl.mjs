@@ -92,7 +92,9 @@ const run = async ({
   const isCurrentWeek =
     !force_update &&
     year === constants.season.year &&
-    week === currentRegularSeasonWeek
+      week === currentRegularSeasonWeek
+
+  log(`importing plays for week ${week} ${year} ${seas_type} (force_update: ${force_update}, bypass_cache: ${bypass_cache}, isCurrentWeek: ${isCurrentWeek}`)
 
   const games = await db('nfl_games').where({
     seas: year,
@@ -157,7 +159,13 @@ const run = async ({
       const { playId } = play
       const currentPlay = currentPlays.find((p) => p.playId === play.playId)
       const playData = getPlayData({ play, year, week, seas_type })
+
       if (currentPlay) {
+        // skip updates when importing current week live plays
+        if (isCurrentWeek) {
+          continue
+        }
+
         // TODO - only update changes
         await db(isCurrentWeek ? 'nfl_plays_current_week' : 'nfl_plays')
           .update({
@@ -189,7 +197,7 @@ const run = async ({
       }
     }
 
-    if (argv.all) await wait(3000)
+    if (argv.all || argv.loop) await wait(3000)
   }
 
   return skip_count === games.length
