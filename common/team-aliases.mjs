@@ -99,6 +99,8 @@ export default {
   'Washington D/ST': 'WAS',
   'Washington DST': 'WAS',
   'Football Team DST': 'WAS',
+  'Commanders D/ST': 'WAS',
+  'Commanders DST': 'WAS',
 
   'Arizona Cardinals': 'ARI',
   'Atlanta Falcons': 'ATL',
