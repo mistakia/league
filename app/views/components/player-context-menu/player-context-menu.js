@@ -319,7 +319,11 @@ export default class PlayerContextMenu extends React.Component {
         })
       }
 
-      if (constants.season.isOffseason && status.active && !status.tagged.transition) {
+      if (
+        constants.season.isOffseason &&
+        status.active &&
+        !status.tagged.transition
+      ) {
         add({
           key: 'cutlist',
           onClick: this.handleCutlist,
