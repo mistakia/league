@@ -200,12 +200,14 @@ export function getPlaysByMatchupId(state, { mid }) {
     if (!game) continue
 
     // TODO - calculate dst stats and points
-    const playStats = play.playStats.filter((p) => p.gsispid)
+    const playStats = play.playStats.filter((p) => p.gsispid || p.gsisId)
     const grouped = {}
     for (const playStat of playStats) {
       const playerMap = playerMaps.find((pMap) => {
-        if (pMap.get('gsispid', false) === playStat.gsispid) return true
-        if (pMap.get('gsisid', false) === playStat.gsisId) return true
+        if (playStat.gsispid && pMap.get('gsispid', false) === playStat.gsispid)
+          return true
+        if (playStat.gsisId && pMap.get('gsisid', false) === playStat.gsisId)
+          return true
         return false
       })
       if (!playerMap) continue
