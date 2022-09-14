@@ -4,7 +4,7 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 import { List } from 'immutable'
 import LinearProgress from '@mui/material/LinearProgress'
 
-import { groupBy } from '@common'
+import { groupBy, constants } from '@common'
 import SelectedPlayerProjection from '@components/selected-player-projection'
 
 export default class SelectedPlayerSeasonProjections extends React.Component {
@@ -27,6 +27,8 @@ export default class SelectedPlayerSeasonProjections extends React.Component {
     const projections_by_week = groupBy(projections, 'week')
     for (const week in projections_by_week) {
       const wk = parseInt(week, 10)
+      if (wk !== constants.week) continue
+
       tables.push(
         <SelectedPlayerProjection
           key={wk}
