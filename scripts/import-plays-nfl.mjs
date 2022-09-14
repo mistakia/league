@@ -92,9 +92,11 @@ const run = async ({
   const isCurrentWeek =
     !force_update &&
     year === constants.season.year &&
-      week === currentRegularSeasonWeek
+    week === currentRegularSeasonWeek
 
-  log(`importing plays for week ${week} ${year} ${seas_type} (force_update: ${force_update}, bypass_cache: ${bypass_cache}, isCurrentWeek: ${isCurrentWeek}`)
+  log(
+    `importing plays for week ${week} ${year} ${seas_type} (force_update: ${force_update}, bypass_cache: ${bypass_cache}, isCurrentWeek: ${isCurrentWeek}`
+  )
 
   const games = await db('nfl_games').where({
     seas: year,
