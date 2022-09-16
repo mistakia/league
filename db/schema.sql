@@ -361,7 +361,7 @@ CREATE TABLE `nfl_games` (
   `site_ngsid` int(5) DEFAULT NULL,
 
   `clock` varchar(10) DEFAULT NULL,
-  `status` varchar(10) DEFAULT NULL,
+  `status` varchar(20) DEFAULT NULL,
 
   `away_rest` int(1) DEFAULT NULL,
   `home_rest` int(1) DEFAULT NULL,
