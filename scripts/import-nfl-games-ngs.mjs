@@ -64,7 +64,7 @@ const format = (item) => {
     date,
     time_est,
     day,
-    timestamp: datetime.unix(),
+    timestamp: datetime.unix() || null,
 
     v: fixTeam(item.visitorTeamAbbr),
     h: fixTeam(item.homeTeamAbbr),
