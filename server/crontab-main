@@ -142,12 +142,12 @@
 
 ################################### Finalize Game Plays ########################################
 
-## At 00:00 on Monday
-0 0 * 1,2,9-12 1 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-play-stats.mjs &>> /var/log/league/league-process-play-stats.log
+## At 00:30 on Monday
+30 0 * 1,2,9-12 1 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-play-stats.mjs &>> /var/log/league/league-process-play-stats.log
 
-## At 00:00 on Tuesday.
-0 0 * 1,2,9-12 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-play-stats.mjs &>> /var/log/league/league-process-play-stats.log
-0 0 * 1,2,9-12 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-matchups.mjs &>> /var/log/league/league-process-matchups.log
+## At 00:30 on Tuesday.
+30 0 * 1,2,9-12 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-play-stats.mjs &>> /var/log/league/league-process-play-stats.log
+30 0 * 1,2,9-12 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-matchups.mjs &>> /var/log/league/league-process-matchups.log
 
 ## At 01:15 on Tuesday.
 15 1 * 1,2,9-12 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-play-stats.mjs &>> /var/log/league/league-process-play-stats.log
@@ -157,8 +157,8 @@
 0 2 * 1,2,9-12 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-play-stats.mjs &>> /var/log/league/league-process-play-stats.log
 0 2 * 1,2,9-12 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-matchups.mjs &>> /var/log/league/league-process-matchups.log
 
-## At 00:00 on Friday
-0 0 * 1,2,9-12 5 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-play-stats.mjs &>> /var/log/league/league-process-play-stats.log
+## At 00:30 on Friday
+30 0 * 1,2,9-12 5 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-play-stats.mjs &>> /var/log/league/league-process-play-stats.log
 
 ################################### nflfastR  ########################################
 
