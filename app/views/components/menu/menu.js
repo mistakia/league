@@ -115,6 +115,9 @@ export default function AppMenu({
                   className='menu__links'
                   onClick={() => isMobile && set_menu_open(false)}
                 >
+                  <NavLink to={`/leagues/${leagueId}/teams/${teamId}`}>
+                    Team
+                  </NavLink>
                   <NavLink to='/lineups'>Lineup</NavLink>
                   <NavLink to='/trade'>Trade</NavLink>
                   <NavLink to='/draft'>Draft</NavLink>
