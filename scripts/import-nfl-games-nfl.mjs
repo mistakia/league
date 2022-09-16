@@ -85,22 +85,10 @@ const run = async ({
     seas_type
   })
 
-  const startedGameWithMissingDetailId = games.find((game) => {
-    if (!game.date || !game.time_est) return false
+  const game_missing_detailid = games.find((game) => !game.detailid)
 
-    const timeStr = `${game.date} ${game.time_est}`
-    const gameStart = dayjs.tz(
-      timeStr,
-      'YYYY/MM/DD HH:mm:SS',
-      'America/New_York'
-    )
-    if (dayjs().isBefore(gameStart)) return false
-
-    return !game.detailid
-  })
-
-  if (!force_import && games.length && !startedGameWithMissingDetailId) {
-    log('found no started games with missing ids')
+  if (!force_import && games.length && !game_missing_detailid) {
+    log('found no games with missing ids')
     return
   }
 
