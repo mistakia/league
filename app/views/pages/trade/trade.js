@@ -96,6 +96,14 @@ export default function TradePage() {
   )
   const proposingTeamReleaseSection = (
     <div className='trade__box'>
+      <div className='trade__box-head'>
+        <List component='nav'>
+          <ListItem>
+            <TeamName tid={trade.propose_tid || proposingTeamRoster.tid} />{' '}
+            Releases
+          </ListItem>
+        </List>
+      </div>
       <div className='trade__box-body'>
         {!isProposed && (
           <TradeSelectItems
@@ -115,16 +123,21 @@ export default function TradePage() {
   )
   const acceptingTeamReleaseSection = (
     <div className='trade__box'>
+      <div className='trade__box-head'>
+        <List component='nav'>
+          <ListItem>
+            <TeamName tid={trade.accept_tid || acceptingTeam.uid} /> Releases
+          </ListItem>
+        </List>
+      </div>
       <div className='trade__box-body'>
-        {isOpen ? (
+        {isOpen && (
           <TradeSelectItems
             title='Select players to release'
             onChange={this.handleReleaseChange}
             selectedPlayers={tradePlayers.acceptingTeamReleasePlayers}
             players={teamReleasePlayers}
           />
-        ) : (
-          <div className='trade__team-release'>Released</div>
         )}
         {acceptingTeamReleasePlayers}
       </div>
@@ -194,7 +207,6 @@ export default function TradePage() {
           {action}
         </Grid>
       </div>
-      <div className='trade__side' />
     </div>
   )
 
