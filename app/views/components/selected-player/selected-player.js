@@ -186,16 +186,6 @@ export default class SelectedPlayer extends React.Component {
                       : '-'}
                   </div>
                   <div className='selected__player-header-item'>
-                    <label>VOBA</label>
-                    {playerMap
-                      .getIn(['vorp', 'ros', 'available'], 0)
-                      .toFixed(1)}
-                  </div>
-                  <div className='selected__player-header-item'>
-                    <label>VOWS</label>
-                    {playerMap.getIn(['vorp', 'ros', 'starter'], 0).toFixed(1)}
-                  </div>
-                  <div className='selected__player-header-item'>
                     <label>Draft</label>
                     {draftNum ? `Rd ${draftRound} (#${draftNum})` : 'UDFA'}
                   </div>
