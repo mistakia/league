@@ -80,7 +80,8 @@ const run = async ({ nextSeason = argv.season } = {}) => {
         tag: p.tag,
         slot: p.slot,
         pid: p.pid,
-        pos: p.pos
+        pos: p.pos,
+        extensions: p.extensions
       }))
 
       const updates = overlapping_pids.filter((p) => {
@@ -102,8 +103,10 @@ const run = async ({ nextSeason = argv.season } = {}) => {
       }
 
       if (updates.length) {
-        for (const { pid, slot, tag } of updates) {
-          await db('rosters_players').where({ rid, pid }).update({ slot, tag })
+        for (const { pid, slot, tag, extensions } of updates) {
+          await db('rosters_players')
+            .where({ rid, pid })
+            .update({ slot, tag, extensions })
         }
       }
     }
