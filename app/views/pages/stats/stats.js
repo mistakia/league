@@ -13,36 +13,61 @@ import SelectYear from '@components/select-year'
 import './stats.styl'
 
 function SummaryRow({ team, percentiles, year }) {
-  const stats = team
-    .getIn(['stats', year], new Map(constants.createFantasyTeamStats()))
-    .toJS()
+  const stats = team.getIn(
+    ['stats', year],
+    new Map(constants.createFantasyTeamStats())
+  )
+
+  const items = []
+  const fields = [
+    'pf',
+    'pa',
+    'pdiff',
+    'pp',
+    'pp_pct',
+    'ppp',
+    'pw',
+    'pl',
+    'pmax',
+    'pmin',
+    'pdev'
+  ]
+  fields.forEach((field, index) => {
+    items.push(
+      <PercentileMetric
+        key={index}
+        scaled
+        {...{ value: stats.get(field), percentile: percentiles[field] }}
+      />
+    )
+  })
+
   return (
     <div className='table__row'>
       <div className='table__cell player__item-name'>{team.name}</div>
-      <PercentileMetric scaled {...{ stats, percentiles, type: 'pf' }} />
-      <PercentileMetric scaled {...{ stats, percentiles, type: 'pa' }} />
-      <PercentileMetric scaled {...{ stats, percentiles, type: 'pdiff' }} />
-      <PercentileMetric scaled {...{ stats, percentiles, type: 'pp' }} />
-      <PercentileMetric scaled {...{ stats, percentiles, type: 'pp_pct' }} />
-      <PercentileMetric scaled {...{ stats, percentiles, type: 'ppp' }} />
-      <PercentileMetric scaled {...{ stats, percentiles, type: 'pw' }} />
-      <PercentileMetric scaled {...{ stats, percentiles, type: 'pl' }} />
-      <PercentileMetric scaled {...{ stats, percentiles, type: 'pmax' }} />
-      <PercentileMetric scaled {...{ stats, percentiles, type: 'pmin' }} />
-      <PercentileMetric scaled {...{ stats, percentiles, type: 'pdev' }} />
+      {items}
       <div className='row__group'>
         <div className='row__group-body'>
           <PercentileMetric
             scaled
-            {...{ stats, percentiles, type: 'apWins' }}
+            {...{
+              value: stats.get('apWins'),
+              percentile: percentiles.apWins
+            }}
           />
           <PercentileMetric
             scaled
-            {...{ stats, percentiles, type: 'apLosses' }}
+            {...{
+              value: stats.get('apLosses'),
+              percentile: percentiles.apLosses
+            }}
           />
           <PercentileMetric
             scaled
-            {...{ stats, percentiles, type: 'apTies' }}
+            {...{
+              value: stats.get('apTies'),
+              percentile: percentiles.apTies
+            }}
           />
           <div className='table__cell metric'>
             {toPercent(
@@ -67,21 +92,15 @@ SummaryRow.propTypes = {
 function PositionRow({ team, percentiles, year }) {
   const positionCells = []
   for (const [index, position] of constants.positions.entries()) {
-    const type = `pPos${position}`
-    const points = team.getIn(['stats', year, type], 0)
+    const key = `pPos${position}`
+    const value = team.getIn(['stats', year, key], 0)
+    const percentile = percentiles[key]
     positionCells.push(
-      <PercentileMetric
-        key={index}
-        stats={team
-          .getIn(['stats', year], new Map(constants.createFantasyTeamStats()))
-          .toJS()}
-        scaled
-        {...{ percentiles, type }}
-      />
+      <PercentileMetric key={index} scaled {...{ value, percentile }} />
     )
     positionCells.push(
       <div key={`${index}%`} className='table__cell metric'>
-        {toPercent(points / team.getIn(['stats', year, 'pf'], 0))}
+        {toPercent(value / team.getIn(['stats', year, 'pf'], 0))}
       </div>
     )
   }
@@ -104,21 +123,15 @@ function SlotRow({ team, slots, percentiles, year }) {
   const slotCells = []
   for (const [index, s] of slots.entries()) {
     const slot = constants.slots[s]
-    const type = `pSlot${slot}`
-    const points = team.getIn(['stats', year, type], 0)
+    const key = `pSlot${slot}`
+    const value = team.getIn(['stats', year, key], 0)
+    const percentile = percentiles[key]
     slotCells.push(
-      <PercentileMetric
-        key={index}
-        stats={team
-          .getIn(['stats', year], new Map(constants.createFantasyTeamStats()))
-          .toJS()}
-        scaled
-        {...{ percentiles, type }}
-      />
+      <PercentileMetric key={index} scaled {...{ value, percentile }} />
     )
     slotCells.push(
       <div key={`${index}%`} className='table__cell metric'>
-        {toPercent(points / team.getIn(['stats', year, 'pf'], 0))}
+        {toPercent(value / team.getIn(['stats', year, 'pf'], 0))}
       </div>
     )
   }

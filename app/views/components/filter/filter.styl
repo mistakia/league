@@ -12,7 +12,7 @@
   flex 0 0 auto
   max-width 126px
   &:not(.switch)
-    background lighten($backgroundColor, 60%)
+    background white
   &:hover
     background white
     .player__filter-label
@@ -30,15 +30,12 @@
 
 .player__filter-dropdown
   background white
-  border 1px solid $borderColor
   position absolute
   top 3rem
   min-width 150px
   z-index 10001
   display flex
   flex-direction column
-  padding 8px
-  box-shadow rgba(0, 0, 0, 0.2) 0px 3px 3px -2px, rgba(0, 0, 0, 0.14) 0px 3px 4px 0px, rgba(0, 0, 0, 0.12) 0px 1px 8px 0px
 
 .player__filter-dropdown-body
   display flex
@@ -46,21 +43,25 @@
   max-height 250px
   overflow hidden
   overflow-y scroll
+  border-radius 0 0 3px 3px
 
 .player__filter-dropdown-item
   flex 1
   padding 8px 16px
-  border 1px solid transparent
-  margin-bottom 4px
-  border-radius 3px
+  display flex
 
   &.selected
-    background #f0f0f0
-    border-color darken(#f0f0f0, 1)
+    background rgba(25, 118, 210, 0.08)
 
   &:hover
     background #fafafa
-    border 1px solid $borderColor
+
+  .MuiCheckbox-root
+    padding 0 9px 0 0
+
+  .MuiSvgIcon-root
+    width 16px
+    height 16px
 
 .player__filter-selection
   white-space nowrap
@@ -70,14 +71,16 @@
 .player__filter-dropdown-head
   display flex
   border-bottom 1px solid $borderColor
-  margin-bottom 4px
   justify-content space-between
-  padding 4px 0
+  padding 8px
 
 .player__filter-dropdown-action
   background #f0f0f0
   padding 0.25rem 0.5rem
   border-radius 3px
+  display flex
+  justify-content center
+  align-items center
   &:hover
     background darken(#f0f0f0, 30%)
 
@@ -87,3 +90,8 @@
     left 50%
     top 50%
     transform translate(-50%, -50%)
+    width 66%
+
+  .player__filter-dropdown-action
+    min-height 32px
+    min-width 48px

@@ -1,49 +1,63 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getApp } from '@core/app'
 import { getStats } from '@core/stats'
-import { getFilteredPlayers, getPlayers, playerActions } from '@core/players'
+import {
+  getFilteredPlayers,
+  playerActions,
+  getSelectedViewGroupedFields,
+  getSelectedPlayersView,
+  getPlayerFields
+} from '@core/players'
 
 import PlayersPage from './players'
 
 const mapStateToProps = createSelector(
   getFilteredPlayers,
-  getPlayers,
-  getApp,
+  (state) => state.getIn(['players', 'allPlayersPending']),
+  (state) => state.getIn(['players', 'search']),
+  (state) => state.getIn(['players', 'selected']),
+  (state) => state.getIn(['players', 'order']),
+  (state) => state.getIn(['players', 'orderBy']),
+  (state) => state.getIn(['app', 'userId']),
   getStats,
-  (players, pState, app, stats) => ({
+  getSelectedPlayersView,
+  getSelectedViewGroupedFields,
+  getPlayerFields,
+  (
     players,
-    week: pState.get('view') === 'ros' ? 'ros' : pState.get('week').get(0),
-    isLoggedIn: Boolean(app.userId),
+    allPlayersPending,
+    searchValue,
+    selected,
+    order,
+    orderBy,
+    userId,
+    stats,
+    selected_players_view,
+    selected_view_grouped_fields,
+    player_fields
+  ) => ({
+    players,
+    selected_view_grouped_fields,
+    isLoggedIn: Boolean(userId),
     isPending:
-      pState.get('allPlayersPending') ||
-      (pState.get('view') === 'stats' && stats.isPending),
-    searchValue: pState.get('search'),
-    selected: pState.get('selected'),
-    order: pState.get('order'),
-    orderBy: pState.get('orderBy'),
-    showQualifier: Boolean(
-      stats.qualifiers.get(pState.get('orderBy').split('.').pop())
+      allPlayersPending ||
+      (selected_players_view.key.includes('stats_by_play') && stats.isPending), // TODO handle player fields being loaded (stats, etc)
+    searchValue,
+    selected,
+    order,
+    orderBy,
+    selected_players_view,
+    show_week_filter: Boolean(
+      selected_players_view.fields.find((f) => f.includes('.week'))
     ),
-    isSeasonView: pState.get('view') === 'season',
-    isRestOfSeasonView: pState.get('view') === 'ros',
-    isWeekView: pState.get('view') === 'week',
-    isStatsView: pState.get('view') === 'stats',
-    isStatsPassingView:
-      pState.get('view') === 'stats' && stats.view === 'passing',
-    isStatsRushingView:
-      pState.get('view') === 'stats' && stats.view === 'rushing',
-    isStatsReceivingView:
-      pState.get('view') === 'stats' && stats.view === 'receiving',
-    isStatsPassingAdvancedView:
-      pState.get('view') === 'stats' &&
-      stats.view === 'passing' &&
-      stats.passing === 'advanced',
-    isStatsPassingPressureView:
-      pState.get('view') === 'stats' &&
-      stats.view === 'passing' &&
-      stats.passing === 'pressure'
+    show_play_filters: Boolean(
+      selected_players_view.fields.find((f) => f.includes('stats.'))
+    ),
+    show_qualifier_filter: Boolean(
+      stats.qualifiers.get(orderBy.split('.').pop())
+    ),
+    player_fields
   })
 )
 

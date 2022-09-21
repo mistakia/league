@@ -1,6 +1,11 @@
 import percentile from 'percentile'
 
-const calculatePercentiles = ({ items, stats, qualifiers = {} }) => {
+const calculatePercentiles = ({
+  items,
+  stats,
+  qualifiers = {},
+  prefix = ''
+}) => {
   const percentiles = {}
 
   for (const stat of stats) {
@@ -10,7 +15,7 @@ const calculatePercentiles = ({ items, stats, qualifiers = {} }) => {
       : items
     const values = filtered.map((t) => t[stat])
     const result = percentile([25, 50, 75, 90, 95, 98, 99, 0, 100], values)
-    percentiles[stat] = {
+    percentiles[`${prefix}${stat}`] = {
       p25: result[0],
       p50: result[1],
       p75: result[2],

@@ -6,7 +6,6 @@ import MenuIcon from '@mui/icons-material/Menu'
 import SwipeableDrawer from '@mui/material/SwipeableDrawer'
 import Fab from '@mui/material/Fab'
 import Tooltip from '@mui/material/Tooltip'
-import IconButton from '@mui/material/IconButton'
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore'
 import NavigateNextIcon from '@mui/icons-material/NavigateNext'
 
@@ -153,14 +152,12 @@ export default function AppMenu({
             </div>
           </div>
         </div>
-        <div className='menu__actions'>
-          <div className='menu__collapse'>
-            <Tooltip title='Collapse Menu'>
-              <IconButton onClick={() => set_menu_open(false)}>
-                {isMobile ? <NavigateNextIcon /> : <NavigateBeforeIcon />}
-              </IconButton>
-            </Tooltip>
-          </div>
+        <div className='menu__collapse'>
+          <Tooltip title='Collapse Menu'>
+            <Fab color='primary' onClick={() => set_menu_open(false)}>
+              {isMobile ? <NavigateNextIcon /> : <NavigateBeforeIcon />}
+            </Fab>
+          </Tooltip>
         </div>
       </SwipeableDrawer>
     </>

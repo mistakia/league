@@ -7,28 +7,28 @@ export function getSchedule(state) {
 
 export function getGameByPlayerId(state, { pid, week }) {
   const playerMap = getPlayerById(state, { pid })
-  return getGameByTeam(state, { team: playerMap.get('team'), week })
+  return getGameByTeam(state, { nfl_team: playerMap.get('team'), week })
 }
 
-export function getByeByTeam(state, { team }) {
-  return state.getIn(['schedule', 'teams', team, 'bye'])
+export function getByeByTeam(state, { nfl_team }) {
+  return state.getIn(['schedule', 'teams', nfl_team, 'bye'])
 }
 
 const currentWeek = Math.max(constants.week, 1)
-export function getGameByTeam(state, { team, week = currentWeek }) {
-  const nflTeam = state.getIn(['schedule', 'teams', team])
-  if (!nflTeam) {
+export function getGameByTeam(state, { nfl_team, week = currentWeek }) {
+  const team = state.getIn(['schedule', 'teams', nfl_team])
+  if (!team) {
     return null
   }
 
-  return nflTeam.games.find((g) => g.wk === week)
+  return team.games.find((g) => g.wk === week)
 }
 
-export function getGamesByTeam(state, { team }) {
-  const nflTeam = state.getIn(['schedule', 'teams', team])
-  if (!nflTeam) {
+export function getGamesByTeam(state, { nfl_team }) {
+  const team = state.getIn(['schedule', 'teams', nfl_team])
+  if (!team) {
     return []
   }
 
-  return nflTeam.games
+  return team.games
 }

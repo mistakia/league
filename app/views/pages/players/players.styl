@@ -4,22 +4,16 @@
   flex-direction column
   width 100%
 
-.players__head-expand
-  flex 0 0 auto
+.players__head-expand.MuiButtonBase-root
+  flex 1 1 100%
   display flex
-  align-items center
-  cursor pointer
-  padding 0 16px
-  .icon
+  height 20px
+  margin-bottom 4px
+  .MuiSvgIcon-root
     transition opacity 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,transform 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms
     border-radius 99em
-  &:hover .icon
+  &:hover .MuiSvgIcon-root
     background white
-
-.players__head-actions
-  flex 1
-  display flex
-  justify-content flex-end
 
 .players__filters
   flex 0 0 auto
@@ -27,22 +21,21 @@
   flex-direction column
   width 100%
 
-  &.expanded .players__head-expand .icon
+  &.expanded .players__head-expand .MuiSvgIcon-root
     transform rotate(180deg)
 
 .players__filters-row
   flex 0 0 auto
   border-bottom 1px solid $borderColor
-  padding 0px 32px
+  padding 4px 32px 0
   display flex
   align-items center
   flex-wrap wrap
   >
     .search__filter
     .players__view-menu
-    .players__head-expand
-    .players__head-actions
-      margin 8px 4px
+    .players__view-export
+      margin 4px
 
 .players__header
   position sticky
@@ -52,7 +45,7 @@
   background $backgroundColor
   width max-content
   min-width 100%
-  height 45px
+  height 48px
   display flex
   align-items center
   font-weight 500
@@ -66,6 +59,7 @@
   justify-content center
   align-items center
   height 100%
+  position relative
   + .row__group
   + .player__row-group
       border-left 1px solid $borderColor
@@ -82,6 +76,19 @@
   width 100%
   text-align center
 
+.players__header
+  .row__group-head
+  .player__row-group-head
+    overflow hidden
+    text-overflow ellipsis
+    position absolute
+    top 0
+    left 0
+    right 0
+  .player__row-group-body
+    align-items flex-end
+
+
 .row__group-body
 .player__row-group-body
   flex 1
@@ -94,23 +101,13 @@
   absolute left 0px top 0px right 0px bottom 0px
   overflow scroll
 
-.players__view-menu
-  flex 1 0 150px
-  max-width 250px
-
-
 @media (max-width 600px)
-  .players__head-actions
+  .players__view-export.MuiButton-root
     display none
 
-  .players__head-expand
-    flex 1
-    display flex
-    justify-content flex-end
-
   .players__filters-row
-    padding 0 4px
+    padding 4px
 
-@media (min-width 601px)
-  .players__filters-row > .players__view-menu
-    margin 8px 4px 8px 16px
+  .search__filter
+    flex 1
+    flex-basis 100%

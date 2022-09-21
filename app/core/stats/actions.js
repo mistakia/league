@@ -3,9 +3,6 @@ export const statActions = {
   GET_CHARTED_PLAYS_PENDING: 'GET_CHARTED_PLAYS_PENDING',
   GET_CHARTED_PLAYS_FULFILLED: 'GET_CHARTED_PLAYS_FULFILLED',
 
-  SET_STAT_VIEW: 'SET_STAT_VIEW',
-  SET_STAT_PASSING_VIEW: 'SET_STAT_PASSING_VIEW',
-
   GET_TEAM_STATS_FAILED: 'GET_TEAM_STATS_FAILED',
   GET_TEAM_STATS_PENDING: 'GET_TEAM_STATS_PENDING',
   GET_TEAM_STATS_FULFILLED: 'GET_TEAM_STATS_FULFILLED',
@@ -36,20 +33,6 @@ export const statActions = {
     payload: {
       type,
       values
-    }
-  }),
-
-  setView: (view) => ({
-    type: statActions.SET_STAT_VIEW,
-    payload: {
-      view
-    }
-  }),
-
-  setPassingView: (view) => ({
-    type: statActions.SET_STAT_PASSING_VIEW,
-    payload: {
-      view
     }
   }),
 

@@ -5,12 +5,12 @@ import NFLTeamLogo from '@components/nfl-team-logo'
 
 import './player-row-opponent.styl'
 
-export default function PlayerRowOpponent({ game, team }) {
+export default function PlayerRowOpponent({ game, nfl_team }) {
   if (!game) {
     return <div className='player__row-opponent' />
   }
 
-  const isHome = game.h === team
+  const isHome = game.h === nfl_team
   const opp = isHome ? game.v : game.h
 
   return (
@@ -23,5 +23,5 @@ export default function PlayerRowOpponent({ game, team }) {
 
 PlayerRowOpponent.propTypes = {
   game: PropTypes.object,
-  team: PropTypes.string
+  nfl_team: PropTypes.string
 }

@@ -1,6 +1,6 @@
 import { call, takeLatest, fork, select, put } from 'redux-saga/effects'
 
-import { getPlayers, playerActions } from '@core/players'
+import { getSelectedPlayersView, playerActions } from '@core/players'
 import { statActions } from './actions'
 import { getChartedPlays } from '@core/api'
 import { getCurrentLeague } from '@core/leagues'
@@ -8,9 +8,11 @@ import { getStats } from './selectors'
 import Worker from 'workerize-loader?inline!../worker' // eslint-disable-line import/no-webpack-loader-syntax
 
 export function* loadChartedPlays() {
-  const players = yield select(getPlayers)
-  const view = players.get('view')
-  if (view === 'stats') {
+  const selected_players_view = yield select(getSelectedPlayersView)
+  const should_load = selected_players_view.fields.find((field) =>
+    field.includes('stats.')
+  )
+  if (should_load) {
     const stats = yield select(getStats)
     const { years } = stats.toJS()
     yield call(getChartedPlays, { years })
@@ -60,7 +62,7 @@ export function* calculateTeamStats() {
 // -------------------------------------
 
 export function* watchSetPlayersView() {
-  yield takeLatest(playerActions.SET_PLAYERS_VIEW, loadChartedPlays)
+  yield takeLatest(playerActions.SELECT_PLAYERS_VIEW, loadChartedPlays)
 }
 
 export function* watchGetChartedPlaysFulfilled() {

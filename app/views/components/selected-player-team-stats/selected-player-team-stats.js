@@ -14,113 +14,39 @@ export default class SelectedPlayerTeamStats extends React.Component {
     const items = []
     for (const [index, year] of sorted.entries()) {
       const percentiles = stats.teamStatsPercentiles[year.seas] || {}
+      const Stat = ({ stat_key, ...params }) => (
+        <PercentileMetric
+          value={year[stat_key]}
+          percentile={percentiles[stat_key]}
+          {...params}
+        />
+      )
+
       items.push(
         <div key={index} className='player__selected-row'>
           <div className='table__cell text'>{year.seas}</div>
-          <PercentileMetric
-            className='row__single-metric'
-            stats={year}
-            percentiles={percentiles}
-            fixed={0}
-            type='drv'
-          />
-          <PercentileMetric
-            className='row__single-metric'
-            stats={year}
-            percentiles={percentiles}
-            fixed={0}
-            type='snpo'
-          />
+          <Stat stat_key='drv' className='row__single-metric' />
+          <Stat stat_key='snpo' className='row__single-metric' />
           <div className='row__group'>
             <div className='row__group-body'>
-              <PercentileMetric
-                stats={year}
-                percentiles={percentiles}
-                fixed={0}
-                type='pa'
-              />
-              <PercentileMetric
-                stats={year}
-                percentiles={percentiles}
-                fixed={0}
-                type='py'
-              />
-              <PercentileMetric
-                stats={year}
-                percentiles={percentiles}
-                fixed={0}
-                type='tdp'
-              />
-              <PercentileMetric
-                stats={year}
-                percentiles={percentiles}
-                fixed={0}
-                type='pfd'
-              />
-              <PercentileMetric
-                stats={year}
-                percentiles={percentiles}
-                fixed={0}
-                type='spp'
-              />
-              <PercentileMetric
-                stats={year}
-                percentiles={percentiles}
-                fixed={0}
-                type='rzpa'
-              />
-              <PercentileMetric
-                stats={year}
-                percentiles={percentiles}
-                fixed={0}
-                type='rzpy'
-              />
+              <Stat stat_key='pa' />
+              <Stat stat_key='py' />
+              <Stat stat_key='tdp' />
+              <Stat stat_key='pfd' />
+              <Stat stat_key='spp' />
+              <Stat stat_key='rzpa' />
+              <Stat stat_key='rzpy' />
             </div>
           </div>
           <div className='row__group'>
             <div className='row__group-body'>
-              <PercentileMetric
-                stats={year}
-                percentiles={percentiles}
-                fixed={0}
-                type='ra'
-              />
-              <PercentileMetric
-                stats={year}
-                percentiles={percentiles}
-                fixed={0}
-                type='ry'
-              />
-              <PercentileMetric
-                stats={year}
-                percentiles={percentiles}
-                fixed={0}
-                type='tdr'
-              />
-              <PercentileMetric
-                stats={year}
-                percentiles={percentiles}
-                fixed={0}
-                type='rfd'
-              />
-              <PercentileMetric
-                stats={year}
-                percentiles={percentiles}
-                fixed={0}
-                type='srp'
-              />
-              <PercentileMetric
-                stats={year}
-                percentiles={percentiles}
-                fixed={0}
-                type='rzra'
-              />
-              <PercentileMetric
-                stats={year}
-                percentiles={percentiles}
-                fixed={0}
-                type='rzry'
-              />
+              <Stat stat_key='ra' />
+              <Stat stat_key='ry' />
+              <Stat stat_key='tdr' />
+              <Stat stat_key='rfd' />
+              <Stat stat_key='srp' />
+              <Stat stat_key='rzra' />
+              <Stat stat_key='rzry' />
             </div>
           </div>
         </div>

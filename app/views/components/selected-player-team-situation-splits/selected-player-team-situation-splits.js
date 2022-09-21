@@ -14,123 +14,47 @@ export default class SelectedPlayerTeamSituationSplits extends React.Component {
     const items = []
     for (const [index, year] of sorted.entries()) {
       const percentiles = stats.teamStatsPercentiles[year.seas] || {}
+      const Stat = ({ stat_key, ...params }) => (
+        <PercentileMetric
+          value={year[stat_key]}
+          percentile={percentiles[stat_key]}
+          {...params}
+        />
+      )
+
       items.push(
         <div key={index} className='player__selected-row'>
           <div className='table__cell text'>{year.seas}</div>
-          <PercentileMetric
-            className='row__single-metric'
-            stats={year}
-            percentiles={percentiles}
-            fixed={0}
-            type='q1p'
-          />
-          <PercentileMetric
-            className='row__single-metric'
-            stats={year}
-            percentiles={percentiles}
-            fixed={0}
-            type='q2p'
-          />
-          <PercentileMetric
-            className='row__single-metric'
-            stats={year}
-            percentiles={percentiles}
-            fixed={0}
-            type='q3p'
-          />
-          <PercentileMetric
-            className='row__single-metric'
-            stats={year}
-            percentiles={percentiles}
-            fixed={0}
-            type='q4p'
-          />
+          <Stat stat_key='q1p' />
+          <Stat stat_key='q2p' />
+          <Stat stat_key='q3p' />
+          <Stat stat_key='q4p' />
           <div className='row__group'>
             <div className='row__group-body'>
-              <PercentileMetric
-                stats={year}
-                percentiles={percentiles}
-                fixed={0}
-                type='q1ra'
-              />
-              <PercentileMetric
-                stats={year}
-                percentiles={percentiles}
-                fixed={0}
-                type='q1pa'
-              />
-              <PercentileMetric
-                stats={year}
-                percentiles={percentiles}
-                fixed={0}
-                type='q1ry'
-              />
-              <PercentileMetric
-                stats={year}
-                percentiles={percentiles}
-                fixed={0}
-                type='q1py'
-              />
+              <Stat stat_key='q1ra' />
+              <Stat stat_key='q1pa' />
+              <Stat stat_key='q1ry' />
+              <Stat stat_key='q1py' />
             </div>
           </div>
           <div className='row__group'>
             <div className='row__group-body'>
-              <PercentileMetric
-                stats={year}
-                percentiles={percentiles}
-                fixed={0}
-                type='lcra'
-              />
-              <PercentileMetric
-                stats={year}
-                percentiles={percentiles}
-                fixed={0}
-                type='lcpa'
-              />
-              <PercentileMetric
-                stats={year}
-                percentiles={percentiles}
-                fixed={0}
-                type='lcry'
-              />
-              <PercentileMetric
-                stats={year}
-                percentiles={percentiles}
-                fixed={0}
-                type='lcpy'
-              />
+              <Stat stat_key='lcra' />
+              <Stat stat_key='lcpa' />
+              <Stat stat_key='lcry' />
+              <Stat stat_key='lcpy' />
             </div>
           </div>
           <div className='row__group'>
             <div className='row__group-body'>
-              <PercentileMetric
-                stats={year}
-                percentiles={percentiles}
-                fixed={0}
-                type='pap'
-              />
-              <PercentileMetric
-                stats={year}
-                percentiles={percentiles}
-                fixed={0}
-                type='papy'
-              />
+              <Stat stat_key='pap' />
+              <Stat stat_key='papy' />
             </div>
           </div>
           <div className='row__group'>
             <div className='row__group-body'>
-              <PercentileMetric
-                stats={year}
-                percentiles={percentiles}
-                fixed={0}
-                type='sga'
-              />
-              <PercentileMetric
-                stats={year}
-                percentiles={percentiles}
-                fixed={0}
-                type='sgy'
-              />
+              <Stat stat_key='sga' />
+              <Stat stat_key='sgy' />
             </div>
           </div>
         </div>

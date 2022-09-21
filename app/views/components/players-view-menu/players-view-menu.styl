@@ -1,2 +1,56 @@
-.players__view-menu.MuiFormControl-root
-  margin-left 8px
+.players__view-menu
+  display flex
+
+  .MuiInputBase-input
+    overflow hidden
+    text-overflow ellipsis
+
+.players__view-popper
+  z-index 1300
+  width 250px
+  background-color #fff
+
+.players__view-list
+  list-style none
+  margin 0
+  padding 8px 0
+  max-height 40vh
+  overflow auto
+  font-weight 400
+  line-height 1.5
+  letter-spacing 0.00938em
+
+  li
+    min-height 32px
+    display flex
+    padding 6px 16px
+    align-items center
+    justify-content flex-start
+
+.players__view-popper-footer
+  border-top 1px solid $borderColor
+  padding 10px
+
+.players__view-input.MuiTextField-root
+  .MuiOutlinedInput-input.MuiInputBase-input
+    padding 8px 16px
+
+
+@media (pointer: fine)
+  .players__view-list li:hover
+    background rgba(0, 0, 0, 0.04)
+
+@media (max-width 600px)
+  .players__view-menu
+  .players__view-input.MuiTextField-root
+    flex 1
+
+@media (min-width 601px)
+  .players__view-menu
+    min-width content
+
+  .players__view-input.MuiTextField-root
+    min-width 250px
+
+  .players__filters-row > .players__view-menu
+    margin 8px 4px 8px 16px

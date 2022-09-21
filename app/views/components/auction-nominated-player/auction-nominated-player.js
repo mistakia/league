@@ -48,7 +48,7 @@ export default function AuctionNominatedPlayer({
         </div>
         <div className='selected__player-header-item'>
           <label>Bye</label>
-          <NFLTeamBye team={playerMap.get('team')} />
+          <NFLTeamBye nfl_team={playerMap.get('team')} />
         </div>
         <div className='selected__player-header-item'>
           <label>Age</label>
