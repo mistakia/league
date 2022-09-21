@@ -1,16 +1,21 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getPlayers, playerActions } from '@core/players'
+import { getSelectedPlayersView, playerActions } from '@core/players'
 
 import PlayersViewMenu from './players-view-menu'
 
-const mapStateToProps = createSelector(getPlayers, (players) => ({
-  view: players.get('view')
-}))
+const mapStateToProps = createSelector(
+  (state) => state.getIn(['players', 'views']),
+  getSelectedPlayersView,
+  (views, selected_players_view) => ({
+    selected_players_view,
+    views
+  })
+)
 
 const mapDispatchToProps = {
-  update: playerActions.setView
+  select_players_view: playerActions.select_players_view
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PlayersViewMenu)

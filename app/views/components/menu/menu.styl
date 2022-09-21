@@ -1,11 +1,10 @@
 $hoverBackground = rgba(255, 255, 255, 0.8)
 $hoverBorder = rgba(0, 0, 0, 0.23)
-$menuActionsHeight = 57px
 
 $menuBackgroundColor = darken($backgroundColor, 5%)
 
 .main__menu
-  absolute left 0 right 0 top 0 bottom $menuActionsHeight
+  absolute left 0 right 0 top 0 bottom 0
   overflow-y scroll
   display flex
   flex-direction column
@@ -14,15 +13,6 @@ $menuBackgroundColor = darken($backgroundColor, 5%)
   display flex
   padding-left 32px
   position relative
-
-.menu__actions
-  absolute left 0 bottom 0 right 0
-  background $menuBackgroundColor
-  border-top 1px solid $borderColor
-  display flex
-  align-items center
-  padding 0 4px
-  height $menuActionsHeight
 
 .league__title
   font-family 'IBM Plex Mono'
@@ -33,9 +23,9 @@ $menuBackgroundColor = darken($backgroundColor, 5%)
   padding 16px 8px
 
 .menu__collapse
-  flex 1
-  display flex
-  justify-content flex-end
+  position absolute
+  right 4px
+  bottom 16px
 
 .menu__sections
   flex 1 0 auto

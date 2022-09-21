@@ -76,7 +76,7 @@ export default function AuctionTargets({
           <PlayerName pid={pid} hidePosition />
           <PlayerWatchlistAction pid={pid} />
           <div className='auction__targets-player-bye'>
-            <NFLTeamBye team={playerMap.get('team')} />
+            <NFLTeamBye nfl_team={playerMap.get('team')} />
           </div>
           <div className='auction__targets-player-salary metric'>
             {salary ? `$${salary}` : ''}

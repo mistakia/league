@@ -3,62 +3,46 @@ import PropTypes from 'prop-types'
 
 import PercentileMetric from '@components/percentile-metric'
 
-const defenseStats = (stats, percentiles = {}, fixed = 0) => (
-  <>
-    <PercentileMetric {...{ stats, percentiles, fixed }} type='dpa' />
-    <PercentileMetric {...{ stats, percentiles, fixed }} type='dya' />
-    <PercentileMetric {...{ stats, percentiles, fixed }} type='dsk' />
-    <PercentileMetric {...{ stats, percentiles, fixed }} type='dint' />
-    <PercentileMetric {...{ stats, percentiles, fixed }} type='dff' />
-    <PercentileMetric {...{ stats, percentiles, fixed }} type='drf' />
-    <PercentileMetric {...{ stats, percentiles, fixed }} type='dtno' />
-    <PercentileMetric {...{ stats, percentiles, fixed }} type='dfds' />
-    <PercentileMetric {...{ stats, percentiles, fixed }} type='dblk' />
-    <PercentileMetric {...{ stats, percentiles, fixed }} type='dsf' />
-    <PercentileMetric {...{ stats, percentiles, fixed }} type='dtpr' />
-    <PercentileMetric {...{ stats, percentiles, fixed }} type='dtd' />
-    <PercentileMetric {...{ stats, percentiles, fixed }} type='prtd' />
-    <PercentileMetric {...{ stats, percentiles, fixed }} type='krtd' />
-  </>
-)
+const defenseStats = [
+  'dpa',
+  'dya',
+  'dsk',
+  'dint',
+  'dff',
+  'drf',
+  'dtno',
+  'dfds',
+  'dblk',
+  'dsf',
+  'dtpr',
+  'dtd',
+  'prtd',
+  'krtd'
+]
+const kickerStats = ['xpm', 'fgm', 'fg19', 'fg29', 'fg39', 'fg49', 'fg50']
+const playerStats = [
+  'pa',
+  'py',
+  'tdp',
+  'ints',
+  'ra',
+  'ry',
+  'tdr',
+  'fuml',
+  'trg',
+  'rec',
+  'recy',
+  'tdrec'
+]
 
-const kickerStats = (stats, percentiles = {}, fixed = 0) => (
-  <>
-    <PercentileMetric {...{ stats, percentiles, fixed }} type='xpm' />
-    <PercentileMetric {...{ stats, percentiles, fixed }} type='fgm' />
-    <PercentileMetric {...{ stats, percentiles, fixed }} type='fg19' />
-    <PercentileMetric {...{ stats, percentiles, fixed }} type='fg29' />
-    <PercentileMetric {...{ stats, percentiles, fixed }} type='fg39' />
-    <PercentileMetric {...{ stats, percentiles, fixed }} type='fg49' />
-    <PercentileMetric {...{ stats, percentiles, fixed }} type='fg50' />
-  </>
-)
-
-const playerStats = (stats, percentiles = {}, fixed = 0) => (
-  <>
-    <PercentileMetric {...{ stats, percentiles, fixed }} type='pa' />
-    <PercentileMetric {...{ stats, percentiles, fixed }} type='py' />
-    <PercentileMetric {...{ stats, percentiles, fixed }} type='tdp' />
-    <PercentileMetric {...{ stats, percentiles, fixed }} type='ints' />
-    <PercentileMetric {...{ stats, percentiles, fixed }} type='ra' />
-    <PercentileMetric {...{ stats, percentiles, fixed }} type='ry' />
-    <PercentileMetric {...{ stats, percentiles, fixed }} type='tdr' />
-    <PercentileMetric {...{ stats, percentiles, fixed }} type='fuml' />
-    <PercentileMetric {...{ stats, percentiles, fixed }} type='trg' />
-    <PercentileMetric {...{ stats, percentiles, fixed }} type='rec' />
-    <PercentileMetric {...{ stats, percentiles, fixed }} type='recy' />
-    <PercentileMetric {...{ stats, percentiles, fixed }} type='tdrec' />
-  </>
-)
-
-const getStatRows = (pos, stats, percentiles, fixed) => {
+const getStatFields = (pos) => {
   switch (pos) {
     case 'DST':
-      return defenseStats(stats, percentiles, fixed)
+      return defenseStats
     case 'K':
-      return kickerStats(stats, percentiles, fixed)
+      return kickerStats
     default:
-      return playerStats(stats, percentiles, fixed)
+      return playerStats
   }
 }
 
@@ -72,19 +56,29 @@ export default class PlayerSelectedRow extends React.Component {
       games,
       lead,
       pos,
-      percentiles,
+      percentiles = {},
       header,
-      fixed
+      fixed = 0
     } = this.props
     const classNames = ['player__selected-row']
     if (className) classNames.push(className)
     if (header) classNames.push('header')
-    const rows = getStatRows(pos, stats, percentiles, fixed)
+    const fields = getStatFields(pos)
+    const items = []
+    fields.forEach((field, index) => {
+      items.push(
+        <PercentileMetric
+          value={stats[field]}
+          percentile={percentiles[field]}
+          fixed={fixed}
+        />
+      )
+    })
     return (
       <div className={classNames.join(' ')}>
         {lead || <div className='table__cell text'>{title}</div>}
         {games && <div className='table__cell metric'>{games}</div>}
-        {rows}
+        {items}
         {action}
       </div>
     )

@@ -6,6 +6,7 @@ import { createPlayer } from './player'
 import { statActions } from '@core/stats'
 import { rosterActions } from '@core/rosters'
 import { auctionActions } from '@core/auction'
+import DefaultPlayersViews from './default-players-views'
 
 import { constants } from '@common'
 
@@ -32,8 +33,9 @@ const initialState = new Map({
   allAges: new List(), // TODO
   items: new Map(),
   order: 'desc',
-  view: constants.isOffseason ? 'season' : 'ros',
-  orderBy: constants.isOffseason ? 'vorp.0' : 'vorp.ros',
+  selected_players_view: DefaultPlayersViews.season_projections.key,
+  views: new Map(DefaultPlayersViews),
+  orderBy: DefaultPlayersViews.season_projections.order_by,
   watchlist: new Set(),
   watchlistOnly: false,
   cutlist: new List(),
@@ -43,21 +45,14 @@ const initialState = new Map({
 
 export function playersReducer(state = initialState, { payload, type }) {
   switch (type) {
-    case playerActions.SET_PLAYERS_VIEW: {
-      // TODO - reset orderBy
-      const week =
-        payload.view === 'season'
-          ? new List([0])
-          : new List([Math.max(constants.week, 1)])
-      if (payload.view === 'stats') {
-        return state.merge({
-          view: 'stats',
-          orderBy: 'stats.pts',
-          order: 'desc'
-        })
-      } else {
-        return state.merge({ view: payload.view, week })
-      }
+    case playerActions.SELECT_PLAYERS_VIEW: {
+      const view = state.getIn(['views', payload.view_key])
+      return state.merge({
+        selected_players_view: payload.view_key,
+        orderBy: view.order_by,
+        order: 'desc',
+        week: new List([Math.max(constants.week, 1)])
+      })
     }
 
     case playerActions.SEARCH_PLAYERS:

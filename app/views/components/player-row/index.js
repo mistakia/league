@@ -3,7 +3,12 @@ import { createSelector } from 'reselect'
 
 import { getApp } from '@core/app'
 import { getStats } from '@core/stats'
-import { getPlayers, playerActions, getPlayerStatus } from '@core/players'
+import {
+  getPlayers,
+  playerActions,
+  getPlayerStatus,
+  getSelectedViewGroupedFields
+} from '@core/players'
 import { getTeams } from '@core/teams'
 
 import PlayerRow from './player-row'
@@ -14,32 +19,17 @@ const mapStateToProps = createSelector(
   getStats,
   getPlayerStatus,
   getTeams,
-  (players, app, statsState, status, teams) => ({
+  getSelectedViewGroupedFields,
+  (players, app, statsState, status, teams, selected_view_grouped_fields) => ({
+    selected_view_grouped_fields,
     status,
     teams,
     teamId: app.teamId,
     isLoggedIn: Boolean(app.userId),
     highlight_teamIds: players.get('highlight_teamIds'),
     selectedPlayer: players.get('selected'),
-    baselines: players.get('baselines'),
     percentiles: statsState.playsPercentiles,
-    week: players.get('view') === 'ros' ? 'ros' : players.get('week').get(0),
-    isRestOfSeasonView: players.get('view') === 'ros',
-    isWeekView: players.get('view') === 'week',
-    isSeasonView: players.get('view') === 'season',
-    isStatsView: players.get('view') === 'stats',
-    isStatsRushingView:
-      players.get('view') === 'stats' && statsState.view === 'rushing',
-    isStatsReceivingView:
-      players.get('view') === 'stats' && statsState.view === 'receiving',
-    isStatsPassingAdvancedView:
-      players.get('view') === 'stats' &&
-      statsState.view === 'passing' &&
-      statsState.passing === 'advanced',
-    isStatsPassingPressureView:
-      players.get('view') === 'stats' &&
-      statsState.view === 'passing' &&
-      statsState.passing === 'pressure'
+    week: players.get('week').get(0)
   })
 )
 

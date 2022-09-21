@@ -207,7 +207,8 @@ const calculateStatsFromPlays = ({ plays, qualifiers, league }) => {
   const percentiles = calculatePercentiles({
     items: Object.values(players),
     stats: constants.fullStats,
-    qualifiers
+    qualifiers,
+    prefix: 'stats.'
   })
 
   return { players, percentiles }

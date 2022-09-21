@@ -1,6 +1,8 @@
 import React, { useState, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import PropTypes from 'prop-types'
+import Paper from '@mui/material/Paper'
+import Checkbox from '@mui/material/Checkbox'
 
 import './filter.styl'
 
@@ -97,7 +99,8 @@ export default function Filter(props) {
         className={classNames.join(' ')}
         onClick={(e) => handleSelect(e, index)}
       >
-        {v.label}
+        <Checkbox checked={v.selected} size='small' />
+        <div className='dropdown__item-label'>{v.label}</div>
       </div>
     )
   })
@@ -120,7 +123,7 @@ export default function Filter(props) {
       <div className='player__filter-label'>{label}</div>
       <div className='player__filter-selection'>{selectedLabel}</div>
       {visible && (
-        <div ref={dropdown_ref} className='player__filter-dropdown'>
+        <Paper ref={dropdown_ref} className='player__filter-dropdown'>
           {!single && (
             <div className='player__filter-dropdown-head'>
               <div
@@ -138,7 +141,7 @@ export default function Filter(props) {
             </div>
           )}
           <div className='player__filter-dropdown-body'>{items}</div>
-        </div>
+        </Paper>
       )}
     </div>
   )

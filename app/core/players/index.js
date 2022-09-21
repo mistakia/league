@@ -1,6 +1,9 @@
 export { playersReducer } from './reducer'
 export {
   getPlayers,
+  getPlayerFields,
+  getSelectedPlayersView,
+  getSelectedViewGroupedFields,
   getBaselines,
   getTransitionPlayers,
   getCutlistPlayers,
