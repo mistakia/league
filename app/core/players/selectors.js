@@ -1,6 +1,6 @@
 import { createSelector } from 'reselect'
 import dayjs from 'dayjs'
-import { Map } from 'immutable'
+import { Map, List } from 'immutable'
 
 import {
   constants,
@@ -41,9 +41,45 @@ import {
 import { getGameByTeam, getGamesByTeam } from '@core/schedule'
 import { getPlayerGamelogs } from '@core/gamelogs'
 
+import PlayerFields from './fields'
+
 export function getPlayers(state) {
   return state.get('players')
 }
+
+export const getPlayerFields = createSelector(
+  (state) =>
+    state.getIn(['players', 'week'], new List([constants.week])).get(0),
+  (week) => PlayerFields({ week })
+)
+
+export const getSelectedPlayersView = createSelector(
+  (state) => state.getIn(['players', 'selected_players_view']),
+  (state) => state.getIn(['players', 'views'], new Map()),
+  (selected_players_view, views) => views.get(selected_players_view)
+)
+
+export const getSelectedViewGroupedFields = createSelector(
+  getSelectedPlayersView,
+  getPlayerFields,
+  (selected_players_view, fields) => {
+    const groups = []
+    for (const field of selected_players_view.fields) {
+      const field_info = fields[field]
+      const group = groups.at(-1)
+      if (!group || group.category !== field_info.category) {
+        groups.push({
+          category: field_info.category,
+          fields: [field_info]
+        })
+      } else {
+        group.fields.push(field_info)
+      }
+    }
+
+    return groups
+  }
+)
 
 export function getBaselines(state) {
   const result = state.getIn(['players', 'baselines'])
@@ -103,12 +139,12 @@ export function getSelectedPlayer(state) {
 
 export function getSelectedPlayerGame(state, { week }) {
   const playerMap = getSelectedPlayer(state)
-  return getGameByTeam(state, { team: playerMap.get('team'), week })
+  return getGameByTeam(state, { nfl_team: playerMap.get('team'), week })
 }
 
 export function getSelectedPlayerGames(state) {
   const playerMap = getSelectedPlayer(state)
-  return getGamesByTeam(state, { team: playerMap.get('team') })
+  return getGamesByTeam(state, { nfl_team: playerMap.get('team') })
 }
 
 export function getAllPlayers(state) {
@@ -319,8 +355,11 @@ export function getFilteredPlayers(state) {
     )
   }
 
+  const player_view_fields = getPlayerFields(state)
+  const order_by = pState.get('orderBy')
+  const order_by_path = player_view_fields[order_by].value
   const sorted = filtered.sort(
-    getComparator(pState.get('order'), pState.get('orderBy'))
+    getComparator(pState.get('order'), order_by_path)
   )
   return sorted.toList()
 }
@@ -438,7 +477,7 @@ export function isPlayerLocked(state, { playerMap = new Map(), pid }) {
     return false
   }
 
-  const game = getGameByTeam(state, { team: playerMap.get('team') })
+  const game = getGameByTeam(state, { nfl_team: playerMap.get('team') })
   if (!game) {
     return false
   }

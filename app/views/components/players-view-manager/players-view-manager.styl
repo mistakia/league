@@ -1,0 +1,38 @@
+.players__view-modal
+  position absolute
+  top 50%
+  left 50%
+  transform translate(-50%, -50%)
+  background white
+  box-shadow 0 2px 4px #0003
+  z-index 150
+  max-width 840px
+  height 90%
+  border-radius 6px
+  width calc(100% - 20px)
+  display flex
+  flex-direction column
+  overflow hidden
+
+.players__view-modal-head
+  height 48px
+  border-bottom 1px solid $borderColor
+  flex 0 0 48px
+
+.players__view-modal-body
+  display flex
+  flex 1
+  overflow hidden
+
+.players__view-manager-fields
+  flex 1
+  overflow hidden
+  overflow-y scroll
+
+.players__view-manager-order
+  flex 0 0 200px
+  width 200px
+  border-left 1px solid $borderColor
+
+.players__view-manager-field.MuiListItemButton-root
+  padding-left 32px

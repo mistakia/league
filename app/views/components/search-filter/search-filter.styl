@@ -1,6 +1,5 @@
 .search__filter
   flex 1 0 140px
-  max-width 250px
   height 35px
   margin-right 8px
   position relative
@@ -10,7 +9,7 @@
 .search__filter-input
   height 100%
   width 100%
-  border-radius 99px
+  border-radius 4px
   padding-left 16px
   font-size 14px
   flex 1
@@ -22,3 +21,7 @@
   padding 0 4px
   &:hover
     fill red
+
+@media (min-width 601px)
+  .search__filter
+    max-width 250px

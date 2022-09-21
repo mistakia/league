@@ -60,7 +60,7 @@ export const playerActions = {
   DEL_PROJECTION_PENDING: 'DEL_PROJECTION_PENDING',
   DEL_PROJECTION_FULFILLED: 'DEL_PROJECTION_FULFILLED',
 
-  SET_PLAYERS_VIEW: 'SET_PLAYERS_VIEW',
+  SELECT_PLAYERS_VIEW: 'SELECT_PLAYERS_VIEW',
 
   GET_CUTLIST_FULFILLED: 'GET_CUTLIST_FULFILLED',
   GET_CUTLIST_PENDING: 'GET_CUTLIST_PENDING',
@@ -126,10 +126,10 @@ export const playerActions = {
     }
   }),
 
-  setView: (view) => ({
-    type: playerActions.SET_PLAYERS_VIEW,
+  select_players_view: (view_key) => ({
+    type: playerActions.SELECT_PLAYERS_VIEW,
     payload: {
-      view
+      view_key
     }
   }),
 

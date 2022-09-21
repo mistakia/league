@@ -136,7 +136,7 @@ export function getStartersByMatchupId(state, { mid }) {
   for (const playerMap of playerMaps) {
     if (!playerMap.get('pid')) continue
     const game = getGameByTeam(state, {
-      team: playerMap.get('team'),
+      nfl_team: playerMap.get('team'),
       week: matchup.week
     })
     if (!game) continue
@@ -193,7 +193,7 @@ export function getPlaysByMatchupId(state, { mid }) {
   let result = new List()
   for (const play of filteredPlays) {
     const game = getGameByTeam(state, {
-      team: fixTeam(play.pos_team),
+      nfl_team: fixTeam(play.pos_team),
       week: matchup.week
     })
 

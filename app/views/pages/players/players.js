@@ -1,9 +1,10 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
-import GetAppIcon from '@mui/icons-material/GetApp'
-import IconButton from '@mui/material/IconButton'
 import InfiniteScroll from 'react-infinite-scroller'
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
+import Button from '@mui/material/Button'
+import dayjs from 'dayjs'
 
 import SearchFilter from '@components/search-filter'
 import StatusFilter from '@components/status-filter'
@@ -19,8 +20,6 @@ import PageLayout from '@layouts/page'
 import PlayerHeader from '@components/player-header'
 import PlayerRow from '@components/player-row'
 import PlayersViewMenu from '@components/players-view-menu'
-import StatMenu from '@components/stat-menu'
-import StatPassingMenu from '@components/stat-passing-menu'
 import AvailabilityFilter from '@components/availability-filter'
 import StatYearsFilter from '@components/stat-years-filter'
 import StatWeeksFilter from '@components/stat-weeks-filter'
@@ -31,25 +30,8 @@ import StatQualifierFilter from '@components/stat-qualifier-filter'
 import CollegeFilter from '@components/college-filter'
 import CollegeDivisionFilter from '@components/college-division-filter'
 import NFLTeamsFilter from '@components/nfl-teams-filter'
-import HeaderStatsFantasy from '@components/header-stats-fantasy'
-import HeaderStatsPassingBasic from '@components/header-stats-passing-basic'
-import HeaderStatsPassingEfficiency from '@components/header-stats-passing-efficiency'
-import HeaderStatsPassingAdvanced from '@components/header-stats-passing-advanced'
-import HeaderStatsPassingAiryards from '@components/header-stats-passing-airyards'
-import HeaderStatsPassingPressure from '@components/header-stats-passing-pressure'
-import HeaderStatsRushingBasic from '@components/header-stats-rushing-basic'
-import HeaderStatsRushingProductivity from '@components/header-stats-rushing-productivity'
-import HeaderStatsRushingAfterContact from '@components/header-stats-rushing-after-contact'
-import HeaderStatsRushingShare from '@components/header-stats-rushing-share'
-import HeaderStatsRushingAdvanced from '@components/header-stats-rushing-advanced'
-import HeaderStatsRushingBrokenTackles from '@components/header-stats-rushing-broken-tackles'
-import HeaderStatsReceivingBasic from '@components/header-stats-receiving-basic'
-import HeaderStatsReceivingOpportunity from '@components/header-stats-receiving-opportunity'
-import HeaderStatsReceivingEfficiency from '@components/header-stats-receiving-efficiency'
 import Loading from '@components/loading'
-import Icon from '@components/icon'
 import { csv } from '@core/export'
-import { constants } from '@common'
 
 import './players.styl'
 
@@ -99,57 +81,58 @@ export default class PlayersPage extends React.Component {
   }
 
   handleExport = () => {
-    const { players, isSeasonView, week } = this.props
-    const data = players.map((p) => {
+    const { players, player_fields, selected_players_view } = this.props
+
+    const headers = {
+      name: 'Player Name',
+      team: 'Team',
+      pos: 'Position'
+    }
+
+    const field_infos = []
+    for (const field of selected_players_view.fields) {
+      const field_info = player_fields[field]
+      field_infos.push(field_info)
+
+      headers[field_info.key] = field_info.name
+    }
+
+    const data = players.map((playerMap) => {
       const item = {
-        name: p.name,
-        team: p.team,
-        pos: p.pos,
-        salary: p.getIn(['market_salary', `${week}`], 0).toFixed(1),
-        salary_adj: p.get('market_salary_adj', 0).toFixed(1),
-        vorp: p.getIn(['vorp', `${week}`], 0).toFixed(1)
+        name: playerMap.get('name'),
+        team: playerMap.get('team'),
+        pos: playerMap.get('pos')
       }
 
-      for (const stat of constants.stats) {
-        item[stat] = p.getIn(['projection', `${week}`, stat], 0).toFixed(1)
+      for (const field_info of field_infos) {
+        item[field_info.key] = playerMap.getIn(field_info.key_path)
       }
 
       return item
     })
 
+    const view_name = selected_players_view.name
+      .replace(/[^a-z0-9]/gi, '-')
+      .toLowerCase()
+
+    const timestamp = dayjs().format('YYYY-MM-DD-H[h]-m[m]')
+
     csv({
-      headers: {
-        name: 'Player Name',
-        team: 'Team',
-        pos: 'Position',
-        salary: 'Salary',
-        salary_adj: 'Salary Adjusted',
-        vorp: 'VORP',
-        ...constants.statHeaders
-      },
+      headers,
       data: data.toJS(),
-      fileName:
-        'xo-football-players-' +
-        (isSeasonView ? 'SeasonProjections' : 'RestOfSeasonProjections')
+      fileName: `xo-football-${view_name}-export-${timestamp}`
     })
   }
 
   render = () => {
     const {
       players,
-      isSeasonView,
-      isStatsView,
-      isStatsPassingView,
-      isWeekView,
-      isStatsRushingView,
-      isStatsReceivingView,
-      isStatsPassingAdvancedView,
-      week,
-      isStatsPassingPressureView,
       isPending,
-      showQualifier,
       isLoggedIn,
-      isRestOfSeasonView
+      selected_view_grouped_fields,
+      show_week_filter,
+      show_play_filters,
+      show_qualifier_filter
     } = this.props
 
     const rowItems = []
@@ -161,187 +144,88 @@ export default class PlayersPage extends React.Component {
           <PlayerRow
             key={playerMap.get('pid')}
             playerMap={playerMap}
-            index={idx}
+            player_row_index={idx}
           />
         )
       )
 
-    const headerSeasonPassing = (
-      <div className='player__row-group'>
-        <div className='player__row-group-head'>Passing</div>
-        <div className='player__row-group-body'>
+    const header_items = []
+    selected_view_grouped_fields.forEach((group, index) => {
+      const group_items = []
+      group.fields.forEach((field_info, index) => {
+        group_items.push(
           <PlayerHeader
-            className='table__cell metric'
-            label='YDS'
-            value={`projection.${week}.py`}
+            key={index}
+            className={field_info.className || 'table__cell metric'}
+            label={field_info.label}
+            value={field_info.key}
           />
-          <PlayerHeader
-            className='table__cell metric'
-            label='TD'
-            value={`projection.${week}.tdp`}
-          />
-          <PlayerHeader
-            className='table__cell metric'
-            label='INT'
-            value={`projection.${week}.ints`}
-          />
-        </div>
-      </div>
-    )
+        )
+      })
 
-    const headerSeasonRushing = (
-      <div className='player__row-group'>
-        <div className='player__row-group-head'>Rushing</div>
-        <div className='player__row-group-body'>
-          <PlayerHeader
-            className='table__cell metric'
-            label='CAR'
-            value={`projection.${week}.ra`}
-          />
-          <PlayerHeader
-            className='table__cell metric'
-            label='YDS'
-            value={`projection.${week}.ry`}
-          />
-          <PlayerHeader
-            className='table__cell metric'
-            label='TD'
-            value={`projection.${week}.tdr`}
-          />
-          <PlayerHeader
-            className='table__cell metric'
-            label='FUM'
-            value={`projection.${week}.fuml`}
-          />
+      header_items.push(
+        <div className='player__row-group' key={index}>
+          <div className='player__row-group-head'>{group.category}</div>
+          <div className='player__row-group-body'>{group_items}</div>
         </div>
-      </div>
-    )
-
-    const headerSeasonReceiving = (
-      <div className='player__row-group'>
-        <div className='player__row-group-head'>Receiving</div>
-        <div className='player__row-group-body'>
-          <PlayerHeader
-            className='table__cell metric'
-            label='TAR'
-            value={`projection.${week}.trg`}
-          />
-          <PlayerHeader
-            className='table__cell metric'
-            label='REC'
-            value={`projection.${week}.rec`}
-          />
-          <PlayerHeader
-            className='table__cell metric'
-            label='YDS'
-            value={`projection.${week}.recy`}
-          />
-          <PlayerHeader
-            className='table__cell metric'
-            label='TD'
-            value={`projection.${week}.tdrec`}
-          />
-        </div>
-      </div>
-    )
-
-    const headerSalary = week === 0 && (
-      <>
-        <PlayerHeader
-          className='table__cell metric'
-          label='Salary'
-          value='value'
-        />
-        {constants.isOffseason && (
-          <PlayerHeader
-            className='table__cell metric'
-            label='Value'
-            value={`vorp_adj.${week}`}
-          />
-        )}
-        {constants.isOffseason && (
-          <PlayerHeader
-            className='table__cell metric'
-            label='Market'
-            value={`market_salary.${week}`}
-          />
-        )}
-        {constants.isOffseason && (
-          <PlayerHeader
-            className='table__cell metric'
-            label='Market Adjusted'
-            value={'market_salary_adj'}
-          />
-        )}
-      </>
-    )
-
-    const headerSeasonSummary = (
-      <div className='player__row-group'>
-        <div className='player__row-group-body'>
-          {isLoggedIn && headerSalary}
-          <PlayerHeader
-            className='table__cell metric'
-            label='Pts Over Replace.'
-            value={`vorp.${week}`}
-          />
-          <PlayerHeader
-            className='table__cell metric'
-            label='Proj'
-            value={`points.${week}.total`}
-          />
-        </div>
-      </div>
-    )
+      )
+    })
 
     const classNames = ['players__filters']
     if (this.state.expanded) classNames.push('expanded')
-
-    const projectionView = isRestOfSeasonView || isSeasonView || isWeekView
 
     const head = (
       <div className='players__head'>
         <div className={classNames.join(' ')}>
           <div className='players__filters-row'>
+            <PlayersViewMenu />
             <SearchFilter
               search={this.props.search}
               value={this.props.searchValue}
             />
-            {isLoggedIn && <WatchlistFilter />}
-            <PlayersViewMenu />
             <PositionFilter />
             {isLoggedIn && <AvailabilityFilter />}
-            {isWeekView && <WeekFilter />}
-            {isStatsView && <StatMenu />}
-            {isStatsPassingView && <StatPassingMenu />}
-            {isStatsView && <StatYearsFilter />}
-            {isStatsView && <StatWeeksFilter />}
-            {isStatsView && <StatDaysFilter />}
-            {isStatsView && <StatQuartersFilter />}
-            {isStatsView && <StatDownsFilter />}
-            {isStatsView && showQualifier && <StatQualifierFilter />}
-            <div className='players__head-expand' onClick={this.handleClick}>
-              <Icon className='players__head-icon' name='arrow-down' />
-            </div>
-            <div className='players__head-actions'>
-              {Boolean(isSeasonView || isRestOfSeasonView) && (
-                <IconButton onClick={this.handleExport} disabled={isPending}>
-                  <GetAppIcon />
-                </IconButton>
-              )}
-            </div>
+            {show_week_filter && <WeekFilter />}
+            <Button
+              variant='outlined'
+              onClick={this.handleExport}
+              disabled={isPending}
+              className='players__view-export'
+            >
+              Export CSV
+            </Button>
+            <Button
+              endIcon={<KeyboardArrowDownIcon />}
+              onClick={this.handleClick}
+              className='players__head-expand'
+            >
+              {this.state.expanded ? 'Hide' : 'Filters'}
+            </Button>
           </div>
           {this.state.expanded && (
-            <div className='players__filters-row'>
-              <ExperienceFilter />
-              {/* <AgeFilter /> */}
-              <DraftRoundFilter />
-              <NFLTeamsFilter />
-              <CollegeFilter />
-              <CollegeDivisionFilter />
-              <StatusFilter />
-              <TeamFilter />
-              <HighlightTeam />
+            <div className='players__filters-expanded-container'>
+              {Boolean(show_play_filters) && (
+                <div className='players__filters-row'>
+                  <StatYearsFilter />
+                  <StatWeeksFilter />
+                  <StatDaysFilter />
+                  <StatQuartersFilter />
+                  <StatDownsFilter />
+                  {show_qualifier_filter && <StatQualifierFilter />}
+                </div>
+              )}
+              <div className='players__filters-row'>
+                <ExperienceFilter />
+                {/* <AgeFilter /> */}
+                <DraftRoundFilter />
+                <NFLTeamsFilter />
+                <CollegeFilter />
+                <CollegeDivisionFilter />
+                <StatusFilter />
+                <TeamFilter />
+                <HighlightTeam />
+                {isLoggedIn && <WatchlistFilter />}
+              </div>
             </div>
           )}
         </div>
@@ -360,32 +244,9 @@ export default class PlayersPage extends React.Component {
             <div className='player__row-name player__header'>Name</div>
             {isLoggedIn && <div className='player__row-tag' />}
             {isLoggedIn && <div className='player__row-action actions' />}
-            {isWeekView && (
-              <div className='player__row-opponent player__header metric'>
-                Opponent
-              </div>
-            )}
             {isLoggedIn && <div className='player__row-availability' />}
           </div>
-          {projectionView && headerSeasonSummary}
-          {projectionView && headerSeasonPassing}
-          {projectionView && headerSeasonRushing}
-          {projectionView && headerSeasonReceiving}
-          {isStatsView && <HeaderStatsFantasy />}
-          {isStatsPassingAdvancedView && <HeaderStatsPassingBasic />}
-          {isStatsPassingAdvancedView && <HeaderStatsPassingEfficiency />}
-          {isStatsPassingAdvancedView && <HeaderStatsPassingAdvanced />}
-          {isStatsPassingAdvancedView && <HeaderStatsPassingAiryards />}
-          {isStatsPassingPressureView && <HeaderStatsPassingPressure />}
-          {isStatsRushingView && <HeaderStatsRushingBasic />}
-          {isStatsRushingView && <HeaderStatsRushingProductivity />}
-          {isStatsRushingView && <HeaderStatsRushingAfterContact />}
-          {isStatsRushingView && <HeaderStatsRushingShare />}
-          {isStatsRushingView && <HeaderStatsRushingAdvanced />}
-          {isStatsRushingView && <HeaderStatsRushingBrokenTackles />}
-          {isStatsReceivingView && <HeaderStatsReceivingBasic />}
-          {isStatsReceivingView && <HeaderStatsReceivingOpportunity />}
-          {isStatsReceivingView && <HeaderStatsReceivingEfficiency />}
+          {header_items}
         </div>
         <InfiniteScroll
           ref={(scroll) => {
@@ -411,20 +272,15 @@ PlayersPage.propTypes = {
   orderBy: PropTypes.string,
   players: ImmutablePropTypes.list,
   selected: PropTypes.string,
-  week: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  isSeasonView: PropTypes.bool,
-  isStatsView: PropTypes.bool,
-  isStatsPassingView: PropTypes.bool,
-  isWeekView: PropTypes.bool,
-  isStatsRushingView: PropTypes.bool,
-  isStatsReceivingView: PropTypes.bool,
-  isStatsPassingAdvancedView: PropTypes.bool,
-  isStatsPassingPressureView: PropTypes.bool,
   isPending: PropTypes.bool,
-  showQualifier: PropTypes.bool,
   isLoggedIn: PropTypes.bool,
-  isRestOfSeasonView: PropTypes.bool,
   search: PropTypes.func,
   searchValue: PropTypes.string,
-  loadAllPlayers: PropTypes.func
+  loadAllPlayers: PropTypes.func,
+  selected_view_grouped_fields: PropTypes.array,
+  show_week_filter: PropTypes.bool,
+  show_play_filters: PropTypes.bool,
+  show_qualifier_filter: PropTypes.bool,
+  player_fields: PropTypes.object,
+  selected_players_view: PropTypes.object
 }
