@@ -16,8 +16,8 @@ import {
 import processGamelogs from './process-gamelogs.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
-const log = debug('process:play-stats')
-debug.enable('process:play-stats,update-player,get-player')
+const log = debug('process-play-stats')
+debug.enable('process-play-stats,update-player,get-player,process-gamelogs')
 const current_week = Math.max(
   dayjs().day() === 2 ? constants.season.week - 1 : constants.season.week,
   1
