@@ -13,11 +13,11 @@ debug.enable('process-gamelogs')
 
 const processGamelogs = async ({
   lid = 1,
-  seas = constants.season.year,
+  year = constants.season.year,
   week = constants.season.week
 } = {}) => {
   const league = await getLeague(lid)
-  const result = await calculateValue({ league, year: seas, week })
+  const result = await calculateValue({ league, year, week })
   const inserts = []
   for (const pid in result.players) {
     const item = result.players[pid]
@@ -33,7 +33,7 @@ const processGamelogs = async ({
 
   if (inserts.length) {
     log(
-      `Updating ${inserts.length} player gamelogs for league ${lid} in week ${week} ${seas}`
+      `Updating ${inserts.length} player gamelogs for league ${lid} in week ${week} ${year}`
     )
     await db('league_player_gamelogs').insert(inserts).onConflict().merge()
   }
@@ -64,11 +64,11 @@ const main = async () => {
           .groupBy('gamelogs.week')
           .orderBy('gamelogs.week', 'asc')
         for (const { week } of weeks) {
-          await processGamelogs({ seas: year, week })
+          await processGamelogs({ year, week })
         }
       }
     } else {
-      await processGamelogs({ seas: argv.seas, week: argv.week })
+      await processGamelogs({ year: argv.year, week: argv.week })
     }
   } catch (err) {
     error = err

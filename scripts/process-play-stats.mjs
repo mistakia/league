@@ -13,6 +13,7 @@ import {
   calculateDstStatsFromPlays,
   getPlayFromPlayStats
 } from '#common'
+import processGamelogs from './process-gamelogs.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('process:play-stats')
@@ -412,6 +413,9 @@ const run = async ({
   }
   log(`Updated ${play_update_count} plays`)
   log(`Updated ${gamelog_update_count} gamelogs`)
+
+  // TODO — process for all leagues
+  await processGamelogs({ year, week, lid: 1 })
 }
 
 const main = async () => {
