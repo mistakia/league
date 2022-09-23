@@ -75,6 +75,8 @@ async function insertProp(prop) {
       }
     }
 
+    message += ` (${constants.sourcesTitle[sourceid]})`
+
     await sendDiscordMessage({
       webhookUrl: config.discord_props_channel_webhook_url,
       message
