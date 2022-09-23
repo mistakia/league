@@ -16,12 +16,28 @@ const migrateData = async () => {
 
   for (const prop of props) {
     const { pid, sourceid, year, wk, type, id, o, u, timestamp } = prop
-    const o_am = Odds.from('decimal', o).to('moneyline', {
-      precision: 0
-    })
-    const u_am = Odds.from('decimal', u).to('moneyline', {
-      precision: 0
-    })
+
+    let o_am = null
+    let u_am = null
+
+    try {
+      o_am = Odds.from('decimal', o).to('moneyline', {
+        precision: 0
+      })
+    } catch (err) {
+      log({ o })
+      log(err)
+    }
+
+    try {
+      u_am = Odds.from('decimal', u).to('moneyline', {
+        precision: 0
+      })
+    } catch (err) {
+      log({ u })
+      log(err)
+    }
+
     await db('props')
       .update({
         o_am,
