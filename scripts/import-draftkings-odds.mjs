@@ -53,7 +53,7 @@ const run = async () => {
       prop.timestamp = timestamp
       prop.wk = constants.season.week
       prop.year = constants.season.year
-      prop.sourceid = constants.sources.DRAFT_KINGS
+      prop.sourceid = constants.sources.DRAFT_KINGS_VA
 
       prop.ln = parseFloat(offer.outcomes[0].line, 10)
 
