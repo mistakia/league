@@ -98,13 +98,6 @@
 ## Import weekly rankings
 ## Import draft rankings
 
-################################### ODDS ########################################
-
-## At every 15th minute on every day-of-week from Wednesday through Sunday in January, February, and every month from September through December.
-# */15 * * 1,2,9-12 3-7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-draftkings-odds.mjs &>> /var/log/league/import-draftkings.log
-# */15 * * 1,2,9-12 3-7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-caesars-odds.mjs &>> /var/log/league/import-caesars.log
-# */15 * * 1,2,9-12 3-7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-betonline-odds.mjs &>> /var/log/league/import-betonline.log
-
 ################################### Waivers - Poaching ########################################
 
 ## Process Poaching Waivers Every 15 Minutes
