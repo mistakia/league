@@ -82,7 +82,7 @@ const run = async () => {
         prop.timestamp = timestamp
         prop.wk = constants.season.week
         prop.year = constants.season.year
-        prop.sourceid = constants.sources.FANDUEL
+        prop.sourceid = constants.sources.FANDUEL_NJ
 
         prop.ln = parseFloat(market.runners[0].handicap, 10)
 

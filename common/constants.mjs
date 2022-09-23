@@ -1201,7 +1201,7 @@ export const sources = {
   FBG_SIGMUND_BLOOM: 11,
   FANTASY_FOOTBALL_NERD: 12,
   NUMBERFIRE: 13,
-  DRAFT_KINGS: 14,
+  DRAFT_KINGS_VA: 14,
   BETONLINE: 15,
   '4FOR4': 16,
   FANTASYPROS: 17,
@@ -1209,8 +1209,8 @@ export const sources = {
   AVERAGE: 18,
 
   FBG_CONSENSUS: 19,
-  CAESARS: 20,
-  FANDUEL: 21
+  CAESARS_VA: 20,
+  FANDUEL_NJ: 21
 }
 
 export const sourcesTitle = {
@@ -1227,15 +1227,15 @@ export const sourcesTitle = {
   11: 'Sigmund Bloom (FBG)',
   12: 'Fantasy Football Nerd',
   13: 'Numberfire',
-  14: 'Draft Kings',
+  14: 'Draft Kings (VA)',
   15: 'BetOnline',
   16: '4For4',
   17: 'FantasyPros',
 
   18: 'Average',
   19: 'Footballguys',
-  20: 'Caesars',
-  21: 'Fanduel'
+  20: 'Caesars (VA)',
+  21: 'Fanduel (NJ)'
 }
 
 export const rankings = {
