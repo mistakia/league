@@ -24,7 +24,7 @@ async function insertProp(prop) {
   // if there is no last prop or if line/odds have changed, insert prop
   if (
     !last_prop ||
-    (last_prop.ln === ln && last_prop.o === o && last_prop.u === u)
+    (last_prop.ln !== ln || last_prop.o !== o || last_prop.u !== u)
   ) {
     await db('props').insert(prop)
 
