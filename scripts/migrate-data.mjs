@@ -1,6 +1,7 @@
 import debug from 'debug'
 // import yargs from 'yargs'
 // import { hideBin } from 'yargs/helpers'
+import { Odds } from 'oddslib'
 
 import db from '#db'
 import { isMain } from '#utils'
@@ -11,32 +12,30 @@ const log = debug('migrate-data')
 debug.enable('migrate-data')
 
 const migrateData = async () => {
-  const props = await db('props')
+  const props = await db('props').whereNull('u_am').orWhereNull('o_am')
 
   for (const prop of props) {
-    const { pid, sourceid, year, wk, type, ln, o, u } = prop
-    const grouped_props = await db('props').where({
-      pid,
-      sourceid,
-      year,
-      wk,
-      type,
-      ln,
-      o,
-      u
+    const { pid, sourceid, year, wk, type, id, o, u, timestamp } = prop
+    const o_am = Odds.from('decimal', o).to('moneyline', {
+      precision: 0
     })
-
-    log(`grouped count ${grouped_props.length}`)
-    if (grouped_props.length < 2) continue
-
-    const sorted = grouped_props.sort((a, b) => a.timestamp - b.timestamp)
-    const earliest_timestamp = sorted[0].timestamp
-    log(`first timestamp: ${earliest_timestamp}`)
-    const count = await db('props')
-      .del()
-      .where({ pid, sourceid, year, wk, type, ln, o, u })
-      .whereNot({ timestamp: earliest_timestamp })
-    log(`deleted ${count} rows`)
+    const u_am = Odds.from('decimal', u).to('moneyline', {
+      precision: 0
+    })
+    await db('props')
+      .update({
+        o_am,
+        u_am
+      })
+      .where({
+        pid,
+        year,
+        wk,
+        sourceid,
+        type,
+        timestamp,
+        id
+      })
   }
 }
 
