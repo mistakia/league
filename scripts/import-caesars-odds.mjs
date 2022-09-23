@@ -89,8 +89,10 @@ const run = async () => {
       for (const selection of market.selections) {
         if (selection.type === 'over') {
           prop.o = selection.price.d
+          prop.o_am = selection.price.a
         } else if (selection.type === 'under') {
           prop.u = selection.price.d
+          prop.u_am = selection.price.a
         }
       }
       props.push(prop)

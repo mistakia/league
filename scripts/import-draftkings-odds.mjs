@@ -60,8 +60,10 @@ const run = async () => {
       for (const outcome of offer.outcomes) {
         if (outcome.label === 'Over') {
           prop.o = outcome.oddsDecimal
+          prop.o_am = Number(outcome.oddsAmerican)
         } else if (outcome.label === 'Under') {
           prop.u = outcome.oddsDecimal
+          prop.u_am = Number(outcome.oddsAmerican)
         }
       }
       props.push(prop)
