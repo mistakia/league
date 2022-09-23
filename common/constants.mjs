@@ -1183,7 +1183,7 @@ export const player_prop_type_desc = {
   15: 'Pass Atts',
   16: 'Longest Comp',
   17: 'Longest Rec',
-  18: 'TDs',
+  18: 'Anytime TDs',
   19: 'Longest Rush'
 }
 
