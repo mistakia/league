@@ -89,8 +89,12 @@ const run = async () => {
         for (const selection of market.runners) {
           if (selection.result.type.toLowerCase() === 'over') {
             prop.o = selection.winRunnerOdds.trueOdds.decimalOdds.decimalOdds
+            prop.o_am =
+              selection.winRunnerOdds.americanDisplayOdds.americanOddsInt
           } else if (selection.result.type.toLowerCase() === 'under') {
             prop.u = selection.winRunnerOdds.trueOdds.decimalOdds.decimalOdds
+            prop.u_am =
+              selection.winRunnerOdds.americanDisplayOdds.americanOddsInt
           }
         }
         props.push(prop)

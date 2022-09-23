@@ -3,6 +3,7 @@ import fs from 'fs-extra'
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
+import { Odds } from 'oddslib'
 
 import db from '#db'
 import { constants } from '#common'
@@ -110,16 +111,25 @@ const run = async () => {
         case 1:
           prop.ln = bet.value - 0.5
           prop.o = bet.odds
+          prop.o_am = Odds.from('decimal', bet.odds).to('moneyline', {
+            precision: 0
+          })
           break
 
         case 18:
           prop.ln = bet.value
           prop.u = bet.odds
+          prop.u_am = Odds.from('decimal', bet.odds).to('moneyline', {
+            precision: 0
+          })
           break
 
         case 19:
           prop.ln = bet.value
           prop.o = bet.odds
+          prop.o_am = Odds.from('decimal', bet.odds).to('moneyline', {
+            precision: 0
+          })
           break
 
         default:

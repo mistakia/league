@@ -5,7 +5,7 @@ import { constants } from '#common'
 import sendDiscordMessage from './send-discord-message.mjs'
 
 async function insertProp(prop) {
-  const { pid, wk, year, type, sourceid, ln, o, u } = prop
+  const { pid, wk, year, type, sourceid, ln, o, u, o_am, u_am } = prop
 
   // get last prop
   const results = await db('props')
@@ -24,7 +24,9 @@ async function insertProp(prop) {
   // if there is no last prop or if line/odds have changed, insert prop
   if (
     !last_prop ||
-    (last_prop.ln !== ln || last_prop.o !== o || last_prop.u !== u)
+    last_prop.ln !== ln ||
+    last_prop.o !== o ||
+    last_prop.u !== u
   ) {
     await db('props').insert(prop)
 
@@ -46,9 +48,15 @@ async function insertProp(prop) {
     let message = `${player_row.fname} ${player_row.lname} (${player_row.cteam}) ${constants.player_prop_type_desc[type]}`
 
     if (!last_prop) {
-      message += ` opened at ${ln} (Over: ${o} / Under: ${u})`
+      message += ` opened at ${ln} (Over: ${o_am} / Under: ${u_am})`
     } else {
       const line_changed = last_prop.ln !== ln
+
+      // TODO - temp fix to ignore odd movements
+      if (!line_changed) {
+        return
+      }
+
       const under_odds_changed = last_prop.u !== u
       const over_odds_changed = last_prop.o !== o
 
@@ -59,11 +67,11 @@ async function insertProp(prop) {
       }
 
       if (under_odds_changed) {
-        changes.push(`under changed from ${last_prop.u} to ${u}`)
+        changes.push(`under odds changed from ${last_prop.u_am} to ${u_am}`)
       }
 
       if (over_odds_changed) {
-        changes.push(`over changed from ${last_prop.o} to ${o}`)
+        changes.push(`over odds changed from ${last_prop.o_am} to ${o_am}`)
       }
 
       if (changes.length > 1) {
