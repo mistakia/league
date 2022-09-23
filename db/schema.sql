@@ -1528,7 +1528,7 @@ CREATE TABLE `nfl_plays` (
   `assist_tk` tinyint(1) DEFAULT NULL,          -- Binary indicator for if an assist tackle occurred.
 
   `special` tinyint(1) DEFAULT NULL,                 -- special teams
-  `special_type` tinyint(1) DEFAULT NULL,            -- special teams play type
+  `special_type` varchar(10) DEFAULT NULL,            -- special teams play type
 
   `pen_team` varchar(3) DEFAULT NULL,           -- String abbreviation of the team with the penalty.
   `pen_yds` int(3) DEFAULT NULL,                -- Yards gained (or lost) by the posteam from the penalty.
@@ -1897,7 +1897,7 @@ CREATE TABLE `nfl_plays_current_week` (
   `assist_tk` tinyint(1) DEFAULT NULL,          -- Binary indicator for if an assist tackle occurred.
 
   `special` tinyint(1) DEFAULT NULL,                 -- special teams
-  `special_type` tinyint(1) DEFAULT NULL,            -- special teams play type
+  `special_type` varchar(10) DEFAULT NULL,            -- special teams play type
 
   `pen_team` varchar(3) DEFAULT NULL,           -- String abbreviation of the team with the penalty.
   `pen_yds` int(3) DEFAULT NULL,                -- Yards gained (or lost) by the posteam from the penalty.

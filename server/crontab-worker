@@ -32,13 +32,13 @@
 ################################### Finalize Game Plays ########################################
 
 ## At 00:00 on Tuesday.
-0 1 * 1,2,9-12 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays-ngs.mjs --final &>> /var/log/league/league-import-plays-ngs.log
-0 1 * 1,2,9-12 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays-nfl.mjs --final &>> /var/log/league/league-import-plays-nfl.log
+0 0 * 1,2,9-12 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays-ngs.mjs --final &>> /var/log/league/league-import-plays-ngs.log
+0 0 * 1,2,9-12 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays-nfl.mjs --final &>> /var/log/league/league-import-plays-nfl.log
 
 ## At 00:00 on Friday
-0 1 * 1,2,9-12 5 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays-ngs.mjs --final &>> /var/log/league/league-import-plays-ngs.log
-0 1 * 1,2,9-12 5 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays-nfl.mjs --final &>> /var/log/league/league-import-plays-nfl.log
+0 0 * 1,2,9-12 5 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays-ngs.mjs --final &>> /var/log/league/league-import-plays-ngs.log
+0 0 * 1,2,9-12 5 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays-nfl.mjs --final &>> /var/log/league/league-import-plays-nfl.log
 
 ## At 00:00 on Monday
-0 1 * 1,2,9-12 1 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays-ngs.mjs --final &>> /var/log/league/league-import-plays-ngs.log
-0 1 * 1,2,9-12 1 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays-nfl.mjs --final &>> /var/log/league/league-import-plays-nfl.log
+0 0 * 1,2,9-12 1 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays-ngs.mjs --final &>> /var/log/league/league-import-plays-ngs.log
+0 0 * 1,2,9-12 1 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays-nfl.mjs --final &>> /var/log/league/league-import-plays-nfl.log
