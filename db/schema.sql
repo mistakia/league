@@ -2536,6 +2536,8 @@ CREATE TABLE `props` (
   `ln` decimal(4,1) NOT NULL,
   `o` decimal(5,2) NOT NULL,
   `u` decimal(5,2) NOT NULL,
+  `o_am` SMALLINT NOT NULL,
+  `u_am` SMALLINT NOT NULL,
   `sourceid` int(6) NOT NULL,
   `timestamp` int(11) NOT NULL,
   UNIQUE KEY `prop` (`sourceid`, `id`, `pid`, `wk`, `year`, `type`, `timestamp`)
