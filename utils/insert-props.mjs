@@ -28,7 +28,10 @@ async function insertProp(prop) {
   ) {
     await db('props').insert(prop)
 
-    if (!config.discord_props_channel_webhook_url) {
+    if (
+      !config.discord_props_channel_webhook_url ||
+      process.env.NODE_ENV !== 'production'
+    ) {
       return
     }
 
