@@ -5,7 +5,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants } from '#common'
-import { isMain, getPlayer, fanduel, wait } from '#utils'
+import { isMain, getPlayer, fanduel, wait, insertProps } from '#utils'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-fanduel')
@@ -87,9 +87,9 @@ const run = async () => {
         prop.ln = parseFloat(market.runners[0].handicap, 10)
 
         for (const selection of market.runners) {
-          if (selection.result.type === 'Over') {
+          if (selection.result.type.toLowerCase() === 'over') {
             prop.o = selection.winRunnerOdds.trueOdds.decimalOdds.decimalOdds
-          } else if (selection.result.type === 'Under') {
+          } else if (selection.result.type.toLowerCase() === 'under') {
             prop.u = selection.winRunnerOdds.trueOdds.decimalOdds.decimalOdds
           }
         }
@@ -112,7 +112,7 @@ const run = async () => {
 
   if (props.length) {
     log(`Inserting ${props.length} props into database`)
-    // await db('props').insert(props)
+    await insertProps(props)
   }
 }
 

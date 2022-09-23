@@ -5,7 +5,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants, team_aliases } from '#common'
-import { isMain, getPlayer, caesars, wait } from '#utils'
+import { isMain, getPlayer, caesars, wait, insertProps } from '#utils'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-caesars')
@@ -111,7 +111,7 @@ const run = async () => {
 
   if (props.length) {
     log(`Inserting ${props.length} props into database`)
-    await db('props').insert(props)
+    await insertProps(props)
   }
 }
 

@@ -2538,8 +2538,7 @@ CREATE TABLE `props` (
   `u` decimal(5,2) NOT NULL,
   `sourceid` int(6) NOT NULL,
   `timestamp` int(11) NOT NULL,
-  UNIQUE KEY `prop` (`sourceid`, `id`, `pid`, `wk`, `year`, `type`, `timestamp`),
-  UNIQUE KEY `line` (`sourceid`, `pid`, `wk`, `year`, `type`, `ln`, `o`, `u`)
+  UNIQUE KEY `prop` (`sourceid`, `id`, `pid`, `wk`, `year`, `type`, `timestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
