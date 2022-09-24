@@ -83,7 +83,7 @@ async function insertProp(prop) {
       }
     }
 
-    message += ` (${constants.sourcesTitle[sourceid]})`
+    message += ` on ${constants.sourcesTitle[sourceid]} market`
 
     await sendDiscordMessage({
       webhookUrl: config.discord_props_channel_webhook_url,
