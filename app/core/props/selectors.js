@@ -1,5 +1,3 @@
-import { Odds } from 'oddslib'
-
 import { getPlayerById } from '@core/players'
 import { constants } from '@common'
 
@@ -76,8 +74,6 @@ export function getFilteredProps(state) {
 
     prop.diff = prop.proj - prop.ln
     prop.abs = Math.abs(prop.diff)
-    prop.over = Odds.from('decimal', prop.o).to('moneyline', { precision: 0 })
-    prop.under = Odds.from('decimal', prop.u).to('moneyline', { precision: 0 })
   }
 
   return items.sort((a, b) => b.abs - a.abs)
