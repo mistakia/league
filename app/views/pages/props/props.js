@@ -32,8 +32,8 @@ export default function PropsPage({ load, player_props }) {
           <div className='item__col metric'>{prop.ln}</div>
           <div className='item__col metric'>{(prop.proj || 0).toFixed(1)}</div>
           <div className='item__col metric'>{(prop.diff || 0).toFixed(1)}</div>
-          <div className='item__col metric'>{prop.over}</div>
-          <div className='item__col metric'>{prop.under}</div>
+          <div className='item__col metric'>{prop.o_am}</div>
+          <div className='item__col metric'>{prop.u_am}</div>
         </div>
         {/* <div className='item__col-group'>
             <div className='item__col metric'>Avg</div>
