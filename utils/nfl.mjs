@@ -269,7 +269,9 @@ query {
           gsisPlayer {
             id
             position
-            displayName
+            firstName
+            lastName
+            rookieYear
             birthDate
           }
           playStatSeq
