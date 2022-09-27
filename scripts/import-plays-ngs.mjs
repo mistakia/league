@@ -109,7 +109,10 @@ const importPlaysForWeek = async ({
       }
     }).then((res) => res.json())
 
-    if (!data || !data.plays) continue
+    if (!data || !data.plays) {
+      log(`skipping esbid: ${game.esbid}, missing play data`)
+      continue
+    }
 
     const timestamp = Math.round(Date.now() / 1000)
 
@@ -128,23 +131,27 @@ const importPlaysForWeek = async ({
         ...playData
       })
 
-      for (const playStat of play.playStats) {
-        const playStatData = getPlayStatData(playStat)
-        play_stat_inserts.push({
-          playId,
-          esbid,
-          valid: 1,
-          statId: playStat.statId,
-          ...playStatData
-        })
+      if (play.playStats && Array.isArray(play.playStats)) {
+        for (const playStat of play.playStats) {
+          const playStatData = getPlayStatData(playStat)
+          play_stat_inserts.push({
+            playId,
+            esbid,
+            valid: 1,
+            statId: playStat.statId,
+            ...playStatData
+          })
+        }
       }
 
-      for (const nflId of play.nflIds) {
-        snap_inserts.push({
-          esbid,
-          nflId,
-          playId
-        })
+      if (play.nflIds && Array.isArray(play.nflIds)) {
+        for (const nflId of play.nflIds) {
+          snap_inserts.push({
+            esbid,
+            nflId,
+            playId
+          })
+        }
       }
     }
 
