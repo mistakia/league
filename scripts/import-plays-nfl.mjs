@@ -228,9 +228,7 @@ const importAllPlays = async ({ start, end, seas_type, force_update } = {}) => {
   }
 
   for (const year of years) {
-    log(
-      `loading plays for year: ${year}, seas_type: ${seas_type || 'all'}`
-    )
+    log(`loading plays for year: ${year}, seas_type: ${seas_type || 'all'}`)
 
     if (seas_type || seas_type.toLowerCase() === 'pre') {
       await importPlaysForYear({ year, seas_type: 'PRE', force_update })
