@@ -21,18 +21,9 @@ const defenseStats = [
 ]
 const kickerStats = ['xpm', 'fgm', 'fg19', 'fg29', 'fg39', 'fg49', 'fg50']
 const playerStats = [
-  'pa',
-  'py',
-  'tdp',
-  'ints',
-  'ra',
-  'ry',
-  'tdr',
-  'fuml',
-  'trg',
-  'rec',
-  'recy',
-  'tdrec'
+  ['pa', 'py', 'tdp', 'ints'],
+  ['ra', 'ry', 'tdr', 'fuml'],
+  ['trg', 'rec', 'recy', 'tdrec']
 ]
 
 const getStatFields = (pos) => {
@@ -66,13 +57,33 @@ export default class PlayerSelectedRow extends React.Component {
     const fields = getStatFields(pos)
     const items = []
     fields.forEach((field, index) => {
-      items.push(
-        <PercentileMetric
-          value={stats[field]}
-          percentile={percentiles[field]}
-          fixed={fixed}
-        />
-      )
+      const is_group = Array.isArray(field)
+      if (is_group) {
+        const group_items = []
+        for (const group_field of field) {
+          group_items.push(
+            <PercentileMetric
+              value={stats[group_field]}
+              percentile={percentiles[group_field]}
+              fixed={fixed}
+            />
+          )
+        }
+
+        items.push(
+          <div className='row__group' key={index}>
+            <div className='row__group-body'>{group_items}</div>
+          </div>
+        )
+      } else {
+        items.push(
+          <PercentileMetric
+            value={stats[field]}
+            percentile={percentiles[field]}
+            fixed={fixed}
+          />
+        )
+      }
     })
     return (
       <div className={classNames.join(' ')}>

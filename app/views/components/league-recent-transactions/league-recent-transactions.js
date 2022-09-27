@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import Grid from '@mui/material/Grid'
 
@@ -23,7 +24,7 @@ function LeagueRecentTransaction({ transaction }) {
 }
 
 LeagueRecentTransaction.propTypes = {
-  transaction: ImmutablePropTypes.record
+  transaction: PropTypes.object
 }
 
 export default function LeagueRecentTransactions({ signings, releases }) {

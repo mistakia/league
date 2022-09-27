@@ -6,9 +6,9 @@ import Tab from '@mui/material/Tab'
 import { constants } from '@common'
 import SelectedPlayerMatchupTable from '@components/selected-player-matchup-table'
 
-import './selected-player-matchup.styl'
+import './selected-player-schedule.styl'
 
-export default class SelectedPlayerMatchup extends React.Component {
+export default class SelectedPlayerSchedule extends React.Component {
   constructor(props) {
     super(props)
 
@@ -44,12 +44,12 @@ export default class SelectedPlayerMatchup extends React.Component {
     })
 
     return (
-      <div className='selected__player-matchup'>
+      <div className='selected__player-schedule'>
         <Tabs
           value={value}
           onChange={this.handleChange}
           variant='scrollable'
-          className='selected__player-matchup-tabs'
+          className='selected__player-schedule-tabs sticky__column'
           orientation='horizontal'
           indicatorColor='primary'
           textColor='inherit'
@@ -62,7 +62,7 @@ export default class SelectedPlayerMatchup extends React.Component {
   }
 }
 
-SelectedPlayerMatchup.propTypes = {
+SelectedPlayerSchedule.propTypes = {
   team: PropTypes.string,
   games: PropTypes.array
 }

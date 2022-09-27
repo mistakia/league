@@ -5,8 +5,6 @@ import PropTypes from 'prop-types'
 import PlayerSelectedRow from '@components/player-selected-row'
 import PlayerSelectedRowHeader from '@components/player-selected-row-header'
 
-import './selected-player-gamelogs.styl'
-
 export default class SelectedPlayerGamelogs extends React.Component {
   componentDidMount = () => {
     const pid = this.props.playerMap.get('pid')
