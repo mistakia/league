@@ -111,9 +111,7 @@ const importPlaysForWeek = async ({
       continue
     }
 
-    const currentPlays = await db(
-      isCurrentWeek ? 'nfl_plays_current_week' : 'nfl_plays'
-    ).where({ esbid: game.esbid })
+    const currentPlays = await db('nfl_plays').where({ esbid: game.esbid })
 
     const haveEndPlay = currentPlays.find((p) => p.type_nfl === 'END_GAME')
 

@@ -50,20 +50,6 @@ const getPlayStatData = (playStat) => ({
   playerName: playStat.playerName
 })
 
-const upsertPlayStat = async ({ playStat, esbid, playId, isCurrentWeek }) => {
-  const playStatData = getPlayStatData(playStat)
-  await db(isCurrentWeek ? 'nfl_play_stats_current_week' : 'nfl_play_stats')
-    .insert({
-      playId,
-      esbid,
-      valid: 1,
-      statId: playStat.statId,
-      ...playStatData
-    })
-    .onConflict()
-    .merge()
-}
-
 const importPlaysForWeek = async ({
   year = constants.season.year,
   week = currentRegularSeasonWeek,
@@ -102,9 +88,7 @@ const importPlaysForWeek = async ({
       continue
     }
 
-    const currentPlays = await db(
-      isCurrentWeek ? 'nfl_plays_current_week' : 'nfl_plays'
-    ).where({ esbid })
+    const currentPlays = await db('nfl_plays').where({ esbid })
 
     const haveEndPlay = currentPlays.find(
       (p) => p.desc === 'END GAME' && p.state === 'APPROVED'
@@ -161,13 +145,6 @@ const importPlaysForWeek = async ({
           nflId,
           playId
         })
-      }
-
-      // insert/update playStats
-      if (play.playStats) {
-        for (const playStat of play.playStats) {
-          await upsertPlayStat({ playStat, esbid, playId, isCurrentWeek })
-        }
       }
     }
 
