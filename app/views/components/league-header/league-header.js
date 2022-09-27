@@ -31,12 +31,13 @@ export default function LeagueHeader({ league }) {
     'qb/rb/wr/te'
   ]
 
-  starting_labels.forEach((starting_label) => {
+  starting_labels.forEach((starting_label, index) => {
     const clean_label = starting_label.replaceAll('/', '')
     const value = league[`s${clean_label}`]
     if (!value) return
     scoring_chips.push(
       <Chip
+        key={index}
         className={`starters ${clean_label}`}
         size='small'
         label={`${value}${starting_label.toUpperCase()}`}
