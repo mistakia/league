@@ -2,7 +2,8 @@ import debug from 'debug'
 import cron from 'node-cron'
 
 import { wait } from '#utils'
-import importPlaysForWeek from './scripts/import-plays-nfl.mjs'
+import import_plays_nfl from './scripts/import-plays-nfl.mjs'
+import import_plays_ngs from './scripts/import-plays-ngs.mjs'
 
 const log = debug('worker')
 debug.enable('worker,import-plays-nfl,import-plays-ngs')
@@ -24,9 +25,13 @@ const import_live_plays = async () => {
 
     loop_count += 1
     log(`running import count: ${loop_count}`)
-    all_games_skipped = await importPlaysForWeek({
+    const all_games_skipped_nfl = await import_plays_nfl({
       bypass_cache: true
     })
+
+    const all_games_skipped_ngs = await import_plays_ngs()
+
+    all_games_skipped = all_games_skipped_nfl && all_games_skipped_ngs
 
     await throttle_timer
     // make sure its been 30 seconds
