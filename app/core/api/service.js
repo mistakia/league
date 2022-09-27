@@ -198,8 +198,10 @@ export const api = {
     const url = `${BASE_URL}/sources/${data.sourceId}`
     return { url, ...PUT(data) }
   },
-  getPlayersGamelogs() {
-    const url = `${BASE_URL}/stats/gamelogs/players`
+  getPlayersGamelogs({ leagueId }) {
+    const url = leagueId
+      ? `${BASE_URL}/stats/gamelogs/players?leagueId=${leagueId}`
+      : `${BASE_URL}/stats/gamelogs/players`
     return { url }
   },
   getTeamGamelogs() {

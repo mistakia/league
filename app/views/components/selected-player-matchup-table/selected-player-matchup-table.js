@@ -26,16 +26,20 @@ export default class SelectedPlayerMatchupTable extends React.Component {
       const percentiles = defensePercentiles[item.type]
 
       const lead = (
-        <div className='row__group'>
-          <div className='row__group-body'>
-            <div className='table__cell metric' />
-            <div className='table__cell metric' />
-            <div className='row__text'>{item.title}</div>
-            <div className='table__cell metric'>
-              {(item.points || 0).toFixed(1)}
-            </div>
+        <>
+          <div className='table__cell sticky__column metric game__week' />
+          <div className='table__cell sticky__column sticky__two text'>
+            {item.title}
           </div>
-        </div>
+          <div className='table__cell metric' />
+          <div className='table__cell metric'>
+            {(item.points || 0).toFixed(1)}
+          </div>
+          <div className='table__cell metric'>
+            {item.points_added ? item.points_added.toFixed(1) : '-'}
+          </div>
+          <div className='table__cell metric'>{item.pos_rnk || '-'}</div>
+        </>
       )
       rows.push(
         <PlayerSelectedRow
@@ -51,18 +55,22 @@ export default class SelectedPlayerMatchupTable extends React.Component {
 
     for (const [index, gamelog] of gamelogs.entrySeq()) {
       const lead = (
-        <div className='row__group'>
-          <div className='row__group-body'>
-            <div className='table__cell metric'>{gamelog.week}</div>
-            <div className='table__cell metric'>{gamelog.tm}</div>
-            <div className='row__text'>
-              <PlayerNameText pid={gamelog.pid} />
-            </div>
-            <div className='table__cell metric'>
-              {(gamelog.pts || 0).toFixed(1)}
-            </div>
+        <>
+          <div className='table__cell sticky__column metric game__week'>
+            {gamelog.week}
           </div>
-        </div>
+          <div className='table__cell sticky__column sticky__two text'>
+            <PlayerNameText pid={gamelog.pid} />
+          </div>
+          <div className='table__cell metric'>{gamelog.tm}</div>
+          <div className='table__cell metric'>
+            {(gamelog.pts || 0).toFixed(1)}
+          </div>
+          <div className='table__cell metric'>
+            {gamelog.points_added ? gamelog.points_added.toFixed(1) : '-'}
+          </div>
+          <div className='table__cell metric'>{gamelog.pos_rnk || '-'}</div>
+        </>
       )
       rows.push(
         <PlayerSelectedRow
@@ -77,18 +85,23 @@ export default class SelectedPlayerMatchupTable extends React.Component {
 
     return (
       <>
-        <div className='selected__section-header'>
+        <div className='selected__section-header sticky__column'>
           <div className='row__group-head'>
             {position}s vs {opp} Gamelogs
           </div>
         </div>
         <div className='selected__section-header'>
+          <div className='table__cell sticky__column metric game__week'>Wk</div>
+          <div className='table__cell sticky__column sticky__two text'>
+            Player
+          </div>
+          <div className='table__cell metric'>Tm</div>
           <div className='row__group'>
+            <div className='row__group-head'>Fantasy</div>
             <div className='row__group-body'>
-              <div className='table__cell metric'>Wk</div>
-              <div className='table__cell metric'>Tm</div>
-              <div className='row__text'>Player</div>
               <div className='table__cell metric'>Pts</div>
+              <div className='table__cell metric'>Pts+</div>
+              <div className='table__cell metric'>Rnk</div>
             </div>
           </div>
           <PlayerSelectedRowHeader pos={position} />
