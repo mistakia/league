@@ -25,13 +25,17 @@ const import_live_plays = async () => {
 
     loop_count += 1
     log(`running import count: ${loop_count}`)
-    const all_games_skipped_nfl = await import_plays_nfl({
-      bypass_cache: true
-    })
+    try {
+      const all_games_skipped_nfl = await import_plays_nfl({
+        bypass_cache: true
+      })
 
-    const all_games_skipped_ngs = await import_plays_ngs()
+      const all_games_skipped_ngs = await import_plays_ngs()
 
-    all_games_skipped = all_games_skipped_nfl && all_games_skipped_ngs
+      all_games_skipped = all_games_skipped_nfl && all_games_skipped_ngs
+    } catch (error) {
+      log(error)
+    }
 
     await throttle_timer
     // make sure its been 30 seconds
