@@ -64,17 +64,20 @@ const upsertPlayStat = async ({ playStat, esbid, playId, isCurrentWeek }) => {
     .merge()
 }
 
-const run = async ({
+const importPlaysForWeek = async ({
   year = constants.season.year,
   week = currentRegularSeasonWeek,
-  force_update = false,
-  seas_type = 'REG'
+  seas_type = 'REG',
+  force_update = false
 } = {}) => {
-  // use current_week tables when importing live plays from the current week
   const isCurrentWeek =
     !force_update &&
     year === constants.season.year &&
     week === currentRegularSeasonWeek
+
+  log(
+    `importing plays for week ${week} ${year} ${seas_type} (force_update: ${force_update}, isCurrentWeek: ${isCurrentWeek}`
+  )
 
   // get list of games for this week
   const games = await db('nfl_games').where({
@@ -94,6 +97,7 @@ const run = async ({
       'America/New_York'
     )
     if (dayjs().isBefore(gameStart)) {
+      log(`skipping esbid: ${game.esbid}, game hasn't started`)
       skip_count += 1
       continue
     }
@@ -107,6 +111,7 @@ const run = async ({
     )
 
     if (!force_update && haveEndPlay) {
+      log(`skipping esbid: ${game.esbid}, already have final play`)
       skip_count += 1
       continue
     }
@@ -122,55 +127,40 @@ const run = async ({
 
     if (!data || !data.plays) continue
 
-    if (force_update) {
-      // reset playStats
-      await db(isCurrentWeek ? 'nfl_play_stats_current_week' : 'nfl_play_stats')
-        .update({ valid: 0 })
-        .where({ esbid })
-    }
-
     const timestamp = Math.round(Date.now() / 1000)
+
+    const play_inserts = []
+    const play_stat_inserts = []
+    const snap_inserts = []
+
     for (const play of data.plays) {
       const { playId } = play
-      const currentPlay = currentPlays.find((p) => p.playId === play.playId)
-
       const playData = getPlayData(play)
+      play_inserts.push({
+        playId,
+        esbid,
+        updated: timestamp,
+        seas_type,
+        ...playData
+      })
 
-      if (currentPlay) {
-        // TODO only update changes
-        await db(isCurrentWeek ? 'nfl_plays_current_week' : 'nfl_plays')
-          .update({
-            ...playData,
-            seas_type,
-            updated: timestamp
-          })
-          .where({ playId, esbid })
-      } else {
-        await db(isCurrentWeek ? 'nfl_plays_current_week' : 'nfl_plays').insert(
-          {
-            playId,
-            esbid,
-            updated: timestamp,
-            seas_type,
-            ...playData
-          }
-        )
+      for (const playStat of play.playStats) {
+        const playStatData = getPlayStatData(playStat)
+        play_stat_inserts.push({
+          playId,
+          esbid,
+          valid: 1,
+          statId: playStat.statId,
+          ...playStatData
+        })
       }
 
-      await db(isCurrentWeek ? 'nfl_snaps_current_week' : 'nfl_snaps')
-        .where({ playId, esbid })
-        .del()
-
-      // insert snaps
       for (const nflId of play.nflIds) {
-        await db(isCurrentWeek ? 'nfl_snaps_current_week' : 'nfl_snaps')
-          .insert({
-            esbid,
-            nflId,
-            playId
-          })
-          .onConflict()
-          .ignore()
+        snap_inserts.push({
+          esbid,
+          nflId,
+          playId
+        })
       }
 
       // insert/update playStats
@@ -181,192 +171,140 @@ const run = async ({
       }
     }
 
-    if (argv.all) await wait(3000)
+    const end_play_exists = data.plays.find(
+      (p) => p.playDescription === 'END GAME' && p.playState === 'APPROVED'
+    )
+
+    if (end_play_exists) {
+      // reset final table playStats
+      await db('nfl_play_stats')
+        .update({ valid: 0 })
+        .where({ esbid: game.esbid })
+
+      await db('nfl_snaps').where({ esbid }).del()
+      await db('nfl_snaps').insert(snap_inserts).onConflict().merge()
+
+      await db('nfl_play_stats').inset(play_stat_inserts).onConflict().merge()
+      await db('nfl_plays').insert(play_inserts).onConflict().merge()
+    }
+
+    await db('nfl_snaps_current_week').where({ esbid }).del()
+    await db('nfl_snaps_current_week').insert(snap_inserts).onConflict().merge()
+
+    // save in current tables
+    await db('nfl_play_stats_current_week')
+      .insert(play_stat_inserts)
+      .onConflict()
+      .merge()
+    await db('nfl_plays_current_week').insert(play_inserts).onConflict().merge()
   }
 
   return skip_count === games.length
+}
+
+const importPlaysForYear = async ({
+  year = constants.season.year,
+  seas_type = 'REG',
+  force_update = false
+} = {}) => {
+  const weeks = await db('nfl_games')
+    .select('wk')
+    .where({ seas: year, seas_type })
+    .groupBy('wk')
+    .orderBy('wk', 'asc')
+
+  log(`processing plays for ${weeks.length} weeks in ${year} (${seas_type})`)
+  for (const { wk } of weeks) {
+    log(`loading plays for week: ${wk} (REG)`)
+    await importPlaysForWeek({
+      year,
+      week: wk,
+      seas_type,
+      force_update
+    })
+    await wait(4000)
+  }
+}
+
+const importAllPlays = async ({ start, end, seas_type, force_update } = {}) => {
+  const nfl_games_result = await db('nfl_games')
+    .select('seas')
+    .groupBy('seas')
+    .orderBy('seas', 'asc')
+
+  let years = nfl_games_result.map((i) => i.seas)
+  if (start) {
+    years = years.filter((year) => year >= start)
+  }
+
+  for (const year of years) {
+    log(`loading plays for year: ${year}, seas_type: ${seas_type || 'all'}`)
+
+    if (seas_type || seas_type.toLowerCase() === 'pre') {
+      await importPlaysForYear({ year, seas_type: 'PRE', force_update })
+      await wait(3000)
+    }
+
+    if (seas_type || seas_type.toLowerCase() === 'reg') {
+      await importPlaysForYear({ year, seas_type: 'REG', force_update })
+      await wait(3000)
+    }
+
+    if (seas_type || seas_type.toLowerCase() === 'post') {
+      await importPlaysForYear({ year, seas_type: 'POST', force_update })
+      await wait(3000)
+    }
+  }
 }
 
 const main = async () => {
   debug.enable('import-plays-ngs')
   let error
   try {
-    if (argv.current) {
-      await run({ force_update: argv.final })
-    } else if (argv.all) {
-      for (let year = 2002; year < constants.season.year; year++) {
-        log(
-          `loading plays for year: ${year}, seas_type: ${
-            argv.seas_type || 'all'
-          }`
-        )
-
-        if (!argv.seas_type || argv.seas_type.toLowerCase() === 'pre') {
-          const weeks = await db('nfl_games')
-            .select('wk')
-            .where({ seas: year, seas_type: 'PRE' })
-            .groupBy('wk')
-
-          log(`processing plays for ${weeks.length} weeks in ${year} (PRE)`)
-          for (const { wk } of weeks) {
-            log(`loading plays for week: ${wk} (PRE)`)
-            await run({
-              year,
-              week: wk,
-              seas_type: 'PRE',
-              force_update: argv.final
-            })
-            await wait(4000)
-          }
-        }
-
-        if (!argv.seas_type || argv.seas_type.toLowerCase() === 'reg') {
-          const weeks = await db('nfl_games')
-            .select('wk')
-            .where({ seas: year, seas_type: 'REG' })
-            .groupBy('wk')
-
-          log(`processing plays for ${weeks.length} weeks in ${year} (REG)`)
-          for (const { wk } of weeks) {
-            log(`loading plays for week: ${wk} (REG)`)
-            await run({
-              year,
-              week: wk,
-              seas_type: 'REG',
-              force_update: argv.final
-            })
-            await wait(4000)
-          }
-        }
-
-        if (!argv.seas_type || argv.seas_type.toLowerCase() === 'post') {
-          const weeks = await db('nfl_games')
-            .select('wk')
-            .where({ seas: year, seas_type: 'POST' })
-            .groupBy('wk')
-
-          log(`processing plays for ${weeks.length} weeks in ${year} (POST)`)
-          for (const { wk } of weeks) {
-            log(`loading plays for week: ${wk} (POST)`)
-            await run({
-              year,
-              week: wk,
-              seas_type: 'POST',
-              force_update: argv.final
-            })
-            await wait(4000)
-          }
-        }
-      }
+    if (argv.all) {
+      await importAllPlays({
+        start: argv.start,
+        end: argv.end,
+        seas_type: argv.seas_type,
+        force_update: argv.final
+      })
     } else if (argv.year) {
-      const year = argv.year
-      log(
-        `loading plays for year: ${year}, week: ${
-          argv.week || 'all'
-        }, seas_type: ${argv.seas_type || 'all'}`
-      )
-
-      if (!argv.seas_type || argv.seas_type.toLowerCase() === 'pre') {
-        if (argv.week) {
-          await run({
-            year,
-            week: argv.week,
-            seas_type: 'PRE',
-            force_update: argv.final
-          })
-        } else {
-          const weeks = await db('nfl_games')
-            .select('wk')
-            .where({ seas: year, seas_type: 'PRE' })
-            .groupBy('wk')
-
-          log(`processing plays for ${weeks.length} weeks in ${year} (PRE)`)
-          for (const { wk } of weeks) {
-            log(`loading plays for week: ${wk} (PRE)`)
-            await run({
-              year,
-              week: wk,
-              seas_type: 'PRE',
-              force_update: argv.final
-            })
-            await wait(4000)
-          }
-        }
-      }
-
-      if (!argv.seas_type || argv.seas_type.toLowerCase() === 'reg') {
-        if (argv.week) {
-          await run({
-            year,
-            week: argv.week,
-            seas_type: 'REG',
-            force_update: argv.final
-          })
-        } else {
-          const weeks = await db('nfl_games')
-            .select('wk')
-            .where({ seas: year, seas_type: 'REG' })
-            .groupBy('wk')
-
-          log(`processing plays for ${weeks.length} weeks in ${year} (REG)`)
-          for (const { wk } of weeks) {
-            log(`loading plays for week: ${wk} (REG)`)
-            await run({
-              year,
-              week: wk,
-              seas_type: 'REG',
-              force_update: argv.final
-            })
-            await wait(4000)
-          }
-        }
-      }
-
-      if (!argv.seas_type || argv.seas_type.toLowerCase() === 'post') {
-        if (argv.week) {
-          await run({
-            year,
-            week: argv.week,
-            seas_type: 'POST',
-            force_update: argv.final
-          })
-        } else {
-          const weeks = await db('nfl_games')
-            .select('wk')
-            .where({ seas: year, seas_type: 'POST' })
-            .groupBy('wk')
-
-          log(`processing plays for ${weeks.length} weeks in ${year} (POST)`)
-          for (const { wk } of weeks) {
-            log(`loading plays for week: ${wk} (POST)`)
-            await run({
-              year,
-              week: wk,
-              seas_type: 'POST',
-              force_update: argv.final
-            })
-            await wait(4000)
-          }
-        }
-      }
-    } else if (argv.loop) {
-      let all_games_skipped = false
-      let loop_count = 1
-      while (!all_games_skipped) {
-        loop_count += 1
-        log(`running import count: ${loop_count}`)
-        all_games_skipped = await run({
+      if (argv.week) {
+        await importPlaysForWeek({
+          year: argv.year,
           week: argv.week,
           seas_type: argv.seas_type,
           force_update: argv.final
         })
+      } else {
+        await importPlaysForYear({
+          year: argv.year,
+          seas_type: argv.seas_type,
+          force_update: argv.final
+        })
+      }
+    } else if (argv.live) {
+      let all_games_skipped = false
+      let loop_count = 0
+      while (!all_games_skipped) {
+        loop_count += 1
+        log(`running import count: ${loop_count}`)
+        all_games_skipped = await importPlaysForWeek({
+          week: argv.week,
+          seas_type: argv.seas_type,
+          bypass_cache: true,
+          force_update: argv.final
+        })
       }
     } else {
-      await run({
+      log('start')
+      await importPlaysForWeek({
         week: argv.week,
         seas_type: argv.seas_type,
+        bypass_cache: true,
         force_update: argv.final
       })
+      log('end')
     }
   } catch (err) {
     error = err
@@ -387,4 +325,4 @@ if (isMain(import.meta.url)) {
   main()
 }
 
-export default run
+export default importPlaysForWeek
