@@ -27,7 +27,7 @@ import SelectedPlayerLineupImpact from '@components/selected-player-lineup-impac
 import SelectedPlayerValue from '@components/selected-player-value'
 import SelectedPlayerGamelogs from '@components/selected-player-gamelogs'
 import SelectedPlayerPractice from '@components/selected-player-practice'
-// import SelectedPlayerMatchup from '@components/selected-player-matchup'
+import SelectedPlayerSchedule from '@components/selected-player-schedule'
 import SelectedPlayerTransactions from '@components/selected-player-transactions'
 import PlayerWatchlistAction from '@components/player-watchlist-action'
 import PlayerContextMenu from '@components/player-context-menu'
@@ -222,9 +222,9 @@ export default class SelectedPlayer extends React.Component {
           >
             <TabsList>
               <Tab>Projections</Tab>
-              {/* <Tab>Matchup</Tab> */}
               <Tab>Games</Tab>
               <Tab>Seasons</Tab>
+              <Tab>Schedule</Tab>
               {/* <Tab>Team Splits</Tab> */}
               {/* <Tab>Efficiency</Tab> */}
               <Tab>Practice</Tab>
@@ -235,14 +235,14 @@ export default class SelectedPlayer extends React.Component {
             <TabPanel value={0}>
               <SelectedPlayerProjections />
             </TabPanel>
-            {/* <TabPanel value={1}>
-                <SelectedPlayerMatchup />
-                </TabPanel> */}
             <TabPanel value={1}>
               <SelectedPlayerGamelogs />
             </TabPanel>
             <TabPanel value={2}>
               <SelectedPlayerSeasonStats pos={pos} />
+            </TabPanel>
+            <TabPanel value={3}>
+              <SelectedPlayerSchedule />
             </TabPanel>
             {/* <TabPanel value={4}>
                 <SelectedPlayerTeamStats />
@@ -252,16 +252,16 @@ export default class SelectedPlayer extends React.Component {
             {/* <TabPanel value={5}>
                 <SelectedPlayerEfficiencyStats />
                 </TabPanel> */}
-            <TabPanel value={3}>
+            <TabPanel value={4}>
               <SelectedPlayerPractice />
             </TabPanel>
-            <TabPanel value={4}>
+            <TabPanel value={5}>
               <SelectedPlayerLineupImpact />
             </TabPanel>
-            <TabPanel value={5}>
+            <TabPanel value={6}>
               <SelectedPlayerValue />
             </TabPanel>
-            <TabPanel value={6}>
+            <TabPanel value={7}>
               <SelectedPlayerTransactions />
             </TabPanel>
           </Tabs>

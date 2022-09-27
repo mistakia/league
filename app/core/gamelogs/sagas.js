@@ -1,13 +1,14 @@
 import { fork, takeLatest, select, call, put } from 'redux-saga/effects'
 
-import { appActions } from '@core/app'
+import { appActions, getApp } from '@core/app'
 import { getPlayersGamelogs, fetchTeamGamelogs } from '@core/api'
 import { getPlayerGamelogs, getTeamGamelogs } from './selectors'
 import { gamelogsActions } from './actions'
 import Worker from 'workerize-loader?inline!../worker' // eslint-disable-line import/no-webpack-loader-syntax
 
 export function* load() {
-  yield fork(getPlayersGamelogs)
+  const { leagueId } = yield select(getApp)
+  yield fork(getPlayersGamelogs, { leagueId })
   yield fork(fetchTeamGamelogs)
 }
 

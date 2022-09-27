@@ -3,7 +3,7 @@ import { createSelector } from 'reselect'
 
 import { getSelectedPlayer, getSelectedPlayerGames } from '@core/players'
 
-import SelectedPlayerMatchup from './selected-player-matchup'
+import SelectedPlayerSchedule from './selected-player-schedule'
 
 const mapStateToProps = createSelector(
   getSelectedPlayer,
@@ -11,4 +11,4 @@ const mapStateToProps = createSelector(
   (playerMap, games) => ({ team: playerMap.get('team'), games })
 )
 
-export default connect(mapStateToProps)(SelectedPlayerMatchup)
+export default connect(mapStateToProps)(SelectedPlayerSchedule)
