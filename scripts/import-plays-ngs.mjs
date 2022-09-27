@@ -168,7 +168,7 @@ const importPlaysForWeek = async ({
       await db('nfl_snaps').where({ esbid }).del()
       await db('nfl_snaps').insert(snap_inserts).onConflict().merge()
 
-      await db('nfl_play_stats').inset(play_stat_inserts).onConflict().merge()
+      await db('nfl_play_stats').insert(play_stat_inserts).onConflict().merge()
       await db('nfl_plays').insert(play_inserts).onConflict().merge()
     }
 
