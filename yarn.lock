@@ -8427,7 +8427,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-cron@npm:^3.0.1":
+"node-cron@npm:^3.0.2":
   version: 3.0.2
   resolution: "node-cron@npm:3.0.2"
   dependencies:
@@ -10526,7 +10526,7 @@ __metadata:
     mysql2: ^2.3.3
     nib: ^1.1.2
     node-cache: ^5.1.2
-    node-cron: ^3.0.1
+    node-cron: ^3.0.2
     node-fetch: ^3.2.4
     normalize.css: ^8.0.1
     oddslib: ^2.1.0

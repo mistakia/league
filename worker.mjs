@@ -1,0 +1,46 @@
+import debug from 'debug'
+import cron from 'node-cron'
+
+import { wait } from '#utils'
+import importPlaysForWeek from './scripts/import-plays-nfl.mjs'
+
+const log = debug('worker')
+debug.enable('worker,import-plays-nfl,import-plays-ngs')
+
+let is_running = false
+
+const import_live_plays = async () => {
+  if (is_running) {
+    log('job already running')
+    return
+  }
+  is_running = true
+  log('started new job')
+
+  let all_games_skipped = false
+  let loop_count = 0
+  while (!all_games_skipped) {
+    const throttle_timer = wait(30000)
+
+    loop_count += 1
+    log(`running import count: ${loop_count}`)
+    all_games_skipped = await importPlaysForWeek({
+      bypass_cache: true
+    })
+
+    await throttle_timer
+    // make sure its been 30 seconds
+  }
+
+  is_running = false
+  log('job exiting')
+}
+
+// monday
+cron.schedule('*/1 20-23 * 1,2,9-12 1', import_live_plays)
+
+// thursday
+cron.schedule('*/1 20-23 * 1,2,9-12 4', import_live_plays)
+
+// sunday
+cron.schedule('*/1 13-23 * 1,2,9-12 7', import_live_plays)

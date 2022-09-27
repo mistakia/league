@@ -1,10 +1,10 @@
 ################################### ODDS ########################################
 
-## At every 15th minute on every day-of-week from Wednesday through Sunday in January, February, and every month from September through December.
-*/10 * * 1,2,9-12 3-7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-draftkings-odds.mjs &>> /var/log/league/import-draftkings.log
-*/10 * * 1,2,9-12 3-7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-caesars-odds.mjs &>> /var/log/league/import-caesars.log
-*/10 * * 1,2,9-12 3-7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-fanduel-odds.mjs &>> /var/log/league/import-fanduel.log
-# */15 * * 1,2,9-12 3-7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-betonline-odds.mjs &>> /var/log/league/import-betonline.log
+## At every 15th minute on every day-of-week from Tuesday through Sunday in January, February, and every month from September through December.
+*/10 * * 1,2,9-12 2-7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-draftkings-odds.mjs &>> /var/log/league/import-draftkings.log
+*/10 * * 1,2,9-12 2-7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-caesars-odds.mjs &>> /var/log/league/import-caesars.log
+*/10 * * 1,2,9-12 2-7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-fanduel-odds.mjs &>> /var/log/league/import-fanduel.log
+# */15 * * 1,2,9-12 2-7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-betonline-odds.mjs &>> /var/log/league/import-betonline.log
 
 ################################### GAMES ########################################
 
@@ -22,20 +22,6 @@
 
 ## At every 15th minute on Sunday in January, February, and every month from September through December.
 */15 * * 1,2,9-12 7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-games-nfl.mjs --current &>> /var/log/league/league-import-nfl-games-nfl.log
-
-################################### Live Game Plays ########################################
-
-## At every minute past every hour from 20 through 23 on Monday in January, February, and every month from September through December.
-# */1 20-23 * 1,2,9-12 1 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays-nfl.mjs &>> /var/log/league/league-import-plays-nfl.log
-# */1 20-23 * 1,2,9-12 1 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays-ngs.mjs &>> /var/log/league/league-import-plays-ngs.log
-
-## At every minute past every hour from 20 through 23 on Thursday in January, February, and every month from September through December.
-# */1 20-23 * 1,2,9-12 4 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays-nfl.mjs &>> /var/log/league/league-import-plays-nfl.log
-# */1 20-23 * 1,2,9-12 4 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays-ngs.mjs &>> /var/log/league/league-import-plays-ngs.log
-
-## At every minute past every hour from 13 through 23 on Sunday in January, February, and every month from September through December.
-# */1 13-23 * 1,2,9-12 7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays-ngs.mjs &>> /var/log/league/league-import-plays-ngs.log
-# */1 13-23 * 1,2,9-12 7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays-nfl.mjs &>> /var/log/league/league-import-plays-nfl.log
 
 ################################### Finalize Game Plays ########################################
 
