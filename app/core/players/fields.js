@@ -39,7 +39,8 @@ export default function ({ week }) {
       label: 'Pts+',
       name: 'Projected Points Added (Rest-Of-Season)',
       value: 'vorp.ros',
-      category: 'fantasy'
+      category: 'fantasy',
+      fixed: 1
     },
     'vorp.0': {
       label: 'Pts+',
@@ -51,14 +52,16 @@ export default function ({ week }) {
       label: 'Pts+',
       name: 'Projected Points Added (Week)',
       value: `vorp.${week}`,
-      category: `Week ${week}`
+      category: `Week ${week}`,
+      fixed: 1
     },
 
     'points.week.total': {
       label: 'Proj',
       name: 'Projected Points (Week)',
       value: `points.${week}.total`,
-      category: `Week ${week}`
+      category: `Week ${week}`,
+      fixed: 1
     },
     'points.ros.total': {
       label: 'Proj',
@@ -70,7 +73,8 @@ export default function ({ week }) {
       label: 'Proj',
       name: 'Projected Points (Season)',
       value: 'points.0.total',
-      category: 'fantasy'
+      category: 'fantasy',
+      fixed: 1
     },
 
     'projection.week.py': {
@@ -83,13 +87,15 @@ export default function ({ week }) {
       label: 'TD',
       name: 'Projected Passing Touchdowns (Week)',
       value: `projection.${week}.tdp`,
-      category: 'passing'
+      category: 'passing',
+      fixed: 1
     },
     'projection.week.ints': {
       label: 'INT',
       name: 'Projected Interceptions (Week)',
       value: `projection.${week}.ints`,
-      category: 'passing'
+      category: 'passing',
+      fixed: 1
     },
 
     'projection.0.py': {
@@ -102,13 +108,15 @@ export default function ({ week }) {
       label: 'TD',
       name: 'Projected Passing Touchdowns (Season)',
       value: 'projection.0.tdp',
-      category: 'passing'
+      category: 'passing',
+      fixed: 1
     },
     'projection.0.ints': {
       label: 'INT',
       name: 'Projected Interceptions (Season)',
       value: 'projection.0.ints',
-      category: 'passing'
+      category: 'passing',
+      fixed: 1
     },
 
     'projection.ros.py': {
@@ -121,13 +129,15 @@ export default function ({ week }) {
       label: 'TD',
       name: 'Projected Passing Touchdowns (Rest-Of-Season)',
       value: 'projection.ros.tdp',
-      category: 'passing'
+      category: 'passing',
+      fixed: 1
     },
     'projection.ros.ints': {
       label: 'INT',
       name: 'Projected Interceptions (Rest-Of-Season)',
       value: 'projection.ros.ints',
-      category: 'passing'
+      category: 'passing',
+      fixed: 1
     },
 
     'projection.week.ra': {
@@ -146,13 +156,15 @@ export default function ({ week }) {
       label: 'TD',
       name: 'Projected Rushing Touchdowns (Week)',
       value: `projection.${week}.tdr`,
-      category: 'rushing'
+      category: 'rushing',
+      fixed: 1
     },
     'projection.week.fuml': {
       label: 'FUM',
       name: 'Projected Fumbles (Week)',
       value: `projection.${week}.fuml`,
-      category: 'rushing'
+      category: 'rushing',
+      fixed: 1
     },
 
     'projection.0.ra': {
@@ -171,13 +183,15 @@ export default function ({ week }) {
       label: 'TD',
       name: 'Projected Rushing Touchdowns (Season)',
       value: 'projection.0.tdr',
-      category: 'rushing'
+      category: 'rushing',
+      fixed: 1
     },
     'projection.0.fuml': {
       label: 'FUM',
       name: 'Projected Fumbles (Season)',
       value: 'projection.0.fuml',
-      category: 'rushing'
+      category: 'rushing',
+      fixed: 1
     },
 
     'projection.ros.ra': {
@@ -196,26 +210,30 @@ export default function ({ week }) {
       label: 'TD',
       name: 'Projected Rushing Touchdowns (Rest-Of-Season)',
       value: 'projection.ros.tdr',
-      category: 'rushing'
+      category: 'rushing',
+      fixed: 1
     },
     'projection.ros.fuml': {
       label: 'FUM',
       name: 'Projected Fumbles (Rest-Of-Season)',
       value: 'projection.ros.fuml',
-      category: 'rushing'
+      category: 'rushing',
+      fixed: 1
     },
 
     'projection.week.trg': {
       label: 'TAR',
       name: 'Projected Targets (Week)',
       value: `projection.${week}.trg`,
-      category: 'receiving'
+      category: 'receiving',
+      fixed: 1
     },
     'projection.week.rec': {
       label: 'REC',
       name: 'Projected Receptions (Week)',
       value: `projection.${week}.rec`,
-      category: 'receiving'
+      category: 'receiving',
+      fixed: 1
     },
     'projection.week.recy': {
       label: 'YDS',
@@ -227,20 +245,23 @@ export default function ({ week }) {
       label: 'TD',
       name: 'Projected Receiving Touchdowns (Week)',
       value: `projection.${week}.tdrec`,
-      category: 'receiving'
+      category: 'receiving',
+      fixed: 1
     },
 
     'projection.0.trg': {
       label: 'TAR',
       name: 'Projected Targets (Season)',
       value: 'projection.0.trg',
-      category: 'receiving'
+      category: 'receiving',
+      fixed: 1
     },
     'projection.0.rec': {
       label: 'REC',
       name: 'Projected Receptions (Season)',
       value: 'projection.0.rec',
-      category: 'receiving'
+      category: 'receiving',
+      fixed: 1
     },
     'projection.0.recy': {
       label: 'YDS',
@@ -252,20 +273,23 @@ export default function ({ week }) {
       label: 'TD',
       name: 'Projected Receiving Touchdowns (Season)',
       value: 'projection.0.tdrec',
-      category: 'receiving'
+      category: 'receiving',
+      fixed: 1
     },
 
     'projection.ros.trg': {
       label: 'TAR',
       name: 'Projected Targets (Rest-Of-Season)',
       value: 'projection.ros.trg',
-      category: 'receiving'
+      category: 'receiving',
+      fixed: 1
     },
     'projection.ros.rec': {
       label: 'REC',
       name: 'Projected Receptions (Rest-Of-Season)',
       value: 'projection.ros.rec',
-      category: 'receiving'
+      category: 'receiving',
+      fixed: 1
     },
     'projection.ros.recy': {
       label: 'YDS',
@@ -277,7 +301,8 @@ export default function ({ week }) {
       label: 'TD',
       name: 'Projected Receiving Touchdowns (Rest-Of-Season)',
       value: 'projection.ros.tdrec',
-      category: 'receiving'
+      category: 'receiving',
+      fixed: 1
     },
 
     'stats.pts': {
@@ -316,25 +341,29 @@ export default function ({ week }) {
       label: 'COMP%',
       name: 'Passing Completion Percentage',
       value: 'stats.pc_pct',
-      category: 'efficiency'
+      category: 'efficiency',
+      fixed: 1
     },
     'stats.tdp_pct': {
       label: 'TD%',
       name: 'Passing Touchdown Percentage',
       value: 'stats.tdp_pct',
-      category: 'efficiency'
+      category: 'efficiency',
+      fixed: 1
     },
     'stats.ints_pct': {
       label: 'INT%',
       name: 'Passing Interception Percentage',
       value: 'stats.ints_pct',
-      category: 'efficiency'
+      category: 'efficiency',
+      fixed: 1
     },
     'stats.intw_pct': {
       label: 'BAD%',
       name: 'Passing Interception Worthy Percentage',
       value: 'stats.intw_pct',
-      category: 'efficiency'
+      category: 'efficiency',
+      fixed: 1
     },
     'stats.pyac': {
       label: 'YAC',
@@ -346,19 +375,22 @@ export default function ({ week }) {
       label: 'YAC/C',
       name: 'Passing Yards After Catch Per Completion',
       value: 'stats.pyac_pc',
-      category: 'efficiency'
+      category: 'efficiency',
+      fixed: 1
     },
     'stats._ypa': {
       label: 'Y/A',
       name: 'Passing Yards Per Pass Attempt',
       value: 'stats._ypa',
-      category: 'efficiency'
+      category: 'efficiency',
+      fixed: 1
     },
     'stats.pdot_pa': {
       label: 'DOT',
       name: 'Passing Depth of Target per Pass Attempt',
       value: 'stats.pdot_pa',
-      category: 'efficiency'
+      category: 'efficiency',
+      fixed: 1
     },
     'stats.pdot': {
       label: 'AY',
@@ -376,7 +408,8 @@ export default function ({ week }) {
       label: 'PACR',
       name: 'Passing Air Conversion Ratio (PACR)',
       value: 'stats._pacr',
-      category: 'air yards'
+      category: 'air yards',
+      fixed: 1
     },
     'stats.sk': {
       label: 'SK',
@@ -418,7 +451,8 @@ export default function ({ week }) {
       label: 'NY/A',
       name: 'Net Yards Per Pass Attempt',
       value: 'stats._nygpa',
-      category: 'pressure'
+      category: 'pressure',
+      fixed: 1
     },
 
     'stats.ry': {
@@ -467,7 +501,8 @@ export default function ({ week }) {
       label: 'AVG',
       name: 'Rushing Yards After Contact Per Rush Attempt',
       value: 'stats.ryaco_pra',
-      category: 'after contact'
+      category: 'after contact',
+      fixed: 1
     },
     'stats._stra': {
       label: 'ATT%',
@@ -485,19 +520,22 @@ export default function ({ week }) {
       label: 'FUM%',
       name: 'Fumble Percentage',
       value: 'stats._fumlpra',
-      category: 'efficiency'
+      category: 'efficiency',
+      fixed: 1
     },
     'stats.posra_pra': {
       label: 'POS%',
       name: 'Positive Rushing Yardage Percentage',
       value: 'stats.posra_pra',
-      category: 'efficiency'
+      category: 'efficiency',
+      fixed: 1
     },
     'stats.rasucc_pra': {
       label: 'SUCC%',
       name: 'Successful Rush Percentage',
       value: 'stats.rasucc_pra',
-      category: 'efficiency'
+      category: 'efficiency',
+      fixed: 1
     },
     'stats.mbt': {
       label: 'BT',
@@ -509,7 +547,8 @@ export default function ({ week }) {
       label: 'BT/T',
       name: 'Broken Tackles Per Rush Attempt',
       value: 'stats.mbt_pt',
-      category: 'broken tackles'
+      category: 'broken tackles',
+      fixed: 1
     },
 
     'stats.rec': {
@@ -582,31 +621,36 @@ export default function ({ week }) {
       label: 'WOPR',
       name: 'Weighted Opportunity Rating',
       value: 'stats._wopr',
-      category: 'oppurtunity'
+      category: 'oppurtunity',
+      fixed: 1
     },
     'stats._recypay': {
       label: 'RACR',
       name: 'Receiver Air Conversion Ratio (RACR)',
       value: 'stats._recypay',
-      category: 'efficiency'
+      category: 'efficiency',
+      fixed: 1
     },
     'stats._recyprec': {
       label: 'Y/R',
       name: 'Receiving Yards Per Reception',
       value: 'stats._recyprec',
-      category: 'efficiency'
+      category: 'efficiency',
+      fixed: 1
     },
     'stats._recyptrg': {
       label: 'Y/T',
       name: 'Receiving Yards Per Target',
       value: 'stats._recyptrg',
-      category: 'efficiency'
+      category: 'efficiency',
+      fixed: 1
     },
     'stats._ryacprec': {
       label: 'YAC/R',
       name: 'Yards After Catch Per Reception',
       value: 'stats._ryacprec',
-      category: 'efficiency'
+      category: 'efficiency',
+      fixed: 1
     }
   }
 

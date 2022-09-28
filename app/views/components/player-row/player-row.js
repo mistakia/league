@@ -67,7 +67,7 @@ class PlayerRow extends Player {
             <PercentileMetric
               key={index}
               value={value}
-              fixed={0}
+              fixed={field_info.fixed || 0}
               percentile={percentile}
             />
           )
