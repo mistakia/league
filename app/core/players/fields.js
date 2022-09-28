@@ -67,7 +67,8 @@ export default function ({ week }) {
       label: 'Proj',
       name: 'Projected Points (Rest-Of-Season)',
       value: 'points.ros.total',
-      category: 'fantasy'
+      category: 'fantasy',
+      fixed: 1
     },
     'points.0.total': {
       label: 'Proj',
