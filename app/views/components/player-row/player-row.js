@@ -46,7 +46,7 @@ class PlayerRow extends Player {
     if (isLoggedIn && !isRostered) classNames.push('fa')
     else if (highlight_teamIds.includes(tid))
       classNames.push(`draft-order-${team.get('do')}`)
-    else if (tid === teamId) classNames.push('rostered')
+    else if (teamId && tid === teamId) classNames.push('rostered')
 
     // TODO add baseline__player className
 

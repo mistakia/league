@@ -204,7 +204,7 @@ export default class SelectedPlayer extends React.Component {
                   )}
                 </IconButton>
               )}
-              <PlayerContextMenu pid={pid} hideDisabled buttonGroup />
+              {isLoggedIn && <PlayerContextMenu pid={pid} hideDisabled buttonGroup />}
             </div>
           </div>
           <Button className='selected__player-close' onClick={this.handleClose}>
