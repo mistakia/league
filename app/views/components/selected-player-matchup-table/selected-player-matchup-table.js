@@ -22,7 +22,7 @@ export default class SelectedPlayerMatchupTable extends React.Component {
     }
 
     const rows = []
-    for (const item of defenseStats) {
+    defenseStats.forEach((item, index) => {
       const percentiles = defensePercentiles[item.type]
 
       const lead = (
@@ -43,7 +43,7 @@ export default class SelectedPlayerMatchupTable extends React.Component {
       )
       rows.push(
         <PlayerSelectedRow
-          key={item.title}
+          key={`summary-${index}`}
           stats={item.stats}
           lead={lead}
           pos={position}
@@ -51,9 +51,9 @@ export default class SelectedPlayerMatchupTable extends React.Component {
           header
         />
       )
-    }
+    })
 
-    for (const [index, gamelog] of gamelogs.entrySeq()) {
+    gamelogs.forEach((gamelog, index) => {
       const lead = (
         <>
           <div className='table__cell sticky__column metric game__week'>
@@ -81,7 +81,7 @@ export default class SelectedPlayerMatchupTable extends React.Component {
           percentiles={playerPercentiles}
         />
       )
-    }
+    })
 
     return (
       <>
