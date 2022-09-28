@@ -222,8 +222,8 @@ export default class PlayersPage extends React.Component {
                 <CollegeFilter />
                 <CollegeDivisionFilter />
                 <StatusFilter />
-                <TeamFilter />
-                <HighlightTeam />
+                {isLoggedIn && <TeamFilter />}
+                {isLoggedIn && <HighlightTeam />}
                 {isLoggedIn && <WatchlistFilter />}
               </div>
             </div>
