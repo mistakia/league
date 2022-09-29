@@ -1,4 +1,4 @@
-import zlib from 'zlib'
+// import zlib from 'zlib'
 import fs from 'fs'
 import os from 'os'
 import { pipeline } from 'stream'
@@ -16,18 +16,19 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-nflfastr-plays')
 debug.enable('import-nflfastr-plays')
 
-const unzip = (source, destination) =>
-  new Promise((resolve, reject) => {
-    // prepare streams
-    const src = fs.createReadStream(source)
-    const dest = fs.createWriteStream(destination)
-
-    // extract the archive
-    src.pipe(zlib.createGunzip()).pipe(dest)
-
-    // callback on extract completion
-    dest.on('close', resolve)
-  })
+/* const unzip = (source, destination) =>
+ *   new Promise((resolve, reject) => {
+ *     // prepare streams
+ *     const src = fs.createReadStream(source)
+ *     const dest = fs.createWriteStream(destination)
+ *
+ *     // extract the archive
+ *     src.pipe(zlib.createGunzip()).pipe(dest)
+ *
+ *     // callback on extract completion
+ *     dest.on('close', resolve)
+ *   })
+ *  */
 
 const formatPlay = (play) => ({
   ydl_100: parseInt(play.yardline_100, 10) || null,
@@ -47,8 +48,8 @@ const formatPlay = (play) => ({
   drive_game_clock_end: play.drive_game_clock_end,
   drive_start_ydl: play.drive_start_yard_line,
   drive_end_ydl: play.drive_end_yard_line,
-  drive_start_play_id: play.drive_play_id_started,
-  drive_end_play_id: play.drive_play_id_ended,
+  drive_start_play_id: play.drive_play_id_started || null,
+  drive_end_play_id: play.drive_play_id_ended || null,
 
   series_seq: parseInt(play.series, 10) || null,
   series_suc: Boolean(play.series_success),
@@ -205,7 +206,7 @@ const run = async () => {
   const year = constants.season.year
   const filename = `play_by_play_${year}.csv`
   const path = `${os.tmpdir()}/${filename}`
-  const url = `https://github.com/nflverse/nflfastR-data/raw/master/data/${filename}.gz`
+  const url = `https://github.com/nflverse/nflverse-data/releases/download/pbp/${filename}`
 
   if (argv.d || !fs.existsSync(path)) {
     // download file
@@ -216,9 +217,9 @@ const run = async () => {
     if (!response.ok)
       throw new Error(`unexpected response ${response.statusText}`)
 
-    await streamPipeline(response.body, fs.createWriteStream(`${path}.gz`))
-    log(`unarchiving to ${path}`)
-    await unzip(`${path}.gz`, path)
+    await streamPipeline(response.body, fs.createWriteStream(`${path}`))
+    // log(`unarchiving to ${path}`)
+    // await unzip(`${path}.gz`, path)
   } else {
     log(`file exists: ${path}`)
   }
