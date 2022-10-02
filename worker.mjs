@@ -52,4 +52,4 @@ cron.schedule('*/1 20-23 * 1,2,9-12 1', import_live_plays)
 cron.schedule('*/1 20-23 * 1,2,9-12 4', import_live_plays)
 
 // sunday
-cron.schedule('*/1 13-23 * 1,2,9-12 7', import_live_plays)
+cron.schedule('*/1 9-23 * 1,2,9-12 7', import_live_plays)
