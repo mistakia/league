@@ -44,7 +44,7 @@ const mapStateToProps = createSelector(
 
     const defenseStats = []
     if (dPos) {
-      const types = { avg: 'Average', adj: 'Opp Avg Adjusted' }
+      const types = { avg: 'Average', adj: 'Over Expected' }
       for (const [type, title] of Object.entries(types)) {
         const stats = dPos.stats[type].find((d) => d.opp === opp)
         const points = calculatePoints({ stats, position, league })
