@@ -15,10 +15,10 @@ const processPlayerSeasonlogs = async ({
   seas_type = 'REG'
 } = {}) => {
   // get league player gamelogs for season
-  const gamelogs = await db('gamelogs')
-    .select('gamelogs.*', 'player.pos')
-    .join('player', 'player.pid', 'gamelogs.pid')
-    .join('nfl_games', 'gamelogs.esbid', 'nfl_games.esbid')
+  const gamelogs = await db('player_gamelogs')
+    .select('player_gamelogs.*', 'player.pos')
+    .join('player', 'player.pid', 'player_gamelogs.pid')
+    .join('nfl_games', 'player_gamelogs.esbid', 'nfl_games.esbid')
     .where({ seas, seas_type })
 
   const inserts = []
@@ -55,8 +55,8 @@ const main = async () => {
   let error
   try {
     if (argv.all) {
-      const results = await db('gamelogs')
-        .join('nfl_games', 'nfl_games.esbid', '=', 'gamelogs.esbid')
+      const results = await db('player_gamelogs')
+        .join('nfl_games', 'nfl_games.esbid', '=', 'player_gamelogs.esbid')
         .select('nfl_games.seas')
         .where('nfl_games.seas_type', 'REG')
         .groupBy('nfl_games.seas')

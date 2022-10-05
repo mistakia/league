@@ -53,26 +53,26 @@ router.get('/gamelogs/players', async (req, res) => {
   try {
     const { leagueId } = req.query
 
-    const query = db('gamelogs')
+    const query = db('player_gamelogs')
       .select(
-        'gamelogs.*',
+        'player_gamelogs.*',
         'nfl_games.day',
         'nfl_games.date',
         'nfl_games.seas_type',
         'nfl_games.timestamp'
       )
-      .join('nfl_games', 'nfl_games.esbid', 'gamelogs.esbid')
+      .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
       .where('nfl_games.seas', constants.season.year)
       .where('nfl_games.seas_type', 'REG')
 
     if (leagueId) {
       query
         .leftJoin('league_player_gamelogs', function () {
-          this.on('league_player_gamelogs.pid', '=', 'gamelogs.pid').andOn(
-            'league_player_gamelogs.esbid',
+          this.on(
+            'league_player_gamelogs.pid',
             '=',
-            'gamelogs.esbid'
-          )
+            'player_gamelogs.pid'
+          ).andOn('league_player_gamelogs.esbid', '=', 'player_gamelogs.esbid')
         })
         .select(
           'league_player_gamelogs.points',

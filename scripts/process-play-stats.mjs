@@ -67,7 +67,7 @@ const upsert = async ({ esbid, pid, stats, opp, pos, tm, week, year }) => {
       return obj
     }, {})
 
-  await db('gamelogs')
+  await db('player_gamelogs')
     .insert({
       esbid,
       tm,
