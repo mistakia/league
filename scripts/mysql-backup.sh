@@ -72,7 +72,7 @@ player_changelog"
 
 DB_STATS_TABLES="
 footballoutsiders
-gamelogs
+player_gamelogs
 keeptradecut_rankings
 nfl_games
 nfl_play_stats
