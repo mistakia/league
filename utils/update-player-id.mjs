@@ -19,11 +19,11 @@ export default async function ({ current_pid, new_pid }) {
   log(`draft rows updated: ${draft_rows.info}`)
   await db('draft').where('pid', current_pid).del()
 
-  const [gamelogs_rows] = await db.raw(
-    `update ignore gamelogs set pid = '${new_pid}' where pid = '${current_pid}'`
+  const [player_gamelogs_rows] = await db.raw(
+    `update ignore player_gamelogs set pid = '${new_pid}' where pid = '${current_pid}'`
   )
-  log(`gamelogs rows updated: ${gamelogs_rows.info}`)
-  await db('gamelogs').where('pid', current_pid).del()
+  log(`player_gamelogs rows updated: ${player_gamelogs_rows.info}`)
+  await db('player_gamelogs').where('pid', current_pid).del()
 
   const [keeptradecut_rankings_rows] = await db.raw(
     `update ignore keeptradecut_rankings set pid = '${new_pid}' where pid = '${current_pid}'`

@@ -2165,12 +2165,12 @@ CREATE TABLE `practice` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `gamelogs`
+-- Table structure for table `player_gamelogs`
 --
 
-DROP TABLE IF EXISTS `gamelogs`;
+DROP TABLE IF EXISTS `player_gamelogs`;
 
-CREATE TABLE `gamelogs` (
+CREATE TABLE `player_gamelogs` (
   `esbid` int(10) NOT NULL,
   `pid` varchar(7) NOT NULL,
   `tm` varchar(3) NOT NULL,
