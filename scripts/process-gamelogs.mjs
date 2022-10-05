@@ -43,12 +43,12 @@ const main = async () => {
   let error
   try {
     if (argv.all) {
-      const results = await db('gamelogs')
-        .join('nfl_games', 'nfl_games.esbid', '=', 'gamelogs.esbid')
-        .select('gamelogs.year')
+      const results = await db('player_gamelogs')
+        .join('nfl_games', 'nfl_games.esbid', '=', 'player_gamelogs.esbid')
+        .select('player_gamelogs.year')
         .where('nfl_games.seas_type', 'REG')
-        .groupBy('gamelogs.year')
-        .orderBy('gamelogs.year', 'asc')
+        .groupBy('player_gamelogs.year')
+        .orderBy('player_gamelogs.year', 'asc')
 
       let years = results.map((r) => r.year)
       if (argv.start) {
@@ -56,13 +56,13 @@ const main = async () => {
       }
 
       for (const year of years) {
-        const weeks = await db('gamelogs')
-          .join('nfl_games', 'nfl_games.esbid', '=', 'gamelogs.esbid')
-          .select('gamelogs.week')
+        const weeks = await db('player_gamelogs')
+          .join('nfl_games', 'nfl_games.esbid', '=', 'player_gamelogs.esbid')
+          .select('player_gamelogs.week')
           .where('nfl_games.seas_type', 'REG')
-          .where('gamelogs.year', year)
-          .groupBy('gamelogs.week')
-          .orderBy('gamelogs.week', 'asc')
+          .where('player_gamelogs.year', year)
+          .groupBy('player_gamelogs.week')
+          .orderBy('player_gamelogs.week', 'asc')
         for (const { week } of weeks) {
           await processGamelogs({ year, week })
         }
