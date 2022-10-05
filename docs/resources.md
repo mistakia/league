@@ -5,6 +5,7 @@
 | [FantasyPros](https://www.fantasypros.com/) | Aggregated expert rankings, analysis, and news |
 | [PFF](https://www.pff.com/fantasy)          | Player grades, staff rankings, advanced stats  |
 | [KeepTradeCut](https://keeptradecut.com/)   | Up-to-date crowdsourced dynasty rankings       |
+| [Fantasycalc](https://www.fantasycalc.com/) | Rankings and trade values automatically generated from trades |
 
 ### Forums & Discussions
 
