@@ -2299,6 +2299,9 @@ DROP TABLE IF EXISTS `league_player_gamelogs`;
 CREATE TABLE `league_player_gamelogs` (
   `pid` varchar(7) NOT NULL,
   `esbid` int(10) NOT NULL,
+  `week` tinyint(2) NOT NULL,
+  `year` smallint(4) NOT NULL,
+
   `lid` int(6) NOT NULL,
   `points` decimal(4,1) DEFAULT NULL,
   `points_added` decimal(4,1) DEFAULT NULL,
@@ -2310,28 +2313,30 @@ CREATE TABLE `league_player_gamelogs` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `league_player_regular_seasons`
+-- Table structure for table `league_player_regular_seasonlogs`
 --
 
-DROP TABLE IF EXISTS `league_player_regular_seasons`;
+DROP TABLE IF EXISTS `league_player_regular_seasonlogs`;
 
-CREATE TABLE `league_player_regular_seasons` (
+CREATE TABLE `league_player_regular_seasonlogs` (
   `pid` varchar(7) NOT NULL,
-  `seas` int(4) NOT NULL,
+  `year` int(4) NOT NULL,
   `lid` int(6) NOT NULL,
   `start_tid` int(6) DEFAULT NULL,
   `start_acquisition_type` tinyint(2) DEFAULT NULL,
   `end_tid` int(6) DEFAULT NULL,
   `end_acquisition_type` tinyint(2) DEFAULT NULL,
   `salary` int(4) DEFAULT NULL,
-  `starts` tinyint(2) DEFAULT NULL,
+  `startable_games` tinyint(2) DEFAULT NULL,
   `points` decimal(4,1) DEFAULT NULL,
   `points_per_game` decimal(3,1) DEFAULT NULL,
   `points_added` decimal(4,1) DEFAULT NULL,
   `points_added_per_game` decimal(3,1) DEFAULT NULL,
   `games` tinyint(2) DEFAULT NULL,
-  `pos_rnk` SMALLINT(5) DEFAULT NULL,
-
+  `points_rnk` SMALLINT(5) DEFAULT NULL,
+  `points_pos_rnk` SMALLINT(5) DEFAULT NULL,
+  `points_added_rnk` SMALLINT(5) DEFAULT NULL,
+  `points_added_pos_rnk` SMALLINT(5) DEFAULT NULL,
   UNIQUE KEY `pid` (`pid`, `seas`, `lid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
