@@ -462,6 +462,8 @@ const main = async () => {
         years = years.filter((year) => year >= argv.start)
       }
 
+      log(`processing plays for ${years.length} years`)
+
       for (const seas of years) {
         for (const seas_type of constants.seas_types) {
           const weeks = await db('nfl_plays')
