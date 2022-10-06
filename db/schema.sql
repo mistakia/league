@@ -1417,7 +1417,7 @@ CREATE TABLE `nfl_plays` (
   `wk` int(2) DEFAULT NULL,
   `dwn` int(1) DEFAULT NULL,
   `qtr` int(1) DEFAULT NULL,
-  `seas` int(4) DEFAULT NULL,
+  `seas` smallint(4) NOT NULL,
   `seas_type` varchar(36) DEFAULT NULL, -- PRE, REG, POST
 
   `desc` text DEFAULT NULL,
