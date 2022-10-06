@@ -1969,8 +1969,6 @@ DROP TABLE IF EXISTS `league_player_gamelogs`;
 CREATE TABLE `league_player_gamelogs` (
   `pid` varchar(7) NOT NULL,
   `esbid` int(10) NOT NULL,
-  `week` tinyint(2) NOT NULL,
-  `year` smallint(4) NOT NULL,
 
   `lid` int(6) NOT NULL,
   `points` decimal(4,1) DEFAULT NULL,
