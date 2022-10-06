@@ -59,16 +59,7 @@ const getPlayType = (type_ngs) => {
   }
 }
 
-const format_gamelog = ({
-  esbid,
-  pid,
-  stats,
-  opp,
-  pos,
-  tm,
-  week,
-  year
-}) => {
+const format_gamelog = ({ esbid, pid, stats, opp, pos, tm, week, year }) => {
   const cleanedStats = Object.keys(stats)
     .filter((key) => constants.fantasyStats.includes(key))
     .reduce((obj, key) => {
@@ -93,7 +84,6 @@ const run = async ({
   year = constants.season.year,
   seas_type = 'REG'
 } = {}) => {
-  let gamelog_update_count = 0
   let play_update_count = 0
 
   const playStats = await db('nfl_play_stats')
@@ -221,7 +211,6 @@ const run = async ({
     const stats = calculateStatsFromPlayStats(play_stats_by_gsispid[gsispid])
     if (argv.dry) continue
 
-    gamelog_update_count += 1
     gamelog_gsispids.push(gsispid)
     const player_gamelog = format_gamelog({
       pid: player_row.pid,
@@ -257,7 +246,6 @@ const run = async ({
     const stats = calculateStatsFromPlayStats(play_stats_by_gsisid[gsisid])
     if (argv.dry) continue
 
-    gamelog_update_count += 1
     const player_gamelog = format_gamelog({
       pid: player_row.pid,
       pos: player_row.pos,
@@ -302,7 +290,6 @@ const run = async ({
     }
     const stats = calculateDstStatsFromPlays(formattedPlays, team)
     if (argv.dry) continue
-    gamelog_update_count += 1
     const player_gamelog = format_gamelog({
       pid: team,
       pos: 'DST',
@@ -322,8 +309,11 @@ const run = async ({
   if (player_gamelog_inserts.length) {
     const pids = player_gamelog_inserts.map((p) => p.pid)
     const deleted_count = await db('player_gamelogs')
-      .where({ week, year })
-      .whereNotIn('pid', pids)
+      .leftJoin('nfl_games', 'player_gamelogs.esbid', 'nfl_games.esbid')
+      .where('nfl_games.week', week)
+      .where('nfl_games.year', year)
+      .where('nfl_games.seas_type', seas_type)
+      .whereNotIn('player_gamelogs.pid', pids)
       .del()
     log(`Deleted ${deleted_count} excess gamelogs`)
 
@@ -437,7 +427,6 @@ const run = async ({
     }
   }
   log(`Updated ${play_update_count} plays`)
-  log(`Updated ${gamelog_update_count} gamelogs`)
 
   // TODO — process for all leagues
   await processGamelogs({ year, week, lid: 1 })
