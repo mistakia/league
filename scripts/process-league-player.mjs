@@ -13,7 +13,7 @@ debug.enable('process-league-player')
 const processLeaguePlayer = async ({ lid = 1 } = {}) => {
   const inserts = []
 
-  const player_seasons = await db('league_player_regular_seasons').where({
+  const player_seasons = await db('league_player_regular_seasonlogs').where({
     lid
   })
   const seasons_by_pid = groupBy(player_seasons, 'pid')
@@ -38,7 +38,7 @@ const processLeaguePlayer = async ({ lid = 1 } = {}) => {
     const draft_class = draft_classes_query.find((i) => i.pid === pid).start
     const seasons = seasons_by_pid[pid]
 
-    const sorted = seasons.sort((a, b) => a.seas - b.seas)
+    const sorted = seasons.sort((a, b) => a.year - b.year)
     const first_three_seasons = sorted.slice(0, 3)
     const first_four_seasons = sorted.slice(0, 4)
     const first_five_seasons = sorted.slice(0, 5)
