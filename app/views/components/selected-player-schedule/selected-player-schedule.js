@@ -36,11 +36,11 @@ export default class SelectedPlayerSchedule extends React.Component {
       const isHome = opp === game.v
       const label = (
         <>
-          <div>{`W${game.wk}`}</div>
+          <div>{`W${game.week}`}</div>
           <div>{`${isHome ? '' : '@'}${opp}`}</div>
         </>
       )
-      labels.push(<Tab key={index} label={label} value={game.wk} />)
+      labels.push(<Tab key={index} label={label} value={game.week} />)
     })
 
     return (

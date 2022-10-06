@@ -37,13 +37,6 @@ export function calculateTeamPercentiles(teams) {
   return percentiles
 }
 
-export function processTeamGamelogs(gamelogs) {
-  return calculatePercentiles({
-    items: gamelogs,
-    stats: constants.teamStats
-  })
-}
-
 export function calculatePlayerValues(payload) {
   const { league, players, rosterRows } = payload
 

@@ -15,8 +15,8 @@ const log = debug('import-charted-plays-from-csv')
 
 const formatGame = (game) => ({
   ...game,
-  seas: parseInt(game.seas, 10),
-  wk: parseInt(game.wk, 10)
+  year: parseInt(game.seas, 10),
+  week: parseInt(game.wk, 10)
 })
 
 const formatPlay = (play) => ({
@@ -109,8 +109,8 @@ const run = async () => {
       })
       .format('mm:ss')
     const opts = {
-      wk: game.wk,
-      seas: game.seas,
+      week: game.week,
+      year: game.year,
       off: cPlay.off,
       def: cPlay.def,
       qtr: cPlay.qtr,

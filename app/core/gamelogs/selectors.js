@@ -8,10 +8,6 @@ export function getPlayerGamelogs(state) {
   return state.get('gamelogs').get('players').toList()
 }
 
-export function getTeamGamelogs(state) {
-  return state.get('gamelogs').get('teams')
-}
-
 export function getGamelogByPlayerId(
   state,
   { pid, week, year = constants.year }

@@ -41,11 +41,11 @@ const format = (item) => {
   const seas_type = item.seasonType
   const week_type = item.gameType
   const time_est = item.gameTimeEastern
-  const wk = getWeek(item.week, week_type)
-  const seas = item.season
+  const week = getWeek(item.week, week_type)
+  const year = item.season
   const score = item.score || {}
   const day = date
-    ? getGameDayAbbreviation({ seas_type, date, time_est, week_type, seas })
+    ? getGameDayAbbreviation({ seas_type, date, time_est, week_type })
     : null
 
   const datetime = dayjs(
@@ -59,8 +59,8 @@ const format = (item) => {
     shieldid: item.smartId,
     ngsid: item.gameId,
 
-    seas,
-    wk,
+    year,
+    week,
     date,
     time_est,
     day,

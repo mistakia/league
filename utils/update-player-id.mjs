@@ -85,12 +85,6 @@ export default async function ({ current_pid, new_pid }) {
   )
   await db('league_team_lineup_starters').where('pid', current_pid).del()
 
-  const [offense_rows] = await db.raw(
-    `update ignore offense set pid = '${new_pid}' where pid = '${current_pid}'`
-  )
-  log(`offense rows updated: ${offense_rows.info}`)
-  await db('offense').where('pid', current_pid).del()
-
   const [player_changelog_rows] = await db.raw(
     `update ignore player_changelog set pid = '${new_pid}' where pid = '${current_pid}'`
   )

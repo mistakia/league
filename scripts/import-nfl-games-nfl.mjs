@@ -27,7 +27,7 @@ const format = (item) => {
   const time_est = datetime
     ? datetime.tz('America/New_York').format('HH:mm:ss')
     : null
-  const seas = item.season
+  const year = item.season
   const score = item.detail || {}
 
   const esbid = (item.externalIds.find((e) => e.source === 'elias') || {}).id
@@ -38,7 +38,7 @@ const format = (item) => {
   ).id
 
   const day = date
-    ? getGameDayAbbreviation({ seas_type, date, time_est, week_type, seas })
+    ? getGameDayAbbreviation({ seas_type, date, time_est, week_type })
     : null
 
   return {
@@ -46,8 +46,8 @@ const format = (item) => {
     shieldid,
     detailid,
 
-    seas,
-    wk: item.week,
+    year,
+    week: item.week,
     date,
     time_est,
     day,
@@ -80,8 +80,8 @@ const run = async ({
 } = {}) => {
   log(`processing ${seas_type} season games for week ${week} in ${year}`)
   const games = await db('nfl_games').where({
-    seas: year,
-    wk: week,
+    year,
+    week,
     seas_type
   })
 
@@ -124,29 +124,29 @@ const main = async () => {
       const year = argv.year
 
       const pre_weeks = await db('nfl_games')
-        .select('wk')
-        .where({ seas: year, seas_type: 'PRE' })
-        .groupBy('wk')
-      for (const { wk } of pre_weeks) {
-        await run({ year, week: wk, seas_type: 'PRE', force_import })
+        .select('week')
+        .where({ year, seas_type: 'PRE' })
+        .groupBy('week')
+      for (const { week } of pre_weeks) {
+        await run({ year, week, seas_type: 'PRE', force_import })
         await wait(3000)
       }
 
       const reg_weeks = await db('nfl_games')
-        .select('wk')
-        .where({ seas: year, seas_type: 'REG' })
-        .groupBy('wk')
-      for (const { wk } of reg_weeks) {
-        await run({ year, week: wk, seas_type: 'REG', force_import })
+        .select('week')
+        .where({ year, seas_type: 'REG' })
+        .groupBy('week')
+      for (const { week } of reg_weeks) {
+        await run({ year, week, seas_type: 'REG', force_import })
         await wait(3000)
       }
 
       const post_weeks = await db('nfl_games')
-        .select('wk')
-        .where({ seas: year, seas_type: 'POST' })
-        .groupBy('wk')
-      for (const { wk } of post_weeks) {
-        await run({ year, week: wk, seas_type: 'POST', force_import })
+        .select('week')
+        .where({ year, seas_type: 'POST' })
+        .groupBy('week')
+      for (const { week } of post_weeks) {
+        await run({ year, week, seas_type: 'POST', force_import })
         await wait(3000)
       }
     } else if (argv.all) {

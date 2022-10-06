@@ -39,18 +39,18 @@ const calculateVOR = async ({ year, rookie, league, week = 'ALL' }) => {
       'player.pname',
       'player.pos',
       'player.start',
-      'player_gamelogs.pid'
+      'player_gamelogs.pid',
+      'nfl_games.week',
+      'nfl_games.year'
     )
     .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
-    .where('nfl_games.seas', year)
+    .where('nfl_games.year', year)
     .where('nfl_games.seas_type', 'REG')
 
     .join('player', 'player_gamelogs.pid', 'player.pid')
 
-  if (week === 'ALL') {
-    query.where('player_gamelogs.week', '<=', constants.season.finalWeek) // TODO - should be set per season
-  } else {
-    query.where('player_gamelogs.week', week)
+  if (week !== 'ALL') {
+    query.where('nfl_games.week', week)
   }
 
   const rows = await query

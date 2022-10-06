@@ -33,7 +33,7 @@ export function* calculateStats() {
   )
   const league = yield select(getCurrentLeague)
   const filtered = plays.filter((play) => {
-    if (!weeks.includes(play.wk)) return false
+    if (!weeks.includes(play.week)) return false
     if (!days.includes(play.day)) return false
     if (!quarters.includes(play.qtr)) return false
     if (!downs.includes(play.dwn)) return false
@@ -47,14 +47,6 @@ export function* calculateStats() {
   })
   worker.terminate()
   yield put(playerActions.setStats(result))
-}
-
-export function* calculateTeamStats() {
-  const { teamStats } = yield select(getStats)
-  const worker = new Worker()
-  const result = yield call(worker.calculateTeamPercentiles, teamStats.toJS())
-  worker.terminate()
-  yield put(statActions.setTeamStatsPercentiles(result))
 }
 
 //= ====================================
@@ -77,10 +69,6 @@ export function* watchFilterStats() {
   yield takeLatest(statActions.FILTER_STATS, filterPlays)
 }
 
-export function* watchGetTeamStatsFulfilled() {
-  yield takeLatest(statActions.GET_TEAM_STATS_FULFILLED, calculateTeamStats)
-}
-
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -89,6 +77,5 @@ export const statSagas = [
   fork(watchSetPlayersView),
   fork(watchGetChartedPlaysFulfilled),
   fork(watchFilterStats),
-  fork(watchGetTeamStatsFulfilled),
   fork(watchUpdateQualifier)
 ]

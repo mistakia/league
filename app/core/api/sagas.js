@@ -25,10 +25,7 @@ import {
   deleteTransitionTagActions,
   putTransitionTagActions
 } from '@core/rosters'
-import {
-  getPlayersGamelogsActions,
-  getTeamGamelogsActions
-} from '@core/gamelogs'
+import { getPlayersGamelogsActions } from '@core/gamelogs'
 import {
   playersRequestActions,
   allPlayersRequestActions,
@@ -46,7 +43,7 @@ import {
   getPlayerGamelogsActions,
   getPlayerPracticesActions
 } from '@core/players'
-import { getChartedPlaysActions, getTeamStatActions } from '@core/stats'
+import { getChartedPlaysActions } from '@core/stats'
 import { getPlaysActions, getPlayStatsActions } from '@core/plays'
 import {
   getTeamsActions,
@@ -261,11 +258,6 @@ export const getPlayersGamelogs = fetch.bind(
   api.getPlayersGamelogs,
   getPlayersGamelogsActions
 )
-export const fetchTeamGamelogs = fetch.bind(
-  null,
-  api.getTeamGamelogs,
-  getTeamGamelogsActions
-)
 
 export const putProjection = fetch.bind(
   null,
@@ -279,12 +271,6 @@ export const delProjection = fetch.bind(
 )
 
 export const putSetting = fetch.bind(null, api.putSetting, putSettingActions)
-
-export const getTeamStats = fetch.bind(
-  null,
-  api.getTeamStats,
-  getTeamStatActions
-)
 
 export const postWaiver = fetch.bind(null, api.postWaiver, postWaiverActions)
 export const putWaiver = fetch.bind(null, api.putWaiver, putWaiverActions)
