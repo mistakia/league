@@ -38,6 +38,7 @@ const processGamelogs = async ({
       .leftJoin('nfl_games', 'league_player_gamelogs.esbid', 'nfl_games.esbid')
       .where('nfl_games.week', week)
       .where('nfl_games.year', year)
+      .where('nfl_games.seas_type', 'REG')
       .whereNotIn('league_player_gamelogs.pid', pids)
       .del()
     log(
