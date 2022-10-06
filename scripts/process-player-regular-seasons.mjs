@@ -148,7 +148,12 @@ const processSeasons = async ({ year = constants.season.year, lid = 1 }) => {
 
   // save inserts
   if (inserts.length) {
-    // TODO - delete excess league player seasonlogs
+    const pids = inserts.map((p) => p.pid)
+    const deleted_count = await db('league_player_regular_seasonlogs')
+      .where({ lid, year })
+      .whereNotIn('pid', pids)
+      .del()
+    log(`Deleted ${deleted_count} excess player seasonlogs`)
 
     log(`updated ${inserts.length} player regular seasons`)
     await db('league_player_regular_seasonlogs')
@@ -164,11 +169,7 @@ const main = async () => {
     const lid = argv.lid || 1
     if (argv.all) {
       const results = await db('league_player_gamelogs')
-        .join(
-          'nfl_games',
-          'nfl_games.esbid',
-          'league_player_gamelogs.esbid'
-        )
+        .join('nfl_games', 'nfl_games.esbid', 'league_player_gamelogs.esbid')
         .select('nfl_games.year')
         .where('nfl_games.seas_type', 'REG')
         .where('league_player_gamelogs.lid', lid)

@@ -90,6 +90,13 @@ const processLeaguePlayer = async ({ lid = 1 } = {}) => {
   }
 
   if (inserts.length) {
+    const pids = inserts.map((p) => p.pid)
+    const deleted_count = await db('league_player')
+      .where({ lid })
+      .whereNotIn('pid', pids)
+      .del()
+    log(`Deleted ${deleted_count} excess league player rows`)
+
     log(`updating ${inserts.length} league players for league ${lid}`)
     await db('league_player').insert(inserts).onConflict().merge()
   }
