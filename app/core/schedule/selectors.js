@@ -21,7 +21,7 @@ export function getGameByTeam(state, { nfl_team, week = currentWeek }) {
     return null
   }
 
-  return team.games.find((g) => g.wk === week)
+  return team.games.find((g) => g.week === week)
 }
 
 export function getGamesByTeam(state, { nfl_team }) {

@@ -3,10 +3,6 @@ export const statActions = {
   GET_CHARTED_PLAYS_PENDING: 'GET_CHARTED_PLAYS_PENDING',
   GET_CHARTED_PLAYS_FULFILLED: 'GET_CHARTED_PLAYS_FULFILLED',
 
-  GET_TEAM_STATS_FAILED: 'GET_TEAM_STATS_FAILED',
-  GET_TEAM_STATS_PENDING: 'GET_TEAM_STATS_PENDING',
-  GET_TEAM_STATS_FULFILLED: 'GET_TEAM_STATS_FULFILLED',
-
   SET_TEAM_STATS_PERCENTILES: 'SET_TEAM_STATS_PERCENTILES',
 
   FILTER_STATS: 'FILTER_STATS',
@@ -57,29 +53,6 @@ export const statActions = {
       opts,
       error
     }
-  }),
-
-  getTeamStatsPending: (opts) => ({
-    type: statActions.GET_TEAM_STATS_PENDING,
-    payload: {
-      opts
-    }
-  }),
-
-  getTeamStatsFulfilled: (opts, data) => ({
-    type: statActions.GET_TEAM_STATS_FULFILLED,
-    payload: {
-      opts,
-      data
-    }
-  }),
-
-  getTeamStatsFailed: (opts, error) => ({
-    type: statActions.GET_TEAM_STATS_FAILED,
-    payload: {
-      opts,
-      error
-    }
   })
 }
 
@@ -87,10 +60,4 @@ export const getChartedPlaysActions = {
   failed: statActions.getChartedPlaysFailed,
   fulfilled: statActions.getChartedPlaysFulfilled,
   pending: statActions.getChartedPlaysPending
-}
-
-export const getTeamStatActions = {
-  failed: statActions.getTeamStatsFailed,
-  fulfilled: statActions.getTeamStatsFulfilled,
-  pending: statActions.getTeamStatsPending
 }

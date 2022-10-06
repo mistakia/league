@@ -9,85 +9,6 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `game`
---
-
-DROP TABLE IF EXISTS `game`;
-
-CREATE TABLE `game` (
-  `gid` int(5) NOT NULL,
-  `seas` int(4) NOT NULL,
-  `wk` tinyint(2) NOT NULL,
-  `day` varchar(3) NOT NULL,
-  `v` varchar(3) NOT NULL,
-  `h` varchar(3) NOT NULL,
-  `stad` varchar(45) NOT NULL,
-  `temp` varchar(4) DEFAULT NULL,
-  `humd` varchar(4) DEFAULT NULL,
-  `wspd` varchar(4) DEFAULT NULL,
-  `wdir` varchar(4) DEFAULT NULL,
-  `cond` varchar(15) DEFAULT NULL,
-  `surf` varchar(30) NOT NULL,
-  `ou` decimal(3,1) NOT NULL,
-  `sprv` decimal(3,1) NOT NULL,
-  `ptsv` tinyint(2) NOT NULL,
-  `ptsh` tinyint(2) NOT NULL,
-
-  UNIQUE KEY `gid` (`gid`),
-  KEY `seas` (`seas`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `offense`
---
-
-DROP TABLE IF EXISTS `offense`;
-
-CREATE TABLE `offense` (
-  `uid` int(6) NOT NULL,
-  `gid` int(5) NOT NULL,
-  `pid` varchar(7) NOT NULL,
-  `pa` tinyint(2) NOT NULL,
-  `pc` tinyint(2) NOT NULL,
-  `py` int(3) NOT NULL,
-  `ints` tinyint(1) NOT NULL,
-  `tdp` tinyint(1) NOT NULL,
-  `ra` tinyint(2) NOT NULL,
-  `sra` tinyint(2) NOT NULL,
-  `ry` int(3) NOT NULL,
-  `tdr` tinyint(1) NOT NULL,
-  `trg` tinyint(2) NOT NULL,
-  `rec` tinyint(2) NOT NULL,
-  `recy` int(3) NOT NULL,
-  `tdrec` tinyint(1) NOT NULL,
-  `ret` tinyint(2) NOT NULL,
-  `rety` int(3) NOT NULL,
-  `tdret` tinyint(1) NOT NULL,
-  `fuml` tinyint(1) NOT NULL,
-  `peny` tinyint(2) NOT NULL,
-  `conv` tinyint(1) NOT NULL,
-  `snp` tinyint(2) NOT NULL,
-  `fp` decimal(4,2) NOT NULL,
-  `fp2` decimal(4,2) NOT NULL,
-  `fp3` decimal(4,2) NOT NULL,
-  `game` tinyint(2) NOT NULL,
-  `seas` tinyint(2) NOT NULL,
-  `year` int(4) NOT NULL,
-  `team` varchar(3) NOT NULL,
-  `posd` varchar(8) NOT NULL,
-  `jnum` tinyint(2) NOT NULL,
-  `dcp` tinyint(1) NOT NULL,
-
-  UNIQUE KEY `uid` (`uid`),
-  KEY `gid` (`gid`),
-  KEY `pid` (`pid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `player`
 --
 
@@ -240,7 +161,7 @@ DROP TABLE IF EXISTS `seasons`;
 
 CREATE TABLE `seasons` (
   `lid` int(11) NOT NULL,
-  `year` int(4) NOT NULL,
+  `year` smallint(4) NOT NULL,
 
   `sqb` tinyint(1) NOT NULL,
   `srb` tinyint(1) NOT NULL,
@@ -330,8 +251,8 @@ CREATE TABLE `nfl_games` (
   `detailid` varchar(36) DEFAULT NULL,
   `pfrid` varchar(20) DEFAULT NULL,
 
-  `seas` int(4) NOT NULL,
-  `wk` tinyint(2) NOT NULL,
+  `year` smallint(4) NOT NULL,
+  `week` tinyint(2) NOT NULL,
   `day` varchar(3) DEFAULT NULL, -- FRI, MN, SAT, SN, SUN, THU, TUE, WED, SB, PRO
   `date` varchar(10) DEFAULT NULL,
   `time_est` varchar(8) DEFAULT NULL,
@@ -382,257 +303,8 @@ CREATE TABLE `nfl_games` (
 
   `referee` varchar(36) DEFAULT NULL,
 
-  UNIQUE KEY `game` (`v`, `h`, `wk`, `seas`, `seas_type`),
+  UNIQUE KEY `game` (`v`, `h`, `week`, `year`, `seas_type`),
   UNIQUE KEY `esbid` (`esbid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `team`
---
-
-DROP TABLE IF EXISTS `team`;
-
-CREATE TABLE `team` (
-  `tid` int(5) NOT NULL,
-  `gid` int(5) NOT NULL,
-  `tname` varchar(3) NOT NULL,
-  `pts` tinyint(2) NOT NULL,
-  `q1p` tinyint(2) NOT NULL,
-  `q2p` tinyint(2) NOT NULL,
-  `q3p` tinyint(2) NOT NULL,
-  `q4p` tinyint(2) NOT NULL,
-  `rfd` tinyint(2) NOT NULL,
-  `pfd` tinyint(2) NOT NULL,
-  `ifd` tinyint(2) NOT NULL,
-  `ry` int(3) NOT NULL,
-  `ra` tinyint(2) NOT NULL,
-  `py` int(3) NOT NULL,
-  `pa` tinyint(2) NOT NULL,
-  `pc` tinyint(2) NOT NULL,
-  `sk` tinyint(2) NOT NULL,
-  `ints` tinyint(1) NOT NULL,
-  `fum` tinyint(1) NOT NULL,
-  `pu` tinyint(2) NOT NULL,
-  `gpy` int(3) NOT NULL,
-  `pr` tinyint(2) NOT NULL,
-  `pry` int(3) NOT NULL,
-  `kr` tinyint(2) NOT NULL,
-  `kry` int(3) NOT NULL,
-  `ir` tinyint(1) NOT NULL,
-  `iry` int(3) NOT NULL,
-  `pen` int(3) NOT NULL,
-  `top` decimal(3,1) NOT NULL,
-  `td` tinyint(1) NOT NULL,
-  `tdr` tinyint(1) NOT NULL,
-  `tdp` tinyint(1) NOT NULL,
-  `tdt` tinyint(1) NOT NULL,
-  `fgm` tinyint(1) NOT NULL,
-  `fgat` tinyint(2) NOT NULL,
-  `fgy` int(3) NOT NULL,
-  `rza` tinyint(2) NOT NULL,
-  `rzc` tinyint(1) NOT NULL,
-  `bry` int(3) NOT NULL,
-  `bpy` int(3) NOT NULL,
-  `srp` tinyint(2) NOT NULL,
-  `s1rp` tinyint(2) NOT NULL,
-  `s2rp` tinyint(2) NOT NULL,
-  `s3rp` tinyint(2) NOT NULL,
-  `spp` tinyint(2) NOT NULL,
-  `s1pp` tinyint(2) NOT NULL,
-  `s2pp` tinyint(2) NOT NULL,
-  `s3pp` tinyint(2) NOT NULL,
-  `lea` tinyint(2) NOT NULL,
-  `ley` int(3) NOT NULL,
-  `lta` tinyint(2) NOT NULL,
-  `lty` int(3) NOT NULL,
-  `lga` tinyint(2) NOT NULL,
-  `lgy` int(3) NOT NULL,
-  `mda` tinyint(2) NOT NULL,
-  `mdy` int(3) NOT NULL,
-  `rga` tinyint(2) NOT NULL,
-  `rgy` int(3) NOT NULL,
-  `rta` tinyint(2) NOT NULL,
-  `rty` int(3) NOT NULL,
-  `rea` tinyint(2) NOT NULL,
-  `rey` int(3) NOT NULL,
-  `r1a` tinyint(2) NOT NULL,
-  `r1y` int(3) NOT NULL,
-  `r2a` tinyint(2) NOT NULL,
-  `r2y` int(3) NOT NULL,
-  `r3a` tinyint(2) NOT NULL,
-  `r3y` int(3) NOT NULL,
-  `qba` tinyint(2) NOT NULL,
-  `qby` int(3) NOT NULL,
-  `sla` tinyint(2) NOT NULL,
-  `sly` int(3) NOT NULL,
-  `sma` tinyint(2) NOT NULL,
-  `smy` int(3) NOT NULL,
-  `sra` tinyint(2) NOT NULL,
-  `sry` int(3) NOT NULL,
-  `dla` tinyint(2) NOT NULL,
-  `dly` int(3) NOT NULL,
-  `dma` tinyint(2) NOT NULL,
-  `dmy` int(3) NOT NULL,
-  `dra` tinyint(2) NOT NULL,
-  `dry` int(3) NOT NULL,
-  `wr1a` tinyint(2) NOT NULL,
-  `wr1y` int(3) NOT NULL,
-  `wr3a` tinyint(2) NOT NULL,
-  `wr3y` int(3) NOT NULL,
-  `tea` tinyint(2) NOT NULL,
-  `tey` int(3) NOT NULL,
-  `rba` tinyint(2) NOT NULL,
-  `rby` int(3) NOT NULL,
-  `sga` tinyint(2) NOT NULL,
-  `sgy` int(3) NOT NULL,
-  `p1a` tinyint(2) NOT NULL,
-  `p1y` int(3) NOT NULL,
-  `p2a` tinyint(2) NOT NULL,
-  `p2y` int(3) NOT NULL,
-  `p3a` tinyint(2) NOT NULL,
-  `p3y` int(3) NOT NULL,
-  `spc` tinyint(2) NOT NULL,
-  `mpc` tinyint(2) NOT NULL,
-  `lpc` tinyint(2) NOT NULL,
-  `q1ra` tinyint(2) NOT NULL,
-  `q1ry` int(3) NOT NULL,
-  `q1pa` tinyint(2) NOT NULL,
-  `q1py` int(3) NOT NULL,
-  `lcra` tinyint(2) NOT NULL,
-  `lcry` int(3) NOT NULL,
-  `lcpa` tinyint(2) NOT NULL,
-  `lcpy` int(3) NOT NULL,
-  `rzra` tinyint(2) NOT NULL,
-  `rzry` int(3) NOT NULL,
-  `rzpa` tinyint(2) NOT NULL,
-  `rzpy` int(3) NOT NULL,
-  `sky` int(3) NOT NULL,
-  `lbs` decimal(3,1) NOT NULL,
-  `dbs` decimal(3,1) NOT NULL,
-  `sfpy` int(3) NOT NULL,
-  `drv` tinyint(2) NOT NULL,
-  `npy` int(3) NOT NULL,
-  `tb` tinyint(1) NOT NULL,
-  `i20` tinyint(1) NOT NULL,
-  `rtd` tinyint(1) NOT NULL,
-  `lnr` decimal(3,1) NOT NULL,
-  `lnp` decimal(3,1) NOT NULL,
-  `lbr` decimal(3,1) NOT NULL,
-  `lbp` decimal(3,1) NOT NULL,
-  `dbr` decimal(3,1) NOT NULL,
-  `dbp` decimal(3,1) NOT NULL,
-  `nha` tinyint(2) NOT NULL,
-  `s3a` tinyint(2) NOT NULL,
-  `s3c` tinyint(2) NOT NULL,
-  `l3a` tinyint(2) NOT NULL,
-  `l3c` tinyint(2) NOT NULL,
-  `stf` tinyint(2) NOT NULL,
-  `dp` tinyint(2) NOT NULL,
-  `fsp` tinyint(2) NOT NULL,
-  `ohp` tinyint(2) NOT NULL,
-  `pbep` tinyint(1) NOT NULL,
-  `dlp` tinyint(1) NOT NULL,
-  `dsp` tinyint(1) NOT NULL,
-  `dum` tinyint(1) NOT NULL,
-  `pfn` tinyint(1) NOT NULL,
-  `snpo` tinyint(2) NOT NULL,
-  `snpd` tinyint(2) NOT NULL,
-  `saf` tinyint(1) NOT NULL,
-  `blk` tinyint(1) NOT NULL,
-  `fp` tinyint(2) NOT NULL,
-  `back0p` tinyint(2) NOT NULL,
-  `back0py` int(3) NOT NULL,
-  `back1p` tinyint(2) NOT NULL,
-  `back1py` int(3) NOT NULL,
-  `back1r` tinyint(2) NOT NULL,
-  `back1ry` int(3) NOT NULL,
-  `back2p` tinyint(2) NOT NULL,
-  `back2py` int(3) NOT NULL,
-  `back2r` tinyint(2) NOT NULL,
-  `back2ry` int(3) NOT NULL,
-  `back3r` tinyint(2) NOT NULL,
-  `back3ry` int(3) NOT NULL,
-  `box4p` tinyint(2) NOT NULL,
-  `box4py` int(3) NOT NULL,
-  `box5p` tinyint(2) NOT NULL,
-  `box5py` int(3) NOT NULL,
-  `box6p` tinyint(2) NOT NULL,
-  `box6py` int(3) NOT NULL,
-  `box6r` tinyint(2) NOT NULL,
-  `box6ry` int(3) NOT NULL,
-  `box7p` tinyint(2) NOT NULL,
-  `box7py` int(3) NOT NULL,
-  `box7r` tinyint(2) NOT NULL,
-  `box7ry` int(3) NOT NULL,
-  `box8r` tinyint(2) NOT NULL,
-  `box8ry` int(3) NOT NULL,
-  `pap` tinyint(2) NOT NULL,
-  `papy` int(3) NOT NULL,
-  `npr` tinyint(2) NOT NULL,
-  `npry` int(3) NOT NULL,
-  `qbp` tinyint(2) NOT NULL,
-  `qbpy` int(3) NOT NULL,
-  `qbhi` tinyint(2) NOT NULL,
-  `qbhiy` int(3) NOT NULL,
-  `qbhu` tinyint(2) NOT NULL,
-  `qbhuy` int(3) NOT NULL,
-  `scrm` tinyint(2) NOT NULL,
-  `scrmy` int(3) NOT NULL,
-  `ttscrm` decimal(3,1) NOT NULL,
-  `ttpr` decimal(3,1) NOT NULL,
-  `ttsk` decimal(3,1) NOT NULL,
-  `pru3` tinyint(2) NOT NULL,
-  `pru3y` int(3) NOT NULL,
-  `pru4` tinyint(2) NOT NULL,
-  `pru4y` int(3) NOT NULL,
-  `pru5` tinyint(2) NOT NULL,
-  `pru5y` int(3) NOT NULL,
-  `pru6` tinyint(2) NOT NULL,
-  `pru6y` int(3) NOT NULL,
-  `blz0p` tinyint(2) NOT NULL,
-  `blz0py` int(3) NOT NULL,
-  `blz1` tinyint(2) NOT NULL,
-  `blz1y` int(3) NOT NULL,
-  `blz2` tinyint(2) NOT NULL,
-  `blz2y` int(3) NOT NULL,
-  `dblz1` tinyint(2) NOT NULL,
-  `dblz1y` int(3) NOT NULL,
-  `spru1` tinyint(2) DEFAULT NULL,
-  `spru1y` int(3) DEFAULT NULL,
-  `oopdes` tinyint(1) DEFAULT NULL,
-  `oopdesy` int(3) DEFAULT NULL,
-  `ooppr` tinyint(1) DEFAULT NULL,
-  `ooppry` int(3) DEFAULT NULL,
-  `oopcl` tinyint(1) DEFAULT NULL,
-  `oopcly` int(3) DEFAULT NULL,
-  `ytg1` int(3) NOT NULL,
-  `ytg2` int(3) NOT NULL,
-  `ytg3` int(3) NOT NULL,
-  `pc1` int(3) NOT NULL,
-  `pc2` int(3) NOT NULL,
-  `pc3` int(3) NOT NULL,
-  `tay1` int(3) NOT NULL,
-  `tay2` int(3) NOT NULL,
-  `tay3` int(3) NOT NULL,
-  `dot1` int(3) NOT NULL,
-  `dot2` int(3) NOT NULL,
-  `dot3` int(3) NOT NULL,
-  `yac1` int(3) NOT NULL,
-  `yac2` int(3) NOT NULL,
-  `yac3` int(3) NOT NULL,
-  `cov0` tinyint(2) NOT NULL,
-  `cov0y` int(3) NOT NULL,
-  `cov1` tinyint(2) NOT NULL,
-  `cov1y` int(3) NOT NULL,
-  `cov2` tinyint(2) NOT NULL,
-  `cov2y` int(3) NOT NULL,
-  `drp` tinyint(2) NOT NULL,
-
-  UNIQUE KEY `tid` (`tid`),
-  KEY `gid` (`gid`),
-  KEY `tname` (`tname`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -652,7 +324,7 @@ CREATE TABLE `draft` (
   `tid` int(6) NOT NULL,
   `otid` int(6) NOT NULL,
   `lid` int(6) NOT NULL,
-  `year` int(4) NOT NULL,
+  `year` smallint(4) NOT NULL,
   `selection_timestamp` int(11) DEFAULT NULL,
   PRIMARY KEY (`uid`),
   UNIQUE KEY `pick` (`round`,`pick`,`lid`,`year`),
@@ -719,7 +391,7 @@ CREATE TABLE `matchups` (
   `hpp` decimal(3,2) DEFAULT 0, -- potential points
   `app` decimal(3,2) DEFAULT 0,
 
-  `year` int(4) NOT NULL,
+  `year` smallint(4) NOT NULL,
   `week` tinyint(2) NOT NULL,
   PRIMARY KEY `uid` (`uid`),
   UNIQUE KEY `aid` (`aid`,`hid`,`year`,`week`),
@@ -738,7 +410,7 @@ CREATE TABLE `playoffs` (
   `uid` int(6) NOT NULL,
   `tid` int(6) NOT NULL,
   `lid` int(6) NOT NULL,
-  `year` int(4) NOT NULL,
+  `year` smallint(4) NOT NULL,
   `week` tinyint(2) NOT NULL,
   `points` decimal(7,4) DEFAULT NULL,
   UNIQUE KEY `tid` (`tid`,`uid`,`year`),
@@ -772,8 +444,8 @@ CREATE TABLE `projections` (
   `fuml` decimal(3,1) DEFAULT NULL,
   `snp` decimal(5,1) DEFAULT NULL,
   `twoptc` decimal(3,1) DEFAULT NULL,
-  `week` int NOT NULL,
-  `year` int NOT NULL,
+  `week` tinyint NOT NULL,
+  `year` smallint NOT NULL,
   `timestamp` datetime NOT NULL,
   `fgm` decimal(4,1) DEFAULT NULL,
   `fgy` int DEFAULT '0',
@@ -828,8 +500,8 @@ CREATE TABLE `projections_archive` (
   `fuml` decimal(3,1) DEFAULT NULL,
   `snp` decimal(5,1) DEFAULT NULL,
   `twoptc` decimal(3,1) DEFAULT NULL,
-  `week` int NOT NULL,
-  `year` int NOT NULL,
+  `week` tinyint NOT NULL,
+  `year` smallint NOT NULL,
   `timestamp` datetime NOT NULL,
   `fgm` decimal(4,1) DEFAULT NULL,
   `fgy` int DEFAULT '0',
@@ -905,8 +577,8 @@ CREATE TABLE `ros_projections` (
   `dtd` decimal(4,1) DEFAULT NULL,
   `krtd` decimal(4,1) DEFAULT NULL,
   `prtd` decimal(4,1) DEFAULT NULL,
-  `week` varchar(3) NOT NULL,
-  `year` int(4) NOT NULL,
+  `week` tinyint(2) NOT NULL,
+  `year` smallint(4) NOT NULL,
   `timestamp` datetime NOT NULL,
   UNIQUE KEY `sourceid` (`sourceid`,`pid`,`year`),
   KEY `pid` (`pid`)
@@ -922,8 +594,8 @@ DROP TABLE IF EXISTS `league_player_projection_points`;
 
 CREATE TABLE `league_player_projection_points` (
   `pid` varchar(7) NOT NULL,
-  `week` varchar(3) NOT NULL,
-  `year` int(4) NOT NULL,
+  `week` tinyint(2) NOT NULL,
+  `year` smallint(4) NOT NULL,
   `lid` int(6) NOT NULL,
 
   `total` decimal(5,2) DEFAULT NULL,
@@ -978,8 +650,8 @@ DROP TABLE IF EXISTS `league_player_projection_values`;
 
 CREATE TABLE `league_player_projection_values` (
   `pid` varchar(7) NOT NULL,
-  `week` varchar(3) NOT NULL,
-  `year` int(4) NOT NULL,
+  `week` tinyint(2) NOT NULL,
+  `year` smallint(4) NOT NULL,
   `lid` int(6) NOT NULL,
 
   `vorp` decimal(5,2) DEFAULT NULL,
@@ -1003,7 +675,7 @@ CREATE TABLE `rosters` (
   `tid` int(6) NOT NULL,
   `lid` int(6) NOT NULL,
   `week` tinyint(2) NOT NULL,
-  `year` int(4) NOT NULL,
+  `year` smallint(4) NOT NULL,
   `last_updated` int(11) DEFAULT NULL,
   PRIMARY KEY `uid` (`uid`),
   UNIQUE KEY `teamid` (`tid`,`week`,`year`),
@@ -1081,7 +753,7 @@ CREATE TABLE `team_stats` (
   `lid` int(6) NOT NULL,
   `tid` int(6) NOT NULL,
   `div` tinyint(1) DEFAULT NULL,
-  `year` int(4) NOT NULL,
+  `year` smallint(4) NOT NULL,
 
   `wins` tinyint(2) DEFAULT 0,
   `losses` tinyint(2) DEFAULT 0,
@@ -1149,7 +821,7 @@ CREATE TABLE `trades` (
   `accept_tid` int(6) NOT NULL,
   `lid` int(6) NOT NULL,
   `userid` int(6) NOT NULL,
-  `year` int(4) NOT NULL,
+  `year` smallint(4) NOT NULL,
   `offered` int(11) NOT NULL,
   `cancelled` int(11) DEFAULT NULL,
   `accepted` int(11) DEFAULT NULL,
@@ -1255,7 +927,7 @@ CREATE TABLE `transactions` (
   `type` tinyint(2) NOT NULL,
   `value` int(4) NOT NULL,
   `week` tinyint(2) NOT NULL,
-  `year` int(4) NOT NULL,
+  `year` smallint(4) NOT NULL,
   `timestamp` int(11) NOT NULL,
   `waiverid` int(11) DEFAULT NULL,
   UNIQUE KEY `uid` (`uid`),
@@ -1414,10 +1086,10 @@ CREATE TABLE `nfl_plays` (
   `sequence` int(10) DEFAULT NULL,
   `state` varchar(36) DEFAULT NULL,
 
-  `wk` int(2) DEFAULT NULL,
+  `week` tinyint(2) DEFAULT NULL,
   `dwn` int(1) DEFAULT NULL,
   `qtr` int(1) DEFAULT NULL,
-  `seas` smallint(4) NOT NULL,
+  `year` smallint(4) NOT NULL,
   `seas_type` varchar(36) DEFAULT NULL, -- PRE, REG, POST
 
   `desc` text DEFAULT NULL,
@@ -1783,10 +1455,10 @@ CREATE TABLE `nfl_plays_current_week` (
   `sequence` int(10) DEFAULT NULL,
   `state` varchar(36) DEFAULT NULL,
 
-  `wk` int(2) DEFAULT NULL,
+  `week` tinyint(2) DEFAULT NULL,
   `dwn` int(1) DEFAULT NULL,
   `qtr` int(1) DEFAULT NULL,
-  `seas` int(4) DEFAULT NULL,
+  `year` smallint(4) DEFAULT NULL,
   `seas_type` varchar(36) DEFAULT NULL, -- PRE, REG, POST
 
   `desc` text DEFAULT NULL,
@@ -2149,7 +1821,7 @@ DROP TABLE IF EXISTS `practice`;
 CREATE TABLE `practice` (
   `pid` varchar(7) NOT NULL,
   `week` tinyint(2) NOT NULL,
-  `year` int(4) NOT NULL,
+  `year` smallint(4) NOT NULL,
   `status` varchar(100) DEFAULT NULL,
   `inj` varchar(100) DEFAULT NULL,
   `m` varchar(20) DEFAULT NULL,
@@ -2176,8 +1848,6 @@ CREATE TABLE `player_gamelogs` (
   `tm` varchar(3) NOT NULL,
   `opp` varchar(3) NOT NULL,
   `pos` varchar(3) NOT NULL,
-  `week` tinyint(2) NOT NULL,
-  `year` int(4) NOT NULL,
 
   `pa` tinyint(2) DEFAULT 0,
   `pc` tinyint(2) DEFAULT 0,
@@ -2236,7 +1906,7 @@ DROP TABLE IF EXISTS `player_seasonlogs`;
 
 CREATE TABLE `player_seasonlogs` (
   `pid` varchar(7) NOT NULL,
-  `year` int(4) NOT NULL,
+  `year` smallint(4) NOT NULL,
   `seas_type` varchar(10) NOT NULL, -- PRE, REG, POST
   `pos` varchar(3) NOT NULL,
 
@@ -2320,7 +1990,7 @@ DROP TABLE IF EXISTS `league_player_regular_seasonlogs`;
 
 CREATE TABLE `league_player_regular_seasonlogs` (
   `pid` varchar(7) NOT NULL,
-  `year` int(4) NOT NULL,
+  `year` smallint(4) NOT NULL,
   `lid` int(6) NOT NULL,
   `start_tid` int(6) DEFAULT NULL,
   `start_acquisition_type` tinyint(2) DEFAULT NULL,
@@ -2337,7 +2007,7 @@ CREATE TABLE `league_player_regular_seasonlogs` (
   `points_pos_rnk` SMALLINT(5) DEFAULT NULL,
   `points_added_rnk` SMALLINT(5) DEFAULT NULL,
   `points_added_pos_rnk` SMALLINT(5) DEFAULT NULL,
-  UNIQUE KEY `pid` (`pid`, `seas`, `lid`)
+  UNIQUE KEY `pid` (`pid`, `year`, `lid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -2401,7 +2071,7 @@ DROP TABLE IF EXISTS `footballoutsiders`;
 
 CREATE TABLE `footballoutsiders` (
   `week` tinyint(2) NOT NULL,
-  `year` int(4) NOT NULL,
+  `year` smallint(4) NOT NULL,
   `team` varchar(3) NOT NULL,
 
   `ork` tinyint(2) DEFAULT NULL,
@@ -2504,8 +2174,8 @@ DROP TABLE IF EXISTS `rankings`;
 CREATE TABLE `rankings` (
   `pid` varchar(7) NOT NULL,
   `pos` varchar(3) NOT NULL,
-  `wk` tinyint(2) NOT NULL,
-  `year` int(4) NOT NULL,
+  `week` tinyint(2) NOT NULL,
+  `year` smallint(4) NOT NULL,
   `min` int(4) DEFAULT NULL,
   `max` int(4) DEFAULT NULL,
   `avg` decimal(5,2) DEFAULT NULL,
@@ -2520,7 +2190,7 @@ CREATE TABLE `rankings` (
   `rookie` tinyint(2) NOT NULL,
   `sourceid` int(6) NOT NULL,
   `timestamp` int(11) NOT NULL,
-  UNIQUE KEY `ranking` (`pid`, `sourceid`, `type`, `adp`, `ppr`, `sf`, `dynasty`, `rookie`, `wk`, `year`, `timestamp`)
+  UNIQUE KEY `ranking` (`pid`, `sourceid`, `type`, `adp`, `ppr`, `sf`, `dynasty`, `rookie`, `week`, `year`, `timestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -2534,8 +2204,8 @@ DROP TABLE IF EXISTS `props`;
 
 CREATE TABLE `props` (
   `pid` varchar(7) NOT NULL,
-  `wk` tinyint(2) NOT NULL,
-  `year` int(4) NOT NULL,
+  `week` tinyint(2) NOT NULL,
+  `year` smallint(4) NOT NULL,
   `type` tinyint(3) NOT NULL,
   `id` varchar(100) NOT NULL,
   `ln` decimal(4,1) NOT NULL,
@@ -2545,7 +2215,7 @@ CREATE TABLE `props` (
   `u_am` SMALLINT NOT NULL,
   `sourceid` int(6) NOT NULL,
   `timestamp` int(11) NOT NULL,
-  UNIQUE KEY `prop` (`sourceid`, `id`, `pid`, `wk`, `year`, `type`, `timestamp`)
+  UNIQUE KEY `prop` (`sourceid`, `id`, `pid`, `week`, `year`, `type`, `timestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -2562,7 +2232,7 @@ CREATE TABLE `transition_bids` (
   `userid` int(6) NOT NULL,
   `bid` int(4) DEFAULT NULL,
   `tid` int(5) NOT NULL,
-  `year` int(4) NOT NULL,
+  `year` smallint(4) NOT NULL,
   `player_tid` int(5) NOT NULL,
   `lid` int(6) NOT NULL,
   `succ` tinyint(1) DEFAULT NULL,
@@ -2598,8 +2268,8 @@ CREATE TABLE `transition_releases` (
 DROP TABLE IF EXISTS `league_team_lineups`;
 
 CREATE TABLE `league_team_lineups` (
-  `week` varchar(3) NOT NULL,
-  `year` int(4) NOT NULL,
+  `week` tinyint(2) NOT NULL,
+  `year` smallint(4) NOT NULL,
   `tid` int(6) NOT NULL,
   `lid` int(6) NOT NULL,
   `total` decimal(5,2) DEFAULT NULL,
@@ -2617,7 +2287,7 @@ DROP TABLE IF EXISTS `league_team_lineup_contributions`;
 
 CREATE TABLE `league_team_lineup_contributions` (
   `pid` varchar(7) NOT NULL,
-  `year` int(4) NOT NULL,
+  `year` smallint(4) NOT NULL,
   `tid` int(6) NOT NULL,
   `lid` int(6) NOT NULL,
   `starts` tinyint(2) NOT NULL,
@@ -2636,8 +2306,8 @@ DROP TABLE IF EXISTS `league_team_lineup_contribution_weeks`;
 
 CREATE TABLE `league_team_lineup_contribution_weeks` (
   `pid` varchar(7) NOT NULL,
-  `week` varchar(3) NOT NULL,
-  `year` int(4) NOT NULL,
+  `week` tinyint(2) NOT NULL,
+  `year` smallint(4) NOT NULL,
   `tid` int(6) NOT NULL,
   `lid` int(6) NOT NULL,
   `start` tinyint(1) NOT NULL,
@@ -2656,8 +2326,8 @@ DROP TABLE IF EXISTS `league_team_lineup_starters`;
 
 CREATE TABLE `league_team_lineup_starters` (
   `pid` varchar(7) NOT NULL,
-  `week` varchar(3) NOT NULL,
-  `year` int(4) NOT NULL,
+  `week` tinyint(2) NOT NULL,
+  `year` smallint(4) NOT NULL,
   `tid` int(6) NOT NULL,
   `lid` int(6) NOT NULL,
   UNIQUE KEY `starter` (`lid`,`pid`,`year`, `week`)
@@ -2674,8 +2344,8 @@ DROP TABLE IF EXISTS `league_team_forecast`;
 CREATE TABLE `league_team_forecast` (
   `tid` int(6) NOT NULL,
   `lid` int(6) NOT NULL,
-  `week` varchar(3) NOT NULL,
-  `year` int(4) NOT NULL,
+  `week` tinyint(2) NOT NULL,
+  `year` smallint(4) NOT NULL,
   `day` int(3) NOT NULL,
   `playoff_odds` decimal(5,4) NOT NULL,
   `division_odds` decimal(5,4) NOT NULL,
@@ -2695,8 +2365,8 @@ DROP TABLE IF EXISTS `league_baselines`;
 
 CREATE TABLE `league_baselines` (
   `lid` int(6) NOT NULL,
-  `week` varchar(3) NOT NULL,
-  `year` int(4) NOT NULL,
+  `week` tinyint(2) NOT NULL,
+  `year` smallint(4) NOT NULL,
   `pid` varchar(7) NOT NULL,
   `type` varchar(10) NOT NULL,
   `pos` varchar(3) NOT NULL,

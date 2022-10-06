@@ -22,8 +22,8 @@ const processNflGames = async () => {
     time_est,
     v,
     h,
-    wk,
-    seas,
+    week,
+    year,
     seas_type,
     week_type
   } of games) {
@@ -37,8 +37,8 @@ const processNflGames = async () => {
       const update = {
         v,
         h,
-        wk,
-        seas,
+        week,
+        year,
         seas_type,
         timestamp: datetime.unix()
       }
@@ -48,8 +48,7 @@ const processNflGames = async () => {
           seas_type,
           date,
           time_est,
-          week_type,
-          seas
+          week_type
         })
       }
 

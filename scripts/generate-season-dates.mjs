@@ -27,7 +27,7 @@ const generateSeasonDates = async ({ year = constants.season.year } = {}) => {
 
   const games = await db('nfl_games')
     .whereIn('seas_type', ['REG', 'POST'])
-    .where('seas', year)
+    .where({ year })
 
   if (!games.length) {
     log(`found no games for ${year} season`)
@@ -74,7 +74,7 @@ const generateSeasonDates = async ({ year = constants.season.year } = {}) => {
   // previous season super bowl
   const previous_super_bowl_query = await db('nfl_games').where({
     day: 'SB',
-    seas: year - 1
+    year: year - 1
   })
   const previous_super_bowl = previous_super_bowl_query[0]
   if (!previous_super_bowl || !previous_super_bowl.timestamp) {
@@ -94,7 +94,7 @@ const generateSeasonDates = async ({ year = constants.season.year } = {}) => {
   }
 
   result.nflFinalWeek = Math.max(
-    ...games.filter((g) => g.seas_type === 'REG').map((g) => g.wk)
+    ...games.filter((g) => g.seas_type === 'REG').map((g) => g.week)
   )
   result.finalWeek = result.nflFinalWeek - 1
   result.regularSeasonFinalWeek = result.finalWeek - 3

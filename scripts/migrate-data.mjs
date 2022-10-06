@@ -15,7 +15,7 @@ const migrateData = async () => {
   const props = await db('props').whereNull('u_am').orWhereNull('o_am')
 
   for (const prop of props) {
-    const { pid, sourceid, year, wk, type, id, o, u, timestamp } = prop
+    const { pid, sourceid, year, week, type, id, o, u, timestamp } = prop
 
     let o_am = null
     let u_am = null
@@ -46,7 +46,7 @@ const migrateData = async () => {
       .where({
         pid,
         year,
-        wk,
+        week,
         sourceid,
         type,
         timestamp,

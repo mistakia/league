@@ -21,7 +21,7 @@ const processSeasons = async ({ year = constants.season.year, lid = 1 }) => {
     .select('league_player_gamelogs.*', 'player.pos')
     .join('player', 'player.pid', 'league_player_gamelogs.pid')
     .join('nfl_games', 'league_player_gamelogs.esbid', 'nfl_games.esbid')
-    .where({ seas: year, seas_type: 'REG', lid })
+    .where({ year, seas_type: 'REG', lid })
 
   log(`loaded ${gamelogs.length} gamelogs`)
 
@@ -170,13 +170,13 @@ const main = async () => {
           '=',
           'league_player_gamelogs.esbid'
         )
-        .select('nfl_games.seas')
+        .select('nfl_games.year')
         .where('nfl_games.seas_type', 'REG')
         .where('league_player_gamelogs.lid', lid)
-        .groupBy('nfl_games.seas')
-        .orderBy('nfl_games.seas', 'asc')
+        .groupBy('nfl_games.year')
+        .orderBy('nfl_games.year', 'asc')
 
-      let years = results.map((r) => r.seas)
+      let years = results.map((r) => r.year)
       if (argv.start) {
         years = years.filter((year) => year >= argv.start)
       }

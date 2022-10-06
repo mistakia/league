@@ -5,14 +5,14 @@ import { constants } from '#common'
 import sendDiscordMessage from './send-discord-message.mjs'
 
 async function insertProp(prop) {
-  const { pid, wk, year, type, sourceid, ln, o, u, o_am, u_am } = prop
+  const { pid, week, year, type, sourceid, ln, o, u, o_am, u_am } = prop
 
   // get last prop
   const results = await db('props')
     .where({
       pid,
       year,
-      wk,
+      week,
       type,
       sourceid
     })

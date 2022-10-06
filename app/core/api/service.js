@@ -204,10 +204,6 @@ export const api = {
       : `${BASE_URL}/stats/gamelogs/players`
     return { url }
   },
-  getTeamGamelogs() {
-    const url = `${BASE_URL}/stats/gamelogs/teams`
-    return { url }
-  },
   putProjection(data) {
     const url = `${BASE_URL}/projections/${data.pid}`
     return { url, ...PUT(data) }
@@ -230,10 +226,6 @@ export const api = {
   },
   getPlayStats(params) {
     const url = `${BASE_URL}/plays/stats?${queryString.stringify(params)}`
-    return { url }
-  },
-  getTeamStats() {
-    const url = `${BASE_URL}/stats/teams`
     return { url }
   },
   getLeagueTeamStats(params) {

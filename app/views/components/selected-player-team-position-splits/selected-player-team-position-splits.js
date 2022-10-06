@@ -10,13 +10,13 @@ export default class SelectedPlayerTeamPositionSplits extends React.Component {
     const { team, stats } = this.props
 
     const teamStats = stats.teamStats.filter((t) => fixTeam(t.tname) === team)
-    const sorted = teamStats.sort((a, b) => b.seas - a.seas)
+    const sorted = teamStats.sort((a, b) => b.year - a.year)
     const items = []
-    for (const [index, year] of sorted.entries()) {
-      const percentiles = stats.teamStatsPercentiles[year.seas] || {}
+    for (const [index, seasonlog] of sorted.entries()) {
+      const percentiles = stats.teamStatsPercentiles[seasonlog.year] || {}
       const Stat = ({ stat_key, ...params }) => (
         <PercentileMetric
-          value={year[stat_key]}
+          value={seasonlog[stat_key]}
           percentile={percentiles[stat_key]}
           {...params}
         />
@@ -24,7 +24,7 @@ export default class SelectedPlayerTeamPositionSplits extends React.Component {
 
       items.push(
         <div key={index} className='player__selected-row'>
-          <div className='table__cell text'>{year.seas}</div>
+          <div className='table__cell text'>{seasonlog.year}</div>
           <div className='row__group'>
             <div className='row__group-body'>
               <Stat stat_key='rba' />

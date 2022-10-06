@@ -86,8 +86,8 @@ export default async function (leagueId) {
       .joinRaw(
         'left join nfl_games on player.cteam = nfl_games.v or player.cteam = nfl_games.h'
       )
-      .where('nfl_games.wk', constants.season.week)
-      .where('nfl_games.seas', constants.season.year)
+      .where('nfl_games.week', constants.season.week)
+      .where('nfl_games.year', constants.season.year)
       .where('nfl_games.seas_type', 'REG')
   }
 

@@ -14,7 +14,7 @@ export function getFilteredProps(state) {
 
   for (const prop of items) {
     const playerMap = getPlayerById(state, { pid: prop.pid })
-    const proj = playerMap.getIn(['projection', `${prop.wk}`], {})
+    const proj = playerMap.getIn(['projection', `${prop.week}`], {})
     switch (prop.type) {
       case constants.player_prop_types.GAME_PASSING_YARDS:
         prop.proj = proj.py

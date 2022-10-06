@@ -25,18 +25,18 @@ export default class SelectedPlayerSeasonProjections extends React.Component {
     }
 
     const projections_by_week = groupBy(projections, 'week')
-    for (const week in projections_by_week) {
-      const wk = parseInt(week, 10)
-      if (wk !== constants.week) continue
+    for (const week_key in projections_by_week) {
+      const week = parseInt(week_key, 10)
+      if (week !== constants.week) continue
 
       tables.push(
         <SelectedPlayerProjection
-          key={wk}
-          week={wk}
+          key={week}
+          week={week}
           projections={projections_by_week[week]}
           pid={pid}
           pos={pos}
-          projection={playerMap.getIn(['projection', wk], {})}
+          projection={playerMap.getIn(['projection', week], {})}
         />
       )
     }
