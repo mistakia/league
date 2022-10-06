@@ -167,7 +167,6 @@ const main = async () => {
         .join(
           'nfl_games',
           'nfl_games.esbid',
-          '=',
           'league_player_gamelogs.esbid'
         )
         .select('nfl_games.year')
