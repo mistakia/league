@@ -11,7 +11,7 @@ const log = debug('process-player-seasonlogs')
 debug.enable('process-player-seasonlogs')
 
 const processPlayerSeasonlogs = async ({
-  seas = constants.season.year,
+  year = constants.season.year,
   seas_type = 'REG'
 } = {}) => {
   // get league player gamelogs for season
@@ -19,7 +19,7 @@ const processPlayerSeasonlogs = async ({
     .select('player_gamelogs.*', 'player.pos')
     .join('player', 'player.pid', 'player_gamelogs.pid')
     .join('nfl_games', 'player_gamelogs.esbid', 'nfl_games.esbid')
-    .where({ seas, seas_type })
+    .where({ year, seas_type })
 
   const inserts = []
 
@@ -38,7 +38,7 @@ const processPlayerSeasonlogs = async ({
 
     inserts.push({
       pid,
-      year: seas,
+      year,
       seas_type,
       pos,
       ...season_stats
@@ -46,7 +46,7 @@ const processPlayerSeasonlogs = async ({
   }
 
   if (inserts.length) {
-    log(`updating ${inserts.length} player seasonlogs for ${seas} ${seas_type}`)
+    log(`updating ${inserts.length} player seasonlogs for ${year} ${seas_type}`)
     await db('player_seasonlogs').insert(inserts).onConflict().merge()
   }
 }
@@ -56,22 +56,22 @@ const main = async () => {
   try {
     if (argv.all) {
       const results = await db('player_gamelogs')
-        .join('nfl_games', 'nfl_games.esbid', '=', 'player_gamelogs.esbid')
-        .select('nfl_games.seas')
+        .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
+        .select('nfl_games.year')
         .where('nfl_games.seas_type', 'REG')
-        .groupBy('nfl_games.seas')
-        .orderBy('nfl_games.seas', 'asc')
+        .groupBy('nfl_games.year')
+        .orderBy('nfl_games.year', 'asc')
 
-      let years = results.map((r) => r.seas)
+      let years = results.map((r) => r.year)
       if (argv.start) {
         years = years.filter((year) => year >= argv.start)
       }
 
       for (const year of years) {
-        await processPlayerSeasonlogs({ seas: year })
+        await processPlayerSeasonlogs({ year })
       }
     } else {
-      await processPlayerSeasonlogs({ seas: argv.seas })
+      await processPlayerSeasonlogs({ year: argv.year })
     }
   } catch (err) {
     error = err

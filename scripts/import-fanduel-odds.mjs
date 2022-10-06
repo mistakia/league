@@ -80,7 +80,7 @@ const run = async () => {
         prop.type = fanduel.markets[market.marketType]
         prop.id = market.marketId
         prop.timestamp = timestamp
-        prop.wk = constants.season.week
+        prop.week = constants.season.week
         prop.year = constants.season.year
         prop.sourceid = constants.sources.FANDUEL_NJ
 

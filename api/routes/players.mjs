@@ -158,10 +158,12 @@ router.get('/:pid/gamelogs/?', async (req, res) => {
         'player_gamelogs.*',
         'nfl_games.day',
         'nfl_games.date',
+        'nfl_games.week',
+        'nfl_games.year',
         'nfl_games.seas_type',
         'nfl_games.timestamp'
       )
-      .join('nfl_games', 'nfl_games.esbid', '=', 'player_gamelogs.esbid')
+      .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
       .where('player_gamelogs.pid', pid)
 
     if (leagueId) {

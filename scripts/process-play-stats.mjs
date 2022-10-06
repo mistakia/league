@@ -59,7 +59,7 @@ const getPlayType = (type_ngs) => {
   }
 }
 
-const format_gamelog = ({ esbid, pid, stats, opp, pos, tm, week, year }) => {
+const format_gamelog = ({ esbid, pid, stats, opp, pos, tm }) => {
   const cleanedStats = Object.keys(stats)
     .filter((key) => constants.fantasyStats.includes(key))
     .reduce((obj, key) => {
@@ -73,8 +73,6 @@ const format_gamelog = ({ esbid, pid, stats, opp, pos, tm, week, year }) => {
     pid,
     pos,
     opp,
-    week,
-    year,
     ...cleanedStats
   }
 }
@@ -102,8 +100,8 @@ const run = async ({
       this.on('nfl_plays.esbid', '=', 'nfl_play_stats.esbid')
       this.andOn('nfl_plays.playId', '=', 'nfl_play_stats.playId')
     })
-    .where('nfl_plays.seas', year)
-    .where('nfl_plays.wk', week)
+    .where('nfl_plays.year', year)
+    .where('nfl_plays.week', week)
     .where('nfl_play_stats.valid', 1)
     .where('nfl_plays.seas_type', seas_type)
 
@@ -218,9 +216,7 @@ const run = async ({
       tm: fixTeam(playStat.clubCode),
       opp,
       esbid: playStat.esbid,
-      stats,
-      year,
-      week
+      stats
     })
     player_gamelog_inserts.push(player_gamelog)
   }
@@ -252,9 +248,7 @@ const run = async ({
       tm: fixTeam(playStat.clubCode),
       opp,
       esbid: playStat.esbid,
-      stats,
-      year,
-      week
+      stats
     })
     player_gamelog_inserts.push(player_gamelog)
   }
@@ -296,9 +290,7 @@ const run = async ({
       tm: team,
       esbid: play.esbid,
       opp: fixTeam(opp),
-      stats,
-      year,
-      week
+      stats
     })
     player_gamelog_inserts.push(player_gamelog)
   }
@@ -310,8 +302,8 @@ const run = async ({
     const pids = player_gamelog_inserts.map((p) => p.pid)
     const deleted_count = await db('player_gamelogs')
       .leftJoin('nfl_games', 'player_gamelogs.esbid', 'nfl_games.esbid')
-      .where('nfl_games.wk', week)
-      .where('nfl_games.seas', year)
+      .where('nfl_games.week', week)
+      .where('nfl_games.year', year)
       .where('nfl_games.seas_type', seas_type)
       .whereNotIn('player_gamelogs.pid', pids)
       .del()
@@ -335,8 +327,8 @@ const run = async ({
       'nfl_plays.pos_team'
     )
     .join('nfl_games', 'nfl_plays.esbid', '=', 'nfl_games.esbid')
-    .where('nfl_plays.seas', year)
-    .where('nfl_plays.wk', week)
+    .where('nfl_plays.year', year)
+    .where('nfl_plays.week', week)
   for (const play of plays) {
     const off = play.pos_team
     if (!off) continue
@@ -442,42 +434,42 @@ const main = async () => {
     if (argv.all) {
       log('processing all plays')
       const results = await db('nfl_plays')
-        .select('seas')
-        .groupBy('seas')
-        .orderBy('seas', 'asc')
+        .select('year')
+        .groupBy('year')
+        .orderBy('year', 'asc')
 
-      let years = results.map((r) => r.seas)
+      let years = results.map((r) => r.year)
       if (argv.start) {
         years = years.filter((year) => year >= argv.start)
       }
 
       log(`processing plays for ${years.length} years`)
 
-      for (const seas of years) {
+      for (const year of years) {
         for (const seas_type of constants.seas_types) {
           const weeks = await db('nfl_plays')
-            .select('wk')
-            .where({ seas, seas_type })
-            .groupBy('wk')
-            .orderBy('wk', 'asc')
+            .select('week')
+            .where({ year, seas_type })
+            .groupBy('week')
+            .orderBy('week', 'asc')
           log(
-            `processing plays for ${weeks.length} weeks in ${seas} (${seas_type})`
+            `processing plays for ${weeks.length} weeks in ${year} (${seas_type})`
           )
-          for (const { wk } of weeks) {
-            log(`processing plays for week ${wk} in ${seas} (${seas_type})`)
-            await run({ year: seas, week: wk, seas_type })
+          for (const { week } of weeks) {
+            log(`processing plays for week ${week} in ${year} (${seas_type})`)
+            await run({ year, week, seas_type })
           }
         }
       }
     } else if (year && !week) {
       const weeks = await db('nfl_plays')
-        .select('wk')
-        .where({ seas: year, seas_type })
-        .groupBy('wk')
+        .select('week')
+        .where({ year, seas_type })
+        .groupBy('week')
       log(`processing plays for ${year} ${seas_type}: ${weeks.length} weeks`)
-      for (const { wk } of weeks) {
-        log(`processing plays for week ${wk} in ${year}`)
-        await run({ year, week: wk, seas_type })
+      for (const { week } of weeks) {
+        log(`processing plays for week ${week} in ${year}`)
+        await run({ year, week, seas_type })
       }
     } else {
       await run({ year: argv.year, week: argv.week, seas_type: argv.seas_type })

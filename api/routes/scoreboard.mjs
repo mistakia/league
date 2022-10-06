@@ -20,7 +20,7 @@ router.get('/?', async (req, res) => {
 
     const query = getPlayByPlayQuery(db)
     const plays = await query
-      .where('nfl_plays_current_week.wk', week)
+      .where('nfl_plays_current_week.week', week)
       .where('nfl_plays_current_week.seas_type', 'REG')
     const esbids = Array.from(uniqBy(plays, 'esbid')).map((p) => p.esbid)
     const playStats = await db('nfl_play_stats_current_week').whereIn(

@@ -16,10 +16,10 @@ router.get('/?', async (req, res) => {
 
     const teams = {}
     const games = await db('nfl_games')
-      .select('seas', 'wk', 'date', 'time_est', 'v', 'h')
-      .where('seas', constants.season.year)
+      .select('year', 'week', 'date', 'time_est', 'v', 'h')
+      .where('year', constants.season.year)
       .where('seas_type', 'REG')
-      .orderBy('wk', 'asc')
+      .orderBy('week', 'asc')
 
     for (const team of constants.nflTeams) {
       teams[team] = {
@@ -34,7 +34,7 @@ router.get('/?', async (req, res) => {
     }
 
     for (const team of constants.nflTeams) {
-      const weeks = teams[team].games.map((m) => m.wk)
+      const weeks = teams[team].games.map((m) => m.week)
       const teamWeeks = new Set(weeks)
       const result = constants.byeWeeks.filter((x) => !teamWeeks.has(x))
       teams[team].bye = result[0]

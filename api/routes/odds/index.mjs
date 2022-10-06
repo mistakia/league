@@ -18,7 +18,7 @@ router.get('/props', async (req, res) => {
     const sub = db('props')
       .select(db.raw('max(timestamp) AS maxtime, sourceid AS sid'))
       .groupBy('sid')
-      .where({ wk: constants.season.week, year: constants.season.year })
+      .where({ week: constants.season.week, year: constants.season.year })
 
     const data = await db
       .select('*')
@@ -29,7 +29,7 @@ router.get('/props', async (req, res) => {
           this.andOn('timestamp', '=', 'maxtime')
         })
       })
-      .where({ wk: constants.season.week, year: constants.season.year })
+      .where({ week: constants.season.week, year: constants.season.year })
 
     cache.set(cacheKey, data, 300) // 5 mins
 

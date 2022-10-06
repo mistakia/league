@@ -28,9 +28,9 @@ const getPlayData = ({ play, year, week, seas_type }) => {
     ydl_start: play.yardLine,
     fd: play.firstDown,
     gtg: play.goalToGo,
-    seas: year,
+    year,
     seas_type,
-    wk: week,
+    week,
     next_play_type: play.nextPlayType,
     sequence: play.orderSequence,
     penalty: play.penaltyOnPlay,
@@ -85,8 +85,8 @@ const importPlaysForWeek = async ({
   )
 
   const games = await db('nfl_games').where({
-    seas: year,
-    wk: week,
+    year,
+    week,
     seas_type
   })
 
@@ -196,17 +196,17 @@ const importPlaysForYear = async ({
   force_update = false
 } = {}) => {
   const weeks = await db('nfl_games')
-    .select('wk')
-    .where({ seas: year, seas_type })
-    .groupBy('wk')
-    .orderBy('wk', 'asc')
+    .select('week')
+    .where({ year, seas_type })
+    .groupBy('week')
+    .orderBy('week', 'asc')
 
   log(`processing plays for ${weeks.length} weeks in ${year} (${seas_type})`)
-  for (const { wk } of weeks) {
-    log(`loading plays for week: ${wk} (REG)`)
+  for (const { week } of weeks) {
+    log(`loading plays for week: ${week} (REG)`)
     await importPlaysForWeek({
       year,
-      week: wk,
+      week,
       seas_type,
       force_update
     })
@@ -216,11 +216,11 @@ const importPlaysForYear = async ({
 
 const importAllPlays = async ({ start, end, seas_type, force_update } = {}) => {
   const nfl_games_result = await db('nfl_games')
-    .select('seas')
-    .groupBy('seas')
-    .orderBy('seas', 'asc')
+    .select('year')
+    .groupBy('year')
+    .orderBy('year', 'asc')
 
-  let years = nfl_games_result.map((i) => i.seas)
+  let years = nfl_games_result.map((i) => i.year)
   if (start) {
     years = years.filter((year) => year >= start)
   }

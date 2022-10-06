@@ -65,7 +65,7 @@ const runOne = async (opts) => {
       pid: player_row.pid,
       pos: params.pos,
       year,
-      wk: 0,
+      week: 0,
 
       adp: 0,
       ppr: constants.scoring.PPR,

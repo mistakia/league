@@ -51,7 +51,7 @@ const run = async () => {
       prop.type = category.type
       prop.id = offer.providerOfferId
       prop.timestamp = timestamp
-      prop.wk = constants.season.week
+      prop.week = constants.season.week
       prop.year = constants.season.year
       prop.sourceid = constants.sources.DRAFT_KINGS_VA
 

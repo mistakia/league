@@ -6,8 +6,8 @@ export default async function ({
   esbid,
   playId,
 
-  wk,
-  seas,
+  week,
+  year,
   off,
   def,
 
@@ -28,12 +28,12 @@ export default async function ({
     query.where({ playId })
   }
 
-  if (wk) {
-    query.where({ wk })
+  if (week) {
+    query.where({ week })
   }
 
-  if (seas) {
-    query.where({ seas })
+  if (year) {
+    query.where({ year })
   }
 
   if (off) {
