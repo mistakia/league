@@ -35,18 +35,19 @@ const processGamelogs = async ({
   }
 
   if (inserts.length) {
-    const pids = inserts.map(p => p.pid)
+    const pids = inserts.map((p) => p.pid)
     const deleted_count = await db('league_player_gamelogs')
       .where({ week, year })
       .whereNotIn('pid', pids)
       .del()
-    log(`Deleted ${deleted_count} excess player gamelogs for league ${lid} in week ${week} ${year}`)
+    log(
+      `Deleted ${deleted_count} excess player gamelogs for league ${lid} in week ${week} ${year}`
+    )
 
     await db('league_player_gamelogs').insert(inserts).onConflict().merge()
     log(
       `Updated ${inserts.length} player gamelogs for league ${lid} in week ${week} ${year}`
     )
-
   }
 }
 
