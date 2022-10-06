@@ -577,7 +577,7 @@ CREATE TABLE `ros_projections` (
   `dtd` decimal(4,1) DEFAULT NULL,
   `krtd` decimal(4,1) DEFAULT NULL,
   `prtd` decimal(4,1) DEFAULT NULL,
-  `week` tinyint(2) NOT NULL,
+  `week` varchar(3) NOT NULL,
   `year` smallint(4) NOT NULL,
   `timestamp` datetime NOT NULL,
   UNIQUE KEY `sourceid` (`sourceid`,`pid`,`year`),
@@ -594,7 +594,7 @@ DROP TABLE IF EXISTS `league_player_projection_points`;
 
 CREATE TABLE `league_player_projection_points` (
   `pid` varchar(7) NOT NULL,
-  `week` tinyint(2) NOT NULL,
+  `week` varchar(3) NOT NULL,
   `year` smallint(4) NOT NULL,
   `lid` int(6) NOT NULL,
 
@@ -650,7 +650,7 @@ DROP TABLE IF EXISTS `league_player_projection_values`;
 
 CREATE TABLE `league_player_projection_values` (
   `pid` varchar(7) NOT NULL,
-  `week` tinyint(2) NOT NULL,
+  `week` varchar(3) NOT NULL,
   `year` smallint(4) NOT NULL,
   `lid` int(6) NOT NULL,
 
@@ -2268,7 +2268,7 @@ CREATE TABLE `transition_releases` (
 DROP TABLE IF EXISTS `league_team_lineups`;
 
 CREATE TABLE `league_team_lineups` (
-  `week` tinyint(2) NOT NULL,
+  `week` varchar(3) NOT NULL,
   `year` smallint(4) NOT NULL,
   `tid` int(6) NOT NULL,
   `lid` int(6) NOT NULL,
@@ -2306,7 +2306,7 @@ DROP TABLE IF EXISTS `league_team_lineup_contribution_weeks`;
 
 CREATE TABLE `league_team_lineup_contribution_weeks` (
   `pid` varchar(7) NOT NULL,
-  `week` tinyint(2) NOT NULL,
+  `week` varchar(3) NOT NULL,
   `year` smallint(4) NOT NULL,
   `tid` int(6) NOT NULL,
   `lid` int(6) NOT NULL,
@@ -2326,7 +2326,7 @@ DROP TABLE IF EXISTS `league_team_lineup_starters`;
 
 CREATE TABLE `league_team_lineup_starters` (
   `pid` varchar(7) NOT NULL,
-  `week` tinyint(2) NOT NULL,
+  `week` varchar(3) NOT NULL,
   `year` smallint(4) NOT NULL,
   `tid` int(6) NOT NULL,
   `lid` int(6) NOT NULL,
@@ -2344,7 +2344,7 @@ DROP TABLE IF EXISTS `league_team_forecast`;
 CREATE TABLE `league_team_forecast` (
   `tid` int(6) NOT NULL,
   `lid` int(6) NOT NULL,
-  `week` tinyint(2) NOT NULL,
+  `week` varchar(3) NOT NULL,
   `year` smallint(4) NOT NULL,
   `day` int(3) NOT NULL,
   `playoff_odds` decimal(5,4) NOT NULL,
@@ -2365,7 +2365,7 @@ DROP TABLE IF EXISTS `league_baselines`;
 
 CREATE TABLE `league_baselines` (
   `lid` int(6) NOT NULL,
-  `week` tinyint(2) NOT NULL,
+  `week` varchar(3) NOT NULL,
   `year` smallint(4) NOT NULL,
   `pid` varchar(7) NOT NULL,
   `type` varchar(10) NOT NULL,
