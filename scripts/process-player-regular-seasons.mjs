@@ -130,7 +130,7 @@ const processSeasons = async ({ year = constants.season.year, lid = 1 }) => {
 
   const sorted_by_points = inserts.map((i) => i.points).sort((a, b) => b - a)
   const sorted_by_points_added = inserts
-    .map((i) => i.points)
+    .map((i) => i.points_added)
     .sort((a, b) => b - a)
 
   for (const insert of inserts) {
