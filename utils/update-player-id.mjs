@@ -207,13 +207,13 @@ export default async function ({ current_pid, new_pid }) {
   )
   await db('league_player_gamelogs').where('pid', current_pid).del()
 
-  const [league_player_regular_seasons_rows] = await db.raw(
-    `update ignore league_player_regular_seasons set pid = '${new_pid}' where pid = '${current_pid}'`
+  const [league_player_regular_seasonlogs_rows] = await db.raw(
+    `update ignore league_player_regular_seasonlogs set pid = '${new_pid}' where pid = '${current_pid}'`
   )
   log(
-    `league_player_regular_seasons rows updated: ${league_player_regular_seasons_rows.info}`
+    `league_player_regular_seasonlogs rows updated: ${league_player_regular_seasonlogs_rows.info}`
   )
-  await db('league_player_regular_seasons').where('pid', current_pid).del()
+  await db('league_player_regular_seasonlogs').where('pid', current_pid).del()
 
   const [league_player_rows] = await db.raw(
     `update ignore league_player set pid = '${new_pid}' where pid = '${current_pid}'`

@@ -59,7 +59,16 @@ const getPlayType = (type_ngs) => {
   }
 }
 
-const upsert = async ({ esbid, pid, stats, opp, pos, tm, week, year }) => {
+const format_gamelog = ({
+  esbid,
+  pid,
+  stats,
+  opp,
+  pos,
+  tm,
+  week,
+  year
+}) => {
   const cleanedStats = Object.keys(stats)
     .filter((key) => constants.fantasyStats.includes(key))
     .reduce((obj, key) => {
@@ -67,19 +76,16 @@ const upsert = async ({ esbid, pid, stats, opp, pos, tm, week, year }) => {
       return obj
     }, {})
 
-  await db('player_gamelogs')
-    .insert({
-      esbid,
-      tm,
-      pid,
-      pos,
-      opp,
-      week,
-      year,
-      ...cleanedStats
-    })
-    .onConflict()
-    .merge()
+  return {
+    esbid,
+    tm,
+    pid,
+    pos,
+    opp,
+    week,
+    year,
+    ...cleanedStats
+  }
 }
 
 const run = async ({
@@ -111,6 +117,7 @@ const run = async ({
     .where('nfl_play_stats.valid', 1)
     .where('nfl_plays.seas_type', seas_type)
 
+  const player_gamelog_inserts = []
   const missing = []
 
   const play_stats_by_gsispid = groupBy(playStats, 'gsispid')
@@ -216,7 +223,7 @@ const run = async ({
 
     gamelog_update_count += 1
     gamelog_gsispids.push(gsispid)
-    await upsert({
+    const player_gamelog = format_gamelog({
       pid: player_row.pid,
       pos: player_row.pos,
       tm: fixTeam(playStat.clubCode),
@@ -226,6 +233,7 @@ const run = async ({
       year,
       week
     })
+    player_gamelog_inserts.push(player_gamelog)
   }
 
   for (const gsisid of Object.keys(play_stats_by_gsisid)) {
@@ -250,7 +258,7 @@ const run = async ({
     if (argv.dry) continue
 
     gamelog_update_count += 1
-    await upsert({
+    const player_gamelog = format_gamelog({
       pid: player_row.pid,
       pos: player_row.pos,
       tm: fixTeam(playStat.clubCode),
@@ -260,6 +268,7 @@ const run = async ({
       year,
       week
     })
+    player_gamelog_inserts.push(player_gamelog)
   }
 
   // generate defense gamelogs
@@ -294,7 +303,7 @@ const run = async ({
     const stats = calculateDstStatsFromPlays(formattedPlays, team)
     if (argv.dry) continue
     gamelog_update_count += 1
-    await upsert({
+    const player_gamelog = format_gamelog({
       pid: team,
       pos: 'DST',
       tm: team,
@@ -304,10 +313,26 @@ const run = async ({
       year,
       week
     })
+    player_gamelog_inserts.push(player_gamelog)
   }
 
   log(`Could not locate ${missing.length} players`)
   missing.forEach((m) => log(`could not find player: ${m.pname} / ${m.cteam}`))
+
+  if (player_gamelog_inserts.length) {
+    const pids = player_gamelog_inserts.map((p) => p.pid)
+    const deleted_count = await db('player_gamelogs')
+      .where({ week, year })
+      .whereNotIn('pid', pids)
+      .del()
+    log(`Deleted ${deleted_count} excess gamelogs`)
+
+    log(`Updated ${player_gamelog_inserts.length} gamelogs`)
+    await db('player_gamelogs')
+      .insert(player_gamelog_inserts)
+      .onConflict()
+      .merge()
+  }
 
   // update play row data - off, def
   const plays = await db('nfl_plays')
