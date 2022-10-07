@@ -107,6 +107,29 @@ export default async function ({
     }
   }
 
+  if (leagueId) {
+    const seasonlog_selects = [
+      'league_player_regular_seasonlogs.startable_games',
+      'league_player_regular_seasonlogs.points',
+      'league_player_regular_seasonlogs.points_per_game',
+      'league_player_regular_seasonlogs.points_added',
+      'league_player_regular_seasonlogs.points_added_per_game',
+      'league_player_regular_seasonlogs.points_rnk',
+      'league_player_regular_seasonlogs.points_pos_rnk',
+      'league_player_regular_seasonlogs.points_added_rnk',
+      'league_player_regular_seasonlogs.points_added_pos_rnk'
+    ]
+    query
+      .leftJoin('league_player_regular_seasonlogs', function () {
+        this.on('league_player_regular_seasonlogs.pid', 'player.pid')
+        this.andOn(
+          'league_player_regular_seasonlogs.year',
+          constants.season.year
+        )
+      })
+      .select(db.raw(seasonlog_selects.join(',')))
+  }
+
   if (leaguePlayerIds.length || teamId || leagueId) {
     query.orWhereIn('player.pid', leaguePlayerIds)
   }
