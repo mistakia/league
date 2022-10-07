@@ -2020,7 +2020,7 @@ CREATE TABLE `league_player` (
   `pid` varchar(7) NOT NULL,
   `lid` int(6) NOT NULL,
   `draft_rank` smallint(3) DEFAULT NULL,
-  `starts` smallint(3) DEFAULT NULL,
+  `startable_games` smallint(3) DEFAULT NULL,
   `points` decimal(6,1) DEFAULT NULL,
   `points_per_game` decimal(3,1) DEFAULT NULL,
   `points_added` decimal(6,1) DEFAULT NULL,
