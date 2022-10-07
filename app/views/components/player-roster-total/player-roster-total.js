@@ -8,9 +8,9 @@ export default class PlayerRosterTotal extends React.Component {
   render() {
     const { players, league, reorder, isBeforeExtensionDeadline } = this.props
 
-    const { isOffseason } = constants
+    const { isOffseason, isRegularSeason } = constants
     const week = Math.max(constants.week, 1)
-    const projectionType = constants.isRegularSeason ? 'ros' : '0'
+    const projectionType = isRegularSeason ? 'ros' : '0'
 
     let baseSalaryTotal = 0
     let extendedSalaryTotal = 0
@@ -18,8 +18,8 @@ export default class PlayerRosterTotal extends React.Component {
     let savingsTotal = 0
     let valueTotal = 0
     let valueAdjTotal = 0
-    let rosPointsTotal = 0
     let weekPointsTotal = 0
+    let points_added = 0
 
     players.forEach((playerMap) => {
       const extensions = playerMap.get('extensions', 0)
@@ -52,10 +52,9 @@ export default class PlayerRosterTotal extends React.Component {
       valueTotal = valueTotal + playerMap.getIn(['vorp', projectionType], 0)
       valueAdjTotal =
         valueAdjTotal + playerMap.getIn(['vorp_adj', projectionType], 0)
-      rosPointsTotal =
-        rosPointsTotal + playerMap.getIn(['points', projectionType, 'total'], 0)
       weekPointsTotal =
         weekPointsTotal + playerMap.getIn(['points', `${week}`, 'total'], 0)
+      points_added = points_added + playerMap.get('points_added', 0)
     })
 
     return (
@@ -79,17 +78,19 @@ export default class PlayerRosterTotal extends React.Component {
             {savingsTotal ? `$${savingsTotal.toFixed(0)}` : '-'}
           </div>
         )}
+        {isRegularSeason && (
+          <div className='metric table__cell'>
+            {points_added ? `${points_added.toFixed(1)}` : '-'}
+          </div>
+        )}
+        {isRegularSeason && <div className='metric table__cell'>-</div>}
+        {isRegularSeason && <div className='metric table__cell'>-</div>}
         <div className='metric table__cell'>
           {valueTotal ? valueTotal.toFixed(1) : '-'}
         </div>
         {isOffseason && (
           <div className='metric table__cell'>
             {valueAdjTotal ? valueAdjTotal.toFixed(1) : '-'}
-          </div>
-        )}
-        {constants.week > 0 && (
-          <div className='metric table__cell'>
-            {rosPointsTotal ? rosPointsTotal.toFixed(1) : '-'}
           </div>
         )}
         {constants.week > 0 && (

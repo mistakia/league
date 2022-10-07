@@ -42,8 +42,9 @@ class PlayerRoster extends Player {
     const bid = playerMap.get('bid', 0)
     const salary = isTransition ? value : bid || value
     const extensions = playerMap.get('extensions', 0)
+    const pos = playerMap.get('pos')
     const extendedSalary = getExtensionAmount({
-      pos: playerMap.get('pos'),
+      pos,
       tag: isBeforeExtensionDeadline ? tag : constants.tags.REGULAR,
       extensions,
       league,
@@ -66,12 +67,14 @@ class PlayerRoster extends Player {
 
     const vorp = playerMap.getIn(['vorp', projectionType], 0)
     const vorpAdj = playerMap.getIn(['vorp_adj', projectionType], 0)
-    const rosPoints = playerMap.getIn(['points', projectionType, 'total'], 0)
     const week = Math.max(constants.week, 1)
     const weekPoints = playerMap.getIn(['points', `${week}`, 'total'], 0)
     const starts = playerMap.getIn(['lineups', 'starts'], 0)
     const startPoints = playerMap.getIn(['lineups', 'sp'], 0)
     const benchPoints = playerMap.getIn(['lineups', 'bp'], 0)
+    const points_added = playerMap.get('points_added', 0)
+    const points_added_rnk = playerMap.get('points_added_rnk', null)
+    const points_added_pos_rnk = playerMap.get('points_added_pos_rnk', null)
 
     const isNegative = Math.sign(savings) === -1
 
@@ -152,15 +155,25 @@ class PlayerRoster extends Player {
             {savings ? `$${savings.toFixed(0)}` : '-'}
           </div>
         )}
-        <div className='metric table__cell'>{vorp ? vorp.toFixed(0) : '-'}</div>
-        {isOffseason && (
+        {isRegularSeason && (
           <div className='metric table__cell'>
-            {vorpAdj ? vorpAdj.toFixed(0) : '-'}
+            {points_added ? points_added.toFixed(1) : '-'}
           </div>
         )}
         {isRegularSeason && (
           <div className='metric table__cell'>
-            {rosPoints ? rosPoints.toFixed(0) : '-'}
+            {`${points_added_rnk || '-'}`}
+          </div>
+        )}
+        {isRegularSeason && (
+          <div className='metric table__cell'>
+            {`${points_added_pos_rnk ? pos : ''}${points_added_pos_rnk || '-'}`}
+          </div>
+        )}
+        <div className='metric table__cell'>{vorp ? vorp.toFixed(0) : '-'}</div>
+        {isOffseason && (
+          <div className='metric table__cell'>
+            {vorpAdj ? vorpAdj.toFixed(0) : '-'}
           </div>
         )}
         {constants.week > 0 && (

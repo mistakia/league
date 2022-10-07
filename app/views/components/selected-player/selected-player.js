@@ -164,15 +164,15 @@ export default class SelectedPlayer extends React.Component {
                 (this.state.show_collapse ? !this.state.collapsed : true) && (
                   <>
                     <div className='selected__player-header-item'>
-                      <label>Starts</label>
+                      <label>Projected Starts</label>
                       {playerMap.getIn(['lineups', 'starts'], '-')}
                     </div>
                     <div className='selected__player-header-item'>
-                      <label>Points+</label>
+                      <label>Projected Points+</label>
                       {playerMap.getIn(['lineups', 'sp'], 0).toFixed(1)}
                     </div>
                     <div className='selected__player-header-item'>
-                      <label>Bench+</label>
+                      <label>Projected Bench+</label>
                       {playerMap.getIn(['lineups', 'bp'], 0).toFixed(1)}
                     </div>
                   </>
