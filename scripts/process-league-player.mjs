@@ -59,7 +59,7 @@ const processLeaguePlayer = async ({ lid = 1 } = {}) => {
 
       draft_rank,
 
-      starts: sum(seasons.map((s) => s.starts)),
+      startable_games: sum(seasons.map((s) => s.startable_games)),
       points,
       points_per_game: points / games,
       points_added,
