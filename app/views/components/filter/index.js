@@ -6,7 +6,14 @@ import Checkbox from '@mui/material/Checkbox'
 
 import './filter.styl'
 
-export default function Filter(props) {
+export default function Filter({
+  label,
+  selected_label,
+  single,
+  body,
+  values: filter_values = [],
+  ...props
+}) {
   const [visible, setVisible] = useState(false)
   const button_ref = useRef()
   const dropdown_ref = useRef()
@@ -61,7 +68,7 @@ export default function Filter(props) {
   }
 
   const handleAllClick = (event) => {
-    const values = props.values.map((i) => i.value)
+    const values = filter_values.map((i) => i.value)
     const { type } = props
     props.filter({ leagueId, type, values })
   }
@@ -73,23 +80,21 @@ export default function Filter(props) {
   const handleSelect = (event, index) => {
     event.preventDefault()
     event.stopPropagation()
-    if (props.single) {
+    if (single) {
       return props.filter({
         leagueId,
         type: props.type,
-        values: [props.values[index].value]
+        values: [filter_values[index].value]
       })
     }
-    const values = props.values.map((v, i) =>
+    const values = filter_values.map((v, i) =>
       index === i ? { ...v, selected: !v.selected } : v
     )
     const filteredValues = values.filter((i) => i.selected).map((i) => i.value)
     props.filter({ leagueId, type: props.type, values: filteredValues })
   }
 
-  const { label, values, single } = props
-
-  const items = values.map((v, index) => {
+  const items = filter_values.map((v, index) => {
     const classNames = ['player__filter-dropdown-item']
     if (v.selected) classNames.push('selected')
     if (v.className) classNames.push(v.className)
@@ -105,14 +110,36 @@ export default function Filter(props) {
     )
   })
 
-  const count = values.filter((v) => v.selected).length
-  const all = count === values.length
-  const selectedLabel = all
+  const count = filter_values.filter((v) => v.selected).length
+  const all = count === filter_values.length
+  const default_selected_label = all
     ? 'ALL'
-    : values
+    : filter_values
         .filter((v) => v.selected)
         .map((v) => v.label)
         .join(', ')
+
+  const default_body = (
+    <>
+      {!single && (
+        <div className='player__filter-dropdown-head'>
+          <div
+            className='player__filter-dropdown-action'
+            onClick={handleAllClick}
+          >
+            All
+          </div>
+          <div
+            className='player__filter-dropdown-action'
+            onClick={handleClearClick}
+          >
+            Clear
+          </div>
+        </div>
+      )}
+      <div className='player__filter-dropdown-body'>{items}</div>
+    </>
+  )
 
   return (
     <div
@@ -121,26 +148,12 @@ export default function Filter(props) {
       ref={button_ref}
     >
       <div className='player__filter-label'>{label}</div>
-      <div className='player__filter-selection'>{selectedLabel}</div>
+      <div className='player__filter-selection'>
+        {selected_label || default_selected_label}
+      </div>
       {visible && (
         <Paper ref={dropdown_ref} className='player__filter-dropdown'>
-          {!single && (
-            <div className='player__filter-dropdown-head'>
-              <div
-                className='player__filter-dropdown-action'
-                onClick={handleAllClick}
-              >
-                All
-              </div>
-              <div
-                className='player__filter-dropdown-action'
-                onClick={handleClearClick}
-              >
-                Clear
-              </div>
-            </div>
-          )}
-          <div className='player__filter-dropdown-body'>{items}</div>
+          {body || default_body}
         </Paper>
       )}
     </div>
@@ -152,5 +165,7 @@ Filter.propTypes = {
   type: PropTypes.string,
   values: PropTypes.array,
   single: PropTypes.bool,
-  label: PropTypes.string
+  label: PropTypes.string,
+  selected_label: PropTypes.string,
+  body: PropTypes.node
 }
