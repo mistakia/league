@@ -6,6 +6,7 @@ export const statActions = {
   SET_TEAM_STATS_PERCENTILES: 'SET_TEAM_STATS_PERCENTILES',
 
   FILTER_STATS: 'FILTER_STATS',
+  FILTER_STATS_YARDLINE: 'FILTER_STATS_YARDLINE',
 
   UPDATE_QUALIFIER: 'UPDATE_QUALIFIER',
 
@@ -29,6 +30,14 @@ export const statActions = {
     payload: {
       type,
       values
+    }
+  }),
+
+  filter_yardline: ({ yardline_start, yardline_end }) => ({
+    type: statActions.FILTER_STATS_YARDLINE,
+    payload: {
+      yardline_start,
+      yardline_end
     }
   }),
 

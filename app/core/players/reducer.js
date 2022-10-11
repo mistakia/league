@@ -137,6 +137,13 @@ export function playersReducer(state = initialState, { payload, type }) {
     case playerActions.SET_PLAYER_STATS:
       return state.withMutations((state) => {
         state.set('isPending', false)
+
+        // clear player stats
+        for (const pid of state.get('items').keys()) {
+          state.deleteIn(['items', pid, 'stats'])
+        }
+
+        // set new stats
         for (const pid in payload.players) {
           if (state.get('items').get(pid)) {
             const stats = payload.players[pid]

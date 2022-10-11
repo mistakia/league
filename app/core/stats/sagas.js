@@ -28,15 +28,27 @@ export function* filterPlays({ payload }) {
 }
 
 export function* calculateStats() {
-  const { plays, weeks, days, quarters, downs, qualifiers } = yield select(
-    getStats
-  )
+  const {
+    plays,
+    weeks,
+    days,
+    quarters,
+    downs,
+    qualifiers,
+    yardline_start,
+    yardline_end
+  } = yield select(getStats)
   const league = yield select(getCurrentLeague)
   const filtered = plays.filter((play) => {
     if (!weeks.includes(play.week)) return false
     if (!days.includes(play.day)) return false
     if (!quarters.includes(play.qtr)) return false
     if (!downs.includes(play.dwn)) return false
+    if (yardline_start !== 0 || yardline_end !== 100) {
+      if (!play.ydl_100) return false
+      if (play.ydl_100 < yardline_start || play.ydl_100 > yardline_end)
+        return false
+    }
     return true
   })
   const worker = new Worker()
@@ -69,6 +81,10 @@ export function* watchFilterStats() {
   yield takeLatest(statActions.FILTER_STATS, filterPlays)
 }
 
+export function* watchFilterStatsYardline() {
+  yield takeLatest(statActions.FILTER_STATS_YARDLINE, calculateStats)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -77,5 +93,6 @@ export const statSagas = [
   fork(watchSetPlayersView),
   fork(watchGetChartedPlaysFulfilled),
   fork(watchFilterStats),
+  fork(watchFilterStatsYardline),
   fork(watchUpdateQualifier)
 ]
