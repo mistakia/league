@@ -618,7 +618,7 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 
 **Poaching.**
 
-14. Players on a PS may be poached by another team at any point for an extra $2 on their current contract. The Manager of the PS player has 48 hours to promote the player to the active roster or lose that player.
+14. Another team may poach players on a PS for an extra $2 on their current contract. The Manager of the PS player has the ability to promote the player to the active roster or lose that player. Poaching claims will be processed 48 hours after submission except for those submitted after 6 pm EST on Thursday and before 3 pm EST on Sunday during the Regular Season, which will be processed the following Tuesday at 3 pm EST.
 
 **Sanctuary Periods.**
 
