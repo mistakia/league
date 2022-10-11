@@ -14,6 +14,8 @@ const initialState = new Record({
   days: new List(constants.days),
   quarters: new List(constants.quarters),
   downs: new List(constants.downs),
+  yardline_start: 0,
+  yardline_end: 100,
   playsPercentiles: {},
   teamStatsPercentiles: new Record({})
 })
@@ -43,6 +45,9 @@ export function statsReducer(state = initialState(), { payload, type }) {
 
     case statActions.FILTER_STATS:
       return state.merge({ [payload.type]: new List(payload.values) })
+
+    case statActions.FILTER_STATS_YARDLINE:
+      return state.merge({ ...payload })
 
     case statActions.GET_CHARTED_PLAYS_FULFILLED:
       return state.merge({
