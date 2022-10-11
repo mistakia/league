@@ -438,7 +438,7 @@ xiv. 10-13 points allowed (2)
 
 **Salary Cap Enforcement.**
 
-4. The $200 Salary Cap will be enforced on all transactions during the offseason and on Opening Day.
+4. The $200 Salary Cap will be enforced on all bids during the Offseason and on Opening Day. Teams above the Salary Cap on Opening Day will have their players automatically released, in ascending market salary savings, until they are at or below the Salary Cap.
 
 ## Article IX
 
@@ -521,6 +521,10 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 3. Each Team's budget will be determined by subtracting the sum of the contract values for all players on the Team’s active roster from $200.
 
 4. Following the rookie draft order, Teams will nominate players for bidding and set a bid themselves (minimum $0). Teams who have a full active roster will be skipped.
+
+**Free Agency Period.**
+
+5. Teams must be at or below the Salary Cap at the start of the Free Agency Period. Teams above the Salary Cap will have their players automatically released, in ascending market salary savings, until they are at or below the Salary Cap.
 
 ## Article XIII
 
