@@ -56,6 +56,19 @@ const getPlayData = ({ play, year, week, seas_type }) => {
     data.score_team = fixTeam(play.scoringTeam.abbreviation)
   }
 
+  if (play.yardLine && data.pos_team) {
+    if (play.yardLine === '50') {
+      data.ydl_num = 50
+      data.ydl_100 = 50
+    } else {
+      const ydl_parts = play.yardLine.split(' ')
+      data.ydl_num = parseInt(ydl_parts[1], 10)
+      data.ydl_side = fixTeam(ydl_parts[0])
+      data.ydl_100 =
+        data.ydl_side === data.pos_team ? 100 - data.ydl_num : data.ydl_num
+    }
+  }
+
   return data
 }
 
