@@ -17,31 +17,50 @@ const currentRegularSeasonWeek = Math.max(
 
 const log = debug('import-plays-ngs')
 
-const getPlayData = (play) => ({
-  sequence: play.sequence,
-  state: play.playState,
-  dwn: play.down,
-  home_score: play.homeScore,
-  special: play.isSTPlay,
-  score: play.isScoring,
-  desc: play.playDescription,
-  type_ngs: play.playType,
-  pos_team: play.possessionTeam ? fixTeam(play.possessionTeam) : null,
-  pos_team_id: play.possessionTeamId,
-  qtr: play.quarter,
-  year: play.season,
-  // seas_type: play.seasonType,
-  away_score: play.visitorScore,
-  week: play.week,
-  ydl_num: play.yardlineNumber,
-  ydl_side: play.yardlineSide ? fixTeam(play.yardlineSide) : null,
-  ytg: play.yardsToGo,
-  off_formation: play.offense ? play.offense.offenseFormation : null,
-  off_personnel: play.offense ? play.offense.personnel : null,
-  box_ngs: play.defense ? play.defense.defendersInTheBox : null,
-  pru_ngs: play.defense ? play.defense.numberOfPassRushers : null,
-  def_personnel: play.defense ? play.defense.personnel : null
-})
+const getPlayData = (play) => {
+  const data = {
+    sequence: play.sequence,
+    state: play.playState,
+    dwn: play.down,
+    home_score: play.homeScore,
+    special: play.isSTPlay,
+    score: play.isScoring,
+    desc: play.playDescription,
+    type_ngs: play.playType,
+    pos_team_id: play.possessionTeamId,
+    qtr: play.quarter,
+    year: play.season,
+    // seas_type: play.seasonType,
+    away_score: play.visitorScore,
+    week: play.week,
+    ydl_num: play.yardlineNumber,
+    ytg: play.yardsToGo,
+    off_formation: play.offense ? play.offense.offenseFormation : null,
+    off_personnel: play.offense ? play.offense.personnel : null,
+    box_ngs: play.defense ? play.defense.defendersInTheBox : null,
+    pru_ngs: play.defense ? play.defense.numberOfPassRushers : null,
+    def_personnel: play.defense ? play.defense.personnel : null
+  }
+
+  if (play.possessionTeam) {
+    data.pos_team = fixTeam(play.possessionTeam)
+  }
+
+  if (play.yardlineSide) {
+    data.ydl_side = fixTeam(play.yardlineSide)
+  }
+
+  if (play.ydl_num) {
+    if (play.ydl_num === 50) {
+      data.ydl_100 = 50
+    } else if (data.pos_team && data.ydl_side) {
+      data.ydl_100 =
+        data.ydl_side === data.pos_team ? 100 - data.ydl_num : data.ydl_num
+    }
+  }
+
+  return data
+}
 
 const getPlayStatData = (playStat) => ({
   yards: playStat.yards,
