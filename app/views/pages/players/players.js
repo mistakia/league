@@ -25,6 +25,7 @@ import StatYearsFilter from '@components/stat-years-filter'
 import StatWeeksFilter from '@components/stat-weeks-filter'
 import StatDaysFilter from '@components/stat-days-filter'
 import StatQuartersFilter from '@components/stat-quarters-filter'
+import StatYardlineFilter from '@components/stat-yardline-filter'
 import StatDownsFilter from '@components/stat-downs-filter'
 import StatQualifierFilter from '@components/stat-qualifier-filter'
 import CollegeFilter from '@components/college-filter'
@@ -211,6 +212,7 @@ export default class PlayersPage extends React.Component {
                   <StatDaysFilter />
                   <StatQuartersFilter />
                   <StatDownsFilter />
+                  <StatYardlineFilter />
                   {show_qualifier_filter && <StatQualifierFilter />}
                 </div>
               )}
