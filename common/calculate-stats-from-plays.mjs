@@ -23,6 +23,12 @@ const calculateStatsFromPlays = ({ plays, qualifiers, league }) => {
   const addStat = (pid, stat, value) => {
     if (!pid) return
     value = parseInt(value, 10)
+
+    if (isNaN(value)) {
+      // TODO log warning
+      return
+    }
+
     // TODO record longest rushing, receiving, passing play
     // TODO count big plays
     // TODO situational splits (i.e. # of defenders in box)
