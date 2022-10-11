@@ -514,7 +514,7 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 
 1. The date and time will be posted on the LEAGUE home page and will also be communicated to each Manager via email.
 
-2. The commencement date of each subsequent LEAGUE Auction shall be set by the Commissioner no later than two (2) weeks prior to the start of the NFL regular season to take place no later than one (1) day before Opening Kickoff, and with no less than seven (7) days’ notice to the Teams.
+2. The commencement date of each subsequent LEAGUE Auction shall be set by the Commissioner no earlier than nine (9) days and no later than (1) day prior to the start of the Regular Season, and with no less than seven (7) days’ notice to the Teams.
 
 **Budget.**
 
@@ -525,6 +525,10 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 **Free Agency Period.**
 
 5. Teams must be at or below the Salary Cap at the start of the Free Agency Period. Teams above the Salary Cap will have their players automatically released, in ascending market salary savings, until they are at or below the Salary Cap.
+
+6. The Free Agency Period will begin no later than forty-eight (48) hours prior to the scheduled Free Agency Auction and last until the start of the Regular Season.
+
+7. The following day after the Free Agency Auction, Active Roster and Practice Squad waivers will be processed daily at 3 pm EST during the Free Agency Period.
 
 ## Article XIII
 
