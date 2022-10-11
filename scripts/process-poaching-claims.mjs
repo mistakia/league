@@ -13,6 +13,7 @@ if (process.env.NODE_ENV !== 'test') {
 const run = async () => {
   const timestamp = Math.round(Date.now() / 1000)
 
+  const { now } = constants.season
   const cutoff = dayjs().subtract('48', 'hours').unix()
   const claims = await db('poaches')
     .where('submitted', '<', cutoff)
@@ -20,6 +21,24 @@ const run = async () => {
 
   if (!claims.length) {
     throw new Errors.EmptyPoachingClaims()
+  }
+
+  if (constants.season.isRegularSeason) {
+    // check if currently between Saturday 6pm and Tuesday 3pm (EST)
+    const start_window = (
+      now.day() < 3 ? now.subtract('1', 'week').day(6) : now.day(6)
+    )
+      .startOf('day')
+      .hour(18)
+    const end_window = (
+      now.day() < 3 ? now.day(2) : now.add('1', 'week').day(2)
+    )
+      .startOf('day')
+      .hour(15)
+    if (now.isBetween(start_window, end_window)) {
+      // do not process any claims during this window
+      return
+    }
   }
 
   for (const claim of claims) {
