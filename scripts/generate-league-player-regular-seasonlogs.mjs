@@ -8,10 +8,13 @@ import { isMain, getAcquisitionTransaction } from '#utils'
 import generateSeasonDates from './generate-season-dates.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
-const log = debug('process-player-regular-seasons')
-debug.enable('process-player-regular-seasons')
+const log = debug('generate-league-player-regular-seasonlogs')
+debug.enable('generate-league-player-regular-seasonlogs')
 
-const processSeasons = async ({ year = constants.season.year, lid = 1 }) => {
+const generate_league_player_regular_seasonlogs = async ({
+  year = constants.season.year,
+  lid = 1
+}) => {
   log(`generating player seasonlogs for leagueId ${lid} in ${year}`)
 
   const season_dates = await generateSeasonDates({ year })
@@ -184,10 +187,10 @@ const main = async () => {
       log(`generating player seasonlogs for ${years.length} years`)
 
       for (const year of years) {
-        await processSeasons({ year, lid })
+        await generate_league_player_regular_seasonlogs({ year, lid })
       }
     } else {
-      await processSeasons({ year: argv.year, lid })
+      await generate_league_player_regular_seasonlogs({ year: argv.year, lid })
     }
   } catch (err) {
     error = err
@@ -208,4 +211,4 @@ if (isMain(import.meta.url)) {
   main()
 }
 
-export default processSeasons
+export default generate_league_player_regular_seasonlogs
