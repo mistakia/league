@@ -48,6 +48,7 @@ CREATE TABLE `player` (
   `esbid` varchar(10) DEFAULT NULL,
   `gsisid` varchar(15) DEFAULT NULL,
   `gsispid` varchar(47) DEFAULT NULL,
+  `gsisItId` mediumint(8) DEFAULT NULL,
 
   `status` varchar(255) DEFAULT NULL,
   `nfl_status` varchar(10) DEFAULT NULL,
