@@ -26,7 +26,13 @@ const import_players_from_snaps = async () => {
         const dob = dayjs(data.birthDate, 'MM/DD/YYYY')
         options.dob = dob.format('YYYY-MM-DD')
       }
-      const player_row = await getPlayer(options)
+
+      let player_row
+      try {
+        player_row = await getPlayer(options)
+      } catch (err) {
+        // ignore
+      }
 
       if (!player_row) {
         missing.push(data)
