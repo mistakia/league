@@ -9,13 +9,14 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 
 import Rank from '@components/rank'
 import { constants } from '@common'
+import { Team } from '@core/teams'
 
 export default function DashboardTeamSummaryRecord({
   overall,
   standings,
   tid
 }) {
-  const team = standings.teams.find((t) => t.uid === tid)
+  const team = standings.teams.find((t) => t.uid === tid) || new Team()
   const rank = overall.findIndex((t) => t.uid === tid) + 1
   const { year } = constants
 
