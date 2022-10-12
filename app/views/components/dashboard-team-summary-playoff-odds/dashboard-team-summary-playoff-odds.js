@@ -9,9 +9,10 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 
 import { toPercent } from '@common'
 import Rank from '@components/rank'
+import { Team } from '@core/teams'
 
 export default function DashboardTeamSummaryPlayoffOdds({ teams, tid }) {
-  const team = teams.find((t) => t.uid === tid)
+  const team = teams.find((t) => t.uid === tid) || new Team()
   const rank = teams.findIndex((t) => t.uid === tid) + 1
 
   const items = []

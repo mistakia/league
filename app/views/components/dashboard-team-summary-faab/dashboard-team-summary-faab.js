@@ -8,9 +8,10 @@ import AccordionSummary from '@mui/material/AccordionSummary'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 
 import Rank from '@components/rank'
+import { Team } from '@core/teams'
 
 export default function DashboardTeamSummaryFAAB({ teams, tid }) {
-  const team = teams.find((t) => t.uid === tid)
+  const team = teams.find((t) => t.uid === tid) || new Team()
   const rank = teams.findIndex((t) => t.uid === tid) + 1
 
   const items = []
