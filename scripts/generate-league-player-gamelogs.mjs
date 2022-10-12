@@ -8,10 +8,10 @@ import { isMain, getLeague } from '#utils'
 import calculateValue from './calculate-vor.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
-const log = debug('process-gamelogs')
-debug.enable('process-gamelogs')
+const log = debug('generate-league-player-gamelogs')
+debug.enable('generate-league-player-gamelogs')
 
-const processGamelogs = async ({
+const generate_league_player_gamelogs = async ({
   lid = 1,
   year = constants.season.year,
   week = constants.season.week
@@ -77,11 +77,14 @@ const main = async () => {
           .groupBy('nfl_games.week')
           .orderBy('nfl_games.week', 'asc')
         for (const { week } of weeks) {
-          await processGamelogs({ year, week })
+          await generate_league_player_gamelogs({ year, week })
         }
       }
     } else {
-      await processGamelogs({ year: argv.year, week: argv.week })
+      await generate_league_player_gamelogs({
+        year: argv.year,
+        week: argv.week
+      })
     }
   } catch (err) {
     error = err
@@ -102,4 +105,4 @@ if (isMain(import.meta.url)) {
   main()
 }
 
-export default processGamelogs
+export default generate_league_player_gamelogs

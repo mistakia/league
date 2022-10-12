@@ -1,16 +1,13 @@
 import debug from 'debug'
-// import yargs from 'yargs'
-// import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants, sum, groupBy } from '#common'
 import { isMain } from '#utils'
 
-// const argv = yargs(hideBin(process.argv)).argv
-const log = debug('process-league-player')
-debug.enable('process-league-player')
+const log = debug('generate-league-player')
+debug.enable('generate-league-player')
 
-const processLeaguePlayer = async ({ lid = 1 } = {}) => {
+const generate_league_player = async ({ lid = 1 } = {}) => {
   const inserts = []
 
   const player_seasons = await db('league_player_regular_seasonlogs').where({
@@ -105,7 +102,7 @@ const processLeaguePlayer = async ({ lid = 1 } = {}) => {
 const main = async () => {
   let error
   try {
-    await processLeaguePlayer()
+    await generate_league_player()
   } catch (err) {
     error = err
     log(error)
@@ -125,4 +122,4 @@ if (isMain(import.meta.url)) {
   main()
 }
 
-export default processLeaguePlayer
+export default generate_league_player
