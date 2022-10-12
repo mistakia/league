@@ -13,11 +13,10 @@ import {
   calculateDstStatsFromPlays,
   getPlayFromPlayStats
 } from '#common'
-import processGamelogs from './process-gamelogs.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('process-play-stats')
-debug.enable('process-play-stats,update-player,get-player,process-gamelogs')
+debug.enable('process-play-stats,update-player,get-player')
 const current_week = Math.max(
   dayjs().day() === 2 ? constants.season.week - 1 : constants.season.week,
   1
@@ -419,9 +418,6 @@ const run = async ({
     }
   }
   log(`Updated ${play_update_count} plays`)
-
-  // TODO — process for all leagues
-  await processGamelogs({ year, week, lid: 1 })
 }
 
 const main = async () => {
