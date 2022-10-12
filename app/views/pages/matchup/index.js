@@ -5,6 +5,7 @@ import { getApp, appActions } from '@core/app'
 import { getSelectedMatchup, matchupsActions } from '@core/matchups'
 import { playerActions } from '@core/players'
 import { scoreboardActions } from '@core/scoreboard'
+import { rosterActions } from '@core/rosters'
 
 import MatchupPage from './matchup'
 
@@ -15,6 +16,7 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
+  loadRosters: rosterActions.loadRosters,
   loadMatchups: matchupsActions.loadMatchups,
   loadLeaguePlayers: playerActions.loadLeaguePlayers,
   selectYear: appActions.selectYear,

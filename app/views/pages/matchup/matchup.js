@@ -24,6 +24,7 @@ export default function MatchupPage({
   year,
   loadMatchups,
   loadLeaguePlayers,
+  loadRosters,
   selectWeek,
   selectYear,
   selectMatchup
@@ -60,6 +61,7 @@ export default function MatchupPage({
     if (matchupId) selectMatchup(matchupId)
 
     loadLeaguePlayers()
+    loadRosters(lid)
   }, [])
 
   useEffect(() => {
@@ -138,5 +140,6 @@ MatchupPage.propTypes = {
   selectWeek: PropTypes.func,
   loadMatchups: PropTypes.func,
   selectMatchup: PropTypes.func,
+  loadRosters: PropTypes.func,
   loadLeaguePlayers: PropTypes.func
 }
