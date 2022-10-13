@@ -70,6 +70,7 @@ CREATE TABLE `player` (
   UNIQUE KEY `esbid` (`esbid`),
   UNIQUE KEY `gsisid` (`gsisid`),
   UNIQUE KEY `gsispid` (`gsispid`),
+  UNIQUE KEY `gsisItId` (`gsisItId`),
 
   UNIQUE KEY `sleeper_id` (`sleeper_id`),
   UNIQUE KEY `rotoworld_id` (`rotoworld_id`),
