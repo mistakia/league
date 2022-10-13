@@ -21,7 +21,7 @@ module.exports = {
       'pre-deploy': 'git pull',
       'pre-deploy-local': '',
       'post-deploy':
-        'source /root/.bash_profile && /root/.nvm/versions/node/v17.4.0/bin/yarn install && pm2 reload ecosystem.config.js --env production',
+        'source /root/.bash_profile && /root/.nvm/versions/node/v17.4.0/bin/yarn install && pm2 reload server.pm2.config.js --env production',
       'pre-setup': ''
     }
   }
