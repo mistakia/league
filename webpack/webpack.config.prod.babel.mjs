@@ -85,7 +85,7 @@ export default merge(baseConfig, {
     }),
 
     new HtmlWebpackPlugin({
-      template: 'app/index.prod.html',
+      template: 'app/index.html',
       inlineSource: '.(js|css)$',
       minify: {
         removeComments: true,
