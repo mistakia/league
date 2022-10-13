@@ -109,6 +109,7 @@ api.use('/api/settings', routes.settings)
 api.use('/index.js.map', (req, res) => {
   res.sendFile(path.join(__dirname, '../', 'dist', 'index.js.map'))
 })
+api.use('/static', express.static(path.join(__dirname, '../', 'dist')))
 api.use('/*', (req, res) => {
   res.sendFile(path.join(__dirname, '../', 'dist', 'index.html'))
 })
