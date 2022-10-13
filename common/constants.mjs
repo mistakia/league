@@ -180,112 +180,242 @@ export const statHeaders = {
 
 export const fullStats = [
   // fantasy
+
   'pts',
 
-  // ////// PASSING ////////
-  // basic
+  /** *********** PASSING *************/
+
+  // pass completion percentage
   'pc_pct',
+
+  // pass yards per game
   'py_pg',
 
+  // touchdown percentage
   'tdp_pct',
+
+  // interception percentage
   'ints_pct',
 
-  // productivity
+  // successful pass attempts
   'psucc',
 
-  // accuracy
+  /** *********** accuracy *************/
+
+  // interception worthy pass attempts
   'intw',
+
+  // interception worthy percentage
   'intw_pct',
-  'drppy', // dropped passing yards
-  'drptdp', // dropped passing touchdowns
-  'high', // highlight pass
-  'drpp', // dropped pass
 
-  // advanced
-  'pcay', // completed air yards
-  'pyac', // yards after catch
-  'pcay_pc', // completed air yards per completion
+  // dropped passing yards
+  'drppy',
+
+  // dropped passing touchdowns
+  'drptdp',
+
+  // highlight pass attempts
+  'high',
+
+  // dropped pass attempts
+  'drpp',
+
+  /** *********** advanced *************/
+
+  // completed air yards
+  'pcay',
+
+  // passing yards after catch
+  'pyac',
+
+  // completed air yards per completion
+  'pcay_pc',
+
+  // passing yards after catch per completion
   'pyac_pc',
+
+  // passing yards per attempts
   '_ypa',
+
+  // TODO
+  // adjusted passing yards per attempt
   '_adjypa',
+
+  // passing yards per completion
   '_ypc',
+
+  // passing yards per game
   '_ypg',
+
+  // passing yards per air yard (passing air conversion ratio)
   '_pacr',
+
+  // adjusted passing air conversion ratio  (pass yards + 20*(pass TD) - 45(interceptions thrown))/(air yards)
   '_apacr',
-  'pdot', // depth of target
-  'pdot_pa', // average depth of taget
-  'padot', // adj. depth of target**
 
-  // pressure
+  // air yards
+  'pdot',
+
+  // air yards per attempt (average depth of taget)
+  'pdot_pa',
+
+  // TODO adj. depth of target**
+
+  /** *********** pressure *************/
+
+  // sacks
   'sk',
-  'sky', // sack yards
+
+  // sack yards
+  'sky',
+
+  // sack percentage
   'sk_pct',
-  'qbp', // pressure
+
+  // quarterback pressures
+  'qbp',
+
+  // quarterback pressure percentage
   'qbp_pct',
-  'qbhi', // hit
+
+  // quarterback hit
+  'qbhi',
+
+  // quarterback hit percentage
   'qbhi_pct',
-  'qbhu', // hurry
+
+  // quarterback hurry
+  'qbhu',
+
+  // quarterback hurry percentage
   'qbhu_pct',
-  '_nygpa', // net yards gained per attempt: (py - sky) / (pa + sk)
 
-  // ////// RECEIVING ////////
-  // basic
+  // net yards gained per attempt: (py - sky) / (pa + sk)
+  '_nygpa',
+
+  /** *********** RECEIVING *************/
+
+  // receiving yards per reception
   'recy_prec',
-  'recy_pg',
-  'ryac', // yards after catch
-  'drprecy', // dropped receiving yards
 
-  // reliability
+  // receiving yards per game
+  'recy_pg',
+
+  // receiving yards after the catch
+  'ryac',
+
+  // receiving yards dropped
+  'drprecy',
+
+  // dropped passes
   'drp',
+
+  // contested targets
   'cnb',
 
-  // share
-  '_stray', // share of team total air yards
-  '_sttrg', // share of team targets
+  // share of team total air yards
+  '_stray',
 
-  // usage
-  'dptrg', // deep target
-  'dptrg_pct', // deep pass percentage
-  'rdot', // depth of target
+  // share of team targets
+  '_sttrg',
 
-  // advanced
-  'rcay', // completed air yards
-  '_ayps', // air yards per snap
-  '_ayprec', // air yards per reception
-  '_ayptrg', // average depth of tagret / air yards per target
-  '_recypay', // receiving yards per air yard
-  '_recypsnp', // receiving yards per snap
-  '_recyprec', // receiving yards per reception
-  '_recyptrg', // receiving yards per target
-  '_wopr', // (1.5 x _sttrg + 0.7 x _stray)
-  '_ryacprec', // yac per rec
+  // deep targets (20 or more air yards)
+  'dptrg',
 
-  // ////// RUSHING ////////
-  // basic
-  'ryaco', // rushing yards after contact
-  'ryaco_pra', // rushing yards after contact per attempt
+  // deep target percentage
+  'dptrg_pct',
+
+  // targeted air yards
+  'rdot',
+
+  // completed air yards
+  'rcay',
+
+  // air yards per snap
+  '_ayps',
+
+  // air yards per reception
+  '_ayprec',
+
+  // average depth of tagret / air yards per target
+  '_ayptrg',
+
+  // receiving yards per air yard
+  '_recypay',
+
+  // receiving yards per snap
+  '_recypsnp',
+
+  // receiving yards per reception
+  '_recyprec',
+
+  // receiving yards per target
+  '_recyptrg',
+
+  // (1.5 x _sttrg + 0.7 x _stray)
+  '_wopr',
+
+  // yards after catch per reception
+  '_ryacprec',
+
+  /** *********** RUSHING *************/
+
+  // rushing yards after contact
+  'ryaco',
+
+  // rushing yards after contact per attempt
+  'ryaco_pra',
+
+  // rushing yards per game
   'ry_pg',
+
+  // rushing yards per rush attempt
   'ry_pra',
-  'posra', // positive rush
-  'rasucc', // successful rush
-  'rfd', // rushing first down
 
-  // advanced
+  // positive rushes
+  'posra',
+
+  // successful rushes
+  'rasucc',
+
+  // rushing first downs
+  'rfd',
+
+  // broken tackles
   'mbt',
-  'mbt_pt', // broken tackles per touch
-  '_fumlpra', // fumble rate
-  'rasucc_pra', // successful rush rate
-  'posra_pra', // possitive rush rate
 
-  // usage
-  '_stra', // share of team rushing attempts
-  '_stry', // share of team rushing yards
+  // broken tackles per touch
+  'mbt_pt',
 
-  // general
+  // fumbles per rushing attempt
+  '_fumlpra',
+
+  // successful rushes per rush attempt
+  'rasucc_pra',
+
+  // positive rushes per rush attempt
+  'posra_pra',
+
+  // share of team rushing attempts
+  '_stra',
+
+  // share of team rushing yards
+  '_stry',
+
+  /** *********** misc *************/
+
+  // touches (receptions + rush attempts)
   '_tch',
-  'fd', // first down
+
+  // first downs
+  'fd',
+
+  // successful plays
   'succ',
-  'fd_pct', // first down pct*
+
+  // first down percentage
+  'fd_pct',
+
   ...fantasyStats
 ]
 
