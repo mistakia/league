@@ -2,7 +2,7 @@ import { fromJS } from 'immutable'
 import { applyMiddleware, compose, createStore } from 'redux'
 import { createReduxHistoryContext } from 'redux-first-history'
 import createSagaMiddleware, { END } from 'redux-saga'
-import { createBrowserHistory } from 'history'
+import { createBrowserHistory, createHashHistory } from 'history'
 
 import rootSaga from './sagas'
 import rootReducer from './reducers'
@@ -14,7 +14,10 @@ const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
 
 const { createReduxHistory, routerMiddleware, routerReducer } =
   createReduxHistoryContext({
-    history: createBrowserHistory(),
+    history:
+      'standalone' in window.navigator && window.navigator.standalone
+        ? createHashHistory()
+        : createBrowserHistory(),
     selectRouterState: (state) => state.get('router')
   })
 
