@@ -96,6 +96,8 @@ api.use('/api/auth', routes.auth)
 api.use('/api/leagues', routes.leagues)
 api.use('/api/teams', routes.teams)
 api.use('/api/odds', routes.odds)
+api.use('/api/percentiles', routes.percentiles)
+api.use('/api/seasonlogs', routes.seasonlogs)
 
 api.use('/api/*', (req, res, next) => {
   if (req.method !== 'OPTIONS' && !req.auth) {

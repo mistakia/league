@@ -8,7 +8,7 @@ import SelectedPlayerSchedule from './selected-player-schedule'
 const mapStateToProps = createSelector(
   getSelectedPlayer,
   getSelectedPlayerGames,
-  (playerMap, games) => ({ team: playerMap.get('team'), games })
+  (playerMap, games, seasonlogs) => ({ team: playerMap.get('team'), games })
 )
 
 export default connect(mapStateToProps)(SelectedPlayerSchedule)

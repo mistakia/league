@@ -81,6 +81,8 @@ import { notificationActions } from '@core/notifications'
 import { getScoreboardActions } from '@core/scoreboard'
 import { postErrorActions } from '@core/errors'
 import { getPropsActions } from '@core/props'
+import { getPercentilesActions } from '@core/percentiles'
+import { getNflTeamSeasonlogsActions } from '@core/seasonlogs'
 
 function* fetchAPI(apiFunction, actions, opts = {}) {
   const { token } = yield select(getApp)
@@ -365,4 +367,16 @@ export const getDraftPickValue = fetch.bind(
   null,
   api.getDraftPickValue,
   getDraftPickValueActions
+)
+
+export const getPercentiles = fetch.bind(
+  null,
+  api.getPercentiles,
+  getPercentilesActions
+)
+
+export const getNflTeamSeasonlogs = fetch.bind(
+  null,
+  api.getNflTeamSeasonlogs,
+  getNflTeamSeasonlogsActions
 )

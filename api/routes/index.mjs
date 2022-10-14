@@ -13,6 +13,8 @@ import status from './status.mjs'
 import scoreboard from './scoreboard.mjs'
 import errors from './errors.mjs'
 import odds from './odds/index.mjs'
+import percentiles from './percentiles.mjs'
+import seasonlogs from './seasonlogs.mjs'
 
 export default {
   auth,
@@ -29,5 +31,7 @@ export default {
   projections,
   scoreboard,
   stats,
-  odds
+  odds,
+  percentiles,
+  seasonlogs
 }

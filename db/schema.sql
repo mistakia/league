@@ -2376,7 +2376,7 @@ CREATE TABLE `league_baselines` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `league_baselines`
+-- Table structure for table `keeptradecut_rankings`
 --
 
 DROP TABLE IF EXISTS `keeptradecut_rankings`;
@@ -2388,6 +2388,110 @@ CREATE TABLE `keeptradecut_rankings` (
   `v` int(5) NOT NULL,
   `type` tinyint(1) NOT NULL,
   UNIQUE KEY `player_value` (`pid`,`d`,`qb`,`type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `nfl_team_seasonlogs`
+--
+
+DROP TABLE IF EXISTS `nfl_team_seasonlogs`;
+
+CREATE TABLE `nfl_team_seasonlogs` (
+  `tm` varchar(7) NOT NULL,
+  `stat_key` varchar(100) NOT NULL,
+  `year` int(4) NOT NULL,
+
+  `pa` decimal(5,2) DEFAULT 0,
+  `pc` decimal(5,2) DEFAULT 0,
+  `py` decimal(6,2) DEFAULT 0,
+  `ints` decimal(4,2) DEFAULT 0,
+  `tdp` decimal(4,2) DEFAULT 0,
+
+  `ra` decimal(5,2) DEFAULT 0,
+  `ry` decimal(6,2) DEFAULT 0,
+  `tdr` decimal(4,2) DEFAULT 0,
+  `fuml` decimal(4,2) DEFAULT 0,
+
+  `trg` decimal(5,2) DEFAULT 0,
+  `rec` decimal(5,2) DEFAULT 0,
+  `recy` decimal(6,2) DEFAULT 0,
+  `tdrec` decimal(4,2) DEFAULT 0,
+
+  `twoptc` decimal(4,2) DEFAULT 0,
+
+  `prtd` decimal(4,2) DEFAULT 0,
+  `krtd` decimal(4,2) DEFAULT 0,
+
+  `snp` decimal(6,2) DEFAULT 0,
+
+  `fgm` decimal(4,2) DEFAULT 0,
+  `fgy` decimal(6,2) DEFAULT 0,
+  `fg19` decimal(4,2) DEFAULT 0,
+  `fg29` decimal(4,2) DEFAULT 0,
+  `fg39` decimal(4,2) DEFAULT 0,
+  `fg49` decimal(4,2) DEFAULT 0,
+  `fg50` decimal(4,2) DEFAULT 0,
+  `xpm` decimal(5,2) DEFAULT 0,
+
+  `dsk` decimal(5,2) DEFAULT 0,
+  `dint` decimal(5,2) DEFAULT 0,
+  `dff` decimal(5,2) DEFAULT 0,
+  `drf` decimal(5,2) DEFAULT 0,
+  `dtno` decimal(5,2) DEFAULT 0,
+  `dfds` decimal(5,2) DEFAULT 0,
+  `dpa` decimal(5,2) DEFAULT 0,
+  `dya` decimal(8,2) DEFAULT 0,
+  `dblk` decimal(5,2) DEFAULT 0,
+  `dsf` decimal(5,2) DEFAULT 0,
+  `dtpr` decimal(5,2) DEFAULT 0,
+  `dtd` decimal(5,2) DEFAULT 0,
+
+  UNIQUE KEY `stat` (`stat_key`, `year`, `tm`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `league_nfl_team_seasonlogs`
+--
+
+DROP TABLE IF EXISTS `league_nfl_team_seasonlogs`;
+
+CREATE TABLE `league_nfl_team_seasonlogs` (
+  `tm` varchar(7) NOT NULL,
+  `stat_key` varchar(100) NOT NULL,
+  `year` int(4) NOT NULL,
+  `lid` int(6) NOT NULL,
+
+  `pts` decimal(5,1) DEFAULT NULL,
+  `rnk` tinyint(1) DEFAULT NULL,
+
+  UNIQUE KEY `league_stat` (`lid`, `stat_key`, `year`, `tm`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `percentiles`
+--
+
+DROP TABLE IF EXISTS `percentiles`;
+
+CREATE TABLE `percentiles` (
+  `percentile_key` varchar(100) NOT NULL,
+  `field` varchar(100) NOT NULL,
+  `p25` decimal(8,2) NOT NULL,
+  `p50` decimal(8,2) NOT NULL,
+  `p75` decimal(8,2) NOT NULL,
+  `p90` decimal(8,2) NOT NULL,
+  `p95` decimal(8,2) NOT NULL,
+  `p98` decimal(8,2) NOT NULL,
+  `p99` decimal(8,2) NOT NULL,
+  `min` decimal(8,2) NOT NULL,
+  `max` decimal(8,2) NOT NULL,
+  UNIQUE KEY `percentile_key` (`percentile_key`, `field`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
