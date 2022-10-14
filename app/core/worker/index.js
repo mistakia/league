@@ -19,8 +19,21 @@ export function workerOptimizeLineup(params) {
   return optimizeLineup(params)
 }
 
-export function calculateStats(params) {
-  return calculateStatsFromPlays(params)
+export function workerCalculateStatsFromPlays({ plays, qualifiers, league }) {
+  const players = calculateStatsFromPlays(plays)
+  const percentiles = calculatePercentiles({
+    items: Object.values(players),
+    stats: constants.fullStats,
+    qualifiers,
+    prefix: 'stats.'
+  })
+
+  // TODO - calculate player fantasy points
+  // TODO - need player position for te premium, etc
+  // const points = calculatePoints({ stats, league })
+  // stats.pts = points.total
+
+  return { players, percentiles }
 }
 
 export function calculateTeamPercentiles(teams) {

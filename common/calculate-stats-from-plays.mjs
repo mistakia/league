@@ -1,6 +1,4 @@
 import * as constants from './constants.mjs'
-import calculatePercentiles from './calculate-percentiles.mjs'
-import calculatePoints from './calculate-points.mjs'
 
 const round = (value, precision) => {
   const multiplier = Math.pow(10, precision || 0)
@@ -9,7 +7,7 @@ const round = (value, precision) => {
 
 const toPct = (value) => value * 100
 
-const calculateStatsFromPlays = ({ plays, qualifiers, league }) => {
+const calculateStatsFromPlays = (plays) => {
   const players = {}
   const teams = {}
   const playerToTeam = {}
@@ -145,10 +143,6 @@ const calculateStatsFromPlays = ({ plays, qualifiers, league }) => {
 
     const skpa = stats.sk + stats.pa
 
-    // TODO - need player position for te premium, etc
-    const points = calculatePoints({ stats, league })
-    stats.pts = points.total
-
     stats._tch = stats.ra + stats.rec
 
     stats.pc_pct = round(toPct(stats.pc / stats.pa), 1) || 0
@@ -210,14 +204,7 @@ const calculateStatsFromPlays = ({ plays, qualifiers, league }) => {
     // stats.succ_psnp
   }
 
-  const percentiles = calculatePercentiles({
-    items: Object.values(players),
-    stats: constants.fullStats,
-    qualifiers,
-    prefix: 'stats.'
-  })
-
-  return { players, percentiles }
+  return players
 }
 
 export default calculateStatsFromPlays

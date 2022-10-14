@@ -52,7 +52,7 @@ export function* calculateStats() {
     return true
   })
   const worker = new Worker()
-  const result = yield call(worker.calculateStats, {
+  const result = yield call(worker.workerCalculateStatsFromPlays, {
     plays: filtered.toJS(),
     qualifiers: qualifiers.toJS(),
     league
