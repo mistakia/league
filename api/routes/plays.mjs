@@ -1,6 +1,6 @@
 import express from 'express'
 
-import { getChartedPlayByPlayQuery, getPlayByPlayQuery } from '#utils'
+import { get_plays_query, get_live_plays_query } from '#utils'
 import { constants } from '#common'
 
 const router = express.Router()
@@ -8,7 +8,7 @@ const router = express.Router()
 router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    const query = getPlayByPlayQuery(db)
+    const query = get_live_plays_query(db)
     const data = await query
       .where('nfl_plays_current_week.year', constants.season.year)
       .where('nfl_plays_current_week.seas_type', 'REG')
@@ -99,7 +99,7 @@ router.get('/charted', async (req, res) => {
       return res.status(400).send({ error: 'too many years listed' })
     }
 
-    let query = getChartedPlayByPlayQuery(db)
+    let query = get_plays_query(db)
 
     query = query.where('nfl_games.seas_type', 'REG')
 

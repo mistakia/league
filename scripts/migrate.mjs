@@ -11,8 +11,9 @@ const log = debug('migrate')
 debug.enable('migrate')
 
 const migrate = async () => {
-  await db.schema.alterTable('league_player', function (table) {
-    table.renameColumn('starts', 'startable_games')
+  await db.schema.alterTable('nfl_plays', function (table) {
+    table.dropColumn('yds_gained')
+    table.tinyint('lateral', 1)
   })
 
   log('all tables migrated')

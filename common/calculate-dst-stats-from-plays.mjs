@@ -2,7 +2,7 @@ import * as constants from './constants.mjs'
 import fixTeam from './fix-team.mjs'
 
 const calculateDstStatsFromPlays = (plays, team) => {
-  const dstStats = constants.createStats()
+  const dstStats = constants.create_fantasy_stats()
   dstStats.dtno = plays.filter(
     (p) =>
       p.drive_play_count === 3 && p.type_nfl === 'PUNT' && p.pos_team !== team

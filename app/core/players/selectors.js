@@ -410,12 +410,14 @@ export function getGamesByYearForSelectedPlayer(state) {
   const overall = {}
   for (const year in years) {
     const initialValue = {}
-    for (const stat of constants.fantasyStats) {
+    for (const stat of constants.fantasy_stats) {
       initialValue[stat] = 0
     }
 
     const sum = years[year].reduce((sums, obj) => {
-      const stats = Object.keys(obj).filter((k) => constants.stats.includes(k))
+      const stats = Object.keys(obj).filter((k) =>
+        constants.fantasy_stats.includes(k)
+      )
       stats.forEach((k) => {
         sums[k] += obj[k] || 0
       })

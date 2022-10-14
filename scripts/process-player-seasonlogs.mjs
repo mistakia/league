@@ -29,7 +29,7 @@ const processPlayerSeasonlogs = async ({
     const player_gamelogs = gamelogs.filter((g) => g.pid === pid)
     const pos = player_gamelogs[0].pos
 
-    const season_stats = constants.createStats()
+    const season_stats = constants.create_fantasy_stats()
     for (const gamelog of player_gamelogs) {
       for (const stat in season_stats) {
         season_stats[stat] += gamelog[stat]

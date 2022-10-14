@@ -128,7 +128,7 @@ export function playersReducer(state = initialState, { payload, type }) {
     case statActions.FILTER_STATS:
       return state.withMutations((state) => {
         state.set('isPending', true)
-        const stats = constants.createFullStats()
+        const stats = constants.create_full_stats()
         for (const pid of state.get('items').keys()) {
           state.setIn(['items', pid, 'stats'], new Map(stats))
         }

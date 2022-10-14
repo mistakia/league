@@ -3,7 +3,7 @@ import debug from 'debug'
 
 import db from '#db'
 import { constants, uniqBy } from '#common'
-import { getPlayByPlayQuery } from '#utils'
+import { get_live_plays_query } from '#utils'
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -39,7 +39,7 @@ export default class Scoreboard {
     )
     const updated = updateTimestamps[0] // get the oldest one
 
-    const query = getPlayByPlayQuery(db)
+    const query = get_live_plays_query(db)
     const plays = await query
       .where('nfl_plays_current_week.year', constants.season.year)
       .where('nfl_plays_current_week.week', constants.season.week)

@@ -85,7 +85,7 @@ router.put(
 
       // TODO - validate range
 
-      if (!constants.stats.includes(type)) {
+      if (!constants.fantasy_stats.includes(type)) {
         return res.status(400).send({ error: 'invalid type' })
       }
 

@@ -1,7 +1,7 @@
 import express from 'express'
 
 import { constants, uniqBy } from '#common'
-import { getPlayByPlayQuery } from '#utils'
+import { get_live_plays_query } from '#utils'
 
 const router = express.Router()
 
@@ -18,7 +18,7 @@ router.get('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid week' })
     }
 
-    const query = getPlayByPlayQuery(db)
+    const query = get_live_plays_query(db)
     const plays = await query
       .where('nfl_plays_current_week.week', week)
       .where('nfl_plays_current_week.seas_type', 'REG')
