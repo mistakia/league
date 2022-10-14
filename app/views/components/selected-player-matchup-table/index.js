@@ -5,6 +5,7 @@ import { constants, calculatePoints } from '@common'
 import { getPlayerGamelogs, getGamelogs } from '@core/gamelogs'
 import { getSelectedPlayer, getSelectedPlayerGame } from '@core/players'
 import { getCurrentLeague } from '@core/leagues'
+import { getSeasonlogs } from '@core/seasonlogs'
 
 import SelectedPlayerMatchupTable from './selected-player-matchup-table'
 
@@ -14,7 +15,8 @@ const mapStateToProps = createSelector(
   getPlayerGamelogs,
   getCurrentLeague,
   getGamelogs,
-  (playerMap, game, logs, league, gamelogState) => {
+  getSeasonlogs,
+  (playerMap, game, logs, league, gamelogState, seasonlogs) => {
     if (!game) {
       return {}
     }
@@ -39,31 +41,23 @@ const mapStateToProps = createSelector(
         }
       })
 
-    const defense = gamelogState.getIn(['playersAnalysis', 'defense'], {})
-    const dPos = defense[position]
-
-    const defenseStats = []
-    if (dPos) {
-      const types = { avg: 'Average', adj: 'Over Expected' }
-      for (const [type, title] of Object.entries(types)) {
-        const stats = dPos.stats[type].find((d) => d.opp === opp)
-        const points = calculatePoints({ stats, position, league })
-        defenseStats.push({
+    const nfl_team_against_seasonlogs = []
+    const types = { avg: 'Average', adj: 'Over Expected' }
+    for (const [type, title] of Object.entries(types)) {
+      const stat_key = `${position}_against_${type}`.toUpperCase()
+      const stats = seasonlogs.getIn(['nfl_teams', opp, stat_key])
+      if (stats) {
+        nfl_team_against_seasonlogs.push({
           type,
           stats,
-          points: points.total,
           title
         })
       }
     }
 
-    const individual = gamelogState.getIn(['playersAnalysis', 'individual'], {})
-
     return {
       gamelogs,
-      defenseStats,
-      playerPercentiles: individual ? individual[position] : {},
-      defensePercentiles: dPos ? dPos.percentiles : {},
+      nfl_team_against_seasonlogs,
       opp,
       position
     }

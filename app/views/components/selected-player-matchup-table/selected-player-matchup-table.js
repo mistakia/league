@@ -8,23 +8,14 @@ import PlayerNameText from '@components/player-name-text'
 
 export default class SelectedPlayerMatchupTable extends React.Component {
   render = () => {
-    const {
-      gamelogs,
-      position,
-      opp,
-      defenseStats,
-      defensePercentiles,
-      playerPercentiles
-    } = this.props
+    const { gamelogs, position, opp, nfl_team_against_seasonlogs } = this.props
 
     if (!opp) {
       return <div>BYE</div>
     }
 
     const rows = []
-    defenseStats.forEach((item, index) => {
-      const percentiles = defensePercentiles[item.type]
-
+    nfl_team_against_seasonlogs.forEach((item, index) => {
       const lead = (
         <>
           <div className='table__cell sticky__column metric game__week' />
@@ -33,12 +24,12 @@ export default class SelectedPlayerMatchupTable extends React.Component {
           </div>
           <div className='table__cell metric' />
           <div className='table__cell metric'>
-            {(item.points || 0).toFixed(1)}
+            {(item.stats.pts || 0).toFixed(1)}
           </div>
           <div className='table__cell metric'>
             {item.points_added ? item.points_added.toFixed(1) : '-'}
           </div>
-          <div className='table__cell metric'>{item.pos_rnk || '-'}</div>
+          <div className='table__cell metric'>{item.stats.rnk || '-'}</div>
         </>
       )
       rows.push(
@@ -47,7 +38,6 @@ export default class SelectedPlayerMatchupTable extends React.Component {
           stats={item.stats}
           lead={lead}
           pos={position}
-          percentiles={percentiles}
           header
         />
       )
@@ -78,7 +68,6 @@ export default class SelectedPlayerMatchupTable extends React.Component {
           stats={gamelog}
           lead={lead}
           pos={position}
-          percentiles={playerPercentiles}
         />
       )
     })
@@ -116,7 +105,5 @@ SelectedPlayerMatchupTable.propTypes = {
   gamelogs: ImmutablePropTypes.list,
   position: PropTypes.string,
   opp: PropTypes.string,
-  defenseStats: PropTypes.array,
-  defensePercentiles: PropTypes.object,
-  playerPercentiles: PropTypes.object
+  nfl_team_against_seasonlogs: PropTypes.array
 }

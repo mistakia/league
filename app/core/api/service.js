@@ -329,6 +329,16 @@ export const api = {
   getDraftPickValue({ leagueId }) {
     const url = `${BASE_URL}/leagues/${leagueId}/draft-pick-value`
     return { url }
+  },
+  getPercentiles({ percentile_key }) {
+    const url = `${BASE_URL}/percentiles/${percentile_key}`
+    return { url }
+  },
+  getNflTeamSeasonlogs({ leagueId }) {
+    const url = leagueId
+      ? `${BASE_URL}/seasonlogs/teams?leagueId=${leagueId}`
+      : `${BASE_URL}/seasonlogs/teams`
+    return { url }
   }
 }
 

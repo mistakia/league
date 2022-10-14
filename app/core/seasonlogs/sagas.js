@@ -1,11 +1,11 @@
-import { fork, takeLatest, select } from 'redux-saga/effects'
+import { fork, takeLatest, select, call } from 'redux-saga/effects'
 
+import { getNflTeamSeasonlogs } from '@core/api'
 import { appActions, getApp } from '@core/app'
-import { getPlayersGamelogs } from '@core/api'
 
 export function* load() {
   const { leagueId } = yield select(getApp)
-  yield fork(getPlayersGamelogs, { leagueId })
+  yield call(getNflTeamSeasonlogs, { leagueId })
 }
 
 //= ====================================
@@ -20,4 +20,4 @@ export function* watchInitApp() {
 //  ROOT
 // -------------------------------------
 
-export const gamelogSagas = [fork(watchInitApp)]
+export const seasonlogSagas = [fork(watchInitApp)]
