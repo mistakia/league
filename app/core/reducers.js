@@ -24,6 +24,7 @@ import { playsReducer } from './plays'
 import { gamelogsReducer } from './gamelogs'
 import { propsReducer } from './props'
 import { draftPickValueReducer } from './draft-pick-value'
+import { seasonlogsReducer } from './seasonlogs'
 
 const rootReducer = (router) =>
   combineReducers({
@@ -51,7 +52,8 @@ const rootReducer = (router) =>
     plays: playsReducer,
     gamelogs: gamelogsReducer,
     props: propsReducer,
-    draft_pick_value: draftPickValueReducer
+    draft_pick_value: draftPickValueReducer,
+    seasonlogs: seasonlogsReducer
   })
 
 export default rootReducer

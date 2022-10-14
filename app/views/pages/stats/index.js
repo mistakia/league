@@ -15,6 +15,7 @@ const mapStateToProps = createSelector(
   getApp,
   (league, teams, app) => {
     const year = app.year
+    // TODO - add prefix
     const percentiles = calculatePercentiles({
       items: teams
         .map((t) =>
