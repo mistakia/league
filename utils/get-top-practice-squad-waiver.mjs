@@ -84,11 +84,8 @@ export default async function (leagueId) {
       .select('nfl_games.time_est')
       .join('player', 'waivers.pid', 'player.pid')
       .joinRaw(
-        'left join nfl_games on player.cteam = nfl_games.v or player.cteam = nfl_games.h'
+        `left join nfl_games on nfl_games.week = ${constants.season.week} and nfl_games.year = ${constants.season.year} and nfl_games.seas_type = "REG" and (player.cteam = nfl_games.v or player.cteam = nfl_games.h)`
       )
-      .where('nfl_games.week', constants.season.week)
-      .where('nfl_games.year', constants.season.year)
-      .where('nfl_games.seas_type', 'REG')
   }
 
   if (recent_transaction_pids.length) {
