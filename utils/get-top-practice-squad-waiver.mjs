@@ -101,6 +101,7 @@ export default async function (leagueId) {
   if (constants.season.isRegularSeason) {
     const now = dayjs()
     const filtered = waiver_rows.filter((waiver_row) => {
+      if (!waiver_row.date) return true
       const gameStart = dayjs.tz(
         `${waiver_row.date} ${waiver_row.time_est}`,
         'YYYY/MM/DD HH:mm:SS',
