@@ -9,7 +9,7 @@
     "start:api": "NODE_ENV=development node server.mjs",
     "build": "cross-env NODE_ENV=production webpack --config ./webpack/webpack.config.prod.babel.mjs",
     "analyze": "cross-env OPEN_ANALYZER=true NODE_ENV=production webpack --config ./webpack/webpack.config.prod.babel.mjs",
-    "deploy": "pm2 deploy production",
+    "deploy": "pm2 deploy server.pm2.config.js production",
     "todo": "grep -rni todo app api common scripts",
     "count:lines": "git ls-files -- ':!:yarn.lock' | xargs wc -l"
   },
