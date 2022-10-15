@@ -5,6 +5,7 @@ import * as constants from './constants.mjs'
 dayjs.extend(isBetween)
 
 export default function (submitted) {
+  const submitted_timestamp = dayjs.unix(submitted)
   if (constants.season.isOffseason) {
     return submitted_timestamp.add('48', 'hours')
   }
@@ -20,7 +21,6 @@ export default function (submitted) {
     .startOf('day')
     .hour(15)
 
-  const submitted_timestamp = dayjs.unix(submitted)
   if (submitted_timestamp.isBetween(start_window, end_window)) {
     return (now.day() < 3 ? now.day(2) : now.add('1', 'week').day(2))
       .startOf('day')
