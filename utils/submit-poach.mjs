@@ -3,7 +3,12 @@ import advancedFormat from 'dayjs/plugin/advancedFormat.js'
 
 import db from '#db'
 
-import { constants, Roster, isSantuaryPeriod } from '#common'
+import {
+  constants,
+  Roster,
+  isSantuaryPeriod,
+  getPoachProcessingTime
+} from '#common'
 import sendNotifications from './send-notifications.mjs'
 import getRoster from './get-roster.mjs'
 import getLeague from './get-league.mjs'
@@ -115,13 +120,14 @@ export default async function ({
     }
   }
 
+  const submitted = Math.round(Date.now() / 1000)
   const data = {
     userid: userId,
     tid: teamId,
     lid: leagueId,
     player_tid: playerTid,
     pid,
-    submitted: Math.round(Date.now() / 1000)
+    submitted
   }
   const rows = await db('poaches').insert(data)
   const poachid = rows[0]
@@ -130,13 +136,14 @@ export default async function ({
     await db('poach_releases').insert(releaseInserts)
   }
 
+  const processing_time = getPoachProcessingTime(submitted)
   const message = `${team.name} has submitted a poaching claim for ${
     poachPlayer.fname
   } ${poachPlayer.lname} (${
     poachPlayer.pos
-  }). This claim will be processed around ${constants.season.now
-    .add('48', 'hours')
-    .format('dddd, MMMM Do h:mm a')} EST.`
+  }). This claim will be processed around ${processing_time.format(
+    'dddd, MMMM Do h:mm a'
+  )} EST.`
   await sendNotifications({
     league,
     teamIds: [],
