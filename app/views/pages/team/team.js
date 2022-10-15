@@ -12,6 +12,7 @@ import './team.styl'
 
 export default function TeamPage({
   loadTeams,
+  loadLeagueTeamStats,
   loadLeaguePlayers,
   teams,
   loadDraftPickValue
@@ -27,6 +28,7 @@ export default function TeamPage({
     loadTeams(lid)
     loadLeaguePlayers(lid)
     loadDraftPickValue()
+    loadLeagueTeamStats(lid)
   }, [])
 
   useEffect(() => {
@@ -52,6 +54,7 @@ export default function TeamPage({
 
 TeamPage.propTypes = {
   loadTeams: PropTypes.func,
+  loadLeagueTeamStats: PropTypes.func,
   loadLeaguePlayers: PropTypes.func,
   teams: ImmutablePropTypes.map,
   loadDraftPickValue: PropTypes.func

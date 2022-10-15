@@ -14,7 +14,8 @@ const mapStateToProps = createSelector(getTeamsForCurrentLeague, (teams) => ({
 const mapDispatchToProps = {
   loadTeams: teamActions.loadTeams,
   loadLeaguePlayers: playerActions.loadLeaguePlayers,
-  loadDraftPickValue: draftPickValueActions.loadDraftPickValue
+  loadDraftPickValue: draftPickValueActions.loadDraftPickValue,
+  loadLeagueTeamStats: teamActions.loadLeagueTeamStats
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(TeamPage)
