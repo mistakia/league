@@ -55,6 +55,8 @@ const import_live_plays = async () => {
     await throttle_timer
   }
 
+  await update_stats({ week: constants.season.week })
+
   is_running = false
   log('job exiting')
 }
