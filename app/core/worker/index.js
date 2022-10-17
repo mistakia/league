@@ -21,17 +21,20 @@ export function workerOptimizeLineup(params) {
 
 export function workerCalculateStatsFromPlays({ plays, qualifiers, league }) {
   const players = calculateStatsFromPlays(plays)
+
+  for (const pid in players) {
+    const stats = players[pid]
+    // TODO - need player position for te premium, etc
+    const points = calculatePoints({ stats, league })
+    stats.pts = points.total
+  }
+
   const percentiles = calculatePercentiles({
     items: Object.values(players),
     stats: constants.fullStats,
     qualifiers,
     prefix: 'stats.'
   })
-
-  // TODO - calculate player fantasy points
-  // TODO - need player position for te premium, etc
-  // const points = calculatePoints({ stats, league })
-  // stats.pts = points.total
 
   return { players, percentiles }
 }
