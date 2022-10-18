@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 import Tabs from '@mui/material/Tabs'
@@ -14,8 +14,13 @@ export default function SelectedPlayerSchedule({
   playerMap,
   games,
   seasonlogs,
-  schedule
+  schedule,
+  load_nfl_team_seasonlogs
 }) {
+  useEffect(() => {
+    load_nfl_team_seasonlogs()
+  }, [])
+
   const pos = playerMap.get('pos')
   const team = playerMap.get('team')
   const current_week = Math.max(constants.week, 1)
@@ -88,5 +93,6 @@ SelectedPlayerSchedule.propTypes = {
   playerMap: ImmutablePropTypes.map,
   games: PropTypes.array,
   seasonlogs: ImmutablePropTypes.map,
-  schedule: ImmutablePropTypes.map
+  schedule: ImmutablePropTypes.map,
+  load_nfl_team_seasonlogs: PropTypes.func
 }
