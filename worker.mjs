@@ -11,6 +11,7 @@ import process_play_stats from './scripts/process-play-stats.mjs'
 import generate_league_player from './scripts/generate-league-player.mjs'
 import generate_league_player_gamelogs from './scripts/generate-league-player-gamelogs.mjs'
 import generate_league_player_regular_seasonlogs from './scripts/generate-league-player-regular-seasonlogs.mjs'
+import generate_nfl_team_seasonlogs from './scripts/generate-nfl-team-seasonlogs.mjs'
 import process_matchups from './scripts/process-matchups.mjs'
 
 const log = debug('worker')
@@ -73,6 +74,8 @@ const update_stats = async ({ week }) => {
   // TODO generate player_seasonlogs
 
   await generate_league_player({ lid })
+
+  await generate_nfl_team_seasonlogs()
 }
 
 const finalize_week = async () => {
