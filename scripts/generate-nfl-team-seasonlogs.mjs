@@ -242,7 +242,7 @@ const generate_seasonlogs = async ({ year = constants.season.year } = {}) => {
         })
 
         const percentiles = calculatePercentiles({
-          items: league_team_seasonlog_inserts,
+          items,
           stats: ['pts']
         })
         percentile_inserts = percentile_inserts.concat(
