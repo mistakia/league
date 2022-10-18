@@ -6,6 +6,7 @@ import { getPlayerGamelogs, getGamelogs } from '@core/gamelogs'
 import { getSelectedPlayer, getSelectedPlayerGame } from '@core/players'
 import { getCurrentLeague } from '@core/leagues'
 import { getSeasonlogs } from '@core/seasonlogs'
+import { percentileActions } from '@core/percentiles'
 
 import SelectedPlayerMatchupTable from './selected-player-matchup-table'
 
@@ -49,6 +50,7 @@ const mapStateToProps = createSelector(
       if (stats) {
         nfl_team_against_seasonlogs.push({
           type,
+          percentile_key: stat_key,
           stats,
           title
         })
@@ -64,4 +66,11 @@ const mapStateToProps = createSelector(
   }
 )
 
-export default connect(mapStateToProps)(SelectedPlayerMatchupTable)
+const mapDispatchToProps = {
+  loadPercentiles: percentileActions.loadPercentiles
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(SelectedPlayerMatchupTable)

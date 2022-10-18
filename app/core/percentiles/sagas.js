@@ -1,10 +1,14 @@
-import { fork, takeLatest, call } from 'redux-saga/effects'
+import { fork, takeEvery, call, select } from 'redux-saga/effects'
 
 import { percentileActions } from './actions'
-import { getPercentiles } from '@core/api'
+import { getPercentiles, getRequestHistory } from '@core/api'
 
 export function* loadPercentiles({ payload }) {
-  yield call(getPercentiles, payload)
+  const request_history = yield select(getRequestHistory)
+  const key = `GET_PERCENTILES_${payload.percentile_key}`
+  if (!request_history.has(key)) {
+    yield call(getPercentiles, payload)
+  }
 }
 
 //= ====================================
@@ -12,7 +16,7 @@ export function* loadPercentiles({ payload }) {
 // -------------------------------------
 
 export function* watchLoadPercentiles() {
-  yield takeLatest(percentileActions.LOAD_PERCENTILES, loadPercentiles)
+  yield takeEvery(percentileActions.LOAD_PERCENTILES, loadPercentiles)
 }
 
 //= ====================================

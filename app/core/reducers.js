@@ -25,11 +25,14 @@ import { gamelogsReducer } from './gamelogs'
 import { propsReducer } from './props'
 import { draftPickValueReducer } from './draft-pick-value'
 import { seasonlogsReducer } from './seasonlogs'
+import { percentilesReducer } from './percentiles'
+import { apiReducer } from './api'
 
 const rootReducer = (router) =>
   combineReducers({
     router,
     app: appReducer,
+    api: apiReducer,
     auction: auctionReducer,
     confirmation: confirmationReducer,
     contextMenu: contextMenuReducer,
@@ -53,7 +56,8 @@ const rootReducer = (router) =>
     gamelogs: gamelogsReducer,
     props: propsReducer,
     draft_pick_value: draftPickValueReducer,
-    seasonlogs: seasonlogsReducer
+    seasonlogs: seasonlogsReducer,
+    percentiles: percentilesReducer
   })
 
 export default rootReducer
