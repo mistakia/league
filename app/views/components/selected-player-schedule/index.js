@@ -2,7 +2,7 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { getSelectedPlayer, getSelectedPlayerGames } from '@core/players'
-import { getSeasonlogs } from '@core/seasonlogs'
+import { getSeasonlogs, seasonlogsActions } from '@core/seasonlogs'
 import { getSchedule } from '@core/schedule'
 
 import SelectedPlayerSchedule from './selected-player-schedule'
@@ -20,4 +20,11 @@ const mapStateToProps = createSelector(
   })
 )
 
-export default connect(mapStateToProps)(SelectedPlayerSchedule)
+const mapDispatchToProps = {
+  load_nfl_team_seasonlogs: seasonlogsActions.load_nfl_team_seasonlogs
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(SelectedPlayerSchedule)
