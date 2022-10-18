@@ -28,7 +28,7 @@ export const percentileActions = {
   }),
 
   getPercentilesFulfilled: (opts, data) => ({
-    type: percentileActions.GET_PERCENTILE_FULFILLED,
+    type: percentileActions.GET_PERCENTILES_FULFILLED,
     payload: {
       opts,
       data

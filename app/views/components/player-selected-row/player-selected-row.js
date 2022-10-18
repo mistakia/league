@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import PropTypes from 'prop-types'
 
 import PercentileMetric from '@components/percentile-metric'
@@ -37,63 +37,72 @@ const getStatFields = (pos) => {
   }
 }
 
-export default class PlayerSelectedRow extends React.Component {
-  render = () => {
-    const {
-      title,
-      stats,
-      action,
-      className,
-      games,
-      lead,
-      pos,
-      percentiles = {},
-      header,
-      fixed = 0
-    } = this.props
-    const classNames = ['player__selected-row']
-    if (className) classNames.push(className)
-    if (header) classNames.push('header')
-    const fields = getStatFields(pos)
-    const items = []
-    fields.forEach((field, index) => {
-      const is_group = Array.isArray(field)
-      if (is_group) {
-        const group_items = []
-        for (const group_field of field) {
-          group_items.push(
-            <PercentileMetric
-              value={stats[group_field]}
-              percentile={percentiles[group_field]}
-              fixed={fixed}
-            />
-          )
-        }
+export default function PlayerSelectedRow({
+  title,
+  stats,
+  action,
+  className,
+  games,
+  lead,
+  pos,
+  loadPercentiles,
+  percentile_key,
+  percentiles = {},
+  header,
+  fixed = 0
+}) {
+  useEffect(() => {
+    if (percentile_key) {
+      loadPercentiles(percentile_key)
+    }
+  }, [])
 
-        items.push(
-          <div className='row__group' key={index}>
-            <div className='row__group-body'>{group_items}</div>
-          </div>
-        )
-      } else {
-        items.push(
+  const classNames = ['player__selected-row']
+  if (className) classNames.push(className)
+  if (header) classNames.push('header')
+  const fields = getStatFields(pos)
+  const items = []
+  fields.forEach((field, index) => {
+    const is_group = Array.isArray(field)
+    if (is_group) {
+      const group_items = []
+      for (const group_field of field) {
+        group_items.push(
           <PercentileMetric
-            value={stats[field]}
-            percentile={percentiles[field]}
+            percentile_key={percentile_key}
+            value={stats[group_field]}
+            percentile={percentiles[group_field]}
             fixed={fixed}
+            field={group_field}
           />
         )
       }
-    })
-    return (
-      <div className={classNames.join(' ')}>
-        {lead || <div className='table__cell text'>{title}</div>}
-        {games && <div className='table__cell metric'>{games}</div>}
-        {items}
-        {action}
-      </div>
-    )
-  }
+
+      items.push(
+        <div className='row__group' key={index}>
+          <div className='row__group-body'>{group_items}</div>
+        </div>
+      )
+    } else {
+      items.push(
+        <PercentileMetric
+          percentile_key={percentile_key}
+          value={stats[field]}
+          percentile={percentiles[field]}
+          fixed={fixed}
+          field={field}
+        />
+      )
+    }
+  })
+  return (
+    <div className={classNames.join(' ')}>
+      {lead || <div className='table__cell text'>{title}</div>}
+      {games && <div className='table__cell metric'>{games}</div>}
+      {items}
+      {action}
+    </div>
+  )
 }
 
 PlayerSelectedRow.propTypes = {
@@ -104,7 +113,9 @@ PlayerSelectedRow.propTypes = {
   games: PropTypes.number,
   lead: PropTypes.element,
   pos: PropTypes.string,
+  loadPercentiles: PropTypes.func,
   percentiles: PropTypes.object,
+  percentile_key: PropTypes.string,
   header: PropTypes.bool,
   fixed: PropTypes.number
 }

@@ -1,14 +1,23 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 
 export default function PercentileMetric({
   percentile = {},
   value,
+  children,
   className,
   scaled,
-  fixed = 0
+  field,
+  fixed = 0,
+  percentiles,
+  percentile_key
 }) {
   let color
+
+  if (percentile_key) {
+    percentile = percentiles.getIn([percentile_key, field], {})
+  }
 
   if (value && value < percentile.p25) {
     const maxPercent =
@@ -24,18 +33,24 @@ export default function PercentileMetric({
     color = `rgba(46, 163, 221, ${maxPercent}`
   }
 
+  const body = children || (value ? value.toFixed(fixed) : '-')
+
   const classNames = ['table__cell', 'metric']
   if (className) classNames.push(className)
   return (
     <div className={classNames.join(' ')} style={{ backgroundColor: color }}>
-      {value ? value.toFixed(fixed) : '-'}
+      {body}
     </div>
   )
 }
 
 PercentileMetric.propTypes = {
   value: PropTypes.number,
+  children: PropTypes.node,
+  field: PropTypes.string,
   percentile: PropTypes.object,
+  percentiles: ImmutablePropTypes.map,
+  percentile_key: PropTypes.string,
   className: PropTypes.string,
   scaled: PropTypes.bool,
   title: PropTypes.string,
