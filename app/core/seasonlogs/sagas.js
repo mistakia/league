@@ -1,23 +1,28 @@
 import { fork, takeLatest, select, call } from 'redux-saga/effects'
 
-import { getNflTeamSeasonlogs } from '@core/api'
-import { appActions, getApp } from '@core/app'
+import { getNflTeamSeasonlogs, getRequestHistory } from '@core/api'
+import { seasonlogsActions } from './actions'
+import { getApp } from '@core/app'
 
 export function* load() {
+  const request_history = yield select(getRequestHistory)
   const { leagueId } = yield select(getApp)
-  yield call(getNflTeamSeasonlogs, { leagueId })
+  const key = `GET_NFL_TEAM_SEASONLOGS_LEAGUE_${leagueId}`
+  if (!request_history.has(key)) {
+    yield call(getNflTeamSeasonlogs, { leagueId })
+  }
 }
 
 //= ====================================
 //  WATCHERS
 // -------------------------------------
 
-export function* watchInitApp() {
-  yield takeLatest(appActions.INIT_APP, load)
+export function* watchLoadNflTeamSeasonlogs() {
+  yield takeLatest(seasonlogsActions.LOAD_NFL_TEAM_SEASONLOGS, load)
 }
 
 //= ====================================
 //  ROOT
 // -------------------------------------
 
-export const seasonlogSagas = [fork(watchInitApp)]
+export const seasonlogSagas = [fork(watchLoadNflTeamSeasonlogs)]
