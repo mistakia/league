@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import InfiniteScroll from 'react-infinite-scroller'
@@ -36,54 +36,65 @@ import { csv } from '@core/export'
 
 import './players.styl'
 
-export default class PlayersPage extends React.Component {
-  constructor(props) {
-    super(props)
+export default function PlayersPage({
+  loadAllPlayers,
+  players,
+  player_fields,
+  selected_players_view,
+  isPending,
+  isLoggedIn,
+  selected_view_grouped_fields,
+  show_week_filter,
+  show_play_filters,
+  show_qualifier_filter,
+  search,
+  searchValue,
+  order,
+  orderBy
+}) {
+  const [expanded, set_expanded] = useState(false)
+  const [page, set_page] = useState(0)
+  const [has_more, set_has_more] = useState(true)
 
-    this.state = { expanded: false, page: 0, hasMore: true }
-  }
+  let scroll_ref
 
-  componentDidMount() {
-    this.props.loadAllPlayers()
-  }
+  useEffect(() => {
+    loadAllPlayers()
+  }, [])
 
-  componentDidUpdate(prevProps) {
-    if (!this.scroll) return
-
-    if (
-      prevProps.order !== this.props.order ||
-      prevProps.orderBy !== this.props.orderBy ||
-      prevProps.searchValue !== this.props.searchValue ||
-      !prevProps.players.equals(this.props.players)
-    ) {
-      this.scroll.pageLoaded = 0
-      const parentElement = this.scroll.getParentElement(
-        this.scroll.scrollComponent
-      )
-      parentElement.scrollTop = 0
-      this.setState({ page: 0, hasMore: true })
+  useEffect(() => {
+    for (const field_key of selected_players_view.fields) {
+      const player_field = player_fields[field_key]
+      if (player_field.load) {
+        player_field.load()
+      }
     }
+  }, [selected_players_view.key])
 
-    if (this.props.selected) {
-      // TODO
-      // const index = this.props.players.findIndex(p => p.pid === this.props.selected)
-      // this.list.current.scrollToRow(index)
-    }
-  }
+  useEffect(() => {
+    set_page(0)
+    set_has_more(true)
 
-  loadMore(page) {
+    if (!scroll_ref) return
+
+    scroll_ref.pageLoaded = 0
+    const parentElement = scroll_ref.getParentElement(
+      scroll_ref.scrollComponent
+    )
+    parentElement.scrollTop = 0
+  }, [selected_players_view.key, order, orderBy, searchValue, players.size])
+  // TODO instead of players.size use players.equal() for comparison
+
+  const loadMore = (page) => {
     const index = page * 25
-    const hasMore = this.props.players.size > index
-    this.setState({ page, hasMore })
+    const has_more = players.size > index
+    set_page(page)
+    set_has_more(has_more)
   }
 
-  handleClick = (event) => {
-    this.setState({ expanded: !this.state.expanded })
-  }
+  const handleClick = (event) => set_expanded(!expanded)
 
-  handleExport = () => {
-    const { players, player_fields, selected_players_view } = this.props
-
+  const handleExport = () => {
     const headers = {
       name: 'Player Name',
       team: 'Team',
@@ -95,7 +106,7 @@ export default class PlayersPage extends React.Component {
       const field_info = player_fields[field]
       field_infos.push(field_info)
 
-      headers[field_info.key] = field_info.name
+      headers[field_info.key] = field_info.csv_header
     }
 
     const data = players.map((playerMap) => {
@@ -125,148 +136,133 @@ export default class PlayersPage extends React.Component {
     })
   }
 
-  render = () => {
-    const {
-      players,
-      isPending,
-      isLoggedIn,
-      selected_view_grouped_fields,
-      show_week_filter,
-      show_play_filters,
-      show_qualifier_filter
-    } = this.props
-
-    const rowItems = []
-    const index = this.state.page * 25
-    players
-      .slice(0, index)
-      .forEach((playerMap, idx) =>
-        rowItems.push(
-          <PlayerRow
-            key={playerMap.get('pid')}
-            playerMap={playerMap}
-            player_row_index={idx}
-          />
-        )
+  const rowItems = []
+  const index = page * 25
+  players
+    .slice(0, index)
+    .forEach((playerMap, idx) =>
+      rowItems.push(
+        <PlayerRow
+          key={playerMap.get('pid')}
+          playerMap={playerMap}
+          player_row_index={idx}
+        />
       )
+    )
 
-    const header_items = []
-    selected_view_grouped_fields.forEach((group, index) => {
-      const group_items = []
-      group.fields.forEach((field_info, index) => {
-        group_items.push(
-          <PlayerHeader
-            key={index}
-            className={field_info.className || 'table__cell metric'}
-            label={field_info.label}
-            value={field_info.key}
-          />
-        )
-      })
-
-      header_items.push(
-        <div className='player__row-group' key={index}>
-          <div className='player__row-group-head'>{group.category}</div>
-          <div className='player__row-group-body'>{group_items}</div>
-        </div>
+  const header_items = []
+  selected_view_grouped_fields.forEach((group, index) => {
+    const group_items = []
+    group.fields.forEach((field_info, index) => {
+      group_items.push(
+        <PlayerHeader
+          key={index}
+          className={field_info.header_className || 'table__cell metric'}
+          label={field_info.column_header}
+          value={field_info.key}
+        />
       )
     })
 
-    const classNames = ['players__filters']
-    if (this.state.expanded) classNames.push('expanded')
+    header_items.push(
+      <div className='player__row-group' key={index}>
+        <div className='player__row-group-head'>{group.category}</div>
+        <div className='player__row-group-body'>{group_items}</div>
+      </div>
+    )
+  })
 
-    const head = (
-      <div className='players__head'>
-        <div className={classNames.join(' ')}>
-          <div className='players__filters-row'>
-            <PlayersViewMenu />
-            <SearchFilter
-              search={this.props.search}
-              value={this.props.searchValue}
-            />
-            <PositionFilter />
-            {isLoggedIn && <AvailabilityFilter />}
-            {show_week_filter && <WeekFilter />}
-            <Button
-              variant='outlined'
-              onClick={this.handleExport}
-              disabled={isPending}
-              className='players__view-export'
-            >
-              Export CSV
-            </Button>
-            <Button
-              endIcon={<KeyboardArrowDownIcon />}
-              onClick={this.handleClick}
-              className='players__head-expand'
-            >
-              {this.state.expanded ? 'Hide' : 'Filters'}
-            </Button>
-          </div>
-          {this.state.expanded && (
-            <div className='players__filters-expanded-container'>
-              {Boolean(show_play_filters) && (
-                <div className='players__filters-row'>
-                  <StatYearsFilter />
-                  <StatWeeksFilter />
-                  <StatDaysFilter />
-                  <StatQuartersFilter />
-                  <StatDownsFilter />
-                  <StatYardlineFilter />
-                  {show_qualifier_filter && <StatQualifierFilter />}
-                </div>
-              )}
+  const classNames = ['players__filters']
+  if (expanded) classNames.push('expanded')
+
+  const head = (
+    <div className='players__head'>
+      <div className={classNames.join(' ')}>
+        <div className='players__filters-row'>
+          <PlayersViewMenu />
+          <SearchFilter search={search} value={searchValue} />
+          <PositionFilter />
+          {isLoggedIn && <AvailabilityFilter />}
+          {show_week_filter && <WeekFilter />}
+          <Button
+            variant='outlined'
+            onClick={handleExport}
+            disabled={isPending}
+            className='players__view-export'
+          >
+            Export CSV
+          </Button>
+          <Button
+            endIcon={<KeyboardArrowDownIcon />}
+            onClick={handleClick}
+            className='players__head-expand'
+          >
+            {expanded ? 'Hide' : 'Filters'}
+          </Button>
+        </div>
+        {expanded && (
+          <div className='players__filters-expanded-container'>
+            {Boolean(show_play_filters) && (
               <div className='players__filters-row'>
-                <ExperienceFilter />
-                {/* <AgeFilter /> */}
-                <DraftRoundFilter />
-                <NFLTeamsFilter />
-                <CollegeFilter />
-                <CollegeDivisionFilter />
-                <StatusFilter />
-                {isLoggedIn && <TeamFilter />}
-                {isLoggedIn && <HighlightTeam />}
-                {isLoggedIn && <WatchlistFilter />}
+                <StatYearsFilter />
+                <StatWeeksFilter />
+                <StatDaysFilter />
+                <StatQuartersFilter />
+                <StatDownsFilter />
+                <StatYardlineFilter />
+                {show_qualifier_filter && <StatQualifierFilter />}
               </div>
+            )}
+            <div className='players__filters-row'>
+              <ExperienceFilter />
+              {/* <AgeFilter /> */}
+              <DraftRoundFilter />
+              <NFLTeamsFilter />
+              <CollegeFilter />
+              <CollegeDivisionFilter />
+              <StatusFilter />
+              {isLoggedIn && <TeamFilter />}
+              {isLoggedIn && <HighlightTeam />}
+              {isLoggedIn && <WatchlistFilter />}
             </div>
-          )}
-        </div>
-      </div>
-    )
-
-    const body = isPending ? (
-      <Loading loading />
-    ) : (
-      <div className='players__table'>
-        <div className='players__header'>
-          <div className='player__row-lead'>
-            <div className='player__row-index' />
-            <div className='player__row-action watchlist' />
-            <div className='player__row-pos' />
-            <div className='player__row-name player__header'>Name</div>
-            {isLoggedIn && <div className='player__row-tag' />}
-            {isLoggedIn && <div className='player__row-action actions' />}
-            {isLoggedIn && <div className='player__row-availability' />}
           </div>
-          {header_items}
-        </div>
-        <InfiniteScroll
-          ref={(scroll) => {
-            this.scroll = scroll
-          }}
-          pageStart={0}
-          loadMore={this.loadMore.bind(this)}
-          hasMore={this.state.hasMore}
-          loader={<Loading loading key={0} />}
-          useWindow={false}
-        >
-          {rowItems}
-        </InfiniteScroll>
+        )}
       </div>
-    )
+    </div>
+  )
 
-    return <PageLayout {...{ body, head }} />
-  }
+  const body = isPending ? (
+    <Loading loading />
+  ) : (
+    <div className='players__table'>
+      <div className='players__header'>
+        <div className='player__row-lead'>
+          <div className='player__row-index' />
+          <div className='player__row-action watchlist' />
+          <div className='player__row-pos' />
+          <div className='player__row-name player__header'>Name</div>
+          {isLoggedIn && <div className='player__row-tag' />}
+          {isLoggedIn && <div className='player__row-action actions' />}
+          {isLoggedIn && <div className='player__row-availability' />}
+        </div>
+        {header_items}
+      </div>
+      <InfiniteScroll
+        ref={(ref) => {
+          scroll_ref = ref
+        }}
+        pageStart={0}
+        loadMore={loadMore}
+        hasMore={has_more}
+        loader={<Loading loading key={0} />}
+        useWindow={false}
+      >
+        {rowItems}
+      </InfiniteScroll>
+    </div>
+  )
+
+  return <PageLayout {...{ body, head }} />
 }
 
 PlayersPage.propTypes = {
