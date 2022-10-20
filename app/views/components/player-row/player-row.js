@@ -22,7 +22,6 @@ class PlayerRow extends Player {
       selectedPlayer,
       isHosted,
       week,
-      percentiles,
       isLoggedIn,
       selected, // inherited from Player class
       status,
@@ -61,14 +60,20 @@ class PlayerRow extends Player {
           const Component = field_info.component
           group_items.push(<Component {...{ nfl_team, pos, week }} />)
         } else {
-          const value = playerMap.getIn(field_info.key_path)
-          const percentile = percentiles[field_info.value]
+          const value = field_info.getValue
+            ? field_info.getValue(playerMap)
+            : playerMap.getIn(field_info.key_path)
+          const percentile_key = field_info.getPercentileKey
+            ? field_info.getPercentileKey(playerMap)
+            : field_info.percentile_key
           group_items.push(
             <PercentileMetric
               key={index}
               value={value}
+              show_positivity={field_info.show_positivity || false}
               fixed={field_info.fixed || 0}
-              percentile={percentile}
+              percentile_key={percentile_key}
+              field={field_info.percentile_field}
             />
           )
         }

@@ -50,7 +50,8 @@ export function getPlayers(state) {
 export const getPlayerFields = createSelector(
   (state) =>
     state.getIn(['players', 'week'], new List([constants.week])).get(0),
-  (week) => PlayerFields({ week })
+  (state) => state,
+  (week, state) => PlayerFields({ week, state })
 )
 
 export const getSelectedPlayersView = createSelector(
@@ -151,10 +152,9 @@ export function getAllPlayers(state) {
   return state.get('players').get('items')
 }
 
-function descendingComparator(a, b, orderBy) {
-  const keyPath = orderBy.split('.')
-  const aValue = a.getIn(keyPath)
-  const bValue = b.getIn(keyPath)
+function descendingComparator(a, b, key_path = [], getValue) {
+  const aValue = getValue ? getValue(a) : a.getIn(key_path)
+  const bValue = getValue ? getValue(b) : b.getIn(key_path)
   if (typeof bValue === 'undefined' || bValue === null) {
     return -1
   }
@@ -172,10 +172,10 @@ function descendingComparator(a, b, orderBy) {
   return 0
 }
 
-function getComparator(order, orderBy) {
+function getComparator(order, key_path, get_value_func) {
   return order === 'desc'
-    ? (a, b) => descendingComparator(a, b, orderBy)
-    : (a, b) => -descendingComparator(a, b, orderBy)
+    ? (a, b) => descendingComparator(a, b, key_path, get_value_func)
+    : (a, b) => -descendingComparator(a, b, key_path, get_value_func)
 }
 
 export function getFilteredPlayers(state) {
@@ -357,9 +357,10 @@ export function getFilteredPlayers(state) {
 
   const player_view_fields = getPlayerFields(state)
   const order_by = pState.get('orderBy')
-  const order_by_path = player_view_fields[order_by].value
+  const order_by_key_path = player_view_fields[order_by].key_path
+  const order_by_value_func = player_view_fields[order_by].getValue
   const sorted = filtered.sort(
-    getComparator(pState.get('order'), order_by_path)
+    getComparator(pState.get('order'), order_by_key_path, order_by_value_func)
   )
   return sorted.toList()
 }

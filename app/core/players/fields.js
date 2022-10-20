@@ -1,663 +1,843 @@
 import PlayerRowOpponent from '@components/player-row-opponent'
+import { getSeasonlogs, seasonlogsActions } from '@core/seasonlogs'
+import { getGameByTeam } from '@core/schedule'
+import { percentileActions } from '@core/percentiles'
+import { store } from '@core/store.js'
 
-export default function ({ week }) {
+// category - required
+// column_header - required
+// csv_header - required
+
+// load - optional
+
+// component - optional
+// header_className - optional
+
+// getValue - optional
+// player_value_path - optional
+
+// getPercentileKey - optional
+// percentile_key - optional
+// percentile_field - optional
+
+// fixed - optional
+
+export default function ({ week, state }) {
   const fields = {
     opponent: {
-      label: 'Opponent',
-      name: 'Opponent',
-      value: 'opponent',
-      component: PlayerRowOpponent,
       category: 'matchup',
-      className: 'player__row-opponent'
+      column_header: 'Opponent',
+      csv_header: 'Opponent',
+      component: PlayerRowOpponent,
+      header_className: 'player__row-opponent',
+      getValue: (playerMap) => {
+        const nfl_team = playerMap.get('team')
+        const game = getGameByTeam(state, { nfl_team, week })
+        if (!game) {
+          return null
+        }
+
+        const isHome = game.h === nfl_team
+        const opp = isHome ? game.v : game.h
+        return opp
+      }
+    },
+    opponent_strength: {
+      category: 'matchup',
+      column_header: 'Strength',
+      csv_header: 'Opponent Strength',
+      getPercentileKey: (playerMap) => {
+        const pos = playerMap.get('pos')
+        return `${pos}_AGAINST_ADJ`
+      },
+      percentile_field: 'pts',
+      fixed: 1,
+      show_positivity: true,
+      load: () => {
+        const positions = state.getIn(['players', 'positions'])
+        positions.forEach((pos) => {
+          const percentile_key = `${pos}_AGAINST_ADJ`
+          store.dispatch(percentileActions.loadPercentiles(percentile_key))
+        })
+        store.dispatch(seasonlogsActions.load_nfl_team_seasonlogs())
+      },
+      getValue: (playerMap) => {
+        const nfl_team = playerMap.get('team')
+        const pos = playerMap.get('pos')
+        const game = getGameByTeam(state, { nfl_team, week })
+        const seasonlogs = getSeasonlogs(state)
+        if (!game) {
+          return null
+        }
+
+        const isHome = game.h === nfl_team
+        const opp = isHome ? game.v : game.h
+        const pts = seasonlogs.getIn(
+          ['nfl_teams', opp, `${pos}_AGAINST_ADJ`, 'pts'],
+          0
+        )
+
+        return pts
+      }
     },
     value: {
-      label: 'Salary',
-      name: 'Projected Salary',
-      value: 'value',
-      category: 'management'
+      category: 'management',
+      column_header: 'Salary',
+      csv_header: 'Projected Salary',
+      player_value_path: 'value'
     },
     'vorp_adj.week': {
-      label: 'Value',
-      name: 'Projected Value',
-      value: `vorp_adj.${week}`,
-      category: 'management'
+      category: 'management',
+      column_header: 'Value',
+      csv_header: 'Projected Value',
+      player_value_path: `vorp_adj.${week}`
     },
     'market_salary.week': {
-      label: 'Market',
-      name: 'Projected Market Salary',
-      value: `market_salary.${week}`,
-      category: 'management'
+      category: 'management',
+      column_header: 'Market',
+      csv_header: 'Projected Market Salary',
+      player_value_path: `market_salary.${week}`
     },
     market_salary_adj: {
-      label: 'Adjusted',
-      name: 'Projected Adjusted Market Salary',
-      value: 'market_salary_adj',
-      category: 'management'
+      category: 'management',
+      column_header: 'Adjusted',
+      csv_header: 'Projected Adjusted Market Salary',
+      player_value_path: 'market_salary_adj'
     },
 
     'vorp.ros': {
-      label: 'Pts+',
-      name: 'Projected Points Added (Rest-Of-Season)',
-      value: 'vorp.ros',
       category: 'fantasy',
+      column_header: 'Pts+',
+      csv_header: 'Projected Points Added (Rest-Of-Season)',
+      player_value_path: 'vorp.ros',
       fixed: 1
     },
     'vorp.0': {
-      label: 'Pts+',
-      name: 'Projected Points Added (Season)',
-      value: 'vorp.0',
-      category: 'fantasy'
+      category: 'fantasy',
+      column_header: 'Pts+',
+      csv_header: 'Projected Points Added (Season)',
+      player_value_path: 'vorp.0'
     },
     'vorp.week': {
-      label: 'Pts+',
-      name: 'Projected Points Added (Week)',
-      value: `vorp.${week}`,
       category: `Week ${week}`,
+      column_header: 'Pts+',
+      csv_header: 'Projected Points Added (Week)',
+      player_value_path: `vorp.${week}`,
       fixed: 1
     },
 
     'points.week.total': {
-      label: 'Proj',
-      name: 'Projected Points (Week)',
-      value: `points.${week}.total`,
       category: `Week ${week}`,
+      column_header: 'Proj',
+      csv_header: 'Projected Points (Week)',
+      player_value_path: `points.${week}.total`,
       fixed: 1
     },
     'points.ros.total': {
-      label: 'Proj',
-      name: 'Projected Points (Rest-Of-Season)',
-      value: 'points.ros.total',
       category: 'fantasy',
+      column_header: 'Proj',
+      csv_header: 'Projected Points (Rest-Of-Season)',
+      player_value_path: 'points.ros.total',
       fixed: 1
     },
     'points.0.total': {
-      label: 'Proj',
-      name: 'Projected Points (Season)',
-      value: 'points.0.total',
       category: 'fantasy',
+      column_header: 'Proj',
+      csv_header: 'Projected Points (Season)',
+      player_value_path: 'points.0.total',
       fixed: 1
     },
 
     'projection.week.py': {
-      label: 'YDS',
-      name: 'Projected Passing Yards (Week)',
-      value: `projection.${week}.py`,
-      category: 'passing'
+      category: 'passing',
+      column_header: 'YDS',
+      csv_header: 'Projected Passing Yards (Week)',
+      player_value_path: `projection.${week}.py`
     },
     'projection.week.tdp': {
-      label: 'TD',
-      name: 'Projected Passing Touchdowns (Week)',
-      value: `projection.${week}.tdp`,
       category: 'passing',
+      column_header: 'TD',
+      csv_header: 'Projected Passing Touchdowns (Week)',
+      player_value_path: `projection.${week}.tdp`,
       fixed: 1
     },
     'projection.week.ints': {
-      label: 'INT',
-      name: 'Projected Interceptions (Week)',
-      value: `projection.${week}.ints`,
       category: 'passing',
+      column_header: 'INT',
+      csv_header: 'Projected Interceptions (Week)',
+      player_value_path: `projection.${week}.ints`,
       fixed: 1
     },
 
     'projection.0.py': {
-      label: 'YDS',
-      name: 'Projected Passing Yards (Season)',
-      value: 'projection.0.py',
-      category: 'passing'
+      category: 'passing',
+      column_header: 'YDS',
+      csv_header: 'Projected Passing Yards (Season)',
+      player_value_path: 'projection.0.py'
     },
     'projection.0.tdp': {
-      label: 'TD',
-      name: 'Projected Passing Touchdowns (Season)',
-      value: 'projection.0.tdp',
       category: 'passing',
+      column_header: 'TD',
+      csv_header: 'Projected Passing Touchdowns (Season)',
+      player_value_path: 'projection.0.tdp',
       fixed: 1
     },
     'projection.0.ints': {
-      label: 'INT',
-      name: 'Projected Interceptions (Season)',
-      value: 'projection.0.ints',
       category: 'passing',
+      column_header: 'INT',
+      csv_header: 'Projected Interceptions (Season)',
+      player_value_path: 'projection.0.ints',
       fixed: 1
     },
 
     'projection.ros.py': {
-      label: 'YDS',
-      name: 'Projected Passing Yards (Rest-Of-Season)',
-      value: 'projection.ros.py',
+      column_header: 'YDS',
+      csv_header: 'Projected Passing Yards (Rest-Of-Season)',
+      player_value_path: 'projection.ros.py',
       category: 'passing'
     },
     'projection.ros.tdp': {
-      label: 'TD',
-      name: 'Projected Passing Touchdowns (Rest-Of-Season)',
-      value: 'projection.ros.tdp',
       category: 'passing',
+      column_header: 'TD',
+      csv_header: 'Projected Passing Touchdowns (Rest-Of-Season)',
+      player_value_path: 'projection.ros.tdp',
       fixed: 1
     },
     'projection.ros.ints': {
-      label: 'INT',
-      name: 'Projected Interceptions (Rest-Of-Season)',
-      value: 'projection.ros.ints',
       category: 'passing',
+      column_header: 'INT',
+      csv_header: 'Projected Interceptions (Rest-Of-Season)',
+      player_value_path: 'projection.ros.ints',
       fixed: 1
     },
 
     'projection.week.ra': {
-      label: 'ATT',
-      name: 'Projected Rushing Attempts (Week)',
-      value: `projection.${week}.ra`,
-      category: 'rushing'
+      category: 'rushing',
+      column_header: 'ATT',
+      csv_header: 'Projected Rushing Attempts (Week)',
+      player_value_path: `projection.${week}.ra`
     },
     'projection.week.ry': {
-      label: 'YDS',
-      name: 'Projected Rushing Yards (Week)',
-      value: `projection.${week}.ry`,
-      category: 'rushing'
+      category: 'rushing',
+      column_header: 'YDS',
+      csv_header: 'Projected Rushing Yards (Week)',
+      player_value_path: `projection.${week}.ry`
     },
     'projection.week.tdr': {
-      label: 'TD',
-      name: 'Projected Rushing Touchdowns (Week)',
-      value: `projection.${week}.tdr`,
       category: 'rushing',
+      column_header: 'TD',
+      csv_header: 'Projected Rushing Touchdowns (Week)',
+      player_value_path: `projection.${week}.tdr`,
       fixed: 1
     },
     'projection.week.fuml': {
-      label: 'FUM',
-      name: 'Projected Fumbles (Week)',
-      value: `projection.${week}.fuml`,
       category: 'rushing',
+      column_header: 'FUM',
+      csv_header: 'Projected Fumbles (Week)',
+      player_value_path: `projection.${week}.fuml`,
       fixed: 1
     },
 
     'projection.0.ra': {
-      label: 'ATT',
-      name: 'Projected Rushing Attempts (Season)',
-      value: 'projection.0.ra',
-      category: 'rushing'
+      category: 'rushing',
+      column_header: 'ATT',
+      csv_header: 'Projected Rushing Attempts (Season)',
+      player_value_path: 'projection.0.ra'
     },
     'projection.0.ry': {
-      label: 'YDS',
-      name: 'Projected Rushing Yards (Season)',
-      value: 'projection.0.ry',
-      category: 'rushing'
+      category: 'rushing',
+      column_header: 'YDS',
+      csv_header: 'Projected Rushing Yards (Season)',
+      player_value_path: 'projection.0.ry'
     },
     'projection.0.tdr': {
-      label: 'TD',
-      name: 'Projected Rushing Touchdowns (Season)',
-      value: 'projection.0.tdr',
       category: 'rushing',
+      column_header: 'TD',
+      csv_header: 'Projected Rushing Touchdowns (Season)',
+      player_value_path: 'projection.0.tdr',
       fixed: 1
     },
     'projection.0.fuml': {
-      label: 'FUM',
-      name: 'Projected Fumbles (Season)',
-      value: 'projection.0.fuml',
       category: 'rushing',
+      column_header: 'FUM',
+      csv_header: 'Projected Fumbles (Season)',
+      player_value_path: 'projection.0.fuml',
       fixed: 1
     },
 
     'projection.ros.ra': {
-      label: 'ATT',
-      name: 'Projected Rushing Attempts (Rest-Of-Season)',
-      value: 'projection.ros.ra',
-      category: 'rushing'
+      category: 'rushing',
+      column_header: 'ATT',
+      csv_header: 'Projected Rushing Attempts (Rest-Of-Season)',
+      player_value_path: 'projection.ros.ra'
     },
     'projection.ros.ry': {
-      label: 'YDS',
-      name: 'Projected Rushing Yards (Rest-Of-Season)',
-      value: 'projection.ros.ry',
-      category: 'rushing'
+      category: 'rushing',
+      column_header: 'YDS',
+      csv_header: 'Projected Rushing Yards (Rest-Of-Season)',
+      player_value_path: 'projection.ros.ry'
     },
     'projection.ros.tdr': {
-      label: 'TD',
-      name: 'Projected Rushing Touchdowns (Rest-Of-Season)',
-      value: 'projection.ros.tdr',
       category: 'rushing',
+      column_header: 'TD',
+      csv_header: 'Projected Rushing Touchdowns (Rest-Of-Season)',
+      player_value_path: 'projection.ros.tdr',
       fixed: 1
     },
     'projection.ros.fuml': {
-      label: 'FUM',
-      name: 'Projected Fumbles (Rest-Of-Season)',
-      value: 'projection.ros.fuml',
       category: 'rushing',
+      column_header: 'FUM',
+      csv_header: 'Projected Fumbles (Rest-Of-Season)',
+      player_value_path: 'projection.ros.fuml',
       fixed: 1
     },
 
     'projection.week.trg': {
-      label: 'TAR',
-      name: 'Projected Targets (Week)',
-      value: `projection.${week}.trg`,
       category: 'receiving',
+      column_header: 'TAR',
+      csv_header: 'Projected Targets (Week)',
+      player_value_path: `projection.${week}.trg`,
       fixed: 1
     },
     'projection.week.rec': {
-      label: 'REC',
-      name: 'Projected Receptions (Week)',
-      value: `projection.${week}.rec`,
       category: 'receiving',
+      column_header: 'REC',
+      csv_header: 'Projected Receptions (Week)',
+      player_value_path: `projection.${week}.rec`,
       fixed: 1
     },
     'projection.week.recy': {
-      label: 'YDS',
-      name: 'Projected Receiving Yards (Week)',
-      value: `projection.${week}.recy`,
-      category: 'receiving'
+      category: 'receiving',
+      column_header: 'YDS',
+      csv_header: 'Projected Receiving Yards (Week)',
+      player_value_path: `projection.${week}.recy`
     },
     'projection.week.tdrec': {
-      label: 'TD',
-      name: 'Projected Receiving Touchdowns (Week)',
-      value: `projection.${week}.tdrec`,
       category: 'receiving',
+      column_header: 'TD',
+      csv_header: 'Projected Receiving Touchdowns (Week)',
+      player_value_path: `projection.${week}.tdrec`,
       fixed: 1
     },
 
     'projection.0.trg': {
-      label: 'TAR',
-      name: 'Projected Targets (Season)',
-      value: 'projection.0.trg',
       category: 'receiving',
+      column_header: 'TAR',
+      csv_header: 'Projected Targets (Season)',
+      player_value_path: 'projection.0.trg',
       fixed: 1
     },
     'projection.0.rec': {
-      label: 'REC',
-      name: 'Projected Receptions (Season)',
-      value: 'projection.0.rec',
       category: 'receiving',
+      column_header: 'REC',
+      csv_header: 'Projected Receptions (Season)',
+      player_value_path: 'projection.0.rec',
       fixed: 1
     },
     'projection.0.recy': {
-      label: 'YDS',
-      name: 'Projected Receiving Yards (Season)',
-      value: 'projection.0.recy',
-      category: 'receiving'
+      category: 'receiving',
+      column_header: 'YDS',
+      csv_header: 'Projected Receiving Yards (Season)',
+      player_value_path: 'projection.0.recy'
     },
     'projection.0.tdrec': {
-      label: 'TD',
-      name: 'Projected Receiving Touchdowns (Season)',
-      value: 'projection.0.tdrec',
       category: 'receiving',
+      column_header: 'TD',
+      csv_header: 'Projected Receiving Touchdowns (Season)',
+      player_value_path: 'projection.0.tdrec',
       fixed: 1
     },
 
     'projection.ros.trg': {
-      label: 'TAR',
-      name: 'Projected Targets (Rest-Of-Season)',
-      value: 'projection.ros.trg',
       category: 'receiving',
+      column_header: 'TAR',
+      csv_header: 'Projected Targets (Rest-Of-Season)',
+      player_value_path: 'projection.ros.trg',
       fixed: 1
     },
     'projection.ros.rec': {
-      label: 'REC',
-      name: 'Projected Receptions (Rest-Of-Season)',
-      value: 'projection.ros.rec',
       category: 'receiving',
+      column_header: 'REC',
+      csv_header: 'Projected Receptions (Rest-Of-Season)',
+      player_value_path: 'projection.ros.rec',
       fixed: 1
     },
     'projection.ros.recy': {
-      label: 'YDS',
-      name: 'Projected Receiving Yards (Rest-Of-Season)',
-      value: 'projection.ros.recy',
-      category: 'receiving'
+      category: 'receiving',
+      column_header: 'YDS',
+      csv_header: 'Projected Receiving Yards (Rest-Of-Season)',
+      player_value_path: 'projection.ros.recy'
     },
     'projection.ros.tdrec': {
-      label: 'TD',
-      name: 'Projected Receiving Touchdowns (Rest-Of-Season)',
-      value: 'projection.ros.tdrec',
       category: 'receiving',
+      column_header: 'TD',
+      csv_header: 'Projected Receiving Touchdowns (Rest-Of-Season)',
+      player_value_path: 'projection.ros.tdrec',
       fixed: 1
     },
 
     'stats.pts': {
-      label: 'PTS',
-      name: 'Fantasy Points',
-      value: 'stats.pts',
       category: 'fantasy',
-      fixed: 1
+      column_header: 'PTS',
+      csv_header: 'Fantasy Points',
+      player_value_path: 'stats.pts',
+      fixed: 1,
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'pts'
     },
 
     'stats.py': {
-      label: 'YDS',
-      name: 'Passing Yards',
-      value: 'stats.py',
-      category: 'passing'
+      category: 'passing',
+      column_header: 'YDS',
+      csv_header: 'Passing Yards',
+      player_value_path: 'stats.py',
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'py'
     },
     'stats.tdp': {
-      label: 'TD',
-      name: 'Passing Touchdowns',
-      value: 'stats.tdp',
-      category: 'passing'
+      category: 'passing',
+      column_header: 'TD',
+      csv_header: 'Passing Touchdowns',
+      player_value_path: 'stats.tdp',
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'tdp'
     },
     'stats.ints': {
-      label: 'INT',
-      name: 'Interceptions',
-      value: 'stats.ints',
-      category: 'passing'
+      category: 'passing',
+      column_header: 'INT',
+      csv_header: 'Interceptions',
+      player_value_path: 'stats.ints',
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'ints'
     },
     'stats.drppy': {
-      label: 'DRP YDS',
-      name: 'Dropped Passing Yards',
-      value: 'stats.drppy',
-      category: 'passing'
+      category: 'passing',
+      column_header: 'DRP YDS',
+      csv_header: 'Dropped Passing Yards',
+      player_value_path: 'stats.drppy',
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'drppy'
     },
     'stats.pc_pct': {
-      label: 'COMP%',
-      name: 'Passing Completion Percentage',
-      value: 'stats.pc_pct',
       category: 'efficiency',
-      fixed: 1
+      column_header: 'COMP%',
+      csv_header: 'Passing Completion Percentage',
+      player_value_path: 'stats.pc_pct',
+      fixed: 1,
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'pc_pct'
     },
     'stats.tdp_pct': {
-      label: 'TD%',
-      name: 'Passing Touchdown Percentage',
-      value: 'stats.tdp_pct',
       category: 'efficiency',
-      fixed: 1
+      column_header: 'TD%',
+      csv_header: 'Passing Touchdown Percentage',
+      player_value_path: 'stats.tdp_pct',
+      fixed: 1,
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'tdp_pct'
     },
     'stats.ints_pct': {
-      label: 'INT%',
-      name: 'Passing Interception Percentage',
-      value: 'stats.ints_pct',
       category: 'efficiency',
-      fixed: 1
+      column_header: 'INT%',
+      csv_header: 'Passing Interception Percentage',
+      player_value_path: 'stats.ints_pct',
+      fixed: 1,
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'ints_pct'
     },
     'stats.intw_pct': {
-      label: 'BAD%',
-      name: 'Passing Interception Worthy Percentage',
-      value: 'stats.intw_pct',
       category: 'efficiency',
-      fixed: 1
+      column_header: 'BAD%',
+      csv_header: 'Passing Interception Worthy Percentage',
+      player_value_path: 'stats.intw_pct',
+      fixed: 1,
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'intw_pct'
     },
     'stats.pyac': {
-      label: 'YAC',
-      name: 'Passing Yards After Catch',
-      value: 'stats.pyac',
-      category: 'passing'
+      category: 'passing',
+      column_header: 'YAC',
+      csv_header: 'Passing Yards After Catch',
+      player_value_path: 'stats.pyac',
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'pyac'
     },
     'stats.pyac_pc': {
-      label: 'YAC/C',
-      name: 'Passing Yards After Catch Per Completion',
-      value: 'stats.pyac_pc',
       category: 'efficiency',
-      fixed: 1
+      column_header: 'YAC/C',
+      csv_header: 'Passing Yards After Catch Per Completion',
+      player_value_path: 'stats.pyac_pc',
+      fixed: 1,
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'pyac_pc'
     },
     'stats._ypa': {
-      label: 'Y/A',
-      name: 'Passing Yards Per Pass Attempt',
-      value: 'stats._ypa',
       category: 'efficiency',
-      fixed: 1
+      column_header: 'Y/A',
+      csv_header: 'Passing Yards Per Pass Attempt',
+      player_value_path: 'stats._ypa',
+      fixed: 1,
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: '_ypa'
     },
     'stats.pdot_pa': {
-      label: 'DOT',
-      name: 'Passing Depth of Target per Pass Attempt',
-      value: 'stats.pdot_pa',
       category: 'efficiency',
-      fixed: 1
+      column_header: 'DOT',
+      csv_header: 'Passing Depth of Target per Pass Attempt',
+      player_value_path: 'stats.pdot_pa',
+      fixed: 1,
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'pdot_pa'
     },
     'stats.pdot': {
-      label: 'AY',
-      name: 'Passing Air Yards',
-      value: 'stats.pdot',
-      category: 'air yards'
+      category: 'air yards',
+      column_header: 'AY',
+      csv_header: 'Passing Air Yards',
+      player_value_path: 'stats.pdot',
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'pdot'
     },
     'stats.pcay_pc': {
-      label: 'CAY/C',
-      name: 'Completed Air Yards Per Completion',
-      value: 'stats.pcay_pc',
-      category: 'air yards'
+      category: 'air yards',
+      column_header: 'CAY/C',
+      csv_header: 'Completed Air Yards Per Completion',
+      player_value_path: 'stats.pcay_pc',
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'pcay_pc'
     },
     'stats._pacr': {
-      label: 'PACR',
-      name: 'Passing Air Conversion Ratio (PACR)',
-      value: 'stats._pacr',
       category: 'air yards',
-      fixed: 1
+      column_header: 'PACR',
+      csv_header: 'Passing Air Conversion Ratio (PACR)',
+      player_value_path: 'stats._pacr',
+      fixed: 1,
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: '_pacr'
     },
     'stats.sk': {
-      label: 'SK',
-      name: 'Sacks',
-      value: 'stats.sk',
-      category: 'pressure'
+      category: 'pressure',
+      column_header: 'SK',
+      csv_header: 'Sacks',
+      player_value_path: 'stats.sk',
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'sk'
     },
     'stats.sky': {
-      label: 'SKY',
-      name: 'Sack Yards',
-      value: 'stats.sky',
-      category: 'pressure'
+      category: 'pressure',
+      column_header: 'SKY',
+      csv_header: 'Sack Yards',
+      player_value_path: 'stats.sky',
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'sky'
     },
     'stats.sk_pct': {
-      label: 'SK%',
-      name: 'Sack Percentage',
-      value: 'stats.sk_pct',
-      category: 'pressure'
+      category: 'pressure',
+      column_header: 'SK%',
+      csv_header: 'Sack Percentage',
+      player_value_path: 'stats.sk_pct',
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'sk_pct'
     },
     'stats.qbhi_pct': {
-      label: 'HIT%',
-      name: 'QB Hit Percentage',
-      value: 'stats.qbhi_pct',
-      category: 'pressure'
+      category: 'pressure',
+      column_header: 'HIT%',
+      csv_header: 'QB Hit Percentage',
+      player_value_path: 'stats.qbhi_pct',
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'qbhi_pct'
     },
     'stats.qbp_pct': {
-      label: 'PRSS%',
-      name: 'QB Pressure Percentage',
-      value: 'stats.qbp_pct',
-      category: 'pressure'
+      category: 'pressure',
+      column_header: 'PRSS%',
+      csv_header: 'QB Pressure Percentage',
+      player_value_path: 'stats.qbp_pct',
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'qbp_pct'
     },
     'stats.qbhu_pct': {
-      label: 'HRRY%',
-      name: 'QB Hurry Percentage',
-      value: 'stats.qbhu_pct',
-      category: 'pressure'
+      category: 'pressure',
+      column_header: 'HRRY%',
+      csv_header: 'QB Hurry Percentage',
+      player_value_path: 'stats.qbhu_pct',
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'qbhu_pct'
     },
     'stats._nygpa': {
-      label: 'NY/A',
-      name: 'Net Yards Per Pass Attempt',
-      value: 'stats._nygpa',
       category: 'pressure',
-      fixed: 1
+      column_header: 'NY/A',
+      csv_header: 'Net Yards Per Pass Attempt',
+      player_value_path: 'stats._nygpa',
+      fixed: 1,
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: '_nygpa'
     },
 
     'stats.ry': {
-      label: 'YDS',
-      name: 'Rushing Yards',
-      value: 'stats.ry',
-      category: 'rushing'
+      category: 'rushing',
+      column_header: 'YDS',
+      csv_header: 'Rushing Yards',
+      player_value_path: 'stats.ry',
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'ry'
     },
     'stats.tdr': {
-      label: 'TD',
-      name: 'Rushing Touchdowns',
-      value: 'stats.tdr',
-      category: 'rushing'
+      category: 'rushing',
+      column_header: 'TD',
+      csv_header: 'Rushing Touchdowns',
+      player_value_path: 'stats.tdr',
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'tdr'
     },
     'stats.ry_pra': {
-      label: 'YPC',
-      name: 'Rushing Yards Per Rush Attempt',
-      value: 'stats.ry_pra',
-      category: 'efficiency'
+      category: 'efficiency',
+      column_header: 'YPC',
+      csv_header: 'Rushing Yards Per Rush Attempt',
+      player_value_path: 'stats.ry_pra',
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'ry_pra'
     },
     'stats.ra': {
-      label: 'ATT',
-      name: 'Rushing Attempts',
-      value: 'stats.ra',
-      category: 'rushing'
+      category: 'rushing',
+      column_header: 'ATT',
+      csv_header: 'Rushing Attempts',
+      player_value_path: 'stats.ra',
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'ra'
     },
     'stats.rfd': {
-      label: 'FD',
-      name: 'Rushing First Downs',
-      value: 'stats.rfd',
-      category: 'rushing'
+      category: 'rushing',
+      column_header: 'FD',
+      csv_header: 'Rushing First Downs',
+      player_value_path: 'stats.rfd',
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'rfd'
     },
     'stats.posra': {
-      label: 'POS',
-      name: 'Positive Yardage Rush Attempts',
-      value: 'stats.posra',
-      category: 'efficiency'
+      category: 'efficiency',
+      column_header: 'POS',
+      csv_header: 'Positive Yardage Rush Attempts',
+      player_value_path: 'stats.posra',
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'posra'
     },
     'stats.ryaco': {
-      label: 'YDS',
-      name: 'Rushing Yards After Contact',
-      value: 'stats.ryaco',
-      category: 'after contact'
+      category: 'after contact',
+      column_header: 'YDS',
+      csv_header: 'Rushing Yards After Contact',
+      player_value_path: 'stats.ryaco',
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'ryaco'
     },
     'stats.ryaco_pra': {
-      label: 'AVG',
-      name: 'Rushing Yards After Contact Per Rush Attempt',
-      value: 'stats.ryaco_pra',
       category: 'after contact',
-      fixed: 1
+      column_header: 'AVG',
+      csv_header: 'Rushing Yards After Contact Per Rush Attempt',
+      player_value_path: 'stats.ryaco_pra',
+      fixed: 1,
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'ryaco_pra'
     },
     'stats._stra': {
-      label: 'ATT%',
-      name: 'Share of Team Rushing Attempts',
-      value: 'stats._stra',
-      category: 'team share'
+      category: 'team share',
+      column_header: 'ATT%',
+      csv_header: 'Share of Team Rushing Attempts',
+      player_value_path: 'stats._stra',
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: '_stra'
     },
     'stats._stry': {
-      label: 'YDS%',
-      name: 'Share of Team Rushing Yardage',
-      value: 'stats._stry',
-      category: 'team share'
+      category: 'team share',
+      column_header: 'YDS%',
+      csv_header: 'Share of Team Rushing Yardage',
+      player_value_path: 'stats._stry',
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: '_stry'
     },
     'stats._fumlpra': {
-      label: 'FUM%',
-      name: 'Fumble Percentage',
-      value: 'stats._fumlpra',
       category: 'efficiency',
-      fixed: 1
+      column_header: 'FUM%',
+      csv_header: 'Fumble Percentage',
+      player_value_path: 'stats._fumlpra',
+      fixed: 1,
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: '_fumlpra'
     },
     'stats.posra_pra': {
-      label: 'POS%',
-      name: 'Positive Rushing Yardage Percentage',
-      value: 'stats.posra_pra',
       category: 'efficiency',
-      fixed: 1
+      column_header: 'POS%',
+      csv_header: 'Positive Rushing Yardage Percentage',
+      player_value_path: 'stats.posra_pra',
+      fixed: 1,
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'posra_pra'
     },
     'stats.rasucc_pra': {
-      label: 'SUCC%',
-      name: 'Successful Rush Percentage',
-      value: 'stats.rasucc_pra',
       category: 'efficiency',
-      fixed: 1
+      column_header: 'SUCC%',
+      csv_header: 'Successful Rush Percentage',
+      player_value_path: 'stats.rasucc_pra',
+      fixed: 1,
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'rasucc_pra'
     },
     'stats.mbt': {
-      label: 'BT',
-      name: 'Broken Tackles',
-      value: 'stats.mbt',
-      category: 'broken tackles'
+      category: 'broken tackles',
+      column_header: 'BT',
+      csv_header: 'Broken Tackles',
+      player_value_path: 'stats.mbt',
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'mbt'
     },
     'stats.mbt_pt': {
-      label: 'BT/T',
-      name: 'Broken Tackles Per Rush Attempt',
-      value: 'stats.mbt_pt',
       category: 'broken tackles',
-      fixed: 1
+      column_header: 'BT/T',
+      csv_header: 'Broken Tackles Per Rush Attempt',
+      player_value_path: 'stats.mbt_pt',
+      fixed: 1,
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'mbt_pt'
     },
 
     'stats.rec': {
-      label: 'REC',
-      name: 'Receptions',
-      value: 'stats.rec',
-      category: 'receiving'
+      category: 'receiving',
+      column_header: 'REC',
+      csv_header: 'Receptions',
+      player_value_path: 'stats.rec',
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'rec'
     },
     'stats.recy': {
-      label: 'YDS',
-      name: 'Receiving Yards',
-      value: 'stats.recy',
-      category: 'receiving'
+      category: 'receiving',
+      column_header: 'YDS',
+      csv_header: 'Receiving Yards',
+      player_value_path: 'stats.recy',
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'recy'
     },
     'stats.tdrec': {
-      label: 'TD',
-      name: 'Receiving Touchdowns',
-      value: 'stats.tdrec',
-      category: 'receiving'
+      category: 'receiving',
+      column_header: 'TD',
+      csv_header: 'Receiving Touchdowns',
+      player_value_path: 'stats.tdrec',
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'tdrec'
     },
     'stats.drp': {
-      label: 'DRP',
-      name: 'Drops',
-      value: 'stats.drp',
-      category: 'receiving'
+      category: 'receiving',
+      column_header: 'DRP',
+      csv_header: 'Drops',
+      player_value_path: 'stats.drp',
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'drp'
     },
     'stats.dryprecy': {
-      label: 'DRP YDS',
-      name: 'Dropped Receiving Yards',
-      value: 'stats.dryprecy',
-      category: 'receiving'
+      category: 'receiving',
+      column_header: 'DRP YDS',
+      csv_header: 'Dropped Receiving Yards',
+      player_value_path: 'stats.dryprecy',
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'dryprecy'
     },
     'stats.trg': {
-      label: 'TAR',
-      name: 'Targets',
-      value: 'stats.trg',
-      category: 'oppurtunity'
+      category: 'oppurtunity',
+      column_header: 'TAR',
+      csv_header: 'Targets',
+      player_value_path: 'stats.trg',
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'trg'
     },
     'stats.dptrg_pct': {
-      label: 'DEEP%',
-      name: 'Percentage of Targets Traveling >= 20 Air Yards',
-      value: 'stats.dptrg_pct',
-      category: 'oppurtunity'
+      category: 'oppurtunity',
+      column_header: 'DEEP%',
+      csv_header: 'Percentage of Targets Traveling >= 20 Air Yards',
+      player_value_path: 'stats.dptrg_pct',
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'dptrg_pct'
     },
     'stats._ayptrg': {
-      label: 'DOT',
-      name: 'Depth Of Target',
-      value: 'stats._ayptrg',
-      category: 'oppurtunity'
+      category: 'oppurtunity',
+      column_header: 'DOT',
+      csv_header: 'Depth Of Target',
+      player_value_path: 'stats._ayptrg',
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: '_ayptrg'
     },
     'stats.rdot': {
-      label: 'AY',
-      name: 'Air Yards',
-      value: 'stats.rdot',
-      category: 'oppurtunity'
+      category: 'oppurtunity',
+      column_header: 'AY',
+      csv_header: 'Air Yards',
+      player_value_path: 'stats.rdot',
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'rdot'
     },
     'stats._stray': {
-      label: 'AY%',
-      name: "Share of Team's Air Yards",
-      value: 'stats._stray',
-      category: 'oppurtunity'
+      category: 'oppurtunity',
+      column_header: 'AY%',
+      csv_header: "Share of Team's Air Yards",
+      player_value_path: 'stats._stray',
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: '_stray'
     },
     'stats._sttrg': {
-      label: 'TAR%',
-      name: "Share of Team's Targets",
-      value: 'stats._sttrg',
-      category: 'oppurtunity'
+      category: 'oppurtunity',
+      column_header: 'TAR%',
+      csv_header: "Share of Team's Targets",
+      player_value_path: 'stats._sttrg',
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: '_sttrg'
     },
     'stats._wopr': {
-      label: 'WOPR',
-      name: 'Weighted Opportunity Rating',
-      value: 'stats._wopr',
       category: 'oppurtunity',
-      fixed: 1
+      column_header: 'WOPR',
+      csv_header: 'Weighted Opportunity Rating',
+      player_value_path: 'stats._wopr',
+      fixed: 1,
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: '_wopr'
     },
     'stats._recypay': {
-      label: 'RACR',
-      name: 'Receiver Air Conversion Ratio (RACR)',
-      value: 'stats._recypay',
       category: 'efficiency',
-      fixed: 1
+      column_header: 'RACR',
+      csv_header: 'Receiver Air Conversion Ratio (RACR)',
+      player_value_path: 'stats._recypay',
+      fixed: 1,
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: '_recypay'
     },
     'stats._recyprec': {
-      label: 'Y/R',
-      name: 'Receiving Yards Per Reception',
-      value: 'stats._recyprec',
       category: 'efficiency',
-      fixed: 1
+      column_header: 'Y/R',
+      csv_header: 'Receiving Yards Per Reception',
+      player_value_path: 'stats._recyprec',
+      fixed: 1,
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: '_recyprec'
     },
     'stats._recyptrg': {
-      label: 'Y/T',
-      name: 'Receiving Yards Per Target',
-      value: 'stats._recyptrg',
       category: 'efficiency',
-      fixed: 1
+      column_header: 'Y/T',
+      csv_header: 'Receiving Yards Per Target',
+      player_value_path: 'stats._recyptrg',
+      fixed: 1,
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: '_recyptrg'
     },
     'stats._ryacprec': {
-      label: 'YAC/R',
-      name: 'Yards After Catch Per Reception',
-      value: 'stats._ryacprec',
       category: 'efficiency',
-      fixed: 1
+      column_header: 'YAC/R',
+      csv_header: 'Yards After Catch Per Reception',
+      player_value_path: 'stats._ryacprec',
+      fixed: 1,
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: '_ryacprec'
     }
   }
 
   for (const [key, value] of Object.entries(fields)) {
     fields[key].key = key
-    fields[key].key_path = value.value.split('.')
+    fields[key].key_path = value.player_value_path
+      ? value.player_value_path.split('.')
+      : []
   }
 
   return fields
