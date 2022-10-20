@@ -30,8 +30,7 @@ export function workerCalculateStatsFromPlays({ plays, qualifiers, league }) {
   const percentiles = calculatePercentiles({
     items: Object.values(players),
     stats: constants.fullStats,
-    qualifiers,
-    prefix: 'stats.'
+    qualifiers
   })
 
   return { players, percentiles }

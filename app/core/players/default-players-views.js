@@ -39,6 +39,7 @@ const views = {
     order_by: 'vorp.week',
     fields: [
       'opponent',
+      'opponent_strength',
       'vorp.week',
       'points.week.total',
       'projection.week.py',

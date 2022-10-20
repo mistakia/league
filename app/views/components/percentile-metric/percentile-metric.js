@@ -11,7 +11,8 @@ export default function PercentileMetric({
   field,
   fixed = 0,
   percentiles,
-  percentile_key
+  percentile_key,
+  show_positivity
 }) {
   let color
 
@@ -33,7 +34,17 @@ export default function PercentileMetric({
     color = `rgba(46, 163, 221, ${maxPercent}`
   }
 
-  const body = children || (value ? value.toFixed(fixed) : '-')
+  const formatValue = (value) => {
+    if (!value) {
+      return '-'
+    }
+
+    const val = value.toFixed(fixed)
+
+    return show_positivity && value > 0 ? `+${val}` : val
+  }
+
+  const body = children || formatValue(value)
 
   const classNames = ['table__cell', 'metric']
   if (className) classNames.push(className)
@@ -51,6 +62,7 @@ PercentileMetric.propTypes = {
   percentile: PropTypes.object,
   percentiles: ImmutablePropTypes.map,
   percentile_key: PropTypes.string,
+  show_positivity: PropTypes.bool,
   className: PropTypes.string,
   scaled: PropTypes.bool,
   title: PropTypes.string,

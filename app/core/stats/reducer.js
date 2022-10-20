@@ -16,7 +16,6 @@ const initialState = new Record({
   downs: new List(constants.downs),
   yardline_start: 0,
   yardline_end: 100,
-  playsPercentiles: {},
   teamStatsPercentiles: new Record({})
 })
 
@@ -36,8 +35,7 @@ export function statsReducer(state = initialState(), { payload, type }) {
 
     case playerActions.SET_PLAYER_STATS:
       return state.merge({
-        isPending: false,
-        playsPercentiles: payload.percentiles
+        isPending: false
       })
 
     case statActions.SET_TEAM_STATS_PERCENTILES:

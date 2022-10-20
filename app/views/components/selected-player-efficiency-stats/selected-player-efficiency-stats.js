@@ -1,5 +1,4 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import { Map } from 'immutable'
 
@@ -7,47 +6,18 @@ import { constants } from '@common'
 import PercentileChart from '@components/percentile-chart'
 
 // TODO - pass epa per play
-const passing = ({ stats, percentiles }) => (
+// TODO - use percentile_key and percentile_field
+const passing = ({ stats }) => (
   <div className='selected__section'>
     <div className='selected__section-header'>
       <div className='row__group-head'>Passing Efficiency</div>
     </div>
-    <PercentileChart
-      title='Comp %'
-      stats={stats}
-      percentiles={percentiles}
-      type='pc_pct'
-    />
-    <PercentileChart
-      title='TD %'
-      stats={stats}
-      percentiles={percentiles}
-      type='tdp_pct'
-    />
-    <PercentileChart
-      title='Int %'
-      stats={stats}
-      percentiles={percentiles}
-      type='ints_pct'
-    />
-    <PercentileChart
-      title='Int Worthy %'
-      stats={stats}
-      percentiles={percentiles}
-      type='intw_pct'
-    />
-    <PercentileChart
-      title='YPA'
-      stats={stats}
-      percentiles={percentiles}
-      type='_ypa'
-    />
-    <PercentileChart
-      title='aDOT'
-      stats={stats}
-      percentiles={percentiles}
-      type='pdot_pa'
-    />
+    <PercentileChart title='Comp %' stats={stats} type='pc_pct' />
+    <PercentileChart title='TD %' stats={stats} type='tdp_pct' />
+    <PercentileChart title='Int %' stats={stats} type='ints_pct' />
+    <PercentileChart title='Int Worthy %' stats={stats} type='intw_pct' />
+    <PercentileChart title='YPA' stats={stats} type='_ypa' />
+    <PercentileChart title='aDOT' stats={stats} type='pdot_pa' />
   </div>
 )
 
@@ -56,47 +26,25 @@ const passing = ({ stats, percentiles }) => (
 // TODO - yards per touch
 // TOOD - breakaway run rate
 // TODO - first down rate
-const rushing = ({ stats, percentiles }) => (
+const rushing = ({ stats }) => (
   <div className='selected__section'>
     <div className='selected__section-header'>
       <div className='row__group-head'>Rushing Efficiency</div>
     </div>
-    <PercentileChart
-      title='Yards Per Carry'
-      stats={stats}
-      percentiles={percentiles}
-      type='ry_pra'
-    />
+    <PercentileChart title='Yards Per Carry' stats={stats} type='ry_pra' />
     <PercentileChart
       title='Yards Created Per Rush'
       stats={stats}
-      percentiles={percentiles}
       type='ryaco_pra'
     />
-    <PercentileChart
-      title='Positive Rush Rate'
-      stats={stats}
-      percentiles={percentiles}
-      type='posra'
-    />
-    <PercentileChart
-      title='Successful Rush Rate'
-      stats={stats}
-      percentiles={percentiles}
-      type='posra'
-    />
+    <PercentileChart title='Positive Rush Rate' stats={stats} type='posra' />
+    <PercentileChart title='Successful Rush Rate' stats={stats} type='posra' />
     <PercentileChart
       title='Broken Tackles Per Touch'
       stats={stats}
-      percentiles={percentiles}
       type='mbt_pt'
     />
-    <PercentileChart
-      title='Fumble Rate'
-      stats={stats}
-      percentiles={percentiles}
-      type='_fumlpra'
-    />
+    <PercentileChart title='Fumble Rate' stats={stats} type='_fumlpra' />
   </div>
 )
 
@@ -109,41 +57,16 @@ const rushing = ({ stats, percentiles }) => (
 // TODO - contested catch rate
 // TODO - qb rating when targeted
 // TODO - first down rate
-const receiving = ({ stats, percentiles }) => (
+const receiving = ({ stats }) => (
   <div className='selected__section'>
     <div className='selected__section-header'>
       <div className='row__group-head'>Receiving Efficiency</div>
     </div>
-    <PercentileChart
-      title='Yards Per Target'
-      stats={stats}
-      percentiles={percentiles}
-      type='_recyptrg'
-    />
-    <PercentileChart
-      title='Yards Per Rec'
-      stats={stats}
-      percentiles={percentiles}
-      type='recy_prec'
-    />
-    <PercentileChart
-      title='Yards Per Game'
-      stats={stats}
-      percentiles={percentiles}
-      type='recy_pg'
-    />
-    <PercentileChart
-      title='DOT'
-      stats={stats}
-      percentiles={percentiles}
-      type='_ayptrg'
-    />
-    <PercentileChart
-      title='YAC Per Rec'
-      stats={stats}
-      percentiles={percentiles}
-      type='_ryacprec'
-    />
+    <PercentileChart title='Yards Per Target' stats={stats} type='_recyptrg' />
+    <PercentileChart title='Yards Per Rec' stats={stats} type='recy_prec' />
+    <PercentileChart title='Yards Per Game' stats={stats} type='recy_pg' />
+    <PercentileChart title='DOT' stats={stats} type='_ayptrg' />
+    <PercentileChart title='YAC Per Rec' stats={stats} type='_ryacprec' />
   </div>
 )
 
@@ -167,7 +90,7 @@ const defense = () => (
 
 export default class SelectedPlayerEfficiencyStats extends React.Component {
   render = () => {
-    const { playerMap, percentiles } = this.props
+    const { playerMap } = this.props
     const stats = (
       playerMap.get('stats', new Map()) || new Map(constants.createFullStats())
     ).toJS()
@@ -175,17 +98,16 @@ export default class SelectedPlayerEfficiencyStats extends React.Component {
 
     return (
       <div>
-        {pos === 'QB' && passing({ stats, percentiles })}
-        {['QB', 'RB'].includes(pos) && rushing({ stats, percentiles })}
-        {['RB', 'WR', 'TE'].includes(pos) && receiving({ stats, percentiles })}
-        {pos === 'K' && kicker({ stats, percentiles })}
-        {pos === 'DST' && defense({ stats, percentiles })}
+        {pos === 'QB' && passing({ stats })}
+        {['QB', 'RB'].includes(pos) && rushing({ stats })}
+        {['RB', 'WR', 'TE'].includes(pos) && receiving({ stats })}
+        {pos === 'K' && kicker({ stats })}
+        {pos === 'DST' && defense({ stats })}
       </div>
     )
   }
 }
 
 SelectedPlayerEfficiencyStats.propTypes = {
-  playerMap: ImmutablePropTypes.map,
-  percentiles: PropTypes.object
+  playerMap: ImmutablePropTypes.map
 }
