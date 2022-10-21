@@ -604,7 +604,7 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 
 7. PS players may be traded and can be placed on the receiving team’s practice squad (PS) or their active roster. Players placed on the active roster must be deactivated within 48 hours of the trade being completed or remain on the active roster permanently.
 
-8. Any rookie that is acquired by waivers or free agency during the Regular Season must be placed onto the PS within 48 hours of the acquisition or remain on the active roster.
+8. Any PS-eligible player that is acquired by waivers or free agency during the Regular Season must be placed onto the PS within 48 hours of the acquisition or remain on the active roster.
 
 9. The Manager of poached PS player will be awarded a Compensatory draft pick
 
