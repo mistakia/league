@@ -45,7 +45,7 @@ This TEFLON (LEAGUE) Constitution constitutes an agreement among the LEAGUE Foot
 **“NFL Rookie Draft”** shall mean the first day upon which the NFL Draft is held within a given season.
 
 **Pronouns.**
-Where the male pronoun is used herein, it shall be taken to apply also to female persons as the situation may warrant.
+Where the male pronoun is used herein, it shall be taken to apply also to any persons as the situation may warrant.
 
 **Computation of Time.**
 Where this Constitution refers to a week, it shall have either the meaning ascribed to it in common usage (e.g., from 7 PM on a Tuesday to 7 PM the following Tuesday), or, in the context of head-to-head competition, a “week” shall refer to the period of time comprising the head-to-head contest between two opponents, regardless of the number of actual days within that time period.
