@@ -21,6 +21,9 @@ export default function simulate({ teams, matchups, rosters }) {
     }
   }
 
+  // TODO randomize injuries
+  // TODO call optimizeLineup and randomize injuries and length of absense
+
   const distributions = {}
   for (const matchup of matchups) {
     const home = rosters[matchup.hid].lineups[matchup.week]
@@ -29,8 +32,8 @@ export default function simulate({ teams, matchups, rosters }) {
     // TODO - use individual player probability curves
     // TODO - calculate team std dev based on history
     const dist = {}
-    dist.home = gaussian(home.total, Math.pow(18, 2))
-    dist.away = gaussian(away.total, Math.pow(18, 2))
+    dist.home = gaussian(home.baseline_total, Math.pow(20, 2))
+    dist.away = gaussian(away.baseline_total, Math.pow(20, 2))
     distributions[matchup.uid] = dist
   }
 
@@ -155,7 +158,7 @@ export default function simulate({ teams, matchups, rosters }) {
     const wildcardRoundTeams = wildcardWinners.concat(wildcardDivisionWinners)
     for (const team of wildcardRoundTeams) {
       const lineup = rosters[team.tid].lineups[wildcardWeek]
-      const distribution = gaussian(lineup.total, Math.pow(18, 2))
+      const distribution = gaussian(lineup.baseline_total, Math.pow(20, 2))
       const score = distribution.random(1)[0]
       wildcardRoundScores.push({
         tid: team.tid,
@@ -190,8 +193,8 @@ export default function simulate({ teams, matchups, rosters }) {
     for (const team of championshipRoundTeams) {
       const lineup1 = rosters[team.tid].lineups[championshipRoundWeek1]
       const lineup2 = rosters[team.tid].lineups[championshipRoundWeek2]
-      const distribution1 = gaussian(lineup1.total, Math.pow(18, 2))
-      const distribution2 = gaussian(lineup2.total, Math.pow(18, 2))
+      const distribution1 = gaussian(lineup1.baseline_total, Math.pow(20, 2))
+      const distribution2 = gaussian(lineup2.baseline_total, Math.pow(20, 2))
       const score1 = distribution1.random(1)[0]
       const score2 = distribution2.random(1)[0]
       championshipRoundScores.push({
