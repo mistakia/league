@@ -80,6 +80,7 @@ class PlayerRoster extends Player {
 
     const classNames = ['player__item', 'table__row']
     if (selected === playerMap.get('pid')) classNames.push('selected')
+    if (isWaiver) classNames.push('waiver')
 
     return (
       <div className={classNames.join(' ')}>
