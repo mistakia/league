@@ -56,11 +56,6 @@ const run = async () => {
     prop.ln = parseFloat(market.runners[0].handicap, 10)
 
     for (const selection of market.runners) {
-      if (!selection.result.type) {
-        console.log(market)
-        console.log(selection)
-        console.log(fanduel.markets[market.marketType])
-      }
       if (selection.result.type.toLowerCase() === 'over') {
         prop.o = selection.winRunnerOdds.trueOdds.decimalOdds.decimalOdds
         prop.o_am = selection.winRunnerOdds.americanDisplayOdds.americanOddsInt
@@ -97,6 +92,45 @@ const run = async () => {
     }
   }
 
+  const handle_leader_market = async (market) => {
+    for (const selection of market.runners) {
+      let player_row
+      // TODO get team
+      const params = {
+        name: selection.runnerName
+      }
+
+      try {
+        player_row = await getPlayer(params)
+      } catch (err) {
+        log(err)
+      }
+
+      if (!player_row) {
+        missing.push(params)
+        continue
+      }
+
+      const prop = {}
+      prop.pid = player_row.pid
+      prop.type = fanduel.markets[market.marketType]
+      prop.id = market.marketId
+      prop.timestamp = timestamp
+      prop.week = constants.season.week
+      prop.year = constants.season.year
+      prop.sourceid = constants.sources.FANDUEL_NJ
+
+      prop.ln = null
+      prop.o = selection.winRunnerOdds.trueOdds.decimalOdds.decimalOdds
+      prop.o_am = selection.winRunnerOdds.americanDisplayOdds.americanOddsInt
+
+      props.u = null
+      props.u_am = null
+
+      props.push(prop)
+    }
+  }
+
   for (const event of current_week_events) {
     for (const tab of fanduel.tabs) {
       const data = await fanduel.getEventTab({ eventId: event.eventId, tab })
@@ -107,28 +141,33 @@ const run = async () => {
           continue
         }
 
-        let player_row
-        // TODO get team
-        const params = {
-          name: formatPlayerName(market.marketName)
-        }
-
-        try {
-          player_row = await getPlayer(params)
-        } catch (err) {
-          log(err)
-        }
-
-        if (!player_row) {
-          missing.push(params)
-          continue
-        }
-
-        const is_alt_line_market = fanduel.alt_line_markets[market.marketType]
-        if (is_alt_line_market) {
-          handle_alt_line_market({ market, player_row })
+        const is_leader_market = fanduel.leader_markets[market.marketType]
+        if (is_leader_market) {
+          await handle_leader_market(market)
         } else {
-          handle_over_under_market({ market, player_row })
+          let player_row
+          // TODO get team
+          const params = {
+            name: formatPlayerName(market.marketName)
+          }
+
+          try {
+            player_row = await getPlayer(params)
+          } catch (err) {
+            log(err)
+          }
+
+          if (!player_row) {
+            missing.push(params)
+            continue
+          }
+
+          const is_alt_line_market = fanduel.alt_line_markets[market.marketType]
+          if (is_alt_line_market) {
+            handle_alt_line_market({ market, player_row })
+          } else {
+            handle_over_under_market({ market, player_row })
+          }
         }
       }
     }

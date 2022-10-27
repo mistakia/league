@@ -1295,8 +1295,24 @@ export const player_prop_types = {
 
   GAME_ALT_PASSING_YARDS: 20,
   GAME_ALT_RUSHING_YARDS: 21,
-  GAME_ALT_RECEIVING_YARDS: 22
+  GAME_ALT_RECEIVING_YARDS: 22,
+
+  GAME_MOST_PASSING_YARDS: 23,
+  GAME_MOST_RUSHING_YARDS: 24,
+  GAME_MOST_RECEIVING_YARDS: 25
 }
+
+export const player_prop_types_alts = [
+  player_prop_types.GAME_ALT_PASSING_YARDS,
+  player_prop_types.GAME_ALT_RUSHING_YARDS,
+  player_prop_types.GAME_ALT_RECEIVING_YARDS
+]
+
+export const player_prop_types_leaders = [
+  player_prop_types.GAME_MOST_PASSING_YARDS,
+  player_prop_types.GAME_MOST_RUSHING_YARDS,
+  player_prop_types.GAME_MOST_RECEIVING_YARDS
+]
 
 export const player_prop_type_desc = {
   1: 'Pass Yards (seas)',
@@ -1318,7 +1334,13 @@ export const player_prop_type_desc = {
   16: 'Longest Comp',
   17: 'Longest Rec',
   18: 'Anytime TDs',
-  19: 'Longest Rush'
+  19: 'Longest Rush',
+  20: 'Pass Yards',
+  21: 'Rush Yards',
+  22: 'Recv Yards',
+  23: 'Most Pass Yards (game)',
+  24: 'Most Rush Yards (game)',
+  25: 'Most Recv Yards (game)'
 }
 
 export const sources = {
