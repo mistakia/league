@@ -4,6 +4,10 @@ import { constants } from '#common'
 
 import sendDiscordMessage from './send-discord-message.mjs'
 
+const discord_config_exists =
+  config.discord_props_change_channel_webhook_url &&
+  config.discord_props_open_channel_webhook_url
+
 const handle_over_under_prop = async (prop) => {
   const { pid, week, year, type, sourceid, ln, o, u, o_am, u_am } = prop
 
@@ -30,10 +34,7 @@ const handle_over_under_prop = async (prop) => {
   ) {
     await db('props').insert(prop)
 
-    if (
-      !config.discord_props_channel_webhook_url ||
-      process.env.NODE_ENV !== 'production'
-    ) {
+    if (!discord_config_exists || process.env.NODE_ENV !== 'production') {
       return
     }
 
@@ -83,12 +84,13 @@ const handle_over_under_prop = async (prop) => {
       }
     }
 
-    message += ` on ${constants.sourcesTitle[sourceid]} market`
+    message += ` on ${constants.sourcesTitle[sourceid]} market (${year} Week ${week})`
 
-    await sendDiscordMessage({
-      webhookUrl: config.discord_props_channel_webhook_url,
-      message
-    })
+    const webhookUrl = last_prop
+      ? config.discord_props_change_channel_webhook_url
+      : config.discord_props_open_channel_webhook_url
+
+    await sendDiscordMessage({ webhookUrl, message })
   }
 }
 
@@ -114,10 +116,7 @@ const handle_alt_line_prop = async (prop) => {
   if (!last_prop || last_prop.o !== o) {
     await db('props').insert(prop)
 
-    if (
-      !config.discord_props_channel_webhook_url ||
-      process.env.NODE_ENV !== 'production'
-    ) {
+    if (!discord_config_exists || process.env.NODE_ENV !== 'production') {
       return
     }
 
@@ -145,12 +144,13 @@ const handle_alt_line_prop = async (prop) => {
       message += ` ${ln} odds changed from ${last_prop.o_am} to ${o_am}`
     }
 
-    message += ` on ${constants.sourcesTitle[sourceid]} market`
+    message += ` on ${constants.sourcesTitle[sourceid]} market (${year} Week ${week})`
 
-    await sendDiscordMessage({
-      webhookUrl: config.discord_props_channel_webhook_url,
-      message
-    })
+    const webhookUrl = last_prop
+      ? config.discord_props_change_channel_webhook_url
+      : config.discord_props_open_channel_webhook_url
+
+    await sendDiscordMessage({ webhookUrl, message })
   }
 }
 
@@ -175,10 +175,7 @@ const handle_leader_prop = async (prop) => {
   if (!last_prop || last_prop.o !== o) {
     await db('props').insert(prop)
 
-    if (
-      !config.discord_props_channel_webhook_url ||
-      process.env.NODE_ENV !== 'production'
-    ) {
+    if (!discord_config_exists || process.env.NODE_ENV !== 'production') {
       return
     }
 
@@ -206,12 +203,13 @@ const handle_leader_prop = async (prop) => {
       message += ` odds changed from ${last_prop.o_am} to ${o_am}`
     }
 
-    message += ` on ${constants.sourcesTitle[sourceid]} market`
+    message += ` on ${constants.sourcesTitle[sourceid]} market (${year} Week ${week})`
 
-    await sendDiscordMessage({
-      webhookUrl: config.discord_props_channel_webhook_url,
-      message
-    })
+    const webhookUrl = last_prop
+      ? config.discord_props_change_channel_webhook_url
+      : config.discord_props_open_channel_webhook_url
+
+    await sendDiscordMessage({ webhookUrl, message })
   }
 }
 
