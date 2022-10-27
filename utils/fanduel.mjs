@@ -189,6 +189,10 @@ export const markets = {
   PLAYER_C_LONGEST_RUSH: constants.player_prop_types.GAME_LONGEST_RUSH,
   PLAYER_D_LONGEST_RUSH: constants.player_prop_types.GAME_LONGEST_RUSH,
 
+  MOST_PASSING_YARDS: constants.player_prop_types.GAME_MOST_PASSING_YARDS,
+  MOST_RECEIVING_YARDS: constants.player_prop_types.GAME_MOST_RECEIVING_YARDS,
+  MOST_RUSHING_YARDS: constants.player_prop_types.GAME_MOST_RUSHING_YARDS,
+
   ...alt_line_markets
 }
 
