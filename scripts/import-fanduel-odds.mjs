@@ -43,7 +43,59 @@ const run = async () => {
 
   log(`Getting odds for ${current_week_events.length} events`)
 
-  const supported_markets = Object.keys(fanduel.markets)
+  const handle_over_under_market = ({ market, player_row }) => {
+    const prop = {}
+    prop.pid = player_row.pid
+    prop.type = fanduel.markets[market.marketType]
+    prop.id = market.marketId
+    prop.timestamp = timestamp
+    prop.week = constants.season.week
+    prop.year = constants.season.year
+    prop.sourceid = constants.sources.FANDUEL_NJ
+
+    prop.ln = parseFloat(market.runners[0].handicap, 10)
+
+    for (const selection of market.runners) {
+      if (!selection.result.type) {
+        console.log(market)
+        console.log(selection)
+        console.log(fanduel.markets[market.marketType])
+      }
+      if (selection.result.type.toLowerCase() === 'over') {
+        prop.o = selection.winRunnerOdds.trueOdds.decimalOdds.decimalOdds
+        prop.o_am = selection.winRunnerOdds.americanDisplayOdds.americanOddsInt
+      } else if (selection.result.type.toLowerCase() === 'under') {
+        prop.u = selection.winRunnerOdds.trueOdds.decimalOdds.decimalOdds
+        prop.u_am = selection.winRunnerOdds.americanDisplayOdds.americanOddsInt
+      }
+    }
+    props.push(prop)
+  }
+
+  const handle_alt_line_market = ({ market, player_row }) => {
+    for (const selection of market.runners) {
+      const prop = {}
+      prop.pid = player_row.pid
+      prop.type = fanduel.markets[market.marketType]
+      prop.id = market.marketId
+      prop.timestamp = timestamp
+      prop.week = constants.season.week
+      prop.year = constants.season.year
+      prop.sourceid = constants.sources.FANDUEL_NJ
+
+      const runner_name_number = Number(
+        selection.runnerName.replace(/\D+/g, '')
+      )
+      prop.ln = runner_name_number - 0.5
+      prop.o = selection.winRunnerOdds.trueOdds.decimalOdds.decimalOdds
+      prop.o_am = selection.winRunnerOdds.americanDisplayOdds.americanOddsInt
+
+      props.u = null
+      props.u_am = null
+
+      props.push(prop)
+    }
+  }
 
   for (const event of current_week_events) {
     for (const tab of fanduel.tabs) {
@@ -51,10 +103,7 @@ const run = async () => {
 
       for (const market of Object.values(data.attachments.markets)) {
         // ignore unsuported markets
-        if (
-          !market.marketType ||
-          !supported_markets.includes(market.marketType)
-        ) {
+        if (!market.marketType || !fanduel.markets[market.marketType]) {
           continue
         }
 
@@ -75,29 +124,12 @@ const run = async () => {
           continue
         }
 
-        const prop = {}
-        prop.pid = player_row.pid
-        prop.type = fanduel.markets[market.marketType]
-        prop.id = market.marketId
-        prop.timestamp = timestamp
-        prop.week = constants.season.week
-        prop.year = constants.season.year
-        prop.sourceid = constants.sources.FANDUEL_NJ
-
-        prop.ln = parseFloat(market.runners[0].handicap, 10)
-
-        for (const selection of market.runners) {
-          if (selection.result.type.toLowerCase() === 'over') {
-            prop.o = selection.winRunnerOdds.trueOdds.decimalOdds.decimalOdds
-            prop.o_am =
-              selection.winRunnerOdds.americanDisplayOdds.americanOddsInt
-          } else if (selection.result.type.toLowerCase() === 'under') {
-            prop.u = selection.winRunnerOdds.trueOdds.decimalOdds.decimalOdds
-            prop.u_am =
-              selection.winRunnerOdds.americanDisplayOdds.americanOddsInt
-          }
+        const is_alt_line_market = fanduel.alt_line_markets[market.marketType]
+        if (is_alt_line_market) {
+          handle_alt_line_market({ market, player_row })
+        } else {
+          handle_over_under_market({ market, player_row })
         }
-        props.push(prop)
       }
     }
 
