@@ -11,6 +11,71 @@ const nfl_game_compeition_id = 12282733
 
 export const tabs = ['passing-props', 'receiving-props', 'rushing-props']
 
+export const alt_line_markets = {
+  'PLAYER_A_-_ALT_PASSING_YARDS':
+    constants.player_prop_types.GAME_ALT_PASSING_YARDS,
+  'PLAYER_B_-_ALT_PASSING_YARDS':
+    constants.player_prop_types.GAME_ALT_PASSING_YARDS,
+  'PLAYER_C_-_ALT_PASSING_YARDS':
+    constants.player_prop_types.GAME_ALT_PASSING_YARDS,
+  'PLAYER_D_-_ALT_PASSING_YARDS':
+    constants.player_prop_types.GAME_ALT_PASSING_YARDS,
+
+  'PLAYER_A_-_ALT_RUSH_YARDS':
+    constants.player_prop_types.GAME_ALT_RUSHING_YARDS,
+  'PLAYER_B_-_ALT_RUSH_YARDS':
+    constants.player_prop_types.GAME_ALT_RUSHING_YARDS,
+  'PLAYER_C_-_ALT_RUSH_YARDS':
+    constants.player_prop_types.GAME_ALT_RUSHING_YARDS,
+  'PLAYER_D_-_ALT_RUSH_YARDS':
+    constants.player_prop_types.GAME_ALT_RUSHING_YARDS,
+  'PLAYER_E_-_ALT_RUSH_YARDS':
+    constants.player_prop_types.GAME_ALT_RUSHING_YARDS,
+  'PLAYER_F_-_ALT_RUSH_YARDS':
+    constants.player_prop_types.GAME_ALT_RUSHING_YARDS,
+  'PLAYER_G_-_ALT_RUSH_YARDS':
+    constants.player_prop_types.GAME_ALT_RUSHING_YARDS,
+  'PLAYER_H_-_ALT_RUSH_YARDS':
+    constants.player_prop_types.GAME_ALT_RUSHING_YARDS,
+  'PLAYER_I_-_ALT_RUSH_YARDS':
+    constants.player_prop_types.GAME_ALT_RUSHING_YARDS,
+  'PLAYER_J_-_ALT_RUSH_YARDS':
+    constants.player_prop_types.GAME_ALT_RUSHING_YARDS,
+  'PLAYER_K_-_ALT_RUSH_YARDS':
+    constants.player_prop_types.GAME_ALT_RUSHING_YARDS,
+  'PLAYER_L_-_ALT_RUSH_YARDS':
+    constants.player_prop_types.GAME_ALT_RUSHING_YARDS,
+  'PLAYER_M_-_ALT_RUSH_YARDS':
+    constants.player_prop_types.GAME_ALT_RUSHING_YARDS,
+
+  'PLAYER_A_-_ALT_RECEIVING_YARDS':
+    constants.player_prop_types.GAME_ALT_RECEIVING_YARDS,
+  'PLAYER_B_-_ALT_RECEIVING_YARDS':
+    constants.player_prop_types.GAME_ALT_RECEIVING_YARDS,
+  'PLAYER_C_-_ALT_RECEIVING_YARDS':
+    constants.player_prop_types.GAME_ALT_RECEIVING_YARDS,
+  'PLAYER_D_-_ALT_RECEIVING_YARDS':
+    constants.player_prop_types.GAME_ALT_RECEIVING_YARDS,
+  'PLAYER_E_-_ALT_RECEIVING_YARDS':
+    constants.player_prop_types.GAME_ALT_RECEIVING_YARDS,
+  'PLAYER_F_-_ALT_RECEIVING_YARDS':
+    constants.player_prop_types.GAME_ALT_RECEIVING_YARDS,
+  'PLAYER_G_-_ALT_RECEIVING_YARDS':
+    constants.player_prop_types.GAME_ALT_RECEIVING_YARDS,
+  'PLAYER_H_-_ALT_RECEIVING_YARDS':
+    constants.player_prop_types.GAME_ALT_RECEIVING_YARDS,
+  'PLAYER_I_-_ALT_RECEIVING_YARDS':
+    constants.player_prop_types.GAME_ALT_RECEIVING_YARDS,
+  'PLAYER_J_-_ALT_RECEIVING_YARDS':
+    constants.player_prop_types.GAME_ALT_RECEIVING_YARDS,
+  'PLAYER_K_-_ALT_RECEIVING_YARDS':
+    constants.player_prop_types.GAME_ALT_RECEIVING_YARDS,
+  'PLAYER_L_-_ALT_RECEIVING_YARDS':
+    constants.player_prop_types.GAME_ALT_RECEIVING_YARDS,
+  'PLAYER_M_-_ALT_RECEIVING_YARDS':
+    constants.player_prop_types.GAME_ALT_RECEIVING_YARDS
+}
+
 export const markets = {
   PLAYER_A_TOTAL_PASSING_YARDS: constants.player_prop_types.GAME_PASSING_YARDS,
   PLAYER_B_TOTAL_PASSING_YARDS: constants.player_prop_types.GAME_PASSING_YARDS,
@@ -122,7 +187,9 @@ export const markets = {
   PLAYER_A_LONGEST_RUSH: constants.player_prop_types.GAME_LONGEST_RUSH,
   PLAYER_B_LONGEST_RUSH: constants.player_prop_types.GAME_LONGEST_RUSH,
   PLAYER_C_LONGEST_RUSH: constants.player_prop_types.GAME_LONGEST_RUSH,
-  PLAYER_D_LONGEST_RUSH: constants.player_prop_types.GAME_LONGEST_RUSH
+  PLAYER_D_LONGEST_RUSH: constants.player_prop_types.GAME_LONGEST_RUSH,
+
+  ...alt_line_markets
 }
 
 export const getEvents = async () => {
