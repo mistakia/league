@@ -2208,14 +2208,14 @@ CREATE TABLE `props` (
   `year` smallint(4) NOT NULL,
   `type` tinyint(3) NOT NULL,
   `id` varchar(100) NOT NULL,
-  `ln` decimal(4,1) NOT NULL,
+  `ln` decimal(4,1) DEFAULT NULL,
   `o` decimal(5,2) NOT NULL,
   `u` decimal(5,2) DEFAULT NULL,
   `o_am` SMALLINT NOT NULL,
   `u_am` SMALLINT DEFAULT NULL,
   `sourceid` int(6) NOT NULL,
   `timestamp` int(11) NOT NULL,
-  UNIQUE KEY `prop` (`sourceid`, `id`, `pid`, `week`, `year`, `type`, `timestamp`)
+  UNIQUE KEY `prop` (`sourceid`, `id`, `pid`, `week`, `year`, `type`, `ln`, `timestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
