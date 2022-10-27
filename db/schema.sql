@@ -1180,8 +1180,8 @@ CREATE TABLE `nfl_plays` (
   `intp` varchar(7) DEFAULT NULL,               -- intercepting player
   `intp_gsis` varchar(36) DEFAULT NULL,         -- intercepting player gsis
 
-  `yds` varchar(3) DEFAULT NULL,                -- yardage
-  `yds_gained` varchar(3) DEFAULT NULL,         -- yardage gained (or lost) by the possessing team, excluding yards gained via fumble recoveries and laterals
+  `yds` tinyint(3) DEFAULT NULL,                -- yardage
+  `yds_gained` tinyint(3) DEFAULT NULL,         -- yardage gained (or lost) by the possessing team, excluding yards gained via fumble recoveries and laterals
 
   `fum` tinyint(1) DEFAULT NULL,                -- fumble occured
   `fuml` tinyint(1) DEFAULT NULL,               -- fumble lost
