@@ -134,7 +134,15 @@ const handle_alt_line_prop = async (prop) => {
     if (!last_prop) {
       message += ` opened at ${ln} (${o_am})`
     } else {
-      message += ` odds changed from ${last_prop.o_am} to ${o_am}`
+      const delta = last_prop.o_am - o_am
+      const delta_pct = Math.abs(delta) / Math.abs(last_prop.o_am)
+
+      // do not send message if change is less than 1%
+      if (delta_pct < 0.02) {
+        return
+      }
+
+      message += ` ${ln} odds changed from ${last_prop.o_am} to ${o_am}`
     }
 
     message += ` on ${constants.sourcesTitle[sourceid]} market`
@@ -187,6 +195,14 @@ const handle_leader_prop = async (prop) => {
     if (!last_prop) {
       message += ` opened at ${o_am}`
     } else {
+      const delta = last_prop.o_am - o_am
+      const delta_pct = Math.abs(delta) / Math.abs(last_prop.o_am)
+
+      // do not send message if change is less than 1%
+      if (delta_pct < 0.02) {
+        return
+      }
+
       message += ` odds changed from ${last_prop.o_am} to ${o_am}`
     }
 
