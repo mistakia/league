@@ -1335,9 +1335,9 @@ export const player_prop_type_desc = {
   17: 'Longest Rec',
   18: 'Anytime TDs',
   19: 'Longest Rush',
-  20: 'Pass Yards',
-  21: 'Rush Yards',
-  22: 'Recv Yards',
+  20: 'Alt Pass Yards',
+  21: 'Alt Rush Yards',
+  22: 'Alt Recv Yards',
   23: 'Most Pass Yards (game)',
   24: 'Most Rush Yards (game)',
   25: 'Most Recv Yards (game)'
