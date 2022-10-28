@@ -1351,7 +1351,7 @@ export const player_prop_type_desc = {
   25: 'Most Recv Yards (game)',
   26: 'Most Pass Yards (sunday)',
   27: 'Most Rush Yards (sunday)',
-  28: 'Most Rush Yards (sunday)'
+  28: 'Most Recv Yards (sunday)'
 }
 
 export const sources = {
