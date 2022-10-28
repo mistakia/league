@@ -11,6 +11,22 @@ const nfl_game_compeition_id = 12282733
 
 export const tabs = ['passing-props', 'receiving-props', 'rushing-props']
 
+export const leader_market_names = {
+  'Most Passing Yards of Game':
+    constants.player_prop_types.GAME_MOST_PASSING_YARDS,
+  'Most Receiving Yards of Game':
+    constants.player_prop_types.GAME_MOST_RECEIVING_YARDS,
+  'Most Rushing Yards of Game':
+    constants.player_prop_types.GAME_MOST_RUSHING_YARDS,
+
+  'Most Passing Yards - Sunday Only':
+    constants.player_prop_types.SUNDAY_MOST_PASSING_YARDS,
+  'Most Receiving Yards - Sunday Only':
+    constants.player_prop_types.SUNDAY_MOST_RECEIVING_YARDS,
+  'Most Rushing Yards - Sunday Only':
+    constants.player_prop_types.SUNDAY_MOST_RUSHING_YARDS
+}
+
 export const alt_line_markets = {
   'PLAYER_A_-_ALT_PASSING_YARDS':
     constants.player_prop_types.GAME_ALT_PASSING_YARDS,
@@ -221,4 +237,23 @@ export const getEventTab = async ({ eventId, tab }) => {
   const data = await res.json()
 
   return data
+}
+
+export const getWeeklySpecials = async () => {
+  const url = `${config.fanduel_api_url}/content-managed-page?betexRegion=GBR&capiJurisdiction=intl&currencyCode=USD&exchangeLocale=en_US&includePrices=true&includeRaceCards=false&includeSeo=true&language=en&regionCode=NAMERICA&timezone=America%2FNew_York&includeMarketBlurbs=true&_ak=FhMFpcPWXMeyZxOx&page=CUSTOM&customPageId=nfl`
+
+  log(`fetching ${url}`)
+  const res = await fetch(url)
+  const data = await res.json()
+
+  const market_names = [
+    'Most Passing Yards - Sunday Only',
+    'Most Receiving Yards - Sunday Only',
+    'Most Rushing Yards - Sunday Only'
+  ]
+  const filtered = Object.values(data.attachments.markets).filter((m) =>
+    market_names.includes(m.marketName)
+  )
+
+  return filtered
 }

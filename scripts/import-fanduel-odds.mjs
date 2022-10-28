@@ -113,7 +113,7 @@ const run = async () => {
 
       const prop = {}
       prop.pid = player_row.pid
-      prop.type = fanduel.markets[market.marketType]
+      prop.type = fanduel.leader_market_names[market.marketName]
       prop.id = market.marketId
       prop.timestamp = timestamp
       prop.week = constants.season.week
@@ -173,6 +173,11 @@ const run = async () => {
     }
 
     await wait(5000)
+  }
+
+  const weekly_specials_markets = await fanduel.getWeeklySpecials()
+  for (const market of weekly_specials_markets) {
+    await handle_leader_market(market)
   }
 
   log(`Could not locate ${missing.length} players`)

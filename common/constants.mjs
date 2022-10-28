@@ -1299,7 +1299,11 @@ export const player_prop_types = {
 
   GAME_MOST_PASSING_YARDS: 23,
   GAME_MOST_RUSHING_YARDS: 24,
-  GAME_MOST_RECEIVING_YARDS: 25
+  GAME_MOST_RECEIVING_YARDS: 25,
+
+  SUNDAY_MOST_PASSING_YARDS: 26,
+  SUNDAY_MOST_RUSHING_YARDS: 27,
+  SUNDAY_MOST_RECEIVING_YARDS: 28
 }
 
 export const player_prop_types_alts = [
@@ -1311,7 +1315,11 @@ export const player_prop_types_alts = [
 export const player_prop_types_leaders = [
   player_prop_types.GAME_MOST_PASSING_YARDS,
   player_prop_types.GAME_MOST_RUSHING_YARDS,
-  player_prop_types.GAME_MOST_RECEIVING_YARDS
+  player_prop_types.GAME_MOST_RECEIVING_YARDS,
+
+  player_prop_types.SUNDAY_MOST_PASSING_YARDS,
+  player_prop_types.SUNDAY_MOST_RUSHING_YARDS,
+  player_prop_types.SUNDAY_MOST_RECEIVING_YARDS
 ]
 
 export const player_prop_type_desc = {
@@ -1340,7 +1348,10 @@ export const player_prop_type_desc = {
   22: 'Alt Recv Yards',
   23: 'Most Pass Yards (game)',
   24: 'Most Rush Yards (game)',
-  25: 'Most Recv Yards (game)'
+  25: 'Most Recv Yards (game)',
+  26: 'Most Pass Yards (sunday)',
+  27: 'Most Rush Yards (sunday)',
+  28: 'Most Rush Yards (sunday)'
 }
 
 export const sources = {
