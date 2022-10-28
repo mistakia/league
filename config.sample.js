@@ -18,6 +18,7 @@ module.exports = {
   draftkings_api_v5_url: '',
   caesars_api_v3_url: '',
   fanduel_api_url: '',
+  betmgm_api_url: '',
   discord_props_change_channel_webhook_url: '',
   discord_props_open_channel_webhook_url: '',
   email: {

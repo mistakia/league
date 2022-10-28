@@ -1214,7 +1214,8 @@ export const jobs = {
   PROCESS_PLAYOFFS: 53,
 
   CAESARS_ODDS: 54,
-  FANDUEL_ODDS: 55
+  FANDUEL_ODDS: 55,
+  BETMGM_ODDS: 56
 }
 
 export const jobDetails = {
@@ -1268,7 +1269,8 @@ export const jobDetails = {
   52: 'Import Plays nflfastR',
   53: 'Process Playoffs',
   54: 'Caesars Player Prop Odds',
-  55: 'Fanduel Player Prop Odds'
+  55: 'Fanduel Player Prop Odds',
+  56: 'BetMGM Player Prop Odds'
 }
 
 export const player_prop_types = {
@@ -1377,7 +1379,8 @@ export const sources = {
 
   FBG_CONSENSUS: 19,
   CAESARS_VA: 20,
-  FANDUEL_NJ: 21
+  FANDUEL_NJ: 21,
+  BETMGM_US: 22
 }
 
 export const sourcesTitle = {
@@ -1402,7 +1405,8 @@ export const sourcesTitle = {
   18: 'Average',
   19: 'Footballguys',
   20: 'Caesars (VA)',
-  21: 'Fanduel (NJ)'
+  21: 'Fanduel (NJ)',
+  22: 'BetMGM (US)'
 }
 
 export const rankings = {

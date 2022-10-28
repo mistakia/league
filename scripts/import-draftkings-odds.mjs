@@ -10,8 +10,6 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-draft-kings')
 debug.enable('import-draft-kings,get-player,draftkings')
 
-const timestamp = Math.round(Date.now() / 1000)
-
 const run = async () => {
   // do not pull in reports outside of the NFL season
   if (
@@ -22,6 +20,8 @@ const run = async () => {
   ) {
     return
   }
+
+  const timestamp = Math.round(Date.now() / 1000)
 
   const missing = []
   const props = []
