@@ -11,8 +11,6 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-fanduel')
 debug.enable('import-fanduel,get-player,fanduel')
 
-const timestamp = Math.round(Date.now() / 1000)
-
 const formatPlayerName = (str) => {
   str = str.split('-')[0]
   return str.trim()
@@ -28,6 +26,8 @@ const run = async () => {
   ) {
     return
   }
+
+  const timestamp = Math.round(Date.now() / 1000)
 
   const missing = []
   const props = []
