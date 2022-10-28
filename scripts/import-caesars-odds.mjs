@@ -11,8 +11,6 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-caesars')
 debug.enable('import-caesars,get-player,caesars')
 
-const timestamp = Math.round(Date.now() / 1000)
-
 const formatTeamName = (str) => {
   str = str.replaceAll('|', '')
   return team_aliases[str]
@@ -28,6 +26,8 @@ const run = async () => {
   ) {
     return
   }
+
+  const timestamp = Math.round(Date.now() / 1000)
 
   const missing = []
   const props = []
