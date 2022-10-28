@@ -134,7 +134,7 @@ export default function AppMenu({
                 {isLoggedIn ? (
                   <a onClick={logout}>Logout</a>
                 ) : (
-                  <NavLink to='/login'>Login/Register</NavLink>
+                  <NavLink to='/login'>Login</NavLink>
                 )}
               </div>
             </div>
