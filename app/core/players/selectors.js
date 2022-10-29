@@ -67,7 +67,7 @@ export const getSelectedViewGroupedFields = createSelector(
     const groups = []
     for (const field of selected_players_view.fields) {
       const field_info = fields[field]
-      const group = groups.at(-1)
+      const group = groups[groups.length - 1]
       if (!group || group.category !== field_info.category) {
         groups.push({
           category: field_info.category,
