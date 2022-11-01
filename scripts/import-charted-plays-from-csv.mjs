@@ -83,9 +83,8 @@ const formatPlay = (play) => ({
   sep: play.sep || null
 })
 
-const run = async () => {
+const run = async ({ dry = false, filepath } = {}) => {
   // read csv file
-  const filepath = argv.path
   if (!filepath) {
     throw new Error('missing --path')
   }
@@ -120,7 +119,7 @@ const run = async () => {
     }
     const dbPlay = await getPlay(opts)
 
-    if (dbPlay) {
+    if (dbPlay && !dry) {
       await db('nfl_plays').update(formatPlay(cPlay)).where({
         esbid: dbPlay.esbid,
         playId: dbPlay.playId
@@ -139,7 +138,7 @@ const main = async () => {
   debug.enable('import-charted-plays-from-csv')
   let error
   try {
-    await run()
+    await run({ dry: argv.dry, filepath: argv.path })
   } catch (err) {
     error = err
     console.log(error)
