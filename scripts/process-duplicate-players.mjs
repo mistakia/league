@@ -9,7 +9,10 @@ debug.enable('process-duplicate-players,update-player')
 
 const processDuplicatePlayers = async () => {
   const duplicates = await db('player')
-    .select('player.*', db.raw('CONCAT(formatted, "__", dob, "__", start) as "group_id"'))
+    .select(
+      'player.*',
+      db.raw('CONCAT(formatted, "__", dob, "__", start) as "group_id"')
+    )
     .count('* as count')
     .groupBy('group_id')
     .having('count', '>', 1)
