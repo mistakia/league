@@ -10,11 +10,6 @@ import { isMain, wait } from '#utils'
 import config from '#config'
 
 const argv = yargs(hideBin(process.argv)).argv
-const currentRegularSeasonWeek = Math.max(
-  dayjs().day() === 2 ? constants.season.week - 1 : constants.season.week,
-  1
-)
-
 const log = debug('import-plays-ngs')
 
 const getPlayData = (play) => {
@@ -71,14 +66,18 @@ const getPlayStatData = (playStat) => ({
 
 const importPlaysForWeek = async ({
   year = constants.season.year,
-  week = currentRegularSeasonWeek,
+  week,
   seas_type = 'REG',
   force_update = false
 } = {}) => {
+  const current_week = Math.max(
+    dayjs().day() === 2 ? constants.season.week - 1 : constants.season.week,
+    1
+  )
+
+  week = week || current_week
   const isCurrentWeek =
-    !force_update &&
-    year === constants.season.year &&
-    week === currentRegularSeasonWeek
+    !force_update && year === constants.season.year && week === current_week
 
   log(
     `importing plays for week ${week} ${year} ${seas_type} (force_update: ${force_update}, isCurrentWeek: ${isCurrentWeek}`
