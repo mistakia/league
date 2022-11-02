@@ -8,10 +8,15 @@ const log = debug('prizepicks')
 debug.enable('prizepicks')
 
 export const stats = {
-  // 'Pass+Rush+Rec TDs'
+  // 'Pass+Rush+Rec TDs':
   'Pass Yards': constants.player_prop_types.GAME_PASSING_YARDS,
   'Rush Yards': constants.player_prop_types.GAME_RUSHING_YARDS,
-  'Receiving Yards': constants.player_prop_types.GAME_RECEIVING_YARDS
+  'Receiving Yards': constants.player_prop_types.GAME_RECEIVING_YARDS,
+  'Pass Completions': constants.player_prop_types.GAME_PASSING_COMPLETIONS,
+  'Pass Attempts': constants.player_prop_types.GAME_PASSING_ATTEMPTS,
+  // 'Pass+Rush Yds':
+  'Rush+Rec Yds': constants.player_prop_types.GAME_SCRIMMAGE_YARDS,
+  Receptions: constants.player_prop_types.GAME_RECEPTIONS
 }
 
 export const getPlayerProps = async ({ page = 1 }) => {
