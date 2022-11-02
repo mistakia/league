@@ -3,7 +3,7 @@ import config from '#config'
 import { constants } from '#common'
 
 import sendDiscordMessage from './send-discord-message.mjs'
-import wait from './wait.mjs'
+import { wait } from './wait.mjs'
 
 const discord_config_exists =
   config.discord_props_change_channel_webhook_url &&
