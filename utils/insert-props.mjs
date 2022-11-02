@@ -3,6 +3,7 @@ import config from '#config'
 import { constants } from '#common'
 
 import sendDiscordMessage from './send-discord-message.mjs'
+import wait from './wait.mjs'
 
 const discord_config_exists =
   config.discord_props_change_channel_webhook_url &&
@@ -49,7 +50,10 @@ const handle_over_under_prop = async (prop) => {
     let message = `${player_row.fname} ${player_row.lname} (${player_row.cteam}) ${constants.player_prop_type_desc[type]}`
 
     if (!last_prop) {
-      message += ` opened at ${ln} (Over: ${o_am} / Under: ${u_am})`
+      message += ` opened at ${ln}`
+      if (o_am && u_am) {
+        message += ` (Over: ${o_am} / Under: ${u_am})`
+      }
     } else {
       const line_changed = last_prop.ln !== ln
 
@@ -91,6 +95,7 @@ const handle_over_under_prop = async (prop) => {
       : config.discord_props_open_channel_webhook_url
 
     await sendDiscordMessage({ webhookUrl, message })
+    await wait(1000)
   }
 }
 
@@ -151,6 +156,7 @@ const handle_alt_line_prop = async (prop) => {
       : config.discord_props_open_channel_webhook_url
 
     await sendDiscordMessage({ webhookUrl, message })
+    await wait(1000)
   }
 }
 
@@ -210,6 +216,7 @@ const handle_leader_prop = async (prop) => {
       : config.discord_props_open_channel_webhook_url
 
     await sendDiscordMessage({ webhookUrl, message })
+    await wait(1000)
   }
 }
 
