@@ -4,7 +4,7 @@ import { constants } from '#common'
 
 import sendDiscordMessage from './send-discord-message.mjs'
 import { wait } from './wait.mjs'
-import get_discord_webhook_url_for_prop_type from './get-webhook-url-for-prop-type.mjs'
+import get_discord_webhook_url_for_prop_type from './get-discord-webhook-url-for-prop-type.mjs'
 
 const discord_config_exists =
   config.discord_props_change_channel_webhook_url &&
