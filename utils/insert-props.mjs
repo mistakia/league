@@ -4,16 +4,19 @@ import { constants } from '#common'
 
 import sendDiscordMessage from './send-discord-message.mjs'
 import { wait } from './wait.mjs'
+import get_discord_webhook_url_for_prop_type from './get-webhook-url-for-prop-type.mjs'
 
 const discord_config_exists =
   config.discord_props_change_channel_webhook_url &&
   config.discord_props_open_channel_webhook_url
 
 const handle_over_under_prop = async (prop) => {
+  const result = { is_new: false, message: null }
+
   const { pid, week, year, type, sourceid, ln, o, u, o_am, u_am } = prop
 
   // get last prop
-  const results = await db('props')
+  const props_query = await db('props')
     .where({
       pid,
       year,
@@ -24,7 +27,8 @@ const handle_over_under_prop = async (prop) => {
     .orderBy('timestamp', 'desc')
     .limit(1)
 
-  const last_prop = results[0]
+  const last_prop = props_query[0]
+  result.is_new = !last_prop
 
   // if there is no last prop or if line/odds have changed, insert prop
   if (
@@ -47,12 +51,12 @@ const handle_over_under_prop = async (prop) => {
       return
     }
 
-    let message = `${player_row.fname} ${player_row.lname} (${player_row.cteam}) ${constants.player_prop_type_desc[type]}`
+    result.message = `${player_row.fname} ${player_row.lname} (${player_row.cteam}) ${constants.player_prop_type_desc[type]}`
 
     if (!last_prop) {
-      message += ` opened at ${ln}`
+      result.message += ` opened at ${ln}`
       if (o_am && u_am) {
-        message += ` (Over: ${o_am} / Under: ${u_am})`
+        result.message += ` (Over: ${o_am} / Under: ${u_am})`
       }
     } else {
       const line_changed = last_prop.ln !== ln
@@ -80,30 +84,27 @@ const handle_over_under_prop = async (prop) => {
       }
 
       if (changes.length > 1) {
-        message += ` ${changes
+        result.message += ` ${changes
           .slice(0, changes.length - 1)
           .join(', ')}, and ${changes.slice(-1)}`
       } else {
-        message += ` ${changes[0]}`
+        result.message += ` ${changes[0]}`
       }
     }
 
-    message += ` on ${constants.sourcesTitle[sourceid]} market (${year} Week ${week})`
+    result.message += ` on ${constants.sourcesTitle[sourceid]} market (${year} Week ${week})`
 
-    const webhookUrl = last_prop
-      ? config.discord_props_change_channel_webhook_url
-      : config.discord_props_open_channel_webhook_url
-
-    await sendDiscordMessage({ webhookUrl, message })
-    await wait(1000)
+    return result
   }
 }
 
 const handle_alt_line_prop = async (prop) => {
+  const result = { is_new: false, message: null }
+
   const { pid, week, year, type, sourceid, ln, o, o_am } = prop
 
   // get last prop
-  const results = await db('props')
+  const props_query = await db('props')
     .where({
       pid,
       year,
@@ -115,7 +116,8 @@ const handle_alt_line_prop = async (prop) => {
     .orderBy('timestamp', 'desc')
     .limit(1)
 
-  const last_prop = results[0]
+  const last_prop = props_query[0]
+  result.is_new = !last_prop
 
   // if there is no last prop or if line/odds have changed, insert prop
   if (!last_prop || last_prop.o !== o) {
@@ -133,10 +135,10 @@ const handle_alt_line_prop = async (prop) => {
       return
     }
 
-    let message = `${player_row.fname} ${player_row.lname} (${player_row.cteam}) ${constants.player_prop_type_desc[type]}`
+    result.message = `${player_row.fname} ${player_row.lname} (${player_row.cteam}) ${constants.player_prop_type_desc[type]}`
 
     if (!last_prop) {
-      message += ` opened at ${ln} (${o_am})`
+      result.message += ` opened at ${ln} (${o_am})`
     } else {
       const delta = last_prop.o_am - o_am
       const delta_pct = Math.abs(delta) / Math.abs(last_prop.o_am)
@@ -146,25 +148,22 @@ const handle_alt_line_prop = async (prop) => {
         return
       }
 
-      message += ` ${ln} odds changed from ${last_prop.o_am} to ${o_am}`
+      result.message += ` ${ln} odds changed from ${last_prop.o_am} to ${o_am}`
     }
 
-    message += ` on ${constants.sourcesTitle[sourceid]} market (${year} Week ${week})`
+    result.message += ` on ${constants.sourcesTitle[sourceid]} market (${year} Week ${week})`
 
-    const webhookUrl = last_prop
-      ? config.discord_props_change_channel_webhook_url
-      : config.discord_props_open_channel_webhook_url
-
-    await sendDiscordMessage({ webhookUrl, message })
-    await wait(1000)
+    return result
   }
 }
 
 const handle_leader_prop = async (prop) => {
+  const result = { is_new: false, message: null }
+
   const { pid, week, year, type, sourceid, o, o_am } = prop
 
   // get last prop
-  const results = await db('props')
+  const props_query = await db('props')
     .where({
       pid,
       year,
@@ -175,7 +174,8 @@ const handle_leader_prop = async (prop) => {
     .orderBy('timestamp', 'desc')
     .limit(1)
 
-  const last_prop = results[0]
+  const last_prop = props_query[0]
+  result.is_new = !last_prop
 
   // if there is no last prop or if line/odds have changed, insert prop
   if (!last_prop || last_prop.o !== o) {
@@ -193,10 +193,10 @@ const handle_leader_prop = async (prop) => {
       return
     }
 
-    let message = `${player_row.fname} ${player_row.lname} (${player_row.cteam}) ${constants.player_prop_type_desc[type]}`
+    result.message = `${player_row.fname} ${player_row.lname} (${player_row.cteam}) ${constants.player_prop_type_desc[type]}`
 
     if (!last_prop) {
-      message += ` opened at ${o_am}`
+      result.message += ` opened at ${o_am}`
     } else {
       const delta = last_prop.o_am - o_am
       const delta_pct = Math.abs(delta) / Math.abs(last_prop.o_am)
@@ -206,30 +206,93 @@ const handle_leader_prop = async (prop) => {
         return
       }
 
-      message += ` odds changed from ${last_prop.o_am} to ${o_am}`
+      result.message += ` odds changed from ${last_prop.o_am} to ${o_am}`
     }
 
-    message += ` on ${constants.sourcesTitle[sourceid]} market (${year} Week ${week})`
+    result.message += ` on ${constants.sourcesTitle[sourceid]} market (${year} Week ${week})`
 
-    const webhookUrl = last_prop
-      ? config.discord_props_change_channel_webhook_url
-      : config.discord_props_open_channel_webhook_url
-
-    await sendDiscordMessage({ webhookUrl, message })
-    await wait(1000)
+    return result
   }
 }
 
 async function insertProp(prop) {
   const is_alt_line_prop = constants.player_prop_types_alts.includes(prop.type)
   const is_leader_prop = constants.player_prop_types_leaders.includes(prop.type)
+  let result
   if (is_alt_line_prop) {
-    await handle_alt_line_prop(prop)
+    result = await handle_alt_line_prop(prop)
   } else if (is_leader_prop) {
-    await handle_leader_prop(prop)
+    result = await handle_leader_prop(prop)
   } else {
-    await handle_over_under_prop(prop)
+    result = await handle_over_under_prop(prop)
   }
+
+  if (!result || !result.message) {
+    return
+  }
+
+  if (result.is_new) {
+    // send message to general open channel
+    await sendDiscordMessage({
+      webhookUrl: config.discord_props_open_channel_webhook_url,
+      message: result.message
+    })
+
+    // throttle discord messages
+    await wait(1000)
+
+    if (is_alt_line_prop) {
+      // alt line open channel
+      await sendDiscordMessage({
+        webhookUrl: config.discord_props_open_alts_channel_webhook_url,
+        message: result.message
+      })
+    } else if (is_leader_prop) {
+      const is_sunday_leaders =
+        constants.player_prop_types_sunday_leaders.includes(prop.type)
+
+      if (is_sunday_leaders) {
+        // sunday leaders open channel
+        await sendDiscordMessage({
+          webhookUrl:
+            config.discord_props_open_sunday_leaders_channel_webhook_url,
+          message: result.message
+        })
+      } else {
+        // game leader open channel
+        await sendDiscordMessage({
+          webhookUrl:
+            config.discord_props_open_game_leaders_channel_webhook_url,
+          message: result.message
+        })
+      }
+    } else {
+      // over/under open channel
+      await sendDiscordMessage({
+        webhookUrl: config.discord_props_open_over_under_channel_webhook_url,
+        message: result.message
+      })
+    }
+
+    // throttle discord messages
+    await wait(1000)
+
+    const prop_type_webhook_url = get_discord_webhook_url_for_prop_type(
+      prop.type
+    )
+    await sendDiscordMessage({
+      webhookUrl: prop_type_webhook_url,
+      message: result.message
+    })
+  } else {
+    await sendDiscordMessage({
+      webhookUrl: config.discord_props_change_channel_webhook_url,
+      message: result.message
+    })
+  }
+
+  // throttle discord messages
+  await wait(1000)
 }
 
 export default async function (props) {
