@@ -1326,6 +1326,12 @@ export const player_prop_types_leaders = [
   player_prop_types.SUNDAY_MOST_RECEIVING_YARDS
 ]
 
+export const player_prop_types_sunday_leaders = [
+  player_prop_types.SUNDAY_MOST_PASSING_YARDS,
+  player_prop_types.SUNDAY_MOST_RUSHING_YARDS,
+  player_prop_types.SUNDAY_MOST_RECEIVING_YARDS
+]
+
 export const player_prop_type_desc = {
   1: 'Pass Yards (seas)',
   2: 'Rush Yards (seas)',
