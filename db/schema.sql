@@ -2211,8 +2211,8 @@ CREATE TABLE `props` (
   `ln` decimal(4,1) DEFAULT NULL,
   `o` decimal(5,2) DEFAULT NULL,
   `u` decimal(5,2) DEFAULT NULL,
-  `o_am` SMALLINT DEFAULT NULL,
-  `u_am` SMALLINT DEFAULT NULL,
+  `o_am` MEDIUMINT DEFAULT NULL,
+  `u_am` MEDIUMINT DEFAULT NULL,
   `sourceid` int(6) NOT NULL,
   `timestamp` int(11) NOT NULL,
   UNIQUE KEY `prop` (`sourceid`, `id`, `pid`, `week`, `year`, `type`, `ln`, `timestamp`)
