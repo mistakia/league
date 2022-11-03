@@ -29,7 +29,7 @@ const handle_over_under_prop = async (prop) => {
 
   const last_prop = props_query[0]
   result.activated =
-    (!last_prop && active) || (active && last_prop.active !== active)
+    (!last_prop && active) || (last_prop.active !== null && active && last_prop.active !== active)
   result.deactivated = !active && last_prop && last_prop.active
 
   // if there is no last prop or if line/odds have changed, insert prop
