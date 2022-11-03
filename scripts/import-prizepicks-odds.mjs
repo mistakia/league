@@ -97,7 +97,8 @@ const import_prizepicks_odds = async () => {
     await insertProps(props)
   }
 }
-const main = async () => {
+
+export const job = async () => {
   let error
   try {
     await import_prizepicks_odds()
@@ -112,7 +113,10 @@ const main = async () => {
     reason: error ? error.message : null,
     timestamp: Math.round(Date.now() / 1000)
   })
+}
 
+const main = async () => {
+  await job()
   process.exit()
 }
 

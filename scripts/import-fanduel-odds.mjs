@@ -196,7 +196,7 @@ const run = async () => {
   }
 }
 
-const main = async () => {
+export const job = async () => {
   let error
   try {
     await run()
@@ -211,7 +211,10 @@ const main = async () => {
     reason: error ? error.message : null,
     timestamp: Math.round(Date.now() / 1000)
   })
+}
 
+const main = async () => {
+  await job()
   process.exit()
 }
 
