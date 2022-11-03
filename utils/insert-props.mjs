@@ -318,6 +318,10 @@ async function insertProp(prop) {
 
 export default async function (props) {
   for (const prop of props) {
+    if (isNaN(prop.ln)) {
+      // TODO log
+      continue
+    }
     await insertProp(prop)
   }
 }
