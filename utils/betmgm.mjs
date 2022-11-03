@@ -13,7 +13,7 @@ export const markets = {
   12280: constants.player_prop_types.GAME_PASSING_ATTEMPTS,
   14923: constants.player_prop_types.GAME_RUSHING_ATTEMPTS,
   14925: constants.player_prop_types.GAME_LONGEST_RECEPTION,
-  // 23262: tackles and assists
+  23262: constants.player_prop_types.GAME_TACKLES_ASSISTS,
   27589: constants.player_prop_types.GAME_PASSING_YARDS,
   27590: constants.player_prop_types.GAME_RECEIVING_YARDS,
   27591: constants.player_prop_types.GAME_RUSHING_YARDS,

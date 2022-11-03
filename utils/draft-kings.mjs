@@ -72,6 +72,11 @@ export const categories = [
     subcategoryId: 9533,
     offerCategoryId: 1001,
     type: constants.player_prop_types.GAME_LONGEST_RUSH
+  },
+  {
+    subcategoryId: 9521,
+    offerCategoryId: 1002,
+    type: constants.player_prop_types.GAME_TACKLES_ASSISTS
   }
 ]
 
