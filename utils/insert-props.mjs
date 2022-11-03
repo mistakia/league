@@ -29,7 +29,11 @@ const handle_over_under_prop = async (prop) => {
 
   const last_prop = props_query[0]
   result.activated =
-    (!last_prop && active) || (last_prop && last_prop.active !== null && active && last_prop.active !== active)
+    (!last_prop && active) ||
+    (last_prop &&
+      last_prop.active !== null &&
+      active &&
+      Boolean(last_prop.active) !== active)
   result.deactivated = !active && last_prop && last_prop.active
 
   // if there is no last prop or if line/odds have changed, insert prop
@@ -38,7 +42,7 @@ const handle_over_under_prop = async (prop) => {
     last_prop.ln !== ln ||
     last_prop.o !== o ||
     last_prop.u !== u ||
-    last_prop.active !== active
+    Boolean(last_prop.active) !== active
   ) {
     await db('props').insert(prop)
 
@@ -65,7 +69,7 @@ const handle_over_under_prop = async (prop) => {
       const line_changed = last_prop.ln !== ln
 
       // TODO - temp fix to ignore odd movements
-      if (!line_changed && last_prop.active === active) {
+      if (!line_changed && Boolean(last_prop.active) === active) {
         return
       }
 
@@ -131,11 +135,15 @@ const handle_alt_line_prop = async (prop) => {
 
   const last_prop = props_query[0]
   result.activated =
-    (!last_prop && active) || (last_prop && last_prop.active !== null && active && last_prop.active !== active)
+    (!last_prop && active) ||
+    (last_prop &&
+      last_prop.active !== null &&
+      active &&
+      Boolean(last_prop.active) !== active)
   result.deactivated = !active && last_prop && last_prop.active
 
   // if there is no last prop or if line/odds have changed, insert prop
-  if (!last_prop || last_prop.o !== o || last_prop.active !== active) {
+  if (!last_prop || last_prop.o !== o || Boolean(last_prop.active) !== active) {
     await db('props').insert(prop)
 
     if (!discord_config_exists || process.env.NODE_ENV !== 'production') {
@@ -193,11 +201,15 @@ const handle_leader_prop = async (prop) => {
 
   const last_prop = props_query[0]
   result.activated =
-    (!last_prop && active) || (last_prop && last_prop.active !== null && active && last_prop.active !== active)
+    (!last_prop && active) ||
+    (last_prop &&
+      last_prop.active !== null &&
+      active &&
+      Boolean(last_prop.active) !== active)
   result.deactivated = !active && last_prop && last_prop.active
 
   // if there is no last prop or if line/odds have changed, insert prop
-  if (!last_prop || last_prop.o !== o || last_prop.active !== active) {
+  if (!last_prop || last_prop.o !== o || Boolean(last_prop.active) !== active) {
     await db('props').insert(prop)
 
     if (!discord_config_exists || process.env.NODE_ENV !== 'production') {
