@@ -22,6 +22,7 @@
     "#utils": "./utils/index.mjs",
     "#common": "./common/index.mjs",
     "#scripts/*": "./scripts/*",
+    "#jobs/*": "./jobs/*",
     "#league-import/*": "./league-import/*"
   },
   "dependencies": {
