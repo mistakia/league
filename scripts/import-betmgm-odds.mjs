@@ -54,6 +54,7 @@ const import_betmgm_odds = async () => {
     prop.week = constants.season.week
     prop.year = constants.season.year
     prop.sourceid = constants.sources.BETMGM_US
+    prop.active = true
 
     prop.ln = Number(player_prop.results[0].attr)
 

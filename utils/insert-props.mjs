@@ -11,9 +11,9 @@ const discord_config_exists =
   config.discord_props_open_channel_webhook_url
 
 const handle_over_under_prop = async (prop) => {
-  const result = { is_new: false, message: null }
+  const result = { activated: false, message: null, deactivated: false }
 
-  const { pid, week, year, type, sourceid, ln, o, u, o_am, u_am } = prop
+  const { pid, week, year, type, sourceid, ln, o, u, o_am, u_am, active } = prop
 
   // get last prop
   const props_query = await db('props')
@@ -28,14 +28,17 @@ const handle_over_under_prop = async (prop) => {
     .limit(1)
 
   const last_prop = props_query[0]
-  result.is_new = !last_prop
+  result.activated =
+    (!last_prop && active) || (active && last_prop.active !== active)
+  result.deactivated = !active && last_prop && last_prop.active
 
   // if there is no last prop or if line/odds have changed, insert prop
   if (
     !last_prop ||
     last_prop.ln !== ln ||
     last_prop.o !== o ||
-    last_prop.u !== u
+    last_prop.u !== u ||
+    last_prop.active !== active
   ) {
     await db('props').insert(prop)
 
@@ -62,7 +65,7 @@ const handle_over_under_prop = async (prop) => {
       const line_changed = last_prop.ln !== ln
 
       // TODO - temp fix to ignore odd movements
-      if (!line_changed) {
+      if (!line_changed && last_prop.active === active) {
         return
       }
 
@@ -72,7 +75,17 @@ const handle_over_under_prop = async (prop) => {
       const changes = []
 
       if (line_changed) {
+        if (result.activated) {
+          changes.push('reopened')
+        } else if (result.deactivated) {
+          changes.push('pulled')
+        }
+
         changes.push(`line changed from ${last_prop.ln} to ${ln}`)
+      } else if (result.activated) {
+        changes.push(`reopened at ${ln}`)
+      } else if (result.deactivated) {
+        changes.push('pulled')
       }
 
       if (under_odds_changed) {
@@ -99,9 +112,9 @@ const handle_over_under_prop = async (prop) => {
 }
 
 const handle_alt_line_prop = async (prop) => {
-  const result = { is_new: false, message: null }
+  const result = { activated: false, message: null, deactivated: false }
 
-  const { pid, week, year, type, sourceid, ln, o, o_am } = prop
+  const { pid, week, year, type, sourceid, ln, o, o_am, active } = prop
 
   // get last prop
   const props_query = await db('props')
@@ -117,10 +130,12 @@ const handle_alt_line_prop = async (prop) => {
     .limit(1)
 
   const last_prop = props_query[0]
-  result.is_new = !last_prop
+  result.activated =
+    (!last_prop && active) || (active && last_prop.active !== active)
+  result.deactivated = !active && last_prop && last_prop.active
 
   // if there is no last prop or if line/odds have changed, insert prop
-  if (!last_prop || last_prop.o !== o) {
+  if (!last_prop || last_prop.o !== o || last_prop.active !== active) {
     await db('props').insert(prop)
 
     if (!discord_config_exists || process.env.NODE_ENV !== 'production') {
@@ -137,8 +152,10 @@ const handle_alt_line_prop = async (prop) => {
 
     result.message = `${player_row.fname} ${player_row.lname} (${player_row.cteam}) ${constants.player_prop_type_desc[type]}`
 
-    if (!last_prop) {
+    if (result.activated) {
       result.message += ` opened at ${ln} (${o_am})`
+    } else if (result.deactivated) {
+      result.message += ` pulled at ${ln} (${o_am})`
     } else {
       const delta = last_prop.o_am - o_am
       const delta_pct = Math.abs(delta) / Math.abs(last_prop.o_am)
@@ -158,9 +175,9 @@ const handle_alt_line_prop = async (prop) => {
 }
 
 const handle_leader_prop = async (prop) => {
-  const result = { is_new: false, message: null }
+  const result = { activated: false, message: null, deactivated: false }
 
-  const { pid, week, year, type, sourceid, o, o_am } = prop
+  const { pid, week, year, type, sourceid, o, o_am, active } = prop
 
   // get last prop
   const props_query = await db('props')
@@ -175,10 +192,12 @@ const handle_leader_prop = async (prop) => {
     .limit(1)
 
   const last_prop = props_query[0]
-  result.is_new = !last_prop
+  result.activated =
+    (!last_prop && active) || (active && last_prop.active !== active)
+  result.deactivated = !active && last_prop && last_prop.active
 
   // if there is no last prop or if line/odds have changed, insert prop
-  if (!last_prop || last_prop.o !== o) {
+  if (!last_prop || last_prop.o !== o || last_prop.active !== active) {
     await db('props').insert(prop)
 
     if (!discord_config_exists || process.env.NODE_ENV !== 'production') {
@@ -195,8 +214,10 @@ const handle_leader_prop = async (prop) => {
 
     result.message = `${player_row.fname} ${player_row.lname} (${player_row.cteam}) ${constants.player_prop_type_desc[type]}`
 
-    if (!last_prop) {
+    if (result.activated) {
       result.message += ` opened at ${o_am}`
+    } else if (result.deactivated) {
+      result.message += ` pulled at ${o_am}`
     } else {
       const delta = last_prop.o_am - o_am
       const delta_pct = Math.abs(delta) / Math.abs(last_prop.o_am)
@@ -231,7 +252,7 @@ async function insertProp(prop) {
     return
   }
 
-  if (result.is_new) {
+  if (result.activated) {
     // send message to general open channel
     await sendDiscordMessage({
       webhookUrl: config.discord_props_open_channel_webhook_url,
