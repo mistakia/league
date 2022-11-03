@@ -20,7 +20,8 @@ export const markets = {
   RUSHING_RECEIVING_YARDS: constants.player_prop_types.GAME_SCRIMMAGE_YARDS,
   RECEPTIONS: constants.player_prop_types.GAME_RECEPTIONS,
   RECEIVING_YARDS: constants.player_prop_types.GAME_RECEIVING_YARDS,
-  LONGEST_RECEPTION: constants.player_prop_types.GAME_LONGEST_RECEPTION
+  LONGEST_RECEPTION: constants.player_prop_types.GAME_LONGEST_RECEPTION,
+  TACKLES_ASSISTS: constants.player_prop_types.GAME_TACKLES_ASSISTS
 }
 
 // TODO - FIND MISSING

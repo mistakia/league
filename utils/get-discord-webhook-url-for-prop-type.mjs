@@ -50,6 +50,9 @@ export default function (prop_type) {
     case constants.player_prop_types.GAME_LONGEST_RUSH:
       return config.discord_props_open_longest_rush_channel_webhook_url
 
+    case constants.player_prop_types.GAME_TACKLES_ASSISTS:
+      return config.discord_props_open_tackles_assists_channel_webhook_url
+
     default:
       return null
   }
