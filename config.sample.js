@@ -44,6 +44,7 @@ module.exports = {
   discord_props_open_longest_completion_channel_webhook_url: '',
   discord_props_open_longest_reception_channel_webhook_url: '',
   discord_props_open_longest_rush_channel_webhook_url: '',
+  discord_props_open_tackles_assists_channel_webhook_url: '',
 
   email: {
     api: '', // sendgrid api

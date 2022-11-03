@@ -9,7 +9,12 @@ debug.enable('fanduel')
 
 const nfl_game_compeition_id = 12282733
 
-export const tabs = ['passing-props', 'receiving-props', 'rushing-props']
+export const tabs = [
+  'passing-props',
+  'receiving-props',
+  'rushing-props',
+  'defensive-props'
+]
 
 export const leader_market_names = {
   'Most Passing Yards of Game':
@@ -210,6 +215,39 @@ export const markets = {
   PLAYER_B_LONGEST_RUSH: constants.player_prop_types.GAME_LONGEST_RUSH,
   PLAYER_C_LONGEST_RUSH: constants.player_prop_types.GAME_LONGEST_RUSH,
   PLAYER_D_LONGEST_RUSH: constants.player_prop_types.GAME_LONGEST_RUSH,
+
+  'PLAYER_A_TOTAL_TACKLES_+_ASSISTS':
+    constants.player_prop_types.GAME_TACKLES_ASSISTS,
+  'PLAYER_B_TOTAL_TACKLES_+_ASSISTS':
+    constants.player_prop_types.GAME_TACKLES_ASSISTS,
+  'PLAYER_C_TOTAL_TACKLES_+_ASSISTS':
+    constants.player_prop_types.GAME_TACKLES_ASSISTS,
+  'PLAYER_D_TOTAL_TACKLES_+_ASSISTS':
+    constants.player_prop_types.GAME_TACKLES_ASSISTS,
+  'PLAYER_E_TOTAL_TACKLES_+_ASSISTS':
+    constants.player_prop_types.GAME_TACKLES_ASSISTS,
+  'PLAYER_F_TOTAL_TACKLES_+_ASSISTS':
+    constants.player_prop_types.GAME_TACKLES_ASSISTS,
+  'PLAYER_G_TOTAL_TACKLES_+_ASSISTS':
+    constants.player_prop_types.GAME_TACKLES_ASSISTS,
+  'PLAYER_H_TOTAL_TACKLES_+_ASSISTS':
+    constants.player_prop_types.GAME_TACKLES_ASSISTS,
+  'PLAYER_I_TOTAL_TACKLES_+_ASSISTS':
+    constants.player_prop_types.GAME_TACKLES_ASSISTS,
+  'PLAYER_J_TOTAL_TACKLES_+_ASSISTS':
+    constants.player_prop_types.GAME_TACKLES_ASSISTS,
+  'PLAYER_K_TOTAL_TACKLES_+_ASSISTS':
+    constants.player_prop_types.GAME_TACKLES_ASSISTS,
+  'PLAYER_L_TOTAL_TACKLES_+_ASSISTS':
+    constants.player_prop_types.GAME_TACKLES_ASSISTS,
+  'PLAYER_M_TOTAL_TACKLES_+_ASSISTS':
+    constants.player_prop_types.GAME_TACKLES_ASSISTS,
+  'PLAYER_N_TOTAL_TACKLES_+_ASSISTS':
+    constants.player_prop_types.GAME_TACKLES_ASSISTS,
+  'PLAYER_O_TOTAL_TACKLES_+_ASSISTS':
+    constants.player_prop_types.GAME_TACKLES_ASSISTS,
+  'PLAYER_P_TOTAL_TACKLES_+_ASSISTS':
+    constants.player_prop_types.GAME_TACKLES_ASSISTS,
 
   ...leader_markets,
   ...alt_line_markets

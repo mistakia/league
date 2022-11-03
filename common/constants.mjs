@@ -1307,7 +1307,9 @@ export const player_prop_types = {
 
   SUNDAY_MOST_PASSING_YARDS: 26,
   SUNDAY_MOST_RUSHING_YARDS: 27,
-  SUNDAY_MOST_RECEIVING_YARDS: 28
+  SUNDAY_MOST_RECEIVING_YARDS: 28,
+
+  GAME_TACKLES_ASSISTS: 29
 }
 
 export const player_prop_types_alts = [
@@ -1361,7 +1363,8 @@ export const player_prop_type_desc = {
   25: 'Most Recv Yards (game)',
   26: 'Most Pass Yards (sunday)',
   27: 'Most Rush Yards (sunday)',
-  28: 'Most Recv Yards (sunday)'
+  28: 'Most Recv Yards (sunday)',
+  29: 'Tackles + Assists'
 }
 
 export const sources = {

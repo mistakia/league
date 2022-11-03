@@ -18,7 +18,7 @@ export const stats = {
   // 'Kicking Points':
   // 'Punts':
   // 'FG Made':
-  // 'Tackles+Ast':
+  'Tackles+Ast': constants.player_prop_types.GAME_TACKLES_ASSISTS,
   'Rush+Rec Yds': constants.player_prop_types.GAME_SCRIMMAGE_YARDS,
   Receptions: constants.player_prop_types.GAME_RECEPTIONS
 }
