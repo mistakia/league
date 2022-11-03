@@ -2215,6 +2215,7 @@ CREATE TABLE `props` (
   `u_am` MEDIUMINT DEFAULT NULL,
   `sourceid` int(6) NOT NULL,
   `timestamp` int(11) NOT NULL,
+  `active` tinyint(1) DEFAULT NULL,
   UNIQUE KEY `prop` (`sourceid`, `id`, `pid`, `week`, `year`, `type`, `ln`, `timestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
