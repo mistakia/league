@@ -2,7 +2,7 @@ import debug from 'debug'
 import cron from 'node-cron'
 
 import import_live_plays from '#jobs/import-live-plays.mjs'
-import finalize_week from '#jobs/finalize_week.mjs'
+import finalize_week from '#jobs/finalize-week.mjs'
 
 debug.enable('worker,import-plays-nfl,import-plays-ngs,import-live-plays')
 
