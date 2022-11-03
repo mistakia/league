@@ -106,6 +106,7 @@ const run = async () => {
       prop.week = constants.season.week
       prop.year = constants.season.year
       prop.sourceid = constants.sources.BETONLINE
+      prop.active = true
 
       switch (bet.type) {
         case 1:

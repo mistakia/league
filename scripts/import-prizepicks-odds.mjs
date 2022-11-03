@@ -70,6 +70,7 @@ const import_prizepicks_odds = async () => {
       prop.week = constants.season.week
       prop.year = constants.season.year
       prop.sourceid = constants.sources.PRIZEPICKS
+      prop.active = true
 
       prop.ln = Number(item.attributes.line_score)
 
