@@ -15,6 +15,10 @@ export const stats = {
   'Pass Completions': constants.player_prop_types.GAME_PASSING_COMPLETIONS,
   'Pass Attempts': constants.player_prop_types.GAME_PASSING_ATTEMPTS,
   // 'Pass+Rush Yds':
+  // 'Kicking Points':
+  // 'Punts':
+  // 'FG Made':
+  // 'Tackles+Ast':
   'Rush+Rec Yds': constants.player_prop_types.GAME_SCRIMMAGE_YARDS,
   Receptions: constants.player_prop_types.GAME_RECEPTIONS
 }
