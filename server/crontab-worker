@@ -1,13 +1,3 @@
-################################### ODDS ########################################
-
-## At every 15th minute on every day-of-week from Tuesday through Sunday in January, February, and every month from September through December.
-*/10 * * 1,2,9-12 2-7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-draftkings-odds.mjs &>> /var/log/league/import-draftkings.log
-*/10 * * 1,2,9-12 2-7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-caesars-odds.mjs &>> /var/log/league/import-caesars.log
-*/10 * * 1,2,9-12 2-7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-fanduel-odds.mjs &>> /var/log/league/import-fanduel.log
-*/10 * * 1,2,9-12 2-7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-betmgm-odds.mjs &>> /var/log/league/import-betmgm.log
-*/10 * * 1,2,9-12 2-7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-prizepicks-odds.mjs &>> /var/log/league/import-prizepicks.log
-# */15 * * 1,2,9-12 2-7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-betonline-odds.mjs &>> /var/log/league/import-betonline.log
-
 ################################### GAMES ########################################
 
 ## Update NFL Schedule At 03:00 every day (Regular Season)
