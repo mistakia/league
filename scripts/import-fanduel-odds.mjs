@@ -58,11 +58,19 @@ const run = async () => {
 
     for (const selection of market.runners) {
       if (selection.result.type.toLowerCase() === 'over') {
-        prop.o = selection.winRunnerOdds.trueOdds.decimalOdds.decimalOdds
-        prop.o_am = selection.winRunnerOdds.americanDisplayOdds.americanOddsInt
+        prop.o = Number(
+          selection.winRunnerOdds.trueOdds.decimalOdds.decimalOdds
+        )
+        prop.o_am = Number(
+          selection.winRunnerOdds.americanDisplayOdds.americanOddsInt
+        )
       } else if (selection.result.type.toLowerCase() === 'under') {
-        prop.u = selection.winRunnerOdds.trueOdds.decimalOdds.decimalOdds
-        prop.u_am = selection.winRunnerOdds.americanDisplayOdds.americanOddsInt
+        prop.u = Number(
+          selection.winRunnerOdds.trueOdds.decimalOdds.decimalOdds
+        )
+        prop.u_am = Number(
+          selection.winRunnerOdds.americanDisplayOdds.americanOddsInt
+        )
       }
     }
     props.push(prop)
@@ -84,8 +92,10 @@ const run = async () => {
         selection.runnerName.replace(/\D+/g, '')
       )
       prop.ln = runner_name_number - 0.5
-      prop.o = selection.winRunnerOdds.trueOdds.decimalOdds.decimalOdds
-      prop.o_am = selection.winRunnerOdds.americanDisplayOdds.americanOddsInt
+      prop.o = Number(selection.winRunnerOdds.trueOdds.decimalOdds.decimalOdds)
+      prop.o_am = Number(
+        selection.winRunnerOdds.americanDisplayOdds.americanOddsInt
+      )
 
       props.u = null
       props.u_am = null
@@ -124,8 +134,10 @@ const run = async () => {
       prop.active = true
 
       prop.ln = null
-      prop.o = selection.winRunnerOdds.trueOdds.decimalOdds.decimalOdds
-      prop.o_am = selection.winRunnerOdds.americanDisplayOdds.americanOddsInt
+      prop.o = Number(selection.winRunnerOdds.trueOdds.decimalOdds.decimalOdds)
+      prop.o_am = Number(
+        selection.winRunnerOdds.americanDisplayOdds.americanOddsInt
+      )
 
       props.u = null
       props.u_am = null
