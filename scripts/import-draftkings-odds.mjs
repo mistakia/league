@@ -26,15 +26,50 @@ const run = async () => {
   const missing = []
   const props = []
 
-  for (const category of draftkings.categories) {
-    const offers = await draftkings.getOffers(category)
+  const handle_over_under_market = async ({ offer, category }) => {
+    // TODO get event info to figure out team
+    let player_row
+    const params = { name: offer.outcomes[0].participant }
+    try {
+      player_row = await getPlayer(params)
+    } catch (err) {
+      log(err)
+    }
 
-    if (!offers) continue
+    if (!player_row) {
+      missing.push(params)
+      return
+    }
 
-    for (const offer of offers) {
+    const prop = {}
+    prop.pid = player_row.pid
+    prop.type = category.type
+    prop.id = offer.providerOfferId
+    prop.timestamp = timestamp
+    prop.week = constants.season.week
+    prop.year = constants.season.year
+    prop.sourceid = constants.sources.DRAFT_KINGS_VA
+    prop.active = Boolean(offer.isOpen)
+
+    prop.ln = parseFloat(offer.outcomes[0].line, 10)
+
+    for (const outcome of offer.outcomes) {
+      if (outcome.label === 'Over') {
+        prop.o = Number(outcome.oddsDecimal)
+        prop.o_am = Number(outcome.oddsAmerican)
+      } else if (outcome.label === 'Under') {
+        prop.u = Number(outcome.oddsDecimal)
+        prop.u_am = Number(outcome.oddsAmerican)
+      }
+    }
+    props.push(prop)
+  }
+
+  const handle_leader_market = async ({ offer, category }) => {
+    for (const outcome of offer.outcomes) {
       // TODO get event info to figure out team
       let player_row
-      const params = { name: offer.outcomes[0].participant }
+      const params = { name: outcome.participant }
       try {
         player_row = await getPlayer(params)
       } catch (err) {
@@ -56,18 +91,31 @@ const run = async () => {
       prop.sourceid = constants.sources.DRAFT_KINGS_VA
       prop.active = Boolean(offer.isOpen)
 
-      prop.ln = parseFloat(offer.outcomes[0].line, 10)
+      prop.ln = null
+      prop.o = Number(outcome.oddsDecimal)
+      prop.o_am = Number(outcome.oddsAmerican)
 
-      for (const outcome of offer.outcomes) {
-        if (outcome.label === 'Over') {
-          prop.o = Number(outcome.oddsDecimal)
-          prop.o_am = Number(outcome.oddsAmerican)
-        } else if (outcome.label === 'Under') {
-          prop.u = Number(outcome.oddsDecimal)
-          prop.u_am = Number(outcome.oddsAmerican)
-        }
-      }
+      prop.u = null
+      prop.u_am = null
+
       props.push(prop)
+    }
+  }
+
+  for (const category of draftkings.categories) {
+    const offers = await draftkings.getOffers(category)
+
+    if (!offers) continue
+
+    for (const offer of offers) {
+      const is_leader_market = constants.player_prop_types_leaders.includes(
+        category.type
+      )
+      if (is_leader_market) {
+        await handle_leader_market({ offer, category })
+      } else {
+        await handle_over_under_market({ offer, category })
+      }
     }
 
     await wait(5000)

@@ -1,6 +1,5 @@
 import debug from 'debug'
 import cron from 'node-cron'
-import config from '#config'
 
 import import_live_plays from '#jobs/import-live-plays.mjs'
 import import_live_odds from '#jobs/import-live-odds.mjs'
