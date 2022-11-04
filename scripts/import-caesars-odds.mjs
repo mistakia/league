@@ -83,7 +83,7 @@ const run = async () => {
       prop.week = constants.season.week
       prop.year = constants.season.year
       prop.sourceid = constants.sources.CAESARS_VA
-      prop.active = market.active
+      prop.active = Boolean(market.active)
 
       prop.ln = parseFloat(market.line, 10)
 
