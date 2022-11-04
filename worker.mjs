@@ -1,5 +1,6 @@
 import debug from 'debug'
 import cron from 'node-cron'
+import config from '#config'
 
 import import_live_plays from '#jobs/import-live-plays.mjs'
 import import_live_odds from '#jobs/import-live-odds.mjs'
@@ -9,6 +10,9 @@ const log = debug('worker')
 debug.enable(
   'worker,get-player,import-plays-nfl,import-plays-ngs,import-live-plays,import-live-odds,import-draft-kings,draftkings,import-caesars,caesars,import-fanduel,fanduel,import-betmgm,betmgm,import-prizepicks-odds,prizepicks'
 )
+
+log(config)
+log(`env: ${process.env.NODE_ENV}`)
 
 // monday
 cron.schedule('*/1 20-23 * 1,2,9-12 1', import_live_plays)
