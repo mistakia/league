@@ -13,7 +13,7 @@ const discord_config_exists =
 const handle_over_under_prop = async (prop) => {
   const result = { activated: false, message: null, deactivated: false }
 
-  const { pid, week, year, type, sourceid, ln, o, u, o_am, u_am, active } = prop
+  const { pid, week, year, type, sourceid, ln, o_am, u_am, active } = prop
 
   // get last prop
   const props_query = await db('props')
@@ -42,8 +42,8 @@ const handle_over_under_prop = async (prop) => {
   if (
     !last_prop ||
     last_prop.ln !== ln ||
-    last_prop.o !== o ||
-    last_prop.u !== u ||
+    last_prop.o_am !== o_am ||
+    last_prop.u_am !== u_am ||
     Boolean(last_prop.active) !== active
   ) {
     await db('props').insert(prop)
@@ -75,8 +75,8 @@ const handle_over_under_prop = async (prop) => {
         return
       }
 
-      const under_odds_changed = last_prop.u !== u
-      const over_odds_changed = last_prop.o !== o
+      const under_odds_changed = last_prop.u_am !== u_am
+      const over_odds_changed = last_prop.o_am !== o_am
 
       const changes = []
 
@@ -120,7 +120,7 @@ const handle_over_under_prop = async (prop) => {
 const handle_alt_line_prop = async (prop) => {
   const result = { activated: false, message: null, deactivated: false }
 
-  const { pid, week, year, type, sourceid, ln, o, o_am, active } = prop
+  const { pid, week, year, type, sourceid, ln, o_am, active } = prop
 
   // get last prop
   const props_query = await db('props')
@@ -145,7 +145,11 @@ const handle_alt_line_prop = async (prop) => {
   result.deactivated = !active && last_prop && last_prop.active
 
   // if there is no last prop or if line/odds have changed, insert prop
-  if (!last_prop || last_prop.o !== o || Boolean(last_prop.active) !== active) {
+  if (
+    !last_prop ||
+    last_prop.o_am !== o_am ||
+    Boolean(last_prop.active) !== active
+  ) {
     await db('props').insert(prop)
 
     if (!discord_config_exists || process.env.NODE_ENV !== 'production') {
@@ -187,7 +191,7 @@ const handle_alt_line_prop = async (prop) => {
 const handle_leader_prop = async (prop) => {
   const result = { activated: false, message: null, deactivated: false }
 
-  const { pid, week, year, type, sourceid, o, o_am, active } = prop
+  const { pid, week, year, type, sourceid, o_am, active } = prop
 
   // get last prop
   const props_query = await db('props')
@@ -211,7 +215,11 @@ const handle_leader_prop = async (prop) => {
   result.deactivated = !active && last_prop && last_prop.active
 
   // if there is no last prop or if line/odds have changed, insert prop
-  if (!last_prop || last_prop.o !== o || Boolean(last_prop.active) !== active) {
+  if (
+    !last_prop ||
+    last_prop.o_am !== o_am ||
+    Boolean(last_prop.active) !== active
+  ) {
     await db('props').insert(prop)
 
     if (!discord_config_exists || process.env.NODE_ENV !== 'production') {

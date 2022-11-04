@@ -60,11 +60,11 @@ const import_betmgm_odds = async () => {
 
     for (const result of player_prop.results) {
       if (result.name.value.includes('Over')) {
-        prop.o = result.odds
-        prop.o_am = result.americanOdds
+        prop.o = Number(result.odds)
+        prop.o_am = Number(result.americanOdds)
       } else if (result.name.value.includes('Under')) {
-        prop.u = result.odds
-        prop.u_am = result.americanOdds
+        prop.u = Number(result.odds)
+        prop.u_am = Number(result.americanOdds)
       }
     }
     props.push(prop)
