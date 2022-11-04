@@ -29,7 +29,9 @@ const handle_over_under_prop = async (prop) => {
 
   const last_prop = props_query[0]
   result.activated =
+    // check for a new prop that is currently active
     (!last_prop && active) ||
+    // check for existing prop that is currently active and previously was not
     (last_prop &&
       last_prop.active !== null &&
       active &&
