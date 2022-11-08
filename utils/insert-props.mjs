@@ -52,6 +52,10 @@ const handle_over_under_prop = async (prop) => {
       return
     }
 
+    if (prop.live) {
+      return
+    }
+
     const player_rows = await db('player').where({ pid })
     const player_row = player_rows[0]
 
@@ -156,6 +160,10 @@ const handle_alt_line_prop = async (prop) => {
       return
     }
 
+    if (prop.live) {
+      return
+    }
+
     const player_rows = await db('player').where({ pid })
     const player_row = player_rows[0]
 
@@ -223,6 +231,10 @@ const handle_leader_prop = async (prop) => {
     await db('props').insert(prop)
 
     if (!discord_config_exists || process.env.NODE_ENV !== 'production') {
+      return
+    }
+
+    if (prop.live) {
       return
     }
 

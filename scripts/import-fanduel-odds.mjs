@@ -53,6 +53,7 @@ const run = async () => {
     prop.year = constants.season.year
     prop.sourceid = constants.sources.FANDUEL_NJ
     prop.active = true
+    prop.live = Boolean(market.inPlay)
 
     prop.ln = parseFloat(market.runners[0].handicap, 10)
 
@@ -87,6 +88,7 @@ const run = async () => {
       prop.year = constants.season.year
       prop.sourceid = constants.sources.FANDUEL_NJ
       prop.active = true
+      prop.live = Boolean(market.inPlay)
 
       const runner_name_number = Number(
         selection.runnerName.replace(/\D+/g, '')
@@ -132,6 +134,7 @@ const run = async () => {
       prop.year = constants.season.year
       prop.sourceid = constants.sources.FANDUEL_NJ
       prop.active = true
+      prop.live = Boolean(market.inPlay)
 
       prop.ln = null
       prop.o = Number(selection.winRunnerOdds.trueOdds.decimalOdds.decimalOdds)

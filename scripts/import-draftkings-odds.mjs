@@ -50,6 +50,7 @@ const run = async () => {
     prop.year = constants.season.year
     prop.sourceid = constants.sources.DRAFT_KINGS_VA
     prop.active = Boolean(offer.isOpen)
+    prop.live = false
 
     prop.ln = parseFloat(offer.outcomes[0].line, 10)
 
@@ -90,6 +91,7 @@ const run = async () => {
       prop.year = constants.season.year
       prop.sourceid = constants.sources.DRAFT_KINGS_VA
       prop.active = Boolean(offer.isOpen)
+      prop.live = false
 
       prop.ln = null
       prop.o = Number(outcome.oddsDecimal)
