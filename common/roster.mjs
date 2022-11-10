@@ -49,6 +49,7 @@ export default class Roster {
         pos,
         rid: roster.uid,
         value: salary,
+        extensions,
         tag
       })
     }
@@ -90,8 +91,15 @@ export default class Roster {
   // used for inserting into rosters_players table
   get rosters_players() {
     const arr = []
-    for (const { slot, pid, pos, rid, tag } of this._players.values()) {
-      arr.push({ slot, pid, pos, rid, tag })
+    for (const {
+      slot,
+      pid,
+      pos,
+      rid,
+      tag,
+      extensions
+    } of this._players.values()) {
+      arr.push({ slot, pid, pos, rid, tag, extensions })
     }
     return arr
   }

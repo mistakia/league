@@ -205,7 +205,8 @@ export default class Auction {
         rid: r.uid,
         slot: constants.slots.BENCH,
         pos: playerInfo.pos,
-        pid
+        pid,
+        extensions: 0
       })
     } catch (err) {
       this.logger(err)

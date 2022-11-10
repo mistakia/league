@@ -89,7 +89,8 @@ export default async function ({
       pid,
       pos,
       slot: constants.slots.BENCH,
-      tag: constants.tags.TRANSITION
+      tag: constants.tags.TRANSITION,
+      extensions: 0
     })
 
     // add conditional pick to original team
