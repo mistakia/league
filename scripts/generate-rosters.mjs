@@ -86,7 +86,11 @@ const run = async ({ nextSeason = argv.season } = {}) => {
 
       const updates = overlapping_pids.filter((p) => {
         const item = existing_rows.find((i) => i.pid === p.pid)
-        return item.slot !== p.slot || item.tag !== p.tag
+        return (
+          item.slot !== p.slot ||
+          item.tag !== p.tag ||
+          item.extensions !== p.extensions
+        )
       })
 
       if (inserts.length) {
@@ -95,6 +99,7 @@ const run = async ({ nextSeason = argv.season } = {}) => {
 
       if (extra_pids.length) {
         await db('rosters_players')
+          .del()
           .where('rid', rid)
           .whereIn(
             'pid',

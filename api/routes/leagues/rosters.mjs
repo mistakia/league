@@ -83,7 +83,8 @@ router.post('/?', async (req, res) => {
       rid: roster.uid,
       pid,
       pos: player_row.pos,
-      slot: constants.slots.BENCH
+      slot: constants.slots.BENCH,
+      extensions: 0
     }
     await db('rosters_players').insert(rosterInsert)
 

@@ -102,7 +102,8 @@ export default async function ({ pid, release = [], lid, tid, userid }) {
     rid: rosterRow.uid,
     slot: constants.slots.BENCH,
     pid,
-    pos: poach_player_row.pos
+    pos: poach_player_row.pos,
+    extensions: 0
   })
 
   // award conditional pick to poached team

@@ -186,7 +186,8 @@ export default async function ({
     rid: roster.uid,
     pid,
     pos: player_row.pos,
-    slot
+    slot,
+    extensions: 0
   })
 
   // add player transaction
