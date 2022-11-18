@@ -296,6 +296,13 @@ async function insertProp(prop) {
     // throttle discord messages
     await wait(1000)
 
+    if (prop.sourceid === constants.sources.PRIZEPICKS) {
+      await sendDiscordMessage({
+        webhookUrl: config.discord_props_open_prizepicks_channel_webhook_url,
+        message: result.message
+      })
+    }
+
     if (is_alt_line_prop) {
       // alt line open channel
       await sendDiscordMessage({
