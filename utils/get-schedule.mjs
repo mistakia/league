@@ -152,6 +152,15 @@ const getSchedule = (teams) => {
     { away: team12, home: team11 }
   ])
 
+  weeks.push([
+    { away: team7, home: team1 },
+    { away: team8, home: team2 },
+    { away: team9, home: team3 },
+    { away: team10, home: team4 },
+    { away: team11, home: team5 },
+    { away: team12, home: team6 }
+  ])
+
   return shuffleArray(weeks)
 }
 
