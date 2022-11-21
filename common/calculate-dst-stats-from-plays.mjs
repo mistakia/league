@@ -89,12 +89,16 @@ const calculateDstStatsFromPlays = (plays, team) => {
 
       case 34:
         // punt return touchdown
-        dstStats.prtd += 1
+        if (fixTeam(playStat.clubCode) === team) {
+          dstStats.prtd += 1
+        }
         break
 
       case 36:
         // punt return touchdown (lateral)
-        dstStats.prtd += 1
+        if (fixTeam(playStat.clubCode) === team) {
+          dstStats.prtd += 1
+        }
         break
 
       case 46:
