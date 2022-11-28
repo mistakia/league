@@ -15,21 +15,10 @@ router.get('/props', async (req, res) => {
       return res.send(odds)
     }
 
-    const sub = db('props')
-      .select(db.raw('max(timestamp) AS maxtime, sourceid AS sid'))
-      .groupBy('sid')
-      .where({ week: constants.season.week, year: constants.season.year })
-
-    const data = await db
-      .select('*')
-      .from(db.raw('(' + sub.toString() + ') AS X'))
-      .innerJoin('props', function () {
-        this.on(function () {
-          this.on('sourceid', '=', 'sid')
-          this.andOn('timestamp', '=', 'maxtime')
-        })
-      })
-      .where({ week: constants.season.week, year: constants.season.year })
+    const data = await db('props_index').where({
+      week: constants.season.week,
+      year: constants.season.year
+    })
 
     cache.set(cacheKey, data, 300) // 5 mins
 

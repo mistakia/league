@@ -64,7 +64,7 @@ const import_prizepicks_odds = async () => {
 
       const prop = {}
       prop.pid = player_row.pid
-      prop.type = prizepicks.stats[item.attributes.stat_type]
+      prop.prop_type = prizepicks.stats[item.attributes.stat_type]
       prop.id = item.id
       prop.timestamp = timestamp
       prop.week = constants.season.week

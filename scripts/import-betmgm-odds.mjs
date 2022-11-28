@@ -48,7 +48,7 @@ const import_betmgm_odds = async () => {
 
     const prop = {}
     prop.pid = player_row.pid
-    prop.type = betmgm.markets[player_prop.templateId]
+    prop.prop_type = betmgm.markets[player_prop.templateId]
     prop.id = player_prop.id
     prop.timestamp = timestamp
     prop.week = constants.season.week

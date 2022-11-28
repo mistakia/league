@@ -77,7 +77,7 @@ const run = async () => {
 
       const prop = {}
       prop.pid = player_row.pid
-      prop.type = caesars.markets[market.metadata.marketCategory]
+      prop.prop_type = caesars.markets[market.metadata.marketCategory]
       prop.id = market.id
       prop.timestamp = timestamp
       prop.week = constants.season.week

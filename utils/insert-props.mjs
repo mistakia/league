@@ -10,10 +10,56 @@ const discord_config_exists =
   config.discord_props_change_channel_webhook_url &&
   config.discord_props_open_channel_webhook_url
 
+const format_index_prop = ({
+  pid,
+  week,
+  year,
+  prop_type,
+  ln,
+  o,
+  u,
+  o_am,
+  u_am,
+  sourceid,
+  timestamp
+}) => ({
+  pid,
+  week,
+  year,
+  prop_type,
+  ln,
+  o,
+  u,
+  o_am,
+  u_am,
+  sourceid,
+  timestamp
+})
+const save_prop = async ({ last_prop, prop }) => {
+  await db('props').insert(prop)
+
+  if (prop.active && !prop.live) {
+    if (!last_prop) {
+      await db('props_index').insert({
+        time_type: constants.player_prop_time_type.OPEN,
+        ...format_index_prop(prop)
+      })
+    } else {
+      await db('props_index')
+        .insert({
+          time_type: constants.player_prop_time_type.CLOSE,
+          ...format_index_prop(prop)
+        })
+        .onConflict()
+        .merge()
+    }
+  }
+}
+
 const handle_over_under_prop = async (prop) => {
   const result = { activated: false, message: null, deactivated: false }
 
-  const { pid, week, year, type, sourceid, ln, o_am, u_am, active } = prop
+  const { pid, week, year, prop_type, sourceid, ln, o_am, u_am, active } = prop
 
   // get last prop
   const props_query = await db('props')
@@ -21,7 +67,7 @@ const handle_over_under_prop = async (prop) => {
       pid,
       year,
       week,
-      type,
+      prop_type,
       sourceid
     })
     .orderBy('timestamp', 'desc')
@@ -46,7 +92,7 @@ const handle_over_under_prop = async (prop) => {
     last_prop.u_am !== u_am ||
     Boolean(last_prop.active) !== active
   ) {
-    await db('props').insert(prop)
+    await save_prop({ last_prop, prop })
 
     if (!discord_config_exists || process.env.NODE_ENV !== 'production') {
       return
@@ -64,7 +110,7 @@ const handle_over_under_prop = async (prop) => {
       return
     }
 
-    result.message = `${player_row.fname} ${player_row.lname} (${player_row.cteam}) ${constants.player_prop_type_desc[type]}`
+    result.message = `${player_row.fname} ${player_row.lname} (${player_row.cteam}) ${constants.player_prop_type_desc[prop_type]}`
 
     if (!last_prop) {
       result.message += ` opened at ${ln}`
@@ -124,7 +170,7 @@ const handle_over_under_prop = async (prop) => {
 const handle_alt_line_prop = async (prop) => {
   const result = { activated: false, message: null, deactivated: false }
 
-  const { pid, week, year, type, sourceid, ln, o_am, active } = prop
+  const { pid, week, year, prop_type, sourceid, ln, o_am, active } = prop
 
   // get last prop
   const props_query = await db('props')
@@ -132,7 +178,7 @@ const handle_alt_line_prop = async (prop) => {
       pid,
       year,
       week,
-      type,
+      prop_type,
       ln,
       sourceid
     })
@@ -154,7 +200,7 @@ const handle_alt_line_prop = async (prop) => {
     last_prop.o_am !== o_am ||
     Boolean(last_prop.active) !== active
   ) {
-    await db('props').insert(prop)
+    await save_prop({ last_prop, prop })
 
     if (!discord_config_exists || process.env.NODE_ENV !== 'production') {
       return
@@ -172,7 +218,7 @@ const handle_alt_line_prop = async (prop) => {
       return
     }
 
-    result.message = `${player_row.fname} ${player_row.lname} (${player_row.cteam}) ${constants.player_prop_type_desc[type]}`
+    result.message = `${player_row.fname} ${player_row.lname} (${player_row.cteam}) ${constants.player_prop_type_desc[prop_type]}`
 
     if (result.activated) {
       result.message += ` opened at ${ln} (${o_am})`
@@ -199,7 +245,7 @@ const handle_alt_line_prop = async (prop) => {
 const handle_leader_prop = async (prop) => {
   const result = { activated: false, message: null, deactivated: false }
 
-  const { pid, week, year, type, sourceid, o_am, active } = prop
+  const { pid, week, year, prop_type, sourceid, o_am, active } = prop
 
   // get last prop
   const props_query = await db('props')
@@ -207,7 +253,7 @@ const handle_leader_prop = async (prop) => {
       pid,
       year,
       week,
-      type,
+      prop_type,
       sourceid
     })
     .orderBy('timestamp', 'desc')
@@ -228,7 +274,7 @@ const handle_leader_prop = async (prop) => {
     last_prop.o_am !== o_am ||
     Boolean(last_prop.active) !== active
   ) {
-    await db('props').insert(prop)
+    await save_prop(prop)
 
     if (!discord_config_exists || process.env.NODE_ENV !== 'production') {
       return
@@ -246,7 +292,7 @@ const handle_leader_prop = async (prop) => {
       return
     }
 
-    result.message = `${player_row.fname} ${player_row.lname} (${player_row.cteam}) ${constants.player_prop_type_desc[type]}`
+    result.message = `${player_row.fname} ${player_row.lname} (${player_row.cteam}) ${constants.player_prop_type_desc[prop_type]}`
 
     if (result.activated) {
       result.message += ` opened at ${o_am}`
@@ -271,8 +317,12 @@ const handle_leader_prop = async (prop) => {
 }
 
 async function insertProp(prop) {
-  const is_alt_line_prop = constants.player_prop_types_alts.includes(prop.type)
-  const is_leader_prop = constants.player_prop_types_leaders.includes(prop.type)
+  const is_alt_line_prop = constants.player_prop_types_alts.includes(
+    prop.prop_type
+  )
+  const is_leader_prop = constants.player_prop_types_leaders.includes(
+    prop.prop_type
+  )
   let result
   if (is_alt_line_prop) {
     result = await handle_alt_line_prop(prop)
@@ -311,7 +361,7 @@ async function insertProp(prop) {
       })
     } else if (is_leader_prop) {
       const is_sunday_leaders =
-        constants.player_prop_types_sunday_leaders.includes(prop.type)
+        constants.player_prop_types_sunday_leaders.includes(prop.prop_type)
 
       if (is_sunday_leaders) {
         // sunday leaders open channel
@@ -340,7 +390,7 @@ async function insertProp(prop) {
     await wait(1000)
 
     const prop_type_webhook_url = get_discord_webhook_url_for_prop_type(
-      prop.type
+      prop.prop_type
     )
     await sendDiscordMessage({
       webhookUrl: prop_type_webhook_url,

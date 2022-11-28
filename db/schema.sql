@@ -2206,7 +2206,7 @@ CREATE TABLE `props` (
   `pid` varchar(7) NOT NULL,
   `week` tinyint(2) NOT NULL,
   `year` smallint(4) NOT NULL,
-  `type` tinyint(3) NOT NULL,
+  `prop_type` tinyint(3) NOT NULL,
   `id` varchar(100) NOT NULL,
   `ln` decimal(4,1) DEFAULT NULL,
   `o` decimal(5,2) DEFAULT NULL,
@@ -2217,7 +2217,31 @@ CREATE TABLE `props` (
   `timestamp` int(11) NOT NULL,
   `active` tinyint(1) DEFAULT NULL,
   `live` tinyint(1) DEFAULT NULL,
-  UNIQUE KEY `prop` (`sourceid`, `id`, `pid`, `week`, `year`, `type`, `ln`, `timestamp`)
+  UNIQUE KEY `prop` (`sourceid`, `id`, `pid`, `week`, `year`, `prop_type`, `ln`, `timestamp`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `props_index`
+--
+
+DROP TABLE IF EXISTS `props_index`;
+
+CREATE TABLE `props_index` (
+  `pid` varchar(7) NOT NULL,
+  `week` tinyint(2) NOT NULL,
+  `year` smallint(4) NOT NULL,
+  `prop_type` tinyint(3) NOT NULL,
+  `ln` decimal(4,1) DEFAULT NULL,
+  `o` decimal(5,2) DEFAULT NULL,
+  `u` decimal(5,2) DEFAULT NULL,
+  `o_am` MEDIUMINT DEFAULT NULL,
+  `u_am` MEDIUMINT DEFAULT NULL,
+  `sourceid` int(6) NOT NULL,
+  `timestamp` int(11) NOT NULL,
+  `time_type` tinyint(3) NOT NULL
+  UNIQUE KEY `prop` (`sourceid`, `pid`, `week`, `year`, `prop_type`, `time_type)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
