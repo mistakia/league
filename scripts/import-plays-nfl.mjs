@@ -193,11 +193,19 @@ const importPlaysForWeek = async ({
     }
 
     // save in current tables
-    await db('nfl_play_stats_current_week')
-      .insert(play_stat_inserts)
-      .onConflict()
-      .merge()
-    await db('nfl_plays_current_week').insert(play_inserts).onConflict().merge()
+    try {
+      await db('nfl_play_stats_current_week')
+        .insert(play_stat_inserts)
+        .onConflict()
+        .merge()
+      await db('nfl_plays_current_week')
+        .insert(play_inserts)
+        .onConflict()
+        .merge()
+    } catch (err) {
+      log('Error on inserting plays and play stats ignored')
+      log(err)
+    }
   }
 
   return skip_count === games.length
