@@ -274,7 +274,7 @@ const handle_leader_prop = async (prop) => {
     last_prop.o_am !== o_am ||
     Boolean(last_prop.active) !== active
   ) {
-    await save_prop(prop)
+    await save_prop({ last_prop, prop })
 
     if (!discord_config_exists || process.env.NODE_ENV !== 'production') {
       return
