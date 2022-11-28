@@ -43,7 +43,7 @@ const run = async () => {
 
     const prop = {}
     prop.pid = player_row.pid
-    prop.type = category.type
+    prop.prop_type = category.type
     prop.id = offer.providerOfferId
     prop.timestamp = timestamp
     prop.week = constants.season.week
@@ -84,7 +84,7 @@ const run = async () => {
 
       const prop = {}
       prop.pid = player_row.pid
-      prop.type = category.type
+      prop.prop_type = category.type
       prop.id = offer.providerOfferId
       prop.timestamp = timestamp
       prop.week = constants.season.week

@@ -100,7 +100,7 @@ const run = async () => {
           : -1
       const prop = index > -1 ? props[index] : {}
       prop.pid = player_row.pid
-      prop.type = types[item.statistic.title]
+      prop.prop_type = types[item.statistic.title]
       prop.id = bet.id
       prop.timestamp = timestamp
       prop.week = constants.season.week

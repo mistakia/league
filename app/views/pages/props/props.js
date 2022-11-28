@@ -24,7 +24,7 @@ export default function PropsPage({ load, player_props }) {
         </div>
         <div className='item__col-group'>
           <div className='item__col'>
-            {constants.player_prop_type_desc[prop.type]}
+            {constants.player_prop_type_desc[prop.prop_type]}
           </div>
           <div className='item__col'>
             {constants.sourcesTitle[prop.sourceid]}

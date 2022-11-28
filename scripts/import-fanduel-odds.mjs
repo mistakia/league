@@ -46,7 +46,7 @@ const run = async () => {
   const handle_over_under_market = ({ market, player_row }) => {
     const prop = {}
     prop.pid = player_row.pid
-    prop.type = fanduel.markets[market.marketType]
+    prop.prop_type = fanduel.markets[market.marketType]
     prop.id = market.marketId
     prop.timestamp = timestamp
     prop.week = constants.season.week
@@ -81,7 +81,7 @@ const run = async () => {
     for (const selection of market.runners) {
       const prop = {}
       prop.pid = player_row.pid
-      prop.type = fanduel.markets[market.marketType]
+      prop.prop_type = fanduel.markets[market.marketType]
       prop.id = market.marketId
       prop.timestamp = timestamp
       prop.week = constants.season.week
@@ -127,7 +127,7 @@ const run = async () => {
 
       const prop = {}
       prop.pid = player_row.pid
-      prop.type = fanduel.leader_market_names[market.marketName]
+      prop.prop_type = fanduel.leader_market_names[market.marketName]
       prop.id = market.marketId
       prop.timestamp = timestamp
       prop.week = constants.season.week
