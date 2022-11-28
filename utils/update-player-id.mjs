@@ -133,6 +133,12 @@ export default async function ({ current_pid, new_pid }) {
   log(`props rows updated: ${props_rows.info}`)
   await db('props').where('pid', current_pid).del()
 
+  const [props_index_rows] = await db.raw(
+    `update ignore props_index set pid = '${new_pid}' where pid = '${current_pid}'`
+  )
+  log(`props_index rows updated: ${props_index_rows.info}`)
+  await db('props_index').where('pid', current_pid).del()
+
   const [rankings_rows] = await db.raw(
     `update ignore rankings set pid = '${new_pid}' where pid = '${current_pid}'`
   )

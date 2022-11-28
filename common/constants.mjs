@@ -1312,6 +1312,11 @@ export const player_prop_types = {
   GAME_TACKLES_ASSISTS: 29
 }
 
+export const player_prop_time_type = {
+  OPEN: 1,
+  CLOSE: 2
+}
+
 export const player_prop_types_alts = [
   player_prop_types.GAME_ALT_PASSING_YARDS,
   player_prop_types.GAME_ALT_RUSHING_YARDS,
