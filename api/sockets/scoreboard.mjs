@@ -33,14 +33,11 @@ export default class Scoreboard {
 
   async poll() {
     // TODO - only poll while games are pending
-    this._log('polling for scoreboard updates')
     this._isPolling = true
     const updateTimestamps = Array.from(this._users.values()).sort(
       (a, b) => a - b
     )
     const updated = updateTimestamps[0] // get the oldest one
-
-    this._log(`searching for plays newer than ${updated}`)
 
     const query = getPlayByPlayQuery(db)
     const plays = await query
@@ -48,8 +45,6 @@ export default class Scoreboard {
       .where('nfl_plays_current_week.week', constants.season.week)
       .where('nfl_plays_current_week.seas_type', 'REG')
       .where('updated', '>', updated)
-
-    this._log(`${plays.length} updated plays found`)
 
     const esbids = Array.from(uniqBy(plays, 'esbid')).map((p) => p.esbid)
     const playStats = await db('nfl_play_stats_current_week')
@@ -75,7 +70,6 @@ export default class Scoreboard {
 
       if (!userPlays.length) continue
 
-      this._log(`sending ${userPlays.length} plays to userId(${userId})`)
       const event = {
         type: 'UPDATE_SCOREBOARD_PLAYS',
         payload: {
