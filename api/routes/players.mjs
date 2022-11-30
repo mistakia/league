@@ -148,7 +148,7 @@ router.get('/:pid/gamelogs/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const { pid } = req.params
-    const { leagueId } = req.query
+    const leagueId = Number(req.query.leagueId || 0) || 0
     if (!pid) {
       return res.status(400).send({ error: 'missing pid' })
     }
