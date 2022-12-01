@@ -43,6 +43,7 @@ export { default as sum } from './sum.mjs'
 export { default as Season } from './season.mjs'
 export { default as median } from './median.mjs'
 export { default as team_aliases } from './team-aliases.mjs'
+export { default as convertToCSV } from './convert-to-csv.mjs'
 
 const uniqBy = (a, key) => {
   const seen = new Set()
