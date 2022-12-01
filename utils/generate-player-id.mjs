@@ -7,8 +7,14 @@ const log = debug('generate-player-id')
 debug.enable('generate-player-id')
 
 const generatePlayerId = async (player_data) => {
-  const firstInitial = player_data.fname.match(/[a-zA-Z]/).pop().toUpperCase()
-  const lastInitial = player_data.lname.match(/[a-zA-Z]/).pop().toUpperCase()
+  const firstInitial = player_data.fname
+    .match(/[a-zA-Z]/)
+    .pop()
+    .toUpperCase()
+  const lastInitial = player_data.lname
+    .match(/[a-zA-Z]/)
+    .pop()
+    .toUpperCase()
   const preset = firstInitial + lastInitial
 
   const player_rows = await db('player')
