@@ -1,4 +1,4 @@
-import { fork, takeLatest, select, call } from 'redux-saga/effects'
+import { fork, takeEvery, select, call } from 'redux-saga/effects'
 
 import { getNflTeamSeasonlogs, getRequestHistory } from '@core/api'
 import { seasonlogsActions } from './actions'
@@ -18,7 +18,7 @@ export function* load() {
 // -------------------------------------
 
 export function* watchLoadNflTeamSeasonlogs() {
-  yield takeLatest(seasonlogsActions.LOAD_NFL_TEAM_SEASONLOGS, load)
+  yield takeEvery(seasonlogsActions.LOAD_NFL_TEAM_SEASONLOGS, load)
 }
 
 //= ====================================

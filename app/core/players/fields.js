@@ -23,6 +23,43 @@ import { store } from '@core/store.js'
 // fixed - optional
 
 export default function ({ week, state }) {
+  const opponent_field = (stat_field) => {
+    return {
+      getPercentileKey: (playerMap) => {
+        const pos = playerMap.get('pos')
+        return `${pos}_AGAINST_ADJ`
+      },
+      fixed: 1,
+      show_positivity: true,
+      load: () => {
+        const positions = state.getIn(['players', 'positions'])
+        positions.forEach((pos) => {
+          const percentile_key = `${pos}_AGAINST_ADJ`
+          store.dispatch(percentileActions.loadPercentiles(percentile_key))
+        })
+        store.dispatch(seasonlogsActions.load_nfl_team_seasonlogs())
+      },
+      getValue: (playerMap) => {
+        const nfl_team = playerMap.get('team')
+        const pos = playerMap.get('pos')
+        const game = getGameByTeam(state, { nfl_team, week })
+        const seasonlogs = getSeasonlogs(state)
+        if (!game) {
+          return null
+        }
+
+        const isHome = game.h === nfl_team
+        const opp = isHome ? game.v : game.h
+        const value = seasonlogs.getIn(
+          ['nfl_teams', opp, `${pos}_AGAINST_ADJ`, stat_field],
+          0
+        )
+
+        return value
+      }
+    }
+  }
+
   const fields = {
     opponent: {
       category: 'matchup',
@@ -830,6 +867,93 @@ export default function ({ week, state }) {
       fixed: 1,
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
       percentile_field: '_ryacprec'
+    },
+
+    opponent_pass_pa: {
+      category: 'passing matchup',
+      column_header: 'ATT',
+      csv_header: 'Opponent pass atts over average',
+      percentile_field: 'pa',
+      ...opponent_field('pa')
+    },
+    opponent_pass_pc: {
+      category: 'passing matchup',
+      column_header: 'COMP',
+      csv_header: 'Opponent pass comps over average',
+      percentile_field: 'pc',
+      ...opponent_field('pc')
+    },
+    opponent_pass_py: {
+      category: 'passing matchup',
+      column_header: 'YDS',
+      csv_header: 'Opponent pass yds over average',
+      percentile_field: 'py',
+      ...opponent_field('py')
+    },
+    opponent_pass_tdp: {
+      category: 'passing matchup',
+      column_header: 'TD',
+      csv_header: 'Opponent pass tds over average',
+      percentile_field: 'tdp',
+      ...opponent_field('tdp')
+    },
+    opponent_pass_ints: {
+      category: 'passing matchup',
+      column_header: 'INTS',
+      csv_header: 'Opponent pass ints over average',
+      percentile_field: 'ints',
+      ...opponent_field('ints')
+    },
+
+    opponent_rush_ra: {
+      category: 'rushing matchup',
+      column_header: 'ATT',
+      csv_header: 'Opponent rush atts over average',
+      percentile_field: 'ra',
+      ...opponent_field('ra')
+    },
+    opponent_rush_ry: {
+      category: 'rushing matchup',
+      column_header: 'YDS',
+      csv_header: 'Opponent rush yds over average',
+      percentile_field: 'ry',
+      ...opponent_field('ry')
+    },
+    opponent_rush_tdr: {
+      category: 'rushing matchup',
+      column_header: 'TD',
+      csv_header: 'Opponent rush tds over average',
+      percentile_field: 'tdr',
+      ...opponent_field('tdr')
+    },
+
+    opponent_recv_trg: {
+      category: 'receiving matchup',
+      column_header: 'TRG',
+      csv_header: 'Opponent targets over average',
+      percentile_field: 'trg',
+      ...opponent_field('trg')
+    },
+    opponent_recv_rec: {
+      category: 'receiving matchup',
+      column_header: 'REC',
+      csv_header: 'Opponent recs over average',
+      percentile_field: 'rec',
+      ...opponent_field('rec')
+    },
+    opponent_recv_recy: {
+      category: 'receiving matchup',
+      column_header: 'YDS',
+      csv_header: 'Opponent recv yds over average',
+      percentile_field: 'recy',
+      ...opponent_field('recy')
+    },
+    opponent_recv_tdrec: {
+      category: 'receiving matchup',
+      column_header: 'TD',
+      csv_header: 'Opponent recv tds over average',
+      percentile_field: 'tdrec',
+      ...opponent_field('tdrec')
     }
   }
 

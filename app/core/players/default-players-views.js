@@ -45,14 +45,26 @@ const views = {
       'projection.week.py',
       'projection.week.tdp',
       'projection.week.ints',
+      'opponent_pass_pa',
+      'opponent_pass_pc',
+      'opponent_pass_py',
+      'opponent_pass_tdp',
+      'opponent_pass_ints',
       'projection.week.ra',
       'projection.week.ry',
       'projection.week.tdr',
       'projection.week.fuml',
+      'opponent_rush_ra',
+      'opponent_rush_ry',
+      'opponent_rush_tdr',
       'projection.week.trg',
       'projection.week.rec',
       'projection.week.recy',
-      'projection.week.tdrec'
+      'projection.week.tdrec',
+      'opponent_recv_trg',
+      'opponent_recv_rec',
+      'opponent_recv_recy',
+      'opponent_recv_tdrec'
     ]
   },
   passing_stats_by_play: {
