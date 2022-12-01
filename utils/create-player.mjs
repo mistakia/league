@@ -82,7 +82,7 @@ const createPlayer = async (playerData) => {
     }
   }
 
-  playerData.pname = `${playerData.fname.charAt(0).toUpperCase()}.${
+  playerData.pname = `${playerData.fname.match(/[a-zA-Z]/).pop().toUpperCase()}.${
     playerData.lname
   }`
   playerData.formatted = formatPlayerName(
