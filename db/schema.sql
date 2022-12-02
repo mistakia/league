@@ -2241,7 +2241,7 @@ CREATE TABLE `props_index` (
   `sourceid` int(6) NOT NULL,
   `timestamp` int(11) NOT NULL,
   `time_type` tinyint(3) NOT NULL,
-  UNIQUE KEY `prop` (`sourceid`, `pid`, `week`, `year`, `prop_type`, `time_type`)
+  UNIQUE KEY `prop` (`sourceid`, `pid`, `week`, `year`, `prop_type`, `ln`, `time_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
