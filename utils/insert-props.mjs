@@ -40,19 +40,23 @@ const save_prop = async ({ last_prop, prop }) => {
 
   if (prop.active && !prop.live) {
     if (!last_prop) {
-      await db('props_index').insert({
-        time_type: constants.player_prop_time_type.OPEN,
-        ...format_index_prop(prop)
-      })
-    } else {
-      await db('props_index')
-        .insert({
-          time_type: constants.player_prop_time_type.CLOSE,
+      try {
+        await db('props_index').insert({
+          time_type: constants.player_prop_time_type.OPEN,
           ...format_index_prop(prop)
         })
-        .onConflict()
-        .merge()
+      } catch (err) {
+        // TODO log error
+      }
     }
+
+    await db('props_index')
+      .insert({
+        time_type: constants.player_prop_time_type.CLOSE,
+        ...format_index_prop(prop)
+      })
+      .onConflict()
+      .merge()
   }
 }
 
