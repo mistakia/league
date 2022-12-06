@@ -30,6 +30,9 @@ dist/stats.html
 *.sql
 *.tar.qz
 *.tar.gz
+data/props.json
+data/prop_sets.json
+data/prop_sets_filtered.json
 
 # Deployment
 current
