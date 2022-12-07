@@ -3,7 +3,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#common'
+import { constants, fixTeam } from '#common'
 import { isMain, getPlayer, draftkings, wait, insertProps } from '#utils'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -26,10 +26,9 @@ const run = async () => {
   const missing = []
   const props = []
 
-  const handle_over_under_market = async ({ offer, category }) => {
-    // TODO get event info to figure out team
+  const handle_over_under_market = async ({ offer, category, teams }) => {
     let player_row
-    const params = { name: offer.outcomes[0].participant }
+    const params = { name: offer.outcomes[0].participant, teams }
     try {
       player_row = await getPlayer(params)
     } catch (err) {
@@ -66,11 +65,10 @@ const run = async () => {
     props.push(prop)
   }
 
-  const handle_leader_market = async ({ offer, category }) => {
+  const handle_leader_market = async ({ offer, category, teams }) => {
     for (const outcome of offer.outcomes) {
-      // TODO get event info to figure out team
       let player_row
-      const params = { name: outcome.participant }
+      const params = { name: outcome.participant, teams }
       try {
         player_row = await getPlayer(params)
       } catch (err) {
@@ -105,18 +103,22 @@ const run = async () => {
   }
 
   for (const category of draftkings.categories) {
-    const offers = await draftkings.getOffers(category)
+    const { offers, event } = await draftkings.getOffers(category)
 
     if (!offers) continue
+
+    const teams = event
+      ? [fixTeam(event.teamShortName1), fixTeam(event.teamShortName2)]
+      : []
 
     for (const offer of offers) {
       const is_leader_market = constants.player_prop_types_leaders.includes(
         category.type
       )
       if (is_leader_market) {
-        await handle_leader_market({ offer, category })
+        await handle_leader_market({ offer, category, teams })
       } else {
-        await handle_over_under_market({ offer, category })
+        await handle_over_under_market({ offer, category, teams })
       }
     }
 

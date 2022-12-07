@@ -41,6 +41,7 @@ const getPlayer = async ({
   name,
   pos,
   team,
+  teams = [],
   dob,
   sleeper_id,
   keeptradecut_id,
@@ -90,6 +91,10 @@ const getPlayer = async ({
 
     if (dob) {
       query.where({ dob })
+    }
+
+    if (teams.length) {
+      query.whereIn('cteam', teams)
     }
   }
 

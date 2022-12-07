@@ -103,6 +103,7 @@ export const getOffers = async ({ offerCategoryId, subcategoryId }) => {
   const data = await res.json()
 
   if (data && data.eventGroup && data.eventGroup.offerCategories) {
+    const event = data.eventGroup.events[0]
     const category = data.eventGroup.offerCategories.find(
       (c) => c.offerCategoryId === offerCategoryId
     )
@@ -117,10 +118,13 @@ export const getOffers = async ({ offerCategoryId, subcategoryId }) => {
         sub_category.offerSubcategory &&
         sub_category.offerSubcategory.offers.length
       ) {
-        return sub_category.offerSubcategory.offers.flat()
+        return {
+          offers: sub_category.offerSubcategory.offers.flat(),
+          event
+        }
       }
     }
   }
 
-  return null
+  return { offers: null, event: null }
 }
