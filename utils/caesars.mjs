@@ -1,11 +1,11 @@
 import fetch from 'node-fetch'
-import debug from 'debug'
+// import debug from 'debug'
 
 import config from '#config'
 import { constants } from '#common'
 
-const log = debug('caesars')
-debug.enable('caesars')
+// const log = debug('caesars')
+// debug.enable('caesars')
 
 export const markets = {
   PASSING_TOUCHDOWNS: constants.player_prop_types.GAME_PASSING_TOUCHDOWNS,
@@ -34,7 +34,7 @@ export const markets = {
 export const getSchedule = async () => {
   const url = `${config.caesars_api_v3_url}/sports/americanfootball/events/schedule?competitionIds=007d7c61-07a7-4e18-bb40-15104b6eac92`
 
-  log(`fetching ${url}`)
+  // log(`fetching ${url}`)
   const res = await fetch(url)
   const data = await res.json()
 
@@ -44,7 +44,7 @@ export const getSchedule = async () => {
 export const getEvent = async (eventId) => {
   const url = `${config.caesars_api_v3_url}/events/${eventId}`
 
-  log(`fetching ${url}`)
+  // log(`fetching ${url}`)
   const res = await fetch(url)
   const data = await res.json()
 

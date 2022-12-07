@@ -4,7 +4,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#common'
+import { constants, team_aliases } from '#common'
 import { isMain, getPlayer, fanduel, wait, insertProps } from '#utils'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -106,7 +106,7 @@ const run = async () => {
     }
   }
 
-  const handle_leader_market = async (market) => {
+  const handle_leader_market = async ({ market, teams = [] }) => {
     for (const selection of market.runners) {
       let player_row
       // TODO get team
@@ -150,6 +150,8 @@ const run = async () => {
   }
 
   for (const event of current_week_events) {
+    const teams = event.name.split('@').map((p) => team_aliases[p.trim()])
+
     for (const tab of fanduel.tabs) {
       const data = await fanduel.getEventTab({ eventId: event.eventId, tab })
 
@@ -161,12 +163,13 @@ const run = async () => {
 
         const is_leader_market = fanduel.leader_markets[market.marketType]
         if (is_leader_market) {
-          await handle_leader_market(market)
+          await handle_leader_market({ market, teams })
         } else {
           let player_row
           // TODO get team
           const params = {
-            name: formatPlayerName(market.marketName)
+            name: formatPlayerName(market.marketName),
+            teams
           }
 
           try {
@@ -193,15 +196,13 @@ const run = async () => {
     await wait(5000)
   }
 
-  const weekly_specials_markets = await fanduel.getWeeklySpecials()
-  for (const market of weekly_specials_markets) {
-    await handle_leader_market(market)
-  }
-
+  /* const weekly_specials_markets = await fanduel.getWeeklySpecials()
+   * for (const market of weekly_specials_markets) {
+   *   await handle_leader_market({ market })
+   * }
+   */
   log(`Could not locate ${missing.length} players`)
-  missing.forEach((m) =>
-    log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`)
-  )
+  missing.forEach((m) => log(`could not find player: ${m.name} / ${m.teams}`))
 
   if (argv.dry) {
     log(props[0])
