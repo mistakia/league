@@ -104,9 +104,7 @@ const run = async () => {
   }
 
   log(`Could not locate ${missing.length} players`)
-  missing.forEach((m) =>
-    log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`)
-  )
+  missing.forEach((m) => log(`could not find player: ${m.name} / ${m.team}`))
 
   if (argv.dry) {
     log(props[0])

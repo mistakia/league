@@ -1,11 +1,11 @@
 import fetch from 'node-fetch'
-import debug from 'debug'
+// import debug from 'debug'
 
 import config from '#config'
 import { constants } from '#common'
 
-const log = debug('draft-kings')
-debug.enable('draft-kings')
+// const log = debug('draft-kings')
+// debug.enable('draft-kings')
 
 export const categories = [
   {
@@ -98,7 +98,7 @@ export const categories = [
 export const getOffers = async ({ offerCategoryId, subcategoryId }) => {
   const url = `${config.draftkings_api_v5_url}/eventgroups/88808/categories/${offerCategoryId}/subcategories/${subcategoryId}?format=json`
 
-  log(`fetching ${url}`)
+  // log(`fetching ${url}`)
   const res = await fetch(url)
   const data = await res.json()
 
