@@ -1,11 +1,11 @@
 import fetch from 'node-fetch'
-import debug from 'debug'
+// import debug from 'debug'
 
 import config from '#config'
 import { constants } from '#common'
 
-const log = debug('betmgm')
-debug.enable('betmgm')
+// const log = debug('betmgm')
+// debug.enable('betmgm')
 
 export const markets = {
   12203: constants.player_prop_types.GAME_PASSING_COMPLETIONS,
@@ -31,7 +31,7 @@ export const markets = {
 export const getPlayerProps = async () => {
   const url = `${config.betmgm_api_url}/bettingoffer/fixtures?x-bwin-accessid=NjQ4MDQ1MWEtMmY1Ny00ODhkLTkxNTItNzA4MzY4MzM2YTE2&sportIds=11&competitionIds=35&country=US&lang=en-us&offerMapping=All`
 
-  log(`fetching ${url}`)
+  // log(`fetching ${url}`)
   const res = await fetch(url)
   const data = await res.json()
 
