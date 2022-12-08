@@ -103,15 +103,16 @@ const run = async () => {
   }
 
   for (const category of draftkings.categories) {
-    const { offers, event } = await draftkings.getOffers(category)
+    const { offers, events } = await draftkings.getOffers(category)
 
     if (!offers) continue
 
-    const teams = event
-      ? [fixTeam(event.teamShortName1), fixTeam(event.teamShortName2)]
-      : []
-
     for (const offer of offers) {
+      const event = events.find((e) => e.eventId === offer.eventId)
+      const teams = event
+        ? [fixTeam(event.teamShortName1), fixTeam(event.teamShortName2)]
+        : []
+
       const is_leader_market = constants.player_prop_types_leaders.includes(
         category.type
       )
