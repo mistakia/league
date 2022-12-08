@@ -13,7 +13,8 @@ export const tabs = [
   'passing-props',
   'receiving-props',
   'rushing-props',
-  'defensive-props'
+  'defensive-props',
+  'td-scorer-props'
 ]
 
 export const leader_market_names = {
@@ -250,7 +251,10 @@ export const markets = {
     constants.player_prop_types.GAME_TACKLES_ASSISTS,
 
   ...leader_markets,
-  ...alt_line_markets
+  ...alt_line_markets,
+
+  ANY_TIME_TOUCHDOWN_SCORER:
+    constants.player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS
 }
 
 export const getEvents = async () => {

@@ -32,8 +32,8 @@ const types = {
   'Rushing Yards': constants.player_prop_types.GAME_RUSHING_YARDS,
   'Receiving Yards': constants.player_prop_types.GAME_RECEIVING_YARDS,
   Receptions: constants.player_prop_types.GAME_RECEPTIONS,
-  Carries: constants.player_prop_types.GAME_RUSHING_ATTEMPTS,
-  Touchdowns: constants.player_prop_types.GAME_TOUCHDOWNS
+  Carries: constants.player_prop_types.GAME_RUSHING_ATTEMPTS
+  // Touchdowns: constants.player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS
 }
 
 const timestamp = Math.round(Date.now() / 1000)
