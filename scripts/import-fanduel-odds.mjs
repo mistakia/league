@@ -106,12 +106,12 @@ const run = async () => {
     }
   }
 
-  const handle_leader_market = async ({ market, teams = [] }) => {
+  const handle_leader_market = async ({ market, teams = [], line = null }) => {
     for (const selection of market.runners) {
       let player_row
-      // TODO get team
       const params = {
-        name: selection.runnerName
+        name: selection.runnerName,
+        teams
       }
 
       try {
@@ -136,7 +136,7 @@ const run = async () => {
       prop.active = true
       prop.live = Boolean(market.inPlay)
 
-      prop.ln = null
+      prop.ln = line
       prop.o = Number(selection.winRunnerOdds.trueOdds.decimalOdds.decimalOdds)
       prop.o_am = Number(
         selection.winRunnerOdds.americanDisplayOdds.americanOddsInt
@@ -161,33 +161,38 @@ const run = async () => {
           continue
         }
 
-        const is_leader_market = fanduel.leader_markets[market.marketType]
-        if (is_leader_market) {
-          await handle_leader_market({ market, teams })
+        if (market.marketType === 'ANY_TIME_TOUCHDOWN_SCORER') {
+          const line = 0.5
+          await handle_leader_market({ market, teams, line })
         } else {
-          let player_row
-          // TODO get team
-          const params = {
-            name: formatPlayerName(market.marketName),
-            teams
-          }
-
-          try {
-            player_row = await getPlayer(params)
-          } catch (err) {
-            log(err)
-          }
-
-          if (!player_row) {
-            missing.push(params)
-            continue
-          }
-
-          const is_alt_line_market = fanduel.alt_line_markets[market.marketType]
-          if (is_alt_line_market) {
-            handle_alt_line_market({ market, player_row })
+          const is_leader_market = fanduel.leader_markets[market.marketType]
+          if (is_leader_market) {
+            await handle_leader_market({ market, teams })
           } else {
-            handle_over_under_market({ market, player_row })
+            let player_row
+            const params = {
+              name: formatPlayerName(market.marketName),
+              teams
+            }
+
+            try {
+              player_row = await getPlayer(params)
+            } catch (err) {
+              log(err)
+            }
+
+            if (!player_row) {
+              missing.push(params)
+              continue
+            }
+
+            const is_alt_line_market =
+              fanduel.alt_line_markets[market.marketType]
+            if (is_alt_line_market) {
+              handle_alt_line_market({ market, player_row })
+            } else {
+              handle_over_under_market({ market, player_row })
+            }
           }
         }
       }

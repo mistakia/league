@@ -48,7 +48,7 @@ export function getFilteredProps(state) {
         prop.proj = proj.ra
         break
 
-      case constants.player_prop_types.GAME_TOUCHDOWNS:
+      case constants.player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS:
         prop.proj = proj.tdr + proj.tdrec
         break
 

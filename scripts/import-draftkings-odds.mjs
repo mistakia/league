@@ -65,7 +65,12 @@ const run = async () => {
     props.push(prop)
   }
 
-  const handle_leader_market = async ({ offer, category, teams }) => {
+  const handle_leader_market = async ({
+    offer,
+    category,
+    teams,
+    line = null
+  }) => {
     for (const outcome of offer.outcomes) {
       let player_row
       const params = { name: outcome.participant, teams }
@@ -91,7 +96,7 @@ const run = async () => {
       prop.active = Boolean(offer.isOpen)
       prop.live = false
 
-      prop.ln = null
+      prop.ln = line
       prop.o = Number(outcome.oddsDecimal)
       prop.o_am = Number(outcome.oddsAmerican)
 
@@ -113,13 +118,21 @@ const run = async () => {
         ? [fixTeam(event.teamShortName1), fixTeam(event.teamShortName2)]
         : []
 
-      const is_leader_market = constants.player_prop_types_leaders.includes(
-        category.type
-      )
-      if (is_leader_market) {
-        await handle_leader_market({ offer, category, teams })
+      if (
+        category.type ===
+        constants.player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS
+      ) {
+        const line = 0.5
+        await handle_leader_market({ offer, category, teams, line })
       } else {
-        await handle_over_under_market({ offer, category, teams })
+        const is_leader_market = constants.player_prop_types_leaders.includes(
+          category.type
+        )
+        if (is_leader_market) {
+          await handle_leader_market({ offer, category, teams })
+        } else {
+          await handle_over_under_market({ offer, category, teams })
+        }
       }
     }
 
