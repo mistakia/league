@@ -92,6 +92,11 @@ export const categories = [
     subcategoryId: 11556,
     offerCategoryId: 1163,
     type: constants.player_prop_types.GAME_MOST_RECEIVING_YARDS
+  },
+  {
+    subcategoryId: 11819,
+    offerCategoryId: 1003,
+    type: constants.player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS
   }
 ]
 

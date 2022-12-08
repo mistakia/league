@@ -45,6 +45,7 @@ module.exports = {
   discord_props_open_longest_reception_channel_webhook_url: '',
   discord_props_open_longest_rush_channel_webhook_url: '',
   discord_props_open_tackles_assists_channel_webhook_url: '',
+  discord_props_open_rushing_receiving_touchdowns_channel_webhook_url: '',
 
   discord_props_open_prizepicks_channel_webhook_url: '',
 
