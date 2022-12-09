@@ -330,6 +330,11 @@ async function insertProp(prop) {
   let result
   if (is_alt_line_prop) {
     result = await handle_alt_line_prop(prop)
+  } else if (
+    prop.prop_type ===
+    constants.player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS
+  ) {
+    result = await handle_leader_prop(prop)
   } else if (is_leader_prop) {
     result = await handle_leader_prop(prop)
   } else {
