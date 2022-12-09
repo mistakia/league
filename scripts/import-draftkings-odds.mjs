@@ -73,7 +73,7 @@ const run = async () => {
   }) => {
     for (const outcome of offer.outcomes) {
       let player_row
-      const params = { name: outcome.participant, teams }
+      const params = { name: outcome.participant || outcome.label, teams }
       try {
         player_row = await getPlayer(params)
       } catch (err) {
