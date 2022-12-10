@@ -127,7 +127,7 @@ const run = async () => {
 
       const prop = {}
       prop.pid = player_row.pid
-      prop.prop_type = fanduel.leader_market_names[market.marketName]
+      prop.prop_type = fanduel.leader_market_names[market.marketName] || fanduel.markets[market.marketType]
       prop.id = market.marketId
       prop.timestamp = timestamp
       prop.week = constants.season.week
