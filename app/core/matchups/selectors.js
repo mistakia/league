@@ -10,7 +10,10 @@ export function getMatchups(state) {
 export function getWeeksForSelectedYearMatchups(state) {
   const matchups = getMatchupsForSelectedYear(state)
   const weeks = matchups.map((m) => m.week)
-  return [...new Set(weeks)]
+  const playoffs = getMatchups(state)
+    .get('playoffs')
+    .map((m) => m.week)
+  return [...new Set([...weeks, ...playoffs])]
 }
 
 export function getMatchupById(state, { mid }) {
