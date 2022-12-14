@@ -30,6 +30,7 @@ dist/stats.html
 *.sql
 *.tar.qz
 *.tar.gz
+tmp/*
 
 # Deployment
 current
