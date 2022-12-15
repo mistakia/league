@@ -27,8 +27,8 @@ export default function (prop_type) {
     case constants.player_prop_types.GAME_RUSHING_ATTEMPTS:
       return config.discord_props_open_rushing_attempts_channel_webhook_url
 
-    case constants.player_prop_types.GAME_SCRIMMAGE_YARDS:
-      return config.discord_props_open_scrimmage_yards_channel_webhook_url
+    case constants.player_prop_types.GAME_RUSHING_RECEIVING_YARDS:
+      return config.discord_props_open_rushing_receiving_yards_channel_webhook_url
 
     case constants.player_prop_types.GAME_RECEIVING_TOUCHDOWNS:
       return config.discord_props_open_receiving_touchdowns_channel_webhook_url

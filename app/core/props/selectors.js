@@ -52,7 +52,7 @@ export function getFilteredProps(state) {
         prop.proj = proj.tdr + proj.tdrec
         break
 
-      case constants.player_prop_types.GAME_SCRIMMAGE_YARDS:
+      case constants.player_prop_types.GAME_RUSHING_RECEIVING_YARDS:
         prop.proj = proj.ry + proj.recy
         break
 

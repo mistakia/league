@@ -19,7 +19,7 @@ export const stats = {
   // 'Punts':
   // 'FG Made':
   'Tackles+Ast': constants.player_prop_types.GAME_TACKLES_ASSISTS,
-  'Rush+Rec Yds': constants.player_prop_types.GAME_SCRIMMAGE_YARDS,
+  'Rush+Rec Yds': constants.player_prop_types.GAME_RUSHING_RECEIVING_YARDS,
   Receptions: constants.player_prop_types.GAME_RECEPTIONS
 }
 

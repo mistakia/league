@@ -56,6 +56,7 @@ export { wait } from './wait.mjs'
 export * as nfl from './nfl.mjs'
 export * as ngs from './ngs.mjs'
 export { default as mergePlayer } from './merge-player.mjs'
+export * as gambet from './gambet.mjs'
 
 export const getChartedPlayByPlayQuery = (db) =>
   db('nfl_plays')

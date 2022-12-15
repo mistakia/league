@@ -208,7 +208,7 @@ const generate_prop_pairings = async ({
       constants.player_prop_types.GAME_RECEPTIONS,
       constants.player_prop_types.GAME_PASSING_INTERCEPTIONS,
       constants.player_prop_types.GAME_RUSHING_ATTEMPTS,
-      constants.player_prop_types.GAME_SCRIMMAGE_YARDS,
+      constants.player_prop_types.GAME_RUSHING_RECEIVING_YARDS,
       constants.player_prop_types.GAME_RECEIVING_TOUCHDOWNS,
       constants.player_prop_types.GAME_RUSHING_TOUCHDOWNS,
       constants.player_prop_types.GAME_PASSING_ATTEMPTS,
