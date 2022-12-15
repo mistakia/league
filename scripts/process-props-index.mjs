@@ -33,7 +33,7 @@ const prop_desc = {
   [constants.player_prop_types.GAME_RECEPTIONS]: 'recs',
   [constants.player_prop_types.GAME_PASSING_INTERCEPTIONS]: 'ints',
   [constants.player_prop_types.GAME_RUSHING_ATTEMPTS]: 'rush atts',
-  [constants.player_prop_types.GAME_SCRIMMAGE_YARDS]: 'rush/recv',
+  [constants.player_prop_types.GAME_RUSHING_RECEIVING_YARDS]: 'rush/recv',
   [constants.player_prop_types.GAME_RECEIVING_TOUCHDOWNS]: 'tds',
   [constants.player_prop_types.GAME_RUSHING_TOUCHDOWNS]: 'tds',
   [constants.player_prop_types.GAME_PASSING_ATTEMPTS]: 'pass atts',
@@ -99,7 +99,7 @@ const is_hit = ({ line, prop_type, player_gamelog, strict = false }) => {
     case constants.player_prop_types.GAME_RUSHING_ATTEMPTS:
       return player_gamelog.ra >= (strict ? line : line - 1)
 
-    case constants.player_prop_types.GAME_SCRIMMAGE_YARDS:
+    case constants.player_prop_types.GAME_RUSHING_RECEIVING_YARDS:
       return (
         player_gamelog.ry + player_gamelog.recy >= (strict ? line : line - 14)
       )
@@ -315,7 +315,7 @@ const main = async () => {
         constants.player_prop_types.GAME_RECEPTIONS,
         constants.player_prop_types.GAME_PASSING_INTERCEPTIONS,
         constants.player_prop_types.GAME_RUSHING_ATTEMPTS,
-        constants.player_prop_types.GAME_SCRIMMAGE_YARDS,
+        constants.player_prop_types.GAME_RUSHING_RECEIVING_YARDS,
         constants.player_prop_types.GAME_RECEIVING_TOUCHDOWNS,
         constants.player_prop_types.GAME_RUSHING_TOUCHDOWNS,
         constants.player_prop_types.GAME_PASSING_ATTEMPTS,

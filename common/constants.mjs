@@ -1216,7 +1216,8 @@ export const jobs = {
   CAESARS_ODDS: 54,
   FANDUEL_ODDS: 55,
   BETMGM_ODDS: 56,
-  PRIZEPICKS_PROJECTIONS: 57
+  PRIZEPICKS_PROJECTIONS: 57,
+  GAMBET_ODDS: 58
 }
 
 export const jobDetails = {
@@ -1272,7 +1273,8 @@ export const jobDetails = {
   54: 'Caesars Player Prop Odds',
   55: 'Fanduel Player Prop Odds',
   56: 'BetMGM Player Prop Odds',
-  57: 'PrizePicks Projections'
+  57: 'PrizePicks Projections',
+  58: 'Gambet Odds'
 }
 
 export const player_prop_types = {
@@ -1288,7 +1290,7 @@ export const player_prop_types = {
   GAME_RECEPTIONS: 9,
   GAME_PASSING_INTERCEPTIONS: 10,
   GAME_RUSHING_ATTEMPTS: 11,
-  GAME_SCRIMMAGE_YARDS: 12,
+  GAME_RUSHING_RECEIVING_YARDS: 12,
   GAME_RECEIVING_TOUCHDOWNS: 13,
   GAME_RUSHING_TOUCHDOWNS: 14,
   GAME_PASSING_ATTEMPTS: 15,
@@ -1309,7 +1311,13 @@ export const player_prop_types = {
   SUNDAY_MOST_RUSHING_YARDS: 27,
   SUNDAY_MOST_RECEIVING_YARDS: 28,
 
-  GAME_TACKLES_ASSISTS: 29
+  GAME_TACKLES_ASSISTS: 29,
+
+  GAME_PASSING_RUSHING_YARDS: 30,
+  GAME_ALT_PASSING_TOUCHDOWNS: 31,
+  GAME_ALT_PASSING_COMPLETIONS: 32,
+  GAME_ALT_RECEPTIONS: 33,
+  GAME_ALT_RUSHING_ATTEMPTS: 34
 }
 
 export const player_prop_time_type = {
@@ -1320,7 +1328,11 @@ export const player_prop_time_type = {
 export const player_prop_types_alts = [
   player_prop_types.GAME_ALT_PASSING_YARDS,
   player_prop_types.GAME_ALT_RUSHING_YARDS,
-  player_prop_types.GAME_ALT_RECEIVING_YARDS
+  player_prop_types.GAME_ALT_RECEIVING_YARDS,
+  player_prop_types.GAEM_ALT_PASSING_TOUCHDOWNS,
+  player_prop_types.GAME_ALT_PASSING_COMPLETIONS,
+  player_prop_types.GAME_ALT_RECEPTIONS,
+  player_prop_types.GAME_ALT_RUSHING_ATTEMPTS
 ]
 
 export const player_prop_types_leaders = [
@@ -1349,10 +1361,10 @@ export const player_prop_type_desc = {
   6: 'Rush Yards',
   7: 'Pass Comps',
   8: 'Pass TDs',
-  9: 'Receptions',
+  9: 'Recs',
   10: 'Ints',
   11: 'Rush Atts',
-  12: 'Rush+Recv Yards',
+  12: 'Rush + Recv Yards',
   13: 'Recv TDs',
   14: 'Rush TDs',
   15: 'Pass Atts',
@@ -1369,7 +1381,12 @@ export const player_prop_type_desc = {
   26: 'Most Pass Yards (sunday)',
   27: 'Most Rush Yards (sunday)',
   28: 'Most Recv Yards (sunday)',
-  29: 'Tackles + Assists'
+  29: 'Tackles + Assists',
+  30: 'Pass + Rush Yards',
+  31: 'Alt Pass TDs',
+  32: 'Alt Pass Comps',
+  33: 'Alt Recs',
+  34: 'Alt Rush Atts'
 }
 
 export const sources = {
@@ -1397,7 +1414,8 @@ export const sources = {
   CAESARS_VA: 20,
   FANDUEL_NJ: 21,
   BETMGM_US: 22,
-  PRIZEPICKS: 23
+  PRIZEPICKS: 23,
+  GAMBET_DC: 24
 }
 
 export const sourcesTitle = {
@@ -1424,7 +1442,8 @@ export const sourcesTitle = {
   20: 'Caesars (VA)',
   21: 'Fanduel (NJ)',
   22: 'BetMGM (US)',
-  23: 'PrizePicks'
+  23: 'PrizePicks',
+  24: 'Gambet (DC)'
 }
 
 export const rankings = {

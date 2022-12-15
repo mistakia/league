@@ -20,6 +20,7 @@ module.exports = {
   fanduel_api_url: '',
   betmgm_api_url: '',
   prizepicks_api_url: '',
+  gambet_api_url: '',
 
   discord_props_change_channel_webhook_url: '',
   discord_props_open_channel_webhook_url: '',
@@ -37,7 +38,7 @@ module.exports = {
   discord_props_open_receptions_channel_webhook_url: '',
   discord_props_open_passing_interceptions_channel_webhook_url: '',
   discord_props_open_rushing_attempts_channel_webhook_url: '',
-  discord_props_open_scrimmage_yards_channel_webhook_url: '',
+  discord_props_open_rushing_receiving_yards_channel_webhook_url: '',
   discord_props_open_receiving_touchdowns_channel_webhook_url: '',
   discord_props_open_rushing_touchdowns_channel_webhook_url: '',
   discord_props_open_passing_attempts_channel_webhook_url: '',

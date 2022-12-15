@@ -17,7 +17,8 @@ export const markets = {
     constants.player_prop_types.GAME_PASSING_LONGEST_COMPLETION,
   RUSHING_YARDS: constants.player_prop_types.GAME_RUSHING_YARDS,
   RUSHING_ATTEMPTS: constants.player_prop_types.GAME_RUSHING_ATTEMPTS,
-  RUSHING_RECEIVING_YARDS: constants.player_prop_types.GAME_SCRIMMAGE_YARDS,
+  RUSHING_RECEIVING_YARDS:
+    constants.player_prop_types.GAME_RUSHING_RECEIVING_YARDS,
   RECEPTIONS: constants.player_prop_types.GAME_RECEPTIONS,
   RECEIVING_YARDS: constants.player_prop_types.GAME_RECEIVING_YARDS,
   LONGEST_RECEPTION: constants.player_prop_types.GAME_LONGEST_RECEPTION,

@@ -80,7 +80,7 @@ const opponent_allowed_for_prop_is_negative = ({
     case constants.player_prop_types.GAME_RUSHING_ATTEMPTS:
       return opponent_seasonlog.ra < (opts.opponent_allowed_ra_min || 0)
 
-    case constants.player_prop_types.GAME_SCRIMMAGE_YARDS:
+    case constants.player_prop_types.GAME_RUSHING_RECEIVING_YARDS:
       return opponent_seasonlog.ry + opponent_seasonlog.recy < 0
 
     case constants.player_prop_types.GAME_RECEIVING_TOUCHDOWNS:

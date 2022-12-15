@@ -86,7 +86,7 @@ const run = async () => {
       prop.active = Boolean(market.active)
       prop.live = Boolean(market.tradedInPlay)
 
-      prop.ln = parseFloat(market.line, 10)
+      prop.ln = Number(market.line)
 
       for (const selection of market.selections) {
         if (selection.type === 'over') {

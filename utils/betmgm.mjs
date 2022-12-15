@@ -19,7 +19,7 @@ export const markets = {
   27591: constants.player_prop_types.GAME_RUSHING_YARDS,
   31919: constants.player_prop_types.GAME_PASSING_INTERCEPTIONS,
   33712: constants.player_prop_types.GAME_PASSING_TOUCHDOWNS,
-  33715: constants.player_prop_types.GAME_SCRIMMAGE_YARDS,
+  33715: constants.player_prop_types.GAME_RUSHING_RECEIVING_YARDS,
   33743: constants.player_prop_types.GAME_PASSING_LONGEST_COMPLETION,
   // 33744: kicker points
   // 33745: extra points

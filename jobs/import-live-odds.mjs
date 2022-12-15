@@ -6,6 +6,7 @@ import { job as import_caesars_odds } from '#scripts/import-caesars-odds.mjs'
 import { job as import_fanduel_odds } from '#scripts/import-fanduel-odds.mjs'
 import { job as import_betmgm_odds } from '#scripts/import-betmgm-odds.mjs'
 import { job as import_prizepicks_odds } from '#scripts/import-prizepicks-odds.mjs'
+import { job as import_gambet_odds } from '#scripts/import-gambet-odds.mjs'
 // import import_betonline_odds from '#scripts/import-betonline-odds.mjs'
 
 const log = debug('import-live-odds')
@@ -46,6 +47,12 @@ export default async function () {
 
   try {
     await import_prizepicks_odds()
+  } catch (err) {
+    log(err)
+  }
+
+  try {
+    await import_gambet_odds()
   } catch (err) {
     log(err)
   }

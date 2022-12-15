@@ -56,7 +56,7 @@ export const categories = [
   {
     subcategoryId: 9523,
     offerCategoryId: 1001,
-    type: constants.player_prop_types.GAME_SCRIMMAGE_YARDS
+    type: constants.player_prop_types.GAME_RUSHING_RECEIVING_YARDS
   },
   {
     subcategoryId: 9518,
