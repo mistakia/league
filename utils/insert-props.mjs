@@ -302,6 +302,9 @@ const handle_leader_prop = async (prop) => {
       result.message += ` opened at ${o_am}`
     } else if (result.deactivated) {
       result.message += ` pulled at ${o_am}`
+    } else if (!last_prop) {
+      // do not send any notifcations for an inactive prop seen for the first time
+      return
     } else {
       const delta = last_prop.o_am - o_am
       const delta_pct = Math.abs(delta) / Math.abs(last_prop.o_am)
