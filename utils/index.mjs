@@ -57,7 +57,7 @@ export * as nfl from './nfl.mjs'
 export * as ngs from './ngs.mjs'
 export { default as mergePlayer } from './merge-player.mjs'
 
-export const getChartedPlayByPlayQuery = (db) =>
+export const get_plays_query = (db) =>
   db('nfl_plays')
     .select(
       'nfl_plays.player_fuml',
@@ -66,7 +66,6 @@ export const getChartedPlayByPlayQuery = (db) =>
       'nfl_plays.type',
       'nfl_plays.bc',
       'nfl_plays.yds',
-      'nfl_plays.yds_gained',
       'nfl_plays.fd',
       'nfl_plays.succ',
       'nfl_plays.psr',
@@ -122,7 +121,7 @@ const fields = [
   'nfl_games.v'
 ]
 
-export const getPlayByPlayQuery = (db) =>
+export const get_live_plays_query = (db) =>
   db('nfl_plays_current_week')
     .select(fields)
     .join('nfl_games', 'nfl_plays_current_week.esbid', '=', 'nfl_games.esbid')

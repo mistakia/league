@@ -1088,11 +1088,11 @@ CREATE TABLE `nfl_plays` (
   `sequence` int(10) DEFAULT NULL,
   `state` varchar(36) DEFAULT NULL,
 
-  `week` tinyint(2) DEFAULT NULL,
+  `week` tinyint(2) DEFAULT NULL, -- TODO remove
   `dwn` int(1) DEFAULT NULL,
   `qtr` int(1) DEFAULT NULL,
-  `year` smallint(4) NOT NULL,
-  `seas_type` varchar(36) DEFAULT NULL, -- PRE, REG, POST
+  `year` smallint(4) NOT NULL, -- TODO remove
+  `seas_type` varchar(36) DEFAULT NULL, -- TODO remove
 
   `desc` text DEFAULT NULL,
 
@@ -1180,8 +1180,7 @@ CREATE TABLE `nfl_plays` (
   `intp` varchar(7) DEFAULT NULL,               -- intercepting player
   `intp_gsis` varchar(36) DEFAULT NULL,         -- intercepting player gsis
 
-  `yds` tinyint(3) DEFAULT NULL,                -- yardage
-  `yds_gained` tinyint(3) DEFAULT NULL,         -- yardage gained (or lost) by the possessing team, excluding yards gained via fumble recoveries and laterals
+  `yds` tinyint(3) DEFAULT NULL,                -- yardage gained (or lost) by the possessing team, excluding yards gained via fumble recoveries and laterals
 
   `fum` tinyint(1) DEFAULT NULL,                -- fumble occured
   `fuml` tinyint(1) DEFAULT NULL,               -- fumble lost
@@ -1194,6 +1193,7 @@ CREATE TABLE `nfl_plays` (
   `touchback` tinyint(1) DEFAULT NULL,          -- touchback
   `safety` tinyint(1) DEFAULT NULL,             -- safety
   `penalty` tinyint(1) DEFAULT NULL,            -- penalty
+  `lateral` tinyint(1) DEFAULT NULL,            -- lateral occured
   `oob` tinyint(1) DEFAULT NULL,                -- 1 if play description contains ran ob, pushed ob, or sacked ob; 0 otherwise.
   `tfl` tinyint(1) DEFAULT NULL,                -- Binary indicator for whether or not a tackle for loss on a run play occurred.
   `rush` tinyint(1) DEFAULT NULL,               -- Binary indicator for if the play was a run.
@@ -1287,9 +1287,9 @@ CREATE TABLE `nfl_plays` (
   `back` tinyint(2) DEFAULT NULL,               -- number in backfield (wr, rb, te, fb)
   `xlm` tinyint(1) DEFAULT NULL,                -- extra men on the line, Number of players lined up on either side of the Offensive Tackles - usually a Tight End.
   `db` tinyint(2) DEFAULT NULL,                 -- number of defensive backs
-  `box` tinyint(2) DEFAULT NULL,                -- number of defenders in the box
+  `box` tinyint(2) DEFAULT NULL,                -- number of defenders in the box -- TODO remove
   `boxdb` tinyint(2) DEFAULT NULL,              -- number of dbs in the box
-  `pru` tinyint(1) DEFAULT NULL,                -- pass rushers
+  `pru` tinyint(1) DEFAULT NULL,                -- pass rushers -- TODO remove
   `blz` tinyint(1) DEFAULT NULL,                -- number of LB's and DB's blitzing
   `dblz` tinyint(1) DEFAULT NULL,               -- Number of DB's blitzing
   `oopd` varchar(2) DEFAULT NULL,               -- out of pocket pass details, Clean [C], Pressure [P], Designed [D], Designed Rollout [DR]
@@ -1430,6 +1430,25 @@ CREATE TABLE `nfl_play_stats` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `nfl_play_laterals`
+--
+
+DROP TABLE IF EXISTS `nfl_play_laterals`;
+
+CREATE TABLE `nfl_play_laterals` (
+  `esbid` int(10) NOT NULL,
+  `playId` int(10) NOT NULL,
+  `tm` varchar(10) DEFAULT NULL,
+  `yds` int(3) DEFAULT NULL,
+  `gsis` varchar(36) DEFAULT NULL,
+  `player` varchar(7) DEFAULT NULL,
+  UNIQUE KEY `gsis` (`esbid`,`playId`,`player`),
+  UNIQUE KEY `player` (`esbid`,`playId`,`gsis`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `nfl_snaps`
 --
 
@@ -1549,8 +1568,7 @@ CREATE TABLE `nfl_plays_current_week` (
   `intp` varchar(7) DEFAULT NULL,               -- intercepting player
   `intp_gsis` varchar(36) DEFAULT NULL,         -- intercepting player gsis
 
-  `yds` varchar(3) DEFAULT NULL,                -- yardage
-  `yds_gained` varchar(3) DEFAULT NULL,         -- yardage gained (or lost) by the possessing team, excluding yards gained via fumble recoveries and laterals
+  `yds` tinyint(3) DEFAULT NULL,                -- yardage gained (or lost) by the possessing team, excluding yards gained via fumble recoveries and laterals
 
   `fum` tinyint(1) DEFAULT NULL,                -- fumble occured
   `fuml` tinyint(1) DEFAULT NULL,               -- fumble lost
@@ -2229,7 +2247,6 @@ CREATE TABLE `props` (
 DROP TABLE IF EXISTS `props_index`;
 
 CREATE TABLE `props_index` (
-  `prop_id` int unsigned NOT NULL AUTO_INCREMENT
   `pid` varchar(7) NOT NULL,
   `week` tinyint(2) NOT NULL,
   `year` smallint(4) NOT NULL,

@@ -104,7 +104,7 @@ export const days = ['WED', 'THU', 'TN', 'FRI', 'SAT', 'SUN', 'MN', 'SN']
 export const quarters = [1, 2, 3, 4, 5]
 export const downs = [1, 2, 3, 4]
 export const positions = ['QB', 'RB', 'WR', 'TE', 'K', 'DST']
-export const stats = [
+export const fantasy_player_stats = [
   'pa',
   'pc',
   'py',
@@ -129,7 +129,7 @@ export const stats = [
   'krtd' // kickoff return touchdown
 ]
 
-export const kStats = [
+export const fantasy_kicker_stats = [
   'fgm', // field goal made
   'fgy', // field goal yards (min of 30)
   'fg19', // field goal <19
@@ -140,7 +140,7 @@ export const kStats = [
   'xpm' // extra point made
 ]
 
-export const dstStats = [
+export const fantasy_defense_stats = [
   'dsk', // sack
   'dint', // int
   'dff', // forced fumble
@@ -155,10 +155,14 @@ export const dstStats = [
   'dtd' // touchdown
 ]
 
-export const fantasyStats = [...stats, ...kStats, ...dstStats]
+export const fantasy_stats = [
+  ...fantasy_player_stats,
+  ...fantasy_kicker_stats,
+  ...fantasy_defense_stats
+]
 
-export const createStats = () =>
-  fantasyStats.reduce((o, key) => ({ ...o, [key]: 0 }), {})
+export const create_fantasy_stats = () =>
+  fantasy_stats.reduce((o, key) => ({ ...o, [key]: 0 }), {})
 
 export const statHeaders = {
   pa: 'Passing Attempts',
@@ -178,18 +182,9 @@ export const statHeaders = {
   twoptc: 'Two Point Conversions'
 }
 
-export const fullStats = [
-  // fantasy
-
-  'pts',
-
-  /** *********** PASSING *************/
-
+const passing_stats = [
   // pass completion percentage
   'pc_pct',
-
-  // pass yards per game
-  'py_pg',
 
   // touchdown percentage
   'tdp_pct',
@@ -198,9 +193,10 @@ export const fullStats = [
   'ints_pct',
 
   // successful pass attempts
-  'psucc',
+  'pasucc',
 
-  /** *********** accuracy *************/
+  // successful pass ateempts per pass attempt
+  'pasucc_pa',
 
   // interception worthy pass attempts
   'intw',
@@ -209,18 +205,16 @@ export const fullStats = [
   'intw_pct',
 
   // dropped passing yards
-  'drppy',
+  'drp_py',
 
   // dropped passing touchdowns
-  'drptdp',
+  'drp_tdp',
 
   // highlight pass attempts
   'high',
 
   // dropped pass attempts
-  'drpp',
-
-  /** *********** advanced *************/
+  'drp_pa',
 
   // completed air yards
   'pcay',
@@ -235,23 +229,19 @@ export const fullStats = [
   'pyac_pc',
 
   // passing yards per attempts
-  '_ypa',
+  'py_pa',
 
   // TODO
   // adjusted passing yards per attempt
-  '_adjypa',
 
   // passing yards per completion
-  '_ypc',
-
-  // passing yards per game
-  '_ypg',
+  'py_pc',
 
   // passing yards per air yard (passing air conversion ratio)
-  '_pacr',
+  'pacr',
 
   // adjusted passing air conversion ratio  (pass yards + 20*(pass TD) - 45(interceptions thrown))/(air yards)
-  '_apacr',
+  'apacr',
 
   // air yards
   'pdot',
@@ -259,10 +249,113 @@ export const fullStats = [
   // air yards per attempt (average depth of taget)
   'pdot_pa',
 
+  // net yards gained per attempt: (py - sky) / (pa + sk)
+  'nyg_pa'
+
   // TODO adj. depth of target**
+]
 
-  /** *********** pressure *************/
+const receiving_stats = [
+  // receiving yards after the catch
+  'ryac',
 
+  // receiving yards dropped
+  'drprecy',
+
+  // dropped passes
+  'drp',
+
+  // contested targets
+  'cnb',
+
+  // share of team total air yards
+  'tm_ay_share',
+
+  // share of team targets
+  'tm_trg_share',
+
+  // deep targets (20 or more air yards)
+  'deep_trg',
+
+  // deep target percentage
+  'deep_trg_pct',
+
+  // targeted air yards
+  'rdot',
+
+  // completed air yards
+  'rcay',
+
+  // air yards per snap
+  'ay_snp',
+
+  // air yards per reception
+  'ay_rec',
+
+  // average depth of tagret / air yards per target
+  'ay_trg',
+
+  // receiving yards per air yard
+  'recy_ay',
+
+  // receiving yards per snap
+  'recy_snp',
+
+  // receiving yards per reception
+  'recy_rec',
+
+  // receiving yards per target
+  'recy_trg',
+
+  // (1.5 x tm_trg_share + 0.7 x tm_ay_share)
+  'wopr',
+
+  // yards after catch per reception
+  'yac_rec'
+]
+
+const rushing_stats = [
+  // rushing yards after contact
+  'ryaco',
+
+  // rushing yards after contact per attempt
+  'ryaco_ra',
+
+  // rushing yards per rush attempt
+  'ry_ra',
+
+  // positive rushes
+  'posra',
+
+  // successful rushes
+  'rasucc',
+
+  // rushing first downs
+  'rfd',
+
+  // broken tackles
+  'mbt',
+
+  // broken tackles per touch
+  'mbt_pt',
+
+  // fumbles per rushing attempt
+  'fuml_ra',
+
+  // successful rushes per rush attempt
+  'rasucc_ra',
+
+  // positive rushes per rush attempt
+  'posra_ra',
+
+  // share of team rushing attempts
+  'tm_ra_share',
+
+  // share of team rushing yards
+  'tm_ry_share'
+]
+
+const pressure_stats = [
   // sacks
   'sk',
 
@@ -288,124 +381,12 @@ export const fullStats = [
   'qbhu',
 
   // quarterback hurry percentage
-  'qbhu_pct',
+  'qbhu_pct'
+]
 
-  // net yards gained per attempt: (py - sky) / (pa + sk)
-  '_nygpa',
-
-  /** *********** RECEIVING *************/
-
-  // receiving yards per reception
-  'recy_prec',
-
-  // receiving yards per game
-  'recy_pg',
-
-  // receiving yards after the catch
-  'ryac',
-
-  // receiving yards dropped
-  'drprecy',
-
-  // dropped passes
-  'drp',
-
-  // contested targets
-  'cnb',
-
-  // share of team total air yards
-  '_stray',
-
-  // share of team targets
-  '_sttrg',
-
-  // deep targets (20 or more air yards)
-  'dptrg',
-
-  // deep target percentage
-  'dptrg_pct',
-
-  // targeted air yards
-  'rdot',
-
-  // completed air yards
-  'rcay',
-
-  // air yards per snap
-  '_ayps',
-
-  // air yards per reception
-  '_ayprec',
-
-  // average depth of tagret / air yards per target
-  '_ayptrg',
-
-  // receiving yards per air yard
-  '_recypay',
-
-  // receiving yards per snap
-  '_recypsnp',
-
-  // receiving yards per reception
-  '_recyprec',
-
-  // receiving yards per target
-  '_recyptrg',
-
-  // (1.5 x _sttrg + 0.7 x _stray)
-  '_wopr',
-
-  // yards after catch per reception
-  '_ryacprec',
-
-  /** *********** RUSHING *************/
-
-  // rushing yards after contact
-  'ryaco',
-
-  // rushing yards after contact per attempt
-  'ryaco_pra',
-
-  // rushing yards per game
-  'ry_pg',
-
-  // rushing yards per rush attempt
-  'ry_pra',
-
-  // positive rushes
-  'posra',
-
-  // successful rushes
-  'rasucc',
-
-  // rushing first downs
-  'rfd',
-
-  // broken tackles
-  'mbt',
-
-  // broken tackles per touch
-  'mbt_pt',
-
-  // fumbles per rushing attempt
-  '_fumlpra',
-
-  // successful rushes per rush attempt
-  'rasucc_pra',
-
-  // positive rushes per rush attempt
-  'posra_pra',
-
-  // share of team rushing attempts
-  '_stra',
-
-  // share of team rushing yards
-  '_stry',
-
-  /** *********** misc *************/
-
+const misc_stats = [
   // touches (receptions + rush attempts)
-  '_tch',
+  'tch',
 
   // first downs
   'fd',
@@ -414,10 +395,20 @@ export const fullStats = [
   'succ',
 
   // first down percentage
-  'fd_pct',
-
-  ...fantasyStats
+  'fd_pct'
 ]
+
+export const full_stats = [
+  ...passing_stats,
+  ...receiving_stats,
+  ...rushing_stats,
+  ...pressure_stats,
+  ...misc_stats,
+  ...fantasy_stats
+]
+
+export const create_full_stats = () =>
+  full_stats.reduce((o, key) => ({ ...o, [key]: 0 }), {})
 
 const passingQualifier = {
   type: 'pa',
@@ -438,44 +429,39 @@ export const qualifiers = {
   pc_pct: passingQualifier,
   tdp_pct: passingQualifier,
   ints_pct: passingQualifier,
-  psucc: passingQualifier,
+  pasucc_pa: passingQualifier,
   intw_pct: passingQualifier,
   pcay_pc: passingQualifier,
   pyac_pc: passingQualifier,
-  _ypa: passingQualifier,
-  _adjypa: passingQualifier,
-  _ypc: passingQualifier,
-  _pacr: passingQualifier,
-  _apacr: passingQualifier,
+  py_pa: passingQualifier,
+  py_pc: passingQualifier,
+  pacr: passingQualifier,
+  apacr: passingQualifier,
   pdot_pa: passingQualifier,
   sk_pct: passingQualifier,
   qbhi_pct: passingQualifier,
   qbp_pct: passingQualifier,
   qbhu_pct: passingQualifier,
-  _nygpa: passingQualifier,
+  nyg_pa: passingQualifier,
 
-  recy_prec: receivingQualifier,
-  dptrg_pct: receivingQualifier,
-  _ayps: receivingQualifier,
-  _ayprec: receivingQualifier,
-  _ayptrg: receivingQualifier,
-  _recypay: receivingQualifier,
-  _recypsnp: receivingQualifier,
-  _recyprec: receivingQualifier,
-  _recyptrg: receivingQualifier,
-  _ryacprec: receivingQualifier,
+  deep_trg_pct: receivingQualifier,
+  ay_snp: receivingQualifier,
+  ay_rec: receivingQualifier,
+  ay_trg: receivingQualifier,
+  recy_ay: receivingQualifier,
+  recy_snp: receivingQualifier,
+  recy_rec: receivingQualifier,
+  recy_trg: receivingQualifier,
+  yac_rec: receivingQualifier,
 
-  ryaco_pra: rushingQualifier,
-  ry_pra: rushingQualifier,
+  ryaco_ra: rushingQualifier,
+  ry_ra: rushingQualifier,
   rasucc: rushingQualifier,
   mbt_pt: rushingQualifier,
-  _fumlpra: rushingQualifier,
-  rasucc_pra: rushingQualifier,
-  posra_pra: rushingQualifier
+  fuml_ra: rushingQualifier,
+  rasucc_ra: rushingQualifier,
+  posra_ra: rushingQualifier
 }
-
-export const createFullStats = () =>
-  fullStats.reduce((o, key) => ({ ...o, [key]: 0 }), {})
 
 export const teamStats = [
   'q1p', // quarter 1 points

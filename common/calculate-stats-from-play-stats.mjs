@@ -1,7 +1,7 @@
 import * as constants from './constants.mjs'
 
 const calculateStatsFromPlayStats = (playStats) => {
-  const stats = constants.createStats()
+  const stats = constants.create_fantasy_stats()
 
   stats._fga = []
   stats._fgm = []
