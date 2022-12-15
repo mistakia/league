@@ -123,7 +123,9 @@ const import_gambet_odds = async () => {
           }
 
           prop.o = odd.odd
-          prop.o_am = oddslib.from('decimal', prop.o).to('moneyline')
+          prop.o_am = Math.round(
+            oddslib.from('decimal', prop.o).to('moneyline')
+          )
 
           props.push({
             ...prop
@@ -141,11 +143,11 @@ const import_gambet_odds = async () => {
 
         prop.o = over_odds ? Number(over_odds.odd) : null
         prop.o_am = prop.o
-          ? oddslib.from('decimal', prop.o).to('moneyline')
+          ? Math.round(oddslib.from('decimal', prop.o).to('moneyline'))
           : null
         prop.u = under_odds ? Number(under_odds.odd) : null
         prop.u_am = prop.u
-          ? oddslib.from('decimal', prop.u).to('moneyline')
+          ? Math.round(oddslib.from('decimal', prop.u).to('moneyline'))
           : null
 
         props.push(prop)
