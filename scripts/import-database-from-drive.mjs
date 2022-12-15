@@ -17,6 +17,7 @@ const run = async ({
   full,
   logs,
   stats,
+  betting,
   cache,
   user,
   download_only = false
@@ -34,6 +35,8 @@ const run = async ({
     file = res.data.files.find((f) => f.name.includes('full'))
   } else if (logs) {
     file = res.data.files.find((f) => f.name.includes('logs'))
+  } else if (betting) {
+    file = res.data.files.find((f) => f.name.includes('betting'))
   } else if (stats) {
     file = res.data.files.find((f) => f.name.includes('stats'))
   } else if (cache) {
@@ -83,10 +86,11 @@ const main = async () => {
     const full = argv.full
     const logs = argv.logs
     const stats = argv.stats
+    const betting = argv.betting
     const user = argv.user
     const cache = argv.cache
     const download_only = argv.download
-    await run({ full, logs, stats, user, cache, download_only })
+    await run({ full, logs, stats, user, cache, download_only, betting })
   } catch (err) {
     error = err
     console.log(error)

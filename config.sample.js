@@ -49,6 +49,35 @@ module.exports = {
 
   discord_props_open_prizepicks_channel_webhook_url: '',
 
+  filter_prop_pairings_options: {
+    market_odds_max_threshold: 1,
+    historical_rate_min_threshold: 1,
+    opponent_allowed_rate_min_threshold: 1,
+    joint_historical_rate_min_threshold: 1,
+    prop_hits_min_threshold: 1,
+    highest_payout_min_threshold: 100,
+    lowest_payout_min_threshold: 100,
+    edge_min_threshold: 0,
+    total_games_min_threshold: 3,
+    exclude_players: [],
+    include_players: [],
+    include_teams: [],
+    exclude_props: [],
+    include_props: [],
+    exclude_nfl_team: [],
+    opponent_allowed_py_min: null,
+    opponent_allowed_ry_min: null,
+    opponent_allowed_recy_min: null,
+    opponent_allowed_pc_min: null,
+    opponent_allowed_tdp_min: null,
+    opponent_allowed_rec_min: null,
+    opponent_allowed_ints_min: null,
+    opponent_allowed_ra_min: null,
+    opponent_allowed_tdrec_min: null,
+    opponent_allowed_tdr_min: null,
+    opponent_allowed_pa_min: null
+  },
+
   email: {
     api: '', // sendgrid api
     admin: '',

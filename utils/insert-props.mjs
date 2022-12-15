@@ -327,6 +327,7 @@ async function insertProp(prop) {
   const is_leader_prop = constants.player_prop_types_leaders.includes(
     prop.prop_type
   )
+
   let result
   if (is_alt_line_prop) {
     result = await handle_alt_line_prop(prop)
@@ -424,4 +425,6 @@ export default async function (props) {
     }
     await insertProp(prop)
   }
+
+  // TODO update props_index table
 }
