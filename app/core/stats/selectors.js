@@ -54,7 +54,7 @@ export function getGamelogForPlayer(state, { playerMap, week }) {
   const stats =
     pos === 'DST'
       ? calculateDstStatsFromPlays(plays, playerMap.get('team'))
-      : calculateStatsFromPlayStats(plays.flatMap((p) => p.playStats))
+      : calculateStatsFromPlayStats(plays.flatMap((p) => p.play_stats))
   const play = plays.find((p) => p.possessionTeam)
   const opp = play
     ? fixTeam(play.possessionTeam) === fixTeam(play.h)

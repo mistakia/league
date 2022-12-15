@@ -91,7 +91,12 @@ export const get_plays_query = (db) =>
       'nfl_games.day',
       'nfl_plays.cov_type',
       'nfl_plays.sep',
-      'nfl_plays.ydl_100'
+      'nfl_plays.ydl_100',
+      'nfl_plays.score_type',
+      'nfl_plays.fga',
+      'nfl_plays.xpa',
+      'nfl_plays.kick_distance',
+      'nfl_plays.kick_player'
     )
     .join('nfl_games', 'nfl_plays.esbid', 'nfl_games.esbid')
     .whereNot('nfl_plays.type', 'NOPL')
@@ -125,3 +130,61 @@ export const get_live_plays_query = (db) =>
   db('nfl_plays_current_week')
     .select(fields)
     .join('nfl_games', 'nfl_plays_current_week.esbid', '=', 'nfl_games.esbid')
+
+export const get_plays = async ({
+  query,
+  include_play_stats = false,
+  db
+} = {}) => {
+  const play_rows = await query.select('nfl_plays.esbid', 'nfl_plays.playId')
+  const esbids = [...new Set(play_rows.map((p) => p.esbid))]
+
+  if (include_play_stats) {
+    const play_stat_rows = await db('nfl_play_stats')
+      .whereIn('esbid', esbids)
+      .where('valid', 1)
+    const play_stat_index = {}
+    for (const play_stat_row of play_stat_rows) {
+      if (play_stat_index[`${play_stat_row.esbid}/${play_stat_row.playId}`]) {
+        play_stat_index[`${play_stat_row.esbid}/${play_stat_row.playId}`].push(
+          play_stat_row
+        )
+      } else {
+        play_stat_index[`${play_stat_row.esbid}/${play_stat_row.playId}`] = [
+          play_stat_row
+        ]
+      }
+    }
+
+    for (const play_row of play_rows) {
+      play_row.play_stats =
+        play_stat_index[`${play_row.esbid}/${play_row.playId}`] || []
+    }
+  }
+
+  const play_lateral_rows = await db('nfl_play_laterals').whereIn(
+    'esbid',
+    esbids
+  )
+  const play_lateral_index = {}
+  for (const play_lateral_row of play_lateral_rows) {
+    if (
+      play_lateral_index[`${play_lateral_row.esbid}/${play_lateral_row.playId}`]
+    ) {
+      play_lateral_index[
+        `${play_lateral_row.esbid}/${play_lateral_row.playId}`
+      ].push(play_lateral_row)
+    } else {
+      play_lateral_index[
+        `${play_lateral_row.esbid}/${play_lateral_row.playId}`
+      ] = [play_lateral_row]
+    }
+  }
+
+  for (const play_row of play_rows) {
+    play_row.play_laterals =
+      play_lateral_index[`${play_row.esbid}/${play_row.playId}`] || []
+  }
+
+  return play_rows
+}

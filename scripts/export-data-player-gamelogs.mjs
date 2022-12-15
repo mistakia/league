@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url'
 // import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { convertToCSV } from '#common'
+import { convertToCSV, constants } from '#common'
 import { isMain } from '#utils'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -16,14 +16,36 @@ const data_path = path.join(__dirname, '../data')
 const log = debug('export-data-player-gamelogs')
 debug.enable('export-data-player-gamelogs')
 
+const player_gamelog_fields = [
+  'esbid',
+  'pid',
+  'opp',
+  'tm',
+  'pos',
+  // 'off',
+  // 'def',
+  ...constants.fantasy_player_stats,
+  ...constants.fantasy_kicker_stats,
+  ...constants.fantasy_defense_stats
+]
+
 const export_data_player_gamelogs = async () => {
   const data = await db('player_gamelogs')
 
   const header = {}
-  for (const field of Object.keys(data[0])) {
+  for (const field of player_gamelog_fields) {
     header[field] = field
   }
-  const csv_data = [header, ...data]
+
+  const formatted_data = data.map((row) => {
+    const result = {}
+    for (const field of player_gamelog_fields) {
+      result[field] = row[field] || 0
+    }
+
+    return result
+  })
+  const csv_data = [header, ...formatted_data]
   const csv_data_string = JSON.stringify(csv_data)
   const csv = convertToCSV(csv_data_string)
 

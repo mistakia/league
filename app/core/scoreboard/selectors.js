@@ -176,14 +176,14 @@ export function getPlaysByMatchupId(state, { mid }) {
     .valueSeq()
     .toList()
     .filter((p) => {
-      if (!p.playStats) return false
+      if (!p.play_stats) return false
 
-      const matchSingleGsis = p.playStats.find((p) =>
+      const matchSingleGsis = p.play_stats.find((p) =>
         gsisids.includes(p.gsisId)
       )
       if (matchSingleGsis) return true
 
-      const matchSingleGsisPid = p.playStats.find((p) =>
+      const matchSingleGsisPid = p.play_stats.find((p) =>
         gsispids.includes(p.gsispid)
       )
       return Boolean(matchSingleGsisPid)
@@ -200,27 +200,30 @@ export function getPlaysByMatchupId(state, { mid }) {
     if (!game) continue
 
     // TODO - calculate dst stats and points
-    const playStats = play.playStats.filter((p) => p.gsispid || p.gsisId)
+    const play_stats = play.play_stats.filter((p) => p.gsispid || p.gsisId)
     const grouped = {}
-    for (const playStat of playStats) {
+    for (const play_stat of play_stats) {
       const playerMap = playerMaps.find((pMap) => {
-        if (playStat.gsispid && pMap.get('gsispid', false) === playStat.gsispid)
+        if (
+          play_stat.gsispid &&
+          pMap.get('gsispid', false) === play_stat.gsispid
+        )
           return true
-        if (playStat.gsisId && pMap.get('gsisid', false) === playStat.gsisId)
+        if (play_stat.gsisId && pMap.get('gsisid', false) === play_stat.gsisId)
           return true
         return false
       })
       if (!playerMap) continue
       const pid = playerMap.get('pid')
       if (!grouped[pid]) grouped[pid] = []
-      grouped[pid].push(playStat)
+      grouped[pid].push(play_stat)
     }
     const points = {}
     const stats = {}
     for (const pid in grouped) {
       const playerMap = playerMaps.find((pMap) => pMap.get('pid') === pid)
-      const playStats = grouped[pid]
-      stats[pid] = calculateStatsFromPlayStats(playStats)
+      const play_stats = grouped[pid]
+      stats[pid] = calculateStatsFromPlayStats(play_stats)
       points[pid] = calculatePoints({
         stats: stats[pid],
         position: playerMap.get('pos'),

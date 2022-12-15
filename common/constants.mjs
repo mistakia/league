@@ -121,12 +121,12 @@ export const fantasy_player_stats = [
   'recy',
   'tdrec',
 
-  'snp',
-
   'twoptc',
 
   'prtd', // punt return touchdown
-  'krtd' // kickoff return touchdown
+  'krtd', // kickoff return touchdown
+
+  'snp' // TODO remove
 ]
 
 export const fantasy_kicker_stats = [

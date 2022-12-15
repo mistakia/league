@@ -37,17 +37,17 @@ export function getPlaysForPlayer(state, { playerMap, week }) {
     )
       continue
 
-    const playStats = play.playStats.filter(
+    const play_stats = play.play_stats.filter(
       (ps) =>
         (ps.gsisId && ps.gsisId === playerMap.get('gsisid')) ||
         (ps.gsispid && ps.gsispid === playerMap.get('gsispid'))
     )
 
-    if (!playStats.length) continue
+    if (!play_stats.length) continue
 
     filtered = filtered.push({
       ...play,
-      playStats
+      play_stats
     })
   }
   return filtered

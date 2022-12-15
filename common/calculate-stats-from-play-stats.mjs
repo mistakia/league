@@ -1,13 +1,13 @@
 import * as constants from './constants.mjs'
 
-const calculateStatsFromPlayStats = (playStats) => {
+const calculateStatsFromPlayStats = (play_stats) => {
   const stats = constants.create_fantasy_stats()
 
   stats._fga = []
   stats._fgm = []
 
-  for (const playStat of playStats) {
-    switch (playStat.statId) {
+  for (const play_stat of play_stats) {
+    switch (play_stat.statId) {
       case 2:
         // punt block
         break
@@ -43,26 +43,26 @@ const calculateStatsFromPlayStats = (playStats) => {
       case 10:
         // rushing attempt w/ yards
         stats.ra += 1
-        stats.ry += playStat.yards
+        stats.ry += play_stat.yards
         break
 
       case 11:
         // rushing touchdown
         stats.ra += 1
-        stats.ry += playStat.yards
+        stats.ry += play_stat.yards
         stats.tdr += 1
         break
 
       case 12:
         // lateral rush
         // stats.ra += 1
-        stats.ry += playStat.yards
+        stats.ry += play_stat.yards
         break
 
       case 13:
         // lateral rushing touchdown
         // stats.ra += 1
-        stats.ry += playStat.yards
+        stats.ry += play_stat.yards
         stats.tdr += 1
         break
 
@@ -75,14 +75,14 @@ const calculateStatsFromPlayStats = (playStats) => {
         // completed pass
         stats.pa += 1
         stats.pc += 1
-        stats.py += playStat.yards
+        stats.py += play_stat.yards
         break
 
       case 16:
         // passing touchdown
         stats.pa += 1
         stats.pc += 1
-        stats.py += playStat.yards
+        stats.py += play_stat.yards
         stats.tdp += 1
         break
 
@@ -100,24 +100,24 @@ const calculateStatsFromPlayStats = (playStats) => {
       case 21:
         // receiving yards
         stats.rec += 1
-        stats.recy += playStat.yards
+        stats.recy += play_stat.yards
         break
 
       case 22:
         // receiving touchdown
         stats.rec += 1
         stats.tdrec += 1
-        stats.recy += playStat.yards
+        stats.recy += play_stat.yards
         break
 
       case 23:
         // lateral receiving yards
-        stats.recy += playStat.yards
+        stats.recy += play_stat.yards
         break
 
       case 24:
         // lateral receving touchdown
-        stats.recy += playStat.yards
+        stats.recy += play_stat.yards
         stats.tdrec += 1
         break
 
@@ -292,22 +292,22 @@ const calculateStatsFromPlayStats = (playStats) => {
       case 69:
         // missed field goal
         stats.fga += 1
-        stats._fga.push(playStat.yards)
+        stats._fga.push(play_stat.yards)
         break
 
       case 70:
         // made field goal
         stats.fgm += 1
         stats.fga += 1
-        stats.fgy += Math.max(playStat.yards, 30)
-        stats._fgm.push(playStat.yards)
-        if (playStat.yards < 20) {
+        stats.fgy += Math.max(play_stat.yards, 30)
+        stats._fgm.push(play_stat.yards)
+        if (play_stat.yards < 20) {
           stats.fg19 += 1
-        } else if (playStat.yards < 30) {
+        } else if (play_stat.yards < 30) {
           stats.fg29 += 1
-        } else if (playStat.yards < 40) {
+        } else if (play_stat.yards < 40) {
           stats.fg39 += 1
-        } else if (playStat.yards < 50) {
+        } else if (play_stat.yards < 50) {
           stats.fg49 += 1
         } else {
           stats.fg50 += 1

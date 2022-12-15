@@ -56,7 +56,9 @@ const run = async ({
   year = constants.season.year,
   seas_type = 'REG'
 } = {}) => {
-  const playStats = await db('nfl_play_stats')
+  const timestamp = Math.round(new Date() / 1000)
+
+  const play_stats = await db('nfl_play_stats')
     .select(
       'nfl_play_stats.*',
       'nfl_plays.type_ngs',
@@ -75,7 +77,7 @@ const run = async ({
     .where('nfl_play_stats.valid', 1)
     .where('nfl_plays.seas_type', seas_type)
 
-  const play_stats_by_gsisid = groupBy(playStats, 'gsisId')
+  const play_stats_by_gsisid = groupBy(play_stats, 'gsisId')
   log(
     `loaded play stats for ${Object.keys(play_stats_by_gsisid).length} players`
   )
@@ -140,20 +142,20 @@ const run = async ({
   const play_rows = []
   const play_laterals = []
 
-  const playStatsByEsbid = groupBy(playStats, 'esbid')
+  const playStatsByEsbid = groupBy(play_stats, 'esbid')
 
   for (const [esbid, single_game_play_stats] of Object.entries(
     playStatsByEsbid
   )) {
     const play_stats_by_play = groupBy(single_game_play_stats, 'playId')
 
-    for (const [playId, playStats] of Object.entries(play_stats_by_play)) {
+    for (const [playId, play_stats] of Object.entries(play_stats_by_play)) {
       // ignore plays with no pos_team, likely a timeout or two minute warning
-      const playStat = playStats.find((p) => p.pos_team)
+      const playStat = play_stats.find((p) => p.pos_team)
       if (!playStat) continue
 
       const { play_row, laterals } = getPlayFromPlayStats({
-        playStats,
+        play_stats,
         esbid,
         playId
       })
@@ -217,7 +219,21 @@ const run = async ({
         }
       }
 
-      play_rows.push(play_row)
+      if (play_row.kick_gsis) {
+        const player = player_gsisid_rows.find(
+          (p) => p.gsisid === play_row.kick_gsis
+        )
+        if (player) {
+          play_row.kick_player = player.pid
+        }
+      }
+
+      play_rows.push({
+        year,
+        week,
+        updated: timestamp,
+        ...play_row
+      })
     }
   }
 
@@ -236,7 +252,7 @@ const run = async ({
   }
 
   if (play_laterals.length) {
-    log(`Updated ${play_rows.length} play laterals`)
+    log(`Updated ${play_laterals.length} play laterals`)
     await db('nfl_play_laterals').insert(play_laterals).onConflict().merge()
   }
 }

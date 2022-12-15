@@ -1179,6 +1179,8 @@ CREATE TABLE `nfl_plays` (
   `trg_gsis` varchar(36) DEFAULT NULL,          -- targeted player gsis
   `intp` varchar(7) DEFAULT NULL,               -- intercepting player
   `intp_gsis` varchar(36) DEFAULT NULL,         -- intercepting player gsis
+  `kick_player` varchar(7) DEFAULT NULL,        -- kicker
+  `kick_gsis` varchar(36) DEFAULT NULL,         -- kicker gsis
 
   `yds` tinyint(3) DEFAULT NULL,                -- yardage gained (or lost) by the possessing team, excluding yards gained via fumble recoveries and laterals
 
@@ -1200,6 +1202,8 @@ CREATE TABLE `nfl_plays` (
   `pass` tinyint(1) DEFAULT NULL,               -- Binary indicator for if the play was a pass attempt (includes sacks).
   `solo_tk` tinyint(1) DEFAULT NULL,            -- Binary indicator if the play had a solo tackle (could be multiple due to fumbles).
   `assist_tk` tinyint(1) DEFAULT NULL,          -- Binary indicator for if an assist tackle occurred.
+  `fga` tinyint(1) DEFAULT NULL,                -- binary indicator for a field goal attempt
+  `xpa` tinyint(1) DEFAULT NULL,                -- binary indicator for an extra point attempt
 
   `special` tinyint(1) DEFAULT NULL,                 -- special teams
   `special_type` varchar(10) DEFAULT NULL,            -- special teams play type

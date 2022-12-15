@@ -47,7 +47,7 @@ export default class Scoreboard {
       .where('updated', '>', updated)
 
     const esbids = Array.from(uniqBy(plays, 'esbid')).map((p) => p.esbid)
-    const playStats = await db('nfl_play_stats_current_week')
+    const play_stats = await db('nfl_play_stats_current_week')
       .whereIn('esbid', esbids)
       .where('valid', 1)
     const playSnaps = await db('nfl_snaps_current_week').whereIn(
@@ -56,7 +56,7 @@ export default class Scoreboard {
     )
 
     for (const play of plays) {
-      play.playStats = playStats.filter(
+      play.play_stats = play_stats.filter(
         (p) => p.playId === play.playId && p.esbid === play.esbid
       )
       play.playSnaps = playSnaps.filter(

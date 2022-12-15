@@ -17,16 +17,24 @@ const calculateStatsFromPlays = (plays) => {
     if (players[pid]) return
 
     players[pid] = constants.create_full_stats()
+
     players[pid].off = off
     players[pid].def = def
+
+    players[pid].tm = off
+    players[pid].opp = def
   }
 
   const initialize_team_stats = (off, def) => {
     if (teams[off]) return
 
     teams[off] = constants.create_full_stats()
+
     teams[off].off = off
     teams[off].def = def
+
+    teams[off].tm = off
+    teams[off].opp = def
   }
 
   const add_stat = ({ pid, stat, value, play }) => {
@@ -48,6 +56,150 @@ const calculateStatsFromPlays = (plays) => {
     teams[off][stat] += value
   }
 
+  const add_rush_stats = (play) => {
+    add_stat({ pid: play.bc, stat: 'ra', value: 1, play })
+    add_stat({ pid: play.bc, stat: 'ry', value: play.yds, play })
+    if (play.yaco)
+      add_stat({ pid: play.bc, stat: 'ryaco', value: play.yaco, play })
+    if (play.fd) {
+      add_stat({ pid: play.bc, stat: 'fd', value: 1, play })
+      add_stat({ pid: play.bc, stat: 'rfd', value: 1, play })
+    }
+    if (play.succ) {
+      add_stat({ pid: play.bc, stat: 'succ', value: 1, play })
+      add_stat({ pid: play.bc, stat: 'rasucc', value: 1, play })
+    }
+    if (play.mbt) add_stat({ pid: play.bc, stat: 'mbt', value: play.mbt, play })
+    if (play.yds > 0) add_stat({ pid: play.bc, stat: 'posra', value: 1, play })
+    if (play.fd) add_stat({ pid: play.bc, stat: 'rfd', value: 1, play })
+    if (play.td) add_stat({ pid: play.bc, stat: 'tdr', value: 1, play })
+  }
+
+  const add_pass_stats = (play) => {
+    // passer
+    if (play.succ) {
+      add_stat({ pid: play.psr, stat: 'pasucc', value: 1, play })
+      add_stat({ pid: play.psr, stat: 'succ', value: 1, play })
+    }
+    if (play.dot) {
+      add_stat({ pid: play.psr, stat: 'pdot', value: play.dot, play })
+    }
+    if (play.qbp) add_stat({ pid: play.psr, stat: 'qbp', value: 1, play })
+    if (play.qbhi) add_stat({ pid: play.psr, stat: 'qbhi', value: 1, play })
+    if (play.qbhu) add_stat({ pid: play.psr, stat: 'qbhu', value: 1, play })
+    if (play.high) add_stat({ pid: play.psr, stat: 'high', value: 1, play })
+    if (play.intw) add_stat({ pid: play.psr, stat: 'intw', value: 1, play })
+    if (play.drp) {
+      add_stat({ pid: play.psr, stat: 'drp_pa', value: 1, play })
+      add_stat({ pid: play.psr, stat: 'drp_py', value: play.dot, play })
+    }
+
+    // receiver
+    if (play.trg) {
+      add_stat({ pid: play.trg, stat: 'trg', value: 1, play })
+      add_stat({ pid: play.trg, stat: 'rdot', value: play.dot, play })
+      if (play.dot >= 20)
+        add_stat({ pid: play.trg, stat: 'deep_trg', value: 1, play })
+      if (play.cnb) add_stat({ pid: play.trg, stat: 'cnb', value: 1, play })
+      if (play.drp) {
+        add_stat({ pid: play.trg, stat: 'drp', value: 1, play })
+        add_stat({ pid: play.trg, stat: 'drprecy', value: play.dot, play })
+      }
+    }
+
+    if (play.intp) {
+      add_stat({ pid: play.psr, stat: 'ints', value: 1, play })
+    } else if (play.comp && play.trg) {
+      // TODO deprecate - temp fix for missing trg
+      // receiver
+      add_stat({ pid: play.trg, stat: 'rec', value: 1, play })
+      add_stat({ pid: play.trg, stat: 'recy', value: play.yds, play })
+      add_stat({ pid: play.trg, stat: 'ryac', value: play.yac, play })
+      add_stat({ pid: play.trg, stat: 'rcay', value: play.dot, play })
+      if (play.mbt)
+        add_stat({ pid: play.trg, stat: 'mbt', value: play.mbt, play })
+
+      // passer
+      add_stat({ pid: play.psr, stat: 'pa', value: 1, play })
+      add_stat({ pid: play.psr, stat: 'py', value: play.yds, play })
+      add_stat({ pid: play.psr, stat: 'pc', value: 1, play })
+      add_stat({ pid: play.psr, stat: 'pcay', value: play.dot, play })
+      if (play.yac)
+        add_stat({ pid: play.psr, stat: 'pyac', value: play.yac, play })
+
+      if (play.succ) add_stat({ pid: play.trg, stat: 'succ', value: 1, play })
+      if (play.fd) {
+        add_stat({ pid: play.psr, stat: 'fd', value: 1, play })
+        add_stat({ pid: play.trg, stat: 'fd', value: 1, play })
+      }
+
+      if (play.td) {
+        add_stat({ pid: play.psr, stat: 'tdp', value: 1, play })
+        add_stat({ pid: play.trg, stat: 'tdrec', value: 1, play })
+      }
+    } else if (play.sk) {
+      add_stat({ pid: play.psr, stat: 'sk', value: 1, play })
+      add_stat({
+        pid: play.psr,
+        stat: 'sky',
+        value: Math.abs(play.yds),
+        play
+      })
+    } else {
+      add_stat({ pid: play.psr, stat: 'pa', value: 1, play })
+    }
+  }
+
+  const add_kick_stats = (play) => {
+    if (play.fga) {
+      add_stat({ pid: play.kick_player, stat: 'fga', value: 1, play })
+      if (play.score_type === 'FG') {
+        add_stat({ pid: play.kick_player, stat: 'fgm', value: 1, play })
+
+        // minimum of 30 yards
+        const kick_yards = Math.max(30, play.kick_distance)
+        add_stat({
+          pid: play.kick_player,
+          stat: 'fgy',
+          value: kick_yards,
+          play
+        })
+
+        if (play.kick_distance <= 19) {
+          add_stat({ pid: play.kick_player, stat: 'fg19', value: 1, play })
+        } else if (play.kick_distance <= 29) {
+          add_stat({ pid: play.kick_player, stat: 'fg29', value: 1, play })
+        } else if (play.kick_distance <= 39) {
+          add_stat({ pid: play.kick_player, stat: 'fg39', value: 1, play })
+        } else if (play.kick_distance <= 49) {
+          add_stat({ pid: play.kick_player, stat: 'fg49', value: 1, play })
+        } else if (play.kick_distance >= 50) {
+          add_stat({ pid: play.kick_player, stat: 'fg50', value: 1, play })
+        }
+      }
+    } else if (play.xpa) {
+      add_stat({ pid: play.kick_player, stat: 'xpa', value: 1, play })
+
+      if (play.score_type === 'PAT') {
+        add_stat({ pid: play.kick_player, stat: 'xpm', value: 1, play })
+      }
+    }
+  }
+
+  const add_two_point_conversion_stats = (play) => {
+    if (play.score_type === 'PAT2') {
+      if (play.psr) {
+        add_stat({ pid: play.psr, stat: 'twoptc', value: 1, play })
+      }
+      if (play.trg) {
+        add_stat({ pid: play.trg, stat: 'twoptc', value: 1, play })
+      }
+      if (play.bc) {
+        add_stat({ pid: play.bc, stat: 'twoptc', value: 1, play })
+      }
+    }
+  }
+
   plays.forEach((play) => {
     if (play.fuml) {
       add_stat({ pid: play.player_fuml, stat: 'fuml', value: 1, play })
@@ -57,101 +209,23 @@ const calculateStatsFromPlays = (plays) => {
 
     switch (play.type) {
       case 'RUSH': {
-        add_stat({ pid: play.bc, stat: 'ra', value: 1, play })
-        add_stat({ pid: play.bc, stat: 'ry', value: play.yds, play })
-        if (play.yaco)
-          add_stat({ pid: play.bc, stat: 'ryaco', value: play.yaco, play })
-        if (play.fd) {
-          add_stat({ pid: play.bc, stat: 'fd', value: 1, play })
-          add_stat({ pid: play.bc, stat: 'rfd', value: 1, play })
-        }
-        if (play.succ) {
-          add_stat({ pid: play.bc, stat: 'succ', value: 1, play })
-          add_stat({ pid: play.bc, stat: 'rasucc', value: 1, play })
-        }
-        if (play.mbt)
-          add_stat({ pid: play.bc, stat: 'mbt', value: play.mbt, play })
-        if (play.yds > 0)
-          add_stat({ pid: play.bc, stat: 'posra', value: 1, play })
-        if (play.fd) add_stat({ pid: play.bc, stat: 'rfd', value: 1, play })
-        if (play.td) add_stat({ pid: play.bc, stat: 'tdr', value: 1, play })
+        add_rush_stats(play)
         break
       }
 
       case 'PASS': {
-        // passer
-        if (play.succ) {
-          add_stat({ pid: play.psr, stat: 'pasucc', value: 1, play })
-          add_stat({ pid: play.psr, stat: 'succ', value: 1, play })
-        }
-        if (play.dot) {
-          add_stat({ pid: play.psr, stat: 'pdot', value: play.dot, play })
-        }
-        if (play.qbp) add_stat({ pid: play.psr, stat: 'qbp', value: 1, play })
-        if (play.qbhi) add_stat({ pid: play.psr, stat: 'qbhi', value: 1, play })
-        if (play.qbhu) add_stat({ pid: play.psr, stat: 'qbhu', value: 1, play })
-        if (play.high) add_stat({ pid: play.psr, stat: 'high', value: 1, play })
-        if (play.intw) add_stat({ pid: play.psr, stat: 'intw', value: 1, play })
-        if (play.drp) {
-          add_stat({ pid: play.psr, stat: 'drp_pa', value: 1, play })
-          add_stat({ pid: play.psr, stat: 'drp_py', value: play.dot, play })
-        }
+        add_pass_stats(play)
+        break
+      }
 
-        // receiver
-        if (play.trg) {
-          add_stat({ pid: play.trg, stat: 'trg', value: 1, play })
-          add_stat({ pid: play.trg, stat: 'rdot', value: play.dot, play })
-          if (play.dot >= 20)
-            add_stat({ pid: play.trg, stat: 'deep_trg', value: 1, play })
-          if (play.cnb) add_stat({ pid: play.trg, stat: 'cnb', value: 1, play })
-          if (play.drp) {
-            add_stat({ pid: play.trg, stat: 'drp', value: 1, play })
-            add_stat({ pid: play.trg, stat: 'drprecy', value: play.dot, play })
-          }
-        }
+      case 'FGXP': {
+        add_kick_stats(play)
+        break
+      }
 
-        if (play.intp) {
-          add_stat({ pid: play.psr, stat: 'ints', value: 1, play })
-        } else if (play.comp && play.trg) {
-          // TODO deprecate - temp fix for missing trg
-          // receiver
-          add_stat({ pid: play.trg, stat: 'rec', value: 1, play })
-          add_stat({ pid: play.trg, stat: 'recy', value: play.yds, play })
-          add_stat({ pid: play.trg, stat: 'ryac', value: play.yac, play })
-          add_stat({ pid: play.trg, stat: 'rcay', value: play.dot, play })
-          if (play.mbt)
-            add_stat({ pid: play.trg, stat: 'mbt', value: play.mbt, play })
-
-          // passer
-          add_stat({ pid: play.psr, stat: 'pa', value: 1, play })
-          add_stat({ pid: play.psr, stat: 'py', value: play.yds, play })
-          add_stat({ pid: play.psr, stat: 'pc', value: 1, play })
-          add_stat({ pid: play.psr, stat: 'pcay', value: play.dot, play })
-          if (play.yac)
-            add_stat({ pid: play.psr, stat: 'pyac', value: play.yac, play })
-
-          if (play.succ)
-            add_stat({ pid: play.trg, stat: 'succ', value: 1, play })
-          if (play.fd) {
-            add_stat({ pid: play.psr, stat: 'fd', value: 1, play })
-            add_stat({ pid: play.trg, stat: 'fd', value: 1, play })
-          }
-
-          if (play.td) {
-            add_stat({ pid: play.psr, stat: 'tdp', value: 1, play })
-            add_stat({ pid: play.trg, stat: 'tdrec', value: 1, play })
-          }
-        } else if (play.sk) {
-          add_stat({ pid: play.psr, stat: 'sk', value: 1, play })
-          add_stat({
-            pid: play.psr,
-            stat: 'sky',
-            value: Math.abs(play.yds),
-            play
-          })
-        } else {
-          add_stat({ pid: play.psr, stat: 'pa', value: 1, play })
-        }
+      case 'CONV': {
+        add_two_point_conversion_stats(play)
+        break
       }
     }
   })
