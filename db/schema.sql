@@ -2280,6 +2280,7 @@ DROP TABLE IF EXISTS `prop_pairings`;
 
 CREATE TABLE `prop_pairings` (
   `pairing_id` varchar(30) NOT NULL,
+  `sourceid` int NOT NULL,
   `name` varchar(150) DEFAULT NULL,
   `team` varchar(3) DEFAULT NULL,
   `week` tinyint(2) NOT NULL,

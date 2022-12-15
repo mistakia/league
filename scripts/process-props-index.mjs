@@ -33,14 +33,19 @@ const prop_desc = {
   [constants.player_prop_types.GAME_RECEPTIONS]: 'recs',
   [constants.player_prop_types.GAME_PASSING_INTERCEPTIONS]: 'ints',
   [constants.player_prop_types.GAME_RUSHING_ATTEMPTS]: 'rush atts',
-  [constants.player_prop_types.GAME_RUSHING_RECEIVING_YARDS]: 'rush/recv',
+  [constants.player_prop_types.GAME_RUSHING_RECEIVING_YARDS]: 'rush + recv',
   [constants.player_prop_types.GAME_RECEIVING_TOUCHDOWNS]: 'tds',
   [constants.player_prop_types.GAME_RUSHING_TOUCHDOWNS]: 'tds',
   [constants.player_prop_types.GAME_PASSING_ATTEMPTS]: 'pass atts',
   // constants.player_prop_types.GAME_PASSING_LONGEST_COMPLETION,
   // constants.player_prop_types.GAME_LONGEST_RECEPTION,
-  [constants.player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS]: 'tds'
+  [constants.player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS]: 'tds',
   // constants.player_prop_types.GAME_LONGEST_RUSH,
+  [constants.player_prop_types.GAME_PASSING_RUSHING_YARDS]: 'pass + rush',
+  [constants.player_prop_types.GAME_ALT_PASSING_COMPLETIONS]: 'comps',
+  [constants.player_prop_types.GAME_ALT_PASSING_TOUCHDOWNS]: 'pass tds',
+  [constants.player_prop_types.GAME_ALT_RECEPTIONS]: 'recs',
+  [constants.player_prop_types.GAME_ALT_RUSHING_ATTEMPTS]: 'rush atts'
 }
 
 const get_hits = ({ line, prop_type, player_gamelogs }) =>
@@ -78,12 +83,15 @@ const is_hit = ({ line, prop_type, player_gamelog, strict = false }) => {
         return player_gamelog.recy >= line - cushion
       }
 
+    case constants.player_prop_types.GAME_ALT_PASSING_COMPLETIONS:
     case constants.player_prop_types.GAME_PASSING_COMPLETIONS:
       return player_gamelog.pc >= (strict ? line : line - 1)
 
+    case constants.player_prop_types.GAME_ALT_PASSING_TOUCHDOWNS:
     case constants.player_prop_types.GAME_PASSING_TOUCHDOWNS:
       return player_gamelog.tdp >= (strict ? line : line)
 
+    case constants.player_prop_types.GAME_ALT_RECEPTIONS:
     case constants.player_prop_types.GAME_RECEPTIONS: {
       if (strict) {
         return player_gamelog.rec >= line
@@ -96,6 +104,7 @@ const is_hit = ({ line, prop_type, player_gamelog, strict = false }) => {
     case constants.player_prop_types.GAME_PASSING_INTERCEPTIONS:
       return player_gamelog.ints >= (strict ? line : line)
 
+    case constants.player_prop_types.GAME_ALT_RUSHING_ATTEMPTS:
     case constants.player_prop_types.GAME_RUSHING_ATTEMPTS:
       return player_gamelog.ra >= (strict ? line : line - 1)
 
@@ -120,6 +129,15 @@ const is_hit = ({ line, prop_type, player_gamelog, strict = false }) => {
       return player_gamelog.tdr + player_gamelog.tdrec >= (strict ? line : line)
 
     // constants.player_prop_types.GAME_LONGEST_RUSH,
+
+    case constants.player_prop_types.GAME_PASSING_RUSHING_YARDS: {
+      if (strict) {
+        return player_gamelog.py + player_gamelog.ry >= line
+      } else {
+        const cushion = Math.min(Math.round(line * 0.06), 20)
+        return player_gamelog.py + player_gamelog.ry >= line - cushion
+      }
+    }
   }
 
   return false
@@ -300,6 +318,7 @@ const main = async () => {
   try {
     const week = argv.week || constants.season.week
     const year = argv.year || constants.season.year
+    const source = argv.source || constants.sources.FANDUEL_NJ
 
     const prop_rows = await db('props_index')
       .whereIn('prop_type', [
@@ -321,11 +340,15 @@ const main = async () => {
         constants.player_prop_types.GAME_PASSING_ATTEMPTS,
         // constants.player_prop_types.GAME_PASSING_LONGEST_COMPLETION,
         // constants.player_prop_types.GAME_LONGEST_RECEPTION,
-        constants.player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS
+        constants.player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS,
         // constants.player_prop_types.GAME_LONGEST_RUSH,
+        constants.player_prop_types.GAME_PASSING_RUSHING_YARDS,
+        constants.player_prop_types.GAME_ALT_PASSING_TOUCHDOWNS,
+        constants.player_prop_types.GAME_ALT_PASSING_COMPLETIONS,
+        constants.player_prop_types.GAME_ALT_RUSHING_ATTEMPTS
       ])
       .where('time_type', constants.player_prop_time_type.CLOSE)
-      .where('sourceid', constants.sources.FANDUEL_NJ)
+      .where('sourceid', source)
       // .whereNot('sourceid', constants.sources.PRIZEPICKS)
       .where({
         week,

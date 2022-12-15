@@ -140,7 +140,7 @@ const get_stats_for_props = async ({ props, week }) => {
   }
 }
 
-const format_prop_pairing = ({ props, prop_stats, week, team }) => {
+const format_prop_pairing = ({ props, prop_stats, week, team, source }) => {
   const prop_odds_array = props.map((p) => 1 - p.market_prob)
   const prop_odds_combined = prop_odds_array.reduce((a, b) => a * b, 1)
   const market_prob = 1 - prop_odds_combined
@@ -168,6 +168,7 @@ const format_prop_pairing = ({ props, prop_stats, week, team }) => {
   const pairing_id = get_prop_pairing_id(props)
   const pairing = {
     pairing_id,
+    sourceid: source,
     name: `${prop_names.join(' / ')} (${status})`,
     team,
     week,
@@ -189,7 +190,8 @@ const format_prop_pairing = ({ props, prop_stats, week, team }) => {
 }
 
 const generate_prop_pairings = async ({
-  week = constants.season.week
+  week = constants.season.week,
+  source = constants.sources.FANDUEL_NJ
 } = {}) => {
   console.time('generate_prop_pairings')
 
@@ -214,11 +216,15 @@ const generate_prop_pairings = async ({
       constants.player_prop_types.GAME_PASSING_ATTEMPTS,
       // constants.player_prop_types.GAME_PASSING_LONGEST_COMPLETION,
       // constants.player_prop_types.GAME_LONGEST_RECEPTION,
-      constants.player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS
+      constants.player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS,
       // constants.player_prop_types.GAME_LONGEST_RUSH,
+      constants.player_prop_types.GAME_PASSING_RUSHING_YARDS,
+      constants.player_prop_types.GAME_ALT_PASSING_TOUCHDOWNS,
+      constants.player_prop_types.GAME_ALT_PASSING_COMPLETIONS,
+      constants.player_prop_types.GAME_ALT_RUSHING_ATTEMPTS
     ])
     .where('time_type', constants.player_prop_time_type.CLOSE)
-    .where('sourceid', constants.sources.FANDUEL_NJ)
+    .where('sourceid', source)
     // .whereNot('sourceid', constants.sources.PRIZEPICKS)
     .where({
       week,
@@ -270,7 +276,8 @@ const generate_prop_pairings = async ({
           team: tm,
           prop_stats,
           props,
-          week
+          week,
+          source
         })
 
         prop_pairing_inserts.push(prop_group_data.pairing)
@@ -295,7 +302,8 @@ const generate_prop_pairings = async ({
               team: tm,
               prop_stats,
               props,
-              week
+              week,
+              source
             })
 
             prop_pairing_inserts.push(prop_group_data.pairing)
@@ -324,7 +332,8 @@ const generate_prop_pairings = async ({
                   team: tm,
                   prop_stats,
                   props,
-                  week
+                  week,
+                  source
                 })
 
                 prop_pairing_inserts.push(prop_group_data.pairing)
@@ -363,7 +372,8 @@ const main = async () => {
   let error
   try {
     const week = argv.week
-    await generate_prop_pairings({ week })
+    const source = argv.source
+    await generate_prop_pairings({ week, source })
   } catch (err) {
     error = err
     log(error)

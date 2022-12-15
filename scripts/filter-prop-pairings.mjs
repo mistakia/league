@@ -100,7 +100,10 @@ const opponent_allowed_for_prop_is_negative = ({
   }
 }
 
-const filter_prop_pairings = async ({ week = constants.season.week } = {}) => {
+const filter_prop_pairings = async ({
+  week = constants.season.week,
+  source = constants.sources.FANDUEL_VA
+} = {}) => {
   const opts = merge(default_options, config.filter_prop_pairings_options || {})
   log('options:')
   log(opts)
@@ -114,6 +117,7 @@ const filter_prop_pairings = async ({ week = constants.season.week } = {}) => {
     .where('lowest_payout', '>=', opts.lowest_payout_min_threshold)
     .where('hist_edge_soft', '>=', opts.edge_min_threshold)
     .where('total_games', '>=', opts.total_games_min_threshold)
+    .where('sourceid', source)
     .whereNotIn('team', opts.exclude_nfl_team)
     .where('week', week)
     .orderBy('hist_rate_soft', 'DESC')
@@ -295,7 +299,8 @@ const main = async () => {
   let error
   try {
     const week = argv.week
-    await filter_prop_pairings({ week })
+    const source = argv.source
+    await filter_prop_pairings({ week, source })
   } catch (err) {
     error = err
     log(error)
