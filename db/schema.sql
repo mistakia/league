@@ -2267,7 +2267,8 @@ CREATE TABLE `props_index` (
   `all_weeks` json DEFAULT NULL,
   `opp_weeks` json DEFAULT NULL,
   PRIMARY KEY (`prop_id`),
-  UNIQUE KEY `prop` (`sourceid`, `pid`, `week`, `year`, `prop_type`, `ln`, `time_type`)
+  UNIQUE KEY `prop` (`sourceid`, `pid`, `week`, `year`, `prop_type`, `ln`, `time_type`),
+  KEY `hits_soft` (`hits_soft`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
