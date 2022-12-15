@@ -102,7 +102,7 @@ const opponent_allowed_for_prop_is_negative = ({
 
 const filter_prop_pairings = async ({
   week = constants.season.week,
-  source = constants.sources.FANDUEL_VA
+  source = constants.sources.FANDUEL_NJ
 } = {}) => {
   const opts = merge(default_options, config.filter_prop_pairings_options || {})
   log('options:')
