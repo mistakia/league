@@ -7,14 +7,16 @@ LOGS=false
 STATS=false
 CACHE=false
 PROJECTIONS=false
+BETTING=false
 
-while getopts 'fclsp' opt; do
+while getopts 'fclspb' opt; do
     case $opt in
         f) FULL=true ;;
         c) CACHE=true ;;
         l) LOGS=true ;;
         s) STATS=true ;;
         p) PROJECTIONS=true ;;
+        b) BETTING=true ;;
 
         *) echo 'Error in command line parsing' >&2
     esac
@@ -81,8 +83,14 @@ nfl_snaps
 player
 players_status
 practice
-props
 rankings
+"
+
+DB_BETTING_TABLES="
+props
+props_index
+prop_pairings
+prop_pairing_props
 "
 
 DB_PROJECTIONS_TABLES="
@@ -98,6 +106,8 @@ elif $LOGS; then
     backup_type="logs"
 elif $STATS; then
     backup_type="stats"
+elif $BETTING; then
+    backup_type="betting"
 elif $CACHE; then
     backup_type="cache"
 elif $PROJECTIONS; then
@@ -119,6 +129,8 @@ elif $LOGS; then
     mysqldump --defaults-extra-file=$DB_FILE $DB_NAME $DB_LOGS_TABLES > $sql_file
 elif $STATS; then
     mysqldump --defaults-extra-file=$DB_FILE $DB_NAME $DB_STATS_TABLES > $sql_file
+elif $BETTING; then
+    mysqldump --defaults-extra-file=$DB_FILE $DB_NAME $DB_BETTING_TABLES > $sql_file
 elif $CACHE; then
     mysqldump --defaults-extra-file=$DB_FILE $DB_NAME $DB_CACHE_TABLES > $sql_file
 elif $PROJECTIONS; then
