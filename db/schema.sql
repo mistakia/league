@@ -2301,7 +2301,18 @@ CREATE TABLE `prop_pairings` (
   `is_success` tinyint(1) unsigned DEFAULT NULL,
   `highest_payout` MEDIUMINT DEFAULT NULL,
   `lowest_payout` MEDIUMINT DEFAULT NULL,
-  PRIMARY KEY (`pairing_id`)
+  PRIMARY KEY (`pairing_id`),
+  KEY `sourceid` (`sourceid`),
+  KEY `market_prob` (`market_prob`),
+  KEY `hist_rate_soft` (`hist_rate_soft`),
+  KEY `opp_allow_rate` (`opp_allow_rate`),
+  KEY `joint_hist_rate` (`joint_hist_rate`),
+  KEY `highest_payout` (`highest_payout`),
+  KEY `lowest_payout` (`lowest_payout`),
+  KEY `hist_edge_soft` (`hist_edge_soft`),
+  KEY `total_games` (`total_games`),
+  KEY `team` (`team`),
+  KEY `week` (`week`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
