@@ -2229,6 +2229,7 @@ CREATE TABLE `props` (
 DROP TABLE IF EXISTS `props_index`;
 
 CREATE TABLE `props_index` (
+  `prop_id` int unsigned NOT NULL AUTO_INCREMENT
   `pid` varchar(7) NOT NULL,
   `week` tinyint(2) NOT NULL,
   `year` smallint(4) NOT NULL,
@@ -2241,7 +2242,79 @@ CREATE TABLE `props_index` (
   `sourceid` int(6) NOT NULL,
   `timestamp` int(11) NOT NULL,
   `time_type` tinyint(3) NOT NULL,
+
+  `name` varchar(50) DEFAULT NULL,
+  `team` varchar(3) DEFAULT NULL,
+  `opp` varchar(3) DEFAULT NULL,
+  `esbid` int(10) unsigned DEFAULT NULL,
+  `pos` varchar(3) DEFAULT NULL,
+  `hits_soft` tinyint(2) unsigned DEFAULT NULL,
+  `hit_weeks_soft` json DEFAULT NULL,
+  `hits_hard` tinyint(2) unsigned DEFAULT NULL,
+  `hit_weeks_hard` json DEFAULT NULL,
+  `hits_opp` tinyint(2) unsigned DEFAULT NULL,
+  `opp_hit_weeks` json DEFAULT NULL,
+  `hist_rate_soft` decimal(5,4) DEFAULT NULL,
+  `hist_rate_hard` decimal(5,4) DEFAULT NULL,
+  `opp_allow_rate` decimal(5,4) DEFAULT NULL,
+  `hist_edge_soft` decimal(6,5) DEFAULT NULL,
+  `hist_edge_hard` decimal(6,5) DEFAULT NULL,
+  `market_prop` decimal(5,4) DEFAULT NULL,
+  `is_pending` tinyint(1) unsigned DEFAULT NULL,
+  `is_success` tinyint(1) unsigned DEFAULT NULL,
+  `risk` decimal(6,4) DEFAULT NULL,
+  `payout` decimal(7,4) DEFAULT NULL,
+  `all_weeks` json DEFAULT NULL,
+  `opp_weeks` json DEFAULT NULL,
+  PRIMARY KEY (`prop_id`),
   UNIQUE KEY `prop` (`sourceid`, `pid`, `week`, `year`, `prop_type`, `ln`, `time_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `prop_pairings`
+--
+
+DROP TABLE IF EXISTS `prop_pairings`;
+
+CREATE TABLE `prop_pairings` (
+  `pairing_id` varchar(30) NOT NULL,
+  `name` varchar(150) DEFAULT NULL,
+  `team` varchar(3) DEFAULT NULL,
+  `week` tinyint(2) NOT NULL,
+  `market_prob` decimal(5,4) DEFAULT NULL,
+  `risk_total` decimal(5,3) DEFAULT NULL,
+  `payout_total` decimal(7,3) DEFAULT NULL,
+  `hist_rate_soft` decimal(5,4) DEFAULT NULL,
+  `hist_rate_hard` decimal(5,4) DEFAULT NULL,
+  `opp_allow_rate` decimal(5,4) DEFAULT NULL,
+  `total_games` tinyint(2) DEFAULT NULL,
+  `week_last_hit` tinyint(2) DEFAULT NULL,
+  `week_first_hit` tinyint(2) DEFAULT NULL,
+  `joint_hist_rate` decimal(5,4) DEFAULT NULL,
+  `joint_games` tinyint(2) DEFAULT NULL,
+  `hist_edge_soft` decimal(6,5) DEFAULT NULL,
+  `hist_edge_hard` decimal(6,5) DEFAULT NULL,
+  `is_pending` tinyint(1) unsigned DEFAULT NULL,
+  `is_success` tinyint(1) unsigned DEFAULT NULL,
+  `highest_payout` MEDIUMINT DEFAULT NULL,
+  `lowest_payout` MEDIUMINT DEFAULT NULL,
+  PRIMARY KEY (`pairing_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `prop_pairing_props`
+--
+
+DROP TABLE IF EXISTS `prop_pairing_props`;
+
+CREATE TABLE `prop_pairing_props` (
+  `pairing_id` varchar(30) NOT NULL,
+  `prop_id` int unsigned NOT NULL,
+  UNIQUE KEY `pairing_prop` (`pairing_id`,`prop_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
