@@ -2286,7 +2286,7 @@ CREATE TABLE `prop_pairings` (
   `team` varchar(3) DEFAULT NULL,
   `week` tinyint(2) NOT NULL,
   `market_prob` decimal(5,4) DEFAULT NULL,
-  `risk_total` decimal(5,3) DEFAULT NULL,
+  `risk_total` decimal(6,3) DEFAULT NULL,
   `payout_total` decimal(7,3) DEFAULT NULL,
   `hist_rate_soft` decimal(5,4) DEFAULT NULL,
   `hist_rate_hard` decimal(5,4) DEFAULT NULL,
