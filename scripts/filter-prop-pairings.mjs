@@ -290,6 +290,7 @@ const filter_prop_pairings = async ({
       columns: [
         { name: 'pairing', alignment: 'left' },
         { name: 'hit_rate', alignment: 'right' },
+        { name: 'edge', alignment: 'right' },
         { name: 'high', alignment: 'right' },
         { name: 'low', alignment: 'right' },
         { name: 'status', alignment: 'right' }
@@ -308,6 +309,7 @@ const filter_prop_pairings = async ({
       p.addRow({
         pairing: `${prop_names.join(' / ')}`,
         hit_rate: `${Math.round(prop.hist_rate_soft * 100)}%`,
+        edge: `${(prop.hist_edge_soft * 100).toFixed(1)}%`,
         high: prop.highest_payout,
         low: prop.lowest_payout,
         status
