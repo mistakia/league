@@ -2315,7 +2315,8 @@ CREATE TABLE `prop_pairings` (
   KEY `total_games` (`total_games`),
   KEY `team` (`team`),
   KEY `week` (`week`),
-  KEY `risk_total` (`risk_total`)
+  KEY `risk_total` (`risk_total`),
+  KEY `size` (`size`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
