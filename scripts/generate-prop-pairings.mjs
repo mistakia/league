@@ -175,6 +175,7 @@ const format_prop_pairing = ({ props, prop_stats, week, team, source }) => {
     market_prob,
     ...props_totals,
     ...prop_stats,
+    size: props.length,
     hist_edge_soft: prop_stats.hist_rate_soft - market_prob,
     hist_edge_hard: prop_stats.hist_rate_hard - market_prob,
     is_pending,
