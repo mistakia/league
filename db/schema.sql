@@ -2262,7 +2262,7 @@ CREATE TABLE `props_index` (
   `market_prop` decimal(5,4) DEFAULT NULL,
   `is_pending` tinyint(1) unsigned DEFAULT NULL,
   `is_success` tinyint(1) unsigned DEFAULT NULL,
-  `risk` decimal(6,4) DEFAULT NULL,
+  `risk` decimal(7,4) DEFAULT NULL,
   `payout` decimal(7,4) DEFAULT NULL,
   `all_weeks` json DEFAULT NULL,
   `opp_weeks` json DEFAULT NULL,
