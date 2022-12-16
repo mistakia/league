@@ -1329,7 +1329,7 @@ export const player_prop_types_alts = [
   player_prop_types.GAME_ALT_PASSING_YARDS,
   player_prop_types.GAME_ALT_RUSHING_YARDS,
   player_prop_types.GAME_ALT_RECEIVING_YARDS,
-  player_prop_types.GAEM_ALT_PASSING_TOUCHDOWNS,
+  player_prop_types.GAME_ALT_PASSING_TOUCHDOWNS,
   player_prop_types.GAME_ALT_PASSING_COMPLETIONS,
   player_prop_types.GAME_ALT_RECEPTIONS,
   player_prop_types.GAME_ALT_RUSHING_ATTEMPTS
