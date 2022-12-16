@@ -2313,7 +2313,8 @@ CREATE TABLE `prop_pairings` (
   KEY `hist_edge_soft` (`hist_edge_soft`),
   KEY `total_games` (`total_games`),
   KEY `team` (`team`),
-  KEY `week` (`week`)
+  KEY `week` (`week`),
+  KEY `risk_total` (`risk_total`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
