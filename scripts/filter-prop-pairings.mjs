@@ -25,6 +25,7 @@ const default_options = {
   opponent_allowed_rate_min_threshold: 1,
   joint_historical_rate_min_threshold: 1,
   prop_hits_min_threshold: 1,
+  pairing_size_max_threshold: 3,
   highest_payout_min_threshold: 100,
   lowest_payout_min_threshold: 100,
   risk_total_max_threshold: 10,
@@ -67,6 +68,7 @@ const opponent_allowed_for_prop_is_negative = ({
     case constants.player_prop_types.GAME_ALT_RECEIVING_YARDS:
       return opponent_seasonlog.recy < (opts.opponent_allowed_recy_min || 0)
 
+    case constants.player_prop_types.GAME_ALT_PASSING_COMPLETIONS:
     case constants.player_prop_types.GAME_PASSING_COMPLETIONS:
       return opponent_seasonlog.pc < (opts.opponent_allowed_pc_min || 0)
 
@@ -121,6 +123,7 @@ const filter_prop_pairings = async ({
     .where('hist_edge_soft', '>=', opts.edge_min_threshold)
     .where('total_games', '>=', opts.total_games_min_threshold)
     .where('risk_total', '<=', opts.risk_total_max_threshold)
+    .where('size', '<=', opts.pairing_size_max_threshold)
     .where('sourceid', source)
     .whereNotIn('team', opts.exclude_nfl_team)
     .where('week', week)
