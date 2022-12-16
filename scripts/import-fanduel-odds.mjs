@@ -12,7 +12,7 @@ const log = debug('import-fanduel')
 debug.enable('import-fanduel,get-player,fanduel')
 
 const formatPlayerName = (str) => {
-  str = str.split('-')[0]
+  str = str.split(' - ')[0]
   return str.trim()
 }
 
