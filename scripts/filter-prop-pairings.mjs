@@ -6,6 +6,7 @@ import path, { dirname } from 'path'
 import { fileURLToPath } from 'url'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
+import { Table } from 'console-table-printer'
 
 import db from '#db'
 import { constants, groupBy } from '#common'
@@ -26,6 +27,7 @@ const default_options = {
   prop_hits_min_threshold: 1,
   highest_payout_min_threshold: 100,
   lowest_payout_min_threshold: 100,
+  risk_total_max_threshold: 10,
   edge_min_threshold: 0,
   total_games_min_threshold: 3,
   exclude_players: [],
@@ -77,6 +79,7 @@ const opponent_allowed_for_prop_is_negative = ({
     case constants.player_prop_types.GAME_PASSING_INTERCEPTIONS:
       return opponent_seasonlog.ints < (opts.opponent_allowed_ints_min || 0)
 
+    case constants.player_prop_types.GAME_ALT_RUSHING_ATTEMPTS:
     case constants.player_prop_types.GAME_RUSHING_ATTEMPTS:
       return opponent_seasonlog.ra < (opts.opponent_allowed_ra_min || 0)
 
@@ -117,6 +120,7 @@ const filter_prop_pairings = async ({
     .where('lowest_payout', '>=', opts.lowest_payout_min_threshold)
     .where('hist_edge_soft', '>=', opts.edge_min_threshold)
     .where('total_games', '>=', opts.total_games_min_threshold)
+    .where('risk_total', '<=', opts.risk_total_max_threshold)
     .where('sourceid', source)
     .whereNotIn('team', opts.exclude_nfl_team)
     .where('week', week)
@@ -281,8 +285,36 @@ const filter_prop_pairings = async ({
 
   const grouped_by_team = groupBy(filtered, 'team')
   for (const team in grouped_by_team) {
-    log(team)
-    log(grouped_by_team[team].map((prop) => prop.name))
+    const p = new Table({
+      title: `${team} plays`,
+      columns: [
+        { name: 'pairing', alignment: 'left' },
+        { name: 'hit_rate', alignment: 'right' },
+        { name: 'high', alignment: 'right' },
+        { name: 'low', alignment: 'right' },
+        { name: 'status', alignment: 'right' }
+      ]
+    })
+    grouped_by_team[team].forEach((prop) => {
+      const status = prop.is_pending
+        ? 'pending'
+        : prop.is_success
+        ? 'hit'
+        : 'miss'
+      const prop_names = prop.props.map(
+        (p) => `${p.name} [${Math.round(p.hist_rate_soft * 100)}% / ${p.o_am}]`
+      )
+
+      p.addRow({
+        pairing: `${prop_names.join(' / ')}`,
+        hit_rate: `${Math.round(prop.hist_rate_soft * 100)}%`,
+        high: prop.highest_payout,
+        low: prop.lowest_payout,
+        status
+      })
+    })
+
+    p.printTable()
   }
 
   log('Plays By Team')
