@@ -113,7 +113,7 @@ const filter_prop_pairings = async ({
   log('options:')
   log(opts)
 
-  const prop_pairing_rows = await db('prop_pairings')
+  const prop_pairing_query = db('prop_pairings')
     .where('market_prob', '<=', opts.market_odds_max_threshold)
     .where('hist_rate_soft', '>=', opts.historical_rate_min_threshold)
     .where('opp_allow_rate', '>=', opts.opponent_allowed_rate_min_threshold)
@@ -128,6 +128,14 @@ const filter_prop_pairings = async ({
     .whereNotIn('team', opts.exclude_nfl_team)
     .where('week', week)
     .orderBy('hist_rate_soft', 'DESC')
+    .orderBy('hist_edge_soft', 'DESC')
+    .orderBy('lowest_payout', 'DESC')
+
+  if (opts.include_teams.length) {
+    prop_pairing_query.whereIn('team', opts.include_teams)
+  }
+
+  const prop_pairing_rows = await prop_pairing_query
 
   const pairing_ids = prop_pairing_rows.map((p) => p.pairing_id)
   const prop_pairing_props = await db('prop_pairing_props')
