@@ -89,8 +89,6 @@ rankings
 DB_BETTING_TABLES="
 props
 props_index
-prop_pairings
-prop_pairing_props
 "
 
 DB_PROJECTIONS_TABLES="
@@ -124,7 +122,7 @@ cd $DUMP_DIR
 
 # run mysqlbackup, tar gz and delete sql file
 if $FULL; then
-    mysqldump --defaults-extra-file=$DB_FILE $DB_NAME > $sql_file
+    mysqldump --defaults-extra-file=$DB_FILE $DB_NAME --ignore-table=prop_pairings --ignore-table=prop_pairing_props > $sql_file
 elif $LOGS; then
     mysqldump --defaults-extra-file=$DB_FILE $DB_NAME $DB_LOGS_TABLES > $sql_file
 elif $STATS; then
