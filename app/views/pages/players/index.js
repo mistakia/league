@@ -7,7 +7,8 @@ import {
   playerActions,
   getSelectedViewGroupedFields,
   getSelectedPlayersView,
-  getPlayerFields
+  getPlayerFields,
+  is_player_filter_options_changed
 } from '@core/players'
 
 import PlayersPage from './players'
@@ -24,6 +25,7 @@ const mapStateToProps = createSelector(
   getSelectedPlayersView,
   getSelectedViewGroupedFields,
   getPlayerFields,
+  is_player_filter_options_changed,
   (
     players,
     allPlayersPending,
@@ -35,7 +37,8 @@ const mapStateToProps = createSelector(
     stats,
     selected_players_view,
     selected_view_grouped_fields,
-    player_fields
+    player_fields,
+    is_player_filter_options_changed
   ) => ({
     players,
     selected_view_grouped_fields,
@@ -57,13 +60,15 @@ const mapStateToProps = createSelector(
     show_qualifier_filter: Boolean(
       stats.qualifiers.get(orderBy.split('.').pop())
     ),
-    player_fields
+    player_fields,
+    is_player_filter_options_changed
   })
 )
 
 const mapDispatchToProps = {
   search: playerActions.search,
-  loadAllPlayers: playerActions.loadAllPlayers
+  loadAllPlayers: playerActions.loadAllPlayers,
+  reset_player_filter_options: playerActions.reset_player_filter_options
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PlayersPage)

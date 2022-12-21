@@ -20,7 +20,8 @@ export {
   getPlayersForWatchlist,
   getPlayerStatus,
   isPlayerPracticeSquadEligible,
-  isPlayerLocked
+  isPlayerLocked,
+  is_player_filter_options_changed
 } from './selectors'
 export { createPlayer } from './player'
 export {

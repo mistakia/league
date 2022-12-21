@@ -95,6 +95,8 @@ export const playerActions = {
   GET_PLAYER_PRACTICES_FAILED: 'GET_PLAYER_PRACTICES_FAILED',
   GET_PLAYER_PRACTICES_PENDING: 'GET_PLAYER_PRACTICES_PENDING',
 
+  RESET_PLAYER_FILTER_OPTIONS: 'RESET_PLAYER_FILTER_OPTIONS',
+
   loadAllPlayers: () => ({
     type: playerActions.LOAD_ALL_PLAYERS
   }),
@@ -619,6 +621,10 @@ export const playerActions = {
       opts,
       error
     }
+  }),
+
+  reset_player_filter_options: () => ({
+    type: playerActions.RESET_PLAYER_FILTER_OPTIONS
   })
 }
 

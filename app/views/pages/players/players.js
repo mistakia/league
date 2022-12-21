@@ -5,6 +5,7 @@ import InfiniteScroll from 'react-infinite-scroller'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import Button from '@mui/material/Button'
 import dayjs from 'dayjs'
+import ClearIcon from '@mui/icons-material/Clear'
 
 import SearchFilter from '@components/search-filter'
 import StatusFilter from '@components/status-filter'
@@ -47,10 +48,12 @@ export default function PlayersPage({
   show_week_filter,
   show_play_filters,
   show_qualifier_filter,
+  reset_player_filter_options,
   search,
   searchValue,
   order,
-  orderBy
+  orderBy,
+  is_player_filter_options_changed
 }) {
   const [expanded, set_expanded] = useState(false)
   const [page, set_page] = useState(0)
@@ -192,6 +195,15 @@ export default function PlayersPage({
           >
             Export CSV
           </Button>
+          {is_player_filter_options_changed && (
+            <Button
+              variant='text'
+              startIcon={<ClearIcon />}
+              onClick={reset_player_filter_options}
+            >
+              Reset Filters
+            </Button>
+          )}
           <Button
             endIcon={<KeyboardArrowDownIcon />}
             onClick={handleClick}
@@ -280,5 +292,7 @@ PlayersPage.propTypes = {
   show_play_filters: PropTypes.bool,
   show_qualifier_filter: PropTypes.bool,
   player_fields: PropTypes.object,
-  selected_players_view: PropTypes.object
+  selected_players_view: PropTypes.object,
+  reset_player_filter_options: PropTypes.func,
+  is_player_filter_options_changed: PropTypes.bool
 }

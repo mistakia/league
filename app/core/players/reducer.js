@@ -10,12 +10,7 @@ import DefaultPlayersViews from './default-players-views'
 
 import { constants } from '@common'
 
-const initialState = new Map({
-  isPending: false,
-  allPlayersLoaded: false,
-  allPlayersPending: false,
-  leaguePlayersLoaded: false,
-  leaguePlayersPending: false,
+export const default_player_filter_options = {
   search: null,
   positions: new List(['QB', 'RB', 'WR', 'TE', 'K', 'DST']),
   nflTeams: new List(constants.nflTeams),
@@ -28,9 +23,17 @@ const initialState = new Map({
   status: new List(Object.keys(constants.status)),
   teams: new List(),
   availability: new List(constants.availability),
-  week: new List([constants.week]),
   age: new List(), // TODO
-  allAges: new List(), // TODO
+  allAges: new List() // TODO
+}
+
+const initialState = new Map({
+  isPending: false,
+  allPlayersLoaded: false,
+  allPlayersPending: false,
+  leaguePlayersLoaded: false,
+  leaguePlayersPending: false,
+  week: new List([constants.week]),
   items: new Map(),
   order: 'desc',
   selected_players_view: DefaultPlayersViews.season_projections.key,
@@ -40,7 +43,8 @@ const initialState = new Map({
   watchlistOnly: false,
   cutlist: new List(),
   baselines: new Map(),
-  selected: null
+  selected: null,
+  ...default_player_filter_options
 })
 
 export function playersReducer(state = initialState, { payload, type }) {
@@ -461,6 +465,9 @@ export function playersReducer(state = initialState, { payload, type }) {
         ['items', payload.opts.pid, 'projections'],
         new List(payload.data)
       )
+
+    case playerActions.RESET_PLAYER_FILTER_OPTIONS:
+      return state.merge({ ...default_player_filter_options })
 
     default:
       return state
