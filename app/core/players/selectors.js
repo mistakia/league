@@ -1,6 +1,6 @@
 import { createSelector } from 'reselect'
 import dayjs from 'dayjs'
-import { Map, List } from 'immutable'
+import Immutable, { Map, List } from 'immutable'
 
 import {
   constants,
@@ -40,6 +40,7 @@ import {
 } from '@core/rosters'
 import { getGameByTeam, getGamesByTeam } from '@core/schedule'
 import { getPlayerGamelogs } from '@core/gamelogs'
+import { default_player_filter_options } from './reducer'
 
 import PlayerFields from './fields'
 
@@ -799,3 +800,17 @@ export const getPlayersForWatchlist = createSelector(getPlayers, (players) => {
     .toList()
     .map((pid) => players.get('items').get(pid) || new Map())
 })
+
+export function is_player_filter_options_changed(state) {
+  const player_state = state.get('players')
+  const option_fields = Object.keys(default_player_filter_options)
+
+  for (const field of option_fields) {
+    const field_value = player_state.get(field)
+    if (!Immutable.is(field_value, default_player_filter_options[field])) {
+      return true
+    }
+  }
+
+  return false
+}
