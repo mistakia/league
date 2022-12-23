@@ -68,12 +68,12 @@ const getPlayData = ({ play, year, week, seas_type }) => {
   return data
 }
 
-const getPlayStatData = (playStat) => ({
-  yards: playStat.yards,
-  teamid: playStat.team.id,
-  playerName: playStat.playerName,
-  clubCode: playStat.team ? fixTeam(playStat.team.abbreviation) : null,
-  gsispid: playStat.gsisPlayer ? playStat.gsisPlayer.id : null
+const getPlayStatData = (play_stat) => ({
+  yards: play_stat.yards,
+  teamid: play_stat.team.id,
+  playerName: play_stat.playerName,
+  clubCode: play_stat.team ? fixTeam(play_stat.team.abbreviation) : null,
+  gsispid: play_stat.gsisPlayer ? play_stat.gsisPlayer.id : null
 })
 
 const importPlaysForWeek = async ({
@@ -163,14 +163,14 @@ const importPlaysForWeek = async ({
         ...playData
       })
 
-      for (const playStat of play.playStats) {
-        const playStatData = getPlayStatData(playStat)
+      for (const play_stat of play.playStats) {
+        const play_stat_data = getPlayStatData(play_stat)
         play_stat_inserts.push({
           playId,
           esbid: game.esbid,
           valid: 1,
-          statId: playStat.statId,
-          ...playStatData
+          statId: play_stat.statId,
+          ...play_stat_data
         })
       }
     }

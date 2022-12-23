@@ -447,13 +447,13 @@ export default function ({ week, state }) {
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
       percentile_field: 'ints'
     },
-    'stats.drppy': {
+    'stats.drp_py': {
       category: 'passing',
       column_header: 'DRP YDS',
       csv_header: 'Dropped Passing Yards',
-      player_value_path: 'stats.drppy',
+      player_value_path: 'stats.drp_py',
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
-      percentile_field: 'drppy'
+      percentile_field: 'drp_py'
     },
     'stats.pc_pct': {
       category: 'efficiency',
@@ -508,14 +508,14 @@ export default function ({ week, state }) {
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
       percentile_field: 'pyac_pc'
     },
-    'stats._ypa': {
+    'stats.py_pa': {
       category: 'efficiency',
       column_header: 'Y/A',
       csv_header: 'Passing Yards Per Pass Attempt',
-      player_value_path: 'stats._ypa',
+      player_value_path: 'stats.py_pa',
       fixed: 1,
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
-      percentile_field: '_ypa'
+      percentile_field: 'py_pa'
     },
     'stats.pdot_pa': {
       category: 'efficiency',
@@ -542,14 +542,14 @@ export default function ({ week, state }) {
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
       percentile_field: 'pcay_pc'
     },
-    'stats._pacr': {
+    'stats.pacr': {
       category: 'air yards',
       column_header: 'PACR',
       csv_header: 'Passing Air Conversion Ratio (PACR)',
-      player_value_path: 'stats._pacr',
+      player_value_path: 'stats.pacr',
       fixed: 1,
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
-      percentile_field: '_pacr'
+      percentile_field: 'pacr'
     },
     'stats.sk': {
       category: 'pressure',
@@ -599,14 +599,15 @@ export default function ({ week, state }) {
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
       percentile_field: 'qbhu_pct'
     },
-    'stats._nygpa': {
+    'stats.nyg_pa': {
+      value: 'stats.nyg_pa',
       category: 'pressure',
       column_header: 'NY/A',
       csv_header: 'Net Yards Per Pass Attempt',
-      player_value_path: 'stats._nygpa',
+      player_value_path: 'stats.nyg_pa',
       fixed: 1,
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
-      percentile_field: '_nygpa'
+      percentile_field: 'nyg_pa'
     },
 
     'stats.ry': {
@@ -625,13 +626,13 @@ export default function ({ week, state }) {
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
       percentile_field: 'tdr'
     },
-    'stats.ry_pra': {
+    'stats.ry_ra': {
       category: 'efficiency',
       column_header: 'YPC',
       csv_header: 'Rushing Yards Per Rush Attempt',
-      player_value_path: 'stats.ry_pra',
+      player_value_path: 'stats.ry_ra',
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
-      percentile_field: 'ry_pra'
+      percentile_field: 'ry_ra'
     },
     'stats.ra': {
       category: 'rushing',
@@ -665,57 +666,58 @@ export default function ({ week, state }) {
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
       percentile_field: 'ryaco'
     },
-    'stats.ryaco_pra': {
+    'stats.ryaco_ra': {
       category: 'after contact',
       column_header: 'AVG',
       csv_header: 'Rushing Yards After Contact Per Rush Attempt',
-      player_value_path: 'stats.ryaco_pra',
+      player_value_path: 'stats.ryaco_ra',
       fixed: 1,
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
-      percentile_field: 'ryaco_pra'
+      percentile_field: 'ryaco_ra'
     },
-    'stats._stra': {
+    'stats.tm_ra_share': {
       category: 'team share',
       column_header: 'ATT%',
       csv_header: 'Share of Team Rushing Attempts',
-      player_value_path: 'stats._stra',
+      player_value_path: 'stats.tm_ra_share',
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
-      percentile_field: '_stra'
+      percentile_field: 'tm_ra_share'
     },
-    'stats._stry': {
+    'stats.tm_ry_share': {
       category: 'team share',
       column_header: 'YDS%',
       csv_header: 'Share of Team Rushing Yardage',
-      player_value_path: 'stats._stry',
+      player_value_path: 'stats.tm_ry_share',
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
-      percentile_field: '_stry'
+      percentile_field: 'tm_ry_share'
     },
-    'stats._fumlpra': {
+    'stats.fuml_ra': {
       category: 'efficiency',
       column_header: 'FUM%',
       csv_header: 'Fumble Percentage',
-      player_value_path: 'stats._fumlpra',
+      player_value_path: 'stats.fuml_ra',
       fixed: 1,
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
-      percentile_field: '_fumlpra'
+      percentile_field: 'fuml_ra'
     },
-    'stats.posra_pra': {
+    'stats.posra_ra': {
       category: 'efficiency',
       column_header: 'POS%',
       csv_header: 'Positive Rushing Yardage Percentage',
-      player_value_path: 'stats.posra_pra',
+      player_value_path: 'stats.posra_ra',
       fixed: 1,
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
-      percentile_field: 'posra_pra'
+      percentile_field: 'posra_ra'
     },
-    'stats.rasucc_pra': {
+    'stats.rasucc_ra': {
+      value: 'stats.rasucc_ra',
       category: 'efficiency',
       column_header: 'SUCC%',
       csv_header: 'Successful Rush Percentage',
-      player_value_path: 'stats.rasucc_pra',
+      player_value_path: 'stats.rasucc_ra',
       fixed: 1,
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
-      percentile_field: 'rasucc_pra'
+      percentile_field: 'rasucc_ra'
     },
     'stats.mbt': {
       category: 'broken tackles',
@@ -783,19 +785,19 @@ export default function ({ week, state }) {
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
       percentile_field: 'trg'
     },
-    'stats.dptrg_pct': {
+    'stats.deep_trg_pct': {
       category: 'oppurtunity',
       column_header: 'DEEP%',
       csv_header: 'Percentage of Targets Traveling >= 20 Air Yards',
-      player_value_path: 'stats.dptrg_pct',
+      player_value_path: 'stats.deep_trg_pct',
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
-      percentile_field: 'dptrg_pct'
+      percentile_field: 'deep_trg_pct'
     },
-    'stats._ayptrg': {
+    'stats.ay_trg': {
       category: 'oppurtunity',
       column_header: 'DOT',
       csv_header: 'Depth Of Target',
-      player_value_path: 'stats._ayptrg',
+      player_value_path: 'stats.ay_trg',
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
       percentile_field: '_ayptrg'
     },
@@ -807,66 +809,69 @@ export default function ({ week, state }) {
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
       percentile_field: 'rdot'
     },
-    'stats._stray': {
+    'stats.tm_ay_share': {
       category: 'oppurtunity',
       column_header: 'AY%',
       csv_header: "Share of Team's Air Yards",
-      player_value_path: 'stats._stray',
+      player_value_path: 'stats.tm_ay_share',
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
-      percentile_field: '_stray'
+      percentile_field: 'tm_ay_share'
     },
-    'stats._sttrg': {
+    'stats.tm_trg_share': {
       category: 'oppurtunity',
       column_header: 'TAR%',
       csv_header: "Share of Team's Targets",
-      player_value_path: 'stats._sttrg',
+      player_value_path: 'stats.tm_trg_share',
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
-      percentile_field: '_sttrg'
+      percentile_field: 'tm_trg_share'
     },
-    'stats._wopr': {
+    'stats.wopr': {
       category: 'oppurtunity',
       column_header: 'WOPR',
       csv_header: 'Weighted Opportunity Rating',
-      player_value_path: 'stats._wopr',
+      player_value_path: 'stats.wopr',
       fixed: 1,
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
-      percentile_field: '_wopr'
+      percentile_field: 'wopr'
     },
-    'stats._recypay': {
+    'stats.recy_ay': {
       category: 'efficiency',
       column_header: 'RACR',
       csv_header: 'Receiver Air Conversion Ratio (RACR)',
-      player_value_path: 'stats._recypay',
+      player_value_path: 'stats.recy_ay',
       fixed: 1,
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
-      percentile_field: '_recypay'
+      percentile_field: 'recy_ay'
     },
-    'stats._recyprec': {
+    'stats.recy_rec': {
       category: 'efficiency',
       column_header: 'Y/R',
       csv_header: 'Receiving Yards Per Reception',
-      player_value_path: 'stats._recyprec',
+      player_value_path: 'stats.recy_rec',
       fixed: 1,
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
-      percentile_field: '_recyprec'
+      percentile_field: 'recy_rec'
     },
-    'stats._recyptrg': {
+    'stats.recy_trg': {
       category: 'efficiency',
       column_header: 'Y/T',
       csv_header: 'Receiving Yards Per Target',
-      player_value_path: 'stats._recyptrg',
+      player_value_path: 'stats.recy_trg',
       fixed: 1,
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
-      percentile_field: '_recyptrg'
+      percentile_field: 'recy_trg'
     },
-    'stats._ryacprec': {
+    'stats.yac_rec': {
+      label: 'YAC/R',
+      name: 'Yards After Catch Per Reception',
+      value: 'stats.yac_rec',
       category: 'efficiency',
       column_header: 'YAC/R',
       csv_header: 'Yards After Catch Per Reception',
-      player_value_path: 'stats._ryacprec',
+      player_value_path: 'stats.yac_rec',
       fixed: 1,
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
-      percentile_field: '_ryacprec'
+      percentile_field: 'yac_rec'
     },
 
     opponent_pass_pa: {

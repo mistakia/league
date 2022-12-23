@@ -48,11 +48,11 @@ const rollup = (group) => {
   }
 
   for (const gamelogs of Object.values(group)) {
-    const t = sum(gamelogs, constants.fantasyStats)
+    const t = sum(gamelogs, constants.fantasy_stats)
     stats.total.push(t)
 
     const weeks = uniqBy(gamelogs, 'week').length
-    const a = avg(t, constants.fantasyStats, weeks)
+    const a = avg(t, constants.fantasy_stats, weeks)
     stats.avg.push(a)
   }
 
@@ -111,7 +111,7 @@ const generate_seasonlogs = async ({ year = constants.season.year } = {}) => {
       const weeks = []
       for (const logs of Object.values(weekGroups)) {
         // sum gamelogs for positon for a given week
-        const gamelog = sum(logs, constants.fantasyStats)
+        const gamelog = sum(logs, constants.fantasy_stats)
         // get team position average
         const offenseAverage = offense[position].avg.find(
           (g) => g.tm === gamelog.tm
@@ -120,12 +120,12 @@ const generate_seasonlogs = async ({ year = constants.season.year } = {}) => {
         const adjusted_stats = adj(
           gamelog,
           offenseAverage,
-          constants.fantasyStats
+          constants.fantasy_stats
         )
         weeks.push(adjusted_stats)
       }
-      const total = sum(weeks, constants.fantasyStats, weeks.length)
-      const avg_stats = avg(total, constants.fantasyStats, weeks.length)
+      const total = sum(weeks, constants.fantasy_stats, weeks.length)
+      const avg_stats = avg(total, constants.fantasy_stats, weeks.length)
       adjusted.push(avg_stats)
     }
 
@@ -133,7 +133,7 @@ const generate_seasonlogs = async ({ year = constants.season.year } = {}) => {
 
     const individual_position_percentiles = calculatePercentiles({
       items: position_gamelogs,
-      stats: constants.fantasyStats
+      stats: constants.fantasy_stats
     })
     percentile_inserts = percentile_inserts.concat(
       format_percentile_inserts(
@@ -159,7 +159,7 @@ const generate_seasonlogs = async ({ year = constants.season.year } = {}) => {
 
       const percentiles = calculatePercentiles({
         items: teams,
-        stats: constants.fantasyStats
+        stats: constants.fantasy_stats
       })
       percentile_inserts = percentile_inserts.concat(
         format_percentile_inserts(percentiles, stat_key)
@@ -183,7 +183,7 @@ const generate_seasonlogs = async ({ year = constants.season.year } = {}) => {
 
       const percentiles = calculatePercentiles({
         items: teams,
-        stats: constants.fantasyStats
+        stats: constants.fantasy_stats
       })
       percentile_inserts = percentile_inserts.concat(
         format_percentile_inserts(percentiles, stat_key)

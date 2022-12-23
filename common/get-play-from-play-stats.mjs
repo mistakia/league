@@ -1,29 +1,31 @@
 // GSIS StatID Documentation: http://www.nflgsis.com/gsis/Documentation/Partners/StatIDs.html
 
-export default function getPlayFromPlayStats(play) {
-  const playRow = {}
-  for (const playStat of play.playStats) {
-    switch (playStat.statId) {
+export default function getPlayFromPlayStats({ esbid, playId, ...play }) {
+  const play_row = { esbid, playId }
+  const laterals = []
+
+  for (const play_stat of play.play_stats) {
+    switch (play_stat.statId) {
       // Punt Blocked (Offense)
       case 2:
-        // playRow.punt_blocked = 1
-        // playRow.punt_attempt = 1
-        // playRow.kick_distance = playStat.yards
+        // play_row.punt_blocked = 1
+        // play_row.punt_attempt = 1
+        // play_row.kick_distance = play_stat.yards
         break
 
       // 1st Down Rushing
       case 3:
-        playRow.fd = 1
+        play_row.fd = 1
         break
 
       // 1st Down Passing
       case 4:
-        playRow.fd = 1
+        play_row.fd = 1
         break
 
       // 1st Down Penalty
       case 5:
-        playRow.fd = 1
+        play_row.fd = 1
         break
 
       // 3rd Down Attempt Converted
@@ -44,134 +46,160 @@ export default function getPlayFromPlayStats(play) {
 
       // Rushing Yards
       case 10:
-        playRow.bc_gsis = playStat.gsisId
-        playRow.yds = playStat.yards
-        playRow.yds_gained = playStat.yards
+        play_row.bc_gsis = play_stat.gsisId
+        play_row.yds = play_stat.yards
         break
 
       // Rushing Yards, TD
       case 11:
-        playRow.fd = 1
-        playRow.td = 1
-        playRow.bc_gsis = playStat.gsisId
-        playRow.yds = playStat.yards
-        playRow.yds_gained = playStat.yards
-        playRow.td_tm = playStat.teamAbbr
+        play_row.fd = 1
+        play_row.td = 1
+        play_row.bc_gsis = play_stat.gsisId
+        play_row.yds = play_stat.yards
+        play_row.td_tm = play_stat.clubCode
+        play_row.td_gsis = play_stat.gsisId
         break
 
       // Lateral Rushing Yards
       case 12:
-        playRow.yds_gained = playStat.yards
+        play_row.lateral = 1
+        laterals.push({
+          esbid,
+          playId,
+          gsis: play_stat.gsisId,
+          yds: play_stat.yards,
+          tm: play_stat.clubCode
+        })
         break
 
       // Lateral Rushing Yards, TD
       case 13:
-        playRow.fd = 1
-        playRow.td = 1
-        playRow.yds_gained = playStat.yards
-        playRow.td_tm = playStat.teamAbbr
+        play_row.fd = 1
+        play_row.td = 1
+        play_row.lateral = 1
+        laterals.push({
+          esbid,
+          playId,
+          gsis: play_stat.gsisId,
+          yds: play_stat.yards,
+          tm: play_stat.clubCode
+        })
+        play_row.td_tm = play_stat.clubCode
+        play_row.td_gsis = play_stat.gsisId
         break
 
       // Pass Incomplete
       case 14:
-        playRow.comp = 0
-        playRow.psr_gsis = playStat.gsisId
+        play_row.comp = 0
+        play_row.psr_gsis = play_stat.gsisId
         break
 
       // Passing Yards
       case 15:
-        playRow.comp = 1
-        playRow.psr_gsis = playStat.gsisId
-        playRow.yds = playStat.yards
-        playRow.yds_gained = playStat.yards
+        play_row.comp = 1
+        play_row.psr_gsis = play_stat.gsisId
         break
 
       // Passing Yards, TD
       case 16:
-        playRow.comp = 1
-        playRow.fd = 1
-        playRow.psr_gsis = playStat.gsisId
-        playRow.yds = playStat.yards
-        playRow.yds_gained = playStat.yards
+        play_row.comp = 1
+        play_row.fd = 1
+        play_row.psr_gsis = play_stat.gsisId
+        play_row.yds = play_stat.yards
         break
 
       // Interception (by Passer)
       case 19:
-        playRow.int = 1
-        playRow.psr_gsis = playStat.gsisId
+        play_row.int = 1
+        play_row.psr_gsis = play_stat.gsisId
         break
 
       // Sack Yards (Offense)
       case 20:
-        playRow.sk = 1
-        playRow.psr_gsis = playStat.gsisId
-        playRow.yds_gained = playStat.yards
+        play_row.sk = 1
+        play_row.psr_gsis = play_stat.gsisId
         break
 
       // Pass Reception Yards
       case 21:
-        playRow.comp = 1
-        playRow.trg_gsis = playStat.gsisId
-        playRow.yds = playStat.yards
-        playRow.yds_gained = playStat.yards
+        play_row.comp = 1
+        play_row.trg_gsis = play_stat.gsisId
+        play_row.yds = play_stat.yards
         break
 
       // Pass Reception Yards, TD
       case 22:
-        playRow.comp = 1
-        playRow.td = 1
-        playRow.fd = 1
-        playRow.trg_gsis = playStat.gsisId
-        playRow.yds = playStat.yards
-        playRow.yds_gained = playStat.yards
-        playRow.td_tm = playStat.teamAbbr
+        play_row.comp = 1
+        play_row.td = 1
+        play_row.fd = 1
+        play_row.trg_gsis = play_stat.gsisId
+        play_row.yds = play_stat.yards
+        play_row.td_tm = play_stat.clubCode
+        play_row.td_gsis = play_stat.gsisId
         break
 
       // Lateral Pass Reception Yards
       case 23:
-        playRow.comp = 1
-        playRow.yds_gained = playStat.yards
+        play_row.comp = 1
+        play_row.lateral = 1
+        laterals.push({
+          esbid,
+          playId,
+          gsis: play_stat.gsisId,
+          yds: play_stat.yards,
+          tm: play_stat.clubCode
+        })
         break
 
       // Lateral Pass Reception Yards, TD
       case 24:
-        playRow.comp = 1
-        playRow.td = 1
-        playRow.fd = 1
-        playRow.yds_gained = playStat.yards
-        playRow.td_tm = playStat.teamAbbr
+        play_row.comp = 1
+        play_row.td = 1
+        play_row.fd = 1
+        play_row.lateral = 1
+        laterals.push({
+          esbid,
+          playId,
+          gsis: play_stat.gsisId,
+          yds: play_stat.yards,
+          tm: play_stat.clubCode
+        })
+        play_row.td_tm = play_stat.clubCode
+        play_row.td_gsis = play_stat.gsisId
         break
 
       // Interception Yards
       case 25:
-        playRow.intp_gsis = playStat.gsisId
-        playRow.ret_tm = playStat.teamAbbr
-        playRow.ret_yds = playStat.yards
+        play_row.intp_gsis = play_stat.gsisId
+        play_row.ret_tm = play_stat.clubCode
+        play_row.ret_yds = play_stat.yards
         break
 
       // Interception Yards, TD
       case 26:
-        playRow.td = 1
-        playRow.ret_td = 1
-        playRow.td_tm = playStat.teamAbbr
-        playRow.intp_gsis = playStat.gsisId
-        playRow.ret_tm = playStat.teamAbbr
-        playRow.ret_yds = playStat.yards
+        play_row.td = 1
+        play_row.ret_td = 1
+        play_row.td_tm = play_stat.clubCode
+        play_row.intp_gsis = play_stat.gsisId
+        play_row.ret_tm = play_stat.clubCode
+        play_row.ret_yds = play_stat.yards
+        play_row.td_gsis = play_stat.gsisId
         break
 
       // Lateral Interception Yards
       case 27:
-        playRow.ret_tm = playStat.teamAbbr
-        playRow.ret_yds = playStat.yards
+        play_row.ret_tm = play_stat.clubCode
+        play_row.ret_yds = play_stat.yards // TODO
         break
 
       // Lateral Interception Yards, TD
       case 28:
-        playRow.td = 1
-        playRow.ret_td = 1
-        playRow.td_tm = playStat.teamAbbr
-        playRow.ret_tm = playStat.teamAbbr
-        playRow.ret_yds = playStat.yards
+        play_row.td = 1
+        play_row.ret_td = 1
+        play_row.td_tm = play_stat.clubCode
+        play_row.ret_tm = play_stat.clubCode
+        play_row.ret_yds = play_stat.yards // TODO
+        play_row.td_gsis = play_stat.gsisId
         break
 
       // Punting Yards
@@ -196,14 +224,18 @@ export default function getPlayFromPlayStats(play) {
 
       // Punt Return Yards, TD
       case 34:
+        play_row.td_gsis = play_stat.gsisId
         break
 
       // Lateral Punt Return Yards
       case 35:
+        // TODO
         break
 
       // Lateral Punt Return Yards, TD
       case 36:
+        play_row.td_gsis = play_stat.gsisId
+        // TODO
         break
 
       // Punt Out Of Bounds
@@ -240,18 +272,24 @@ export default function getPlayFromPlayStats(play) {
 
       // Kickoff Return Yards
       case 45:
+        // TODO
         break
 
       // Kickoff Return Yards, TD
       case 46:
+        play_row.td_gsis = play_stat.gsisId
+        // TODO
         break
 
       // Lateral Kickoff Return Yards
       case 47:
+        // TODO
         break
 
       // Kickoff Return Yards, TD
       case 48:
+        play_row.td_gsis = play_stat.gsisId
+        // TODO
         break
 
       // Kickoff Out Of Bounds
@@ -284,14 +322,18 @@ export default function getPlayFromPlayStats(play) {
 
       // Own Recovery Yards, TD
       case 56:
+        play_row.td_gsis = play_stat.gsisId
         break
 
       // Lateral Own Recovery Yards
       case 57:
+        // TODO
         break
 
       // Lateral Own Recovery Yards, TD
       case 58:
+        play_row.td_gsis = play_stat.gsisId
+        // TODO
         break
 
       // Opponent Recovery Yards
@@ -300,14 +342,18 @@ export default function getPlayFromPlayStats(play) {
 
       // Opponent Recovery Yards, TD
       case 60:
+        play_row.td_gsis = play_stat.gsisId
         break
 
       // Lateral Opponent Recovery Yards
       case 61:
+        // TODO
         break
 
       // Lateral Opponent Recovery Yards, TD
       case 62:
+        play_row.td_gsis = play_stat.gsisId
+        // TODO
         break
 
       // Miscellaneous Yards
@@ -324,26 +370,41 @@ export default function getPlayFromPlayStats(play) {
 
       // Field Goal Missed Yards
       case 69:
+        play_row.fga = 1
+        play_row.kick_distance = play_stat.yards
+        play_row.kick_gsis = play_stat.gsisId
         break
 
       // Field Goal Yards
       case 70:
+        play_row.fga = 1
+        play_row.kick_distance = play_stat.yards
+        play_row.kick_gsis = play_stat.gsisId
         break
 
       // Field Goal Blocked (Offense)
       case 71:
+        play_row.fga = 0
+        play_row.kick_distance = play_stat.yards
+        play_row.kick_gsis = play_stat.gsisId
         break
 
       // Extra Point - Good
       case 72:
+        play_row.xpa = 1
+        play_row.kick_gsis = play_stat.gsisId
         break
 
       // Extra Point - Failed
       case 73:
+        play_row.xpa = 1
+        play_row.kick_gsis = play_stat.gsisId
         break
 
       // Extra Point - Blocked
       case 74:
+        play_row.xpa = 0
+        play_row.kick_gsis = play_stat.gsisId
         break
 
       // 2 Point Rush - Good
@@ -356,6 +417,7 @@ export default function getPlayFromPlayStats(play) {
 
       // 2 Point Pass - Good
       case 77:
+        play_row.psr_gsis = play_stat.gsisId
         break
 
       // 2 Point Pass - Failed
@@ -440,6 +502,7 @@ export default function getPlayFromPlayStats(play) {
 
       // 2 Point Pass Reception - Good
       case 104:
+        play_row.trg_gsis = play_stat.gsisId
         break
 
       // 2 Point Pass Reception - Failed
@@ -448,8 +511,8 @@ export default function getPlayFromPlayStats(play) {
 
       // Fumble - Lost
       case 106:
-        playRow.fuml = 1
-        playRow.player_fuml_gsis = playStat.gsisId
+        play_row.fuml = 1
+        play_row.player_fuml_gsis = play_stat.gsisId
         break
 
       // Own Kickoff Recovery
@@ -458,6 +521,7 @@ export default function getPlayFromPlayStats(play) {
 
       // Own Kickoff Recovery, TD
       case 108:
+        play_row.td_gsis = play_stat.gsisId
         break
 
       // Quarterback Hit
@@ -466,27 +530,27 @@ export default function getPlayFromPlayStats(play) {
 
       // Pass Length, Completion
       case 111:
-        playRow.comp = 1
-        playRow.psr_gsis = playStat.gsisId
-        playRow.dot = playStat.yards
+        play_row.comp = 1
+        play_row.psr_gsis = play_stat.gsisId
+        play_row.dot = play_stat.yards
         break
 
       // Pass Length, No Completion
       case 112:
-        playRow.psr_gsis = playStat.gsisId
-        playRow.dot = playStat.yards
+        play_row.psr_gsis = play_stat.gsisId
+        play_row.dot = play_stat.yards
         break
 
       // Yardage Gained After the Catch
       case 113:
-        playRow.comp = 1
-        playRow.trg_gsis = playStat.gsisId
-        playRow.yac = playStat.yards
+        play_row.comp = 1
+        play_row.trg_gsis = play_stat.gsisId
+        play_row.yac = play_stat.yards
         break
 
       // Pass Target
       case 115:
-        playRow.trg_gsis = playStat.gsisId
+        play_row.trg_gsis = play_stat.gsisId
         break
 
       // Tackle for a Loss
@@ -523,5 +587,5 @@ export default function getPlayFromPlayStats(play) {
     }
   }
 
-  return playRow
+  return { play_row, laterals }
 }

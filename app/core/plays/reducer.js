@@ -11,7 +11,7 @@ export function playsReducer(state = new Map(), { payload, type }) {
       return state.withMutations((state) => {
         payload.data.forEach((play) => {
           state.setIn([play.week, `${play.esbid}:${play.playId}`], {
-            playStats: [],
+            play_stats: [],
             ...play
           })
         })
@@ -19,14 +19,14 @@ export function playsReducer(state = new Map(), { payload, type }) {
 
     case playActions.GET_PLAYSTATS_FULFILLED:
       return state.withMutations((state) => {
-        payload.data.forEach((playStat) => {
+        payload.data.forEach((play_stat) => {
           state.mergeIn(
             [
-              playStat.week,
-              `${playStat.esbid}:${playStat.playId}`,
-              'playStats'
+              play_stat.week,
+              `${play_stat.esbid}:${play_stat.playId}`,
+              'play_stats'
             ],
-            [playStat]
+            [play_stat]
           )
         })
       })

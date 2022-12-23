@@ -3,7 +3,7 @@ import debug from 'debug'
 
 import db from '#db'
 import { constants, uniqBy } from '#common'
-import { getPlayByPlayQuery } from '#utils'
+import { get_live_plays_query } from '#utils'
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -39,7 +39,7 @@ export default class Scoreboard {
     )
     const updated = updateTimestamps[0] // get the oldest one
 
-    const query = getPlayByPlayQuery(db)
+    const query = get_live_plays_query(db)
     const plays = await query
       .where('nfl_plays_current_week.year', constants.season.year)
       .where('nfl_plays_current_week.week', constants.season.week)
@@ -47,7 +47,7 @@ export default class Scoreboard {
       .where('updated', '>', updated)
 
     const esbids = Array.from(uniqBy(plays, 'esbid')).map((p) => p.esbid)
-    const playStats = await db('nfl_play_stats_current_week')
+    const play_stats = await db('nfl_play_stats_current_week')
       .whereIn('esbid', esbids)
       .where('valid', 1)
     const playSnaps = await db('nfl_snaps_current_week').whereIn(
@@ -56,7 +56,7 @@ export default class Scoreboard {
     )
 
     for (const play of plays) {
-      play.playStats = playStats.filter(
+      play.play_stats = play_stats.filter(
         (p) => p.playId === play.playId && p.esbid === play.esbid
       )
       play.playSnaps = playSnaps.filter(

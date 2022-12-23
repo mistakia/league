@@ -18,7 +18,7 @@ export function workerOptimizeLineup(params) {
 }
 
 export function workerCalculateStatsFromPlays({ plays, qualifiers, league }) {
-  const players = calculateStatsFromPlays(plays)
+  const { players } = calculateStatsFromPlays(plays)
 
   for (const pid in players) {
     const stats = players[pid]
@@ -29,7 +29,7 @@ export function workerCalculateStatsFromPlays({ plays, qualifiers, league }) {
 
   const percentiles = calculatePercentiles({
     items: Object.values(players),
-    stats: constants.fullStats,
+    stats: constants.full_stats,
     qualifiers
   })
 

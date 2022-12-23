@@ -112,7 +112,7 @@ const processLeague = async ({ year, lid }) => {
     }
 
     // calculate ros projection
-    const ros = constants.createStats()
+    const ros = constants.create_full_stats()
     let projWks = 0
     for (const [week, projection] of Object.entries(player_row.projection)) {
       if (week && week !== '0' && week >= constants.season.week) {

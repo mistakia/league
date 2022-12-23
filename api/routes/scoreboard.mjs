@@ -1,7 +1,7 @@
 import express from 'express'
 
 import { constants, uniqBy } from '#common'
-import { getPlayByPlayQuery } from '#utils'
+import { get_live_plays_query } from '#utils'
 
 const router = express.Router()
 
@@ -18,12 +18,12 @@ router.get('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid week' })
     }
 
-    const query = getPlayByPlayQuery(db)
+    const query = get_live_plays_query(db)
     const plays = await query
       .where('nfl_plays_current_week.week', week)
       .where('nfl_plays_current_week.seas_type', 'REG')
     const esbids = Array.from(uniqBy(plays, 'esbid')).map((p) => p.esbid)
-    const playStats = await db('nfl_play_stats_current_week').whereIn(
+    const play_stats = await db('nfl_play_stats_current_week').whereIn(
       'esbid',
       esbids
     )
@@ -33,7 +33,7 @@ router.get('/?', async (req, res) => {
     )
 
     for (const play of plays) {
-      play.playStats = playStats.filter(
+      play.play_stats = play_stats.filter(
         (p) => p.playId === play.playId && p.esbid === play.esbid
       )
       play.playSnaps = playSnaps.filter(

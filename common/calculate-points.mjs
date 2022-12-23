@@ -1,8 +1,8 @@
-import { stats } from './constants.mjs'
+import { fantasy_stats } from './constants.mjs'
 
 const getScoring = ({ league }) => {
   const result = {}
-  for (const stat of stats) {
+  for (const stat of fantasy_stats) {
     result[stat] = league[stat] || 0
   }
   return result
