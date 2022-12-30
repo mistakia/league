@@ -72,12 +72,43 @@ const format_percentile_inserts = (percentiles, percentile_key) => {
   return inserts
 }
 
-const generate_seasonlogs = async ({ year = constants.season.year } = {}) => {
-  const gamelogs = await db('player_gamelogs')
+const get_stat_key = (base, { seasonlogs_type } = {}) =>
+  (seasonlogs_type ? `${base}_${seasonlogs_type}` : base).toUpperCase()
+
+const generate_seasonlogs = async ({
+  year = constants.season.year,
+  seasonlogs_type
+} = {}) => {
+  const gamelogs_query = db('player_gamelogs')
     .select('player_gamelogs.*', 'nfl_games.week', 'nfl_games.year')
     .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
     .where('nfl_games.year', year)
     .where('nfl_games.seas_type', 'REG')
+
+  const query_weeks = []
+
+  if (seasonlogs_type === 'LAST_THREE') {
+    for (let i = 1; i <= 3; i++) {
+      const week = constants.season.week - i
+      if (week > 0) query_weeks.push(week)
+    }
+  } else if (seasonlogs_type === 'LAST_FOUR') {
+    for (let i = 1; i <= 4; i++) {
+      const week = constants.season.week - i
+      if (week > 0) query_weeks.push(week)
+    }
+  } else if (seasonlogs_type === 'LAST_EIGHT') {
+    for (let i = 1; i <= 8; i++) {
+      const week = constants.season.week - i
+      if (week > 0) query_weeks.push(week)
+    }
+  }
+
+  if (query_weeks.length) {
+    gamelogs_query.whereIn('nfl_games.week', query_weeks)
+  }
+
+  const gamelogs = await gamelogs_query
 
   const weeks = [...new Set(gamelogs.map((g) => g.week))]
   log(`loaded ${gamelogs.length} gamelogs for ${year} REG weeks: ${weeks}`)
@@ -146,7 +177,9 @@ const generate_seasonlogs = async ({ year = constants.season.year } = {}) => {
   // iterate defense
   for (const position of Object.keys(defense)) {
     for (const stat_type of Object.keys(defense[position])) {
-      const stat_key = `${position}_against_${stat_type}`.toUpperCase()
+      const stat_key = get_stat_key(`${position}_against_${stat_type}`, {
+        seasonlogs_type
+      })
       const teams = defense[position][stat_type]
       for (const { opp, tm, ...stats } of teams) {
         team_seasonlog_inserts.push({
@@ -170,7 +203,9 @@ const generate_seasonlogs = async ({ year = constants.season.year } = {}) => {
   // iterate offense
   for (const position of Object.keys(offense)) {
     for (const stat_type of Object.keys(offense[position])) {
-      const stat_key = `${position}_${stat_type}`.toUpperCase()
+      const stat_key = get_stat_key(`${position}_${stat_type}`, {
+        seasonlogs_type
+      })
       const teams = offense[position][stat_type]
       for (const { opp, tm, ...stats } of teams) {
         team_seasonlog_inserts.push({
@@ -209,7 +244,9 @@ const generate_seasonlogs = async ({ year = constants.season.year } = {}) => {
     for (const position of Object.keys(defense)) {
       const stat_types = ['adj', 'total', 'avg']
       for (const stat_type of stat_types) {
-        const stat_key = `${position}_against_${stat_type}`.toUpperCase()
+        const stat_key = get_stat_key(`${position}_against_${stat_type}`, {
+          seasonlogs_type
+        })
         const teams = defense[position][stat_type]
 
         const items = []
@@ -272,6 +309,18 @@ const main = async () => {
   let error
   try {
     await generate_seasonlogs()
+
+    if (constants.season.week > 3) {
+      await generate_seasonlogs({ seasonlogs_type: 'LAST_THREE' })
+    }
+
+    if (constants.season.week > 4) {
+      await generate_seasonlogs({ seasonlogs_type: 'LAST_FOUR' })
+    }
+
+    if (constants.season.week > 8) {
+      await generate_seasonlogs({ seasonlogs_type: 'LAST_EIGHT' })
+    }
   } catch (err) {
     error = err
     log(error)
