@@ -5,9 +5,15 @@ import { playActions } from '@core/plays'
 import { scoreboardActions } from './actions'
 import { constants } from '@common'
 
+const current_week = Math.min(constants.week, constants.season.finalWeek)
+const initial_week = Math.max(
+  dayjs().day() === 2 ? current_week - 1 : current_week,
+  1
+)
+
 const initialState = new Map({
   isLoaded: false,
-  week: Math.max(dayjs().day() === 2 ? constants.week - 1 : constants.week, 1)
+  week: initial_week
 })
 
 export function scoreboardReducer(state = initialState, { payload, type }) {
