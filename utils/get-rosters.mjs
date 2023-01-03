@@ -7,7 +7,10 @@ export default async function ({ lid, userId }) {
     .where({ lid, year: constants.season.year })
     .orderBy('week', 'desc')
 
-  const currentWeek = Math.max(constants.season.week, 1)
+  const currentWeek = Math.min(
+    Math.max(constants.season.week, 1),
+    constants.season.finalWeek
+  )
   const lineups = await db('league_team_lineups')
     .where({ lid, year: constants.season.year })
     .where('week', '>=', currentWeek)

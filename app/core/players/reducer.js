@@ -27,13 +27,15 @@ export const default_player_filter_options = {
   allAges: new List() // TODO
 }
 
+const current_week = Math.min(constants.week, constants.season.nflFinalWeek)
+
 const initialState = new Map({
   isPending: false,
   allPlayersLoaded: false,
   allPlayersPending: false,
   leaguePlayersLoaded: false,
   leaguePlayersPending: false,
-  week: new List([constants.week]),
+  week: new List([current_week]),
   items: new Map(),
   order: 'desc',
   selected_players_view: DefaultPlayersViews.season_projections.key,
