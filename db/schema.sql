@@ -2229,7 +2229,7 @@ CREATE TABLE `props` (
 DROP TABLE IF EXISTS `props_index`;
 
 CREATE TABLE `props_index` (
-  `prop_id` int unsigned NOT NULL AUTO_INCREMENT
+  `prop_id` int unsigned NOT NULL AUTO_INCREMENT,
   `pid` varchar(7) NOT NULL,
   `week` tinyint(2) NOT NULL,
   `year` smallint(4) NOT NULL,
