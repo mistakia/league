@@ -177,7 +177,7 @@ class PlayerRoster extends Player {
             {vorpAdj ? vorpAdj.toFixed(0) : '-'}
           </div>
         )}
-        {constants.week > 0 && (
+        {isRegularSeason && (
           <div className='metric table__cell'>
             {weekPoints ? weekPoints.toFixed(1) : '-'}
           </div>
