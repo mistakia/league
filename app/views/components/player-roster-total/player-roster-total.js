@@ -93,7 +93,7 @@ export default class PlayerRosterTotal extends React.Component {
             {valueAdjTotal ? valueAdjTotal.toFixed(1) : '-'}
           </div>
         )}
-        {constants.week > 0 && (
+        {isRegularSeason && (
           <div className='metric table__cell'>
             {weekPointsTotal ? weekPointsTotal.toFixed(1) : '-'}
           </div>

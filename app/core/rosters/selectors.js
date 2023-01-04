@@ -15,7 +15,11 @@ export function getRosters(state) {
 
 export function getRosterRecordByTeamId(
   state,
-  { tid, week = constants.week, year = constants.year }
+  {
+    tid,
+    week = Math.min(constants.week, constants.season.finalWeek),
+    year = constants.year
+  }
 ) {
   const rosters = getRosters(state)
   return rosters.getIn([tid, year, week]) || new RosterRecord()
@@ -289,7 +293,6 @@ export function getRosterPositionalValueByTeamId(state, { tid }) {
     value
   }))
   values.sorted_tids = team_values.sort((a, b) => b.value - a.value)
-
   values.team_total = values.total[team.uid]
 
   return values
@@ -298,7 +301,8 @@ export function getRosterPositionalValueByTeamId(state, { tid }) {
 export function getGroupedPlayersByTeamId(state, { tid }) {
   const rosters = getRosters(state)
   const league = getCurrentLeague(state)
-  const roster = rosters.getIn([tid, constants.year, constants.week])
+  const week = Math.min(constants.week, constants.season.finalWeek)
+  const roster = rosters.getIn([tid, constants.year, week])
   if (!roster) {
     return {
       active: new List(),
