@@ -33,8 +33,7 @@ export function getScoreboardRosterByTeamId(state, { tid }) {
 
 export function getSelectedMatchupScoreboards(state) {
   const matchup = getSelectedMatchup(state)
-  const week = state.getIn(['scoreboard', 'week'])
-  return matchup.tids.map((tid) => getScoreboardByTeamId(state, { tid, week }))
+  return matchup.tids.map((tid) => getScoreboardByTeamId(state, { tid }))
 }
 
 export function getPointsByTeamId(state, { tid, week }) {

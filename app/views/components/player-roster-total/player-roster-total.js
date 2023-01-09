@@ -78,13 +78,11 @@ export default class PlayerRosterTotal extends React.Component {
             {savingsTotal ? `$${savingsTotal.toFixed(0)}` : '-'}
           </div>
         )}
-        {isRegularSeason && (
-          <div className='metric table__cell'>
-            {points_added ? `${points_added.toFixed(1)}` : '-'}
-          </div>
-        )}
-        {isRegularSeason && <div className='metric table__cell'>-</div>}
-        {isRegularSeason && <div className='metric table__cell'>-</div>}
+        <div className='metric table__cell'>
+          {points_added ? `${points_added.toFixed(1)}` : '-'}
+        </div>
+        <div className='metric table__cell'>-</div>
+        <div className='metric table__cell'>-</div>
         <div className='metric table__cell'>
           {valueTotal ? valueTotal.toFixed(1) : '-'}
         </div>

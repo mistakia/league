@@ -25,20 +25,22 @@ export function* generate({ payload }) {
 
 export function* selectMatchup() {
   const state = yield select(getMatchups)
-  const { teamId } = yield select(getApp)
+  const { teamId, year } = yield select(getApp)
   const scoreboard = yield select(getScoreboard)
   const week = scoreboard.get('week')
   if (week <= constants.season.regularSeasonFinalWeek) {
     const matchups = state.get('items')
     const matchup = teamId
-      ? matchups.find((m) => m.tids.includes(teamId) && m.week === week)
+      ? matchups.find(
+          (m) => m.tids.includes(teamId) && m.week === week && m.year === year
+        )
       : matchups.first()
     if (matchup) {
       yield put(matchupsActions.select(matchup.uid))
     }
   } else {
     const playoffs = state.get('playoffs')
-    const filtered = playoffs.filter((m) => m.week === week)
+    const filtered = playoffs.filter((m) => m.week === week && m.year === year)
     const matchup = teamId
       ? filtered.find((m) => m.tids.includes(teamId))
       : filtered.first()

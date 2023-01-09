@@ -198,30 +198,24 @@ export default class DashboardPlayersTable extends React.Component {
                 />
               </div>
             )}
-            {isRegularSeason && (
-              <div className='table__cell metric'>
-                <PlayerRosterHeader
-                  tooltip='Points produced above baseline starter'
-                  title='Pts+'
-                />
-              </div>
-            )}
-            {isRegularSeason && (
-              <div className='table__cell metric'>
-                <PlayerRosterHeader
-                  tooltip='Rank among all players in points produced above baseline starter'
-                  title='Pts+ Rank'
-                />
-              </div>
-            )}
-            {isRegularSeason && (
-              <div className='table__cell metric'>
-                <PlayerRosterHeader
-                  tooltip='Rank among position players in points produced above baseline starter'
-                  title='Pts+ Pos Rank'
-                />
-              </div>
-            )}
+            <div className='table__cell metric'>
+              <PlayerRosterHeader
+                tooltip='Points produced above baseline starter'
+                title='Pts+'
+              />
+            </div>
+            <div className='table__cell metric'>
+              <PlayerRosterHeader
+                tooltip='Rank among all players in points produced above baseline starter'
+                title='Pts+ Rank'
+              />
+            </div>
+            <div className='table__cell metric'>
+              <PlayerRosterHeader
+                tooltip='Rank among position players in points produced above baseline starter'
+                title='Pts+ Pos Rank'
+              />
+            </div>
             <div className='table__cell metric'>
               <PlayerRosterHeader
                 tooltip='Projected points over baseline player'

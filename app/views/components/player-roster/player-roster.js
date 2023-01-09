@@ -156,21 +156,13 @@ class PlayerRoster extends Player {
             {savings ? `$${savings.toFixed(0)}` : '-'}
           </div>
         )}
-        {isRegularSeason && (
-          <div className='metric table__cell'>
-            {points_added ? points_added.toFixed(1) : '-'}
-          </div>
-        )}
-        {isRegularSeason && (
-          <div className='metric table__cell'>
-            {`${points_added_rnk || '-'}`}
-          </div>
-        )}
-        {isRegularSeason && (
-          <div className='metric table__cell'>
-            {`${points_added_pos_rnk ? pos : ''}${points_added_pos_rnk || '-'}`}
-          </div>
-        )}
+        <div className='metric table__cell'>
+          {points_added ? points_added.toFixed(1) : '-'}
+        </div>
+        <div className='metric table__cell'>{`${points_added_rnk || '-'}`}</div>
+        <div className='metric table__cell'>
+          {`${points_added_pos_rnk ? pos : ''}${points_added_pos_rnk || '-'}`}
+        </div>
         <div className='metric table__cell'>{vorp ? vorp.toFixed(0) : '-'}</div>
         {isOffseason && (
           <div className='metric table__cell'>

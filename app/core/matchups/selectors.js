@@ -39,13 +39,17 @@ export function getSelectedMatchup(state) {
   if (!matchupId) return createMatchup()
 
   // TODO - fix / derive based on season schedule
+  const year = state.getIn(['app', 'year'], constants.year)
   const week = state.getIn(['scoreboard', 'week'])
   if (week <= constants.season.regularSeasonFinalWeek) {
     const items = matchups.get('items')
     return items.find((m) => m.uid === matchupId) || createMatchup()
   } else {
     const items = matchups.get('playoffs')
-    return items.find((m) => m.uid === matchupId) || createMatchup()
+    return (
+      items.find((m) => m.uid === matchupId && m.year === year) ||
+      createMatchup()
+    )
   }
 }
 
