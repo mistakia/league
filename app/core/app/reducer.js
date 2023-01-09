@@ -144,7 +144,9 @@ export function appReducer(state = initialState(), { payload, type }) {
 
     case appActions.SELECT_YEAR:
       return state.merge({
-        year: payload.year
+        year: payload.year,
+        isLoadingMatchups: null,
+        isLoadedMatchups: null
       })
 
     default:
