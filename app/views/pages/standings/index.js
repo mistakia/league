@@ -20,7 +20,7 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  load: teamActions.loadLeagueTeamStats
+  loadLeagueTeamStats: teamActions.loadLeagueTeamStats
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(StandingsPage)
