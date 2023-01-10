@@ -21,6 +21,8 @@ const import_prizepicks_odds = async () => {
     return
   }
 
+  console.time('import-prizepicks-odds')
+
   const timestamp = Math.round(Date.now() / 1000)
 
   const props = []
@@ -97,6 +99,8 @@ const import_prizepicks_odds = async () => {
     log(`Inserting ${props.length} props into database`)
     await insertProps(props)
   }
+
+  console.timeEnd('import-prizepicks-odds')
 }
 
 export const job = async () => {

@@ -27,6 +27,8 @@ const run = async () => {
     return
   }
 
+  console.time('import-fanduel-odds')
+
   const timestamp = Math.round(Date.now() / 1000)
 
   const missing = []
@@ -220,6 +222,8 @@ const run = async () => {
     log(`Inserting ${props.length} props into database`)
     await insertProps(props)
   }
+
+  console.timeEnd('import-fanduel-odds')
 }
 
 export const job = async () => {
