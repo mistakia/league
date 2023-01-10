@@ -146,7 +146,7 @@ Overall.propTypes = {
 }
 
 export default function StandingsPage({
-  load,
+  loadLeagueTeamStats,
   standings,
   division_teams_sorted,
   year
@@ -158,9 +158,11 @@ export default function StandingsPage({
     if (isNaN(lid)) {
       return navigate('/', { replace: true })
     }
-
-    load(lid)
   }, [])
+
+  useEffect(() => {
+    loadLeagueTeamStats(lid)
+  }, [year])
 
   const divisions = []
   for (const [div, teams] of division_teams_sorted.entries()) {
@@ -187,7 +189,7 @@ export default function StandingsPage({
 
 StandingsPage.propTypes = {
   standings: PropTypes.object,
-  load: PropTypes.func,
+  loadLeagueTeamStats: PropTypes.func,
   year: PropTypes.number,
   division_teams_sorted: ImmutablePropTypes.map
 }
