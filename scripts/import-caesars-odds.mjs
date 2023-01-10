@@ -27,6 +27,8 @@ const run = async () => {
     return
   }
 
+  console.time('import-caesars-odds')
+
   const timestamp = Math.round(Date.now() / 1000)
 
   const missing = []
@@ -115,6 +117,8 @@ const run = async () => {
     log(`Inserting ${props.length} props into database`)
     await insertProps(props)
   }
+
+  console.timeEnd('import-caesars-odds')
 }
 
 export const job = async () => {

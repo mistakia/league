@@ -23,6 +23,8 @@ const import_betmgm_odds = async () => {
     return
   }
 
+  console.time('import-betmgm-odds')
+
   const timestamp = Math.round(Date.now() / 1000)
 
   const props = []
@@ -83,6 +85,8 @@ const import_betmgm_odds = async () => {
     log(`Inserting ${props.length} props into database`)
     await insertProps(props)
   }
+
+  console.timeEnd('import-betmgm-odds')
 }
 
 export const job = async () => {
