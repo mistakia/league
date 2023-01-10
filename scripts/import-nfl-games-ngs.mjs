@@ -20,6 +20,7 @@ const getWeek = (week, week_type) => {
   switch (week_type) {
     case 'PRE':
     case 'REG':
+    case 'HOF':
       return week
 
     case 'WC':
@@ -33,13 +34,18 @@ const getWeek = (week, week_type) => {
 
     case 'SB':
       return 4
+
+    default:
+      throw new Error(`invalid week_type: ${week_type}`)
   }
 }
 
 const format = (item) => {
   const date = item.gameDate ? dayjs(item.gameDate).format('YYYY/MM/DD') : null
   const seas_type = item.seasonType
-  const week_type = item.gameType
+  const week_type = ['REG', 'PRE'].includes(seas_type)
+    ? seas_type
+    : item.weekNameAbbr
   const time_est = item.gameTimeEastern
   const week = getWeek(item.week, week_type)
   const year = item.season

@@ -108,4 +108,36 @@ export default class Season {
     const now = this.now
     return now.isBefore(this.end) ? this.start.year() : this.end.year()
   }
+
+  get nfl_seas_type() {
+    const week = this.week
+
+    if (week === 0) {
+      return 'PRE'
+    } else if (week > this.nflFinalWeek) {
+      return 'POST'
+    } else {
+      return 'REG'
+    }
+  }
+
+  get nfl_seas_week() {
+    const week = this.now.diff(this.start, 'weeks')
+
+    if (week < 1) {
+      if (week <= -3) {
+        return 0
+      } else if (week === -2) {
+        return 1
+      } else if (week === -1) {
+        return 2
+      } else {
+        return 3
+      }
+    } else if (week > this.nflFinalWeek) {
+      return week - this.nflFinalWeek
+    } else {
+      return week
+    }
+  }
 }

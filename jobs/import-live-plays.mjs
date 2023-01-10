@@ -1,5 +1,6 @@
 import debug from 'debug'
 
+import { constants } from '#common'
 import { wait } from '#utils'
 import import_plays_nfl from '#scripts/import-plays-nfl.mjs'
 import import_plays_ngs from '#scripts/import-plays-ngs.mjs'
@@ -10,6 +11,10 @@ const log = debug('import-live-plays')
 let live_plays_job_is_running = false
 
 export default async function () {
+  if (constants.season.week > constants.season.nflFinalWeek) {
+    return
+  }
+
   if (live_plays_job_is_running) {
     log('job already running')
     return

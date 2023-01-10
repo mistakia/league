@@ -14,11 +14,6 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-nfl-games-nfl')
 debug.enable('import-nfl-games-nfl,nfl')
 
-const currentRegularSeasonWeek = Math.max(
-  dayjs().day() === 2 ? constants.season.week - 1 : constants.season.week,
-  1
-)
-
 const format = (item) => {
   const datetime = item.time ? dayjs.tz(item.time, 'America/New_York') : null
   const date = datetime ? datetime.format('YYYY/MM/DD') : null
@@ -73,8 +68,8 @@ const format = (item) => {
 
 const run = async ({
   year = constants.season.year,
-  week = currentRegularSeasonWeek,
-  seas_type = 'REG',
+  week = constants.season.nfl_seas_week,
+  seas_type = constants.season.nfl_seas_type,
   token,
   force_import = false
 } = {}) => {
@@ -172,8 +167,8 @@ const main = async () => {
       }
     } else {
       const year = argv.year
-      const seas_type = argv.seas_type
       const week = argv.week
+      const seas_type = argv.seas_type
       await run({ year, week, seas_type, force_import })
     }
   } catch (err) {
