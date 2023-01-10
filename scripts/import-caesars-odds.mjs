@@ -5,7 +5,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants, team_aliases } from '#common'
-import { isMain, getPlayer, caesars, wait, insertProps } from '#utils'
+import { isMain, getPlayer, caesars, insertProps } from '#utils'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-caesars')
@@ -46,6 +46,7 @@ const run = async () => {
   log(`Getting odds for ${current_week_events.length} events`)
 
   for (const event of current_week_events) {
+    console.time(`caesars-event-${event.id}`)
     const event_odds = await caesars.getEvent(event.id)
 
     const supported_markets = Object.keys(caesars.markets)
@@ -102,7 +103,7 @@ const run = async () => {
       props.push(prop)
     }
 
-    await wait(5000)
+    console.timeEnd(`caesars-event-${event.id}`)
   }
 
   log(`Could not locate ${missing.length} players`)

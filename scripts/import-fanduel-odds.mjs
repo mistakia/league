@@ -5,7 +5,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants, team_aliases } from '#common'
-import { isMain, getPlayer, fanduel, wait, insertProps } from '#utils'
+import { isMain, getPlayer, fanduel, insertProps } from '#utils'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-fanduel')
@@ -156,6 +156,7 @@ const run = async () => {
   for (const event of current_week_events) {
     const teams = event.name.split('@').map((p) => team_aliases[p.trim()])
 
+    console.time(`fanduel-event-${event.eventId}`)
     for (const tab of fanduel.tabs) {
       const data = await fanduel.getEventTab({ eventId: event.eventId, tab })
 
@@ -201,8 +202,7 @@ const run = async () => {
         }
       }
     }
-
-    await wait(5000)
+    console.timeEnd(`fanduel-event-${event.eventId}`)
   }
 
   /* const weekly_specials_markets = await fanduel.getWeeklySpecials()

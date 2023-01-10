@@ -23,6 +23,8 @@ export default async function () {
 
   console.time('live-odds-job')
 
+  const throttle_timer = wait(60000)
+
   try {
     await import_draftkings_odds()
   } catch (err) {
@@ -59,7 +61,6 @@ export default async function () {
    *   log(err)
    * }
    */
-  const throttle_timer = wait(60000)
 
   // make sure its been 60 seconds
   await throttle_timer
