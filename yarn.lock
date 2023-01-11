@@ -3789,14 +3789,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"colorette@npm:2.0.16":
-  version: 2.0.16
-  resolution: "colorette@npm:2.0.16"
-  checksum: cd55596a3a2d1071c1a28eee7fd8a5387593ff1bd10a3e8d0a6221499311fe34a9f2b9272d77c391e0e003dcdc8934fb2f8d106e7ef1f7516f8060c901d41a27
-  languageName: node
-  linkType: hard
-
-"colorette@npm:^2.0.10, colorette@npm:^2.0.14":
+"colorette@npm:2.0.19, colorette@npm:^2.0.10, colorette@npm:^2.0.14":
   version: 2.0.19
   resolution: "colorette@npm:2.0.19"
   checksum: 888cf5493f781e5fcf54ce4d49e9d7d698f96ea2b2ef67906834bb319a392c667f9ec69f4a10e268d2946d13a9503d2d19b3abaaaf174e3451bfe91fb9d82427
@@ -7451,11 +7444,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"knex@npm:2.1.0":
-  version: 2.1.0
-  resolution: "knex@npm:2.1.0"
+"knex@npm:2.4.0":
+  version: 2.4.0
+  resolution: "knex@npm:2.4.0"
   dependencies:
-    colorette: 2.0.16
+    colorette: 2.0.19
     commander: ^9.1.0
     debug: 4.3.4
     escalade: ^3.1.1
@@ -7486,7 +7479,7 @@ __metadata:
       optional: true
   bin:
     knex: bin/cli.js
-  checksum: 60ff38de9135cba3ec3daef37e2b7f4fe07a03636da3c2eaed0072a1dbc96a1dca6698ad8645c0c3501b3a8cb6d3da29409cdcb7513c21083041cfecc2ae3e2e
+  checksum: 66b4ae8412c61125b78512a66d924af95116628e16026efce4d03b80b2ced6b63208b37bb49fb52a499761da5e8981e136b48fcefcd48c3fe9fc72d9d17c5661
   languageName: node
   linkType: hard
 
@@ -10516,7 +10509,7 @@ __metadata:
     javascript-lp-solver: ^0.4.24
     jsdom: ^19.0.0
     jsonwebtoken: ^8.5.1
-    knex: 2.1.0
+    knex: 2.4.0
     marked: ^1.1.0
     mini-css-extract-plugin: ^2.6.0
     mocha: ^10.0.0
