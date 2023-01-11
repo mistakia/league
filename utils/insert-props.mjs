@@ -37,6 +37,7 @@ const format_index_prop = ({
   sourceid,
   timestamp
 })
+
 const save_prop = async ({ last_prop, prop }) => {
   await db('props').insert(prop)
 
@@ -423,6 +424,9 @@ async function insertProp(prop) {
 }
 
 export default async function (props) {
+  console.log(`saving ${props.length} props`)
+  console.time('insert-props')
+
   for (const prop of props) {
     if (isNaN(prop.ln)) {
       // TODO log
@@ -430,6 +434,8 @@ export default async function (props) {
     }
     await insertProp(prop)
   }
+
+  console.timeEnd('insert-props')
 
   // TODO update props_index table
 }
