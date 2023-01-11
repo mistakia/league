@@ -11,31 +11,142 @@ const log = debug('migrate')
 debug.enable('migrate')
 
 const migrate = async () => {
-  await db.schema.alterTable('props_index', function (table) {
-    table.string('name', 50).nullable()
-    table.string('team', 3).nullable()
-    table.string('opp', 3).nullable()
-    table.integer('esbid', 10).unsigned().nullable()
-    table.string('pos', 3).nullable()
-    table.tinyint('hits_soft', 2).unsigned().nullable()
-    table.json('hit_weeks_soft').nullable()
-    table.tinyint('hits_hard', 2).unsigned().nullable()
-    table.json('hit_weeks_hard').nullable()
-    table.tinyint('hits_opp', 2).unsigned().nullable()
-    table.json('opp_hit_weeks').nullable()
-    table.decimal('hist_rate_soft', 5, 4).nullable()
-    table.decimal('hist_rate_hard', 5, 4).nullable()
-    table.decimal('opp_allow_rate', 5, 4).nullable()
-    table.decimal('hist_edge_soft', 6, 5).nullable()
-    table.decimal('hist_edge_hard', 6, 5).nullable()
-    table.decimal('market_prob', 5, 4).nullable()
-    table.tinyint('is_pending', 1).unsigned().nullable()
-    table.tinyint('is_success', 1).unsigned().nullable()
-    table.decimal('risk', 6, 4).nullable()
-    table.decimal('payout', 7, 4).nullable()
-    table.json('all_weeks').nullable()
-    table.json('opp_weeks').nullable()
-  })
+  const props_years = await db('props')
+    .select('year')
+    .whereNull('esbid')
+    .groupBy('year')
+  for (const { year } of props_years) {
+    const nfl_games = await db('nfl_games').where({ year })
+
+    const updates = []
+
+    const weeks = await db('props')
+      .select('week')
+      .where({ year })
+      .whereNull('esbid')
+      .groupBy('week')
+    for (const { week } of weeks) {
+      const props = await db('props').where({ week, year }).whereNull('esbid')
+      const pids = [...new Set(props.map((p) => p.pid))]
+      const player_rows = await db('player').whereIn('pid', pids)
+      const gamelogs = await db('player_gamelogs')
+        .select('player_gamelogs.esbid', 'player_gamelogs.pid')
+        .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
+        .where({ week, year, seas_type: 'REG' })
+
+      for (const prop of props) {
+        const player_row = player_rows.find((p) => p.pid === prop.pid)
+        let nfl_game = gamelogs.find((g) => g.pid === prop.pid)
+
+        if (!nfl_game) {
+          nfl_game = nfl_games.find(
+            (game) =>
+              game.week === week &&
+              game.year === year &&
+              game.seas_type === 'REG' &&
+              (game.h === player_row.cteam || game.v === player_row.cteam)
+          )
+        }
+
+        if (!nfl_game) {
+          log(
+            `nfl game not found for ${year} week ${week} team ${player_row.cteam}`
+          )
+          continue
+        }
+
+        updates.push({
+          esbid: nfl_game.esbid,
+          sourceid: prop.sourceid,
+          id: prop.id,
+          pid: prop.pid,
+          week: prop.week,
+          year: prop.year,
+          prop_type: prop.prop_type,
+          ln: prop.ln,
+          timestamp: prop.timestamp
+        })
+      }
+
+      log(`migrating ${updates.length} props for ${year} week ${week}`)
+      const chunk_size = 50000
+      for (let i = 0; i < updates.length; i += chunk_size) {
+        const chunk = updates.slice(i, i + chunk_size)
+        await db('props').insert(chunk).onConflict().merge()
+      }
+    }
+  }
+
+  const props_index_years = await db('props_index')
+    .select('year')
+    .whereNull('esbid')
+    .groupBy('year')
+  for (const { year } of props_index_years) {
+    const nfl_games = await db('nfl_games').where({ year })
+
+    const updates = []
+
+    const weeks = await db('props_index')
+      .select('week')
+      .where({ year })
+      .whereNull('esbid')
+      .groupBy('week')
+    for (const { week } of weeks) {
+      log(`migrating props for ${year} week ${week}`)
+
+      const props = await db('props_index')
+        .where({ week, year })
+        .whereNull('esbid')
+      const pids = [...new Set(props.map((p) => p.pid))]
+      const player_rows = await db('player').whereIn('pid', pids)
+      const gamelogs = await db('player_gamelogs')
+        .select('player_gamelogs.esbid', 'player_gamelogs.pid')
+        .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
+        .where({ week, year, seas_type: 'REG' })
+
+      for (const prop of props) {
+        const player_row = player_rows.find((p) => p.pid === prop.pid)
+        let nfl_game = gamelogs.find((g) => g.pid === prop.pid)
+
+        if (!nfl_game) {
+          nfl_game = nfl_games.find(
+            (game) =>
+              game.week === week &&
+              game.year === year &&
+              game.seas_type === 'REG' &&
+              (game.h === player_row.cteam || game.v === player_row.cteam)
+          )
+        }
+
+        if (!nfl_game) {
+          log(
+            `nfl game not found for ${year} week ${week} team ${player_row.cteam}`
+          )
+          continue
+        }
+
+        updates.push({
+          esbid: nfl_game.esbid,
+          prop_id: prop.prop_id,
+          sourceid: prop.sourceid,
+          pid: prop.pid,
+          week: prop.week,
+          year: prop.year,
+          prop_type: prop.prop_type,
+          ln: prop.ln,
+          time_type: prop.time_type,
+          timestamp: prop.timestamp
+        })
+      }
+
+      log(`migrating ${updates.length} props for ${year} week ${week}`)
+      const chunk_size = 50000
+      for (let i = 0; i < updates.length; i += chunk_size) {
+        const chunk = updates.slice(i, i + chunk_size)
+        await db('props_index').insert(chunk).onConflict().merge()
+      }
+    }
+  }
 
   log('all tables migrated')
 }

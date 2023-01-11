@@ -15,6 +15,7 @@ router.get('/props', async (req, res) => {
       return res.send(odds)
     }
 
+    // TODO update, join nfl_games table
     const data = await db('props_index').where({
       week: constants.season.week,
       year: constants.season.year

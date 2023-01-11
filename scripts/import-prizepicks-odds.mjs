@@ -28,6 +28,12 @@ const import_prizepicks_odds = async () => {
   const props = []
   const missing = []
 
+  const nfl_games = await db('nfl_games').where({
+    week: constants.season.nfl_seas_week,
+    year: constants.season.year,
+    seas_type: constants.season.nfl_seas_type
+  })
+
   let page = 1
   let data
   do {
@@ -64,6 +70,14 @@ const import_prizepicks_odds = async () => {
         continue
       }
 
+      const nfl_game = nfl_games.find(
+        (game) => game.v === player_row.cteam || game.h === player_row.cteam
+      )
+
+      if (!nfl_game) {
+        continue
+      }
+
       const prop = {}
       prop.pid = player_row.pid
       prop.prop_type = prizepicks.stats[item.attributes.stat_type]
@@ -71,6 +85,7 @@ const import_prizepicks_odds = async () => {
       prop.timestamp = timestamp
       prop.week = constants.season.week
       prop.year = constants.season.year
+      prop.esbid = nfl_game.esbid
       prop.sourceid = constants.sources.PRIZEPICKS
       prop.active = true
 

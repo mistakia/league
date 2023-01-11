@@ -34,6 +34,12 @@ const run = async () => {
   const missing = []
   const props = []
 
+  const nfl_games = await db('nfl_games').where({
+    week: constants.season.nfl_seas_week,
+    year: constants.season.year,
+    seas_type: constants.season.nfl_seas_type
+  })
+
   const schedule = await caesars.getSchedule()
   log(schedule)
 
@@ -78,6 +84,14 @@ const run = async () => {
         continue
       }
 
+      const nfl_game = nfl_games.find(
+        (game) => game.v === player_row.cteam || game.h === player_row.cteam
+      )
+
+      if (!nfl_game) {
+        continue
+      }
+
       const prop = {}
       prop.pid = player_row.pid
       prop.prop_type = caesars.markets[market.metadata.marketCategory]
@@ -85,6 +99,7 @@ const run = async () => {
       prop.timestamp = timestamp
       prop.week = constants.season.week
       prop.year = constants.season.year
+      prop.esbid = nfl_game.esbid
       prop.sourceid = constants.sources.CAESARS_VA
       prop.active = Boolean(market.active)
       prop.live = Boolean(market.tradedInPlay)

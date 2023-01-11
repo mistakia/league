@@ -14,6 +14,7 @@ const format_index_prop = ({
   pid,
   week,
   year,
+  esbid,
   prop_type,
   ln,
   o,
@@ -26,6 +27,7 @@ const format_index_prop = ({
   pid,
   week,
   year,
+  esbid,
   prop_type,
   ln,
   o,
@@ -69,8 +71,8 @@ const handle_over_under_prop = async (prop) => {
   const props_query = await db('props')
     .where({
       pid,
-      year,
       week,
+      year,
       prop_type,
       sourceid
     })
@@ -165,7 +167,7 @@ const handle_over_under_prop = async (prop) => {
       }
     }
 
-    result.message += ` on ${constants.sourcesTitle[sourceid]} market (${year} Week ${week})`
+    result.message += ` on ${constants.sourcesTitle[sourceid]} market (${constants.season.year} Week ${constants.season.week})`
 
     return result
   }
@@ -180,8 +182,8 @@ const handle_alt_line_prop = async (prop) => {
   const props_query = await db('props')
     .where({
       pid,
-      year,
       week,
+      year,
       prop_type,
       ln,
       sourceid
@@ -240,7 +242,7 @@ const handle_alt_line_prop = async (prop) => {
       result.message += ` ${ln} odds changed from ${last_prop.o_am} to ${o_am}`
     }
 
-    result.message += ` on ${constants.sourcesTitle[sourceid]} market (${year} Week ${week})`
+    result.message += ` on ${constants.sourcesTitle[sourceid]} market (${constants.season.year} Week ${constants.season.week})`
 
     return result
   }
@@ -255,8 +257,8 @@ const handle_leader_prop = async (prop) => {
   const props_query = await db('props')
     .where({
       pid,
-      year,
       week,
+      year,
       prop_type,
       sourceid
     })
@@ -317,7 +319,7 @@ const handle_leader_prop = async (prop) => {
       result.message += ` odds changed from ${last_prop.o_am} to ${o_am}`
     }
 
-    result.message += ` on ${constants.sourcesTitle[sourceid]} market (${year} Week ${week})`
+    result.message += ` on ${constants.sourcesTitle[sourceid]} market (${constants.season.year} Week ${constants.season.week})`
 
     return result
   }
