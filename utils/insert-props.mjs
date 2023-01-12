@@ -412,15 +412,19 @@ async function insertProp(prop) {
       webhookUrl: prop_type_webhook_url,
       message: result.message
     })
-  } else {
-    await sendDiscordMessage({
-      webhookUrl: config.discord_props_change_channel_webhook_url,
-      message: result.message
-    })
-  }
 
-  // throttle discord messages
-  await wait(1000)
+    // throttle discord messages
+    await wait(1000)
+  } else {
+    // disable change channel notifications for now
+    /* await sendDiscordMessage({
+     *   webhookUrl: config.discord_props_change_channel_webhook_url,
+     *   message: result.message
+     * })
+
+     * // throttle discord messages
+     * await wait(1000)     */
+  }
 }
 
 export default async function (props) {
