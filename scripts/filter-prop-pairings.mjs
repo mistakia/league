@@ -106,7 +106,9 @@ const opponent_allowed_for_prop_is_negative = ({
 }
 
 const filter_prop_pairings = async ({
-  week = constants.season.week,
+  week = constants.season.nfl_seas_week,
+  year = constants.season.year,
+  seas_type = constants.season.nfl_seas_type,
   source = constants.sources.FANDUEL_NJ
 } = {}) => {
   const opts = merge(default_options, config.filter_prop_pairings_options || {})

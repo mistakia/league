@@ -11,15 +11,6 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('process-props-index')
 debug.enable('process-props-index')
 
-const get_game = ({ team, nfl_games }) => {
-  const game = nfl_games.find((game) => game.v === team || game.h === team)
-  if (!game) {
-    return {}
-  }
-
-  return { opponent: team === game.h ? game.v : game.h, game }
-}
-
 const prop_desc = {
   [constants.player_prop_types.GAME_ALT_PASSING_YARDS]: 'pass',
   [constants.player_prop_types.GAME_ALT_RUSHING_YARDS]: 'rush',
@@ -149,7 +140,8 @@ const format_prop_row = ({
   week,
   opponent,
   player_row,
-  esbid
+  esbid,
+  seas_type
 }) => {
   const odds = prop_row.o_am ? oddslib.from('moneyline', prop_row.o_am) : null
   const market_prob = prop_row.o_am ? odds.to('impliedProbability') : null
@@ -158,8 +150,18 @@ const format_prop_row = ({
     (p) => p.pid === prop_row.pid
   )
   const all_weeks = player_gamelogs.map((p) => p.week)
-  const current_week = player_gamelogs.find((p) => p.week === week)
-  const previous_weeks = player_gamelogs.filter((p) => p.week < week)
+  const current_week = player_gamelogs.find((p) => p.esbid === esbid)
+  const previous_weeks = player_gamelogs.filter((p) => {
+    if (seas_type === 'POST' && p.seas_type === 'REG') {
+      return true
+    }
+
+    if (seas_type === p.seas_type && p.week < week) {
+      return true
+    }
+
+    return false
+  })
   const is_success = current_week
     ? is_hit({
         line: prop_row.ln,
@@ -181,9 +183,24 @@ const format_prop_row = ({
     strict: true
   })
 
-  const opponent_player_gamelogs = all_player_gamelogs.filter(
-    (p) => p.opp === opponent && p.pos === player_row.pos && p.week < week
-  )
+  const opponent_player_gamelogs = all_player_gamelogs.filter((p) => {
+    if (p.opp !== opponent) {
+      return false
+    }
+    if (p.pos !== player_row.pos) {
+      return false
+    }
+
+    if (seas_type === 'REG' && p.seas_type === 'POST') {
+      return false
+    }
+
+    if (seas_type === p.seas_type && p.week >= week) {
+      return false
+    }
+
+    return true
+  })
   const opponent_total_weeks = [
     ...new Set(opponent_player_gamelogs.map((p) => p.week))
   ]
@@ -248,7 +265,8 @@ const format_prop_row = ({
 
 const process_props_index = async ({
   prop_rows,
-  week,
+  seas_type = constants.season.nfl_seas_type,
+  week = constants.season.nfl_seas_week,
   year = constants.season.year
 } = {}) => {
   log(`processing ${prop_rows.length} prop rows`)
@@ -258,21 +276,19 @@ const process_props_index = async ({
   }
 
   const nfl_games = await db('nfl_games').where({
-    year: constants.season.year,
+    year,
     week,
-    seas_type: 'REG'
+    seas_type
   })
   log(
     `loaded ${nfl_games.length} nfl games for week ${week} ${constants.season.year}`
   )
 
   const all_player_gamelogs = await db('player_gamelogs')
-    .select('player_gamelogs.*', 'nfl_games.week')
+    .select('player_gamelogs.*', 'nfl_games.esbid', 'nfl_games.week')
     .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
     .where('nfl_games.year', year)
-    .where('nfl_games.week', '<=', week)
-    // .where('nfl_games.week', '>=', start_week)
-    .where('nfl_games.seas_type', 'REG')
+    .whereNot('nfl_games.seas_type', 'PRE')
 
   log(`loaded ${all_player_gamelogs.length} gamelogs`)
 
@@ -287,8 +303,13 @@ const process_props_index = async ({
 
   for (const prop_row of prop_rows) {
     const player_row = player_rows.find((player) => player.pid === prop_row.pid)
+    const nfl_game = nfl_games.find((g) => g.esbid === prop_row.esbid)
 
-    const { opponent, game } = get_game({ team: player_row.cteam, nfl_games })
+    if (!nfl_game) {
+      continue
+    }
+
+    const opponent = player_row.cteam === nfl_game.h ? nfl_game.v : nfl_game.h
 
     // skip props on bye
     if (!opponent) {
@@ -301,7 +322,8 @@ const process_props_index = async ({
       week,
       opponent,
       player_row,
-      esbid: game.esbid
+      esbid: nfl_game.esbid,
+      seas_type
     })
 
     props_index_inserts.push(formatted_prop_row)
@@ -316,11 +338,14 @@ const process_props_index = async ({
 const main = async () => {
   let error
   try {
-    const week = argv.week || constants.season.week
+    const week = argv.week || constants.season.nfl_seas_week
     const year = argv.year || constants.season.year
+    const seas_type = argv.seas_type || constants.season.nfl_seas_type
     const source = argv.source || constants.sources.FANDUEL_NJ
 
     const prop_rows = await db('props_index')
+      .select('props_index.*')
+      .join('nfl_games', 'nfl_games.esbid', 'props_index.esbid')
       .whereIn('prop_type', [
         constants.player_prop_types.GAME_ALT_PASSING_YARDS,
         constants.player_prop_types.GAME_ALT_RECEIVING_YARDS,
@@ -350,12 +375,11 @@ const main = async () => {
       .where('time_type', constants.player_prop_time_type.CLOSE)
       .where('sourceid', source)
       // .whereNot('sourceid', constants.sources.PRIZEPICKS)
-      .where({
-        week,
-        year
-      })
+      .where('nfl_games.week', week)
+      .where('nfl_games.seas_type', seas_type)
+      .where('nfl_games.year', year)
 
-    await process_props_index({ prop_rows, week, year })
+    await process_props_index({ prop_rows, week, year, seas_type })
   } catch (err) {
     error = err
     log(error)

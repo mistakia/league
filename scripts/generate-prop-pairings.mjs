@@ -191,12 +191,16 @@ const format_prop_pairing = ({ props, prop_stats, week, team, source }) => {
 }
 
 const generate_prop_pairings = async ({
-  week = constants.season.week,
+  week = constants.season.nfl_seas_week,
+  year = constants.season.year,
+  seas_type = constants.season.nfl_seas_type,
   source = constants.sources.FANDUEL_NJ
 } = {}) => {
   console.time('generate_prop_pairings')
 
   const prop_rows = await db('props_index')
+    .select('props_index.*')
+    .joing('nfl_games', 'nfl_games.esbid', 'props_index.esbid')
     .whereNotNull('hist_edge_soft')
     .where('hits_soft', '>', 0)
     .whereIn('prop_type', [
@@ -228,10 +232,9 @@ const generate_prop_pairings = async ({
     .where('time_type', constants.player_prop_time_type.CLOSE)
     .where('sourceid', source)
     // .whereNot('sourceid', constants.sources.PRIZEPICKS)
-    .where({
-      week,
-      year: constants.season.year
-    })
+    .where('nfl_games.week', week)
+    .where('nfl_games.year', year)
+    .where('nfl_games.seas_type', seas_type)
 
   log(`loaded ${prop_rows.length} props`)
 
@@ -374,8 +377,10 @@ const main = async () => {
   let error
   try {
     const week = argv.week
+    const year = argv.year
+    const seas_type = argv.seas_type
     const source = argv.source
-    await generate_prop_pairings({ week, source })
+    await generate_prop_pairings({ week, year, seas_type, source })
   } catch (err) {
     error = err
     log(error)
