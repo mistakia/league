@@ -284,7 +284,12 @@ const process_props_index = async ({
   )
 
   const all_player_gamelogs = await db('player_gamelogs')
-    .select('player_gamelogs.*', 'nfl_games.esbid', 'nfl_games.week', 'nfl_games.seas_type')
+    .select(
+      'player_gamelogs.*',
+      'nfl_games.esbid',
+      'nfl_games.week',
+      'nfl_games.seas_type'
+    )
     .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
     .where('nfl_games.year', year)
     .whereNot('nfl_games.seas_type', 'PRE')
