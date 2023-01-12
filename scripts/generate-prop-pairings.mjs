@@ -200,7 +200,7 @@ const generate_prop_pairings = async ({
 
   const prop_rows = await db('props_index')
     .select('props_index.*')
-    .joing('nfl_games', 'nfl_games.esbid', 'props_index.esbid')
+    .join('nfl_games', 'nfl_games.esbid', 'props_index.esbid')
     .whereNotNull('hist_edge_soft')
     .where('hits_soft', '>', 0)
     .whereIn('prop_type', [
