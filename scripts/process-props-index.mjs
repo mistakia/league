@@ -255,7 +255,6 @@ const format_prop_row = ({
     risk,
     payout: is_pending ? 0 : is_success ? 1 : -risk,
 
-    week,
     all_weeks: all_weeks.length ? JSON.stringify(all_weeks.sort()) : null,
     opp_weeks: opponent_total_weeks.length
       ? JSON.stringify(opponent_total_weeks.sort())
