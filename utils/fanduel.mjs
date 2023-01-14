@@ -1,11 +1,14 @@
 import fetch from 'node-fetch'
-// import debug from 'debug'
+import queryString from 'query-string'
+import dayjs from 'dayjs'
+import debug from 'debug'
 
 import config from '#config'
 import { constants } from '#common'
+import { wait } from './wait.mjs'
 
-// const log = debug('fanduel')
-// debug.enable('fanduel')
+const log = debug('fanduel')
+debug.enable('fanduel')
 
 const nfl_game_compeition_id = 12282733
 
@@ -298,4 +301,103 @@ export const getWeeklySpecials = async () => {
   )
 
   return filtered
+}
+
+export const get_wagers = async ({
+  fanduel_state,
+  is_settled = true,
+  authorization,
+  start = 0,
+  end = 200
+} = {}) => {
+  if (!fanduel_state) {
+    log('missing fanduel state param')
+    return null
+  }
+
+  if (!authorization) {
+    log('missing fanduel authorization param')
+    return null
+  }
+
+  const params = {
+    locale: 'en_US',
+    isSettled: is_settled,
+    fromRecord: start,
+    toRecord: end,
+    sortDir: 'DESC',
+    sortParam: 'CLOSEST_START_TIME',
+    _ak: 'FhMFpcPWXMeyZxOx'
+  }
+
+  const headers = {
+    'x-authentication': authorization
+  }
+
+  const url = `https://sbapi.${fanduel_state}.sportsbook.fanduel.com/api/my-bets?${queryString.stringify(
+    params
+  )}`
+
+  const res = await fetch(url, { headers })
+  const data = await res.json()
+
+  return data
+}
+
+export const get_all_wagers = async ({
+  fanduel_state,
+  is_settled = true,
+  authorization,
+  placed_after = null
+} = {}) => {
+  if (!fanduel_state) {
+    log('missing fanduel state param')
+    return null
+  }
+
+  if (!authorization) {
+    log('missing fanduel authorization param')
+    return null
+  }
+
+  const limit = 100
+  let start = 0
+  let end = start + limit
+  let has_more = false
+
+  let results = []
+
+  const placed_cutoff = placed_after ? dayjs(placed_after) : null
+
+  do {
+    const fanduel_res = await get_wagers({
+      fanduel_state,
+      is_settled,
+      authorization,
+      start,
+      end
+    })
+
+    if (fanduel_res && fanduel_res.bets && fanduel_res.bets.length) {
+      results = results.concat(fanduel_res.bets)
+
+      const last_wager = fanduel_res.bets[fanduel_res.bets.length - 1]
+      if (placed_cutoff) {
+        has_more = dayjs(last_wager.placedDate).isAfter(placed_cutoff)
+      } else {
+        has_more = fanduel_res.moreAvailable
+      }
+    } else {
+      has_more = false
+    }
+
+    start = start + limit
+    end = end + limit
+
+    if (has_more) {
+      await wait(2000)
+    }
+  } while (has_more)
+
+  return results
 }
