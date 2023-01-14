@@ -62,7 +62,9 @@ const get_wagers_summary = ({ wagers, props = [] }) =>
         return leg.result === 'LOST'
       }).length
 
-      const total_return = wager.betPrice * wager.currentSize
+      const total_return = wager.betPrice
+        ? wager.betPrice * wager.currentSize
+        : Number(wager.potentialWin)
       const is_won = lost_legs === 0
 
       return {
