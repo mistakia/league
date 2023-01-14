@@ -171,13 +171,14 @@ const analyze_fanduel_wagers = async ({
     // .filter((p) => p.americanPrice >= 200)
     .sort((a, b) => b.americanPrice - a.americanPrice)
     .filter((p) => {
-      if (filtered_props_key[p.selectionName]) {
+      const key = `${p.marketId}_${p.selectionId}`
+      if (filtered_props_key[key]) {
         return false
       }
-      filtered_props_key[p.selectionName] = true
+      filtered_props_key[key] = true
       return true
     })
-  // log(filtered_props)
+  // console.log(filtered_props.map(p => p.handicap ? `${p.selectionName} ${p.handicap}` : p.selectionName).sort())
   log(get_props_summary(filtered_props))
 
   const one_prop = []
