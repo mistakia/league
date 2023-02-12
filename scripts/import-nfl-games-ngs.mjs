@@ -30,6 +30,7 @@ const getWeek = (week, week_type) => {
       return 2
 
     case 'CON':
+    case 'CONF':
       return 3
 
     case 'SB':
