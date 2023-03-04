@@ -10,6 +10,7 @@ module.exports = {
   bidTimer: 15000,
   pff: '', // cookies for pff
   nfl_api_url: '',
+  nfl_combine_profiles_url: '',
   ngs_api_url: '',
   mflUserAgent: '',
   sportradar_api: '',
@@ -21,6 +22,8 @@ module.exports = {
   betmgm_api_url: '',
   prizepicks_api_url: '',
   gambet_api_url: '',
+
+  league_api_auth_token: '', // used for cache
 
   discord_props_change_channel_webhook_url: '',
   discord_props_open_channel_webhook_url: '',
