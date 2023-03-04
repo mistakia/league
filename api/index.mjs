@@ -39,7 +39,7 @@ api.enable('etag')
 api.disable('x-powered-by')
 api.use(compression())
 api.use(morgan('api', 'combined'))
-api.use(bodyParser.json())
+api.use(bodyParser.json({ limit: '150mb' }))
 
 api.use(
   favicon(path.join(__dirname, '../', 'dist', 'favicon.ico'), {

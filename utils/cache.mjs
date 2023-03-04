@@ -7,7 +7,8 @@ export const set = async ({ key, value }) => {
     method: 'POST',
     body: JSON.stringify(value),
     headers: {
-      authorization: `Bearer ${config.league_api_auth_token}`
+      authorization: `Bearer ${config.league_api_auth_token}`,
+      'Content-Type': 'application/json'
     }
   })
   const data = await res.json()
