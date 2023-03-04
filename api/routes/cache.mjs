@@ -44,6 +44,10 @@ router.post('/:cache_key(*)', async (req, res) => {
       return res.status(401).send({ error: 'invalid token' })
     }
 
+    if (!body || typeof body !== 'object') {
+      return res.status(400).send({ error: 'invalid body' })
+    }
+
     const full_path = path.join(cache_path, cache_key)
     await fs.ensureFile(full_path)
     await fs.writeJson(full_path, body, { spaces: 2 })
