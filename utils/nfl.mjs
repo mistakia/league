@@ -386,3 +386,32 @@ query {
 
   return data
 }
+
+export const get_combine_profiles = async ({
+  ignore_cache = false,
+  year,
+  token
+} = {}) => {
+  const cache_key = `/nfl/combine_profiles/${year}.json`
+  if (!ignore_cache) {
+    const cache_value = await cache.get({ key: cache_key })
+    if (cache_value) {
+      return cache_value
+    }
+  }
+
+  const url = `${config.nfl_combine_profiles_url}?year=${year}&limit=1000`
+  log(url)
+  const res = await fetch(url, {
+    headers: {
+      authorization: `Bearer ${token}`
+    }
+  })
+  const data = await res.json()
+
+  if (res.ok) {
+    await cache.set({ key: cache_key, value: data })
+  }
+
+  return data
+}

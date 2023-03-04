@@ -1,6 +1,11 @@
 import debug from 'debug'
 
-import { formatHeight, formatPlayerName, fixTeam } from '#common'
+import {
+  formatHeight,
+  formatPlayerName,
+  fixTeam,
+  formatPosition
+} from '#common'
 import db from '#db'
 import generatePlayerId from './generate-player-id.mjs'
 import * as espn from './espn.mjs'
@@ -91,6 +96,9 @@ const createPlayer = async (playerData) => {
   )
   playerData.height = formatHeight(playerData.height)
   playerData.cteam = fixTeam(playerData.cteam)
+  playerData.pos = formatPosition(playerData.pos)
+  playerData.pos1 = formatPosition(playerData.pos1)
+  playerData.posd = formatPosition(playerData.posd)
 
   try {
     await db('player').insert({
