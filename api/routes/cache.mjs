@@ -4,7 +4,7 @@ import fs from 'fs-extra'
 import path from 'path'
 
 const router = express.Router()
-const cache_path = path.join(os.homedir())
+const cache_path = path.join(os.homedir(), './cache')
 
 router.get('/:cache_key(*)', async (req, res) => {
   const { logger } = req.app.locals
