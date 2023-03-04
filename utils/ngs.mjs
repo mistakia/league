@@ -1,12 +1,9 @@
 import fetch from 'node-fetch'
-import os from 'os'
-import fs from 'fs-extra'
-import path from 'path'
 import debug from 'debug'
 
 import config from '#config'
+import * as cache from './cache.mjs'
 
-const cache_path = path.join(os.homedir(), '/ngs')
 const log = debug('ngs')
 debug.enable('ngs')
 
@@ -15,10 +12,12 @@ export const getPlayer = async ({ ignore_cache = false, nflId } = {}) => {
     return
   }
 
-  const api_path = `/player/${nflId}.json`
-  const full_path = path.join(cache_path, api_path)
-  if (!ignore_cache && fs.pathExistsSync(full_path)) {
-    return fs.readJsonSync(full_path)
+  const cache_key = `/ngs/player/${nflId}.json`
+  if (!ignore_cache) {
+    const cache_value = await cache.get({ key: cache_key })
+    if (cache_value) {
+      return cache_value
+    }
   }
 
   const url = `${config.ngs_api_url}/league/player?nflId=${nflId}`
@@ -29,8 +28,7 @@ export const getPlayer = async ({ ignore_cache = false, nflId } = {}) => {
   const data = await res.json()
 
   if (data && data.gsisItId) {
-    fs.ensureFileSync(full_path)
-    fs.writeJsonSync(full_path, data, { spaces: 2 })
+    await cache.set({ key: cache_key, value: data })
   }
 
   return data

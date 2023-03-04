@@ -1,21 +1,18 @@
 import fetch from 'node-fetch'
-import os from 'os'
-import fs from 'fs-extra'
-import path from 'path'
 import debug from 'debug'
 
 import config from '#config'
 import { wait } from './wait.mjs'
+import * as cache from './cache.mjs'
 
-const cache_path = path.join(os.homedir(), '/espn')
 const log = debug('espn')
 debug.enable('espn')
 
 export const getPlayer = async ({ espn_id }) => {
-  const api_path = `/players/${espn_id}.json`
-  const full_path = path.join(cache_path, api_path)
-  if (fs.pathExistsSync(full_path)) {
-    return fs.readJsonSync(full_path)
+  const cache_key = `/espn/players/${espn_id}.json`
+  const cache_value = await cache.get({ key: cache_key })
+  if (cache_value) {
+    return cache_value
   }
 
   const url = `${config.espn_api_v3_url}/athletes/${espn_id}`
@@ -26,8 +23,7 @@ export const getPlayer = async ({ espn_id }) => {
   await wait(4000)
 
   if (res.ok) {
-    fs.ensureFileSync(full_path)
-    fs.writeJsonSync(full_path, data, { spaces: 2 })
+    await cache.set({ key: cache_key, value: data })
   }
 
   return data

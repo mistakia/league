@@ -1,21 +1,20 @@
 import fetch from 'node-fetch'
-import os from 'os'
-import fs from 'fs-extra'
-import path from 'path'
 import debug from 'debug'
 
 import config from '#config'
 import { wait } from './wait.mjs'
+import * as cache from './cache.mjs'
 
-const cache_path = path.join(os.homedir(), '/nfl')
 const log = debug('nfl')
 debug.enable('nfl')
 
 export const getPlayers = async ({ year, token, ignore_cache = false }) => {
-  const api_path = `/players/${year}.json`
-  const full_path = path.join(cache_path, api_path)
-  if (!ignore_cache && fs.pathExistsSync(full_path)) {
-    return fs.readJsonSync(full_path)
+  const cache_key = `/nfl/players/${year}.json`
+  if (!ignore_cache) {
+    const cache_value = await cache.get({ key: cache_key })
+    if (cache_value) {
+      return cache_value
+    }
   }
 
   let results = []
@@ -110,18 +109,17 @@ query {
   } while (data && data.data && data.data.viewer.players.pageInfo.hasNextPage)
 
   if (results.length) {
-    fs.ensureFileSync(full_path)
-    fs.writeJsonSync(full_path, results, { spaces: 2 })
+    await cache.set({ key: cache_key, value: results })
   }
 
   return results
 }
 
 export const getGames = async ({ year, week, seas_type, token }) => {
-  const api_path = `/games/${year}/${seas_type}/${week}.json`
-  const full_path = path.join(cache_path, api_path)
-  if (fs.pathExistsSync(full_path)) {
-    return fs.readJsonSync(full_path)
+  const cache_key = `/nfl/games/${year}/${seas_type}/${week}.json`
+  const cache_value = await cache.get({ key: cache_key })
+  if (cache_value) {
+    return cache_value
   }
 
   const url = `${config.nfl_api_url}/experience/v1/games?season=${year}&seasonType=${seas_type}&week=${week}&withExternalIds=true&limit=100`
@@ -135,18 +133,19 @@ export const getGames = async ({ year, week, seas_type, token }) => {
   const data = await res.json()
 
   if (data && data.games.length) {
-    fs.ensureFileSync(full_path)
-    fs.writeJsonSync(full_path, data, { spaces: 2 })
+    await cache.set({ key: cache_key, value: data })
   }
 
   return data
 }
 
 export const getPlays = async ({ id, token, bypass_cache = false }) => {
-  const api_path = `/plays/${id}.json`
-  const full_path = path.join(cache_path, api_path)
-  if (!bypass_cache && fs.pathExistsSync(full_path)) {
-    return fs.readJsonSync(full_path)
+  const cache_key = `/nfl/plays/${id}.json`
+  if (!bypass_cache) {
+    const cache_value = await cache.get({ key: cache_key })
+    if (cache_value) {
+      return cache_value
+    }
   }
 
   log(`getting game details for ${id}`)
@@ -382,8 +381,7 @@ query {
   const data = await res.json()
 
   if (data && data.data) {
-    fs.ensureFileSync(full_path)
-    fs.writeJsonSync(full_path, data, { spaces: 2 })
+    await cache.set({ key: cache_key, value: data })
   }
 
   return data
