@@ -6,7 +6,7 @@ import config from '#config'
 const log = debug('update-player-id')
 
 export default async function ({ current_pid, new_pid }) {
-  const player_rows = await db('player').where({ pid: current_pid })
+  const player_rows = await db('player').where({ pid: new_pid })
   const player_row = player_rows[0]
 
   if (!player_row) {

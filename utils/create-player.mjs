@@ -7,7 +7,7 @@ import {
   formatPosition
 } from '#common'
 import db from '#db'
-import generatePlayerId from './generate-player-id.mjs'
+import generate_player_id from './generate-player-id.mjs'
 import * as espn from './espn.mjs'
 import * as sportradar from './sportradar.mjs'
 
@@ -51,7 +51,7 @@ const required = [
 ]
 
 const createPlayer = async (playerData) => {
-  const playerId = await generatePlayerId(playerData)
+  const playerId = await generate_player_id(playerData)
 
   if (!playerData.start) {
     const { espn_id, sportradar_id } = playerData

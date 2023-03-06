@@ -1,50 +1,55 @@
 import debug from 'debug'
 
-import db from '#db'
 import isMain from './is-main.mjs'
 
 const log = debug('generate-player-id')
 debug.enable('generate-player-id')
 
-const generatePlayerId = async (player_data) => {
-  const firstInitial = player_data.fname
-    .match(/[a-zA-Z]/)
-    .pop()
-    .toUpperCase()
-  const lastInitial = player_data.lname
-    .match(/[a-zA-Z]/)
-    .pop()
-    .toUpperCase()
-  const preset = firstInitial + lastInitial
+const required_fields = ['fname', 'lname', 'start', 'dob']
 
-  const player_rows = await db('player')
-    .select('pid')
-    .where('pid', 'like', `${preset}-%`)
-    .orderBy('pid', 'desc')
-    .limit(1)
-
-  if (!player_rows.length) {
-    return `${preset}-1000`
+const generate_player_id = (player_data) => {
+  // check if all required fields are present
+  for (const field of required_fields) {
+    if (!player_data[field]) {
+      throw new Error(`Missing field ${field}`)
+    }
   }
 
-  const cursor_pid = player_rows[0].pid
-  const re_results = /[A-Z]{2}-(?<index>[0-9]{4})/.exec(cursor_pid)
-  const cursor_pid_index = parseInt(re_results.groups.index, 10)
-  log(`current index: ${cursor_pid_index}`)
+  // get first initial, uppercase, pad if needed
+  const first_name_first_four = player_data.fname
+    .match(/[a-zA-Z]/g)
+    .slice(0, 4)
+    .map((initial) => initial.toUpperCase())
+    .join('')
+    .padEnd(4, 'X')
 
-  // increase cursor_pid_index by 10 and round to the nearest 10
-  const new_index = Math.ceil((cursor_pid_index + 10) / 10) * 10
-  const formatted_index = ('0000' + new_index).slice(-4)
-  log(`new index: ${formatted_index}`)
+  // get last three initials, uppercase and pad if needed
+  const last_name_first_four = player_data.lname
+    .match(/[a-zA-Z]/g)
+    .slice(0, 4)
+    .map((initial) => initial.toUpperCase())
+    .join('')
+    .padEnd(4, 'X')
 
-  return `${preset}-${formatted_index}`
+  // format nfl start year, a number, to ensure it is in format YYYY, fill in any missing digits
+  const start = player_data.start.toString().slice(0, 4).padStart(4, '0')
+
+  // format date of birth to ensure it is in format YYYY-MM-DD, fill in any missing digits
+  const dob = player_data.dob
+    .split('-')
+    .map((part) => part.padStart(2, '0')) // pad each part
+    .join('-')
+
+  const pid = `${first_name_first_four}-${last_name_first_four}-${start}-${dob}`
+  log(`Generated pid ${pid}`)
+  return pid
 }
 
-export default generatePlayerId
+export default generate_player_id
 
 if (isMain(import.meta.url)) {
-  const main = async () => {
-    const pid = await generatePlayerId({
+  const main = () => {
+    const pid = generate_player_id({
       fname: 'Francis',
       lname: 'Scott'
     })
