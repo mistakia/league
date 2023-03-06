@@ -1,8 +1,17 @@
+import debug from 'debug'
+
 import db from '#db'
 import update_player_id from './update-player-id.mjs'
 import updatePlayer from './update-player.mjs'
 
+const log = debug('merge-player')
+debug.enable('merge-player,update-player-id')
+
 export default async function ({ update_player_row, remove_player_row }) {
+  log(
+    `merging ${update_player_row.fname} ${update_player_row.lname} ${update_player_row.pid} and ${remove_player_row.fname} ${remove_player_row.lname} ${remove_player_row.pid}`
+  )
+
   await update_player_id({
     current_pid: remove_player_row.pid,
     new_pid: update_player_row.pid

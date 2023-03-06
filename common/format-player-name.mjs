@@ -12,5 +12,8 @@ export default function (str) {
   // suffix removal
   str = str.replace(/ Jr[.]?$| Sr[.]?$| III$| II$| IV$| V$|'|\.|,/gi, '')
 
+  // remove all characters except alpha, space or hyphen
+  str = str.replace(/[^a-zA-Z -]/gi, '')
+
   return str.toLowerCase()
 }
