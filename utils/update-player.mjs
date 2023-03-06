@@ -10,7 +10,7 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('update-player')
 debug.enable('update-player')
 
-const excluded_props = ['pid', 'fname', 'formatted', 'pos']
+const excluded_props = ['pid', 'formatted', 'pos']
 
 const protected_props = [
   'nflid',
