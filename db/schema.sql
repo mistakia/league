@@ -15,7 +15,7 @@ SET time_zone = "+00:00";
 DROP TABLE IF EXISTS `player`;
 
 CREATE TABLE `player` (
-  `pid` varchar(7) NOT NULL,
+  `pid` varchar(25) NOT NULL,
   `fname` varchar(20) NOT NULL,
   `lname` varchar(25) NOT NULL,
   `pname` varchar(25) NOT NULL,
@@ -94,7 +94,7 @@ CREATE TABLE `player` (
 DROP TABLE IF EXISTS `players_status`;
 
 CREATE TABLE `players_status` (
-  `pid` varchar(7) NOT NULL,
+  `pid` varchar(25) NOT NULL,
   `mfl_id` varchar(11) DEFAULT NULL,
   `sleeper_id` varchar(11) DEFAULT NULL,
   `active` tinyint(1) DEFAULT NULL,
@@ -125,7 +125,7 @@ DROP TABLE IF EXISTS `poaches`;
 
 CREATE TABLE `poaches` (
   `uid` int(11) NOT NULL AUTO_INCREMENT,
-  `pid` varchar(7) NOT NULL,
+  `pid` varchar(25) NOT NULL,
   `userid` int(6) NOT NULL,
   `tid` int(5) NOT NULL,
   `player_tid` int(5) NOT NULL,
@@ -148,7 +148,7 @@ DROP TABLE IF EXISTS `poach_releases`;
 
 CREATE TABLE `poach_releases` (
   `poachid` int(11) NOT NULL,
-  `pid` varchar(7) NOT NULL,
+  `pid` varchar(25) NOT NULL,
   KEY `poachid` (`poachid`),
   UNIQUE KEY `pid` (`poachid`, `pid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -319,7 +319,7 @@ DROP TABLE IF EXISTS `draft`;
 
 CREATE TABLE `draft` (
   `uid` int(6) unsigned NOT NULL AUTO_INCREMENT,
-  `pid` varchar(7) DEFAULT NULL,
+  `pid` varchar(25) DEFAULT NULL,
   `round` tinyint(1) NOT NULL,
   `comp` tinyint(1) DEFAULT 0,
   `pick` tinyint(2) DEFAULT NULL,
@@ -428,7 +428,7 @@ CREATE TABLE `playoffs` (
 DROP TABLE IF EXISTS `projections`;
 
 CREATE TABLE `projections` (
-  `pid` varchar(7) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `pid` varchar(25) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `sourceid` int NOT NULL DEFAULT '0',
   `userid` int NOT NULL DEFAULT '0',
   `pa` decimal(5,1) DEFAULT NULL,
@@ -484,7 +484,7 @@ CREATE TABLE `projections` (
 DROP TABLE IF EXISTS `projections_archive`;
 
 CREATE TABLE `projections_archive` (
-  `pid` varchar(7) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `pid` varchar(25) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `sourceid` int NOT NULL DEFAULT '0',
   `userid` int NOT NULL DEFAULT '0',
   `pa` decimal(5,1) DEFAULT NULL,
@@ -540,7 +540,7 @@ CREATE TABLE `projections_archive` (
 DROP TABLE IF EXISTS `ros_projections`;
 
 CREATE TABLE `ros_projections` (
-  `pid` varchar(7) NOT NULL,
+  `pid` varchar(25) NOT NULL,
   `sourceid` int(3) NOT NULL,
   `pa` decimal(5,1) DEFAULT NULL,
   `pc` decimal(5,1) DEFAULT NULL,
@@ -595,7 +595,7 @@ CREATE TABLE `ros_projections` (
 DROP TABLE IF EXISTS `league_player_projection_points`;
 
 CREATE TABLE `league_player_projection_points` (
-  `pid` varchar(7) NOT NULL,
+  `pid` varchar(25) NOT NULL,
   `week` varchar(3) NOT NULL,
   `year` smallint(4) NOT NULL,
   `lid` int(6) NOT NULL,
@@ -651,7 +651,7 @@ CREATE TABLE `league_player_projection_points` (
 DROP TABLE IF EXISTS `league_player_projection_values`;
 
 CREATE TABLE `league_player_projection_values` (
-  `pid` varchar(7) NOT NULL,
+  `pid` varchar(25) NOT NULL,
   `week` varchar(3) NOT NULL,
   `year` smallint(4) NOT NULL,
   `lid` int(6) NOT NULL,
@@ -695,7 +695,7 @@ DROP TABLE IF EXISTS `rosters_players`;
 CREATE TABLE `rosters_players` (
   `rid` int(11) NOT NULL,
   `slot` int(11) NOT NULL,
-  `pid` varchar(7) NOT NULL,
+  `pid` varchar(25) NOT NULL,
   `pos` varchar(3) NOT NULL,
   `tag` tinyint(1) unsigned NOT NULL DEFAULT '1',
   `extensions` tinyint(1) unsigned NOT NULL DEFAULT '0',
@@ -843,7 +843,7 @@ DROP TABLE IF EXISTS `trade_releases`;
 CREATE TABLE `trade_releases` (
   `tradeid` int(6) NOT NULL,
   `tid` int(6) NOT NULL,
-  `pid` varchar(7) NOT NULL,
+  `pid` varchar(25) NOT NULL,
   KEY (`tradeid`),
   UNIQUE KEY `pid` (`tradeid`,`pid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -860,7 +860,7 @@ DROP TABLE IF EXISTS `trades_players`;
 CREATE TABLE `trades_players` (
   `tradeid` int(6) NOT NULL,
   `tid` int(6) NOT NULL,
-  `pid` varchar(7) NOT NULL,
+  `pid` varchar(25) NOT NULL,
   KEY (`tradeid`),
   UNIQUE KEY `pid` (`tradeid`,`pid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -904,7 +904,7 @@ CREATE TABLE `trades_transactions` (
 DROP TABLE IF EXISTS `league_cutlist`;
 
 CREATE TABLE `league_cutlist` (
-  `pid` varchar(7) NOT NULL,
+  `pid` varchar(25) NOT NULL,
   `tid` int(6) NOT NULL,
   `order` tinyint(2) NOT NULL,
   KEY `pid` (`pid`),
@@ -925,7 +925,7 @@ CREATE TABLE `transactions` (
   `userid` int(6) NOT NULL,
   `tid` int(6) NOT NULL,
   `lid` int(6) NOT NULL,
-  `pid` varchar(7) NOT NULL,
+  `pid` varchar(25) NOT NULL,
   `type` tinyint(2) NOT NULL,
   `value` int(4) NOT NULL,
   `week` tinyint(2) NOT NULL,
@@ -1004,7 +1004,7 @@ DROP TABLE IF EXISTS `waivers`;
 CREATE TABLE `waivers` (
   `uid` int(11) NOT NULL AUTO_INCREMENT,
   `userid` int(6) NOT NULL,
-  `pid` varchar(7) NOT NULL,
+  `pid` varchar(25) NOT NULL,
   `drop` varchar(7) DEFAULT NULL,
   `tid` int(5) NOT NULL,
   `lid` int(6) NOT NULL,
@@ -1033,7 +1033,7 @@ DROP TABLE IF EXISTS `waiver_releases`;
 
 CREATE TABLE `waiver_releases` (
   `waiverid` int(11) NOT NULL,
-  `pid` varchar(7) NOT NULL,
+  `pid` varchar(25) NOT NULL,
   KEY `waiverid` (`waiverid`),
   UNIQUE KEY `waiverid_pid` (`waiverid`, `pid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -1065,7 +1065,7 @@ DROP TABLE IF EXISTS `player_changelog`;
 
 CREATE TABLE `player_changelog` (
   `uid` int NOT NULL AUTO_INCREMENT,
-  `pid` varchar(7) NOT NULL,
+  `pid` varchar(25) NOT NULL,
   `prop` varchar(100) NOT NULL,
   `prev` varchar(400) NOT NULL,
   `new` varchar(400) DEFAULT NULL,
@@ -1821,7 +1821,7 @@ CREATE TABLE `nfl_snaps_current_week` (
 DROP TABLE IF EXISTS `practice`;
 
 CREATE TABLE `practice` (
-  `pid` varchar(7) NOT NULL,
+  `pid` varchar(25) NOT NULL,
   `week` tinyint(2) NOT NULL,
   `year` smallint(4) NOT NULL,
   `status` varchar(100) DEFAULT NULL,
@@ -1846,7 +1846,7 @@ DROP TABLE IF EXISTS `player_gamelogs`;
 
 CREATE TABLE `player_gamelogs` (
   `esbid` int(10) NOT NULL,
-  `pid` varchar(7) NOT NULL,
+  `pid` varchar(25) NOT NULL,
   `tm` varchar(3) NOT NULL,
   `opp` varchar(3) NOT NULL,
   `pos` varchar(3) NOT NULL,
@@ -1907,7 +1907,7 @@ CREATE TABLE `player_gamelogs` (
 DROP TABLE IF EXISTS `player_seasonlogs`;
 
 CREATE TABLE `player_seasonlogs` (
-  `pid` varchar(7) NOT NULL,
+  `pid` varchar(25) NOT NULL,
   `year` smallint(4) NOT NULL,
   `seas_type` varchar(10) NOT NULL, -- PRE, REG, POST
   `pos` varchar(3) NOT NULL,
@@ -1969,7 +1969,7 @@ CREATE TABLE `player_seasonlogs` (
 DROP TABLE IF EXISTS `league_player_gamelogs`;
 
 CREATE TABLE `league_player_gamelogs` (
-  `pid` varchar(7) NOT NULL,
+  `pid` varchar(25) NOT NULL,
   `esbid` int(10) NOT NULL,
 
   `lid` int(6) NOT NULL,
@@ -1989,7 +1989,7 @@ CREATE TABLE `league_player_gamelogs` (
 DROP TABLE IF EXISTS `league_player_regular_seasonlogs`;
 
 CREATE TABLE `league_player_regular_seasonlogs` (
-  `pid` varchar(7) NOT NULL,
+  `pid` varchar(25) NOT NULL,
   `year` smallint(4) NOT NULL,
   `lid` int(6) NOT NULL,
   `start_tid` int(6) DEFAULT NULL,
@@ -2019,7 +2019,7 @@ CREATE TABLE `league_player_regular_seasonlogs` (
 DROP TABLE IF EXISTS `league_player`;
 
 CREATE TABLE `league_player` (
-  `pid` varchar(7) NOT NULL,
+  `pid` varchar(25) NOT NULL,
   `lid` int(6) NOT NULL,
   `draft_rank` smallint(3) DEFAULT NULL,
   `startable_games` smallint(3) DEFAULT NULL,
@@ -2172,7 +2172,7 @@ CREATE TABLE `footballoutsiders` (
 DROP TABLE IF EXISTS `rankings`;
 
 CREATE TABLE `rankings` (
-  `pid` varchar(7) NOT NULL,
+  `pid` varchar(25) NOT NULL,
   `pos` varchar(3) NOT NULL,
   `week` tinyint(2) NOT NULL,
   `year` smallint(4) NOT NULL,
@@ -2203,7 +2203,7 @@ CREATE TABLE `rankings` (
 DROP TABLE IF EXISTS `props`;
 
 CREATE TABLE `props` (
-  `pid` varchar(7) NOT NULL,
+  `pid` varchar(25) NOT NULL,
   `week` tinyint(2) NOT NULL,
   `year` smallint(4) NOT NULL,
   `esbid` int(10) unsigned DEFAULT NULL,
@@ -2231,7 +2231,7 @@ DROP TABLE IF EXISTS `props_index`;
 
 CREATE TABLE `props_index` (
   `prop_id` int unsigned NOT NULL AUTO_INCREMENT,
-  `pid` varchar(7) NOT NULL,
+  `pid` varchar(25) NOT NULL,
   `week` tinyint(2) NOT NULL,
   `year` smallint(4) NOT NULL,
   `prop_type` tinyint(3) NOT NULL,
@@ -2344,7 +2344,7 @@ DROP TABLE IF EXISTS `transition_bids`;
 
 CREATE TABLE `transition_bids` (
   `uid` int(11) NOT NULL AUTO_INCREMENT,
-  `pid` varchar(7) NOT NULL,
+  `pid` varchar(25) NOT NULL,
   `userid` int(6) NOT NULL,
   `bid` int(4) DEFAULT NULL,
   `tid` int(5) NOT NULL,
@@ -2370,7 +2370,7 @@ DROP TABLE IF EXISTS `transition_releases`;
 
 CREATE TABLE `transition_releases` (
   `transitionid` int(11) NOT NULL,
-  `pid` varchar(7) NOT NULL,
+  `pid` varchar(25) NOT NULL,
   KEY `transitionid` (`transitionid`),
   UNIQUE KEY `pid` (`transitionid`, `pid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -2402,7 +2402,7 @@ CREATE TABLE `league_team_lineups` (
 DROP TABLE IF EXISTS `league_team_lineup_contributions`;
 
 CREATE TABLE `league_team_lineup_contributions` (
-  `pid` varchar(7) NOT NULL,
+  `pid` varchar(25) NOT NULL,
   `year` smallint(4) NOT NULL,
   `tid` int(6) NOT NULL,
   `lid` int(6) NOT NULL,
@@ -2421,7 +2421,7 @@ CREATE TABLE `league_team_lineup_contributions` (
 DROP TABLE IF EXISTS `league_team_lineup_contribution_weeks`;
 
 CREATE TABLE `league_team_lineup_contribution_weeks` (
-  `pid` varchar(7) NOT NULL,
+  `pid` varchar(25) NOT NULL,
   `week` varchar(3) NOT NULL,
   `year` smallint(4) NOT NULL,
   `tid` int(6) NOT NULL,
@@ -2441,7 +2441,7 @@ CREATE TABLE `league_team_lineup_contribution_weeks` (
 DROP TABLE IF EXISTS `league_team_lineup_starters`;
 
 CREATE TABLE `league_team_lineup_starters` (
-  `pid` varchar(7) NOT NULL,
+  `pid` varchar(25) NOT NULL,
   `week` varchar(3) NOT NULL,
   `year` smallint(4) NOT NULL,
   `tid` int(6) NOT NULL,
@@ -2483,7 +2483,7 @@ CREATE TABLE `league_baselines` (
   `lid` int(6) NOT NULL,
   `week` varchar(3) NOT NULL,
   `year` smallint(4) NOT NULL,
-  `pid` varchar(7) NOT NULL,
+  `pid` varchar(25) NOT NULL,
   `type` varchar(10) NOT NULL,
   `pos` varchar(3) NOT NULL,
   UNIQUE KEY `baseline` (`lid`,`week`,`pos`,`type`)
@@ -2498,7 +2498,7 @@ CREATE TABLE `league_baselines` (
 DROP TABLE IF EXISTS `keeptradecut_rankings`;
 
 CREATE TABLE `keeptradecut_rankings` (
-  `pid` varchar(7) NOT NULL,
+  `pid` varchar(25) NOT NULL,
   `qb` tinyint(1) NOT NULL,
   `d` int(11) NOT NULL,
   `v` int(5) NOT NULL,
