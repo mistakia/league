@@ -28,25 +28,27 @@ export const markets = {
   34346: constants.player_prop_types.GAME_LONGEST_RUSH
 }
 
-export const getPlayerProps = async () => {
-  const url = `${config.betmgm_api_url}/bettingoffer/fixtures?x-bwin-accessid=NjQ4MDQ1MWEtMmY1Ny00ODhkLTkxNTItNzA4MzY4MzM2YTE2&sportIds=11&competitionIds=35&country=US&lang=en-us&offerMapping=All`
+export const get_markets = async () => {
+  const url = `${config.betmgm_api_url}/bettingoffer/fixtures?x-bwin-accessid=YmNkZjhiMzEtYWIwYS00ZDg1LWE2MWYtOGMyYjljNTdjYjFl&sportIds=11&competitionIds=35&country=US&lang=en-us&offerMapping=All`
 
   // log(`fetching ${url}`)
   const res = await fetch(url)
   const data = await res.json()
 
-  if (!data || !data.fixtures.length) {
-    return []
+  if (!data || !data.fixtures || !data.fixtures.length) {
+    return { nfl_game_markets: [], all_markets: [] }
   }
 
   // filter out non-game fixtures
   const filtered_fixtures = data.fixtures.filter((f) => f.participants.length)
 
-  // filter games to supported markets
-  const games = filtered_fixtures
+  // filter to supported markets
+  const nfl_game_markets = filtered_fixtures
     .map((f) => f.games)
     .flat()
     .filter((g) => g.categoryId === 518 && markets[g.templateId])
 
-  return games
+  const all_markets = data.fixtures.map((f) => f.games).flat()
+
+  return { nfl_game_markets, all_markets }
 }
