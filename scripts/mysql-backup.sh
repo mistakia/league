@@ -89,6 +89,8 @@ rankings
 DB_BETTING_TABLES="
 props
 props_index
+prop_markets
+prop_markets_index
 "
 
 DB_PROJECTIONS_TABLES="
