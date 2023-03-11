@@ -2275,6 +2275,49 @@ CREATE TABLE `props_index` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `prop_markets`
+--
+
+DROP TABLE IF EXISTS `prop_markets`;
+
+CREATE TABLE `prop_markets` (
+  `market_id` varchar(255) NOT NULL,
+  `source_id` tinyint(1) unsigned NOT NULL,
+  `source_event_id` varchar(255) DEFAULT NULL,
+  `source_market_name` varchar(255) DEFAULT NULL,
+  `market_type` tinyint(1) unsigned DEFAULT NULL,
+  `market_name` varchar(255) DEFAULT NULL,
+  `open` tinyint(1) DEFAULT NULL,
+  `live` tinyint(1) DEFAULT NULL,
+  `runners` tinyint(3) DEFAULT NULL,
+  `timestamp` int(11) NOT NULL,
+  UNIQUE KEY `market` (`source_id`, `market_id`, `timestamp`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `prop_markets_index`
+--
+
+DROP TABLE IF EXISTS `prop_markets_index`;
+
+CREATE TABLE `prop_markets_index` (
+  `market_id` varchar(255) NOT NULL,
+  `source_id` tinyint(1) unsigned NOT NULL,
+  `source_event_id` varchar(255) DEFAULT NULL,
+  `source_market_name` varchar(255) DEFAULT NULL,
+  `market_type` tinyint(1) unsigned DEFAULT NULL,
+  `market_name` varchar(255) DEFAULT NULL,
+  `open` tinyint(1) DEFAULT NULL,
+  `live` tinyint(1) DEFAULT NULL,
+  `runners` tinyint(3) DEFAULT NULL,
+  UNIQUE KEY `market` (`source_id`, `market_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `prop_pairings`
 --
 

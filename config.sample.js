@@ -53,6 +53,9 @@ module.exports = {
 
   discord_props_open_prizepicks_channel_webhook_url: '',
 
+  discord_props_market_new_channel_webhook_url: '',
+  discord_props_market_update_channel_webhook_url: '',
+
   filter_prop_pairings_options: {
     market_odds_max_threshold: 1,
     historical_rate_min_threshold: 1,
