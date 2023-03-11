@@ -20,9 +20,11 @@ const insert_market = async ({ timestamp, ...market }) => {
     await db('prop_markets').insert({ timestamp, ...market })
 
     // send notifcation to `props_market_new` channel
-    const message = `New market opened on ${
+    const message = `New market detected on ${
       constants.sourcesTitle[market.source_id]
-    } called \`${market.market_name}\` wtih ${market.runners} runners.`
+    } called \`${market.market_name}\` wtih ${market.runners} runners (open: ${
+      market.open ? 'yes' : 'no'
+    }, live: ${market.live ? 'yes' : 'no'})`
     log(message)
 
     await sendDiscordMessage({
