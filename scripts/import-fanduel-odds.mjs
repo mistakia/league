@@ -44,7 +44,11 @@ const run = async () => {
   const formatted_markets = markets.map((fanduel_market) =>
     format_market({ fanduel_market, timestamp })
   )
-  await insert_prop_markets(formatted_markets)
+
+  if (formatted_markets.length) {
+    log(`inserting ${formatted_markets.length} markets`)
+    await insert_prop_markets(formatted_markets)
+  }
 
   // do not pull in nfl_game_event props outside of the NFL season
   if (

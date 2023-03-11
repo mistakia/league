@@ -4,31 +4,28 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants } from '#common'
-import { isMain, betmgm, getPlayer, insertProps } from '#utils'
+import {
+  isMain,
+  betmgm,
+  getPlayer,
+  insertProps,
+  insert_prop_markets
+} from '#utils'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-betmgm-odds')
-debug.enable('import-betmgm-odds,get-player,betmgm')
+debug.enable('import-betmgm-odds,get-player,betmgm,insert-prop-market')
 
 const team_name_re = /\(([^)]+)\)/
 
 const import_betmgm_odds = async () => {
-  // do not pull in reports outside of the NFL season
-  if (
-    !constants.season.now.isBetween(
-      constants.season.start,
-      constants.season.end
-    )
-  ) {
-    return
-  }
-
   console.time('import-betmgm-odds')
 
   const timestamp = Math.round(Date.now() / 1000)
 
   const props = []
   const missing = []
+  const formatted_markets = []
 
   const nfl_games = await db('nfl_games').where({
     week: constants.season.nfl_seas_week,
@@ -36,9 +33,40 @@ const import_betmgm_odds = async () => {
     seas_type: constants.season.nfl_seas_type
   })
 
-  const player_props = await betmgm.getPlayerProps()
+  const { all_markets, nfl_game_markets } = await betmgm.get_markets()
 
-  for (const player_prop of player_props) {
+  for (const market of all_markets) {
+    formatted_markets.push({
+      market_id: market.id,
+      source_id: constants.sources.BETMGM_US,
+      source_event_id: null,
+      source_market_name: market.name.value,
+      market_name: market.name.value,
+      open: market.visibility === 'Visible',
+      live: false,
+      runners: market.results.length,
+      market_type: betmgm.markets[market.templateId] || null,
+      timestamp
+    })
+  }
+
+  if (formatted_markets.length) {
+    log(`inserting ${formatted_markets.length} markets`)
+    await insert_prop_markets(formatted_markets)
+  }
+
+  // do not pull in props outside of the NFL season
+  if (
+    !constants.season.now.isBetween(
+      constants.season.start,
+      constants.season.end
+    )
+  ) {
+    console.timeEnd('import-betmgm-odds')
+    return
+  }
+
+  for (const player_prop of nfl_game_markets) {
     let player_row
 
     const matches = team_name_re.exec(player_prop.player1.value)
