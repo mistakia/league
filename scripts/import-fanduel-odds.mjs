@@ -53,6 +53,7 @@ const run = async () => {
       constants.season.end
     )
   ) {
+    console.timeEnd('import-fanduel-odds')
     return
   }
 
