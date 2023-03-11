@@ -5,19 +5,52 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants, team_aliases } from '#common'
-import { isMain, getPlayer, fanduel, insertProps } from '#utils'
+import {
+  isMain,
+  getPlayer,
+  fanduel,
+  insertProps,
+  insert_prop_markets
+} from '#utils'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-fanduel')
-debug.enable('import-fanduel,get-player,fanduel')
+debug.enable('import-fanduel,get-player,fanduel,insert-prop-market')
 
 const formatPlayerName = (str) => {
   str = str.split(' - ')[0]
   return str.trim()
 }
 
+const format_market = ({ fanduel_market, timestamp }) => ({
+  market_id: fanduel_market.marketId,
+  source_id: constants.sources.FANDUEL_NJ,
+  source_event_id: String(fanduel_market.eventId),
+  source_market_name: fanduel_market.marketName,
+  market_name: `${fanduel_market.marketName} (${fanduel_market.marketType})`,
+  open: fanduel_market.marketStatus === 'OPEN',
+  live: Boolean(fanduel_market.inPlay),
+  runners: fanduel_market.numberOfRunners,
+  market_type: fanduel.markets[fanduel_market.marketType] || null,
+  timestamp
+})
+
 const run = async () => {
-  // do not pull in reports outside of the NFL season
+  console.time('import-fanduel-odds')
+
+  const timestamp = Math.round(Date.now() / 1000)
+
+  const missing = []
+  const props = []
+
+  const { nfl_game_events, markets } = await fanduel.getEvents()
+
+  const formatted_markets = markets.map((fanduel_market) =>
+    format_market({ fanduel_market, timestamp })
+  )
+  await insert_prop_markets(formatted_markets)
+
+  // do not pull in nfl_game_event props outside of the NFL season
   if (
     !constants.season.now.isBetween(
       constants.season.start,
@@ -27,23 +60,15 @@ const run = async () => {
     return
   }
 
-  console.time('import-fanduel-odds')
-
-  const timestamp = Math.round(Date.now() / 1000)
-
-  const missing = []
-  const props = []
-
   const nfl_games = await db('nfl_games').where({
     week: constants.season.nfl_seas_week,
     year: constants.season.year,
     seas_type: constants.season.nfl_seas_type
   })
-  const events = await fanduel.getEvents()
 
   // filter events to those for current week
   const week_end = constants.season.week_end
-  const current_week_events = events.filter(
+  const current_week_events = nfl_game_events.filter(
     (event) =>
       dayjs(event.openDate).isBefore(week_end) && event.name !== 'NFL Matches'
   )

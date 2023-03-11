@@ -270,8 +270,9 @@ export const getEvents = async () => {
   const filtered = Object.values(data.attachments.events).filter(
     (e) => e.competitionId === nfl_game_compeition_id
   )
+  const markets = Object.values(data.attachments.markets)
 
-  return filtered
+  return { nfl_games_events: filtered, markets }
 }
 
 export const getEventTab = async ({ eventId, tab }) => {
