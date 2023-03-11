@@ -5,11 +5,17 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants, team_aliases } from '#common'
-import { isMain, getPlayer, caesars, insertProps } from '#utils'
+import {
+  isMain,
+  getPlayer,
+  caesars,
+  insertProps,
+  insert_prop_markets
+} from '#utils'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-caesars')
-debug.enable('import-caesars,get-player,caesars')
+debug.enable('import-caesars,get-player,caesars,insert-prop-market')
 
 const formatTeamName = (str) => {
   str = str.replaceAll('|', '')
@@ -17,22 +23,54 @@ const formatTeamName = (str) => {
 }
 
 const run = async () => {
-  // do not pull in reports outside of the NFL season
-  if (
-    !constants.season.now.isBetween(
-      constants.season.start,
-      constants.season.end
-    )
-  ) {
-    return
-  }
-
   console.time('import-caesars-odds')
 
   const timestamp = Math.round(Date.now() / 1000)
 
   const missing = []
   const props = []
+  const formatted_markets = []
+
+  const futures = await caesars.getFutures()
+
+  if (futures && futures.competitions && futures.competitions.length) {
+    for (const event of futures.competitions[0].events) {
+      for (const market of event.markets) {
+        formatted_markets.push({
+          market_id: market.id,
+          source_id: constants.sources.CAESARS_VA,
+          source_event_id: String(event.id),
+          source_market_name: market.name,
+          market_name: `${event.name.replaceAll('|', '')} - ${
+            market.displayName
+          }`,
+          open: market.active,
+          live: false,
+          runners: market.selections.length,
+          market_type: market.metadata
+            ? caesars.markets[market.metadata.marketCategory] || null
+            : null,
+          timestamp
+        })
+      }
+    }
+  }
+
+  if (formatted_markets.length) {
+    log(`inserting ${formatted_markets.length} markets`)
+    await insert_prop_markets(formatted_markets)
+  }
+
+  // do not pull in props outside of the NFL season
+  if (
+    !constants.season.now.isBetween(
+      constants.season.start,
+      constants.season.end
+    )
+  ) {
+    console.timeEnd('import-caesars-odds')
+    return
+  }
 
   const nfl_games = await db('nfl_games').where({
     week: constants.season.nfl_seas_week,
@@ -41,7 +79,6 @@ const run = async () => {
   })
 
   const schedule = await caesars.getSchedule()
-  log(schedule)
 
   // filter events to those for current week
   const week_end = constants.season.week_end
