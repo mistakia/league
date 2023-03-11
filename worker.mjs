@@ -12,6 +12,8 @@ debug.enable(
 
 log(`env: ${process.env.NODE_ENV}`)
 
+// REGULAR SEASON
+
 // monday
 cron.schedule('*/1 20-23 * 1,2,9-12 1', import_live_plays)
 
@@ -32,5 +34,10 @@ cron.schedule('*/10 * * 1,2,9-12 1-4,7', import_live_odds)
 
 // friday through saturday
 cron.schedule('*/5 * * 1,2,9-12 5-6', import_live_odds)
+
+// OFF SEASON
+
+// every 10 minutes
+cron.schedule('*/10 * * 3,4,5,6,7,8 *', import_live_odds)
 
 log('all jobs registered')
