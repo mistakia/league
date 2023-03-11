@@ -10,9 +10,10 @@ const log = debug('insert-prop-market')
 debug.enable('insert-prop-market')
 
 const insert_market = async ({ timestamp, ...market }) => {
-  // get existing market row in `prop_markets` table
+  // get existing market row in `prop_markets` table order by latest timestamp
   const existing_market = await db('prop_markets')
     .where('market_id', market.market_id)
+    .orderBy('timestamp', 'desc')
     .first()
 
   // if market does not exist, insert it
@@ -43,8 +44,13 @@ const insert_market = async ({ timestamp, ...market }) => {
     const differences = diff(existing_market, market)
 
     if (differences && differences.length) {
-      // insert market into `prop_markets` table when open changes
-      if (differences.some((difference) => difference.path[0] === 'open')) {
+      // insert market into `prop_markets` table when open, runner count, or live changes
+      const update_on_change = ['open', 'runners', 'live']
+      const should_update = differences.some((difference) =>
+        update_on_change.includes(difference.path[0])
+      )
+
+      if (should_update) {
         await db('prop_markets')
           .insert({ timestamp, ...market })
           .onConflict()
