@@ -37,7 +37,7 @@ const import_betmgm_odds = async () => {
 
   for (const market of all_markets) {
     formatted_markets.push({
-      market_id: market.id,
+      market_id: String(market.id),
       source_id: constants.sources.BETMGM_US,
       source_event_id: null,
       source_market_name: market.name.value,
