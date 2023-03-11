@@ -100,7 +100,7 @@ export const categories = [
   }
 ]
 
-export const getOffers = async ({ offerCategoryId, subcategoryId }) => {
+export const get_offers = async ({ offerCategoryId, subcategoryId }) => {
   const url = `${config.draftkings_api_v5_url}/eventgroups/88808/categories/${offerCategoryId}/subcategories/${subcategoryId}?format=json`
 
   // log(`fetching ${url}`)
@@ -132,4 +132,18 @@ export const getOffers = async ({ offerCategoryId, subcategoryId }) => {
   }
 
   return { offers: null, events: [] }
+}
+
+export const get_all_offers = async () => {
+  const url = `${config.draftkings_api_v5_url}/eventgroups/88808?format=json`
+
+  // log(`fetching ${url}`)
+  const res = await fetch(url)
+  const data = await res.json()
+
+  if (data && data.eventGroup && data.eventGroup.offerCategories) {
+    return data.eventGroup.offerCategories
+  }
+
+  return []
 }

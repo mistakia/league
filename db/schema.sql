@@ -2289,7 +2289,7 @@ CREATE TABLE `prop_markets` (
   `market_name` varchar(255) DEFAULT NULL,
   `open` tinyint(1) DEFAULT NULL,
   `live` tinyint(1) DEFAULT NULL,
-  `runners` tinyint(3) DEFAULT NULL,
+  `runners` smallint unsigned DEFAULT NULL,
   `timestamp` int(11) NOT NULL,
   UNIQUE KEY `market` (`source_id`, `market_id`, `timestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -2311,7 +2311,7 @@ CREATE TABLE `prop_markets_index` (
   `market_name` varchar(255) DEFAULT NULL,
   `open` tinyint(1) DEFAULT NULL,
   `live` tinyint(1) DEFAULT NULL,
-  `runners` tinyint(3) DEFAULT NULL,
+  `runners` smallint unsigned DEFAULT NULL,
   UNIQUE KEY `market` (`source_id`, `market_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

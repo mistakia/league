@@ -39,10 +39,6 @@ const run = async () => {
   console.time('import-fanduel-odds')
 
   const timestamp = Math.round(Date.now() / 1000)
-
-  const missing = []
-  const props = []
-
   const { nfl_game_events, markets } = await fanduel.getEvents()
 
   const formatted_markets = markets.map((fanduel_market) =>
@@ -59,6 +55,9 @@ const run = async () => {
   ) {
     return
   }
+
+  const missing = []
+  const props = []
 
   const nfl_games = await db('nfl_games').where({
     week: constants.season.nfl_seas_week,
