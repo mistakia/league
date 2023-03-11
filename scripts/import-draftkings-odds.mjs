@@ -4,29 +4,25 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants, fixTeam } from '#common'
-import { isMain, getPlayer, draftkings, wait, insertProps } from '#utils'
+import {
+  isMain,
+  getPlayer,
+  draftkings,
+  insertProps,
+  insert_prop_markets
+} from '#utils'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-draft-kings')
-debug.enable('import-draft-kings,get-player,draftkings')
+debug.enable('import-draft-kings,get-player,draftkings,insert-prop-market')
 
 const run = async () => {
-  // do not pull in reports outside of the NFL season
-  if (
-    !constants.season.now.isBetween(
-      constants.season.start,
-      constants.season.end
-    )
-  ) {
-    return
-  }
-
   console.time('import-draft-kings')
 
   const timestamp = Math.round(Date.now() / 1000)
-
   const missing = []
   const props = []
+  const formatted_markets = []
 
   const nfl_games = await db('nfl_games').where({
     week: constants.season.nfl_seas_week,
@@ -133,36 +129,88 @@ const run = async () => {
     }
   }
 
-  for (const category of draftkings.categories) {
-    const { offers, events } = await draftkings.getOffers(category)
+  const offers = await draftkings.get_all_offers()
+  for (const offer_category of offers) {
+    for (const sub_offer_category of offer_category.offerSubcategoryDescriptors) {
+      const { offers, events } = await draftkings.get_offers({
+        offerCategoryId: offer_category.offerCategoryId,
+        subcategoryId: sub_offer_category.subcategoryId
+      })
 
-    if (!offers) continue
+      if (!offers) {
+        continue
+      }
 
-    for (const offer of offers) {
-      const event = events.find((e) => e.eventId === offer.eventId)
-      const teams = event
-        ? [fixTeam(event.teamShortName1), fixTeam(event.teamShortName2)]
-        : []
+      for (const offer of offers) {
+        formatted_markets.push({
+          market_id: `${offer_category.offerCategoryId}/${sub_offer_category.subcategoryId}/${offer.providerOfferId}`,
+          source_id: constants.sources.DRAFT_KINGS_VA,
+          source_event_id: offer.eventId,
+          source_market_name: offer.label,
+          market_name: `${offer_category.name} - ${sub_offer_category.name} - ${offer.label}`,
+          open: offer.isOpen,
+          live: false,
+          runners: offer.outcomes.length,
+          market_type: null,
+          timestamp
+        })
 
-      if (
-        category.type ===
-        constants.player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS
-      ) {
-        const line = 0.5
-        await handle_leader_market({ offer, category, teams, line })
-      } else {
-        const is_leader_market = constants.player_prop_types_leaders.includes(
-          category.type
+        // do not pull in props outside of the NFL season
+        if (
+          !constants.season.now.isBetween(
+            constants.season.start,
+            constants.season.end
+          )
+        ) {
+          continue
+        }
+
+        // check if this is a tracked market
+        const tracked_category = draftkings.categories.find(
+          (c) =>
+            c.subcategoryId === sub_offer_category.subcategoryId &&
+            c.offerCategoryId === offer_category.offerCategoryId
         )
-        if (is_leader_market) {
-          await handle_leader_market({ offer, category, teams })
+        if (!tracked_category) {
+          continue
+        }
+
+        const event = events.find((e) => e.eventId === offer.eventId)
+        const teams = event
+          ? [fixTeam(event.teamShortName1), fixTeam(event.teamShortName2)]
+          : []
+
+        if (
+          tracked_category.type ===
+          constants.player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS
+        ) {
+          const line = 0.5
+          await handle_leader_market({
+            offer,
+            category: tracked_category,
+            teams,
+            line
+          })
         } else {
-          await handle_over_under_market({ offer, category, teams })
+          const is_leader_market = constants.player_prop_types_leaders.includes(
+            tracked_category.type
+          )
+          if (is_leader_market) {
+            await handle_leader_market({
+              offer,
+              category: tracked_category,
+              teams
+            })
+          } else {
+            await handle_over_under_market({
+              offer,
+              category: tracked_category,
+              teams
+            })
+          }
         }
       }
     }
-
-    await wait(5000)
   }
 
   log(`Could not locate ${missing.length} players`)
@@ -176,6 +224,11 @@ const run = async () => {
   if (props.length) {
     log(`Inserting ${props.length} props into database`)
     await insertProps(props)
+  }
+
+  if (formatted_markets.length) {
+    log(`Inserting ${formatted_markets.length} markets into database`)
+    await insert_prop_markets(formatted_markets)
   }
 
   console.timeEnd('import-draft-kings')
