@@ -42,6 +42,16 @@ export const getSchedule = async () => {
   return data
 }
 
+export const getFutures = async () => {
+  const url = `${config.caesars_api_v3_url}/sports/americanfootball/events/futures?competitionIds=007d7c61-07a7-4e18-bb40-15104b6eac92`
+
+  // log(`fetching ${url}`)
+  const res = await fetch(url)
+  const data = await res.json()
+
+  return data
+}
+
 export const getEvent = async (eventId) => {
   const url = `${config.caesars_api_v3_url}/events/${eventId}`
 
