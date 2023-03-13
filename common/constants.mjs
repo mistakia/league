@@ -1217,7 +1217,8 @@ export const jobs = {
   FANDUEL_ODDS: 55,
   BETMGM_ODDS: 56,
   PRIZEPICKS_PROJECTIONS: 57,
-  GAMBET_ODDS: 58
+  GAMBET_ODDS: 58,
+  BETRIVERS_ODDS: 59
 }
 
 export const jobDetails = {
@@ -1274,7 +1275,8 @@ export const jobDetails = {
   55: 'Fanduel Player Prop Odds',
   56: 'BetMGM Player Prop Odds',
   57: 'PrizePicks Projections',
-  58: 'Gambet Odds'
+  58: 'Gambet Odds',
+  59: 'Betrivers Odds'
 }
 
 export const player_prop_types = {
@@ -1415,7 +1417,8 @@ export const sources = {
   FANDUEL_NJ: 21,
   BETMGM_US: 22,
   PRIZEPICKS: 23,
-  GAMBET_DC: 24
+  GAMBET_DC: 24,
+  BETRIVERS_MD: 25
 }
 
 export const sourcesTitle = {
@@ -1443,7 +1446,8 @@ export const sourcesTitle = {
   21: 'Fanduel (NJ)',
   22: 'BetMGM (US)',
   23: 'PrizePicks',
-  24: 'Gambet (DC)'
+  24: 'Gambet (DC)',
+  25: 'BetRivers (MD)'
 }
 
 export const rankings = {

@@ -22,6 +22,8 @@ module.exports = {
   betmgm_api_url: '',
   prizepicks_api_url: '',
   gambet_api_url: '',
+  betrivers_api_url: '',
+  betrivers_market_groups_api_url: '',
 
   league_api_auth_token: '', // used for cache
 
