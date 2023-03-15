@@ -139,7 +139,7 @@
     "stylus-loader": "^6.2.0",
     "terser-webpack-plugin": "5.3.1",
     "timeago.js": "^4.0.2",
-    "webpack": "5.72.1",
+    "webpack": "5.76.0",
     "webpack-bugsnag-plugins": "1.8.0",
     "webpack-bundle-analyzer": "4.5.0",
     "webpack-cli": "^4.10.0",
