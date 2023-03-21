@@ -129,12 +129,16 @@ const run = async () => {
     }
   }
 
-  const offers = await draftkings.get_all_offers()
+  const offers = await draftkings.get_eventgroup_offer_categories()
   for (const offer_category of offers) {
-    for (const sub_offer_category of offer_category.offerSubcategoryDescriptors) {
+    const { offerCategoryId } = offer_category
+    const offer_subcategories =
+      await draftkings.get_eventgroup_offer_subcategories({ offerCategoryId })
+    for (const offer_sub_category of offer_subcategories) {
+      const { subcategoryId } = offer_sub_category
       const { offers, events } = await draftkings.get_offers({
-        offerCategoryId: offer_category.offerCategoryId,
-        subcategoryId: sub_offer_category.subcategoryId
+        offerCategoryId,
+        subcategoryId
       })
 
       if (!offers) {
@@ -143,11 +147,11 @@ const run = async () => {
 
       for (const offer of offers) {
         formatted_markets.push({
-          market_id: `${offer_category.offerCategoryId}/${sub_offer_category.subcategoryId}/${offer.providerOfferId}`,
+          market_id: `${offer_category.offerCategoryId}/${subcategoryId}/${offer.providerOfferId}`,
           source_id: constants.sources.DRAFT_KINGS_VA,
           source_event_id: offer.eventId,
           source_market_name: offer.label,
-          market_name: `${offer_category.name} - ${sub_offer_category.name} - ${offer.label}`,
+          market_name: `${offer_category.name} - ${offer_sub_category.name} - ${offer.label}`,
           open: offer.isOpen,
           live: false,
           runners: offer.outcomes.length,
@@ -168,7 +172,7 @@ const run = async () => {
         // check if this is a tracked market
         const tracked_category = draftkings.categories.find(
           (c) =>
-            c.subcategoryId === sub_offer_category.subcategoryId &&
+            c.subcategoryId === subcategoryId &&
             c.offerCategoryId === offer_category.offerCategoryId
         )
         if (!tracked_category) {
