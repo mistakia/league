@@ -1,18 +1,19 @@
 import debug from 'debug'
-import yargs from 'yargs'
-import { hideBin } from 'yargs/helpers'
+// import yargs from 'yargs'
+// import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants } from '#common'
 import { isMain } from '#utils'
 
-const argv = yargs(hideBin(process.argv)).argv
 const log = debug('generate-rosters')
 debug.enable('generate-rosters')
 
-const run = async ({ nextSeason = argv.season } = {}) => {
+const run = async () => {
+  const is_new_season = constants.season.now > constants.season.end
+
   // do not run once season is over unless generating roster for next season
-  if (constants.season.week >= constants.season.finalWeek && !nextSeason) {
+  if (constants.season.week >= constants.season.finalWeek && !is_new_season) {
     log('season over')
     return
   }
@@ -20,19 +21,16 @@ const run = async ({ nextSeason = argv.season } = {}) => {
   // get list of hosted leagues
   const leagues = await db('leagues').where('hosted', 1)
 
-  const nextWeek = nextSeason ? 0 : constants.season.week + 1
-  const nextYear = nextSeason
-    ? constants.season.week === 0
-      ? constants.season.year
-      : constants.season.year + 1
-    : constants.season.year
-  const previousWeek = nextSeason
+  const nextWeek = is_new_season ? 0 : constants.season.week + 1
+  const previousWeek = is_new_season
     ? constants.season.finalWeek
     : constants.season.week
-  const previousYear = nextSeason ? nextYear - 1 : constants.season.year
+  const previousYear = is_new_season
+    ? constants.season.year - 1
+    : constants.season.year
 
   log(
-    `Generating rosters for ${nextYear} Week ${nextWeek} using ${previousYear} Week ${previousWeek}`
+    `Generating rosters for ${constants.season.year} Week ${nextWeek} using ${previousYear} Week ${previousWeek}`
   )
 
   for (const league of leagues) {
@@ -54,7 +52,7 @@ const run = async ({ nextSeason = argv.season } = {}) => {
         tid,
         lid,
         week: nextWeek,
-        year: nextYear
+        year: constants.season.year
       }
       const rosterRows = await db('rosters').where(rosterData)
       let rid = rosterRows.length ? rosterRows[0].uid : null
