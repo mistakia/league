@@ -32,7 +32,8 @@ export function getDraftPickValueByPick(state, { pick }) {
     (3 * item.median_best_season_points_added_per_game +
       item.median_career_points_added_per_game) /
     4
-  const weeks_remaining = constants.season.finalWeek - constants.week
+  const weeks_remaining =
+    constants.season.finalWeek - constants.fantasy_season_week
 
   return avg * weeks_remaining
 }

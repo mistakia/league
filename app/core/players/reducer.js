@@ -27,15 +27,13 @@ export const default_player_filter_options = {
   allAges: new List() // TODO
 }
 
-const current_week = Math.min(constants.week, constants.season.nflFinalWeek)
-
 const initialState = new Map({
   isPending: false,
   allPlayersLoaded: false,
   allPlayersPending: false,
   leaguePlayersLoaded: false,
   leaguePlayersPending: false,
-  week: new List([current_week]),
+  week: new List([constants.fantasy_season_week]),
   items: new Map(),
   order: 'desc',
   selected_players_view: DefaultPlayersViews.season_projections.key,
@@ -57,7 +55,7 @@ export function playersReducer(state = initialState, { payload, type }) {
         selected_players_view: payload.view_key,
         orderBy: view.order_by,
         order: 'desc',
-        week: new List([Math.max(constants.week, 1)])
+        week: new List([Math.max(constants.fantasy_season_week, 1)])
       })
     }
 
@@ -197,7 +195,6 @@ export function playersReducer(state = initialState, { payload, type }) {
     case playerActions.FETCH_TEAM_PLAYERS_FULFILLED:
     case playerActions.FETCH_LEAGUE_PLAYERS_FULFILLED:
     case playerActions.FETCH_PLAYERS_FULFILLED: {
-      console.log(`loaded ${payload.data.length} players`)
       return state.withMutations((players) => {
         if (type === playerActions.FETCH_ALL_PLAYERS_FULFILLED) {
           players.set('allPlayersLoaded', true)
@@ -295,7 +292,10 @@ export function playersReducer(state = initialState, { payload, type }) {
       })
 
     case rosterActions.GET_ROSTERS_FULFILLED: {
-      const week = Math.min(constants.week, constants.season.finalWeek)
+      const week = Math.min(
+        constants.fantasy_season_week,
+        constants.season.finalWeek
+      )
       const rosters = payload.data.filter((r) => r.week === week)
       return state.withMutations((state) => {
         rosters.forEach((roster) => {

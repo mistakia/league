@@ -17,7 +17,7 @@ export function getRosterRecordByTeamId(
   state,
   {
     tid,
-    week = Math.min(constants.week, constants.season.finalWeek),
+    week = Math.min(constants.fantasy_season_week, constants.season.finalWeek),
     year = constants.year
   }
 ) {
@@ -47,7 +47,7 @@ export function getStartersByTeamId(state, { tid, week }) {
 
 export function getActivePlayersByTeamId(
   state,
-  { tid, week = constants.week }
+  { tid, week = constants.fantasy_season_week }
 ) {
   const roster = getRosterByTeamId(state, { tid, week })
   return roster.active.map(({ pid }) => getPlayerById(state, { pid }))
@@ -56,7 +56,10 @@ export function getActivePlayersByTeamId(
 export function getRostersForCurrentLeague(state) {
   const rosters = getRosters(state)
   const { leagueId } = getApp(state)
-  const week = Math.min(constants.week, constants.season.finalWeek)
+  const week = Math.min(
+    constants.fantasy_season_week,
+    constants.season.finalWeek
+  )
   const year = constants.year
   const filtered = rosters.filter((w) => {
     const r = w.getIn([year, week])
@@ -201,7 +204,7 @@ export function getCurrentTeamRosterRecord(state) {
   const rosters = getRosters(state)
   const { teamId } = getApp(state)
   return rosters.getIn(
-    [teamId, constants.year, constants.week],
+    [teamId, constants.year, constants.fantasy_season_week],
     new RosterRecord()
   )
 }
@@ -301,7 +304,10 @@ export function getRosterPositionalValueByTeamId(state, { tid }) {
 export function getGroupedPlayersByTeamId(state, { tid }) {
   const rosters = getRosters(state)
   const league = getCurrentLeague(state)
-  const week = Math.min(constants.week, constants.season.finalWeek)
+  const week = Math.min(
+    constants.fantasy_season_week,
+    constants.season.finalWeek
+  )
   const roster = rosters.getIn([tid, constants.year, week])
   if (!roster) {
     return {
