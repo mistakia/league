@@ -11,6 +11,7 @@ export { espn }
 export const season = new Season(season_dates)
 export const week = season.week
 export const year = season.year
+export const fantasy_season_week = season.fantasy_season_week
 export const isOffseason = season.isOffseason
 export const isRegularSeason = season.isRegularSeason
 

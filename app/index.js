@@ -15,4 +15,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
   console.log(`Year: ${constants.year}`)
   console.log(`Week: ${constants.week}`)
+  console.log(`Fantasy Season Week: ${constants.fantasy_season_week}`)
 })
