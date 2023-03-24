@@ -3,7 +3,7 @@ import db from '#db'
 
 export default async function ({
   tid,
-  week = constants.season.week,
+  week = constants.season.fantasy_season_week,
   year = constants.season.year
 }) {
   const rows = await db('rosters').where({ tid, year, week })
