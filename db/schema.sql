@@ -164,6 +164,7 @@ DROP TABLE IF EXISTS `seasons`;
 CREATE TABLE `seasons` (
   `lid` int(11) NOT NULL,
   `year` smallint(4) NOT NULL,
+  `season_started_at` int(11) unsigned DEFAULT NULL,
 
   `sqb` tinyint(1) NOT NULL,
   `srb` tinyint(1) NOT NULL,
@@ -223,13 +224,17 @@ CREATE TABLE `seasons` (
   `frb` mediumint(3) unsigned DEFAULT NULL, -- rb franchise tag amount
   `fwr` mediumint(3) unsigned DEFAULT NULL, -- wr franchise tag amount
   `fte` mediumint(3) unsigned DEFAULT NULL, -- te franchise tag amount
+
   `tran_start` int(11) unsigned DEFAULT NULL, -- start of restricted free agency
   `tran_end` int(11) unsigned DEFAULT NULL, -- end of restricted free agency
+
   `ext_date` int(11) unsigned DEFAULT NULL, -- extension deadline
+
   `draft_start` int(11) unsigned DEFAULT NULL,
   `draft_type` varchar(10) DEFAULT NULL, -- `hour`, `day`
   `draft_hour_min` tinyint(2) unsigned DEFAULT NULL,
   `draft_hour_max` tinyint(2) unsigned DEFAULT NULL,
+
   `adate` int(11) unsigned DEFAULT NULL,
   `tddate` int(11) unsigned DEFAULT NULL,
   UNIQUE KEY `season` (`lid`,`year`)
@@ -368,6 +373,7 @@ CREATE TABLE `leagues` (
   `b_DST` decimal(2,1) unsigned DEFAULT NULL, -- baseline dst pts/game
 
   `processed_at` int(11) DEFAULT NULL,
+  `archived_at` int(11) DEFAULT NULL,
 
   UNIQUE KEY `uid` (`uid`),
   KEY `commishid` (`commishid`)
