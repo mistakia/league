@@ -8,7 +8,7 @@ export default async function ({ lid, userId }) {
     .orderBy('week', 'desc')
 
   const currentWeek = Math.min(
-    Math.max(constants.season.week, 1),
+    Math.max(constants.season.fantasy_season_week, 0),
     constants.season.finalWeek
   )
   const lineups = await db('league_team_lineups')

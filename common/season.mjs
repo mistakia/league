@@ -94,6 +94,18 @@ export default class Season {
     return false
   }
 
+  get fantasy_season_week() {
+    if (this.now < this.start) {
+      return 0
+    }
+
+    if (this.now > this.end) {
+      return 0
+    }
+
+    return this.week
+  }
+
   get week() {
     const diff = Math.max(0, this.now.diff(this.start, 'weeks'))
     return diff
