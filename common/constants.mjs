@@ -1219,7 +1219,9 @@ export const jobs = {
   BETMGM_ODDS: 56,
   PRIZEPICKS_PROJECTIONS: 57,
   GAMBET_ODDS: 58,
-  BETRIVERS_ODDS: 59
+  BETRIVERS_ODDS: 59,
+
+  GENERATE_NEW_SEASONS: 60
 }
 
 export const jobDetails = {
@@ -1277,7 +1279,8 @@ export const jobDetails = {
   56: 'BetMGM Player Prop Odds',
   57: 'PrizePicks Projections',
   58: 'Gambet Odds',
-  59: 'Betrivers Odds'
+  59: 'Betrivers Odds',
+  60: 'Generate New Seasons'
 }
 
 export const player_prop_types = {
