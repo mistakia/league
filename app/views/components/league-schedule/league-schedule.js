@@ -14,19 +14,22 @@ dayjs.extend(relativeTime)
 
 export default function LeagueSchedule({ events }) {
   const [open, set_open] = useState(false)
-  const next = events.length
+  const have_events = Boolean(events.length)
+  const next = have_events
     ? `${events[0].detail} ${dayjs().to(events[0].date)}`
-    : null
+    : 'No upcoming events'
 
   return (
     <div className='league__schedule'>
       <div className='league__schedule-anchor' onClick={() => set_open(!open)}>
         <div className='league__schedule-text'>{next}</div>
-        {open ? <ExpandLess /> : <ExpandMore />}
+        {have_events && (open ? <ExpandLess /> : <ExpandMore />)}
       </div>
-      <Collapse in={open} timeout='auto' unmountOnExit>
-        <LeagueScheduleList />
-      </Collapse>
+      {have_events && (
+        <Collapse in={open} timeout='auto' unmountOnExit>
+          <LeagueScheduleList />
+        </Collapse>
+      )}
     </div>
   )
 }
