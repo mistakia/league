@@ -75,6 +75,8 @@ export default function MatchupPage({
     )
   }, [matchup.uid])
 
+  const matchup_exists = selected_tid
+
   const body = (
     <Container maxWidth='lg'>
       <Grid container spacing={0}>
@@ -89,10 +91,13 @@ export default function MatchupPage({
         </Grid>
         <Grid container item xs={12} spacing={0}>
           <Grid item xs={12} md={9}>
+            {!matchup_exists && (
+              <div className='scoreboard__no-matchup'>No Matchup Found</div>
+            )}
             {!isHeadToHead && (
               <ScoreboardTeams
                 onClick={set_selected_tid}
-                selected={show_bench}
+                selected={selected_tid}
               />
             )}
             <div className='scoreboard__main'>
@@ -103,29 +108,39 @@ export default function MatchupPage({
                   showBench={show_bench}
                 />
               )}
-              <ScoreboardSlots />
-              <ScoreboardTeam
-                tid={selected_tid}
-                type='home'
-                showBench={show_bench}
-              />
+              {matchup_exists && (
+                <>
+                  <ScoreboardSlots />
+                  <ScoreboardTeam
+                    tid={selected_tid}
+                    type='home'
+                    showBench={show_bench}
+                  />
+                </>
+              )}
             </div>
-            <div
-              className='scoreboard__bench cursor'
-              onClick={() => set_show_bench(!show_bench)}
-            >
-              Show Bench
-            </div>
+            {matchup_exists && (
+              <div
+                className='scoreboard__bench cursor'
+                onClick={() => set_show_bench(!show_bench)}
+              >
+                Show Bench
+              </div>
+            )}
           </Grid>
-          <Grid item xs={12} md={3}>
-            <ScoreboardPlayByPlay mid={matchup.uid} />
-          </Grid>
+          {matchup_exists && (
+            <Grid item xs={12} md={3}>
+              <ScoreboardPlayByPlay mid={matchup.uid} />
+            </Grid>
+          )}
         </Grid>
-        <Grid container item xs={12} spacing={0}>
-          <Grid item xs={12}>
-            <ScoreboardOverTime mid={matchup.uid} />
+        {matchup_exists && (
+          <Grid container item xs={12} spacing={0}>
+            <Grid item xs={12}>
+              <ScoreboardOverTime mid={matchup.uid} />
+            </Grid>
           </Grid>
-        </Grid>
+        )}
       </Grid>
     </Container>
   )
