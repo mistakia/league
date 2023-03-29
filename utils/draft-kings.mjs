@@ -101,10 +101,10 @@ export const categories = [
 ]
 
 export const get_offers = async ({ offerCategoryId, subcategoryId }) => {
-  const url = `${config.draftkings_api_v5_url}/eventgroups/88808/categories/${offerCategoryId}/subcategories/${subcategoryId}?format=json`
+  const url = `${config.draftkings_api_v6_url}/eventgroups/88808/categories/${offerCategoryId}/subcategories/${subcategoryId}?format=json`
 
   // log(`fetching ${url}`)
-  const res = await fetch(url)
+  const res = await fetch(url, { method: 'POST' })
   const data = await res.json()
 
   if (data && data.eventGroup && data.eventGroup.offerCategories) {
@@ -135,10 +135,10 @@ export const get_offers = async ({ offerCategoryId, subcategoryId }) => {
 }
 
 export const get_eventgroup_offer_categories = async () => {
-  const url = `${config.draftkings_api_v5_url}/eventgroups/88808?format=json`
+  const url = `${config.draftkings_api_v6_url}/eventgroups/88808?format=json`
 
   // log(`fetching ${url}`)
-  const res = await fetch(url)
+  const res = await fetch(url, { method: 'POST' })
   const data = await res.json()
 
   if (data && data.eventGroup && data.eventGroup.offerCategories) {
@@ -151,10 +151,10 @@ export const get_eventgroup_offer_categories = async () => {
 export const get_eventgroup_offer_subcategories = async ({
   offerCategoryId
 }) => {
-  const url = `${config.draftkings_api_v5_url}/eventgroups/88808/categories/${offerCategoryId}?format=json`
+  const url = `${config.draftkings_api_v6_url}/eventgroups/88808/categories/${offerCategoryId}?format=json`
 
   // log(`fetching ${url}`)
-  const res = await fetch(url)
+  const res = await fetch(url, { method: 'POST' })
   const data = await res.json()
 
   if (data && data.eventGroup && data.eventGroup.offerCategories) {
