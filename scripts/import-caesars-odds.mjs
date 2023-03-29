@@ -163,6 +163,7 @@ const run = async () => {
 
   if (argv.dry) {
     log(props[0])
+    console.timeEnd('import-caesars-odds')
     return
   }
 
