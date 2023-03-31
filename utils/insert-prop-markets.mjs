@@ -45,7 +45,13 @@ const insert_market = async ({ timestamp, ...market }) => {
 
     if (differences && differences.length) {
       // insert market into `prop_markets` table when open, runner count, or live changes
-      const update_on_change = ['open', 'runners', 'live']
+      const update_on_change = [
+        'open',
+        'runners',
+        'live',
+        'source_market_name',
+        'market_name'
+      ]
       const should_update = differences.some((difference) =>
         update_on_change.includes(difference.path[0])
       )
@@ -57,30 +63,38 @@ const insert_market = async ({ timestamp, ...market }) => {
           .merge()
       }
 
-      // create message for discord notification based on differences
-      let message = `Market \`${market.market_name}\` on ${
-        constants.sourcesTitle[market.source_id]
-      } has changed.`
-      for (const difference of differences) {
-        const { kind, path, lhs, rhs } = difference
-        if (kind === 'E') {
-          message += `\n\`${path.join(
-            '.'
-          )}\` changed from \`${lhs}\` to \`${rhs}\``
-        } else if (kind === 'N') {
-          message += `\n\`${path.join('.')}\` added with value \`${rhs}\``
-        } else if (kind === 'D') {
-          message += `\n\`${path.join('.')}\` deleted with value \`${lhs}\``
+      const notify_on_change = ['open', 'live', 'runnners']
+      // only notify on change if open, live, or runners changes
+      const should_notify = differences.some((difference) =>
+        notify_on_change.includes(difference.path[0])
+      )
+
+      if (should_notify) {
+        // create message for discord notification based on differences
+        let message = `Market \`${market.market_name}\` on ${
+          constants.sourcesTitle[market.source_id]
+        } has changed.`
+        for (const difference of differences) {
+          const { kind, path, lhs, rhs } = difference
+          if (kind === 'E') {
+            message += `\n\`${path.join(
+              '.'
+            )}\` changed from \`${lhs}\` to \`${rhs}\``
+          } else if (kind === 'N') {
+            message += `\n\`${path.join('.')}\` added with value \`${rhs}\``
+          } else if (kind === 'D') {
+            message += `\n\`${path.join('.')}\` deleted with value \`${lhs}\``
+          }
         }
+
+        log(message)
+
+        // send notification to `props_market_update` channel
+        await sendDiscordMessage({
+          webhookUrl: config.discord_props_market_update_channel_webhook_url,
+          message
+        })
       }
-
-      log(message)
-
-      // send notification to `props_market_update` channel
-      await sendDiscordMessage({
-        webhookUrl: config.discord_props_market_update_channel_webhook_url,
-        message
-      })
     }
   }
 
