@@ -239,7 +239,7 @@ const generate_seasonlogs = async ({
   const league_team_seasonlog_inserts = []
 
   for (const leagueId of leagueIds) {
-    const league = await getLeague(leagueId)
+    const league = await getLeague({ lid: leagueId })
 
     for (const position of Object.keys(defense)) {
       const stat_types = ['adj', 'total', 'avg']

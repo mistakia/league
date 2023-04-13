@@ -187,7 +187,7 @@ const main = async () => {
       console.log('missing --lid')
       return
     }
-    const league = await getLeague(lid)
+    const league = await getLeague({ lid })
     const { players, baselineTotals, weeks } = await calculateVOR({
       year,
       rookie,

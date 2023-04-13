@@ -40,7 +40,7 @@ if (isMain(import.meta.url)) {
       return
     }
 
-    const league = await getLeague(lid)
+    const league = await getLeague({ lid })
     await createConditionalPick({
       tid,
       league

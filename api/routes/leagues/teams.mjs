@@ -18,7 +18,7 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'missing leagueId' })
     }
 
-    const league = await getLeague(leagueId)
+    const league = await getLeague({ lid: leagueId })
     if (!league) {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
@@ -76,7 +76,7 @@ router.delete('/?', async (req, res) => {
       return res.status(400).send({ error: 'missing leagueId' })
     }
 
-    const league = await getLeague(leagueId)
+    const league = await getLeague({ lid: leagueId })
     if (!league) {
       return res.status(400).send({ error: 'invalid leagueId' })
     }

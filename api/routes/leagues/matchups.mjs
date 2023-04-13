@@ -10,7 +10,7 @@ router.post('/?', async (req, res) => {
   try {
     const { leagueId } = req.params
 
-    const league = await getLeague(leagueId)
+    const league = await getLeague({ lid: leagueId })
     if (league.commishid !== req.auth.userId) {
       return res.status(401).send({ error: 'user is not commish' })
     }

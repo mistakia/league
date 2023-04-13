@@ -8,10 +8,10 @@ import { isMain, getRoster, getLeague } from '#utils'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('process-matchups')
-debug.enable('process-matchups')
+debug.enable('process-matchups,calculate-standings')
 
 const run = async ({ lid = 1, year = constants.season.year }) => {
-  const league = await getLeague(lid)
+  const league = await getLeague({ lid, year })
   const matchups = await db('matchups').where({ lid, year })
   const gamelogs = await db('player_gamelogs')
     .select('player_gamelogs.*', 'nfl_games.week', 'nfl_games.year')

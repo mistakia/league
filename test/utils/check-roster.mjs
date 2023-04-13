@@ -6,7 +6,7 @@ import { Roster } from '#common'
 const expect = chai.expect
 
 export default async function ({ teamId, pid, leagueId }) {
-  const league = await getLeague(leagueId)
+  const league = await getLeague({ lid: leagueId })
   const rosterRow = await getRoster({ tid: teamId })
   const roster = new Roster({ roster: rosterRow, league })
 

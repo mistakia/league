@@ -9,7 +9,7 @@ import {
 } from '#common'
 
 export default async function ({ teamId, leagueId }) {
-  const league = await getLeague(leagueId)
+  const league = await getLeague({ lid: leagueId })
   const rosterRow = await getRoster({ tid: teamId })
   const roster = new Roster({ roster: rosterRow, league })
   const reserve_pids = roster.reserve.map((p) => p.pid)

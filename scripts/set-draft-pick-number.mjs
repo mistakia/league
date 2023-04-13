@@ -10,14 +10,14 @@ const calculatePick = ({ round, order, league }) =>
   (round - 1) * league.nteams + order
 
 const run = async () => {
-  const leagueId = 1
+  const lid = 1
 
-  const league = await getLeague(leagueId)
-  const teams = await db('teams').where({ lid: leagueId })
+  const league = await getLeague({ lid })
+  const teams = await db('teams').where({ lid })
   const draftOrder = teams.sort((a, b) => a.do - b.do).map((t) => t.uid)
 
   const picks = await db('draft').where({
-    lid: leagueId,
+    lid,
     year: constants.season.year,
     comp: 0
   })
@@ -33,7 +33,7 @@ const run = async () => {
 
   const query_params = {
     comp: 1,
-    lid: leagueId,
+    lid,
     year: constants.season.year
   }
   await db('draft').update({ pick: null }).where(query_params)

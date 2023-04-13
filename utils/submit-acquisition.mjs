@@ -43,7 +43,7 @@ export default async function ({
   }
 
   // verify leagueId
-  const league = await getLeague(leagueId)
+  const league = await getLeague({ lid: leagueId })
   if (!league) {
     throw new Error('invalid leagueId')
   }

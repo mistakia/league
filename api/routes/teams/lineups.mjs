@@ -87,7 +87,7 @@ router.put('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid player' })
     }
 
-    const league = await getLeague(leagueId)
+    const league = await getLeague({ lid: leagueId })
     if (!league) {
       return res.status(400).send({ error: 'invalid leagueId' })
     }

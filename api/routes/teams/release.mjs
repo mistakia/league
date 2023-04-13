@@ -51,7 +51,7 @@ router.post('/?', async (req, res) => {
     const player_row = player_rows[0]
 
     // if active roster, verify not during FA Auction Period
-    const league = await getLeague(leagueId)
+    const league = await getLeague({ lid: leagueId })
     if (league.adate) {
       const rosterRow = await getRoster({ tid })
       const roster = new Roster({ roster: rosterRow, league })

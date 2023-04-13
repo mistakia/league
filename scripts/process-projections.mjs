@@ -30,7 +30,7 @@ const timestamp = Math.round(Date.now() / 1000)
 const processLeague = async ({ year, lid }) => {
   let week = year === constants.season.year ? constants.season.week : 0
   const { finalWeek } = constants.season
-  const league = await getLeague(lid)
+  const league = await getLeague({ lid })
   const teams = await db('teams').where({ lid })
   const { nteams, cap, minBid } = league
   const rosterSize = getRosterSize(league)

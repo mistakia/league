@@ -33,7 +33,7 @@ export default async function ({
 
   const pos = playerRosterRow.pos
   const slot = constants.slots.BENCH
-  const league = await getLeague(lid)
+  const league = await getLeague({ lid })
   const rosterRow = await getRoster({ tid })
   const roster = new Roster({ roster: rosterRow, league })
 

@@ -166,7 +166,7 @@ router.post(
         return res.status(400).send({ error: 'player has poaching claim' })
       }
 
-      const league = await getLeague(leagueId)
+      const league = await getLeague({ lid: leagueId })
       const now = dayjs()
 
       // check for restricted free agency players during RFA

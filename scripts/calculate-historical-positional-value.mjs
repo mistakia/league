@@ -96,7 +96,7 @@ if (isMain(import.meta.url)) {
       return
     }
 
-    const league = await getLeague(lid)
+    const league = await getLeague({ lid })
     const result = await calculateHistoricalPositionalValue({ league })
     const baselines = {}
     for (const pos of constants.positions) {

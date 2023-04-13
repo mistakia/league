@@ -1474,3 +1474,7 @@ export const KEEPTRADECUT = {
 }
 
 export const default_points_added = -999
+
+export const team_pid_regex = /^([A-Z]{1,3})$/gi
+export const player_pid_regex =
+  /^([A-Z]{4}-[A-Z]{4}-[0-9]{4}-[0-9]{4}-[0-9]{2}-[0-9]{2})$/gi

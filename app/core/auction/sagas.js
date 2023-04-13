@@ -64,7 +64,8 @@ export function* optimize() {
     league
   })
   let starter_pids = Object.keys(result).filter(
-    (r) => r.match(/^([A-Z]{2,})-([0-9]{4,})$/gi) || r.match(/^([A-Z]{1,3})$/gi)
+    (r) =>
+      r.match(constants.player_pid_regex) || r.match(constants.team_pid_regex)
   )
 
   const rosterConstraints = {}
@@ -107,7 +108,8 @@ export function* optimize() {
   }
   worker.terminate()
   starter_pids = Object.keys(result).filter(
-    (r) => r.match(/^([A-Z]{2,})-([0-9]{4,})$/gi) || r.match(/^([A-Z]{1,3})$/gi)
+    (r) =>
+      r.match(constants.player_pid_regex) || r.match(constants.team_pid_regex)
   )
   yield put(
     auctionActions.setOptimalLineup({

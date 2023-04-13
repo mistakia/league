@@ -35,7 +35,7 @@ export default async function ({
   }
 
   // make sure player is on active roster
-  const league = await getLeague(leagueId)
+  const league = await getLeague({ lid: leagueId })
   if (!league) {
     throw new Error('invalid leagueId')
   }

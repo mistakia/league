@@ -36,8 +36,8 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
     })
 
     it('rookie post draft single waiver - offseason', async () => {
-      const leagueId = 1
-      const league = await getLeague(leagueId)
+      const lid = 1
+      const league = await getLeague({ lid })
       const picks = await knex('draft')
       const draftDates = getDraftDates({
         start: league.draft_start,
@@ -53,7 +53,7 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
       await knex('waivers').insert({
         tid: teamId,
         userid: 1,
-        lid: leagueId,
+        lid,
         pid: player.pid,
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
@@ -95,12 +95,12 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
       await checkRoster({
         teamId,
         pid: player.pid,
-        leagueId
+        leagueId: lid
       })
 
       // verify transaction
       await checkLastTransaction({
-        leagueId,
+        leagueId: lid,
         pid: player.pid,
         teamId,
         userId: 1,
@@ -132,8 +132,8 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
     })
 
     it('no waivers ready to process - offseason', async () => {
-      const leagueId = 1
-      const league = await getLeague(leagueId)
+      const lid = 1
+      const league = await getLeague({ lid })
       const picks = await knex('draft')
       const draftDates = getDraftDates({
         start: league.draft_start,
@@ -149,7 +149,7 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
       await knex('waivers').insert({
         tid: teamId,
         userid: 1,
-        lid: leagueId,
+        lid,
         pid: player.pid,
         po: 9999,
         submitted: Math.round(Date.now() / 1000),

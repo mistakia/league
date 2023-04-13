@@ -24,7 +24,8 @@ const run = async () => {
     .where('draft_start', '<', now)
 
   for (const league_season of league_seasons) {
-    const league = await getLeague(league_season.lid)
+    const { lid } = league_season
+    const league = await getLeague({ lid })
     const draftStart = dayjs.unix(league_season.draft_start)
     const difference = dayjs().diff(draftStart, 'days')
     const pick = difference + 1

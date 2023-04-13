@@ -74,7 +74,7 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'Player on Sanctuary Period' })
     }
 
-    const league = await getLeague(leagueId)
+    const league = await getLeague({ lid: leagueId })
     if (!constants.season.isRegularSeason && league.adate) {
       const faPeriod = getFreeAgentPeriod(league.adate)
       if (constants.season.now.isBetween(faPeriod.start, faPeriod.end)) {
@@ -156,7 +156,7 @@ router.put('/:poachId', async (req, res) => {
     }
 
     const tid = parseInt(teamId, 10)
-    const league = await getLeague(leagueId)
+    const league = await getLeague({ lid: leagueId })
     if (!league) {
       return res.status(400).send({ error: 'invalid leagueId' })
     }

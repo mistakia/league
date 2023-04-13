@@ -61,7 +61,7 @@ router.post('/?', async (req, res) => {
     const lid = parseInt(leagueId, 10)
 
     // make sure draft has started
-    const league = await getLeague(lid)
+    const league = await getLeague({ lid })
     if (!league) {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
