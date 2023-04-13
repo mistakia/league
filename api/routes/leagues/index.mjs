@@ -33,7 +33,7 @@ router.put('/:leagueId', async (req, res) => {
 
     // verify leagueId
     const lid = parseInt(leagueId, 10)
-    const league = await getLeague(lid)
+    const league = await getLeague({ lid })
     if (!league) {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
@@ -246,7 +246,7 @@ router.get('/:leagueId/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const { leagueId } = req.params
-    const league = await getLeague(leagueId)
+    const league = await getLeague({ lid: leagueId })
     if (!league) {
       return res.status(400).send({ error: 'invalid leagueId' })
     }

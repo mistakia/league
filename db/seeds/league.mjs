@@ -14,7 +14,7 @@ export default async function (knex) {
     adate: null,
     tddate: constants.season.start.add('12', 'weeks').unix()
   })
-  const league = await getLeague(leagueId)
+  const league = await getLeague({ lid: leagueId })
 
   await knex('users_sources').del()
   await knex('users_teams').del()

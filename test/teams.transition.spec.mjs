@@ -186,7 +186,7 @@ describe('API /teams - transition', function () {
       const userId = 1
       const bid = 10
 
-      const league = await getLeague(leagueId)
+      const league = await getLeague({ lid: leagueId })
 
       const exclude_pids = []
       const tagPlayer = await selectPlayer()
@@ -517,7 +517,7 @@ describe('API /teams - transition', function () {
      *   const userId = 1
      *   const teamId = 1
      *   const bid = 10
-     *   const league = await getLeague(leagueId)
+     *   const league = await getLeague({ lid: leagueId })
 
      *   await addPlayer({
      *     leagueId,
@@ -561,7 +561,7 @@ describe('API /teams - transition', function () {
      *   const teamId = 1
      *   const bid = 10
      *   const cutlistPlayerValue = 10
-     *   const league = await getLeague(leagueId)
+     *   const league = await getLeague({ lid: leagueId })
 
      *   await addPlayer({
      *     leagueId,
@@ -624,7 +624,7 @@ describe('API /teams - transition', function () {
      *   const teamId = 1
      *   const bid = 10
      *   const releasePlayerValue = 10
-     *   const league = await getLeague(leagueId)
+     *   const league = await getLeague({ lid: leagueId })
 
      *   await addPlayer({
      *     leagueId,

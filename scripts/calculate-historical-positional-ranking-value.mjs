@@ -86,7 +86,7 @@ if (isMain(import.meta.url)) {
       return
     }
 
-    const league = await getLeague(lid)
+    const league = await getLeague({ lid })
     const result = await calculateHistoricalPositionalRankingValue({ league })
 
     const p = new Table()

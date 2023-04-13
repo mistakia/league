@@ -150,7 +150,7 @@ router.post(
       )
       const all_pids = tradedPlayers.concat(releasePlayers)
 
-      const league = await getLeague(leagueId)
+      const league = await getLeague({ lid: leagueId })
 
       // make sure trade deadline has not passed
       const deadline = dayjs.unix(league.tddate)
@@ -614,7 +614,7 @@ router.post(
         .where({ uid: tradeId })
         .update({ rejected: Math.round(Date.now() / 1000) })
 
-      const league = await getLeague(leagueId)
+      const league = await getLeague({ lid: leagueId })
       await sendNotifications({
         league,
         teamIds: [trade.propose_tid],
@@ -670,7 +670,7 @@ router.post(
         .where({ uid: tradeId })
         .update({ cancelled: Math.round(Date.now() / 1000) })
 
-      const league = await getLeague(leagueId)
+      const league = await getLeague({ lid: leagueId })
       await sendNotifications({
         league,
         teamIds: [trade.accept_tid],
@@ -693,7 +693,7 @@ router.post(
     try {
       const { tradeId, leagueId } = req.params
 
-      const league = await getLeague(leagueId)
+      const league = await getLeague({ lid: leagueId })
       if (league.commishid !== req.auth.userId) {
         return res
           .status(401)

@@ -11,7 +11,7 @@ const log = debug('process-playoffs')
 debug.enable('process-playoffs')
 
 const processPlayoffs = async ({ lid, year }) => {
-  const league = await getLeague(lid)
+  const league = await getLeague({ lid })
   const playoffs = await db('playoffs').where({ lid, year })
   const weeks = [...new Set(playoffs.map((p) => p.week))]
   const gamelogs = await db('player_gamelogs')

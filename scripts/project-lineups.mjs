@@ -9,7 +9,7 @@ const log = debug('project-lineups')
 const run = async () => {
   const { year } = constants.season
   const leagueId = 1
-  const league = await getLeague(leagueId)
+  const league = await getLeague({ lid: leagueId })
   const teams = await db('teams').where({ lid: leagueId })
   const team_lineup_inserts = []
   const team_lineup_starter_inserts = []

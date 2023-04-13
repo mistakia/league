@@ -1,6 +1,10 @@
+import debug from 'debug'
 import * as constants from './constants.mjs'
 import calculatePoints from './calculate-points.mjs'
 import optimizeStandingsLineup from './optimize-standings-lineup.mjs'
+
+const log = debug('calculate-standings')
+debug.enable('calculate-standings')
 
 const average = (data) => data.reduce((sum, value) => sum + value) / data.length
 const standardDeviation = (values) =>
@@ -61,6 +65,7 @@ const calculateStandings = ({
       for (const { pid, pos } of active[week][tid]) {
         const gamelog = gamelogs.find((g) => g.week === week && g.pid === pid)
         if (!gamelog) {
+          log(`No gamelog found for pid ${pid} in week ${week}`)
           continue
         }
 

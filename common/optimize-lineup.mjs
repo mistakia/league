@@ -63,7 +63,7 @@ export default function optimizeLineup({
     const result = solver.Solve(model)
     const starter_pids = Object.keys(result).filter(
       (r) =>
-        r.match(/^([A-Z]{2,})-([0-9]{4,})$/gi) || r.match(/^([A-Z]{1,3})$/gi)
+        r.match(constants.player_pid_regex) || r.match(constants.team_pid_regex)
     )
 
     results[week] = {

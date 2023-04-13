@@ -217,7 +217,7 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
       })
 
       // verify released players
-      const league = await getLeague(leagueId)
+      const league = await getLeague({ lid: leagueId })
       const rosterRow = await getRoster({ tid: teamId })
       const roster = new Roster({ roster: rosterRow, league })
 

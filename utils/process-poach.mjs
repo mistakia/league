@@ -35,7 +35,7 @@ export default async function ({ pid, release = [], lid, tid, userid }) {
   }
   const player_rows = await db('player').whereIn('pid', pids)
   const poach_player_row = player_rows.find((p) => p.pid === pid)
-  const league = await getLeague(lid)
+  const league = await getLeague({ lid })
   const rosterRow = await getRoster({ tid })
   const roster = new Roster({ roster: rosterRow, league })
   const releasePlayers = []

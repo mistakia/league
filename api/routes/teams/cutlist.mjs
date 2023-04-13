@@ -69,7 +69,7 @@ router.post('/?', async (req, res) => {
 
     const tid = parseInt(teamId, 10)
 
-    const league = await getLeague(leagueId)
+    const league = await getLeague({ lid: leagueId })
     if (!league) {
       return res.status(400).send({ error: 'invalid leagueId' })
     }

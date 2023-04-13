@@ -12,7 +12,7 @@ const log = debug('calculate-historical-baseline')
 debug.enable('calculate-historical-baseline')
 
 const calculateHistoricalBaseline = async ({ lid, save = false }) => {
-  const league = await getLeague(lid)
+  const league = await getLeague({ lid })
   const years = 2
   let year = constants.season.year - years
 

@@ -58,7 +58,7 @@ const createTransaction = async ({ roster_player, tid, league }) => {
 }
 
 const run = async ({ lid }) => {
-  const league = await getLeague(lid)
+  const league = await getLeague({ lid })
   const teams = await db('teams').where({ lid })
   await db('transactions')
     .where({

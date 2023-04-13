@@ -16,7 +16,7 @@ const generate_league_player_gamelogs = async ({
   year = constants.season.year,
   week = constants.season.week
 } = {}) => {
-  const league = await getLeague(lid)
+  const league = await getLeague({ lid })
   const result = await calculateValue({ league, year, week })
   const inserts = []
   for (const pid in result.players) {

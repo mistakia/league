@@ -8,8 +8,8 @@ import { getLeague, isMain } from '#utils'
 const log = debug('reset-player-tags')
 
 const run = async () => {
-  const leagueId = 1
-  const league = await getLeague(leagueId)
+  const lid = 1
+  const league = await getLeague({ lid })
 
   // past transition deadline
   if (
@@ -24,7 +24,7 @@ const run = async () => {
   const transitionBids = await db('transition_bids')
     .where({
       year: constants.season.year,
-      lid: leagueId
+      lid
     })
     .whereNull('cancelled')
     .whereNull('processed')

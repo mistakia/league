@@ -4,12 +4,12 @@ import db from '#db'
 import { constants, getDraftDates } from '#common'
 import getLeague from './get-league.mjs'
 
-export default async function (leagueId) {
-  const league = await getLeague(leagueId)
+export default async function (lid) {
+  const league = await getLeague({ lid })
   const picks = await db('draft')
     .where({
       year: constants.season.year,
-      lid: leagueId
+      lid
     })
     .orderBy('pick', 'asc')
 
@@ -34,7 +34,7 @@ export default async function (leagueId) {
   const active_waiver_rows = await db('waivers')
     .whereNull('processed')
     .whereNull('cancelled')
-    .where('lid', leagueId)
+    .where('lid', lid)
     .where('type', constants.waivers.FREE_AGENCY)
     .groupBy('pid')
   const active_waiver_pids = active_waiver_rows.map((w) => w.pid)
@@ -46,7 +46,7 @@ export default async function (leagueId) {
   const recent_transaction_rows = await db('transactions')
     .where('type', constants.transactions.ROSTER_RELEASE)
     .where('timestamp', '>=', cutoff)
-    .where('lid', leagueId)
+    .where('lid', lid)
   const recent_transaction_pids = recent_transaction_rows.map((t) => t.pid)
 
   const query = db('waivers')
@@ -61,7 +61,7 @@ export default async function (leagueId) {
     .join('teams', 'waivers.tid', 'teams.uid')
     .whereNull('processed')
     .whereNull('cancelled')
-    .where('waivers.lid', leagueId)
+    .where('waivers.lid', lid)
     .where('waivers.type', constants.waivers.FREE_AGENCY_PRACTICE)
     .orderBy([
       {

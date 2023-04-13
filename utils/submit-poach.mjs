@@ -35,7 +35,7 @@ export default async function ({
   const poachPlayer = player_rows.find((p) => p.pid === pid)
 
   // verify leagueId
-  const league = await getLeague(leagueId)
+  const league = await getLeague({ lid: leagueId })
   if (!league) {
     throw new Error('invalid leagueId')
   }

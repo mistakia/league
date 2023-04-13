@@ -19,8 +19,8 @@ const run = async ({ message, dry = false }) => {
     return
   }
 
-  const leagueId = 1
-  const league = await getLeague(leagueId)
+  const lid = 1
+  const league = await getLeague({ lid })
   await sendNotifications({
     league,
     notifyLeague: true,

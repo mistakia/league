@@ -37,7 +37,7 @@ const run = async () => {
   for (const lid of leagueIds) {
     if (!constants.season.isRegularSeason) {
       // check if during free agency period
-      const league = await getLeague(lid)
+      const league = await getLeague({ lid })
 
       if (league.adate) {
         const faPeriod = getFreeAgentPeriod(league.adate)

@@ -6,7 +6,7 @@ import db from '#db'
 import sendNotifications from './send-notifications.mjs'
 
 export default async function ({ tid, activate_pid, leagueId, userId }) {
-  const league = await getLeague(leagueId)
+  const league = await getLeague({ lid: leagueId })
   if (!league) {
     throw new Error('invalid leagueId')
   }

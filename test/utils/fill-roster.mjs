@@ -10,7 +10,7 @@ export default async function ({
   excludeIR = false,
   exclude_pids = []
 }) {
-  const league = await getLeague(leagueId)
+  const league = await getLeague({ lid: leagueId })
   const rosterRow = await getRoster({ tid: teamId })
   let roster = new Roster({ roster: rosterRow, league })
 
