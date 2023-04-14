@@ -15,7 +15,7 @@ const mapStateToProps = createSelector(
   (auction, app, league) => ({
     transactions: auction.transactions,
     tids: auction.tids,
-    isHosted: league.hosted,
+    isHosted: Boolean(league.hosted),
     isCommish: app.userId === league.commishid
   })
 )

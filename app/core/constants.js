@@ -7,7 +7,9 @@
 export const BASE_URL = IS_DEV
   ? 'http://' + MACHINE_IP + ':8082/api'
   : 'https://xo.football/api'
-export const WS_URL = IS_DEV ? 'ws://' + MACHINE_IP + ':8082' : 'wss://xo.football'
+export const WS_URL = IS_DEV
+  ? 'ws://' + MACHINE_IP + ':8082'
+  : 'wss://xo.football'
 export const DOCS_URL =
   'https://api.github.com/repos/mistakia/league/contents/docs'
 

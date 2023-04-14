@@ -118,7 +118,7 @@ export default class SettingsTeam extends React.Component {
           label='Team Name'
           field='name'
           limit={100}
-          grid={{ xs: '12' }}
+          grid={{ xs: 12 }}
           {...props}
         />
         <EditableTeamField
@@ -128,7 +128,7 @@ export default class SettingsTeam extends React.Component {
           {...props}
         />
         <EditableTeamField label='Logo (URL)' field='image' {...props} />
-        <Grid xs='12' item container>
+        <Grid xs={12} item container>
           <div className='settings__team-section team__brand'>
             <div
               className='team__brand-pc'
