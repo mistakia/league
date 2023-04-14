@@ -8,9 +8,9 @@ import { Scoreboard } from '@core/scoreboard'
 
 import './scoreboard-teams.styl'
 
-function Team({ tid, onClick, selected, cutoff, challenger }) {
+function Team({ tid, onClick, selected_tid, cutoff, challenger }) {
   const classNames = ['scoreboard__teams-team', 'cursor']
-  if (tid === selected) classNames.push('selected')
+  if (tid === selected_tid) classNames.push('selected')
   return (
     <div className={classNames.join(' ')} onClick={() => onClick(tid)}>
       <ScoreboardScoreTeam
@@ -25,14 +25,14 @@ function Team({ tid, onClick, selected, cutoff, challenger }) {
 Team.propTypes = {
   tid: PropTypes.number,
   onClick: PropTypes.func,
-  selected: PropTypes.number,
+  selected_tid: PropTypes.number,
   cutoff: PropTypes.number,
   challenger: PropTypes.number
 }
 
 export default class ScoreboardTeams extends React.Component {
   render = () => {
-    const { onClick, selected, scoreboards, week } = this.props
+    const { onClick, selected_tid, scoreboards, week } = this.props
 
     const isWC = week === constants.season.wildcardWeek
     const sorted = scoreboards.sort((a, b) => b.points - a.points)
@@ -46,7 +46,10 @@ export default class ScoreboardTeams extends React.Component {
     for (const [index, scoreboard] of sorted.entries()) {
       const { tid } = scoreboard
       items.push(
-        <Team key={index} {...{ tid, selected, onClick, cutoff, challenger }} />
+        <Team
+          key={index}
+          {...{ tid, selected_tid, onClick, cutoff, challenger }}
+        />
       )
     }
 
@@ -56,7 +59,7 @@ export default class ScoreboardTeams extends React.Component {
 
 ScoreboardTeams.propTypes = {
   onClick: PropTypes.func,
-  selected: PropTypes.number,
+  selected_tid: PropTypes.number,
   week: PropTypes.number,
   scoreboards: ImmutablePropTypes.list
 }

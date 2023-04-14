@@ -92,7 +92,7 @@ export default function MatchupPage({
             {!isHeadToHead && (
               <ScoreboardTeams
                 onClick={set_selected_tid}
-                selected={show_bench}
+                selected_tid={selected_tid}
               />
             )}
             <div className='scoreboard__main'>

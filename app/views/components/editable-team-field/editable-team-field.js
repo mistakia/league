@@ -11,7 +11,7 @@ export default function EditableTeamField({
   onchange,
   limit,
   label,
-  grid = { xs: '6', sm: '3' }
+  grid = { xs: 6, sm: 3 }
 }) {
   const [value, set_value] = useState(team[field])
   const [invalid, set_invalid] = useState(false)
