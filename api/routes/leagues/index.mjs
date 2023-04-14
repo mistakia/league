@@ -325,9 +325,11 @@ router.get('/:leagueId/rosters/?', async (req, res) => {
   const { logger } = req.app.locals
   try {
     const { leagueId } = req.params
+    const { year } = req.query
     const rosters = await getRosters({
       lid: leagueId,
-      userId: req.auth ? req.auth.userId : null
+      userId: req.auth ? req.auth.userId : null,
+      year
     })
     res.send(rosters)
   } catch (err) {
