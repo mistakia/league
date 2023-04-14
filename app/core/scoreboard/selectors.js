@@ -27,7 +27,8 @@ export function getScoreboardRosterByTeamId(state, { tid }) {
   const isFuture = year === constants.year && week > constants.week
   return getRosterByTeamId(state, {
     tid,
-    week: isFuture ? constants.week : week
+    week: isFuture ? constants.week : week,
+    year
   })
 }
 
