@@ -70,9 +70,11 @@ export default function MatchupPage({
 
   useEffect(() => {
     set_selected_tid(isHeadToHead ? matchup.hid : matchup.getIn(['tids', '0']))
-    navigate(
-      `/leagues/${matchup.lid}/matchups/${matchup.year}/${matchup.week}/${matchup.uid}`
-    )
+    if (matchup.uid) {
+      navigate(
+        `/leagues/${matchup.lid}/matchups/${matchup.year}/${matchup.week}/${matchup.uid}`
+      )
+    }
   }, [matchup.uid])
 
   const body = (

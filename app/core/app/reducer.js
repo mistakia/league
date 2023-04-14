@@ -6,7 +6,6 @@ import { settingActions } from '@core/settings'
 import { constants } from '@common'
 import { rosterActions } from '@core/rosters'
 import { teamActions } from '@core/teams'
-import { matchupsActions } from '@core/matchups'
 
 const initialState = new Record({
   token: null,
@@ -26,9 +25,7 @@ const initialState = new Record({
   isLoadingRosters: null,
   isLoadedRosters: null,
   isLoadingTeams: null,
-  isLoadedTeams: null,
-  isLoadingMatchups: null,
-  isLoadedMatchups: null
+  isLoadedTeams: null
 })
 
 export function appReducer(state = initialState(), { payload, type }) {
@@ -40,15 +37,6 @@ export function appReducer(state = initialState(), { payload, type }) {
         leagueId: payload.leagueId,
         leagueIds: new List([payload.leagueId])
       })
-
-    case matchupsActions.GET_MATCHUPS_PENDING:
-      return state.set('isLoadingMatchups', payload.opts.leagueId)
-
-    case matchupsActions.GET_MATCHUPS_FAILED:
-      return state.set('isLoadingMatchups', null)
-
-    case matchupsActions.GET_MATCHUPS_FULFILLED:
-      return state.set('isLoadedMatchups', payload.opts.leagueId)
 
     case rosterActions.GET_ROSTERS_PENDING:
       return state.set('isLoadingRosters', payload.opts.leagueId)
@@ -144,9 +132,7 @@ export function appReducer(state = initialState(), { payload, type }) {
 
     case appActions.SELECT_YEAR:
       return state.merge({
-        year: payload.year,
-        isLoadingMatchups: null,
-        isLoadedMatchups: null
+        year: payload.year
       })
 
     default:
