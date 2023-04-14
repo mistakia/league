@@ -7,6 +7,7 @@ import {
   putResolve,
   debounce
 } from 'redux-saga/effects'
+import { Map } from 'immutable'
 
 import { getApp, getRouter, appActions } from '@core/app'
 import { notificationActions } from '@core/notifications'
@@ -244,6 +245,23 @@ export function* loadPlayerPractices({ payload }) {
   yield call(getPlayerPractices, { pid })
 }
 
+export function* load_missing_roster_players({ payload }) {
+  const { leagueId } = yield select(getApp)
+  const players_map = yield select((state) =>
+    state.getIn(['players', 'items'], new Map())
+  )
+  const pids = []
+
+  for (const roster of payload.data) {
+    for (const item of roster.players) {
+      if (!players_map.has(item.pid)) {
+        pids.push(item.pid)
+      }
+    }
+  }
+  yield call(fetchPlayers, { pids, leagueId })
+}
+
 //= ====================================
 //  WATCHERS
 // -------------------------------------
@@ -363,6 +381,13 @@ export function* watchFetchAllPlayersFulfilled() {
   yield takeLatest(playerActions.FETCH_ALL_PLAYERS_FULFILLED, initLeaguePlayers)
 }
 
+export function* watch_get_rosters_fulfilled() {
+  yield takeLatest(
+    rosterActions.GET_ROSTERS_FULFILLED,
+    load_missing_roster_players
+  )
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -401,5 +426,7 @@ export const playerSagas = [
   fork(watchLoadLeaguePlayers),
   fork(watchLoadTeamPlayers),
   fork(watchAuctionSelectPlayer),
-  fork(watchFetchAllPlayersFulfilled)
+  fork(watchFetchAllPlayersFulfilled),
+
+  fork(watch_get_rosters_fulfilled)
 ]

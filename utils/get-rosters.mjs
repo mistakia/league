@@ -1,25 +1,40 @@
 import db from '#db'
 import { constants } from '#common'
 
-export default async function ({ lid, userId }) {
+export default async function ({
+  lid,
+  userId,
+  year = constants.season.year,
+  min_week
+}) {
   const rosters = await db('rosters')
     .select('*')
-    .where({ lid, year: constants.season.year })
+    .where({ lid, year })
     .orderBy('week', 'desc')
 
-  const currentWeek = Math.min(
-    Math.max(constants.season.fantasy_season_week, 0),
-    constants.season.finalWeek
-  )
+  if (min_week === null || min_week === undefined) {
+    // for current year, we want to start at the current week (between 0 and final week)
+    // for past years we want to start at week 0
+    const is_current_year = year === constants.season.year
+    if (is_current_year) {
+      min_week = Math.min(
+        Math.max(constants.season.fantasy_season_week, 0),
+        constants.season.finalWeek
+      )
+    } else {
+      min_week = 0
+    }
+  }
+
   const lineups = await db('league_team_lineups')
     .where({ lid, year: constants.season.year })
-    .where('week', '>=', currentWeek)
+    .where('week', '>=', min_week)
   const lineupStarters = await db('league_team_lineup_starters')
     .where({
-      year: constants.season.year,
+      year,
       lid
     })
-    .where('week', '>=', currentWeek)
+    .where('week', '>=', min_week)
 
   const players = await db('rosters_players')
     .select(

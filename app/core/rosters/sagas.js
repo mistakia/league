@@ -68,6 +68,11 @@ export function* loadRosters({ payload }) {
   yield call(getRosters, { leagueId })
 }
 
+export function* load_rosters_for_year() {
+  const { leagueId, year } = yield select(getApp)
+  yield call(getRosters, { leagueId, year })
+}
+
 export function* updateRosterPlayerSlot({ payload }) {
   const { teamId, leagueId } = yield select(getApp)
   yield call(putRoster, { teamId, leagueId, ...payload })
@@ -619,6 +624,10 @@ export function* watchLoadTeams() {
   yield takeLatest(teamActions.LOAD_TEAMS, loadRosters)
 }
 
+export function* watchSelectYear() {
+  yield takeLatest(appActions.SELECT_YEAR, load_rosters_for_year)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -668,5 +677,7 @@ export const rosterSagas = [
   fork(watchExportRosters),
 
   fork(watchLoadRosters),
-  fork(watchLoadTeams)
+  fork(watchLoadTeams),
+
+  fork(watchSelectYear)
 ]
