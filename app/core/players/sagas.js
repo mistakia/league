@@ -254,11 +254,12 @@ export function* load_missing_roster_players({ payload }) {
 
   for (const roster of payload.data) {
     for (const item of roster.players) {
-      if (!players_map.has(item.pid)) {
+      if (!players_map.getIn([item.pid, 'fname'])) {
         pids.push(item.pid)
       }
     }
   }
+
   yield call(fetchPlayers, { pids, leagueId })
 }
 

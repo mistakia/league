@@ -12,7 +12,6 @@ Object.keys(ifaces).forEach((ifname) => {
   ifaces[ifname].forEach((iface) => {
     if (iface.family === 'IPv4' && iface.internal === false) {
       MACHINE_IP = iface.address
-      console.log(MACHINE_IP)
     }
   })
 })

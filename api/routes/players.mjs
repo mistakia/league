@@ -21,16 +21,16 @@ if (process.env.NODE_ENV !== 'test') {
   cron.schedule('*/5 * * * *', loadPlayers)
 }
 
-router.get('/?', async (req, res) => {
+router.post('/?', async (req, res) => {
   const { logger } = req.app.locals
   try {
-    const search = req.query.q
-    const { leagueId } = req.query
+    const search = req.body.q
+    const { leagueId } = req.body
     const userId = req.auth ? req.auth.userId : null
-    const pids = req.query.pids
-      ? Array.isArray(req.query.pids)
-        ? req.query.pids
-        : [req.query.pids]
+    const pids = req.body.pids
+      ? Array.isArray(req.body.pids)
+        ? req.body.pids
+        : [req.body.pids]
       : []
 
     const cacheKey = `/players/${leagueId || 0}`

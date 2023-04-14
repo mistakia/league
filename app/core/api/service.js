@@ -43,8 +43,8 @@ export const api = {
     return { url }
   },
   fetchPlayers(params) {
-    const url = `${BASE_URL}/players?${queryString.stringify(params)}`
-    return { url }
+    const url = `${BASE_URL}/players`
+    return { url, ...POST(params) }
   },
   getLeaguePlayers({ leagueId }) {
     const url = `${BASE_URL}/leagues/${leagueId}/players`
@@ -198,10 +198,10 @@ export const api = {
     const url = `${BASE_URL}/sources/${data.sourceId}`
     return { url, ...PUT(data) }
   },
-  getPlayersGamelogs({ leagueId }) {
-    const url = leagueId
-      ? `${BASE_URL}/stats/gamelogs/players?leagueId=${leagueId}`
-      : `${BASE_URL}/stats/gamelogs/players`
+  getPlayersGamelogs(params) {
+    const url = `${BASE_URL}/stats/gamelogs/players?${queryString.stringify(
+      params
+    )}`
     return { url }
   },
   putProjection(data) {
