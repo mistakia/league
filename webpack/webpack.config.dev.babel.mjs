@@ -1,9 +1,21 @@
 import path from 'path'
+import os from 'os'
 import webpack from 'webpack'
 import { merge } from 'webpack-merge'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 
 import baseConfig from './webpack.config.base.mjs'
+
+let MACHINE_IP
+const ifaces = os.networkInterfaces()
+Object.keys(ifaces).forEach((ifname) => {
+  ifaces[ifname].forEach((iface) => {
+    if (iface.family === 'IPv4' && iface.internal === false) {
+      MACHINE_IP = iface.address
+      console.log(MACHINE_IP)
+    }
+  })
+})
 
 export default merge(baseConfig, {
   devtool: 'inline-source-map',
@@ -39,7 +51,8 @@ export default merge(baseConfig, {
      */
     new webpack.DefinePlugin({
       IS_DEV: !process.env.NC_DEV_LIVE,
-      APP_VERSION: JSON.stringify('0.0.x')
+      APP_VERSION: JSON.stringify('0.0.x'),
+      MACHINE_IP: JSON.stringify(MACHINE_IP)
     }),
 
     new webpack.LoaderOptionsPlugin({
