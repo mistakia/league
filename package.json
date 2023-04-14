@@ -2,11 +2,13 @@
   "scripts": {
     "dev": "concurrently \"yarn start\" \"yarn start:api\"",
     "dev:live": "NC_DEV_LIVE=true yarn start",
+    "dev:prod": "concurrently \"yarn start\" \"yarn start:api:prod\"",
     "start": "cross-env START_HOT=1 NODE_ENV=development webpack serve --mode=development --config webpack/webpack.config.dev.babel.mjs",
     "lint": "eslint . --ext js,mjs",
     "prettier": "prettier --write .",
     "test": "TZ=America/New_York NODE_ENV=test TEST=all mocha --exit --exclude test/importer-espn.spec.mjs --require test/global.mjs",
     "start:api": "NODE_ENV=development node server.mjs",
+    "start:api:prod": "NODE_ENV=production node server.mjs",
     "build": "cross-env NODE_ENV=production webpack --config ./webpack/webpack.config.prod.babel.mjs",
     "analyze": "cross-env OPEN_ANALYZER=true NODE_ENV=production webpack --config ./webpack/webpack.config.prod.babel.mjs",
     "deploy": "pm2 deploy server.pm2.config.js production",
