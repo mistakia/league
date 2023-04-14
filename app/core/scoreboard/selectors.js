@@ -154,7 +154,8 @@ export function getScoreboardGamelogByPlayerId(state, { pid }) {
   if (!playerMap.get('pid')) return
 
   const week = state.getIn(['scoreboard', 'week'])
-  return getGamelogForPlayer(state, { playerMap, week })
+  const year = state.getIn(['app', 'year'])
+  return getGamelogForPlayer(state, { playerMap, week, year })
 }
 
 export function getPlaysByMatchupId(state, { mid }) {

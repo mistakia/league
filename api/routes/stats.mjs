@@ -8,6 +8,7 @@ router.get('/gamelogs/players', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const { leagueId } = req.query
+    const year = req.query.year || constants.season.year
 
     const query = db('player_gamelogs')
       .select(
@@ -20,7 +21,7 @@ router.get('/gamelogs/players', async (req, res) => {
         'nfl_games.timestamp'
       )
       .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
-      .where('nfl_games.year', constants.season.year)
+      .where('nfl_games.year', year)
       .where('nfl_games.seas_type', 'REG')
 
     if (leagueId) {
