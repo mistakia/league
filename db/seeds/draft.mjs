@@ -2,7 +2,8 @@ import { constants, Roster } from '#common'
 import { getRoster, getLeague } from '#utils'
 
 export default async function (knex) {
-  const league = await getLeague(1)
+  const lid = 1
+  const league = await getLeague({ lid })
   const players = await knex('player').orderByRaw('RAND()')
 
   await knex('rosters_players').del()

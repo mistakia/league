@@ -34,7 +34,7 @@ const run = async () => {
     }) will be processed ${time.toNow()} around ${time.format(
       'dddd, MMMM Do h:mm a'
     )} EST.`
-    const league = await getLeague(claim.lid)
+    const league = await getLeague({ lid: claim.lid })
     await sendNotifications({
       league,
       teamIds: [claim.tid],

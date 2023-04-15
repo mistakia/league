@@ -67,7 +67,7 @@ const run = async () => {
         )
         const player_rows = await db('player').where('pid', waiver.pid).limit(1)
         const player_row = player_rows[0]
-        const league = await getLeague(waiver.lid)
+        const league = await getLeague({ lid: waiver.lid })
         await sendNotifications({
           league,
           teamIds: [waiver.tid],
