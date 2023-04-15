@@ -28,10 +28,11 @@ describe('API /leagues - update', function () {
 
   describe('put', function () {
     it('update name', async () => {
+      const lid = 1
       const value = 'TEST LEAGUE'
       const res = await chai
         .request(server)
-        .put('/api/leagues/1')
+        .put(`/api/leagues/${lid}`)
         .set('Authorization', `Bearer ${user1}`)
         .send({
           field: 'name',
@@ -44,16 +45,17 @@ describe('API /leagues - update', function () {
 
       // verify database change
       res.body.value.should.equal(value)
-      const league = await getLeague(1)
+      const league = await getLeague({ lid })
 
       expect(league.name).to.equal(value)
     })
 
     it('update sqb', async () => {
+      const lid = 1
       const value = 2
       const res = await chai
         .request(server)
-        .put('/api/leagues/1')
+        .put(`/api/leagues/${lid}`)
         .set('Authorization', `Bearer ${user1}`)
         .send({
           field: 'sqb',
@@ -66,16 +68,17 @@ describe('API /leagues - update', function () {
 
       // verify database change
       res.body.value.should.equal(value)
-      const league = await getLeague(1)
+      const league = await getLeague({ lid })
 
       expect(league.sqb).to.equal(value)
     })
 
     it('update rec', async () => {
+      const lid = 1
       const value = 1.5
       const res = await chai
         .request(server)
-        .put('/api/leagues/1')
+        .put(`/api/leagues/${lid}`)
         .set('Authorization', `Bearer ${user1}`)
         .send({
           field: 'rec',
@@ -88,7 +91,7 @@ describe('API /leagues - update', function () {
 
       // verify database change
       res.body.value.should.equal(value)
-      const league = await getLeague(1)
+      const league = await getLeague({ lid })
 
       expect(league.rec).to.equal(value)
     })

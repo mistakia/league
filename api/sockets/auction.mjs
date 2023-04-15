@@ -431,7 +431,7 @@ export default class Auction {
       .orderBy('timestamp', 'desc')
       .orderBy('uid', 'desc')
 
-    this._league = await getLeague(this._lid)
+    this._league = await getLeague({ lid: this._lid })
 
     for (const team of this._teams) {
       const roster = await getRoster({ tid: team.uid })
