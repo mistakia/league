@@ -16,6 +16,7 @@ export const getPlayer = async ({ ignore_cache = false, nflId } = {}) => {
   if (!ignore_cache) {
     const cache_value = await cache.get({ key: cache_key })
     if (cache_value) {
+      log(`cache hit for ngs player with nflId: ${nflId}`)
       return cache_value
     }
   }
@@ -27,7 +28,7 @@ export const getPlayer = async ({ ignore_cache = false, nflId } = {}) => {
   })
   const data = await res.json()
 
-  if (data && data.gsisItId) {
+  if (data && data.displayName) {
     await cache.set({ key: cache_key, value: data })
   }
 

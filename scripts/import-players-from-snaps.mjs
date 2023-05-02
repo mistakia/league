@@ -20,16 +20,31 @@ const import_players_from_snaps = async () => {
 
   for (const { nflId } of nfl_ids) {
     const data = await ngs.getPlayer({ nflId })
-    if (data && data.gsisItId) {
-      const options = { name: data.displayName }
-      if (data.birthDate) {
-        const dob = dayjs(data.birthDate, 'MM/DD/YYYY')
-        options.dob = dob.format('YYYY-MM-DD')
-      }
-
+    if (data && data.displayName) {
       let player_row
       try {
-        player_row = await getPlayer(options)
+        if (data.gsisId) {
+          player_row = await getPlayer({ gsisid: data.gsisId })
+        }
+
+        if (!player_row && data.esbId) {
+          player_row = await getPlayer({ esbid: data.esbId })
+        }
+
+        if (!player_row) {
+          const options = { name: data.displayName }
+          if (data.birthDate) {
+            const dob = dayjs(data.birthDate, 'MM/DD/YYYY')
+            options.dob = dob.format('YYYY-MM-DD')
+          }
+
+          // TODO use entryYear
+          // if (data.entryYear) {
+          //   options.start = data.entryYear
+          // }
+
+          player_row = await getPlayer(options)
+        }
       } catch (err) {
         // ignore
       }
@@ -40,7 +55,7 @@ const import_players_from_snaps = async () => {
       }
 
       const update = {
-        gsisItId: data.gsisItId,
+        gsisItId: nflId,
         gsisid: data.gsisId,
         esbid: data.esbId
       }
