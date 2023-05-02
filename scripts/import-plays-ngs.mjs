@@ -67,7 +67,8 @@ const importPlaysForWeek = async ({
   year = constants.season.year,
   week,
   seas_type = 'REG',
-  force_update = false
+  force_update = false,
+  ignore_cache = false
 } = {}) => {
   const current_week = Math.max(
     dayjs().day() === 2 ? constants.season.week - 1 : constants.season.week,
@@ -75,8 +76,7 @@ const importPlaysForWeek = async ({
   )
 
   week = week || current_week
-  const isCurrentWeek =
-    !force_update && year === constants.season.year && week === current_week
+  const isCurrentWeek = year === constants.season.year && week === current_week
 
   log(
     `importing plays for week ${week} ${year} ${seas_type} (force_update: ${force_update}, isCurrentWeek: ${isCurrentWeek})`
@@ -119,7 +119,7 @@ const importPlaysForWeek = async ({
 
     const data = await ngs.getPlays({
       esbid,
-      ignore_cache: isCurrentWeek || force_update
+      ignore_cache: isCurrentWeek || ignore_cache
     })
 
     if (!data || !data.plays) {
@@ -185,30 +185,32 @@ const importPlaysForWeek = async ({
       await db('nfl_plays').insert(play_inserts).onConflict().merge()
     }
 
-    try {
-      await db('nfl_snaps_current_week').where({ esbid }).del()
-      await db('nfl_snaps_current_week')
-        .insert(snap_inserts)
-        .onConflict()
-        .merge()
-    } catch (err) {
-      log('Error on inserting snaps ignored')
-      log(err)
-    }
+    if (isCurrentWeek) {
+      try {
+        await db('nfl_snaps_current_week').where({ esbid }).del()
+        await db('nfl_snaps_current_week')
+          .insert(snap_inserts)
+          .onConflict()
+          .merge()
+      } catch (err) {
+        log('Error on inserting snaps ignored')
+        log(err)
+      }
 
-    try {
-      // save in current tables
-      await db('nfl_play_stats_current_week')
-        .insert(play_stat_inserts)
-        .onConflict()
-        .merge()
-      await db('nfl_plays_current_week')
-        .insert(play_inserts)
-        .onConflict()
-        .merge()
-    } catch (err) {
-      log('Error on inserting plays and play stats ignored')
-      log(err)
+      try {
+        // save in current tables
+        await db('nfl_play_stats_current_week')
+          .insert(play_stat_inserts)
+          .onConflict()
+          .merge()
+        await db('nfl_plays_current_week')
+          .insert(play_inserts)
+          .onConflict()
+          .merge()
+      } catch (err) {
+        log('Error on inserting plays and play stats ignored')
+        log(err)
+      }
     }
   }
 
@@ -218,7 +220,8 @@ const importPlaysForWeek = async ({
 const importPlaysForYear = async ({
   year = constants.season.year,
   seas_type = 'REG',
-  force_update = false
+  force_update = false,
+  ignore_cache = false
 } = {}) => {
   const weeks = await db('nfl_games')
     .select('week')
@@ -233,13 +236,20 @@ const importPlaysForYear = async ({
       year,
       week,
       seas_type,
-      force_update
+      force_update,
+      ignore_cache
     })
     await wait(4000)
   }
 }
 
-const importAllPlays = async ({ start, end, seas_type, force_update } = {}) => {
+const importAllPlays = async ({
+  start,
+  end,
+  seas_type,
+  force_update,
+  ignore_cache = false
+} = {}) => {
   const nfl_games_result = await db('nfl_games')
     .select('year')
     .groupBy('year')
@@ -254,17 +264,32 @@ const importAllPlays = async ({ start, end, seas_type, force_update } = {}) => {
     log(`loading plays for year: ${year}, seas_type: ${seas_type || 'all'}`)
 
     if (seas_type || seas_type.toLowerCase() === 'pre') {
-      await importPlaysForYear({ year, seas_type: 'PRE', force_update })
+      await importPlaysForYear({
+        year,
+        seas_type: 'PRE',
+        force_update,
+        ignore_cache
+      })
       await wait(3000)
     }
 
     if (seas_type || seas_type.toLowerCase() === 'reg') {
-      await importPlaysForYear({ year, seas_type: 'REG', force_update })
+      await importPlaysForYear({
+        year,
+        seas_type: 'REG',
+        force_update,
+        ignore_cache
+      })
       await wait(3000)
     }
 
     if (seas_type || seas_type.toLowerCase() === 'post') {
-      await importPlaysForYear({ year, seas_type: 'POST', force_update })
+      await importPlaysForYear({
+        year,
+        seas_type: 'POST',
+        force_update,
+        ignore_cache
+      })
       await wait(3000)
     }
   }
@@ -279,7 +304,8 @@ const main = async () => {
         start: argv.start,
         end: argv.end,
         seas_type: argv.seas_type,
-        force_update: argv.final
+        force_update: argv.final,
+        ignore_cache: argv.ignore_cache
       })
     } else if (argv.year) {
       if (argv.week) {
@@ -287,13 +313,15 @@ const main = async () => {
           year: argv.year,
           week: argv.week,
           seas_type: argv.seas_type,
-          force_update: argv.final
+          force_update: argv.final,
+          ignore_cache: argv.ignore_cache
         })
       } else {
         await importPlaysForYear({
           year: argv.year,
           seas_type: argv.seas_type,
-          force_update: argv.final
+          force_update: argv.final,
+          ignore_cache: argv.ignore_cache
         })
       }
     } else if (argv.live) {
@@ -306,7 +334,8 @@ const main = async () => {
           week: argv.week,
           seas_type: argv.seas_type,
           bypass_cache: true,
-          force_update: argv.final
+          force_update: argv.final,
+          ignore_cache: argv.ignore_cache
         })
       }
     } else {
@@ -315,7 +344,8 @@ const main = async () => {
         week: argv.week,
         seas_type: argv.seas_type,
         bypass_cache: true,
-        force_update: argv.final
+        force_update: argv.final,
+        ignore_cache: argv.ignore_cache
       })
       log('end')
     }
