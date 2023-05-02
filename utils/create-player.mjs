@@ -46,7 +46,6 @@ const required = [
   'pos1',
   'height',
   'weight',
-  'col',
   'posd'
 ]
 

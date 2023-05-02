@@ -2,10 +2,19 @@ import debug from 'debug'
 import dayjs from 'dayjs'
 
 import db from '#db'
-import { isMain, ngs, updatePlayer, getPlayer, wait } from '#utils'
+import {
+  isMain,
+  ngs,
+  updatePlayer,
+  getPlayer,
+  wait,
+  createPlayer
+} from '#utils'
 
 const log = debug('import-players-from-snaps')
-debug.enable('import-players-from-snaps,ngs,update-player,get-player')
+debug.enable(
+  'import-players-from-snaps,ngs,update-player,get-player,create-player'
+)
 
 const import_players_from_snaps = async () => {
   const nfl_ids = await db('nfl_snaps')
@@ -32,7 +41,7 @@ const import_players_from_snaps = async () => {
         }
 
         if (!player_row) {
-          const options = { name: data.displayName }
+          const options = { name: `${data.firstName} ${data.lastName}` }
           if (data.birthDate) {
             const dob = dayjs(data.birthDate, 'MM/DD/YYYY')
             options.dob = dob.format('YYYY-MM-DD')
@@ -44,9 +53,37 @@ const import_players_from_snaps = async () => {
           // }
 
           player_row = await getPlayer(options)
+
+          if (!player_row) {
+            options.name = data.displayName
+            player_row = await getPlayer(options)
+          }
+        }
+
+        if (!player_row) {
+          await createPlayer({
+            fname: data.firstName,
+            lname: data.lastName,
+            dob: data.birthDate
+              ? dayjs(data.birthDate, 'MM/DD/YYYY').format('YYYY-MM-DD')
+              : '0000-00-00',
+            start: data.entryYear,
+            pos: data.position,
+            pos1: data.position,
+            height: data.height,
+            weight: data.weight,
+            col: null,
+            posd: 'INA',
+            esbid: data.esbId,
+            gsisid: data.gsisId,
+            gsisItId: nflId,
+            jnum: data.jerseyNumber,
+            cteam: data.currentTeamAbbr
+          })
+          continue
         }
       } catch (err) {
-        // ignore
+        log(err)
       }
 
       if (!player_row) {
