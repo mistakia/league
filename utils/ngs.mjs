@@ -34,3 +34,34 @@ export const getPlayer = async ({ ignore_cache = false, nflId } = {}) => {
 
   return data
 }
+
+export const getPlays = async ({ ignore_cache = false, esbid } = {}) => {
+  if (!esbid) {
+    return
+  }
+
+  const cache_key = `/ngs/plays/${esbid}.json`
+  if (!ignore_cache) {
+    const cache_value = await cache.get({ key: cache_key })
+    if (cache_value) {
+      log(`cache hit for ngs game with esbid: ${esbid}`)
+      return cache_value
+    }
+  }
+
+  log(`fetching ngs game with esbid: ${esbid}`)
+  const url = `${config.ngs_api_url}/live/plays/playlist/game?gameId=${esbid}`
+  const res = await fetch(url, {
+    headers: {
+      origin: 'https://nextgenstats.nfl.com',
+      referer: 'https://nextgenstats.nfl.com/stats/game-center'
+    }
+  })
+  const data = await res.json()
+
+  if (data && data.gameId) {
+    await cache.set({ key: cache_key, value: data })
+  }
+
+  return data
+}
