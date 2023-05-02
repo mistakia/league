@@ -36,7 +36,7 @@ CREATE TABLE `player` (
   `hand` decimal(5,3) DEFAULT NULL,
   `dpos` int(3) NOT NULL DEFAULT '0', -- draft position
   `round` tinyint(1) NOT NULL DEFAULT '0', -- draft round
-  `col` varchar(255) NOT NULL,
+  `col` varchar(255) DEFAULT NULL,
   `dv` varchar(35) DEFAULT NULL,
   `start` int(4) NOT NULL,
   `cteam` varchar(3) NOT NULL DEFAULT 'INA',
