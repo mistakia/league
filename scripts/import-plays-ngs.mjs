@@ -75,7 +75,9 @@ const importPlaysForWeek = async ({
     1
   )
 
-  week = week || current_week
+  if (week === null || week === undefined) {
+    week = current_week
+  }
   const isCurrentWeek = year === constants.season.year && week === current_week
 
   log(
@@ -178,38 +180,58 @@ const importPlaysForWeek = async ({
         .update({ valid: 0 })
         .where({ esbid: game.esbid })
 
-      await db('nfl_snaps').where({ esbid }).del()
-      await db('nfl_snaps').insert(snap_inserts).onConflict().merge()
+      if (snap_inserts.length) {
+        try {
+          await db('nfl_snaps').where({ esbid }).del()
+          await db('nfl_snaps').insert(snap_inserts).onConflict().merge()
+        } catch (err) {
+          log(`Error on inserting snaps for esbid: ${game.esbid}`)
+          log(err)
+        }
+      }
 
-      await db('nfl_play_stats').insert(play_stat_inserts).onConflict().merge()
-      await db('nfl_plays').insert(play_inserts).onConflict().merge()
+      if (play_inserts.length) {
+        try {
+          await db('nfl_play_stats')
+            .insert(play_stat_inserts)
+            .onConflict()
+            .merge()
+          await db('nfl_plays').insert(play_inserts).onConflict().merge()
+        } catch (err) {
+          log(`Error on inserting plays and play stats for esbid: ${game.esbid}`)
+          log(err)
+        }
+      }
     }
 
     if (isCurrentWeek) {
-      try {
-        await db('nfl_snaps_current_week').where({ esbid }).del()
-        await db('nfl_snaps_current_week')
-          .insert(snap_inserts)
-          .onConflict()
-          .merge()
-      } catch (err) {
-        log('Error on inserting snaps ignored')
-        log(err)
+      if (snap_inserts.length) {
+        try {
+          await db('nfl_snaps_current_week').where({ esbid }).del()
+          await db('nfl_snaps_current_week')
+            .insert(snap_inserts)
+            .onConflict()
+            .merge()
+        } catch (err) {
+          log(`Error on inserting snaps for esbid: ${game.esbid}`)
+          log(err)
+        }
       }
 
-      try {
-        // save in current tables
-        await db('nfl_play_stats_current_week')
-          .insert(play_stat_inserts)
-          .onConflict()
-          .merge()
-        await db('nfl_plays_current_week')
-          .insert(play_inserts)
-          .onConflict()
-          .merge()
-      } catch (err) {
-        log('Error on inserting plays and play stats ignored')
-        log(err)
+      if (play_inserts.length) {
+        try {
+          await db('nfl_play_stats_current_week')
+            .insert(play_stat_inserts)
+            .onConflict()
+            .merge()
+          await db('nfl_plays_current_week')
+            .insert(play_inserts)
+            .onConflict()
+            .merge()
+        } catch (err) {
+          log(`Error on inserting plays and play stats for esbid: ${game.esbid}`)
+          log(err)
+        }
       }
     }
   }
@@ -246,7 +268,7 @@ const importPlaysForYear = async ({
 const importAllPlays = async ({
   start,
   end,
-  seas_type,
+  seas_type = 'ALL',
   force_update,
   ignore_cache = false
 } = {}) => {
@@ -259,11 +281,15 @@ const importAllPlays = async ({
   if (start) {
     years = years.filter((year) => year >= start)
   }
+  if (end) {
+    years = years.filter((year) => year <= end)
+  }
 
   for (const year of years) {
-    log(`loading plays for year: ${year}, seas_type: ${seas_type || 'all'}`)
+    log(`loading plays for year: ${year}, seas_type: ${seas_type}`)
+    const is_seas_type_all = seas_type.toLowerCase() === 'all'
 
-    if (seas_type || seas_type.toLowerCase() === 'pre') {
+    if (is_seas_type_all || seas_type.toLowerCase() === 'pre') {
       await importPlaysForYear({
         year,
         seas_type: 'PRE',
@@ -273,7 +299,7 @@ const importAllPlays = async ({
       await wait(3000)
     }
 
-    if (seas_type || seas_type.toLowerCase() === 'reg') {
+    if (is_seas_type_all || seas_type.toLowerCase() === 'reg') {
       await importPlaysForYear({
         year,
         seas_type: 'REG',
@@ -283,7 +309,7 @@ const importAllPlays = async ({
       await wait(3000)
     }
 
-    if (seas_type || seas_type.toLowerCase() === 'post') {
+    if (is_seas_type_all || seas_type.toLowerCase() === 'post') {
       await importPlaysForYear({
         year,
         seas_type: 'POST',
