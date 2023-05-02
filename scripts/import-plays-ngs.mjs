@@ -1,4 +1,3 @@
-import fetch from 'node-fetch'
 import dayjs from 'dayjs'
 import debug from 'debug'
 import yargs from 'yargs'
@@ -6,11 +5,11 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants, fixTeam } from '#common'
-import { isMain, wait } from '#utils'
-import config from '#config'
+import { isMain, wait, ngs } from '#utils'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-plays-ngs')
+debug.enable('import-plays-ngs,ngs')
 
 const getPlayData = (play) => {
   const data = {
@@ -80,7 +79,7 @@ const importPlaysForWeek = async ({
     !force_update && year === constants.season.year && week === current_week
 
   log(
-    `importing plays for week ${week} ${year} ${seas_type} (force_update: ${force_update}, isCurrentWeek: ${isCurrentWeek}`
+    `importing plays for week ${week} ${year} ${seas_type} (force_update: ${force_update}, isCurrentWeek: ${isCurrentWeek})`
   )
 
   // get list of games for this week
@@ -118,14 +117,10 @@ const importPlaysForWeek = async ({
       continue
     }
 
-    log(`loading plays for esbid: ${esbid}`)
-    const url = `${config.ngs_api_url}/live/plays/playlist/game?gameId=${esbid}`
-    const data = await fetch(url, {
-      headers: {
-        origin: 'https://nextgenstats.nfl.com',
-        referer: 'https://nextgenstats.nfl.com/stats/game-center'
-      }
-    }).then((res) => res.json())
+    const data = await ngs.getPlays({
+      esbid,
+      ignore_cache: isCurrentWeek || force_update
+    })
 
     if (!data || !data.plays) {
       log(`skipping esbid: ${game.esbid}, missing play data`)
