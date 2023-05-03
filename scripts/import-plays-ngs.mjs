@@ -137,6 +137,11 @@ const importPlaysForWeek = async ({
 
     for (const play of data.plays) {
       const { playId } = play
+      if (!play.playType) {
+        log(`skipping playId: ${playId} missing playType (esbid: ${esbid})`)
+        continue
+      }
+
       const playData = getPlayData(play)
       play_inserts.push({
         playId,
@@ -198,7 +203,9 @@ const importPlaysForWeek = async ({
             .merge()
           await db('nfl_plays').insert(play_inserts).onConflict().merge()
         } catch (err) {
-          log(`Error on inserting plays and play stats for esbid: ${game.esbid}`)
+          log(
+            `Error on inserting plays and play stats for esbid: ${game.esbid}`
+          )
           log(err)
         }
       }
@@ -229,7 +236,9 @@ const importPlaysForWeek = async ({
             .onConflict()
             .merge()
         } catch (err) {
-          log(`Error on inserting plays and play stats for esbid: ${game.esbid}`)
+          log(
+            `Error on inserting plays and play stats for esbid: ${game.esbid}`
+          )
           log(err)
         }
       }

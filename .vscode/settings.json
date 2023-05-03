@@ -4,6 +4,7 @@
     "**/.git": true,
     "**/.yarn": true,
     "**/node_modules": true,
-    "**/tmp": true
+    "**/tmp": true,
+    "**/data": true
   }
 }
