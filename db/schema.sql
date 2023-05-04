@@ -1857,6 +1857,10 @@ CREATE TABLE `player_gamelogs` (
   `opp` varchar(3) NOT NULL,
   `pos` varchar(3) NOT NULL,
 
+  `jnum` tinyint(2) DEFAULT NULL,
+  `active` tinyint(1) DEFAULT NULL,
+  `started` tinyint(1) DEFAULT NULL,
+
   `pa` tinyint(2) DEFAULT 0,
   `pc` tinyint(2) DEFAULT 0,
   `py` int(3) DEFAULT 0,

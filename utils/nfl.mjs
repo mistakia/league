@@ -13,6 +13,7 @@ export const getPlayers = async ({ year, token, ignore_cache = false }) => {
   if (!ignore_cache) {
     const cache_value = await cache.get({ key: cache_key })
     if (cache_value) {
+      log(`cache hit for nfl players with year: ${year}`)
       return cache_value
     }
   }
@@ -119,6 +120,9 @@ export const getGames = async ({ year, week, seas_type, token }) => {
   const cache_key = `/nfl/games/${year}/${seas_type}/${week}.json`
   const cache_value = await cache.get({ key: cache_key })
   if (cache_value) {
+    log(
+      `cache hit for nfl games with year: ${year}, week: ${week}, seas_type: ${seas_type}`
+    )
     return cache_value
   }
 
@@ -144,6 +148,7 @@ export const getPlays = async ({ id, token, bypass_cache = false }) => {
   if (!bypass_cache) {
     const cache_value = await cache.get({ key: cache_key })
     if (cache_value) {
+      log(`cache hit for nfl plays with id: ${id}`)
       return cache_value
     }
   }
@@ -396,6 +401,7 @@ export const get_combine_profiles = async ({
   if (!ignore_cache) {
     const cache_value = await cache.get({ key: cache_key })
     if (cache_value) {
+      log(`cache hit for nfl combine profiles with year: ${year}`)
       return cache_value
     }
   }
