@@ -16,8 +16,9 @@ const { start, end } = constants.season
 const expect = chai.expect
 
 describe('SCRIPTS /rosters - generate weekly rosters', function () {
+  this.timeout(60 * 1000)
+
   before(async function () {
-    this.timeout(60 * 1000)
     await knex.migrate.forceFreeMigrationsLock()
     await knex.migrate.rollback()
     await knex.migrate.latest()
@@ -26,7 +27,6 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
 
   describe('process', function () {
     beforeEach(async function () {
-      this.timeout(60 * 1000)
       MockDate.set(start.subtract('1', 'month').toISOString())
       await league(knex)
     })
@@ -203,7 +203,6 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
 
   /* describe('errors', function () {
    *   beforeEach(async function () {
-   *     this.timeout(60 * 1000)
    *     MockDate.set(start.subtract('1', 'month').toISOString())
    *     await league(knex)
    *   })
