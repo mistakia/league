@@ -1444,9 +1444,8 @@ DROP TABLE IF EXISTS `nfl_snaps`;
 CREATE TABLE `nfl_snaps` (
   `esbid` int(10) NOT NULL,
   `playId` int(10) NOT NULL,
-  `nflId` int(10) NOT NULL,
-  KEY `playId` (`playId`),
-  UNIQUE KEY `snap` (`playId`,`nflId`)
+  `nflId` int(10) NOT NULL comment 'ngs nflId/gsisItId',
+  UNIQUE KEY `snap` (`playId`,`nflId`,`esbid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -1815,7 +1814,7 @@ CREATE TABLE `nfl_snaps_current_week` (
   `playId` int(10) NOT NULL,
   `nflId` int(10) NOT NULL,
   KEY `playId` (`playId`),
-  UNIQUE KEY `snap` (`playId`,`nflId`)
+  UNIQUE KEY `snap` (`playId`,`nflId`,`esbid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -1905,6 +1904,26 @@ CREATE TABLE `player_gamelogs` (
   `dsf` tinyint(2) DEFAULT 0,
   `dtpr` tinyint(2) DEFAULT 0,
   `dtd` tinyint(2) DEFAULT 0,
+  UNIQUE KEY `pid` (`pid`, `esbid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `player_snaps_game`
+--
+
+DROP TABLE IF EXISTS `player_snaps_game`;
+
+CREATE TABLE `player_snaps_game` (
+  `esbid` int(10) NOT NULL,
+  `pid` varchar(25) NOT NULL,
+
+  `snaps_off` tinyint(3) unsigned DEFAULT NULL comment 'Offensive snaps',
+  `snaps_def` tinyint(3) unsigned DEFAULT NULL comment 'Defensive snaps',
+  `snaps_st` tinyint(3) unsigned DEFAULT NULL comment 'Special teams snaps',
+  `snaps_pass` tinyint(3) unsigned DEFAULT NULL comment 'Passing snaps (Pass attempts, sacks, scrambles)',
+  `snaps_run` tinyint(3) unsigned DEFAULT NULL comment 'Rushing snaps',
   UNIQUE KEY `pid` (`pid`, `esbid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
