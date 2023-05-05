@@ -17,7 +17,7 @@ const log = debug('export-data-nfl-games')
 debug.enable('export-data-nfl-games')
 
 const export_data_nfl_games = async () => {
-  const data = await db('nfl_games')
+  const data = await db('nfl_games').orderBy('esbid', 'asc')
 
   const header = {}
   for (const field of Object.keys(data[0])) {
@@ -27,8 +27,8 @@ const export_data_nfl_games = async () => {
   const csv_data_string = JSON.stringify(csv_data)
   const csv = convertToCSV(csv_data_string)
 
-  const json_file_path = `${data_path}/nfl_games.json`
-  const csv_file_path = `${data_path}/nfl_games.csv`
+  const json_file_path = `${data_path}/nfl/games.json`
+  const csv_file_path = `${data_path}/nfl/games.csv`
 
   await fs.writeJson(json_file_path, data, { spaces: 2 })
   log(`wrote json to ${json_file_path}`)
