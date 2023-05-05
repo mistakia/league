@@ -18,23 +18,41 @@ debug.enable('export-data-player-gamelogs')
 
 const export_data_player_gamelogs = async () => {
   const data = await db('player_gamelogs')
+    .select('player_gamelogs.*', 'nfl_games.year')
+    .join('nfl_games', 'player_gamelogs.esbid', 'nfl_games.esbid')
+    .orderBy('esbid', 'asc')
+    .orderBy('pid', 'asc')
 
   const header = {}
   for (const field of Object.keys(data[0])) {
     header[field] = field
   }
-  const csv_data = [header, ...data]
-  const csv_data_string = JSON.stringify(csv_data)
-  const csv = convertToCSV(csv_data_string)
 
-  const json_file_path = `${data_path}/player_gamelogs.json`
-  const csv_file_path = `${data_path}/player_gamelogs.csv`
+  const gamelogs_by_year = {}
+  for (const item of data) {
+    const { year, ...gamelog } = item
+    if (!gamelogs_by_year[year]) {
+      gamelogs_by_year[year] = []
+    }
 
-  await fs.writeJson(json_file_path, data, { spaces: 2 })
-  log(`wrote json to ${json_file_path}`)
+    gamelogs_by_year[year].push(gamelog)
+  }
 
-  await fs.writeFile(csv_file_path, csv)
-  log(`wrote csv to ${csv_file_path}`)
+  for (const year of Object.keys(gamelogs_by_year)) {
+    const year_data = gamelogs_by_year[year]
+    const year_json_file_path = `${data_path}/player_gamelogs_${year}.json`
+    const year_csv_file_path = `${data_path}/player_gamelogs_${year}.csv`
+
+    const year_csv_data = [header, ...year_data]
+    const year_csv_data_string = JSON.stringify(year_csv_data)
+    const year_csv = convertToCSV(year_csv_data_string)
+
+    await fs.writeJson(year_json_file_path, year_data, { spaces: 2 })
+    log(`wrote json to ${year_json_file_path}`)
+
+    await fs.writeFile(year_csv_file_path, year_csv)
+    log(`wrote csv to ${year_csv_file_path}`)
+  }
 }
 
 const main = async () => {
