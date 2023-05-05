@@ -10,7 +10,7 @@ import { constants, convertToCSV } from '#common'
 import { isMain } from '#utils'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const data_path = path.join(__dirname, '../data', 'nfl_plays')
+const data_path = path.join(__dirname, '../data')
 
 // const argv = yargs(hideBin(process.argv)).argv
 const log = debug('export-data-nfl-plays')
@@ -324,12 +324,18 @@ const nfl_play_fields = [
   'cpoe'
 ]
 
-const export_data_nfl_plays = async ({ year = constants.season.year } = {}) => {
+const export_data_nfl_plays = async ({
+  year = constants.season.year,
+  seas_type = 'REG'
+} = {}) => {
   log(`exporting plays for ${year}`)
   const data = await db('nfl_plays')
     .select('nfl_plays.*')
     .join('nfl_games', 'nfl_plays.esbid', 'nfl_games.esbid')
     .where('nfl_games.year', year)
+    .where('nfl_games.seas_type', seas_type)
+    .orderBy('nfl_plays.esbid', 'asc')
+    .orderBy('nfl_plays.playId', 'asc')
 
   const header = {}
 
@@ -340,13 +346,13 @@ const export_data_nfl_plays = async ({ year = constants.season.year } = {}) => {
   const csv_data_string = JSON.stringify(csv_data)
   const csv = convertToCSV(csv_data_string)
 
-  await fs.ensureDir(data_path)
+  await fs.ensureDir(`${data_path}/nfl/plays/${year}`)
 
-  const json_file_path = `${data_path}/${year}.json`
-  const csv_file_path = `${data_path}/${year}.csv`
+  // const json_file_path = `${data_path}/${year}.json`
+  const csv_file_path = `${data_path}/nfl/plays/${year}/${seas_type}.csv`
 
-  await fs.writeJson(json_file_path, data, { spaces: 2 })
-  log(`wrote json to ${json_file_path}`)
+  // await fs.writeJson(json_file_path, data, { spaces: 2 })
+  // log(`wrote json to ${json_file_path}`)
 
   await fs.writeFile(csv_file_path, csv)
   log(`wrote csv to ${csv_file_path}`)
@@ -361,9 +367,12 @@ const main = async () => {
       .orderBy('year', 'asc')
 
     const years = years_query_results.map((r) => r.year)
+    const seas_types = ['PRE', 'REG', 'POST']
 
     for (const year of years) {
-      await export_data_nfl_plays({ year })
+      for (const seas_type of seas_types) {
+        await export_data_nfl_plays({ year, seas_type })
+      }
     }
   } catch (err) {
     error = err

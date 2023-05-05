@@ -17,7 +17,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const data_path = path.join(__dirname, '../data')
 
 const export_league_matchups = async () => {
-  const data = await db('matchups')
+  const data = await db('matchups').orderBy('uid', 'asc')
 
   const header = {}
   for (const field of Object.keys(data[0])) {
@@ -27,8 +27,9 @@ const export_league_matchups = async () => {
   const csv_data_string = JSON.stringify(csv_data)
   const csv = convertToCSV(csv_data_string)
 
-  const json_file_path = `${data_path}/league_matchups.json`
-  const csv_file_path = `${data_path}/league_matchups.csv`
+  await fs.ensureDir(`${data_path}/league`)
+  const json_file_path = `${data_path}/league/matchups.json`
+  const csv_file_path = `${data_path}/league/matchups.csv`
 
   await fs.writeJson(json_file_path, data, { spaces: 2 })
   log(`wrote json to ${json_file_path}`)

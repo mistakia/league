@@ -18,6 +18,9 @@ const data_path = path.join(__dirname, '../data')
 
 const export_league_team_stats = async () => {
   const data = await db('team_stats')
+    .orderBy('year', 'asc')
+    .orderBy('lid', 'asc')
+    .orderBy('tid', 'asc')
 
   const header = {}
   for (const field of Object.keys(data[0])) {
@@ -27,9 +30,10 @@ const export_league_team_stats = async () => {
   const csv_data_string = JSON.stringify(csv_data)
   const csv = convertToCSV(csv_data_string)
 
-  const json_file_path = `${data_path}/league_team_stats.json`
-  const csv_file_path = `${data_path}/league_team_stats.csv`
+  const json_file_path = `${data_path}/league/team_stats.json`
+  const csv_file_path = `${data_path}/league/team_stats.csv`
 
+  await fs.ensureDir(`${data_path}/league`)
   await fs.writeJson(json_file_path, data, { spaces: 2 })
   log(`wrote json to ${json_file_path}`)
 

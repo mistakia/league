@@ -40,13 +40,14 @@ const export_data_player_gamelogs = async () => {
 
   for (const year of Object.keys(gamelogs_by_year)) {
     const year_data = gamelogs_by_year[year]
-    const year_json_file_path = `${data_path}/player_gamelogs_${year}.json`
-    const year_csv_file_path = `${data_path}/player_gamelogs_${year}.csv`
+    const year_json_file_path = `${data_path}/nfl/player_gamelogs/${year}.json`
+    const year_csv_file_path = `${data_path}/nfl/player_gamelogs/${year}.csv`
 
     const year_csv_data = [header, ...year_data]
     const year_csv_data_string = JSON.stringify(year_csv_data)
     const year_csv = convertToCSV(year_csv_data_string)
 
+    await fs.ensureDir(`${data_path}/nfl/player_gamelogs`)
     await fs.writeJson(year_json_file_path, year_data, { spaces: 2 })
     log(`wrote json to ${year_json_file_path}`)
 
