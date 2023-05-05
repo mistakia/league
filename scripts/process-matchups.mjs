@@ -13,11 +13,6 @@ debug.enable('process-matchups,calculate-standings')
 const run = async ({ lid = 1, year = constants.season.year }) => {
   const league = await getLeague({ lid, year })
   const matchups = await db('matchups').where({ lid, year })
-  const gamelogs = await db('player_gamelogs')
-    .select('player_gamelogs.*', 'nfl_games.week', 'nfl_games.year')
-    .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
-    .where('nfl_games.year', year)
-    .where('nfl_games.seas_type', 'REG')
   const teams = await db('teams').where({ lid })
   const tids = teams.map((t) => t.uid)
 
@@ -31,6 +26,7 @@ const run = async ({ lid = 1, year = constants.season.year }) => {
 
   const starters = {}
   const active = {}
+  const player_pids = {}
   for (let week = 1; week <= finalWeek; week++) {
     starters[week] = {}
     active[week] = {}
@@ -46,8 +42,19 @@ const run = async ({ lid = 1, year = constants.season.year }) => {
         pid: p.pid,
         pos: p.pos
       }))
+      for (const p of roster.active) {
+        player_pids[p.pid] = true
+      }
     }
   }
+
+  const gamelogs = await db('player_gamelogs')
+    .select('player_gamelogs.*', 'nfl_games.week', 'nfl_games.year')
+    .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
+    .where('nfl_games.year', year)
+    .where('player_gamelogs.active', true)
+    .where('nfl_games.seas_type', 'REG')
+    .whereIn('player_gamelogs.pid', Object.keys(player_pids))
 
   const result = calculateStandings({
     starters,
