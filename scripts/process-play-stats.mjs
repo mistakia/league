@@ -3,7 +3,7 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { isMain, getPlayer, updatePlayer } from '#utils'
+import { isMain } from '#utils'
 import db from '#db'
 import {
   constants,
@@ -16,7 +16,7 @@ import {
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('process-play-stats')
-debug.enable('process-play-stats,update-player,get-player')
+debug.enable('process-play-stats')
 const current_week = Math.max(
   dayjs().day() === 2 ? constants.season.week - 1 : constants.season.week,
   1
@@ -72,6 +72,7 @@ const format_gamelog = ({ esbid, pid, stats, opp, pos, tm }) => {
     pid,
     pos,
     opp,
+    active: true,
     ...cleanedStats
   }
 }
@@ -115,78 +116,9 @@ const run = async ({
     `loaded play stats for ${Object.keys(play_stats_by_gsispid).length} players`
   )
 
-  // Update players with missing gsispids
-  const existing_gsispids = player_gsispid_rows.map((p) => p.gsispid)
-  const missing_gsispids = gsispids.filter(
-    (p) => !existing_gsispids.includes(p)
-  )
-  for (const gsispid of missing_gsispids) {
-    const playStat = play_stats_by_gsispid[gsispid].find(
-      (p) => p.clubCode && p.playerName
-    )
-    if (!playStat) continue
-
-    const params = {
-      pname: playStat.playerName,
-      team: playStat.clubCode,
-      gsisid: playStat.gsisId
-    }
-
-    let player_row
-    try {
-      player_row = await getPlayer(params)
-    } catch (e) {
-      // ignore
-    }
-
-    if (!player_row) {
-      missing.push(params)
-      continue
-    }
-
-    if (!argv.dry) {
-      await updatePlayer({ player_row, update: { gsispid } })
-    }
-    player_row.gsispid = gsispid
-    player_gsispid_rows.push(player_row)
-  }
-
   const play_stats_by_gsisid = groupBy(playStats, 'gsisId')
   const gsisids = Object.keys(play_stats_by_gsisid)
   const player_gsisid_rows = await db('player').whereIn('gsisid', gsisids)
-
-  const existing_gsisids = player_gsisid_rows.map((p) => p.gsisid)
-  const missing_gsisids = gsisids.filter((p) => !existing_gsisids.includes(p))
-  for (const gsisid of missing_gsisids) {
-    const playStat = play_stats_by_gsisid[gsisid].find(
-      (p) => p.clubCode && p.playerName
-    )
-    if (!playStat) continue
-
-    // TODO - include gsispid?
-    const params = {
-      pname: playStat.playerName,
-      team: playStat.clubCode
-    }
-
-    let player_row
-    try {
-      player_row = await getPlayer(params)
-    } catch (e) {
-      // ignore
-    }
-
-    if (!player_row) {
-      missing.push(params)
-      continue
-    }
-
-    if (!argv.dry) {
-      await updatePlayer({ player_row, update: { gsisid } })
-    }
-    player_row.gsisid = gsisid
-    player_gsisid_rows.push(player_row)
-  }
 
   // track generated gamelogs by gsispids
   const gamelog_gsispids = []
@@ -196,7 +128,10 @@ const run = async ({
     if (gsispid === 'null') continue
 
     const player_row = player_gsispid_rows.find((p) => p.gsispid === gsispid)
-    if (!player_row) continue
+    if (!player_row) {
+      log(`missing player for gsispid: ${gsispid}`)
+      continue
+    }
     if (!constants.positions.includes(player_row.pos)) continue
 
     const playStat = play_stats_by_gsispid[gsispid].find((p) => p.clubCode)
@@ -224,7 +159,10 @@ const run = async ({
     if (gsisid === 'null') continue
 
     const player_row = player_gsisid_rows.find((p) => p.gsisid === gsisid)
-    if (!player_row) continue
+    if (!player_row) {
+      log(`missing player for gsisid: ${gsisid}`)
+      continue
+    }
     if (!constants.positions.includes(player_row.pos)) continue
 
     // check to see if gamelog was already generated using gsispid
@@ -298,16 +236,6 @@ const run = async ({
   missing.forEach((m) => log(`could not find player: ${m.pname} / ${m.cteam}`))
 
   if (player_gamelog_inserts.length) {
-    const pids = player_gamelog_inserts.map((p) => p.pid)
-    const deleted_count = await db('player_gamelogs')
-      .leftJoin('nfl_games', 'player_gamelogs.esbid', 'nfl_games.esbid')
-      .where('nfl_games.week', week)
-      .where('nfl_games.year', year)
-      .where('nfl_games.seas_type', seas_type)
-      .whereNotIn('player_gamelogs.pid', pids)
-      .del()
-    log(`Deleted ${deleted_count} excess gamelogs`)
-
     log(`Updated ${player_gamelog_inserts.length} gamelogs`)
     await db('player_gamelogs')
       .insert(player_gamelog_inserts)
