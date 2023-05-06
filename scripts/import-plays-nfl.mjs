@@ -5,7 +5,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants, fixTeam } from '#common'
-import { isMain, getToken, wait, nfl } from '#utils'
+import { isMain, wait, nfl } from '#utils'
 
 const log = debug('import-plays-nfl')
 debug.enable('import-plays-nfl')
@@ -135,7 +135,7 @@ const importPlaysForWeek = async ({
     }
 
     if (!token) {
-      token = await getToken()
+      token = await nfl.getToken()
     }
 
     if (!token) {
@@ -214,13 +214,18 @@ const importPlaysForWeek = async ({
 const importPlaysForYear = async ({
   year = constants.season.year,
   seas_type = 'REG',
-  force_update = false
+  force_update = false,
+  token
 } = {}) => {
   const weeks = await db('nfl_games')
     .select('week')
     .where({ year, seas_type })
     .groupBy('week')
     .orderBy('week', 'asc')
+
+  if (!token) {
+    token = await nfl.getToken()
+  }
 
   log(`processing plays for ${weeks.length} weeks in ${year} (${seas_type})`)
   for (const { week } of weeks) {
@@ -229,7 +234,8 @@ const importPlaysForYear = async ({
       year,
       week,
       seas_type,
-      force_update
+      force_update,
+      token
     })
     await wait(4000)
   }
@@ -247,20 +253,21 @@ const importAllPlays = async ({ start, end, seas_type, force_update } = {}) => {
   }
 
   for (const year of years) {
+    const token = nfl.getToken()
     log(`loading plays for year: ${year}, seas_type: ${seas_type || 'all'}`)
 
     if (seas_type || seas_type.toLowerCase() === 'pre') {
-      await importPlaysForYear({ year, seas_type: 'PRE', force_update })
+      await importPlaysForYear({ year, seas_type: 'PRE', force_update, token })
       await wait(3000)
     }
 
     if (seas_type || seas_type.toLowerCase() === 'reg') {
-      await importPlaysForYear({ year, seas_type: 'REG', force_update })
+      await importPlaysForYear({ year, seas_type: 'REG', force_update, token })
       await wait(3000)
     }
 
     if (seas_type || seas_type.toLowerCase() === 'post') {
-      await importPlaysForYear({ year, seas_type: 'POST', force_update })
+      await importPlaysForYear({ year, seas_type: 'POST', force_update, token })
       await wait(3000)
     }
   }

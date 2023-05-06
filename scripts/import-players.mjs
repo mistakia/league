@@ -2,7 +2,7 @@ import fetch from 'node-fetch'
 import debug from 'debug'
 
 import db from '#db'
-import { isMain, getToken, getPlayer, wait, updatePlayer } from '#utils'
+import { isMain, getPlayer, wait, updatePlayer, nfl } from '#utils'
 import { constants, fixTeam } from '#common'
 import config from '#config'
 
@@ -11,7 +11,7 @@ debug.enable('import:nfl:players,get-player,update-player')
 
 const run = async () => {
   const missing = []
-  const token = await getToken()
+  const token = await nfl.getToken()
 
   log('fetching team ids')
   // get team ids

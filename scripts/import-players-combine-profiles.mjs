@@ -1,34 +1,28 @@
 import debug from 'debug'
-// import yargs from 'yargs'
-// import { hideBin } from 'yargs/helpers'
+import yargs from 'yargs'
+import { hideBin } from 'yargs/helpers'
 
 // import db from '#db'
 import { constants } from '#common'
-import {
-  isMain,
-  getPlayer,
-  createPlayer,
-  updatePlayer,
-  nfl,
-  getToken
-} from '#utils'
+import { isMain, getPlayer, createPlayer, updatePlayer, nfl } from '#utils'
 
-// const argv = yargs(hideBin(process.argv)).argv
+const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-players-combine-profiles')
 debug.enable(
   'import-players-combine-profiles,get-player,create-player,update-player,nfl'
 )
 
-const import_players_from_combine_profiles = async ({
+const import_players_from_combine_profiles_for_year = async ({
+  year = constants.season.year,
+  token,
   ignore_cache = false
 } = {}) => {
   let changeCount = 0
   let createCount = 0
 
-  const token = await getToken()
   const data = await nfl.get_combine_profiles({
     ignore_cache,
-    year: constants.season.year,
+    year,
     token
   })
 
@@ -68,7 +62,7 @@ const import_players_from_combine_profiles = async ({
           col: profile.person.collegeNames.length
             ? profile.person.collegeNames[0]
             : null,
-          start: constants.season.year,
+          start: year,
           esbid: profile.person.esbId,
           jnum: 0,
           dob: '0000-00-00', // TODO - ideally required
@@ -91,10 +85,35 @@ const import_players_from_combine_profiles = async ({
   log(`created ${createCount} players`)
 }
 
+const import_all_players_from_combine_profiles = async ({
+  start = constants.season.year,
+  end = constants.season.year
+}) => {
+  const token = await nfl.getToken()
+  start = Math.max(start, 2006)
+  end = Math.min(end, constants.season.year)
+
+  for (let year = start; year <= end; year++) {
+    await import_players_from_combine_profiles_for_year({
+      year,
+      token
+    })
+  }
+}
+
 const main = async () => {
   let error
   try {
-    await import_players_from_combine_profiles()
+    if (argv.all) {
+      await import_all_players_from_combine_profiles({
+        start: argv.start,
+        end: argv.end
+      })
+    } else {
+      await import_players_from_combine_profiles_for_year({
+        year: argv.year
+      })
+    }
   } catch (err) {
     error = err
     log(error)
@@ -114,4 +133,4 @@ if (isMain(import.meta.url)) {
   main()
 }
 
-export default import_players_from_combine_profiles
+export default import_players_from_combine_profiles_for_year

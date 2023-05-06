@@ -4,7 +4,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants, fixTeam, formatPosition } from '#common'
-import { isMain, getToken, nfl, wait, getPlayer } from '#utils'
+import { isMain, nfl, wait, getPlayer } from '#utils'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import_player_gamelogs')
@@ -33,7 +33,7 @@ const import_player_gamelogs_for_week = async ({
     }
 
     if (!token) {
-      token = await getToken()
+      token = await nfl.getToken()
     }
 
     if (!token) {
@@ -164,13 +164,18 @@ const import_player_gamelogs_for_week = async ({
 const import_player_gamelogs_for_year = async ({
   year = constants.season.year,
   seas_type = 'REG',
-  ignore_cache = false
+  ignore_cache = false,
+  token
 } = {}) => {
   const weeks = await db('nfl_games')
     .select('week')
     .where({ year, seas_type })
     .groupBy('week')
     .orderBy('week', 'asc')
+
+  if (!token) {
+    token = await nfl.getToken()
+  }
 
   log(`processing plays for ${weeks.length} weeks in ${year} (${seas_type})`)
   for (const { week } of weeks) {
@@ -179,7 +184,8 @@ const import_player_gamelogs_for_year = async ({
       year,
       week,
       seas_type,
-      ignore_cache
+      ignore_cache,
+      token
     })
     await wait(4000)
   }
@@ -205,6 +211,8 @@ const import_all_player_gamelogs = async ({
   }
 
   for (const year of years) {
+    const token = await nfl.getToken()
+
     const is_seas_type_all = seas_type.toLowerCase() === 'all'
     log(`loading plays for year: ${year}, seas_type: ${seas_type}`)
 
@@ -212,7 +220,8 @@ const import_all_player_gamelogs = async ({
       await import_player_gamelogs_for_year({
         year,
         seas_type: 'PRE',
-        ignore_cache
+        ignore_cache,
+        token
       })
       await wait(3000)
     }
@@ -221,7 +230,8 @@ const import_all_player_gamelogs = async ({
       await import_player_gamelogs_for_year({
         year,
         seas_type: 'REG',
-        ignore_cache
+        ignore_cache,
+        token
       })
       await wait(3000)
     }
@@ -230,7 +240,8 @@ const import_all_player_gamelogs = async ({
       await import_player_gamelogs_for_year({
         year,
         seas_type: 'POST',
-        ignore_cache
+        ignore_cache,
+        token
       })
       await wait(3000)
     }

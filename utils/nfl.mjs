@@ -1,4 +1,4 @@
-import fetch from 'node-fetch'
+import fetch, { FormData } from 'node-fetch'
 import debug from 'debug'
 
 import config from '#config'
@@ -8,6 +8,24 @@ import * as cache from './cache.mjs'
 const log = debug('nfl')
 debug.enable('nfl')
 
+export const getToken = async () => {
+  const form = new FormData()
+  form.set('grant_type', 'client_credentials')
+  const data = await fetch(`${config.nfl_api_url}/v1/reroute`, {
+    method: 'POST',
+    body: form,
+    headers: {
+      origin: 'https://www.nfl.com',
+      referer: 'https://www.nfl.com/scores/',
+      'User-Agent':
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36',
+      'x-domain-id': '100'
+    }
+  }).then((res) => res.json())
+
+  return data.access_token
+}
+
 export const getPlayers = async ({ year, token, ignore_cache = false }) => {
   const cache_key = `/nfl/players/${year}.json`
   if (!ignore_cache) {
@@ -16,6 +34,10 @@ export const getPlayers = async ({ year, token, ignore_cache = false }) => {
       log(`cache hit for nfl players with year: ${year}`)
       return cache_value
     }
+  }
+
+  if (!token) {
+    token = await getToken()
   }
 
   let results = []
@@ -126,6 +148,10 @@ export const getGames = async ({ year, week, seas_type, token }) => {
     return cache_value
   }
 
+  if (!token) {
+    token = await getToken()
+  }
+
   const url = `${config.nfl_api_url}/experience/v1/games?season=${year}&seasonType=${seas_type}&week=${week}&withExternalIds=true&limit=100`
   log(url)
   const res = await fetch(url, {
@@ -154,6 +180,10 @@ export const getPlays = async ({ id, token, bypass_cache = false }) => {
   }
 
   log(`getting game details for ${id}`)
+
+  if (!token) {
+    token = await getToken()
+  }
 
   const query = `
 query {
@@ -404,6 +434,10 @@ export const get_combine_profiles = async ({
       log(`cache hit for nfl combine profiles with year: ${year}`)
       return cache_value
     }
+  }
+
+  if (!token) {
+    token = await getToken()
   }
 
   const url = `${config.nfl_combine_profiles_url}?year=${year}&limit=1000`
