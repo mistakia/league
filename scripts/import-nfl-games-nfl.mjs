@@ -6,7 +6,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants, fixTeam, getGameDayAbbreviation } from '#common'
-import { isMain, getToken, wait, nfl } from '#utils'
+import { isMain, wait, nfl } from '#utils'
 
 dayjs.extend(timezone)
 
@@ -88,7 +88,7 @@ const run = async ({
   }
 
   if (!token) {
-    token = await getToken()
+    token = await nfl.getToken()
   }
 
   if (!token) {
@@ -148,7 +148,7 @@ const main = async () => {
       const start = argv.start || 1970
       const end = argv.end || 2002
       for (let year = start; year < end; year++) {
-        const token = await getToken()
+        const token = await nfl.getToken()
 
         for (let week = 0; week < 5; week++) {
           await run({ year, week, seas_type: 'PRE', token, force_import })

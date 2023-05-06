@@ -1,6 +1,7 @@
 const path = require('path')
 
 module.exports = {
+  user_agent: '',
   ssl: true,
   key: path.resolve(__dirname, './key.pem'),
   cert: path.resolve(__dirname, './cert.pem'),

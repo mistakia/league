@@ -3,14 +3,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import { constants, Errors, formatHeight } from '#common'
-import {
-  isMain,
-  getToken,
-  nfl,
-  getPlayer,
-  updatePlayer,
-  createPlayer
-} from '#utils'
+import { isMain, nfl, getPlayer, updatePlayer, createPlayer } from '#utils'
 import db from '#db'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -25,7 +18,7 @@ const importPlayersNFL = async ({
   log(`loading players for year: ${year}`)
 
   if (!token) {
-    token = await getToken()
+    token = await nfl.getToken()
   }
 
   const pids = []
@@ -153,7 +146,7 @@ const main = async () => {
     }
 
     if (argv.all) {
-      const token = await getToken()
+      const token = await nfl.getToken()
       let year = argv.start || 1970
       for (; year < constants.season.year; year++) {
         await importPlayersNFL({ year, token })
