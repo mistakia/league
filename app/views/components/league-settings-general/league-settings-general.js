@@ -24,7 +24,7 @@ export default function LeagueSettingsGeneral({
       />
       <EditableLeagueField
         label='Number of Teams'
-        field='nteams'
+        field='num_teams'
         type='int'
         max={20}
         min={4}
@@ -48,7 +48,7 @@ export default function LeagueSettingsGeneral({
       />
       <EditableLeagueField
         label='Min Bid'
-        field='minBid'
+        field='min_bid'
         type='int'
         max={1}
         min={0}

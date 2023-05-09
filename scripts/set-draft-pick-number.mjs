@@ -7,7 +7,7 @@ import { getLeague, isMain } from '#utils'
 const log = debug('set-draft-pick-number')
 
 const calculatePick = ({ round, order, league }) =>
-  (round - 1) * league.nteams + order
+  (round - 1) * league.num_teams + order
 
 const run = async () => {
   const lid = 1
@@ -43,14 +43,14 @@ const run = async () => {
   let count = 0
   while (compPicks.length) {
     // find comp picks following the draft order
-    const tid = draftOrder[count % league.nteams]
+    const tid = draftOrder[count % league.num_teams]
     const index = compPicks.findIndex((p) => p.tid === tid)
     if (index >= 0) {
       const pick = compPicks.splice(index, 1)[0]
       inserts.push(pick)
       const num = picks.length + inserts.length
       await db('draft')
-        .update({ pick: num, round: Math.ceil(num / league.nteams) })
+        .update({ pick: num, round: Math.ceil(num / league.num_teams) })
         .where('uid', pick.uid)
     }
 

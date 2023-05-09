@@ -14,7 +14,7 @@ export default class DashboardTeamValue extends React.Component {
 
     const allClassNames = []
     if (allRank <= quarterOfLeague) allClassNames.push('text-green')
-    if (allRank >= league.nteams - quarterOfLeague) {
+    if (allRank >= league.num_teams - quarterOfLeague) {
       allClassNames.push('text-red')
     }
 
@@ -34,7 +34,8 @@ export default class DashboardTeamValue extends React.Component {
       const rank = values.indexOf(value) + 1
       const classNames = []
       if (rank <= quarterOfLeague) classNames.push('text-green')
-      if (rank >= league.nteams - quarterOfLeague) classNames.push('text-red')
+      if (rank >= league.num_teams - quarterOfLeague)
+        classNames.push('text-red')
       rows.push(
         <tr key={idx}>
           <td>{position}</td>
@@ -49,7 +50,7 @@ export default class DashboardTeamValue extends React.Component {
     const draft_rank = draft_values.indexOf(draft_value) + 1
     const classNames = []
     if (draft_rank <= quarterOfLeague) classNames.push('text-green')
-    if (draft_rank >= league.nteams - quarterOfLeague)
+    if (draft_rank >= league.num_teams - quarterOfLeague)
       classNames.push('text-red')
     rows.push(
       <tr key={'DRAFT'}>

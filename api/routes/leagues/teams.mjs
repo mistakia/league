@@ -30,7 +30,7 @@ router.post('/?', async (req, res) => {
 
     // make sure league has space for another team
     const teams = await db('teams').where({ lid: leagueId })
-    if (teams.length >= league.nteams) {
+    if (teams.length >= league.num_teams) {
       return res.status(400).send({ error: 'league is full' })
     }
 

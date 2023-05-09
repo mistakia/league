@@ -39,7 +39,7 @@ const calculateBaselines = ({ players, rosterRows = [], league, week }) => {
   }
 
   const rows = []
-  for (let i = 0; i < league.nteams; i++) {
+  for (let i = 0; i < league.num_teams; i++) {
     rows.push(rosterRows[i] || { players: [] })
   }
 

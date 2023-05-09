@@ -1,6 +1,11 @@
 import express from 'express'
 
-import { getRosters, getLeague } from '#utils'
+import {
+  getRosters,
+  getLeague,
+  generate_league_format_hash,
+  generate_scoring_format_hash
+} from '#utils'
 import { constants } from '#common'
 import transactions from './transactions.mjs'
 import draft from './draft.mjs'
@@ -82,8 +87,8 @@ router.put('/:leagueId', async (req, res) => {
       'tdrec',
       'fuml',
       'name',
-      'nteams',
-      'minBid',
+      'num_teams',
+      'min_bid',
       'prtd',
       'krtd',
 
@@ -143,8 +148,8 @@ router.put('/:leagueId', async (req, res) => {
       'twoptc',
       'tdrec',
       'fuml',
-      'nteams',
-      'minBid',
+      'num_teams',
+      'min_bid',
       'prtd',
       'krtd',
 
@@ -175,7 +180,7 @@ router.put('/:leagueId', async (req, res) => {
       'mk',
       'faab',
       'cap',
-      'minBid',
+      'min_bid',
       'prtd',
       'krtd',
 
@@ -215,7 +220,7 @@ router.put('/:leagueId', async (req, res) => {
 
     const league_fields = [
       'name',
-      'nteams',
+      'num_teams',
 
       'espn_id',
       'sleeper_id',
@@ -234,6 +239,23 @@ router.put('/:leagueId', async (req, res) => {
     }
 
     // TODO create changelog
+
+    const league_format_hash = generate_league_format_hash({
+      ...league,
+      [field]: value
+    })
+    const scoring_format_hash = generate_scoring_format_hash({
+      ...league,
+      [field]: value
+    })
+    if (
+      league_format_hash !== league.league_format_hash ||
+      scoring_format_hash !== league.scoring_format_hash
+    ) {
+      await db('seasons')
+        .update({ league_format_hash, scoring_format_hash })
+        .where({ lid, year: constants.season.year })
+    }
 
     res.send({ value })
   } catch (err) {

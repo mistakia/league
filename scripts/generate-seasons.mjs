@@ -2,7 +2,11 @@ import debug from 'debug'
 
 import db from '#db'
 import { constants } from '#common'
-import { isMain } from '#utils'
+import {
+  isMain,
+  generate_league_format_hash,
+  generate_scoring_format_hash
+} from '#utils'
 
 const log = debug('generate-seasons')
 debug.enable('generate-seasons')
@@ -31,6 +35,12 @@ const generate_seasons = async () => {
     if (season.year !== constants.season.year) {
       const new_season = {
         ...season,
+
+        league_format_hash: generate_league_format_hash({
+          ...league,
+          ...season
+        }),
+        scoring_format_hash: generate_scoring_format_hash(season),
 
         // reset
         tran_start: null,

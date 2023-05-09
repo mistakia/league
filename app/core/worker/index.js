@@ -39,9 +39,9 @@ export function workerCalculateStatsFromPlays({ plays, qualifiers, league }) {
 export function calculatePlayerValues(payload) {
   const { league, players, rosterRows } = payload
 
-  const { nteams, cap, minBid } = league
+  const { num_teams, cap, min_bid } = league
   const rosterSize = getRosterSize(league)
-  const leagueTotalCap = nteams * cap - nteams * rosterSize * minBid
+  const leagueTotalCap = num_teams * cap - num_teams * rosterSize * min_bid
 
   const finalWeek = constants.season.finalWeek
   for (const player of players) {

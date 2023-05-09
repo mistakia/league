@@ -32,9 +32,9 @@ const processLeague = async ({ year, lid }) => {
   const { finalWeek } = constants.season
   const league = await getLeague({ lid })
   const teams = await db('teams').where({ lid })
-  const { nteams, cap, minBid } = league
+  const { num_teams, cap, min_bid } = league
   const rosterSize = getRosterSize(league)
-  const leagueTotalCap = nteams * cap - nteams * rosterSize * minBid
+  const leagueTotalCap = num_teams * cap - num_teams * rosterSize * min_bid
   let league_available_salary_space = 0
 
   const rosterRows = []
@@ -45,7 +45,7 @@ const processLeague = async ({ year, lid }) => {
     rosterRow.players.forEach((p) => rostered_pids.push(p.pid))
     const roster = new Roster({ roster: rosterRow, league })
     const team_available_salary_space =
-      roster.availableCap - minBid * roster.availableSpace
+      roster.availableCap - min_bid * roster.availableSpace
     if (team_available_salary_space > 0) {
       league_available_salary_space =
         league_available_salary_space + team_available_salary_space

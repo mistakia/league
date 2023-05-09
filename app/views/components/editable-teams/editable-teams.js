@@ -37,7 +37,7 @@ export default class EditableTeams extends React.Component {
     }
 
     let addTeam
-    if (teams.size < league.nteams) {
+    if (teams.size < league.num_teams) {
       addTeam = (
         <Button onClick={this.handleAdd} text>
           Add Team

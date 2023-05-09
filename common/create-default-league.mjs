@@ -1,7 +1,7 @@
 const createDefaultLeague = ({ commishid = 0 } = {}) => ({
   commishid,
   name: 'SUPERFLEX DYNASTY LEAGUE',
-  nteams: 12,
+  num_teams: 12,
   sqb: 1,
   srb: 2,
   swr: 2,
@@ -43,7 +43,7 @@ const createDefaultLeague = ({ commishid = 0 } = {}) => ({
   prtd: 6,
   draft_start: null,
   adate: null,
-  minBid: 1,
+  min_bid: 1,
   tddate: 1606626000,
   b_QB: 13.3,
   b_RB: 8.9,

@@ -26,9 +26,9 @@ const calculateVOR = async ({ year, rookie, league, week = 'ALL' }) => {
     throw new Error(`${year} invalid year`)
   }
 
-  const { nteams, cap, minBid } = league
+  const { num_teams, cap, min_bid } = league
   const rosterSize = getRosterSize(league)
-  const leagueTotalCap = nteams * cap - nteams * rosterSize * minBid
+  const leagueTotalCap = num_teams * cap - num_teams * rosterSize * min_bid
 
   log(`calculating VOR for ${year}`)
 

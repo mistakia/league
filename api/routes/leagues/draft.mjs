@@ -133,7 +133,9 @@ router.post('/?', async (req, res) => {
     })
     const roster = new Roster({ roster: rosterRow, league })
     const value =
-      league.nteams - pick.pick + 1 > 0 ? league.nteams - pick.pick + 1 : 1
+      league.num_teams - pick.pick + 1 > 0
+        ? league.num_teams - pick.pick + 1
+        : 1
 
     const insertRoster = db('rosters_players').insert({
       rid: roster.uid,
@@ -190,7 +192,7 @@ router.post('/?', async (req, res) => {
     if (pick.pick === 1) {
       message += 'the first overall pick '
     } else {
-      const pickNum = pick.pick % league.nteams || league.nteams
+      const pickNum = pick.pick % league.num_teams || league.num_teams
       message += `pick #${pick.pick} (${pick.round}.${('0' + pickNum).slice(
         -2
       )}) `

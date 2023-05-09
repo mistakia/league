@@ -5,7 +5,7 @@ const getPlayerCountBySlot = ({ league }) => {
   for (const slot of Object.keys(slots)) {
     const id = slot.toLowerCase()
     const setting = league[`s${id}`] || league[id] || 0
-    count[slot] = setting * league.nteams
+    count[slot] = setting * league.num_teams
   }
 
   return count
