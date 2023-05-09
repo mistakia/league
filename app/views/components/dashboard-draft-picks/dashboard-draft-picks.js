@@ -11,7 +11,7 @@ function SeasonDraftPicks({ picks, year, league }) {
   const sortedPicks = picks.sort((a, b) => a.round - b.round || a.pick - b.pick)
   const pickItems = []
   for (const pick of sortedPicks) {
-    const pickNum = pick.pick % league.nteams || league.nteams
+    const pickNum = pick.pick % league.num_teams || league.num_teams
     const pickStr = `${pick.round}.${('0' + pickNum).slice(-2)}`
     pickItems.push(
       <div key={pick.uid} className='player__item table__row'>

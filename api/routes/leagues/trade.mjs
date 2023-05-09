@@ -515,7 +515,7 @@ router.post(
       )
       for (const pick of picks) {
         const pickTeam = teams.find((t) => t.uid === pick.otid)
-        const pickNum = pick.pick % league.nteams || league.nteams
+        const pickNum = pick.pick % league.num_teams || league.num_teams
         let pickStr = pick.pick
           ? `${pick.year} ${pick.round}.${('0' + pickNum).slice(-2)}`
           : `${pick.year} ${pick.round}${nth(pick.round)}`

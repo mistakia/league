@@ -6,7 +6,7 @@ export const League = new Record({
   uid: null,
   commishid: null,
   name: null,
-  nteams: null,
+  num_teams: null,
 
   sqb: null,
   srb: null,
@@ -69,7 +69,7 @@ export const League = new Record({
   draft_hour_min: null,
   draft_hour_max: null,
 
-  minBid: 0,
+  min_bid: 0,
   hosted: 0,
   host: null,
 
@@ -107,7 +107,7 @@ export function createLeague({
   uid,
   commishid,
   name,
-  nteams,
+  num_teams,
 
   sqb,
   srb,
@@ -170,7 +170,7 @@ export function createLeague({
   draft_hour_min,
   draft_hour_max,
 
-  minBid,
+  min_bid,
   hosted,
   host,
 
@@ -207,7 +207,7 @@ export function createLeague({
     uid,
     commishid,
     name,
-    nteams,
+    num_teams,
 
     sqb,
     srb,
@@ -270,7 +270,7 @@ export function createLeague({
     draft_hour_min,
     draft_hour_max,
 
-    minBid,
+    min_bid,
     hosted,
     host,
 

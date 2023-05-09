@@ -7,8 +7,8 @@ import { constants } from '#common'
 import { isMain } from '#utils'
 
 // const argv = yargs(hideBin(process.argv)).argv
-const log = debug('script')
-debug.enable('script')
+const log = debug('template')
+debug.enable('template')
 
 const script = async () => {}
 const main = async () => {

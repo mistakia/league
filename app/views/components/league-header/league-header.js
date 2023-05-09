@@ -48,8 +48,8 @@ export default function LeagueHeader({ league }) {
     <div className='league__header'>
       <h1>{league.name}</h1>
       <Stack direction='row' spacing={1} className='league__chips'>
-        {Boolean(league.nteams) && (
-          <Chip variant='outlined' label={`${league.nteams} Teams`} />
+        {Boolean(league.num_teams) && (
+          <Chip variant='outlined' label={`${league.num_teams} Teams`} />
         )}
         {isHalfPPR && <Chip size='small' label='Half PPR' />}
         {isFullPPR && <Chip size='small' label='Full PPR' />}

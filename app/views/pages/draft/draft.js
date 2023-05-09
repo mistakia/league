@@ -55,7 +55,7 @@ export default function DraftPage() {
       )
     } else if (nextPick) {
       if (dayjs().isBefore(nextPick.draftWindow) && !isPreviousSelectionMade) {
-        const pickNum = nextPick.pick % league.nteams || league.nteams
+        const pickNum = nextPick.pick % league.num_teams || league.num_teams
         draftInfo = (
           <div className='draft__side-top-pick'>
             <div className='draft__side-top-pick-title'>
@@ -66,7 +66,7 @@ export default function DraftPage() {
           </div>
         )
       } else {
-        const pickNum = nextPick.pick % league.nteams || league.nteams
+        const pickNum = nextPick.pick % league.num_teams || league.num_teams
         const now = dayjs()
         const isWindowClosed = now.isAfter(windowEnd)
         const hours = windowEnd.diff(now, 'hours')

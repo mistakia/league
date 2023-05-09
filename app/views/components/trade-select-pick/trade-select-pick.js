@@ -12,7 +12,7 @@ export default class TradeSelectPick extends React.Component {
 
     let text = `${pick.year} - ${ordinalSuffixOf(pick.round)}`
     if (pick.pick) {
-      const pickNum = pick.pick % league.nteams || league.nteams
+      const pickNum = pick.pick % league.num_teams || league.num_teams
       const pickStr = `${pick.round}.${('0' + pickNum).slice(-2)}`
       text = `${text} #${pick.pick} (${pickStr})`
     }

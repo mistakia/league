@@ -11,7 +11,7 @@ export default class DraftPick extends React.Component {
   render() {
     const { playerMap, pick, team, league, isActive, isUser } = this.props
 
-    const pickNum = pick.pick % league.nteams || league.nteams
+    const pickNum = pick.pick % league.num_teams || league.num_teams
 
     const classNames = ['draft__pick']
     if (isActive && !pick.pid) {

@@ -6,9 +6,9 @@ export default function ({ players, league }) {
   // calculate total available vorp
   let totalVorp = 0
 
-  const { nteams, cap, minBid } = league
+  const { num_teams, cap, min_bid } = league
   const rosterSize = getRosterSize(league)
-  const leagueTotalCap = nteams * cap - nteams * rosterSize * minBid
+  const leagueTotalCap = num_teams * cap - num_teams * rosterSize * min_bid
 
   for (const player of players) {
     let vorpRos = 0

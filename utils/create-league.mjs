@@ -1,9 +1,12 @@
 import db from '#db'
 import { constants, createDefaultLeague } from '#common'
 
+import generate_league_format_hash from './generate-league-format-hash.mjs'
+import generate_scoring_format_hash from './generate-scoring-format-hash.mjs'
+
 export default async function ({ lid, commishid, ...params } = {}) {
   const defaultLeague = createDefaultLeague({ commishid })
-  const { name, nteams, hosted, host, ...season } = Object.assign(
+  const { name, num_teams, hosted, host, ...season } = Object.assign(
     {},
     defaultLeague,
     params
@@ -12,7 +15,7 @@ export default async function ({ lid, commishid, ...params } = {}) {
   const league = {
     commishid,
     name,
-    nteams,
+    num_teams,
     hosted,
     host
   }
@@ -32,6 +35,8 @@ export default async function ({ lid, commishid, ...params } = {}) {
   await db('seasons').insert({
     lid: leagueId,
     year: constants.season.year,
+    league_format_hash: generate_league_format_hash({ ...league, ...season }),
+    scoring_format_hash: generate_scoring_format_hash(season),
     ...season
   })
 

@@ -2131,6 +2131,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@trashman/ed25519-blake2b@npm:^0.0.3":
+  version: 0.0.3
+  resolution: "@trashman/ed25519-blake2b@npm:0.0.3"
+  dependencies:
+    napi-macros: ^2.0.0
+    node-gyp: latest
+    node-gyp-build: ^4.4.0
+  checksum: 4a2b358350fe050e2b0779480e28ebf5b8f8ab7bc6905ad64820bc045eb5e0743129e5b4743301febe642e84908712f440ba711ff180de50953c3248b4cb3b1f
+  languageName: node
+  linkType: hard
+
 "@trysound/sax@npm:0.2.0":
   version: 0.2.0
   resolution: "@trysound/sax@npm:0.2.0"
@@ -8349,6 +8360,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"napi-macros@npm:^2.0.0":
+  version: 2.2.2
+  resolution: "napi-macros@npm:2.2.2"
+  checksum: c6f9bd71cdbbc37ddc3535aa5be481238641d89585b8a3f4d301cb89abf459e2d294810432bb7d12056d1f9350b1a0899a5afcf460237a3da6c398cf0fec7629
+  languageName: node
+  linkType: hard
+
 "natural-compare@npm:^1.4.0":
   version: 1.4.0
   resolution: "natural-compare@npm:1.4.0"
@@ -8493,6 +8511,17 @@ __metadata:
     node-gyp-build-optional: optional.js
     node-gyp-build-test: build-test.js
   checksum: d888bae0fb88335f69af1b57a2294a931c5042f36e413d8d364c992c9ebfa0b96ffe773179a5a2c8f04b73856e8634e09cce108dbb9804396d3cc8c5455ff2db
+  languageName: node
+  linkType: hard
+
+"node-gyp-build@npm:^4.4.0":
+  version: 4.6.0
+  resolution: "node-gyp-build@npm:4.6.0"
+  bin:
+    node-gyp-build: bin.js
+    node-gyp-build-optional: optional.js
+    node-gyp-build-test: build-test.js
+  checksum: 25d78c5ef1f8c24291f4a370c47ba52fcea14f39272041a90a7894cd50d766f7c8cb8fb06c0f42bf6f69b204b49d9be3c8fc344aac09714d5bdb95965499eb15
   languageName: node
   linkType: hard
 
@@ -10469,6 +10498,7 @@ __metadata:
     "@mui/styled-engine-sc": ^5.10.1
     "@sendgrid/mail": ^7.6.2
     "@simonwep/pickr": ^1.7.2
+    "@trashman/ed25519-blake2b": ^0.0.3
     babel-loader: ^8.2.5
     babel-plugin-dev-expression: ^0.2.3
     babel-plugin-module-resolver: ^4.1.0

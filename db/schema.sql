@@ -166,6 +166,9 @@ CREATE TABLE `seasons` (
   `year` smallint(4) NOT NULL,
   `season_started_at` int(11) unsigned DEFAULT NULL,
 
+  `league_format_hash` varchar(64) NOT NULL,
+  `scoring_format_hash` varchar(64) NOT NULL,
+
   `sqb` tinyint(1) NOT NULL,
   `srb` tinyint(1) NOT NULL,
   `swr` tinyint(1) NOT NULL,
@@ -190,7 +193,7 @@ CREATE TABLE `seasons` (
 
   `faab` int(4) NOT NULL,
   `cap` int(4) NOT NULL,
-  `minBid` tinyint(1) DEFAULT 0,
+  `min_bid` tinyint(1) DEFAULT 0,
 
   `pa` decimal(3,2) NOT NULL,
   `pc` decimal(3,2) NOT NULL,
@@ -351,7 +354,7 @@ CREATE TABLE `leagues` (
   `uid` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `commishid` int(6) NOT NULL,
   `name` varchar(50) NOT NULL,
-  `nteams` tinyint(2) NOT NULL,
+  `num_teams` tinyint(2) NOT NULL,
 
   `espn_id` int unsigned DEFAULT NULL,
   `sleeper_id` int unsigned DEFAULT NULL,
@@ -377,6 +380,60 @@ CREATE TABLE `leagues` (
 
   UNIQUE KEY `uid` (`uid`),
   KEY `commishid` (`commishid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `league_formats`
+--
+
+DROP TABLE IF EXISTS `league_formats`;
+
+CREATE TABLE `league_formats` (
+  `league_format_hash` varchar(64) NOT NULL,
+  `scoring_format_hash` varchar(64) NOT NULL,
+
+  `num_teams` tinyint(2) NOT NULL,
+
+  `sqb` tinyint(1) NOT NULL,
+  `srb` tinyint(1) NOT NULL,
+  `swr` tinyint(1) NOT NULL,
+  `ste` tinyint(1) NOT NULL,
+  `srbwr` tinyint(1) NOT NULL,
+  `srbwrte` tinyint(1) NOT NULL,
+  `sqbrbwrte` tinyint(1) NOT NULL,
+  `swrte` tinyint(1) NOT NULL,
+  `sdst` tinyint(1) NOT NULL,
+  `sk` tinyint(1) NOT NULL,
+
+  `bench` tinyint(2) NOT NULL,
+  `ps` tinyint(1) NOT NULL,
+  `ir` tinyint(1) NOT NULL,
+
+  `cap` int(4) NOT NULL,
+  `min_bid` tinyint(1) DEFAULT 0,
+
+  `pa` decimal(3,2) NOT NULL,
+  `pc` decimal(3,2) NOT NULL,
+  `py` decimal(3,2) NOT NULL,
+  `ints` tinyint(1) NOT NULL,
+  `tdp` tinyint(1) NOT NULL,
+  `ra` decimal(2,1) NOT NULL,
+  `ry` decimal(2,1) NOT NULL,
+  `tdr` tinyint(1) NOT NULL,
+  `rec` decimal(2,1) NOT NULL,
+  `rbrec` decimal(2,1) NOT NULL,
+  `wrrec` decimal(2,1) NOT NULL,
+  `terec` decimal(2,1) NOT NULL,
+  `recy` decimal(2,1) NOT NULL,
+  `twoptc` tinyint(1) NOT NULL,
+  `tdrec` tinyint(1) NOT NULL,
+  `fuml` tinyint(1) NOT NULL,
+  `prtd` tinyint(1) NOT NULL,
+  `krtd` tinyint(1) NOT NULL,
+
+  UNIQUE KEY `league_format_hash` (`league_format_hash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
