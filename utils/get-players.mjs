@@ -1,19 +1,31 @@
 import db from '#db'
 import { constants } from '#common'
 import getPlayerTransactions from './get-player-transactions.mjs'
+import getLeague from './get-league.mjs'
 
 export default async function ({
   textSearch,
-  leagueId,
-  pids = [],
-  all = false,
   teamId,
-  baseline_players = false
+  leagueId,
+  scoring_format_hash,
+  league_format_hash,
+  pids = [],
+  include_all_active_players = false,
+  include_baseline_players = false
 }) {
-  const leaguePlayerIds = []
-  const baselinePlayerIds = []
+  const league_roster_player_ids = []
+  const baseline_player_ids = []
 
   const projectionLeagueId = leagueId || constants.DEFAULTS.LEAGUE_ID
+  const league = await getLeague({ lid: projectionLeagueId })
+
+  if (!league_format_hash) {
+    league_format_hash = league.league_format_hash
+  }
+
+  if (!scoring_format_hash) {
+    scoring_format_hash = league.scoring_format_hash
+  }
 
   if (teamId) {
     const query = db('rosters_players')
@@ -27,7 +39,7 @@ export default async function ({
     }
 
     const playerSlots = await query
-    playerSlots.forEach((s) => leaguePlayerIds.push(s.pid))
+    playerSlots.forEach((s) => league_roster_player_ids.push(s.pid))
   } else if (leagueId) {
     const query = db('rosters_players')
       .join('rosters', 'rosters_players.rid', 'rosters.uid')
@@ -40,15 +52,15 @@ export default async function ({
     }
 
     const playerSlots = await query
-    playerSlots.forEach((s) => leaguePlayerIds.push(s.pid))
+    playerSlots.forEach((s) => league_roster_player_ids.push(s.pid))
   }
 
-  if (baseline_players) {
+  if (include_baseline_players && leagueId) {
     const baselines = await db('league_baselines')
       .select('pid')
-      .where({ lid: projectionLeagueId })
+      .where({ lid: leagueId })
       .groupBy('pid')
-    baselines.forEach((b) => baselinePlayerIds.push(b.pid))
+    baselines.forEach((b) => baseline_player_ids.push(b.pid))
   }
 
   const selects = [
@@ -85,7 +97,7 @@ export default async function ({
       .whereIn('player.pos', constants.positions)
   } else if (pids.length) {
     query.whereIn('player.pid', pids)
-  } else if (all) {
+  } else if (include_all_active_players) {
     query.orWhere(function () {
       this.whereIn('player.pos', constants.positions)
         .whereNot('player.cteam', 'INA')
@@ -107,35 +119,39 @@ export default async function ({
     }
   }
 
-  if (leagueId) {
+  if (league_format_hash) {
     const seasonlog_selects = [
-      'league_player_regular_seasonlogs.startable_games',
-      'league_player_regular_seasonlogs.points',
-      'league_player_regular_seasonlogs.points_per_game',
-      'league_player_regular_seasonlogs.points_added',
-      'league_player_regular_seasonlogs.points_added_per_game',
-      'league_player_regular_seasonlogs.points_rnk',
-      'league_player_regular_seasonlogs.points_pos_rnk',
-      'league_player_regular_seasonlogs.points_added_rnk',
-      'league_player_regular_seasonlogs.points_added_pos_rnk'
+      'league_format_player_seasonlogs.startable_games',
+      'league_format_player_seasonlogs.points',
+      'league_format_player_seasonlogs.points_per_game',
+      'league_format_player_seasonlogs.points_added',
+      'league_format_player_seasonlogs.points_added_per_game',
+      'league_format_player_seasonlogs.points_rnk',
+      'league_format_player_seasonlogs.points_pos_rnk',
+      'league_format_player_seasonlogs.points_added_rnk',
+      'league_format_player_seasonlogs.points_added_pos_rnk'
     ]
     query
-      .leftJoin('league_player_regular_seasonlogs', function () {
-        this.on('league_player_regular_seasonlogs.pid', 'player.pid')
+      .leftJoin('league_format_player_seasonlogs', function () {
+        this.on('league_format_player_seasonlogs.pid', 'player.pid')
         this.andOn(
-          'league_player_regular_seasonlogs.year',
+          'league_format_player_seasonlogs.year',
           constants.season.year
         )
       })
       .select(db.raw(seasonlog_selects.join(',')))
+      .where(
+        'league_format_player_seasonlogs.league_format_hash',
+        league_format_hash
+      )
   }
 
-  if (leaguePlayerIds.length || teamId || leagueId) {
-    query.orWhereIn('player.pid', leaguePlayerIds)
+  if (league_roster_player_ids.length || teamId || leagueId) {
+    query.orWhereIn('player.pid', league_roster_player_ids)
   }
 
-  if (baselinePlayerIds.length) {
-    query.orWhereIn('player.pid', baselinePlayerIds)
+  if (baseline_player_ids.length) {
+    query.orWhereIn('player.pid', baseline_player_ids)
   }
 
   const player_rows = await query
@@ -153,7 +169,7 @@ export default async function ({
 
   const returnedPlayerIds = Object.keys(players_by_pid)
   const playerIdsInLeague = returnedPlayerIds.filter((pid) =>
-    leaguePlayerIds.includes(pid)
+    league_roster_player_ids.includes(pid)
   )
 
   if (playerIdsInLeague.length) {
@@ -168,35 +184,52 @@ export default async function ({
     }
   }
 
-  const leaguePointsProj = await db('league_player_projection_points')
-    .where({
-      lid: projectionLeagueId,
-      year: constants.season.year
-    })
-    .whereIn('pid', returnedPlayerIds)
+  if (scoring_format_hash) {
+    const leaguePointsProj = await db('scoring_format_player_projection_points')
+      .where({
+        scoring_format_hash,
+        year: constants.season.year
+      })
+      .whereIn('pid', returnedPlayerIds)
 
-  for (const pointProjection of leaguePointsProj) {
-    players_by_pid[pointProjection.pid].points[pointProjection.week] =
-      pointProjection
+    for (const pointProjection of leaguePointsProj) {
+      players_by_pid[pointProjection.pid].points[pointProjection.week] =
+        pointProjection
+    }
   }
 
-  const leagueValuesProj = await db('league_player_projection_values')
-    .where({
-      lid: projectionLeagueId,
-      year: constants.season.year
-    })
-    .whereIn('pid', returnedPlayerIds)
+  if (league_format_hash) {
+    const league_format_values = await db(
+      'league_format_player_projection_values'
+    )
+      .where({
+        league_format_hash,
+        year: constants.season.year
+      })
+      .whereIn('pid', returnedPlayerIds)
 
-  for (const pointProjection of leagueValuesProj) {
-    const { vorp, vorp_adj, market_salary, market_salary_adj } = pointProjection
-    players_by_pid[pointProjection.pid].vorp[pointProjection.week] = vorp
-    players_by_pid[pointProjection.pid].vorp_adj[pointProjection.week] =
-      vorp_adj
-    players_by_pid[pointProjection.pid].market_salary[pointProjection.week] =
-      market_salary
+    for (const row of league_format_values) {
+      const { pid, week, vorp, market_salary } = row
+      players_by_pid[pid].vorp[week] = vorp
+      players_by_pid[pid].market_salary[week] = market_salary
+    }
+  }
 
-    if (pointProjection.week === '0') {
-      players_by_pid[pointProjection.pid].market_salary_adj = market_salary_adj
+  if (leagueId) {
+    const leagueValuesProj = await db('league_player_projection_values')
+      .where({
+        lid: leagueId,
+        year: constants.season.year
+      })
+      .whereIn('pid', returnedPlayerIds)
+
+    for (const pointProjection of leagueValuesProj) {
+      const { pid, week, vorp_adj, market_salary_adj } = pointProjection
+      players_by_pid[pid].vorp_adj[week] = vorp_adj
+
+      if (pointProjection.week === '0') {
+        players_by_pid[pid].market_salary_adj = market_salary_adj
+      }
     }
   }
 
@@ -219,7 +252,12 @@ export default async function ({
     players_by_pid[rosProjection.pid].projection.ros = rosProjection
   }
 
-  if (!all && !textSearch && !pids.length && (teamId || leagueId)) {
+  if (
+    !include_all_active_players &&
+    !textSearch &&
+    !pids.length &&
+    (teamId || leagueId)
+  ) {
     const params = leagueId ? { lid: leagueId } : { tid: teamId }
     const contributions = await db('league_team_lineup_contributions').where(
       params

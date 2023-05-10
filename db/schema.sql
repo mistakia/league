@@ -169,21 +169,6 @@ CREATE TABLE `seasons` (
   `league_format_hash` varchar(64) NOT NULL,
   `scoring_format_hash` varchar(64) NOT NULL,
 
-  `sqb` tinyint(1) NOT NULL,
-  `srb` tinyint(1) NOT NULL,
-  `swr` tinyint(1) NOT NULL,
-  `ste` tinyint(1) NOT NULL,
-  `srbwr` tinyint(1) NOT NULL,
-  `srbwrte` tinyint(1) NOT NULL,
-  `sqbrbwrte` tinyint(1) NOT NULL,
-  `swrte` tinyint(1) NOT NULL,
-  `sdst` tinyint(1) NOT NULL,
-  `sk` tinyint(1) NOT NULL,
-
-  `bench` tinyint(2) NOT NULL,
-  `ps` tinyint(1) NOT NULL,
-  `ir` tinyint(1) NOT NULL,
-
   `mqb` tinyint(1) NOT NULL,
   `mrb` tinyint(1) NOT NULL,
   `mwr` tinyint(1) NOT NULL,
@@ -192,27 +177,6 @@ CREATE TABLE `seasons` (
   `mk` tinyint(1) NOT NULL,
 
   `faab` int(4) NOT NULL,
-  `cap` int(4) NOT NULL,
-  `min_bid` tinyint(1) DEFAULT 0,
-
-  `pa` decimal(3,2) NOT NULL,
-  `pc` decimal(3,2) NOT NULL,
-  `py` decimal(3,2) NOT NULL,
-  `ints` tinyint(1) NOT NULL,
-  `tdp` tinyint(1) NOT NULL,
-  `ra` decimal(2,1) NOT NULL,
-  `ry` decimal(2,1) NOT NULL,
-  `tdr` tinyint(1) NOT NULL,
-  `rec` decimal(2,1) NOT NULL,
-  `rbrec` decimal(2,1) NOT NULL,
-  `wrrec` decimal(2,1) NOT NULL,
-  `terec` decimal(2,1) NOT NULL,
-  `recy` decimal(2,1) NOT NULL,
-  `twoptc` tinyint(1) NOT NULL,
-  `tdrec` tinyint(1) NOT NULL,
-  `fuml` tinyint(1) NOT NULL,
-  `prtd` tinyint(1) NOT NULL,
-  `krtd` tinyint(1) NOT NULL,
 
   `tag2` tinyint(1) unsigned NOT NULL DEFAULT '1', -- franchise tag count
   `tag3` tinyint(1) unsigned NOT NULL DEFAULT '1', -- rookie tag count
@@ -354,7 +318,6 @@ CREATE TABLE `leagues` (
   `uid` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `commishid` int(6) NOT NULL,
   `name` varchar(50) NOT NULL,
-  `num_teams` tinyint(2) NOT NULL,
 
   `espn_id` int unsigned DEFAULT NULL,
   `sleeper_id` int unsigned DEFAULT NULL,
@@ -367,13 +330,6 @@ CREATE TABLE `leagues` (
 
   `hosted` tinyint(1) DEFAULT 0,
   `host` tinyint(1) DEFAULT NULL,
-
-  `b_QB` decimal(2,1) unsigned DEFAULT NULL, -- baseline qb pts/game
-  `b_RB` decimal(2,1) unsigned DEFAULT NULL, -- baseline rb pts/game
-  `b_WR` decimal(2,1) unsigned DEFAULT NULL, -- baseline wr pts/game
-  `b_TE` decimal(2,1) unsigned DEFAULT NULL, -- baseline te pts/game
-  `b_K` decimal(2,1) unsigned DEFAULT NULL, -- baseline k pts/game
-  `b_DST` decimal(2,1) unsigned DEFAULT NULL, -- baseline dst pts/game
 
   `processed_at` int(11) DEFAULT NULL,
   `archived_at` int(11) DEFAULT NULL,
@@ -414,6 +370,27 @@ CREATE TABLE `league_formats` (
   `cap` int(4) NOT NULL,
   `min_bid` tinyint(1) DEFAULT 0,
 
+  `b_QB` decimal(2,1) unsigned DEFAULT NULL, -- baseline qb pts/game
+  `b_RB` decimal(2,1) unsigned DEFAULT NULL, -- baseline rb pts/game
+  `b_WR` decimal(2,1) unsigned DEFAULT NULL, -- baseline wr pts/game
+  `b_TE` decimal(2,1) unsigned DEFAULT NULL, -- baseline te pts/game
+  `b_K` decimal(2,1) unsigned DEFAULT NULL, -- baseline k pts/game
+  `b_DST` decimal(2,1) unsigned DEFAULT NULL, -- baseline dst pts/game
+
+  UNIQUE KEY `league_format_hash` (`league_format_hash`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `league_scoring_formats`
+--
+
+DROP TABLE IF EXISTS `league_scoring_formats`;
+
+CREATE TABLE `league_scoring_formats` (
+  `scoring_format_hash` varchar(64) NOT NULL,
+
   `pa` decimal(3,2) NOT NULL,
   `pc` decimal(3,2) NOT NULL,
   `py` decimal(3,2) NOT NULL,
@@ -433,7 +410,7 @@ CREATE TABLE `league_formats` (
   `prtd` tinyint(1) NOT NULL,
   `krtd` tinyint(1) NOT NULL,
 
-  UNIQUE KEY `league_format_hash` (`league_format_hash`)
+  UNIQUE KEY `scoring_format_hash` (`scoring_format_hash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -642,7 +619,6 @@ CREATE TABLE `ros_projections` (
   `dtd` decimal(4,1) DEFAULT NULL,
   `krtd` decimal(4,1) DEFAULT NULL,
   `prtd` decimal(4,1) DEFAULT NULL,
-  `week` varchar(3) NOT NULL,
   `year` smallint(4) NOT NULL,
   `timestamp` datetime NOT NULL,
   UNIQUE KEY `sourceid` (`sourceid`,`pid`,`year`),
@@ -652,16 +628,16 @@ CREATE TABLE `ros_projections` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `league_player_projection_points`
+-- Table structure for table `scoring_format_player_projection_points`
 --
 
-DROP TABLE IF EXISTS `league_player_projection_points`;
+DROP TABLE IF EXISTS `scoring_format_player_projection_points`;
 
-CREATE TABLE `league_player_projection_points` (
+CREATE TABLE `scoring_format_player_projection_points` (
   `pid` varchar(25) NOT NULL,
   `week` varchar(3) NOT NULL,
   `year` smallint(4) NOT NULL,
-  `lid` int(6) NOT NULL,
+  `scoring_format_hash` varchar(64) NOT NULL,
 
   `total` decimal(5,2) DEFAULT NULL,
 
@@ -702,7 +678,7 @@ CREATE TABLE `league_player_projection_points` (
   `krtd` decimal(4,1) DEFAULT NULL,
   `prtd` decimal(4,1) DEFAULT NULL,
   KEY `pid` (`pid`),
-  UNIQUE KEY `player_league_points` (`pid`, `lid`, `week`, `year`)
+  UNIQUE KEY `player_league_points` (`pid`, `scoring_format_hash`, `week`, `year`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -719,12 +695,30 @@ CREATE TABLE `league_player_projection_values` (
   `year` smallint(4) NOT NULL,
   `lid` int(6) NOT NULL,
 
-  `vorp` decimal(5,2) DEFAULT NULL,
   `vorp_adj` decimal(5,2) DEFAULT NULL,
-  `market_salary` decimal(6,2) DEFAULT NULL,
   `market_salary_adj` decimal(6,2) DEFAULT NULL,
   KEY `pid` (`pid`),
   UNIQUE KEY `player_value` (`pid`, `lid`, `week`, `year`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `league_format_player_projection_values`
+--
+
+DROP TABLE IF EXISTS `league_format_player_projection_values`;
+
+CREATE TABLE `league_format_player_projection_values` (
+  `pid` varchar(25) NOT NULL,
+  `week` varchar(3) NOT NULL,
+  `year` smallint(4) NOT NULL,
+  `league_format_hash` varchar(32) NOT NULL,
+
+  `vorp` decimal(5,2) DEFAULT NULL,
+  `market_salary` decimal(6,2) DEFAULT NULL,
+  KEY `pid` (`pid`),
+  UNIQUE KEY `player_value` (`pid`, `league_format_hash`, `week`, `year`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -2050,32 +2044,32 @@ CREATE TABLE `player_seasonlogs` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `league_player_gamelogs`
+-- Table structure for table `league_format_player_gamelogs`
 --
 
-DROP TABLE IF EXISTS `league_player_gamelogs`;
+DROP TABLE IF EXISTS `league_format_player_gamelogs`;
 
-CREATE TABLE `league_player_gamelogs` (
+CREATE TABLE `league_format_player_gamelogs` (
   `pid` varchar(25) NOT NULL,
   `esbid` int(10) NOT NULL,
 
-  `lid` int(6) NOT NULL,
+  `league_format_hash` varchar(32) NOT NULL,
   `points` decimal(4,1) DEFAULT NULL,
   `points_added` decimal(4,1) DEFAULT NULL,
   `pos_rnk` tinyint(2) unsigned DEFAULT NULL,
 
-  UNIQUE KEY `pid` (`pid`, `esbid`, `lid`)
+  UNIQUE KEY `pid` (`pid`, `esbid`, `league_format_hash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `league_player_regular_seasonlogs`
+-- Table structure for table `league_player_seasonlogs`
 --
 
-DROP TABLE IF EXISTS `league_player_regular_seasonlogs`;
+DROP TABLE IF EXISTS `league_player_seasonlogs`;
 
-CREATE TABLE `league_player_regular_seasonlogs` (
+CREATE TABLE `league_player_seasonlogs` (
   `pid` varchar(25) NOT NULL,
   `year` smallint(4) NOT NULL,
   `lid` int(6) NOT NULL,
@@ -2084,6 +2078,20 @@ CREATE TABLE `league_player_regular_seasonlogs` (
   `end_tid` int(6) DEFAULT NULL,
   `end_acquisition_type` tinyint(2) DEFAULT NULL,
   `salary` int(4) DEFAULT NULL,
+  UNIQUE KEY `pid` (`pid`, `year`, `lid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+--
+-- Table structure for table `league_format_player_seasonlogs`
+--
+
+DROP TABLE IF EXISTS `league_format_player_seasonlogs`;
+
+CREATE TABLE `league_format_player_seasonlogs` (
+  `pid` varchar(25) NOT NULL,
+  `year` smallint(4) NOT NULL,
+  `league_format_hash` varchar(32) NOT NULL,
   `startable_games` tinyint(2) DEFAULT NULL,
   `points` decimal(4,1) DEFAULT NULL,
   `points_per_game` decimal(3,1) DEFAULT NULL,
@@ -2094,20 +2102,20 @@ CREATE TABLE `league_player_regular_seasonlogs` (
   `points_pos_rnk` SMALLINT(5) DEFAULT NULL,
   `points_added_rnk` SMALLINT(5) DEFAULT NULL,
   `points_added_pos_rnk` SMALLINT(5) DEFAULT NULL,
-  UNIQUE KEY `pid` (`pid`, `year`, `lid`)
+  UNIQUE KEY `pid` (`pid`, `year`, `league_format_hash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `league_player`
+-- Table structure for table `league_format_player_careerlogs`
 --
 
-DROP TABLE IF EXISTS `league_player`;
+DROP TABLE IF EXISTS `league_format_player_careerlogs`;
 
-CREATE TABLE `league_player` (
+CREATE TABLE `league_format_player_careerlogs` (
   `pid` varchar(25) NOT NULL,
-  `lid` int(6) NOT NULL,
+  `league_format_hash` varchar(64) NOT NULL,
   `draft_rank` smallint(3) DEFAULT NULL,
   `startable_games` smallint(3) DEFAULT NULL,
   `points` decimal(6,1) DEFAULT NULL,
@@ -2128,24 +2136,24 @@ CREATE TABLE `league_player` (
   `top_24` TINYINT(2) DEFAULT NULL,
   `top_36` TINYINT(2) DEFAULT NULL,
 
-  UNIQUE KEY `pid` (`pid`, `lid`)
+  UNIQUE KEY `pid` (`pid`, `league_format_hash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `league_draft_pick_value`
+-- Table structure for table `league_format_draft_pick_value`
 --
 
-DROP TABLE IF EXISTS `league_draft_pick_value`;
+DROP TABLE IF EXISTS `league_format_draft_pick_value`;
 
-CREATE TABLE `league_draft_pick_value` (
-  `lid` int(6) NOT NULL,
+CREATE TABLE `league_format_draft_pick_value` (
+  `league_format_hash` varchar(64) NOT NULL,
   `rank` smallint(3) NOT null,
   `median_best_season_points_added_per_game` decimal(3,1) DEFAULT NULL,
   `median_career_points_added_per_game` decimal(3,1) DEFAULT NULL,
 
-  UNIQUE KEY `pick` (`rank`, `lid`)
+  UNIQUE KEY `pick` (`rank`, `league_format_hash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------

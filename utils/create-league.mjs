@@ -5,19 +5,14 @@ import generate_league_format_hash from './generate-league-format-hash.mjs'
 import generate_scoring_format_hash from './generate-scoring-format-hash.mjs'
 
 export default async function ({ lid, commishid, ...params } = {}) {
-  const defaultLeague = createDefaultLeague({ commishid })
-  const { name, num_teams, hosted, host, ...season } = Object.assign(
-    {},
-    defaultLeague,
-    params
-  )
+  const default_league_params = createDefaultLeague({ commishid })
+  const league_params = Object.assign({}, default_league_params, params)
 
   const league = {
     commishid,
-    name,
-    num_teams,
-    hosted,
-    host
+    name: league_params.name,
+    hosted: league_params.hosted,
+    host: league_params.host
   }
 
   if (lid) league.uid = lid
@@ -25,19 +20,62 @@ export default async function ({ lid, commishid, ...params } = {}) {
   const leagues = await db('leagues').insert(league)
   const leagueId = leagues[0]
 
-  for (const position of constants.positions) {
-    delete season[`b_${position}`]
-  }
+  const league_format = generate_league_format_hash(league_params)
+  const scoring_format = generate_scoring_format_hash(league_params)
 
-  delete season.processed_at
-  delete season.commishid
+  league_format.scoring_format_hash = scoring_format.scoring_format_hash
+
+  await db('league_formats')
+    .insert(league_format)
+    .onConflict('league_format_hash')
+    .ignore()
+  await db('league_scoring_formats')
+    .insert(scoring_format)
+    .onConflict('scoring_format_hash')
+    .ignore()
 
   await db('seasons').insert({
     lid: leagueId,
     year: constants.season.year,
-    league_format_hash: generate_league_format_hash({ ...league, ...season }),
-    scoring_format_hash: generate_scoring_format_hash(season),
-    ...season
+
+    league_format_hash: league_format.league_format_hash,
+    scoring_format_hash: scoring_format.scoring_format_hash,
+
+    mqb: league_params.mqb,
+    mrb: league_params.mrb,
+    mwr: league_params.mwr,
+    mte: league_params.mte,
+    mdst: league_params.mdst,
+    mk: league_params.mk,
+
+    faab: league_params.faab,
+
+    tag2: league_params.tag2,
+    tag3: league_params.tag3,
+    tag4: league_params.tag4,
+
+    ext1: league_params.ext1,
+    ext2: league_params.ext2,
+    ext3: league_params.ext3,
+    ext4: league_params.ext4,
+
+    fqb: league_params.fqb,
+    frb: league_params.frb,
+    fwr: league_params.fwr,
+    fte: league_params.fte,
+
+    tran_start: league_params.tran_start,
+    tran_end: league_params.tran_end,
+
+    ext_date: league_params.ext_date,
+
+    draft_start: league_params.draft_start,
+    draft_type: league_params.draft_type,
+    draft_hour_min: league_params.draft_hour_min,
+    draft_hour_max: league_params.draft_hour_max,
+
+    adate: league_params.adate,
+    tddate: league_params.tddate
   })
 
   return leagueId
