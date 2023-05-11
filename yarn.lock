@@ -7386,6 +7386,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"jsonwebtoken@npm:^9.0.0":
+  version: 9.0.0
+  resolution: "jsonwebtoken@npm:9.0.0"
+  dependencies:
+    jws: ^3.2.2
+    lodash: ^4.17.21
+    ms: ^2.1.1
+    semver: ^7.3.8
+  checksum: b9181cecf9df99f1dc0253f91ba000a1aa4d91f5816d1608c0dba61a5623726a0bfe200b51df25de18c1a6000825d231ad7ce2788aa54fd48dcb760ad9eb9514
+  languageName: node
+  linkType: hard
+
 "jsprim@npm:^1.2.2":
   version: 1.4.2
   resolution: "jsprim@npm:1.4.2"
@@ -10547,7 +10559,7 @@ __metadata:
     immutable: 4.1.0
     javascript-lp-solver: ^0.4.24
     jsdom: ^19.0.0
-    jsonwebtoken: ^8.5.1
+    jsonwebtoken: ^9.0.0
     knex: 2.4.0
     marked: ^1.1.0
     mini-css-extract-plugin: ^2.6.0
@@ -10779,6 +10791,17 @@ __metadata:
   bin:
     semver: bin/semver.js
   checksum: 2fa3e877568cd6ce769c75c211beaed1f9fce80b28338cadd9d0b6c40f2e2862bafd62c19a6cff42f3d54292b7c623277bcab8816a2b5521cf15210d43e75232
+  languageName: node
+  linkType: hard
+
+"semver@npm:^7.3.8":
+  version: 7.5.0
+  resolution: "semver@npm:7.5.0"
+  dependencies:
+    lru-cache: ^6.0.0
+  bin:
+    semver: bin/semver.js
+  checksum: 2d266937756689a76f124ffb4c1ea3e1bbb2b263219f90ada8a11aebebe1280b13bb76cca2ca96bdee3dbc554cbc0b24752eb895b2a51577aa644427e9229f2b
   languageName: node
   linkType: hard
 
