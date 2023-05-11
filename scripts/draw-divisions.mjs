@@ -11,7 +11,7 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('draw-divisions')
 debug.enable('draw-divisions')
 
-const run = async ({ lid, print = true, dry = false }) => {
+const run = async ({ lid, print = true, dry_run = false }) => {
   log(`Drawing divisions for leagueId: ${lid}`)
   const teams = await db('teams').where({ lid })
   const tids = teams.map((t) => t.uid)
@@ -83,7 +83,7 @@ const run = async ({ lid, print = true, dry = false }) => {
       division.push(team[0])
     }
 
-    if (!argv.dry) {
+    if (!dry_run) {
       for (const team of division) {
         await db('teams').update({ div }).where({ uid: team.tid })
       }
@@ -114,7 +114,7 @@ const main = async () => {
       process.exit()
     }
 
-    await run({ lid, print: argv.print, dry: argv.dry })
+    await run({ lid, print: argv.print, dry_run: argv.dry })
   } catch (err) {
     error = err
     console.log(error)
