@@ -22,7 +22,7 @@ router.get('/?', async (req, res) => {
         'users_teams.teamvoice',
         'users_teams.leaguetext'
       )
-      .where({ userid: req.auth.userId })
+      .where({ userid: req.auth.userId, year: constants.season.year })
       .join('users_teams', 'users_teams.tid', 'teams.uid')
 
     const leagueIds = teams.map((t) => t.lid)

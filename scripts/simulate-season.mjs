@@ -14,7 +14,10 @@ const timestamp = Math.round(Date.now() / 1000)
 const run = async () => {
   const leagueId = 1
   const currentWeek = Math.max(constants.season.week, 1)
-  const teamRows = await db('teams').where({ lid: leagueId })
+  const teamRows = await db('teams').where({
+    lid: leagueId,
+    year: constants.season.year
+  })
   const matchups = await db('matchups')
     .where({ lid: leagueId })
     .where('week', '>=', currentWeek)

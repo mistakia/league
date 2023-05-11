@@ -23,6 +23,7 @@ export default async function ({
    *   .join('teams', 'users_teams.tid', 'teams.uid')
    *   .join('users', 'users_teams.userid', 'users.id')
    *   .where('teams.lid', league.uid)
+   *   .where('teams.year', constants.season.year)
    */
   if (notifyLeague) {
     // send league text messages

@@ -4,7 +4,7 @@ import db from '#db'
 
 export default async function ({ lid }) {
   await db('matchups').del().where({ lid, year: constants.season.year })
-  const teams = await db('teams').where({ lid })
+  const teams = await db('teams').where({ lid, year: constants.season.year })
   const schedule = getSchedule(teams)
   const inserts = []
   for (const [index, value] of schedule.entries()) {

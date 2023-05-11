@@ -185,7 +185,10 @@ router.post('/?', async (req, res) => {
     })
     res.send(data)
 
-    const teams = await db('teams').where({ uid: teamId })
+    const teams = await db('teams').where({
+      uid: teamId,
+      year: constants.season.year
+    })
     const team = teams[0]
 
     let message = `${team.name} has selected ${player_row.fname} ${player_row.lname} (${player_row.pos}) with `

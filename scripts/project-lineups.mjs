@@ -10,7 +10,10 @@ const run = async () => {
   const { year } = constants.season
   const leagueId = 1
   const league = await getLeague({ lid: leagueId })
-  const teams = await db('teams').where({ lid: leagueId })
+  const teams = await db('teams').where({
+    lid: leagueId,
+    year: constants.season.year
+  })
   const team_lineup_inserts = []
   const team_lineup_starter_inserts = []
   const team_lineup_contribution_inserts = []

@@ -92,7 +92,10 @@ export default async function ({ tid, activate_pid, leagueId, userId }) {
     transaction
   }
 
-  const teams = await db('teams').where({ uid: tid })
+  const teams = await db('teams').where({
+    uid: tid,
+    year: constants.season.year
+  })
   const team = teams[0]
 
   const message = `${team.name} (${team.abbrv}) has activated ${player_row.fname} ${player_row.lname} (${player_row.pos}).`

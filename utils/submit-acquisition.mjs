@@ -48,7 +48,9 @@ export default async function ({
     throw new Error('invalid leagueId')
   }
 
-  const teams = await db('teams').where({ uid: teamId }).limit(1)
+  const teams = await db('teams')
+    .where({ uid: teamId, year: constants.season.year })
+    .limit(1)
   const team = teams[0]
 
   if (team.faab - bid < 0) {

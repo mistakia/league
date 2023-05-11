@@ -13,7 +13,12 @@ debug.enable('draw-divisions')
 
 const run = async ({ lid, print = true, dry_run = false }) => {
   log(`Drawing divisions for leagueId: ${lid}`)
-  const teams = await db('teams').where({ lid })
+  const teams = await db('teams').where({ lid, year: constants.season.year })
+  if (!teams.length) {
+    log(`No teams found for leagueId: ${lid}`)
+    return
+  }
+
   const tids = teams.map((t) => t.uid)
 
   // get team stats for last three years
@@ -85,7 +90,9 @@ const run = async ({ lid, print = true, dry_run = false }) => {
 
     if (!dry_run) {
       for (const team of division) {
-        await db('teams').update({ div }).where({ uid: team.tid })
+        await db('teams')
+          .update({ div })
+          .where({ uid: team.tid, year: constants.season.year })
       }
     }
 

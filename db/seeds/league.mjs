@@ -24,6 +24,7 @@ export default async function (knex) {
   for (let i = 1; i <= 12; i++) {
     await knex('teams').insert({
       uid: i,
+      year: constants.season.year,
       lid: 1,
       wo: i,
       do: i,

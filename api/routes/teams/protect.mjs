@@ -130,7 +130,10 @@ router.post('/?', async (req, res) => {
       payload: { data }
     })
 
-    const teams = await db('teams').where({ uid: tid })
+    const teams = await db('teams').where({
+      uid: tid,
+      year: constants.season.year
+    })
     const team = teams[0]
 
     const message = `${team.name} (${team.abbrv}) has designated ${player_row.fname} ${player_row.lname} (${player_row.pos}) as a protected practice squad member.`
