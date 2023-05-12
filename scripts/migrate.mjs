@@ -3,9 +3,13 @@ import debug from 'debug'
 // import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import config from '#config'
+// import config from '#config'
 // import { constants } from '#common'
-import { isMain } from '#utils'
+import {
+  isMain,
+  generate_league_format_hash,
+  generate_scoring_format_hash
+} from '#utils'
 
 // const argv = yargs(hideBin(process.argv)).argv
 const log = debug('migrate')
@@ -13,19 +17,25 @@ debug.enable('migrate')
 
 const migrate = async () => {
   // get all tables with pid columns
-  const tables = await db('information_schema.columns')
-    .select('table_name')
-    .where({ column_name: 'pid' })
-    .groupBy('table_name')
-    .where('table_schema', config.mysql.connection.database)
+  const seasons = await db('seasons').join(
+    'leagues',
+    'leagues.uid',
+    'seasons.lid'
+  )
 
-  const table_names = tables.map((table) => table.TABLE_NAME)
+  for (const season of seasons) {
+    const { league_format_hash } = generate_league_format_hash(season)
+    const { scoring_format_hash } = generate_scoring_format_hash(season)
 
-  // update all pid columns to be varchar(20)
-  for (const table_name of table_names) {
-    await db.schema.alterTable(table_name, (table) => {
-      table.string('pid', 25).alter()
-    })
+    await db('seasons')
+      .update({
+        league_format_hash,
+        scoring_format_hash
+      })
+      .where({
+        lid: season.lid,
+        year: season.year
+      })
   }
 }
 

@@ -16,16 +16,22 @@ export default function ({
   ps = 0,
   ir = 0,
   cap = 0,
-  min_bid = 0
+  min_bid = 0,
+  scoring_format_hash
 }) {
+  if (!scoring_format_hash) {
+    throw new Error('scoring_format_hash is required')
+  }
+
   const league_format_hash = ed25519
     .hash(
-      `${num_teams}${sqb}${srb}${swr}${ste}${srbwr}${srbwrte}${sqbrbwrte}${swrte}${sdst}${sk}${bench}${ps}${ir}${cap}${min_bid}`
+      `${num_teams}${sqb}${srb}${swr}${ste}${srbwr}${srbwrte}${sqbrbwrte}${swrte}${sdst}${sk}${bench}${ps}${ir}${cap}${min_bid}${scoring_format_hash}}`
     )
     .toString('hex')
 
   return {
     league_format_hash,
+    scoring_format_hash,
 
     num_teams,
 
