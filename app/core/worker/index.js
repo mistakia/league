@@ -79,13 +79,13 @@ export function calculatePlayerValues(payload) {
     baselinesByWeek[week] = baselines
 
     // calculate values
-    const total = calculateValues({
+    const total_vorp = calculateValues({
       players,
       baselines,
       week,
       league
     })
-    calculatePrices({ cap: leagueTotalCap, total, players, week })
+    calculatePrices({ cap: leagueTotalCap, total_vorp, players, week })
   }
 
   calculatePlayerValuesRestOfSeason({ players, rosterRows, league })

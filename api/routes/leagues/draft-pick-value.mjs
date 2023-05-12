@@ -1,5 +1,7 @@
 import express from 'express'
 
+import { getLeague } from '#utils'
+
 const router = express.Router({ mergeParams: true })
 
 router.get('/?', async (req, res) => {
@@ -7,13 +9,19 @@ router.get('/?', async (req, res) => {
   try {
     const { leagueId } = req.params
 
-    const data = await db('league_draft_pick_value')
+    const league = await getLeague({ lid: leagueId })
+
+    if (!league) {
+      return res.status(400).send({ error: 'invalid leagueId' })
+    }
+
+    const data = await db('league_format_draft_pick_value')
       .select(
         'rank',
         'median_best_season_points_added_per_game',
         'median_career_points_added_per_game'
       )
-      .where({ lid: leagueId })
+      .where({ league_format_hash: league.league_format_hash })
     res.send(data)
   } catch (err) {
     logger(err)

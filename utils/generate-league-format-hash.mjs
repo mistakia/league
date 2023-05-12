@@ -13,30 +13,38 @@ export default function ({
   sdst = 0,
   sk = 0,
   bench = 0,
-  pa = 0,
-  pc = 0,
-  py = 0,
-  ints = 0,
-  tdp = 0,
-  ra = 0,
-  ry = 0,
-  tdr = 0,
-  rec = 0,
-  rbrec = 0,
-  wrrec = 0,
-  terec = 0,
-  recy = 0,
-  twoptc = 0,
-  tdrec = 0,
-  fuml = 0,
-  prtd = 0,
-  krtd = 0,
+  ps = 0,
+  ir = 0,
   cap = 0,
   min_bid = 0
 }) {
-  return ed25519
+  const league_format_hash = ed25519
     .hash(
-      `${num_teams}${sqb}${srb}${swr}${ste}${srbwr}${srbwrte}${sqbrbwrte}${swrte}${sdst}${sk}${bench}${pa}${pc}${py}${ints}${tdp}${ra}${ry}${tdr}${rec}${recy}${rbrec}${wrrec}${terec}${twoptc}${tdrec}${fuml}${prtd}${krtd}${cap}${min_bid}`
+      `${num_teams}${sqb}${srb}${swr}${ste}${srbwr}${srbwrte}${sqbrbwrte}${swrte}${sdst}${sk}${bench}${ps}${ir}${cap}${min_bid}`
     )
     .toString('hex')
+
+  return {
+    league_format_hash,
+
+    num_teams,
+
+    sqb,
+    srb,
+    swr,
+    ste,
+    srbwr,
+    srbwrte,
+    sqbrbwrte,
+    swrte,
+    sdst,
+    sk,
+
+    bench,
+    ps,
+    ir,
+
+    cap,
+    min_bid
+  }
 }

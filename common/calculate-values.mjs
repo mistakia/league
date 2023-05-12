@@ -1,7 +1,7 @@
 import { default_points_added, season } from './constants.mjs'
 
 const calculateValues = ({ players, baselines, week, league = {} }) => {
-  let total = 0
+  let total_vorp = 0
 
   for (const player of players) {
     const { pos } = player
@@ -22,11 +22,11 @@ const calculateValues = ({ players, baselines, week, league = {} }) => {
     }
 
     if (player.vorp[week] > 0) {
-      total = total + player.vorp[week]
+      total_vorp = total_vorp + player.vorp[week]
     }
   }
 
-  return total
+  return total_vorp
 }
 
 export default calculateValues

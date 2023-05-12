@@ -7,11 +7,21 @@ export default async function ({ lid, year = constants.season.year } = {}) {
     return { uid: 0, ...league }
   }
 
-  const leagues = await db('leagues')
+  return db('leagues')
     .leftJoin('seasons', function () {
       this.on('leagues.uid', '=', 'seasons.lid')
       this.on(db.raw(`seasons.year = ${year} or seasons.year is null`))
     })
-    .where({ uid: lid })
-  return leagues[0]
+    .leftJoin(
+      'league_formats',
+      'seasons.league_format_hash',
+      'league_formats.league_format_hash'
+    )
+    .leftJoin(
+      'league_scoring_formats',
+      'seasons.scoring_format_hash',
+      'league_scoring_formats.scoring_format_hash'
+    )
+    .where('leagues.uid', lid)
+    .first()
 }

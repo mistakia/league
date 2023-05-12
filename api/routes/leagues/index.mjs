@@ -48,28 +48,37 @@ router.put('/:leagueId', async (req, res) => {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
 
-    const fields = [
+    const league_fields = [
+      'name',
+
+      'espn_id',
+      'sleeper_id',
+      'mfl_id',
+      'fleaflicker_id'
+    ]
+
+    const league_format_fields = [
+      'num_teams',
       'sqb',
       'srb',
       'swr',
       'ste',
-      'sk',
-      'sdst',
       'srbwr',
       'srbwrte',
       'sqbrbwrte',
       'swrte',
+      'sdst',
+      'sk',
+
       'bench',
       'ps',
       'ir',
-      'mqb',
-      'mrb',
-      'mwr',
-      'mte',
-      'mdst',
-      'mk',
-      'faab',
+
       'cap',
+      'min_bid'
+    ]
+
+    const league_scoring_format_fields = [
       'pa',
       'pc',
       'py',
@@ -78,24 +87,25 @@ router.put('/:leagueId', async (req, res) => {
       'ra',
       'ry',
       'tdr',
+      'rec',
       'rbrec',
       'wrrec',
       'terec',
-      'rec',
       'recy',
       'twoptc',
       'tdrec',
       'fuml',
-      'name',
-      'num_teams',
-      'min_bid',
       'prtd',
-      'krtd',
+      'krtd'
+    ]
 
-      'espn_id',
-      'sleeper_id',
-      'mfl_id',
-      'fleaflicker_id'
+    const season_fields = ['mqb', 'mrb', 'mwr', 'mte', 'mdst', 'mk', 'faab']
+
+    const fields = [
+      ...league_fields,
+      ...season_fields,
+      ...league_format_fields,
+      ...league_scoring_format_fields
     ]
 
     if (!field) {
@@ -218,44 +228,41 @@ router.put('/:leagueId', async (req, res) => {
       }
     }
 
-    const league_fields = [
-      'name',
-      'num_teams',
-
-      'espn_id',
-      'sleeper_id',
-      'mfl_id',
-      'fleaflicker_id'
-    ]
-
     if (league_fields.includes(field)) {
       await db('leagues')
         .update({ [field]: value })
         .where({ uid: lid })
-    } else {
+    } else if (season_fields.includes(field)) {
       await db('seasons')
         .update({ [field]: value })
+        .where({ lid, year: constants.season.year })
+    } else if (league_scoring_format_fields.includes(field)) {
+      const scoring_format = generate_scoring_format_hash({
+        ...league,
+        [field]: value
+      })
+      await db('league_scoring_formats')
+        .insert(scoring_format)
+        .onConflict('scoring_format_hash')
+        .ignore()
+      await db('seasons')
+        .update({ scoring_format_hash: scoring_format.scoring_format_hash })
+        .where({ lid, year: constants.season.year })
+    } else if (league_format_fields.includes(field)) {
+      const league_format = generate_league_format_hash({
+        ...league,
+        [field]: value
+      })
+      await db('league_formats')
+        .insert(league_format)
+        .onConflict('league_format_hash')
+        .ignore()
+      await db('seasons')
+        .update({ league_format_hash: league_format.league_format_hash })
         .where({ lid, year: constants.season.year })
     }
 
     // TODO create changelog
-
-    const league_format_hash = generate_league_format_hash({
-      ...league,
-      [field]: value
-    })
-    const scoring_format_hash = generate_scoring_format_hash({
-      ...league,
-      [field]: value
-    })
-    if (
-      league_format_hash !== league.league_format_hash ||
-      scoring_format_hash !== league.scoring_format_hash
-    ) {
-      await db('seasons')
-        .update({ league_format_hash, scoring_format_hash })
-        .where({ lid, year: constants.season.year })
-    }
 
     res.send({ value })
   } catch (err) {

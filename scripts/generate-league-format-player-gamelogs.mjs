@@ -4,20 +4,25 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants } from '#common'
-import { isMain, getLeague } from '#utils'
+import { isMain, getLeague, get_league_format } from '#utils'
 import calculateValue from './calculate-vor.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
-const log = debug('generate-league-player-gamelogs')
-debug.enable('generate-league-player-gamelogs')
+const log = debug('generate-league-format-player-gamelogs')
+debug.enable('generate-league-format-player-gamelogs')
 
-const generate_league_player_gamelogs = async ({
-  lid = 1,
+const generate_league_format_player_gamelogs = async ({
+  league_format_hash,
   year = constants.season.year,
   week = constants.season.week
 } = {}) => {
-  const league = await getLeague({ lid })
-  const result = await calculateValue({ league, year, week })
+  if (!league_format_hash) {
+    throw new Error('league_format_hash is required')
+  }
+
+  const league_format = await get_league_format({ league_format_hash })
+
+  const result = await calculateValue({ league: league_format, year, week })
   const inserts = []
   for (const pid in result.players) {
     const item = result.players[pid]
@@ -25,7 +30,7 @@ const generate_league_player_gamelogs = async ({
     inserts.push({
       pid,
       esbid: item.games[0].esbid,
-      lid,
+      league_format_hash,
       pos_rnk: item.pos_rnk,
       points: item.points,
       points_added: item.vor
@@ -34,20 +39,31 @@ const generate_league_player_gamelogs = async ({
 
   if (inserts.length) {
     const pids = inserts.map((p) => p.pid)
-    const deleted_count = await db('league_player_gamelogs')
-      .leftJoin('nfl_games', 'league_player_gamelogs.esbid', 'nfl_games.esbid')
+    const deleted_count = await db('league_format_player_gamelogs')
+      .leftJoin(
+        'nfl_games',
+        'league_format_player_gamelogs.esbid',
+        'nfl_games.esbid'
+      )
       .where('nfl_games.week', week)
       .where('nfl_games.year', year)
       .where('nfl_games.seas_type', 'REG')
-      .whereNotIn('league_player_gamelogs.pid', pids)
+      .where(
+        'league_format_player_gamelogs.league_format_hash',
+        league_format_hash
+      )
+      .whereNotIn('league_format_player_gamelogs.pid', pids)
       .del()
     log(
-      `Deleted ${deleted_count} excess player gamelogs for league ${lid} in week ${week} ${year}`
+      `Deleted ${deleted_count} excess player gamelogs for league_format ${league_format_hash} in week ${week} ${year}`
     )
 
-    await db('league_player_gamelogs').insert(inserts).onConflict().merge()
+    await db('league_format_player_gamelogs')
+      .insert(inserts)
+      .onConflict()
+      .merge()
     log(
-      `Updated ${inserts.length} player gamelogs for league ${lid} in week ${week} ${year}`
+      `Updated ${inserts.length} player gamelogs for league_format ${league_format_hash} in week ${week} ${year}`
     )
   }
 }
@@ -55,6 +71,9 @@ const generate_league_player_gamelogs = async ({
 const main = async () => {
   let error
   try {
+    const lid = 1
+    const { league_format_hash } = await getLeague({ lid })
+
     if (argv.all) {
       const results = await db('player_gamelogs')
         .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
@@ -77,11 +96,16 @@ const main = async () => {
           .groupBy('nfl_games.week')
           .orderBy('nfl_games.week', 'asc')
         for (const { week } of weeks) {
-          await generate_league_player_gamelogs({ year, week })
+          await generate_league_format_player_gamelogs({
+            league_format_hash,
+            year,
+            week
+          })
         }
       }
     } else {
-      await generate_league_player_gamelogs({
+      await generate_league_format_player_gamelogs({
+        league_format_hash,
         year: argv.year,
         week: argv.week
       })
@@ -105,4 +129,4 @@ if (isMain(import.meta.url)) {
   main()
 }
 
-export default generate_league_player_gamelogs
+export default generate_league_format_player_gamelogs

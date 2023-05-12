@@ -63,6 +63,7 @@ export * as cache from './cache.mjs'
 export * as betrivers from './betrivers.mjs'
 export { default as generate_league_format_hash } from './generate-league-format-hash.mjs'
 export { default as generate_scoring_format_hash } from './generate-scoring-format-hash.mjs'
+export { default as get_league_format } from './get-league-format.mjs'
 
 export const getChartedPlayByPlayQuery = (db) =>
   db('nfl_plays')

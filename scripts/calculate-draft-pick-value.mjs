@@ -10,18 +10,27 @@ import { isMain } from '#utils'
 const log = debug('calculate-draft-pick-value')
 debug.enable('calculate-draft-pick-value')
 
-const calculateDraftPickValue = async ({ lid = 1 } = {}) => {
+const calculateDraftPickValue = async ({ league_format_hash } = {}) => {
+  if (!league_format_hash) {
+    throw new Error('missing league_format_hash')
+  }
+
   const inserts = []
 
-  const league_players = await db('league_player')
-    .where({ lid })
+  const league_format_player_careerlogs = await db(
+    'league_format_player_careerlogs'
+  )
+    .where({ league_format_hash })
     .where('draft_rank', '>=', 1)
 
-  const league_players_by_draft_rank = groupBy(league_players, 'draft_rank')
-  for (const rank in league_players_by_draft_rank) {
-    const players = league_players_by_draft_rank[rank]
+  const league_format_player_careerlogs_by_draft_rank = groupBy(
+    league_format_player_careerlogs,
+    'draft_rank'
+  )
+  for (const rank in league_format_player_careerlogs_by_draft_rank) {
+    const players = league_format_player_careerlogs_by_draft_rank[rank]
     inserts.push({
-      lid,
+      league_format_hash,
       rank: Number(rank),
       median_best_season_points_added_per_game: median(
         players.map((p) => p.best_season_points_added_per_game)
@@ -34,7 +43,10 @@ const calculateDraftPickValue = async ({ lid = 1 } = {}) => {
 
   if (inserts.length) {
     log(`updated ${inserts.length} draft pick values`)
-    await db('league_draft_pick_value').insert(inserts).onConflict().merge()
+    await db('league_format_draft_pick_value')
+      .insert(inserts)
+      .onConflict()
+      .merge()
   }
 }
 

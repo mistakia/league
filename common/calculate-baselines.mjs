@@ -91,7 +91,7 @@ const calculateBaselines = ({ players, rosterRows = [], league, week }) => {
     }
   }
 
-  // remove rostered players
+  // fill remaining roster slots with best available players
   const availablePlayerPool = data.filter(
     (p) =>
       !rostered_pids.includes(p.pid) || !constants.positions.includes(p.pos)
