@@ -129,26 +129,26 @@ describe('COMMON Season', function () {
   it('year', function () {
     // start of week 0
     MockDate.set(start.toISOString())
-    expect(constants.season.year).to.equal(2022)
+    expect(constants.season.year).to.equal(2023)
 
     // start of year
     MockDate.set(start.startOf('year').toISOString())
-    expect(constants.season.year).to.equal(2022)
+    expect(constants.season.year).to.equal(2023)
 
     // last day of year
     MockDate.set(start.endOf('year').toISOString())
-    expect(constants.season.year).to.equal(2022)
+    expect(constants.season.year).to.equal(2023)
 
     // first day of new year
     MockDate.set(end.startOf('year').toISOString())
-    expect(constants.season.year).to.equal(2022)
+    expect(constants.season.year).to.equal(2023)
 
     // before super bowl
     MockDate.set(end.subtract('1', 'day').toISOString())
-    expect(constants.season.year).to.equal(2022)
+    expect(constants.season.year).to.equal(2023)
 
     // after super bowl
     MockDate.set(end.add('1', 'minute').toISOString())
-    expect(constants.season.year).to.equal(2023)
+    expect(constants.season.year).to.equal(2024)
   })
 })
