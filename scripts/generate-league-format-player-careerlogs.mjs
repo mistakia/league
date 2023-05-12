@@ -4,14 +4,20 @@ import db from '#db'
 import { constants, sum, groupBy } from '#common'
 import { isMain } from '#utils'
 
-const log = debug('generate-league-player')
-debug.enable('generate-league-player')
+const log = debug('generate-league-format-player-careerlogs')
+debug.enable('generate-league-format-player-careerlogs')
 
-const generate_league_player = async ({ lid = 1 } = {}) => {
+const generate_league_format_player_careerlogs = async ({
+  league_format_hash
+} = {}) => {
+  if (!league_format_hash) {
+    throw new Error('missing league_format_hash')
+  }
+
   const inserts = []
 
-  const player_seasons = await db('league_player_regular_seasonlogs').where({
-    lid
+  const player_seasons = await db('league_format_player_seasonlogs').where({
+    league_format_hash
   })
   const seasons_by_pid = groupBy(player_seasons, 'pid')
 
@@ -52,7 +58,7 @@ const generate_league_player = async ({ lid = 1 } = {}) => {
 
     inserts.push({
       pid,
-      lid,
+      league_format_hash,
 
       draft_rank,
 
@@ -88,21 +94,26 @@ const generate_league_player = async ({ lid = 1 } = {}) => {
 
   if (inserts.length) {
     const pids = inserts.map((p) => p.pid)
-    const deleted_count = await db('league_player')
-      .where({ lid })
+    const deleted_count = await db('`league_format_player_careerlogs')
+      .where({ league_format_hash })
       .whereNotIn('pid', pids)
       .del()
     log(`Deleted ${deleted_count} excess league player rows`)
 
-    log(`updating ${inserts.length} league players for league ${lid}`)
-    await db('league_player').insert(inserts).onConflict().merge()
+    log(
+      `updating ${inserts.length} league players for league_format ${league_format_hash}`
+    )
+    await db('`league_format_player_careerlogs')
+      .insert(inserts)
+      .onConflict()
+      .merge()
   }
 }
 
 const main = async () => {
   let error
   try {
-    await generate_league_player()
+    await generate_league_format_player_careerlogs()
   } catch (err) {
     error = err
     log(error)
@@ -122,4 +133,4 @@ if (isMain(import.meta.url)) {
   main()
 }
 
-export default generate_league_player
+export default generate_league_format_player_careerlogs

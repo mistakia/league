@@ -8,9 +8,9 @@ import { constants } from '#common'
 import { isMain } from '#utils'
 
 import process_play_stats from './process-play-stats.mjs'
-import generate_league_player from './generate-league-player.mjs'
-import generate_league_player_gamelogs from './generate-league-player-gamelogs.mjs'
-import generate_league_player_regular_seasonlogs from './generate-league-player-regular-seasonlogs.mjs'
+import generate_league_format_player_careerlogs from './generate-league-format-player-careerlogs.mjs'
+import generate_league_format_player_gamelogs from './generate-league-format-player-gamelogs.mjs'
+import generate_league_format_player_seasonlogs from './generate-league-format-player-seasonlogs.mjs'
 import generate_nfl_team_seasonlogs from './generate-nfl-team-seasonlogs.mjs'
 
 // const argv = yargs(hideBin(process.argv)).argv
@@ -30,12 +30,14 @@ const update_stats_weekly = async () => {
   // process play stats / generate player_gamelogs
   await process_play_stats({ week })
 
-  await generate_league_player_gamelogs({ week, lid })
-  await generate_league_player_regular_seasonlogs({ lid })
+  // TODO update to use league_format_hash instead of lid
+
+  await generate_league_format_player_gamelogs({ week, lid })
+  await generate_league_format_player_seasonlogs({ lid })
 
   // TODO generate player_seasonlogs
 
-  await generate_league_player({ lid })
+  await generate_league_format_player_careerlogs({ lid })
   await generate_nfl_team_seasonlogs()
 }
 

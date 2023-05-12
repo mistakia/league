@@ -1,7 +1,11 @@
 import { constants } from '#common'
 import db from '#db'
 
-export default async function ({ week, pids = [] } = {}) {
+export default async function ({
+  year = constants.season.year,
+  week,
+  pids = []
+} = {}) {
   if (!pids.length) {
     const players = await db('player')
       .select('pid')
@@ -17,7 +21,7 @@ export default async function ({ week, pids = [] } = {}) {
       )
     )
     .groupBy('sid_week')
-    .where('year', constants.season.year)
+    .where('year', year)
     .where('userid', 0)
 
   const query = db

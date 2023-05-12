@@ -1,7 +1,7 @@
 import { constants } from '#common'
 import { getLeague, createLeague } from '#utils'
 
-export default async function (knex) {
+export default async function (knex, league_params = {}) {
   await knex('leagues').del()
   await knex('seasons').del()
 
@@ -12,7 +12,9 @@ export default async function (knex) {
     commishid: userId,
     draft_start: Math.round(Date.now() / 1000),
     adate: null,
-    tddate: constants.season.start.add('12', 'weeks').unix()
+    tddate: constants.season.start.add('12', 'weeks').unix(),
+    ext_date: constants.season.now.subtract('1', 'week').unix(),
+    ...league_params
   })
   const league = await getLeague({ lid: leagueId })
 

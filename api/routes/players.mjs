@@ -2,14 +2,17 @@ import express from 'express'
 import cron from 'node-cron'
 
 import cache from '#api/cache.mjs'
-import { getPlayers, getTransitionBids } from '#utils'
+import { getPlayers, getTransitionBids, getLeague } from '#utils'
 
 const router = express.Router()
 
 const leagueIds = [0, 1]
 const loadPlayers = async () => {
   for (const leagueId of leagueIds) {
-    const players = await getPlayers({ leagueId, all: true })
+    const players = await getPlayers({
+      leagueId,
+      include_all_active_players: true
+    })
     const cacheKey = `/players/${leagueId}`
     cache.set(cacheKey, players, 1800) // 30 mins
   }
@@ -64,7 +67,7 @@ router.post('/?', async (req, res) => {
       leagueId,
       pids,
       textSearch: search,
-      all: !pids.length
+      include_all_active_players: !pids.length
     })
 
     if (!search && !pids.length) {
@@ -167,23 +170,34 @@ router.get('/:pid/gamelogs/?', async (req, res) => {
       .where('player_gamelogs.pid', pid)
 
     if (leagueId) {
+      const league = await getLeague({ lid: leagueId })
+
+      if (!league) {
+        return res.status(400).send({ error: 'invalid leagueId' })
+      }
+
       query
-        .leftJoin('league_player_gamelogs', function () {
+        .leftJoin('league_format_player_gamelogs', function () {
           this.on(
-            'league_player_gamelogs.pid',
+            'league_format_player_gamelogs.pid',
             '=',
             'player_gamelogs.pid'
-          ).andOn('league_player_gamelogs.esbid', '=', 'player_gamelogs.esbid')
+          ).andOn(
+            'league_format_player_gamelogs.esbid',
+            '=',
+            'player_gamelogs.esbid'
+          )
         })
         .select(
-          'league_player_gamelogs.points',
-          'league_player_gamelogs.points_added',
-          'league_player_gamelogs.pos_rnk'
+          'league_format_player_gamelogs.points',
+          'league_format_player_gamelogs.points_added',
+          'league_format_player_gamelogs.pos_rnk'
         )
         .where(function () {
-          this.where('league_player_gamelogs.lid', leagueId).orWhereNull(
-            'league_player_gamelogs.lid'
-          )
+          this.where(
+            'league_format_player_gamelogs.league_format_hash',
+            league.league_format_hash
+          ).orWhereNull('league_format_player_gamelogs.league_format_hash')
         })
     }
 

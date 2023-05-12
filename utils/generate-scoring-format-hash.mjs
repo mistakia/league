@@ -20,9 +20,32 @@ export default function ({
   prtd = 0,
   krtd = 0
 }) {
-  return ed25519
+  const scoring_format_hash = ed25519
     .hash(
       `${pa}${pc}${py}${ints}${tdp}${ra}${ry}${tdr}${rec}${rbrec}${wrrec}${terec}${recy}${twoptc}${tdrec}${fuml}${prtd}${krtd}`
     )
     .toString('hex')
+
+  return {
+    scoring_format_hash,
+
+    pa,
+    pc,
+    py,
+    ints,
+    tdp,
+    ra,
+    ry,
+    tdr,
+    rec,
+    rbrec,
+    wrrec,
+    terec,
+    recy,
+    twoptc,
+    tdrec,
+    fuml,
+    prtd,
+    krtd
+  }
 }

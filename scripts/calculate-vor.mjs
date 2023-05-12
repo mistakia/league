@@ -108,8 +108,8 @@ const calculateVOR = async ({ year, rookie, league, week = 'ALL' }) => {
     }
 
     // calculate values
-    const total = calculateValues({ players, baselines: baseline, week })
-    calculatePrices({ cap: leagueTotalCap, total, players, week })
+    const total_vorp = calculateValues({ players, baselines: baseline, week })
+    calculatePrices({ cap: leagueTotalCap, total_vorp, players, week })
   }
 
   const points_by_position = {}
@@ -118,7 +118,7 @@ const calculateVOR = async ({ year, rookie, league, week = 'ALL' }) => {
   }
 
   // calculate earned contract value
-  let totalVorp = 0
+  let total_vorp = 0
   for (const player of players) {
     player.vorp.earned = 0
     player.starts = Object.values(player.vorp).filter((v) => v > 0).length
@@ -129,7 +129,7 @@ const calculateVOR = async ({ year, rookie, league, week = 'ALL' }) => {
       }
 
       player.vorp.earned += value
-      totalVorp += value
+      total_vorp += value
     }
 
     points_by_position[player.pos].push(player.points)
@@ -145,7 +145,7 @@ const calculateVOR = async ({ year, rookie, league, week = 'ALL' }) => {
 
   calculatePrices({
     cap: leagueTotalCap,
-    total: totalVorp,
+    total_vorp,
     players,
     week: 'earned'
   })
