@@ -136,7 +136,7 @@ class PlayerRoster extends Player {
             {isPoach ? value + 2 || '-' : salary ? `$${salary}` : '-'}
           </div>
         )}
-        {!isWaiver && !isPoach && !isOffseason && (
+        {!isWaiver && !isPoach && (
           <div className='metric table__cell'>
             {extendedSalary ? `$${extendedSalary}` : '-'}
           </div>
