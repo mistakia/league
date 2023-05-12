@@ -32,6 +32,10 @@ export function getLeagueById(state, { lid }) {
 
 export function isBeforeExtensionDeadline(state) {
   const league = getCurrentLeague(state)
+  if (!league.ext_date) {
+    return true
+  }
+
   const deadline = dayjs.unix(league.ext_date)
   return constants.season.now.isBefore(deadline)
 }
