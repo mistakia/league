@@ -208,7 +208,10 @@ export default async function ({
     })
     .del()
 
-  const teams = await db('teams').where({ uid: tid })
+  const teams = await db('teams').where({
+    uid: tid,
+    year: constants.season.year
+  })
   const team = teams[0]
   let message = `${team.name} (${team.abbrv}) has placed ${player_row.fname} ${player_row.lname} (${player_row.pos}) on ${constants.transactionsDetail[type]}.`
 

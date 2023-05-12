@@ -204,7 +204,10 @@ export default async function ({
   })
 
   if (create_notification) {
-    const teams = await db('teams').where({ uid: tid })
+    const teams = await db('teams').where({
+      uid: tid,
+      year: constants.season.year
+    })
     const team = teams[0]
 
     let message

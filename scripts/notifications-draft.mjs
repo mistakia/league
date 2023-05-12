@@ -32,10 +32,9 @@ const run = async () => {
 
     const picks = await db('draft')
       .join('teams', 'draft.tid', 'teams.uid')
-      .where({
-        year: constants.season.year,
-        pick
-      })
+      .where('draft.year', constants.season.year)
+      .where('teams.year', constants.season.year)
+      .where('draft.pick', pick)
       .where('draft.lid', league.uid)
       .whereNull('draft.pid')
 

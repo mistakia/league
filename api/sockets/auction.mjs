@@ -220,7 +220,9 @@ export default class Auction {
     team.availableSpace = team.availableSpace - 1
     const newCap = (team.cap = r.availableCap - value)
     try {
-      await db('teams').where({ uid: tid }).update('cap', newCap)
+      await db('teams')
+        .where({ uid: tid, year: constants.season.year })
+        .update('cap', newCap)
     } catch (err) {
       this.logger(err)
       this.logger('unable to update cap space')
@@ -417,7 +419,10 @@ export default class Auction {
   }
 
   async setup() {
-    const teams = await db('teams').where('lid', this._lid)
+    const teams = await db('teams').where({
+      lid: this._lid,
+      year: constants.season.year
+    })
     this._teams = teams.sort((a, b) => a.do - b.do)
 
     this._tids = this._teams.map((t) => t.uid)

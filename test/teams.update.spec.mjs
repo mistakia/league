@@ -7,6 +7,7 @@ import knex from '#db'
 import league from '#db/seeds/league.mjs'
 import { user1, user2 } from './fixtures/token.mjs'
 import { notLoggedIn, missing, invalid } from './utils/index.mjs'
+import { constants } from '#common'
 
 process.env.NODE_ENV = 'test'
 
@@ -93,8 +94,9 @@ describe('API /teams - update', function () {
 
       // verify database change
       res.body.value.should.equal(value)
-      const teams = await knex('teams').where({ uid: 1 }).limit(1)
-      const team = teams[0]
+      const team = await knex('teams')
+        .where({ uid: 1, year: constants.season.year })
+        .first()
 
       expect(team.name).to.equal(value)
     })
@@ -116,8 +118,9 @@ describe('API /teams - update', function () {
 
       // verify database change
       res.body.value.should.equal(value)
-      const teams = await knex('teams').where({ uid: 2 }).limit(1)
-      const team = teams[0]
+      const team = await knex('teams')
+        .where({ uid: 2, year: constants.season.year })
+        .first()
 
       expect(team.name).to.equal(value)
     })
@@ -139,8 +142,9 @@ describe('API /teams - update', function () {
 
       // verify database change
       res.body.value.should.equal(value)
-      const teams = await knex('teams').where({ uid: 1 }).limit(1)
-      const team = teams[0]
+      const team = await knex('teams')
+        .where({ uid: 1, year: constants.season.year })
+        .first()
 
       expect(team.image).to.equal(value)
     })
@@ -162,8 +166,9 @@ describe('API /teams - update', function () {
 
       // verify database change
       res.body.value.should.equal(value)
-      const teams = await knex('teams').where({ uid: 1 }).limit(1)
-      const team = teams[0]
+      const team = await knex('teams')
+        .where({ uid: 1, year: constants.season.year })
+        .first()
 
       expect(team.abbrv).to.equal(value)
     })

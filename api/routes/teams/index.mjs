@@ -12,6 +12,7 @@ import protect from './protect.mjs'
 import tag from './tag.mjs'
 import transactions from './transactions.mjs'
 import players from './players.mjs'
+import { constants } from '#common'
 
 const router = express.Router()
 
@@ -60,7 +61,7 @@ router.put('/:teamId', async (req, res) => {
     if (userTeamFields.indexOf(field) < 0) {
       await db('teams')
         .update({ [field]: value })
-        .where({ uid: teamId })
+        .where({ uid: teamId, year: constants.season.year })
     } else {
       await db('users_teams')
         .update({ [field]: value })

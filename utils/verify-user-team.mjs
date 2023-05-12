@@ -1,4 +1,5 @@
 import db from '#db'
+import { constants } from '#common'
 
 export default async function ({ userId, leagueId, teamId, requireLeague }) {
   if (!teamId) {
@@ -22,6 +23,7 @@ export default async function ({ userId, leagueId, teamId, requireLeague }) {
     .leftJoin('users_teams', 'teams.uid', 'users_teams.tid')
     .join('leagues', 'teams.lid', 'leagues.uid')
     .where('teams.uid', tid)
+    .where('teams.year', constants.season.year)
   const team = userTeams.find(
     (p) => p.userid === userId || p.commishid === userId
   )

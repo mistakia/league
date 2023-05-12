@@ -286,7 +286,10 @@ router.get('/:leagueId/teams/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const { leagueId } = req.params
-    const teams = await db('teams').where({ lid: leagueId })
+    const teams = await db('teams').where({
+      lid: leagueId,
+      year: constants.season.year
+    })
     const picks = await db('draft').where({ lid: leagueId }).whereNull('pid')
 
     const forecastSub = db('league_team_forecast')

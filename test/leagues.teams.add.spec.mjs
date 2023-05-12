@@ -58,7 +58,10 @@ describe('API /leagues/teams - add', function () {
       res.body.team.faab.should.equal(200)
       res.body.team.lid.should.equal(leagueId)
 
-      const teams = await knex('teams').where({ lid: leagueId })
+      const teams = await knex('teams').where({
+        lid: leagueId,
+        year: constants.season.year
+      })
       expect(teams[0].lid).to.equal(leagueId)
       expect(teams[0].name).to.equal('Team1')
       expect(teams[0].abbrv).to.equal('TM1')
@@ -113,6 +116,7 @@ describe('API /leagues/teams - add', function () {
     it('exceeds league team limit', async () => {
       for (let i = 1; i <= 12; i++) {
         await knex('teams').insert({
+          year: constants.season.year,
           uid: i,
           lid: 1,
           wo: i,

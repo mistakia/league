@@ -3,7 +3,10 @@ import { constants } from '#common'
 
 export default async function (knex) {
   await knex('matchups').del()
-  const teams = await knex('teams').where({ lid: 1 })
+  const teams = await knex('teams').where({
+    lid: 1,
+    year: constants.season.year
+  })
   const schedule = getSchedule(teams)
   for (const [index, value] of schedule.entries()) {
     for (const matchup of value) {

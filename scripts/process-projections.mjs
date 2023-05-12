@@ -31,7 +31,7 @@ const processLeague = async ({ year, lid }) => {
   let week = year === constants.season.year ? constants.season.week : 0
   const { finalWeek } = constants.season
   const league = await getLeague({ lid })
-  const teams = await db('teams').where({ lid })
+  const teams = await db('teams').where({ lid, year: constants.season.year })
   const { num_teams, cap, min_bid } = league
   const rosterSize = getRosterSize(league)
   const leagueTotalCap = num_teams * cap - num_teams * rosterSize * min_bid

@@ -82,6 +82,7 @@ export default async function ({
       .join('users_teams', 'teams.uid', 'users_teams.tid')
       .where('users_teams.userid', userId)
       .where('teams.lid', lid)
+      .where('teams.year', constants.season.year)
 
     if (query1.length) {
       const tid = query1[0].uid

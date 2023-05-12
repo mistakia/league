@@ -791,6 +791,7 @@ DROP TABLE IF EXISTS `teams`;
 
 CREATE TABLE `teams` (
   `uid` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `year` smallint(4) NOT NULL,
   `lid` int(6) NOT NULL,
   `div` tinyint(1) DEFAULT NULL,
   `name` varchar(50) NOT NULL,
@@ -802,7 +803,7 @@ CREATE TABLE `teams` (
   `wo` tinyint(2) DEFAULT NULL,
   `pc` varchar(6) DEFAULT NULL,
   `ac` varchar(6) DEFAULT NULL,
-  UNIQUE KEY `uid` (`uid`),
+  UNIQUE KEY `team_year` (`uid`, `year`),
   KEY `lid` (`lid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

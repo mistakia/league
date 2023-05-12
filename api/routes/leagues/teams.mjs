@@ -29,13 +29,17 @@ router.post('/?', async (req, res) => {
     }
 
     // make sure league has space for another team
-    const teams = await db('teams').where({ lid: leagueId })
+    const teams = await db('teams').where({
+      lid: leagueId,
+      year: constants.season.year
+    })
     if (teams.length >= league.num_teams) {
       return res.status(400).send({ error: 'league is full' })
     }
 
     const count = teams.length + 1
     const team = {
+      year: constants.season.year,
       name: `Team${count}`,
       abbrv: `TM${count}`,
       wo: count,
@@ -90,6 +94,7 @@ router.delete('/?', async (req, res) => {
     const teamRows = await db('teams')
       .join('users_teams', 'teams.uid', 'users_teams.tid')
       .where({
+        year: constants.season.year,
         lid: leagueId,
         tid: teamId,
         userid: req.auth.userId
@@ -107,6 +112,7 @@ router.delete('/?', async (req, res) => {
 
     const teams = await db('teams')
       .where({
+        year: constants.season.year,
         uid: teamId,
         lid: leagueId
       })

@@ -1,38 +1,46 @@
 import debug from 'debug'
-import yargs from 'yargs'
-import { hideBin } from 'yargs/helpers'
+// import yargs from 'yargs'
+// import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants } from '#common'
 import { isMain } from '#utils'
 
-const argv = yargs(hideBin(process.argv)).argv
+// const argv = yargs(hideBin(process.argv)).argv
 const log = debug('generate-draft-picks')
 
-const run = async ({ year = constants.season.year + 1 } = {}) => {
+const run = async () => {
+  const future_year = constants.season.year + 1
   const leagues = await db('leagues').where('hosted', 1)
 
-  /* if (!constants.season.isRegularSeason) {
-   *   return
-   * }
-   */
+  if (constants.season.isRegularSeason) {
+    log('not generating future draft picks during the regular season')
+    return
+  }
 
   for (const league of leagues) {
-    const picks = await db('draft').where({ lid: league.uid, year }).limit(1)
+    const picks = await db('draft')
+      .where({ lid: league.uid, year: future_year })
+      .limit(1)
     if (picks.length) continue
 
-    const teams = await db('teams').where({ lid: league.uid })
+    const teams = await db('teams').where({
+      lid: league.uid,
+      year: constants.season.year
+    })
     for (const team of teams) {
       for (let i = 1; i < 4; i++) {
         const rows = await db('draft').where({
           otid: team.uid,
           round: i,
           lid: league.uid,
-          year
+          year: future_year
         })
 
         if (rows.length) {
-          log(`picks exist for team ${team.uid} in round ${i}, year ${year}`)
+          log(
+            `picks exist for team ${team.uid} in round ${i}, year ${future_year}`
+          )
           continue
         }
 
@@ -41,7 +49,7 @@ const run = async ({ year = constants.season.year + 1 } = {}) => {
           otid: team.uid,
           lid: league.uid,
           round: i,
-          year
+          year: future_year
         })
       }
     }
@@ -54,8 +62,7 @@ const main = async () => {
   debug.enable('generate-draft-picks')
   let error
   try {
-    const year = argv.year
-    await run({ year })
+    await run()
   } catch (err) {
     error = err
     console.log(error)
