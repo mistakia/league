@@ -70,7 +70,10 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
       expect(waivers[0].cancelled).to.equal(null)
 
       // check team waiver order
-      const teams = await knex('teams').where({ lid: 1 })
+      const teams = await knex('teams').where({
+        lid: 1,
+        year: constants.season.year
+      })
       const team1 = teams.find((t) => t.uid === 1)
       const team2 = teams.find((t) => t.uid === 2)
       const team3 = teams.find((t) => t.uid === 3)
@@ -237,7 +240,10 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
       expect(waivers[6].pid).to.equal(player4.pid)
 
       // check team waiver order
-      const teams = await knex('teams').where({ lid: 1 })
+      const teams = await knex('teams').where({
+        lid: 1,
+        year: constants.season.year
+      })
       const team1 = teams.find((t) => t.uid === 1)
       const team2 = teams.find((t) => t.uid === 2)
       const team3 = teams.find((t) => t.uid === 3)

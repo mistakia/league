@@ -491,7 +491,10 @@ router.post(
           .update({ cancelled: Math.round(Date.now() / 1000) })
       }
 
-      const teams = await db('teams').where('lid', leagueId)
+      const teams = await db('teams').where({
+        lid: leagueId,
+        year: constants.season.year
+      })
       const proposingTeam = teams.find((t) => t.uid === trade.propose_tid)
       const acceptingTeam = teams.find((t) => t.uid === trade.accept_tid)
       const proposingTeamItems = []
@@ -585,6 +588,7 @@ router.post(
         .join('teams', 'trades.accept_tid', 'teams.uid')
         .join('users_teams', 'trades.accept_tid', 'users_teams.tid')
         .where('trades.uid', tradeId)
+        .where('teams.year', constants.season.year)
         .where('users_teams.userid', req.auth.userId)
         .whereNull('accepted')
         .whereNull('vetoed')
@@ -641,6 +645,7 @@ router.post(
         .join('users_teams', 'trades.propose_tid', 'users_teams.tid')
         .join('teams', 'trades.propose_tid', 'teams.uid')
         .where('trades.uid', tradeId)
+        .where('teams.year', constants.season.year)
         .where('users_teams.userid', req.auth.userId)
         .whereNull('accepted')
         .whereNull('vetoed')

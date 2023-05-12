@@ -71,7 +71,10 @@ router.post('/register', async (req, res) => {
         return res.status(400).send({ error: 'league does not exist' })
       }
 
-      const teams = await db('teams').where({ lid: leagueId })
+      const teams = await db('teams').where({
+        lid: leagueId,
+        year: constants.season.year
+      })
       if (teamId) {
         if (!teams.find((t) => t.uid === teamId)) {
           return res.status(400).send({ error: 'team does not exist' })
@@ -92,7 +95,8 @@ router.post('/register', async (req, res) => {
       const teams = await db('teams').insert({
         lid: leagueId,
         name: 'Team Name',
-        abbrv: 'TM'
+        abbrv: 'TM',
+        year: constants.season.year
       })
       teamId = teams[0]
     }

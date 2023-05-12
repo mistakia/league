@@ -13,7 +13,7 @@ debug.enable('process-matchups,calculate-standings')
 const run = async ({ lid = 1, year = constants.season.year }) => {
   const league = await getLeague({ lid, year })
   const matchups = await db('matchups').where({ lid, year })
-  const teams = await db('teams').where({ lid })
+  const teams = await db('teams').where({ lid, year: constants.season.year })
   const tids = teams.map((t) => t.uid)
 
   const finalWeek =

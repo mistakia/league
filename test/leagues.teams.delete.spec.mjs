@@ -35,6 +35,7 @@ describe('API /leagues/teams - delete', function () {
     it('remove team', async () => {
       const leagueId = 1
       const team = {
+        year: constants.season.year,
         name: 'Team1',
         abbrv: 'TM1',
         lid: leagueId
@@ -67,7 +68,10 @@ describe('API /leagues/teams - delete', function () {
       res.body.rosters.should.equal(1)
       res.body.teams.should.equal(1)
 
-      const teams = await knex('teams').where({ lid: leagueId })
+      const teams = await knex('teams').where({
+        lid: leagueId,
+        year: constants.season.year
+      })
       const rosters = await knex('rosters').where({ lid: leagueId })
       expect(teams.length).to.equal(0)
       expect(rosters.length).to.equal(0)
@@ -138,6 +142,7 @@ describe('API /leagues/teams - delete', function () {
     it('can not remove user team', async () => {
       const rows = await knex('teams').insert({
         lid: 1,
+        year: constants.season.year,
         name: 'Team1',
         abbrv: 'TM1',
         cap: 200,

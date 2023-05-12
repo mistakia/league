@@ -106,9 +106,10 @@ const run = async () => {
 
         // update team budget
         if (constants.season.isRegularSeason) {
-          await db('teams')
-            .decrement('faab', waiver.bid)
-            .where('uid', waiver.tid)
+          await db('teams').decrement('faab', waiver.bid).where({
+            uid: waiver.tid,
+            year: constants.season.year
+          })
         }
       } catch (err) {
         error = err

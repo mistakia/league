@@ -49,6 +49,7 @@ router.post('/?', async (req, res) => {
     const userTeams = await db('users_teams')
       .join('teams', 'users_teams.tid', 'teams.uid')
       .where('userid', req.auth.userId)
+      .where('teams.year', constants.season.year)
     const team = userTeams.find((p) => p.tid === teamId)
     if (!team) {
       return res.status(400).send({ error: 'invalid teamId' })

@@ -59,6 +59,7 @@ export default async function (lid) {
       'waivers.userid'
     )
     .join('teams', 'waivers.tid', 'teams.uid')
+    .where('teams.year', constants.season.year)
     .whereNull('processed')
     .whereNull('cancelled')
     .where('waivers.lid', lid)
