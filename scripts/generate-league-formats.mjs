@@ -104,32 +104,6 @@ const generate_league_formats = async () => {
                                                       for (const krtd of krtd_options) {
                                                         for (const cap of cap_options) {
                                                           for (const min_bid of min_bid_options) {
-                                                            const league_format =
-                                                              {
-                                                                num_teams,
-                                                                sqb,
-                                                                srb,
-                                                                swr,
-                                                                ste,
-                                                                srbwr,
-                                                                srbwrte,
-                                                                sqbrbwrte,
-                                                                swrte,
-                                                                sdst,
-                                                                sk,
-                                                                bench,
-
-                                                                cap,
-                                                                min_bid
-                                                              }
-
-                                                            const {
-                                                              league_format_hash
-                                                            } =
-                                                              generate_league_format_hash(
-                                                                league_format
-                                                              )
-
                                                             const scoring_format =
                                                               {
                                                                 pa,
@@ -165,6 +139,34 @@ const generate_league_formats = async () => {
                                                                 ...scoring_format
                                                               }
                                                             )
+
+                                                            const league_format =
+                                                              {
+                                                                scoring_format_hash,
+
+                                                                num_teams,
+                                                                sqb,
+                                                                srb,
+                                                                swr,
+                                                                ste,
+                                                                srbwr,
+                                                                srbwrte,
+                                                                sqbrbwrte,
+                                                                swrte,
+                                                                sdst,
+                                                                sk,
+                                                                bench,
+
+                                                                cap,
+                                                                min_bid
+                                                              }
+
+                                                            const {
+                                                              league_format_hash
+                                                            } =
+                                                              generate_league_format_hash(
+                                                                league_format
+                                                              )
 
                                                             league_formats.push(
                                                               {
