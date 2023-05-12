@@ -6,6 +6,7 @@ import Container from '@mui/material/Container'
 
 import PageLayout from '@layouts/page'
 import Matchup from '@components/matchup'
+import SelectYear from '@components/select-year'
 import ScheduleWeeksFilter from '@components/schedule-weeks-filter'
 import ScheduleTeamsFilter from '@components/schedule-teams-filter'
 import { groupBy } from '@common'
@@ -45,6 +46,7 @@ export default function SchedulePage({ matchups, load }) {
   const body = (
     <Container maxWidth='md'>
       <div className='schedule__filter'>
+        <SelectYear />
         <ScheduleWeeksFilter />
         <ScheduleTeamsFilter />
       </div>

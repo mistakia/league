@@ -1,6 +1,6 @@
 import { call, takeLatest, fork, select, put } from 'redux-saga/effects'
 
-import { getApp } from '@core/app'
+import { getApp, appActions } from '@core/app'
 import { fetchMatchups, postMatchups, getRequestHistory } from '@core/api'
 import { constants } from '@common'
 import { matchupsActions } from './actions'
@@ -70,6 +70,10 @@ export function* watchLoadMatchups() {
   yield takeLatest(matchupsActions.LOAD_MATCHUPS, loadMatchups)
 }
 
+export function* watchSelectYear() {
+  yield takeLatest(appActions.SELECT_YEAR, loadMatchups)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -78,5 +82,6 @@ export const matchupSagas = [
   fork(watchGetMatchupsFulfilled),
   fork(watchGenerateMatchups),
   fork(watchScoreboardSelectWeek),
-  fork(watchLoadMatchups)
+  fork(watchLoadMatchups),
+  fork(watchSelectYear)
 ]
