@@ -713,7 +713,7 @@ CREATE TABLE `league_format_player_projection_values` (
   `pid` varchar(25) NOT NULL,
   `week` varchar(3) NOT NULL,
   `year` smallint(4) NOT NULL,
-  `league_format_hash` varchar(32) NOT NULL,
+  `league_format_hash` varchar(64) NOT NULL,
 
   `vorp` decimal(5,2) DEFAULT NULL,
   `market_salary` decimal(6,2) DEFAULT NULL,
@@ -2053,7 +2053,7 @@ CREATE TABLE `league_format_player_gamelogs` (
   `pid` varchar(25) NOT NULL,
   `esbid` int(10) NOT NULL,
 
-  `league_format_hash` varchar(32) NOT NULL,
+  `league_format_hash` varchar(64) NOT NULL,
   `points` decimal(4,1) DEFAULT NULL,
   `points_added` decimal(4,1) DEFAULT NULL,
   `pos_rnk` tinyint(2) unsigned DEFAULT NULL,
@@ -2091,7 +2091,7 @@ DROP TABLE IF EXISTS `league_format_player_seasonlogs`;
 CREATE TABLE `league_format_player_seasonlogs` (
   `pid` varchar(25) NOT NULL,
   `year` smallint(4) NOT NULL,
-  `league_format_hash` varchar(32) NOT NULL,
+  `league_format_hash` varchar(64) NOT NULL,
   `startable_games` tinyint(2) DEFAULT NULL,
   `points` decimal(4,1) DEFAULT NULL,
   `points_per_game` decimal(3,1) DEFAULT NULL,

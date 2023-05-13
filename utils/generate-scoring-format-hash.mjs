@@ -1,4 +1,7 @@
+import debug from 'debug'
 import ed25519 from '@trashman/ed25519-blake2b'
+
+const log = debug('generate-scoring-format-hash')
 
 export default function ({
   pa = 0,
@@ -20,11 +23,10 @@ export default function ({
   prtd = 0,
   krtd = 0
 }) {
-  const scoring_format_hash = ed25519
-    .hash(
-      `${pa}${pc}${py}${ints}${tdp}${ra}${ry}${tdr}${rec}${rbrec}${wrrec}${terec}${recy}${twoptc}${tdrec}${fuml}${prtd}${krtd}`
-    )
-    .toString('hex')
+  const key = `${pa}${pc}${py}${ints}${tdp}${ra}${ry}${tdr}${rec}${rbrec}${wrrec}${terec}${recy}${twoptc}${tdrec}${fuml}${prtd}${krtd}`
+  log(`key: ${key}`)
+
+  const scoring_format_hash = ed25519.hash(key).toString('hex')
 
   return {
     scoring_format_hash,

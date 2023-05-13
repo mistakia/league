@@ -1,4 +1,7 @@
 import ed25519 from '@trashman/ed25519-blake2b'
+import debug from 'debug'
+
+const log = debug('generate-league-format-hash')
 
 export default function ({
   num_teams = 0,
@@ -23,11 +26,10 @@ export default function ({
     throw new Error('scoring_format_hash is required')
   }
 
-  const league_format_hash = ed25519
-    .hash(
-      `${num_teams}${sqb}${srb}${swr}${ste}${srbwr}${srbwrte}${sqbrbwrte}${swrte}${sdst}${sk}${bench}${ps}${ir}${cap}${min_bid}${scoring_format_hash}}`
-    )
-    .toString('hex')
+  const key = `${num_teams}${sqb}${srb}${swr}${ste}${srbwr}${srbwrte}${sqbrbwrte}${swrte}${sdst}${sk}${bench}${ps}${ir}${cap}${min_bid}${scoring_format_hash}`
+  log(`key: ${key}`)
+
+  const league_format_hash = ed25519.hash(key).toString('hex')
 
   return {
     league_format_hash,
