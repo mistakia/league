@@ -83,7 +83,6 @@ const runOne = async (week) => {
       week,
       year,
       sourceid: 6, // pff sourceid,
-      timestamp,
       ...data
     })
   }
@@ -101,7 +100,8 @@ const runOne = async (week) => {
 
   if (inserts.length) {
     log(`Inserting ${inserts.length} projections into database`)
-    await db('projections').insert(inserts)
+    await db('projections_index').insert(inserts).onConflict().merge()
+    await db('projections').insert(inserts.map((i) => ({ ...i, timestamp })))
   }
 }
 
