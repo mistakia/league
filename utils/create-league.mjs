@@ -20,8 +20,11 @@ export default async function ({ lid, commishid, ...params } = {}) {
   const leagues = await db('leagues').insert(league)
   const leagueId = leagues[0]
 
-  const league_format = generate_league_format_hash(league_params)
   const scoring_format = generate_scoring_format_hash(league_params)
+  const league_format = generate_league_format_hash({
+    scoring_format_hash: scoring_format.scoring_format_hash,
+    ...league_params
+  })
 
   league_format.scoring_format_hash = scoring_format.scoring_format_hash
 
