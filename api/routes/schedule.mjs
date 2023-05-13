@@ -28,15 +28,19 @@ router.get('/?', async (req, res) => {
       }
     }
 
+    const weeks = {}
     for (const game of games) {
+      weeks[game.week] = true
       teams[game.v].games.push(game)
       teams[game.h].games.push(game)
     }
 
+    const week_keys = Object.keys(weeks).map((x) => Number(x))
+
     for (const team of constants.nflTeams) {
-      const weeks = teams[team].games.map((m) => m.week)
-      const teamWeeks = new Set(weeks)
-      const result = constants.byeWeeks.filter((x) => !teamWeeks.has(x))
+      const team_weeks = teams[team].games.map((m) => m.week)
+      const team_weeks_set = new Set(team_weeks)
+      const result = week_keys.filter((x) => !team_weeks_set.has(x))
       teams[team].bye = result[0]
     }
 
