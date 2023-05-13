@@ -90,7 +90,9 @@ const getPlayer = async ({
     }
 
     if (dob) {
-      query.where({ dob })
+      query.where(function () {
+        this.where({ dob }).orWhere({ dob: '0000-00-00' })
+      })
     }
 
     if (teams.length) {
