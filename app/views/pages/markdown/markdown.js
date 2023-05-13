@@ -1,7 +1,7 @@
 /* global fetch */
 import React from 'react'
 import PropTypes from 'prop-types'
-import marked from 'marked'
+import { marked } from 'marked'
 import Container from '@mui/material/Container'
 
 import { DOCS_URL } from '@core/constants'
