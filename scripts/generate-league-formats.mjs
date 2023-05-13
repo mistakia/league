@@ -7,7 +7,7 @@ import {
   generate_league_format_hash,
   generate_scoring_format_hash
 } from '#common'
-import { isMain } from '#utils'
+import { isMain, getLeague } from '#utils'
 
 // const argv = yargs(hideBin(process.argv)).argv
 const log = debug('generate-league-formats')
@@ -208,6 +208,10 @@ const generate_league_formats = async () => {
       }
     }
   }
+
+  const default_league = await getLeague({ lid: 0 })
+  scoring_formats.push(generate_scoring_format_hash(default_league))
+  league_formats.push(generate_league_format_hash(default_league))
 
   await db('league_formats')
     .insert(league_formats)
