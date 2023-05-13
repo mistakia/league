@@ -6422,10 +6422,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"highcharts@npm:^8.2.0":
-  version: 8.2.2
-  resolution: "highcharts@npm:8.2.2"
-  checksum: e2537c5e5b307c3ebf12bd6f6517965742afb419875a26ade2b162d6b99565c239550a5a91eb79e07c48be282757117e0cb2810091be54f9d7be78afe2ade1bb
+"highcharts@npm:^9.0.0":
+  version: 9.3.3
+  resolution: "highcharts@npm:9.3.3"
+  checksum: bd952eafcf7b1c136ab1e20d6b58172f9aeab9381c13e3d67f08b10eb6b2c1f96e62a8d276f29b1e92ef0a8cbc6d1696cd0e554691063a5183235e820b42404b
   languageName: node
   linkType: hard
 
@@ -10367,7 +10367,7 @@ __metadata:
     gaussian: "errcw/gaussian#3b3e49cd35f278429af80e310aed85de94d1eb99"
     googleapis: ^84.0.0
     groupme: ^0.5.8
-    highcharts: ^8.2.0
+    highcharts: ^9.0.0
     highcharts-custom-events: ^3.0.10
     highcharts-react-official: 3.1.0
     hotkeys-js: ^3.9.3
