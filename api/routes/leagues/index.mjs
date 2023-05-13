@@ -1,12 +1,11 @@
 import express from 'express'
 
+import { getRosters, getLeague } from '#utils'
 import {
-  getRosters,
-  getLeague,
+  constants,
   generate_league_format_hash,
   generate_scoring_format_hash
-} from '#utils'
-import { constants } from '#common'
+} from '#common'
 import transactions from './transactions.mjs'
 import draft from './draft.mjs'
 import games from './games.mjs'

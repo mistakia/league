@@ -3301,6 +3301,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"blakejs@npm:^1.2.1":
+  version: 1.2.1
+  resolution: "blakejs@npm:1.2.1"
+  checksum: d699ba116cfa21d0b01d12014a03e484dd76d483133e6dc9eb415aa70a119f08beb3bcefb8c71840106a00b542cba77383f8be60cd1f0d4589cb8afb922eefbe
+  languageName: node
+  linkType: hard
+
 "body-parser@npm:1.20.0, body-parser@npm:^1.20.0":
   version: 1.20.0
   resolution: "body-parser@npm:1.20.0"
@@ -10327,6 +10334,7 @@ __metadata:
     babel-plugin-module-resolver: ^4.1.0
     babel-plugin-transform-react-remove-prop-types: ^0.4.24
     bcrypt: ^5.0.0
+    blakejs: ^1.2.1
     body-parser: ^1.20.0
     chai: ^4.3.6
     chai-http: ^4.3.0
