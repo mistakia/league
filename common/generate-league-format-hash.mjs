@@ -1,7 +1,4 @@
-import ed25519 from '@trashman/ed25519-blake2b'
-import debug from 'debug'
-
-const log = debug('generate-league-format-hash')
+import { blake2b } from 'blakejs'
 
 export default function ({
   num_teams = 0,
@@ -27,9 +24,10 @@ export default function ({
   }
 
   const key = `${num_teams}${sqb}${srb}${swr}${ste}${srbwr}${srbwrte}${sqbrbwrte}${swrte}${sdst}${sk}${bench}${ps}${ir}${cap}${min_bid}${scoring_format_hash}`
-  log(`key: ${key}`)
 
-  const league_format_hash = ed25519.hash(key).toString('hex')
+  const league_format_hash = Array.from(blake2b(key, null, 32))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
 
   return {
     league_format_hash,

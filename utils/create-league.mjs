@@ -1,8 +1,10 @@
 import db from '#db'
-import { constants, createDefaultLeague } from '#common'
-
-import generate_league_format_hash from './generate-league-format-hash.mjs'
-import generate_scoring_format_hash from './generate-scoring-format-hash.mjs'
+import {
+  constants,
+  createDefaultLeague,
+  generate_league_format_hash,
+  generate_scoring_format_hash
+} from '#common'
 
 export default async function ({ lid, commishid, ...params } = {}) {
   const default_league_params = createDefaultLeague({ commishid })

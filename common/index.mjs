@@ -45,6 +45,8 @@ export { default as median } from './median.mjs'
 export { default as team_aliases } from './team-aliases.mjs'
 export { default as convertToCSV } from './convert-to-csv.mjs'
 export { default as formatPosition } from './format-position.mjs'
+export { default as generate_league_format_hash } from './generate-league-format-hash.mjs'
+export { default as generate_scoring_format_hash } from './generate-scoring-format-hash.mjs'
 
 const uniqBy = (a, key) => {
   const seen = new Set()

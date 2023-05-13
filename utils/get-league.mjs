@@ -2,6 +2,8 @@ import db from '#db'
 import { constants, createDefaultLeague } from '#common'
 
 export default async function ({ lid, year = constants.season.year } = {}) {
+  lid = Number(lid)
+
   if (!lid) {
     const league = createDefaultLeague()
     return { uid: 0, ...league }
