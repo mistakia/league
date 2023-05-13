@@ -2,7 +2,7 @@ import debug from 'debug'
 
 import db from '#db'
 import { constants, sum, groupBy } from '#common'
-import { isMain } from '#utils'
+import { isMain, getLeague } from '#utils'
 
 const log = debug('generate-league-format-player-careerlogs')
 debug.enable('generate-league-format-player-careerlogs')
@@ -13,6 +13,8 @@ const generate_league_format_player_careerlogs = async ({
   if (!league_format_hash) {
     throw new Error('missing league_format_hash')
   }
+
+  log(`generating league_format_player_careerlogs for ${league_format_hash}`)
 
   const inserts = []
 
@@ -94,7 +96,7 @@ const generate_league_format_player_careerlogs = async ({
 
   if (inserts.length) {
     const pids = inserts.map((p) => p.pid)
-    const deleted_count = await db('`league_format_player_careerlogs')
+    const deleted_count = await db('league_format_player_careerlogs')
       .where({ league_format_hash })
       .whereNotIn('pid', pids)
       .del()
@@ -103,7 +105,7 @@ const generate_league_format_player_careerlogs = async ({
     log(
       `updating ${inserts.length} league players for league_format ${league_format_hash}`
     )
-    await db('`league_format_player_careerlogs')
+    await db('league_format_player_careerlogs')
       .insert(inserts)
       .onConflict()
       .merge()
@@ -113,7 +115,10 @@ const generate_league_format_player_careerlogs = async ({
 const main = async () => {
   let error
   try {
-    await generate_league_format_player_careerlogs()
+    const lid = 1
+    const league = await getLeague({ lid })
+    const { league_format_hash } = league
+    await generate_league_format_player_careerlogs({ league_format_hash })
   } catch (err) {
     error = err
     log(error)
