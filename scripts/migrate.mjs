@@ -13,15 +13,13 @@ import {
 
 // const argv = yargs(hideBin(process.argv)).argv
 const log = debug('migrate')
-debug.enable('migrate')
+debug.enable('migrate,generate-league-format-hash,generate-scoring-format-hash')
 
 const migrate = async () => {
   // get all tables with pid columns
-  const seasons = await db('seasons').join(
-    'leagues',
-    'leagues.uid',
-    'seasons.lid'
-  )
+  const seasons = await db('seasons')
+    .join('leagues', 'leagues.uid', 'seasons.lid')
+    .where('lid', 1)
 
   for (const season of seasons) {
     const { league_format_hash } = generate_league_format_hash(season)
