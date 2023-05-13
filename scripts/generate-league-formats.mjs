@@ -78,12 +78,7 @@ const generate_league_formats = async () => {
                 for (const sqbrbwrte of sqbrbwrte_options) {
                   for (const swrte of swrte_options) {
                     // skip formats with multiple different starting flex configurations
-                    if (
-                      srbwrte +
-                        srbwr -
-                        Math.max(srbwrte, srbwr) >
-                      0
-                    ) {
+                    if (srbwrte + srbwr - Math.max(srbwrte, srbwr) > 0) {
                       continue
                     }
 

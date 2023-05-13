@@ -46,6 +46,7 @@ const calculateVOR = async ({ year, rookie, league, week = 'ALL' }) => {
     .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
     .where('nfl_games.year', year)
     .where('nfl_games.seas_type', 'REG')
+    .whereIn('player.pos', constants.positions) // TODO - filter using player_gamelogs.pos
 
     .join('player', 'player_gamelogs.pid', 'player.pid')
 
