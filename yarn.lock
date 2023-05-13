@@ -7866,12 +7866,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"marked@npm:^1.1.0":
-  version: 1.2.9
-  resolution: "marked@npm:1.2.9"
+"marked@npm:^5.0.2":
+  version: 5.0.2
+  resolution: "marked@npm:5.0.2"
   bin:
-    marked: bin/marked
-  checksum: c5a461b8081ee8f672197bf6503c49eba3906614eefea29f3188f5dac06a7fca45a0c2d97ed5d0910a1c96696c827f062ae5cc0b37c9a0acdaafb2acb1467a2f
+    marked: bin/marked.js
+  checksum: 9d66c998a91d33c422f6242fe08c3b451e4e7863a37e990617179f96786f613e49176859dacc9557d3f6944b2afe44feaaa6a1187550a68746f070c250462213
   languageName: node
   linkType: hard
 
@@ -10378,7 +10378,7 @@ __metadata:
     jsdom: ^19.0.0
     jsonwebtoken: ^9.0.0
     knex: 2.4.0
-    marked: ^1.1.0
+    marked: ^5.0.2
     mini-css-extract-plugin: ^2.6.0
     mocha: ^10.0.0
     mockdate: ^3.0.5
