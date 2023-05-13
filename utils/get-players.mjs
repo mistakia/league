@@ -233,7 +233,7 @@ export default async function ({
     }
   }
 
-  const projections = await db('projections')
+  const projections = await db('projections_index')
     .where('sourceid', constants.sources.AVERAGE)
     .where('year', constants.season.year)
     .where('week', '>=', constants.season.week)

@@ -59,7 +59,6 @@ const process_average_projections = async ({ year }) => {
         pid: player_row.pid,
         sourceid: constants.sources.AVERAGE,
         year: constants.season.year,
-        timestamp: 0, // must be set at zero for unique key
         week,
         ...projection
       })
@@ -90,7 +89,12 @@ const process_average_projections = async ({ year }) => {
   }
 
   if (projectionInserts.length) {
-    await db('projections').insert(projectionInserts).onConflict().merge()
+    const timestamp = 0 // must be set at zero for unique key
+    await db('projections_index').insert(projectionInserts).onConflict().merge()
+    await db('projections')
+      .insert(projectionInserts.map((i) => ({ ...i, timestamp })))
+      .onConflict()
+      .merge()
     log(`processed and saved ${projectionInserts.length} projections`)
   }
 

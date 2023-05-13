@@ -12,15 +12,23 @@ debug.enable('archive-projections')
 
 const archiveProjections = async () => {
   const insert_result = await db.raw(
-    `INSERT IGNORE INTO projections_archive SELECT * FROM projections where year != ${constants.season.year}`
+    `INSERT IGNORE INTO projections_archive SELECT * FROM projections where year != ${constants.season.year};`
   )
   log(insert_result)
-  // log(`Inserted ${inserted} projections`)
 
-  const delete_result = await db('projections')
-    .whereNot({ year: constants.season.year })
-    .del()
-  log(`Deleted ${delete_result} projections`)
+  const delete_result = await db.raw(
+    `DELETE p
+    FROM projections p
+    INNER JOIN projections_archive pa
+    ON p.sourceid = pa.sourceid
+    AND p.pid = pa.pid
+    AND p.userid = pa.userid
+    AND p.week = pa.week
+    AND p.year = pa.year
+    AND p.timestamp = pa.timestamp;
+    `
+  )
+  log(delete_result)
 }
 
 const main = async () => {

@@ -16,7 +16,7 @@ router.get('/?', async (req, res) => {
      */
     let projections = cache.get('projections')
     if (!projections) {
-      projections = await db('projections')
+      projections = await db('projections_index')
         .where('sourceid', constants.sources.AVERAGE)
         .where('year', constants.season.year)
         .where('week', '>=', constants.season.week)
@@ -25,7 +25,7 @@ router.get('/?', async (req, res) => {
 
     let userProjections = []
     if (req.auth) {
-      userProjections = await db('projections')
+      userProjections = await db('projections_index')
         .select('projections.*')
         .join('player', 'projections.pid', 'player.pid')
         .whereIn('player.pos', constants.positions)
@@ -97,18 +97,19 @@ router.put(
         }
       }
 
-      const rows = await db('projections').where({
-        userid: userId,
-        pid,
-        week,
-        year: constants.season.year
-      })
+      const existing_projection = await db('projections_index')
+        .where({
+          userid: userId,
+          pid,
+          week,
+          year: constants.season.year
+        })
+        .first()
 
-      if (rows.length) {
-        await db('projections')
+      if (existing_projection) {
+        await db('projections_index')
           .update({
-            [type]: value,
-            timestamp: new Date()
+            [type]: value
           })
           .where({
             userid: userId,
@@ -116,14 +117,25 @@ router.put(
             week,
             year: constants.season.year
           })
-      } else {
+
         await db('projections').insert({
+          ...existing_projection,
           [type]: value,
-          timestamp: new Date(),
+          timestamp: new Date()
+        })
+      } else {
+        const insert = {
+          [type]: value,
           userid: userId,
           pid,
           week,
           year: constants.season.year
+        }
+        await db('projections_index').insert(insert)
+
+        await db('projections').insert({
+          ...insert,
+          timestamp: new Date()
         })
       }
 
@@ -152,7 +164,7 @@ router.delete(
 
       // TODO validate pid
 
-      await db('projections').del().where({
+      await db('projections_index').del().where({
         userid: userId,
         pid,
         week,

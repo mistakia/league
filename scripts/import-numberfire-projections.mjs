@@ -75,7 +75,6 @@ const run = async () => {
       year: constants.season.year,
       week: current_week,
       sourceid: 13,
-      timestamp,
       ...data
     })
   }
@@ -92,7 +91,8 @@ const run = async () => {
   }
 
   log(`Inserting ${inserts.length} projections into database`)
-  await db('projections').insert(inserts)
+  await db('projections_index').insert(inserts).onConflict().merge()
+  await db('projections').insert(inserts.map((i) => ({ ...i, timestamp })))
 }
 
 const main = async () => {

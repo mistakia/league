@@ -121,7 +121,6 @@ const run = async () => {
       week,
       year,
       sourceid: 2, // cbs sourceid
-      timestamp,
       ...data
     })
   }
@@ -139,7 +138,8 @@ const run = async () => {
 
   if (inserts.length) {
     log(`Inserting ${inserts.length} projections into database`)
-    await db('projections').insert(inserts)
+    await db('projections_index').insert(inserts).onConflict().merge()
+    await db('projections').insert(inserts.map((i) => ({ ...i, timestamp })))
   }
 }
 
