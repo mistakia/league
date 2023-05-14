@@ -370,12 +370,12 @@ CREATE TABLE `league_formats` (
   `cap` int(4) NOT NULL,
   `min_bid` tinyint(1) DEFAULT 0,
 
-  `b_QB` decimal(2,1) unsigned DEFAULT NULL, -- baseline qb pts/game
-  `b_RB` decimal(2,1) unsigned DEFAULT NULL, -- baseline rb pts/game
-  `b_WR` decimal(2,1) unsigned DEFAULT NULL, -- baseline wr pts/game
-  `b_TE` decimal(2,1) unsigned DEFAULT NULL, -- baseline te pts/game
-  `b_K` decimal(2,1) unsigned DEFAULT NULL, -- baseline k pts/game
-  `b_DST` decimal(2,1) unsigned DEFAULT NULL, -- baseline dst pts/game
+  `b_QB` decimal(3,1) unsigned DEFAULT NULL, -- baseline qb pts/game
+  `b_RB` decimal(3,1) unsigned DEFAULT NULL, -- baseline rb pts/game
+  `b_WR` decimal(3,1) unsigned DEFAULT NULL, -- baseline wr pts/game
+  `b_TE` decimal(3,1) unsigned DEFAULT NULL, -- baseline te pts/game
+  `b_K` decimal(3,1) unsigned DEFAULT NULL, -- baseline k pts/game
+  `b_DST` decimal(3,1) unsigned DEFAULT NULL, -- baseline dst pts/game
 
   UNIQUE KEY `league_format_hash` (`league_format_hash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
