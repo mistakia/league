@@ -2,13 +2,16 @@ import regression from 'regression'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import { Table } from 'console-table-printer'
+import debug from 'debug'
 
-import { groupBy, constants, getPlayerCountBySlot } from '#common'
+import { groupBy, constants } from '#common'
 import { getLeague, isMain } from '#utils'
-import db from '#db'
+// import db from '#db'
 import calculateVOR from './calculate-vor.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
+// const log = debug('calculate-historical-positional-value')
+debug.enable('calculate-historical-positional-value,calculate-vor')
 
 const calculateHistoricalPositionalValue = async ({ league }) => {
   const years = 2
@@ -139,18 +142,22 @@ if (isMain(import.meta.url)) {
 
     if (argv.display) {
       p.printTable()
-    } else if (argv.save) {
-      const playerCountBySlot = getPlayerCountBySlot({ league })
-      const update = {}
-      for (const pos of constants.positions) {
-        if (baselines[pos].rank) {
-          const min = playerCountBySlot[pos]
-          update[`b_${pos.toLowerCase()}`] = Math.max(baselines[pos].rank, min)
-        }
-      }
-
-      await db('leagues').update(update).where({ uid: lid })
     }
+
+    // TODO not used - needs updating
+    // if (argv.save) {
+    //   const playerCountBySlot = getPlayerCountBySlot({ league })
+    //   const update = {}
+    //   for (const pos of constants.positions) {
+    //     if (baselines[pos].rank) {
+    //       const min = playerCountBySlot[pos]
+    //       update[`b_${pos.toLowerCase()}`] = Math.max(baselines[pos].rank, min)
+    //     }
+    //   }
+
+    //   log(update)
+    //   // await db('leagues').update(update).where({ uid: lid })
+    // }
 
     process.exit()
   }

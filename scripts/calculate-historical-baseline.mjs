@@ -4,15 +4,18 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants } from '#common'
-import { isMain, getLeague } from '#utils'
+import { isMain, getLeague, get_league_format } from '#utils'
 import calculateVOR from './calculate-vor.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('calculate-historical-baseline')
 debug.enable('calculate-historical-baseline')
 
-const calculateHistoricalBaseline = async ({ lid, save = false }) => {
-  const league = await getLeague({ lid })
+const calculateHistoricalBaseline = async ({
+  league_format_hash,
+  save = false
+}) => {
+  const league_format = await get_league_format({ league_format_hash })
   const years = 2
   let year = constants.season.year - years
 
@@ -20,7 +23,10 @@ const calculateHistoricalBaseline = async ({ lid, save = false }) => {
   constants.positions.forEach((p) => (bTotals[p] = 0))
   let totalWeeks = 0
   for (; year < constants.season.year; year++) {
-    const { baselineTotals, weeks } = await calculateVOR({ year, league })
+    const { baselineTotals, weeks } = await calculateVOR({
+      year,
+      league: league_format
+    })
     for (const [position, total] of Object.entries(baselineTotals)) {
       bTotals[position] += total
     }
@@ -37,20 +43,32 @@ const calculateHistoricalBaseline = async ({ lid, save = false }) => {
   }
 
   if (save) {
-    await db('leagues').update(update).where({ uid: lid })
+    log(update)
+    await db('league_formats').update(update).where({ league_format_hash })
   }
 }
 
 const main = async () => {
   let error
   try {
-    const lid = argv.lid
-    if (typeof lid === 'undefined') {
-      console.log('missing --lid')
-      return
+    if (argv.lid) {
+      const league = await getLeague({ lid: argv.lid })
+      if (!league) {
+        throw new Error(`League ${argv.lid} not found`)
+      }
+      const { league_format_hash } = league
+      await calculateHistoricalBaseline({ league_format_hash, save: argv.save })
+    } else {
+      const league_formats = await db('league_formats')
+      log(`calculating baseline for ${league_formats.length} league formats`)
+      for (const league_format of league_formats) {
+        const { league_format_hash } = league_format
+        await calculateHistoricalBaseline({
+          league_format_hash,
+          save: argv.save
+        })
+      }
     }
-
-    await calculateHistoricalBaseline({ lid, save: argv.save })
   } catch (err) {
     error = err
     log(error)
