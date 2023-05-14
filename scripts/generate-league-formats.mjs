@@ -213,6 +213,22 @@ const generate_league_formats = async () => {
   scoring_formats.push(generate_scoring_format_hash(default_league))
   league_formats.push(generate_league_format_hash(default_league))
 
+  // delete league formats not in `league_formats` array or in `seasons` table
+  const league_format_hashes = league_formats.map(
+    ({ league_format_hash }) => league_format_hash
+  )
+  const delete_query = await db('league_formats')
+    .leftJoin(
+      'seasons',
+      'league_formats.league_format_hash',
+      'seasons.league_format_hash'
+    )
+    .whereNull('seasons.league_format_hash')
+    .whereNotIn('league_formats.league_format_hash', league_format_hashes)
+    .del()
+
+  log(`Deleted ${delete_query} stale league formats`)
+
   await db('league_formats')
     .insert(league_formats)
     .onConflict('league_format_hash')
