@@ -43,6 +43,7 @@ const process_average_projections = async ({ year }) => {
 
   for (const player_row of player_rows) {
     const projections = projections_by_pid[player_row.pid] || []
+    player_row.projection = {}
 
     let week = year === constants.season.year ? constants.season.week : 0
     for (; week <= constants.season.finalWeek; week++) {
@@ -165,7 +166,11 @@ const process_league_format = async ({
   year,
   league_format_hash
 }) => {
+  log(`processing league format ${league_format_hash}`)
   const league_format = await get_league_format({ league_format_hash })
+  if (!league_format) {
+    throw new Error(`league format ${league_format_hash} not found`)
+  }
 
   const { num_teams, cap, min_bid } = league_format
   const league_roster_size = getRosterSize(league_format)
@@ -174,6 +179,7 @@ const process_league_format = async ({
 
   const player_rows = await getPlayers({
     pids: projection_pids,
+    league_format_hash: league_format.league_format_hash,
     scoring_format_hash: league_format.scoring_format_hash
   })
 
@@ -225,10 +231,10 @@ const process_league_format = async ({
   }
 
   if (valueInserts.length) {
-    await db('league_player_projection_values')
+    await db('league_format_player_projection_values')
       .del()
       .where({ league_format_hash })
-    await db('league_player_projection_values').insert(valueInserts)
+    await db('league_format_player_projection_values').insert(valueInserts)
     log(`processed and saved ${valueInserts.length} player values`)
   }
 }
@@ -431,7 +437,7 @@ const run = async ({ year = constants.season.year } = {}) => {
   const scoring_formats = {}
   const lids = [0, 1]
 
-  const player_rows = await process_average_projections()
+  const player_rows = await process_average_projections({ year })
   const projection_pids = player_rows.map((p) => p.pid)
 
   // register league and scoring formats to process

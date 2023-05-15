@@ -18,9 +18,12 @@ const getWorseStarterForPosition = ({
     const slotId = constants.slots[slot]
     const players = groupedStarters[slotId]
     const worst = players[players.length - 1]
-    if (worst && worst.points[week].total < minTotal) {
-      minTotal = worst.points[week].total
-      selectedPlayer = worst
+    if (worst) {
+      const worst_player_week_points = (worst.points[week] || {}).total || null
+      if (worst_player_week_points !== null && worst_player_week_points < minTotal) {
+        minTotal = worst_player_week_points
+        selectedPlayer = worst
+      }
     }
   }
 
@@ -29,7 +32,7 @@ const getWorseStarterForPosition = ({
 
 const calculateBaselines = ({ players, rosterRows = [], league, week }) => {
   const data = players.sort(
-    (a, b) => b.points[week].total - a.points[week].total
+    (a, b) => (b.points[week] || {}).total - (a.points[week] || {}).total
   )
 
   // group by position
@@ -134,7 +137,9 @@ const calculateBaselines = ({ players, rosterRows = [], league, week }) => {
   for (const slot of constants.starterSlots) {
     groupedStarters[slot] = starters
       .filter((s) => s.slot === slot)
-      .sort((a, b) => b.points[week].total - a.points[week].total)
+      .sort(
+        (a, b) => (b.points[week] || {}).total - (a.points[week] || {}).total
+      )
   }
 
   // group remaining players by position
