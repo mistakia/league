@@ -12,7 +12,7 @@ const views = {
       // TODO player market salary
       // TODO player market adjusted salary
       constants.season.isOffseason ? 'vorp.0' : 'vorp.ros',
-      constants.season.isOffSeason ? 'points.0.total' : 'points.ros.total',
+      constants.season.isOffseason ? 'points.0.total' : 'points.ros.total',
       constants.season.isOffseason ? 'projection.0.py' : 'projection.ros.py',
       constants.season.isOffseason ? 'projection.0.tdp' : 'projection.ros.tdp',
       constants.season.isOffseason
