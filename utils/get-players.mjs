@@ -140,10 +140,12 @@ export default async function ({
         )
       })
       .select(db.raw(seasonlog_selects.join(',')))
-      .where(
-        'league_format_player_seasonlogs.league_format_hash',
-        league_format_hash
-      )
+      .where(function () {
+        this.where(
+          'league_format_player_seasonlogs.league_format_hash',
+          league_format_hash
+        ).orWhereNull('league_format_player_seasonlogs.league_format_hash')
+      })
   }
 
   if (league_roster_player_ids.length || teamId || leagueId) {
