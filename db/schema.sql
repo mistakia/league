@@ -63,6 +63,7 @@ CREATE TABLE `player` (
   `fantasy_data_id` int(11) DEFAULT NULL,
   `yahoo_id` int(11) DEFAULT NULL,
   `keeptradecut_id` int(11) DEFAULT NULL,
+  `pfr_id` varchar(10) DEFAULT NULL,
 
   FULLTEXT KEY `name` (`fname`,`lname`),
 
@@ -80,6 +81,7 @@ CREATE TABLE `player` (
   UNIQUE KEY `fantasy_data_id` (`fantasy_data_id`),
   UNIQUE KEY `yahoo_id` (`yahoo_id`),
   UNIQUE KEY `keeptradecut_id` (`keeptradecut_id`),
+  UNIQUE KEY `pfr_id` (`pfr_id`),
   UNIQUE KEY `pid` (`pid`),
   KEY `fname` (`fname`),
   KEY `lname` (`lname`)

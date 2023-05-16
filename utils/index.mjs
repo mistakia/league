@@ -62,6 +62,7 @@ export * as gambet from './gambet.mjs'
 export * as cache from './cache.mjs'
 export * as betrivers from './betrivers.mjs'
 export { default as get_league_format } from './get-league-format.mjs'
+export * as pfr from './pro-football-reference.mjs'
 
 export const getChartedPlayByPlayQuery = (db) =>
   db('nfl_plays')
