@@ -48,7 +48,7 @@
     "gaussian": "errcw/gaussian#3b3e49cd35f278429af80e310aed85de94d1eb99",
     "groupme": "^0.5.8",
     "hotkeys-js": "^3.9.3",
-    "jsdom": "^19.0.0",
+    "jsdom": "^22.0.0",
     "jsonwebtoken": "^9.0.0",
     "knex": "2.4.0",
     "marked": "^5.0.2",

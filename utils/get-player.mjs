@@ -45,6 +45,7 @@ const getPlayer = async ({
   dob,
   sleeper_id,
   keeptradecut_id,
+  pfr_id,
   esbid,
   gsisid,
   pname
@@ -62,6 +63,8 @@ const getPlayer = async ({
 
   if (keeptradecut_id) {
     query.where({ keeptradecut_id })
+  } else if (pfr_id) {
+    query.where({ pfr_id })
   } else if (esbid) {
     query.where({ esbid })
   } else if (gsisid) {
@@ -78,10 +81,14 @@ const getPlayer = async ({
     }
 
     if (pos) {
-      const p = fixPosition(pos)
-      query.where(function () {
-        this.where({ pos: p }).orWhere({ pos1: p }).orWhere({ pos2: p })
-      })
+      if (typeof pos === 'string') {
+        const p = fixPosition(pos)
+        query.where(function () {
+          this.where({ pos: p }).orWhere({ pos1: p }).orWhere({ pos2: p })
+        })
+      } else if (Array.isArray(pos)) {
+        query.whereIn('pos', pos)
+      }
     }
 
     if (team) {

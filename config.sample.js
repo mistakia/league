@@ -9,6 +9,7 @@ module.exports = {
   url: 'https://example.com',
   nominationTimer: 30000,
   bidTimer: 15000,
+  pro_football_reference_url: '',
   pff: '', // cookies for pff
   nfl_api_url: '',
   nfl_combine_profiles_url: '',
