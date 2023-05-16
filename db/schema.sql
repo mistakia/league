@@ -329,7 +329,6 @@ CREATE TABLE `leagues` (
   `groupme_id` varchar(26) DEFAULT NULL,
 
   `hosted` tinyint(1) DEFAULT 0,
-  `host` tinyint(1) DEFAULT NULL,
 
   `processed_at` int(11) DEFAULT NULL,
   `archived_at` int(11) DEFAULT NULL,
