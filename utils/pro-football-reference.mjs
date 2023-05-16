@@ -67,7 +67,9 @@ const get_players_from_page = async ({ url, ignore_cache = false }) => {
     }
   })
 
-  await cache.set({ key: cache_key, value: players })
+  if (players.length) {
+    await cache.set({ key: cache_key, value: players })
+  }
 
   return players
 }
@@ -77,7 +79,7 @@ const get_players_page_links = async ({ ignore_cache = false } = {}) => {
     throw new Error('config.pro_football_reference_url is required')
   }
 
-  const cache_key = '/pro-football-reference/players.json'
+  const cache_key = '/pro-football-reference/players-links.json'
   if (!ignore_cache) {
     const cache_value = await cache.get({ key: cache_key })
     if (cache_value) {
@@ -95,18 +97,32 @@ const get_players_page_links = async ({ ignore_cache = false } = {}) => {
     (link) => `${config.pro_football_reference_url}${link.href}`
   )
 
-  await cache.set({ key: cache_key, value: hrefs })
+  if (hrefs.length) {
+    await cache.set({ key: cache_key, value: hrefs })
+  }
 
   return hrefs
 }
 
 export const get_players = async ({ ignore_cache = false } = {}) => {
+  const cache_key = '/pro-football-reference/players.json'
+  if (!ignore_cache) {
+    const cache_value = await cache.get({ key: cache_key })
+    if (cache_value) {
+      return cache_value
+    }
+  }
+
   const links = await get_players_page_links({ ignore_cache })
 
   const players = []
   for (const url of links) {
     const players_from_page = await get_players_from_page({ url, ignore_cache })
     players.push(...players_from_page)
+  }
+
+  if (players.length) {
+    await cache.set({ key: cache_key, value: players })
   }
 
   return players

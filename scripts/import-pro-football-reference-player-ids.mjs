@@ -29,16 +29,48 @@ const import_pro_football_reference_player_ids = async ({
         continue
       }
 
+      if (pfr_player.positions.includes('P')) {
+        pfr_player.positions.push('K')
+      }
+
+      if (pfr_player.positions.includes('K')) {
+        pfr_player.positions.push('P')
+      }
+
+      if (pfr_player.positions.includes('RB')) {
+        pfr_player.positions.push('FB')
+      }
+
+      if (pfr_player.positions.includes('FB')) {
+        pfr_player.positions.push('RB')
+      }
+
       const formatted = formatPlayerName(pfr_player.name)
       const matched_players = all_players.filter(
         (p) =>
           p.formatted === formatted &&
-          pfr_player.positions.includes(p.pos) &&
+          (pfr_player.positions.includes(p.pos) ||
+            pfr_player.positions.includes(p.pos1) ||
+            pfr_player.positions.includes(p.pos2)) &&
           pfr_player.start === p.start
       )
 
       if (matched_players.length === 1) {
         player = matched_players[0]
+      }
+
+      if (!matched_players.length) {
+        const matched_players = all_players.filter(
+          (p) =>
+            p.formatted === formatted &&
+            (pfr_player.positions.includes(p.pos) ||
+              pfr_player.positions.includes(p.pos1) ||
+              pfr_player.positions.includes(p.pos2))
+        )
+
+        if (matched_players.length === 1) {
+          player = matched_players[0]
+        }
       }
     } catch (err) {
       log(err)
