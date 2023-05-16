@@ -28,6 +28,7 @@ export default function AppMenu({
   const location = useLocation()
   const isAuction = location.pathname === '/auction'
   const isMobile = window.innerWidth < 800
+  const is_hosted = Boolean(league.hosted)
 
   const sx = isMobile ? { right: 16 } : { left: 16 }
 
@@ -82,30 +83,42 @@ export default function AppMenu({
                     ) : (
                       <NavLink to={`/leagues/${leagueId}/teams`}>Teams</NavLink>
                     )}
-                    <NavLink to={`/leagues/${leagueId}/transactions`}>
-                      Transactions
-                    </NavLink>
-                    <NavLink to={`/leagues/${leagueId}/waivers`}>
-                      Waivers
-                    </NavLink>
+                    {is_hosted && (
+                      <NavLink to={`/leagues/${leagueId}/transactions`}>
+                        Transactions
+                      </NavLink>
+                    )}
+                    {is_hosted && (
+                      <NavLink to={`/leagues/${leagueId}/waivers`}>
+                        Waivers
+                      </NavLink>
+                    )}
                     <NavLink to={`/leagues/${leagueId}/rosters`}>
                       Rosters
                     </NavLink>
-                    <NavLink to={`/leagues/${leagueId}/standings`}>
-                      Standings
-                    </NavLink>
-                    <NavLink to={`/leagues/${leagueId}/stats`}>Stats</NavLink>
-                    <NavLink to={`/leagues/${leagueId}/schedule`}>
-                      Schedule
-                    </NavLink>
-                    <NavLink to={`/leagues/${leagueId}/matchups`}>
-                      Matchups
-                    </NavLink>
+                    {is_hosted && (
+                      <NavLink to={`/leagues/${leagueId}/standings`}>
+                        Standings
+                      </NavLink>
+                    )}
+                    {is_hosted && (
+                      <NavLink to={`/leagues/${leagueId}/stats`}>Stats</NavLink>
+                    )}
+                    {is_hosted && (
+                      <NavLink to={`/leagues/${leagueId}/schedule`}>
+                        Schedule
+                      </NavLink>
+                    )}
+                    {is_hosted && (
+                      <NavLink to={`/leagues/${leagueId}/matchups`}>
+                        Matchups
+                      </NavLink>
+                    )}
                   </>
                 )}
               </div>
             </div>
-            {Boolean(teamId) && (
+            {Boolean(teamId) && is_hosted && (
               <div className='menu__section'>
                 <div className='menu__heading'>
                   <TeamName image abbrv tid={teamId} />

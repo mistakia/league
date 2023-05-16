@@ -27,6 +27,14 @@ export default function LeagueSettingsExternal({
           </Alert>
         </Grid>
       )}
+      {Boolean(league.uid) && (
+        <Grid xs={12} item>
+          <Alert severity='info'>
+            External league importing is currently disabled. Will be re-enabled
+            in the future.
+          </Alert>
+        </Grid>
+      )}
       <EditableLeagueField
         label='ESPN ID'
         field='espn_id'
