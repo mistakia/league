@@ -147,6 +147,10 @@ export function auctionReducer(state = initialState(), { payload, type }) {
       })
 
     case appActions.AUTH_FULFILLED:
+      if (!payload.data.leagues.length) {
+        return state
+      }
+
       return state.merge({
         lineupBudget: Math.round(payload.data.leagues[0].cap * 0.9)
       })
