@@ -71,7 +71,6 @@ export const League = new Record({
 
   min_bid: 0,
   hosted: 0,
-  host: null,
 
   fqb: null,
   frb: null,
@@ -172,7 +171,6 @@ export function createLeague({
 
   min_bid,
   hosted,
-  host,
 
   b_QB,
   b_RB,
@@ -272,7 +270,6 @@ export function createLeague({
 
     min_bid,
     hosted,
-    host,
 
     b_QB,
     b_RB,

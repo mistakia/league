@@ -13,8 +13,7 @@ export default async function ({ lid, commishid, ...params } = {}) {
   const league = {
     commishid,
     name: league_params.name,
-    hosted: league_params.hosted,
-    host: league_params.host
+    hosted: league_params.hosted
   }
 
   if (lid) league.uid = lid
