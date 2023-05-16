@@ -11,16 +11,22 @@ const calculateValues = ({ players, baselines, week, league = {} }) => {
     const { pos } = player
     player.vorp[week] = default_points_added
 
+    if (pos === 'K') {
+      continue
+    }
+
     const player_week_points = (player.points[week] || {}).total || null
     if (player_week_points) {
-      const historic_baseline_per_game = league[`b_${pos}`]
-      if (historic_baseline_per_game) {
-        const isSeasonProjection = week === 0
-        const baseline = isSeasonProjection
-          ? historic_baseline_per_game * (season.nflFinalWeek - 1)
-          : historic_baseline_per_game
-
+      const isSeasonProjection = week === 0
+      const historic_baseline_week =
+        league[`pts_base_week_${pos.toLowerCase()}`]
+      const historic_baseline_season =
+        league[`pts_base_season_${pos.toLowerCase()}`]
+      if (isSeasonProjection && historic_baseline_season) {
+        const baseline = historic_baseline_season * (season.nflFinalWeek - 1)
         player.vorp[week] = player_week_points - baseline
+      } else if (historic_baseline_week) {
+        player.vorp[week] = player_week_points - historic_baseline_week
       } else if (baselines[pos].starter) {
         player.vorp[week] =
           player_week_points - baselines[pos].starter.points[week].total

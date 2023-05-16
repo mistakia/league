@@ -64,6 +64,7 @@
     "react-dom": "^18.1.0",
     "react-sortable-hoc": "^1.11.0",
     "serve-favicon": "^2.5.0",
+    "simple-statistics": "^7.8.3",
     "ws": "^7.2.5"
   },
   "devDependencies": {

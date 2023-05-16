@@ -370,12 +370,19 @@ CREATE TABLE `league_formats` (
   `cap` int(4) NOT NULL,
   `min_bid` tinyint(1) DEFAULT 0,
 
-  `b_QB` decimal(3,1) unsigned DEFAULT NULL, -- baseline qb pts/game
-  `b_RB` decimal(3,1) unsigned DEFAULT NULL, -- baseline rb pts/game
-  `b_WR` decimal(3,1) unsigned DEFAULT NULL, -- baseline wr pts/game
-  `b_TE` decimal(3,1) unsigned DEFAULT NULL, -- baseline te pts/game
-  `b_K` decimal(3,1) unsigned DEFAULT NULL, -- baseline k pts/game
-  `b_DST` decimal(3,1) unsigned DEFAULT NULL, -- baseline dst pts/game
+  `pts_base_week_qb` decimal(3,1) unsigned DEFAULT NULL comment 'qb pts/game baseline',
+  `pts_base_week_rb` decimal(3,1) unsigned DEFAULT NULL comment 'rb pts/game baseline',
+  `pts_base_week_wr` decimal(3,1) unsigned DEFAULT NULL comment 'wr pts/game bsaeline',
+  `pts_base_week_te` decimal(3,1) unsigned DEFAULT NULL comment 'te pts/game baseline',
+  `pts_base_week_k` decimal(3,1) unsigned DEFAULT NULL comment 'k pts/game baseline',
+  `pts_base_week_dst` decimal(3,1) unsigned DEFAULT NULL comment 'dst pts/game baseline',
+
+  `pts_base_season_qb` decimal(3,1) unsigned DEFAULT NULL comment 'qb pts/season baseline',
+  `pts_base_season_rb` decimal(3,1) unsigned DEFAULT NULL comment 'rb pts/season baseline',
+  `pts_base_season_wr` decimal(3,1) unsigned DEFAULT NULL comment 'wr pts/season baseline',
+  `pts_base_season_te` decimal(3,1) unsigned DEFAULT NULL comment 'te pts/season baseline',
+  `pts_base_season_k` decimal(3,1) unsigned DEFAULT NULL comment 'k pts/season baseline',
+  `pts_base_season_dst` decimal(3,1) unsigned DEFAULT NULL comment 'dst pts/season baseline',
 
   UNIQUE KEY `league_format_hash` (`league_format_hash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

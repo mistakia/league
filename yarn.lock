@@ -10413,6 +10413,7 @@ __metadata:
     regression: ^2.0.1
     reselect: ^4.1.5
     serve-favicon: ^2.5.0
+    simple-statistics: ^7.8.3
     style-loader: ^3.3.1
     styled-components: ^5.3.5
     stylus: ^0.57.0
@@ -10774,6 +10775,13 @@ __metadata:
   version: 3.0.7
   resolution: "signal-exit@npm:3.0.7"
   checksum: a2f098f247adc367dffc27845853e9959b9e88b01cb301658cfe4194352d8d2bb32e18467c786a7fe15f1d44b233ea35633d076d5e737870b7139949d1ab6318
+  languageName: node
+  linkType: hard
+
+"simple-statistics@npm:^7.8.3":
+  version: 7.8.3
+  resolution: "simple-statistics@npm:7.8.3"
+  checksum: 4eec5fd87b733c072cdce4f911cd1736a6e3a89ddaab9df8785a0a36abc0818d43f90b93079df4c34bd4a4f010eefad962051c65debcde199cdae08403917282
   languageName: node
   linkType: hard
 
