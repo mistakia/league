@@ -19,13 +19,14 @@ export default function EditableLeague({ update, league, userId }) {
 
   const isCommish = league.commishid === userId
   const isDefault = !league.commishid
+  const is_external_league = !league.hosted
 
   const props = { league, isCommish, isDefault, onchange }
 
   return (
     <>
       <LeagueSettingsGeneral {...props} />
-      <LeagueSettingsExternal {...props} />
+      {is_external_league && <LeagueSettingsExternal {...props} />}
       <LeagueSettingsStartingLineup {...props} />
       <LeagueSettingsRosterLimits {...props} />
       <LeagueSettingsPassing {...props} />

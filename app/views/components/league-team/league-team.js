@@ -23,6 +23,7 @@ export default function LeagueTeam({
 }) {
   const { lid, tid } = useParams()
 
+  const is_hosted_league = Boolean(league.hosted)
   const teamId = Number(tid)
 
   useEffect(() => {
@@ -139,7 +140,7 @@ export default function LeagueTeam({
         </Grid>
       </Grid>
       <Grid item xs={12} md={4}>
-        <DashboardTeamSummary tid={teamId} />
+        {is_hosted_league && <DashboardTeamSummary tid={teamId} />}
         <DashboardTeamValue tid={teamId} />
         <DashboardByeWeeks tid={teamId} />
       </Grid>
