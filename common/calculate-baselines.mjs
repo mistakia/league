@@ -20,7 +20,10 @@ const getWorseStarterForPosition = ({
     const worst = players[players.length - 1]
     if (worst) {
       const worst_player_week_points = (worst.points[week] || {}).total || null
-      if (worst_player_week_points !== null && worst_player_week_points < minTotal) {
+      if (
+        worst_player_week_points !== null &&
+        worst_player_week_points < minTotal
+      ) {
         minTotal = worst_player_week_points
         selectedPlayer = worst
       }

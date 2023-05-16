@@ -8,10 +8,10 @@ import { isMain, getLeague, get_league_format } from '#utils'
 import calculateVOR from './calculate-vor.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
-const log = debug('calculate-historical-baseline')
-debug.enable('calculate-historical-baseline')
+const log = debug('calculate-points-added-baseline-week')
+debug.enable('calculate-points-added-baseline-week')
 
-const calculateHistoricalBaseline = async ({
+const calculate_points_added_baseline_week = async ({
   league_format_hash,
   save = false
 }) => {
@@ -27,6 +27,7 @@ const calculateHistoricalBaseline = async ({
       year,
       league: league_format
     })
+    log(`${year} baseline totals: ${JSON.stringify(baselineTotals)}`)
     for (const [position, total] of Object.entries(baselineTotals)) {
       bTotals[position] += total
     }
@@ -38,7 +39,8 @@ const calculateHistoricalBaseline = async ({
   for (const position of constants.positions) {
     const totalPoints = bTotals[position]
     const avg = totalPoints / totalWeeks
-    update[`b_${position}`] = Math.round(avg * 10) / 10
+    update[`pts_base_week_${position.toLowerCase()}`] =
+      Math.round(avg * 10) / 10
     log(`${position} baseline per week: ${avg.toFixed(2)}`)
   }
 
@@ -57,13 +59,16 @@ const main = async () => {
         throw new Error(`League ${argv.lid} not found`)
       }
       const { league_format_hash } = league
-      await calculateHistoricalBaseline({ league_format_hash, save: argv.save })
+      await calculate_points_added_baseline_week({
+        league_format_hash,
+        save: argv.save
+      })
     } else {
       const league_formats = await db('league_formats')
       log(`calculating baseline for ${league_formats.length} league formats`)
       for (const league_format of league_formats) {
         const { league_format_hash } = league_format
-        await calculateHistoricalBaseline({
+        await calculate_points_added_baseline_week({
           league_format_hash,
           save: argv.save
         })
@@ -88,4 +93,4 @@ if (isMain(import.meta.url)) {
   main()
 }
 
-export default calculateHistoricalBaseline
+export default calculate_points_added_baseline_week
