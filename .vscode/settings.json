@@ -1,10 +1,10 @@
 {
   "search.exclude": {
-    "**/dist": true,
-    "**/.git": true,
-    "**/.yarn": true,
-    "**/node_modules": true,
-    "**/tmp": true,
-    "**/data": true
+    "dist": true,
+    ".git": true,
+    ".yarn": true,
+    "node_modules": true,
+    "tmp": true,
+    "data": true
   }
 }
