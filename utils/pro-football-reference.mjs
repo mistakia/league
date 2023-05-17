@@ -2,10 +2,69 @@ import fetch from 'node-fetch'
 import { JSDOM } from 'jsdom'
 import debug from 'debug'
 
+import { constants, getGameDayAbbreviation, fixTeam } from '#common'
+import { wait } from '#utils'
 import * as cache from './cache.mjs'
 import config from '#config'
+import db from '#db'
 
 const log = debug('pro-football-reference')
+
+const format_time = (time_string) => {
+  // Extract hours, minutes, and period from the time string
+  const time_regex = /^(\d+):(\d+)(AM|PM)$/i
+  const [, hours, minutes, period] = time_string.match(time_regex)
+
+  // Convert hours to 24-hour format
+  let formatted_hours = Number(hours)
+  if (period.toUpperCase() === 'PM' && formatted_hours !== 12) {
+    formatted_hours += 12
+  } else if (period.toUpperCase() === 'AM' && formatted_hours === 12) {
+    formatted_hours = 0
+  }
+
+  // Format the time in HH:mm:ss format
+  const formatted_time = `${formatted_hours
+    .toString()
+    .padStart(2, '0')}:${minutes.padStart(2, '0')}:00`
+
+  return formatted_time
+}
+
+const get_post_season_week_type = (week) => {
+  switch (week) {
+    case 'WildCard':
+      return 'WC'
+
+    case 'Division':
+      return 'DIV'
+
+    case 'ConfChamp':
+      return 'CONF'
+
+    case 'SuperBowl':
+      return 'SB'
+
+    default:
+      return null
+  }
+}
+
+const get_post_season_week_from_day = (day) => {
+  switch (day) {
+    case 'WC':
+      return 1
+
+    case 'DIV':
+      return 2
+
+    case 'CONF':
+      return 3
+
+    case 'SB':
+      return 4
+  }
+}
 
 const extract_position_start_end = (string) => {
   const regex = /\(([^)]*)\).+(\d{4})-(\d{4})$/
@@ -21,8 +80,8 @@ const extract_position_start_end = (string) => {
   }
 
   const positions = match[1].split('-')
-  const startYear = parseInt(match[2])
-  const endYear = parseInt(match[3])
+  const startYear = Number(match[2])
+  const endYear = Number(match[3])
 
   return {
     positions,
@@ -104,6 +163,825 @@ const get_players_page_links = async ({ ignore_cache = false } = {}) => {
   return hrefs
 }
 
+const get_starters = ({ doc, is_home }) => {
+  const starters = []
+  const starters_table = doc.querySelector(
+    'table#' + (is_home ? 'home' : 'vis') + '_starters'
+  )
+
+  const rows = starters_table.querySelectorAll('tbody tr[data-row]')
+  for (const row of rows) {
+    const player_link = row.querySelector('td[data-stat="player"] a')
+    const player_name = player_link.textContent
+    const player_url = player_link.href
+    const pfr_id = player_url.split('/').slice(-1)[0].split('.')[0]
+    const position = row.querySelector('td[data-stat="pos"]').textContent
+
+    starters.push({
+      name: player_name,
+      url: player_url,
+      pfr_id,
+      position
+    })
+  }
+
+  return starters
+}
+
+const get_roster = ({ doc, is_home, starters }) => {
+  if (!config.pro_football_reference_url) {
+    throw new Error('config.pro_football_reference_url is required')
+  }
+
+  const roster = []
+
+  const snap_rows = Array.from(
+    doc.querySelectorAll(
+      '#' + (is_home ? 'home' : 'vis') + '_snap_counts tbody tr'
+    )
+  )
+
+  for (const row of snap_rows) {
+    const player_link = row.querySelector('th[data-stat="player"] a')
+    const player_name = player_link.textContent
+    const player_url = player_link.href
+    const pfr_id = player_url.split('/').slice(-1)[0].split('.')[0]
+    const position = row.querySelector('td[data-stat="pos"]').textContent
+    const off_snap_count = Number(
+      row.querySelector('td[data-stat="offense"]').textContent
+    )
+    const off_snap_pct = Number(
+      row.querySelector('td[data-stat="off_pct"]').textContent.replace('%', '')
+    )
+    const def_snap_count = Number(
+      row.querySelector('td[data-stat="defense"]').textContent
+    )
+    const def_snap_pct = Number(
+      row.querySelector('td[data-stat="def_pct"]').textContent.replace('%', '')
+    )
+    const st_snap_count = Number(
+      row.querySelector('td[data-stat="special_teams"]').textContent
+    )
+    const st_snap_pct = Number(
+      row.querySelector('td[data-stat="st_pct"]').textContent.replace('%', '')
+    )
+
+    const starter = starters.find((starter) => starter.pfr_id === pfr_id)
+
+    roster.push({
+      name: player_name,
+      url: `${config.pro_football_reference_url}${player_url}`,
+      pfr_id,
+      position,
+      off_snap_count,
+      off_snap_pct,
+      def_snap_count,
+      def_snap_pct,
+      st_snap_count,
+      st_snap_pct,
+      is_starter: !!starter
+    })
+  }
+
+  return roster
+}
+
+const get_teams = ({ doc }) => {
+  if (!config.pro_football_reference_url) {
+    throw new Error('config.pro_football_reference_url is required')
+  }
+
+  const home_team_link = doc.querySelector(
+    '.scorebox div:nth-child(1) strong a'
+  )
+  const home_team_name = home_team_link.textContent
+  const home_team_url = `${config.pro_football_reference_url}${home_team_link.href}`
+  const home_team_pfr_id = home_team_url.split('/').slice(-2)[0]
+
+  const away_team_link = doc.querySelector(
+    '.scorebox div:nth-child(2) strong a'
+  )
+  const away_team_name = away_team_link.textContent
+  const away_team_url = `${config.pro_football_reference_url}${away_team_link.href}`
+  const away_team_pfr_id = away_team_url.split('/').slice(-2)[0]
+
+  return {
+    home_team_abbr: fixTeam(home_team_name),
+    home_team_name,
+    home_team_url,
+    home_team_pfr_id,
+
+    away_team_abbr: fixTeam(away_team_name),
+    away_team_name,
+    away_team_url,
+    away_team_pfr_id
+  }
+}
+
+const get_coach = ({ doc, is_home }) => {
+  if (!config.pro_football_reference_url) {
+    throw new Error('config.pro_football_reference_url is required')
+  }
+
+  const coach = {}
+
+  const coach_element = doc.querySelector(
+    `.scorebox div:nth-child(${is_home ? 1 : 2}) .datapoint a`
+  )
+  if (coach_element) {
+    const coach_name = coach_element.textContent
+    const coach_url = coach_element.href
+    const pfr_id = coach_url.split('/').slice(-1)[0].split('.')[0]
+
+    coach.name = coach_name
+    coach.url = `${config.pro_football_reference_url}${coach_url}`
+    coach.pfr_id = pfr_id
+  }
+
+  return coach
+}
+
+const get_scores = ({ doc }) => {
+  const linescore_tbody_elem = doc.querySelector('.linescore tbody')
+  const home_tr_elems = linescore_tbody_elem.querySelectorAll('tr')[0]
+  const away_tr_elems = linescore_tbody_elem.querySelectorAll('tr')[1]
+  const has_overtime = home_tr_elems.querySelectorAll('td').length > 7
+
+  return {
+    home_q1_score: Number(home_tr_elems.querySelectorAll('td')[2].textContent),
+    home_q2_score: Number(home_tr_elems.querySelectorAll('td')[3].textContent),
+    home_q3_score: Number(home_tr_elems.querySelectorAll('td')[4].textContent),
+    home_q4_score: Number(home_tr_elems.querySelectorAll('td')[5].textContent),
+    home_ot_score: has_overtime
+      ? Number(home_tr_elems.querySelectorAll('td')[6].textContent)
+      : null,
+    home_final_score: has_overtime
+      ? Number(home_tr_elems.querySelectorAll('td')[7].textContent)
+      : Number(home_tr_elems.querySelectorAll('td')[6].textContent),
+
+    away_q1_score: Number(away_tr_elems.querySelectorAll('td')[2].textContent),
+    away_q2_score: Number(away_tr_elems.querySelectorAll('td')[3].textContent),
+    away_q3_score: Number(away_tr_elems.querySelectorAll('td')[4].textContent),
+    away_q4_score: Number(away_tr_elems.querySelectorAll('td')[5].textContent),
+    away_ot_score: has_overtime
+      ? Number(away_tr_elems.querySelectorAll('td')[6].textContent)
+      : null,
+    away_final_score: has_overtime
+      ? Number(away_tr_elems.querySelectorAll('td')[7].textContent)
+      : Number(away_tr_elems.querySelectorAll('td')[6].textContent),
+
+    ot: has_overtime
+  }
+}
+
+const get_scorebox_meta = ({ doc }) => {
+  if (!config.pro_football_reference_url) {
+    throw new Error('config.pro_football_reference_url is required')
+  }
+
+  const scorebox_elem = doc.querySelector('.scorebox_meta')
+  const scorebox_divs = Array.from(scorebox_elem.querySelectorAll('div'))
+  const game_date = scorebox_elem.querySelector('div:nth-child(1)').textContent
+
+  const game_time_elem = scorebox_divs.find((div) =>
+    div.textContent.includes('Start Time')
+  )
+  let game_time = null
+  if (game_time_elem) {
+    game_time = game_time_elem.textContent.replace('Start Time: ', '').trim()
+  }
+
+  const stadium_elem = scorebox_divs.find((div) =>
+    div.textContent.includes('Stadium')
+  )
+  const stadium = {
+    name: null,
+    url: null,
+    stadium_pfr_id: null
+  }
+  if (stadium_elem) {
+    const stadium_link = stadium_elem.querySelector('a')
+    stadium.name = stadium_link.textContent
+    stadium.url = `${config.pro_football_reference_url}${stadium_link.href}`
+    stadium.stadium_pfr_id = stadium_link.href
+      .split('/')
+      .slice(-1)[0]
+      .split('.')[0]
+  }
+
+  const attendance_elem = scorebox_divs.find((div) =>
+    div.textContent.includes('Attendance')
+  )
+  let attendance = null
+  if (attendance_elem) {
+    attendance = Number(
+      attendance_elem.querySelector('a').textContent.replace(',', '')
+    )
+  }
+
+  const duration_elem = scorebox_divs.find((div) =>
+    div.textContent.includes('Time of Game')
+  )
+  let duration = null
+  if (duration_elem) {
+    duration = duration_elem.textContent.replace('Time of Game: ', '').trim()
+  }
+
+  return {
+    game_date,
+    game_time,
+    stadium,
+    attendance,
+    duration
+  }
+}
+
+const get_coin_toss = ({ tr }) => {
+  if (!tr) {
+    return {
+      coin_toss_winner: null,
+      coin_toss_result: null
+    }
+  }
+
+  const coin_toss_text = tr.querySelector('td:nth-child(2)').textContent
+
+  return {
+    coin_toss_winner: fixTeam(
+      coin_toss_text.match(/^(.*?)\s?(\(deferred\))?$/)[1]
+    ),
+    coin_toss_result: coin_toss_text.includes('(deferred)')
+      ? 'deferred'
+      : 'receive'
+  }
+}
+
+const get_ot_coin_toss = ({ tr }) => {
+  if (!tr) {
+    return {
+      ot_coin_toss_winner: null
+    }
+  }
+
+  return {
+    ot_coin_toss_winner: fixTeam(
+      tr.querySelector('td:nth-child(2)').textContent
+    )
+  }
+}
+
+const get_spread = ({ tr }) => {
+  const spread_text = tr.querySelector('td:nth-child(2)').textContent
+
+  const regex = /^(.*)\s(-?\d+(\.\d+)?)$/
+  const matches = spread_text.match(regex)
+
+  if (!matches) {
+    return {
+      spread_favorite: null,
+      spread: null
+    }
+  }
+
+  return {
+    spread_favorite: fixTeam(matches[1]),
+    spread: Number(matches[2])
+  }
+}
+
+const get_over_under = ({ tr }) => {
+  const over_under_text = tr.querySelector('td:nth-child(2)').textContent
+
+  const regex = /^(\d+(\.\d+)?)/
+  const match = over_under_text.match(regex)
+
+  return {
+    over_under: match ? Number(match[1]) : null
+  }
+}
+
+const get_game_info = ({ doc }) => {
+  const game_info_rows = Array.from(
+    doc.querySelectorAll('#game_info tbody tr:not(.onecell)')
+  )
+  const coin_toss_row = game_info_rows.filter((row) => {
+    return row.querySelector('th').textContent === 'Won Toss'
+  })[0]
+  const ot_coin_toss_row = game_info_rows.filter((row) => {
+    return row.querySelector('th').textContent === 'OT Won Toss'
+  })[0]
+  const stadium_roof_row = game_info_rows.filter((row) => {
+    return row.querySelector('th').textContent === 'Roof'
+  })[0]
+  const stadium_surface_row = game_info_rows.filter((row) => {
+    return row.querySelector('th').textContent === 'Surface'
+  })[0]
+  const vegas_line_row = game_info_rows.filter((row) => {
+    return row.querySelector('th').textContent === 'Vegas Line'
+  })[0]
+  const over_under_row = game_info_rows.filter((row) => {
+    return row.querySelector('th').textContent === 'Over/Under'
+  })[0]
+  const weather_row = game_info_rows.filter((row) => {
+    return row.querySelector('th').textContent === 'Weather'
+  })[0]
+
+  return {
+    ...get_coin_toss({ tr: coin_toss_row }),
+    ...get_ot_coin_toss({ tr: ot_coin_toss_row }),
+    ...get_spread({ tr: vegas_line_row }),
+    ...get_over_under({ tr: over_under_row }),
+
+    weather_text: weather_row
+      ? weather_row.querySelector('td:nth-child(2)').textContent
+      : null,
+
+    stadium_roof: stadium_roof_row
+      ? stadium_roof_row.querySelector('td:nth-child(2)').textContent
+      : null,
+    stadium_surface: stadium_surface_row
+      ? stadium_surface_row.querySelector('td:nth-child(2)').textContent
+      : null
+  }
+}
+
+const get_expected_points_summary = ({ doc }) => {
+  const expected_points_summary_rows = Array.from(
+    doc.querySelectorAll('#expected_points tbody tr')
+  )
+
+  return expected_points_summary_rows.map((row) => {
+    const team = fixTeam(row.querySelector('th').textContent)
+    const tds = row.querySelectorAll('td[data-stat]')
+    const stats = {}
+    for (const td of tds) {
+      const stat = td.getAttribute('data-stat')
+      const value = Number(td.textContent)
+      stats[stat] = value
+    }
+
+    return {
+      team,
+      ...stats
+    }
+  })
+}
+
+// const get_team_stats = ({ doc }) => {
+//   // TODO
+// }
+
+const get_player_passing_rushing_receiving = ({ doc }) => {
+  if (!config.pro_football_reference_url) {
+    throw new Error('config.pro_football_reference_url is required')
+  }
+
+  const rows = Array.from(
+    doc.querySelectorAll('#player_offense tbody tr:not([class])')
+  )
+
+  return rows.map((row) => {
+    const player_link = row.querySelector('th a')
+    const player_name = player_link.textContent
+    const player_url = `${config.pro_football_reference_url}${player_link.href}`
+    const pfr_id = player_url.match(/\/players\/[A-Z]+\/([^/.]+)/)[1]
+
+    const tds = row.querySelectorAll('td[data-stat]')
+    const stats = {}
+    for (const td of tds) {
+      const stat = td.getAttribute('data-stat')
+      if (stat === 'team') {
+        stats.team = fixTeam(td.textContent)
+        continue
+      }
+      const value = Number(td.textContent)
+      stats[stat] = value
+    }
+
+    return {
+      player_name,
+      player_url,
+      pfr_id,
+      ...stats
+    }
+  })
+}
+
+const get_player_defense = ({ doc }) => {
+  if (!config.pro_football_reference_url) {
+    throw new Error('config.pro_football_reference_url is required')
+  }
+
+  const rows = Array.from(
+    doc.querySelectorAll('#player_defense tbody tr:not([class])')
+  )
+
+  return rows.map((row) => {
+    const player_link = row.querySelector('th a')
+    const player_name = player_link.textContent
+    const player_url = `${config.pro_football_reference_url}${player_link.href}`
+    const pfr_id = player_url.match(/\/players\/[A-Z]+\/([^/.]+)/)[1]
+
+    const tds = row.querySelectorAll('td[data-stat]')
+    const stats = {}
+    for (const td of tds) {
+      const stat = td.getAttribute('data-stat')
+      if (stat === 'team') {
+        stats.team = fixTeam(td.textContent)
+        continue
+      }
+      const value = Number(td.textContent)
+      stats[stat] = value
+    }
+
+    return {
+      player_name,
+      player_url,
+      pfr_id,
+      ...stats
+    }
+  })
+}
+
+const get_player_kick_punt_returns = ({ doc }) => {
+  if (!config.pro_football_reference_url) {
+    throw new Error('config.pro_football_reference_url is required')
+  }
+
+  const rows = Array.from(
+    doc.querySelectorAll('#returns tbody tr:not([class])')
+  )
+
+  return rows.map((row) => {
+    const player_link = row.querySelector('th a')
+    const player_name = player_link.textContent
+    const player_url = `${config.pro_football_reference_url}${player_link.href}`
+    const pfr_id = player_url.match(/\/players\/[A-Z]+\/([^/.]+)/)[1]
+
+    const tds = row.querySelectorAll('td[data-stat]')
+    const stats = {}
+    for (const td of tds) {
+      const stat = td.getAttribute('data-stat')
+      if (stat === 'team') {
+        stats.team = fixTeam(td.textContent)
+        continue
+      }
+      const value = Number(td.textContent)
+      stats[stat] = value
+    }
+
+    return {
+      player_name,
+      player_url,
+      pfr_id,
+      ...stats
+    }
+  })
+}
+
+const get_player_kicking_punting = ({ doc }) => {
+  if (!config.pro_football_reference_url) {
+    throw new Error('config.pro_football_reference_url is required')
+  }
+
+  const rows = Array.from(
+    doc.querySelectorAll('#kicking tbody tr:not([class])')
+  )
+
+  return rows.map((row) => {
+    const player_link = row.querySelector('th a')
+    const player_name = player_link.textContent
+    const player_url = `${config.pro_football_reference_url}${player_link.href}`
+    const pfr_id = player_url.match(/\/players\/[A-Z]+\/([^/.]+)/)[1]
+
+    const tds = row.querySelectorAll('td[data-stat]')
+    const stats = {}
+    for (const td of tds) {
+      const stat = td.getAttribute('data-stat')
+      if (stat === 'team') {
+        stats.team = fixTeam(td.textContent)
+        continue
+      }
+      const value = Number(td.textContent)
+      stats[stat] = value
+    }
+
+    return {
+      player_name,
+      player_url,
+      pfr_id,
+      ...stats
+    }
+  })
+}
+
+const get_player_advanced_passing = ({ doc }) => {
+  if (!config.pro_football_reference_url) {
+    throw new Error('config.pro_football_reference_url is required')
+  }
+
+  const rows = Array.from(
+    doc.querySelectorAll('#passing_advanced tbody tr:not([class])')
+  )
+
+  return rows.map((row) => {
+    const player_link = row.querySelector('th a')
+    const player_name = player_link.textContent
+    const player_url = `${config.pro_football_reference_url}${player_link.href}`
+    const pfr_id = player_url.match(/\/players\/[A-Z]+\/([^/.]+)/)[1]
+
+    const tds = row.querySelectorAll('td[data-stat]')
+    const stats = {}
+    for (const td of tds) {
+      const stat = td.getAttribute('data-stat')
+      if (stat === 'team') {
+        stats.team = fixTeam(td.textContent)
+        continue
+      }
+      const value = Number(td.textContent.replace('%', ''))
+      stats[stat] = value
+    }
+
+    return {
+      player_name,
+      player_url,
+      pfr_id,
+      ...stats
+    }
+  })
+}
+
+const get_player_advanced_rushing = ({ doc }) => {
+  if (!config.pro_football_reference_url) {
+    throw new Error('config.pro_football_reference_url is required')
+  }
+
+  const rows = Array.from(
+    doc.querySelectorAll('#rushing_advanced tbody tr:not([class])')
+  )
+
+  return rows.map((row) => {
+    const player_link = row.querySelector('th a')
+    const player_name = player_link.textContent
+    const player_url = `${config.pro_football_reference_url}${player_link.href}`
+    const pfr_id = player_url.match(/\/players\/[A-Z]+\/([^/.]+)/)[1]
+
+    const tds = row.querySelectorAll('td[data-stat]')
+    const stats = {}
+    for (const td of tds) {
+      const stat = td.getAttribute('data-stat')
+      if (stat === 'team') {
+        stats.team = fixTeam(td.textContent)
+        continue
+      }
+      const value = Number(td.textContent.replace('%', ''))
+      stats[stat] = value
+    }
+
+    return {
+      player_name,
+      player_url,
+      pfr_id,
+      ...stats
+    }
+  })
+}
+
+const get_player_advanced_receiving = ({ doc }) => {
+  if (!config.pro_football_reference_url) {
+    throw new Error('config.pro_football_reference_url is required')
+  }
+
+  const rows = Array.from(
+    doc.querySelectorAll('#receiving_advanced tbody tr:not([class])')
+  )
+
+  return rows.map((row) => {
+    const player_link = row.querySelector('th a')
+    const player_name = player_link.textContent
+    const player_url = `${config.pro_football_reference_url}${player_link.href}`
+    const pfr_id = player_url.match(/\/players\/[A-Z]+\/([^/.]+)/)[1]
+
+    const tds = row.querySelectorAll('td[data-stat]')
+    const stats = {}
+    for (const td of tds) {
+      const stat = td.getAttribute('data-stat')
+      if (stat === 'team') {
+        stats.team = fixTeam(td.textContent)
+        continue
+      }
+      const value = Number(td.textContent.replace('%', ''))
+      stats[stat] = value
+    }
+
+    return {
+      player_name,
+      player_url,
+      pfr_id,
+      ...stats
+    }
+  })
+}
+
+const get_player_advanced_defense = ({ doc }) => {
+  if (!config.pro_football_reference_url) {
+    throw new Error('config.pro_football_reference_url is required')
+  }
+
+  const rows = Array.from(
+    doc.querySelectorAll('#defense_advanced tbody tr:not([class])')
+  )
+
+  return rows.map((row) => {
+    const player_link = row.querySelector('th a')
+    const player_name = player_link.textContent
+    const player_url = `${config.pro_football_reference_url}${player_link.href}`
+    const pfr_id = player_url.match(/\/players\/[A-Z]+\/([^/.]+)/)[1]
+
+    const tds = row.querySelectorAll('td[data-stat]')
+    const stats = {}
+    for (const td of tds) {
+      const stat = td.getAttribute('data-stat')
+      if (stat === 'team') {
+        stats.team = fixTeam(td.textContent)
+        continue
+      }
+      const value = Number(td.textContent.replace('%', ''))
+      stats[stat] = value
+    }
+
+    return {
+      player_name,
+      player_url,
+      pfr_id,
+      ...stats
+    }
+  })
+}
+
+const get_plays = ({ doc }) => {
+  const rows = Array.from(
+    doc.querySelectorAll('#div_pbp tbody tr:not([class])')
+  )
+
+  return rows.map((row) => {
+    const cols = row.querySelectorAll('[data-stat]')
+    const stats = {}
+    for (const col of cols) {
+      const stat = col.getAttribute('data-stat')
+      if (stat === 'detail') {
+        stats.detail_text = col.textContent
+        stats.detail_html = col.innerHTML
+        continue
+      }
+
+      const value = col.textContent
+      stats[stat] = value
+    }
+
+    return stats
+  })
+}
+
+const get_drives = ({ doc, is_home }) => {
+  const rows = Array.from(
+    doc.querySelectorAll(`#${is_home ? 'home' : 'vis'}_drives tbody tr`)
+  )
+
+  return rows.map((row) => {
+    const cols = row.querySelectorAll('[data-stat]')
+    const stats = {}
+    for (const col of cols) {
+      const stat = col.getAttribute('data-stat')
+      const value = col.textContent
+      stats[stat] = value
+    }
+
+    return stats
+  })
+}
+
+const format_player_gamelogs = ({ pfr_game }) => {
+  const player_gamelogs = {}
+
+  const set_player_gamelog_values = ({ pfr_id, ...values }) => {
+    if (!player_gamelogs[pfr_id]) {
+      player_gamelogs[pfr_id] = {
+        pfr_game_id: pfr_game.pfr_game_id,
+        week: pfr_game.week,
+        seas_type: pfr_game.seas_type,
+        pfr_id,
+        ...values
+      }
+    } else {
+      player_gamelogs[pfr_id] = {
+        ...player_gamelogs[pfr_id],
+        ...values
+      }
+    }
+  }
+
+  const handle_roster_player = ({ roster_player, tm, opp }) => {
+    const { pfr_id } = roster_player
+    set_player_gamelog_values({
+      pfr_id,
+
+      tm,
+      opp,
+      pos: roster_player.position,
+
+      active: true,
+      starter: roster_player.is_starter,
+
+      snp:
+        roster_player.off_snap_count +
+        roster_player.def_snap_count +
+        roster_player.st_snap_count,
+
+      snaps_off: roster_player.off_snap_count,
+      snaps_def: roster_player.def_snap_count,
+      snaps_st: roster_player.st_snap_count
+    })
+  }
+
+  for (const roster_player of pfr_game.home_roster) {
+    handle_roster_player({
+      roster_player,
+      tm: fixTeam(pfr_game.home_team_abbr),
+      opp: fixTeam(pfr_game.away_team_abbr)
+    })
+  }
+
+  for (const roster_player of pfr_game.away_roster) {
+    handle_roster_player({
+      roster_player,
+      tm: fixTeam(pfr_game.away_team_abbr),
+      opp: fixTeam(pfr_game.home_team_abbr)
+    })
+  }
+
+  for (const offense_stats of pfr_game.player_passing_rushing_receiving) {
+    const { pfr_id, team } = offense_stats
+    set_player_gamelog_values({
+      pfr_id,
+
+      tm: fixTeam(team),
+      opp:
+        team === pfr_game.home_team_abbr
+          ? fixTeam(pfr_game.away_team_abbr)
+          : fixTeam(pfr_game.home_team_abbr),
+
+      pa: offense_stats.pass_att,
+      pc: offense_stats.pass_cmp,
+      py: offense_stats.pass_yds,
+      ints: offense_stats.pass_int,
+      tdp: offense_stats.pass_td,
+
+      ra: offense_stats.rush_att,
+      ry: offense_stats.rush_yds,
+      tdr: offense_stats.rush_td,
+      fuml: offense_stats.fumbles_lost,
+
+      trg: offense_stats.targets,
+      rec: offense_stats.rec,
+      recy: offense_stats.rec_yds,
+      tdrec: offense_stats.rec_td
+    })
+  }
+
+  for (const kick_punt_return_stats of pfr_game.kick_punt_returns) {
+    const { pfr_id, team } = kick_punt_return_stats
+    set_player_gamelog_values({
+      pfr_id,
+
+      tm: fixTeam(team),
+      opp:
+        team === pfr_game.home_team_abbr
+          ? fixTeam(pfr_game.away_team_abbr)
+          : fixTeam(pfr_game.home_team_abbr),
+
+      prtd: kick_punt_return_stats.punt_ret_td,
+      krtd: kick_punt_return_stats.kick_ret_td
+    })
+  }
+
+  return Object.values(player_gamelogs)
+}
+
+const format_game_html = (html) => {
+  const regex = /<div class="placeholder"><\/div>[^<]{0,10}<!--([\s\S]*?)-->/g
+
+  let match
+  while ((match = regex.exec(html)) !== null) {
+    const [full_match, comment] = match
+
+    // update html and unescape comment
+    html = html.replace(full_match, comment)
+  }
+
+  return html
+}
+
 export const get_players = async ({ ignore_cache = false } = {}) => {
   const cache_key = '/pro-football-reference/players.json'
   if (!ignore_cache) {
@@ -126,4 +1004,258 @@ export const get_players = async ({ ignore_cache = false } = {}) => {
   }
 
   return players
+}
+
+export const get_games = async ({
+  year = constants.season.year,
+  ignore_cache = false
+} = {}) => {
+  if (!config.pro_football_reference_url) {
+    throw new Error('config.pro_football_reference_url is required')
+  }
+
+  const cache_key = `/pro-football-reference/games/${year}.json`
+  if (!ignore_cache) {
+    const cache_value = await cache.get({ key: cache_key })
+    if (cache_value) {
+      return cache_value
+    }
+  }
+
+  const url = `${config.pro_football_reference_url}/years/${year}/games.htm`
+  log(`fetching ${url}`)
+
+  const response = await fetch(url)
+  const text = await response.text()
+  const dom = new JSDOM(text)
+  const doc = dom.window.document
+  const table_rows = doc.querySelectorAll('#games tbody tr:not([class])')
+  const game_rows = Array.from(table_rows).filter((row) => {
+    const week_text = row.querySelector('th[data-stat="week_num"]').textContent
+    return week_text
+  })
+  const games = game_rows.map((row) => {
+    const week_text = row.querySelector('th[data-stat="week_num"]').textContent
+    const week_num = Number(week_text)
+    const is_post_season = isNaN(week_num)
+
+    const seas_type = is_post_season ? 'POST' : 'REG'
+    const week_type = is_post_season
+      ? get_post_season_week_type(week_text)
+      : 'REG'
+    const date = row
+      .querySelector('td[data-stat="game_date"]')
+      .textContent.replace('-', '/')
+    const time_est = format_time(
+      row.querySelector('td[data-stat="gametime"]').textContent
+    )
+    const day = getGameDayAbbreviation({ date, time_est, week_type, seas_type })
+    const week = is_post_season ? get_post_season_week_from_day(day) : week_num
+    const game_link = `${config.pro_football_reference_url}${
+      row.querySelector('td[data-stat="boxscore_word"] a').href
+    }`
+    const pfr_game_id = game_link.split('/').slice(-1)[0].split('.')[0]
+
+    return {
+      week,
+      day,
+      date,
+      time_est,
+      game_link,
+      pfr_game_id,
+      seas_type
+    }
+  })
+
+  if (games.length) {
+    await cache.set({ key: cache_key, value: games })
+  }
+
+  return games
+}
+
+export const get_game = async ({
+  pfr_game_id,
+  pfr_game_meta,
+  ignore_cache = false
+} = {}) => {
+  if (!config.pro_football_reference_url) {
+    throw new Error('config.pro_football_reference_url is required')
+  }
+
+  const cache_key = `/pro-football-reference/games/${pfr_game_id}.json`
+  if (!ignore_cache) {
+    const cache_value = await cache.get({ key: cache_key })
+    if (cache_value) {
+      return {
+        cached: true,
+        ...cache_value
+      }
+    }
+  }
+
+  const url = `${config.pro_football_reference_url}/boxscores/${pfr_game_id}.htm`
+  log(`fetching ${url}`)
+  const response = await fetch(url)
+  const text = await response.text()
+  const formatted_text = format_game_html(text)
+  const dom = new JSDOM(formatted_text)
+  const doc = dom.window.document
+
+  const home_starters = get_starters({
+    doc,
+    is_home: true
+  })
+  const away_starters = get_starters({
+    doc,
+    is_home: false
+  })
+
+  const home_roster = get_roster({
+    doc,
+    is_home: true,
+    starters: home_starters
+  })
+  const away_roster = get_roster({
+    doc,
+    is_home: false,
+    starters: away_starters
+  })
+
+  const officials = Array.from(
+    doc.querySelectorAll('#officials tbody tr:not(.onecell)')
+  ).map((row) => {
+    const role = row.querySelector('th').textContent
+    const referee_link = row.querySelector('td a')
+
+    return {
+      role,
+      name: referee_link ? referee_link.textContent : null,
+      link: referee_link
+        ? `${config.pro_football_reference_url}${referee_link.href}`
+        : null,
+      referee_pfr_id: referee_link
+        ? referee_link.href.split('/').slice(-1)[0].split('.')[0]
+        : null
+    }
+  })
+
+  const week_games_link = doc.querySelector('#div_other_scores h2 a')
+  const week_games_text = week_games_link.textContent
+  const is_playoffs = week_games_text.includes('Playoffs')
+  const seas_type = is_playoffs ? 'POST' : 'REG'
+  const year = Number(week_games_link.href.split('/')[2])
+
+  const regex = /\/years\/\d+\/week_(\d+)\.htm/
+  const match = week_games_link.href.match(regex)
+  const week_num = match ? Number(match[1]) : null
+  let week = null
+
+  if (week_num) {
+    if (!is_playoffs) {
+      week = week_num
+    } else {
+      const weeks_query = await db('nfl_games')
+        .select('week')
+        .where({ year, seas_type: 'REG' })
+        .groupBy('week')
+      const regular_season_weeks = weeks_query.length
+
+      week = week_num - regular_season_weeks
+    }
+  }
+
+  const game = {
+    ...pfr_game_meta,
+
+    week,
+    year,
+    seas_type,
+
+    // TODO add day
+    // TODO add week_type
+
+    pfr_game_id,
+
+    home_coach: get_coach({ doc, is_home: true }),
+    away_coach: get_coach({ doc, is_home: false }),
+
+    ...get_teams({ doc }),
+    ...get_scores({ doc }),
+    ...get_scorebox_meta({ doc }),
+    ...get_game_info({ doc }),
+
+    officials,
+
+    expected_points_summary: get_expected_points_summary({ doc }),
+    // team_stats: get_team_stats({ doc }),
+    player_passing_rushing_receiving: get_player_passing_rushing_receiving({
+      doc
+    }),
+    player_defense: get_player_defense({ doc }),
+
+    kick_punt_returns: get_player_kick_punt_returns({ doc }),
+    kicking_punting: get_player_kicking_punting({ doc }),
+
+    advanced_passing: get_player_advanced_passing({ doc }),
+    advanced_rushing: get_player_advanced_rushing({ doc }),
+    advanced_receiving: get_player_advanced_receiving({ doc }),
+    advanced_defense: get_player_advanced_defense({ doc }),
+
+    home_roster,
+    away_roster,
+    plays: get_plays({ doc }),
+    home_drives: get_drives({ doc, is_home: true }),
+    away_drives: get_drives({ doc, is_home: false })
+  }
+
+  if (game.pfr_game_id && game.over_under) {
+    await cache.set({ key: cache_key, value: game })
+  }
+
+  return game
+}
+
+export const get_player_gamelogs_for_season = async ({
+  year = constants.season.year,
+  ignore_cache = false
+} = {}) => {
+  const cache_key = `/pro-football-reference/player-gamelogs/${year}.json`
+  if (!ignore_cache) {
+    const cache_value = await cache.get({ key: cache_key })
+    if (cache_value) {
+      return cache_value
+    }
+  }
+
+  let player_gamelogs = []
+
+  const games = await get_games({ year, ignore_cache })
+  log(`fetching ${games.length} games for ${year}`)
+
+  for (const game of games) {
+    const pfr_game = await get_game({
+      pfr_game_id: game.pfr_game_id,
+      pfr_game_meta: game,
+      ignore_cache
+    })
+
+    const game_player_gamelogs = format_player_gamelogs({ pfr_game })
+    player_gamelogs = player_gamelogs.concat(game_player_gamelogs)
+
+    // delay next request if previous request was not cached
+    if (!pfr_game.cached) {
+      await wait(8000)
+    }
+  }
+
+  player_gamelogs = player_gamelogs.sort(
+    (a, b) => a.seas_type - b.seas_type || a.week - b.week
+  )
+
+  if (player_gamelogs.length) {
+    await cache.set({ key: cache_key, value: player_gamelogs })
+  }
+
+  return player_gamelogs
 }
