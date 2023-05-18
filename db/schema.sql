@@ -2388,7 +2388,7 @@ CREATE TABLE `props` (
   `timestamp` int(11) NOT NULL,
   `active` tinyint(1) DEFAULT NULL,
   `live` tinyint(1) DEFAULT NULL,
-  UNIQUE KEY `prop` (`sourceid`, `id`, `pid`, `week`, `year`, `prop_type`, `ln`, `timestamp`) -- TODO remove week, year and add esbid
+  UNIQUE KEY `prop` (`sourceid`, `pid`, `esbid`, `prop_type`, `timestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -2438,7 +2438,7 @@ CREATE TABLE `props_index` (
   `all_weeks` json DEFAULT NULL,
   `opp_weeks` json DEFAULT NULL,
   PRIMARY KEY (`prop_id`),
-  UNIQUE KEY `prop` (`sourceid`, `pid`, `week`, `year`, `prop_type`, `ln`, `time_type`), -- TODO remove week, year and add esbid
+  UNIQUE KEY `prop` (`sourceid`, `pid`, `esbid`, `prop_type`, `time_type`),
   KEY `hits_soft` (`hits_soft`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
