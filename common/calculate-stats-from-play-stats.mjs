@@ -94,7 +94,6 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 20:
         // sack (team)
-        stats.pa += 1
         break
 
       case 21:
@@ -346,13 +345,11 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 77:
         // two point pass good
-        stats.pa += 1
         stats.twoptc += 1
         break
 
       case 78:
         // two point pass failed
-        stats.pa += 1
         break
 
       case 79:
