@@ -1325,9 +1325,21 @@ export const player_prop_types = {
   GAME_ALT_RUSHING_ATTEMPTS: 34
 }
 
+export const player_prop_type_keys = {}
+for (const key in player_prop_types) {
+  const value = player_prop_types[key]
+  player_prop_type_keys[value] = key
+}
+
 export const player_prop_time_type = {
   OPEN: 1,
   CLOSE: 2
+}
+
+export const player_prop_time_type_keys = {}
+for (const key in player_prop_time_type) {
+  const value = player_prop_time_type[key]
+  player_prop_time_type_keys[value] = key
 }
 
 export const player_prop_types_alts = [
@@ -1422,6 +1434,12 @@ export const sources = {
   PRIZEPICKS: 23,
   GAMBET_DC: 24,
   BETRIVERS_MD: 25
+}
+
+export const source_keys = {}
+for (const key in sources) {
+  const value = sources[key]
+  source_keys[value] = key
 }
 
 export const sourcesTitle = {

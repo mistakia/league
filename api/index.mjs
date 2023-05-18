@@ -71,11 +71,11 @@ if (options.ssl) {
   })
 }
 
-const speedLimiter = slowDown({
+const speed_limiter = slowDown({
   windowMs: 5 * 60 * 1000,
   delayAfter: 5,
   delayMs: 500,
-  maxDelayMs: 2500
+  maxDelayMs: 10000
 })
 
 api.use('/api/*', expressjwt(config.jwt), (err, req, res, next) => {
@@ -86,16 +86,16 @@ api.use('/api/*', expressjwt(config.jwt), (err, req, res, next) => {
 })
 api.use('/api/status', routes.status)
 api.use('/api/errors', routes.errors)
-api.use('/api/stats', speedLimiter, routes.stats)
+api.use('/api/stats', speed_limiter, routes.stats)
 api.use('/api/players', routes.players)
 api.use('/api/projections', routes.projections)
-api.use('/api/plays', speedLimiter, routes.plays)
+api.use('/api/plays', speed_limiter, routes.plays)
 api.use('/api/schedule', routes.schedule)
 api.use('/api/sources', routes.sources)
 api.use('/api/auth', routes.auth)
 api.use('/api/leagues', routes.leagues)
 api.use('/api/teams', routes.teams)
-api.use('/api/odds', routes.odds)
+api.use('/api/odds', speed_limiter, routes.odds)
 api.use('/api/percentiles', routes.percentiles)
 api.use('/api/seasonlogs', routes.seasonlogs)
 api.use('/api/cache', routes.cache)
