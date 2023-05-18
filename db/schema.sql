@@ -1302,15 +1302,15 @@ CREATE TABLE `nfl_plays` (
 
   `next_play_type` varchar(36) DEFAULT NULL,
 
-  `player_fuml` varchar(7) DEFAULT NULL,                -- fumbling player
-  `player_fuml_gsis` varchar(36) DEFAULT NULL,          -- fumbling player gsis
-  `bc` varchar(7) DEFAULT NULL,                 -- ball carrier
+  `player_fuml_pid` varchar(25) DEFAULT NULL,   -- fumbling player
+  `player_fuml_gsis` varchar(36) DEFAULT NULL,  -- fumbling player gsis
+  `bc_pid` varchar(25) DEFAULT NULL,            -- ball carrier
   `bc_gsis` varchar(36) DEFAULT NULL,           -- ball carrier gsis
-  `psr` varchar(7) DEFAULT NULL,                -- passer
+  `psr_pid` varchar(25) DEFAULT NULL,           -- passer
   `psr_gsis` varchar(36) DEFAULT NULL,          -- passer gsis
-  `trg` varchar(7) DEFAULT NULL,                -- targeted player
+  `trg_pid` varchar(25) DEFAULT NULL,           -- targeted player
   `trg_gsis` varchar(36) DEFAULT NULL,          -- targeted player gsis
-  `intp` varchar(7) DEFAULT NULL,               -- intercepting player
+  `intp_pid` varchar(25) DEFAULT NULL,          -- intercepting player
   `intp_gsis` varchar(36) DEFAULT NULL,         -- intercepting player gsis
 
   `yds` tinyint(3) DEFAULT NULL,                -- yardage
@@ -1670,15 +1670,15 @@ CREATE TABLE `nfl_plays_current_week` (
 
   `next_play_type` varchar(36) DEFAULT NULL,
 
-  `player_fuml` varchar(7) DEFAULT NULL,                -- fumbling player
-  `player_fuml_gsis` varchar(36) DEFAULT NULL,          -- fumbling player gsis
-  `bc` varchar(7) DEFAULT NULL,                 -- ball carrier
+  `player_fuml_pid` varchar(25) DEFAULT NULL,   -- fumbling player
+  `player_fuml_gsis` varchar(36) DEFAULT NULL,  -- fumbling player gsis
+  `bc_pid` varchar(25) DEFAULT NULL,            -- ball carrier
   `bc_gsis` varchar(36) DEFAULT NULL,           -- ball carrier gsis
-  `psr` varchar(7) DEFAULT NULL,                -- passer
+  `psr_pid` varchar(25) DEFAULT NULL,           -- passer
   `psr_gsis` varchar(36) DEFAULT NULL,          -- passer gsis
-  `trg` varchar(7) DEFAULT NULL,                -- targeted player
+  `trg_pid` varchar(25) DEFAULT NULL,           -- targeted player
   `trg_gsis` varchar(36) DEFAULT NULL,          -- targeted player gsis
-  `intp` varchar(7) DEFAULT NULL,               -- intercepting player
+  `intp_pid` varchar(25) DEFAULT NULL,          -- intercepting player
   `intp_gsis` varchar(36) DEFAULT NULL,         -- intercepting player gsis
 
   `yds` varchar(3) DEFAULT NULL,                -- yardage

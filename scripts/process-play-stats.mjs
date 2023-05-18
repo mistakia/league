@@ -296,7 +296,7 @@ const run = async ({
           (p) => p.gsisid === play_row.player_fuml_gsis
         )
         if (player) {
-          play_row.player_fuml = player.pid
+          play_row.player_fuml_pid = player.pid
         }
       }
 
@@ -305,7 +305,7 @@ const run = async ({
           (p) => p.gsisid === play_row.bc_gsis
         )
         if (player) {
-          play_row.bc = player.pid
+          play_row.bc_pid = player.pid
         }
       }
 
@@ -314,7 +314,7 @@ const run = async ({
           (p) => p.gsisid === play_row.psr_gsis
         )
         if (player) {
-          play_row.psr = player.pid
+          play_row.psr_pid = player.pid
         }
       }
 
@@ -323,7 +323,7 @@ const run = async ({
           (p) => p.gsisid === play_row.trg_gsis
         )
         if (player) {
-          play_row.trg = player.pid
+          play_row.trg_pid = player.pid
         }
       }
 
@@ -332,7 +332,7 @@ const run = async ({
           (p) => p.gsisid === play_row.intp_gsis
         )
         if (player) {
-          play_row.intp = player.pid
+          play_row.intp_pid = player.pid
         }
       }
 

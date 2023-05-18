@@ -68,18 +68,18 @@ export * as validators from './validators.mjs'
 export const getChartedPlayByPlayQuery = (db) =>
   db('nfl_plays')
     .select(
-      'nfl_plays.player_fuml',
+      'nfl_plays.player_fuml_pid',
       'nfl_plays.fuml',
       'nfl_plays.off',
       'nfl_plays.type',
-      'nfl_plays.bc',
+      'nfl_plays.bc_pid',
       'nfl_plays.yds',
       'nfl_plays.yds_gained',
       'nfl_plays.fd',
       'nfl_plays.succ',
-      'nfl_plays.psr',
-      'nfl_plays.trg',
-      'nfl_plays.intp',
+      'nfl_plays.psr_pid',
+      'nfl_plays.trg_pid',
+      'nfl_plays.intp_pid',
       'nfl_plays.comp',
       'nfl_plays.td',
       'nfl_plays.sk',
