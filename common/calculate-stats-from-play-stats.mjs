@@ -335,12 +335,10 @@ const calculateStatsFromPlayStats = (playStats) => {
       case 75:
         // two point rush good
         stats.twoptc += 1
-        stats.ra += 1
         break
 
       case 76:
         // two point rush failed
-        stats.ra += 1
         break
 
       case 77:
