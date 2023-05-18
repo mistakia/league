@@ -36,101 +36,101 @@ const calculateStatsFromPlays = (plays) => {
 
   plays.forEach((play) => {
     if (play.fuml) {
-      addStat(play.player_fuml, 'fuml', 1)
-      playerToTeam[play.player_fuml] = play.off
+      addStat(play.player_fuml_pid, 'fuml', 1)
+      playerToTeam[play.player_fuml_pid] = play.off
     }
 
     switch (play.type) {
       case 'RUSH': {
-        playerToTeam[play.bc] = play.off
+        playerToTeam[play.bc_pid] = play.off
         addTeamStat(play.off, 'ra', 1)
         addTeamStat(play.off, 'ry', play.yds)
-        addStat(play.bc, 'ra', 1)
-        addStat(play.bc, 'ry', play.yds)
-        if (play.yaco) addStat(play.bc, 'ryaco', play.yaco)
+        addStat(play.bc_pid, 'ra', 1)
+        addStat(play.bc_pid, 'ry', play.yds)
+        if (play.yaco) addStat(play.bc_pid, 'ryaco', play.yaco)
         if (play.fd) {
-          addStat(play.bc, 'fd', 1)
-          addStat(play.bc, 'rfd', 1)
+          addStat(play.bc_pid, 'fd', 1)
+          addStat(play.bc_pid, 'rfd', 1)
         }
         if (play.succ) {
-          addStat(play.bc, 'succ', 1)
-          addStat(play.bc, 'rasucc', 1)
+          addStat(play.bc_pid, 'succ', 1)
+          addStat(play.bc_pid, 'rasucc', 1)
         }
-        if (play.mbt) addStat(play.bc, 'mbt', play.mbt)
-        if (play.yds > 0) addStat(play.bc, 'posra', 1)
-        if (play.fd) addStat(play.bc, 'rfd', 1)
-        if (play.td) addStat(play.bc, 'tdr', 1)
+        if (play.mbt) addStat(play.bc_pid, 'mbt', play.mbt)
+        if (play.yds > 0) addStat(play.bc_pid, 'posra', 1)
+        if (play.fd) addStat(play.bc_pid, 'rfd', 1)
+        if (play.td) addStat(play.bc_pid, 'tdr', 1)
         break
       }
 
       case 'PASS': {
         // passer
-        playerToTeam[play.psr] = play.off
+        playerToTeam[play.psr_pid] = play.off
         if (play.succ) {
-          addStat(play.psr, 'psucc', 1)
-          addStat(play.psr, 'succ', 1)
+          addStat(play.psr_pid, 'psucc', 1)
+          addStat(play.psr_pid, 'succ', 1)
         }
         if (play.dot) {
-          addStat(play.psr, 'pdot', play.dot)
+          addStat(play.psr_pid, 'pdot', play.dot)
           addTeamStat(play.off, 'rdot', play.dot)
         }
-        if (play.qbp) addStat(play.psr, 'qbp', 1)
-        if (play.qbhi) addStat(play.psr, 'qbhi', 1)
-        if (play.qbhu) addStat(play.psr, 'qbhu', 1)
-        if (play.high) addStat(play.psr, 'high', 1)
-        if (play.intw) addStat(play.psr, 'intw', 1)
+        if (play.qbp) addStat(play.psr_pid, 'qbp', 1)
+        if (play.qbhi) addStat(play.psr_pid, 'qbhi', 1)
+        if (play.qbhu) addStat(play.psr_pid, 'qbhu', 1)
+        if (play.high) addStat(play.psr_pid, 'high', 1)
+        if (play.intw) addStat(play.psr_pid, 'intw', 1)
         if (play.drp) {
-          addStat(play.psr, 'drpp', 1)
-          addStat(play.psr, 'drppy', play.dot)
+          addStat(play.psr_pid, 'drpp', 1)
+          addStat(play.psr_pid, 'drppy', play.dot)
         }
 
         // receiver
-        if (play.trg) {
-          playerToTeam[play.trg] = play.off
+        if (play.trg_pid) {
+          playerToTeam[play.trg_pid] = play.off
           addTeamStat(play.off, 'trg', 1)
-          addStat(play.trg, 'trg', 1)
-          addStat(play.trg, 'rdot', play.dot)
-          if (play.dot >= 20) addStat(play.trg, 'dptrg', 1)
-          if (play.cnb) addStat(play.trg, 'cnb', 1)
+          addStat(play.trg_pid, 'trg', 1)
+          addStat(play.trg_pid, 'rdot', play.dot)
+          if (play.dot >= 20) addStat(play.trg_pid, 'dptrg', 1)
+          if (play.cnb) addStat(play.trg_pid, 'cnb', 1)
           if (play.drp) {
-            addStat(play.trg, 'drp', 1)
-            addStat(play.trg, 'drprecy', play.dot)
+            addStat(play.trg_pid, 'drp', 1)
+            addStat(play.trg_pid, 'drprecy', play.dot)
           }
         }
 
         if (play.intp) {
-          addStat(play.psr, 'ints', 1)
-        } else if (play.comp && play.trg) {
+          addStat(play.psr_pid, 'ints', 1)
+        } else if (play.comp && play.trg_pid) {
           // TODO deprecate - temp fix for missing trg
           // receiver
-          addStat(play.trg, 'rec', 1)
-          addStat(play.trg, 'recy', play.yds)
-          addStat(play.trg, 'ryac', play.yac)
-          addStat(play.trg, 'rcay', play.dot)
-          if (play.mbt) addStat(play.trg, 'mbt', play.mbt)
+          addStat(play.trg_pid, 'rec', 1)
+          addStat(play.trg_pid, 'recy', play.yds)
+          addStat(play.trg_pid, 'ryac', play.yac)
+          addStat(play.trg_pid, 'rcay', play.dot)
+          if (play.mbt) addStat(play.trg_pid, 'mbt', play.mbt)
 
           // passer
-          addStat(play.psr, 'pa', 1)
-          addStat(play.psr, 'py', play.yds)
-          addStat(play.psr, 'pc', 1)
-          addStat(play.psr, 'pcay', play.dot)
-          if (play.yac) addStat(play.psr, 'pyac', play.yac)
+          addStat(play.psr_pid, 'pa', 1)
+          addStat(play.psr_pid, 'py', play.yds)
+          addStat(play.psr_pid, 'pc', 1)
+          addStat(play.psr_pid, 'pcay', play.dot)
+          if (play.yac) addStat(play.psr_pid, 'pyac', play.yac)
 
-          if (play.succ) addStat(play.trg, 'succ', 1)
+          if (play.succ) addStat(play.trg_pid, 'succ', 1)
           if (play.fd) {
-            addStat(play.psr, 'fd', 1)
-            addStat(play.trg, 'fd', 1)
+            addStat(play.psr_pid, 'fd', 1)
+            addStat(play.trg_pid, 'fd', 1)
           }
 
           if (play.td) {
-            addStat(play.psr, 'tdp', 1)
-            addStat(play.trg, 'tdrec', 1)
+            addStat(play.psr_pid, 'tdp', 1)
+            addStat(play.trg_pid, 'tdrec', 1)
           }
         } else if (play.sk) {
-          addStat(play.psr, 'sk', 1)
-          addStat(play.psr, 'sky', Math.abs(play.yds_gained)) // TODO - consolidate to play.yds
+          addStat(play.psr_pid, 'sk', 1)
+          addStat(play.psr_pid, 'sky', Math.abs(play.yds_gained)) // TODO - consolidate to play.yds
         } else {
-          addStat(play.psr, 'pa', 1)
+          addStat(play.psr_pid, 'pa', 1)
         }
       }
     }

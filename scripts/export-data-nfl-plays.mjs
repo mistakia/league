@@ -95,15 +95,15 @@ const nfl_play_fields = [
 
   'next_play_type',
 
-  'player_fuml',
+  'player_fuml_pid',
   'player_fuml_gsis',
-  'bc',
+  'bc_pid',
   'bc_gsis',
-  'psr',
+  'psr_pid',
   'psr_gsis',
-  'trg',
+  'trg_pid',
   'trg_gsis',
-  'intp',
+  'intp_pid',
   'intp_gsis',
 
   'yds',
