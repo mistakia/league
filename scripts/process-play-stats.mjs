@@ -132,7 +132,6 @@ const run = async ({
       log(`missing player for gsispid: ${gsispid}`)
       continue
     }
-    if (!constants.positions.includes(player_row.pos)) continue
 
     const playStat = play_stats_by_gsispid[gsispid].find((p) => p.clubCode)
     if (!playStat) continue
@@ -163,7 +162,6 @@ const run = async ({
       log(`missing player for gsisid: ${gsisid}`)
       continue
     }
-    if (!constants.positions.includes(player_row.pos)) continue
 
     // check to see if gamelog was already generated using gsispid
     if (player_row.gsispid && gamelog_gsispids.includes(player_row.gsispid))

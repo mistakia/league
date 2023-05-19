@@ -88,6 +88,7 @@ export function getBaselines(state) {
   const playerMaps = getAllPlayers(state)
   return result.withMutations((b) => {
     for (const [week, positions] of b.entrySeq()) {
+      // TODO document this
       if (constants.positions.includes(week)) continue
       for (const [position, baselines] of positions.entrySeq()) {
         for (const [baseline, pid] of baselines.entrySeq()) {
