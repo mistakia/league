@@ -1221,7 +1221,7 @@ CREATE TABLE `nfl_plays` (
   `sequence` int(10) DEFAULT NULL,
   `state` varchar(36) DEFAULT NULL,
 
-  `week` tinyint(2) DEFAULT NULL,
+  `week` tinyint(2) NOT NULL,
   `dwn` int(1) DEFAULT NULL,
   `qtr` int(1) DEFAULT NULL,
   `year` smallint(4) NOT NULL,
@@ -1589,10 +1589,10 @@ CREATE TABLE `nfl_plays_current_week` (
   `sequence` int(10) DEFAULT NULL,
   `state` varchar(36) DEFAULT NULL,
 
-  `week` tinyint(2) DEFAULT NULL,
+  `week` tinyint(2) NOT NULL,
   `dwn` int(1) DEFAULT NULL,
   `qtr` int(1) DEFAULT NULL,
-  `year` smallint(4) DEFAULT NULL,
+  `year` smallint(4) NOT NULL,
   `seas_type` varchar(36) DEFAULT NULL, -- PRE, REG, POST
 
   `desc` text DEFAULT NULL,
