@@ -169,9 +169,9 @@ export const getGames = async ({ year, week, seas_type, token }) => {
   return data
 }
 
-export const getPlays = async ({ id, token, bypass_cache = false }) => {
+export const getPlays = async ({ id, token, ignore_cache = false }) => {
   const cache_key = `/nfl/plays/${id}.json`
-  if (!bypass_cache) {
+  if (!ignore_cache) {
     const cache_value = await cache.get({ key: cache_key })
     if (cache_value) {
       log(`cache hit for nfl plays with id: ${id}`)

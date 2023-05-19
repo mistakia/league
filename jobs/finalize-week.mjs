@@ -22,7 +22,7 @@ export default async function () {
 
   // finalize plays
   await import_plays_ngs({ week, force_update: true })
-  await import_plays_nfl({ week, bypass_cache: true, force_update: true })
+  await import_plays_nfl({ week, ignore_cache: true, force_update: true })
 
   await update_stats_weekly()
 

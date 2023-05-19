@@ -368,7 +368,6 @@ const main = async () => {
         all_games_skipped = await importPlaysForWeek({
           week: argv.week,
           seas_type: argv.seas_type,
-          bypass_cache: true,
           force_update: argv.final,
           ignore_cache: argv.ignore_cache
         })
@@ -378,7 +377,6 @@ const main = async () => {
       await importPlaysForWeek({
         week: argv.week,
         seas_type: argv.seas_type,
-        bypass_cache: true,
         force_update: argv.final,
         ignore_cache: argv.ignore_cache
       })
