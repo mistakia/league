@@ -179,29 +179,42 @@ const importPlaysForWeek = async ({
       (p) => p.playType === 'END_GAME'
     )
     if (end_play_exists) {
-      // reset final table playStats
-      await db('nfl_play_stats')
-        .update({ valid: 0 })
-        .where({ esbid: game.esbid })
+      if (play_stat_inserts.length) {
+        // reset final table playStats
+        await db('nfl_play_stats')
+          .update({ valid: 0 })
+          .where({ esbid: game.esbid })
 
-      // delete any excess plays
-      // TODO
+        // delete any excess plays
+        // TODO
 
-      // save in final tables
-      await db('nfl_play_stats').insert(play_stat_inserts).onConflict().merge()
-      await db('nfl_plays').insert(play_inserts).onConflict().merge()
+        // save in final tables
+        await db('nfl_play_stats')
+          .insert(play_stat_inserts)
+          .onConflict()
+          .merge()
+      }
+
+      if (play_inserts.length) {
+        await db('nfl_plays').insert(play_inserts).onConflict().merge()
+      }
     }
 
     // save in current tables
     try {
-      await db('nfl_play_stats_current_week')
-        .insert(play_stat_inserts)
-        .onConflict()
-        .merge()
-      await db('nfl_plays_current_week')
-        .insert(play_inserts)
-        .onConflict()
-        .merge()
+      if (play_stat_inserts.length) {
+        await db('nfl_play_stats_current_week')
+          .insert(play_stat_inserts)
+          .onConflict()
+          .merge()
+      }
+
+      if (play_inserts.length) {
+        await db('nfl_plays_current_week')
+          .insert(play_inserts)
+          .onConflict()
+          .merge()
+      }
     } catch (err) {
       log('Error on inserting plays and play stats ignored')
       log(err)
