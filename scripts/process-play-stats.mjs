@@ -236,14 +236,15 @@ const run = async ({
   missing.forEach((m) => log(`could not find player: ${m.pname} / ${m.cteam}`))
 
   if (player_gamelog_inserts.length) {
-    log(`Updated ${player_gamelog_inserts.length} gamelogs`)
     await db('player_gamelogs')
       .insert(player_gamelog_inserts)
       .onConflict()
       .merge()
+    log(`Updated ${player_gamelog_inserts.length} gamelogs`)
   }
 
-  // update play row data - off, def
+  log('Updating play row columns: off, def')
+
   const plays = await db('nfl_plays')
     .select(
       'nfl_games.h',
@@ -275,7 +276,7 @@ const run = async ({
       })
   }
 
-  // update play row data
+  log('Updating play row pid columns')
   const playStatsByEsbid = groupBy(playStats, 'esbid')
   const play_rows = []
   for (const [esbid, playStats] of Object.entries(playStatsByEsbid)) {
