@@ -246,7 +246,7 @@ const importPlaysForYear = async ({
 const importAllPlays = async ({
   start,
   end,
-  seas_type,
+  seas_type = 'ALL',
   force_update,
   ignore_cache = false
 } = {}) => {
@@ -265,9 +265,10 @@ const importAllPlays = async ({
 
   for (const year of years) {
     const token = nfl.getToken()
-    log(`loading plays for year: ${year}, seas_type: ${seas_type || 'all'}`)
+    log(`loading plays for year: ${year}, seas_type: ${seas_type}`)
+    const is_seas_type_all = seas_type.toLowerCase() === 'all'
 
-    if (seas_type || seas_type.toLowerCase() === 'pre') {
+    if (is_seas_type_all || seas_type.toLowerCase() === 'pre') {
       await importPlaysForYear({
         year,
         seas_type: 'PRE',
@@ -278,7 +279,7 @@ const importAllPlays = async ({
       await wait(3000)
     }
 
-    if (seas_type || seas_type.toLowerCase() === 'reg') {
+    if (is_seas_type_all || seas_type.toLowerCase() === 'reg') {
       await importPlaysForYear({
         year,
         seas_type: 'REG',
@@ -289,7 +290,7 @@ const importAllPlays = async ({
       await wait(3000)
     }
 
-    if (seas_type || seas_type.toLowerCase() === 'post') {
+    if (is_seas_type_all || seas_type.toLowerCase() === 'post') {
       await importPlaysForYear({
         year,
         seas_type: 'POST',
