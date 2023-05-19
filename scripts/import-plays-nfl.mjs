@@ -264,7 +264,7 @@ const importAllPlays = async ({
   }
 
   for (const year of years) {
-    const token = nfl.getToken()
+    const token = await nfl.getToken()
     log(`loading plays for year: ${year}, seas_type: ${seas_type}`)
     const is_seas_type_all = seas_type.toLowerCase() === 'all'
 
