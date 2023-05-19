@@ -1557,7 +1557,7 @@ CREATE TABLE `nfl_play_stats` (
   `teamid` varchar(36) DEFAULT NULL,
   `valid` tinyint(1) DEFAULT NULL,
   KEY `playId` (`playId`),
-  UNIQUE KEY `esbid` (`esbid`,`playId`,`statId`)
+  UNIQUE KEY `play_stat` (`esbid`,`playId`,`statId`,`playerName`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -1925,7 +1925,7 @@ CREATE TABLE `nfl_play_stats_current_week` (
   `teamid` varchar(36) DEFAULT NULL,
   `valid` tinyint(1) DEFAULT NULL,
   KEY `playId` (`playId`),
-  UNIQUE KEY `esbid` (`esbid`,`playId`,`statId`)
+  UNIQUE KEY `play_stat` (`esbid`,`playId`,`statId`,`playerName`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
