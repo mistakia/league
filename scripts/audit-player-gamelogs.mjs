@@ -99,7 +99,9 @@ const audit_player_gamelogs = async ({
     const formated_db_gamelog = format_gamelog(player_gamelog)
     const differences = diff(formated_pfr_gamelog, formated_db_gamelog)
     if (differences && differences.length) {
-      log(`differences for ${player_gamelog.pid} week ${player_gamelog.week} ${player_gamelog.seas_type} pfr_game_id ${pfr_player_gamelog.pfr_game_id}`)
+      log(
+        `differences for ${player_gamelog.pid} week ${player_gamelog.week} ${player_gamelog.seas_type} pfr_game_id ${pfr_player_gamelog.pfr_game_id}`
+      )
       log(differences)
     }
   }
