@@ -215,6 +215,7 @@ const importPlaysForYear = async ({
   year = constants.season.year,
   seas_type = 'REG',
   force_update = false,
+  ignore_cache = false,
   token
 } = {}) => {
   const weeks = await db('nfl_games')
@@ -235,13 +236,20 @@ const importPlaysForYear = async ({
       week,
       seas_type,
       force_update,
+      ignore_cache,
       token
     })
     await wait(4000)
   }
 }
 
-const importAllPlays = async ({ start, end, seas_type, force_update } = {}) => {
+const importAllPlays = async ({
+  start,
+  end,
+  seas_type,
+  force_update,
+  ignore_cache = false
+} = {}) => {
   const nfl_games_result = await db('nfl_games')
     .select('year')
     .groupBy('year')
@@ -251,23 +259,44 @@ const importAllPlays = async ({ start, end, seas_type, force_update } = {}) => {
   if (start) {
     years = years.filter((year) => year >= start)
   }
+  if (end) {
+    years = years.filter((year) => year <= end)
+  }
 
   for (const year of years) {
     const token = nfl.getToken()
     log(`loading plays for year: ${year}, seas_type: ${seas_type || 'all'}`)
 
     if (seas_type || seas_type.toLowerCase() === 'pre') {
-      await importPlaysForYear({ year, seas_type: 'PRE', force_update, token })
+      await importPlaysForYear({
+        year,
+        seas_type: 'PRE',
+        force_update,
+        ignore_cache,
+        token
+      })
       await wait(3000)
     }
 
     if (seas_type || seas_type.toLowerCase() === 'reg') {
-      await importPlaysForYear({ year, seas_type: 'REG', force_update, token })
+      await importPlaysForYear({
+        year,
+        seas_type: 'REG',
+        force_update,
+        ignore_cache,
+        token
+      })
       await wait(3000)
     }
 
     if (seas_type || seas_type.toLowerCase() === 'post') {
-      await importPlaysForYear({ year, seas_type: 'POST', force_update, token })
+      await importPlaysForYear({
+        year,
+        seas_type: 'POST',
+        force_update,
+        ignore_cache,
+        token
+      })
       await wait(3000)
     }
   }
@@ -281,6 +310,7 @@ const main = async () => {
         start: argv.start,
         end: argv.end,
         seas_type: argv.seas_type,
+        ignore_cache: argv.ignore_cache,
         force_update: argv.final
       })
     } else if (argv.year) {
@@ -289,12 +319,14 @@ const main = async () => {
           year: argv.year,
           week: argv.week,
           seas_type: argv.seas_type,
+          ignore_cache: argv.ignore_cache,
           force_update: argv.final
         })
       } else {
         await importPlaysForYear({
           year: argv.year,
           seas_type: argv.seas_type,
+          ignore_cache: argv.ignore_cache,
           force_update: argv.final
         })
       }
