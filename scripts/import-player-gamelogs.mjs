@@ -44,7 +44,7 @@ const import_player_gamelogs_for_week = async ({
     const data = await nfl.getPlays({
       id: game.detailid,
       token,
-      bypass_cache: ignore_cache
+      ignore_cache
     })
     if (!data.data) continue
 

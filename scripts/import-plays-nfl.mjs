@@ -80,7 +80,7 @@ const importPlaysForWeek = async ({
   year = constants.season.year,
   week,
   seas_type = 'REG',
-  bypass_cache = false,
+  ignore_cache = false,
   force_update = false,
   token
 } = {}) => {
@@ -94,7 +94,7 @@ const importPlaysForWeek = async ({
     !force_update && year === constants.season.year && week === current_week
 
   log(
-    `importing plays for week ${week} ${year} ${seas_type} (force_update: ${force_update}, bypass_cache: ${bypass_cache}, isCurrentWeek: ${isCurrentWeek}`
+    `importing plays for week ${week} ${year} ${seas_type} (force_update: ${force_update}, ignore_cache: ${ignore_cache}, isCurrentWeek: ${isCurrentWeek}`
   )
 
   const games = await db('nfl_games').where({
@@ -144,7 +144,7 @@ const importPlaysForWeek = async ({
 
     log(`loading plays for esbid: ${game.esbid}`)
 
-    const data = await nfl.getPlays({ id: game.detailid, token, bypass_cache })
+    const data = await nfl.getPlays({ id: game.detailid, token, ignore_cache })
 
     if (!data.data) continue
 
@@ -307,7 +307,7 @@ const main = async () => {
         all_games_skipped = await importPlaysForWeek({
           week: argv.week,
           seas_type: argv.seas_type,
-          bypass_cache: true,
+          ignore_cache: true,
           force_update: argv.final
         })
       }
@@ -316,7 +316,7 @@ const main = async () => {
       await importPlaysForWeek({
         week: argv.week,
         seas_type: argv.seas_type,
-        bypass_cache: true,
+        ignore_cache: true,
         force_update: argv.final
       })
       log('end')

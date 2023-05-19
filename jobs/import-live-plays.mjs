@@ -31,7 +31,7 @@ export default async function () {
     log(`running import count: ${loop_count}`)
     try {
       const all_games_skipped_nfl = await import_plays_nfl({
-        bypass_cache: true
+        ignore_cache: true
       })
 
       const all_games_skipped_ngs = await import_plays_ngs()
