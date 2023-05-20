@@ -912,6 +912,10 @@ CREATE TABLE `team_stats` (
   `pmin` decimal(5,2) DEFAULT 0,
   `pdev` decimal(5,2) DEFAULT 0,
 
+  `division_finish` tinyint(2) DEFAULT 0,
+  `regular_season_finish` tinyint(2) DEFAULT 0,
+  `post_season_finish` tinyint(2) DEFAULT 0,
+
   `doi` decimal(4,2) DEFAULT 0,
 
   `pSlot1` decimal(6,2) DEFAULT 0,

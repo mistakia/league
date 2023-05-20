@@ -14,7 +14,7 @@ const calculateStandings = ({
   starters,
   active,
   league,
-  tids,
+  teams,
   gamelogs,
   matchups,
   year = constants.season.year
@@ -27,7 +27,7 @@ const calculateStandings = ({
         )
       : constants.season.regularSeasonFinalWeek
   const teamStats = {}
-  for (const tid of tids) {
+  for (const { uid: tid } of teams) {
     teamStats[tid] = {
       tid,
       gamelogs: [],
@@ -56,7 +56,7 @@ const calculateStandings = ({
     league.sk
 
   for (let week = 1; week <= finalWeek; week++) {
-    for (const tid of tids) {
+    for (const { uid: tid } of teams) {
       const startingPlayers = starters[week][tid]
       const starter_pids = startingPlayers.map((p) => p.pid)
       let total = 0
@@ -148,7 +148,7 @@ const calculateStandings = ({
 
     // calculate all play record
 
-    for (const tid of tids) {
+    for (const { uid: tid } of teams) {
       const scores = Object.values(teamStats)
         .filter((p) => p.tid !== tid)
         .map((p) => p.points.weeks[week])
@@ -174,7 +174,7 @@ const calculateStandings = ({
   const maxPP = Math.max(...potentialPoints)
   const minAPL = Math.min(...allPlayLosses)
   const maxAPL = Math.max(...allPlayLosses)
-  for (const tid of tids) {
+  for (const { uid: tid } of teams) {
     const pp = teamStats[tid].stats.pp + teamStats[tid].stats.ppp
     const apl = teamStats[tid].stats.apLosses
     const normPP = (pp - minPP) / (maxPP - minPP)
@@ -189,6 +189,71 @@ const calculateStandings = ({
       (teamStats[tid].stats.pf / teamStats[tid].stats.pp) * 100 || null
 
     if (teamStats[tid].stats.pmin === Infinity) teamStats[tid].stats.pmin = null
+  }
+
+  // calculate division finish
+  const divisions = {}
+  for (const { uid: tid } of teams) {
+    const { div } = teams.find((t) => t.uid === tid)
+    if (!divisions[div]) divisions[div] = []
+    divisions[div].push(tid)
+  }
+  for (const div in divisions) {
+    const div_teams = divisions[div]
+    const div_teams_sorted = div_teams.sort((team_a_tid, team_b_tid) => {
+      const a_wins = teamStats[team_a_tid].stats.wins
+      const b_wins = teamStats[team_b_tid].stats.wins
+      const a_losses = teamStats[team_a_tid].stats.losses
+      const b_losses = teamStats[team_b_tid].stats.losses
+      const a_ties = teamStats[team_a_tid].stats.ties
+      const b_ties = teamStats[team_b_tid].stats.ties
+      const a_points_for = teamStats[team_a_tid].stats.pf
+      const b_points_for = teamStats[team_b_tid].stats.pf
+      const a_all_play = teamStats[team_a_tid].stats.apWins
+      const b_all_play = teamStats[team_b_tid].stats.apWins
+
+      if (a_wins > b_wins) return -1
+      if (a_wins < b_wins) return 1
+      if (a_losses < b_losses) return -1
+      if (a_losses > b_losses) return 1
+      if (a_ties > b_ties) return -1
+      if (a_ties < b_ties) return 1
+      if (a_points_for > b_points_for) return -1
+      if (a_points_for < b_points_for) return 1
+      if (a_all_play > b_all_play) return -1
+      if (a_all_play < b_all_play) return 1
+
+      return 0
+    })
+
+    for (let i = 0; i < div_teams_sorted.length; i++) {
+      const tid = div_teams_sorted[i]
+      teamStats[tid].stats.division_finish = i + 1
+    }
+  }
+
+  // calculate regular season finish
+
+  // top 4 teams are division winners sorted by all play record
+  const div_winners = Object.values(teamStats)
+    .filter((p) => p.stats.division_finish === 1)
+    .sort((a, b) => b.stats.apWins - a.stats.apWins)
+    .map((p) => p.tid)
+
+  for (let i = 0; i < div_winners.length; i++) {
+    const tid = div_winners[i]
+    teamStats[tid].stats.regular_season_finish = i + 1
+  }
+
+  // remaining teams are sorted by points for
+  const remaining_teams = Object.values(teamStats)
+    .filter((p) => p.stats.division_finish !== 1)
+    .sort((a, b) => b.stats.pf - a.stats.pf)
+    .map((p) => p.tid)
+
+  for (let i = 0; i < remaining_teams.length; i++) {
+    const tid = remaining_teams[i]
+    teamStats[tid].stats.regular_season_finish = i + 5
   }
 
   return teamStats
