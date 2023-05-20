@@ -649,6 +649,10 @@ export const fantasyTeamStats = [
   'pmin',
   'pdev',
 
+  'division_finish',
+  'regular_season_finish',
+  'post_season_finish',
+
   'doi',
 
   ...Object.values(slots).map((s) => `pSlot${s}`),
