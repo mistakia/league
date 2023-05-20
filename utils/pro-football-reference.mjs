@@ -505,6 +505,338 @@ const get_game_info = ({ doc }) => {
   }
 }
 
+const get_team_stats = ({ doc }) => {
+  const team_stats_rows = Array.from(
+    doc.querySelectorAll('#team_stats tbody tr')
+  )
+
+  const home_pfr_id = fixTeam(
+    doc.querySelector('#div_team_stats thead th[data-stat="home_stat"]')
+      .textContent
+  )
+  const away_pfr_id = fixTeam(
+    doc.querySelector('#div_team_stats thead th[data-stat="vis_stat"]')
+      .textContent
+  )
+
+  const team_stats = {}
+  team_stats[home_pfr_id] = {
+    team: home_pfr_id
+  }
+  team_stats[away_pfr_id] = {
+    team: away_pfr_id
+  }
+
+  const first_down_row = team_stats_rows.filter((row) => {
+    return row.querySelector('th').textContent === 'First Downs'
+  })
+  if (first_down_row) {
+    const first_down_tds = first_down_row[0].querySelectorAll('td[data-stat]')
+    const home_first_downs = Number(first_down_tds[0].textContent)
+    const away_first_downs = Number(first_down_tds[1].textContent)
+
+    team_stats[home_pfr_id].first_downs = home_first_downs
+    team_stats[away_pfr_id].first_downs = away_first_downs
+  }
+
+  const rushing_row = team_stats_rows.filter((row) => {
+    return row.querySelector('th').textContent === 'Rush-Yds-TDs'
+  })
+  if (rushing_row) {
+    const rushing_regex = /^(\d+)-(\d+)-(\d+)$/
+
+    const get_team_rushing_stats = (input) => {
+      const matches = input.match(rushing_regex)
+      return {
+        rush_att: Number(matches[1]),
+        rush_yds: Number(matches[2]),
+        rush_tds: Number(matches[3])
+      }
+    }
+
+    const rushing_tds = rushing_row[0].querySelectorAll('td[data-stat]')
+    const home_rushing_stats = get_team_rushing_stats(
+      rushing_tds[0].textContent
+    )
+    const away_rushing_stats = get_team_rushing_stats(
+      rushing_tds[1].textContent
+    )
+
+    team_stats[home_pfr_id] = {
+      ...team_stats[home_pfr_id],
+      ...home_rushing_stats
+    }
+    team_stats[away_pfr_id] = {
+      ...team_stats[away_pfr_id],
+      ...away_rushing_stats
+    }
+  }
+
+  const passing_row = team_stats_rows.filter((row) => {
+    return row.querySelector('th').textContent === 'Cmp-Att-Yd-TD-INT'
+  })
+  if (passing_row) {
+    const passing_regex = /^(\d+)-(\d+)-(\d+)-(\d+)-(\d+)$/
+
+    const get_team_passing_stats = (input) => {
+      const matches = input.match(passing_regex)
+      return {
+        pass_cmp: Number(matches[1]),
+        pass_att: Number(matches[2]),
+        pass_yds: Number(matches[3]),
+        pass_tds: Number(matches[4]),
+        pass_int: Number(matches[5])
+      }
+    }
+
+    const passing_tds = passing_row[0].querySelectorAll('td[data-stat]')
+    const home_passing_stats = get_team_passing_stats(
+      passing_tds[0].textContent
+    )
+    const away_passing_stats = get_team_passing_stats(
+      passing_tds[1].textContent
+    )
+
+    team_stats[home_pfr_id] = {
+      ...team_stats[home_pfr_id],
+      ...home_passing_stats
+    }
+    team_stats[away_pfr_id] = {
+      ...team_stats[away_pfr_id],
+      ...away_passing_stats
+    }
+  }
+
+  const sacks_row = team_stats_rows.filter((row) => {
+    return row.querySelector('th').textContent === 'Sacked-Yards'
+  })
+  if (sacks_row) {
+    const sacks_regex = /^(\d+)-(\d+)$/
+
+    const get_team_sacks_stats = (input) => {
+      const matches = input.match(sacks_regex)
+      return {
+        sacks: Number(matches[1]),
+        sack_yds: Number(matches[2])
+      }
+    }
+
+    const sacks_tds = sacks_row[0].querySelectorAll('td[data-stat]')
+    const home_sacks_stats = get_team_sacks_stats(sacks_tds[0].textContent)
+    const away_sacks_stats = get_team_sacks_stats(sacks_tds[1].textContent)
+
+    team_stats[home_pfr_id] = {
+      ...team_stats[home_pfr_id],
+      ...home_sacks_stats
+    }
+    team_stats[away_pfr_id] = {
+      ...team_stats[away_pfr_id],
+      ...away_sacks_stats
+    }
+  }
+
+  const net_pass_yards_row = team_stats_rows.filter((row) => {
+    return row.querySelector('th').textContent === 'Net Pass Yards'
+  })
+  if (net_pass_yards_row) {
+    const net_pass_yards_tds =
+      net_pass_yards_row[0].querySelectorAll('td[data-stat]')
+    const home_net_pass_yards = Number(net_pass_yards_tds[0].textContent)
+    const away_net_pass_yards = Number(net_pass_yards_tds[1].textContent)
+
+    team_stats[home_pfr_id].net_pass_yds = home_net_pass_yards
+    team_stats[away_pfr_id].net_pass_yds = away_net_pass_yards
+  }
+
+  const total_yards_row = team_stats_rows.filter((row) => {
+    return row.querySelector('th').textContent === 'Total Yards'
+  })
+  if (total_yards_row) {
+    const total_yards_tds = total_yards_row[0].querySelectorAll('td[data-stat]')
+    const home_total_yards = Number(total_yards_tds[0].textContent)
+    const away_total_yards = Number(total_yards_tds[1].textContent)
+
+    team_stats[home_pfr_id].total_yds = home_total_yards
+    team_stats[away_pfr_id].total_yds = away_total_yards
+  }
+
+  const fumbles_row = team_stats_rows.filter((row) => {
+    return row.querySelector('th').textContent === 'Fumbles-Lost'
+  })
+  if (fumbles_row) {
+    const fumbles_regex = /^(\d+)-(\d+)$/
+
+    const get_team_fumbles_stats = (input) => {
+      const matches = input.match(fumbles_regex)
+      return {
+        fumbles: Number(matches[1]),
+        fumbles_lost: Number(matches[2])
+      }
+    }
+
+    const fumbles_tds = fumbles_row[0].querySelectorAll('td[data-stat]')
+    const home_fumbles_stats = get_team_fumbles_stats(
+      fumbles_tds[0].textContent
+    )
+    const away_fumbles_stats = get_team_fumbles_stats(
+      fumbles_tds[1].textContent
+    )
+
+    team_stats[home_pfr_id] = {
+      ...team_stats[home_pfr_id],
+      ...home_fumbles_stats
+    }
+    team_stats[away_pfr_id] = {
+      ...team_stats[away_pfr_id],
+      ...away_fumbles_stats
+    }
+  }
+
+  const turnovers_row = team_stats_rows.filter((row) => {
+    return row.querySelector('th').textContent === 'Turnovers'
+  })
+  if (turnovers_row) {
+    const turnovers_tds = turnovers_row[0].querySelectorAll('td[data-stat]')
+    const home_turnovers = Number(turnovers_tds[0].textContent)
+    const away_turnovers = Number(turnovers_tds[1].textContent)
+
+    team_stats[home_pfr_id].turnovers = home_turnovers
+    team_stats[away_pfr_id].turnovers = away_turnovers
+  }
+
+  const penalties_row = team_stats_rows.filter((row) => {
+    return row.querySelector('th').textContent === 'Penalties-Yards'
+  })
+  if (penalties_row) {
+    const penalties_regex = /^(\d+)-(\d+)$/
+
+    const get_team_penalties_stats = (input) => {
+      const matches = input.match(penalties_regex)
+      return {
+        penalties: Number(matches[1]),
+        penalty_yds: Number(matches[2])
+      }
+    }
+
+    const penalties_tds = penalties_row[0].querySelectorAll('td[data-stat]')
+    const home_penalties_stats = get_team_penalties_stats(
+      penalties_tds[0].textContent
+    )
+    const away_penalties_stats = get_team_penalties_stats(
+      penalties_tds[1].textContent
+    )
+
+    team_stats[home_pfr_id] = {
+      ...team_stats[home_pfr_id],
+      ...home_penalties_stats
+    }
+    team_stats[away_pfr_id] = {
+      ...team_stats[away_pfr_id],
+      ...away_penalties_stats
+    }
+  }
+
+  const third_down_conv_row = team_stats_rows.filter((row) => {
+    return row.querySelector('th').textContent === 'Third Down Conv.'
+  })
+  if (third_down_conv_row) {
+    const third_down_regex = /^(\d+)-(\d+)$/
+
+    const get_team_third_down_stats = (input) => {
+      const matches = input.match(third_down_regex)
+      return {
+        third_down_att: Number(matches[1]),
+        third_down_conv: Number(matches[2])
+      }
+    }
+
+    const third_down_tds =
+      third_down_conv_row[0].querySelectorAll('td[data-stat]')
+    const home_third_down_stats = get_team_third_down_stats(
+      third_down_tds[0].textContent
+    )
+    const away_third_down_stats = get_team_third_down_stats(
+      third_down_tds[1].textContent
+    )
+
+    team_stats[home_pfr_id] = {
+      ...team_stats[home_pfr_id],
+      ...home_third_down_stats
+    }
+    team_stats[away_pfr_id] = {
+      ...team_stats[away_pfr_id],
+      ...away_third_down_stats
+    }
+  }
+
+  const fourth_down_conv_row = team_stats_rows.filter((row) => {
+    return row.querySelector('th').textContent === 'Fourth Down Conv.'
+  })
+  if (fourth_down_conv_row) {
+    const fourth_down_regex = /^(\d+)-(\d+)$/
+
+    const get_team_fourth_down_stats = (input) => {
+      const matches = input.match(fourth_down_regex)
+      return {
+        fourth_down_att: Number(matches[1]),
+        fourth_down_conv: Number(matches[2])
+      }
+    }
+
+    const fourth_down_tds =
+      fourth_down_conv_row[0].querySelectorAll('td[data-stat]')
+    const home_fourth_down_stats = get_team_fourth_down_stats(
+      fourth_down_tds[0].textContent
+    )
+    const away_fourth_down_stats = get_team_fourth_down_stats(
+      fourth_down_tds[1].textContent
+    )
+
+    team_stats[home_pfr_id] = {
+      ...team_stats[home_pfr_id],
+      ...home_fourth_down_stats
+    }
+    team_stats[away_pfr_id] = {
+      ...team_stats[away_pfr_id],
+      ...away_fourth_down_stats
+    }
+  }
+
+  const time_of_possession_row = team_stats_rows.filter((row) => {
+    return row.querySelector('th').textContent === 'Time of Possession'
+  })
+  if (time_of_possession_row) {
+    const time_of_possession_regex = /^(\d+):(\d+)$/
+
+    const get_team_time_of_possession_stats = (input) => {
+      const matches = input.match(time_of_possession_regex)
+      return {
+        time_of_possession: Number(matches[1]) * 60 + Number(matches[2])
+      }
+    }
+
+    const time_of_possession_tds =
+      time_of_possession_row[0].querySelectorAll('td[data-stat]')
+    const home_time_of_possession_stats = get_team_time_of_possession_stats(
+      time_of_possession_tds[0].textContent
+    )
+    const away_time_of_possession_stats = get_team_time_of_possession_stats(
+      time_of_possession_tds[1].textContent
+    )
+
+    team_stats[home_pfr_id] = {
+      ...team_stats[home_pfr_id],
+      ...home_time_of_possession_stats
+    }
+    team_stats[away_pfr_id] = {
+      ...team_stats[away_pfr_id],
+      ...away_time_of_possession_stats
+    }
+  }
+
+  return Object.values(team_stats)
+}
+
 const get_expected_points_summary = ({ doc }) => {
   const expected_points_summary_rows = Array.from(
     doc.querySelectorAll('#expected_points tbody tr')
@@ -965,6 +1297,79 @@ const format_player_gamelogs = ({ pfr_game }) => {
     })
   }
 
+  // generate team defense and special teams gamelog
+  const team_defense_gamelogs = {}
+  team_defense_gamelogs[pfr_game.home_team_abbr] = {
+    pfr_id: pfr_game.home_team_abbr,
+    tm: fixTeam(pfr_game.home_team_abbr),
+    opp: fixTeam(pfr_game.away_team_abbr)
+  }
+  team_defense_gamelogs[pfr_game.away_team_abbr] = {
+    pfr_id: pfr_game.away_team_abbr,
+    tm: fixTeam(pfr_game.away_team_abbr),
+    opp: fixTeam(pfr_game.home_team_abbr)
+  }
+
+  constants.dstStats.forEach((stat) => {
+    team_defense_gamelogs[pfr_game.home_team_abbr][stat] = 0
+    team_defense_gamelogs[pfr_game.away_team_abbr][stat] = 0
+  })
+
+  // get team defense stat keys from first player
+  const defense_stats_keys = Object.keys(pfr_game.player_defense[0]).filter(
+    (key) => !isNaN(pfr_game.player_defense[0][key])
+  )
+
+  // sum up defense stats for each team
+  for (const defense_stats of pfr_game.player_defense) {
+    const { team } = defense_stats
+    for (const stat of defense_stats_keys) {
+      if (!team_defense_gamelogs[team][stat]) {
+        team_defense_gamelogs[team][stat] = 0
+      }
+      team_defense_gamelogs[team][stat] += defense_stats[stat]
+    }
+  }
+
+  // sum up kick punt returns for each team
+  const kick_punt_return_stats_keys = Object.keys(
+    pfr_game.kick_punt_returns[0]
+  ).filter((key) => !isNaN(pfr_game.kick_punt_returns[0][key]))
+
+  for (const kick_punt_return_stats of pfr_game.kick_punt_returns) {
+    const { team } = kick_punt_return_stats
+    for (const stat of kick_punt_return_stats_keys) {
+      if (!team_defense_gamelogs[team][stat]) {
+        team_defense_gamelogs[team][stat] = 0
+      }
+      team_defense_gamelogs[team][stat] += kick_punt_return_stats[stat]
+    }
+  }
+
+  // format team defense gamelogs and add to player_gamelogs
+  for (const team_defense_gamelog of Object.values(team_defense_gamelogs)) {
+    set_player_gamelog_values({
+      pfr_id: team_defense_gamelog.pfr_id,
+
+      dsk: team_defense_gamelog.sacks,
+      dint: team_defense_gamelog.def_int,
+      dff: team_defense_gamelog.fumbles_forced,
+      drf: team_defense_gamelog.fumbles_rec,
+      dtno: null, // TODO
+      dfds: null, // TODO
+      dpa: null, // TODO
+      dya: null, // TODO
+      dblk: null, // TODO
+      dsf: null, // TODO
+      dtpr: null, // TODO
+      dtd:
+        team_defense_gamelog.def_int_td + team_defense_gamelog.fumbles_rec_td,
+
+      krtd: team_defense_gamelog.kick_ret_td,
+      prtd: team_defense_gamelog.punt_ret_td
+    })
+  }
+
   return Object.values(player_gamelogs)
 }
 
@@ -1079,6 +1484,10 @@ export const get_game = async ({
   pfr_game_meta,
   ignore_cache = false
 } = {}) => {
+  if (!pfr_game_id) {
+    throw new Error('pfr_game_id is required')
+  }
+
   if (!config.pro_football_reference_url) {
     throw new Error('config.pro_football_reference_url is required')
   }
@@ -1184,6 +1593,8 @@ export const get_game = async ({
     ...get_scores({ doc }),
     ...get_scorebox_meta({ doc }),
     ...get_game_info({ doc }),
+
+    team_stats: get_team_stats({ doc }),
 
     officials,
 
