@@ -30,13 +30,15 @@ export const getPicks = createSelector(
           return p
         }
 
-        p.draftWindow = getDraftWindow({
-          start: draft_start,
-          type: draft_type,
-          min: draft_hour_min,
-          max: draft_hour_max,
-          pickNum: p.pick
-        })
+        if (draft_start && draft_type) {
+          p.draftWindow = getDraftWindow({
+            start: draft_start,
+            type: draft_type,
+            min: draft_hour_min,
+            max: draft_hour_max,
+            pickNum: p.pick
+          })
+        }
 
         if (previousNotActive) {
           return p
@@ -138,13 +140,16 @@ export const getNextPick = createSelector(
     const pick = team_picks.filter((p) => p.pick).find((p) => !p.pid)
     if (!pick) return null
 
-    pick.draftWindow = getDraftWindow({
-      start: draft_start,
-      type: draft_type,
-      min: draft_hour_min,
-      max: draft_hour_max,
-      pickNum: pick.pick
-    })
+    if (draft_start && draft_type) {
+      pick.draftWindow = getDraftWindow({
+        start: draft_start,
+        type: draft_type,
+        min: draft_hour_min,
+        max: draft_hour_max,
+        pickNum: pick.pick
+      })
+    }
+
     return pick
   }
 )
