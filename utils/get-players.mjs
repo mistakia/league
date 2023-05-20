@@ -1,7 +1,11 @@
+import debug from 'debug'
+
 import db from '#db'
 import { constants } from '#common'
 import getPlayerTransactions from './get-player-transactions.mjs'
 import getLeague from './get-league.mjs'
+
+const log = debug('get_players')
 
 export default async function ({
   textSearch,
@@ -149,13 +153,14 @@ export default async function ({
   }
 
   if (league_roster_player_ids.length || teamId || leagueId) {
-    query.orWhereIn('player.pid', league_roster_player_ids)
+    query.whereIn('player.pid', league_roster_player_ids)
   }
 
   if (baseline_player_ids.length) {
     query.orWhereIn('player.pid', baseline_player_ids)
   }
 
+  log(query.toString())
   const player_rows = await query
 
   const players_by_pid = {}
