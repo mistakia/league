@@ -4,7 +4,7 @@ import debug from 'debug'
 
 import db from '#db'
 import { groupBy, median } from '#common'
-import { isMain } from '#utils'
+import { isMain, getLeague } from '#utils'
 
 // const argv = yargs(hideBin(process.argv)).argv
 const log = debug('calculate-draft-pick-value')
@@ -53,7 +53,10 @@ const calculateDraftPickValue = async ({ league_format_hash } = {}) => {
 const main = async () => {
   let error
   try {
-    await calculateDraftPickValue()
+    const lid = 1
+    const league = await getLeague({ lid })
+    const { league_format_hash } = league
+    await calculateDraftPickValue({ league_format_hash })
   } catch (err) {
     error = err
     log(error)
