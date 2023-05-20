@@ -36,6 +36,16 @@ router.get('/?', async (req, res) => {
           )
         )
       })
+      .leftJoin(
+        'league_formats',
+        'seasons.league_format_hash',
+        'league_formats.league_format_hash'
+      )
+      .leftJoin(
+        'league_scoring_formats',
+        'seasons.league_scoring_format_hash',
+        'league_scoring_formats.league_scoring_format_hash'
+      )
       .whereIn('leagues.uid', leagueIds)
 
     const seasons = await db('seasons').whereIn('lid', leagueIds)

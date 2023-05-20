@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 
 import { constants } from '#common'
-import { createLeague } from '#utils'
+import { createLeague, getLeague } from '#utils'
 
 const router = express.Router()
 
@@ -63,10 +63,8 @@ router.post('/register', async (req, res) => {
       return res.status(400).send({ error: 'email exists' })
     }
 
-    let league
     if (leagueId) {
-      const leagues = await db('leagues').where({ uid: leagueId })
-      league = leagues[0]
+      const league = getLeague({ lid: leagueId })
       if (!league) {
         return res.status(400).send({ error: 'league does not exist' })
       }
