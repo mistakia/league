@@ -43,8 +43,8 @@ router.get('/?', async (req, res) => {
       )
       .leftJoin(
         'league_scoring_formats',
-        'seasons.league_scoring_format_hash',
-        'league_scoring_formats.league_scoring_format_hash'
+        'seasons.scoring_format_hash',
+        'league_scoring_formats.scoring_format_hash'
       )
       .whereIn('leagues.uid', leagueIds)
 
