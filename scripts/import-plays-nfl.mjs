@@ -94,7 +94,7 @@ const importPlaysForWeek = async ({
     !force_update && year === constants.season.year && week === current_week
 
   log(
-    `importing plays for week ${week} ${year} ${seas_type} (force_update: ${force_update}, ignore_cache: ${ignore_cache}, isCurrentWeek: ${isCurrentWeek}`
+    `importing plays for week ${week} ${year} ${seas_type} (force_update: ${force_update}, ignore_cache: ${ignore_cache}, isCurrentWeek: ${isCurrentWeek})`
   )
 
   const games = await db('nfl_games').where({
