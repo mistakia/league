@@ -31,7 +31,8 @@ export default class DashboardPlayersTable extends React.Component {
       reorderCutlist,
       leadColumn = '',
       space,
-      isTransition
+      isTransition,
+      percentiles
     } = this.props
 
     const { isOffseason, isRegularSeason } = constants
@@ -48,6 +49,7 @@ export default class DashboardPlayersTable extends React.Component {
           claim={waiver}
           playerMap={waiver.playerMap}
           reorder
+          {...{ percentiles }}
         />
       )
     })
@@ -71,6 +73,7 @@ export default class DashboardPlayersTable extends React.Component {
             poachId={poach.uid}
             pid={poach.pid}
             playerMap={poach.playerMap}
+            {...{ percentiles }}
           />
         )
       })
@@ -95,7 +98,9 @@ export default class DashboardPlayersTable extends React.Component {
       )
     } else if (cutlist) {
       const SortableItem = SortableElement(({ playerMap }) => {
-        return <PlayerRoster playerMap={playerMap} reorder />
+        return (
+          <PlayerRoster playerMap={playerMap} reorder {...{ percentiles }} />
+        )
       })
 
       const SortableCutlist = SortableContainer(({ items }) => {
@@ -257,6 +262,7 @@ export default class DashboardPlayersTable extends React.Component {
               players={total}
               reorder={showReorder}
               isBeforeExtensionDeadline={isBeforeExtensionDeadline}
+              {...{ percentiles }}
             />
           )}
           {body}
@@ -279,5 +285,6 @@ DashboardPlayersTable.propTypes = {
   total: ImmutablePropTypes.list,
   cutlist: ImmutablePropTypes.list,
   reorderCutlist: PropTypes.func,
-  isTransition: PropTypes.bool
+  isTransition: PropTypes.bool,
+  percentiles: PropTypes.object
 }

@@ -8,6 +8,7 @@ import IconButton from '@components/icon-button'
 import { Player, connect } from '@components/player'
 import PlayerHeadshotGroup from '@components/player-headshot-group'
 import TeamName from '@components/team-name'
+import PercentileMetric from '@components/percentile-metric'
 
 const DragHandle = sortableHandle(() => (
   <div className='player__item-action reorder table__cell'>
@@ -28,7 +29,8 @@ class PlayerRoster extends Player {
       league,
       isRestrictedFreeAgencyPeriod,
       isBeforeExtensionDeadline,
-      isTransition
+      isTransition,
+      percentiles
     } = this.props
 
     const isWaiver = Boolean(waiverId)
@@ -53,15 +55,12 @@ class PlayerRoster extends Player {
     })
     const projectionType = isRegularSeason ? 'ros' : '0'
     const hasProjections = playerMap.hasIn(['market_salary', projectionType])
-    const projectedSalary = playerMap.getIn(
-      ['market_salary', projectionType],
-      0
-    )
+    const market_salary = playerMap.getIn(['market_salary', projectionType], 0)
     const market_salary_adj = playerMap.get('market_salary_adj', 0)
     const savings =
       hasProjections &&
       (!isRestrictedFreeAgencyPeriod || bid || !isRestrictedFreeAgent)
-        ? projectedSalary -
+        ? market_salary -
           (isBeforeExtensionDeadline ? extendedSalary : bid || value)
         : null
 
@@ -75,8 +74,6 @@ class PlayerRoster extends Player {
     const points_added = playerMap.get('points_added', 0)
     const points_added_rnk = playerMap.get('points_added_rnk', null)
     const points_added_pos_rnk = playerMap.get('points_added_pos_rnk', null)
-
-    const isNegative = Math.sign(savings) === -1
 
     const classNames = ['player__item', 'table__row']
     if (selected === playerMap.get('pid')) classNames.push('selected')
@@ -142,19 +139,25 @@ class PlayerRoster extends Player {
           </div>
         )}
         {!isWaiver && !isPoach && isOffseason && (
-          <div className='metric table__cell'>
-            {market_salary_adj ? `$${market_salary_adj.toFixed(0)}` : '-'}
-          </div>
+          <PercentileMetric
+            scaled
+            value={market_salary_adj}
+            percentile={percentiles.market_salary_adj}
+          />
         )}
         {!isWaiver && !isPoach && isOffseason && (
-          <div className='metric table__cell'>
-            {projectedSalary ? `$${projectedSalary.toFixed(0)}` : '-'}
-          </div>
+          <PercentileMetric
+            scaled
+            value={market_salary}
+            percentile={percentiles.market_salary}
+          />
         )}
         {isOffseason && (
-          <div className={`metric table__cell ${isNegative ? 'warning' : ''}`}>
-            {savings ? `$${savings.toFixed(0)}` : '-'}
-          </div>
+          <PercentileMetric
+            scaled
+            value={savings}
+            percentile={percentiles.savings}
+          />
         )}
         <div className='metric table__cell'>
           {points_added ? points_added.toFixed(1) : '-'}

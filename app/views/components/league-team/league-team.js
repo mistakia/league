@@ -19,7 +19,8 @@ export default function LeagueTeam({
   loadTeamPlayers,
   roster,
   picks,
-  players
+  players,
+  percentiles
 }) {
   const { lid, tid } = useParams()
 
@@ -52,7 +53,10 @@ export default function LeagueTeam({
       if (!playerMap.get('pid')) continue
       activePlayers = activePlayers.push(playerMap)
       activeItems.push(
-        <PlayerRoster key={playerMap.get('pid')} playerMap={playerMap} />
+        <PlayerRoster
+          key={playerMap.get('pid')}
+          {...{ playerMap, percentiles }}
+        />
       )
     }
   }
@@ -61,7 +65,10 @@ export default function LeagueTeam({
   for (const playerMap of players.practice_signed) {
     if (!playerMap.get('pid')) continue
     practice_signed_items.push(
-      <PlayerRoster key={playerMap.get('pid')} playerMap={playerMap} />
+      <PlayerRoster
+        key={playerMap.get('pid')}
+        {...{ playerMap, percentiles }}
+      />
     )
   }
 
@@ -69,7 +76,10 @@ export default function LeagueTeam({
   for (const playerMap of players.practice_drafted) {
     if (!playerMap.get('pid')) continue
     practice_drafted_items.push(
-      <PlayerRoster key={playerMap.get('pid')} playerMap={playerMap} />
+      <PlayerRoster
+        key={playerMap.get('pid')}
+        {...{ playerMap, percentiles }}
+      />
     )
   }
 
@@ -77,7 +87,10 @@ export default function LeagueTeam({
   for (const playerMap of players.ir) {
     if (!playerMap.get('pid')) continue
     reserveIRItems.push(
-      <PlayerRoster key={playerMap.get('pid')} playerMap={playerMap} />
+      <PlayerRoster
+        key={playerMap.get('pid')}
+        {...{ playerMap, percentiles }}
+      />
     )
   }
 
@@ -85,7 +98,10 @@ export default function LeagueTeam({
   for (const playerMap of players.cov) {
     if (!playerMap.get('pid')) continue
     reserveCOVItems.push(
-      <PlayerRoster key={playerMap.get('pid')} playerMap={playerMap} />
+      <PlayerRoster
+        key={playerMap.get('pid')}
+        {...{ playerMap, percentiles }}
+      />
     )
   }
 
@@ -98,6 +114,7 @@ export default function LeagueTeam({
             title='Active Roster'
             space={roster.availableSpace}
             total={activePlayers}
+            {...{ percentiles }}
           />
         </Grid>
         <Grid item xs={12}>
@@ -105,12 +122,14 @@ export default function LeagueTeam({
             items={practice_signed_items}
             title='Practice Squad — Signed'
             space={roster.availablePracticeSpace}
+            {...{ percentiles }}
           />
         </Grid>
         <Grid item xs={12}>
           <DashboardPlayersTable
             items={practice_drafted_items}
             title='Practice Squad — Drafted'
+            {...{ percentiles }}
           />
         </Grid>
         <Grid item xs={12}>
@@ -119,6 +138,7 @@ export default function LeagueTeam({
               items={reserveIRItems}
               title='Reserve/IR'
               space={roster.availableReserveSpace}
+              {...{ percentiles }}
             />
           )}
         </Grid>
@@ -127,6 +147,7 @@ export default function LeagueTeam({
             <DashboardPlayersTable
               items={reserveCOVItems}
               title='Reserve/COVID-19'
+              {...{ percentiles }}
             />
           )}
         </Grid>
@@ -153,5 +174,6 @@ LeagueTeam.propTypes = {
   loadTeamPlayers: PropTypes.func,
   roster: PropTypes.object,
   picks: ImmutablePropTypes.list,
-  players: PropTypes.object
+  players: PropTypes.object,
+  percentiles: PropTypes.object
 }
