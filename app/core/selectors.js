@@ -1888,11 +1888,18 @@ export function getRosterPositionalValueByTeamId(state, { tid }) {
   const divTeamIds = teams.filter((t) => t.div === team.div).map((t) => t.uid)
 
   const values = {
+    league_min: {},
     league_avg: {},
+    league_avg_normalized: {},
+    league_max: {},
     league: {},
     div_avg: {},
+    div_avg_normalized: {},
     div: {},
+
     team: {},
+    team_normalized: {},
+
     total: {},
     rosters: {},
     sorted_tids: []
@@ -1929,6 +1936,26 @@ export function getRosterPositionalValueByTeamId(state, { tid }) {
     values.league[position] = league
     values.div_avg[position] = div.reduce((s, i) => s + i, 0) / div.length
     values.div[position] = div
+
+    values.league_min[position] = Math.min(...league)
+    values.league_max[position] = Math.max(...league)
+    const team_value = values.team[position]
+    const min_value = values.league_min[position]
+    const max_value = values.league_max[position]
+    const is_max = max_value - min_value === 0
+    values.team_normalized[position] = is_max
+      ? 100
+      : ((team_value - min_value) / (max_value - min_value)) * 100
+
+    const div_value = values.div_avg[position]
+    values.div_avg_normalized[position] = is_max
+      ? 100
+      : ((div_value - min_value) / (max_value - min_value)) * 100
+
+    const league_value = values.league_avg[position]
+    values.league_avg_normalized[position] = is_max
+      ? 100
+      : ((league_value - min_value) / (max_value - min_value)) * 100
   }
 
   const league_draft_value = []
@@ -1955,6 +1982,32 @@ export function getRosterPositionalValueByTeamId(state, { tid }) {
   values.div_avg.DRAFT =
     div_draft_value.reduce((s, i) => s + i, 0) / div_draft_value.length
   values.div.DRAFT = div_draft_value
+
+  values.league_max.DRAFT = Math.max(...league_draft_value)
+  values.league_min.DRAFT = Math.min(...league_draft_value)
+  const team_draft_value = values.team.DRAFT
+  const min_draft_value = values.league_min.DRAFT
+  const max_draft_value = values.league_max.DRAFT
+  const is_max_draft = max_draft_value - min_draft_value === 0
+  values.team_normalized.DRAFT = is_max_draft
+    ? 100
+    : ((team_draft_value - min_draft_value) /
+        (max_draft_value - min_draft_value)) *
+      100
+
+  const div_draft_value_avg = values.div_avg.DRAFT
+  values.div_avg_normalized.DRAFT = is_max_draft
+    ? 100
+    : ((div_draft_value_avg - min_draft_value) /
+        (max_draft_value - min_draft_value)) *
+      100
+
+  const league_draft_value_avg = values.league_avg.DRAFT
+  values.league_avg_normalized.DRAFT = is_max_draft
+    ? 100
+    : ((league_draft_value_avg - min_draft_value) /
+        (max_draft_value - min_draft_value)) *
+      100
 
   const team_values = Object.entries(values.total).map(([key, value]) => ({
     tid: key,

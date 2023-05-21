@@ -88,7 +88,9 @@ export default class DashboardTeamValue extends React.Component {
         gridLineInterpolation: 'polygon',
         gridLineColor: '#cccccc',
         lineWidth: 0,
-        min: 0
+        min: 0,
+        max: 100,
+        tickInterval: 20
       },
 
       legend: {
@@ -105,21 +107,21 @@ export default class DashboardTeamValue extends React.Component {
         {
           type: 'area',
           name: 'Team',
-          data: Object.values(summary.team).map((v) =>
+          data: Object.values(summary.team_normalized).map((v) =>
             parseFloat(v.toFixed(1))
           ),
           pointPlacement: 'on'
         },
         {
           name: 'League Avg.',
-          data: Object.values(summary.league_avg).map((v) =>
+          data: Object.values(summary.league_avg_normalized).map((v) =>
             parseFloat(v.toFixed(1))
           ),
           pointPlacement: 'on'
         },
         {
           name: 'Division Avg.',
-          data: Object.values(summary.div_avg).map((v) =>
+          data: Object.values(summary.div_avg_normalized).map((v) =>
             parseFloat(v.toFixed(1))
           ),
           pointPlacement: 'on',
