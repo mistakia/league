@@ -8,7 +8,7 @@ import {
   getMatchups,
   getScoreboard
 } from '@core/selectors'
-import { constants } from '@common'
+import { constants, is_league_post_season_week } from '@common'
 import { matchupsActions } from './actions'
 import { scoreboardActions } from '@core/scoreboard'
 
@@ -31,17 +31,20 @@ export function* selectMatchup() {
   const { teamId, year } = yield select(get_app)
   const scoreboard = yield select(getScoreboard)
   const week = scoreboard.get('week')
-  if (week <= constants.season.regularSeasonFinalWeek) {
-    const matchups = state.get('items')
-    const matchup = teamId
-      ? matchups.find(
-          (m) => m.tids.includes(teamId) && m.week === week && m.year === year
-        )
-      : matchups.first()
-    if (matchup) {
-      yield put(matchupsActions.select(matchup.uid))
-    }
-  } else {
+
+  // TODO temp fix for 2020 season
+  if (year === 2020 && week > 16) {
+    yield put(scoreboardActions.selectWeek(16))
+    return
+  }
+
+  const is_post_season_week = is_league_post_season_week({ year, week })
+  if (year === constants.week && is_post_season_week) {
+    yield put(scoreboardActions.selectWeek(constants.week))
+    return
+  }
+
+  if (is_post_season_week) {
     const playoffs = state.get('playoffs')
     const filtered = playoffs.filter((m) => m.week === week && m.year === year)
     const matchup = teamId
@@ -51,6 +54,16 @@ export function* selectMatchup() {
     if (matchup || first) {
       const uid = matchup ? matchup.uid : first.uid
       yield put(matchupsActions.select(uid))
+    }
+  } else {
+    const matchups = state.get('items')
+    const matchup = teamId
+      ? matchups.find(
+          (m) => m.tids.includes(teamId) && m.week === week && m.year === year
+        )
+      : matchups.first()
+    if (matchup) {
+      yield put(matchupsActions.select(matchup.uid))
     }
   }
 }

@@ -20,7 +20,8 @@ import {
   getFreeAgentPeriod,
   getDraftWindow,
   groupBy,
-  fixTeam
+  fixTeam,
+  is_league_post_season_week
 } from '@common'
 import { League } from '@core/leagues'
 import { fuzzySearch } from '@core/utils'
@@ -694,9 +695,15 @@ export const get_regular_season_weeks = createSelector(
   (matchups, year) => matchups.filter((m) => m.year === year).map((m) => m.week)
 )
 
+export const get_post_season_weeks = createSelector(
+  (state) => state.getIn(['matchups', 'playoffs']),
+  (state) => state.getIn(['app', 'year'], constants.year),
+  (playoffs, year) => playoffs.filter((m) => m.year === year).map((m) => m.week)
+)
+
 export const getWeeksForSelectedYearMatchups = createSelector(
   get_regular_season_weeks,
-  (state) => state.getIn(['matchups', 'playoffs']).map((m) => m.week),
+  get_post_season_weeks,
   (regular_season_weeks, post_season_weeks) => {
     return [...new Set([...regular_season_weeks, ...post_season_weeks])]
   }
@@ -727,15 +734,15 @@ export function getSelectedMatchup(state) {
   // TODO - fix / derive based on season schedule
   const year = state.getIn(['app', 'year'], constants.year)
   const week = state.getIn(['scoreboard', 'week'])
-  if (week <= constants.season.regularSeasonFinalWeek) {
-    const items = matchups.get('items')
-    return items.find((m) => m.uid === matchupId) || createMatchup()
-  } else {
+  if (is_league_post_season_week({ year, week })) {
     const items = matchups.get('playoffs')
     return (
       items.find((m) => m.uid === matchupId && m.year === year) ||
       createMatchup()
     )
+  } else {
+    const items = matchups.get('items')
+    return items.find((m) => m.uid === matchupId) || createMatchup()
   }
 }
 

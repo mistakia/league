@@ -6,6 +6,7 @@ import Container from '@mui/material/Container'
 import Grid from '@mui/material/Grid'
 import Stack from '@mui/material/Stack'
 
+import Loading from '@components/loading'
 import PageLayout from '@layouts/page'
 import SelectYear from '@components/select-year'
 import ScoreboardSelectWeek from '@components/scoreboard-select-week'
@@ -20,6 +21,7 @@ import { constants } from '@common'
 import './matchup.styl'
 
 export default function MatchupPage({
+  is_loading,
   matchup,
   year,
   loadMatchups,
@@ -30,7 +32,6 @@ export default function MatchupPage({
   selectMatchup
 }) {
   const isHeadToHead = matchup.type === constants.matchups.H2H
-
   const navigate = useNavigate()
   const [show_bench, set_show_bench] = useState(false)
   const { lid, seas_year, seas_week, matchupId } = useParams()
@@ -77,15 +78,14 @@ export default function MatchupPage({
     }
   }, [matchup.uid])
 
-  const body = (
-    <Container maxWidth='lg'>
-      <Grid container spacing={0}>
-        <Grid item xs={12}>
-          <Stack direction='row' spacing={1} sx={{ paddingTop: '32px' }}>
-            <SelectYear />
-            <ScoreboardSelectWeek />
-          </Stack>
-        </Grid>
+  let matchup_body
+  if (is_loading) {
+    matchup_body = <Loading loading={is_loading} />
+  } else if (!matchup.uid) {
+    matchup_body = <div className='scoreboard__empty empty' />
+  } else {
+    matchup_body = (
+      <>
         <Grid item xs={12}>
           {isHeadToHead && <ScoreboardScores />}
         </Grid>
@@ -128,6 +128,20 @@ export default function MatchupPage({
             <ScoreboardOverTime mid={matchup.uid} />
           </Grid>
         </Grid>
+      </>
+    )
+  }
+
+  const body = (
+    <Container maxWidth='lg'>
+      <Grid container spacing={0}>
+        <Grid item xs={12}>
+          <Stack direction='row' spacing={1} sx={{ paddingTop: '32px' }}>
+            <SelectYear />
+            <ScoreboardSelectWeek />
+          </Stack>
+        </Grid>
+        {matchup_body}
       </Grid>
     </Container>
   )
@@ -136,6 +150,7 @@ export default function MatchupPage({
 }
 
 MatchupPage.propTypes = {
+  is_loading: PropTypes.bool,
   year: PropTypes.number,
   matchup: ImmutablePropTypes.record,
   selectYear: PropTypes.func,
