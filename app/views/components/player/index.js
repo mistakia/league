@@ -4,8 +4,8 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 import { connect as connectRedux } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { contextMenuActions, getContextMenuInfo } from '@core/context-menu'
-import { getCurrentLeague } from '@core/leagues'
+import { contextMenuActions } from '@core/context-menu'
+import { get_context_menu_info, getCurrentLeague } from '@core/selectors'
 import { playerActions } from '@core/players'
 
 import './player.styl'
@@ -36,7 +36,7 @@ Player.propTypes = {
 }
 
 const mapStateToProps = createSelector(
-  getContextMenuInfo,
+  get_context_menu_info,
   getCurrentLeague,
   (contextMenu, league) => ({
     selected: contextMenu.data.pid,

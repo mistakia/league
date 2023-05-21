@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getTeamsForCurrentLeague } from '@core/teams'
+import { getTeamsForCurrentLeague } from '@core/selectors'
 
 import DashboardTeamSummaryByeOdds from './dashboard-team-summary-bye-odds'
 

@@ -1,7 +1,8 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getStats, statActions } from '@core/stats'
+import { statActions } from '@core/stats'
+import { getStats } from '@core/selectors'
 
 import StatYardlineFilter from './stat-yardline-filter'
 

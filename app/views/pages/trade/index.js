@@ -3,9 +3,8 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getApp } from '@core/app'
 import {
-  tradeActions,
+  get_app,
   getCurrentTrade,
   getCurrentTradePlayers,
   getTradeIsValid,
@@ -15,7 +14,8 @@ import {
   getAcceptingTeam,
   getProposingTeam,
   getProposingTeamRoster
-} from '@core/trade'
+} from '@core/selectors'
+import { tradeActions } from '@core/trade'
 import { playerActions } from '@core/players'
 
 import render from './trade'
@@ -87,7 +87,7 @@ TradePage.propTypes = {
 }
 
 const mapStateToProps = createSelector(
-  getApp,
+  get_app,
 
   getCurrentTrade,
   getCurrentTradePlayers,

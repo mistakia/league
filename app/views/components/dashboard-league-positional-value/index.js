@@ -1,9 +1,11 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getRosterPositionalValueByTeamId } from '@core/rosters'
-import { getCurrentLeague } from '@core/leagues'
-import { getTeamsForCurrentLeague } from '@core/teams'
+import {
+  getTeamsForCurrentLeague,
+  getCurrentLeague,
+  getRosterPositionalValueByTeamId
+} from '@core/selectors'
 
 import DashboardLeaguePositionalValue from './dashboard-league-positional-value'
 

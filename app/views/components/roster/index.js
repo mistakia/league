@@ -1,14 +1,13 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getCurrentLeague } from '@core/leagues'
-import { getApp } from '@core/app'
+import { get_app, getCurrentLeague } from '@core/selectors'
 
 import Roster from './roster'
 
 const mapStateToProps = createSelector(
   getCurrentLeague,
-  getApp,
+  get_app,
   (league, app) => ({
     league,
     teamId: app.teamId

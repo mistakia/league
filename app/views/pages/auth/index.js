@@ -1,11 +1,12 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getApp, appActions } from '@core/app'
+import { appActions } from '@core/app'
+import { get_app } from '@core/selectors'
 
 import AuthPage from './auth'
 
-const mapStateToProps = createSelector(getApp, (app) => ({
+const mapStateToProps = createSelector(get_app, (app) => ({
   isPending: app.isPending,
   authError: app.authError
 }))

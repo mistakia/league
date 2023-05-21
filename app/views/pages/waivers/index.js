@@ -1,7 +1,8 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getWaiverReportItems, waiverActions, getWaivers } from '@core/waivers'
+import { getWaiverReportItems, getWaivers } from '@core/selectors'
+import { waiverActions } from '@core/waivers'
 
 import WaiversPage from './waivers'
 

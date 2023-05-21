@@ -2,10 +2,14 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { constants, calculatePoints } from '@common'
-import { getPlayerGamelogs, getGamelogs } from '@core/gamelogs'
-import { getSelectedPlayer, getSelectedPlayerGame } from '@core/players'
-import { getCurrentLeague } from '@core/leagues'
-import { getSeasonlogs } from '@core/seasonlogs'
+import {
+  getCurrentLeague,
+  getSelectedPlayer,
+  getSelectedPlayerGame,
+  getPlayerGamelogs,
+  getGamelogs,
+  get_seasonlogs
+} from '@core/selectors'
 import { percentileActions } from '@core/percentiles'
 
 import SelectedPlayerMatchupTable from './selected-player-matchup-table'
@@ -16,7 +20,7 @@ const mapStateToProps = createSelector(
   getPlayerGamelogs,
   getCurrentLeague,
   getGamelogs,
-  getSeasonlogs,
+  get_seasonlogs,
   (playerMap, game, logs, league, gamelogState, seasonlogs) => {
     if (!game) {
       return {}

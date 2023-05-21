@@ -1,8 +1,12 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getCurrentPlayers, rosterActions } from '@core/rosters'
-import { getCutlistTotalSalary, getPlayers } from '@core/players'
+import { rosterActions } from '@core/rosters'
+import {
+  getCurrentPlayers,
+  getCutlistTotalSalary,
+  getPlayers
+} from '@core/selectors'
 
 import TransitionConfirmation from './transition-confirmation'
 

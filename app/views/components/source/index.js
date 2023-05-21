@@ -1,10 +1,12 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getSourceById } from '@core/sources'
+import { get_source_by_id } from '@core/selectors'
 
 import Source from './source'
 
-const mapStateToProps = createSelector(getSourceById, (source) => ({ source }))
+const mapStateToProps = createSelector(get_source_by_id, (source) => ({
+  source
+}))
 
 export default connect(mapStateToProps)(Source)

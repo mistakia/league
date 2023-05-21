@@ -1,7 +1,8 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getFilteredMatchups, matchupsActions } from '@core/matchups'
+import { getFilteredMatchups } from '@core/selectors'
+import { matchupsActions } from '@core/matchups'
 
 import SchedulePage from './schedule'
 

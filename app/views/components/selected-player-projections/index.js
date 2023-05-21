@@ -1,7 +1,8 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getSelectedPlayer, playerActions } from '@core/players'
+import { getSelectedPlayer } from '@core/selectors'
+import { playerActions } from '@core/players'
 
 import SelectedPlayerSeasonProjections from './selected-player-projections'
 

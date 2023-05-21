@@ -1,7 +1,8 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { propActions, getFilteredProps } from '@core/props'
+import { propActions } from '@core/props'
+import { getFilteredProps } from '@core/selectors'
 
 import PropsPage from './props'
 

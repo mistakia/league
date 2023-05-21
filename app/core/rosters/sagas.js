@@ -10,6 +10,7 @@ import {
 import { Map } from 'immutable'
 
 import { rosterActions } from './actions'
+import { tradeActions } from '@core/trade'
 import { notificationActions } from '@core/notifications'
 import {
   getRosters,
@@ -29,30 +30,33 @@ import {
   deleteTransitionTag,
   putTransitionTag
 } from '@core/api'
-import { getApp, appActions } from '@core/app'
-import { constants } from '@common'
-import { getPlayers, getAllPlayers, playerActions } from '@core/players'
+import { appActions } from '@core/app'
 import {
-  tradeActions,
+  get_app,
+  getPlayers,
+  get_player_maps,
   getCurrentTradePlayers,
   getProposingTeamTradedRosterPlayers,
-  getAcceptingTeamTradedRosterPlayers
-} from '@core/trade'
-import {
+  getAcceptingTeamTradedRosterPlayers,
   getActivePlayersByRosterForCurrentLeague,
   getRostersForCurrentLeague,
   getCurrentTeamRosterRecord,
-  getCurrentPlayers
-} from './selectors'
-import { poachActions, getPoachPlayersForCurrentTeam } from '@core/poaches'
-import { waiverActions, getWaiverPlayersForCurrentTeam } from '@core/waivers'
-import { getCurrentLeague } from '@core/leagues'
+  getCurrentPlayers,
+  getPoachPlayersForCurrentTeam,
+  getWaiverPlayersForCurrentTeam,
+  getCurrentLeague,
+  getTeamById
+} from '@core/selectors'
+import { constants } from '@common'
+import { playerActions } from '@core/players'
+import { poachActions } from '@core/poaches'
+import { waiverActions } from '@core/waivers'
 import Worker from 'workerize-loader?inline!../worker' // eslint-disable-line import/no-webpack-loader-syntax
 import { csv } from '@core/export'
-import { teamActions, getTeamById } from '@core/teams'
+import { teamActions } from '@core/teams'
 
 export function* initRosters() {
-  const { leagueId } = yield select(getApp)
+  const { leagueId } = yield select(get_app)
   if (leagueId) yield call(getRosters, { leagueId })
 }
 
@@ -69,27 +73,27 @@ export function* loadRosters({ payload }) {
 }
 
 export function* load_rosters_for_year() {
-  const { leagueId, year } = yield select(getApp)
+  const { leagueId, year } = yield select(get_app)
   yield call(getRosters, { leagueId, year })
 }
 
 export function* updateRosterPlayerSlot({ payload }) {
-  const { teamId, leagueId } = yield select(getApp)
+  const { teamId, leagueId } = yield select(get_app)
   yield call(putRoster, { teamId, leagueId, ...payload })
 }
 
 export function* activate({ payload }) {
-  const { teamId, leagueId } = yield select(getApp)
+  const { teamId, leagueId } = yield select(get_app)
   yield call(postActivate, { teamId, leagueId, ...payload })
 }
 
 export function* deactivate({ payload }) {
-  const { teamId, leagueId } = yield select(getApp)
+  const { teamId, leagueId } = yield select(get_app)
   yield call(postDeactivate, { teamId, leagueId, ...payload })
 }
 
 export function* protect({ payload }) {
-  const { teamId, leagueId } = yield select(getApp)
+  const { teamId, leagueId } = yield select(get_app)
   yield call(postProtect, { teamId, leagueId, ...payload })
 }
 
@@ -112,7 +116,7 @@ export function* setPlayerLineupContribution({ pid }) {
     yield take(rosterActions.SET_LINEUPS)
   }
   const projectedContribution = {}
-  const playerMap = (yield select(getAllPlayers)).get(pid)
+  const playerMap = (yield select(get_player_maps)).get(pid)
   const result = yield call(calculatePlayerLineupContribution, { playerMap })
   projectedContribution[pid] = result
   yield put(playerActions.setProjectedContribution(projectedContribution))
@@ -122,7 +126,7 @@ export function* calculatePlayerLineupContribution({ playerMap }) {
   const currentRosterPlayers = yield select(getCurrentPlayers)
   const league = yield select(getCurrentLeague)
   const baselines = (yield select(getPlayers)).get('baselines')
-  const playerItems = yield select(getAllPlayers)
+  const playerItems = yield select(get_player_maps)
   const currentRoster = yield select(getCurrentTeamRosterRecord)
 
   const playerData = {
@@ -310,42 +314,42 @@ export function* projectTrade() {
 }
 
 export function* addTag({ payload }) {
-  const { teamId, leagueId } = yield select(getApp)
+  const { teamId, leagueId } = yield select(get_app)
   yield call(postTag, { teamId, leagueId, ...payload })
 }
 
 export function* removeTag({ payload }) {
-  const { teamId, leagueId } = yield select(getApp)
+  const { teamId, leagueId } = yield select(get_app)
   yield call(deleteTag, { teamId, leagueId, ...payload })
 }
 
 export function* addPlayer({ payload }) {
-  const { leagueId } = yield select(getApp)
+  const { leagueId } = yield select(get_app)
   yield call(postRosters, { leagueId, ...payload })
 }
 
 export function* removePlayer({ payload }) {
-  const { leagueId } = yield select(getApp)
+  const { leagueId } = yield select(get_app)
   yield call(deleteRosters, { leagueId, ...payload })
 }
 
 export function* updatePlayer({ payload }) {
-  const { leagueId } = yield select(getApp)
+  const { leagueId } = yield select(get_app)
   yield call(putRosters, { leagueId, ...payload })
 }
 
 export function* addFreeAgent({ payload }) {
-  const { leagueId, teamId } = yield select(getApp)
+  const { leagueId, teamId } = yield select(get_app)
   yield call(postAddFreeAgent, { leagueId, teamId, ...payload })
 }
 
 export function* reserve({ payload }) {
-  const { leagueId, teamId } = yield select(getApp)
+  const { leagueId, teamId } = yield select(get_app)
   yield call(postReserve, { leagueId, teamId, ...payload })
 }
 
 export function* release({ payload }) {
-  const { leagueId, teamId } = yield select(getApp)
+  const { leagueId, teamId } = yield select(get_app)
   yield call(postRelease, { leagueId, teamId, ...payload })
 }
 
@@ -395,24 +399,24 @@ export function* transitionRemovedNotification() {
 }
 
 export function* addTransitionTag({ payload }) {
-  const { leagueId, teamId } = yield select(getApp)
+  const { leagueId, teamId } = yield select(get_app)
   yield call(postTransitionTag, { leagueId, teamId, ...payload })
 }
 
 export function* removeTransitionTag({ payload }) {
-  const { leagueId, teamId } = yield select(getApp)
+  const { leagueId, teamId } = yield select(get_app)
   yield call(deleteTransitionTag, { leagueId, teamId, ...payload })
 }
 
 export function* updateTransitionTag({ payload }) {
-  const { leagueId, teamId } = yield select(getApp)
+  const { leagueId, teamId } = yield select(get_app)
   yield call(putTransitionTag, { leagueId, teamId, ...payload })
 }
 
 export function* exportRosters() {
   const league = yield select(getCurrentLeague)
   const rosters = yield select(getRostersForCurrentLeague)
-  const playerMaps = yield select(getAllPlayers)
+  const playerMaps = yield select(get_player_maps)
   const projectionType = constants.isRegularSeason ? 'ros' : '0'
 
   const data = []

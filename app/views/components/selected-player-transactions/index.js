@@ -2,8 +2,12 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 import { List } from 'immutable'
 
-import { playerActions, getSelectedPlayer } from '@core/players'
-import { getCurrentLeague, isBeforeExtensionDeadline } from '@core/leagues'
+import {
+  getSelectedPlayer,
+  getCurrentLeague,
+  isBeforeExtensionDeadline
+} from '@core/selectors'
+import { playerActions } from '@core/players'
 
 import SelectedPlayerTransactions from './selected-player-transactions'
 

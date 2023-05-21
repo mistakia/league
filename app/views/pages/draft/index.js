@@ -5,16 +5,17 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { constants, getDraftWindow } from '@common'
+import { draftActions } from '@core/draft'
 import {
-  draftActions,
+  get_app,
+  getCurrentLeague,
   getSelectedDraftPlayer,
   getDraft,
   getPicks,
-  getNextPick
-} from '@core/draft'
-import { getCurrentLeague } from '@core/leagues'
-import { getRookiePlayers, playerActions } from '@core/players'
-import { getApp } from '@core/app'
+  getNextPick,
+  getRookiePlayers
+} from '@core/selectors'
+import { playerActions } from '@core/players'
 import { confirmationActions } from '@core/confirmations'
 
 import render from './draft'
@@ -59,7 +60,7 @@ const mapStateToProps = createSelector(
   getDraft,
   getPicks,
   getCurrentLeague,
-  getApp,
+  get_app,
   (players, selectedPlayerMap, nextPick, draft, picks, league, app) => {
     const windowEnd = nextPick
       ? getDraftWindow({

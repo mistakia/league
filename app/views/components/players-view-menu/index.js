@@ -1,7 +1,8 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getSelectedPlayersView, playerActions } from '@core/players'
+import { getSelectedPlayersView } from '@core/selectors'
+import { playerActions } from '@core/players'
 
 import PlayersViewMenu from './players-view-menu'
 

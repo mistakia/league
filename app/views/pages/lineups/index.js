@@ -2,7 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getCurrentTeamRosterRecord } from '@core/rosters'
+import { getCurrentTeamRosterRecord } from '@core/selectors'
 import render from './lineups'
 
 class LineupsPage extends React.Component {

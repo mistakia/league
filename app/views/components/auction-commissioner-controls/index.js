@@ -1,7 +1,8 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { auctionActions, getAuction } from '@core/auction'
+import { auctionActions } from '@core/auction'
+import { getAuction } from '@core/selectors'
 
 import AuctionCommissionerControls from './auction-commissioner-controls'
 

@@ -5,12 +5,8 @@ import { contextMenuActions } from '@core/context-menu'
 import { rosterActions } from '@core/rosters'
 import { confirmationActions } from '@core/confirmations'
 import { waiverActions } from '@core/waivers'
-import {
-  playerActions,
-  getPlayerStatus,
-  getPlayers,
-  getPlayerById
-} from '@core/players'
+import { playerActions } from '@core/players'
+import { getPlayerStatus, getPlayers, getPlayerById } from '@core/selectors'
 
 import PlayerContextMenu from './player-context-menu'
 

@@ -1,28 +1,4 @@
 export { playersReducer } from './reducer'
-export {
-  getPlayers,
-  getPlayerFields,
-  getSelectedPlayersView,
-  getSelectedViewGroupedFields,
-  getBaselines,
-  getTransitionPlayers,
-  getCutlistPlayers,
-  getCutlistTotalSalary,
-  getPlayersByPosition,
-  getSelectedPlayer,
-  getSelectedPlayerGame,
-  getSelectedPlayerGames,
-  getAllPlayers,
-  getFilteredPlayers,
-  getRookiePlayers,
-  getPlayerById,
-  getGamesByYearForSelectedPlayer,
-  getPlayersForWatchlist,
-  getPlayerStatus,
-  isPlayerPracticeSquadEligible,
-  isPlayerLocked,
-  is_player_filter_options_changed
-} from './selectors'
 export { createPlayer } from './player'
 export {
   playerActions,

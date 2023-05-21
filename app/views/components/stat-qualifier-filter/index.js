@@ -1,8 +1,8 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getStats, statActions } from '@core/stats'
-import { getPlayers } from '@core/players'
+import { statActions } from '@core/stats'
+import { getStats, getPlayers } from '@core/selectors'
 
 import StatQualifierFilter from './stat-qualifier-filter'
 

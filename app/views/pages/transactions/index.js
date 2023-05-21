@@ -1,7 +1,8 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getTransactions, transactionsActions } from '@core/transactions'
+import { getTransactions } from '@core/selectors'
+import { transactionsActions } from '@core/transactions'
 
 import TransactionsPage from './transactions'
 

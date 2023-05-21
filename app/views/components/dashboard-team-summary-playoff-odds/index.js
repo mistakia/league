@@ -1,13 +1,12 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getApp } from '@core/app'
-import { getTeamsForCurrentLeague } from '@core/teams'
+import { get_app, getTeamsForCurrentLeague } from '@core/selectors'
 
 import DashboardTeamSummaryPlayoffOdds from './dashboard-team-summary-playoff-odds'
 
 const mapStateToProps = createSelector(
-  getApp,
+  get_app,
   getTeamsForCurrentLeague,
   (app, teams) => {
     const list = teams.toList()

@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getSelectedPlayer } from '@core/players'
+import { getSelectedPlayer } from '@core/selectors'
 
 import SelectedPlayerEfficiencyStats from './selected-player-efficiency-stats'
 

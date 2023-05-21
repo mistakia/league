@@ -1,14 +1,14 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getOverallStandings, teamActions } from '@core/teams'
-import { getApp } from '@core/app'
+import { teamActions } from '@core/teams'
+import { getOverallStandings, get_app } from '@core/selectors'
 
 import StandingsPage from './standings'
 
 const mapStateToProps = createSelector(
   getOverallStandings,
-  getApp,
+  get_app,
   (standings, app) => ({
     standings,
     year: app.year,

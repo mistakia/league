@@ -1,19 +1,18 @@
 import { call, takeLatest, fork, select } from 'redux-saga/effects'
 
-import { getApp } from '@core/app'
+import { get_app, get_player_maps } from '@core/selectors'
 import { fetchProps, fetchPlayers } from '@core/api'
 import { propActions } from './actions'
-import { getAllPlayers } from '@core/players'
 
 export function* load() {
   yield call(fetchProps)
 }
 
 export function* loadPlayers({ payload }) {
-  const players = yield select(getAllPlayers)
+  const players = yield select(get_player_maps)
   const missing = payload.data.filter((p) => !players.getIn([p.pid, 'fname']))
   if (missing.length) {
-    const { leagueId } = yield select(getApp)
+    const { leagueId } = yield select(get_app)
     const pids = [...new Set(missing.map((p) => p.pid))]
     yield call(fetchPlayers, { leagueId, pids })
   }

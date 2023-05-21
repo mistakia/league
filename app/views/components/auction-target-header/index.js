@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getAuctionInfoForPosition } from '@core/auction'
+import { getAuctionInfoForPosition } from '@core/selectors'
 
 import AuctionTargetHeader from './auction-target-header'
 

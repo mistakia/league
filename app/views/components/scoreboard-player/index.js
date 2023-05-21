@@ -1,8 +1,11 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getPlayerById } from '@core/players'
-import { getScoreboardGamelogByPlayerId, getScoreboard } from '@core/scoreboard'
+import {
+  getPlayerById,
+  getScoreboardGamelogByPlayerId,
+  getScoreboard
+} from '@core/selectors'
 
 import ScoreboardPlayer from './scoreboard-player'
 

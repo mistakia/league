@@ -1,28 +1,3 @@
-export {
-  getRosters,
-  getRosterByTeamId,
-  getRosterRecordByTeamId,
-  getRostersForCurrentLeague,
-  getStartersByTeamId,
-  getPlayersByTeamId,
-  getGroupedPlayersByTeamId,
-  getCurrentTeamRoster,
-  getCurrentTeamRosterRecord,
-  getCurrentPlayers,
-  getActivePlayersByTeamId,
-  getRosteredPlayerIdsForCurrentLeague,
-  getActiveRosterPlayerIdsForCurrentLeague,
-  getPracticeSquadPlayerIdsForCurrentLeague,
-  getInjuredReservePlayerIdsForCurrentLeague,
-  isPlayerFreeAgent,
-  isPlayerEligible,
-  isPlayerOnPracticeSquad,
-  getRosterInfoForPlayerId,
-  getActivePlayersByRosterForCurrentLeague,
-  getAvailablePlayersForCurrentLeague,
-  getRosterPositionalValueByTeamId,
-  getAvailableSalarySpaceForCurrentLeague
-} from './selectors'
 export { rosterSagas } from './sagas'
 export { rostersReducer } from './reducer'
 export {

@@ -1,19 +1,17 @@
 import { takeLatest, fork, select, delay, put, call } from 'redux-saga/effects'
 
-import { getApp } from '@core/app'
-import { getAuction } from './selectors'
+import {
+  get_player_maps,
+  getPlayers,
+  get_app,
+  getAuction,
+  getCurrentLeague,
+  getRosteredPlayerIdsForCurrentLeague,
+  getCurrentPlayers,
+  getPlayersForWatchlist
+} from '@core/selectors'
 import { auctionActions } from './actions'
 import { send } from '@core/ws'
-import { getCurrentLeague } from '@core/leagues'
-import {
-  getRosteredPlayerIdsForCurrentLeague,
-  getCurrentPlayers
-} from '@core/rosters'
-import {
-  getPlayersForWatchlist,
-  getAllPlayers,
-  getPlayers
-} from '@core/players'
 import { constants, getEligibleSlots } from '@common'
 import { beep } from '@core/audio'
 import Worker from 'workerize-loader?inline!../worker' // eslint-disable-line import/no-webpack-loader-syntax
@@ -90,7 +88,7 @@ export function* optimize() {
       limits[pid] = { min: 1 }
     }
 
-    const playerMaps = yield select(getAllPlayers)
+    const playerMaps = yield select(get_player_maps)
     const availablePlayers = playerMaps
       .filter((pMap) => !rostered_pids.includes(pMap.get('pid')))
       .sort(
@@ -120,7 +118,7 @@ export function* optimize() {
 }
 
 export function* joinAuction({ type }) {
-  const { leagueId, teamId } = yield select(getApp)
+  const { leagueId, teamId } = yield select(get_app)
   const message = {
     type,
     payload: { lid: leagueId, tid: teamId }
@@ -134,7 +132,7 @@ export function* releaseLock() {
 }
 
 export function* submitBid({ payload }) {
-  const { userId, teamId } = yield select(getApp)
+  const { userId, teamId } = yield select(get_app)
   const { nominated_pid, bid } = yield select(getAuction)
   if (payload.value <= bid) {
     yield put(auctionActions.release())
@@ -158,7 +156,7 @@ export function* submitBid({ payload }) {
 }
 
 export function* submitNomination({ payload }) {
-  const { userId, teamId } = yield select(getApp)
+  const { userId, teamId } = yield select(get_app)
   const { selected_pid } = yield select(getAuction)
   const { value } = payload
   const message = {

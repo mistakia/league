@@ -1,12 +1,12 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getApp } from '@core/app'
+import { get_app } from '@core/selectors'
 import { settingActions } from '@core/settings'
 
 import SettingsSwitch from './settings-switch'
 
-const mapStateToProps = createSelector(getApp, (app) => ({ app }))
+const mapStateToProps = createSelector(get_app, (app) => ({ app }))
 
 const mapDispatchToProps = {
   update: settingActions.update

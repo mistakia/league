@@ -1,13 +1,3 @@
-export {
-  getMatchups,
-  getFilteredMatchups,
-  getSelectedMatchup,
-  getMatchupsForSelectedWeek,
-  getMatchupById,
-  getSelectedMatchupTeams,
-  getWeeksForSelectedYearMatchups,
-  getMatchupByTeamId
-} from './selectors'
 export { matchupsReducer } from './reducer'
 export { matchupSagas } from './sagas'
 export {

@@ -1,6 +1,6 @@
 import { call, takeLatest, fork, select } from 'redux-saga/effects'
 
-import { getScoreboard, getScoreboardUpdated } from './selectors'
+import { getScoreboard, getScoreboardUpdated } from '@core/selectors'
 import { scoreboardActions } from './actions'
 import { playActions } from '@core/plays'
 import { send, wsActions } from '@core/ws'

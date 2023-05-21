@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getWaivers } from '@core/waivers'
+import { getWaivers } from '@core/selectors'
 
 import WaiverTypeFilter from './waiver-type-filter'
 

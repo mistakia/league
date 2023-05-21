@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getTeamById } from '@core/teams'
+import { getTeamById } from '@core/selectors'
 
 import TeamImage from './team-image'
 

@@ -1,10 +1,13 @@
 import { call, takeLatest, fork, select, put } from 'redux-saga/effects'
 
-import { getSelectedPlayersView, playerActions } from '@core/players'
+import {
+  getSelectedPlayersView,
+  getCurrentLeague,
+  getStats
+} from '@core/selectors'
+import { playerActions } from '@core/players'
 import { statActions } from './actions'
 import { getChartedPlays } from '@core/api'
-import { getCurrentLeague } from '@core/leagues'
-import { getStats } from './selectors'
 import Worker from 'workerize-loader?inline!../worker' // eslint-disable-line import/no-webpack-loader-syntax
 
 export function* loadChartedPlays() {

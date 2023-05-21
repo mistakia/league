@@ -1,8 +1,8 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getCurrentLeague } from '@core/leagues'
-import { getCurrentPlayers, rosterActions } from '@core/rosters'
+import { getCurrentLeague, getCurrentPlayers } from '@core/selectors'
+import { rosterActions } from '@core/rosters'
 
 import RemoveTransitionTagConfirmation from './remove-transition-tag-confirmation'
 

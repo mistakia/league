@@ -1,11 +1,15 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getCurrentPlayers, getCurrentTeamRosterRecord } from '@core/rosters'
-import { getCurrentLeague } from '@core/leagues'
-import { getCurrentTeam } from '@core/teams'
-import { waiverActions, getWaiverById } from '@core/waivers'
-import { getPlayerStatus } from '@core/players'
+import {
+  getWaiverById,
+  getCurrentPlayers,
+  getCurrentTeamRosterRecord,
+  getCurrentLeague,
+  getCurrentTeam,
+  getPlayerStatus
+} from '@core/selectors'
+import { waiverActions } from '@core/waivers'
 
 import WaiverConfirmation from './waiver-confirmation'
 

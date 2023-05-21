@@ -1,11 +1,11 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getNotificationInfo } from '@core/notifications'
+import { get_notification_info } from '@core/selectors'
 
 import Notification from './notification'
 
-const mapStateToProps = createSelector(getNotificationInfo, (info) => ({
+const mapStateToProps = createSelector(get_notification_info, (info) => ({
   info
 }))
 

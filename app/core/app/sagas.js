@@ -1,12 +1,12 @@
 import { call, takeLatest, fork, select } from 'redux-saga/effects'
 
-import { getApp } from './selectors'
+import { get_app } from '@core/selectors'
 import { appActions } from './actions'
 import { postRegister, postLogin, fetchAuth } from '@core/api'
 import { localStorageAdapter } from '@core/utils'
 
 export function* init() {
-  const { token } = yield select(getApp)
+  const { token } = yield select(get_app)
   if (token) {
     yield call(fetchAuth)
   }
@@ -25,7 +25,7 @@ export function logout() {
 }
 
 export function* saveToken({ payload }) {
-  const { token } = yield select(getApp)
+  const { token } = yield select(get_app)
   localStorageAdapter.setItem('token', token)
   yield fork(init)
 }

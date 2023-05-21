@@ -1,13 +1,13 @@
 import { fork, takeLatest, call, select } from 'redux-saga/effects'
 
 import { playerActions } from '@core/players'
-import { getApp } from '@core/app'
+import { get_app } from '@core/selectors'
 import { getDraftPickValue } from '@core/api'
 import { tradeActions } from '@core/trade'
 import { draftPickValueActions } from './actions'
 
 export function* loadDraftPickValue() {
-  const { leagueId } = yield select(getApp)
+  const { leagueId } = yield select(get_app)
   yield call(getDraftPickValue, { leagueId })
 }
 

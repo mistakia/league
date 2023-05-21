@@ -1,9 +1,13 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getCurrentLeague } from '@core/leagues'
-import { tradeActions, getCurrentTrade, getTradeIsValid } from '@core/trade'
-import { getApp } from '@core/app'
+import { tradeActions } from '@core/trade'
+import {
+  get_app,
+  getCurrentLeague,
+  getCurrentTrade,
+  getTradeIsValid
+} from '@core/selectors'
 
 import TradeAction from './trade-action'
 
@@ -11,7 +15,7 @@ const mapStateToProps = createSelector(
   getCurrentLeague,
   getCurrentTrade,
   getTradeIsValid,
-  getApp,
+  get_app,
   (league, trade, isValid, app) => ({
     league,
     trade,

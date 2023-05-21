@@ -2,9 +2,12 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 import { Map } from 'immutable'
 
-import { getTeamsForCurrentLeague, teamActions } from '@core/teams'
-import { getCurrentLeague } from '@core/leagues'
-import { getApp } from '@core/app'
+import { teamActions } from '@core/teams'
+import {
+  get_app,
+  getCurrentLeague,
+  getTeamsForCurrentLeague
+} from '@core/selectors'
 import { constants, calculatePercentiles } from '@common'
 
 import StatsPage from './stats'
@@ -12,7 +15,7 @@ import StatsPage from './stats'
 const mapStateToProps = createSelector(
   getCurrentLeague,
   getTeamsForCurrentLeague,
-  getApp,
+  get_app,
   (league, teams, app) => {
     const year = app.year
     // TODO - add prefix

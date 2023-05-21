@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getPlayers } from '@core/players'
+import { getPlayers } from '@core/selectors'
 
 import NFLTeamsFilter from './nfl-teams-filter'
 

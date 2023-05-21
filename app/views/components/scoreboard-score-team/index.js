@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getScoreboardByTeamId } from '@core/scoreboard'
+import { getScoreboardByTeamId } from '@core/selectors'
 
 import ScoreboardScoreTeam from './scoreboard-score-team'
 

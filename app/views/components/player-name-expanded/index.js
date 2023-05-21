@@ -1,8 +1,8 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getPlayerById, playerActions } from '@core/players'
-import { getGameStatusByPlayerId } from '@core/scoreboard'
+import { playerActions } from '@core/players'
+import { getPlayerById, getGameStatusByPlayerId } from '@core/selectors'
 
 import PlayerNameExpanded from './player-name-expanded'
 

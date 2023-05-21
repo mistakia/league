@@ -1,8 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getStats } from '@core/stats'
-import { getSelectedPlayer } from '@core/players'
+import { getStats, getSelectedPlayer } from '@core/selectors'
 
 import SelectedPlayerTeamSituationSplits from './selected-player-team-situation-splits'
 

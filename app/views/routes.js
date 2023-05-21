@@ -11,7 +11,7 @@ import {
 } from 'react-router-dom'
 import queryString from 'query-string'
 
-import { getApp } from '@core/app'
+import { get_app } from '@core/selectors'
 import AuthPage from '@pages/auth'
 import LeagueHomePage from '@pages/league-home'
 import DraftPage from '@pages/draft'
@@ -33,7 +33,7 @@ import TeamPage from '@pages/team'
 import LeagueSettingsPage from '@pages/league-settings'
 import MatchupPage from '@pages/matchup'
 
-const mapStateToProps = createSelector(getApp, (app) => ({ app }))
+const mapStateToProps = createSelector(get_app, (app) => ({ app }))
 
 const Routes = ({ app }) => {
   const location = useLocation()

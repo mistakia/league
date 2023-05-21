@@ -1,7 +1,8 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getStatus, statusActions } from '@core/status'
+import { getStatus } from '@core/selectors'
+import { statusActions } from '@core/status'
 
 import StatusPage from './status'
 

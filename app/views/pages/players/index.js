@@ -1,15 +1,15 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getStats } from '@core/stats'
 import {
   getFilteredPlayers,
-  playerActions,
+  getStats,
   getSelectedViewGroupedFields,
   getSelectedPlayersView,
   getPlayerFields,
   is_player_filter_options_changed
-} from '@core/players'
+} from '@core/selectors'
+import { playerActions } from '@core/players'
 
 import PlayersPage from './players'
 

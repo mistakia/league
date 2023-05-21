@@ -1,8 +1,8 @@
 import { createSelector } from 'reselect'
 import { connect } from 'react-redux'
 
-import { draftActions, getDraft, isDrafted } from '@core/draft'
-import { getPlayers } from '@core/players'
+import { isDrafted, getDraft, getPlayers } from '@core/selectors'
+import { draftActions } from '@core/draft'
 
 import DraftPlayer from './draft-player'
 

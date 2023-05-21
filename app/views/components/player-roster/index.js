@@ -4,7 +4,7 @@ import { createSelector } from 'reselect'
 import {
   isBeforeExtensionDeadline,
   isRestrictedFreeAgencyPeriod
-} from '@core/leagues'
+} from '@core/selectors'
 
 import PlayerRoster from './player-roster'
 

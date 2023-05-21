@@ -1,8 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getTeamEvents } from '@core/teams'
-import { getLeagueEvents } from '@core/leagues'
+import { getTeamEvents, getLeagueEvents } from '@core/selectors'
 
 import LeagueScheduleList from './league-schedule-list'
 

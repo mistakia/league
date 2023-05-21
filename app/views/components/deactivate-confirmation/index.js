@@ -1,7 +1,8 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { rosterActions, getCurrentPlayers } from '@core/rosters'
+import { getCurrentPlayers } from '@core/selectors'
+import { rosterActions } from '@core/rosters'
 import { playerActions } from '@core/players'
 
 import DeactivateConfirmation from './deactivate-confirmation'
