@@ -23,17 +23,17 @@ function StandingsTeam({ team, year, is_current_year }) {
   return (
     <div className='table__row'>
       <div className='table__cell player__item-name'>{team.name}</div>
-      <div className='table__cell metric'>
+      <div className='table__cell metric wide_cell'>
         {team.getIn(['stats', year, 'wins'], 0)}-
         {team.getIn(['stats', year, 'losses'], 0)}-
         {team.getIn(['stats', year, 'ties'], 0)}
       </div>
-      <div className='table__cell metric'>
+      <div className='table__cell metric wide_cell'>
         {team.getIn(['stats', year, 'apWins'], 0)}-
         {team.getIn(['stats', year, 'apLosses'], 0)}-
         {team.getIn(['stats', year, 'apTies'], 0)}
       </div>
-      <div className='table__cell metric'>
+      <div className='table__cell metric wide_cell'>
         {team.getIn(['stats', year, 'pf'], 0).toFixed(1)}
       </div>
       {is_current_year && (
@@ -83,9 +83,9 @@ function Standings({ teams, title, year, is_current_year }) {
       <div className='table__container'>
         <div className='table__row table__head'>
           <div className='table__cell player__item-name'>Team</div>
-          <div className='table__cell metric'>Record</div>
-          <div className='table__cell metric'>All Play</div>
-          <div className='table__cell metric'>Points</div>
+          <div className='table__cell metric wide_cell'>Record</div>
+          <div className='table__cell metric wide_cell'>All Play</div>
+          <div className='table__cell metric wide_cell'>Points</div>
           {is_current_year && <div className='table__cell metric'>P Odds</div>}
           {is_current_year && (
             <div className='table__cell metric'>Bye Odds</div>
@@ -142,15 +142,19 @@ function Overall({ standings, year, is_current_year }) {
       <div className='table__container'>
         <div className='table__row table__head'>
           <div className='table__cell player__item-name'>Team</div>
-          <div className='table__cell metric'>Record</div>
-          <div className='table__cell metric'>All Play</div>
-          <div className='table__cell metric'>Points</div>
-          {is_current_year && <div className='table__cell metric'>P Odds</div>}
+          <div className='table__cell metric wide_cell'>Record</div>
+          <div className='table__cell metric wide_cell'>All Play</div>
+          <div className='table__cell metric wide_cell'>Points</div>
+          {is_current_year && (
+            <div className='table__cell metric'>Playoff Odds</div>
+          )}
           {is_current_year && (
             <div className='table__cell metric'>Bye Odds</div>
           )}
-          {is_current_year && <div className='table__cell metric'>C Odds</div>}
-          <div className='table__cell metric'>DOI</div>
+          {is_current_year && (
+            <div className='table__cell metric'>Champ Odds</div>
+          )}
+          <div className='table__cell metric'>Draft Index</div>
         </div>
         {overallRows}
       </div>

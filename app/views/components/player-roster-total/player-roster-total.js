@@ -49,7 +49,8 @@ export default class PlayerRosterTotal extends React.Component {
       extendedSalaryTotal = extendedSalaryTotal + extendedSalary
       projectedSalaryTotal = projectedSalaryTotal + projectedSalary
       savingsTotal = savingsTotal + savings
-      valueTotal = valueTotal + playerMap.getIn(['vorp', projectionType], 0)
+      valueTotal =
+        valueTotal + Math.max(playerMap.getIn(['vorp', projectionType], 0), 0)
       valueAdjTotal =
         valueAdjTotal + playerMap.getIn(['vorp_adj', projectionType], 0)
       weekPointsTotal =
@@ -63,38 +64,56 @@ export default class PlayerRosterTotal extends React.Component {
         <div className='player__item-name table__cell sticky__column'>
           Total
         </div>
-        <div className='metric table__cell'>${baseSalaryTotal.toFixed(0)}</div>
-        <div className='metric table__cell'>${extendedSalaryTotal}</div>
-        {isOffseason && <div className='metric table__cell'>-</div>}
-        {isOffseason && (
-          <div className='metric table__cell'>
-            {projectedSalaryTotal ? `$${projectedSalaryTotal.toFixed(0)}` : '-'}
+        <div className='row__group'>
+          <div className='row__group-body'>
+            <div className='metric table__cell'>
+              ${baseSalaryTotal.toFixed(0)}
+            </div>
+            <div className='metric table__cell'>${extendedSalaryTotal}</div>
+            {/* {isOffseason && <div className='metric table__cell'>-</div>} */}
+            {isOffseason && (
+              <div className='metric table__cell'>
+                {projectedSalaryTotal
+                  ? `$${projectedSalaryTotal.toFixed(0)}`
+                  : '-'}
+              </div>
+            )}
+            {isOffseason && (
+              <div className='metric table__cell'>
+                {savingsTotal ? `$${savingsTotal.toFixed(0)}` : '-'}
+              </div>
+            )}
           </div>
-        )}
-        {isOffseason && (
-          <div className='metric table__cell'>
-            {savingsTotal ? `$${savingsTotal.toFixed(0)}` : '-'}
-          </div>
-        )}
-        <div className='metric table__cell'>
-          {points_added ? `${points_added.toFixed(1)}` : '-'}
         </div>
-        <div className='metric table__cell'>-</div>
-        <div className='metric table__cell'>-</div>
-        <div className='metric table__cell'>
-          {valueTotal ? valueTotal.toFixed(1) : '-'}
-        </div>
-        {isOffseason && (
-          <div className='metric table__cell'>
-            {valueAdjTotal ? valueAdjTotal.toFixed(1) : '-'}
+        {!isOffseason && (
+          <div className='row__group'>
+            <div className='row__group-body'>
+              <div className='metric table__cell'>
+                {points_added ? `${points_added.toFixed(1)}` : '-'}
+              </div>
+              <div className='metric table__cell'>-</div>
+              <div className='metric table__cell'>-</div>
+            </div>
           </div>
         )}
+        <div className='row__group'>
+          <div className='row__group-body'>
+            <div className='metric table__cell'>
+              {valueTotal ? valueTotal.toFixed(1) : '-'}
+            </div>
+            {isOffseason && (
+              <div className='metric table__cell'>
+                {valueAdjTotal ? valueAdjTotal.toFixed(1) : '-'}
+              </div>
+            )}
+            <div className='metric table__cell'>-</div>
+          </div>
+        </div>
         {isRegularSeason && (
           <div className='metric table__cell'>
             {weekPointsTotal ? weekPointsTotal.toFixed(1) : '-'}
           </div>
         )}
-        <div className='metric table__cell'>-</div>
         <div className='metric table__cell'>-</div>
         <div className='metric table__cell'>-</div>
       </div>

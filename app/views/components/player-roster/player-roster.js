@@ -56,7 +56,7 @@ class PlayerRoster extends Player {
     const projectionType = isRegularSeason ? 'ros' : '0'
     const hasProjections = playerMap.hasIn(['market_salary', projectionType])
     const market_salary = playerMap.getIn(['market_salary', projectionType], 0)
-    const market_salary_adj = playerMap.get('market_salary_adj', 0)
+    // const market_salary_adj = playerMap.get('market_salary_adj', 0)
     const savings =
       hasProjections &&
       (!isRestrictedFreeAgencyPeriod || bid || !isRestrictedFreeAgent)
@@ -128,56 +128,76 @@ class PlayerRoster extends Player {
             {isNaN(claim.bid) ? '-' : `$${claim.bid}`}
           </div>
         )}
-        {!isWaiver && (
-          <div className='metric table__cell'>
-            {isPoach ? value + 2 || '-' : salary ? `$${salary}` : '-'}
+        <div className='row__group'>
+          <div className='row__group-body'>
+            {!isWaiver && (
+              <div className='metric table__cell'>
+                {isPoach ? value + 2 || '-' : salary ? `$${salary}` : '-'}
+              </div>
+            )}
+            {!isWaiver && !isPoach && (
+              <div className='metric table__cell'>
+                {extendedSalary ? `$${extendedSalary}` : '-'}
+              </div>
+            )}
+            {/* {!isWaiver && !isPoach && isOffseason && (
+              <PercentileMetric
+                scaled
+                value={market_salary_adj}
+                percentile={percentiles.market_salary_adj}
+              />
+            )} */}
+            {!isWaiver && !isPoach && isOffseason && (
+              <PercentileMetric
+                scaled
+                value={market_salary}
+                percentile={percentiles.market_salary}
+              />
+            )}
+            {isOffseason && (
+              <PercentileMetric
+                scaled
+                value={savings}
+                percentile={percentiles.savings}
+              />
+            )}
           </div>
-        )}
-        {!isWaiver && !isPoach && (
-          <div className='metric table__cell'>
-            {extendedSalary ? `$${extendedSalary}` : '-'}
-          </div>
-        )}
-        {!isWaiver && !isPoach && isOffseason && (
-          <PercentileMetric
-            scaled
-            value={market_salary_adj}
-            percentile={percentiles.market_salary_adj}
-          />
-        )}
-        {!isWaiver && !isPoach && isOffseason && (
-          <PercentileMetric
-            scaled
-            value={market_salary}
-            percentile={percentiles.market_salary}
-          />
-        )}
-        {isOffseason && (
-          <PercentileMetric
-            scaled
-            value={savings}
-            percentile={percentiles.savings}
-          />
-        )}
-        <div className='metric table__cell'>
-          {points_added ? points_added.toFixed(1) : '-'}
         </div>
-        <div className='metric table__cell'>{`${points_added_rnk || '-'}`}</div>
-        <div className='metric table__cell'>
-          {`${points_added_pos_rnk ? pos : ''}${points_added_pos_rnk || '-'}`}
-        </div>
-        <div className='metric table__cell'>{vorp ? vorp.toFixed(0) : '-'}</div>
-        {isOffseason && (
-          <div className='metric table__cell'>
-            {vorpAdj ? vorpAdj.toFixed(0) : '-'}
+        {!isOffseason && (
+          <div className='row__group'>
+            <div className='row__group-body'>
+              <div className='metric table__cell'>
+                {points_added ? points_added.toFixed(1) : '-'}
+              </div>
+              <div className='metric table__cell'>{`${
+                points_added_rnk || '-'
+              }`}</div>
+              <div className='metric table__cell'>
+                {`${points_added_pos_rnk ? pos : ''}${
+                  points_added_pos_rnk || '-'
+                }`}
+              </div>
+            </div>
           </div>
         )}
+        <div className='row__group'>
+          <div className='row__group-body'>
+            <div className='metric table__cell'>
+              {vorp ? vorp.toFixed(0) : '-'}
+            </div>
+            {isOffseason && (
+              <div className='metric table__cell'>
+                {vorpAdj ? vorpAdj.toFixed(0) : '-'}
+              </div>
+            )}
+            <div className='metric table__cell'>{starts || '-'}</div>
+          </div>
+        </div>
         {isRegularSeason && (
           <div className='metric table__cell'>
             {weekPoints ? weekPoints.toFixed(1) : '-'}
           </div>
         )}
-        <div className='metric table__cell'>{starts || '-'}</div>
         <div className='metric table__cell'>
           {startPoints ? startPoints.toFixed(0) : '-'}
         </div>
