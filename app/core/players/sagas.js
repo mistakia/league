@@ -9,7 +9,16 @@ import {
 } from 'redux-saga/effects'
 import { Map } from 'immutable'
 
-import { getApp, getRouter, appActions } from '@core/app'
+import { appActions } from '@core/app'
+import {
+  get_app,
+  get_router,
+  get_player_maps,
+  getPlayers,
+  getCurrentLeague,
+  getSources,
+  getRostersForCurrentLeague
+} from '@core/selectors'
 import { notificationActions } from '@core/notifications'
 import {
   getCutlist,
@@ -31,10 +40,9 @@ import {
 } from '@core/api'
 import { draftActions } from '@core/draft'
 import { playerActions } from './actions'
-import { getAllPlayers, getPlayers } from './selectors'
-import { leagueActions, getCurrentLeague } from '@core/leagues'
-import { sourceActions, getSources } from '@core/sources'
-import { getRostersForCurrentLeague, rosterActions } from '@core/rosters'
+import { leagueActions } from '@core/leagues'
+import { sourceActions } from '@core/sources'
+import { rosterActions } from '@core/rosters'
 import { auctionActions } from '@core/auction'
 import Worker from 'workerize-loader?inline!../worker' // eslint-disable-line import/no-webpack-loader-syntax
 
@@ -43,7 +51,7 @@ export function* loadAllPlayers() {
   const isLoaded = state.get('allPlayersLoaded', false)
   const isPending = state.get('allPlayersPending', false)
   if (isLoaded || isPending) return
-  const { leagueId } = yield select(getApp)
+  const { leagueId } = yield select(get_app)
   yield call(fetchAllPlayers, { leagueId })
 }
 
@@ -57,12 +65,12 @@ export function* loadLeaguePlayers() {
   const isLoaded = state.get('leaguePlayersLoaded', false)
   const isPending = state.get('leaguePlayersPending', false)
   if (isLoaded || isPending) return
-  const { leagueId } = yield select(getApp)
+  const { leagueId } = yield select(get_app)
   yield call(getLeaguePlayers, { leagueId })
 }
 
 export function* search() {
-  const { leagueId } = yield select(getApp)
+  const { leagueId } = yield select(get_app)
   const players = yield select(getPlayers)
   const q = players.get('search')
   yield call(searchPlayers, { q, leagueId })
@@ -81,9 +89,9 @@ export function* calculateValues() {
       message: 'Calculating values'
     })
   )
-  const { userId } = yield select(getApp)
+  const { userId } = yield select(get_app)
   const league = yield select(getCurrentLeague)
-  const players = yield select(getAllPlayers)
+  const players = yield select(get_player_maps)
   const sources = yield select(getSources)
   const rosterRows = (yield select(getRostersForCurrentLeague)).toList().toJS()
 
@@ -133,7 +141,7 @@ export function* toggleOrder({ payload }) {
 }
 
 export function* saveProjection({ payload }) {
-  const { token } = yield select(getApp)
+  const { token } = yield select(get_app)
   const { value, type, pid, userId, week } = payload
   if (token) yield call(putProjection, { value, type, pid, userId, week })
   else
@@ -150,16 +158,16 @@ export function* loadPlayer({ payload }) {
 
 export function* deleteProjection({ payload }) {
   const { pid, week } = payload
-  const { userId, token } = yield select(getApp)
+  const { userId, token } = yield select(get_app)
   if (token) yield call(delProjection, { userId, week, pid })
   else yield putResolve(playerActions.removeProjection({ pid, week }))
   yield call(calculateValues)
 }
 
 export function* init({ payload }) {
-  const app = yield select(getApp)
+  const app = yield select(get_app)
   const league = yield select(getCurrentLeague)
-  const router = yield select(getRouter)
+  const router = yield select(get_router)
   const all_player_paths = ['/players', '/auction']
   const league_player_paths = ['/', '/dashboard', '/trade', '/league/rosters']
   const { pathname } = router.location
@@ -189,7 +197,7 @@ export function* init({ payload }) {
     const pids = []
     payload.data.waivers.forEach((w) => pids.push(w.pid))
     payload.data.poaches.forEach((p) => pids.push(p.pid))
-    const { leagueId } = yield select(getApp)
+    const { leagueId } = yield select(get_app)
     yield call(fetchPlayers, { leagueId, pids })
   }
 }
@@ -203,14 +211,14 @@ export function* putWatchlist({ payload }) {
 }
 
 export function* fetchCutlist() {
-  const { teamId } = yield select(getApp)
+  const { teamId } = yield select(get_app)
   yield call(getCutlist, { teamId })
 }
 
 export function* updateCutlist() {
   const players = yield select(getPlayers)
   const cutlist = players.get('cutlist').toArray()
-  const { teamId, leagueId } = yield select(getApp)
+  const { teamId, leagueId } = yield select(get_app)
   yield call(postCutlist, { pids: cutlist, teamId, leagueId })
 }
 
@@ -224,7 +232,7 @@ export function* cutlistNotification() {
 }
 
 export function* fetchPlayerTransactions({ payload }) {
-  const { leagueId } = yield select(getApp)
+  const { leagueId } = yield select(get_app)
   const { pid } = payload
   yield call(getPlayerTransactions, { pid, leagueId })
 }
@@ -236,7 +244,7 @@ export function* fetchPlayerProjections({ payload }) {
 
 export function* loadPlayerGamelogs({ payload }) {
   const { pid } = payload
-  const { leagueId } = yield select(getApp)
+  const { leagueId } = yield select(get_app)
   yield call(getPlayerGamelogs, { pid, leagueId })
 }
 
@@ -246,7 +254,7 @@ export function* loadPlayerPractices({ payload }) {
 }
 
 export function* load_missing_roster_players({ payload }) {
-  const { leagueId } = yield select(getApp)
+  const { leagueId } = yield select(get_app)
   const players_map = yield select((state) =>
     state.getIn(['players', 'items'], new Map())
   )

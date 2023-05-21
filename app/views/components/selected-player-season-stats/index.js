@@ -3,9 +3,9 @@ import { createSelector } from 'reselect'
 
 import {
   getSelectedPlayer,
-  getGamesByYearForSelectedPlayer,
-  playerActions
-} from '@core/players'
+  getGamesByYearForSelectedPlayer
+} from '@core/selectors'
+import { playerActions } from '@core/players'
 
 import SelectedPlayerSeasonStats from './selected-player-season-stats'
 

@@ -1,16 +1,21 @@
 import { call, takeLatest, fork, select, put } from 'redux-saga/effects'
 
-import { getApp, appActions } from '@core/app'
-import { fetchMatchups, postMatchups, getRequestHistory } from '@core/api'
+import { appActions } from '@core/app'
+import { fetchMatchups, postMatchups } from '@core/api'
+import {
+  get_app,
+  get_request_history,
+  getMatchups,
+  getScoreboard
+} from '@core/selectors'
 import { constants } from '@common'
 import { matchupsActions } from './actions'
-import { getMatchups } from './selectors'
-import { getScoreboard, scoreboardActions } from '@core/scoreboard'
+import { scoreboardActions } from '@core/scoreboard'
 
 export function* loadMatchups() {
-  const { leagueId, year } = yield select(getApp)
+  const { leagueId, year } = yield select(get_app)
 
-  const request_history = yield select(getRequestHistory)
+  const request_history = yield select(get_request_history)
   const key = `GET_MATCHUPS_${leagueId}_${year}`
   if (!request_history.has(key)) {
     yield call(fetchMatchups, { leagueId, year })
@@ -23,7 +28,7 @@ export function* generate({ payload }) {
 
 export function* selectMatchup() {
   const state = yield select(getMatchups)
-  const { teamId, year } = yield select(getApp)
+  const { teamId, year } = yield select(get_app)
   const scoreboard = yield select(getScoreboard)
   const week = scoreboard.get('week')
   if (week <= constants.season.regularSeasonFinalWeek) {

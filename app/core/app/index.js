@@ -6,4 +6,3 @@ export {
 } from './actions'
 export { appReducer } from './reducer'
 export { appSagas } from './sagas'
-export { getApp, getRouter } from './selectors'

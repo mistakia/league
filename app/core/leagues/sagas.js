@@ -2,14 +2,14 @@ import { call, takeLatest, fork, select, put } from 'redux-saga/effects'
 
 import { leagueActions } from './actions'
 import { putLeague, getLeague } from '@core/api'
-import { getApp, appActions } from '@core/app'
+import { appActions } from '@core/app'
+import { get_app, getLeagueById } from '@core/selectors'
 import { notificationActions } from '@core/notifications'
 import { teamActions } from '@core/teams'
 import { rosterActions } from '@core/rosters'
-import { getLeagueById } from './selectors'
 
 export function* loadLeague() {
-  const { leagueId } = yield select(getApp)
+  const { leagueId } = yield select(get_app)
   if (!leagueId) return
 
   const league = yield select(getLeagueById, { lid: leagueId })
@@ -21,7 +21,7 @@ export function* loadLeague() {
 }
 
 export function* updateLeague({ payload }) {
-  const { token } = yield select(getApp)
+  const { token } = yield select(get_app)
   if (token) yield call(putLeague, payload)
   else yield put(leagueActions.set(payload))
 }

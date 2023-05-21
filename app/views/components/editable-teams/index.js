@@ -1,14 +1,17 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getApp } from '@core/app'
-import { getCurrentLeague } from '@core/leagues'
-import { getTeamsForCurrentLeague, teamActions } from '@core/teams'
+import {
+  get_app,
+  getCurrentLeague,
+  getTeamsForCurrentLeague
+} from '@core/selectors'
+import { teamActions } from '@core/teams'
 
 import EditableTeams from './editable-teams'
 
 const mapStateToProps = createSelector(
-  getApp,
+  get_app,
   getCurrentLeague,
   getTeamsForCurrentLeague,
   (app, league, teams) => ({

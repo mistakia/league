@@ -2,8 +2,11 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 import dayjs from 'dayjs'
 
-import { getPlaysByMatchupId, getStartersByMatchupId } from '@core/scoreboard'
-import { getSelectedMatchupTeams } from '@core/matchups'
+import {
+  getSelectedMatchupTeams,
+  getPlaysByMatchupId,
+  getStartersByMatchupId
+} from '@core/selectors'
 
 import ScoreboardOverTime from './scoreboard-over-time'
 

@@ -1,7 +1,8 @@
 import { call, takeLatest, fork, select, put } from 'redux-saga/effects'
 
 import { teamActions } from './actions'
-import { getApp, appActions } from '@core/app'
+import { appActions } from '@core/app'
+import { get_app } from '@core/selectors'
 import {
   getTeams,
   putTeam,
@@ -16,12 +17,12 @@ import { matchupsActions } from '@core/matchups'
 import { rosterActions } from '@core/rosters'
 
 export function* initTeams() {
-  const { leagueId } = yield select(getApp)
+  const { leagueId } = yield select(get_app)
   if (leagueId) yield call(getTeams, { leagueId })
 }
 
 export function* loadTeams() {
-  const { leagueId } = yield select(getApp)
+  const { leagueId } = yield select(get_app)
   const state = yield select()
   const isLoading = state.getIn(['app', 'isLoadingTeams'])
   const isLoaded = state.getIn(['app', 'isLoadedTeams'])
@@ -46,12 +47,12 @@ export function* saveNotification() {
 }
 
 export function* addTeam() {
-  const { leagueId } = yield select(getApp)
+  const { leagueId } = yield select(get_app)
   yield call(postTeams, { leagueId })
 }
 
 export function* deleteTeam({ payload }) {
-  const { leagueId } = yield select(getApp)
+  const { leagueId } = yield select(get_app)
   const { teamId } = payload
   yield call(deleteTeams, { leagueId, teamId })
 }
@@ -75,7 +76,7 @@ export function* deleteNotification() {
 }
 
 export function* loadLeagueTeamStats({ payload }) {
-  const { leagueId, year } = yield select(getApp)
+  const { leagueId, year } = yield select(get_app)
   yield call(loadTeams)
   yield call(getLeagueTeamStats, { leagueId, year })
 }

@@ -1,10 +1,14 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getAuction, isTeamConnected, getTeamBid } from '@core/auction'
-import { getTeamById } from '@core/teams'
-import { getRosterByTeamId } from '@core/rosters'
-import { getApp } from '@core/app'
+import {
+  get_app,
+  getAuction,
+  isTeamConnected,
+  getTeamBid,
+  getTeamById,
+  getRosterByTeamId
+} from '@core/selectors'
 
 import AuctionTeam from './auction-team'
 
@@ -14,7 +18,7 @@ const mapStateToProps = createSelector(
   isTeamConnected,
   getRosterByTeamId,
   getTeamBid,
-  getApp,
+  get_app,
   (auction, team, isConnected, roster, bid, app) => ({
     team,
     isConnected,

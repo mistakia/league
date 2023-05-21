@@ -1,12 +1,12 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
+import { rosterActions } from '@core/rosters'
 import {
   getAvailablePlayersForCurrentLeague,
   getRostersForCurrentLeague,
-  rosterActions
-} from '@core/rosters'
-import { getCurrentLeague } from '@core/leagues'
+  getCurrentLeague
+} from '@core/selectors'
 
 import AddPlayerDialog from './add-player-dialog'
 

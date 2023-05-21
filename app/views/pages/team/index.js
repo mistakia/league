@@ -1,8 +1,9 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
+import { getTeamsForCurrentLeague } from '@core/selectors'
 import { playerActions } from '@core/players'
-import { teamActions, getTeamsForCurrentLeague } from '@core/teams'
+import { teamActions } from '@core/teams'
 import { draftPickValueActions } from '@core/draft-pick-value'
 
 import TeamPage from './team'

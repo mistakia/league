@@ -1,8 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getTransactions } from '@core/transactions'
-import { getTeamsForCurrentLeague } from '@core/leagues'
+import { getTransactions, getTeamsForCurrentLeague } from '@core/selectors'
 
 import TransactionTeamFilter from './transaction-team-filter'
 

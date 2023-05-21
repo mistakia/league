@@ -1,8 +1,8 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getTeamById, teamActions } from '@core/teams'
-import { getCurrentLeague } from '@core/leagues'
+import { teamActions } from '@core/teams'
+import { getTeamById, getCurrentLeague } from '@core/selectors'
 
 import SettingsTeam from './settings-team'
 

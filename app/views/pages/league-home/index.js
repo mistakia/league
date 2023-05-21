@@ -1,30 +1,28 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getApp } from '@core/app'
-import { getCurrentTeam } from '@core/teams'
-import { getCurrentPlayers, getCurrentTeamRoster } from '@core/rosters'
-import { getCurrentLeague, isBeforeTransitionEnd } from '@core/leagues'
-import { getWaiverPlayersForCurrentTeam } from '@core/waivers'
-import { getPoachPlayersForCurrentLeague } from '@core/poaches'
 import {
-  playerActions,
+  get_app,
   getTransitionPlayers,
-  getCutlistPlayers
-} from '@core/players'
+  getCutlistPlayers,
+  getCurrentLeague,
+  getCurrentPlayers,
+  isBeforeTransitionEnd,
+  getWaiverPlayersForCurrentTeam,
+  getPoachPlayersForCurrentLeague
+} from '@core/selectors'
+import { playerActions } from '@core/players'
 import { draftPickValueActions } from '@core/draft-pick-value'
 import { transactionsActions } from '@core/transactions'
 
 import LeagueHomePage from './league-home'
 
 const mapStateToProps = createSelector(
-  getApp,
+  get_app,
   getTransitionPlayers,
   getCurrentPlayers,
   getCutlistPlayers,
-  getCurrentTeam,
   getCurrentLeague,
-  getCurrentTeamRoster,
   getWaiverPlayersForCurrentTeam,
   getPoachPlayersForCurrentLeague,
   isBeforeTransitionEnd,
@@ -33,9 +31,7 @@ const mapStateToProps = createSelector(
     transitionPlayers,
     players,
     cutlist,
-    team,
     league,
-    roster,
     waivers,
     poaches,
     isBeforeTransitionEnd
@@ -44,9 +40,7 @@ const mapStateToProps = createSelector(
     teamId: app.teamId,
     players,
     cutlist,
-    picks: team.picks,
     league,
-    roster,
     waivers,
     poaches,
     isBeforeTransitionEnd

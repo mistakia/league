@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getStats } from '@core/stats'
+import { getStats } from '@core/selectors'
 
 import StatQuartersFilter from './stat-quarters-filter'
 

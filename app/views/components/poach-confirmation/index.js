@@ -4,15 +4,13 @@ import { createSelector } from 'reselect'
 import {
   getCurrentPlayers,
   getCurrentTeamRosterRecord,
-  getRosterInfoForPlayerId
-} from '@core/rosters'
-import { getCurrentLeague } from '@core/leagues'
-import {
+  getRosterInfoForPlayerId,
+  getCurrentLeague,
   getPoachById,
-  poachActions,
-  getPoachReleasePlayers
-} from '@core/poaches'
-import { getPlayerStatus } from '@core/players'
+  getPoachReleasePlayers,
+  getPlayerStatus
+} from '@core/selectors'
+import { poachActions } from '@core/poaches'
 import { waiverActions } from '@core/waivers'
 
 import PoachConfirmation from './poach-confirmation'

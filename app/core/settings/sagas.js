@@ -1,11 +1,11 @@
 import { call, takeLatest, fork, select, putResolve } from 'redux-saga/effects'
 
-import { getApp } from '@core/app'
+import { get_app } from '@core/selectors'
 import { settingActions } from './actions'
 import { putSetting } from '@core/api'
 
 export function* updateSetting({ payload }) {
-  const { token } = yield select(getApp)
+  const { token } = yield select(get_app)
   if (token) yield call(putSetting, payload)
   else yield putResolve(settingActions.set(payload))
 }

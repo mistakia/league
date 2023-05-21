@@ -1,11 +1,8 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import {
-  getMatchups,
-  getMatchupsForSelectedWeek,
-  matchupsActions
-} from '@core/matchups'
+import { getMatchups, getMatchupsForSelectedWeek } from '@core/selectors'
+import { matchupsActions } from '@core/matchups'
 
 import ScoreboardScores from './scoreboard-scores'
 

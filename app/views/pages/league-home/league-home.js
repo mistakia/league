@@ -31,12 +31,10 @@ export default function LeagueHomePage({
   players,
   transitionPlayers,
   cutlist,
-  picks,
   league,
   waivers,
   poaches,
   teamId,
-  roster,
   isBeforeTransitionEnd,
   loadLeaguePlayers,
   loadDraftPickValue,
@@ -105,15 +103,11 @@ export default function LeagueHomePage({
   }
 
   const transitionItems = []
-  for (const playerMap of transitionPlayers.valueSeq()) {
+  transitionPlayers.forEach((playerMap, index) => {
     transitionItems.push(
-      <PlayerRoster
-        key={playerMap.get('pid')}
-        playerMap={playerMap}
-        isTransition
-      />
+      <PlayerRoster key={index} playerMap={playerMap} isTransition />
     )
-  }
+  })
 
   const reserveIRItems = []
   for (const playerMap of players.ir) {
@@ -288,14 +282,12 @@ LeagueHomePage.propTypes = {
   players: PropTypes.object,
   transitionPlayers: ImmutablePropTypes.map,
   cutlist: ImmutablePropTypes.list,
-  picks: ImmutablePropTypes.list,
   league: PropTypes.object,
   waivers: PropTypes.object,
   loadLeaguePlayers: PropTypes.func,
   loadDraftPickValue: PropTypes.func,
   poaches: ImmutablePropTypes.list,
   teamId: PropTypes.number,
-  roster: PropTypes.object,
   isBeforeTransitionEnd: PropTypes.bool,
   loadRecentTransactions: PropTypes.func
 }

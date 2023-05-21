@@ -2,7 +2,7 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { rosterActions } from '@core/rosters'
-import { getCurrentLeague } from '@core/leagues'
+import { getCurrentLeague } from '@core/selectors'
 
 import Lineup from './lineup'
 

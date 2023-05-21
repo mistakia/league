@@ -1,7 +1,6 @@
 import { call, takeLatest, fork, select } from 'redux-saga/effects'
 
-import { getApp } from '@core/app'
-import { getTrade, getTradeSelectedTeamId } from './selectors'
+import { get_app, getTrade, getTradeSelectedTeamId } from '@core/selectors'
 import { tradeActions } from './actions'
 import {
   postProposeTrade,
@@ -12,7 +11,7 @@ import {
 } from '@core/api'
 
 export function* propose() {
-  const { teamId, leagueId } = yield select(getApp)
+  const { teamId, leagueId } = yield select(get_app)
   const accept_tid = yield select(getTradeSelectedTeamId)
   const trade = yield select(getTrade)
 
@@ -30,24 +29,24 @@ export function* propose() {
 }
 
 export function* load() {
-  const { teamId, leagueId } = yield select(getApp)
+  const { teamId, leagueId } = yield select(get_app)
   yield call(getTrades, { leagueId, teamId })
 }
 
 export function* cancel() {
   const { selectedTradeId } = yield select(getTrade)
-  const { leagueId } = yield select(getApp)
+  const { leagueId } = yield select(get_app)
   yield call(postCancelTrade, { leagueId, tradeId: selectedTradeId })
 }
 
 export function* reject() {
   const { selectedTradeId } = yield select(getTrade)
-  const { leagueId } = yield select(getApp)
+  const { leagueId } = yield select(get_app)
   yield call(postRejectTrade, { leagueId, tradeId: selectedTradeId })
 }
 
 export function* accept() {
-  const { teamId, leagueId } = yield select(getApp)
+  const { teamId, leagueId } = yield select(get_app)
   const { selectedTradeId } = yield select(getTrade)
   const trade = yield select(getTrade)
   const releasePlayers = trade.releasePlayers.toJS()

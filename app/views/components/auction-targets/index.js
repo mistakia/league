@@ -3,18 +3,16 @@ import { createSelector } from 'reselect'
 import { List } from 'immutable'
 
 import {
+  get_app,
   getAuction,
   getAuctionTargetPlayers,
-  auctionActions
-} from '@core/auction'
-import {
   getCurrentPlayers,
-  getRosteredPlayerIdsForCurrentLeague
-} from '@core/rosters'
+  getRosteredPlayerIdsForCurrentLeague,
+  getPlayers,
+  getCurrentLeague
+} from '@core/selectors'
+import { auctionActions } from '@core/auction'
 import { constants } from '@common'
-import { getPlayers } from '@core/players'
-import { getApp } from '@core/app'
-import { getCurrentLeague } from '@core/leagues'
 
 import AuctionTargets from './auction-targets'
 
@@ -24,7 +22,7 @@ const mapStateToProps = createSelector(
   getCurrentPlayers,
   getRosteredPlayerIdsForCurrentLeague,
   getPlayers,
-  getApp,
+  get_app,
   getCurrentLeague,
   (auction, players, team, rosteredPlayerIds, playerState, app, league) => {
     const playersByPosition = {}

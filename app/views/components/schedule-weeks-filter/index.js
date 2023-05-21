@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getMatchups } from '@core/matchups'
+import { getMatchups } from '@core/selectors'
 
 import ScheduleWeeksFilter from './schedule-weeks-filter'
 

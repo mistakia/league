@@ -1,7 +1,8 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { playerActions, getPlayers } from '@core/players'
+import { playerActions } from '@core/players'
+import { getPlayers } from '@core/selectors'
 
 import WatchlistFilter from './watchlist-filter'
 

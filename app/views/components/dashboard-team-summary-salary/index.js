@@ -2,9 +2,11 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { Roster } from '@common'
-import { getTeamsForCurrentLeague } from '@core/teams'
-import { getCurrentLeague } from '@core/leagues'
-import { getRostersForCurrentLeague } from '@core/rosters'
+import {
+  getRostersForCurrentLeague,
+  getTeamsForCurrentLeague,
+  getCurrentLeague
+} from '@core/selectors'
 
 import DashboardTeamSummarySalary from './dashboard-team-summary-salary'
 

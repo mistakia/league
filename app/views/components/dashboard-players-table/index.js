@@ -3,7 +3,7 @@ import { createSelector } from 'reselect'
 
 import { waiverActions } from '@core/waivers'
 import { playerActions } from '@core/players'
-import { isBeforeExtensionDeadline } from '@core/leagues'
+import { isBeforeExtensionDeadline } from '@core/selectors'
 
 import DashboardPlayersTable from './dashboard-players-table'
 

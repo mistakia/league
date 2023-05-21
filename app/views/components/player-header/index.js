@@ -1,7 +1,8 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getPlayers, playerActions } from '@core/players'
+import { getPlayers } from '@core/selectors'
+import { playerActions } from '@core/players'
 
 import PlayerHeader from './player-header'
 

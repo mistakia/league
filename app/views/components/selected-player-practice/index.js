@@ -2,7 +2,8 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 import { List } from 'immutable'
 
-import { playerActions, getSelectedPlayer } from '@core/players'
+import { getSelectedPlayer } from '@core/selectors'
+import { playerActions } from '@core/players'
 
 import SelectedPlayerPractice from './selected-player-practice'
 

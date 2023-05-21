@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getPlayerById, isPlayerLocked } from '@core/players'
+import { getPlayerById, isPlayerLocked } from '@core/selectors'
 
 import PlayerSlot from './player-slot'
 

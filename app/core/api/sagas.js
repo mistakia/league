@@ -2,11 +2,12 @@ import { call, put, cancelled, select } from 'redux-saga/effects'
 import Bugsnag from '@bugsnag/js'
 
 import { api, apiRequest } from '@core/api/service'
-import { getDraftPickValueActions } from '@core/draft-pick-value'
-import { authActions, loginActions, registerActions, getApp } from '@core/app'
-import { getStatusActions } from '@core/status'
-import { getScheduleActions } from '@core/schedule'
-import { getDraftActions, postDraftActions } from '@core/draft'
+import { getDraftPickValueActions } from '@core/draft-pick-value/actions'
+import { authActions, loginActions, registerActions } from '@core/app/actions'
+import { get_app } from '@core/selectors'
+import { getStatusActions } from '@core/status/actions'
+import { getScheduleActions } from '@core/schedule/actions'
+import { getDraftActions, postDraftActions } from '@core/draft/actions'
 import {
   getRostersActions,
   putRosterActions,
@@ -24,8 +25,8 @@ import {
   postTransitionTagActions,
   deleteTransitionTagActions,
   putTransitionTagActions
-} from '@core/rosters'
-import { getPlayersGamelogsActions } from '@core/gamelogs'
+} from '@core/rosters/actions'
+import { getPlayersGamelogsActions } from '@core/gamelogs/actions'
 import {
   playersRequestActions,
   allPlayersRequestActions,
@@ -42,33 +43,33 @@ import {
   getPlayerProjectionsActions,
   getPlayerGamelogsActions,
   getPlayerPracticesActions
-} from '@core/players'
-import { getChartedPlaysActions } from '@core/stats'
-import { getPlaysActions, getPlayStatsActions } from '@core/plays'
+} from '@core/players/actions'
+import { getChartedPlaysActions } from '@core/stats/actions'
+import { getPlaysActions, getPlayStatsActions } from '@core/plays/actions'
 import {
   getTeamsActions,
   putTeamActions,
   postTeamsActions,
   deleteTeamsActions,
   getLeagueTeamStatsActions
-} from '@core/teams'
+} from '@core/teams/actions'
 import {
   getTransactionsActions,
   getReleaseTransactionsActions,
   getReserveTransactionsActions
-} from '@core/transactions'
-import { getMatchupsActions, postMatchupsActions } from '@core/matchups'
+} from '@core/transactions/actions'
+import { getMatchupsActions, postMatchupsActions } from '@core/matchups/actions'
 import {
   postTradeProposeActions,
   postTradeAcceptActions,
   postTradeCancelActions,
   postTradeRejectActions,
   getTradesActions
-} from '@core/trade'
-import { putLeagueActions, getLeagueActions } from '@core/leagues'
-import { getSourcesActions, putSourceActions } from '@core/sources'
-import { putSettingActions } from '@core/settings'
-import { postPoachActions, putPoachActions } from '@core/poaches'
+} from '@core/trade/actions'
+import { putLeagueActions, getLeagueActions } from '@core/leagues/actions'
+import { getSourcesActions, putSourceActions } from '@core/sources/actions'
+import { putSettingActions } from '@core/settings/actions'
+import { postPoachActions, putPoachActions } from '@core/poaches/actions'
 import {
   postWaiverActions,
   putWaiverActions,
@@ -76,16 +77,16 @@ import {
   postWaiverOrderActions,
   getWaiversActions,
   getWaiverReportActions
-} from '@core/waivers'
-import { notificationActions } from '@core/notifications'
-import { getScoreboardActions } from '@core/scoreboard'
-import { postErrorActions } from '@core/errors'
-import { getPropsActions } from '@core/props'
-import { getPercentilesActions } from '@core/percentiles'
-import { getNflTeamSeasonlogsActions } from '@core/seasonlogs'
+} from '@core/waivers/actions'
+import { notificationActions } from '@core/notifications/actions'
+import { getScoreboardActions } from '@core/scoreboard/actions'
+import { postErrorActions } from '@core/errors/actions'
+import { getPropsActions } from '@core/props/actions'
+import { getPercentilesActions } from '@core/percentiles/actions'
+import { getNflTeamSeasonlogsActions } from '@core/seasonlogs/actions'
 
 function* fetchAPI(apiFunction, actions, opts = {}) {
-  const { token } = yield select(getApp)
+  const { token } = yield select(get_app)
   const { request } = apiRequest(apiFunction, opts, token)
   try {
     yield put(actions.pending(opts))

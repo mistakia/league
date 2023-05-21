@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getPlaysByMatchupId } from '@core/scoreboard'
+import { getPlaysByMatchupId } from '@core/selectors'
 
 import ScoreboardPlayByPlay from './scoreboard-play-by-play'
 

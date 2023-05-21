@@ -1,13 +1,3 @@
-export {
-  getTeams,
-  getTeamById,
-  getCurrentTeam,
-  getDraftPickById,
-  getTeamEvents,
-  getTeamsForCurrentLeague,
-  getOverallStandings
-} from './selectors'
-
 export { teamsReducer } from './reducer'
 export { teamSagas } from './sagas'
 export {

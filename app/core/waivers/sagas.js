@@ -1,6 +1,11 @@
 import { call, takeLatest, fork, select, put } from 'redux-saga/effects'
 
-import { getApp } from '@core/app'
+import {
+  get_app,
+  getWaivers,
+  getWaiverPlayersForCurrentTeam,
+  get_player_maps
+} from '@core/selectors'
 import { waiverActions } from './actions'
 import {
   postWaiver,
@@ -11,27 +16,25 @@ import {
   getWaiverReport,
   fetchPlayers
 } from '@core/api'
-import { getWaivers, getWaiverPlayersForCurrentTeam } from './selectors'
 import { notificationActions } from '@core/notifications'
-import { getAllPlayers } from '@core/players'
 
 export function* claim({ payload }) {
-  const { leagueId, teamId } = yield select(getApp)
+  const { leagueId, teamId } = yield select(get_app)
   yield call(postWaiver, { leagueId, teamId, ...payload })
 }
 
 export function* update({ payload }) {
-  const { leagueId, teamId } = yield select(getApp)
+  const { leagueId, teamId } = yield select(get_app)
   yield call(putWaiver, { leagueId, teamId, ...payload })
 }
 
 export function* cancel({ payload }) {
-  const { leagueId, teamId } = yield select(getApp)
+  const { leagueId, teamId } = yield select(get_app)
   yield call(postCancelWaiver, { leagueId, teamId, ...payload })
 }
 
 export function* reorder({ payload }) {
-  const { leagueId, teamId } = yield select(getApp)
+  const { leagueId, teamId } = yield select(get_app)
   const teamWaivers = yield select(getWaiverPlayersForCurrentTeam)
   const { oldIndex, newIndex, type } = payload
   const items = teamWaivers[type]
@@ -87,14 +90,14 @@ export function* updateNotification() {
 }
 
 export function* loadWaivers() {
-  const { leagueId, teamId } = yield select(getApp)
+  const { leagueId, teamId } = yield select(get_app)
   const state = yield select(getWaivers)
   const type = state.get('type').get(0)
   yield call(fetchWaivers, { leagueId, teamId, type })
 }
 
 export function* loadWaiverReport() {
-  const { leagueId, teamId } = yield select(getApp)
+  const { leagueId, teamId } = yield select(get_app)
   const state = yield select(getWaivers)
   const type = state.get('type').get(0)
   const processed = state.get('processed').get(0)
@@ -111,10 +114,10 @@ export function* filterWaivers({ payload }) {
 }
 
 export function* loadPlayers({ payload }) {
-  const players = yield select(getAllPlayers)
+  const players = yield select(get_player_maps)
   const missing = payload.data.filter((p) => !players.getIn([p.pid, 'fname']))
   if (missing.length) {
-    const { leagueId } = yield select(getApp)
+    const { leagueId } = yield select(get_app)
     yield call(fetchPlayers, { leagueId, pids: missing.map((p) => p.pid) })
   }
 }

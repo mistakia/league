@@ -1,11 +1,12 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getContextMenuInfo, contextMenuActions } from '@core/context-menu'
+import { contextMenuActions } from '@core/context-menu'
+import { get_context_menu_info } from '@core/selectors'
 import ContextMenu from './context-menu'
 
 const mapStateToProps = createSelector(
-  getContextMenuInfo,
+  get_context_menu_info,
   (contextMenuInfo) => ({ contextMenuInfo })
 )
 

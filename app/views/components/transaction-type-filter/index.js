@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getTransactions } from '@core/transactions'
+import { getTransactions } from '@core/selectors'
 
 import TransactionTypeFilter from './transaction-type-filter'
 

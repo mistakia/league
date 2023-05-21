@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getByeByTeam } from '@core/schedule'
+import { getByeByTeam } from '@core/selectors'
 
 import NFLTeamBye from './nfl-team-bye'
 

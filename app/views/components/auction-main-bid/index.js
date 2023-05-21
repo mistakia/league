@@ -2,14 +2,14 @@ import { connect } from 'react-redux'
 import dayjs from 'dayjs'
 import { createSelector } from 'reselect'
 
+import { auctionActions } from '@core/auction'
 import {
-  auctionActions,
+  get_app,
+  getCurrentTeamRoster,
+  getCurrentLeague,
   getAuction,
   isNominatedPlayerEligible
-} from '@core/auction'
-import { getApp } from '@core/app'
-import { getCurrentTeamRoster } from '@core/rosters'
-import { getCurrentLeague } from '@core/leagues'
+} from '@core/selectors'
 import { notificationActions } from '@core/notifications'
 import { getFreeAgentPeriod } from '@common'
 
@@ -17,7 +17,7 @@ import AuctionMainBid from './auction-main-bid'
 
 const mapStateToProps = createSelector(
   getAuction,
-  getApp,
+  get_app,
   getCurrentTeamRoster,
   isNominatedPlayerEligible,
   getCurrentLeague,

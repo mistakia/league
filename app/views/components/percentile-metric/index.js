@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getPercentiles } from '@core/percentiles'
+import { getPercentiles } from '@core/selectors'
 
 import PercentileMetric from './percentile-metric'
 

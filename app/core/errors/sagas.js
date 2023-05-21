@@ -5,7 +5,7 @@ import { auctionActions } from '@core/auction'
 import { notificationActions } from '@core/notifications'
 
 export function* report({ payload }) {
-  // const { leagueId, teamId, userId } = yield select(getApp)
+  // const { leagueId, teamId, userId } = yield select(get_app)
   // const { message, stack } = payload
   /* yield call(postError, {
    *   ignoreError: true,

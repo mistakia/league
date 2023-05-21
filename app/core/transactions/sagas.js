@@ -1,8 +1,8 @@
 import { call, takeLatest, fork, select } from 'redux-saga/effects'
 
 import { constants } from '@common'
-import { getApp, appActions } from '@core/app'
-import { getTransactions } from './selectors'
+import { appActions } from '@core/app'
+import { get_app, getTransactions, get_player_maps } from '@core/selectors'
 import { transactionsActions } from './actions'
 import { TRANSACTIONS_PER_LOAD } from '@core/constants'
 import {
@@ -11,7 +11,6 @@ import {
   getReleaseTransactions,
   getReserveTransactions
 } from '@core/api'
-import { getAllPlayers } from '@core/players'
 
 export function* load({ payload }) {
   const { leagueId } = payload
@@ -30,27 +29,27 @@ export function* load({ payload }) {
 }
 
 export function* loadReleaseTransactions() {
-  const { leagueId } = yield select(getApp)
+  const { leagueId } = yield select(get_app)
   if (leagueId) yield call(getReleaseTransactions, { leagueId })
 }
 
 export function* loadReserveTransactions() {
-  const { leagueId, teamId } = yield select(getApp)
+  const { leagueId, teamId } = yield select(get_app)
   if (leagueId && teamId)
     yield call(getReserveTransactions, { leagueId, teamId })
 }
 
 export function* loadPlayers({ payload }) {
-  const players = yield select(getAllPlayers)
+  const players = yield select(get_player_maps)
   const missing = payload.data.filter((p) => !players.getIn([p.pid, 'fname']))
   if (missing.length) {
-    const { leagueId } = yield select(getApp)
+    const { leagueId } = yield select(get_app)
     yield call(fetchPlayers, { leagueId, pids: missing.map((p) => p.pid) })
   }
 }
 
 export function* loadRecentTransactions() {
-  const { leagueId } = yield select(getApp)
+  const { leagueId } = yield select(get_app)
   const params = {
     leagueId,
     types: [

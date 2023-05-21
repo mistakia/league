@@ -1,9 +1,11 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getPlayerById } from '@core/players'
-import { getAvailableSalarySpaceForCurrentLeague } from '@core/rosters'
-import { getAuctionInfoForPosition } from '@core/auction'
+import {
+  getAvailableSalarySpaceForCurrentLeague,
+  getAuctionInfoForPosition,
+  getPlayerById
+} from '@core/selectors'
 
 import AuctionNominatedPlayer from './auction-nominated-player'
 

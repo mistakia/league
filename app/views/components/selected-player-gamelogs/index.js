@@ -2,9 +2,12 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { calculatePoints, groupBy } from '@common'
-import { getSelectedPlayer, playerActions } from '@core/players'
-import { getGamelogsForSelectedPlayer } from '@core/stats'
-import { getCurrentLeague } from '@core/leagues'
+import { playerActions } from '@core/players'
+import {
+  getGamelogsForSelectedPlayer,
+  getSelectedPlayer,
+  getCurrentLeague
+} from '@core/selectors'
 
 import SelectedPlayerGamelogs from './selected-player-gamelogs'
 

@@ -1,12 +1,12 @@
 import { fork, takeEvery, select, call } from 'redux-saga/effects'
 
-import { getNflTeamSeasonlogs, getRequestHistory } from '@core/api'
+import { getNflTeamSeasonlogs } from '@core/api'
 import { seasonlogsActions } from './actions'
-import { getApp } from '@core/app'
+import { get_app, get_request_history } from '@core/selectors'
 
 export function* load() {
-  const request_history = yield select(getRequestHistory)
-  const { leagueId } = yield select(getApp)
+  const request_history = yield select(get_request_history)
+  const { leagueId } = yield select(get_app)
   const key = `GET_NFL_TEAM_SEASONLOGS_LEAGUE_${leagueId}`
   if (!request_history.has(key)) {
     yield call(getNflTeamSeasonlogs, { leagueId })

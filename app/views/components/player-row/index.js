@@ -1,20 +1,20 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getApp } from '@core/app'
 import {
+  getTeams,
   getPlayers,
-  playerActions,
+  get_app,
   getPlayerStatus,
   getSelectedViewGroupedFields
-} from '@core/players'
-import { getTeams } from '@core/teams'
+} from '@core/selectors'
+import { playerActions } from '@core/players'
 
 import PlayerRow from './player-row'
 
 const mapStateToProps = createSelector(
   getPlayers,
-  getApp,
+  get_app,
   getPlayerStatus,
   getTeams,
   getSelectedViewGroupedFields,

@@ -1,7 +1,8 @@
 import { call, takeLatest, select, fork, delay, put } from 'redux-saga/effects'
 
 import { wsActions } from './actions'
-import { getApp, appActions } from '@core/app'
+import { appActions } from '@core/app'
+import { get_app } from '@core/selectors'
 import { openWS, closeWS, isOpen } from './service'
 
 export function* disconnect() {
@@ -9,12 +10,12 @@ export function* disconnect() {
 }
 
 export function* connect() {
-  const { leagueId, token } = yield select(getApp)
+  const { leagueId, token } = yield select(get_app)
   yield call(openWS, { token, leagueId })
 }
 
 export function* reconnect() {
-  const { userId } = yield select(getApp)
+  const { userId } = yield select(get_app)
   if (userId) {
     while (!isOpen()) {
       yield call(connect)

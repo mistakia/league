@@ -1,8 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getGroupedPlayersByTeamId } from '@core/rosters'
-import { getSchedule } from '@core/schedule'
+import { getSchedule, getGroupedPlayersByTeamId } from '@core/selectors'
 
 import DashboardByeWeeks from './dashboard-bye-weeks'
 

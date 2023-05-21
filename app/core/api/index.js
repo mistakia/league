@@ -1,4 +1,3 @@
-export { getRequestHistory } from './selectors'
 export { apiReducer } from './reducer'
 export {
   postRegister,
