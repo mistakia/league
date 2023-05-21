@@ -77,6 +77,7 @@ export default function PlayersViewMenu({
         <div className='players__view-menu'>
           <TextField
             label='View'
+            autoComplete='off'
             placeholder='Filter views'
             value={
               typeof input_value === 'undefined' ? selected_value : input_value
