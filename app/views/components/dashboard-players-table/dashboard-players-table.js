@@ -127,7 +127,7 @@ export default class DashboardPlayersTable extends React.Component {
         </div>
       )
     } else {
-      body = <div className='empty'>{items}</div>
+      body = <div className='table__body empty'>{items}</div>
     }
 
     const classNames = ['section', 'dashboard__players-table']
@@ -171,79 +171,92 @@ export default class DashboardPlayersTable extends React.Component {
             {(isWaiver || isTransition) && (
               <div className='metric table__cell'>Bid</div>
             )}
-            {!isWaiver && (
-              <div className='metric table__cell'>{`${baseYear} Salary`}</div>
-            )}
-            {!isWaiver && !isPoach && (
-              <div className='metric table__cell'>{`${
-                baseYear + 1
-              } Salary`}</div>
-            )}
-            {!isWaiver && !isPoach && isOffseason && (
-              <div className='table__cell metric'>
-                <PlayerRosterHeader
-                  tooltip='Market Salary adjusted for player availability and salary space'
-                  title='Market Salary Adjusted'
-                />
+            <div className='row__group'>
+              <div className='row__group-head'>Salary</div>
+              <div className='row__group-body'>
+                {!isWaiver && <div className='table__cell'>{baseYear}</div>}
+                {!isWaiver && !isPoach && (
+                  <div className='table__cell'>{baseYear + 1}</div>
+                )}
+                {/* {!isWaiver && !isPoach && isOffseason && (
+                  <div className='table__cell'>
+                    <PlayerRosterHeader
+                      tooltip='Market Salary adjusted for player availability and salary space'
+                      title='Market Adjusted'
+                    />
+                  </div>
+                )} */}
+                {!isWaiver && !isPoach && isOffseason && (
+                  <div className='table__cell'>
+                    <PlayerRosterHeader
+                      tooltip='Salary based on projected points over baseline player'
+                      title='Market'
+                    />
+                  </div>
+                )}
+                {isOffseason && (
+                  <div className='table__cell'>
+                    <PlayerRosterHeader
+                      tooltip='Difference between a players salary and the market salary'
+                      title='Savings'
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+            {!isOffseason && (
+              <div className='row__group'>
+                <div className='row__group-head'>Results</div>
+                <div className='row__group-body'>
+                  <div className='table__cell'>
+                    <PlayerRosterHeader
+                      tooltip='Points produced above baseline starter'
+                      title='Pts+'
+                    />
+                  </div>
+                  <div className='table__cell'>
+                    <PlayerRosterHeader
+                      tooltip='Rank among all players in points produced above baseline starter'
+                      title='Rank'
+                    />
+                  </div>
+                  <div className='table__cell'>
+                    <PlayerRosterHeader
+                      tooltip='Rank among position players in points produced above baseline starter'
+                      title='Pos Rank'
+                    />
+                  </div>
+                </div>
               </div>
             )}
-            {!isWaiver && !isPoach && isOffseason && (
-              <div className='table__cell metric'>
-                <PlayerRosterHeader
-                  tooltip='Salary based on projected points over baseline player'
-                  title='Market Salary'
-                />
+            <div className='row__group'>
+              <div className='row__group-head'>Projected</div>
+              <div className='row__group-body'>
+                <div className='table__cell'>
+                  <PlayerRosterHeader
+                    tooltip='Projected points over baseline player'
+                    title='Pts+'
+                  />
+                </div>
+                {isOffseason && (
+                  <div className='table__cell'>
+                    <PlayerRosterHeader
+                      tooltip='Salary Adjusted points over baseline player'
+                      title='Value'
+                    />
+                  </div>
+                )}
+                <div className='table__cell'>
+                  <PlayerRosterHeader
+                    tooltip='Projected games started'
+                    title='Starts'
+                  />
+                </div>
               </div>
-            )}
-            {isOffseason && (
-              <div className='table__cell metric'>
-                <PlayerRosterHeader
-                  tooltip='Difference between a players salary and the market salary'
-                  title='Market Savings'
-                />
-              </div>
-            )}
-            <div className='table__cell metric'>
-              <PlayerRosterHeader
-                tooltip='Points produced above baseline starter'
-                title='Pts+'
-              />
             </div>
-            <div className='table__cell metric'>
-              <PlayerRosterHeader
-                tooltip='Rank among all players in points produced above baseline starter'
-                title='Pts+ Rank'
-              />
-            </div>
-            <div className='table__cell metric'>
-              <PlayerRosterHeader
-                tooltip='Rank among position players in points produced above baseline starter'
-                title='Pts+ Pos Rank'
-              />
-            </div>
-            <div className='table__cell metric'>
-              <PlayerRosterHeader
-                tooltip='Projected points over baseline player'
-                title='Projected Pts+'
-              />
-            </div>
-            {isOffseason && (
-              <div className='table__cell metric'>
-                <PlayerRosterHeader
-                  tooltip='Salary Adjusted points over baseline player'
-                  title='Value'
-                />
-              </div>
-            )}
             {isRegularSeason && (
               <div className='table__cell metric'>Week {week}</div>
             )}
-            <div className='table__cell metric'>
-              <PlayerRosterHeader
-                tooltip='Projected games started'
-                title='Projected Starts'
-              />
-            </div>
             <div className='table__cell metric'>
               <PlayerRosterHeader
                 tooltip='Projected starter points you would lose without player'

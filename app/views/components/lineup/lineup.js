@@ -199,7 +199,7 @@ export default class Lineup extends React.Component {
     return (
       <Grid container spacing={1} classes={{ root: 'lineup' }}>
         <Grid item xs={12} md={6}>
-          <div className='section'>
+          <div className='lineup__starters'>
             <div className='dashboard__section-body-header'>
               <div className='player__slot-slotName' />
               <div className='player__item-name' />
@@ -212,7 +212,7 @@ export default class Lineup extends React.Component {
           </div>
         </Grid>
         <Grid item xs={12} md={6}>
-          <div className='section'>
+          <div>
             <div className='dashboard__section-body-header'>
               <div className='player__slot-slotName' />
               <div className='player__item-name' />

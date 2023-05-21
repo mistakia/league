@@ -9,8 +9,14 @@
   display flex
   align-items center
   background white
-  &:not(:last-child)
-    border-bottom 1px solid rgba(224, 224, 224, 1)
+
+@media (pointer:fine)
+  .table__row:hover
+    background #fafafa
+    .player__item-name.table__cell
+      background #eaeaea
+    .player__item-menu
+      display flex
 
 .table__head
   align-items center
@@ -21,8 +27,9 @@
   font-weight 500
 
 .table__cell
-  flex 1 0 60px
+  flex 0 0 60px
   width 60px
+  min-height 30px
   display flex
   align-items center
   padding 6px
@@ -35,6 +42,10 @@
     overflow hidden
     text-overflow ellipsis
     white-space nowrap
+
+  &.wide_cell
+    width 90px
+    flex 0 0 90px
 
 .table__cell-text
   text-overflow ellipsis

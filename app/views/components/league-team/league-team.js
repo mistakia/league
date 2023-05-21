@@ -107,7 +107,7 @@ export default function LeagueTeam({
 
   return (
     <Grid container spacing={2} alignItems='flex-start'>
-      <Grid container item xs={12} md={8}>
+      <Grid container item xs={12} lg={8}>
         <Grid item xs={12}>
           <DashboardPlayersTable
             items={activeItems}
@@ -151,19 +151,27 @@ export default function LeagueTeam({
             />
           )}
         </Grid>
+      </Grid>
+      <Grid container item xs={12} lg={4}>
         <Grid item xs={12}>
-          <div className='section'>
+          <div className='section expand'>
             <Toolbar>
               <div className='dashboard__section-header-title'>Draft Picks</div>
             </Toolbar>
             <DashboardDraftPicks picks={picks} league={league} />
           </div>
         </Grid>
-      </Grid>
-      <Grid item xs={12} md={4}>
-        {is_hosted_league && <DashboardTeamSummary tid={teamId} />}
-        <DashboardTeamValue tid={teamId} />
-        <DashboardByeWeeks tid={teamId} />
+        {is_hosted_league && (
+          <Grid item xs={12}>
+            <DashboardTeamSummary tid={teamId} />
+          </Grid>
+        )}
+        <Grid item xs={12}>
+          <DashboardByeWeeks tid={teamId} />
+        </Grid>
+        <Grid item xs={12}>
+          <DashboardTeamValue tid={teamId} />
+        </Grid>
       </Grid>
     </Grid>
   )
