@@ -4,7 +4,8 @@ import {
   get_app,
   getWaivers,
   getWaiverPlayersForCurrentTeam,
-  get_player_maps
+  get_player_maps,
+  get_request_history
 } from '@core/selectors'
 import { waiverActions } from './actions'
 import {
@@ -93,6 +94,12 @@ export function* loadWaivers() {
   const { leagueId, teamId } = yield select(get_app)
   const state = yield select(getWaivers)
   const type = state.get('type').get(0)
+  const key = `GET_WAIVERS_${leagueId}_${teamId}_${type}`
+  const request_history = yield select(get_request_history)
+  if (request_history.has(key)) {
+    return
+  }
+
   yield call(fetchWaivers, { leagueId, teamId, type })
 }
 
@@ -102,7 +109,9 @@ export function* loadWaiverReport() {
   const type = state.get('type').get(0)
   const processed = state.get('processed').get(0)
   if (!processed) return
-  yield call(getWaiverReport, { leagueId, teamId, type, processed })
+
+  const opts = { leagueId, teamId, type, processed }
+  yield call(getWaiverReport, opts)
 }
 
 export function* filterWaivers({ payload }) {

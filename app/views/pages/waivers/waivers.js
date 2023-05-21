@@ -28,16 +28,15 @@ export default function WaiversPage({ load, items, isPending }) {
     rows.push(<WaiverReportItem key={index} waiver={waiver} />)
   })
 
+  const waiver_body = isPending && !rows.length ? <Loading loading /> : rows
+
   const body = (
     <Container maxWidth='sm'>
       <div className='waivers__filter'>
         <WaiverTypeFilter />
         <WaiverProcessedFilter />
       </div>
-      <div className='waivers__body empty'>
-        {isPending && <Loading loading />}
-        {rows}
-      </div>
+      <div className='waivers__body empty'>{waiver_body}</div>
     </Container>
   )
 
