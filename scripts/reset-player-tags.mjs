@@ -1,20 +1,24 @@
 import debug from 'debug'
 import dayjs from 'dayjs'
+import yargs from 'yargs'
+import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants } from '#common'
 import { getLeague, isMain } from '#utils'
 
 const log = debug('reset-player-tags')
+const argv = yargs(hideBin(process.argv)).argv
 
-const run = async () => {
+const run = async ({ force = false } = {}) => {
   const lid = 1
   const league = await getLeague({ lid })
 
   // past transition deadline
   if (
-    !league.tran_start ||
-    constants.season.now.isBefore(dayjs.unix(league.tran_start))
+    !force &&
+    (!league.tran_start ||
+      constants.season.now.isBefore(dayjs.unix(league.tran_start)))
   ) {
     log('aborted, before transition deadline')
     return
@@ -51,7 +55,7 @@ const main = async () => {
 
   let error
   try {
-    await run()
+    await run({ force: argv.force })
   } catch (err) {
     error = err
     console.log(error)
