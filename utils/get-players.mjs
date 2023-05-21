@@ -152,7 +152,7 @@ export default async function ({
       })
   }
 
-  if (league_roster_player_ids.length || teamId || leagueId) {
+  if (league_roster_player_ids.length) {
     query.whereIn('player.pid', league_roster_player_ids)
   }
 
