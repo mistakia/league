@@ -6,7 +6,7 @@ import Container from '@mui/material/Container'
 import Toolbar from '@mui/material/Toolbar'
 
 import SelectYear from '@components/select-year'
-import { toPercent } from '@common'
+import { toPercent, constants } from '@common'
 import PageLayout from '@layouts/page'
 
 import './standings.styl'
@@ -19,7 +19,7 @@ Divider.propTypes = {
   title: PropTypes.string
 }
 
-function StandingsTeam({ team, year }) {
+function StandingsTeam({ team, year, is_current_year }) {
   return (
     <div className='table__row'>
       <div className='table__cell player__item-name'>{team.name}</div>
@@ -36,11 +36,17 @@ function StandingsTeam({ team, year }) {
       <div className='table__cell metric'>
         {team.getIn(['stats', year, 'pf'], 0).toFixed(1)}
       </div>
-      <div className='table__cell metric'>{toPercent(team.playoff_odds)}</div>
-      <div className='table__cell metric'>{toPercent(team.bye_odds)}</div>
-      <div className='table__cell metric'>
-        {toPercent(team.championship_odds)}
-      </div>
+      {is_current_year && (
+        <div className='table__cell metric'>{toPercent(team.playoff_odds)}</div>
+      )}
+      {is_current_year && (
+        <div className='table__cell metric'>{toPercent(team.bye_odds)}</div>
+      )}
+      {is_current_year && (
+        <div className='table__cell metric'>
+          {toPercent(team.championship_odds)}
+        </div>
+      )}
       <div className='table__cell metric'>
         {team.getIn(['stats', year, 'doi'], 0).toFixed(2)}
       </div>
@@ -49,11 +55,12 @@ function StandingsTeam({ team, year }) {
 }
 
 StandingsTeam.propTypes = {
+  is_current_year: PropTypes.bool,
   team: ImmutablePropTypes.record,
   year: PropTypes.number
 }
 
-function Standings({ teams, title, year }) {
+function Standings({ teams, title, year, is_current_year }) {
   const sorted = teams.sort(
     (a, b) =>
       b.getIn(['stats', year, 'wins'], 0) -
@@ -62,8 +69,10 @@ function Standings({ teams, title, year }) {
   )
 
   const overallRows = []
-  sorted.forEach((team, index) => {
-    overallRows.push(<StandingsTeam key={index} team={team} year={year} />)
+  sorted.forEach((team, key) => {
+    overallRows.push(
+      <StandingsTeam {...{ key, team, year, is_current_year }} />
+    )
   })
 
   return (
@@ -77,9 +86,11 @@ function Standings({ teams, title, year }) {
           <div className='table__cell metric'>Record</div>
           <div className='table__cell metric'>All Play</div>
           <div className='table__cell metric'>Points</div>
-          <div className='table__cell metric'>P Odds</div>
-          <div className='table__cell metric'>Bye Odds</div>
-          <div className='table__cell metric'>C Odds</div>
+          {is_current_year && <div className='table__cell metric'>P Odds</div>}
+          {is_current_year && (
+            <div className='table__cell metric'>Bye Odds</div>
+          )}
+          {is_current_year && <div className='table__cell metric'>C Odds</div>}
           <div className='table__cell metric'>DOI</div>
         </div>
         {overallRows}
@@ -89,16 +100,19 @@ function Standings({ teams, title, year }) {
 }
 
 Standings.propTypes = {
+  is_current_year: PropTypes.bool,
   teams: ImmutablePropTypes.map,
   title: PropTypes.string,
   year: PropTypes.number
 }
 
-function Overall({ standings, year }) {
+function Overall({ standings, year, is_current_year }) {
   const overallRows = []
   let key = 0
   for (const team of standings.divisionLeaders.values()) {
-    overallRows.push(<StandingsTeam key={key} team={team} year={year} />)
+    overallRows.push(
+      <StandingsTeam {...{ key, team, year, is_current_year }} />
+    )
     key++
     if (key === 2) {
       overallRows.push(<Divider key={key} title='Bye Teams' />)
@@ -110,7 +124,9 @@ function Overall({ standings, year }) {
   }
 
   for (const team of standings.wildcardTeams.values()) {
-    overallRows.push(<StandingsTeam key={key} team={team} year={year} />)
+    overallRows.push(
+      <StandingsTeam {...{ key, team, year, is_current_year }} />
+    )
     key++
     if (key === 8) {
       overallRows.push(<Divider key={key} title='Wildcard Teams' />)
@@ -129,9 +145,11 @@ function Overall({ standings, year }) {
           <div className='table__cell metric'>Record</div>
           <div className='table__cell metric'>All Play</div>
           <div className='table__cell metric'>Points</div>
-          <div className='table__cell metric'>P Odds</div>
-          <div className='table__cell metric'>Bye Odds</div>
-          <div className='table__cell metric'>C Odds</div>
+          {is_current_year && <div className='table__cell metric'>P Odds</div>}
+          {is_current_year && (
+            <div className='table__cell metric'>Bye Odds</div>
+          )}
+          {is_current_year && <div className='table__cell metric'>C Odds</div>}
           <div className='table__cell metric'>DOI</div>
         </div>
         {overallRows}
@@ -141,6 +159,7 @@ function Overall({ standings, year }) {
 }
 
 Overall.propTypes = {
+  is_current_year: PropTypes.bool,
   standings: PropTypes.object,
   year: PropTypes.number
 }
@@ -164,14 +183,15 @@ export default function StandingsPage({
     loadLeagueTeamStats(lid)
   }, [year])
 
+  const is_current_year = year === constants.year
+
   const divisions = []
   for (const [div, teams] of division_teams_sorted.entries()) {
     divisions.push(
       <Standings
         key={div}
         title={`Division ${div}`}
-        teams={teams}
-        year={year}
+        {...{ is_current_year, teams, year }}
       />
     )
   }
@@ -179,7 +199,7 @@ export default function StandingsPage({
   const body = (
     <Container maxWidth='md' classes={{ root: 'standings' }}>
       <SelectYear />
-      <Overall standings={standings} year={year} />
+      <Overall {...{ standings, year, is_current_year }} />
       {divisions}
     </Container>
   )

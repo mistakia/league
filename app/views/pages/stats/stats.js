@@ -245,66 +245,77 @@ export default function StatsPage({
     )
   }
 
+  let stats_body
+  if (year === constants.year && constants.week === 0) {
+    stats_body = <div className='section empty' />
+  } else {
+    stats_body = (
+      <>
+        <div className='section'>
+          <Toolbar>
+            <div className='dashboard__section-header-title'>League Stats</div>
+          </Toolbar>
+          <div className='table__container'>
+            <div className='table__row table__head'>
+              <div className='table__cell player__item-name'>Team</div>
+              <div className='table__cell metric'>PF</div>
+              <div className='table__cell metric'>PA</div>
+              <div className='table__cell metric'>DIFF</div>
+              <div className='table__cell metric'>PP</div>
+              <div className='table__cell metric'>PP%</div>
+              <div className='table__cell metric'>PP Pen</div>
+              <div className='table__cell metric'>P WINS</div>
+              <div className='table__cell metric'>P LOSSES</div>
+              <div className='table__cell metric'>MAX</div>
+              <div className='table__cell metric'>MIN</div>
+              <div className='table__cell metric'>STDEV</div>
+              <div className='player__row-group'>
+                <div className='player__row-group-head'>All Play Record</div>
+                <div className='player__row-group-body'>
+                  <div className='table__cell metric'>W</div>
+                  <div className='table__cell metric'>L</div>
+                  <div className='table__cell metric'>T</div>
+                  <div className='table__cell metric'>PCT</div>
+                </div>
+              </div>
+            </div>
+            {summaryRows}
+          </div>
+        </div>
+        <div className='section'>
+          <Toolbar>
+            <div className='dashboard__section-header-title'>Lineup Stats</div>
+          </Toolbar>
+          <div className='table__container'>
+            <div className='table__row table__head'>
+              <div className='table__cell player__item-name'>Team</div>
+              {slotHeaders}
+            </div>
+            {slotRows}
+          </div>
+        </div>
+        <div className='section'>
+          <Toolbar>
+            <div className='dashboard__section-header-title'>
+              Positional Stats
+            </div>
+          </Toolbar>
+          <div className='table__container'>
+            <div className='table__row table__head'>
+              <div className='table__cell player__item-name'>Team</div>
+              {positionHeaders}
+            </div>
+            {positionRows}
+          </div>
+        </div>
+      </>
+    )
+  }
+
   const body = (
     <div className='stats'>
       <SelectYear />
-      <div className='section'>
-        <Toolbar>
-          <div className='dashboard__section-header-title'>League Stats</div>
-        </Toolbar>
-        <div className='table__container'>
-          <div className='table__row table__head'>
-            <div className='table__cell player__item-name'>Team</div>
-            <div className='table__cell metric'>PF</div>
-            <div className='table__cell metric'>PA</div>
-            <div className='table__cell metric'>DIFF</div>
-            <div className='table__cell metric'>PP</div>
-            <div className='table__cell metric'>PP%</div>
-            <div className='table__cell metric'>PP Pen</div>
-            <div className='table__cell metric'>P WINS</div>
-            <div className='table__cell metric'>P LOSSES</div>
-            <div className='table__cell metric'>MAX</div>
-            <div className='table__cell metric'>MIN</div>
-            <div className='table__cell metric'>STDEV</div>
-            <div className='player__row-group'>
-              <div className='player__row-group-head'>All Play Record</div>
-              <div className='player__row-group-body'>
-                <div className='table__cell metric'>W</div>
-                <div className='table__cell metric'>L</div>
-                <div className='table__cell metric'>T</div>
-                <div className='table__cell metric'>PCT</div>
-              </div>
-            </div>
-          </div>
-          {summaryRows}
-        </div>
-      </div>
-      <div className='section'>
-        <Toolbar>
-          <div className='dashboard__section-header-title'>Lineup Stats</div>
-        </Toolbar>
-        <div className='table__container'>
-          <div className='table__row table__head'>
-            <div className='table__cell player__item-name'>Team</div>
-            {slotHeaders}
-          </div>
-          {slotRows}
-        </div>
-      </div>
-      <div className='section'>
-        <Toolbar>
-          <div className='dashboard__section-header-title'>
-            Positional Stats
-          </div>
-        </Toolbar>
-        <div className='table__container'>
-          <div className='table__row table__head'>
-            <div className='table__cell player__item-name'>Team</div>
-            {positionHeaders}
-          </div>
-          {positionRows}
-        </div>
-      </div>
+      {stats_body}
     </div>
   )
 

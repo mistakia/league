@@ -11,9 +11,10 @@ import { rosterActions } from '@core/rosters'
 import MatchupPage from './matchup'
 
 const mapStateToProps = createSelector(
+  (state) => state.getIn(['matchups', 'isPending']),
   get_app,
   getSelectedMatchup,
-  (app, matchup) => ({ year: app.year, matchup })
+  (is_loading, app, matchup) => ({ is_loading, year: app.year, matchup })
 )
 
 const mapDispatchToProps = {

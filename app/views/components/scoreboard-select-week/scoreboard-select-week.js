@@ -7,6 +7,7 @@ import MenuItem from '@mui/material/MenuItem'
 
 export default function ScoreboardSelectWeek({ selectWeek, week, weeks }) {
   if (!week) return null
+  if (!weeks.length) return null
 
   const handleChange = (event) => selectWeek(event.target.value)
   const menuItems = []
