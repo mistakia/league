@@ -5,6 +5,7 @@ import Icon from '@components/icon'
 import Source from '@components/source'
 import PlayerSelectedRow from '@components/player-selected-row'
 import PlayerSelectedRowHeader from '@components/player-selected-row-header'
+import { constants } from '@common'
 
 export default class SelectedPlayerProjection extends React.Component {
   handleClearClick = () => {
@@ -60,7 +61,7 @@ export default class SelectedPlayerProjection extends React.Component {
       <div className='selected__section'>
         <div className='selected__section-header sticky__column'>
           <div className='row__group-head'>
-            {week === 0 ? 'Season Projections' : `Week ${week} Projections`}
+            {week === 0 ? `${constants.year} Regular Season Projections` : `Week ${week} Projections`}
           </div>
         </div>
         <div className='selected__section-header'>
