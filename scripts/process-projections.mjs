@@ -26,6 +26,7 @@ import projectLineups from './project-lineups.mjs'
 import simulateSeason from './simulate-season.mjs'
 
 const log = debug('process-projections')
+debug.enable('process-projections')
 
 const timestamp = Math.round(Date.now() / 1000)
 
@@ -278,7 +279,8 @@ const process_league = async ({ year, lid }) => {
 
   const player_rows = await getPlayers({
     pids: projection_pids.concat(rostered_pids),
-    leagueId: lid
+    leagueId: lid,
+    scoring_format_hash: league.scoring_format_hash
   })
 
   const transactions = await getPlayerTransactions({
@@ -290,25 +292,6 @@ const process_league = async ({ year, lid }) => {
   for (const tran of transactions) {
     const player_row = player_rows.find((p) => p.pid === tran.pid)
     player_row.value = tran.value
-  }
-
-  for (const player_row of player_rows) {
-    player_row.value =
-      typeof player_row.value === 'undefined' || player_row.value === null
-        ? null
-        : player_row.value
-    player_row.projection = {}
-    player_row.points = {}
-    player_row.vorp = {}
-    player_row.vorp_adj = {}
-    player_row.market_salary = {}
-
-    week = year === constants.season.year ? constants.season.week : 0
-    for (; week <= constants.season.finalWeek; week++) {
-      player_row.vorp[week] = {}
-      player_row.vorp_adj[week] = {}
-      player_row.market_salary[week] = {}
-    }
   }
 
   week = year === constants.season.year ? constants.season.week : 0
