@@ -14,6 +14,8 @@ import {
 import { playerActions } from '@core/players'
 import { draftPickValueActions } from '@core/draft-pick-value'
 import { transactionsActions } from '@core/transactions'
+import { teamActions } from '@core/teams'
+import { rosterActions } from '@core/rosters'
 
 import LeagueHomePage from './league-home'
 
@@ -38,6 +40,7 @@ const mapStateToProps = createSelector(
   ) => ({
     transitionPlayers,
     teamId: app.teamId,
+    leagueId: app.leagueId,
     players,
     cutlist,
     league,
@@ -48,6 +51,8 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
+  loadTeams: teamActions.loadTeams,
+  loadRosters: rosterActions.loadRosters,
   loadLeaguePlayers: playerActions.loadLeaguePlayers,
   loadDraftPickValue: draftPickValueActions.loadDraftPickValue,
   loadRecentTransactions: transactionsActions.loadRecentTransactions

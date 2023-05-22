@@ -38,7 +38,10 @@ export default function LeagueHomePage({
   isBeforeTransitionEnd,
   loadLeaguePlayers,
   loadDraftPickValue,
-  loadRecentTransactions
+  loadRecentTransactions,
+  loadTeams,
+  loadRosters,
+  leagueId
 }) {
   const navigate = useNavigate()
   const { lid } = useParams()
@@ -47,11 +50,15 @@ export default function LeagueHomePage({
     if (isNaN(lid)) {
       return navigate('/', { replace: true })
     }
+  }, [])
 
+  useEffect(() => {
+    loadTeams(leagueId)
+    loadRosters(leagueId)
     loadLeaguePlayers()
     loadDraftPickValue()
     loadRecentTransactions()
-  }, [])
+  }, [leagueId])
 
   const notices = []
   if (league.adate) {
@@ -289,5 +296,8 @@ LeagueHomePage.propTypes = {
   poaches: ImmutablePropTypes.list,
   teamId: PropTypes.number,
   isBeforeTransitionEnd: PropTypes.bool,
-  loadRecentTransactions: PropTypes.func
+  loadRecentTransactions: PropTypes.func,
+  loadTeams: PropTypes.func,
+  leagueId: PropTypes.number,
+  loadRosters: PropTypes.func
 }
