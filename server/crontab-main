@@ -40,8 +40,8 @@
 0 0 * 1,2,6-12 1,3-7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-pff-projections.mjs &>> /var/log/league/import-pff.log
 
 ## import season projections
-0 0 * 6-8 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-cbs-projections.mjs --season &>> /var/log/league/import-cbs-season.log
-0 0 * 6-8 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-espn-projections.mjs --season &>> /var/log/league/import-espn-season.log
+0 0 * 5-8 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-cbs-projections.mjs --season &>> /var/log/league/import-cbs-season.log
+0 0 * 5-8 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-espn-projections.mjs --season &>> /var/log/league/import-espn-season.log
 0 0 * 6-8 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-fantasysharks-projections.mjs --season &>> /var/log/league/import-fantasysharks-season.log
 0 0 * 6-8 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-fftoday-projections.mjs --season &>> /var/log/league/import-fftoday-season.log
 0 0 * 6-8 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-projections.mjs --season &>> /var/log/league/import-nfl-season.log
