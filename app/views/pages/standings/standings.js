@@ -93,7 +93,7 @@ function Standings({ teams, title, year, is_current_year }) {
           {is_current_year && <div className='table__cell metric'>C Odds</div>}
           <div className='table__cell metric'>DOI</div>
         </div>
-        {overallRows}
+        <div className='table__body'>{overallRows}</div>
       </div>
     </div>
   )
@@ -156,7 +156,7 @@ function Overall({ standings, year, is_current_year }) {
           )}
           <div className='table__cell metric'>Draft Index</div>
         </div>
-        {overallRows}
+        <div className='table__body'>{overallRows}</div>
       </div>
     </div>
   )

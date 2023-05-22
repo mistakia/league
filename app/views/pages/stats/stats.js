@@ -279,7 +279,7 @@ export default function StatsPage({
                 </div>
               </div>
             </div>
-            {summaryRows}
+            <div className='table__body'>{summaryRows}</div>
           </div>
         </div>
         <div className='section'>
@@ -291,7 +291,7 @@ export default function StatsPage({
               <div className='table__cell player__item-name'>Team</div>
               {slotHeaders}
             </div>
-            {slotRows}
+            <div className='table__body'>{slotRows}</div>
           </div>
         </div>
         <div className='section'>
@@ -305,7 +305,7 @@ export default function StatsPage({
               <div className='table__cell player__item-name'>Team</div>
               {positionHeaders}
             </div>
-            {positionRows}
+            <div className='table__body'>{positionRows}</div>
           </div>
         </div>
       </>
