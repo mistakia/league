@@ -36,7 +36,7 @@ function SeasonDraftPicks({ picks, year, league }) {
             <div className='metric table__cell'>Round</div>
             <div className='metric table__cell draft-pick__team'>Team</div>
           </div>
-          <div className='empty'>{pickItems}</div>
+          <div className='table__body empty'>{pickItems}</div>
         </div>
       </div>
     </div>
