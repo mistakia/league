@@ -8,7 +8,7 @@ import ScheduleTeamsFilter from './schedule-teams-filter'
 const mapStateToProps = createSelector(
   getMatchups,
   getTeamsForCurrentLeague,
-  (matchups, leagueTeams) => ({ teams: matchups.get('teams'), leagueTeams })
+  (matchups, teams) => ({ matchup_teams: matchups.get('teams'), league_teams: teams.toList() })
 )
 
 export default connect(mapStateToProps)(ScheduleTeamsFilter)
