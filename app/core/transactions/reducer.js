@@ -19,6 +19,7 @@ const initialState = new Record({
 export function transactionsReducer(state = initialState(), { payload, type }) {
   switch (type) {
     case transactionsActions.LOAD_TRANSACTIONS:
+    case transactionsActions.LOAD_RECENT_TRANSACTIONS:
       return state.merge({ items: new List(), hasMore: true })
 
     case transactionsActions.GET_RELEASE_TRANSACTIONS_FULFILLED:

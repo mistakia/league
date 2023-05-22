@@ -11,11 +11,11 @@ export default class ScheduleTeamsFilter extends React.Component {
       values: []
     }
 
-    for (const team of this.props.leagueTeams) {
+    for (const team of this.props.league_teams) {
       state.values.push({
         value: team.uid,
         label: team.name,
-        selected: this.props.teams.includes(team.uid)
+        selected: this.props.matchup_teams.includes(team.uid)
       })
     }
 
@@ -24,6 +24,6 @@ export default class ScheduleTeamsFilter extends React.Component {
 }
 
 ScheduleTeamsFilter.propTypes = {
-  leagueTeams: ImmutablePropTypes.list,
-  teams: ImmutablePropTypes.list
+  league_teams: ImmutablePropTypes.list,
+  matchup_teams: ImmutablePropTypes.list
 }
