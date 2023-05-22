@@ -1,0 +1,122 @@
+import React from 'react'
+import PropTypes from 'prop-types'
+import ImmutablePropTypes from 'react-immutable-proptypes'
+
+import Highcharts from 'highcharts'
+import HighchartsReact from 'highcharts-react-official'
+import HighchartsSeriesLabel from 'highcharts/modules/series-label'
+
+import { constants } from '#common'
+
+HighchartsSeriesLabel(Highcharts)
+
+export default function LeagueTeamValuesOverTime({
+  load_league_team_daily_values,
+  league_team_daily_values,
+  teams
+}) {
+  React.useEffect(() => {
+    load_league_team_daily_values()
+  }, [])
+  const series = []
+  const colors = []
+
+  let color_index = 0
+  const next_color = () => {
+    color_index += 1
+    return constants.colors[color_index - 1]
+  }
+
+  // find team with highest value
+  let max_value = 0
+  let min_value = Infinity
+  let highest_value_team = null
+  let lowest_value_team = null
+  teams.forEach((team) => {
+    const team_values = league_team_daily_values.get(team.uid)
+    if (!team_values) return
+    const most_recent_value = team_values.last()
+    if (most_recent_value && most_recent_value.ktc_value > max_value) {
+      max_value = most_recent_value.ktc_value
+      highest_value_team = team
+    }
+
+    if (most_recent_value && most_recent_value.ktc_value < min_value) {
+      min_value = most_recent_value.ktc_value
+      lowest_value_team = team
+    }
+  })
+
+  teams.forEach((team) => {
+    const team_values = league_team_daily_values.get(team.uid)
+    if (!team_values) return
+    const data = []
+    team_values.forEach((item) => {
+      data.push([item.timestamp, item.ktc_value])
+    })
+    const item = {
+      name: team.name,
+      data
+    }
+
+    if (
+      team.uid !== highest_value_team.uid &&
+      team.uid !== lowest_value_team.uid
+    ) {
+      item.label = {
+        enabled: false
+      }
+    }
+
+    series.push(item)
+
+    const team_color = team.pc ? `#${team.pc}` : next_color()
+    colors.push(team_color)
+  })
+
+  const options = {
+    chart: {
+      type: 'line'
+    },
+
+    title: {
+      text: null
+    },
+
+    xAxis: {
+      type: 'datetime',
+      labels: {
+        formatter: function () {
+          return Highcharts.dateFormat('%b %Y', this.value)
+        }
+      }
+    },
+
+    credits: {
+      enabled: false
+    },
+
+    plotOptions: {
+      series: {
+        label: {
+          connectorAllowed: false
+        }
+      }
+    },
+
+    series,
+    colors
+  }
+
+  return (
+    <div>
+      <HighchartsReact highcharts={Highcharts} options={options} />
+    </div>
+  )
+}
+
+LeagueTeamValuesOverTime.propTypes = {
+  load_league_team_daily_values: PropTypes.func.isRequired,
+  league_team_daily_values: ImmutablePropTypes.map.isRequired,
+  teams: ImmutablePropTypes.list.isRequired
+}

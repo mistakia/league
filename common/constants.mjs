@@ -21,6 +21,26 @@ export const DEFAULTS = {
   LEAGUE_ID: 0
 }
 
+export const colors = [
+  '#e6194B', // red
+  '#f58231', // orange
+  '#ffe119', // yellow
+  '#fabed4', // pink
+  '#3cb44b', // green
+  '#42d4f4', // cyan
+  '#4363d8', // blue
+  '#000075', // navy
+  '#f032e6', // magenta
+  '#911eb4', // purple
+  '#dcbeff', // lavender
+  '#aaffc3', // mint
+  '#800000', // maroon
+  '#9A6324', // brown
+  '#fffac8', // beige
+  '#a9a9a9', // grey
+  '#bfef45' // lime
+]
+
 export const status = {
   'Voluntary Opt Out': 'OPT',
   DNR: 'DNR',

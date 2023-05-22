@@ -339,6 +339,10 @@ export const api = {
       ? `${BASE_URL}/seasonlogs/teams?leagueId=${leagueId}`
       : `${BASE_URL}/seasonlogs/teams`
     return { url }
+  },
+  get_league_team_daily_values({ leagueId }) {
+    const url = `${BASE_URL}/leagues/${leagueId}/team-daily-values`
+    return { url }
   }
 }
 

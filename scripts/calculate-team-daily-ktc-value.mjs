@@ -16,6 +16,8 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('calculate-team-daily-ktc-value')
 debug.enable('calculate-team-daily-ktc-value')
 
+const MAX_DAY_INTERVAL = 5
+
 const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
   const teams = await db('teams')
     .select('uid')
@@ -81,7 +83,9 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
   log(`processing ${transactions.length} transactions`)
 
   // calculate team daily keeptradecut value based on end of day roster's total keeptradecut value
-  for (const transaction of transactions) {
+  for (let i = 0; i < transactions.length; i++) {
+    const transaction = transactions[i]
+
     const tran_date = dayjs.unix(transaction.timestamp).format('YYYY-MM-DD')
     const tran_tid = transaction.tid
     // update team roster based on transaction type
@@ -193,8 +197,47 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
           lid,
           tid: team.uid,
           date: last_date,
+          timestamp: dayjs(last_date).valueOf(),
           ktc_value: team_ktc_value
         })
+      }
+    }
+
+    // check if next tran date is larger than the max interval
+    const next_tran_date = dayjs.unix(transactions[i + 1]?.timestamp)
+    if (next_tran_date.diff(transaction.timestamp, 'day') > MAX_DAY_INTERVAL) {
+      // calculate team daily keeptradecut value for days in between based on max_day_interval
+      let cursor_date = dayjs
+        .unix(transaction.timestamp)
+        .add(MAX_DAY_INTERVAL, 'day')
+      while (cursor_date < next_tran_date) {
+        const formatted_date = cursor_date.format('YYYY-MM-DD')
+        for (const team of Object.values(teams_index)) {
+          const team_players = Object.keys(team.players)
+          const team_players_ktc_value = team_players.reduce((acc, pid) => {
+            const ktc_player = keeptradecut_index[pid]
+            const ktc_value = ktc_player ? ktc_player[formatted_date] : null
+            return acc + (ktc_value || 0)
+          }, 0)
+
+          // calculate keeptradecut value for team
+          const team_ktc_value = team_players_ktc_value // + team_picks_ktc_value
+
+          if (team_ktc_value === 0) {
+            // TOOD figure out why
+            continue
+          }
+
+          team_daily_value_inserts.push({
+            lid,
+            tid: team.uid,
+            date: formatted_date,
+            timestamp: cursor_date.valueOf(),
+            ktc_value: team_ktc_value
+          })
+        }
+
+        cursor_date = cursor_date.add(MAX_DAY_INTERVAL, 'day')
       }
     }
 

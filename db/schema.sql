@@ -2839,6 +2839,7 @@ CREATE TABLE `league_team_daily_values` (
   `lid` int(6) NOT NULL,
   `tid` int(6) NOT NULL,
   `date` date NOT NULL,
+  `timestamp` bigint(20) NOT NULL,
   `ktc_value` int(6) DEFAULT NULL,
   UNIQUE KEY `league_team` (`lid`, `tid`, `date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
