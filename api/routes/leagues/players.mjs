@@ -29,7 +29,7 @@ router.get('/?', async (req, res) => {
 
     // TODO  verify leagueId
 
-    const cacheKey = `/players/${leagueId}/teams`
+    const cacheKey = `/players/leagues/${leagueId}`
     let players = cache.get(cacheKey)
     if (players) {
       logger('USING CACHE')

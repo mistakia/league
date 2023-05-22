@@ -12,7 +12,7 @@ router.get('/?', async (req, res) => {
     const { leagueId } = req.query
     const userId = req.auth ? req.auth.userId : null
 
-    const cacheKey = `/players/${leagueId}/${teamId}`
+    const cacheKey = `/players/leagues/${leagueId}/teams/${teamId}`
     let players = cache.get(cacheKey)
     if (players) {
       logger('USING CACHE')
