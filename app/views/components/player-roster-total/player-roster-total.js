@@ -48,7 +48,7 @@ export default class PlayerRosterTotal extends React.Component {
       baseSalaryTotal = baseSalaryTotal + (bid || value)
       extendedSalaryTotal = extendedSalaryTotal + extendedSalary
       projectedSalaryTotal = projectedSalaryTotal + projectedSalary
-      savingsTotal = savingsTotal + savings
+      savingsTotal = savingsTotal + Math.max(savings, 0)
       valueTotal =
         valueTotal + Math.max(playerMap.getIn(['vorp', projectionType], 0), 0)
       valueAdjTotal =
