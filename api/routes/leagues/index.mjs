@@ -21,6 +21,7 @@ import teamStats from './team-stats.mjs'
 import players from './players.mjs'
 import matchups from './matchups.mjs'
 import draft_pick_value from './draft-pick-value.mjs'
+import team_daily_values from './team-daily-values.mjs'
 
 const router = express.Router()
 
@@ -382,6 +383,7 @@ router.use('/:leagueId/teams', teams)
 router.use('/:leagueId/rosters', rosters)
 router.use('/:leagueId/baselines', baselines)
 router.use('/:leagueId/team-stats', teamStats)
+router.use('/:leagueId/team-daily-values', team_daily_values)
 router.use('/:leagueId/players', players)
 router.use('/:leagueId/matchups', matchups)
 

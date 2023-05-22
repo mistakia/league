@@ -2827,6 +2827,22 @@ CREATE TABLE `percentiles` (
   UNIQUE KEY `percentile_key` (`percentile_key`, `field`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `league_team_daily_values`
+--
+
+DROP TABLE IF EXISTS `league_team_daily_values`;
+
+CREATE TABLE `league_team_daily_values` (
+  `lid` int(6) NOT NULL,
+  `tid` int(6) NOT NULL,
+  `date` date NOT NULL,
+  `ktc_value` int(6) DEFAULT NULL,
+  UNIQUE KEY `league_team` (`lid`, `tid`, `date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
