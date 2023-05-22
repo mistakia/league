@@ -99,7 +99,7 @@ export default function DashboardLeaguePositionalValue({ summary, teams }) {
     yAxis: {
       min: 0,
       title: {
-        text: 'Projected Points Added (Team Value)'
+        text: 'Projected Points+'
       }
     },
     legend: {

@@ -3,9 +3,11 @@ import PropTypes from 'prop-types'
 import Stack from '@mui/material/Stack'
 import Chip from '@mui/material/Chip'
 
+import LeagueTeamValuesOverTime from '@components/league-team-values-over-time'
+
 import './league-header.styl'
 
-export default function LeagueHeader({ league }) {
+export default function LeagueHeader({ league, is_in_league }) {
   const is_ppr_equal =
     league.terec === league.rbrec && league.terec === league.wrrec
   const isTEP = league.terec !== league.rbrec || league.terec !== league.wrrec
@@ -47,19 +49,23 @@ export default function LeagueHeader({ league }) {
   return (
     <div className='league__header'>
       <h1>{league.name}</h1>
-      <Stack direction='row' spacing={1} className='league__chips'>
-        {Boolean(league.num_teams) && (
-          <Chip variant='outlined' label={`${league.num_teams} Teams`} />
-        )}
-        {isHalfPPR && <Chip size='small' label='Half PPR' />}
-        {isFullPPR && <Chip size='small' label='Full PPR' />}
-        {isTEP && <Chip size='small' label='TEP' />}
-        {scoring_chips}
-      </Stack>
+      {!is_in_league && (
+        <Stack direction='row' spacing={1} className='league__chips'>
+          {Boolean(league.num_teams) && (
+            <Chip variant='outlined' label={`${league.num_teams} Teams`} />
+          )}
+          {isHalfPPR && <Chip size='small' label='Half PPR' />}
+          {isFullPPR && <Chip size='small' label='Full PPR' />}
+          {isTEP && <Chip size='small' label='TEP' />}
+          {scoring_chips}
+        </Stack>
+      )}
+      <LeagueTeamValuesOverTime />
     </div>
   )
 }
 
 LeagueHeader.propTypes = {
-  league: PropTypes.object
+  league: PropTypes.object,
+  is_in_league: PropTypes.bool
 }

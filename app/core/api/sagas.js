@@ -84,6 +84,7 @@ import { postErrorActions } from '@core/errors/actions'
 import { getPropsActions } from '@core/props/actions'
 import { getPercentilesActions } from '@core/percentiles/actions'
 import { getNflTeamSeasonlogsActions } from '@core/seasonlogs/actions'
+import { get_league_team_daily_values_actions } from '@core/league-team-daily-values/actions'
 
 function* fetchAPI(apiFunction, actions, opts = {}) {
   const { token } = yield select(get_app)
@@ -380,4 +381,10 @@ export const getNflTeamSeasonlogs = fetch.bind(
   null,
   api.getNflTeamSeasonlogs,
   getNflTeamSeasonlogsActions
+)
+
+export const get_league_team_daily_values = fetch.bind(
+  null,
+  api.get_league_team_daily_values,
+  get_league_team_daily_values_actions
 )

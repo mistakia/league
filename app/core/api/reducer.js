@@ -5,6 +5,7 @@ import { seasonlogsActions } from '@core/seasonlogs/actions'
 import { matchupsActions } from '@core/matchups/actions'
 import { gamelogsActions } from '@core/gamelogs/actions'
 import { waiverActions } from '@core/waivers/actions'
+import { league_team_daily_values_actions } from '@core/league-team-daily-values/actions'
 
 const initialState = new Map({
   request_history: new Map()
@@ -74,6 +75,15 @@ export function apiReducer(state = initialState, { payload, type }) {
         [
           'request_history',
           `GET_WAIVERS_${payload.opts.leagueId}_${payload.opts.teamId}_${payload.opts.type}`
+        ],
+        true
+      )
+
+    case league_team_daily_values_actions.GET_LEAGUE_TEAM_DAILY_VALUES_FULFILLED:
+      return state.setIn(
+        [
+          'request_history',
+          `GET_LEAGUE_TEAM_DAILY_VALUES_${payload.opts.leagueId}`
         ],
         true
       )
