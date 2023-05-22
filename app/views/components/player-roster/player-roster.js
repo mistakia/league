@@ -186,9 +186,11 @@ class PlayerRoster extends Player {
               {vorp ? vorp.toFixed(0) : '-'}
             </div>
             {isOffseason && (
-              <div className='metric table__cell'>
-                {vorpAdj ? vorpAdj.toFixed(0) : '-'}
-              </div>
+              <PercentileMetric
+                scaled
+                value={vorpAdj}
+                percentile={percentiles.vorp_adj}
+              />
             )}
             <div className='metric table__cell'>{starts || '-'}</div>
           </div>
