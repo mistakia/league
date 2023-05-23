@@ -2,6 +2,7 @@
 import React from 'react'
 import { Provider } from 'react-redux'
 import { HistoryRouter as Router } from 'redux-first-history/rr6'
+import Highcharts from 'highcharts'
 
 import Bugsnag from '@bugsnag/js'
 import BugsnagPluginReact from '@bugsnag/plugin-react'
@@ -11,6 +12,14 @@ import storeRegistry from '@core/store-registry'
 import App from '@components/app'
 
 storeRegistry.register(store)
+
+Highcharts.setOptions({
+  chart: {
+    style: {
+      fontFamily: "'IBM Plex Mono', monospace"
+    }
+  }
+})
 
 Bugsnag.start({
   apiKey: '183fca706d9f94c00a661167bf8cfc5d',
