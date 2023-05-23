@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import Stack from '@mui/material/Stack'
 import Chip from '@mui/material/Chip'
 
-import LeagueTeamValuesOverTime from '@components/league-team-values-over-time'
+import LeagueTeamsValueOverTime from '@components/league-teams-value-over-time'
 
 import './league-header.styl'
 
@@ -60,7 +60,7 @@ export default function LeagueHeader({ league, is_in_league }) {
           {scoring_chips}
         </Stack>
       )}
-      <LeagueTeamValuesOverTime />
+      <LeagueTeamsValueOverTime />
     </div>
   )
 }

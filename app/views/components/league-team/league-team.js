@@ -13,6 +13,7 @@ import DashboardTeamSummary from '@components/dashboard-team-summary'
 import DashboardTeamValue from '@components/dashboard-team-value'
 import PlayerRoster from '@components/player-roster'
 import { constants } from '@common'
+import LeagueTeamValueDeltas from '@components/league-team-value-deltas'
 
 export default function LeagueTeam({
   league,
@@ -150,6 +151,9 @@ export default function LeagueTeam({
               {...{ percentiles }}
             />
           )}
+        </Grid>
+        <Grid item md={12} sx={{ display: { xs: 'none', md: 'block' } }}>
+          <LeagueTeamValueDeltas tid={teamId} />
         </Grid>
       </Grid>
       <Grid container item xs={12} lg={3}>

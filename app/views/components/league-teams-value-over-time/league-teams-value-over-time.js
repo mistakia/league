@@ -10,7 +10,7 @@ import { constants } from '#common'
 
 HighchartsSeriesLabel(Highcharts)
 
-export default function LeagueTeamValuesOverTime({
+export default function LeagueTeamsValueOverTime({
   load_league_team_daily_values,
   league_team_daily_values,
   teams,
@@ -113,7 +113,7 @@ export default function LeagueTeamValuesOverTime({
 
     yAxis: {
       title: {
-        text: 'Franchise Demand'
+        text: 'Team Market Value'
       }
     },
 
@@ -140,7 +140,7 @@ export default function LeagueTeamValuesOverTime({
   )
 }
 
-LeagueTeamValuesOverTime.propTypes = {
+LeagueTeamsValueOverTime.propTypes = {
   load_league_team_daily_values: PropTypes.func.isRequired,
   league_team_daily_values: ImmutablePropTypes.map.isRequired,
   teams: ImmutablePropTypes.map.isRequired,
