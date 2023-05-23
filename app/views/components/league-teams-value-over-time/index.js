@@ -7,7 +7,7 @@ import {
 } from '@core/selectors'
 import { league_team_daily_values_actions } from '@core/league-team-daily-values'
 
-import LeagueTeamValuesOverTime from './league-team-values-over-time'
+import LeagueTeamsValueOverTime from './league-teams-value-over-time'
 
 const mapStateToProps = createSelector(
   (state) => state.get('league_team_daily_values'),
@@ -28,4 +28,4 @@ const mapDispatchToProps = {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(LeagueTeamValuesOverTime)
+)(LeagueTeamsValueOverTime)

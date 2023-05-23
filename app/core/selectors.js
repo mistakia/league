@@ -2450,7 +2450,9 @@ export const get_team_value_deltas_by_team_id = createSelector(
       latest_team_share * league_total_due_amount
     )
 
-    const days_ago = [30, 90, 365, 720]
+    const deltas_result = []
+
+    const days_ago = [7, 30, 90, 365, 730]
     const sorted_values = team_values.sort((a, b) => b.timestamp - a.timestamp)
     for (const days of days_ago) {
       const value = sorted_values.find(
@@ -2461,8 +2463,11 @@ export const get_team_value_deltas_by_team_id = createSelector(
       const team_share = value.ktc_share
       const delta = latest_team_share - team_share
       const delta_pct = delta / team_share
-      result = result.set(`delta_pct_${days}`, { delta, delta_pct })
+      const delta_dollar_amount = delta * league_total_due_amount
+      deltas_result.push({ delta, delta_pct, days, delta_dollar_amount })
     }
+
+    result = result.set('deltas', deltas_result)
 
     return result
   }
