@@ -92,6 +92,12 @@ export default function LeagueTeamValuesOverTime({
       }
     },
 
+    yAxis: {
+      title: {
+        text: 'Franchise Demand'
+      }
+    },
+
     credits: {
       enabled: false
     },
@@ -118,5 +124,5 @@ export default function LeagueTeamValuesOverTime({
 LeagueTeamValuesOverTime.propTypes = {
   load_league_team_daily_values: PropTypes.func.isRequired,
   league_team_daily_values: ImmutablePropTypes.map.isRequired,
-  teams: ImmutablePropTypes.list.isRequired
+  teams: ImmutablePropTypes.map.isRequired
 }

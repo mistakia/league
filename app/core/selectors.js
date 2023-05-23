@@ -46,6 +46,7 @@ export const get_request_history = (state) =>
 export const get_confirmation_info = (state) => state.get('confirmation')
 export const get_context_menu_info = (state) => state.get('contextMenu').toJS()
 export const get_player_maps = (state) => state.getIn(['players', 'items'])
+export const get_draft_pick_values = (state) => state.get('draft_pick_value')
 
 export const getWaivers = (state) => state.get('waivers')
 export const getTransactions = (state) => state.get('transactions')
@@ -119,6 +120,12 @@ export const getCurrentTeamRosterRecord = createSelector(
       new RosterRecord()
     )
   }
+)
+
+export const getTeamsForCurrentLeague = createSelector(
+  (state) => state.getIn(['app', 'leagueId']),
+  getTeams,
+  (leagueId, teams) => teams.filter((t) => t.lid === leagueId)
 )
 
 export const getWaiversForCurrentTeam = createSelector(
@@ -466,26 +473,28 @@ const getRank = ({ pick, round }) => {
   }
 }
 
-export const getDraftPickValueByPick = createSelector(
-  (state) => state.get('draft_pick_value'),
-  (state, { pick }) => pick,
-  (values, pick) => {
-    const rank = getRank(pick)
-    const item = values.find((value) => value.rank === rank)
+function get_draft_pick_value(values, pick) {
+  const rank = getRank(pick)
+  const item = values.find((value) => value.rank === rank)
 
-    if (!item) {
-      return 0
-    }
-
-    const avg =
-      (3 * item.median_best_season_points_added_per_game +
-        item.median_career_points_added_per_game) /
-      4
-    const weeks_remaining =
-      constants.season.finalWeek - constants.fantasy_season_week
-
-    return avg * weeks_remaining
+  if (!item) {
+    return 0
   }
+
+  const avg =
+    (3 * item.median_best_season_points_added_per_game +
+      item.median_career_points_added_per_game) /
+    4
+  const weeks_remaining =
+    constants.season.finalWeek - constants.fantasy_season_week
+
+  return avg * weeks_remaining
+}
+
+export const getDraftPickValueByPick = createSelector(
+  get_draft_pick_values,
+  (state, { pick }) => pick,
+  get_draft_pick_value
 )
 
 export const isBeforeExtensionDeadline = createSelector(
@@ -1880,144 +1889,160 @@ export const getCurrentTeamRoster = createSelector(
   }
 )
 
-export function getRosterPositionalValueByTeamId(state, { tid }) {
-  const rosterRecords = getRostersForCurrentLeague(state)
-  const league = getCurrentLeague(state)
-  const teams = getTeamsForCurrentLeague(state)
-  const team = getTeamById(state, { tid })
-  const divTeamIds = teams.filter((t) => t.div === team.div).map((t) => t.uid)
-
-  const values = {
-    league_min: {},
-    league_avg: {},
-    league_avg_normalized: {},
-    league_max: {},
-    league: {},
-    div_avg: {},
-    div_avg_normalized: {},
-    div: {},
-
-    team: {},
-    team_normalized: {},
-
-    total: {},
-    rosters: {},
-    sorted_tids: []
+export const get_rostered_player_maps = createSelector(
+  getRosteredPlayerIdsForCurrentLeague,
+  get_player_maps,
+  (pids, player_maps) => {
+    let result = new Map()
+    for (const pid of pids) {
+      result = result.set(pid, player_maps.get(pid))
+    }
+    return result
   }
+)
 
-  const rosters = []
-  for (const rec of rosterRecords.valueSeq()) {
-    const roster = new Roster({ roster: rec.toJS(), league })
-    rosters.push(roster)
-    values.rosters[roster.tid] = {}
-  }
+export const getRosterPositionalValueByTeamId = createSelector(
+  getRostersForCurrentLeague,
+  getCurrentLeague,
+  getTeamsForCurrentLeague,
+  getTeamById,
+  get_rostered_player_maps,
+  get_draft_pick_values,
+  (rosterRecords, league, teams, team, player_maps, draft_pick_values) => {
+    const divTeamIds = teams.filter((t) => t.div === team.div).map((t) => t.uid)
 
-  const seasonType = constants.isOffseason ? '0' : 'ros'
-  for (const position of constants.positions) {
-    const league = []
-    const div = []
-    for (const roster of rosters) {
-      const rosterPlayers = roster.active.filter((p) => p.pos === position)
-      const playerMaps = rosterPlayers.map(({ pid }) =>
-        getPlayerById(state, { pid })
+    const values = {
+      league_min: {},
+      league_avg: {},
+      league_avg_normalized: {},
+      league_max: {},
+      league: {},
+      div_avg: {},
+      div_avg_normalized: {},
+      div: {},
+
+      team: {},
+      team_normalized: {},
+
+      total: {},
+      rosters: {},
+      sorted_tids: []
+    }
+
+    const rosters = []
+    for (const rec of rosterRecords.valueSeq()) {
+      const roster = new Roster({ roster: rec.toJS(), league })
+      rosters.push(roster)
+      values.rosters[roster.tid] = {}
+    }
+
+    const seasonType = constants.isOffseason ? '0' : 'ros'
+    for (const position of constants.positions) {
+      const league = []
+      const div = []
+      for (const roster of rosters) {
+        const rosterPlayers = roster.active.filter((p) => p.pos === position)
+        const playerMaps = rosterPlayers.map(({ pid }) =>
+          player_maps.get(pid, new Map())
+        )
+        const vorps = playerMaps.map((pMap) =>
+          Math.max(pMap.getIn(['vorp', seasonType], 0), 0)
+        )
+        const sum = vorps.reduce((s, i) => s + i, 0)
+        league.push(sum)
+        values.rosters[roster.tid][position] = sum
+        if (divTeamIds.includes(roster.tid)) div.push(sum)
+        if (roster.tid === team.uid) values.team[position] = sum
+        values.total[roster.tid] = (values.total[roster.tid] ?? 0) + sum
+      }
+      values.league_avg[position] =
+        league.reduce((s, i) => s + i, 0) / league.length
+      values.league[position] = league
+      values.div_avg[position] = div.reduce((s, i) => s + i, 0) / div.length
+      values.div[position] = div
+
+      values.league_min[position] = Math.min(...league)
+      values.league_max[position] = Math.max(...league)
+      const team_value = values.team[position]
+      const min_value = values.league_min[position]
+      const max_value = values.league_max[position]
+      const is_max = max_value - min_value === 0
+      values.team_normalized[position] = is_max
+        ? 100
+        : ((team_value - min_value) / (max_value - min_value)) * 100
+
+      const div_value = values.div_avg[position]
+      values.div_avg_normalized[position] = is_max
+        ? 100
+        : ((div_value - min_value) / (max_value - min_value)) * 100
+
+      const league_value = values.league_avg[position]
+      values.league_avg_normalized[position] = is_max
+        ? 100
+        : ((league_value - min_value) / (max_value - min_value)) * 100
+    }
+
+    const league_draft_value = []
+    const div_draft_value = []
+    for (const [tid, team_i] of teams) {
+      const draft_value = team_i.picks.reduce(
+        (sum, pick) => sum + get_draft_pick_value(draft_pick_values, pick),
+        0
       )
-      const vorps = playerMaps.map((pMap) =>
-        Math.max(pMap.getIn(['vorp', seasonType], 0), 0)
-      )
-      const sum = vorps.reduce((s, i) => s + i, 0)
-      league.push(sum)
-      values.rosters[roster.tid][position] = sum
-      if (divTeamIds.includes(roster.tid)) div.push(sum)
-      if (roster.tid === team.uid) values.team[position] = sum
-      values.total[roster.tid] = (values.total[roster.tid] ?? 0) + sum
+      league_draft_value.push(draft_value)
+      if (divTeamIds.includes(tid)) div_draft_value.push(draft_value)
+      if (tid === team.uid) {
+        values.team.DRAFT = draft_value
+      }
+      if (values.rosters[tid]) {
+        values.rosters[tid].DRAFT = draft_value
+        values.total[tid] = values.total[tid] + draft_value
+      }
     }
-    values.league_avg[position] =
-      league.reduce((s, i) => s + i, 0) / league.length
-    values.league[position] = league
-    values.div_avg[position] = div.reduce((s, i) => s + i, 0) / div.length
-    values.div[position] = div
 
-    values.league_min[position] = Math.min(...league)
-    values.league_max[position] = Math.max(...league)
-    const team_value = values.team[position]
-    const min_value = values.league_min[position]
-    const max_value = values.league_max[position]
-    const is_max = max_value - min_value === 0
-    values.team_normalized[position] = is_max
-      ? 100
-      : ((team_value - min_value) / (max_value - min_value)) * 100
+    values.league_avg.DRAFT =
+      league_draft_value.reduce((s, i) => s + i, 0) / league_draft_value.length
+    values.league.DRAFT = league_draft_value
+    values.div_avg.DRAFT =
+      div_draft_value.reduce((s, i) => s + i, 0) / div_draft_value.length
+    values.div.DRAFT = div_draft_value
 
-    const div_value = values.div_avg[position]
-    values.div_avg_normalized[position] = is_max
+    values.league_max.DRAFT = Math.max(...league_draft_value)
+    values.league_min.DRAFT = Math.min(...league_draft_value)
+    const team_draft_value = values.team.DRAFT
+    const min_draft_value = values.league_min.DRAFT
+    const max_draft_value = values.league_max.DRAFT
+    const is_max_draft = max_draft_value - min_draft_value === 0
+    values.team_normalized.DRAFT = is_max_draft
       ? 100
-      : ((div_value - min_value) / (max_value - min_value)) * 100
+      : ((team_draft_value - min_draft_value) /
+          (max_draft_value - min_draft_value)) *
+        100
 
-    const league_value = values.league_avg[position]
-    values.league_avg_normalized[position] = is_max
+    const div_draft_value_avg = values.div_avg.DRAFT
+    values.div_avg_normalized.DRAFT = is_max_draft
       ? 100
-      : ((league_value - min_value) / (max_value - min_value)) * 100
+      : ((div_draft_value_avg - min_draft_value) /
+          (max_draft_value - min_draft_value)) *
+        100
+
+    const league_draft_value_avg = values.league_avg.DRAFT
+    values.league_avg_normalized.DRAFT = is_max_draft
+      ? 100
+      : ((league_draft_value_avg - min_draft_value) /
+          (max_draft_value - min_draft_value)) *
+        100
+
+    const team_values = Object.entries(values.total).map(([key, value]) => ({
+      tid: key,
+      value
+    }))
+    values.sorted_tids = team_values.sort((a, b) => b.value - a.value)
+    values.team_total = values.total[team.uid]
+
+    return values
   }
-
-  const league_draft_value = []
-  const div_draft_value = []
-  for (const [tid, team_i] of teams) {
-    const draft_value = team_i.picks.reduce(
-      (sum, pick) => sum + getDraftPickValueByPick(state, { pick }),
-      0
-    )
-    league_draft_value.push(draft_value)
-    if (divTeamIds.includes(tid)) div_draft_value.push(draft_value)
-    if (tid === team.uid) {
-      values.team.DRAFT = draft_value
-    }
-    if (values.rosters[tid]) {
-      values.rosters[tid].DRAFT = draft_value
-      values.total[tid] = values.total[tid] + draft_value
-    }
-  }
-
-  values.league_avg.DRAFT =
-    league_draft_value.reduce((s, i) => s + i, 0) / league_draft_value.length
-  values.league.DRAFT = league_draft_value
-  values.div_avg.DRAFT =
-    div_draft_value.reduce((s, i) => s + i, 0) / div_draft_value.length
-  values.div.DRAFT = div_draft_value
-
-  values.league_max.DRAFT = Math.max(...league_draft_value)
-  values.league_min.DRAFT = Math.min(...league_draft_value)
-  const team_draft_value = values.team.DRAFT
-  const min_draft_value = values.league_min.DRAFT
-  const max_draft_value = values.league_max.DRAFT
-  const is_max_draft = max_draft_value - min_draft_value === 0
-  values.team_normalized.DRAFT = is_max_draft
-    ? 100
-    : ((team_draft_value - min_draft_value) /
-        (max_draft_value - min_draft_value)) *
-      100
-
-  const div_draft_value_avg = values.div_avg.DRAFT
-  values.div_avg_normalized.DRAFT = is_max_draft
-    ? 100
-    : ((div_draft_value_avg - min_draft_value) /
-        (max_draft_value - min_draft_value)) *
-      100
-
-  const league_draft_value_avg = values.league_avg.DRAFT
-  values.league_avg_normalized.DRAFT = is_max_draft
-    ? 100
-    : ((league_draft_value_avg - min_draft_value) /
-        (max_draft_value - min_draft_value)) *
-      100
-
-  const team_values = Object.entries(values.total).map(([key, value]) => ({
-    tid: key,
-    value
-  }))
-  values.sorted_tids = team_values.sort((a, b) => b.value - a.value)
-  values.team_total = values.total[team.uid]
-
-  return values
-}
+)
 
 export const getGroupedPlayersByTeamId = createSelector(
   getRosters,
@@ -2512,12 +2537,6 @@ export function getOverallStandings(state) {
     wildcardTeams: sortedWildcardTeams
   }
 }
-
-export const getTeamsForCurrentLeague = createSelector(
-  (state) => state.getIn(['app', 'leagueId']),
-  getTeams,
-  (leagueId, teams) => teams.filter((t) => t.lid === leagueId)
-)
 
 export const getTeamEvents = createSelector(
   getNextPick,

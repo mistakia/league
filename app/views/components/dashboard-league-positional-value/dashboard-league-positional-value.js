@@ -17,7 +17,12 @@ export default function DashboardLeaguePositionalValue({ summary, teams }) {
       const rounded = parseInt(summary.rosters[tid][position].toFixed(1), 10)
       data.push(rounded)
     }
-    series.push({ name: position, data, borderColor: 'transparent' })
+    series.push({
+      name: position,
+      data,
+      borderColor: 'transparent',
+      animation: false
+    })
   }
 
   const draft_data = []
@@ -31,28 +36,29 @@ export default function DashboardLeaguePositionalValue({ summary, teams }) {
   series.push({
     name: 'Draft Picks',
     data: draft_data,
-    borderColor: 'transparent'
+    borderColor: 'transparent',
+    animation: false
   })
 
   const teamNames = []
   for (const { tid } of summary.sorted_tids) {
     const id = parseInt(tid, 10)
     const name = teams.getIn([id, 'name'])
-    teamNames.push(name)
+    teamNames.push(name || '')
   }
 
   const options = {
     chart: {
+      animation: false,
       type: 'bar',
       backgroundColor: 'transparent'
     },
     title: {
-      text: ''
+      text: 'Projected Points+'
     },
     xAxis: {
       categories: teamNames,
       labels: {
-        animate: true,
         events: {
           mouseover: function (e) {
             const chart = this.chart
