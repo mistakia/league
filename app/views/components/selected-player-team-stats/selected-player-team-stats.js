@@ -55,10 +55,10 @@ export default class SelectedPlayerTeamStats extends React.Component {
 
     return (
       <div className='selected__section'>
-        <div className='selected__section-header'>
+        <div className='selected__table-header'>
           <div className='row__group-head'>Team Season Volume Splits</div>
         </div>
-        <div className='selected__section-header'>
+        <div className='selected__table-header'>
           <div className='table__cell text'>Year</div>
           <div className='table__cell metric row__single-metric'>DRV</div>
           <div className='table__cell metric row__single-metric'>SNP</div>

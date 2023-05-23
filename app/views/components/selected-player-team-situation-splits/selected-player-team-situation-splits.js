@@ -63,10 +63,10 @@ export default class SelectedPlayerTeamSituationSplits extends React.Component {
 
     return (
       <div className='selected__section'>
-        <div className='selected__section-header'>
+        <div className='selected__table-header'>
           <div className='row__group-head'>Team Season Situation Splits</div>
         </div>
-        <div className='selected__section-header'>
+        <div className='selected__table-header'>
           <div className='table__cell text'>Year</div>
           <div className='table__cell metric row__single-metric'>Q1P</div>
           <div className='table__cell metric row__single-metric'>Q2P</div>

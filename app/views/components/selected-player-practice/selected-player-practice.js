@@ -52,10 +52,10 @@ export default class SelectedPlayerPractice extends React.Component {
 
     return (
       <div className='selected__section'>
-        <div className='selected__section-header sticky__column'>
+        <div className='selected__table-header sticky__column'>
           <div className='row__group-head'>Practice Reports</div>
         </div>
-        <div className='selected__section-header'>
+        <div className='selected__table-header'>
           <div className='row__group'>
             <div className='row__group-body'>
               <div className='table__cell metric'>Year</div>
