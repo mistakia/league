@@ -168,12 +168,21 @@ export function* init({ payload }) {
   const app = yield select(get_app)
   const league = yield select(getCurrentLeague)
   const router = yield select(get_router)
-  const all_player_paths = ['/players', '/auction']
-  const league_player_paths = ['/', '/dashboard', '/trade', '/league/rosters']
+
+  // determine what players to load (all_active, league, team)
   const { pathname } = router.location
+  const all_player_paths = ['/players', '/auction']
+  const league_player_paths = ['/', '/trade', 'rosters']
+  const league_home_re = /\/leagues\/[0-9]+\/?$/
+  const is_league_player_path = league_player_paths.find(
+    (path) =>
+      path === pathname ||
+      pathname.includes(path) ||
+      league_home_re.test(pathname)
+  )
   if (all_player_paths.includes(pathname)) {
     yield fork(loadAllPlayers)
-  } else if (league_player_paths.includes(pathname)) {
+  } else if (is_league_player_path) {
     yield fork(loadLeaguePlayers)
   } else {
     const teamId = (payload.data.teams[0] || {}).uid
