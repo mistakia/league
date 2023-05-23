@@ -59,12 +59,14 @@ export default class SelectedPlayerProjection extends React.Component {
 
     return (
       <div className='selected__section'>
-        <div className='selected__section-header sticky__column'>
+        <div className='selected__table-header sticky__column'>
           <div className='row__group-head'>
-            {week === 0 ? `${constants.year} Regular Season Projections` : `Week ${week} Projections`}
+            {week === 0
+              ? `${constants.year} Regular Season Projections`
+              : `Week ${week} Projections`}
           </div>
         </div>
-        <div className='selected__section-header'>
+        <div className='selected__table-header'>
           <div className='table__cell text'>Source</div>
           <PlayerSelectedRowHeader pos={pos} />
           <div className='row__action' />

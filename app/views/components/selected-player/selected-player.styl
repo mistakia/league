@@ -77,15 +77,6 @@
   &:first-child
     margin-top 16px
 
-.selected__section-header
-  flex 1
-  display flex
-  align-items stretch
-  font-weight 500
-  border-bottom 1px solid $borderColor
-  font-size 12px
-  min-width fit-content
-
 .selected__table
   height 100%
   max-width fit-content
@@ -94,14 +85,14 @@
   padding-bottom 32px
 
 .selected__table-header
-  height 40px
+  flex 1
   display flex
   align-items stretch
   font-weight 500
   border-bottom 1px solid $borderColor
   font-size 12px
-  width fit-content
-  background white
+  min-width fit-content
+  background rgb(245, 245, 245)
 
   &.sticky
     position sticky

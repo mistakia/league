@@ -9,7 +9,7 @@ import PercentileChart from '@components/percentile-chart'
 // TODO - use percentile_key and percentile_field
 const passing = ({ stats }) => (
   <div className='selected__section'>
-    <div className='selected__section-header'>
+    <div className='selected__table-header'>
       <div className='row__group-head'>Passing Efficiency</div>
     </div>
     <PercentileChart title='Comp %' stats={stats} type='pc_pct' />
@@ -28,7 +28,7 @@ const passing = ({ stats }) => (
 // TODO - first down rate
 const rushing = ({ stats }) => (
   <div className='selected__section'>
-    <div className='selected__section-header'>
+    <div className='selected__table-header'>
       <div className='row__group-head'>Rushing Efficiency</div>
     </div>
     <PercentileChart title='Yards Per Carry' stats={stats} type='ry_pra' />
@@ -59,7 +59,7 @@ const rushing = ({ stats }) => (
 // TODO - first down rate
 const receiving = ({ stats }) => (
   <div className='selected__section'>
-    <div className='selected__section-header'>
+    <div className='selected__table-header'>
       <div className='row__group-head'>Receiving Efficiency</div>
     </div>
     <PercentileChart title='Yards Per Target' stats={stats} type='_recyptrg' />
@@ -72,7 +72,7 @@ const receiving = ({ stats }) => (
 
 const kicker = () => (
   <div className='selected__section'>
-    <div className='selected__section-header'>
+    <div className='selected__table-header'>
       <div className='row__group-head'>Kicker Efficiency</div>
     </div>
     <p>In Development</p>
@@ -81,7 +81,7 @@ const kicker = () => (
 
 const defense = () => (
   <div className='selected__section'>
-    <div className='selected__section-header'>
+    <div className='selected__table-header'>
       <div className='row__group-head'>Defense Efficiency</div>
     </div>
     <p>In Development</p>

@@ -58,7 +58,7 @@ export default class SelectedPlayerGamelogs extends React.Component {
 
     return (
       <div className='selected__table'>
-        <div className='selected__section-header sticky__column'>
+        <div className='selected__table-header sticky__column'>
           <div className='row__group-head'>Gamelogs</div>
         </div>
         <div className='selected__table-header sticky'>
@@ -66,13 +66,13 @@ export default class SelectedPlayerGamelogs extends React.Component {
           <div className='table__cell metric sticky__column sticky__two game__week'>
             Wk
           </div>
-          <div className='table__cell metric'>Opp</div>
+          <div className='table__cell'>Opp</div>
           <div className='row__group'>
             <div className='row__group-head'>Fantasy</div>
             <div className='row__group-body'>
-              <div className='table__cell metric'>Pts</div>
-              <div className='table__cell metric'>Pts+</div>
-              <div className='table__cell metric'>Rnk</div>
+              <div className='table__cell'>Pts</div>
+              <div className='table__cell'>Pts+</div>
+              <div className='table__cell'>Rnk</div>
             </div>
           </div>
           <PlayerSelectedRowHeader pos={position} />
