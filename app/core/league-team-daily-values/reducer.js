@@ -18,7 +18,11 @@ export function league_team_daily_values_reducer(
           }
 
           state.updateIn([i.tid], (list) =>
-            list.push({ ktc_value: i.ktc_value, timestamp: i.timestamp })
+            list.push({
+              ktc_value: i.ktc_value,
+              ktc_share: i.ktc_share,
+              timestamp: i.timestamp
+            })
           )
         })
       })

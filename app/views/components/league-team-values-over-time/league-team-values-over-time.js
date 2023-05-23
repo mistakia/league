@@ -13,7 +13,8 @@ HighchartsSeriesLabel(Highcharts)
 export default function LeagueTeamValuesOverTime({
   load_league_team_daily_values,
   league_team_daily_values,
-  teams
+  teams,
+  teams_value_deltas
 }) {
   React.useEffect(() => {
     load_league_team_daily_values()
@@ -55,6 +56,7 @@ export default function LeagueTeamValuesOverTime({
       data.push([item.timestamp, item.ktc_value])
     })
     const item = {
+      tid: team.uid,
       name: team.name,
       data
     }
@@ -92,6 +94,23 @@ export default function LeagueTeamValuesOverTime({
       }
     },
 
+    legend: {
+      labelFormatter: function () {
+        const team = teams.get(this.options.tid)
+        const team_delta_value = teams_value_deltas.get(this.options.tid)
+        const latest_team_value = team_delta_value.get(
+          'latest_team_value',
+          null
+        )
+
+        if (latest_team_value) {
+          return `${team.name} ($${latest_team_value.toFixed(0)})`
+        }
+
+        return this.name
+      }
+    },
+
     yAxis: {
       title: {
         text: 'Franchise Demand'
@@ -124,5 +143,6 @@ export default function LeagueTeamValuesOverTime({
 LeagueTeamValuesOverTime.propTypes = {
   load_league_team_daily_values: PropTypes.func.isRequired,
   league_team_daily_values: ImmutablePropTypes.map.isRequired,
-  teams: ImmutablePropTypes.map.isRequired
+  teams: ImmutablePropTypes.map.isRequired,
+  teams_value_deltas: ImmutablePropTypes.map.isRequired
 }
