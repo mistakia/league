@@ -45,8 +45,10 @@ class PlayerRoster extends Player {
     const salary = isTransition ? value : bid || value
     const extensions = playerMap.get('extensions', 0)
     const pos = playerMap.get('pos')
+    const slot = playerMap.get('slot')
     const extendedSalary = getExtensionAmount({
       pos,
+      slot,
       tag: isBeforeExtensionDeadline ? tag : constants.tags.REGULAR,
       extensions,
       league,
@@ -78,6 +80,31 @@ class PlayerRoster extends Player {
     const classNames = ['player__item', 'table__row']
     if (selected === playerMap.get('pid')) classNames.push('selected')
     if (isWaiver) classNames.push('waiver')
+
+    let rookie_tag_savings = null
+    let franchise_tag_savings = null
+    const regular_extended_salary = getExtensionAmount({
+      pos,
+      slot,
+      tag: constants.tags.REGULAR,
+      extensions,
+      league,
+      value
+    })
+
+    if (isBeforeExtensionDeadline) {
+      const is_rookie = playerMap.get('start') >= constants.year - 1
+      if (is_rookie) {
+        rookie_tag_savings =
+          Math.max(regular_extended_salary - value, 0) || null
+      }
+
+      franchise_tag_savings =
+        Math.max(
+          regular_extended_salary - league[`f${pos.toLowerCase()}`],
+          0
+        ) || null
+    }
 
     return (
       <div className={classNames.join(' ')}>
@@ -163,6 +190,25 @@ class PlayerRoster extends Player {
             )}
           </div>
         </div>
+        {isBeforeExtensionDeadline && (
+          <>
+            <div className='metric table__cell'>{regular_extended_salary}</div>
+            <div className='row__group'>
+              <div className='row__group-body'>
+                <PercentileMetric
+                  scaled
+                  value={franchise_tag_savings}
+                  percentile={percentiles.franchise_tag_savings}
+                />
+                <PercentileMetric
+                  scaled
+                  value={rookie_tag_savings}
+                  percentile={percentiles.rookie_tag_savings}
+                />
+              </div>
+            </div>
+          </>
+        )}
         {!isOffseason && (
           <div className='row__group'>
             <div className='row__group-body'>

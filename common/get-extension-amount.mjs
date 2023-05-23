@@ -16,7 +16,17 @@ const getFranchiseAmount = ({ pos, league }) => {
   }
 }
 
-export default function ({ extensions, tag, pos, league, value, bid }) {
+export default function ({ extensions, tag, pos, league, value, bid, slot }) {
+  if (
+    slot &&
+    (slot === constants.slots.PS ||
+      slot === constants.slots.PSP ||
+      slot === constants.slots.PSD ||
+      slot === constants.slots.PSDP)
+  ) {
+    return value
+  }
+
   switch (tag) {
     case constants.tags.FRANCHISE:
       return getFranchiseAmount({ pos, league })

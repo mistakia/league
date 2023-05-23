@@ -85,6 +85,17 @@ export default class PlayerRosterTotal extends React.Component {
             )}
           </div>
         </div>
+        {isBeforeExtensionDeadline && (
+          <>
+            <div className='table__cell'>-</div>
+            <div className='row__group'>
+              <div className='row__group-body'>
+                <div className='table__cell'>-</div>
+                <div className='table__cell'>-</div>
+              </div>
+            </div>
+          </>
+        )}
         {!isOffseason && (
           <div className='row__group'>
             <div className='row__group-body'>

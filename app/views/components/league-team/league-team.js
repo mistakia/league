@@ -107,7 +107,7 @@ export default function LeagueTeam({
 
   return (
     <Grid container spacing={2} alignItems='flex-start'>
-      <Grid container item xs={12} lg={8}>
+      <Grid container item xs={12} lg={9}>
         <Grid item xs={12}>
           <DashboardPlayersTable
             items={activeItems}
@@ -152,7 +152,7 @@ export default function LeagueTeam({
           )}
         </Grid>
       </Grid>
-      <Grid container item xs={12} lg={4}>
+      <Grid container item xs={12} lg={3}>
         <Grid item xs={12}>
           <div className='section expand'>
             <Toolbar>

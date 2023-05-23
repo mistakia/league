@@ -229,6 +229,33 @@ export default class DashboardPlayersTable extends React.Component {
                 </div>
               </div>
             )}
+            <div className='table__cell'>
+              <PlayerRosterHeader
+                tooltip='Player salary amount after extension'
+                title='Regular Extension'
+              />
+            </div>
+            {isBeforeExtensionDeadline && (
+              <>
+                <div className='row__group'>
+                  <div className='row__group-head'>Tag savings</div>
+                  <div className='row__group-body'>
+                    <div className='table__cell'>
+                      <PlayerRosterHeader
+                        tooltip='Savings from franchise tag compared to regular extension'
+                        title='Franchise'
+                      />
+                    </div>
+                    <div className='table__cell'>
+                      <PlayerRosterHeader
+                        tooltip='Savings from rookie tag compared to regular extension'
+                        title='Rookie'
+                      />
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
             <div className='row__group'>
               <div className='row__group-head'>Projected</div>
               <div className='row__group-body'>
