@@ -98,6 +98,8 @@ export const League = new Record({
   mfl_id: null,
   fleaflicker_id: null,
 
+  season_due_amount: null,
+
   isLoading: false,
   isLoaded: false
 })
@@ -198,6 +200,8 @@ export function createLeague({
   mfl_id,
   fleaflicker_id,
 
+  season_due_amount,
+
   isLoaded,
   isLoading
 }) {
@@ -296,6 +300,8 @@ export function createLeague({
     sleeper_id,
     mfl_id,
     fleaflicker_id,
+
+    season_due_amount,
 
     isLoading,
     isLoaded

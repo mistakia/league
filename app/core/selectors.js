@@ -2429,6 +2429,58 @@ export const getGamelogsForSelectedPlayer = createSelector(
   }
 )
 
+export const get_team_value_deltas_by_team_id = createSelector(
+  getCurrentLeague,
+  (state) => state.get('league_team_daily_values'),
+  (state, { tid }) => tid,
+  (league, league_team_daily_values, tid) => {
+    const team_values = league_team_daily_values.get(tid)
+    if (!team_values) return new Map()
+
+    const league_total_due_amount = league.num_teams * league.season_due_amount
+
+    let result = new Map()
+
+    const latest_value = team_values.last()
+    const latest_team_share = latest_value.ktc_share
+
+    result = result.set('latest_team_share', latest_team_share)
+    result = result.set(
+      'latest_team_value',
+      latest_team_share * league_total_due_amount
+    )
+
+    const days_ago = [30, 90, 365, 720]
+    const sorted_values = team_values.sort((a, b) => b.timestamp - a.timestamp)
+    for (const days of days_ago) {
+      const value = sorted_values.find(
+        (v) => v.timestamp < dayjs().subtract(days, 'days').valueOf()
+      )
+      if (!value) continue
+
+      const team_share = value.ktc_share
+      const delta = latest_team_share - team_share
+      const delta_pct = delta / team_share
+      result = result.set(`delta_pct_${days}`, { delta, delta_pct })
+    }
+
+    return result
+  }
+)
+
+export function get_league_teams_value_deltas(state) {
+  const teams = getTeamsForCurrentLeague(state)
+
+  let result = new Map()
+  for (const team of teams.values()) {
+    const uid = team.get('uid')
+    const deltas = get_team_value_deltas_by_team_id(state, { tid: uid })
+    result = result.set(uid, deltas)
+  }
+
+  return result
+}
+
 export function getGamelogForPlayer(
   state,
   { playerMap, week, year = constants.year }

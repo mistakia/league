@@ -206,6 +206,8 @@ CREATE TABLE `seasons` (
 
   `adate` int(11) unsigned DEFAULT NULL,
   `tddate` int(11) unsigned DEFAULT NULL,
+
+  `season_due_amount` int(6) unsigned DEFAULT NULL,
   UNIQUE KEY `season` (`lid`,`year`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -2841,6 +2843,7 @@ CREATE TABLE `league_team_daily_values` (
   `date` date NOT NULL,
   `timestamp` bigint(20) NOT NULL,
   `ktc_value` int(6) DEFAULT NULL,
+  `ktc_share` decimal(5,5) DEFAULT NULL,
   UNIQUE KEY `league_team` (`lid`, `tid`, `date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

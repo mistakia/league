@@ -167,6 +167,8 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
     // check if new day
     if (last_date && tran_date !== last_date) {
       // calculate team daily keeptradecut value for last_date
+      const day_inserts = []
+      let day_ktc_total = 0
       for (const team of Object.values(teams_index)) {
         // calculate keeptradecut value for team_players
         const team_players = Object.keys(team.players)
@@ -193,13 +195,19 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
           continue
         }
 
-        team_daily_value_inserts.push({
+        day_ktc_total += team_ktc_value
+        day_inserts.push({
           lid,
           tid: team.uid,
           date: last_date,
           timestamp: dayjs(last_date).valueOf(),
           ktc_value: team_ktc_value
         })
+      }
+
+      for (const insert of day_inserts) {
+        insert.ktc_share = insert.ktc_value / day_ktc_total
+        team_daily_value_inserts.push(insert)
       }
     }
 
@@ -212,6 +220,9 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
         .add(MAX_DAY_INTERVAL, 'day')
       while (cursor_date < next_tran_date) {
         const formatted_date = cursor_date.format('YYYY-MM-DD')
+        const day_inserts = []
+        let day_ktc_total = 0
+
         for (const team of Object.values(teams_index)) {
           const team_players = Object.keys(team.players)
           const team_players_ktc_value = team_players.reduce((acc, pid) => {
@@ -228,13 +239,19 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
             continue
           }
 
-          team_daily_value_inserts.push({
+          day_ktc_total += team_ktc_value
+          day_inserts.push({
             lid,
             tid: team.uid,
             date: formatted_date,
             timestamp: cursor_date.valueOf(),
             ktc_value: team_ktc_value
           })
+        }
+
+        for (const insert of day_inserts) {
+          insert.ktc_share = insert.ktc_value / day_ktc_total
+          team_daily_value_inserts.push(insert)
         }
 
         cursor_date = cursor_date.add(MAX_DAY_INTERVAL, 'day')
