@@ -1,14 +1,9 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import {
-  getTeams,
-  getPlayers,
-  get_app,
-  getPlayerStatus,
-  getSelectedViewGroupedFields
-} from '@core/selectors'
+import { getTeams, getPlayers, get_app, getPlayerStatus } from '@core/selectors'
 import { playerActions } from '@core/players'
+import { getSelectedViewGroupedFields } from '@core/players/selectors'
 
 import PlayerRow from './player-row'
 
@@ -25,8 +20,8 @@ const mapStateToProps = createSelector(
     teamId: app.teamId,
     is_logged_in: Boolean(app.userId),
     highlight_teamIds: players.get('highlight_teamIds'),
-    selectedPlayer: players.get('selected'),
-    week: players.get('week').get(0)
+    week: players.get('week').get(0),
+    selectedPlayer: players.get('selected')
   })
 )
 

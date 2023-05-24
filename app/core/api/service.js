@@ -348,6 +348,18 @@ export const api = {
   get_league_team_daily_values({ leagueId }) {
     const url = `${BASE_URL}/leagues/${leagueId}/team-daily-values`
     return { url }
+  },
+  post_players_table_view_search(data) {
+    const url = `${BASE_URL}/players/search`
+    return { url, ...POST(data) }
+  },
+  post_players_table_view(data) {
+    const url = `${BASE_URL}/players/table-views`
+    return { url, ...POST(data) }
+  },
+  delete_players_table_view({ view_id }) {
+    const url = `${BASE_URL}/players/table-views/${view_id}`
+    return { url, method: 'DELETE' }
   }
 }
 

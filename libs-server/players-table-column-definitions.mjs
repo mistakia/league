@@ -21,7 +21,11 @@ const league_format_player_projection_values_join = ({
   query,
   params = {}
 }) => {
-  const { year = constants.season.year, week = 0, league_format_hash = '1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b' } = params
+  const {
+    year = constants.season.year,
+    week = 0,
+    league_format_hash = '1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b'
+  } = params
   const table_alias = league_format_player_projection_values_table_alias({
     params
   })
@@ -41,7 +45,11 @@ const league_format_player_projection_values_join = ({
 const league_format_player_projection_values_table_alias = ({
   params = {}
 }) => {
-  const { year = constants.season.year, week = 0, league_format_hash = '1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b' } = params
+  const {
+    year = constants.season.year,
+    week = 0,
+    league_format_hash = '1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b'
+  } = params
   return `league_format_player_projection_values_${year}_week_${week}_${league_format_hash}`
 }
 
@@ -49,7 +57,11 @@ const scoring_format_player_projection_points_join = ({
   query,
   params = {}
 }) => {
-  const { year = constants.season.year, week = 0, scoring_format_hash = '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d' } = params
+  const {
+    year = constants.season.year,
+    week = 0,
+    scoring_format_hash = '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d'
+  } = params
   const table_alias = scoring_format_player_projection_points_table_alias({
     params
   })
@@ -69,7 +81,11 @@ const scoring_format_player_projection_points_join = ({
 const scoring_format_player_projection_points_table_alias = ({
   params = {}
 }) => {
-  const { year = constants.season.year, week = 0, scoring_format_hash = '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d' } = params
+  const {
+    year = constants.season.year,
+    week = 0,
+    scoring_format_hash = '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d'
+  } = params
   return `scoring_format_player_projection_points_${year}_week_${week}_${scoring_format_hash}`
 }
 

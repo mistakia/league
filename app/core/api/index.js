@@ -77,5 +77,8 @@ export {
   getPercentiles,
   getNflTeamSeasonlogs,
   get_league_team_daily_values,
-  post_process_poach
+  post_process_poach,
+  post_players_table_view_search,
+  post_players_table_view,
+  delete_players_table_view
 } from './sagas'

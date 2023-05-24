@@ -41,7 +41,7 @@ import './players.styl'
 export default function PlayersPage({
   players,
   player_fields,
-  selected_players_view,
+  selected_players_page_view,
   isPending,
   is_logged_in,
   selected_view_grouped_fields,
@@ -54,7 +54,8 @@ export default function PlayersPage({
   order,
   orderBy,
   is_player_filter_options_changed,
-  loadRosters
+  loadRosters,
+  loadAllPlayers
 }) {
   const { lid } = useParams()
   const navigate = useNavigate()
@@ -65,13 +66,21 @@ export default function PlayersPage({
   let scroll_ref
 
   useEffect(() => {
-    for (const field_key of selected_players_view.fields) {
+    loadAllPlayers()
+  }, [loadAllPlayers])
+
+  useEffect(() => {
+    for (const field_key of selected_players_page_view.fields) {
       const player_field = player_fields[field_key]
       if (player_field.load) {
         player_field.load()
       }
     }
-  }, [player_fields, selected_players_view.fields, selected_players_view.key])
+  }, [
+    player_fields,
+    selected_players_page_view.fields,
+    selected_players_page_view.key
+  ])
 
   useEffect(() => {
     if (isNaN(lid)) {
@@ -96,7 +105,7 @@ export default function PlayersPage({
     parentElement.scrollTop = 0
   }, [
     scroll_ref,
-    selected_players_view.key,
+    selected_players_page_view.key,
     order,
     orderBy,
     searchValue,
@@ -122,7 +131,7 @@ export default function PlayersPage({
     }
 
     const field_infos = []
-    for (const field of selected_players_view.fields) {
+    for (const field of selected_players_page_view.fields) {
       const field_info = player_fields[field]
       field_infos.push(field_info)
 
@@ -143,7 +152,7 @@ export default function PlayersPage({
       return item
     })
 
-    const view_name = selected_players_view.name
+    const view_name = selected_players_page_view.name
       .replace(/[^a-z0-9]/gi, '-')
       .toLowerCase()
 
@@ -307,8 +316,9 @@ PlayersPage.propTypes = {
   show_play_filters: PropTypes.bool,
   show_qualifier_filter: PropTypes.bool,
   player_fields: PropTypes.object,
-  selected_players_view: PropTypes.object,
+  selected_players_page_view: PropTypes.object,
   reset_player_filter_options: PropTypes.func,
   is_player_filter_options_changed: PropTypes.bool,
-  loadRosters: PropTypes.func
+  loadRosters: PropTypes.func,
+  loadAllPlayers: PropTypes.func
 }

@@ -1,6 +1,5 @@
 import { Map, List, Set } from 'immutable'
 
-import { appActions } from '@core/app'
 import { playerActions } from './actions'
 import { createPlayer } from './player'
 import { statActions } from '@core/stats'
@@ -22,9 +21,7 @@ export const default_player_filter_options = {
   experience: new List([0, 1, -1]),
   selected_nfl_statuses: new List(Object.keys(constants.player_nfl_status)),
   teams: new List(),
-  availability: new List(constants.availability),
-  age: new List(), // TODO
-  allAges: new List() // TODO
+  availability: new List(constants.availability)
 }
 
 const initialState = new Map({
@@ -36,23 +33,24 @@ const initialState = new Map({
   week: new List([constants.fantasy_season_week]),
   items: new Map(),
   order: 'desc',
-  selected_players_view: DefaultPlayersViews.season_projections.key,
-  views: new Map(DefaultPlayersViews),
+  selected_players_page_view: DefaultPlayersViews.season_projections.key,
+  players_page_views: new Map(DefaultPlayersViews),
   orderBy: DefaultPlayersViews.season_projections.order_by,
   watchlist: new Set(),
   watchlistOnly: false,
   cutlist: new List(),
   baselines: new Map(),
   selected: null,
+  players_table_view_result_pids: new List(),
   ...default_player_filter_options
 })
 
 export function playersReducer(state = initialState, { payload, type }) {
   switch (type) {
-    case playerActions.SELECT_PLAYERS_VIEW: {
-      const view = state.getIn(['views', payload.view_key])
+    case playerActions.SELECT_PLAYERS_PAGE_VIEW: {
+      const view = state.getIn(['players_page_views', payload.view_key])
       return state.merge({
-        selected_players_view: payload.view_key,
+        selected_players_page_view: payload.view_key,
         orderBy: view.order_by,
         order: 'desc',
         week: new List([Math.max(constants.fantasy_season_week, 1)])
@@ -103,7 +101,7 @@ export function playersReducer(state = initialState, { payload, type }) {
     case playerActions.TOGGLE_WATCHLIST_ONLY:
       return state.merge({ watchlistOnly: !state.get('watchlistOnly') })
 
-    case playerActions.SET_ORDER: {
+    case playerActions.SET_PLAYERS_PAGE_ORDER: {
       const { order, orderBy } = payload
       return state.merge({ order, orderBy, selected: null })
     }
@@ -234,14 +232,6 @@ export function playersReducer(state = initialState, { payload, type }) {
           ['items', payload.opts.pid, 'practice'],
           new List(payload.data)
         )
-      })
-
-    case appActions.AUTH_FULFILLED:
-      return state.withMutations((players) => {
-        const week = constants.isOffseason ? '0' : 'ros'
-        players.merge({
-          orderBy: `pts_added.${week}`
-        })
       })
 
     case playerActions.GET_CUTLIST_FULFILLED:
@@ -471,6 +461,32 @@ export function playersReducer(state = initialState, { payload, type }) {
 
     case playerActions.RESET_PLAYER_FILTER_OPTIONS:
       return state.merge({ ...default_player_filter_options })
+
+    case playerActions.POST_PLAYERS_TABLE_VIEW_SEARCH_FULFILLED:
+      return state.withMutations((players) => {
+        payload.data.forEach((playerData) => {
+          if (players.hasIn(['items', playerData.pid])) {
+            const data = players.getIn(['items', playerData.pid])
+            players.setIn(
+              ['items', playerData.pid],
+              createPlayer({
+                ...data.toJS(),
+                ...playerData
+              })
+            )
+          } else {
+            players.setIn(['items', playerData.pid], createPlayer(playerData))
+          }
+        })
+
+        const players_table_view_result_pids = payload.data.map(
+          (playerData) => playerData.pid
+        )
+        players.set(
+          'players_table_view_result_pids',
+          new List(players_table_view_result_pids)
+        )
+      })
 
     default:
       return state
