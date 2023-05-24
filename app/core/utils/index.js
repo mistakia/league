@@ -2,6 +2,7 @@ export { localStorageAdapter } from './local-storage'
 export { fuzzySearch } from './fuzzy-search'
 export { timeago } from './timeago'
 export { default as useTraceUpdate } from './use-trace-update'
+export { create_debug_selector } from './create-debug-selector'
 
 export const ordinalSuffixOf = (i) => {
   const j = i % 10

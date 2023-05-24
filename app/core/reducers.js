@@ -28,6 +28,7 @@ import { seasonlogsReducer } from './seasonlogs'
 import { percentilesReducer } from './percentiles'
 import { apiReducer } from './api'
 import { league_team_daily_values_reducer } from './league-team-daily-values'
+import { players_table_views_reducer } from './players-table-views'
 
 const rootReducer = (router) =>
   combineReducers({
@@ -59,7 +60,8 @@ const rootReducer = (router) =>
     draft_pick_value: draftPickValueReducer,
     seasonlogs: seasonlogsReducer,
     percentiles: percentilesReducer,
-    league_team_daily_values: league_team_daily_values_reducer
+    league_team_daily_values: league_team_daily_values_reducer,
+    players_table_views: players_table_views_reducer
   })
 
 export default rootReducer

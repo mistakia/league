@@ -16,6 +16,7 @@ import LeagueHomePage from '@pages/league-home'
 import DraftPage from '@pages/draft'
 import AuctionPage from '@pages/auction'
 import PlayersPage from '@pages/players'
+import PlayersTablePage from '@pages/players-table'
 import LineupsPage from '@pages/lineups'
 import TradePage from '@pages/trade'
 import SettingsPage from '@pages/settings'
@@ -55,6 +56,10 @@ const Routes = ({ app }) => {
       {app.userId && <Route path='/trade' element={<TradePage />} />}
       <Route path='/leagues/:lid'>
         <Route path='/leagues/:lid/players' element={<PlayersPage />} />
+        <Route
+          path='/leagues/:lid/players-table'
+          element={<PlayersTablePage />}
+        />
         <Route path='/leagues/:lid/auction' element={<AuctionPage />} />
         <Route path='/leagues/:lid/draft' element={<DraftPage />} />
         <Route path='/leagues/:lid/teams/:tid' element={<TeamPage />} />

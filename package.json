@@ -86,11 +86,12 @@
     "@babel/register": "^7.22.5",
     "@bugsnag/js": "^7.20.2",
     "@bugsnag/plugin-react": "^7.19.0",
-    "@emotion/react": "^11.10.0",
-    "@emotion/styled": "^11.10.0",
-    "@mui/icons-material": "^5.8.4",
-    "@mui/lab": "^5.0.0-alpha.95",
-    "@mui/material": "^5.10.1",
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@mui/base": "^5.0.0-beta.16",
+    "@mui/icons-material": "^5.11.16",
+    "@mui/lab": "^5.0.0-alpha.133",
+    "@mui/material": "^5.14.10",
     "@mui/styled-engine": "^5.10.1",
     "@mui/styled-engine-sc": "^5.10.1",
     "@simonwep/pickr": "^1.8.2",
@@ -143,6 +144,7 @@
     "react-redux": "^8.0.7",
     "react-router": "^6.12.1",
     "react-router-dom": "^6.12.1",
+    "react-table": "mistakia/react-table#proto/league",
     "react-virtualized": "^9.22.5",
     "redux": "^4.2.1",
     "redux-first-history": "^5.1.1",
@@ -168,7 +170,8 @@
     "yargs": "17.7.2"
   },
   "resolutions": {
-    "@mui/styled-engine": "npm:@mui/styled-engine-sc@latest"
+    "@mui/styled-engine": "npm:@mui/styled-engine-sc@latest",
+    "react-table": "portal:/Users/trashman/Projects/react-table"
   },
   "packageManager": "yarn@3.2.0"
 }

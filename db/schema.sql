@@ -2888,6 +2888,31 @@ CREATE TABLE `player_aliases` (
   UNIQUE KEY `alias` (`pid`, `formatted_alias`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user_table_views`
+--
+
+DROP TABLE IF EXISTS `user_table_views`;
+
+CREATE TABLE `user_table_views` (
+  `view_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `view_name` varchar(30) NOT NULL,
+  `view_description` text DEFAULT NULL,
+  `table_name` varchar(255) NOT NULL,
+  `table_state` json DEFAULT NULL,
+  `user_id` binary(16) NOT NULL,
+  `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  check (
+    updated_at is null
+    or updated_at >= created_at
+  ),
+  PRIMARY KEY (`view_id`),
+  UNIQUE KEY `table_view` (`view_name`, `user_id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8;)
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

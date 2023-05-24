@@ -42,7 +42,8 @@ import {
   getBaselinesActions,
   getPlayerProjectionsActions,
   getPlayerGamelogsActions,
-  getPlayerPracticesActions
+  getPlayerPracticesActions,
+  post_players_table_view_search_actions
 } from '@core/players/actions'
 import { getChartedPlaysActions } from '@core/stats/actions'
 import { getPlaysActions, getPlayStatsActions } from '@core/plays/actions'
@@ -89,6 +90,10 @@ import { getPropsActions } from '@core/props/actions'
 import { getPercentilesActions } from '@core/percentiles/actions'
 import { getNflTeamSeasonlogsActions } from '@core/seasonlogs/actions'
 import { get_league_team_daily_values_actions } from '@core/league-team-daily-values/actions'
+import {
+  post_players_table_view_actions,
+  delete_players_table_view_actions
+} from '@core/players-table-views/actions'
 
 function* fetchAPI(apiFunction, actions, opts = {}) {
   const { token } = yield select(get_app)
@@ -397,4 +402,22 @@ export const post_process_poach = fetch.bind(
   null,
   api.post_process_poach,
   postProcessPoachActions
+)
+
+export const post_players_table_view_search = fetch.bind(
+  null,
+  api.post_players_table_view_search,
+  post_players_table_view_search_actions
+)
+
+export const post_players_table_view = fetch.bind(
+  null,
+  api.post_players_table_view,
+  post_players_table_view_actions
+)
+
+export const delete_players_table_view = fetch.bind(
+  null,
+  api.delete_players_table_view,
+  delete_players_table_view_actions
 )

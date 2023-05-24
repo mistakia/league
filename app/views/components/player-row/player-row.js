@@ -3,7 +3,6 @@ import React from 'react'
 // import EditableProjection from '@components/editable-projection'
 import Position from '@components/position'
 import PlayerWatchlistAction from '@components/player-watchlist-action'
-import PercentileMetric from '@components/percentile-metric'
 import NFLTeam from '@components/nfl-team'
 import TeamName from '@components/team-name'
 import { Player, connect } from '@components/player'
@@ -21,15 +20,13 @@ class PlayerRow extends Player {
       playerMap,
       selectedPlayer,
       isHosted,
-      week,
       isLoggedIn,
       selected, // inherited from Player class
       status,
       teamId,
       player_row_index,
       teams,
-      highlight_teamIds,
-      selected_view_grouped_fields
+      highlight_teamIds
     } = this.props
 
     const pid = playerMap.get('pid')
@@ -52,39 +49,39 @@ class PlayerRow extends Player {
     const name =
       window.innerWidth <= 600 ? playerMap.get('pname') : playerMap.get('name')
 
-    const field_items = []
-    selected_view_grouped_fields.forEach((group, index) => {
-      const group_items = []
-      group.fields.forEach((field_info, index) => {
-        if (field_info.component) {
-          const Component = field_info.component
-          group_items.push(<Component {...{ nfl_team, pos, week }} />)
-        } else {
-          const value = field_info.getValue
-            ? field_info.getValue(playerMap)
-            : playerMap.getIn(field_info.key_path)
-          const percentile_key = field_info.getPercentileKey
-            ? field_info.getPercentileKey(playerMap)
-            : field_info.percentile_key
-          group_items.push(
-            <PercentileMetric
-              key={index}
-              value={value}
-              show_positivity={field_info.show_positivity || false}
-              fixed={field_info.fixed || 0}
-              percentile_key={percentile_key}
-              field={field_info.percentile_field}
-            />
-          )
-        }
-      })
+    // const field_items = []
+    // selected_view_grouped_fields.forEach((group, index) => {
+    //   const group_items = []
+    //   group.fields.forEach((field_info, index) => {
+    //     if (field_info.component) {
+    //       const Component = field_info.component
+    //       group_items.push(<Component {...{ nfl_team, pos, week }} />)
+    //     } else {
+    //       const value = field_info.getValue
+    //         ? field_info.getValue(playerMap)
+    //         : playerMap.getIn(field_info.key_path)
+    //       const percentile_key = field_info.getPercentileKey
+    //         ? field_info.getPercentileKey(playerMap)
+    //         : field_info.percentile_key
+    //       group_items.push(
+    //         <PercentileMetric
+    //           key={index}
+    //           value={value}
+    //           show_positivity={field_info.show_positivity || false}
+    //           fixed={field_info.fixed || 0}
+    //           percentile_key={percentile_key}
+    //           field={field_info.percentile_field}
+    //         />
+    //       )
+    //     }
+    //   })
 
-      field_items.push(
-        <div className='row__group' key={index}>
-          <div className='row__group-body'>{group_items}</div>
-        </div>
-      )
-    })
+    //   field_items.push(
+    //     <div className='row__group' key={index}>
+    //       <div className='row__group-body'>{group_items}</div>
+    //     </div>
+    //   )
+    // })
 
     return (
       <div className={classNames.join(' ')}>
@@ -135,7 +132,6 @@ class PlayerRow extends Player {
             </div>
           )}
         </div>
-        {field_items}
       </div>
     )
   }

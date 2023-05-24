@@ -25,9 +25,9 @@ export default function ScoreboardSelectWeek({ selectWeek, week, weeks }) {
       variant='outlined'
       className='scoreboard__select-week'
     >
-      <InputLabel id='players__view-menu-label'>Week</InputLabel>
+      <InputLabel id='scoreboard-select-week'>Week</InputLabel>
       <Select
-        labelId='players__view-menu-label'
+        labelId='scoreboard-select-week'
         value={week}
         onChange={handleChange}
         label='Week'

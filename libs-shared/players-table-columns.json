@@ -1,0 +1,1506 @@
+[
+  {
+    "table_name": "draft",
+    "column_name": "round"
+  },
+  {
+    "table_name": "draft",
+    "column_name": "comp"
+  },
+  {
+    "table_name": "draft",
+    "column_name": "pick"
+  },
+  {
+    "table_name": "draft",
+    "column_name": "otid"
+  },
+  {
+    "table_name": "draft",
+    "column_name": "year"
+  },
+  {
+    "table_name": "draft",
+    "column_name": "selection_timestamp"
+  },
+  {
+    "table_name": "keeptradecut_rankings",
+    "column_name": "qb"
+  },
+  {
+    "table_name": "keeptradecut_rankings",
+    "column_name": "d"
+  },
+  {
+    "table_name": "keeptradecut_rankings",
+    "column_name": "v"
+  },
+  {
+    "table_name": "keeptradecut_rankings",
+    "column_name": "type"
+  },
+  {
+    "table_name": "league_cutlist",
+    "column_name": "order"
+  },
+  {
+    "table_name": "league_format_player_careerlogs",
+    "column_name": "draft_rank"
+  },
+  {
+    "table_name": "league_format_player_careerlogs",
+    "column_name": "startable_games"
+  },
+  {
+    "table_name": "league_format_player_careerlogs",
+    "column_name": "points"
+  },
+  {
+    "table_name": "league_format_player_careerlogs",
+    "column_name": "points_per_game"
+  },
+  {
+    "table_name": "league_format_player_careerlogs",
+    "column_name": "points_added"
+  },
+  {
+    "table_name": "league_format_player_careerlogs",
+    "column_name": "points_added_per_game"
+  },
+  {
+    "table_name": "league_format_player_careerlogs",
+    "column_name": "best_season_points_added_per_game"
+  },
+  {
+    "table_name": "league_format_player_careerlogs",
+    "column_name": "points_added_first_three_seas"
+  },
+  {
+    "table_name": "league_format_player_careerlogs",
+    "column_name": "points_added_first_four_seas"
+  },
+  {
+    "table_name": "league_format_player_careerlogs",
+    "column_name": "points_added_first_five_seas"
+  },
+  {
+    "table_name": "league_format_player_careerlogs",
+    "column_name": "points_added_first_seas"
+  },
+  {
+    "table_name": "league_format_player_careerlogs",
+    "column_name": "points_added_second_seas"
+  },
+  {
+    "table_name": "league_format_player_careerlogs",
+    "column_name": "points_added_third_seas"
+  },
+  {
+    "table_name": "league_format_player_careerlogs",
+    "column_name": "games"
+  },
+  {
+    "table_name": "league_format_player_careerlogs",
+    "column_name": "top_3"
+  },
+  {
+    "table_name": "league_format_player_careerlogs",
+    "column_name": "top_6"
+  },
+  {
+    "table_name": "league_format_player_careerlogs",
+    "column_name": "top_12"
+  },
+  {
+    "table_name": "league_format_player_careerlogs",
+    "column_name": "top_24"
+  },
+  {
+    "table_name": "league_format_player_careerlogs",
+    "column_name": "top_36"
+  },
+  {
+    "table_name": "league_format_player_gamelogs",
+    "column_name": "points"
+  },
+  {
+    "table_name": "league_format_player_gamelogs",
+    "column_name": "points_added"
+  },
+  {
+    "table_name": "league_format_player_gamelogs",
+    "column_name": "pos_rnk"
+  },
+  {
+    "table_name": "league_format_player_projection_values",
+    "column_name": "week"
+  },
+  {
+    "table_name": "league_format_player_projection_values",
+    "column_name": "year"
+  },
+  {
+    "table_name": "league_format_player_projection_values",
+    "column_name": "vorp"
+  },
+  {
+    "table_name": "league_format_player_projection_values",
+    "column_name": "market_salary"
+  },
+  {
+    "table_name": "league_format_player_seasonlogs",
+    "column_name": "year"
+  },
+  {
+    "table_name": "league_format_player_seasonlogs",
+    "column_name": "startable_games"
+  },
+  {
+    "table_name": "league_format_player_seasonlogs",
+    "column_name": "points"
+  },
+  {
+    "table_name": "league_format_player_seasonlogs",
+    "column_name": "points_per_game"
+  },
+  {
+    "table_name": "league_format_player_seasonlogs",
+    "column_name": "points_added"
+  },
+  {
+    "table_name": "league_format_player_seasonlogs",
+    "column_name": "points_added_per_game"
+  },
+  {
+    "table_name": "league_format_player_seasonlogs",
+    "column_name": "games"
+  },
+  {
+    "table_name": "league_format_player_seasonlogs",
+    "column_name": "points_rnk"
+  },
+  {
+    "table_name": "league_format_player_seasonlogs",
+    "column_name": "points_pos_rnk"
+  },
+  {
+    "table_name": "league_format_player_seasonlogs",
+    "column_name": "points_added_rnk"
+  },
+  {
+    "table_name": "league_format_player_seasonlogs",
+    "column_name": "points_added_pos_rnk"
+  },
+  {
+    "table_name": "league_player_projection_values",
+    "column_name": "week"
+  },
+  {
+    "table_name": "league_player_projection_values",
+    "column_name": "year"
+  },
+  {
+    "table_name": "league_player_projection_values",
+    "column_name": "vorp_adj"
+  },
+  {
+    "table_name": "league_player_projection_values",
+    "column_name": "market_salary_adj"
+  },
+  {
+    "table_name": "league_player_seasonlogs",
+    "column_name": "year"
+  },
+  {
+    "table_name": "league_player_seasonlogs",
+    "column_name": "start_tid"
+  },
+  {
+    "table_name": "league_player_seasonlogs",
+    "column_name": "start_acquisition_type"
+  },
+  {
+    "table_name": "league_player_seasonlogs",
+    "column_name": "end_tid"
+  },
+  {
+    "table_name": "league_player_seasonlogs",
+    "column_name": "end_acquisition_type"
+  },
+  {
+    "table_name": "league_player_seasonlogs",
+    "column_name": "salary"
+  },
+  {
+    "table_name": "league_team_lineup_contribution_weeks",
+    "column_name": "week"
+  },
+  {
+    "table_name": "league_team_lineup_contribution_weeks",
+    "column_name": "year"
+  },
+  {
+    "table_name": "league_team_lineup_contribution_weeks",
+    "column_name": "start"
+  },
+  {
+    "table_name": "league_team_lineup_contribution_weeks",
+    "column_name": "sp"
+  },
+  {
+    "table_name": "league_team_lineup_contribution_weeks",
+    "column_name": "bp"
+  },
+  {
+    "table_name": "league_team_lineup_contributions",
+    "column_name": "year"
+  },
+  {
+    "table_name": "league_team_lineup_contributions",
+    "column_name": "starts"
+  },
+  {
+    "table_name": "league_team_lineup_contributions",
+    "column_name": "sp"
+  },
+  {
+    "table_name": "league_team_lineup_contributions",
+    "column_name": "bp"
+  },
+  {
+    "table_name": "league_team_lineup_starters",
+    "column_name": "week"
+  },
+  {
+    "table_name": "league_team_lineup_starters",
+    "column_name": "year"
+  },
+  {
+    "table_name": "player",
+    "column_name": "fname"
+  },
+  {
+    "table_name": "player",
+    "column_name": "lname"
+  },
+  {
+    "table_name": "player",
+    "column_name": "pname"
+  },
+  {
+    "table_name": "player",
+    "column_name": "formatted"
+  },
+  {
+    "table_name": "player",
+    "column_name": "pos"
+  },
+  {
+    "table_name": "player",
+    "column_name": "pos1"
+  },
+  {
+    "table_name": "player",
+    "column_name": "pos2"
+  },
+  {
+    "table_name": "player",
+    "column_name": "height"
+  },
+  {
+    "table_name": "player",
+    "column_name": "weight"
+  },
+  {
+    "table_name": "player",
+    "column_name": "dob"
+  },
+  {
+    "table_name": "player",
+    "column_name": "forty"
+  },
+  {
+    "table_name": "player",
+    "column_name": "bench"
+  },
+  {
+    "table_name": "player",
+    "column_name": "vertical"
+  },
+  {
+    "table_name": "player",
+    "column_name": "broad"
+  },
+  {
+    "table_name": "player",
+    "column_name": "shuttle"
+  },
+  {
+    "table_name": "player",
+    "column_name": "cone"
+  },
+  {
+    "table_name": "player",
+    "column_name": "arm"
+  },
+  {
+    "table_name": "player",
+    "column_name": "hand"
+  },
+  {
+    "table_name": "player",
+    "column_name": "dpos"
+  },
+  {
+    "table_name": "player",
+    "column_name": "round"
+  },
+  {
+    "table_name": "player",
+    "column_name": "col"
+  },
+  {
+    "table_name": "player",
+    "column_name": "dv"
+  },
+  {
+    "table_name": "player",
+    "column_name": "start"
+  },
+  {
+    "table_name": "player",
+    "column_name": "cteam"
+  },
+  {
+    "table_name": "player",
+    "column_name": "posd"
+  },
+  {
+    "table_name": "player",
+    "column_name": "jnum"
+  },
+  {
+    "table_name": "player",
+    "column_name": "dcp"
+  },
+  {
+    "table_name": "player",
+    "column_name": "nflid"
+  },
+  {
+    "table_name": "player",
+    "column_name": "gsisid"
+  },
+  {
+    "table_name": "player",
+    "column_name": "gsispid"
+  },
+  {
+    "table_name": "player",
+    "column_name": "gsisItId"
+  },
+  {
+    "table_name": "player",
+    "column_name": "status"
+  },
+  {
+    "table_name": "player",
+    "column_name": "nfl_status"
+  },
+  {
+    "table_name": "player",
+    "column_name": "injury_status"
+  },
+  {
+    "table_name": "player",
+    "column_name": "high_school"
+  },
+  {
+    "table_name": "player",
+    "column_name": "sleeper_id"
+  },
+  {
+    "table_name": "player",
+    "column_name": "rotoworld_id"
+  },
+  {
+    "table_name": "player",
+    "column_name": "rotowire_id"
+  },
+  {
+    "table_name": "player",
+    "column_name": "sportradar_id"
+  },
+  {
+    "table_name": "player",
+    "column_name": "espn_id"
+  },
+  {
+    "table_name": "player",
+    "column_name": "fantasy_data_id"
+  },
+  {
+    "table_name": "player",
+    "column_name": "yahoo_id"
+  },
+  {
+    "table_name": "player",
+    "column_name": "keeptradecut_id"
+  },
+  {
+    "table_name": "player",
+    "column_name": "pfr_id"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "opp"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "tm"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "pos"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "jnum"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "active"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "started"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "pa"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "pc"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "py"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "ints"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "tdp"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "ra"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "ry"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "tdr"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "fuml"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "trg"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "rec"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "recy"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "tdrec"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "twoptc"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "prtd"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "krtd"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "snp"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "fgm"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "fgy"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "fg19"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "fg29"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "fg39"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "fg49"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "fg50"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "xpm"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "dsk"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "dint"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "dff"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "drf"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "dtno"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "dfds"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "dpa"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "dya"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "dblk"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "dsf"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "dtpr"
+  },
+  {
+    "table_name": "player_gamelogs",
+    "column_name": "dtd"
+  },
+  {
+    "table_name": "player_snaps_game",
+    "column_name": "snaps_off"
+  },
+  {
+    "table_name": "player_snaps_game",
+    "column_name": "snaps_def"
+  },
+  {
+    "table_name": "player_snaps_game",
+    "column_name": "snaps_st"
+  },
+  {
+    "table_name": "player_snaps_game",
+    "column_name": "snaps_pass"
+  },
+  {
+    "table_name": "player_snaps_game",
+    "column_name": "snaps_run"
+  },
+  {
+    "table_name": "practice",
+    "column_name": "week"
+  },
+  {
+    "table_name": "practice",
+    "column_name": "year"
+  },
+  {
+    "table_name": "practice",
+    "column_name": "status"
+  },
+  {
+    "table_name": "practice",
+    "column_name": "inj"
+  },
+  {
+    "table_name": "practice",
+    "column_name": "m"
+  },
+  {
+    "table_name": "practice",
+    "column_name": "tu"
+  },
+  {
+    "table_name": "practice",
+    "column_name": "w"
+  },
+  {
+    "table_name": "practice",
+    "column_name": "th"
+  },
+  {
+    "table_name": "practice",
+    "column_name": "f"
+  },
+  {
+    "table_name": "practice",
+    "column_name": "s"
+  },
+  {
+    "table_name": "practice",
+    "column_name": "su"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "sourceid"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "userid"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "week"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "year"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "pa"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "pc"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "py"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "ints"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "tdp"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "ra"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "ry"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "tdr"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "trg"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "rec"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "recy"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "tdrec"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "fuml"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "snp"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "twoptc"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "fgm"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "fgy"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "fg19"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "fg29"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "fg39"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "fg49"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "fg50"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "xpm"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "dsk"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "dint"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "dff"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "drf"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "dtno"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "dfds"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "dpa"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "dya"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "dblk"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "dsf"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "dtpr"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "dtd"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "krtd"
+  },
+  {
+    "table_name": "projections_index",
+    "column_name": "prtd"
+  },
+  {
+    "table_name": "props_index",
+    "column_name": "week"
+  },
+  {
+    "table_name": "props_index",
+    "column_name": "year"
+  },
+  {
+    "table_name": "props_index",
+    "column_name": "prop_type"
+  },
+  {
+    "table_name": "props_index",
+    "column_name": "ln"
+  },
+  {
+    "table_name": "props_index",
+    "column_name": "o"
+  },
+  {
+    "table_name": "props_index",
+    "column_name": "u"
+  },
+  {
+    "table_name": "props_index",
+    "column_name": "o_am"
+  },
+  {
+    "table_name": "props_index",
+    "column_name": "u_am"
+  },
+  {
+    "table_name": "props_index",
+    "column_name": "sourceid"
+  },
+  {
+    "table_name": "props_index",
+    "column_name": "timestamp"
+  },
+  {
+    "table_name": "props_index",
+    "column_name": "time_type"
+  },
+  {
+    "table_name": "props_index",
+    "column_name": "name"
+  },
+  {
+    "table_name": "props_index",
+    "column_name": "team"
+  },
+  {
+    "table_name": "props_index",
+    "column_name": "opp"
+  },
+  {
+    "table_name": "props_index",
+    "column_name": "pos"
+  },
+  {
+    "table_name": "props_index",
+    "column_name": "hits_soft"
+  },
+  {
+    "table_name": "props_index",
+    "column_name": "hit_weeks_soft"
+  },
+  {
+    "table_name": "props_index",
+    "column_name": "hits_hard"
+  },
+  {
+    "table_name": "props_index",
+    "column_name": "hit_weeks_hard"
+  },
+  {
+    "table_name": "props_index",
+    "column_name": "hits_opp"
+  },
+  {
+    "table_name": "props_index",
+    "column_name": "opp_hit_weeks"
+  },
+  {
+    "table_name": "props_index",
+    "column_name": "hist_rate_soft"
+  },
+  {
+    "table_name": "props_index",
+    "column_name": "hist_rate_hard"
+  },
+  {
+    "table_name": "props_index",
+    "column_name": "opp_allow_rate"
+  },
+  {
+    "table_name": "props_index",
+    "column_name": "hist_edge_soft"
+  },
+  {
+    "table_name": "props_index",
+    "column_name": "hist_edge_hard"
+  },
+  {
+    "table_name": "props_index",
+    "column_name": "market_prob"
+  },
+  {
+    "table_name": "props_index",
+    "column_name": "is_pending"
+  },
+  {
+    "table_name": "props_index",
+    "column_name": "is_success"
+  },
+  {
+    "table_name": "props_index",
+    "column_name": "risk"
+  },
+  {
+    "table_name": "props_index",
+    "column_name": "payout"
+  },
+  {
+    "table_name": "props_index",
+    "column_name": "all_weeks"
+  },
+  {
+    "table_name": "props_index",
+    "column_name": "opp_weeks"
+  },
+  {
+    "table_name": "props_index",
+    "column_name": "prop_id"
+  },
+  {
+    "table_name": "props_index_new",
+    "column_name": "prop_id"
+  },
+  {
+    "table_name": "props_index_new",
+    "column_name": "prop_type"
+  },
+  {
+    "table_name": "props_index_new",
+    "column_name": "ln"
+  },
+  {
+    "table_name": "props_index_new",
+    "column_name": "o"
+  },
+  {
+    "table_name": "props_index_new",
+    "column_name": "u"
+  },
+  {
+    "table_name": "props_index_new",
+    "column_name": "o_am"
+  },
+  {
+    "table_name": "props_index_new",
+    "column_name": "u_am"
+  },
+  {
+    "table_name": "props_index_new",
+    "column_name": "sourceid"
+  },
+  {
+    "table_name": "props_index_new",
+    "column_name": "timestamp"
+  },
+  {
+    "table_name": "props_index_new",
+    "column_name": "time_type"
+  },
+  {
+    "table_name": "props_index_new",
+    "column_name": "name"
+  },
+  {
+    "table_name": "props_index_new",
+    "column_name": "team"
+  },
+  {
+    "table_name": "props_index_new",
+    "column_name": "opp"
+  },
+  {
+    "table_name": "props_index_new",
+    "column_name": "pos"
+  },
+  {
+    "table_name": "props_index_new",
+    "column_name": "hits_soft"
+  },
+  {
+    "table_name": "props_index_new",
+    "column_name": "hit_weeks_soft"
+  },
+  {
+    "table_name": "props_index_new",
+    "column_name": "hits_hard"
+  },
+  {
+    "table_name": "props_index_new",
+    "column_name": "hit_weeks_hard"
+  },
+  {
+    "table_name": "props_index_new",
+    "column_name": "hits_opp"
+  },
+  {
+    "table_name": "props_index_new",
+    "column_name": "opp_hit_weeks"
+  },
+  {
+    "table_name": "props_index_new",
+    "column_name": "hist_rate_soft"
+  },
+  {
+    "table_name": "props_index_new",
+    "column_name": "hist_rate_hard"
+  },
+  {
+    "table_name": "props_index_new",
+    "column_name": "opp_allow_rate"
+  },
+  {
+    "table_name": "props_index_new",
+    "column_name": "hist_edge_soft"
+  },
+  {
+    "table_name": "props_index_new",
+    "column_name": "hist_edge_hard"
+  },
+  {
+    "table_name": "props_index_new",
+    "column_name": "market_prop"
+  },
+  {
+    "table_name": "props_index_new",
+    "column_name": "is_pending"
+  },
+  {
+    "table_name": "props_index_new",
+    "column_name": "is_success"
+  },
+  {
+    "table_name": "props_index_new",
+    "column_name": "risk"
+  },
+  {
+    "table_name": "props_index_new",
+    "column_name": "payout"
+  },
+  {
+    "table_name": "props_index_new",
+    "column_name": "all_weeks"
+  },
+  {
+    "table_name": "props_index_new",
+    "column_name": "opp_weeks"
+  },
+  {
+    "table_name": "rankings",
+    "column_name": "pos"
+  },
+  {
+    "table_name": "rankings",
+    "column_name": "week"
+  },
+  {
+    "table_name": "rankings",
+    "column_name": "year"
+  },
+  {
+    "table_name": "rankings",
+    "column_name": "min"
+  },
+  {
+    "table_name": "rankings",
+    "column_name": "max"
+  },
+  {
+    "table_name": "rankings",
+    "column_name": "avg"
+  },
+  {
+    "table_name": "rankings",
+    "column_name": "std"
+  },
+  {
+    "table_name": "rankings",
+    "column_name": "ornk"
+  },
+  {
+    "table_name": "rankings",
+    "column_name": "prnk"
+  },
+  {
+    "table_name": "rankings",
+    "column_name": "type"
+  },
+  {
+    "table_name": "rankings",
+    "column_name": "adp"
+  },
+  {
+    "table_name": "rankings",
+    "column_name": "ppr"
+  },
+  {
+    "table_name": "rankings",
+    "column_name": "sf"
+  },
+  {
+    "table_name": "rankings",
+    "column_name": "dynasty"
+  },
+  {
+    "table_name": "rankings",
+    "column_name": "rookie"
+  },
+  {
+    "table_name": "rankings",
+    "column_name": "sourceid"
+  },
+  {
+    "table_name": "rankings",
+    "column_name": "timestamp"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "sourceid"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "pa"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "pc"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "py"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "ints"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "tdp"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "ra"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "ry"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "tdr"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "trg"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "rec"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "recy"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "tdrec"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "fuml"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "twoptc"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "snp"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "fgm"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "fgy"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "fg19"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "fg29"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "fg39"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "fg49"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "fg50"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "xpm"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "dsk"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "dint"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "dff"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "drf"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "dtno"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "dfds"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "dpa"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "dya"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "dblk"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "dsf"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "dtpr"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "dtd"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "krtd"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "prtd"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "year"
+  },
+  {
+    "table_name": "ros_projections",
+    "column_name": "timestamp"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "week"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "year"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "scoring_format_hash"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "total"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "pa"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "pc"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "py"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "ints"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "tdp"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "ra"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "ry"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "tdr"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "trg"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "rec"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "recy"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "tdrec"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "fuml"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "twoptc"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "snp"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "fgm"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "fg19"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "fg29"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "fg39"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "fg49"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "fg50"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "xpm"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "dsk"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "dint"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "dff"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "drf"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "dtno"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "dfds"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "dpa"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "dya"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "dblk"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "dsf"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "dtpr"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "dtd"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "krtd"
+  },
+  {
+    "table_name": "scoring_format_player_projection_points",
+    "column_name": "prtd"
+  }
+]

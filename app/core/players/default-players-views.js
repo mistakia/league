@@ -1,66 +1,86 @@
 import { constants } from '@libs-shared'
 
-const views = {
+const players_page_views = {
   season_projections: {
     name: constants.season.isOffseason
       ? 'Season Projections'
       : 'Rest of Season Projections',
-    order_by: constants.season.isOffseason ? 'pts_added.0' : 'pts_added.ros',
+    order_by: constants.season.isOffseason
+      ? 'player_season_projected_points_added'
+      : 'player_rest_of_season_projected_points_added',
     fields: [
       // TODO player salary
       // TODO player points+
       // TODO player market salary
       // TODO player market adjusted salary
-      constants.season.isOffseason ? 'pts_added.0' : 'pts_added.ros',
-      constants.season.isOffseason ? 'points.0.total' : 'points.ros.total',
-      constants.season.isOffseason ? 'projection.0.py' : 'projection.ros.py',
-      constants.season.isOffseason ? 'projection.0.tdp' : 'projection.ros.tdp',
       constants.season.isOffseason
-        ? 'projection.0.ints'
-        : 'projection.ros.ints',
-      constants.season.isOffseason ? 'projection.0.ra' : 'projection.ros.ra',
-      constants.season.isOffseason ? 'projection.0.ry' : 'projection.ros.ry',
-      constants.season.isOffseason ? 'projection.0.tdr' : 'projection.ros.tdr',
+        ? 'player_season_projected_points_added'
+        : 'player_rest_of_season_projected_points_added',
       constants.season.isOffseason
-        ? 'projection.0.fuml'
-        : 'projection.ros.fuml',
-      constants.season.isOffseason ? 'projection.0.trg' : 'projection.ros.trg',
-      constants.season.isOffseason ? 'projection.0.rec' : 'projection.ros.rec',
+        ? 'player_season_projected_points'
+        : 'player_rest_of_season_projected_points',
       constants.season.isOffseason
-        ? 'projection.0.recy'
-        : 'projection.ros.recy',
+        ? 'player_season_projected_pass_yds'
+        : 'player_rest_of_season_projected_pass_yds',
       constants.season.isOffseason
-        ? 'projection.0.tdrec'
-        : 'projection.ros.tdrec'
+        ? 'player_season_projected_pass_tds'
+        : 'player_rest_of_season_projected_pass_tds',
+      constants.season.isOffseason
+        ? 'player_season_projected_pass_ints'
+        : 'player_rest_of_season_projected_pass_ints',
+      constants.season.isOffseason
+        ? 'player_season_projected_rush_atts'
+        : 'player_rest_of_season_projected_rush_atts',
+      constants.season.isOffseason
+        ? 'player_season_projected_rush_yds'
+        : 'player_rest_of_season_projected_rush_yds',
+      constants.season.isOffseason
+        ? 'player_season_projected_rush_tds'
+        : 'player_rest_of_season_projected_rush_tds',
+      constants.season.isOffseason
+        ? 'player_season_projected_fumbles_lost'
+        : 'player_rest_of_season_projected_fumbles_lost',
+      constants.season.isOffseason
+        ? 'player_season_projected_targets'
+        : 'player_rest_of_season_projected_targets',
+      constants.season.isOffseason
+        ? 'player_season_projected_recs'
+        : 'player_rest_of_season_projected_recs',
+      constants.season.isOffseason
+        ? 'player_season_projected_rec_yds'
+        : 'player_rest_of_season_projected_rec_yds',
+      constants.season.isOffseason
+        ? 'player_season_projected_rec_tds'
+        : 'player_rest_of_season_projected_rec_tds'
     ]
   },
   week_projections: {
     name: 'Week Projections',
-    order_by: 'pts_added.week',
+    order_by: 'player_week_projected_points_added',
     fields: [
       'opponent',
       'opponent_strength',
-      'pts_added.week',
-      'points.week.total',
-      'projection.week.py',
-      'projection.week.tdp',
-      'projection.week.ints',
+      'player_week_projected_points_added',
+      'player_week_projected_points',
+      'player_week_projected_pass_yds',
+      'player_week_projected_pass_tds',
+      'player_week_projected_pass_ints',
       'opponent_pass_pa',
       'opponent_pass_pc',
       'opponent_pass_py',
       'opponent_pass_tdp',
       'opponent_pass_ints',
-      'projection.week.ra',
-      'projection.week.ry',
-      'projection.week.tdr',
-      'projection.week.fuml',
+      'player_week_projected_rush_atts',
+      'player_week_projected_rush_yds',
+      'player_week_projected_rush_tds',
+      'player_week_projected_fumbles_lost',
       'opponent_rush_ra',
       'opponent_rush_ry',
       'opponent_rush_tdr',
-      'projection.week.trg',
-      'projection.week.rec',
-      'projection.week.recy',
-      'projection.week.tdrec',
+      'player_week_projected_targets',
+      'player_week_projected_recs',
+      'player_week_projected_rec_yds',
+      'player_week_projected_rec_tds',
       'opponent_recv_trg',
       'opponent_recv_rec',
       'opponent_recv_recy',
@@ -144,8 +164,8 @@ const views = {
   }
 }
 
-for (const key of Object.keys(views)) {
-  views[key].key = key
+for (const key of Object.keys(players_page_views)) {
+  players_page_views[key].key = key
 }
 
-export default views
+export default players_page_views

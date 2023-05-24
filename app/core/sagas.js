@@ -27,6 +27,7 @@ import { draftPickValueSagas } from './draft-pick-value'
 import { seasonlogSagas } from './seasonlogs'
 import { percentileSagas } from './percentiles'
 import { league_team_daily_values_sagas } from './league-team-daily-values'
+import { players_table_views_sagas } from './players-table-views'
 
 export default function* rootSaga() {
   yield all([
@@ -56,6 +57,7 @@ export default function* rootSaga() {
     ...draftPickValueSagas,
     ...seasonlogSagas,
     ...percentileSagas,
-    ...league_team_daily_values_sagas
+    ...league_team_daily_values_sagas,
+    ...players_table_views_sagas
   ])
 }
