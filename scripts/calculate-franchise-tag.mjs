@@ -1,17 +1,26 @@
 import debug from 'debug'
+import yargs from 'yargs'
+import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants, groupBy } from '#common'
 import { isMain } from '#utils'
 
+const argv = yargs(hideBin(process.argv)).argv
 const log = debug('calculate:franchise-tags')
 debug.enable('calculate:franchise-tags')
 
 const average = (array) => array.reduce((a, b) => a + b) / array.length
 
-const run = async () => {
-  const seasons = await db('seasons').where('year', constants.season.year)
+const run = async ({ year = constants.season.year }) => {
+  const seasons = await db('seasons')
+    .select('seasons.*')
+    .join('leagues', 'leagues.uid', '=', 'seasons.lid')
+    .where('leagues.hosted', 1)
+    .where('year', year)
+
   for (const { lid, year } of seasons) {
+    log(`Calculating franchise tags for lid ${lid} in ${year}`)
     const rosters = await db('rosters_players')
       .select(
         'rosters_players.*',
@@ -61,6 +70,11 @@ const run = async () => {
       update[`f${pos.toLowerCase()}`] = Math.round(avg)
     }
 
+    if (argv.dry) {
+      log(update)
+      continue
+    }
+
     log(`Updating lid ${lid} for ${constants.season.year} with:`, update)
     await db('seasons').update(update).where({ lid, year })
   }
@@ -72,7 +86,7 @@ export default run
 const main = async () => {
   let error
   try {
-    await run()
+    await run({ year: argv.year })
   } catch (err) {
     error = err
     console.log(error)
