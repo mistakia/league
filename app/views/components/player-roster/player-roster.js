@@ -30,7 +30,7 @@ class PlayerRoster extends Player {
       isRestrictedFreeAgencyPeriod,
       isBeforeExtensionDeadline,
       isTransition,
-      percentiles
+      percentiles = {}
     } = this.props
 
     const isWaiver = Boolean(waiverId)
@@ -44,7 +44,7 @@ class PlayerRoster extends Player {
     const bid = playerMap.get('bid', 0)
     const salary = isTransition ? value : bid || value
     const extensions = playerMap.get('extensions', 0)
-    const pos = playerMap.get('pos')
+    const pos = playerMap.get('pos', '')
     const slot = playerMap.get('slot')
     const extendedSalary = getExtensionAmount({
       pos,
