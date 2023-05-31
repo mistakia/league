@@ -15,7 +15,9 @@ const calculateDraftPickValue = async ({ league_format_hash } = {}) => {
     throw new Error('missing league_format_hash')
   }
 
-  log(`calculating draft pick value for league format hash: ${league_format_hash}`)
+  log(
+    `calculating draft pick value for league format hash: ${league_format_hash}`
+  )
 
   const inserts = []
 

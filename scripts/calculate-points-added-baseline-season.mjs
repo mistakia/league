@@ -203,7 +203,7 @@ if (isMain(import.meta.url)) {
 
       const update = {}
       for (const pos of constants.positions) {
-        const pos_starters = (starters_pool_by_pos[pos] || [])
+        const pos_starters = starters_pool_by_pos[pos] || []
         const pos_starters_baselines = pos_starters
           .map((p) => p.points - p.vor)
           .sort((a, b) => b - a)
