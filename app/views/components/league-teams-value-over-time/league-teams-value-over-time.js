@@ -7,6 +7,7 @@ import HighchartsReact from 'highcharts-react-official'
 import HighchartsSeriesLabel from 'highcharts/modules/series-label'
 
 import { constants } from '#common'
+import { Team } from '@core/teams'
 
 HighchartsSeriesLabel(Highcharts)
 
@@ -96,7 +97,7 @@ export default function LeagueTeamsValueOverTime({
 
     legend: {
       labelFormatter: function () {
-        const team = teams.get(this.options.tid)
+        const team = teams.get(this.options.tid, new Team())
         const team_delta_value = teams_value_deltas.get(this.options.tid)
         const latest_team_value = team_delta_value.get(
           'latest_team_value',

@@ -32,20 +32,18 @@ export default class TradeSelectTeam extends React.Component {
   }
 
   render = () => {
-    const { teams, teamId, trade } = this.props
+    const { teams, trade } = this.props
     const { anchorEl } = this.state
 
-    const menuItems = teams
-      .filter((t) => t.uid !== teamId)
-      .map((team, index) => (
-        <MenuItem
-          key={team.uid}
-          selected={team.uid === trade.accept_tid}
-          onClick={() => this.handleSelect(team.uid)}
-        >
-          {team.name}
-        </MenuItem>
-      ))
+    const menuItems = teams.map((team, index) => (
+      <MenuItem
+        key={team.uid}
+        selected={team.uid === trade.accept_tid}
+        onClick={() => this.handleSelect(team.uid)}
+      >
+        {team.name}
+      </MenuItem>
+    ))
 
     return (
       <div>
@@ -72,7 +70,6 @@ export default class TradeSelectTeam extends React.Component {
 
 TradeSelectTeam.propTypes = {
   select: PropTypes.func,
-  teams: ImmutablePropTypes.list,
-  teamId: PropTypes.number,
+  teams: PropTypes.array,
   trade: ImmutablePropTypes.record
 }

@@ -3,6 +3,7 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 
 import { ordinalSuffixOf } from '@core/utils'
+import { Team } from '@core/teams'
 
 import './trade-select-pick.styl'
 
@@ -17,8 +18,10 @@ export default class TradeSelectPick extends React.Component {
       text = `${text} #${pick.pick} (${pickStr})`
     }
 
-    const team = teams.get(pick.otid)
-    text += ` (${team.name})`
+    const team = teams.get(pick.otid, new Team())
+    if (team.name) {
+      text += ` (${team.name})`
+    }
 
     const classNames = ['trade__select-pick']
     if (isSelected) classNames.push('selected')

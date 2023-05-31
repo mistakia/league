@@ -34,7 +34,7 @@ class PlayerRow extends Player {
 
     const pid = playerMap.get('pid')
     const tid = playerMap.get('tid')
-    const team = teams.get(tid) || new Team()
+    const team = teams.get(tid, new Team())
     const nfl_team = playerMap.get('team')
     const pos = playerMap.get('pos')
     const isRostered = Boolean(tid)
