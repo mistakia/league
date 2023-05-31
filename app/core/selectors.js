@@ -2823,7 +2823,7 @@ function getTeamTradeSummary(state, { lineups, playerMaps, picks }) {
     0
   )
   const player_value = playerMaps.reduce(
-    (sum, pMap) => sum + Math.max(pMap.getIn(['vorp', vorpType]), 0),
+    (sum, pMap) => sum + Math.max(pMap.getIn(['vorp', vorpType], 0), 0),
     0
   )
   const values = {
@@ -2832,7 +2832,7 @@ function getTeamTradeSummary(state, { lineups, playerMaps, picks }) {
     player_value,
     draft_value,
     value_adj: playerMaps.reduce(
-      (sum, pMap) => sum + Math.max(pMap.getIn(['vorp_adj', vorpType]), 0),
+      (sum, pMap) => sum + Math.max(pMap.getIn(['vorp_adj', vorpType], 0), 0),
       0
     ),
     salary: playerMaps.reduce((sum, pMap) => sum + pMap.get('value', 0), 0)

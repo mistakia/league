@@ -39,7 +39,7 @@ export default function optimizeLineup({
 
     for (const player of players) {
       const points = Math.round(
-        (player.points[week] && player.points[week].total) || 0
+        (player.points && player.points[week] && player.points[week].total) || 0
       )
       addPlayer({ pid: player.pid, player_pos: player.pos, points })
     }
