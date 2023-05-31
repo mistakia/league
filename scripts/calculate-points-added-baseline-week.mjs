@@ -53,7 +53,8 @@ const calculate_points_added_baseline_week = async ({
 const main = async () => {
   let error
   try {
-    if (argv.lid) {
+    const lid = argv.lid
+    if (typeof lid === 'number') {
       const league = await getLeague({ lid: argv.lid })
       if (!league) {
         throw new Error(`League ${argv.lid} not found`)
