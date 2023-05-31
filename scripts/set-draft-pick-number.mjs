@@ -37,16 +37,17 @@ const run = async () => {
     year: constants.season.year
   }
   await db('draft').update({ pick: null }).where(query_params)
-  const compPicks = await db('draft').where(query_params)
+  const compensatory_picks = await db('draft').where(query_params)
 
   const inserts = []
   let count = 0
-  while (compPicks.length) {
+  while (compensatory_picks.length) {
     // find comp picks following the draft order
+    // TODO do not use num_teams as it could change
     const tid = draftOrder[count % league.num_teams]
-    const index = compPicks.findIndex((p) => p.tid === tid)
+    const index = compensatory_picks.findIndex((p) => p.tid === tid)
     if (index >= 0) {
-      const pick = compPicks.splice(index, 1)[0]
+      const pick = compensatory_picks.splice(index, 1)[0]
       inserts.push(pick)
       const num = picks.length + inserts.length
       await db('draft')

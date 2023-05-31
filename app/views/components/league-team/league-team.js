@@ -162,7 +162,7 @@ export default function LeagueTeam({
             <Toolbar>
               <div className='dashboard__section-header-title'>Draft Picks</div>
             </Toolbar>
-            <DashboardDraftPicks picks={picks} league={league} />
+            <DashboardDraftPicks picks={picks} />
           </div>
         </Grid>
         {is_hosted_league && (

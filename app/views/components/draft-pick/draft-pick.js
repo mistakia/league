@@ -9,9 +9,7 @@ import './draft-pick.styl'
 
 export default class DraftPick extends React.Component {
   render() {
-    const { playerMap, pick, team, league, isActive, isUser } = this.props
-
-    const pickNum = pick.pick % league.num_teams || league.num_teams
+    const { playerMap, pick, team, isActive, isUser } = this.props
 
     const classNames = ['draft__pick']
     if (isActive && !pick.pid) {
@@ -28,7 +26,7 @@ export default class DraftPick extends React.Component {
     return (
       <div className={classNames.join(' ')}>
         <div className='draft__pick-num formatted'>
-          {`${pick.round}.${('0' + pickNum).slice(-2)}`}
+          {pick.pick_str || pick.pick || '-'}
         </div>
         <div className='draft__pick-num pick'>{`#${pick.pick}`}</div>
         <div className='draft__pick-main'>
@@ -67,6 +65,5 @@ DraftPick.propTypes = {
   pick: PropTypes.object,
   team: ImmutablePropTypes.record,
   isActive: PropTypes.bool,
-  isUser: PropTypes.bool,
-  league: PropTypes.object
+  isUser: PropTypes.bool
 }

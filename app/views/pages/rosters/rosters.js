@@ -192,7 +192,7 @@ export default function RostersPage({
   const pickItems = []
   for (const team of teams.valueSeq()) {
     pickItems.push(
-      <DashboardDraftPicks key={team.uid} picks={team.picks} league={league} />
+      <DashboardDraftPicks key={team.uid} picks={team.picks} />
     )
   }
 
