@@ -299,6 +299,7 @@ CREATE TABLE `draft` (
   `round` tinyint(1) NOT NULL,
   `comp` tinyint(1) DEFAULT 0,
   `pick` tinyint(2) DEFAULT NULL,
+  `pick_str` varchar(4) DEFAULT NULL,
   `tid` int(6) NOT NULL,
   `otid` int(6) NOT NULL,
   `lid` int(6) NOT NULL,
