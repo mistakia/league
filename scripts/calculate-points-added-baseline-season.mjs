@@ -203,7 +203,7 @@ if (isMain(import.meta.url)) {
 
       const update = {}
       for (const pos of constants.positions) {
-        const pos_starters = starters_pool_by_pos[pos]
+        const pos_starters = (starters_pool_by_pos[pos] || [])
         const pos_starters_baselines = pos_starters
           .map((p) => p.points - p.vor)
           .sort((a, b) => b - a)
@@ -212,7 +212,7 @@ if (isMain(import.meta.url)) {
           const top_week =
             pos_starters_baselines[0] / (constants.season.nflFinalWeek - 1)
 
-          update[`pts_base_season_${pos.toLowerCase()}`] = top_week
+          update[`pts_base_season_${pos.toLowerCase()}`] = top_week || null
           continue
         }
 
@@ -224,7 +224,7 @@ if (isMain(import.meta.url)) {
           const top_week =
             filtered_starter_baselines[0] / (constants.season.nflFinalWeek - 1)
 
-          update[`pts_base_season_${pos.toLowerCase()}`] = top_week
+          update[`pts_base_season_${pos.toLowerCase()}`] = top_week || null
           continue
         }
 
@@ -248,7 +248,7 @@ if (isMain(import.meta.url)) {
           filtered_break_mean / (constants.season.nflFinalWeek - 1)
 
         update[`pts_base_season_${pos.toLowerCase()}`] =
-          filtered_break_mean_week
+          filtered_break_mean_week || null
       }
 
       log(update)
