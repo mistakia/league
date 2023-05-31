@@ -27,7 +27,7 @@ const generate_league_formats = async () => {
   const sqbrbwrte_options = [0, 1]
   const swrte_options = [0]
   const sdst_options = [1]
-  const sk_options = [1]
+  const sk_options = [0, 1]
 
   const bench_options = [7]
   const ps_options = [4]
