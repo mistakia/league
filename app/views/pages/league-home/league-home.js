@@ -2,7 +2,6 @@ import React, { useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
-import { List } from 'immutable'
 import dayjs from 'dayjs'
 import Alert from '@mui/material/Alert'
 import AlertTitle from '@mui/material/AlertTitle'
@@ -90,25 +89,6 @@ export default function LeagueHomePage({
       )
   }
 
-  const activeItems = []
-  let activePlayers = new List()
-  const cutlist_pids = cutlist.map((cMap) => cMap.get('pid')).toJS()
-  for (const position in groups) {
-    const players = groups[position]
-    for (const playerMap of players) {
-      if (
-        !constants.isRegularSeason &&
-        cutlist_pids.includes(playerMap.get('pid'))
-      )
-        continue
-      if (!playerMap.get('pid')) continue
-      activePlayers = activePlayers.push(playerMap)
-      activeItems.push(
-        <PlayerRoster key={playerMap.get('pid')} playerMap={playerMap} />
-      )
-    }
-  }
-
   const transitionItems = []
   transitionPlayers.forEach((playerMap, index) => {
     transitionItems.push(
@@ -116,12 +96,8 @@ export default function LeagueHomePage({
     )
   })
 
-  const reserveIRItems = []
   for (const playerMap of players.ir) {
     if (!playerMap.get('pid')) continue
-    reserveIRItems.push(
-      <PlayerRoster key={playerMap.get('pid')} playerMap={playerMap} />
-    )
 
     if (
       !isReserveEligible({
@@ -141,12 +117,8 @@ export default function LeagueHomePage({
     }
   }
 
-  const reserveCOVItems = []
   for (const playerMap of players.cov) {
     if (!playerMap.get('pid')) continue
-    reserveCOVItems.push(
-      <PlayerRoster key={playerMap.get('pid')} playerMap={playerMap} />
-    )
 
     if (
       !isReserveCovEligible({
@@ -185,30 +157,11 @@ export default function LeagueHomePage({
     )
   }
 
-  const practice_signed_items = []
-  for (const playerMap of players.practice_signed) {
-    if (!playerMap.get('pid')) continue
-    practice_signed_items.push(
-      <PlayerRoster key={playerMap.get('pid')} playerMap={playerMap} />
-    )
-  }
-
-  const practice_drafted_items = []
-  for (const playerMap of players.practice_drafted) {
-    if (!playerMap.get('pid')) continue
-    practice_drafted_items.push(
-      <PlayerRoster key={playerMap.get('pid')} playerMap={playerMap} />
-    )
-  }
-
   const teamPoaches = poaches.filter((p) => p.tid === teamId)
 
   const body = (
     <Container maxWidth='md' classes={{ root: 'league__home' }}>
       <Grid container spacing={2} alignItems='flex-start'>
-        <Grid item xs={12}>
-          <LeagueHeader />
-        </Grid>
         {notices.length ? (
           <Grid item xs={12}>
             {notices}
@@ -258,6 +211,9 @@ export default function LeagueHomePage({
             />
           </Grid>
         )}
+        <Grid item xs={12}>
+          <LeagueHeader />
+        </Grid>
         {Boolean(cutlist.size) && (
           <Grid item xs={12}>
             <DashboardPlayersTable

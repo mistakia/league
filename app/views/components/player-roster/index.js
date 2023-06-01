@@ -3,7 +3,8 @@ import { createSelector } from 'reselect'
 
 import {
   isBeforeExtensionDeadline,
-  isRestrictedFreeAgencyPeriod
+  isRestrictedFreeAgencyPeriod,
+  get_app
 } from '@core/selectors'
 
 import PlayerRoster from './player-roster'
@@ -11,9 +12,11 @@ import PlayerRoster from './player-roster'
 const mapStateToProps = createSelector(
   isRestrictedFreeAgencyPeriod,
   isBeforeExtensionDeadline,
-  (isRestrictedFreeAgencyPeriod, isBeforeExtensionDeadline) => ({
+  get_app,
+  (isRestrictedFreeAgencyPeriod, isBeforeExtensionDeadline, app) => ({
     isRestrictedFreeAgencyPeriod,
-    isBeforeExtensionDeadline
+    isBeforeExtensionDeadline,
+    is_manager_in_league: app.get('leagueIds').includes(app.get('leagueId'))
   })
 )
 

@@ -82,7 +82,7 @@ export default class DashboardPlayersTable extends React.Component {
     let body
     if (isWaiver) {
       body = (
-        <div ref={this.ref}>
+        <div className='table__body' ref={this.ref}>
           <SortableList
             items={claims}
             lockAxis='y'
@@ -114,7 +114,7 @@ export default class DashboardPlayersTable extends React.Component {
       })
 
       body = (
-        <div ref={this.ref}>
+        <div className='table__body' ref={this.ref}>
           <SortableCutlist
             items={cutlist}
             lockAxis='y'

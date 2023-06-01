@@ -288,7 +288,6 @@ export default class PlayerContextMenu extends React.Component {
         add({
           key: 'transition',
           onClick: this.handleTransitionTag,
-          disabled: !status.eligible.protect,
           label: `${
             status.tagged.transition ? 'Update' : 'Apply'
           } Transition Tag`
