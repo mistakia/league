@@ -18,10 +18,15 @@ import {
 } from '#common'
 
 const argv = yargs(hideBin(process.argv)).argv
-const log = debug('calculate-vor')
-debug.enable('calculate-vor')
+const log = debug('calculate-points-added')
+debug.enable('calculate-points-added')
 
-const calculateVOR = async ({ year, rookie, league, week = 'ALL' }) => {
+const calculate_points_added = async ({
+  year,
+  rookie,
+  league,
+  week = 'ALL'
+}) => {
   if (!Number.isInteger(year)) {
     throw new Error(`${year} invalid year`)
   }
@@ -30,7 +35,7 @@ const calculateVOR = async ({ year, rookie, league, week = 'ALL' }) => {
   const rosterSize = getRosterSize(league)
   const leagueTotalCap = num_teams * cap - num_teams * rosterSize * min_bid
 
-  log(`calculating VOR for ${year}`)
+  log(`calculating Points Added for ${year}`)
 
   // get player stats for year
   const query = db('player_gamelogs')
@@ -65,15 +70,15 @@ const calculateVOR = async ({ year, rookie, league, week = 'ALL' }) => {
     item.games = games
 
     item.points = {}
-    item.vorp = {}
-    item.vorp_adj = {}
+    item.pts_added = {}
+    item.salary_adj_pts_added = {}
     item.market_salary = {}
 
     // set default values
     for (const week of weeks) {
       item.points[week] = { total: 0 }
-      item.vorp[week] = -999
-      item.vorp_adj[week] = 0
+      item.pts_added[week] = -999
+      item.salary_adj_pts_added[week] = 0
       item.market_salary[week] = 0
     }
 
@@ -91,7 +96,7 @@ const calculateVOR = async ({ year, rookie, league, week = 'ALL' }) => {
     players.push({ pid, pname, pos, start, ...item })
   }
 
-  log(`calculating VOR for ${rows.length} players`)
+  log(`calculating Points Added for ${rows.length} players`)
 
   const baselines = {}
   const baselineTotals = {}
@@ -109,8 +114,12 @@ const calculateVOR = async ({ year, rookie, league, week = 'ALL' }) => {
     }
 
     // calculate values
-    const total_vorp = calculateValues({ players, baselines: baseline, week })
-    calculatePrices({ cap: leagueTotalCap, total_vorp, players, week })
+    const total_pts_added = calculateValues({
+      players,
+      baselines: baseline,
+      week
+    })
+    calculatePrices({ cap: leagueTotalCap, total_pts_added, players, week })
   }
 
   const points_by_position = {}
@@ -119,18 +128,18 @@ const calculateVOR = async ({ year, rookie, league, week = 'ALL' }) => {
   }
 
   // calculate earned contract value
-  let total_vorp = 0
+  let total_pts_added = 0
   for (const player of players) {
-    player.vorp.earned = 0
-    player.starts = Object.values(player.vorp).filter((v) => v > 0).length
+    player.pts_added.earned = 0
+    player.starts = Object.values(player.pts_added).filter((v) => v > 0).length
     player.points = sum(Object.values(player.points).map((p) => p.total))
-    for (const value of Object.values(player.vorp)) {
+    for (const value of Object.values(player.pts_added)) {
       if (value <= 0) {
         continue
       }
 
-      player.vorp.earned += value
-      total_vorp += value
+      player.pts_added.earned += value
+      total_pts_added += value
     }
 
     points_by_position[player.pos].push(player.points)
@@ -146,7 +155,7 @@ const calculateVOR = async ({ year, rookie, league, week = 'ALL' }) => {
 
   calculatePrices({
     cap: leagueTotalCap,
-    total_vorp,
+    total_pts_added,
     players,
     week: 'earned'
   })
@@ -158,7 +167,7 @@ const calculateVOR = async ({ year, rookie, league, week = 'ALL' }) => {
       rookie: player.start === year,
       pos: player.pos,
       pos_rnk: player.pos_rnk,
-      vor: player.vorp.earned,
+      pts_added: player.pts_added.earned,
       value: player.market_salary.earned,
       points: player.points,
       games: player.games,
@@ -189,14 +198,14 @@ const main = async () => {
       return
     }
     const league = await getLeague({ lid })
-    const { players, baselineTotals, weeks } = await calculateVOR({
+    const { players, baselineTotals, weeks } = await calculate_points_added({
       year,
       rookie,
       league,
       week
     })
     const top200 = Object.values(players)
-      .sort((a, b) => b.vor - a.vor)
+      .sort((a, b) => b.pts_added - a.pts_added)
       .slice(0, 200)
     const p = new Table()
     const getColor = (pos) => {
@@ -216,7 +225,7 @@ const main = async () => {
         {
           index: index + 1,
           name: player.player,
-          vor: player.vor.toFixed(2),
+          pts_added: player.pts_added.toFixed(2),
           points: player.points.toFixed(2),
           rank: `${player.pos}${player.pos_rnk}`,
           value: `$${player.value}`,
@@ -248,8 +257,8 @@ const main = async () => {
 }
 
 if (isMain(import.meta.url)) {
-  debug.enable('calculate-vor')
+  debug.enable('calculate-points-added')
   main()
 }
 
-export default calculateVOR
+export default calculate_points_added

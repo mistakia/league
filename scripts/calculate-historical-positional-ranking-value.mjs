@@ -5,7 +5,7 @@ import { Table } from 'console-table-printer'
 
 import { groupBy, constants } from '#common'
 import { getLeague, isMain } from '#utils'
-import calculateVOR from './calculate-vor.mjs'
+import calculate_points_added from './calculate-points-added.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 
@@ -16,7 +16,7 @@ const calculateHistoricalPositionalRankingValue = async ({ league }) => {
   const data = {}
 
   for (; year < constants.season.year; year++) {
-    const { players } = await calculateVOR({ year, league })
+    const { players } = await calculate_points_added({ year, league })
     const values = Object.values(players)
     const byPosition = groupBy(values, 'pos')
     for (const pos in byPosition) {
@@ -38,14 +38,14 @@ const calculateHistoricalPositionalRankingValue = async ({ league }) => {
       const players = byPosition[year]
       for (const player of players) {
         if (sums[player.prnk]) {
-          sums[player.prnk].vor += player.vor
+          sums[player.prnk].pts_added += player.pts_added
           sums[player.prnk].value += player.value
           sums[player.prnk].points += player.points
         } else {
           sums[player.prnk] = {
             pos,
             rank: player.prnk,
-            vor: player.vor,
+            pts_added: player.pts_added,
             value: player.value,
             points: player.points
           }
@@ -58,9 +58,9 @@ const calculateHistoricalPositionalRankingValue = async ({ league }) => {
       item.value = item.value / years
     }
 
-    /* const vorValues = Object.values(sums).map(v => [v.rank, v.vor || 0.01])
-     * const vorReg = pos === 'QB' ? regression.linear(vorValues) : regression.exponential(vorValues)
-     * const values = Object.values(sums).map(v => ({ reg: vorReg.predict(v.rank)[1], ...v }))
+    /* const pts_added_values = Object.values(sums).map(v => [v.rank, v.pts_added || 0.01])
+     * const pts_added_regression = pos === 'QB' ? regression.linear(pts_added_values) : regression.exponential(pts_added_values)
+     * const values = Object.values(sums).map(v => ({ reg: pts_added_regression.predict(v.rank)[1], ...v }))
      */
     const regValues = Object.values(sums).map((v) => [v.rank, v.value || 0.01])
     const reg =
@@ -107,7 +107,7 @@ if (isMain(import.meta.url)) {
       p.addRow(
         {
           position: `${player.pos}${player.rank}`,
-          vor: player.vor.toFixed(1),
+          pts_added: player.pts_added.toFixed(1),
           value: player.reg,
           actual: player.value.toFixed(2)
         },

@@ -51,9 +51,11 @@ export default class PlayerRosterTotal extends React.Component {
       projectedSalaryTotal = projectedSalaryTotal + projectedSalary
       savingsTotal = savingsTotal + Math.max(savings, 0)
       valueTotal =
-        valueTotal + Math.max(playerMap.getIn(['vorp', projectionType], 0), 0)
+        valueTotal +
+        Math.max(playerMap.getIn(['pts_added', projectionType], 0), 0)
       valueAdjTotal =
-        valueAdjTotal + playerMap.getIn(['vorp_adj', projectionType], 0)
+        valueAdjTotal +
+        playerMap.getIn(['salary_adj_pts_added', projectionType], 0)
       weekPointsTotal =
         weekPointsTotal + playerMap.getIn(['points', `${week}`, 'total'], 0)
       points_added = points_added + playerMap.get('points_added', 0)

@@ -5,13 +5,13 @@ const views = {
     name: constants.season.isOffseason
       ? 'Season Projections'
       : 'Rest of Season Projections',
-    order_by: constants.season.isOffseason ? 'vorp.0' : 'vorp.ros',
+    order_by: constants.season.isOffseason ? 'pts_added.0' : 'pts_added.ros',
     fields: [
       // TODO player salary
       // TODO player points+
       // TODO player market salary
       // TODO player market adjusted salary
-      constants.season.isOffseason ? 'vorp.0' : 'vorp.ros',
+      constants.season.isOffseason ? 'pts_added.0' : 'pts_added.ros',
       constants.season.isOffseason ? 'points.0.total' : 'points.ros.total',
       constants.season.isOffseason ? 'projection.0.py' : 'projection.ros.py',
       constants.season.isOffseason ? 'projection.0.tdp' : 'projection.ros.tdp',
@@ -36,11 +36,11 @@ const views = {
   },
   week_projections: {
     name: 'Week Projections',
-    order_by: 'vorp.week',
+    order_by: 'pts_added.week',
     fields: [
       'opponent',
       'opponent_strength',
-      'vorp.week',
+      'pts_added.week',
       'points.week.total',
       'projection.week.py',
       'projection.week.tdp',

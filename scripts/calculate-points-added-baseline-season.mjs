@@ -13,11 +13,11 @@ import {
 } from '#common'
 import { getLeague, isMain } from '#utils'
 import db from '#db'
-import calculateVOR from './calculate-vor.mjs'
+import calculate_points_added from './calculate-points-added.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('calculate-points-added-baseline-season')
-debug.enable('calculate-points-added-baseline-season,calculate-vor')
+debug.enable('calculate-points-added-baseline-season,calculate-points-added')
 
 function removeOutliers(arr) {
   // Sort the array in ascending order
@@ -47,7 +47,7 @@ const calculate_points_added_baseline_season = async ({ league }) => {
   const data = {}
 
   for (; year < constants.season.year; year++) {
-    const { players } = await calculateVOR({ year, league })
+    const { players } = await calculate_points_added({ year, league })
     const values = Object.values(players)
     const byPosition = groupBy(values, 'pos')
     for (const pos in byPosition) {
@@ -67,17 +67,17 @@ const calculate_points_added_baseline_season = async ({ league }) => {
     const sums = {}
     for (const year in byPosition) {
       const players = byPosition[year]
-      const sorted = players.sort((a, b) => b.vor - a.vor)
+      const sorted = players.sort((a, b) => b.pts_added - a.pts_added)
       for (const [index, player] of sorted.entries()) {
         if (sums[index]) {
-          sums[index].vor += player.vor
+          sums[index].pts_added += player.pts_added
           sums[index].value += player.value
           sums[index].points += player.points
         } else {
           sums[index] = {
             pos,
             rank: index + 1,
-            vor: player.vor,
+            pts_added: player.pts_added,
             value: player.value,
             points: player.points
           }
@@ -88,13 +88,13 @@ const calculate_points_added_baseline_season = async ({ league }) => {
     for (const prnk in sums) {
       const item = sums[prnk]
       item.value = item.value / years
-      item.vor = item.vor / years
+      item.pts_added = item.pts_added / years
       item.points = item.points / years
     }
 
-    /* const vorValues = Object.values(sums).map(v => [v.rank, v.vor || 0.01])
-     * const vorReg = pos === 'QB' ? regression.linear(vorValues) : regression.exponential(vorValues)
-     * const values = Object.values(sums).map(v => ({ reg: vorReg.predict(v.rank)[1], ...v }))
+    /* const pts_added_values = Object.values(sums).map(v => [v.rank, v.pts_added || 0.01])
+     * const pts_added_regression = pos === 'QB' ? regression.linear(pts_added_values) : regression.exponential(pts_added_values)
+     * const values = Object.values(sums).map(v => ({ reg: pts_added_regression.predict(v.rank)[1], ...v }))
      */
     const regValues = Object.values(sums).map((v) => [v.rank, v.value || 0.01])
     const regV =
@@ -115,7 +115,7 @@ const calculate_points_added_baseline_season = async ({ league }) => {
     output = output.concat(values)
   }
 
-  return output.sort((a, b) => b.vor - a.vor)
+  return output.sort((a, b) => b.pts_added - a.pts_added)
 }
 
 if (isMain(import.meta.url)) {
@@ -148,14 +148,14 @@ if (isMain(import.meta.url)) {
     }
 
     for (const player of result) {
-      if (player.vor > 0) {
+      if (player.pts_added > 0) {
         baselines[player.pos] = player
       }
 
       p.addRow(
         {
           position: `${player.pos}${player.rank}`,
-          value: player.vor.toFixed(1),
+          value: player.pts_added.toFixed(1),
           reg_value: player.regV,
           reg_points: player.regP,
           salary: player.value.toFixed(2),
@@ -205,7 +205,7 @@ if (isMain(import.meta.url)) {
       for (const pos of constants.positions) {
         const pos_starters = starters_pool_by_pos[pos] || []
         const pos_starters_baselines = pos_starters
-          .map((p) => p.points - p.vor)
+          .map((p) => p.points - p.pts_added)
           .sort((a, b) => b - a)
 
         if (pos === 'K' || pos === 'DST') {

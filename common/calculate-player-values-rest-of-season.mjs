@@ -3,8 +3,8 @@ import calculatePrices from './calculate-prices.mjs'
 import * as constants from './constants.mjs'
 
 export default function ({ players, league }) {
-  // calculate total available vorp
-  let total_vorp = 0
+  // calculate total available points added
+  let total_pts_added = 0
 
   const { num_teams, cap, min_bid } = league
   const league_roster_size = getRosterSize(league)
@@ -12,25 +12,25 @@ export default function ({ players, league }) {
     num_teams * cap - num_teams * league_roster_size * min_bid
 
   for (const player of players) {
-    let player_ros_vorp = 0
-    for (const [week, week_vorp_value] of Object.entries(player.vorp)) {
+    let player_ros_pts_added = 0
+    for (const [week, pts_added] of Object.entries(player.pts_added)) {
       const wk = Number(week)
       if (wk && wk >= constants.season.week) {
-        if (week_vorp_value < 0) {
+        if (pts_added < 0) {
           continue
         }
 
-        player_ros_vorp += week_vorp_value
-        total_vorp += week_vorp_value
+        player_ros_pts_added += pts_added
+        total_pts_added += pts_added
       }
     }
-    player.vorp.ros = player_ros_vorp
+    player.pts_added.ros = player_ros_pts_added
   }
 
   // calculate ros contract value
   calculatePrices({
     cap: league_total_salary_cap,
-    total_vorp,
+    total_pts_added,
     players,
     week: 'ros'
   })

@@ -69,8 +69,11 @@ class PlayerRoster extends Player {
           (isBeforeExtensionDeadline ? extendedSalary : bid || value)
         : null
 
-    const vorp = playerMap.getIn(['vorp', projectionType], 0)
-    const vorpAdj = playerMap.getIn(['vorp_adj', projectionType], 0)
+    const pts_added = playerMap.getIn(['pts_added', projectionType], 0)
+    const salary_adj_pts_added = playerMap.getIn(
+      ['salary_adj_pts_added', projectionType],
+      0
+    )
     const week = Math.max(constants.week, 1)
     const weekPoints = playerMap.getIn(['points', `${week}`, 'total'], 0)
     const starts = playerMap.getIn(['lineups', 'starts'], 0)
@@ -234,13 +237,13 @@ class PlayerRoster extends Player {
         <div className='row__group'>
           <div className='row__group-body'>
             <div className='metric table__cell'>
-              {vorp ? vorp.toFixed(0) : '-'}
+              {pts_added ? pts_added.toFixed(0) : '-'}
             </div>
             {isOffseason && (
               <PercentileMetric
                 scaled
-                value={vorpAdj}
-                percentile={percentiles.vorp_adj}
+                value={salary_adj_pts_added}
+                percentile={percentiles.salary_adj_pts_added}
               />
             )}
             <div className='metric table__cell'>{starts || '-'}</div>

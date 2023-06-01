@@ -5,7 +5,7 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { constants } from '#common'
 import { isMain, getLeague, get_league_format } from '#utils'
-import calculateValue from './calculate-vor.mjs'
+import calculate_points_added from './calculate-points-added.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('generate-league-format-player-gamelogs')
@@ -22,7 +22,11 @@ const generate_league_format_player_gamelogs = async ({
 
   const league_format = await get_league_format({ league_format_hash })
 
-  const result = await calculateValue({ league: league_format, year, week })
+  const result = await calculate_points_added({
+    league: league_format,
+    year,
+    week
+  })
   const inserts = []
   for (const pid in result.players) {
     const item = result.players[pid]
@@ -33,7 +37,7 @@ const generate_league_format_player_gamelogs = async ({
       league_format_hash,
       pos_rnk: item.pos_rnk,
       points: item.points,
-      points_added: item.vor
+      points_added: item.pts_added
     })
   }
 

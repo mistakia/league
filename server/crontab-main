@@ -46,7 +46,7 @@
 0 0 * 6-8 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-fftoday-projections.mjs --season &>> /var/log/league/import-fftoday-season.log
 0 0 * 6-8 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-projections.mjs --season &>> /var/log/league/import-nfl-season.log
 
-## process projections & generate vorp, market salary
+## process projections & calculate projected points added, market salary
 30 * * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-projections.mjs &>> /var/log/league/process-projections.log
 
 ################################### PLAYERS ########################################

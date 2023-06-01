@@ -94,7 +94,10 @@ const mapStateToProps = createSelector(
         franchise_tag_savings,
         market_salary_adj: p.get('market_salary_adj', 0),
         projected_salary: p.getIn(['market_salary', projectionType], 0),
-        vorp_adj: p.getIn(['vorp_adj', projectionType], 0)
+        salary_adj_pts_added: p.getIn(
+          ['salary_adj_pts_added', projectionType],
+          0
+        )
       })
     })
 
@@ -107,7 +110,7 @@ const mapStateToProps = createSelector(
         'franchise_tag_savings',
         'market_salary_adj',
         'projected_salary',
-        'vorp_adj'
+        'salary_adj_pts_added'
       ]
     })
 

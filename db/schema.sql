@@ -773,7 +773,7 @@ CREATE TABLE `league_player_projection_values` (
   `year` smallint(4) NOT NULL,
   `lid` int(6) NOT NULL,
 
-  `vorp_adj` decimal(5,2) DEFAULT NULL,
+  `salary_adj_pts_added` decimal(5,2) DEFAULT NULL,
   `market_salary_adj` decimal(6,2) DEFAULT NULL,
   KEY `pid` (`pid`),
   UNIQUE KEY `player_value` (`pid`, `lid`, `week`, `year`)
@@ -793,7 +793,7 @@ CREATE TABLE `league_format_player_projection_values` (
   `year` smallint(4) NOT NULL,
   `league_format_hash` varchar(64) NOT NULL,
 
-  `vorp` decimal(5,2) DEFAULT NULL,
+  `pts_added` decimal(5,2) DEFAULT NULL,
   `market_salary` decimal(6,2) DEFAULT NULL,
   KEY `pid` (`pid`),
   UNIQUE KEY `player_value` (`pid`, `league_format_hash`, `week`, `year`)

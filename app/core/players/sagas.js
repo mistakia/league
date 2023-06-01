@@ -119,7 +119,7 @@ export function* toggleOrder({ payload }) {
       yield put(
         playerActions.setOrder({
           order: 'desc',
-          orderBy: 'vorp.ros' // TODO set based on view
+          orderBy: 'pts_added.ros' // TODO set based on view
         })
       )
     } else {
