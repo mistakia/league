@@ -32,7 +32,7 @@ class PlayerRosterRow extends Player {
     if (starter) classNames.push('starter')
 
     const deadline = dayjs.unix(league.ext_date)
-    const calculateExtension = constants.season.now.isBefore(deadline)
+    const calculateExtension = !practice_signed && !practice_drafted && constants.season.now.isBefore(deadline)
     const extensions = playerMap.get('extensions', 0)
     const value = playerMap.get('value')
     const bid = playerMap.get('bid')
