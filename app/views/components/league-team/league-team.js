@@ -5,6 +5,7 @@ import { useParams } from 'react-router-dom'
 import { List } from 'immutable'
 import Grid from '@mui/material/Grid'
 import Toolbar from '@mui/material/Toolbar'
+import NotInterestedIcon from '@mui/icons-material/NotInterested'
 
 import DashboardDraftPicks from '@components/dashboard-draft-picks'
 import DashboardByeWeeks from '@components/dashboard-bye-weeks'
@@ -21,7 +22,8 @@ export default function LeagueTeam({
   roster,
   picks,
   players,
-  percentiles
+  percentiles,
+  cutlist
 }) {
   const { lid, tid } = useParams()
 
@@ -48,10 +50,17 @@ export default function LeagueTeam({
 
   const activeItems = []
   let activePlayers = new List()
+  const cutlist_pids = cutlist.map((cMap) => cMap.get('pid')).toJS()
   for (const position in groups) {
     const players = groups[position]
     for (const playerMap of players) {
       if (!playerMap.get('pid')) continue
+      if (
+        !constants.isRegularSeason &&
+        cutlist_pids.includes(playerMap.get('pid'))
+      )
+        continue
+
       activePlayers = activePlayers.push(playerMap)
       activeItems.push(
         <PlayerRoster
@@ -109,6 +118,20 @@ export default function LeagueTeam({
   return (
     <Grid container spacing={2} alignItems='flex-start'>
       <Grid container item xs={12} lg={9}>
+        {Boolean(cutlist.size) && (
+          <Grid item xs={12}>
+            <DashboardPlayersTable
+              title={
+                <>
+                  Cutlist
+                  <NotInterestedIcon />
+                </>
+              }
+              cutlist={cutlist}
+              total={cutlist}
+            />
+          </Grid>
+        )}
         <Grid item xs={12}>
           <DashboardPlayersTable
             items={activeItems}
@@ -187,5 +210,6 @@ LeagueTeam.propTypes = {
   roster: PropTypes.object,
   picks: ImmutablePropTypes.list,
   players: PropTypes.object,
-  percentiles: PropTypes.object
+  percentiles: PropTypes.object,
+  cutlist: ImmutablePropTypes.list
 }

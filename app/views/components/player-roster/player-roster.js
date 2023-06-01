@@ -30,7 +30,8 @@ class PlayerRoster extends Player {
       isRestrictedFreeAgencyPeriod,
       isBeforeExtensionDeadline,
       isTransition,
-      percentiles = {}
+      percentiles = {},
+      is_manager_in_league
     } = this.props
 
     const isWaiver = Boolean(waiverId)
@@ -117,16 +118,16 @@ class PlayerRoster extends Player {
             hideActions={isPoach}
             headshot_width={48}
           />
-          <div className='player__item-menu'>
-            {Boolean(playerMap.get('pid') && isHosted) && (
+          {Boolean(playerMap.get('pid') && isHosted && is_manager_in_league) && (
+            <div className='player__item-menu'>
               <IconButton
                 small
                 text
                 icon='more'
                 onClick={this.handleContextClick}
               />
-            )}
-          </div>
+            </div>
+          )}
         </div>
         {isClaim && (
           <div className='player__item-name table__cell'>
