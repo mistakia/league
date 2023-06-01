@@ -158,7 +158,9 @@ export default class DashboardPlayersTable extends React.Component {
         </Toolbar>
         <div className='table__container'>
           <div className='table__row table__head'>
-            {showReorder && <div className='player__item-action table__cell' />}
+            {showReorder && (
+              <div className='player__item-action reorder table__cell' />
+            )}
             <div className='player__item-name table__cell sticky__column'>
               {leadColumn}
             </div>
