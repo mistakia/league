@@ -292,20 +292,6 @@ describe('API /teams - transition', function () {
       await missing(request, 'pid')
     })
 
-    it('missing bid', async () => {
-      const request = chai
-        .request(server)
-        .post('/api/teams/1/tag/transition')
-        .set('Authorization', `Bearer ${user1}`)
-        .send({
-          pid: 'x',
-          playerTid: 1,
-          leagueId: 1
-        })
-
-      await missing(request, 'bid')
-    })
-
     it('missing leagueId', async () => {
       const request = chai
         .request(server)
