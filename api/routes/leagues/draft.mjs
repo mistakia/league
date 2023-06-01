@@ -195,10 +195,7 @@ router.post('/?', async (req, res) => {
     if (pick.pick === 1) {
       message += 'the first overall pick '
     } else {
-      const pickNum = pick.pick % league.num_teams || league.num_teams
-      message += `pick #${pick.pick} (${pick.round}.${('0' + pickNum).slice(
-        -2
-      )}) `
+      message += `pick #${pick.pick} (${pick.pick_str}) `
     }
     message += `in the ${constants.season.year} draft`
 

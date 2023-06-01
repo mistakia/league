@@ -517,20 +517,21 @@ router.post(
         pickRows.map((p) => p.pickid)
       )
       for (const pick of picks) {
-        const pickTeam = teams.find((t) => t.uid === pick.otid)
-        const pickNum = pick.pick % league.num_teams || league.num_teams
-        let pickStr = pick.pick
-          ? `${pick.year} ${pick.round}.${('0' + pickNum).slice(-2)}`
+        const pick_team = teams.find((t) => t.uid === pick.otid)
+        let pick_str = pick.pick_str
+          ? `${pick.pick_str}`
           : `${pick.year} ${pick.round}${nth(pick.round)}`
 
-        pickStr = `${pickStr} (${pickTeam.name})`
+        if (pick_team) {
+          pick_str = `${pick_str} (${pick_team.name})`
+        }
 
         // pick.tid is the team the pick belongs to
         const pickTradeInfo = pickRows.find((p) => p.pickid === pick.uid)
         if (pickTradeInfo.tid === trade.propose_tid) {
-          proposingTeamItems.push(pickStr)
+          proposingTeamItems.push(pick_str)
         } else {
-          acceptingTeamItems.push(pickStr)
+          acceptingTeamItems.push(pick_str)
         }
       }
       const proposingTeamStr = toStringArray(proposingTeamItems)
