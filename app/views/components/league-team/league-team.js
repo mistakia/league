@@ -23,7 +23,8 @@ export default function LeagueTeam({
   picks,
   players,
   percentiles,
-  cutlist
+  cutlist,
+  is_team_manager
 }) {
   const { lid, tid } = useParams()
 
@@ -118,7 +119,7 @@ export default function LeagueTeam({
   return (
     <Grid container spacing={2} alignItems='flex-start'>
       <Grid container item xs={12} lg={9}>
-        {Boolean(cutlist.size) && (
+        {Boolean(cutlist.size) && is_team_manager && (
           <Grid item xs={12}>
             <DashboardPlayersTable
               title={
@@ -211,5 +212,6 @@ LeagueTeam.propTypes = {
   picks: ImmutablePropTypes.list,
   players: PropTypes.object,
   percentiles: PropTypes.object,
-  cutlist: ImmutablePropTypes.list
+  cutlist: ImmutablePropTypes.list,
+  is_team_manager: PropTypes.bool
 }
