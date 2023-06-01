@@ -8,7 +8,8 @@ import {
   getGroupedPlayersByTeamId,
   isRestrictedFreeAgencyPeriod,
   isBeforeExtensionDeadline,
-  getCutlistPlayers
+  getCutlistPlayers,
+  get_app
 } from '@core/selectors'
 import { constants, calculatePercentiles, getExtensionAmount } from '@common'
 import { playerActions } from '@core/players'
@@ -23,6 +24,7 @@ const mapStateToProps = createSelector(
   isRestrictedFreeAgencyPeriod,
   isBeforeExtensionDeadline,
   getCutlistPlayers,
+  get_app,
   (
     league,
     roster,
@@ -30,7 +32,8 @@ const mapStateToProps = createSelector(
     players,
     isRestrictedFreeAgencyPeriod,
     isBeforeExtensionDeadline,
-    cutlist
+    cutlist,
+    app
   ) => {
     const projectionType = constants.season.isRegularSeason ? 'ros' : '0'
     const items = []
@@ -114,7 +117,8 @@ const mapStateToProps = createSelector(
       picks: team.picks,
       players,
       percentiles,
-      cutlist
+      cutlist,
+      is_team_manager: app.teamId === team.uid
     }
   }
 )
