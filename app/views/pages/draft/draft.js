@@ -88,8 +88,8 @@ export default function DraftPage() {
 
   const sorted = players.sort(
     (a, b) =>
-      b.getIn(['vorp', '0'], constants.default_points_added) -
-      a.getIn(['vorp', '0'], constants.default_points_added)
+      b.getIn(['pts_added', '0'], constants.default_points_added) -
+      a.getIn(['pts_added', '0'], constants.default_points_added)
   )
   const allRow = ({ index, key, ...params }) => {
     const playerMap = sorted.get(index)

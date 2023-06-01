@@ -123,8 +123,8 @@ export function playersReducer(state = initialState, { payload, type }) {
           state.mergeIn(['items', p.pid], {
             points: new Map(p.points),
             market_salary: new Map(p.market_salary),
-            vorp: new Map(p.vorp),
-            vorp_adj: new Map(p.vorp_adj)
+            pts_added: new Map(p.pts_added),
+            salary_adj_pts_added: new Map(p.salary_adj_pts_added)
           })
         })
       })
@@ -239,7 +239,7 @@ export function playersReducer(state = initialState, { payload, type }) {
       return state.withMutations((players) => {
         const week = constants.isOffseason ? '0' : 'ros'
         players.merge({
-          orderBy: `vorp.${week}`
+          orderBy: `pts_added.${week}`
         })
       })
 

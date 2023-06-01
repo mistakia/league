@@ -196,7 +196,7 @@ const process_league_format = async ({
     baselines[week] = baseline
 
     // calculate values
-    const total_vorp = calculateValues({
+    const total_pts_added = calculateValues({
       players: player_rows,
       baselines: baseline,
       week,
@@ -204,7 +204,7 @@ const process_league_format = async ({
     })
     calculatePrices({
       cap: league_total_salary_cap,
-      total_vorp,
+      total_pts_added,
       players: player_rows,
       week
     })
@@ -217,13 +217,13 @@ const process_league_format = async ({
 
   const valueInserts = []
   for (const player_row of player_rows) {
-    for (const [week, vorp] of Object.entries(player_row.vorp)) {
+    for (const [week, pts_added] of Object.entries(player_row.pts_added)) {
       const params = {
         pid: player_row.pid,
         year: constants.season.year,
         league_format_hash,
         week,
-        vorp,
+        pts_added,
         market_salary: player_row.market_salary[week]
       }
 
@@ -308,7 +308,7 @@ const process_league = async ({ year, lid }) => {
     baselines[week] = baseline
 
     // calculate values
-    const total_vorp = calculateValues({
+    const total_pts_added = calculateValues({
       players: player_rows,
       baselines: baseline,
       week,
@@ -316,7 +316,7 @@ const process_league = async ({ year, lid }) => {
     })
     calculatePrices({
       cap: league_total_salary_cap,
-      total_vorp,
+      total_pts_added,
       players: player_rows,
       week
     })
@@ -328,11 +328,12 @@ const process_league = async ({ year, lid }) => {
     league
   })
 
-  let league_available_vorp = 0
+  let league_available_pts_added = 0
   for (const player_row of player_rows) {
     const is_available = !rostered_pids.includes(player_row.pid)
-    if (is_available && player_row.vorp[0] > 0) {
-      league_available_vorp = league_available_vorp + player_row.vorp[0]
+    if (is_available && player_row.pts_added[0] > 0) {
+      league_available_pts_added =
+        league_available_pts_added + player_row.pts_added[0]
     }
   }
 
@@ -344,22 +345,24 @@ const process_league = async ({ year, lid }) => {
 
     const is_available = !rostered_pids.includes(player_row.pid)
     const league_adjusted_rate = is_available
-      ? league_available_salary_space / league_available_vorp
+      ? league_available_salary_space / league_available_pts_added
       : (league_available_salary_space + player_row.value) /
-        (league_available_vorp + Math.max(player_row.vorp[0], 0))
+        (league_available_pts_added + Math.max(player_row.pts_added[0], 0))
     const market_salary_adj = Math.max(
-      Math.round(league_adjusted_rate * player_row.vorp[0]) || 0,
+      Math.round(league_adjusted_rate * player_row.pts_added[0]) || 0,
       0
     )
     player_row.market_salary_adj = market_salary_adj
 
-    for (const [week, vorp_adj] of Object.entries(player_row.vorp_adj)) {
+    for (const [week, salary_adj_pts_added] of Object.entries(
+      player_row.salary_adj_pts_added
+    )) {
       const params = {
         pid: player_row.pid,
         year: constants.season.year,
         lid,
         week,
-        vorp_adj
+        salary_adj_pts_added
       }
 
       if (week === '0') {

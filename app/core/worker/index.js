@@ -59,7 +59,7 @@ export function calculatePlayerValues(payload) {
       } else {
         player.points[week] = player.points[week] || { total: 0 }
       }
-      player.vorp[week] = {}
+      player.pts_added[week] = {}
       player.market_salary[week] = {}
     }
 
@@ -79,13 +79,13 @@ export function calculatePlayerValues(payload) {
     baselinesByWeek[week] = baselines
 
     // calculate values
-    const total_vorp = calculateValues({
+    const total_pts_added = calculateValues({
       players,
       baselines,
       week,
       league
     })
-    calculatePrices({ cap: leagueTotalCap, total_vorp, players, week })
+    calculatePrices({ cap: leagueTotalCap, total_pts_added, players, week })
   }
 
   calculatePlayerValuesRestOfSeason({ players, rosterRows, league })

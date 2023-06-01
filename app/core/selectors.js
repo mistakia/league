@@ -166,8 +166,8 @@ export function getAuctionTargetPlayers(state) {
   }
   return filtered.sort(
     (a, b) =>
-      b.getIn(['vorp', '0'], constants.default_points_added) -
-      a.getIn(['vorp', '0'], constants.default_points_added)
+      b.getIn(['pts_added', '0'], constants.default_points_added) -
+      a.getIn(['pts_added', '0'], constants.default_points_added)
   )
 }
 
@@ -227,12 +227,12 @@ export const getAuctionInfoForPosition = createSelector(
       active_pids.includes(pMap.get('pid'))
     )
 
-    const totalVorp = playerMaps.reduce(
-      (a, b) => a + Math.max(b.getIn(['vorp', '0']) || 0, 0),
+    const total_pts_added = playerMaps.reduce(
+      (a, b) => a + Math.max(b.getIn(['pts_added', '0']) || 0, 0),
       0
     )
-    const rosteredVorp = rostered.reduce(
-      (a, b) => a + Math.max(b.getIn(['vorp', '0']) || 0, 0),
+    const rostered_pts_added = rostered.reduce(
+      (a, b) => a + Math.max(b.getIn(['pts_added', '0']) || 0, 0),
       0
     )
     const retail = rostered.reduce(
@@ -248,9 +248,9 @@ export const getAuctionInfoForPosition = createSelector(
         total: playerMaps.size,
         rostered: rostered.size
       },
-      vorp: {
-        total: totalVorp,
-        rostered: rosteredVorp
+      pts_added: {
+        total: total_pts_added,
+        rostered: rostered_pts_added
       },
       value: {
         retail,
@@ -1945,15 +1945,16 @@ export const getRosterPositionalValueByTeamId = createSelector(
         const playerMaps = rosterPlayers.map(({ pid }) =>
           player_maps.get(pid, new Map())
         )
-        const vorps = playerMaps.map((pMap) =>
-          Math.max(pMap.getIn(['vorp', seasonType], 0), 0)
+        const pts_added_array = playerMaps.map((pMap) =>
+          Math.max(pMap.getIn(['pts_added', seasonType], 0), 0)
         )
-        const sum = vorps.reduce((s, i) => s + i, 0)
-        league.push(sum)
-        values.rosters[roster.tid][position] = sum
-        if (divTeamIds.includes(roster.tid)) div.push(sum)
-        if (roster.tid === team.uid) values.team[position] = sum
-        values.total[roster.tid] = (values.total[roster.tid] ?? 0) + sum
+        const pts_added_total = pts_added_array.reduce((s, i) => s + i, 0)
+        league.push(pts_added_total)
+        values.rosters[roster.tid][position] = pts_added_total
+        if (divTeamIds.includes(roster.tid)) div.push(pts_added_total)
+        if (roster.tid === team.uid) values.team[position] = pts_added_total
+        values.total[roster.tid] =
+          (values.total[roster.tid] ?? 0) + pts_added_total
       }
       values.league_avg[position] =
         league.reduce((s, i) => s + i, 0) / league.length
@@ -2817,13 +2818,14 @@ export function getAcceptingTeamTradedRosterPlayers(state) {
 }
 
 function getTeamTradeSummary(state, { lineups, playerMaps, picks }) {
-  const vorpType = constants.isOffseason ? '0' : 'ros'
+  const pts_added_type = constants.isOffseason ? '0' : 'ros'
   const draft_value = picks.reduce(
     (sum, pick) => sum + getDraftPickValueByPick(state, { pick }),
     0
   )
   const player_value = playerMaps.reduce(
-    (sum, pMap) => sum + Math.max(pMap.getIn(['vorp', vorpType], 0), 0),
+    (sum, pMap) =>
+      sum + Math.max(pMap.getIn(['pts_added', pts_added_type], 0), 0),
     0
   )
   const values = {
@@ -2832,7 +2834,12 @@ function getTeamTradeSummary(state, { lineups, playerMaps, picks }) {
     player_value,
     draft_value,
     value_adj: playerMaps.reduce(
-      (sum, pMap) => sum + Math.max(pMap.getIn(['vorp_adj', vorpType], 0), 0),
+      (sum, pMap) =>
+        sum +
+        Math.max(
+          pMap.getIn(['salary_adjusted_pts_added', pts_added_type], 0),
+          0
+        ),
       0
     ),
     salary: playerMaps.reduce((sum, pMap) => sum + pMap.get('value', 0), 0)
@@ -3142,11 +3149,11 @@ function PlayerFields({ week, state }) {
       csv_header: 'Projected Salary',
       player_value_path: 'value'
     },
-    'vorp_adj.week': {
+    'salary_adj_pts_added.week': {
       category: 'management',
       column_header: 'Value',
       csv_header: 'Projected Value',
-      player_value_path: `vorp_adj.${week}`
+      player_value_path: `salary_adj_pts_added.${week}`
     },
     'market_salary.week': {
       category: 'management',
@@ -3161,24 +3168,24 @@ function PlayerFields({ week, state }) {
       player_value_path: 'market_salary_adj'
     },
 
-    'vorp.ros': {
+    'pts_added.ros': {
       category: 'fantasy',
       column_header: 'Pts+',
       csv_header: 'Projected Points Added (Rest-Of-Season)',
-      player_value_path: 'vorp.ros',
+      player_value_path: 'pts_added.ros',
       fixed: 1
     },
-    'vorp.0': {
+    'pts_added.0': {
       category: 'fantasy',
       column_header: 'Pts+',
       csv_header: 'Projected Points Added (Season)',
-      player_value_path: 'vorp.0'
+      player_value_path: 'pts_added.0'
     },
-    'vorp.week': {
+    'pts_added.week': {
       category: `Week ${week}`,
       column_header: 'Pts+',
       csv_header: 'Projected Points Added (Week)',
-      player_value_path: `vorp.${week}`,
+      player_value_path: `pts_added.${week}`,
       fixed: 1
     },
 

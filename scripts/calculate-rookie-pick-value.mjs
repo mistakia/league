@@ -5,7 +5,7 @@ import { hideBin } from 'yargs/helpers'
 import { Table } from 'console-table-printer'
 
 import { isMain } from '#utils'
-import calculateVOR from './calculate-vor.mjs'
+import calculate_points_added from './calculate-points-added.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 // const log = debug('script:calculate-rookie-pick-value')
@@ -21,7 +21,7 @@ const calculateRookiePickValue = async ({ year }) => {
   const seasons = {}
   const limit = LATEST_YEAR - year + 1
   for (let i = 1; i <= limit; i++) {
-    const { players } = await calculateVOR({
+    const { players } = await calculate_points_added({
       year: year + (i - 1),
       rookie: i === 1
     })
@@ -34,14 +34,14 @@ const calculateRookiePickValue = async ({ year }) => {
   for (const pid in rookieSeason) {
     const playerRookieSeason = rookieSeason[pid]
     const playerResult = {
-      vor: playerRookieSeason.vor,
+      pts_added: playerRookieSeason.pts_added,
       value: playerRookieSeason.value,
       points: playerRookieSeason.points
     }
     for (let i = 2; i <= limit; i++) {
       const playerSeason = seasons[i][pid]
       if (playerSeason) {
-        playerResult.vor += playerSeason.vor
+        playerResult.pts_added += playerSeason.pts_added
         playerResult.value += playerSeason.value
         playerResult.points += playerSeason.points
       }
@@ -56,7 +56,7 @@ const calculateRookiePickValue = async ({ year }) => {
 }
 
 if (isMain(import.meta.url)) {
-  debug.enable('script:calculate-vor')
+  debug.enable('script:calculate-points-added')
   const main = async () => {
     try {
       const year = argv.year
@@ -82,7 +82,7 @@ if (isMain(import.meta.url)) {
           {
             index: index + 1,
             pid: player.pid,
-            vor: player.vor.toFixed(2),
+            pts_added: player.pts_added.toFixed(2),
             points: player.points.toFixed(2),
             prnk: player.prnk,
             value: player.value,

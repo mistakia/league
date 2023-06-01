@@ -5,7 +5,7 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { constants } from '#common'
 import { isMain, getLeague, get_league_format } from '#utils'
-import calculateVOR from './calculate-vor.mjs'
+import calculate_points_added from './calculate-points-added.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('calculate-points-added-baseline-week')
@@ -23,7 +23,7 @@ const calculate_points_added_baseline_week = async ({
   constants.positions.forEach((p) => (bTotals[p] = 0))
   let totalWeeks = 0
   for (; year < constants.season.year; year++) {
-    const { baselineTotals, weeks } = await calculateVOR({
+    const { baselineTotals, weeks } = await calculate_points_added({
       year,
       league: league_format
     })

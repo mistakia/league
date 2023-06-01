@@ -25,7 +25,7 @@ export default class AuctionTargetHeader extends React.Component {
             <span>
               {(
                 100 -
-                (info.vorp.rostered / info.vorp.total || 0) * 100
+                (info.pts_added.rostered / info.pts_added.total || 0) * 100
               ).toFixed(1)}
               %
             </span>

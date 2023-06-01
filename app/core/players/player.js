@@ -8,8 +8,8 @@ export function createPlayer({
   projection,
   points,
   market_salary,
-  vorp,
-  vorp_adj,
+  pts_added,
+  salary_adj_pts_added,
   projections,
   practice,
   transactions,
@@ -42,12 +42,12 @@ export function createPlayer({
     params.market_salary = new Map(market_salary)
   }
 
-  if (vorp) {
-    params.vorp = new Map(vorp)
+  if (pts_added) {
+    params.pts_added = new Map(pts_added)
   }
 
-  if (vorp_adj) {
-    params.vorp_adj = new Map(vorp_adj)
+  if (salary_adj_pts_added) {
+    params.salary_adj_pts_added = new Map(salary_adj_pts_added)
   }
 
   if (projections) {

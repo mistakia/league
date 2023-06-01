@@ -9,7 +9,7 @@ import './trade-player.styl'
 export default class TradePlayer extends React.Component {
   render = () => {
     const { playerMap } = this.props
-    const vorpType = constants.isOffseason ? '0' : 'ros'
+    const pts_added_type = constants.isOffseason ? '0' : 'ros'
     return (
       <div className='trade__player'>
         <div className='trade__player-name'>
@@ -28,11 +28,13 @@ export default class TradePlayer extends React.Component {
         </div>
         <div className='trade__player-metric metric'>
           <label>Adj Val</label>
-          {playerMap.getIn(['vorp_adj', vorpType], 0).toFixed(1)}
+          {playerMap
+            .getIn(['salary_adj_pts_added', pts_added_type], 0)
+            .toFixed(1)}
         </div>
         <div className='trade__player-metric metric'>
           <label>Val</label>
-          {playerMap.getIn(['vorp', vorpType], 0).toFixed(1)}
+          {playerMap.getIn(['pts_added', pts_added_type], 0).toFixed(1)}
         </div>
       </div>
     )

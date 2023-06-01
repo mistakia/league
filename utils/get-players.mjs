@@ -167,8 +167,8 @@ export default async function ({
   for (const player_row of player_rows) {
     player_row.value = null
     player_row.points = {}
-    player_row.vorp = {}
-    player_row.vorp_adj = {}
+    player_row.pts_added = {}
+    player_row.salary_adj_pts_added = {}
     player_row.market_salary = {}
     player_row.projection = {}
     players_by_pid[player_row.pid] = player_row
@@ -216,8 +216,8 @@ export default async function ({
       .whereIn('pid', returnedPlayerIds)
 
     for (const row of league_format_values) {
-      const { pid, week, vorp, market_salary } = row
-      players_by_pid[pid].vorp[week] = vorp
+      const { pid, week, pts_added, market_salary } = row
+      players_by_pid[pid].pts_added[week] = pts_added
       players_by_pid[pid].market_salary[week] = market_salary
     }
   }
@@ -231,8 +231,9 @@ export default async function ({
       .whereIn('pid', returnedPlayerIds)
 
     for (const pointProjection of leagueValuesProj) {
-      const { pid, week, vorp_adj, market_salary_adj } = pointProjection
-      players_by_pid[pid].vorp_adj[week] = vorp_adj
+      const { pid, week, salary_adj_pts_added, market_salary_adj } =
+        pointProjection
+      players_by_pid[pid].salary_adj_pts_added[week] = salary_adj_pts_added
 
       if (pointProjection.week === '0') {
         players_by_pid[pid].market_salary_adj = market_salary_adj
