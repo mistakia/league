@@ -45,7 +45,8 @@ export default class PlayerRosterTotal extends React.Component {
           (isBeforeExtensionDeadline ? extendedSalary : bid || value)
         : 0
 
-      baseSalaryTotal = baseSalaryTotal + (bid || value)
+      baseSalaryTotal =
+        baseSalaryTotal + (isBeforeExtensionDeadline ? value : bid || value)
       extendedSalaryTotal = extendedSalaryTotal + extendedSalary
       projectedSalaryTotal = projectedSalaryTotal + projectedSalary
       savingsTotal = savingsTotal + Math.max(savings, 0)

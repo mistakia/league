@@ -43,19 +43,21 @@ class PlayerRoster extends Player {
 
     const value = playerMap.get('value', 0)
     const bid = playerMap.get('bid', 0)
-    const salary = isTransition ? value : bid || value
+    const salary = isBeforeExtensionDeadline ? value : bid || value
     const extensions = playerMap.get('extensions', 0)
     const pos = playerMap.get('pos', '')
     const slot = playerMap.get('slot')
-    const extendedSalary = getExtensionAmount({
-      pos,
-      slot,
-      tag: isBeforeExtensionDeadline ? tag : constants.tags.REGULAR,
-      extensions,
-      league,
-      value,
-      bid
-    })
+    const extendedSalary = isTransition
+      ? bid
+      : getExtensionAmount({
+          pos,
+          slot,
+          tag: isBeforeExtensionDeadline ? tag : constants.tags.REGULAR,
+          extensions,
+          league,
+          value,
+          bid
+        })
     const projectionType = isRegularSeason ? 'ros' : '0'
     const hasProjections = playerMap.hasIn(['market_salary', projectionType])
     const market_salary = playerMap.getIn(['market_salary', projectionType], 0)
@@ -118,7 +120,9 @@ class PlayerRoster extends Player {
             hideActions={isPoach}
             headshot_width={48}
           />
-          {Boolean(playerMap.get('pid') && isHosted && is_manager_in_league) && (
+          {Boolean(
+            playerMap.get('pid') && isHosted && is_manager_in_league
+          ) && (
             <div className='player__item-menu'>
               <IconButton
                 small
