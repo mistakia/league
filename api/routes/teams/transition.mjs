@@ -50,9 +50,9 @@ router.post('/?', async (req, res) => {
   try {
     const { teamId } = req.params
     const { pid, leagueId, remove } = req.body
-    const playerTid = parseInt(req.body.playerTid || 0, 10)
+    const playerTid = Number(req.body.playerTid || 0)
     let { release } = req.body
-    const bid = parseInt(req.body.bid || 0, 10)
+    const bid = Number(req.body.bid || 0)
 
     if (!Array.isArray(release)) {
       release = release ? [release] : []
@@ -70,7 +70,7 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'missing leagueId' })
     }
 
-    if (!bid) {
+    if (typeof bid === 'undefined') {
       return res.status(400).send({ error: 'missing bid' })
     }
 
