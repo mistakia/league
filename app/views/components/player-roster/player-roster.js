@@ -27,7 +27,6 @@ class PlayerRoster extends Player {
       poachId,
       isHosted,
       league,
-      isRestrictedFreeAgencyPeriod,
       isBeforeExtensionDeadline,
       isTransition,
       percentiles = {},
@@ -42,7 +41,7 @@ class PlayerRoster extends Player {
     const isRestrictedFreeAgent = tag === constants.tags.TRANSITION
 
     const value = playerMap.get('value', 0)
-    const bid = playerMap.get('bid', 0)
+    const bid = playerMap.get('bid')
     const salary = isBeforeExtensionDeadline ? value : bid || value
     const extensions = playerMap.get('extensions', 0)
     const pos = playerMap.get('pos', '')
@@ -62,12 +61,14 @@ class PlayerRoster extends Player {
     const hasProjections = playerMap.hasIn(['market_salary', projectionType])
     const market_salary = playerMap.getIn(['market_salary', projectionType], 0)
     // const market_salary_adj = playerMap.get('market_salary_adj', 0)
-    const savings =
-      hasProjections &&
-      (!isRestrictedFreeAgencyPeriod || bid || !isRestrictedFreeAgent)
-        ? market_salary -
-          (isBeforeExtensionDeadline ? extendedSalary : bid || value)
-        : null
+    const get_savings = () => {
+      if (!hasProjections) return null
+      if (isTransition || isRestrictedFreeAgent)
+        return typeof bid === 'number' ? market_salary - bid : null
+      if (isBeforeExtensionDeadline) return market_salary - extendedSalary
+      return market_salary - value
+    }
+    const savings = get_savings()
 
     const pts_added = playerMap.getIn(['pts_added', projectionType], 0)
     const salary_adj_pts_added = playerMap.getIn(
@@ -165,16 +166,19 @@ class PlayerRoster extends Player {
         )}
         <div className='row__group'>
           <div className='row__group-body'>
-            {!isWaiver && (
+            {!isWaiver && !isTransition && (
               <div className='metric table__cell'>
                 {isPoach ? value + 2 || '-' : salary ? `$${salary}` : '-'}
               </div>
             )}
-            {!isWaiver && !isPoach && (
-              <div className='metric table__cell'>
-                {extendedSalary ? `$${extendedSalary}` : '-'}
-              </div>
-            )}
+            {!isWaiver &&
+              !isPoach &&
+              isOffseason &&
+              isBeforeExtensionDeadline && (
+                <div className='metric table__cell'>
+                  {extendedSalary ? `$${extendedSalary}` : '-'}
+                </div>
+              )}
             {/* {!isWaiver && !isPoach && isOffseason && (
               <PercentileMetric
                 scaled
@@ -187,6 +191,7 @@ class PlayerRoster extends Player {
                 scaled
                 value={market_salary}
                 percentile={percentiles.market_salary}
+                prefix='$'
               />
             )}
             {isOffseason && (
@@ -194,6 +199,8 @@ class PlayerRoster extends Player {
                 scaled
                 value={savings}
                 percentile={percentiles.savings}
+                prefix='$'
+                show_positivity
               />
             )}
           </div>
@@ -236,9 +243,12 @@ class PlayerRoster extends Player {
         )}
         <div className='row__group'>
           <div className='row__group-body'>
-            <div className='metric table__cell'>
-              {pts_added ? pts_added.toFixed(0) : '-'}
-            </div>
+            <PercentileMetric
+              scaled
+              value={pts_added}
+              percentile={percentiles.pts_added}
+              show_positivity
+            />
             {isOffseason && (
               <PercentileMetric
                 scaled

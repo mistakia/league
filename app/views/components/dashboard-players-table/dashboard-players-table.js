@@ -176,10 +176,15 @@ export default class DashboardPlayersTable extends React.Component {
             <div className='row__group'>
               <div className='row__group-head'>Salary</div>
               <div className='row__group-body'>
-                {!isWaiver && <div className='table__cell'>{baseYear}</div>}
-                {!isWaiver && !isPoach && (
-                  <div className='table__cell'>{baseYear + 1}</div>
+                {!isWaiver && !isTransition && (
+                  <div className='table__cell'>{baseYear}</div>
                 )}
+                {!isWaiver &&
+                  !isPoach &&
+                  isOffseason &&
+                  isBeforeExtensionDeadline && (
+                    <div className='table__cell'>{baseYear + 1}</div>
+                  )}
                 {/* {!isWaiver && !isPoach && isOffseason && (
                   <div className='table__cell'>
                     <PlayerRosterHeader
@@ -191,7 +196,7 @@ export default class DashboardPlayersTable extends React.Component {
                 {!isWaiver && !isPoach && isOffseason && (
                   <div className='table__cell'>
                     <PlayerRosterHeader
-                      tooltip='Salary based on projected points over baseline player'
+                      tooltip='Salary based on projected relative to baseline player'
                       title='Market'
                     />
                   </div>
@@ -231,14 +236,14 @@ export default class DashboardPlayersTable extends React.Component {
                 </div>
               </div>
             )}
-            <div className='table__cell'>
-              <PlayerRosterHeader
-                tooltip='Player salary amount after extension'
-                title='Regular Extension'
-              />
-            </div>
             {isBeforeExtensionDeadline && (
               <>
+                <div className='table__cell'>
+                  <PlayerRosterHeader
+                    tooltip='Player salary amount after extension'
+                    title='Regular Extension'
+                  />
+                </div>
                 <div className='row__group'>
                   <div className='row__group-head'>Tag savings</div>
                   <div className='row__group-body'>
@@ -263,14 +268,14 @@ export default class DashboardPlayersTable extends React.Component {
               <div className='row__group-body'>
                 <div className='table__cell'>
                   <PlayerRosterHeader
-                    tooltip='Projected points over baseline player'
+                    tooltip='Projected points relative to baseline player'
                     title='Pts+'
                   />
                 </div>
                 {isOffseason && (
                   <div className='table__cell'>
                     <PlayerRosterHeader
-                      tooltip='Salary Adjusted points over baseline player'
+                      tooltip='Salary adjusted value relative to baseline player'
                       title='Value'
                     />
                   </div>

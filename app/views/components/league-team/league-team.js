@@ -130,6 +130,7 @@ export default function LeagueTeam({
               }
               cutlist={cutlist}
               total={cutlist}
+              {...{ percentiles }}
             />
           </Grid>
         )}

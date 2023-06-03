@@ -16,6 +16,7 @@ import { draftPickValueActions } from '@core/draft-pick-value'
 import { transactionsActions } from '@core/transactions'
 import { teamActions } from '@core/teams'
 import { rosterActions } from '@core/rosters'
+import { calculatePercentiles } from '@common'
 
 import LeagueHomePage from './league-home'
 
@@ -37,17 +38,34 @@ const mapStateToProps = createSelector(
     waivers,
     poaches,
     isBeforeTransitionEnd
-  ) => ({
-    transitionPlayers,
-    teamId: app.teamId,
-    leagueId: app.leagueId,
-    players,
-    cutlist,
-    league,
-    waivers,
-    poaches,
-    isBeforeTransitionEnd
-  })
+  ) => {
+    const items = []
+    transitionPlayers.forEach((p) => {
+      items.push({
+        market_salary: p.getIn(['market_salary', '0'], 0),
+        pts_added: p.getIn(['pts_added', '0'], 0),
+        salary_adj_pts_added: p.getIn(['salary_adj_pts_added', '0'], 0)
+      })
+    })
+
+    const percentiles = calculatePercentiles({
+      items,
+      stats: ['market_salary', 'pts_added', 'salary_adj_pts_added']
+    })
+
+    return {
+      transitionPlayers,
+      teamId: app.teamId,
+      leagueId: app.leagueId,
+      players,
+      cutlist,
+      league,
+      waivers,
+      poaches,
+      isBeforeTransitionEnd,
+      percentiles
+    }
+  }
 )
 
 const mapDispatchToProps = {
