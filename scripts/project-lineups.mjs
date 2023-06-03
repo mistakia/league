@@ -1,24 +1,30 @@
 import debug from 'debug'
+import yargs from 'yargs'
+import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants, Roster, optimizeLineup } from '#common'
 import { getLeague, getRoster, getPlayers, isMain } from '#utils'
 
+const argv = yargs(hideBin(process.argv)).argv
 const log = debug('project-lineups')
 
-const run = async () => {
+const run = async (lid) => {
+  if (isNaN(lid)) {
+    throw new Error(`Missing lid param: ${lid}`)
+  }
+
   const { year } = constants.season
-  const leagueId = 1
-  const league = await getLeague({ lid: leagueId })
+  const league = await getLeague({ lid })
   const teams = await db('teams').where({
-    lid: leagueId,
+    lid,
     year: constants.season.year
   })
   const team_lineup_inserts = []
   const team_lineup_starter_inserts = []
   const team_lineup_contribution_inserts = []
   const team_lineup_contribution_week_inserts = []
-  const baselines = await db('league_baselines').where({ lid: leagueId })
+  const baselines = await db('league_baselines').where({ lid, year })
   const baseline_pids = [...new Set(baselines.map((p) => p.pid))]
   const baseline_players = await getPlayers({ pids: baseline_pids })
 
@@ -28,7 +34,7 @@ const run = async () => {
     const roster = new Roster({ roster: rosterRows, league })
     const player_pids = roster.players.map((p) => p.pid)
     const active_pids = roster.active.map((p) => p.pid)
-    const player_rows = await getPlayers({ leagueId, pids: player_pids })
+    const player_rows = await getPlayers({ leagueId: lid, pids: player_pids })
     const active_players = player_rows.filter((p) =>
       active_pids.includes(p.pid)
     )
@@ -47,7 +53,7 @@ const run = async () => {
       team_lineup_inserts.push({
         week,
         tid,
-        lid: leagueId,
+        lid,
         year,
         total: lineup.total,
         baseline_total: baseline_lineups[week].baseline_total
@@ -56,7 +62,7 @@ const run = async () => {
         team_lineup_starter_inserts.push({
           pid,
           week,
-          lid: leagueId,
+          lid,
           year,
           tid
         })
@@ -141,7 +147,7 @@ const run = async () => {
       const { starts, sp, bp } = playerData
       team_lineup_contribution_inserts.push({
         tid,
-        lid: leagueId,
+        lid,
         pid,
         year,
         starts,
@@ -153,7 +159,7 @@ const run = async () => {
         team_lineup_contribution_week_inserts.push({
           week,
           tid,
-          lid: leagueId,
+          lid,
           pid,
           year,
           start,
@@ -173,7 +179,7 @@ const run = async () => {
   }
 
   if (team_lineup_starter_inserts.length) {
-    await db('league_team_lineup_starters').del().where({ lid: leagueId, year })
+    await db('league_team_lineup_starters').del().where({ lid, year })
     await db('league_team_lineup_starters')
       .insert(team_lineup_starter_inserts)
       .onConflict()
@@ -182,9 +188,7 @@ const run = async () => {
   }
 
   if (team_lineup_contribution_inserts.length) {
-    await db('league_team_lineup_contributions')
-      .del()
-      .where({ lid: leagueId, year })
+    await db('league_team_lineup_contributions').del().where({ lid, year })
     await db('league_team_lineup_contributions')
       .insert(team_lineup_contribution_inserts)
       .onConflict()
@@ -195,9 +199,7 @@ const run = async () => {
   }
 
   if (team_lineup_contribution_week_inserts.length) {
-    await db('league_team_lineup_contribution_weeks')
-      .del()
-      .where({ lid: leagueId, year })
+    await db('league_team_lineup_contribution_weeks').del().where({ lid, year })
     await db('league_team_lineup_contribution_weeks')
       .insert(team_lineup_contribution_week_inserts)
       .onConflict()
@@ -212,7 +214,8 @@ const main = async () => {
   debug.enable('project-lineups')
   let error
   try {
-    await run()
+    const lid = argv.lid || 1
+    await run(lid)
   } catch (err) {
     error = err
     console.log(error)
