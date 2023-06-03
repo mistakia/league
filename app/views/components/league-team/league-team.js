@@ -66,7 +66,7 @@ export default function LeagueTeam({
       activeItems.push(
         <PlayerRoster
           key={playerMap.get('pid')}
-          {...{ playerMap, percentiles }}
+          {...{ playerMap, percentiles, is_team_manager }}
         />
       )
     }

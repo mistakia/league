@@ -30,7 +30,8 @@ class PlayerRoster extends Player {
       isBeforeExtensionDeadline,
       isTransition,
       percentiles = {},
-      is_manager_in_league
+      is_manager_in_league,
+      is_team_manager
     } = this.props
 
     const isWaiver = Boolean(waiverId)
@@ -44,7 +45,7 @@ class PlayerRoster extends Player {
     const bid = playerMap.get('bid')
     const salary = isBeforeExtensionDeadline
       ? value
-      : isRestrictedFreeAgent
+      : isRestrictedFreeAgent && (is_team_manager || isTransition)
       ? bid
       : value
     const extensions = playerMap.get('extensions', 0)
@@ -161,7 +162,9 @@ class PlayerRoster extends Player {
           </div>
         )}
         {Boolean(isTransition) && (
-          <div className='metric table__cell'>{typeof bid === 'number' ? `$${bid}` : '-'}</div>
+          <div className='metric table__cell'>
+            {typeof bid === 'number' ? `$${bid}` : '-'}
+          </div>
         )}
         {isWaiver && (
           <div className='metric table__cell'>
