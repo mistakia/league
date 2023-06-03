@@ -6,7 +6,13 @@ import { constants, getExtensionAmount } from '@common'
 
 export default class PlayerRosterTotal extends React.Component {
   render() {
-    const { players, league, reorder, isBeforeExtensionDeadline } = this.props
+    const {
+      players,
+      league,
+      reorder,
+      isBeforeExtensionDeadline,
+      is_team_manager
+    } = this.props
 
     const { isOffseason, isRegularSeason } = constants
     const week = Math.max(constants.week, 1)
@@ -25,11 +31,11 @@ export default class PlayerRosterTotal extends React.Component {
       const extensions = playerMap.get('extensions', 0)
       const value = playerMap.get('value', 0)
       const bid = playerMap.get('bid', 0)
+      const tag = playerMap.get('tag')
+      const isRestrictedFreeAgent = tag === constants.tags.TRANSITION
       const extendedSalary = getExtensionAmount({
         pos: playerMap.get('pos'),
-        tag: isBeforeExtensionDeadline
-          ? playerMap.get('tag')
-          : constants.tags.REGULAR,
+        tag: isBeforeExtensionDeadline ? tag : constants.tags.REGULAR,
         extensions,
         league,
         value,
@@ -45,8 +51,12 @@ export default class PlayerRosterTotal extends React.Component {
           (isBeforeExtensionDeadline ? extendedSalary : bid || value)
         : 0
 
-      baseSalaryTotal =
-        baseSalaryTotal + (isBeforeExtensionDeadline ? value : bid || value)
+      const salary = isBeforeExtensionDeadline
+        ? value
+        : isRestrictedFreeAgent && is_team_manager
+        ? bid
+        : value
+      baseSalaryTotal = baseSalaryTotal + salary
       extendedSalaryTotal = extendedSalaryTotal + extendedSalary
       projectedSalaryTotal = projectedSalaryTotal + projectedSalary
       savingsTotal = savingsTotal + Math.max(savings, 0)
@@ -141,5 +151,6 @@ PlayerRosterTotal.propTypes = {
   players: ImmutablePropTypes.list,
   reorder: PropTypes.bool,
   league: PropTypes.object,
-  isBeforeExtensionDeadline: PropTypes.bool
+  isBeforeExtensionDeadline: PropTypes.bool,
+  is_team_manager: PropTypes.bool
 }

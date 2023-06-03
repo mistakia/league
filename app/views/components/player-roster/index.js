@@ -1,10 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import {
-  isBeforeExtensionDeadline,
-  get_app
-} from '@core/selectors'
+import { isBeforeExtensionDeadline, get_app } from '@core/selectors'
 
 import PlayerRoster from './player-roster'
 
