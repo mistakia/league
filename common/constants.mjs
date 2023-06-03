@@ -1280,9 +1280,13 @@ export const jobDetails = {
   30: 'Process Play Stats',
   31: 'Armchair (Data)',
   32: 'Import Football Outsiders (Data)',
-
+  33: 'DraftKings Odds',
+  34: 'BetOnline Odds',
+  35: 'Projections (4for4)',
+  36: 'FantasyPros Dynasty',
+  37: 'FantasyPros Weekly',
+  38: 'FantasyPros Draft',
   39: 'Calculate Franchise Tags',
-
   40: 'Process Matchups',
   41: 'Draw Divisions',
   42: 'Generate Schedule',
