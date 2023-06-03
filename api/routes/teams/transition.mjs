@@ -412,7 +412,7 @@ router.put('/?', async (req, res) => {
       return res.status(400).send({ error: 'missing leagueId' })
     }
 
-    if (!bid) {
+    if (typeof bid === 'undefined') {
       return res.status(400).send({ error: 'missing bid' })
     }
 
