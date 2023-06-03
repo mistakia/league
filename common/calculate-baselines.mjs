@@ -168,6 +168,8 @@ const calculateBaselines = ({ players, rosterRows = [], league, week }) => {
       week
     })
 
+    result[position].available = groupedRemainingPlayers[position][0]
+
     result[position].starter =
       worstStarter || groupedRemainingPlayers[position][0]
   }
