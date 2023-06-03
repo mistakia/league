@@ -40,7 +40,8 @@ export default function LeagueHomePage({
   loadRecentTransactions,
   loadTeams,
   loadRosters,
-  leagueId
+  leagueId,
+  percentiles
 }) {
   const navigate = useNavigate()
   const { lid } = useParams()
@@ -92,7 +93,12 @@ export default function LeagueHomePage({
   const transitionItems = []
   transitionPlayers.forEach((playerMap, index) => {
     transitionItems.push(
-      <PlayerRoster key={index} playerMap={playerMap} isTransition />
+      <PlayerRoster
+        key={index}
+        playerMap={playerMap}
+        isTransition
+        {...{ percentiles }}
+      />
     )
   })
 
@@ -173,6 +179,7 @@ export default function LeagueHomePage({
               title='Restricted Free Agents'
               items={transitionItems}
               isTransition
+              {...{ percentiles }}
             />
           </Grid>
         )}
@@ -225,6 +232,7 @@ export default function LeagueHomePage({
               }
               cutlist={cutlist}
               total={cutlist}
+              {...{ percentiles }}
             />
           </Grid>
         )}
@@ -255,5 +263,6 @@ LeagueHomePage.propTypes = {
   loadRecentTransactions: PropTypes.func,
   loadTeams: PropTypes.func,
   leagueId: PropTypes.number,
-  loadRosters: PropTypes.func
+  loadRosters: PropTypes.func,
+  percentiles: PropTypes.object
 }

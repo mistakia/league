@@ -12,7 +12,8 @@ export default function PercentileMetric({
   fixed = 0,
   percentiles,
   percentile_key,
-  show_positivity
+  show_positivity,
+  prefix = ''
 }) {
   let color
 
@@ -39,9 +40,12 @@ export default function PercentileMetric({
       return '-'
     }
 
+    const is_negative = value < 0
+    const sign_str = is_negative ? '-' : show_positivity ? '+' : ''
     const val = value.toFixed(fixed)
+    const abs_value = Math.abs(val)
 
-    return show_positivity && value > 0 ? `+${val}` : val
+    return `${sign_str}${prefix}${abs_value}`
   }
 
   const body = children || formatValue(value)
@@ -66,5 +70,6 @@ PercentileMetric.propTypes = {
   className: PropTypes.string,
   scaled: PropTypes.bool,
   title: PropTypes.string,
-  fixed: PropTypes.number
+  fixed: PropTypes.number,
+  prefix: PropTypes.string
 }
