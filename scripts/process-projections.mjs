@@ -404,13 +404,13 @@ const process_league = async ({ year, lid }) => {
     log(`processed and saved ${valueInserts.length} player values`)
   }
 
-  await projectLineups()
+  await projectLineups(lid)
 
   if (
     constants.season.week &&
     constants.season.week <= constants.season.regularSeasonFinalWeek
   ) {
-    await simulateSeason()
+    await simulateSeason(lid)
   }
 
   if (lid) {

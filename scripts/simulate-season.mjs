@@ -1,3 +1,5 @@
+import yargs from 'yargs'
+import { hideBin } from 'yargs/helpers'
 import debug from 'debug'
 import dayjs from 'dayjs'
 import dayOfYear from 'dayjs/plugin/dayOfYear.js'
@@ -10,18 +12,21 @@ dayjs.extend(dayOfYear)
 const log = debug('simulate-season')
 debug.enable('simulate-season')
 const timestamp = Math.round(Date.now() / 1000)
+const argv = yargs(hideBin(process.argv)).argv
 
-const run = async () => {
-  const leagueId = 1
+const run = async (lid) => {
+  if (isNaN(lid)) {
+    throw new Error(`missing lid param: ${lid}`)
+  }
   const currentWeek = Math.max(constants.season.week, 1)
   const teamRows = await db('teams').where({
-    lid: leagueId,
+    lid,
     year: constants.season.year
   })
   const matchups = await db('matchups')
-    .where({ lid: leagueId })
+    .where({ lid })
     .where('week', '>=', currentWeek)
-  const rosterRows = await getRosters({ lid: leagueId })
+  const rosterRows = await getRosters({ lid })
   const tids = teamRows.map((t) => t.uid)
   const teamStats = await db('team_stats')
     .where('year', constants.season.year)
@@ -52,7 +57,7 @@ const run = async () => {
       forecast
     forecastInserts.push({
       tid,
-      lid: leagueId,
+      lid,
 
       week: constants.season.week,
       year: constants.season.year,
@@ -79,7 +84,8 @@ const run = async () => {
 const main = async () => {
   let error
   try {
-    await run()
+    const lid = argv.lid || 1
+    await run(lid)
   } catch (err) {
     error = err
     console.log(error)
