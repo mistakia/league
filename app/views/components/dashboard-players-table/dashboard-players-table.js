@@ -32,7 +32,8 @@ export default class DashboardPlayersTable extends React.Component {
       leadColumn = '',
       space,
       isTransition,
-      percentiles
+      percentiles,
+      is_team_manager
     } = this.props
 
     const { isOffseason, isRegularSeason } = constants
@@ -309,7 +310,7 @@ export default class DashboardPlayersTable extends React.Component {
               players={total}
               reorder={showReorder}
               isBeforeExtensionDeadline={isBeforeExtensionDeadline}
-              {...{ percentiles }}
+              {...{ percentiles, is_team_manager }}
             />
           )}
           {body}
@@ -333,5 +334,6 @@ DashboardPlayersTable.propTypes = {
   cutlist: ImmutablePropTypes.list,
   reorderCutlist: PropTypes.func,
   isTransition: PropTypes.bool,
-  percentiles: PropTypes.object
+  percentiles: PropTypes.object,
+  is_team_manager: PropTypes.bool
 }

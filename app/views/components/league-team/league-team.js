@@ -130,7 +130,7 @@ export default function LeagueTeam({
               }
               cutlist={cutlist}
               total={cutlist}
-              {...{ percentiles }}
+              {...{ percentiles, is_team_manager }}
             />
           </Grid>
         )}
@@ -140,7 +140,7 @@ export default function LeagueTeam({
             title='Active Roster'
             space={roster.availableSpace}
             total={activePlayers}
-            {...{ percentiles }}
+            {...{ percentiles, is_team_manager }}
           />
         </Grid>
         <Grid item xs={12}>
@@ -148,14 +148,14 @@ export default function LeagueTeam({
             items={practice_signed_items}
             title='Practice Squad — Signed'
             space={roster.availablePracticeSpace}
-            {...{ percentiles }}
+            {...{ percentiles, is_team_manager }}
           />
         </Grid>
         <Grid item xs={12}>
           <DashboardPlayersTable
             items={practice_drafted_items}
             title='Practice Squad — Drafted'
-            {...{ percentiles }}
+            {...{ percentiles, is_team_manager }}
           />
         </Grid>
         <Grid item xs={12}>
@@ -164,7 +164,7 @@ export default function LeagueTeam({
               items={reserveIRItems}
               title='Reserve/IR'
               space={roster.availableReserveSpace}
-              {...{ percentiles }}
+              {...{ percentiles, is_team_manager }}
             />
           )}
         </Grid>
@@ -173,7 +173,7 @@ export default function LeagueTeam({
             <DashboardPlayersTable
               items={reserveCOVItems}
               title='Reserve/COVID-19'
-              {...{ percentiles }}
+              {...{ percentiles, is_team_manager }}
             />
           )}
         </Grid>

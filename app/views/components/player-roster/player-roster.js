@@ -42,7 +42,11 @@ class PlayerRoster extends Player {
 
     const value = playerMap.get('value', 0)
     const bid = playerMap.get('bid')
-    const salary = isBeforeExtensionDeadline ? value : bid || value
+    const salary = isBeforeExtensionDeadline
+      ? value
+      : isRestrictedFreeAgent
+      ? bid
+      : value
     const extensions = playerMap.get('extensions', 0)
     const pos = playerMap.get('pos', '')
     const slot = playerMap.get('slot')
@@ -157,7 +161,7 @@ class PlayerRoster extends Player {
           </div>
         )}
         {Boolean(isTransition) && (
-          <div className='metric table__cell'>{bid ? `$${bid}` : '-'}</div>
+          <div className='metric table__cell'>{typeof bid === 'number' ? `$${bid}` : '-'}</div>
         )}
         {isWaiver && (
           <div className='metric table__cell'>
@@ -168,7 +172,11 @@ class PlayerRoster extends Player {
           <div className='row__group-body'>
             {!isWaiver && !isTransition && (
               <div className='metric table__cell'>
-                {isPoach ? value + 2 || '-' : salary ? `$${salary}` : '-'}
+                {isPoach
+                  ? value + 2 || '-'
+                  : typeof salary === 'number'
+                  ? `$${salary}`
+                  : '-'}
               </div>
             )}
             {!isWaiver &&
