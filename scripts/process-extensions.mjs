@@ -64,8 +64,13 @@ const run = async ({ lid }) => {
     .where({
       userid: 0,
       lid,
-      year: constants.season.year
+      year: constants.season.year,
     })
+    .whereIn('type', [
+      constants.transactions.FRANCHISE_TAG,
+      constants.transactions.ROOKIE_TAG,
+      constants.transactions.EXTENSION
+    ])
     .del()
 
   for (const team of teams) {
