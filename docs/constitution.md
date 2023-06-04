@@ -272,7 +272,7 @@ iv. 2pt Passing Conversions (2)
 
 (b) Rushing categories:
 
-i. Rushing Yards (0.1)
+i. Rushing Yards excluding Quarterback Kneels (0.1)
 
 ii. TD Rush (6)
 
