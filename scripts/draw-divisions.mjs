@@ -11,7 +11,11 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('draw-divisions')
 debug.enable('draw-divisions')
 
-const run = async ({ lid, print = true, dry_run = false }) => {
+const run = async ({ lid, print = true, dry_run = false, num_divisions }) => {
+  if (!num_divisions) {
+    throw new Error('missing num_divisions')
+  }
+
   log(`Drawing divisions for leagueId: ${lid}`)
   const teams = await db('teams').where({ lid, year: constants.season.year })
   if (!teams.length) {
@@ -22,7 +26,7 @@ const run = async ({ lid, print = true, dry_run = false }) => {
   const tids = teams.map((t) => t.uid)
 
   // get team stats for last three years
-  const cutoff = constants.season.year - 3
+  const cutoff = constants.season.year - 2
   const teamStats = await db('team_stats')
     .where('year', '>=', cutoff)
     .whereIn('tid', tids)
@@ -58,7 +62,7 @@ const run = async ({ lid, print = true, dry_run = false }) => {
   }
 
   const sorted = powerIndexes.sort((a, b) => b.powerIndex - a.powerIndex)
-  const poolLimit = 4
+  const poolLimit = num_divisions
   const pools = []
   while (sorted.length > 0) {
     pools.push(sorted.splice(0, poolLimit))
@@ -71,7 +75,7 @@ const run = async ({ lid, print = true, dry_run = false }) => {
       for (const team of pool) {
         p.addRow({
           team: team.name,
-          PowerIndex: team.powerIndex.toFixed(2),
+          PowerIndex: team.powerIndex.toFixed(4),
           Wins: team.wins,
           PF: Math.floor(team.pf)
         })
@@ -80,7 +84,7 @@ const run = async ({ lid, print = true, dry_run = false }) => {
     })
   }
 
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < num_divisions; i++) {
     const div = i + 1
     const division = []
     for (const pool of pools) {
@@ -102,7 +106,7 @@ const run = async ({ lid, print = true, dry_run = false }) => {
       for (const team of division) {
         p.addRow({
           team: team.name,
-          PowerIndex: team.powerIndex.toFixed(2)
+          PowerIndex: team.powerIndex.toFixed(4)
         })
       }
       p.printTable()
@@ -121,7 +125,12 @@ const main = async () => {
       process.exit()
     }
 
-    await run({ lid, print: argv.print, dry_run: argv.dry })
+    await run({
+      lid,
+      print: argv.print,
+      dry_run: argv.dry,
+      num_divisions: argv.num_divisions
+    })
   } catch (err) {
     error = err
     console.log(error)
