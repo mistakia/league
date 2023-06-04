@@ -787,3 +787,20 @@ i. Under extreme circumstances, a recurring refusal to engage in reasonable tran
 11. There is no minimum quorum or representation requirement for a non-binding jury vote.
 
 Interpretive Note: _While the Commissioner is the dispute resolution officer of the LEAGUE, in extremely rare cases the Commissioner may decide to appoint others to resolve disputes. This will be particularly – and perhaps exclusively – useful where the Commissioner is charged with, or the victim of, an offence; or where the nature of the offence is subjective. For example, the Commissioner may appoint a neutral third party arbitrator to determine what penalty, if any, a Manager should suffer for harassing him; or may appoint a small jury to determine whether or not someone’s ‘non-competitive behavior’ is enough to count as such. Jury votes are not permitted to be secret, so that the Commissioner cannot be accused of lying about their results. Neither are jury votes binding, as the Commissioner may reasonably determine that there was enough concern demonstrated in a vote to give rise to an offence, or may determine that it is unnecessary or undesirable for every Manager to weigh in. (For example, if 40% of jurors agreed that a Manager’s contact with another Manager was unreasonable harassment, the Commissioner might decide to penalize that Manager with a lighter punishment, rather than finding there was no offence at all.)_
+
+## Article XX
+
+> CANCELLED OR RESCHEDULED NFL GAMES
+
+**Rescheduled.**
+
+1. If an NFL game is cancelled or suspended, stats from the rescheduled game will be used for scoring unless the result of that NFL game is not needed to determine the NFL playoff seed of both NFL teams.
+   Cancelled.
+
+**Cancelled**
+
+2. If a rescheduled game can not be used, the first game outside of the REGULAR SEASON will be used where the player is active and is an NFL post-season game or NFL regular-season game within the same year and where at the start of the game the result of that game is needed to determine the playoff seed of both NFL teams.
+
+3. If a player has no such games available then stats can be used from an NFL regular-season game where at the start of the game the result of that game is needed to determine the playoff seed of the NFL opponent of that player’s NFL team.
+
+4. If a substitute and rescheduled game is not available, the REGULAR SEASON ALL-PLAY record will be used to determine the results among teams whose results are impacted by a cancelled or suspended NFL game. REGULAR SEASON POINTS FOR would serve as a tiebreaker.
