@@ -388,7 +388,7 @@ xiv. 10-13 points allowed (2)
 
 12. Divisions shall be redrawn yearly. The draw process is as follows:
 
-(a) The teams shall be divided into three (3) pots based on a team’s power index (PI), which is calculated by combining the team’s normalized win percentage and points for (PF) per game from, at most, the previous three (3) years.
+(a) The teams shall be divided into five (5) pots based on a team’s power index (PI), which is calculated by combining the team’s normalized win percentage and points for (PF) per game from, at most, the previous two (2) years.
 
 (b) At random, one team will be selected from each pot to form a division.
 
@@ -670,7 +670,7 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 
 **Participation.**
 
-3. The two (2) DIVISION WINNERS with the lowest All Play win percentage are admitted along with two (2) non-division winners with the highest Total Points For (PF).
+3. The team with the lowest All Play win percentage, among the two teams with the highest Head-to-Head record in that division, will be admitted along with two (2) at large teams with the highest Total Points For (PF) among teams who are not 1st or 2nd in their division.
 
 4. In the event that any Teams should be tied in respect of All Play win percentage, the tie breaker shall be the Total Points For (PF) during the LEAGUE regular season.
 
@@ -692,7 +692,7 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 
 **Participation.**
 
-3. The two (2) DIVISION WINNERS with the highest All Play win percentage are admitted along with the two (2) WILDCARD ROUND winners.
+3. The team with the highest All Play win percentage, among the two teams with the highest Head-to-Head record in that division, will be admitted along with the two (2) WILDCARD ROUND winners.
 
 4. In the event that any Teams should be tied in respect of All Play win percentage, the tie breaker shall be the Total Points For (PF) during the LEAGUE regular season.
 
