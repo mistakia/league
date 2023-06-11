@@ -44,12 +44,12 @@ export default async function () {
     log(err)
   }
 
-  try {
-    await import_betmgm_odds()
-  } catch (err) {
-    log(err)
-  }
-
+  /* try {
+   *   await import_betmgm_odds()
+   * } catch (err) {
+   *   log(err)
+   * }
+   */
   try {
     await import_prizepicks_odds()
   } catch (err) {
