@@ -146,6 +146,8 @@ const run = async () => {
       }
 
       for (const offer of offers) {
+        if (!offer.label) continue
+
         formatted_markets.push({
           market_id: `${offer_category.offerCategoryId}/${subcategoryId}/${offer.providerOfferId}`,
           source_id: constants.sources.DRAFT_KINGS_VA,
