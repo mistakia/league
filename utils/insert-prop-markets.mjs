@@ -6,8 +6,8 @@ import sendDiscordMessage from './send-discord-message.mjs'
 import { constants } from '#common'
 import diff from 'deep-diff'
 
-const log = debug('insert-prop-market')
-debug.enable('insert-prop-market')
+const log = debug('insert-prop-markets')
+debug.enable('insert-prop-markets')
 
 const insert_market = async ({ timestamp, ...market }) => {
   // get existing market row in `prop_markets` table order by latest timestamp
