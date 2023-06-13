@@ -1,11 +1,11 @@
-import fetch from 'node-fetch'
-// import debug from 'debug'
+import debug from 'debug'
 
 import config from '#config'
 import { constants } from '#common'
+import { puppeteer } from '#utils'
 
-// const log = debug('betmgm')
-// debug.enable('betmgm')
+const log = debug('betmgm')
+debug.enable('betmgm')
 
 export const markets = {
   12203: constants.player_prop_types.GAME_PASSING_COMPLETIONS,
@@ -29,11 +29,15 @@ export const markets = {
 }
 
 export const get_markets = async () => {
-  const url = `${config.betmgm_api_url}/bettingoffer/fixtures?x-bwin-accessid=YmNkZjhiMzEtYWIwYS00ZDg1LWE2MWYtOGMyYjljNTdjYjFl&sportIds=11&competitionIds=35&country=US&lang=en-us&offerMapping=All`
-
-  // log(`fetching ${url}`)
-  const res = await fetch(url)
-  const data = await res.json()
+  const { page, browser } = await puppeteer.getPage(
+    'https://sports.md.betmgm.com/en/sports/football-11/betting/usa-9/nfl-35'
+  )
+  const market_data_url = `${config.betmgm_api_url}/bettingoffer/fixtures?x-bwin-accessid=YmNkZjhiMzEtYWIwYS00ZDg1LWE2MWYtOGMyYjljNTdjYjFl&country=US&lang=en-us&offerMapping=All&sportIds=11&competitionIds=35`
+  log(`fetching ${market_data_url}`)
+  await page.waitForTimeout(2000)
+  const response = await page.goto(market_data_url)
+  const data = await response.json()
+  await browser.close()
 
   if (!data || !data.fixtures || !data.fixtures.length) {
     return { nfl_game_markets: [], all_markets: [] }
