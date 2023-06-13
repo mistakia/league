@@ -67,6 +67,7 @@ export * as validators from './validators.mjs'
 export { default as get_trades } from './get-trades.mjs'
 export { default as get_transition_signings } from './get-transition-signings.mjs'
 export { default as batch_insert } from './batch-insert.mjs'
+export * as puppeteer from './puppeteer.mjs'
 
 export const getChartedPlayByPlayQuery = (db) =>
   db('nfl_plays')
