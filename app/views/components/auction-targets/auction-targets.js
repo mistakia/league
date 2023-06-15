@@ -62,7 +62,7 @@ export default function AuctionTargets({
       : playerMap.getIn(['market_salary', '0'], 0)
 
     return (
-      <div key={key} index={index} style={style}>
+      <div {...{ key, style }}>
         <div className={classNames.join(' ')}>
           {isNominating && isNominatable && (
             <div className='auction__player-nominate'>

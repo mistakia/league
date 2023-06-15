@@ -14,46 +14,79 @@ export default class SelectedPlayerTeamPositionSplits extends React.Component {
     const items = []
     for (const [index, seasonlog] of sorted.entries()) {
       const percentiles = stats.teamStatsPercentiles[seasonlog.year] || {}
-      const Stat = ({ stat_key, ...params }) => (
-        <PercentileMetric
-          value={seasonlog[stat_key]}
-          percentile={percentiles[stat_key]}
-          {...params}
-        />
+
+      const running_back_stat_keys = ['rba', 'rby']
+      const running_back_stat_items = running_back_stat_keys.map(
+        (stat_key, index) => (
+          <PercentileMetric
+            key={index}
+            value={seasonlog[stat_key]}
+            percentile={percentiles[stat_key]}
+          />
+        )
+      )
+
+      const wide_receiver_1_stat_keys = ['wr1a', 'wr1y']
+      const wide_receiver_1_stat_items = wide_receiver_1_stat_keys.map(
+        (stat_key, index) => (
+          <PercentileMetric
+            key={index}
+            value={seasonlog[stat_key]}
+            percentile={percentiles[stat_key]}
+          />
+        )
+      )
+
+      const wide_receiver_3_stat_keys = ['wr3a', 'wr3y']
+      const wide_receiver_3_stat_items = wide_receiver_3_stat_keys.map(
+        (stat_key, index) => (
+          <PercentileMetric
+            key={index}
+            value={seasonlog[stat_key]}
+            percentile={percentiles[stat_key]}
+          />
+        )
+      )
+
+      const tight_end_stat_keys = ['tea', 'tey']
+      const tight_end_stat_items = tight_end_stat_keys.map(
+        (stat_key, index) => (
+          <PercentileMetric
+            key={index}
+            value={seasonlog[stat_key]}
+            percentile={percentiles[stat_key]}
+          />
+        )
+      )
+
+      const quarterback_stat_keys = ['qba', 'qby']
+      const quarterback_stat_items = quarterback_stat_keys.map(
+        (stat_key, index) => (
+          <PercentileMetric
+            key={index}
+            value={seasonlog[stat_key]}
+            percentile={percentiles[stat_key]}
+          />
+        )
       )
 
       items.push(
         <div key={index} className='player__selected-row'>
           <div className='table__cell text'>{seasonlog.year}</div>
           <div className='row__group'>
-            <div className='row__group-body'>
-              <Stat stat_key='rba' />
-              <Stat stat_key='rby' />
-            </div>
+            <div className='row__group-body'>{running_back_stat_items}</div>
           </div>
           <div className='row__group'>
-            <div className='row__group-body'>
-              <Stat stat_key='wr1a' />
-              <Stat stat_key='wr1y' />
-            </div>
+            <div className='row__group-body'>{wide_receiver_1_stat_items}</div>
           </div>
           <div className='row__group'>
-            <div className='row__group-body'>
-              <Stat stat_key='wr3a' />
-              <Stat stat_key='wr3y' />
-            </div>
+            <div className='row__group-body'>{wide_receiver_3_stat_items}</div>
           </div>
           <div className='row__group'>
-            <div className='row__group-body'>
-              <Stat stat_key='tea' />
-              <Stat stat_key='tey' />
-            </div>
+            <div className='row__group-body'>{tight_end_stat_items}</div>
           </div>
           <div className='row__group'>
-            <div className='row__group-body'>
-              <Stat stat_key='qba' />
-              <Stat stat_key='qby' />
-            </div>
+            <div className='row__group-body'>{quarterback_stat_items}</div>
           </div>
         </div>
       )

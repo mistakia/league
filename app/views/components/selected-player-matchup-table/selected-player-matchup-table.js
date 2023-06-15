@@ -13,14 +13,13 @@ export default function SelectedPlayerMatchupTable({
   nfl_team_against_seasonlogs,
   loadPercentiles
 }) {
-  if (!opp) {
-    return <div>BYE</div>
-  }
-
   const individual_percentile_key = `INDIVIDUAL_GAMELOG_${position}`
 
   // load percentiles
   useEffect(() => {
+    if (!opp) {
+      return
+    }
     const percentile_keys = [individual_percentile_key]
     nfl_team_against_seasonlogs.forEach((item) =>
       percentile_keys.push(item.percentile_key)
@@ -28,7 +27,16 @@ export default function SelectedPlayerMatchupTable({
     for (const percentile_key of percentile_keys) {
       loadPercentiles(percentile_key)
     }
-  }, [])
+  }, [
+    individual_percentile_key,
+    loadPercentiles,
+    nfl_team_against_seasonlogs,
+    opp
+  ])
+
+  if (!opp) {
+    return <div>BYE</div>
+  }
 
   const rows = []
   nfl_team_against_seasonlogs.forEach((item, index) => {

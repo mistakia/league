@@ -13,7 +13,7 @@ export default function PropsPage({ load, player_props }) {
   const listEl = useRef(null)
   useEffect(() => {
     load()
-  }, [])
+  }, [load])
 
   const Row = ({ index, key, style }) => {
     const prop = player_props[index]

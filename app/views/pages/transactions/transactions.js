@@ -35,7 +35,7 @@ export default function TransactionsPage({
     }
 
     load(lid)
-  }, [])
+  }, [lid, load, navigate])
 
   useEffect(() => {
     window.addEventListener('resize', update)

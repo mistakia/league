@@ -21,7 +21,7 @@ export default function WaiversPage({ load, items, isPending }) {
     }
 
     load(lid)
-  }, [])
+  }, [lid, load, navigate])
 
   const rows = []
   items.forEach((waiver, index) => {

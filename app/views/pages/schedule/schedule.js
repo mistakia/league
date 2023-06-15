@@ -23,7 +23,7 @@ export default function SchedulePage({ matchups, load }) {
     }
 
     load(lid)
-  }, [])
+  }, [lid, load, navigate])
 
   const sections = []
   const groups = groupBy(matchups, 'week')

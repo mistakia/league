@@ -165,11 +165,11 @@ export default function StatsPage({
     if (isNaN(lid)) {
       return navigate('/', { replace: true })
     }
-  }, [])
+  }, [lid, navigate])
 
   useEffect(() => {
     loadLeagueTeamStats()
-  }, [year])
+  }, [year, loadLeagueTeamStats])
 
   const slotHeaders = []
   const eligibleStarterSlots = getEligibleSlots({ pos: 'ALL', league })

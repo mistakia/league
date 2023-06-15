@@ -19,7 +19,7 @@ export default function SelectedPlayerSchedule({
 }) {
   useEffect(() => {
     load_nfl_team_seasonlogs()
-  }, [])
+  }, [load_nfl_team_seasonlogs])
 
   const pos = playerMap.get('pos')
   const team = playerMap.get('team')

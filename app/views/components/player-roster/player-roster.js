@@ -241,9 +241,9 @@ class PlayerRoster extends Player {
               <div className='metric table__cell'>
                 {points_added ? points_added.toFixed(1) : '-'}
               </div>
-              <div className='metric table__cell'>{`${
-                points_added_rnk || '-'
-              }`}</div>
+              <div className='metric table__cell'>
+                {`${points_added_rnk || '-'}`}
+              </div>
               <div className='metric table__cell'>
                 {`${points_added_pos_rnk ? pos : ''}${
                   points_added_pos_rnk || '-'

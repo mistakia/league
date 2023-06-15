@@ -27,7 +27,7 @@ export default function DeactivateConfirmation({
 
   useEffect(() => {
     loadPlayerTransactions(pid)
-  }, [])
+  }, [loadPlayerTransactions, pid])
 
   const handleSelectRelease = (event) => {
     const { value } = event.target

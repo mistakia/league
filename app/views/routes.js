@@ -1,5 +1,4 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
@@ -95,7 +94,6 @@ const Routes = ({ app }) => {
 }
 
 Routes.propTypes = {
-  location: PropTypes.object,
   app: ImmutablePropTypes.record
 }
 

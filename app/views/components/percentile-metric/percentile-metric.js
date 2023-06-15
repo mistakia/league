@@ -69,7 +69,6 @@ PercentileMetric.propTypes = {
   show_positivity: PropTypes.bool,
   className: PropTypes.string,
   scaled: PropTypes.bool,
-  title: PropTypes.string,
   fixed: PropTypes.number,
   prefix: PropTypes.string
 }

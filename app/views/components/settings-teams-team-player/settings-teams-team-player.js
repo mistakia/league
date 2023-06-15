@@ -40,7 +40,6 @@ export default class SettingsTeamsTeamPlayer extends React.Component {
 }
 
 SettingsTeamsTeamPlayer.propTypes = {
-  update: PropTypes.func,
   remove: PropTypes.func,
   showConfirmation: PropTypes.func,
   pid: PropTypes.string,

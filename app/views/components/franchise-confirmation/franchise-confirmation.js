@@ -119,9 +119,6 @@ export default class FranchiseConfirmation extends React.Component {
 FranchiseConfirmation.propTypes = {
   team: PropTypes.object,
   onClose: PropTypes.func,
-  league: PropTypes.object,
   add: PropTypes.func,
-  status: PropTypes.object,
-  playerMap: ImmutablePropTypes.map,
-  waiver: PropTypes.object
+  playerMap: ImmutablePropTypes.map
 }

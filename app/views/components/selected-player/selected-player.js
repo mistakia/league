@@ -274,7 +274,6 @@ export default class SelectedPlayer extends React.Component {
 }
 
 SelectedPlayer.propTypes = {
-  children: PropTypes.element,
   deselect: PropTypes.func,
   playerMap: ImmutablePropTypes.map,
   isLoggedIn: PropTypes.bool
