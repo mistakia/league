@@ -14,48 +14,75 @@ export default class SelectedPlayerTeamSituationSplits extends React.Component {
     const items = []
     for (const [index, seasonlog] of sorted.entries()) {
       const percentiles = stats.teamStatsPercentiles[seasonlog.year] || {}
-      const Stat = ({ stat_key, ...params }) => (
+
+      const quarter_points_stat_keys = ['q1p', 'q2p', 'q3p', 'q4p']
+      const quarter_points_stat_items = quarter_points_stat_keys.map(
+        (stat_key, index) => (
+          <PercentileMetric
+            key={index}
+            value={seasonlog[stat_key]}
+            percentile={percentiles[stat_key]}
+          />
+        )
+      )
+
+      const first_quarter_stat_keys = ['q1ra', 'q1pa', 'q1ry', 'q1py']
+      const first_quarter_stat_items = first_quarter_stat_keys.map(
+        (stat_key, index) => (
+          <PercentileMetric
+            key={index}
+            value={seasonlog[stat_key]}
+            percentile={percentiles[stat_key]}
+          />
+        )
+      )
+
+      const late_close_stat_keys = ['lcra', 'lcpa', 'lcry', 'lcpy']
+      const late_close_stat_items = late_close_stat_keys.map(
+        (stat_key, index) => (
+          <PercentileMetric
+            key={index}
+            value={seasonlog[stat_key]}
+            percentile={percentiles[stat_key]}
+          />
+        )
+      )
+
+      const play_action_stat_keys = ['pap', 'papy']
+      const play_action_stat_items = play_action_stat_keys.map(
+        (stat_key, index) => (
+          <PercentileMetric
+            key={index}
+            value={seasonlog[stat_key]}
+            percentile={percentiles[stat_key]}
+          />
+        )
+      )
+
+      const shotgun_stat_keys = ['sga', 'sgy']
+      const shotgun_stat_items = shotgun_stat_keys.map((stat_key, index) => (
         <PercentileMetric
+          key={index}
           value={seasonlog[stat_key]}
           percentile={percentiles[stat_key]}
-          {...params}
         />
-      )
+      ))
 
       items.push(
         <div key={index} className='player__selected-row'>
           <div className='table__cell text'>{seasonlog.year}</div>
-          <Stat stat_key='q1p' />
-          <Stat stat_key='q2p' />
-          <Stat stat_key='q3p' />
-          <Stat stat_key='q4p' />
+          {quarter_points_stat_items}
           <div className='row__group'>
-            <div className='row__group-body'>
-              <Stat stat_key='q1ra' />
-              <Stat stat_key='q1pa' />
-              <Stat stat_key='q1ry' />
-              <Stat stat_key='q1py' />
-            </div>
+            <div className='row__group-body'>{first_quarter_stat_items}</div>
           </div>
           <div className='row__group'>
-            <div className='row__group-body'>
-              <Stat stat_key='lcra' />
-              <Stat stat_key='lcpa' />
-              <Stat stat_key='lcry' />
-              <Stat stat_key='lcpy' />
-            </div>
+            <div className='row__group-body'>{late_close_stat_items}</div>
           </div>
           <div className='row__group'>
-            <div className='row__group-body'>
-              <Stat stat_key='pap' />
-              <Stat stat_key='papy' />
-            </div>
+            <div className='row__group-body'>{play_action_stat_items}</div>
           </div>
           <div className='row__group'>
-            <div className='row__group-body'>
-              <Stat stat_key='sga' />
-              <Stat stat_key='sgy' />
-            </div>
+            <div className='row__group-body'>{shotgun_stat_items}</div>
           </div>
         </div>
       )

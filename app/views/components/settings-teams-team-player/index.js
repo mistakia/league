@@ -6,7 +6,6 @@ import { confirmationActions } from '@core/confirmations'
 import SettingsTeamsTeamPlayer from './settings-teams-team-player'
 
 const mapDispatchToProps = {
-  update: rosterActions.updateValue,
   remove: rosterActions.remove,
   showConfirmation: confirmationActions.show
 }

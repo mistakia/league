@@ -50,7 +50,7 @@ export default function LeagueHomePage({
     if (isNaN(lid)) {
       return navigate('/', { replace: true })
     }
-  }, [])
+  }, [lid, navigate])
 
   useEffect(() => {
     loadTeams(leagueId)
@@ -58,7 +58,14 @@ export default function LeagueHomePage({
     loadLeaguePlayers()
     loadDraftPickValue()
     loadRecentTransactions()
-  }, [leagueId])
+  }, [
+    leagueId,
+    loadTeams,
+    loadRosters,
+    loadLeaguePlayers,
+    loadDraftPickValue,
+    loadRecentTransactions
+  ])
 
   const notices = []
   if (league.adate) {

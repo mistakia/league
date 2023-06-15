@@ -23,7 +23,7 @@ export default function LeagueTeamValueDeltas({
 }) {
   useEffect(() => {
     load_league_team_daily_values()
-  }, [])
+  }, [load_league_team_daily_values])
 
   if (!team_value_deltas) return null
   const delta_items = []

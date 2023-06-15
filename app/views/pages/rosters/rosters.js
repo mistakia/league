@@ -32,7 +32,7 @@ export default function RostersPage({
 
     loadLeaguePlayers()
     loadRosters(lid)
-  }, [])
+  }, [lid, loadRosters, loadLeaguePlayers, navigate])
 
   const labels = []
   if (league.sqb) {

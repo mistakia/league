@@ -29,14 +29,23 @@ export default function TeamPage({
     loadLeaguePlayers(lid)
     loadDraftPickValue()
     loadLeagueTeamStats(lid)
-  }, [])
+  }, [
+    lid,
+    tid,
+    loadTeams,
+    loadLeaguePlayers,
+    loadDraftPickValue,
+    loadLeagueTeamStats,
+    navigate
+  ])
 
+  const league_loaded_and_no_tid = !tid && teams.size
   useEffect(() => {
     if (!tid && teams.size) {
       const team = teams.first()
       return navigate(`/leagues/${lid}/teams/${team.uid}`, { replace: true })
     }
-  }, [!tid && teams.size])
+  }, [lid, tid, league_loaded_and_no_tid, teams, navigate])
 
   if (!tid) return <PageLayout />
 

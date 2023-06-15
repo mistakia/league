@@ -36,7 +36,7 @@ export default function LeagueTeam({
       leagueId: Number(lid),
       teamId
     })
-  }, [tid])
+  }, [tid, lid, loadTeamPlayers, teamId])
 
   const groups = {}
   for (const position of constants.positions) {

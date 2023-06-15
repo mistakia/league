@@ -63,7 +63,7 @@ export default function PlayersPage({
 
   useEffect(() => {
     loadAllPlayers()
-  }, [])
+  }, [loadAllPlayers])
 
   useEffect(() => {
     for (const field_key of selected_players_view.fields) {
@@ -72,7 +72,7 @@ export default function PlayersPage({
         player_field.load()
       }
     }
-  }, [selected_players_view.key])
+  }, [player_fields, selected_players_view.fields, selected_players_view.key])
 
   useEffect(() => {
     set_page(0)
@@ -85,7 +85,14 @@ export default function PlayersPage({
       scroll_ref.scrollComponent
     )
     parentElement.scrollTop = 0
-  }, [selected_players_view.key, order, orderBy, searchValue, players.size])
+  }, [
+    scroll_ref,
+    selected_players_view.key,
+    order,
+    orderBy,
+    searchValue,
+    players.size
+  ])
   // TODO instead of players.size use players.equal() for comparison
 
   const loadMore = (page) => {

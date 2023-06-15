@@ -22,7 +22,7 @@ export default function AuctionPage({
   useEffect(() => {
     loadAllPlayers()
     join()
-  }, [])
+  }, [join, loadAllPlayers])
 
   useEffect(() => {
     const element = document.querySelector('.auction__team.winning')

@@ -65,6 +65,5 @@ export default class DashboardDraftPicks extends React.Component {
 }
 
 DashboardDraftPicks.propTypes = {
-  picks: ImmutablePropTypes.list,
-  league: PropTypes.object
+  picks: ImmutablePropTypes.list
 }

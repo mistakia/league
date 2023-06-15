@@ -14,40 +14,59 @@ export default class SelectedPlayerTeamStats extends React.Component {
     const items = []
     for (const [index, seasonlog] of sorted.entries()) {
       const percentiles = stats.teamStatsPercentiles[seasonlog.year] || {}
-      const Stat = ({ stat_key, ...params }) => (
+
+      const passing_stat_keys = [
+        'pa',
+        'py',
+        'tdp',
+        'pfd',
+        'spp',
+        'rzpa',
+        'rzpy'
+      ]
+      const passing_stat_items = passing_stat_keys.map((stat_key, index) => (
         <PercentileMetric
+          key={index}
           value={seasonlog[stat_key]}
           percentile={percentiles[stat_key]}
-          {...params}
         />
-      )
+      ))
+
+      const rushing_stat_keys = [
+        'ra',
+        'ry',
+        'tdr',
+        'rfd',
+        'srp',
+        'rzra',
+        'rzry'
+      ]
+      const rushing_stat_items = rushing_stat_keys.map((stat_key, index) => (
+        <PercentileMetric
+          key={index}
+          value={seasonlog[stat_key]}
+          percentile={percentiles[stat_key]}
+        />
+      ))
 
       items.push(
         <div key={index} className='player__selected-row'>
           <div className='table__cell text'>{seasonlog.year}</div>
-          <Stat stat_key='drv' className='row__single-metric' />
-          <Stat stat_key='snpo' className='row__single-metric' />
+          <PercentileMetric
+            value={seasonlog.drv}
+            percentile={percentiles.drv}
+            className='row__single-metric'
+          />
+          <PercentileMetric
+            value={seasonlog.snpo}
+            percentile={percentiles.snpo}
+            className='row__single-metric'
+          />
           <div className='row__group'>
-            <div className='row__group-body'>
-              <Stat stat_key='pa' />
-              <Stat stat_key='py' />
-              <Stat stat_key='tdp' />
-              <Stat stat_key='pfd' />
-              <Stat stat_key='spp' />
-              <Stat stat_key='rzpa' />
-              <Stat stat_key='rzpy' />
-            </div>
+            <div className='row__group-body'>{passing_stat_items}</div>
           </div>
           <div className='row__group'>
-            <div className='row__group-body'>
-              <Stat stat_key='ra' />
-              <Stat stat_key='ry' />
-              <Stat stat_key='tdr' />
-              <Stat stat_key='rfd' />
-              <Stat stat_key='srp' />
-              <Stat stat_key='rzra' />
-              <Stat stat_key='rzry' />
-            </div>
+            <div className='row__group-body'>{rushing_stat_items}</div>
           </div>
         </div>
       )

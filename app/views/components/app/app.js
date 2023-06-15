@@ -18,7 +18,7 @@ import '@styles/normalize.css'
 import '@styles/index.styl'
 import './app.styl'
 
-hotkeys('control+command+w', function (event, handler) {
+hotkeys('control+command+w', () => {
   document.body.classList.toggle('hide-watchlist')
 })
 
@@ -34,7 +34,7 @@ export default function App({ init, isPending }) {
       init({ token, leagueId })
     }
     onLoad()
-  }, [])
+  }, [init, leagueId])
 
   if (isPending) {
     return <Loading loading={isPending} />

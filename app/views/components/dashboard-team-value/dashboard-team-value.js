@@ -52,8 +52,9 @@ export default class DashboardTeamValue extends React.Component {
     if (draft_rank <= quarterOfLeague) classNames.push('text-green')
     if (draft_rank >= league.num_teams - quarterOfLeague)
       classNames.push('text-red')
+
     rows.push(
-      <tr key={'DRAFT'}>
+      <tr key='DRAFT'>
         <td>Draft</td>
         <td>{draft_value.toFixed(1)}</td>
         <td className={classNames.join(' ')}>{`${draft_rank}${nth(

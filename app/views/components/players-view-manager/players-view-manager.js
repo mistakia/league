@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 import Box from '@mui/material/Box'
 import Modal from '@mui/material/Modal'
@@ -81,12 +80,7 @@ PlayerFieldGroup.propTypes = {
   fields: PropTypes.object
 }
 
-export default function PlayersViewManager({
-  open,
-  handleClose,
-  views,
-  fields
-}) {
+export default function PlayersViewManager({ open, handleClose, fields }) {
   const items = []
   Object.keys(fields_grouping).forEach((group_key, index) => {
     items.push(
@@ -102,12 +96,12 @@ export default function PlayersViewManager({
   return (
     <Modal open={open} onClose={handleClose}>
       <div className='players__view-modal'>
-        <div className='players__view-modal-head'></div>
+        <div className='players__view-modal-head' />
         <div className='players__view-modal-body'>
           <div className='players__view-manager-fields'>
             <div className='players__view-manager-fields-list'>{items}</div>
           </div>
-          <div className='players__view-manager-order'></div>
+          <div className='players__view-manager-order' />
         </div>
       </div>
     </Modal>
@@ -117,6 +111,5 @@ export default function PlayersViewManager({
 PlayersViewManager.propTypes = {
   open: PropTypes.bool,
   handleClose: PropTypes.func,
-  fields: PropTypes.object,
-  views: ImmutablePropTypes.map
+  fields: PropTypes.object
 }

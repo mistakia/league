@@ -5,10 +5,8 @@ import { getPlayerFields } from '@core/selectors'
 
 import PlayersViewManager from './players-view-manager'
 
-const mapStateToProps = createSelector(
-  (state) => state.getIn(['players', 'views']),
-  getPlayerFields,
-  (views, fields) => ({ views, fields })
-)
+const mapStateToProps = createSelector(getPlayerFields, (fields) => ({
+  fields
+}))
 
 export default connect(mapStateToProps)(PlayersViewManager)

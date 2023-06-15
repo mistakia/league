@@ -1,5 +1,4 @@
-import React from 'react'
-import { is } from 'immutable'
+import React, { useEffect, useMemo } from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import CellMeasurer from 'react-virtualized/dist/es/CellMeasurer'
@@ -11,65 +10,65 @@ import ScoreboardPlay from '@components/scoreboard-play'
 
 import './scoreboard-play-by-play.styl'
 
-export default class ScoreboardPlayByPlay extends React.Component {
-  constructor(props) {
-    super(props)
-    this._cache = new CellMeasurerCache({ defaultHeight: 85, fixedWidth: true })
-    this._ref = React.createRef()
+export default function ScoreboardPlayByPlay({ plays, mid }) {
+  const cell_cache = useMemo(
+    () =>
+      new CellMeasurerCache({
+        defaultHeight: 85,
+        fixedWidth: true
+      }),
+    []
+  )
+  const ref = React.createRef()
+
+  useEffect(() => {
+    cell_cache.clearAll()
+    if (ref.current) {
+      ref.current.recomputeRowHeights()
+    }
+  }, [plays.size, cell_cache, ref])
+
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.scrollToRow(0)
+    }
+  }, [mid, ref])
+
+  const PlayRow = ({ index, key, parent, style }) => (
+    <CellMeasurer
+      cache={cell_cache}
+      columnIndex={0}
+      key={key}
+      parent={parent}
+      rowIndex={index}
+    >
+      <ScoreboardPlay {...{ key, play: plays.get(index), style }} />
+    </CellMeasurer>
+  )
+
+  PlayRow.propTypes = {
+    index: PropTypes.number,
+    key: PropTypes.string,
+    parent: PropTypes.object,
+    style: PropTypes.object
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    if (!is(this.props.plays.size, prevProps.plays.size)) {
-      this._resizeAll()
-    }
-
-    if (this.props.mid !== prevProps.mid && this._ref.current) {
-      this._ref.current.scrollToRow(0)
-    }
-  }
-
-  _resizeAll = () => {
-    this._cache.clearAll()
-    if (this._ref.current) {
-      this._ref.current.recomputeRowHeights()
-    }
-  }
-
-  render = () => {
-    const { plays } = this.props
-
-    const PlayRow = ({ index, key, parent, ...params }) => {
-      const play = plays.get(index)
-      return (
-        <CellMeasurer
-          cache={this._cache}
-          columnIndex={0}
-          key={key}
-          parent={parent}
-          rowIndex={index}
-        >
-          <ScoreboardPlay key={key} play={play} {...params} />
-        </CellMeasurer>
-      )
-    }
-
-    return (
-      <div className='scoreboard__play-by-play'>
-        <AutoSizer>
-          {({ height, width }) => (
-            <List
-              width={width}
-              height={height}
-              ref={this._ref}
-              rowHeight={this._cache.rowHeight}
-              rowCount={plays.size}
-              rowRenderer={PlayRow}
-            />
-          )}
-        </AutoSizer>
-      </div>
-    )
-  }
+  return (
+    <div className='scoreboard__play-by-play'>
+      <AutoSizer>
+        {({ height, width }) => (
+          <List
+            width={width}
+            height={height}
+            ref={ref}
+            rowHeight={cell_cache.rowHeight}
+            rowCount={plays.size}
+            rowRenderer={PlayRow}
+          />
+        )}
+      </AutoSizer>
+    </div>
+  )
 }
 
 ScoreboardPlayByPlay.propTypes = {

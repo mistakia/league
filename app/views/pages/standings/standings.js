@@ -181,11 +181,11 @@ export default function StandingsPage({
     if (isNaN(lid)) {
       return navigate('/', { replace: true })
     }
-  }, [])
+  }, [lid, navigate])
 
   useEffect(() => {
     loadLeagueTeamStats(lid)
-  }, [year])
+  }, [year, lid, loadLeagueTeamStats])
 
   const is_current_year = year === constants.year
 

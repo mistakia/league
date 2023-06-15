@@ -55,7 +55,7 @@ export default function PlayerSelectedRow({
     if (percentile_key) {
       loadPercentiles(percentile_key)
     }
-  }, [])
+  }, [percentile_key, loadPercentiles])
 
   const classNames = ['player__selected-row']
   if (className) classNames.push(className)

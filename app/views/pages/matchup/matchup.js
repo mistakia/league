@@ -63,11 +63,22 @@ export default function MatchupPage({
 
     loadLeaguePlayers()
     loadRosters(lid)
-  }, [])
+  }, [
+    lid,
+    loadLeaguePlayers,
+    loadRosters,
+    seas_week,
+    seas_year,
+    matchupId,
+    navigate,
+    selectMatchup,
+    selectWeek,
+    selectYear
+  ])
 
   useEffect(() => {
     loadMatchups()
-  }, [year])
+  }, [year, loadMatchups])
 
   useEffect(() => {
     set_selected_tid(isHeadToHead ? matchup.hid : matchup.getIn(['tids', '0']))
@@ -76,7 +87,7 @@ export default function MatchupPage({
         `/leagues/${matchup.lid}/matchups/${matchup.year}/${matchup.week}/${matchup.uid}`
       )
     }
-  }, [matchup.uid])
+  }, [matchup, isHeadToHead, navigate])
 
   let matchup_body
   if (is_loading) {

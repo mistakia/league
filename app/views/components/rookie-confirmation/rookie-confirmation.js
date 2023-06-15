@@ -115,7 +115,5 @@ RookieConfirmation.propTypes = {
   team: PropTypes.object,
   add: PropTypes.func,
   playerMap: ImmutablePropTypes.map,
-  status: PropTypes.object,
-  onClose: PropTypes.func,
-  waiver: PropTypes.object
+  onClose: PropTypes.func
 }

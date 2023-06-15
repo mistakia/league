@@ -19,7 +19,7 @@ export default function LeagueTeamsValueOverTime({
 }) {
   React.useEffect(() => {
     load_league_team_daily_values()
-  }, [])
+  }, [load_league_team_daily_values])
   const series = []
   const colors = []
 
