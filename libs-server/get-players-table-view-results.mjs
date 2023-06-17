@@ -89,8 +89,15 @@ export default async function ({
 
   for (const sort_clause of sort) {
     sort_clause.desc = sort_clause.desc === 'true'
+    // postgres
+    // players_query.orderByRaw(
+    //   `${sort_clause.id} ${sort_clause.desc ? 'desc' : 'asc'} NULLS LAST`
+    // )
+
+    // mysql
+    // use minus sign and reverse sort order to sort nulls last
     players_query.orderByRaw(
-      `${sort_clause.id} ${sort_clause.desc ? 'desc' : 'asc'} NULLS LAST`
+      `-${sort_clause.id} ${sort_clause.desc ? 'asc' : 'desc'}`
     )
   }
 
