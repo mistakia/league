@@ -3,8 +3,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants, Roster, optimizeLineup } from '#common'
-import { getLeague, getRoster, getPlayers, isMain } from '#utils'
+import { constants, Roster, optimizeLineup } from '#libs-shared'
+import { getLeague, getRoster, getPlayers, isMain } from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('project-lineups')

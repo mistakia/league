@@ -5,8 +5,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants, fixTeam, getGameDayAbbreviation } from '#common'
-import { isMain, wait, nfl } from '#utils'
+import { constants, fixTeam, getGameDayAbbreviation } from '#libs-shared'
+import { isMain, wait, nfl } from '#libs-server'
 
 dayjs.extend(timezone)
 

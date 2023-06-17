@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { constants, calculatePoints } from '@common'
+import { constants, calculatePoints } from '@libs-shared'
 import {
   getCurrentLeague,
   getSelectedPlayer,

@@ -4,8 +4,8 @@ import dayjs from 'dayjs'
 // import { hideBin } from 'yargs/helpers'
 
 // import db from '#db'
-import { constants } from '#common'
-import { isMain } from '#utils'
+import { constants } from '#libs-shared'
+import { isMain } from '#libs-server'
 
 import process_play_stats from './process-play-stats.mjs'
 import generate_league_format_player_careerlogs from './generate-league-format-player-careerlogs.mjs'

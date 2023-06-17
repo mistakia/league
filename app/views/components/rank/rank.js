@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { nth } from '@common'
+import { nth } from '@libs-shared'
 
 export default class Rank extends React.Component {
   render = () => {

@@ -4,8 +4,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#common'
-import { isMain, getPlayer, wait } from '#utils'
+import { constants } from '#libs-shared'
+import { isMain, getPlayer, wait } from '#libs-server'
 import config from '#config'
 
 const argv = yargs(hideBin(process.argv)).argv

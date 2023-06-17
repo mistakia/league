@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 import PlayerFilter from '@components/player-filter'
 
 export default class WeekFilter extends React.Component {

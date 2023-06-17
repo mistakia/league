@@ -7,8 +7,8 @@ import { fileURLToPath } from 'url'
 import { hideBin } from 'yargs/helpers'
 
 // import db from '#db'
-// import { constants } from '#common'
-import { isMain, fanduel } from '#utils'
+// import { constants } from '#libs-shared'
+import { isMain, fanduel } from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-fanduel-wagers')

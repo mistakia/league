@@ -2,7 +2,7 @@ import { Record, List, Map } from 'immutable'
 
 import { statActions } from './actions'
 import { playerActions } from '@core/players'
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 
 const initialState = new Record({
   isPending: false,

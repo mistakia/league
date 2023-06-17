@@ -1,7 +1,7 @@
 import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 import TransactionsFilter from '@components/transactions-filter'
 
 export default class TransactionTypeFilter extends React.Component {

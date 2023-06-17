@@ -4,14 +4,14 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants, team_aliases } from '#common'
+import { constants, team_aliases } from '#libs-shared'
 import {
   isMain,
   getPlayer,
   caesars,
   insertProps,
   insert_prop_markets
-} from '#utils'
+} from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-caesars')

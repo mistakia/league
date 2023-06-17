@@ -9,7 +9,7 @@ import Matchup from '@components/matchup'
 import SelectYear from '@components/select-year'
 import ScheduleWeeksFilter from '@components/schedule-weeks-filter'
 import ScheduleTeamsFilter from '@components/schedule-teams-filter'
-import { groupBy } from '@common'
+import { groupBy } from '@libs-shared'
 
 import './schedule.styl'
 

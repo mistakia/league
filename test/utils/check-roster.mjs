@@ -1,7 +1,7 @@
 import chai from 'chai'
 
-import { getRoster, getLeague } from '#utils'
-import { Roster } from '#common'
+import { getRoster, getLeague } from '#libs-server'
+import { Roster } from '#libs-shared'
 
 const expect = chai.expect
 

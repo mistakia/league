@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { calculatePoints, groupBy } from '@common'
+import { calculatePoints, groupBy } from '@libs-shared'
 import { playerActions } from '@core/players'
 import {
   getGamelogsForSelectedPlayer,

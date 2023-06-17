@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import AutoSizer from 'react-virtualized/dist/es/AutoSizer'
 import List from 'react-virtualized/dist/es/List'
 
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 import PlayerName from '@components/player-name'
 import PageLayout from '@layouts/page'
 

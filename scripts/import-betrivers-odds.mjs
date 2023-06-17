@@ -3,8 +3,8 @@ import debug from 'debug'
 // import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#common'
-import { isMain, insert_prop_markets, betrivers } from '#utils'
+import { constants } from '#libs-shared'
+import { isMain, insert_prop_markets, betrivers } from '#libs-server'
 
 // const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-betrivers-odds')

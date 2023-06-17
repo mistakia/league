@@ -18,7 +18,7 @@ import Chip from '@mui/material/Chip'
 import Position from '@components/position'
 import NFLTeam from '@components/nfl-team'
 import Button from '@components/button'
-import { Roster, constants, getExtensionAmount } from '@common'
+import { Roster, constants, getExtensionAmount } from '@libs-shared'
 
 import './waiver-confirmation.styl'
 

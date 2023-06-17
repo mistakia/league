@@ -12,7 +12,7 @@ import {
 } from '@core/selectors'
 import { auctionActions } from './actions'
 import { send } from '@core/ws'
-import { constants, getEligibleSlots } from '@common'
+import { constants, getEligibleSlots } from '@libs-shared'
 import { beep } from '@core/audio'
 import Worker from 'workerize-loader?inline!../worker' // eslint-disable-line import/no-webpack-loader-syntax
 

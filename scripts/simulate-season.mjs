@@ -5,8 +5,8 @@ import dayjs from 'dayjs'
 import dayOfYear from 'dayjs/plugin/dayOfYear.js'
 
 import db from '#db'
-import { constants, simulate } from '#common'
-import { getRosters, isMain } from '#utils'
+import { constants, simulate } from '#libs-shared'
+import { getRosters, isMain } from '#libs-server'
 
 dayjs.extend(dayOfYear)
 const log = debug('simulate-season')

@@ -3,7 +3,7 @@ import Bugsnag from '@bugsnag/js'
 
 import { appActions } from './actions'
 import { settingActions } from '@core/settings'
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 import { rosterActions } from '@core/rosters'
 import { teamActions } from '@core/teams'
 

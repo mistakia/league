@@ -1,8 +1,12 @@
 import debug from 'debug'
 
 import db from '#db'
-import { constants } from '#common'
-import { getTopTransitionBids, processTransitionBid, isMain } from '#utils'
+import { constants } from '#libs-shared'
+import {
+  getTopTransitionBids,
+  processTransitionBid,
+  isMain
+} from '#libs-server'
 
 const log = debug('process-transition-bids')
 debug.enable('process-transition-bids')

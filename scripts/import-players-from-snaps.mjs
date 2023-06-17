@@ -9,7 +9,7 @@ import {
   getPlayer,
   wait,
   createPlayer
-} from '#utils'
+} from '#libs-server'
 
 const log = debug('import-players-from-snaps')
 debug.enable(

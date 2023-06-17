@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 
 import Position from '@components/position'
 import NFLTeam from '@components/nfl-team'
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 import PlayerLabel from '@components/player-label'
 
 import './trade-select-player.styl'

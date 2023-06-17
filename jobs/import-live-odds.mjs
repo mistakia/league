@@ -1,6 +1,6 @@
 import debug from 'debug'
 
-import { wait } from '#utils'
+import { wait } from '#libs-server'
 import { job as import_draftkings_odds } from '#scripts/import-draftkings-odds.mjs'
 import { job as import_caesars_odds } from '#scripts/import-caesars-odds.mjs'
 import { job as import_fanduel_odds } from '#scripts/import-fanduel-odds.mjs'

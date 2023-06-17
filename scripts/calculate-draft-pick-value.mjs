@@ -3,8 +3,8 @@ import debug from 'debug'
 // import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { groupBy, median } from '#common'
-import { isMain, getLeague } from '#utils'
+import { groupBy, median } from '#libs-shared'
+import { isMain, getLeague } from '#libs-server'
 
 // const argv = yargs(hideBin(process.argv)).argv
 const log = debug('calculate-draft-pick-value')

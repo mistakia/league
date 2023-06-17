@@ -3,8 +3,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#common'
-import { isMain, getLeague } from '#utils'
+import { constants } from '#libs-shared'
+import { isMain, getLeague } from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('generate-league-season-teams')

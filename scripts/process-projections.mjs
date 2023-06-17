@@ -12,7 +12,7 @@ import {
   calculatePrices,
   calculateBaselines,
   calculatePlayerValuesRestOfSeason
-} from '#common'
+} from '#libs-shared'
 import {
   get_league_format,
   getProjections,
@@ -21,7 +21,7 @@ import {
   getLeague,
   getPlayerTransactions,
   isMain
-} from '#utils'
+} from '#libs-server'
 import projectLineups from './project-lineups.mjs'
 import simulateSeason from './simulate-season.mjs'
 

@@ -47,7 +47,7 @@ import {
   getCurrentLeague,
   getTeamById
 } from '@core/selectors'
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 import { playerActions } from '@core/players'
 import { poachActions } from '@core/poaches'
 import { waiverActions } from '@core/waivers'

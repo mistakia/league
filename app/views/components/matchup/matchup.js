@@ -3,7 +3,7 @@ import { Map } from 'immutable'
 import { useNavigate } from 'react-router-dom'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 import TeamName from '@components/team-name'
 import TeamImage from '@components/team-image'
 

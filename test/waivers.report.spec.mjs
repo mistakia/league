@@ -6,7 +6,7 @@ import MockDate from 'mockdate'
 import knex from '#db'
 
 import league from '#db/seeds/league.mjs'
-import { constants } from '#common'
+import { constants } from '#libs-shared'
 
 process.env.NODE_ENV = 'test'
 

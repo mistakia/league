@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 import TeamName from '@components/team-name'
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 
 import './scoreboard-score-team.styl'
 

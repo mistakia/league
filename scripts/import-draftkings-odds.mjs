@@ -3,14 +3,14 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants, fixTeam } from '#common'
+import { constants, fixTeam } from '#libs-shared'
 import {
   isMain,
   getPlayer,
   draftkings,
   insertProps,
   insert_prop_markets
-} from '#utils'
+} from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-draft-kings')

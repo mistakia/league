@@ -8,7 +8,7 @@ import AccordionSummary from '@mui/material/AccordionSummary'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 
 import Rank from '@components/rank'
-import { nth } from '@common'
+import { nth } from '@libs-shared'
 import { Team } from '@core/teams'
 
 export default function DashboardTeamSummaryWaiverOrder({ teams, tid }) {

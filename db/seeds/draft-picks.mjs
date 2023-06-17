@@ -1,5 +1,5 @@
-import { constants } from '#common'
-import { getLeague } from '#utils'
+import { constants } from '#libs-shared'
+import { getLeague } from '#libs-server'
 
 export default async function (knex) {
   const lid = 1

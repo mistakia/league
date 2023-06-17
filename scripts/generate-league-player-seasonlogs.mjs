@@ -3,8 +3,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#common'
-import { isMain, getAcquisitionTransaction, getLeague } from '#utils'
+import { constants } from '#libs-shared'
+import { isMain, getAcquisitionTransaction, getLeague } from '#libs-server'
 import generateSeasonDates from './generate-season-dates.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv

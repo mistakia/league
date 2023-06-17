@@ -8,7 +8,7 @@ import { rosterActions } from '@core/rosters'
 import { auctionActions } from '@core/auction'
 import DefaultPlayersViews from './default-players-views'
 
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 
 export const default_player_filter_options = {
   search: null,

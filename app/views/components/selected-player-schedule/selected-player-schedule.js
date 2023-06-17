@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
 
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 import SelectedPlayerMatchupTable from '@components/selected-player-matchup-table'
 import PercentileMetric from '@components/percentile-metric'
 

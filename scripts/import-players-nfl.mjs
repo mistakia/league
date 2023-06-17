@@ -2,8 +2,14 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { constants, Errors, formatHeight } from '#common'
-import { isMain, nfl, getPlayer, updatePlayer, createPlayer } from '#utils'
+import { constants, Errors, formatHeight } from '#libs-shared'
+import {
+  isMain,
+  nfl,
+  getPlayer,
+  updatePlayer,
+  createPlayer
+} from '#libs-server'
 import db from '#db'
 
 const argv = yargs(hideBin(process.argv)).argv

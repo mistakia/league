@@ -1,4 +1,4 @@
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 
 export const appActions = {
   INIT_APP: 'INIT_APP',

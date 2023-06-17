@@ -2,8 +2,8 @@ import fetch from 'node-fetch'
 import debug from 'debug'
 
 import db from '#db'
-import { constants } from '#common'
-import { isMain, getPlayer } from '#utils'
+import { constants } from '#libs-shared'
+import { isMain, getPlayer } from '#libs-server'
 
 const log = debug('import:practice-report')
 debug.enable('import:practice-report,get-player')

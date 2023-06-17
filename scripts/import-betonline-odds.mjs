@@ -6,8 +6,8 @@ import { hideBin } from 'yargs/helpers'
 import { Odds } from 'oddslib'
 
 import db from '#db'
-import { constants } from '#common'
-import { isMain, getPlayer, insertProps } from '#utils'
+import { constants } from '#libs-shared'
+import { isMain, getPlayer, insertProps } from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
 

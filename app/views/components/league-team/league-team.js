@@ -13,7 +13,7 @@ import DashboardPlayersTable from '@components/dashboard-players-table'
 import DashboardTeamSummary from '@components/dashboard-team-summary'
 import DashboardTeamValue from '@components/dashboard-team-value'
 import PlayerRoster from '@components/player-roster'
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 import LeagueTeamValueDeltas from '@components/league-team-value-deltas'
 
 export default function LeagueTeam({

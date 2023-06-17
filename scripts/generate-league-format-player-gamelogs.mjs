@@ -3,8 +3,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#common'
-import { isMain, getLeague, get_league_format } from '#utils'
+import { constants } from '#libs-shared'
+import { isMain, getLeague, get_league_format } from '#libs-server'
 import calculate_points_added from './calculate-points-added.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv

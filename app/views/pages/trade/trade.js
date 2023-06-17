@@ -5,7 +5,7 @@ import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import Grid from '@mui/material/Grid'
 
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 import TeamName from '@components/team-name'
 import PageLayout from '@layouts/page'
 import TradePlayer from '@components/trade-player'

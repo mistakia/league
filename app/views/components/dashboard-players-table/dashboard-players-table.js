@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import { SortableContainer, SortableElement } from 'react-sortable-hoc'
 import Toolbar from '@mui/material/Toolbar'
 
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 import PlayerRoster from '@components/player-roster'
 import PlayerRosterHeader from '@components/player-roster-header'
 import PlayerRosterTotal from '@components/player-roster-total'

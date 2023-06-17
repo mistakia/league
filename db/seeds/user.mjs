@@ -1,4 +1,4 @@
-import { createLeague } from '#utils'
+import { createLeague } from '#libs-server'
 
 export default async function (knex) {
   await knex('users_sources').del()

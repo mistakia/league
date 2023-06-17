@@ -8,7 +8,7 @@ import knex from '#db'
 
 import league from '#db/seeds/league.mjs'
 import draftPicks from '#db/seeds/draft-picks.mjs'
-import { constants } from '#common'
+import { constants } from '#libs-shared'
 import { user1, user2 } from './fixtures/token.mjs'
 import { notLoggedIn, missing, invalid } from './utils/index.mjs'
 

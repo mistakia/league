@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import PlayerLabel from '@components/player-label'
 
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 
 export default class PlayerTag extends React.Component {
   render() {

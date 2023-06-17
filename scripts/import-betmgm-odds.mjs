@@ -3,14 +3,14 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#common'
+import { constants } from '#libs-shared'
 import {
   isMain,
   betmgm,
   getPlayer,
   insertProps,
   insert_prop_markets
-} from '#utils'
+} from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-betmgm-odds')

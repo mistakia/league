@@ -10,7 +10,7 @@ import DraftPlayer from '@components/draft-player'
 import PlayerAge from '@components/player-age'
 import DraftPick from '@components/draft-pick'
 import Position from '@components/position'
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 
 import './draft.styl'
 

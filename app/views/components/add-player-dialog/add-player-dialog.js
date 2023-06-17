@@ -11,7 +11,7 @@ import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogTitle from '@mui/material/DialogTitle'
 
-import { Roster } from '@common'
+import { Roster } from '@libs-shared'
 import Button from '@components/button'
 
 import './add-player-dialog.styl'

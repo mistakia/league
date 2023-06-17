@@ -5,7 +5,7 @@ import Icon from '@components/icon'
 import Source from '@components/source'
 import PlayerSelectedRow from '@components/player-selected-row'
 import PlayerSelectedRowHeader from '@components/player-selected-row-header'
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 
 export default class SelectedPlayerProjection extends React.Component {
   handleClearClick = () => {

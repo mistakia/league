@@ -6,8 +6,8 @@ import { fileURLToPath } from 'url'
 // import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { convertToCSV } from '#common'
-import { isMain } from '#utils'
+import { convertToCSV } from '#libs-shared'
+import { isMain } from '#libs-server'
 
 // const argv = yargs(hideBin(process.argv)).argv
 const log = debug('export_league_matchups')

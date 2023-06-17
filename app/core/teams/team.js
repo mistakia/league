@@ -1,5 +1,5 @@
 import { Record, List, Map } from 'immutable'
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 
 export const Team = new Record({
   uid: null,

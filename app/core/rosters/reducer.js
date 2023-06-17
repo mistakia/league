@@ -3,7 +3,7 @@ import { Map } from 'immutable'
 import { rosterActions } from './actions'
 import { createRoster } from './roster'
 import { appActions } from '@core/app'
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 import { auctionActions } from '@core/auction'
 import { teamActions } from '@core/teams'
 

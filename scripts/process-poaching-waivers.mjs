@@ -1,6 +1,6 @@
 import debug from 'debug'
 
-import { constants, Errors } from '#common'
+import { constants, Errors } from '#libs-shared'
 import {
   sendNotifications,
   submitPoach,
@@ -8,7 +8,7 @@ import {
   getTopPoachingWaiver,
   getLeague,
   isMain
-} from '#utils'
+} from '#libs-server'
 import db from '#db'
 
 const log = debug('process:waivers:poach')

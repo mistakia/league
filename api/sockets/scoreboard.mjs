@@ -2,8 +2,8 @@ import WebSocket from 'ws'
 import debug from 'debug'
 
 import db from '#db'
-import { constants, uniqBy } from '#common'
-import { getPlayByPlayQuery } from '#utils'
+import { constants, uniqBy } from '#libs-shared'
+import { getPlayByPlayQuery } from '#libs-server'
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 

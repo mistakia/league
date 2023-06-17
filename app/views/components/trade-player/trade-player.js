@@ -1,7 +1,7 @@
 import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 import PlayerNameExpanded from '@components/player-name-expanded'
 
 import './trade-player.styl'

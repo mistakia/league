@@ -1,6 +1,6 @@
 import express from 'express'
 
-import { constants } from '#common'
+import { constants } from '#libs-shared'
 
 const router = express.Router()
 

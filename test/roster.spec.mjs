@@ -1,12 +1,12 @@
 /* global describe it */
 import chai from 'chai'
 
-import { constants, Roster } from '#common'
+import { constants, Roster } from '#libs-shared'
 
 process.env.NODE_ENV = 'test'
 chai.should()
 
-describe('COMMON Roster', function () {
+describe('LIBS-SHARED Roster', function () {
   it('constructor', () => {
     const league = {
       sqb: 1,

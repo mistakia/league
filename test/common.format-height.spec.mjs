@@ -2,12 +2,12 @@
 
 import chai from 'chai'
 
-import { formatHeight } from '#common'
+import { formatHeight } from '#libs-shared'
 
 chai.should()
 const expect = chai.expect
 
-describe('COMMON formatHeight', function () {
+describe('LIBS-SHARED formatHeight', function () {
   it('inches', () => {
     const target = 82
     expect(formatHeight('82')).to.equal(target)

@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 import { getTransactions } from '@core/selectors'
 
 import LeagueRecentTransactions from './league-recent-transactions'

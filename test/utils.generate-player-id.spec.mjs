@@ -1,7 +1,7 @@
 /* global describe it */
 import chai from 'chai'
 
-import { generate_player_id } from '#utils'
+import { generate_player_id } from '#libs-server'
 
 chai.should()
 const expect = chai.expect

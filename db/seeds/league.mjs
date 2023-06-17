@@ -1,5 +1,5 @@
-import { constants } from '#common'
-import { getLeague, createLeague } from '#utils'
+import { constants } from '#libs-shared'
+import { getLeague, createLeague } from '#libs-server'
 
 export default async function (knex, league_params = {}) {
   await knex('leagues').del()

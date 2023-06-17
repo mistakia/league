@@ -2,7 +2,7 @@ import React from 'react'
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator'
 import { sortableHandle } from 'react-sortable-hoc'
 
-import { constants, getExtensionAmount } from '@common'
+import { constants, getExtensionAmount } from '@libs-shared'
 import PlayerName from '@components/player-name'
 import IconButton from '@components/icon-button'
 import { Player, connect } from '@components/player'

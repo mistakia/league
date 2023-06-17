@@ -4,8 +4,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants, fixTeam } from '#common'
-import { isMain, wait, nfl } from '#utils'
+import { constants, fixTeam } from '#libs-shared'
+import { isMain, wait, nfl } from '#libs-server'
 
 const log = debug('import-plays-nfl')
 debug.enable('import-plays-nfl')

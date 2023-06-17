@@ -3,8 +3,8 @@ import debug from 'debug'
 // import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-// import { constants } from '#common'
-import { isMain, generate_player_id, update_player_id } from '#utils'
+// import { constants } from '#libs-shared'
+import { isMain, generate_player_id, update_player_id } from '#libs-server'
 
 // const argv = yargs(hideBin(process.argv)).argv
 const log = debug('format-player-ids')

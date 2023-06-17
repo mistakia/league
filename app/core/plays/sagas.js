@@ -2,7 +2,7 @@ import { fork, takeLatest, call } from 'redux-saga/effects'
 
 import { playerActions } from '@core/players'
 import { getPlays, getPlayStats } from '@core/api'
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 
 export function* loadPlays() {
   yield call(getPlays)

@@ -6,7 +6,7 @@ import Highcharts from 'highcharts'
 import HighchartsReact from 'highcharts-react-official'
 import HighchartsSeriesLabel from 'highcharts/modules/series-label'
 
-import { constants } from '#common'
+import { constants } from '#libs-shared'
 import { Team } from '@core/teams'
 
 HighchartsSeriesLabel(Highcharts)

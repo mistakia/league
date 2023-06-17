@@ -6,8 +6,8 @@ import { hideBin } from 'yargs/helpers'
 import timezone from 'dayjs/plugin/timezone.js'
 
 import db from '#db'
-import { constants, fixTeam, getGameDayAbbreviation } from '#common'
-import { isMain } from '#utils'
+import { constants, fixTeam, getGameDayAbbreviation } from '#libs-shared'
+import { isMain } from '#libs-server'
 import config from '#config'
 
 dayjs.extend(timezone)

@@ -8,7 +8,7 @@ import {
   getCurrentLeague,
   getTeamsForCurrentLeague
 } from '@core/selectors'
-import { constants, calculatePercentiles } from '@common'
+import { constants, calculatePercentiles } from '@libs-shared'
 
 import StatsPage from './stats'
 

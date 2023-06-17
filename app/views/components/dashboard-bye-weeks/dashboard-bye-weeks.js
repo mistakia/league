@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import Popover from '@mui/material/Popover'
 
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 import Position from '@components/position'
 
 import './dashboard-bye-weeks.styl'

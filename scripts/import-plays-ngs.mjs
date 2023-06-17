@@ -4,8 +4,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants, fixTeam } from '#common'
-import { isMain, wait, ngs } from '#utils'
+import { constants, fixTeam } from '#libs-shared'
+import { isMain, wait, ngs } from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-plays-ngs')

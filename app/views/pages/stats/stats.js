@@ -7,7 +7,7 @@ import Toolbar from '@mui/material/Toolbar'
 
 import PageLayout from '@layouts/page'
 import PercentileMetric from '@components/percentile-metric'
-import { constants, getEligibleSlots, toPercent } from '@common'
+import { constants, getEligibleSlots, toPercent } from '@libs-shared'
 import SelectYear from '@components/select-year'
 
 import './stats.styl'

@@ -1,5 +1,5 @@
-import { getSchedule } from '#utils'
-import { constants } from '#common'
+import { getSchedule } from '#libs-server'
+import { constants } from '#libs-shared'
 
 export default async function (knex) {
   await knex('matchups').del()

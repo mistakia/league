@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import Highcharts from 'highcharts'
 import HighchartsReact from 'highcharts-react-official'
 
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 
 export default class SelectedPlayerLineupImpact extends React.Component {
   render = () => {

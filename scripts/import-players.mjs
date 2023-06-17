@@ -2,8 +2,8 @@ import fetch from 'node-fetch'
 import debug from 'debug'
 
 import db from '#db'
-import { isMain, getPlayer, wait, updatePlayer, nfl } from '#utils'
-import { constants, fixTeam } from '#common'
+import { isMain, getPlayer, wait, updatePlayer, nfl } from '#libs-server'
+import { constants, fixTeam } from '#libs-shared'
 import config from '#config'
 
 const log = debug('import:nfl:players')

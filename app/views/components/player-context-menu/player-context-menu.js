@@ -7,7 +7,7 @@ import MenuList from '@mui/material/MenuList'
 import Button from '@mui/material/Button'
 import ButtonGroup from '@mui/material/ButtonGroup'
 
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 
 export default class PlayerContextMenu extends React.Component {
   handleDeactivate = () => {

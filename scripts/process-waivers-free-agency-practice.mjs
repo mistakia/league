@@ -1,13 +1,13 @@
 import debug from 'debug'
 
 import db from '#db'
-import { constants, Errors } from '#common'
+import { constants, Errors } from '#libs-shared'
 import {
   submitAcquisition,
   resetWaiverOrder,
   getTopPracticeSquadWaiver,
   isMain
-} from '#utils'
+} from '#libs-server'
 
 const log = debug('process:waivers:freeagency')
 if (process.env.NODE_ENV !== 'test') {

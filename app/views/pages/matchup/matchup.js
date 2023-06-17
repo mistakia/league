@@ -16,7 +16,7 @@ import ScoreboardOverTime from '@components/scoreboard-over-time'
 import ScoreboardPlayByPlay from '@components/scoreboard-play-by-play'
 import ScoreboardSlots from '@components/scoreboard-slots'
 import ScoreboardTeams from '@components/scoreboard-teams'
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 
 import './matchup.styl'
 

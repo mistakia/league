@@ -4,8 +4,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#common'
-import { getLeague, isMain } from '#utils'
+import { constants } from '#libs-shared'
+import { getLeague, isMain } from '#libs-server'
 
 const log = debug('reset-player-tags')
 const argv = yargs(hideBin(process.argv)).argv

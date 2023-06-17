@@ -4,8 +4,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants, team_aliases } from '#common'
-import { isMain, gambet, wait, getPlayer, insertProps } from '#utils'
+import { constants, team_aliases } from '#libs-shared'
+import { isMain, gambet, wait, getPlayer, insertProps } from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-gambet-odds')

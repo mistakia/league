@@ -1,6 +1,6 @@
 import express from 'express'
 
-import { verifyUserTeam } from '#utils'
+import { verifyUserTeam } from '#libs-server'
 import activate from './activate.mjs'
 import cutlist from './cutlist.mjs'
 import deactivate from './deactivate.mjs'
@@ -12,7 +12,7 @@ import protect from './protect.mjs'
 import tag from './tag.mjs'
 import transactions from './transactions.mjs'
 import players from './players.mjs'
-import { constants } from '#common'
+import { constants } from '#libs-shared'
 
 const router = express.Router()
 

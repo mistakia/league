@@ -11,7 +11,11 @@ import {
   getCutlistPlayers,
   get_app
 } from '@core/selectors'
-import { constants, calculatePercentiles, getExtensionAmount } from '@common'
+import {
+  constants,
+  calculatePercentiles,
+  getExtensionAmount
+} from '@libs-shared'
 import { playerActions } from '@core/players'
 
 import LeagueTeam from './league-team'

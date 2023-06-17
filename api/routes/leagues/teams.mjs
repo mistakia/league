@@ -1,7 +1,7 @@
 import express from 'express'
 
-import { constants } from '#common'
-import { getLeague } from '#utils'
+import { constants } from '#libs-shared'
+import { getLeague } from '#libs-server'
 
 const router = express.Router()
 

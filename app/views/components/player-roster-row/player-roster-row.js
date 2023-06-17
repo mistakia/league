@@ -1,7 +1,7 @@
 import React from 'react'
 import dayjs from 'dayjs'
 
-import { getExtensionAmount, constants } from '@common'
+import { getExtensionAmount, constants } from '@libs-shared'
 import { Player, connect } from '@components/player'
 import IconButton from '@components/icon-button'
 import PlayerName from '@components/player-name'

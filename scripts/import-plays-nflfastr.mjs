@@ -9,8 +9,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants, fixTeam } from '#common'
-import { isMain, readCSV, getPlay } from '#utils'
+import { constants, fixTeam } from '#libs-shared'
+import { isMain, readCSV, getPlay } from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-nflfastr-plays')

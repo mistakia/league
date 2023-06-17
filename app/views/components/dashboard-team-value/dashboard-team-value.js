@@ -4,7 +4,7 @@ import Highcharts from 'highcharts'
 import HighchartsReact from 'highcharts-react-official'
 import HighchartsMore from 'highcharts/highcharts-more'
 
-import { constants, nth } from '@common'
+import { constants, nth } from '@libs-shared'
 
 HighchartsMore(Highcharts)
 
