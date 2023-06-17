@@ -9,7 +9,7 @@ export default async function ({
   offset = 0
 }) {
   const joined_table_index = {}
-  const players_query = db('players').select('player.pid')
+  const players_query = db('player').select('player.pid')
 
   for (const column of columns) {
     // column could be a string representing column_id or an object containing column_id and params
@@ -35,7 +35,7 @@ export default async function ({
     if (column_definition.join_function) {
       column_definition.join({ query: players_query, params: column_params })
     } else if (
-      column_definition.table_name !== 'players' &&
+      column_definition.table_name !== 'player' &&
       !joined_table_index[column_definition.table_name]
     ) {
       players_query.leftJoin(
