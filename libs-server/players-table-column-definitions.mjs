@@ -3,7 +3,7 @@ import { constants } from '#libs-shared'
 const projections_index_join = ({ query, params = {} }) => {
   const { year = constants.season.year, week = 0 } = params
   query.leftJoin('projections_index', function () {
-    this.on('projections_index.pid', '=', 'players.pid')
+    this.on('projections_index.pid', '=', 'player.pid')
     this.andOn('projections_index.year', '=', year)
     this.andOn('projections_index.week', '=', week)
     this.andOn('projections_index.sourceid', '=', 0)
@@ -30,7 +30,7 @@ const league_format_player_projection_values_join = ({
 }) => {
   const { year = constants.season.year, week = 0, league_format_hash } = params
   query.leftJoin('league_format_player_projection_values', function () {
-    this.on('league_format_player_projection_values.pid', '=', 'players.pid')
+    this.on('league_format_player_projection_values.pid', '=', 'player.pid')
     this.andOn('league_format_player_projection_values.year', '=', year)
     this.andOn('league_format_player_projection_values.week', '=', week)
     this.andOn(
@@ -54,7 +54,7 @@ const scoring_format_player_projection_points_join = ({
 }) => {
   const { year = constants.season.year, week = 0, scoring_format_hash } = params
   query.leftJoin('scoring_format_player_projection_points', function () {
-    this.on('scoring_format_player_projection_points.pid', '=', 'players.pid')
+    this.on('scoring_format_player_projection_points.pid', '=', 'player.pid')
     this.andOn('scoring_format_player_projection_points.year', '=', year)
     this.andOn('scoring_format_player_projection_points.week', '=', week)
     this.andOn(
@@ -75,7 +75,7 @@ const league_player_projection_values_select =
 const league_player_projection_values_join = ({ query, params = {} }) => {
   const { year = constants.season.year, week = 0, league_id } = params
   query.leftJoin('league_player_projection_values', function () {
-    this.on('league_player_projection_values.pid', '=', 'players.pid')
+    this.on('league_player_projection_values.pid', '=', 'player.pid')
     this.andOn('league_player_projection_values.year', '=', year)
     this.andOn('league_player_projection_values.week', '=', week)
     this.andOn('league_player_projection_values.lid', '=', league_id)
