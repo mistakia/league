@@ -1,4 +1,4 @@
-import { constants } from '#common'
+import { constants } from '#libs-shared'
 
 const projections_index_join = ({ query, params = {} }) => {
   const { year = constants.season.year, week = 0 } = params
