@@ -2,6 +2,14 @@ import db from '#db'
 
 import players_table_column_definitions from './players-table-column-definitions.mjs'
 
+const find_column = ({ column_id, columns }) => {
+  return columns.find((column) =>
+    typeof column === 'string'
+      ? column === column_id
+      : column.column_id === column_id
+  )
+}
+
 export default async function ({
   where = [],
   columns = [],
@@ -88,6 +96,11 @@ export default async function ({
   }
 
   for (const sort_clause of sort) {
+    const column = find_column({ column_id: sort_clause.id, columns })
+    const column_id = typeof column === 'string' ? column : column.column_id
+    const column_params = typeof column === 'string' ? {} : column.params
+    const column_definition = players_table_column_definitions[column_id]
+
     sort_clause.desc = sort_clause.desc === 'true'
     // postgres
     // players_query.orderByRaw(
@@ -96,9 +109,18 @@ export default async function ({
 
     // mysql
     // use minus sign and reverse sort order to sort nulls last
-    players_query.orderByRaw(
-      `-${sort_clause.id} ${sort_clause.desc ? 'asc' : 'desc'}`
-    )
+    if (column_definition.select_as) {
+      const select_as = column_definition.select_as(column_params)
+      players_query.orderByRaw(
+        `-${select_as} ${sort_clause.desc ? 'asc' : 'desc'}`
+      )
+    } else {
+      players_query.orderByRaw(
+        `-${column_definition.table_name}.${column_definition.column_name} ${
+          sort_clause.desc ? 'asc' : 'desc'
+        }`
+      )
+    }
   }
 
   if (offset) {
