@@ -14,7 +14,8 @@ export default async function ({
   where = [],
   columns = [],
   sort = [],
-  offset = 0
+  offset = 0,
+  limit = 500
 }) {
   const joined_table_index = {}
   const players_query = db('player').select('player.pid')
@@ -126,6 +127,8 @@ export default async function ({
   if (offset) {
     players_query.offset(offset)
   }
+
+  players_query.limit(limit)
 
   return players_query
 }
