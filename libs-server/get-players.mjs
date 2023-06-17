@@ -13,6 +13,7 @@ export default async function ({
   leagueId,
   scoring_format_hash,
   league_format_hash,
+  columns = [],
   pids = [],
   include_all_active_players = false,
   include_baseline_players = false
@@ -67,24 +68,34 @@ export default async function ({
     baselines.forEach((b) => baseline_player_ids.push(b.pid))
   }
 
-  const selects = [
-    'player.pid',
-    'player.fname',
-    'player.lname',
-    'player.pname',
-    'player.start',
-    'player.col',
-    'player.dv',
-    'player.pos',
-    'player.round',
-    'player.cteam',
-    'player.gsisid',
-    'player.gsispid',
-    'player.espn_id',
-    'player.status',
-    'player.injury_status',
-    'practice.status as gamestatus'
-  ]
+  const selects = ['player.pid']
+
+  if (columns.length) {
+    for (const column of columns) {
+      // TODO check if table needs to be joined
+      selects.push(`${column.table_name}.${column.column_name}`)
+    }
+  } else {
+    const default_columns = [
+      'player.fname',
+      'player.lname',
+      'player.pname',
+      'player.start',
+      'player.col',
+      'player.dv',
+      'player.pos',
+      'player.round',
+      'player.cteam',
+      'player.gsisid',
+      'player.gsispid',
+      'player.espn_id',
+      'player.status',
+      'player.injury_status',
+      'practice.status as gamestatus'
+    ]
+
+    selects.push(...default_columns)
+  }
 
   const query = db('player')
     .select(db.raw(selects.join(',')))
@@ -124,7 +135,7 @@ export default async function ({
   }
 
   if (league_format_hash) {
-    const seasonlog_selects = [
+    const league_format_player_seasonlogs_selects = [
       'league_format_player_seasonlogs.startable_games',
       'league_format_player_seasonlogs.points',
       'league_format_player_seasonlogs.points_per_game',
@@ -143,7 +154,7 @@ export default async function ({
           constants.season.year
         )
       })
-      .select(db.raw(seasonlog_selects.join(',')))
+      .select(db.raw(league_format_player_seasonlogs_selects.join(',')))
       .where(function () {
         this.where(
           'league_format_player_seasonlogs.league_format_hash',
@@ -180,6 +191,7 @@ export default async function ({
   )
 
   if (playerIdsInLeague.length) {
+    // include league player salary values
     const playerTransactions = await getPlayerTransactions({
       lid: leagueId,
       pids: playerIdsInLeague
@@ -192,6 +204,7 @@ export default async function ({
   }
 
   if (scoring_format_hash) {
+    // include projected fantasy point values
     const leaguePointsProj = await db('scoring_format_player_projection_points')
       .where({
         scoring_format_hash,
@@ -206,6 +219,7 @@ export default async function ({
   }
 
   if (league_format_hash) {
+    // include points added and market salary
     const league_format_values = await db(
       'league_format_player_projection_values'
     )
@@ -223,6 +237,7 @@ export default async function ({
   }
 
   if (leagueId) {
+    // include salary adjusted points added and inflation adjusted market salary
     const leagueValuesProj = await db('league_player_projection_values')
       .where({
         lid: leagueId,
@@ -241,6 +256,7 @@ export default async function ({
     }
   }
 
+  // include player season, week and ros projections
   const projections = await db('projections_index')
     .where('sourceid', constants.sources.AVERAGE)
     .where('year', constants.season.year)
