@@ -105,7 +105,7 @@ export default {
     join: league_player_projection_values_join
   },
   player_week_projected_salary_adjusted_points_added: {
-    column_name: 'points_added_adj',
+    column_name: 'salary_adj_pts_added',
     table_name: 'league_player_projection_values',
     select_as: league_player_projection_values_select(
       'salary_adjusted_points_added'
@@ -114,7 +114,7 @@ export default {
   },
 
   player_week_projected_points_added: {
-    column_name: 'points_added',
+    column_name: 'pts_added',
     table_name: 'league_format_player_projection_values',
     select_as: league_format_player_projection_values_select('points_added'),
     join: league_format_player_projection_values_join
@@ -219,7 +219,7 @@ export default {
     join: league_player_projection_values_join
   },
   player_season_projected_points_added: {
-    column_name: 'points_added',
+    column_name: 'pts_added',
     table_name: 'league_format_player_projection_values',
     select_as: league_format_player_projection_values_select('points_added'),
     join: league_format_player_projection_values_join
@@ -231,7 +231,7 @@ export default {
     join: scoring_format_player_projection_points_join
   },
   player_season_projected_salary_adjusted_points_added: {
-    column_name: 'salary_adjusted_points_added',
+    column_name: 'salary_adj_pts_added',
     table_name: 'league_player_projection_values',
     select_as: league_player_projection_values_select(
       'salary_adjusted_points_added'
