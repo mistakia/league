@@ -97,4 +97,6 @@ export default async function ({
   if (offset) {
     players_query.offset(offset)
   }
+
+  return players_query
 }
