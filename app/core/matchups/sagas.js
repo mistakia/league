@@ -8,7 +8,7 @@ import {
   getMatchups,
   getScoreboard
 } from '@core/selectors'
-import { constants, is_league_post_season_week } from '@common'
+import { constants, is_league_post_season_week } from '@libs-shared'
 import { matchupsActions } from './actions'
 import { scoreboardActions } from '@core/scoreboard'
 

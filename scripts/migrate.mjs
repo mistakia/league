@@ -7,8 +7,8 @@ import db from '#db'
 import {
   generate_league_format_hash,
   generate_scoring_format_hash
-} from '#common'
-import { isMain } from '#utils'
+} from '#libs-shared'
+import { isMain } from '#libs-server'
 
 // const argv = yargs(hideBin(process.argv)).argv
 const log = debug('migrate')

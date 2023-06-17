@@ -9,8 +9,8 @@ import {
   uniqBy,
   calculatePercentiles,
   calculatePoints
-} from '#common'
-import { isMain, getLeague } from '#utils'
+} from '#libs-shared'
+import { isMain, getLeague } from '#libs-server'
 
 // const argv = yargs(hideBin(process.argv)).argv
 const log = debug('generate-nfl-team-seasonlogs')

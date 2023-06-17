@@ -3,8 +3,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants, fixTeam, formatPosition } from '#common'
-import { isMain, nfl, wait, getPlayer } from '#utils'
+import { constants, fixTeam, formatPosition } from '#libs-shared'
+import { isMain, nfl, wait, getPlayer } from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import_player_gamelogs')

@@ -3,7 +3,7 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 
 import PlayerRosterRow from '@components/player-roster-row'
-import { Roster as RosterBuilder, constants } from '@common'
+import { Roster as RosterBuilder, constants } from '@libs-shared'
 import TeamName from '@components/team-name'
 
 import './roster.styl'

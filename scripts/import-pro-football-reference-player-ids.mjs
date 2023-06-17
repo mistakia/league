@@ -3,8 +3,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { formatPlayerName } from '#common'
-import { isMain, pfr } from '#utils'
+import { formatPlayerName } from '#libs-shared'
+import { isMain, pfr } from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-pfr-player-ids')

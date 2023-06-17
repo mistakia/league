@@ -1,4 +1,4 @@
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 
 const views = {
   season_projections: {

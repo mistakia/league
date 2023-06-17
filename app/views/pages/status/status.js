@@ -13,7 +13,7 @@ import ListItemText from '@mui/material/ListItemText'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
 import ErrorIcon from '@mui/icons-material/Error'
 
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 import PageLayout from '@layouts/page'
 
 export default class StatusPage extends React.Component {

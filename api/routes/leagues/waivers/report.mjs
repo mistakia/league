@@ -1,7 +1,7 @@
 import express from 'express'
 
-import { constants } from '#common'
-import { verifyUserTeam } from '#utils'
+import { constants } from '#libs-shared'
+import { verifyUserTeam } from '#libs-server'
 
 const router = express.Router({ mergeParams: true })
 

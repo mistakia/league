@@ -1,7 +1,7 @@
 import express from 'express'
 
 import config from '#config'
-import { sendEmail } from '#utils'
+import { sendEmail } from '#libs-server'
 
 const router = express.Router()
 

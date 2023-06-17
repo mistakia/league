@@ -12,7 +12,7 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogTitle from '@mui/material/DialogTitle'
 
 import Button from '@components/button'
-import { Roster, constants } from '@common'
+import { Roster, constants } from '@libs-shared'
 
 export default class AddFreeAgentDialog extends React.Component {
   constructor(props) {

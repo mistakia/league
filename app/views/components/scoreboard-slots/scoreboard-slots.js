@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 
 import './scoreboard-slots.styl'
 

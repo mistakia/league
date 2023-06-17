@@ -2,7 +2,7 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { getLeague, sendNotifications, isMain } from '#utils'
+import { getLeague, sendNotifications, isMain } from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('send-notification')

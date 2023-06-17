@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { constants, getDraftWindow } from '@common'
+import { constants, getDraftWindow } from '@libs-shared'
 import { draftActions } from '@core/draft'
 import {
   get_app,

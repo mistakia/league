@@ -3,7 +3,7 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 
 import TeamName from '@components/team-name'
-import { groupBy, nth } from '@common'
+import { groupBy, nth } from '@libs-shared'
 
 import './dashboard-draft-picks.styl'
 

@@ -1,8 +1,8 @@
 import debug from 'debug'
 
 import db from '#db'
-import { constants, formatPlayerName } from '#common'
-import { isMain, updatePlayer } from '#utils'
+import { constants, formatPlayerName } from '#libs-shared'
+import { isMain, updatePlayer } from '#libs-server'
 
 const log = debug('update-formatted-names')
 debug.enable('update-formatted-names')

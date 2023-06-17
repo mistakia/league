@@ -1,7 +1,7 @@
 import express from 'express'
 
-import { constants } from '#common'
-import { validators } from '#utils'
+import { constants } from '#libs-shared'
+import { validators } from '#libs-server'
 import cache from '#api/cache.mjs'
 
 const router = express.Router()

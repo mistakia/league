@@ -11,7 +11,7 @@ import {
 } from '@core/selectors'
 import { draftActions } from './actions'
 import { fetchDraft, postDraft } from '@core/api'
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 
 dayjs.extend(isBetween)
 

@@ -3,14 +3,14 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants, Roster, getExtensionAmount } from '#common'
+import { constants, Roster, getExtensionAmount } from '#libs-shared'
 import {
   getLeague,
   getRoster,
   getPlayerExtensions,
   getLastTransaction,
   isMain
-} from '#utils'
+} from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('process-extensions')

@@ -18,7 +18,7 @@ import Chip from '@mui/material/Chip'
 import Position from '@components/position'
 import NFLTeam from '@components/nfl-team'
 import Button from '@components/button'
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 
 import './transition-confirmation.styl'
 

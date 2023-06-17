@@ -1,8 +1,8 @@
 import debug from 'debug'
 
 import db from '#db'
-import { constants } from '#common'
-import { isMain } from '#utils'
+import { constants } from '#libs-shared'
+import { isMain } from '#libs-server'
 
 const log = debug('reset-protected-designation')
 debug.enable('reset-protected-designation')

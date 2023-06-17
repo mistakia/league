@@ -22,7 +22,7 @@ import {
   isReserveCovEligible,
   getFreeAgentPeriod,
   getPoachProcessingTime
-} from '@common'
+} from '@libs-shared'
 
 import './league-home.styl'
 

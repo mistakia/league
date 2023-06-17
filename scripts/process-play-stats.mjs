@@ -3,7 +3,7 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { isMain } from '#utils'
+import { isMain } from '#libs-server'
 import db from '#db'
 import {
   constants,
@@ -12,7 +12,7 @@ import {
   calculateStatsFromPlayStats,
   calculateDstStatsFromPlays,
   getPlayFromPlayStats
-} from '#common'
+} from '#libs-shared'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('process-play-stats')

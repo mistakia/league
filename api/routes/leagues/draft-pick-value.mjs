@@ -1,6 +1,6 @@
 import express from 'express'
 
-import { getLeague } from '#utils'
+import { getLeague } from '#libs-server'
 
 const router = express.Router({ mergeParams: true })
 

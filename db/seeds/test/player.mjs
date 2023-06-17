@@ -1,4 +1,4 @@
-import { constants } from '#common'
+import { constants } from '#libs-shared'
 import path, { dirname } from 'path'
 import fs from 'fs/promises'
 import { fileURLToPath } from 'url'

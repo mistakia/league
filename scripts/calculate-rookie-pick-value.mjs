@@ -4,7 +4,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import { Table } from 'console-table-printer'
 
-import { isMain } from '#utils'
+import { isMain } from '#libs-server'
 import calculate_points_added from './calculate-points-added.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv

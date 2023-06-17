@@ -2,7 +2,7 @@ import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import { Map } from 'immutable'
 
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 import PercentileChart from '@components/percentile-chart'
 
 // TODO - pass epa per play

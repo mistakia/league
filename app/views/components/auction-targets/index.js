@@ -12,7 +12,7 @@ import {
   getCurrentLeague
 } from '@core/selectors'
 import { auctionActions } from '@core/auction'
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 
 import AuctionTargets from './auction-targets'
 

@@ -7,7 +7,7 @@ import {
   getRostersForCurrentLeague,
   getCurrentLeague
 } from '@core/selectors'
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 import { playerActions } from '@core/players'
 
 import RostersPage from './rosters'

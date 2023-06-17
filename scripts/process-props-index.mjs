@@ -4,8 +4,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#common'
-import { isMain } from '#utils'
+import { constants } from '#libs-shared'
+import { isMain } from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('process-props-index')

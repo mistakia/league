@@ -1,7 +1,7 @@
 import debug from 'debug'
 
 import db from '#db'
-import { isMain } from '#utils'
+import { isMain } from '#libs-server'
 
 const log = debug('calculate-play-yardline')
 debug.enable('calculate-play-yardline')

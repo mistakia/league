@@ -2,7 +2,7 @@ import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 import ScoreboardPlayer from '@components/scoreboard-player'
 import TeamName from '@components/team-name'
 import TeamImage from '@components/team-image'

@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 import DashboardTeamSummaryFAAB from '@components/dashboard-team-summary-faab'
 import DashboardTeamSummarySalary from '@components/dashboard-team-summary-salary'
 import DashboardTeamSummaryWaiverOrder from '@components/dashboard-team-summary-waiver-order'

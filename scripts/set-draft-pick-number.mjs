@@ -1,8 +1,8 @@
 import debug from 'debug'
 
 import db from '#db'
-import { constants } from '#common'
-import { getLeague, isMain } from '#utils'
+import { constants } from '#libs-shared'
+import { getLeague, isMain } from '#libs-server'
 
 const log = debug('set-draft-pick-number')
 

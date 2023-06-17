@@ -4,8 +4,8 @@ import { hideBin } from 'yargs/helpers'
 import { Table } from 'console-table-printer'
 
 import db from '#db'
-import { constants, sum } from '#common'
-import { isMain } from '#utils'
+import { constants, sum } from '#libs-shared'
+import { isMain } from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('draw-divisions')

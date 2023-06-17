@@ -1,6 +1,6 @@
 import { List, Record } from 'immutable'
 
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 import { transactionsActions } from './actions'
 import { teamActions } from '@core/teams'
 import { rosterActions } from '@core/rosters'

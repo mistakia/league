@@ -14,7 +14,7 @@ import IconButton from '@mui/material/IconButton'
 import { Map } from 'immutable'
 
 import PlayerName from '@components/player-name'
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 import TeamName from '@components/team-name'
 import PlayerAge from '@components/player-age'
 import SelectedPlayerSeasonStats from '@components/selected-player-season-stats'

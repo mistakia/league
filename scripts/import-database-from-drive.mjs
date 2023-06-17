@@ -6,7 +6,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { isMain, googleDrive, downloadFile } from '#utils'
+import { isMain, googleDrive, downloadFile } from '#libs-server'
 import config from '#config'
 
 const argv = yargs(hideBin(process.argv)).argv

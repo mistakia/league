@@ -5,7 +5,7 @@ import NotInterestedIcon from '@mui/icons-material/NotInterested'
 
 import Position from '@components/position'
 import NFLTeam from '@components/nfl-team'
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 import PlayerLabel from '@components/player-label'
 import PlayerTag from '@components/player-tag'
 import PlayerStatus from '@components/player-status'

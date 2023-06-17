@@ -5,8 +5,8 @@ import MockDate from 'mockdate'
 
 import knex from '#db'
 import league from '#db/seeds/league.mjs'
-import { constants, Errors } from '#common'
-import { getRoster } from '#utils'
+import { constants, Errors } from '#libs-shared'
+import { getRoster } from '#libs-server'
 import { addPlayer, selectPlayer } from './utils/index.mjs'
 import run from '#scripts/process-poaching-claims.mjs'
 

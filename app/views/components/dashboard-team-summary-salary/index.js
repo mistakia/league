@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { Roster } from '@common'
+import { Roster } from '@libs-shared'
 import {
   getRostersForCurrentLeague,
   getTeamsForCurrentLeague,

@@ -5,8 +5,8 @@ import utc from 'dayjs/plugin/utc.js'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#common'
-import { isMain } from '#utils'
+import { constants } from '#libs-shared'
+import { isMain } from '#libs-server'
 
 dayjs.extend(utc)
 const argv = yargs(hideBin(process.argv)).argv

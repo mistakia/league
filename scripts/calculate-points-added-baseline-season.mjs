@@ -10,8 +10,8 @@ import {
   constants,
   getPlayerCountBySlot,
   getEligibleSlots
-} from '#common'
-import { getLeague, isMain } from '#utils'
+} from '#libs-shared'
+import { getLeague, isMain } from '#libs-server'
 import db from '#db'
 import calculate_points_added from './calculate-points-added.mjs'
 

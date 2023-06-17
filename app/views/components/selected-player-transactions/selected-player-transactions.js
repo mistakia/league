@@ -10,7 +10,7 @@ import TableRow from '@mui/material/TableRow'
 import LinearProgress from '@mui/material/LinearProgress'
 import { List } from 'immutable'
 
-import { constants, getExtensionAmount } from '@common'
+import { constants, getExtensionAmount } from '@libs-shared'
 import TeamName from '@components/team-name'
 import Timestamp from '@components/timestamp'
 import TransactionRow from '@components/transaction-row'

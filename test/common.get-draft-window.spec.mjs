@@ -4,13 +4,13 @@ import chai from 'chai'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone.js'
 
-import { getDraftWindow } from '#common'
+import { getDraftWindow } from '#libs-shared'
 
 dayjs.extend(timezone)
 chai.should()
 const expect = chai.expect
 
-describe('COMMON getDraftWindow', function () {
+describe('LIBS-SHARED getDraftWindow', function () {
   it('first pick', () => {
     const start = dayjs().tz('America/New_York').startOf('day')
     const draftWindow = getDraftWindow({

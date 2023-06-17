@@ -1,7 +1,7 @@
 import express from 'express'
 
-import { constants } from '#common'
-import { getProjections } from '#utils'
+import { constants } from '#libs-shared'
+import { getProjections } from '#libs-server'
 
 const router = express.Router()
 

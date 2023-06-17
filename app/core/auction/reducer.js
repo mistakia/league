@@ -1,6 +1,6 @@
 import { Record, List } from 'immutable'
 
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 import { auctionActions } from './actions'
 import { appActions } from '@core/app'
 

@@ -2,7 +2,7 @@
 
 import chai from 'chai'
 
-import { getSchedule } from '#utils'
+import { getSchedule } from '#libs-server'
 
 chai.should()
 

@@ -12,7 +12,7 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogTitle from '@mui/material/DialogTitle'
 
 import Button from '@components/button'
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 
 export default class ReserveConfirmation extends React.Component {
   constructor(props) {

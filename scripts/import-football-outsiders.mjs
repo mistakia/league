@@ -3,8 +3,8 @@ import { Map } from 'immutable'
 import debug from 'debug'
 
 import db from '#db'
-import { constants, fixTeam } from '#common'
-import { isMain } from '#utils'
+import { constants, fixTeam } from '#libs-shared'
+import { isMain } from '#libs-server'
 
 const log = debug('import:footballoutsiders')
 debug.enable('import:footballoutsiders')

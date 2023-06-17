@@ -5,8 +5,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { getYardlineInfoFromString } from '#common'
-import { isMain, readCSV, getPlay } from '#utils'
+import { getYardlineInfoFromString } from '#libs-shared'
+import { isMain, readCSV, getPlay } from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
 dayjs.extend(duration)

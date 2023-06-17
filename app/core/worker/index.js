@@ -10,7 +10,7 @@ import {
   getOptimizerPositionConstraints,
   optimizeLineup,
   calculatePlayerValuesRestOfSeason
-} from '@common'
+} from '@libs-shared'
 import solver from 'javascript-lp-solver'
 
 export function workerOptimizeLineup(params) {

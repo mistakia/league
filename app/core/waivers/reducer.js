@@ -1,6 +1,6 @@
 import { Map, List } from 'immutable'
 
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 import { waiverActions } from './actions'
 import { appActions } from '@core/app'
 import { createWaiver } from './waiver'

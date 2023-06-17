@@ -2,7 +2,7 @@ import { Map, List } from 'immutable'
 
 import { matchupsActions } from './actions'
 import { teamActions } from '@core/teams'
-import { constants, groupBy } from '@common'
+import { constants, groupBy } from '@libs-shared'
 import { createMatchup } from './matchup'
 
 const initialState = new Map({

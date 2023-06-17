@@ -1,14 +1,14 @@
 import debug from 'debug'
 
 import db from '#db'
-import { constants, Errors, getFreeAgentPeriod } from '#common'
+import { constants, Errors, getFreeAgentPeriod } from '#libs-shared'
 import {
   submitAcquisition,
   resetWaiverOrder,
   getTopFreeAgencyWaiver,
   isMain,
   getLeague
-} from '#utils'
+} from '#libs-server'
 
 const log = debug('process:waivers:freeagency')
 if (process.env.NODE_ENV !== 'test') {

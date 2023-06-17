@@ -1,7 +1,7 @@
 import express from 'express'
 
-import { constants, uniqBy } from '#common'
-import { getPlayByPlayQuery } from '#utils'
+import { constants, uniqBy } from '#libs-shared'
+import { getPlayByPlayQuery } from '#libs-server'
 
 const router = express.Router()
 

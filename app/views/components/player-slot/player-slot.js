@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
-import { constants, toStringArray } from '@common'
+import { constants, toStringArray } from '@libs-shared'
 import Button from '@components/button'
 import PlayerNameExpanded from '@components/player-name-expanded'
 

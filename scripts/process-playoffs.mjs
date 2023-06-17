@@ -3,8 +3,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants, Roster, calculatePoints } from '#common'
-import { isMain, getLeague, getRoster } from '#utils'
+import { constants, Roster, calculatePoints } from '#libs-shared'
+import { isMain, getLeague, getRoster } from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('process-playoffs')

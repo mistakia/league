@@ -3,8 +3,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#common'
-import { isMain, prizepicks, getPlayer, insertProps } from '#utils'
+import { constants } from '#libs-shared'
+import { isMain, prizepicks, getPlayer, insertProps } from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-prizepicks-odds')

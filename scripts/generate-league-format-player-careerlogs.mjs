@@ -1,8 +1,8 @@
 import debug from 'debug'
 
 import db from '#db'
-import { constants, sum, groupBy } from '#common'
-import { isMain, getLeague } from '#utils'
+import { constants, sum, groupBy } from '#libs-shared'
+import { isMain, getLeague } from '#libs-server'
 
 const log = debug('generate-league-format-player-careerlogs')
 debug.enable('generate-league-format-player-careerlogs')

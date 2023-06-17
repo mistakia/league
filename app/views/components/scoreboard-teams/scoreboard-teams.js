@@ -3,7 +3,7 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 
 import ScoreboardScoreTeam from '@components/scoreboard-score-team'
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 import { Scoreboard } from '@core/scoreboard'
 
 import './scoreboard-teams.styl'

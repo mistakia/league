@@ -5,8 +5,8 @@ import { hideBin } from 'yargs/helpers'
 import csv from 'csv-parser'
 
 import config from '#config'
-import { getPlayer, isMain } from '#utils'
-import { constants } from '#common'
+import { getPlayer, isMain } from '#libs-server'
+import { constants } from '#libs-shared'
 import db from '#db'
 
 const log = debug('import:projections')

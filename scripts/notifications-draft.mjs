@@ -2,8 +2,8 @@ import dayjs from 'dayjs'
 import debug from 'debug'
 
 import db from '#db'
-import { constants } from '#common'
-import { isMain, getLeague } from '#utils'
+import { constants } from '#libs-shared'
+import { isMain, getLeague } from '#libs-server'
 
 const log = debug('notifications-draft')
 debug.enable('notifications-draft')

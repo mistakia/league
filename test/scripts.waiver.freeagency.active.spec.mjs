@@ -4,7 +4,7 @@ import MockDate from 'mockdate'
 import knex from '#db'
 
 import league from '#db/seeds/league.mjs'
-import { constants, Errors } from '#common'
+import { constants, Errors } from '#libs-shared'
 import {
   selectPlayer,
   checkLastTransaction,

@@ -1,5 +1,5 @@
 import db from '#db'
-import { constants, Errors } from '#common'
+import { constants, Errors } from '#libs-shared'
 
 import processActiveWaivers from './process-waivers-free-agency-active.mjs'
 import processPracticeWaivers from './process-waivers-free-agency-practice.mjs'

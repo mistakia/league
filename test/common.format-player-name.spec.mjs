@@ -2,12 +2,12 @@
 
 import chai from 'chai'
 
-import { formatPlayerName } from '#common'
+import { formatPlayerName } from '#libs-shared'
 
 chai.should()
 const expect = chai.expect
 
-describe('COMMON formatPlayerName', function () {
+describe('LIBS-SHARED formatPlayerName', function () {
   it('lower', () => {
     expect(formatPlayerName('Nick Chubb')).to.equal('nick chubb')
   })

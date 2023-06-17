@@ -2,7 +2,7 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { getSelectedPlayer, getBaselines } from '@core/selectors'
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 
 import SelectedPlayerValue from './selected-player-value'
 

@@ -1,7 +1,7 @@
 import express from 'express'
 import dayjs from 'dayjs'
 
-import { constants } from '#common'
+import { constants } from '#libs-shared'
 
 const router = express.Router()
 

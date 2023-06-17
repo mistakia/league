@@ -3,8 +3,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants, Roster, calculateStandings } from '#common'
-import { isMain, getRoster, getLeague } from '#utils'
+import { constants, Roster, calculateStandings } from '#libs-shared'
+import { isMain, getRoster, getLeague } from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('process-matchups')

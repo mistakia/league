@@ -12,7 +12,7 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogTitle from '@mui/material/DialogTitle'
 
 import Button from '@components/button'
-import { constants, isReserveEligible } from '@common'
+import { constants, isReserveEligible } from '@libs-shared'
 
 export default class ActivateConfirmation extends React.Component {
   constructor(props) {

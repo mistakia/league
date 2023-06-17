@@ -4,7 +4,7 @@ import { createRoot } from 'react-dom/client'
 import 'whatwg-fetch'
 
 import Root from '@views/root'
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 
 import 'react-virtualized/styles.css'
 

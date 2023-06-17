@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
-import { fixTeam } from '@common'
+import { fixTeam } from '@libs-shared'
 import PercentileMetric from '@components/percentile-metric'
 
 export default class SelectedPlayerTeamPositionSplits extends React.Component {

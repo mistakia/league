@@ -7,7 +7,7 @@ import AccordionDetails from '@mui/material/AccordionDetails'
 import AccordionSummary from '@mui/material/AccordionSummary'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 
-import { toPercent } from '@common'
+import { toPercent } from '@libs-shared'
 import Rank from '@components/rank'
 import { Team } from '@core/teams'
 

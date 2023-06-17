@@ -1,6 +1,6 @@
 import { Record, List } from 'immutable'
 
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 
 export const League = new Record({
   uid: null,

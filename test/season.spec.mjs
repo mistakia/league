@@ -3,12 +3,12 @@
 import chai from 'chai'
 import MockDate from 'mockdate'
 
-import { constants } from '#common'
+import { constants } from '#libs-shared'
 
 const { start, end } = constants.season
 const expect = chai.expect
 
-describe('COMMON Season', function () {
+describe('LIBS-SHARED Season', function () {
   after(() => {
     MockDate.reset()
   })

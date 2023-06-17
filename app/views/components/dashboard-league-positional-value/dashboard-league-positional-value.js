@@ -5,7 +5,7 @@ import Highcharts from 'highcharts'
 import HighchartsCustomEvents from 'highcharts-custom-events'
 import HighchartsReact from 'highcharts-react-official'
 
-import { constants, sum } from '@common'
+import { constants, sum } from '@libs-shared'
 
 HighchartsCustomEvents(Highcharts)
 

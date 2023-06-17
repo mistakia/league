@@ -2,7 +2,7 @@ import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 
-import { constants, getExtensionAmount } from '@common'
+import { constants, getExtensionAmount } from '@libs-shared'
 
 export default class PlayerRosterTotal extends React.Component {
   render() {

@@ -2,8 +2,8 @@ import express from 'express'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 
-import { constants } from '#common'
-import { createLeague, getLeague } from '#utils'
+import { constants } from '#libs-shared'
+import { createLeague, getLeague } from '#libs-server'
 
 const router = express.Router()
 

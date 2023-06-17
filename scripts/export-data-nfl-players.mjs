@@ -6,8 +6,8 @@ import { fileURLToPath } from 'url'
 // import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { convertToCSV } from '#common'
-import { isMain } from '#utils'
+import { convertToCSV } from '#libs-shared'
+import { isMain } from '#libs-server'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const data_path = path.join(__dirname, '../data')

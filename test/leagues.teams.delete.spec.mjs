@@ -7,7 +7,7 @@ import server from '#api'
 import knex from '#db'
 
 import user from '#db/seeds/user.mjs'
-import { constants } from '#common'
+import { constants } from '#libs-shared'
 import { user1, user2 } from './fixtures/token.mjs'
 import { missing, invalid, error, notLoggedIn } from './utils/index.mjs'
 

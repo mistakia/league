@@ -1,7 +1,12 @@
 import express from 'express'
 
-import { getRoster, verifyUserTeam, isPlayerLocked, getLeague } from '#utils'
-import { constants, Roster } from '#common'
+import {
+  getRoster,
+  verifyUserTeam,
+  isPlayerLocked,
+  getLeague
+} from '#libs-server'
+import { constants, Roster } from '#libs-shared'
 
 const router = express.Router({ mergeParams: true })
 

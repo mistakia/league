@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import Grid from '@mui/material/Grid'
 import { Map } from 'immutable'
 
-import { Roster, constants } from '@common'
+import { Roster, constants } from '@libs-shared'
 import PlayerSlot from '@components/player-slot'
 
 import './lineup.styl'

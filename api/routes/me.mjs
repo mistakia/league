@@ -1,7 +1,7 @@
 import express from 'express'
 import bcrypt from 'bcrypt'
 
-import { constants, groupBy } from '#common'
+import { constants, groupBy } from '#libs-shared'
 
 const router = express.Router()
 

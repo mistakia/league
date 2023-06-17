@@ -1,7 +1,7 @@
 import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 import PlayerFilter from '@components/player-filter'
 
 export default class NFLTeamsFilter extends React.Component {

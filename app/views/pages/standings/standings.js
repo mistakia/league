@@ -6,7 +6,7 @@ import Container from '@mui/material/Container'
 import Toolbar from '@mui/material/Toolbar'
 
 import SelectYear from '@components/select-year'
-import { toPercent, constants } from '@common'
+import { toPercent, constants } from '@libs-shared'
 import PageLayout from '@layouts/page'
 
 import './standings.styl'

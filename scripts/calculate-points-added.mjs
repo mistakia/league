@@ -5,7 +5,7 @@ import { hideBin } from 'yargs/helpers'
 import { Table } from 'console-table-printer'
 
 import db from '#db'
-import { isMain, getLeague } from '#utils'
+import { isMain, getLeague } from '#libs-server'
 import {
   sum,
   constants,
@@ -15,7 +15,7 @@ import {
   calculateValues,
   calculatePrices,
   calculateBaselines
-} from '#common'
+} from '#libs-shared'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('calculate-points-added')

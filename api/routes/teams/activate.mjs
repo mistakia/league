@@ -1,12 +1,12 @@
 import express from 'express'
 
-import { constants } from '#common'
+import { constants } from '#libs-shared'
 import {
   submitReserve,
   submitActivate,
   processRelease,
   verifyUserTeam
-} from '#utils'
+} from '#libs-server'
 
 const router = express.Router({ mergeParams: true })
 

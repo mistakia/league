@@ -4,8 +4,8 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import db from '#db'
-import { isMain, mergePlayer, readCSV } from '#utils'
-import { formatPlayerName } from '#common'
+import { isMain, mergePlayer, readCSV } from '#libs-server'
+import { formatPlayerName } from '#libs-shared'
 
 const log = debug('process-duplicate-players')
 debug.enable('process-duplicate-players,update-player,merge-player')

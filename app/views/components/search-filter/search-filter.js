@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 import Icon from '@components/icon'
-import { debounce } from '@common'
+import { debounce } from '@libs-shared'
 
 import './search-filter.styl'
 

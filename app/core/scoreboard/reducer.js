@@ -3,7 +3,7 @@ import dayjs from 'dayjs'
 
 import { playActions } from '@core/plays'
 import { scoreboardActions } from './actions'
-import { constants } from '@common'
+import { constants } from '@libs-shared'
 
 const current_week = Math.min(constants.week, constants.season.finalWeek)
 const initial_week = Math.max(
