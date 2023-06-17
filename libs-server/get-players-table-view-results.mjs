@@ -41,7 +41,7 @@ export default async function ({
       )
     }
 
-    if (column_definition.join_function) {
+    if (column_definition.join) {
       column_definition.join({ query: players_query, params: column_params })
     } else if (
       column_definition.table_name !== 'player' &&
