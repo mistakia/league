@@ -1,6 +1,6 @@
 import db from '#db'
 
-import { players_table_column_definitions } from '#utils'
+import players_table_column_definitions from './players-table-column-definitions.mjs'
 
 export default async function ({
   where = [],
