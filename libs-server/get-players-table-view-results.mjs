@@ -9,7 +9,7 @@ export default async function ({
   offset = 0
 }) {
   const joined_table_index = {}
-  const players_query = db('player').select('pid')
+  const players_query = db('players').select('player.pid')
 
   for (const column of columns) {
     // column could be a string representing column_id or an object containing column_id and params
