@@ -108,13 +108,15 @@ export default async function ({
     // use minus sign and reverse sort order to sort nulls last
     if (column_definition.select_as) {
       const select_as = column_definition.select_as(column_params)
+      players_query.orderByRaw(`${select_as} IS NULL`)
       players_query.orderByRaw(
-        `-${select_as} ${sort_clause.desc ? 'asc' : 'desc'}`
+        `${select_as} ${sort_clause.desc ? 'desc' : 'asc'}`
       )
     } else {
+      players_query.orderByRaw(`${table_name}.${column_definition.column_name} IS NULL`)
       players_query.orderByRaw(
         `-${table_name}.${column_definition.column_name} ${
-          sort_clause.desc ? 'asc' : 'desc'
+          sort_clause.desc ? 'desc' : 'asc'
         }`
       )
     }
