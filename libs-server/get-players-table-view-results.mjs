@@ -30,29 +30,27 @@ export default async function ({
       throw new Error(`Invalid column id: ${column_id}`)
     }
 
+    const table_name = column_definition.table_alias
+      ? column_definition.table_alias(column_params)
+      : column_definition.table_name
+
     if (column_definition.select_as) {
       const select_as = column_definition.select_as(column_params)
       players_query.select(
-        `${column_definition.table_name}.${column_definition.column_name} AS ${select_as}`
+        `${table_name}.${column_definition.column_name} AS ${select_as}`
       )
     } else {
-      players_query.select(
-        `${column_definition.table_name}.${column_definition.column_name}`
-      )
+      players_query.select(`${table_name}.${column_definition.column_name}`)
     }
 
-    if (column_definition.join) {
-      column_definition.join({ query: players_query, params: column_params })
-    } else if (
-      column_definition.table_name !== 'player' &&
-      !joined_table_index[column_definition.table_name]
-    ) {
-      players_query.leftJoin(
-        column_definition.table_name,
-        `${column_definition.table_name}.pid`,
-        'player.pid'
-      )
-      joined_table_index[column_definition.table_name] = true
+    if (!joined_table_index[table_name]) {
+      if (column_definition.join) {
+        column_definition.join({ query: players_query, params: column_params })
+      } else if (table_name !== 'player') {
+        players_query.leftJoin(table_name, `${table_name}.pid`, 'player.pid')
+      }
+
+      joined_table_index[table_name] = true
     }
   }
 
@@ -101,13 +99,11 @@ export default async function ({
     const column_id = typeof column === 'string' ? column : column.column_id
     const column_params = typeof column === 'string' ? {} : column.params
     const column_definition = players_table_column_definitions[column_id]
+    const table_name = column_definition.table_alias
+      ? column_definition.table_alias(column_params)
+      : column_definition.table_name
 
     sort_clause.desc = sort_clause.desc === 'true'
-    // postgres
-    // players_query.orderByRaw(
-    //   `${sort_clause.id} ${sort_clause.desc ? 'desc' : 'asc'} NULLS LAST`
-    // )
-
     // mysql
     // use minus sign and reverse sort order to sort nulls last
     if (column_definition.select_as) {
@@ -117,11 +113,14 @@ export default async function ({
       )
     } else {
       players_query.orderByRaw(
-        `-${column_definition.table_name}.${column_definition.column_name} ${
+        `-${table_name}.${column_definition.column_name} ${
           sort_clause.desc ? 'asc' : 'desc'
         }`
       )
     }
+
+    // postgres
+    // use NULLS LAST
   }
 
   if (offset) {
