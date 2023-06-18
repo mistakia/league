@@ -8,7 +8,7 @@ const projections_index_join = ({ query, params = {} }) => {
     this.on(`${table_alias}.pid`, '=', 'player.pid')
     this.andOn(`${table_alias}.year`, '=', year)
     this.andOn(`${table_alias}.week`, '=', week)
-    this.andOn(`${table_alias}.sourceid`, '=', 0)
+    this.andOn(`${table_alias}.sourceid`, '=', constants.sources.AVERAGE)
   })
 }
 
