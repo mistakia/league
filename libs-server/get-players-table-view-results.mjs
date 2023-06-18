@@ -103,7 +103,7 @@ export default async function ({
       ? column_definition.table_alias(column_params)
       : column_definition.table_name
 
-    sort_clause.desc = sort_clause.desc === 'true'
+    sort_clause.desc = sort_clause.desc === true || sort_clause.desc === 'true'
     // mysql
     // use minus sign and reverse sort order to sort nulls last
     if (column_definition.select_as) {
@@ -113,9 +113,11 @@ export default async function ({
         `${select_as} ${sort_clause.desc ? 'desc' : 'asc'}`
       )
     } else {
-      players_query.orderByRaw(`${table_name}.${column_definition.column_name} IS NULL`)
       players_query.orderByRaw(
-        `-${table_name}.${column_definition.column_name} ${
+        `${table_name}.${column_definition.column_name} IS NULL`
+      )
+      players_query.orderByRaw(
+        `${table_name}.${column_definition.column_name} ${
           sort_clause.desc ? 'desc' : 'asc'
         }`
       )
