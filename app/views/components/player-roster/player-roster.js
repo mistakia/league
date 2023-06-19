@@ -28,6 +28,7 @@ class PlayerRoster extends Player {
       isHosted,
       league,
       isBeforeExtensionDeadline,
+      isBeforeTransitionEnd,
       isTransition,
       percentiles = {},
       is_manager_in_league,
@@ -45,7 +46,9 @@ class PlayerRoster extends Player {
     const bid = playerMap.get('bid')
     const salary = isBeforeExtensionDeadline
       ? value
-      : isRestrictedFreeAgent && (is_team_manager || isTransition)
+      : isBeforeTransitionEnd &&
+        isRestrictedFreeAgent &&
+        (is_team_manager || isTransition)
       ? bid
       : value
     const extensions = playerMap.get('extensions', 0)
