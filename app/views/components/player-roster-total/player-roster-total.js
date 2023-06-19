@@ -11,6 +11,7 @@ export default class PlayerRosterTotal extends React.Component {
       league,
       reorder,
       isBeforeExtensionDeadline,
+      isBeforeTransitionEnd,
       is_team_manager
     } = this.props
 
@@ -53,7 +54,7 @@ export default class PlayerRosterTotal extends React.Component {
 
       const salary = isBeforeExtensionDeadline
         ? value
-        : isRestrictedFreeAgent && is_team_manager
+        : isBeforeTransitionEnd && isRestrictedFreeAgent && is_team_manager
         ? bid
         : value
       baseSalaryTotal = baseSalaryTotal + salary
@@ -152,5 +153,6 @@ PlayerRosterTotal.propTypes = {
   reorder: PropTypes.bool,
   league: PropTypes.object,
   isBeforeExtensionDeadline: PropTypes.bool,
+  isBeforeTransitionEnd: PropTypes.bool,
   is_team_manager: PropTypes.bool
 }
