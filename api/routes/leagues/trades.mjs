@@ -36,6 +36,7 @@ router.get('/?', async (req, res) => {
         'trades_picks.*',
         'draft.uid',
         'draft.pick',
+        'draft.pick_str',
         'draft.round',
         'draft.year',
         'draft.lid',
