@@ -1,16 +1,15 @@
 import debug from 'debug'
-// import yargs from 'yargs'
-// import { hideBin } from 'yargs/helpers'
+import yargs from 'yargs'
+import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants } from '#libs-shared'
 import { isMain } from '#libs-server'
 
-// const argv = yargs(hideBin(process.argv)).argv
+const argv = yargs(hideBin(process.argv)).argv
 const log = debug('generate-draft-picks')
 
-const run = async () => {
-  const future_year = constants.season.year + 1
+const run = async ({ future_year = constants.season.year + 1 }) => {
   const leagues = await db('leagues').where('hosted', 1)
 
   if (constants.season.isRegularSeason) {
@@ -62,7 +61,7 @@ const main = async () => {
   debug.enable('generate-draft-picks')
   let error
   try {
-    await run()
+    await run({ future_year: argv.year })
   } catch (err) {
     error = err
     console.log(error)
