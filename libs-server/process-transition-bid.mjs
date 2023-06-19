@@ -48,6 +48,23 @@ export default async function ({
     roster.availableCap >= bid &&
     roster.isEligibleForSlot({ slot, pos })
 
+  // get team unsigned rfa players and remove from roster
+  const unsigned_rfa_players = await db('transition_bids')
+    .select('pid')
+    .where('player_tid', tid)
+    .where('tid', tid)
+    .where('year', constants.season.year)
+    .whereNull('cancelled')
+    .whereNull('processed')
+
+  for (const unsigned_rfa_player of unsigned_rfa_players) {
+    if (!roster.has(unsigned_rfa_player.pid)) {
+      continue
+    }
+
+    roster.removePlayer(unsigned_rfa_player.pid)
+  }
+
   if (isOriginalTeam) {
     roster.removePlayer(pid)
   }
