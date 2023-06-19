@@ -12,7 +12,11 @@ export default class TradePick extends React.Component {
     const { pick, teams, draft_value } = this.props
     let text = `${pick.year} - ${ordinalSuffixOf(pick.round)}`
     if (pick.pick) {
-      text = `${text} #${pick.pick} (${pick.pick_str})`
+      text = `${text} #${pick.pick}`
+    }
+
+    if (pick.pick_str) {
+      text += ` (${pick.pick_str})`
     }
 
     const team = teams.get(pick.otid, new Team())
