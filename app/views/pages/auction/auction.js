@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react'
+import { useParams } from 'react-router-dom'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 
@@ -17,12 +18,18 @@ export default function AuctionPage({
   isCommish,
   isHosted,
   loadAllPlayers,
-  join
+  load_league,
+  join,
+  loadRosters
 }) {
+  const { lid } = useParams()
+
   useEffect(() => {
+    load_league()
     loadAllPlayers()
     join()
-  }, [join, loadAllPlayers])
+    loadRosters(lid)
+  }, [join, loadAllPlayers, load_league, loadRosters, lid])
 
   useEffect(() => {
     const element = document.querySelector('.auction__team.winning')
@@ -70,5 +77,7 @@ AuctionPage.propTypes = {
   transactions: ImmutablePropTypes.list,
   tids: ImmutablePropTypes.list,
   isCommish: PropTypes.bool,
-  isHosted: PropTypes.bool
+  isHosted: PropTypes.bool,
+  load_league: PropTypes.func,
+  loadRosters: PropTypes.func
 }

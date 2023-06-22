@@ -1,4 +1,7 @@
-import React from 'react'
+import React, { useEffect } from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
+import { useParams } from 'react-router-dom'
+import PropTypes from 'prop-types'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import AutoSizer from 'react-virtualized/dist/es/AutoSizer'
@@ -16,18 +19,51 @@ import './draft.styl'
 
 dayjs.extend(relativeTime)
 
-export default function DraftPage() {
-  const {
-    windowEnd,
-    players,
-    nextPick,
-    picks,
-    league,
-    selectedPlayerMap,
-    drafted,
-    isDraftWindowOpen,
-    teamId
-  } = this.props
+export default function DraftPage({
+  windowEnd,
+  players,
+  nextPick,
+  picks,
+  league,
+  selectedPlayerMap,
+  drafted,
+  isDraftWindowOpen,
+  teamId,
+  showConfirmation,
+  draftPlayer,
+  loadDraft,
+  loadAllPlayers,
+  load_league,
+  loadTeams
+}) {
+  const { lid } = useParams()
+
+  useEffect(() => {
+    loadDraft()
+    loadAllPlayers()
+    load_league()
+    loadTeams(lid)
+  }, [loadDraft, loadAllPlayers, load_league, loadTeams, lid])
+
+  useEffect(() => {
+    const element = document.querySelector(
+      '.draft__side-main .draft__pick.active'
+    )
+    if (element)
+      element.scrollIntoView({ behavior: 'smooth', inline: 'center' })
+  }, [nextPick])
+
+  const handleDraft = () => {
+    showConfirmation({
+      title: 'Draft Selection',
+      description: `Select ${selectedPlayerMap.get(
+        'fname'
+      )} ${selectedPlayerMap.get('lname')} (${selectedPlayerMap.get(
+        'pos'
+      )}) with the #${nextPick.pick} pick in the ${constants.year} draft.`,
+      onConfirm: draftPlayer
+    })
+  }
   const { positions } = constants
 
   const draftActive =
@@ -166,7 +202,7 @@ export default function DraftPage() {
         </div>
         {draftActive && onTheClock && !isDrafted && (
           <div className='draft__selected-action'>
-            <Button onClick={this.handleDraft}>Draft</Button>
+            <Button onClick={handleDraft}>Draft</Button>
           </div>
         )}
       </div>
@@ -330,4 +366,22 @@ export default function DraftPage() {
   )
 
   return <PageLayout body={body} />
+}
+
+DraftPage.propTypes = {
+  windowEnd: PropTypes.object,
+  loadDraft: PropTypes.func,
+  draftPlayer: PropTypes.func,
+  showConfirmation: PropTypes.func,
+  selectedPlayerMap: ImmutablePropTypes.map,
+  nextPick: PropTypes.object,
+  loadAllPlayers: PropTypes.func,
+  load_league: PropTypes.func,
+  loadTeams: PropTypes.func,
+  players: ImmutablePropTypes.list,
+  picks: ImmutablePropTypes.list,
+  league: PropTypes.object,
+  drafted: ImmutablePropTypes.list,
+  isDraftWindowOpen: PropTypes.bool,
+  teamId: PropTypes.number
 }

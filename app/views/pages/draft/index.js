@@ -1,6 +1,3 @@
-import React from 'react'
-import ImmutablePropTypes from 'react-immutable-proptypes'
-import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
@@ -17,41 +14,10 @@ import {
 } from '@core/selectors'
 import { playerActions } from '@core/players'
 import { confirmationActions } from '@core/confirmations'
+import { leagueActions } from '@core/leagues'
+import { teamActions } from '@core/teams'
 
-import render from './draft'
-
-class DraftPage extends React.Component {
-  componentDidUpdate() {
-    const element = document.querySelector(
-      '.draft__side-main .draft__pick.active'
-    )
-    if (element)
-      element.scrollIntoView({ behavior: 'smooth', inline: 'center' })
-  }
-
-  componentDidMount() {
-    this.props.loadDraft()
-    this.props.loadAllPlayers()
-  }
-
-  handleDraft = () => {
-    const playerMap = this.props.selectedPlayerMap
-    const { nextPick, draftPlayer } = this.props
-    this.props.showConfirmation({
-      title: 'Draft Selection',
-      description: `Select ${playerMap.get('fname')} ${playerMap.get(
-        'lname'
-      )} (${playerMap.get('pos')}) with the #${nextPick.pick} pick in the ${
-        constants.year
-      } draft.`,
-      onConfirm: draftPlayer
-    })
-  }
-
-  render() {
-    return render.call(this)
-  }
-}
+import DraftPage from './draft'
 
 const mapStateToProps = createSelector(
   getRookiePlayers,
@@ -93,16 +59,9 @@ const mapDispatchToProps = {
   loadDraft: draftActions.loadDraft,
   draftPlayer: draftActions.draftPlayer,
   showConfirmation: confirmationActions.show,
-  loadAllPlayers: playerActions.loadAllPlayers
-}
-
-DraftPage.propTypes = {
-  loadDraft: PropTypes.func,
-  draftPlayer: PropTypes.func,
-  showConfirmation: PropTypes.func,
-  selectedPlayerMap: ImmutablePropTypes.map,
-  nextPick: PropTypes.object,
-  loadAllPlayers: PropTypes.func
+  loadAllPlayers: playerActions.loadAllPlayers,
+  load_league: leagueActions.load_league,
+  loadTeams: teamActions.loadTeams
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(DraftPage)

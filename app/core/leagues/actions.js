@@ -1,6 +1,6 @@
 export const leagueActions = {
+  LOAD_LEAGUE: 'LOAD_LEAGUE',
   UPDATE_LEAGUE: 'UPDATE_LEAGUE',
-
   SET_LEAGUE: 'SET_LEAGUE',
 
   PUT_LEAGUE_FAILED: 'PUT_LEAGUE_FAILED',
@@ -10,6 +10,10 @@ export const leagueActions = {
   GET_LEAGUE_FAILED: 'GET_LEAGUE_FAILED',
   GET_LEAGUE_PENDING: 'GET_LEAGUE_PENDING',
   GET_LEAGUE_FULFILLED: 'GET_LEAGUE_FULFILLED',
+
+  load_league: () => ({
+    type: leagueActions.LOAD_LEAGUE
+  }),
 
   update: ({ leagueId, value, field }) => ({
     type: leagueActions.UPDATE_LEAGUE,
