@@ -73,7 +73,7 @@ export default function AppMenu({
                     Settings
                   </NavLink>
                 )}
-                <NavLink to='/players'>Players</NavLink>
+                <NavLink to={`/leagues/${leagueId}/players`}>Players</NavLink>
                 {Boolean(leagueId) && (
                   <>
                     {teamId ? (
@@ -82,6 +82,14 @@ export default function AppMenu({
                       </NavLink>
                     ) : (
                       <NavLink to={`/leagues/${leagueId}/teams`}>Teams</NavLink>
+                    )}
+                    {is_hosted && (
+                      <NavLink to={`/leagues/${leagueId}/draft`}>Draft</NavLink>
+                    )}
+                    {is_hosted && (
+                      <NavLink to={`/leagues/${leagueId}/auction`}>
+                        Auction
+                      </NavLink>
                     )}
                     {is_hosted && (
                       <NavLink to={`/leagues/${leagueId}/transactions`}>
@@ -132,8 +140,6 @@ export default function AppMenu({
                   </NavLink>
                   <NavLink to='/lineups'>Lineup</NavLink>
                   <NavLink to='/trade'>Trade</NavLink>
-                  <NavLink to='/draft'>Draft</NavLink>
-                  <NavLink to='/auction'>Auction</NavLink>
                   <NavLink to='/settings'>Settings</NavLink>
                 </div>
               </div>

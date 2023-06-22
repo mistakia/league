@@ -44,19 +44,19 @@ const Routes = ({ app }) => {
     } else if (leagueId || teamId) {
       return <Navigate to={`/login${location.search}`} />
     } else {
-      return <Navigate to='/players' />
+      return <Navigate to='/leagues/0/players' />
     }
   }
 
   return (
     <RouterRoutes>
-      {app.userId && <Route path='/lineups' element={<LineupsPage />} />}
-      <Route path='/players' element={<PlayersPage />} />
-      {app.userId && <Route path='/auction' element={<AuctionPage />} />}
-      {app.userId && <Route path='/draft' element={<DraftPage />} />}
-      {app.userId && <Route path='/trade' element={<TradePage />} />}
       {!app.userId && <Route path='/login' element={<AuthPage />} />}
+      {app.userId && <Route path='/lineups' element={<LineupsPage />} />}
+      {app.userId && <Route path='/trade' element={<TradePage />} />}
       <Route path='/leagues/:lid'>
+        <Route path='/leagues/:lid/players' element={<PlayersPage />} />
+        <Route path='/leagues/:lid/auction' element={<AuctionPage />} />
+        <Route path='/leagues/:lid/draft' element={<DraftPage />} />
         <Route path='/leagues/:lid/teams/:tid' element={<TeamPage />} />
         <Route path='/leagues/:lid/teams' element={<TeamPage />} />
         <Route

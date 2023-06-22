@@ -14,7 +14,9 @@ export function* loadPlayers({ payload }) {
   if (missing.length) {
     const { leagueId } = yield select(get_app)
     const pids = [...new Set(missing.map((p) => p.pid))]
-    yield call(fetchPlayers, { leagueId, pids })
+    if (pids.length) {
+      yield call(fetchPlayers, { leagueId, pids })
+    }
   }
 }
 

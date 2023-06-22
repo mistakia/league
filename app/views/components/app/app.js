@@ -26,15 +26,15 @@ export default function App({ init, isPending }) {
   const isMobile = window.innerWidth < 800
   const [menu_open, set_menu_open] = useState(!isMobile)
   const match = useMatch('leagues/:leagueId/*')
-  const leagueId = match ? Number(match.params.leagueId) || 0 : undefined
 
   useEffect(() => {
     async function onLoad() {
+      const leagueId = match ? Number(match.params.leagueId) || 0 : undefined
       const token = await localStorageAdapter.getItem('token')
       init({ token, leagueId })
     }
     onLoad()
-  }, [init, leagueId])
+  }, [init]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (isPending) {
     return <Loading loading={isPending} />
