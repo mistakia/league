@@ -2,21 +2,19 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { appActions } from '@core/app'
-import { get_app, getCurrentLeague, getCurrentTeam } from '@core/selectors'
+import { get_app, getCurrentLeague } from '@core/selectors'
 
 import AppMenu from './menu'
 
 const mapStateToProps = createSelector(
   get_app,
-  getCurrentTeam,
   getCurrentLeague,
-  (app, team, league) => ({
+  (app, league) => ({
     isLoggedIn: Boolean(app.userId),
     leagueId: app.leagueId,
     teamId: app.teamId,
     isCommish: league.commishid === app.userId,
-    league,
-    team
+    league
   })
 )
 
