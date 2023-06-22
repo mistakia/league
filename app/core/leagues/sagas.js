@@ -63,6 +63,10 @@ export function* watchLoadTeams() {
   yield takeLatest(teamActions.LOAD_TEAMS, loadLeague)
 }
 
+export function* watch_load_league() {
+  yield takeLatest(leagueActions.LOAD_LEAGUE, loadLeague)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -73,5 +77,6 @@ export const leagueSagas = [
   fork(watchLoadLeagueTeamStats),
   fork(watchLoadRosters),
   fork(watchLoadTeams),
-  fork(watchAuthFulfilled)
+  fork(watchAuthFulfilled),
+  fork(watch_load_league)
 ]
