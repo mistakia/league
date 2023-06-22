@@ -180,7 +180,10 @@ export function* init({ payload }) {
       pathname.includes(path) ||
       league_home_re.test(pathname)
   )
-  if (all_player_paths.includes(pathname)) {
+  const is_all_player_path = all_player_paths.find((path) =>
+    pathname.includes(path)
+  )
+  if (is_all_player_path) {
     yield fork(loadAllPlayers)
   } else if (is_league_player_path) {
     yield fork(loadLeaguePlayers)
@@ -207,7 +210,9 @@ export function* init({ payload }) {
     payload.data.waivers.forEach((w) => pids.push(w.pid))
     payload.data.poaches.forEach((p) => pids.push(p.pid))
     const { leagueId } = yield select(get_app)
-    yield call(fetchPlayers, { leagueId, pids })
+    if (pids.length) {
+      yield call(fetchPlayers, { leagueId, pids })
+    }
   }
 }
 
@@ -277,7 +282,9 @@ export function* load_missing_roster_players({ payload }) {
     }
   }
 
-  yield call(fetchPlayers, { pids, leagueId })
+  if (pids.length) {
+    yield call(fetchPlayers, { pids, leagueId })
+  }
 }
 
 //= ====================================
