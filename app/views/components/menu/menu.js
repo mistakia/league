@@ -1,6 +1,5 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import ImmutablePropTypes from 'react-immutable-proptypes'
 import { NavLink, useLocation } from 'react-router-dom'
 import MenuIcon from '@mui/icons-material/Menu'
 import SwipeableDrawer from '@mui/material/SwipeableDrawer'
@@ -20,7 +19,6 @@ export default function AppMenu({
   logout,
   isLoggedIn,
   teamId,
-  team,
   leagueId,
   league,
   isCommish
@@ -73,9 +71,36 @@ export default function AppMenu({
                     Settings
                   </NavLink>
                 )}
+                {Boolean(leagueId) && is_hosted && (
+                  <>
+                    <NavLink to={`/leagues/${leagueId}/auction`}>
+                      Auction
+                    </NavLink>
+                    <NavLink to={`/leagues/${leagueId}/draft`}>Draft</NavLink>
+                    <NavLink to={`/leagues/${leagueId}/matchups`}>
+                      Matchups
+                    </NavLink>
+                  </>
+                )}
                 <NavLink to={`/leagues/${leagueId}/players`}>Players</NavLink>
                 {Boolean(leagueId) && (
                   <>
+                    <NavLink to={`/leagues/${leagueId}/rosters`}>
+                      Rosters
+                    </NavLink>
+                    {is_hosted && (
+                      <>
+                        <NavLink to={`/leagues/${leagueId}/schedule`}>
+                          Schedule
+                        </NavLink>
+                        <NavLink to={`/leagues/${leagueId}/standings`}>
+                          Standings
+                        </NavLink>
+                        <NavLink to={`/leagues/${leagueId}/stats`}>
+                          Stats
+                        </NavLink>
+                      </>
+                    )}
                     {teamId ? (
                       <NavLink to={`/leagues/${leagueId}/teams/${teamId}`}>
                         Teams
@@ -84,43 +109,14 @@ export default function AppMenu({
                       <NavLink to={`/leagues/${leagueId}/teams`}>Teams</NavLink>
                     )}
                     {is_hosted && (
-                      <NavLink to={`/leagues/${leagueId}/draft`}>Draft</NavLink>
-                    )}
-                    {is_hosted && (
-                      <NavLink to={`/leagues/${leagueId}/auction`}>
-                        Auction
-                      </NavLink>
-                    )}
-                    {is_hosted && (
-                      <NavLink to={`/leagues/${leagueId}/transactions`}>
-                        Transactions
-                      </NavLink>
-                    )}
-                    {is_hosted && (
-                      <NavLink to={`/leagues/${leagueId}/waivers`}>
-                        Waivers
-                      </NavLink>
-                    )}
-                    <NavLink to={`/leagues/${leagueId}/rosters`}>
-                      Rosters
-                    </NavLink>
-                    {is_hosted && (
-                      <NavLink to={`/leagues/${leagueId}/standings`}>
-                        Standings
-                      </NavLink>
-                    )}
-                    {is_hosted && (
-                      <NavLink to={`/leagues/${leagueId}/stats`}>Stats</NavLink>
-                    )}
-                    {is_hosted && (
-                      <NavLink to={`/leagues/${leagueId}/schedule`}>
-                        Schedule
-                      </NavLink>
-                    )}
-                    {is_hosted && (
-                      <NavLink to={`/leagues/${leagueId}/matchups`}>
-                        Matchups
-                      </NavLink>
+                      <>
+                        <NavLink to={`/leagues/${leagueId}/transactions`}>
+                          Transactions
+                        </NavLink>
+                        <NavLink to={`/leagues/${leagueId}/waivers`}>
+                          Waivers
+                        </NavLink>
+                      </>
                     )}
                   </>
                 )}
@@ -187,7 +183,6 @@ AppMenu.propTypes = {
   isLoggedIn: PropTypes.bool,
   leagueId: PropTypes.number,
   teamId: PropTypes.number,
-  team: ImmutablePropTypes.record,
   league: PropTypes.object,
   logout: PropTypes.func,
   menu_open: PropTypes.bool,
