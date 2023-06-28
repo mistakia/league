@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import dayjs from 'dayjs'
 
 export default function PlayerAge({ date }) {
-  if (!date) {
+  if (!date || date === '0000-00-00') {
     return <span>-</span>
   }
 
