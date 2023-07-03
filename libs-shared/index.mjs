@@ -48,6 +48,7 @@ export { default as formatPosition } from './format-position.mjs'
 export { default as generate_league_format_hash } from './generate-league-format-hash.mjs'
 export { default as generate_scoring_format_hash } from './generate-scoring-format-hash.mjs'
 export { default as is_league_post_season_week } from './is-league-post-season-week.mjs'
+export { stat_in_year_week } from './stat-in-year-week.mjs'
 
 const uniqBy = (a, key) => {
   const seen = new Set()
