@@ -81,14 +81,17 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid pickId' })
     }
 
-    const prevQuery = await db('draft').where({
-      pick: pick.pick - 1,
-      lid,
-      year: constants.season.year
-    })
-    const prevPick = prevQuery[0]
+    // previous pick might not be pick - 1 if it belonged to a commissioned team
+    const prev_pick = await db('draft')
+      .where({
+        lid,
+        year: constants.season.year
+      })
+      .where('pick', '<', pick.pick)
+      .orderBy('pick', 'desc')
+      .first()
     const isPreviousSelectionMade =
-      pick.pick === 1 || Boolean(prevPick && prevPick.pid)
+      pick.pick === 1 || Boolean(prev_pick && prev_pick.pid)
 
     // if previous selection is not made make, check if teams window has opened
     const isWindowOpen = isDraftWindowOpen({

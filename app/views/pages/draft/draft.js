@@ -69,12 +69,14 @@ export default function DraftPage({
   const draftActive =
     league.draft_start &&
     dayjs().isAfter(dayjs.unix(league.draft_start).startOf('day'))
-  const prevPick = picks.find(
-    (p) => p.pick === (nextPick ? nextPick.pick - 1 : null)
-  )
+
+  const picksSorted = picks.sort((a, b) => a.round - b.round || a.pick - b.pick)
+  // previous pick might not be pick - 1 if it belonged to a commissioned team
+  const next_pick_index = picksSorted.findIndex((p) => p.pick === nextPick.pick)
+  const prev_pick = picksSorted.get(next_pick_index - 1)
   const isPreviousSelectionMade =
     Boolean(nextPick && nextPick.pick === 1) ||
-    Boolean(prevPick && prevPick.pid)
+    Boolean(prev_pick && prev_pick.pid)
   const onTheClock =
     league.draft_start &&
     nextPick &&
@@ -157,11 +159,13 @@ export default function DraftPage({
   }
 
   const pickItems = []
-  const picksSorted = picks.sort((a, b) => a.round - b.round || a.pick - b.pick)
+
+  let pick_index = 0
   for (const pick of picksSorted) {
-    const prevPick = picks.find((p) => p.pick === pick.pick - 1)
+    // previous pick might not be pick - 1 if it belonged to a commissioned team
+    const prev_pick = picksSorted.get(pick_index - 1)
     const isPreviousSelectionMade =
-      pick.pick === 1 || Boolean(prevPick && prevPick.pid)
+      pick.pick === 1 || Boolean(prev_pick && prev_pick.pid)
     const isUser = pick.tid === teamId
     const isActive =
       draftActive &&
@@ -169,6 +173,7 @@ export default function DraftPage({
       Boolean(pick.pick) &&
       (constants.season.now.isAfter(pick.draftWindow) ||
         isPreviousSelectionMade)
+
     pickItems.push(
       <DraftPick
         key={pick.uid}
@@ -179,6 +184,8 @@ export default function DraftPage({
         isActive={isActive}
       />
     )
+
+    pick_index += 1
   }
 
   const p = selectedPlayerMap
