@@ -103,7 +103,7 @@ router.post('/?', async (req, res) => {
 router.post('/search/?', async (req, res) => {
   const { logger } = req.app.locals
   try {
-    const { where, columns, sort, offset } = req.body
+    const { where, columns, sort, offset, prefix_columns } = req.body
     if (where) {
       // TODO validate where
     }
@@ -124,7 +124,8 @@ router.post('/search/?', async (req, res) => {
       where,
       columns,
       sort,
-      offset
+      offset,
+      prefix_columns
     })
 
     res.send(result)

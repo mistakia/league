@@ -13,6 +13,7 @@ const find_column = ({ column_id, columns }) => {
 export default async function ({
   where = [],
   columns = [],
+  prefix_columns = [],
   sort = [],
   offset = 0,
   limit = 500
@@ -20,21 +21,25 @@ export default async function ({
   const joined_table_index = {}
   const players_query = db('player').select('player.pid')
 
-  for (const column of columns) {
+  const all_table_columns = [...prefix_columns, ...columns]
+
+  for (const column of all_table_columns) {
     // column could be a string representing column_id or an object containing column_id and params
     const column_id = typeof column === 'string' ? column : column.column_id
     const column_params = typeof column === 'string' ? {} : column.params
     const column_definition = players_table_column_definitions[column_id]
 
     if (!column_definition) {
-      throw new Error(`Invalid column id: ${column_id}`)
+      continue
     }
 
     const table_name = column_definition.table_alias
       ? column_definition.table_alias(column_params)
       : column_definition.table_name
 
-    if (column_definition.select_as) {
+    if (column_definition.select) {
+      column_definition.select({ query: players_query, params: column_params })
+    } else if (column_definition.select_as) {
       const select_as = column_definition.select_as(column_params)
       players_query.select(
         `${table_name}.${column_definition.column_name} AS ${select_as}`
@@ -95,7 +100,10 @@ export default async function ({
   }
 
   for (const sort_clause of sort) {
-    const column = find_column({ column_id: sort_clause.id, columns })
+    const column = find_column({
+      column_id: sort_clause.id,
+      columns: all_table_columns
+    })
     const column_id = typeof column === 'string' ? column : column.column_id
     const column_params = typeof column === 'string' ? {} : column.params
     const column_definition = players_table_column_definitions[column_id]
