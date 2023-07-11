@@ -90,7 +90,7 @@ const scoring_format_player_projection_points_table_alias = ({
 }
 
 const league_player_projection_values_join = ({ query, params = {} }) => {
-  const { year = constants.season.year, week = 0, league_id } = params
+  const { year = constants.season.year, week = 0, league_id = 1 } = params
   const table_alias = league_player_projection_values_table_alias({ params })
   query.leftJoin(
     `league_player_projection_values as ${table_alias}`,
@@ -104,8 +104,8 @@ const league_player_projection_values_join = ({ query, params = {} }) => {
 }
 
 const league_player_projection_values_table_alias = ({ params = {} }) => {
-  const { year = constants.season.year, week = 0, league_id } = params
-  return `league_player_projection_values_${year}_week_${week}_${league_id}`
+  const { year = constants.season.year, week = 0, league_id = 1 } = params
+  return `league_player_projection_values_${year}_week_${week}_league_${league_id}`
 }
 
 const player_projected_points_added = {
