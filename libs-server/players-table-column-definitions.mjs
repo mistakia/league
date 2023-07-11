@@ -97,7 +97,7 @@ const league_player_projection_values_join = ({ query, params = {} }) => {
     function () {
       this.on(`${table_alias}.pid`, '=', 'player.pid')
       this.andOn(`${table_alias}.year`, '=', year)
-      this.andOn(`${table_alias}.week`, '=', week)
+      this.andOn(db.raw(`${table_alias}.week = '${week}'`))
       this.andOn(`${table_alias}.lid`, '=', league_id)
     }
   )
