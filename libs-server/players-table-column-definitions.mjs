@@ -251,7 +251,7 @@ export default {
     select: ({ query }) => {
       query.select('player.fname', 'player.lname')
       query.select(
-        query.raw("CONCAT(player.fname, ' ', player.lname) as player_name")
+        db.raw("CONCAT(player.fname, ' ', player.lname) as player_name")
       )
     }
   },
