@@ -85,32 +85,33 @@ export default async function ({
       joined_table_index[table_name] = true
     }
 
+    const where_column = column_definition.where_column
+      ? column_definition.where_column({
+          case_insensitive: where_clause.operator === 'ILIKE'
+        })
+      : `${table_name}.${column_name}`
+
     if (where_clause.operator === 'IS NULL') {
-      players_query.whereNull(`${table_name}.${column_name}`)
+      players_query.whereNull(where_column)
     } else if (where_clause.operator === 'IS NOT NULL') {
-      players_query.whereNotNull(`${table_name}.${column_name}`)
+      players_query.whereNotNull(where_column)
     } else if (where_clause.operator === 'IN') {
-      players_query.whereIn(`${table_name}.${column_name}`, where_clause.value)
+      players_query.whereIn(where_column, where_clause.value)
     } else if (where_clause.operator === 'NOT IN') {
-      players_query.whereNotIn(
-        `${table_name}.${column_name}`,
-        where_clause.value
+      players_query.whereNotIn(where_column, where_clause.value)
+    } else if (where_clause.operator === 'ILIKE') {
+      players_query.where(
+        where_column,
+        'LIKE',
+        db.raw(`UPPER(%${where_clause.value}%)`)
       )
     } else if (where_clause.operator === 'LIKE') {
-      players_query.where(
-        `${table_name}.${column_name}`,
-        'LIKE',
-        `%${where_clause.value}%`
-      )
+      players_query.where(where_column, 'LIKE', `%${where_clause.value}%`)
     } else if (where_clause.operator === 'NOT LIKE') {
-      players_query.where(
-        `${table_name}.${column_name}`,
-        'NOT LIKE',
-        `%${where_clause.value}%`
-      )
+      players_query.where(where_column, 'NOT LIKE', `%${where_clause.value}%`)
     } else if (where_clause.value) {
       players_query.where(
-        `${table_name}.${column_name}`,
+        where_column,
         where_clause.operator,
         where_clause.value
       )
