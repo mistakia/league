@@ -249,9 +249,9 @@ export default {
     table_name: 'player',
     where_column: ({ case_insensitive = false }) => {
       if (case_insensitive) {
-        db.raw(`UPPER(CONCAT(player.fname, ' ', player.lname))`)
+        return db.raw(`UPPER(CONCAT(player.fname, ' ', player.lname))`)
       } else {
-        db.raw(`CONCAT(player.fname, ' ', player.lname)`)
+        return db.raw(`CONCAT(player.fname, ' ', player.lname)`)
       }
     },
     select: ({ query }) => {
