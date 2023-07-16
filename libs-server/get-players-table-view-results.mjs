@@ -103,7 +103,7 @@ export default async function ({
       players_query.where(
         where_column,
         'LIKE',
-        db.raw(`UPPER(%${where_clause.value}%)`)
+        `%${where_clause.value.toUpperCase()}%`)
       )
     } else if (where_clause.operator === 'LIKE') {
       players_query.where(where_column, 'LIKE', `%${where_clause.value}%`)
