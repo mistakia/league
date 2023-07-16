@@ -247,8 +247,12 @@ const player_projected_rec_tds = {
 export default {
   player_name: {
     table_name: 'player',
+    column_name: 'player_name',
     select: ({ query }) => {
       query.select('player.fname', 'player.lname')
+      query.select(
+        query.raw("CONCAT(player.fname, ' ', player.lname) as player_name")
+      )
     }
   },
   player_league_salary: {

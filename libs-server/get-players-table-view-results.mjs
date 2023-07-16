@@ -60,39 +60,57 @@ export default async function ({
   }
 
   for (const where_clause of where) {
+    const { column_id, params: column_params } = where_clause
+    const column_definition = players_table_column_definitions[column_id]
+
+    if (!column_definition) {
+      continue
+    }
+
+    const table_name = column_definition.table_alias
+      ? column_definition.table_alias(column_params)
+      : column_definition.table_name
+
+    const column_name = column_definition.select_as
+      ? column_definition.select_as(column_params)
+      : column_definition.column_name
+
+    if (!joined_table_index[table_name]) {
+      if (column_definition.join) {
+        column_definition.join({ query: players_query, params: column_params })
+      } else if (table_name !== 'player') {
+        players_query.leftJoin(table_name, `${table_name}.pid`, 'player.pid')
+      }
+
+      joined_table_index[table_name] = true
+    }
+
     if (where_clause.operator === 'IS NULL') {
-      players_query.whereNull(
-        `${where_clause.table_name}.${where_clause.column_name}`
-      )
+      players_query.whereNull(`${table_name}.${column_name}`)
     } else if (where_clause.operator === 'IS NOT NULL') {
-      players_query.whereNotNull(
-        `${where_clause.table_name}.${where_clause.column_name}`
-      )
+      players_query.whereNotNull(`${table_name}.${column_name}`)
     } else if (where_clause.operator === 'IN') {
-      players_query.whereIn(
-        `${where_clause.table_name}.${where_clause.column_name}`,
-        where_clause.value
-      )
+      players_query.whereIn(`${table_name}.${column_name}`, where_clause.value)
     } else if (where_clause.operator === 'NOT IN') {
       players_query.whereNotIn(
-        `${where_clause.table_name}.${where_clause.column_name}`,
+        `${table_name}.${column_name}`,
         where_clause.value
       )
     } else if (where_clause.operator === 'LIKE') {
       players_query.where(
-        `${where_clause.table_name}.${where_clause.column_name}`,
+        `${table_name}.${column_name}`,
         'LIKE',
         `%${where_clause.value}%`
       )
     } else if (where_clause.operator === 'NOT LIKE') {
       players_query.where(
-        `${where_clause.table_name}.${where_clause.column_name}`,
+        `${table_name}.${column_name}`,
         'NOT LIKE',
         `%${where_clause.value}%`
       )
     } else if (where_clause.value) {
       players_query.where(
-        `${where_clause.table_name}.${where_clause.column_name}`,
+        `${table_name}.${column_name}`,
         where_clause.operator,
         where_clause.value
       )
