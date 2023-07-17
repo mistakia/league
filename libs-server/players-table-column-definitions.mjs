@@ -258,6 +258,10 @@ export default {
       query.select('player.fname', 'player.lname')
     }
   },
+  player_position: {
+    table_name: 'player',
+    column_name: 'pos',
+  },
   player_league_salary: {
     column_name: 'value',
     table_name: 'transactions',
