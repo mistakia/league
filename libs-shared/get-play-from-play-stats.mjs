@@ -53,6 +53,7 @@ export default function getPlayFromPlayStats(play) {
       case 11:
         playRow.fd = 1
         playRow.td = 1
+        playRow.rush_td = 1
         playRow.bc_gsis = playStat.gsisId
         playRow.rush_yds = playStat.yards
         playRow.yds_gained = playStat.yards + (playRow.yds_gained || 0)
@@ -68,6 +69,7 @@ export default function getPlayFromPlayStats(play) {
       case 13:
         playRow.fd = 1
         playRow.td = 1
+        playRow.rush_td = 1
         playRow.yds_gained = playStat.yards + (playRow.yds_gained || 0)
         playRow.td_tm = playStat.teamAbbr
         break
@@ -90,6 +92,8 @@ export default function getPlayFromPlayStats(play) {
       case 16:
         playRow.comp = 1
         playRow.fd = 1
+        playRow.td = 1
+        playRow.pass_td = 1
         playRow.psr_gsis = playStat.gsisId
         playRow.pass_yds = playStat.yards
         playRow.yds_gained = playStat.yards + (playRow.yds_gained || 0)
@@ -118,8 +122,9 @@ export default function getPlayFromPlayStats(play) {
       // Pass Reception Yards, TD
       case 22:
         playRow.comp = 1
-        playRow.td = 1
         playRow.fd = 1
+        playRow.td = 1
+        playRow.pass_td = 1
         playRow.trg_gsis = playStat.gsisId
         playRow.recv_yds = playStat.yards
         playRow.td_tm = playStat.teamAbbr
@@ -133,8 +138,9 @@ export default function getPlayFromPlayStats(play) {
       // Lateral Pass Reception Yards, TD
       case 24:
         playRow.comp = 1
-        playRow.td = 1
         playRow.fd = 1
+        playRow.td = 1
+        playRow.pass_td = 1
         playRow.td_tm = playStat.teamAbbr
         break
 
@@ -192,6 +198,7 @@ export default function getPlayFromPlayStats(play) {
 
       // Punt Return Yards, TD
       case 34:
+        playRow.td = 1
         break
 
       // Lateral Punt Return Yards
@@ -200,6 +207,7 @@ export default function getPlayFromPlayStats(play) {
 
       // Lateral Punt Return Yards, TD
       case 36:
+        playRow.td = 1
         break
 
       // Punt Out Of Bounds
@@ -240,6 +248,8 @@ export default function getPlayFromPlayStats(play) {
 
       // Kickoff Return Yards, TD
       case 46:
+        playRow.td = 1
+        playRow.ret_td = 1
         break
 
       // Lateral Kickoff Return Yards
@@ -248,6 +258,8 @@ export default function getPlayFromPlayStats(play) {
 
       // Kickoff Return Yards, TD
       case 48:
+        playRow.td = 1
+        playRow.ret_td = 1
         break
 
       // Kickoff Out Of Bounds
@@ -280,6 +292,7 @@ export default function getPlayFromPlayStats(play) {
 
       // Own Recovery Yards, TD
       case 56:
+        playRow.td = 1
         break
 
       // Lateral Own Recovery Yards
@@ -288,6 +301,7 @@ export default function getPlayFromPlayStats(play) {
 
       // Lateral Own Recovery Yards, TD
       case 58:
+        playRow.td = 1
         break
 
       // Opponent Recovery Yards
@@ -296,6 +310,7 @@ export default function getPlayFromPlayStats(play) {
 
       // Opponent Recovery Yards, TD
       case 60:
+        playRow.td = 1
         break
 
       // Lateral Opponent Recovery Yards
@@ -304,6 +319,7 @@ export default function getPlayFromPlayStats(play) {
 
       // Lateral Opponent Recovery Yards, TD
       case 62:
+        playRow.td = 1
         break
 
       // Miscellaneous Yards
@@ -312,6 +328,7 @@ export default function getPlayFromPlayStats(play) {
 
       // Miscellaneous Yards, TD
       case 64:
+        playRow.td = 1
         break
 
       // Timeout
@@ -454,6 +471,7 @@ export default function getPlayFromPlayStats(play) {
 
       // Own Kickoff Recovery, TD
       case 108:
+        playRow.td = 1
         break
 
       // Quarterback Hit
