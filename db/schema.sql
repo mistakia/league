@@ -1305,7 +1305,7 @@ CREATE TABLE `nfl_plays` (
 
   `play_type` varchar(4) DEFAULT NULL,                   -- RUSH, PASS, FGXP, PUNT, KOFF, ONSD, NOPL, CONV
   `play_type_nfl` varchar(36) DEFAULT NULL,
-  `play_type_ngs` text DEFAULT NULL,
+  `play_type_ngs` varchar(36) DEFAULT NULL,
 
   `next_play_type` varchar(36) DEFAULT NULL,
 
@@ -1672,7 +1672,7 @@ CREATE TABLE `nfl_plays_current_week` (
 
   `play_type` varchar(4) DEFAULT NULL,                   -- RUSH, PASS, FGXP, PUNT, KOFF, ONSD, NOPL, CONV
   `play_type_nfl` varchar(36) DEFAULT NULL,
-  `play_type_ngs` text DEFAULT NULL,
+  `play_type_ngs` varchar(36) DEFAULT NULL,
 
   `next_play_type` varchar(36) DEFAULT NULL,
 
