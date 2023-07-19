@@ -44,9 +44,9 @@ const calculateStatsFromPlays = (plays) => {
       case 'RUSH': {
         playerToTeam[play.bc_pid] = play.off
         addTeamStat(play.off, 'ra', 1)
-        addTeamStat(play.off, 'ry', play.yds)
+        addTeamStat(play.off, 'ry', play.yds_gained)
         addStat(play.bc_pid, 'ra', 1)
-        addStat(play.bc_pid, 'ry', play.yds)
+        addStat(play.bc_pid, 'ry', play.rush_yds)
         if (play.yaco) addStat(play.bc_pid, 'ryaco', play.yaco)
         if (play.fd) {
           addStat(play.bc_pid, 'fd', 1)
@@ -57,7 +57,7 @@ const calculateStatsFromPlays = (plays) => {
           addStat(play.bc_pid, 'rasucc', 1)
         }
         if (play.mbt) addStat(play.bc_pid, 'mbt', play.mbt)
-        if (play.yds > 0) addStat(play.bc_pid, 'posra', 1)
+        if (play.rush_yds > 0) addStat(play.bc_pid, 'posra', 1)
         if (play.fd) addStat(play.bc_pid, 'rfd', 1)
         if (play.td) addStat(play.bc_pid, 'tdr', 1)
         break
@@ -104,14 +104,14 @@ const calculateStatsFromPlays = (plays) => {
           // TODO deprecate - temp fix for missing trg
           // receiver
           addStat(play.trg_pid, 'rec', 1)
-          addStat(play.trg_pid, 'recy', play.yds)
+          addStat(play.trg_pid, 'recy', play.recv_yds)
           addStat(play.trg_pid, 'ryac', play.yac)
           addStat(play.trg_pid, 'rcay', play.dot)
           if (play.mbt) addStat(play.trg_pid, 'mbt', play.mbt)
 
           // passer
           addStat(play.psr_pid, 'pa', 1)
-          addStat(play.psr_pid, 'py', play.yds)
+          addStat(play.psr_pid, 'py', play.pass_yds)
           addStat(play.psr_pid, 'pc', 1)
           addStat(play.psr_pid, 'pcay', play.dot)
           if (play.yac) addStat(play.psr_pid, 'pyac', play.yac)
@@ -128,7 +128,7 @@ const calculateStatsFromPlays = (plays) => {
           }
         } else if (play.sk) {
           addStat(play.psr_pid, 'sk', 1)
-          addStat(play.psr_pid, 'sky', Math.abs(play.yds_gained)) // TODO - consolidate to play.yds
+          addStat(play.psr_pid, 'sky', Math.abs(play.yds_gained))
         } else {
           addStat(play.psr_pid, 'pa', 1)
         }
