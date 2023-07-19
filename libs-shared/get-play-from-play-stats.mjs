@@ -113,7 +113,6 @@ export default function getPlayFromPlayStats(play) {
         playRow.comp = 1
         playRow.trg_gsis = playStat.gsisId
         playRow.recv_yds = playStat.yards
-        playRow.yds_gained = playStat.yards + (playRow.yds_gained || 0)
         break
 
       // Pass Reception Yards, TD
@@ -123,14 +122,12 @@ export default function getPlayFromPlayStats(play) {
         playRow.fd = 1
         playRow.trg_gsis = playStat.gsisId
         playRow.recv_yds = playStat.yards
-        playRow.yds_gained = playStat.yards + (playRow.yds_gained || 0)
         playRow.td_tm = playStat.teamAbbr
         break
 
       // Lateral Pass Reception Yards
       case 23:
         playRow.comp = 1
-        playRow.yds_gained = playStat.yards + (playRow.yds_gained || 0)
         break
 
       // Lateral Pass Reception Yards, TD
@@ -138,7 +135,6 @@ export default function getPlayFromPlayStats(play) {
         playRow.comp = 1
         playRow.td = 1
         playRow.fd = 1
-        playRow.yds_gained = playStat.yards + (playRow.yds_gained || 0)
         playRow.td_tm = playStat.teamAbbr
         break
 
