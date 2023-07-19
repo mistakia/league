@@ -75,8 +75,8 @@ const formatPlay = (play) => ({
   pen_team: play.penalty_team ? fixTeam(play.penalty_team) : null,
   pen_yds: parseInt(play.penalty_yards, 10) || null,
 
-  pass_td: Boolean(play.pass_touchdown),
-  rush_td: Boolean(play.rush_touchdown),
+  pass_td: play.pass_touchdown ? play.pass_touchdown === '1' : null,
+  rush_td: play.rush_touchdown ? play.rush_touchdown === '1' : null,
 
   pass_yds: parseInt(play.passing_yards, 10) || null,
   recv_yds: parseInt(play.receiving_yards, 10) || null,
