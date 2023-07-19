@@ -39,7 +39,7 @@ const generate_player_snaps_for_week = async ({
       'nfl_snaps.nflId as gsis_it_id',
       'nfl_plays.off',
       'nfl_plays.def',
-      'nfl_plays.type'
+      'nfl_plays.play_type'
     )
     .leftJoin('nfl_plays', function () {
       this.on('nfl_plays.esbid', '=', 'nfl_snaps.esbid').andOn(
@@ -87,10 +87,10 @@ const generate_player_snaps_for_week = async ({
         .length,
       snaps_st: player_snap_rows.filter(
         (i) =>
-          i.type === 'PUNT' ||
-          i.type === 'FGXP' ||
-          i.type === 'KOFF' ||
-          i.type === 'ONSD'
+          i.play_type === 'PUNT' ||
+          i.play_type === 'FGXP' ||
+          i.play_type === 'KOFF' ||
+          i.play_type === 'ONSD'
       ).length
     })
   }

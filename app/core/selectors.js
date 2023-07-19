@@ -1567,9 +1567,9 @@ export function getPlaysForPlayer(state, { playerMap, week }) {
 
       return (
         (Boolean(p.pos_team) && fixTeam(p.pos_team) !== playerMap.get('pid')) ||
-        p.type_nfl === 'PUNT' ||
-        p.type_nfl === 'KICK_OFF' ||
-        p.type_nfl === 'XP_KICK'
+        p.play_type_nfl === 'PUNT' ||
+        p.play_type_nfl === 'KICK_OFF' ||
+        p.play_type_nfl === 'XP_KICK'
       )
     })
   }
@@ -1580,9 +1580,9 @@ export function getPlaysForPlayer(state, { playerMap, week }) {
     if (
       !pos ||
       (fixTeam(pos) !== playerTeam &&
-        play.type_nfl !== 'PUNT' &&
-        play.type_nfl !== 'KICK_OFF' &&
-        play.type_nfl !== 'XP_KICK')
+        play.play_type_nfl !== 'PUNT' &&
+        play.play_type_nfl !== 'KICK_OFF' &&
+        play.play_type_nfl !== 'XP_KICK')
     )
       continue
 

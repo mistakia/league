@@ -40,7 +40,7 @@ const calculateStatsFromPlays = (plays) => {
       playerToTeam[play.player_fuml_pid] = play.off
     }
 
-    switch (play.type) {
+    switch (play.play_type) {
       case 'RUSH': {
         playerToTeam[play.bc_pid] = play.off
         addTeamStat(play.off, 'ra', 1)

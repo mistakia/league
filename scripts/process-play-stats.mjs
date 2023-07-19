@@ -23,8 +23,8 @@ const current_week = Math.max(
 )
 
 // TODO - add KNEE, SPKE
-const getPlayType = (type_ngs) => {
-  switch (type_ngs) {
+const getPlayType = (play_type_ngs) => {
+  switch (play_type_ngs) {
     case 'play_type_field_goal':
       return 'FGXP'
 
@@ -88,8 +88,8 @@ const run = async ({
     .select(
       'nfl_play_stats.*',
       'nfl_plays.drive_play_count',
-      'nfl_plays.type_ngs',
-      'nfl_plays.type_nfl',
+      'nfl_plays.play_type_ngs',
+      'nfl_plays.play_type_nfl',
       'nfl_plays.pos_team',
       'nfl_games.h',
       'nfl_games.v',
@@ -197,9 +197,9 @@ const run = async ({
 
       return (
         (Boolean(p.pos_team) && fixTeam(p.pos_team) !== team) ||
-        p.type_nfl === 'PUNT' ||
-        p.type_nfl === 'KICK_OFF' ||
-        p.type_nfl === 'XP_KICK'
+        p.play_type_nfl === 'PUNT' ||
+        p.play_type_nfl === 'KICK_OFF' ||
+        p.play_type_nfl === 'XP_KICK'
       )
     })
     if (!opponentPlays.length) continue
@@ -213,7 +213,7 @@ const run = async ({
       formattedPlays.push({
         pos_team: p.pos_team,
         drive_play_count: p.drive_play_count,
-        type_nfl: p.type_nfl,
+        play_type_nfl: p.play_type_nfl,
         playStats
       })
     }
@@ -249,7 +249,7 @@ const run = async ({
       'nfl_games.v',
       'nfl_plays.esbid',
       'nfl_plays.playId',
-      'nfl_plays.type_ngs',
+      'nfl_plays.play_type_ngs',
       'nfl_plays.pos_team'
     )
     .join('nfl_games', 'nfl_plays.esbid', '=', 'nfl_games.esbid')
@@ -259,14 +259,14 @@ const run = async ({
     const off = play.pos_team
     if (!off) continue
     const def = off === play.h ? play.v : play.h
-    const type = getPlayType(play.type_ngs)
+    const play_type = getPlayType(play.play_type_ngs)
 
     const { esbid, playId } = play
     await db('nfl_plays')
       .update({
         off,
         def,
-        type
+        play_type
       })
       .where({
         esbid,

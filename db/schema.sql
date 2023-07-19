@@ -1303,9 +1303,9 @@ CREATE TABLE `nfl_plays` (
   `deleted` tinyint(1) DEFAULT NULL,
   `review` text DEFAULT NULL,
 
-  `type` varchar(4) DEFAULT NULL,                   -- RUSH, PASS, FGXP, PUNT, KOFF, ONSD, NOPL, CONV
-  `type_nfl` varchar(36) DEFAULT NULL,
-  `type_ngs` text DEFAULT NULL,
+  `play_type` varchar(4) DEFAULT NULL,                   -- RUSH, PASS, FGXP, PUNT, KOFF, ONSD, NOPL, CONV
+  `play_type_nfl` varchar(36) DEFAULT NULL,
+  `play_type_ngs` text DEFAULT NULL,
 
   `next_play_type` varchar(36) DEFAULT NULL,
 
@@ -1341,7 +1341,7 @@ CREATE TABLE `nfl_plays` (
   `assist_tk` tinyint(1) DEFAULT NULL,          -- Binary indicator for if an assist tackle occurred.
 
   `special` tinyint(1) DEFAULT NULL,                 -- special teams
-  `special_type` varchar(10) DEFAULT NULL,            -- special teams play type
+  `special_play_type` varchar(10) DEFAULT NULL,            -- special teams play type
 
   `pen_team` varchar(3) DEFAULT NULL,           -- String abbreviation of the team with the penalty.
   `pen_yds` int(3) DEFAULT NULL,                -- Yards gained (or lost) by the posteam from the penalty.
@@ -1670,9 +1670,9 @@ CREATE TABLE `nfl_plays_current_week` (
   `deleted` tinyint(1) DEFAULT NULL,
   `review` text DEFAULT NULL,
 
-  `type` varchar(4) DEFAULT NULL,                   -- RUSH, PASS, FGXP, PUNT, KOFF, ONSD, NOPL, CONV
-  `type_nfl` varchar(36) DEFAULT NULL,
-  `type_ngs` text DEFAULT NULL,
+  `play_type` varchar(4) DEFAULT NULL,                   -- RUSH, PASS, FGXP, PUNT, KOFF, ONSD, NOPL, CONV
+  `play_type_nfl` varchar(36) DEFAULT NULL,
+  `play_type_ngs` text DEFAULT NULL,
 
   `next_play_type` varchar(36) DEFAULT NULL,
 
@@ -1708,7 +1708,7 @@ CREATE TABLE `nfl_plays_current_week` (
   `assist_tk` tinyint(1) DEFAULT NULL,          -- Binary indicator for if an assist tackle occurred.
 
   `special` tinyint(1) DEFAULT NULL,                 -- special teams
-  `special_type` varchar(10) DEFAULT NULL,            -- special teams play type
+  `special_play_type` varchar(10) DEFAULT NULL,            -- special teams play type
 
   `pen_team` varchar(3) DEFAULT NULL,           -- String abbreviation of the team with the penalty.
   `pen_yds` int(3) DEFAULT NULL,                -- Yards gained (or lost) by the posteam from the penalty.
