@@ -35,11 +35,11 @@ const getPlayData = ({ play, year, week, seas_type }) => {
     review: play.playReviewStatus,
     score: play.scoringPlay,
     score_type: play.scoringPlayType,
-    special_type: play.stPlayType,
+    special_play_type: play.stPlayType,
     timestamp: play.timeOfDay,
     ytg: play.yardsToGo,
     qtr: play.quarter,
-    type_nfl: play.playType
+    play_type_nfl: play.playType
   }
 
   if (play.possessionTeam) {
@@ -126,7 +126,7 @@ const importPlaysForWeek = async ({
 
     const currentPlays = await db('nfl_plays').where({ esbid: game.esbid })
 
-    const haveEndPlay = currentPlays.find((p) => p.type_nfl === 'END_GAME')
+    const haveEndPlay = currentPlays.find((p) => p.play_type_nfl === 'END_GAME')
 
     if (!force_update && haveEndPlay) {
       log(`skipping esbid: ${game.esbid}, already have final play`)

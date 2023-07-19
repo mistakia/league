@@ -20,7 +20,7 @@ const getPlayData = (play) => {
     special: play.isSTPlay,
     score: play.isScoring,
     desc: play.playDescription,
-    type_ngs: play.playType,
+    play_type_ngs: play.playType,
     pos_team_id: play.possessionTeamId,
     qtr: play.quarter,
     year: play.season,

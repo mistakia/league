@@ -5,7 +5,9 @@ const calculateDstStatsFromPlays = (plays, team) => {
   const dstStats = constants.createStats()
   dstStats.dtno = plays.filter(
     (p) =>
-      p.drive_play_count === 3 && p.type_nfl === 'PUNT' && p.pos_team !== team
+      p.drive_play_count === 3 &&
+      p.play_type_nfl === 'PUNT' &&
+      p.pos_team !== team
   ).length
   const playStats = plays.map((p) => p.playStats).flat()
 

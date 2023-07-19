@@ -76,7 +76,7 @@ export const getChartedPlayByPlayQuery = (db) =>
       'nfl_plays.player_fuml_pid',
       'nfl_plays.fuml',
       'nfl_plays.off',
-      'nfl_plays.type',
+      'nfl_plays.play_type',
       'nfl_plays.bc_pid',
       'nfl_plays.pass_yds',
       'nfl_plays.rush_yds',
@@ -110,7 +110,7 @@ export const getChartedPlayByPlayQuery = (db) =>
       'nfl_plays.ydl_100'
     )
     .join('nfl_games', 'nfl_plays.esbid', 'nfl_games.esbid')
-    .whereNot('nfl_plays.type', 'NOPL')
+    .whereNot('nfl_plays.play_type', 'NOPL')
 
 const fields = [
   'nfl_plays_current_week.esbid',
@@ -130,7 +130,7 @@ const fields = [
   'nfl_plays_current_week.gtg',
   'nfl_plays_current_week.drive_play_count',
   'nfl_plays_current_week.timestamp',
-  'nfl_plays_current_week.type_nfl',
+  'nfl_plays_current_week.play_type_nfl',
   'nfl_plays_current_week.updated',
 
   'nfl_games.h',

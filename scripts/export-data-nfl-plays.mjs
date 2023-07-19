@@ -89,9 +89,9 @@ const nfl_play_fields = [
 
   'review',
 
-  'type',
-  'type_nfl',
-  'type_ngs',
+  'play_type',
+  'play_type_nfl',
+  'play_type_ngs',
 
   'next_play_type',
 
@@ -128,7 +128,7 @@ const nfl_play_fields = [
   'assist_tk',
 
   'special',
-  'special_type',
+  'special_play_type',
 
   'pen_team',
   'pen_yds',

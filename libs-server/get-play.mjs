@@ -14,7 +14,7 @@ export default async function ({
   qtr,
   game_clock_start,
   dwn,
-  type,
+  play_type,
   ydl_num,
   ydl_side
 }) {
@@ -56,8 +56,8 @@ export default async function ({
     query.where({ dwn: parseInt(dwn, 10) })
   }
 
-  if (type) {
-    query.where({ type })
+  if (play_type) {
+    query.where({ play_type })
   }
 
   if (ydl_num) {
