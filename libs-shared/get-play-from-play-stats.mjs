@@ -45,8 +45,8 @@ export default function getPlayFromPlayStats(play) {
       // Rushing Yards
       case 10:
         playRow.bc_gsis = playStat.gsisId
-        playRow.yds = playStat.yards
-        playRow.yds_gained = playStat.yards
+        playRow.rush_yds = playStat.yards
+        playRow.yds_gained = playStat.yards + (playRow.yds_gained || 0)
         break
 
       // Rushing Yards, TD
@@ -54,21 +54,21 @@ export default function getPlayFromPlayStats(play) {
         playRow.fd = 1
         playRow.td = 1
         playRow.bc_gsis = playStat.gsisId
-        playRow.yds = playStat.yards
-        playRow.yds_gained = playStat.yards
+        playRow.rush_yds = playStat.yards
+        playRow.yds_gained = playStat.yards + (playRow.yds_gained || 0)
         playRow.td_tm = playStat.teamAbbr
         break
 
       // Lateral Rushing Yards
       case 12:
-        playRow.yds_gained = playStat.yards
+        playRow.yds_gained = playStat.yards + (playRow.yds_gained || 0)
         break
 
       // Lateral Rushing Yards, TD
       case 13:
         playRow.fd = 1
         playRow.td = 1
-        playRow.yds_gained = playStat.yards
+        playRow.yds_gained = playStat.yards + (playRow.yds_gained || 0)
         playRow.td_tm = playStat.teamAbbr
         break
 
@@ -82,8 +82,8 @@ export default function getPlayFromPlayStats(play) {
       case 15:
         playRow.comp = 1
         playRow.psr_gsis = playStat.gsisId
-        playRow.yds = playStat.yards
-        playRow.yds_gained = playStat.yards
+        playRow.pass_yds = playStat.yards
+        playRow.yds_gained = playStat.yards + (playRow.yds_gained || 0)
         break
 
       // Passing Yards, TD
@@ -91,8 +91,8 @@ export default function getPlayFromPlayStats(play) {
         playRow.comp = 1
         playRow.fd = 1
         playRow.psr_gsis = playStat.gsisId
-        playRow.yds = playStat.yards
-        playRow.yds_gained = playStat.yards
+        playRow.pass_yds = playStat.yards
+        playRow.yds_gained = playStat.yards + (playRow.yds_gained || 0)
         break
 
       // Interception (by Passer)
@@ -105,15 +105,15 @@ export default function getPlayFromPlayStats(play) {
       case 20:
         playRow.sk = 1
         playRow.psr_gsis = playStat.gsisId
-        playRow.yds_gained = playStat.yards
+        playRow.yds_gained = playStat.yards + (playRow.yds_gained || 0)
         break
 
       // Pass Reception Yards
       case 21:
         playRow.comp = 1
         playRow.trg_gsis = playStat.gsisId
-        playRow.yds = playStat.yards
-        playRow.yds_gained = playStat.yards
+        playRow.recv_yds = playStat.yards
+        playRow.yds_gained = playStat.yards + (playRow.yds_gained || 0)
         break
 
       // Pass Reception Yards, TD
@@ -122,15 +122,15 @@ export default function getPlayFromPlayStats(play) {
         playRow.td = 1
         playRow.fd = 1
         playRow.trg_gsis = playStat.gsisId
-        playRow.yds = playStat.yards
-        playRow.yds_gained = playStat.yards
+        playRow.recv_yds = playStat.yards
+        playRow.yds_gained = playStat.yards + (playRow.yds_gained || 0)
         playRow.td_tm = playStat.teamAbbr
         break
 
       // Lateral Pass Reception Yards
       case 23:
         playRow.comp = 1
-        playRow.yds_gained = playStat.yards
+        playRow.yds_gained = playStat.yards + (playRow.yds_gained || 0)
         break
 
       // Lateral Pass Reception Yards, TD
@@ -138,7 +138,7 @@ export default function getPlayFromPlayStats(play) {
         playRow.comp = 1
         playRow.td = 1
         playRow.fd = 1
-        playRow.yds_gained = playStat.yards
+        playRow.yds_gained = playStat.yards + (playRow.yds_gained || 0)
         playRow.td_tm = playStat.teamAbbr
         break
 

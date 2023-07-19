@@ -260,7 +260,7 @@ export default {
   },
   player_position: {
     table_name: 'player',
-    column_name: 'pos',
+    column_name: 'pos'
   },
   player_league_salary: {
     column_name: 'value',

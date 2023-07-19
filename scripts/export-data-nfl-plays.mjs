@@ -106,7 +106,7 @@ const nfl_play_fields = [
   'intp_pid',
   'intp_gsis',
 
-  'yds',
+  'yds_gained',
 
   'fum',
   'fuml',
@@ -140,8 +140,8 @@ const nfl_play_fields = [
   'td_tm',
 
   'pass_yds',
-  // 'recv_yds',
-  // 'rush_yds',
+  'recv_yds',
+  'rush_yds',
 
   'dot',
   // 'tay',

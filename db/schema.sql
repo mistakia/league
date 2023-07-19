@@ -1320,8 +1320,7 @@ CREATE TABLE `nfl_plays` (
   `intp_pid` varchar(25) DEFAULT NULL,          -- intercepting player
   `intp_gsis` varchar(36) DEFAULT NULL,         -- intercepting player gsis
 
-  `yds` tinyint(3) DEFAULT NULL,                -- yardage
-  `yds_gained` tinyint(3) DEFAULT NULL,         -- yardage gained (or lost) by the possessing team, excluding yards gained via fumble recoveries and laterals
+  `yds_gained` tinyint(3) DEFAULT NULL,         -- yardage gained (or lost) by the possessing team
 
   `fum` tinyint(1) DEFAULT NULL,                -- fumble occured
   `fuml` tinyint(1) DEFAULT NULL,               -- fumble lost
@@ -1353,9 +1352,9 @@ CREATE TABLE `nfl_plays` (
   `rush_td` tinyint(1) DEFAULT NULL,            -- rushing touchdown
   `td_tm` varchar(5) DEFAULT NULL,              -- touchdown team abbreviation
 
-  `pass_yds` int(3) DEFAULT NULL,               -- Numeric yards by the passer_player_name, including yards gained in pass plays with laterals. This should equal official passing statistics.
-  `recv_yds` int(3) DEFAULT NULL,               -- Numeric yards by the receiver_player_name, excluding yards gained in pass plays with laterals. This should equal official receiving statistics but could miss yards gained in pass plays with laterals. Please see the description of `lateral_receiver_player_name` for further information.
-  `rush_yds` int(3) DEFAULT NULL,               -- Numeric yards by the rusher_player_name, excluding yards gained in rush plays with laterals. This should equal official rushing statistics but could miss yards gained in rush plays with laterals. Please see the description of `lateral_rusher_player_name` for further information.
+  `pass_yds` tinyint(3) DEFAULT NULL,               -- Numeric yards by the passer_player_name, including yards gained in pass plays with laterals. This should equal official passing statistics.
+  `recv_yds` tinyint(3) DEFAULT NULL,               -- Numeric yards by the receiver_player_name, excluding yards gained in pass plays with laterals. This should equal official receiving statistics but could miss yards gained in pass plays with laterals. Please see the description of `lateral_receiver_player_name` for further information.
+  `rush_yds` tinyint(3) DEFAULT NULL,               -- Numeric yards by the rusher_player_name, excluding yards gained in rush plays with laterals. This should equal official rushing statistics but could miss yards gained in rush plays with laterals. Please see the description of `lateral_rusher_player_name` for further information.
 
   `dot` int(3) DEFAULT NULL,                    -- depth of target
   `tay` tinyint(1) DEFAULT NULL,                -- true air yards, Distance ball travels in the air from point of throw to a receivers hands; back of endzone or sideline.
@@ -1688,8 +1687,7 @@ CREATE TABLE `nfl_plays_current_week` (
   `intp_pid` varchar(25) DEFAULT NULL,          -- intercepting player
   `intp_gsis` varchar(36) DEFAULT NULL,         -- intercepting player gsis
 
-  `yds` varchar(3) DEFAULT NULL,                -- yardage
-  `yds_gained` varchar(3) DEFAULT NULL,         -- yardage gained (or lost) by the possessing team, excluding yards gained via fumble recoveries and laterals
+  `yds_gained` tinyint(3) DEFAULT NULL,         -- yardage gained (or lost) by the possessing team
 
   `fum` tinyint(1) DEFAULT NULL,                -- fumble occured
   `fuml` tinyint(1) DEFAULT NULL,               -- fumble lost
@@ -1721,9 +1719,9 @@ CREATE TABLE `nfl_plays_current_week` (
   `rush_td` tinyint(1) DEFAULT NULL,            -- rushing touchdown
   `td_tm` varchar(5) DEFAULT NULL,              -- touchdown team abbreviation
 
-  `pass_yds` int(3) DEFAULT NULL,               -- Numeric yards by the passer_player_name, including yards gained in pass plays with laterals. This should equal official passing statistics.
-  `recv_yds` int(3) DEFAULT NULL,               -- Numeric yards by the receiver_player_name, excluding yards gained in pass plays with laterals. This should equal official receiving statistics but could miss yards gained in pass plays with laterals. Please see the description of `lateral_receiver_player_name` for further information.
-  `rush_yds` int(3) DEFAULT NULL,               -- Numeric yards by the rusher_player_name, excluding yards gained in rush plays with laterals. This should equal official rushing statistics but could miss yards gained in rush plays with laterals. Please see the description of `lateral_rusher_player_name` for further information.
+  `pass_yds` tinyint(3) DEFAULT NULL,               -- Numeric yards by the passer_player_name, including yards gained in pass plays with laterals. This should equal official passing statistics.
+  `recv_yds` tinyint(3) DEFAULT NULL,               -- Numeric yards by the receiver_player_name, excluding yards gained in pass plays with laterals. This should equal official receiving statistics but could miss yards gained in pass plays with laterals. Please see the description of `lateral_receiver_player_name` for further information.
+  `rush_yds` tinyint(3) DEFAULT NULL,               -- Numeric yards by the rusher_player_name, excluding yards gained in rush plays with laterals. This should equal official rushing statistics but could miss yards gained in rush plays with laterals. Please see the description of `lateral_rusher_player_name` for further information.
 
   `dot` int(3) DEFAULT NULL,                    -- depth of target
   `tay` tinyint(1) DEFAULT NULL,                -- true air yards, Distance ball travels in the air from point of throw to a receivers hands; back of endzone or sideline.
