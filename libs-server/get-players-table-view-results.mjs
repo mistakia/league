@@ -71,7 +71,7 @@ export default async function ({
   }
 
   if (nfl_plays_join_keys.length) {
-    players_query.joinRaw(`nfl_plays ON (${nfl_play_joins.join(' OR ')})`)
+    players_query.joinRaw(`join nfl_plays ON (${nfl_play_joins.join(' OR ')})`)
     players_query.where('nfl_plays.play_type', '!=', 'NOPL')
   }
 

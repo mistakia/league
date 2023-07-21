@@ -371,8 +371,8 @@ export default {
 
   player_passing_yards_from_plays: {
     table_name: 'nfl_plays',
-    column_name: 'pass_yds',
     nfl_plays_join_on: 'psr_pid',
+    select_as: () => 'pass_yds',
     select: ({ query, params = {} }) => {
       query.select(
         db.raw(
