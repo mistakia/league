@@ -254,7 +254,7 @@ export default {
         return db.raw(`CONCAT(player.fname, ' ', player.lname)`)
       }
     },
-    select: ({ query }) => {
+    select: ({ query, params }) => {
       query.select('player.fname', 'player.lname')
     }
   },
@@ -368,6 +368,20 @@ export default {
   player_week_projected_rec_tds: player_projected_rec_tds,
   player_season_projected_rec_tds: player_projected_rec_tds,
   player_rest_of_season_projected_rec_tds: player_projected_rec_tds,
+
+  player_passing_yards_from_plays: {
+    table_name: 'nfl_plays',
+    column_name: 'pass_yds',
+    nfl_plays_join_on: 'psr_pid',
+    select: ({ query, params = {} }) => {
+      query.select(
+        db.raw(
+          'SUM(CASE WHEN nfl_plays.psr_pid = player.pid THEN nfl_plays.pass_yds ELSE 0 END) AS pass_yds'
+        )
+      )
+    },
+    use_having: true
+  },
 
   week_opponent_abbreviation: {},
   week_opponent_points_allowed_over_average: {}

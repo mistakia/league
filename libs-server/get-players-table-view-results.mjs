@@ -19,6 +19,7 @@ export default async function ({
   limit = 500
 }) {
   const joined_table_index = {}
+  const nfl_plays_join_index = {}
   const players_query = db('player').select('player.pid')
 
   const all_table_columns = [...prefix_columns, ...columns]
@@ -51,12 +52,27 @@ export default async function ({
     if (!joined_table_index[table_name]) {
       if (column_definition.join) {
         column_definition.join({ query: players_query, params: column_params })
-      } else if (table_name !== 'player') {
+      } else if (table_name !== 'player' && table_name !== 'nfl_plays') {
         players_query.leftJoin(table_name, `${table_name}.pid`, 'player.pid')
       }
 
       joined_table_index[table_name] = true
     }
+
+    if (column_definition.nfl_plays_join_on) {
+      nfl_plays_join_index[column_definition.nfl_plays_join_on] = true
+    }
+  }
+
+  const nfl_plays_join_keys = Object.keys(nfl_plays_join_index)
+  const nfl_play_joins = []
+  for (const nfl_plays_join_key of nfl_plays_join_keys) {
+    nfl_play_joins.push('player.pid = nfl_plays.' + nfl_plays_join_key)
+  }
+
+  if (nfl_plays_join_keys.length) {
+    players_query.joinRaw(`nfl_plays ON (${nfl_play_joins.join(' OR ')})`)
+    players_query.where('nfl_plays.play_type', '!=', 'NOPL')
   }
 
   for (const where_clause of where) {
@@ -64,6 +80,10 @@ export default async function ({
     const column_definition = players_table_column_definitions[column_id]
 
     if (!column_definition) {
+      continue
+    }
+
+    if (column_definition.use_having) {
       continue
     }
 
@@ -78,7 +98,7 @@ export default async function ({
     if (!joined_table_index[table_name]) {
       if (column_definition.join) {
         column_definition.join({ query: players_query, params: column_params })
-      } else if (table_name !== 'player') {
+      } else if (table_name !== 'player' && table_name !== 'nfl_plays') {
         players_query.leftJoin(table_name, `${table_name}.pid`, 'player.pid')
       }
 
@@ -158,7 +178,11 @@ export default async function ({
     players_query.offset(offset)
   }
 
+  players_query.groupBy('player.pid', 'player.lname', 'player.fname')
+
   players_query.limit(limit)
+
+  console.log(players_query.toString())
 
   return players_query
 }
