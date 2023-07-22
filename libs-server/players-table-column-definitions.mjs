@@ -389,7 +389,7 @@ export default {
     select: ({ query, params = {} }) => {
       query.select(
         db.raw(
-          'SUM(CASE WHEN nfl_plays.psr_pid = player.pid THEN nfl_plays.pass_tds ELSE 0 END) AS pass_tds'
+          'SUM(CASE WHEN nfl_plays.psr_pid = player.pid AND nfl_plays.td = 1 THEN 1 ELSE 0 END) AS pass_tds'
         )
       )
     },
@@ -428,7 +428,7 @@ export default {
     select: ({ query, params = {} }) => {
       query.select(
         db.raw(
-          'CASE WHEN SUM(CASE WHEN np.psr_pid = p.pid AND np.comp = 1 THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN np.psr_pid = p.pid AND np.comp = 1 THEN 1 ELSE 0 END) / SUM(CASE WHEN np.psr_pid = p.pid AND (np.sk is null or np.sk = 0) THEN 1 ELSE 0 END), 2) ELSE 0 END AS pass_comp_pct'
+          'CASE WHEN SUM(CASE WHEN nfl_plays.psr_pid = player.pid AND nfl_plays.comp = 1 THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN nfl_plays.psr_pid = player.pid AND nfl_plays.comp = 1 THEN 1 ELSE 0 END) / SUM(CASE WHEN nfl_plays.psr_pid = player.pid AND (nfl_plays.sk is null or nfl_plays.sk = 0) THEN 1 ELSE 0 END), 2) ELSE 0 END AS pass_comp_pct'
         )
       )
     },
@@ -441,7 +441,7 @@ export default {
     select: ({ query, params = {} }) => {
       query.select(
         db.raw(
-          'CASE WHEN SUM(CASE WHEN np.psr_pid = p.pid AND np.td = 1 THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN np.psr_pid = p.pid AND np.td = 1 THEN 1 ELSE 0 END) / SUM(CASE WHEN np.psr_pid = p.pid AND (np.sk is null or np.sk = 0) THEN 1 ELSE 0 END), 2) ELSE 0 END AS pass_td_pct'
+          'CASE WHEN SUM(CASE WHEN nfl_plays.psr_pid = player.pid AND nfl_plays.td = 1 THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN nfl_plays.psr_pid = player.pid AND nfl_plays.td = 1 THEN 1 ELSE 0 END) / SUM(CASE WHEN nfl_plays.psr_pid = player.pid AND (nfl_plays.sk is null or nfl_plays.sk = 0) THEN 1 ELSE 0 END), 2) ELSE 0 END AS pass_td_pct'
         )
       )
     },
@@ -454,7 +454,7 @@ export default {
     select: ({ query, params = {} }) => {
       query.select(
         db.raw(
-          'CASE WHEN SUM(CASE WHEN np.psr_pid = p.pid AND np.int = 1 THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN np.psr_pid = p.pid AND np.int = 1 THEN 1 ELSE 0 END) / SUM(CASE WHEN np.psr_pid = p.pid AND (np.sk is null or np.sk = 0) THEN 1 ELSE 0 END), 2) ELSE 0 END AS pass_int_pct'
+          'CASE WHEN SUM(CASE WHEN nfl_plays.psr_pid = player.pid AND nfl_plays.int = 1 THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN nfl_plays.psr_pid = player.pid AND nfl_plays.int = 1 THEN 1 ELSE 0 END) / SUM(CASE WHEN nfl_plays.psr_pid = player.pid AND (nfl_plays.sk is null or nfl_plays.sk = 0) THEN 1 ELSE 0 END), 2) ELSE 0 END AS pass_int_pct'
         )
       )
     },
