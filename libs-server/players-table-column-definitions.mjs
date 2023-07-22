@@ -369,7 +369,7 @@ export default {
   player_season_projected_rec_tds: player_projected_rec_tds,
   player_rest_of_season_projected_rec_tds: player_projected_rec_tds,
 
-  player_passing_yards_from_plays: {
+  player_pass_yards_from_plays: {
     table_name: 'nfl_plays',
     nfl_plays_join_on: 'psr_pid',
     select_as: () => 'pass_yds',
@@ -377,6 +377,84 @@ export default {
       query.select(
         db.raw(
           'SUM(CASE WHEN nfl_plays.psr_pid = player.pid THEN nfl_plays.pass_yds ELSE 0 END) AS pass_yds'
+        )
+      )
+    },
+    use_having: true
+  },
+  player_pass_touchdowns_from_plays: {
+    table_name: 'nfl_plays',
+    nfl_plays_join_on: 'psr_pid',
+    select_as: () => 'pass_tds',
+    select: ({ query, params = {} }) => {
+      query.select(
+        db.raw(
+          'SUM(CASE WHEN nfl_plays.psr_pid = player.pid THEN nfl_plays.pass_tds ELSE 0 END) AS pass_tds'
+        )
+      )
+    },
+    use_having: true
+  },
+  player_pass_interceptions_from_plays: {
+    table_name: 'nfl_plays',
+    nfl_plays_join_on: 'psr_pid',
+    select_as: () => 'pass_ints',
+    select: ({ query, params = {} }) => {
+      query.select(
+        db.raw(
+          'SUM(CASE WHEN nfl_plays.psr_pid = player.pid AND nfl_plays.int = 1 THEN 1 ELSE 0 END) AS pass_ints'
+        )
+      )
+    },
+    use_having: true
+  },
+  player_dropped_passing_yards_from_plays: {
+    table_name: 'nfl_plays',
+    nfl_plays_join_on: 'psr_pid',
+    select_as: () => 'drop_pass_yds',
+    select: ({ query, params = {} }) => {
+      query.select(
+        db.raw(
+          'SUM(CASE WHEN nfl_plays.psr_pid = player.pid AND nfl_plays.drp = 1 THEN nfl_plays.dot ELSE 0 END) AS drop_pass_yds'
+        )
+      )
+    },
+    use_having: true
+  },
+  player_pass_completion_percentage_from_plays: {
+    table_name: 'nfl_plays',
+    nfl_plays_join_on: 'psr_pid',
+    select_as: () => 'pass_comp_pct',
+    select: ({ query, params = {} }) => {
+      query.select(
+        db.raw(
+          'CASE WHEN SUM(CASE WHEN np.psr_pid = p.pid AND np.comp = 1 THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN np.psr_pid = p.pid AND np.comp = 1 THEN 1 ELSE 0 END) / SUM(CASE WHEN np.psr_pid = p.pid AND (np.sk is null or np.sk = 0) THEN 1 ELSE 0 END), 2) ELSE 0 END AS pass_comp_pct'
+        )
+      )
+    },
+    use_having: true
+  },
+  player_pass_touchdown_percentage_from_plays: {
+    table_name: 'nfl_plays',
+    nfl_plays_join_on: 'psr_pid',
+    select_as: () => 'pass_td_pct',
+    select: ({ query, params = {} }) => {
+      query.select(
+        db.raw(
+          'CASE WHEN SUM(CASE WHEN np.psr_pid = p.pid AND np.td = 1 THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN np.psr_pid = p.pid AND np.td = 1 THEN 1 ELSE 0 END) / SUM(CASE WHEN np.psr_pid = p.pid AND (np.sk is null or np.sk = 0) THEN 1 ELSE 0 END), 2) ELSE 0 END AS pass_td_pct'
+        )
+      )
+    },
+    use_having: true
+  },
+  player_pass_interception_percentage_from_plays: {
+    table_name: 'nfl_plays',
+    nfl_plays_join_on: 'psr_pid',
+    select_as: () => 'pass_int_pct',
+    select: ({ query, params = {} }) => {
+      query.select(
+        db.raw(
+          'CASE WHEN SUM(CASE WHEN np.psr_pid = p.pid AND np.int = 1 THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN np.psr_pid = p.pid AND np.int = 1 THEN 1 ELSE 0 END) / SUM(CASE WHEN np.psr_pid = p.pid AND (np.sk is null or np.sk = 0) THEN 1 ELSE 0 END), 2) ELSE 0 END AS pass_int_pct'
         )
       )
     },
