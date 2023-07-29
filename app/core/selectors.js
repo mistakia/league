@@ -3617,13 +3617,13 @@ function PlayerFields({ week, state }) {
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
       percentile_field: 'qb_pressure_pct'
     },
-    'stats.qbhu_pct': {
+    'stats.qb_hurry_pct': {
       category: 'pressure',
       column_header: 'HRRY%',
       csv_header: 'QB Hurry Percentage',
-      player_value_path: 'stats.qbhu_pct',
+      player_value_path: 'stats.qb_hurry_pct',
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
-      percentile_field: 'qbhu_pct'
+      percentile_field: 'qb_hurry_pct'
     },
     'stats._nygpa': {
       category: 'pressure',

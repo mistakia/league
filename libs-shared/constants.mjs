@@ -305,10 +305,10 @@ export const fullStats = [
   'qb_hit_pct',
 
   // quarterback hurry
-  'qbhu',
+  'qb_hurry',
 
   // quarterback hurry percentage
-  'qbhu_pct',
+  'qb_hurry_pct',
 
   // net yards gained per attempt: (py - sky) / (pa + sk)
   '_nygpa',
@@ -471,7 +471,7 @@ export const qualifiers = {
   sk_pct: passingQualifier,
   qb_hit_pct: passingQualifier,
   qb_pressure_pct: passingQualifier,
-  qbhu_pct: passingQualifier,
+  qb_hurry_pct: passingQualifier,
   _nygpa: passingQualifier,
 
   recy_prec: receivingQualifier,
@@ -577,8 +577,8 @@ export const teamStats = [
   'qb_pressure_yds', // qb pressure yards
   'qb_hit', // qb hit
   'qb_hit_yds', // qb hit yards
-  'qbhu', // qb hurry
-  'qbhuy', // qb hurry yards
+  'qb_hurry', // qb hurry
+  'qb_hurry_yds', // qb hurry yards
   'scrm', // scrambles
   'scrmy', // scramble yards
   'drp' // drops

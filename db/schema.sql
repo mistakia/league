@@ -1375,7 +1375,7 @@ CREATE TABLE `nfl_plays` (
 
   `qb_pressure` tinyint(2) DEFAULT NULL,                -- QB pressure
   `qb_hit` tinyint(2) DEFAULT NULL,               -- QB hit
-  `qbhu` tinyint(2) DEFAULT NULL,               -- QB hurry
+  `qb_hurry` tinyint(2) DEFAULT NULL,               -- QB hurry
 
   `int_worthy` tinyint(1) DEFAULT NULL,               -- interception worthy
   `cball` tinyint(1) DEFAULT NULL,              -- catchable ball, A pass in which an eligible receiver has the opportunity to get his hands on the football with reasonable movement, timing, and opportunity.
@@ -1742,7 +1742,7 @@ CREATE TABLE `nfl_plays_current_week` (
 
   `qb_pressure` tinyint(2) DEFAULT NULL,                -- QB pressure
   `qb_hit` tinyint(2) DEFAULT NULL,               -- QB hit
-  `qbhu` tinyint(2) DEFAULT NULL,               -- QB hurry
+  `qb_hurry` tinyint(2) DEFAULT NULL,               -- QB hurry
 
   `int_worthy` tinyint(1) DEFAULT NULL,               -- interception worthy
   `cball` tinyint(1) DEFAULT NULL,              -- catchable ball, A pass in which an eligible receiver has the opportunity to get his hands on the football with reasonable movement, timing, and opportunity.
