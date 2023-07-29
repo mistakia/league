@@ -78,7 +78,7 @@ const calculateStatsFromPlays = (plays) => {
         if (play.qbhi) addStat(play.psr_pid, 'qbhi', 1)
         if (play.qbhu) addStat(play.psr_pid, 'qbhu', 1)
         if (play.high) addStat(play.psr_pid, 'high', 1)
-        if (play.intw) addStat(play.psr_pid, 'intw', 1)
+        if (play.int_worthy) addStat(play.psr_pid, 'int_worthy', 1)
         if (play.drp) {
           addStat(play.psr_pid, 'drpp', 1)
           addStat(play.psr_pid, 'drppy', play.dot)
@@ -151,7 +151,7 @@ const calculateStatsFromPlays = (plays) => {
     stats.tdp_pct = round(toPct(stats.tdp / stats.pa), 1) || 0
     stats.ints_pct = round(toPct(stats.ints / stats.pa), 1) || 0
 
-    stats.intw_pct = round(toPct(stats.intw / stats.pa), 1) || 0
+    stats.int_worthy_pct = round(toPct(stats.int_worthy / stats.pa), 1) || 0
     stats.pcay_pc = round(stats.pcay / stats.pc, 1) || 0
     stats._ypa = round(stats.py / stats.pa, 1) || 0
     stats.pyac_pc = round(stats.pyac / stats.pc, 1) || 0

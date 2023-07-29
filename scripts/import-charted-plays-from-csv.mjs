@@ -23,7 +23,7 @@ const formatPlay = (play) => ({
   drp: Boolean(parseInt(play.drp, 10)),
   qbp: Boolean(parseInt(play.qbp, 10)),
   qbhi: Boolean(parseInt(play.qbhi, 10)),
-  intw: Boolean(parseInt(play.intw, 10)),
+  int_worthy: Boolean(parseInt(play.int_worthy, 10)),
   succ: Boolean(parseInt(play.succ, 10)),
   mbt: parseInt(play.mbt, 10) || null,
   yaco: parseInt(play.yaco, 10) || null,
