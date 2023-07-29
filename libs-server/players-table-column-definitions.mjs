@@ -606,12 +606,12 @@ export default {
   },
   player_quarterback_hits_percentage_from_plays: {
     table_name: 'nfl_plays',
-    nfl_plays_join_on: 'qbp_pid',
+    nfl_plays_join_on: 'psr_pid',
     select_as: () => 'qb_hit_pct',
     select: ({ query, params = {} }) => {
       query.select(
         db.raw(
-          'CASE WHEN SUM(CASE WHEN nfl_plays.qbp_pid = player.pid THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN nfl_plays.qbp_pid = player.pid AND nfl_plays.qbhi = 1 THEN 1 ELSE 0 END) / SUM(CASE WHEN nfl_plays.qbp_pid = player.pid THEN 1 ELSE 0 END), 2) ELSE 0 END AS qb_hit_pct'
+          'CASE WHEN SUM(CASE WHEN nfl_plays.psr_pid = player.pid THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN nfl_plays.psr_pid = player.pid AND nfl_plays.qb_hit = 1 THEN 1 ELSE 0 END) / SUM(CASE WHEN nfl_plays.psr_pid = player.pid THEN 1 ELSE 0 END), 2) ELSE 0 END AS qb_hit_pct'
         )
       )
     },
@@ -619,12 +619,12 @@ export default {
   },
   player_quarterback_pressures_percentage_from_plays: {
     table_name: 'nfl_plays',
-    nfl_plays_join_on: 'qbp_pid',
+    nfl_plays_join_on: 'psr_pid',
     select_as: () => 'qb_press_pct',
     select: ({ query, params = {} }) => {
       query.select(
         db.raw(
-          'CASE WHEN SUM(CASE WHEN nfl_plays.qbp_pid = player.pid THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN nfl_plays.qbp_pid = player.pid AND nfl_plays.qbp = 1 THEN 1 ELSE 0 END) / SUM(CASE WHEN nfl_plays.qbp_pid = player.pid THEN 1 ELSE 0 END), 2) ELSE 0 END AS qb_press_pct'
+          'CASE WHEN SUM(CASE WHEN nfl_plays.psr_pid = player.pid THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN nfl_plays.psr_pid = player.pid AND nfl_plays.psr = 1 THEN 1 ELSE 0 END) / SUM(CASE WHEN nfl_plays.psr_pid = player.pid THEN 1 ELSE 0 END), 2) ELSE 0 END AS qb_press_pct'
         )
       )
     },
@@ -632,12 +632,12 @@ export default {
   },
   player_quarterback_hurries_percentage_from_plays: {
     table_name: 'nfl_plays',
-    nfl_plays_join_on: 'qbp_pid',
+    nfl_plays_join_on: 'psr_pid',
     select_as: () => 'qb_hurry_pct',
     select: ({ query, params = {} }) => {
       query.select(
         db.raw(
-          'CASE WHEN SUM(CASE WHEN nfl_plays.qbp_pid = player.pid THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN nfl_plays.qbp_pid = player.pid AND nfl_plays.qbhu = 1 THEN 1 ELSE 0 END) / SUM(CASE WHEN nfl_plays.qbp_pid = player.pid THEN 1 ELSE 0 END), 2) ELSE 0 END AS qb_hurry_pct'
+          'CASE WHEN SUM(CASE WHEN nfl_plays.psr_pid = player.pid THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN nfl_plays.psr_pid = player.pid AND nfl_plays.qbhu = 1 THEN 1 ELSE 0 END) / SUM(CASE WHEN nfl_plays.psr_pid = player.pid THEN 1 ELSE 0 END), 2) ELSE 0 END AS qb_hurry_pct'
         )
       )
     },

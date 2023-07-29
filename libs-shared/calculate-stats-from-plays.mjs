@@ -74,8 +74,8 @@ const calculateStatsFromPlays = (plays) => {
           addStat(play.psr_pid, 'pdot', play.dot)
           addTeamStat(play.off, 'rdot', play.dot)
         }
-        if (play.qbp) addStat(play.psr_pid, 'qbp', 1)
-        if (play.qbhi) addStat(play.psr_pid, 'qbhi', 1)
+        if (play.qb_pressure) addStat(play.psr_pid, 'qb_pressure', 1)
+        if (play.qb_hit) addStat(play.psr_pid, 'qb_hit', 1)
         if (play.qbhu) addStat(play.psr_pid, 'qbhu', 1)
         if (play.high) addStat(play.psr_pid, 'high', 1)
         if (play.int_worthy) addStat(play.psr_pid, 'int_worthy', 1)
@@ -163,8 +163,8 @@ const calculateStatsFromPlays = (plays) => {
     // stats._apacr
 
     stats.sk_pct = round(toPct(stats.sk / skpa), 1) || 0
-    stats.qbp_pct = round(toPct(stats.qbp / skpa), 1) || 0
-    stats.qbhi_pct = round(toPct(stats.qbhi / skpa), 1) || 0
+    stats.qb_pressure_pct = round(toPct(stats.qb_pressure / skpa), 1) || 0
+    stats.qb_hit_pct = round(toPct(stats.qb_hit / skpa), 1) || 0
     stats.qbhu_pct = round(toPct(stats.qbhu / skpa), 1) || 0
     stats._nygpa = round((stats.py - stats.sky) / skpa, 1) || 0
 

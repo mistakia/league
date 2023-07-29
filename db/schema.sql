@@ -1373,8 +1373,8 @@ CREATE TABLE `nfl_plays` (
   `sneak` tinyint(1) DEFAULT NULL,              -- QB sneak
   `scrm` tinyint(1) DEFAULT NULL,               -- QB scramble
 
-  `qbp` tinyint(2) DEFAULT NULL,                -- QB pressure
-  `qbhi` tinyint(2) DEFAULT NULL,               -- QB hit
+  `qb_pressure` tinyint(2) DEFAULT NULL,                -- QB pressure
+  `qb_hit` tinyint(2) DEFAULT NULL,               -- QB hit
   `qbhu` tinyint(2) DEFAULT NULL,               -- QB hurry
 
   `int_worthy` tinyint(1) DEFAULT NULL,               -- interception worthy
@@ -1740,8 +1740,8 @@ CREATE TABLE `nfl_plays_current_week` (
   `sneak` tinyint(1) DEFAULT NULL,              -- QB sneak
   `scrm` tinyint(1) DEFAULT NULL,               -- QB scramble
 
-  `qbp` tinyint(2) DEFAULT NULL,                -- QB pressure
-  `qbhi` tinyint(2) DEFAULT NULL,               -- QB hit
+  `qb_pressure` tinyint(2) DEFAULT NULL,                -- QB pressure
+  `qb_hit` tinyint(2) DEFAULT NULL,               -- QB hit
   `qbhu` tinyint(2) DEFAULT NULL,               -- QB hurry
 
   `int_worthy` tinyint(1) DEFAULT NULL,               -- interception worthy

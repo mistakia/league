@@ -90,8 +90,8 @@ const views = {
       'stats.sk',
       'stats.sky',
       'stats.sk_pct',
-      'stats.qbhi_pct',
-      'stats.qbp_pct',
+      'stats.qb_hit_pct',
+      'stats.qb_pressure_pct',
       'stats.qbhu_pct',
       'stats._nygpa'
     ]

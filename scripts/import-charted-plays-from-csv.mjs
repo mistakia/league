@@ -21,8 +21,8 @@ const formatGame = (game) => ({
 
 const formatPlay = (play) => ({
   drp: Boolean(parseInt(play.drp, 10)),
-  qbp: Boolean(parseInt(play.qbp, 10)),
-  qbhi: Boolean(parseInt(play.qbhi, 10)),
+  qb_pressure: Boolean(parseInt(play.qb_pressure, 10)),
+  qb_hit: Boolean(parseInt(play.qb_hit, 10)),
   int_worthy: Boolean(parseInt(play.int_worthy, 10)),
   succ: Boolean(parseInt(play.succ, 10)),
   mbt: parseInt(play.mbt, 10) || null,
