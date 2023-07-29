@@ -3508,14 +3508,14 @@ function PlayerFields({ week, state }) {
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
       percentile_field: 'ints_pct'
     },
-    'stats.intw_pct': {
+    'stats.int_worthy_pct': {
       category: 'efficiency',
       column_header: 'BAD%',
       csv_header: 'Passing Interception Worthy Percentage',
-      player_value_path: 'stats.intw_pct',
+      player_value_path: 'stats.int_worthy_pct',
       fixed: 1,
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
-      percentile_field: 'intw_pct'
+      percentile_field: 'int_worthy_pct'
     },
     'stats.pyac': {
       category: 'passing',

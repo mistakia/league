@@ -15,7 +15,7 @@ const passing = ({ stats }) => (
     <PercentileChart title='Comp %' stats={stats} type='pc_pct' />
     <PercentileChart title='TD %' stats={stats} type='tdp_pct' />
     <PercentileChart title='Int %' stats={stats} type='ints_pct' />
-    <PercentileChart title='Int Worthy %' stats={stats} type='intw_pct' />
+    <PercentileChart title='Int Worthy %' stats={stats} type='int_worthy_pct' />
     <PercentileChart title='YPA' stats={stats} type='_ypa' />
     <PercentileChart title='aDOT' stats={stats} type='pdot_pa' />
   </div>

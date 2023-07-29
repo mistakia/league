@@ -467,7 +467,7 @@ export default {
     select: ({ query, params = {} }) => {
       query.select(
         db.raw(
-          'CASE WHEN SUM(CASE WHEN nfl_plays.psr_pid = player.pid AND nfl_plays.intw = 1 THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN nfl_plays.psr_pid = player.pid AND nfl_plays.int_worthy = 1 THEN 1 ELSE 0 END) / SUM(CASE WHEN nfl_plays.psr_pid = player.pid AND (nfl_plays.sk is null or nfl_plays.sk = 0) THEN 1 ELSE 0 END), 2) ELSE 0 END AS pass_int_worthy_pct'
+          'CASE WHEN SUM(CASE WHEN nfl_plays.psr_pid = player.pid AND nfl_plays.int_worthy = 1 THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN nfl_plays.psr_pid = player.pid AND nfl_plays.int_worthy = 1 THEN 1 ELSE 0 END) / SUM(CASE WHEN nfl_plays.psr_pid = player.pid AND (nfl_plays.sk is null or nfl_plays.sk = 0) THEN 1 ELSE 0 END), 2) ELSE 0 END AS pass_int_worthy_pct'
         )
       )
     }

@@ -80,7 +80,7 @@ const views = {
       'stats.pc_pct',
       'stats.tdp_pct',
       'stats.ints_pct',
-      'stats.intw_pct',
+      'stats.int_worthy_pct',
       'stats.pyac_pc',
       'stats._ypa',
       'stats.pdot_pa',

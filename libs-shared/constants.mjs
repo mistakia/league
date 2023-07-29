@@ -223,10 +223,10 @@ export const fullStats = [
   /** *********** accuracy *************/
 
   // interception worthy pass attempts
-  'intw',
+  'int_worthy',
 
   // interception worthy percentage
-  'intw_pct',
+  'int_worthy_pct',
 
   // dropped passing yards
   'drppy',
@@ -459,7 +459,7 @@ export const qualifiers = {
   tdp_pct: passingQualifier,
   ints_pct: passingQualifier,
   psucc: passingQualifier,
-  intw_pct: passingQualifier,
+  int_worthy_pct: passingQualifier,
   pcay_pc: passingQualifier,
   pyac_pc: passingQualifier,
   _ypa: passingQualifier,

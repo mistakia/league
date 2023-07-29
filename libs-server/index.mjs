@@ -97,7 +97,7 @@ export const getChartedPlayByPlayQuery = (db) =>
       'nfl_plays.qbhi',
       'nfl_plays.qbhu',
       'nfl_plays.high',
-      'nfl_plays.intw',
+      'nfl_plays.int_worthy',
       'nfl_plays.drp',
       'nfl_plays.cnb',
       'nfl_plays.mbt',

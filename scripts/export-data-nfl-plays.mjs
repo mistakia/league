@@ -164,7 +164,7 @@ const nfl_play_fields = [
   'qbhi',
   'qbhu',
 
-  'intw',
+  'int_worthy',
   // 'cball',
   // 'qbta',
   // 'shov',
