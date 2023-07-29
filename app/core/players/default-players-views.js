@@ -92,7 +92,7 @@ const views = {
       'stats.sk_pct',
       'stats.qb_hit_pct',
       'stats.qb_pressure_pct',
-      'stats.qbhu_pct',
+      'stats.qb_hurry_pct',
       'stats._nygpa'
     ]
   },

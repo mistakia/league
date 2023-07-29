@@ -162,7 +162,7 @@ const nfl_play_fields = [
 
   'qb_pressure',
   'qb_hit',
-  'qbhu',
+  'qb_hurry',
 
   'int_worthy',
   // 'cball',
