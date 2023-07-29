@@ -293,16 +293,16 @@ export const fullStats = [
   'sk_pct',
 
   // quarterback pressures
-  'qbp',
+  'qb_pressure',
 
   // quarterback pressure percentage
-  'qbp_pct',
+  'qb_pressure_pct',
 
   // quarterback hit
-  'qbhi',
+  'qb_hit',
 
   // quarterback hit percentage
-  'qbhi_pct',
+  'qb_hit_pct',
 
   // quarterback hurry
   'qbhu',
@@ -469,8 +469,8 @@ export const qualifiers = {
   _apacr: passingQualifier,
   pdot_pa: passingQualifier,
   sk_pct: passingQualifier,
-  qbhi_pct: passingQualifier,
-  qbp_pct: passingQualifier,
+  qb_hit_pct: passingQualifier,
+  qb_pressure_pct: passingQualifier,
   qbhu_pct: passingQualifier,
   _nygpa: passingQualifier,
 
@@ -573,10 +573,10 @@ export const teamStats = [
   'papy', // play action pass yards
   'npr', // no pressure pass attempts
   'npry', // no pressure pass yards
-  'qbp', // qb pressure
-  'qbpy', // qb pressure yards
-  'qbhi', // qb hit
-  'qbhiy', // qb hit yards
+  'qb_pressure', // qb pressure
+  'qb_pressure_yds', // qb pressure yards
+  'qb_hit', // qb hit
+  'qb_hit_yds', // qb hit yards
   'qbhu', // qb hurry
   'qbhuy', // qb hurry yards
   'scrm', // scrambles

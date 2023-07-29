@@ -3601,21 +3601,21 @@ function PlayerFields({ week, state }) {
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
       percentile_field: 'sk_pct'
     },
-    'stats.qbhi_pct': {
+    'stats.qb_hit_pct': {
       category: 'pressure',
       column_header: 'HIT%',
       csv_header: 'QB Hit Percentage',
-      player_value_path: 'stats.qbhi_pct',
+      player_value_path: 'stats.qb_hit_pct',
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
-      percentile_field: 'qbhi_pct'
+      percentile_field: 'qb_hit_pct'
     },
-    'stats.qbp_pct': {
+    'stats.qb_pressure_pct': {
       category: 'pressure',
       column_header: 'PRSS%',
       csv_header: 'QB Pressure Percentage',
-      player_value_path: 'stats.qbp_pct',
+      player_value_path: 'stats.qb_pressure_pct',
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
-      percentile_field: 'qbp_pct'
+      percentile_field: 'qb_pressure_pct'
     },
     'stats.qbhu_pct': {
       category: 'pressure',

@@ -160,8 +160,8 @@ const nfl_play_fields = [
   'sneak',
   'scrm',
 
-  'qbp',
-  'qbhi',
+  'qb_pressure',
+  'qb_hit',
   'qbhu',
 
   'int_worthy',
