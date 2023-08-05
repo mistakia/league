@@ -37,6 +37,13 @@ export default function DraftPage({
   loadTeams
 }) {
   const { lid } = useParams()
+  const scroll_to_pick = () => {
+    const element = document.querySelector(
+      '.draft__side-main .draft__pick.active'
+    )
+    if (element)
+      element.scrollIntoView({ behavior: 'smooth', inline: 'center' })
+  }
 
   useEffect(() => {
     loadDraft()
@@ -46,12 +53,10 @@ export default function DraftPage({
   }, [loadDraft, loadAllPlayers, load_league, loadTeams, lid])
 
   useEffect(() => {
-    const element = document.querySelector(
-      '.draft__side-main .draft__pick.active'
-    )
-    if (element)
-      element.scrollIntoView({ behavior: 'smooth', inline: 'center' })
+    scroll_to_pick()
   }, [nextPick])
+
+  scroll_to_pick()
 
   const handleDraft = () => {
     showConfirmation({
@@ -72,8 +77,10 @@ export default function DraftPage({
 
   const picksSorted = picks.sort((a, b) => a.round - b.round || a.pick - b.pick)
   // previous pick might not be pick - 1 if it belonged to a commissioned team
-  const next_pick_index = picksSorted.findIndex((p) => p.pick === nextPick.pick)
-  const prev_pick = picksSorted.get(next_pick_index - 1)
+  const next_pick_index = nextPick
+    ? picksSorted.findIndex((p) => p.pick === nextPick.pick)
+    : null
+  const prev_pick = nextPick ? picksSorted.get(next_pick_index - 1) : null
   const isPreviousSelectionMade =
     Boolean(nextPick && nextPick.pick === 1) ||
     Boolean(prev_pick && prev_pick.pid)
