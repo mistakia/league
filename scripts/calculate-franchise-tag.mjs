@@ -29,7 +29,6 @@ const run = async ({ year = constants.season.year }) => {
         'transactions.timestamp',
         'transactions.year'
       )
-      .join('rosters', 'rosters_players.rid', '=', 'rosters.uid')
       .leftJoin('transactions', function () {
         this.on(
           'transactions.uid',
@@ -39,9 +38,9 @@ const run = async ({ year = constants.season.year }) => {
           )
         )
       })
-      .where('rosters.lid', lid)
-      .where('rosters.week', 0)
-      .where('rosters.year', year - 1)
+      .where('rosters_players.lid', lid)
+      .where('rosters_players.week', 0)
+      .where('rosters_players.year', year - 1)
 
     if (!rosters.length) {
       log(`Missing roster, skipping lid ${lid}`)

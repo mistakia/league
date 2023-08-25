@@ -597,7 +597,7 @@ export const slots = {
   DST: 10,
   BENCH: 11,
   PS: 12, // practice squad - signed
-  IR: 13,
+  IR: 13, // injured reserve
   COV: 14,
   PSP: 15, // practice squad - signed and protected
   PSD: 16, // practice squad - drafted

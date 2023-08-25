@@ -206,7 +206,11 @@ export default class Auction {
         slot: constants.slots.BENCH,
         pos: playerInfo.pos,
         pid,
-        extensions: 0
+        extensions: 0,
+        tid,
+        lid: this._lid,
+        year: constants.season.year,
+        week: 0
       })
     } catch (err) {
       this.logger(err)
@@ -355,7 +359,6 @@ export default class Auction {
 
     // make sure player is not rostered
     const rosterRows = await db('rosters_players')
-      .join('rosters', 'rosters_players.rid', 'rosters.uid')
       .where('lid', this._lid)
       .where('year', constants.season.year)
       .where('pid', pid)

@@ -102,7 +102,6 @@ describe('API /teams - reserve', function () {
       res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
 
       const rosterRows1 = await knex('rosters_players')
-        .join('rosters', 'rosters_players.rid', 'rosters.uid')
         .where({
           year: constants.season.year,
           week: constants.season.week,
@@ -114,7 +113,6 @@ describe('API /teams - reserve', function () {
       expect(rosterRow1.slot).to.equal(constants.slots.IR)
 
       const rosterRows2 = await knex('rosters_players')
-        .join('rosters', 'rosters_players.rid', 'rosters.uid')
         .where({
           year: constants.season.year,
           week: constants.season.week,

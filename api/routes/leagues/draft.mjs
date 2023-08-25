@@ -121,9 +121,12 @@ router.post('/?', async (req, res) => {
     }
 
     // make sure player is available/undrafted
-    const rosterPlayers = await db('rosters_players')
-      .join('rosters', 'rosters_players.rid', 'rosters.uid')
-      .where({ lid, year: constants.season.year, week: 0, pid })
+    const rosterPlayers = await db('rosters_players').where({
+      lid,
+      year: constants.season.year,
+      week: 0,
+      pid
+    })
     if (rosterPlayers.length) {
       return res.status(400).send({ error: 'player rostered' })
     }
@@ -145,7 +148,11 @@ router.post('/?', async (req, res) => {
       pid,
       pos: player_row.pos,
       slot: constants.slots.PSD,
-      extensions: 0
+      extensions: 0,
+      tid: teamId,
+      lid,
+      year: constants.season.year,
+      week: 0
     })
 
     const insertTransaction = db('transactions').insert({

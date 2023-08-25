@@ -31,7 +31,11 @@ export default async function (knex) {
       slot: constants.slots.BENCH,
       pid: player.pid,
       pos: player.pos1,
-      rid: roster.uid
+      rid: roster.uid,
+      tid: roster.tid,
+      lid: league.uid,
+      year: constants.season.year,
+      week: constants.season.week
     })
     const value = Math.floor(Math.random() * Math.min(r.availableCap, 60))
     await knex('transactions').insert([

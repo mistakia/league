@@ -154,7 +154,6 @@ router.put('/?', async (req, res) => {
     const data = []
     for (const { slot, pid } of players) {
       const updateid = await db('rosters_players')
-        .join('rosters', 'rosters_players.rid', 'rosters.uid')
         .update({ slot })
         .where({ week, year, tid, pid })
 

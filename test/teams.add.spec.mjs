@@ -78,14 +78,12 @@ describe('API /teams - add', function () {
       res.body[0].transaction.value.should.equal(0)
       res.body[0].transaction.year.should.equal(constants.season.year)
 
-      const rosters = await knex('rosters_players')
-        .join('rosters', 'rosters_players.rid', 'rosters.uid')
-        .where({
-          pid: player.pid,
-          tid: teamId,
-          week: constants.season.week,
-          year: constants.season.year
-        })
+      const rosters = await knex('rosters_players').where({
+        pid: player.pid,
+        tid: teamId,
+        week: constants.season.week,
+        year: constants.season.year
+      })
 
       expect(rosters.length).to.equal(1)
       expect(rosters[0].slot).to.equal(constants.slots.BENCH)
@@ -148,14 +146,12 @@ describe('API /teams - add', function () {
       res.body[0].transaction.value.should.equal(0)
       res.body[0].transaction.year.should.equal(constants.season.year)
 
-      const rosters = await knex('rosters_players')
-        .join('rosters', 'rosters_players.rid', 'rosters.uid')
-        .where({
-          pid: player.pid,
-          tid: teamId,
-          week: constants.season.week,
-          year: constants.season.year
-        })
+      const rosters = await knex('rosters_players').where({
+        pid: player.pid,
+        tid: teamId,
+        week: constants.season.week,
+        year: constants.season.year
+      })
 
       expect(rosters.length).to.equal(1)
       expect(rosters[0].slot).to.equal(constants.slots.PS)

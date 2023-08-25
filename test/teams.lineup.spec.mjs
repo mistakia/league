@@ -73,14 +73,12 @@ describe('API /teams - lineups', function () {
       res.body[0].year.should.equal(constants.season.year)
       res.body[0].tid.should.equal(teamId)
 
-      const rosterRows = await knex('rosters_players')
-        .join('rosters', 'rosters_players.rid', 'rosters.uid')
-        .where({
-          pid: player.pid,
-          tid: teamId,
-          week: constants.season.week,
-          year: constants.season.year
-        })
+      const rosterRows = await knex('rosters_players').where({
+        pid: player.pid,
+        tid: teamId,
+        week: constants.season.week,
+        year: constants.season.year
+      })
 
       expect(rosterRows[0].slot).to.equal(constants.slots.RB)
       expect(rosterRows[0].pid).to.equal(player.pid)

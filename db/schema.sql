@@ -809,10 +809,10 @@ DROP TABLE IF EXISTS `rosters`;
 
 CREATE TABLE `rosters` (
   `uid` int(11) NOT NULL AUTO_INCREMENT,
-  `tid` int(6) NOT NULL,
-  `lid` int(6) NOT NULL,
-  `week` tinyint(2) NOT NULL,
-  `year` smallint(4) NOT NULL,
+  `tid` int(6) unsigned NOT NULL,
+  `lid` int(6) unsigned NOT NULL,
+  `week` tinyint(2) unsigned NOT NULL,
+  `year` smallint(4) unsigned NOT NULL,
   `last_updated` int(11) DEFAULT NULL,
   PRIMARY KEY `uid` (`uid`),
   UNIQUE KEY `teamid` (`tid`,`week`,`year`),
@@ -834,7 +834,12 @@ CREATE TABLE `rosters_players` (
   `pos` varchar(3) NOT NULL,
   `tag` tinyint(1) unsigned NOT NULL DEFAULT '1',
   `extensions` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `tid` int(6) unsigned NOT NULL,
+  `lid` int(6) unsigned NOT NULL,
+  `week` tinyint(2) unsigned NOT NULL,
+  `year` smallint(4) unsigned NOT NULL,
   UNIQUE KEY `pid` (`rid`,`pid`),
+  UNIQUE KEY `player_team` (`pid`,`week`,`year`,`tid`),
   KEY `rid` (`rid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

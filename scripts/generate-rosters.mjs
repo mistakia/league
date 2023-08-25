@@ -79,7 +79,11 @@ const run = async () => {
         slot: p.slot,
         pid: p.pid,
         pos: p.pos,
-        extensions: p.extensions
+        extensions: p.extensions,
+        tid,
+        lid,
+        year: constants.season.year,
+        week: nextWeek
       }))
 
       const updates = overlapping_pids.filter((p) => {

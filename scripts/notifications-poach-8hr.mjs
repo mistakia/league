@@ -14,7 +14,6 @@ const run = async () => {
   const claims = await db('poaches')
     .select('rosters.tid', 'player.*', 'rosters.lid')
     .join('rosters_players', 'poaches.pid', 'rosters_players.pid')
-    .join('rosters', 'rosters_players.rid', 'rosters.uid')
     .join('player', 'poaches.pid', 'player.pid')
     .where('year', constants.season.year)
     .where('week', constants.season.week)

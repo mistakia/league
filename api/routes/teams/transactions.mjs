@@ -32,7 +32,6 @@ router.get('/reserve', async (req, res) => {
     const { week, year } = constants.season
 
     const reserve_roster_rows = await db('rosters_players')
-      .join('rosters', 'rosters.uid', 'rosters_players.rid')
       .where('rosters_players.slot', constants.slots.IR)
       .where({ tid, year, week })
 

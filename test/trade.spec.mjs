@@ -41,13 +41,21 @@ describe('API /trades', function () {
       await draft(knex)
 
       const proposingTeamPlayerRows = await knex('rosters_players')
-        .leftJoin('rosters', 'rosters_players.rid', 'rosters.uid')
-        .where('rosters.tid', 1)
+        .where({
+          lid: 1,
+          tid: 1,
+          year: constants.season.year,
+          week: constants.season.week
+        })
         .limit(1)
 
       const acceptingTeamPlayerRows = await knex('rosters_players')
-        .leftJoin('rosters', 'rosters_players.rid', 'rosters.uid')
-        .where('rosters.tid', 2)
+        .where({
+          lid: 1,
+          tid: 2,
+          year: constants.season.year,
+          week: constants.season.week
+        })
         .limit(1)
 
       const proposingTeamPlayers = proposingTeamPlayerRows.map((p) => p.pid)
@@ -109,12 +117,10 @@ describe('API /trades', function () {
       acceptRes.body.proposingTeamPlayers.should.be.eql(proposingTeamPlayers)
       acceptRes.body.acceptingTeamPlayers.should.be.eql(acceptingTeamPlayers)
 
-      const rows = await knex('rosters_players')
-        .leftJoin('rosters', 'rosters_players.rid', 'rosters.uid')
-        .whereIn(
-          'rosters_players.pid',
-          proposingTeamPlayers.concat(acceptingTeamPlayers)
-        )
+      const rows = await knex('rosters_players').whereIn(
+        'pid',
+        proposingTeamPlayers.concat(acceptingTeamPlayers)
+      )
 
       rows.length.should.equal(2)
       const proposingRow = rows.find((p) => p.tid === 1)
@@ -230,12 +236,10 @@ describe('API /trades', function () {
       acceptRes.body.proposingTeamPlayers.should.be.eql(proposingTeamPlayers)
       acceptRes.body.acceptingTeamPlayers.should.be.eql(acceptingTeamPlayers)
 
-      const rows = await knex('rosters_players')
-        .leftJoin('rosters', 'rosters_players.rid', 'rosters.uid')
-        .whereIn(
-          'rosters_players.pid',
-          proposingTeamPlayers.concat(acceptingTeamPlayers)
-        )
+      const rows = await knex('rosters_players').whereIn(
+        'pid',
+        proposingTeamPlayers.concat(acceptingTeamPlayers)
+      )
 
       rows.length.should.equal(2)
       const proposingRow = rows.find((p) => p.tid === 1)
@@ -279,7 +283,6 @@ describe('API /trades', function () {
       expect(poaches[0].reason).to.equal('Player traded')
 
       const rosterRows = await knex('rosters_players')
-        .join('rosters', 'rosters_players.rid', 'rosters.uid')
         .where({
           year: constants.season.year,
           week: constants.season.week,
