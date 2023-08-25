@@ -42,7 +42,6 @@ export default async function ({
 
   // verify player is on a practice squad
   const slots = await db('rosters_players')
-    .join('rosters', 'rosters_players.rid', 'rosters.uid')
     .where({
       lid: leagueId,
       week: constants.season.week,

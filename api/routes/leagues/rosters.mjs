@@ -84,7 +84,11 @@ router.post('/?', async (req, res) => {
       pid,
       pos: player_row.pos,
       slot: constants.slots.BENCH,
-      extensions: 0
+      extensions: 0,
+      tid: teamId,
+      lid: leagueId,
+      year: constants.season.year,
+      week: constants.season.week
     }
     await db('rosters_players').insert(rosterInsert)
 

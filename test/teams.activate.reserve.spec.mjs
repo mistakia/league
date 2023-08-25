@@ -49,14 +49,12 @@ describe('API /teams - activate', function () {
 
       await fillRoster({ leagueId, teamId })
 
-      const players = await knex('rosters_players')
-        .join('rosters', 'rosters_players.rid', 'rosters.uid')
-        .where({
-          lid: leagueId,
-          tid: teamId,
-          week: constants.season.week,
-          year: constants.season.year
-        })
+      const players = await knex('rosters_players').where({
+        lid: leagueId,
+        tid: teamId,
+        week: constants.season.week,
+        year: constants.season.year
+      })
 
       const player1 = players.find((p) => p.slot === constants.slots.IR)
       const player2 = players.find((p) => p.slot === constants.slots.BENCH)
@@ -99,7 +97,6 @@ describe('API /teams - activate', function () {
       res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
 
       const rosterRows = await knex('rosters_players')
-        .join('rosters', 'rosters_players.rid', 'rosters.uid')
         .where({
           year: constants.season.year,
           week: constants.season.week,
@@ -212,14 +209,12 @@ describe('API /teams - activate', function () {
 
       await fillRoster({ leagueId, teamId })
 
-      const players = await knex('rosters_players')
-        .join('rosters', 'rosters_players.rid', 'rosters.uid')
-        .where({
-          lid: leagueId,
-          tid: teamId,
-          week: constants.season.week,
-          year: constants.season.year
-        })
+      const players = await knex('rosters_players').where({
+        lid: leagueId,
+        tid: teamId,
+        week: constants.season.week,
+        year: constants.season.year
+      })
 
       const player1 = players.find((p) => p.slot === constants.slots.IR)
       const player2 = players.find(
@@ -248,14 +243,12 @@ describe('API /teams - activate', function () {
 
       await fillRoster({ leagueId, teamId })
 
-      const players = await knex('rosters_players')
-        .join('rosters', 'rosters_players.rid', 'rosters.uid')
-        .where({
-          lid: leagueId,
-          tid: teamId,
-          week: constants.season.week,
-          year: constants.season.year
-        })
+      const players = await knex('rosters_players').where({
+        lid: leagueId,
+        tid: teamId,
+        week: constants.season.week,
+        year: constants.season.year
+      })
 
       const exclude_pids = players.map((p) => p.pid)
       const player1 = players.find((p) => p.slot === constants.slots.IR)

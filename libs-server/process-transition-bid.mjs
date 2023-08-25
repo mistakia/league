@@ -107,7 +107,11 @@ export default async function ({
       pos,
       slot: constants.slots.BENCH,
       tag: constants.tags.TRANSITION,
-      extensions: 0
+      extensions: 0,
+      tid,
+      lid,
+      year: constants.season.year,
+      week: constants.season.week
     })
 
     // add conditional pick to original team

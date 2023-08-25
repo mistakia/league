@@ -43,7 +43,6 @@ const generate_league_player_seasonlogs = async ({
   for (const pid of pids) {
     // get start team
     const rosters_start = await db('rosters_players')
-      .join('rosters', 'rosters.uid', 'rosters_players.rid')
       .where('lid', lid)
       .where('pid', pid)
       .where('year', year)
@@ -62,7 +61,6 @@ const generate_league_player_seasonlogs = async ({
 
     // get end team
     const rosters_end = await db('rosters_players')
-      .join('rosters', 'rosters.uid', 'rosters_players.rid')
       .where('lid', lid)
       .where('pid', pid)
       .where('year', year)

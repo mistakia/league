@@ -64,7 +64,6 @@ export default async function ({
 
   // verify player is a free agent
   const rosters = await db('rosters_players')
-    .join('rosters', 'rosters_players.rid', 'rosters.uid')
     .where({
       lid: leagueId,
       week: constants.season.week,
@@ -194,7 +193,11 @@ export default async function ({
     pid,
     pos: player_row.pos,
     slot,
-    extensions: 0
+    extensions: 0,
+    tid: teamId,
+    lid: leagueId,
+    year: constants.season.year,
+    week: constants.season.week
   })
 
   // add player transaction

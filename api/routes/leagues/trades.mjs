@@ -146,7 +146,6 @@ router.post(
         releasePlayers
       )
       const psPlayers = await db('rosters_players')
-        .join('rosters', 'rosters_players.rid', 'rosters.uid')
         .join('poaches', 'rosters_players.pid', 'poaches.pid')
         .where({
           year: constants.season.year,

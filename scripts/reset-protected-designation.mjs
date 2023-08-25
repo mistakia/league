@@ -16,7 +16,6 @@ const run = async () => {
   // reset protection for signed PS players
   const signed_row_count = await db('rosters_players')
     .update({ slot: constants.slots.PS })
-    .join('rosters', 'rosters.uid', 'rosters_players.rid')
     .where({
       week: 0,
       slot: constants.slots.PSP,
@@ -27,7 +26,6 @@ const run = async () => {
   // reset protection for drafted PS players
   const drafted_row_count = await db('rosters_players')
     .update({ slot: constants.slots.PSD })
-    .join('rosters', 'rosters.uid', 'rosters_players.rid')
     .where({
       week: 0,
       slot: constants.slots.PSDP,

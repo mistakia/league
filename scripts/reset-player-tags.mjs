@@ -41,7 +41,6 @@ const run = async ({ force = false } = {}) => {
   // reset tags for current rosters
   const rowCount = await db('rosters_players')
     .update({ tag: constants.tags.REGULAR })
-    .join('rosters', 'rosters.uid', 'rosters_players.rid')
     .where({
       week: 0,
       year: constants.season.year

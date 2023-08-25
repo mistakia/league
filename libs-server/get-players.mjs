@@ -34,9 +34,7 @@ export default async function ({
 
   if (teamId) {
     const query = db('rosters_players')
-      .join('rosters', 'rosters_players.rid', 'rosters.uid')
-      .where('rosters.tid', teamId)
-      .where('rosters.year', constants.season.year)
+      .where({ tid: teamId, year: constants.season.year })
       .groupBy('rosters_players.pid')
 
     if (pids.length) {
@@ -47,9 +45,7 @@ export default async function ({
     playerSlots.forEach((s) => league_roster_player_ids.push(s.pid))
   } else if (leagueId) {
     const query = db('rosters_players')
-      .join('rosters', 'rosters_players.rid', 'rosters.uid')
-      .where('rosters.lid', leagueId)
-      .where('rosters.year', constants.season.year)
+      .where({ lid: leagueId, year: constants.season.year })
       .groupBy('rosters_players.pid')
 
     if (pids.length) {

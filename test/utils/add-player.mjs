@@ -39,6 +39,10 @@ export default async function ({
     pid: player.pid,
     slot,
     pos: player.pos1,
-    tag
+    tag,
+    tid: teamId,
+    lid: leagueId,
+    year: constants.season.year,
+    week: constants.season.week
   })
 }

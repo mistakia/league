@@ -8,10 +8,9 @@ import createConditionalPick from './create-conditional-pick.mjs'
 import getLastTransaction from './get-last-transaction.mjs'
 
 export default async function ({ pid, release = [], lid, tid, userid }) {
-  const rosterSlots = await db('rosters')
-    .join('rosters_players', 'rosters.uid', 'rosters_players.rid')
+  const rosterSlots = await db('rosters_players')
     .where('rosters_players.pid', pid)
-    .where({ week: constants.season.week, year: constants.season.year })
+    .where({ week: constants.season.week, year: constants.season.year, lid })
 
   // verify player is on a team
   if (!rosterSlots.length) {
