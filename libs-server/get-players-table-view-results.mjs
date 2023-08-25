@@ -83,10 +83,6 @@ export default async function ({
       continue
     }
 
-    if (column_definition.use_having) {
-      continue
-    }
-
     const table_name = column_definition.table_alias
       ? column_definition.table_alias(column_params)
       : column_definition.table_name
@@ -110,6 +106,40 @@ export default async function ({
           case_insensitive: where_clause.operator === 'ILIKE'
         })
       : `${table_name}.${column_name}`
+
+    if (column_definition.use_having) {
+      if (where_clause.operator === 'IS NULL') {
+        players_query.havingNull(where_column)
+      } else if (where_clause.operator === 'IS NOT NULL') {
+        players_query.havingNotNull(where_column)
+      } else if (where_clause.operator === 'IN') {
+        players_query.havingIn(where_column, where_clause.value)
+      } else if (where_clause.operator === 'NOT IN') {
+        players_query.havingNotIn(where_column, where_clause.value)
+      } else if (where_clause.operator === 'ILIKE') {
+        players_query.having(
+          where_column,
+          'LIKE',
+          `%${(where_clause.value || '').toUpperCase()}%`
+        )
+      } else if (where_clause.operator === 'LIKE') {
+        players_query.having(where_column, 'LIKE', `%${where_clause.value}%`)
+      } else if (where_clause.operator === 'NOT LIKE') {
+        players_query.having(
+          where_column,
+          'NOT LIKE',
+          `%${where_clause.value}%`
+        )
+      } else if (where_clause.value) {
+        players_query.having(
+          where_column,
+          where_clause.operator,
+          where_clause.value
+        )
+      }
+
+      continue
+    }
 
     if (where_clause.operator === 'IS NULL') {
       players_query.whereNull(where_column)
