@@ -262,6 +262,40 @@ export default {
     table_name: 'player',
     column_name: 'pos'
   },
+  player_league_roster_status: {
+    where_column: () => 'player_league_roster_status',
+    select: ({ query, params = {} }) => {
+      query.select(
+        db.raw(`
+        CASE
+          WHEN rosters_players.slot = ${constants.slots.IR} THEN 'injured_reserve'
+          WHEN rosters_players.slot = ${constants.slots.PS} THEN 'practice_squad'
+          WHEN rosters_players.slot IS NULL THEN 'free_agent'
+          ELSE 'active_roster'
+        END AS player_league_roster_status
+      `)
+      )
+
+      query.select(
+        'rosters_players.slot',
+        'rosters_players.tid',
+        'rosters_players.tag'
+      )
+    },
+    join: ({ query, params = {} }) => {
+      const { year = constants.season.year, week = 0, lid = 1 } = params
+      query.leftJoin(
+        'rosters_players',
+        function() {
+          this.on('rosters_players.pid', '=', 'player.pid')
+          this.andOn('rosters_players.year', '=', year)
+          this.andOn('rosters_players.week', '=', week)
+          this.andOn('rosters_players.lid', '=', lid)
+        }
+      )
+    },
+    use_having: true
+  },
   player_league_salary: {
     column_name: 'value',
     table_name: 'transactions',
