@@ -284,15 +284,12 @@ export default {
     },
     join: ({ query, params = {} }) => {
       const { year = constants.season.year, week = 0, lid = 1 } = params
-      query.leftJoin(
-        'rosters_players',
-        function() {
-          this.on('rosters_players.pid', '=', 'player.pid')
-          this.andOn('rosters_players.year', '=', year)
-          this.andOn('rosters_players.week', '=', week)
-          this.andOn('rosters_players.lid', '=', lid)
-        }
-      )
+      query.leftJoin('rosters_players', function () {
+        this.on('rosters_players.pid', '=', 'player.pid')
+        this.andOn('rosters_players.year', '=', year)
+        this.andOn('rosters_players.week', '=', week)
+        this.andOn('rosters_players.lid', '=', lid)
+      })
     },
     use_having: true
   },
