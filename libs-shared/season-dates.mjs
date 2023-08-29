@@ -2,8 +2,8 @@ const season_dates = {
   // super bowl
   offseason: 1676178000,
 
-  // Two Tuesdays before first game
-  start: 1692676800,
+  // start of tuesday before first game
+  start: 1693886400,
 
   // super bowl
   end: 1710129600,
