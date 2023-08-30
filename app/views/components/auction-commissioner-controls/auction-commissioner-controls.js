@@ -85,6 +85,9 @@ export default class AuctionCommissionerControls extends React.Component {
             }
             tooltipOpen
             onClick={this.props.toggle_pause_on_team_disconnect}
+            classes={{
+              staticTooltipLabel: 'tooltip-label-pause-on-disconnect'
+            }}
           />
           {/* <SpeedDialAction
               icon={<Icon name='previous' />}

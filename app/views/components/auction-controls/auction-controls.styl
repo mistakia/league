@@ -1,0 +1,22 @@
+.auction__controls
+  position fixed
+  bottom 0
+  left 0
+  right 0
+  flex 0 0 auto
+  display flex
+  flex-direction column
+  border-top 1px solid $borderColor
+  background white
+  z-index 1
+
+@media (min-width 800px)
+  .auction__controls
+    transition margin 225ms cubic-bezier(0, 0, 0.2, 1) 0ms
+    height $auctionHeightDesktop
+  .menu__open .auction__controls
+    margin-left $menuWidth
+
+@media (max-width 799px)
+  .auction__controls
+    height $auctionHeightMobile

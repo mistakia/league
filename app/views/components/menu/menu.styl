@@ -91,6 +91,13 @@ $menuBackgroundColor = darken($backgroundColor, 5%)
   .MuiDrawer-paper.MuiPaper-root.menu__drawer
     border-right 1px solid lighten($borderColor, 30%)
 
+  .auction__live .main__menu-button.MuiFab-root
+    bottom $auctionHeightDesktop + 8px
+
+@media (max-width 799px)
+  .auction__live .main__menu-button.MuiFab-root
+    bottom $auctionHeightMobile - 16px
+
 @media (pointer: fine)
   .menu__links a:hover
   a.menu__text:hover

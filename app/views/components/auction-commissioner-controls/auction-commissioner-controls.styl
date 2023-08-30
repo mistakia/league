@@ -3,9 +3,12 @@
     z-index 1000
 
   .MuiSpeedDial-root.MuiSpeedDial-directionUp
-    absolute bottom 264px right 16px
+    absolute bottom ($auctionHeightMobile + 48 - 16 + 16) right 16px
     z-index 1001
 
-@media screen and (min-width 1051px)
+  .tooltip-label-pause-on-disconnect
+    width 176px
+
+@media screen and (min-width 800px)
   .auction__commissioner-controls .MuiSpeedDial-root.MuiSpeedDial-directionUp
-    bottom 120px
+    bottom 160px
