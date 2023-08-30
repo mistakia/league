@@ -4,19 +4,15 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 
 import PageLayout from '@layouts/page'
-import AuctionTransaction from '@components/auction-transaction'
+// import AuctionTransaction from '@components/auction-transaction'
 import AuctionTeam from '@components/auction-team'
-import AuctionMainBid from '@components/auction-main-bid'
 import AuctionTargets from '@components/auction-targets'
-import AuctionCommissionerControls from '@components/auction-commissioner-controls'
 
 import './auction.styl'
 
 export default function AuctionPage({
   transactions,
   tids,
-  isCommish,
-  isHosted,
   loadAllPlayers,
   load_league,
   join,
@@ -36,17 +32,18 @@ export default function AuctionPage({
     if (element) element.scrollIntoView({ behavior: 'smooth' })
   }, [transactions])
 
-  const TransactionRow = ({ index, key, ...params }) => {
-    const transaction = transactions.get(index)
-    return (
-      <AuctionTransaction key={key} transaction={transaction} {...params} />
-    )
-  }
+  // TODO show auction transactions
+  // const TransactionRow = ({ index, key, ...params }) => {
+  //   const transaction = transactions.get(index)
+  //   return (
+  //     <AuctionTransaction key={key} transaction={transaction} {...params} />
+  //   )
+  // }
 
-  TransactionRow.propTypes = {
-    index: PropTypes.number,
-    key: PropTypes.number
-  }
+  // TransactionRow.propTypes = {
+  //   index: PropTypes.number,
+  //   key: PropTypes.number
+  // }
 
   const teamItems = []
   tids.forEach((tid, index) => {
@@ -60,11 +57,6 @@ export default function AuctionPage({
           <AuctionTargets />
         </div>
       </div>
-      <div className='auction__header'>
-        <AuctionMainBid />
-        <div className='auction__teams'>{teamItems}</div>
-      </div>
-      {isCommish && isHosted ? <AuctionCommissionerControls /> : null}
     </div>
   )
 
@@ -76,8 +68,6 @@ AuctionPage.propTypes = {
   loadAllPlayers: PropTypes.func,
   transactions: ImmutablePropTypes.list,
   tids: ImmutablePropTypes.list,
-  isCommish: PropTypes.bool,
-  isHosted: PropTypes.bool,
   load_league: PropTypes.func,
   loadRosters: PropTypes.func
 }

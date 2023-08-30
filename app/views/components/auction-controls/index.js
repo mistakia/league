@@ -3,22 +3,17 @@ import { createSelector } from 'reselect'
 
 import { getAuction } from '@core/selectors'
 import { auctionActions } from '@core/auction'
-import { playerActions } from '@core/players'
 import { leagueActions } from '@core/leagues'
-import { rosterActions } from '@core/rosters'
 
-import AuctionPage from './auction'
+import AuctionControls from './auction-controls'
 
 const mapStateToProps = createSelector(getAuction, (auction) => ({
-  transactions: auction.transactions,
   tids: auction.tids
 }))
 
 const mapDispatchToProps = {
   join: auctionActions.join,
-  loadAllPlayers: playerActions.loadAllPlayers,
-  load_league: leagueActions.load_league,
-  loadRosters: rosterActions.loadRosters
+  load_league: leagueActions.load_league
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(AuctionPage)
+export default connect(mapStateToProps, mapDispatchToProps)(AuctionControls)
