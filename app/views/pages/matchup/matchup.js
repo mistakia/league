@@ -40,41 +40,37 @@ export default function MatchupPage({
   )
 
   useEffect(() => {
-    if (isNaN(lid)) {
-      return navigate('/', { replace: true })
-    }
-
     if (seas_year && isNaN(seas_year)) {
       return navigate('/', { replace: true })
     }
 
+    if (seas_year) selectYear(seas_year)
+  }, [seas_year, selectYear, navigate])
+
+  useEffect(() => {
     if (seas_week && isNaN(seas_week)) {
       return navigate('/', { replace: true })
     }
 
+    if (seas_week) selectWeek(seas_week)
+  }, [seas_week, selectWeek, navigate])
+
+  useEffect(() => {
     if (matchupId && isNaN(matchupId)) {
       return navigate('/', { replace: true })
     }
 
-    if (seas_year) selectYear(seas_year)
-    if (seas_week) selectWeek(seas_week)
-
     if (matchupId) selectMatchup(matchupId)
+  }, [matchupId, selectMatchup, navigate])
+
+  useEffect(() => {
+    if (isNaN(lid)) {
+      return navigate('/', { replace: true })
+    }
 
     loadLeaguePlayers()
     loadRosters(lid)
-  }, [
-    lid,
-    loadLeaguePlayers,
-    loadRosters,
-    seas_week,
-    seas_year,
-    matchupId,
-    navigate,
-    selectMatchup,
-    selectWeek,
-    selectYear
-  ])
+  }, [lid, loadLeaguePlayers, loadRosters, navigate])
 
   useEffect(() => {
     loadMatchups()
