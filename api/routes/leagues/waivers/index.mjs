@@ -155,7 +155,7 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
 
-    const faPeriod = getFreeAgentPeriod(league.free_agency_live_auction_start)
+    const faPeriod = getFreeAgentPeriod(league)
 
     // check free agency waivers
     if (

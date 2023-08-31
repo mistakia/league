@@ -69,7 +69,7 @@ router.post('/?', async (req, res) => {
       const rosterPlayer = roster.get(pid)
       const isOnActiveRoster = isSlotActive(rosterPlayer.slot)
 
-      const faPeriod = getFreeAgentPeriod(league.free_agency_live_auction_start)
+      const faPeriod = getFreeAgentPeriod(league)
       if (
         constants.season.now.isAfter(faPeriod.start) &&
         constants.season.now.isBefore(faPeriod.end) &&

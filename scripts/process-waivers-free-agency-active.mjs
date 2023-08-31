@@ -40,9 +40,7 @@ const run = async () => {
       const league = await getLeague({ lid })
 
       if (league.free_agency_live_auction_start) {
-        const faPeriod = getFreeAgentPeriod(
-          league.free_agency_live_auction_start
-        )
+        const faPeriod = getFreeAgentPeriod(league)
         if (
           constants.season.now.isBefore(faPeriod.free_agency_live_auction_start)
         ) {
