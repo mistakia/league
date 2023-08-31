@@ -19,26 +19,12 @@ debug.enable('calculate-team-daily-ktc-value')
 const MAX_DAY_INTERVAL = 5
 
 const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
-  const teams = await db('teams')
-    .select('uid')
-    .where({ lid, year: constants.season.year })
-
-  if (!teams.length) {
-    throw new Error(`no teams found for league ${lid}`)
-  }
+  log(`calculating team daily ktc value for league ${lid}`)
 
   const teams_index = {}
-  for (const team of teams) {
-    teams_index[team.uid] = {
-      ...team,
-      players: {},
-      picks: {}
-    }
-  }
-
   const trades = await get_trades({ lid })
   const transactions = await db('transactions')
-    .select('tid', 'pid', 'pid', 'type', 'timestamp')
+    .select('tid', 'pid', 'pid', 'type', 'timestamp', 'year')
     .where('lid', lid)
     .orderBy('timestamp', 'asc')
 
@@ -79,11 +65,41 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
   const processed_trades_index = {}
   const ignored_tran_types = new Set()
   let last_date = null
+  let current_year = null
 
   log(`processing ${transactions.length} transactions`)
 
   // calculate team daily keeptradecut value based on end of day roster's total keeptradecut value
   for (let i = 0; i < transactions.length; i++) {
+    if (!current_year || current_year !== transactions[i].year) {
+      current_year = transactions[i].year
+
+      log(`updating teams index for year ${current_year}`)
+
+      const teams = await db('teams')
+        .select('uid')
+        .where({ lid, year: current_year })
+
+      // add any new teams to team index
+      for (const team of teams) {
+        if (teams_index[team.uid]) continue
+
+        teams_index[team.uid] = {
+          ...team,
+          players: {},
+          picks: {}
+        }
+      }
+
+      // remove any decommissioned teams from team index
+      for (const team_id of Object.keys(teams_index)) {
+        const tid = Number(team_id)
+        if (teams.find((t) => t.uid === tid)) continue
+
+        delete teams_index[team_id]
+      }
+    }
+
     const transaction = transactions[i]
 
     const tran_date = dayjs.unix(transaction.timestamp).format('YYYY-MM-DD')
@@ -120,7 +136,8 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
 
       case constants.transactions.ROSTER_RELEASE:
         // remove player from roster
-        delete teams_index[tran_tid].players[transaction.pid]
+        // team index may not exist for a decommissioning release if team was decommissioned
+        delete teams_index[tran_tid]?.players[transaction.pid]
         break
 
       default:
