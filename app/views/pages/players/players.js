@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import InfiniteScroll from 'react-infinite-scroller'
@@ -53,8 +54,11 @@ export default function PlayersPage({
   searchValue,
   order,
   orderBy,
-  is_player_filter_options_changed
+  is_player_filter_options_changed,
+  loadRosters
 }) {
+  const { lid } = useParams()
+  const navigate = useNavigate()
   const [expanded, set_expanded] = useState(false)
   const [page, set_page] = useState(0)
   const [has_more, set_has_more] = useState(true)
@@ -73,6 +77,14 @@ export default function PlayersPage({
       }
     }
   }, [player_fields, selected_players_view.fields, selected_players_view.key])
+
+  useEffect(() => {
+    if (isNaN(lid)) {
+      return navigate('/', { replace: true })
+    }
+
+    loadRosters(lid)
+  }, [lid, loadRosters, navigate])
 
   useEffect(() => {
     set_page(0)
@@ -301,5 +313,6 @@ PlayersPage.propTypes = {
   player_fields: PropTypes.object,
   selected_players_view: PropTypes.object,
   reset_player_filter_options: PropTypes.func,
-  is_player_filter_options_changed: PropTypes.bool
+  is_player_filter_options_changed: PropTypes.bool,
+  loadRosters: PropTypes.func
 }
