@@ -137,3 +137,8 @@
 
 ## At 03:00 in January, February, and every month from September through December.
 0 3 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays-nflfastr.mjs -d &>> /var/log/league/league-import-plays-nflfastr.log
+
+################################### nflfastR  ########################################
+
+## Every day at 4:00AM
+0 4 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/calculate-team-daily-ktc-values.mjs &>> /var/log/league/league-calculate-team-daily-ktc-values.log
