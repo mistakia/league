@@ -27,7 +27,7 @@ export default async function (knex) {
     lid: 1,
     hosted: 1,
     draft_start: Math.round(Date.now() / 1000),
-    adate: Math.round(Date.now() / 1000),
+    free_agency_live_auction_start: Math.round(Date.now() / 1000),
     tddate: 1606626000
   })
 }

@@ -155,7 +155,7 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
 
-    const faPeriod = getFreeAgentPeriod(league.adate)
+    const faPeriod = getFreeAgentPeriod(league.free_agency_live_auction_start)
 
     // check free agency waivers
     if (
@@ -184,7 +184,8 @@ router.post('/?', async (req, res) => {
         // reject active roster waivers before start of free agenct period
         if (
           type === constants.waivers.FREE_AGENCY &&
-          (!league.adate || dayjs().isBefore(faPeriod.start))
+          (!league.free_agency_live_auction_start ||
+            dayjs().isBefore(faPeriod.start))
         ) {
           return res
             .status(400)
@@ -223,7 +224,8 @@ router.post('/?', async (req, res) => {
             if (
               league.draft_start &&
               dayjs().isAfter(draftDates.waiverEnd) &&
-              (!league.adate || dayjs().isBefore(faPeriod.start))
+              (!league.free_agency_live_auction_start ||
+                dayjs().isBefore(faPeriod.start))
             ) {
               const isOnWaivers = await isPlayerOnWaivers({ pid, leagueId })
               if (!isOnWaivers) {
@@ -234,7 +236,10 @@ router.post('/?', async (req, res) => {
             }
           } else {
             // reject practice waivers for veterans before fa period
-            if (!league.adate || dayjs().isBefore(faPeriod.start)) {
+            if (
+              !league.free_agency_live_auction_start ||
+              dayjs().isBefore(faPeriod.start)
+            ) {
               return res.status(400).send({
                 error: 'practice squad waivers are not open for non-rookies'
               })

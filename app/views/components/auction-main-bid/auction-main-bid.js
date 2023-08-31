@@ -125,13 +125,13 @@ export default class AuctionMainBid extends React.Component {
       isWinningBid,
       league,
       isStarted,
-      adate
+      free_agency_live_auction_start
     } = this.props
 
     const classNames = []
     let action = null
     let disabled = false
-    if (!league.adate || !isStarted || isComplete) {
+    if (!league.free_agency_live_auction_start || !isStarted || isComplete) {
       action = null
     } else if (isPaused) {
       action = null
@@ -183,14 +183,15 @@ export default class AuctionMainBid extends React.Component {
     }
 
     let main
-    if (!league.adate) {
+    if (!league.free_agency_live_auction_start) {
       main = <div className='auction__text'>Auction is not scheduled</div>
     } else if (isComplete) {
       main = <div className='auction__text'>Auction is complete</div>
     } else if (!isStarted) {
       main = (
         <div className='auction__text'>
-          Auction will begin on {adate.format('dddd, MMMM D YYYY, ha')}
+          Auction will begin on{' '}
+          {free_agency_live_auction_start.format('dddd, MMMM D YYYY, ha')}
         </div>
       )
     } else if (isPaused) {
@@ -278,5 +279,5 @@ AuctionMainBid.propTypes = {
   isWinningBid: PropTypes.bool,
   league: PropTypes.object,
   isStarted: PropTypes.bool,
-  adate: PropTypes.object
+  free_agency_live_auction_start: PropTypes.object
 }

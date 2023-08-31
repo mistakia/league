@@ -39,9 +39,13 @@ const run = async () => {
       // check if during free agency period
       const league = await getLeague({ lid })
 
-      if (league.adate) {
-        const faPeriod = getFreeAgentPeriod(league.adate)
-        if (constants.season.now.isBefore(faPeriod.adate)) {
+      if (league.free_agency_live_auction_start) {
+        const faPeriod = getFreeAgentPeriod(
+          league.free_agency_live_auction_start
+        )
+        if (
+          constants.season.now.isBefore(faPeriod.free_agency_live_auction_start)
+        ) {
           // skip leagues during offseason before start of free agency auction
           continue
         }

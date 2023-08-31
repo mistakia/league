@@ -78,7 +78,8 @@ export default async function ({ lid, commishid, ...params } = {}) {
     draft_hour_min: league_params.draft_hour_min,
     draft_hour_max: league_params.draft_hour_max,
 
-    adate: league_params.adate,
+    free_agency_live_auction_start:
+      league_params.free_agency_live_auction_start,
     tddate: league_params.tddate
   })
 

@@ -76,8 +76,11 @@ router.post('/?', async (req, res) => {
     }
 
     const league = await getLeague({ lid: leagueId })
-    if (!constants.season.isRegularSeason && league.adate) {
-      const faPeriod = getFreeAgentPeriod(league.adate)
+    if (
+      !constants.season.isRegularSeason &&
+      league.free_agency_live_auction_start
+    ) {
+      const faPeriod = getFreeAgentPeriod(league.free_agency_live_auction_start)
       if (constants.season.now.isBetween(faPeriod.start, faPeriod.end)) {
         return res.status(400).send({ error: 'Player on Sanctuary Period' })
       }

@@ -68,8 +68,8 @@ export default function LeagueHomePage({
   ])
 
   const notices = []
-  if (league.adate) {
-    const faPeriod = getFreeAgentPeriod(league.adate)
+  if (league.free_agency_live_auction_start) {
+    const faPeriod = getFreeAgentPeriod(league.free_agency_live_auction_start)
     if (constants.season.now.isBefore(faPeriod.start)) {
       notices.push(
         <Alert key='fa-period' severity='warning'>

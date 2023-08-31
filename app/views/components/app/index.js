@@ -18,11 +18,15 @@ const mapStateToProps = createSelector(
   getCurrentLeague,
   getAuction,
   (app, league, auction) => {
-    const faPeriod = getFreeAgentPeriod(league.adate)
+    const faPeriod = getFreeAgentPeriod(league.free_agency_live_auction_start)
     const now = dayjs()
-    const adate = league.adate ? dayjs.unix(league.adate) : null
+    const free_agency_live_auction_start = league.free_agency_live_auction_start
+      ? dayjs.unix(league.free_agency_live_auction_start)
+      : null
     const auction_is_ended = now.isAfter(faPeriod.end)
-    const auction_is_started = adate && adate.isBefore(now)
+    const auction_is_started =
+      free_agency_live_auction_start &&
+      free_agency_live_auction_start.isBefore(now)
 
     return {
       isPending: app.isPending,

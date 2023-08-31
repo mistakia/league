@@ -9,8 +9,8 @@ export default function isSantuaryPeriod(league) {
     return true
   }
 
-  if (league.adate) {
-    const faPeriod = getFreeAgentPeriod(league.adate)
+  if (league.free_agency_live_auction_start) {
+    const faPeriod = getFreeAgentPeriod(league.free_agency_live_auction_start)
     if (season.now.isBetween(faPeriod.start, faPeriod.end)) {
       return true
     }

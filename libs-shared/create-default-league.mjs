@@ -46,7 +46,7 @@ const createDefaultLeague = ({ commishid = 0 } = {}) => {
     krtd: 6,
     prtd: 6,
     draft_start: null,
-    adate: null,
+    free_agency_live_auction_start: null,
     min_bid: 1,
     tddate: 1606626000,
     b_QB: 13.3,
