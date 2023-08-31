@@ -36,7 +36,7 @@ describe('API /waivers - cancel', function () {
 
     await knex('seasons')
       .update({
-        adate: start.subtract('1', 'week').unix()
+        free_agency_live_auction_start: start.subtract('1', 'week').unix()
       })
       .where('lid', 1)
   })

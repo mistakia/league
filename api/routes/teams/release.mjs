@@ -57,7 +57,7 @@ router.post('/?', async (req, res) => {
 
     // if active roster, verify not during FA Auction Period
     const league = await getLeague({ lid: leagueId })
-    if (league.adate) {
+    if (league.free_agency_live_auction_start) {
       const rosterRow = await getRoster({ tid })
       const roster = new Roster({ roster: rosterRow, league })
       if (!roster.has(pid)) {
@@ -69,7 +69,7 @@ router.post('/?', async (req, res) => {
       const rosterPlayer = roster.get(pid)
       const isOnActiveRoster = isSlotActive(rosterPlayer.slot)
 
-      const faPeriod = getFreeAgentPeriod(league.adate)
+      const faPeriod = getFreeAgentPeriod(league.free_agency_live_auction_start)
       if (
         constants.season.now.isAfter(faPeriod.start) &&
         constants.season.now.isBefore(faPeriod.end) &&

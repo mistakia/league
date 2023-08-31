@@ -61,7 +61,7 @@ export const League = new Record({
   ext3: null,
   ext4: null,
 
-  adate: null,
+  free_agency_live_auction_start: null,
   tddate: null,
 
   draft_start: null,
@@ -163,7 +163,7 @@ export function createLeague({
   ext3,
   ext4,
 
-  adate,
+  free_agency_live_auction_start,
   tddate,
 
   draft_start,
@@ -264,7 +264,7 @@ export function createLeague({
     ext3,
     ext4,
 
-    adate,
+    free_agency_live_auction_start,
     tddate,
 
     draft_start,

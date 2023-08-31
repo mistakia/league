@@ -39,7 +39,7 @@ const generate_seasons = async () => {
         draft_type: null,
         draft_hour_min: null,
         draft_hour_max: null,
-        adate: null,
+        free_agency_live_auction_start: null,
         tddate: null,
 
         season_started_at: null

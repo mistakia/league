@@ -106,9 +106,13 @@ export default async function ({
 
     // check if during free agency period for veterans
     if (player_row.start !== constants.season.year) {
-      if (league.adate) {
-        const faPeriod = getFreeAgentPeriod(league.adate)
-        if (constants.season.now.isBefore(faPeriod.adate)) {
+      if (league.free_agency_live_auction_start) {
+        const faPeriod = getFreeAgentPeriod(
+          league.free_agency_live_auction_start
+        )
+        if (
+          constants.season.now.isBefore(faPeriod.free_agency_live_auction_start)
+        ) {
           throw new Error('veteran free agency not open')
         }
 
