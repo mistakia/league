@@ -107,10 +107,11 @@ export default function PlayersPage({
   ])
   // TODO instead of players.size use players.equal() for comparison
 
-  const loadMore = (page) => {
-    const index = page * 25
+  const loadMore = (p) => {
+    if (p === page) return
+    const index = p * 25
     const has_more = players.size > index
-    set_page(page)
+    set_page(p)
     set_has_more(has_more)
   }
 
