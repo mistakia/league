@@ -34,7 +34,8 @@ export default function DraftPage({
   loadDraft,
   loadAllPlayers,
   load_league,
-  loadTeams
+  loadTeams,
+  is_draft_complete
 }) {
   const { lid } = useParams()
   const scroll_to_pick = () => {
@@ -176,6 +177,7 @@ export default function DraftPage({
     const isUser = pick.tid === teamId
     const isActive =
       draftActive &&
+      !is_draft_complete &&
       !pick.pid &&
       Boolean(pick.pick) &&
       (constants.season.now.isAfter(pick.draftWindow) ||
@@ -397,5 +399,6 @@ DraftPage.propTypes = {
   league: PropTypes.object,
   drafted: ImmutablePropTypes.list,
   isDraftWindowOpen: PropTypes.bool,
-  teamId: PropTypes.number
+  teamId: PropTypes.number,
+  is_draft_complete: PropTypes.bool
 }

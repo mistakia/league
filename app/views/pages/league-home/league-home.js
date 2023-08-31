@@ -80,7 +80,9 @@ export default function LeagueHomePage({
           be able to release any players once the FA period begins.
           <br />
           <br />
-          Any players left on Reserve at the start of the FA period will be ineligble to enter a starting lineup for the first six weeks of the season.
+          Any players left on Reserve at the start of the FA period will be
+          ineligble to enter a starting lineup for the first six weeks of the
+          season.
           <br />
           <br />
           {faPeriod.start.local().format('[Starts] l [at] LT z')}

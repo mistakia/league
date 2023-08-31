@@ -426,7 +426,24 @@ export const isAfterDraft = createSelector(
 export const getNextPick = createSelector(
   getDraft,
   (state) => state.get('app'),
-  (draft, app) => {
+  getLastPick,
+  getCurrentLeague,
+  (draft, app, lastPick, league) => {
+    if (lastPick) {
+      const draftDates = getDraftDates({
+        start: league.draft_start,
+        type: league.draft_type,
+        min: league.draft_hour_min,
+        max: league.draft_hour_max,
+        picks: lastPick.pick, // TODO — should be total number of picks in case some picks are missing due to decommissoned teams
+        last_selection_timestamp: lastPick.selection_timestamp
+      })
+
+      if (constants.season.now.isAfter(draftDates.draftEnd)) {
+        return null
+      }
+    }
+
     const { draft_start, draft_type, draft_hour_min, draft_hour_max, picks } =
       draft
     const { teamId } = app
