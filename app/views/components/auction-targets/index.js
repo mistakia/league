@@ -47,7 +47,23 @@ const mapStateToProps = createSelector(
           app.userId === league.commishid),
       team,
       rosteredPlayerIds,
-      watchlist: playerState.get('watchlist')
+      watchlist: playerState.get('watchlist'),
+      show_qb: Boolean(league.sqb || league.sqbrbwrte),
+      show_rb: Boolean(
+        league.srb || league.sqbrbwrte || league.srbwr || league.srbwrte
+      ),
+      show_wr: Boolean(
+        league.swr ||
+          league.srbwr ||
+          league.srbwrte ||
+          league.swrte ||
+          league.sqbrbwrte
+      ),
+      show_te: Boolean(
+        league.ste || league.srbwrte || league.swrte || league.sqbrbwrte
+      ),
+      show_k: Boolean(league.sk),
+      show_dst: Boolean(league.sdst)
     }
   }
 )
