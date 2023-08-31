@@ -10,6 +10,7 @@ import {
   is_player_filter_options_changed
 } from '@core/selectors'
 import { playerActions } from '@core/players'
+import { rosterActions } from '@core/rosters'
 
 import PlayersPage from './players'
 
@@ -68,7 +69,8 @@ const mapStateToProps = createSelector(
 const mapDispatchToProps = {
   search: playerActions.search,
   loadAllPlayers: playerActions.loadAllPlayers,
-  reset_player_filter_options: playerActions.reset_player_filter_options
+  reset_player_filter_options: playerActions.reset_player_filter_options,
+  loadRosters: rosterActions.loadRosters
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PlayersPage)

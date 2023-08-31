@@ -1,10 +1,16 @@
 import db from '#db'
 
-export default async function ({ lid, accepted = true }) {
-  const trades = await db('trades')
+export default async function ({ lid, year = null }) {
+  const trade_query = db('trades')
     .where({ lid })
     .orderBy('accepted', 'asc')
     .whereNotNull('accepted')
+
+  if (year) {
+    trade_query.where({ year })
+  }
+
+  const trades = await trade_query
 
   const trade_ids = trades.map((t) => t.uid)
 
