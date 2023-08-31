@@ -1,7 +1,12 @@
 import express from 'express'
 import dayjs from 'dayjs'
 
-import { constants, Roster, isDraftWindowOpen } from '#libs-shared'
+import {
+  constants,
+  Roster,
+  isDraftWindowOpen,
+  getDraftDates
+} from '#libs-shared'
 import {
   getRoster,
   sendNotifications,
@@ -69,6 +74,28 @@ router.post('/?', async (req, res) => {
     const draftStart = dayjs.unix(league.draft_start)
     if (constants.season.now.isBefore(draftStart)) {
       return res.status(400).send({ error: 'draft has not started' })
+    }
+
+    // make sure draft has not ended
+    const last_pick = await db('draft')
+      .where({
+        year: constants.season.year,
+        lid: leagueId
+      })
+      .orderBy('pick', 'desc')
+      .first()
+
+    const draftDates = getDraftDates({
+      start: league.draft_start,
+      type: league.draft_type,
+      min: league.draft_hour_min,
+      max: league.draft_hour_max,
+      picks: last_pick?.pick, // TODO — should be total number of picks in case some picks are missing due to decommissoned teams
+      last_selection_timestamp: last_pick ? last_pick.selection_timestamp : null
+    })
+
+    if (constants.season.now.isAfter(draftDates.draftEnd)) {
+      return res.status(400).send({ error: 'draft has ended' })
     }
 
     // check if previous pick has been made

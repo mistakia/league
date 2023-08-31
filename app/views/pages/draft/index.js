@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { constants, getDraftWindow } from '@libs-shared'
+import { constants, getDraftWindow, getDraftDates } from '@libs-shared'
 import { draftActions } from '@core/draft'
 import {
   get_app,
@@ -10,6 +10,7 @@ import {
   getDraft,
   getPicks,
   getNextPick,
+  getLastPick,
   getRookiePlayers
 } from '@core/selectors'
 import { playerActions } from '@core/players'
@@ -27,7 +28,17 @@ const mapStateToProps = createSelector(
   getPicks,
   getCurrentLeague,
   get_app,
-  (players, selectedPlayerMap, nextPick, draft, picks, league, app) => {
+  getLastPick,
+  (
+    players,
+    selectedPlayerMap,
+    nextPick,
+    draft,
+    picks,
+    league,
+    app,
+    last_pick
+  ) => {
     const windowEnd = nextPick
       ? getDraftWindow({
           start: league.draft_start,
@@ -41,6 +52,20 @@ const mapStateToProps = createSelector(
     const isWindowOpen =
       nextPick && constants.season.now.isAfter(nextPick.draftWindow)
 
+    let is_draft_complete = false
+    if (last_pick) {
+      const draftDates = getDraftDates({
+        start: league.draft_start,
+        type: league.draft_type,
+        min: league.draft_hour_min,
+        max: league.draft_hour_max,
+        picks: last_pick.pick, // TODO — should be total number of picks in case some picks are missing due to decommissoned teams
+        last_selection_timestamp: last_pick.selection_timestamp
+      })
+
+      is_draft_complete = constants.season.now.isAfter(draftDates.draftEnd)
+    }
+
     return {
       windowEnd,
       isDraftWindowOpen: isWindowOpen,
@@ -50,7 +75,8 @@ const mapStateToProps = createSelector(
       teamId: app.teamId,
       picks,
       drafted: draft.drafted,
-      league
+      league,
+      is_draft_complete
     }
   }
 )

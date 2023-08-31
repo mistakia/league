@@ -274,6 +274,22 @@ describe('API /draft', function () {
       await error(request, 'player rostered')
     })
 
+    it('selection after draft has ended', async () => {
+      MockDate.set(start.add('1', 'month').add('1', 'day').toISOString())
+      const player = await selectPlayer({ rookie: true })
+      const request = chai
+        .request(server)
+        .post('/api/leagues/1/draft')
+        .set('Authorization', `Bearer ${user2}`)
+        .send({
+          teamId: 2,
+          pid: player.pid,
+          pickId: 2
+        })
+
+      await error(request, 'draft has ended')
+    })
+
     it('exceeds roster limit', async () => {
       // TODO
     })
