@@ -5,13 +5,17 @@ import Highcharts from 'highcharts'
 import HighchartsCustomEvents from 'highcharts-custom-events'
 import HighchartsReact from 'highcharts-react-official'
 
-import { constants, sum } from '@libs-shared'
+import { sum } from '@libs-shared'
 
 HighchartsCustomEvents(Highcharts)
 
-export default function DashboardLeaguePositionalValue({ summary, teams }) {
+export default function DashboardLeaguePositionalValue({
+  summary,
+  teams,
+  league_positions
+}) {
   const series = []
-  for (const position of constants.positions) {
+  for (const position of league_positions) {
     const data = []
     for (const { tid } of summary.sorted_tids) {
       const rounded = parseInt(summary.rosters[tid][position].toFixed(1), 10)
@@ -185,5 +189,6 @@ export default function DashboardLeaguePositionalValue({ summary, teams }) {
 
 DashboardLeaguePositionalValue.propTypes = {
   teams: ImmutablePropTypes.map,
-  summary: PropTypes.object
+  summary: PropTypes.object,
+  league_positions: PropTypes.array
 }
