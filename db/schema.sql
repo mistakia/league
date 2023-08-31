@@ -204,6 +204,8 @@ CREATE TABLE `seasons` (
   `draft_hour_min` tinyint(2) unsigned DEFAULT NULL,
   `draft_hour_max` tinyint(2) unsigned DEFAULT NULL,
 
+  `free_agency_period_start` int(11) unsigned DEFAULT NULL,
+  `free_agency_period_end` int(11) unsigned DEFAULT NULL,
   `free_agency_live_auction_start` int(11) unsigned DEFAULT NULL,
   `tddate` int(11) unsigned DEFAULT NULL,
 

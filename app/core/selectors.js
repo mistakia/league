@@ -285,22 +285,14 @@ export const isNominatedPlayerEligible = createSelector(
   }
 )
 
-export const isFreeAgentPeriod = createSelector(
-  (state) =>
-    state.getIn([
-      'leagues',
-      state.getIn(['app', 'leagueId']),
-      'free_agency_live_auction_start'
-    ]),
-  (free_agency_live_auction_start) => {
-    if (!free_agency_live_auction_start) {
-      return false
-    }
-
-    const faPeriod = getFreeAgentPeriod(free_agency_live_auction_start)
-    return constants.season.now.isBetween(faPeriod.start, faPeriod.end)
+export const isFreeAgentPeriod = createSelector(getCurrentLeague, (league) => {
+  if (!league.free_agency_live_auction_start) {
+    return false
   }
-)
+
+  const faPeriod = getFreeAgentPeriod(league)
+  return constants.season.now.isBetween(faPeriod.start, faPeriod.end)
+})
 
 export const getPlayersForOptimalLineup = createSelector(
   (state) => state.get('players'),
@@ -657,7 +649,7 @@ export const getLeagueEvents = createSelector(
     }
 
     if (league.free_agency_live_auction_start) {
-      const faPeriod = getFreeAgentPeriod(league.free_agency_live_auction_start)
+      const faPeriod = getFreeAgentPeriod(league)
       const date = dayjs.unix(league.free_agency_live_auction_start)
       if (now.isBefore(date)) {
         if (now.isBefore(faPeriod.start)) {

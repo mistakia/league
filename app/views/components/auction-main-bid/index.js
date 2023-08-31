@@ -22,7 +22,7 @@ const mapStateToProps = createSelector(
   isNominatedPlayerEligible,
   getCurrentLeague,
   (auction, app, roster, isEligible, league) => {
-    const faPeriod = getFreeAgentPeriod(league.free_agency_live_auction_start)
+    const faPeriod = getFreeAgentPeriod(league)
     const now = dayjs()
     const isEnded = now.isAfter(faPeriod.end)
     const isStarted = faPeriod.free_agency_live_auction_start.isBefore(now)
