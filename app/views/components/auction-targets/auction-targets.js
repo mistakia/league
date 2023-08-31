@@ -32,7 +32,13 @@ export default function AuctionTargets({
   players,
   muted,
   toggleMuted,
-  nominated_pid
+  nominated_pid,
+  show_qb,
+  show_rb,
+  show_wr,
+  show_te,
+  show_k,
+  show_dst
 }) {
   const AuctionPlayerRow = ({ index, key, pos, style }) => {
     const playerMap = pos
@@ -124,114 +130,126 @@ export default function AuctionTargets({
             </AutoSizer>
           </div>
         </div>
-        <div className='auction__targets-column'>
-          <AuctionTargetHeader pos='QB' />
-          <div className='auction__targets-column-body'>
-            <AutoSizer>
-              {({ height, width }) => (
-                <List
-                  width={width}
-                  height={height}
-                  rowHeight={30}
-                  rowCount={playersByPosition.QB.size}
-                  rowRenderer={(args) =>
-                    AuctionPlayerRow({ pos: 'QB', ...args })
-                  }
-                />
-              )}
-            </AutoSizer>
+        {show_qb && (
+          <div className='auction__targets-column'>
+            <AuctionTargetHeader pos='QB' />
+            <div className='auction__targets-column-body'>
+              <AutoSizer>
+                {({ height, width }) => (
+                  <List
+                    width={width}
+                    height={height}
+                    rowHeight={30}
+                    rowCount={playersByPosition.QB.size}
+                    rowRenderer={(args) =>
+                      AuctionPlayerRow({ pos: 'QB', ...args })
+                    }
+                  />
+                )}
+              </AutoSizer>
+            </div>
           </div>
-        </div>
-        <div className='auction__targets-column'>
-          <AuctionTargetHeader pos='RB' />
-          <div className='auction__targets-column-body'>
-            <AutoSizer>
-              {({ height, width }) => (
-                <List
-                  width={width}
-                  height={height}
-                  rowHeight={30}
-                  rowCount={playersByPosition.RB.size}
-                  rowRenderer={(args) =>
-                    AuctionPlayerRow({ pos: 'RB', ...args })
-                  }
-                />
-              )}
-            </AutoSizer>
+        )}
+        {show_rb && (
+          <div className='auction__targets-column'>
+            <AuctionTargetHeader pos='RB' />
+            <div className='auction__targets-column-body'>
+              <AutoSizer>
+                {({ height, width }) => (
+                  <List
+                    width={width}
+                    height={height}
+                    rowHeight={30}
+                    rowCount={playersByPosition.RB.size}
+                    rowRenderer={(args) =>
+                      AuctionPlayerRow({ pos: 'RB', ...args })
+                    }
+                  />
+                )}
+              </AutoSizer>
+            </div>
           </div>
-        </div>
-        <div className='auction__targets-column'>
-          <AuctionTargetHeader pos='WR' />
-          <div className='auction__targets-column-body'>
-            <AutoSizer>
-              {({ height, width }) => (
-                <List
-                  width={width}
-                  height={height}
-                  rowHeight={30}
-                  rowCount={playersByPosition.WR.size}
-                  rowRenderer={(args) =>
-                    AuctionPlayerRow({ pos: 'WR', ...args })
-                  }
-                />
-              )}
-            </AutoSizer>
+        )}
+        {show_wr && (
+          <div className='auction__targets-column'>
+            <AuctionTargetHeader pos='WR' />
+            <div className='auction__targets-column-body'>
+              <AutoSizer>
+                {({ height, width }) => (
+                  <List
+                    width={width}
+                    height={height}
+                    rowHeight={30}
+                    rowCount={playersByPosition.WR.size}
+                    rowRenderer={(args) =>
+                      AuctionPlayerRow({ pos: 'WR', ...args })
+                    }
+                  />
+                )}
+              </AutoSizer>
+            </div>
           </div>
-        </div>
-        <div className='auction__targets-column'>
-          <AuctionTargetHeader pos='TE' />
-          <div className='auction__targets-column-body'>
-            <AutoSizer>
-              {({ height, width }) => (
-                <List
-                  width={width}
-                  height={height}
-                  rowHeight={30}
-                  rowCount={playersByPosition.TE.size}
-                  rowRenderer={(args) =>
-                    AuctionPlayerRow({ pos: 'TE', ...args })
-                  }
-                />
-              )}
-            </AutoSizer>
+        )}
+        {show_te && (
+          <div className='auction__targets-column'>
+            <AuctionTargetHeader pos='TE' />
+            <div className='auction__targets-column-body'>
+              <AutoSizer>
+                {({ height, width }) => (
+                  <List
+                    width={width}
+                    height={height}
+                    rowHeight={30}
+                    rowCount={playersByPosition.TE.size}
+                    rowRenderer={(args) =>
+                      AuctionPlayerRow({ pos: 'TE', ...args })
+                    }
+                  />
+                )}
+              </AutoSizer>
+            </div>
           </div>
-        </div>
-        <div className='auction__targets-column'>
-          <AuctionTargetHeader pos='K' />
-          <div className='auction__targets-column-body'>
-            <AutoSizer>
-              {({ height, width }) => (
-                <List
-                  width={width}
-                  height={height}
-                  rowHeight={30}
-                  rowCount={playersByPosition.K.size}
-                  rowRenderer={(args) =>
-                    AuctionPlayerRow({ pos: 'K', ...args })
-                  }
-                />
-              )}
-            </AutoSizer>
+        )}
+        {show_k && (
+          <div className='auction__targets-column'>
+            <AuctionTargetHeader pos='K' />
+            <div className='auction__targets-column-body'>
+              <AutoSizer>
+                {({ height, width }) => (
+                  <List
+                    width={width}
+                    height={height}
+                    rowHeight={30}
+                    rowCount={playersByPosition.K.size}
+                    rowRenderer={(args) =>
+                      AuctionPlayerRow({ pos: 'K', ...args })
+                    }
+                  />
+                )}
+              </AutoSizer>
+            </div>
           </div>
-        </div>
-        <div className='auction__targets-column'>
-          <AuctionTargetHeader pos='DST' />
-          <div className='auction__targets-column-body'>
-            <AutoSizer>
-              {({ height, width }) => (
-                <List
-                  width={width}
-                  height={height}
-                  rowHeight={30}
-                  rowCount={playersByPosition.DST.size}
-                  rowRenderer={(args) =>
-                    AuctionPlayerRow({ pos: 'DST', ...args })
-                  }
-                />
-              )}
-            </AutoSizer>
+        )}
+        {show_dst && (
+          <div className='auction__targets-column'>
+            <AuctionTargetHeader pos='DST' />
+            <div className='auction__targets-column-body'>
+              <AutoSizer>
+                {({ height, width }) => (
+                  <List
+                    width={width}
+                    height={height}
+                    rowHeight={30}
+                    rowCount={playersByPosition.DST.size}
+                    rowRenderer={(args) =>
+                      AuctionPlayerRow({ pos: 'DST', ...args })
+                    }
+                  />
+                )}
+              </AutoSizer>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   )
@@ -250,5 +268,11 @@ AuctionTargets.propTypes = {
   select: PropTypes.func,
   isNominating: PropTypes.bool,
   players: ImmutablePropTypes.list,
-  nominated_pid: PropTypes.string
+  nominated_pid: PropTypes.string,
+  show_qb: PropTypes.bool,
+  show_rb: PropTypes.bool,
+  show_wr: PropTypes.bool,
+  show_te: PropTypes.bool,
+  show_k: PropTypes.bool,
+  show_dst: PropTypes.bool
 }
