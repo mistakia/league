@@ -36,6 +36,10 @@
 .auction__targets-column-body
   flex 1
 
+body:not(.hide-watchlist)
+  .auction__targets-player:not(.signed).watchlist
+    background lighten(yellow, 80%)
+
 .auction__targets-player
   display flex
   border-left 4px solid transparent
@@ -43,9 +47,6 @@
 
   &.optimal
     border-left 4px solid $accentColor
-
-  &.watchlist
-    background lighten(yellow, 80%)
 
   &.signed
     background lighten(green, 80%)
