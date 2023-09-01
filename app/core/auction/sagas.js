@@ -118,10 +118,10 @@ export function* optimize() {
 }
 
 export function* joinAuction({ type }) {
-  const { leagueId, teamId } = yield select(get_app)
+  const { leagueId, teamId, clientId } = yield select(get_app)
   const message = {
     type,
-    payload: { lid: leagueId, tid: teamId }
+    payload: { lid: leagueId, tid: teamId, clientId }
   }
   send(message)
 }

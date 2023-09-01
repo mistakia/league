@@ -18,6 +18,7 @@ export default class Auction {
     this._teams = []
     this._transactions = []
     this._connected = {}
+    this._connectedClientIds = {}
     this.logger = debug(`auction:league:${lid}`)
   }
 
@@ -60,7 +61,21 @@ export default class Auction {
     return null
   }
 
-  join({ ws, tid, userId, onclose }) {
+  join({ ws, tid, userId, onclose, clientId }) {
+    // if clientId is already connected, ignore
+    if (this._connectedClientIds[clientId]) {
+      this.logger(`clientId ${clientId} already connected`)
+      return
+    }
+
+    if (this._connected[tid]) {
+      this._connected[tid].push(userId)
+    } else {
+      this._connected[tid] = [userId]
+    }
+
+    this._connectedClientIds[clientId] = userId
+
     this.logger(`userId ${userId} joined`)
     ws.on('message', (msg) => {
       const message = JSON.parse(msg)
@@ -106,6 +121,8 @@ export default class Auction {
         if (this._pause_on_team_disconnect) this.pause()
       }
 
+      delete this._connectedClientIds[clientId]
+
       onclose()
 
       this.broadcast({
@@ -115,12 +132,6 @@ export default class Auction {
         }
       })
     })
-
-    if (this._connected[tid]) {
-      this._connected[tid].push(userId)
-    } else {
-      this._connected[tid] = [userId]
-    }
 
     const nominatingTeamId = this.nominatingTeamId
 

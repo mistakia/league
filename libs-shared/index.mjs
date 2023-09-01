@@ -1,41 +1,42 @@
-import weightProjections from './weight-projections.mjs'
-import calculateBaselines from './calculate-baselines.mjs'
-import calculatePoints from './calculate-points.mjs'
-import calculateValues from './calculate-values.mjs'
 import * as constants from './constants.mjs'
-import getEligibleSlots from './get-eligible-slots.mjs'
-import Roster from './roster.mjs'
-import calculateDstStatsFromPlays from './calculate-dst-stats-from-plays.mjs'
-import calculateStatsFromPlayStats from './calculate-stats-from-play-stats.mjs'
-import calculateStatsFromPlays from './calculate-stats-from-plays.mjs'
-import calculatePrices from './calculate-prices.mjs'
-import getRosterSize from './get-roster-size.mjs'
-import getProjectedSnapsRemaining from './get-projected-snaps-remaining.mjs'
-import createDefaultLeague from './create-default-league.mjs'
-import getOptimizerPositionConstraints from './get-optimizer-position-constraints.mjs'
-import isOnReleaseWaivers from './is-on-release-waivers.mjs'
-import fixTeam from './fix-team.mjs'
-import calculatePercentiles from './calculate-percentiles.mjs'
-import getExtensionAmount from './get-extension-amount.mjs'
-import calculateStandings from './calculate-standings.mjs'
-import optimizeStandingsLineup from './optimize-standings-lineup.mjs'
-import getPlayerCountBySlot from './get-player-count-by-slot.mjs'
-import getActiveRosterLimit from './get-active-roster-limit.mjs'
-import isReserveEligible from './is-reserve-eligible.mjs'
-import isReserveCovEligible from './is-reserve-cov-eligible.mjs'
-import isSlotActive from './is-slot-active.mjs'
 import getDraftWindow from './get-draft-window.mjs'
-import getDraftDates from './get-draft-dates.mjs'
-import optimizeLineup from './optimize-lineup.mjs'
-import simulate from './simulate.mjs'
-import groupBy from './group-by.mjs'
-import getFreeAgentPeriod from './get-free-agent-period.mjs'
-import calculatePlayerValuesRestOfSeason from './calculate-player-values-rest-of-season.mjs'
-import getPlayFromPlayStats from './get-play-from-play-stats.mjs'
-import isSantuaryPeriod from './is-santuary-period.mjs'
-import getYardlineInfoFromString from './get-yardline-info-from-string.mjs'
-import * as Errors from './errors.mjs'
-import getGameDayAbbreviation from './get-game-day-abbreviation.mjs'
+
+export { default as weightProjections } from './weight-projections.mjs'
+export { default as calculateBaselines } from './calculate-baselines.mjs'
+export { default as calculatePoints } from './calculate-points.mjs'
+export { default as calculateValues } from './calculate-values.mjs'
+export { default as getEligibleSlots } from './get-eligible-slots.mjs'
+export { default as Roster } from './roster.mjs'
+export { default as calculateDstStatsFromPlays } from './calculate-dst-stats-from-plays.mjs'
+export { default as calculateStatsFromPlayStats } from './calculate-stats-from-play-stats.mjs'
+export { default as calculateStatsFromPlays } from './calculate-stats-from-plays.mjs'
+export { default as calculatePrices } from './calculate-prices.mjs'
+export { default as getRosterSize } from './get-roster-size.mjs'
+export { default as getProjectedSnapsRemaining } from './get-projected-snaps-remaining.mjs'
+export { default as createDefaultLeague } from './create-default-league.mjs'
+export { default as getOptimizerPositionConstraints } from './get-optimizer-position-constraints.mjs'
+export { default as isOnReleaseWaivers } from './is-on-release-waivers.mjs'
+export { default as fixTeam } from './fix-team.mjs'
+export { default as calculatePercentiles } from './calculate-percentiles.mjs'
+export { default as getExtensionAmount } from './get-extension-amount.mjs'
+export { default as calculateStandings } from './calculate-standings.mjs'
+export { default as optimizeStandingsLineup } from './optimize-standings-lineup.mjs'
+export { default as getPlayerCountBySlot } from './get-player-count-by-slot.mjs'
+export { default as getActiveRosterLimit } from './get-active-roster-limit.mjs'
+export { default as isReserveEligible } from './is-reserve-eligible.mjs'
+export { default as isReserveCovEligible } from './is-reserve-cov-eligible.mjs'
+export { default as isSlotActive } from './is-slot-active.mjs'
+export { default as getDraftDates } from './get-draft-dates.mjs'
+export { default as optimizeLineup } from './optimize-lineup.mjs'
+export { default as simulate } from './simulate.mjs'
+export { default as groupBy } from './group-by.mjs'
+export { default as getFreeAgentPeriod } from './get-free-agent-period.mjs'
+export { default as calculatePlayerValuesRestOfSeason } from './calculate-player-values-rest-of-season.mjs'
+export { default as getPlayFromPlayStats } from './get-play-from-play-stats.mjs'
+export { default as isSantuaryPeriod } from './is-santuary-period.mjs'
+export { default as getYardlineInfoFromString } from './get-yardline-info-from-string.mjs'
+export * as Errors from './errors.mjs'
+export { default as getGameDayAbbreviation } from './get-game-day-abbreviation.mjs'
 export { default as getPoachProcessingTime } from './get-poach-processing-time.mjs'
 export { default as formatHeight } from './format-height.mjs'
 export { default as formatPlayerName } from './format-player-name.mjs'
@@ -50,7 +51,7 @@ export { default as generate_scoring_format_hash } from './generate-scoring-form
 export { default as is_league_post_season_week } from './is-league-post-season-week.mjs'
 export { stat_in_year_week } from './stat-in-year-week.mjs'
 
-const uniqBy = (a, key) => {
+export const uniqBy = (a, key) => {
   const seen = new Set()
   return a.filter((item) => {
     const k = item[key]
@@ -58,29 +59,29 @@ const uniqBy = (a, key) => {
   })
 }
 
-const arrayToSentence = (arr) =>
+export const arrayToSentence = (arr) =>
   arr.length > 1
     ? arr.slice(0, arr.length - 1).join(', ') + ', and ' + arr.slice(-1)
     : arr[0]
-const toPercent = (num) => `${((num || 0) * 100).toFixed(1)}%`
+export const toPercent = (num) => `${((num || 0) * 100).toFixed(1)}%`
 
-const formatRoster = (roster) => {
+export const formatRoster = (roster) => {
   const result = new Map()
   Object.keys(roster).forEach(
     (k) => k.startsWith('s') && result.set(k, roster[k])
   )
   return result
 }
-const nth = (n) =>
+export const nth = (n) =>
   ['st', 'nd', 'rd'][((((n + 90) % 100) - 10) % 10) - 1] || 'th'
 
-const toStringArray = (arr) => {
+export const toStringArray = (arr) => {
   return arr.length > 1
     ? arr.slice(0, -1).join(', ') + ', and ' + arr.slice(-1)
     : arr.toString()
 }
 
-const debounce = (callback, wait) => {
+export const debounce = (callback, wait) => {
   let timeout = null
   return (...args) => {
     // eslint-disable-next-line
@@ -90,54 +91,15 @@ const debounce = (callback, wait) => {
   }
 }
 
-const isDraftWindowOpen = (params) =>
+export const isDraftWindowOpen = (params) =>
   constants.season.now.isAfter(getDraftWindow(params))
 
-export {
-  debounce,
-  arrayToSentence,
-  calculateBaselines,
-  calculatePoints,
-  calculateValues,
-  constants,
-  getEligibleSlots,
-  getRosterSize,
-  groupBy,
-  uniqBy,
-  formatRoster,
-  weightProjections,
-  Roster,
-  calculatePrices,
-  calculateStatsFromPlayStats,
-  calculateStatsFromPlays,
-  createDefaultLeague,
-  getProjectedSnapsRemaining,
-  getOptimizerPositionConstraints,
-  calculateDstStatsFromPlays,
-  isOnReleaseWaivers,
-  nth,
-  toStringArray,
-  fixTeam,
-  toPercent,
-  calculatePercentiles,
-  getExtensionAmount,
-  calculateStandings,
-  optimizeStandingsLineup,
-  getPlayerCountBySlot,
-  getActiveRosterLimit,
-  isReserveEligible,
-  isReserveCovEligible,
-  isSlotActive,
-  getDraftWindow,
-  isDraftWindowOpen,
-  getDraftDates,
-  Errors,
-  optimizeLineup,
-  simulate,
-  getFreeAgentPeriod,
-  calculatePlayerValuesRestOfSeason,
-  isSantuaryPeriod,
-  getYardlineInfoFromString,
-  getPlayFromPlayStats,
-  getGameDayAbbreviation
-}
+export const uuidv4 = () =>
+  ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
+    (
+      c ^
+      (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
+    ).toString(16)
+  )
+
+export { constants, getDraftWindow }
