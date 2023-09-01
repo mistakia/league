@@ -18,7 +18,7 @@ const mapStateToProps = createSelector(
 
     return {
       remaining_salary_space: rosters.reduce((acc, roster) => {
-        return acc + roster.availableCap
+        return acc + (roster.availableCap > 0 ? roster.availableCap : 0)
       }, 0),
       remaining_active_roster_space: rosters.reduce((acc, roster) => {
         return acc + roster.availableSpace
