@@ -227,6 +227,8 @@ export const getAuctionInfoForPosition = createSelector(
       active_pids.includes(pMap.get('pid'))
     )
 
+    // TODO remove other rostered players (reserve & psquad) from the pts_added and retail totals
+
     const total_pts_added = playerMaps.reduce(
       (a, b) => a + Math.max(b.getIn(['pts_added', '0']) || 0, 0),
       0
