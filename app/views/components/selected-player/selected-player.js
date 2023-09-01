@@ -99,7 +99,12 @@ export default class SelectedPlayer extends React.Component {
   }
 
   render = () => {
-    const { playerMap, isLoggedIn } = this.props
+    const {
+      playerMap,
+      isLoggedIn,
+      market_salary_adjusted,
+      is_before_end_of_free_agent_period
+    } = this.props
     const { value } = this.state
 
     const blacklist = ['0', 'ros']
@@ -138,16 +143,10 @@ export default class SelectedPlayer extends React.Component {
           <PlayerWatchlistAction pid={pid} />
           <div className='selected__player-header-secondary'>
             <div className='selected__player-header-section'>
-              {isLoggedIn && (
+              {isLoggedIn && Boolean(tid) && (
                 <div className='selected__player-header-item'>
                   <label>Manager</label>
-                  {tid ? <TeamName abbrv tid={tid} /> : '-'}
-                </div>
-              )}
-              {isLoggedIn && (
-                <div className='selected__player-header-item'>
-                  <label>Salary</label>
-                  {playerValue ? `$${playerValue}` : '-'}
+                  <TeamName abbrv tid={tid} />
                 </div>
               )}
               <div className='selected__player-header-item'>
@@ -156,6 +155,23 @@ export default class SelectedPlayer extends React.Component {
                   ? playerStatus
                   : playerMap.get('gamestatus') || 'Active'}
               </div>
+              {isLoggedIn && Boolean(tid) && (
+                <div className='selected__player-header-item'>
+                  <label>Salary</label>
+                  {playerValue ? `$${playerValue}` : '-'}
+                </div>
+              )}
+              {constants.season.isOffseason && (
+                <div className='selected__player-header-item'>
+                  <label>Market</label>$
+                  {playerMap.getIn(['market_salary', '0'], 0)}
+                </div>
+              )}
+              {is_before_end_of_free_agent_period && (
+                <div className='selected__player-header-item'>
+                  <label>Adjusted</label>${market_salary_adjusted}
+                </div>
+              )}
               <div className='selected__player-header-item'>
                 <label>Age</label>
                 <PlayerAge date={playerMap.get('dob')} />
@@ -276,5 +292,7 @@ export default class SelectedPlayer extends React.Component {
 SelectedPlayer.propTypes = {
   deselect: PropTypes.func,
   playerMap: ImmutablePropTypes.map,
-  isLoggedIn: PropTypes.bool
+  isLoggedIn: PropTypes.bool,
+  market_salary_adjusted: PropTypes.number,
+  is_before_end_of_free_agent_period: PropTypes.bool
 }
