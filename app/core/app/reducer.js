@@ -3,13 +3,14 @@ import Bugsnag from '@bugsnag/js'
 
 import { appActions } from './actions'
 import { settingActions } from '@core/settings'
-import { constants } from '@libs-shared'
+import { constants, uuidv4 } from '@libs-shared'
 import { rosterActions } from '@core/rosters'
 import { teamActions } from '@core/teams'
 
 const initialState = new Record({
   token: null,
   userId: 0,
+  clientId: uuidv4(),
   year: constants.year,
   teamId: undefined,
   leagueId: constants.DEFAULTS.LEAGUE_ID,

@@ -20,7 +20,7 @@ export default function (wss) {
         return
       }
 
-      const { lid, tid } = message.payload
+      const { lid, tid, clientId } = message.payload
       const auction = auctions.get(lid)
 
       const onclose = () => {
@@ -31,12 +31,12 @@ export default function (wss) {
       }
 
       if (auction) {
-        auction.join({ ws, tid, userId, onclose })
+        auction.join({ ws, tid, userId, onclose, clientId })
       } else {
         const auction = new Auction({ wss, lid })
         auctions.set(lid, auction)
         await auction.setup()
-        auction.join({ ws, tid, userId, onclose })
+        auction.join({ ws, tid, userId, onclose, clientId })
       }
     })
   })
