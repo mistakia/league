@@ -16,10 +16,17 @@ export default class AuctionTargetHeader extends React.Component {
         : 0
 
     const positive = inflation >= 0
+    const has_position = Boolean(pos)
+    const positive_text = `A positive value indicates rostered player salaries ${
+      has_position ? 'at this position' : ''
+    } are below market salaries.`
+    const negative_text = `A negative value indicates rostered player salaries ${
+      has_position ? 'at this position' : ''
+    } are above market salaries.`
 
     return (
       <div className='auction__target-header'>
-        {Boolean(pos) && <Position pos={pos} />}
+        {has_position && <Position pos={pos} />}
         <div className='auction__target-header-scarcity'>
           <Tooltip title='Positional Value Remaining' placement='bottom'>
             <span>
@@ -45,7 +52,9 @@ export default class AuctionTargetHeader extends React.Component {
         </div>
         <div className='auction__target-header-inflation'>
           <Tooltip
-            title='Positional Salary Inflation. A positive value indicates rostered player salaries at this position are below market salaries'
+            title={`Positional Salary Inflation. ${
+              positive ? positive_text : negative_text
+            }`}
             placement='bottom'
           >
             <span>
