@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 import Button from '@mui/material/Button'
@@ -46,247 +46,223 @@ const getHeadshotWidth = () => {
 
 const showCollapse = () => window.innerWidth < 750
 
-export default class SelectedPlayer extends React.Component {
-  constructor(props) {
-    super(props)
+export default function SelectedPlayer({
+  playerMap,
+  isLoggedIn,
+  market_salary_adjusted,
+  is_before_end_of_free_agent_period,
+  deselect
+}) {
+  const projectionView = 0
+  const transactionsView = 6
+  const gamelogsView = 1
+  const [value, setValue] = useState(
+    isLoggedIn
+      ? constants.isRegularSeason
+        ? projectionView
+        : transactionsView
+      : gamelogsView
+  )
+  const [headshot_width, setHeadshotWidth] = useState(getHeadshotWidth())
+  const [show_collapse, setShowCollapse] = useState(showCollapse())
+  const [collapsed, setCollapsed] = useState(showCollapse())
 
-    const projectionView = 0
-    const transactionsView = 6
-    const gamelogsView = 1
-    this.state = {
-      value: props.isLoggedIn
-        ? constants.isRegularSeason
-          ? projectionView
-          : transactionsView
-        : gamelogsView,
-      headshot_width: getHeadshotWidth(),
-      show_collapse: showCollapse(),
-      collapsed: showCollapse()
+  const update = () => {
+    setHeadshotWidth(getHeadshotWidth())
+    setShowCollapse(showCollapse())
+    setCollapsed(showCollapse())
+  }
+
+  useEffect(() => {
+    window.addEventListener('resize', update)
+    return () => {
+      window.removeEventListener('resize', update)
     }
-  }
+  }, [])
 
-  update = () => {
-    this.setState({
-      headshot_width: getHeadshotWidth(),
-      show_collapse: showCollapse(),
-      collapsed: showCollapse()
-    })
-  }
+  const handleChange = (event, value) => setValue(value)
+  const handleToggleExpand = (event) => setCollapsed(!collapsed)
+  const handleClose = () => deselect()
 
-  componentDidMount = () => {
-    window.addEventListener('resize', this.update)
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener('resize', this.update)
-  }
-
-  handleChange = (event, value) => {
-    this.setState({ value })
-  }
-
-  handleToggleExpand = (event) => {
-    this.setState({ collapsed: !this.state.collapsed })
-  }
-
-  handleClose = () => {
-    this.props.deselect()
-  }
-
-  componentDidUpdate() {
+  useEffect(() => {
     const element = document.querySelector('.TabUnstyled-root.Mui-selected')
     if (element) element.scrollIntoView({ behavior: 'smooth' })
-  }
+  }, [value])
 
-  render = () => {
-    const {
-      playerMap,
-      isLoggedIn,
-      market_salary_adjusted,
-      is_before_end_of_free_agent_period
-    } = this.props
-    const { value } = this.state
+  const blacklist = ['0', 'ros']
+  const projWks = playerMap
+    .get('projection', new Map())
+    .keySeq()
+    .toArray()
+    .filter((week) => !blacklist.includes(week)).length
 
-    const blacklist = ['0', 'ros']
-    const projWks = playerMap
-      .get('projection', new Map())
-      .keySeq()
-      .toArray()
-      .filter((week) => !blacklist.includes(week)).length
+  const pos = playerMap.get('pos')
+  const pid = playerMap.get('pid')
+  const tid = playerMap.get('tid', false)
+  const playerStatus = playerMap.get('status')
+  const draftNum = playerMap.get('dpos')
+  const draftYear = playerMap.get('start')
+  const draftRound = playerMap.get('round')
+  const playerValue = playerMap.get('value')
+  const rosPoints = playerMap.getIn(['points', 'ros', 'total'], 0)
 
-    const pos = playerMap.get('pos')
-    const pid = playerMap.get('pid')
-    const tid = playerMap.get('tid', false)
-    const playerStatus = playerMap.get('status')
-    const draftNum = playerMap.get('dpos')
-    const draftYear = playerMap.get('start')
-    const draftRound = playerMap.get('round')
-    const playerValue = playerMap.get('value')
-    const rosPoints = playerMap.getIn(['points', 'ros', 'total'], 0)
-
-    return (
-      <Drawer
-        anchor='bottom'
-        open={Boolean(pid)}
-        onClose={this.handleClose}
-        classes={{
-          paper: 'selected__player-paper'
-        }}
-      >
-        <div className='selected__player-header'>
-          <PlayerName
-            large
-            headshot_width={this.state.headshot_width}
-            headshot_square={window.innerWidth < 900}
-            playerMap={playerMap}
-          />
-          <PlayerWatchlistAction pid={pid} />
-          <div className='selected__player-header-secondary'>
-            <div className='selected__player-header-section'>
-              {isLoggedIn && Boolean(tid) && (
-                <div className='selected__player-header-item'>
-                  <label>Manager</label>
-                  <TeamName abbrv tid={tid} />
-                </div>
-              )}
+  return (
+    <Drawer
+      anchor='bottom'
+      open={Boolean(pid)}
+      onClose={handleClose}
+      classes={{
+        paper: 'selected__player-paper'
+      }}
+    >
+      <div className='selected__player-header'>
+        <PlayerName
+          large
+          headshot_width={headshot_width}
+          headshot_square={window.innerWidth < 900}
+          playerMap={playerMap}
+        />
+        <PlayerWatchlistAction pid={pid} />
+        <div className='selected__player-header-secondary'>
+          <div className='selected__player-header-section'>
+            {isLoggedIn && Boolean(tid) && (
               <div className='selected__player-header-item'>
-                <label>Status</label>
-                {constants.status[playerStatus]
-                  ? playerStatus
-                  : playerMap.get('gamestatus') || 'Active'}
+                <label>Manager</label>
+                <TeamName abbrv tid={tid} />
               </div>
-              {isLoggedIn && Boolean(tid) && (
-                <div className='selected__player-header-item'>
-                  <label>Salary</label>
-                  {playerValue ? `$${playerValue}` : '-'}
-                </div>
-              )}
-              {constants.season.isOffseason && (
-                <div className='selected__player-header-item'>
-                  <label>Market</label>$
-                  {playerMap.getIn(['market_salary', '0'], 0)}
-                </div>
-              )}
-              {is_before_end_of_free_agent_period && (
-                <div className='selected__player-header-item'>
-                  <label>Adjusted</label>${market_salary_adjusted}
-                </div>
-              )}
-              <div className='selected__player-header-item'>
-                <label>Age</label>
-                <PlayerAge date={playerMap.get('dob')} />
-              </div>
-              {isLoggedIn &&
-                (this.state.show_collapse ? !this.state.collapsed : true) && (
-                  <>
-                    <div className='selected__player-header-item'>
-                      <label>Projected Starts</label>
-                      {playerMap.getIn(['lineups', 'starts'], '-')}
-                    </div>
-                    <div className='selected__player-header-item'>
-                      <label>Projected Points+</label>
-                      {playerMap.getIn(['lineups', 'sp'], 0).toFixed(1)}
-                    </div>
-                    <div className='selected__player-header-item'>
-                      <label>Projected Bench+</label>
-                      {playerMap.getIn(['lineups', 'bp'], 0).toFixed(1)}
-                    </div>
-                  </>
-                )}
-              {(this.state.show_collapse ? !this.state.collapsed : true) && (
-                <>
-                  <div className='selected__player-header-item'>
-                    <label>Proj/G</label>
-                    {rosPoints && projWks
-                      ? (rosPoints / projWks).toFixed(1)
-                      : '-'}
-                  </div>
-                  <div className='selected__player-header-item'>
-                    <label>Draft</label>
-                    {draftNum ? `Rd ${draftRound} (#${draftNum})` : 'UDFA'}
-                  </div>
-                  <div className='selected__player-header-item'>
-                    <label>Exp.</label>
-                    {constants.year - draftYear || 'Rookie'}
-                  </div>
-                </>
-              )}
-              {this.state.show_collapse && (
-                <IconButton onClick={this.handleToggleExpand}>
-                  {this.state.collapsed ? (
-                    <ExpandMoreIcon />
-                  ) : (
-                    <ExpandLessIcon />
-                  )}
-                </IconButton>
-              )}
-              {isLoggedIn && (
-                <PlayerContextMenu pid={pid} hideDisabled buttonGroup />
-              )}
+            )}
+            <div className='selected__player-header-item'>
+              <label>Status</label>
+              {constants.status[playerStatus]
+                ? playerStatus
+                : playerMap.get('gamestatus') || 'Active'}
             </div>
+            {isLoggedIn && Boolean(tid) && (
+              <div className='selected__player-header-item'>
+                <label>Salary</label>
+                {playerValue ? `$${playerValue}` : '-'}
+              </div>
+            )}
+            {constants.season.isOffseason && (
+              <div className='selected__player-header-item'>
+                <label>Market</label>$
+                {playerMap.getIn(['market_salary', '0'], 0)}
+              </div>
+            )}
+            {is_before_end_of_free_agent_period && (
+              <div className='selected__player-header-item'>
+                <label>Adjusted</label>${market_salary_adjusted}
+              </div>
+            )}
+            <div className='selected__player-header-item'>
+              <label>Age</label>
+              <PlayerAge date={playerMap.get('dob')} />
+            </div>
+            {isLoggedIn && (show_collapse ? !collapsed : true) && (
+              <>
+                <div className='selected__player-header-item'>
+                  <label>Projected Starts</label>
+                  {playerMap.getIn(['lineups', 'starts'], '-')}
+                </div>
+                <div className='selected__player-header-item'>
+                  <label>Projected Points+</label>
+                  {playerMap.getIn(['lineups', 'sp'], 0).toFixed(1)}
+                </div>
+                <div className='selected__player-header-item'>
+                  <label>Projected Bench+</label>
+                  {playerMap.getIn(['lineups', 'bp'], 0).toFixed(1)}
+                </div>
+              </>
+            )}
+            {(show_collapse ? !collapsed : true) && (
+              <>
+                <div className='selected__player-header-item'>
+                  <label>Proj/G</label>
+                  {rosPoints && projWks
+                    ? (rosPoints / projWks).toFixed(1)
+                    : '-'}
+                </div>
+                <div className='selected__player-header-item'>
+                  <label>Draft</label>
+                  {draftNum ? `Rd ${draftRound} (#${draftNum})` : 'UDFA'}
+                </div>
+                <div className='selected__player-header-item'>
+                  <label>Exp.</label>
+                  {constants.year - draftYear || 'Rookie'}
+                </div>
+              </>
+            )}
+            {show_collapse && (
+              <IconButton onClick={handleToggleExpand}>
+                {collapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}
+              </IconButton>
+            )}
+            {isLoggedIn && (
+              <PlayerContextMenu pid={pid} hideDisabled buttonGroup />
+            )}
           </div>
-          <Button className='selected__player-close' onClick={this.handleClose}>
-            <CloseIcon />
-          </Button>
         </div>
-        <div className='selected__player-main'>
-          <Tabs
-            orientation='horizontal'
-            variant='scrollable'
-            value={value}
-            className='selected__player-menu'
-            onChange={this.handleChange}
-            defaultValue={0}
-          >
-            <TabsList>
-              <Tab>Projections</Tab>
-              <Tab>Games</Tab>
-              <Tab>Seasons</Tab>
-              <Tab>Schedule</Tab>
-              {/* <Tab>Team Splits</Tab> */}
-              {/* <Tab>Efficiency</Tab> */}
-              <Tab>Practice</Tab>
-              {isLoggedIn && <Tab>Contribution</Tab>}
-              {isLoggedIn && <Tab>Value</Tab>}
-              {isLoggedIn && <Tab>Transactions</Tab>}
-            </TabsList>
-            <TabPanel value={0}>
-              <SelectedPlayerProjections />
-            </TabPanel>
-            <TabPanel value={1}>
-              <SelectedPlayerGamelogs />
-            </TabPanel>
-            <TabPanel value={2}>
-              <SelectedPlayerSeasonStats pos={pos} />
-            </TabPanel>
-            <TabPanel value={3}>
-              <SelectedPlayerSchedule />
-            </TabPanel>
-            {/* <TabPanel value={4}>
-                <SelectedPlayerTeamStats />
-                <SelectedPlayerTeamSituationSplits />
-                <SelectedPlayerTeamPositionSplits />
-                </TabPanel> */}
-            {/* <TabPanel value={5}>
-                <SelectedPlayerEfficiencyStats />
-                </TabPanel> */}
-            <TabPanel value={4}>
-              <SelectedPlayerPractice />
-            </TabPanel>
-            <TabPanel value={5}>
-              <SelectedPlayerLineupImpact />
-            </TabPanel>
-            <TabPanel value={6}>
-              <SelectedPlayerValue />
-            </TabPanel>
-            <TabPanel value={7}>
-              <SelectedPlayerTransactions />
-            </TabPanel>
-          </Tabs>
-        </div>
-      </Drawer>
-    )
-  }
+        <Button className='selected__player-close' onClick={handleClose}>
+          <CloseIcon />
+        </Button>
+      </div>
+      <div className='selected__player-main'>
+        <Tabs
+          orientation='horizontal'
+          variant='scrollable'
+          value={value}
+          className='selected__player-menu'
+          onChange={handleChange}
+          defaultValue={0}
+        >
+          <TabsList>
+            <Tab>Projections</Tab>
+            <Tab>Games</Tab>
+            <Tab>Seasons</Tab>
+            <Tab>Schedule</Tab>
+            {/* <Tab>Team Splits</Tab> */}
+            {/* <Tab>Efficiency</Tab> */}
+            <Tab>Practice</Tab>
+            {isLoggedIn && <Tab>Contribution</Tab>}
+            {isLoggedIn && <Tab>Value</Tab>}
+            {isLoggedIn && <Tab>Transactions</Tab>}
+          </TabsList>
+          <TabPanel value={0}>
+            <SelectedPlayerProjections />
+          </TabPanel>
+          <TabPanel value={1}>
+            <SelectedPlayerGamelogs />
+          </TabPanel>
+          <TabPanel value={2}>
+            <SelectedPlayerSeasonStats pos={pos} />
+          </TabPanel>
+          <TabPanel value={3}>
+            <SelectedPlayerSchedule />
+          </TabPanel>
+          {/* <TabPanel value={4}>
+              <SelectedPlayerTeamStats />
+              <SelectedPlayerTeamSituationSplits />
+              <SelectedPlayerTeamPositionSplits />
+              </TabPanel> */}
+          {/* <TabPanel value={5}>
+              <SelectedPlayerEfficiencyStats />
+              </TabPanel> */}
+          <TabPanel value={4}>
+            <SelectedPlayerPractice />
+          </TabPanel>
+          <TabPanel value={5}>
+            <SelectedPlayerLineupImpact />
+          </TabPanel>
+          <TabPanel value={6}>
+            <SelectedPlayerValue />
+          </TabPanel>
+          <TabPanel value={7}>
+            <SelectedPlayerTransactions />
+          </TabPanel>
+        </Tabs>
+      </div>
+    </Drawer>
+  )
 }
 
 SelectedPlayer.propTypes = {
