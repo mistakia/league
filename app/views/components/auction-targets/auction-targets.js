@@ -16,6 +16,7 @@ import PlayerWatchlistAction from '@components/player-watchlist-action'
 import AuctionTargetHeader from '@components/auction-target-header'
 import PlayerName from '@components/player-name'
 import SearchFilter from '@components/search-filter'
+import AuctionLeagueStats from '@components/auction-league-stats'
 
 import './auction-targets.styl'
 
@@ -112,6 +113,7 @@ export default function AuctionTargets({
             label='Muted'
           />
         </FormGroup>
+        <AuctionLeagueStats />
       </div>
       <div className='auction__targets-body'>
         <div className='auction__targets-column'>
