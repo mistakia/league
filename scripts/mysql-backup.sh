@@ -56,10 +56,15 @@ waivers"
 
 DB_CACHE_TABLES="
 league_baselines
+league_formats
+league_scoring_formats
 league_format_player_careerlogs
 league_format_player_gamelogs
+league_format_player_seasonlogs
 league_player_seasonlogs
 scoring_format_player_projection_points
+league_format_player_projection_values
+league_format_draft_pick_value
 league_player_projection_values
 league_team_forecast
 league_team_lineup_contribution_weeks
