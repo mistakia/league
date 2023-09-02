@@ -205,8 +205,7 @@ export default class AuctionMainBid extends React.Component {
     } else {
       main = (
         <div className='auction__text'>
-          Waiting for a player to be nominated by{' '}
-          <TeamName tid={nominatingTeamId} abbrv />
+          Waiting for a nomination by <TeamName tid={nominatingTeamId} abbrv />
         </div>
       )
     }
