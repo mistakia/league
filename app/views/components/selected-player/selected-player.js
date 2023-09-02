@@ -51,7 +51,8 @@ export default function SelectedPlayer({
   isLoggedIn,
   market_salary_adjusted,
   is_before_end_of_free_agent_period,
-  deselect
+  deselect,
+  loadAllPlayers
 }) {
   const projectionView = 0
   const transactionsView = 6
@@ -79,6 +80,12 @@ export default function SelectedPlayer({
       window.removeEventListener('resize', update)
     }
   }, [])
+
+  useEffect(() => {
+    if (is_before_end_of_free_agent_period) {
+      loadAllPlayers()
+    }
+  }, [is_before_end_of_free_agent_period, loadAllPlayers])
 
   const handleChange = (event, value) => setValue(value)
   const handleToggleExpand = (event) => setCollapsed(!collapsed)
@@ -270,5 +277,6 @@ SelectedPlayer.propTypes = {
   playerMap: ImmutablePropTypes.map,
   isLoggedIn: PropTypes.bool,
   market_salary_adjusted: PropTypes.number,
-  is_before_end_of_free_agent_period: PropTypes.bool
+  is_before_end_of_free_agent_period: PropTypes.bool,
+  loadAllPlayers: PropTypes.func
 }
