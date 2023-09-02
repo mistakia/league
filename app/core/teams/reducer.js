@@ -12,17 +12,19 @@ const initialState = new Map()
 export function teamsReducer(state = initialState, { payload, type }) {
   switch (type) {
     case appActions.AUTH_FULFILLED:
+    case teamActions.GET_TEAMS_FULFILLED:
       return state.withMutations((state) => {
-        payload.data.teams.forEach((t) => state.set(t.uid, createTeam(t)))
+        payload.data.teams.forEach((t) => {
+          if (state.has(t.uid)) {
+            state.set(t.uid, state.get(t.uid).merge(t))
+          } else {
+            state.set(t.uid, createTeam(t))
+          }
+        })
       })
 
     case appActions.LOGOUT:
       return initialState
-
-    case teamActions.GET_TEAMS_FULFILLED:
-      return state.withMutations((state) => {
-        payload.data.teams.forEach((t) => state.set(t.uid, createTeam(t)))
-      })
 
     case auctionActions.AUCTION_PROCESSED: {
       const newCap = state.get(payload.tid).get('cap') - payload.value
@@ -112,7 +114,10 @@ export function teamsReducer(state = initialState, { payload, type }) {
               team.setIn(['stats', stats.year], new Map(stats))
             )
           } else {
-            state.set(stats.tid, createTeam({ stats }))
+            state.set(
+              stats.tid,
+              createTeam({ ...stats, uid: stats.tid, stats })
+            )
           }
         })
       })

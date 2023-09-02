@@ -2586,7 +2586,7 @@ export function getDraftPickById(state, { pickId }) {
 export function getOverallStandings(state) {
   const { year } = get_app(state)
   const teams = getTeamsForCurrentLeague(state)
-  const divisionTeams = teams.groupBy((x) => x.getIn(['stats', year, 'div'], 0))
+  const divisionTeams = teams.groupBy((x) => x.getIn(['div'], 0))
   let divisionLeaders = new List()
   for (const teams of divisionTeams.values()) {
     const sorted = teams.sort(
@@ -2597,10 +2597,13 @@ export function getOverallStandings(state) {
           a.getIn(['stats', year, 'ties'], 0) ||
         b.getIn(['stats', year, 'pf'], 0) - a.getIn(['stats', year, 'pf'], 0)
     )
-    divisionLeaders = divisionLeaders.push(sorted.first())
+
+    // top two teams
+    divisionLeaders = divisionLeaders.push(sorted.toList().get(0, new Map()))
+    divisionLeaders = divisionLeaders.push(sorted.toList().get(1, new Map()))
   }
 
-  const sortedDivisionLeaders = divisionLeaders.sort(
+  let sortedDivisionLeaders = divisionLeaders.sort(
     (a, b) =>
       b.getIn(['stats', year, 'apWins'], 0) -
         a.getIn(['stats', year, 'apWins'], 0) ||
@@ -2608,6 +2611,20 @@ export function getOverallStandings(state) {
         a.getIn(['stats', year, 'apTies'], 0) ||
       b.getIn(['stats', year, 'pf'], 0) - a.getIn(['stats', year, 'pf'], 0)
   )
+
+  // TODO cleanup
+  // if the 2nd ranked team in sortedDivisionLeaders is from the same division as the first, swap it with the 3rd ranked team
+  if (
+    sortedDivisionLeaders.get(0).get('div') ===
+    sortedDivisionLeaders.get(1).get('div')
+  ) {
+    const temp = sortedDivisionLeaders.get(1)
+    sortedDivisionLeaders = sortedDivisionLeaders.set(
+      1,
+      sortedDivisionLeaders.get(2)
+    )
+    sortedDivisionLeaders = sortedDivisionLeaders.set(2, temp)
+  }
 
   const playoffTeamTids = divisionLeaders.map((p) => p.uid)
   const wildcardTeams = teams

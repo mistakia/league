@@ -234,7 +234,7 @@ const calculateStandings = ({
 
   // calculate regular season finish
 
-  // top 4 teams are division winners sorted by all play record
+  // TODO - top 2 teams are division winners, one from each top two division leader with best all-play record
   const div_winners = Object.values(teamStats)
     .filter((p) => p.stats.division_finish === 1)
     .sort((a, b) => b.stats.apWins - a.stats.apWins)
