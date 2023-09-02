@@ -146,30 +146,35 @@ export function getTeamBid(state, { tid }) {
   return bid ? bid.value : null
 }
 
-export function getAuctionTargetPlayers(state) {
-  const playerMaps = state.get('players').get('items')
-  const rostered_pids = getRosteredPlayerIdsForCurrentLeague(state)
-  const auction = state.get('auction')
-  const search = auction.get('search')
-  const currentPlayers = getCurrentPlayers(state)
+export const getAuctionTargetPlayers = createSelector(
+  (state) => state.get('players').get('items'),
+  getRosteredPlayerIdsForCurrentLeague,
+  (state) => state.get('auction'),
+  getCurrentPlayers,
+  (playerMaps, rostered_pids, auction, currentPlayers) => {
+    let filtered = playerMaps
+    filtered = filtered.filter(
+      (pMap) => !rostered_pids.includes(pMap.get('pid'))
+    )
+    for (const playerMap of currentPlayers.active) {
+      const pid = playerMap.get('pid')
+      if (!pid) continue
+      filtered = filtered.set(pid, playerMap)
+    }
 
-  let filtered = playerMaps
-  filtered = filtered.filter((pMap) => !rostered_pids.includes(pMap.get('pid')))
-  for (const playerMap of currentPlayers.active) {
-    const pid = playerMap.get('pid')
-    if (!pid) continue
-    filtered = filtered.set(pid, playerMap)
+    const search = auction.get('search')
+    if (search) {
+      filtered = filtered.filter((pMap) =>
+        fuzzySearch(search, pMap.get('name', ''))
+      )
+    }
+    return filtered.sort(
+      (a, b) =>
+        b.getIn(['pts_added', '0'], constants.default_points_added) -
+        a.getIn(['pts_added', '0'], constants.default_points_added)
+    )
   }
-
-  if (search) {
-    filtered = filtered.filter((pMap) => fuzzySearch(search, pMap.get('name')))
-  }
-  return filtered.sort(
-    (a, b) =>
-      b.getIn(['pts_added', '0'], constants.default_points_added) -
-      a.getIn(['pts_added', '0'], constants.default_points_added)
-  )
-}
+)
 
 export const getAuctionPosition = createSelector(
   (state) => state.getIn(['auction', 'transactions']),
