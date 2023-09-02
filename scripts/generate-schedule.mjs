@@ -10,9 +10,9 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('generate-schedule')
 debug.enable('generate-schedule')
 
-const run = async ({ lid }) => {
+const run = async ({ lid, random_seed }) => {
   log(`generating schedule for league: ${lid}`)
-  await generateSchedule({ lid })
+  await generateSchedule({ lid, random_seed })
 }
 
 const main = async () => {
@@ -23,7 +23,11 @@ const main = async () => {
       console.log('missing --lid')
       return
     }
-    await run({ lid })
+
+    const block_timestamp = argv.block_timestamp
+    const block_reward = argv.block_reward
+    const random_seed = block_timestamp + block_reward
+    await run({ lid, random_seed })
   } catch (err) {
     error = err
     console.log(error)

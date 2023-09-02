@@ -1,10 +1,16 @@
+import ed25519 from '@trashman/ed25519-blake2b'
+
 import { constants } from '#libs-shared'
 
 // fully random by @BetonMAN
-const shuffleArray = (arr) =>
+// random_seed = ethereum_block_timestsamp + ethereum_block_reward
+const shuffleArray = (arr, random_seed = Math.random() * 1000000) =>
   arr
-    .map((a) => [Math.random(), a])
-    .sort((a, b) => a[0] - b[0])
+    .map((a, index) => [
+      ed25519.hash(`${random_seed}${index}`).toString('hex'),
+      a
+    ])
+    .sort((a, b) => a[0].localeCompare(b[0]))
     .map((a) => a[1])
 
 const getInterSched = (div1, div2, divOffsets) => {
@@ -61,7 +67,7 @@ const getIntraSched = (div1, div2, divOffset = 1) => {
 // should return an array of 14 arrays of matchup objects with home and away properties
 // each week there should be teams.length / 2 matchups
 
-const getSchedule = (teams) => {
+const getSchedule = (teams, random_seed) => {
   const num_weeks = constants.season.regularSeasonFinalWeek
 
   const divisions = {}
@@ -72,7 +78,7 @@ const getSchedule = (teams) => {
 
   // shuffle each division
   for (const div of Object.keys(divisions)) {
-    divisions[div] = shuffleArray(divisions[div])
+    divisions[div] = shuffleArray(divisions[div], random_seed)
   }
 
   const num_divisions = Object.keys(divisions).length
@@ -155,7 +161,7 @@ const getSchedule = (teams) => {
     }
   }
 
-  return shuffleArray(schedule)
+  return shuffleArray(schedule, random_seed)
 }
 
 export default getSchedule
