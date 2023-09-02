@@ -43,6 +43,9 @@ export default class AuctionTeam extends React.Component {
           <TeamName abbrv color tid={team.uid} />
         </div>
         <div className='auction__team-cap'>${roster.availableCap}</div>
+        <div className='auction__team-roster-space'>
+          {roster.availableSpace}
+        </div>
         {hasBid && <div className='auction__team-bid'>$ {bid}</div>}
       </div>
     )
