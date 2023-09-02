@@ -226,13 +226,21 @@ export const getAuctionInfoForPosition = createSelector(
     get_player_maps(state).filter((pMap) =>
       pos ? pMap.get('pos') === pos : true
     ),
+  getRosteredPlayerIdsForCurrentLeague,
   getActiveRosterPlayerIdsForCurrentLeague,
-  (playerMaps, active_pids) => {
+  (playerMaps, rostered_pids, active_roster_pids) => {
     const rostered = playerMaps.filter((pMap) =>
-      active_pids.includes(pMap.get('pid'))
+      rostered_pids.includes(pMap.get('pid'))
+    )
+    const active_rostered = playerMaps.filter((pMap) =>
+      active_roster_pids.includes(pMap.get('pid'))
     )
 
-    // TODO remove other rostered players (reserve & psquad) from the pts_added and retail totals
+    const available_players_above_baseline = playerMaps.filter(
+      (pMap) =>
+        pMap.getIn(['pts_added', '0'], 0) > 0 &&
+        !rostered_pids.includes(pMap.get('pid'))
+    )
 
     const total_pts_added = playerMaps.reduce(
       (a, b) => a + Math.max(b.getIn(['pts_added', '0']) || 0, 0),
@@ -242,18 +250,20 @@ export const getAuctionInfoForPosition = createSelector(
       (a, b) => a + Math.max(b.getIn(['pts_added', '0']) || 0, 0),
       0
     )
-    const retail = rostered.reduce(
+    const retail = active_rostered.reduce(
       (sum, playerMap) => sum + (playerMap.getIn(['market_salary', '0']) || 0),
       0
     )
-    const actual = rostered.reduce(
+    const actual = active_rostered.reduce(
       (sum, playerMap) => sum + (playerMap.get('value') || 0),
       0
     )
     return {
       count: {
         total: playerMaps.size,
-        rostered: rostered.size
+        rostered: rostered.size,
+        total_available_players_above_baseline:
+          available_players_above_baseline.size
       },
       pts_added: {
         total: total_pts_added,
