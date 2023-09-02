@@ -57,6 +57,8 @@ router.post('/?', async (req, res) => {
 
     // if active roster, verify not during FA Auction Period
     const league = await getLeague({ lid: leagueId })
+    const is_commish = league.commishid === req.auth.userId
+
     if (league.free_agency_live_auction_start) {
       const rosterRow = await getRoster({ tid })
       const roster = new Roster({ roster: rosterRow, league })
@@ -73,7 +75,8 @@ router.post('/?', async (req, res) => {
       if (
         constants.season.now.isAfter(faPeriod.start) &&
         constants.season.now.isBefore(faPeriod.end) &&
-        isOnActiveRoster
+        isOnActiveRoster &&
+        !is_commish
       ) {
         return res.status(400).send({
           error: 'Unable to release player from active roster during FA period'
