@@ -93,6 +93,7 @@ export function playersReducer(state = initialState, { payload, type }) {
     case playerActions.PLAYERS_SELECT_PLAYER:
       return state.merge({ selected: payload.pid })
 
+    case auctionActions.AUCTION_SELECT_PLAYER:
     case playerActions.PLAYERS_DESELECT_PLAYER:
       return state.merge({ selected: null })
 

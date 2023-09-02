@@ -6,7 +6,15 @@ import { rosterActions } from '@core/rosters'
 import { confirmationActions } from '@core/confirmations'
 import { waiverActions } from '@core/waivers'
 import { playerActions } from '@core/players'
-import { getPlayerStatus, getPlayers, getPlayerById } from '@core/selectors'
+import {
+  getPlayerStatus,
+  getPlayers,
+  getPlayerById,
+  getAuction,
+  get_app,
+  getCurrentLeague
+} from '@core/selectors'
+import { auctionActions } from '@core/auction'
 
 import PlayerContextMenu from './player-context-menu'
 
@@ -14,22 +22,30 @@ const mapStateToProps = createSelector(
   getPlayerById,
   getPlayerStatus,
   getPlayers,
-  (playerMap, status, players) => ({
+  getAuction,
+  get_app,
+  getCurrentLeague,
+  (playerMap, status, players, auction, app, league) => ({
     playerMap,
     status,
-    isOnCutlist: players.get('cutlist').includes(playerMap.get('pid'))
+    isOnCutlist: players.get('cutlist').includes(playerMap.get('pid')),
+    isNominating:
+      !auction.isPaused &&
+      !auction.nominated_pid &&
+      (auction.nominatingTeamId === app.teamId ||
+        app.userId === league.commishid)
   })
 )
 
 const mapDispatchToProps = {
-  showContext: contextMenuActions.show,
   hide: contextMenuActions.hide,
   showConfirmation: confirmationActions.show,
   cancelClaim: waiverActions.cancel,
   reserve: rosterActions.reserve,
   release: rosterActions.release,
   protect: rosterActions.protect,
-  toggleCutlist: playerActions.toggleCutlist
+  toggleCutlist: playerActions.toggleCutlist,
+  nominate_pid: auctionActions.select
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PlayerContextMenu)
