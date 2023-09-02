@@ -2,7 +2,6 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { getAuction } from '@core/selectors'
-import { auctionActions } from '@core/auction'
 import { playerActions } from '@core/players'
 import { leagueActions } from '@core/leagues'
 import { rosterActions } from '@core/rosters'
@@ -15,7 +14,6 @@ const mapStateToProps = createSelector(getAuction, (auction) => ({
 }))
 
 const mapDispatchToProps = {
-  join: auctionActions.join,
   loadAllPlayers: playerActions.loadAllPlayers,
   load_league: leagueActions.load_league,
   loadRosters: rosterActions.loadRosters
