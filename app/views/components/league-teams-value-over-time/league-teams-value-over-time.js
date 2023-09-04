@@ -1,6 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
+import ToggleButton from '@mui/material/ToggleButton'
 
 import Highcharts from 'highcharts'
 import HighchartsReact from 'highcharts-react-official'
@@ -8,6 +10,8 @@ import HighchartsSeriesLabel from 'highcharts/modules/series-label'
 
 import { constants } from '#libs-shared'
 import { Team } from '@core/teams'
+
+import './league-teams-value-over-time.styl'
 
 HighchartsSeriesLabel(Highcharts)
 
@@ -20,6 +24,13 @@ export default function LeagueTeamsValueOverTime({
   React.useEffect(() => {
     load_league_team_daily_values()
   }, [load_league_team_daily_values])
+
+  const [date_range, set_date_range] = React.useState(0)
+
+  const handle_change = (event, new_date_range) => {
+    set_date_range(new_date_range)
+  }
+
   const series = []
   const colors = []
 
@@ -49,11 +60,20 @@ export default function LeagueTeamsValueOverTime({
     }
   })
 
+  const current_timestamp = Date.now()
+
   teams.forEach((team) => {
     const team_values = league_team_daily_values.get(team.uid)
     if (!team_values) return
     const data = []
     team_values.forEach((item) => {
+      // if date range is set, only show values within that range
+      if (date_range) {
+        const date_range_timestamp =
+          current_timestamp - date_range * 24 * 60 * 60 * 1000
+        if (item.timestamp < date_range_timestamp) return
+      }
+
       data.push([item.timestamp, item.ktc_value])
     })
     const item = {
@@ -136,6 +156,20 @@ export default function LeagueTeamsValueOverTime({
 
   return (
     <div>
+      <div className='league-teams-value-header'>
+        <ToggleButtonGroup
+          value={date_range}
+          exclusive
+          onChange={handle_change}
+          className='league-teams-value-date-range'
+        >
+          <ToggleButton value={30}>1M</ToggleButton>
+          <ToggleButton value={90}>3M</ToggleButton>
+          <ToggleButton value={180}>6M</ToggleButton>
+          <ToggleButton value={365}>1Y</ToggleButton>
+          <ToggleButton value={0}>ALL</ToggleButton>
+        </ToggleButtonGroup>
+      </div>
       <HighchartsReact highcharts={Highcharts} options={options} />
     </div>
   )
