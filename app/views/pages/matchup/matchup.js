@@ -45,7 +45,8 @@ export default function MatchupPage({
     }
 
     if (seas_year) selectYear(seas_year)
-  }, [seas_year, selectYear, navigate])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seas_year, selectYear])
 
   useEffect(() => {
     if (seas_week && isNaN(seas_week)) {
