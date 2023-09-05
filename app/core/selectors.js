@@ -56,7 +56,7 @@ export const getTeamById = (state, { tid }) =>
   state.getIn(['teams', tid], new Team())
 export const getScoreboard = (state) => state.get('scoreboard')
 export const getProps = (state) => state.getIn(['props', 'items'])
-export const getPlays = (state, { week = constants.week }) =>
+export const getPlays = (state, { week = constants.week } = {}) =>
   state.getIn(['plays', week], new Map())
 export const getDraft = (state) => state.get('draft')
 export const getStatus = (state) => state.get('status')
