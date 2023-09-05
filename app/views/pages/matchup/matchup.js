@@ -54,7 +54,8 @@ export default function MatchupPage({
     }
 
     if (seas_week) selectWeek(seas_week)
-  }, [seas_week, selectWeek, navigate])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seas_week, selectWeek])
 
   useEffect(() => {
     if (matchupId && isNaN(matchupId)) {
@@ -62,7 +63,8 @@ export default function MatchupPage({
     }
 
     if (matchupId) selectMatchup(matchupId)
-  }, [matchupId, selectMatchup, navigate])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [matchupId, selectMatchup])
 
   useEffect(() => {
     if (isNaN(lid)) {
@@ -71,7 +73,8 @@ export default function MatchupPage({
 
     loadLeaguePlayers()
     loadRosters(lid)
-  }, [lid, loadLeaguePlayers, loadRosters, navigate])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lid, loadLeaguePlayers, loadRosters])
 
   useEffect(() => {
     loadMatchups()
@@ -84,7 +87,8 @@ export default function MatchupPage({
         `/leagues/${matchup.lid}/matchups/${matchup.year}/${matchup.week}/${matchup.uid}`
       )
     }
-  }, [matchup, isHeadToHead, navigate])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [matchup, isHeadToHead])
 
   let matchup_body
   if (is_loading) {
