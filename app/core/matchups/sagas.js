@@ -28,6 +28,11 @@ export function* generate({ payload }) {
 
 export function* selectMatchup() {
   const state = yield select(getMatchups)
+
+  if (state.get('selected')) {
+    return
+  }
+
   const { teamId, year } = yield select(get_app)
   const scoreboard = yield select(getScoreboard)
   const week = scoreboard.get('week')
