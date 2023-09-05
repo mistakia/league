@@ -2,6 +2,8 @@ import { Map, List } from 'immutable'
 
 import { matchupsActions } from './actions'
 import { teamActions } from '@core/teams'
+import { appActions } from '@core/app'
+import { scoreboardActions } from '@core/scoreboard'
 import { constants, groupBy } from '@libs-shared'
 import { createMatchup } from './matchup'
 
@@ -28,6 +30,12 @@ export function matchupsReducer(state = initialState, { payload, type }) {
     case teamActions.GET_TEAMS_FULFILLED:
       return state.merge({
         teams: new List(payload.data.teams.map((t) => t.uid))
+      })
+
+    case scoreboardActions.SCOREBOARD_SELECT_WEEK:
+    case appActions.SELECT_YEAR:
+      return state.merge({
+        selected: null
       })
 
     case matchupsActions.GET_MATCHUPS_FULFILLED: {

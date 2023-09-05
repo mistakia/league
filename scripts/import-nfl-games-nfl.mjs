@@ -19,9 +19,7 @@ const format = (item) => {
   const date = datetime ? datetime.format('YYYY/MM/DD') : null
   const seas_type = item.seasonType
   const week_type = item.weekType
-  const time_est = datetime
-    ? datetime.format('HH:mm:ss')
-    : null
+  const time_est = datetime ? datetime.format('HH:mm:ss') : null
   const year = item.season
   const score = item.detail || {}
 

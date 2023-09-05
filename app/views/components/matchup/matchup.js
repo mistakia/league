@@ -11,7 +11,7 @@ import './matchup.styl'
 
 export default function Matchup({ matchup, teams, rosters }) {
   const navigate = useNavigate()
-  const home = teams.find((t) => t.uid === matchup.hid)
+  const home = teams.find((t) => t.uid === matchup.hid) || {}
   const home_roster = rosters.getIn(
     [home.uid, constants.year, constants.week],
     new Map()
@@ -20,7 +20,7 @@ export default function Matchup({ matchup, teams, rosters }) {
     ['lineups', `${matchup.week}`, 'baseline_total'],
     0
   )
-  const away = teams.find((t) => t.uid === matchup.aid)
+  const away = teams.find((t) => t.uid === matchup.aid) || {}
   const away_roster = rosters.getIn(
     [away.uid, constants.year, constants.week],
     new Map()
