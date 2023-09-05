@@ -15,12 +15,12 @@ const log = debug('import-nfl-games-nfl')
 debug.enable('import-nfl-games-nfl,nfl')
 
 const format = (item) => {
-  const datetime = item.time ? dayjs.tz(item.time, 'America/New_York') : null
+  const datetime = item.time ? dayjs(item.time).tz('America/New_York') : null
   const date = datetime ? datetime.format('YYYY/MM/DD') : null
   const seas_type = item.seasonType
   const week_type = item.weekType
   const time_est = datetime
-    ? datetime.tz('America/New_York').format('HH:mm:ss')
+    ? datetime.format('HH:mm:ss')
     : null
   const year = item.season
   const score = item.detail || {}
