@@ -159,7 +159,8 @@ export default async function ({
       })
   }
 
-  if (!pids.length && league_roster_player_ids.length) {
+  // do not limit query to league player ids if text search or specific pids are provided
+  if (!pids.length && !textSearch && league_roster_player_ids.length) {
     query.whereIn('player.pid', league_roster_player_ids)
   }
 
