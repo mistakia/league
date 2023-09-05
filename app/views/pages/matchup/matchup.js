@@ -40,31 +40,24 @@ export default function MatchupPage({
   )
 
   useEffect(() => {
-    if (seas_year && isNaN(seas_year)) {
-      return navigate('/', { replace: true })
-    }
-
-    if (seas_year) selectYear(seas_year)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [seas_year, selectYear])
-
-  useEffect(() => {
-    if (seas_week && isNaN(seas_week)) {
-      return navigate('/', { replace: true })
-    }
-
-    if (seas_week) selectWeek(seas_week)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [seas_week, selectWeek])
-
-  useEffect(() => {
     if (matchupId && isNaN(matchupId)) {
       return navigate('/', { replace: true })
     }
 
+    if (seas_year && isNaN(seas_year)) {
+      return navigate('/', { replace: true })
+    }
+
+    if (seas_week && isNaN(seas_week)) {
+      return navigate('/', { replace: true })
+    }
+
     if (matchupId) selectMatchup(matchupId)
+    else if (seas_week) selectWeek(seas_week)
+    else if (seas_year) selectYear(seas_year)
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [matchupId, selectMatchup])
+  }, [seas_year, seas_week, matchupId, selectYear, selectWeek, selectMatchup])
 
   useEffect(() => {
     if (isNaN(lid)) {
