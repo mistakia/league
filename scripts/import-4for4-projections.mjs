@@ -14,12 +14,11 @@ debug.enable('import:projections,get-player')
 
 const timestamp = new Date()
 const argv = yargs(hideBin(process.argv)).argv
-const URL = 'https://www.4for4.com/projections_weekly_csv/60444'
 
 const getProjection = (stats) => ({
   py: parseFloat(stats['Pass Yds']),
   pa: parseFloat(stats['Pass Att']),
-  pc: parseFloat(stats.Comp),
+  pc: stats.Comp ? parseFloat(stats.Comp) : parseFloat(stats['Pass Comp']) || null,
   tdp: parseFloat(stats['Pass TD']),
   ints: parseFloat(stats.INT),
 
@@ -37,15 +36,19 @@ const getProjection = (stats) => ({
   xpm: parseFloat(stats.XP)
 })
 
-const run = async () => {
+const run = async ({ url, is_regular_season_projection = false }) => {
   // do not pull in any projections after the season has ended
   if (constants.season.week > constants.season.finalWeek) {
     return
   }
 
-  const data = await fetch(URL, {
+  if (!url) {
+    throw new Error('No URL provided')
+  }
+
+  const data = await fetch(url, {
     headers: {
-      cookie: config['4for4']
+      cookie: config['token_4for4']
     }
   }).then(
     (res) =>
@@ -61,6 +64,10 @@ const run = async () => {
 
   const inserts = []
   const missing = []
+
+  const week = is_regular_season_projection
+    ? 0
+    : Number(data[0].Week) || constants.season.week
 
   for (const item of data) {
     const params = {
@@ -86,7 +93,7 @@ const run = async () => {
     inserts.push({
       pid: player_row.pid,
       year: constants.season.year,
-      week: parseInt(item.Week, 10),
+      week,
       sourceid: constants.sources['4FOR4'],
       ...proj
     })
@@ -103,7 +110,7 @@ const run = async () => {
     return
   }
 
-  log(`Inserting ${inserts.length} projections into database`)
+  log(`Inserting ${inserts.length} projections for week ${week} into database`)
   await db('projections_index').insert(inserts).onConflict().merge()
   await db('projections').insert(inserts.map((i) => ({ ...i, timestamp })))
 }
@@ -111,7 +118,7 @@ const run = async () => {
 const main = async () => {
   let error
   try {
-    await run()
+    await run({ url: argv.url, is_regular_season_projection: argv.season })
   } catch (err) {
     error = err
     console.log(error)
