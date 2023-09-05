@@ -18,7 +18,9 @@ const argv = yargs(hideBin(process.argv)).argv
 const getProjection = (stats) => ({
   py: parseFloat(stats['Pass Yds']),
   pa: parseFloat(stats['Pass Att']),
-  pc: stats.Comp ? parseFloat(stats.Comp) : parseFloat(stats['Pass Comp']) || null,
+  pc: stats.Comp
+    ? parseFloat(stats.Comp)
+    : parseFloat(stats['Pass Comp']) || null,
   tdp: parseFloat(stats['Pass TD']),
   ints: parseFloat(stats.INT),
 
@@ -48,7 +50,7 @@ const run = async ({ url, is_regular_season_projection = false }) => {
 
   const data = await fetch(url, {
     headers: {
-      cookie: config['token_4for4']
+      cookie: config.token_4for4
     }
   }).then(
     (res) =>
