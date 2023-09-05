@@ -46,6 +46,8 @@ export const status = {
   DNR: 'DNR',
   'Did Not Report': 'DNR',
 
+  Sus: 'SUSP',
+  SUS: 'SUSP',
   SUSP: 'SUSP',
   Suspended: 'SUSP',
 
@@ -85,6 +87,7 @@ export const statusDescriptions = {
   PUP: 'Physically Unable to Perform',
   OPT: 'Voluntary Opt Out',
   IR: 'Injured Reserve',
+  SUS: 'Suspended',
   SUSP: 'Suspended',
   CEL: 'Commissioner Exempt List',
   NFI: 'Non Football Injury',
