@@ -117,7 +117,24 @@ const mapStateToProps = createSelector(
       }
     }
 
-    return { data, breaks }
+    const series = []
+    const colors = ['red', 'black', 'green', 'blue']
+    data.forEach((team, index) => {
+      series.push({
+        name: team.team.name,
+        data: team.data,
+        color: colors[index]
+      })
+
+      series.push({
+        name: `${team.team.name} Projection`,
+        data: team.projection,
+        dashStyle: 'DashDot',
+        color: colors[index]
+      })
+    })
+
+    return { breaks, series }
   }
 )
 
