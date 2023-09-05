@@ -34,7 +34,7 @@ const run = async ({ year = constants.season.year }) => {
           'transactions.uid',
           '=',
           db.raw(
-            '(select max(uid) from transactions where transactions.tid = rosters.tid and transactions.pid = rosters_players.pid)'
+            '(select max(uid) from transactions where transactions.tid = rosters_players.tid and transactions.pid = rosters_players.pid)'
           )
         )
       })
@@ -74,7 +74,7 @@ const run = async ({ year = constants.season.year }) => {
       continue
     }
 
-    log(`Updating lid ${lid} for ${constants.season.year} with:`, update)
+    log(`Updating lid ${lid} for ${year} with:`, update)
     await db('seasons').update(update).where({ lid, year })
   }
 }
