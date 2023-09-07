@@ -128,6 +128,9 @@ export default async function ({
         )
       })
     }
+  } else if (league_roster_player_ids.length) {
+    // only limit to players on league rosters when other conditions are not met
+    query.whereIn('player.pid', league_roster_player_ids)
   }
 
   if (league_format_hash) {
@@ -157,11 +160,6 @@ export default async function ({
           league_format_hash
         ).orWhereNull('league_format_player_seasonlogs.league_format_hash')
       })
-  }
-
-  // do not limit query to league player ids if text search or specific pids are provided
-  if (!pids.length && !textSearch && league_roster_player_ids.length) {
-    query.whereIn('player.pid', league_roster_player_ids)
   }
 
   if (baseline_player_ids.length) {
