@@ -18,7 +18,7 @@ import Chip from '@mui/material/Chip'
 import Position from '@components/position'
 import NFLTeam from '@components/nfl-team'
 import Button from '@components/button'
-import { Roster, constants, getExtensionAmount } from '@libs-shared'
+import { Roster, constants } from '@libs-shared'
 
 import './waiver-confirmation.styl'
 
@@ -163,23 +163,13 @@ export default function WaiverConfirmation({
 
   const options = []
   for (const releasePlayerMap of release_options) {
-    const extensions = releasePlayerMap.get('extensions', 0)
-    const pos = releasePlayerMap.get('pos')
-    const salary = getExtensionAmount({
-      pos,
-      tag: releasePlayerMap.get('tag'),
-      extensions,
-      league,
-      value: releasePlayerMap.get('value'),
-      bid: releasePlayerMap.get('bid')
-    })
     options.push({
       id: releasePlayerMap.get('pid'),
       label: releasePlayerMap.get('name'),
-      pos,
+      pos: releasePlayerMap.get('pos'),
       team: releasePlayerMap.get('team'),
       pname: releasePlayerMap.get('pname'),
-      value: salary
+      value: releasePlayerMap.get('value')
     })
   }
 
