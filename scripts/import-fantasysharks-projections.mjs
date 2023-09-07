@@ -20,7 +20,7 @@ const timestamp = new Date()
 
 const run = async () => {
   // do not pull in any projections after the season has ended
-  if (constants.season.week > constants.season.finalWeek) {
+  if (constants.season.week > constants.season.nflFinalWeek) {
     return
   }
 

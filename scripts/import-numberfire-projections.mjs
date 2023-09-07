@@ -15,7 +15,7 @@ const current_week = Math.max(constants.season.week, 1)
 
 const run = async () => {
   // do not pull in any projections after the season has ended
-  if (constants.season.week > constants.season.finalWeek) {
+  if (constants.season.week > constants.season.nflFinalWeek) {
     return
   }
 
