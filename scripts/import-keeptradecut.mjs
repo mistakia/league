@@ -7,68 +7,11 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants } from '#libs-shared'
-import {
-  isMain,
-  getPlayer,
-  wait,
-  createPlayer,
-  updatePlayer
-} from '#libs-server'
+import { isMain, getPlayer, wait } from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-keeptradecut')
-debug.enable('import-keeptradecut,update-player,create-player,get-player')
-
-const importPlayer = async (item) => {
-  let player_row
-  const dob = item.birthday
-    ? dayjs.unix(item.birthday).format('YYYY-MM-DD')
-    : null
-  try {
-    player_row = await getPlayer({ keeptradecut_id: item.playerID })
-    if (!player_row) {
-      player_row = await getPlayer({
-        name: item.playerName,
-        pos: item.position,
-        team: item.team,
-        dob
-      })
-    }
-  } catch (err) {
-    log(err)
-    return null
-  }
-
-  if (!player_row) {
-    player_row = await createPlayer({
-      fname: item.playerName.split(' ').shift(),
-      lname: item.playerName.substr(item.playerName.indexOf(' ') + 1),
-      dob,
-      start: item.draftYear,
-
-      pos: item.position,
-      pos1: item.position,
-      posd: item.position,
-
-      cteam: item.team,
-      jnum: item.number,
-
-      height: item.heightFeet * 12 + item.heightInches,
-      weight: item.weight,
-
-      col: item.college,
-
-      keeptradecut_id: item.playerID
-    })
-  } else {
-    await updatePlayer({
-      player_row,
-      update: { keeptradecut_id: item.playerID }
-    })
-  }
-
-  return player_row
-}
+debug.enable('import-keeptradecut,get-player')
 
 const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
   const url = 'https://keeptradecut.com/dynasty-rankings/history'
@@ -80,9 +23,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
   log(`Processing ${data.length} players`)
 
   for (const item of data) {
-    if (!constants.positions.includes(item.position)) continue
-
-    const player_row = await importPlayer(item)
+    const player_row = await await getPlayer({ keeptradecut_id: item.playerID })
     if (!player_row) continue
 
     const inserts = []
@@ -154,7 +95,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
         })
       })
     } else {
-      item.oneQBValues.history.forEach((i) => {
+      item.oneQBValueHistory.forEach((i) => {
         inserts.push({
           qb: 1,
           pid,
@@ -164,7 +105,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
         })
       })
 
-      item.superflexValues.history.forEach((i) => {
+      item.superflexValueHistory.forEach((i) => {
         inserts.push({
           qb: 2,
           pid,
@@ -176,7 +117,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
     }
 
     if (dry) {
-      log(`${item.playerName} values: ${inserts.length}`)
+      log(`ktc playerID ${item.playerID} values: ${inserts.length}`)
       log(inserts[0])
       continue
     }
