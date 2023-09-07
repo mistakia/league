@@ -5394,6 +5394,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"dirty-chai@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "dirty-chai@npm:2.0.1"
+  peerDependencies:
+    chai: ">=2.2.1 <5"
+  checksum: 1e8602e78a0a47b9f701a66a4c2d7f375b9c8ae4235b79297bbc5926996bd9aa95f0759e5bc44a37d6046ebe9ba78a4151e9d628fc05bdb986599650abf9d805
+  languageName: node
+  linkType: hard
+
 "dns-equal@npm:^1.0.0":
   version: 1.0.0
   resolution: "dns-equal@npm:1.0.0"
@@ -12057,6 +12066,7 @@ __metadata:
     deep-diff: ^1.0.2
     deep-extend: ^0.6.0
     deepmerge: ^4.3.1
+    dirty-chai: ^2.0.1
     eslint: 8.42.0
     eslint-config-prettier: ^8.8.0
     eslint-config-standard: ^17.1.0
