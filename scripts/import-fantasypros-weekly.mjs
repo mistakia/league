@@ -97,7 +97,7 @@ const runOne = async (opts) => {
 }
 
 const run = async () => {
-  if (week < 1 || week > constants.season.finalWeek) {
+  if (week < 1 || week > constants.season.nflFinalWeek) {
     return
   }
 

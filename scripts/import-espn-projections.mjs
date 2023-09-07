@@ -20,7 +20,7 @@ const run = async ({
   dry_run = false
 }) => {
   // do not pull in any projections after the season has ended
-  if (constants.season.week > constants.season.finalWeek) {
+  if (constants.season.week > constants.season.nflFinalWeek) {
     return
   }
 

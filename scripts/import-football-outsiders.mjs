@@ -241,7 +241,7 @@ const run = async () => {
 
 const main = async () => {
   // do not pull in any data after the season has ended
-  if (constants.season.week > constants.season.finalWeek) {
+  if (constants.season.week > constants.season.nflFinalWeek) {
     return
   }
 
