@@ -89,7 +89,7 @@
 ################################### FOOTBALL OUTSIDERS ########################################
 
 ## Import football outsiders dvoa at 12:00 from Thursday to Saturday.
-0 12 * 1,2,9-12 4-6 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-football-outsiders.mjs &>> /var/log/league/import-football-outsiders.log
+# 0 12 * 1,2,9-12 4-6 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-football-outsiders.mjs &>> /var/log/league/import-football-outsiders.log
 
 ################################### RANKINGS ########################################
 
