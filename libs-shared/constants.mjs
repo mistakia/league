@@ -1464,7 +1464,9 @@ export const sources = {
   BETMGM_US: 22,
   PRIZEPICKS: 23,
   GAMBET_DC: 24,
-  BETRIVERS_MD: 25
+  BETRIVERS_MD: 25,
+  FANTASYLIFE_DWAIN_MCFARLAND: 26,
+  FANTASYLIFE: 27
 }
 
 export const source_keys = {}
@@ -1499,7 +1501,9 @@ export const sourcesTitle = {
   22: 'BetMGM (US)',
   23: 'PrizePicks',
   24: 'Gambet (DC)',
-  25: 'BetRivers (MD)'
+  25: 'BetRivers (MD)',
+  26: 'Fantasy Life (Dwain McFarland)',
+  27: 'Fantasy Life'
 }
 
 export const rankings = {
