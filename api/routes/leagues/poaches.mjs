@@ -6,7 +6,9 @@ import {
   verifyReserveStatus,
   verifyUserTeam,
   getRoster,
-  getLeague
+  getLeague,
+  processPoach,
+  sendNotifications
 } from '#libs-server'
 import { constants, Roster, getFreeAgentPeriod } from '#libs-shared'
 
@@ -252,6 +254,96 @@ router.put('/:poachId', async (req, res) => {
       .whereNotIn('pid', release)
 
     res.send({ ...poach, release })
+  } catch (error) {
+    logger(error)
+    res.status(500).send({ error: error.toString() })
+  }
+})
+
+router.post('/:poachId/process', async (req, res) => {
+  const { db, logger } = req.app.locals
+  try {
+    const { poachId } = req.params
+
+    const poaching_claim = await db('poaches')
+      .where({
+        uid: poachId
+      })
+      .whereNull('processed')
+      .first()
+
+    if (!poaching_claim) {
+      return res.status(400).send({ error: 'invalid poachId' })
+    }
+
+    const { lid, player_tid } = poaching_claim
+
+    // verify poached player belongs to user controlled team
+    try {
+      await verifyUserTeam({
+        userId: req.auth.userId,
+        leagueId: lid,
+        teamId: player_tid,
+        requireLeague: true
+      })
+    } catch (error) {
+      return res.status(400).send({ error: error.message })
+    }
+
+    let player_row
+    let error
+    try {
+      const player_rows = await db('player')
+        .where({ pid: poaching_claim.pid })
+        .limit(1)
+      player_row = player_rows[0]
+
+      const release = await db('poach_releases')
+        .select('pid')
+        .where('poachid', poaching_claim.uid)
+
+      await processPoach({
+        release: release.map((r) => r.pid),
+        ...poaching_claim
+      })
+      logger(
+        `poaching claim awarded to teamId: (${poaching_claim.tid}) for ${poaching_claim.pid}`
+      )
+    } catch (err) {
+      error = err
+      logger(
+        `poaching claim unsuccessful by teamId: (${poaching_claim.tid}) because ${error.message}`
+      )
+      const league = await getLeague({ lid: poaching_claim.lid })
+      await sendNotifications({
+        league,
+        teamIds: [poaching_claim.tid],
+        voice: false,
+        notifyLeague: false,
+        message: player_row
+          ? `Your poaching claim for ${player_row.fname} ${player_row.lname} (${player_row.pos}) was unsuccessful`
+          : 'Your poaching claim was unsuccessful.'
+      })
+    }
+
+    const timestamp = Math.round(Date.now() / 1000)
+    await db('poaches')
+      .update('processed', timestamp)
+      .update('reason', error ? error.message : null) // TODO - add error codes
+      .update('succ', error ? 0 : 1)
+      .where({
+        pid: poaching_claim.pid,
+        tid: poaching_claim.tid,
+        lid: poaching_claim.lid
+      })
+
+    const processed_claim = await db('poaches')
+      .where({
+        uid: poachId
+      })
+      .first()
+
+    res.send(processed_claim)
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })
