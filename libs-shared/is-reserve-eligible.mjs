@@ -7,6 +7,7 @@ export default function isReserveEligible({ status, injury_status } = {}) {
     injury_status === 'IR' ||
     injury_status === 'Doubtful' ||
     injury_status === 'Sus' ||
+    injury_status === 'Out' ||
     (injury_status && constants.season.week === 0)
   )
 }
