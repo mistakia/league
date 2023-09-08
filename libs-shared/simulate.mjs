@@ -111,18 +111,22 @@ export default function simulate({ teams, matchups, rosters }) {
 
     // determine division winners
     const divisions = groupBy(Object.values(standings), 'div')
-    const divisionWinners = []
+    const byeTeams = []
+    const division_wildcard_teams = []
     for (const teams of Object.values(divisions)) {
       const sorted = teams.sort(
         (a, b) => b.wins - a.wins || b.ties - a.ties || b.pf - a.pf
       )
-      divisionWinners.push(sorted[0])
+
+      // top two teams are the division leaders
+      const sorted_division_leaders = sorted
+        .slice(0, 2)
+        .sort((a, b) => b.apWins - a.apWins)
+      byeTeams.push(sorted_division_leaders[0])
+      division_wildcard_teams.push(sorted_division_leaders[1])
     }
-    const sortedDivisionWinners = divisionWinners.sort(
-      (a, b) => b.apWins - a.apWins || b.apTies - a.apTies || b.pf - a.pf
-    )
-    const byeTeams = sortedDivisionWinners.slice(0, 2)
-    const divisionWinnerIds = divisionWinners.map((t) => t.tid)
+    const divisionLeaders = byeTeams.concat(division_wildcard_teams)
+    const divisionWinnerIds = divisionLeaders.map((t) => t.tid)
 
     // determine wildcard winners
     const wildcardRanks = Object.values(standings)
@@ -131,13 +135,11 @@ export default function simulate({ teams, matchups, rosters }) {
     const wildcardWinners = wildcardRanks.slice(0, 2)
 
     // determine playoff teams
-    const wildcardTeams = wildcardWinners.concat(
-      sortedDivisionWinners.slice(2, 4)
-    )
+    const wildcardTeams = wildcardWinners.concat(division_wildcard_teams)
     const playoffTeams = byeTeams.concat(wildcardTeams)
 
     // record results
-    divisionWinners.forEach((t) => {
+    byeTeams.forEach((t) => {
       result[t.tid].division_wins += 1
     })
     wildcardWinners.forEach((t) => {
@@ -154,9 +156,7 @@ export default function simulate({ teams, matchups, rosters }) {
 
     const wildcardRoundScores = []
     const wildcardWeek = 15
-    const wildcardDivisionWinners = sortedDivisionWinners.slice(2)
-    const wildcardRoundTeams = wildcardWinners.concat(wildcardDivisionWinners)
-    for (const team of wildcardRoundTeams) {
+    for (const team of wildcardTeams) {
       const lineup = rosters[team.tid].lineups[wildcardWeek]
       const distribution = gaussian(lineup.baseline_total, Math.pow(20, 2))
       const score = distribution.random(1)[0]
@@ -172,11 +172,11 @@ export default function simulate({ teams, matchups, rosters }) {
     const wildcardRoundWinnerIds = sortedWildcardRoundScores
       .slice(0, 2)
       .map((p) => p.tid)
-    const wildcardRoundWinners = wildcardRoundTeams.filter((p) =>
+    const wildcardRoundWinners = wildcardTeams.filter((p) =>
       wildcardRoundWinnerIds.includes(p.tid)
     )
 
-    wildcardRoundTeams.forEach((t) => {
+    wildcardTeams.forEach((t) => {
       result[t.tid].wildcard_round_appearances += 1
     })
     wildcardRoundWinners.forEach((t) => {

@@ -24,7 +24,7 @@ const run = async (lid) => {
     year: constants.season.year
   })
   const matchups = await db('matchups')
-    .where({ lid })
+    .where({ lid, year: constants.season.year })
     .where('week', '>=', currentWeek)
   const rosterRows = await getRosters({ lid })
   const tids = teamRows.map((t) => t.uid)
