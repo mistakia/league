@@ -2,7 +2,7 @@ import debug from 'debug'
 
 import { constants } from '#libs-shared'
 import { wait } from '#libs-server'
-import import_plays_nfl from '#scripts/import-plays-nfl.mjs'
+// import import_plays_nfl from '#scripts/import-plays-nfl.mjs'
 import import_plays_ngs from '#scripts/import-plays-ngs.mjs'
 import update_stats_weekly from '#scripts/update-stats-weekly.mjs'
 
@@ -30,13 +30,14 @@ export default async function () {
     loop_count += 1
     log(`running import count: ${loop_count}`)
     try {
-      const all_games_skipped_nfl = await import_plays_nfl({
-        ignore_cache: true
-      })
+      // TODO not working currently for 2023
+      // const all_games_skipped_nfl = await import_plays_nfl({
+      //   ignore_cache: true
+      // })
 
       const all_games_skipped_ngs = await import_plays_ngs()
 
-      all_games_skipped = all_games_skipped_nfl && all_games_skipped_ngs
+      all_games_skipped = /* all_games_skipped_nfl && */ all_games_skipped_ngs
     } catch (error) {
       log(error)
     }
