@@ -27,8 +27,9 @@ const calculateStandings = ({
         )
       : constants.season.regularSeasonFinalWeek
   const teamStats = {}
-  for (const { uid: tid } of teams) {
+  for (const { uid: tid, div } of teams) {
     teamStats[tid] = {
+      div,
       tid,
       gamelogs: [],
       games: {},
@@ -198,6 +199,7 @@ const calculateStandings = ({
     if (!divisions[div]) divisions[div] = []
     divisions[div].push(tid)
   }
+  const divisions_index = {}
   for (const div in divisions) {
     const div_teams = divisions[div]
     const div_teams_sorted = div_teams.sort((team_a_tid, team_b_tid) => {
@@ -226,6 +228,8 @@ const calculateStandings = ({
       return 0
     })
 
+    divisions_index[div] = div_teams_sorted
+
     for (let i = 0; i < div_teams_sorted.length; i++) {
       const tid = div_teams_sorted[i]
       teamStats[tid].stats.division_finish = i + 1
@@ -234,20 +238,39 @@ const calculateStandings = ({
 
   // calculate regular season finish
 
-  // TODO - top 2 teams are division winners, one from each top two division leader with best all-play record
-  const div_winners = Object.values(teamStats)
-    .filter((p) => p.stats.division_finish === 1)
+  // best all play among each set of division leaders
+  const bye_teams = []
+  const division_wildcard_teams = []
+  for (const div in divisions) {
+    const sorted_division_leaders = Object.values(teamStats)
+      .filter((p) => p.stats.division_finish < 3 && p.div === div)
+      .sort((a, b) => b.stats.apWins - a.stats.apWins)
+
+    bye_teams.push(sorted_division_leaders[0])
+    division_wildcard_teams.push(sorted_division_leaders[0])
+  }
+
+  const sorted_bye_team_ids = bye_teams
     .sort((a, b) => b.stats.apWins - a.stats.apWins)
     .map((p) => p.tid)
 
-  for (let i = 0; i < div_winners.length; i++) {
-    const tid = div_winners[i]
+  for (let i = 0; i < sorted_bye_team_ids.length; i++) {
+    const tid = sorted_bye_team_ids[i]
     teamStats[tid].stats.regular_season_finish = i + 1
+  }
+
+  const sorted_division_wildcard_team_ids = division_wildcard_teams
+    .sort((a, b) => b.stats.apWins - a.stats.apWins)
+    .map((p) => p.tid)
+
+  for (let i = 0; i < sorted_division_wildcard_team_ids.length; i++) {
+    const tid = sorted_division_wildcard_team_ids[i]
+    teamStats[tid].stats.regular_season_finish = i + 3
   }
 
   // remaining teams are sorted by points for
   const remaining_teams = Object.values(teamStats)
-    .filter((p) => p.stats.division_finish !== 1)
+    .filter((p) => p.stats.division_finish > 2)
     .sort((a, b) => b.stats.pf - a.stats.pf)
     .map((p) => p.tid)
 
