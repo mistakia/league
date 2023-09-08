@@ -422,6 +422,7 @@ const run = async ({ year = constants.season.year } = {}) => {
   const league_formats = {}
   const scoring_formats = {}
   const lids = [0, 1]
+  const leagues_cache = {}
 
   const player_rows = await process_average_projections({ year })
   const projection_pids = player_rows.map((p) => p.pid)
@@ -429,6 +430,7 @@ const run = async ({ year = constants.season.year } = {}) => {
   // register league and scoring formats to process
   for (const lid of lids) {
     const league = await getLeague({ lid, year })
+    leagues_cache[lid] = league
     league_formats[league.league_format_hash] = true
     scoring_formats[league.scoring_format_hash] = true
   }
@@ -445,6 +447,11 @@ const run = async ({ year = constants.season.year } = {}) => {
 
   // calculate league specific player values for each league
   for (const lid of lids) {
+    const league = leagues_cache[lid]
+    if (!league.hosted) {
+      continue
+    }
+
     await process_league({ year, lid })
   }
 }
