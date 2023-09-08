@@ -5,7 +5,6 @@ import config from '#config'
 import * as cache from './cache.mjs'
 
 const log = debug('ngs')
-debug.enable('ngs')
 
 export const getPlayer = async ({ ignore_cache = false, nflId } = {}) => {
   if (!nflId) {

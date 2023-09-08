@@ -331,7 +331,6 @@ const importAllPlays = async ({
 }
 
 const main = async () => {
-  debug.enable('import-plays-ngs')
   let error
   try {
     if (argv.all) {
@@ -394,7 +393,10 @@ const main = async () => {
     timestamp: Math.round(Date.now() / 1000)
   })
 
-  process.exit()
+  await db.destroy()
+
+  // process.exit() is not working
+  process.kill(process.pid)
 }
 
 if (isMain(import.meta.url)) {
