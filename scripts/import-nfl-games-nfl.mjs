@@ -93,7 +93,13 @@ const run = async ({
     throw new Error('missing access token')
   }
 
-  const data = await nfl.getGames({ year, week, seas_type, token })
+  const data = await nfl.getGames({
+    year,
+    week,
+    seas_type,
+    token,
+    ignore_cache: force_import
+  })
 
   const inserts = []
   for (const game of data.games) {
