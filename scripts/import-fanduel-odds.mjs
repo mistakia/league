@@ -39,7 +39,7 @@ const run = async () => {
   console.time('import-fanduel-odds')
 
   const timestamp = Math.round(Date.now() / 1000)
-  const { nfl_game_events, markets } = await fanduel.getEvents()
+  const { nfl_games_events, markets } = await fanduel.getEvents()
 
   const formatted_markets = markets.map((fanduel_market) =>
     format_market({ fanduel_market, timestamp })
@@ -72,7 +72,7 @@ const run = async () => {
 
   // filter events to those for current week
   const week_end = constants.season.week_end
-  const current_week_events = nfl_game_events.filter(
+  const current_week_events = nfl_games_events.filter(
     (event) =>
       dayjs(event.openDate).isBefore(week_end) && event.name !== 'NFL Matches'
   )
