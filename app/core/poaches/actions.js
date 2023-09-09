@@ -1,5 +1,6 @@
 export const poachActions = {
   POACH_PLAYER: 'POACH_PLAYER',
+  PROCESS_POACH: 'PROCESS_POACH',
 
   POST_POACH_FAILED: 'POST_POACH_FAILED',
   POST_POACH_FULFILLED: 'POST_POACH_FULFILLED',
@@ -8,6 +9,10 @@ export const poachActions = {
   PUT_POACH_FAILED: 'PUT_POACH_FAILED',
   PUT_POACH_PENDING: 'PUT_POACH_PENDING',
   PUT_POACH_FULFILLED: 'PUT_POACH_FULFILLED',
+
+  POST_PROCESS_POACH_FAILED: 'POST_PROCESS_POACH_FAILED',
+  POST_PROCESS_POACH_PENDING: 'POST_PROCESS_POACH_PENDING',
+  POST_PROCESS_POACH_FULFILLED: 'POST_PROCESS_POACH_FULFILLED',
 
   UPDATE_POACH: 'UPDATE_POACH',
 
@@ -24,6 +29,13 @@ export const poachActions = {
     payload: {
       pid,
       release
+    }
+  }),
+
+  process_poach: (poachId) => ({
+    type: poachActions.PROCESS_POACH,
+    payload: {
+      poachId
     }
   }),
 
@@ -71,6 +83,29 @@ export const poachActions = {
     payload: {
       opts
     }
+  }),
+
+  postProcessPoachFailed: (opts, error) => ({
+    type: poachActions.POST_PROCESS_POACH_FAILED,
+    payload: {
+      opts,
+      error
+    }
+  }),
+
+  postProcessPoachFulfilled: (opts, data) => ({
+    type: poachActions.POST_PROCESS_POACH_FULFILLED,
+    payload: {
+      opts,
+      data
+    }
+  }),
+
+  postProcessPoachPending: (opts) => ({
+    type: poachActions.POST_PROCESS_POACH_PENDING,
+    payload: {
+      opts
+    }
   })
 }
 
@@ -84,4 +119,10 @@ export const putPoachActions = {
   failed: poachActions.putPoachFailed,
   pending: poachActions.putPoachPending,
   fulfilled: poachActions.putPoachFulfilled
+}
+
+export const postProcessPoachActions = {
+  failed: poachActions.postProcessPoachFailed,
+  pending: poachActions.postProcessPoachPending,
+  fulfilled: poachActions.postProcessPoachFulfilled
 }

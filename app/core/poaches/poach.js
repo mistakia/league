@@ -7,15 +7,25 @@ export const Poach = new Record({
   processed: null,
   release: new List(),
   submitted: null,
-  playerMap: new Map()
+  playerMap: new Map(),
+  player_tid: null
 })
 
-export const createPoach = ({ uid, tid, pid, processed, release, submitted }) =>
+export const createPoach = ({
+  uid,
+  tid,
+  pid,
+  processed,
+  release,
+  submitted,
+  player_tid
+}) =>
   new Poach({
     uid,
     tid,
     pid,
     processed,
     release: new List(release),
-    submitted
+    submitted,
+    player_tid
   })

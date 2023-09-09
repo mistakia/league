@@ -69,7 +69,11 @@ import {
 import { putLeagueActions, getLeagueActions } from '@core/leagues/actions'
 import { getSourcesActions, putSourceActions } from '@core/sources/actions'
 import { putSettingActions } from '@core/settings/actions'
-import { postPoachActions, putPoachActions } from '@core/poaches/actions'
+import {
+  postPoachActions,
+  putPoachActions,
+  postProcessPoachActions
+} from '@core/poaches/actions'
 import {
   postWaiverActions,
   putWaiverActions,
@@ -387,4 +391,10 @@ export const get_league_team_daily_values = fetch.bind(
   null,
   api.get_league_team_daily_values,
   get_league_team_daily_values_actions
+)
+
+export const post_process_poach = fetch.bind(
+  null,
+  api.post_process_poach,
+  postProcessPoachActions
 )

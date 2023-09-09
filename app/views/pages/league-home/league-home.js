@@ -8,6 +8,7 @@ import AlertTitle from '@mui/material/AlertTitle'
 import Container from '@mui/material/Container'
 import Grid from '@mui/material/Grid'
 import NotInterestedIcon from '@mui/icons-material/NotInterested'
+import Button from '@mui/material/Button'
 
 import LeagueHeader from '@components/league-header'
 import TeamName from '@components/team-name'
@@ -41,7 +42,9 @@ export default function LeagueHomePage({
   loadTeams,
   loadRosters,
   leagueId,
-  percentiles
+  percentiles,
+  process_poach,
+  showConfirmation
 }) {
   const navigate = useNavigate()
   const { lid } = useParams()
@@ -156,6 +159,19 @@ export default function LeagueHomePage({
     }
   }
 
+  const handle_process_poach = (poach) => {
+    const playerMap = poach.get('playerMap')
+    showConfirmation({
+      title: 'Process Poach',
+      description: `${playerMap.get('fname')} ${playerMap.get(
+        'lname'
+      )} (${playerMap.get(
+        'pos'
+      )}) will be poached. Are you sure you want to proceed? This will remove the player from your roster and add them to the roster of the team that submitted the poach.`,
+      onConfirm: () => process_poach(poach.get('uid'))
+    })
+  }
+
   for (const poach of poaches) {
     const playerMap = poach.get('playerMap')
     if (!playerMap) continue
@@ -171,6 +187,17 @@ export default function LeagueHomePage({
         <div>
           Submitted by: <TeamName tid={poach.tid} />
         </div>
+        {poach.get('player_tid') === teamId && (
+          <div style={{ paddingTop: '16px' }}>
+            <Button
+              variant='contained'
+              color='primary'
+              onClick={() => handle_process_poach(poach)}
+            >
+              Process Poach
+            </Button>
+          </div>
+        )}
       </Alert>
     )
   }
@@ -276,5 +303,7 @@ LeagueHomePage.propTypes = {
   loadTeams: PropTypes.func,
   leagueId: PropTypes.number,
   loadRosters: PropTypes.func,
-  percentiles: PropTypes.object
+  percentiles: PropTypes.object,
+  process_poach: PropTypes.func,
+  showConfirmation: PropTypes.func
 }

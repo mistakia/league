@@ -9,6 +9,7 @@ export function poachesReducer(state = new Map(), { payload, type }) {
     case poachActions.POACH_SUBMITTED:
     case poachActions.POST_POACH_FULFILLED:
     case poachActions.PUT_POACH_FULFILLED:
+    case poachActions.POST_PROCESS_POACH_FULFILLED:
       return state.withMutations((state) => {
         let leaguePoaches = state.get(payload.data.lid) || new Map()
         leaguePoaches = leaguePoaches.set(
