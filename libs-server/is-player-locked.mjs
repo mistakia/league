@@ -27,18 +27,30 @@ export default async function (pid) {
     return false
   }
 
-  // TODO - fix check to exclude any players who have become inactive after the game
-  /* if (player_row.status === 'Inactive') {
-   *   return false
-   * }
-   */
-
   const gameStart = dayjs.tz(
     `${player_row.date} ${player_row.time_est}`,
     'YYYY/MM/DD HH:mm:SS',
     'America/New_York'
   )
+
   if (dayjs().isAfter(gameStart)) {
+    if (player_row.status === 'Inactive') {
+      // check player statuses leading up to the game
+      const players_status_rows = await db('players_status')
+        .select('players_status.*')
+        .where({ pid })
+        .whereBetween('timestamp', [
+          dayjs(gameStart).subtract(5, 'day').unix(),
+          dayjs(gameStart).unix()
+        ])
+
+      // if the player was Inactive prior to the game, then they are not locked
+      const statuses = players_status_rows.map((row) => row.status)
+      if (statuses.includes('Inactive')) {
+        return false
+      }
+    }
+
     return true
   }
 
