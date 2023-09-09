@@ -1,6 +1,7 @@
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
+import fs from 'fs-extra'
 
 import db from '#db'
 import { constants } from '#libs-shared'
@@ -48,6 +49,14 @@ const import_betmgm_odds = async () => {
       market_type: betmgm.markets[market.templateId] || null,
       timestamp
     })
+  }
+
+  if (argv.write) {
+    await fs.writeFile(
+      `./betmgm-markets-${timestamp}.json`,
+      JSON.stringify(all_markets, null, 2)
+    )
+    return
   }
 
   if (formatted_markets.length) {

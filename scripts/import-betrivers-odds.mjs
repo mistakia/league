@@ -1,17 +1,19 @@
 import debug from 'debug'
-// import yargs from 'yargs'
-// import { hideBin } from 'yargs/helpers'
+import yargs from 'yargs'
+import { hideBin } from 'yargs/helpers'
+import fs from 'fs-extra'
 
 import db from '#db'
 import { constants } from '#libs-shared'
 import { isMain, insert_prop_markets, betrivers } from '#libs-server'
 
-// const argv = yargs(hideBin(process.argv)).argv
+const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-betrivers-odds')
 debug.enable('import-betrivers-odds,insert-prop-market')
 
 const import_betrivers_odds = async () => {
   const formatted_markets = []
+  const all_markets = []
   const timestamp = Math.round(Date.now() / 1000)
 
   const format_market = ({ offer, event }) => ({
@@ -36,6 +38,7 @@ const import_betrivers_odds = async () => {
         for (const offering_group of event_markets.offeringGroups) {
           for (const criterion_group of offering_group.criterionGroups) {
             for (const offer of criterion_group.betOffers) {
+              all_markets.push(offer)
               formatted_markets.push(format_market({ event, offer }))
             }
           }
@@ -44,9 +47,18 @@ const import_betrivers_odds = async () => {
       }
 
       for (const offer of event.betOffers) {
+        all_markets.push(offer)
         formatted_markets.push(format_market({ event, offer }))
       }
     }
+  }
+
+  if (argv.write) {
+    await fs.writeFile(
+      `./betrivers-markets-${timestamp}.json`,
+      JSON.stringify(all_markets, null, 2)
+    )
+    return
   }
 
   if (formatted_markets.length) {

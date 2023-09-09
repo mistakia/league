@@ -1,6 +1,7 @@
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
+import fs from 'fs-extra'
 
 import db from '#db'
 import { constants, fixTeam } from '#libs-shared'
@@ -23,6 +24,7 @@ const run = async () => {
   const missing = []
   const props = []
   const formatted_markets = []
+  const all_markets = []
 
   const nfl_games = await db('nfl_games').where({
     week: constants.season.nfl_seas_week,
@@ -146,6 +148,7 @@ const run = async () => {
       }
 
       for (const offer of offers) {
+        all_markets.push(offer)
         if (!offer.label) continue
 
         formatted_markets.push({
@@ -221,6 +224,14 @@ const run = async () => {
 
   log(`Could not locate ${missing.length} players`)
   missing.forEach((m) => log(`could not find player: ${m.name} / ${m.teams}`))
+
+  if (argv.write) {
+    await fs.writeFile(
+      `./draftking-markets-${timestamp}.json`,
+      JSON.stringify(all_markets, null, 2)
+    )
+    return
+  }
 
   if (argv.dry) {
     log(props[0])
