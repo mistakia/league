@@ -2,6 +2,7 @@ import debug from 'debug'
 import dayjs from 'dayjs'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
+import fs from 'fs-extra'
 
 import db from '#db'
 import { constants, team_aliases } from '#libs-shared'
@@ -30,12 +31,15 @@ const run = async () => {
   const missing = []
   const props = []
   const formatted_markets = []
+  const all_markets = []
 
   const futures = await caesars.getFutures()
 
   if (futures && futures.competitions && futures.competitions.length) {
     for (const event of futures.competitions[0].events) {
       for (const market of event.markets) {
+        all_markets.push(market)
+
         formatted_markets.push({
           market_id: market.id,
           source_id: constants.sources.CAESARS_VA,
@@ -54,6 +58,14 @@ const run = async () => {
         })
       }
     }
+  }
+
+  if (argv.write) {
+    await fs.writeFile(
+      `./caesars-markets-${timestamp}.json`,
+      JSON.stringify(all_markets, null, 2)
+    )
+    return
   }
 
   if (formatted_markets.length) {

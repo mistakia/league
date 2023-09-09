@@ -1,6 +1,7 @@
 import debug from 'debug'
 import dayjs from 'dayjs'
 import yargs from 'yargs'
+import fs from 'fs-extra'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
@@ -40,6 +41,17 @@ const run = async () => {
 
   const timestamp = Math.round(Date.now() / 1000)
   const { nfl_games_events, markets } = await fanduel.getEvents()
+
+  // write markets object to file
+  if (argv.write) {
+    await fs.writeFile(
+      `./fanduel-markets-${timestamp}.json`,
+      JSON.stringify(markets, null, 2)
+    )
+
+    // TODO send to archives
+    return
+  }
 
   const formatted_markets = markets.map((fanduel_market) =>
     format_market({ fanduel_market, timestamp })
