@@ -175,6 +175,11 @@ export const getPage = async (
     })
   }
 
+  await page._client().send('Network.enable', {
+    maxResourceBufferSize: 1024 * 1204 * 100,
+    maxTotalBufferSize: 1024 * 1204 * 200
+  })
+
   await page.goto(url)
 
   return { page, browser }
