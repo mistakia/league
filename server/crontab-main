@@ -55,23 +55,20 @@
 ## At 02:30AM Everyday
 30 2 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-players-sleeper.mjs &>> /var/log/league/import-players-sleeper.log
 
-## At 12:15PM Everyday
-# 15 12 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-players-sleeper.mjs &>> /var/log/league/import-players-sleeper.log
+## At 12:15PM Everyday during the NFL Season
+15 12 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-players-sleeper.mjs &>> /var/log/league/import-players-sleeper.log
 
-## At 8:10PM Everyday
-# 10 20 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-players-sleeper.mjs &>> /var/log/league/import-players-sleeper.log
+## At 5:10PM Everyday during the NFL Season
+10 17 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-players-sleeper.mjs &>> /var/log/league/import-players-sleeper.log
 
-## At 5:10PM Friday
-# 10 17 * * 5 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-players-sleeper.mjs &>> /var/log/league/import-players-sleeper.log
+## At 8PM Everyday during the NFL Season
+0 20 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-players-sleeper.mjs &>> /var/log/league/import-players-sleeper.log
 
-## At 8PM on Monday
-# 0 20 * * 1 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-mfl-players.mjs &>> /var/log/league/import-mfl-players.log
+## At 7PM on Monday and Thursday during the NFL Season
+0 19 * 1,2,9-12 1,4 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-players-sleeper.mjs &>> /var/log/league/import-players-sleeper.log
 
-## At 8PM Everyday
-# 0 20 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-mfl-injuries.mjs &>> /var/log/league/import-mfl-injuries.log
-
-## At 23:55 on Monday
-55 23 * 1,2,9-12 1 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/generate-rosters.mjs &>> /var/log/league/league-generate-rosters.log
+## At 11:00 AM on Sunday during the NFL Season
+0 11 * 1,2,9-12 0 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-players-sleeper.mjs &>> /var/log/league/import-players-sleeper.log
 
 ################################### KEEP TRADE CUT ########################################
 
@@ -139,10 +136,15 @@
 ## At 03:00 in January, February, and every month from September through December.
 0 3 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays-nflfastr.mjs -d &>> /var/log/league/league-import-plays-nflfastr.log
 
-################################### League  ########################################
+################################### League ########################################
 
 ## Every day at 4:00AM
 0 4 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/calculate-team-daily-ktc-values.mjs &>> /var/log/league/league-calculate-team-daily-ktc-values.log
+
+################################### League Each Season Week ########################################
+
+## At 23:55 on Monday during the NFL Season
+55 23 * 1,2,9-12 1 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/generate-rosters.mjs &>> /var/log/league/league-generate-rosters.log
 
 ################################### Maintenance ########################################
 
