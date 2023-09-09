@@ -17,6 +17,8 @@ import { transactionsActions } from '@core/transactions'
 import { teamActions } from '@core/teams'
 import { rosterActions } from '@core/rosters'
 import { calculatePercentiles } from '@libs-shared'
+import { confirmationActions } from '@core/confirmations'
+import { poachActions } from '@core/poaches'
 
 import LeagueHomePage from './league-home'
 
@@ -73,7 +75,9 @@ const mapDispatchToProps = {
   loadRosters: rosterActions.loadRosters,
   loadLeaguePlayers: playerActions.loadLeaguePlayers,
   loadDraftPickValue: draftPickValueActions.loadDraftPickValue,
-  loadRecentTransactions: transactionsActions.loadRecentTransactions
+  loadRecentTransactions: transactionsActions.loadRecentTransactions,
+  confirmationActions: confirmationActions.show,
+  process_poach: poachActions.process_poach
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(LeagueHomePage)

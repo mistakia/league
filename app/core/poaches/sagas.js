@@ -2,7 +2,7 @@ import { call, takeLatest, fork, select, put } from 'redux-saga/effects'
 
 import { get_app } from '@core/selectors'
 import { poachActions } from './actions'
-import { postPoach, putPoach } from '@core/api'
+import { postPoach, putPoach, post_process_poach } from '@core/api'
 import { notificationActions } from '@core/notifications'
 
 export function* poach({ payload }) {
@@ -13,6 +13,11 @@ export function* poach({ payload }) {
 export function* update({ payload }) {
   const { leagueId, teamId } = yield select(get_app)
   yield call(putPoach, { leagueId, teamId, ...payload })
+}
+
+export function* process_poach({ payload }) {
+  const { leagueId } = yield select(get_app)
+  yield call(post_process_poach, { leagueId, ...payload })
 }
 
 export function* poachNotification() {
@@ -53,6 +58,10 @@ export function* watchPutPoachFulfilled() {
   yield takeLatest(poachActions.PUT_POACH_FULFILLED, updateNotification)
 }
 
+export function* watchProcessPoach() {
+  yield takeLatest(poachActions.PROCESS_POACH, process_poach)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -61,5 +70,6 @@ export const poachSagas = [
   fork(watchPoach),
   fork(watchUpdatePoach),
   fork(watchPutPoachFulfilled),
-  fork(watchPostPoachFulfilled)
+  fork(watchPostPoachFulfilled),
+  fork(watchProcessPoach)
 ]
