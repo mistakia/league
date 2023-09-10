@@ -27,7 +27,7 @@ const calculateDstStatsFromPlays = (plays, team) => {
 
       case 9:
         // fourth down failed
-        dstStats.dfds += 1
+        // dstStats.dfds += 1
         break
 
       case 10:
