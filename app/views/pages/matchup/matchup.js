@@ -52,7 +52,8 @@ export default function MatchupPage({
       return navigate('/', { replace: true })
     }
 
-    if (matchupId) selectMatchup(matchupId)
+    if (matchupId)
+      selectMatchup({ matchupId, year: seas_year, week: seas_week })
     else if (seas_week) selectWeek(seas_week)
     else if (seas_year) selectYear(seas_year)
 

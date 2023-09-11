@@ -58,7 +58,7 @@ export function* selectMatchup() {
     const first = filtered.first()
     if (matchup || first) {
       const uid = matchup ? matchup.uid : first.uid
-      yield put(matchupsActions.select(uid))
+      yield put(matchupsActions.select({ matchupId: uid }))
     }
   } else {
     const matchups = state.get('items')
@@ -68,7 +68,7 @@ export function* selectMatchup() {
         )
       : matchups.first()
     if (matchup) {
-      yield put(matchupsActions.select(matchup.uid))
+      yield put(matchupsActions.select({ matchupId: matchup.uid }))
     }
   }
 }
