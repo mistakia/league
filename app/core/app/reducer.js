@@ -6,6 +6,7 @@ import { settingActions } from '@core/settings'
 import { constants, uuidv4 } from '@libs-shared'
 import { rosterActions } from '@core/rosters'
 import { teamActions } from '@core/teams'
+import { matchupsActions } from '@core/matchups'
 
 const initialState = new Record({
   token: null,
@@ -131,6 +132,15 @@ export function appReducer(state = initialState(), { payload, type }) {
       })
 
     case appActions.SELECT_YEAR:
+      return state.merge({
+        year: payload.year
+      })
+
+    case matchupsActions.SELECT_MATCHUP:
+      if (payload.year === null || payload.year === undefined) {
+        return state
+      }
+
       return state.merge({
         year: payload.year
       })

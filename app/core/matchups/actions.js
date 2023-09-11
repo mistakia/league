@@ -18,10 +18,12 @@ export const matchupsActions = {
     type: matchupsActions.LOAD_MATCHUPS
   }),
 
-  select: (matchupId) => ({
+  select: ({ matchupId, week, year }) => ({
     type: matchupsActions.SELECT_MATCHUP,
     payload: {
-      matchupId: Number(matchupId)
+      matchupId: Number(matchupId),
+      week: week !== null && week !== undefined ? Number(week) : undefined,
+      year: year !== null && year !== undefined ? Number(year) : undefined
     }
   }),
 

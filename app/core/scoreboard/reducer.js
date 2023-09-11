@@ -4,6 +4,7 @@ import dayjs from 'dayjs'
 import { playActions } from '@core/plays'
 import { scoreboardActions } from './actions'
 import { constants } from '@libs-shared'
+import { matchupsActions } from '@core/matchups'
 
 const current_week = Math.min(constants.week, constants.season.finalWeek)
 const initial_week = Math.max(
@@ -24,6 +25,15 @@ export function scoreboardReducer(state = initialState, { payload, type }) {
       return state.set('isLoaded', true)
 
     case scoreboardActions.SCOREBOARD_SELECT_WEEK:
+      return state.merge({
+        week: payload.week
+      })
+
+    case matchupsActions.SELECT_MATCHUP:
+      if (payload.week === null || payload.week === undefined) {
+        return state
+      }
+
       return state.merge({
         week: payload.week
       })
