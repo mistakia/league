@@ -30,9 +30,8 @@ const getProjection = (stats) => ({
   tdrec: stats.rectd
 })
 
-const PLAYERS_URL =
-  'https://appdata.footballguys.com/2021-6265cea3e6ba4/NFLPlayers.json'
-const PROJECTIONS_URL = `https://appdata.footballguys.com/2021-6265cea3e6ba4/WeeklyProjections-${constants.season.year}-${constants.season.week}.json`
+const PLAYERS_URL = 'https://appdata.footballguys.com/tn/NFLPlayers.json'
+const PROJECTIONS_URL = `https://appdata.footballguys.com/tn/WeeklyProjections-${constants.season.year}-${constants.season.week}.json`
 const timestamp = new Date()
 
 const run = async () => {
@@ -58,15 +57,23 @@ const run = async () => {
 
   const missing = []
   const inserts = []
-  for (const id in projectors) {
-    const projector = parseInt(id, 10)
-    const projections = data.find(
-      (p) => p.projector === projector && p.type === 'off'
-    )
+  for (const item of data) {
+    if (item.type !== 'off') continue
 
-    if (!projections) continue
+    const projector = projectors[item.projector]
+    if (!projector) continue
 
-    for (const fbgId in projections.projections) {
+    for (const fbgId in item.projections) {
+      const fbg_player_projection = item.projections[fbgId]
+
+      // ignore players with no projections, empty array
+      if (
+        Array.isArray(fbg_player_projection) &&
+        !fbg_player_projection.length
+      ) {
+        continue
+      }
+
       const fbg_player = fbg_players.find((p) => p.id === fbgId)
       if (!fbg_player) {
         log(`could not find ${fbgId} in players set`)
@@ -93,12 +100,18 @@ const run = async () => {
         continue
       }
 
-      const proj = getProjection(projections.projections[fbgId])
+      const proj = getProjection(fbg_player_projection)
+
+      // ignore if all the values are undefined or null
+      if (Object.values(proj).every((v) => v === undefined || v === null)) {
+        continue
+      }
+
       inserts.push({
         pid: player_row.pid,
         year: constants.season.year,
         week,
-        sourceid: projectors[id],
+        sourceid: projector,
         ...proj
       })
     }
@@ -115,9 +128,11 @@ const run = async () => {
     return
   }
 
-  log(`Inserting ${inserts.length} projections into database`)
-  await db('projections_index').insert(inserts).onConflict().merge()
-  await db('projections').insert(inserts.map((i) => ({ ...i, timestamp })))
+  if (inserts.length) {
+    log(`Inserting ${inserts.length} projections into database`)
+    await db('projections_index').insert(inserts).onConflict().merge()
+    await db('projections').insert(inserts.map((i) => ({ ...i, timestamp })))
+  }
 }
 
 const main = async () => {
