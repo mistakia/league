@@ -16,7 +16,7 @@ export function teamsReducer(state = initialState, { payload, type }) {
       return state.withMutations((state) => {
         payload.data.teams.forEach((t) => {
           if (state.has(t.uid)) {
-            state.set(t.uid, state.get(t.uid).merge(t))
+            state.set(t.uid, state.get(t.uid).merge(createTeam(t)))
           } else {
             state.set(t.uid, createTeam(t))
           }
