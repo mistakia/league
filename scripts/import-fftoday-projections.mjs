@@ -50,35 +50,35 @@ const run = async () => {
           const data = {}
 
           if (pos === 'QB') {
-            data.pa = $(el).find('td').eq(5).text().trim()
-            data.pc = $(el).find('td').eq(4).text().trim()
-            data.py = $(el).find('td').eq(6).text().replace(',', '').trim()
-            data.tdp = $(el).find('td').eq(7).text().trim()
-            data.ints = $(el).find('td').eq(8).text().trim()
+            data.pa = Number($(el).find('td').eq(5).text().trim()) || null
+            data.pc = Number($(el).find('td').eq(4).text().trim()) || null
+            data.py = Number($(el).find('td').eq(6).text().replace(',', '').trim()) || null
+            data.tdp = Number($(el).find('td').eq(7).text().trim()) || null
+            data.ints = Number($(el).find('td').eq(8).text().trim()) || null
 
-            data.ra = $(el).find('td').eq(9).text().trim()
-            data.ry = $(el).find('td').eq(10).text().replace(',', '').trim()
-            data.tdr = $(el).find('td').eq(11).text().trim()
+            data.ra = Number($(el).find('td').eq(9).text().trim()) || null
+            data.ry = Number($(el).find('td').eq(10).text().replace(',', '').trim()) || null
+            data.tdr = Number($(el).find('td').eq(11).text().trim()) || null
           } else if (pos === 'TE') {
-            data.rec = $(el).find('td').eq(4).text().trim()
-            data.recy = $(el).find('td').eq(5).text().replace(',', '').trim()
-            data.tdrec = $(el).find('td').eq(6).text().trim()
+            data.rec = Number($(el).find('td').eq(4).text().trim()) || null
+            data.recy = Number($(el).find('td').eq(5).text().replace(',', '').trim()) || null
+            data.tdrec = Number($(el).find('td').eq(6).text().trim()) || null
           } else if (pos === 'WR') {
-            data.rec = $(el).find('td').eq(4).text().trim()
-            data.recy = $(el).find('td').eq(5).text().replace(',', '').trim()
-            data.tdrec = $(el).find('td').eq(6).text().trim()
+            data.rec = Number($(el).find('td').eq(4).text().trim()) || null
+            data.recy = Number($(el).find('td').eq(5).text().replace(',', '').trim()) || null
+            data.tdrec = Number($(el).find('td').eq(6).text().trim()) || null
 
-            data.ra = $(el).find('td').eq(7).text().trim()
-            data.ry = $(el).find('td').eq(8).text().replace(',', '').trim()
-            data.tdr = $(el).find('td').eq(9).text().trim()
+            data.ra = Number($(el).find('td').eq(7).text().trim()) || null
+            data.ry = Number($(el).find('td').eq(8).text().replace(',', '').trim()) || null
+            data.tdr = Number($(el).find('td').eq(9).text().trim()) || null
           } else if (pos === 'RB') {
-            data.ra = $(el).find('td').eq(4).text().trim()
-            data.ry = $(el).find('td').eq(5).text().replace(',', '').trim()
-            data.tdr = $(el).find('td').eq(6).text().trim()
+            data.ra = Number($(el).find('td').eq(4).text().trim()) || null
+            data.ry = Number($(el).find('td').eq(5).text().replace(',', '').trim()) || null
+            data.tdr = Number($(el).find('td').eq(6).text().trim()) || null
 
-            data.rec = $(el).find('td').eq(7).text().trim()
-            data.recy = $(el).find('td').eq(8).text().replace(',', '').trim()
-            data.tdrec = $(el).find('td').eq(9).text().trim()
+            data.rec = Number($(el).find('td').eq(7).text().trim()) || null
+            data.recy = Number($(el).find('td').eq(8).text().replace(',', '').trim()) || null
+            data.tdrec = Number($(el).find('td').eq(9).text().trim()) || null
           }
 
           items.push({ params, data })
