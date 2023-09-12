@@ -63,6 +63,8 @@ const run = async () => {
     const projector = projectors[item.projector]
     if (!projector) continue
 
+    const player_id_index = {}
+
     for (const fbgId in item.projections) {
       const fbg_player_projection = item.projections[fbgId]
 
@@ -106,6 +108,16 @@ const run = async () => {
       if (Object.values(proj).every((v) => v === undefined || v === null)) {
         continue
       }
+
+      if (player_id_index[player_row.pid]) {
+        log(`duplicate player: ${player_row.pid}`, {
+          ...params,
+          ...player_id_index[player_row.pid]
+        })
+        continue
+      }
+
+      player_id_index[player_row.pid] = params
 
       inserts.push({
         pid: player_row.pid,
