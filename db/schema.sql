@@ -1217,8 +1217,7 @@ CREATE TABLE `player_changelog` (
   `prev` varchar(400) NOT NULL,
   `new` varchar(400) DEFAULT NULL,
   `timestamp` int NOT NULL,
-  PRIMARY KEY (`uid`),
-  UNIQUE KEY `field value` (`pid`,`prop`,`prev`)
+  PRIMARY KEY (`uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -2851,6 +2850,24 @@ CREATE TABLE `league_team_daily_values` (
   `ktc_value` int(6) DEFAULT NULL,
   `ktc_share` decimal(5,5) DEFAULT NULL,
   UNIQUE KEY `league_team` (`lid`, `tid`, `date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `play_changelog`
+--
+
+DROP TABLE IF EXISTS `play_changelog`;
+
+CREATE TABLE `play_changelog` (
+  `esbid` int(10) unsigned NOT NULL,
+  `playId` int(10) unsigned NOT NULL,
+  `prop` varchar(100) NOT NULL,
+  `prev` varchar(400) NOT NULL,
+  `new` varchar(400) DEFAULT NULL,
+  `timestamp` int(11) NOT NULL,
+  UNIQUE KEY `play` (`esbid`, `playId`, `prop`, `timestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

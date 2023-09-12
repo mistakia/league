@@ -70,6 +70,7 @@ export { default as get_transition_signings } from './get-transition-signings.mj
 export { default as batch_insert } from './batch-insert.mjs'
 export * as puppeteer from './puppeteer.mjs'
 export { default as get_players_table_view_results } from './get-players-table-view-results.mjs'
+export { default as update_play } from './update-play.mjs'
 
 export const getChartedPlayByPlayQuery = (db) =>
   db('nfl_plays')
