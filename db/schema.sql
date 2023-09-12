@@ -228,7 +228,8 @@ CREATE TABLE `nfl_games` (
   `espnid` int(15) DEFAULT NULL,
   `ngsid` int(10) DEFAULT NULL,
   `shieldid` varchar(36) DEFAULT NULL,
-  `detailid` varchar(36) DEFAULT NULL,
+  `detailid_v3` varchar(36) DEFAULT NULL,
+  `detailid_v1` varchar(36) DEFAULT NULL,
   `pfrid` varchar(20) DEFAULT NULL,
 
   `year` smallint(4) NOT NULL,

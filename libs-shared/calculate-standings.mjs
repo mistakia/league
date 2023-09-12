@@ -250,7 +250,7 @@ const calculateStandings = ({
     division_wildcard_teams.push(sorted_division_leaders[0])
   }
 
-    const sorted_bye_team_ids = bye_teams
+  const sorted_bye_team_ids = bye_teams
     .sort((a, b) => b.stats.apWins - a.stats.apWins)
     .map((p) => p.tid)
 

@@ -177,7 +177,43 @@ export const getGames = async ({
   return data
 }
 
-export const getPlays = async ({ id, token, ignore_cache = false }) => {
+export const get_plays_v1 = async ({ id, token, ignore_cache = false }) => {
+  const cache_key = `/nfl_v1/plays/${id}.json`
+  if (!ignore_cache) {
+    const cache_value = await cache.get({ key: cache_key })
+    if (cache_value) {
+      log(`cache hit for nfl plays with id: ${id}`)
+      return cache_value
+    }
+  }
+
+  log(`getting game details for ${id}`)
+  if (!token) {
+    token = await getToken()
+  }
+
+  const url = `${config.nfl_api_url}/experience/v1/gamedetails/${id}?withExternalIds`
+  const res = await fetch(url, {
+    headers: {
+      authorization: `Bearer ${token}`
+    }
+  })
+
+  const data = await res.json()
+
+  if (
+    data &&
+    data.viewer &&
+    data.viewer.gameDetail &&
+    data.viewer.gameDetail.id
+  ) {
+    await cache.set({ key: cache_key, value: data })
+  }
+
+  return data
+}
+
+export const get_plays_v3 = async ({ id, token, ignore_cache = false }) => {
   const cache_key = `/nfl/plays/${id}.json`
   if (!ignore_cache) {
     const cache_value = await cache.get({ key: cache_key })

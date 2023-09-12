@@ -27,8 +27,8 @@ const import_player_gamelogs_for_week = async ({
   const player_gamelog_inserts = []
 
   for (const game of games) {
-    if (!game.detailid) {
-      log(`skipping esbid: ${game.esbid}, missing detailid`)
+    if (!game.detailid_v3) {
+      log(`skipping esbid: ${game.esbid}, missing detailid_v3`)
       continue
     }
 
@@ -41,8 +41,8 @@ const import_player_gamelogs_for_week = async ({
     }
 
     log(`loading plays for esbid: ${game.esbid}`)
-    const data = await nfl.getPlays({
-      id: game.detailid,
+    const data = await nfl.get_plays_v3({
+      id: game.detailid_v3,
       token,
       ignore_cache
     })
