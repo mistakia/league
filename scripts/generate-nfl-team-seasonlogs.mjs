@@ -115,6 +115,13 @@ const generate_seasonlogs = async ({
 
   const positions = groupBy(gamelogs, 'pos')
 
+  // remove non fantasy relevant position gamelogs
+  for (const position in positions) {
+    if (!constants.positions.includes(position)) {
+      delete positions[position]
+    }
+  }
+
   const defense = {}
   const offense = {}
   const individual = {}
@@ -155,11 +162,13 @@ const generate_seasonlogs = async ({
         )
         weeks.push(adjusted_stats)
       }
-      const total = sum(weeks, constants.fantasyStats, weeks.length)
-      const avg_stats = avg(total, constants.fantasyStats, weeks.length)
-      adjusted.push(avg_stats)
-    }
 
+      if (weeks.length > 0) {
+        const total = sum(weeks, constants.fantasyStats, weeks.length)
+        const avg_stats = avg(total, constants.fantasyStats, weeks.length)
+        adjusted.push(avg_stats)
+      }
+    }
     defense[position].adj = adjusted
 
     const individual_position_percentiles = calculatePercentiles({
