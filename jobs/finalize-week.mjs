@@ -2,11 +2,14 @@ import dayjs from 'dayjs'
 import { constants } from '#libs-shared'
 import db from '#db'
 import { isMain } from '#libs-server'
+import debug from 'debug'
 
 // import import_plays_nfl_v3 from '#scripts/import-plays-nfl-v3.mjs'
 import import_plays_ngs from '#scripts/import-plays-ngs.mjs'
 import process_matchups from '#scripts/process-matchups.mjs'
 import update_stats_weekly from '#scripts/update-stats-weekly.mjs'
+
+const log = debug('finalize-week')
 
 const clear_live_plays = async () => {
   await db('nfl_plays_current_week').del()
