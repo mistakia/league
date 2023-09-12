@@ -81,7 +81,7 @@ const updatePlayer = async ({ player_row, pid, update }) => {
       `Updating player: ${player_row.pid}, Field: ${prop}, Value: ${edit.rhs}`
     )
 
-    const prev = edit.lh
+    const prev = edit.lhs
     if (prev) {
       await db('player_changelog')
         .insert({
