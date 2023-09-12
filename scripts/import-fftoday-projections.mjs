@@ -52,32 +52,46 @@ const run = async () => {
           if (pos === 'QB') {
             data.pa = Number($(el).find('td').eq(5).text().trim()) || null
             data.pc = Number($(el).find('td').eq(4).text().trim()) || null
-            data.py = Number($(el).find('td').eq(6).text().replace(',', '').trim()) || null
+            data.py =
+              Number($(el).find('td').eq(6).text().replace(',', '').trim()) ||
+              null
             data.tdp = Number($(el).find('td').eq(7).text().trim()) || null
             data.ints = Number($(el).find('td').eq(8).text().trim()) || null
 
             data.ra = Number($(el).find('td').eq(9).text().trim()) || null
-            data.ry = Number($(el).find('td').eq(10).text().replace(',', '').trim()) || null
+            data.ry =
+              Number($(el).find('td').eq(10).text().replace(',', '').trim()) ||
+              null
             data.tdr = Number($(el).find('td').eq(11).text().trim()) || null
           } else if (pos === 'TE') {
             data.rec = Number($(el).find('td').eq(4).text().trim()) || null
-            data.recy = Number($(el).find('td').eq(5).text().replace(',', '').trim()) || null
+            data.recy =
+              Number($(el).find('td').eq(5).text().replace(',', '').trim()) ||
+              null
             data.tdrec = Number($(el).find('td').eq(6).text().trim()) || null
           } else if (pos === 'WR') {
             data.rec = Number($(el).find('td').eq(4).text().trim()) || null
-            data.recy = Number($(el).find('td').eq(5).text().replace(',', '').trim()) || null
+            data.recy =
+              Number($(el).find('td').eq(5).text().replace(',', '').trim()) ||
+              null
             data.tdrec = Number($(el).find('td').eq(6).text().trim()) || null
 
             data.ra = Number($(el).find('td').eq(7).text().trim()) || null
-            data.ry = Number($(el).find('td').eq(8).text().replace(',', '').trim()) || null
+            data.ry =
+              Number($(el).find('td').eq(8).text().replace(',', '').trim()) ||
+              null
             data.tdr = Number($(el).find('td').eq(9).text().trim()) || null
           } else if (pos === 'RB') {
             data.ra = Number($(el).find('td').eq(4).text().trim()) || null
-            data.ry = Number($(el).find('td').eq(5).text().replace(',', '').trim()) || null
+            data.ry =
+              Number($(el).find('td').eq(5).text().replace(',', '').trim()) ||
+              null
             data.tdr = Number($(el).find('td').eq(6).text().trim()) || null
 
             data.rec = Number($(el).find('td').eq(7).text().trim()) || null
-            data.recy = Number($(el).find('td').eq(8).text().replace(',', '').trim()) || null
+            data.recy =
+              Number($(el).find('td').eq(8).text().replace(',', '').trim()) ||
+              null
             data.tdrec = Number($(el).find('td').eq(9).text().trim()) || null
           }
 
