@@ -227,12 +227,9 @@ const importPlaysForWeek = async ({
 
       if (play_inserts.length) {
         try {
-          await db('nfl_play_stats_current_week')
-            .where({ esbid })
-            .del()
+          await db('nfl_play_stats_current_week').where({ esbid }).del()
 
-          await db('nfl_play_stats_current_week')
-            .insert(play_stat_inserts)
+          await db('nfl_play_stats_current_week').insert(play_stat_inserts)
 
           await db('nfl_plays_current_week')
             .insert(play_inserts)
