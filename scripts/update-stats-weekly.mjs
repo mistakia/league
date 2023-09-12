@@ -5,7 +5,7 @@ import dayjs from 'dayjs'
 
 // import db from '#db'
 import { constants } from '#libs-shared'
-import { isMain } from '#libs-server'
+import { isMain, getLeague } from '#libs-server'
 
 import process_play_stats from './process-play-stats.mjs'
 import generate_league_format_player_careerlogs from './generate-league-format-player-careerlogs.mjs'
@@ -24,6 +24,8 @@ const update_stats_weekly = async () => {
     1
   )
   const lid = 1
+  const league = await getLeague({ lid })
+  const { league_format_hash } = league
 
   log(`updating stats for week ${week} (lid: ${lid})`)
 
@@ -32,12 +34,16 @@ const update_stats_weekly = async () => {
 
   // TODO update to use league_format_hash instead of lid
 
-  await generate_league_format_player_gamelogs({ week, lid })
-  await generate_league_format_player_seasonlogs({ lid })
+  await generate_league_format_player_gamelogs({
+    week,
+    lid,
+    league_format_hash
+  })
+  await generate_league_format_player_seasonlogs({ lid, league_format_hash })
 
   // TODO generate player_seasonlogs
 
-  await generate_league_format_player_careerlogs({ lid })
+  await generate_league_format_player_careerlogs({ lid, league_format_hash })
   await generate_nfl_team_seasonlogs()
 }
 
