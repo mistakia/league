@@ -1672,6 +1672,12 @@ export function getPoachPlayersForCurrentLeague(state) {
 
   for (const poach of poaches.values()) {
     const pid = poach.pid
+
+    if (poach.processed) {
+      poaches = poaches.delete(pid)
+      continue
+    }
+
     const playerMap = getPlayerById(state, { pid })
 
     const slot = playerMap.get('slot')

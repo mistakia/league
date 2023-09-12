@@ -38,6 +38,15 @@ export function* updateNotification() {
   )
 }
 
+export function* poach_process_notification() {
+  yield put(
+    notificationActions.show({
+      message: 'Poach Processed',
+      severity: 'success'
+    })
+  )
+}
+
 //= ====================================
 //  WATCHERS
 // -------------------------------------
@@ -62,6 +71,13 @@ export function* watchProcessPoach() {
   yield takeLatest(poachActions.PROCESS_POACH, process_poach)
 }
 
+export function* watchPostProcessPoachFulfilled() {
+  yield takeLatest(
+    poachActions.POST_PROCESS_POACH_FULFILLED,
+    poach_process_notification
+  )
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -71,5 +87,6 @@ export const poachSagas = [
   fork(watchUpdatePoach),
   fork(watchPutPoachFulfilled),
   fork(watchPostPoachFulfilled),
-  fork(watchProcessPoach)
+  fork(watchProcessPoach),
+  fork(watchPostProcessPoachFulfilled)
 ]

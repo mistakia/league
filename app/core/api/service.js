@@ -270,7 +270,7 @@ export const api = {
     const url = `${BASE_URL}/leagues/${data.leagueId}/poaches/${data.poachId}`
     return { url, ...PUT(data) }
   },
-  postProcessPoach(data) {
+  post_process_poach(data) {
     const url = `${BASE_URL}/leagues/${data.leagueId}/poaches/${data.poachId}/process`
     return { url, ...POST(data) }
   },

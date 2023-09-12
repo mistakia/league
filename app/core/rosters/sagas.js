@@ -72,6 +72,11 @@ export function* loadRosters({ payload }) {
   yield call(getRosters, { leagueId })
 }
 
+export function* load_rosters_ignore_cache() {
+  const { leagueId } = yield select(get_app)
+  yield call(getRosters, { leagueId })
+}
+
 export function* load_rosters_for_year() {
   const { leagueId, year } = yield select(get_app)
   yield call(getRosters, { leagueId, year })
@@ -632,6 +637,13 @@ export function* watchSelectYear() {
   yield takeLatest(appActions.SELECT_YEAR, load_rosters_for_year)
 }
 
+export function* watchPostProcessPoachFulfilled() {
+  yield takeLatest(
+    poachActions.POST_PROCESS_POACH_FULFILLED,
+    load_rosters_ignore_cache
+  )
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -683,5 +695,7 @@ export const rosterSagas = [
   fork(watchLoadRosters),
   fork(watchLoadTeams),
 
-  fork(watchSelectYear)
+  fork(watchSelectYear),
+
+  fork(watchPostProcessPoachFulfilled)
 ]

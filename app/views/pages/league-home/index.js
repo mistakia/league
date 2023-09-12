@@ -76,8 +76,8 @@ const mapDispatchToProps = {
   loadLeaguePlayers: playerActions.loadLeaguePlayers,
   loadDraftPickValue: draftPickValueActions.loadDraftPickValue,
   loadRecentTransactions: transactionsActions.loadRecentTransactions,
-  confirmationActions: confirmationActions.show,
-  process_poach: poachActions.process_poach
+  process_poach: poachActions.process_poach,
+  showConfirmation: confirmationActions.show
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(LeagueHomePage)
