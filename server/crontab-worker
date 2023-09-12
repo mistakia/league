@@ -2,15 +2,16 @@
 
 ## Update NFL Schedule At 03:00 every day (Regular Season)
 0 3 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-games-ngs.mjs &>> /var/log/league/import-nfl-games-ngs.log
+0 3 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-games-nfl.mjs --current --force &>> /var/log/league/league-import-nfl-games-nfl.log
 
 ## Update NFL Schedule At 03:00 every day (Off Season)
 0 3 * 5-8 0 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-games-ngs.mjs &>> /var/log/league/import-nfl-games-ngs.log
 
 ## At every 15th minute past every hour from 19 through 20 on Monday in January, February, and every month from September through December.
-*/15 19-20 * 1,2,9-12 1 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-games-nfl.mjs --current &>> /var/log/league/league-import-nfl-games-nfl.log
+# */15 19-20 * 1,2,9-12 1 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-games-nfl.mjs --current --force &>> /var/log/league/league-import-nfl-games-nfl.log
 
 ## At every 15th minute past every hour from 19 through 20 on Thursday in January, February, and every month from September through December.
-*/15 19-20 * 1,2,9-12 4 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-games-nfl.mjs --current &>> /var/log/league/league-import-nfl-games-nfl.log
+# */15 19-20 * 1,2,9-12 4 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-games-nfl.mjs --current --force &>> /var/log/league/league-import-nfl-games-nfl.log
 
 ## At every 15th minute on Sunday in January, February, and every month from September through December.
-*/15 * * 1,2,9-12 7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-games-nfl.mjs --current &>> /var/log/league/league-import-nfl-games-nfl.log
+# */15 * * 1,2,9-12 7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-games-nfl.mjs --current --force &>> /var/log/league/league-import-nfl-games-nfl.log
