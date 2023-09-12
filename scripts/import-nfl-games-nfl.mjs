@@ -26,7 +26,7 @@ const format = (item) => {
   const esbid = (item.externalIds.find((e) => e.source === 'elias') || {}).id
   const shieldid = (item.externalIds.find((e) => e.source === 'shield') || {})
     .id
-  const detailid = (
+  const detailid_v3 = (
     item.externalIds.find((e) => e.source === 'gamedetail') || {}
   ).id
 
@@ -37,7 +37,8 @@ const format = (item) => {
   return {
     esbid,
     shieldid,
-    detailid,
+    detailid_v3,
+    detailid_v1: item.id,
 
     year,
     week: item.week,
@@ -78,9 +79,15 @@ const run = async ({
     seas_type
   })
 
-  const game_missing_detailid = games.find((game) => !game.detailid)
+  const game_missing_detailid_v3 = games.find((game) => !game.detailid_v3)
+  const game_missing_detailid_v1 = games.find((game) => !game.detailid_v1)
 
-  if (!force_import && games.length && !game_missing_detailid) {
+  if (
+    !force_import &&
+    games.length &&
+    !game_missing_detailid_v1 &&
+    !game_missing_detailid_v3
+  ) {
     log('found no games with missing ids')
     return
   }

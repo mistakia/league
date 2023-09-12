@@ -78,7 +78,8 @@ const importPlaysForWeek = async ({
   if (week === null || week === undefined) {
     week = current_week
   }
-  const isCurrentWeek = year === constants.season.year && week === current_week
+  const isCurrentWeek =
+    year === constants.season.year && week === constants.season.week
 
   log(
     `importing plays for week ${week} ${year} ${seas_type} (force_update: ${force_update}, isCurrentWeek: ${isCurrentWeek})`
@@ -227,9 +228,11 @@ const importPlaysForWeek = async ({
 
       if (play_inserts.length) {
         try {
-          await db('nfl_play_stats_current_week').where({ esbid }).del()
+          if (play_stat_inserts.length) {
+            await db('nfl_play_stats_current_week').where({ esbid }).del()
 
-          await db('nfl_play_stats_current_week').insert(play_stat_inserts)
+            await db('nfl_play_stats_current_week').insert(play_stat_inserts)
+          }
 
           await db('nfl_plays_current_week')
             .insert(play_inserts)

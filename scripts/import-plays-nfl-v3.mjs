@@ -7,8 +7,8 @@ import db from '#db'
 import { constants, fixTeam } from '#libs-shared'
 import { isMain, wait, nfl } from '#libs-server'
 
-const log = debug('import-plays-nfl')
-debug.enable('import-plays-nfl')
+const log = debug('import-plays-nfl-v3')
+debug.enable('import-plays-nfl-v3')
 
 const argv = yargs(hideBin(process.argv)).argv
 
@@ -118,8 +118,8 @@ const importPlaysForWeek = async ({
       continue
     }
 
-    if (!game.detailid) {
-      log(`skipping esbid: ${game.esbid}, missing detailid`)
+    if (!game.detailid_v3) {
+      log(`skipping esbid: ${game.esbid}, missing detailid_v3`)
       skip_count += 1
       continue
     }
@@ -144,7 +144,11 @@ const importPlaysForWeek = async ({
 
     log(`loading plays for esbid: ${game.esbid}`)
 
-    const data = await nfl.getPlays({ id: game.detailid, token, ignore_cache })
+    const data = await nfl.get_plays_v3({
+      id: game.detailid_v3,
+      token,
+      ignore_cache
+    })
 
     if (!data.data) continue
 
@@ -379,7 +383,10 @@ const main = async () => {
     timestamp: Math.round(Date.now() / 1000)
   })
 
-  process.exit()
+  await db.destroy()
+
+  // process.exit() is not working
+  process.kill(process.pid)
 }
 
 if (isMain(import.meta.url)) {

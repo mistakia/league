@@ -2,7 +2,7 @@ import debug from 'debug'
 
 import { constants } from '#libs-shared'
 import { wait } from '#libs-server'
-// import import_plays_nfl from '#scripts/import-plays-nfl.mjs'
+// import import_plays_nfl from '#scripts/import-plays-nfl-v3.mjs'
 import import_plays_ngs from '#scripts/import-plays-ngs.mjs'
 import update_stats_weekly from '#scripts/update-stats-weekly.mjs'
 
