@@ -243,14 +243,14 @@ const calculateStandings = ({
   const division_wildcard_teams = []
   for (const div in divisions) {
     const sorted_division_leaders = Object.values(teamStats)
-      .filter((p) => p.stats.division_finish < 3 && p.div === div)
+      .filter((p) => p.stats.division_finish < 3 && p.div === Number(div))
       .sort((a, b) => b.stats.apWins - a.stats.apWins)
 
     bye_teams.push(sorted_division_leaders[0])
     division_wildcard_teams.push(sorted_division_leaders[0])
   }
 
-  const sorted_bye_team_ids = bye_teams
+    const sorted_bye_team_ids = bye_teams
     .sort((a, b) => b.stats.apWins - a.stats.apWins)
     .map((p) => p.tid)
 
