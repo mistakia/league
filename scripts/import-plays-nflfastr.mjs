@@ -219,14 +219,20 @@ const format_play = (play) => ({
   cpoe: format_number(play.cpoe)
 })
 
-const run = async () => {
-  const year = constants.season.year
+const run = async ({
+  year = constants.season.year,
+  force_import = false,
+  force_download = false
+} = {}) => {
+  if (year === constants.season.year && !constants.season.week) {
+    throw new Error('Season has not started yet')
+  }
+
   const filename = `play_by_play_${year}.csv`
   const path = `${os.tmpdir()}/${filename}`
   const url = `https://github.com/nflverse/nflverse-data/releases/download/pbp/${filename}`
-  const force_import = argv.force
 
-  if (argv.d || !fs.existsSync(path)) {
+  if (force_download || !fs.existsSync(path)) {
     // download file
 
     log(`downloading ${url}`)
@@ -281,9 +287,10 @@ const run = async () => {
 const main = async () => {
   let error
   try {
-    if (constants.season.week) {
-      await run()
-    }
+    const year = argv.year || constants.season.year
+    const force_import = argv.force
+    const force_download = argv.d
+    await run({ year, force_import, force_download })
   } catch (err) {
     error = err
     console.log(error)
