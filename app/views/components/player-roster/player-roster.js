@@ -174,51 +174,50 @@ class PlayerRoster extends Player {
             {isNaN(claim.bid) ? '-' : `$${claim.bid}`}
           </div>
         )}
-        <div className='row__group'>
-          <div className='row__group-body'>
-            {!isWaiver && !isTransition && (
-              <div className='metric table__cell'>
-                {isPoach
-                  ? value + 2 || '-'
-                  : typeof salary === 'number'
-                  ? `$${salary}`
-                  : '-'}
-              </div>
-            )}
-            {!isWaiver &&
-              !isPoach &&
-              isOffseason &&
-              isBeforeExtensionDeadline && (
+        {!isWaiver && (
+          <div className='row__group'>
+            <div className='row__group-body'>
+              {!isTransition && (
+                <div className='metric table__cell'>
+                  {isPoach
+                    ? value + 2 || '-'
+                    : typeof salary === 'number'
+                    ? `$${salary}`
+                    : '-'}
+                </div>
+              )}
+              {!isPoach && isOffseason && isBeforeExtensionDeadline && (
                 <div className='metric table__cell'>
                   {extendedSalary ? `$${extendedSalary}` : '-'}
                 </div>
               )}
-            {/* {!isWaiver && !isPoach && isOffseason && (
+              {/* {!isPoach && isOffseason && (
               <PercentileMetric
                 scaled
                 value={market_salary_adj}
                 percentile={percentiles.market_salary_adj}
               />
             )} */}
-            {!isWaiver && !isPoach && isOffseason && (
-              <PercentileMetric
-                scaled
-                value={market_salary}
-                percentile={percentiles.market_salary}
-                prefix='$'
-              />
-            )}
-            {isOffseason && (
-              <PercentileMetric
-                scaled
-                value={savings}
-                percentile={percentiles.savings}
-                prefix='$'
-                show_positivity
-              />
-            )}
+              {!isPoach && isOffseason && (
+                <PercentileMetric
+                  scaled
+                  value={market_salary}
+                  percentile={percentiles.market_salary}
+                  prefix='$'
+                />
+              )}
+              {isOffseason && (
+                <PercentileMetric
+                  scaled
+                  value={savings}
+                  percentile={percentiles.savings}
+                  prefix='$'
+                  show_positivity
+                />
+              )}
+            </div>
           </div>
-        </div>
+        )}
         {isBeforeExtensionDeadline && (
           <>
             <div className='metric table__cell'>{regular_extended_salary}</div>
