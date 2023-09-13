@@ -1441,63 +1441,63 @@ CREATE TABLE `nfl_plays` (
   `oopd` varchar(2) DEFAULT NULL,               -- out of pocket pass details, Clean [C], Pressure [P], Designed [D], Designed Rollout [DR]
   `cov` tinyint(1) DEFAULT NULL,                -- coverage on target, Uncovered is 0, single coverage is 1, double is 2.
 
-  `ep` decimal(22,20) DEFAULT NULL,             -- Using the scoring event probabilities, the estimated expected points with respect to the possession team for the given play.
-  `epa` decimal(22,20) DEFAULT NULL,            -- Expected points added (EPA) by the posteam for the given play.
+  `ep` decimal(16,12) DEFAULT NULL,             -- Using the scoring event probabilities, the estimated expected points with respect to the possession team for the given play.
+  `epa` decimal(16,12) DEFAULT NULL,            -- Expected points added (EPA) by the posteam for the given play.
   `ep_succ` tinyint(1) DEFAULT NULL,            -- Binary indicator wheter epa > 0 in the given play.
 
-  `total_home_epa` decimal(22,20) DEFAULT NULL,             -- Cumulative total EPA for the home team in the game so far.
-  `total_away_epa` decimal(22,20) DEFAULT NULL,             -- Cumulative total EPA for the away team in the game so far.
-  `total_home_rush_epa` decimal(22,20) DEFAULT NULL,        -- Cumulative total rushing EPA for the home team in the game so far.
-  `total_away_rush_epa` decimal(22,20) DEFAULT NULL,        -- Cumulative total rushing EPA for the away team in the game so far.
-  `total_home_pass_epa` decimal(22,20) DEFAULT NULL,        -- Cumulative total passing EPA for the home team in the game so far.
-  `total_away_pass_epa` decimal(22,20) DEFAULT NULL,        -- Cumulative total passing EPA for the away team in the game so far.
+  `total_home_epa` decimal(16,12) DEFAULT NULL,             -- Cumulative total EPA for the home team in the game so far.
+  `total_away_epa` decimal(16,12) DEFAULT NULL,             -- Cumulative total EPA for the away team in the game so far.
+  `total_home_rush_epa` decimal(16,12) DEFAULT NULL,        -- Cumulative total rushing EPA for the home team in the game so far.
+  `total_away_rush_epa` decimal(16,12) DEFAULT NULL,        -- Cumulative total rushing EPA for the away team in the game so far.
+  `total_home_pass_epa` decimal(16,12) DEFAULT NULL,        -- Cumulative total passing EPA for the home team in the game so far.
+  `total_away_pass_epa` decimal(16,12) DEFAULT NULL,        -- Cumulative total passing EPA for the away team in the game so far.
 
-  `qb_epa` decimal(22,20) DEFAULT NULL,                     -- Gives QB credit for EPA for up to the point where a receiver lost a fumble after a completed catch and makes EPA work more like passing yards on plays with fumbles.
-  `air_epa` decimal(22,20) DEFAULT NULL,                    -- EPA from the air yards alone. For completions this represents the actual value provided through the air. For incompletions this represents the hypothetical value that could've been added through the air if the pass was completed.
-  `yac_epa` decimal(22,20) DEFAULT NULL,                    -- EPA from the yards after catch alone. For completions this represents the actual value provided after the catch. For incompletions this represents the difference between the hypothetical air_epa and the play's raw observed EPA (how much the incomplete pass cost the posteam).
-  `comp_air_epa` decimal(22,20) DEFAULT NULL,               -- EPA from the air yards alone only for completions.
-  `comp_yac_epa` decimal(22,20) DEFAULT NULL,               -- EPA from the yards after catch alone only for completions.
-  `xyac_epa` decimal(22,20) DEFAULT NULL,                   -- Expected value of EPA gained after the catch, starting from where the catch was made. Zero yards after the catch would be listed as zero EPA.
-  `total_home_comp_air_epa` decimal(22,20) DEFAULT NULL,    -- Cumulative total completions air EPA for the home team in the game so far.
-  `total_away_comp_air_epa` decimal(22,20) DEFAULT NULL,    -- Cumulative total completions air EPA for the away team in the game so far.
-  `total_home_comp_yac_epa` decimal(22,20) DEFAULT NULL,    -- Cumulative total completions yac EPA for the home team in the game so far.
-  `total_away_comp_yac_epa` decimal(22,20) DEFAULT NULL,    -- Cumulative total completions yac EPA for the away team in the game so far.
-  `total_home_raw_air_epa` decimal(22,20) DEFAULT NULL,     -- Cumulative total raw air EPA for the home team in the game so far.
-  `total_away_raw_air_epa` decimal(22,20) DEFAULT NULL,     -- Cumulative total raw air EPA for the away team in the game so far.
-  `total_home_raw_yac_epa` decimal(22,20) DEFAULT NULL,     -- Cumulative total raw yac EPA for the home team in the game so far.
-  `total_away_raw_yac_epa` decimal(22,20) DEFAULT NULL,     -- Cumulative total raw yac EPA for the away team in the game so far.
+  `qb_epa` decimal(16,12) DEFAULT NULL,                     -- Gives QB credit for EPA for up to the point where a receiver lost a fumble after a completed catch and makes EPA work more like passing yards on plays with fumbles.
+  `air_epa` decimal(16,12) DEFAULT NULL,                    -- EPA from the air yards alone. For completions this represents the actual value provided through the air. For incompletions this represents the hypothetical value that could've been added through the air if the pass was completed.
+  `yac_epa` decimal(16,12) DEFAULT NULL,                    -- EPA from the yards after catch alone. For completions this represents the actual value provided after the catch. For incompletions this represents the difference between the hypothetical air_epa and the play's raw observed EPA (how much the incomplete pass cost the posteam).
+  `comp_air_epa` decimal(16,12) DEFAULT NULL,               -- EPA from the air yards alone only for completions.
+  `comp_yac_epa` decimal(16,12) DEFAULT NULL,               -- EPA from the yards after catch alone only for completions.
+  `xyac_epa` decimal(16,12) DEFAULT NULL,                   -- Expected value of EPA gained after the catch, starting from where the catch was made. Zero yards after the catch would be listed as zero EPA.
+  `total_home_comp_air_epa` decimal(16,12) DEFAULT NULL,    -- Cumulative total completions air EPA for the home team in the game so far.
+  `total_away_comp_air_epa` decimal(16,12) DEFAULT NULL,    -- Cumulative total completions air EPA for the away team in the game so far.
+  `total_home_comp_yac_epa` decimal(16,12) DEFAULT NULL,    -- Cumulative total completions yac EPA for the home team in the game so far.
+  `total_away_comp_yac_epa` decimal(16,12) DEFAULT NULL,    -- Cumulative total completions yac EPA for the away team in the game so far.
+  `total_home_raw_air_epa` decimal(16,12) DEFAULT NULL,     -- Cumulative total raw air EPA for the home team in the game so far.
+  `total_away_raw_air_epa` decimal(16,12) DEFAULT NULL,     -- Cumulative total raw air EPA for the away team in the game so far.
+  `total_home_raw_yac_epa` decimal(16,12) DEFAULT NULL,     -- Cumulative total raw yac EPA for the home team in the game so far.
+  `total_away_raw_yac_epa` decimal(16,12) DEFAULT NULL,     -- Cumulative total raw yac EPA for the away team in the game so far.
 
-  `wp` decimal(22,20) DEFAULT NULL,             -- Estimated win probabiity for the posteam given the current situation at the start of the given play.
-  `wpa` decimal(22,20) DEFAULT NULL,            -- Win probability added (WPA) for the posteam.
-  `home_wp` decimal(22,20) DEFAULT NULL,        -- Estimated win probability for the home team.
-  `away_wp` decimal(22,20) DEFAULT NULL,        -- Estimated win probability for the away team.
-  `vegas_wpa` decimal(22,20) DEFAULT NULL,      -- Win probability added (WPA) for the posteam: spread_adjusted model.
-  `vegas_home_wpa` decimal(22,20) DEFAULT NULL, -- Win probability added (WPA) for the home team: spread_adjusted model.
-  `home_wp_post` decimal(22,20) DEFAULT NULL,   -- Estimated win probability for the home team at the end of the play.
-  `away_wp_post` decimal(22,20) DEFAULT NULL,   -- Estimated win probability for the away team at the end of the play.
-  `vegas_wp` decimal(22,20) DEFAULT NULL,       -- Estimated win probabiity for the posteam given the current situation at the start of the given play, incorporating pre-game Vegas line.
-  `vegas_home_wp` decimal(22,20) DEFAULT NULL,  -- Estimated win probability for the home team incorporating pre-game Vegas line.
-  `total_home_rush_wpa` decimal(22,20) DEFAULT NULL, -- Cumulative total rushing WPA for the home team in the game so far.
-  `total_away_rush_wpa` decimal(22,20) DEFAULT NULL, -- Cumulative total rushing WPA for the away team in the game so far.
-  `total_home_pass_wpa` decimal(22,20) DEFAULT NULL, -- Cumulative total passing WPA for the home team in the game so far.
-  `total_away_pass_wpa` decimal(22,20) DEFAULT NULL, -- Cumulative total passing WPA for the away team in the game so far.
-  `air_wpa` decimal(22,20) DEFAULT NULL,       -- WPA through the air (same logic as air_epa).
-  `yac_wpa` decimal(22,20) DEFAULT NULL,       -- WPA from yards after the catch (same logic as yac_epa).
-  `comp_air_wpa` decimal(22,20) DEFAULT NULL,  -- The air_wpa for completions only.
-  `comp_yac_wpa` decimal(22,20) DEFAULT NULL,  -- The yac_wpa for completions only.
-  `total_home_comp_air_wpa` decimal(22,20) DEFAULT NULL,      -- Cumulative total completions air WPA for the home team in the game so far.
-  `total_away_comp_air_wpa` decimal(22,20) DEFAULT NULL,      -- Cumulative total completions air WPA for the away team in the game so far.
-  `total_home_comp_yac_wpa` decimal(22,20) DEFAULT NULL,      -- Cumulative total completions yac WPA for the home team in the game so far.
-  `total_away_comp_yac_wpa` decimal(22,20) DEFAULT NULL,      -- Cumulative total completions yac WPA for the away team in the game so far.
-  `total_home_raw_air_wpa` decimal(22,20) DEFAULT NULL,       -- Cumulative total raw air WPA for the home team in the game so far.
-  `total_away_raw_air_wpa` decimal(22,20) DEFAULT NULL,       -- Cumulative total raw air WPA for the away team in the game so far.
-  `total_home_raw_yac_wpa` decimal(22,20) DEFAULT NULL,       -- Cumulative total raw yac WPA for the home team in the game so far.
-  `total_away_raw_yac_wpa` decimal(22,20) DEFAULT NULL,       -- Cumulative total raw yac WPA for the away team in the game so far.
+  `wp` decimal(16,12) DEFAULT NULL,             -- Estimated win probabiity for the posteam given the current situation at the start of the given play.
+  `wpa` decimal(16,12) DEFAULT NULL,            -- Win probability added (WPA) for the posteam.
+  `home_wp` decimal(16,12) DEFAULT NULL,        -- Estimated win probability for the home team.
+  `away_wp` decimal(16,12) DEFAULT NULL,        -- Estimated win probability for the away team.
+  `vegas_wpa` decimal(16,12) DEFAULT NULL,      -- Win probability added (WPA) for the posteam: spread_adjusted model.
+  `vegas_home_wpa` decimal(16,12) DEFAULT NULL, -- Win probability added (WPA) for the home team: spread_adjusted model.
+  `home_wp_post` decimal(16,12) DEFAULT NULL,   -- Estimated win probability for the home team at the end of the play.
+  `away_wp_post` decimal(16,12) DEFAULT NULL,   -- Estimated win probability for the away team at the end of the play.
+  `vegas_wp` decimal(16,12) DEFAULT NULL,       -- Estimated win probabiity for the posteam given the current situation at the start of the given play, incorporating pre-game Vegas line.
+  `vegas_home_wp` decimal(16,12) DEFAULT NULL,  -- Estimated win probability for the home team incorporating pre-game Vegas line.
+  `total_home_rush_wpa` decimal(16,12) DEFAULT NULL, -- Cumulative total rushing WPA for the home team in the game so far.
+  `total_away_rush_wpa` decimal(16,12) DEFAULT NULL, -- Cumulative total rushing WPA for the away team in the game so far.
+  `total_home_pass_wpa` decimal(16,12) DEFAULT NULL, -- Cumulative total passing WPA for the home team in the game so far.
+  `total_away_pass_wpa` decimal(16,12) DEFAULT NULL, -- Cumulative total passing WPA for the away team in the game so far.
+  `air_wpa` decimal(16,12) DEFAULT NULL,       -- WPA through the air (same logic as air_epa).
+  `yac_wpa` decimal(16,12) DEFAULT NULL,       -- WPA from yards after the catch (same logic as yac_epa).
+  `comp_air_wpa` decimal(16,12) DEFAULT NULL,  -- The air_wpa for completions only.
+  `comp_yac_wpa` decimal(16,12) DEFAULT NULL,  -- The yac_wpa for completions only.
+  `total_home_comp_air_wpa` decimal(16,12) DEFAULT NULL,      -- Cumulative total completions air WPA for the home team in the game so far.
+  `total_away_comp_air_wpa` decimal(16,12) DEFAULT NULL,      -- Cumulative total completions air WPA for the away team in the game so far.
+  `total_home_comp_yac_wpa` decimal(16,12) DEFAULT NULL,      -- Cumulative total completions yac WPA for the home team in the game so far.
+  `total_away_comp_yac_wpa` decimal(16,12) DEFAULT NULL,      -- Cumulative total completions yac WPA for the away team in the game so far.
+  `total_home_raw_air_wpa` decimal(16,12) DEFAULT NULL,       -- Cumulative total raw air WPA for the home team in the game so far.
+  `total_away_raw_air_wpa` decimal(16,12) DEFAULT NULL,       -- Cumulative total raw air WPA for the away team in the game so far.
+  `total_home_raw_yac_wpa` decimal(16,12) DEFAULT NULL,       -- Cumulative total raw yac WPA for the home team in the game so far.
+  `total_away_raw_yac_wpa` decimal(16,12) DEFAULT NULL,       -- Cumulative total raw yac WPA for the away team in the game so far.
 
-  `xyac_mean_yds` decimal(22,20) DEFAULT NULL,    -- Average expected yards after the catch based on where the ball was caught.
-  `xyac_median_yds` decimal(22,20) DEFAULT NULL,  -- Median expected yards after the catch based on where the ball was caught.
-  `xyac_succ_prob` decimal(22,20) DEFAULT NULL,   -- Probability play earns positive EPA (relative to where play started) based on where ball was caught.
-  `xyac_fd_prob` decimal(22,20) DEFAULT NULL,     -- Probability play earns a first down based on where the ball was caught.
+  `xyac_mean_yds` decimal(16,12) DEFAULT NULL,    -- Average expected yards after the catch based on where the ball was caught.
+  `xyac_median_yds` decimal(16,12) DEFAULT NULL,  -- Median expected yards after the catch based on where the ball was caught.
+  `xyac_succ_prob` decimal(16,12) DEFAULT NULL,   -- Probability play earns positive EPA (relative to where play started) based on where ball was caught.
+  `xyac_fd_prob` decimal(16,12) DEFAULT NULL,     -- Probability play earns a first down based on where the ball was caught.
 
   `ep_att` tinyint(1) DEFAULT NULL,       -- Binary indicator for extra point attempt.
   `two_att` tinyint(1) DEFAULT NULL,      -- Binary indicator for two point conversion attempt.
@@ -1527,21 +1527,21 @@ CREATE TABLE `nfl_plays` (
   `def_score_post` tinyint(2) DEFAULT NULL,         -- Score for the defteam at the end of the play.
   `score_diff_post` tinyint(2) DEFAULT NULL,        -- Score differential between the posteam and defteam at the end of the play.
 
-  `no_score_prob` tinyint(2) DEFAULT NULL,          -- Predicted probability of no score occurring for the rest of the half based on the expected points model.
-  `opp_fg_prob` decimal(22,20) DEFAULT NULL,        -- Predicted probability of the defteam scoring a FG next.
-  `opp_safety_prob` decimal(22,20) DEFAULT NULL,    -- Predicted probability of the defteam scoring a safety next.
-  `opp_td_prob` decimal(22,20) DEFAULT NULL,        -- Predicted probability of the defteam scoring a TD next.
-  `fg_prob` decimal(22,20) DEFAULT NULL,            -- Predicted probability of the posteam scoring a FG next.
-  `safety_prob` decimal(22,20) DEFAULT NULL,        -- Predicted probability of the posteam scoring a safety next.
-  `td_prob` decimal(22,20) DEFAULT NULL,            -- Predicted probability of the posteam scoring a TD next.
-  `extra_point_prob` decimal(22,20) DEFAULT NULL,   -- Predicted probability of the posteam scoring an extra point.
-  `two_conv_prob` decimal(22,20) DEFAULT NULL,      -- Predicted probability of the posteam scoring the two point conversion.
+  `no_score_prob` decimal(16,12) DEFAULT NULL,          -- Predicted probability of no score occurring for the rest of the half based on the expected points model.
+  `opp_fg_prob` decimal(16,12) DEFAULT NULL,        -- Predicted probability of the defteam scoring a FG next.
+  `opp_safety_prob` decimal(16,12) DEFAULT NULL,    -- Predicted probability of the defteam scoring a safety next.
+  `opp_td_prob` decimal(16,12) DEFAULT NULL,        -- Predicted probability of the defteam scoring a TD next.
+  `fg_prob` decimal(16,12) DEFAULT NULL,            -- Predicted probability of the posteam scoring a FG next.
+  `safety_prob` decimal(16,12) DEFAULT NULL,        -- Predicted probability of the posteam scoring a safety next.
+  `td_prob` decimal(16,12) DEFAULT NULL,            -- Predicted probability of the posteam scoring a TD next.
+  `extra_point_prob` decimal(16,12) DEFAULT NULL,   -- Predicted probability of the posteam scoring an extra point.
+  `two_conv_prob` decimal(16,12) DEFAULT NULL,      -- Predicted probability of the posteam scoring the two point conversion.
 
-  `xpass_prob` decimal(21,20) DEFAULT NULL,         -- Probability of dropback scaled from 0 to 1.
-  `pass_oe` decimal(22,20) DEFAULT NULL,            -- Dropback percent over expected on a given play scaled from 0 to 100.
+  `xpass_prob` decimal(16,12) DEFAULT NULL,         -- Probability of dropback scaled from 0 to 1.
+  `pass_oe` decimal(16,12) DEFAULT NULL,            -- Dropback percent over expected on a given play scaled from 0 to 100.
 
-  `cp` decimal(22,20) DEFAULT NULL,                 -- Numeric value indicating the probability for a complete pass based on comparable game situations.
-  `cpoe` decimal(22,20) DEFAULT NULL,               -- For a single pass play this is 1 - cp when the pass was completed or 0 - cp when the pass was incomplete. Analyzed for a whole game or season an indicator for the passer how much over or under expectation his completion percentage was.
+  `cp` decimal(16,12) DEFAULT NULL,                 -- Numeric value indicating the probability for a complete pass based on comparable game situations.
+  `cpoe` decimal(16,12) DEFAULT NULL,               -- For a single pass play this is 1 - cp when the pass was completed or 0 - cp when the pass was incomplete. Analyzed for a whole game or season an indicator for the passer how much over or under expectation his completion percentage was.
 
   `charted` tinyint(1) DEFAULT NULL,
   `updated` int(11) NOT NULL,
@@ -1808,63 +1808,63 @@ CREATE TABLE `nfl_plays_current_week` (
   `oopd` varchar(2) DEFAULT NULL,               -- out of pocket pass details, Clean [C], Pressure [P], Designed [D], Designed Rollout [DR]
   `cov` tinyint(1) DEFAULT NULL,                -- coverage on target, Uncovered is 0, single coverage is 1, double is 2.
 
-  `ep` decimal(22,20) DEFAULT NULL,             -- Using the scoring event probabilities, the estimated expected points with respect to the possession team for the given play.
-  `epa` decimal(22,20) DEFAULT NULL,            -- Expected points added (EPA) by the posteam for the given play.
+  `ep` decimal(16,12) DEFAULT NULL,             -- Using the scoring event probabilities, the estimated expected points with respect to the possession team for the given play.
+  `epa` decimal(16,12) DEFAULT NULL,            -- Expected points added (EPA) by the posteam for the given play.
   `ep_succ` tinyint(1) DEFAULT NULL,            -- Binary indicator wheter epa > 0 in the given play.
 
-  `total_home_epa` decimal(22,20) DEFAULT NULL,             -- Cumulative total EPA for the home team in the game so far.
-  `total_away_epa` decimal(22,20) DEFAULT NULL,             -- Cumulative total EPA for the away team in the game so far.
-  `total_home_rush_epa` decimal(22,20) DEFAULT NULL,        -- Cumulative total rushing EPA for the home team in the game so far.
-  `total_away_rush_epa` decimal(22,20) DEFAULT NULL,        -- Cumulative total rushing EPA for the away team in the game so far.
-  `total_home_pass_epa` decimal(22,20) DEFAULT NULL,        -- Cumulative total passing EPA for the home team in the game so far.
-  `total_away_pass_epa` decimal(22,20) DEFAULT NULL,        -- Cumulative total passing EPA for the away team in the game so far.
+  `total_home_epa` decimal(16,12) DEFAULT NULL,             -- Cumulative total EPA for the home team in the game so far.
+  `total_away_epa` decimal(16,12) DEFAULT NULL,             -- Cumulative total EPA for the away team in the game so far.
+  `total_home_rush_epa` decimal(16,12) DEFAULT NULL,        -- Cumulative total rushing EPA for the home team in the game so far.
+  `total_away_rush_epa` decimal(16,12) DEFAULT NULL,        -- Cumulative total rushing EPA for the away team in the game so far.
+  `total_home_pass_epa` decimal(16,12) DEFAULT NULL,        -- Cumulative total passing EPA for the home team in the game so far.
+  `total_away_pass_epa` decimal(16,12) DEFAULT NULL,        -- Cumulative total passing EPA for the away team in the game so far.
 
-  `qb_epa` decimal(22,20) DEFAULT NULL,                     -- Gives QB credit for EPA for up to the point where a receiver lost a fumble after a completed catch and makes EPA work more like passing yards on plays with fumbles.
-  `air_epa` decimal(22,20) DEFAULT NULL,                    -- EPA from the air yards alone. For completions this represents the actual value provided through the air. For incompletions this represents the hypothetical value that could've been added through the air if the pass was completed.
-  `yac_epa` decimal(22,20) DEFAULT NULL,                    -- EPA from the yards after catch alone. For completions this represents the actual value provided after the catch. For incompletions this represents the difference between the hypothetical air_epa and the play's raw observed EPA (how much the incomplete pass cost the posteam).
-  `comp_air_epa` decimal(22,20) DEFAULT NULL,               -- EPA from the air yards alone only for completions.
-  `comp_yac_epa` decimal(22,20) DEFAULT NULL,               -- EPA from the yards after catch alone only for completions.
-  `xyac_epa` decimal(22,20) DEFAULT NULL,                   -- Expected value of EPA gained after the catch, starting from where the catch was made. Zero yards after the catch would be listed as zero EPA.
-  `total_home_comp_air_epa` decimal(22,20) DEFAULT NULL,    -- Cumulative total completions air EPA for the home team in the game so far.
-  `total_away_comp_air_epa` decimal(22,20) DEFAULT NULL,    -- Cumulative total completions air EPA for the away team in the game so far.
-  `total_home_comp_yac_epa` decimal(22,20) DEFAULT NULL,    -- Cumulative total completions yac EPA for the home team in the game so far.
-  `total_away_comp_yac_epa` decimal(22,20) DEFAULT NULL,    -- Cumulative total completions yac EPA for the away team in the game so far.
-  `total_home_raw_air_epa` decimal(22,20) DEFAULT NULL,     -- Cumulative total raw air EPA for the home team in the game so far.
-  `total_away_raw_air_epa` decimal(22,20) DEFAULT NULL,     -- Cumulative total raw air EPA for the away team in the game so far.
-  `total_home_raw_yac_epa` decimal(22,20) DEFAULT NULL,     -- Cumulative total raw yac EPA for the home team in the game so far.
-  `total_away_raw_yac_epa` decimal(22,20) DEFAULT NULL,     -- Cumulative total raw yac EPA for the away team in the game so far.
+  `qb_epa` decimal(16,12) DEFAULT NULL,                     -- Gives QB credit for EPA for up to the point where a receiver lost a fumble after a completed catch and makes EPA work more like passing yards on plays with fumbles.
+  `air_epa` decimal(16,12) DEFAULT NULL,                    -- EPA from the air yards alone. For completions this represents the actual value provided through the air. For incompletions this represents the hypothetical value that could've been added through the air if the pass was completed.
+  `yac_epa` decimal(16,12) DEFAULT NULL,                    -- EPA from the yards after catch alone. For completions this represents the actual value provided after the catch. For incompletions this represents the difference between the hypothetical air_epa and the play's raw observed EPA (how much the incomplete pass cost the posteam).
+  `comp_air_epa` decimal(16,12) DEFAULT NULL,               -- EPA from the air yards alone only for completions.
+  `comp_yac_epa` decimal(16,12) DEFAULT NULL,               -- EPA from the yards after catch alone only for completions.
+  `xyac_epa` decimal(16,12) DEFAULT NULL,                   -- Expected value of EPA gained after the catch, starting from where the catch was made. Zero yards after the catch would be listed as zero EPA.
+  `total_home_comp_air_epa` decimal(16,12) DEFAULT NULL,    -- Cumulative total completions air EPA for the home team in the game so far.
+  `total_away_comp_air_epa` decimal(16,12) DEFAULT NULL,    -- Cumulative total completions air EPA for the away team in the game so far.
+  `total_home_comp_yac_epa` decimal(16,12) DEFAULT NULL,    -- Cumulative total completions yac EPA for the home team in the game so far.
+  `total_away_comp_yac_epa` decimal(16,12) DEFAULT NULL,    -- Cumulative total completions yac EPA for the away team in the game so far.
+  `total_home_raw_air_epa` decimal(16,12) DEFAULT NULL,     -- Cumulative total raw air EPA for the home team in the game so far.
+  `total_away_raw_air_epa` decimal(16,12) DEFAULT NULL,     -- Cumulative total raw air EPA for the away team in the game so far.
+  `total_home_raw_yac_epa` decimal(16,12) DEFAULT NULL,     -- Cumulative total raw yac EPA for the home team in the game so far.
+  `total_away_raw_yac_epa` decimal(16,12) DEFAULT NULL,     -- Cumulative total raw yac EPA for the away team in the game so far.
 
-  `wp` decimal(22,20) DEFAULT NULL,             -- Estimated win probabiity for the posteam given the current situation at the start of the given play.
-  `wpa` decimal(22,20) DEFAULT NULL,            -- Win probability added (WPA) for the posteam.
-  `home_wp` decimal(22,20) DEFAULT NULL,        -- Estimated win probability for the home team.
-  `away_wp` decimal(22,20) DEFAULT NULL,        -- Estimated win probability for the away team.
-  `vegas_wpa` decimal(22,20) DEFAULT NULL,      -- Win probability added (WPA) for the posteam: spread_adjusted model.
-  `vegas_home_wpa` decimal(22,20) DEFAULT NULL, -- Win probability added (WPA) for the home team: spread_adjusted model.
-  `home_wp_post` decimal(22,20) DEFAULT NULL,   -- Estimated win probability for the home team at the end of the play.
-  `away_wp_post` decimal(22,20) DEFAULT NULL,   -- Estimated win probability for the away team at the end of the play.
-  `vegas_wp` decimal(22,20) DEFAULT NULL,       -- Estimated win probabiity for the posteam given the current situation at the start of the given play, incorporating pre-game Vegas line.
-  `vegas_home_wp` decimal(22,20) DEFAULT NULL,  -- Estimated win probability for the home team incorporating pre-game Vegas line.
-  `total_home_rush_wpa` decimal(22,20) DEFAULT NULL, -- Cumulative total rushing WPA for the home team in the game so far.
-  `total_away_rush_wpa` decimal(22,20) DEFAULT NULL, -- Cumulative total rushing WPA for the away team in the game so far.
-  `total_home_pass_wpa` decimal(22,20) DEFAULT NULL, -- Cumulative total passing WPA for the home team in the game so far.
-  `total_away_pass_wpa` decimal(22,20) DEFAULT NULL, -- Cumulative total passing WPA for the away team in the game so far.
-  `air_wpa` decimal(22,20) DEFAULT NULL,       -- WPA through the air (same logic as air_epa).
-  `yac_wpa` decimal(22,20) DEFAULT NULL,       -- WPA from yards after the catch (same logic as yac_epa).
-  `comp_air_wpa` decimal(22,20) DEFAULT NULL,  -- The air_wpa for completions only.
-  `comp_yac_wpa` decimal(22,20) DEFAULT NULL,  -- The yac_wpa for completions only.
-  `total_home_comp_air_wpa` decimal(22,20) DEFAULT NULL,      -- Cumulative total completions air WPA for the home team in the game so far.
-  `total_away_comp_air_wpa` decimal(22,20) DEFAULT NULL,      -- Cumulative total completions air WPA for the away team in the game so far.
-  `total_home_comp_yac_wpa` decimal(22,20) DEFAULT NULL,      -- Cumulative total completions yac WPA for the home team in the game so far.
-  `total_away_comp_yac_wpa` decimal(22,20) DEFAULT NULL,      -- Cumulative total completions yac WPA for the away team in the game so far.
-  `total_home_raw_air_wpa` decimal(22,20) DEFAULT NULL,       -- Cumulative total raw air WPA for the home team in the game so far.
-  `total_away_raw_air_wpa` decimal(22,20) DEFAULT NULL,       -- Cumulative total raw air WPA for the away team in the game so far.
-  `total_home_raw_yac_wpa` decimal(22,20) DEFAULT NULL,       -- Cumulative total raw yac WPA for the home team in the game so far.
-  `total_away_raw_yac_wpa` decimal(22,20) DEFAULT NULL,       -- Cumulative total raw yac WPA for the away team in the game so far.
+  `wp` decimal(16,12) DEFAULT NULL,             -- Estimated win probabiity for the posteam given the current situation at the start of the given play.
+  `wpa` decimal(16,12) DEFAULT NULL,            -- Win probability added (WPA) for the posteam.
+  `home_wp` decimal(16,12) DEFAULT NULL,        -- Estimated win probability for the home team.
+  `away_wp` decimal(16,12) DEFAULT NULL,        -- Estimated win probability for the away team.
+  `vegas_wpa` decimal(16,12) DEFAULT NULL,      -- Win probability added (WPA) for the posteam: spread_adjusted model.
+  `vegas_home_wpa` decimal(16,12) DEFAULT NULL, -- Win probability added (WPA) for the home team: spread_adjusted model.
+  `home_wp_post` decimal(16,12) DEFAULT NULL,   -- Estimated win probability for the home team at the end of the play.
+  `away_wp_post` decimal(16,12) DEFAULT NULL,   -- Estimated win probability for the away team at the end of the play.
+  `vegas_wp` decimal(16,12) DEFAULT NULL,       -- Estimated win probabiity for the posteam given the current situation at the start of the given play, incorporating pre-game Vegas line.
+  `vegas_home_wp` decimal(16,12) DEFAULT NULL,  -- Estimated win probability for the home team incorporating pre-game Vegas line.
+  `total_home_rush_wpa` decimal(16,12) DEFAULT NULL, -- Cumulative total rushing WPA for the home team in the game so far.
+  `total_away_rush_wpa` decimal(16,12) DEFAULT NULL, -- Cumulative total rushing WPA for the away team in the game so far.
+  `total_home_pass_wpa` decimal(16,12) DEFAULT NULL, -- Cumulative total passing WPA for the home team in the game so far.
+  `total_away_pass_wpa` decimal(16,12) DEFAULT NULL, -- Cumulative total passing WPA for the away team in the game so far.
+  `air_wpa` decimal(16,12) DEFAULT NULL,       -- WPA through the air (same logic as air_epa).
+  `yac_wpa` decimal(16,12) DEFAULT NULL,       -- WPA from yards after the catch (same logic as yac_epa).
+  `comp_air_wpa` decimal(16,12) DEFAULT NULL,  -- The air_wpa for completions only.
+  `comp_yac_wpa` decimal(16,12) DEFAULT NULL,  -- The yac_wpa for completions only.
+  `total_home_comp_air_wpa` decimal(16,12) DEFAULT NULL,      -- Cumulative total completions air WPA for the home team in the game so far.
+  `total_away_comp_air_wpa` decimal(16,12) DEFAULT NULL,      -- Cumulative total completions air WPA for the away team in the game so far.
+  `total_home_comp_yac_wpa` decimal(16,12) DEFAULT NULL,      -- Cumulative total completions yac WPA for the home team in the game so far.
+  `total_away_comp_yac_wpa` decimal(16,12) DEFAULT NULL,      -- Cumulative total completions yac WPA for the away team in the game so far.
+  `total_home_raw_air_wpa` decimal(16,12) DEFAULT NULL,       -- Cumulative total raw air WPA for the home team in the game so far.
+  `total_away_raw_air_wpa` decimal(16,12) DEFAULT NULL,       -- Cumulative total raw air WPA for the away team in the game so far.
+  `total_home_raw_yac_wpa` decimal(16,12) DEFAULT NULL,       -- Cumulative total raw yac WPA for the home team in the game so far.
+  `total_away_raw_yac_wpa` decimal(16,12) DEFAULT NULL,       -- Cumulative total raw yac WPA for the away team in the game so far.
 
-  `xyac_mean_yds` decimal(22,20) DEFAULT NULL,    -- Average expected yards after the catch based on where the ball was caught.
-  `xyac_median_yds` decimal(22,20) DEFAULT NULL,  -- Median expected yards after the catch based on where the ball was caught.
-  `xyac_succ_prob` decimal(22,20) DEFAULT NULL,   -- Probability play earns positive EPA (relative to where play started) based on where ball was caught.
-  `xyac_fd_prob` decimal(22,20) DEFAULT NULL,     -- Probability play earns a first down based on where the ball was caught.
+  `xyac_mean_yds` decimal(16,12) DEFAULT NULL,    -- Average expected yards after the catch based on where the ball was caught.
+  `xyac_median_yds` decimal(16,12) DEFAULT NULL,  -- Median expected yards after the catch based on where the ball was caught.
+  `xyac_succ_prob` decimal(16,12) DEFAULT NULL,   -- Probability play earns positive EPA (relative to where play started) based on where ball was caught.
+  `xyac_fd_prob` decimal(16,12) DEFAULT NULL,     -- Probability play earns a first down based on where the ball was caught.
 
   `ep_att` tinyint(1) DEFAULT NULL,       -- Binary indicator for extra point attempt.
   `two_att` tinyint(1) DEFAULT NULL,      -- Binary indicator for two point conversion attempt.
@@ -1895,20 +1895,20 @@ CREATE TABLE `nfl_plays_current_week` (
   `score_diff_post` tinyint(2) DEFAULT NULL,        -- Score differential between the posteam and defteam at the end of the play.
 
   `no_score_prob` tinyint(2) DEFAULT NULL,          -- Predicted probability of no score occurring for the rest of the half based on the expected points model.
-  `opp_fg_prob` decimal(22,20) DEFAULT NULL,        -- Predicted probability of the defteam scoring a FG next.
-  `opp_safety_prob` decimal(22,20) DEFAULT NULL,    -- Predicted probability of the defteam scoring a safety next.
-  `opp_td_prob` decimal(22,20) DEFAULT NULL,        -- Predicted probability of the defteam scoring a TD next.
-  `fg_prob` decimal(22,20) DEFAULT NULL,            -- Predicted probability of the posteam scoring a FG next.
-  `safety_prob` decimal(22,20) DEFAULT NULL,        -- Predicted probability of the posteam scoring a safety next.
-  `td_prob` decimal(22,20) DEFAULT NULL,            -- Predicted probability of the posteam scoring a TD next.
-  `extra_point_prob` decimal(22,20) DEFAULT NULL,   -- Predicted probability of the posteam scoring an extra point.
-  `two_conv_prob` decimal(22,20) DEFAULT NULL,      -- Predicted probability of the posteam scoring the two point conversion.
+  `opp_fg_prob` decimal(16,12) DEFAULT NULL,        -- Predicted probability of the defteam scoring a FG next.
+  `opp_safety_prob` decimal(16,12) DEFAULT NULL,    -- Predicted probability of the defteam scoring a safety next.
+  `opp_td_prob` decimal(16,12) DEFAULT NULL,        -- Predicted probability of the defteam scoring a TD next.
+  `fg_prob` decimal(16,12) DEFAULT NULL,            -- Predicted probability of the posteam scoring a FG next.
+  `safety_prob` decimal(16,12) DEFAULT NULL,        -- Predicted probability of the posteam scoring a safety next.
+  `td_prob` decimal(16,12) DEFAULT NULL,            -- Predicted probability of the posteam scoring a TD next.
+  `extra_point_prob` decimal(16,12) DEFAULT NULL,   -- Predicted probability of the posteam scoring an extra point.
+  `two_conv_prob` decimal(16,12) DEFAULT NULL,      -- Predicted probability of the posteam scoring the two point conversion.
 
-  `xpass_prob` decimal(21,20) DEFAULT NULL,         -- Probability of dropback scaled from 0 to 1.
-  `pass_oe` decimal(22,20) DEFAULT NULL,            -- Dropback percent over expected on a given play scaled from 0 to 100.
+  `xpass_prob` decimal(16,12) DEFAULT NULL,         -- Probability of dropback scaled from 0 to 1.
+  `pass_oe` decimal(16,12) DEFAULT NULL,            -- Dropback percent over expected on a given play scaled from 0 to 100.
 
-  `cp` decimal(22,20) DEFAULT NULL,                 -- Numeric value indicating the probability for a complete pass based on comparable game situations.
-  `cpoe` decimal(22,20) DEFAULT NULL,               -- For a single pass play this is 1 - cp when the pass was completed or 0 - cp when the pass was incomplete. Analyzed for a whole game or season an indicator for the passer how much over or under expectation his completion percentage was.
+  `cp` decimal(16,12) DEFAULT NULL,                 -- Numeric value indicating the probability for a complete pass based on comparable game situations.
+  `cpoe` decimal(16,12) DEFAULT NULL,               -- For a single pass play this is 1 - cp when the pass was completed or 0 - cp when the pass was incomplete. Analyzed for a whole game or season an indicator for the passer how much over or under expectation his completion percentage was.
 
   `charted` tinyint(1) DEFAULT NULL,
   `updated` int(11) NOT NULL,
