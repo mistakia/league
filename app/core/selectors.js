@@ -29,7 +29,7 @@ import { createMatchup } from '@core/matchups'
 import { default_player_filter_options } from '@core/players/reducer'
 import { Poach } from '@core/poaches/poach'
 import { Roster as RosterRecord } from '@core/rosters/roster'
-import { Scoreboard } from '@core/scoreboard'
+import { createScoreboard } from '@core/scoreboard'
 import { Team } from '@core/teams'
 import { createTrade } from '@core/trade'
 import PlayerRowOpponent from '@components/player-row-opponent'
@@ -2208,11 +2208,12 @@ export function getScoreboardByTeamId(state, { tid }) {
 
   // TODO - set flag for processed matchup
   if (matchup.ap) {
-    return new Scoreboard({
+    return createScoreboard({
       tid,
       points: matchup.aid === tid ? matchup.ap : matchup.hp,
       projected: 0,
-      minutes
+      minutes,
+      matchup
     })
   }
 
@@ -2254,11 +2255,12 @@ export function getScoreboardByTeamId(state, { tid }) {
     return add + sum
   }, 0)
 
-  return new Scoreboard({
+  return createScoreboard({
     tid,
     points,
     projected: projected + previousWeek,
-    minutes
+    minutes,
+    matchup
   })
 }
 

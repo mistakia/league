@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo, useCallback } from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 
@@ -9,145 +9,113 @@ import TeamImage from '@components/team-image'
 
 import './scoreboard-team.styl'
 
-export default class ScoreboardTeam extends React.Component {
-  render = () => {
-    const { team, roster, league, type, scoreboard, showBench } = this.props
+export default function ScoreboardTeam({
+  team,
+  roster,
+  league,
+  type,
+  scoreboard,
+  showBench
+}) {
+  const { matchup } = scoreboard
+  const is_home = useMemo(
+    () => team.uid === matchup.hid,
+    [team.uid, matchup.hid]
+  )
+  const final_projection = useMemo(
+    () => (is_home ? matchup.home_projection : matchup.away_projection),
+    [is_home, matchup.home_projection, matchup.away_projection]
+  )
+  const is_final = useMemo(
+    () =>
+      matchup.week < constants.season.week ||
+      matchup.year < constants.season.year,
+    [matchup.week, matchup.year]
+  )
 
-    const rows = []
-    if (league.sqb) {
-      const slot = constants.slots.QB
+  const generateRows = useCallback(
+    (slot, count) => {
       const players = roster.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.sqb; i++) {
+      return Array.from({ length: count }, (_, i) => {
         const { pid } = players[i] || {}
-        rows.push(<ScoreboardPlayer key={`${slot}${i}`} {...{ pid, roster }} />)
+        return <ScoreboardPlayer key={`${slot}${i}`} {...{ pid, roster }} />
+      })
+    },
+    [roster]
+  )
+
+  const rows = useMemo(() => {
+    let result = []
+    const league_slots = [
+      'sqb',
+      'srb',
+      'swr',
+      'srbwr',
+      'srbwrte',
+      'sqbrbwrte',
+      'swrte',
+      'ste',
+      'sk',
+      'sdst'
+    ]
+    for (const slot of league_slots) {
+      if (league[slot]) {
+        const slot_key = slot.substring(1).toUpperCase()
+        const slot_id = constants.slots[slot_key]
+        result = result.concat(generateRows(slot_id, league[slot]))
       }
     }
+    return result
+  }, [league, generateRows])
 
-    if (league.srb) {
-      const slot = constants.slots.RB
-      const players = roster.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.srb; i++) {
-        const { pid } = players[i] || {}
-        rows.push(<ScoreboardPlayer key={`${slot}${i}`} {...{ pid, roster }} />)
-      }
-    }
-
-    if (league.swr) {
-      const slot = constants.slots.WR
-      const players = roster.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.swr; i++) {
-        const { pid } = players[i] || {}
-        rows.push(<ScoreboardPlayer key={`${slot}${i}`} {...{ pid, roster }} />)
-      }
-    }
-
-    if (league.srbwr) {
-      const slot = constants.slots.RBWR
-      const players = roster.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.srbwr; i++) {
-        const { pid } = players[i] || {}
-        rows.push(<ScoreboardPlayer key={`${slot}${i}`} {...{ pid, roster }} />)
-      }
-    }
-
-    if (league.srbwrte) {
-      const slot = constants.slots.RBWRTE
-      const players = roster.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.srbwrte; i++) {
-        const { pid } = players[i] || {}
-        rows.push(<ScoreboardPlayer key={`${slot}${i}`} {...{ pid, roster }} />)
-      }
-    }
-
-    if (league.sqbrbwrte) {
-      const slot = constants.slots.QBRBWRTE
-      const players = roster.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.sqbrbwrte; i++) {
-        const { pid } = players[i] || {}
-        rows.push(<ScoreboardPlayer key={`${slot}${i}`} {...{ pid, roster }} />)
-      }
-    }
-
-    if (league.swrte) {
-      const slot = constants.slots.WRTE
-      const players = roster.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.swrte; i++) {
-        const { pid } = players[i] || {}
-        rows.push(<ScoreboardPlayer key={`${slot}${i}`} {...{ pid, roster }} />)
-      }
-    }
-
-    if (league.ste) {
-      const slot = constants.slots.TE
-      const players = roster.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.ste; i++) {
-        const { pid } = players[i] || {}
-        rows.push(<ScoreboardPlayer key={`${slot}${i}`} {...{ pid, roster }} />)
-      }
-    }
-
-    if (league.sk) {
-      const slot = constants.slots.K
-      const players = roster.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.sk; i++) {
-        const { pid } = players[i] || {}
-        rows.push(<ScoreboardPlayer key={`${slot}${i}`} {...{ pid, roster }} />)
-      }
-    }
-
-    if (league.sdst) {
-      const slot = constants.slots.DST
-      const players = roster.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.sdst; i++) {
-        const { pid } = players[i] || {}
-        rows.push(<ScoreboardPlayer key={`${slot}${i}`} {...{ pid, roster }} />)
-      }
-    }
-
-    const bench = []
+  const bench = useMemo(() => {
     if (showBench) {
-      for (const [index, rosterSlot] of roster.bench.entries()) {
+      return Array.from(roster.bench.entries(), ([index, rosterSlot]) => {
         const { pid } = rosterSlot
-        bench.push(<ScoreboardPlayer key={index} {...{ pid, roster }} />)
-      }
+        return <ScoreboardPlayer key={index} {...{ pid, roster }} />
+      })
     }
+    return []
+  }, [showBench, roster])
 
-    const classNames = ['scoreboard__team']
-    classNames.push(type)
+  const classNames = useMemo(() => {
+    return ['scoreboard__team', type]
+  }, [type])
 
-    return (
-      <div className={classNames.join(' ')}>
-        <div className='scoreboard__team-head'>
-          <div
-            className='scoreboard__team-banner'
-            style={{
-              backgroundColor: `#${team.pc || 'd0d0d0'}`
-            }}
-          />
-          <div
-            className='scoreboard__team-line'
-            style={{
-              backgroundColor: `#${team.ac || 'd0d0d0'}`
-            }}
-          />
-          <TeamImage tid={team.uid} />
-          <TeamName tid={team.uid} />
-        </div>
-        <div className='scoreboard__team-meta'>
-          <div className='scoreboard__team-score'>
-            <div className='score metric'>
-              {scoreboard.points ? scoreboard.points.toFixed(2) : '-'}
-            </div>
-            <div className='projected metric'>
-              {(scoreboard.projected || 0).toFixed(2)}
-            </div>
+  return (
+    <div className={classNames.join(' ')}>
+      <div className='scoreboard__team-head'>
+        <div
+          className='scoreboard__team-banner'
+          style={{
+            backgroundColor: `#${team.pc || 'd0d0d0'}`
+          }}
+        />
+        <div
+          className='scoreboard__team-line'
+          style={{
+            backgroundColor: `#${team.ac || 'd0d0d0'}`
+          }}
+        />
+        <TeamImage tid={team.uid} />
+        <TeamName tid={team.uid} />
+      </div>
+      <div className='scoreboard__team-meta'>
+        <div className='scoreboard__team-score'>
+          <div className='score metric'>
+            {scoreboard.points ? scoreboard.points.toFixed(2) : '-'}
+          </div>
+          <div className='projected metric'>
+            {is_final
+              ? final_projection
+              : (scoreboard.projected || 0).toFixed(2)}
           </div>
         </div>
-        <div className='scoreboard__team-roster'>{rows}</div>
-        {showBench && <div className='scoreboard__team-bench'>{bench}</div>}
       </div>
-    )
-  }
+      <div className='scoreboard__team-roster'>{rows}</div>
+      {showBench && <div className='scoreboard__team-bench'>{bench}</div>}
+    </div>
+  )
 }
 
 ScoreboardTeam.propTypes = {
