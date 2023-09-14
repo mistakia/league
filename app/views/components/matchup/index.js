@@ -1,14 +1,13 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getRosters, getTeamsForCurrentLeague } from '@core/selectors'
+import { getTeamsForCurrentLeague } from '@core/selectors'
 
 import Matchup from './matchup'
 
 const mapDispatchToProps = createSelector(
   getTeamsForCurrentLeague,
-  getRosters,
-  (teams, rosters) => ({ teams, rosters })
+  (teams) => ({ teams })
 )
 
 export default connect(mapDispatchToProps)(Matchup)
