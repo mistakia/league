@@ -67,6 +67,7 @@ const run = async ({ url, is_regular_season_projection = false }) => {
   const inserts = []
   const missing = []
 
+  const year = constants.season.year
   const week = is_regular_season_projection
     ? 0
     : Number(data[0].Week) || constants.season.week
@@ -94,7 +95,7 @@ const run = async ({ url, is_regular_season_projection = false }) => {
     const proj = getProjection(item)
     inserts.push({
       pid: player_row.pid,
-      year: constants.season.year,
+      year,
       week,
       sourceid: constants.sources['4FOR4'],
       ...proj
@@ -112,9 +113,22 @@ const run = async ({ url, is_regular_season_projection = false }) => {
     return
   }
 
-  log(`Inserting ${inserts.length} projections for week ${week} into database`)
-  await db('projections_index').insert(inserts).onConflict().merge()
-  await db('projections').insert(inserts.map((i) => ({ ...i, timestamp })))
+  if (inserts.length) {
+    // remove any existing projections in index not included in this set
+    await db('projections_index')
+      .where({ year, week, sourceid: constants.sources['4FOR4'] })
+      .whereNotIn(
+        'pid',
+        inserts.map((i) => i.pid)
+      )
+      .del()
+
+    log(
+      `Inserting ${inserts.length} projections for week ${week} into database`
+    )
+    await db('projections_index').insert(inserts).onConflict().merge()
+    await db('projections').insert(inserts.map((i) => ({ ...i, timestamp })))
+  }
 }
 
 const main = async () => {

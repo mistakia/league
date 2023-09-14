@@ -37,6 +37,8 @@ const import_fantasylife_projections = async ({
     return
   }
 
+  const year = constants.season.year
+  const week = constants.season.week
   const timestamp = new Date()
   const inserts = []
   const missing = []
@@ -52,7 +54,6 @@ const import_fantasylife_projections = async ({
       scoring_system_data: '{"id":185}'
     }
     const data = await fantasylife.get_projections({ table_id, query_params })
-    log(data[0])
 
     if (!data) {
       continue
@@ -81,8 +82,8 @@ const import_fantasylife_projections = async ({
       const data = format_projection(item)
       inserts.push({
         pid: player_row.pid,
-        year: constants.season.year,
-        week: constants.season.week,
+        year,
+        week,
         sourceid: constants.sources.FANTASYLIFE,
         ...data
       })
@@ -100,6 +101,15 @@ const import_fantasylife_projections = async ({
   }
 
   if (inserts.length) {
+    // remove any existing projections in index not included in this set
+    await db('projections_index')
+      .where({ year, week, sourceid: constants.sources.FANTASYLIFE })
+      .whereNotIn(
+        'pid',
+        inserts.map((i) => i.pid)
+      )
+      .del()
+
     log(`Inserting ${inserts.length} projections into database`)
     await db('projections_index').insert(inserts).onConflict().merge()
     await db('projections').insert(inserts.map((i) => ({ ...i, timestamp })))
