@@ -24,6 +24,7 @@ import {
 } from '#libs-server'
 import projectLineups from './project-lineups.mjs'
 import simulateSeason from './simulate-season.mjs'
+import calculateMatchupProjection from './calculate-matchup-projection.mjs'
 
 const log = debug('process-projections')
 debug.enable('process-projections')
@@ -405,6 +406,7 @@ const process_league = async ({ year, lid }) => {
   }
 
   await projectLineups(lid)
+  await calculateMatchupProjection({ lid })
 
   if (
     constants.season.week &&
