@@ -95,6 +95,7 @@ class PlayerRoster extends Player {
     const classNames = ['player__item', 'table__row']
     if (selected === playerMap.get('pid')) classNames.push('selected')
     if (isWaiver) classNames.push('waiver')
+    if (isClaim) classNames.push('claim')
 
     let rookie_tag_savings = null
     let franchise_tag_savings = null
