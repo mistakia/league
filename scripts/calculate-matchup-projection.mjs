@@ -35,8 +35,8 @@ const calculate_matchup_projection = async ({
       continue
     }
 
-    const home_projection = home_lineup.total
-    const away_projection = away_lineup.total
+    const home_projection = home_lineup.baseline_total
+    const away_projection = away_lineup.baseline_total
 
     matchup_updates.push({
       ...matchup,
