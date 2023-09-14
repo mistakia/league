@@ -1,46 +1,36 @@
 import React from 'react'
-import { Map } from 'immutable'
 import { useNavigate } from 'react-router-dom'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
-import { constants } from '@libs-shared'
+import { get_string_from_object } from '@libs-shared'
 import TeamName from '@components/team-name'
 import TeamImage from '@components/team-image'
 
 import './matchup.styl'
 
-export default function Matchup({ matchup, teams, rosters }) {
+export default function Matchup({ matchup, teams }) {
   const navigate = useNavigate()
   const home = teams.find((t) => t.uid === matchup.hid) || {}
-  const home_roster = rosters.getIn(
-    [home.uid, constants.year, constants.week],
-    new Map()
-  )
-  const home_baseline_projection = home_roster.getIn(
-    ['lineups', `${matchup.week}`, 'baseline_total'],
-    0
-  )
   const away = teams.find((t) => t.uid === matchup.aid) || {}
-  const away_roster = rosters.getIn(
-    [away.uid, constants.year, constants.week],
-    new Map()
-  )
-  const away_baseline_projection = away_roster.getIn(
-    ['lineups', `${matchup.week}`, 'baseline_total'],
-    0
-  )
   const handleClick = () =>
     navigate(
       `/leagues/${matchup.lid}/matchups/${matchup.year}/${matchup.week}/${matchup.uid}`
     )
-  const formatSpread = (value) => (value > 0 ? `+${value}` : value)
+  const formatSpread = (value) =>
+    value === 0 ? 'EVEN' : value > 0 ? `+${value}` : value
 
   return (
-    <div className='matchup' onClick={handleClick}>
+    <div className='matchup cursor' onClick={handleClick}>
       <div className='matchup__head'>
-        <div className='matchup__col metric'>Spread</div>
+        <div className='matchup__col metric spread'>Spread</div>
+        <div className='matchup__col metric score' />
       </div>
-      <div className='matchup__away'>
+      <div
+        className={get_string_from_object({
+          matchup__away: true,
+          winner: matchup.ap > matchup.hp
+        })}
+      >
         <div
           className='matchup__banner'
           style={{
@@ -49,11 +39,20 @@ export default function Matchup({ matchup, teams, rosters }) {
         />
         <TeamImage tid={matchup.aid} />
         <TeamName tid={matchup.aid} />
-        <div className='matchup__col metric'>
-          {formatSpread(home_baseline_projection - away_baseline_projection)}
+        <div className='matchup__col metric spread'>
+          {formatSpread(matchup.home_projection - matchup.away_projection)}
         </div>
+        <div className='matchup__col metric score'>{matchup.ap || '-'}</div>
+        {matchup.ap > matchup.hp && (
+          <div className='matchup__winner-arrow-left' />
+        )}
       </div>
-      <div className='matchup__home'>
+      <div
+        className={get_string_from_object({
+          matchup__home: true,
+          winner: matchup.hp > matchup.ap
+        })}
+      >
         <div
           className='matchup__banner'
           style={{
@@ -62,9 +61,13 @@ export default function Matchup({ matchup, teams, rosters }) {
         />
         <TeamImage tid={matchup.hid} />
         <TeamName tid={matchup.hid} />
-        <div className='matchup__col metric'>
-          {formatSpread(away_baseline_projection - home_baseline_projection)}
+        <div className='matchup__col metric spread'>
+          {formatSpread(matchup.away_projection - matchup.home_projection)}
         </div>
+        <div className='matchup__col metric score'>{matchup.hp || '-'}</div>
+        {matchup.hp > matchup.ap && (
+          <div className='matchup__winner-arrow-left' />
+        )}
       </div>
     </div>
   )
@@ -72,6 +75,5 @@ export default function Matchup({ matchup, teams, rosters }) {
 
 Matchup.propTypes = {
   matchup: ImmutablePropTypes.record,
-  teams: ImmutablePropTypes.map,
-  rosters: ImmutablePropTypes.map
+  teams: ImmutablePropTypes.map
 }
