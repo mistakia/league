@@ -47,12 +47,12 @@ const run = async () => {
 
   // if no projections or 404 exit
   const projectors = {
-    2: 7, // david dodds
-    41: 8, // bob henry
-    50: 9, // jason wood
-    53: 10, // maurile tremblay
-    107: 11, // sigmund bloom
-    996: 19 // fbg consensus
+    2: constants.sources.FBG_DAVID_DODDS,
+    41: constants.sources.FBG_BOB_HENRY,
+    50: constants.sources.FBG_JASON_WOOD,
+    53: constants.sources.FBG_MAURILE_TREMBLAY,
+    107: constants.sources.FBG_SIGMUND_BLOOM,
+    996: constants.sources.FBG_CONSENSUS
   }
 
   const missing = []

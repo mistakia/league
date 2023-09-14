@@ -82,7 +82,7 @@ const runOne = async (week) => {
       pid: player_row.pid,
       week,
       year,
-      sourceid: 6, // pff sourceid,
+      sourceid: constants.sources.PFF,
       ...data
     })
   }
@@ -99,6 +99,15 @@ const runOne = async (week) => {
   }
 
   if (inserts.length) {
+    // remove any existing projections in index not included in this set
+    await db('projections_index')
+      .where({ year, week, sourceid: constants.sources.PFF })
+      .whereNotIn(
+        'pid',
+        inserts.map((i) => i.pid)
+      )
+      .del()
+
     log(`Inserting ${inserts.length} projections into database`)
     await db('projections_index').insert(inserts).onConflict().merge()
     await db('projections').insert(inserts.map((i) => ({ ...i, timestamp })))

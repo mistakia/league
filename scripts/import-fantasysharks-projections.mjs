@@ -74,7 +74,7 @@ const run = async () => {
       pid: player_row.pid,
       year,
       week,
-      sourceid: 1, // fantasy sharks sourceid
+      sourceid: constants.sources.FANTASY_SHARKS,
       ...entry
     })
   }
@@ -90,6 +90,15 @@ const run = async () => {
   }
 
   if (inserts.length) {
+    // remove any existing projections in index not included in this set
+    await db('projections_index')
+      .where({ year, week, sourceid: constants.sources.FANTASY_SHARKS })
+      .whereNotIn(
+        'pid',
+        inserts.map((i) => i.pid)
+      )
+      .del()
+
     log(`Inserting ${inserts.length} projections into database`)
     await db('projections_index').insert(inserts).onConflict().merge()
     await db('projections').insert(inserts.map((i) => ({ ...i, timestamp })))

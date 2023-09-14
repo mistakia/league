@@ -10,14 +10,16 @@ import { isMain, getPlayer } from '#libs-server'
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import:projections')
 debug.enable('import:projections,get-player')
-const timestamp = new Date()
-const current_week = Math.max(constants.season.week, 1)
 
 const run = async () => {
   // do not pull in any projections after the season has ended
   if (constants.season.week > constants.season.nflFinalWeek) {
     return
   }
+
+  const timestamp = new Date()
+  const week = Math.max(constants.season.week, 1)
+  const year = constants.season.year
 
   const $ = await fetchCheerioObject(
     'https://www.numberfire.com/nfl/fantasy/fantasy-football-projections'
@@ -72,9 +74,9 @@ const run = async () => {
 
     inserts.push({
       pid: player_row.pid,
-      year: constants.season.year,
-      week: current_week,
-      sourceid: 13,
+      year,
+      week,
+      sourceid: constants.sources.NUMBERFIRE,
       ...data
     })
   }
@@ -90,9 +92,20 @@ const run = async () => {
     return
   }
 
-  log(`Inserting ${inserts.length} projections into database`)
-  await db('projections_index').insert(inserts).onConflict().merge()
-  await db('projections').insert(inserts.map((i) => ({ ...i, timestamp })))
+  if (inserts.length) {
+    // remove any existing projections in index not included in this set
+    await db('projections_index')
+      .where({ year, week, sourceid: constants.sources.NUMBERFIRE })
+      .whereNotIn(
+        'pid',
+        inserts.map((i) => i.pid)
+      )
+      .del()
+
+    log(`Inserting ${inserts.length} projections into database`)
+    await db('projections_index').insert(inserts).onConflict().merge()
+    await db('projections').insert(inserts.map((i) => ({ ...i, timestamp })))
+  }
 }
 
 const main = async () => {
