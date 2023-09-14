@@ -441,11 +441,14 @@ CREATE TABLE `matchups` (
   `hid` int(6) NOT NULL,
   `lid` int(6) NOT NULL,
 
-  `hp` decimal(3,2) DEFAULT 0, -- points
-  `ap` decimal(3,2) DEFAULT 0,
+  `hp` decimal(5,2) DEFAULT 0, -- points
+  `ap` decimal(5,2) DEFAULT 0,
 
-  `hpp` decimal(3,2) DEFAULT 0, -- potential points
-  `app` decimal(3,2) DEFAULT 0,
+  `hpp` decimal(5,2) DEFAULT 0, -- potential points
+  `app` decimal(5,2) DEFAULT 0,
+
+  `home_projection` decimal(5,2) DEFAULT NULL,
+  `away_projection` decimal(5,2) DEFAULT NULL,
 
   `year` smallint(4) NOT NULL,
   `week` tinyint(2) NOT NULL,
@@ -2609,7 +2612,7 @@ CREATE TABLE `transition_releases` (
 DROP TABLE IF EXISTS `league_team_lineups`;
 
 CREATE TABLE `league_team_lineups` (
-  `week` varchar(3) NOT NULL,
+  `week` tinyint(2) NOT NULL,
   `year` smallint(4) NOT NULL,
   `tid` int(6) NOT NULL,
   `lid` int(6) NOT NULL,
