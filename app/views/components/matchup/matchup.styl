@@ -66,6 +66,11 @@ $height = 45px
     width 80px
     font-size 13px
 
+  &.proj
+    flex 0 0 40px
+    width 40px
+    font-size 12px
+
 .matchup__head
   background $backgroundColor
   display flex
@@ -95,9 +100,11 @@ $height = 45px
   .matchup:hover
     box-shadow 0px 3px 3px -2px rgba(0,0,0,0.2), 0px 3px 4px 0px rgba(0,0,0,0.14), 0px 1px 8px 0px rgba(0,0,0,0.12)
 
-    .matchup__head .matchup__col.spread
-      background lighten(#666, 75%)
-      color black
+    .matchup__head
+      .matchup__col.spread
+      .matchup__col.proj
+        background lighten(#666, 75%)
+        color black
 
 @media (min-width: 750px)
   .matchup

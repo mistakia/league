@@ -748,10 +748,10 @@ export const getWeeksForSelectedYearMatchups = createSelector(
   }
 )
 
-export function getMatchupById(state, { mid }) {
+export function getMatchupById(state, { matchupId }) {
   const matchups = state.get('matchups')
   const items = matchups.get('items')
-  return items.find((m) => m.uid === mid)
+  return items.find((m) => m.uid === matchupId)
 }
 
 export function getFilteredMatchups(state) {
@@ -2199,6 +2199,21 @@ export function getPointsByTeamId(state, { tid, week }) {
   return points
 }
 
+export function getScoreboardByMatchupId(state, { matchupId }) {
+  const matchup = getMatchupById(state, { matchupId })
+  if (!matchup) {
+    return {
+      home: createScoreboard(),
+      away: createScoreboard()
+    }
+  }
+
+  const home = getScoreboardByTeamId(state, { tid: matchup.hid })
+  const away = getScoreboardByTeamId(state, { tid: matchup.aid })
+
+  return { home, away }
+}
+
 export function getScoreboardByTeamId(state, { tid }) {
   const year = state.getIn(['app', 'year'])
   const week = state.getIn(['scoreboard', 'week'])
@@ -2257,8 +2272,8 @@ export function getScoreboardByTeamId(state, { tid }) {
 
   return createScoreboard({
     tid,
-    points,
-    projected: projected + previousWeek,
+    points: Number(points.toFixed(2)),
+    projected: Number((projected + previousWeek).toFixed(2)),
     minutes,
     matchup
   })
