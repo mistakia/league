@@ -3,9 +3,7 @@ import debug from 'debug'
 
 import db from '#db'
 import { constants, uniqBy } from '#libs-shared'
-import { getPlayByPlayQuery } from '#libs-server'
-
-const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+import { getPlayByPlayQuery, wait } from '#libs-server'
 
 export default class Scoreboard {
   constructor(wss) {
