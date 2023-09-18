@@ -116,27 +116,106 @@ const filter_prop_pairings = async ({
   log(opts)
 
   const prop_pairing_query = db('prop_pairings')
-    .where('market_prob', '<=', opts.market_odds_max_threshold)
-    .where('hist_rate_soft', '>=', opts.historical_rate_min_threshold)
-    .where('opp_allow_rate', '>=', opts.opponent_allowed_rate_min_threshold)
-    .where('joint_hist_rate', '>=', opts.joint_historical_rate_min_threshold)
-    .where('highest_payout', '>=', opts.highest_payout_min_threshold)
-    .where('lowest_payout', '>=', opts.lowest_payout_min_threshold)
-    .where('hist_edge_soft', '>=', opts.edge_min_threshold)
-    .where('total_games', '>=', opts.total_games_min_threshold)
-    .where('risk_total', '<=', opts.risk_total_max_threshold)
-    .where('size', '<=', opts.pairing_size_max_threshold)
     .where('sourceid', source)
-    .whereNotIn('team', opts.exclude_nfl_team)
     .where('week', week)
     .orderBy('hist_rate_soft', 'DESC')
     .orderBy('hist_edge_soft', 'DESC')
     .orderBy('lowest_payout', 'DESC')
 
+  if (
+    opts.market_odds_max_threshold !== null &&
+    opts.market_odds_max_threshold !== undefined
+  ) {
+    prop_pairing_query.where(
+      'market_prob',
+      '<=',
+      opts.market_odds_max_threshold
+    )
+  }
+  if (
+    opts.historical_rate_min_threshold !== null &&
+    opts.historical_rate_min_threshold !== undefined
+  ) {
+    prop_pairing_query.where(
+      'hist_rate_soft',
+      '>=',
+      opts.historical_rate_min_threshold
+    )
+  }
+  if (
+    opts.opponent_allowed_rate_min_threshold !== null &&
+    opts.opponent_allowed_rate_min_threshold !== undefined
+  ) {
+    prop_pairing_query.where(
+      'opp_allow_rate',
+      '>=',
+      opts.opponent_allowed_rate_min_threshold
+    )
+  }
+  if (
+    opts.joint_historical_rate_min_threshold !== null &&
+    opts.joint_historical_rate_min_threshold !== undefined
+  ) {
+    prop_pairing_query.where(
+      'joint_hist_rate',
+      '>=',
+      opts.joint_historical_rate_min_threshold
+    )
+  }
+  if (
+    opts.highest_payout_min_threshold !== null &&
+    opts.highest_payout_min_threshold !== undefined
+  ) {
+    prop_pairing_query.where(
+      'highest_payout',
+      '>=',
+      opts.highest_payout_min_threshold
+    )
+  }
+  if (
+    opts.lowest_payout_min_threshold !== null &&
+    opts.lowest_payout_min_threshold !== undefined
+  ) {
+    prop_pairing_query.where(
+      'lowest_payout',
+      '>=',
+      opts.lowest_payout_min_threshold
+    )
+  }
+  if (opts.hist_edge_soft !== null && opts.hist_edge_soft !== undefined) {
+    prop_pairing_query.where('hist_edge_soft', '>=', opts.hist_edge_soft)
+  }
+  if (
+    opts.total_games_min_threshold !== null &&
+    opts.total_games_min_threshold !== undefined
+  ) {
+    prop_pairing_query.where(
+      'total_games',
+      '>=',
+      opts.total_games_min_threshold
+    )
+  }
+  if (
+    opts.risk_total_max_threshold !== null &&
+    opts.risk_total_max_threshold !== undefined
+  ) {
+    prop_pairing_query.where('risk_total', '<=', opts.risk_total_max_threshold)
+  }
+  if (
+    opts.pairing_size_max_threshold !== null &&
+    opts.pairing_size_max_threshold !== undefined
+  ) {
+    prop_pairing_query.where('size', '<=', opts.pairing_size_max_threshold)
+  }
+  if (opts.exclude_nfl_team.length) {
+    prop_pairing_query.whereNotIn('team', opts.exclude_nfl_team)
+  }
+
   if (opts.include_teams.length) {
     prop_pairing_query.whereIn('team', opts.include_teams)
   }
 
+  log(prop_pairing_query.toString())
   const prop_pairing_rows = await prop_pairing_query
 
   const pairing_ids = prop_pairing_rows.map((p) => p.pairing_id)
