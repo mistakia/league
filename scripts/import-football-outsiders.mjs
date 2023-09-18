@@ -4,12 +4,11 @@ import debug from 'debug'
 
 import db from '#db'
 import { constants, fixTeam } from '#libs-shared'
-import { isMain } from '#libs-server'
+import { isMain, wait } from '#libs-server'
 
 const log = debug('import:footballoutsiders')
 debug.enable('import:footballoutsiders')
 
-const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 const urls = [
   {
     type: 'TEAMOFF',

@@ -23,7 +23,7 @@ export default function Matchup({ matchup, teams, scoreboard }) {
     matchup.week === constants.season.week &&
     matchup.year === constants.season.year
   const is_final = Boolean(matchup.ap && matchup.hp)
-    const home_score =
+  const home_score =
     !is_final && is_current_week ? scoreboard.home.points : matchup.hp
   const away_score =
     !is_final && is_current_week ? scoreboard.away.points : matchup.ap
