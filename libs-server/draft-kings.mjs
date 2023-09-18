@@ -1,10 +1,14 @@
 import fetch from 'node-fetch'
-// import debug from 'debug'
+import debug from 'debug'
+import dayjs from 'dayjs'
 
 import config from '#config'
 import { constants } from '#libs-shared'
+import { randomUUID as uuidv4 } from 'crypto'
+import { wait } from '#libs-server'
+import WebSocket from 'ws'
 
-// const log = debug('draft-kings')
+const log = debug('draft-kings')
 // debug.enable('draft-kings')
 
 export const categories = [
@@ -168,4 +172,125 @@ export const get_eventgroup_offer_subcategories = async ({
   }
 
   return []
+}
+
+export const get_websocket_connection = ({ authorization } = {}) =>
+  new Promise((resolve, reject) => {
+    if (!authorization) {
+      return reject(new Error('missing authorization'))
+    }
+
+    const wss = new WebSocket(
+      `${config.draftkings_wss_url}?jwt=${authorization}`,
+      {
+        headers: {
+          Origin: 'https://sportsbook.draftkings.com',
+          'User-Agent': config.user_agent
+        }
+      }
+    )
+
+    log(wss)
+
+    wss.on('open', () => {
+      log('wss connection opened')
+      resolve(wss)
+    })
+  })
+
+export const get_wagers = ({ wss, placed_after = null }) =>
+  new Promise((resolve, reject) => {
+    if (!wss) {
+      return reject(new Error('missing wss'))
+    }
+
+    const placed_cutoff = placed_after ? dayjs(placed_after) : null
+    const limit = 100
+    let results = []
+
+    wss.send(
+      JSON.stringify({
+        jsonrpc: '2.0',
+        method: 'InitializeBetsPageRequest',
+        id: uuidv4(),
+        params: {
+          betsRequest: {
+            filter: { status: 'All' },
+            pagination: {
+              count: limit,
+              skip: 0
+            }
+          }
+        }
+      })
+    )
+
+    const request_most_wagers = () => {
+      log(`requesting ${limit} more wagers`)
+      wss.send(
+        JSON.stringify({
+          id: uuidv4(),
+          jsonrpc: '2.0',
+          method: 'BetsRequest',
+          params: {
+            filter: { status: 'All' },
+            pagination: {
+              count: limit,
+              skip: results.length
+            }
+          }
+        })
+      )
+    }
+
+    const handle_bet_message = async (bets) => {
+      log(`received ${bets.length} wagers`)
+      results = results.concat(bets)
+
+      const last_wager = bets[bets.length - 1]
+      if (placed_cutoff && dayjs(last_wager.placementDate) < placed_cutoff) {
+        return resolve(results)
+      }
+
+      if (bets.length < limit) {
+        return resolve(results)
+      }
+
+      await wait(5000)
+      request_most_wagers()
+    }
+
+    wss.on('message', async (data) => {
+      const json = JSON.parse(data)
+      log(json)
+      if (
+        json.result &&
+        json.result.initial &&
+        json.result.initial.bets &&
+        json.result.initial.bets.length
+      ) {
+        await handle_bet_message(json.result.initial.bets)
+      } else if (json.result && json.result.bets && json.result.bets.length) {
+        await handle_bet_message(json.result.bets)
+      }
+    })
+  })
+
+export const get_all_wagers = async ({
+  authorization,
+  placed_after = null
+} = {}) => {
+  if (!authorization) {
+    throw new Error('missing authorization')
+  }
+
+  const wss = await get_websocket_connection({ authorization })
+  wss.on('error', (error) => {
+    log(error)
+  })
+  const wagers = await get_wagers({ wss, placed_after })
+
+  wss.terminate()
+
+  return wagers
 }
