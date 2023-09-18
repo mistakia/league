@@ -42,7 +42,9 @@ const import_fanduel_wagers = async ({
   log(`loaded ${wagers.length} wagers`)
 
   await fs.ensureDir(data_path)
-  const json_file_path = `${data_path}/fanduel_wagers.json`
+  const json_file_path = `${data_path}/fanduel_wagers_${fanduel_state}_${placed_after.format(
+    'YYYY'
+  )}_${placed_after.format('MM')}_${placed_after.format('DD')}.json`
   await fs.writeJson(json_file_path, wagers, { spaces: 2 })
   log(`wrote json to ${json_file_path}`)
 }
