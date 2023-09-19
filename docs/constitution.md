@@ -442,6 +442,10 @@ xiv. 10-13 points allowed (2)
 
 4. The $200 Salary Cap will be enforced on all bids during the Offseason and on Opening Day. Teams above the Salary Cap on Opening Day will have their players automatically released, in ascending market salary savings, until they are at or below the Salary Cap.
 
+**Extension Deadline**
+
+5. Extensions will be applied to all active roster players at the extension deadline, the first deadline in the OFFSEASON.
+
 ## Article IX
 
 > RESTRCIED FREE AGENCY AUCTION
