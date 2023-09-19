@@ -366,7 +366,7 @@ xiv. 10-13 points allowed (2)
 
 5. Weekly Head-to-Head matchups are won by the team with the higher point total for that given week
 
-6. Matchups that end in a tie are recorded as a tie with the exception of Wildcard, Draft Order Tournament and Championship game as described herein.
+6. Matchups that end in a tie are recorded as a tie with the exception of WILDCARD Round and CHAMPIONSHIP Round as described herein.
 
 **Transactional Restrictions.**
 
