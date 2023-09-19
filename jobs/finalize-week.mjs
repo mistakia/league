@@ -5,6 +5,7 @@ import { isMain } from '#libs-server'
 import debug from 'debug'
 
 // import import_plays_nfl_v3 from '#scripts/import-plays-nfl-v3.mjs'
+import import_plays_nfl_v1 from '#scripts/import-plays-nfl-v1.mjs'
 import import_plays_ngs from '#scripts/import-plays-ngs.mjs'
 import process_matchups from '#scripts/process-matchups.mjs'
 import update_stats_weekly from '#scripts/update-stats-weekly.mjs'
@@ -26,6 +27,7 @@ const finalize_week = async () => {
 
   // finalize plays
   await import_plays_ngs({ week, force_update: true })
+  await import_plays_nfl_v1({ week, force_update: true, ignore_cache: true })
   // await import_plays_nfl_v3({ week, ignore_cache: true, force_update: true })
 
   await update_stats_weekly()
