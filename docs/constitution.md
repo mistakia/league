@@ -354,11 +354,9 @@ xiv. 10-13 points allowed (2)
 
 (g) 1 starting Team Defence/Special Teams (D/ST); 3 maximum
 
-(h) 1 starting Place Kicker (K); 3 maximum
+(h) 7 Bench (BE);
 
-(i) 7 Bench (BE);
-
-4. During the Regular Season, this roster shall consist at all times of 17 players unless a roster spot is emptied due to a penalty described in Article XIII, Section 13.
+4. During the Regular Season, this roster shall consist at all times of 16 players unless a roster spot is emptied due to a penalty described in Article XIII, Section 13.
 
 **Wins and Tiebreakers.**
 
