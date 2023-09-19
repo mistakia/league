@@ -358,6 +358,10 @@ xiv. 10-13 points allowed (2)
 
 4. During the Regular Season, this roster shall consist at all times of 16 players unless a roster spot is emptied due to a penalty described in Article XIII, Section 13.
 
+**Player Position Determination**
+
+5. A player's position shall be determined based on the NFL team reported depth chart position listing. The NFL provides depth charts on their publicly accessible domain nfl.com.
+
 **Wins and Tiebreakers.**
 
 5. Weekly Head-to-Head matchups are won by the team with the higher point total for that given week
