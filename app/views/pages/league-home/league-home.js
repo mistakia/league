@@ -181,8 +181,9 @@ export default function LeagueHomePage({
       <Alert key={playerMap.get('pid')} severity='warning'>
         <div>
           {playerMap.get('name', 'N/A')} has a poaching claim that will be
-          processed {processingTime.fromNow()} on{' '}
-          {processingTime.format('dddd, h:mm a')}.
+          processed no later than {processingTime.fromNow()} on{' '}
+          {processingTime.format('dddd, h:mm a')}. It can be processed at any
+          time prior to that by <TeamName tid={poach.get('player_tid')} />.
         </div>
         <div>
           Submitted by: <TeamName tid={poach.tid} />
