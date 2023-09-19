@@ -135,12 +135,19 @@ export default async function ({
     await db('poach_releases').insert(releaseInserts)
   }
 
+  const player_team = await db('teams')
+    .where({
+      uid: playerTid,
+      year: constants.season.year,
+      lid: leagueId
+    })
+    .first()
   const processing_time = getPoachProcessingTime(submitted)
   const message = `${team.name} has submitted a poaching claim for ${
     poachPlayer.fname
-  } ${poachPlayer.lname} (${
-    poachPlayer.pos
-  }). This claim will be processed around ${processing_time.format(
+  } ${poachPlayer.lname} (${poachPlayer.pos}) on ${
+    player_team.name
+  }. This claim will be processed around ${processing_time.format(
     'dddd, MMMM Do h:mm a'
   )} EST.`
   await sendNotifications({

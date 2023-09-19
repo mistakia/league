@@ -25,6 +25,8 @@ const finalize_week = async () => {
     1
   )
 
+  log(`finalizing week ${week}`)
+
   // finalize plays
   await import_plays_ngs({ week, force_update: true })
   await import_plays_nfl_v1({ week, force_update: true, ignore_cache: true })
