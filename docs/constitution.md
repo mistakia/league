@@ -706,7 +706,7 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 
 7. Payouts shall be made as follows:
 
-(a) LEAGUE Championship Champion: 64% of total yearly buy-in
+(a) LEAGUE Championship Champion: 62% of total yearly buy-in
 
 (b) LEAGUE Championship Runner-Up: 10% of total yearly buy-in
 
