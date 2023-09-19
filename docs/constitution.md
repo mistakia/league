@@ -488,7 +488,7 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 
 **Interpretive Note:** _A team’s Potential Points and All-Play Losses make up 90% and 10% of their DOI, respectively. A lower value yields a higher draft pick._
 
-3. In the event a team’s optimal lineup does not meet the requirements of a complete set of starters who were active, they will receive a Potential Points Penalty (PPP) so that their Potential Points for that week is equal to that of the team with the highest Potential Points for that week.
+3. In the event a team’s optimal lineup does not meet the requirements of a complete set of starters who were active, if they are in possession of their own first round pick for the following year, they will receive a Potential Points Penalty (PPP) so that their Potential Points for that week is equal to that of the team with the highest Potential Points for that week.
 
 4. Playoff team draft order will be based on the following results:
 
