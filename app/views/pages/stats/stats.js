@@ -181,25 +181,25 @@ export default function StatsPage({
       </div>
     )
     slotHeaders.push(
-      <div key={`${index}%`} className='table__cell metric'>
+      <div key={`${index}_pct`} className='table__cell metric'>
         %
       </div>
     )
   }
 
   const positionHeaders = []
-  for (const position of constants.positions) {
+  constants.positions.forEach((position, index) => {
     positionHeaders.push(
-      <div key={position} className='table__cell metric'>
+      <div key={index} className='table__cell metric'>
         {position}
       </div>
     )
     positionHeaders.push(
-      <div key={`${position}%`} className='table__cell metric'>
+      <div key={`${index}_pct`} className='table__cell metric'>
         %
       </div>
     )
-  }
+  })
 
   const sorted = teams.sort(
     (a, b) =>
