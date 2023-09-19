@@ -165,7 +165,7 @@ export default class PoachConfirmation extends React.Component {
               'pos'
             )}). If your claim is successful, he will be added to your active roster with a salary of $${
               rosterInfo.value + 2
-            } and will not be eligible for the practice squad.`}
+            } and will not be eligible for the practice squad. The player's current manager can choose to process the claim at any time.`}
           </DialogContentText>
           <DialogContentText>
             {status.waiver.poach
