@@ -107,6 +107,7 @@ export default function MatchupPage({
               {isHeadToHead && (
                 <ScoreboardTeam
                   tid={matchup.aid}
+                  week={matchup.week}
                   type='away'
                   showBench={show_bench}
                 />
@@ -114,6 +115,7 @@ export default function MatchupPage({
               <ScoreboardSlots />
               <ScoreboardTeam
                 tid={selected_tid}
+                week={matchup.week}
                 type='home'
                 showBench={show_bench}
               />

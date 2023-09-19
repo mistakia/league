@@ -76,10 +76,10 @@ export function createTeam({
     stats: Map.isMap(stats)
       ? stats
       : stats
-        ? new Map({
-            [stats.year]: stats
-          })
-        : undefined,
+      ? new Map({
+          [stats.year]: stats
+        })
+      : undefined,
 
     playoff_odds,
     division_odds,
