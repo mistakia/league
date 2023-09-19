@@ -16,7 +16,17 @@ export function teamsReducer(state = initialState, { payload, type }) {
       return state.withMutations((state) => {
         payload.data.teams.forEach((t) => {
           if (state.has(t.uid)) {
-            state.set(t.uid, state.get(t.uid).merge(createTeam(t)))
+            if (t.stats) {
+              state.set(t.uid, state.get(t.uid).mergeDeep(createTeam(t)))
+            } else {
+              let new_team = state.get(t.uid).merge(createTeam(t))
+              const existing_stats = state.get(t.uid).get('stats')
+              for (const [year, stats] of existing_stats.entrySeq()) {
+                new_team = new_team.setIn(['stats', Number(year)], stats)
+              }
+
+              state.set(t.uid, new_team)
+            }
           } else {
             state.set(t.uid, createTeam(t))
           }

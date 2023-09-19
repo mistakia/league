@@ -73,11 +73,13 @@ export function createTeam({
     leaguetext,
     picks: new List(picks),
 
-    stats: stats
-      ? new Map({
-          [stats.year]: stats
-        })
-      : undefined,
+    stats: Map.isMap(stats)
+      ? stats
+      : stats
+        ? new Map({
+            [stats.year]: stats
+          })
+        : undefined,
 
     playoff_odds,
     division_odds,
