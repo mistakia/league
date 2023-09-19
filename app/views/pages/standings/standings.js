@@ -86,11 +86,15 @@ function Standings({ teams, title, year, is_current_year }) {
           <div className='table__cell metric wide_cell'>Record</div>
           <div className='table__cell metric wide_cell'>All Play</div>
           <div className='table__cell metric wide_cell'>Points</div>
-          {is_current_year && <div className='table__cell metric'>P Odds</div>}
+          {is_current_year && (
+            <div className='table__cell metric'>Playoff Odds</div>
+          )}
           {is_current_year && (
             <div className='table__cell metric'>Bye Odds</div>
           )}
-          {is_current_year && <div className='table__cell metric'>C Odds</div>}
+          {is_current_year && (
+            <div className='table__cell metric'>Champ Odds</div>
+          )}
           <div className='table__cell metric'>DOI</div>
         </div>
         <div className='table__body'>{overallRows}</div>
