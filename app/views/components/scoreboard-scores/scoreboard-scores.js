@@ -17,8 +17,8 @@ export default function ScoreboardScores({ select, matchups, selected }) {
         className={classNames.join(' ')}
         onClick={() => select({ matchupId: matchup.uid })}
       >
-        <ScoreboardScoreTeam tid={matchup.aid} />
-        <ScoreboardScoreTeam tid={matchup.hid} />
+        <ScoreboardScoreTeam tid={matchup.aid} week={matchup.week} />
+        <ScoreboardScoreTeam tid={matchup.hid} week={matchup.week} />
       </div>
     )
   }

@@ -2214,9 +2214,11 @@ export function getScoreboardByMatchupId(state, { matchupId }) {
   return { home, away }
 }
 
-export function getScoreboardByTeamId(state, { tid }) {
+export function getScoreboardByTeamId(
+  state,
+  { tid, week = constants.season.week }
+) {
   const year = state.getIn(['app', 'year'])
-  const week = state.getIn(['scoreboard', 'week'])
   const matchup = getMatchupByTeamId(state, { tid, year, week })
 
   let minutes = 0
