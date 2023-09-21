@@ -39,7 +39,7 @@ yarn install
 ##### Start server
 
 ```
-pm2 start ecosystem.config.js
+pm2 start ecosystem.config.js --env production
 ```
 
 > Edit [`ecosystem.config.js`](https://github.com/mistakia/league/blob/master/ecosystem.config.js) to enable `yarn deploy` on local machine.
