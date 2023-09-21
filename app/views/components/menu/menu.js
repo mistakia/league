@@ -55,8 +55,10 @@ export default function AppMenu({
         <div className='main__menu'>
           <div className='menu__sections'>
             <div className='menu__section'>
-              <div className='league__title'>{league.name}</div>
-              <LeagueSchedule />
+              {Boolean(league.uid) && (
+                <div className='league__title'>{league.name}</div>
+              )}
+              {Boolean(league.uid) && <LeagueSchedule />}
               <div
                 className='menu__links'
                 onClick={() => isMobile && set_menu_open(false)}
@@ -64,11 +66,6 @@ export default function AppMenu({
                 {Boolean(leagueId) && (
                   <NavLink to={`/leagues/${leagueId}`} end>
                     Home
-                  </NavLink>
-                )}
-                {isCommish && (
-                  <NavLink to={`/leagues/${leagueId}/settings`}>
-                    Settings
                   </NavLink>
                 )}
                 {Boolean(leagueId) && is_hosted && (
@@ -120,6 +117,11 @@ export default function AppMenu({
                     )}
                   </>
                 )}
+                {isCommish && (
+                  <NavLink to={`/leagues/${leagueId}/settings`}>
+                    Settings
+                  </NavLink>
+                )}
               </div>
             </div>
             {Boolean(teamId) && is_hosted && (
@@ -159,7 +161,7 @@ export default function AppMenu({
                 className='menu__links'
                 onClick={() => isMobile && set_menu_open(false)}
               >
-                <NavLink to='/props'>Props</NavLink>
+                {/* <NavLink to='/props'>Props</NavLink> */}
                 <NavLink to='/status'>Status</NavLink>
                 <NavLink to='/glossary'>Glossary</NavLink>
                 <NavLink to='/resources'>Resources</NavLink>
