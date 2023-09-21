@@ -2481,44 +2481,102 @@ CREATE TABLE `props_index` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `prop_markets`
+-- Table structure for table `prop_markets_history`
 --
 
-DROP TABLE IF EXISTS `prop_markets`;
+DROP TABLE IF EXISTS `prop_markets_history`;
 
-CREATE TABLE `prop_markets` (
-  `market_id` varchar(255) NOT NULL,
-  `source_id` tinyint(1) unsigned NOT NULL,
-  `source_event_id` varchar(255) DEFAULT NULL,
-  `source_market_name` varchar(255) DEFAULT NULL,
-  `market_type` tinyint(1) unsigned DEFAULT NULL,
-  `market_name` varchar(255) DEFAULT NULL,
+CREATE TABLE `prop_markets_history` (
+  `source_id` ENUM('BETONLINE', 'BETMGM', 'BETRIVERS', 'BOVADA', 'CAESARS', 'DRAFTKINGS', 'FANDUEL', 'GAMBET', 'PRIZEPICKS') NOT NULL,
+  `source_market_id` varchar(255) NOT NULL,
+  `source_market_name` varchar(500) DEFAULT NULL,
+  
   `open` tinyint(1) DEFAULT NULL,
   `live` tinyint(1) DEFAULT NULL,
-  `runners` smallint unsigned DEFAULT NULL,
+  `selection_count` smallint unsigned NOT NULL,
+
   `timestamp` int(11) NOT NULL,
-  UNIQUE KEY `market` (`source_id`, `market_id`, `timestamp`)
+  UNIQUE KEY `market` (`source_id`, `source_market_id`, `timestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `prop_markets_index`
+-- Table structure for table `prop_markets_index_new`
 --
 
-DROP TABLE IF EXISTS `prop_markets_index`;
+DROP TABLE IF EXISTS `prop_markets_index_new`;
 
-CREATE TABLE `prop_markets_index` (
-  `market_id` varchar(255) NOT NULL,
-  `source_id` tinyint(1) unsigned NOT NULL,
-  `source_event_id` varchar(255) DEFAULT NULL,
-  `source_market_name` varchar(255) DEFAULT NULL,
+CREATE TABLE `prop_markets_index_new` (
   `market_type` tinyint(1) unsigned DEFAULT NULL,
-  `market_name` varchar(255) DEFAULT NULL,
+
+  `source_id` ENUM('BETONLINE', 'BETMGM', 'BETRIVERS', 'BOVADA', 'CAESARS', 'DRAFTKINGS', 'FANDUEL', 'GAMBET', 'PRIZEPICKS') NOT NULL,
+  `source_market_id` varchar(255) NOT NULL,
+  `source_market_name` varchar(500) DEFAULT NULL,
+
+  `esbid` int(10) unsigned DEFAULT NULL,
+  `source_event_id` varchar(255) DEFAULT NULL,
+  `source_event_name` varchar(255) DEFAULT NULL,
+
   `open` tinyint(1) DEFAULT NULL,
   `live` tinyint(1) DEFAULT NULL,
-  `runners` smallint unsigned DEFAULT NULL,
-  UNIQUE KEY `market` (`source_id`, `market_id`)
+  `selection_count` smallint unsigned NOT NULL,
+
+  `settled` tinyint(1) DEFAULT NULL,
+  `winning_selection_id` varchar(255) DEFAULT NULL,
+  `metric_result_value` decimal(6,1) DEFAULT NULL,
+
+  `time_type` ENUM('OPEN', 'CLOSE') NOT NULL,
+  `timestamp` int(11) NOT NULL,
+  UNIQUE KEY `market` (`source_id`, `source_market_id`, `time_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `prop_market_selections_history`
+--
+
+DROP TABLE IF EXISTS `prop_market_selections_history`;
+
+CREATE TABLE `prop_market_selections_history` (
+  `source_id` ENUM('BETONLINE', 'BETMGM', 'BETRIVERS', 'BOVADA', 'CAESARS', 'DRAFTKINGS', 'FANDUEL', 'GAMBET', 'PRIZEPICKS') NOT NULL,
+  `source_market_id` varchar(255) NOT NULL,
+  `source_selection_id` varchar(255) NOT NULL,
+
+  `selection_name` varchar(255) DEFAULT NULL,
+  `selection_metric_line` decimal(6,1) DEFAULT NULL,
+  `odds_decimal` decimal(15,3) DEFAULT NULL,
+  `odds_american` int(11) DEFAULT NULL,
+
+  `timestamp` int(11) NOT NULL,
+  UNIQUE KEY `market_selection` (`source_id`, `source_market_id`, `source_selection_id`, `timestamp`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `prop_market_selections_index`
+--
+
+DROP TABLE IF EXISTS `prop_market_selections_index`;
+
+CREATE TABLE `prop_market_selections_index` (
+  `source_id` ENUM('BETONLINE', 'BETMGM', 'BETRIVERS', 'BOVADA', 'CAESARS', 'DRAFTKINGS', 'FANDUEL', 'GAMBET', 'PRIZEPICKS') NOT NULL,
+  `source_market_id` varchar(255) NOT NULL,
+  `source_selection_id` varchar(255) NOT NULL,
+
+  `selection_pid` varchar(25) DEFAULT NULL,
+  `selection_name` varchar(255) DEFAULT NULL,
+  `selection_metric_line` decimal(6,1) DEFAULT NULL,
+  `odds_decimal` decimal(15,3) DEFAULT NULL,
+  `odds_american` int(11) DEFAULT NULL,
+
+  `result` ENUM('PENDING','WON','LOST','PUSH','CANCELLED') DEFAULT NULL,
+
+  `timestamp` int(11) NOT NULL,
+  `time_type` ENUM('OPEN', 'CLOSE') NOT NULL,
+  UNIQUE KEY `market` (`source_id`, `source_market_id`, `source_selection_id`, `time_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -2907,6 +2965,67 @@ CREATE TABLE `player_aliases` (
   `pid` varchar(25) NOT NULL,
   `formatted_alias` varchar(100) NOT NULL,
   UNIQUE KEY `alias` (`pid`, `formatted_alias`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+-- Table structure for table `placed_wagers`
+--
+
+DROP TABLE IF EXISTS `placed_wagers`;
+
+CREATE TABLE `placed_wagers` (
+  `wager_id` int(11) NOT NULL AUTO_INCREMENT,
+  `userid` int(6) NOT NULL,
+
+  `wager_type` ENUM('STRAIGHT', 'PARLAY', 'ROUND_ROBIN') NOT NULL,
+  -- `wager_sub_type` varchar(255) NOT NULL,
+  `placed_at` int(11) NOT NULL,
+  `bet_count` tinyint(2) NOT NULL,
+  `selection_count` tinyint(2) NOT NULL,
+
+  `wager_status` ENUM('OPEN', 'WON', 'LOST', 'PUSH', 'CANCELLED') NOT NULL, -- win includes partial wins for round robins
+  `bet_wager_amount` decimal(7,2) NOT NULL,
+  `total_wager_amount` decimal(7,2) NOT NULL,
+  `wager_returned_amount` decimal(12,2) NOT NULL,
+  `book_id` ENUM('DRAFTKINGS', 'FANDUEL') NOT NULL,
+  `book_wager_id` varchar(255) NOT NULL,
+
+  `selection_1_id` varchar(255) DEFAULT NULL,
+  `selection_1_odds` int(11) DEFAULT NULL,
+
+  `selection_2_id` varchar(255) DEFAULT NULL,
+  `selection_2_odds` int(11) DEFAULT NULL,
+
+  `selection_3_id` varchar(255) DEFAULT NULL,
+  `selection_3_odds` int(11) DEFAULT NULL,
+
+  `selection_4_id` varchar(255) DEFAULT NULL,
+  `selection_4_odds` int(11) DEFAULT NULL,
+
+  `selection_5_id` varchar(255) DEFAULT NULL,
+  `selection_5_odds` int(11) DEFAULT NULL,
+
+  `selection_6_id` varchar(255) DEFAULT NULL,
+  `selection_6_odds` int(11) DEFAULT NULL,
+
+  `selection_7_id` varchar(255) DEFAULT NULL,
+  `selection_7_odds` int(11) DEFAULT NULL,
+
+  `selection_8_id` varchar(255) DEFAULT NULL,
+  `selection_8_odds` int(11) DEFAULT NULL,
+
+  `selection_9_id` varchar(255) DEFAULT NULL,
+  `selection_9_odds` int(11) DEFAULT NULL,
+
+  `selection_10_id` varchar(255) DEFAULT NULL,
+  `selection_10_odds` int(11) DEFAULT NULL,
+
+  PRIMARY KEY (`wager_id`),
+  KEY `userid` (`userid`),
+  KEY `placed_at` (`placed_at`),
+
+  UNIQUE KEY `wager` (`book_wager_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

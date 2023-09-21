@@ -72,6 +72,7 @@ export * as puppeteer from './puppeteer.mjs'
 export { default as get_players_table_view_results } from './get-players-table-view-results.mjs'
 export { default as update_play } from './update-play.mjs'
 export { default as update_nfl_game } from './update-nfl-game.mjs'
+export * as betonline from './betonline.mjs'
 
 export const getChartedPlayByPlayQuery = (db) =>
   db('nfl_plays')

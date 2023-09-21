@@ -40,19 +40,8 @@ export const get_markets = async () => {
   await browser.close()
 
   if (!data || !data.fixtures || !data.fixtures.length) {
-    return { nfl_game_markets: [], all_markets: [] }
+    return { fixtures: [] }
   }
 
-  // filter out non-game fixtures
-  const filtered_fixtures = data.fixtures.filter((f) => f.participants.length)
-
-  // filter to supported markets
-  const nfl_game_markets = filtered_fixtures
-    .map((f) => f.games)
-    .flat()
-    .filter((g) => g.categoryId === 518 && markets[g.templateId])
-
-  const all_markets = data.fixtures.map((f) => f.games).flat()
-
-  return { nfl_game_markets, all_markets }
+  return { fixtures: data.fixtures }
 }

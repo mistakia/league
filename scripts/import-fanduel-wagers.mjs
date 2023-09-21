@@ -5,8 +5,9 @@ import fs from 'fs-extra'
 import path, { dirname } from 'path'
 import { fileURLToPath } from 'url'
 import { hideBin } from 'yargs/helpers'
+import oddslib from 'oddslib'
 
-// import db from '#db'
+import db from '#db'
 // import { constants } from '#libs-shared'
 import { isMain, fanduel } from '#libs-server'
 
@@ -17,13 +18,58 @@ debug.enable('import-fanduel-wagers,fanduel')
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const data_path = path.join(__dirname, '../tmp')
 
-const import_fanduel_wagers = async ({
-  authorization,
+const format_wager_type = (type) => {
+  switch (type) {
+    case 'ACC2':
+    case 'ACC3':
+    case 'ACC4':
+    case 'ACC5':
+    case 'ACC6':
+    case 'ACC7':
+    case 'ACC8':
+    case 'ACC9':
+    case 'ACC10':
+      return 'PARLAY'
+
+    default:
+      throw new Error(`unknown wager type ${type}`)
+  }
+}
+
+const format_wager_status = (settlement_status) => {
+  switch (settlement_status) {
+    case 'OPEN':
+      return 'OPEN'
+
+    case 'WON':
+      return 'WON'
+
+    case 'LOST':
+      return 'LOST'
+
+    default:
+      throw new Error(`unknown wager status ${settlement_status}`)
+  }
+}
+
+const format_bet_count = (wager) => Number(wager.numberOfSelections)
+
+const load_fanduel_wagers = async ({
+  filename,
   is_settled = false,
   fanduel_state = 'va',
+  authorization,
   placed_after,
   placed_before
-} = {}) => {
+}) => {
+  if (filename) {
+    return fs.readJson(filename)
+  }
+
+  if (!authorization) {
+    throw new Error('missing authorization')
+  }
+
   if (!placed_after) {
     placed_after = dayjs().subtract(1, 'week')
   }
@@ -32,7 +78,8 @@ const import_fanduel_wagers = async ({
     is_settled,
     placed_after: placed_after.format(),
     placed_before: placed_before ? placed_before.format() : null,
-    fanduel_state
+    fanduel_state,
+    authorization
   })
 
   const wagers = await fanduel.get_all_wagers({
@@ -42,6 +89,7 @@ const import_fanduel_wagers = async ({
     placed_after,
     placed_before
   })
+
   log(`loaded ${wagers.length} wagers`)
 
   await fs.ensureDir(data_path)
@@ -51,7 +99,85 @@ const import_fanduel_wagers = async ({
     placed_before ? placed_before.format('YYYY_MM_DD') : 'present'
   }.json`
   await fs.writeJson(json_file_path, wagers, { spaces: 2 })
-  log(`wrote json to ${json_file_path}`)
+  log(`saved wagers to ${json_file_path}`)
+
+  return wagers
+}
+
+const import_fanduel_wagers = async ({
+  user_id = 1,
+  filename,
+  authorization,
+  is_settled = false,
+  fanduel_state = 'va',
+  placed_after
+} = {}) => {
+  const wagers = await load_fanduel_wagers({
+    filename,
+    is_settled,
+    authorization,
+    placed_after,
+    fanduel_state
+  })
+
+  const wager_inserts = []
+
+  for (const wager of wagers) {
+    let wager_item
+
+    try {
+      wager_item = {
+        userid: user_id,
+        wager_type: format_wager_type(wager.betType),
+        placed_at: dayjs(wager.placedDate).unix(),
+        bet_count: format_bet_count(wager),
+        selection_count: wager.legs.length,
+        wager_status: format_wager_status(wager.result),
+        bet_wager_amount: wager.current_size,
+        // TODO total_wager_amount:
+        wager_returned_amount: wager.pandl,
+        book_id: 'FANDUEL',
+        book_wager_id: wager.betId
+      }
+
+      if (wager.legs.length > 10) {
+        throw new Error(`wager ${wager.betId} has more than 10 selections`)
+      }
+
+      wager.legs.forEach((leg, index) => {
+        // TODO check and add any missing markets and selections
+
+        if (leg.parts.length > 1) {
+          throw new Error('leg has multiple parts')
+        }
+
+        wager_item[`selection_${index + 1}_id`] = leg.parts[0].selectionId
+        const decimal_odds = Number(leg.parts[0].price)
+        wager_item[`selection_${index + 1}_odds`] = oddslib
+          .from('decimal', decimal_odds)
+          .to('moneyline')
+      })
+    } catch (err) {
+      log(err)
+    }
+
+    if (wager_item) {
+      wager_inserts.push(wager_item)
+    }
+  }
+
+  if (argv.dry) {
+    log(wager_inserts[0])
+    return
+  }
+
+  if (wager_inserts.length) {
+    log(`inserting ${wager_inserts.length} wagers`)
+    await db('placed_wagers')
+      .insert(wager_inserts)
+      .onConflict(['book_wager_id'])
+      .merge()
+  }
 }
 
 const main = async () => {
