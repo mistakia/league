@@ -3521,6 +3521,14 @@ function PlayerFields({ week, state }) {
       percentile_field: 'pts'
     },
 
+    'stats.pa': {
+      category: 'passing',
+      column_header: 'ATT',
+      csv_header: 'Passing Attempts',
+      player_value_path: 'stats.pa',
+      percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
+      percentile_field: 'pa'
+    },
     'stats.py': {
       category: 'passing',
       column_header: 'YDS',

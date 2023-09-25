@@ -72,6 +72,7 @@ const views = {
     order_by: 'stats.py',
     fields: [
       'stats.pts',
+      'stats.pa',
       'stats.py',
       'stats.pyac',
       'stats.tdp',
