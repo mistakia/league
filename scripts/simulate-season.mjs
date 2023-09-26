@@ -14,7 +14,7 @@ debug.enable('simulate-season')
 const timestamp = Math.round(Date.now() / 1000)
 const argv = yargs(hideBin(process.argv)).argv
 
-const run = async (lid) => {
+const simulate_season = async (lid) => {
   if (isNaN(lid)) {
     throw new Error(`missing lid param: ${lid}`)
   }
@@ -85,7 +85,7 @@ const main = async () => {
   let error
   try {
     const lid = argv.lid || 1
-    await run(lid)
+    await simulate_season(lid)
   } catch (err) {
     error = err
     console.log(error)
@@ -105,4 +105,4 @@ if (isMain(import.meta.url)) {
   main()
 }
 
-export default run
+export default simulate_season

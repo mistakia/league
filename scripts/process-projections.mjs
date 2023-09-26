@@ -22,8 +22,8 @@ import {
   getPlayerTransactions,
   isMain
 } from '#libs-server'
-import projectLineups from './project-lineups.mjs'
-import simulateSeason from './simulate-season.mjs'
+import project_lineups from './project-lineups.mjs'
+import simulate_season from './simulate-season.mjs'
 import calculateMatchupProjection from './calculate-matchup-projection.mjs'
 
 const log = debug('process-projections')
@@ -405,14 +405,14 @@ const process_league = async ({ year, lid }) => {
     log(`processed and saved ${valueInserts.length} player values`)
   }
 
-  await projectLineups(lid)
+  await project_lineups(lid)
   await calculateMatchupProjection({ lid })
 
   if (
     constants.season.week &&
     constants.season.week <= constants.season.regularSeasonFinalWeek
   ) {
-    await simulateSeason(lid)
+    await simulate_season(lid)
   }
 
   if (lid) {
