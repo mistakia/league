@@ -2874,6 +2874,20 @@ CREATE TABLE `play_changelog` (
   UNIQUE KEY `play` (`esbid`, `playId`, `prop`, `timestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `player_aliases`
+--
+
+DROP TABLE IF EXISTS `player_aliases`;
+
+CREATE TABLE `player_aliases` (
+  `pid` varchar(25) NOT NULL,
+  `formatted_alias` varchar(100) NOT NULL,
+  UNIQUE KEY `alias` (`pid`, `formatted_alias`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
