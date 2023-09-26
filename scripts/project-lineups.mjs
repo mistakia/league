@@ -9,7 +9,7 @@ import { getLeague, getRoster, getPlayers, isMain } from '#libs-server'
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('project-lineups')
 
-const run = async (lid) => {
+const project_lineups = async (lid) => {
   if (isNaN(lid)) {
     throw new Error(`Missing lid param: ${lid}`)
   }
@@ -33,18 +33,21 @@ const run = async (lid) => {
     const rosterRows = await getRoster({ tid })
     const roster = new Roster({ roster: rosterRows, league })
     const player_pids = roster.players.map((p) => p.pid)
-    const active_pids = roster.active.map((p) => p.pid)
+    const ineligible_slots = [constants.slots.PSP, constants.slots.PSDP]
+    const eligible_starters_pids = roster.players
+      .filter((p) => !ineligible_slots.includes(p.slot))
+      .map((p) => p.pid)
     const player_rows = await getPlayers({ leagueId: lid, pids: player_pids })
-    const active_players = player_rows.filter((p) =>
-      active_pids.includes(p.pid)
+    const eligible_players = player_rows.filter((p) =>
+      eligible_starters_pids.includes(p.pid)
     )
     const lineups = optimizeLineup({
-      players: active_players,
+      players: eligible_players,
       league
     })
 
     const baseline_lineups = optimizeLineup({
-      players: active_players,
+      players: eligible_players,
       league,
       use_baseline_when_missing: true
     })
@@ -215,7 +218,7 @@ const main = async () => {
   let error
   try {
     const lid = argv.lid || 1
-    await run(lid)
+    await project_lineups(lid)
   } catch (err) {
     error = err
     console.log(error)
@@ -235,4 +238,4 @@ if (isMain(import.meta.url)) {
   main()
 }
 
-export default run
+export default project_lineups
