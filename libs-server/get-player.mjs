@@ -1,11 +1,11 @@
 import debug from 'debug'
 import yargs from 'yargs'
+import { hideBin } from 'yargs/helpers'
 
 import isMain from './is-main.mjs'
 import { fixTeam, formatPlayerName, Errors, team_aliases } from '#libs-shared'
 import db from '#db'
 
-const argv = yargs.argv
 const log = debug('get-player')
 debug.enable('get-player')
 
@@ -73,7 +73,11 @@ const getPlayer = async ({
     if (name) {
       const formatted = formatPlayerName(name)
 
-      query.where({ formatted })
+      query.leftJoin('player_aliases', 'player.pid', 'player_aliases.pid')
+
+      query.where(function () {
+        this.where({ formatted }).orWhere({ formatted_alias: formatted })
+      })
     }
 
     if (pname) {
@@ -121,6 +125,7 @@ export default getPlayer
 const main = async () => {
   let error
   try {
+    const argv = yargs(hideBin(process.argv)).argv
     const options = {
       name: argv.name,
       pos: argv.pos,
