@@ -67,8 +67,14 @@
 ## At 7PM on Monday and Thursday during the NFL Season
 0 19 * 1,2,9-12 1,4 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-players-sleeper.mjs &>> /var/log/league/import-players-sleeper.log
 
+## At 10:00 AM on Sunday during the NFL Season
+0 10 * 1,2,9-12 0 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-players-sleeper.mjs &>> /var/log/league/import-players-sleeper.log
+
 ## At 11:00 AM on Sunday during the NFL Season
 0 11 * 1,2,9-12 0 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-players-sleeper.mjs &>> /var/log/league/import-players-sleeper.log
+
+## At 12:00 AM on Sunday during the NFL Season
+0 12 * 1,2,9-12 0 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-players-sleeper.mjs &>> /var/log/league/import-players-sleeper.log
 
 ################################### KEEP TRADE CUT ########################################
 
