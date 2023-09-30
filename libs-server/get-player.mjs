@@ -55,7 +55,7 @@ const getPlayer = async ({
     return result[0]
   }
 
-  const query = db('player')
+  const query = db('player').select('player.*')
 
   if (sleeper_id) {
     query.where({ sleeper_id })
