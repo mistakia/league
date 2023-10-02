@@ -152,14 +152,13 @@ export default async function ({
           'league_format_player_seasonlogs.year',
           constants.season.year
         )
+        this.andOn(
+          db.raw(
+            `league_format_player_seasonlogs.league_format_hash = '${league_format_hash}'`
+          )
+        )
       })
       .select(db.raw(league_format_player_seasonlogs_selects.join(',')))
-      .where(function () {
-        this.where(
-          'league_format_player_seasonlogs.league_format_hash',
-          league_format_hash
-        ).orWhereNull('league_format_player_seasonlogs.league_format_hash')
-      })
   }
 
   if (baseline_player_ids.length) {
