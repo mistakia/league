@@ -2639,16 +2639,14 @@ export function getOverallStandings(state) {
 
   // TODO cleanup
   // if the 2nd ranked team in sortedDivisionLeaders is from the same division as the first, swap it with the 3rd ranked team
-  if (
-    sortedDivisionLeaders.get(0).get('div') ===
-    sortedDivisionLeaders.get(1).get('div')
-  ) {
-    const temp = sortedDivisionLeaders.get(1)
+  const team_1 = sortedDivisionLeaders.get(0)
+  const team_2 = sortedDivisionLeaders.get(1)
+  if (team_1 && team_2 && team_1.get('div') === team_2.get('div')) {
     sortedDivisionLeaders = sortedDivisionLeaders.set(
       1,
       sortedDivisionLeaders.get(2)
     )
-    sortedDivisionLeaders = sortedDivisionLeaders.set(2, temp)
+    sortedDivisionLeaders = sortedDivisionLeaders.set(2, team_2)
   }
 
   const playoffTeamTids = divisionLeaders.map((p) => p.uid)
