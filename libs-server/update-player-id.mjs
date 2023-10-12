@@ -16,18 +16,22 @@ export default async function ({ current_pid, new_pid }) {
 
   // get all tables with pid columns, except for player table
   const tables = await db('information_schema.columns')
-    .select('table_name')
-    .where({ column_name: 'pid' })
-    .groupBy('table_name')
+    .select('table_name', 'column_name')
+    .where(function () {
+      this.where('column_name', 'like', '%_pid')
+      this.orWhere('column_name', 'pid')
+    })
+    .groupBy('table_name', 'column_name')
     .where('table_schema', config.mysql.connection.database)
     .whereNot('table_name', 'player')
 
-  const table_names = tables.map((table) => table.TABLE_NAME)
-  for (const table_name of table_names) {
+  for (const table of tables) {
+    const table_name = table.table_name
+    const column_name = table.column_name
     const [rows_updated] = await db.raw(
-      `update ignore ${table_name} set pid = '${new_pid}' where pid = '${current_pid}'`
+      `update ignore ${table_name} set ${column_name} = '${new_pid}' where ${column_name} = '${current_pid}'`
     )
-    log(`${table_name} rows updated: ${rows_updated.info}`)
-    await db(table_name).where('pid', current_pid).del()
+    log(`${table_name} ${column_name} rows updated: ${rows_updated.info}`)
+    await db(table_name).where(column_name, current_pid).del()
   }
 }
