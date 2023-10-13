@@ -224,13 +224,13 @@ DROP TABLE IF EXISTS `nfl_games`;
 CREATE TABLE `nfl_games` (
   `esbid` int(10) DEFAULT NULL,
   `gsisid` int(5) DEFAULT NULL,
-  `gameid` varchar(20) DEFAULT NULL,
   `espnid` int(15) DEFAULT NULL,
   `ngsid` int(10) DEFAULT NULL,
   `shieldid` varchar(36) DEFAULT NULL,
   `detailid_v3` varchar(36) DEFAULT NULL,
   `detailid_v1` varchar(36) DEFAULT NULL,
   `pfrid` varchar(20) DEFAULT NULL,
+  `nflverse_game_id` varchar(15) DEFAULT NULL,
 
   `year` smallint(4) NOT NULL,
   `week` tinyint(2) NOT NULL,
@@ -272,20 +272,41 @@ CREATE TABLE `nfl_games` (
   `spread_line` int(3) DEFAULT NULL,
   `total_line` int(3) DEFAULT NULL,
 
-  `roof` varchar(30) DEFAULT NULL,
-  `surf` varchar(30) DEFAULT NULL,
+  `roof` ENUM('dome', 'outdoors', 'closed', 'open') DEFAULT NULL,
+  `surf` ENUM('grass', 'astroturf', 'fieldturf', 'dessograss', 'astroplay', 'matrixturf', 'sportturf', 'a_turf') DEFAULT NULL,
 
   `temp` int(3) DEFAULT NULL,
   `wind` int(3) DEFAULT NULL,
 
+  `away_qb_pid` varchar(25) DEFAULT NULL,
+  `home_qb_pid` varchar(25) DEFAULT NULL,
+
   `away_coach` varchar(36) DEFAULT NULL,
   `home_coach` varchar(36) DEFAULT NULL,
-  `off_play_caller` varchar(36) DEFAULT NULL,
+
+  `away_play_caller` varchar(36) DEFAULT NULL,
+  `home_play_caller` varchar(36) DEFAULT NULL,
 
   `referee` varchar(36) DEFAULT NULL,
 
   UNIQUE KEY `game` (`v`, `h`, `week`, `year`, `seas_type`),
   UNIQUE KEY `esbid` (`esbid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `nfl_games_changelog`
+--
+
+DROP TABLE IF EXISTS `nfl_games_changelog`;
+
+CREATE TABLE `nfl_games_changelog` (
+  `esbid` varchar(36) NOT NULL,
+  `column_name` varchar(36) NOT NULL,
+  `prev` varchar(400) DEFAULT NULL,
+  `new` varchar(400) DEFAULT NULL,
+  `timestamp` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------

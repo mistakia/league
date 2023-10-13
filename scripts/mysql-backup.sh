@@ -75,7 +75,10 @@ ros_projections"
 
 DB_LOGS_TABLES="
 jobs
-player_changelog"
+player_changelog
+nfl_games_changelog
+play_changelog
+"
 
 DB_STATS_TABLES="
 footballoutsiders

@@ -1247,7 +1247,9 @@ export const jobs = {
   GAMBET_ODDS: 58,
   BETRIVERS_ODDS: 59,
 
-  GENERATE_NEW_SEASONS: 60
+  GENERATE_NEW_SEASONS: 60,
+
+  IMPORT_GAMES_NFLVERSE: 61
 }
 
 export const jobDetails = {
@@ -1310,7 +1312,8 @@ export const jobDetails = {
   57: 'PrizePicks Projections',
   58: 'Gambet Odds',
   59: 'Betrivers Odds',
-  60: 'Generate New Seasons'
+  60: 'Generate New Seasons',
+  61: 'Import NFL Games (NFLverse)'
 }
 
 export const player_prop_types = {
