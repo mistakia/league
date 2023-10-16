@@ -30,12 +30,12 @@ const get_props_summary = (props) =>
       const odds = oddslib.from('moneyline', prop.americanPrice)
       const is_win = prop.result === 'WON'
       return {
+        total_props: accumulator.total_props + 1,
         expected_hits:
           accumulator.expected_hits + odds.to('impliedProbability'),
         actual_hits: is_win
           ? accumulator.actual_hits + 1
-          : accumulator.actual_hits,
-        total_props: accumulator.total_props + 1
+          : accumulator.actual_hits
       }
     },
     {
@@ -44,11 +44,6 @@ const get_props_summary = (props) =>
       total_props: 0
     }
   )
-
-const format_wagers_summary = (summary) => ({
-  ...summary,
-  roi: (summary.total_won / summary.total_risk - 1) * 100
-})
 
 const get_wagers_summary = ({ wagers, props = [] }) =>
   wagers.reduce(
@@ -133,8 +128,37 @@ const analyze_fanduel_wagers = async ({
     return wager_week === week
   })
 
-  const wager_summary = get_wagers_summary({ wagers: filtered })
-  log(format_wagers_summary(wager_summary))
+  let wager_summary = get_wagers_summary({ wagers: filtered })
+  wager_summary.roi = `${
+    (wager_summary.total_won / wager_summary.total_risk - 1) * 100
+  }%`
+  wager_summary.total_risk = Number(wager_summary.total_risk.toFixed(2))
+  wager_summary.total_potential_win = Number(
+    wager_summary.total_potential_win.toFixed(2)
+  )
+
+  const wager_summary_table = new Table({ title: 'Wagers Summary' })
+  wager_summary_table.addRow({
+    wagers: wager_summary.wagers,
+    wagers_won: wager_summary.wagers_won,
+    wagers_loss: wager_summary.wagers_loss,
+    total_risk: wager_summary.total_risk,
+    total_won: wager_summary.total_won,
+    total_potential_win: wager_summary.total_potential_win,
+    roi: wager_summary.roi
+  })
+  wager_summary_table.printTable()
+
+  const lost_by_legs_summary_table = new Table({
+    title: 'Wagers Lost By # Legs'
+  })
+  lost_by_legs_summary_table.addRow({
+    1: wager_summary.lost_by_one_leg,
+    2: wager_summary.lost_by_two_legs,
+    3: wager_summary.lost_by_three_legs,
+    '4+': wager_summary.lost_by_four_or_more_legs
+  })
+  lost_by_legs_summary_table.printTable()
 
   const wager_legs = filtered.map((wager) => wager.legs).flat()
   const wager_parts = wager_legs.map((legs) => legs.parts).flat()
@@ -179,11 +203,15 @@ const analyze_fanduel_wagers = async ({
       return true
     })
   // console.log(filtered_props.map(p => p.handicap ? `${p.selectionName} ${p.handicap}` : p.selectionName).sort())
-  log(get_props_summary(filtered_props))
+  const props_summary = get_props_summary(filtered_props)
+  props_summary.expected_hits = Number(props_summary.expected_hits.toFixed(2))
+  const props_summary_table = new Table()
+  props_summary_table.addRow(props_summary)
+  props_summary_table.printTable()
 
   const one_prop = []
   const two_props = []
-  const three_props = []
+  // const three_props = []
 
   const lost_props = props.filter((prop) => prop.result === 'LOST')
 
@@ -198,14 +226,15 @@ const analyze_fanduel_wagers = async ({
       wagers: filtered,
       props: [prop_a]
     })
-    const gain = one_prop_summary.total_won - wager_summary.total_won
-    const wins = one_prop_summary.wagers_won - wager_summary.wagers_won
+    const potential_gain = one_prop_summary.total_won - wager_summary.total_won
+    const potential_wins =
+      one_prop_summary.wagers_won - wager_summary.wagers_won
 
-    if (gain) {
+    if (potential_gain) {
       one_prop.push({
         name: prop_a.selectionName,
-        gain,
-        wins
+        potential_gain,
+        potential_wins
       })
     }
 
@@ -218,74 +247,105 @@ const analyze_fanduel_wagers = async ({
         wagers: filtered,
         props: [prop_a, prop_b]
       })
-      const gain = two_prop_summary.total_won - wager_summary.total_won
-      const wins = two_prop_summary.wagers_won - wager_summary.wagers_won
+      const potential_gain =
+        two_prop_summary.total_won - wager_summary.total_won
+      const potential_wins =
+        two_prop_summary.wagers_won - wager_summary.wagers_won
 
-      if (gain) {
+      if (potential_gain) {
         two_props.push({
           name: `${prop_a.selectionName} / ${prop_b.selectionName}`,
-          gain,
-          wins
+          potential_gain,
+          potential_wins
         })
       }
 
-      for (let k = j + 1; k < lost_props.length; k++) {
-        const prop_c = lost_props[k]
+      // for (let k = j + 1; k < lost_props.length; k++) {
+      //   const prop_c = lost_props[k]
 
-        if (exclude_props.includes(prop_c.selectionName)) continue
+      //   if (exclude_props.includes(prop_c.selectionName)) continue
 
-        const three_prop_summary = get_wagers_summary({
-          wagers: filtered,
-          props: [prop_a, prop_b, prop_c]
-        })
-        const gain = three_prop_summary.total_won - wager_summary.total_won
-        const wins = three_prop_summary.wagers_won - wager_summary.wagers_won
+      //   const three_prop_summary = get_wagers_summary({
+      //     wagers: filtered,
+      //     props: [prop_a, prop_b, prop_c]
+      //   })
+      //   const potential_gain = three_prop_summary.total_won - wager_summary.total_won
+      //   const potential_wins = three_prop_summary.wagers_won - wager_summary.wagers_won
 
-        if (gain) {
-          three_props.push({
-            name: `${prop_a.selectionName} / ${prop_b.selectionName} / ${prop_c.selectionName}`,
-            gain,
-            wins
-          })
-        }
-      }
+      //   if (potential_gain) {
+      //     three_props.push({
+      //       name: `${prop_a.selectionName} / ${prop_b.selectionName} / ${prop_c.selectionName}`,
+      //       potential_gain,
+      //       potential_wins
+      //     })
+      //   }
+      // }
     }
   }
 
-  log('One Leg Away')
-  const one_prop_table = new Table()
-  for (const prop of one_prop.sort((a, b) => b.gain - a.gain)) {
+  const one_prop_table = new Table({ title: 'One Leg Away' })
+  for (const prop of one_prop.sort(
+    (a, b) => b.potential_gain - a.potential_gain
+  )) {
+    const potential_roi_added =
+      (prop.potential_gain / wager_summary.total_risk) * 100
     one_prop_table.addRow({
       name: prop.name,
-      gain: prop.gain.toFixed(2),
-      wins: prop.wins
+      potential_gain: prop.potential_gain.toFixed(2),
+      potential_wins: prop.potential_wins,
+      potential_roi_added: potential_roi_added.toFixed(2) + '%'
     })
   }
   one_prop_table.printTable()
 
-  log('Two Legs Away')
-  const two_prop_table = new Table()
-  for (const prop of two_props.sort((a, b) => b.gain - a.gain)) {
+  const two_prop_table = new Table({ title: 'Two Legs Away' })
+  for (const prop of two_props.sort(
+    (a, b) => b.potential_gain - a.potential_gain
+  )) {
+    const potential_roi_added =
+      (prop.potential_gain / wager_summary.total_risk) * 100
     two_prop_table.addRow({
       name: prop.name,
-      gain: prop.gain.toFixed(2),
-      wins: prop.wins
+      potential_gain: prop.potential_gain.toFixed(2),
+      potential_wins: prop.potential_wins,
+      potential_roi_added: potential_roi_added.toFixed(2) + '%'
     })
   }
-  // two_prop_table.printTable()
+  two_prop_table.printTable()
 
-  log('Three Legs Away')
-  const three_prop_table = new Table()
-  for (const prop of three_props
-    .sort((a, b) => b.gain - a.gain)
-    .splice(0, 100)) {
-    three_prop_table.addRow({
-      name: prop.name,
-      gain: prop.gain.toFixed(2),
-      wins: prop.wins
+  console.log('Top 50 closest slips to win with highest odds')
+  const closest_wagers = filtered.filter(
+    (wager) => wager.legs.filter((leg) => leg.result === 'LOST').length <= 2
+  )
+  for (const wager of closest_wagers
+    .sort((a, b) => b.americanBetPrice - a.americanBetPrice)
+    .slice(0, 50)) {
+    const total_return = wager.betPrice
+      ? wager.betPrice * wager.currentSize
+      : Number(wager.potentialWin)
+    const potential_roi_gain = (total_return / wager_summary.total_risk) * 100
+    const bet_receipt_id = wager.betReceiptId.replace(
+      /(\d{4})(\d{4})(\d{4})(\d{4})/,
+      '$1-$2-$3-$4'
+    )
+    const wager_table = new Table({
+      title: `Wager ID: ${
+        wager.betId
+      }, Bet Receipt ID: ${bet_receipt_id}, Number of Legs: ${
+        wager.legs.length
+      }, American Odds: +${
+        wager.americanBetPrice
+      }, Potential ROI Gain: +${potential_roi_gain.toFixed(2)}%`
     })
+    for (const legs of wager.legs) {
+      wager_table.addRow({
+        selection: legs.parts[0].selectionName,
+        odds: legs.parts[0].americanPrice,
+        result: legs.result
+      })
+    }
+    wager_table.printTable()
   }
-  // three_prop_table.printTable()
 }
 
 const main = async () => {
