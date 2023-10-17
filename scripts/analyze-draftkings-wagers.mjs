@@ -8,16 +8,21 @@ import { Table } from 'console-table-printer'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-// import db from '#db'
 import { constants } from '#libs-shared'
 import { isMain } from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
-const log = debug('analyze-fanduel-wagers')
-debug.enable('analyze-fanduel-wagers')
+const log = debug('analyze-draftkings-wagers')
+debug.enable('analyze-draftkings-wagers')
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const data_path = path.join(__dirname, '../tmp')
+
+const format_prop_name = (prop) => {
+  const player_name = prop.marketDisplayName.split(' Alternate ')[0]
+  const prop_type = prop.marketDisplayName.split(' Alternate ')[1]
+  return `${player_name} ${prop.selectionDisplayName} ${prop_type}`
+}
 
 const is_prop_equal = (prop_a, prop_b) =>
   prop_a.eventId === prop_b.eventId &&
@@ -27,8 +32,8 @@ const is_prop_equal = (prop_a, prop_b) =>
 const get_props_summary = (props) =>
   props.reduce(
     (accumulator, prop) => {
-      const odds = oddslib.from('moneyline', prop.americanPrice)
-      const is_win = prop.result === 'WON'
+      const odds = oddslib.from('moneyline', prop.parsed_odds)
+      const is_win = prop.settlementStatus === 'Won'
       return {
         total_props: accumulator.total_props + 1,
         expected_hits:
@@ -48,18 +53,15 @@ const get_props_summary = (props) =>
 const get_wagers_summary = ({ wagers, props = [] }) =>
   wagers.reduce(
     (accumulator, wager) => {
-      const lost_legs = wager.legs.filter((leg) => {
+      const lost_legs = wager.selections.filter((selection) => {
         for (const prop of props) {
-          if (is_prop_equal(leg.parts[0], prop)) {
+          if (is_prop_equal(selection, prop)) {
             return false
           }
         }
-        return leg.result === 'LOST'
+        return selection.settlementStatus === 'Lost'
       }).length
 
-      const total_return = wager.betPrice
-        ? Number(wager.betPrice * wager.currentSize)
-        : Number(wager.potentialWin)
       const is_won = lost_legs === 0
 
       return {
@@ -71,11 +73,12 @@ const get_wagers_summary = ({ wagers, props = [] }) =>
           ? accumulator.wagers_loss
           : accumulator.wagers_loss + 1,
 
-        total_risk: accumulator.total_risk + wager.currentSize,
+        total_risk: accumulator.total_risk + wager.stake,
         total_won: is_won
-          ? accumulator.total_won + (wager.pandl || total_return)
+          ? accumulator.total_won + wager.potentialReturns
           : accumulator.total_won,
-        total_potential_win: accumulator.total_potential_win + total_return,
+        total_potential_win:
+          accumulator.total_potential_win + wager.potentialReturns,
 
         lost_by_one_leg:
           lost_legs === 1
@@ -109,7 +112,7 @@ const get_wagers_summary = ({ wagers, props = [] }) =>
     }
   )
 
-const analyze_fanduel_wagers = async ({ filename, week } = {}) => {
+const analyze_draftkings_wagers = async ({ filename, week } = {}) => {
   if (!filename) {
     throw new Error('filename is required')
   }
@@ -119,14 +122,18 @@ const analyze_fanduel_wagers = async ({ filename, week } = {}) => {
   const wagers = await fs.readJson(json_file_path)
 
   for (const wager of wagers) {
-    wager.week = dayjs(wager.settledDate)
+    wager.week = dayjs(wager.settlementDate)
       .subtract('2', 'day')
       .diff(constants.season.start, 'weeks')
   }
 
   const filtered = wagers.filter((wager) => {
-    // filter out wagers that do not have multiple legs
-    if (wager.legs.length < 2) {
+    if (wager.type === 'RoundRobin') {
+      return false
+    }
+
+    // filter out wagers that do not have multiple selections
+    if (wager.selections.length < 2) {
       return false
     }
 
@@ -136,6 +143,10 @@ const analyze_fanduel_wagers = async ({ filename, week } = {}) => {
 
     return true
   })
+
+  for (const wager of filtered) {
+    wager.parsed_odds = Number(wager.displayOdds.replace(/—|-|−/g, '-'))
+  }
 
   const wager_summary = get_wagers_summary({ wagers: filtered })
   wager_summary.roi = `${
@@ -169,12 +180,17 @@ const analyze_fanduel_wagers = async ({ filename, week } = {}) => {
   })
   lost_by_legs_summary_table.printTable()
 
-  const wager_legs = filtered.map((wager) => wager.legs).flat()
-  const wager_parts = wager_legs.map((legs) => legs.parts).flat()
+  const wager_selections = filtered
+    .map((wager) => {
+      return wager.selections.map((selection) => {
+        return { ...selection, week: wager.week }
+      })
+    })
+    .flat()
   const wager_index = {}
 
-  const props = wager_parts.filter((leg) => {
-    const key = `${leg.eventId}/${leg.marketId}/${leg.selectionId}`
+  const props = wager_selections.filter((selection) => {
+    const key = `${selection.eventId}/${selection.marketId}/${selection.selectionId}`
     if (wager_index[key]) {
       return false
     }
@@ -184,33 +200,31 @@ const analyze_fanduel_wagers = async ({ filename, week } = {}) => {
     return true
   })
 
-  /* const props_hit_table = new Table()
-   * for (const prop of props
-   *   .filter((p) => p.result === 'WON')
-   *   .sort((a, b) => b.americanPrice - a.americanPrice)) {
-   *   log(prop)
-   * }
-
-   * const props_miss_table = new Table()
-   * for (const prop of props
-   *   .filter((p) => p.result === 'LOST')
-   *   .sort((a, b) => b.americanPrice - a.americanPrice)) {
-   *   log(prop)
-   * }
-   */
-
   const filtered_props_key = {}
   const filtered_props = props
-    .filter((p) => p.result !== 'VOID')
-    .sort((a, b) => b.americanPrice - a.americanPrice)
     .filter((p) => {
+      // TODO confirm this is correct
+      if (p.settlementStatus === 'Void') {
+        return false
+      }
+
+      if (!p.displayOdds) {
+        return false
+      }
+
       const key = `${p.marketId}_${p.selectionId}`
       if (filtered_props_key[key]) {
         return false
       }
+
       filtered_props_key[key] = true
       return true
     })
+    .map((prop) => ({
+      ...prop,
+      parsed_odds: Number(prop.displayOdds.replace(/—|-|−/g, '-'))
+    }))
+    .sort((a, b) => b.parsed_odds - a.parsed_odds)
 
   const props_summary = get_props_summary(filtered_props)
   props_summary.expected_hits = Number(props_summary.expected_hits.toFixed(2))
@@ -220,9 +234,8 @@ const analyze_fanduel_wagers = async ({ filename, week } = {}) => {
 
   const one_prop = []
   const two_props = []
-  // const three_props = []
 
-  const lost_props = props.filter((prop) => prop.result === 'LOST')
+  const lost_props = props.filter((prop) => prop.settlementStatus === 'Lost')
 
   for (let i = 0; i < lost_props.length; i++) {
     const prop_a = lost_props[i]
@@ -236,11 +249,9 @@ const analyze_fanduel_wagers = async ({ filename, week } = {}) => {
       one_prop_summary.wagers_won - wager_summary.wagers_won
 
     if (potential_gain) {
-      const week = dayjs(prop_a.startTime)
-        .subtract('2', 'day')
-        .diff(constants.season.start, 'weeks')
+      const prop_name = format_prop_name(prop_a)
       one_prop.push({
-        name: `${prop_a.selectionName} (week ${week})`,
+        name: `${prop_name} (week ${prop_a.week})`,
         potential_gain,
         potential_wins
       })
@@ -259,37 +270,14 @@ const analyze_fanduel_wagers = async ({ filename, week } = {}) => {
         two_prop_summary.wagers_won - wager_summary.wagers_won
 
       if (potential_gain) {
-        const week = dayjs(prop_a.startTime)
-          .subtract('2', 'day')
-          .diff(constants.season.start, 'weeks')
-
         two_props.push({
-          name: `${prop_a.selectionName} / ${prop_b.selectionName} (week ${week})`,
+          name: `${format_prop_name(prop_a)} / ${format_prop_name(
+            prop_b
+          )} (week ${prop_a.week})`,
           potential_gain,
           potential_wins
         })
       }
-
-      // for (let k = j + 1; k < lost_props.length; k++) {
-      //   const prop_c = lost_props[k]
-
-      //   if (exclude_props.includes(prop_c.selectionName)) continue
-
-      //   const three_prop_summary = get_wagers_summary({
-      //     wagers: filtered,
-      //     props: [prop_a, prop_b, prop_c]
-      //   })
-      //   const potential_gain = three_prop_summary.total_won - wager_summary.total_won
-      //   const potential_wins = three_prop_summary.wagers_won - wager_summary.wagers_won
-
-      //   if (potential_gain) {
-      //     three_props.push({
-      //       name: `${prop_a.selectionName} / ${prop_b.selectionName} / ${prop_c.selectionName}`,
-      //       potential_gain,
-      //       potential_wins
-      //     })
-      //   }
-      // }
     }
   }
 
@@ -325,33 +313,27 @@ const analyze_fanduel_wagers = async ({ filename, week } = {}) => {
 
   console.log('Top 50 closest slips to win with highest odds')
   const closest_wagers = filtered.filter(
-    (wager) => wager.legs.filter((leg) => leg.result === 'LOST').length <= 2
+    (wager) =>
+      wager.selections.filter((leg) => leg.settlementStatus === 'Lost')
+        .length <= 2
   )
   for (const wager of closest_wagers
-    .sort((a, b) => b.americanBetPrice - a.americanBetPrice)
+    .sort((a, b) => b.parsed_odds - a.parsed_odds)
     .slice(0, 50)) {
-    const total_return = wager.betPrice
-      ? wager.betPrice * wager.currentSize
-      : Number(wager.potentialWin)
+    const total_return = wager.potentialReturns
     const potential_roi_gain = (total_return / wager_summary.total_risk) * 100
-    const bet_receipt_id = wager.betReceiptId.replace(
-      /(\d{4})(\d{4})(\d{4})(\d{4})/,
-      '$1-$2-$3-$4'
-    )
     const wager_table = new Table({
-      title: `Week: ${wager.week}, Wager ID: ${
-        wager.betId
-      }, Bet Receipt ID: ${bet_receipt_id}, Number of Legs: ${
-        wager.legs.length
-      }, American Odds: +${
-        wager.americanBetPrice
-      }, Potential ROI Gain: +${potential_roi_gain.toFixed(2)}%, Potential Gain: ${total_return}`
+      title: `Week: ${wager.week}, Wager ID: ${wager.betId}, Bet Receipt ID: ${
+        wager.receiptId
+      }, Number of Legs: ${wager.selections.length}, American Odds: ${wager.displayOdds}, Potential ROI Gain: +${potential_roi_gain.toFixed(
+        2
+      )}%, Potential Gain: ${total_return}`
     })
-    for (const legs of wager.legs) {
+    for (const selection of wager.selections) {
       wager_table.addRow({
-        selection: legs.parts[0].selectionName,
-        odds: legs.parts[0].americanPrice,
-        result: legs.result
+        name: format_prop_name(selection),
+        odds: selection.displayOdds,
+        status: selection.settlementStatus
       })
     }
     wager_table.printTable()
@@ -361,19 +343,15 @@ const analyze_fanduel_wagers = async ({ filename, week } = {}) => {
 const main = async () => {
   let error
   try {
-    await analyze_fanduel_wagers({ filename: argv.file, week: argv.week })
+    const filename = argv.filename
+    const week = argv.week ? Number(argv.week) : null
+
+    await analyze_draftkings_wagers({ filename, week })
   } catch (err) {
     error = err
     log(error)
   }
 
-  /* await db('jobs').insert({
-   *   type: constants.jobs.EXAMPLE,
-   *   succ: error ? 0 : 1,
-   *   reason: error ? error.message : null,
-   *   timestamp: Math.round(Date.now() / 1000)
-   * })
-   */
   process.exit()
 }
 
@@ -381,4 +359,4 @@ if (isMain(import.meta.url)) {
   main()
 }
 
-export default analyze_fanduel_wagers
+export default analyze_draftkings_wagers
