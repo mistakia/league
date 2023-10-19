@@ -345,7 +345,9 @@ const analyze_fanduel_wagers = async ({ filename, week } = {}) => {
         wager.legs.length
       }, American Odds: +${
         wager.americanBetPrice
-      }, Potential ROI Gain: +${potential_roi_gain.toFixed(2)}%, Potential Gain: ${total_return}`
+      }, Potential ROI Gain: +${potential_roi_gain.toFixed(
+        2
+      )}%, Potential Gain: ${total_return}`
     })
     for (const legs of wager.legs) {
       wager_table.addRow({

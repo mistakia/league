@@ -325,7 +325,9 @@ const analyze_draftkings_wagers = async ({ filename, week } = {}) => {
     const wager_table = new Table({
       title: `Week: ${wager.week}, Wager ID: ${wager.betId}, Bet Receipt ID: ${
         wager.receiptId
-      }, Number of Legs: ${wager.selections.length}, American Odds: ${wager.displayOdds}, Potential ROI Gain: +${potential_roi_gain.toFixed(
+      }, Number of Legs: ${wager.selections.length}, American Odds: ${
+        wager.displayOdds
+      }, Potential ROI Gain: +${potential_roi_gain.toFixed(
         2
       )}%, Potential Gain: ${total_return}`
     })
