@@ -22,6 +22,7 @@ module.exports = {
   draftkings_api_v6_url: '',
   caesars_api_v3_url: '',
   fanduel_api_url: '',
+  fanduel_api_headers: {},
   betmgm_api_url: '',
   prizepicks_api_url: '',
   gambet_api_url: '',
