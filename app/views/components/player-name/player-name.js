@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 import NotInterestedIcon from '@mui/icons-material/NotInterested'
@@ -48,6 +48,19 @@ export default function PlayerName({
   hidePosition,
   large
 }) {
+  const [is_mobile, set_is_mobile] = useState(window.innerWidth < 600)
+
+  useEffect(() => {
+    const handleResize = () => {
+      set_is_mobile(window.innerWidth < 600)
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [])
+
   const handleClick = () => select(playerMap.get('pid'))
 
   if (large) {
@@ -79,14 +92,17 @@ export default function PlayerName({
               playerMap={playerMap}
               width={headshot_width}
               square={headshot_square}
+              position={is_mobile ? playerMap.get('pos') : null}
             />
           </div>
         )}
         <div className='player__name-main'>
-          <span>{playerMap.get('pname')}</span>
-          {constants.year === playerMap.get('start') && (
-            <PlayerLabel label='R' type='rookie' description='Rookie' />
-          )}
+          <div className='player__name-top'>
+            <span>{playerMap.get('pname')}</span>
+            {constants.year === playerMap.get('start') && (
+              <PlayerLabel label='R' type='rookie' description='Rookie' />
+            )}
+          </div>
           <NFLTeam team={playerMap.get('team')} />
         </div>
       </div>

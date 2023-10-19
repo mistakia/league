@@ -24,14 +24,18 @@
 .player__name-main
   flex 1
   overflow hidden
-  text-overflow ellipsis
+  display flex
+  flex-direction row
   line-height 20px
-  max-height 40px
+  max-height 35px
+
+  .player__name-top
+    overflow hidden
+    text-overflow ellipsis
+    margin-right 4px
+
   &:hover
     color $accentColor
-
-  span:first-child
-    padding-right 5px
 
 .player__name-label
   flex 0 0 20px
@@ -56,3 +60,7 @@
 
 .player__name-meta .position
   margin-right 8px
+
+@media (max-width 600px)
+  .player__name .player__name-headshot
+    margin-right 4px

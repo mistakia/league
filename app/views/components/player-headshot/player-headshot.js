@@ -9,7 +9,8 @@ import './player-headshot.styl'
 export default function PlayerHeadshot({
   playerMap,
   width = 48,
-  square = false
+  square = false,
+  position
 }) {
   const isTeam = playerMap.get('pos') === 'DST'
   const height = Math.round((width * 70) / 96)
@@ -31,7 +32,7 @@ export default function PlayerHeadshot({
 
   const classNames = ['player__headshot']
   const style = {
-    width: square || isTeam ? height : width,
+    width: square ? height : width,
     height
   }
 
@@ -39,7 +40,11 @@ export default function PlayerHeadshot({
     classNames.push('square')
   }
 
-  if (square || isTeam) {
+  if (position) {
+    classNames.push(position)
+  }
+
+  if (square) {
     const diff = Math.round((width - height) / 2)
     style.margin = `0 ${diff}px`
   }
@@ -50,5 +55,6 @@ export default function PlayerHeadshot({
 PlayerHeadshot.propTypes = {
   playerMap: ImmutablePropTypes.map,
   width: PropTypes.number,
-  square: PropTypes.bool
+  square: PropTypes.bool,
+  position: PropTypes.string
 }
