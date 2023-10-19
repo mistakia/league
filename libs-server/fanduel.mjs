@@ -264,7 +264,9 @@ export const getEvents = async () => {
   const url = `${config.fanduel_api_url}/content-managed-page?betexRegion=GBR&capiJurisdiction=intl&currencyCode=USD&exchangeLocale=en_US&includePrices=true&includeRaceCards=false&includeSeo=true&language=en&regionCode=NAMERICA&timezone=America%2FNew_York&includeMarketBlurbs=true&_ak=FhMFpcPWXMeyZxOx&page=CUSTOM&customPageId=nfl`
 
   // log(`fetching ${url}`)
-  const res = await fetch(url)
+  const res = await fetch(url, {
+    headers: config.fanduel_api_headers
+  })
   const data = await res.json()
 
   const filtered = Object.values(data.attachments.events).filter(
@@ -279,7 +281,9 @@ export const getEventTab = async ({ eventId, tab }) => {
   const url = `${config.fanduel_api_url}/event-page?betexRegion=GBR&capiJurisdiction=intl&currencyCode=USD&exchangeLocale=en_US&includePrices=true&language=en&priceHistory=1&regionCode=NAMERICA&_ak=FhMFpcPWXMeyZxOx&eventId=${eventId}&tab=${tab}`
 
   // log(`fetching ${url}`)
-  const res = await fetch(url)
+  const res = await fetch(url, {
+    headers: config.fanduel_api_headers
+  })
   const data = await res.json()
 
   return data
@@ -289,7 +293,9 @@ export const getWeeklySpecials = async () => {
   const url = `${config.fanduel_api_url}/content-managed-page?betexRegion=GBR&capiJurisdiction=intl&currencyCode=USD&exchangeLocale=en_US&includePrices=true&includeRaceCards=false&includeSeo=true&language=en&regionCode=NAMERICA&timezone=America%2FNew_York&includeMarketBlurbs=true&_ak=FhMFpcPWXMeyZxOx&page=CUSTOM&customPageId=nfl`
 
   // log(`fetching ${url}`)
-  const res = await fetch(url)
+  const res = await fetch(url, {
+    headers: config.fanduel_api_headers
+  })
   const data = await res.json()
 
   const market_names = [
