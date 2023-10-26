@@ -14,6 +14,7 @@ import PlayerHeadshot from '@components/player-headshot'
 import './player-name.styl'
 
 function PlayerLarge({ playerMap, handleClick, width, square = false }) {
+  const player_number = playerMap.get('jnum')
   return (
     <div className='player__name large'>
       <div className='player__name-headshot'>
@@ -25,7 +26,7 @@ function PlayerLarge({ playerMap, handleClick, width, square = false }) {
         <div className='player__name-meta'>
           <Position pos={playerMap.get('pos')} />
           <NFLTeam team={playerMap.get('team')} />
-          <span>#{playerMap.get('jnum', '-')}</span>
+          {Boolean(player_number) && <span>#{player_number}</span>}
         </div>
       </div>
     </div>
