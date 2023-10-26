@@ -11,7 +11,8 @@ import {
   getPlayer,
   fanduel,
   insertProps,
-  insert_prop_markets
+  insert_prop_markets,
+  wait
 } from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -274,6 +275,8 @@ const run = async () => {
           }
         }
       }
+
+      await wait(2500)
     }
     console.timeEnd(`fanduel-event-${event.eventId}`)
   }
