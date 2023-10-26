@@ -20,7 +20,7 @@ export function* load() {
 // -------------------------------------
 
 export function* watchInitApp() {
-  yield takeLatest(appActions.INIT_APP, load)
+  yield takeLatest(appActions.AUTH_FULFILLED, load)
 }
 
 export function* watchLoadMatchups() {
