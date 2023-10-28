@@ -416,9 +416,6 @@ const filter_prop_pairings = async ({
   for (const team of Object.keys(filtered_props_by_team)) {
     log(`${team}: ${filtered_props_by_team[team].length}`)
   }
-
-  log(team_index)
-  log(unique_index)
 }
 
 const main = async () => {
