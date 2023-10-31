@@ -19,7 +19,8 @@ const data_path = path.join(__dirname, '../tmp')
 
 const import_draftkings_wagers = async ({
   authorization,
-  placed_after
+  placed_after,
+  placed_before
 } = {}) => {
   if (!placed_after) {
     placed_after = dayjs().subtract(1, 'week')
@@ -31,7 +32,8 @@ const import_draftkings_wagers = async ({
 
   const wagers = await draftkings.get_all_wagers({
     authorization,
-    placed_after
+    placed_after,
+    placed_before
   })
   log(`loaded ${wagers.length} wagers`)
 
@@ -51,9 +53,13 @@ const main = async () => {
     const placed_after = argv.placed_after
       ? dayjs(argv.placed_after, 'YYYY-MM-DD')
       : null
+    const placed_before = argv.placed_before
+      ? dayjs(argv.placed_before, 'YYYY-MM-DD')
+      : null
     await import_draftkings_wagers({
       authorization: auth,
-      placed_after
+      placed_after,
+      placed_before
     })
   } catch (err) {
     error = err
