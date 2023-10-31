@@ -198,14 +198,22 @@ export const get_websocket_connection = ({ authorization } = {}) =>
     })
   })
 
-export const get_wagers = ({ wss, placed_after = null }) =>
+export const get_wagers = ({
+  wss,
+  placed_after = null,
+  placed_before = null
+}) =>
   new Promise((resolve, reject) => {
     if (!wss) {
       return reject(new Error('missing wss'))
     }
 
-    const placed_cutoff = placed_after ? dayjs(placed_after) : null
+    const placed_after_cutoff = placed_after ? dayjs(placed_after) : null
+    const placed_before_cutoff = placed_before ? dayjs(placed_before) : null
     const limit = 100
+    let start = 0
+    let has_more = false
+    let has_entered_range = false
     let results = []
 
     wss.send(
@@ -236,7 +244,7 @@ export const get_wagers = ({ wss, placed_after = null }) =>
             filter: { status: 'All' },
             pagination: {
               count: limit,
-              skip: results.length
+              skip: start
             }
           }
         })
@@ -245,19 +253,57 @@ export const get_wagers = ({ wss, placed_after = null }) =>
 
     const handle_bet_message = async (bets) => {
       log(`received ${bets.length} wagers`)
-      results = results.concat(bets)
+      const filtered_bets = bets.filter((bet) => {
+        const bet_date = dayjs(bet.placementDate)
+        return (
+          (!placed_after_cutoff || bet_date.isAfter(placed_after_cutoff)) &&
+          (!placed_before_cutoff || bet_date.isBefore(placed_before_cutoff))
+        )
+      })
+      results = results.concat(filtered_bets)
 
-      const last_wager = bets[bets.length - 1]
-      if (placed_cutoff && dayjs(last_wager.placementDate) < placed_cutoff) {
-        return resolve(results)
+      has_entered_range = bets.some((bet) => {
+        const bet_date = dayjs(bet.placementDate)
+        return (
+          (!placed_after_cutoff || bet_date.isAfter(placed_after_cutoff)) &&
+          (!placed_before_cutoff || bet_date.isBefore(placed_before_cutoff))
+        )
+      })
+
+      if (bets.length) {
+        if (has_entered_range) {
+          const last_wager = bets[bets.length - 1]
+          if (placed_after_cutoff && placed_before_cutoff) {
+            has_more =
+              dayjs(last_wager.placementDate).isAfter(placed_after_cutoff) &&
+              dayjs(last_wager.placementDate).isBefore(placed_before_cutoff)
+          } else if (placed_after_cutoff) {
+            has_more = dayjs(last_wager.placementDate).isAfter(
+              placed_after_cutoff
+            )
+          } else if (placed_before_cutoff) {
+            has_more = dayjs(last_wager.placementDate).isBefore(
+              placed_before_cutoff
+            )
+          } else if (bets.length < limit) {
+            has_more = false
+          } else {
+            has_more = true
+          }
+        } else {
+          has_more = true
+        }
+      } else {
+        has_more = false
       }
 
-      if (bets.length < limit) {
-        return resolve(results)
+      if (has_more) {
+        start = start + limit
+        await wait(5000)
+        request_most_wagers()
+      } else {
+        resolve(results)
       }
-
-      await wait(5000)
-      request_most_wagers()
     }
 
     wss.on('message', async (data) => {
@@ -278,7 +324,8 @@ export const get_wagers = ({ wss, placed_after = null }) =>
 
 export const get_all_wagers = async ({
   authorization,
-  placed_after = null
+  placed_after = null,
+  placed_before = null
 } = {}) => {
   if (!authorization) {
     throw new Error('missing authorization')
@@ -288,7 +335,7 @@ export const get_all_wagers = async ({
   wss.on('error', (error) => {
     log(error)
   })
-  const wagers = await get_wagers({ wss, placed_after })
+  const wagers = await get_wagers({ wss, placed_after, placed_before })
 
   wss.terminate()
 

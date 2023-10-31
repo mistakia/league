@@ -60,16 +60,17 @@ const get_wagers_summary = ({ wagers, props = [] }) =>
       const total_return = wager.betPrice
         ? Number(wager.betPrice * wager.currentSize)
         : Number(wager.potentialWin)
-      const is_won = lost_legs === 0
+      const is_won = wager.isSettled && lost_legs === 0
+      const is_lost = wager.isSettled && !is_won
 
       return {
         wagers: accumulator.wagers + 1,
         wagers_won: is_won
           ? accumulator.wagers_won + 1
           : accumulator.wagers_won,
-        wagers_loss: is_won
-          ? accumulator.wagers_loss
-          : accumulator.wagers_loss + 1,
+        wagers_loss: is_lost
+          ? accumulator.wagers_loss + 1
+          : accumulator.wagers_loss,
 
         total_risk: accumulator.total_risk + wager.currentSize,
         total_won: is_won
@@ -212,6 +213,41 @@ const analyze_fanduel_wagers = async ({ filename, week } = {}) => {
       return true
     })
 
+  const unique_props_table = new Table()
+  const props_with_exposure = filtered_props.map((prop) => {
+    let potential_payout = 0
+    let exposure_count = 0
+
+    for (const wager of filtered) {
+      for (const leg of wager.legs) {
+        if (is_prop_equal(leg.parts[0], prop)) {
+          potential_payout += Number(wager.potentialWin)
+          exposure_count += 1
+
+          break
+        }
+      }
+    }
+
+    const week = dayjs(prop.startTime)
+      .subtract('2', 'day')
+      .diff(constants.season.start, 'weeks')
+    return {
+      name: `${prop.selectionName} (week ${week})`,
+      american_price: prop.americanPrice,
+      exposure_count,
+      exposure_rate: `${((exposure_count / filtered.length) * 100).toFixed(
+        2
+      )}%`,
+      potential_payout: potential_payout.toFixed(2),
+      result: prop.result
+    }
+  })
+
+  props_with_exposure.sort((a, b) => b.exposure_count - a.exposure_count)
+  props_with_exposure.forEach((prop) => unique_props_table.addRow(prop))
+  unique_props_table.printTable()
+
   const props_summary = get_props_summary(filtered_props)
   props_summary.expected_hits = Number(props_summary.expected_hits.toFixed(2))
   const props_summary_table = new Table()
@@ -293,37 +329,42 @@ const analyze_fanduel_wagers = async ({ filename, week } = {}) => {
     }
   }
 
-  const one_prop_table = new Table({ title: 'One Leg Away' })
-  for (const prop of one_prop
-    .sort((a, b) => b.potential_gain - a.potential_gain)
-    .slice(0, 50)) {
-    const potential_roi_added =
-      (prop.potential_gain / wager_summary.total_risk) * 100
-    one_prop_table.addRow({
-      name: prop.name,
-      potential_gain: prop.potential_gain.toFixed(2),
-      potential_wins: prop.potential_wins,
-      potential_roi_added: potential_roi_added.toFixed(2) + '%'
-    })
+  if (one_prop.length) {
+    const one_prop_table = new Table({ title: 'One Leg Away' })
+    for (const prop of one_prop
+      .sort((a, b) => b.potential_gain - a.potential_gain)
+      .slice(0, 50)) {
+      const potential_roi_added =
+        (prop.potential_gain / wager_summary.total_risk) * 100
+      one_prop_table.addRow({
+        name: prop.name,
+        potential_gain: prop.potential_gain.toFixed(2),
+        potential_wins: prop.potential_wins,
+        potential_roi_added: potential_roi_added.toFixed(2) + '%'
+      })
+    }
+    one_prop_table.printTable()
   }
-  one_prop_table.printTable()
 
-  const two_prop_table = new Table({ title: 'Two Legs Away' })
-  for (const prop of two_props
-    .sort((a, b) => b.potential_gain - a.potential_gain)
-    .slice(0, 50)) {
-    const potential_roi_added =
-      (prop.potential_gain / wager_summary.total_risk) * 100
-    two_prop_table.addRow({
-      name: prop.name,
-      potential_gain: prop.potential_gain.toFixed(2),
-      potential_wins: prop.potential_wins,
-      potential_roi_added: potential_roi_added.toFixed(2) + '%'
-    })
+  if (two_props.length) {
+    const two_prop_table = new Table({ title: 'Two Legs Away' })
+    for (const prop of two_props
+      .sort((a, b) => b.potential_gain - a.potential_gain)
+      .slice(0, 50)) {
+      const potential_roi_added =
+        (prop.potential_gain / wager_summary.total_risk) * 100
+      two_prop_table.addRow({
+        name: prop.name,
+        potential_gain: prop.potential_gain.toFixed(2),
+        potential_wins: prop.potential_wins,
+        potential_roi_added: potential_roi_added.toFixed(2) + '%'
+      })
+    }
+    two_prop_table.printTable()
   }
-  two_prop_table.printTable()
 
-  console.log('Top 50 closest slips to win with highest odds')
+  console.log('\n\nTop 50 slips sorted by highest odds (<= 2 lost legs)\n\n');
+
   const closest_wagers = filtered.filter(
     (wager) => wager.legs.filter((leg) => leg.result === 'LOST').length <= 2
   )

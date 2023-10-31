@@ -19,6 +19,15 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const data_path = path.join(__dirname, '../tmp')
 
 const format_prop_name = (prop) => {
+  if (prop.nestedSGPSelections) {
+    const names = []
+    for (const nested_prop of prop.nestedSGPSelections) {
+      names.push(format_prop_name(nested_prop))
+    }
+
+    return names.join(' / ')
+  }
+
   const player_name = prop.marketDisplayName.split(' Alternate ')[0]
   const prop_type = prop.marketDisplayName.split(' Alternate ')[1]
   return `${player_name} ${prop.selectionDisplayName} ${prop_type}`
@@ -62,16 +71,19 @@ const get_wagers_summary = ({ wagers, props = [] }) =>
         return selection.settlementStatus === 'Lost'
       }).length
 
-      const is_won = lost_legs === 0
+      const is_settled = wager.settlementStatus === 'Settled'
+
+      const is_won = is_settled && lost_legs === 0
+      const is_lost = is_settled && lost_legs > 0
 
       return {
         wagers: accumulator.wagers + 1,
         wagers_won: is_won
           ? accumulator.wagers_won + 1
           : accumulator.wagers_won,
-        wagers_loss: is_won
-          ? accumulator.wagers_loss
-          : accumulator.wagers_loss + 1,
+        wagers_loss: is_lost
+          ? accumulator.wagers_loss + 1
+          : accumulator.wagers_loss,
 
         total_risk: accumulator.total_risk + wager.stake,
         total_won: is_won
@@ -226,6 +238,38 @@ const analyze_draftkings_wagers = async ({ filename, week } = {}) => {
     }))
     .sort((a, b) => b.parsed_odds - a.parsed_odds)
 
+  const unique_props_table = new Table()
+  const props_with_exposure = filtered_props.map((prop) => {
+    let potential_payout = 0
+    let exposure_count = 0
+
+    for (const wager of filtered) {
+      for (const selection of wager.selections) {
+        if (is_prop_equal(prop, selection)) {
+          potential_payout += wager.potentialReturns
+          exposure_count += 1
+
+          break
+        }
+      }
+    }
+
+    return {
+      name: format_prop_name(prop),
+      american_price: prop.displayOdds,
+      exposure_count,
+      exposure_rate: `${((exposure_count / filtered.length) * 100).toFixed(
+        2
+      )}%`,
+      potential_payout: potential_payout.toFixed(2),
+      result: prop.settlementStatus
+    }
+  })
+
+  props_with_exposure.sort((a, b) => b.exposure_count - a.exposure_count)
+  props_with_exposure.forEach((prop) => unique_props_table.addRow(prop))
+  unique_props_table.printTable()
+
   const props_summary = get_props_summary(filtered_props)
   props_summary.expected_hits = Number(props_summary.expected_hits.toFixed(2))
   const props_summary_table = new Table()
@@ -281,37 +325,42 @@ const analyze_draftkings_wagers = async ({ filename, week } = {}) => {
     }
   }
 
-  const one_prop_table = new Table({ title: 'One Leg Away' })
-  for (const prop of one_prop
-    .sort((a, b) => b.potential_gain - a.potential_gain)
-    .slice(0, 50)) {
-    const potential_roi_added =
-      (prop.potential_gain / wager_summary.total_risk) * 100
-    one_prop_table.addRow({
-      name: prop.name,
-      potential_gain: prop.potential_gain.toFixed(2),
-      potential_wins: prop.potential_wins,
-      potential_roi_added: potential_roi_added.toFixed(2) + '%'
-    })
+  if (one_prop.length) {
+    const one_prop_table = new Table({ title: 'One Leg Away' })
+    for (const prop of one_prop
+      .sort((a, b) => b.potential_gain - a.potential_gain)
+      .slice(0, 50)) {
+      const potential_roi_added =
+        (prop.potential_gain / wager_summary.total_risk) * 100
+      one_prop_table.addRow({
+        name: prop.name,
+        potential_gain: prop.potential_gain.toFixed(2),
+        potential_wins: prop.potential_wins,
+        potential_roi_added: potential_roi_added.toFixed(2) + '%'
+      })
+    }
+    one_prop_table.printTable()
   }
-  one_prop_table.printTable()
 
-  const two_prop_table = new Table({ title: 'Two Legs Away' })
-  for (const prop of two_props
-    .sort((a, b) => b.potential_gain - a.potential_gain)
-    .slice(0, 50)) {
-    const potential_roi_added =
-      (prop.potential_gain / wager_summary.total_risk) * 100
-    two_prop_table.addRow({
-      name: prop.name,
-      potential_gain: prop.potential_gain.toFixed(2),
-      potential_wins: prop.potential_wins,
-      potential_roi_added: potential_roi_added.toFixed(2) + '%'
-    })
+  if (two_props.length) {
+    const two_prop_table = new Table({ title: 'Two Legs Away' })
+    for (const prop of two_props
+      .sort((a, b) => b.potential_gain - a.potential_gain)
+      .slice(0, 50)) {
+      const potential_roi_added =
+        (prop.potential_gain / wager_summary.total_risk) * 100
+      two_prop_table.addRow({
+        name: prop.name,
+        potential_gain: prop.potential_gain.toFixed(2),
+        potential_wins: prop.potential_wins,
+        potential_roi_added: potential_roi_added.toFixed(2) + '%'
+      })
+    }
+    two_prop_table.printTable()
   }
-  two_prop_table.printTable()
 
-  console.log('Top 50 closest slips to win with highest odds')
+  console.log('\n\nTop 50 slips sorted by highest odds (<= 2 lost legs)\n\n');
+
   const closest_wagers = filtered.filter(
     (wager) =>
       wager.selections.filter((leg) => leg.settlementStatus === 'Lost')
