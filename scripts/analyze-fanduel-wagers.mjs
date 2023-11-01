@@ -363,7 +363,7 @@ const analyze_fanduel_wagers = async ({ filename, week } = {}) => {
     two_prop_table.printTable()
   }
 
-  console.log('\n\nTop 50 slips sorted by highest odds (<= 2 lost legs)\n\n');
+  console.log('\n\nTop 50 slips sorted by highest odds (<= 2 lost legs)\n\n')
 
   const closest_wagers = filtered.filter(
     (wager) => wager.legs.filter((leg) => leg.result === 'LOST').length <= 2
