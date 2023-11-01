@@ -26,8 +26,8 @@ export default async function ({ current_pid, new_pid }) {
     .whereNot('table_name', 'player')
 
   for (const table of tables) {
-    const table_name = table.table_name
-    const column_name = table.column_name
+    const table_name = table.TABLE_NAME
+    const column_name = table.COLUMN_NAME
     const [rows_updated] = await db.raw(
       `update ignore ${table_name} set ${column_name} = '${new_pid}' where ${column_name} = '${current_pid}'`
     )
