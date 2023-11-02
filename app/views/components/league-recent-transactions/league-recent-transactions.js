@@ -15,7 +15,7 @@ function LeagueRecentTransaction({ transaction }) {
       <div className='transaction__team'>
         <TeamName abbrv color image tid={transaction.tid} />
       </div>
-      <PlayerName hidePosition headshot_width={48} pid={transaction.pid} />
+      <PlayerName headshot_width={48} pid={transaction.pid} />
       <div className='transaction__timestamp'>
         {timeago.format(transaction.timestamp * 1000, 'league_short')}
       </div>

@@ -47,7 +47,8 @@ export default function PlayerName({
   headshot_width,
   headshot_square,
   hidePosition,
-  large
+  large,
+  show_position_bar
 }) {
   const [is_mobile, set_is_mobile] = useState(window.innerWidth < 600)
 
@@ -93,7 +94,9 @@ export default function PlayerName({
               playerMap={playerMap}
               width={headshot_width}
               square={headshot_square}
-              position={is_mobile ? playerMap.get('pos') : null}
+              position={
+                show_position_bar && is_mobile ? playerMap.get('pos') : null
+              }
             />
           </div>
         )}
@@ -128,5 +131,6 @@ PlayerName.propTypes = {
   isOnCutlist: PropTypes.bool,
   headshot_square: PropTypes.bool,
   hidePosition: PropTypes.bool,
-  large: PropTypes.bool
+  large: PropTypes.bool,
+  show_position_bar: PropTypes.bool
 }

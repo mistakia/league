@@ -151,6 +151,10 @@ export default class DashboardPlayersTable extends React.Component {
       ? constants.year - 1
       : constants.year
 
+    const header_classNames = ['table__row', 'table__head']
+    if (isClaim) header_classNames.push('claim')
+    if (isWaiver) header_classNames.push('waiver')
+
     return (
       <div className={classNames.join(' ')}>
         <Toolbar variant='dense'>
@@ -158,7 +162,7 @@ export default class DashboardPlayersTable extends React.Component {
           {Boolean(summary) && summary}
         </Toolbar>
         <div className='table__container'>
-          <div className='table__row table__head'>
+          <div className={header_classNames.join(' ')}>
             {showReorder && (
               <div className='player__item-action reorder table__cell' />
             )}

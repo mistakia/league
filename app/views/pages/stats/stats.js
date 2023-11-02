@@ -269,9 +269,9 @@ export default function StatsPage({
               <div className='table__cell metric'>MAX</div>
               <div className='table__cell metric'>MIN</div>
               <div className='table__cell metric'>STDEV</div>
-              <div className='player__row-group'>
-                <div className='player__row-group-head'>All Play Record</div>
-                <div className='player__row-group-body'>
+              <div className='row__group'>
+                <div className='row__group-head'>All Play Record</div>
+                <div className='row__group-body'>
                   <div className='table__cell metric'>W</div>
                   <div className='table__cell metric'>L</div>
                   <div className='table__cell metric'>T</div>
