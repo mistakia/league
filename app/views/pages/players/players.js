@@ -188,9 +188,9 @@ export default function PlayersPage({
     })
 
     header_items.push(
-      <div className='player__row-group' key={index}>
-        <div className='player__row-group-head'>{group.category}</div>
-        <div className='player__row-group-body'>{group_items}</div>
+      <div className='row__group' key={index}>
+        <div className='row__group-head'>{group.category}</div>
+        <div className='row__group-body'>{group_items}</div>
       </div>
     )
   })

@@ -45,14 +45,13 @@
   background $backgroundColor
   width max-content
   min-width 100%
-  height 48px
+  height 55px
   display flex
   align-items stretch
   font-weight 500
   border-bottom 1px solid $borderColor
 
 .row__group
-.player__row-group
   flex 0 0 auto
   display inline-flex
   flex-direction column
@@ -60,17 +59,14 @@
   align-items center
   position relative
   + .row__group
-  + .player__row-group
   + .table__cell
       border-left 1px solid $borderColor
 
-.table__cell
+.table__cell:not(.player__item-name)
   + .row__group
-  + .player__row-group
       border-left 1px solid $borderColor
 
 .row__group-head
-.player__row-group-head
   font-family 'IBM Plex Mono', monospace
   font-weight 800
   flex 0 0 auto
@@ -88,19 +84,17 @@
 
 .players__header
   .row__group-head
-  .player__row-group-head
     overflow hidden
     text-overflow ellipsis
     position absolute
     top 0
     left 0
     right 0
-  .player__row-group-body
+  .row__group-body
     align-items flex-end
 
 
 .row__group-body
-.player__row-group-body
   flex 1
   display flex
   justify-content space-evenly

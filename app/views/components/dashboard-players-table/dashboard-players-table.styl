@@ -30,18 +30,27 @@ $cutlistColor = lighten(red, 92%)
 
 
 @media (max-width 600px)
-  .dashboard__players-table .player__item-name.table__cell
-    width 136px
-    flex 0 0 136px
-    padding-left 0px
+  .dashboard__players-table
+    .player__item-name.table__cell
+      width 136px
+      flex 0 0 136px
 
-    .player__name-main
-      display flex
-      flex-direction column
+      .player__name-main
+        display flex
+        flex-direction column
 
-    .player__name-position
-      display none
+      .player__name-position
+        display none
 
-    .player__name-top
-      font-size 12px
-      font-weight 600
+      .player__name-top
+        font-size 12px
+        font-weight 600
+
+    .table__row.waiver
+    .table__row.claim
+      .player__item-name.table__cell
+          width 190px
+          flex 0 0 190px
+
+    .table__body .player__item-name.table__cell
+      padding-left 0px

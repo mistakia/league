@@ -26,12 +26,14 @@ export default function DashboardTeamSummaryRecord({
     const item = (
       <tr key={t.uid}>
         <td>{t.name}</td>
-        <td>
+        <td style={{ minWidth: '58px' }}>
           {t.getIn(['stats', year, 'wins'], 0)}-
           {t.getIn(['stats', year, 'losses'], 0)}-
           {t.getIn(['stats', year, 'ties'], 0)}
         </td>
-        <td>{t.getIn(['stats', year, 'pf'], 0).toFixed(1)}</td>
+        <td style={{ minWidth: '58px' }}>
+          {t.getIn(['stats', year, 'pf'], 0).toFixed(1)}
+        </td>
       </tr>
     )
 

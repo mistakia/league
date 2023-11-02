@@ -18,7 +18,10 @@ export default class TeamName extends React.Component {
     )
 
     const colorEl = (
-      <div className='team__color' style={{ backgroundColor: `#${team.pc}` }} />
+      <div
+        className='team__color'
+        style={{ backgroundColor: `#${team.pc || '666666'}` }}
+      />
     )
 
     const imageEl = <TeamImage tid={team.uid} />
