@@ -16,198 +16,122 @@ debug.enable(
 )
 
 const generate_league_formats = async () => {
-  const num_teams_options = [10, 12]
-
-  const sqb_options = [1]
-  const srb_options = [2]
-  const swr_options = [2]
-  const ste_options = [1]
-  const srbwr_options = [0]
-  const srbwrte_options = [1, 2]
-  const sqbrbwrte_options = [0, 1]
-  const swrte_options = [0]
-  const sdst_options = [1]
-  const sk_options = [0, 1]
-
-  const bench_options = [7]
-  const ps_options = [4]
-  const ir_options = [3]
-
-  const pa_options = [0]
-  const pc_options = [0]
-  const py_options = [0.04, 0.05]
-  const ints_options = [-1, -2]
-  const tdp_options = [4, 6]
-
-  const ra_options = [0]
-  const ry_options = [0.1]
-  const tdr_options = [6]
-
-  const rec_options = [0, 0.5, 1]
-
-  // TODO TE premium
-  // const rbrec_options = [0, 0.5, 1]
-  // const wrrec_options = [0, 0.5, 1]
-  // const terec_options = [0, 0.5, 1, 1.5]
-
-  const recy_options = [0.1]
-  const twoptc_options = [2]
-  const tdrec_options = [6]
-  const fuml_options = [-1, -2]
-  const prtd_options = [6]
-  const krtd_options = [6]
-
-  const cap_options = [200]
-  const min_bid_options = [0]
+  const options = {
+    num_teams: [10, 12],
+    sqb: [1],
+    srb: [2],
+    swr: [2],
+    ste: [1],
+    srbwr: [0],
+    srbwrte: [1, 2],
+    sqbrbwrte: [0, 1],
+    swrte: [0],
+    sdst: [1],
+    sk: [0, 1],
+    bench: [7],
+    ps: [4],
+    ir: [3],
+    pa: [0],
+    pc: [0],
+    py: [0.04, 0.05],
+    ints: [-1, -2],
+    tdp: [4, 6],
+    ra: [0],
+    ry: [0.1],
+    tdr: [6],
+    rec: [0, 0.5, 1],
+    recy: [0.1],
+    twoptc: [2],
+    tdrec: [6],
+    fuml: [-1, -2],
+    prtd: [6],
+    krtd: [6],
+    cap: [200],
+    min_bid: [0]
+  }
 
   const league_formats = []
   const scoring_formats = []
 
-  for (const num_teams of num_teams_options) {
-    for (const sqb of sqb_options) {
-      for (const srb of srb_options) {
-        for (const swr of swr_options) {
-          if (srb + swr > 5) {
-            continue
+  const keys = Object.keys(options)
+  const combinations = keys.reduce(
+    (acc, key) => {
+      const new_combinations = []
+      acc.forEach((combination) => {
+        options[key].forEach((option) => {
+          const new_combination = { ...combination, [key]: option }
+          if (
+            !(new_combination.srb + new_combination.swr > 5) &&
+            !(
+              new_combination.srbwrte +
+                new_combination.srbwr -
+                Math.max(new_combination.srbwrte, new_combination.srbwr) >
+              0
+            )
+          ) {
+            new_combinations.push(new_combination)
           }
+        })
+      })
+      return new_combinations
+    },
+    [{}]
+  )
 
-          for (const ste of ste_options) {
-            for (const srbwr of srbwr_options) {
-              for (const srbwrte of srbwrte_options) {
-                for (const sqbrbwrte of sqbrbwrte_options) {
-                  for (const swrte of swrte_options) {
-                    // skip formats with multiple different starting flex configurations
-                    if (srbwrte + srbwr - Math.max(srbwrte, srbwr) > 0) {
-                      continue
-                    }
+  log(`Generated ${combinations.length} combinations`)
 
-                    for (const sdst of sdst_options) {
-                      for (const sk of sk_options) {
-                        for (const bench of bench_options) {
-                          for (const ps of ps_options) {
-                            for (const ir of ir_options) {
-                              for (const pa of pa_options) {
-                                for (const pc of pc_options) {
-                                  for (const py of py_options) {
-                                    for (const ints of ints_options) {
-                                      for (const tdp of tdp_options) {
-                                        for (const ra of ra_options) {
-                                          for (const ry of ry_options) {
-                                            for (const tdr of tdr_options) {
-                                              for (const rec of rec_options) {
-                                                for (const recy of recy_options) {
-                                                  for (const twoptc of twoptc_options) {
-                                                    for (const tdrec of tdrec_options) {
-                                                      for (const fuml of fuml_options) {
-                                                        for (const prtd of prtd_options) {
-                                                          for (const krtd of krtd_options) {
-                                                            for (const cap of cap_options) {
-                                                              for (const min_bid of min_bid_options) {
-                                                                const scoring_format =
-                                                                  {
-                                                                    pa,
-                                                                    pc,
-                                                                    py,
-                                                                    ints,
-                                                                    tdp,
-                                                                    ra,
-                                                                    ry,
-                                                                    tdr,
-                                                                    rec,
-                                                                    rbrec: rec,
-                                                                    wrrec: rec,
-                                                                    terec: rec,
-                                                                    recy,
-                                                                    twoptc,
-                                                                    tdrec,
-                                                                    fuml,
-                                                                    prtd,
-                                                                    krtd
-                                                                  }
-
-                                                                const {
-                                                                  scoring_format_hash
-                                                                } =
-                                                                  generate_scoring_format_hash(
-                                                                    scoring_format
-                                                                  )
-
-                                                                scoring_formats.push(
-                                                                  {
-                                                                    scoring_format_hash,
-                                                                    ...scoring_format
-                                                                  }
-                                                                )
-
-                                                                const league_format =
-                                                                  {
-                                                                    scoring_format_hash,
-
-                                                                    num_teams,
-                                                                    sqb,
-                                                                    srb,
-                                                                    swr,
-                                                                    ste,
-                                                                    srbwr,
-                                                                    srbwrte,
-                                                                    sqbrbwrte,
-                                                                    swrte,
-                                                                    sdst,
-                                                                    sk,
-
-                                                                    bench,
-                                                                    ps,
-                                                                    ir,
-
-                                                                    cap,
-                                                                    min_bid
-                                                                  }
-
-                                                                const {
-                                                                  league_format_hash
-                                                                } =
-                                                                  generate_league_format_hash(
-                                                                    league_format
-                                                                  )
-
-                                                                league_formats.push(
-                                                                  {
-                                                                    league_format_hash,
-                                                                    scoring_format_hash,
-                                                                    ...league_format
-                                                                  }
-                                                                )
-                                                              }
-                                                            }
-                                                          }
-                                                        }
-                                                      }
-                                                    }
-                                                  }
-                                                }
-                                              }
-                                            }
-                                          }
-                                        }
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+  combinations.forEach((combination) => {
+    const scoring_format = {
+      pa: combination.pa,
+      pc: combination.pc,
+      py: combination.py,
+      ints: combination.ints,
+      tdp: combination.tdp,
+      ra: combination.ra,
+      ry: combination.ry,
+      tdr: combination.tdr,
+      rec: combination.rec,
+      rbrec: combination.rec,
+      wrrec: combination.rec,
+      terec: combination.rec,
+      recy: combination.recy,
+      twoptc: combination.twoptc,
+      tdrec: combination.tdrec,
+      fuml: combination.fuml,
+      prtd: combination.prtd,
+      krtd: combination.krtd
     }
-  }
+
+    const { scoring_format_hash } = generate_scoring_format_hash(scoring_format)
+    scoring_formats.push({ scoring_format_hash, ...scoring_format })
+
+    const league_format = {
+      scoring_format_hash,
+      num_teams: combination.num_teams,
+      sqb: combination.sqb,
+      srb: combination.srb,
+      swr: combination.swr,
+      ste: combination.ste,
+      srbwr: combination.srbwr,
+      srbwrte: combination.srbwrte,
+      sqbrbwrte: combination.sqbrbwrte,
+      swrte: combination.swrte,
+      sdst: combination.sdst,
+      sk: combination.sk,
+      bench: combination.bench,
+      ps: combination.ps,
+      ir: combination.ir,
+      cap: combination.cap,
+      min_bid: combination.min_bid
+    }
+
+    const { league_format_hash } = generate_league_format_hash(league_format)
+    league_formats.push({
+      league_format_hash,
+      scoring_format_hash,
+      ...league_format
+    })
+  })
 
   const default_league = await getLeague({ lid: 0 })
   scoring_formats.push(generate_scoring_format_hash(default_league))
