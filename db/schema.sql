@@ -2165,7 +2165,7 @@ CREATE TABLE `league_format_player_gamelogs` (
   `esbid` int(10) NOT NULL,
 
   `league_format_hash` varchar(64) NOT NULL,
-  `points` decimal(4,1) DEFAULT NULL,
+  `points` decimal(6,3) DEFAULT NULL,
   `points_added` decimal(4,1) DEFAULT NULL,
   `pos_rnk` tinyint(2) unsigned DEFAULT NULL,
 
