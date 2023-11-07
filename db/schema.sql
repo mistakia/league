@@ -445,6 +445,8 @@ CREATE TABLE `league_scoring_formats` (
   `prtd` tinyint(1) NOT NULL,
   `krtd` tinyint(1) NOT NULL,
 
+  `exclude_kneel` tinyint(1) NOT NULL DEFAULT 0,
+
   UNIQUE KEY `scoring_format_hash` (`scoring_format_hash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

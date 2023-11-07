@@ -136,6 +136,7 @@ export const stats = [
 
   'ra',
   'ry',
+  'kneel_yds',
   'tdr',
   'fuml',
 

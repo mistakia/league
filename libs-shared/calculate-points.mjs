@@ -18,7 +18,13 @@ const calculatePoints = ({ stats, position = '', league }) => {
         ? league[`${position.toLowerCase()}rec`] || scoring[stat]
         : scoring[stat]
 
-    const score = factor * (stats[stat] || 0)
+    let score = factor * (stats[stat] || 0)
+
+    if (stat === 'ry' && league.exclude_kneel) {
+      const kneel_score = factor * (stats.kneel_yds || 0)
+      score = score + Math.abs(kneel_score)
+    }
+
     result[stat] = score
     result.total = result.total + score
   }
