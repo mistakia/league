@@ -11,8 +11,15 @@ router.get('/gamelogs/players', async (req, res) => {
     const { leagueId } = req.query
     const year = req.query.year || constants.season.year
     const week = req.query.week ? Number(req.query.week) : null
-    const team = req.query.team
-    const opp = req.query.opp
+    const nfl_team = req.query.nfl_team
+    const opponent = req.query.opponent
+    let position = req.query.position
+
+    if (!position) {
+      position = constants.positions
+    } else if (!Array.isArray(position)) {
+      position = [position]
+    }
 
     const query = db('player_gamelogs')
       .select(
@@ -27,17 +34,18 @@ router.get('/gamelogs/players', async (req, res) => {
       .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
       .where('nfl_games.year', year)
       .where('nfl_games.seas_type', 'REG')
+      .whereIn('player_gamelogs.pos', position)
 
     if (week) {
       query.where('nfl_games.week', week)
     }
 
-    if (team) {
-      query.where('player_gamelogs.tm', team)
+    if (nfl_team) {
+      query.where('player_gamelogs.tm', nfl_team)
     }
 
-    if (opp) {
-      query.where('player_gamelogs.opp', opp)
+    if (opponent) {
+      query.where('player_gamelogs.opp', opponent)
     }
 
     if (leagueId) {
