@@ -43,7 +43,7 @@ const mapStateToProps = createSelector(
   ) => ({
     players,
     selected_view_grouped_fields,
-    isLoggedIn: Boolean(userId),
+    is_logged_in: Boolean(userId),
     isPending:
       allPlayersPending ||
       (selected_players_view.key.includes('stats_by_play') && stats.isPending), // TODO handle player fields being loaded (stats, etc)

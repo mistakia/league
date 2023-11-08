@@ -23,7 +23,7 @@ const mapStateToProps = createSelector(
     status,
     teams,
     teamId: app.teamId,
-    isLoggedIn: Boolean(app.userId),
+    is_logged_in: Boolean(app.userId),
     highlight_teamIds: players.get('highlight_teamIds'),
     selectedPlayer: players.get('selected'),
     week: players.get('week').get(0)

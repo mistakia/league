@@ -48,7 +48,7 @@ const showCollapse = () => window.innerWidth < 750
 
 export default function SelectedPlayer({
   playerMap,
-  isLoggedIn,
+  is_logged_in,
   market_salary_adjusted,
   is_before_end_of_free_agent_period,
   deselect,
@@ -58,7 +58,7 @@ export default function SelectedPlayer({
   const transactionsView = 6
   const gamelogsView = 1
   const [value, setValue] = useState(
-    isLoggedIn
+    is_logged_in
       ? constants.isRegularSeason
         ? projectionView
         : transactionsView
@@ -132,7 +132,7 @@ export default function SelectedPlayer({
         <PlayerWatchlistAction pid={pid} />
         <div className='selected__player-header-secondary'>
           <div className='selected__player-header-section'>
-            {isLoggedIn && Boolean(tid) && (
+            {is_logged_in && Boolean(tid) && (
               <div className='selected__player-header-item'>
                 <label>Manager</label>
                 <TeamName abbrv tid={tid} />
@@ -144,7 +144,7 @@ export default function SelectedPlayer({
                 ? playerStatus
                 : playerMap.get('gamestatus') || 'Active'}
             </div>
-            {isLoggedIn && Boolean(tid) && (
+            {is_logged_in && Boolean(tid) && (
               <div className='selected__player-header-item'>
                 <label>Salary</label>
                 {playerValue ? `$${playerValue}` : '-'}
@@ -165,7 +165,7 @@ export default function SelectedPlayer({
               <label>Age</label>
               <PlayerAge date={playerMap.get('dob')} />
             </div>
-            {isLoggedIn && (show_collapse ? !collapsed : true) && (
+            {is_logged_in && (show_collapse ? !collapsed : true) && (
               <>
                 <div className='selected__player-header-item'>
                   <label>Projected Starts</label>
@@ -204,7 +204,7 @@ export default function SelectedPlayer({
                 {collapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}
               </IconButton>
             )}
-            {isLoggedIn && (
+            {is_logged_in && (
               <PlayerContextMenu pid={pid} hideDisabled buttonGroup />
             )}
           </div>
@@ -230,9 +230,9 @@ export default function SelectedPlayer({
             {/* <Tab>Team Splits</Tab> */}
             {/* <Tab>Efficiency</Tab> */}
             <Tab>Practice</Tab>
-            {isLoggedIn && <Tab>Contribution</Tab>}
-            {isLoggedIn && <Tab>Value</Tab>}
-            {isLoggedIn && <Tab>Transactions</Tab>}
+            {is_logged_in && <Tab>Contribution</Tab>}
+            {is_logged_in && <Tab>Value</Tab>}
+            {is_logged_in && <Tab>Transactions</Tab>}
           </TabsList>
           <TabPanel value={0}>
             <SelectedPlayerProjections />
@@ -275,7 +275,7 @@ export default function SelectedPlayer({
 SelectedPlayer.propTypes = {
   deselect: PropTypes.func,
   playerMap: ImmutablePropTypes.map,
-  isLoggedIn: PropTypes.bool,
+  is_logged_in: PropTypes.bool,
   market_salary_adjusted: PropTypes.number,
   is_before_end_of_free_agent_period: PropTypes.bool,
   loadAllPlayers: PropTypes.func

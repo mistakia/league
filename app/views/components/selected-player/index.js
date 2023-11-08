@@ -37,7 +37,7 @@ const mapStateToProps = createSelector(
     return {
       playerMap,
       market_salary_adjusted,
-      isLoggedIn: Boolean(app.userId),
+      is_logged_in: Boolean(app.userId),
       is_before_end_of_free_agent_period
     }
   }

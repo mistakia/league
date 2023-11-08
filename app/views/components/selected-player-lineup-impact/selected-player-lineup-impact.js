@@ -8,9 +8,9 @@ import { constants } from '@libs-shared'
 
 export default class SelectedPlayerLineupImpact extends React.Component {
   render = () => {
-    const { isLoggedIn, playerMap } = this.props
+    const { is_logged_in, playerMap } = this.props
 
-    if (!isLoggedIn) {
+    if (!is_logged_in) {
       return <div>Must be logged in.</div>
     }
 
@@ -86,6 +86,6 @@ export default class SelectedPlayerLineupImpact extends React.Component {
 }
 
 SelectedPlayerLineupImpact.propTypes = {
-  isLoggedIn: PropTypes.bool,
+  is_logged_in: PropTypes.bool,
   playerMap: ImmutablePropTypes.map
 }

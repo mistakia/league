@@ -53,6 +53,10 @@ export default function LeagueHomePage({
     if (isNaN(lid)) {
       return navigate('/', { replace: true })
     }
+
+    if (Number(lid) === constants.DEFAULTS.LEAGUE_ID) {
+      return navigate(`/leagues/${lid}/players`, { replace: true })
+    }
   }, [lid, navigate])
 
   useEffect(() => {

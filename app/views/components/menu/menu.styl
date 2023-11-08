@@ -53,7 +53,7 @@ $menuBackgroundColor = darken($backgroundColor, 5%)
 
 .menu__links
   margin-top 8px
-  padding 0 16px 16px
+  padding 0 16px 8px
   a
     display flex
     align-items center
@@ -86,6 +86,18 @@ $menuBackgroundColor = darken($backgroundColor, 5%)
 
 .menu__open .main__menu-button.MuiFab-root
   display none
+
+.league__warning
+  display flex
+  align-items center
+  justify-content center
+  background-color rgb(255, 244, 229)
+  padding 6px
+  font-size 10px
+
+  .MuiSvgIcon-root
+    width 15px
+    height 15px
 
 @media (min-width 800px)
   .MuiDrawer-paper.MuiPaper-root.menu__drawer

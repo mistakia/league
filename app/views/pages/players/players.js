@@ -44,7 +44,7 @@ export default function PlayersPage({
   player_fields,
   selected_players_view,
   isPending,
-  isLoggedIn,
+  is_logged_in,
   selected_view_grouped_fields,
   show_week_filter,
   show_play_filters,
@@ -205,7 +205,7 @@ export default function PlayersPage({
           <PlayersViewMenu />
           <SearchFilter search={search} value={searchValue} />
           <PositionFilter />
-          {isLoggedIn && <AvailabilityFilter />}
+          {is_logged_in && <AvailabilityFilter />}
           {show_week_filter && <WeekFilter />}
           <Button
             variant='outlined'
@@ -253,9 +253,9 @@ export default function PlayersPage({
               <CollegeFilter />
               <CollegeDivisionFilter />
               <StatusFilter />
-              {isLoggedIn && <TeamFilter />}
-              {isLoggedIn && <HighlightTeam />}
-              {isLoggedIn && <WatchlistFilter />}
+              {is_logged_in && <TeamFilter />}
+              {is_logged_in && <HighlightTeam />}
+              {is_logged_in && <WatchlistFilter />}
             </div>
           </div>
         )}
@@ -273,9 +273,9 @@ export default function PlayersPage({
           <div className='player__row-action watchlist' />
           <div className='player__row-pos' />
           <div className='player__row-name player__header'>Name</div>
-          {isLoggedIn && <div className='player__row-tag' />}
-          {isLoggedIn && <div className='player__row-action actions' />}
-          {isLoggedIn && <div className='player__row-availability' />}
+          {is_logged_in && <div className='player__row-tag' />}
+          {is_logged_in && <div className='player__row-action actions' />}
+          {is_logged_in && <div className='player__row-availability' />}
         </div>
         {header_items}
       </div>
@@ -303,7 +303,7 @@ PlayersPage.propTypes = {
   players: ImmutablePropTypes.list,
   selected: PropTypes.string,
   isPending: PropTypes.bool,
-  isLoggedIn: PropTypes.bool,
+  is_logged_in: PropTypes.bool,
   search: PropTypes.func,
   searchValue: PropTypes.string,
   loadAllPlayers: PropTypes.func,

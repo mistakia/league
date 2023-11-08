@@ -22,7 +22,7 @@ class PlayerRow extends Player {
       selectedPlayer,
       isHosted,
       week,
-      isLoggedIn,
+      is_logged_in,
       selected, // inherited from Player class
       status,
       teamId,
@@ -42,7 +42,7 @@ class PlayerRow extends Player {
 
     const classNames = ['player__row']
     if (isSelected) classNames.push('selected')
-    if (isLoggedIn && !isRostered) classNames.push('fa')
+    if (is_logged_in && !isRostered) classNames.push('fa')
     else if (highlight_teamIds.includes(tid))
       classNames.push(`draft-order-${team.get('do')}`)
     else if (teamId && tid === teamId) classNames.push('rostered')
@@ -103,12 +103,12 @@ class PlayerRow extends Player {
             )}
             <NFLTeam team={nfl_team} />
           </div>
-          {isLoggedIn && (
+          {is_logged_in && (
             <div className='player__row-tag'>
               <PlayerTag tag={playerMap.get('tag')} />
             </div>
           )}
-          {isLoggedIn && (
+          {is_logged_in && (
             <div className='player__row-action actions'>
               {Boolean(isHosted) && (
                 <IconButton
@@ -120,7 +120,7 @@ class PlayerRow extends Player {
               )}
             </div>
           )}
-          {isLoggedIn && (
+          {is_logged_in && (
             <div className='player__row-availability'>
               {isRostered ? (
                 <TeamName abbrv tid={tid} />
