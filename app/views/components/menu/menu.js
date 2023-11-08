@@ -7,6 +7,8 @@ import Fab from '@mui/material/Fab'
 import Tooltip from '@mui/material/Tooltip'
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore'
 import NavigateNextIcon from '@mui/icons-material/NavigateNext'
+import IconButton from '@mui/material/IconButton'
+import InfoIcon from '@mui/icons-material/Info'
 
 import TeamName from '@components/team-name'
 import LeagueSchedule from '@components/league-schedule'
@@ -17,11 +19,11 @@ export default function AppMenu({
   menu_open,
   set_menu_open,
   logout,
-  isLoggedIn,
+  is_logged_in,
   teamId,
   leagueId,
   league,
-  isCommish
+  is_commish
 }) {
   const location = useLocation()
   const isAuction = location.pathname === '/auction'
@@ -55,8 +57,29 @@ export default function AppMenu({
         <div className='main__menu'>
           <div className='menu__sections'>
             <div className='menu__section'>
-              {Boolean(league.uid) && (
+              {league.uid ? (
                 <div className='league__title'>{league.name}</div>
+              ) : (
+                <div className='league__warning'>
+                  League not connected
+                  <Tooltip
+                    PopperProps={{ className: 'multiline' }}
+                    title={
+                      <span>
+                        Using the default 12 team half-ppr superflex league
+                        settings.
+                        <br />
+                        <br />
+                        Account needed to view league connected pages and player
+                        views.
+                      </span>
+                    }
+                  >
+                    <IconButton size='small'>
+                      <InfoIcon />
+                    </IconButton>
+                  </Tooltip>
+                </div>
               )}
               {Boolean(league.uid) && <LeagueSchedule />}
               <div
@@ -117,7 +140,7 @@ export default function AppMenu({
                     )}
                   </>
                 )}
-                {isCommish && (
+                {is_logged_in && is_commish && (
                   <NavLink to={`/leagues/${leagueId}/settings`}>
                     Settings
                   </NavLink>
@@ -148,7 +171,7 @@ export default function AppMenu({
                 className='menu__links'
                 onClick={() => isMobile && set_menu_open(false)}
               >
-                {isLoggedIn ? (
+                {is_logged_in ? (
                   <a onClick={logout}>Logout</a>
                 ) : (
                   <NavLink to='/login'>Login</NavLink>
@@ -182,12 +205,12 @@ export default function AppMenu({
 }
 
 AppMenu.propTypes = {
-  isLoggedIn: PropTypes.bool,
+  is_logged_in: PropTypes.bool,
   leagueId: PropTypes.number,
   teamId: PropTypes.number,
   league: PropTypes.object,
   logout: PropTypes.func,
   menu_open: PropTypes.bool,
   set_menu_open: PropTypes.func,
-  isCommish: PropTypes.bool
+  is_commish: PropTypes.bool
 }
