@@ -10,6 +10,9 @@ router.get('/gamelogs/players', async (req, res) => {
   try {
     const { leagueId } = req.query
     const year = req.query.year || constants.season.year
+    const week = req.query.week ? Number(req.query.week) : null
+    const team = req.query.team
+    const opp = req.query.opp
 
     const query = db('player_gamelogs')
       .select(
@@ -24,6 +27,18 @@ router.get('/gamelogs/players', async (req, res) => {
       .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
       .where('nfl_games.year', year)
       .where('nfl_games.seas_type', 'REG')
+
+    if (week) {
+      query.where('nfl_games.week', week)
+    }
+
+    if (team) {
+      query.where('player_gamelogs.tm', team)
+    }
+
+    if (opp) {
+      query.where('player_gamelogs.opp', opp)
+    }
 
     if (leagueId) {
       const league = await getLeague({ lid: leagueId })
