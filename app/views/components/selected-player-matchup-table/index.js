@@ -8,8 +8,10 @@ import {
   getSelectedPlayerGame,
   getPlayerGamelogs,
   getGamelogs,
-  get_seasonlogs
+  get_seasonlogs,
+  get_app
 } from '@core/selectors'
+import { gamelogsActions } from '@core/gamelogs'
 import { percentileActions } from '@core/percentiles'
 
 import SelectedPlayerMatchupTable from './selected-player-matchup-table'
@@ -21,17 +23,18 @@ const mapStateToProps = createSelector(
   getCurrentLeague,
   getGamelogs,
   get_seasonlogs,
-  (playerMap, game, logs, league, gamelogState, seasonlogs) => {
+  get_app,
+  (playerMap, game, logs, league, gamelogState, seasonlogs, app) => {
     if (!game) {
       return {}
     }
-    const opp = playerMap.get('team') === game.h ? game.v : game.h
+    const opponent = playerMap.get('team') === game.h ? game.v : game.h
     const position = playerMap.get('pos')
     const gamelogs = logs
       .filter(
         (g) =>
           g.year === constants.season.year &&
-          g.opp === opp &&
+          g.opp === opponent &&
           g.pos === position
       )
       .sort((a, b) => a.week - b.week)
@@ -50,7 +53,7 @@ const mapStateToProps = createSelector(
     const types = { avg: 'Average', adj: 'Over Expected' }
     for (const [type, title] of Object.entries(types)) {
       const stat_key = `${position}_against_${type}`.toUpperCase()
-      const stats = seasonlogs.getIn(['nfl_teams', opp, stat_key])
+      const stats = seasonlogs.getIn(['nfl_teams', opponent, stat_key])
       if (stats) {
         nfl_team_against_seasonlogs.push({
           type,
@@ -64,14 +67,16 @@ const mapStateToProps = createSelector(
     return {
       gamelogs,
       nfl_team_against_seasonlogs,
-      opp,
-      position
+      opponent,
+      position,
+      year: app.year
     }
   }
 )
 
 const mapDispatchToProps = {
-  loadPercentiles: percentileActions.loadPercentiles
+  loadPercentiles: percentileActions.loadPercentiles,
+  load_players_gamelogs: gamelogsActions.load_players_gamelogs
 }
 
 export default connect(

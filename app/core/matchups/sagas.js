@@ -16,7 +16,7 @@ export function* loadMatchups() {
   const { leagueId, year } = yield select(get_app)
 
   const request_history = yield select(get_request_history)
-  const key = `GET_MATCHUPS_${leagueId}_${year}`
+  const key = `GET_MATCHUPS_LEAGUE_${leagueId}_${year}`
   if (!request_history.has(key)) {
     yield call(fetchMatchups, { leagueId, year })
   }

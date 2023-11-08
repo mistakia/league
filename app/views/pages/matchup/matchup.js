@@ -24,6 +24,7 @@ export default function MatchupPage({
   is_loading,
   matchup,
   year,
+  week,
   loadMatchups,
   loadLeaguePlayers,
   loadRosters,
@@ -71,8 +72,16 @@ export default function MatchupPage({
   }, [lid, loadLeaguePlayers, loadRosters])
 
   useEffect(() => {
-    loadMatchups()
-  }, [year, loadMatchups])
+    if (seas_week && Number(seas_week) !== week) {
+      return
+    }
+
+    if (seas_year && Number(seas_year) !== year) {
+      return
+    }
+
+    loadMatchups({ year, week })
+  }, [year, week, seas_week, seas_year, loadMatchups])
 
   useEffect(() => {
     set_selected_tid(isHeadToHead ? matchup.hid : matchup.getIn(['tids', '0']))
@@ -160,6 +169,7 @@ export default function MatchupPage({
 MatchupPage.propTypes = {
   is_loading: PropTypes.bool,
   year: PropTypes.number,
+  week: PropTypes.number,
   matchup: ImmutablePropTypes.record,
   selectYear: PropTypes.func,
   selectWeek: PropTypes.func,
