@@ -9,15 +9,17 @@ import PlayerNameText from '@components/player-name-text'
 export default function SelectedPlayerMatchupTable({
   gamelogs,
   position,
-  opp,
+  opponent,
   nfl_team_against_seasonlogs,
-  loadPercentiles
+  loadPercentiles,
+  load_players_gamelogs,
+  year
 }) {
   const individual_percentile_key = `INDIVIDUAL_GAMELOG_${position}`
 
   // load percentiles
   useEffect(() => {
-    if (!opp) {
+    if (!opponent) {
       return
     }
     const percentile_keys = [individual_percentile_key]
@@ -31,10 +33,17 @@ export default function SelectedPlayerMatchupTable({
     individual_percentile_key,
     loadPercentiles,
     nfl_team_against_seasonlogs,
-    opp
+    opponent
   ])
 
-  if (!opp) {
+  useEffect(() => {
+    if (!opponent) {
+      return
+    }
+    load_players_gamelogs({ year, opponent, position })
+  }, [year, opponent, position, load_players_gamelogs])
+
+  if (!opponent) {
     return <div>BYE</div>
   }
 
@@ -102,7 +111,7 @@ export default function SelectedPlayerMatchupTable({
     <>
       <div className='selected__table-header sticky__column'>
         <div className='row__group-head'>
-          {position}s vs {opp} Gamelogs
+          {position}s vs {opponent} Gamelogs
         </div>
       </div>
       <div className='selected__table-header'>
@@ -130,6 +139,8 @@ SelectedPlayerMatchupTable.propTypes = {
   loadPercentiles: PropTypes.func,
   gamelogs: ImmutablePropTypes.list,
   position: PropTypes.string,
-  opp: PropTypes.string,
-  nfl_team_against_seasonlogs: PropTypes.array
+  opponent: PropTypes.string,
+  nfl_team_against_seasonlogs: PropTypes.array,
+  load_players_gamelogs: PropTypes.func,
+  year: PropTypes.number
 }

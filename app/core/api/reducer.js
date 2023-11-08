@@ -59,7 +59,11 @@ export function apiReducer(state = initialState, { payload, type }) {
       return state.setIn(
         [
           'request_history',
-          `GET_GAMELOGS_${payload.opts.leagueId}_${payload.opts.year}`
+          `GET_GAMELOGS_${payload.opts.leagueId}_${payload.opts.year || 'X'}_${
+            payload.opts.week || 'X'
+          }_${payload.opts.nfl_team || 'X'}_${payload.opts.opponent || 'X'}_${
+            payload.opts.position || 'X'
+          }`
         ],
         true
       )
@@ -67,7 +71,11 @@ export function apiReducer(state = initialState, { payload, type }) {
     case gamelogsActions.GET_PLAYERS_GAMELOGS_FAILED:
       return state.deleteIn([
         'request_history',
-        `GET_GAMELOGS_${payload.opts.leagueId}_${payload.opts.year}`
+        `GET_GAMELOGS_${payload.opts.leagueId}_${payload.opts.year || 'X'}_${
+          payload.opts.week || 'X'
+        }_${payload.opts.nfl_team || 'X'}_${payload.opts.opponent || 'X'}_${
+          payload.opts.position || 'X'
+        }`
       ])
 
     case waiverActions.GET_WAIVERS_FULFILLED:

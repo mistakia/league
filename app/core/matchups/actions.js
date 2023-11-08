@@ -14,8 +14,12 @@ export const matchupsActions = {
   POST_MATCHUPS_PENDING: 'POST_MATCHUPS_PENDING',
   POST_MATCHUPS_FULFILLED: 'POST_MATCHUPS_FULFILLED',
 
-  loadMatchups: () => ({
-    type: matchupsActions.LOAD_MATCHUPS
+  loadMatchups: ({ year, week }) => ({
+    type: matchupsActions.LOAD_MATCHUPS,
+    payload: {
+      year,
+      week
+    }
   }),
 
   select: ({ matchupId, week, year }) => ({
