@@ -244,7 +244,7 @@ const generate_seasonlogs = async ({
   }
 
   // calculate league specific team stats
-  const leagueIds = [1]
+  const leagueIds = [0, 1]
   const league_team_seasonlog_inserts = []
 
   for (const leagueId of leagueIds) {

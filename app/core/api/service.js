@@ -339,9 +339,10 @@ export const api = {
     return { url }
   },
   getNflTeamSeasonlogs({ leagueId }) {
-    const url = leagueId
-      ? `${BASE_URL}/seasonlogs/teams?leagueId=${leagueId}`
-      : `${BASE_URL}/seasonlogs/teams`
+    const url =
+      leagueId !== null && leagueId !== undefined
+        ? `${BASE_URL}/seasonlogs/teams?leagueId=${leagueId}`
+        : `${BASE_URL}/seasonlogs/teams`
     return { url }
   },
   get_league_team_daily_values({ leagueId }) {
