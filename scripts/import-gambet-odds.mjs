@@ -1,11 +1,19 @@
 import debug from 'debug'
+import fs from 'fs-extra'
+import dayjs from 'dayjs'
 import oddslib from 'oddslib'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants, team_aliases } from '#libs-shared'
-import { isMain, gambet, wait, getPlayer, insertProps } from '#libs-server'
+import { constants, fixTeam } from '#libs-shared'
+import {
+  isMain,
+  gambet,
+  wait,
+  getPlayer,
+  insert_prop_markets
+} from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-gambet-odds')
@@ -35,24 +43,80 @@ const format_player_name = (str) => {
   return str.trim()
 }
 
-const import_gambet_odds = async () => {
-  // do not pull in props outside of the NFL season
-  if (
-    !constants.season.now.isBetween(
-      constants.season.start,
-      constants.season.end
-    )
-  ) {
-    return
+const format_market = async ({ gambet_market, timestamp, event, nfl_game }) => {
+  let player_row
+  const selections = []
+
+  if (gambet_market.playerId) {
+    const params = {
+      name: format_player_name(gambet_market.name),
+      teams: nfl_game ? [nfl_game.v, nfl_game.h] : []
+    }
+
+    try {
+      player_row = await getPlayer(params)
+    } catch (err) {
+      log(err)
+    }
   }
 
+  for (const odd of gambet_market.odds) {
+    const selection_metric_line = Number(odd.handicap) || null
+    let selection_name = null
+
+    if (odd.type === 'Over') {
+      selection_name = 'over'
+    } else if (odd.type === 'Under') {
+      selection_name = 'under'
+    } else {
+      selection_name = odd.name
+    }
+
+    selections.push({
+      source_id: 'GAMBET',
+      source_market_id: gambet_market.id,
+      source_selection_id: odd.id,
+
+      selection_pid: player_row?.pid || null,
+      selection_name,
+      selection_metric_line,
+      odds_decimal: odd.odd,
+      odds_american: oddslib.from('decimal', odd.odd).to('moneyline')
+    })
+  }
+
+  return {
+    market_type: null, // TODO use type
+
+    source_id: 'GAMBET',
+    source_market_id: gambet_market.id,
+    source_market_name: `${gambet_market.description} - (${gambet_market.type})`,
+
+    esbid: nfl_game?.esbid || null,
+    source_event_id: event?.matchId || null,
+    source_event_name: event?.longName || null,
+
+    open: gambet_market.status === 'active',
+    live: gambet_market.isLive,
+    selection_count: gambet_market.odds.length,
+
+    timestamp,
+    selections
+  }
+}
+
+const import_gambet_odds = async () => {
   log('importing gambet odds')
 
+  const formatted_markets = []
+  const all_markets = []
   const timestamp = Math.round(Date.now() / 1000)
-  const props = []
-  const missing = []
 
-  const supported_markets = Object.keys(gambet.markets)
+  const nfl_games = await db('nfl_games').where({
+    week: constants.season.nfl_seas_week,
+    year: constants.season.year,
+    seas_type: constants.season.nfl_seas_type
+  })
 
   const events = await gambet.get_events()
 
@@ -61,111 +125,51 @@ const import_gambet_odds = async () => {
       event_url: event.eventUrl
     })
 
-    const teams = [
-      team_aliases[event.awayTeam.name],
-      team_aliases[event.homeTeam.name]
-    ]
+    let nfl_game = null
 
-    for (const market of event_markets) {
-      // ignore unsupported markets
-      if (!supported_markets.includes(market.type)) {
-        continue
-      }
-
-      let player_row
-      const params = {
-        name: format_player_name(market.name),
-        teams
-      }
-
-      try {
-        player_row = await getPlayer(params)
-      } catch (err) {
-        log(err)
-      }
-
-      if (!player_row) {
-        missing.push({
-          market,
-          ...params
-        })
-        continue
-      }
-
-      const prop = {}
-      prop.pid = player_row.pid
-      prop.prop_type = gambet.markets[market.type]
-      prop.id = market.id
-      prop.timestamp = timestamp
-      prop.week = constants.season.week
-      prop.year = constants.season.year
-      prop.sourceid = constants.sources.GAMBET_DC
-      prop.active = Boolean(market.displayed)
-      prop.live = Boolean(market.isLive)
-
-      const is_alt_line = constants.player_prop_types_alts.includes(
-        prop.prop_type
+    if (event && event.homeTeam && event.awayTeam) {
+      const home = fixTeam(event.homeTeam.name)
+      const visitor = fixTeam(event.awayTeam.name)
+      const week = dayjs(event.date).diff(constants.season.start, 'weeks')
+      nfl_game = nfl_games.find(
+        (game) =>
+          game.week === week &&
+          game.year === constants.season.year &&
+          game.v === visitor &&
+          game.h === home
       )
-      if (is_alt_line) {
-        for (const odd of market.odds) {
-          let ln
-
-          try {
-            const re = /(?<line>\d+)+/gi
-            const re_result = re.exec(odd.short)
-            ln = Number(re_result.groups.line) - 0.5
-          } catch (err) {
-            log(err)
-          }
-
-          if (!ln || isNaN(ln)) {
-            continue
-          }
-
-          props.push({
-            ln,
-            o: odd.odd,
-            o_am: Math.round(oddslib.from('decimal', odd.odd).to('moneyline')),
-            ...prop
-          })
-        }
-      } else {
-        prop.ln = market.lines.length ? Number(market.lines[0]) : null
-
-        const under_odds = market.odds.find(
-          (o) => o.type === 'Under' || o.type === 'No'
-        )
-        const over_odds = market.odds.find(
-          (o) => o.type === 'Over' || o.type === 'Yes'
-        )
-
-        prop.o = over_odds ? Number(over_odds.odd) : null
-        prop.o_am = prop.o
-          ? Math.round(oddslib.from('decimal', prop.o).to('moneyline'))
-          : null
-        prop.u = under_odds ? Number(under_odds.odd) : null
-        prop.u_am = prop.u
-          ? Math.round(oddslib.from('decimal', prop.u).to('moneyline'))
-          : null
-
-        props.push(prop)
-      }
     }
 
-    await wait(5000)
+    for (const market of event_markets) {
+      all_markets.push(market)
+      formatted_markets.push(
+        await format_market({
+          gambet_market: market,
+          timestamp,
+          event,
+          nfl_game
+        })
+      )
+    }
+
+    await wait(2500)
   }
 
-  log(`Could not locate ${missing.length} players`)
-  missing.forEach((m) => log(`could not find player: ${m.name} / ${m.teams}`))
+  if (argv.write) {
+    await fs.writeFile(
+      `./tmp/gambet-event-markets-${timestamp}.json`,
+      JSON.stringify(all_markets, null, 2)
+    )
+  }
 
   if (argv.dry) {
-    log(props[0])
+    log(formatted_markets[0])
     return
   }
 
-  if (props.length) {
-    log(`Inserting ${props.length} props into database`)
-    await insertProps(props)
+  if (formatted_markets.length) {
+    log(`Inserting ${formatted_markets.length} markets into database`)
+    await insert_prop_markets(formatted_markets)
   }
 }
 

@@ -52,7 +52,8 @@ users
 users_sources
 users_teams
 waiver_releases
-waivers"
+waivers
+placed_wagers"
 
 DB_CACHE_TABLES="
 league_baselines
@@ -99,6 +100,10 @@ props
 props_index
 prop_markets
 prop_markets_index
+prop_markets_history
+prop_markets_index_new
+prop_market_selections_history
+prop_market_selections_index
 "
 
 DB_PROJECTIONS_TABLES="

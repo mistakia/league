@@ -1,14 +1,93 @@
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
+import fs from 'fs-extra'
 
 import db from '#db'
 import { constants } from '#libs-shared'
-import { isMain, prizepicks, getPlayer, insertProps } from '#libs-server'
+import {
+  isMain,
+  prizepicks,
+  getPlayer,
+  insert_prop_markets
+} from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-prizepicks-odds')
 debug.enable('import-prizepicks-odds,get-player,prizepicks')
+
+const format_market = async ({
+  prizepicks_market,
+  timestamp,
+  prizepicks_player,
+  nfl_games = []
+}) => {
+  const selections = []
+  let player_row
+  let nfl_game
+
+  const params = {
+    name: prizepicks_player.attributes.name,
+    team: prizepicks_player.attributes.team
+  }
+
+  try {
+    player_row = await getPlayer(params)
+  } catch (err) {
+    log(err)
+  }
+
+  if (player_row) {
+    nfl_game = nfl_games.find(
+      (game) => game.v === player_row.cteam || game.h === player_row.cteam
+    )
+  }
+
+  selections.push({
+    source_id: 'PRIZEPICKS',
+    source_market_id: prizepicks_market.id,
+    source_selection_id: `${prizepicks_market.id}-over`,
+
+    selection_pid: player_row?.pid || null,
+    selection_name: 'over',
+    selection_metric_line:
+      Number(prizepicks_market.attributes?.line_score) || null,
+    odds_decimal: null,
+    odds_american: null
+  })
+
+  selections.push({
+    source_id: 'PRIZEPICKS',
+    source_market_id: prizepicks_market.id,
+    source_selection_id: `${prizepicks_market.id}-under`,
+
+    selection_pid: player_row?.pid || null,
+    selection_name: 'under',
+    selection_metric_line:
+      Number(prizepicks_market.attributes?.line_score) || null,
+    odds_decimal: null,
+    odds_american: null
+  })
+
+  return {
+    market_type: null, // TODO use projection_type and stat_type
+
+    source_id: 'PRIZEPICKS',
+    source_market_id: prizepicks_market.id,
+    source_market_name: `${prizepicks_market.attributes?.projection_type} - ${prizepicks_market.attributes?.stat_type}`,
+
+    esbid: nfl_game?.esbid || null,
+    source_event_id: prizepicks_market.attributes?.game_id || null,
+    source_event_name: null,
+
+    open: true,
+    live: false,
+    selection_count: 2,
+
+    timestamp,
+    selections
+  }
+}
 
 const import_prizepicks_odds = async () => {
   // do not pull in reports outside of the NFL season
@@ -24,9 +103,8 @@ const import_prizepicks_odds = async () => {
   console.time('import-prizepicks-odds')
 
   const timestamp = Math.round(Date.now() / 1000)
-
-  const props = []
-  const missing = []
+  const formatted_markets = []
+  const all_markets = []
 
   const nfl_games = await db('nfl_games').where({
     week: constants.season.nfl_seas_week,
@@ -40,79 +118,48 @@ const import_prizepicks_odds = async () => {
     data = await prizepicks.getPlayerProps({ page })
 
     for (const item of data.data) {
-      // ignore unsupported stat types
-      if (!prizepicks.stats[item.attributes.stat_type]) continue
+      all_markets.push(item)
 
-      let player_row
-
-      const item_player = data.included.find(
+      const prizepicks_player = data.included.find(
         (d) =>
           d.type === 'new_player' &&
           d.id === item.relationships.new_player.data.id
       )
-      if (!item_player) {
+
+      if (!prizepicks_player) {
         // TODO log warning
         continue
       }
 
-      const params = {
-        name: item_player.attributes.name,
-        team: item_player.attributes.team
-      }
-      try {
-        player_row = await getPlayer(params)
-      } catch (err) {
-        log(err)
-      }
-
-      if (!player_row) {
-        missing.push(params)
-        continue
-      }
-
-      const nfl_game = nfl_games.find(
-        (game) => game.v === player_row.cteam || game.h === player_row.cteam
+      formatted_markets.push(
+        await format_market({
+          prizepicks_market: item,
+          prizepicks_player,
+          timestamp,
+          nfl_games
+        })
       )
-
-      if (!nfl_game) {
-        continue
-      }
-
-      const prop = {}
-      prop.pid = player_row.pid
-      prop.prop_type = prizepicks.stats[item.attributes.stat_type]
-      prop.id = item.id
-      prop.timestamp = timestamp
-      prop.week = constants.season.week
-      prop.year = constants.season.year
-      prop.esbid = nfl_game.esbid
-      prop.sourceid = constants.sources.PRIZEPICKS
-      prop.active = true
-
-      prop.ln = Number(item.attributes.line_score)
-
-      prop.o = null
-      prop.o_am = null
-      prop.u = null
-      prop.u_am = null
-
-      props.push(prop)
     }
 
     page += 1
   } while (!data || data.meta.current_page < data.meta.total_pages)
 
-  log(`Could not locate ${missing.length} players`)
-  missing.forEach((m) => log(`could not find player: ${m.name} / ${m.team}`))
+  if (argv.write) {
+    await fs.writeFile(
+      `./tmp/prizepick-markets-${timestamp}.json`,
+      JSON.stringify(all_markets, null, 2)
+    )
+  }
 
   if (argv.dry) {
-    log(props[0])
+    log(formatted_markets[0])
+    console.timeEnd('import-prizepicks-odds')
     return
   }
 
-  if (props.length) {
-    log(`Inserting ${props.length} props into database`)
-    await insertProps(props)
+  if (formatted_markets.length) {
+    log(`Inserting ${formatted_markets.length} markets into database`)
+    await insert_prop_markets(formatted_markets)
   }
 
   console.timeEnd('import-prizepicks-odds')
