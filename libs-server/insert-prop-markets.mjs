@@ -150,7 +150,7 @@ const insert_market = async ({ timestamp, selections, ...market }) => {
       existing_market
     })
 
-    log(selection_results)
+    // log(selection_results)
   }
 }
 
