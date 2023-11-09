@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import { Map } from 'immutable'
 import Toolbar from '@mui/material/Toolbar'
+import Tooltip from '@mui/material/Tooltip'
 
 import PageLayout from '@layouts/page'
 import PercentileMetric from '@components/percentile-metric'
@@ -25,7 +26,6 @@ function SummaryRow({ team, percentiles, year }) {
     'pdiff',
     'pp',
     'pp_pct',
-    'ppp',
     'pw',
     'pl',
     'pmax',
@@ -258,17 +258,36 @@ export default function StatsPage({
           <div className='table__container'>
             <div className='table__row table__head'>
               <div className='table__cell player__item-name'>Team</div>
-              <div className='table__cell metric'>PF</div>
-              <div className='table__cell metric'>PA</div>
-              <div className='table__cell metric'>DIFF</div>
-              <div className='table__cell metric'>PP</div>
-              <div className='table__cell metric'>PP%</div>
-              <div className='table__cell metric'>PP Pen</div>
-              <div className='table__cell metric'>P WINS</div>
-              <div className='table__cell metric'>P LOSSES</div>
-              <div className='table__cell metric'>MAX</div>
-              <div className='table__cell metric'>MIN</div>
-              <div className='table__cell metric'>STDEV</div>
+              <Tooltip title='Points scored'>
+                <div className='table__cell metric'>PF</div>
+              </Tooltip>
+              <Tooltip title='Points against'>
+                <div className='table__cell metric'>PA</div>
+              </Tooltip>
+              <Tooltip title='Point differential'>
+                <div className='table__cell metric'>DIFF</div>
+              </Tooltip>
+              <Tooltip title='Potential points. Points scored with optimal lineup.'>
+                <div className='table__cell metric'>PP</div>
+              </Tooltip>
+              <Tooltip title='Percentage of potential points scored'>
+                <div className='table__cell metric'>PP%</div>
+              </Tooltip>
+              <Tooltip title='Potential wins. Games that could have been won with optimal lineup'>
+                <div className='table__cell metric'>P WINS</div>
+              </Tooltip>
+              <Tooltip title='Potential losses. Games that could have been lost with opponents optimal lineup'>
+                <div className='table__cell metric'>P LOSSES</div>
+              </Tooltip>
+              <Tooltip title='Maximum points for'>
+                <div className='table__cell metric'>MAX</div>
+              </Tooltip>
+              <Tooltip title='Minimum points for'>
+                <div className='table__cell metric'>MIN</div>
+              </Tooltip>
+              <Tooltip title='Points scored standard deviation'>
+                <div className='table__cell metric'>STDEV</div>
+              </Tooltip>
               <div className='row__group'>
                 <div className='row__group-head'>All Play Record</div>
                 <div className='row__group-body'>
