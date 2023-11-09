@@ -28,6 +28,7 @@ module.exports = {
   gambet_api_url: '',
   betrivers_api_url: '',
   betrivers_market_groups_api_url: '',
+  digital_sports_tech_api_url: '',
 
   league_api_auth_token: '', // used for cache
 

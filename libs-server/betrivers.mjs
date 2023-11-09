@@ -1,6 +1,7 @@
 import fetch from 'node-fetch'
 
 import config from '#config'
+import { wait } from '#libs-server'
 
 export const get_market_groups = async () => {
   const url = `${config.betrivers_market_groups_api_url}/offering/v2018/rsiusmd/group.json?t=1678603265664&lang=en_US&market=US-MD`
@@ -26,15 +27,30 @@ export const get_market_groups = async () => {
 }
 
 export const get_group_events = async (group_id) => {
-  const url = `${config.betrivers_api_url}/service/sportsbook/offering/listview/events?t=2023212700&cageCode=410&type=futures&groupId=${group_id}&pageNr=1&pageSize=20&offset=0`
-  const res = await fetch(url)
-  const data = await res.json()
+  let page_nr = 1
+  const page_size = 20
+  let total_pages = 1
+  let group_events = []
 
-  if (data && data.items) {
-    return data.items
+  while (page_nr <= total_pages) {
+    const url = `${config.betrivers_api_url}/service/sportsbook/offering/listview/events?t=2023212700&cageCode=410&groupId=${group_id}&pageNr=${page_nr}&pageSize=${page_size}&offset=0`
+    const res = await fetch(url)
+    const data = await res.json()
+
+    if (data && data.items) {
+      group_events = group_events.concat(data.items)
+    }
+
+    if (data && data.paging) {
+      total_pages = data.paging.totalPages
+    }
+
+    page_nr++
+
+    await wait(2500)
   }
 
-  return []
+  return group_events
 }
 
 export const get_event_markets = async (event_id) => {

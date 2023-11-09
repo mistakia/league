@@ -1,46 +1,69 @@
-import fetch from 'node-fetch'
 import fs from 'fs-extra'
 import debug from 'debug'
 import yargs from 'yargs'
+import dayjs from 'dayjs'
 import { hideBin } from 'yargs/helpers'
-import { Odds } from 'oddslib'
+import oddslib from 'oddslib'
 
 import db from '#db'
-import { constants } from '#libs-shared'
-import { isMain, getPlayer, insertProps } from '#libs-server'
+import { constants, fixTeam } from '#libs-shared'
+import {
+  isMain,
+  getPlayer,
+  insert_prop_markets,
+  betonline,
+  wait
+} from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
 
-const log = debug('import:odds')
-debug.enable('import:odds,get-player')
-
-const URL =
-  'https://widgets.digitalsportstech.com/api/feed?' +
-  [
-    'betType=in,18,19',
-    'isActive=1',
-    'limit=9999',
-    'tz=-5',
-    'sb=betonline',
-    'leagueId=142'
-  ].join('&')
-
-const types = {
-  'Passing Yards': constants.player_prop_types.GAME_PASSING_YARDS,
-  'Pass Completions': constants.player_prop_types.GAME_PASSING_COMPLETIONS,
-  'Passing TDs': constants.player_prop_types.GAME_PASSING_TOUCHDOWNS,
-  'Rushing Yards': constants.player_prop_types.GAME_RUSHING_YARDS,
-  'Receiving Yards': constants.player_prop_types.GAME_RECEIVING_YARDS,
-  Receptions: constants.player_prop_types.GAME_RECEPTIONS,
-  Carries: constants.player_prop_types.GAME_RUSHING_ATTEMPTS
-  // Touchdowns: constants.player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS
-}
+const log = debug('import-betonline')
+debug.enable('import-betonline,get-player,betonline')
 
 const timestamp = Math.round(Date.now() / 1000)
 
-// betType 1 is at least
-// betType 18 is Under
-// betType 19 is Over
+const format_market = async ({
+  betonline_market,
+  timestamp,
+  player_row,
+  nfl_game,
+  source_event_id
+}) => {
+  const selections = []
+
+  selections.push({
+    source_id: 'BETONLINE',
+    source_market_id: betonline_market.id,
+    source_selection_id: `${betonline_market.id}-over`,
+
+    selection_pid: player_row?.pid || null,
+    selection_name: 'over',
+    selection_metric_line: Number(betonline_market.value) - 0.5,
+    odds_decimal: Number(betonline_market.odds),
+    odds_american: oddslib
+      .from('decimal', betonline_market.odds)
+      .to('moneyline')
+  })
+
+  return {
+    market_type: null, // TODO use statistic id
+
+    source_id: 'BETONLINE',
+    source_market_id: betonline_market.id,
+    source_market_name: `betonline_market.statistic.title (id: ${betonline_market.statistic.id})`,
+
+    esbid: nfl_game?.esbid || null,
+    source_event_id,
+    source_event_name: null,
+
+    open: true,
+    live: null,
+    selection_count: 1,
+
+    timestamp,
+    selections
+  }
+}
 
 const run = async () => {
   // do not pull in reports outside of the NFL season
@@ -50,110 +73,104 @@ const run = async () => {
       constants.season.end
     )
   ) {
+    log('Not during regular season')
     return
   }
 
-  // request page
-  let parsed
+  const all_markets = []
+  const formatted_markets = []
 
-  const tmpFile = '/tmp/betonline.json'
-  if (argv.test && fs.existsSync(tmpFile)) {
-    parsed = fs.readJsonSync(tmpFile)
-  } else {
-    parsed = await fetch(URL).then((res) => res.json())
-    fs.writeJsonSync(tmpFile, parsed, { spaces: 2 })
-  }
+  const nfl_games = await db('nfl_games').where({
+    week: constants.season.nfl_seas_week,
+    year: constants.season.year,
+    seas_type: constants.season.nfl_seas_type
+  })
 
-  const missing = []
-  const props = []
+  const market_groups = await betonline.get_market_groups()
+  const events = await betonline.get_events()
 
-  for (const item of parsed.data) {
-    if (item.game1.leagueId !== 142) continue
-    if (!types[item.statistic.title]) continue
-
-    // find player
-    let player_row
-    const params = {
-      name: item.player1.name,
-      team: item.player1.team.abbreviation
-    }
-    try {
-      player_row = await getPlayer(params)
-      if (!player_row) {
-        missing.push(params)
-        continue
-      }
-    } catch (err) {
-      console.log(err)
-      missing.push(params)
+  for (const event of events) {
+    const gameId = event.providers.find((p) => p.name === 'nix')?.id
+    if (!gameId) {
+      log(`No gameId for event ${event}`)
       continue
     }
 
-    for (const bet of item.markets) {
-      const index =
-        bet.type !== 1
-          ? props.findIndex(
-              (p) =>
-                p.pid === player_row.pid &&
-                p.type === types[item.statistic.title]
-            )
-          : -1
-      const prop = index > -1 ? props[index] : {}
-      prop.pid = player_row.pid
-      prop.prop_type = types[item.statistic.title]
-      prop.id = bet.id
-      prop.timestamp = timestamp
-      prop.week = constants.season.week
-      prop.year = constants.season.year
-      prop.sourceid = constants.sources.BETONLINE
-      prop.active = true
+    let nfl_game
+    if (
+      event.team1 &&
+      event.team1.length &&
+      event.team2 &&
+      event.team2.length
+    ) {
+      const week = dayjs(event.date).diff(constants.season.start, 'weeks')
+      const home = fixTeam(event.team1[0]?.title)
+      const visitor = fixTeam(event.team2[0]?.title)
+      nfl_game = nfl_games.find(
+        (game) =>
+          game.week === week &&
+          game.year === constants.season.year &&
+          game.v === visitor &&
+          game.h === home
+      )
+    }
 
-      switch (bet.type) {
-        case 1:
-          prop.ln = bet.value - 0.5
-          prop.o = bet.odds
-          prop.o_am = Odds.from('decimal', bet.odds).to('moneyline', {
-            precision: 0
-          })
-          break
+    for (const market_group of betonline.market_groups) {
+      for (const market_sub_group of market_groups[market_group]) {
+        const markets = await betonline.get_markets({
+          statistic: encodeURIComponent(market_sub_group),
+          gameId
+        })
 
-        case 18:
-          prop.ln = bet.value
-          prop.u = bet.odds
-          prop.u_am = Odds.from('decimal', bet.odds).to('moneyline', {
-            precision: 0
-          })
-          break
+        for (const market of markets) {
+          for (const betonline_player of market.players) {
+            let player_row
+            const params = {
+              name: betonline_player.name,
+              team: fixTeam(betonline_player.team)
+            }
 
-        case 19:
-          prop.ln = bet.value
-          prop.o = bet.odds
-          prop.o_am = Odds.from('decimal', bet.odds).to('moneyline', {
-            precision: 0
-          })
-          break
+            try {
+              player_row = await getPlayer(params)
+            } catch (err) {
+              log(err)
+            }
 
-        default:
-          log(`unrecognized bet type ${bet.type}`)
+            for (const market of betonline_player.markets) {
+              all_markets.push(market)
+              formatted_markets.push(
+                await format_market({
+                  betonline_market: market,
+                  timestamp,
+                  player_row,
+                  nfl_game,
+                  source_event_id: gameId
+                })
+              )
+            }
+          }
+        }
+
+        await wait(2500)
       }
-
-      if (index === -1) props.push(prop)
     }
   }
 
-  log(`Could not locate ${missing.length} players`)
-  missing.forEach((m) =>
-    log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`)
-  )
+  if (argv.write) {
+    await fs.writeFile(
+      `./tmp/betonline-markets-${timestamp}.json`,
+      JSON.stringify(all_markets, null, 2)
+    )
+  }
 
   if (argv.dry) {
-    log(props[0])
+    log(formatted_markets[0])
     return
   }
 
-  if (props.length) {
-    log(`Inserting ${props.length} props into database`)
-    await insertProps(props)
+  if (formatted_markets.length) {
+    log(`Inserting ${formatted_markets.length} markets`)
+    await insert_prop_markets(formatted_markets)
   }
 }
 
