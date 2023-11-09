@@ -37,24 +37,11 @@ const calculateStandings = ({
         weeks: {}
       },
       stats: constants.createFantasyTeamStats(),
-      potentialPoints: {},
-      potentialPointsPenalty: {}
+      potentialPoints: {}
     }
 
     teamStats[tid].stats.pmin = Infinity
   }
-
-  const minStarters =
-    league.sqb +
-    league.srb +
-    league.swr +
-    league.ste +
-    league.srbwr +
-    league.srbwrte +
-    league.sqbrbwrte +
-    league.swrte +
-    league.sdst +
-    league.sk
 
   for (let week = 1; week <= finalWeek; week++) {
     for (const { uid: tid } of teams) {
@@ -95,13 +82,6 @@ const calculateStandings = ({
         players: optimizePlayers,
         league
       })
-      // TODO - determine regular season end based on league settings
-      if (
-        optimizeResult.starters.length < minStarters &&
-        week <= constants.season.regularSeasonFinalWeek
-      ) {
-        teamStats[tid].potentialPointsPenalty[week] = true
-      }
       teamStats[tid].potentialPoints[week] = optimizeResult.total
       teamStats[tid].stats.pp += optimizeResult.total
 
@@ -157,26 +137,18 @@ const calculateStandings = ({
       teamStats[tid].stats.apWins += scores.filter((p) => p < score).length
       teamStats[tid].stats.apLosses += scores.filter((p) => p > score).length
       teamStats[tid].stats.apTies += scores.filter((p) => p === score).length
-
-      if (teamStats[tid].potentialPointsPenalty[week]) {
-        const pps = Object.values(teamStats).map((p) => p.potentialPoints[week])
-        const max = Math.max(...pps)
-        teamStats[tid].stats.ppp += max - teamStats[tid].potentialPoints[week]
-      }
     }
   }
 
   // calculate draft order
-  const potentialPoints = Object.values(teamStats).map(
-    (p) => p.stats.pp + p.stats.ppp
-  )
+  const potentialPoints = Object.values(teamStats).map((p) => p.stats.pp)
   const allPlayLosses = Object.values(teamStats).map((p) => p.stats.apLosses)
   const minPP = Math.min(...potentialPoints)
   const maxPP = Math.max(...potentialPoints)
   const minAPL = Math.min(...allPlayLosses)
   const maxAPL = Math.max(...allPlayLosses)
   for (const { uid: tid } of teams) {
-    const pp = teamStats[tid].stats.pp + teamStats[tid].stats.ppp
+    const pp = teamStats[tid].stats.pp
     const apl = teamStats[tid].stats.apLosses
     const normPP = (pp - minPP) / (maxPP - minPP)
     const normAPL = (apl - minAPL) / (maxAPL - minAPL)
