@@ -229,7 +229,7 @@ const generate_prop_pairings = async ({
       constants.player_prop_types.GAME_ALT_PASSING_COMPLETIONS,
       constants.player_prop_types.GAME_ALT_RUSHING_ATTEMPTS
     ])
-    .where('time_type', constants.player_prop_time_type.CLOSE)
+    .where('time_type', 'CLOSE')
     .where('sourceid', source)
     // .whereNot('sourceid', constants.sources.PRIZEPICKS)
     .where('nfl_games.week', week)

@@ -1365,17 +1365,6 @@ for (const key in player_prop_types) {
   player_prop_type_keys[value] = key
 }
 
-export const player_prop_time_type = {
-  OPEN: 1,
-  CLOSE: 2
-}
-
-export const player_prop_time_type_keys = {}
-for (const key in player_prop_time_type) {
-  const value = player_prop_time_type[key]
-  player_prop_time_type_keys[value] = key
-}
-
 export const player_prop_types_alts = [
   player_prop_types.GAME_ALT_PASSING_YARDS,
   player_prop_types.GAME_ALT_RUSHING_YARDS,

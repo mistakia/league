@@ -82,7 +82,6 @@ router.get('/props', async (req, res) => {
       ...row,
 
       prop_type: constants.player_prop_type_keys[row.prop_type],
-      time_type: constants.player_prop_time_type_keys[row.time_type],
       prop_source: constants.source_keys[row.prop_source]
     }))
 
