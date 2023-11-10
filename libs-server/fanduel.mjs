@@ -98,7 +98,21 @@ export const alt_line_markets = {
   'PLAYER_L_-_ALT_RECEIVING_YARDS':
     constants.player_prop_types.GAME_ALT_RECEIVING_YARDS,
   'PLAYER_M_-_ALT_RECEIVING_YARDS':
-    constants.player_prop_types.GAME_ALT_RECEIVING_YARDS
+    constants.player_prop_types.GAME_ALT_RECEIVING_YARDS,
+
+  'PLAYER_A_-_ALT_RECEPTIONS': constants.player_prop_types.GAME_ALT_RECEPTIONS,
+  'PLAYER_B_-_ALT_RECEPTIONS': constants.player_prop_types.GAME_ALT_RECEPTIONS,
+  'PLAYER_C_-_ALT_RECEPTIONS': constants.player_prop_types.GAME_ALT_RECEPTIONS,
+  'PLAYER_D_-_ALT_RECEPTIONS': constants.player_prop_types.GAME_ALT_RECEPTIONS,
+  'PLAYER_E_-_ALT_RECEPTIONS': constants.player_prop_types.GAME_ALT_RECEPTIONS,
+  'PLAYER_F_-_ALT_RECEPTIONS': constants.player_prop_types.GAME_ALT_RECEPTIONS,
+  'PLAYER_G_-_ALT_RECEPTIONS': constants.player_prop_types.GAME_ALT_RECEPTIONS,
+  'PLAYER_H_-_ALT_RECEPTIONS': constants.player_prop_types.GAME_ALT_RECEPTIONS,
+  'PLAYER_I_-_ALT_RECEPTIONS': constants.player_prop_types.GAME_ALT_RECEPTIONS,
+  'PLAYER_J_-_ALT_RECEPTIONS': constants.player_prop_types.GAME_ALT_RECEPTIONS,
+  'PLAYER_K_-_ALT_RECEPTIONS': constants.player_prop_types.GAME_ALT_RECEPTIONS,
+  'PLAYER_L_-_ALT_RECEPTIONS': constants.player_prop_types.GAME_ALT_RECEPTIONS,
+  'PLAYER_M_-_ALT_RECEPTIONS': constants.player_prop_types.GAME_ALT_RECEPTIONS
 }
 
 export const leader_markets = {

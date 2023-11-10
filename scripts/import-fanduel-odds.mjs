@@ -117,7 +117,7 @@ const format_market = async ({
   }
 
   return {
-    market_type: null, // TODO use marketType
+    market_type: fanduel.markets[fanduel_market.marketType],
 
     source_id: 'FANDUEL',
     source_market_id: fanduel_market.marketId,
