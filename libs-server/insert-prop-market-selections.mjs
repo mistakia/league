@@ -158,7 +158,7 @@ export default async function ({ timestamp, selections, existing_market }) {
     (selection) => selection.source_selection_id
   )
   const missing_selection_ids = existing_selection_ids.filter(
-    (id) => !new_selection_ids.includes(id)
+    (id) => !new_selection_ids.includes(id.toString())
   )
   await db('prop_market_selections_index')
     .where({
