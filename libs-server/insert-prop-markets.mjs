@@ -144,13 +144,12 @@ const insert_market = async ({ timestamp, selections, ...market }) => {
       .onConflict()
       .merge()
 
-    const selection_results = await insert_prop_market_selections({
+    // TODO use return value for notifications
+    await insert_prop_market_selections({
       timestamp,
       selections,
       existing_market
     })
-
-    // log(selection_results)
   }
 }
 

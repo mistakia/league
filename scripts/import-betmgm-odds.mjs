@@ -43,7 +43,7 @@ const format_game_market = async ({
 
     source_id: 'BETMGM',
     source_market_id: betmgm_market.id,
-    source_market_name: betmgm_market.name.value,
+    source_market_name: `${betmgm_market.name.value} (templateId: ${betmgm_market.templateId}, catgeoryId: ${betmgm_market.categoryId})`,
 
     esbid: nfl_game?.esbid || null,
     source_event_id: fixture.id,
@@ -120,7 +120,7 @@ const format_option_market = async ({
 
     source_id: 'BETMGM',
     source_market_id: betmgm_market.id,
-    source_market_name: `betmgm_market.name.value (templateId: ${
+    source_market_name: `${betmgm_market.name.value} (templateId: ${
       templateId || ''
     })`,
 
