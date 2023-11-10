@@ -2446,9 +2446,9 @@ CREATE TABLE `props_index` (
   `u` decimal(5,2) DEFAULT NULL,
   `o_am` MEDIUMINT DEFAULT NULL,
   `u_am` MEDIUMINT DEFAULT NULL,
-  `sourceid` int(6) NOT NULL,
+  `source_id` ENUM('BETONLINE', 'BETMGM', 'BETRIVERS', 'BOVADA', 'CAESARS', 'DRAFTKINGS', 'FANDUEL', 'GAMBET', 'PRIZEPICKS') NOT NULL,
   `timestamp` int(11) NOT NULL,
-  `time_type` tinyint(3) NOT NULL,
+  `time_type` ENUM('OPEN', 'CLOSE') NOT NULL,
 
   `name` varchar(50) DEFAULT NULL,
   `team` varchar(3) DEFAULT NULL,

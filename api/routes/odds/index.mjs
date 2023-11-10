@@ -57,7 +57,7 @@ router.get('/props', async (req, res) => {
         'props_index.u as under_decimal',
         'props_index.o_am as over_american',
         'props_index.u_am as under_american',
-        'props_index.sourceid as prop_source',
+        'props_index.source_id as prop_source',
         'props_index.time_type',
         'props_index.timestamp',
 

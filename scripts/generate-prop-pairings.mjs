@@ -30,7 +30,7 @@ const get_prop_pairing_id = (props) =>
  *     u: null,
  *     o_am: null,
  *     u_am: null,
- *     sourceid: 0,
+ *     source_id: 0,
  *     timestamp: 0,
  *     time_type: 0
  *   }
@@ -230,8 +230,8 @@ const generate_prop_pairings = async ({
       constants.player_prop_types.GAME_ALT_RUSHING_ATTEMPTS
     ])
     .where('time_type', 'CLOSE')
-    .where('sourceid', source)
-    // .whereNot('sourceid', constants.sources.PRIZEPICKS)
+    .where('source_id', source)
+    // .whereNot('source_id', constants.sources.PRIZEPICKS)
     .where('nfl_games.week', week)
     .where('nfl_games.year', year)
     .where('nfl_games.seas_type', seas_type)
