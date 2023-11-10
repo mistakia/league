@@ -154,8 +154,8 @@ export default async function ({ timestamp, selections, existing_market }) {
   const existing_selection_ids = existing_selections.map(
     (selection) => selection.source_selection_id
   )
-  const new_selection_ids = selections.map(
-    (selection) => selection.source_selection_id.toString()
+  const new_selection_ids = selections.map((selection) =>
+    selection.source_selection_id.toString()
   )
   const missing_selection_ids = existing_selection_ids.filter(
     (id) => !new_selection_ids.includes(id)
