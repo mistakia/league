@@ -332,6 +332,7 @@ const filter_prop_pairings = async ({
         return {
           hits: prop.is_success ? accumulator.hits + 1 : accumulator.hits,
           hist_rate_soft: accumulator.hist_rate_soft + prop.hist_rate_soft,
+          hist_rate_hard: accumulator.hist_rate_hard + prop.hist_rate_hard,
           market_prob: accumulator.market_prob + prop.market_prob,
           completed: accumulator.completed + 1,
           pending: accumulator.pending,
@@ -347,6 +348,7 @@ const filter_prop_pairings = async ({
       payout: 0,
       risk: 0,
       hist_rate_soft: 0,
+      hist_rate_hard: 0,
       market_prob: 0
     }
   )
@@ -381,7 +383,8 @@ const filter_prop_pairings = async ({
       title: `${team} plays`,
       columns: [
         { name: 'pairing', alignment: 'left' },
-        { name: 'hit_rate', alignment: 'right' },
+        { name: 'hit_rate_soft', alignment: 'right' },
+        { name: 'hit_rate_hard', alignment: 'right' },
         { name: 'edge', alignment: 'right' },
         { name: 'high', alignment: 'right' },
         { name: 'low', alignment: 'right' },
@@ -400,7 +403,8 @@ const filter_prop_pairings = async ({
 
       p.addRow({
         pairing: `${prop_names.join(' / ')}`,
-        hit_rate: `${Math.round(prop.hist_rate_soft * 100)}%`,
+        hit_rate_soft: `${Math.round(prop.hist_rate_soft * 100)}%`,
+        hit_rate_hard: `${Math.round(prop.hist_rate_hard * 100)}%`,
         edge: `${(prop.hist_edge_soft * 100).toFixed(1)}%`,
         high: prop.highest_payout,
         low: prop.lowest_payout,

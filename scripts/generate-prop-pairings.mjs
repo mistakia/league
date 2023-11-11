@@ -354,6 +354,8 @@ const generate_prop_pairings = async ({
     }
   }
 
+  log(`generated ${prop_pairing_inserts.length} prop pairings`)
+
   if (prop_pairing_inserts.length) {
     const chunk_size = 10000
     for (let i = 0; i < prop_pairing_inserts.length; i += chunk_size) {
