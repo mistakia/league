@@ -226,10 +226,22 @@ const filter_prop_pairings = async ({
     .join('props_index', 'props_index.prop_id', 'prop_pairing_props.prop_id')
     .whereIn('pairing_id', pairing_ids)
 
+  log(`loaded ${prop_pairing_props.length} props for week ${week}`)
+
+  // Create a lookup object
+  const prop_pairing_props_lookup = prop_pairing_props.reduce(
+    (lookup, prop) => {
+      if (!lookup[prop.pairing_id]) {
+        lookup[prop.pairing_id] = []
+      }
+      lookup[prop.pairing_id].push(prop)
+      return lookup
+    },
+    {}
+  )
+
   for (const pairing of prop_pairing_rows) {
-    pairing.props = prop_pairing_props.filter(
-      (prop) => prop.pairing_id === pairing.pairing_id
-    )
+    pairing.props = prop_pairing_props_lookup[pairing.pairing_id] || []
   }
 
   log(`loaded ${prop_pairing_rows.length} prop pairings for week ${week}`)
