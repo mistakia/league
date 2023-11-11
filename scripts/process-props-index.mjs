@@ -454,7 +454,6 @@ const main = async () => {
       .where('nfl_games.week', week)
       .where('nfl_games.seas_type', seas_type)
       .where('nfl_games.year', year)
-      .where('prop_market_selections_index.odds_american', '>', 100)
       .whereRaw('LOWER(selection_name) NOT LIKE ?', ['%under%'])
 
     await process_props_index({ prop_rows, week, year, seas_type })
