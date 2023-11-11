@@ -114,11 +114,15 @@ const getPlayer = async ({
     }
 
     if (ignore_retired) {
-      query.whereNot({ nfl_status: 'RET' })
+      query.where(function () {
+        this.whereNot({ nfl_status: 'RET' }).orWhereNull('nfl_status')
+      })
     }
 
     if (ignore_free_agent) {
-      query.whereNot({ cteam: 'INA' })
+      query.where(function () {
+        this.whereNot({ cteam: 'INA' }).orWhereNull('cteam')
+      })
     }
   }
 
