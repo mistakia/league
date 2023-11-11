@@ -105,6 +105,16 @@ const format_market = async ({
       }
     }
 
+    let selection_metric_line = Number(runner.handicap) || null
+
+    if (!selection_metric_line) {
+      // extract metric line from selection name
+      const metric_line = runner.runnerName.match(/(\d+)\+/)
+      if (metric_line) {
+        selection_metric_line = Number(metric_line[1])
+      }
+    }
+
     selections.push({
       source_id: 'FANDUEL',
       source_market_id: fanduel_market.marketId,
@@ -112,7 +122,7 @@ const format_market = async ({
 
       selection_pid: player_row?.pid || null,
       selection_name: runner.runnerName,
-      selection_metric_line: runner.handicap,
+      selection_metric_line,
       odds_decimal: runner.winRunnerOdds.trueOdds.decimalOdds.decimalOdds,
       odds_american: runner.winRunnerOdds.americanDisplayOdds.americanOddsInt
     })
