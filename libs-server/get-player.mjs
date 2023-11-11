@@ -48,7 +48,10 @@ const getPlayer = async ({
   pfr_id,
   esbid,
   gsisid,
-  pname
+  pname,
+
+  ignore_retired = false,
+  ignore_free_agent = false
 }) => {
   if (team_aliases[name]) {
     const result = await db('player').where({ pid: team_aliases[name] })
@@ -109,6 +112,14 @@ const getPlayer = async ({
     if (teams.length) {
       query.whereIn('cteam', teams)
     }
+
+    if (ignore_retired) {
+      query.whereNot({ nfl_status: 'RET' })
+    }
+
+    if (ignore_free_agent) {
+      query.whereNot({ cteam: 'INA' })
+    }
   }
 
   const player_rows = await query
@@ -129,7 +140,9 @@ const main = async () => {
     const options = {
       name: argv.name,
       pos: argv.pos,
-      team: argv.team
+      team: argv.team,
+      ignore_retired: argv.ignore_retired,
+      ignore_free_agent: argv.ignore_free_agent
     }
     log(options)
     const player_row = await getPlayer(options)

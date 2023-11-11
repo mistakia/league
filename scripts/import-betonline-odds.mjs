@@ -127,7 +127,9 @@ const run = async () => {
             let player_row
             const params = {
               name: betonline_player.name,
-              team: fixTeam(betonline_player.team)
+              team: fixTeam(betonline_player.team),
+              ignore_free_agent: true,
+              ignore_retired: true
             }
 
             try {

@@ -73,7 +73,9 @@ const format_option_market = async ({
     const team_re_matches = team_name_re.exec(betmgm_market.player1.value)
     const params = {
       name: betmgm_market.player1.short,
-      team: team_re_matches ? team_re_matches[1] : null
+      team: team_re_matches ? team_re_matches[1] : null,
+      ignore_free_agent: true,
+      ignore_retired: true
     }
     try {
       player_row = await getPlayer(params)

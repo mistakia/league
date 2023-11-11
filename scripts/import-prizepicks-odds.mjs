@@ -28,7 +28,9 @@ const format_market = async ({
 
   const params = {
     name: prizepicks_player.attributes.name,
-    team: prizepicks_player.attributes.team
+    team: prizepicks_player.attributes.team,
+    ignore_free_agent: true,
+    ignore_retired: true
   }
 
   try {

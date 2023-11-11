@@ -50,7 +50,9 @@ const format_market = async ({ gambet_market, timestamp, event, nfl_game }) => {
   if (gambet_market.playerId) {
     const params = {
       name: format_player_name(gambet_market.name),
-      teams: nfl_game ? [nfl_game.v, nfl_game.h] : []
+      teams: nfl_game ? [nfl_game.v, nfl_game.h] : [],
+      ignore_free_agent: true,
+      ignore_retired: true
     }
 
     try {
