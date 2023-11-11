@@ -39,9 +39,9 @@ const prop_desc = {
   [constants.player_prop_types.GAME_ALT_RUSHING_ATTEMPTS]: 'rush atts'
 }
 
-const get_hits = ({ line, prop_type, player_gamelogs }) =>
+const get_hits = ({ line, prop_type, player_gamelogs, strict }) =>
   player_gamelogs.filter((player_gamelog) =>
-    is_hit({ line, prop_type, player_gamelog })
+    is_hit({ line, prop_type, player_gamelog, strict })
   )
 
 const is_hit = ({ line, prop_type, player_gamelog, strict = false }) => {
@@ -454,6 +454,7 @@ const main = async () => {
       .where('nfl_games.week', week)
       .where('nfl_games.seas_type', seas_type)
       .where('nfl_games.year', year)
+      .where('prop_market_selections_index.odds_american', '>', 100)
       .whereRaw('LOWER(selection_name) NOT LIKE ?', ['%under%'])
 
     await process_props_index({ prop_rows, week, year, seas_type })
