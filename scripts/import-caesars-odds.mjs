@@ -26,7 +26,9 @@ const format_market = async ({
     const team = fixTeam(caesars_market.metadata.teamName.replaceAll('|', ''))
     const params = {
       name: caesars_market.metadata.player,
-      team
+      team,
+      ignore_free_agent: true,
+      ignore_retired: true
     }
 
     try {
@@ -83,7 +85,9 @@ const format_market = async ({
     // if (!player_row) {
     //   try {
     //     player_row = await getPlayer({
-    //       name: selection.name.replaceAll('|', '')
+    //       name: selection.name.replaceAll('|', ''),
+    //       ignore_free_agent: true,
+    //       ignore_retired: true
     //     })
     //   } catch (err) {
     //     log(err)

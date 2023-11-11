@@ -109,14 +109,14 @@ const filter_prop_pairings = async ({
   week = constants.season.nfl_seas_week,
   year = constants.season.year,
   seas_type = constants.season.nfl_seas_type,
-  source = constants.sources.FANDUEL_NJ
+  source = 'FANDUEL'
 } = {}) => {
   const opts = merge(default_options, config.filter_prop_pairings_options || {})
   log('options:')
   log(opts)
 
   const prop_pairing_query = db('prop_pairings')
-    .where('sourceid', source)
+    .where('source_id', source)
     .where('week', week)
     .orderBy('hist_rate_soft', 'DESC')
     .orderBy('hist_edge_soft', 'DESC')
