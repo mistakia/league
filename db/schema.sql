@@ -2474,7 +2474,7 @@ CREATE TABLE `props_index` (
   `all_weeks` json DEFAULT NULL,
   `opp_weeks` json DEFAULT NULL,
   PRIMARY KEY (`prop_id`),
-  UNIQUE KEY `prop` (`sourceid`, `pid`, `week`, `year`, `prop_type`, `ln`, `time_type`), -- TODO remove week, year and add esbid
+  UNIQUE KEY `prop` (`source_id`, `pid`, `week`, `year`, `prop_type`, `ln`, `time_type`), -- TODO remove week, year and add esbid
   KEY `hits_soft` (`hits_soft`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -2589,7 +2589,7 @@ DROP TABLE IF EXISTS `prop_pairings`;
 
 CREATE TABLE `prop_pairings` (
   `pairing_id` varchar(30) NOT NULL,
-  `sourceid` int NOT NULL,
+  `source_id` ENUM('BETONLINE', 'BETMGM', 'BETRIVERS', 'BOVADA', 'CAESARS', 'DRAFTKINGS', 'FANDUEL', 'GAMBET', 'PRIZEPICKS') NOT NULL,
   `name` varchar(150) DEFAULT NULL,
   `team` varchar(3) DEFAULT NULL,
   `week` tinyint(2) NOT NULL,
@@ -2612,7 +2612,7 @@ CREATE TABLE `prop_pairings` (
   `highest_payout` MEDIUMINT DEFAULT NULL,
   `lowest_payout` MEDIUMINT DEFAULT NULL,
   PRIMARY KEY (`pairing_id`),
-  KEY `sourceid` (`sourceid`),
+  KEY `source_id` (`source_id`),
   KEY `market_prob` (`market_prob`),
   KEY `hist_rate_soft` (`hist_rate_soft`),
   KEY `opp_allow_rate` (`opp_allow_rate`),
