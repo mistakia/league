@@ -143,11 +143,44 @@ const format_prop_row = ({
   esbid,
   seas_type
 }) => {
-  const odds = prop_row.o_am ? oddslib.from('moneyline', prop_row.o_am) : null
-  const market_prob = prop_row.o_am ? odds.to('impliedProbability') : null
+  const formatted_prop_row = {
+    pid: prop_row.selection_pid,
+    esbid: prop_row.esbid,
+    week: prop_row.week,
+    year: prop_row.year,
+    prop_type: prop_row.market_type,
+    ln: prop_row.selection_metric_line,
+    o: prop_row.odds_decimal,
+    o_am: prop_row.odds_american,
+    source_id: prop_row.source_id,
+    timestamp: prop_row.timestamp,
+    time_type: prop_row.time_type
+  }
+
+  // prop_row properties
+  // - pid
+  // - esbid
+  // - week
+  // - year
+  // - prop_type
+  // - ln
+  // - o
+  // - u
+  // - o_am
+  // - u_am
+  // - source_id
+  // - timestamp
+  // - time_type
+
+  const odds = formatted_prop_row.o_am
+    ? oddslib.from('moneyline', formatted_prop_row.o_am)
+    : null
+  const market_prob = formatted_prop_row.o_am
+    ? odds.to('impliedProbability')
+    : null
 
   const player_gamelogs = all_player_gamelogs.filter(
-    (p) => p.pid === prop_row.pid
+    (p) => p.pid === formatted_prop_row.pid
   )
   const all_weeks = player_gamelogs.map((p) => p.week)
   const current_week = player_gamelogs.find((p) => p.esbid === esbid)
@@ -164,21 +197,21 @@ const format_prop_row = ({
   })
   const is_success = current_week
     ? is_hit({
-        line: prop_row.ln,
-        prop_type: prop_row.prop_type,
+        line: formatted_prop_row.ln,
+        prop_type: formatted_prop_row.prop_type,
         player_gamelog: current_week,
         strict: true
       })
     : null
 
   const hits_soft = get_hits({
-    line: prop_row.ln,
-    prop_type: prop_row.prop_type,
+    line: formatted_prop_row.ln,
+    prop_type: formatted_prop_row.prop_type,
     player_gamelogs: previous_weeks
   })
   const hits_hard = get_hits({
-    line: prop_row.ln,
-    prop_type: prop_row.prop_type,
+    line: formatted_prop_row.ln,
+    prop_type: formatted_prop_row.prop_type,
     player_gamelogs: previous_weeks,
     strict: true
   })
@@ -205,8 +238,8 @@ const format_prop_row = ({
     ...new Set(opponent_player_gamelogs.map((p) => p.week))
   ]
   const opponent_allowed_hits = get_hits({
-    line: prop_row.ln,
-    prop_type: prop_row.prop_type,
+    line: formatted_prop_row.ln,
+    prop_type: formatted_prop_row.prop_type,
     player_gamelogs: opponent_player_gamelogs
   })
   const opponent_hit_weeks = [
@@ -215,13 +248,13 @@ const format_prop_row = ({
 
   const hist_rate_soft = hits_soft.length / player_gamelogs.length || 0
   const hist_rate_hard = hits_hard.length / player_gamelogs.length || 0
-  const risk = prop_row.o_am ? 1 / odds.to('hongKong') : null
+  const risk = formatted_prop_row.o_am ? 1 / odds.to('hongKong') : null
   const is_pending = !current_week
 
   return {
-    ...prop_row,
-    name: `${player_row.fname} ${player_row.lname} ${prop_row.ln} ${
-      prop_desc[prop_row.prop_type]
+    ...formatted_prop_row,
+    name: `${player_row.fname} ${player_row.lname} ${formatted_prop_row.ln} ${
+      prop_desc[formatted_prop_row.prop_type]
     }`,
     team: player_row.cteam,
     opp: opponent,
@@ -296,7 +329,7 @@ const process_props_index = async ({
 
   log(`loaded ${all_player_gamelogs.length} gamelogs`)
 
-  const player_pids = prop_rows.map((p) => p.pid)
+  const player_pids = prop_rows.map((p) => p.selection_pid).filter(Boolean)
   const player_rows = await db('player')
     .select('pid', 'fname', 'lname', 'cteam', 'pos')
     .whereIn('pid', player_pids)
@@ -306,7 +339,23 @@ const process_props_index = async ({
   const props_index_inserts = []
 
   for (const prop_row of prop_rows) {
-    const player_row = player_rows.find((player) => player.pid === prop_row.pid)
+    if (!prop_row.selection_pid) {
+      continue
+    }
+
+    if (prop_row.selection_metric_line === 0) {
+      console.log(prop_row)
+      process.exit()
+    }
+
+    if (prop_row.source_market_id === '734.77146964') {
+      console.log(prop_row)
+      process.exit()
+    }
+
+    const player_row = player_rows.find(
+      (player) => player.pid === prop_row.selection_pid
+    )
     const nfl_game = nfl_games.find((g) => g.esbid === prop_row.esbid)
 
     if (!nfl_game) {
@@ -333,6 +382,11 @@ const process_props_index = async ({
     props_index_inserts.push(formatted_prop_row)
   }
 
+  if (argv.dry) {
+    log(props_index_inserts[0])
+    return
+  }
+
   if (props_index_inserts.length) {
     log(`saving ${props_index_inserts.length} prop rows`)
     await db('props_index').insert(props_index_inserts).onConflict().merge()
@@ -345,12 +399,34 @@ const main = async () => {
     const week = argv.week || constants.season.nfl_seas_week
     const year = argv.year || constants.season.year
     const seas_type = argv.seas_type || constants.season.nfl_seas_type
-    const source = argv.source || constants.sources.FANDUEL_NJ
+    const source = argv.source || 'FANDUEL'
 
-    const prop_rows = await db('props_index')
-      .select('props_index.*')
-      .join('nfl_games', 'nfl_games.esbid', 'props_index.esbid')
-      .whereIn('prop_type', [
+    const prop_rows = await db('prop_markets_index_new')
+      .select(
+        'prop_markets_index_new.*',
+        'prop_market_selections_index.*',
+        'nfl_games.week',
+        'nfl_games.year'
+      )
+      .join('nfl_games', 'nfl_games.esbid', 'prop_markets_index_new.esbid')
+      .join('prop_market_selections_index', function () {
+        this.on(
+          'prop_markets_index_new.source_market_id',
+          '=',
+          'prop_market_selections_index.source_market_id'
+        )
+        this.andOn(
+          'prop_market_selections_index.source_id',
+          '=',
+          db.raw('?', [source])
+        )
+        this.andOn(
+          'prop_market_selections_index.time_type',
+          '=',
+          db.raw('?', ['CLOSE'])
+        )
+      })
+      .whereIn('market_type', [
         constants.player_prop_types.GAME_ALT_PASSING_YARDS,
         constants.player_prop_types.GAME_ALT_RECEIVING_YARDS,
         constants.player_prop_types.GAME_ALT_RUSHING_YARDS,
@@ -374,14 +450,16 @@ const main = async () => {
         constants.player_prop_types.GAME_PASSING_RUSHING_YARDS,
         constants.player_prop_types.GAME_ALT_PASSING_TOUCHDOWNS,
         constants.player_prop_types.GAME_ALT_PASSING_COMPLETIONS,
-        constants.player_prop_types.GAME_ALT_RUSHING_ATTEMPTS
+        constants.player_prop_types.GAME_ALT_RUSHING_ATTEMPTS,
+        constants.player_prop_types.GAME_ALT_RECEPTIONS
       ])
-      .where('time_type', 'CLOSE')
-      .where('sourceid', source)
-      // .whereNot('sourceid', constants.sources.PRIZEPICKS)
+      .where('prop_markets_index_new.time_type', 'CLOSE')
+      .where('prop_markets_index_new.source_id', source)
+      // .whereNot('prop_markets_index_new.source_id', constants.sources.PRIZEPICKS)
       .where('nfl_games.week', week)
       .where('nfl_games.seas_type', seas_type)
       .where('nfl_games.year', year)
+      .whereRaw('LOWER(selection_name) NOT LIKE ?', ['%under%'])
 
     await process_props_index({ prop_rows, week, year, seas_type })
   } catch (err) {

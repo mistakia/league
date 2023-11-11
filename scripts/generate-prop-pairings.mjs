@@ -168,7 +168,7 @@ const format_prop_pairing = ({ props, prop_stats, week, team, source }) => {
   const pairing_id = get_prop_pairing_id(props)
   const pairing = {
     pairing_id,
-    sourceid: source,
+    source_id: source,
     name: `${prop_names.join(' / ')} (${status})`,
     team,
     week,
@@ -194,7 +194,7 @@ const generate_prop_pairings = async ({
   week = constants.season.nfl_seas_week,
   year = constants.season.year,
   seas_type = constants.season.nfl_seas_type,
-  source = constants.sources.FANDUEL_NJ
+  source = 'FANDUEL'
 } = {}) => {
   console.time('generate_prop_pairings')
 
@@ -227,7 +227,8 @@ const generate_prop_pairings = async ({
       constants.player_prop_types.GAME_PASSING_RUSHING_YARDS,
       constants.player_prop_types.GAME_ALT_PASSING_TOUCHDOWNS,
       constants.player_prop_types.GAME_ALT_PASSING_COMPLETIONS,
-      constants.player_prop_types.GAME_ALT_RUSHING_ATTEMPTS
+      constants.player_prop_types.GAME_ALT_RUSHING_ATTEMPTS,
+      constants.player_prop_types.GAME_ALT_RECEPTIONS
     ])
     .where('time_type', 'CLOSE')
     .where('source_id', source)
