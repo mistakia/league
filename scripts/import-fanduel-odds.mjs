@@ -124,8 +124,8 @@ const format_market = async ({
       selection_pid: player_row?.pid || null,
       selection_name: runner.runnerName,
       selection_metric_line,
-      odds_decimal: runner.winRunnerOdds.trueOdds.decimalOdds.decimalOdds,
-      odds_american: runner.winRunnerOdds.americanDisplayOdds.americanOddsInt
+      odds_decimal: runner.winRunnerOdds?.trueOdds?.decimalOdds.decimalOdds || null,
+      odds_american: runner.winRunnerOdds?.americanDisplayOdds?.americanOddsInt || null
     })
   }
 
