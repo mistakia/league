@@ -20,6 +20,7 @@ debug.enable('import-fanduel,get-player,fanduel,insert-prop-market')
 
 const format_player_name = (str = '') => {
   str = str.split(' - ')[0].replace('Over', '').replace('Under', '')
+  str = str.split('(')[0] // remove anything in paranthesis
   return str.trim()
 }
 
