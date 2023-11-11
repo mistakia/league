@@ -30,7 +30,9 @@ const format_market = async ({
   if (betrivers_market.participant) {
     const params = {
       name: betrivers_market.participant,
-      teams: nfl_game ? [nfl_game.v, nfl_game.h] : []
+      teams: nfl_game ? [nfl_game.v, nfl_game.h] : [],
+      ignore_free_agent: true,
+      ignore_retired: true
     }
 
     try {

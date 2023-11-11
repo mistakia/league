@@ -57,7 +57,9 @@ const format_market = async ({
     if (player_name) {
       const params = {
         name: player_name,
-        teams
+        teams,
+        ignore_free_agent: true,
+        ignore_retired: true
       }
 
       try {
