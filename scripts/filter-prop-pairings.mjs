@@ -218,6 +218,8 @@ const filter_prop_pairings = async ({
   log(prop_pairing_query.toString())
   const prop_pairing_rows = await prop_pairing_query
 
+  log(`loading ${prop_pairing_rows.length} prop pairings for week ${week}`)
+
   const pairing_ids = prop_pairing_rows.map((p) => p.pairing_id)
   const prop_pairing_props = await db('prop_pairing_props')
     .select('props_index.*', 'prop_pairing_props.pairing_id')
