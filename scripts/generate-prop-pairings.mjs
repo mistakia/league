@@ -202,7 +202,8 @@ const generate_prop_pairings = async ({
     .select('props_index.*')
     .join('nfl_games', 'nfl_games.esbid', 'props_index.esbid')
     .whereNotNull('hist_edge_soft')
-    .where('hits_soft', '>', 0)
+    .where('hits_soft', '>', 1)
+    .where('o_am', '<', 1000)
     .where('o_am', '>', 100)
     .whereIn('prop_type', [
       constants.player_prop_types.GAME_ALT_PASSING_YARDS,
