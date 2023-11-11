@@ -348,11 +348,6 @@ const process_props_index = async ({
       process.exit()
     }
 
-    if (prop_row.source_market_id === '734.77146964') {
-      console.log(prop_row)
-      process.exit()
-    }
-
     const player_row = player_rows.find(
       (player) => player.pid === prop_row.selection_pid
     )
