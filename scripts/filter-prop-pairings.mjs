@@ -21,7 +21,8 @@ const data_path = path.join(__dirname, '../tmp')
 
 const default_options = {
   market_odds_max_threshold: 1,
-  historical_rate_min_threshold: 1,
+  soft_hit_rate_min_threshold: 1,
+  hard_hit_rate_min_threshold: 0.5,
   opponent_allowed_rate_min_threshold: 1,
   joint_historical_rate_min_threshold: 1,
   prop_hits_min_threshold: 1,
@@ -133,13 +134,23 @@ const filter_prop_pairings = async ({
     )
   }
   if (
-    opts.historical_rate_min_threshold !== null &&
-    opts.historical_rate_min_threshold !== undefined
+    opts.soft_hit_rate_min_threshold !== null &&
+    opts.soft_hit_rate_min_threshold !== undefined
   ) {
     prop_pairing_query.where(
       'hist_rate_soft',
       '>=',
-      opts.historical_rate_min_threshold
+      opts.soft_hit_rate_min_threshold
+    )
+  }
+  if (
+    opts.hard_hit_rate_min_threshold !== null &&
+    opts.hard_hit_rate_min_threshold !== undefined
+  ) {
+    prop_pairing_query.where(
+      'hist_rate_hard',
+      '>=',
+      opts.hard_hit_rate_min_threshold
     )
   }
   if (
