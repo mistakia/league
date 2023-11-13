@@ -367,7 +367,6 @@ export const get_wagers = async ({
 
 export const get_all_wagers = async ({
   fanduel_state,
-  is_settled = true,
   authorization,
   placed_after = null,
   placed_before = null
@@ -382,71 +381,81 @@ export const get_all_wagers = async ({
     return null
   }
 
-  const limit = 100
-  let start = 0
-  let end = start + limit
-  let has_more = false
-  let has_entered_range = false
-
   let results = []
 
   const placed_after_cutoff = placed_after ? dayjs(placed_after) : null
   const placed_before_cutoff = placed_before ? dayjs(placed_before) : null
 
-  do {
-    const fanduel_res = await get_wagers({
-      fanduel_state,
-      is_settled,
-      authorization,
-      start,
-      end
-    })
+  // Separate loops for settled and unsettled wagers
+  for (const is_settled of [true, false]) {
+    const limit = 100
+    let start = 0
+    let end = start + limit
+    let has_more = false
+    let has_entered_range = false
 
-    if (fanduel_res && fanduel_res.bets && fanduel_res.bets.length) {
-      const filtered_bets = fanduel_res.bets.filter((bet) => {
-        const bet_date = dayjs(bet.placedDate)
-        return (
-          (!placed_after_cutoff || bet_date.isAfter(placed_after_cutoff)) &&
-          (!placed_before_cutoff || bet_date.isBefore(placed_before_cutoff))
-        )
-      })
-      results = results.concat(filtered_bets)
-
-      has_entered_range = fanduel_res.bets.some((bet) => {
-        const bet_date = dayjs(bet.placedDate)
-        return (
-          (!placed_after_cutoff || bet_date.isAfter(placed_after_cutoff)) &&
-          (!placed_before_cutoff || bet_date.isBefore(placed_before_cutoff))
-        )
+    do {
+      const fanduel_res = await get_wagers({
+        fanduel_state,
+        is_settled,
+        authorization,
+        start,
+        end
       })
 
-      if (has_entered_range) {
-        const last_wager = fanduel_res.bets[fanduel_res.bets.length - 1]
-        if (placed_after_cutoff && placed_before_cutoff) {
-          has_more =
-            dayjs(last_wager.placedDate).isAfter(placed_after_cutoff) &&
-            dayjs(last_wager.placedDate).isBefore(placed_before_cutoff)
-        } else if (placed_after_cutoff) {
-          has_more = dayjs(last_wager.placedDate).isAfter(placed_after_cutoff)
-        } else if (placed_before_cutoff) {
-          has_more = dayjs(last_wager.placedDate).isBefore(placed_before_cutoff)
+      if (fanduel_res && fanduel_res.bets && fanduel_res.bets.length) {
+        const filtered_bets = fanduel_res.bets.filter((bet) => {
+          const bet_date = dayjs(bet.placedDate)
+          return (
+            (!placed_after_cutoff || bet_date.isAfter(placed_after_cutoff)) &&
+            (!placed_before_cutoff || bet_date.isBefore(placed_before_cutoff))
+          )
+        })
+        results = results.concat(filtered_bets)
+
+        has_entered_range = fanduel_res.bets.some((bet) => {
+          const bet_date = dayjs(bet.placedDate)
+          return (
+            (!placed_after_cutoff || bet_date.isAfter(placed_after_cutoff)) &&
+            (!placed_before_cutoff || bet_date.isBefore(placed_before_cutoff))
+          )
+        })
+
+        if (has_entered_range) {
+          const last_wager = fanduel_res.bets[fanduel_res.bets.length - 1]
+          if (placed_after_cutoff && placed_before_cutoff) {
+            has_more =
+              dayjs(last_wager.placedDate).isAfter(placed_after_cutoff) &&
+              dayjs(last_wager.placedDate).isBefore(placed_before_cutoff)
+          } else if (placed_after_cutoff) {
+            has_more = dayjs(last_wager.placedDate).isAfter(placed_after_cutoff)
+          } else if (placed_before_cutoff) {
+            has_more = dayjs(last_wager.placedDate).isBefore(
+              placed_before_cutoff
+            )
+          } else {
+            has_more = fanduel_res.moreAvailable
+          }
         } else {
           has_more = fanduel_res.moreAvailable
         }
       } else {
-        has_more = fanduel_res.moreAvailable
+        has_more = false
       }
-    } else {
-      has_more = false
-    }
 
-    start = start + limit
-    end = end + limit
+      start = start + limit
+      end = end + limit
 
-    if (has_more) {
-      await wait(2000)
-    }
-  } while (has_more)
+      if (has_more) {
+        await wait(2000)
+      }
+    } while (has_more)
+  }
+
+  // Sort the results by placedDate in descending order
+  results.sort(
+    (a, b) => dayjs(b.placedDate).unix() - dayjs(a.placedDate).unix()
+  )
 
   return results
 }
