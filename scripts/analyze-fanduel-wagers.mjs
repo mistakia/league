@@ -71,12 +71,17 @@ const get_wagers_summary = ({ wagers, props = [] }) =>
         wagers_loss: is_lost
           ? accumulator.wagers_loss + 1
           : accumulator.wagers_loss,
+        wagers_open: wager.isSettled
+          ? accumulator.wagers_open
+          : accumulator.wagers_open + 1,
 
         total_risk: accumulator.total_risk + wager.currentSize,
         total_won: is_won
           ? accumulator.total_won + (wager.pandl || total_return)
           : accumulator.total_won,
-        total_potential_win: accumulator.total_potential_win + total_return,
+        max_potential_win: accumulator.max_potential_win + total_return,
+        open_potential_win:
+          accumulator.open_potential_win + Number(wager.potentialWin),
 
         lost_by_one_leg:
           lost_legs === 1
@@ -100,9 +105,11 @@ const get_wagers_summary = ({ wagers, props = [] }) =>
       wagers: 0,
       wagers_won: 0,
       wagers_loss: 0,
+      wagers_open: 0,
       total_risk: 0,
       total_won: 0,
-      total_potential_win: 0,
+      max_potential_win: 0,
+      open_potential_win: 0,
       lost_by_one_leg: 0,
       lost_by_two_legs: 0,
       lost_by_three_legs: 0,
@@ -147,8 +154,11 @@ const analyze_fanduel_wagers = async ({
     (wager_summary.total_won / wager_summary.total_risk - 1) * 100
   }%`
   wager_summary.total_risk = Number(wager_summary.total_risk.toFixed(2))
-  wager_summary.total_potential_win = Number(
-    wager_summary.total_potential_win.toFixed(2)
+  wager_summary.max_potential_win = Number(
+    wager_summary.max_potential_win.toFixed(2)
+  )
+  wager_summary.open_potential_win = Number(
+    wager_summary.open_potential_win.toFixed(2)
   )
 
   const wager_summary_table = new Table({ title: 'Wagers Summary' })
@@ -156,9 +166,25 @@ const analyze_fanduel_wagers = async ({
     wagers: wager_summary.wagers,
     wagers_won: wager_summary.wagers_won,
     wagers_loss: wager_summary.wagers_loss,
-    total_risk: wager_summary.total_risk,
+    wagers_open: wager_summary.wagers_open,
+    total_risk_units: wager_summary.total_risk,
     total_won: wager_summary.total_won,
-    total_potential_win: wager_summary.total_potential_win,
+    ...(show_potential_gain
+      ? { max_potential_win: wager_summary.max_potential_win }
+      : {}),
+    max_potential_roi:
+      (
+        (wager_summary.max_potential_win / wager_summary.total_risk - 1) *
+        100
+      ).toFixed(0) + '%',
+    ...(show_potential_gain
+      ? { open_potential_win: wager_summary.open_potential_win }
+      : {}),
+    open_potential_roi:
+      (
+        (wager_summary.open_potential_win / wager_summary.total_risk - 1) *
+        100
+      ).toFixed(0) + '%',
     roi: wager_summary.roi
   })
   wager_summary_table.printTable()
@@ -219,17 +245,18 @@ const analyze_fanduel_wagers = async ({
 
   const unique_props_table = new Table()
   const props_with_exposure = filtered_props.map((prop) => {
-    let potential_payout = 0
+    let max_potential_payout = 0
+    let open_potential_payout = 0
     let exposure_count = 0
-    let potential_roi_added = 0
 
     for (const wager of filtered) {
       for (const leg of wager.legs) {
         if (is_prop_equal(leg.parts[0], prop)) {
-          potential_payout += Number(wager.potentialWin)
+          open_potential_payout += Number(wager.potentialWin)
+          max_potential_payout +=
+            Number(wager.currentSize) *
+            Number(wager.betPrices.betPrice.decimalPrice)
           exposure_count += 1
-          potential_roi_added +=
-            (potential_payout / wager_summary.total_risk) * 100
 
           break
         }
@@ -247,12 +274,18 @@ const analyze_fanduel_wagers = async ({
       exposure_rate: `${((exposure_count / filtered.length) * 100).toFixed(
         2
       )}%`,
-      potential_roi_added: potential_roi_added.toFixed(2),
+      max_potential_roi:
+        ((max_potential_payout / wager_summary.total_risk) * 100).toFixed(0) +
+        '%',
+      open_potential_roi:
+        ((open_potential_payout / wager_summary.total_risk) * 100).toFixed(0) +
+        '%',
       result: prop.result
     }
 
     if (show_potential_gain) {
-      result.potential_payout = potential_payout.toFixed(2)
+      result.max_potential_payout = max_potential_payout.toFixed(2)
+      result.open_potential_payout = open_potential_payout.toFixed(2)
     }
 
     return result
@@ -336,7 +369,7 @@ const analyze_fanduel_wagers = async ({
       const row = {
         name: prop.name,
         potential_wins: prop.potential_wins,
-        potential_roi_added: prop.potential_roi_added.toFixed(2) + '%'
+        potential_roi_added: prop.potential_roi_added.toFixed(0) + '%'
       }
       if (show_potential_gain) {
         row.potential_gain = prop.potential_gain.toFixed(2)
@@ -354,7 +387,7 @@ const analyze_fanduel_wagers = async ({
       const row = {
         name: prop.name,
         potential_wins: prop.potential_wins,
-        potential_roi_added: prop.potential_roi_added.toFixed(2) + '%'
+        potential_roi_added: prop.potential_roi_added.toFixed(0) + '%'
       }
       if (show_potential_gain) {
         row.potential_gain = prop.potential_gain.toFixed(2)
@@ -371,7 +404,7 @@ const analyze_fanduel_wagers = async ({
   )
   for (const wager of closest_wagers
     .sort((a, b) => b.americanBetPrice - a.americanBetPrice)
-    .slice(0, 50)) {
+    .slice(0, 400)) {
     const total_return = wager.betPrice
       ? wager.betPrice * wager.currentSize
       : Number(wager.potentialWin)
@@ -380,17 +413,17 @@ const analyze_fanduel_wagers = async ({
       /(\d{4})(\d{4})(\d{4})(\d{4})/,
       '$1-$2-$3-$4'
     )
-    const wager_table = new Table({
-      title: `Week: ${wager.week}, Wager ID: ${
-        wager.betId
-      }, Bet Receipt ID: ${bet_receipt_id}, Number of Legs: ${
-        wager.legs.length
-      }, American Odds: +${
-        wager.americanBetPrice
-      }, Potential ROI Gain: +${potential_roi_gain.toFixed(
-        2
-      )}%, Potential Gain: ${total_return}`
-    })
+    let wager_table_title = `Week: ${wager.week}, Wager ID: ${
+      wager.betId
+    }, Bet Receipt ID: ${bet_receipt_id}, Number of Legs: ${
+      wager.legs.length
+    }, American Odds: +${
+      wager.americanBetPrice
+    }, Potential ROI Gain: +${potential_roi_gain.toFixed(2)}%`
+    if (show_potential_gain) {
+      wager_table_title += `, Potential Gain: ${total_return}`
+    }
+    const wager_table = new Table({ title: wager_table_title })
     for (const legs of wager.legs) {
       wager_table.addRow({
         selection: legs.parts[0].selectionName,
