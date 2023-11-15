@@ -248,7 +248,10 @@ const format_prop_row = ({
 
   const hist_rate_soft = hits_soft.length / player_gamelogs.length || 0
   const hist_rate_hard = hits_hard.length / player_gamelogs.length || 0
-  const risk = formatted_prop_row.o_am ? 1 / odds.to('hongKong') : null
+  let risk = formatted_prop_row.o_am ? 1 / odds.to('hongKong') : null
+  if (risk > 100) {
+    risk = null
+  }
   const is_pending = !current_week
 
   return {
