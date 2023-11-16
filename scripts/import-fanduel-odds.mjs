@@ -264,12 +264,12 @@ export const job = async () => {
     console.log(error)
   }
 
-  // await db('jobs').insert({
-  //   type: constants.jobs.FANDUEL_ODDS,
-  //   succ: error ? 0 : 1,
-  //   reason: error ? error.message : null,
-  //   timestamp: Math.round(Date.now() / 1000)
-  // })
+  await db('jobs').insert({
+    type: constants.jobs.FANDUEL_ODDS,
+    succ: error ? 0 : 1,
+    reason: error ? error.message : null,
+    timestamp: Math.round(Date.now() / 1000)
+  })
 }
 
 const main = async () => {
