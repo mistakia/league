@@ -1,5 +1,5 @@
 export default function (team) {
-  team = team ? team.toUpperCase() : null
+  team = team ? team.toUpperCase().trim() : null
 
   switch (team) {
     case 'FA':
