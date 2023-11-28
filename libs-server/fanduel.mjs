@@ -277,7 +277,7 @@ export const markets = {
 export const getEvents = async () => {
   const url = `${config.fanduel_api_url}/content-managed-page?betexRegion=GBR&capiJurisdiction=intl&currencyCode=USD&exchangeLocale=en_US&includePrices=true&includeRaceCards=false&includeSeo=true&language=en&regionCode=NAMERICA&timezone=America%2FNew_York&includeMarketBlurbs=true&_ak=FhMFpcPWXMeyZxOx&page=CUSTOM&customPageId=nfl`
 
-  // log(`fetching ${url}`)
+  log(`fetching ${url}`)
   const res = await fetch(url, {
     headers: config.fanduel_api_headers
   })
@@ -294,7 +294,7 @@ export const getEvents = async () => {
 export const getEventTab = async ({ eventId, tab }) => {
   const url = `${config.fanduel_api_url}/event-page?betexRegion=GBR&capiJurisdiction=intl&currencyCode=USD&exchangeLocale=en_US&includePrices=true&language=en&priceHistory=1&regionCode=NAMERICA&_ak=FhMFpcPWXMeyZxOx&eventId=${eventId}&tab=${tab}`
 
-  // log(`fetching ${url}`)
+  log(`fetching ${url}`)
   const res = await fetch(url, {
     headers: config.fanduel_api_headers
   })
@@ -306,7 +306,7 @@ export const getEventTab = async ({ eventId, tab }) => {
 export const getWeeklySpecials = async () => {
   const url = `${config.fanduel_api_url}/content-managed-page?betexRegion=GBR&capiJurisdiction=intl&currencyCode=USD&exchangeLocale=en_US&includePrices=true&includeRaceCards=false&includeSeo=true&language=en&regionCode=NAMERICA&timezone=America%2FNew_York&includeMarketBlurbs=true&_ak=FhMFpcPWXMeyZxOx&page=CUSTOM&customPageId=nfl`
 
-  // log(`fetching ${url}`)
+  log(`fetching ${url}`)
   const res = await fetch(url, {
     headers: config.fanduel_api_headers
   })
@@ -420,6 +420,18 @@ export const get_all_wagers = async ({
             (!placed_before_cutoff || bet_date.isBefore(placed_before_cutoff))
           )
         })
+
+        // check if the latest wager is before the cutoff
+        if (
+          !placed_before_cutoff &&
+          placed_after_cutoff &&
+          !has_entered_range
+        ) {
+          const last_wager = fanduel_res.bets[fanduel_res.bets.length - 1]
+          has_entered_range = dayjs(last_wager.placedDate).isBefore(
+            placed_after_cutoff
+          )
+        }
 
         if (has_entered_range) {
           const last_wager = fanduel_res.bets[fanduel_res.bets.length - 1]
