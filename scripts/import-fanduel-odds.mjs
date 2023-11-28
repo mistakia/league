@@ -234,6 +234,11 @@ const run = async () => {
       `./tmp/fanduel-event-markets-${timestamp}.json`,
       JSON.stringify(all_event_markets, null, 2)
     )
+
+    await fs.writeFile(
+      `./tmp/fanduel-event-markets-formatted-${timestamp}.json`,
+      JSON.stringify(formatted_event_markets, null, 2)
+    )
   }
 
   /* const weekly_specials_markets = await fanduel.getWeeklySpecials()
