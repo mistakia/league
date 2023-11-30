@@ -53,7 +53,11 @@ const insert_market_selection = async ({
   }
 
   const existing_selection = await db('prop_market_selections_history')
-    .where('source_selection_id', selection.source_selection_id)
+    .where({
+      source_id: existing_market.source_id,
+      source_market_id: existing_market.source_market_id,
+      source_selection_id: selection.source_selection_id
+    })
     .orderBy('timestamp', 'desc')
     .first()
 
