@@ -195,12 +195,23 @@ const analyze_fanduel_wagers = async ({
         }
       }
 
+      const player_name = leg.eventMarketDescription.split(' - ')[0]
+      const stat_type = leg.eventMarketDescription
+        .split(' - ')[1]
+        .replace('Alt', '')
+        .trim()
+        .replace('Receptions', 'Recs')
+        .replace('Passing', 'Pass')
+        .replace('Rushing', 'Rush')
+        .replace('Receiving', 'Recv')
+      const handicap = Math.round(Number(leg.parsedHandicap))
+
       return {
         ...leg,
         exposure_count,
         open_potential_payout,
         max_potential_payout,
-        name: `${leg.selectionName} [week ${week}]`,
+        name: `${player_name} ${handicap}+ ${stat_type} [week ${week}]`,
         week,
         exposure_rate: `${((exposure_count / filtered.length) * 100).toFixed(
           2
@@ -215,6 +226,12 @@ const analyze_fanduel_wagers = async ({
       }
     })
     .sort((a, b) => b.exposure_count - a.exposure_count)
+
+  const props_index = {}
+  for (const prop of props) {
+    const key = `${prop.eventId}/${prop.marketId}/${prop.selectionId}`
+    props_index[key] = prop
+  }
 
   wager_summary.current_roi = `${(
     (wager_summary.total_won / wager_summary.total_risk - 1) *
@@ -251,8 +268,8 @@ const analyze_fanduel_wagers = async ({
   if (show_counts) {
     wager_table_row.wagers = wager_summary.wagers
     wager_table_row.total_won = wager_summary.total_won
-    wager_table_row.wagers_won = wager_summary.wagers_won
-    wager_table_row.wagers_loss = wager_summary.wagers_loss
+    // wager_table_row.wagers_won = wager_summary.wagers_won
+    // wager_table_row.wagers_loss = wager_summary.wagers_loss
     wager_table_row.wagers_open = wager_summary.wagers_open
     wager_table_row.total_risk_units = wager_summary.total_risk
   }
@@ -348,11 +365,8 @@ const analyze_fanduel_wagers = async ({
       (potential_gain / wager_summary.total_risk) * 100
 
     if (potential_gain) {
-      const week = dayjs(prop_a.startTime)
-        .subtract('2', 'day')
-        .diff(constants.season.start, 'weeks')
       one_prop.push({
-        name: `${prop_a.selectionName} [week ${week}]`,
+        name: prop_a.name,
         potential_gain,
         potential_wins,
         potential_roi_added
@@ -374,12 +388,8 @@ const analyze_fanduel_wagers = async ({
         (potential_gain / wager_summary.total_risk) * 100
 
       if (potential_gain) {
-        const week = dayjs(prop_a.startTime)
-          .subtract('2', 'day')
-          .diff(constants.season.start, 'weeks')
-
         two_props.push({
-          name: `${prop_a.selectionName} / ${prop_b.selectionName} [week ${week}]`,
+          name: `${prop_a.name} / ${prop_b.name}`,
           potential_gain,
           potential_wins,
           potential_roi_added
@@ -467,8 +477,12 @@ const analyze_fanduel_wagers = async ({
 
     const wager_table = new Table({ title: wager_table_title })
     for (const legs of wager.legs) {
+      const prop =
+        props_index[
+          `${legs.parts[0].eventId}/${legs.parts[0].marketId}/${legs.parts[0].selectionId}`
+        ]
       wager_table.addRow({
-        selection: legs.parts[0].selectionName,
+        selection: prop.name,
         odds: legs.parts[0].americanPrice,
         result: legs.result
       })
