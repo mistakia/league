@@ -447,7 +447,7 @@ const analyze_fanduel_wagers = async ({
   console.log('\n\nTop 50 slips sorted by highest odds (<= 1 lost legs)\n\n')
 
   const closest_wagers = filtered.filter(
-    (wager) => wager.legs.filter((leg) => leg.result === 'LOST').length <= 1
+    (wager) => wager.legs.filter((leg) => leg.result === 'LOST').length <= 3
   )
   for (const wager of closest_wagers
     .sort((a, b) => b.americanBetPrice - a.americanBetPrice)

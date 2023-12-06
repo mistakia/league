@@ -72,6 +72,7 @@ export { default as get_players_table_view_results } from './get-players-table-v
 export { default as update_play } from './update-play.mjs'
 export { default as update_nfl_game } from './update-nfl-game.mjs'
 export * as betonline from './betonline.mjs'
+export { default as encode_market_selection_id } from './encode-market-selection-id.mjs'
 
 export const getChartedPlayByPlayQuery = (db) =>
   db('nfl_plays')
