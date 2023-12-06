@@ -111,6 +111,11 @@ export default class Season {
     return diff
   }
 
+  calculate_week(dayjs_date) {
+    const diff = Math.max(0, dayjs_date.diff(this.start, 'weeks'))
+    return diff
+  }
+
   get week_end() {
     const week = this.week
     return this.start.add(week + 1, 'weeks')

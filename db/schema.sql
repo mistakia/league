@@ -2978,11 +2978,12 @@ CREATE TABLE `placed_wagers` (
   `wager_id` int(11) NOT NULL AUTO_INCREMENT,
   `userid` int(6) NOT NULL,
 
-  `wager_type` ENUM('STRAIGHT', 'PARLAY', 'ROUND_ROBIN') NOT NULL,
+  `wager_type` ENUM('SINGLE', 'PARLAY', 'ROUND_ROBIN') NOT NULL,
   -- `wager_sub_type` varchar(255) NOT NULL,
   `placed_at` int(11) NOT NULL,
   `bet_count` tinyint(2) NOT NULL,
   `selection_count` tinyint(2) NOT NULL,
+  `selection_lost` tinyint(2) DEFAULT 0,
 
   `wager_status` ENUM('OPEN', 'WON', 'LOST', 'PUSH', 'CANCELLED') NOT NULL, -- win includes partial wins for round robins
   `bet_wager_amount` decimal(7,2) NOT NULL,
@@ -2992,34 +2993,52 @@ CREATE TABLE `placed_wagers` (
   `book_wager_id` varchar(255) NOT NULL,
 
   `selection_1_id` varchar(255) DEFAULT NULL,
+  `selection_1_status` ENUM('OPEN', 'WON', 'LOST', 'PUSH', 'CANCELLED') DEFAULT NULL,
   `selection_1_odds` int(11) DEFAULT NULL,
 
   `selection_2_id` varchar(255) DEFAULT NULL,
+  `selection_2_status` ENUM('OPEN', 'WON', 'LOST', 'PUSH', 'CANCELLED') DEFAULT NULL,
   `selection_2_odds` int(11) DEFAULT NULL,
 
   `selection_3_id` varchar(255) DEFAULT NULL,
+  `selection_3_status` ENUM('OPEN', 'WON', 'LOST', 'PUSH', 'CANCELLED') DEFAULT NULL,
   `selection_3_odds` int(11) DEFAULT NULL,
 
   `selection_4_id` varchar(255) DEFAULT NULL,
+  `selection_4_status` ENUM('OPEN', 'WON', 'LOST', 'PUSH', 'CANCELLED') DEFAULT NULL,
   `selection_4_odds` int(11) DEFAULT NULL,
 
   `selection_5_id` varchar(255) DEFAULT NULL,
+  `selection_5_status` ENUM('OPEN', 'WON', 'LOST', 'PUSH', 'CANCELLED') DEFAULT NULL,
   `selection_5_odds` int(11) DEFAULT NULL,
 
   `selection_6_id` varchar(255) DEFAULT NULL,
+  `selection_6_status` ENUM('OPEN', 'WON', 'LOST', 'PUSH', 'CANCELLED') DEFAULT NULL,
   `selection_6_odds` int(11) DEFAULT NULL,
 
   `selection_7_id` varchar(255) DEFAULT NULL,
+  `selection_7_status` ENUM('OPEN', 'WON', 'LOST', 'PUSH', 'CANCELLED') DEFAULT NULL,
   `selection_7_odds` int(11) DEFAULT NULL,
 
   `selection_8_id` varchar(255) DEFAULT NULL,
+  `selection_8_status` ENUM('OPEN', 'WON', 'LOST', 'PUSH', 'CANCELLED') DEFAULT NULL,
   `selection_8_odds` int(11) DEFAULT NULL,
 
   `selection_9_id` varchar(255) DEFAULT NULL,
+  `selection_9_status` ENUM('OPEN', 'WON', 'LOST', 'PUSH', 'CANCELLED') DEFAULT NULL,
   `selection_9_odds` int(11) DEFAULT NULL,
 
   `selection_10_id` varchar(255) DEFAULT NULL,
+  `selection_10_status` ENUM('OPEN', 'WON', 'LOST', 'PUSH', 'CANCELLED') DEFAULT NULL,
   `selection_10_odds` int(11) DEFAULT NULL,
+
+  `selection_11_id` varchar(255) DEFAULT NULL,
+  `selection_11_status` ENUM('OPEN', 'WON', 'LOST', 'PUSH', 'CANCELLED') DEFAULT NULL,
+  `selection_11_odds` int(11) DEFAULT NULL,
+
+  `selection_12_id` varchar(255) DEFAULT NULL,
+  `selection_12_status` ENUM('OPEN', 'WON', 'LOST', 'PUSH', 'CANCELLED') DEFAULT NULL,
+  `selection_12_odds` int(11) DEFAULT NULL,
 
   PRIMARY KEY (`wager_id`),
   KEY `userid` (`userid`),
