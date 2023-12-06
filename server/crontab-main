@@ -135,7 +135,13 @@
 0 0 * 9-12 3 /bin/bash /root/league/scripts/mysql-backup.sh -s &>> /var/log/league/league-mysql-backup.log
 
 ## Backup All Data (At 04:00 on Wednesday in every month from September through December)
-0 4 * 9-12 3 /bin/bash /root/league/scripts/mysql-backup.sh -f &>> /var/log/league/league-mysql-backup-full.log
+# 0 4 * 9-12 3 /bin/bash /root/league/scripts/mysql-backup.sh -f &>> /var/log/league/league-mysql-backup-full.log
+
+## Backup All Betting Data (At 06:00 on Wednesday in every month from September through December)
+# 0 6 * 9-12 3 /bin/bash /root/league/scripts/mysql-backup.sh -b &>> /var/log/league/league-mysql-backup-betting.log
+
+## Backup All Projections Data (At 08:00 on Wednesday in every month from September through December)
+# 0 8 * 9-12 3 /bin/bash /root/league/scripts/mysql-backup.sh -p &>> /var/log/league/league-mysql-backup-projections.log
 
 ################################### nflfastR  ########################################
 
