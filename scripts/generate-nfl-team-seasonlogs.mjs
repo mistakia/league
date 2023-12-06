@@ -141,23 +141,46 @@ const generate_seasonlogs = async ({
     offense[position] = rollup(gamelogs_by_team)
 
     const adjusted = []
+    // calculate defenase allowed over average
     for (const team of constants.nflTeams) {
-      // get defense gamelogs
-      const gs = gamelogs_by_opponent[team] || []
-      // group by week
-      const weekGroups = groupBy(gs, 'week')
+      // get gamelogs for players facing this team
+      const opponent_gamelogs = gamelogs_by_opponent[team] || []
+
+      // group player gamelogs by game
+      const opponent_gamelogs_by_week = groupBy(opponent_gamelogs, 'week')
       const weeks = []
-      for (const logs of Object.values(weekGroups)) {
-        // sum gamelogs for positon for a given week
-        const gamelog = sum(logs, constants.fantasyStats)
-        // get team position average
-        const offenseAverage = offense[position].avg.find(
-          (g) => g.tm === gamelog.tm
+
+      // calculated allowed over average for each game
+      for (const game_gamelogs of Object.values(opponent_gamelogs_by_week)) {
+        // sum gamelogs for positon for this game
+        const sum_gamelog_for_game = sum(game_gamelogs, constants.fantasyStats)
+
+        // get all team gamelogs except against this opponent
+        const opponent = game_gamelogs[0].opp
+        const team_gamelogs_except_opponent = (
+          gamelogs_by_team[opponent] || []
+        ).filter((g) => g.opp !== team)
+
+        if (!team_gamelogs_except_opponent.length) {
+          continue
+        }
+
+        // calculate the offense average in all games except against this opponent
+        const total_weeks = uniqBy(team_gamelogs_except_opponent, 'week').length
+        const team_gamelogs_sum_outside_this_opponent = sum(
+          team_gamelogs_except_opponent,
+          constants.fantasyStats
         )
-        // calculate difference between team average and given week
+        const offense_average_outside_this_opponent = avg(
+          team_gamelogs_sum_outside_this_opponent,
+          constants.fantasyStats,
+          total_weeks
+        )
+        
+        // calculate difference between team average and given game
         const adjusted_stats = adj(
-          gamelog,
-          offenseAverage,
+          sum_gamelog_for_game,
+          offense_average_outside_this_opponent,
           constants.fantasyStats
         )
         weeks.push(adjusted_stats)
