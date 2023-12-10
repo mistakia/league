@@ -325,6 +325,9 @@ export const get_market_details_from_wager = (wager_leg) => {
       case 'Any Time Touchdown Scorer':
         return 'RUSHING_RECEIVING_TOUCHDOWNS'
 
+      case 'Moneyline':
+        return 'MONEYLINE'
+
       default:
         log(wager_leg)
         throw new Error(`Invalid stat type: ${stat_type}`)
@@ -346,6 +349,7 @@ export const get_market_details_from_wager = (wager_leg) => {
 
   const get_selection_name = ({ metric_name, over_or_under }) => {
     switch (metric_name) {
+      case 'MONEYLINE':
       case 'SPREAD': {
         if (wager_leg.selectionName.includes('(')) {
           const team_name = wager_leg.selectionName.split('(')[0].trim()
