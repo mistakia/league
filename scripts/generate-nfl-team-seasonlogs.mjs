@@ -142,9 +142,9 @@ const generate_seasonlogs = async ({
 
     const adjusted = []
     // calculate defenase allowed over average
-    for (const team of constants.nflTeams) {
+    for (const nfl_team of constants.nflTeams) {
       // get gamelogs for players facing this team
-      const opponent_gamelogs = gamelogs_by_opponent[team] || []
+      const opponent_gamelogs = gamelogs_by_opponent[nfl_team] || []
 
       // group player gamelogs by game
       const opponent_gamelogs_by_week = groupBy(opponent_gamelogs, 'week')
@@ -156,10 +156,10 @@ const generate_seasonlogs = async ({
         const sum_gamelog_for_game = sum(game_gamelogs, constants.fantasyStats)
 
         // get all team gamelogs except against this opponent
-        const opponent = game_gamelogs[0].opp
+        const opponent = game_gamelogs[0].tm
         const team_gamelogs_except_opponent = (
           gamelogs_by_team[opponent] || []
-        ).filter((g) => g.opp !== team)
+        ).filter((g) => g.opp !== nfl_team)
 
         if (!team_gamelogs_except_opponent.length) {
           continue
@@ -176,7 +176,7 @@ const generate_seasonlogs = async ({
           constants.fantasyStats,
           total_weeks
         )
-        
+
         // calculate difference between team average and given game
         const adjusted_stats = adj(
           sum_gamelog_for_game,
