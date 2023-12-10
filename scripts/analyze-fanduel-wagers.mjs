@@ -196,8 +196,11 @@ const analyze_fanduel_wagers = async ({
       }
 
       const player_name = leg.eventMarketDescription.split(' - ')[0]
-      const stat_type = leg.eventMarketDescription
-        .split(' - ')[1]
+      const stat_type = (
+        leg.eventMarketDescription.includes(' - ')
+          ? leg.eventMarketDescription.split(' - ')[1]
+          : leg.eventMarketDescription
+      )
         .replace('Alt', '')
         .trim()
         .replace('Receptions', 'Recs')
@@ -206,12 +209,20 @@ const analyze_fanduel_wagers = async ({
         .replace('Receiving', 'Recv')
       const handicap = Math.round(Number(leg.parsedHandicap))
 
+      let name
+
+      if (stat_type === 'Moneyline') {
+        name = `${leg.selectionName} ${stat_type} [week ${week}]`
+      } else {
+        name = `${player_name} ${handicap}+ ${stat_type} [week ${week}]`
+      }
+
       return {
         ...leg,
         exposure_count,
         open_potential_payout,
         max_potential_payout,
-        name: `${player_name} ${handicap}+ ${stat_type} [week ${week}]`,
+        name,
         week,
         exposure_rate: `${((exposure_count / filtered.length) * 100).toFixed(
           2
