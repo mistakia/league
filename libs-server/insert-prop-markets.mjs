@@ -41,11 +41,13 @@ const insert_market = async ({ timestamp, selections, ...market }) => {
       timestamp,
       time_type: 'OPEN'
     })
-    await db('prop_markets_index_new').insert({
-      ...market,
-      timestamp,
-      time_type: 'CLOSE'
-    })
+    if (!live) {
+      await db('prop_markets_index_new').insert({
+        ...market,
+        timestamp,
+        time_type: 'CLOSE'
+      })
+    }
 
     // send notifcation to `props_market_new` channel
     const message = `New market detected on ${market.source_id} called \`${
@@ -138,17 +140,20 @@ const insert_market = async ({ timestamp, selections, ...market }) => {
       }
     }
 
-    // update market in `prop_markets_index` table
-    await db('prop_markets_index_new')
-      .insert({ ...market, timestamp, time_type: 'CLOSE' })
-      .onConflict()
-      .merge()
+    if (!market.live) {
+      // update market in `prop_markets_index` table
+      await db('prop_markets_index_new')
+        .insert({ ...market, timestamp, time_type: 'CLOSE' })
+        .onConflict()
+        .merge()
+    }
 
     // TODO use return value for notifications
     await insert_prop_market_selections({
       timestamp,
       selections,
-      existing_market
+      existing_market,
+      market
     })
   }
 }
