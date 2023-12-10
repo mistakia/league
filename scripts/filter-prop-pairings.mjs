@@ -110,7 +110,8 @@ const filter_prop_pairings = async ({
   week = constants.season.nfl_seas_week,
   year = constants.season.year,
   seas_type = constants.season.nfl_seas_type,
-  source = 'FANDUEL'
+  source = 'FANDUEL',
+  filter_by_allowed_over_average = false
 } = {}) => {
   const opts = merge(default_options, config.filter_prop_pairings_options || {})
   log('options:')
@@ -295,22 +296,24 @@ const filter_prop_pairings = async ({
         return false
       }
 
-      const opponent_seasonlog = nfl_team_seasonlogs.find(
-        (s) =>
-          s.stat_key === `${single_prop.pos}_AGAINST_ADJ` &&
-          s.tm === single_prop.opp
-      )
-      if (opponent_seasonlog) {
-        const is_negative = opponent_allowed_for_prop_is_negative({
-          opponent_seasonlog,
-          prop_type: single_prop.prop_type,
-          opts
-        })
-        if (is_negative) {
-          return false
+      if (filter_by_allowed_over_average) {
+        const opponent_seasonlog = nfl_team_seasonlogs.find(
+          (s) =>
+            s.stat_key === `${single_prop.pos}_AGAINST_ADJ` &&
+            s.tm === single_prop.opp
+        )
+        if (opponent_seasonlog) {
+          const is_negative = opponent_allowed_for_prop_is_negative({
+            opponent_seasonlog,
+            prop_type: single_prop.prop_type,
+            opts
+          })
+          if (is_negative) {
+            return false
+          }
+        } else {
+          log(`missing seasonlog for ${single_prop.opp}`)
         }
-      } else {
-        log(`missing seasonlog for ${single_prop.opp}`)
       }
     }
 
@@ -426,8 +429,14 @@ const filter_prop_pairings = async ({
         (p) => `${p.name} [${Math.round(p.hist_rate_soft * 100)}% / ${p.o_am}]`
       )
 
+      const sum_hist_rate_soft = prop.props.reduce(
+        (accumulator, p) => accumulator + p.hist_rate_soft,
+        0
+      )
+
       p.addRow({
         pairing: `${prop_names.join(' / ')}`,
+        sum_hist_rate_soft: `${Math.round(sum_hist_rate_soft * 100)}%`,
         hit_rate_soft: `${Math.round(prop.hist_rate_soft * 100)}%`,
         hit_rate_hard: `${Math.round(prop.hist_rate_hard * 100)}%`,
         edge: `${(prop.hist_edge_soft * 100).toFixed(1)}%`,
@@ -452,7 +461,8 @@ const main = async () => {
   try {
     const week = argv.week
     const source = argv.source
-    await filter_prop_pairings({ week, source })
+    const filter_by_allowed_over_average = argv.filter_by_allowed_over_average
+    await filter_prop_pairings({ week, source, filter_by_allowed_over_average })
   } catch (err) {
     error = err
     log(error)
