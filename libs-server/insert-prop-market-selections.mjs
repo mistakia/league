@@ -5,7 +5,8 @@ import db from '#db'
 const insert_market_selection = async ({
   timestamp,
   selection,
-  existing_market
+  existing_market,
+  market
 }) => {
   const save_new_selection = async () => {
     const {
@@ -33,11 +34,13 @@ const insert_market_selection = async ({
       timestamp,
       time_type: 'OPEN'
     })
-    await db('prop_market_selections_index').insert({
-      ...selection,
-      timestamp,
-      time_type: 'CLOSE'
-    })
+    if (!market.live) {
+      await db('prop_market_selections_index').insert({
+        ...selection,
+        timestamp,
+        time_type: 'CLOSE'
+      })
+    }
 
     return {
       source_selection_id,
@@ -118,14 +121,16 @@ const insert_market_selection = async ({
     }
   }
 
-  await db('prop_market_selections_index')
-    .insert({
-      ...selection,
-      timestamp,
-      time_type: 'CLOSE'
-    })
-    .onConflict()
-    .merge()
+  if (!market.live) {
+    await db('prop_market_selections_index')
+      .insert({
+        ...selection,
+        timestamp,
+        time_type: 'CLOSE'
+      })
+      .onConflict()
+      .merge()
+  }
 
   return {
     source_selection_id: selection.source_selection_id,
@@ -136,41 +141,49 @@ const insert_market_selection = async ({
   }
 }
 
-export default async function ({ timestamp, selections, existing_market }) {
+export default async function ({
+  timestamp,
+  selections,
+  existing_market,
+  market
+}) {
   const results = []
   for (const selection of selections) {
     const result = await insert_market_selection({
       timestamp,
       selection,
-      existing_market
+      existing_market,
+      market
     })
     results.push(result)
   }
 
-  // remove any missing selections from `prop_market_selections_index`
-  const existing_selections = await db('prop_market_selections_index')
-    .where({
-      source_market_id: existing_market.source_market_id,
-      time_type: 'CLOSE'
-    })
-    .select('source_selection_id')
+  if (!market.live) {
+    // remove any missing selections from `prop_market_selections_index`
+    const existing_selections = await db('prop_market_selections_index')
+      .where({
+        source_market_id: existing_market.source_market_id,
+        time_type: 'CLOSE'
+      })
+      .select('source_selection_id')
 
-  const existing_selection_ids = existing_selections.map(
-    (selection) => selection.source_selection_id
-  )
-  const new_selection_ids = selections.map((selection) =>
-    selection.source_selection_id.toString()
-  )
-  const missing_selection_ids = existing_selection_ids.filter(
-    (id) => !new_selection_ids.includes(id)
-  )
-  await db('prop_market_selections_index')
-    .where({
-      source_market_id: existing_market.source_market_id,
-      time_type: 'CLOSE'
-    })
-    .whereIn('source_selection_id', missing_selection_ids)
-    .del()
+    const existing_selection_ids = existing_selections.map(
+      (selection) => selection.source_selection_id
+    )
+    const new_selection_ids = selections.map((selection) =>
+      selection.source_selection_id.toString()
+    )
+    const missing_selection_ids = existing_selection_ids.filter(
+      (id) => !new_selection_ids.includes(id)
+    )
+    await db('prop_market_selections_index')
+      .where({
+        source_market_id: existing_market.source_market_id,
+        time_type: 'CLOSE'
+      })
+      .whereIn('source_selection_id', missing_selection_ids)
+      .del()
+  }
 
   return results
 }
