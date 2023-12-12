@@ -122,7 +122,9 @@ const analyze_fanduel_wagers = async ({
   week,
   show_potential_gain = false,
   show_counts = false,
-  show_bet_receipts = false
+  show_bet_receipts = false,
+  wagers_limit = 400,
+  wagers_lost_leg_limit = 1
 } = {}) => {
   if (!filename) {
     throw new Error('filename is required')
@@ -179,11 +181,15 @@ const analyze_fanduel_wagers = async ({
 
       let max_potential_payout = 0
       let open_potential_payout = 0
+      let open_wagers = 0
       let exposure_count = 0
 
       for (const wager of filtered) {
         for (const wager_leg of wager.legs) {
           if (is_prop_equal(wager_leg.parts[0], leg)) {
+            if (!wager.isSettled) {
+              open_wagers += 1
+            }
             open_potential_payout += Number(wager.potentialWin)
             max_potential_payout +=
               Number(wager.currentSize) *
@@ -220,6 +226,7 @@ const analyze_fanduel_wagers = async ({
       return {
         ...leg,
         exposure_count,
+        open_wagers,
         open_potential_payout,
         max_potential_payout,
         name,
@@ -346,12 +353,25 @@ const analyze_fanduel_wagers = async ({
     grouped_props_by_event[event_id]
       .sort((a, b) => b.exposure_count - a.exposure_count)
       .forEach((prop) => {
-        event_table.addRow({
+        const row = {
           name: prop.name,
-          result: prop.result,
           odds: prop.americanPrice,
-          exposure_rate: prop.exposure_rate
-        })
+          exposure_rate: prop.exposure_rate,
+          result: prop.result,
+          max_potential_roi: prop.max_potential_roi,
+          open_potential_roi: prop.open_potential_roi
+        }
+
+        if (show_counts) {
+          row.open_wagers = prop.open_wagers
+        }
+
+        if (show_potential_gain) {
+          row.open_potential_payout = prop.open_potential_payout.toFixed(2)
+          row.max_potential_payout = prop.max_potential_payout.toFixed(2)
+        }
+
+        event_table.addRow(row)
       })
     event_table.printTable()
   }
@@ -411,9 +431,9 @@ const analyze_fanduel_wagers = async ({
 
   if (one_prop.length) {
     const one_prop_table = new Table({ title: 'One Leg Away' })
-    for (const prop of one_prop
-      .sort((a, b) => b.potential_gain - a.potential_gain)
-      .slice(0, 50)) {
+    for (const prop of one_prop.sort(
+      (a, b) => b.potential_gain - a.potential_gain
+    )) {
       const row = {
         name: prop.name,
         potential_roi_added: prop.potential_roi_added.toFixed(0) + '%'
@@ -434,9 +454,9 @@ const analyze_fanduel_wagers = async ({
 
   if (two_props.length) {
     const two_prop_table = new Table({ title: 'Two Legs Away' })
-    for (const prop of two_props
-      .sort((a, b) => b.potential_gain - a.potential_gain)
-      .slice(0, 50)) {
+    for (const prop of two_props.sort(
+      (a, b) => b.potential_gain - a.potential_gain
+    )) {
       const row = {
         name: prop.name,
         potential_roi_added: prop.potential_roi_added.toFixed(0) + '%'
@@ -458,11 +478,13 @@ const analyze_fanduel_wagers = async ({
   console.log('\n\nTop 50 slips sorted by highest odds (<= 1 lost legs)\n\n')
 
   const closest_wagers = filtered.filter(
-    (wager) => wager.legs.filter((leg) => leg.result === 'LOST').length <= 3
+    (wager) =>
+      wager.legs.filter((leg) => leg.result === 'LOST').length <=
+      wagers_lost_leg_limit
   )
   for (const wager of closest_wagers
     .sort((a, b) => b.americanBetPrice - a.americanBetPrice)
-    .slice(0, 400)) {
+    .slice(0, wagers_limit)) {
     const total_return = wager.betPrice
       ? wager.betPrice * wager.currentSize
       : Number(wager.potentialWin)
@@ -510,7 +532,9 @@ const main = async () => {
       week: argv.week,
       show_potential_gain: argv.show_potential_gain,
       show_counts: argv.show_counts,
-      show_bet_receipts: argv.show_bet_receipts
+      show_bet_receipts: argv.show_bet_receipts,
+      wagers_limit: argv.wagers_limit,
+      wagers_lost_leg_limit: argv.wagers_lost_leg_limit
     })
   } catch (err) {
     error = err
