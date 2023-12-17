@@ -17,6 +17,7 @@ import percentiles from './percentiles.mjs'
 import seasonlogs from './seasonlogs.mjs'
 import cache from './cache.mjs'
 import table_views from './table_views.mjs'
+import wagers from './wagers.mjs'
 
 export default {
   auth,
@@ -37,5 +38,6 @@ export default {
   percentiles,
   seasonlogs,
   cache,
-  table_views
+  table_views,
+  wagers
 }
