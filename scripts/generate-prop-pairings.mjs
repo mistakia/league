@@ -166,6 +166,15 @@ const format_prop_pairing = ({ props, prop_stats, week, team, source }) => {
 
   const status = is_pending ? 'pending' : is_success ? 'hit' : 'miss'
   const pairing_id = get_prop_pairing_id(props)
+  const sorted_payouts = props.map((p) => p.o_am).sort((a, b) => a - b)
+  const sum_hist_rate_soft = props.reduce(
+    (accumulator, prop) => accumulator + prop.hist_rate_soft,
+    0
+  )
+  const sum_hist_rate_hard = props.reduce(
+    (accumulator, prop) => accumulator + prop.hist_rate_hard,
+    0
+  )
   const pairing = {
     pairing_id,
     source_id: source,
@@ -180,8 +189,11 @@ const format_prop_pairing = ({ props, prop_stats, week, team, source }) => {
     hist_edge_hard: prop_stats.hist_rate_hard - market_prob,
     is_pending,
     is_success,
-    highest_payout: Math.max(...props.map((p) => p.o_am)),
-    lowest_payout: Math.min(...props.map((p) => p.o_am))
+    highest_payout: sorted_payouts[sorted_payouts.length - 1],
+    lowest_payout: sorted_payouts[0],
+    second_lowest_payout: sorted_payouts[1],
+    sum_hist_rate_soft,
+    sum_hist_rate_hard
   }
 
   return {
@@ -204,7 +216,7 @@ const generate_prop_pairings = async ({
     .whereNotNull('hist_edge_soft')
     .where('hits_soft', '>', 1)
     .where('o_am', '<', 1000)
-    .where('o_am', '>', 100)
+    .where('o_am', '>', -350)
     .whereIn('prop_type', [
       constants.player_prop_types.GAME_ALT_PASSING_YARDS,
       constants.player_prop_types.GAME_ALT_RECEIVING_YARDS,
