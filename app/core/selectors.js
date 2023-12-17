@@ -2398,14 +2398,10 @@ export function getPlaysByMatchupId(state, { mid }) {
         league
       })
     }
-    const date = dayjs.tz(
-      `${game.date} ${game.time_est}`,
-      'YYYY/MM/DD HH:mm:SS',
+    const time = dayjs.tz(
+      `${game.date} ${play.timestamp}`,
+      'YYYY-MM-DD HH:mm:ss',
       'America/New_York'
-    )
-    const time = dayjs.utc(
-      `${date.utc().format('YYYY-MM-DD')} ${play.timestamp}`,
-      'YYYY-MM-DD HH:mm:ss'
     )
     result = result.push({
       time: time.unix(),
