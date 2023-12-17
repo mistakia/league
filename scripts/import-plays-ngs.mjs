@@ -33,7 +33,15 @@ const getPlayData = (play) => {
     off_personnel: play.offense ? play.offense.personnel : null,
     box_ngs: play.defense ? play.defense.defendersInTheBox : null,
     pru_ngs: play.defense ? play.defense.numberOfPassRushers : null,
-    def_personnel: play.defense ? play.defense.personnel : null
+    def_personnel: play.defense ? play.defense.personnel : null,
+    game_clock_start: play.gameClockStart,
+    game_clock_end: play.gameClockEnd,
+    qb_pressure_ngs: play.passInfo ? play.passInfo.wasPressure : null,
+    air_yards_ngs: play.passInfo ? play.passInfo.airYards : null,
+    time_to_throw_ngs: play.passInfo ? play.passInfo.timeToThrow : null,
+    route_ngs: play.recInfo ? play.recInfo.route : null,
+    man_zone_ngs: play.defense ? play.defense.manZoneType : null,
+    cov_type_ngs: play.defense ? play.defense.coverageType : null
   }
 
   if (play.possessionTeam) {
