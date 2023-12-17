@@ -1282,8 +1282,14 @@ CREATE TABLE `nfl_plays` (
   `off_formation` varchar(100) DEFAULT NULL,
   `off_personnel` varchar(100) DEFAULT NULL,
   `def_personnel` varchar(36) DEFAULT NULL,
+
   `box_ngs` int(3) DEFAULT NULL,
   `pru_ngs` int(3) DEFAULT NULL,
+  `air_yards_ngs` decimal(8,4) DEFAULT NULL,
+  `time_to_throw_ngs` decimal(8,4) DEFAULT NULL,
+  `route_ngs` varchar(100) DEFAULT NULL,
+  `man_zone_ngs` varchar(100) DEFAULT NULL,
+  `cov_type_ngs` varchar(100) DEFAULT NULL,
 
   `drive_seq` int(4) DEFAULT NULL,                  -- drive count
   `drive_yds` int(3) DEFAULT NULL,
@@ -1405,6 +1411,7 @@ CREATE TABLE `nfl_plays` (
   `scrm` tinyint(1) DEFAULT NULL,               -- QB scramble
 
   `qb_pressure` tinyint(2) DEFAULT NULL,                -- QB pressure
+  `qb_pressure_ngs` tinyint(2) DEFAULT NULL,            -- QB pressure (NGS)
   `qb_hit` tinyint(2) DEFAULT NULL,               -- QB hit
   `qb_hurry` tinyint(2) DEFAULT NULL,               -- QB hurry
 
@@ -1652,6 +1659,12 @@ CREATE TABLE `nfl_plays_current_week` (
   `box_ngs` int(3) DEFAULT NULL,
   `pru_ngs` int(3) DEFAULT NULL,
 
+  `air_yards_ngs` decimal(8,4) DEFAULT NULL,
+  `time_to_throw_ngs` decimal(8,4) DEFAULT NULL,
+  `route_ngs` varchar(100) DEFAULT NULL,
+  `man_zone_ngs` varchar(100) DEFAULT NULL,
+  `cov_type_ngs` varchar(100) DEFAULT NULL,
+
   `drive_seq` int(4) DEFAULT NULL,                  -- drive count
   `drive_yds` int(3) DEFAULT NULL,
   `drive_play_count` int(3) DEFAULT NULL,           -- Numeric value of how many regular plays happened in a given drive.
@@ -1771,11 +1784,11 @@ CREATE TABLE `nfl_plays_current_week` (
   `sneak` tinyint(1) DEFAULT NULL,              -- QB sneak
   `scrm` tinyint(1) DEFAULT NULL,               -- QB scramble
 
-  `qb_pressure` tinyint(2) DEFAULT NULL,                -- QB pressure
-  `qb_hit` tinyint(2) DEFAULT NULL,               -- QB hit
-  `qb_hurry` tinyint(2) DEFAULT NULL,               -- QB hurry
+  `qb_pressure` tinyint(2) DEFAULT NULL,        -- QB pressure
+  `qb_hit` tinyint(2) DEFAULT NULL,             -- QB hit
+  `qb_hurry` tinyint(2) DEFAULT NULL,           -- QB hurry
 
-  `int_worthy` tinyint(1) DEFAULT NULL,               -- interception worthy
+  `int_worthy` tinyint(1) DEFAULT NULL,         -- interception worthy
   `cball` tinyint(1) DEFAULT NULL,              -- catchable ball, A pass in which an eligible receiver has the opportunity to get his hands on the football with reasonable movement, timing, and opportunity.
   `qbta` tinyint(1) DEFAULT NULL,               -- QB Throw Away
   `shov` tinyint(1) DEFAULT NULL,               -- Shovel/Touch Pass
