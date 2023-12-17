@@ -100,6 +100,7 @@ api.use('/api/percentiles', routes.percentiles)
 api.use('/api/seasonlogs', routes.seasonlogs)
 api.use('/api/cache', routes.cache)
 api.use('/api/table-views', routes.table_views)
+api.use('/api/wagers', routes.wagers)
 
 api.use('/api/*', (req, res, next) => {
   if (req.method !== 'OPTIONS' && !req.auth) {

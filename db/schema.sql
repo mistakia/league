@@ -2981,6 +2981,8 @@ CREATE TABLE `placed_wagers` (
   `wager_id` int(11) NOT NULL AUTO_INCREMENT,
   `userid` int(6) NOT NULL,
 
+  `public` tinyint(1) DEFAULT 0,
+
   `wager_type` ENUM('SINGLE', 'PARLAY', 'ROUND_ROBIN') NOT NULL,
   -- `wager_sub_type` varchar(255) NOT NULL,
   `placed_at` int(11) NOT NULL,
