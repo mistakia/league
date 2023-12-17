@@ -1,5 +1,5 @@
 /* global describe, before, it */
-import chai, { expect } from 'chai'
+import chai from 'chai'
 import chaiHTTP from 'chai-http'
 
 import server from '#api'
