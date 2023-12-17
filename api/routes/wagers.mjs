@@ -111,7 +111,8 @@ router.get('/:user_id', async (req, res) => {
       wager_status = [wager_status]
     }
 
-    const public_only = req.auth.userId && req.auth.userId !== user_id
+    const public_only =
+      req.auth && req.auth.userId && req.auth.userId !== user_id
 
     const validation_response = query_params_validator({
       user_id,
