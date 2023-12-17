@@ -29,6 +29,9 @@ const default_options = {
   pairing_size_max_threshold: 3,
   highest_payout_min_threshold: 100,
   lowest_payout_min_threshold: 100,
+  second_lowest_payout_min_threshold: 100,
+  sum_hist_rate_soft_min_threshold: 0.7,
+  sum_hist_rate_hard_min_threshold: 0.7,
   risk_total_max_threshold: 10,
   edge_min_threshold: 0,
   total_games_min_threshold: 3,
@@ -116,12 +119,15 @@ const filter_prop_pairings = async ({
   const opts = merge(default_options, config.filter_prop_pairings_options || {})
   log('options:')
   log(opts)
+  log({ week, year, seas_type, source, filter_by_allowed_over_average })
 
   const prop_pairing_query = db('prop_pairings')
     .where('source_id', source)
     .where('week', week)
+    .orderBy('hist_rate_hard', 'DESC')
     .orderBy('hist_rate_soft', 'DESC')
     .orderBy('hist_edge_soft', 'DESC')
+    .orderBy('sum_hist_rate_soft', 'DESC')
     .orderBy('lowest_payout', 'DESC')
 
   if (
@@ -194,6 +200,16 @@ const filter_prop_pairings = async ({
       opts.lowest_payout_min_threshold
     )
   }
+  if (
+    opts.second_lowest_payout_min_threshold !== null &&
+    opts.second_lowest_payout_min_threshold !== undefined
+  ) {
+    prop_pairing_query.where(
+      'second_lowest_payout',
+      '>=',
+      opts.second_lowest_payout_min_threshold
+    )
+  }
   if (opts.hist_edge_soft !== null && opts.hist_edge_soft !== undefined) {
     prop_pairing_query.where('hist_edge_soft', '>=', opts.hist_edge_soft)
   }
@@ -225,6 +241,20 @@ const filter_prop_pairings = async ({
 
   if (opts.include_teams.length) {
     prop_pairing_query.whereIn('team', opts.include_teams)
+  }
+  if (opts.sum_hist_rate_soft_min_threshold) {
+    prop_pairing_query.where(
+      'sum_hist_rate_soft',
+      '>=',
+      opts.sum_hist_rate_soft_min_threshold
+    )
+  }
+  if (opts.sum_hist_rate_hard_min_threshold) {
+    prop_pairing_query.where(
+      'sum_hist_rate_hard',
+      '>=',
+      opts.sum_hist_rate_hard_min_threshold
+    )
   }
 
   log(prop_pairing_query.toString())
@@ -413,36 +443,31 @@ const filter_prop_pairings = async ({
         { name: 'pairing', alignment: 'left' },
         { name: 'hit_rate_soft', alignment: 'right' },
         { name: 'hit_rate_hard', alignment: 'right' },
-        { name: 'edge', alignment: 'right' },
+        { name: 'soft_edge', alignment: 'right' },
         { name: 'high', alignment: 'right' },
         { name: 'low', alignment: 'right' },
-        { name: 'status', alignment: 'right' }
+        { name: 'sum_hist_rate_soft', alignment: 'right' }
       ]
     })
     grouped_by_team[team].forEach((prop) => {
-      const status = prop.is_pending
-        ? 'pending'
-        : prop.is_success
-        ? 'hit'
-        : 'miss'
+      // const status = prop.is_pending
+      //   ? 'pending'
+      //   : prop.is_success
+      //   ? 'hit'
+      //   : 'miss'
       const prop_names = prop.props.map(
         (p) => `${p.name} [${Math.round(p.hist_rate_soft * 100)}% / ${p.o_am}]`
       )
 
-      const sum_hist_rate_soft = prop.props.reduce(
-        (accumulator, p) => accumulator + p.hist_rate_soft,
-        0
-      )
-
       p.addRow({
         pairing: `${prop_names.join(' / ')}`,
-        sum_hist_rate_soft: `${Math.round(sum_hist_rate_soft * 100)}%`,
         hit_rate_soft: `${Math.round(prop.hist_rate_soft * 100)}%`,
         hit_rate_hard: `${Math.round(prop.hist_rate_hard * 100)}%`,
-        edge: `${(prop.hist_edge_soft * 100).toFixed(1)}%`,
+        soft_edge: `${(prop.hist_edge_soft * 100).toFixed(1)}%`,
         high: prop.highest_payout,
         low: prop.lowest_payout,
-        status
+        sum_hist_rate_soft: `${Math.round(prop.sum_hist_rate_soft * 100)}%`,
+        sum_hist_rate_hard: `${Math.round(prop.sum_hist_rate_hard * 100)}%`
       })
     })
 
