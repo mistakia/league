@@ -24,7 +24,8 @@ describe('API /wagers', function () {
   it('/api/wagers/:user_id', async () => {
     const res = await chai.request(server).get('/api/wagers/1')
     res.should.have.status(200)
-    expect(res).to.be.json
+    // eslint-disable-next-line no-unused-expressions
+    res.should.be.json
     res.body.should.be.an('array')
 
     console.log(res.body)
@@ -34,14 +35,16 @@ describe('API /wagers', function () {
     it('invalid user_id', async () => {
       const res = await chai.request(server).get('/api/wagers/abc')
       res.should.have.status(400)
-      expect(res).to.be.json
+      // eslint-disable-next-line no-unused-expressions
+      res.should.be.json
       res.body.error.should.equal("The 'user_id' field must be a number.")
     })
 
     it('out of range limit', async () => {
       const res = await chai.request(server).get('/api/wagers/1?limit=1001')
       res.should.have.status(400)
-      expect(res).to.be.json
+      // eslint-disable-next-line no-unused-expressions
+      res.should.be.json
       res.body.error.should.equal(
         "The 'limit' field must be less than or equal to 1000."
       )
@@ -50,7 +53,8 @@ describe('API /wagers', function () {
     it('out of range offset', async () => {
       const res = await chai.request(server).get('/api/wagers/1?offset=-1')
       res.should.have.status(400)
-      expect(res).to.be.json
+      // eslint-disable-next-line no-unused-expressions
+      res.should.be.json
       res.body.error.should.equal(
         "The 'offset' field must be greater than or equal to 0."
       )
@@ -61,7 +65,8 @@ describe('API /wagers', function () {
         .request(server)
         .get('/api/wagers/1?wager_type=INVALID')
       res.should.have.status(400)
-      expect(res).to.be.json
+      // eslint-disable-next-line no-unused-expressions
+      res.should.be.json
       res.body.error.should.equal(
         "The 'wager_type[0]' field value 'SINGLE, PARLAY, ROUND_ROBIN' does not match any of the allowed values."
       )
@@ -72,7 +77,8 @@ describe('API /wagers', function () {
         .request(server)
         .get('/api/wagers/1?min_selection_count=13')
       res.should.have.status(400)
-      expect(res).to.be.json
+      // eslint-disable-next-line no-unused-expressions
+      res.should.be.json
       res.body.error.should.equal(
         "The 'min_selection_count' field must be less than or equal to 12."
       )
@@ -83,7 +89,8 @@ describe('API /wagers', function () {
         .request(server)
         .get('/api/wagers/1?max_selection_count=13')
       res.should.have.status(400)
-      expect(res).to.be.json
+      // eslint-disable-next-line no-unused-expressions
+      res.should.be.json
       res.body.error.should.equal(
         "The 'max_selection_count' field must be less than or equal to 12."
       )
@@ -94,7 +101,8 @@ describe('API /wagers', function () {
         .request(server)
         .get('/api/wagers/1?min_selection_lost_count=13')
       res.should.have.status(400)
-      expect(res).to.be.json
+      // eslint-disable-next-line no-unused-expressions
+      res.should.be.json
       res.body.error.should.equal(
         "The 'min_selection_lost_count' field must be less than or equal to 12."
       )
@@ -105,7 +113,8 @@ describe('API /wagers', function () {
         .request(server)
         .get('/api/wagers/1?max_selection_lost_count=13')
       res.should.have.status(400)
-      expect(res).to.be.json
+      // eslint-disable-next-line no-unused-expressions
+      res.should.be.json
       res.body.error.should.equal(
         "The 'max_selection_lost_count' field must be less than or equal to 12."
       )
@@ -116,7 +125,8 @@ describe('API /wagers', function () {
         .request(server)
         .get('/api/wagers/1?wager_status=INVALID')
       res.should.have.status(400)
-      expect(res).to.be.json
+      // eslint-disable-next-line no-unused-expressions
+      res.should.be.json
       res.body.error.should.equal(
         "The 'wager_status[0]' field value 'OPEN, WON, LOST, PUSH, CANCELLED' does not match any of the allowed values."
       )
