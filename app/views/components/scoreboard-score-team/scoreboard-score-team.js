@@ -50,7 +50,9 @@ export default function ScoreboardScoreTeam({
     if (type === constants.matchups.TOURNAMENT) {
       return (
         <div className='scoreboard__score-minutes'>
-          {scoreboard.minutes + (scoreboard.minutes > 1 ? ' mins' : ' min')}
+          {scoreboard.minutes && !isNaN(scoreboard.minutes)
+            ? scoreboard.minutes + (scoreboard.minutes > 1 ? ' mins' : ' min')
+            : ''}
         </div>
       )
     }
