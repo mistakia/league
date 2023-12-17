@@ -1785,6 +1785,7 @@ CREATE TABLE `nfl_plays_current_week` (
   `scrm` tinyint(1) DEFAULT NULL,               -- QB scramble
 
   `qb_pressure` tinyint(2) DEFAULT NULL,        -- QB pressure
+  `qb_pressure_ngs` tinyint(2) DEFAULT NULL,            -- QB pressure (NGS)
   `qb_hit` tinyint(2) DEFAULT NULL,             -- QB hit
   `qb_hurry` tinyint(2) DEFAULT NULL,           -- QB hurry
 
