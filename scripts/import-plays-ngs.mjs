@@ -273,7 +273,7 @@ const importPlaysForYear = async ({
 
   log(`processing plays for ${weeks.length} weeks in ${year} (${seas_type})`)
   for (const { week } of weeks) {
-    log(`loading plays for week: ${week} (REG)`)
+    log(`loading plays for week: ${week} (${seas_type})`)
     await importPlaysForWeek({
       year,
       week,
