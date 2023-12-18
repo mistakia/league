@@ -1281,7 +1281,7 @@ CREATE TABLE `nfl_plays` (
 
   `off_formation` varchar(100) DEFAULT NULL,
   `off_personnel` varchar(100) DEFAULT NULL,
-  `def_personnel` varchar(36) DEFAULT NULL,
+  `def_personnel` varchar(100) DEFAULT NULL,
 
   `box_ngs` int(3) DEFAULT NULL,
   `pru_ngs` int(3) DEFAULT NULL,

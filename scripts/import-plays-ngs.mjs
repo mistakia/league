@@ -76,7 +76,8 @@ const importPlaysForWeek = async ({
   week,
   seas_type = 'REG',
   force_update = false,
-  ignore_cache = false
+  ignore_cache = false,
+  throttle = 0
 } = {}) => {
   const current_week = Math.max(
     dayjs().day() === 2 ? constants.season.week - 1 : constants.season.week,
@@ -254,6 +255,10 @@ const importPlaysForWeek = async ({
         }
       }
     }
+
+    if (throttle) {
+      await wait(throttle)
+    }
   }
 
   return skip_count === games.length
@@ -279,7 +284,8 @@ const importPlaysForYear = async ({
       week,
       seas_type,
       force_update,
-      ignore_cache
+      ignore_cache,
+      throttle: 3000
     })
     await wait(4000)
   }
