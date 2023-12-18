@@ -441,6 +441,7 @@ const filter_prop_pairings = async ({
       title: `${team} plays`,
       columns: [
         { name: 'pairing', alignment: 'left' },
+        { name: 'status', alignment: 'left' },
         { name: 'hit_rate_soft', alignment: 'right' },
         { name: 'hit_rate_hard', alignment: 'right' },
         { name: 'soft_edge', alignment: 'right' },
@@ -450,17 +451,18 @@ const filter_prop_pairings = async ({
       ]
     })
     grouped_by_team[team].forEach((prop) => {
-      // const status = prop.is_pending
-      //   ? 'pending'
-      //   : prop.is_success
-      //   ? 'hit'
-      //   : 'miss'
+      const status = prop.is_pending
+        ? 'pending'
+        : prop.is_success
+        ? 'hit'
+        : 'miss'
       const prop_names = prop.props.map(
         (p) => `${p.name} [${Math.round(p.hist_rate_soft * 100)}% / ${p.o_am}]`
       )
 
       p.addRow({
         pairing: `${prop_names.join(' / ')}`,
+        status,
         hit_rate_soft: `${Math.round(prop.hist_rate_soft * 100)}%`,
         hit_rate_hard: `${Math.round(prop.hist_rate_hard * 100)}%`,
         soft_edge: `${(prop.hist_edge_soft * 100).toFixed(1)}%`,
