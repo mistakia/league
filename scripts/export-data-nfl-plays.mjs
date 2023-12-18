@@ -42,6 +42,11 @@ const nfl_play_fields = [
   'def_personnel',
   'box_ngs',
   'pru_ngs',
+  'air_yds_ngs',
+  'time_to_throw_ngs',
+  'route_ngs',
+  'man_zone_ngs',
+  'cov_type_ngs',
 
   'drive_seq',
   'drive_yds',
@@ -161,6 +166,7 @@ const nfl_play_fields = [
   'scrm',
 
   'qb_pressure',
+  'qb_pressure_ngs',
   'qb_hit',
   'qb_hurry',
 
