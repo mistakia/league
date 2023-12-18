@@ -1120,6 +1120,7 @@ DROP TABLE IF EXISTS `users`;
 
 CREATE TABLE `users` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `username` varchar(50) NOT NULL,
   `email` varchar(50) NOT NULL DEFAULT '',
   `password` varchar(60) NOT NULL DEFAULT '',
   `vbaseline` varchar(9) NOT NULL DEFAULT 'default',
@@ -1129,7 +1130,8 @@ CREATE TABLE `users` (
   `text` tinyint(1) NOT NULL DEFAULT 1,
   `voice` tinyint(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `email` (`email`)
+  UNIQUE KEY `email` (`email`),
+  UNIQUE KEY `username` (`username`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------

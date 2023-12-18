@@ -42,6 +42,7 @@ router.post('/register', async (req, res) => {
   const { db, config, logger } = req.app.locals
   try {
     const { email, password } = req.body
+    let username = req.body.username
 
     let teamId = req.body.teamId ? parseInt(req.body.teamId, 10) : null
     let leagueId = req.body.leagueId ? parseInt(req.body.leagueId, 10) : null
@@ -61,6 +62,32 @@ router.post('/register', async (req, res) => {
     const emailExists = await db('users').where({ email })
     if (emailExists.length) {
       return res.status(400).send({ error: 'email exists' })
+    }
+
+    if (!username) {
+      // generate new unique username
+      while (!username) {
+        const new_username = 'user' + Math.floor(Math.random() * 10000000000)
+        const username_exists = await db('users').where({
+          username: new_username
+        })
+        if (!username_exists.length) {
+          username = new_username
+        }
+      }
+    }
+
+    if (username.length < 3) {
+      return res.status(400).send({ error: 'username too short' })
+    }
+
+    if (username.length > 60) {
+      return res.status(400).send({ error: 'username too long' })
+    }
+
+    const usernameExists = await db('users').where({ username })
+    if (usernameExists.length) {
+      return res.status(400).send({ error: 'username exists' })
     }
 
     if (leagueId) {
@@ -84,7 +111,11 @@ router.post('/register', async (req, res) => {
 
     const salt = await bcrypt.genSalt(10)
     const hashedPassword = await bcrypt.hash(password, salt)
-    const users = await db('users').insert({ email, password: hashedPassword })
+    const users = await db('users').insert({
+      email,
+      password: hashedPassword,
+      username
+    })
     const userId = users[0]
 
     if (!leagueId) {
