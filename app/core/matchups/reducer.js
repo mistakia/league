@@ -44,7 +44,9 @@ export function matchupsReducer(state = initialState, { payload, type }) {
           createMatchup({
             ...m,
             tids: [m.hid, m.aid],
-            type: constants.matchups.H2H
+            type: constants.matchups.H2H,
+            points: [m.hp, m.ap],
+            projections: [m.home_projection, m.away_projection]
           })
         )
         state.merge({
@@ -55,12 +57,16 @@ export function matchupsReducer(state = initialState, { payload, type }) {
         const playoffs = groupBy(payload.data.playoffs, 'uid')
         for (const gid in playoffs) {
           const tids = playoffs[gid].map((p) => p.tid)
+          const points = playoffs[gid].map((p) => p.points)
+          const projections = playoffs[gid].map((p) => p.projection)
           state.updateIn(['playoffs'], (arr) =>
             arr.push(
               createMatchup({
+                ...playoffs[gid][0],
                 tids,
                 type: constants.matchups.TOURNAMENT,
-                ...playoffs[gid][0]
+                points,
+                projections
               })
             )
           )

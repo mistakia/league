@@ -46,11 +46,16 @@ const processPlayoffs = async ({ lid, year }) => {
     return
   }
 
-  const weeks = constants.season.year === year
-    ? [...new Set(playoffs
-        .filter((p) => p.week < constants.season.week)
-        .map((p) => p.week))]
-    : [...new Set(playoffs.map((p) => p.week))]
+  const weeks =
+    constants.season.year === year
+      ? [
+          ...new Set(
+            playoffs
+              .filter((p) => p.week < constants.season.week)
+              .map((p) => p.week)
+          )
+        ]
+      : [...new Set(playoffs.map((p) => p.week))]
   const gamelogs = await db('player_gamelogs')
     .select('player_gamelogs.*', 'nfl_games.week', 'nfl_games.year')
     .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
@@ -60,7 +65,10 @@ const processPlayoffs = async ({ lid, year }) => {
 
   for (const item of playoffs) {
     const { tid, week, year } = item
-    if (item.year === constants.season.year && item.week >= constants.season.week) {
+    if (
+      item.year === constants.season.year &&
+      item.week >= constants.season.week
+    ) {
       continue
     }
     const rosterRow = await getRoster({ tid, week, year })
