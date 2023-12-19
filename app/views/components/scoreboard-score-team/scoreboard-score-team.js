@@ -13,22 +13,6 @@ export default function ScoreboardScoreTeam({
   cutoff,
   challenger
 }) {
-  const { matchup } = scoreboard
-
-  const is_home = useMemo(() => tid === matchup.hid, [tid, matchup.hid])
-
-  const final_projection = useMemo(
-    () => (is_home ? matchup.home_projection : matchup.away_projection),
-    [is_home, matchup.home_projection, matchup.away_projection]
-  )
-
-  const is_final = useMemo(
-    () =>
-      matchup.week < constants.season.week ||
-      matchup.year < constants.season.year,
-    [matchup.week, matchup.year]
-  )
-
   const is_advancing = useMemo(
     () => scoreboard.points >= cutoff,
     [scoreboard.points, cutoff]
@@ -65,7 +49,7 @@ export default function ScoreboardScoreTeam({
         {scoreboard.points ? scoreboard.points.toFixed(0) : ''}
       </div>
       <div className='scoreboard__score-proj metric'>
-        {is_final ? final_projection : scoreboard.projected.toFixed(0)}
+        {scoreboard.projected ? scoreboard.projected.toFixed(0) : ''}
       </div>
       {render_score_diff()}
       {render_score_minutes()}

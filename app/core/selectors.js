@@ -808,6 +808,24 @@ export function getMatchupsForSelectedWeek(state) {
 }
 
 export function getMatchupByTeamId(state, { tid, year, week }) {
+  const playoffs = state.getIn(['matchups', 'playoffs'])
+
+  // first check if week is in playoffs
+  const playoff_matchup = playoffs.find(
+    (m) => m.year === year && m.week === week
+  )
+  if (playoff_matchup) {
+    if (!tid) {
+      return playoff_matchup
+    }
+
+    return (
+      playoffs.find(
+        (m) => m.year === year && m.week === week && m.tids.includes(tid)
+      ) || createMatchup()
+    )
+  }
+
   const matchups = state.getIn(['matchups', 'items'])
   return (
     matchups.find(
@@ -2214,21 +2232,22 @@ export function getScoreboardByMatchupId(state, { matchupId }) {
   return { home, away }
 }
 
-export function getScoreboardByTeamId(
-  state,
-  { tid, week = constants.season.week }
-) {
+export function getScoreboardByTeamId(state, { tid }) {
   const year = state.getIn(['app', 'year'])
+  const week = state.getIn(['scoreboard', 'week'])
   const matchup = getMatchupByTeamId(state, { tid, year, week })
 
   let minutes = 0
+  let projected = 0
 
   // TODO - set flag for processed matchup
-  if (matchup.ap) {
+  // check matchup points to see if it has any truthy values
+  if (matchup.points.some((p) => Boolean(p))) {
+    const index = matchup.tids.indexOf(tid)
     return createScoreboard({
       tid,
-      points: matchup.aid === tid ? matchup.ap : matchup.hp,
-      projected: 0,
+      points: matchup.points.get(index),
+      projected: matchup.projections.get(index),
       minutes,
       matchup
     })
@@ -2246,7 +2265,7 @@ export function getScoreboardByTeamId(
     tid,
     week: isFuture ? constants.week : week
   })
-  const projected = starterMaps.reduce((sum, playerMap) => {
+  for (const playerMap of starterMaps) {
     const gamelog = getGamelogForPlayer(state, { playerMap, week })
     if (gamelog) {
       points += gamelog.total
@@ -2269,8 +2288,9 @@ export function getScoreboardByTeamId(
     const add = gamelog
       ? gamelog.total
       : playerMap.getIn(['points', `${week}`, 'total'], 0)
-    return add + sum
-  }, 0)
+
+    projected += add
+  }
 
   return createScoreboard({
     tid,
