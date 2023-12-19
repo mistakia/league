@@ -105,6 +105,10 @@ const run = async ({
     .where('nfl_play_stats.valid', 1)
     .where('nfl_plays.seas_type', seas_type)
 
+  const unique_esbids = [...new Set(playStats.map((p) => p.esbid))]
+  log(`loaded play stats for ${unique_esbids.length} games`)
+  log(unique_esbids.join(', '))
+
   const player_gamelog_inserts = []
   const missing = []
 
@@ -255,6 +259,7 @@ const run = async ({
     .join('nfl_games', 'nfl_plays.esbid', '=', 'nfl_games.esbid')
     .where('nfl_plays.year', year)
     .where('nfl_plays.week', week)
+    .where('nfl_plays.seas_type', seas_type)
   for (const play of plays) {
     const off = play.pos_team
     if (!off) continue
