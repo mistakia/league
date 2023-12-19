@@ -25,6 +25,7 @@ import {
 import project_lineups from './project-lineups.mjs'
 import simulate_season from './simulate-season.mjs'
 import calculateMatchupProjection from './calculate-matchup-projection.mjs'
+import calculatePlayoffMatchupProjection from './calculate-playoff-matchup-projection.mjs'
 
 const log = debug('process-projections')
 debug.enable('process-projections')
@@ -407,6 +408,7 @@ const process_league = async ({ year, lid }) => {
 
   await project_lineups(lid)
   await calculateMatchupProjection({ lid })
+  await calculatePlayoffMatchupProjection({ lid })
 
   if (
     constants.season.week &&
