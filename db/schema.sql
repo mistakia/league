@@ -493,6 +493,7 @@ CREATE TABLE `playoffs` (
   `year` smallint(4) NOT NULL,
   `week` tinyint(2) NOT NULL,
   `points` decimal(7,4) DEFAULT NULL,
+  `projection` decimal(5,2) DEFAULT NULL,
   UNIQUE KEY `tid` (`tid`,`uid`,`year`),
   KEY `lid` (`lid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
