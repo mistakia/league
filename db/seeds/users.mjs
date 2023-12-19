@@ -9,6 +9,7 @@ export default async function (knex) {
     const password = await bcrypt.hash(`password${i}`, salt)
     await knex('users').insert({
       email: `user${i}@email.com`,
+      username: `user${i}`,
       password
     })
   }
