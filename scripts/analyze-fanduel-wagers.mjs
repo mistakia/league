@@ -213,11 +213,17 @@ const analyze_fanduel_wagers = async ({
         .replace('Passing', 'Pass')
         .replace('Rushing', 'Rush')
         .replace('Receiving', 'Recv')
+        .replace('Any Time Touchdown Scorer', 'Anytime TD')
+        .replace('To Score 2+ Touchdowns', '2+ TDs')
       const handicap = Math.round(Number(leg.parsedHandicap))
 
       let name
 
-      if (stat_type === 'Moneyline') {
+      if (
+        stat_type === 'Moneyline' ||
+        stat_type === 'Anytime TD' ||
+        stat_type === '2+ TDs'
+      ) {
         name = `${leg.selectionName} ${stat_type} [week ${week}]`
       } else {
         name = `${player_name} ${handicap}+ ${stat_type} [week ${week}]`
