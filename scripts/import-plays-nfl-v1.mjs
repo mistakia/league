@@ -5,10 +5,10 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants, fixTeam } from '#libs-shared'
-import { isMain, wait, nfl } from '#libs-server'
+import { isMain, wait, nfl, getPlayers } from '#libs-server'
 
-const log = debug('import-plays-nfl-v3')
-debug.enable('import-plays-nfl-v3')
+const log = debug('import-plays-nfl-v1')
+debug.enable('import-plays-nfl-v1')
 
 const argv = yargs(hideBin(process.argv)).argv
 
@@ -68,40 +68,40 @@ const getPlayData = ({ play, year, week, seas_type }) => {
   return data
 }
 
-// const to_ascii = (hexString) => {
-//   let ascii = ''
-//   for (let i = 0; i < hexString.length; i += 2) {
-//     ascii += String.fromCharCode(parseInt(hexString.substring(i, i + 2), 16))
-//   }
-//   return ascii
-// }
+const to_ascii = (hexString) => {
+  let ascii = ''
+  for (let i = 0; i < hexString.length; i += 2) {
+    ascii += String.fromCharCode(parseInt(hexString.substring(i, i + 2), 16))
+  }
+  return ascii
+}
 
-// const decode_id = (smart_id) => {
-//   const size = smart_id.length
-//   if (size === 36) {
-//     return to_ascii(smart_id.replace(/-/g, '').substring(4, 24))
-//   } else if (size >= 5) {
-//     return smart_id
-//   } else {
-//     return null
-//   }
-// }
+const decode_id = (smart_id) => {
+  const size = smart_id.length
+  if (size === 36) {
+    return to_ascii(smart_id.replace(/-/g, '').substring(4, 24))
+  } else if (size >= 5) {
+    return smart_id
+  } else {
+    return null
+  }
+}
 
-// const extract_elias = (smart_id) => {
-//   const decoded_id = decode_id(smart_id)
-//   const name_abbr = decoded_id.substring(0, 3)
-//   const id_no = smart_id.replace(/-/g, '').substring(10, 16)
-//   const elias_id = name_abbr + id_no
-//   return elias_id
-// }
+const extract_elias = (smart_id) => {
+  const decoded_id = decode_id(smart_id)
+  const name_abbr = decoded_id.substring(0, 3)
+  const id_no = smart_id.replace(/-/g, '').substring(10, 16)
+  const elias_id = name_abbr + id_no
+  return elias_id
+}
 
-// const getPlayStatData = (playStat) => ({
-//   yards: playStat.yards,
-//   teamid: playStat.team.id,
-//   playerName: playStat.playerName,
-//   clubCode: playStat.team ? fixTeam(playStat.team.abbreviation) : null,
-//   esbid: playStat.gsisPlayer ? extract_elias(playStat.gsisPlayer.id) : null
-// })
+const getPlayStatData = (playStat) => ({
+  yards: playStat.yards,
+  teamid: playStat.team.id,
+  playerName: playStat.playerName,
+  clubCode: playStat.team ? fixTeam(playStat.team.abbreviation) : null,
+  esbid: playStat.gsisPlayer ? extract_elias(playStat.gsisPlayer.id) : null
+})
 
 const importPlaysForWeek = async ({
   year = constants.season.year,
@@ -123,6 +123,15 @@ const importPlaysForWeek = async ({
   log(
     `importing plays for week ${week} ${year} ${seas_type} (force_update: ${force_update}, ignore_cache: ${ignore_cache}, isCurrentWeek: ${isCurrentWeek})`
   )
+
+  const players = await getPlayers({ include_all_active_players: true })
+
+  const esbid_to_gsis_id_index = {}
+  for (const player of players) {
+    if (player.esbid && player.gsisid) {
+      esbid_to_gsis_id_index[player.esbid] = player.gsisid
+    }
+  }
 
   const games = await db('nfl_games').where({
     year,
@@ -195,16 +204,21 @@ const importPlaysForWeek = async ({
       })
 
       // TODO re-enable and add `esbid` column to play_stats table
-      // for (const playStat of play.playStats) {
-      //   const playStatData = getPlayStatData(playStat)
-      //   play_stat_inserts.push({
-      //     playId,
-      //     esbid: game.esbid,
-      //     valid: 1,
-      //     statId: playStat.statId,
-      //     ...playStatData
-      //   })
-      // }
+      for (const playStat of play.playStats) {
+        const { esbid, playerName, clubCode, teamid, yards } =
+          getPlayStatData(playStat)
+        play_stat_inserts.push({
+          playId,
+          esbid: game.esbid,
+          valid: 1,
+          statId: playStat.statId,
+          gsisId: esbid_to_gsis_id_index[esbid] || null,
+          playerName,
+          clubCode,
+          teamid,
+          yards
+        })
+      }
     }
 
     const end_play_exists = data.data.viewer.gameDetail.plays.find(
