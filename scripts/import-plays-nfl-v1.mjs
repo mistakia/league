@@ -89,6 +89,7 @@ const decode_id = (smart_id) => {
 
 const extract_elias = (smart_id) => {
   const decoded_id = decode_id(smart_id)
+  if (!decoded_id) return null
   const name_abbr = decoded_id.substring(0, 3)
   const id_no = smart_id.replace(/-/g, '').substring(10, 16)
   const elias_id = name_abbr + id_no
