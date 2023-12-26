@@ -123,7 +123,7 @@ const analyze_fanduel_wagers = async ({
   show_potential_gain = false,
   show_counts = false,
   show_bet_receipts = false,
-  wagers_limit = 400,
+  wagers_limit = Infinity,
   wagers_lost_leg_limit = 1
 } = {}) => {
   if (!filename) {
@@ -495,7 +495,8 @@ const analyze_fanduel_wagers = async ({
       ? wager.betPrice * wager.currentSize
       : Number(wager.potentialWin)
     const potential_roi_gain = (total_return / wager_summary.total_risk) * 100
-    let wager_table_title = `+${
+    const num_of_legs = wager.legs.length
+    let wager_table_title = `[${num_of_legs} leg parlay] American odds: +${
       wager.americanBetPrice
     } / ${potential_roi_gain.toFixed(2)}% roi`
 
