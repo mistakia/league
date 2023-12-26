@@ -5,7 +5,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants, fixTeam } from '#libs-shared'
-import { isMain, wait, nfl, getPlayers } from '#libs-server'
+import { isMain, wait, nfl } from '#libs-server'
 
 const log = debug('import-plays-nfl-v1')
 debug.enable('import-plays-nfl-v1')
@@ -125,7 +125,12 @@ const importPlaysForWeek = async ({
     `importing plays for week ${week} ${year} ${seas_type} (force_update: ${force_update}, ignore_cache: ${ignore_cache}, isCurrentWeek: ${isCurrentWeek})`
   )
 
-  const players = await getPlayers({ include_all_active_players: true })
+  const players = await db('player')
+    .select('esbid', 'gsisid')
+    .whereNotNull('esbid')
+    .whereNotNull('gsisid')
+
+  log(`loaded ${players.length} players`)
 
   const esbid_to_gsis_id_index = {}
   for (const player of players) {
@@ -133,6 +138,12 @@ const importPlaysForWeek = async ({
       esbid_to_gsis_id_index[player.esbid] = player.gsisid
     }
   }
+
+  log(
+    `built esbid_to_gsis_id_index with ${
+      Object.keys(esbid_to_gsis_id_index).length
+    } entries`
+  )
 
   const games = await db('nfl_games').where({
     year,
@@ -208,12 +219,19 @@ const importPlaysForWeek = async ({
       for (const playStat of play.playStats) {
         const { esbid, playerName, clubCode, teamid, yards } =
           getPlayStatData(playStat)
+        const gsisId = esbid_to_gsis_id_index[esbid] || null
+        if (!gsisId) {
+          log(
+            `missing gsisId for esbid: ${esbid}, playerName: ${playerName}, clubCode: ${clubCode}`
+          )
+        }
+
         play_stat_inserts.push({
           playId,
           esbid: game.esbid,
           valid: 1,
           statId: playStat.statId,
-          gsisId: esbid_to_gsis_id_index[esbid] || null,
+          gsisId,
           playerName,
           clubCode,
           teamid,

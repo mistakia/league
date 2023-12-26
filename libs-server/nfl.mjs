@@ -203,9 +203,10 @@ export const get_plays_v1 = async ({ id, token, ignore_cache = false }) => {
 
   if (
     data &&
-    data.viewer &&
-    data.viewer.gameDetail &&
-    data.viewer.gameDetail.id
+    data.data &&
+    data.data.viewer &&
+    data.data.viewer.gameDetail &&
+    data.data.viewer.gameDetail.id
   ) {
     await cache.set({ key: cache_key, value: data })
   }
