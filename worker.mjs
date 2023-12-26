@@ -15,7 +15,7 @@ log(`env: ${process.env.NODE_ENV}`)
 // REGULAR SEASON
 
 // monday
-schedule.scheduleJob('*/1 20-23 * 1,2,9-12 1', import_live_plays)
+schedule.scheduleJob('*/1 9-23 * 1,2,9-12 1', import_live_plays)
 
 // tuesday
 schedule.scheduleJob('0 0 * 1,2,9-12 2', finalize_week)
@@ -24,7 +24,12 @@ schedule.scheduleJob('0 0 * 1,2,9-12 2', finalize_week)
 schedule.scheduleJob('0 0 * 1,2,9-12 3', finalize_week)
 
 // thursday
-schedule.scheduleJob('*/1 20-23 * 1,2,9-12 4', import_live_plays)
+schedule.scheduleJob('*/1 12-23 * 1,2,9-12 4', import_live_plays)
+
+// TODO black friday game
+
+// saturday in December
+schedule.scheduleJob('*/1 9-23 * 12 6', import_live_plays)
 
 // sunday
 schedule.scheduleJob('*/1 9-23 * 1,2,9-12 7', import_live_plays)
