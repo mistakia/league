@@ -4,10 +4,25 @@ import { getPlayersGamelogs } from '@core/api'
 import { get_app, get_request_history } from '@core/selectors'
 import { matchupsActions } from '@core/matchups'
 import { gamelogsActions } from './actions'
+import { constants } from '@libs-shared'
 
 export function* load({ payload }) {
   const { leagueId } = yield select(get_app)
   const { year, week, nfl_team, opponent, position } = payload
+
+  // load last week gamelogs as well when its the final week of the championship round
+  if (week === constants.season.finalWeek && week === constants.season.week) {
+    yield call(load, {
+      payload: {
+        leagueId,
+        year,
+        week: week - 1,
+        nfl_team,
+        opponent,
+        position
+      }
+    })
+  }
 
   const request_history = yield select(get_request_history)
 
