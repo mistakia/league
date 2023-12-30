@@ -193,7 +193,7 @@ const analyze_fanduel_wagers = async ({
             open_potential_payout += Number(wager.potentialWin)
             max_potential_payout +=
               Number(wager.currentSize) *
-              Number(wager.betPrices.betPrice.decimalPrice)
+              (Number(wager.betPrices.betPrice.decimalPrice) || 0)
             exposure_count += 1
 
             break
@@ -497,7 +497,7 @@ const analyze_fanduel_wagers = async ({
     const potential_roi_gain = (total_return / wager_summary.total_risk) * 100
     const num_of_legs = wager.legs.length
     let wager_table_title = `[${num_of_legs} leg parlay] American odds: +${
-      wager.americanBetPrice
+      wager.americanBetPrice || 'N/A'
     } / ${potential_roi_gain.toFixed(2)}% roi`
 
     if (show_potential_gain) {
