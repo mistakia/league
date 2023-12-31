@@ -2418,11 +2418,17 @@ export function getPlaysByMatchupId(state, { mid }) {
         league
       })
     }
-    const time = dayjs.tz(
-      `${game.date} ${play.timestamp}`,
-      'YYYY-MM-DD HH:mm:ss',
-      'America/New_York'
-    )
+    let time
+    try {
+      time = dayjs.tz(
+        `${game.date} ${play.timestamp}`,
+        'YYYY-MM-DD HH:mm:ss',
+        'America/New_York'
+      )
+    } catch (error) {
+      console.error(`Invalid or missing date for playId: ${play.playId}, esbid: ${play.esbid}`, error)
+      time = dayjs() // default to current time if date is invalid or missing
+    }
     result = result.push({
       time: time.unix(),
       play,
