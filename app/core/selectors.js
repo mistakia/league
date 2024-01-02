@@ -2426,7 +2426,10 @@ export function getPlaysByMatchupId(state, { mid }) {
         'America/New_York'
       )
     } catch (error) {
-      console.error(`Invalid or missing date for playId: ${play.playId}, esbid: ${play.esbid}`, error)
+      console.error(
+        `Invalid or missing date for playId: ${play.playId}, esbid: ${play.esbid}`,
+        error
+      )
       time = dayjs() // default to current time if date is invalid or missing
     }
     result = result.push({

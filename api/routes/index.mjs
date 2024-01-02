@@ -18,6 +18,7 @@ import seasonlogs from './seasonlogs.mjs'
 import cache from './cache.mjs'
 import table_views from './table_views.mjs'
 import wagers from './wagers.mjs'
+import markets from './markets.mjs'
 
 export default {
   auth,
@@ -39,5 +40,6 @@ export default {
   seasonlogs,
   cache,
   table_views,
-  wagers
+  wagers,
+  markets
 }
