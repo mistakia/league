@@ -49,7 +49,7 @@ const process_average_projections = async ({ year }) => {
     player_row.projection = {}
 
     let week = year === constants.season.year ? constants.season.week : 0
-    for (; week <= constants.season.finalWeek; week++) {
+    for (; week <= constants.season.nflFinalWeek; week++) {
       player_row.projection[week] = {}
 
       // average projection
@@ -126,7 +126,7 @@ const process_scoring_format = async ({
 
   for (const player_row of player_rows) {
     let week = year === constants.season.year ? constants.season.week : 0
-    for (; week <= constants.season.finalWeek; week++) {
+    for (; week <= constants.season.nflFinalWeek; week++) {
       const projection = player_row.projection[week]
 
       pointsInserts.push({
@@ -188,7 +188,7 @@ const process_league_format = async ({
 
   const baselines = {}
   let week = year === constants.season.year ? constants.season.week : 0
-  for (; week <= constants.season.finalWeek; week++) {
+  for (; week <= constants.season.nflFinalWeek; week++) {
     // baselines
     const baseline = calculateBaselines({
       players: player_rows,
@@ -257,20 +257,24 @@ const process_league = async ({ year, lid }) => {
   // initialize roster rows
   const rosterRows = []
   const rostered_pids = []
-  for (const team of teams) {
-    const rosterRow = await getRoster({ tid: team.uid, week })
-    rosterRows.push(rosterRow)
-    rosterRow.players.forEach((p) => rostered_pids.push(p.pid))
-    const roster = new Roster({ roster: rosterRow, league })
-    const team_available_salary_space =
-      roster.availableCap - min_bid * roster.availableSpace
-    if (team_available_salary_space > 0) {
-      league_available_salary_space =
-        league_available_salary_space + team_available_salary_space
-    }
 
-    team._roster_row = rosterRow
-    team._roster = roster
+  // check to see if it is past the fantasy season
+  if (week <= constants.season.finalWeek) {
+    for (const team of teams) {
+      const rosterRow = await getRoster({ tid: team.uid, week })
+      rosterRows.push(rosterRow)
+      rosterRow.players.forEach((p) => rostered_pids.push(p.pid))
+      const roster = new Roster({ roster: rosterRow, league })
+      const team_available_salary_space =
+        roster.availableCap - min_bid * roster.availableSpace
+      if (team_available_salary_space > 0) {
+        league_available_salary_space =
+          league_available_salary_space + team_available_salary_space
+      }
+
+      team._roster_row = rosterRow
+      team._roster = roster
+    }
   }
 
   // get projections for current week
@@ -299,7 +303,7 @@ const process_league = async ({ year, lid }) => {
   week = year === constants.season.year ? constants.season.week : 0
 
   const baselines = {}
-  for (; week <= constants.season.finalWeek; week++) {
+  for (; week <= constants.season.nflFinalWeek; week++) {
     // baselines
     const baseline = calculateBaselines({
       players: player_rows,
@@ -406,9 +410,11 @@ const process_league = async ({ year, lid }) => {
     log(`processed and saved ${valueInserts.length} player values`)
   }
 
-  await project_lineups(lid)
-  await calculateMatchupProjection({ lid })
-  await calculatePlayoffMatchupProjection({ lid })
+  if (week <= constants.season.finalWeek) {
+    await project_lineups(lid)
+    await calculateMatchupProjection({ lid })
+    await calculatePlayoffMatchupProjection({ lid })
+  }
 
   if (
     constants.season.week &&
