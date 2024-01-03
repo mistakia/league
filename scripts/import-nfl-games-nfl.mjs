@@ -35,33 +35,35 @@ const format = (item) => {
     : null
 
   return {
-    esbid,
-    shieldid,
-    detailid_v3,
-    detailid_v1: item.id,
+    ...(esbid && { esbid }),
+    ...(shieldid && { shieldid }),
+    ...(detailid_v3 && { detailid_v3 }),
+    ...(item.id && { detailid_v1: item.id }),
 
-    year,
-    week: item.week,
-    date,
-    time_est,
-    day,
-    timestamp: datetime ? datetime.unix() : null,
+    ...(year && { year }),
+    ...(item.week && { week: item.week }),
+    ...(date && { date }),
+    ...(time_est && { time_est }),
+    ...(day && { day }),
+    ...(datetime && { timestamp: datetime.unix() }),
 
-    v: fixTeam(item.awayTeam.abbreviation),
-    h: fixTeam(item.homeTeam.abbreviation),
+    ...(item.awayTeam.abbreviation && {
+      v: fixTeam(item.awayTeam.abbreviation)
+    }),
+    ...(item.homeTeam.abbreviation && {
+      h: fixTeam(item.homeTeam.abbreviation)
+    }),
 
-    seas_type,
-    week_type,
-    ot: (score.detail ? score.detail.phase || '' : '').includes('OVERTIME'),
+    ...(seas_type && { seas_type }),
+    ...(week_type && { week_type }),
+    ...(score.detail && {
+      ot: (score.detail.phase || '').includes('OVERTIME')
+    }),
 
-    home_score: score.homePointsTotal,
-    away_score: score.visitorPointsTotal,
+    ...(score.homePointsTotal && { home_score: score.homePointsTotal }),
+    ...(score.visitorPointsTotal && { away_score: score.visitorPointsTotal }),
 
-    stad: item.venue ? item.venue.name : null,
-    stad_nflid: item.venue ? item.venue.id : null
-
-    // clock: score.time,
-    // status: score.phase
+    ...(item.venue && { stad: item.venue.name, stad_nflid: item.venue.id })
   }
 }
 
