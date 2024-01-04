@@ -4,36 +4,44 @@ import debug from 'debug'
 
 import db from '#db'
 // import config from '#config'
-import {
-  generate_league_format_hash,
-  generate_scoring_format_hash
-} from '#libs-shared'
-import { isMain } from '#libs-server'
+import { isMain, insert_prop_markets } from '#libs-server'
 
 // const argv = yargs(hideBin(process.argv)).argv
 const log = debug('migrate')
-debug.enable('migrate,generate-league-format-hash,generate-scoring-format-hash')
+debug.enable('migrate,insert-prop-markets')
 
 const migrate = async () => {
-  // get all tables with pid columns
-  const seasons = await db('seasons')
-    .join('leagues', 'leagues.uid', 'seasons.lid')
-    .where('lid', 1)
+  const market_rows = await db('prop_markets')
+    .where('source_id', 14)
+    .orderBy('timestamp', 'asc')
 
-  for (const season of seasons) {
-    const { league_format_hash } = generate_league_format_hash(season)
-    const { scoring_format_hash } = generate_scoring_format_hash(season)
+  log(`market_rows.length: ${market_rows.length}`)
 
-    await db('seasons')
-      .update({
-        league_format_hash,
-        scoring_format_hash
-      })
-      .where({
-        lid: season.lid,
-        year: season.year
-      })
+  const formatted_market_inserts = []
+
+  for (const market_row of market_rows) {
+    const formatted_row = {
+      market_type: market_row.market_type,
+      source_id: 'FANDUEL',
+      source_market_id: market_row.market_id,
+      source_market_name: market_row.market_name,
+
+      esbid: null,
+      source_event_id: market_row.source_event_id,
+      source_event_name: null,
+
+      open: Boolean(market_row.open),
+      live: Boolean(market_row.live),
+      selection_count: market_row.runners,
+      selections: [],
+
+      timestamp: market_row.timestamp
+    }
+
+    formatted_market_inserts.push(formatted_row)
   }
+
+  await insert_prop_markets(formatted_market_inserts)
 }
 
 async function main() {
