@@ -10,6 +10,16 @@ const log = debug('insert-prop-markets')
 debug.enable('insert-prop-markets')
 
 const insert_market = async ({ timestamp, selections, ...market }) => {
+  const { source_id, source_market_id } = market
+
+  if (!source_id) {
+    throw new Error('source_id is required')
+  }
+
+  if (!source_market_id) {
+    throw new Error('source_market_id is required')
+  }
+
   // get existing market row in `prop_markets_history` table order by latest timestamp
   const existing_market = await db('prop_markets_history')
     .where('source_market_id', market.source_market_id)
@@ -159,6 +169,12 @@ const insert_market = async ({ timestamp, selections, ...market }) => {
 
 export default async function (markets) {
   for (const market of markets) {
-    await insert_market(market)
+    try {
+      await insert_market(market)
+    } catch (err) {
+      log(market)
+      console.log(err)
+      log(err)
+    }
   }
 }
