@@ -1,6 +1,9 @@
 import diff from 'deep-diff'
+import debug from 'debug'
 
 import db from '#db'
+
+const log = debug('insert-prop-market-selections')
 
 const insert_market_selection = async ({
   timestamp,
@@ -28,6 +31,30 @@ const insert_market_selection = async ({
       odds_american,
       timestamp
     })
+
+    if (!source_id) {
+      throw new Error('source_id is required')
+    }
+
+    if (!source_market_id) {
+      throw new Error('source_market_id is required')
+    }
+
+    if (!source_selection_id) {
+      throw new Error('source_selection_id is required')
+    }
+
+    if (!odds_american) {
+      throw new Error('odds_american is required')
+    }
+
+    if (!odds_decimal) {
+      throw new Error('odds_decimal is required')
+    }
+
+    if (!timestamp) {
+      throw new Error('timestamp is required')
+    }
 
     await db('prop_market_selections_index').insert({
       ...selection,
@@ -149,13 +176,19 @@ export default async function ({
 }) {
   const results = []
   for (const selection of selections) {
-    const result = await insert_market_selection({
-      timestamp,
-      selection,
-      existing_market,
-      market
-    })
-    results.push(result)
+    try {
+      const result = await insert_market_selection({
+        timestamp,
+        selection,
+        existing_market,
+        market
+      })
+      results.push(result)
+    } catch (err) {
+      log(selection)
+      console.log(err)
+      log(err)
+    }
   }
 
   if (!market.live) {
