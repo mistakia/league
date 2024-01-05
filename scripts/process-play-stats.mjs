@@ -23,15 +23,17 @@ const current_week = Math.max(
 )
 
 // TODO - add KNEE, SPKE
-const getPlayType = (play_type_ngs) => {
+const get_play_type_ngs = (play_type_ngs) => {
   switch (play_type_ngs) {
     case 'play_type_field_goal':
+    case 'play_type_xp':
       return 'FGXP'
 
     case 'play_type_kickoff':
       return 'KOFF'
 
     case 'play_type_pass':
+    case 'play_type_sack':
       return 'PASS'
 
     case 'play_type_punt':
@@ -40,9 +42,6 @@ const getPlayType = (play_type_ngs) => {
     case 'play_type_rush':
       return 'RUSH'
 
-    case 'play_type_sack':
-      return 'PASS'
-
     case 'play_type_two_point_conversion':
       return 'CONV'
 
@@ -50,8 +49,45 @@ const getPlayType = (play_type_ngs) => {
     case 'play_type_unknown':
       return 'NOPL'
 
-    case 'play_type_xp':
+    default:
+      return null
+  }
+}
+
+const get_play_type_nfl = (play_type_nfl) => {
+  switch (play_type_nfl) {
+    case 'FIELD_GOAL':
+    case 'XP_KICK':
       return 'FGXP'
+
+    case 'KICK_OFF':
+      return 'KOFF'
+
+    case 'PASS':
+    case 'SACK':
+    case 'INTERCEPTION':
+      return 'PASS'
+
+    case 'PUNT':
+      return 'PUNT'
+
+    case 'RUSH':
+      return 'RUSH'
+
+    case 'PAT2':
+      return 'CONV'
+
+    case 'FREE_KICK':
+      return 'FREE'
+
+    case 'TIMEOUT':
+    case 'UNSPECFIED':
+    case 'PENALTY':
+    case 'COMMENT':
+    case 'GAME_START':
+    case 'END_GAME':
+    case 'END_QUARTER':
+      return 'NOPL'
 
     default:
       return null
@@ -264,7 +300,14 @@ const run = async ({
     const off = play.pos_team
     if (!off) continue
     const def = off === play.h ? play.v : play.h
-    const play_type = getPlayType(play.play_type_ngs)
+    let play_type
+    if (play.play_type_ngs) {
+      play_type = get_play_type_ngs(play.play_type_ngs)
+    } else if (play.play_type_nfl) {
+      play_type = get_play_type_nfl(play.play_type_nfl)
+    } else {
+      continue
+    }
 
     const { esbid, playId } = play
     await db('nfl_plays')
