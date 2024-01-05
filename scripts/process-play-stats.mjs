@@ -290,6 +290,7 @@ const run = async ({
       'nfl_plays.esbid',
       'nfl_plays.playId',
       'nfl_plays.play_type_ngs',
+      'nfl_plays.play_type_nfl',
       'nfl_plays.pos_team'
     )
     .join('nfl_games', 'nfl_plays.esbid', '=', 'nfl_games.esbid')
