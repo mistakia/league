@@ -91,7 +91,10 @@ const format_market = async ({
   }
 
   return {
-    market_type: null, // TODO use categoryId and subcategoryId
+    market_type: draftkings.get_market_type({
+      offerCategoryId: offer_category.offerCategoryId,
+      subcategoryId: offer_sub_category.subcategoryId
+    }),
 
     source_id: 'DRAFTKINGS',
     source_market_id: draftkings_market.providerOfferId,

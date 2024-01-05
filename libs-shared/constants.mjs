@@ -1356,7 +1356,15 @@ export const player_prop_types = {
   GAME_ALT_PASSING_TOUCHDOWNS: 31,
   GAME_ALT_PASSING_COMPLETIONS: 32,
   GAME_ALT_RECEPTIONS: 33,
-  GAME_ALT_RUSHING_ATTEMPTS: 34
+  GAME_ALT_RUSHING_ATTEMPTS: 34,
+
+  SEASON_PASSING_TOUCHDOWNS: 35,
+  SEASON_RUSHING_TOUCHDOWNS: 36,
+  SEASON_RECEIVING_TOUCHDOWNS: 37,
+  SEASON_SACKS: 38,
+  SEASON_INTERCEPTIONS: 39,
+
+  GAME_ALT_RUSHING_RECEIVING_YARDS: 40
 }
 
 export const player_prop_type_keys = {}
@@ -1372,7 +1380,8 @@ export const player_prop_types_alts = [
   player_prop_types.GAME_ALT_PASSING_TOUCHDOWNS,
   player_prop_types.GAME_ALT_PASSING_COMPLETIONS,
   player_prop_types.GAME_ALT_RECEPTIONS,
-  player_prop_types.GAME_ALT_RUSHING_ATTEMPTS
+  player_prop_types.GAME_ALT_RUSHING_ATTEMPTS,
+  player_prop_types.GAME_ALT_RUSHING_RECEIVING_YARDS
 ]
 
 export const player_prop_types_leaders = [
@@ -1426,7 +1435,13 @@ export const player_prop_type_desc = {
   31: 'Alt Pass TDs',
   32: 'Alt Pass Comps',
   33: 'Alt Recs',
-  34: 'Alt Rush Atts'
+  34: 'Alt Rush Atts',
+  35: 'Pass TDs (seas)',
+  36: 'Rush TDs (seas)',
+  37: 'Recv TDs (seas)',
+  38: 'Sacks (seas)',
+  39: 'Ints (seas)',
+  40: 'Alt Rush + Recv Yards'
 }
 
 export const sources = {
