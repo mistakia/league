@@ -5,6 +5,7 @@ import { constants } from '#libs-shared'
 
 const router = express.Router()
 
+// returns all nfl plays for the current week
 router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
@@ -19,6 +20,7 @@ router.get('/?', async (req, res) => {
   }
 })
 
+// returns all nfl play stats for the current week
 router.get('/stats', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
@@ -45,6 +47,7 @@ router.get('/stats', async (req, res) => {
   }
 })
 
+// returns historical nfl plays
 router.get('/charted', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
