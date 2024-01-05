@@ -141,7 +141,6 @@ const insert_market = async ({ timestamp, selections, ...market }) => {
     }
 
     if (!market.live) {
-      // update market in `prop_markets_index` table
       await db('prop_markets_index_new')
         .insert({ ...market, timestamp, time_type: 'CLOSE' })
         .onConflict()

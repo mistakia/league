@@ -11,98 +11,204 @@ import WebSocket from 'ws'
 const log = debug('draft-kings')
 // debug.enable('draft-kings')
 
-export const categories = [
-  {
-    subcategoryId: 9524,
-    offerCategoryId: 1000,
-    type: constants.player_prop_types.GAME_PASSING_YARDS
-  },
-  {
-    subcategoryId: 9525,
-    offerCategoryId: 1000,
-    type: constants.player_prop_types.GAME_PASSING_TOUCHDOWNS
-  },
-  {
-    subcategoryId: 9522,
-    offerCategoryId: 1000,
-    type: constants.player_prop_types.GAME_PASSING_COMPLETIONS
-  },
-  {
-    subcategoryId: 9517,
-    offerCategoryId: 1000,
-    type: constants.player_prop_types.GAME_PASSING_ATTEMPTS
-  },
-  {
-    subcategoryId: 9526,
-    offerCategoryId: 1000,
-    type: constants.player_prop_types.GAME_PASSING_LONGEST_COMPLETION
-  },
-  {
-    subcategoryId: 9516,
-    offerCategoryId: 1000,
-    type: constants.player_prop_types.GAME_PASSING_INTERCEPTIONS
-  },
-  {
-    subcategoryId: 9512,
-    offerCategoryId: 1001,
-    type: constants.player_prop_types.GAME_RECEIVING_YARDS
-  },
-  {
-    subcategoryId: 9514,
-    offerCategoryId: 1001,
-    type: constants.player_prop_types.GAME_RUSHING_YARDS
-  },
-  {
-    subcategoryId: 9519,
-    offerCategoryId: 1001,
-    type: constants.player_prop_types.GAME_RECEPTIONS
-  },
-  {
-    subcategoryId: 9523,
-    offerCategoryId: 1001,
-    type: constants.player_prop_types.GAME_RUSHING_RECEIVING_YARDS
-  },
-  {
-    subcategoryId: 9518,
-    offerCategoryId: 1001,
-    type: constants.player_prop_types.GAME_RUSHING_ATTEMPTS
-  },
-  {
-    subcategoryId: 9527,
-    offerCategoryId: 1001,
-    type: constants.player_prop_types.GAME_LONGEST_RECEPTION
-  },
-  {
-    subcategoryId: 9533,
-    offerCategoryId: 1001,
-    type: constants.player_prop_types.GAME_LONGEST_RUSH
-  },
-  {
-    subcategoryId: 9521,
-    offerCategoryId: 1002,
-    type: constants.player_prop_types.GAME_TACKLES_ASSISTS
-  },
-  {
-    subcategoryId: 11555,
-    offerCategoryId: 1163,
-    type: constants.player_prop_types.SUNDAY_MOST_PASSING_YARDS
-  },
-  {
-    subcategoryId: 11557,
-    offerCategoryId: 1163,
-    type: constants.player_prop_types.SUNDAY_MOST_RUSHING_YARDS
-  },
-  {
-    subcategoryId: 11556,
-    offerCategoryId: 1163,
-    type: constants.player_prop_types.GAME_MOST_RECEIVING_YARDS
-  },
-  {
-    subcategoryId: 11819,
-    offerCategoryId: 1003,
-    type: constants.player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS
+export const get_market_type_offer_634 = (subcategoryId) => {
+  switch (subcategoryId) {
+    case 7512:
+      return constants.player_prop_types.SEASON_PASSING_YARDS
+
+    case 7524:
+      return constants.player_prop_types.SEASON_PASSING_TOUCHDOWNS
+
+    case 7562:
+      return constants.player_prop_types.SEASON_RUSHING_YARDS
+
+    case 7608:
+      return constants.player_prop_types.SEASON_RUSHING_TOUCHDOWNS
+
+    case 7725:
+      return constants.player_prop_types.SEASON_RECEIVING_YARDS
+
+    case 8130:
+      return constants.player_prop_types.SEASON_RECEIVING_TOUCHDOWNS
+
+    case 8161:
+      return constants.player_prop_types.SEASON_SACKS
+
+    case 13400:
+      return constants.player_prop_types.SEASON_INTERCEPTIONS
+
+    default:
+      log(`unknown offercategoryId 634 subcategoryId ${subcategoryId}`)
+      return null
   }
-]
+}
+
+export const get_market_type_offer_1000 = (subcategoryId) => {
+  switch (subcategoryId) {
+    case 9516:
+      return constants.player_prop_types.GAME_PASSING_INTERCEPTIONS
+
+    case 9517:
+      return constants.player_prop_types.GAME_PASSING_ATTEMPTS
+
+    case 9522:
+      return constants.player_prop_types.GAME_PASSING_COMPLETIONS
+
+    case 9524:
+      return constants.player_prop_types.GAME_PASSING_YARDS
+
+    case 9525:
+      return constants.player_prop_types.GAME_PASSING_TOUCHDOWNS
+
+    case 9526:
+      return constants.player_prop_types.GAME_PASSING_LONGEST_COMPLETION
+
+    case 9532:
+      return constants.player_prop_types.GAME_PASSING_RUSHING_YARDS
+
+    case 12093:
+    case 14119:
+      return constants.player_prop_types.GAME_ALT_PASSING_YARDS
+
+    default:
+      log(`unknown offercategoryId 1000 subcategoryId ${subcategoryId}`)
+      return null
+  }
+}
+
+export const get_market_type_offer_1001 = (subcategoryId) => {
+  switch (subcategoryId) {
+    case 9512:
+      return constants.player_prop_types.GAME_RECEIVING_YARDS
+
+    case 9514:
+      return constants.player_prop_types.GAME_RUSHING_YARDS
+
+    case 9518:
+      return constants.player_prop_types.GAME_RUSHING_ATTEMPTS
+
+    case 9519:
+      return constants.player_prop_types.GAME_RECEPTIONS
+
+    case 9523:
+      return constants.player_prop_types.GAME_RUSHING_RECEIVING_YARDS
+
+    case 9527:
+      return constants.player_prop_types.GAME_LONGEST_RECEPTION
+
+    case 9533:
+      return constants.player_prop_types.GAME_LONGEST_RUSH
+
+    case 12094:
+    case 14118:
+      return constants.player_prop_types.GAME_ALT_RUSHING_YARDS
+
+    case 12095:
+      return constants.player_prop_types.GAME_ALT_RECEIVING_YARDS
+
+    case 12096:
+      return constants.player_prop_types.GAME_ALT_RUSHING_RECEIVING_YARDS
+
+    case 14126:
+      return constants.player_prop_types.GAME_MOST_RUSHING_YARDS
+
+    default:
+      log(`unknown offercategoryId 1001 subcategoryId ${subcategoryId}`)
+      return null
+  }
+}
+
+export const get_market_type_offer_1002 = (subcategoryId) => {
+  switch (subcategoryId) {
+    case 9521:
+      return constants.player_prop_types.GAME_TACKLES_ASSISTS
+
+    default:
+      log(`unknown offercategoryId 1002 subcategoryId ${subcategoryId}`)
+      return null
+  }
+}
+
+export const get_market_type_offer_1003 = (subcategoryId) => {
+  switch (subcategoryId) {
+    case 11819:
+      return constants.player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS
+
+    default:
+      log(`unknown offercategoryId 1003 subcategoryId ${subcategoryId}`)
+      return null
+  }
+}
+
+export const get_market_type_offer_1163 = (subcategoryId) => {
+  switch (subcategoryId) {
+    case 11555:
+      return constants.player_prop_types.SUNDAY_MOST_PASSING_YARDS
+
+    case 11556:
+      return constants.player_prop_types.GAME_MOST_RECEIVING_YARDS
+
+    case 11557:
+      return constants.player_prop_types.SUNDAY_MOST_RUSHING_YARDS
+
+    default:
+      log(`unknown offercategoryId 1163 subcategoryId ${subcategoryId}`)
+      return null
+  }
+}
+
+export const get_market_type_offer_1342 = (subcategoryId) => {
+  switch (subcategoryId) {
+    case 14113:
+    case 14117:
+      return constants.player_prop_types.GAME_ALT_RECEIVING_YARDS
+
+    case 14114:
+      return constants.player_prop_types.GAME_RECEIVING_YARDS
+
+    case 14115:
+      return constants.player_prop_types.GAME_RECEPTIONS
+
+    case 14116:
+      return constants.player_prop_types.GAME_LONGEST_RECEPTION
+
+    case 14124:
+      return constants.player_prop_types.GAME_MOST_RECEIVING_YARDS
+
+    default:
+      log(`unknown offercategoryId 1342 subcategoryId ${subcategoryId}`)
+      return null
+  }
+}
+
+export const get_market_type = ({ offerCategoryId, subcategoryId }) => {
+  switch (offerCategoryId) {
+    case 634:
+      return get_market_type_offer_634(subcategoryId)
+
+    case 1000:
+      return get_market_type_offer_1000(subcategoryId)
+
+    case 1001:
+      return get_market_type_offer_1001(subcategoryId)
+
+    case 1002:
+      return get_market_type_offer_1002(subcategoryId)
+
+    case 1003:
+      return get_market_type_offer_1003(subcategoryId)
+
+    case 1163:
+      return get_market_type_offer_1163(subcategoryId)
+
+    case 1342:
+      return get_market_type_offer_1342(subcategoryId)
+
+    default:
+      log(`unknown offerCategoryId ${offerCategoryId}`)
+      return null
+  }
+}
 
 export const get_offers = async ({ offerCategoryId, subcategoryId }) => {
   const url = `${config.draftkings_api_v6_url}/eventgroups/88808/categories/${offerCategoryId}/subcategories/${subcategoryId}?format=json`
