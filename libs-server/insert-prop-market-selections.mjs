@@ -184,39 +184,38 @@ export default async function ({
         market
       })
       results.push(result)
+
+      if (!market.live) {
+        // remove any missing selections from `prop_market_selections_index`
+        const existing_selections = await db('prop_market_selections_index')
+          .where({
+            source_market_id: existing_market.source_market_id,
+            time_type: 'CLOSE'
+          })
+          .select('source_selection_id')
+    
+        const existing_selection_ids = existing_selections.map(
+          (selection) => selection.source_selection_id
+        )
+        const new_selection_ids = selections.map((selection) =>
+          selection.source_selection_id.toString()
+        )
+        const missing_selection_ids = existing_selection_ids.filter(
+          (id) => !new_selection_ids.includes(id)
+        )
+        await db('prop_market_selections_index')
+          .where({
+            source_market_id: existing_market.source_market_id,
+            time_type: 'CLOSE'
+          })
+          .whereIn('source_selection_id', missing_selection_ids)
+          .del()
+      }    
     } catch (err) {
       log(selection)
       console.log(err)
       log(err)
     }
   }
-
-  if (!market.live) {
-    // remove any missing selections from `prop_market_selections_index`
-    const existing_selections = await db('prop_market_selections_index')
-      .where({
-        source_market_id: existing_market.source_market_id,
-        time_type: 'CLOSE'
-      })
-      .select('source_selection_id')
-
-    const existing_selection_ids = existing_selections.map(
-      (selection) => selection.source_selection_id
-    )
-    const new_selection_ids = selections.map((selection) =>
-      selection.source_selection_id.toString()
-    )
-    const missing_selection_ids = existing_selection_ids.filter(
-      (id) => !new_selection_ids.includes(id)
-    )
-    await db('prop_market_selections_index')
-      .where({
-        source_market_id: existing_market.source_market_id,
-        time_type: 'CLOSE'
-      })
-      .whereIn('source_selection_id', missing_selection_ids)
-      .del()
-  }
-
   return results
 }
