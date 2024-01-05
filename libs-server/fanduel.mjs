@@ -22,18 +22,18 @@ export const tabs = [
 
 export const leader_market_names = {
   'Most Passing Yards of Game':
-    constants.player_prop_types.GAME_MOST_PASSING_YARDS,
+    constants.player_prop_types.GAME_LEADER_PASSING_YARDS,
   'Most Receiving Yards of Game':
-    constants.player_prop_types.GAME_MOST_RECEIVING_YARDS,
+    constants.player_prop_types.GAME_LEADER_RECEIVING_YARDS,
   'Most Rushing Yards of Game':
-    constants.player_prop_types.GAME_MOST_RUSHING_YARDS,
+    constants.player_prop_types.GAME_LEADER_RUSHING_YARDS,
 
   'Most Passing Yards - Sunday Only':
-    constants.player_prop_types.SUNDAY_MOST_PASSING_YARDS,
+    constants.player_prop_types.SUNDAY_LEADER_PASSING_YARDS,
   'Most Receiving Yards - Sunday Only':
-    constants.player_prop_types.SUNDAY_MOST_RECEIVING_YARDS,
+    constants.player_prop_types.SUNDAY_LEADER_RECEIVING_YARDS,
   'Most Rushing Yards - Sunday Only':
-    constants.player_prop_types.SUNDAY_MOST_RUSHING_YARDS
+    constants.player_prop_types.SUNDAY_LEADER_RUSHING_YARDS
 }
 
 export const alt_line_markets = {
@@ -116,9 +116,9 @@ export const alt_line_markets = {
 }
 
 export const leader_markets = {
-  MOST_PASSING_YARDS: constants.player_prop_types.GAME_MOST_PASSING_YARDS,
-  MOST_RECEIVING_YARDS: constants.player_prop_types.GAME_MOST_RECEIVING_YARDS,
-  MOST_RUSHING_YARDS: constants.player_prop_types.GAME_MOST_RUSHING_YARDS
+  MOST_PASSING_YARDS: constants.player_prop_types.GAME_LEADER_PASSING_YARDS,
+  MOST_RECEIVING_YARDS: constants.player_prop_types.GAME_LEADER_RECEIVING_YARDS,
+  MOST_RUSHING_YARDS: constants.player_prop_types.GAME_LEADER_RUSHING_YARDS
 }
 
 export const markets = {

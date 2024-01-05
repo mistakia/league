@@ -14,28 +14,28 @@ const log = debug('draft-kings')
 export const get_market_type_offer_634 = (subcategoryId) => {
   switch (subcategoryId) {
     case 7512:
-      return constants.player_prop_types.SEASON_PASSING_YARDS
+      return constants.player_prop_types.SEASON_LEADER_PASSING_YARDS
 
     case 7524:
-      return constants.player_prop_types.SEASON_PASSING_TOUCHDOWNS
+      return constants.player_prop_types.SEASON_LEADER_PASSING_TOUCHDOWNS
 
     case 7562:
-      return constants.player_prop_types.SEASON_RUSHING_YARDS
+      return constants.player_prop_types.SEASON_LEADER_RUSHING_YARDS
 
     case 7608:
-      return constants.player_prop_types.SEASON_RUSHING_TOUCHDOWNS
+      return constants.player_prop_types.SEASON_LEADER_RUSHING_TOUCHDOWNS
 
     case 7725:
-      return constants.player_prop_types.SEASON_RECEIVING_YARDS
+      return constants.player_prop_types.SEASON_LEADER_RECEIVING_YARDS
 
     case 8130:
-      return constants.player_prop_types.SEASON_RECEIVING_TOUCHDOWNS
+      return constants.player_prop_types.SEASON_LEADER_RECEIVING_TOUCHDOWNS
 
     case 8161:
-      return constants.player_prop_types.SEASON_SACKS
+      return constants.player_prop_types.SEASON_LEADER_SACKS
 
     case 13400:
-      return constants.player_prop_types.SEASON_INTERCEPTIONS
+      return constants.player_prop_types.SEASON_LEADER_INTERCEPTIONS
 
     default:
       log(`unknown offercategoryId 634 subcategoryId ${subcategoryId}`)
@@ -110,7 +110,7 @@ export const get_market_type_offer_1001 = (subcategoryId) => {
       return constants.player_prop_types.GAME_ALT_RUSHING_RECEIVING_YARDS
 
     case 14126:
-      return constants.player_prop_types.GAME_MOST_RUSHING_YARDS
+      return constants.player_prop_types.GAME_LEADER_RUSHING_YARDS
 
     default:
       log(`unknown offercategoryId 1001 subcategoryId ${subcategoryId}`)
@@ -143,13 +143,13 @@ export const get_market_type_offer_1003 = (subcategoryId) => {
 export const get_market_type_offer_1163 = (subcategoryId) => {
   switch (subcategoryId) {
     case 11555:
-      return constants.player_prop_types.SUNDAY_MOST_PASSING_YARDS
+      return constants.player_prop_types.SUNDAY_LEADER_PASSING_YARDS
 
     case 11556:
-      return constants.player_prop_types.GAME_MOST_RECEIVING_YARDS
+      return constants.player_prop_types.GAME_LEADER_RECEIVING_YARDS
 
     case 11557:
-      return constants.player_prop_types.SUNDAY_MOST_RUSHING_YARDS
+      return constants.player_prop_types.SUNDAY_LEADER_RUSHING_YARDS
 
     default:
       log(`unknown offercategoryId 1163 subcategoryId ${subcategoryId}`)
@@ -173,7 +173,7 @@ export const get_market_type_offer_1342 = (subcategoryId) => {
       return constants.player_prop_types.GAME_LONGEST_RECEPTION
 
     case 14124:
-      return constants.player_prop_types.GAME_MOST_RECEIVING_YARDS
+      return constants.player_prop_types.GAME_LEADER_RECEIVING_YARDS
 
     default:
       log(`unknown offercategoryId 1342 subcategoryId ${subcategoryId}`)
@@ -339,7 +339,7 @@ export const get_wagers = ({
       })
     )
 
-    const request_most_wagers = () => {
+    const request_LEADER_wagers = () => {
       log(`requesting ${limit} more wagers`)
       wss.send(
         JSON.stringify({
@@ -406,7 +406,7 @@ export const get_wagers = ({
       if (has_more) {
         start = start + limit
         await wait(5000)
-        request_most_wagers()
+        request_LEADER_wagers()
       } else {
         resolve(results)
       }
