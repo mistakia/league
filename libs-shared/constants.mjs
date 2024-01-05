@@ -1342,13 +1342,13 @@ export const player_prop_types = {
   GAME_ALT_RUSHING_YARDS: 21,
   GAME_ALT_RECEIVING_YARDS: 22,
 
-  GAME_MOST_PASSING_YARDS: 23,
-  GAME_MOST_RUSHING_YARDS: 24,
-  GAME_MOST_RECEIVING_YARDS: 25,
+  GAME_LEADER_PASSING_YARDS: 23,
+  GAME_LEADER_RUSHING_YARDS: 24,
+  GAME_LEADER_RECEIVING_YARDS: 25,
 
-  SUNDAY_MOST_PASSING_YARDS: 26,
-  SUNDAY_MOST_RUSHING_YARDS: 27,
-  SUNDAY_MOST_RECEIVING_YARDS: 28,
+  SUNDAY_LEADER_PASSING_YARDS: 26,
+  SUNDAY_LEADER_RUSHING_YARDS: 27,
+  SUNDAY_LEADER_RECEIVING_YARDS: 28,
 
   GAME_TACKLES_ASSISTS: 29,
 
@@ -1358,13 +1358,17 @@ export const player_prop_types = {
   GAME_ALT_RECEPTIONS: 33,
   GAME_ALT_RUSHING_ATTEMPTS: 34,
 
-  SEASON_PASSING_TOUCHDOWNS: 35,
-  SEASON_RUSHING_TOUCHDOWNS: 36,
-  SEASON_RECEIVING_TOUCHDOWNS: 37,
-  SEASON_SACKS: 38,
-  SEASON_INTERCEPTIONS: 39,
+  SEASON_LEADER_PASSING_TOUCHDOWNS: 35,
+  SEASON_LEADER_RUSHING_TOUCHDOWNS: 36,
+  SEASON_LEADER_RECEIVING_TOUCHDOWNS: 37,
+  SEASON_LEADER_SACKS: 38,
+  SEASON_LEADER_INTERCEPTIONS: 39,
 
-  GAME_ALT_RUSHING_RECEIVING_YARDS: 40
+  GAME_ALT_RUSHING_RECEIVING_YARDS: 40,
+
+  SEASON_LEADER_PASSING_YARDS: 41,
+  SEASON_LEADER_RUSHING_YARDS: 42,
+  SEASON_LEADER_RECEIVING_YARDS: 43
 }
 
 export const player_prop_type_keys = {}
@@ -1385,19 +1389,19 @@ export const player_prop_types_alts = [
 ]
 
 export const player_prop_types_leaders = [
-  player_prop_types.GAME_MOST_PASSING_YARDS,
-  player_prop_types.GAME_MOST_RUSHING_YARDS,
-  player_prop_types.GAME_MOST_RECEIVING_YARDS,
+  player_prop_types.GAME_LEADER_PASSING_YARDS,
+  player_prop_types.GAME_LEADER_RUSHING_YARDS,
+  player_prop_types.GAME_LEADER_RECEIVING_YARDS,
 
-  player_prop_types.SUNDAY_MOST_PASSING_YARDS,
-  player_prop_types.SUNDAY_MOST_RUSHING_YARDS,
-  player_prop_types.SUNDAY_MOST_RECEIVING_YARDS
+  player_prop_types.SUNDAY_LEADER_PASSING_YARDS,
+  player_prop_types.SUNDAY_LEADER_RUSHING_YARDS,
+  player_prop_types.SUNDAY_LEADER_RECEIVING_YARDS
 ]
 
 export const player_prop_types_sunday_leaders = [
-  player_prop_types.SUNDAY_MOST_PASSING_YARDS,
-  player_prop_types.SUNDAY_MOST_RUSHING_YARDS,
-  player_prop_types.SUNDAY_MOST_RECEIVING_YARDS
+  player_prop_types.SUNDAY_LEADER_PASSING_YARDS,
+  player_prop_types.SUNDAY_LEADER_RUSHING_YARDS,
+  player_prop_types.SUNDAY_LEADER_RECEIVING_YARDS
 ]
 
 export const player_prop_type_desc = {
@@ -1424,12 +1428,12 @@ export const player_prop_type_desc = {
   20: 'Alt Pass Yards',
   21: 'Alt Rush Yards',
   22: 'Alt Recv Yards',
-  23: 'Most Pass Yards (game)',
-  24: 'Most Rush Yards (game)',
-  25: 'Most Recv Yards (game)',
-  26: 'Most Pass Yards (sunday)',
-  27: 'Most Rush Yards (sunday)',
-  28: 'Most Recv Yards (sunday)',
+  23: 'Pass Yards Leader (game)',
+  24: 'Rush Yards Leader (game)',
+  25: 'Recv Yards Leader (game)',
+  26: 'Pass Yards Leader (sunday)',
+  27: 'Rush Yards Leader (sunday)',
+  28: 'Recv Yards Leader (sunday)',
   29: 'Tackles + Assists',
   30: 'Pass + Rush Yards',
   31: 'Alt Pass TDs',
@@ -1441,7 +1445,10 @@ export const player_prop_type_desc = {
   37: 'Recv TDs (seas)',
   38: 'Sacks (seas)',
   39: 'Ints (seas)',
-  40: 'Alt Rush + Recv Yards'
+  40: 'Alt Rush + Recv Yards',
+  41: 'Pass Yards Leader (seas)',
+  42: 'Rush Yards Leader (seas)',
+  43: 'Recv Yards Leader (seas)'
 }
 
 export const sources = {
