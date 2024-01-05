@@ -399,7 +399,7 @@ const main = async () => {
     const seas_type = argv.seas_type || constants.season.nfl_seas_type
     const source = argv.source || 'FANDUEL'
 
-    const prop_rows = await db('prop_markets_index_new')
+    const prop_rows_query = db('prop_markets_index_new')
       .select(
         'prop_markets_index_new.*',
         'prop_market_selections_index.*',
@@ -458,6 +458,10 @@ const main = async () => {
       .where('nfl_games.seas_type', seas_type)
       .where('nfl_games.year', year)
       .whereRaw('LOWER(selection_name) NOT LIKE ?', ['%under%'])
+
+    // log(prop_rows_query.toString())
+
+    const prop_rows = await prop_rows_query
 
     await process_props_index({ prop_rows, week, year, seas_type })
   } catch (err) {

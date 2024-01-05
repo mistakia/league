@@ -77,6 +77,15 @@ const format_market = async ({
       }
     }
 
+    let selection_metric_line = outcome.line
+
+    if (!selection_metric_line && outcome.label) {
+      const parsed_line = outcome.label.match(/(\d+\.?\d*)+/)
+      if (parsed_line) {
+        selection_metric_line = Number(parsed_line[0])
+      }
+    }
+
     selections.push({
       source_id: 'DRAFTKINGS',
       source_market_id: draftkings_market.providerOfferId,
@@ -84,7 +93,7 @@ const format_market = async ({
 
       selection_pid: player_row?.pid || null,
       selection_name: outcome.label,
-      selection_metric_line: outcome.line,
+      selection_metric_line,
       odds_decimal: outcome.oddsDecimal,
       odds_american: outcome.oddsAmerican
     })
