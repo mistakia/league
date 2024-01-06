@@ -5,6 +5,7 @@ import fs from 'fs-extra'
 import path, { dirname } from 'path'
 import { fileURLToPath } from 'url'
 import { hideBin } from 'yargs/helpers'
+import isBetween from 'dayjs/plugin/isBetween.js'
 
 import db from '#db'
 import { constants, fixTeam, Errors } from '#libs-shared'
@@ -14,6 +15,8 @@ import {
   getPlayer,
   encode_market_selection_id
 } from '#libs-server'
+
+dayjs.extend(isBetween)
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-fanduel-wagers')
@@ -172,8 +175,8 @@ const import_fanduel_wagers = async ({
   for (const part of unique_parts) {
     const start_time = dayjs(part.startTime)
 
-    // check if start_time is this season
-    if (start_time.year() !== constants.season.year) {
+    // check if start_time is not between now and end of current season
+    if (!start_time.isBetween(constants.season.start, constants.season.end)) {
       throw new Error(
         `start time ${start_time.format()} is not this season (${
           constants.season.year
