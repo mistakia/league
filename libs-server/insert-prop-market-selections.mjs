@@ -193,7 +193,7 @@ export default async function ({
             time_type: 'CLOSE'
           })
           .select('source_selection_id')
-    
+
         const existing_selection_ids = existing_selections.map(
           (selection) => selection.source_selection_id
         )
@@ -210,7 +210,7 @@ export default async function ({
           })
           .whereIn('source_selection_id', missing_selection_ids)
           .del()
-      }    
+      }
     } catch (err) {
       log(selection)
       console.log(err)
