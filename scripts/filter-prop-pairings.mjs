@@ -440,7 +440,9 @@ const filter_prop_pairings = async ({
     const p = new Table({
       title: `${team} plays`,
       columns: [
-        { name: 'pairing', alignment: 'left' },
+        { name: 'prop_1', alignment: 'left' },
+        { name: 'prop_2', alignment: 'left' },
+        { name: 'prop_3', alignment: 'left' },
         { name: 'status', alignment: 'left' },
         { name: 'hit_rate_soft', alignment: 'right' },
         { name: 'hit_rate_hard', alignment: 'right' },
@@ -456,12 +458,15 @@ const filter_prop_pairings = async ({
         : prop.is_success
         ? 'hit'
         : 'miss'
-      const prop_names = prop.props.map(
+      const sorted_props = prop.props.sort((a, b) => a.o_am - b.o_am)
+      const prop_names = sorted_props.map(
         (p) => `${p.name} [${Math.round(p.hist_rate_soft * 100)}% / ${p.o_am}]`
       )
 
       p.addRow({
-        pairing: `${prop_names.join(' / ')}`,
+        prop_1: prop_names[0] || '',
+        prop_2: prop_names[1] || '',
+        prop_3: prop_names[2] || '',
         status,
         hit_rate_soft: `${Math.round(prop.hist_rate_soft * 100)}%`,
         hit_rate_hard: `${Math.round(prop.hist_rate_hard * 100)}%`,
