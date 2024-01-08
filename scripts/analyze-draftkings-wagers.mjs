@@ -124,7 +124,12 @@ const get_wagers_summary = ({ wagers, props = [] }) =>
     }
   )
 
-const analyze_draftkings_wagers = async ({ filename, week } = {}) => {
+const analyze_draftkings_wagers = async ({
+  filename,
+  week,
+  show_counts = false,
+  show_potential_gain = false
+} = {}) => {
   if (!filename) {
     throw new Error('filename is required')
   }
@@ -256,7 +261,7 @@ const analyze_draftkings_wagers = async ({ filename, week } = {}) => {
 
     return {
       name: format_prop_name(prop),
-      american_price: prop.displayOdds,
+      odds: prop.displayOdds,
       exposure_count,
       exposure_rate: `${((exposure_count / filtered.length) * 100).toFixed(
         2
@@ -267,7 +272,19 @@ const analyze_draftkings_wagers = async ({ filename, week } = {}) => {
   })
 
   props_with_exposure.sort((a, b) => b.exposure_count - a.exposure_count)
-  props_with_exposure.forEach((prop) => unique_props_table.addRow(prop))
+  props_with_exposure.forEach(
+    ({ exposure_count, potential_payout, ...prop }) => {
+      if (show_counts) {
+        prop.exposure_count = exposure_count
+      }
+
+      if (show_potential_gain) {
+        prop.potential_payout = potential_payout
+      }
+
+      unique_props_table.addRow(prop)
+    }
+  )
   unique_props_table.printTable()
 
   const props_summary = get_props_summary(filtered_props)
