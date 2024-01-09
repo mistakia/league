@@ -269,8 +269,8 @@ CREATE TABLE `nfl_games` (
   `home_rest` int(1) DEFAULT NULL,
   `home_moneyline` int(5) DEFAULT NULL,
   `away_moneyline` int(5) DEFAULT NULL,
-  `spread_line` int(3) DEFAULT NULL,
-  `total_line` int(3) DEFAULT NULL,
+  `spread_line` decimal(3,1) DEFAULT NULL,
+  `total_line` decimal(3,1) DEFAULT NULL,
 
   `roof` ENUM('dome', 'outdoors', 'closed', 'open') DEFAULT NULL,
   `surf` ENUM('grass', 'astroturf', 'fieldturf', 'dessograss', 'astroplay', 'matrixturf', 'sportturf', 'a_turf') DEFAULT NULL,
