@@ -8,7 +8,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { constants, fixTeam } from '#libs-shared'
 import { isMain, readCSV, update_nfl_game, getPlayer } from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -95,9 +95,32 @@ const import_nfl_games_nflverse_nfldata = async ({
   })
 
   for (const item of data) {
-    const db_game = await db('nfl_games')
-      .where({ esbid: item.old_game_id })
+    let db_game = await db('nfl_games')
+      .where({
+        year: item.season,
+        week: item.week,
+        seas_type: item.game_type,
+        v: fixTeam(item.away_team),
+        h: fixTeam(item.home_team),
+        esbid: item.old_game_id
+      })
       .first()
+
+    if (!db_game) {
+      db_game = await db('nfl_games')
+        .where({
+          year: item.season,
+          week: item.week,
+          seas_type: item.game_type,
+          v: fixTeam(item.away_team),
+          h: fixTeam(item.home_team)
+        })
+        .first()
+    }
+
+    if (!db_game) {
+      db_game = await db('nfl_games').where({ esbid: item.old_game_id }).first()
+    }
 
     if (db_game) {
       const game = format_game(item)
