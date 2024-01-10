@@ -184,7 +184,7 @@ const import_fanduel_wagers = async ({
       )
     }
 
-    const week = constants.season.calculate_week(start_time)
+    const { week } = constants.season.calculate_week(start_time)
 
     if (!weeks.includes(week)) {
       weeks.push(week)
@@ -203,7 +203,7 @@ const import_fanduel_wagers = async ({
       const { player_name, event_description, start_time } =
         fanduel.get_market_details_from_wager(part)
 
-      const event_week = constants.season.calculate_week(start_time)
+      const { week: event_week } = constants.season.calculate_week(start_time)
 
       const home_team = fixTeam(event_description.split(' @ ')[1])
       const away_team = fixTeam(event_description.split(' @ ')[0])

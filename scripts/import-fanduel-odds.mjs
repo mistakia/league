@@ -52,11 +52,14 @@ const format_market = async ({
 
   if (event.name) {
     const event_name_split = event.name.split(' @ ')
-    const week = dayjs(event.openDate).diff(constants.season.start, 'weeks')
+    const { week, seas_type } = constants.season.calculate_week(
+      dayjs(event.openDate)
+    )
 
     nfl_game = nfl_games.find(
       (game) =>
         game.week === week &&
+        game.seas_type === seas_type &&
         game.year === constants.season.year &&
         game.v === fixTeam(event_name_split[0]) &&
         game.h === fixTeam(event_name_split[1])
