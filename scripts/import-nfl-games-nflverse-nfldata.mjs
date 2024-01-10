@@ -35,7 +35,7 @@ const format_number = (num) => {
 
 const format_game = (game) => ({
   nflverse_game_id: game.game_id,
-  esbid: game.old_game_id,
+  // esbid: game.old_game_id,
   gsisid: format_number(game.gsis),
   pfr_game_id: game.pfr,
   pff_game_id: game.pff,
@@ -130,6 +130,8 @@ const import_nfl_games_nflverse_nfldata = async ({
 
         if (away_qb_player) {
           game.away_qb_pid = away_qb_player.pid
+        } else {
+          log(`away_qb_player not found: ${item.away_qb_id}`)
         }
       }
 
@@ -138,6 +140,8 @@ const import_nfl_games_nflverse_nfldata = async ({
 
         if (home_qb_player) {
           game.home_qb_pid = home_qb_player.pid
+        } else {
+          log(`home_qb_player not found: ${item.home_qb_id}`)
         }
       }
 
