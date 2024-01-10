@@ -399,6 +399,13 @@ const main = async () => {
     const seas_type = argv.seas_type || constants.season.nfl_seas_type
     const source = argv.source || 'FANDUEL'
 
+    log({
+      week,
+      year,
+      seas_type,
+      source
+    })
+
     const prop_rows_query = db('prop_markets_index_new')
       .select(
         'prop_markets_index_new.*',
