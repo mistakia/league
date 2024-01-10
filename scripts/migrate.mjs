@@ -11,9 +11,21 @@ const log = debug('migrate')
 debug.enable('migrate,insert-prop-markets')
 
 const migrate = async () => {
+  // get market_rows that do not exist prop_markets_history
   const market_rows = await db('prop_markets')
-    .where('source_id', 14)
-    .orderBy('timestamp', 'asc')
+    .select('prop_markets.*')
+    .leftJoin('prop_markets_history', function () {
+      this.on(db.raw(`prop_markets_history.source_id = 'DRAFTKINGS'`))
+      this.on(
+        'prop_markets_history.source_market_id',
+        '=',
+        'prop_markets.market_id'
+      )
+      this.on('prop_markets_history.timestamp', '=', 'prop_markets.timestamp')
+    })
+    .where('prop_markets.source_id', 14)
+    .whereNull('prop_markets_history.source_id')
+    .orderBy('prop_markets.timestamp', 'asc')
 
   log(`market_rows.length: ${market_rows.length}`)
 
@@ -22,7 +34,7 @@ const migrate = async () => {
   for (const market_row of market_rows) {
     const formatted_row = {
       market_type: market_row.market_type,
-      source_id: 'FANDUEL',
+      source_id: 'DRAFTKINGS',
       source_market_id: market_row.market_id,
       source_market_name: market_row.market_name,
 
