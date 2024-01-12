@@ -43,7 +43,7 @@ export default async function (leagueId) {
         order: 'desc'
       },
       {
-        column: 'teams.wo',
+        column: 'teams.waiver_order',
         order: 'asc'
       },
       {

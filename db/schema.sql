@@ -905,7 +905,7 @@ CREATE TABLE `teams` (
   `cap` int(4) NOT NULL,
   `faab` int(4) NOT NULL,
   `do` tinyint(2) DEFAULT NULL,
-  `wo` tinyint(2) DEFAULT NULL,
+  `waiver_order` tinyint(2) DEFAULT NULL,
   `pc` varchar(6) DEFAULT NULL,
   `ac` varchar(6) DEFAULT NULL,
   UNIQUE KEY `team_year` (`uid`, `year`),

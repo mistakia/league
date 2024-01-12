@@ -28,7 +28,7 @@ export default async function (knex, league_params = {}) {
       uid: i,
       year: constants.season.year,
       lid: 1,
-      wo: i,
+      waiver_order: i,
       do: i,
       cap: league.cap,
       faab: league.faab,

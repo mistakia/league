@@ -78,10 +78,10 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
       const team2 = teams.find((t) => t.uid === 2)
       const team3 = teams.find((t) => t.uid === 3)
       const team4 = teams.find((t) => t.uid === 4)
-      expect(team1.wo).to.equal(1)
-      expect(team2.wo).to.equal(2)
-      expect(team3.wo).to.equal(3)
-      expect(team4.wo).to.equal(4)
+      expect(team1.waiver_order).to.equal(1)
+      expect(team2.waiver_order).to.equal(2)
+      expect(team3.waiver_order).to.equal(3)
+      expect(team4.waiver_order).to.equal(4)
 
       // verify roster
       await checkRoster({
@@ -248,10 +248,10 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
       const team2 = teams.find((t) => t.uid === 2)
       const team3 = teams.find((t) => t.uid === 3)
       const team4 = teams.find((t) => t.uid === 4)
-      expect(team1.wo).to.equal(12)
-      expect(team2.wo).to.equal(1)
-      expect(team3.wo).to.equal(2)
-      expect(team4.wo).to.equal(3)
+      expect(team1.waiver_order).to.equal(12)
+      expect(team2.waiver_order).to.equal(1)
+      expect(team3.waiver_order).to.equal(2)
+      expect(team4.waiver_order).to.equal(3)
 
       // verify roster
       await checkRoster({

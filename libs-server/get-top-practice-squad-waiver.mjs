@@ -66,7 +66,7 @@ export default async function (lid) {
     .where('waivers.type', constants.waivers.FREE_AGENCY_PRACTICE)
     .orderBy([
       {
-        column: 'teams.wo',
+        column: 'teams.waiver_order',
         order: 'asc'
       },
       {

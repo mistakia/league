@@ -29,7 +29,7 @@ export default async function (leagueId) {
     .whereNull('processed')
     .whereNull('cancelled')
     .where('type', constants.waivers.POACH)
-    .orderBy(['teams.wo', 'waivers.po', 'waivers.uid'])
+    .orderBy(['teams.waiver_order', 'waivers.po', 'waivers.uid'])
 
   if (exclude_pids.length) {
     waiversQuery.whereNotIn('waivers.pid', exclude_pids)
