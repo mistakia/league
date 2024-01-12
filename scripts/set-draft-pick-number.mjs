@@ -14,7 +14,9 @@ const run = async () => {
 
   const league = await getLeague({ lid })
   const teams = await db('teams').where({ lid, year: constants.season.year })
-  const draftOrder = teams.sort((a, b) => a.do - b.do).map((t) => t.uid)
+  const draftOrder = teams
+    .sort((a, b) => a.draft_order - b.draft_order)
+    .map((t) => t.uid)
 
   const picks = await db('draft').where({
     lid,

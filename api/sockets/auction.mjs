@@ -437,7 +437,7 @@ export default class Auction {
       lid: this._lid,
       year: constants.season.year
     })
-    this._teams = teams.sort((a, b) => a.do - b.do)
+    this._teams = teams.sort((a, b) => a.draft_order - b.draft_order)
 
     this._tids = this._teams.map((t) => t.uid)
     this._transactions = await db('transactions')
