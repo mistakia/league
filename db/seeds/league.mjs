@@ -29,7 +29,7 @@ export default async function (knex, league_params = {}) {
       year: constants.season.year,
       lid: 1,
       waiver_order: i,
-      do: i,
+      draft_order: i,
       cap: league.cap,
       faab: league.faab,
       div: (i % 4) + 1,

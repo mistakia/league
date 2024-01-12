@@ -53,7 +53,7 @@ describe('API /leagues/teams - add', function () {
       res.body.team.name.should.equal('Team1')
       res.body.team.abbrv.should.equal('TM1')
       res.body.team.waiver_order.should.equal(1)
-      res.body.team.do.should.equal(1)
+      res.body.team.draft_order.should.equal(1)
       res.body.team.cap.should.equal(200)
       res.body.team.faab.should.equal(200)
       res.body.team.lid.should.equal(leagueId)
@@ -120,7 +120,7 @@ describe('API /leagues/teams - add', function () {
           uid: i,
           lid: 1,
           waiver_order: i,
-          do: i,
+          draft_order: i,
           name: `Team${i}`,
           abbrv: `TM${i}`
         })

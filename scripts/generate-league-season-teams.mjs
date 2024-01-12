@@ -30,7 +30,7 @@ const generate_league_season_teams = async ({
   // draft order is determined by draft order index for teams that didnt make the post season
   const draft_order_non_post_season = team_stats
     .filter((t) => !t.post_season_finish)
-    .sort((a, b) => a.doi - b.doi)
+    .sort((a, b) => a.draft_orderi - b.draft_orderi)
     .map((t) => t.tid)
 
   // draft order is determined by post season finish for teams that made the post season
@@ -57,7 +57,7 @@ const generate_league_season_teams = async ({
 
       // reset team stats
       waiver_order: i + 1,
-      do: i + 1,
+      draft_order: i + 1,
       cap: league.cap,
       faab: league.faab
     })

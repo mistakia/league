@@ -43,7 +43,7 @@ router.post('/?', async (req, res) => {
       name: `Team${count}`,
       abbrv: `TM${count}`,
       waiver_order: count,
-      do: count,
+      draft_order: count,
       cap: league.cap,
       faab: league.faab,
       lid: leagueId
