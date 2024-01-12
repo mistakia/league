@@ -20,8 +20,8 @@ export default function DashboardTeamSummaryWaiverOrder({ teams, tid }) {
       <tr key={team.uid}>
         <td>{team.name}</td>
         <td>
-          {team.wo}
-          {nth(team.wo)}
+          {team.waiver_order}
+          {nth(team.waiver_order)}
         </td>
       </tr>
     )
@@ -35,7 +35,7 @@ export default function DashboardTeamSummaryWaiverOrder({ teams, tid }) {
             Waiver Order
           </Grid>
           <Grid item xs={2}>
-            <Rank rank={team.wo} size={teams.size} />
+            <Rank rank={team.waiver_order} size={teams.size} />
           </Grid>
         </Grid>
       </AccordionSummary>

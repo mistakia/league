@@ -212,10 +212,10 @@ describe('SCRIPTS /waivers - poach', function () {
       const team2 = teams.find((t) => t.uid === 2)
       const team3 = teams.find((t) => t.uid === 3)
       const team4 = teams.find((t) => t.uid === 4)
-      expect(team1.wo).to.equal(1)
-      expect(team2.wo).to.equal(12)
-      expect(team3.wo).to.equal(2)
-      expect(team4.wo).to.equal(3)
+      expect(team1.waiver_order).to.equal(1)
+      expect(team2.waiver_order).to.equal(12)
+      expect(team3.waiver_order).to.equal(2)
+      expect(team4.waiver_order).to.equal(3)
 
       // verify poaching claim
       const poaches = await knex('poaches').where({ lid: 1 })
@@ -287,10 +287,10 @@ describe('SCRIPTS /waivers - poach', function () {
       const team2 = teams.find((t) => t.uid === 2)
       const team3 = teams.find((t) => t.uid === 3)
       const team4 = teams.find((t) => t.uid === 4)
-      expect(team1.wo).to.equal(1)
-      expect(team2.wo).to.equal(12)
-      expect(team3.wo).to.equal(2)
-      expect(team4.wo).to.equal(3)
+      expect(team1.waiver_order).to.equal(1)
+      expect(team2.waiver_order).to.equal(12)
+      expect(team3.waiver_order).to.equal(2)
+      expect(team4.waiver_order).to.equal(3)
 
       // verify poaching claim
       const poaches = await knex('poaches').where({ lid: 1 })
@@ -332,7 +332,7 @@ describe('SCRIPTS /waivers - poach', function () {
         type: constants.waivers.POACH
       })
 
-      // waiver two - user 4
+      // waiver twaiver_order - user 4
       await knex('waivers').insert({
         tid: 4,
         userid: 4,
@@ -383,10 +383,10 @@ describe('SCRIPTS /waivers - poach', function () {
       const team2 = teams.find((t) => t.uid === 2)
       const team3 = teams.find((t) => t.uid === 3)
       const team4 = teams.find((t) => t.uid === 4)
-      expect(team1.wo).to.equal(1)
-      expect(team2.wo).to.equal(12)
-      expect(team3.wo).to.equal(2)
-      expect(team4.wo).to.equal(3)
+      expect(team1.waiver_order).to.equal(1)
+      expect(team2.waiver_order).to.equal(12)
+      expect(team3.waiver_order).to.equal(2)
+      expect(team4.waiver_order).to.equal(3)
 
       // verify poaching claim
       const poaches = await knex('poaches').where({ lid: 1 })
@@ -442,7 +442,7 @@ describe('SCRIPTS /waivers - poach', function () {
         type: constants.waivers.POACH
       })
 
-      // waiver two - user 4
+      // waiver twaiver_order - user 4
       await knex('waivers').insert({
         tid: 4,
         userid: 4,
@@ -493,10 +493,10 @@ describe('SCRIPTS /waivers - poach', function () {
       const team2 = teams.find((t) => t.uid === 2)
       const team3 = teams.find((t) => t.uid === 3)
       const team4 = teams.find((t) => t.uid === 4)
-      expect(team1.wo).to.equal(1)
-      expect(team2.wo).to.equal(11)
-      expect(team3.wo).to.equal(2)
-      expect(team4.wo).to.equal(12)
+      expect(team1.waiver_order).to.equal(1)
+      expect(team2.waiver_order).to.equal(11)
+      expect(team3.waiver_order).to.equal(2)
+      expect(team4.waiver_order).to.equal(12)
 
       // verify poaching claims
       const poaches = await knex('poaches').where({ lid: 1 })
@@ -564,7 +564,7 @@ describe('SCRIPTS /waivers - poach', function () {
         type: constants.waivers.POACH
       })
 
-      // waiver two - user 4
+      // waiver twaiver_order - user 4
       await knex('waivers').insert({
         tid: 4,
         userid: 4,
@@ -635,11 +635,11 @@ describe('SCRIPTS /waivers - poach', function () {
       const team3 = teams.find((t) => t.uid === 3)
       const team4 = teams.find((t) => t.uid === 4)
       const team6 = teams.find((t) => t.uid === 6)
-      expect(team1.wo).to.equal(1)
-      expect(team2.wo).to.equal(11)
-      expect(team3.wo).to.equal(2)
-      expect(team4.wo).to.equal(12)
-      expect(team6.wo).to.equal(4)
+      expect(team1.waiver_order).to.equal(1)
+      expect(team2.waiver_order).to.equal(11)
+      expect(team3.waiver_order).to.equal(2)
+      expect(team4.waiver_order).to.equal(12)
+      expect(team6.waiver_order).to.equal(4)
 
       // verify poaching claims
       const poaches = await knex('poaches').where({ lid: 1 })
@@ -749,10 +749,10 @@ describe('SCRIPTS /waivers - poach', function () {
       const team2 = teams.find((t) => t.uid === 2)
       const team3 = teams.find((t) => t.uid === 3)
       const team4 = teams.find((t) => t.uid === 4)
-      expect(team1.wo).to.equal(1)
-      expect(team2.wo).to.equal(2)
-      expect(team3.wo).to.equal(3)
-      expect(team4.wo).to.equal(4)
+      expect(team1.waiver_order).to.equal(1)
+      expect(team2.waiver_order).to.equal(2)
+      expect(team3.waiver_order).to.equal(3)
+      expect(team4.waiver_order).to.equal(4)
 
       // verify poaching claim
       const poaches = await knex('poaches').where({ lid: 1 })

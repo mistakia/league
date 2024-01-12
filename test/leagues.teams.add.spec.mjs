@@ -52,7 +52,7 @@ describe('API /leagues/teams - add', function () {
       res.body.roster.year.should.equal(constants.season.year)
       res.body.team.name.should.equal('Team1')
       res.body.team.abbrv.should.equal('TM1')
-      res.body.team.wo.should.equal(1)
+      res.body.team.waiver_order.should.equal(1)
       res.body.team.do.should.equal(1)
       res.body.team.cap.should.equal(200)
       res.body.team.faab.should.equal(200)
@@ -119,7 +119,7 @@ describe('API /leagues/teams - add', function () {
           year: constants.season.year,
           uid: i,
           lid: 1,
-          wo: i,
+          waiver_order: i,
           do: i,
           name: `Team${i}`,
           abbrv: `TM${i}`

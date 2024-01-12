@@ -42,7 +42,7 @@ router.post('/?', async (req, res) => {
       year: constants.season.year,
       name: `Team${count}`,
       abbrv: `TM${count}`,
-      wo: count,
+      waiver_order: count,
       do: count,
       cap: league.cap,
       faab: league.faab,

@@ -7,7 +7,7 @@ import DashboardTeamSummaryWaiverOrder from './dashboard-team-summary-waiver-ord
 
 const mapStateToProps = createSelector(getTeamsForCurrentLeague, (teams) => {
   const list = teams.toList()
-  const sorted = list.sort((a, b) => a.wo - b.wo)
+  const sorted = list.sort((a, b) => a.waiver_order - b.waiver_order)
   return { teams: sorted }
 })
 

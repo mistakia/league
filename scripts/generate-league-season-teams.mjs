@@ -56,7 +56,7 @@ const generate_league_season_teams = async ({
       year,
 
       // reset team stats
-      wo: i + 1,
+      waiver_order: i + 1,
       do: i + 1,
       cap: league.cap,
       faab: league.faab
