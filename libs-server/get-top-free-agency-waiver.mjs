@@ -30,7 +30,7 @@ export default async function (leagueId) {
     .join('teams', 'waivers.tid', 'teams.uid')
     .join('player', 'waivers.pid', 'player.pid')
     .joinRaw(
-      `left join nfl_games on (player.cteam = nfl_games.v or player.cteam = nfl_games.h) and (nfl_games.week = ${constants.season.week} or nfl_games.week is null) and (nfl_games.year = ${constants.season.year} or nfl_games.year is null) and (nfl_games.seas_type = 'REG' or nfl_games.seas_type is null)`
+      `left join nfl_games on (player.current_nfl_team = nfl_games.v or player.current_nfl_team = nfl_games.h) and (nfl_games.week = ${constants.season.week} or nfl_games.week is null) and (nfl_games.year = ${constants.season.year} or nfl_games.year is null) and (nfl_games.seas_type = 'REG' or nfl_games.seas_type is null)`
     )
     .where('teams.year', constants.season.year)
     .where('waivers.lid', leagueId)

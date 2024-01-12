@@ -14,7 +14,7 @@ export default async function (pid) {
     .select('player.*', 'nfl_games.date', 'nfl_games.time_est')
     .where({ pid })
     .joinRaw(
-      'left join nfl_games on player.cteam = nfl_games.v or player.cteam = nfl_games.h'
+      'left join nfl_games on player.current_nfl_team = nfl_games.v or player.current_nfl_team = nfl_games.h'
     )
     .where('nfl_games.week', constants.season.week)
     .where('nfl_games.year', constants.season.year)

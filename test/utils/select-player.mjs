@@ -8,7 +8,7 @@ export default async function ({
   excludePS = false
 } = {}) {
   const query = db('player')
-    .whereNot('cteam', 'INA')
+    .whereNot('current_nfl_team', 'INA')
     .where('pos1', pos)
     .orderByRaw('RAND()')
     .limit(1)

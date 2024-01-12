@@ -3,7 +3,7 @@ import { List, Map } from 'immutable'
 export function createPlayer({
   fname,
   lname,
-  cteam,
+  current_nfl_team,
 
   projection,
   points,
@@ -20,8 +20,8 @@ export function createPlayer({
     ...data
   }
 
-  if (cteam) {
-    params.team = cteam
+  if (current_nfl_team) {
+    params.team = current_nfl_team
   }
 
   if (fname && lname) {

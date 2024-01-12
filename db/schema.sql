@@ -39,7 +39,7 @@ CREATE TABLE `player` (
   `col` varchar(255) DEFAULT NULL,
   `dv` varchar(35) DEFAULT NULL,
   `start` int(4) NOT NULL,
-  `cteam` varchar(3) NOT NULL DEFAULT 'INA',
+  `current_nfl_team` varchar(3) NOT NULL DEFAULT 'INA',
   `posd` varchar(8) NOT NULL DEFAULT 'INA',
   `jnum` tinyint(2) NOT NULL DEFAULT 0,
   `dcp` tinyint(1) NOT NULL DEFAULT 0,

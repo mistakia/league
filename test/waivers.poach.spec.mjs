@@ -292,7 +292,9 @@ describe('API /waivers - poach', function () {
     })
 
     it('release player not on team', async () => {
-      const players = await knex('player').whereNot('cteam', 'INA').limit(1)
+      const players = await knex('player')
+        .whereNot('current_nfl_team', 'INA')
+        .limit(1)
       const releasePlayerId = players[0].pid
 
       const request = chai
@@ -326,7 +328,9 @@ describe('API /waivers - poach', function () {
     })
 
     it('player not on a practice squad', async () => {
-      const players = await knex('player').whereNot('cteam', 'INA').limit(1)
+      const players = await knex('player')
+        .whereNot('current_nfl_team', 'INA')
+        .limit(1)
       const randomPlayerId = players[0].pid
 
       const request = chai

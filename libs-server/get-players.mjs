@@ -81,7 +81,7 @@ export default async function ({
       'player.dv',
       'player.pos',
       'player.round',
-      'player.cteam',
+      'player.current_nfl_team',
       'player.gsisid',
       'player.gsispid',
       'player.espn_id',
@@ -111,7 +111,7 @@ export default async function ({
   } else if (include_all_active_players) {
     query.orWhere(function () {
       this.whereIn('player.pos', constants.positions)
-        .whereNot('player.cteam', 'INA')
+        .whereNot('player.current_nfl_team', 'INA')
         .where(function () {
           this.whereNotIn('player.nfl_status', ['RET']).orWhereNull(
             'player.nfl_status'

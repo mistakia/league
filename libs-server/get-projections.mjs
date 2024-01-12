@@ -10,7 +10,7 @@ export default async function ({
     const players = await db('player')
       .select('pid')
       .whereIn('pos', constants.positions)
-      .whereNot({ cteam: 'INA' })
+      .whereNot({ current_nfl_team: 'INA' })
     players.forEach((p) => pids.push(p.pid))
   }
 

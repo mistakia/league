@@ -7,7 +7,7 @@ export default async function (knex) {
       pname: 'Cardinals',
       pos: 'DST',
       pos1: 'DST',
-      cteam: 'ARI',
+      current_nfl_team: 'ARI',
       dob: '0000-00-00'
     },
     {
@@ -17,7 +17,7 @@ export default async function (knex) {
       pname: 'Falcons',
       pos: 'DST',
       pos1: 'DST',
-      cteam: 'ATL',
+      current_nfl_team: 'ATL',
       dob: '0000-00-00'
     },
     {
@@ -27,7 +27,7 @@ export default async function (knex) {
       pname: 'Ravens',
       pos: 'DST',
       pos1: 'DST',
-      cteam: 'BAL',
+      current_nfl_team: 'BAL',
       dob: '0000-00-00'
     },
     {
@@ -37,7 +37,7 @@ export default async function (knex) {
       pname: 'Bills',
       pos: 'DST',
       pos1: 'DST',
-      cteam: 'BUF',
+      current_nfl_team: 'BUF',
       dob: '0000-00-00'
     },
     {
@@ -47,7 +47,7 @@ export default async function (knex) {
       pname: 'Panthers',
       pos: 'DST',
       pos1: 'DST',
-      cteam: 'CAR',
+      current_nfl_team: 'CAR',
       dob: '0000-00-00'
     },
     {
@@ -57,7 +57,7 @@ export default async function (knex) {
       pname: 'Bears',
       pos: 'DST',
       pos1: 'DST',
-      cteam: 'CHI',
+      current_nfl_team: 'CHI',
       dob: '0000-00-00'
     },
     {
@@ -67,7 +67,7 @@ export default async function (knex) {
       pname: 'Bengals',
       pos: 'DST',
       pos1: 'DST',
-      cteam: 'CIN',
+      current_nfl_team: 'CIN',
       dob: '0000-00-00'
     },
     {
@@ -77,7 +77,7 @@ export default async function (knex) {
       pname: 'Browns',
       pos: 'DST',
       pos1: 'DST',
-      cteam: 'CLE',
+      current_nfl_team: 'CLE',
       dob: '0000-00-00'
     },
     {
@@ -87,7 +87,7 @@ export default async function (knex) {
       pname: 'Cowboys',
       pos: 'DST',
       pos1: 'DST',
-      cteam: 'DAL',
+      current_nfl_team: 'DAL',
       dob: '0000-00-00'
     },
     {
@@ -97,7 +97,7 @@ export default async function (knex) {
       pname: 'Broncos',
       pos: 'DST',
       pos1: 'DST',
-      cteam: 'DEN',
+      current_nfl_team: 'DEN',
       dob: '0000-00-00'
     },
     {
@@ -107,7 +107,7 @@ export default async function (knex) {
       pname: 'Lions',
       pos: 'DST',
       pos1: 'DST',
-      cteam: 'DET',
+      current_nfl_team: 'DET',
       dob: '0000-00-00'
     },
     {
@@ -117,7 +117,7 @@ export default async function (knex) {
       pname: 'Packers',
       pos: 'DST',
       pos1: 'DST',
-      cteam: 'GB',
+      current_nfl_team: 'GB',
       dob: '0000-00-00'
     },
     {
@@ -127,7 +127,7 @@ export default async function (knex) {
       pname: 'Texans',
       pos: 'DST',
       pos1: 'DST',
-      cteam: 'HOU',
+      current_nfl_team: 'HOU',
       dob: '0000-00-00'
     },
     {
@@ -137,7 +137,7 @@ export default async function (knex) {
       pname: 'Colts',
       pos: 'DST',
       pos1: 'DST',
-      cteam: 'IND',
+      current_nfl_team: 'IND',
       dob: '0000-00-00'
     },
     {
@@ -147,7 +147,7 @@ export default async function (knex) {
       pname: 'Jaguars',
       pos: 'DST',
       pos1: 'DST',
-      cteam: 'JAX',
+      current_nfl_team: 'JAX',
       dob: '0000-00-00'
     },
     {
@@ -157,7 +157,7 @@ export default async function (knex) {
       pname: 'Chiefs',
       pos: 'DST',
       pos1: 'DST',
-      cteam: 'KC',
+      current_nfl_team: 'KC',
       dob: '0000-00-00'
     },
     {
@@ -167,7 +167,7 @@ export default async function (knex) {
       pname: 'Rams',
       pos: 'DST',
       pos1: 'DST',
-      cteam: 'LA',
+      current_nfl_team: 'LA',
       dob: '0000-00-00'
     },
     {
@@ -177,7 +177,7 @@ export default async function (knex) {
       pname: 'Chargers',
       pos: 'DST',
       pos1: 'DST',
-      cteam: 'LAC',
+      current_nfl_team: 'LAC',
       dob: '0000-00-00'
     },
     {
@@ -187,7 +187,7 @@ export default async function (knex) {
       pname: 'Raiders',
       pos: 'DST',
       pos1: 'DST',
-      cteam: 'LV',
+      current_nfl_team: 'LV',
       dob: '0000-00-00'
     },
     {
@@ -197,7 +197,7 @@ export default async function (knex) {
       pname: 'Dolphins',
       pos: 'DST',
       pos1: 'DST',
-      cteam: 'MIA',
+      current_nfl_team: 'MIA',
       dob: '0000-00-00'
     },
     {
@@ -207,7 +207,7 @@ export default async function (knex) {
       pname: 'Vikings',
       pos: 'DST',
       pos1: 'DST',
-      cteam: 'MIN',
+      current_nfl_team: 'MIN',
       dob: '0000-00-00'
     },
     {
@@ -217,7 +217,7 @@ export default async function (knex) {
       pname: 'Patriots',
       pos: 'DST',
       pos1: 'DST',
-      cteam: 'NE',
+      current_nfl_team: 'NE',
       dob: '0000-00-00'
     },
     {
@@ -227,7 +227,7 @@ export default async function (knex) {
       pname: 'Saints',
       pos: 'DST',
       pos1: 'DST',
-      cteam: 'NO',
+      current_nfl_team: 'NO',
       dob: '0000-00-00'
     },
     {
@@ -237,7 +237,7 @@ export default async function (knex) {
       pname: 'Giants',
       pos: 'DST',
       pos1: 'DST',
-      cteam: 'NYG',
+      current_nfl_team: 'NYG',
       dob: '0000-00-00'
     },
     {
@@ -247,7 +247,7 @@ export default async function (knex) {
       pname: 'Jets',
       pos: 'DST',
       pos1: 'DST',
-      cteam: 'NYJ',
+      current_nfl_team: 'NYJ',
       dob: '0000-00-00'
     },
     {
@@ -257,7 +257,7 @@ export default async function (knex) {
       pname: 'Eagles',
       pos: 'DST',
       pos1: 'DST',
-      cteam: 'PHI',
+      current_nfl_team: 'PHI',
       dob: '0000-00-00'
     },
     {
@@ -267,7 +267,7 @@ export default async function (knex) {
       pname: 'Steelers',
       pos: 'DST',
       pos1: 'DST',
-      cteam: 'PIT',
+      current_nfl_team: 'PIT',
       dob: '0000-00-00'
     },
     {
@@ -277,7 +277,7 @@ export default async function (knex) {
       pname: 'Seahawks',
       pos: 'DST',
       pos1: 'DST',
-      cteam: 'SEA',
+      current_nfl_team: 'SEA',
       dob: '0000-00-00'
     },
     {
@@ -287,7 +287,7 @@ export default async function (knex) {
       pname: '49ers',
       pos: 'DST',
       pos1: 'DST',
-      cteam: 'SF',
+      current_nfl_team: 'SF',
       dob: '0000-00-00'
     },
     {
@@ -297,7 +297,7 @@ export default async function (knex) {
       pname: 'Buccaneers',
       pos: 'DST',
       pos1: 'DST',
-      cteam: 'TB',
+      current_nfl_team: 'TB',
       dob: '0000-00-00'
     },
     {
@@ -307,7 +307,7 @@ export default async function (knex) {
       pname: 'Titans',
       pos: 'DST',
       pos1: 'DST',
-      cteam: 'TEN',
+      current_nfl_team: 'TEN',
       dob: '0000-00-00'
     },
     {
@@ -317,7 +317,7 @@ export default async function (knex) {
       pname: 'Redskins',
       pos: 'DST',
       pos1: 'DST',
-      cteam: 'WAS',
+      current_nfl_team: 'WAS',
       dob: '0000-00-00'
     }
   ])

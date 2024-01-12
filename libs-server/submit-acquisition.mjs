@@ -134,7 +134,7 @@ export default async function ({
   /* if (type === constants.transactions.PRACTICE_ADD) {
    *   if (
    *     player_row.start !== constants.season.year &&
-   *     player_row.cteam !== 'INA'
+   *     player_row.current_nfl_team !== 'INA'
    *   ) {
    *     throw new Error('player is not practice squad eligible')
    *   }

@@ -260,9 +260,9 @@ const generate_prop_pairings = async ({
    * const prop_pids = prop_pid_query.map((p) => p.pid)
 
    * const active_players = await db('player')
-   *   .select('fname', 'lname', 'pid', 'cteam', 'pos')
+   *   .select('fname', 'lname', 'pid', 'current_nfl_team', 'pos')
    *   .whereIn('pos', ['QB', 'RB', 'WR', 'TE'])
-   *   .whereNot('cteam', 'INA')
+   *   .whereNot('current_nfl_team', 'INA')
    *   .where('status', 'Active')
    *   .whereIn('pid', prop_pids)
 

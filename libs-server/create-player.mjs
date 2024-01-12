@@ -25,7 +25,7 @@ debug.enable('create-player')
    pos1
    posd
 
-   cteam
+   current_nfl_team
 
    height
    weight
@@ -94,7 +94,7 @@ const createPlayer = async (playerData) => {
     `${playerData.fname} ${playerData.lname}`
   )
   playerData.height = formatHeight(playerData.height)
-  playerData.cteam = fixTeam(playerData.cteam)
+  playerData.current_nfl_team = fixTeam(playerData.current_nfl_team)
   playerData.pos = formatPosition(playerData.pos)
   playerData.pos1 = formatPosition(playerData.pos1)
   playerData.posd = formatPosition(playerData.posd)

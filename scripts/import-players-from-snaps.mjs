@@ -78,7 +78,7 @@ const import_players_from_snaps = async () => {
             gsisid: data.gsisId,
             gsisItId: nflId,
             jnum: data.jerseyNumber,
-            cteam: data.currentTeamAbbr
+            current_nfl_team: data.currentTeamAbbr
           })
           continue
         }

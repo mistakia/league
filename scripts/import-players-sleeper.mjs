@@ -82,7 +82,7 @@ const run = async () => {
       status,
       injury_status,
       sleeper_id,
-      cteam: team
+      current_nfl_team: team
     }
 
     if (!player_row) {
@@ -100,7 +100,7 @@ const run = async () => {
           weight: item.weight,
           dob: item.birth_date,
           col: item.college,
-          cteam: item.team,
+          current_nfl_team: item.team,
           jnum: item.number,
 
           posd: item.position,

@@ -271,7 +271,9 @@ const run = async ({
   }
 
   log(`Could not locate ${missing.length} players`)
-  missing.forEach((m) => log(`could not find player: ${m.pname} / ${m.cteam}`))
+  missing.forEach((m) =>
+    log(`could not find player: ${m.pname} / ${m.current_nfl_team}`)
+  )
 
   if (player_gamelog_inserts.length) {
     await db('player_gamelogs')

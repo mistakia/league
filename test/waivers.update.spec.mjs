@@ -43,7 +43,9 @@ describe('API /waivers - update', function () {
     it('change order for single waiver', async () => {
       MockDate.set(start.add('1', 'week').toISOString())
 
-      const players = await knex('player').whereNot('cteam', 'INA').limit(1)
+      const players = await knex('player')
+        .whereNot('current_nfl_team', 'INA')
+        .limit(1)
       const pid = players[0].pid
 
       // submit waiver claim
@@ -84,7 +86,9 @@ describe('API /waivers - update', function () {
     it('change order for two waivers', async () => {
       MockDate.set(start.add('1', 'week').toISOString())
 
-      const players = await knex('player').whereNot('cteam', 'INA').limit(2)
+      const players = await knex('player')
+        .whereNot('current_nfl_team', 'INA')
+        .limit(2)
       const pid1 = players[0].pid
       const pid2 = players[1].pid
 
@@ -141,7 +145,9 @@ describe('API /waivers - update', function () {
     it('change order for three waivers', async () => {
       MockDate.set(start.add('1', 'week').toISOString())
 
-      const players = await knex('player').whereNot('cteam', 'INA').limit(3)
+      const players = await knex('player')
+        .whereNot('current_nfl_team', 'INA')
+        .limit(3)
       const pid1 = players[0].pid
       const pid2 = players[1].pid
       const pid3 = players[2].pid
@@ -214,7 +220,9 @@ describe('API /waivers - update', function () {
     it('update bid', async () => {
       MockDate.set(start.add('1', 'week').toISOString())
 
-      const players = await knex('player').whereNot('cteam', 'INA').limit(1)
+      const players = await knex('player')
+        .whereNot('current_nfl_team', 'INA')
+        .limit(1)
       const pid = players[0].pid
 
       // submit waiver claim
@@ -261,7 +269,7 @@ describe('API /waivers - update', function () {
       MockDate.set(start.add('1', 'week').toISOString())
 
       const players = await knex('player')
-        .whereNot('cteam', 'INA')
+        .whereNot('current_nfl_team', 'INA')
         .where('pos1', 'WR')
         .limit(2)
       const pid = players[0].pid
@@ -319,7 +327,9 @@ describe('API /waivers - update', function () {
 
       MockDate.set(start.add('1', 'week').toISOString())
 
-      const players = await knex('player').whereNot('cteam', 'INA').limit(1)
+      const players = await knex('player')
+        .whereNot('current_nfl_team', 'INA')
+        .limit(1)
       const pid = players[0].pid
 
       // submit waiver claim
@@ -514,7 +524,7 @@ describe('API /waivers - update', function () {
       MockDate.set(start.add('1', 'week').toISOString())
 
       const players = await knex('player')
-        .whereNot('cteam', 'INA')
+        .whereNot('current_nfl_team', 'INA')
         .where('pos1', 'WR')
         .limit(2)
       const pid = players[0].pid

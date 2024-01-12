@@ -259,7 +259,7 @@ const format_prop_row = ({
     name: `${player_row.fname} ${player_row.lname} ${formatted_prop_row.ln} ${
       prop_desc[formatted_prop_row.prop_type]
     }`,
-    team: player_row.cteam,
+    team: player_row.current_nfl_team,
     opp: opponent,
     esbid,
     pos: player_row.pos,
@@ -334,7 +334,7 @@ const process_props_index = async ({
 
   const player_pids = prop_rows.map((p) => p.selection_pid).filter(Boolean)
   const player_rows = await db('player')
-    .select('pid', 'fname', 'lname', 'cteam', 'pos')
+    .select('pid', 'fname', 'lname', 'current_nfl_team', 'pos')
     .whereIn('pid', player_pids)
 
   log(`loaded ${player_rows.length} players`)
@@ -360,7 +360,8 @@ const process_props_index = async ({
       continue
     }
 
-    const opponent = player_row.cteam === nfl_game.h ? nfl_game.v : nfl_game.h
+    const opponent =
+      player_row.current_nfl_team === nfl_game.h ? nfl_game.v : nfl_game.h
 
     // skip props on bye
     if (!opponent) {

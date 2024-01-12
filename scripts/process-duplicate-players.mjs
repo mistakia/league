@@ -72,7 +72,7 @@ const accept_diff_props = [
   'pname',
 
   'pid',
-  'cteam',
+  'current_nfl_team',
   'weight',
   'height',
   'jnum',
