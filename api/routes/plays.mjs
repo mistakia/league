@@ -109,7 +109,7 @@ router.get('/charted', async (req, res) => {
     if (pid) {
       const player_rows = await db('player').where({ pid }).limit(1)
       const player_row = player_rows[0]
-      query = query.where('nfl_plays.off', player_row.cteam)
+      query = query.where('nfl_plays.off', player_row.current_nfl_team)
     }
 
     if (years.length) {

@@ -100,7 +100,7 @@ const getPlayer = async ({
 
     if (team) {
       const t = fixTeam(team)
-      query.where({ cteam: t })
+      query.where({ current_nfl_team: t })
     }
 
     if (dob) {
@@ -110,7 +110,7 @@ const getPlayer = async ({
     }
 
     if (teams.length) {
-      query.whereIn('cteam', teams)
+      query.whereIn('current_nfl_team', teams)
     }
 
     if (ignore_retired) {
@@ -121,7 +121,9 @@ const getPlayer = async ({
 
     if (ignore_free_agent) {
       query.where(function () {
-        this.whereNot({ cteam: 'INA' }).orWhereNull('cteam')
+        this.whereNot({ current_nfl_team: 'INA' }).orWhereNull(
+          'current_nfl_team'
+        )
       })
     }
   }

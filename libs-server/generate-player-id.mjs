@@ -17,7 +17,7 @@ const generate_player_id = (player_data) => {
 
   // if DST, get pid from team abbreviation
   if (player_data.pos === 'DST') {
-    return player_data.cteam
+    return player_data.current_nfl_team
   }
 
   // get first initial, uppercase, pad if needed

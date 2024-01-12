@@ -69,7 +69,9 @@ const importPlayersNFL = async ({
     const round = node.person.draftRound
     let start = node.person.draftYear
     const weight = node.weight
-    const cteam = node.currentTeam ? node.currentTeam.abbreviation : null
+    const current_nfl_team = node.currentTeam
+      ? node.currentTeam.abbreviation
+      : null
     const jnum = node.jerseyNumber
     const height = formatHeight(node.height)
     const nfl_status = node.person.status
@@ -113,7 +115,7 @@ const importPlayersNFL = async ({
         pos1: pos,
         posd: pos,
 
-        cteam,
+        current_nfl_team,
         jnum,
 
         weight,
@@ -141,13 +143,13 @@ const main = async () => {
   let error
   try {
     const setInactive = async (pids) => {
-      // set cteam to INA for pid not in pids
+      // set current_nfl_team to INA for pid not in pids
       const player_rows = await db('player')
-        .whereNot('cteam', 'INA')
+        .whereNot('current_nfl_team', 'INA')
         .whereNot('pos', 'DST')
         .whereNotIn('pid', pids)
       for (const player_row of player_rows) {
-        await updatePlayer({ player_row, update: { cteam: 'INA' } })
+        await updatePlayer({ player_row, update: { current_nfl_team: 'INA' } })
       }
     }
 

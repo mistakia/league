@@ -29,7 +29,7 @@ router.get('/?', async (req, res) => {
         .select('projections.*')
         .join('player', 'projections.pid', 'player.pid')
         .whereIn('player.pos', constants.positions)
-        .whereNot('player.cteam', 'INA')
+        .whereNot('player.current_nfl_team', 'INA')
         .where({
           year: constants.season.year,
           userid: req.auth.userId

@@ -22,7 +22,7 @@ export async function seed(knex, Promise) {
       lname: `TestRookie${i}`,
       pos,
       pos1: pos,
-      cteam: constants.nflTeams[i % constants.nflTeams.length],
+      current_nfl_team: constants.nflTeams[i % constants.nflTeams.length],
       start: constants.season.year
     })
   }
@@ -38,7 +38,7 @@ export async function seed(knex, Promise) {
       lname: `TestSophmore${i}`,
       pos,
       pos1: pos,
-      cteam: constants.nflTeams[i % constants.nflTeams.length],
+      current_nfl_team: constants.nflTeams[i % constants.nflTeams.length],
       start: constants.season.year - 1
     })
   }
