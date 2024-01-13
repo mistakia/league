@@ -1,4 +1,4 @@
-INSERT INTO `player` (`pid`, `fname`, `lname`, `pname`, `pos`, `pos1`, `pos2`, `height`, `weight`, `dob`, `forty`, `bench`, `vertical`, `broad`, `shuttle`, `cone`, `arm`, `hand`, `dpos`, `col`, `dv`, `start`, `cteam`, `posd`, `jnum`, `dcp`, `nflid`, `esbid`, `gsisid`, `gsispid`)
+INSERT INTO `player` (`pid`, `fname`, `lname`, `pname`, `pos`, `pos1`, `pos2`, `height`, `weight`, `dob`, `forty`, `bench`, `vertical`, `broad`, `shuttle`, `cone`, `arm`, `hand`, `dpos`, `col`, `dv`, `start`, `current_nfl_team`, `posd`, `jnum`, `dcp`, `nflid`, `esbid`, `gsisid`, `gsispid`)
 VALUES
 	('AA-0025', 'Ameer', 'Abdullah', 'A.Abdullah', 'RB', 'RB', '', 69, 205, '1993-06-13', 4.50, 24, 42.5, 130, 3.95, 6.79, 30.000, 8.625, 54, 'Nebraska', 'Big Ten', 2015, 'MIN', 'RB', 31, 3, 2552374, 'ABD647726', '00-0032104', '32013030-2d30-3033-3231-3034b84feb82'),
 	('AA-0075', 'Andrew', 'Adams', 'A.Adams', 'DB', 'DB', '', 71, 203, '1992-10-28', 4.54, 24, 33.0, 118, 4.32, 6.96, 0.000, 0.000, 0, 'Connecticut', 'American Athletic', 2016, 'TB', 'FS', 26, 2, 2556456, 'ADA104253', '00-0032637', '32013030-2d30-3033-3236-33374ebfc4c7'),
@@ -968,7 +968,7 @@ VALUES
 	('JI-1000', 'Joel', 'Iyiegbuniwe', 'J.Iyiegbuniwe', 'LB', 'LB', '', 73, 229, '1995-10-12', 4.60, 19, 35.0, 117, 4.28, 7.06, 32.625, 10.250, 115, 'Western Kentucky', 'Conference USA (C-USA)', 2018, 'CHI', 'ILB', 45, 2, 2560750, 'IYI177981', '00-0034372', '32013030-2d30-3033-3433-37321f13e939'),
 	('JJ-0050', 'J.C.', 'Jackson', 'J.Jackson', 'DB', 'DB', '', 70, 201, '1995-11-17', 4.46, 14, 35.5, 120, 4.28, 6.92, 0.000, 0.000, 0, 'Maryland', 'Big Ten', 2018, 'NE', 'LCB', 27, 2, 2560754, 'JAC239712', '00-0034591', '32013030-2d30-3033-3435-3931dbc8518a');
 
-INSERT INTO `player` (`pid`, `fname`, `lname`, `pname`, `pos`, `pos1`, `pos2`, `height`, `weight`, `dob`, `forty`, `bench`, `vertical`, `broad`, `shuttle`, `cone`, `arm`, `hand`, `dpos`, `col`, `dv`, `start`, `cteam`, `posd`, `jnum`, `dcp`, `nflid`, `esbid`, `gsisid`, `gsispid`)
+INSERT INTO `player` (`pid`, `fname`, `lname`, `pname`, `pos`, `pos1`, `pos2`, `height`, `weight`, `dob`, `forty`, `bench`, `vertical`, `broad`, `shuttle`, `cone`, `arm`, `hand`, `dpos`, `col`, `dv`, `start`, `current_nfl_team`, `posd`, `jnum`, `dcp`, `nflid`, `esbid`, `gsisid`, `gsispid`)
 VALUES
 	('JJ-0375', 'Joe', 'Jackson', 'J.Jackson', 'DL', 'DL', '', 76, 275, '1996-12-20', 4.86, 22, 27.0, 109, 4.66, 7.80, 34.125, 10.000, 165, 'Miami (FL)', 'Atlantic Coast (ACC)', 2019, 'CLE', 'LDE', 91, 3, 2562432, 'JAC000005', '00-0035281', '32013030-2d30-3033-3532-3831a10c30d2'),
 	('JJ-0525', 'Josh', 'Jackson', 'J.Jackson', 'DB', 'DB', '', 72, 196, '1996-04-03', 4.52, 18, 40.0, 123, 4.03, 6.86, 31.125, 9.375, 45, 'Iowa', 'Big Ten', 2018, 'GB', 'RCB', 37, 2, 2560755, 'JAC280902', '00-0034751', '32013030-2d30-3033-3437-35317e43e142'),
@@ -1934,7 +1934,7 @@ VALUES
 	('TW-2800', 'Trent', 'Williams', 'T.Williams', 'OL', 'OL', '', 77, 314, '1988-07-19', 4.81, 23, 34.5, 113, 4.63, 7.64, 34.250, 9.750, 4, 'Oklahoma', 'Big 12', 2010, 'SF', 'LT', 71, 1, 497073, 'WIL547553', '00-0027857', '32013030-2d30-3032-3738-3537f52a204e'),
 	('TW-2875', 'Tyrell', 'Williams', 'T.Williams', 'WR', 'WR', '', 76, 200, '1992-02-12', 4.43, 0, 39.5, 127, 4.17, 6.74, 33.500, 9.875, 0, 'Western Oregon', '', 2015, 'LV', 'RES', 16, 2, 2553913, 'WIL547641', '00-0032160', '32013030-2d30-3033-3231-36309a9b200a');
 
-INSERT INTO `player` (`pid`, `fname`, `lname`, `pname`, `pos`, `pos1`, `pos2`, `height`, `weight`, `dob`, `forty`, `bench`, `vertical`, `broad`, `shuttle`, `cone`, `arm`, `hand`, `dpos`, `col`, `dv`, `start`, `cteam`, `posd`, `jnum`, `dcp`, `nflid`, `esbid`, `gsisid`, `gsispid`)
+INSERT INTO `player` (`pid`, `fname`, `lname`, `pname`, `pos`, `pos1`, `pos2`, `height`, `weight`, `dob`, `forty`, `bench`, `vertical`, `broad`, `shuttle`, `cone`, `arm`, `hand`, `dpos`, `col`, `dv`, `start`, `current_nfl_team`, `posd`, `jnum`, `dcp`, `nflid`, `esbid`, `gsisid`, `gsispid`)
 VALUES
 	('TW-3250', 'Tavon', 'Wilson', 'T.Wilson', 'DB', 'DB', '', 72, 205, '1990-03-19', 0.00, 0, 0.0, 0, 0.00, 0.00, 0.000, 0.000, 48, 'Illinois', 'Big Ten', 2012, 'IND', 'SS', 31, 2, 2534830, 'WIL791595', '00-0029410', '32013030-2d30-3032-3934-3130acb3f0c4'),
 	('TY-0150', 'T.J.', 'Yeldon', 'T.Yeldon', 'RB', 'RB', '', 73, 226, '1993-10-02', 4.52, 22, 36.0, 117, 4.22, 7.19, 31.625, 9.000, 36, 'Alabama', 'Southeastern (SEC)', 2015, 'BUF', 'RB', 22, 3, 2552471, 'YEL060186', '00-0032209', '32013030-2d30-3033-3232-30396041922e'),
