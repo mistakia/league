@@ -73,8 +73,8 @@ const getPlayStatData = (playStat) => ({
 
 const importPlaysForWeek = async ({
   year = constants.season.year,
-  week,
-  seas_type = 'REG',
+  week = constants.season.nfl_seas_week,
+  seas_type = constants.season.nfl_seas_type,
   force_update = false,
   ignore_cache = false,
   throttle = 0
@@ -88,7 +88,7 @@ const importPlaysForWeek = async ({
     week = current_week
   }
   const isCurrentWeek =
-    year === constants.season.year && week === constants.season.week
+    year === constants.season.year && week === constants.season.nfl_seas_week
 
   log(
     `importing plays for week ${week} ${year} ${seas_type} (force_update: ${force_update}, isCurrentWeek: ${isCurrentWeek})`

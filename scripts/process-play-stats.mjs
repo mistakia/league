@@ -18,7 +18,9 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('process-play-stats')
 debug.enable('process-play-stats')
 const current_week = Math.max(
-  dayjs().day() === 2 ? constants.season.week - 1 : constants.season.week,
+  dayjs().day() === 2
+    ? constants.season.nfl_seas_week - 1
+    : constants.season.nfl_seas_week,
   1
 )
 
@@ -116,7 +118,7 @@ const format_gamelog = ({ esbid, pid, stats, opp, pos, tm }) => {
 const run = async ({
   week = current_week,
   year = constants.season.year,
-  seas_type = 'REG'
+  seas_type = constants.season.nfl_seas_type
 } = {}) => {
   let play_update_count = 0
 
@@ -403,7 +405,7 @@ const main = async () => {
   try {
     const year = argv.year
     const week = argv.week
-    const seas_type = argv.seas_type || 'REG'
+    const seas_type = argv.seas_type || constants.season.nfl_seas_type
 
     if (argv.all) {
       log('processing all plays')

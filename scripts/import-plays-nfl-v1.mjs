@@ -106,14 +106,16 @@ const getPlayStatData = (playStat) => ({
 
 const importPlaysForWeek = async ({
   year = constants.season.year,
-  week,
-  seas_type = 'REG',
+  week = constants.season.nfl_seas_week,
+  seas_type = constants.season.nfl_seas_type,
   ignore_cache = false,
   force_update = false,
   token
 } = {}) => {
   const current_week = Math.max(
-    dayjs().day() === 2 ? constants.season.week - 1 : constants.season.week,
+    dayjs().day() === 2
+      ? constants.season.nfl_seas_week - 1
+      : constants.season.nfl_seas_week,
     1
   )
 
