@@ -27,39 +27,31 @@ router.get('/?', async (req, res) => {
 
     const week_validation_result = validators.week_validator(week)
     if (week_validation_result !== true) {
-      return res
-        .status(400)
-        .send({
-          error: `invalid week query param: ${week_validation_result[0].message}`
-        })
+      return res.status(400).send({
+        error: `invalid week query param: ${week_validation_result[0].message}`
+      })
     }
 
     const year_validation_result = validators.year_validator(year)
     if (year_validation_result !== true) {
-      return res
-        .status(400)
-        .send({
-          error: `invalid year query param: ${year_validation_result[0].message}`
-        })
+      return res.status(400).send({
+        error: `invalid year query param: ${year_validation_result[0].message}`
+      })
     }
 
     const seas_type_validation_result =
       validators.seas_type_validator(seas_type)
     if (seas_type_validation_result !== true) {
-      return res
-        .status(400)
-        .send({
-          error: `invalid seas_type query param: ${seas_type_validation_result[0].message}`
-        })
+      return res.status(400).send({
+        error: `invalid seas_type query param: ${seas_type_validation_result[0].message}`
+      })
     }
 
     const bookmaker_validation_result = bookmaker_validator(bookmaker)
     if (bookmaker_validation_result !== true) {
-      return res
-        .status(400)
-        .send({
-          error: `invalid bookmaker query param: ${bookmaker_validation_result[0].message}`
-        })
+      return res.status(400).send({
+        error: `invalid bookmaker query param: ${bookmaker_validation_result[0].message}`
+      })
     }
 
     const cache_key = `/markets/${year}/${week}/${seas_type}/${bookmaker}`
