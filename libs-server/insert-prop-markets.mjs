@@ -73,84 +73,114 @@ const insert_market = async ({ timestamp, selections, ...market }) => {
       message
     })
   } else {
-    // format existing_market to convert `open` and `live` to booleans for comparison
-    existing_market.open = Boolean(existing_market.open)
-    existing_market.live = Boolean(existing_market.live)
+    // existing market might be newer than this current market snapshot
+    const previous_market_row = await db('prop_markets_history')
+      .where('source_market_id', market.source_market_id)
+      .where('timestamp', '<=', timestamp)
+      .orderBy('timestamp', 'desc')
+      .first()
 
-    // remove timestamp from existing market
-    delete existing_market.timestamp
-
-    // get differences between existing market and new market
-    const differences = diff(existing_market, market)
-
-    if (differences && differences.length) {
-      // insert market into `prop_markets_history` table when open, selection_count, or live changes
-      const update_on_change = [
-        'open',
-        'selection_count',
-        'live',
-        'source_market_name'
-      ]
-      const should_update = differences.some((difference) =>
-        update_on_change.includes(difference.path[0])
-      )
-
-      if (should_update) {
-        const {
+    if (!previous_market_row) {
+      const {
+        source_id,
+        source_market_id,
+        source_market_name,
+        open,
+        live,
+        selection_count
+      } = market
+      await db('prop_markets_history')
+        .insert({
+          timestamp,
           source_id,
           source_market_id,
           source_market_name,
           open,
           live,
           selection_count
-        } = market
-        await db('prop_markets_history')
-          .insert({
-            timestamp,
+        })
+        .onConflict()
+        .merge()
+    } else {
+      // format previous_market_row to convert `open` and `live` to booleans for comparison
+      previous_market_row.open = Boolean(previous_market_row.open)
+      previous_market_row.live = Boolean(previous_market_row.live)
+
+      // remove timestamp from existing market
+      delete previous_market_row.timestamp
+
+      // get differences between existing market and new market
+      const differences = diff(previous_market_row, market)
+
+      if (differences && differences.length) {
+        // insert market into `prop_markets_history` table when open, selection_count, or live changes
+        const update_on_change = [
+          'open',
+          'selection_count',
+          'live',
+          'source_market_name'
+        ]
+        const should_update = differences.some((difference) =>
+          update_on_change.includes(difference.path[0])
+        )
+
+        if (should_update) {
+          const {
             source_id,
             source_market_id,
             source_market_name,
             open,
             live,
             selection_count
-          })
-          .onConflict()
-          .merge()
-      }
-
-      const notify_on_change = ['open', 'selection_count']
-      // only notify on change if open or selection_count changes
-      const should_notify = differences.some((difference) =>
-        notify_on_change.includes(difference.path[0])
-      )
-
-      if (should_notify) {
-        // create message for discord notification based on differences
-        let message = `Market \`${market.source_market_name}\` on ${market.source_id} has changed.`
-        for (const difference of differences) {
-          const { kind, path, lhs, rhs } = difference
-          if (kind === 'E') {
-            message += `\n\`${path.join(
-              '.'
-            )}\` changed from \`${lhs}\` to \`${rhs}\``
-          } else if (kind === 'N') {
-            message += `\n\`${path.join('.')}\` added with value \`${rhs}\``
-          } else if (kind === 'D') {
-            message += `\n\`${path.join('.')}\` deleted with value \`${lhs}\``
-          }
+          } = market
+          await db('prop_markets_history')
+            .insert({
+              timestamp,
+              source_id,
+              source_market_id,
+              source_market_name,
+              open,
+              live,
+              selection_count
+            })
+            .onConflict()
+            .merge()
         }
 
-        log(message)
+        const notify_on_change = ['open', 'selection_count']
+        // only notify on change if open or selection_count changes
+        const should_notify = differences.some((difference) =>
+          notify_on_change.includes(difference.path[0])
+        )
 
-        // send notification to `props_market_update` channel
-        // await sendDiscordMessage({
-        //   webhookUrl: config.discord_props_market_update_channel_webhook_url,
-        //   message
-        // })
+        if (should_notify) {
+          // create message for discord notification based on differences
+          let message = `Market \`${market.source_market_name}\` on ${market.source_id} has changed.`
+          for (const difference of differences) {
+            const { kind, path, lhs, rhs } = difference
+            if (kind === 'E') {
+              message += `\n\`${path.join(
+                '.'
+              )}\` changed from \`${lhs}\` to \`${rhs}\``
+            } else if (kind === 'N') {
+              message += `\n\`${path.join('.')}\` added with value \`${rhs}\``
+            } else if (kind === 'D') {
+              message += `\n\`${path.join('.')}\` deleted with value \`${lhs}\``
+            }
+          }
+
+          log(message)
+
+          // send notification to `props_market_update` channel
+          // await sendDiscordMessage({
+          //   webhookUrl: config.discord_props_market_update_channel_webhook_url,
+          //   message
+          // })
+        }
       }
     }
 
-    if (!market.live) {
+    if (!market.live && timestamp > existing_market.timestamp) {
       await db('prop_markets_index_new')
         .insert({ ...market, timestamp, time_type: 'CLOSE' })
         .onConflict()
@@ -161,7 +191,7 @@ const insert_market = async ({ timestamp, selections, ...market }) => {
     await insert_prop_market_selections({
       timestamp,
       selections,
-      existing_market,
+      existing_market: previous_market_row,
       market
     })
   }
