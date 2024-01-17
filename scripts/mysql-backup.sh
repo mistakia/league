@@ -98,10 +98,8 @@ rankings
 DB_BETTING_TABLES="
 props
 props_index
-prop_markets
-prop_markets_index
 prop_markets_history
-prop_markets_index_new
+prop_markets_index
 prop_market_selections_history
 prop_market_selections_index
 "

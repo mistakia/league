@@ -407,17 +407,17 @@ const main = async () => {
       source
     })
 
-    const prop_rows_query = db('prop_markets_index_new')
+    const prop_rows_query = db('prop_markets_index')
       .select(
-        'prop_markets_index_new.*',
+        'prop_markets_index.*',
         'prop_market_selections_index.*',
         'nfl_games.week',
         'nfl_games.year'
       )
-      .join('nfl_games', 'nfl_games.esbid', 'prop_markets_index_new.esbid')
+      .join('nfl_games', 'nfl_games.esbid', 'prop_markets_index.esbid')
       .join('prop_market_selections_index', function () {
         this.on(
-          'prop_markets_index_new.source_market_id',
+          'prop_markets_index.source_market_id',
           '=',
           'prop_market_selections_index.source_market_id'
         )
@@ -459,9 +459,9 @@ const main = async () => {
         constants.player_prop_types.GAME_ALT_RUSHING_ATTEMPTS,
         constants.player_prop_types.GAME_ALT_RECEPTIONS
       ])
-      .where('prop_markets_index_new.time_type', 'CLOSE')
-      .where('prop_markets_index_new.source_id', source)
-      // .whereNot('prop_markets_index_new.source_id', constants.sources.PRIZEPICKS)
+      .where('prop_markets_index.time_type', 'CLOSE')
+      .where('prop_markets_index.source_id', source)
+      // .whereNot('prop_markets_index.source_id', constants.sources.PRIZEPICKS)
       .where('nfl_games.week', week)
       .where('nfl_games.seas_type', seas_type)
       .where('nfl_games.year', year)

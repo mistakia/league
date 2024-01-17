@@ -22,7 +22,7 @@ const generate_draftkings_category_index = async () => {
   let draftkings_markets = []
 
   while (offset === 0 || draftkings_markets.length === limit) {
-    draftkings_markets = await db('prop_markets_index_new')
+    draftkings_markets = await db('prop_markets_index')
       .select('source_market_name')
       .where('source_id', 'DRAFTKINGS')
       .where('source_market_name', 'like', '%(categoryId:%')
