@@ -46,13 +46,13 @@ const insert_market = async ({ timestamp, selections, ...market }) => {
       timestamp
     })
 
-    await db('prop_markets_index_new').insert({
+    await db('prop_markets_index').insert({
       ...market,
       timestamp,
       time_type: 'OPEN'
     })
     if (!live) {
-      await db('prop_markets_index_new').insert({
+      await db('prop_markets_index').insert({
         ...market,
         timestamp,
         time_type: 'CLOSE'
@@ -181,7 +181,7 @@ const insert_market = async ({ timestamp, selections, ...market }) => {
     }
 
     if (!market.live && timestamp > existing_market.timestamp) {
-      await db('prop_markets_index_new')
+      await db('prop_markets_index')
         .insert({ ...market, timestamp, time_type: 'CLOSE' })
         .onConflict()
         .merge()

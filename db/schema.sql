@@ -2519,12 +2519,12 @@ CREATE TABLE `prop_markets_history` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `prop_markets_index_new`
+-- Table structure for table `prop_markets_index`
 --
 
-DROP TABLE IF EXISTS `prop_markets_index_new`;
+DROP TABLE IF EXISTS `prop_markets_index`;
 
-CREATE TABLE `prop_markets_index_new` (
+CREATE TABLE `prop_markets_index` (
   `market_type` tinyint(1) unsigned DEFAULT NULL,
 
   `source_id` ENUM('BETONLINE', 'BETMGM', 'BETRIVERS', 'BOVADA', 'CAESARS', 'DRAFTKINGS', 'FANDUEL', 'GAMBET', 'PRIZEPICKS') NOT NULL,

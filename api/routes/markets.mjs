@@ -60,14 +60,14 @@ router.get('/?', async (req, res) => {
       return res.send(markets)
     }
 
-    const markets_data = await db('prop_markets_index_new')
-      .select('prop_markets_index_new.*')
-      .leftJoin('nfl_games', 'prop_markets_index_new.esbid', 'nfl_games.esbid')
+    const markets_data = await db('prop_markets_index')
+      .select('prop_markets_index.*')
+      .leftJoin('nfl_games', 'prop_markets_index.esbid', 'nfl_games.esbid')
       .where('nfl_games.week', week)
       .where('nfl_games.year', year)
       .where('nfl_games.seas_type', seas_type)
-      .where('prop_markets_index_new.source_id', bookmaker)
-      .where('prop_markets_index_new.time_type', 'CLOSE')
+      .where('prop_markets_index.source_id', bookmaker)
+      .where('prop_markets_index.time_type', 'CLOSE')
 
     const source_market_ids = markets_data.map(
       (market) => market.source_market_id
