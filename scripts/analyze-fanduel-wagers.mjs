@@ -207,7 +207,7 @@ const analyze_fanduel_wagers = async ({
           ? leg.eventMarketDescription.split(' - ')[1]
           : leg.eventMarketDescription
       )
-        .replace('Alt', '')
+        .replace('Alt ', '')
         .trim()
         .replace('Receptions', 'Recs')
         .replace('Passing', 'Pass')
@@ -225,6 +225,8 @@ const analyze_fanduel_wagers = async ({
         stat_type === '2+ TDs'
       ) {
         name = `${leg.selectionName} ${stat_type} [week ${week}]`
+      } else if (stat_type === 'Alternate Spread') {
+        name = `${leg.selectionName} [week ${week}]`
       } else {
         name = `${player_name} ${handicap}+ ${stat_type} [week ${week}]`
       }
