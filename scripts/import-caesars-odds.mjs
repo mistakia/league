@@ -158,9 +158,7 @@ const run = async () => {
   }
 
   const nfl_games = await db('nfl_games').where({
-    week: constants.season.nfl_seas_week,
-    year: constants.season.year,
-    seas_type: constants.season.nfl_seas_type
+    year: constants.season.year
   })
 
   const schedule = await caesars.getSchedule()
@@ -181,10 +179,13 @@ const run = async () => {
 
     if (event?.type === 'MATCH') {
       const event_name_split = event.name.replaceAll('|', '').split(' at ')
-      const week = dayjs(event.startTime).diff(constants.season.start, 'weeks')
+      const { week, seas_type } = constants.season.calculate_week(
+        dayjs(event.startTime)
+      )
       nfl_game = nfl_games.find(
         (game) =>
           game.week === week &&
+          game.seas_type === seas_type &&
           game.year === constants.season.year &&
           game.v === fixTeam(event_name_split[0]) &&
           game.h === fixTeam(event_name_split[1])

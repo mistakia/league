@@ -81,9 +81,7 @@ const run = async () => {
   const formatted_markets = []
 
   const nfl_games = await db('nfl_games').where({
-    week: constants.season.nfl_seas_week,
-    year: constants.season.year,
-    seas_type: constants.season.nfl_seas_type
+    year: constants.season.year
   })
 
   const market_groups = await betonline.get_market_groups()
@@ -103,12 +101,15 @@ const run = async () => {
       event.team2 &&
       event.team2.length
     ) {
-      const week = dayjs(event.date).diff(constants.season.start, 'weeks')
+      const { week, seas_type } = constants.season.calculate_week(
+        dayjs(event.date)
+      )
       const home = fixTeam(event.team1[0]?.title)
       const visitor = fixTeam(event.team2[0]?.title)
       nfl_game = nfl_games.find(
         (game) =>
           game.week === week &&
+          game.seas_type === seas_type &&
           game.year === constants.season.year &&
           game.v === visitor &&
           game.h === home
