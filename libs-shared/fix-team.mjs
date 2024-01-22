@@ -7,6 +7,12 @@ export default function (team) {
     case null:
       return 'INA'
 
+    case 'AFC':
+      return 'AFC'
+
+    case 'NFC':
+      return 'NFC'
+
     case 'ARIZONA CARDINALS':
     case 'CARDINALS':
     case 'ARI':
