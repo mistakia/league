@@ -39,10 +39,13 @@ const format_market = async ({
       : []
 
   if (event && event.teamShortName1 && event.teamShortName2) {
-    const week = dayjs(event.startDate).diff(constants.season.start, 'weeks')
+    const { week, seas_type } = constants.season.calculate_week(
+      dayjs(event.startDate)
+    )
     nfl_game = nfl_games.find(
       (game) =>
         game.week === week &&
+        game.seas_type === seas_type &&
         game.year === constants.season.year &&
         game.v === fixTeam(event.teamShortName1) &&
         game.h === fixTeam(event.teamShortName2)
@@ -130,9 +133,7 @@ const run = async () => {
   const all_markets = []
 
   const nfl_games = await db('nfl_games').where({
-    week: constants.season.nfl_seas_week,
-    year: constants.season.year,
-    seas_type: constants.season.nfl_seas_type
+    year: constants.season.year
   })
 
   const offers = await draftkings.get_eventgroup_offer_categories()

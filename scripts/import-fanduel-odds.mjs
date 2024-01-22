@@ -195,12 +195,11 @@ const run = async () => {
 
   const all_event_markets = []
   const nfl_games = await db('nfl_games').where({
-    week: constants.season.nfl_seas_week,
-    year: constants.season.year,
-    seas_type: constants.season.nfl_seas_type
+    year: constants.season.year
   })
 
   // filter events to those for current week
+  // TODO remove filter
   const week_end = constants.season.week_end
   const current_week_events = nfl_games_events.filter(
     (event) =>

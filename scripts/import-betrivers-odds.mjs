@@ -94,9 +94,7 @@ const import_betrivers_odds = async () => {
   const timestamp = Math.round(Date.now() / 1000)
 
   const nfl_games = await db('nfl_games').where({
-    week: constants.season.nfl_seas_week,
-    year: constants.season.year,
-    seas_type: constants.season.nfl_seas_type
+    year: constants.season.year
   })
 
   const market_groups = await betrivers.get_market_groups()
@@ -108,11 +106,14 @@ const import_betrivers_odds = async () => {
       if (event && event.format === 'MATCH') {
         const visitor = fixTeam(event.extendedFormatName[0])
         const home = fixTeam(event.extendedFormatName[2])
-        const week = dayjs(event.start).diff(constants.season.start, 'weeks')
+        const { week, seas_type } = constants.season.calculate_week(
+          dayjs(event.start)
+        )
 
         nfl_game = nfl_games.find(
           (game) =>
             game.week === week &&
+            game.seas_type === seas_type &&
             game.year === constants.season.year &&
             game.v === visitor &&
             game.h === home

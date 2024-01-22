@@ -115,9 +115,7 @@ const import_gambet_odds = async () => {
   const timestamp = Math.round(Date.now() / 1000)
 
   const nfl_games = await db('nfl_games').where({
-    week: constants.season.nfl_seas_week,
-    year: constants.season.year,
-    seas_type: constants.season.nfl_seas_type
+    year: constants.season.year
   })
 
   const events = await gambet.get_events()
@@ -132,10 +130,13 @@ const import_gambet_odds = async () => {
     if (event && event.homeTeam && event.awayTeam) {
       const home = fixTeam(event.homeTeam.name)
       const visitor = fixTeam(event.awayTeam.name)
-      const week = dayjs(event.date).diff(constants.season.start, 'weeks')
+      const { week, seas_type } = constants.season.calculate_week(
+        dayjs(event.date)
+      )
       nfl_game = nfl_games.find(
         (game) =>
           game.week === week &&
+          game.seas_type === seas_type &&
           game.year === constants.season.year &&
           game.v === visitor &&
           game.h === home
