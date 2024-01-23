@@ -203,7 +203,7 @@ const run = async () => {
   const week_end = constants.season.week_end
   const current_week_events = nfl_games_events.filter(
     (event) =>
-      dayjs(event.openDate).isBefore(week_end) && event.name !== 'NFL Matches'
+      dayjs(event.openDate).isBefore(week_end) && event.name !== 'NFL Matches' && event.name !== 'NFL'
   )
 
   log(`Getting odds for ${current_week_events.length} events`)
