@@ -61,6 +61,11 @@ const updatePlayer = async ({ player_row, pid, update }) => {
       continue
     }
 
+    // ignore empty dates
+    if (edit.rhs === '0000-00-00') {
+      continue
+    }
+
     if (excluded_props.includes(prop)) {
       log(`not allowed to update ${prop}`)
       continue
