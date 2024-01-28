@@ -32,6 +32,8 @@ const import_players_from_combine_profiles_for_year = async ({
     token
   })
 
+  log(`got ${data.combineProfiles.length} combine profiles for ${year}`)
+
   for (const profile of data.combineProfiles) {
     let player_row
     try {
@@ -74,7 +76,7 @@ const import_players_from_combine_profiles_for_year = async ({
           dob: '0000-00-00', // TODO - ideally required
           ...data
         })
-        createCount += 1
+        if (player_row) createCount += 1
       } catch (err) {
         log(err)
       }
@@ -117,7 +119,8 @@ const main = async () => {
       })
     } else {
       await import_players_from_combine_profiles_for_year({
-        year: argv.year
+        year: argv.year,
+        ignore_cache: argv.ignore_cache
       })
     }
   } catch (err) {
