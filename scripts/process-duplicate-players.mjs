@@ -1,42 +1,12 @@
 import debug from 'debug'
 import diff from 'deep-diff'
-import path from 'path'
-import { fileURLToPath } from 'url'
 
 import db from '#db'
-import { isMain, mergePlayer, readCSV } from '#libs-server'
+import { isMain, mergePlayer, nicknames } from '#libs-server'
 import { formatPlayerName } from '#libs-shared'
 
 const log = debug('process-duplicate-players')
 debug.enable('process-duplicate-players,update-player,merge-player')
-
-const nickname_sets = []
-
-const get_nickname_set_indexes_for_name = (name) => {
-  const nickname_set_indexes = []
-  for (let i = 0; i < nickname_sets.length; i++) {
-    const nickname_set = nickname_sets[i]
-    if (nickname_set.includes(name)) {
-      nickname_set_indexes.push(i)
-    }
-  }
-
-  return nickname_set_indexes
-}
-
-const is_nicknames = (name1, name2) => {
-  const nickname_set_indexes1 = get_nickname_set_indexes_for_name(name1)
-  const nickname_set_indexes2 = get_nickname_set_indexes_for_name(name2)
-
-  // find first intersection
-  for (const i of nickname_set_indexes1) {
-    if (nickname_set_indexes2.includes(i)) {
-      return true
-    }
-  }
-
-  return false
-}
 
 const jaccard_distance = (a, b) => {
   // convert to sets if arrays
@@ -181,7 +151,7 @@ const unresolvable_differences = (a, b) => {
 
       // for first name check if they could be nicknames
       if (difference.path[0] === 'fname') {
-        if (is_nicknames(lhs, rhs)) {
+        if (nicknames.check(lhs, rhs)) {
           return false
         }
 
@@ -280,19 +250,8 @@ const processDuplicatePlayers = async () => {
 const main = async () => {
   let error
   try {
-    const __dirname = path.dirname(fileURLToPath(import.meta.url))
-    const nicknames_csv_path = path.join(
-      __dirname,
-      '..',
-      'data',
-      'nicknames.csv'
-    )
-    const csv = await readCSV(nicknames_csv_path)
-    for (const row of csv) {
-      const nickname_set = Object.values(row)
-      nickname_sets.push(nickname_set)
-    }
-    log(`loaded ${nickname_sets.length} nickname sets`)
+    await nicknames.load()
+    log('loaded nickname sets')
     await processDuplicatePlayers()
   } catch (err) {
     error = err

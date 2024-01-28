@@ -5,10 +5,10 @@ import { constants, formatPlayerName } from '#libs-shared'
 import { isMain, updatePlayer } from '#libs-server'
 
 const log = debug('update-formatted-names')
-debug.enable('update-formatted-names')
+debug.enable('update-formatted-names,update-player')
 
 const updateFormattedNames = async () => {
-  const player_rows = await db('player')
+  const player_rows = await db('player').whereNot({ pos: 'DST' })
 
   let count = 0
   for (const player_row of player_rows) {
@@ -16,7 +16,11 @@ const updateFormattedNames = async () => {
       const formatted = formatPlayerName(
         `${player_row.fname} ${player_row.lname}`
       )
-      const changes = await updatePlayer({ player_row, update: { formatted } })
+      const changes = await updatePlayer({
+        player_row,
+        update: { formatted },
+        update_formatted: true
+      })
       count += changes
     } catch (err) {
       log(err)

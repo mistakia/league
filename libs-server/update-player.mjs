@@ -10,7 +10,7 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('update-player')
 debug.enable('update-player')
 
-const excluded_props = ['pid', 'formatted', 'pos']
+const excluded_props = ['pid', 'pos']
 
 const protected_props = [
   'nflid',
@@ -34,7 +34,12 @@ const nullable_props = ['injury_status']
    player can be a string identifier or player db entry
 */
 
-const updatePlayer = async ({ player_row, pid, update }) => {
+const updatePlayer = async ({
+  player_row,
+  pid,
+  update,
+  update_formatted = false
+}) => {
   if (!player_row && (typeof pid === 'string' || pid instanceof String)) {
     const player_rows = await db('player').where({ pid })
     player_row = player_rows[0]
@@ -68,6 +73,11 @@ const updatePlayer = async ({ player_row, pid, update }) => {
 
     if (excluded_props.includes(prop)) {
       log(`not allowed to update ${prop}`)
+      continue
+    }
+
+    if (prop === 'formatted' && !update_formatted) {
+      log('not allowed to update formatted name')
       continue
     }
 
