@@ -199,11 +199,8 @@ const run = async () => {
   })
 
   // filter events to those for current week
-  // TODO remove filter
-  const week_end = constants.season.week_end
   const current_week_events = nfl_games_events.filter(
     (event) =>
-      dayjs(event.openDate).isBefore(week_end) &&
       event.name !== 'NFL Matches' &&
       event.name !== 'NFL'
   )
