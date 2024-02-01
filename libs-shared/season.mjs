@@ -126,7 +126,7 @@ export default class Season {
       // week_number = diff + 4
     } else if (diff > this.nflFinalWeek) {
       seas_type = 'POST'
-      week_number = diff - this.nflFinalWeek
+      week_number = Math.min(diff - this.nflFinalWeek, 4)
     } else {
       seas_type = 'REG'
       week_number = diff
