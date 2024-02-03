@@ -162,34 +162,38 @@ const run = async () => {
   })
 
   const schedule = await caesars.getSchedule()
+  const { events } = schedule.competitions[0]
 
-  // filter events to those for current week
-  const week_end = constants.season.week_end
-  const current_week_events = schedule.competitions[0].events.filter((event) =>
-    dayjs(event.startTime).isBefore(week_end)
-  )
+  log(`Getting odds for ${events.length} events`)
 
-  log(`Getting odds for ${current_week_events.length} events`)
-
-  for (const event of current_week_events) {
+  for (const event of events) {
     console.time(`caesars-event-${event.id}`)
     const event_odds = await caesars.getEvent(event.id)
 
     let nfl_game = null
 
     if (event?.type === 'MATCH') {
-      const event_name_split = event.name.replaceAll('|', '').split(' at ')
-      const { week, seas_type } = constants.season.calculate_week(
-        dayjs(event.startTime)
-      )
-      nfl_game = nfl_games.find(
-        (game) =>
-          game.week === week &&
-          game.seas_type === seas_type &&
-          game.year === constants.season.year &&
-          game.v === fixTeam(event_name_split[0]) &&
-          game.h === fixTeam(event_name_split[1])
-      )
+      if (!event.name.includes('|at|')) {
+        log(`Could not parse event name: ${event.name}`)
+      } else {
+        try {
+          const event_name_split = event.name.replaceAll('|', '').split(' at ')
+          const { week, seas_type } = constants.season.calculate_week(
+            dayjs(event.startTime)
+          )
+          nfl_game = nfl_games.find(
+            (game) =>
+              game.week === week &&
+              game.seas_type === seas_type &&
+              game.year === constants.season.year &&
+              game.v === fixTeam(event_name_split[0]) &&
+              game.h === fixTeam(event_name_split[1])
+          )
+        } catch (err) {
+          log(err)
+          log('Could not find game for event', event.name)
+        }
+      }
     }
 
     for (const market of event_odds.markets) {

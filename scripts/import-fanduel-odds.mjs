@@ -200,9 +200,7 @@ const run = async () => {
 
   // filter events to those for current week
   const current_week_events = nfl_games_events.filter(
-    (event) =>
-      event.name !== 'NFL Matches' &&
-      event.name !== 'NFL'
+    (event) => event.name !== 'NFL Matches' && event.name !== 'NFL'
   )
 
   log(`Getting odds for ${current_week_events.length} events`)
