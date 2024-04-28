@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import Box from '@mui/material/Box'
 // import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
-import PopperUnstyled from '@mui/base/PopperUnstyled'
+import { Popper } from '@mui/base/Popper'
 import InputAdornment from '@mui/material/InputAdornment'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import ClickAwayListener from '@mui/material/ClickAwayListener'
@@ -95,7 +95,7 @@ export default function PlayersViewMenu({
               )
             }}
           />
-          <PopperUnstyled
+          <Popper
             className='players__view-popper'
             placement='bottom-start'
             open={popper_open}
@@ -109,7 +109,7 @@ export default function PlayersViewMenu({
                   </Button>
                   </div> */}
             </Paper>
-          </PopperUnstyled>
+          </Popper>
         </div>
       </ClickAwayListener>
       <PlayersViewManager open={manager_open} handleClose={handleMangerClose} />
