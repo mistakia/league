@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 import Button from '@mui/material/Button'
-import Tabs from '@mui/base/TabsUnstyled'
-import Tab from '@mui/base/TabUnstyled'
-import TabPanel from '@mui/base/TabPanelUnstyled'
-import TabsList from '@mui/base/TabsListUnstyled'
+import { Tabs } from '@mui/base/Tabs'
+import { Tab } from '@mui/base/Tab'
+import { TabPanel } from '@mui/base/TabPanel'
+import { TabsList } from '@mui/base/TabsList'
 import Drawer from '@mui/material/Drawer'
 import CloseIcon from '@mui/icons-material/Close'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
@@ -92,7 +92,7 @@ export default function SelectedPlayer({
   const handleClose = () => deselect()
 
   useEffect(() => {
-    const element = document.querySelector('.TabUnstyled-root.Mui-selected')
+    const element = document.querySelector('.base-Tab-root.Mui-selected')
     if (element) element.scrollIntoView({ behavior: 'smooth' })
   }, [value])
 
