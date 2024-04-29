@@ -18,7 +18,16 @@ const data_path = path.join(__dirname, '../data')
 
 const export_league_playoffs = async () => {
   const data = await db('playoffs')
-    .select('uid', 'tid', 'lid', 'year', 'week', 'points', 'points_manual', 'projection')
+    .select(
+      'uid',
+      'tid',
+      'lid',
+      'year',
+      'week',
+      'points',
+      'points_manual',
+      'projection'
+    )
     .orderBy('year', 'asc')
     .orderBy('uid', 'asc')
 
