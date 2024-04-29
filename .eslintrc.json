@@ -11,6 +11,14 @@
       "jsx": true
     }
   },
+  "overrides": [
+    {
+      "files": ["libs-server/*.mjs"],
+      "rules": {
+        "react/prop-types": "off"
+      }
+    }
+  ],
   "rules": {
     "camelcase": ["off"],
     "curly": ["off"],
