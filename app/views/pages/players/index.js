@@ -18,7 +18,6 @@ const mapStateToProps = createSelector(
   getFilteredPlayers,
   (state) => state.getIn(['players', 'allPlayersPending']),
   (state) => state.getIn(['players', 'search']),
-  (state) => state.getIn(['players', 'selected']),
   (state) => state.getIn(['players', 'order']),
   (state) => state.getIn(['players', 'orderBy']),
   (state) => state.getIn(['app', 'userId']),
@@ -31,7 +30,6 @@ const mapStateToProps = createSelector(
     players,
     allPlayersPending,
     searchValue,
-    selected,
     order,
     orderBy,
     userId,
@@ -48,7 +46,6 @@ const mapStateToProps = createSelector(
       allPlayersPending ||
       (selected_players_view.key.includes('stats_by_play') && stats.isPending), // TODO handle player fields being loaded (stats, etc)
     searchValue,
-    selected,
     order,
     orderBy,
     selected_players_view,

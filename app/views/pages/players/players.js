@@ -301,7 +301,6 @@ PlayersPage.propTypes = {
   order: PropTypes.string,
   orderBy: PropTypes.string,
   players: ImmutablePropTypes.list,
-  selected: PropTypes.string,
   isPending: PropTypes.bool,
   is_logged_in: PropTypes.bool,
   search: PropTypes.func,
