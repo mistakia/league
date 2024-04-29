@@ -10,6 +10,7 @@ const calculatePick = ({ round, order, league }) =>
   (round - 1) * league.num_teams + order
 
 const run = async () => {
+  log(`setting draft picks for ${constants.season.year}`)
   const lid = 1
 
   const league = await getLeague({ lid })
@@ -24,13 +25,33 @@ const run = async () => {
     comp: 0
   })
 
-  for (const pick of picks) {
+  const team_ids = teams.map((t) => t.uid)
+  const filtered_picks = picks.filter((p) => team_ids.includes(p.tid))
+
+  for (const pick of filtered_picks) {
     const num = calculatePick({
       round: pick.round,
       order: draftOrder.indexOf(pick.otid) + 1,
       league
     })
     await db('draft').update({ pick: num }).where('uid', pick.uid)
+  }
+
+  // reset pick numbers as there could be gaps due to decommissioned teams
+  const sorted_draft_picks = await db('draft')
+    .where({
+      comp: 0,
+      lid,
+      year: constants.season.year
+    })
+    .orderBy('pick', 'asc')
+
+  for (let i = 0; i < sorted_draft_picks.length; i++) {
+    const pick = sorted_draft_picks[i]
+    const num = i + 1
+    if (pick.pick !== num) {
+      await db('draft').update({ pick: num }).where('uid', pick.uid)
+    }
   }
 
   const query_params = {
@@ -51,7 +72,7 @@ const run = async () => {
     if (index >= 0) {
       const pick = compensatory_picks.splice(index, 1)[0]
       inserts.push(pick)
-      const num = picks.length + inserts.length
+      const num = sorted_draft_picks.length + inserts.length
       await db('draft')
         .update({ pick: num, round: Math.ceil(num / league.num_teams) })
         .where('uid', pick.uid)
@@ -61,7 +82,7 @@ const run = async () => {
   }
 
   log(
-    `set ${inserts.length + picks.length} draft picks for ${
+    `set ${inserts.length + sorted_draft_picks.length} draft picks for ${
       constants.season.year
     }`
   )
