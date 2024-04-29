@@ -17,7 +17,10 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const data_path = path.join(__dirname, '../data')
 
 const export_league_playoffs = async () => {
-  const data = await db('playoffs').orderBy('uid', 'asc')
+  const data = await db('playoffs')
+    .select('uid', 'tid', 'lid', 'year', 'week', 'points', 'points_manual', 'projection')
+    .orderBy('year', 'asc')
+    .orderBy('uid', 'asc')
 
   const header = {}
   for (const field of Object.keys(data[0])) {
