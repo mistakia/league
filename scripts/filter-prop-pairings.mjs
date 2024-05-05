@@ -456,8 +456,8 @@ const filter_prop_pairings = async ({
       const status = prop.is_pending
         ? 'pending'
         : prop.is_success
-        ? 'hit'
-        : 'miss'
+          ? 'hit'
+          : 'miss'
       const sorted_props = prop.props.sort((a, b) => a.o_am - b.o_am)
       const prop_names = sorted_props.map(
         (p) => `${p.name} [${Math.round(p.hist_rate_soft * 100)}% / ${p.o_am}]`
