@@ -55,8 +55,8 @@ export default class PlayerRosterTotal extends React.Component {
       const salary = isBeforeExtensionDeadline
         ? value
         : isBeforeTransitionEnd && isRestrictedFreeAgent && is_team_manager
-        ? bid
-        : value
+          ? bid
+          : value
       baseSalaryTotal = baseSalaryTotal + salary
       extendedSalaryTotal = extendedSalaryTotal + extendedSalary
       projectedSalaryTotal = projectedSalaryTotal + projectedSalary

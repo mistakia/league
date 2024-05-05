@@ -47,10 +47,10 @@ class PlayerRoster extends Player {
     const salary = isBeforeExtensionDeadline
       ? value
       : isBeforeTransitionEnd &&
-        isRestrictedFreeAgent &&
-        (is_team_manager || isTransition)
-      ? bid
-      : value
+          isRestrictedFreeAgent &&
+          (is_team_manager || isTransition)
+        ? bid
+        : value
     const extensions = playerMap.get('extensions', 0)
     const pos = playerMap.get('pos', '')
     const slot = playerMap.get('slot')
@@ -185,8 +185,8 @@ class PlayerRoster extends Player {
                   {isPoach
                     ? value + 2 || '-'
                     : typeof salary === 'number'
-                    ? `$${salary}`
-                    : '-'}
+                      ? `$${salary}`
+                      : '-'}
                 </div>
               )}
               {!isPoach && isOffseason && isBeforeExtensionDeadline && (
