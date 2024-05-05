@@ -74,7 +74,7 @@ if (options.ssl) {
 const speed_limiter = slowDown({
   windowMs: 5 * 60 * 1000,
   delayAfter: 5,
-  delayMs: 500,
+  delayMs: (hits, req) => (hits - req.slowDown.limit) * 500, // begin adding 500ms of delay per request above `delayAfter`
   maxDelayMs: 10000
 })
 
