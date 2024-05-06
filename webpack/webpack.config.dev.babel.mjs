@@ -26,6 +26,7 @@ export default merge(baseConfig, {
 
   // Don't use hashes in dev mode for better performance
   output: {
+    clean: true,
     publicPath: '/',
     filename: '[name].js',
     chunkFilename: '[name].chunk.js'
