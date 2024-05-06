@@ -1,15 +1,17 @@
 const season_dates = {
+  // use unix timestamp, start of day, new york timezone
+
   // super bowl
-  offseason: 1676178000,
+  offseason: 1710129600,
 
   // Two Tuesdays before first game
-  start: 1693281600,
+  start: 1724731200,
 
   // super bowl
-  end: 1710129600,
+  end: 1739077200,
 
   // first game
-  openingDay: 1694059200,
+  openingDay: 1725508800,
 
   finalWeek: 17,
   nflFinalWeek: 18,

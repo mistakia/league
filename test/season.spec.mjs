@@ -2,8 +2,10 @@
 
 import chai from 'chai'
 import MockDate from 'mockdate'
+import dayjs from 'dayjs'
 
 import { constants } from '#libs-shared'
+import season_dates from '#libs-shared/season-dates.mjs'
 
 const { start, end } = constants.season
 const expect = chai.expect
@@ -127,28 +129,31 @@ describe('LIBS-SHARED Season', function () {
   })
 
   it('year', function () {
+    const current_year = dayjs.unix(season_dates.offseason).year()
+    const next_year = dayjs.unix(season_dates.end).year()
+
     // start of week 0
     MockDate.set(start.toISOString())
-    expect(constants.season.year).to.equal(2023)
+    expect(constants.season.year).to.equal(current_year)
 
     // start of year
     MockDate.set(start.startOf('year').toISOString())
-    expect(constants.season.year).to.equal(2023)
+    expect(constants.season.year).to.equal(current_year)
 
     // last day of year
     MockDate.set(start.endOf('year').toISOString())
-    expect(constants.season.year).to.equal(2023)
+    expect(constants.season.year).to.equal(current_year)
 
     // first day of new year
     MockDate.set(end.startOf('year').toISOString())
-    expect(constants.season.year).to.equal(2023)
+    expect(constants.season.year).to.equal(current_year)
 
     // before super bowl
     MockDate.set(end.subtract('1', 'day').toISOString())
-    expect(constants.season.year).to.equal(2023)
+    expect(constants.season.year).to.equal(current_year)
 
     // after super bowl
     MockDate.set(end.add('1', 'minute').toISOString())
-    expect(constants.season.year).to.equal(2024)
+    expect(constants.season.year).to.equal(next_year)
   })
 })
