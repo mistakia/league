@@ -112,12 +112,41 @@ api.use('/api/*', (req, res, next) => {
 api.use('/api/scoreboard', routes.scoreboard)
 api.use('/api/me', routes.me)
 api.use('/api/settings', routes.settings)
-api.use('/index.js.map', (req, res) => {
-  res.sendFile(path.join(__dirname, '../', 'dist', 'index.js.map'))
+api.use('/index.js.map', (req, res, next) => {
+  res.sendFile(path.join(__dirname, '../', 'dist', 'index.js.map'), (err) => {
+    if (err) {
+      if (!res.headersSent) {
+        res.status(404).send('File not found')
+      } else {
+        next(err)
+      }
+    }
+  })
 })
-api.use('/static', express.static(path.join(__dirname, '../', 'static')))
-api.use('/*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../', 'dist', 'index.html'))
+api.use(
+  '/static',
+  express.static(path.join(__dirname, '../', 'static'), {
+    fallthrough: false
+  }),
+  (err, req, res, next) => {
+    // Error handling middleware
+    if (err) {
+      res.status(404).send('Static content not found')
+    } else {
+      next()
+    }
+  }
+)
+api.use('/*', (req, res, next) => {
+  res.sendFile(path.join(__dirname, '../', 'dist', 'index.html'), (err) => {
+    if (err) {
+      if (!res.headersSent) {
+        res.status(404).send('Page not found')
+      } else {
+        next(err)
+      }
+    }
+  })
 })
 
 const createServer = () => {
