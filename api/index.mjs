@@ -42,7 +42,7 @@ api.use(morgan('api', 'combined'))
 api.use(bodyParser.json({ limit: '150mb' }))
 
 api.use(
-  favicon(path.join(__dirname, '../', 'dist', 'favicon.ico'), {
+  favicon(path.join(__dirname, '../', 'static', 'favicon.ico'), {
     maxAge: '604800'
   })
 )
