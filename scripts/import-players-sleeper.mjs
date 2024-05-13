@@ -25,6 +25,7 @@ const run = async () => {
     const name = item.full_name || ''
     const team = fixTeam(item.team)
     const pos = item.position
+    const start = item.metadata?.start_year || null
 
     if (!name || !pos) continue
 
@@ -36,7 +37,13 @@ const run = async () => {
     try {
       player_row = await getPlayer({ sleeper_id })
       if (!player_row) {
-        player_row = await getPlayer({ name, pos, team })
+        player_row = await getPlayer({
+          name,
+          pos,
+          teams: [team, 'INA'],
+          ignore_retired: true,
+          start
+        })
       }
     } catch (err) {
       log(err)
@@ -104,11 +111,13 @@ const run = async () => {
           jnum: item.number,
 
           posd: item.position,
+          start,
 
           ...data
         })
       } catch (err) {
         log(err)
+        log(item)
       }
     } else {
       const changes = await updatePlayer({
