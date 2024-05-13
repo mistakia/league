@@ -3,6 +3,7 @@ export default function (team) {
 
   switch (team) {
     case 'FA':
+    case 'INA':
     case undefined:
     case null:
       return 'INA'
