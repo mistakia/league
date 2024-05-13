@@ -16,7 +16,7 @@ const format_player_ids = async () => {
   let error_count = 0
   let unchanged_count = 0
 
-  const players = await db('player')
+  const players = await db('player').whereNot({ pos: 'DEF' })
 
   for (const player of players) {
     let pid
@@ -44,6 +44,10 @@ const format_player_ids = async () => {
 
       try {
         // update player
+        log(
+          `updating pid for ${player.fname} ${player.lname} from ${player.pid} to ${pid}`
+        )
+
         await db('player').where({ pid: player.pid }).update({ pid })
         await update_player_id({ current_pid: player.pid, new_pid: pid })
 
