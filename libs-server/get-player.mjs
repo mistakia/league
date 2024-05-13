@@ -49,6 +49,7 @@ const getPlayer = async ({
   esbid,
   gsisid,
   pname,
+  start,
 
   ignore_retired = false,
   ignore_free_agent = false
@@ -110,7 +111,8 @@ const getPlayer = async ({
     }
 
     if (teams.length) {
-      query.whereIn('current_nfl_team', teams)
+      const formatted_teams = teams.map(fixTeam)
+      query.whereIn('current_nfl_team', formatted_teams)
     }
 
     if (ignore_retired) {
@@ -126,6 +128,10 @@ const getPlayer = async ({
         )
       })
     }
+
+    if (start) {
+      query.where({ start })
+    }
   }
 
   const player_rows = await query
@@ -134,7 +140,12 @@ const getPlayer = async ({
     throw new Errors.MatchedMultiplePlayers()
   }
 
-  return player_rows.length ? player_rows[0] : undefined
+  if (!player_rows.length) {
+    log(`no player rows found for query: ${query.toString()}`)
+    return undefined
+  }
+
+  return player_rows[0]
 }
 
 export default getPlayer
