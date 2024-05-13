@@ -56,7 +56,12 @@ const run = async () => {
         .text()
         .trim()
 
-      const params = { name, team, pos }
+      const params = {
+        name,
+        teams: [team],
+        pos,
+        ignore_retired: year === constants.season.year
+      }
       const data = {}
 
       if (position === 'QB') {
@@ -130,7 +135,7 @@ const run = async () => {
 
   log(`Could not locate ${missing.length} players`)
   missing.forEach((m) =>
-    log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`)
+    log(`could not find player: ${m.name} / ${m.pos} / ${m.teams.join(', ')}`)
   )
 
   if (argv.dry) {
