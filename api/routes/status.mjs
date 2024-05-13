@@ -21,16 +21,22 @@ router.get('/overall', async (req, res) => {
   const { logger } = req.app.locals
   try {
     const jobs = await getJobs()
-    const failed = jobs.find((j) => !j.succ)
-    if (!failed) {
+    const failed_jobs = jobs.filter((job) => !job.succ)
+
+    if (failed_jobs.length === 0) {
       return res.send({ status: 'operational' })
     }
 
-    const timestamp = dayjs.unix(failed.timestamp).format('YYYY/MM/DD HH:mm')
-    const message = `${constants.jobDetails[failed.type]}: ${
-      failed.reason
-    } (${timestamp})`
-    return res.status(500).send({ message })
+    const errors = failed_jobs.map(job => {
+      const timestamp = dayjs.unix(job.timestamp).format('YYYY/MM/DD HH:mm')
+      return {
+        job: constants.jobDetails[job.type],
+        reason: job.reason,
+        timestamp: timestamp
+      }
+    })
+
+    return res.status(500).send({ errors })
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })
