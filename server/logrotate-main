@@ -1,0 +1,7 @@
+/var/log/league/*.log {
+    size 100M
+    rotate 2
+    missingok
+    notifempty
+    create 666 root root
+}
