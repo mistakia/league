@@ -4,4 +4,5 @@
     missingok
     notifempty
     create 666 root root
+    su root root
 }
