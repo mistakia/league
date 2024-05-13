@@ -32,6 +32,8 @@ module.exports = {
 
   league_api_auth_token: '', // used for cache
 
+  discord_sysadmin_alerts_channel_webhook_url: '',
+
   discord_props_change_channel_webhook_url: '',
   discord_props_open_channel_webhook_url: '',
 

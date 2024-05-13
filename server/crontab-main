@@ -165,3 +165,6 @@
 
 ## Every day at 0:00
 0 0 * * * find /tmp/puppeteer* -mtime +2 -exec rm -rf {} \; &>> /var/log/league/league-cleanup-puppeteer.log
+
+## Check disk space every hour
+0 * * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/check-disk-space-main-server.mjs &>> /var/log/league/league-check-disk-space-main-server.log
