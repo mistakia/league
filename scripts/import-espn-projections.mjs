@@ -25,7 +25,7 @@ const run = async ({
   }
 
   const URL =
-    `https://fantasy.espn.com/apis/v3/games/ffl/seasons/${year}/segments/0/leaguedefaults/3?view=kona_player_info` +
+    `https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/${year}/segments/0/leaguedefaults/3?view=kona_player_info` +
     (season_totals ? '&seasonTotals=true' : '')
   log(URL)
 
@@ -43,7 +43,12 @@ const run = async ({
     const name = item.player.fullName
     const team = constants.espn.teamId[item.player.proTeamId]
     const pos = constants.espn.positionId[item.player.defaultPositionId]
-    const params = { name, team, pos }
+    const params = {
+      name,
+      teams: [team],
+      pos,
+      ignore_retired: year === constants.season.year
+    }
     let player_row
 
     // TODO cleanup
@@ -76,7 +81,7 @@ const run = async ({
 
   log(`Could not locate ${missing.length} players`)
   missing.forEach((m) =>
-    log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`)
+    log(`could not find player: ${m.name} / ${m.pos} / ${m.teams.join(', ')}`)
   )
 
   if (dry_run) {
