@@ -7,13 +7,26 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants } from '#libs-shared'
-import { isMain, getPlayer, wait } from '#libs-server'
+import { isMain, getPlayer, updatePlayer, wait } from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-keeptradecut')
-debug.enable('import-keeptradecut,get-player')
+debug.enable('import-keeptradecut,get-player,update-player')
 
 const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
+  const dynasty_rankings_html = await fetch(
+    'https://keeptradecut.com/dynasty-rankings'
+  ).then((res) => res.text())
+  const dynasty_rankings_dom = new JSDOM(dynasty_rankings_html, {
+    runScripts: 'dangerously'
+  })
+
+  const { playersArray } = dynasty_rankings_dom.window
+  const players_index = {}
+  for (const player of playersArray) {
+    players_index[player.playerID] = player
+  }
+
   const url = 'https://keeptradecut.com/dynasty-rankings/history'
   const data = await fetch(url, {
     method: 'POST',
@@ -23,15 +36,48 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
   log(`Processing ${data.length} players`)
 
   for (const item of data) {
-    const player_row = await await getPlayer({ keeptradecut_id: item.playerID })
-    if (!player_row) continue
+    let player_row
+    const keeptradecut_player = players_index[item.playerID]
+
+    if (keeptradecut_player.position === 'RDP') {
+      // skip draft pick values for now
+      continue
+    }
+
+    try {
+      player_row = await getPlayer({ keeptradecut_id: item.playerID })
+      if (!player_row) {
+        player_row = await getPlayer({
+          name: keeptradecut_player.playerName,
+          pos: keeptradecut_player.position,
+          team: keeptradecut_player.team,
+          start: keeptradecut_player.draftYear
+        })
+
+        if (player_row) {
+          await updatePlayer({
+            player_row,
+            update: { keeptradecut_id: item.playerID }
+          })
+        } else {
+          log(
+            `PlayerID ${keeptradecut_player.playerID} not found, name: ${keeptradecut_player.playerName}, team: ${keeptradecut_player.team}, slug: ${keeptradecut_player.slug}, draft year: ${keeptradecut_player.draftYear}`
+          )
+          continue
+        }
+      }
+    } catch (err) {
+      log(`Error getting player ${item.playerID}: ${err}`)
+      continue
+    }
 
     const inserts = []
     const { pid } = player_row
 
     if (full) {
+      const slug = keeptradecut_player.slug
       const html = await fetch(
-        `https://keeptradecut.com/dynasty-rankings/players/${item.slug}`
+        `https://keeptradecut.com/dynasty-rankings/players/${slug}`
       ).then((res) => res.text())
 
       const dom = new JSDOM(html, { runScripts: 'dangerously' })
@@ -95,7 +141,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
         })
       })
     } else {
-      item.oneQBValueHistory.forEach((i) => {
+      item.oneQB?.valueHistory?.forEach((i) => {
         inserts.push({
           qb: 1,
           pid,
@@ -105,7 +151,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
         })
       })
 
-      item.superflexValueHistory.forEach((i) => {
+      item.superflex?.valueHistory?.forEach((i) => {
         inserts.push({
           qb: 2,
           pid,
