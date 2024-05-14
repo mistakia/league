@@ -1,6 +1,7 @@
 import {
   fork,
   takeLatest,
+  takeEvery,
   call,
   select,
   put,
@@ -391,7 +392,7 @@ export function* watchLoadPlayerPractices() {
 }
 
 export function* watchLoadAllPlayers() {
-  yield takeLatest(playerActions.LOAD_ALL_PLAYERS, loadAllPlayers)
+  yield takeEvery(playerActions.LOAD_ALL_PLAYERS, loadAllPlayers)
 }
 
 export function* watchLoadLeaguePlayers() {

@@ -39,7 +39,6 @@ import { csv } from '@core/export'
 import './players.styl'
 
 export default function PlayersPage({
-  loadAllPlayers,
   players,
   player_fields,
   selected_players_view,
@@ -66,10 +65,6 @@ export default function PlayersPage({
   let scroll_ref
 
   useEffect(() => {
-    loadAllPlayers()
-  }, [loadAllPlayers])
-
-  useEffect(() => {
     for (const field_key of selected_players_view.fields) {
       const player_field = player_fields[field_key]
       if (player_field.load) {
@@ -83,7 +78,9 @@ export default function PlayersPage({
       return navigate('/', { replace: true })
     }
 
-    loadRosters(lid)
+    if (lid !== '0') {
+      loadRosters(lid)
+    }
   }, [lid, loadRosters, navigate])
 
   useEffect(() => {
@@ -305,7 +302,6 @@ PlayersPage.propTypes = {
   is_logged_in: PropTypes.bool,
   search: PropTypes.func,
   searchValue: PropTypes.string,
-  loadAllPlayers: PropTypes.func,
   selected_view_grouped_fields: PropTypes.array,
   show_week_filter: PropTypes.bool,
   show_play_filters: PropTypes.bool,
