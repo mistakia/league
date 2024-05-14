@@ -60,8 +60,8 @@ export default function LeagueHomePage({
   }, [lid, navigate])
 
   useEffect(() => {
-    loadTeams(leagueId)
-    loadRosters(leagueId)
+    if (leagueId) loadTeams(leagueId)
+    if (leagueId) loadRosters(leagueId)
     loadLeaguePlayers()
     loadDraftPickValue()
     loadRecentTransactions()

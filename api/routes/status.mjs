@@ -27,12 +27,12 @@ router.get('/overall', async (req, res) => {
       return res.send({ status: 'operational' })
     }
 
-    const errors = failed_jobs.map(job => {
+    const errors = failed_jobs.map((job) => {
       const timestamp = dayjs.unix(job.timestamp).format('YYYY/MM/DD HH:mm')
       return {
         job: constants.jobDetails[job.type],
         reason: job.reason,
-        timestamp: timestamp
+        timestamp
       }
     })
 

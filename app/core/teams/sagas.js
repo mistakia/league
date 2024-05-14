@@ -30,6 +30,8 @@ export function* loadTeams() {
     return
   }
 
+  if (!leagueId) return
+
   yield call(getTeams, { leagueId })
 }
 
