@@ -23,10 +23,8 @@ yarn-error.log
 config.*.js
 key.pem
 cert.pem
-dist/*.worker.js*
 drive-credentials.json
 drive-token.json
-dist/stats.html
 *.sql
 *.tar.qz
 *.tar.gz

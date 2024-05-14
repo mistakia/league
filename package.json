@@ -12,7 +12,7 @@
     "build": "cross-env NODE_ENV=production webpack --config ./webpack/webpack.config.prod.babel.mjs",
     "analyze": "cross-env OPEN_ANALYZER=true NODE_ENV=production webpack --config ./webpack/webpack.config.prod.babel.mjs",
     "deploy": "pm2 deploy server.pm2.config.js production",
-    "deploy:dist": "scp -r dist/* league:/root/league/source/dist",
+    "deploy:dist": "rsync -av --exclude 'stats.html' dist/ league:/root/league/source/dist",
     "todo": "grep -rni todo app api common scripts",
     "count:lines": "git ls-files -- ':!:yarn.lock' ':!:./data' | xargs wc -l | tail -n 1",
     "load:main": "ssh league 'export NVM_DIR=\"$HOME/.nvm\" && [ -s \"$NVM_DIR/nvm.sh\" ] && . \"$NVM_DIR/nvm.sh\" && cd /root/league && git pull && yarn install'",
