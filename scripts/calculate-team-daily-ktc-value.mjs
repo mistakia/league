@@ -16,7 +16,7 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('calculate-team-daily-ktc-value')
 debug.enable('calculate-team-daily-ktc-value')
 
-const MAX_DAY_INTERVAL = 5
+const max_day_interval = 5
 
 const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
   log(`calculating team daily ktc value for league ${lid}`)
@@ -230,11 +230,11 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
 
     // check if next tran date is larger than the max interval
     const next_tran_date = dayjs.unix(transactions[i + 1]?.timestamp)
-    if (next_tran_date.diff(transaction.timestamp, 'day') > MAX_DAY_INTERVAL) {
+    if (next_tran_date.diff(transaction.timestamp, 'day') > max_day_interval) {
       // calculate team daily keeptradecut value for days in between based on max_day_interval
       let cursor_date = dayjs
         .unix(transaction.timestamp)
-        .add(MAX_DAY_INTERVAL, 'day')
+        .add(max_day_interval, 'day')
       while (cursor_date < next_tran_date) {
         const formatted_date = cursor_date.format('YYYY-MM-DD')
         const day_inserts = []
@@ -271,11 +271,59 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
           team_daily_value_inserts.push(insert)
         }
 
-        cursor_date = cursor_date.add(MAX_DAY_INTERVAL, 'day')
+        cursor_date = cursor_date.add(max_day_interval, 'day')
       }
     }
 
     last_date = tran_date
+  }
+
+  // Check if the gap between the last transaction and the present day is larger than the max interval
+  const present_date = dayjs()
+  if (
+    last_date &&
+    present_date.diff(dayjs(last_date), 'day') > max_day_interval
+  ) {
+    // calculate team daily keeptradecut value for days in between based on max_day_interval
+    let cursor_date = dayjs(last_date).add(max_day_interval, 'day')
+    while (cursor_date < present_date) {
+      const formatted_date = cursor_date.format('YYYY-MM-DD')
+      const day_inserts = []
+      let day_ktc_total = 0
+
+      for (const team of Object.values(teams_index)) {
+        const team_players = Object.keys(team.players)
+        const team_players_ktc_value = team_players.reduce((acc, pid) => {
+          const ktc_player = keeptradecut_index[pid]
+          const ktc_value = ktc_player ? ktc_player[formatted_date] : null
+          return acc + (ktc_value || 0)
+        }, 0)
+
+        // calculate keeptradecut value for team
+        const team_ktc_value = team_players_ktc_value // + team_picks_ktc_value
+
+        if (team_ktc_value === 0) {
+          // TOOD figure out why
+          continue
+        }
+
+        day_ktc_total += team_ktc_value
+        day_inserts.push({
+          lid,
+          tid: team.uid,
+          date: formatted_date,
+          timestamp: cursor_date.valueOf(),
+          ktc_value: team_ktc_value
+        })
+      }
+
+      for (const insert of day_inserts) {
+        insert.ktc_share = insert.ktc_value / day_ktc_total
+        team_daily_value_inserts.push(insert)
+      }
+
+      cursor_date = cursor_date.add(max_day_interval, 'day')
+    }
   }
 
   log(`ignored ${ignored_tran_types.size} transaction types`)
