@@ -44,6 +44,10 @@ const updatePlayer = async ({ player_row, pid, update }) => {
     return 0
   }
 
+  if (!player_row.pid) {
+    throw new Error('Player row is missing pid')
+  }
+
   const differences = diff(player_row, update)
 
   const edits = differences.filter((d) => d.kind === 'E')
@@ -54,10 +58,10 @@ const updatePlayer = async ({ player_row, pid, update }) => {
   let changes = 0
   for (const edit of edits) {
     const prop = edit.path[0]
-    const isNull = !edit.rhs
-    const isNullable = nullable_props.includes(prop)
+    const is_null = !edit.rhs
+    const is_nullable = nullable_props.includes(prop)
 
-    if (isNull && !isNullable) {
+    if (is_null && !is_nullable) {
       continue
     }
 
