@@ -6,6 +6,7 @@ export default function (team) {
     case 'INA':
     case undefined:
     case null:
+    case 'FA*':
       return 'INA'
 
     case 'AFC':
@@ -135,6 +136,7 @@ export default function (team) {
     case 'LAR':
     case 'LA':
     case 'STL':
+    case 'RAM':
     case 'LAR RAMS':
     case 'LA RAMS':
       return 'LA'
