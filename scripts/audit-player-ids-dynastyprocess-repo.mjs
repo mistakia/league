@@ -146,6 +146,7 @@ const audit_player_ids_dynastyprocess_repo = async ({
     )
 
     if (!matching_player) {
+      // TODO create new player
       log(
         `no matching player for ${dp_player.formatted}, ${dp_player.pos}, ${dp_player.current_nfl_team}`
       )
