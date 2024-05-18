@@ -27,7 +27,7 @@ const askQuestion = (question) => {
 
 const audit_player_ids_dynastyprocess_repo = async ({
   force_download = false,
-  update_player = false
+  update_player_conflicts = false
 } = {}) => {
   const url =
     'https://raw.githubusercontent.com/dynastyprocess/data/master/files/db_playerids.csv'
@@ -162,7 +162,9 @@ const audit_player_ids_dynastyprocess_repo = async ({
         key === 'formatted' ||
         key === 'height' ||
         key === 'weight' ||
-        key === 'pos'
+        key === 'pos' || // TODO
+        key === 'nflid' ||
+        key === 'current_nfl_team'
     )
     if (diff_result) {
       const filtered_diff_result = diff_result.filter(
@@ -192,7 +194,22 @@ const audit_player_ids_dynastyprocess_repo = async ({
         })
         log(filtered_diff_result)
 
-        if (update_player) {
+        const truthy_differences = filtered_diff_result.filter(
+          (change) => change.lhs && change.rhs
+        )
+
+        if (truthy_differences.length === 0) {
+          const updates = filtered_diff_result.reduce((acc, change) => {
+            acc[change.path[0]] = change.rhs
+            return acc
+          }, {})
+
+          await updatePlayer({
+            player_row: matching_player,
+            update: updates
+          })
+          log(`Updated player ${dp_player.formatted} with all differences`)
+        } else if (update_player_conflicts) {
           for (const change of filtered_diff_result) {
             const field = change.path[0]
             const current_value = matching_player[field]
@@ -238,10 +255,10 @@ const main = async () => {
   let error
   try {
     const force_download = argv.d
-    const update_player = argv.update
+    const update_player_conflicts = argv.update
     await audit_player_ids_dynastyprocess_repo({
       force_download,
-      update_player
+      update_player_conflicts
     })
   } catch (err) {
     error = err
