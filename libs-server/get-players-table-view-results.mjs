@@ -24,6 +24,18 @@ export default async function ({
 
   const all_table_columns = [...prefix_columns, ...columns]
 
+  const missing_where_columns = where.filter(({ column_id }) => {
+    return !all_table_columns.some((column) => {
+      return (
+        column_id === (typeof column === 'string' ? column : column.column_id)
+      )
+    })
+  })
+
+  missing_where_columns.forEach(({ column_id }) => {
+    all_table_columns.push(column_id)
+  })
+
   for (const column of all_table_columns) {
     // column could be a string representing column_id or an object containing column_id and params
     const column_id = typeof column === 'string' ? column : column.column_id
@@ -105,7 +117,9 @@ export default async function ({
       ? column_definition.where_column({
           case_insensitive: where_clause.operator === 'ILIKE'
         })
-      : `${table_name}.${column_name}`
+      : column_definition.use_having
+        ? column_name
+        : `${table_name}.${column_name}`
 
     if (column_definition.use_having) {
       if (where_clause.operator === 'IS NULL') {
