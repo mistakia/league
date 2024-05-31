@@ -184,7 +184,7 @@ export default async function ({
 
   for (const sort_clause of sort) {
     const column = find_column({
-      column_id: sort_clause.id,
+      column_id: sort_clause.column_id,
       columns: all_table_columns
     })
     const column_id = typeof column === 'string' ? column : column.column_id
