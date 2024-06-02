@@ -106,7 +106,7 @@ export default function SelectedPlayer({
   const pos = playerMap.get('pos')
   const pid = playerMap.get('pid')
   const tid = playerMap.get('tid', false)
-  const playerStatus = playerMap.get('status')
+  const player_nfl_status = playerMap.get('nfl_status')
   const draftNum = playerMap.get('dpos')
   const draftYear = playerMap.get('start')
   const draftRound = playerMap.get('round')
@@ -140,9 +140,11 @@ export default function SelectedPlayer({
             )}
             <div className='selected__player-header-item'>
               <label>Status</label>
-              {constants.status[playerStatus]
-                ? playerStatus
-                : playerMap.get('gamestatus') || 'Active'}
+              {player_nfl_status
+                ? constants.nfl_player_status_full[player_nfl_status]
+                : constants.nfl_player_status_full[
+                    playerMap.get('game_status')
+                  ] || 'Active'}
             </div>
             {is_logged_in && Boolean(tid) && (
               <div className='selected__player-header-item'>

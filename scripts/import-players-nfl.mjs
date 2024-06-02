@@ -2,7 +2,12 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { constants, Errors, formatHeight } from '#libs-shared'
+import {
+  constants,
+  Errors,
+  formatHeight,
+  format_nfl_status
+} from '#libs-shared'
 import {
   isMain,
   nfl,
@@ -74,7 +79,7 @@ const importPlayersNFL = async ({
       : null
     const jnum = node.jerseyNumber
     const height = formatHeight(node.height)
-    const nfl_status = node.person.status
+    const nfl_status = format_nfl_status(node.person.status)
 
     if (!start && node.nflExperience === 0) {
       start = year

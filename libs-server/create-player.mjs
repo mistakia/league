@@ -4,7 +4,8 @@ import {
   formatHeight,
   formatPlayerName,
   fixTeam,
-  formatPosition
+  formatPosition,
+  format_nfl_status
 } from '#libs-shared'
 import db from '#db'
 import generate_player_id from './generate-player-id.mjs'
@@ -98,6 +99,7 @@ const createPlayer = async (playerData) => {
   playerData.pos = formatPosition(playerData.pos)
   playerData.pos1 = formatPosition(playerData.pos1)
   playerData.posd = formatPosition(playerData.posd)
+  playerData.nfl_status = format_nfl_status(playerData.nfl_status)
 
   try {
     await db('player').insert({

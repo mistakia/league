@@ -263,7 +263,7 @@ const generate_prop_pairings = async ({
    *   .select('fname', 'lname', 'pid', 'current_nfl_team', 'pos')
    *   .whereIn('pos', ['QB', 'RB', 'WR', 'TE'])
    *   .whereNot('current_nfl_team', 'INA')
-   *   .where('status', 'Active')
+   *   .where('nfl_status', constants.player_nfl_status.ACTIVE)
    *   .whereIn('pid', prop_pids)
 
    * log(`loaded ${active_players.length} active players`)

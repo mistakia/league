@@ -3,6 +3,7 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
+import { format_nfl_status, format_nfl_injury_status } from '#libs-shared'
 import isMain from './is-main.mjs'
 import db from '#db'
 
@@ -48,7 +49,21 @@ const updatePlayer = async ({ player_row, pid, update }) => {
     throw new Error('Player row is missing pid')
   }
 
-  const differences = diff(player_row, update)
+  const formatted_update = {
+    ...update
+  }
+
+  if (update.nfl_status) {
+    formatted_update.nfl_status = format_nfl_status(update.nfl_status)
+  }
+
+  if (update.injury_status) {
+    formatted_update.injury_status = format_nfl_injury_status(
+      update.injury_status
+    )
+  }
+
+  const differences = diff(player_row, formatted_update)
 
   const edits = differences.filter((d) => d.kind === 'E')
   if (!edits.length) {

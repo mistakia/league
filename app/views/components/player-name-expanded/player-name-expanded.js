@@ -101,8 +101,8 @@ class PlayerNameExpanded extends Player {
         ? playerMap.get('pname')
         : `${playerMap.get('fname', '')} ${playerMap.get('lname', '')}`
 
-    const playerStatus = playerMap.get('status')
-    const playerGamestatus = playerMap.get('gamestatus')
+    const player_nfl_status = playerMap.get('nfl_status')
+    const player_game_status = playerMap.get('game_status')
     const slot = playerMap.get('slot')
     return (
       <div className={classNames.join(' ')}>
@@ -140,17 +140,21 @@ class PlayerNameExpanded extends Player {
             <Position pos={playerMap.get('pos')} />
             <NFLTeam team={playerMap.get('team')} />
             <GameStatus status={status} playerMap={playerMap} />
-            {Boolean(constants.status[playerStatus] || playerGamestatus) && (
+            {Boolean(
+              constants.nfl_player_status_abbreviations[player_nfl_status] ||
+                constants.nfl_player_status_abbreviations[player_game_status]
+            ) && (
               <PlayerLabel
                 type='game'
                 label={
-                  constants.status[playerStatus] ||
-                  constants.status[playerGamestatus]
+                  constants.nfl_player_status_abbreviations[
+                    player_nfl_status
+                  ] ||
+                  constants.nfl_player_status_abbreviations[player_game_status]
                 }
                 description={
-                  constants.status[playerStatus]
-                    ? playerStatus
-                    : playerGamestatus
+                  constants.nfl_player_status_descriptions[player_nfl_status] ||
+                  constants.nfl_player_status_descriptions[player_game_status]
                 }
               />
             )}

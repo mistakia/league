@@ -78,7 +78,6 @@ const accept_diff_props = [
   'jnum',
 
   'nfl_status',
-  'status',
   'injury_status',
 
   'pos',

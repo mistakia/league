@@ -85,9 +85,9 @@ export default async function ({
       'player.gsisid',
       'player.gsispid',
       'player.espn_id',
-      'player.status',
+      'player.nfl_status',
       'player.injury_status',
-      'practice.status as gamestatus'
+      'practice.formatted_status as game_status'
     ]
 
     selects.push(...default_columns)
@@ -113,9 +113,9 @@ export default async function ({
       this.whereIn('player.pos', constants.positions)
         .whereNot('player.current_nfl_team', 'INA')
         .where(function () {
-          this.whereNotIn('player.nfl_status', ['RET']).orWhereNull(
-            'player.nfl_status'
-          )
+          this.whereNotIn('player.nfl_status', [
+            constants.player_nfl_status.RETIRED
+          ]).orWhereNull('player.nfl_status')
         })
     })
 

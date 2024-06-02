@@ -68,7 +68,7 @@ describe('API /teams - reserve', function () {
 
       await knex('player')
         .update({
-          status: 'Injured Reserve'
+          nfl_status: constants.player_nfl_status.INJURED_RESERVE
         })
         .where({
           pid: player1.pid
@@ -160,7 +160,7 @@ describe('API /teams - reserve', function () {
 
       await knex('player')
         .update({
-          status: 'Injured Reserve'
+          nfl_status: constants.player_nfl_status.INJURED_RESERVE
         })
         .where({
           pid: player1.pid
@@ -200,7 +200,7 @@ describe('API /teams - reserve', function () {
 
       await knex('player')
         .update({
-          status: 'Injured Reserve'
+          nfl_status: constants.player_nfl_status.INJURED_RESERVE
         })
         .where({
           pid: player1.pid
@@ -250,7 +250,7 @@ describe('API /teams - reserve', function () {
 
       await knex('player')
         .update({
-          status: 'Injured Reserve'
+          nfl_status: constants.player_nfl_status.INJURED_RESERVE
         })
         .where({
           pid: player1.pid
@@ -300,7 +300,7 @@ describe('API /teams - reserve', function () {
 
       await knex('player')
         .update({
-          status: 'Injured Reserve'
+          nfl_status: constants.player_nfl_status.INJURED_RESERVE
         })
         .where({
           pid: player1.pid

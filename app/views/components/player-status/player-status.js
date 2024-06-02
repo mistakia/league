@@ -6,9 +6,9 @@ import PlayerLabel from '@components/player-label'
 
 export default function PlayerStatus({ playerMap }) {
   const label =
-    constants.status[playerMap.get('status')] ||
-    constants.status[playerMap.get('injury_status')] ||
-    constants.status[playerMap.get('gamestatus')]
+    constants.nfl_player_status_abbreviations[playerMap.get('nfl_status')] ||
+    constants.nfl_player_status_abbreviations[playerMap.get('injury_status')] ||
+    constants.nfl_player_status_abbreviations[playerMap.get('game_status')]
 
   if (!label) {
     return null
@@ -18,7 +18,7 @@ export default function PlayerStatus({ playerMap }) {
     <PlayerLabel
       type='status'
       label={label}
-      description={constants.statusDescriptions[label]}
+      description={constants.nfl_player_status_descriptions[label]}
     />
   )
 }

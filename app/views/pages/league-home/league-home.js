@@ -126,7 +126,7 @@ export default function LeagueHomePage({
 
     if (
       !isReserveEligible({
-        status: playerMap.get('status'),
+        nfl_status: playerMap.get('nfl_status'),
         injury_status: playerMap.get('injury_status')
       })
     ) {
@@ -147,8 +147,7 @@ export default function LeagueHomePage({
 
     if (
       !isReserveCovEligible({
-        status: playerMap.get('status'),
-        injury_status: playerMap.get('injury_status')
+        nfl_status: playerMap.get('nfl_status')
       })
     ) {
       notices.push(

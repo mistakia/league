@@ -2,7 +2,11 @@ import fetch from 'node-fetch'
 import debug from 'debug'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import {
+  constants,
+  format_nfl_status,
+  format_nfl_injury_status
+} from '#libs-shared'
 import { isMain, getPlayer } from '#libs-server'
 
 const log = debug('import:practice-report')
@@ -10,17 +14,37 @@ debug.enable('import:practice-report,get-player')
 
 const url = 'https://www.rotowire.com/football/tables/practice-report.php?team='
 const { week, year } = constants.season
-const getReport = (item) => ({
-  status: item.status,
-  inj: item.injtype,
-  m: item.monday === '-' ? null : item.monday,
-  tu: item.tuesday === '-' ? null : item.tuesday,
-  w: item.wednesday === '-' ? null : item.wednesday,
-  th: item.thursday === '-' ? null : item.thursday,
-  f: item.friday === '-' ? null : item.friday,
-  s: item.saturday === '-' ? null : item.saturday,
-  su: item.sunday === '-' ? null : item.sunday
-})
+const getReport = (item) => {
+  const data = {
+    status: item.status,
+    inj: item.injtype,
+    m: item.monday === '-' ? null : item.monday,
+    tu: item.tuesday === '-' ? null : item.tuesday,
+    w: item.wednesday === '-' ? null : item.wednesday,
+    th: item.thursday === '-' ? null : item.thursday,
+    f: item.friday === '-' ? null : item.friday,
+    s: item.saturday === '-' ? null : item.saturday,
+    su: item.sunday === '-' ? null : item.sunday
+  }
+
+  try {
+    data.formatted_status = format_nfl_injury_status(item.status)
+  } catch (err) {
+    log(err)
+    log(item)
+  }
+
+  if (!data.formatted_status) {
+    try {
+      data.formatted_status = format_nfl_status(item.status)
+    } catch (err) {
+      log(err)
+      log(item)
+    }
+  }
+
+  return data
+}
 
 const run = async () => {
   // do not pull in reports outside of the NFL season

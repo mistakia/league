@@ -37,7 +37,7 @@ export default class ActivateConfirmation extends React.Component {
       this._activePlayers.push(activePlayerMap)
       if (
         isReserveEligible({
-          status: activePlayerMap.get('status'),
+          nfl_status: activePlayerMap.get('nfl_status'),
           injury_status: activePlayerMap.get('injury_status')
         })
       ) {
