@@ -50,9 +50,8 @@ CREATE TABLE `player` (
   `gsispid` varchar(47) DEFAULT NULL,
   `gsisItId` mediumint(8) DEFAULT NULL,
 
-  `status` varchar(255) DEFAULT NULL,
-  `nfl_status` varchar(10) DEFAULT NULL,
-  `injury_status` varchar(255) DEFAULT NULL,
+  `nfl_status` varchar(50) DEFAULT NULL,
+  `injury_status` varchar(12) DEFAULT NULL,
   `high_school` varchar(255) DEFAULT NULL,
 
   `sleeper_id` varchar(11) DEFAULT NULL,
@@ -111,6 +110,7 @@ CREATE TABLE `players_status` (
   `practice_participation` varchar(255) DEFAULT NULL, -- TODO refine
   `practice_description` varchar(255) DEFAULT NULL, -- TODO refine
   `status` varchar(255) DEFAULT NULL,
+  `formatted_status` varchar(100) DEFAULT NULL,
   `search_rank` int(7) DEFAULT NULL,
   `timestamp` int(11) NOT NULL,
   KEY `pid` (`pid`),
@@ -2011,6 +2011,7 @@ CREATE TABLE `practice` (
   `week` tinyint(2) NOT NULL,
   `year` smallint(4) NOT NULL,
   `status` varchar(100) DEFAULT NULL,
+  `formatted_status` varchar(100) DEFAULT NULL,
   `inj` varchar(100) DEFAULT NULL,
   `m` varchar(20) DEFAULT NULL,
   `tu` varchar(20) DEFAULT NULL,

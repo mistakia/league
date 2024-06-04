@@ -61,7 +61,7 @@ describe('API /teams - activate', function () {
 
       await knex('player')
         .update({
-          status: 'Injured Reserve'
+          nfl_status: constants.player_nfl_status.INJURED_RESERVE
         })
         .where({
           pid: player2.pid
@@ -265,7 +265,7 @@ describe('API /teams - activate', function () {
 
       await knex('player')
         .update({
-          status: 'Injured Reserve'
+          nfl_status: constants.player_nfl_status.INJURED_RESERVE
         })
         .where({
           pid: player2.pid
@@ -315,7 +315,7 @@ describe('API /teams - activate', function () {
 
       await knex('player')
         .update({
-          status: 'Injured Reserve'
+          nfl_status: constants.player_nfl_status.INJURED_RESERVE
         })
         .where({
           pid: player2.pid

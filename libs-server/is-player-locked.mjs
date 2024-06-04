@@ -34,7 +34,7 @@ export default async function (pid) {
   )
 
   if (dayjs().isAfter(gameStart)) {
-    if (player_row.status === 'Inactive') {
+    if (player_row.nfl_status === constants.player_nfl_status.INACTIVE) {
       // check player statuses leading up to the game
       const players_status_rows = await db('players_status')
         .select('players_status.*')
@@ -45,8 +45,12 @@ export default async function (pid) {
         ])
 
       // if the player was Inactive prior to the game, then they are not locked
-      const statuses = players_status_rows.map((row) => row.status)
-      if (statuses.includes('Inactive')) {
+      const player_formatted_statuses = players_status_rows.map(
+        (row) => row.formatted_status
+      )
+      if (
+        player_formatted_statuses.includes(constants.player_nfl_status.INACTIVE)
+      ) {
         return false
       }
     }

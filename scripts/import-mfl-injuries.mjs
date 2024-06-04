@@ -54,7 +54,7 @@ const run = async () => {
 
    *   inserts.push({
    *     exp_return,
-   *     status,
+   *     status, // TODO needs to adhere to status formatting
    *     details,
    *     mfl_id,
    *     pid,

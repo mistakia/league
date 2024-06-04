@@ -6,7 +6,7 @@ import { getPlayers } from '@core/selectors'
 import StatusFilter from './status-filter'
 
 const mapStateToProps = createSelector(getPlayers, (players) => ({
-  status: players.get('status')
+  selected_nfl_statuses: players.get('selected_nfl_statuses')
 }))
 
 export default connect(mapStateToProps)(StatusFilter)

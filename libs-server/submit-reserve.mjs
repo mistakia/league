@@ -66,13 +66,13 @@ export default async function ({
       )
     }
 
-    const { status, injury_status } = player_row
-    if (!isReserveCovEligible({ status, injury_status })) {
+    const { nfl_status } = player_row
+    if (!isReserveCovEligible({ nfl_status })) {
       throw new Error('player not eligible for Reserve/COV')
     }
   } else {
-    const { status, injury_status } = player_row
-    if (!isReserveEligible({ status, injury_status })) {
+    const { nfl_status, injury_status } = player_row
+    if (!isReserveEligible({ nfl_status, injury_status })) {
       throw new Error('player not eligible for Reserve')
     }
   }
