@@ -12,11 +12,11 @@ export default class StatusFilter extends React.Component {
       values: []
     }
 
-    for (const status in constants.status) {
+    for (const player_nfl_status in constants.player_nfl_status) {
       state.values.push({
-        label: status,
-        value: status,
-        selected: this.props.status.includes(status)
+        label: player_nfl_status,
+        value: player_nfl_status,
+        selected: this.props.selected_nfl_statuses.includes(player_nfl_status)
       })
     }
 
@@ -25,5 +25,5 @@ export default class StatusFilter extends React.Component {
 }
 
 StatusFilter.propTypes = {
-  status: ImmutablePropTypes.list
+  selected_nfl_statuses: ImmutablePropTypes.list
 }

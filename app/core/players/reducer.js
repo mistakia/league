@@ -20,7 +20,7 @@ export const default_player_filter_options = {
   collegeDivisions: new List(constants.collegeDivisions),
   nfl_draft_rounds: new List(constants.nfl_draft_rounds),
   experience: new List([0, 1, -1]),
-  status: new List(Object.keys(constants.status)),
+  selected_nfl_statuses: new List(Object.keys(constants.player_nfl_status)),
   teams: new List(),
   availability: new List(constants.availability),
   age: new List(), // TODO

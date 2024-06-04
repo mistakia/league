@@ -1129,10 +1129,13 @@ export function getFilteredPlayers(state) {
     })
   }
 
-  const status = pState.get('status')
-  if (status.size !== Object.keys(constants.status).length) {
+  const selected_player_nfl_statuses = pState.get('selected_nfl_statuses')
+  if (
+    selected_player_nfl_statuses.size !==
+    Object.keys(constants.player_nfl_status).length
+  ) {
     filtered = filtered.filter((playerMap) =>
-      status.includes(playerMap.get('status'))
+      selected_player_nfl_statuses.includes(playerMap.get('nfl_status'))
     )
   }
 
@@ -1233,16 +1236,23 @@ export function isPlayerReserveEligible(state, { playerMap }) {
     cov: false
   }
 
-  const params = {
-    status: playerMap.get('status'),
-    injury_status: playerMap.get('injury_status')
-  }
+  const nfl_status = playerMap.get('nfl_status')
+  const injury_status = playerMap.get('injury_status')
 
-  if (isReserveEligible(params)) {
+  if (
+    isReserveEligible({
+      nfl_status,
+      injury_status
+    })
+  ) {
     reserve.ir = true
   }
 
-  if (isReserveCovEligible(params)) {
+  if (
+    isReserveCovEligible({
+      nfl_status
+    })
+  ) {
     reserve.cov = true
   }
 
@@ -1262,7 +1272,7 @@ export function isPlayerLocked(state, { playerMap = new Map(), pid }) {
     return false
   }
 
-  if (playerMap.get('status') === 'Inactive') {
+  if (playerMap.get('nfl_status') === constants.player_nfl_status.INACTIVE) {
     return false
   }
 

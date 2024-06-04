@@ -4,7 +4,12 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants, fixTeam } from '#libs-shared'
+import {
+  constants,
+  fixTeam,
+  format_nfl_status,
+  format_nfl_injury_status
+} from '#libs-shared'
 import { isMain, getPlayer, updatePlayer, createPlayer } from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -86,10 +91,22 @@ const run = async () => {
       fantasy_data_id,
       yahoo_id,
       // stats_global_id: stats_id,
-      status,
       injury_status,
       sleeper_id,
       current_nfl_team: team
+    }
+
+    // check to see if status matches injury status first
+    try {
+      data.injury_status = format_nfl_injury_status(injury_status)
+    } catch (err) {
+      log(err)
+      log(item)
+    }
+
+    // if status did not match injury status, then check nfl status
+    if (!data.injury_status) {
+      data.nfl_status = format_nfl_status(status)
     }
 
     if (!player_row) {
@@ -129,7 +146,7 @@ const run = async () => {
 
     if (!player_row || !injury_status) continue
 
-    statuses.push({
+    const status_insert = {
       pid: player_row.pid,
       sleeper_id,
 
@@ -146,7 +163,25 @@ const run = async () => {
       search_rank,
 
       timestamp
-    })
+    }
+
+    try {
+      status_insert.formatted_status = format_nfl_injury_status(injury_status)
+    } catch (err) {
+      log(err)
+      log(item)
+    }
+
+    if (!status_insert.formatted_status) {
+      try {
+        status_insert.formatted_status = format_nfl_status(status)
+      } catch (err) {
+        log(err)
+        log(item)
+      }
+    }
+
+    statuses.push(status_insert)
   }
 
   log(`updated ${changeCount} player fields`)
