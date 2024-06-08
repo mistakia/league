@@ -12,12 +12,48 @@
     text-transform uppercase
     display block
     padding-bottom 6px
+    display flex
+    justify-content center
+    text-align center
 
   .player__watchlist-action
     margin 0 16px 0 8px
 
   .player__name
     flex 0 0 auto
+
+.selected__player-info
+  min-width 200px
+  flex 1
+  display flex
+  align-items center
+  justify-content flex-start
+  flex-wrap wrap
+
+.selected-player-bio-info
+  display flex
+  flex-direction row
+  gap 8px
+
+.player-external-page-links
+  display flex
+  align-items center
+  justify-content center
+  gap 8px
+  border 1px solid $borderColor
+  border-radius 4px
+  background $backgroundColor
+
+.player-external-page-link
+  display flex
+  align-items center
+  justify-content center
+  width 32px
+  height 32px
+  cursor pointer
+  padding 4px
+  &:hover
+    background $yellowColor
 
 .selected__player-header-item
   flex 0 1 10%
@@ -27,13 +63,16 @@
   flex-direction column
   justify-content center
   align-items center
-  padding 16px
   min-width 80px
 
 .selected__player-header-secondary
   flex 1
   display flex
   background white
+  flex-direction column
+  min-height fit-content
+  row-gap 4px
+  padding 8px 0
 
 .selected__player-header-section
   flex 1
@@ -41,22 +80,24 @@
   flex-wrap wrap
   justify-content flex-start
   align-items center
-  overflow hidden
+  row-gap 4px
+  height fit-content
   .MuiButtonGroup-root
     margin 0 16px 16px
   .MuiButton-root
     font-size 10px
 
 .selected__player-main
-  display flex
-  flex-direction column
   overflow hidden
   height 100%
 
   .base-TabPanel-root
-    height 100%
     overflow hidden
     overflow-y scroll
+    height 100%
+
+  .base-TabsList-root
+    height 52px
 
 .selected__player-body
   flex 1
@@ -143,23 +184,24 @@
   flex 1
   height 100%
   overflow hidden
-  display flex
-  flex-direction column
 
-@media (min-width 901px)
+.MuiButton-root.selected__player-close
+  margin-left 8px
+
+@media (min-width 951px)
   .selected__player-header
     .player__headshot
       border-radius 0
 
-@media (max-width 800px)
-  .selected__player-header-section
-    justify-content center
-
-@media (max-width 900px)
+@media (max-width 950px)
   .selected__player-header .player__headshot
     margin 8px 0 0 8px
 
-@media (max-width 750px)
+@media (max-width 950px)
+  .selected__player-info
+  .selected__player-header-section
+    justify-content center
+
   .selected__player-header
     flex-wrap wrap
     .player__name
