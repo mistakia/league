@@ -262,6 +262,98 @@ export default {
     table_name: 'player',
     column_name: 'pos'
   },
+
+  player_height: {
+    table_name: 'player',
+    column_name: 'height'
+  },
+  player_weight: {
+    table_name: 'player',
+    column_name: 'weight'
+  },
+  player_age: {
+    table_name: 'player',
+    where_column: () => 'age',
+    select_as: () => 'age',
+    select: ({ query }) => {
+      query.select(
+        db.raw(
+          `ROUND(DATEDIFF(CURDATE(), STR_TO_DATE(player.dob, '%Y-%m-%d')) / 365.25, 2) as age`
+        )
+      )
+    }
+  },
+  player_date_of_birth: {
+    table_name: 'player',
+    column_name: 'dob'
+  },
+  player_forty_yard_dash: {
+    table_name: 'player',
+    column_name: 'forty'
+  },
+  player_bench_press: {
+    table_name: 'player',
+    column_name: 'bench'
+  },
+  player_vertical_jump: {
+    table_name: 'player',
+    column_name: 'vertical'
+  },
+  player_broad_jump: {
+    table_name: 'player',
+    column_name: 'broad'
+  },
+  player_shuttle_run: {
+    table_name: 'player',
+    column_name: 'shuttle'
+  },
+  player_three_cone_drill: {
+    table_name: 'player',
+    column_name: 'cone'
+  },
+  player_arm_length: {
+    table_name: 'player',
+    column_name: 'arm'
+  },
+  player_hand_size: {
+    table_name: 'player',
+    column_name: 'hand'
+  },
+  player_draft_position: {
+    table_name: 'player',
+    column_name: 'dpos'
+  },
+  player_draft_round: {
+    table_name: 'player',
+    column_name: 'round'
+  },
+  player_college: {
+    table_name: 'player',
+    column_name: 'col'
+  },
+  player_college_division: {
+    table_name: 'player',
+    column_name: 'dv'
+  },
+  player_starting_nfl_year: {
+    table_name: 'player',
+    column_name: 'start'
+  },
+  player_current_nfl_team: {
+    table_name: 'player',
+    column_name: 'current_nfl_team'
+  },
+  player_position_depth: {
+    table_name: 'player',
+    column_name: 'posd'
+  },
+  player_jersey_number: {
+    table_name: 'player',
+    column_name: 'jnum'
+  },
+
+  // TODO player.dcp ??
+
   player_league_roster_status: {
     where_column: () => 'player_league_roster_status',
     select: ({ query, params = {} }) => {
