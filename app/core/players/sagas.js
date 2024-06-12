@@ -45,6 +45,7 @@ import { leagueActions } from '@core/leagues'
 import { sourceActions } from '@core/sources'
 import { rosterActions } from '@core/rosters'
 import { auctionActions } from '@core/auction'
+import DefaultPlayersViews from './default-players-views'
 import Worker from 'workerize-loader?inline!../worker' // eslint-disable-line import/no-webpack-loader-syntax
 
 export function* loadAllPlayers() {
@@ -113,19 +114,21 @@ export function* calculateValues() {
 export function* toggleOrder({ payload }) {
   const { orderBy } = payload
   const players = yield select(getPlayers)
+  const selected_view = players.get('selected_players_page_view')
   const currentOrderBy = players.get('orderBy')
   const currentOrder = players.get('order')
   if (orderBy === currentOrderBy) {
     if (currentOrder === 'asc') {
+      const view_default_order_by = DefaultPlayersViews[selected_view].order_by
       yield put(
-        playerActions.setOrder({
+        playerActions.set_players_order({
           order: 'desc',
-          orderBy: 'pts_added.ros' // TODO set based on view
+          orderBy: view_default_order_by
         })
       )
     } else {
       yield put(
-        playerActions.setOrder({
+        playerActions.set_players_order({
           order: 'asc',
           orderBy
         })
@@ -133,7 +136,7 @@ export function* toggleOrder({ payload }) {
     }
   } else {
     yield put(
-      playerActions.setOrder({
+      playerActions.set_players_order({
         order: 'desc',
         orderBy
       })
@@ -300,8 +303,8 @@ export function* watchAuthFailed() {
   yield takeLatest(appActions.AUTH_FAILED, loadAllPlayers)
 }
 
-export function* watchToggleOrder() {
-  yield takeLatest(playerActions.TOGGLE_ORDER, toggleOrder)
+export function* watch_players_page_order() {
+  yield takeLatest(playerActions.TOGGLE_PLAYERS_PAGE_ORDER, toggleOrder)
 }
 
 export function* watchSaveProjection() {
@@ -422,7 +425,7 @@ export const playerSagas = [
   fork(watchAuthFulfilled),
   fork(watchAuthFailed),
   fork(watchSetLeague),
-  fork(watchToggleOrder),
+  fork(watch_players_page_order),
   fork(watchSaveProjection),
   fork(watchDraftSelectPlayer),
   fork(watchSelectPlayer),

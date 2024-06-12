@@ -12,9 +12,18 @@ import './players-view-manager.styl'
 
 const fields_grouping = {
   'Player Biography': [],
-  'Week Projections': ['pts_added.week', 'points.week.total'],
-  'Season Projections': ['pts_added.0', 'points.0.total'],
-  'Rest of Season Projections': ['pts_added.ros', 'points.ros.total'],
+  'Week Projections': [
+    'player_week_projected_points_added',
+    'player_week_projected_points'
+  ],
+  'Season Projections': [
+    'player_season_projected_points_added',
+    'player_season_projected_points'
+  ],
+  'Rest of Season Projections': [
+    'player_rest_of_season_projected_points_added',
+    'player_rest_of_season_projected_points'
+  ],
   'Stats By Play': {
     'Passing Stats By Play': {
       Production: ['stats.py', 'stats.tdp'],

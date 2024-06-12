@@ -1,7 +1,7 @@
 import { call, takeLatest, fork, select, put } from 'redux-saga/effects'
 
 import {
-  getSelectedPlayersView,
+  getSelectedPlayersPageView,
   getCurrentLeague,
   getStats
 } from '@core/selectors'
@@ -11,8 +11,8 @@ import { getChartedPlays } from '@core/api'
 import Worker from 'workerize-loader?inline!../worker' // eslint-disable-line import/no-webpack-loader-syntax
 
 export function* loadChartedPlays() {
-  const selected_players_view = yield select(getSelectedPlayersView)
-  const should_load = selected_players_view.fields.find((field) =>
+  const selected_players_page_view = yield select(getSelectedPlayersPageView)
+  const should_load = selected_players_page_view.fields.find((field) =>
     field.includes('stats.')
   )
   if (should_load) {
@@ -69,7 +69,7 @@ export function* calculateStats() {
 // -------------------------------------
 
 export function* watchSetPlayersView() {
-  yield takeLatest(playerActions.SELECT_PLAYERS_VIEW, loadChartedPlays)
+  yield takeLatest(playerActions.SELECT_PLAYERS_PAGE_VIEW, loadChartedPlays)
 }
 
 export function* watchGetChartedPlaysFulfilled() {

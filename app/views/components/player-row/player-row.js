@@ -21,7 +21,6 @@ class PlayerRow extends Player {
       playerMap,
       selectedPlayer,
       isHosted,
-      week,
       is_logged_in,
       selected, // inherited from Player class
       status,
@@ -29,7 +28,8 @@ class PlayerRow extends Player {
       player_row_index,
       teams,
       highlight_teamIds,
-      selected_view_grouped_fields
+      selected_view_grouped_fields,
+      week
     } = this.props
 
     const pid = playerMap.get('pid')

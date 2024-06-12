@@ -1,0 +1,84 @@
+.player__row-name-column
+  display flex
+  align-items center
+  height 100%
+  user-select none
+
+  .player__label-tag
+    margin-right 4px
+
+  &.border_right
+    border-right 1px solid $borderColor
+
+  .player__row-name-column-name
+    flex 1 0 120px
+    width 120px
+    overflow hidden
+    text-overflow ellipsis
+    white-space nowrap
+    line-height 20px
+
+    .nfl__team
+      margin-left 4px
+
+  .player__row-name-column-action
+    flex 0 0 30px
+    width 30px
+    display flex
+    justify-content center
+
+  .player__row-name-column-pos
+    flex 0 0 40px
+    width 40px
+    display flex
+
+@media (max-width 600px)
+  .player__row-name-column-name
+    flex 1
+
+  .player__row-name-column-action
+    display none
+
+  .player__row-name-column-pos
+    width 30px
+    flex 0 0 30px
+
+  .player__row-name-column-name
+    width 60px
+    flex 0 0 60px
+    margin-right 4px
+    font-size 12px
+
+@media (min-width 601px)
+  .players__header .player__row-name-column-action.actions
+    display none
+
+  .player__row-name-column
+    .player__row-name-column-action.actions
+      display none
+
+    .player__watchlist-action
+      opacity 0
+
+    .player__watchlist-action.selected
+    &:hover .player__watchlist-action
+      opacity 1
+
+    &:hover
+      .player__row-name-column-action.actions
+        display flex
+
+@media (pointer: fine)
+  .player__row-name-column
+    &:hover
+    &:hover .player__row-lead
+      background white
+      color black
+
+  .player__row-name-column-name
+    &:hover
+      color $accentColor
+
+  .row__action
+    &:hover
+      fill $accentColor

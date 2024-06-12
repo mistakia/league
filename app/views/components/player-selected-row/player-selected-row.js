@@ -69,6 +69,7 @@ export default function PlayerSelectedRow({
       for (const group_field of field) {
         group_items.push(
           <PercentileMetric
+            key={group_field}
             percentile_key={percentile_key}
             value={stats[group_field]}
             percentile={percentiles[group_field]}
@@ -86,6 +87,7 @@ export default function PlayerSelectedRow({
     } else {
       items.push(
         <PercentileMetric
+          key={field}
           percentile_key={percentile_key}
           value={stats[field]}
           percentile={percentiles[field]}
