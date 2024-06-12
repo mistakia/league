@@ -24,7 +24,7 @@ export default {
       },
       {
         test: /\.m?js$/,
-        exclude: /(node_modules)/,
+        exclude: /node_modules\/(?!react-table)/,
         use: {
           loader: 'babel-loader',
           options: {
