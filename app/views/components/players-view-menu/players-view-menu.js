@@ -16,21 +16,21 @@ import PlayersViewManager from '@components/players-view-manager'
 import './players-view-menu.styl'
 
 export default function PlayersViewMenu({
-  select_players_view,
-  selected_players_view,
-  views
+  select_players_page_view,
+  selected_players_page_view,
+  players_page_views
 }) {
   const anchor_el = useRef()
   const [input_value, set_input_value] = useState()
   const [selected_value, set_selected_value] = useState(
-    selected_players_view.name
+    selected_players_page_view.name
   )
   const [manager_open, set_manager_open] = useState(false)
   const [popper_open, set_popper_open] = useState(false)
 
   useEffect(() => {
-    set_selected_value(selected_players_view.name)
-  }, [selected_players_view.name])
+    set_selected_value(selected_players_page_view.name)
+  }, [selected_players_page_view.name])
 
   const handleInputChange = (event) => {
     const { value } = event.target
@@ -38,7 +38,7 @@ export default function PlayersViewMenu({
   }
   const handleInputBlur = (event) => {
     set_input_value(undefined)
-    set_selected_value(selected_players_view.name)
+    set_selected_value(selected_players_page_view.name)
   }
   const handleInputFocus = (event) => {
     set_selected_value('')
@@ -47,7 +47,7 @@ export default function PlayersViewMenu({
   }
   const handleSelect = (view) => (event) => {
     set_popper_open(false)
-    select_players_view(view.key)
+    select_players_page_view(view.key)
     set_input_value(undefined)
   }
   const handleClickAway = () => set_popper_open(false)
@@ -58,8 +58,8 @@ export default function PlayersViewMenu({
    * }
    */
   const filtered_views = input_value
-    ? views.filter((view) => fuzzySearch(input_value, view.name))
-    : views
+    ? players_page_views.filter((view) => fuzzySearch(input_value, view.name))
+    : players_page_views
 
   const filtered_items = filtered_views.toList().map((view, index) => (
     <li className='cursor' key={index} onClick={handleSelect(view)}>
@@ -118,7 +118,7 @@ export default function PlayersViewMenu({
 }
 
 PlayersViewMenu.propTypes = {
-  select_players_view: PropTypes.func,
-  selected_players_view: PropTypes.object,
-  views: ImmutablePropTypes.map
+  select_players_page_view: PropTypes.func,
+  selected_players_page_view: PropTypes.object,
+  players_page_views: ImmutablePropTypes.map
 }

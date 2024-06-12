@@ -95,7 +95,15 @@ export default {
    */
   resolve: {
     extensions: ['.js', '.json'],
-    modules: [path.join(__dirname, '..', 'app'), 'node_modules']
+    modules: [path.join(__dirname, '..', 'app'), 'node_modules'],
+    alias: {
+      react: path.resolve(__dirname, '../node_modules/react'),
+      'react-dom': path.resolve(__dirname, '../node_modules/react-dom'),
+      '@emotion/react': path.resolve(
+        __dirname,
+        '../node_modules/@emotion/react'
+      )
+    }
   },
 
   plugins: [

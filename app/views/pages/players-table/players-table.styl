@@ -33,7 +33,6 @@
   flex-wrap wrap
   >
     .search__filter
-    .players__view-menu
     .players__view-export
       margin 4px
 
@@ -45,7 +44,7 @@
   background $backgroundColor
   width max-content
   min-width 100%
-  height 55px
+  height 48px
   display flex
   align-items stretch
   font-weight 500
@@ -62,7 +61,7 @@
   + .table__cell
       border-left 1px solid $borderColor
 
-.table__cell:not(.player__item-name)
+.table__cell
   + .row__group
       border-left 1px solid $borderColor
 
@@ -71,12 +70,12 @@
   font-weight 800
   flex 0 0 auto
   text-transform uppercase
-  font-size 9px
-  padding 2px
+  font-size 11px
+  padding 4px
   border-bottom 1px solid $borderColor
   width 100%
   text-align center
-  height 24px
+  min-height 24px
   display flex
   align-items center
   justify-content center
@@ -90,8 +89,6 @@
     top 0
     left 0
     right 0
-  .row__group-body
-    align-items flex-end
 
 
 .row__group-body
@@ -100,11 +97,86 @@
   justify-content space-evenly
   align-items stretch
   width 100%
-  height 40px
 
 .players__table
   absolute left 0px top 0px right 0px bottom 0px
   overflow scroll
+  overflow-y scroll
+  overflow-x scroll
+
+  .table
+    padding-left 0
+
+  .row
+    background $backgroundColor
+    &.selected
+      background lighten($accentColor, 85%)
+
+    &.fa
+      background lighten(orange, 80%)
+    &.fa .player__row-status-column
+      color rgba(0,0,0,0.3)
+
+    &.rostered
+      background lighten($yellow, 12%)
+
+    &.baseline__player
+      border-bottom 2px solid red
+
+    &.draft-order-1
+    &.draft-order-1 .player__row-name-column
+      background lighten($red, 12%)
+      color white
+
+    &.draft-order-2
+    &.draft-order-2 .player__row-name-column
+      background lighten($orange, 12%)
+
+    &.draft-order-3
+    &.draft-order-3 .player__row-name-column
+      background lighten($purple, 12%)
+      color white
+
+    &.draft-order-4
+    &.draft-order-4 .player__row-name-column
+      background lighten($pink, 12%)
+
+    &.draft-order-5
+    &.draft-order-5 .player__row-name-column
+      background lighten($green, 12%)
+      color white
+
+    &.draft-order-6
+    &.draft-order-6 .player__row-name-column
+      background lighten($cyan, 12%)
+
+    &.draft-order-7
+    &.draft-order-7 .player__row-name-column
+      background lighten($blue, 12%)
+      color white
+
+    &.draft-order-8
+    &.draft-order-8 .player__row-name-column
+      background lighten($navy, 12%)
+      color white
+
+    &.draft-order-9
+    &.draft-order-9 .player__row-name-column
+      background lighten($lime, 12%)
+
+    &.draft-order-10
+    &.draft-order-10 .player__row-name-column
+      background lighten($brown, 12%)
+      color white
+
+    &.draft-order-11
+    &.draft-order-11 .player__row-name-column
+      background lighten($mint, 12%)
+
+    &.draft-order-12
+    &.draft-order-12 .player__row-name-column
+      background lighten($maroon, 12%)
+      color white
 
 @media (max-width 600px)
   .players__head

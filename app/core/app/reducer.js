@@ -7,6 +7,10 @@ import { constants, uuidv4 } from '@libs-shared'
 import { rosterActions } from '@core/rosters'
 import { teamActions } from '@core/teams'
 import { matchupsActions } from '@core/matchups'
+import {
+  players_table_views_actions,
+  default_players_table_views
+} from '@core/players-table-views'
 
 const initialState = new Record({
   token: null,
@@ -23,6 +27,9 @@ const initialState = new Record({
   voice: 0,
   teamIds: new List(),
   leagueIds: new List([constants.DEFAULTS.LEAGUE_ID]),
+
+  selected_players_table_view_id:
+    default_players_table_views.SEASON_PROJECTIONS.view_id,
 
   isLoadingRosters: null,
   isLoadedRosters: null,
@@ -143,6 +150,16 @@ export function appReducer(state = initialState(), { payload, type }) {
 
       return state.merge({
         year: payload.year
+      })
+
+    case players_table_views_actions.SET_SELECTED_PLAYERS_TABLE_VIEW:
+      return state.merge({
+        selected_players_table_view_id: payload.players_table_view_id
+      })
+
+    case players_table_views_actions.PLAYERS_TABLE_VIEW_CHANGED:
+      return state.merge({
+        selected_players_table_view_id: payload.players_table_view.view_id
       })
 
     default:

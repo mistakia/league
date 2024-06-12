@@ -9,8 +9,8 @@ export const playerActions = {
   SEARCH_PLAYERS: 'SEARCH_PLAYERS',
   FILTER_PLAYERS: 'FILTER_PLAYERS',
   TOGGLE_WATCHLIST_ONLY: 'TOGGLE_WATCHLIST_ONLY',
-  TOGGLE_ORDER: 'TOGGLE_ORDER',
-  SET_ORDER: 'SET_ORDER',
+  TOGGLE_PLAYERS_PAGE_ORDER: 'TOGGLE_PLAYERS_PAGE_ORDER',
+  SET_PLAYERS_PAGE_ORDER: 'SET_PLAYERS_PAGE_ORDER',
   PLAYERS_SELECT_PLAYER: 'PLAYERS_SELECT_PLAYER',
   PLAYERS_DESELECT_PLAYER: 'PLAYERS_DESELECT_PLAYER',
 
@@ -60,7 +60,7 @@ export const playerActions = {
   DEL_PROJECTION_PENDING: 'DEL_PROJECTION_PENDING',
   DEL_PROJECTION_FULFILLED: 'DEL_PROJECTION_FULFILLED',
 
-  SELECT_PLAYERS_VIEW: 'SELECT_PLAYERS_VIEW',
+  SELECT_PLAYERS_PAGE_VIEW: 'SELECT_PLAYERS_PAGE_VIEW',
 
   GET_CUTLIST_FULFILLED: 'GET_CUTLIST_FULFILLED',
   GET_CUTLIST_PENDING: 'GET_CUTLIST_PENDING',
@@ -97,6 +97,13 @@ export const playerActions = {
 
   RESET_PLAYER_FILTER_OPTIONS: 'RESET_PLAYER_FILTER_OPTIONS',
 
+  POST_PLAYERS_TABLE_VIEW_SEARCH_FAILED:
+    'POST_PLAYERS_TABLE_VIEW_SEARCH_FAILED',
+  POST_PLAYERS_TABLE_VIEW_SEARCH_PENDING:
+    'POST_PLAYERS_TABLE_VIEW_SEARCH_PENDING',
+  POST_PLAYERS_TABLE_VIEW_SEARCH_FULFILLED:
+    'POST_PLAYERS_TABLE_VIEW_SEARCH_FULFILLED',
+
   loadAllPlayers: () => ({
     type: playerActions.LOAD_ALL_PLAYERS
   }),
@@ -128,8 +135,8 @@ export const playerActions = {
     }
   }),
 
-  select_players_view: (view_key) => ({
-    type: playerActions.SELECT_PLAYERS_VIEW,
+  select_players_page_view: (view_key) => ({
+    type: playerActions.SELECT_PLAYERS_PAGE_VIEW,
     payload: {
       view_key
     }
@@ -227,15 +234,15 @@ export const playerActions = {
     }
   }),
 
-  toggle: (orderBy) => ({
-    type: playerActions.TOGGLE_ORDER,
+  toggle_players_page_order: (orderBy) => ({
+    type: playerActions.TOGGLE_PLAYERS_PAGE_ORDER,
     payload: {
       orderBy
     }
   }),
 
-  setOrder: ({ order, orderBy }) => ({
-    type: playerActions.SET_ORDER,
+  set_players_order: ({ order, orderBy }) => ({
+    type: playerActions.SET_PLAYERS_PAGE_ORDER,
     payload: {
       order,
       orderBy
@@ -625,6 +632,29 @@ export const playerActions = {
 
   reset_player_filter_options: () => ({
     type: playerActions.RESET_PLAYER_FILTER_OPTIONS
+  }),
+
+  post_players_table_view_search_failed: (opts, error) => ({
+    type: playerActions.POST_PLAYERS_TABLE_VIEW_SEARCH_FAILED,
+    payload: {
+      opts,
+      error
+    }
+  }),
+
+  post_players_table_view_search_pending: (opts) => ({
+    type: playerActions.POST_PLAYERS_TABLE_VIEW_SEARCH_PENDING,
+    payload: {
+      opts
+    }
+  }),
+
+  post_players_table_view_search_fulfilled: (opts, data) => ({
+    type: playerActions.POST_PLAYERS_TABLE_VIEW_SEARCH_FULFILLED,
+    payload: {
+      opts,
+      data
+    }
   })
 }
 
@@ -716,4 +746,10 @@ export const getPlayerPracticesActions = {
   failed: playerActions.getPlayerPracticesFailed,
   pending: playerActions.getPlayerPracticesPending,
   fulfilled: playerActions.getPlayerPracticesFulfilled
+}
+
+export const post_players_table_view_search_actions = {
+  failed: playerActions.post_players_table_view_search_failed,
+  pending: playerActions.post_players_table_view_search_pending,
+  fulfilled: playerActions.post_players_table_view_search_fulfilled
 }
