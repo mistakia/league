@@ -314,10 +314,20 @@ export function PlayerTableFields({
       column_title: 'Current NFL Team',
       header_label: 'Team',
       size: 60,
-      data_type: table_constants.TABLE_DATA_TYPES.TEXT,
+      data_type: table_constants.TABLE_DATA_TYPES.SELECT,
       player_value_path: 'team',
       component: PlayerRowNFLTeam,
-      column_groups: [COLUMN_GROUPS.NFL_TEAM]
+      column_groups: [COLUMN_GROUPS.NFL_TEAM],
+      operators: [
+        table_constants.TABLE_OPERATORS.IN,
+        table_constants.TABLE_OPERATORS.NOT_IN,
+        table_constants.TABLE_OPERATORS.IS_NULL,
+        table_constants.TABLE_OPERATORS.IS_NOT_NULL
+      ],
+      column_values: [
+        'INA',
+        ...constants.nflTeams
+      ]
     },
     player_position_depth: {
       column_title: 'Position Depth',
