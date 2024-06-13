@@ -154,7 +154,7 @@ const format_market = async ({
   }
 }
 
-const run = async () => {
+const run = async ({ dry = false }) => {
   console.time('import-fanduel-odds')
 
   const timestamp = Math.round(Date.now() / 1000)
@@ -177,7 +177,7 @@ const run = async () => {
     formatted_markets.push(formatted_market)
   }
 
-  if (formatted_markets.length) {
+  if (formatted_markets.length && !dry) {
     log(`inserting ${formatted_markets.length} markets`)
     await insert_prop_markets(formatted_markets)
   }
@@ -246,7 +246,7 @@ const run = async () => {
    * }
    */
 
-  if (argv.dry) {
+  if (dry) {
     log(formatted_event_markets[0])
     return
   }
@@ -262,18 +262,22 @@ const run = async () => {
 export const job = async () => {
   let error
   try {
-    await run()
+    await run({
+      dry: argv.dry
+    })
   } catch (err) {
     error = err
     console.log(error)
   }
 
-  await db('jobs').insert({
-    type: constants.jobs.FANDUEL_ODDS,
-    succ: error ? 0 : 1,
-    reason: error ? error.message : null,
-    timestamp: Math.round(Date.now() / 1000)
-  })
+  if (!argv.dry) {
+    await db('jobs').insert({
+      type: constants.jobs.FANDUEL_ODDS,
+      succ: error ? 0 : 1,
+      reason: error ? error.message : null,
+      timestamp: Math.round(Date.now() / 1000)
+    })
+  }
 }
 
 const main = async () => {
