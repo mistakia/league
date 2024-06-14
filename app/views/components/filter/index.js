@@ -105,7 +105,7 @@ export default function Filter({
         onClick={(e) => handleSelect(e, index)}
       >
         <Checkbox checked={v.selected} size='small' />
-        <div className='dropdown__item-label'>{v.label}</div>
+        {v.label}
       </div>
     )
   })

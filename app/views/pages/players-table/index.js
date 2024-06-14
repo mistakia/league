@@ -34,8 +34,9 @@ const get_players_percentiles = createSelector(
       .toJS()
 
     const percentile_stat_keys = []
-    for (const field_key of selected_players_table_view.table_state.columns) {
-      const field = player_fields[field_key]
+    for (const column of selected_players_table_view.table_state.columns) {
+      const column_id = typeof column === 'string' ? column : column.column_id
+      const field = player_fields[column_id]
 
       if (field.data_type === table_constants.TABLE_DATA_TYPES.NUMBER) {
         percentile_stat_keys.push(field.player_value_path)
