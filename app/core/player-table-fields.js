@@ -110,7 +110,8 @@ const play_params = {
 export const getPlayerTableFields = createSelector(
   (state) =>
     state.getIn(['players', 'week'], new List([constants.week])).get(0),
-  (week) => PlayerTableFields({ week })
+  (state) => state.getIn(['app', 'userId']),
+  (week, userId) => PlayerTableFields({ week, is_logged_in: Boolean(userId) })
   // (state) => state.get('seasonlogs'),
   // (state) => state.getIn(['players', 'positions'], new List()),
   // (state) => state.getIn(['schedule', 'teams']),
@@ -119,7 +120,8 @@ export const getPlayerTableFields = createSelector(
 )
 
 export function PlayerTableFields({
-  week
+  week,
+  is_logged_in
   // seasonlogs,
   // player_positions,
   // nfl_team_schedule
@@ -188,20 +190,6 @@ export function PlayerTableFields({
       operators: [
         table_constants.TABLE_OPERATORS.IN,
         table_constants.TABLE_OPERATORS.NOT_IN
-      ]
-    },
-    player_league_roster_status: {
-      column_title: 'Roster Status',
-      header_label: '',
-      size: 50,
-      component: PlayerRowStatusColumn,
-      data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-      sticky: true,
-      column_values: [
-        'free_agent',
-        'active_roster',
-        'practice_squad',
-        'injured_reserve'
       ]
     },
 
@@ -426,86 +414,6 @@ export function PlayerTableFields({
     //   },
     //   data_type: table_constants.TABLE_DATA_TYPES.NUMBER
     // },
-    player_league_salary: {
-      column_title: 'Player Salary',
-      column_groups: [COLUMN_GROUPS.MANAGEMENT],
-      header_label: 'Salary',
-      player_value_path: 'player_salary',
-      size: 70,
-      data_type: table_constants.TABLE_DATA_TYPES.NUMBER
-    },
-
-    player_week_projected_market_salary: {
-      column_title: 'Projected Market Salary',
-      column_groups: [
-        COLUMN_GROUPS.PROJECTION,
-        COLUMN_GROUPS.WEEK_PROJECTION,
-        COLUMN_GROUPS.MANAGEMENT
-      ],
-      header_label: 'Market',
-      player_value_path: stat_in_year_week('market_salary')({
-        params: { week }
-      }),
-      size: 70,
-      data_type: table_constants.TABLE_DATA_TYPES.NUMBER
-    },
-    player_season_projected_inflation_adjusted_market_salary: {
-      column_title: 'Inflation Adj. Projected Market Salary',
-      column_groups: [
-        COLUMN_GROUPS.PROJECTION,
-        COLUMN_GROUPS.SEASON_PROJECTION,
-        COLUMN_GROUPS.MANAGEMENT
-      ],
-      header_label: 'Adjusted',
-      player_value_path: stat_in_year_week('inflation_adjusted_market_salary')({
-        params: { week: 0 }
-      }),
-      size: 70,
-      data_type: table_constants.TABLE_DATA_TYPES.NUMBER
-    },
-
-    player_week_projected_salary_adjusted_points_added: {
-      column_title: 'Salary Adj. Points Added (Week)',
-      column_groups: [
-        COLUMN_GROUPS.PROJECTION,
-        COLUMN_GROUPS.WEEK_PROJECTION,
-        COLUMN_GROUPS.MANAGEMENT
-      ],
-      header_label: 'Value',
-      player_value_path: stat_in_year_week('salary_adjusted_points_added')({
-        params: { week }
-      }),
-      size: 70,
-      data_type: table_constants.TABLE_DATA_TYPES.NUMBER
-    },
-    player_season_projected_salary_adjusted_points_added: {
-      column_title: 'Salary Adj. Points Added (Season)',
-      column_groups: [
-        COLUMN_GROUPS.PROJECTION,
-        COLUMN_GROUPS.SEASON_PROJECTION,
-        COLUMN_GROUPS.MANAGEMENT
-      ],
-      header_label: 'Value',
-      player_value_path: stat_in_year_week('salary_adjusted_points_added')({
-        params: { week: 0 }
-      }),
-      size: 70,
-      data_type: table_constants.TABLE_DATA_TYPES.NUMBER
-    },
-    player_rest_of_season_projected_salary_adjusted_points_added: {
-      column_title: 'Salary Adj. Points Added (Rest-Of-Season)',
-      column_groups: [
-        COLUMN_GROUPS.PROJECTION,
-        COLUMN_GROUPS.REST_OF_SEASON_PROJECTION,
-        COLUMN_GROUPS.MANAGEMENT
-      ],
-      header_label: 'Value',
-      player_value_path: stat_in_year_week('salary_adjusted_points_added')({
-        params: { week: 'ros' }
-      }),
-      size: 70,
-      data_type: table_constants.TABLE_DATA_TYPES.NUMBER
-    },
 
     player_rest_of_season_projected_points_added: {
       column_title: 'Projected Points Added (Rest-Of-Season)',
@@ -1709,6 +1617,107 @@ export function PlayerTableFields({
     //   size: 70,
     //   data_type: table_constants.TABLE_DATA_TYPES.NUMBER
     // }
+  }
+
+  if (is_logged_in) {
+    fields.player_league_roster_status = {
+      column_title: 'Roster Status',
+      header_label: '',
+      size: 50,
+      component: PlayerRowStatusColumn,
+      data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+      sticky: true,
+      column_values: [
+        'free_agent',
+        'active_roster',
+        'practice_squad',
+        'injured_reserve'
+      ]
+    }
+
+    fields.player_league_salary = {
+      column_title: 'Player Salary',
+      column_groups: [COLUMN_GROUPS.MANAGEMENT],
+      header_label: 'Salary',
+      player_value_path: 'player_salary',
+      size: 70,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER
+    }
+
+    fields.player_week_projected_market_salary = {
+      column_title: 'Projected Market Salary',
+      column_groups: [
+        COLUMN_GROUPS.PROJECTION,
+        COLUMN_GROUPS.WEEK_PROJECTION,
+        COLUMN_GROUPS.MANAGEMENT
+      ],
+      header_label: 'Market',
+      player_value_path: stat_in_year_week('market_salary')({
+        params: { week }
+      }),
+      size: 70,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER
+    }
+
+    fields.player_season_projected_inflation_adjusted_market_salary = {
+      column_title: 'Inflation Adj. Projected Market Salary',
+      column_groups: [
+        COLUMN_GROUPS.PROJECTION,
+        COLUMN_GROUPS.SEASON_PROJECTION,
+        COLUMN_GROUPS.MANAGEMENT
+      ],
+      header_label: 'Adjusted',
+      player_value_path: stat_in_year_week('inflation_adjusted_market_salary')({
+        params: { week: 0 }
+      }),
+      size: 70,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER
+    }
+
+    fields.player_week_projected_salary_adjusted_points_added = {
+      column_title: 'Salary Adj. Points Added (Week)',
+      column_groups: [
+        COLUMN_GROUPS.PROJECTION,
+        COLUMN_GROUPS.WEEK_PROJECTION,
+        COLUMN_GROUPS.MANAGEMENT
+      ],
+      header_label: 'Value',
+      player_value_path: stat_in_year_week('salary_adjusted_points_added')({
+        params: { week }
+      }),
+      size: 70,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER
+    }
+
+    fields.player_season_projected_salary_adjusted_points_added = {
+      column_title: 'Salary Adj. Points Added (Season)',
+      column_groups: [
+        COLUMN_GROUPS.PROJECTION,
+        COLUMN_GROUPS.SEASON_PROJECTION,
+        COLUMN_GROUPS.MANAGEMENT
+      ],
+      header_label: 'Value',
+      player_value_path: stat_in_year_week('salary_adjusted_points_added')({
+        params: { week: 0 }
+      }),
+      size: 70,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER
+    }
+
+    fields.player_rest_of_season_projected_salary_adjusted_points_added = {
+      column_title: 'Salary Adj. Points Added (Rest-Of-Season)',
+      column_groups: [
+        COLUMN_GROUPS.PROJECTION,
+        COLUMN_GROUPS.REST_OF_SEASON_PROJECTION,
+        COLUMN_GROUPS.MANAGEMENT
+      ],
+      header_label: 'Value',
+      player_value_path: stat_in_year_week('salary_adjusted_points_added')({
+        params: { week: 'ros' }
+      }),
+      size: 70,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER
+    }
   }
 
   for (const [key, value] of Object.entries(fields)) {

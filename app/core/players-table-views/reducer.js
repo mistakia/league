@@ -1,5 +1,6 @@
 import Immutable, { Map } from 'immutable'
 
+import { appActions } from '@core/app/actions'
 import { players_table_views_actions } from './actions'
 import { default_players_table_views } from './default-players-table-views'
 import { playerActions } from '@core/players/actions'
@@ -26,6 +27,21 @@ export function players_table_views_reducer(
           )
         })
       })
+
+    case appActions.AUTH_FULFILLED: {
+      return state.withMutations((state) => {
+        state.forEach((view, key) => {
+          const updated_view = view
+            .update('view_filters', (filters) =>
+              filters.push('player_league_roster_status')
+            )
+            .updateIn(['table_state', 'prefix_columns'], (columns) =>
+              columns.push('player_league_roster_status')
+            )
+          state.set(key, updated_view)
+        })
+      })
+    }
 
     case players_table_views_actions.PLAYERS_TABLE_VIEW_CHANGED: {
       const { players_table_view } = payload
