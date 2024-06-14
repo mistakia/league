@@ -35,8 +35,9 @@ export default function PlayersTablePage({
   }, [players_table_view_changed]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    for (const field_key of selected_players_table_view.table_state.columns) {
-      const player_field = player_fields[field_key]
+    for (const column of selected_players_table_view.table_state.columns) {
+      const column_id = typeof column === 'string' ? column : column.column_id
+      const player_field = player_fields[column_id]
       if (player_field.load) {
         player_field.load()
       }
@@ -46,48 +47,6 @@ export default function PlayersTablePage({
     selected_players_table_view.view_id,
     selected_players_table_view.table_state.columns
   ])
-
-  // const handleExport = () => {
-  //   const headers = {
-  //     name: 'Player Name',
-  //     team: 'Team',
-  //     pos: 'Position'
-  //   }
-
-  //   const field_infos = []
-  //   for (const field of selected_players_page_view.fields) {
-  //     const field_info = player_fields[field]
-  //     field_infos.push(field_info)
-
-  //     headers[field_info.key] = field_info.column_title
-  //   }
-
-  //   const data = players.map((playerMap) => {
-  //     const item = {
-  //       name: playerMap.get('name'),
-  //       team: playerMap.get('team'),
-  //       pos: playerMap.get('pos')
-  //     }
-
-  //     for (const field_info of field_infos) {
-  //       item[field_info.key] = playerMap.getIn(field_info.key_path)
-  //     }
-
-  //     return item
-  //   })
-
-  //   const view_name = selected_players_page_view.name
-  //     .replace(/[^a-z0-9]/gi, '-')
-  //     .toLowerCase()
-
-  //   const timestamp = dayjs().format('YYYY-MM-DD-H[h]-m[m]')
-
-  //   csv({
-  //     headers,
-  //     data: data.toJS(),
-  //     fileName: `xo-football-${view_name}-export-${timestamp}`
-  //   })
-  // }
 
   for (const player of players) {
     const is_rostered = Boolean(player.tid)
