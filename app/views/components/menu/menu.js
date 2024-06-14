@@ -182,13 +182,33 @@ export default function AppMenu({
               </div>
             </div>
             <div className='menu__section'>
-              <div className='menu__heading'>The Machine</div>
               <div
                 className='menu__links'
                 onClick={() => isMobile && set_menu_open(false)}
               >
                 {/* <NavLink to='/props'>Props</NavLink> */}
                 <NavLink to='/status'>Status</NavLink>
+                <a
+                  href='https://github.com/mistakia/league'
+                  target='_blank'
+                  rel='noopener noreferrer'
+                >
+                  GitHub
+                </a>
+                <a
+                  href='https://discord.gg/azSX97Qj9Z'
+                  target='_blank'
+                  rel='noopener noreferrer'
+                >
+                  Discord
+                </a>
+                <a
+                  href='https://github.com/users/mistakia/projects/1/views/3'
+                  target='_blank'
+                  rel='noopener noreferrer'
+                >
+                  Roadmap
+                </a>
                 <NavLink to='/glossary'>Glossary</NavLink>
                 <NavLink to='/resources'>Resources</NavLink>
               </div>
