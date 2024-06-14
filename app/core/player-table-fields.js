@@ -8,54 +8,22 @@ import PlayerRowStatusColumn from '@components/player-row-status-column'
 import PlayerRowNFLTeam from '@components/player-row-nfl-team'
 
 const COLUMN_GROUPS = {
-  MEASURABLES: {
-    priority: 1
-  },
-  COLLEGE: {
-    priority: 1
-  },
-  NFL_TEAM: {
-    priority: 1
-  },
-  DRAFT: {
-    priority: 1
-  },
-  MANAGEMENT: {
-    priority: 1
-  },
-  PROJECTION: {
-    priority: 1
-  },
-  WEEK_PROJECTION: {
-    priority: 2
-  },
-  SEASON_PROJECTION: {
-    priority: 2
-  },
-  REST_OF_SEASON_PROJECTION: {
-    priority: 2
-  },
-  FANTASY: {
-    priority: 3
-  },
-  PASSING: {
-    priority: 3
-  },
-  RUSHING: {
-    priority: 3
-  },
-  RECEIVING: {
-    priority: 3
-  },
-  TOTALS: {
-    priority: 4
-  },
-  EFFICIENCY: {
-    priority: 4
-  },
-  AFTER_CATCH: {
-    priority: 5
-  }
+  MEASURABLES: { priority: 1 },
+  COLLEGE: { priority: 1 },
+  NFL_TEAM: { priority: 1 },
+  DRAFT: { priority: 1 },
+  MANAGEMENT: { priority: 1 },
+  PROJECTION: { priority: 1 },
+  WEEK_PROJECTION: { priority: 2 },
+  SEASON_PROJECTION: { priority: 2 },
+  REST_OF_SEASON_PROJECTION: { priority: 2 },
+  FANTASY: { priority: 3 },
+  PASSING: { priority: 3 },
+  RUSHING: { priority: 3 },
+  RECEIVING: { priority: 3 },
+  TOTALS: { priority: 4 },
+  EFFICIENCY: { priority: 4 },
+  AFTER_CATCH: { priority: 5 }
 }
 
 for (const [key, value] of Object.entries(COLUMN_GROUPS)) {
@@ -984,7 +952,7 @@ export function PlayerTableFields({
       column_title: 'Passing Yards (By Play)',
       column_groups: [COLUMN_GROUPS.PASSING, COLUMN_GROUPS.TOTALS],
       header_label: 'YDS',
-      player_value_path: 'pass_yds',
+      player_value_path: 'pass_yds_from_plays',
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_params: play_params
@@ -993,7 +961,7 @@ export function PlayerTableFields({
       column_title: 'Passing Touchdowns (By Play)',
       column_groups: [COLUMN_GROUPS.PASSING, COLUMN_GROUPS.TOTALS],
       header_label: 'TD',
-      player_value_path: 'pass_tds',
+      player_value_path: 'pass_tds_from_plays',
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_params: play_params
@@ -1002,7 +970,7 @@ export function PlayerTableFields({
       column_title: 'Passing Interceptions (By Play)',
       column_groups: [COLUMN_GROUPS.PASSING, COLUMN_GROUPS.TOTALS],
       header_label: 'INT',
-      player_value_path: 'pass_ints',
+      player_value_path: 'pass_ints_from_plays',
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_params: play_params
@@ -1011,7 +979,7 @@ export function PlayerTableFields({
       column_title: 'Dropped Passing Yards (By Play)',
       column_groups: [COLUMN_GROUPS.PASSING],
       header_label: 'DRP YDS',
-      player_value_path: 'drop_pass_yds',
+      player_value_path: 'drop_pass_yds_from_plays',
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_params: play_params
@@ -1020,7 +988,7 @@ export function PlayerTableFields({
       column_title: 'Passing Completion Percentage (By Play)',
       column_groups: [COLUMN_GROUPS.PASSING, COLUMN_GROUPS.EFFICIENCY],
       header_label: 'COMP%',
-      player_value_path: 'pass_comp_pct',
+      player_value_path: 'pass_comp_pct_from_plays',
       fixed: 1,
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
@@ -1030,7 +998,7 @@ export function PlayerTableFields({
       column_title: 'Passing Touchdown Percentage (By Play)',
       column_groups: [COLUMN_GROUPS.PASSING, COLUMN_GROUPS.EFFICIENCY],
       header_label: 'TD%',
-      player_value_path: 'pass_td_pct',
+      player_value_path: 'pass_td_pct_from_plays',
       fixed: 1,
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
@@ -1040,7 +1008,7 @@ export function PlayerTableFields({
       column_title: 'Passing Interception Percentage (By Play)',
       column_groups: [COLUMN_GROUPS.PASSING, COLUMN_GROUPS.EFFICIENCY],
       header_label: 'INT%',
-      player_value_path: 'pass_int_pct',
+      player_value_path: 'pass_int_pct_from_plays',
       fixed: 1,
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
@@ -1050,7 +1018,7 @@ export function PlayerTableFields({
       column_title: 'Passing Interception Worthy Percentage (By Play)',
       column_groups: [COLUMN_GROUPS.PASSING, COLUMN_GROUPS.EFFICIENCY],
       header_label: 'BAD%',
-      player_value_path: 'pass_int_worthy_pct',
+      player_value_path: 'pass_int_worthy_pct_from_plays',
       fixed: 1,
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
@@ -1064,7 +1032,7 @@ export function PlayerTableFields({
         COLUMN_GROUPS.AFTER_CATCH
       ],
       header_label: 'YAC',
-      player_value_path: 'pass_yds_after_catch',
+      player_value_path: 'pass_yds_after_catch_from_plays',
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_params: play_params
@@ -1077,7 +1045,7 @@ export function PlayerTableFields({
         COLUMN_GROUPS.AFTER_CATCH
       ],
       header_label: 'YAC/C',
-      player_value_path: 'pass_yds_after_catch_per_comp',
+      player_value_path: 'pass_yds_after_catch_per_comp_from_plays',
       fixed: 1,
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
@@ -1087,7 +1055,7 @@ export function PlayerTableFields({
       column_title: 'Passing Yards Per Pass Attempt (By Play)',
       column_groups: [COLUMN_GROUPS.PASSING, COLUMN_GROUPS.EFFICIENCY],
       header_label: 'Y/A',
-      player_value_path: 'pass_yds_per_att',
+      player_value_path: 'pass_yds_per_att_from_plays',
       fixed: 1,
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
@@ -1097,7 +1065,7 @@ export function PlayerTableFields({
       column_title: 'Passing Depth of Target Per Pass Attempt (By Play)',
       column_groups: [COLUMN_GROUPS.PASSING],
       header_label: 'DOT',
-      player_value_path: 'pass_depth_per_att',
+      player_value_path: 'pass_depth_per_att_from_plays',
       fixed: 1,
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
@@ -1107,7 +1075,7 @@ export function PlayerTableFields({
       column_title: 'Passing Air Yards (By Play)',
       column_groups: [COLUMN_GROUPS.PASSING],
       header_label: 'AY',
-      player_value_path: 'pass_air_yds',
+      player_value_path: 'pass_air_yds_from_plays',
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_params: play_params
@@ -1116,7 +1084,7 @@ export function PlayerTableFields({
       column_title: 'Completed Air Yards Per Completion (By Play)',
       column_groups: [COLUMN_GROUPS.PASSING],
       header_label: 'CAY/C',
-      player_value_path: 'comp_air_yds_per_comp',
+      player_value_path: 'comp_air_yds_per_comp_from_plays',
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_params: play_params
@@ -1125,7 +1093,7 @@ export function PlayerTableFields({
       column_title: 'Passing Air Conversion Ratio (By Play)',
       column_groups: [COLUMN_GROUPS.PASSING],
       header_label: 'PACR',
-      player_value_path: 'pass_air_conv_ratio',
+      player_value_path: 'pass_air_conv_ratio_from_plays',
       fixed: 1,
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
@@ -1135,7 +1103,7 @@ export function PlayerTableFields({
       column_title: 'Sacks (By Play)',
       column_groups: [COLUMN_GROUPS.PASSING],
       header_label: 'SK',
-      player_value_path: 'sacked',
+      player_value_path: 'sacked_from_plays',
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_params: play_params
@@ -1144,7 +1112,7 @@ export function PlayerTableFields({
       column_title: 'Sack Yards (By Play)',
       column_groups: [COLUMN_GROUPS.PASSING],
       header_label: 'SK YDS',
-      player_value_path: 'sacked_yds',
+      player_value_path: 'sacked_yds_from_plays',
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_params: play_params
@@ -1153,7 +1121,7 @@ export function PlayerTableFields({
       column_title: 'Sack Percentage (By Play)',
       column_groups: [COLUMN_GROUPS.PASSING],
       header_label: 'SK%',
-      player_value_path: 'sacked_pct',
+      player_value_path: 'sacked_pct_from_plays',
       fixed: 1,
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
@@ -1163,7 +1131,7 @@ export function PlayerTableFields({
       column_title: 'QB Hits Percentage (By Play)',
       column_groups: [COLUMN_GROUPS.PASSING],
       header_label: 'HIT%',
-      player_value_path: 'qb_hit_pct',
+      player_value_path: 'qb_hit_pct_from_plays',
       fixed: 1,
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
@@ -1173,7 +1141,7 @@ export function PlayerTableFields({
       column_title: 'QB Pressures Percentage (By Play)',
       column_groups: [COLUMN_GROUPS.PASSING],
       header_label: 'PRSS%',
-      player_value_path: 'qb_press_pct',
+      player_value_path: 'qb_press_pct_from_plays',
       fixed: 1,
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
@@ -1183,7 +1151,7 @@ export function PlayerTableFields({
       column_title: 'QB Hurries Percentage (By Play)',
       column_groups: [COLUMN_GROUPS.PASSING],
       header_label: 'HRRY%',
-      player_value_path: 'qb_hurry_pct',
+      player_value_path: 'qb_hurry_pct_from_plays',
       fixed: 1,
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
@@ -1193,7 +1161,7 @@ export function PlayerTableFields({
       column_title: 'Passing Net Yards Per Attempt (By Play)',
       column_groups: [COLUMN_GROUPS.PASSING],
       header_label: 'NY/A',
-      player_value_path: 'pass_net_yds_per_att',
+      player_value_path: 'pass_net_yds_per_att_from_plays',
       fixed: 1,
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
@@ -1204,7 +1172,7 @@ export function PlayerTableFields({
       column_title: 'Rushing Yards (By Play)',
       column_groups: [COLUMN_GROUPS.RUSHING],
       header_label: 'YDS',
-      player_value_path: 'rush_yds',
+      player_value_path: 'rush_yds_from_plays',
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_params: play_params
@@ -1213,7 +1181,7 @@ export function PlayerTableFields({
       column_title: 'Rushing Touchdowns (By Play)',
       column_groups: [COLUMN_GROUPS.RUSHING],
       header_label: 'TD',
-      player_value_path: 'rush_tds',
+      player_value_path: 'rush_tds_from_plays',
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_params: play_params
@@ -1222,7 +1190,7 @@ export function PlayerTableFields({
       column_title: 'Rushing Yards Per Attempt (By Play)',
       column_groups: [COLUMN_GROUPS.RUSHING],
       header_label: 'Y/A',
-      player_value_path: 'rush_yds_per_att',
+      player_value_path: 'rush_yds_per_att_from_plays',
       fixed: 1,
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
@@ -1232,7 +1200,7 @@ export function PlayerTableFields({
       column_title: 'Rushing Attempts (By Play)',
       column_groups: [COLUMN_GROUPS.RUSHING],
       header_label: 'ATT',
-      player_value_path: 'rush_atts',
+      player_value_path: 'rush_atts_from_plays',
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_params: play_params
@@ -1241,7 +1209,7 @@ export function PlayerTableFields({
       column_title: 'Rushing First Downs (By Play)',
       column_groups: [COLUMN_GROUPS.RUSHING],
       header_label: 'FD',
-      player_value_path: 'rush_first_downs',
+      player_value_path: 'rush_first_downs_from_plays',
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_params: play_params
@@ -1250,7 +1218,7 @@ export function PlayerTableFields({
       column_title: 'Positive Yardage Rush Attempts (By Play)',
       column_groups: [COLUMN_GROUPS.RUSHING],
       header_label: 'POS',
-      player_value_path: 'positive_rush_atts',
+      player_value_path: 'positive_rush_atts_from_plays',
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_params: play_params
@@ -1259,7 +1227,7 @@ export function PlayerTableFields({
       column_title: 'Rushing Yards After Contact (By Play)',
       column_groups: [COLUMN_GROUPS.RUSHING],
       header_label: 'YAC',
-      player_value_path: 'rush_yds_after_contact',
+      player_value_path: 'rush_yds_after_contact_from_plays',
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_params: play_params
@@ -1268,7 +1236,7 @@ export function PlayerTableFields({
       column_title: 'Rushing Yards After Contact Per Attempt (By Play)',
       column_groups: [COLUMN_GROUPS.RUSHING],
       header_label: 'YAC/A',
-      player_value_path: 'rush_yds_after_contact_per_att',
+      player_value_path: 'rush_yds_after_contact_per_att_from_plays',
       fixed: 1,
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
@@ -1278,7 +1246,7 @@ export function PlayerTableFields({
       column_title: 'Share of Team Rushing Attempts (By Play)',
       column_groups: [COLUMN_GROUPS.RUSHING],
       header_label: 'ATT%',
-      player_value_path: 'team_rush_atts_pct',
+      player_value_path: 'team_rush_atts_pct_from_plays',
       fixed: 1,
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
@@ -1288,7 +1256,7 @@ export function PlayerTableFields({
       column_title: 'Share of Team Rushing Yardage (By Play)',
       column_groups: [COLUMN_GROUPS.RUSHING],
       header_label: 'YDS%',
-      player_value_path: 'team_rush_yds_pct',
+      player_value_path: 'team_rush_yds_pct_from_plays',
       fixed: 1,
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
@@ -1298,7 +1266,7 @@ export function PlayerTableFields({
       column_title: 'Fumble Percentage (By Play)',
       column_groups: [COLUMN_GROUPS.RUSHING],
       header_label: 'FUM%',
-      player_value_path: 'fumble_pct',
+      player_value_path: 'fumble_pct_from_plays',
       fixed: 1,
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
@@ -1308,7 +1276,7 @@ export function PlayerTableFields({
       column_title: 'Positive Rushing Yardage Percentage (By Play)',
       column_groups: [COLUMN_GROUPS.RUSHING],
       header_label: 'POS%',
-      player_value_path: 'positive_rush_pct',
+      player_value_path: 'positive_rush_pct_from_plays',
       fixed: 1,
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
@@ -1318,7 +1286,7 @@ export function PlayerTableFields({
       column_title: 'Successful Rush Percentage (By Play)',
       column_groups: [COLUMN_GROUPS.RUSHING],
       header_label: 'SUCC%',
-      player_value_path: 'succ_rush_pct',
+      player_value_path: 'succ_rush_pct_from_plays',
       fixed: 1,
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
@@ -1328,7 +1296,7 @@ export function PlayerTableFields({
       column_title: 'Broken Tackles (By Play)',
       column_groups: [COLUMN_GROUPS.RUSHING],
       header_label: 'BT',
-      player_value_path: 'broken_tackles',
+      player_value_path: 'broken_tackles_from_plays',
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_params: play_params
@@ -1337,7 +1305,7 @@ export function PlayerTableFields({
       column_title: 'Broken Tackles Per Rush Attempt (By Play)',
       column_groups: [COLUMN_GROUPS.RUSHING],
       header_label: 'BT/A',
-      player_value_path: 'broken_tackles_per_rush_att',
+      player_value_path: 'broken_tackles_per_rush_att_from_plays',
       fixed: 1,
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
@@ -1348,7 +1316,7 @@ export function PlayerTableFields({
       column_title: 'Receptions (By Play)',
       column_groups: [COLUMN_GROUPS.RECEIVING],
       header_label: 'REC',
-      player_value_path: 'recs',
+      player_value_path: 'recs_from_plays',
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_params: play_params
@@ -1357,7 +1325,7 @@ export function PlayerTableFields({
       column_title: 'Receiving Yards (By Play)',
       column_groups: [COLUMN_GROUPS.RECEIVING],
       header_label: 'YDS',
-      player_value_path: 'rec_yds',
+      player_value_path: 'rec_yds_from_plays',
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_params: play_params
@@ -1366,7 +1334,7 @@ export function PlayerTableFields({
       column_title: 'Receiving Touchdowns (By Play)',
       column_groups: [COLUMN_GROUPS.RECEIVING],
       header_label: 'TD',
-      player_value_path: 'rec_tds',
+      player_value_path: 'rec_tds_from_plays',
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_params: play_params
@@ -1375,7 +1343,7 @@ export function PlayerTableFields({
       column_title: 'Drops (By Play)',
       column_groups: [COLUMN_GROUPS.RECEIVING],
       header_label: 'DRP',
-      player_value_path: 'drops',
+      player_value_path: 'drops_from_plays',
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_params: play_params
@@ -1384,7 +1352,7 @@ export function PlayerTableFields({
       column_title: 'Dropped Receiving Yards (By Play)',
       column_groups: [COLUMN_GROUPS.RECEIVING],
       header_label: 'DRP YDS',
-      player_value_path: 'drop_rec_yds',
+      player_value_path: 'drop_rec_yds_from_plays',
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_params: play_params
@@ -1393,7 +1361,7 @@ export function PlayerTableFields({
       column_title: 'Targets (By Play)',
       column_groups: [COLUMN_GROUPS.RECEIVING],
       header_label: 'TAR',
-      player_value_path: 'trg',
+      player_value_path: 'trg_from_plays',
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_params: play_params
@@ -1402,7 +1370,7 @@ export function PlayerTableFields({
       column_title: 'Deep Targets (By Play)',
       column_groups: [COLUMN_GROUPS.RECEIVING],
       header_label: 'DEEP',
-      player_value_path: 'deep_trg',
+      player_value_path: 'deep_trg_from_plays',
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_params: play_params
@@ -1411,7 +1379,7 @@ export function PlayerTableFields({
       column_title: 'Deep Target Percentage (By Play)',
       column_groups: [COLUMN_GROUPS.RECEIVING],
       header_label: 'DEEP%',
-      player_value_path: 'deep_trg_pct',
+      player_value_path: 'deep_trg_pct_from_plays',
       fixed: 1,
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
@@ -1421,7 +1389,7 @@ export function PlayerTableFields({
       column_title: 'Air Yards Per Target / Average Depth of Target (By Play)',
       column_groups: [COLUMN_GROUPS.RECEIVING],
       header_label: 'AY/T',
-      player_value_path: 'air_yds_per_trg',
+      player_value_path: 'air_yds_per_trg_from_plays',
       fixed: 1,
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
@@ -1431,7 +1399,7 @@ export function PlayerTableFields({
       column_title: 'Air Yards (By Play)',
       column_groups: [COLUMN_GROUPS.RECEIVING],
       header_label: 'AY',
-      player_value_path: 'air_yds',
+      player_value_path: 'air_yds_from_plays',
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_params: play_params
@@ -1440,7 +1408,7 @@ export function PlayerTableFields({
       column_title: 'Share of Team Air Yards (By Play)',
       column_groups: [COLUMN_GROUPS.RECEIVING],
       header_label: 'AY%',
-      player_value_path: 'team_air_yds_pct',
+      player_value_path: 'team_air_yds_pct_from_plays',
       fixed: 1,
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
@@ -1450,7 +1418,7 @@ export function PlayerTableFields({
       column_title: 'Share of Team Targets (By Play)',
       column_groups: [COLUMN_GROUPS.RECEIVING],
       header_label: 'TAR%',
-      player_value_path: 'team_trg_pct',
+      player_value_path: 'team_trg_pct_from_plays',
       fixed: 1,
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
@@ -1460,7 +1428,7 @@ export function PlayerTableFields({
       column_title: 'Weighted Opportunity Rating (By Play)',
       column_groups: [COLUMN_GROUPS.RECEIVING],
       header_label: 'WOPR',
-      player_value_path: 'wopr',
+      player_value_path: 'wopr_from_plays',
       fixed: 1,
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
@@ -1470,7 +1438,7 @@ export function PlayerTableFields({
       column_title: 'Receiver Air Conversion Ratio (By Play)',
       column_groups: [COLUMN_GROUPS.RECEIVING],
       header_label: 'RACR',
-      player_value_path: 'rec_air_conv_ratio',
+      player_value_path: 'rec_air_conv_ratio_from_plays',
       fixed: 1,
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
@@ -1480,7 +1448,7 @@ export function PlayerTableFields({
       column_title: 'Receiving Yards Per Reception (By Play)',
       column_groups: [COLUMN_GROUPS.RECEIVING],
       header_label: 'Y/R',
-      player_value_path: 'rec_yds_per_rec',
+      player_value_path: 'rec_yds_per_rec_from_plays',
       fixed: 1,
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
@@ -1490,7 +1458,7 @@ export function PlayerTableFields({
       column_title: 'Receiving Yards Per Target (By Play)',
       column_groups: [COLUMN_GROUPS.RECEIVING],
       header_label: 'Y/T',
-      player_value_path: 'rec_yds_per_trg',
+      player_value_path: 'rec_yds_per_trg_from_plays',
       fixed: 1,
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
@@ -1500,7 +1468,7 @@ export function PlayerTableFields({
       column_title: 'Receiving Yards After Catch Per Reception (By Play)',
       column_groups: [COLUMN_GROUPS.RECEIVING],
       header_label: 'YAC/R',
-      player_value_path: 'rec_yds_after_catch_per_rec',
+      player_value_path: 'rec_yds_after_catch_per_rec_from_plays',
       fixed: 1,
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
