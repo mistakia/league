@@ -1,16 +1,37 @@
+import { blake2b } from 'blakejs'
+
 import { constants, stat_in_year_week } from '#libs-shared'
 import db from '#db'
 
-const apply_play_by_play_select_conditions = ({
+const generate_play_by_play_table_alias = ({ params = {}, stat_name } = {}) => {
+  const {
+    year = [],
+    week = [],
+    offense = [],
+    defense = [],
+    down = [],
+    quarter = []
+  } = params
+  const key = `${year}${week}${offense}${defense}${down}${quarter}${stat_name}`
+
+  const hash = Array.from(blake2b(key, null, 32))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
+  return hash
+}
+
+const apply_play_by_play_with = ({
   query,
   params = {},
-  select_string,
   with_select_columns = [],
-  with_table_name = 'filtered_plays',
-  stat_name
+  with_table_name,
+  select_string,
+  where_clauses = [],
+  stat_name,
+  pid_column
 }) => {
-  if (!select_string) {
-    throw new Error('select_string is required')
+  if (!with_table_name) {
+    throw new Error('with_table_name is required')
   }
 
   if (!with_select_columns.length) {
@@ -38,16 +59,15 @@ const apply_play_by_play_select_conditions = ({
     .join(' AND ')
 
   const with_query = `
-    SELECT ${with_select_columns.join(', ')}
+    SELECT ${with_select_columns.join(', ')}, ${db.raw(select_string({ stat_name }))}
     FROM nfl_plays
-    WHERE ${condition_strings ? `${condition_strings}` : ''}
-    AND play_type != 'NOPL' AND seas_type = 'REG'
+    WHERE ${condition_strings ? `${condition_strings} AND ` : ''}
+    play_type != 'NOPL' AND seas_type = 'REG'
+    GROUP BY ${pid_column}
+    ${where_clauses.length ? `HAVING ${where_clauses.join(' AND ')}` : ''}
   `
 
   query.with(with_table_name, db.raw(with_query, params))
-  query.select(
-    db.raw(select_string({ table_name: with_table_name, stat_name }))
-  )
 }
 
 const projections_index_join = ({ query, params = {} }) => {
@@ -61,8 +81,25 @@ const projections_index_join = ({ query, params = {} }) => {
   })
 }
 
-const join_filtered_plays_table = ({ query, table_name, pid_column }) => {
-  query.leftJoin(table_name, `${table_name}.${pid_column}`, 'player.pid')
+const get_join_func = (join_type) => {
+  switch (join_type) {
+    case 'LEFT':
+      return 'leftJoin'
+    case 'INNER':
+      return 'innerJoin'
+    default:
+      return 'leftJoin'
+  }
+}
+
+const join_filtered_plays_table = ({
+  query,
+  table_name,
+  pid_column,
+  join_type = 'LEFT'
+}) => {
+  const join_func = get_join_func(join_type)
+  query[join_func](table_name, `${table_name}.${pid_column}`, 'player.pid')
 }
 
 const player_stat_from_plays = ({
@@ -71,23 +108,32 @@ const player_stat_from_plays = ({
   with_select_columns,
   stat_name
 }) => ({
-  table_name: `filtered_plays_${stat_name}`,
-  select_as: () => stat_name,
-  select: ({ query, params = {} }) => {
-    apply_play_by_play_select_conditions({
+  table_alias: ({ params }) =>
+    generate_play_by_play_table_alias({ params, stat_name }),
+  column_name: stat_name,
+  // put select and where/having in the with function
+  with: ({ query, params = {}, with_table_name, where_clauses = [] }) => {
+    apply_play_by_play_with({
       query,
       params,
-      select_string,
       with_select_columns,
-      with_table_name: `filtered_plays_${stat_name}`,
-      stat_name
+      with_table_name,
+      stat_name,
+      select_string,
+      where_clauses,
+      pid_column
     })
   },
-  join: ({ query, params = {} }) => {
+  join: ({
+    query,
+    table_name = `filtered_plays_${stat_name}`,
+    join_type = 'LEFT'
+  }) => {
     join_filtered_plays_table({
       query,
-      table_name: `filtered_plays_${stat_name}`,
-      pid_column
+      table_name,
+      pid_column,
+      join_type
     })
   },
   use_having: true
@@ -575,102 +621,100 @@ export default {
 
   player_pass_yards_from_plays: player_stat_from_plays({
     pid_column: 'psr_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `SUM(CASE WHEN ${table_name}.psr_pid = player.pid THEN ${table_name}.pass_yds ELSE 0 END) AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `SUM(pass_yds) AS ${stat_name}`,
     with_select_columns: ['psr_pid', 'pass_yds'],
     stat_name: 'pass_yds_from_plays'
   }),
   player_pass_touchdowns_from_plays: player_stat_from_plays({
     pid_column: 'psr_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `SUM(CASE WHEN ${table_name}.psr_pid = player.pid AND ${table_name}.td = 1 THEN 1 ELSE 0 END) AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `SUM(CASE td = 1 THEN 1 ELSE 0 END) AS ${stat_name}`,
     with_select_columns: ['psr_pid', 'td'],
     stat_name: 'pass_tds_from_plays'
   }),
   player_pass_interceptions_from_plays: player_stat_from_plays({
     pid_column: 'psr_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `SUM(CASE WHEN ${table_name}.psr_pid = player.pid AND ${table_name}.int = 1 THEN 1 ELSE 0 END) AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `SUM(CASE int = 1 THEN 1 ELSE 0 END) AS ${stat_name}`,
     with_select_columns: ['psr_pid', 'int'],
     stat_name: 'pass_ints_from_plays'
   }),
   player_dropped_passing_yards_from_plays: player_stat_from_plays({
     pid_column: 'psr_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `SUM(CASE WHEN ${table_name}.psr_pid = player.pid AND ${table_name}.drp = 1 THEN ${table_name}.dot ELSE 0 END) AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `SUM(CASE drp = 1 THEN dot ELSE 0 END) AS ${stat_name}`,
     with_select_columns: ['psr_pid', 'drp', 'dot'],
     stat_name: 'drop_pass_yds_from_plays'
   }),
   player_pass_completion_percentage_from_plays: player_stat_from_plays({
     pid_column: 'psr_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `CASE WHEN SUM(CASE WHEN ${table_name}.psr_pid = player.pid AND ${table_name}.comp = 1 THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN ${table_name}.psr_pid = player.pid AND ${table_name}.comp = 1 THEN 1 ELSE 0 END) / SUM(CASE WHEN ${table_name}.psr_pid = player.pid AND (${table_name}.sk is null or ${table_name}.sk = 0) THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `CASE WHEN SUM(CASE WHEN comp = 1 THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN comp = 1 THEN 1 ELSE 0 END) / SUM(CASE WHEN sk is null or sk = 0 THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
     with_select_columns: ['psr_pid', 'comp', 'sk'],
     stat_name: 'pass_comp_pct_from_plays'
   }),
   player_pass_touchdown_percentage_from_plays: player_stat_from_plays({
     pid_column: 'psr_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `CASE WHEN SUM(CASE WHEN ${table_name}.psr_pid = player.pid AND ${table_name}.td = 1 THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN ${table_name}.psr_pid = player.pid AND ${table_name}.td = 1 THEN 1 ELSE 0 END) / SUM(CASE WHEN ${table_name}.psr_pid = player.pid AND (${table_name}.sk is null or ${table_name}.sk = 0) THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `CASE WHEN SUM(CASE WHEN td = 1 THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN td = 1 THEN 1 ELSE 0 END) / SUM(CASE WHEN sk is null or sk = 0 THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
     with_select_columns: ['psr_pid', 'td', 'sk'],
     stat_name: 'pass_td_pct_from_plays'
   }),
   player_pass_interception_percentage_from_plays: player_stat_from_plays({
     pid_column: 'psr_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `CASE WHEN SUM(CASE WHEN ${table_name}.psr_pid = player.pid AND ${table_name}.int = 1 THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN ${table_name}.psr_pid = player.pid AND ${table_name}.int = 1 THEN 1 ELSE 0 END) / SUM(CASE WHEN ${table_name}.psr_pid = player.pid AND (${table_name}.sk is null or ${table_name}.sk = 0) THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `CASE WHEN SUM(CASE WHEN int = 1 THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN int = 1 THEN 1 ELSE 0 END) / SUM(CASE WHEN sk is null or sk = 0 THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
     with_select_columns: ['psr_pid', 'int', 'sk'],
     stat_name: 'pass_int_pct_from_plays'
   }),
   player_pass_interception_worthy_percentage_from_plays: player_stat_from_plays(
     {
       pid_column: 'psr_pid',
-      select_string: ({ table_name, stat_name }) =>
-        `CASE WHEN SUM(CASE WHEN ${table_name}.psr_pid = player.pid AND ${table_name}.int_worthy = 1 THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN ${table_name}.psr_pid = player.pid AND ${table_name}.int_worthy = 1 THEN 1 ELSE 0 END) / SUM(CASE WHEN ${table_name}.psr_pid = player.pid AND (${table_name}.sk is null or ${table_name}.sk = 0) THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
+      select_string: ({ stat_name }) =>
+        `CASE WHEN SUM(CASE WHEN int_worthy = 1 THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN int_worthy = 1 THEN 1 ELSE 0 END) / SUM(CASE WHEN sk is null or sk = 0 THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
       with_select_columns: ['psr_pid', 'int_worthy', 'sk'],
       stat_name: 'pass_int_worthy_pct_from_plays'
     }
   ),
   player_pass_yards_after_catch_from_plays: player_stat_from_plays({
     pid_column: 'psr_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `SUM(CASE WHEN ${table_name}.psr_pid = player.pid THEN ${table_name}.yac ELSE 0 END) AS ${stat_name}`,
+    select_string: ({ stat_name }) => `SUM(yac) AS ${stat_name}`,
     with_select_columns: ['psr_pid', 'yac'],
     stat_name: 'pass_yds_after_catch_from_plays'
   }),
   player_pass_yards_after_catch_per_completion_from_plays:
     player_stat_from_plays({
       pid_column: 'psr_pid',
-      select_string: ({ table_name, stat_name }) =>
-        `CASE WHEN SUM(CASE WHEN ${table_name}.psr_pid = player.pid AND ${table_name}.comp = 1 THEN 1 ELSE 0 END) > 0 THEN ROUND(SUM(CASE WHEN ${table_name}.psr_pid = player.pid THEN ${table_name}.yac ELSE 0 END) / SUM(CASE WHEN ${table_name}.psr_pid = player.pid AND ${table_name}.comp = 1 THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
+      select_string: ({ stat_name }) =>
+        `CASE WHEN SUM(CASE WHEN comp = 1 THEN 1 ELSE 0 END) > 0 THEN ROUND(SUM(yac) / SUM(CASE WHEN comp = 1 THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
       with_select_columns: ['psr_pid', 'yac', 'comp'],
       stat_name: 'pass_yds_after_catch_per_comp_from_plays'
     }),
   player_pass_yards_per_pass_attempt_from_plays: player_stat_from_plays({
     pid_column: 'psr_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `CASE WHEN SUM(CASE WHEN ${table_name}.psr_pid = player.pid AND (${table_name}.sk is null or ${table_name}.sk = 0) THEN 1 ELSE 0 END) > 0 THEN ROUND(SUM(CASE WHEN ${table_name}.psr_pid = player.pid THEN ${table_name}.pass_yds ELSE 0 END) / SUM(CASE WHEN ${table_name}.psr_pid = player.pid AND (${table_name}.sk is null or ${table_name}.sk = 0) THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `CASE WHEN SUM(CASE WHEN sk is null or sk = 0 THEN 1 ELSE 0 END) > 0 THEN ROUND(SUM(pass_yds) / SUM(CASE WHEN sk is null or sk = 0 THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
     with_select_columns: ['psr_pid', 'pass_yds', 'sk'],
     stat_name: 'pass_yds_per_att_from_plays'
   }),
   player_pass_depth_per_pass_attempt_from_plays: player_stat_from_plays({
     pid_column: 'psr_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `CASE WHEN SUM(CASE WHEN ${table_name}.psr_pid = player.pid AND (${table_name}.sk is null or ${table_name}.sk = 0) THEN 1 ELSE 0 END) > 0 THEN ROUND(SUM(CASE WHEN ${table_name}.psr_pid = player.pid THEN ${table_name}.dot ELSE 0 END) / SUM(CASE WHEN ${table_name}.psr_pid = player.pid AND (${table_name}.sk is null or ${table_name}.sk = 0) THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `CASE WHEN SUM(CASE WHEN sk is null or sk = 0 THEN 1 ELSE 0 END) > 0 THEN ROUND(SUM(dot) / SUM(CASE WHEN sk is null or sk = 0 THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
     with_select_columns: ['psr_pid', 'dot', 'sk'],
     stat_name: 'pass_depth_per_att_from_plays'
   }),
   player_pass_air_yards_from_plays: player_stat_from_plays({
     pid_column: 'psr_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `SUM(CASE WHEN ${table_name}.psr_pid = player.pid THEN ${table_name}.dot ELSE 0 END) AS ${stat_name}`,
+    select_string: ({ stat_name }) => `SUM(dot) AS ${stat_name}`,
     with_select_columns: ['psr_pid', 'dot'],
     stat_name: 'pass_air_yds_from_plays'
   }),
   player_completed_air_yards_per_completion_from_plays: player_stat_from_plays({
     pid_column: 'psr_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `CASE WHEN SUM(CASE WHEN ${table_name}.psr_pid = player.pid AND ${table_name}.comp = 1 THEN 1 ELSE 0 END) > 0 THEN ROUND(SUM(CASE WHEN ${table_name}.psr_pid = player.pid AND ${table_name}.comp = 1 THEN ${table_name}.dot ELSE 0 END) / SUM(CASE WHEN ${table_name}.psr_pid = player.pid AND ${table_name}.comp = 1 THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `CASE WHEN SUM(CASE WHEN comp = 1 THEN 1 ELSE 0 END) > 0 THEN ROUND(SUM(dot) / SUM(CASE WHEN comp = 1 THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
     with_select_columns: ['psr_pid', 'dot', 'comp'],
     stat_name: 'comp_air_yds_per_comp_from_plays'
   }),
@@ -678,50 +722,50 @@ export default {
   // completed air yards / total air yards
   player_passing_air_conversion_ratio_from_plays: player_stat_from_plays({
     pid_column: 'psr_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `CASE WHEN SUM(CASE WHEN ${table_name}.psr_pid = player.pid THEN ${table_name}.dot ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN ${table_name}.psr_pid = player.pid AND ${table_name}.comp = 1 THEN ${table_name}.dot ELSE 0 END) / SUM(CASE WHEN ${table_name}.psr_pid = player.pid THEN ${table_name}.dot ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `CASE WHEN SUM(CASE WHEN comp = 1 THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN comp = 1 THEN dot ELSE 0 END) / SUM(CASE WHEN comp = 1 THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
     with_select_columns: ['psr_pid', 'dot', 'comp'],
     stat_name: 'pass_air_conv_ratio_from_plays'
   }),
   player_sacked_from_plays: player_stat_from_plays({
     pid_column: 'psr_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `SUM(CASE WHEN ${table_name}.psr_pid = player.pid AND ${table_name}.sk = 1 THEN 1 ELSE 0 END) AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `SUM(CASE WHEN sk = 1 THEN 1 ELSE 0 END) AS ${stat_name}`,
     with_select_columns: ['psr_pid', 'sk'],
     stat_name: 'sacked_from_plays'
   }),
   player_sacked_yards_from_plays: player_stat_from_plays({
     pid_column: 'psr_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `SUM(CASE WHEN ${table_name}.psr_pid = player.pid AND ${table_name}.sk = 1 THEN ${table_name}.yds_gained ELSE 0 END) AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `SUM(CASE WHEN sk = 1 THEN yds_gained ELSE 0 END) AS ${stat_name}`,
     with_select_columns: ['psr_pid', 'sk', 'yds_gained'],
     stat_name: 'sacked_yds_from_plays'
   }),
   player_sacked_percentage_from_plays: player_stat_from_plays({
     pid_column: 'psr_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `CASE WHEN SUM(CASE WHEN ${table_name}.psr_pid = player.pid THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN ${table_name}.psr_pid = player.pid AND ${table_name}.sk = 1 THEN 1 ELSE 0 END) / SUM(CASE WHEN ${table_name}.psr_pid = player.pid THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `CASE WHEN SUM(CASE WHEN sk = 1 THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN sk = 1 THEN 1 ELSE 0 END) / SUM(CASE WHEN sk = 1 THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
     with_select_columns: ['psr_pid', 'sk'],
     stat_name: 'sacked_pct_from_plays'
   }),
   player_quarterback_hits_percentage_from_plays: player_stat_from_plays({
     pid_column: 'psr_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `CASE WHEN SUM(CASE WHEN ${table_name}.psr_pid = player.pid THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN ${table_name}.psr_pid = player.pid AND ${table_name}.qb_hit = 1 THEN 1 ELSE 0 END) / SUM(CASE WHEN ${table_name}.psr_pid = player.pid THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `CASE WHEN COUNT(*) > 0 THEN ROUND(100.0 * SUM(CASE WHEN qb_hit = 1 THEN 1 ELSE 0 END) / COUNT(*), 2) ELSE 0 END AS ${stat_name}`,
     with_select_columns: ['psr_pid', 'qb_hit'],
     stat_name: 'qb_hit_pct_from_plays'
   }),
   player_quarterback_pressures_percentage_from_plays: player_stat_from_plays({
     pid_column: 'psr_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `CASE WHEN SUM(CASE WHEN ${table_name}.psr_pid = player.pid THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN ${table_name}.psr_pid = player.pid AND ${table_name}.qb_pressure = 1 THEN 1 ELSE 0 END) / SUM(CASE WHEN ${table_name}.psr_pid = player.pid THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `CASE WHEN COUNT(*) > 0 THEN ROUND(100.0 * SUM(CASE WHEN qb_pressure = 1 THEN 1 ELSE 0 END) / COUNT(*), 2) ELSE 0 END AS ${stat_name}`,
     with_select_columns: ['psr_pid', 'qb_pressure'],
     stat_name: 'qb_press_pct_from_plays'
   }),
   player_quarterback_hurries_percentage_from_plays: player_stat_from_plays({
     pid_column: 'psr_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `CASE WHEN SUM(CASE WHEN ${table_name}.psr_pid = player.pid THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN ${table_name}.psr_pid = player.pid AND ${table_name}.qb_hurry = 1 THEN 1 ELSE 0 END) / SUM(CASE WHEN ${table_name}.psr_pid = player.pid THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `CASE WHEN COUNT(*) > 0 THEN ROUND(100.0 * SUM(CASE WHEN qb_hurry = 1 THEN 1 ELSE 0 END) / COUNT(*), 2) ELSE 0 END AS ${stat_name}`,
     with_select_columns: ['psr_pid', 'qb_hurry'],
     stat_name: 'qb_hurry_pct_from_plays'
   }),
@@ -729,66 +773,64 @@ export default {
   // net yards per passing attempt: (pass yards - sack yards)/(passing attempts + sacks).
   player_pass_net_yards_per_attempt_from_plays: player_stat_from_plays({
     pid_column: 'psr_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `CASE WHEN SUM(CASE WHEN ${table_name}.psr_pid = player.pid THEN 1 ELSE 0 END) > 0 THEN ROUND((SUM(CASE WHEN ${table_name}.psr_pid = player.pid THEN ${table_name}.pass_yds ELSE 0 END) - SUM(CASE WHEN ${table_name}.psr_pid = player.pid AND ${table_name}.sk = 1 THEN ${table_name}.yds_gained ELSE 0 END)) / SUM(CASE WHEN ${table_name}.psr_pid = player.pid THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `CASE WHEN COUNT(*) > 0 THEN ROUND((SUM(pass_yds) - SUM(CASE WHEN sk = 1 THEN yds_gained ELSE 0 END)) / COUNT(*), 2) ELSE 0 END AS ${stat_name}`,
     with_select_columns: ['psr_pid', 'pass_yds', 'sk', 'yds_gained'],
     stat_name: 'pass_net_yds_per_att_from_plays'
   }),
 
   player_rush_yards_from_plays: player_stat_from_plays({
     pid_column: 'bc_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `SUM(CASE WHEN ${table_name}.bc_pid = player.pid THEN ${table_name}.rush_yds ELSE 0 END) AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `SUM(rush_yds) AS ${stat_name}`,
     with_select_columns: ['bc_pid', 'rush_yds'],
     stat_name: 'rush_yds_from_plays'
   }),
   player_rush_touchdowns_from_plays: player_stat_from_plays({
     pid_column: 'bc_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `SUM(CASE WHEN ${table_name}.bc_pid = player.pid AND ${table_name}.td = 1 THEN 1 ELSE 0 END) AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `SUM(CASE WHEN td = 1 THEN 1 ELSE 0 END) AS ${stat_name}`,
     with_select_columns: ['bc_pid', 'td'],
     stat_name: 'rush_tds_from_plays'
   }),
   player_rush_yds_per_attempt_from_plays: player_stat_from_plays({
     pid_column: 'bc_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `CASE WHEN SUM(CASE WHEN ${table_name}.bc_pid = player.pid THEN 1 ELSE 0 END) > 0 THEN ROUND(SUM(CASE WHEN ${table_name}.bc_pid = player.pid THEN ${table_name}.rush_yds ELSE 0 END) / SUM(CASE WHEN ${table_name}.bc_pid = player.pid THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `CASE WHEN COUNT(*) > 0 THEN ROUND(SUM(rush_yds) / COUNT(*), 2) ELSE 0 END AS ${stat_name}`,
     with_select_columns: ['bc_pid', 'rush_yds'],
     stat_name: 'rush_yds_per_att_from_plays'
   }),
   player_rush_attempts_from_plays: player_stat_from_plays({
     pid_column: 'bc_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `SUM(CASE WHEN ${table_name}.bc_pid = player.pid THEN 1 ELSE 0 END) AS ${stat_name}`,
+    select_string: ({ stat_name }) => `COUNT(*) AS ${stat_name}`,
     with_select_columns: ['bc_pid'],
     stat_name: 'rush_atts_from_plays'
   }),
   player_rush_first_downs_from_plays: player_stat_from_plays({
     pid_column: 'bc_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `SUM(CASE WHEN ${table_name}.bc_pid = player.pid AND ${table_name}.fd = 1 THEN 1 ELSE 0 END) AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `SUM(CASE WHEN fd = 1 THEN 1 ELSE 0 END) AS ${stat_name}`,
     with_select_columns: ['bc_pid', 'fd'],
     stat_name: 'rush_first_downs_from_plays'
   }),
   player_positive_rush_attempts_from_plays: player_stat_from_plays({
     pid_column: 'bc_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `SUM(CASE WHEN ${table_name}.bc_pid = player.pid AND ${table_name}.rush_yds > 0 THEN 1 ELSE 0 END) AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `SUM(CASE WHEN rush_yds > 0 THEN 1 ELSE 0 END) AS ${stat_name}`,
     with_select_columns: ['bc_pid', 'rush_yds'],
     stat_name: 'positive_rush_atts_from_plays'
   }),
   player_rush_yards_after_contact_from_plays: player_stat_from_plays({
     pid_column: 'bc_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `SUM(CASE WHEN ${table_name}.bc_pid = player.pid THEN ${table_name}.yaco ELSE 0 END) AS ${stat_name}`,
+    select_string: ({ stat_name }) => `SUM(yaco) AS ${stat_name}`,
     with_select_columns: ['bc_pid', 'yaco'],
     stat_name: 'rush_yds_after_contact_from_plays'
   }),
   player_rush_yards_after_contact_per_attempt_from_plays:
     player_stat_from_plays({
       pid_column: 'bc_pid',
-      select_string: ({ table_name, stat_name }) =>
-        `CASE WHEN SUM(CASE WHEN ${table_name}.bc_pid = player.pid THEN 1 ELSE 0 END) > 0 THEN ROUND(SUM(CASE WHEN ${table_name}.bc_pid = player.pid THEN ${table_name}.yaco ELSE 0 END) / SUM(CASE WHEN ${table_name}.bc_pid = player.pid THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
+      select_string: ({ stat_name }) =>
+        `CASE WHEN COUNT(*) > 0 THEN ROUND(SUM(yaco) / COUNT(*), 2) ELSE 0 END AS ${stat_name}`,
       with_select_columns: ['bc_pid', 'yaco'],
       stat_name: 'rush_yds_after_contact_per_att_from_plays'
     }),
@@ -799,106 +841,104 @@ export default {
 
   player_fumble_percentage_from_plays: player_stat_from_plays({
     pid_column: 'bc_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `CASE WHEN SUM(CASE WHEN ${table_name}.bc_pid = player.pid THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN ${table_name}.bc_pid = player.pid AND ${table_name}.player_fuml_pid = player.pid THEN 1 ELSE 0 END) / SUM(CASE WHEN ${table_name}.bc_pid = player.pid THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `CASE WHEN COUNT(*) > 0 THEN ROUND(100.0 * SUM(CASE WHEN player_fuml_pid = player.pid THEN 1 ELSE 0 END) / COUNT(*), 2) ELSE 0 END AS ${stat_name}`,
     with_select_columns: ['bc_pid', 'player_fuml_pid'],
     stat_name: 'fumble_pct_from_plays'
   }),
   player_positive_rush_percentage_from_plays: player_stat_from_plays({
     pid_column: 'bc_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `CASE WHEN SUM(CASE WHEN ${table_name}.bc_pid = player.pid THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN ${table_name}.bc_pid = player.pid AND ${table_name}.rush_yds > 0 THEN 1 ELSE 0 END) / SUM(CASE WHEN ${table_name}.bc_pid = player.pid THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `CASE WHEN COUNT(*) > 0 THEN ROUND(100.0 * SUM(CASE WHEN rush_yds > 0 THEN 1 ELSE 0 END) / COUNT(*), 2) ELSE 0 END AS ${stat_name}`,
     with_select_columns: ['bc_pid', 'rush_yds'],
     stat_name: 'positive_rush_pct_from_plays'
   }),
   player_successful_rush_percentage_from_plays: player_stat_from_plays({
     pid_column: 'bc_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `CASE WHEN SUM(CASE WHEN ${table_name}.bc_pid = player.pid THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN ${table_name}.bc_pid = player.pid AND ${table_name}.succ = 1 THEN 1 ELSE 0 END) / SUM(CASE WHEN ${table_name}.bc_pid = player.pid THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `CASE WHEN COUNT(*) > 0 THEN ROUND(100.0 * SUM(CASE WHEN succ = 1 THEN 1 ELSE 0 END) / COUNT(*), 2) ELSE 0 END AS ${stat_name}`,
     with_select_columns: ['bc_pid', 'succ'],
     stat_name: 'succ_rush_pct_from_plays'
   }),
   player_broken_tackles_from_plays: player_stat_from_plays({
     pid_column: 'bc_pid', // TODO should include bc_pid and trg_pid
-    select_string: ({ table_name, stat_name }) =>
-      `SUM(CASE WHEN ${table_name}.bc_pid = player.pid THEN ${table_name}.mbt ELSE 0 END) AS ${stat_name}`,
+    select_string: ({ stat_name }) => `SUM(mbt) AS ${stat_name}`,
     with_select_columns: ['bc_pid', 'mbt'],
     stat_name: 'broken_tackles_from_plays'
   }),
   player_broken_tackles_per_rush_attempt_from_plays: player_stat_from_plays({
     pid_column: 'bc_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `CASE WHEN SUM(CASE WHEN ${table_name}.bc_pid = player.pid THEN 1 ELSE 0 END) > 0 THEN ROUND(SUM(CASE WHEN ${table_name}.bc_pid = player.pid THEN ${table_name}.mbt ELSE 0 END) / SUM(CASE WHEN ${table_name}.bc_pid = player.pid THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `CASE WHEN COUNT(*) > 0 THEN ROUND(SUM(mbt) / COUNT(*), 2) ELSE 0 END AS ${stat_name}`,
     with_select_columns: ['bc_pid', 'mbt'],
     stat_name: 'broken_tackles_per_rush_att_from_plays'
   }),
   player_receptions_from_plays: player_stat_from_plays({
     pid_column: 'trg_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `SUM(CASE WHEN ${table_name}.trg_pid = player.pid AND ${table_name}.comp = 1 THEN 1 ELSE 0 END) AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `SUM(CASE WHEN comp = 1 THEN 1 ELSE 0 END) AS ${stat_name}`,
     with_select_columns: ['trg_pid', 'comp'],
     stat_name: 'recs_from_plays'
   }),
   player_receiving_yards_from_plays: player_stat_from_plays({
     pid_column: 'trg_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `SUM(CASE WHEN ${table_name}.trg_pid = player.pid AND ${table_name}.comp = 1 THEN ${table_name}.recv_yds ELSE 0 END) AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `SUM(CASE WHEN comp = 1 THEN recv_yds ELSE 0 END) AS ${stat_name}`,
     with_select_columns: ['trg_pid', 'comp', 'recv_yds'],
     stat_name: 'rec_yds_from_plays'
   }),
   player_receiving_touchdowns_from_plays: player_stat_from_plays({
     pid_column: 'trg_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `SUM(CASE WHEN ${table_name}.trg_pid = player.pid AND ${table_name}.comp = 1 AND ${table_name}.td = 1 THEN 1 ELSE 0 END) AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `SUM(CASE WHEN comp = 1 AND td = 1 THEN 1 ELSE 0 END) AS ${stat_name}`,
     with_select_columns: ['trg_pid', 'comp', 'td'],
     stat_name: 'rec_tds_from_plays'
   }),
   player_drops_from_plays: player_stat_from_plays({
     pid_column: 'trg_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `SUM(CASE WHEN ${table_name}.trg_pid = player.pid AND ${table_name}.drp = 1 THEN 1 ELSE 0 END) AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `SUM(CASE WHEN drp = 1 THEN 1 ELSE 0 END) AS ${stat_name}`,
     with_select_columns: ['trg_pid', 'drp'],
     stat_name: 'drops_from_plays'
   }),
   player_dropped_receiving_yards_from_plays: player_stat_from_plays({
     pid_column: 'trg_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `SUM(CASE WHEN ${table_name}.trg_pid = player.pid AND ${table_name}.drp = 1 THEN ${table_name}.dot ELSE 0 END) AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `SUM(CASE WHEN drp = 1 THEN dot ELSE 0 END) AS ${stat_name}`,
     with_select_columns: ['trg_pid', 'drp', 'dot'],
     stat_name: 'drop_rec_yds_from_plays'
   }),
   player_targets_from_plays: player_stat_from_plays({
     pid_column: 'trg_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `SUM(CASE WHEN ${table_name}.trg_pid = player.pid THEN 1 ELSE 0 END) AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `SUM(CASE WHEN trg_pid = player.pid THEN 1 ELSE 0 END) AS ${stat_name}`,
     with_select_columns: ['trg_pid'],
     stat_name: 'trg_from_plays'
   }),
   player_deep_targets_from_plays: player_stat_from_plays({
     pid_column: 'trg_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `SUM(CASE WHEN ${table_name}.trg_pid = player.pid AND ${table_name}.dot >= 20 THEN 1 ELSE 0 END) AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `SUM(CASE WHEN trg_pid = player.pid AND dot >= 20 THEN 1 ELSE 0 END) AS ${stat_name}`,
     with_select_columns: ['trg_pid', 'dot'],
     stat_name: 'deep_trg_from_plays'
   }),
   player_deep_targets_percentage_from_plays: player_stat_from_plays({
     pid_column: 'trg_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `CASE WHEN SUM(CASE WHEN ${table_name}.trg_pid = player.pid THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN ${table_name}.trg_pid = player.pid AND ${table_name}.dot >= 20 THEN 1 ELSE 0 END) / SUM(CASE WHEN ${table_name}.trg_pid = player.pid THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `CASE WHEN COUNT(*) > 0 THEN ROUND(100.0 * SUM(CASE WHEN dot >= 20 THEN 1 ELSE 0 END) / COUNT(*), 2) ELSE 0 END AS ${stat_name}`,
     with_select_columns: ['trg_pid', 'dot'],
     stat_name: 'deep_trg_pct_from_plays'
   }),
   player_air_yards_per_target_from_plays: player_stat_from_plays({
     pid_column: 'trg_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `CASE WHEN SUM(CASE WHEN ${table_name}.trg_pid = player.pid THEN 1 ELSE 0 END) > 0 THEN ROUND(SUM(CASE WHEN ${table_name}.trg_pid = player.pid THEN ${table_name}.dot ELSE 0 END) / SUM(CASE WHEN ${table_name}.trg_pid = player.pid THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `CASE WHEN COUNT(*) > 0 THEN ROUND(SUM(dot) / COUNT(*), 2) ELSE 0 END AS ${stat_name}`,
     with_select_columns: ['trg_pid', 'dot'],
     stat_name: 'air_yds_per_trg_from_plays'
   }),
   player_air_yards_from_plays: player_stat_from_plays({
     pid_column: 'trg_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `SUM(CASE WHEN ${table_name}.trg_pid = player.pid THEN ${table_name}.dot ELSE 0 END) AS ${stat_name}`,
+    select_string: ({ stat_name }) => `SUM(dot) AS ${stat_name}`,
     with_select_columns: ['trg_pid', 'dot'],
     stat_name: 'air_yds_from_plays'
   }),
@@ -911,30 +951,30 @@ export default {
   // receiving yards / air yards
   player_receiver_air_conversion_ratio_from_plays: player_stat_from_plays({
     pid_column: 'trg_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `CASE WHEN SUM(CASE WHEN ${table_name}.trg_pid = player.pid THEN ${table_name}.dot ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN ${table_name}.trg_pid = player.pid AND ${table_name}.comp = 1 THEN ${table_name}.recv_yds ELSE 0 END) / SUM(CASE WHEN ${table_name}.trg_pid = player.pid THEN ${table_name}.dot ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `CASE WHEN SUM(CASE WHEN comp = 1 THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN comp = 1 THEN recv_yds ELSE 0 END) / SUM(CASE WHEN comp = 1 THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
     with_select_columns: ['trg_pid', 'dot', 'comp', 'recv_yds'],
     stat_name: 'rec_air_conv_ratio_from_plays'
   }),
   player_receiving_yards_per_reception_from_plays: player_stat_from_plays({
     pid_column: 'trg_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `CASE WHEN SUM(CASE WHEN ${table_name}.trg_pid = player.pid AND ${table_name}.comp = 1 THEN 1 ELSE 0 END) > 0 THEN ROUND(SUM(CASE WHEN ${table_name}.trg_pid = player.pid AND ${table_name}.comp = 1 THEN ${table_name}.recv_yds ELSE 0 END) / SUM(CASE WHEN ${table_name}.trg_pid = player.pid AND ${table_name}.comp = 1 THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `CASE WHEN SUM(CASE WHEN comp = 1 THEN 1 ELSE 0 END) > 0 THEN ROUND(SUM(CASE WHEN comp = 1 THEN recv_yds ELSE 0 END) / SUM(CASE WHEN comp = 1 THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
     with_select_columns: ['trg_pid', 'comp', 'recv_yds'],
     stat_name: 'rec_yds_per_rec_from_plays'
   }),
   player_receiving_yards_per_target_from_plays: player_stat_from_plays({
     pid_column: 'trg_pid',
-    select_string: ({ table_name, stat_name }) =>
-      `CASE WHEN SUM(CASE WHEN ${table_name}.trg_pid = player.pid THEN 1 ELSE 0 END) > 0 THEN ROUND(SUM(CASE WHEN ${table_name}.trg_pid = player.pid AND ${table_name}.comp = 1 THEN ${table_name}.recv_yds ELSE 0 END) / SUM(CASE WHEN ${table_name}.trg_pid = player.pid THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
+    select_string: ({ stat_name }) =>
+      `CASE WHEN SUM(CASE WHEN comp = 1 THEN 1 ELSE 0 END) > 0 THEN ROUND(SUM(CASE WHEN comp = 1 THEN recv_yds ELSE 0 END) / SUM(CASE WHEN comp = 1 THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
     with_select_columns: ['trg_pid', 'comp', 'recv_yds'],
     stat_name: 'rec_yds_per_trg_from_plays'
   }),
   player_receiving_yards_after_catch_per_reception_from_plays:
     player_stat_from_plays({
       pid_column: 'trg_pid',
-      select_string: ({ table_name, stat_name }) =>
-        `CASE WHEN SUM(CASE WHEN ${table_name}.trg_pid = player.pid AND ${table_name}.comp = 1 THEN 1 ELSE 0 END) > 0 THEN ROUND(SUM(CASE WHEN ${table_name}.trg_pid = player.pid AND ${table_name}.comp = 1 THEN ${table_name}.yac ELSE 0 END) / SUM(CASE WHEN ${table_name}.trg_pid = player.pid AND ${table_name}.comp = 1 THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
+      select_string: ({ stat_name }) =>
+        `CASE WHEN SUM(CASE WHEN comp = 1 THEN 1 ELSE 0 END) > 0 THEN ROUND(SUM(CASE WHEN comp = 1 THEN yac ELSE 0 END) / SUM(CASE WHEN comp = 1 THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}`,
       with_select_columns: ['trg_pid', 'comp', 'yac'],
       stat_name: 'rec_yds_after_catch_per_rec_from_plays'
     }),
