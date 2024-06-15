@@ -34,12 +34,30 @@ const get_players_percentiles = createSelector(
       .toJS()
 
     const percentile_stat_keys = []
-    for (const column of selected_players_table_view.table_state.columns) {
+    const table_state_columns = []
+    for (const [
+      index,
+      column
+    ] of selected_players_table_view.table_state.columns.entries()) {
       const column_id = typeof column === 'string' ? column : column.column_id
+      table_state_columns.push({
+        index,
+        column_id
+      })
+    }
+
+    for (const { index, column_id } of table_state_columns) {
       const field = player_fields[column_id]
 
+      const columns_with_same_id = table_state_columns.filter(
+        ({ column_id: c_id }) => c_id === column_id
+      )
+      const column_index = columns_with_same_id.findIndex(
+        ({ index: i }) => i === index
+      )
+
       if (field.data_type === table_constants.TABLE_DATA_TYPES.NUMBER) {
-        percentile_stat_keys.push(field.player_value_path)
+        percentile_stat_keys.push(`${field.player_value_path}_${column_index}`)
       }
     }
 

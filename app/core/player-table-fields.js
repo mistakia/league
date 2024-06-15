@@ -1690,6 +1690,7 @@ export function PlayerTableFields({
 
   for (const [key, value] of Object.entries(fields)) {
     fields[key].column_id = key
+    // TODO remove - I think this is not used
     fields[key].key_path = value.player_value_path
       ? value.player_value_path.split('.')
       : []
