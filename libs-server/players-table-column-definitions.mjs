@@ -621,8 +621,7 @@ export default {
 
   player_pass_yards_from_plays: player_stat_from_plays({
     pid_column: 'psr_pid',
-    select_string: ({ stat_name }) =>
-      `SUM(pass_yds) AS ${stat_name}`,
+    select_string: ({ stat_name }) => `SUM(pass_yds) AS ${stat_name}`,
     with_select_columns: ['psr_pid', 'pass_yds'],
     stat_name: 'pass_yds_from_plays'
   }),
@@ -781,8 +780,7 @@ export default {
 
   player_rush_yards_from_plays: player_stat_from_plays({
     pid_column: 'bc_pid',
-    select_string: ({ stat_name }) =>
-      `SUM(rush_yds) AS ${stat_name}`,
+    select_string: ({ stat_name }) => `SUM(rush_yds) AS ${stat_name}`,
     with_select_columns: ['bc_pid', 'rush_yds'],
     stat_name: 'rush_yds_from_plays'
   }),
