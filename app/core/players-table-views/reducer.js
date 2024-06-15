@@ -38,6 +38,9 @@ export function players_table_views_reducer(
             .updateIn(['table_state', 'prefix_columns'], (columns) =>
               columns.push('player_league_roster_status')
             )
+            .updateIn(['saved_table_state', 'prefix_columns'], (columns) =>
+              columns.push('player_league_roster_status')
+            )
           state.set(key, updated_view)
         })
       })
