@@ -1582,7 +1582,10 @@ CREATE TABLE `nfl_plays` (
   `updated` int(11) NOT NULL,
   UNIQUE KEY `gamePlay` (`esbid`,`playId`),
   KEY `esbid` (`esbid`),
-  KEY `playId` (`playId`)
+  KEY `playId` (`playId`),
+  KEY `psr_pid` (`psr_pid`),
+  KEY `bc_pid` (`bc_pid`),
+  KEY `trg_pid` (`trg_pid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
