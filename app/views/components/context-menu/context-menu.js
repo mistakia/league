@@ -7,7 +7,7 @@ import './context-menu.styl'
 
 export default class ContextMenu extends React.Component {
   handleClick = (event) => {
-    const { visible } = this.props.contextMenuInfo
+    const visible = this.props.contextMenuInfo.get('visible')
     if (!visible) {
       return
     }
@@ -31,7 +31,9 @@ export default class ContextMenu extends React.Component {
   }
 
   componentDidUpdate = () => {
-    const { visible, clickX, clickY } = this.props.contextMenuInfo
+    const visible = this.props.contextMenuInfo.get('visible')
+    const clickX = this.props.contextMenuInfo.get('clickX')
+    const clickY = this.props.contextMenuInfo.get('clickY')
 
     if (!visible || !this.root) {
       return this.removeListeners()
@@ -76,7 +78,9 @@ export default class ContextMenu extends React.Component {
   }
 
   render = () => {
-    const { visible, id, data } = this.props.contextMenuInfo
+    const visible = this.props.contextMenuInfo.get('visible')
+    const id = this.props.contextMenuInfo.get('id')
+    const data = this.props.contextMenuInfo.get('data')
 
     if (!visible) {
       return null

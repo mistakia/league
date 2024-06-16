@@ -219,20 +219,18 @@ export const getSelectedViewGroupedFields = createSelector(
   getSelectedPlayersPageView,
   getPlayerFields,
   (selected_players_page_view, fields) => {
-    const groups = []
-    for (const field of selected_players_page_view.fields) {
+    return selected_players_page_view.fields.reduce((groups, field) => {
       const field_info = fields[field]
-      const group = groups[groups.length - 1]
-      if (!group || group.category !== field_info.category) {
+      const lastGroup = groups[groups.length - 1]
+      if (!lastGroup || lastGroup.category !== field_info.category) {
         groups.push({
           category: field_info.category,
           fields: [field_info]
         })
       } else {
-        group.fields.push(field_info)
+        lastGroup.fields.push(field_info)
       }
-    }
-
-    return groups
+      return groups
+    }, [])
   }
 )
