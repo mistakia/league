@@ -54,10 +54,6 @@ api.use((req, res, next) => {
     'Access-Control-Allow-Headers',
     'Authorization, Origin, X-Requested-With, Content-Type, Accept'
   )
-  res.set('Cache-Control', 'no-cache, must-revalidate, proxy-revalidate')
-  res.set('Expires', '0')
-  res.set('Pragma', 'no-cache')
-  res.set('Surrogate-Control', 'no-store')
   next()
 })
 
@@ -76,6 +72,14 @@ const speed_limiter = slowDown({
   delayAfter: 5,
   delayMs: (hits, req) => (hits - req.slowDown.limit) * 500, // begin adding 500ms of delay per request above `delayAfter`
   maxDelayMs: 10000
+})
+
+api.use('/api/*', (req, res, next) => {
+  res.set('Cache-Control', 'no-cache, must-revalidate, proxy-revalidate')
+  res.set('Expires', '0')
+  res.set('Pragma', 'no-cache')
+  res.set('Surrogate-Control', 'no-store')
+  next()
 })
 
 api.use('/api/*', expressjwt(config.jwt), (err, req, res, next) => {
