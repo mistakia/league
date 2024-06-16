@@ -3,7 +3,7 @@ import { blake2b } from 'blakejs'
 import { constants, stat_in_year_week } from '#libs-shared'
 import db from '#db'
 
-const generate_play_by_play_table_alias = ({ params = {}, stat_name } = {}) => {
+const generate_play_by_play_table_alias = ({ params = {} } = {}) => {
   const {
     year = [],
     week = [],
@@ -12,7 +12,7 @@ const generate_play_by_play_table_alias = ({ params = {}, stat_name } = {}) => {
     down = [],
     quarter = []
   } = params
-  const key = `${year}${week}${offense}${defense}${down}${quarter}${stat_name}`
+  const key = `${year}${week}${offense}${defense}${down}${quarter}`
 
   const hash = Array.from(blake2b(key, null, 32))
     .map((b) => b.toString(16).padStart(2, '0'))
@@ -109,7 +109,7 @@ const player_stat_from_plays = ({
   stat_name
 }) => ({
   table_alias: ({ params }) =>
-    generate_play_by_play_table_alias({ params, stat_name }),
+    generate_play_by_play_table_alias({ params }),
   column_name: stat_name,
   // put select and where/having in the with function
   with: ({ query, params = {}, with_table_name, where_clauses = [] }) => {
