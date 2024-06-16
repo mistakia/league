@@ -1,12 +1,23 @@
 import db from '#db'
 import players_table_column_definitions from './players-table-column-definitions.mjs'
 
-const find_column = ({ column_id, columns }) => {
-  return columns.find((column) =>
-    typeof column === 'string'
-      ? column === column_id
-      : column.column_id === column_id
+const get_column_index = ({ column_id, index, columns }) => {
+  const columns_with_same_id = columns.filter(
+    ({ column: c }) => (typeof c === 'string' ? c : c.column_id) === column_id
   )
+  return columns_with_same_id.findIndex(({ index: i }) => i === index)
+}
+
+const find_sort_column = ({ column_id, column_index = 0, columns }) => {
+  const item = columns.find(({ column, index }) => {
+    const c_id = typeof column === 'string' ? column : column.column_id
+    return (
+      c_id === column_id &&
+      get_column_index({ column_id: c_id, index, columns }) === column_index
+    )
+  })
+
+  return item ? item.column : null
 }
 
 const get_table_name = ({ column_definition, column_params }) => {
@@ -19,21 +30,25 @@ const add_select_clause = ({
   players_query,
   column_definition,
   table_name,
-  column_params
+  column_params,
+  column_index = 0
 }) => {
   if (column_definition.select) {
     column_definition.select({
       query: players_query,
       table_name,
-      params: column_params
+      params: column_params,
+      column_index
     })
   } else if (column_definition.select_as) {
     const select_as = column_definition.select_as(column_params)
     players_query.select(
-      `${table_name}.${column_definition.column_name} AS ${select_as}`
+      `${table_name}.${column_definition.column_name} AS ${select_as}_${column_index}`
     )
   } else {
-    players_query.select(`${table_name}.${column_definition.column_name}`)
+    players_query.select(
+      `${table_name}.${column_definition.column_name} as ${column_definition.column_name}_${column_index}`
+    )
   }
 }
 
@@ -132,21 +147,22 @@ const add_sort_clause = ({
   sort_clause,
   column_definition,
   table_name,
-  column_params
+  column_params,
+  column_index = 0
 }) => {
   sort_clause.desc = sort_clause.desc === true || sort_clause.desc === 'true'
   if (column_definition.select_as) {
     const select_as = column_definition.select_as(column_params)
-    players_query.orderByRaw(`${select_as} IS NULL`)
+    players_query.orderByRaw(`${select_as}_${column_index} IS NULL`)
     players_query.orderByRaw(
-      `${select_as} ${sort_clause.desc ? 'desc' : 'asc'}`
+      `${select_as}_${column_index} ${sort_clause.desc ? 'desc' : 'asc'}`
     )
   } else {
     players_query.orderByRaw(
-      `${table_name}.${column_definition.column_name} IS NULL`
+      `${table_name}.${column_definition.column_name}_${column_index} IS NULL`
     )
     players_query.orderByRaw(
-      `${table_name}.${column_definition.column_name} ${
+      `${table_name}.${column_definition.column_name}_${column_index} ${
         sort_clause.desc ? 'desc' : 'asc'
       }`
     )
@@ -195,18 +211,13 @@ export default async function ({
   const joined_table_index = {}
   const with_statement_index = {}
   const players_query = db('player').select('player.pid')
-  const all_table_columns = [...prefix_columns, ...columns]
-  const missing_where_columns = where.filter(({ column_id }) => {
-    return !all_table_columns.some((column) => {
-      return (
-        column_id === (typeof column === 'string' ? column : column.column_id)
-      )
+  const table_columns = []
+  for (const [index, column] of [...prefix_columns, ...columns].entries()) {
+    table_columns.push({
+      column,
+      index
     })
-  })
-
-  missing_where_columns.forEach(({ column_id }) => {
-    all_table_columns.push(column_id)
-  })
+  }
 
   const grouped_where_clauses = get_grouped_where_clauses({
     where,
@@ -237,10 +248,17 @@ export default async function ({
     })
   }
 
-  for (const column of all_table_columns) {
+  for (const { column, index } of table_columns) {
     const column_id = typeof column === 'string' ? column : column.column_id
     const column_params = typeof column === 'string' ? {} : column.params
     const column_definition = players_table_column_definitions[column_id]
+
+    // column_index among columns with the same column_id
+    const column_index = get_column_index({
+      column_id,
+      index,
+      columns: table_columns
+    })
 
     if (!column_definition) {
       continue
@@ -251,7 +269,8 @@ export default async function ({
       players_query,
       column_definition,
       table_name,
-      column_params
+      column_params,
+      column_index
     })
     join_table_if_needed({
       players_query,
@@ -273,9 +292,10 @@ export default async function ({
   }
 
   for (const sort_clause of sort) {
-    const column = find_column({
+    const column = find_sort_column({
       column_id: sort_clause.column_id,
-      columns: all_table_columns
+      column_index: sort_clause.column_index,
+      columns: table_columns
     })
     const column_id = typeof column === 'string' ? column : column.column_id
     const column_params = typeof column === 'string' ? {} : column.params
@@ -287,7 +307,8 @@ export default async function ({
       sort_clause,
       column_definition,
       table_name,
-      column_params
+      column_params,
+      column_index: sort_clause.column_index
     })
   }
 
