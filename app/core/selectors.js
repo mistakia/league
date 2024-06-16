@@ -40,7 +40,7 @@ export const get_router = (state) => state.get('router')
 export const get_request_history = (state) =>
   state.getIn(['api', 'request_history'])
 export const get_confirmation_info = (state) => state.get('confirmation')
-export const get_context_menu_info = (state) => state.get('contextMenu').toJS()
+export const get_context_menu_info = (state) => state.get('contextMenu')
 export const get_player_maps = (state) => state.getIn(['players', 'items'])
 export const get_draft_pick_values = (state) => state.get('draft_pick_value')
 export const get_players_table_views = (state) =>
