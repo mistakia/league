@@ -1,3 +1,4 @@
+import React from 'react'
 import { List } from 'immutable'
 import { createSelector } from 'reselect'
 import * as table_constants from 'react-table/src/constants.mjs'
@@ -148,7 +149,7 @@ export function PlayerTableFields({
           : window.innerWidth <= 400
             ? 100
             : 150) + (is_logged_in ? 30 : 0),
-      component: PlayerRowNameColumn,
+      component: React.memo(PlayerRowNameColumn),
       data_type: table_constants.TABLE_DATA_TYPES.TEXT,
       player_value_path: 'name',
       sticky: true
@@ -304,7 +305,7 @@ export function PlayerTableFields({
       size: 60,
       data_type: table_constants.TABLE_DATA_TYPES.SELECT,
       player_value_path: 'team',
-      component: PlayerRowNFLTeam,
+      component: React.memo(PlayerRowNFLTeam),
       column_groups: [COLUMN_GROUPS.NFL_TEAM],
       operators: [
         table_constants.TABLE_OPERATORS.IN,
@@ -335,7 +336,7 @@ export function PlayerTableFields({
     //   column_title: 'Opponent (NFL Team)',
     //   column_groups: [COLUMN_GROUPS.MATCHUP],
     //   header_label: 'Opponent',
-    //   component: PlayerRowOpponent,
+    //   component: React.memo(PlayerRowOpponent),
     //   header_className: 'player__row-opponent',
     //   getValue: (playerMap) => {
     //     const nfl_team = playerMap.get('team')
@@ -1597,7 +1598,7 @@ export function PlayerTableFields({
       column_title: 'Roster Status',
       header_label: '',
       size: 50,
-      component: PlayerRowStatusColumn,
+      component: React.memo(PlayerRowStatusColumn),
       data_type: table_constants.TABLE_DATA_TYPES.SELECT,
       sticky: true,
       column_values: [
