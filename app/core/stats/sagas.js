@@ -53,7 +53,9 @@ export function* calculateStats() {
     }
     return true
   })
-  const Worker = yield call(() => import('workerize-loader?inline!../worker')) // eslint-disable-line import/no-webpack-loader-syntax
+  const { default: Worker } = yield call(
+    () => import('workerize-loader?inline!../worker') // eslint-disable-line import/no-webpack-loader-syntax
+  )
   const worker = new Worker()
   const result = yield call(worker.workerCalculateStatsFromPlays, {
     plays: filtered.toJS(),

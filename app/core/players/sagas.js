@@ -96,7 +96,9 @@ export function* calculateValues() {
   const sources = yield select(getSources)
   const rosterRows = (yield select(getRostersForCurrentLeague)).toList().toJS()
 
-  const Worker = yield call(() => import('workerize-loader?inline!../worker')) // eslint-disable-line import/no-webpack-loader-syntax
+  const { default: Worker } = yield call(
+    () => import('workerize-loader?inline!../worker') // eslint-disable-line import/no-webpack-loader-syntax
+  )
   const worker = new Worker()
   const result = yield call(worker.calculatePlayerValues, {
     players: players.valueSeq().toJS(),
