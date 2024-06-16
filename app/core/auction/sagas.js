@@ -53,7 +53,9 @@ export function* optimize() {
   })
 
   // optimze lineup using current players and watchlist
-  const Worker = yield call(() => import('workerize-loader?inline!../worker')) // eslint-disable-line import/no-webpack-loader-syntax
+  const { default: Worker } = yield call(
+    () => import('workerize-loader?inline!../worker') // eslint-disable-line import/no-webpack-loader-syntax
+  )
   const worker = new Worker()
   let result = yield call(worker.optimizeAuctionLineup, {
     limits: defaultLimit,
