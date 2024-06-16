@@ -74,6 +74,7 @@ const speed_limiter = slowDown({
   maxDelayMs: 10000
 })
 
+// disable caching for all api routes
 api.use('/api/*', (req, res, next) => {
   res.set('Cache-Control', 'no-cache, must-revalidate, proxy-revalidate')
   res.set('Expires', '0')
@@ -119,7 +120,11 @@ api.use('/api/settings', routes.settings)
 api.use(
   '/dist',
   express.static(path.join(__dirname, '../', 'dist'), {
-    fallthrough: true
+    fallthrough: true,
+    setHeaders: (res, path) => {
+      // Set Cache-Control to cache forever
+      res.set('Cache-Control', 'public, max-age=31536000, immutable')
+    }
   })
 )
 api.use(
@@ -127,8 +132,8 @@ api.use(
   express.static(path.join(__dirname, '../', 'static'), {
     fallthrough: false,
     setHeaders: (res, path) => {
-      // Set Cache-Control for 1 year as files include hashes
-      res.set('Cache-Control', 'public, max-age=31536000')
+      // Set Cache-Control for 7 days
+      res.set('Cache-Control', 'public, max-age=604800')
     }
   }),
   (err, req, res, next) => {
