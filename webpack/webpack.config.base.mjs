@@ -11,6 +11,9 @@ export default {
   target: 'web',
 
   optimization: {
+    splitChunks: {
+      chunks: 'all'
+    },
     moduleIds: 'named'
   },
 

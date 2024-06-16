@@ -200,29 +200,11 @@ export default class Lineup extends React.Component {
       <Grid container spacing={1} classes={{ root: 'lineup' }}>
         <Grid item xs={12} md={6}>
           <div className='lineup__starters'>
-            <div className='dashboard__section-body-header'>
-              <div className='player__slot-slotName' />
-              <div className='player__item-name' />
-              {/* <div className='player__item-metric'>Opp</div>
-                  <div className='player__item-metric'>Avg</div>
-                  <div className='player__item-metric'>Proj</div>
-                  <div className='player__item-metric'>Sos</div> */}
-            </div>
             <div className='dashboard__section-body empty'>{starters}</div>
           </div>
         </Grid>
         <Grid item xs={12} md={6}>
-          <div>
-            <div className='dashboard__section-body-header'>
-              <div className='player__slot-slotName' />
-              <div className='player__item-name' />
-              {/* <div className='player__item-metric'>Opp</div>
-                  <div className='player__item-metric'>Avg</div>
-                  <div className='player__item-metric'>Proj</div>
-                  <div className='player__item-metric'>Sos</div> */}
-            </div>
-            <div className='dashboard__section-body empty'>{bench}</div>
-          </div>
+          <div className='dashboard__section-body empty'>{bench}</div>
         </Grid>
       </Grid>
     )

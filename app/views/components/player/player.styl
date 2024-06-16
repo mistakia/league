@@ -1,8 +1,6 @@
 .player__item
   &.selected
     background #fafafa
-    .player__item-name.table__cell
-      background #fafafa
 
   .player__item-menu
     display none
@@ -10,28 +8,6 @@
 .player__item-position
   flex 0 0 50px
   display flex
-
-.player__item-name
-  flex 0 0 150px
-  width 150px
-  overflow hidden
-  text-overflow ellipsis
-  white-space nowrap
-  min-height 18px
-  &.table__cell
-    flex 0 0 250px
-    width 250px
-    background white
-    border-right 1px solid #f0f0f0
-    padding 0 4px 0 4px
-
-.table__body .player__item-name.table__cell
-  border-bottom 1px solid #e8e8e8
-
-.player__item-metric
-  flex 1
-  font-family "DecimaMonoPro",monospace
-  font-weight 600
 
 .player__item-action.table__cell
   flex 0 0 45px

@@ -75,9 +75,7 @@ export default class PlayerRosterTotal extends React.Component {
     return (
       <div className='player__item table__row table__row-summary'>
         {reorder && <div className='player__item-action reorder table__cell' />}
-        <div className='player__item-name table__cell sticky__column'>
-          Total
-        </div>
+        <div className='table__cell text lead-cell sticky__column'>Total</div>
         <div className='row__group'>
           <div className='row__group-body'>
             <div className='metric table__cell'>

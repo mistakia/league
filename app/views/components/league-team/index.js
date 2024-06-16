@@ -86,7 +86,7 @@ const mapStateToProps = createSelector(
 
         franchise_tag_savings =
           Math.max(
-            regular_extended_salary - league[`f${pos.toLowerCase()}`],
+            regular_extended_salary - (league[`f${pos?.toLowerCase()}`] || 0),
             0
           ) || null
       }

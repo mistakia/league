@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { lazy } from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
@@ -11,27 +11,28 @@ import {
 import queryString from 'query-string'
 
 import { get_app } from '@core/selectors'
-import AuthPage from '@pages/auth'
-import LeagueHomePage from '@pages/league-home'
-import DraftPage from '@pages/draft'
-import AuctionPage from '@pages/auction'
-import PlayersPage from '@pages/players'
-import PlayersTablePage from '@pages/players-table'
-import LineupsPage from '@pages/lineups'
-import TradePage from '@pages/trade'
-import SettingsPage from '@pages/settings'
-import MarkdownPage from '@pages/markdown'
-import StatusPage from '@pages/status'
-import PropsPage from '@pages/props'
-import TransactionsPage from '@pages/transactions'
-import StandingsPage from '@pages/standings'
-import StatsPage from '@pages/stats'
-import SchedulePage from '@pages/schedule'
-import RostersPage from '@pages/rosters'
-import WaiversPage from '@pages/waivers'
-import TeamPage from '@pages/team'
-import LeagueSettingsPage from '@pages/league-settings'
-import MatchupPage from '@pages/matchup'
+
+const AuthPage = lazy(() => import('@pages/auth'))
+const LeagueHomePage = lazy(() => import('@pages/league-home'))
+const DraftPage = lazy(() => import('@pages/draft'))
+const AuctionPage = lazy(() => import('@pages/auction'))
+const PlayersPage = lazy(() => import('@pages/players'))
+const PlayersTablePage = lazy(() => import('@pages/players-table'))
+const LineupsPage = lazy(() => import('@pages/lineups'))
+const TradePage = lazy(() => import('@pages/trade'))
+const SettingsPage = lazy(() => import('@pages/settings'))
+const MarkdownPage = lazy(() => import('@pages/markdown'))
+const StatusPage = lazy(() => import('@pages/status'))
+const PropsPage = lazy(() => import('@pages/props'))
+const TransactionsPage = lazy(() => import('@pages/transactions'))
+const StandingsPage = lazy(() => import('@pages/standings'))
+const StatsPage = lazy(() => import('@pages/stats'))
+const SchedulePage = lazy(() => import('@pages/schedule'))
+const RostersPage = lazy(() => import('@pages/rosters'))
+const WaiversPage = lazy(() => import('@pages/waivers'))
+const TeamPage = lazy(() => import('@pages/team'))
+const LeagueSettingsPage = lazy(() => import('@pages/league-settings'))
+const MatchupPage = lazy(() => import('@pages/matchup'))
 
 const mapStateToProps = createSelector(get_app, (app) => ({ app }))
 

@@ -14,7 +14,6 @@ import { auctionActions } from './actions'
 import { send } from '@core/ws'
 import { constants, getEligibleSlots } from '@libs-shared'
 import { beep } from '@core/audio'
-import Worker from 'workerize-loader?inline!../worker' // eslint-disable-line import/no-webpack-loader-syntax
 
 export function* optimize() {
   const league = yield select(getCurrentLeague)
@@ -54,6 +53,7 @@ export function* optimize() {
   })
 
   // optimze lineup using current players and watchlist
+  const Worker = yield call(() => import('workerize-loader?inline!../worker')) // eslint-disable-line import/no-webpack-loader-syntax
   const worker = new Worker()
   let result = yield call(worker.optimizeAuctionLineup, {
     limits: defaultLimit,

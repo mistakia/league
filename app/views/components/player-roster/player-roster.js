@@ -125,7 +125,7 @@ class PlayerRoster extends Player {
     return (
       <div className={classNames.join(' ')}>
         {reorder && <DragHandle />}
-        <div className='player__item-name table__cell sticky__column'>
+        <div className='table__cell text sticky__column lead-cell'>
           <PlayerName
             pid={playerMap.get('pid')}
             waiverId={waiverId}
@@ -148,7 +148,7 @@ class PlayerRoster extends Player {
           )}
         </div>
         {isClaim && (
-          <div className='player__item-name table__cell'>
+          <div className='table__cell text lead-cell'>
             {Boolean(claim.release.size) &&
               (claim.release.size > 1 ? (
                 <PlayerHeadshotGroup players={claim.release} />

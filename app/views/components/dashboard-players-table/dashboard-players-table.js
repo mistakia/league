@@ -166,11 +166,11 @@ export default class DashboardPlayersTable extends React.Component {
             {showReorder && (
               <div className='player__item-action reorder table__cell' />
             )}
-            <div className='player__item-name table__cell sticky__column'>
+            <div className='table__cell sticky__column text lead-cell'>
               {leadColumn}
             </div>
             {isClaim && (
-              <div className='player__item-name table__cell'>Release</div>
+              <div className='table__cell text lead-cell'>Release</div>
             )}
             {Boolean(isTransition) && (
               <div className='table__cell player__item-team'>Team</div>
