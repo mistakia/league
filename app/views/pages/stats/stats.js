@@ -253,7 +253,7 @@ export default function StatsPage({
       <>
         <div className='section'>
           <Toolbar>
-            <div className='dashboard__section-header-title'>League Stats</div>
+            <div className='section-header-title'>League Stats</div>
           </Toolbar>
           <div className='table__container'>
             <div className='table__row table__head'>
@@ -303,7 +303,7 @@ export default function StatsPage({
         </div>
         <div className='section'>
           <Toolbar>
-            <div className='dashboard__section-header-title'>Lineup Stats</div>
+            <div className='section-header-title'>Lineup Stats</div>
           </Toolbar>
           <div className='table__container'>
             <div className='table__row table__head'>
@@ -315,9 +315,7 @@ export default function StatsPage({
         </div>
         <div className='section'>
           <Toolbar>
-            <div className='dashboard__section-header-title'>
-              Positional Stats
-            </div>
+            <div className='section-header-title'>Positional Stats</div>
           </Toolbar>
           <div className='table__container'>
             <div className='table__row table__head'>

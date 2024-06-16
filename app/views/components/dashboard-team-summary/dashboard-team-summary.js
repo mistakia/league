@@ -14,8 +14,8 @@ import DashboardTeamSummaryFranchiseTags from '@components/dashboard-team-summar
 
 export default function DashboardTeamSummary({ tid }) {
   return (
-    <div className='dashboard__section-side'>
-      <div className='dashboard__section-side-body'>
+    <div className='league-team-section-side'>
+      <div className='league-team-section-side-body'>
         {constants.isRegularSeason && <DashboardTeamSummaryRecord tid={tid} />}
         {constants.isRegularSeason && (
           <DashboardTeamSummaryPlayoffOdds tid={tid} />

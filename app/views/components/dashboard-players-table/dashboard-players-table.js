@@ -158,7 +158,7 @@ export default class DashboardPlayersTable extends React.Component {
     return (
       <div className={classNames.join(' ')}>
         <Toolbar variant='dense'>
-          <div className='dashboard__section-header-title'>{title}</div>
+          <div className='section-header-title'>{title}</div>
           {Boolean(summary) && summary}
         </Toolbar>
         <div className='table__container'>

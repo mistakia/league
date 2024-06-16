@@ -90,7 +90,7 @@ export default class DashboardByeWeeks extends React.Component {
     })
     return (
       <div className='dashboard__bye-week'>
-        <div className='dashboard__section-side-title'>Bye Weeks</div>
+        <div className='league-team-section-side-title'>Bye Weeks</div>
         {items}
       </div>
     )

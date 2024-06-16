@@ -16,6 +16,8 @@ import PlayerRoster from '@components/player-roster'
 import { constants } from '@libs-shared'
 import LeagueTeamValueDeltas from '@components/league-team-value-deltas'
 
+import './league-team.styl'
+
 export default function LeagueTeam({
   league,
   loadTeamPlayers,
@@ -185,7 +187,7 @@ export default function LeagueTeam({
         <Grid item xs={12}>
           <div className='section expand'>
             <Toolbar>
-              <div className='dashboard__section-header-title'>Draft Picks</div>
+              <div className='section-header-title'>Draft Picks</div>
             </Toolbar>
             <DashboardDraftPicks picks={picks} />
           </div>
