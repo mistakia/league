@@ -147,7 +147,7 @@ export function PlayerTableFields({
           ? 200
           : window.innerWidth <= 400
             ? 100
-            : 150) + (is_logged_in ? 50 : 0),
+            : 150) + (is_logged_in ? 30 : 0),
       component: PlayerRowNameColumn,
       data_type: table_constants.TABLE_DATA_TYPES.TEXT,
       player_value_path: 'name',
