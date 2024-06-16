@@ -44,7 +44,7 @@ function SummaryRow({ team, percentiles, year }) {
 
   return (
     <div className='table__row'>
-      <div className='table__cell player__item-name'>{team.name}</div>
+      <div className='table__cell text lead-cell'>{team.name}</div>
       {items}
       <div className='row__group'>
         <div className='row__group-body'>
@@ -107,7 +107,7 @@ function PositionRow({ team, percentiles, year }) {
 
   return (
     <div className='table__row'>
-      <div className='table__cell player__item-name'>{team.name}</div>
+      <div className='table__cell text lead-cell'>{team.name}</div>
       {positionCells}
     </div>
   )
@@ -138,7 +138,7 @@ function SlotRow({ team, slots, percentiles, year }) {
 
   return (
     <div className='table__row'>
-      <div className='table__cell player__item-name'>{team.name}</div>
+      <div className='table__cell text lead-cell'>{team.name}</div>
       {slotCells}
     </div>
   )
@@ -257,7 +257,7 @@ export default function StatsPage({
           </Toolbar>
           <div className='table__container'>
             <div className='table__row table__head'>
-              <div className='table__cell player__item-name'>Team</div>
+              <div className='table__cell text lead-cell'>Team</div>
               <Tooltip title='Points scored'>
                 <div className='table__cell metric'>PF</div>
               </Tooltip>
@@ -307,7 +307,7 @@ export default function StatsPage({
           </Toolbar>
           <div className='table__container'>
             <div className='table__row table__head'>
-              <div className='table__cell player__item-name'>Team</div>
+              <div className='table__cell text lead-cell'>Team</div>
               {slotHeaders}
             </div>
             <div className='table__body'>{slotRows}</div>
@@ -321,7 +321,7 @@ export default function StatsPage({
           </Toolbar>
           <div className='table__container'>
             <div className='table__row table__head'>
-              <div className='table__cell player__item-name'>Team</div>
+              <div className='table__cell text lead-cell'>Team</div>
               {positionHeaders}
             </div>
             <div className='table__body'>{positionRows}</div>

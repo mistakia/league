@@ -8,7 +8,6 @@ import {
 import { playerActions } from '@core/players'
 import { statActions } from './actions'
 import { getChartedPlays } from '@core/api'
-import Worker from 'workerize-loader?inline!../worker' // eslint-disable-line import/no-webpack-loader-syntax
 
 export function* loadChartedPlays() {
   const selected_players_page_view = yield select(getSelectedPlayersPageView)
@@ -54,6 +53,7 @@ export function* calculateStats() {
     }
     return true
   })
+  const Worker = yield call(() => import('workerize-loader?inline!../worker')) // eslint-disable-line import/no-webpack-loader-syntax
   const worker = new Worker()
   const result = yield call(worker.workerCalculateStatsFromPlays, {
     plays: filtered.toJS(),

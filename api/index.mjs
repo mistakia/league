@@ -112,17 +112,12 @@ api.use('/api/*', (req, res, next) => {
 api.use('/api/scoreboard', routes.scoreboard)
 api.use('/api/me', routes.me)
 api.use('/api/settings', routes.settings)
-api.use('/index.js.map', (req, res, next) => {
-  res.sendFile(path.join(__dirname, '../', 'dist', 'index.js.map'), (err) => {
-    if (err) {
-      if (!res.headersSent) {
-        res.status(404).send('File not found')
-      } else {
-        next(err)
-      }
-    }
+api.use(
+  '/dist',
+  express.static(path.join(__dirname, '../', 'dist'), {
+    fallthrough: true
   })
-})
+)
 api.use(
   '/static',
   express.static(path.join(__dirname, '../', 'static'), {

@@ -5,6 +5,8 @@ import PropTypes from 'prop-types'
 import PlayerSelectedRow from '@components/player-selected-row'
 import PlayerSelectedRowHeader from '@components/player-selected-row-header'
 
+import './selected-player-gamelogs.styl'
+
 export default class SelectedPlayerGamelogs extends React.Component {
   componentDidMount = () => {
     const pid = this.props.playerMap.get('pid')
@@ -19,7 +21,7 @@ export default class SelectedPlayerGamelogs extends React.Component {
     const sorted_years = Object.keys(years).sort((a, b) => b - a)
     sorted_years.forEach((year, yearIndex) => {
       rows.push(
-        <div key={yearIndex} className='header__row sticky__column sticky__row'>
+        <div key={yearIndex} className='header__row sticky__column selected-player-gamelogs-year'>
           {year}
         </div>
       )

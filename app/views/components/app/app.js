@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, Suspense } from 'react'
 import { useMatch } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import hotkeys from 'hotkeys-js'
@@ -60,7 +60,9 @@ export default function App({
   return (
     <main className={classNames.join(' ')}>
       <Menu {...{ menu_open, set_menu_open }} />
-      <Routes />
+      <Suspense fallback={<Loading loading />}>
+        <Routes />
+      </Suspense>
       <ContextMenu />
       <Confirmation />
       <Notification />

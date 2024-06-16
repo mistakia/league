@@ -25,8 +25,8 @@ export default merge(baseConfig, {
 
   output: {
     path: path.join(__dirname, '..', 'dist'),
-    publicPath: './dist/',
-    filename: 'index.js'
+    publicPath: '/dist/',
+    filename: '[name].js'
   },
 
   module: {
@@ -86,7 +86,6 @@ export default merge(baseConfig, {
 
     new HtmlWebpackPlugin({
       template: 'app/index.html',
-      inlineSource: '.(js|css)$',
       minify: {
         removeComments: true,
         collapseWhitespace: true,
@@ -102,7 +101,7 @@ export default merge(baseConfig, {
     }),
 
     new MiniCssExtractPlugin({
-      filename: 'style.css'
+      filename: '[name].css'
     }),
 
     new HtmlWebpackInlineSourcePlugin(HtmlWebpackPlugin),

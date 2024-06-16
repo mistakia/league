@@ -46,7 +46,6 @@ import { sourceActions } from '@core/sources'
 import { rosterActions } from '@core/rosters'
 import { auctionActions } from '@core/auction'
 import DefaultPlayersViews from './default-players-views'
-import Worker from 'workerize-loader?inline!../worker' // eslint-disable-line import/no-webpack-loader-syntax
 
 export function* loadAllPlayers() {
   const state = yield select(getPlayers)
@@ -97,6 +96,7 @@ export function* calculateValues() {
   const sources = yield select(getSources)
   const rosterRows = (yield select(getRostersForCurrentLeague)).toList().toJS()
 
+  const Worker = yield call(() => import('workerize-loader?inline!../worker')) // eslint-disable-line import/no-webpack-loader-syntax
   const worker = new Worker()
   const result = yield call(worker.calculatePlayerValues, {
     players: players.valueSeq().toJS(),

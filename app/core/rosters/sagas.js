@@ -51,7 +51,6 @@ import { constants } from '@libs-shared'
 import { playerActions } from '@core/players'
 import { poachActions } from '@core/poaches'
 import { waiverActions } from '@core/waivers'
-import Worker from 'workerize-loader?inline!../worker' // eslint-disable-line import/no-webpack-loader-syntax
 import { csv } from '@core/export'
 import { teamActions } from '@core/teams'
 
@@ -152,6 +151,8 @@ export function* calculatePlayerLineupContribution({ playerMap }) {
   const playerPool = isActive
     ? currentRosterPlayers.active.filter((pMap) => pMap.get('pid') !== pid)
     : currentRosterPlayers.active.push(playerMap)
+
+  const Worker = yield call(() => import('workerize-loader?inline!../worker')) // eslint-disable-line import/no-webpack-loader-syntax
   const worker = new Worker()
   const result = yield call(worker.workerOptimizeLineup, {
     players: playerPool.toJS(),
@@ -262,6 +263,7 @@ export function* projectLineups() {
   const rosters = yield select(getActivePlayersByRosterForCurrentLeague)
   const lineups = {}
 
+  const Worker = yield call(() => import('workerize-loader?inline!../worker')) // eslint-disable-line import/no-webpack-loader-syntax
   const worker = new Worker()
   for (const [teamId, players] of rosters.entrySeq()) {
     lineups[teamId] = {}
@@ -280,6 +282,7 @@ export function* projectLineups() {
 export function* projectTrade() {
   // TODO - make sure player values and projections have been calculated
   const league = yield select(getCurrentLeague)
+  const Worker = yield call(() => import('workerize-loader?inline!../worker')) // eslint-disable-line import/no-webpack-loader-syntax
   const worker = new Worker()
   const proposingTeamTradedPlayers = yield select(
     getProposingTeamTradedRosterPlayers

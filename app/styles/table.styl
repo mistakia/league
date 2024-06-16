@@ -7,13 +7,13 @@
   min-width 100%
   position relative
   display flex
-  align-items center
+  align-items stretch
   background white
 
 @media (pointer:fine)
   .table__body .table__row:hover
     background #fafafa
-    .player__item-name.table__cell
+    .table__cell.lead-cell
       background #eaeaea
     .player__item-menu
       display flex
@@ -47,6 +47,14 @@
   &.wide_cell
     width 90px
     flex 0 0 90px
+
+  &.lead-cell
+    flex 0 0 250px
+    width 250px
+    background white
+    border-right 1px solid #f0f0f0
+    padding 0 4px 0 4px
+    border-bottom 1px solid #e8e8e8
 
 .table__cell-text
   text-overflow ellipsis
@@ -98,7 +106,36 @@
   &.sticky__two
     left 60px
 
-.sticky__row
-  position sticky
-  z-index 2
-  top 55px
+.row__group
+  flex 0 0 auto
+  display inline-flex
+  flex-direction column
+  justify-content center
+  align-items center
+  position relative
+  + .row__group
+  + .table__cell
+      border-left 1px solid $borderColor
+
+.row__group-head
+  font-family 'IBM Plex Mono', monospace
+  font-weight 800
+  flex 0 0 auto
+  text-transform uppercase
+  font-size 11px
+  padding 2px
+  border-bottom 1px solid $borderColor
+  width 100%
+  text-align center
+  height 24px
+  display flex
+  align-items center
+  justify-content center
+  letter-spacing 1px
+
+.row__group-body
+  flex 1
+  display flex
+  justify-content space-evenly
+  align-items stretch
+  width 100%

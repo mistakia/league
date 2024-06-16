@@ -22,7 +22,7 @@ Divider.propTypes = {
 function StandingsTeam({ team, year, is_current_year }) {
   return (
     <div className='table__row'>
-      <div className='table__cell player__item-name'>{team.name}</div>
+      <div className='table__cell text lead-cell'>{team.name}</div>
       <div className='table__cell metric wide_cell'>
         {team.getIn(['stats', year, 'wins'], 0)}-
         {team.getIn(['stats', year, 'losses'], 0)}-
@@ -82,7 +82,7 @@ function Standings({ teams, title, year, is_current_year }) {
       </Toolbar>
       <div className='table__container'>
         <div className='table__row table__head'>
-          <div className='table__cell player__item-name'>Team</div>
+          <div className='table__cell text lead-cell'>Team</div>
           <div className='table__cell metric wide_cell'>Record</div>
           <div className='table__cell metric wide_cell'>All Play</div>
           <div className='table__cell metric wide_cell'>Points</div>
@@ -145,7 +145,7 @@ function Overall({ standings, year, is_current_year }) {
       </Toolbar>
       <div className='table__container'>
         <div className='table__row table__head'>
-          <div className='table__cell player__item-name'>Team</div>
+          <div className='table__cell text lead-cell'>Team</div>
           <div className='table__cell metric wide_cell'>Record</div>
           <div className='table__cell metric wide_cell'>All Play</div>
           <div className='table__cell metric wide_cell'>Points</div>
