@@ -10,6 +10,15 @@ export default function PlayerStatus({ playerMap }) {
     constants.nfl_player_status_abbreviations[playerMap.get('injury_status')] ||
     constants.nfl_player_status_abbreviations[playerMap.get('game_status')]
 
+  if (
+    label ===
+    constants.nfl_player_status_abbreviations[
+      constants.player_nfl_status.ACTIVE
+    ]
+  ) {
+    return null
+  }
+
   if (!label) {
     return null
   }
