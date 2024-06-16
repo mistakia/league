@@ -26,7 +26,8 @@ export default merge(baseConfig, {
   output: {
     path: path.join(__dirname, '..', 'dist'),
     publicPath: '/dist/',
-    filename: '[name].js'
+    filename: '[name].[contenthash:8].js',
+    chunkFilename: '[name].[contenthash:8].chunk.js'
   },
 
   module: {
@@ -101,7 +102,8 @@ export default merge(baseConfig, {
     }),
 
     new MiniCssExtractPlugin({
-      filename: '[name].css'
+      filename: '[name].[contenthash:8].css',
+      chunkFilename: '[name].[contenthash:8].chunk.css'
     }),
 
     new HtmlWebpackInlineSourcePlugin(HtmlWebpackPlugin),

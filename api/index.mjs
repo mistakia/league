@@ -121,7 +121,11 @@ api.use(
 api.use(
   '/static',
   express.static(path.join(__dirname, '../', 'static'), {
-    fallthrough: false
+    fallthrough: false,
+    setHeaders: (res, path) => {
+      // Set Cache-Control for 1 year as files include hashes
+      res.set('Cache-Control', 'public, max-age=31536000')
+    }
   }),
   (err, req, res, next) => {
     // Error handling middleware
