@@ -628,21 +628,21 @@ export default {
   player_pass_touchdowns_from_plays: player_stat_from_plays({
     pid_column: 'psr_pid',
     select_string: ({ stat_name }) =>
-      `SUM(CASE td = 1 THEN 1 ELSE 0 END) AS ${stat_name}`,
+      `SUM(CASE WHEN td = 1 THEN 1 ELSE 0 END) AS ${stat_name}`,
     with_select_columns: ['psr_pid', 'td'],
     stat_name: 'pass_tds_from_plays'
   }),
   player_pass_interceptions_from_plays: player_stat_from_plays({
     pid_column: 'psr_pid',
     select_string: ({ stat_name }) =>
-      `SUM(CASE int = 1 THEN 1 ELSE 0 END) AS ${stat_name}`,
+      `SUM(CASE WHEN int = 1 THEN 1 ELSE 0 END) AS ${stat_name}`,
     with_select_columns: ['psr_pid', 'int'],
     stat_name: 'pass_ints_from_plays'
   }),
   player_dropped_passing_yards_from_plays: player_stat_from_plays({
     pid_column: 'psr_pid',
     select_string: ({ stat_name }) =>
-      `SUM(CASE drp = 1 THEN dot ELSE 0 END) AS ${stat_name}`,
+      `SUM(CASE WHEN drp = 1 THEN dot ELSE 0 END) AS ${stat_name}`,
     with_select_columns: ['psr_pid', 'drp', 'dot'],
     stat_name: 'drop_pass_yds_from_plays'
   }),
