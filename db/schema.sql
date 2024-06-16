@@ -2126,7 +2126,6 @@ CREATE TABLE `player_seasonlogs` (
   `seas_type` varchar(10) NOT NULL, -- PRE, REG, POST
   `pos` varchar(3) NOT NULL,
 
-
   `pa` smallint(4) DEFAULT 0,
   `pc` smallint(4) DEFAULT 0,
   `py` int(4) DEFAULT 0,
@@ -2171,6 +2170,15 @@ CREATE TABLE `player_seasonlogs` (
   `dsf` smallint(3) DEFAULT 0,
   `dtpr` smallint(3) DEFAULT 0,
   `dtd` smallint(3) DEFAULT 0,
+
+  `espn_open_score` smallint(3) UNSIGNED DEFAULT 0,
+  `espn_catch_score` smallint(3) UNSIGNED DEFAULT 0,
+  `espn_overall_score` smallint(3) UNSIGNED DEFAULT 0,
+  `espn_yac_score` smallint(3) UNSIGNED DEFAULT 0,
+
+  `espn_rtm_routes` smallint(3) UNSIGNED DEFAULT 0,
+  `espn_rtm_targets` smallint(3) UNSIGNED DEFAULT 0,
+  `espn_rtm_recv_yds` smallint(4) UNSIGNED DEFAULT 0,
   UNIQUE KEY `pid` (`pid`, `year`, `seas_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
