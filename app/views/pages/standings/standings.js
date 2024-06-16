@@ -78,7 +78,7 @@ function Standings({ teams, title, year, is_current_year }) {
   return (
     <div className='section'>
       <Toolbar>
-        <div className='dashboard__section-header-title'>{title}</div>
+        <div className='section-header-title'>{title}</div>
       </Toolbar>
       <div className='table__container'>
         <div className='table__row table__head'>
@@ -141,7 +141,7 @@ function Overall({ standings, year, is_current_year }) {
   return (
     <div className='section'>
       <Toolbar>
-        <div className='dashboard__section-header-title'>Overall</div>
+        <div className='section-header-title'>Overall</div>
       </Toolbar>
       <div className='table__container'>
         <div className='table__row table__head'>

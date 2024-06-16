@@ -21,7 +21,10 @@ export default class SelectedPlayerGamelogs extends React.Component {
     const sorted_years = Object.keys(years).sort((a, b) => b - a)
     sorted_years.forEach((year, yearIndex) => {
       rows.push(
-        <div key={yearIndex} className='header__row sticky__column selected-player-gamelogs-year'>
+        <div
+          key={yearIndex}
+          className='header__row sticky__column selected-player-gamelogs-year'
+        >
           {year}
         </div>
       )
