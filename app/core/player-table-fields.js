@@ -142,7 +142,12 @@ export function PlayerTableFields({
     player_name: {
       column_title: 'Full Name',
       header_label: 'Name',
-      size: 250,
+      size:
+        (window.innerWidth >= 601
+          ? 200
+          : window.innerWidth <= 400
+            ? 100
+            : 150) + (is_logged_in ? 50 : 0),
       component: PlayerRowNameColumn,
       data_type: table_constants.TABLE_DATA_TYPES.TEXT,
       player_value_path: 'name',

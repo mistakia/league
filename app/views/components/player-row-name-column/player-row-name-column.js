@@ -47,9 +47,11 @@ export default function PlayerRowNameColumn({
         border_right: is_logged_in
       })}
     >
-      <div className='player__row-name-column-action watchlist'>
-        <PlayerWatchlistAction pid={pid} />
-      </div>
+      {is_logged_in && (
+        <div className='player__row-name-column-action watchlist'>
+          <PlayerWatchlistAction pid={pid} />
+        </div>
+      )}
       <div className='player__row-name-column-pos'>
         <Position pos={pos} />
       </div>

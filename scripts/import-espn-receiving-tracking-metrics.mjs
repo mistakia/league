@@ -39,7 +39,7 @@ const import_espn_receiving_tracking_metrics = async ({
   )
 
   log(`single_season_data length: ${single_season_data.length}`)
-  
+
   const players = await db('player').select('pid', 'gsisid', 'pos')
   const player_seasonlogs_inserts = []
 
@@ -74,7 +74,9 @@ const import_espn_receiving_tracking_metrics = async ({
   }
 
   if (player_seasonlogs_inserts.length) {
-    log(`inserting ${player_seasonlogs_inserts.length} player_seasonlogs records`)
+    log(
+      `inserting ${player_seasonlogs_inserts.length} player_seasonlogs records`
+    )
     await db('player_seasonlogs')
       .insert(player_seasonlogs_inserts)
       .onConflict(['pid', 'year', 'seas_type'])
