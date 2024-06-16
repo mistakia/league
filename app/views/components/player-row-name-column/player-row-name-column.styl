@@ -3,6 +3,7 @@
   align-items center
   height 100%
   user-select none
+  padding-left 4px
 
   .player__label-tag
     margin-right 4px
@@ -10,42 +11,36 @@
   &.border_right
     border-right 1px solid $borderColor
 
-  .player__row-name-column-name
-    flex 1 0 120px
-    width 120px
-    overflow hidden
-    text-overflow ellipsis
-    white-space nowrap
-    line-height 20px
+.player__row-name-column-name
+  flex 1 1 120px
+  width 120px
+  overflow hidden
+  text-overflow ellipsis
+  white-space nowrap
+  line-height 20px
 
-    .nfl__team
-      margin-left 4px
+  .nfl__team
+    margin-left 4px
 
-  .player__row-name-column-action
-    flex 0 0 30px
-    width 30px
-    display flex
-    justify-content center
+.player__row-name-column-action
+  flex 0 0 26px
+  width 26px
+  display flex
+  justify-content center
 
-  .player__row-name-column-pos
-    flex 0 0 40px
-    width 40px
-    display flex
+.player__row-name-column-pos
+  flex 0 0 40px
+  width 40px
+  display flex
 
 @media (max-width 600px)
-  .player__row-name-column-name
-    flex 1
-
-  .player__row-name-column-action
-    display none
-
   .player__row-name-column-pos
     width 30px
     flex 0 0 30px
 
   .player__row-name-column-name
     width 60px
-    flex 0 0 60px
+    flex 1 1 60px
     margin-right 4px
     font-size 12px
 
