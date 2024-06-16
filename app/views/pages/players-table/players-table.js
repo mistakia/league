@@ -87,6 +87,7 @@ export default function PlayersTablePage({
         disable_rank_aggregation
         percentiles={players_percentiles}
         disable_create_view
+        enable_duplicate_column_ids
       />
     </div>
   )
