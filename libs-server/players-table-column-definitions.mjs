@@ -738,7 +738,7 @@ export default {
   player_fumble_percentage_from_plays: player_stat_from_plays({
     pid_column: 'bc_pid',
     select_string: ({ stat_name }) =>
-      `CASE WHEN COUNT(*) > 0 THEN ROUND(100.0 * SUM(CASE WHEN player_fuml_pid = player.pid THEN 1 ELSE 0 END) / COUNT(*), 2) ELSE 0 END AS ${stat_name}`,
+      `CASE WHEN COUNT(*) > 0 THEN ROUND(100.0 * SUM(CASE WHEN player_fuml_pid = bc_pid THEN 1 ELSE 0 END) / COUNT(*), 2) ELSE 0 END AS ${stat_name}`,
     stat_name: 'fumble_pct_from_plays'
   }),
   player_positive_rush_percentage_from_plays: player_stat_from_plays({
@@ -796,14 +796,13 @@ export default {
   }),
   player_targets_from_plays: player_stat_from_plays({
     pid_column: 'trg_pid',
-    select_string: ({ stat_name }) =>
-      `SUM(CASE WHEN trg_pid = player.pid THEN 1 ELSE 0 END) AS ${stat_name}`,
+    select_string: ({ stat_name }) => `COUNT(*) AS ${stat_name}`,
     stat_name: 'trg_from_plays'
   }),
   player_deep_targets_from_plays: player_stat_from_plays({
     pid_column: 'trg_pid',
     select_string: ({ stat_name }) =>
-      `SUM(CASE WHEN trg_pid = player.pid AND dot >= 20 THEN 1 ELSE 0 END) AS ${stat_name}`,
+      `SUM(CASE WHEN dot >= 20 THEN 1 ELSE 0 END) AS ${stat_name}`,
     stat_name: 'deep_trg_from_plays'
   }),
   player_deep_targets_percentage_from_plays: player_stat_from_plays({
