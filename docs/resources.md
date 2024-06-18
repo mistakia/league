@@ -23,7 +23,6 @@
 | ----------------------------------------------------------------- | --------------------------------------------------------------------- |
 | [fantasydata.com](https://fantasydata.com/nfl)                    | General & advanced stats                                              |
 | [PlayerProfiler](https://www.playerprofiler.com/)                 | Player prospect profile & advanced stats                              |
-| [Football Outsiders](https://www.footballoutsiders.com/)          | Team & Player DVOA data                                               |
 | [Pro Football Reference](https://www.pro-football-reference.com/) | Historical Team & Player stats                                        |
 | [CFB Reference](https://www.sports-reference.com/cfb/)            | Historical College Team & Player stats                                |
 | [Game On Paper](https://gameonpaper.com/cfb)                      | Historical college advanced stats boxscores                           |
