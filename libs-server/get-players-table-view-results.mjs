@@ -1,6 +1,6 @@
 import db from '#db'
 import players_table_column_definitions from './players-table-column-definitions.mjs'
-import nfl_plays_column_params from '@libs-shared/nfl-play-column-params.mjs'
+import nfl_plays_column_params from '#libs-shared/nfl-plays-column-params.mjs'
 import * as table_constants from 'react-table/src/constants.mjs'
 
 const add_play_by_play_with_statement = ({
