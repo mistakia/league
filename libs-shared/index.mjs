@@ -53,6 +53,7 @@ export { stat_in_year_week } from './stat-in-year-week.mjs'
 export { default as get_string_from_object } from './get-string-from-object.mjs'
 export { default as format_nfl_status } from './format-nfl-status.mjs'
 export { default as format_nfl_injury_status } from './format-nfl-injury-status.mjs'
+export { default as nfl_plays_column_params } from './nfl-plays-column-params.mjs'
 
 export const uniqBy = (a, key) => {
   const seen = new Set()
