@@ -1,30 +1,87 @@
 .markdown
   margin 0 auto
-  max-width 650px
+  max-width 950px
   margin-bottom 150px
+  font 400 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"
   p
     padding-bottom 16px
   ul
     list-style-type none
     padding-left 16px
+    ul
+      margin-block-start 16px
+      padding-left 32px
   a
-    line-height 16px
-    border-bottom 1px solid $accentColor
+    color $accentColor
+    font-weight 700
+    font-family 'IBM Plex Mono', monospace
+    border-bottom none
+    &:hover
+      font-weight 900
+      border-bottom 1px solid $accentColor
   li
     padding-bottom 8px
   a:hover
     color $accentColor
 
+  h1
+  h2
+  h3
+  h4
+  h5
+  h6
+    font-family 'IBM Plex Mono', monospace
+
+  h1
+  h2
+  h3
+    margin-top 1.4em
+    font-size 1.875em
+  h4
+  h5
+  h6
+    margin-top 1em
+    font-size 1.25em
+
   table
-    border-collapse collapse
-    margin-bottom 16px
-    background white
     width 100%
-    tr
-      border-top 1px solid $borderColor
-      &:hover
-        background #fafafa
-    td
-    th
-      padding 6px 13px
-      border 1px solid $borderColor
+    padding 8px
+    font-family 'Inter', sans-serif
+    margin 0 auto 16px
+    background white
+    box-shadow 0px 2px 1px -1px rgba(0,0,0,0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 1px 3px 0px rgba(0, 0, 0, 0.12)
+    border-radius 3px
+
+    code
+      white-space nowrap
+
+  tr
+    min-height 30px
+
+  th
+    text-align start
+    padding 4px 16px
+    border-bottom 1px solid $borderColor
+    font-family 'IBM Plex Mono', monospace
+    font-weight 900
+
+  td
+    padding 4px 16px
+    border-bottom 1px solid $borderColor
+    height 36px
+
+@media (min-width: 768px)
+  .markdown
+    align-items flex-start
+    flex-direction row-reverse
+    display flex
+
+    .table-of-contents
+      position sticky
+      top 0
+      width 200px
+      margin-left 32px
+      padding-top 48px
+
+    .body
+      flex 1
