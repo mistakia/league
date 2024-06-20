@@ -1,3 +1,5 @@
+<div class="table-of-contents">
+
 #### Table of Contents
 
 - [Stats & Research](#stats--research)
@@ -15,10 +17,13 @@
 
 [Submit a link](https://github.com/mistakia/league/issues/new?assignees=&labels=kind%2Fcontent%2C+status%2Fready&projects=&template=submit-a-link-resource.md&title=Add+resource%3A+%3CURL%3E)
 
+</div>
+
+<div class="body">
+
 ### Stats & Research
 
-<details>
-<summary>#### Stats</summary>
+#### Stats
 
 | Name                                                              | Description                                                           |
 | ----------------------------------------------------------------- | --------------------------------------------------------------------- |
@@ -37,20 +42,14 @@
 | [nfelo](https://www.nfeloapp.com/)                                | NFL power rankings, QB rankings, and general data driven analysis     |
 | [sumersports](https://sumersports.com/)                           | NFL Advanced boxscores and player stats, data-drive analysis          |
 
-</details>
-
-<details>
-<summary>#### Blogs</summary>
+#### Blogs
 
 | Name                                                                    | Description |
 | ----------------------------------------------------------------------- | ----------- |
 | [Harvard Sports Analysis Collective](http://harvardsportsanalysis.org/) |             |
 | [Fantasy Football Analytics](https://fantasyfootballanalytics.net/)     |             |
 
-</details>
-
-<details>
-<summary>#### Libraries</summary>
+#### Libraries
 
 | Name                                                    | Description                                 |
 | ------------------------------------------------------- | ------------------------------------------- |
@@ -58,10 +57,7 @@
 | [nflfastR](https://www.nflfastr.com/)                   | play-by-play data for R                     |
 | [ffscrapr](https://github.com/dynastyprocess/ffscrapr/) | R wrapper for fantasy football APIs         |
 
-</details>
-
-<details>
-<summary>### Premium Content</summary>
+### Premium Content
 
 | Name                                                              | Description                                    |
 | ----------------------------------------------------------------- | ---------------------------------------------- |
@@ -79,20 +75,14 @@
 | [Fantasy Sharks](https://www.fantasysharks.com/)                  |                                                |
 | [FantasyOmatic](https://fantasyomatic.com/)                       |                                                |
 
-</details>
-
-<details>
-<summary>### Forums & Discussions</summary>
+### Forums & Discussions
 
 | Name                                                          | Description                                                |
 | ------------------------------------------------------------- | ---------------------------------------------------------- |
 | [r/fantasyfootball](https://www.reddit.com/r/fantasyfootball) | General fantasy discussion with a focus on redraft formats |
 | [r/dynastyff](https://www.reddit.com/r/dynastyff)             | Fantasy discussion with a focus toward dynasty formats     |
 
-</details>
-
-<details>
-<summary>### Projections</summary>
+### Projections
 
 | Name                                                                              | Description |
 | --------------------------------------------------------------------------------- | ----------- |
@@ -100,10 +90,7 @@
 | [FantasyPros / Aggregated](https://www.fantasypros.com/nfl/projections/qb.php)    |             |
 | [NFL](https://fantasy.nfl.com/research/projections)                               |             |
 
-</details>
-
-<details>
-<summary>### Rankings & ADP</summary>
+### Rankings & ADP
 
 | Name                                                                                                                                     | Description |
 | ---------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
@@ -117,10 +104,7 @@
 | [Fantasy Football Calculator](https://fantasyfootballcalculator.com/)                                                                    |             |
 | [Grinding The Mocks](https://grindingthemocks.shinyapps.io/Dashboard/)                                                                   |             |
 
-</details>
-
-<details>
-<summary>### Tools</summary>
+### Tools
 
 #### Trade Tools
 
@@ -140,13 +124,10 @@
 | [Dynasty Data Lab](https://dynastydatalab.com/)                          | Collection of tools to assist managing dynasty teams |
 | [fantasymath](https://fantasymath.com/#/)                                | Player production probability distributions          |
 
-</details>
-
-<details>
-<summary>### NFL Draft</summary>
+### NFL Draft
 
 | Name                                      | Description                                                 |
 | ----------------------------------------- | ----------------------------------------------------------- |
 | [Tankathon](http://www.tankathon.com/nfl) | Projected NFL Draft Order, Mock Drafts, and Player Rankings |
 
-</details>
+</div>
