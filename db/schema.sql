@@ -1327,7 +1327,7 @@ CREATE TABLE `nfl_plays` (
 
   `timestamp` varchar(10) DEFAULT NULL,
 
-  `play_clock` varchar(10) DEFAULT NULL,        -- Time on the playclock when the ball was snapped.
+  `play_clock` tinyint unsigned DEFAULT NULL,        -- Time on the playclock when the ball was snapped.
 
   `game_clock_start` varchar(10) DEFAULT NULL,  -- Time at start of play provided in string format as minutes:seconds remaining in the quarter.
   `game_clock_end` varchar(10) DEFAULT NULL,    -- Game time at the end of a given play.
@@ -1704,7 +1704,7 @@ CREATE TABLE `nfl_plays_current_week` (
 
   `timestamp` varchar(10) DEFAULT NULL,
 
-  `play_clock` varchar(10) DEFAULT NULL,        -- Time on the playclock when the ball was snapped.
+  `play_clock` tinyint unsigned DEFAULT NULL,        -- Time on the playclock when the ball was snapped.
 
   `game_clock_start` varchar(10) DEFAULT NULL,  -- Time at start of play provided in string format as minutes:seconds remaining in the quarter.
   `game_clock_end` varchar(10) DEFAULT NULL,    -- Game time at the end of a given play.
