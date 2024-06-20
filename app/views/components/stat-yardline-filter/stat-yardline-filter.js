@@ -7,7 +7,7 @@ import Button from '@mui/material/Button'
 
 import StatFilter from '@components/stat-filter'
 
-export default function StatDownsFilter({
+export default function StatYardlineFilter({
   yardline_start,
   yardline_end,
   filter_yardline
@@ -65,7 +65,7 @@ export default function StatDownsFilter({
   return <StatFilter {...{ selected_label, body, ...filter_options }} />
 }
 
-StatDownsFilter.propTypes = {
+StatYardlineFilter.propTypes = {
   yardline_start: PropTypes.number,
   yardline_end: PropTypes.number,
   filter_yardline: PropTypes.func
