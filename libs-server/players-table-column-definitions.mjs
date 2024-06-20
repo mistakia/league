@@ -1,6 +1,10 @@
 import { blake2b } from 'blakejs'
 
-import { constants, stat_in_year_week } from '#libs-shared'
+import {
+  constants,
+  stat_in_year_week,
+  nfl_plays_column_params
+} from '#libs-shared'
 import db from '#db'
 
 const generate_play_by_play_table_alias = ({
@@ -10,22 +14,19 @@ const generate_play_by_play_table_alias = ({
   if (!pid_column) {
     throw new Error('pid_column is required')
   }
-  const {
-    year = [],
-    week = [],
-    offense = [],
-    defense = [],
-    down = [],
-    quarter = []
-  } = params
-  const key = `${year}${week}${offense}${defense}${down}${quarter}${pid_column}`
+  const column_param_keys = Object.keys(nfl_plays_column_params).sort()
+  const key = column_param_keys
+    .map((key) => {
+      const value = params[key]
+      return Array.isArray(value) ? value.sort().join('') : value || ''
+    })
+    .join('')
 
   const hash = Array.from(blake2b(key, null, 32))
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('')
   return hash
 }
-
 const projections_index_join = ({ query, params = {} }) => {
   const table_alias = projections_index_table_alias({ params })
   const { year = constants.season.year, week = 0 } = params

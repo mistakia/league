@@ -1,5 +1,7 @@
 import db from '#db'
 import players_table_column_definitions from './players-table-column-definitions.mjs'
+import nfl_plays_column_params from '@libs-shared/nfl-play-column-params.mjs'
+import * as table_constants from 'react-table/src/constants.mjs'
 
 const add_play_by_play_with_statement = ({
   query,
@@ -13,21 +15,6 @@ const add_play_by_play_with_statement = ({
     throw new Error('with_table_name is required')
   }
 
-  const conditions = [
-    { column: 'year', param: 'year', condition: params.year },
-    { column: 'week', param: 'week', condition: params.week },
-    { column: 'def', param: 'defense', condition: params.defense },
-    { column: 'off', param: 'offense', condition: params.offense },
-    { column: 'dwn', param: 'down', condition: params.down },
-    { column: 'qtr', param: 'quarter', condition: params.quarter }
-  ]
-
-  conditions.forEach((cond) => {
-    if (!Array.isArray(params[cond.param])) {
-      params[cond.param] = [params[cond.param]]
-    }
-  })
-
   const with_query = db('nfl_plays')
     .select(pid_column)
     .whereNot('play_type', 'NOPL')
@@ -39,9 +26,33 @@ const add_play_by_play_with_statement = ({
   }
 
   // column_params to filter plays
-  for (const condition of conditions) {
-    if (condition.condition) {
-      with_query.whereIn(condition.column, condition.condition)
+  const column_param_keys = Object.keys(nfl_plays_column_params)
+  for (const column_param_key of column_param_keys) {
+    const param_value = params[column_param_key]
+    if (typeof param_value !== 'undefined' || param_value !== null) {
+      const column_param_definition = nfl_plays_column_params[column_param_key]
+      if (
+        column_param_definition.data_type ===
+        table_constants.TABLE_DATA_TYPES.RANGE
+      ) {
+        with_query.whereBetween(column_param_key, [
+          param_value[0],
+          param_value[1]
+        ])
+      } else if (
+        column_param_definition.data_type ===
+        table_constants.TABLE_DATA_TYPES.SELECT
+      ) {
+        const column_values = Array.isArray(param_value)
+          ? param_value
+          : [param_value]
+        with_query.whereIn(column_param_key, column_values)
+      } else if (
+        column_param_definition.data_type ===
+        table_constants.TABLE_DATA_TYPES.BOOLEAN
+      ) {
+        with_query.where(column_param_key, param_value)
+      }
     }
   }
 
