@@ -29,7 +29,7 @@ const add_play_by_play_with_statement = ({
   const column_param_keys = Object.keys(nfl_plays_column_params)
   for (const column_param_key of column_param_keys) {
     const param_value = params[column_param_key]
-    if (typeof param_value !== 'undefined' || param_value !== null) {
+    if (typeof param_value !== 'undefined' && param_value !== null) {
       const column_param_definition = nfl_plays_column_params[column_param_key]
       if (
         column_param_definition.data_type ===
