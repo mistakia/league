@@ -64,6 +64,11 @@ export default function PlayersTablePage({
     player.className = get_string_from_object(class_params)
   }
 
+  const new_prefix_columns = ['player_name']
+  if (isLoggedIn) {
+    new_prefix_columns.push('player_league_roster_status')
+  }
+
   const body = isPending ? (
     <Loading loading />
   ) : (
@@ -86,8 +91,9 @@ export default function PlayersTablePage({
         delete_view={delete_players_table_view}
         disable_rank_aggregation
         percentiles={players_percentiles}
-        disable_create_view
+        disable_edit_view
         enable_duplicate_column_ids
+        new_view_prefix_columns={new_prefix_columns}
       />
     </div>
   )
