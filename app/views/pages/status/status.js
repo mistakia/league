@@ -4,7 +4,6 @@ import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import Paper from '@mui/material/Paper'
-import Container from '@mui/material/Container'
 import { green, red } from '@mui/material/colors'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
@@ -53,11 +52,11 @@ export default class StatusPage extends React.Component {
     }
 
     const body = (
-      <Container maxWidth='sm'>
+      <div className='league-container'>
         <Paper style={{ marginTop: '36px' }}>
           <List>{items}</List>
         </Paper>
-      </Container>
+      </div>
     )
 
     return <PageLayout body={body} scroll />

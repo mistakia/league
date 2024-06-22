@@ -2,7 +2,6 @@ import React, { useEffect } from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import { useParams, useNavigate } from 'react-router-dom'
-import Container from '@mui/material/Container'
 
 import PageLayout from '@layouts/page'
 import LeagueSelectTeam from '@components/league-select-team'
@@ -52,10 +51,10 @@ export default function TeamPage({
   const teamId = Number(tid)
 
   const body = (
-    <Container maxWidth='xl' classes={{ root: 'league__team' }}>
+    <div className='league-container full'>
       <LeagueSelectTeam selected_tid={teamId} />
       <LeagueTeam tid={teamId} />
-    </Container>
+    </div>
   )
 
   return <PageLayout body={body} scroll />

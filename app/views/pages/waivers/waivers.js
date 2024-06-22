@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import PropTypes from 'prop-types'
-import Container from '@mui/material/Container'
 
 import Loading from '@components/loading'
 import WaiverTypeFilter from '@components/waiver-type-filter'
@@ -31,13 +30,13 @@ export default function WaiversPage({ load, items, isPending }) {
   const waiver_body = isPending && !rows.length ? <Loading loading /> : rows
 
   const body = (
-    <Container maxWidth='sm'>
+    <div className='league-container'>
       <div className='waivers__filter'>
         <WaiverTypeFilter />
         <WaiverProcessedFilter />
       </div>
       <div className='waivers__body empty'>{waiver_body}</div>
-    </Container>
+    </div>
   )
 
   return <PageLayout body={body} scroll />

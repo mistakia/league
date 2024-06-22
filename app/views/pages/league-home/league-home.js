@@ -5,7 +5,6 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 import dayjs from 'dayjs'
 import Alert from '@mui/material/Alert'
 import AlertTitle from '@mui/material/AlertTitle'
-import Container from '@mui/material/Container'
 import Grid from '@mui/material/Grid'
 import NotInterestedIcon from '@mui/icons-material/NotInterested'
 import Button from '@mui/material/Button'
@@ -209,7 +208,7 @@ export default function LeagueHomePage({
   const teamPoaches = poaches.filter((p) => p.tid === teamId)
 
   const body = (
-    <Container maxWidth='md' classes={{ root: 'league__home' }}>
+    <div className='league-container league__home'>
       <Grid container spacing={2} alignItems='flex-start'>
         {notices.length ? (
           <Grid item xs={12}>
@@ -286,7 +285,7 @@ export default function LeagueHomePage({
           <LeagueRecentTransactions />
         </Grid>
       </Grid>
-    </Container>
+    </div>
   )
 
   return <PageLayout body={body} scroll />

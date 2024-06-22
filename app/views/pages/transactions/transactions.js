@@ -5,7 +5,6 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 import AutoSizer from 'react-virtualized/dist/es/AutoSizer'
 import List from 'react-virtualized/dist/es/List'
 import InfiniteLoader from 'react-virtualized/dist/es/InfiniteLoader'
-import Container from '@mui/material/Container'
 
 import PageLayout from '@layouts/page'
 import TransactionRow from '@components/transaction-row'
@@ -62,7 +61,7 @@ export default function TransactionsPage({
   const rowCount = hasMore ? transactions.size + 1 : transactions.size
 
   const body = (
-    <Container maxWidth='md' classes={{ root: 'transactions' }}>
+    <div className='league-container league-transactions'>
       <div className='transactions__filter'>
         <TransactionTypeFilter />
         <TransactionTeamFilter />
@@ -90,7 +89,7 @@ export default function TransactionsPage({
           )}
         </InfiniteLoader>
       </div>
-    </Container>
+    </div>
   )
 
   return <PageLayout body={body} />
