@@ -1,8 +1,8 @@
 <div class="body">
 
-# League
+# xo.football
 
-[League](https://xo.football) is an open-source platform for managing fantasy football leagues, exploring analytics, and participating in betting markets. We're actively developing it and seeking contributors for development and testing. Interested? Join us on [Discord](https://discord.com/invite/azSX97Qj9Z).
+[xo.football](https://xo.football) is an open-source platform for managing fantasy football leagues, exploring analytics, and participating in betting markets. We're actively developing it and seeking contributors for development and testing. Interested? Join us on [Discord](https://discord.com/invite/azSX97Qj9Z).
 
 ## Features
 
