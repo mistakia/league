@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { useParams, useNavigate } from 'react-router-dom'
 import ImmutablePropTypes from 'react-immutable-proptypes'
-import Container from '@mui/material/Container'
 import Grid from '@mui/material/Grid'
 import Stack from '@mui/material/Stack'
 
@@ -150,7 +149,7 @@ export default function MatchupPage({
   }
 
   const body = (
-    <Container maxWidth='lg'>
+    <div className='league-container large'>
       <Grid container spacing={0}>
         <Grid item xs={12}>
           <Stack direction='row' spacing={1} sx={{ paddingTop: '32px' }}>
@@ -160,7 +159,7 @@ export default function MatchupPage({
         </Grid>
         {matchup_body}
       </Grid>
-    </Container>
+    </div>
   )
 
   return <PageLayout body={body} scroll />

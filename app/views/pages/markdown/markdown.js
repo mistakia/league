@@ -44,14 +44,14 @@ export default class MarkdownPage extends React.Component {
         }
         const markdown = marked(content, { renderer })
         const className = get_string_from_object({
-          'markdown': true,
+          markdown: true,
           'max-width-1150': this.props.path === '/resources'
         })
         const html = (
-            <div
-              className='markdown'
-              dangerouslySetInnerHTML={{ __html: markdown }}
-            />
+          <div
+            className={className}
+            dangerouslySetInnerHTML={{ __html: markdown }}
+          />
         )
         this.setState({ html })
       })

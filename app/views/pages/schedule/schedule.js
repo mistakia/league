@@ -2,7 +2,6 @@ import React, { useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
-import Container from '@mui/material/Container'
 
 import PageLayout from '@layouts/page'
 import Matchup from '@components/matchup'
@@ -46,14 +45,14 @@ export default function SchedulePage({ matchups, load }) {
   })
 
   const body = (
-    <Container maxWidth='md'>
+    <div className='league-container'>
       <div className='schedule__filter'>
         <SelectYear />
         <ScheduleWeeksFilter />
         <ScheduleTeamsFilter />
       </div>
       <div className='schedule__body empty'>{sections}</div>
-    </Container>
+    </div>
   )
 
   return <PageLayout body={body} scroll />

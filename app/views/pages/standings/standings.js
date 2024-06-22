@@ -2,14 +2,11 @@ import React, { useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
-import Container from '@mui/material/Container'
 import Toolbar from '@mui/material/Toolbar'
 
 import SelectYear from '@components/select-year'
 import { toPercent, constants } from '@libs-shared'
 import PageLayout from '@layouts/page'
-
-import './standings.styl'
 
 function Divider({ title }) {
   return <div className='table__row table__divider'>{title}</div>
@@ -205,11 +202,11 @@ export default function StandingsPage({
   }
 
   const body = (
-    <Container maxWidth='md' classes={{ root: 'standings' }}>
+    <div className='league-container'>
       <SelectYear />
       <Overall {...{ standings, year, is_current_year }} />
       {divisions}
-    </Container>
+    </div>
   )
 
   return <PageLayout body={body} scroll />

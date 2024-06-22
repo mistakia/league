@@ -1,6 +1,5 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import Container from '@mui/material/Container'
 
 import EditableLeague from '@components/editable-league'
 import EditableTeams from '@components/editable-teams'
@@ -8,10 +7,10 @@ import PageLayout from '@layouts/page'
 
 export default function LeagueSettingsPage({ leagueId }) {
   const body = (
-    <Container maxWidth='md' classes={{ root: 'settings' }}>
+    <div className='league-container'>
       <EditableLeague lid={leagueId} />
       {Boolean(leagueId) && <EditableTeams />}
-    </Container>
+    </div>
   )
 
   return <PageLayout body={body} scroll />
