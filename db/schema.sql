@@ -1293,6 +1293,7 @@ CREATE TABLE `nfl_plays` (
   `time_to_throw_ngs` decimal(8,4) DEFAULT NULL,
   `route_ngs` varchar(100) DEFAULT NULL,
   `man_zone_ngs` varchar(100) DEFAULT NULL,
+  `cov_type_charted` varchar(3) DEFAULT NULL,
   `cov_type_ngs` varchar(100) DEFAULT NULL,
 
   `drive_seq` int(4) DEFAULT NULL COMMENT 'drive count',
@@ -1670,6 +1671,7 @@ CREATE TABLE `nfl_plays_current_week` (
   `time_to_throw_ngs` decimal(8,4) DEFAULT NULL,
   `route_ngs` varchar(100) DEFAULT NULL,
   `man_zone_ngs` varchar(100) DEFAULT NULL,
+  `cov_type_charted` varchar(3) DEFAULT NULL,
   `cov_type_ngs` varchar(100) DEFAULT NULL,
 
   `drive_seq` int(4) DEFAULT NULL COMMENT 'drive count',
