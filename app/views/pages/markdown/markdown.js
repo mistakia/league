@@ -2,10 +2,10 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { marked } from 'marked'
-import Container from '@mui/material/Container'
 
 import { DOCS_URL } from '@core/constants'
 import PageLayout from '@layouts/page'
+import { get_string_from_object } from '@libs-shared'
 
 import './markdown.styl'
 
@@ -43,13 +43,15 @@ export default class MarkdownPage extends React.Component {
           return html
         }
         const markdown = marked(content, { renderer })
+        const className = get_string_from_object({
+          'markdown': true,
+          'max-width-1150': this.props.path === '/resources'
+        })
         const html = (
-          <Container maxWidth='md'>
             <div
               className='markdown'
               dangerouslySetInnerHTML={{ __html: markdown }}
             />
-          </Container>
         )
         this.setState({ html })
       })
