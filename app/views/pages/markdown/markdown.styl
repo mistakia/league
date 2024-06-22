@@ -1,8 +1,14 @@
 .markdown
-  margin 0 auto
-  max-width 950px
+  padding 16px
   margin-bottom 150px
   font 400 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"
+  margin 0 auto
+  max-width 1300px
+
+  &.max-width-1150
+    margin 0 auto
+    max-width 1150px
+
   p
     padding-bottom 16px
   ul
@@ -70,18 +76,19 @@
     border-bottom 1px solid $borderColor
     height 36px
 
-@media (min-width: 768px)
+@media (min-width: 960px)
   .markdown
     align-items flex-start
     flex-direction row-reverse
     display flex
 
     .table-of-contents
-      position sticky
+      position fixed
       top 0
-      width 200px
-      margin-left 32px
+      bottom 0
+      overflow-y scroll
+      width 256px
       padding-top 48px
 
     .body
-      flex 1
+      margin-right 288px
