@@ -186,6 +186,7 @@ export default function AppMenu({
                 className='menu__links'
                 onClick={() => isMobile && set_menu_open(false)}
               >
+                <NavLink to='/about'>About</NavLink>
                 {/* <NavLink to='/props'>Props</NavLink> */}
                 <NavLink to='/status'>Status</NavLink>
                 <a

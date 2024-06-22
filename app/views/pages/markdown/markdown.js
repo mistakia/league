@@ -3,7 +3,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { marked } from 'marked'
 
-import { DOCS_URL } from '@core/constants'
+import { DOCS_URL, README_URL } from '@core/constants'
 import PageLayout from '@layouts/page'
 import { get_string_from_object } from '@libs-shared'
 
@@ -17,7 +17,12 @@ export default class MarkdownPage extends React.Component {
   }
 
   _load() {
-    fetch(`${DOCS_URL}${this.props.path}`)
+    console.log(this.props.path)
+    const url =
+      this.props.path === '/README.md'
+        ? README_URL
+        : `${DOCS_URL}${this.props.path}`
+    fetch(url)
       .then((response) => {
         if (response.status >= 200 && response.status < 300) {
           return response
