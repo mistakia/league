@@ -1267,21 +1267,21 @@ CREATE TABLE `nfl_plays` (
   `dwn` int(1) DEFAULT NULL,
   `qtr` int(1) DEFAULT NULL,
   `year` smallint(4) NOT NULL,
-  `seas_type` varchar(36) DEFAULT NULL, -- PRE, REG, POST
+  `seas_type` varchar(36) DEFAULT NULL COMMENT 'PRE, REG, POST',
 
   `desc` text DEFAULT NULL,
 
   `ydl_num` int(4) DEFAULT NULL,
   `ydl_side` varchar(10) DEFAULT NULL,
-  `ydl_start` varchar(10) DEFAULT NULL,     -- String indicating the start field position for a given play.
-  `ydl_end` varchar(10) DEFAULT NULL,       -- String indicating the end field position for a given play.
-  `ydl_100` int(3) DEFAULT NULL,            -- Numeric distance in the number of yards from the opponent's endzone for the posteam.
+  `ydl_start` varchar(10) DEFAULT NULL COMMENT 'String indicating the start field position for a given play.',
+  `ydl_end` varchar(10) DEFAULT NULL COMMENT 'String indicating the end field position for a given play.',
+  `ydl_100` int(3) DEFAULT NULL COMMENT 'Numeric distance in the number of yards from the opponents endzone for the posteam.',
 
-  `hash` varchar(1) DEFAULT NULL,           -- hash location, values: (L)eft hash, (R)ight hash or in-between (M)
-  `mot` varchar(2) DEFAULT NULL,            -- motion, There are 2 types of motion: Pre-snap (P) which starts and stops before the snap and the more aggressive type of motion that is occurring during the snap (S). When both occur we mark 'PS'
+  `hash` varchar(1) DEFAULT NULL COMMENT 'hash location, values: (L)eft hash, (R)ight hash or in-between (M)',
+  `mot` varchar(2) DEFAULT NULL COMMENT 'motion, There are 2 types of motion: Pre-snap (P) which starts and stops before the snap and the more aggressive type of motion that is occurring during the snap (S). When both occur we mark PS',
 
-  `ytg` int(3) DEFAULT NULL,                -- yards to go
-  `yfog` int(3) DEFAULT NULL,               -- yards from own goal (1-99)
+  `ytg` int(3) DEFAULT NULL COMMENT 'yards to go',
+  `yfog` int(3) DEFAULT NULL COMMENT 'yards from own goal (1-99)',
 
   `off_formation` varchar(100) DEFAULT NULL,
   `off_personnel` varchar(100) DEFAULT NULL,
@@ -1295,288 +1295,288 @@ CREATE TABLE `nfl_plays` (
   `man_zone_ngs` varchar(100) DEFAULT NULL,
   `cov_type_ngs` varchar(100) DEFAULT NULL,
 
-  `drive_seq` int(4) DEFAULT NULL,                  -- drive count
+  `drive_seq` int(4) DEFAULT NULL COMMENT 'drive count',
   `drive_yds` int(3) DEFAULT NULL,
-  `drive_play_count` int(3) DEFAULT NULL,           -- Numeric value of how many regular plays happened in a given drive.
-  `drive_result` varchar(30) DEFAULT NULL,          -- drive result
-  `drive_top` varchar(10) DEFAULT NULL,             -- Time of possession in a given drive.
-  `drive_fds` int(2) DEFAULT NULL,                  -- Number of first downs in a given drive.
-  `drive_inside20` tinyint(1) DEFAULT NULL,         -- Binary indicator if the offense was able to get inside the opponents 20 yard line.
-  `drive_score` tinyint(1) DEFAULT NULL, -- Binary indicator the drive ended with a score.
-  `drive_start_qtr` tinyint(1) DEFAULT NULL,       -- Numeric value indicating in which quarter the given drive has started.
-  `drive_end_qtr` tinyint(1) DEFAULT NULL,         -- Numeric value indicating in which quarter the given drive has ended.
-  `drive_yds_penalized` int(3) DEFAULT NULL,       -- Numeric value of how many yards the offense gained or lost through penalties in the given drive.
-  `drive_start_transition` varchar(30) DEFAULT NULL,  -- String indicating how the offense got the ball.
-  `drive_end_transition` varchar(30) DEFAULT NULL,    -- String indicating how the offense lost the ball.
-  `drive_game_clock_start` varchar(10) DEFAULT NULL,   -- Game time at the beginning of a given drive.
-  `drive_game_clock_end` varchar(10) DEFAULT NULL,     -- Game time at the end of a given drive.
-  `drive_start_ydl` varchar(10) DEFAULT NULL,      -- String indicating where a given drive started consisting of team half and yard line number.
-  `drive_end_ydl` varchar(10) DEFAULT NULL,        -- String indicating where a given drive ended consisting of team half and yard line number.
-  `drive_start_play_id` int(10) DEFAULT NULL,      -- Play_id of the first play in the given drive.
-  `drive_end_play_id` int(10) DEFAULT NULL,        -- Play_id of the last play in the given drive.
+  `drive_play_count` int(3) DEFAULT NULL COMMENT 'Numeric value of how many regular plays happened in a given drive.',
+  `drive_result` varchar(30) DEFAULT NULL COMMENT 'drive result',
+  `drive_top` varchar(10) DEFAULT NULL COMMENT 'Time of possession in a given drive.',
+  `drive_fds` int(2) DEFAULT NULL COMMENT 'Number of first downs in a given drive.',
+  `drive_inside20` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator if the offense was able to get inside the opponents 20 yard line.',
+  `drive_score` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator the drive ended with a score.',
+  `drive_start_qtr` tinyint(1) DEFAULT NULL COMMENT 'Numeric value indicating in which quarter the given drive has started.',
+  `drive_end_qtr` tinyint(1) DEFAULT NULL COMMENT 'Numeric value indicating in which quarter the given drive has ended.',
+  `drive_yds_penalized` int(3) DEFAULT NULL COMMENT 'Numeric value of how many yards the offense gained or lost through penalties in the given drive.',
+  `drive_start_transition` varchar(30) DEFAULT NULL COMMENT 'String indicating how the offense got the ball.',
+  `drive_end_transition` varchar(30) DEFAULT NULL COMMENT 'String indicating how the offense lost the ball.',
+  `drive_game_clock_start` varchar(10) DEFAULT NULL COMMENT 'Game time at the beginning of a given drive.',
+  `drive_game_clock_end` varchar(10) DEFAULT NULL COMMENT 'Game time at the end of a given drive.',
+  `drive_start_ydl` varchar(10) DEFAULT NULL COMMENT 'String indicating where a given drive started consisting of team half and yard line number.',
+  `drive_end_ydl` varchar(10) DEFAULT NULL COMMENT 'String indicating where a given drive ended consisting of team half and yard line number.',
+  `drive_start_play_id` int(10) DEFAULT NULL COMMENT 'Play_id of the first play in the given drive.',
+  `drive_end_play_id` int(10) DEFAULT NULL COMMENT 'Play_id of the last play in the given drive.',
 
-  `series_seq` int(3) DEFAULT NULL,                -- Starts at 1, each new first down increments, numbers shared across both teams NA: kickoffs, extra point/two point conversion attempts, non-plays, no posteam
-  `series_suc` tinyint(1) DEFAULT NULL,            -- 1: scored touchdown, gained enough yards for first down.
-  `series_result` varchar(100) DEFAULT NULL,       -- Possible values: First down, Touchdown, Opp touchdown, Field goal, Missed field goal, Safety, Turnover, Punt, Turnover on downs, QB kneel, End of half
+  `series_seq` int(3) DEFAULT NULL COMMENT 'Starts at 1, each new first down increments, numbers shared across both teams NA: kickoffs, extra point/two point conversion attempts, non-plays, no posteam',
+  `series_suc` tinyint(1) DEFAULT NULL COMMENT '1: scored touchdown, gained enough yards for first down.',
+  `series_result` varchar(100) DEFAULT NULL COMMENT 'Possible values: First down, Touchdown, Opp touchdown, Field goal, Missed field goal, Safety, Turnover, Punt, Turnover on downs, QB kneel, End of half',
 
-  `gtg` tinyint(1) DEFAULT NULL,                    -- Binary indicator for whether or not the posteam is in a goal down situation.
+  `gtg` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for whether or not the posteam is in a goal down situation.',
 
-  `score` tinyint(1) DEFAULT NULL,                     -- Binary indicator for whether or not a score occurred on the play.
-  `score_type` varchar(10) DEFAULT NULL,               -- Scoring play type: FG, PAT, PAT2, SFTY, TD
-  `score_team` varchar(4) DEFAULT NULL,                -- Scoring play team
+  `score` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for whether or not a score occurred on the play.',
+  `score_type` varchar(10) DEFAULT NULL COMMENT 'Scoring play type: FG, PAT, PAT2, SFTY, TD',
+  `score_team` varchar(4) DEFAULT NULL COMMENT 'Scoring play team',
 
   `timestamp` varchar(10) DEFAULT NULL,
 
-  `play_clock` tinyint unsigned DEFAULT NULL,        -- Time on the playclock when the ball was snapped.
+  `play_clock` tinyint unsigned DEFAULT NULL COMMENT 'Time on the playclock when the ball was snapped.',
 
-  `game_clock_start` varchar(10) DEFAULT NULL,  -- Time at start of play provided in string format as minutes:seconds remaining in the quarter.
-  `game_clock_end` varchar(10) DEFAULT NULL,    -- Game time at the end of a given play.
-  `sec_rem_qtr` int(4) DEFAULT NULL,            -- Numeric seconds remaining in the quarter.
-  `sec_rem_half` int(4) DEFAULT NULL,           -- Numeric seconds remaining in the half.
-  `sec_rem_gm` int(4) DEFAULT NULL,             -- Numeric seconds remaining in the game.
+  `game_clock_start` varchar(10) DEFAULT NULL COMMENT 'Time at start of play provided in string format as minutes:seconds remaining in the quarter.',
+  `game_clock_end` varchar(10) DEFAULT NULL COMMENT 'Game time at the end of a given play.',
+  `sec_rem_qtr` int(4) DEFAULT NULL COMMENT 'Numeric seconds remaining in the quarter.',
+  `sec_rem_half` int(4) DEFAULT NULL COMMENT 'Numeric seconds remaining in the half.',
+  `sec_rem_gm` int(4) DEFAULT NULL COMMENT 'Numeric seconds remaining in the game.',
 
   `pos_team` varchar(4) DEFAULT NULL,
   `pos_team_id` varchar(36) DEFAULT NULL,
 
-  `off` varchar(3) DEFAULT NULL,                    -- offense
-  `def` varchar(3) DEFAULT NULL,                    -- defense
+  `off` varchar(3) DEFAULT NULL COMMENT 'offense',
+  `def` varchar(3) DEFAULT NULL COMMENT 'defense',
 
   `deleted` tinyint(1) DEFAULT NULL,
   `review` text DEFAULT NULL,
 
-  `play_type` varchar(4) DEFAULT NULL,                   -- RUSH, PASS, FGXP, PUNT, KOFF, ONSD, NOPL, CONV
+  `play_type` varchar(4) DEFAULT NULL COMMENT 'RUSH, PASS, FGXP, PUNT, KOFF, ONSD, NOPL, CONV',
   `play_type_nfl` varchar(36) DEFAULT NULL,
   `play_type_ngs` varchar(36) DEFAULT NULL,
 
   `next_play_type` varchar(36) DEFAULT NULL,
 
-  `player_fuml_pid` varchar(25) DEFAULT NULL,   -- fumbling player
-  `player_fuml_gsis` varchar(36) DEFAULT NULL,  -- fumbling player gsis
-  `bc_pid` varchar(25) DEFAULT NULL,            -- ball carrier
-  `bc_gsis` varchar(36) DEFAULT NULL,           -- ball carrier gsis
-  `psr_pid` varchar(25) DEFAULT NULL,           -- passer
-  `psr_gsis` varchar(36) DEFAULT NULL,          -- passer gsis
-  `trg_pid` varchar(25) DEFAULT NULL,           -- targeted player
-  `trg_gsis` varchar(36) DEFAULT NULL,          -- targeted player gsis
-  `intp_pid` varchar(25) DEFAULT NULL,          -- intercepting player
-  `intp_gsis` varchar(36) DEFAULT NULL,         -- intercepting player gsis
+  `player_fuml_pid` varchar(25) DEFAULT NULL COMMENT 'fumbling player',
+  `player_fuml_gsis` varchar(36) DEFAULT NULL COMMENT 'fumbling player gsis',
+  `bc_pid` varchar(25) DEFAULT NULL COMMENT 'ball carrier',
+  `bc_gsis` varchar(36) DEFAULT NULL COMMENT 'ball carrier gsis',
+  `psr_pid` varchar(25) DEFAULT NULL COMMENT 'passer',
+  `psr_gsis` varchar(36) DEFAULT NULL COMMENT 'passer gsis',
+  `trg_pid` varchar(25) DEFAULT NULL COMMENT 'targeted player',
+  `trg_gsis` varchar(36) DEFAULT NULL COMMENT 'targeted player gsis',
+  `intp_pid` varchar(25) DEFAULT NULL COMMENT 'intercepting player',
+  `intp_gsis` varchar(36) DEFAULT NULL COMMENT 'intercepting player gsis',
 
-  `yds_gained` tinyint(3) DEFAULT NULL,         -- yardage gained (or lost) by the possessing team
+  `yds_gained` tinyint(3) DEFAULT NULL COMMENT 'yardage gained (or lost) by the possessing team',
 
-  `fum` tinyint(1) DEFAULT NULL,                -- fumble occured
-  `fuml` tinyint(1) DEFAULT NULL,               -- fumble lost
-  `int` tinyint(1) DEFAULT NULL,                -- interception
-  `sk` tinyint(1) DEFAULT NULL,                 -- sack
-  `succ` tinyint(1) DEFAULT NULL,               -- successful play
-  `comp` tinyint(1) DEFAULT NULL,               -- completion
-  `incomp` tinyint(1) DEFAULT NULL,             -- incompletion
-  `trick` tinyint(1) DEFAULT NULL,              -- trick play
-  `touchback` tinyint(1) DEFAULT NULL,          -- touchback
-  `safety` tinyint(1) DEFAULT NULL,             -- safety
-  `penalty` tinyint(1) DEFAULT NULL,            -- penalty
-  `oob` tinyint(1) DEFAULT NULL,                -- 1 if play description contains ran ob, pushed ob, or sacked ob; 0 otherwise.
-  `tfl` tinyint(1) DEFAULT NULL,                -- Binary indicator for whether or not a tackle for loss on a run play occurred.
-  `rush` tinyint(1) DEFAULT NULL,               -- Binary indicator for if the play was a run.
-  `pass` tinyint(1) DEFAULT NULL,               -- Binary indicator for if the play was a pass attempt (includes sacks).
-  `solo_tk` tinyint(1) DEFAULT NULL,            -- Binary indicator if the play had a solo tackle (could be multiple due to fumbles).
-  `assist_tk` tinyint(1) DEFAULT NULL,          -- Binary indicator for if an assist tackle occurred.
+  `fum` tinyint(1) DEFAULT NULL COMMENT 'fumble occurred',
+  `fuml` tinyint(1) DEFAULT NULL COMMENT 'fumble lost',
+  `int` tinyint(1) DEFAULT NULL COMMENT 'interception',
+  `sk` tinyint(1) DEFAULT NULL COMMENT 'sack',
+  `succ` tinyint(1) DEFAULT NULL COMMENT 'successful play',
+  `comp` tinyint(1) DEFAULT NULL COMMENT 'completion',
+  `incomp` tinyint(1) DEFAULT NULL COMMENT 'incompletion',
+  `trick` tinyint(1) DEFAULT NULL COMMENT 'trick play',
+  `touchback` tinyint(1) DEFAULT NULL COMMENT 'touchback',
+  `safety` tinyint(1) DEFAULT NULL COMMENT 'safety',
+  `penalty` tinyint(1) DEFAULT NULL COMMENT 'penalty',
+  `oob` tinyint(1) DEFAULT NULL COMMENT '1 if play description contains ran ob, pushed ob, or sacked ob; 0 otherwise.',
+  `tfl` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for whether or not a tackle for loss on a run play occurred.',
+  `rush` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for if the play was a run.',
+  `pass` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for if the play was a pass attempt (includes sacks).',
+  `solo_tk` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator if the play had a solo tackle (could be multiple due to fumbles).',
+  `assist_tk` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for if an assist tackle occurred.',
 
-  `special` tinyint(1) DEFAULT NULL,                 -- special teams
-  `special_play_type` varchar(10) DEFAULT NULL,            -- special teams play type
+  `special` tinyint(1) DEFAULT NULL COMMENT 'special teams',
+  `special_play_type` varchar(10) DEFAULT NULL COMMENT 'special teams play type',
 
-  `pen_team` varchar(3) DEFAULT NULL,           -- String abbreviation of the team with the penalty.
-  `pen_yds` int(3) DEFAULT NULL,                -- Yards gained (or lost) by the posteam from the penalty.
+  `pen_team` varchar(3) DEFAULT NULL COMMENT 'String abbreviation of the team with the penalty.',
+  `pen_yds` int(3) DEFAULT NULL COMMENT 'Yards gained (or lost) by the posteam from the penalty.',
 
-  `td` tinyint(1) DEFAULT NULL,                 -- touchdown
-  `ret_td` tinyint(1) DEFAULT NULL,             -- return touchdown
-  `pass_td` tinyint(1) DEFAULT NULL,            -- passing touchdown
-  `rush_td` tinyint(1) DEFAULT NULL,            -- rushing touchdown
-  `td_tm` varchar(5) DEFAULT NULL,              -- touchdown team abbreviation
+  `td` tinyint(1) DEFAULT NULL COMMENT 'touchdown',
+  `ret_td` tinyint(1) DEFAULT NULL COMMENT 'return touchdown',
+  `pass_td` tinyint(1) DEFAULT NULL COMMENT 'passing touchdown',
+  `rush_td` tinyint(1) DEFAULT NULL COMMENT 'rushing touchdown',
+  `td_tm` varchar(5) DEFAULT NULL COMMENT 'touchdown team abbreviation',
 
-  `pass_yds` tinyint(3) DEFAULT NULL,               -- Numeric yards by the passer_player_name, including yards gained in pass plays with laterals. This should equal official passing statistics.
-  `recv_yds` tinyint(3) DEFAULT NULL,               -- Numeric yards by the receiver_player_name, excluding yards gained in pass plays with laterals. This should equal official receiving statistics but could miss yards gained in pass plays with laterals. Please see the description of `lateral_receiver_player_name` for further information.
-  `rush_yds` tinyint(3) DEFAULT NULL,               -- Numeric yards by the rusher_player_name, excluding yards gained in rush plays with laterals. This should equal official rushing statistics but could miss yards gained in rush plays with laterals. Please see the description of `lateral_rusher_player_name` for further information.
+  `pass_yds` tinyint(3) DEFAULT NULL COMMENT 'Numeric yards by the passer_player_name, including yards gained in pass plays with laterals. This should equal official passing statistics.',
+  `recv_yds` tinyint(3) DEFAULT NULL COMMENT 'Numeric yards by the receiver_player_name, excluding yards gained in pass plays with laterals. This should equal official receiving statistics but could miss yards gained in pass plays with laterals. Please see the description of lateral_receiver_player_name for further information.',
+  `rush_yds` tinyint(3) DEFAULT NULL COMMENT 'Numeric yards by the rusher_player_name, excluding yards gained in rush plays with laterals. This should equal official rushing statistics but could miss yards gained in rush plays with laterals. Please see the description of lateral_rusher_player_name for further information.',
 
-  `dot` int(3) DEFAULT NULL,                    -- depth of target
-  `tay` tinyint(1) DEFAULT NULL,                -- true air yards, Distance ball travels in the air from point of throw to a receivers hands; back of endzone or sideline.
-  `yac` int(3) DEFAULT NULL,                    -- yard after catch
-  `yaco` int(3) DEFAULT NULL,                   -- yards after contact
-  `ret_yds` int(3) DEFAULT NULL,                -- return yardage
-  `ret_tm` varchar(5) DEFAULT NULL,             -- return team abbrevation
+  `dot` int(3) DEFAULT NULL COMMENT 'depth of target',
+  `tay` tinyint(1) DEFAULT NULL COMMENT 'true air yards, Distance ball travels in the air from point of throw to a receivers hands; back of endzone or sideline.',
+  `yac` int(3) DEFAULT NULL COMMENT 'yard after catch',
+  `yaco` int(3) DEFAULT NULL COMMENT 'yards after contact',
+  `ret_yds` int(3) DEFAULT NULL COMMENT 'return yardage',
+  `ret_tm` varchar(5) DEFAULT NULL COMMENT 'return team abbreviation',
 
-  `sg` tinyint(1) DEFAULT NULL,                 -- shotgun
-  `nh` tinyint(1) DEFAULT NULL,                 -- no huddle
-  `pap` tinyint(1) DEFAULT NULL,                -- play action pass
-  `qbd` tinyint(1) DEFAULT NULL,                -- QB dropped back on the play (pass attempt, sack, or scrambled).
-  `qbk` tinyint(1) DEFAULT NULL,                -- QB took a knee.
-  `qbs` tinyint(1) DEFAULT NULL,                -- QB spiked the ball.
-  `qbru` tinyint(1) DEFAULT NULL,               -- QB run, a designed running play for the QB. These are only marked on runs by a natural QB where he lined up as a QB. Also, sneaks and kneel-downs are not counted.
-  `sneak` tinyint(1) DEFAULT NULL,              -- QB sneak
-  `scrm` tinyint(1) DEFAULT NULL,               -- QB scramble
+  `sg` tinyint(1) DEFAULT NULL COMMENT 'shotgun',
+  `nh` tinyint(1) DEFAULT NULL COMMENT 'no huddle',
+  `pap` tinyint(1) DEFAULT NULL COMMENT 'play action pass',
+  `qbd` tinyint(1) DEFAULT NULL COMMENT 'QB dropped back on the play (pass attempt, sack, or scrambled).',
+  `qbk` tinyint(1) DEFAULT NULL COMMENT 'QB took a knee.',
+  `qbs` tinyint(1) DEFAULT NULL COMMENT 'QB spiked the ball.',
+  `qbru` tinyint(1) DEFAULT NULL COMMENT 'QB run, a designed running play for the QB. These are only marked on runs by a natural QB where he lined up as a QB. Also, sneaks and kneel-downs are not counted.',
+  `sneak` tinyint(1) DEFAULT NULL COMMENT 'QB sneak',
+  `scrm` tinyint(1) DEFAULT NULL COMMENT 'QB scramble',
 
-  `qb_pressure` tinyint(2) DEFAULT NULL,                -- QB pressure
-  `qb_pressure_ngs` tinyint(2) DEFAULT NULL,            -- QB pressure (NGS)
-  `qb_hit` tinyint(2) DEFAULT NULL,               -- QB hit
-  `qb_hurry` tinyint(2) DEFAULT NULL,               -- QB hurry
+  `qb_pressure` tinyint(2) DEFAULT NULL COMMENT 'QB pressure',
+  `qb_pressure_ngs` tinyint(2) DEFAULT NULL COMMENT 'QB pressure (NGS)',
+  `qb_hit` tinyint(2) DEFAULT NULL COMMENT 'QB hit',
+  `qb_hurry` tinyint(2) DEFAULT NULL COMMENT 'QB hurry',
 
-  `int_worthy` tinyint(1) DEFAULT NULL,               -- interception worthy
-  `cball` tinyint(1) DEFAULT NULL,              -- catchable ball, A pass in which an eligible receiver has the opportunity to get his hands on the football with reasonable movement, timing, and opportunity.
-  `qbta` tinyint(1) DEFAULT NULL,               -- QB Throw Away
-  `shov` tinyint(1) DEFAULT NULL,               -- Shovel/Touch Pass
-  `side` tinyint(1) DEFAULT NULL,               -- Sideline pass, Balls outside of the field but catchable when the receiver extends body/arms.
-  `high` tinyint(1) DEFAULT NULL,               -- Highlight pass, Perfect pass that only the receiver can reach. Features perfect placement in a tight window.
+  `int_worthy` tinyint(1) DEFAULT NULL COMMENT 'interception worthy',
+  `cball` tinyint(1) DEFAULT NULL COMMENT 'catchable ball, A pass in which an eligible receiver has the opportunity to get his hands on the football with reasonable movement, timing, and opportunity.',
+  `qbta` tinyint(1) DEFAULT NULL COMMENT 'QB Throw Away',
+  `shov` tinyint(1) DEFAULT NULL COMMENT 'Shovel/Touch Pass',
+  `side` tinyint(1) DEFAULT NULL COMMENT 'Sideline pass, Balls outside of the field but catchable when the receiver extends body/arms.',
+  `high` tinyint(1) DEFAULT NULL COMMENT 'Highlight pass, Perfect pass that only the receiver can reach. Features perfect placement in a tight window.',
 
-  `drp` tinyint(1) DEFAULT NULL,                -- dropped pass
-  `cnb` tinyint(1) DEFAULT NULL,                -- contested ball, Passes into close coverage that involve a physical battle between receiver and defender for control of the ball.
-  `crr` tinyint(1) DEFAULT NULL,                -- Created Reception, Difficult catches that require exceptional body control; hands; acrobatics, or any combination thereof.
+  `drp` tinyint(1) DEFAULT NULL COMMENT 'dropped pass',
+  `cnb` tinyint(1) DEFAULT NULL COMMENT 'contested ball, Passes into close coverage that involve a physical battle between receiver and defender for control of the ball.',
+  `crr` tinyint(1) DEFAULT NULL COMMENT 'Created Reception, Difficult catches that require exceptional body control; hands; acrobatics, or any combination thereof.',
 
-  `mbt` tinyint(1) DEFAULT NULL,                -- missed or broken tackles
-  `avsk` tinyint(1) DEFAULT NULL,               -- number of avoided sacks
+  `mbt` tinyint(1) DEFAULT NULL COMMENT 'missed or broken tackles',
+  `avsk` tinyint(1) DEFAULT NULL COMMENT 'number of avoided sacks',
 
-  `run_location` varchar(10) DEFAULT NULL,      -- String indicator for location of run: left, middle, or right.
-  `run_gap` varchar(10) DEFAULT NULL,           -- String indicator for line gap of run: end, guard, or tackle
+  `run_location` varchar(10) DEFAULT NULL COMMENT 'String indicator for location of run: left, middle, or right.',
+  `run_gap` varchar(10) DEFAULT NULL COMMENT 'String indicator for line gap of run: end, guard, or tackle',
 
-  `option` varchar(3) DEFAULT NULL,             -- option play, values: RPO (run/pass), RUN (run/qbrun)
-  `tlook` tinyint(1) DEFAULT NULL,              -- trick look
+  `option` varchar(3) DEFAULT NULL COMMENT 'option play, values: RPO (run/pass), RUN (run/qbrun)',
+  `tlook` tinyint(1) DEFAULT NULL COMMENT 'trick look',
 
-  `fd` tinyint(1) DEFAULT NULL,                 -- first down
-  `fd_rush` tinyint(1) DEFAULT NULL,            -- Binary indicator for if a running play converted the first down.
-  `fd_pass` tinyint(1) DEFAULT NULL,            -- Binary indicator for if a passing play converted the first down.
-  `fd_penalty` tinyint(1) DEFAULT NULL,         -- Binary indicator for if a penalty converted the first down.
+  `fd` tinyint(1) DEFAULT NULL COMMENT 'first down',
+  `fd_rush` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for if a running play converted the first down.',
+  `fd_pass` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for if a passing play converted the first down.',
+  `fd_penalty` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for if a penalty converted the first down.',
 
-  `third_down_converted` tinyint(1) DEFAULT NULL,  -- Binary indicator for if the first down was converted on third down.
-  `third_down_failed` tinyint(1) DEFAULT NULL,     -- Binary indicator for if the posteam failed to convert first down on third down.
-  `fourth_down_converted` tinyint(1) DEFAULT NULL, -- Binary indicator for if the first down was converted on fourth down.
-  `fourth_down_failed` tinyint(1) DEFAULT NULL,    -- Binary indicator for if the posteam failed to convert first down on fourth down.
+  `third_down_converted` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for if the first down was converted on third down.',
+  `third_down_failed` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for if the posteam failed to convert first down on third down.',
+  `fourth_down_converted` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for if the first down was converted on fourth down.',
+  `fourth_down_failed` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for if the posteam failed to convert first down on fourth down.',
 
-  `htm` tinyint(1) DEFAULT NULL,                -- hindered throwing motion
-  `zblz` tinyint(1) DEFAULT NULL,               -- zone blitz, at least one Off-Ball LB rushed the passer instead of a DL who dropped into coverage
-  `stnt` tinyint(1) DEFAULT NULL,               -- stunt, when any two pass rushers cross, trading pass rush lanes on a passing down
-  `oop` tinyint(1) DEFAULT NULL,                -- out of pocket pass
-  `phyb` tinyint(1) DEFAULT NULL,               -- physical ball, Pass target takes significant punishment whether the pass is caught or not. Most 'Contested Balls' will also be a 'Physical Ball'.
-  `bap` tinyint(1) DEFAULT NULL,                -- batted pass
-  `fread` tinyint(1) DEFAULT NULL,              -- first read
-  `scre` tinyint(1) DEFAULT NULL,               -- screen pass
-  `pfp` tinyint(1) DEFAULT NULL,                -- pain free play, Ball carrier is only lightly touched by a defender on the field (ie QB slide) or runs out of bounds with little or no physical contact with the defender or sideline personnel/equipment. Includes TD's
-  `qbsk` tinyint(1) DEFAULT NULL,               -- qb sack, QB was to blame for the sack: held ball too long; missed wide open receiver etc
+  `htm` tinyint(1) DEFAULT NULL COMMENT 'hindered throwing motion',
+  `zblz` tinyint(1) DEFAULT NULL COMMENT 'zone blitz, at least one Off-Ball LB rushed the passer instead of a DL who dropped into coverage',
+  `stnt` tinyint(1) DEFAULT NULL COMMENT 'stunt, when any two pass rushers cross, trading pass rush lanes on a passing down',
+  `oop` tinyint(1) DEFAULT NULL COMMENT 'out of pocket pass',
+  `phyb` tinyint(1) DEFAULT NULL COMMENT 'physical ball, Pass target takes significant punishment whether the pass is caught or not. Most Contested Balls will also be a Physical Ball.',
+  `bap` tinyint(1) DEFAULT NULL COMMENT 'batted pass',
+  `fread` tinyint(1) DEFAULT NULL COMMENT 'first read',
+  `scre` tinyint(1) DEFAULT NULL COMMENT 'screen pass',
+  `pfp` tinyint(1) DEFAULT NULL COMMENT 'pain free play, Ball carrier is only lightly touched by a defender on the field (ie QB slide) or runs out of bounds with little or no physical contact with the defender or sideline personnel/equipment. Includes TDs',
+  `qbsk` tinyint(1) DEFAULT NULL COMMENT 'qb sack, QB was to blame for the sack: held ball too long; missed wide open receiver etc',
 
-  `ttscrm` decimal(3,1) DEFAULT NULL,           -- time to scramble
-  `ttp` decimal(3,1) DEFAULT NULL,              -- time to pass
-  `ttsk` decimal(3,1) DEFAULT NULL,             -- time to sack
-  `ttpr` decimal(3,1) DEFAULT NULL,             -- time to pressure
+  `ttscrm` decimal(3,1) DEFAULT NULL COMMENT 'time to scramble',
+  `ttp` decimal(3,1) DEFAULT NULL COMMENT 'time to pass',
+  `ttsk` decimal(3,1) DEFAULT NULL COMMENT 'time to sack',
+  `ttpr` decimal(3,1) DEFAULT NULL COMMENT 'time to pressure',
 
-  `back` tinyint(2) DEFAULT NULL,               -- number in backfield (wr, rb, te, fb)
-  `xlm` tinyint(1) DEFAULT NULL,                -- extra men on the line, Number of players lined up on either side of the Offensive Tackles - usually a Tight End.
-  `db` tinyint(2) DEFAULT NULL,                 -- number of defensive backs
-  `box` tinyint(2) DEFAULT NULL,                -- number of defenders in the box
-  `boxdb` tinyint(2) DEFAULT NULL,              -- number of dbs in the box
-  `pru` tinyint(1) DEFAULT NULL,                -- pass rushers
-  `blz` tinyint(1) DEFAULT NULL,                -- number of LB's and DB's blitzing
-  `dblz` tinyint(1) DEFAULT NULL,               -- Number of DB's blitzing
-  `oopd` varchar(2) DEFAULT NULL,               -- out of pocket pass details, Clean [C], Pressure [P], Designed [D], Designed Rollout [DR]
-  `cov` tinyint(1) DEFAULT NULL,                -- coverage on target, Uncovered is 0, single coverage is 1, double is 2.
+  `back` tinyint(2) DEFAULT NULL COMMENT 'number in backfield (wr, rb, te, fb)',
+  `xlm` tinyint(1) DEFAULT NULL COMMENT 'extra men on the line, Number of players lined up on either side of the Offensive Tackles - usually a Tight End.',
+  `db` tinyint(2) DEFAULT NULL COMMENT 'number of defensive backs',
+  `box` tinyint(2) DEFAULT NULL COMMENT 'number of defenders in the box',
+  `boxdb` tinyint(2) DEFAULT NULL COMMENT 'number of dbs in the box',
+  `pru` tinyint(1) DEFAULT NULL COMMENT 'pass rushers',
+  `blz` tinyint(1) DEFAULT NULL COMMENT 'number of LBs and DBs blitzing',
+  `dblz` tinyint(1) DEFAULT NULL COMMENT 'Number of DBs blitzing',
+  `oopd` varchar(2) DEFAULT NULL COMMENT 'out of pocket pass details, Clean [C], Pressure [P], Designed [D], Designed Rollout [DR]',
+  `cov` tinyint(1) DEFAULT NULL COMMENT 'coverage on target, Uncovered is 0, single coverage is 1, double is 2.',
 
-  `ep` decimal(16,12) DEFAULT NULL,             -- Using the scoring event probabilities, the estimated expected points with respect to the possession team for the given play.
-  `epa` decimal(16,12) DEFAULT NULL,            -- Expected points added (EPA) by the posteam for the given play.
-  `ep_succ` tinyint(1) DEFAULT NULL,            -- Binary indicator wheter epa > 0 in the given play.
+  `ep` decimal(16,12) DEFAULT NULL COMMENT 'Using the scoring event probabilities, the estimated expected points with respect to the possession team for the given play.',
+  `epa` decimal(16,12) DEFAULT NULL COMMENT 'Expected points added (EPA) by the posteam for the given play.',
+  `ep_succ` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator wheter epa > 0 in the given play.',
 
-  `total_home_epa` decimal(16,12) DEFAULT NULL,             -- Cumulative total EPA for the home team in the game so far.
-  `total_away_epa` decimal(16,12) DEFAULT NULL,             -- Cumulative total EPA for the away team in the game so far.
-  `total_home_rush_epa` decimal(16,12) DEFAULT NULL,        -- Cumulative total rushing EPA for the home team in the game so far.
-  `total_away_rush_epa` decimal(16,12) DEFAULT NULL,        -- Cumulative total rushing EPA for the away team in the game so far.
-  `total_home_pass_epa` decimal(16,12) DEFAULT NULL,        -- Cumulative total passing EPA for the home team in the game so far.
-  `total_away_pass_epa` decimal(16,12) DEFAULT NULL,        -- Cumulative total passing EPA for the away team in the game so far.
+  `total_home_epa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total EPA for the home team in the game so far.',
+  `total_away_epa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total EPA for the away team in the game so far.',
+  `total_home_rush_epa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total rushing EPA for the home team in the game so far.',
+  `total_away_rush_epa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total rushing EPA for the away team in the game so far.',
+  `total_home_pass_epa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total passing EPA for the home team in the game so far.',
+  `total_away_pass_epa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total passing EPA for the away team in the game so far.',
 
-  `qb_epa` decimal(16,12) DEFAULT NULL,                     -- Gives QB credit for EPA for up to the point where a receiver lost a fumble after a completed catch and makes EPA work more like passing yards on plays with fumbles.
-  `air_epa` decimal(16,12) DEFAULT NULL,                    -- EPA from the air yards alone. For completions this represents the actual value provided through the air. For incompletions this represents the hypothetical value that could've been added through the air if the pass was completed.
-  `yac_epa` decimal(16,12) DEFAULT NULL,                    -- EPA from the yards after catch alone. For completions this represents the actual value provided after the catch. For incompletions this represents the difference between the hypothetical air_epa and the play's raw observed EPA (how much the incomplete pass cost the posteam).
-  `comp_air_epa` decimal(16,12) DEFAULT NULL,               -- EPA from the air yards alone only for completions.
-  `comp_yac_epa` decimal(16,12) DEFAULT NULL,               -- EPA from the yards after catch alone only for completions.
-  `xyac_epa` decimal(16,12) DEFAULT NULL,                   -- Expected value of EPA gained after the catch, starting from where the catch was made. Zero yards after the catch would be listed as zero EPA.
-  `total_home_comp_air_epa` decimal(16,12) DEFAULT NULL,    -- Cumulative total completions air EPA for the home team in the game so far.
-  `total_away_comp_air_epa` decimal(16,12) DEFAULT NULL,    -- Cumulative total completions air EPA for the away team in the game so far.
-  `total_home_comp_yac_epa` decimal(16,12) DEFAULT NULL,    -- Cumulative total completions yac EPA for the home team in the game so far.
-  `total_away_comp_yac_epa` decimal(16,12) DEFAULT NULL,    -- Cumulative total completions yac EPA for the away team in the game so far.
-  `total_home_raw_air_epa` decimal(16,12) DEFAULT NULL,     -- Cumulative total raw air EPA for the home team in the game so far.
-  `total_away_raw_air_epa` decimal(16,12) DEFAULT NULL,     -- Cumulative total raw air EPA for the away team in the game so far.
-  `total_home_raw_yac_epa` decimal(16,12) DEFAULT NULL,     -- Cumulative total raw yac EPA for the home team in the game so far.
-  `total_away_raw_yac_epa` decimal(16,12) DEFAULT NULL,     -- Cumulative total raw yac EPA for the away team in the game so far.
+  `qb_epa` decimal(16,12) DEFAULT NULL COMMENT 'Gives QB credit for EPA for up to the point where a receiver lost a fumble after a completed catch and makes EPA work more like passing yards on plays with fumbles.',
+  `air_epa` decimal(16,12) DEFAULT NULL COMMENT 'EPA from the air yards alone. For completions this represents the actual value provided through the air. For incompletions this represents the hypothetical value that could have been added through the air if the pass was completed.',
+  `yac_epa` decimal(16,12) DEFAULT NULL COMMENT 'EPA from the yards after catch alone. For completions this represents the actual value provided after the catch. For incompletions this represents the difference between the hypothetical air_epa and the plays raw observed EPA (how much the incomplete pass cost the posteam).',
+  `comp_air_epa` decimal(16,12) DEFAULT NULL COMMENT 'EPA from the air yards alone only for completions.',
+  `comp_yac_epa` decimal(16,12) DEFAULT NULL COMMENT 'EPA from the yards after catch alone only for completions.',
+  `xyac_epa` decimal(16,12) DEFAULT NULL COMMENT 'Expected value of EPA gained after the catch, starting from where the catch was made. Zero yards after the catch would be listed as zero EPA.',
+  `total_home_comp_air_epa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total completions air EPA for the home team in the game so far.',
+  `total_away_comp_air_epa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total completions air EPA for the away team in the game so far.',
+  `total_home_comp_yac_epa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total completions yac EPA for the home team in the game so far.',
+  `total_away_comp_yac_epa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total completions yac EPA for the away team in the game so far.',
+  `total_home_raw_air_epa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total raw air EPA for the home team in the game so far.',
+  `total_away_raw_air_epa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total raw air EPA for the away team in the game so far.',
+  `total_home_raw_yac_epa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total raw yac EPA for the home team in the game so far.',
+  `total_away_raw_yac_epa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total raw yac EPA for the away team in the game so far.',
 
-  `wp` decimal(16,12) DEFAULT NULL,             -- Estimated win probabiity for the posteam given the current situation at the start of the given play.
-  `wpa` decimal(16,12) DEFAULT NULL,            -- Win probability added (WPA) for the posteam.
-  `home_wp` decimal(16,12) DEFAULT NULL,        -- Estimated win probability for the home team.
-  `away_wp` decimal(16,12) DEFAULT NULL,        -- Estimated win probability for the away team.
-  `vegas_wpa` decimal(16,12) DEFAULT NULL,      -- Win probability added (WPA) for the posteam: spread_adjusted model.
-  `vegas_home_wpa` decimal(16,12) DEFAULT NULL, -- Win probability added (WPA) for the home team: spread_adjusted model.
-  `home_wp_post` decimal(16,12) DEFAULT NULL,   -- Estimated win probability for the home team at the end of the play.
-  `away_wp_post` decimal(16,12) DEFAULT NULL,   -- Estimated win probability for the away team at the end of the play.
-  `vegas_wp` decimal(16,12) DEFAULT NULL,       -- Estimated win probabiity for the posteam given the current situation at the start of the given play, incorporating pre-game Vegas line.
-  `vegas_home_wp` decimal(16,12) DEFAULT NULL,  -- Estimated win probability for the home team incorporating pre-game Vegas line.
-  `total_home_rush_wpa` decimal(16,12) DEFAULT NULL, -- Cumulative total rushing WPA for the home team in the game so far.
-  `total_away_rush_wpa` decimal(16,12) DEFAULT NULL, -- Cumulative total rushing WPA for the away team in the game so far.
-  `total_home_pass_wpa` decimal(16,12) DEFAULT NULL, -- Cumulative total passing WPA for the home team in the game so far.
-  `total_away_pass_wpa` decimal(16,12) DEFAULT NULL, -- Cumulative total passing WPA for the away team in the game so far.
-  `air_wpa` decimal(16,12) DEFAULT NULL,       -- WPA through the air (same logic as air_epa).
-  `yac_wpa` decimal(16,12) DEFAULT NULL,       -- WPA from yards after the catch (same logic as yac_epa).
-  `comp_air_wpa` decimal(16,12) DEFAULT NULL,  -- The air_wpa for completions only.
-  `comp_yac_wpa` decimal(16,12) DEFAULT NULL,  -- The yac_wpa for completions only.
-  `total_home_comp_air_wpa` decimal(16,12) DEFAULT NULL,      -- Cumulative total completions air WPA for the home team in the game so far.
-  `total_away_comp_air_wpa` decimal(16,12) DEFAULT NULL,      -- Cumulative total completions air WPA for the away team in the game so far.
-  `total_home_comp_yac_wpa` decimal(16,12) DEFAULT NULL,      -- Cumulative total completions yac WPA for the home team in the game so far.
-  `total_away_comp_yac_wpa` decimal(16,12) DEFAULT NULL,      -- Cumulative total completions yac WPA for the away team in the game so far.
-  `total_home_raw_air_wpa` decimal(16,12) DEFAULT NULL,       -- Cumulative total raw air WPA for the home team in the game so far.
-  `total_away_raw_air_wpa` decimal(16,12) DEFAULT NULL,       -- Cumulative total raw air WPA for the away team in the game so far.
-  `total_home_raw_yac_wpa` decimal(16,12) DEFAULT NULL,       -- Cumulative total raw yac WPA for the home team in the game so far.
-  `total_away_raw_yac_wpa` decimal(16,12) DEFAULT NULL,       -- Cumulative total raw yac WPA for the away team in the game so far.
+  `wp` decimal(16,12) DEFAULT NULL COMMENT 'Estimated win probability for the posteam given the current situation at the start of the given play',
+  `wpa` decimal(16,12) DEFAULT NULL COMMENT 'Win probability added (WPA) for the posteam',
+  `home_wp` decimal(16,12) DEFAULT NULL COMMENT 'Estimated win probability for the home team',
+  `away_wp` decimal(16,12) DEFAULT NULL COMMENT 'Estimated win probability for the away team',
+  `vegas_wpa` decimal(16,12) DEFAULT NULL COMMENT 'Win probability added (WPA) for the posteam: spread adjusted model',
+  `vegas_home_wpa` decimal(16,12) DEFAULT NULL COMMENT 'Win probability added (WPA) for the home team: spread adjusted model',
+  `home_wp_post` decimal(16,12) DEFAULT NULL COMMENT 'Estimated win probability for the home team at the end of the play',
+  `away_wp_post` decimal(16,12) DEFAULT NULL COMMENT 'Estimated win probability for the away team at the end of the play',
+  `vegas_wp` decimal(16,12) DEFAULT NULL COMMENT 'Estimated win probability for the posteam given the current situation at the start of the given play, incorporating pre-game Vegas line',
+  `vegas_home_wp` decimal(16,12) DEFAULT NULL COMMENT 'Estimated win probability for the home team incorporating pre-game Vegas line',
+  `total_home_rush_wpa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total rushing WPA for the home team in the game so far',
+  `total_away_rush_wpa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total rushing WPA for the away team in the game so far',
+  `total_home_pass_wpa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total passing WPA for the home team in the game so far',
+  `total_away_pass_wpa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total passing WPA for the away team in the game so far',
+  `air_wpa` decimal(16,12) DEFAULT NULL COMMENT 'WPA through the air (same logic as air_epa)',
+  `yac_wpa` decimal(16,12) DEFAULT NULL COMMENT 'WPA from yards after the catch (same logic as yac_epa)',
+  `comp_air_wpa` decimal(16,12) DEFAULT NULL COMMENT 'The air_wpa for completions only',
+  `comp_yac_wpa` decimal(16,12) DEFAULT NULL COMMENT 'The yac_wpa for completions only',
+  `total_home_comp_air_wpa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total completions air WPA for the home team in the game so far',
+  `total_away_comp_air_wpa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total completions air WPA for the away team in the game so far',
+  `total_home_comp_yac_wpa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total completions yac WPA for the home team in the game so far',
+  `total_away_comp_yac_wpa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total completions yac WPA for the away team in the game so far',
+  `total_home_raw_air_wpa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total raw air WPA for the home team in the game so far',
+  `total_away_raw_air_wpa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total raw air WPA for the away team in the game so far',
+  `total_home_raw_yac_wpa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total raw yac WPA for the home team in the game so far',
+  `total_away_raw_yac_wpa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total raw yac WPA for the away team in the game so far',
 
-  `xyac_mean_yds` decimal(16,12) DEFAULT NULL,    -- Average expected yards after the catch based on where the ball was caught.
-  `xyac_median_yds` decimal(16,12) DEFAULT NULL,  -- Median expected yards after the catch based on where the ball was caught.
-  `xyac_succ_prob` decimal(16,12) DEFAULT NULL,   -- Probability play earns positive EPA (relative to where play started) based on where ball was caught.
-  `xyac_fd_prob` decimal(16,12) DEFAULT NULL,     -- Probability play earns a first down based on where the ball was caught.
+  `xyac_mean_yds` decimal(16,12) DEFAULT NULL COMMENT 'Average expected yards after the catch based on where the ball was caught',
+  `xyac_median_yds` decimal(16,12) DEFAULT NULL COMMENT 'Median expected yards after the catch based on where the ball was caught',
+  `xyac_succ_prob` decimal(16,12) DEFAULT NULL COMMENT 'Probability play earns positive EPA (relative to where play started) based on where ball was caught',
+  `xyac_fd_prob` decimal(16,12) DEFAULT NULL COMMENT 'Probability play earns a first down based on where the ball was caught',
 
-  `ep_att` tinyint(1) DEFAULT NULL,       -- Binary indicator for extra point attempt.
-  `two_att` tinyint(1) DEFAULT NULL,      -- Binary indicator for two point conversion attempt.
-  `fg_att` tinyint(1) DEFAULT NULL,       -- Binary indicator for field goal attempt.
-  `kickoff_att` tinyint(1) DEFAULT NULL,     -- Binary indicator for kickoff.
-  `punt_att` tinyint(1) DEFAULT NULL,        -- Binary indicator for punts.
+  `ep_att` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for extra point attempt',
+  `two_att` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for two point conversion attempt',
+  `fg_att` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for field goal attempt',
+  `kickoff_att` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for kickoff',
+  `punt_att` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for punts',
 
-  `fg_result` varchar(10) DEFAULT NULL,         -- String indicator for result of field goal attempt: made, missed, or blocked.
-  `kick_distance` int(3) DEFAULT NULL,          -- Numeric distance in yards for kickoffs, field goals, and punts.
-  `ep_result` varchar(10) DEFAULT NULL,         -- String indicator for the result of the extra point attempt: good, failed, blocked, safety (touchback in defensive endzone is 1 point apparently), or aborted.
-  `tp_result` varchar(10) DEFAULT NULL,         -- String indicator for result of two point conversion attempt: success, failure, safety (touchback in defensive endzone is 1 point apparently), or return.
-  `punt_blocked` tinyint(1) DEFAULT NULL,       -- Binary indicator for if the punt was blocked.
+  `fg_result` varchar(10) DEFAULT NULL COMMENT 'String indicator for result of field goal attempt: made, missed, or blocked',
+  `kick_distance` int(3) DEFAULT NULL COMMENT 'Numeric distance in yards for kickoffs, field goals, and punts',
+  `ep_result` varchar(10) DEFAULT NULL COMMENT 'String indicator for the result of the extra point attempt: good, failed, blocked, safety (touchback in defensive endzone is 1 point apparently), or aborted',
+  `tp_result` varchar(10) DEFAULT NULL COMMENT 'String indicator for result of two point conversion attempt: success, failure, safety (touchback in defensive endzone is 1 point apparently), or return',
+  `punt_blocked` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for if the punt was blocked',
 
-  `home_to_rem` tinyint(1) DEFAULT NULL,        -- Numeric timeouts remaining in the half for the home team.
-  `away_to_rem` tinyint(1) DEFAULT NULL,        -- Numeric timeouts remaining in the half for the away team.
-  `pos_to_rem` tinyint(1) DEFAULT NULL,         -- Number of timeouts remaining for the possession team.
-  `def_to_rem` tinyint(1) DEFAULT NULL,         -- Number of timeouts remaining for the team on defense.
-  `to` tinyint(1) DEFAULT NULL,                 -- Binary indicator for whether or not a timeout was called by either team.
-  `to_team` varchar(3) DEFAULT NULL,            -- String abbreviation for which team called the timeout.
+  `home_to_rem` tinyint(1) DEFAULT NULL COMMENT 'Numeric timeouts remaining in the half for the home team',
+  `away_to_rem` tinyint(1) DEFAULT NULL COMMENT 'Numeric timeouts remaining in the half for the away team',
+  `pos_to_rem` tinyint(1) DEFAULT NULL COMMENT 'Number of timeouts remaining for the possession team',
+  `def_to_rem` tinyint(1) DEFAULT NULL COMMENT 'Number of timeouts remaining for the team on defense',
+  `to` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for whether or not a timeout was called by either team',
+  `to_team` varchar(3) DEFAULT NULL COMMENT 'String abbreviation for which team called the timeout',
 
-  `home_score` tinyint(2) DEFAULT NULL,             -- Score for the home team at the end of the play.
-  `away_score` tinyint(2) DEFAULT NULL,             -- Score for the away team at the end of the play.
-  `pos_score` tinyint(2) DEFAULT NULL,              -- Score the posteam at the start of the play.
-  `def_score` tinyint(2) DEFAULT NULL,              -- Score the defteam at the start of the play.
-  `score_diff` tinyint(2) DEFAULT NULL,             -- Score differential between the posteam and defteam at the start of the play.
-  `pos_score_post` tinyint(2) DEFAULT NULL,         -- Score for the posteam at the end of the play.
-  `def_score_post` tinyint(2) DEFAULT NULL,         -- Score for the defteam at the end of the play.
-  `score_diff_post` tinyint(2) DEFAULT NULL,        -- Score differential between the posteam and defteam at the end of the play.
+  `home_score` tinyint(2) DEFAULT NULL COMMENT 'Score for the home team at the end of the play',
+  `away_score` tinyint(2) DEFAULT NULL COMMENT 'Score for the away team at the end of the play',
+  `pos_score` tinyint(2) DEFAULT NULL COMMENT 'Score the posteam at the start of the play',
+  `def_score` tinyint(2) DEFAULT NULL COMMENT 'Score the defteam at the start of the play',
+  `score_diff` tinyint(2) DEFAULT NULL COMMENT 'Score differential between the posteam and defteam at the start of the play',
+  `pos_score_post` tinyint(2) DEFAULT NULL COMMENT 'Score for the posteam at the end of the play',
+  `def_score_post` tinyint(2) DEFAULT NULL COMMENT 'Score for the defteam at the end of the play',
+  `score_diff_post` tinyint(2) DEFAULT NULL COMMENT 'Score differential between the posteam and defteam at the end of the play',
 
-  `no_score_prob` decimal(16,12) DEFAULT NULL,          -- Predicted probability of no score occurring for the rest of the half based on the expected points model.
-  `opp_fg_prob` decimal(16,12) DEFAULT NULL,        -- Predicted probability of the defteam scoring a FG next.
-  `opp_safety_prob` decimal(16,12) DEFAULT NULL,    -- Predicted probability of the defteam scoring a safety next.
-  `opp_td_prob` decimal(16,12) DEFAULT NULL,        -- Predicted probability of the defteam scoring a TD next.
-  `fg_prob` decimal(16,12) DEFAULT NULL,            -- Predicted probability of the posteam scoring a FG next.
-  `safety_prob` decimal(16,12) DEFAULT NULL,        -- Predicted probability of the posteam scoring a safety next.
-  `td_prob` decimal(16,12) DEFAULT NULL,            -- Predicted probability of the posteam scoring a TD next.
-  `extra_point_prob` decimal(16,12) DEFAULT NULL,   -- Predicted probability of the posteam scoring an extra point.
-  `two_conv_prob` decimal(16,12) DEFAULT NULL,      -- Predicted probability of the posteam scoring the two point conversion.
+  `no_score_prob` decimal(16,12) DEFAULT NULL COMMENT 'Predicted probability of no score occurring for the rest of the half based on the expected points model',
+  `opp_fg_prob` decimal(16,12) DEFAULT NULL COMMENT 'Predicted probability of the defteam scoring a FG next',
+  `opp_safety_prob` decimal(16,12) DEFAULT NULL COMMENT 'Predicted probability of the defteam scoring a safety next',
+  `opp_td_prob` decimal(16,12) DEFAULT NULL COMMENT 'Predicted probability of the defteam scoring a TD next',
+  `fg_prob` decimal(16,12) DEFAULT NULL COMMENT 'Predicted probability of the posteam scoring a FG next',
+  `safety_prob` decimal(16,12) DEFAULT NULL COMMENT 'Predicted probability of the posteam scoring a safety next',
+  `td_prob` decimal(16,12) DEFAULT NULL COMMENT 'Predicted probability of the posteam scoring a TD next',
+  `extra_point_prob` decimal(16,12) DEFAULT NULL COMMENT 'Predicted probability of the posteam scoring an extra point',
+  `two_conv_prob` decimal(16,12) DEFAULT NULL COMMENT 'Predicted probability of the posteam scoring the two point conversion',
 
-  `xpass_prob` decimal(16,12) DEFAULT NULL,         -- Probability of dropback scaled from 0 to 1.
-  `pass_oe` decimal(16,12) DEFAULT NULL,            -- Dropback percent over expected on a given play scaled from 0 to 100.
+  `xpass_prob` decimal(16,12) DEFAULT NULL COMMENT 'Probability of dropback scaled from 0 to 1',
+  `pass_oe` decimal(16,12) DEFAULT NULL COMMENT 'Dropback percent over expected on a given play scaled from 0 to 100',
 
-  `cp` decimal(16,12) DEFAULT NULL,                 -- Numeric value indicating the probability for a complete pass based on comparable game situations.
-  `cpoe` decimal(16,12) DEFAULT NULL,               -- For a single pass play this is 1 - cp when the pass was completed or 0 - cp when the pass was incomplete. Analyzed for a whole game or season an indicator for the passer how much over or under expectation his completion percentage was.
+  `cp` decimal(16,12) DEFAULT NULL COMMENT 'Numeric value indicating the probability for a complete pass based on comparable game situations',
+  `cpoe` decimal(16,12) DEFAULT NULL COMMENT 'For a single pass play this is 1 - cp when the pass was completed or 0 - cp when the pass was incomplete. Analyzed for a whole game or season an indicator for the passer how much over or under expectation his completion percentage was',
 
   `charted` tinyint(1) DEFAULT NULL,
   `updated` int(11) NOT NULL,
@@ -1644,316 +1644,316 @@ CREATE TABLE `nfl_plays_current_week` (
   `dwn` int(1) DEFAULT NULL,
   `qtr` int(1) DEFAULT NULL,
   `year` smallint(4) NOT NULL,
-  `seas_type` varchar(36) DEFAULT NULL, -- PRE, REG, POST
+  `seas_type` varchar(36) DEFAULT NULL COMMENT 'PRE, REG, POST',
 
   `desc` text DEFAULT NULL,
 
   `ydl_num` int(4) DEFAULT NULL,
   `ydl_side` varchar(10) DEFAULT NULL,
-  `ydl_start` varchar(10) DEFAULT NULL,     -- String indicating the start field position for a given play.
-  `ydl_end` varchar(10) DEFAULT NULL,       -- String indicating the end field position for a given play.
-  `ydl_100` int(3) DEFAULT NULL,            -- Numeric distance in the number of yards from the opponent's endzone for the posteam.
+  `ydl_start` varchar(10) DEFAULT NULL COMMENT 'String indicating the start field position for a given play.',
+  `ydl_end` varchar(10) DEFAULT NULL COMMENT 'String indicating the end field position for a given play.',
+  `ydl_100` int(3) DEFAULT NULL COMMENT 'Numeric distance in the number of yards from the opponents endzone for the posteam.',
 
-  `hash` varchar(1) DEFAULT NULL,           -- hash location, values: (L)eft hash, (R)ight hash or in-between (M)
-  `mot` varchar(2) DEFAULT NULL,            -- motion, There are 2 types of motion: Pre-snap (P) which starts and stops before the snap and the more aggressive type of motion that is occurring during the snap (S). When both occur we mark 'PS'
+  `hash` varchar(1) DEFAULT NULL COMMENT 'hash location, values: (L)eft hash, (R)ight hash or in-between (M)',
+  `mot` varchar(2) DEFAULT NULL COMMENT 'motion, There are 2 types of motion: Pre-snap (P) which starts and stops before the snap and the more aggressive type of motion that is occurring during the snap (S). When both occur we mark PS',
 
-  `ytg` int(3) DEFAULT NULL,                -- yards to go
-  `yfog` int(3) DEFAULT NULL,               -- yards from own goal (1-99)
+  `ytg` int(3) DEFAULT NULL COMMENT 'yards to go',
+  `yfog` int(3) DEFAULT NULL COMMENT 'yards from own goal (1-99)',
 
   `off_formation` varchar(100) DEFAULT NULL,
   `off_personnel` varchar(100) DEFAULT NULL,
-  `def_personnel` varchar(36) DEFAULT NULL,
+  `def_personnel` varchar(100) DEFAULT NULL,
+
   `box_ngs` int(3) DEFAULT NULL,
   `pru_ngs` int(3) DEFAULT NULL,
-
   `air_yards_ngs` decimal(8,4) DEFAULT NULL,
   `time_to_throw_ngs` decimal(8,4) DEFAULT NULL,
   `route_ngs` varchar(100) DEFAULT NULL,
   `man_zone_ngs` varchar(100) DEFAULT NULL,
   `cov_type_ngs` varchar(100) DEFAULT NULL,
 
-  `drive_seq` int(4) DEFAULT NULL,                  -- drive count
+  `drive_seq` int(4) DEFAULT NULL COMMENT 'drive count',
   `drive_yds` int(3) DEFAULT NULL,
-  `drive_play_count` int(3) DEFAULT NULL,           -- Numeric value of how many regular plays happened in a given drive.
-  `drive_result` varchar(30) DEFAULT NULL,          -- drive result
-  `drive_top` varchar(10) DEFAULT NULL,             -- Time of possession in a given drive.
-  `drive_fds` int(2) DEFAULT NULL,                  -- Number of first downs in a given drive.
-  `drive_inside20` tinyint(1) DEFAULT NULL,         -- Binary indicator if the offense was able to get inside the opponents 20 yard line.
-  `drive_score` tinyint(1) DEFAULT NULL, -- Binary indicator the drive ended with a score.
-  `drive_start_qtr` tinyint(1) DEFAULT NULL,       -- Numeric value indicating in which quarter the given drive has started.
-  `drive_end_qtr` tinyint(1) DEFAULT NULL,         -- Numeric value indicating in which quarter the given drive has ended.
-  `drive_yds_penalized` int(3) DEFAULT NULL,       -- Numeric value of how many yards the offense gained or lost through penalties in the given drive.
-  `drive_start_transition` varchar(30) DEFAULT NULL,  -- String indicating how the offense got the ball.
-  `drive_end_transition` varchar(30) DEFAULT NULL,    -- String indicating how the offense lost the ball.
-  `drive_game_clock_start` varchar(10) DEFAULT NULL,   -- Game time at the beginning of a given drive.
-  `drive_game_clock_end` varchar(10) DEFAULT NULL,     -- Game time at the end of a given drive.
-  `drive_start_ydl` varchar(10) DEFAULT NULL,      -- String indicating where a given drive started consisting of team half and yard line number.
-  `drive_end_ydl` varchar(10) DEFAULT NULL,        -- String indicating where a given drive ended consisting of team half and yard line number.
-  `drive_start_play_id` int(10) DEFAULT NULL,      -- Play_id of the first play in the given drive.
-  `drive_end_play_id` int(10) DEFAULT NULL,        -- Play_id of the last play in the given drive.
+  `drive_play_count` int(3) DEFAULT NULL COMMENT 'Numeric value of how many regular plays happened in a given drive.',
+  `drive_result` varchar(30) DEFAULT NULL COMMENT 'drive result',
+  `drive_top` varchar(10) DEFAULT NULL COMMENT 'Time of possession in a given drive.',
+  `drive_fds` int(2) DEFAULT NULL COMMENT 'Number of first downs in a given drive.',
+  `drive_inside20` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator if the offense was able to get inside the opponents 20 yard line.',
+  `drive_score` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator the drive ended with a score.',
+  `drive_start_qtr` tinyint(1) DEFAULT NULL COMMENT 'Numeric value indicating in which quarter the given drive has started.',
+  `drive_end_qtr` tinyint(1) DEFAULT NULL COMMENT 'Numeric value indicating in which quarter the given drive has ended.',
+  `drive_yds_penalized` int(3) DEFAULT NULL COMMENT 'Numeric value of how many yards the offense gained or lost through penalties in the given drive.',
+  `drive_start_transition` varchar(30) DEFAULT NULL COMMENT 'String indicating how the offense got the ball.',
+  `drive_end_transition` varchar(30) DEFAULT NULL COMMENT 'String indicating how the offense lost the ball.',
+  `drive_game_clock_start` varchar(10) DEFAULT NULL COMMENT 'Game time at the beginning of a given drive.',
+  `drive_game_clock_end` varchar(10) DEFAULT NULL COMMENT 'Game time at the end of a given drive.',
+  `drive_start_ydl` varchar(10) DEFAULT NULL COMMENT 'String indicating where a given drive started consisting of team half and yard line number.',
+  `drive_end_ydl` varchar(10) DEFAULT NULL COMMENT 'String indicating where a given drive ended consisting of team half and yard line number.',
+  `drive_start_play_id` int(10) DEFAULT NULL COMMENT 'Play_id of the first play in the given drive.',
+  `drive_end_play_id` int(10) DEFAULT NULL COMMENT 'Play_id of the last play in the given drive.',
 
-  `series_seq` int(3) DEFAULT NULL,                -- Starts at 1, each new first down increments, numbers shared across both teams NA: kickoffs, extra point/two point conversion attempts, non-plays, no posteam
-  `series_suc` tinyint(1) DEFAULT NULL,            -- 1: scored touchdown, gained enough yards for first down.
-  `series_result` varchar(100) DEFAULT NULL,       -- Possible values: First down, Touchdown, Opp touchdown, Field goal, Missed field goal, Safety, Turnover, Punt, Turnover on downs, QB kneel, End of half
+  `series_seq` int(3) DEFAULT NULL COMMENT 'Starts at 1, each new first down increments, numbers shared across both teams NA: kickoffs, extra point/two point conversion attempts, non-plays, no posteam',
+  `series_suc` tinyint(1) DEFAULT NULL COMMENT '1: scored touchdown, gained enough yards for first down.',
+  `series_result` varchar(100) DEFAULT NULL COMMENT 'Possible values: First down, Touchdown, Opp touchdown, Field goal, Missed field goal, Safety, Turnover, Punt, Turnover on downs, QB kneel, End of half',
 
-  `gtg` tinyint(1) DEFAULT NULL,                    -- Binary indicator for whether or not the posteam is in a goal down situation.
+  `gtg` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for whether or not the posteam is in a goal down situation.',
 
-  `score` tinyint(1) DEFAULT NULL,                     -- Binary indicator for whether or not a score occurred on the play.
-  `score_type` varchar(10) DEFAULT NULL,               -- Scoring play type: FG, PAT, PAT2, SFTY, TD
-  `score_team` varchar(4) DEFAULT NULL,                -- Scoring play team
+  `score` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for whether or not a score occurred on the play.',
+  `score_type` varchar(10) DEFAULT NULL COMMENT 'Scoring play type: FG, PAT, PAT2, SFTY, TD',
+  `score_team` varchar(4) DEFAULT NULL COMMENT 'Scoring play team',
 
   `timestamp` varchar(10) DEFAULT NULL,
 
-  `play_clock` tinyint unsigned DEFAULT NULL,        -- Time on the playclock when the ball was snapped.
+  `play_clock` tinyint unsigned DEFAULT NULL COMMENT 'Time on the playclock when the ball was snapped.',
 
-  `game_clock_start` varchar(10) DEFAULT NULL,  -- Time at start of play provided in string format as minutes:seconds remaining in the quarter.
-  `game_clock_end` varchar(10) DEFAULT NULL,    -- Game time at the end of a given play.
-  `sec_rem_qtr` int(4) DEFAULT NULL,            -- Numeric seconds remaining in the quarter.
-  `sec_rem_half` int(4) DEFAULT NULL,           -- Numeric seconds remaining in the half.
-  `sec_rem_gm` int(4) DEFAULT NULL,             -- Numeric seconds remaining in the game.
+  `game_clock_start` varchar(10) DEFAULT NULL COMMENT 'Time at start of play provided in string format as minutes:seconds remaining in the quarter.',
+  `game_clock_end` varchar(10) DEFAULT NULL COMMENT 'Game time at the end of a given play.',
+  `sec_rem_qtr` int(4) DEFAULT NULL COMMENT 'Numeric seconds remaining in the quarter.',
+  `sec_rem_half` int(4) DEFAULT NULL COMMENT 'Numeric seconds remaining in the half.',
+  `sec_rem_gm` int(4) DEFAULT NULL COMMENT 'Numeric seconds remaining in the game.',
 
   `pos_team` varchar(4) DEFAULT NULL,
   `pos_team_id` varchar(36) DEFAULT NULL,
 
-  `off` varchar(3) DEFAULT NULL,                    -- offense
-  `def` varchar(3) DEFAULT NULL,                    -- defense
+  `off` varchar(3) DEFAULT NULL COMMENT 'offense',
+  `def` varchar(3) DEFAULT NULL COMMENT 'defense',
 
   `deleted` tinyint(1) DEFAULT NULL,
   `review` text DEFAULT NULL,
 
-  `play_type` varchar(4) DEFAULT NULL,                   -- RUSH, PASS, FGXP, PUNT, KOFF, ONSD, NOPL, CONV
+  `play_type` varchar(4) DEFAULT NULL COMMENT 'RUSH, PASS, FGXP, PUNT, KOFF, ONSD, NOPL, CONV',
   `play_type_nfl` varchar(36) DEFAULT NULL,
   `play_type_ngs` varchar(36) DEFAULT NULL,
 
   `next_play_type` varchar(36) DEFAULT NULL,
 
-  `player_fuml_pid` varchar(25) DEFAULT NULL,   -- fumbling player
-  `player_fuml_gsis` varchar(36) DEFAULT NULL,  -- fumbling player gsis
-  `bc_pid` varchar(25) DEFAULT NULL,            -- ball carrier
-  `bc_gsis` varchar(36) DEFAULT NULL,           -- ball carrier gsis
-  `psr_pid` varchar(25) DEFAULT NULL,           -- passer
-  `psr_gsis` varchar(36) DEFAULT NULL,          -- passer gsis
-  `trg_pid` varchar(25) DEFAULT NULL,           -- targeted player
-  `trg_gsis` varchar(36) DEFAULT NULL,          -- targeted player gsis
-  `intp_pid` varchar(25) DEFAULT NULL,          -- intercepting player
-  `intp_gsis` varchar(36) DEFAULT NULL,         -- intercepting player gsis
+  `player_fuml_pid` varchar(25) DEFAULT NULL COMMENT 'fumbling player',
+  `player_fuml_gsis` varchar(36) DEFAULT NULL COMMENT 'fumbling player gsis',
+  `bc_pid` varchar(25) DEFAULT NULL COMMENT 'ball carrier',
+  `bc_gsis` varchar(36) DEFAULT NULL COMMENT 'ball carrier gsis',
+  `psr_pid` varchar(25) DEFAULT NULL COMMENT 'passer',
+  `psr_gsis` varchar(36) DEFAULT NULL COMMENT 'passer gsis',
+  `trg_pid` varchar(25) DEFAULT NULL COMMENT 'targeted player',
+  `trg_gsis` varchar(36) DEFAULT NULL COMMENT 'targeted player gsis',
+  `intp_pid` varchar(25) DEFAULT NULL COMMENT 'intercepting player',
+  `intp_gsis` varchar(36) DEFAULT NULL COMMENT 'intercepting player gsis',
 
-  `yds_gained` tinyint(3) DEFAULT NULL,         -- yardage gained (or lost) by the possessing team
+  `yds_gained` tinyint(3) DEFAULT NULL COMMENT 'yardage gained (or lost) by the possessing team',
 
-  `fum` tinyint(1) DEFAULT NULL,                -- fumble occured
-  `fuml` tinyint(1) DEFAULT NULL,               -- fumble lost
-  `int` tinyint(1) DEFAULT NULL,                -- interception
-  `sk` tinyint(1) DEFAULT NULL,                 -- sack
-  `succ` tinyint(1) DEFAULT NULL,               -- successful play
-  `comp` tinyint(1) DEFAULT NULL,               -- completion
-  `incomp` tinyint(1) DEFAULT NULL,             -- incompletion
-  `trick` tinyint(1) DEFAULT NULL,              -- trick play
-  `touchback` tinyint(1) DEFAULT NULL,          -- touchback
-  `safety` tinyint(1) DEFAULT NULL,             -- safety
-  `penalty` tinyint(1) DEFAULT NULL,            -- penalty
-  `oob` tinyint(1) DEFAULT NULL,                -- 1 if play description contains ran ob, pushed ob, or sacked ob; 0 otherwise.
-  `tfl` tinyint(1) DEFAULT NULL,                -- Binary indicator for whether or not a tackle for loss on a run play occurred.
-  `rush` tinyint(1) DEFAULT NULL,               -- Binary indicator for if the play was a run.
-  `pass` tinyint(1) DEFAULT NULL,               -- Binary indicator for if the play was a pass attempt (includes sacks).
-  `solo_tk` tinyint(1) DEFAULT NULL,            -- Binary indicator if the play had a solo tackle (could be multiple due to fumbles).
-  `assist_tk` tinyint(1) DEFAULT NULL,          -- Binary indicator for if an assist tackle occurred.
+  `fum` tinyint(1) DEFAULT NULL COMMENT 'fumble occurred',
+  `fuml` tinyint(1) DEFAULT NULL COMMENT 'fumble lost',
+  `int` tinyint(1) DEFAULT NULL COMMENT 'interception',
+  `sk` tinyint(1) DEFAULT NULL COMMENT 'sack',
+  `succ` tinyint(1) DEFAULT NULL COMMENT 'successful play',
+  `comp` tinyint(1) DEFAULT NULL COMMENT 'completion',
+  `incomp` tinyint(1) DEFAULT NULL COMMENT 'incompletion',
+  `trick` tinyint(1) DEFAULT NULL COMMENT 'trick play',
+  `touchback` tinyint(1) DEFAULT NULL COMMENT 'touchback',
+  `safety` tinyint(1) DEFAULT NULL COMMENT 'safety',
+  `penalty` tinyint(1) DEFAULT NULL COMMENT 'penalty',
+  `oob` tinyint(1) DEFAULT NULL COMMENT '1 if play description contains ran ob, pushed ob, or sacked ob; 0 otherwise.',
+  `tfl` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for whether or not a tackle for loss on a run play occurred.',
+  `rush` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for if the play was a run.',
+  `pass` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for if the play was a pass attempt (includes sacks).',
+  `solo_tk` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator if the play had a solo tackle (could be multiple due to fumbles).',
+  `assist_tk` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for if an assist tackle occurred.',
 
-  `special` tinyint(1) DEFAULT NULL,                 -- special teams
-  `special_play_type` varchar(10) DEFAULT NULL,            -- special teams play type
+  `special` tinyint(1) DEFAULT NULL COMMENT 'special teams',
+  `special_play_type` varchar(10) DEFAULT NULL COMMENT 'special teams play type',
 
-  `pen_team` varchar(3) DEFAULT NULL,           -- String abbreviation of the team with the penalty.
-  `pen_yds` int(3) DEFAULT NULL,                -- Yards gained (or lost) by the posteam from the penalty.
+  `pen_team` varchar(3) DEFAULT NULL COMMENT 'String abbreviation of the team with the penalty.',
+  `pen_yds` int(3) DEFAULT NULL COMMENT 'Yards gained (or lost) by the posteam from the penalty.',
 
-  `td` tinyint(1) DEFAULT NULL,                 -- touchdown
-  `ret_td` tinyint(1) DEFAULT NULL,             -- return touchdown
-  `pass_td` tinyint(1) DEFAULT NULL,            -- passing touchdown
-  `rush_td` tinyint(1) DEFAULT NULL,            -- rushing touchdown
-  `td_tm` varchar(5) DEFAULT NULL,              -- touchdown team abbreviation
+  `td` tinyint(1) DEFAULT NULL COMMENT 'touchdown',
+  `ret_td` tinyint(1) DEFAULT NULL COMMENT 'return touchdown',
+  `pass_td` tinyint(1) DEFAULT NULL COMMENT 'passing touchdown',
+  `rush_td` tinyint(1) DEFAULT NULL COMMENT 'rushing touchdown',
+  `td_tm` varchar(5) DEFAULT NULL COMMENT 'touchdown team abbreviation',
 
-  `pass_yds` tinyint(3) DEFAULT NULL,               -- Numeric yards by the passer_player_name, including yards gained in pass plays with laterals. This should equal official passing statistics.
-  `recv_yds` tinyint(3) DEFAULT NULL,               -- Numeric yards by the receiver_player_name, excluding yards gained in pass plays with laterals. This should equal official receiving statistics but could miss yards gained in pass plays with laterals. Please see the description of `lateral_receiver_player_name` for further information.
-  `rush_yds` tinyint(3) DEFAULT NULL,               -- Numeric yards by the rusher_player_name, excluding yards gained in rush plays with laterals. This should equal official rushing statistics but could miss yards gained in rush plays with laterals. Please see the description of `lateral_rusher_player_name` for further information.
+  `pass_yds` tinyint(3) DEFAULT NULL COMMENT 'Numeric yards by the passer_player_name, including yards gained in pass plays with laterals. This should equal official passing statistics.',
+  `recv_yds` tinyint(3) DEFAULT NULL COMMENT 'Numeric yards by the receiver_player_name, excluding yards gained in pass plays with laterals. This should equal official receiving statistics but could miss yards gained in pass plays with laterals. Please see the description of lateral_receiver_player_name for further information.',
+  `rush_yds` tinyint(3) DEFAULT NULL COMMENT 'Numeric yards by the rusher_player_name, excluding yards gained in rush plays with laterals. This should equal official rushing statistics but could miss yards gained in rush plays with laterals. Please see the description of lateral_rusher_player_name for further information.',
 
-  `dot` int(3) DEFAULT NULL,                    -- depth of target
-  `tay` tinyint(1) DEFAULT NULL,                -- true air yards, Distance ball travels in the air from point of throw to a receivers hands; back of endzone or sideline.
-  `yac` int(3) DEFAULT NULL,                    -- yard after catch
-  `yaco` int(3) DEFAULT NULL,                   -- yards after contact
-  `ret_yds` int(3) DEFAULT NULL,                -- return yardage
-  `ret_tm` varchar(5) DEFAULT NULL,             -- return team abbrevation
+  `dot` int(3) DEFAULT NULL COMMENT 'depth of target',
+  `tay` tinyint(1) DEFAULT NULL COMMENT 'true air yards, Distance ball travels in the air from point of throw to a receivers hands; back of endzone or sideline.',
+  `yac` int(3) DEFAULT NULL COMMENT 'yard after catch',
+  `yaco` int(3) DEFAULT NULL COMMENT 'yards after contact',
+  `ret_yds` int(3) DEFAULT NULL COMMENT 'return yardage',
+  `ret_tm` varchar(5) DEFAULT NULL COMMENT 'return team abbreviation',
 
-  `sg` tinyint(1) DEFAULT NULL,                 -- shotgun
-  `nh` tinyint(1) DEFAULT NULL,                 -- no huddle
-  `pap` tinyint(1) DEFAULT NULL,                -- play action pass
-  `qbd` tinyint(1) DEFAULT NULL,                -- QB dropped back on the play (pass attempt, sack, or scrambled).
-  `qbk` tinyint(1) DEFAULT NULL,                -- QB took a knee.
-  `qbs` tinyint(1) DEFAULT NULL,                -- QB spiked the ball.
-  `qbru` tinyint(1) DEFAULT NULL,               -- QB run, a designed running play for the QB. These are only marked on runs by a natural QB where he lined up as a QB. Also, sneaks and kneel-downs are not counted.
-  `sneak` tinyint(1) DEFAULT NULL,              -- QB sneak
-  `scrm` tinyint(1) DEFAULT NULL,               -- QB scramble
+  `sg` tinyint(1) DEFAULT NULL COMMENT 'shotgun',
+  `nh` tinyint(1) DEFAULT NULL COMMENT 'no huddle',
+  `pap` tinyint(1) DEFAULT NULL COMMENT 'play action pass',
+  `qbd` tinyint(1) DEFAULT NULL COMMENT 'QB dropped back on the play (pass attempt, sack, or scrambled).',
+  `qbk` tinyint(1) DEFAULT NULL COMMENT 'QB took a knee.',
+  `qbs` tinyint(1) DEFAULT NULL COMMENT 'QB spiked the ball.',
+  `qbru` tinyint(1) DEFAULT NULL COMMENT 'QB run, a designed running play for the QB. These are only marked on runs by a natural QB where he lined up as a QB. Also, sneaks and kneel-downs are not counted.',
+  `sneak` tinyint(1) DEFAULT NULL COMMENT 'QB sneak',
+  `scrm` tinyint(1) DEFAULT NULL COMMENT 'QB scramble',
 
-  `qb_pressure` tinyint(2) DEFAULT NULL,        -- QB pressure
-  `qb_pressure_ngs` tinyint(2) DEFAULT NULL,            -- QB pressure (NGS)
-  `qb_hit` tinyint(2) DEFAULT NULL,             -- QB hit
-  `qb_hurry` tinyint(2) DEFAULT NULL,           -- QB hurry
+  `qb_pressure` tinyint(2) DEFAULT NULL COMMENT 'QB pressure',
+  `qb_pressure_ngs` tinyint(2) DEFAULT NULL COMMENT 'QB pressure (NGS)',
+  `qb_hit` tinyint(2) DEFAULT NULL COMMENT 'QB hit',
+  `qb_hurry` tinyint(2) DEFAULT NULL COMMENT 'QB hurry',
 
-  `int_worthy` tinyint(1) DEFAULT NULL,         -- interception worthy
-  `cball` tinyint(1) DEFAULT NULL,              -- catchable ball, A pass in which an eligible receiver has the opportunity to get his hands on the football with reasonable movement, timing, and opportunity.
-  `qbta` tinyint(1) DEFAULT NULL,               -- QB Throw Away
-  `shov` tinyint(1) DEFAULT NULL,               -- Shovel/Touch Pass
-  `side` tinyint(1) DEFAULT NULL,               -- Sideline pass, Balls outside of the field but catchable when the receiver extends body/arms.
-  `high` tinyint(1) DEFAULT NULL,               -- Highlight pass, Perfect pass that only the receiver can reach. Features perfect placement in a tight window.
+  `int_worthy` tinyint(1) DEFAULT NULL COMMENT 'interception worthy',
+  `cball` tinyint(1) DEFAULT NULL COMMENT 'catchable ball, A pass in which an eligible receiver has the opportunity to get his hands on the football with reasonable movement, timing, and opportunity.',
+  `qbta` tinyint(1) DEFAULT NULL COMMENT 'QB Throw Away',
+  `shov` tinyint(1) DEFAULT NULL COMMENT 'Shovel/Touch Pass',
+  `side` tinyint(1) DEFAULT NULL COMMENT 'Sideline pass, Balls outside of the field but catchable when the receiver extends body/arms.',
+  `high` tinyint(1) DEFAULT NULL COMMENT 'Highlight pass, Perfect pass that only the receiver can reach. Features perfect placement in a tight window.',
 
-  `drp` tinyint(1) DEFAULT NULL,                -- dropped pass
-  `cnb` tinyint(1) DEFAULT NULL,                -- contested ball, Passes into close coverage that involve a physical battle between receiver and defender for control of the ball.
-  `crr` tinyint(1) DEFAULT NULL,                -- Created Reception, Difficult catches that require exceptional body control; hands; acrobatics, or any combination thereof.
+  `drp` tinyint(1) DEFAULT NULL COMMENT 'dropped pass',
+  `cnb` tinyint(1) DEFAULT NULL COMMENT 'contested ball, Passes into close coverage that involve a physical battle between receiver and defender for control of the ball.',
+  `crr` tinyint(1) DEFAULT NULL COMMENT 'Created Reception, Difficult catches that require exceptional body control; hands; acrobatics, or any combination thereof.',
 
-  `mbt` tinyint(1) DEFAULT NULL,                -- missed or broken tackles
-  `avsk` tinyint(1) DEFAULT NULL,               -- number of avoided sacks
+  `mbt` tinyint(1) DEFAULT NULL COMMENT 'missed or broken tackles',
+  `avsk` tinyint(1) DEFAULT NULL COMMENT 'number of avoided sacks',
 
-  `run_location` varchar(10) DEFAULT NULL,      -- String indicator for location of run: left, middle, or right.
-  `run_gap` varchar(10) DEFAULT NULL,           -- String indicator for line gap of run: end, guard, or tackle
+  `run_location` varchar(10) DEFAULT NULL COMMENT 'String indicator for location of run: left, middle, or right.',
+  `run_gap` varchar(10) DEFAULT NULL COMMENT 'String indicator for line gap of run: end, guard, or tackle',
 
-  `option` varchar(3) DEFAULT NULL,             -- option play, values: RPO (run/pass), RUN (run/qbrun)
-  `tlook` tinyint(1) DEFAULT NULL,              -- trick look
+  `option` varchar(3) DEFAULT NULL COMMENT 'option play, values: RPO (run/pass), RUN (run/qbrun)',
+  `tlook` tinyint(1) DEFAULT NULL COMMENT 'trick look',
 
-  `fd` tinyint(1) DEFAULT NULL,                 -- first down
-  `fd_rush` tinyint(1) DEFAULT NULL,            -- Binary indicator for if a running play converted the first down.
-  `fd_pass` tinyint(1) DEFAULT NULL,            -- Binary indicator for if a passing play converted the first down.
-  `fd_penalty` tinyint(1) DEFAULT NULL,         -- Binary indicator for if a penalty converted the first down.
+  `fd` tinyint(1) DEFAULT NULL COMMENT 'first down',
+  `fd_rush` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for if a running play converted the first down.',
+  `fd_pass` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for if a passing play converted the first down.',
+  `fd_penalty` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for if a penalty converted the first down.',
 
-  `third_down_converted` tinyint(1) DEFAULT NULL,  -- Binary indicator for if the first down was converted on third down.
-  `third_down_failed` tinyint(1) DEFAULT NULL,     -- Binary indicator for if the posteam failed to convert first down on third down.
-  `fourth_down_converted` tinyint(1) DEFAULT NULL, -- Binary indicator for if the first down was converted on fourth down.
-  `fourth_down_failed` tinyint(1) DEFAULT NULL,    -- Binary indicator for if the posteam failed to convert first down on fourth down.
+  `third_down_converted` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for if the first down was converted on third down.',
+  `third_down_failed` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for if the posteam failed to convert first down on third down.',
+  `fourth_down_converted` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for if the first down was converted on fourth down.',
+  `fourth_down_failed` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for if the posteam failed to convert first down on fourth down.',
 
-  `htm` tinyint(1) DEFAULT NULL,                -- hindered throwing motion
-  `zblz` tinyint(1) DEFAULT NULL,               -- zone blitz, at least one Off-Ball LB rushed the passer instead of a DL who dropped into coverage
-  `stnt` tinyint(1) DEFAULT NULL,               -- stunt, when any two pass rushers cross, trading pass rush lanes on a passing down
-  `oop` tinyint(1) DEFAULT NULL,                -- out of pocket pass
-  `phyb` tinyint(1) DEFAULT NULL,               -- physical ball, Pass target takes significant punishment whether the pass is caught or not. Most 'Contested Balls' will also be a 'Physical Ball'.
-  `bap` tinyint(1) DEFAULT NULL,                -- batted pass
-  `fread` tinyint(1) DEFAULT NULL,              -- first read
-  `scre` tinyint(1) DEFAULT NULL,               -- screen pass
-  `pfp` tinyint(1) DEFAULT NULL,                -- pain free play, Ball carrier is only lightly touched by a defender on the field (ie QB slide) or runs out of bounds with little or no physical contact with the defender or sideline personnel/equipment. Includes TD's
-  `qbsk` tinyint(1) DEFAULT NULL,               -- qb sack, QB was to blame for the sack: held ball too long; missed wide open receiver etc
+  `htm` tinyint(1) DEFAULT NULL COMMENT 'hindered throwing motion',
+  `zblz` tinyint(1) DEFAULT NULL COMMENT 'zone blitz, at least one Off-Ball LB rushed the passer instead of a DL who dropped into coverage',
+  `stnt` tinyint(1) DEFAULT NULL COMMENT 'stunt, when any two pass rushers cross, trading pass rush lanes on a passing down',
+  `oop` tinyint(1) DEFAULT NULL COMMENT 'out of pocket pass',
+  `phyb` tinyint(1) DEFAULT NULL COMMENT 'physical ball, Pass target takes significant punishment whether the pass is caught or not. Most Contested Balls will also be a Physical Ball.',
+  `bap` tinyint(1) DEFAULT NULL COMMENT 'batted pass',
+  `fread` tinyint(1) DEFAULT NULL COMMENT 'first read',
+  `scre` tinyint(1) DEFAULT NULL COMMENT 'screen pass',
+  `pfp` tinyint(1) DEFAULT NULL COMMENT 'pain free play, Ball carrier is only lightly touched by a defender on the field (ie QB slide) or runs out of bounds with little or no physical contact with the defender or sideline personnel/equipment. Includes TDs',
+  `qbsk` tinyint(1) DEFAULT NULL COMMENT 'qb sack, QB was to blame for the sack: held ball too long; missed wide open receiver etc',
 
-  `ttscrm` decimal(3,1) DEFAULT NULL,           -- time to scramble
-  `ttp` decimal(3,1) DEFAULT NULL,              -- time to pass
-  `ttsk` decimal(3,1) DEFAULT NULL,             -- time to sack
-  `ttpr` decimal(3,1) DEFAULT NULL,             -- time to pressure
+  `ttscrm` decimal(3,1) DEFAULT NULL COMMENT 'time to scramble',
+  `ttp` decimal(3,1) DEFAULT NULL COMMENT 'time to pass',
+  `ttsk` decimal(3,1) DEFAULT NULL COMMENT 'time to sack',
+  `ttpr` decimal(3,1) DEFAULT NULL COMMENT 'time to pressure',
 
-  `back` tinyint(2) DEFAULT NULL,               -- number in backfield (wr, rb, te, fb)
-  `xlm` tinyint(1) DEFAULT NULL,                -- extra men on the line, Number of players lined up on either side of the Offensive Tackles - usually a Tight End.
-  `db` tinyint(2) DEFAULT NULL,                 -- number of defensive backs
-  `box` tinyint(2) DEFAULT NULL,                -- number of defenders in the box
-  `boxdb` tinyint(2) DEFAULT NULL,              -- number of dbs in the box
-  `pru` tinyint(1) DEFAULT NULL,                -- pass rushers
-  `blz` tinyint(1) DEFAULT NULL,                -- number of LB's and DB's blitzing
-  `dblz` tinyint(1) DEFAULT NULL,               -- Number of DB's blitzing
-  `oopd` varchar(2) DEFAULT NULL,               -- out of pocket pass details, Clean [C], Pressure [P], Designed [D], Designed Rollout [DR]
-  `cov` tinyint(1) DEFAULT NULL,                -- coverage on target, Uncovered is 0, single coverage is 1, double is 2.
+  `back` tinyint(2) DEFAULT NULL COMMENT 'number in backfield (wr, rb, te, fb)',
+  `xlm` tinyint(1) DEFAULT NULL COMMENT 'extra men on the line, Number of players lined up on either side of the Offensive Tackles - usually a Tight End.',
+  `db` tinyint(2) DEFAULT NULL COMMENT 'number of defensive backs',
+  `box` tinyint(2) DEFAULT NULL COMMENT 'number of defenders in the box',
+  `boxdb` tinyint(2) DEFAULT NULL COMMENT 'number of dbs in the box',
+  `pru` tinyint(1) DEFAULT NULL COMMENT 'pass rushers',
+  `blz` tinyint(1) DEFAULT NULL COMMENT 'number of LBs and DBs blitzing',
+  `dblz` tinyint(1) DEFAULT NULL COMMENT 'Number of DBs blitzing',
+  `oopd` varchar(2) DEFAULT NULL COMMENT 'out of pocket pass details, Clean [C], Pressure [P], Designed [D], Designed Rollout [DR]',
+  `cov` tinyint(1) DEFAULT NULL COMMENT 'coverage on target, Uncovered is 0, single coverage is 1, double is 2.',
 
-  `ep` decimal(16,12) DEFAULT NULL,             -- Using the scoring event probabilities, the estimated expected points with respect to the possession team for the given play.
-  `epa` decimal(16,12) DEFAULT NULL,            -- Expected points added (EPA) by the posteam for the given play.
-  `ep_succ` tinyint(1) DEFAULT NULL,            -- Binary indicator wheter epa > 0 in the given play.
+  `ep` decimal(16,12) DEFAULT NULL COMMENT 'Using the scoring event probabilities, the estimated expected points with respect to the possession team for the given play.',
+  `epa` decimal(16,12) DEFAULT NULL COMMENT 'Expected points added (EPA) by the posteam for the given play.',
+  `ep_succ` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator wheter epa > 0 in the given play.',
 
-  `total_home_epa` decimal(16,12) DEFAULT NULL,             -- Cumulative total EPA for the home team in the game so far.
-  `total_away_epa` decimal(16,12) DEFAULT NULL,             -- Cumulative total EPA for the away team in the game so far.
-  `total_home_rush_epa` decimal(16,12) DEFAULT NULL,        -- Cumulative total rushing EPA for the home team in the game so far.
-  `total_away_rush_epa` decimal(16,12) DEFAULT NULL,        -- Cumulative total rushing EPA for the away team in the game so far.
-  `total_home_pass_epa` decimal(16,12) DEFAULT NULL,        -- Cumulative total passing EPA for the home team in the game so far.
-  `total_away_pass_epa` decimal(16,12) DEFAULT NULL,        -- Cumulative total passing EPA for the away team in the game so far.
+  `total_home_epa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total EPA for the home team in the game so far.',
+  `total_away_epa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total EPA for the away team in the game so far.',
+  `total_home_rush_epa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total rushing EPA for the home team in the game so far.',
+  `total_away_rush_epa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total rushing EPA for the away team in the game so far.',
+  `total_home_pass_epa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total passing EPA for the home team in the game so far.',
+  `total_away_pass_epa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total passing EPA for the away team in the game so far.',
 
-  `qb_epa` decimal(16,12) DEFAULT NULL,                     -- Gives QB credit for EPA for up to the point where a receiver lost a fumble after a completed catch and makes EPA work more like passing yards on plays with fumbles.
-  `air_epa` decimal(16,12) DEFAULT NULL,                    -- EPA from the air yards alone. For completions this represents the actual value provided through the air. For incompletions this represents the hypothetical value that could've been added through the air if the pass was completed.
-  `yac_epa` decimal(16,12) DEFAULT NULL,                    -- EPA from the yards after catch alone. For completions this represents the actual value provided after the catch. For incompletions this represents the difference between the hypothetical air_epa and the play's raw observed EPA (how much the incomplete pass cost the posteam).
-  `comp_air_epa` decimal(16,12) DEFAULT NULL,               -- EPA from the air yards alone only for completions.
-  `comp_yac_epa` decimal(16,12) DEFAULT NULL,               -- EPA from the yards after catch alone only for completions.
-  `xyac_epa` decimal(16,12) DEFAULT NULL,                   -- Expected value of EPA gained after the catch, starting from where the catch was made. Zero yards after the catch would be listed as zero EPA.
-  `total_home_comp_air_epa` decimal(16,12) DEFAULT NULL,    -- Cumulative total completions air EPA for the home team in the game so far.
-  `total_away_comp_air_epa` decimal(16,12) DEFAULT NULL,    -- Cumulative total completions air EPA for the away team in the game so far.
-  `total_home_comp_yac_epa` decimal(16,12) DEFAULT NULL,    -- Cumulative total completions yac EPA for the home team in the game so far.
-  `total_away_comp_yac_epa` decimal(16,12) DEFAULT NULL,    -- Cumulative total completions yac EPA for the away team in the game so far.
-  `total_home_raw_air_epa` decimal(16,12) DEFAULT NULL,     -- Cumulative total raw air EPA for the home team in the game so far.
-  `total_away_raw_air_epa` decimal(16,12) DEFAULT NULL,     -- Cumulative total raw air EPA for the away team in the game so far.
-  `total_home_raw_yac_epa` decimal(16,12) DEFAULT NULL,     -- Cumulative total raw yac EPA for the home team in the game so far.
-  `total_away_raw_yac_epa` decimal(16,12) DEFAULT NULL,     -- Cumulative total raw yac EPA for the away team in the game so far.
+  `qb_epa` decimal(16,12) DEFAULT NULL COMMENT 'Gives QB credit for EPA for up to the point where a receiver lost a fumble after a completed catch and makes EPA work more like passing yards on plays with fumbles.',
+  `air_epa` decimal(16,12) DEFAULT NULL COMMENT 'EPA from the air yards alone. For completions this represents the actual value provided through the air. For incompletions this represents the hypothetical value that could have been added through the air if the pass was completed.',
+  `yac_epa` decimal(16,12) DEFAULT NULL COMMENT 'EPA from the yards after catch alone. For completions this represents the actual value provided after the catch. For incompletions this represents the difference between the hypothetical air_epa and the plays raw observed EPA (how much the incomplete pass cost the posteam).',
+  `comp_air_epa` decimal(16,12) DEFAULT NULL COMMENT 'EPA from the air yards alone only for completions.',
+  `comp_yac_epa` decimal(16,12) DEFAULT NULL COMMENT 'EPA from the yards after catch alone only for completions.',
+  `xyac_epa` decimal(16,12) DEFAULT NULL COMMENT 'Expected value of EPA gained after the catch, starting from where the catch was made. Zero yards after the catch would be listed as zero EPA.',
+  `total_home_comp_air_epa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total completions air EPA for the home team in the game so far.',
+  `total_away_comp_air_epa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total completions air EPA for the away team in the game so far.',
+  `total_home_comp_yac_epa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total completions yac EPA for the home team in the game so far.',
+  `total_away_comp_yac_epa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total completions yac EPA for the away team in the game so far.',
+  `total_home_raw_air_epa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total raw air EPA for the home team in the game so far.',
+  `total_away_raw_air_epa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total raw air EPA for the away team in the game so far.',
+  `total_home_raw_yac_epa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total raw yac EPA for the home team in the game so far.',
+  `total_away_raw_yac_epa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total raw yac EPA for the away team in the game so far.',
 
-  `wp` decimal(16,12) DEFAULT NULL,             -- Estimated win probabiity for the posteam given the current situation at the start of the given play.
-  `wpa` decimal(16,12) DEFAULT NULL,            -- Win probability added (WPA) for the posteam.
-  `home_wp` decimal(16,12) DEFAULT NULL,        -- Estimated win probability for the home team.
-  `away_wp` decimal(16,12) DEFAULT NULL,        -- Estimated win probability for the away team.
-  `vegas_wpa` decimal(16,12) DEFAULT NULL,      -- Win probability added (WPA) for the posteam: spread_adjusted model.
-  `vegas_home_wpa` decimal(16,12) DEFAULT NULL, -- Win probability added (WPA) for the home team: spread_adjusted model.
-  `home_wp_post` decimal(16,12) DEFAULT NULL,   -- Estimated win probability for the home team at the end of the play.
-  `away_wp_post` decimal(16,12) DEFAULT NULL,   -- Estimated win probability for the away team at the end of the play.
-  `vegas_wp` decimal(16,12) DEFAULT NULL,       -- Estimated win probabiity for the posteam given the current situation at the start of the given play, incorporating pre-game Vegas line.
-  `vegas_home_wp` decimal(16,12) DEFAULT NULL,  -- Estimated win probability for the home team incorporating pre-game Vegas line.
-  `total_home_rush_wpa` decimal(16,12) DEFAULT NULL, -- Cumulative total rushing WPA for the home team in the game so far.
-  `total_away_rush_wpa` decimal(16,12) DEFAULT NULL, -- Cumulative total rushing WPA for the away team in the game so far.
-  `total_home_pass_wpa` decimal(16,12) DEFAULT NULL, -- Cumulative total passing WPA for the home team in the game so far.
-  `total_away_pass_wpa` decimal(16,12) DEFAULT NULL, -- Cumulative total passing WPA for the away team in the game so far.
-  `air_wpa` decimal(16,12) DEFAULT NULL,       -- WPA through the air (same logic as air_epa).
-  `yac_wpa` decimal(16,12) DEFAULT NULL,       -- WPA from yards after the catch (same logic as yac_epa).
-  `comp_air_wpa` decimal(16,12) DEFAULT NULL,  -- The air_wpa for completions only.
-  `comp_yac_wpa` decimal(16,12) DEFAULT NULL,  -- The yac_wpa for completions only.
-  `total_home_comp_air_wpa` decimal(16,12) DEFAULT NULL,      -- Cumulative total completions air WPA for the home team in the game so far.
-  `total_away_comp_air_wpa` decimal(16,12) DEFAULT NULL,      -- Cumulative total completions air WPA for the away team in the game so far.
-  `total_home_comp_yac_wpa` decimal(16,12) DEFAULT NULL,      -- Cumulative total completions yac WPA for the home team in the game so far.
-  `total_away_comp_yac_wpa` decimal(16,12) DEFAULT NULL,      -- Cumulative total completions yac WPA for the away team in the game so far.
-  `total_home_raw_air_wpa` decimal(16,12) DEFAULT NULL,       -- Cumulative total raw air WPA for the home team in the game so far.
-  `total_away_raw_air_wpa` decimal(16,12) DEFAULT NULL,       -- Cumulative total raw air WPA for the away team in the game so far.
-  `total_home_raw_yac_wpa` decimal(16,12) DEFAULT NULL,       -- Cumulative total raw yac WPA for the home team in the game so far.
-  `total_away_raw_yac_wpa` decimal(16,12) DEFAULT NULL,       -- Cumulative total raw yac WPA for the away team in the game so far.
+  `wp` decimal(16,12) DEFAULT NULL COMMENT 'Estimated win probability for the posteam given the current situation at the start of the given play',
+  `wpa` decimal(16,12) DEFAULT NULL COMMENT 'Win probability added (WPA) for the posteam',
+  `home_wp` decimal(16,12) DEFAULT NULL COMMENT 'Estimated win probability for the home team',
+  `away_wp` decimal(16,12) DEFAULT NULL COMMENT 'Estimated win probability for the away team',
+  `vegas_wpa` decimal(16,12) DEFAULT NULL COMMENT 'Win probability added (WPA) for the posteam: spread adjusted model',
+  `vegas_home_wpa` decimal(16,12) DEFAULT NULL COMMENT 'Win probability added (WPA) for the home team: spread adjusted model',
+  `home_wp_post` decimal(16,12) DEFAULT NULL COMMENT 'Estimated win probability for the home team at the end of the play',
+  `away_wp_post` decimal(16,12) DEFAULT NULL COMMENT 'Estimated win probability for the away team at the end of the play',
+  `vegas_wp` decimal(16,12) DEFAULT NULL COMMENT 'Estimated win probability for the posteam given the current situation at the start of the given play, incorporating pre-game Vegas line',
+  `vegas_home_wp` decimal(16,12) DEFAULT NULL COMMENT 'Estimated win probability for the home team incorporating pre-game Vegas line',
+  `total_home_rush_wpa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total rushing WPA for the home team in the game so far',
+  `total_away_rush_wpa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total rushing WPA for the away team in the game so far',
+  `total_home_pass_wpa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total passing WPA for the home team in the game so far',
+  `total_away_pass_wpa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total passing WPA for the away team in the game so far',
+  `air_wpa` decimal(16,12) DEFAULT NULL COMMENT 'WPA through the air (same logic as air_epa)',
+  `yac_wpa` decimal(16,12) DEFAULT NULL COMMENT 'WPA from yards after the catch (same logic as yac_epa)',
+  `comp_air_wpa` decimal(16,12) DEFAULT NULL COMMENT 'The air_wpa for completions only',
+  `comp_yac_wpa` decimal(16,12) DEFAULT NULL COMMENT 'The yac_wpa for completions only',
+  `total_home_comp_air_wpa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total completions air WPA for the home team in the game so far',
+  `total_away_comp_air_wpa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total completions air WPA for the away team in the game so far',
+  `total_home_comp_yac_wpa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total completions yac WPA for the home team in the game so far',
+  `total_away_comp_yac_wpa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total completions yac WPA for the away team in the game so far',
+  `total_home_raw_air_wpa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total raw air WPA for the home team in the game so far',
+  `total_away_raw_air_wpa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total raw air WPA for the away team in the game so far',
+  `total_home_raw_yac_wpa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total raw yac WPA for the home team in the game so far',
+  `total_away_raw_yac_wpa` decimal(16,12) DEFAULT NULL COMMENT 'Cumulative total raw yac WPA for the away team in the game so far',
 
-  `xyac_mean_yds` decimal(16,12) DEFAULT NULL,    -- Average expected yards after the catch based on where the ball was caught.
-  `xyac_median_yds` decimal(16,12) DEFAULT NULL,  -- Median expected yards after the catch based on where the ball was caught.
-  `xyac_succ_prob` decimal(16,12) DEFAULT NULL,   -- Probability play earns positive EPA (relative to where play started) based on where ball was caught.
-  `xyac_fd_prob` decimal(16,12) DEFAULT NULL,     -- Probability play earns a first down based on where the ball was caught.
+  `xyac_mean_yds` decimal(16,12) DEFAULT NULL COMMENT 'Average expected yards after the catch based on where the ball was caught',
+  `xyac_median_yds` decimal(16,12) DEFAULT NULL COMMENT 'Median expected yards after the catch based on where the ball was caught',
+  `xyac_succ_prob` decimal(16,12) DEFAULT NULL COMMENT 'Probability play earns positive EPA (relative to where play started) based on where ball was caught',
+  `xyac_fd_prob` decimal(16,12) DEFAULT NULL COMMENT 'Probability play earns a first down based on where the ball was caught',
 
-  `ep_att` tinyint(1) DEFAULT NULL,       -- Binary indicator for extra point attempt.
-  `two_att` tinyint(1) DEFAULT NULL,      -- Binary indicator for two point conversion attempt.
-  `fg_att` tinyint(1) DEFAULT NULL,       -- Binary indicator for field goal attempt.
-  `kickoff_att` tinyint(1) DEFAULT NULL,     -- Binary indicator for kickoff.
-  `punt_att` tinyint(1) DEFAULT NULL,        -- Binary indicator for punts.
+  `ep_att` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for extra point attempt',
+  `two_att` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for two point conversion attempt',
+  `fg_att` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for field goal attempt',
+  `kickoff_att` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for kickoff',
+  `punt_att` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for punts',
 
-  `fg_result` varchar(10) DEFAULT NULL,         -- String indicator for result of field goal attempt: made, missed, or blocked.
-  `kick_distance` int(3) DEFAULT NULL,          -- Numeric distance in yards for kickoffs, field goals, and punts.
-  `ep_result` varchar(10) DEFAULT NULL,         -- String indicator for the result of the extra point attempt: good, failed, blocked, safety (touchback in defensive endzone is 1 point apparently), or aborted.
-  `tp_result` varchar(10) DEFAULT NULL,         -- String indicator for result of two point conversion attempt: success, failure, safety (touchback in defensive endzone is 1 point apparently), or return.
-  `punt_blocked` tinyint(1) DEFAULT NULL,       -- Binary indicator for if the punt was blocked.
+  `fg_result` varchar(10) DEFAULT NULL COMMENT 'String indicator for result of field goal attempt: made, missed, or blocked',
+  `kick_distance` int(3) DEFAULT NULL COMMENT 'Numeric distance in yards for kickoffs, field goals, and punts',
+  `ep_result` varchar(10) DEFAULT NULL COMMENT 'String indicator for the result of the extra point attempt: good, failed, blocked, safety (touchback in defensive endzone is 1 point apparently), or aborted',
+  `tp_result` varchar(10) DEFAULT NULL COMMENT 'String indicator for result of two point conversion attempt: success, failure, safety (touchback in defensive endzone is 1 point apparently), or return',
+  `punt_blocked` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for if the punt was blocked',
 
-  `home_to_rem` tinyint(1) DEFAULT NULL,        -- Numeric timeouts remaining in the half for the home team.
-  `away_to_rem` tinyint(1) DEFAULT NULL,        -- Numeric timeouts remaining in the half for the away team.
-  `pos_to_rem` tinyint(1) DEFAULT NULL,         -- Number of timeouts remaining for the possession team.
-  `def_to_rem` tinyint(1) DEFAULT NULL,         -- Number of timeouts remaining for the team on defense.
-  `to` tinyint(1) DEFAULT NULL,                 -- Binary indicator for whether or not a timeout was called by either team.
-  `to_team` varchar(3) DEFAULT NULL,            -- String abbreviation for which team called the timeout.
+  `home_to_rem` tinyint(1) DEFAULT NULL COMMENT 'Numeric timeouts remaining in the half for the home team',
+  `away_to_rem` tinyint(1) DEFAULT NULL COMMENT 'Numeric timeouts remaining in the half for the away team',
+  `pos_to_rem` tinyint(1) DEFAULT NULL COMMENT 'Number of timeouts remaining for the possession team',
+  `def_to_rem` tinyint(1) DEFAULT NULL COMMENT 'Number of timeouts remaining for the team on defense',
+  `to` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for whether or not a timeout was called by either team',
+  `to_team` varchar(3) DEFAULT NULL COMMENT 'String abbreviation for which team called the timeout',
 
-  `home_score` tinyint(2) DEFAULT NULL,             -- Score for the home team at the end of the play.
-  `away_score` tinyint(2) DEFAULT NULL,             -- Score for the away team at the end of the play.
-  `pos_score` tinyint(2) DEFAULT NULL,              -- Score the posteam at the start of the play.
-  `def_score` tinyint(2) DEFAULT NULL,              -- Score the defteam at the start of the play.
-  `score_diff` tinyint(2) DEFAULT NULL,             -- Score differential between the posteam and defteam at the start of the play.
-  `pos_score_post` tinyint(2) DEFAULT NULL,         -- Score for the posteam at the end of the play.
-  `def_score_post` tinyint(2) DEFAULT NULL,         -- Score for the defteam at the end of the play.
-  `score_diff_post` tinyint(2) DEFAULT NULL,        -- Score differential between the posteam and defteam at the end of the play.
+  `home_score` tinyint(2) DEFAULT NULL COMMENT 'Score for the home team at the end of the play',
+  `away_score` tinyint(2) DEFAULT NULL COMMENT 'Score for the away team at the end of the play',
+  `pos_score` tinyint(2) DEFAULT NULL COMMENT 'Score the posteam at the start of the play',
+  `def_score` tinyint(2) DEFAULT NULL COMMENT 'Score the defteam at the start of the play',
+  `score_diff` tinyint(2) DEFAULT NULL COMMENT 'Score differential between the posteam and defteam at the start of the play',
+  `pos_score_post` tinyint(2) DEFAULT NULL COMMENT 'Score for the posteam at the end of the play',
+  `def_score_post` tinyint(2) DEFAULT NULL COMMENT 'Score for the defteam at the end of the play',
+  `score_diff_post` tinyint(2) DEFAULT NULL COMMENT 'Score differential between the posteam and defteam at the end of the play',
 
-  `no_score_prob` tinyint(2) DEFAULT NULL,          -- Predicted probability of no score occurring for the rest of the half based on the expected points model.
-  `opp_fg_prob` decimal(16,12) DEFAULT NULL,        -- Predicted probability of the defteam scoring a FG next.
-  `opp_safety_prob` decimal(16,12) DEFAULT NULL,    -- Predicted probability of the defteam scoring a safety next.
-  `opp_td_prob` decimal(16,12) DEFAULT NULL,        -- Predicted probability of the defteam scoring a TD next.
-  `fg_prob` decimal(16,12) DEFAULT NULL,            -- Predicted probability of the posteam scoring a FG next.
-  `safety_prob` decimal(16,12) DEFAULT NULL,        -- Predicted probability of the posteam scoring a safety next.
-  `td_prob` decimal(16,12) DEFAULT NULL,            -- Predicted probability of the posteam scoring a TD next.
-  `extra_point_prob` decimal(16,12) DEFAULT NULL,   -- Predicted probability of the posteam scoring an extra point.
-  `two_conv_prob` decimal(16,12) DEFAULT NULL,      -- Predicted probability of the posteam scoring the two point conversion.
+  `no_score_prob` decimal(16,12) DEFAULT NULL COMMENT 'Predicted probability of no score occurring for the rest of the half based on the expected points model',
+  `opp_fg_prob` decimal(16,12) DEFAULT NULL COMMENT 'Predicted probability of the defteam scoring a FG next',
+  `opp_safety_prob` decimal(16,12) DEFAULT NULL COMMENT 'Predicted probability of the defteam scoring a safety next',
+  `opp_td_prob` decimal(16,12) DEFAULT NULL COMMENT 'Predicted probability of the defteam scoring a TD next',
+  `fg_prob` decimal(16,12) DEFAULT NULL COMMENT 'Predicted probability of the posteam scoring a FG next',
+  `safety_prob` decimal(16,12) DEFAULT NULL COMMENT 'Predicted probability of the posteam scoring a safety next',
+  `td_prob` decimal(16,12) DEFAULT NULL COMMENT 'Predicted probability of the posteam scoring a TD next',
+  `extra_point_prob` decimal(16,12) DEFAULT NULL COMMENT 'Predicted probability of the posteam scoring an extra point',
+  `two_conv_prob` decimal(16,12) DEFAULT NULL COMMENT 'Predicted probability of the posteam scoring the two point conversion',
 
-  `xpass_prob` decimal(16,12) DEFAULT NULL,         -- Probability of dropback scaled from 0 to 1.
-  `pass_oe` decimal(16,12) DEFAULT NULL,            -- Dropback percent over expected on a given play scaled from 0 to 100.
+  `xpass_prob` decimal(16,12) DEFAULT NULL COMMENT 'Probability of dropback scaled from 0 to 1',
+  `pass_oe` decimal(16,12) DEFAULT NULL COMMENT 'Dropback percent over expected on a given play scaled from 0 to 100',
 
-  `cp` decimal(16,12) DEFAULT NULL,                 -- Numeric value indicating the probability for a complete pass based on comparable game situations.
-  `cpoe` decimal(16,12) DEFAULT NULL,               -- For a single pass play this is 1 - cp when the pass was completed or 0 - cp when the pass was incomplete. Analyzed for a whole game or season an indicator for the passer how much over or under expectation his completion percentage was.
+  `cp` decimal(16,12) DEFAULT NULL COMMENT 'Numeric value indicating the probability for a complete pass based on comparable game situations',
+  `cpoe` decimal(16,12) DEFAULT NULL COMMENT 'For a single pass play this is 1 - cp when the pass was completed or 0 - cp when the pass was incomplete. Analyzed for a whole game or season an indicator for the passer how much over or under expectation his completion percentage was',
 
   `charted` tinyint(1) DEFAULT NULL,
   `updated` int(11) NOT NULL,
