@@ -1,4 +1,35 @@
-## General
+<div class="table-of-contents">
+
+#### Table of Contents
+
+- [Stats](#stats)
+  - [General](#general)
+  - [Passing](#passing)
+  - [Rushing](#rushing)
+  - [Receiving](#receiving)
+  - [Defense](#defense)
+- [Play By Play Columns](#play-by-play-columns)
+  - [General](#general-1)
+  - [Passing](#passing-1)
+  - [Series](#series)
+  - [Play Types, Events & Outcomes](#play-types-events--outcomes)
+  - [Game](#game)
+  - [Situation](#situation)
+  - [Personnel, Formation & Coverage](#personnel-formation--coverage)
+  - [Drive](#drive)
+  - [Expected Points](#expected-points)
+  - [Win Probability](#win-probability)
+  - [Expected Models & Probabilities](#expected-models--probabilities)
+  - [Player Identification](#player-identification)
+  - [Special Teams](#special-teams)
+
+</div>
+
+<div class="body">
+
+## Stats
+
+### General
 
 | Abbrev | Name                                     | Description                                                                                                                                                                                                                                                                       | Status  | Since |
 | ------ | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- | ----- |
@@ -27,7 +58,7 @@
 | VOWS   | Value Over Worst Starter                 | todo                                                                                                                                                                                                                                                                              | Planned | 2000  |
 | YAR    | Yards Above Replacement                  | todo                                                                                                                                                                                                                                                                              | Planned | 2000  |
 
-## Passing
+### Passing
 
 | Abbrev  | Name                                     | Description                                                                                                                                                                                                                                                  | Status    | Since |
 | ------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------- | ----- |
@@ -82,7 +113,7 @@
 | Y/A     | Yards Per Attempt                        | Total passing yards divided by total passing attempts                                                                                                                                                                                                        | Available | 2000  |
 | Y/C     | Yards Per Completion                     | Total passing yards divided by total passing completions                                                                                                                                                                                                     | Planned   | 2000  |
 
-## Rushing
+### Rushing
 
 | Abbrev | Name                            | Description                                                                                                                                                                                                                           | Status    | Since |
 | ------ | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ----- |
@@ -109,19 +140,7 @@
 | YACO   | Yards After Contact             | Yards gained by running back after contact and beyond what was blocked. Yards are accrued after the running back's first evaded tackle.                                                                                               | Available | 2019  |
 | YACO/A | Yards After Contact per Attempt | Yards after contact per rushing attempt                                                                                                                                                                                               | Available | 2019  |
 
-**Base Front**: seven defenders in the box. The width of the box is the distance between the outer shoulder of right and the outer shoulder of the left tackle. The depth of the box is six yards from the line of scrimmage.
-
-**Stacked Front**: eight or more defenders in the box.
-
-**Light Front**: six or less defenders in the box.
-
-**Inside**: Runs where the intended direction was between the center and guard (excluding kneeldowns).
-
-**Off Tackle**: Runs where the intended direction was between the guard and the tackle.
-
-**Outside**: Runs where the intended direction was outside the tackles.
-
-## Receiving
+### Receiving
 
 | Abbrev | Name                            | Description                                                                                                                                                                                                                             | Status    | Since |
 | ------ | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ----- |
@@ -161,7 +180,7 @@
 | Y/S    | Receiving Yards Per Snap        | todo                                                                                                                                                                                                                                    | Planned   | 2020  |
 | Y/T    | Receiving Yards Per Target      | todo                                                                                                                                                                                                                                    | Planned   | 2020  |
 
-## Defense
+### Defense
 
 | Abbrev | Name            | Description                                                                                                                      | Status  | Since |
 | ------ | --------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------- | ----- |
@@ -169,122 +188,255 @@
 | COVR   | Coverage Rating | Cornerback efficiency metric incorporating target rate, pass break-ups, catch rate allowed, and fantasy points allowed per snap. | Planned | 2020  |
 | SEP    | Seperation      | Average Distance in yards to the receiver at the time the ball reaches the pass target.                                          | Planned | 2020  |
 
-# Stat Filters
+## Play By Play Columns
 
-**Season**: the season the game is played in
+### General
 
-**Week**: the week the game is played in
+| column      | name               | description                                                     | coverage | since       |
+| ----------- | ------------------ | --------------------------------------------------------------- | -------- | ----------- |
+| desc        | Description        | Text description of the play                                    | 100%     | 2001/01/06        |
+| mot         | Motion Type        | Type of motion: Pre-snap (P), during the snap (S), or both (PS) | -       | - |
+| timestamp   | Timestamp          | Timestamp of the play                                           | 99%      | 2001/01/06        |
+| pos_team    | Possession Team    | Team in possession of the ball                                  | 100%     | 2001/01/06        |
+| pos_team_id | Possession Team ID | ID of the team in possession                                    | 95%      | 2002/08/03        |
+| off         | Offense            | Abbreviation for the offensive team                             | 99%      | 2001/01/06        |
+| def         | Defense            | Abbreviation for the defensive team                             | 100%     | 2001/01/06        |
+| trick       | Trick Play         | Indicator if the play was a trick play                          | 3%       | 2021/09/10        |
 
-**Day of week**: the day of the week the game is played in, differentiated by primetime games (i.e SUN vs SN)
+### Passing
 
-**Stadium**: the stadium the game is played in
+| column            | name                  | description                                              | coverage | since       |
+| ----------------- | --------------------- | -------------------------------------------------------- | -------- | ----------- |
+| air_yards_ngs     | Air Yards NGS         | Air yards according to Next Gen Stats                    | 100%     | 2016/08/11         |
+| time_to_throw_ngs | Time to Throw NGS     | Time taken to throw the ball according to Next Gen Stats | 34%      | 2016/08/11   |
+| route_ngs         | Route NGS             | Route run according to Next Gen Stats                    | 33%      | 2016/08/27   |
+| oopd              | Out of Pocket Details | Details about the quarterback being out of the pocket    | 3%       | 2021/09/10   |
 
-**Temperature**: the temperature at the start of the game
+### Series
 
-**Humidity**: the humidity at the start of the game
+| column        | name            | description                                                   | coverage | since         |
+| ------------- | --------------- | ------------------------------------------------------------- | -------- | ------------- |
+| series_seq    | Series Sequence | Sequence number of the series within the game                 | 8%       | 2022/09/08    |
+| series_suc    | Series Success  | Indicator if the series resulted in a touchdown or first down | 8%       | 2022/09/08    |
+| series_result | Series Result   | Outcome of the series (e.g., touchdown, field goal)           | 8%       | 2022/09/08    |
 
-**Wind Speed**: the wind speed at the start of the game
+### Play Types, Events & Outcomes
 
-**Conditions**: 18 Possible Choices: Closed Roof; Dome; Flurries; Light Snow; Snow; Chance Rain; Light Rain; Rain; Mostly Cloudy; Partly Cloudy; Cloudy; Mostly Sunny; Partly Sunny; Sunny; Hazy; Foggy; Clear; Fair.
+| column         | name            | description                                                   | coverage | since       |
+| -------------- | --------------- | ------------------------------------------------------------- | -------- | ----------- |
+| play_type      | Play Type       | Type of play (e.g., RUSH, PASS)                               | 95%      | 2002/08/03  |
+| play_type_nfl  | Play Type NFL   | NFL-defined type of play                                      | 99%      | 2001/01/06  |
+| play_type_ngs  | Play Type NGS   | Next Gen Stats defined type of play                           | 95%      | 2002/08/03  |
+| next_play_type | Next Play Type  | Type of the next play                                         | 98%      | 2001/01/06  |
+| yds_gained     | Yards Gained    | Yardage gained or lost by the possessing team during the play | 99%        | 2001/01/06           |
+| fum            | Fumble Occurred | Indicator if a fumble occurred during the play                | 8%       | 2022/09/08  |
+| fuml           | Fumble Lost     | Indicator if the fumble was lost to the opposing team         | 71%      | 2001/01/06  |
+| int            | Interception    | Indicator if an interception occurred during the play         | 84%      | 2001/01/06  |
+| sk             | Sack            | Indicator if a sack occurred during the play                  | 97%      | 2001/01/06  |
+| succ           | Successful Play | Indicator if the play was successful                          | 3%       | 2021/09/10  |
+| comp           | Completion      | Indicator if the pass was completed                           | 99%      | 2001/01/06  |
+| incomp         | Incompletion    | Indicator if the pass was incomplete                          | 8%       | 2022/09/08  |
+| safety         | Safety          | Indicator if a safety occurred                                | 8%       | 2022/09/08  |
+| punt_blocked   | Punt Blocked    | Binary indicator for if the punt was blocked.                 | 8%       | 2022/09/08  |
+| score          | Score Occurred  | Indicator if a score occurred during the play                 | 100%     | 2001/01/06  |
+| score_type     | Score Type      | Type of score (e.g., field goal, touchdown)                   | 99%      | 2001/01/06  |
+| score_team     | Scoring Team    | Team that scored                                              | 99%      | 2001/01/06  |
 
-**Surface**: 11 Possible Choices: Grass; AstroTurf; AstroPlay; FieldTurf; SportGrass; NeXTurf; MomentumTurf; DD GrassMaster; Sportex; A Turf Titan; UBU Speed Series S5M
+### Game
 
-**Over/Under**: the o/u at the start of the game
+| column    | name        | description                         | coverage | since       |
+| --------- | ----------- | ----------------------------------- | -------- | ----------- |
+| week      | Week        | Week of the NFL season              | 100%     | 2001/01/06  |
+| year      | Year        | Year of the NFL season              | 100%     | 2001/01/06  |
+| seas_type | Season Type | Type of NFL season (PRE, REG, POST) | 100%     | 2001/01/06  |
 
-**Point Spread**: the point spread at the start of the game
+### Situation
 
-**Quarter**: the quarter the play is in
+| column           | name                          | description                                                                  | coverage | since       |
+| ---------------- | ----------------------------- | ---------------------------------------------------------------------------- | -------- | ----------- |
+| dwn              | Down                          | Current down in the play                                                     | 100%     | 2020        |
+| qtr              | Quarter                       | Current quarter of the game                                                  | 100%     | 2001/01/06  |
+| ydl_num          | Yard Line Number              | Numeric distance in yards from the closest endzone                           | 100%     | 2001/01/06  |
+| ydl_side         | Yard Line Side                | Side of the field for the yard line (e.g., home or away)                     | 100%     | 2001/01/06  |
+| ydl_start        | Yard Line Start               | Starting yard line for the play                                              | 100%     | 2001/01/06  |
+| ydl_end          | Yard Line End                 | Ending yard line after the play                                              | 100%     | 2001/01/06  |
+| ydl_100          | Yard Line 100                 | Numeric distance in yards from the opponent's endzone for the posteam        | 99%      | 2001/01/06  |
+| hash             | Hash Location                 | Hash location (L)eft, (R)ight, or in-between (M)                             | 3%       | 2021/09/10  |
+| ytg              | Yards to Go                   | Yards remaining to achieve a first down                                      | 100%     | 2001/01/06  |
+| yfog             | Yards from Own Goal           | Yards from the team's own goal line                                          | -        | -           |
+| gtg              | Goal to Go                    | Indicator if the team is in a goal-to-go situation                           | 99%      | 2001/01/06  |
+| game_clock_start | Game Clock Start              | Game time at the start of the play                                           | 69%      | 2001/01/06  |
+| game_clock_end   | Game Clock End                | Game time at the end of the play                                             | 0%       | 2022/10/02  |
+| sec_rem_qtr      | Seconds Remaining Quarter     | Seconds remaining in the quarter                                             | 8%       | 2022/09/08  |
+| sec_rem_half     | Seconds Remaining Half        | Seconds remaining in the half                                                | 8%       | 2022/09/08  |
+| sec_rem_gm       | Seconds Remaining Game        | Seconds remaining in the game                                                | 8%       | 2022/09/08  |
+| play_clock       | Play Clock                    | Time on the play clock when the ball was snapped                             | 69%      | 2001/01/06  |
+| home_to_rem      | Home Timeouts Remaining       | Numeric timeouts remaining in the half for the home team.                    | 8%       | 2022/09/08  |
+| away_to_rem      | Away Timeouts Remaining       | Numeric timeouts remaining in the half for the away team.                    | -        | -           |
+| pos_to_rem       | Possession Timeouts Remaining | Number of timeouts remaining for the possession team.                        | 8%       | 2022/09/08  |
+| def_to_rem       | Defense Timeouts Remaining    | Number of timeouts remaining for the team on defense.                        | -        | -           |
+| home_score       | Home Score                    | Score for the home team at the end of the play.                              | 96%      | 2002/08/03  |
+| away_score       | Away Score                    | Score for the away team at the end of the play.                              | -        | -           |
+| pos_score        | Possession Team Score         | Score the posteam at the start of the play.                                  | 8%       | 2022/09/08  |
+| def_score        | Defense Team Score            | Score the defteam at the start of the play.                                  | -        | -           |
+| score_diff       | Score Difference              | Score differential between the posteam and defteam at the start of the play. | 8%       | 2022/09/08  |
+| pos_score_post   | Possession Team Score Post    | Score for the posteam at the end of the play.                                | 8%       | 2022/09/08  |
+| def_score_post   | Defense Team Score Post       | Score for the defteam at the end of the play.                                | -        | -           |
+| score_diff_post  | Score Difference Post         | Score differential between the posteam and defteam at the end of the play.   | 8%       | 2022/09/08  |
 
-**Down**: the down of the play
 
-**Yards to go**: the distance to go for a first down
+### Personnel, Formation & Coverage
 
-**Line of scrimmage**: the line of scrimmage for the play, in other words, the location on the field
+| column        | name                 | description                                                            | coverage | since |
+| ------------- | -------------------- | ---------------------------------------------------------------------- | -------- | ----- |
+| off_formation | Offensive Formation  | Description of the offensive formation                                 | 100%     | 2020  |
+| off_personnel | Offensive Personnel  | Description of the offensive personnel involved                        | 100%     | 2020  |
+| def_personnel | Defensive Personnel  | Description of the defensive personnel involved                        | 100%     | 2020  |
+| man_zone_ngs  | Man Zone NGS         | Man or zone coverage according to Next Gen Stats                       | 100%     | 2020  |
+| cov_type_ngs  | Coverage Type NGS    | Type of coverage according to Next Gen Stats                           | 100%     | 2020  |
+| cov           | Coverage on Target   | Coverage on the targeted receiver (0: Uncovered, 1: Single, 2: Double) | 100%     | 2020  |
+| box_ngs       | Box NGS              | Number of defenders in the box according to Next Gen Stats             | 100%     | 2020  |
+| pru_ngs       | Pass Rushers NGS     | Number of pass rushers according to Next Gen Stats                     | 100%     | 2020  |
+| db            | Defensive Backs      | Number of defensive backs involved in the play                         | 100%     | 2020  |
+| box           | Defenders in the Box | Number of defenders in the box                                         | 100%     | 2020  |
+| boxdb         | DBs in the Box       | Number of defensive backs in the box                                   | 100%     | 2020  |
+| pru           | Pass Rushers         | Number of pass rushers involved in the play                            | 100%     | 2020  |
+| blz           | Blitzers             | Number of linebackers and defensive backs blitzing                     | 100%     | 2020  |
+| dblz          | DB Blitzers          | Number of defensive backs blitzing                                     | 100%     | 2020  |
 
-**Shutgun**: if play is in shotgun formation
+### Drive
 
-**No Huddle**: if there is or isnt a huddle before the play
+| column                 | name                     | description                                                         | coverage | since |
+| ---------------------- | ------------------------ | ------------------------------------------------------------------- | -------- | ----- |
+| drive_seq              | Drive Sequence           | Drive count within the game                                         | 100%     | 2020  |
+| drive_yds              | Drive Yards              | Yards gained or lost during the drive                               | 100%     | 2020  |
+| drive_play_count       | Drive Play Count         | Number of plays in the drive                                        | 100%     | 2020  |
+| drive_result           | Drive Result             | Outcome of the drive (e.g., touchdown, field goal)                  | 100%     | 2020  |
+| drive_top              | Drive Time of Possession | Time of possession during the drive                                 | 100%     | 2020  |
+| drive_fds              | Drive First Downs        | Number of first downs during the drive                              | 100%     | 2020  |
+| drive_inside20         | Drive Inside 20          | Indicator if the offense reached inside the opponent's 20 yard line | 100%     | 2020  |
+| drive_score            | Drive Score              | Indicator if the drive ended with a score                           | 100%     | 2020  |
+| drive_start_qtr        | Drive Start Quarter      | Quarter in which the drive started                                  | 100%     | 2020  |
+| drive_end_qtr          | Drive End Quarter        | Quarter in which the drive ended                                    | 100%     | 2020  |
+| drive_yds_penalized    | Drive Yards Penalized    | Yards penalized during the drive                                    | 100%     | 2020  |
+| drive_start_transition | Drive Start Transition   | How the offense got the ball at the start of the drive              | 100%     | 2020  |
+| drive_end_transition   | Drive End Transition     | How the offense lost the ball at the end of the drive               | 100%     | 2020  |
+| drive_game_clock_start | Drive Game Clock Start   | Game time at the beginning of the drive                             | 100%     | 2020  |
+| drive_game_clock_end   | Drive Game Clock End     | Game time at the end of the drive                                   | 100%     | 2020  |
+| drive_start_ydl        | Drive Start Yard Line    | Yard line where the drive started                                   | 100%     | 2020  |
+| drive_end_ydl          | Drive End Yard Line      | Yard line where the drive ended                                     | 100%     | 2020  |
+| drive_start_play_id    | Drive Start Play ID      | Play ID of the first play in the drive                              | 100%     | 2020  |
+| drive_end_play_id      | Drive End Play ID        | Play ID of the last play in the drive                               | 100%     | 2020  |
 
-**Number of players in the backfield**: RB + TE + FB + WR
+### Expected Points
 
-**Extra Men on the Line**: Number of players lined up on either side of the Offensive Tackles - usually a Tight End.
+| column                  | name                         | description                                                                                  | coverage | since |
+| ----------------------- | ---------------------------- | -------------------------------------------------------------------------------------------- | -------- | ----- |
+| ep                      | Expected Points              | Expected points with respect to the possession team for the given play                       | 100%     | 2020  |
+| epa                     | Expected Points Added        | Expected points added by the posteam for the given play                                      | 100%     | 2020  |
+| ep_succ                 | EPA Success                  | Indicator whether EPA > 0 in the given play                                                  | 100%     | 2020  |
+| total_home_epa          | Total Home EPA               | Cumulative total EPA for the home team in the game so far                                    | 100%     | 2020  |
+| total_away_epa          | Total Away EPA               | Cumulative total EPA for the away team in the game so far                                    | 100%     | 2020  |
+| total_home_rush_epa     | Total Home Rush EPA          | Cumulative total rushing EPA for the home team in the game so far                            | 100%     | 2020  |
+| total_away_rush_epa     | Total Away Rush EPA          | Cumulative total rushing EPA for the away team in the game so far                            | 100%     | 2020  |
+| total_home_pass_epa     | Total Home Pass EPA          | Cumulative total passing EPA for the home team in the game so far                            | 100%     | 2020  |
+| total_away_pass_epa     | Total Away Pass EPA          | Cumulative total passing EPA for the away team in the game so far                            | 100%     | 2020  |
+| qb_epa                  | QB EPA                       | EPA credited to the quarterback up to the point where a receiver lost a fumble after a catch | 100%     | 2020  |
+| air_epa                 | Air EPA                      | EPA from the air yards alone                                                                 | 100%     | 2020  |
+| yac_epa                 | YAC EPA                      | EPA from the yards after catch alone                                                         | 100%     | 2020  |
+| comp_air_epa            | Completed Air EPA            | EPA from the air yards alone only for completions                                            | 100%     | 2020  |
+| comp_yac_epa            | Completed YAC EPA            | EPA from the yards after catch alone only for completions                                    | 100%     | 2020  |
+| xyac_epa                | Expected YAC EPA             | Expected value of EPA gained after the catch                                                 | 100%     | 2020  |
+| total_home_comp_air_epa | Total Home Completed Air EPA | Cumulative total completions air EPA for the home team in the game so far                    | 100%     | 2020  |
+| total_away_comp_air_epa | Total Away Completed Air EPA | Cumulative total completions air EPA for the away team in the game so far                    | 100%     | 2020  |
+| total_home_comp_yac_epa | Total Home Completed YAC EPA | Cumulative total completions yac EPA for the home team in the game so far                    | 100%     | 2020  |
+| total_away_comp_yac_epa | Total Away Completed YAC EPA | Cumulative total completions yac EPA for the away team in the game so far                    | 100%     | 2020  |
+| total_home_raw_air_epa  | Total Home Raw Air EPA       | Cumulative total raw air EPA for the home team in the game so far                            | 100%     | 2020  |
+| total_away_raw_air_epa  | Total Away Raw Air EPA       | Cumulative total raw air EPA for the away team in the game so far                            | 100%     | 2020  |
+| total_home_raw_yac_epa  | Total Home Raw YAC EPA       | Cumulative total raw yac EPA for the home team in the game so far                            | 100%     | 2020  |
+| total_away_raw_yac_epa  | Total Away Raw YAC EPA       | Cumulative total raw yac EPA for the away team in the game so far                            | 100%     | 2020  |
 
-**Bunched/Stacked Formations (BSF)**: Can be 'B', 'S1', 'S2' or 'BS'. Bunched formations involve 3 receivers within a box not taller than 3 yards and spaced less than 2 standard arm lengths away from their neighbour.
+### Win Probability
 
-Stacked Formations are where 2 receivers are in-line vertically with at least 1.5 yards distance between them. S1 is one pair while S2 denotes 2 pairs. When both bunched/stacked are present we mark (BS).
+| column                  | name                             | description                                                                                    | coverage | since |
+| ----------------------- | -------------------------------- | ---------------------------------------------------------------------------------------------- | -------- | ----- |
+| wp                      | Win Probability                  | Estimated win probability for the posteam given the current situation at the start of the play | 100%     | 2020  |
+| wpa                     | Win Probability Added            | Win probability added for the posteam                                                          | 100%     | 2020  |
+| home_wp                 | Home Win Probability             | Estimated win probability for the home team                                                    | 100%     | 2020  |
+| away_wp                 | Away Win Probability             | Estimated win probability for the away team                                                    | 100%     | 2020  |
+| vegas_wpa               | Vegas Win Probability Added      | Win probability added for the posteam: spread_adjusted model                                   | 100%     | 2020  |
+| vegas_home_wpa          | Vegas Home Win Probability Added | Win probability added for the home team: spread_adjusted model                                 | 100%     | 2020  |
+| home_wp_post            | Home Win Probability Post        | Estimated win probability for the home team at the end of the play                             | 100%     | 2020  |
+| away_wp_post            | Away Win Probability Post        | Estimated win probability for the away team at the end of the play                             | 100%     | 2020  |
+| vegas_wp                | Vegas Win Probability            | Estimated win probability for the posteam incorporating pre-game Vegas line                    | 100%     | 2020  |
+| vegas_home_wp           | Vegas Home Win Probability       | Estimated win probability for the home team incorporating pre-game Vegas line                  | 100%     | 2020  |
+| total_home_rush_wpa     | Total Home Rush WPA              | Cumulative total rushing WPA for the home team in the game so far                              | 100%     | 2020  |
+| total_away_rush_wpa     | Total Away Rush WPA              | Cumulative total rushing WPA for the away team in the game so far                              | 100%     | 2020  |
+| total_home_pass_wpa     | Total Home Pass WPA              | Cumulative total passing WPA for the home team in the game so far                              | 100%     | 2020  |
+| total_away_pass_wpa     | Total Away Pass WPA              | Cumulative total passing WPA for the away team in the game so far                              | 100%     | 2020  |
+| air_wpa                 | Air WPA                          | WPA through the air (same logic as air_epa)                                                    | 100%     | 2020  |
+| yac_wpa                 | YAC WPA                          | WPA from yards after the catch (same logic as yac_epa)                                         | 100%     | 2020  |
+| comp_air_wpa            | Completed Air WPA                | The air_wpa for completions only                                                               | 100%     | 2020  |
+| comp_yac_wpa            | Completed YAC WPA                | The yac_wpa for completions only                                                               | 100%     | 2020  |
+| total_home_comp_air_wpa | Total Home Completed Air WPA     | Cumulative total completions air WPA for the home team in the game so far                      | 100%     | 2020  |
+| total_away_comp_air_wpa | Total Away Completed Air WPA     | Cumulative total completions air WPA for the away team in the game so far                      | 100%     | 2020  |
+| total_home_comp_yac_wpa | Total Home Completed YAC WPA     | Cumulative total completions yac WPA for the home team in the game so far                      | 100%     | 2020  |
+| total_away_comp_yac_wpa | Total Away Completed YAC WPA     | Cumulative total completions yac WPA for the away team in the game so far                      | 100%     | 2020  |
+| total_home_raw_air_wpa  | Total Home Raw Air WPA           | Cumulative total raw air WPA for the home team in the game so far                              | 100%     | 2020  |
+| total_away_raw_air_wpa  | Total Away Raw Air WPA           | Cumulative total raw air WPA for the away team in the game so far                              | 100%     | 2020  |
+| total_home_raw_yac_wpa  | Total Home Raw YAC WPA           | Cumulative total raw yac WPA for the home team in the game so far                              | 100%     | 2020  |
+| total_away_raw_yac_wpa  | Total Away Raw YAC WPA           | Cumulative total raw yac WPA for the away team in the game so far                              | 100%     | 2020  |
 
-**Hash Mark Location**: Where the ball is placed when the center has it in his hand. Values can be (L)eft hash, (R)ight hash or in-between (M for Middle).
+### Expected Models & Probabilities
 
-**Motion**: There are 2 types of motion: Pre-snap (P) which starts and stops before the snap and the more aggressive type of motion that is occurring during the snap (S). When both occur we mark 'PS'.
+| column           | name                             | description                                                                                                                                                                                                                                 | coverage | since |
+| ---------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ----- |
+| xyac_mean_yds    | XYAC Mean Yards                  | Average expected yards after the catch based on where the ball was caught                                                                                                                                                                   | 100%     | 2020  |
+| xyac_median_yds  | XYAC Median Yards                | Median expected yards after the catch based on where the ball was caught                                                                                                                                                                    | 100%     | 2020  |
+| xyac_succ_prob   | XYAC Success Probability         | Probability play earns positive EPA (relative to where play started) based on where ball was caught                                                                                                                                         | 100%     | 2020  |
+| xyac_fd_prob     | XYAC First Down Probability      | Probability play earns a first down based on where the ball was caught                                                                                                                                                                      | 100%     | 2020  |
+| no_score_prob    | No Score Probability             | Predicted probability of no score occurring for the rest of the half.                                                                                                                                                                       | 100%     | 2020  |
+| opp_fg_prob      | Opponent FG Probability          | Predicted probability of the defteam scoring a FG next.                                                                                                                                                                                     | 100%     | 2020  |
+| opp_safety_prob  | Opponent Safety Probability      | Predicted probability of the defteam scoring a safety next.                                                                                                                                                                                 | 100%     | 2020  |
+| opp_td_prob      | Opponent TD Probability          | Predicted probability of the defteam scoring a TD next.                                                                                                                                                                                     | 100%     | 2020  |
+| fg_prob          | FG Probability                   | Predicted probability of the posteam scoring a FG next.                                                                                                                                                                                     | 100%     | 2020  |
+| safety_prob      | Safety Probability               | Predicted probability of the posteam scoring a safety next.                                                                                                                                                                                 | 100%     | 2020  |
+| td_prob          | TD Probability                   | Predicted probability of the posteam scoring a TD next.                                                                                                                                                                                     | 100%     | 2020  |
+| extra_point_prob | Extra Point Probability          | Predicted probability of the posteam scoring an extra point.                                                                                                                                                                                | 100%     | 2020  |
+| two_conv_prob    | Two Point Conversion Probability | Predicted probability of the posteam scoring the two point conversion.                                                                                                                                                                      | 100%     | 2020  |
+| xpass_prob       | Pass Probability                 | Probability of dropback scaled from 0 to 1.                                                                                                                                                                                                 | 100%     | 2020  |
+| pass_oe          | Pass Over Expected               | Dropback percent over expected on a given play scaled from 0 to 100.                                                                                                                                                                        | 100%     | 2020  |
+| cp               | Completion Probability           | Numeric value indicating the probability for a complete pass based on comparable situations.                                                                                                                                                | 100%     | 2020  |
+| cpoe             | Completion Over Expected         | For a single pass play this is 1 - cp when the pass was completed or 0 - cp when the pass was incomplete. Analyzed for a whole game or season an indicator for the passer how much over or under expectation his completion percentage was. | 100%     | 2020  |
 
-**Number of Defensive Linemen on the field**
+### Player Identification
 
-**Number of Linebackers on the field**
+| column           | name                        | description                          | coverage | since |
+| ---------------- | --------------------------- | ------------------------------------ | -------- | ----- |
+| player_fuml_pid  | Player Fumble Player ID     | Player ID of the player who fumbled  | 100%     | 2020  |
+| player_fuml_gsis | Player Fumble GSIS ID       | GSIS ID of the player who fumbled    | 100%     | 2020  |
+| bc_pid           | Ball Carrier Player ID      | Player ID of the ball carrier        | 100%     | 2020  |
+| bc_gsis          | Ball Carrier GSIS ID        | GSIS ID of the ball carrier          | 100%     | 2020  |
+| psr_pid          | Passer Player ID            | Player ID of the passer              | 100%     | 2020  |
+| psr_gsis         | Passer GSIS ID              | GSIS ID of the passer                | 100%     | 2020  |
+| trg_pid          | Targeted Player ID          | Player ID of the targeted player     | 100%     | 2020  |
+| trg_gsis         | Targeted Player GSIS ID     | GSIS ID of the targeted player       | 100%     | 2020  |
+| intp_pid         | Intercepting Player ID      | Player ID of the intercepting player | 100%     | 2020  |
+| intp_gsis        | Intercepting Player GSIS ID | GSIS ID of the intercepting player   | 100%     | 2020  |
 
-**Number of Defenders in the box**
+### Special Teams
 
-**Number of DB's in the box**
+| column        | name                         | description                                                                  | coverage | since |
+| ------------- | ---------------------------- | ---------------------------------------------------------------------------- | -------- | ----- |
+| touchback     | Touchback                    | Indicator if a touchback occurred                                            | 100%     | 2020  |
+| ep_att        | Extra Point Attempt          | Binary indicator for extra point attempt.                                    | 100%     | 2020  |
+| two_att       | Two Point Conversion Attempt | Binary indicator for two point conversion attempt.                           | 100%     | 2020  |
+| fg_att        | Field Goal Attempt           | Binary indicator for field goal attempt.                                     | 100%     | 2020  |
+| kickoff_att   | Kickoff Attempt              | Binary indicator for kickoff.                                                | 100%     | 2020  |
+| punt_att      | Punt Attempt                 | Binary indicator for punts.                                                  | 100%     | 2020  |
+| fg_result     | Field Goal Result            | String indicator for result of field goal attempt: made, missed, or blocked. | 100%     | 2020  |
+| kick_distance | Kick Distance                | Numeric distance in yards for kickoffs, field goals, and punts.              | 100%     | 2020  |
+| ep_result     | Extra Point Result           | String indicator for the result of the extra point attempt.                  | 100%     | 2020  |
+| tp_result     | Two Point Conversion Result  | String indicator for result of two point conversion attempt.                 | 100%     | 2020  |
 
-**Play Action Pass**: Does not consider whether a defense was fooled or not, just that a QB motioned to the RB with the ball and some effort to sell the run occurred.
-
-**Option Play**: Values can be RPO (run/pass), RUN (run/qbrun) or blank when there is not an option.
-
-**Trick Look**: Usually it's a wildcat formation or when the QB lines up in a uncommon position. Fake punts and fake field goals are not trick looks since they look like regular punts or FG's
-
-**Trick Play**: Fake punts, double passes, flea flickers, wildcats etc
-
-**QB Pressure**: Plays where the pocket is breached and the QB is near the breach.
-
-**QB Hit**: Quarterback was brought to the ground or otherwise significantly man-handled.
-
-**QB Hurry**: The Defense forces the QB to leave the pocket or forces the QB to throw the ball before he's fully ready.
-
-**Hindered Throwing Motion**: QB's throwing motion was hindered in some way by a defender.
-
-**Pass Rush**: Total number of players rushing the passer.
-
-**Blitz**: Total number of LB's and DB's blitzing.
-
-**DB Blitz**: Number of DB's blitzing. This is included in the Blitz total.
-
-**Stun Pass Rushers**: These are the number blitzing LB's who replace a DL dropping back into coverage. Included in the PRU total
-
-**Out of Pocket Pass (OOP)**: Quarterback attempts the pass out of the pocket whether pressured or not. See 'OOPD' for more details.
-
-**Out Of Pocket Pass Details (OOPD)**: This field helps to expand on why an OOP occurred. When OOP is '1', this field will have a value of 'DE' (by Design); 'DR' (Designed Rollout); 'P' (due to Pressure) or 'C' (QB decided on his own to leave a Clean pocket).
-
-**Play Clock Running**: whether or not play clock was running
-
-**Play Clock Time**: Seconds left on the play clock when the ball was snapped.
-
-**# of Running Backs on the field**
-
-**# of Tight Ends on the field**
-
-**Quarterback Position**: QB (under center), QB-5, QB-6 etc
-
-## Available But Unused Statistics
-
-**QB Run (QBRU)**: A designed running play for the QB. These are only marked on runs by a natural QB where he lined up as a QB. Also, sneaks and kneel-downs are not counted
-
-**QB Sneak (SNEAK)**: Quarterback dives ahead directly off the snap for short-yardage. A high percentage conversion but these plays also open up QB's for some physical abuse
-
-**QB Scramble (SCRM)**: Play design is initially a pass but QB elects to run based on pressure; a lack of open receivers, or, simply seeing an opportunity to make positive yardage running himself
-
-**Available Targets (AVT)**: Number of skill players (WR-TE-RB) running a route on the play. AVT does not determine whether the target was open or not.
-
-**Depth Of Target Rank (DOTR)**: The rank of pass targets according to distance in yards from the QB. #1 is closest to the QB. Targets are ranked at the point the ball is closest to the receiver.
-
-**Coverage on Target (COV)**: Uncovered is 0, single coverage is 1, double is 2.
-
-**Play Timestamp HR (STAMP_HR)**: Hours from start of game at point of snap.
-
-**Play Timestamp MIN (STAMP_MIN)**: Minutes from start of last hour at point of snap.
-
-**Play Timestamp SEC (STAMP_SEC)**: Seconds from start of last minute at point of snap.
-
-**Shovel/Touch Pass (SHOV)**: 0 or 1 if a touch/shovel pass
-
-**Screen Pass (SCRE)**: 0 or 1 if a screen pass
-
-**Number of Screening Players (NSCRE)**: Used in combination with 'SCRE', this field shows the actual number of players who were screening
+</div>
