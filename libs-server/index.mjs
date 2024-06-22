@@ -109,7 +109,7 @@ export const getChartedPlayByPlayQuery = (db) =>
       'nfl_plays.yaco',
       'nfl_games.week',
       'nfl_games.day',
-      'nfl_plays.cov_type',
+      'nfl_plays.cov_type_ngs',
       'nfl_plays.sep',
       'nfl_plays.ydl_100'
     )

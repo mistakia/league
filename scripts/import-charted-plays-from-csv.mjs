@@ -79,7 +79,8 @@ const formatPlay = (play) => ({
   dblz: parseInt(play.dblz, 10) || null,
   oopd: play.oopd || null,
   cov: play.cov || null,
-  cov_type: play.cov_type || null,
+  // TODO create new column
+  // cov_type: play.cov_type || null,
   sep: play.sep || null
 })
 
