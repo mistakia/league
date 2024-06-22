@@ -89,6 +89,7 @@ const Routes = ({ app }) => {
       <Route path='/props' element={<PropsPage />} />
       <Route path='/status' element={<StatusPage />} />
       <Route path='/settings' element={<SettingsPage />} />
+      <Route path='/about' element={<MarkdownPage path='/README.md' />} />
       <Route
         path='/resources'
         element={<MarkdownPage path='/resources.md' />}

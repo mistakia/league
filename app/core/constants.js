@@ -13,4 +13,7 @@ export const WS_URL = IS_DEV
 export const DOCS_URL =
   'https://api.github.com/repos/mistakia/league/contents/docs'
 
+export const README_URL =
+  'https://api.github.com/repos/mistakia/league/contents/README.md'
+
 export const TRANSACTIONS_PER_LOAD = 100
