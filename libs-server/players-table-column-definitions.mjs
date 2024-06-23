@@ -344,7 +344,8 @@ export default {
     select_as: () => 'age',
     select: () => [
       `ROUND(DATEDIFF(CURDATE(), STR_TO_DATE(player.dob, '%Y-%m-%d')) / 365.25, 2) as age`
-    ]
+    ],
+    use_having: true
   },
   player_date_of_birth: {
     table_name: 'player',
