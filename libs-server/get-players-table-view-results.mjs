@@ -7,7 +7,7 @@ const add_play_by_play_with_statement = ({
   query,
   params = {},
   with_table_name,
-  where_clauses = [],
+  having_clauses = [],
   select_strings = [],
   pid_column
 }) => {
@@ -57,8 +57,8 @@ const add_play_by_play_with_statement = ({
   }
 
   // where_clauses to filter stats/metrics
-  for (const where_clause of where_clauses) {
-    with_query.havingRaw(where_clause)
+  for (const having_clause of having_clauses) {
+    with_query.havingRaw(having_clause)
   }
 
   query.with(with_table_name, with_query)
@@ -215,6 +215,7 @@ const add_clauses_for_table = ({
   }
 
   const where_clause_strings = []
+  const having_clause_strings = []
   const unique_column_ids = new Set(column_ids)
   for (const where_clause of where_clauses) {
     const column_definition =
@@ -224,7 +225,11 @@ const add_clauses_for_table = ({
       column_definition,
       table_name
     })
-    where_clause_strings.push(where_string)
+    if (column_definition.use_having) {
+      having_clause_strings.push(where_string)
+    } else {
+      where_clause_strings.push(where_string)
+    }
 
     if (column_definition.join) {
       join_func = column_definition.join
@@ -247,6 +252,16 @@ const add_clauses_for_table = ({
       for (const s of select_string) {
         select_strings.push(s)
       }
+    } else if (!unique_column_ids.has(where_clause.column_id)) {
+      const select_string = get_select_string({
+        column_params,
+        column_index: 0,
+        column_definition,
+        table_name
+      })
+      for (const s of select_string) {
+        select_strings.push(s)
+      }
     }
   }
 
@@ -255,7 +270,7 @@ const add_clauses_for_table = ({
       query: players_query,
       params: column_params,
       with_table_name: table_name,
-      where_clauses: where_clause_strings,
+      having_clauses: having_clause_strings,
       select_strings,
       pid_column
     })
@@ -268,7 +283,12 @@ const add_clauses_for_table = ({
       )
     }
   } else {
-    players_query.whereRaw(where_clause_strings.join(' AND '))
+    if (where_clause_strings.length) {
+      players_query.whereRaw(where_clause_strings.join(' AND '))
+    }
+    if (having_clause_strings.length) {
+      players_query.havingRaw(having_clause_strings.join(' AND '))
+    }
     for (const select_string of select_strings) {
       players_query.select(db.raw(select_string))
     }
