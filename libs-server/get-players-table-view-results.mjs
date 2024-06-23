@@ -446,6 +446,11 @@ export default async function ({
     const column_id = typeof column === 'string' ? column : column.column_id
     const column_params = typeof column === 'string' ? {} : column.params
     const column_definition = players_table_column_definitions[column_id]
+
+    if (!column_definition) {
+      continue
+    }
+
     const table_name = get_table_name({ column_definition, column_params })
 
     add_sort_clause({
