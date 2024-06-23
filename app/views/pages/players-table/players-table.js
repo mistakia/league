@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'
 import PropTypes from 'prop-types'
+import { useLocation } from 'react-router-dom'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import Table from 'react-table/index.js'
 
@@ -28,11 +29,54 @@ export default function PlayersTablePage({
   teams,
   players_percentiles
 }) {
+  const location = useLocation()
+
   useEffect(() => {
-    players_table_view_changed(selected_players_table_view, {
-      view_state_changed: true
-    })
-  }, [players_table_view_changed]) // eslint-disable-line react-hooks/exhaustive-deps
+    const search_params = new URLSearchParams(location.search)
+    const columns = JSON.parse(search_params.get('columns') || 'null') || []
+    const sort = JSON.parse(search_params.get('sort') || 'null') || []
+    const where = JSON.parse(search_params.get('where') || 'null') || []
+    const prefix_columns =
+      JSON.parse(search_params.get('prefix_columns') || 'null') || []
+    const view_id = search_params.get('view_id') || ''
+    const view_name = search_params.get('view_name') || ''
+    const view_search_column_id =
+      search_params.get('view_search_column_id') || ''
+    const view_description = search_params.get('view_description') || ''
+
+    const has_table_state =
+      columns.length || where.length || (prefix_columns.length && sort.length)
+
+    if (has_table_state) {
+      players_table_view_changed(
+        {
+          view_id,
+          view_name,
+          view_search_column_id,
+          view_description,
+          table_state: {
+            columns,
+            sort,
+            where,
+            prefix_columns
+          },
+          saved_table_state: {
+            columns,
+            sort,
+            where,
+            prefix_columns
+          }
+        },
+        {
+          view_state_changed: true
+        }
+      )
+    } else {
+      players_table_view_changed(selected_players_table_view, {
+        view_state_changed: true
+      })
+    }
+  }, [location, players_table_view_changed]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     for (const column of selected_players_table_view.table_state.columns) {
