@@ -11,7 +11,7 @@
     - [Receiving Yards in Week 1 (Column for Each Year between 2019-2023)](#receiving-yards-in-week-1-column-for-each-year-between-2019-2023)
     - [Total Receiving Yards from Week 1-3 Between 2021-2023](#total-receiving-yards-from-week-1-3-between-2021-2023)
     - [Most Receptions over 60 yards since 2021](#most-receptions-over-60-yards-since-2021)
-    - [Receiving Yards & Touchdowns from players with an overall ESPN open score over 80](#receiving-yards--touchdowns-from-players-with-an-overall-espn-open-score-over-80)
+    - [Receiving Yards & Touchdowns from players with an overall ESPN open score over 80 in 2023](#receiving-yards--touchdowns-from-players-with-an-overall-espn-open-score-over-80-in-2023)
     - [Players with over 80 receiving yards in Week 1 and 1200+ receiving yards in 2023](#players-with-over-80-receiving-yards-in-week-1-and-1200-receiving-yards-in-2023)
     - [Receiving yards from non first read targets](#receiving-yards-from-non-first-read-targets)
     - [Receiving yards in the first quarter in 2023](#receiving-yards-in-the-first-quarter-in-2023)
@@ -142,7 +142,7 @@ TODO
   - `Recv Yds` to `60` to `99`
 ```
 
-#### Receiving Yards & Touchdowns from players with an overall ESPN open score over 80
+#### Receiving Yards & Touchdowns from players with an overall ESPN open score over 80 in 2023
 
 TODO
 
@@ -189,7 +189,33 @@ TODO
 
 #### Passing yards while the winning percentage is less than 75% in 2022 and 2023
 
-TODO
+[View Link](https://xo.football/leagues/0/players-table?columns=%5B%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22params%22%3A%7B%22year%22%3A%5B2023%5D%7D%7D%2C%7B%22column_id%22%3A%22player_receiving_touchdowns_from_plays%22%2C%22params%22%3A%7B%22year%22%3A%5B2023%5D%7D%7D%2C%7B%22column_id%22%3A%22player_espn_open_score%22%2C%22params%22%3A%7B%22year%22%3A%5B2023%5D%7D%7D%5D&prefix_columns=%5B%22player_name%22%5D&sort=%5B%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22desc%22%3Atrue%7D%5D&where=%5B%7B%22column_id%22%3A%22player_espn_open_score%22%2C%22operator%22%3A%22%3E%3D%22%2C%22value%22%3A%2280%22%7D%5D&view_id=48240f40-87a3-48e3-b03a-4536b9928a17&view_name=New+view&view_search_column_id=player_name&view_description=New+view+description)
+
+```
+- new view
+- open columns controller
+- filter for `receiving yards`, scroll and select `Receiving Yards (By Play)`
+- expand column to view available parameters
+- set column params
+  - `Year` to `2023`
+- filter for `receiving touchdowns`, scroll and select `Receiving Touchdowns (By Play)`
+- expand column to view available parameters
+- set column params
+  - `Year` to `2023`
+- filter for `espn open score`, scroll and select `ESPN Open Score`
+- expand column to view available parameters
+- set column params
+  - `Year` to `2023`
+- apply changes
+- open filter controller
+- filter for `espn open score`, scroll and select `ESPN Open Score`
+  - set the operator to `Greater Than or Equal`
+  - set the value to `80`
+  - expand filter to view available parameters
+  - set filter params
+    - `Year` to `2023`
+- apply changes
+```
 
 ## Share / Export View
 
