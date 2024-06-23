@@ -95,6 +95,10 @@ const Routes = ({ app }) => {
         element={<MarkdownPage path='/resources.md' />}
       />
       <Route path='/glossary' element={<MarkdownPage path='/glossary.md' />} />
+      <Route
+        path='/guides/players-table'
+        element={<MarkdownPage path='/guides/players-table.md' />}
+      />
       <Route path='*' element={<UnmatchedRoute />} />
     </RouterRoutes>
   )

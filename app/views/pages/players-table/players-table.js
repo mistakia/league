@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react'
 import PropTypes from 'prop-types'
-import { useLocation } from 'react-router-dom'
+import { useLocation, NavLink } from 'react-router-dom'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import Table from 'react-table/index.js'
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 
 import PageLayout from '@layouts/page'
 import Loading from '@components/loading'
@@ -117,6 +118,13 @@ export default function PlayersTablePage({
     <Loading loading />
   ) : (
     <div className='players__table'>
+      <div className='players__table-help'>
+        <InfoOutlinedIcon />
+        <span>
+          Visit the <NavLink to='/guides/players-table'>guide</NavLink> to learn
+          how to use the players table.
+        </span>
+      </div>
       <Table
         style={{ fontFamily: "'IBM Plex Mono', monospace" }}
         data={players}
