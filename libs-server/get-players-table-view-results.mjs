@@ -154,6 +154,7 @@ const get_select_string = ({
 }
 
 const add_sort_clause = ({
+  table_name,
   players_query,
   sort_clause,
   column_definition,
@@ -167,12 +168,21 @@ const add_sort_clause = ({
     players_query.orderByRaw(
       `${select_as}_${column_index} ${sort_clause.desc ? 'desc' : 'asc'}`
     )
-  } else {
+  } else if (column_index) { // TODO temp fix to not break the query when there are multiple of the same column_ids
     players_query.orderByRaw(
       `\`${column_definition.column_name}_${column_index}\` IS NULL`
     )
     players_query.orderByRaw(
       `\`${column_definition.column_name}_${column_index}\` ${
+        sort_clause.desc ? 'desc' : 'asc'
+      }`
+    )
+  } else { // TODO temp fix to not break the query when there are multiple 0 index columns across different with tables
+    players_query.orderByRaw(
+      `\`${table_name}\`.\`${column_definition.column_name}_0\` IS NULL`
+    )
+    players_query.orderByRaw(
+      `\`${table_name}\`.\`${column_definition.column_name}_0\` ${
         sort_clause.desc ? 'desc' : 'asc'
       }`
     )
@@ -425,12 +435,14 @@ export default async function ({
     const column_id = typeof column === 'string' ? column : column.column_id
     const column_params = typeof column === 'string' ? {} : column.params
     const column_definition = players_table_column_definitions[column_id]
+    const table_name = get_table_name({ column_definition, column_params })
 
     add_sort_clause({
       players_query,
       sort_clause,
       column_definition,
       column_params,
+      table_name,
       column_index: sort_clause.column_index
     })
   }
