@@ -317,7 +317,12 @@ const create_espn_score_columns = (column_name) => ({
   table_name: 'player_seasonlogs',
   column_name,
   join: ({ query, table_name, params } = {}) => {
-    const { year = constants.season.year } = params
+    let year = Number(params.year) || 2023
+
+    if (Number.isNaN(year) || year < 2017 || year > 2023) {
+      year = 2023
+    }
+
     query.joinRaw(
       `LEFT JOIN ${table_name} ON \`player_seasonlogs\`.\`pid\` = \`player\`.\`pid\` AND \`player_seasonlogs\`.\`year\` = ${year}`
     )
