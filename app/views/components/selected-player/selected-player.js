@@ -12,6 +12,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import IconButton from '@mui/material/IconButton'
 import { Map } from 'immutable'
+import ButtonGroup from '@mui/material/ButtonGroup'
 
 import PlayerName from '@components/player-name'
 import { constants, nth } from '@libs-shared'
@@ -117,54 +118,84 @@ export default function SelectedPlayer({
   const playerValue = playerMap.get('value')
   const rosPoints = playerMap.getIn(['points', 'ros', 'total'], 0)
 
+  const external_button_items = []
+
   const has_pfr_link = Boolean(
     playerMap.get('lname') && playerMap.get('pfr_id')
   )
-  const open_pfr_link = () => {
-    window.open(
-      `https://www.pro-football-reference.com/players/${playerMap.get('lname')[0].toUpperCase()}/${playerMap.get('pfr_id')}.htm`,
-      '_blank'
+  if (has_pfr_link) {
+    const open_pfr_link = () => {
+      window.open(
+        `https://www.pro-football-reference.com/players/${playerMap.get('lname')[0].toUpperCase()}/${playerMap.get('pfr_id')}.htm`,
+        '_blank'
+      )
+    }
+    external_button_items.push(
+      <Button size='small' onClick={open_pfr_link}>
+        PFR
+      </Button>
     )
   }
 
   const has_rotowire_link = Boolean(playerMap.get('rotowire_id'))
-  const open_rotowire_link = () => {
-    window.open(
-      `https://rotowire.com/football/player.php?id=${playerMap.get('rotowire_id')}`,
-      '_blank'
+  if (has_rotowire_link) {
+    const open_rotowire_link = () => {
+      window.open(
+        `https://rotowire.com/football/player.php?id=${playerMap.get('rotowire_id')}`,
+        '_blank'
+      )
+    }
+    external_button_items.push(
+      <Button size='small' onClick={open_rotowire_link}>
+        Rotowire
+      </Button>
     )
   }
 
   const has_fantasy_data_link = Boolean(playerMap.get('fantasy_data_id'))
-  const open_fantasy_data_link = () => {
-    window.open(
-      `https://fantasydata.com/nfl/player-fantasy/${playerMap.get('fantasy_data_id')}`,
-      '_blank'
+  if (has_fantasy_data_link) {
+    const open_fantasy_data_link = () => {
+      window.open(
+        `https://fantasydata.com/nfl/player-fantasy/${playerMap.get('fantasy_data_id')}`,
+        '_blank'
+      )
+    }
+    external_button_items.push(
+      <Button size='small' onClick={open_fantasy_data_link}>
+        FantasyData
+      </Button>
     )
   }
 
   const has_espn_link = Boolean(playerMap.get('espn_id'))
-  const open_espn_link = () => {
-    window.open(
-      `https://www.espn.com/nfl/player/_/id/${playerMap.get('espn_id')}`,
-      '_blank'
+  if (has_espn_link) {
+    const open_espn_link = () => {
+      window.open(
+        `https://www.espn.com/nfl/player/_/id/${playerMap.get('espn_id')}`,
+        '_blank'
+      )
+    }
+    external_button_items.push(
+      <Button size='small' onClick={open_espn_link}>
+        ESPN
+      </Button>
     )
   }
 
   const has_yahoo_link = Boolean(playerMap.get('yahoo_id'))
-  const open_yahoo_link = () => {
-    window.open(
-      `https://sports.yahoo.com/nfl/players/${playerMap.get('yahoo_id')}`,
-      '_blank'
+  if (has_yahoo_link) {
+    const open_yahoo_link = () => {
+      window.open(
+        `https://sports.yahoo.com/nfl/players/${playerMap.get('yahoo_id')}`,
+        '_blank'
+      )
+    }
+    external_button_items.push(
+      <Button size='small' onClick={open_yahoo_link}>
+        Yahoo
+      </Button>
     )
   }
-
-  const has_external_link =
-    has_pfr_link ||
-    has_rotowire_link ||
-    has_fantasy_data_link ||
-    has_espn_link ||
-    has_yahoo_link
 
   return (
     <Drawer
@@ -184,108 +215,6 @@ export default function SelectedPlayer({
         />
         <PlayerWatchlistAction pid={pid} />
         <div className='selected__player-header-secondary'>
-          <div className='selected__player-info'>
-            <div className='selected-player-bio-info'>
-              <div className='selected__player-header-item'>
-                <label>Age</label>
-                <PlayerAge date={playerMap.get('dob')} />
-              </div>
-              <div className='selected__player-header-item'>
-                <label>Draft</label>
-                {draftNum ? (
-                  <>
-                    {draftRound}
-                    {nth(draftRound)}{' '}
-                    <small>
-                      (#
-                      {draftNum})
-                    </small>
-                  </>
-                ) : (
-                  'UDFA'
-                )}
-              </div>
-              <div className='selected__player-header-item'>
-                <label>Exp.</label>
-                {constants.year - draftYear || 'Rookie'}
-              </div>
-            </div>
-            {has_external_link && (
-              <div className='player-external-page-links'>
-                {has_pfr_link && (
-                  <div
-                    className='player-external-page-link'
-                    onClick={open_pfr_link}
-                  >
-                    <svg
-                      version='1.1'
-                      xmlns='http://www.w3.org/2000/svg'
-                      width='24'
-                      height='24'
-                    >
-                      <path
-                        d='M0 0 C0 5.94 0 11.88 0 18 C-1.2375 17.505 -2.475 17.01 -3.75 16.5 C-5.73177995 16.35519353 -7.67356835 16.26389613 -9.65625 16.21875 C-14.22033868 16.01424174 -17.43375982 15.74867356 -21 12.75 C-23.08944916 10.28586125 -23.9480762 8.95097126 -24.1875 5.71875 C-24.0946875 4.74421875 -24.0946875 4.74421875 -24 3.75 C-22.58460938 4.05164063 -22.58460938 4.05164063 -21.140625 4.359375 C-17.10366091 4.83844508 -14.39906588 3.49800229 -10.86035156 1.66992188 C-6.90108643 -0.28788797 -4.82036555 0 0 0 Z '
-                        fill='#0B8A4D'
-                        transform='translate(24,3)'
-                      />
-                    </svg>
-                  </div>
-                )}
-                {has_rotowire_link && (
-                  <div
-                    className='player-external-page-link'
-                    onClick={open_rotowire_link}
-                  >
-                    <img
-                      src='/static/images/external_link_icons/rotowire-icon-48.png'
-                      alt='Rotowire'
-                      width='24'
-                      height='24'
-                    />
-                  </div>
-                )}
-                {has_fantasy_data_link && (
-                  <div
-                    className='player-external-page-link'
-                    onClick={open_fantasy_data_link}
-                  >
-                    <img
-                      src='/static/images/external_link_icons/fantasydata-icon-48.png'
-                      alt='Fantasy Data'
-                      width='24'
-                      height='24'
-                    />
-                  </div>
-                )}
-                {has_espn_link && (
-                  <div
-                    className='player-external-page-link'
-                    onClick={open_espn_link}
-                  >
-                    <img
-                      src='/static/images/external_link_icons/espn-icon-48.png'
-                      alt='ESPN'
-                      width='24'
-                      height='24'
-                    />
-                  </div>
-                )}
-                {has_yahoo_link && (
-                  <div
-                    className='player-external-page-link'
-                    onClick={open_yahoo_link}
-                  >
-                    <img
-                      src='/static/images/external_link_icons/yahoo-icon-48.png'
-                      alt='Yahoo'
-                      width='24'
-                      height='24'
-                    />
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
           <div className='selected__player-header-section'>
             {is_logged_in && Boolean(tid) && (
               <div className='selected__player-header-item'>
@@ -345,13 +274,33 @@ export default function SelectedPlayer({
                 </div>
               </>
             )}
+            <div className='selected__player-header-item'>
+              <label>Age</label>
+              <PlayerAge date={playerMap.get('dob')} />
+            </div>
+            <div className='selected__player-header-item'>
+              <label>Draft</label>
+              {draftNum ? (
+                <>
+                  {draftRound}
+                  {nth(draftRound)}{' '}
+                  <small>
+                    (#
+                    {draftNum})
+                  </small>
+                </>
+              ) : (
+                'UDFA'
+              )}
+            </div>
+            <div className='selected__player-header-item'>
+              <label>Exp.</label>
+              {constants.year - draftYear || 'Rookie'}
+            </div>
             {show_collapse && (
               <IconButton onClick={handleToggleExpand}>
                 {collapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}
               </IconButton>
-            )}
-            {is_logged_in && (
-              <PlayerContextMenu pid={pid} hideDisabled buttonGroup />
             )}
           </div>
         </div>
@@ -413,6 +362,14 @@ export default function SelectedPlayer({
             <SelectedPlayerTransactions />
           </TabPanel>
         </Tabs>
+      </div>
+      <div className='selected__player-actions'>
+        {is_logged_in && (
+          <PlayerContextMenu pid={pid} hideDisabled buttonGroup />
+        )}
+        {external_button_items.length > 0 && (
+          <ButtonGroup variant='contained'>{external_button_items}</ButtonGroup>
+        )}
       </div>
     </Drawer>
   )

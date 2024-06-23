@@ -22,40 +22,6 @@
   .player__name
     flex 0 0 auto
 
-.selected__player-info
-  min-width 200px
-  flex 1
-  display flex
-  align-items center
-  justify-content flex-start
-  flex-wrap wrap
-  row-gap 8px
-
-.selected-player-bio-info
-  display flex
-  flex-direction row
-  gap 8px
-
-.player-external-page-links
-  display flex
-  align-items center
-  justify-content center
-  gap 8px
-  border 1px solid $borderColor
-  border-radius 4px
-  background $backgroundColor
-
-.player-external-page-link
-  display flex
-  align-items center
-  justify-content center
-  width 32px
-  height 32px
-  cursor pointer
-  padding 4px
-  &:hover
-    background $yellowColor
-
 .selected__player-header-item
   flex 0 1 10%
   font-weight 800
@@ -74,6 +40,7 @@
   min-height fit-content
   row-gap 8px
   padding 8px 0
+  align-items center
 
 .selected__player-header-section
   flex 1
@@ -83,10 +50,7 @@
   align-items center
   row-gap 4px
   height fit-content
-  .MuiButtonGroup-root
-    margin 0 16px 16px
-  .MuiButton-root
-    font-size 10px
+  max-width 600px
 
 .selected__player-main
   overflow hidden
@@ -189,17 +153,31 @@
 .MuiButton-root.selected__player-close
   margin-left 8px
 
+.selected__player-actions
+  display flex
+  align-items center
+  gap 8px
+  background lighten($backgroundColor, 50%)
+  border-top 1px solid $borderColor
+  padding 16px
+  overflow-x scroll
+  .MuiButton-root
+    white-space nowrap
+    font-size 10px
+
 @media (min-width 951px)
   .selected__player-header
     .player__headshot
       border-radius 0
+
+  .selected__player-actions
+    justify-content flex-end
 
 @media (max-width 950px)
   .selected__player-header .player__headshot
     margin 8px 0 0 8px
 
 @media (max-width 950px)
-  .selected__player-info
   .selected__player-header-section
     justify-content center
 

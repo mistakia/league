@@ -350,8 +350,8 @@ const export_data_nfl_plays = async ({
   }
 
   // Convert Buffer fields to integers if they represent BIT(1)
-  data.forEach(play => {
-    Object.keys(play).forEach(key => {
+  data.forEach((play) => {
+    Object.keys(play).forEach((key) => {
       if (Buffer.isBuffer(play[key]) && play[key].length === 1) {
         play[key] = play[key][0]
       }
