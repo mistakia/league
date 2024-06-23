@@ -170,7 +170,8 @@ const add_sort_clause = ({
     players_query.orderByRaw(
       `${select_as}_${column_index} ${sort_clause.desc ? 'desc' : 'asc'}`
     )
-  } else if (column_index) { // TODO temp fix to not break the query when there are multiple of the same column_ids
+  } else if (column_index) {
+    // TODO temp fix to not break the query when there are multiple of the same column_ids
     players_query.orderByRaw(
       `\`${column_definition.column_name}_${column_index}\` IS NULL`
     )
@@ -179,7 +180,8 @@ const add_sort_clause = ({
         sort_clause.desc ? 'desc' : 'asc'
       }`
     )
-  } else { // TODO temp fix to not break the query when there are multiple 0 index columns across different with tables
+  } else {
+    // TODO temp fix to not break the query when there are multiple 0 index columns across different with tables
     players_query.orderByRaw(
       `\`${table_name}\`.\`${column_definition.column_name}_0\` IS NULL`
     )

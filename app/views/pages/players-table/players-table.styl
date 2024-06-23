@@ -77,3 +77,25 @@
     &.draft-order-12 .player__row-name-column
       background lighten($maroon, 12%)
       color white
+
+.players__table-help
+  font 500 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"
+  display flex
+  align-items center
+  gap 8px
+  padding 8px
+  background rgb(229, 246, 253)
+  border-radius 4px
+  color rgb(1, 67, 97)
+  position sticky
+  left 0
+
+  a
+    color #f00
+    font-weight 900
+
+    &:hover
+      border-bottom 2px solid #f00
+
+  .MuiSvgIcon-root
+    color rgb(2, 136, 209)
