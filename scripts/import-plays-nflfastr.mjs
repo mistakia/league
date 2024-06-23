@@ -31,7 +31,7 @@ debug.enable('import-nflfastr-plays,update-play')
  *  */
 
 const format_number = (num) => {
-  if (num === null || num === undefined) {
+  if (num === null || num === undefined || num === '') {
     return null
   }
 
@@ -52,28 +52,28 @@ const format_play = (play) => ({
   ydl_100: format_number(play.yardline_100),
 
   drive_seq: format_number(play.fixed_drive),
-  drive_result: play.fixed_drive_result,
-  drive_top: play.drive_time_of_possession,
-  drive_fds: format_number(play.drive_first_downs),
+  drive_result: play.fixed_drive_result || null,
+  drive_top: play.drive_time_of_possession || null,
+  drive_fds: format_number(play.drive_first_downs) || null,
   drive_inside20: format_number(play.drive_inside20),
   drive_score: format_number(play.drive_ended_with_score),
   drive_start_qtr: format_number(play.drive_quarter_start),
   drive_end_qtr: format_number(play.drive_quarter_end),
   drive_yds_penalized: format_number(play.drive_yards_penalized),
-  drive_start_transition: play.drive_start_transition,
-  drive_end_transition: play.drive_end_transition,
-  drive_game_clock_start: play.drive_game_clock_start,
-  drive_game_clock_end: play.drive_game_clock_end,
-  drive_start_ydl: play.drive_start_yard_line,
-  drive_end_ydl: play.drive_end_yard_line,
+  drive_start_transition: play.drive_start_transition || null,
+  drive_end_transition: play.drive_end_transition || null,
+  drive_game_clock_start: play.drive_game_clock_start || null,
+  drive_game_clock_end: play.drive_game_clock_end || null,
+  drive_start_ydl: play.drive_start_yard_line || null,
+  drive_end_ydl: play.drive_end_yard_line || null,
   drive_start_play_id: format_number(play.drive_play_id_started),
   drive_end_play_id: format_number(play.drive_play_id_ended),
 
   series_seq: format_number(play.series),
   series_suc: format_number(play.series_success),
-  series_result: play.series_result,
+  series_result: play.series_result || null,
 
-  game_clock_end: play.end_clock_time,
+  game_clock_end: play.end_clock_time || null,
   sec_rem_qtr: format_number(play.quarter_seconds_remaining),
   sec_rem_half: format_number(play.half_seconds_remaining),
   sec_rem_gm: format_number(play.game_seconds_remaining),
@@ -103,8 +103,8 @@ const format_play = (play) => ({
   qbk: format_number(play.qb_kneel),
   qbs: format_number(play.qb_spike),
 
-  run_location: play.run_location,
-  run_gap: play.run_gap,
+  run_location: play.run_location || null,
+  run_gap: play.run_gap || null,
 
   fd_rush: format_number(play.first_down_rush),
   fd_pass: format_number(play.first_down_pass),
@@ -180,10 +180,10 @@ const format_play = (play) => ({
   kickoff_att: format_number(play.kickoff_attempt),
   punt_att: format_number(play.punt_attempt),
 
-  fg_result: play.field_goal_result,
+  fg_result: play.field_goal_result || null,
   kick_distance: format_number(play.kick_distance),
-  ep_result: play.extra_point_result,
-  tp_result: play.two_point_conv_result,
+  ep_result: play.extra_point_result || null,
+  tp_result: play.two_point_conv_result || null,
   punt_blocked: format_number(play.punt_blocked),
 
   home_to_rem: format_number(play.home_timeouts_remaining),
