@@ -313,6 +313,17 @@ const player_projected_rec_tds = {
   join: projections_index_join
 }
 
+const create_espn_score_columns = (column_name) => ({
+  table_name: 'player_seasonlogs',
+  column_name,
+  join: ({ query, table_name, params } = {}) => {
+    const { year = constants.season.year } = params
+    query.joinRaw(
+      `LEFT JOIN ${table_name} ON \`player_seasonlogs\`.\`pid\` = \`player\`.\`pid\` AND \`player_seasonlogs\`.\`year\` = ${year}`
+    )
+  }
+})
+
 export default {
   player_name: {
     table_name: 'player',
@@ -858,5 +869,10 @@ export default {
     }),
 
   week_opponent_abbreviation: {},
-  week_opponent_points_allowed_over_average: {}
+  week_opponent_points_allowed_over_average: {},
+
+  player_espn_open_score: create_espn_score_columns('espn_open_score'),
+  player_espn_catch_score: create_espn_score_columns('espn_catch_score'),
+  player_espn_overall_score: create_espn_score_columns('espn_overall_score'),
+  player_espn_yac_score: create_espn_score_columns('espn_yac_score')
 }
