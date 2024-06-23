@@ -313,7 +313,7 @@ export default function SelectedPlayer({
                 {playerMap.getIn(['market_salary', '0'], 0)}
               </div>
             )}
-            {is_before_end_of_free_agent_period && (
+            {is_logged_in && is_before_end_of_free_agent_period && (
               <div className='selected__player-header-item'>
                 <label>Adjusted</label>${market_salary_adjusted}
               </div>
