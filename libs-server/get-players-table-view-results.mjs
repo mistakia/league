@@ -21,7 +21,9 @@ const add_play_by_play_with_statement = ({
     .where('seas_type', 'REG')
     .groupBy(pid_column)
 
-  for (const select_string of select_strings) {
+  const unique_select_strings = new Set(select_strings)
+
+  for (const select_string of unique_select_strings) {
     with_query.select(db.raw(select_string))
   }
 
