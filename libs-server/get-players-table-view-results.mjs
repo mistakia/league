@@ -284,7 +284,7 @@ const add_clauses_for_table = ({
     for (const { column_id, column_index } of select_columns) {
       const column_definition = players_table_column_definitions[column_id]
       players_query.select(
-        `${table_name}.${column_definition.column_name} as ${column_definition.column_name}_${column_index}`
+        `${table_name}.${column_definition.column_name}_0 as ${column_definition.column_name}_${column_index}`
       )
     }
   } else {
