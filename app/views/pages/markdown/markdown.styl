@@ -76,6 +76,20 @@
     border-bottom 1px solid $borderColor
     height 36px
 
+  pre
+    background white
+    border 1px solid $borderColor
+    border-radius 8px
+    padding 16px 0 16px 16px
+    margin 16px 0
+    overflow-x scroll
+
+  code:not(pre > code)
+    background white
+    border 1px solid $borderColor
+    border-radius 6px
+    padding 4px
+
 @media (min-width: 960px)
   .markdown
     align-items flex-start
