@@ -89,7 +89,12 @@ const get_table_name = ({ column_definition, column_params }) => {
     : column_definition.table_name
 }
 
-const get_where_string = ({ where_clause, column_definition, table_name }) => {
+const get_where_string = ({
+  where_clause,
+  column_definition,
+  table_name,
+  column_index = 0
+}) => {
   const column_name = column_definition.select_as
     ? column_definition.select_as(where_clause.params)
     : column_definition.column_name
@@ -98,7 +103,7 @@ const get_where_string = ({ where_clause, column_definition, table_name }) => {
         case_insensitive: where_clause.operator === 'ILIKE'
       })
     : column_definition.use_having
-      ? column_name
+      ? `${column_name}_${column_index}`
       : `${table_name}.${column_name}`
 
   let where_string = ''
@@ -152,7 +157,6 @@ const add_sort_clause = ({
   players_query,
   sort_clause,
   column_definition,
-  table_name,
   column_params,
   column_index = 0
 }) => {
@@ -165,10 +169,10 @@ const add_sort_clause = ({
     )
   } else {
     players_query.orderByRaw(
-      `\`${table_name}\`.\`${column_definition.column_name}\` IS NULL`
+      `\`${column_definition.column_name}_${column_index}\` IS NULL`
     )
     players_query.orderByRaw(
-      `\`${table_name}\`.\`${column_definition.column_name}\` ${
+      `\`${column_definition.column_name}_${column_index}\` ${
         sort_clause.desc ? 'desc' : 'asc'
       }`
     )
@@ -223,7 +227,8 @@ const add_clauses_for_table = ({
     const where_string = get_where_string({
       where_clause,
       column_definition,
-      table_name
+      table_name,
+      column_index: 0
     })
     if (column_definition.use_having) {
       having_clause_strings.push(where_string)
@@ -420,13 +425,11 @@ export default async function ({
     const column_id = typeof column === 'string' ? column : column.column_id
     const column_params = typeof column === 'string' ? {} : column.params
     const column_definition = players_table_column_definitions[column_id]
-    const table_name = get_table_name({ column_definition, column_params })
 
     add_sort_clause({
       players_query,
       sort_clause,
       column_definition,
-      table_name,
       column_params,
       column_index: sort_clause.column_index
     })
