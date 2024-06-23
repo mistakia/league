@@ -9,6 +9,7 @@
   - [Receiving](#receiving)
   - [Defense](#defense)
 - [Play By Play Columns](#play-by-play-columns)
+
   - [General](#general-1)
   - [Passing](#passing-1)
   - [Rushing](#rushing-1)
@@ -23,6 +24,8 @@
   - [Expected Models & Probabilities](#expected-models--probabilities)
   - [Player Identification](#player-identification)
   - [Special Teams](#special-teams)
+
+  [Submit a Stat](https://github.com/mistakia/league/issues/new?assignees=&labels=kind%2Fstat%2C+status%2Fready&projects=&template=submit-a-stat.md&title=Add+stat%3A+%3CSTAT+NAME%3E)
 
 </div>
 

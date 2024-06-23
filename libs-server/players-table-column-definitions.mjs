@@ -340,10 +340,9 @@ export default {
   },
   player_age: {
     table_name: 'player',
-    where_column: () => 'age',
-    select_as: () => 'age',
-    select: () => [
-      `ROUND(DATEDIFF(CURDATE(), STR_TO_DATE(player.dob, '%Y-%m-%d')) / 365.25, 2) as age`
+    column_name: 'age',
+    select: ({ column_index }) => [
+      `ROUND(DATEDIFF(CURDATE(), STR_TO_DATE(player.dob, '%Y-%m-%d')) / 365.25, 2) as age_${column_index}`
     ],
     use_having: true
   },
@@ -419,6 +418,7 @@ export default {
   // TODO player.dcp ??
 
   player_league_roster_status: {
+    // TODO should be removed, do not use `where_column` with `use_having`
     where_column: () => 'player_league_roster_status',
     select: () => [
       `CASE
