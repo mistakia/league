@@ -19,6 +19,7 @@ const COLUMN_GROUPS = {
   DRAFT: { priority: 1 },
   MANAGEMENT: { priority: 1 },
   PROJECTION: { priority: 1 },
+  ESPN: { priority: 1 },
   WEEK_PROJECTION: { priority: 2 },
   SEASON_PROJECTION: { priority: 2 },
   REST_OF_SEASON_PROJECTION: { priority: 2 },
@@ -33,6 +34,25 @@ const COLUMN_GROUPS = {
 
 for (const [key, value] of Object.entries(COLUMN_GROUPS)) {
   value.column_group_id = key
+}
+
+function create_espn_score_field({ score_type, label }) {
+  return {
+    column_title: `ESPN ${label} Score`,
+    column_groups: [COLUMN_GROUPS.ESPN, COLUMN_GROUPS.RECEIVING],
+    header_label: label,
+    player_value_path: `espn_${score_type}_score`,
+    size: 70,
+    data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+    column_params: {
+      year: {
+        values: [2023, 2022, 2021, 2020, 2019, 2018, 2017],
+        data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+        single: true,
+        default_value: 2023
+      }
+    }
+  }
 }
 
 // Player Column Fields
@@ -1461,7 +1481,24 @@ export function PlayerTableFields({
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_params: nfl_plays_column_params
-    }
+    },
+
+    player_espn_open_score: create_espn_score_field({
+      score_type: 'open',
+      label: 'OPEN'
+    }),
+    player_espn_catch_score: create_espn_score_field({
+      score_type: 'catch',
+      label: 'CATCH'
+    }),
+    player_espn_overall_score: create_espn_score_field({
+      score_type: 'overall',
+      label: 'OVR'
+    }),
+    player_espn_yac_score: create_espn_score_field({
+      score_type: 'yac',
+      label: 'YAC'
+    })
 
     // opponent_pass_pa: {
     //   column_title: 'Opponent pass atts over average',
