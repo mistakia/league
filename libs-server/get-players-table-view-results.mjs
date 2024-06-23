@@ -180,13 +180,20 @@ const add_sort_clause = ({
         sort_clause.desc ? 'desc' : 'asc'
       }`
     )
-  } else {
+  } else if (column_definition.use_with) {
     // TODO temp fix to not break the query when there are multiple 0 index columns across different with tables
     players_query.orderByRaw(
       `\`${table_name}\`.\`${column_definition.column_name}_0\` IS NULL`
     )
     players_query.orderByRaw(
       `\`${table_name}\`.\`${column_definition.column_name}_0\` ${
+        sort_clause.desc ? 'desc' : 'asc'
+      }`
+    )
+  } else {
+    players_query.orderByRaw(`\`${column_definition.column_name}_0\` IS NULL`)
+    players_query.orderByRaw(
+      `\`${column_definition.column_name}_0\` ${
         sort_clause.desc ? 'desc' : 'asc'
       }`
     )
