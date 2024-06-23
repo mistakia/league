@@ -45,8 +45,8 @@ const nfl_play_fields = [
   'air_yds_ngs',
   'time_to_throw_ngs',
   'route_ngs',
-  'man_zone_ngs',
-  'cov_type_ngs',
+  // 'man_zone_ngs',
+  // 'cov_type_ngs',
 
   'drive_seq',
   'drive_yds',
@@ -225,7 +225,7 @@ const nfl_play_fields = [
   'blz',
   'dblz',
   // 'oopd',
-  // 'cov',
+  // 'cov_charted',
 
   'ep',
   'epa',
@@ -348,6 +348,16 @@ const export_data_nfl_plays = async ({
   for (const field of nfl_play_fields) {
     header[field] = field
   }
+
+  // Convert Buffer fields to integers if they represent BIT(1)
+  data.forEach(play => {
+    Object.keys(play).forEach(key => {
+      if (Buffer.isBuffer(play[key]) && play[key].length === 1) {
+        play[key] = play[key][0]
+      }
+    })
+  })
+
   const csv_data = [header, ...data]
   const csv_data_string = JSON.stringify(csv_data)
   const csv = convertToCSV(csv_data_string)
@@ -367,6 +377,16 @@ const export_data_nfl_plays = async ({
 const main = async () => {
   let error
   try {
+    const columns = await db('nfl_plays').columnInfo()
+    const column_keys = Object.keys(columns)
+
+    const missing_columns = column_keys.filter(
+      (key) => !nfl_play_fields.includes(key)
+    )
+    log(
+      `Missing columns not included in nfl_play_fields: ${missing_columns.join(', ')}`
+    )
+
     const years_query_results = await db('nfl_plays')
       .select('year')
       .groupBy('year')
