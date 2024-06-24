@@ -265,7 +265,7 @@ const run = async ({
       const play = format_play(item)
 
       // temp ignore discrepanies in current year data
-      if (year >= 2023) {
+      if (year >= 2022) {
         delete play.game_clock_end
       }
 
