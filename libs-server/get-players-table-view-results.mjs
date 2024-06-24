@@ -115,9 +115,9 @@ const get_where_string = ({
   } else if (where_clause.operator === 'IS NOT NULL') {
     where_string = `${where_column} IS NOT NULL`
   } else if (where_clause.operator === 'IN') {
-    where_string = `${where_column} IN (${where_clause.value.join(', ')})`
+    where_string = `${where_column} IN ('${where_clause.value.join('\', \'')}')`
   } else if (where_clause.operator === 'NOT IN') {
-    where_string = `${where_column} NOT IN (${where_clause.value.join(', ')})`
+    where_string = `${where_column} NOT IN ('${where_clause.value.join('\', \'')}')`
   } else if (where_clause.operator === 'ILIKE') {
     where_string = `${where_column} LIKE '%${(where_clause.value || '').toUpperCase()}%'`
   } else if (where_clause.operator === 'LIKE') {
@@ -125,7 +125,7 @@ const get_where_string = ({
   } else if (where_clause.operator === 'NOT LIKE') {
     where_string = `${where_column} NOT LIKE '%${where_clause.value}%'`
   } else if (where_clause.value) {
-    where_string = `${where_column} ${where_clause.operator} ${where_clause.value}`
+    where_string = `${where_column} ${where_clause.operator} '${where_clause.value}'`
   }
 
   return where_string
