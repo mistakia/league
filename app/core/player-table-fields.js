@@ -960,6 +960,15 @@ export function PlayerTableFields({
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_params: nfl_plays_column_params
     },
+    player_pass_attempts_from_plays: {
+      column_title: 'Passing Attempts (By Play)',
+      column_groups: [COLUMN_GROUPS.PASSING, COLUMN_GROUPS.TOTALS],
+      header_label: 'ATT',
+      player_value_path: 'pass_atts_from_plays',
+      size: 70,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+      column_params: nfl_plays_column_params
+    },
     player_pass_touchdowns_from_plays: {
       column_title: 'Passing Touchdowns (By Play)',
       column_groups: [COLUMN_GROUPS.PASSING, COLUMN_GROUPS.TOTALS],
