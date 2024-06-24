@@ -37,9 +37,16 @@ const add_play_by_play_with_statement = ({
         column_param_definition.data_type ===
         table_constants.TABLE_DATA_TYPES.RANGE
       ) {
+        const param_value_0 = Number(param_value[0])
+        const param_value_1 = Number(param_value[1])
+
+        if (isNaN(param_value_0) || isNaN(param_value_1)) {
+          throw new Error(`Invalid number range for ${column_param_key}`)
+        }
+
         with_query.whereBetween(column_param_key, [
-          param_value[0],
-          param_value[1]
+          Math.min(param_value_0, param_value_1),
+          Math.max(param_value_0, param_value_1)
         ])
       } else if (
         column_param_definition.data_type ===
