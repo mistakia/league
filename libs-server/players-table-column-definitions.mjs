@@ -18,7 +18,9 @@ const generate_play_by_play_table_alias = ({
   const key = column_param_keys
     .map((key) => {
       const value = params[key]
-      return Array.isArray(value) ? value.sort().join('') : value || ''
+      return Array.isArray(value)
+        ? `${key}${value.sort().join('')}`
+        : `${key}${value || ''}`
     })
     .join('')
 
