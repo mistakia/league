@@ -1586,7 +1586,8 @@ CREATE TABLE `nfl_plays` (
   KEY `playId` (`playId`),
   KEY `psr_pid` (`psr_pid`),
   KEY `bc_pid` (`bc_pid`),
-  KEY `trg_pid` (`trg_pid`)
+  KEY `trg_pid` (`trg_pid`),
+  KEY `idx_nfl_plays_year_esbid` (`year`, `esbid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -2091,7 +2092,8 @@ CREATE TABLE `player_gamelogs` (
   `dsf` tinyint(2) DEFAULT 0,
   `dtpr` tinyint(2) DEFAULT 0,
   `dtd` tinyint(2) DEFAULT 0,
-  UNIQUE KEY `pid` (`pid`, `esbid`)
+  UNIQUE KEY `pid` (`pid`, `esbid`),
+  KEY `idx_player_gamelogs_esbid_tm_pid` (`esbid`, `tm`, `pid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
