@@ -194,8 +194,56 @@ export const markets = {
 export const get_market_type_for_quarterback_season_props = ({
   marketName
 }) => {
-  if (marketName.toLowerCase().includes('passing tds')) {
+  if (
+    marketName.toLowerCase().includes('passing tds') ||
+    marketName.toLowerCase().includes('passing touchdowns')
+  ) {
+    return player_prop_types.SEASON_PASSING_TOUCHDOWNS
   }
+
+  if (marketName.toLowerCase().includes('passing yards')) {
+    return player_prop_types.SEASON_PASSING_YARDS
+  }
+
+  return null
+}
+
+export const get_market_type_for_wide_receiver_season_props = ({
+  marketName
+}) => {
+  if (marketName.toLowerCase().includes('receiving yards')) {
+    return player_prop_types.SEASON_RECEIVING_YARDS
+  }
+
+  if (
+    marketName.toLowerCase().includes('receiving tds') ||
+    marketName.toLowerCase().includes('receiving touchdowns')
+  ) {
+    return player_prop_types.SEASON_RECEIVING_TOUCHDOWNS
+  }
+
+  if (marketName.toLowerCase().includes('receptions')) {
+    return player_prop_types.SEASON_RECEPTIONS
+  }
+
+  return null
+}
+
+export const get_market_type_for_running_back_season_props = ({
+  marketName
+}) => {
+  if (marketName.toLowerCase().includes('rushing yards')) {
+    return player_prop_types.SEASON_RUSHING_YARDS
+  }
+
+  if (
+    marketName.toLowerCase().includes('rushing tds') ||
+    marketName.toLowerCase().includes('rushing touchdowns')
+  ) {
+    return player_prop_types.SEASON_RUSHING_TOUCHDOWNS
+  }
+
+  return null
 }
 
 export const get_market_type = ({ marketName, marketType }) => {

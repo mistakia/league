@@ -135,7 +135,10 @@ const format_market = async ({
   }
 
   return {
-    market_type: fanduel.markets[fanduel_market.marketType],
+    market_type: fanduel.get_market_type({
+      marketName: fanduel_market.marketName,
+      marketType: fanduel_market.marketType
+    }),
 
     source_id: 'FANDUEL',
     source_market_id: fanduel_market.marketId,
