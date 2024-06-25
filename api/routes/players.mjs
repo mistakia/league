@@ -120,13 +120,15 @@ router.post('/search/?', async (req, res) => {
       // TODO validate offset
     }
 
-    const result = await get_players_table_view_results({
+    const query = get_players_table_view_results({
       where,
       columns,
       sort,
       offset,
       prefix_columns
     })
+
+    const result = await query
 
     res.send(result)
   } catch (error) {

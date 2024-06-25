@@ -1,7 +1,6 @@
 import db from '#db'
 import players_table_column_definitions from './players-table-column-definitions.mjs'
-import nfl_plays_column_params from '#libs-shared/nfl-plays-column-params.mjs'
-import * as table_constants from 'react-table/src/constants.mjs'
+import apply_play_by_play_column_params_to_query from './apply-play-by-play-column-params-to-query.mjs'
 
 const add_play_by_play_with_statement = ({
   query,
@@ -27,43 +26,10 @@ const add_play_by_play_with_statement = ({
     with_query.select(db.raw(select_string))
   }
 
-  // column_params to filter plays
-  const column_param_keys = Object.keys(nfl_plays_column_params)
-  for (const column_param_key of column_param_keys) {
-    const param_value = params[column_param_key]
-    if (typeof param_value !== 'undefined' && param_value !== null) {
-      const column_param_definition = nfl_plays_column_params[column_param_key]
-      if (
-        column_param_definition.data_type ===
-        table_constants.TABLE_DATA_TYPES.RANGE
-      ) {
-        const param_value_0 = Number(param_value[0])
-        const param_value_1 = Number(param_value[1])
-
-        if (isNaN(param_value_0) || isNaN(param_value_1)) {
-          throw new Error(`Invalid number range for ${column_param_key}`)
-        }
-
-        with_query.whereBetween(column_param_key, [
-          Math.min(param_value_0, param_value_1),
-          Math.max(param_value_0, param_value_1)
-        ])
-      } else if (
-        column_param_definition.data_type ===
-        table_constants.TABLE_DATA_TYPES.SELECT
-      ) {
-        const column_values = Array.isArray(param_value)
-          ? param_value
-          : [param_value]
-        with_query.whereIn(column_param_key, column_values)
-      } else if (
-        column_param_definition.data_type ===
-        table_constants.TABLE_DATA_TYPES.BOOLEAN
-      ) {
-        with_query.where(column_param_key, param_value)
-      }
-    }
-  }
+  apply_play_by_play_column_params_to_query({
+    query: with_query,
+    params
+  })
 
   // where_clauses to filter stats/metrics
   for (const having_clause of having_clauses) {
@@ -187,7 +153,7 @@ const add_sort_clause = ({
         sort_clause.desc ? 'desc' : 'asc'
       }`
     )
-  } else if (column_definition.use_with) {
+  } else if (column_definition.use_play_by_play_with) {
     // TODO temp fix to not break the query when there are multiple 0 index columns across different with tables
     players_query.orderByRaw(
       `\`${table_name}\`.\`${column_definition.column_name}_0\` IS NULL`
@@ -216,11 +182,12 @@ const add_clauses_for_table = ({
 }) => {
   const column_ids = []
   const select_strings = []
-  let use_with = false
+  let use_play_by_play_with = false
 
   // the pid column and join_func should be the same among column definitions with the same table name/alias
   let pid_column = null
   let join_func = null
+  let with_func = null
 
   for (const { column_id, column_index } of select_columns) {
     const column_definition = players_table_column_definitions[column_id]
@@ -238,10 +205,12 @@ const add_clauses_for_table = ({
       join_func = column_definition.join
     }
 
-    if (column_definition.use_with) {
-      use_with = true
+    if (column_definition.use_play_by_play_with) {
+      use_play_by_play_with = true
       pid_column = column_definition.pid_column
       join_func = column_definition.join
+    } else if (column_definition.with) {
+      with_func = column_definition.with
     }
     column_ids.push(column_id)
   }
@@ -268,12 +237,16 @@ const add_clauses_for_table = ({
       join_func = column_definition.join
     }
 
-    // if use_with (play by play) a select string should be added to the with statement as its needed for the having clause (avoid duplicates for the same column)
+    if (column_definition.with) {
+      with_func = column_definition.with
+    }
+
+    // if use_play_by_play_with (play by play) a select string should be added to the with statement as its needed for the having clause (avoid duplicates for the same column)
     if (
-      column_definition.use_with &&
+      column_definition.use_play_by_play_with &&
       !unique_column_ids.has(where_clause.column_id)
     ) {
-      use_with = true
+      use_play_by_play_with = true
       pid_column = column_definition.pid_column
       join_func = column_definition.join
       const select_string = get_select_string({
@@ -298,7 +271,7 @@ const add_clauses_for_table = ({
     }
   }
 
-  if (use_with) {
+  if (use_play_by_play_with) {
     add_play_by_play_with_statement({
       query: players_query,
       params: column_params,
@@ -314,6 +287,17 @@ const add_clauses_for_table = ({
       players_query.select(
         `${table_name}.${column_definition.column_name}_0 as ${column_definition.column_name}_${column_index}`
       )
+    }
+  } else if (with_func) {
+    with_func({
+      query: players_query,
+      params: column_params,
+      with_table_name: table_name,
+      having_clauses: having_clause_strings
+    })
+
+    for (const select_string of select_strings) {
+      players_query.select(db.raw(select_string))
     }
   } else {
     if (where_clause_strings.length) {
@@ -403,14 +387,14 @@ const get_grouped_clauses_by_table = ({
   return grouped_clauses_by_table
 }
 
-export default async function ({
+export default function ({
   where = [],
   columns = [],
   prefix_columns = [],
   sort = [],
   offset = 0,
   limit = 500
-}) {
+} = {}) {
   const joined_table_index = {}
   const with_statement_index = {}
   const players_query = db('player').select('player.pid')
