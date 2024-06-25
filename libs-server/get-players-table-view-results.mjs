@@ -97,7 +97,7 @@ const get_where_string = ({
     where_string = `${where_column} LIKE '%${where_clause.value}%'`
   } else if (where_clause.operator === 'NOT LIKE') {
     where_string = `${where_column} NOT LIKE '%${where_clause.value}%'`
-  } else if (where_clause.value) {
+  } else if (where_clause.value || where_clause.value === 0) {
     where_string = `${where_column} ${where_clause.operator} '${where_clause.value}'`
   }
 
@@ -227,6 +227,11 @@ const add_clauses_for_table = ({
       table_name,
       column_index: 0
     })
+
+    if (!where_string) {
+      continue
+    }
+
     if (column_definition.use_having) {
       having_clause_strings.push(where_string)
     } else {
