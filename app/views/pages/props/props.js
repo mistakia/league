@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import AutoSizer from 'react-virtualized/dist/es/AutoSizer'
 import List from 'react-virtualized/dist/es/List'
 
-import { constants } from '@libs-shared'
+import { constants, bookmaker_constants } from '@libs-shared'
 import PlayerName from '@components/player-name'
 import PageLayout from '@layouts/page'
 
@@ -24,7 +24,7 @@ export default function PropsPage({ load, player_props }) {
         </div>
         <div className='item__col-group'>
           <div className='item__col'>
-            {constants.player_prop_type_desc[prop.prop_type]}
+            {bookmaker_constants.player_prop_types[prop.prop_type]}
           </div>
           <div className='item__col'>
             {constants.sourcesTitle[prop.sourceid]}

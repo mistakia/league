@@ -2447,7 +2447,7 @@ CREATE TABLE `props` (
   `week` tinyint(2) NOT NULL,
   `year` smallint(4) NOT NULL,
   `esbid` int(10) unsigned DEFAULT NULL,
-  `prop_type` tinyint(3) NOT NULL,
+  `prop_type` varchar(50) DEFAULT NULL,
   `id` varchar(100) NOT NULL,
   `ln` decimal(4,1) DEFAULT NULL,
   `o` decimal(5,2) DEFAULT NULL,
@@ -2474,7 +2474,7 @@ CREATE TABLE `props_index` (
   `pid` varchar(25) NOT NULL,
   `week` tinyint(2) NOT NULL,
   `year` smallint(4) NOT NULL,
-  `prop_type` tinyint(3) NOT NULL,
+  `prop_type` varchar(50) DEFAULT NULL,
   `ln` decimal(4,1) DEFAULT NULL,
   `o` decimal(5,2) DEFAULT NULL,
   `u` decimal(5,2) DEFAULT NULL,
@@ -2542,7 +2542,7 @@ CREATE TABLE `prop_markets_history` (
 DROP TABLE IF EXISTS `prop_markets_index`;
 
 CREATE TABLE `prop_markets_index` (
-  `market_type` tinyint(1) unsigned DEFAULT NULL,
+  `market_type` varchar(50) DEFAULT NULL,
 
   `source_id` ENUM('BETONLINE', 'BETMGM', 'BETRIVERS', 'BOVADA', 'CAESARS', 'DRAFTKINGS', 'FANDUEL', 'GAMBET', 'PRIZEPICKS') NOT NULL,
   `source_market_id` varchar(255) NOT NULL,

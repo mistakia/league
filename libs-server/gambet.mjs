@@ -4,56 +4,41 @@ import dayjs from 'dayjs'
 
 import config from '#config'
 import { constants } from '#libs-shared'
+import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 
 // const log = debug('gambet')
 // debug.enable('gambet')
 
 export const markets = {
   // pass props
-  'AMERICAN_FOOTBALL:FT:PROPPSATT':
-    constants.player_prop_types.GAME_PASSING_ATTEMPTS,
-  'AMERICAN_FOOTBALL:FTOT:PPTOU':
-    constants.player_prop_types.GAME_PASSING_TOUCHDOWNS,
-  'AMERICAN_FOOTBALL:FT:PROPINT':
-    constants.player_prop_types.GAME_PASSING_INTERCEPTIONS,
+  'AMERICAN_FOOTBALL:FT:PROPPSATT': player_prop_types.GAME_PASSING_ATTEMPTS,
+  'AMERICAN_FOOTBALL:FTOT:PPTOU': player_prop_types.GAME_PASSING_TOUCHDOWNS,
+  'AMERICAN_FOOTBALL:FT:PROPINT': player_prop_types.GAME_PASSING_INTERCEPTIONS,
   'AMERICAN_FOOTBALL:FT:PROPPASRECYA':
-    constants.player_prop_types.GAME_PASSING_RUSHING_YARDS,
-  'AMERICAN_FOOTBALL:FT:PPT':
-    constants.player_prop_types.GAME_ALT_PASSING_TOUCHDOWNS,
-  'AMERICAN_FOOTBALL:FTOT:PPCOU':
-    constants.player_prop_types.GAME_PASSING_COMPLETIONS,
+    player_prop_types.GAME_PASSING_RUSHING_YARDS,
+  'AMERICAN_FOOTBALL:FT:PPT': player_prop_types.GAME_ALT_PASSING_TOUCHDOWNS,
+  'AMERICAN_FOOTBALL:FTOT:PPCOU': player_prop_types.GAME_PASSING_COMPLETIONS,
   'AMERICAN_FOOTBALL:FT:PROPLNGPSCMP':
-    constants.player_prop_types.GAME_PASSING_LONGEST_COMPLETION,
-  'AMERICAN_FOOTBALL:FTOT:PPSYOU':
-    constants.player_prop_types.GAME_PASSING_YARDS,
-  'AMERICAN_FOOTBALL:FT:PPC':
-    constants.player_prop_types.GAME_ALT_PASSING_COMPLETIONS,
-  'AMERICAN_FOOTBALL:FT:PPY':
-    constants.player_prop_types.GAME_ALT_PASSING_YARDS,
+    player_prop_types.GAME_PASSING_LONGEST_COMPLETION,
+  'AMERICAN_FOOTBALL:FTOT:PPSYOU': player_prop_types.GAME_PASSING_YARDS,
+  'AMERICAN_FOOTBALL:FT:PPC': player_prop_types.GAME_ALT_PASSING_COMPLETIONS,
+  'AMERICAN_FOOTBALL:FT:PPY': player_prop_types.GAME_ALT_PASSING_YARDS,
 
   // rec props
-  'AMERICAN_FOOTBALL:FTOT:PRCYOU':
-    constants.player_prop_types.GAME_RECEIVING_YARDS,
-  'AMERICAN_FOOTBALL:FTOT:PRCOU': constants.player_prop_types.GAME_RECEPTIONS,
-  'AMERICAN_FOOTBALL:FT:PROPLNGREC':
-    constants.player_prop_types.GAME_LONGEST_RECEPTION,
-  'AMERICAN_FOOTBALL:FT:PRCY':
-    constants.player_prop_types.GAME_ALT_RECEIVING_YARDS,
-  'AMERICAN_FOOTBALL:FT:PRC': constants.player_prop_types.GAME_ALT_RECEPTIONS,
+  'AMERICAN_FOOTBALL:FTOT:PRCYOU': player_prop_types.GAME_RECEIVING_YARDS,
+  'AMERICAN_FOOTBALL:FTOT:PRCOU': player_prop_types.GAME_RECEPTIONS,
+  'AMERICAN_FOOTBALL:FT:PROPLNGREC': player_prop_types.GAME_LONGEST_RECEPTION,
+  'AMERICAN_FOOTBALL:FT:PRCY': player_prop_types.GAME_ALT_RECEIVING_YARDS,
+  'AMERICAN_FOOTBALL:FT:PRC': player_prop_types.GAME_ALT_RECEPTIONS,
 
   // rush props
-  'AMERICAN_FOOTBALL:FTOT:PCOU':
-    constants.player_prop_types.GAME_RUSHING_ATTEMPTS,
+  'AMERICAN_FOOTBALL:FTOT:PCOU': player_prop_types.GAME_RUSHING_ATTEMPTS,
   'AMERICAN_FOOTBALL:FT:PROPRSPRCYDS':
-    constants.player_prop_types.GAME_RUSHING_RECEIVING_YARDS,
-  'AMERICAN_FOOTBALL:FT:PRSY':
-    constants.player_prop_types.GAME_ALT_RUSHING_YARDS,
-  'AMERICAN_FOOTBALL:FTOT:PRSYOU':
-    constants.player_prop_types.GAME_RUSHING_YARDS,
-  'AMERICAN_FOOTBALL:FT:PC':
-    constants.player_prop_types.GAME_ALT_RUSHING_ATTEMPTS,
-  'AMERICAN_FOOTBALL:FT:PROPLNGRUS':
-    constants.player_prop_types.GAME_LONGEST_RUSH,
+    player_prop_types.GAME_RUSHING_RECEIVING_YARDS,
+  'AMERICAN_FOOTBALL:FT:PRSY': player_prop_types.GAME_ALT_RUSHING_YARDS,
+  'AMERICAN_FOOTBALL:FTOT:PRSYOU': player_prop_types.GAME_RUSHING_YARDS,
+  'AMERICAN_FOOTBALL:FT:PC': player_prop_types.GAME_ALT_RUSHING_ATTEMPTS,
+  'AMERICAN_FOOTBALL:FT:PROPLNGRUS': player_prop_types.GAME_LONGEST_RUSH,
 
   // 'AMERICAN_FOOTBALL:FT:PROPRSATT':
 
@@ -64,7 +49,7 @@ export const markets = {
   // 'AMERICAN_FOOTBALL:FT:PRST',
   // 'AMERICAN_FOOTBALL:FT:PRCT',
   'AMERICAN_FOOTBALL:FT:PROPATD':
-    constants.player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS
+    player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS
   // 'AMERICAN_FOOTBALL:FT:PROPRCTD': ,
   // 'AMERICAN_FOOTBALL:FT:PROPRSTD'
 }

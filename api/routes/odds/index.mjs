@@ -81,7 +81,6 @@ router.get('/props', async (req, res) => {
     const props = data.map((row) => ({
       ...row,
 
-      prop_type: constants.player_prop_type_keys[row.prop_type],
       prop_source: constants.source_keys[row.prop_source]
     }))
 

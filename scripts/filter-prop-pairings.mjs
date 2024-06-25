@@ -10,6 +10,7 @@ import { Table } from 'console-table-printer'
 
 import db from '#db'
 import { constants, groupBy } from '#libs-shared'
+import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 import { isMain } from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -60,52 +61,52 @@ const opponent_allowed_for_prop_is_negative = ({
   opts = {}
 }) => {
   switch (prop_type) {
-    case constants.player_prop_types.GAME_PASSING_YARDS:
-    case constants.player_prop_types.GAME_ALT_PASSING_YARDS:
+    case player_prop_types.GAME_PASSING_YARDS:
+    case player_prop_types.GAME_ALT_PASSING_YARDS:
       return opponent_seasonlog.py < (opts.opponent_allowed_py_min || 0)
 
-    case constants.player_prop_types.GAME_RUSHING_YARDS:
-    case constants.player_prop_types.GAME_ALT_RUSHING_YARDS:
+    case player_prop_types.GAME_RUSHING_YARDS:
+    case player_prop_types.GAME_ALT_RUSHING_YARDS:
       return opponent_seasonlog.ry < (opts.opponent_allowed_ry_min || 0)
 
-    case constants.player_prop_types.GAME_RECEIVING_YARDS:
-    case constants.player_prop_types.GAME_ALT_RECEIVING_YARDS:
+    case player_prop_types.GAME_RECEIVING_YARDS:
+    case player_prop_types.GAME_ALT_RECEIVING_YARDS:
       return opponent_seasonlog.recy < (opts.opponent_allowed_recy_min || 0)
 
-    case constants.player_prop_types.GAME_ALT_PASSING_COMPLETIONS:
-    case constants.player_prop_types.GAME_PASSING_COMPLETIONS:
+    case player_prop_types.GAME_ALT_PASSING_COMPLETIONS:
+    case player_prop_types.GAME_PASSING_COMPLETIONS:
       return opponent_seasonlog.pc < (opts.opponent_allowed_pc_min || 0)
 
-    case constants.player_prop_types.GAME_PASSING_TOUCHDOWNS:
+    case player_prop_types.GAME_PASSING_TOUCHDOWNS:
       return opponent_seasonlog.tdp < (opts.opponent_allowed_tdp_min || 0)
 
-    case constants.player_prop_types.GAME_RECEPTIONS:
+    case player_prop_types.GAME_RECEPTIONS:
       return opponent_seasonlog.rec < (opts.opponent_allowed_rec_min || 0)
 
-    case constants.player_prop_types.GAME_PASSING_INTERCEPTIONS:
+    case player_prop_types.GAME_PASSING_INTERCEPTIONS:
       return opponent_seasonlog.ints < (opts.opponent_allowed_ints_min || 0)
 
-    case constants.player_prop_types.GAME_ALT_RUSHING_ATTEMPTS:
-    case constants.player_prop_types.GAME_RUSHING_ATTEMPTS:
+    case player_prop_types.GAME_ALT_RUSHING_ATTEMPTS:
+    case player_prop_types.GAME_RUSHING_ATTEMPTS:
       return opponent_seasonlog.ra < (opts.opponent_allowed_ra_min || 0)
 
-    case constants.player_prop_types.GAME_RUSHING_RECEIVING_YARDS:
+    case player_prop_types.GAME_RUSHING_RECEIVING_YARDS:
       return opponent_seasonlog.ry + opponent_seasonlog.recy < 0
 
-    case constants.player_prop_types.GAME_RECEIVING_TOUCHDOWNS:
+    case player_prop_types.GAME_RECEIVING_TOUCHDOWNS:
       return opponent_seasonlog.tdrec < (opts.opponent_allowed_tdrec_min || 0)
 
-    case constants.player_prop_types.GAME_RUSHING_TOUCHDOWNS:
+    case player_prop_types.GAME_RUSHING_TOUCHDOWNS:
       return opponent_seasonlog.tdr < (opts.opponent_allowed_tdr_min || 0)
 
-    case constants.player_prop_types.GAME_PASSING_ATTEMPTS:
+    case player_prop_types.GAME_PASSING_ATTEMPTS:
       return opponent_seasonlog.pa < (opts.opponent_allowed_pa_min || 0)
 
-    // constants.player_prop_types.GAME_PASSING_LONGEST_COMPLETION,
-    // constants.player_prop_types.GAME_LONGEST_RECEPTION,
-    case constants.player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS:
+    // player_prop_types.GAME_PASSING_LONGEST_COMPLETION,
+    // player_prop_types.GAME_LONGEST_RECEPTION,
+    case player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS:
       return opponent_seasonlog.tdr + opponent_seasonlog.tdrec < 1
-    // constants.player_prop_types.GAME_LONGEST_RUSH,
+    // player_prop_types.GAME_LONGEST_RUSH,
   }
 }
 
