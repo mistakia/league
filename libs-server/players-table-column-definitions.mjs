@@ -5,14 +5,12 @@ import {
   stat_in_year_week,
   nfl_plays_column_params
 } from '#libs-shared'
+import apply_play_by_play_column_params_to_query from './apply-play-by-play-column-params-to-query.mjs'
 import db from '#db'
 
-const generate_play_by_play_table_alias = ({
-  params = {},
-  pid_column
-} = {}) => {
-  if (!pid_column) {
-    throw new Error('pid_column is required')
+const generate_table_alias = ({ type, params = {} } = {}) => {
+  if (!type) {
+    throw new Error('type is required')
   }
   const column_param_keys = Object.keys(nfl_plays_column_params).sort()
   const key = column_param_keys
@@ -24,11 +22,12 @@ const generate_play_by_play_table_alias = ({
     })
     .join('')
 
-  const hash = Array.from(blake2b(key, null, 32))
+  const hash = Array.from(blake2b(`${type}_${key}`, null, 32))
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('')
   return hash
 }
+
 const projections_index_join = ({ query, params = {} }) => {
   const table_alias = projections_index_table_alias({ params })
   const { year = constants.season.year, week = 0 } = params
@@ -63,11 +62,11 @@ const join_filtered_plays_table = ({
 
 const player_stat_from_plays = ({ pid_column, select_string, stat_name }) => ({
   table_alias: ({ params }) =>
-    generate_play_by_play_table_alias({ params, pid_column }),
+    generate_table_alias({ type: 'play_by_play', params }),
   column_name: stat_name,
   select: () => [select_string({ stat_name })],
   pid_column,
-  use_with: true,
+  use_play_by_play_with: true,
   join: ({
     query,
     table_name = `filtered_plays_${stat_name}`,
@@ -328,6 +327,54 @@ const create_espn_score_columns = (column_name) => ({
     query.joinRaw(
       `LEFT JOIN ${table_name} ON \`player_seasonlogs\`.\`pid\` = \`player\`.\`pid\` AND \`player_seasonlogs\`.\`year\` = ${year}`
     )
+  }
+})
+
+const create_team_share_stat = ({
+  column_name,
+  pid_column,
+  select_string
+}) => ({
+  column_name,
+  where_column: () => column_name,
+  use_having: true,
+  with: ({ query, with_table_name, params, having_clauses = [] }) => {
+    const with_query = db('nfl_plays')
+      .select('pg.pid')
+      .select(db.raw(select_string))
+      .join('player_gamelogs as pg', function () {
+        this.on('nfl_plays.esbid', '=', 'pg.esbid').andOn(
+          'nfl_plays.off',
+          '=',
+          'pg.tm'
+        )
+      })
+      .whereNot('play_type', 'NOPL')
+      .where('seas_type', 'REG')
+      .whereNotNull(pid_column)
+      .groupBy('pg.pid')
+
+    apply_play_by_play_column_params_to_query({
+      query: with_query,
+      params
+    })
+
+    const unique_having_clauses = new Set(having_clauses)
+    for (const having_clause of unique_having_clauses) {
+      with_query.havingRaw(having_clause)
+    }
+
+    query.with(with_table_name, with_query)
+  },
+  table_alias: ({ params }) =>
+    generate_table_alias({ type: column_name, params }),
+  join: ({ query, table_name, join_type }) => {
+    join_filtered_plays_table({
+      query,
+      table_name,
+      pid_column: 'pid',
+      join_type
+    })
   }
 })
 
@@ -756,9 +803,18 @@ export default {
       stat_name: 'rush_yds_after_contact_per_att_from_plays'
     }),
 
-  // TODO
-  // player_team_rush_attempts_percentage_from_plays
-  // player_team_rush_yards_percentage_from_plays
+  player_rush_attempts_share_from_plays: create_team_share_stat({
+    column_name: 'rush_att_share_from_plays',
+    pid_column: 'bc_pid',
+    select_string:
+      'ROUND(100.0 * COUNT(CASE WHEN nfl_plays.bc_pid = pg.pid THEN 1 ELSE NULL END) / COUNT(*), 2) AS rush_att_share_from_plays'
+  }),
+  player_rush_yards_share_from_plays: create_team_share_stat({
+    column_name: 'rush_yds_share_from_plays',
+    pid_column: 'bc_pid',
+    select_string:
+      'ROUND(100.0 * SUM(CASE WHEN nfl_plays.bc_pid = pg.pid THEN nfl_plays.rush_yds ELSE 0 END) / SUM(nfl_plays.rush_yds), 2) AS rush_yds_share_from_plays'
+  }),
 
   player_fumble_percentage_from_plays: player_stat_from_plays({
     pid_column: 'bc_pid',
@@ -848,10 +904,24 @@ export default {
     stat_name: 'air_yds_from_plays'
   }),
 
-  // TODO
-  // player_team_air_yards_percentage_from_plays
-  // player_team_target_percentage_from_plays
-  // player_weighted_opportunity_rating_from_plays
+  player_air_yards_share_from_plays: create_team_share_stat({
+    column_name: 'air_yds_share_from_plays',
+    pid_column: 'trg_pid',
+    select_string:
+      'ROUND(100.0 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / SUM(nfl_plays.dot), 2) AS air_yds_share_from_plays'
+  }),
+  player_target_share_from_plays: create_team_share_stat({
+    column_name: 'trg_share_from_plays',
+    pid_column: 'trg_pid',
+    select_string:
+      'ROUND(100.0 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / COUNT(*), 2) AS trg_share_from_plays'
+  }),
+  player_weighted_opportunity_rating_from_plays: create_team_share_stat({
+    column_name: 'weighted_opp_rating_from_plays',
+    pid_column: 'trg_pid',
+    select_string:
+      'ROUND((1.5 * (100.0 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / COUNT(*))) + (0.7 * (100.0 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / SUM(nfl_plays.dot))), 2) AS weighted_opp_rating_from_plays'
+  }),
 
   // receiving yards / air yards
   player_receiver_air_conversion_ratio_from_plays: player_stat_from_plays({
