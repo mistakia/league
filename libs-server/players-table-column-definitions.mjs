@@ -920,7 +920,7 @@ export default {
     column_name: 'weighted_opp_rating_from_plays',
     pid_column: 'trg_pid',
     select_string:
-      'ROUND((1.5 * (100.0 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / COUNT(*))) + (0.7 * (100.0 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / SUM(nfl_plays.dot))), 2) AS weighted_opp_rating_from_plays'
+      'ROUND((1.5 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / COUNT(*)) + (0.7 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / SUM(nfl_plays.dot)), 2) AS weighted_opp_rating_from_plays'
   }),
 
   // receiving yards / air yards
